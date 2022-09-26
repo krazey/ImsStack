@@ -21,6 +21,23 @@
 #include "ImsVector.h"
 #include "CarrierConfig.h"
 
+struct AosSubErrCodeForInitRegBundle
+{
+public:
+    AosSubErrCodeForInitRegBundle() :
+            nSubErrCodeForInitRegWithRetryMaxCnt(0),
+            objSubErrCodeForInitReg(IMSVector<IMS_SINT32>())
+    {
+    }
+
+    AosSubErrCodeForInitRegBundle(IN const AosSubErrCodeForInitRegBundle&) = delete;
+    AosSubErrCodeForInitRegBundle& operator=(IN const AosSubErrCodeForInitRegBundle&) = delete;
+
+public:
+    IMS_SINT32 nSubErrCodeForInitRegWithRetryMaxCnt;
+    IMSVector<IMS_SINT32> objSubErrCodeForInitReg;
+};
+
 struct AosSpecificRegistrationErrorBundle
 {
 public:
@@ -125,25 +142,6 @@ public:
 public:
     IMSVector<IMS_SINT32> objReregistrationErrorCodeWithCallEnd;
     IMSVector<IMS_SINT32> objReregistrationErrorCauseWithPdnReactivationAfterCallEnd;
-};
-
-struct AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle
-{
-public:
-    AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle() :
-            nSubErrRetryMaxCountWithInitReg(0),
-            objSubErrCodeWithInitReg(IMSVector<IMS_SINT32>())
-    {
-    }
-
-    AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle(
-            IN const AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle&) = delete;
-    AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle& operator=(
-            IN const AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle&) = delete;
-
-public:
-    IMS_SINT32 nSubErrRetryMaxCountWithInitReg;
-    IMSVector<IMS_SINT32> objSubErrCodeWithInitReg;
 };
 
 struct AosSubscriptionTerminatedErrorCodeForRegEventBundle

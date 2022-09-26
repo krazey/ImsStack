@@ -25,58 +25,58 @@ struct AosAsset
 {
 public:
     AosAsset() :
-            bUseSecurityServerPortInRegContactOfInitialRegistration(IMS_FALSE),
-            bUseSecurityServerPortInInitialRegistration(IMS_FALSE),
-            bRemoveOldSaOnEstablishingSa(IMS_FALSE),
+            bCdmalessFeatureTagRequired(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingRegistration(IMS_FALSE),
-            bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
-            objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>()),
-            bHoldRegistrationWhenIpcanChangedWithImsActiveCall(IMS_FALSE),
-            bSupportVerstatForRegistration(IMS_FALSE),
-            bNoInitialRegistrationOnPcscfChange(IMS_FALSE),
+            bDisableT3482ForEmergency(IMS_FALSE),
             bEmergencyCallBasedOnPAssociatedUriOfNormalRegistration(IMS_FALSE),
-            bSipOverIpsecEnabledInRoaming(IMS_TRUE),
-            bRegistrationContactValidation(IMS_FALSE),
-            nRegistrationOutOfServicePolicy(CarrierConfig::Assets::REGISTRATION_OOS_POLICY_DEFAULT),
-            objVowifiSubscriptionErrorCodeWithInitialRegistration(IMSVector<IMS_SINT32>()),
-            objSubscriptionErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
-            objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf(
-                    IMSVector<IMS_SINT32>()),
-            objWfcRegEventErrorByMissing911Address(IMSVector<IMS_SINT32>()),
+            bHoldRegistrationWhenIpcanChangedWithImsActiveCall(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
-            bSmsOverImsAvailableWithoutVoiceCapability(IMS_FALSE),
             bImsDeregisterOn3gNetworks(IMS_FALSE),
-            bVideoOverWifiSupportedWithoutVoice(IMS_FALSE),
+            bNoInitialRegistrationOnPcscfChange(IMS_FALSE),
+            bRegistrationContactValidation(IMS_FALSE),
+            bRemoveOldSaOnEstablishingSa(IMS_FALSE),
             bRequiredEmergencyRegistrationInRoaming(IMS_FALSE),
-            objClearPermanentPdnFailure(IMSVector<IMS_SINT32>()),
-            bUseWfcCountryCodeAvailabilityCheck(IMS_FALSE),
             bRequiredVolteBlockBySetting(IMS_FALSE),
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
-            objSupportedRoamingRats(IMSVector<IMS_SINT32>()),
+            bRequireRegAfterImsCallEndOnRegHeld(IMS_FALSE),
+            bSipOverIpsecEnabledInRoaming(IMS_TRUE),
+            bSmsOverImsAvailableWithoutVoiceCapability(IMS_FALSE),
+            bSupportContactUserInfo(IMS_TRUE),
+            bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
+            bSupportVerstatForRegistration(IMS_FALSE),
+            bUpdateRegistrationWithCountryChange(IMS_FALSE),
+            bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
+            bUseSecurityServerPortInInitialRegistration(IMS_FALSE),
+            bUseSecurityServerPortInRegContactOfInitialRegistration(IMS_FALSE),
+            bUseWfcCountryCodeAvailabilityCheck(IMS_FALSE),
+            bVideoOverWifiSupportedWithoutVoice(IMS_FALSE),
+            nContactUserInfoPolicyForNonRegisterMessage(
+                    CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT),
             nEmergencyPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
-            nSipMessageThresholdForTransportChange(200),
-            bCdmalessFeatureTagRequired(IMS_FALSE),
-            objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
-            nRegistrationRetryCountResetPolicy(0),
-            objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>()),
+            nGeolocationPidfFormingPolicy(
+                    CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION),
             nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nImsSignallingDscp(46),
             nRegistrationActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
-            bDisableT3482ForEmergency(IMS_FALSE),
-            nRegistrationTimerForEmergencyCallMillis(0),
-            bUpdateRegistrationWithCountryChange(IMS_FALSE),
+            nRegistrationOutOfServicePolicy(CarrierConfig::Assets::REGISTRATION_OOS_POLICY_DEFAULT),
             nRegistrationPcscfUpdatePolicy(0),
-            bSupportContactUserInfo(IMS_TRUE),
-            bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
-            nContactUserInfoPolicyForNonRegisterMessage(
-                    CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT),
-            nGeolocationPidfFormingPolicy(
-                    CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION),
+            nRegistrationRetryCountResetPolicy(0),
+            nRegistrationTimerForEmergencyCallMillis(0),
+            nSipMessageThresholdForTransportChange(200),
+            objClearPermanentPdnFailure(IMSVector<IMS_SINT32>()),
+            objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
+            objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>()),
             objRegErrorCodesWithPcscfDiscovery(IMSVector<IMS_SINT32>()),
-            objReregErrorCodesWithInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
+            objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>()),
             objReregErrorCodesWithImsPdnReactivation(IMSVector<IMS_SINT32>()),
-            bRequireRegAfterImsCallEndOnRegHeld(IMS_FALSE)
+            objReregErrorCodesWithInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
+            objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf(
+                    IMSVector<IMS_SINT32>()),
+            objSubscriptionErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
+            objSupportedRoamingRats(IMSVector<IMS_SINT32>()),
+            objVowifiSubscriptionErrorCodeWithInitialRegistration(IMSVector<IMS_SINT32>()),
+            objWfcRegEventErrorByMissing911Address(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -84,54 +84,54 @@ public:
     AosAsset& operator=(IN const AosAsset&) = delete;
 
 public:
-    IMS_BOOL bUseSecurityServerPortInRegContactOfInitialRegistration;
-    IMS_BOOL bUseSecurityServerPortInInitialRegistration;
-    IMS_BOOL bRemoveOldSaOnEstablishingSa;
+    IMS_BOOL bCdmalessFeatureTagRequired;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingRegistration;
-    IMS_BOOL bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType;
-    IMSVector<IMS_SINT32> objPcscfDiscoveryMethodRoaming;
-    IMS_BOOL bHoldRegistrationWhenIpcanChangedWithImsActiveCall;
-    IMS_BOOL bSupportVerstatForRegistration;
-    IMS_BOOL bNoInitialRegistrationOnPcscfChange;
+    IMS_BOOL bDisableT3482ForEmergency;
     IMS_BOOL bEmergencyCallBasedOnPAssociatedUriOfNormalRegistration;
-    IMS_BOOL bSipOverIpsecEnabledInRoaming;
-    IMS_BOOL bRegistrationContactValidation;
-    IMS_SINT32 nRegistrationOutOfServicePolicy;
-    IMSVector<IMS_SINT32> objVowifiSubscriptionErrorCodeWithInitialRegistration;
-    IMSVector<IMS_SINT32> objSubscriptionErrorCodeForStoppingByExpirationTime;
-    IMSVector<IMS_SINT32> objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf;
-    IMSVector<IMS_SINT32> objWfcRegEventErrorByMissing911Address;
+    IMS_BOOL bHoldRegistrationWhenIpcanChangedWithImsActiveCall;
     IMS_BOOL bIgnoreVopsForVolteEnable;
-    IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapability;
     IMS_BOOL bImsDeregisterOn3gNetworks;
-    IMS_BOOL bVideoOverWifiSupportedWithoutVoice;
+    IMS_BOOL bNoInitialRegistrationOnPcscfChange;
+    IMS_BOOL bRegistrationContactValidation;
+    IMS_BOOL bRemoveOldSaOnEstablishingSa;
     IMS_BOOL bRequiredEmergencyRegistrationInRoaming;
-    IMSVector<IMS_SINT32> objClearPermanentPdnFailure;
-    IMS_BOOL bUseWfcCountryCodeAvailabilityCheck;
     IMS_BOOL bRequiredVolteBlockBySetting;
     IMS_BOOL bRequiredVolteBlockByAirplaneMode;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
-    IMSVector<IMS_SINT32> objSupportedRoamingRats;
+    IMS_BOOL bRequireRegAfterImsCallEndOnRegHeld;
+    IMS_BOOL bSipOverIpsecEnabledInRoaming;
+    IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapability;
+    IMS_BOOL bSupportContactUserInfo;
+    IMS_BOOL bSupportRegWithFeatureTagUnavailable;
+    IMS_BOOL bSupportVerstatForRegistration;
+    IMS_BOOL bUpdateRegistrationWithCountryChange;
+    IMS_BOOL bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType;
+    IMS_BOOL bUseSecurityServerPortInInitialRegistration;
+    IMS_BOOL bUseSecurityServerPortInRegContactOfInitialRegistration;
+    IMS_BOOL bUseWfcCountryCodeAvailabilityCheck;
+    IMS_BOOL bVideoOverWifiSupportedWithoutVoice;
+    IMS_SINT32 nContactUserInfoPolicyForNonRegisterMessage;
     IMS_SINT32 nEmergencyPreferredIpType;
-    IMS_SINT32 nSipMessageThresholdForTransportChange;
-    IMS_BOOL bCdmalessFeatureTagRequired;
-    IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
-    IMS_SINT32 nRegistrationRetryCountResetPolicy;
-    IMSVector<IMS_SINT32> objRegistrationPermanentErrorMaxCount;
+    IMS_SINT32 nGeolocationPidfFormingPolicy;
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
     IMS_SINT32 nRegistrationActualWaitTimePolicy;
-    IMS_BOOL bDisableT3482ForEmergency;
-    IMS_SINT32 nRegistrationTimerForEmergencyCallMillis;
-    IMS_BOOL bUpdateRegistrationWithCountryChange;
+    IMS_SINT32 nRegistrationOutOfServicePolicy;
     IMS_SINT32 nRegistrationPcscfUpdatePolicy;
-    IMS_BOOL bSupportContactUserInfo;
-    IMS_BOOL bSupportRegWithFeatureTagUnavailable;
-    IMS_SINT32 nContactUserInfoPolicyForNonRegisterMessage;
-    IMS_SINT32 nGeolocationPidfFormingPolicy;
+    IMS_SINT32 nRegistrationRetryCountResetPolicy;
+    IMS_SINT32 nRegistrationTimerForEmergencyCallMillis;
+    IMS_SINT32 nSipMessageThresholdForTransportChange;
+    IMSVector<IMS_SINT32> objClearPermanentPdnFailure;
+    IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
+    IMSVector<IMS_SINT32> objPcscfDiscoveryMethodRoaming;
     IMSVector<IMS_SINT32> objRegErrorCodesWithPcscfDiscovery;
-    IMSVector<IMS_SINT32> objReregErrorCodesWithInitRegWithAvailablePcscf;
+    IMSVector<IMS_SINT32> objRegistrationPermanentErrorMaxCount;
     IMSVector<IMS_SINT32> objReregErrorCodesWithImsPdnReactivation;
-    IMS_BOOL bRequireRegAfterImsCallEndOnRegHeld;
+    IMSVector<IMS_SINT32> objReregErrorCodesWithInitRegWithAvailablePcscf;
+    IMSVector<IMS_SINT32> objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf;
+    IMSVector<IMS_SINT32> objSubscriptionErrorCodeForStoppingByExpirationTime;
+    IMSVector<IMS_SINT32> objSupportedRoamingRats;
+    IMSVector<IMS_SINT32> objVowifiSubscriptionErrorCodeWithInitialRegistration;
+    IMSVector<IMS_SINT32> objWfcRegEventErrorByMissing911Address;
 };
 #endif  // AOS_ASSET_H_

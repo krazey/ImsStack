@@ -794,6 +794,14 @@ const IMS_CHAR
                 "wfc_reg_event_error_code_by_missing_911_address_int_array";
 
 // Bundle {
+const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE[] =
+        "sub_err_code_for_init_reg_bundle";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT[] =
+        "sub_err_code_for_init_reg_with_retry_max_cnt_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY[] =
+        "sub_err_code_for_init_reg_int_array";
+// }
+// Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
         "specific_registration_error_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT[] =
@@ -866,17 +874,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_CODE_WITH_CALL_EN
 const IMS_CHAR CarrierConfig::Assets::
         KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[] =
                 "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
-// }
-// Bundle {
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
-                "subscription_error_code_for_reg_event_with_initial_registration_bundle";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SUBSCRIPTION_ERROR_RETRY_MAX_COUNT_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT[] =
-                "subscription_error_retry_max_count_for_reg_event_with_initial_registration_int";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
-                "subscription_error_code_for_reg_event_with_initial_registration_int_array";
 // }
 // Bundle {
 const IMS_CHAR
