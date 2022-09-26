@@ -53,5 +53,8 @@ private:
 
 private:
     IAosAppContext* m_piContext;
+
+private:
+    friend class AosInfoTest;
 };
 #endif  // AOS_INFO_H_

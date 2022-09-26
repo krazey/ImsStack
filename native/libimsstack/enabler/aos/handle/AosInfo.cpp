@@ -244,13 +244,13 @@ PRIVATE VIRTUAL void AosInfo::NotifyScbmState(IN IMS_UINT32 nState)
         case SCBM_STARTED:
             nCommand = IAosRegistration::CMD_SCBM_STARTED;
             break;
-        case SCMB_TERMINATED:
+        case SCBM_TERMINATED:
             nCommand = IAosRegistration::CMD_SCBM_TERMINATED;
             break;
-        case SCMB_TERMINATED_BY_ECALL:
+        case SCBM_TERMINATED_BY_ECALL:
             nCommand = IAosRegistration::CMD_SCBM_TERMINATED_ECALL;
             break;
-        case SCMB_TERMINATED_BY_ESMS:
+        case SCBM_TERMINATED_BY_ESMS:
             nCommand = IAosRegistration::CMD_SCBM_TERMINATED_ESMS;
             break;
         default:
