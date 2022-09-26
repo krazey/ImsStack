@@ -262,7 +262,6 @@
     <boolean name="registration_contact_validation_bool" value="false"/>
     <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
     <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
-    <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
     <boolean name="required_emergency_registration_in_roaming_bool" value="false"/>
     <boolean name="required_volte_block_by_setting_bool" value="false"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="false"/>
@@ -272,6 +271,7 @@
     <boolean name="support_contact_user_info_bool" value="true"/>
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="false"/>
     <boolean name="support_verstat_for_registration_bool" value="false"/>
+    <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
     <boolean name="update_registration_with_country_change_bool" value="false"/>
     <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <boolean name="use_security_server_port_in_initial_registration_bool" value="false"/>
@@ -322,6 +322,11 @@
     <int-array name="wfc_reg_event_error_code_by_missing_911_address_int_array" num="0">
     </int-array>
 
+    <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
+    <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="0"/>
+    <int-array name="sub_err_code_for_init_reg_int_array" num="0">
+    </int-array>
+
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="0"/>
     <int name="specific_registration_error_policy_int" value="0"/>
@@ -363,12 +368,6 @@
     <int-array name="reregistration_error_code_with_call_end_int_array" num="0">
     </int-array>
     <int-array name="reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array" num="0">
-    </int-array>
-
-    <!-- End BUNDLE -->
-    <!-- KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
-    <int name="subscription_error_retry_max_count_for_reg_event_with_initial_registration_int" value="0"/>
-    <int-array name="subscription_error_code_for_reg_event_with_initial_registration_int_array" num="0">
     </int-array>
     <!-- End BUNDLE -->
     <!-- KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE -->

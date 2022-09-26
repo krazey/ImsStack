@@ -39,20 +39,37 @@
         <item value="1"/>
         <item value="2"/>
     </int-array>
+    <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
+    <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>
+
+    <boolean name="ims.registration_event_for_cat_required_bool" value="true"/>
+    <int name="ims.isim_index_for_impu_int" value="0"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="0"/>
     </int-array>
-    <int name="ims.isim_index_for_impu_int" value="0"/>
-    <int name="registration_actual_wait_time_policy_int" value="1"/>
-    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
-    <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
-    <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>
-    <boolean name="ims.registration_event_for_cat_required_bool" value="true"/>
+
+    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_registration_bool" value="true"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
+    <boolean name="required_volte_block_by_airplane_mode_bool" value="true"/>
+    <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="true"/>
     <boolean name="support_contact_user_info_bool" value="false"/>
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="true"/>
+    <int name="registration_actual_wait_time_policy_int" value="1"/>
+    <int-array name="permanent_pdn_failure_int_array" num="2">
+        <item value="28"/>
+        <item value="33"/>
+    </int-array>
 
-   <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
+    <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
+    <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
+    <int-array name="sub_err_code_for_init_reg_int_array" num="3">
+        <item value="403"/>
+        <item value="504"/>
+        <item value="0"/>
+    </int-array>
+
+    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
      <int-array name="specific_registration_error_code_int_array" num="2">
         <item value="0"/>
         <item value="2"/>
@@ -68,21 +85,6 @@
         <item value="0"/>
         <item value="1"/>
         <item value="9"/>
-    </int-array>
-
-    <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="true"/>
-    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_registration_bool" value="true"/>
-    <!-- KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
-    <int name="subscription_error_retry_max_count_for_reg_event_with_initial_registration_int" value="1"/>
-    <int-array name="subscription_error_code_for_reg_event_with_initial_registration_int_array" num="3">
-        <item value="403"/>
-        <item value="504"/>
-        <item value="0"/>
-    </int-array>
-    <boolean name="required_volte_block_by_airplane_mode_bool" value="true"/>
-     <int-array name="permanent_pdn_failure_int_array" num="2">
-        <item value="28"/>
-        <item value="33"/>
     </int-array>
 
     <!-- Uce -->

@@ -865,7 +865,9 @@ public:
 
     /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to perform
-     *        initial registration
+     *        initial registration.
+     *
+     *        This function relates to GetRetryCountSubErrorRegRequired()
      *
      * @return IMSVector<IMS_SINT32>& return array list for error response information
      */
@@ -874,6 +876,8 @@ public:
     /**
      * @brief Get the number of error responses against SUBSCRIBE message that is condition to
      *        perform initial registration.
+     *
+     *        This function relates to GetSubErrorRegRequired()
      *
      * @return IMS_SINT32 Return retry count for initial registration
      */

@@ -466,9 +466,6 @@ public class CarrierConfig {
                 "remove_old_sa_on_establishing_sa_bool";
         public static final String KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
                 "require_reg_after_ims_call_end_on_reg_held_bool";
-        public static final String
-                KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
-                        "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
         public static final String KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL =
                 "required_emergency_registration_in_roaming_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL =
@@ -487,6 +484,9 @@ public class CarrierConfig {
                 "support_reg_with_feature_tag_unavailable_bool";
         public static final String KEY_SUPPORT_VERSTAT_FOR_REGISTRATION_BOOL =
                 "support_verstat_for_registration_bool";
+        public static final String
+                KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
+                        "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
         public static final String KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL =
                 "update_registration_with_country_change_bool";
         public static final String
@@ -559,6 +559,14 @@ public class CarrierConfig {
                         "wfc_reg_event_error_code_by_missing_911_address_int_array";
 
         // Bundle {
+        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE =
+                "sub_err_code_for_init_reg_bundle";
+        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT =
+                "sub_err_code_for_init_reg_with_retry_max_cnt_int";
+        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
+                "sub_err_code_for_init_reg_int_array";
+        // }
+        // Bundle {
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT =
@@ -623,14 +631,6 @@ public class CarrierConfig {
                 "reregistration_error_code_with_call_end_int_array";
         public static final String KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY =
                 "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE =
-                "subscription_error_code_for_reg_event_with_initial_registration_bundle";
-        public static final String KEY_SUBSCRIPTION_ERROR_RETRY_MAX_COUNT_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT =
-                "subscription_error_retry_max_count_for_reg_event_with_initial_registration_int";
-        public static final String KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT_ARRAY =
-                "subscription_error_code_for_reg_event_with_initial_registration_int_array";
         // }
         // Bundle {
         public static final String KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE =
@@ -1414,15 +1414,25 @@ public class CarrierConfig {
 
     private void refineBundlesForAssets() {
         // Check the following keys:
+        // KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE
         // KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE
         // KEY_REGISTRATION_RETRY_BUNDLE
         // KEY_REREGISTRATION_RETRY_BUNDLE
         // KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE
-        // KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE
         // KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE
         // KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE
         // KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE
         // KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE
+
+        final String[] SUB_ERR_CODE_FOR_INIT_REG_BUNDLE_KEYS =
+            {
+                Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT,
+                Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY
+            };
+
+        setBundle(mConfig,
+                Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
+                SUB_ERR_CODE_FOR_INIT_REG_BUNDLE_KEYS);
 
         final String[] SPECIFIC_REGISTRATION_ERROR_BUNDLE_KEYS =
             {
@@ -1480,16 +1490,6 @@ public class CarrierConfig {
         setBundle(mConfig,
                 Assets.KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE,
                 REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE_KEYS);
-
-        final String[] SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE_KEYS =
-            {
-                Assets.KEY_SUBSCRIPTION_ERROR_RETRY_MAX_COUNT_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT,
-                Assets.KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT_ARRAY
-            };
-
-        setBundle(mConfig,
-                Assets.KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE,
-                SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE_KEYS);
 
         final String[] SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE_KEYS =
             {
