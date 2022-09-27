@@ -559,6 +559,16 @@ public class CarrierConfig {
                         "wfc_reg_event_error_code_by_missing_911_address_int_array";
 
         // Bundle {
+        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE =
+                "reg_err_code_with_ra_time_bundle";
+        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL =
+                "reg_err_code_with_ra_time_only_defined_bool";
+        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY =
+                "reg_err_code_with_ra_time_int_array";
+        public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY =
+                "reg_err_code_with_ra_time_for_update_int_array";
+        // }
+        // Bundle {
         public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE =
                 "sub_err_code_for_init_reg_bundle";
         public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT =
@@ -639,16 +649,6 @@ public class CarrierConfig {
                 "reregistration_error_code_with_call_end_int_array";
         public static final String KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY =
                 "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE =
-                "registration_error_code_with_retry_after_time_bundle";
-        public static final String KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_ONLY_DEFINED_BOOL =
-                "registration_error_code_with_retry_after_time_only_defined_bool";
-        public static final String KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY =
-                "registration_error_code_with_retry_after_time_int_array";
-        public static final String KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY =
-                "reregistration_error_code_with_retry_after_time_int_array";
         // }
         // Bundle {
         public static final String
@@ -1414,15 +1414,26 @@ public class CarrierConfig {
 
     private void refineBundlesForAssets() {
         // Check the following keys:
+        // KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE
         // KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE
         // KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE
         // KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE
         // KEY_REGISTRATION_RETRY_BUNDLE
         // KEY_REREGISTRATION_RETRY_BUNDLE
         // KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE
-        // KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE
         // KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE
         // KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE
+
+        final String[] REG_ERR_CODE_WITH_RA_TIME_BUNDLE_KEYS =
+            {
+                Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL,
+                Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,
+                Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY
+            };
+
+        setBundle(mConfig,
+                Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
+                REG_ERR_CODE_WITH_RA_TIME_BUNDLE_KEYS);
 
         final String[] SUB_ERR_CODE_FOR_INIT_REG_BUNDLE_KEYS =
             {
@@ -1500,17 +1511,6 @@ public class CarrierConfig {
         setBundle(mConfig,
                 Assets.KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE,
                 REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE_KEYS);
-
-        final String[] REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE_KEYS =
-            {
-                Assets.KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_ONLY_DEFINED_BOOL,
-                Assets.KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY,
-                Assets.KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY
-            };
-
-        setBundle(mConfig,
-                Assets.KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE,
-                REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE_KEYS);
 
         final String[] notifyTerminatedForRegEventWithInitRegBundleKeys = {
                 Assets.KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT,

@@ -21,6 +21,25 @@
 #include "ImsVector.h"
 #include "CarrierConfig.h"
 
+struct AosRegErrCodeWithRaTimeBundle
+{
+public:
+    AosRegErrCodeWithRaTimeBundle() :
+            bRegErrCodeWithRaTimeOnlyDefined(IMS_FALSE),
+            objRegErrCodeWithRaTime(IMSVector<IMS_SINT32>()),
+            objRegErrCodeWithRaTimeForUpdate(IMSVector<IMS_SINT32>())
+    {
+    }
+
+    AosRegErrCodeWithRaTimeBundle(IN const AosRegErrCodeWithRaTimeBundle&) = delete;
+    AosRegErrCodeWithRaTimeBundle& operator=(IN const AosRegErrCodeWithRaTimeBundle&) = delete;
+
+public:
+    IMS_BOOL bRegErrCodeWithRaTimeOnlyDefined;
+    IMSVector<IMS_SINT32> objRegErrCodeWithRaTime;
+    IMSVector<IMS_SINT32> objRegErrCodeWithRaTimeForUpdate;
+};
+
 struct AosSubErrCodeForInitRegBundle
 {
 public:
@@ -160,27 +179,6 @@ public:
 public:
     IMSVector<IMS_SINT32> objReregistrationErrorCodeWithCallEnd;
     IMSVector<IMS_SINT32> objReregistrationErrorCauseWithPdnReactivationAfterCallEnd;
-};
-
-struct AosRegistrationErrorCodeWithRetryAfterTimeBundle
-{
-public:
-    AosRegistrationErrorCodeWithRetryAfterTimeBundle() :
-            bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined(IMS_FALSE),
-            objRegistrationErrorCodeWithRetryAfterTime(IMSVector<IMS_SINT32>()),
-            objReregistrationErrorCodeWithRetryAfterTime(IMSVector<IMS_SINT32>())
-    {
-    }
-
-    AosRegistrationErrorCodeWithRetryAfterTimeBundle(
-            IN const AosRegistrationErrorCodeWithRetryAfterTimeBundle&) = delete;
-    AosRegistrationErrorCodeWithRetryAfterTimeBundle& operator=(
-            IN const AosRegistrationErrorCodeWithRetryAfterTimeBundle&) = delete;
-
-public:
-    IMS_BOOL bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined;
-    IMSVector<IMS_SINT32> objRegistrationErrorCodeWithRetryAfterTime;
-    IMSVector<IMS_SINT32> objReregistrationErrorCodeWithRetryAfterTime;
 };
 
 #endif  // AOS_ASSET_BUNDLE_H_

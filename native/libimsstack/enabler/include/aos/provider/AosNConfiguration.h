@@ -184,10 +184,11 @@ private:
 
     AosRegistrationRetryIntervalBundle m_objRegRetryInterval;
 
+    AosRegErrCodeWithRaTimeBundle m_objRegErrCodeWithRaTime;
+
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;
     AosSubErrCodeForTerminatedBundle m_objSubErrCodeForTerminated;
 
-    AosRegistrationErrorCodeWithRetryAfterTimeBundle m_objRegErrCodeWithRetryAfterTime;
     AosRegistrationRetryBundle m_objRegRetry;
 
     AosReregistrationErrorPolicyDuringCallBundle m_objReregErrPolicyCall;
