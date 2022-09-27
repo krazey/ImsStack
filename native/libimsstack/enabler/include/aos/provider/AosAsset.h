@@ -35,11 +35,11 @@ public:
             bNoInitialRegistrationOnPcscfChange(IMS_FALSE),
             bRegistrationContactValidation(IMS_FALSE),
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
+            bRequireRegAfterImsCallEndOnRegHeld(IMS_FALSE),
             bRequiredEmergencyRegistrationInRoaming(IMS_FALSE),
             bRequiredVolteBlockBySetting(IMS_FALSE),
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
-            bRequireRegAfterImsCallEndOnRegHeld(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapability(IMS_FALSE),
             bSupportContactUserInfo(IMS_TRUE),
@@ -94,11 +94,11 @@ public:
     IMS_BOOL bNoInitialRegistrationOnPcscfChange;
     IMS_BOOL bRegistrationContactValidation;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
+    IMS_BOOL bRequireRegAfterImsCallEndOnRegHeld;
     IMS_BOOL bRequiredEmergencyRegistrationInRoaming;
     IMS_BOOL bRequiredVolteBlockBySetting;
     IMS_BOOL bRequiredVolteBlockByAirplaneMode;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
-    IMS_BOOL bRequireRegAfterImsCallEndOnRegHeld;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapability;
     IMS_BOOL bSupportContactUserInfo;

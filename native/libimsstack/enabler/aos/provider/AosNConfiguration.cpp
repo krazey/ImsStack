@@ -1245,6 +1245,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REGISTRATION_CONTACT_VALIDATION_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL);
+    m_objAsset.bRequireRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
     m_objAsset.bRequiredEmergencyRegistrationInRoaming = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL);
     m_objAsset.bRequiredVolteBlockBySetting =
@@ -1253,8 +1255,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL);
     m_objAsset.bRequiredWfcBlockByAirplaneMode =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL);
-    m_objAsset.bRequireRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
     m_objAsset.bSipOverIpsecEnabledInRoaming =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL);
     m_objAsset.bSmsOverImsAvailableWithoutVoiceCapability = piCc->GetBoolean(
