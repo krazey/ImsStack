@@ -185,6 +185,7 @@ private:
     AosRegistrationRetryIntervalBundle m_objRegRetryInterval;
 
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;
+    AosSubErrCodeForTerminatedBundle m_objSubErrCodeForTerminated;
 
     AosRegistrationErrorCodeWithRetryAfterTimeBundle m_objRegErrCodeWithRetryAfterTime;
     AosRegistrationRetryBundle m_objRegRetry;
@@ -193,8 +194,6 @@ private:
     AosReregistrationRetryBundle m_objReregRetry;
 
     AosSpecificRegistrationErrorBundle m_objSpecificRegErr;
-
-    AosSubscriptionTerminatedErrorCodeForRegEventBundle m_objSubTerminatedErrCode;
 
     IMS_UINT32 m_nEventForInitRegOnTerminatedState;
     IMS_UINT32 m_nEventToFollowWtForInitRegOnTerminatedState;

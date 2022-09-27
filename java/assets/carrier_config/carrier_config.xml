@@ -326,6 +326,10 @@
     <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="0"/>
     <int-array name="sub_err_code_for_init_reg_int_array" num="0">
     </int-array>
+    <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
+    <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="0"/>
+    <int-array name="sub_err_code_for_terminated_int_array" num="0">
+    </int-array>
 
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="0"/>
@@ -368,11 +372,6 @@
     <int-array name="reregistration_error_code_with_call_end_int_array" num="0">
     </int-array>
     <int-array name="reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array" num="0">
-    </int-array>
-    <!-- End BUNDLE -->
-    <!-- KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE -->
-    <int name="subscription_terminated_error_code_for_reg_event_retry_max_count_int" value="0"/>
-    <int-array name="subscription_terminated_error_code_for_reg_event_int_array" num="0">
     </int-array>
     <!-- End BUNDLE -->
     <!-- KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE -->

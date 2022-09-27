@@ -38,6 +38,24 @@ public:
     IMSVector<IMS_SINT32> objSubErrCodeForInitReg;
 };
 
+struct AosSubErrCodeForTerminatedBundle
+{
+public:
+    AosSubErrCodeForTerminatedBundle() :
+            nSubErrCodeForTerminatedRetryMaxCnt(0),
+            objSubErrCodeForTerminated(IMSVector<IMS_SINT32>())
+    {
+    }
+
+    AosSubErrCodeForTerminatedBundle(IN const AosSubErrCodeForTerminatedBundle&) = delete;
+    AosSubErrCodeForTerminatedBundle& operator=(
+            IN const AosSubErrCodeForTerminatedBundle&) = delete;
+
+public:
+    IMS_SINT32 nSubErrCodeForTerminatedRetryMaxCnt;
+    IMSVector<IMS_SINT32> objSubErrCodeForTerminated;
+};
+
 struct AosSpecificRegistrationErrorBundle
 {
 public:
@@ -142,25 +160,6 @@ public:
 public:
     IMSVector<IMS_SINT32> objReregistrationErrorCodeWithCallEnd;
     IMSVector<IMS_SINT32> objReregistrationErrorCauseWithPdnReactivationAfterCallEnd;
-};
-
-struct AosSubscriptionTerminatedErrorCodeForRegEventBundle
-{
-public:
-    AosSubscriptionTerminatedErrorCodeForRegEventBundle() :
-            nSubTerminatedErrCodeRetryMaxCount(0),
-            objSubscriptionTerminatedErrorCodeForRegEvent(IMSVector<IMS_SINT32>())
-    {
-    }
-
-    AosSubscriptionTerminatedErrorCodeForRegEventBundle(
-            IN const AosSubscriptionTerminatedErrorCodeForRegEventBundle&) = delete;
-    AosSubscriptionTerminatedErrorCodeForRegEventBundle& operator=(
-            IN const AosSubscriptionTerminatedErrorCodeForRegEventBundle&) = delete;
-
-public:
-    IMS_SINT32 nSubTerminatedErrCodeRetryMaxCount;
-    IMSVector<IMS_SINT32> objSubscriptionTerminatedErrorCodeForRegEvent;
 };
 
 struct AosRegistrationErrorCodeWithRetryAfterTimeBundle
