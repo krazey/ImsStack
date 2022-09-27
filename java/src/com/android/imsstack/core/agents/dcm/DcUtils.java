@@ -34,6 +34,7 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.List;
@@ -158,9 +159,9 @@ public class DcUtils implements IDcUtils {
         ImsLog.w(mSlotId, "Not implemented");
     }
 
-    private ServiceState getServiceState() {
-        TelephonyManager tm = null;
-
+    @VisibleForTesting
+    protected ServiceState getServiceState() {
+        final TelephonyManager tm;
         if (MSimUtils.isMultiSimEnabled()) {
             tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
         } else {
@@ -170,21 +171,20 @@ public class DcUtils implements IDcUtils {
         return (tm != null) ? tm.getServiceState() : null;
     }
 
-    private String[] getAccessNetworkInfoFromCache(int networkType) {
+    @VisibleForTesting
+    protected String[] getAccessNetworkInfoFromCache(int networkType) {
         ImsLog.d(mSlotId, "ANI: from cache");
         List<String> ani = mRecentAccessNetworkInfos.get(networkType);
         return (ani != null) ? ani.toArray(new String[0]) : null;
     }
 
-    private void storeAccessNetworkInfoToCache(int networkType, String[] ani) {
-        if (ani == null) {
-            mRecentAccessNetworkInfos.put(networkType, null);
-        } else {
-            mRecentAccessNetworkInfos.put(networkType, Arrays.asList(ani));
-        }
+    @VisibleForTesting
+    protected void storeAccessNetworkInfoToCache(int networkType, @NonNull String[] ani) {
+        mRecentAccessNetworkInfos.put(networkType, Arrays.asList(ani));
     }
 
-    private String[] getAccessNetworkInfoForLte(@NonNull NetworkRegistrationInfo nri,
+    @VisibleForTesting
+    protected String[] getAccessNetworkInfoForLte(@NonNull NetworkRegistrationInfo nri,
             int duplexMode) {
         String[] ani = null;
         CellIdentityLte ci = getCellIdentity(nri, CellIdentityLte.class);
@@ -205,7 +205,8 @@ public class DcUtils implements IDcUtils {
         return ani;
     }
 
-    private String[] getAccessNetworkInfoForNr(@NonNull NetworkRegistrationInfo nri,
+    @VisibleForTesting
+    protected String[] getAccessNetworkInfoForNr(@NonNull NetworkRegistrationInfo nri,
             int duplexMode) {
         String[] ani = null;
         CellIdentityNr ci = getCellIdentity(nri, CellIdentityNr.class);
@@ -226,7 +227,8 @@ public class DcUtils implements IDcUtils {
         return ani;
     }
 
-    private String[] getAccessNetworkInfoForWcdma(@NonNull NetworkRegistrationInfo nri) {
+    @VisibleForTesting
+    protected String[] getAccessNetworkInfoForWcdma(@NonNull NetworkRegistrationInfo nri) {
         CellIdentityWcdma ci = getCellIdentity(nri, CellIdentityWcdma.class);
 
         if (ci != null) {
@@ -236,7 +238,8 @@ public class DcUtils implements IDcUtils {
         return null;
     }
 
-    private String[] getAccessNetworkInfoForGsm(@NonNull NetworkRegistrationInfo nri) {
+    @VisibleForTesting
+    protected String[] getAccessNetworkInfoForGsm(@NonNull NetworkRegistrationInfo nri) {
         CellIdentityGsm ci = getCellIdentity(nri, CellIdentityGsm.class);
 
         if (ci != null) {
