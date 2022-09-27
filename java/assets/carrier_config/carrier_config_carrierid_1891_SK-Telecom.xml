@@ -38,9 +38,9 @@
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
 
     <!-- Aos -->
-    <!-- KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE -->
-    <int name="subscription_terminated_error_code_for_reg_event_retry_max_count_int" value="1"/>
-    <int-array name="subscription_terminated_error_code_for_reg_event_int_array" num="1">
+    <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
+    <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="1"/>
+    <int-array name="sub_err_code_for_terminated_int_array" num="1">
         <item value="489"/>
     </int-array>
 

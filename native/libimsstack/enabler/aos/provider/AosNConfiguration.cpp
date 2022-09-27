@@ -35,12 +35,12 @@ AosNConfiguration::AosNConfiguration() :
         m_objNotifyTerminated(AosNotifyTerminatedForRegEventWithInitialRegistrationBundle()),
         m_objRegRetryInterval(AosRegistrationRetryIntervalBundle()),
         m_objSubErrCodeForInitReg(AosSubErrCodeForInitRegBundle()),
+        m_objSubErrCodeForTerminated(AosSubErrCodeForTerminatedBundle()),
         m_objRegErrCodeWithRetryAfterTime(AosRegistrationErrorCodeWithRetryAfterTimeBundle()),
         m_objRegRetry(AosRegistrationRetryBundle()),
         m_objReregErrPolicyCall(AosReregistrationErrorPolicyDuringCallBundle()),
         m_objReregRetry(AosReregistrationRetryBundle()),
         m_objSpecificRegErr(AosSpecificRegistrationErrorBundle()),
-        m_objSubTerminatedErrCode(AosSubscriptionTerminatedErrorCodeForRegEventBundle()),
         m_nEventForInitRegOnTerminatedState(0),
         m_nEventToFollowWtForInitRegOnTerminatedState(0),
         m_nClearPermanentPdnFailure(0),
@@ -580,12 +580,12 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetWfcRegEventErrorByMi
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRetryCountSubErrorSubTerminated() const
 {
-    return m_objSubTerminatedErrCode.nSubTerminatedErrCodeRetryMaxCount;
+    return m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorSubTerminated()
 {
-    return m_objSubTerminatedErrCode.objSubscriptionTerminatedErrorCodeForRegEvent;
+    return m_objSubErrCodeForTerminated.objSubErrCodeForTerminated;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorStoppingResub()
@@ -785,6 +785,28 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         {
             IMS_SINT32 nValue = m_objSubErrCodeForInitReg.objSubErrCodeForInitReg.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "SECWIR(%d), ", nValue, 0, 0);
+        }
+#endif
+    }
+
+    // AosSubErrCodeForTerminatedBundle
+    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt = piCcBundle->GetInt(
+                CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT);
+        m_objSubErrCodeForTerminated.objSubErrCodeForTerminated = piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY);
+        piCcBundle->ReleaseBundle();
+        piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG, "KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE :: STECRM(%d)",
+                m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt, 0, 0);
+        IMS_UINT32 nSize = m_objSubErrCodeForTerminated.objSubErrCodeForTerminated.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objSubErrCodeForTerminated.objSubErrCodeForTerminated.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "STECFRE(%d), ", nValue, 0, 0);
         }
 #endif
     }
@@ -1077,35 +1099,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         {
             m_nEventToFollowWtForInitRegOnTerminatedState |= 0x1 << (objEventToFollow.GetAt(i) - 1);
         }
-    }
-
-    // AosSubscriptionTerminatedErrorCodeForRegEventBundle
-    piCcBundle = piCc->GetBundle(
-            CarrierConfig::Assets::KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE);
-    if (piCcBundle != IMS_NULL)
-    {
-        m_objSubTerminatedErrCode.nSubTerminatedErrCodeRetryMaxCount = piCcBundle->GetInt(
-                CarrierConfig::Assets::
-                        KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_RETRY_MAX_COUNT_INT);
-        m_objSubTerminatedErrCode.objSubscriptionTerminatedErrorCodeForRegEvent =
-                piCcBundle->GetIntArray(CarrierConfig::Assets::
-                                KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_INT_ARRAY);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
-#ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG,
-                "KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE :: STECRM(%d)",
-                m_objSubTerminatedErrCode.nSubTerminatedErrCodeRetryMaxCount, 0, 0);
-        IMS_UINT32 nSize =
-                m_objSubTerminatedErrCode.objSubscriptionTerminatedErrorCodeForRegEvent.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue =
-                    m_objSubTerminatedErrCode.objSubscriptionTerminatedErrorCodeForRegEvent.GetAt(
-                            i);
-            A_IMS_TRACE_D(LOGTAG, "STECFRE(%d), ", nValue, 0, 0);
-        }
-#endif
     }
 }
 

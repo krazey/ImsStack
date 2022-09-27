@@ -903,7 +903,9 @@ public:
     virtual IMSVector<IMS_SINT32>& GetWfcRegEventErrorByMissing911Address() = 0;
     /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to terminate
-     *        its subscription
+     *        its subscription.
+     *
+     *        This function relates to GetRetryCountSubErrorSubTerminated()
      *
      * @return IMSVector<IMS_SINT32>& return array list for error response information
      */
@@ -912,6 +914,8 @@ public:
     /**
      * @brief Get the number of error responses against SUBSCRIBE message that is condition to
      *        terminate its subscription.
+     *
+     *        This function relates to GetSubErrorSubTerminated()
      *
      * @return IMS_SINT32 Return retry count for terminating subscription
      */
