@@ -159,14 +159,6 @@ public class DcGov implements IDc, ISystemAPINetwork {
     }
 
     @Override
-    public int getLteRsrpStrength4Sys() {
-        ImsLog.d(mSlotId, "");
-        IDcUtils dcutil = getDcUtil();
-        //final int rsrpsignal_default = 0;
-        return (dcutil != null) ? dcutil.getLteRsrpStrength() : 0;
-    }
-
-    @Override
     public String[] getPcscfAddresses4Sys(int apnType, int ipVersion) {
         ImsLog.d(mSlotId, "");
         IDcApn dcapn = getDcApn();

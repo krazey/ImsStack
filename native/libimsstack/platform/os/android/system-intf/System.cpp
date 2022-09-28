@@ -852,12 +852,6 @@ IMS_BOOL System::IsImsVoiceCallSupported(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::GetLteRsrpStrength(IN IMS_SINT32 nSlotId)
-{
-    return GetInt(SystemConstants::GET_LTE_RSRP_STRENGTH, 0, nSlotId);
-}
-
-PUBLIC
 IMS_SINT32 System::ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)

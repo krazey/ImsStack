@@ -496,11 +496,6 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsVoiceCallSupported()
     return PlatformContext::GetInstance()->GetSystem()->IsImsVoiceCallSupported(GetSlotId());
 }
 
-PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetLteRsrpStrength()
-{
-    return PlatformContext::GetInstance()->GetSystem()->GetLteRsrpStrength(GetSlotId());
-}
-
 PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsLteEmergencyOnly()
 {
     return PlatformContext::GetInstance()->GetSystem()->IsLteEmergencyOnly(GetSlotId());

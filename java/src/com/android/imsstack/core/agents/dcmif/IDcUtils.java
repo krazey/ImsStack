@@ -47,12 +47,6 @@ public interface IDcUtils extends IDc {
     boolean isMobileDataEnabled();
 
     /**
-     * Return signal strength value via IMSPhone.
-     * If current network type is not LTE, it returns 0;
-     */
-    int getLteRsrpStrength();
-
-    /**
      * Update all cell-info forcingly if the device doesn't have SIM card
      * or is in limited service state (emergency only).
      */

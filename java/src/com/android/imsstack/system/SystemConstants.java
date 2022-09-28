@@ -117,21 +117,20 @@ public class SystemConstants {
     public static final int GET_IPCAN_CATEGORY = CATEGORY_BASE + 411;
     public static final int IS_IMS_VOICE_CALL_SUPPORTED = CATEGORY_BASE + 412;
     public static final int GET_IFACE_NAME = CATEGORY_BASE + 413;
-    public static final int GET_LTE_RSRP_STRENGTH = CATEGORY_BASE + 414;
-    public static final int GET_LAST_ACCESS_NETWORK_INFO = CATEGORY_BASE + 415;
-    public static final int GET_IFACE_ID = CATEGORY_BASE + 416;
-    public static final int GET_HOST_BY_NAME = CATEGORY_BASE + 417;
-    public static final int IS_IMS_EMERGENCY_CALL_SUPPORTED = CATEGORY_BASE + 418;
-    public static final int GET_VOICE_NETWORK_TYPE = CATEGORY_BASE + 419;
-    public static final int IS_LTE_EMERGENCY_ONLY = CATEGORY_BASE + 420;
-    public static final int IS_MOBILE_DATA_ENABLED = CATEGORY_BASE + 421;
-    public static final int GET_MOCN_PLMN_INFO = CATEGORY_BASE + 422;
-    public static final int GET_VOICE_SERVICE_STATE = CATEGORY_BASE + 423;
-    public static final int GET_VOICE_ROAMING_TYPE = CATEGORY_BASE + 424;
-    public static final int GET_DATA_ROAMING_TYPE = CATEGORY_BASE + 425;
-    public static final int GET_MTU = CATEGORY_BASE + 426;
-    public static final int IS_EMERGENCY_ATTACH_SUPPORTED = CATEGORY_BASE + 427;
-    public static final int BIND_SOCKET = CATEGORY_BASE + 428;
+    public static final int GET_LAST_ACCESS_NETWORK_INFO = CATEGORY_BASE + 414;
+    public static final int GET_IFACE_ID = CATEGORY_BASE + 415;
+    public static final int GET_HOST_BY_NAME = CATEGORY_BASE + 416;
+    public static final int IS_IMS_EMERGENCY_CALL_SUPPORTED = CATEGORY_BASE + 417;
+    public static final int GET_VOICE_NETWORK_TYPE = CATEGORY_BASE + 418;
+    public static final int IS_LTE_EMERGENCY_ONLY = CATEGORY_BASE + 419;
+    public static final int IS_MOBILE_DATA_ENABLED = CATEGORY_BASE + 420;
+    public static final int GET_MOCN_PLMN_INFO = CATEGORY_BASE + 421;
+    public static final int GET_VOICE_SERVICE_STATE = CATEGORY_BASE + 422;
+    public static final int GET_VOICE_ROAMING_TYPE = CATEGORY_BASE + 423;
+    public static final int GET_DATA_ROAMING_TYPE = CATEGORY_BASE + 424;
+    public static final int GET_MTU = CATEGORY_BASE + 425;
+    public static final int IS_EMERGENCY_ATTACH_SUPPORTED = CATEGORY_BASE + 426;
+    public static final int BIND_SOCKET = CATEGORY_BASE + 427;
 
     /**
      * WiFi-related information

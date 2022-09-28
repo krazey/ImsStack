@@ -23,17 +23,12 @@ import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
 import android.telephony.CellIdentityWcdma;
 import android.telephony.CellInfo;
-import android.telephony.CellSignalStrength;
-import android.telephony.CellSignalStrengthLte;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
-import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.SparseArray;
 
 import com.android.imsstack.core.SettingsUtils;
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ITelephonyState;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
@@ -156,43 +151,6 @@ public class DcUtils implements IDcUtils {
     @Override
     public boolean isMobileDataEnabled() {
         return SettingsUtils.isMobileDataEnabled(AppContext.getInstance().getContentResolver());
-    }
-
-    @Override
-    public int getLteRsrpStrength() {
-        final int defaultRsrp = 0;
-
-        ITelephonyState ts = (ITelephonyState) AgentFactory.getAgent(
-                AgentFactory.TELEPHONY_STATE, mSlotId);
-
-        if (ts == null) {
-            return defaultRsrp;
-        }
-
-        int rat = ts.getNetworkType();
-
-        if (rat == TelephonyManager.NETWORK_TYPE_LTE) {
-            TelephonyManager tm = null;
-
-            if (MSimUtils.isMultiSimEnabled()) {
-                tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
-            } else {
-                tm = AppContext.getTelephonyManager();
-            }
-
-            SignalStrength ss = tm.getSignalStrength();
-            if (ss != null) {
-                List<CellSignalStrength> cssList = ss.getCellSignalStrengths();
-                for (CellSignalStrength css : cssList) {
-                    if (css instanceof CellSignalStrengthLte) {
-                        CellSignalStrengthLte lteStrength = (CellSignalStrengthLte) css;
-                        return lteStrength.getRsrp();
-                    }
-                }
-            }
-        }
-
-        return defaultRsrp;
     }
 
     @Override

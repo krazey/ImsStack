@@ -53,7 +53,6 @@ public interface ISystemAPINetwork {
     int getIpcanCategory4Sys(int apnType);
     String[] getLastAccessNetworkInfo4Sys(int networkType);
     String getLocalAddress4Sys(int apnType, int ipVersion);
-    int getLteRsrpStrength4Sys();
     String[] getPcscfAddresses4Sys(int apnType, int ipVersion);
     int getRoamingState4Sys();
     int getVoiceRoamingType4Sys();

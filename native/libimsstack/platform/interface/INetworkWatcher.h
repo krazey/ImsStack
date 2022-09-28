@@ -128,8 +128,6 @@ public:
 
     virtual IMS_BOOL IsImsVoiceCallSupported() = 0;
 
-    virtual IMS_SINT32 GetLteRsrpStrength() = 0;
-
     virtual IMS_BOOL IsLteEmergencyOnly() = 0;
 
     virtual IMS_BOOL IsEmergencyAttachSupported() = 0;

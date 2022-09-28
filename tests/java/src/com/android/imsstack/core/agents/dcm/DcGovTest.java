@@ -200,15 +200,6 @@ public class DcGovTest {
     }
 
     @Test
-    public void testGetLteRsrpStrength4Sys() throws Exception {
-        int rsrp = 104;
-        when(mMockIDcUtils.getLteRsrpStrength()).thenReturn(rsrp);
-
-        assertEquals(rsrp, mDcGov.getLteRsrpStrength4Sys());
-        verify(mMockIDcUtils).getLteRsrpStrength();
-    }
-
-    @Test
     public void testGetPcscfAddresses4Sys() throws Exception {
         int ipVersion = EIpVersion.IPV4V6.getInt();
         String[] addr = {"1.1.1.1"};

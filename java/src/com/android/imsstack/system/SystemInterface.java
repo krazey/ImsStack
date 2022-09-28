@@ -690,8 +690,6 @@ public class SystemInterface implements JniSystemListener {
                 "GET_LAST_ACCESS_NETWORK_INFO");
         sMethodToString.put(SystemConstants.GET_LOCAL_ADDRESS,
                 "GET_LOCAL_ADDRESS");
-        sMethodToString.put(SystemConstants.GET_LTE_RSRP_STRENGTH,
-                "GET_LTE_RSRP_STRENGTH");
         sMethodToString.put(SystemConstants.GET_PCSCF_ADDRESSES,
                 "GET_PCSCF_ADDRESSES");
         sMethodToString.put(SystemConstants.GET_ROAMING_STATE,
@@ -1394,7 +1392,6 @@ public class SystemInterface implements JniSystemListener {
                         break;
                     //mISystemAPINetwork 11 ~ 20
                     case SystemConstants.GET_IPCAN_CATEGORY: //FALL-THROUGH
-                    case SystemConstants.GET_LTE_RSRP_STRENGTH: //FALL-THROUGH
                     case SystemConstants.GET_PCSCF_ADDRESSES: //FALL-THROUGH
                     case SystemConstants.GET_ROAMING_STATE: //FALL-THROUGH
                     case SystemConstants.GET_SERVICE_STATE: //FALL-THROUGH
@@ -1665,9 +1662,6 @@ public class SystemInterface implements JniSystemListener {
                 }
                 break;
             }
-            case SystemConstants.GET_LTE_RSRP_STRENGTH:
-                result.writeInt(mISystemAPINetwork.getLteRsrpStrength4Sys());
-                break;
             case SystemConstants.GET_PCSCF_ADDRESSES:
                 String[] pcscfs = mISystemAPINetwork.getPcscfAddresses4Sys(parcel.readInt(),
                     parcel.readInt());
