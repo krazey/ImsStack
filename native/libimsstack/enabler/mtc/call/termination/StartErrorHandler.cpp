@@ -25,7 +25,9 @@
 #include "call/IMtcCallContext.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "core/IMessageBodyPart.h"
 #include "helper/IMtcAosConnector.h"
+#include "sipcore/ISipMessage.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -103,6 +105,11 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
             break;
+        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL:
+            nReason = CODE_INTERNAL_REDIAL;
+            nExtraCode = EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT;
+            // TODO: triggerepsfallback
+            break;
     }
 
     return CallReasonInfo(nReason, nExtraCode);
@@ -159,8 +166,7 @@ CallReasonInfo StartErrorHandler::HandleRedirection(IN const IMessage& objMessag
     if (strContact.GetLength() > 0)
     {
         // TODO: silent redial with the Contact header to be implemented
-        return CallReasonInfo(
-                CODE_INTERNAL_REDIAL, GetDefaultExtraCode(objMessage), strContact);
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION, strContact);
     }
 
     if (IsRetry1xRequiredForNormalCall(objMessage))
@@ -318,8 +324,9 @@ CallReasonInfo StartErrorHandler::Handle488Response(IN const IMessage& objMessag
     if (MessageUtil::HasSdp(&objMessage))
     {
         // TODO: silent redial with the SDP to be implemented
-        AString strSdp;
-        return CallReasonInfo(CODE_INTERNAL_REDIAL, SipStatusCode::SC_488, strSdp);
+        // temporary solution. to be verified.
+        AString strSdp = objMessage.GetMessage()->GetSdpBodyPart()->GetContent().ToString();
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strSdp);
     }
 
     if (IsRetry1xRequiredForNormalCall(objMessage))

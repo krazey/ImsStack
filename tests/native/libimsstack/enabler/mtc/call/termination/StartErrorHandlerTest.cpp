@@ -30,7 +30,9 @@
 #include "internal/Ims3gpp.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
+#include "sipcore/MockISipMessageBodyPart.h"
 #include "sipcore/SipStatusCode.h"
+#include "util/ByteArray.h"
 #include "utility/MockIMessageUtils.h"
 
 using ::testing::_;
@@ -254,7 +256,7 @@ TEST_F(StartErrorHandlerTest, HandleRedirectionBy3xxResponses)
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(strAnyContactUri));
     EXPECT_TRUE(CheckHandleResult(
-            CODE_INTERNAL_REDIAL, ANY_REJECT_CODE, strAnyContactUri));
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION, strAnyContactUri));
 
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(""));
@@ -407,10 +409,21 @@ TEST_F(StartErrorHandlerTest, Handle407Response)
 TEST_F(StartErrorHandlerTest, Handle488Response)
 {
     SetMessageCode(SipStatusCode::SC_488);
+    MockISipMessage objISipMessage;
+    MockISipMessageBodyPart objISipMessageBodyPart;
+    AString strAnySdpBodyStr("audio video");
+    ByteArray objAnySdpBody(strAnySdpBodyStr);
     ON_CALL(objMessageUtils, HasSdp(&objMessage))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessage, GetMessage())
+            .WillByDefault(Return(&objISipMessage));
+    ON_CALL(objISipMessage, GetSdpBodyPart)
+            .WillByDefault(Return(&objISipMessageBodyPart));
+    ON_CALL(objISipMessageBodyPart, GetContent)
+            .WillByDefault(ReturnRef(objAnySdpBody));
+
     EXPECT_TRUE(CheckHandleResult(
-            CODE_INTERNAL_REDIAL, SipStatusCode::SC_488, AString::ConstNull()));
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strAnySdpBodyStr));
 
     ON_CALL(objMessageUtils, HasSdp(&objMessage))
             .WillByDefault(Return(IMS_FALSE));

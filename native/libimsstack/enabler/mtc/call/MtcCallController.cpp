@@ -16,13 +16,16 @@
 
 #include "IMessage.h"
 #include "ImsList.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "IMtcContext.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "IMtcService.h"
 #include "utility/MessageUtil.h"
+#include "call/ISilentRedialHelper.h"
 #include "call/MtcCallController.h"
+#include "call/SilentRedialHelper.h"
 #include "MtcDef.h"
 #include "ussi/UssiConstants.h"
 #include "IuMtcService.h"
@@ -34,11 +37,15 @@
 PUBLIC
 MtcCallController::MtcCallController(IN IMtcContext& objContext) :
         m_objContext(objContext),
-        m_objCallManager(objContext.GetCallManager())
+        m_objCallManager(objContext.GetCallManager()),
+        m_pRedialHelper(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL MtcCallController::~MtcCallController() {}
+PUBLIC VIRTUAL MtcCallController::~MtcCallController()
+{
+    delete m_pRedialHelper;
+}
 
 PUBLIC
 void MtcCallController::TerminateCalls(
@@ -291,4 +298,28 @@ void MtcCallController::HandleIpcanChanged()
             piCall->HandleIpcanChanged();
         }
     }
+}
+
+PUBLIC
+ISilentRedialHelper& MtcCallController::GetRedialHelper(
+        IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason)
+{
+    if (m_pRedialHelper)
+    {
+        if (m_pRedialHelper->IsSameRedialType(objReason))
+        {
+            return *m_pRedialHelper;
+        }
+        // not support different type of redial.
+        delete m_pRedialHelper;
+    }
+    m_pRedialHelper = new SilentRedialHelper(objContext, objReason);
+    return *m_pRedialHelper;
+}
+
+PUBLIC
+void MtcCallController::ReleaseRedialHelper()
+{
+    delete m_pRedialHelper;
+    m_pRedialHelper = IMS_NULL;
 }

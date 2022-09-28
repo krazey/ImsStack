@@ -21,6 +21,8 @@
 #include "call/IMtcCall.h"
 #include "INativeEnabler.h"
 
+class IMtcCallContext;
+class ISilentRedialHelper;
 enum class KeyType;
 union Key;
 
@@ -172,6 +174,10 @@ public:
     virtual void Transfer(IN CallKey nCallKey, IN const AString& strTarget) = 0;
 
     virtual void HandleIpcanChanged() = 0;
+
+    virtual ISilentRedialHelper& GetRedialHelper(
+            IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) = 0;
+    virtual void ReleaseRedialHelper() = 0;
 };
 
 enum class KeyType
