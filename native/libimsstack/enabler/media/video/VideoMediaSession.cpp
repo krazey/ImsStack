@@ -41,7 +41,7 @@ PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
         m_nCameraZoom(-1),
         m_bPreviewSurfaceSet(IMS_FALSE),
         m_bDisplaySurfaceSet(IMS_FALSE),
-        m_nPrevDirection(-1)
+        m_nPrevVideoMode(-1)
 {
     IMS_TRACE_I("+VideoMediaSession()", 0, 0, 0);
 }
@@ -136,7 +136,6 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
         nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
     }
 
-    m_nPrevDirection = nVideoDerection;
     m_objConfig.setMediaDirection((int32_t)nVideoDerection);
 
     IMS_TRACE_D("UpdateRtpConfig() - TxPayloadTypeNumber[%d], RxPayloadTypeNumber[%d]",
@@ -167,8 +166,14 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
     IMS_TRACE_D("UpdateRtpConfig() - RTCP TransmitPort[%d], IntervalSec[%d]",
             objRtcpConfig.getTransmitPort(), objRtcpConfig.getIntervalSec(), 0);
 
-    /** TODO: add statement to split case between recording and pause image mode */
-    m_objConfig.setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
+    if (m_nCameraId == CAMERA_ID_NONE)
+    {
+        m_objConfig.setVideoMode(VideoConfig::VIDEO_MODE_PAUSE_IMAGE);
+    }
+    else
+    {
+        m_objConfig.setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
+    }
 
     if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("H264"))
     {
@@ -638,26 +643,32 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
 
         delete param;
 
-        if (m_nState == STATE_PREVIEW || m_nState == STATE_RECORDING)
+        if (m_nState == STATE_PREVIEW || m_nState == STATE_RECORDING ||
+                m_nState == STATE_PAUSE_IMAGE)
         {
             if (m_nCameraId != CAMERA_ID_NONE)
             {
-                if (m_objConfig.getMediaDirection() == RtpConfig::MEDIA_DIRECTION_INACTIVE)
+                if (m_nPrevVideoMode != -1 && m_nState == STATE_PAUSE_IMAGE)
                 {
-                    m_objConfig.setMediaDirection(m_nPrevDirection);
+                    m_objConfig.setVideoMode(m_nPrevVideoMode);
                 }
-
-                m_objConfig.setCameraId(m_nCameraId);
-                this->Modify();
             }
             else
             {
-                /** TODO: go to pause Image mode, currently set media direction to inactive to
-                 * disable the camera */
-                m_nPrevDirection = (IMS_SINT32)m_objConfig.getMediaDirection();
-                m_objConfig.setMediaDirection(RtpConfig::MEDIA_DIRECTION_INACTIVE);
-                this->Modify();
+                if (m_nState == STATE_PREVIEW)
+                {
+                    m_nPrevVideoMode = VideoConfig::VIDEO_MODE_PREVIEW;
+                }
+                else if (m_nState == STATE_RECORDING)
+                {
+                    m_nPrevVideoMode = VideoConfig::VIDEO_MODE_RECORDING;
+                }
+
+                m_objConfig.setVideoMode(VideoConfig::VIDEO_MODE_PAUSE_IMAGE);
             }
+
+            m_objConfig.setCameraId(m_nCameraId);
+            this->Modify();
         }
 
         return IMS_TRUE;
