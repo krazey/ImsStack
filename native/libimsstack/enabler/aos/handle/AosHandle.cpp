@@ -1201,7 +1201,7 @@ PROTECTED
 void AosHandle::ProcessBlock(
         IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess /* = IMS_TRUE */)
 {
-    A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: nBlock[%d], bAdded[%s], bPreProcess[%s]", nBlock,
+    A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: nBlock[%x], bAdded[%s], bPreProcess[%s]", nBlock,
             _TRACE_B_(bAdded), _TRACE_B_(bPreProcess));
 
     if (bPreProcess)
@@ -1302,7 +1302,7 @@ Remarks
 PROTECTED
 void AosHandle::ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd)
 {
-    A_IMS_TRACE_I(APPPROFILE, "ProcessUnavailableFeature :: nFeature[%d], bAdd[%s]", nFeature,
+    A_IMS_TRACE_I(APPPROFILE, "ProcessUnavailableFeature :: nFeature[%x], bAdd[%s]", nFeature,
             _TRACE_B_(bAdd), 0);
 
     if (bAdd)
@@ -1788,7 +1788,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
 
-            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d) , m_nReason(%d)", nState,
+            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
                     m_nReason, 0);
 
             switch (nState)
@@ -1867,7 +1867,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
             IMS_UINT32 nState = LONG_TO_INT(objMSG.nWparam);
             SetReason(LONG_TO_INT(objMSG.nLparam));
 
-            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d) , m_nReason(%d)", nState,
+            A_IMS_TRACE_I(APPPROFILE, "HANDLE_MSG_APP_STATUS :: State(%d), m_nReason(%d)", nState,
                     m_nReason, 0);
 
             switch (nState)

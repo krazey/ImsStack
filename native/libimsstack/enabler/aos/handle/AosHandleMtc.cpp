@@ -113,7 +113,7 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
             if (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
             {
                 A_IMS_TRACE_D(APPPROFILE,
-                        "CallTracker_StateChanged :: handle vops block , state (%d)",
+                        "CallTracker_StateChanged :: handle vops block, state(%d)",
                         m_nHoldingVopsState, 0, 0);
 
                 m_nVopsState = m_nHoldingVopsState;
@@ -560,7 +560,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
         IMS_UINT32 nNewCapabilities = objNewCapabilities.GetValue(nCapaNetworkType);
 
         A_IMS_TRACE_D(APPPROFILE, "ProcessCapabilitiesChanged :: \
-                nCapaNetworkType[%d], nNewCapabilities[%d], m_nNetworkType[%s]",
+                nCapaNetworkType[%d], nNewCapabilities[%x], m_nNetworkType[%s]",
                 nCapaNetworkType, nNewCapabilities, RadioTypeToString(m_nNetworkType));
 
         m_objCapabilities.SetValue(nCapaNetworkType, nNewCapabilities);
@@ -633,7 +633,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nStat
         if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
         {
             A_IMS_TRACE_I(APPPROFILE,
-                    "ProcessVopsStateChanged :: pending the block feature, state (%d)", nState, 0,
+                    "ProcessVopsStateChanged :: pending the block feature, state(%d)", nState, 0,
                     0);
             m_nHoldingVopsState = nState;
             return;
