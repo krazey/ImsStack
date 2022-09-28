@@ -25,6 +25,7 @@ class MtcConfigurationProxy;
 class IMtcService;
 class IJniMtcServiceThread;
 class MtcEmergencyServiceManager;
+class IMtcCallTrafficChecker;
 
 class MockMtcAosEventHandler : public MtcAosEventHandler
 {
@@ -35,8 +36,10 @@ public:
     {
     }
     ~MockMtcAosEventHandler() {}
-    MOCK_METHOD(void, OnConnected, (IN IMS_UINT32, IN IMS_UINT32, IN IJniMtcServiceThread*,
-            IN MtcEmergencyServiceManager*, IN IMtcCallController&), (override));
+    MOCK_METHOD(void, OnConnected,
+            (IN IMS_UINT32, IN IMS_UINT32, IN IJniMtcServiceThread*, IN MtcEmergencyServiceManager*,
+                    IN IMtcCallController&, IN IMtcCallTrafficChecker&),
+            (override));
     MOCK_METHOD(void, OnDisconnecting, (IN IMS_UINT32, IN IMtcCallController&), (override));
     MOCK_METHOD(void, OnDisconnected, (IN IMS_UINT32, IN IMtcCallController&,
             IN IJniMtcServiceThread*, IN MtcEmergencyServiceManager*), (override));

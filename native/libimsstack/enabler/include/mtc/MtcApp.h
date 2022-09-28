@@ -27,6 +27,7 @@
 #include "IMtcService.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
+#include "call/traffic/MtcCallTrafficChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "vonr/MtcVonrManager.h"
@@ -43,6 +44,7 @@ class IMtcDialingPlan;
 class IMtcVonrManager;
 class ICallStateProxy;
 class IMessageUtils;
+class IMtcCallTrafficChecker;
 class IMtcImsEventReceiver;
 class IMtcAosConnector;
 class IMtcSipInterfaceFactory;
@@ -67,6 +69,10 @@ public:
     IMtcService* GetServiceByType(IN ServiceType eServiceType) override;
     inline IMtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }
     inline IMtcCallController& GetCallController() override { return m_objCallController; }
+    inline IMtcCallTrafficChecker& GetCallTrafficChecker() override
+    {
+        return m_objMtcCallTrafficChecker;
+    }
     inline IMtcCallManager& GetCallManager() override { return m_objCallManager; }
     inline IMtcVonrManager& GetVonrManager() override { return m_objVonrManager; }
     inline MtcConfigurationProxy& GetConfigurationProxy() override
@@ -110,6 +116,7 @@ protected:
     MessageUtils m_objMessageUtils;
 
     IMS_BOOL m_bWifiTestMode;
+    MtcCallTrafficChecker m_objMtcCallTrafficChecker;
 };
 
 #endif

@@ -35,6 +35,7 @@ class IEctManager;
 class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
 class IMessageUtils;
+class IMtcCallTrafficChecker;
 
 class IMtcContext
 {
@@ -44,6 +45,7 @@ public:
     virtual IMtcDialingPlan& GetDialingPlan() = 0;
     virtual IMtcCallController& GetCallController() = 0;
     virtual IMtcCallManager& GetCallManager() = 0;
+    virtual IMtcCallTrafficChecker& GetCallTrafficChecker() = 0;
     virtual IMtcVonrManager& GetVonrManager() = 0;
     virtual MtcConfigurationProxy& GetConfigurationProxy() = 0;
     virtual ICallStateProxy& GetCallStateProxy() = 0;

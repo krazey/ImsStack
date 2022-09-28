@@ -24,6 +24,7 @@
 #include "ImsAosParameter.h"
 #include "IuMtcService.h"
 #include "MtcEmergencyServiceManager.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosEventHandler.h"
 
@@ -50,7 +51,7 @@ PUBLIC
 void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
         IN IJniMtcServiceThread* pServiceThread,
         IN MtcEmergencyServiceManager* pEmergencyServiceManager,
-        IN IMtcCallController& objCallController)
+        IN IMtcCallController& objCallController, IN IMtcCallTrafficChecker& objCallTrafficChecker)
 {
     IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nIpcan, 0);
@@ -60,7 +61,9 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
     IMS_UINT32 nVideoConnected =
             nFeatures & ImsAosFeature::VIDEO ? ImsAosFeature::VIDEO : ImsAosFeature::NONE;
 
-    if (m_objService.IsEmergency())
+    IMS_BOOL bEmergency = m_objService.IsEmergency();
+
+    if (bEmergency)
     {
         pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE);
     }
@@ -78,6 +81,8 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
     if (m_nIpcan != nIpcan)
     {
         m_nIpcan = nIpcan;
+
+        objCallTrafficChecker.HandleIpcanChanged(m_nIpcan, bEmergency);
         if (m_objConfiguration.Is(Feature::ENABLE_SEND_REINVITE_ON_RAT_CHANGE))
         {
             objCallController.HandleIpcanChanged();

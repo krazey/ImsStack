@@ -32,6 +32,7 @@
 #include "call/ParticipantInfo.h"
 #include "call/block/CallCountBlockRule.h"
 #include "call/block/CallTypeBlockRule.h"
+#include "call/block/CallTrafficBlockRule.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/NetworkBlockRule.h"
@@ -453,7 +454,8 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new CallTypeBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     lstRules.Append(new TerminalBasedCallWaitingBlockRule(m_objContext));
-
+    lstRules.Append(
+            new CallTrafficBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     return lstRules;
 }
 
@@ -470,6 +472,8 @@ IMSList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
+    lstRules.Append(
+            new CallTrafficBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
 
     return lstRules;
 }

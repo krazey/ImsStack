@@ -22,6 +22,7 @@
 #include "call/ParticipantInfo.h"
 #include "call/block/MockIMtcBlockChecker.h"
 #include "call/state/IdleState.h"
+#include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
@@ -47,6 +48,7 @@ public:
     MockIMtcImsEventReceiver objImsEventReceiver;
     MockIMtcCallManager objCallManager;
     CallInfo objCallInfo;
+    MockIMtcCallTrafficChecker objMockIMtcCallTrafficChecker;
 
 protected:
     virtual void SetUp() override
@@ -75,6 +77,8 @@ protected:
                 .WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objCallContext, GetCallManager)
                 .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objCallContext, GetCallTrafficChecker)
+                .WillByDefault(ReturnRef(objMockIMtcCallTrafficChecker));
 
         pIdleState = new IdleState(objCallContext);
     }

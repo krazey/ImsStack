@@ -138,6 +138,7 @@ PUBLIC
 void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* piSession)
 {
     CallInfo objCallInfo;
+    objCallInfo.bEmergency = pService->IsEmergency();
     m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)->HandleIncoming(piSession);
 }
 
@@ -322,4 +323,10 @@ void MtcCallController::ReleaseRedialHelper()
 {
     delete m_pRedialHelper;
     m_pRedialHelper = IMS_NULL;
+}
+
+void MtcCallController::OnConnectionFailed(IN CallKey nCallKey)
+{
+    Key nKey = {nCallKey};
+    TerminateCalls(KeyType::CALL_KEY, nKey, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE));
 }

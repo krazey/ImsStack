@@ -35,6 +35,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipFactory.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcCapabilityQueryHandler.h"
@@ -172,7 +173,8 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
     IMS_TRACE_I("ImsAos_Connected", 0, 0, 0);
     m_eStatus = ServiceStatus::SERVICE_ACTIVE;
     m_pAosEventHandler->OnConnected(nFeatures, nIpcan, GetJniThread(),
-            m_objContext.GetEmergencyServiceManager(), m_objContext.GetCallController());
+            m_objContext.GetEmergencyServiceManager(), m_objContext.GetCallController(),
+            m_objContext.GetCallTrafficChecker());
     SetAosReady(IMS_TRUE);
 }
 

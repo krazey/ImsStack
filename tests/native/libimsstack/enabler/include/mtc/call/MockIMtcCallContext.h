@@ -40,6 +40,7 @@ class OperationAsyncRunner;
 class ParticipantInfo;
 class UpdatingInfo;
 class UssiController;
+class IMtcCallTrafficChecker;
 struct CallInfo;
 
 class MockIMtcCallContext : public IMtcCallContext
@@ -80,6 +81,7 @@ public:
     MOCK_METHOD(IMtcDialingPlan&, GetDialingPlan, (), (override));
     MOCK_METHOD(IMtcCallController&, GetCallController, (), (override));
     MOCK_METHOD(IMtcCallManager&, GetCallManager, (), (override));
+    MOCK_METHOD(IMtcCallTrafficChecker&, GetCallTrafficChecker, (), (override));
     MOCK_METHOD(IMtcVonrManager&, GetVonrManager, (), (override));
     MOCK_METHOD(MtcConfigurationProxy&, GetConfigurationProxy, (), (override));
     MOCK_METHOD(ICallStateProxy&, GetCallStateProxy, (), (override));

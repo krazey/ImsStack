@@ -52,6 +52,7 @@ class IConferenceManager;
 class IEctManager;
 class IMtcAosConnector;
 class IMtcCallController;
+class IMtcCallTrafficChecker;
 class IMtcContext;
 class IMtcDialingPlan;
 class IMtcMediaManager;
@@ -163,6 +164,10 @@ public:
         return m_objContext.GetServiceByType(eServiceType);
     }
     inline IMtcCallManager& GetCallManager() override { return m_objContext.GetCallManager(); }
+    inline IMtcCallTrafficChecker& GetCallTrafficChecker() override
+    {
+        return m_objContext.GetCallTrafficChecker();
+    }
     inline IMtcCallController& GetCallController() override
     {
         return m_objContext.GetCallController();

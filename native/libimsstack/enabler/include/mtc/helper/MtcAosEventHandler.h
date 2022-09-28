@@ -24,6 +24,7 @@ class IMessage;
 class AString;
 class IMtcCallController;
 class MtcConfigurationProxy;
+class IMtcCallTrafficChecker;
 class IMtcService;
 class IJniMtcServiceThread;
 class MtcEmergencyServiceManager;
@@ -40,7 +41,8 @@ public:
     virtual void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
             IN IJniMtcServiceThread* pServiceThread,
             IN MtcEmergencyServiceManager* pEmergencyServiceManager,
-            IN IMtcCallController& objCallController);
+            IN IMtcCallController& objCallController,
+            IN IMtcCallTrafficChecker& objCallTrafficChecker);
     virtual void OnDisconnecting(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController);
     virtual void OnDisconnected(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController,
             IN IJniMtcServiceThread* pServiceThread,

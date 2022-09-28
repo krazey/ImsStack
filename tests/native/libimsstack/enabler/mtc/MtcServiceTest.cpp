@@ -27,6 +27,7 @@
 #include "IIpcan.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
+#include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "MockMtcEmergencyServiceManager.h"
 #include "core/MockICoreService.h"
 #include "core/MockIReference.h"
@@ -83,6 +84,7 @@ public:
     MockMtcEmergencyServiceManager* pMockEmergencyManager;
     MockIMtcCallManager objMockCallManager;
     MockIMtcCallController objMockCallController;
+    MockIMtcCallTrafficChecker objMockIMtcCallTrafficChecker;
     MockICoreService objMockCoreService;
     MockMtcAosEventHandler* pMockAosEventHandler;
     MockSrvccStateManager* pMockSrvccStateManager;
@@ -108,6 +110,8 @@ protected:
                 .WillByDefault(ReturnRef(objMockCallManager));
         ON_CALL(objMockContext, GetCallController)
                 .WillByDefault(ReturnRef(objMockCallController));
+        ON_CALL(objMockContext, GetCallTrafficChecker)
+                .WillByDefault(ReturnRef(objMockIMtcCallTrafficChecker));
 
         pNormalMtcService = CreateMtcService(ServiceType::NORMAL);
         pEmergencyMtcService = new MtcService(objMockContext, ServiceType::EMERGENCY);
@@ -185,8 +189,8 @@ TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
 {
     IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
     IMS_UINT32 nIpcan = IIpcan::CATEGORY_MOBILE;
-    EXPECT_CALL(*pMockAosEventHandler, OnConnected(
-            nFeature, nIpcan, IMS_NULL, pMockEmergencyManager, _))
+    EXPECT_CALL(*pMockAosEventHandler,
+            OnConnected(nFeature, nIpcan, IMS_NULL, pMockEmergencyManager, _, _))
             .Times(1);
 
     pNormalMtcService->ImsAos_Connected(nFeature, nIpcan);
