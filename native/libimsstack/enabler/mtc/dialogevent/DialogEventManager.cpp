@@ -715,7 +715,7 @@ PROTECTED VIRTUAL void DEMngr::HandleStartFailed(IN IMSMSG& objMSG)
 
     IMS_TRACE_I("HandleStartFailed : [%d]", nStatusCode, 0, 0);
 
-    SendTerminatedToListn(CallReasonInfo(CODE_UNSPECIFIED, -1));
+    SendTerminatedToListn(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -737,7 +737,7 @@ PROTECTED VIRTUAL void DEMngr::HandleTerminated(IN IMSMSG& /*objMSG*/)
 
     IMS_TRACE_I("HandleTerminated", 0, 0, 0);
 
-    SendTerminatedToListn(CallReasonInfo(CODE_UNSPECIFIED, -1));
+    SendTerminatedToListn(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -956,7 +956,7 @@ PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleUnSubCompleted(IN ISubscription* pISubs
     bHandle = IMS_TRUE;
     IMS_TRACE_I("HandleUnSubCompleted : [%s]", _TRACE_B_(bHandle), 0, 0);
 
-    SendTerminatedToListn(CallReasonInfo(CODE_UNSPECIFIED, -1));
+    SendTerminatedToListn(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
     return bHandle;
 }
 

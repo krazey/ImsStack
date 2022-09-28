@@ -157,7 +157,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
     IMtcSession* pSession = m_objContext.CreateSession(piSession);
     if (pSession == IMS_NULL)
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
@@ -243,7 +243,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     {
         if (m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
         {
-            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR));
+            return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         }
     }
     else
@@ -274,7 +274,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSessio
 
     if (!m_objContext.GetUssiController()->HasValidXmlBodyForNetworkInitiatedUssi(piMessage))
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_UNKNOWN));
     }
 
     m_objOperationAfterBlockCheck = [&]()
@@ -320,7 +320,7 @@ CallStateName IdleState::ContinueStart()
     IMS_TRACE_D("ContinueStart", 0, 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 
@@ -330,7 +330,7 @@ CallStateName IdleState::ContinueStart()
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 
@@ -346,7 +346,7 @@ CallStateName IdleState::ContinueConference(IN IMSList<ConfUser*> lstUsers)
     IMS_TRACE_D("ContinueConference", 0, 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 
@@ -359,7 +359,7 @@ CallStateName IdleState::ContinueConference(IN IMSList<ConfUser*> lstUsers)
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 
@@ -386,7 +386,7 @@ CallStateName IdleState::ContinueStartUssi()
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     if (m_objContext.CreateSession() == IMS_NULL)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 
@@ -395,7 +395,7 @@ CallStateName IdleState::ContinueStartUssi()
     if (m_objContext.GetUssiController()->FormStartUssiRequest(
             m_objContext.GetParticipantInfo().GetRemoteNumber()) == IMS_FAILURE)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 
@@ -405,7 +405,7 @@ CallStateName IdleState::ContinueStartUssi()
 
     if (m_objContext.GetSession()->Start() == IMS_FAILURE)
     {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_UNSPECIFIED));
+        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;
     }
 

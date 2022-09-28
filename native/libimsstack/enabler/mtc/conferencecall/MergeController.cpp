@@ -279,7 +279,7 @@ void MergeController::RecoverOnReferring()
     {
         IMS_TRACE_I("RecoverOnReferring : failure before start inviting members", 0, 0, 0);
         ClearIndividualCallOnMergeFailed();  // ??
-        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
+        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
         m_objOperationQueue.Clear();
         SetState(STATE_IDLE);
         return;
@@ -296,7 +296,7 @@ void MergeController::RecoverOnReferring()
     {
         IMS_TRACE_I("RecoverOnReferring : failure during additional adding", 0, 0, 0);
         ClearIndividualCallOnMergeFailed();
-        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_UNSPECIFIED, -1));
+        m_objNotifier.NotifyMergeFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
         m_objOperationQueue.Clear();
         SetState(STATE_IDLE);
         return;

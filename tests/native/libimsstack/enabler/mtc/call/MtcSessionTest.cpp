@@ -174,7 +174,7 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
 
 TEST_F(MtcSessionTest, TerminateWithReasonVccDoesnsInvokeTerminate)
 {
-    const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+    const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
     EXPECT_CALL(*pMessageSender, Terminate(_, _))
             .Times(0);
 

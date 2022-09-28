@@ -1015,7 +1015,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         } else if (getUpdateState() == UPDATE_STATE_RECEIVED) {
             // GLARE_CONDITION: between call mode changes
             CallReasonInfo callReasonInfo = new CallReasonInfo(
-                    CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPDATE, 0, "");
+                    CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPGRADE, 0, "");
             Message.obtain(mHandler, MSG_CALL_UPDATE_FAILED, callReasonInfo).sendToTarget();
             return;
         }
@@ -2108,7 +2108,7 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             if (getUpdateState() == UPDATE_STATE_SENT) {
                 rejectInternal(MtcCall.this, IUMtcCall.REJECT_UPDATE,
-                        CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPDATE);
+                        CallReasonInfo.CODE_REJECT_ONGOING_CALL_UPGRADE);
                 return;
             }
 

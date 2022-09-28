@@ -146,7 +146,7 @@ TEST_F(AlertingStateTest, HandleUserAlertSendsProvisonalResponseAndStartAlerting
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_MT_ALERTING, nAnyTime));
 
-    pAlertingState->HandleUserAlert();
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->HandleUserAlert());
 }
 
 TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFails)
@@ -158,10 +158,10 @@ TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFail
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
 
-    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR)));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR)));
+    EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
 
-    pAlertingState->HandleUserAlert();
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->HandleUserAlert());
 }
 
 TEST_F(AlertingStateTest, AcceptSameCallTypeInvokesAccept)
@@ -175,7 +175,7 @@ TEST_F(AlertingStateTest, AcceptSameCallTypeInvokesAccept)
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
 
-    pAlertingState->Accept(eAcceptCallType, &objMediaInfo);
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, RejectIncomingCallIfAcceptFails)
@@ -189,11 +189,12 @@ TEST_F(AlertingStateTest, RejectIncomingCallIfAcceptFails)
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
 
-    const CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
+    const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    pAlertingState->Accept(eAcceptCallType, &objMediaInfo);
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
@@ -208,7 +209,7 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
             .Times(0);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL));
 
-    pAlertingState->Accept(eAcceptCallType, &objMediaInfo);
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, RejectInvokesRejectIncoming)
@@ -217,7 +218,7 @@ TEST_F(AlertingStateTest, RejectInvokesRejectIncoming)
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    pAlertingState->Reject(objReason);
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->Reject(objReason));
 }
 
 TEST_F(AlertingStateTest, RejectIncomingCallIfAlertingTimerExpired)
@@ -226,14 +227,15 @@ TEST_F(AlertingStateTest, RejectIncomingCallIfAlertingTimerExpired)
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    pAlertingState->OnTimerExpired(MtcCallState::TIMER_MT_ALERTING);
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pAlertingState->OnTimerExpired(MtcCallState::TIMER_MT_ALERTING));
 }
 
 TEST_F(AlertingStateTest, QosReserveFailedInvokesRejectIncomingCallIfNextActionIsRelease)
 {
     EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objISession, IMS_TRUE))
             .Times(2); // TODO: duplicated code.
-    const CallReasonInfo objReason(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
+    const CallReasonInfo objReason(CODE_REJECT_QOS_FAILURE);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
@@ -246,10 +248,9 @@ TEST_F(AlertingStateTest, QosReserveFailedDoesNothingIfNextActionIsModify)
     // TODO: do modify
     EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objISession, IMS_TRUE))
             .Times(0);
-    const CallReasonInfo objReason(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED);
-    EXPECT_CALL(objMtcSession, Reject(objReason))
+    EXPECT_CALL(objMtcSession, Reject(_))
             .Times(0);
-    EXPECT_CALL(objUiNotifier, SendStartFailed(objReason))
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_))
             .Times(0);
 
     EXPECT_EQ(CallStateName::ALERTING,
@@ -319,7 +320,8 @@ TEST_F(AlertingStateTest, AcceptIsCalledWhenUpdateIsNotSentBySrvcc)
     ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::UNKNOWN, strHeaderName))
             .WillByDefault(Return(AString::ConstEmpty()));
     EXPECT_CALL(objMtcSession, Accept).Times(1);
-    pAlertingState->SessionEarlyMediaUpdated(&objISession);
+    EXPECT_EQ(CallStateName::ALERTING,
+            pAlertingState->SessionEarlyMediaUpdated(&objISession));
 }
 
 TEST_F(AlertingStateTest, NoAcceptIsCalledWhenUpdateIsSentBySrvcc)
@@ -333,13 +335,15 @@ TEST_F(AlertingStateTest, NoAcceptIsCalledWhenUpdateIsSentBySrvcc)
     ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::UNKNOWN, strHeaderName))
             .WillByDefault(Return(MessageUtil::STR_REASON_HANDOVER_CANCELLED));
     EXPECT_CALL(objMtcSession, Accept).Times(0);
-    pAlertingState->SessionEarlyMediaUpdated(&objISession);
+    EXPECT_EQ(CallStateName::ALERTING,
+            pAlertingState->SessionEarlyMediaUpdated(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionEarlyMediaUpdateFailedNotifiesStartFailed)
 {
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_SESSION_INTERNAL_ERROR)));
-    pAlertingState->SessionEarlyMediaUpdateFailed(&objISession);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pAlertingState->SessionEarlyMediaUpdateFailed(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUpdate200)
@@ -355,10 +359,11 @@ TEST_F(AlertingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
     EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_200))
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
-    const CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
+    const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
-    pAlertingState->SessionEarlyMediaUpdateReceived(&objISession);
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pAlertingState->SessionEarlyMediaUpdateReceived(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUpdate488)
@@ -373,7 +378,8 @@ TEST_F(AlertingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
             .WillByDefault(Return(NegotiationState::STATE_OFFER_RECEIVED));
 
     EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_488));
-    pAlertingState->SessionEarlyMediaUpdateReceived(&objISession);
+    EXPECT_EQ(CallStateName::ALERTING,
+            pAlertingState->SessionEarlyMediaUpdateReceived(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionPRAckReceivedInvokesRespondToPrack)
@@ -387,16 +393,16 @@ TEST_F(AlertingStateTest, SessionPRAckReceivedInvokesRespondToPrack)
 
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200))
             .Times(1);
-    pAlertingState->SessionPRAckReceived(&objISession);
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionPRAckReceived(&objISession));
 
     // RespondToPrack fails
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200))
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
-    const CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
+    const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
-    pAlertingState->SessionPRAckReceived(&objISession);
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionPRAckReceived(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionPRAckReceivedInvokesRejectIncomingIfOfferAnswerFails)
@@ -420,16 +426,17 @@ TEST_F(AlertingStateTest, SessionPRAckReceivedInvokesRejectIncomingIfOfferAnswer
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
-    pAlertingState->SessionPRAckReceived(&objISession);
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionPRAckReceived(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionRPRDeliveryFailedRejectsIncomingCall)
 {
-    const CallReasonInfo objReason(CODE_NETWORK_RESP_TIMEOUT);
+    const CallReasonInfo objReason(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    pAlertingState->SessionRPRDeliveryFailed(&objISession);
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pAlertingState->SessionRPRDeliveryFailed(&objISession));
 }
 
 TEST_F(AlertingStateTest, AcceptUssiInvokesAccept)
@@ -443,7 +450,8 @@ TEST_F(AlertingStateTest, AcceptUssiInvokesAccept)
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
 
-    pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo);
+    EXPECT_EQ(CallStateName::ALERTING,
+            pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
@@ -455,11 +463,12 @@ TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
     EXPECT_CALL(objMtcSession, Accept)
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
-    const CallReasonInfo objReason(CODE_SESSION_INTERNAL_ERROR);
+    const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo);
+    EXPECT_EQ(CallStateName::TERMINATING,
+            pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
@@ -480,7 +489,7 @@ TEST_F(AlertingStateTest, SessionStartFailedNotifiesStartFailed)
 {
     ON_CALL(objService, GetSrvccState)
             .WillByDefault(Return(SrvccState::IDLE));
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT)));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR)));
 
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStartFailed(&objISession));
 }
@@ -495,7 +504,7 @@ TEST_F(AlertingStateTest, SessionStartFailedDoesNotNotifyStartFailedIfSrvccStart
     ON_CALL(objAosConnector, IsImsConnected)
             .WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT)))
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_))
             .Times(0);
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionStartFailed(&objISession));

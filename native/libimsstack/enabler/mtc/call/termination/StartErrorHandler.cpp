@@ -42,15 +42,18 @@ StartErrorHandler::~StartErrorHandler() {}
 PUBLIC
 CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        // TODO: emergency retry must be managed separately
+        // check if CODE_SIP_ALTERNATE_EMERGENCY_CALL is valid for emergency call retry case
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+    }
+
     if (IsTransactionTimeout(piMessage))
     {
         IMS_TRACE_I("Handle : Timeout", 0, 0, 0);
         return HandleTransactionTimeout();
-    }
-
-    if (m_objContext.GetCallInfo().bEmergency)
-    {
-        return HandleResponse(*piMessage);
     }
 
     if (IsConditionCheckRequiredBeforeRetry1x(*piMessage) == IMS_FALSE &&
@@ -66,18 +69,13 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
-    if (m_objContext.GetCallInfo().bEmergency)
-    {
-        // TODO: emergency policy is required?
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
-    }
-
     Feature eFeature = m_objContext.GetService().IsWlanIpCanType()
             ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
             : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
 
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(eFeature);
     IMS_SINT32 nReason = CODE_NETWORK_RESP_TIMEOUT;
+    IMS_SINT32 nExtraCode = EXTRA_CODE_METHOD_INVITE;
     switch (nPolicy)
     {
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END:
@@ -87,9 +85,11 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
             nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+            nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
             nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;  // TODO : check requirement
+            nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF:
             ControlAos(ImsAosControl::REGISTER_REINITIATE);
@@ -100,11 +100,12 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
         case CarrierConfig::ImsVoice::
                 MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB:
             nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+            nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
             ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
             break;
     }
 
-    return CallReasonInfo(nReason);
+    return CallReasonInfo(nReason, nExtraCode);
 }
 
 PRIVATE
@@ -159,7 +160,7 @@ CallReasonInfo StartErrorHandler::HandleRedirection(IN const IMessage& objMessag
     {
         // TODO: silent redial with the Contact header to be implemented
         return CallReasonInfo(
-                CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED, GetDefaultExtraCode(objMessage), strContact);
+                CODE_INTERNAL_REDIAL, GetDefaultExtraCode(objMessage), strContact);
     }
 
     if (IsRetry1xRequiredForNormalCall(objMessage))
@@ -179,15 +180,15 @@ CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessag
     if (eSosType != EXTRA_CODE_EMERGENCYSERVICE_INVALID &&
             IsNonUeDetectableEmergencyCall(objMessage))
     {
-        // TODO : verify CODE_SIP_ALTERNATE_EMERGENCY_CALL and update.
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, eSosType);
+        return CallReasonInfo(CODE_SIP_ALTERNATE_EMERGENCY_CALL, eSosType);
     }
 
     if (HasEmergencyServiceTypeInBody(objMessage))
     {
+        // TODO: check
         // Set to EXTRA_CODE_CALL_RETRY_NORMAL even though it's emergency service.
         // Call app will retry according to the UX scenario.
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_NORMAL);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
     }
 
     if (IsRetry1xRequiredForNormalCall(objMessage))
@@ -240,8 +241,7 @@ CallReasonInfo StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessag
             // so, if there is no Min-SE header, CODE_SIP_INTERVAL_TOO_BRIEF will be used
             return CallReasonInfo(CODE_SIP_INTERVAL_TOO_BRIEF, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_480:
-            return CallReasonInfo(
-                    CODE_SIP_TEMPORARILY_UNAVAILABLE, GetDefaultExtraCode(objMessage));
+            return CallReasonInfo(CODE_SIP_TEMPRARILY_UNAVAILABLE, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_481:
             return CallReasonInfo(
                     CODE_SIP_TRANSACTION_DOES_NOT_EXIST, GetDefaultExtraCode(objMessage));
@@ -308,15 +308,8 @@ CallReasonInfo StartErrorHandler::Handle404Response() const
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle407Response() const
 {
-    if (m_objContext.GetCallInfo().bEmergency)
-    {
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
-    }
-    else
-    {
-        // TODO: an initial INVITE must be sent with Authorization.
-        return CallReasonInfo(CODE_SIP_PROXY_AUTHENTICATION_REQUIRED, SipStatusCode::SC_407);
-    }
+    // TODO: an initial INVITE must be sent with Authorization.
+    return CallReasonInfo(CODE_SIP_PROXY_AUTHENTICATION_REQUIRED, SipStatusCode::SC_407);
 }
 
 PRIVATE
@@ -326,7 +319,7 @@ CallReasonInfo StartErrorHandler::Handle488Response(IN const IMessage& objMessag
     {
         // TODO: silent redial with the SDP to be implemented
         AString strSdp;
-        return CallReasonInfo(CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED, SipStatusCode::SC_488, strSdp);
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, SipStatusCode::SC_488, strSdp);
     }
 
     if (IsRetry1xRequiredForNormalCall(objMessage))

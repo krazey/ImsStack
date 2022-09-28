@@ -144,8 +144,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::Terminate(IN const CallReasonInfo& o
 
     StopTimer();
 
-    // SetTerminateCodeForInvitedSessionToConf
-
     const CallReasonInfo objTerminateReason = GetAudioInactivityReasonOnTermination(objReason);
 
     HandleTerminate(objTerminateReason);
@@ -284,7 +282,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::QosReserveFailed(
 PROTECTED VIRTUAL CallStateName UpdatingState::HandleSrvccStarted()
 {
     IMS_TRACE_D("HandleSrvccStarted", 0, 0, 0);
-    const CallReasonInfo objReason(CODE_LOCAL_VCC_ON_PROGRESSING);
+    const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
     if (m_objContext.GetUpdatingInfo().IsModifier())  // TODO: proper condition?
     {
         return CancelUpdate(objReason);
@@ -468,18 +466,18 @@ void UpdatingState::RecoverModificationFailure()
 
     m_objContext.GetMediaManager().RestoreSdp(&m_objContext.GetSession()->GetISession());
 
-    CallReasonInfo objReason(CODE_NONE);
     if (m_objContext.GetUpdatingInfo().IsHeld())
     {
-        m_objContext.GetUiNotifier().SendHoldFailed(objReason);
+        m_objContext.GetUiNotifier().SendHoldFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
     }
     else if (m_objContext.GetUpdatingInfo().IsResumed())
     {
-        m_objContext.GetUiNotifier().SendResumeFailed(objReason);
+        m_objContext.GetUiNotifier().SendResumeFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
     }
     else
     {
-        m_objContext.GetUiNotifier().SendUpdateFailed(objReason);
+        m_objContext.GetUiNotifier().SendUpdateFailed(
+                CallReasonInfo(CODE_USER_REJECTED_SESSION_MODIFICATION));
     }
 }
 

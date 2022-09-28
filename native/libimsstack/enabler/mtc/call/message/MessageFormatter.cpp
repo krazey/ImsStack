@@ -633,21 +633,15 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
 
     switch (objReason.nCode)
     {
-        case CODE_UNSPECIFIED:
-            eStatusCode = SipStatusCode::SC_480;
-            break;
         case CODE_USER_DECLINE:
             eStatusCode = m_objContext.GetConfigurationProxy().GetInt(
                     Feature::INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE);
             break;
         case CODE_USER_NOANSWER:
-            eStatusCode = SipStatusCode::SC_603;
+            eStatusCode = SipStatusCode::SC_486;
             break;
         case CODE_LOW_BATTERY:
-            eStatusCode = SipStatusCode::SC_603;
-            break;
-        case CODE_LOCAL_CALL_END_UNSPECIFIED:
-            eStatusCode = SipStatusCode::SC_603;
+            eStatusCode = SipStatusCode::SC_486;
             break;
         case CODE_REJECT_ONGOING_CALL_WAITING_DISABLED:
             eStatusCode = SipStatusCode::SC_486;
@@ -678,6 +672,9 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
         case CODE_LOCAL_CALL_BUSY:
             eStatusCode = SipStatusCode::SC_486;
             break;
+        case CODE_LOCAL_CALL_DECLINE:
+            eStatusCode = SipStatusCode::SC_603;
+            break;
         case CODE_USER_IGNORE:
             eStatusCode = SipStatusCode::SC_486;
             break;
@@ -698,17 +695,15 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
                 eStatusCode = SipStatusCode::SC_406;
             }
             break;
-        case CODE_REJECT_ONGOING_CALL_UPDATE:
+        case CODE_REJECT_ONGOING_CALL_UPGRADE:
             eStatusCode = SipStatusCode::SC_486;
             break;
-        case CODE_SESSION_INTERNAL_ERROR:
+        case CODE_REJECT_INTERNAL_ERROR:
             eStatusCode = SipStatusCode::SC_480;
             break;
-        case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED:
+        case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED: // TODO: can be removed?
+        case CODE_REJECT_QOS_FAILURE:
             eStatusCode = SipStatusCode::SC_580;
-            break;
-        case CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE:
-            eStatusCode = SipStatusCode::SC_480;
             break;
         case CODE_MEDIA_INIT_FAILED:
             eStatusCode = SipStatusCode::SC_480;
@@ -725,6 +720,12 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             break;
         case CODE_NETWORK_RESP_TIMEOUT:
             eStatusCode = SipStatusCode::SC_500;
+            break;
+        case CODE_BLACKLISTED_CALL_ID:
+            eStatusCode = SipStatusCode::SC_603;
+            break;
+        case CODE_USER_REJECTED_SESSION_MODIFICATION:
+            eStatusCode = SipStatusCode::SC_603;
             break;
 
         default:
@@ -758,7 +759,7 @@ void MessageFormatter::GetRejectPhrase(IN const CallReasonInfo& objReason, OUT A
         case CODE_TIMEOUT_NO_ANSWER:
             strPhrase = GetRejectPhrase(RejectType::NO_ANSWER_BY_USER);
             break;
-        case CODE_REJECT_ONGOING_CALL_UPDATE:
+        case CODE_REJECT_ONGOING_CALL_UPGRADE:
             strPhrase = GetRejectPhrase(RejectType::ON_CONVERTING);
             break;
         case CODE_MEDIA_NOT_ACCEPTABLE:
@@ -835,7 +836,7 @@ void MessageFormatter::GetTerminateReason(
         case CODE_TIMEOUT_NO_ANSWER:
             strReason = GetTerminateReason(TerminateType::CALL_SETUP_TIMEOUT);
             break;
-        case CODE_EARLYDIALOG_FORKED_TERMINATED_INTERNALONLY:
+        case CODE_INTERNAL_EARLYDIALOG_FORKED_TERMINATED:
             strReason = GetTerminateReason(TerminateType::TERMINATING_EARLY_DIALOG);
             break;
         case CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE:

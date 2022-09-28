@@ -149,41 +149,44 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
     SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CALL_END);
     EXPECT_CALL(objAosConnector, Control(_))
             .Times(0);
-    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE);
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT))
             .Times(1);
-    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB);
     EXPECT_CALL(objAosConnector, Control(_))
             .Times(0);
-    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
     SetTcallTimerConfig(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE);
     EXPECT_CALL(objAosConnector, Control(_))
             .Times(0);
-    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
     SetTcallTimerConfig(
             CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF);
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE))
             .Times(1);
-    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     SetTcallTimerConfig(
             CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_NEXT_PCSCF);
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT))
             .Times(1);
-    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT));
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 
     SetTcallTimerConfig(
             CarrierConfig::ImsVoice::
                     MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB);
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB))
             .Times(1);
-    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
@@ -251,7 +254,7 @@ TEST_F(StartErrorHandlerTest, HandleRedirectionBy3xxResponses)
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(strAnyContactUri));
     EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED, ANY_REJECT_CODE, strAnyContactUri));
+            CODE_INTERNAL_REDIAL, ANY_REJECT_CODE, strAnyContactUri));
 
     ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(""));
@@ -322,7 +325,7 @@ TEST_F(StartErrorHandlerTest, Handle4xxResponses)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_INTERVAL_TOO_BRIEF, SipStatusCode::SC_422));
 
     SetMessageCode(SipStatusCode::SC_480);
-    EXPECT_TRUE(CheckHandleResult(CODE_SIP_TEMPORARILY_UNAVAILABLE, SipStatusCode::SC_480));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_TEMPRARILY_UNAVAILABLE, SipStatusCode::SC_480));
 
     SetMessageCode(SipStatusCode::SC_481);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_TRANSACTION_DOES_NOT_EXIST, SipStatusCode::SC_481));
@@ -407,7 +410,7 @@ TEST_F(StartErrorHandlerTest, Handle488Response)
     ON_CALL(objMessageUtils, HasSdp(&objMessage))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_VOLTE_RETRY_REQUIRED, SipStatusCode::SC_488, AString::ConstNull()));
+            CODE_INTERNAL_REDIAL, SipStatusCode::SC_488, AString::ConstNull()));
 
     ON_CALL(objMessageUtils, HasSdp(&objMessage))
             .WillByDefault(Return(IMS_FALSE));

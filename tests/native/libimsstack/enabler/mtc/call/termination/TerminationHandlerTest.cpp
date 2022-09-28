@@ -100,7 +100,8 @@ TEST_F(TerminationHandlerTest, HandleSessionTerminatedRefreshTxnTimeoutReturnsNe
     ON_CALL(objSession, GetTerminationReason)
             .WillByDefault(Return(nReason));
 
-    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, nReason), objHandler.Handle(objSession));
+    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
+                objHandler.Handle(objSession));
 }
 
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedRefreshTimeoutReturnsNetworkTimeout)
@@ -109,7 +110,7 @@ TEST_F(TerminationHandlerTest, HandleSessionTerminatedRefreshTimeoutReturnsNetwo
     ON_CALL(objSession, GetTerminationReason)
             .WillByDefault(Return(nReason));
 
-    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, nReason),
+    EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
             objHandler.Handle(objSession));
 }
 
@@ -119,7 +120,7 @@ TEST_F(TerminationHandlerTest, HandleSessionTerminatedServiceClosedReturnsServic
     ON_CALL(objSession, GetTerminationReason)
             .WillByDefault(Return(nReason));
 
-    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_SERVICE_UNAVAILABLE, nReason),
+    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_NOT_REGISTERED, nReason),
             objHandler.Handle(objSession));
 }
 

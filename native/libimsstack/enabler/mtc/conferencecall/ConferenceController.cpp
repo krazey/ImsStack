@@ -131,7 +131,7 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
         case SubscriptionUpdateType::TERMINATED:
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_UNSUBSCRIBE);  // to stop timer
             m_objOperationQueue.CreateNPutWithReason(
-                    CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_UNSPECIFIED, IMS_TRUE);
+                    CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_NONE, IMS_TRUE);
             break;
         case SubscriptionUpdateType::NOTIFY_RECEIVED:
             if (m_objParticipantList.GetSize() <= 0)
@@ -388,7 +388,8 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& 
 
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyJoinFailed(CallReasonInfo(CODE_UNSPECIFIED, -1), m_objParticipantList);
+        m_objNotifier.NotifyJoinFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1),
+                m_objParticipantList);
         return;
     }
 

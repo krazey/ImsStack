@@ -33,13 +33,13 @@ CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage) con
     if (IsTransactionTimeout(piMessage))
     {
         IMS_TRACE_I("Handle : Timeout", 0, 0, 0);
-        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT);
+        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
     }
 
     IMS_SINT32 nStatusCode = piMessage->GetStatusCode();
     IMS_ASSERT(nStatusCode >= SipStatusCode::SC_300);
 
-    return CallReasonInfo(CODE_SESSION_INTERNAL_ERROR, nStatusCode);
+    return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, nStatusCode);
 }
 
 PRIVATE

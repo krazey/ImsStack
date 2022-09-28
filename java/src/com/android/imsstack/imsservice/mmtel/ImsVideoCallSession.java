@@ -225,7 +225,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
             } else {
                 // need to map statusCode with ImsReasonInfo.CODE_USER_DECLINE for operator specific
                 // reject code rejectSessionModification(statusCode);
-                rejectSessionModification(ImsReasonInfo.CODE_USER_DECLINE);
+                rejectSessionModification(ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
             }
         } else if (modificationType == MODIFICATION_VIDEO_PROFILE) {
             // FIXME: how to identify if the response video profile is for accept?

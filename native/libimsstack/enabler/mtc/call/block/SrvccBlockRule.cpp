@@ -32,7 +32,7 @@ PUBLIC VIRTUAL SrvccBlockRule::Result SrvccBlockRule::Check(
 {
     if (m_eSrvccState == SrvccState::STARTED)
     {
-        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_VCC_ON_PROGRESSING));
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_VCC_ON_PROGRESSING));
     }
     return Result(Result::Status::UNBLOCKED);
 }
