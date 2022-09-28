@@ -330,6 +330,9 @@ public:
      * @brief Flag indicating whether the defined error codes are only applied with Retry-After
      *        header value.
      *
+     *        This function relates to GetRegErrCodeWithRetryAfterTime() and
+     *        GetReregErrCodeWithRetryAfterTime()
+     *
      * @return IMS_BOOL Return wherther the defined error codes is used.
      */
     virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const = 0;
@@ -1110,6 +1113,8 @@ public:
      * @brief Indicate the list of the error response with time value containing Retry-After header
      *        for registration retry.
      *
+     *        This function relates to IsRegErrCodeWithRetryAfterTimeOnlyDefined()
+     *
      * @return vector error code list
      */
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() = 0;
@@ -1117,6 +1122,8 @@ public:
     /**
      * @brief Indicate the list of the error response with time value containing Retry-After header
      *        for reregistration retry.
+     *
+     *        This function relates to IsRegErrCodeWithRetryAfterTimeOnlyDefined()
      *
      * @return vector error code list
      */

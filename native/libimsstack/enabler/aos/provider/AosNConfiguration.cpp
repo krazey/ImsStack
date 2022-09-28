@@ -34,9 +34,9 @@ AosNConfiguration::AosNConfiguration() :
         m_objMmtelProvisioning(AosMmtelRequiresProvisioningBundle()),
         m_objNotifyTerminated(AosNotifyTerminatedForRegEventWithInitialRegistrationBundle()),
         m_objRegRetryInterval(AosRegistrationRetryIntervalBundle()),
+        m_objRegErrCodeWithRaTime(AosRegErrCodeWithRaTimeBundle()),
         m_objSubErrCodeForInitReg(AosSubErrCodeForInitRegBundle()),
         m_objSubErrCodeForTerminated(AosSubErrCodeForTerminatedBundle()),
-        m_objRegErrCodeWithRetryAfterTime(AosRegistrationErrorCodeWithRetryAfterTimeBundle()),
         m_objRegRetry(AosRegistrationRetryBundle()),
         m_objReregErrPolicyCall(AosReregistrationErrorPolicyDuringCallBundle()),
         m_objReregRetry(AosReregistrationRetryBundle()),
@@ -329,7 +329,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsCdmalessFeatureTagRequired() const
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegErrCodeWithRetryAfterTimeOnlyDefined() const
 {
-    return m_objRegErrCodeWithRetryAfterTime.bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined;
+    return m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined;
 }
 
 PUBLIC VIRTUAL IMS_BOOL
@@ -676,12 +676,12 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrMaxCo
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryAfterTime()
 {
-    return m_objRegErrCodeWithRetryAfterTime.objRegistrationErrorCodeWithRetryAfterTime;
+    return m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetryAfterTime()
 {
-    return m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime;
+    return m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryWaitTime()
@@ -764,9 +764,39 @@ PRIVATE VIRTUAL void AosNConfiguration::Init(IN IN IMS_SINT32 nSlotId /* = IMS_S
 PRIVATE
 void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
 {
-    // AosSubErrCodeForInitRegBundle
+    // AosRegErrCodeWithRaTimeBundle
     ICarrierConfig* piCcBundle =
-            piCc->GetBundle(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE);
+            piCc->GetBundle(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined = piCcBundle->GetBoolean(
+                CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL);
+        m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime = piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY);
+        m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate = piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY);
+        piCcBundle->ReleaseBundle();
+        piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG, "KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE :: RECWRATOD(%d)",
+                m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined, 0, 0);
+        IMS_UINT32 nSize = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RECWRAT(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRECWRAT(%d), ", nValue, 0, 0);
+        }
+#endif
+    }
+
+    // AosSubErrCodeForInitRegBundle
+    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objSubErrCodeForInitReg.nSubErrCodeForInitRegWithRetryMaxCnt = piCcBundle->GetInt(
@@ -1002,48 +1032,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         {
             IMS_SINT32 nValue = m_objRegRetryInterval.objRegistrationRetryIntervalSec.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RRIS(%d), ", nValue, 0, 0);
-        }
-#endif
-    }
-
-    // AosRegistrationErrorCodeWithRetryAfterTimeBundle
-    piCcBundle = piCc->GetBundle(
-            CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE);
-    if (piCcBundle != IMS_NULL)
-    {
-        m_objRegErrCodeWithRetryAfterTime
-                .bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined = piCcBundle->GetBoolean(
-                CarrierConfig::Assets::
-                        KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_ONLY_DEFINED_BOOL);
-        m_objRegErrCodeWithRetryAfterTime
-                .objRegistrationErrorCodeWithRetryAfterTime = piCcBundle->GetIntArray(
-                CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY);
-        m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime =
-                piCcBundle->GetIntArray(CarrierConfig::Assets::
-                                KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
-#ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG,
-                "KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE :: RECWRATOD(%d)",
-                m_objRegErrCodeWithRetryAfterTime
-                        .bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined,
-                0, 0);
-        IMS_UINT32 nSize = m_objRegErrCodeWithRetryAfterTime
-                                   .objRegistrationErrorCodeWithRetryAfterTime.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue = m_objRegErrCodeWithRetryAfterTime
-                                        .objRegistrationErrorCodeWithRetryAfterTime.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RECWRAT(%d), ", nValue, 0, 0);
-        }
-        nSize = m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime
-                        .GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue = m_objRegErrCodeWithRetryAfterTime
-                                        .objReregistrationErrorCodeWithRetryAfterTime.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RRECWRAT(%d), ", nValue, 0, 0);
         }
 #endif
     }
