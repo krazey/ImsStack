@@ -60,6 +60,13 @@ public interface ISscNetConnection {
     boolean isPdnAvailable();
 
     /**
+     * Returns network type of APN used for XCAP operation
+     *
+     * @return network type. See {@link TelephonyManager#NETWORK_TYPE_XXX}
+     */
+    int getNetworkType();
+
+    /**
      * Request network disconnection
      */
     void disconnect();

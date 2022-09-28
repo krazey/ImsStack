@@ -26,8 +26,10 @@ import android.telephony.TelephonyManager;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IAlarmTimer;
 import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
+import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.ImsLog;
@@ -44,6 +46,7 @@ public class SscNetConnection implements ISscNetConnection {
 
     protected static final int EVENT_PDN_CONNECTED = 2001;
     protected static final int EVENT_PDN_DISCONNECTED = 2002;
+    protected static final int EVENT_PDN_IPCAN_CHANGED = 2003;
 
     protected static final long DISCONNECTION_DELAY = 1000; // 1 sec
     protected static final long PDN_CONNECTION_TIMEOUT_TIMER = 30 * 1000; // 30 sec
@@ -57,6 +60,7 @@ public class SscNetConnection implements ISscNetConnection {
     private EApnType mApnType = null;
     @VisibleForTesting
     protected long mConnectionInactivityTimer = 120 * 1000;
+    private final ApnStateListener mApnStateListener = new ApnStateListenerImpl();
 
     @VisibleForTesting
     protected Hashtable<Integer, Integer> mTimerIdTable = new Hashtable<Integer, Integer>();
@@ -81,12 +85,28 @@ public class SscNetConnection implements ISscNetConnection {
                     EVENT_PDN_CONNECTION_FAILED, null);
         }
 
+        if (mApnType != null) {
+            IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
+            IApn apn = (dcApn != null) ? dcApn.getApnControl(mApnType.getType()) : null;
+            if (apn != null) {
+                apn.addListener(mApnStateListener);
+            }
+        }
+
         mConnectionInactivityTimer = SscConfig.getXcapApnInactivityTimer(mSlotId);
     }
 
     @Override
     public void cleanup() {
         disconnect();
+
+        if (mApnType != null) {
+            IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
+            IApn apn = (dcApn != null) ? dcApn.getApnControl(mApnType.getType()) : null;
+            if (apn != null) {
+                apn.removeListener(mApnStateListener);
+            }
+        }
 
         if (mSscNetConnectionHandler != null) {
             IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
@@ -213,6 +233,28 @@ public class SscNetConnection implements ISscNetConnection {
     }
 
     @Override
+    public int getNetworkType() {
+        int ipcanCategory = IApn.IPCAN_CATEGORY_MOBILE;
+
+        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
+        if (dcGovApnCtrl != null) {
+            ipcanCategory = dcGovApnCtrl.getIpcanCategory(mApnType.getType());
+        }
+
+        int networkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        if (ipcanCategory == IApn.IPCAN_CATEGORY_WLAN) {
+            networkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+        } else {
+            IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+            if (dnw != null) {
+                networkType = dnw.getNetworkType();
+            }
+        }
+
+        return networkType;
+    }
+
+    @Override
     public void setCallbackHandler(Handler handler) {
         mSscTransactionHandler = handler;
     }
@@ -279,6 +321,16 @@ public class SscNetConnection implements ISscNetConnection {
         atm.stopTimer(timerId);
         atm.unregisterForTimerExpired(timerId, mSscNetConnectionHandler);
         mTimerIdTable.remove(eventNum);
+    }
+
+    private final class ApnStateListenerImpl extends ApnStateListener {
+        @Override
+        public void onIpcanCategoryChanged(int apnType, int ipcanCategory) {
+            ImsLog.d(mSlotId, "IPCAN changed : " + ipcanCategory);
+            if (mSscTransactionHandler != null) {
+                mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_IPCAN_CHANGED);
+            }
+        }
     }
 
     private final class SscNetConnectionHandler extends Handler {

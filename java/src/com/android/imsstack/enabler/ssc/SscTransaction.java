@@ -24,6 +24,8 @@ import android.util.Pair;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.GbaInterface;
+import com.android.imsstack.core.agents.ImsRadioInterface;
+import com.android.imsstack.core.agents.ImsRadioInterface.ConnectionListener;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscData;
@@ -38,26 +40,29 @@ import org.w3c.dom.Document;
 import java.lang.ref.WeakReference;
 
 public class SscTransaction {
-    public static final int EVENT_SRV_RETRY_REQUIRED = 1001;
+    public static final int EVENT_SEND_HTTP_REQUEST = 1001;
+    public static final int EVENT_SRV_RETRY_REQUIRED = 1002;
 
-    protected SscXmlGov mXmlGov = null;
+    private final int mSlotId;
+    private final SscXmlGov mXmlGov;
+    private final ImsRadioInterface mImsRadio;
 
-    protected Handler mTransactionHandler = null;
-    protected Handler mSscServiceImplHandler = null;
+    private int mEventNumber = 0;
+    private int mTransactionId = 0;
+    private boolean mXcapTrafficNotified = false;
+    private boolean mXcapTrafficStarted = false;
 
-    protected Thread mSscTransactionThread = null;
-    protected HttpTransaction mTransaction = null;
+    private Handler mTransactionHandler = null;
+    private Handler mSscServiceImplHandler = null;
 
-    protected int mEventNumber = 0;
-    protected int mTransactionId = 0;
-
-    protected int mTimerId = -1;
-    protected int mSlotId = -1;
+    private Thread mSscTransactionThread = null;
+    private HttpTransaction mTransaction = null;
 
     public SscTransaction(int slotId, Handler handler) {
         mSlotId = slotId;
-        mSscServiceImplHandler = handler;
         mXmlGov = getSscXmlGov();
+        mImsRadio = AgentFactory.getInstance().getAgent(ImsRadioInterface.class, slotId);
+        mSscServiceImplHandler = handler;
     }
 
     public void close() {
@@ -65,6 +70,13 @@ public class SscTransaction {
         if (mTransactionHandler != null) {
             mTransactionHandler.getLooper().quit();
             mTransactionHandler = null;
+        }
+
+        if (mImsRadio != null) {
+            if (mXcapTrafficNotified) {
+                mImsRadio.stopImsTraffic(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP);
+                mXcapTrafficNotified = false;
+            }
         }
 
         SscNetConnectionGov.getInstance().setCallbackHandler(mSlotId, null);
@@ -90,7 +102,7 @@ public class SscTransaction {
         mSscTransactionThread.start();
     }
 
-    protected void sendMessageToServiceImpl(int eventNum, int transactionId, int resultState,
+    private void sendMessageToServiceImpl(int eventNum, int transactionId, int resultState,
             int responseCode, SscServiceData data) {
         ImsLog.d("");
         Message msg = Message.obtain();
@@ -106,7 +118,7 @@ public class SscTransaction {
         close();
     }
 
-    protected void sendFailMessageToServiceImpl(int eventNum, int transactionId) {
+    private void sendFailMessageToServiceImpl(int eventNum, int transactionId) {
         ImsLog.d("");
         Message msg = Message.obtain();
         msg.what = eventNum;
@@ -116,7 +128,7 @@ public class SscTransaction {
         close();
     }
 
-    protected final class SscTransactionThread extends Thread {
+    private final class SscTransactionThread extends Thread {
         private SscTransaction mSscTransaction = null;
 
         public SscTransactionThread(SscTransaction SscTransaction) {
@@ -163,15 +175,7 @@ public class SscTransaction {
 
         public void startTransaction() {
             ImsLog.d(mSlotId, "");
-/*
-            if (isTrmSupported()) {
-                if (!isTrmAvailable()) {
-                    ImsLog.e(mSlotId, "TRM is not available");
-                    sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-                    return;
-                }
-            }
-*/
+
             ISscNetConnectionGov netConnectionGov = SscNetConnectionGov.getInstance();
             if (netConnectionGov.isConnected(mSlotId)) {
                 netConnectionGov.refreshConnectionTimer(mSlotId);
@@ -184,7 +188,19 @@ public class SscTransaction {
                 return;
             }
 
-            sendRequest();
+            if (mImsRadio == null) {
+                ImsLog.e(mSlotId, "Can't check whether the XCAP traffic is allowed");
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                return;
+            }
+
+            if (!mImsRadio.isImsTrafficAllowed(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP)) {
+                ImsLog.e(mSlotId, "XCAP traffic not allowed");
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                return;
+            }
+
+            stratXcapTraffic();
         }
 
         private void sendRequest() {
@@ -221,7 +237,7 @@ public class SscTransaction {
 
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED) {
                 if (gbaEnabled) {
-                    if (getGbaKey(true) == false) {
+                    if (!getGbaKey(true)) {
                         getSscServiceStateAgent().setGbaRequestFailed(mSlotId, true);
                         sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                         return;
@@ -263,7 +279,7 @@ public class SscTransaction {
         }
     }
 
-    protected class GetTransaction extends HttpTransaction {
+    private final class GetTransaction extends HttpTransaction {
         SscServiceQueryData mData = null;
 
         public GetTransaction(SscServiceQueryData data) {
@@ -317,7 +333,7 @@ public class SscTransaction {
         }
     }
 
-    protected class PutTransaction extends HttpTransaction {
+    private final class PutTransaction extends HttpTransaction {
         SscServiceData mData = null;
 
         public PutTransaction(SscData SscData) {
@@ -384,17 +400,7 @@ public class SscTransaction {
                     dataFromServer);
         }
     }
-/*
-    private boolean isTrmAvailable() {
-        // TODO: add TRM related operations
-        return true;
-    }
 
-    private boolean isTrmSupported() {
-        // TODO: add TRM support or not
-        return false;
-    }
-*/
     @VisibleForTesting
     protected Handler getTransactionHandler() {
         return mTransactionHandler;
@@ -447,7 +453,7 @@ public class SscTransaction {
         }
 
         ISscAuthAgent authAgent = getSscAuthAgent();
-        if (authAgent.isCredentialInfoUpdated() == false) {
+        if (!authAgent.isCredentialInfoUpdated()) {
             return false;
         }
 
@@ -469,7 +475,40 @@ public class SscTransaction {
         return true;
     }
 
-    public static class TransactionHandler extends Handler {
+    // Actual XCAP traffic will start once onConnectionSetupPrepared()
+    private void stratXcapTraffic() {
+        if (mImsRadio != null) {
+            int networkType = SscNetConnectionGov.getInstance().getNetworkType(mSlotId);
+            int convertedNetworkType = getSscUtils().convertToImsRadioNetworkType(networkType);
+            ImsLog.d(mSlotId, "access network type is : " + convertedNetworkType);
+
+            mImsRadio.startImsTraffic(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP, convertedNetworkType,
+                    new ConnectionListener() {
+                        @Override
+                        public void onConnectionFailed(int failureReason, int causeCode,
+                                int waitTimeMillis) {
+                            ImsLog.e(mSlotId, "starting XCAP traffic failed. failureReason = "
+                                    + failureReason + ", causeCode = " + causeCode);
+                            sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                        }
+
+                        @Override
+                        public void onConnectionSetupPrepared() {
+                            if (!mXcapTrafficStarted) {
+                                if (mTransactionHandler != null) {
+                                    // mXcapTrafficStarted will never be false once it's set as true
+                                    // to prevent unintended HTTP requests for one XCAP transaction
+                                    mXcapTrafficStarted = true;
+                                    mTransactionHandler.sendEmptyMessage(EVENT_SEND_HTTP_REQUEST);
+                                }
+                            }
+                        }
+                    });
+            mXcapTrafficNotified = true;
+        }
+    }
+
+    private class TransactionHandler extends Handler {
         private final WeakReference<SscTransaction> mService;
 
         public TransactionHandler(SscTransaction service, Looper looper) {
@@ -486,10 +525,14 @@ public class SscTransaction {
         }
     }
 
-    public void handleMessage(Message msg) {
+    private void handleMessage(Message msg) {
         ImsLog.d("SscTransactionHandler - what=" + msg.what);
 
         switch (msg.what) {
+            case EVENT_SEND_HTTP_REQUEST:
+                ImsLog.d("sendRequest");
+                mTransaction.sendRequest();
+                break;
             case SscNetConnection.EVENT_PDN_CONNECTED:
                 ImsLog.d("PDN Connected");
                 if (mSscTransactionThread != null) {
@@ -499,6 +542,12 @@ public class SscTransaction {
             case SscNetConnection.EVENT_PDN_DISCONNECTED:
                 ImsLog.d("PDN Disconnected");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                break;
+            case SscNetConnection.EVENT_PDN_IPCAN_CHANGED:
+                ImsLog.d("PDN IPCAN Changed");
+                if (mXcapTrafficNotified) {
+                    stratXcapTraffic();
+                }
                 break;
             case SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT:
                 ImsLog.d("Connection Timeout");

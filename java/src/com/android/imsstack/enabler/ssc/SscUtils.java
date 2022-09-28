@@ -16,10 +16,13 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import android.telephony.Annotation.NetworkType;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ITelephonySubscriber;
+import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.util.ImsLog;
@@ -232,6 +235,33 @@ public class SscUtils {
 
         ImsLog.d("uri is " + uri);
         return uri;
+    }
+
+    /**
+     * Converts network type from TelephonyManager#NETWORK_TYPE_XXX to
+     * ImsRadioInterface#ACCESS_NETWORK_TYPE_XXX
+     *
+     * @param network type. See {@link TelephonyManager#NETWORK_TYPE_XXX}
+     * @return Matched network type of {@link ImsRadioInterface.AccessNetworkType}
+     */
+    protected int convertToImsRadioNetworkType(@NetworkType int networkType) {
+        switch (networkType) {
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN;
+            case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSUPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSPAP: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return ImsRadioInterface.ACCESS_NETWORK_TYPE_EUTRAN;
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return ImsRadioInterface.ACCESS_NETWORK_TYPE_NGRAN;
+            default:
+                return ImsRadioInterface.ACCESS_NETWORK_TYPE_UNKNOWN;
+        }
     }
 
     @VisibleForTesting

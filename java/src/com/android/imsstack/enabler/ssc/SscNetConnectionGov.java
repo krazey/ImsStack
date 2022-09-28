@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.ssc;
 
 import android.os.Handler;
+import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.internal.annotations.VisibleForTesting;
@@ -79,6 +80,16 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
         if (netConnection != null) {
             netConnection.disconnect();
         }
+    }
+
+    @Override
+    public int getNetworkType(int slotId) {
+        ISscNetConnection netConnection = mSscNetConnection.get(slotId);
+        if (netConnection != null) {
+            return netConnection.getNetworkType();
+        }
+
+        return TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
     @Override

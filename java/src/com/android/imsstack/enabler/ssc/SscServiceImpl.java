@@ -823,6 +823,11 @@ public class SscServiceImpl implements IUtInterface {
                 return;
             }
 
+            if (requestData.getTransactionId() != rr.getTransactionId()) {
+                ImsLog.e(mSlotId, "invalid transaction : " + rr.getTransactionId());
+                return;
+            }
+
             int resultState = rr.getResultState();
             if (resultState == SscConstant.REQUEST_FAILURE) {
                 if (rr.getCode() == SscConstant.HTTP_PRECONDITION_FAILURE) {
