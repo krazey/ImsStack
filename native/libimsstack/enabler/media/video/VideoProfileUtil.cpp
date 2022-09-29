@@ -71,7 +71,7 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
     IMS_TRACE_D("CreateProfile() objIpAddress[%s], port[%d]",
             pVideoProfile->objIpAddress.ToCharString(), pVideoProfile->nDataPort, 0);
 
-    if (pConfig->IsVideoAvpfEnabled() && pConfig->GetSdpOfferCapNegoForAvpf() == 0)
+    if (pConfig->IsVideoAvpfEnabled() && pConfig->GetSdpOfferCapNegoForAvpf() != 0)
     {
         pVideoProfile->strTransportType = "RTP/AVPF";
     }
