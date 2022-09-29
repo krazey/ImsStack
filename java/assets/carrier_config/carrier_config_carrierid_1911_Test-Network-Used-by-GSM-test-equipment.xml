@@ -80,4 +80,6 @@
     <!-- Ut/Xcap Assets -->
     <boolean name="ut_oir_tir_always_temporary_mode_bool" value="false"/>
 
+    <!-- MTC -->
+    <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
 </carrier_config>
