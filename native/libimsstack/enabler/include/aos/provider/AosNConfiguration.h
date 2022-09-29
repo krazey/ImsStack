@@ -180,11 +180,11 @@ private:
 
     AosMmtelRequiresProvisioningBundle m_objMmtelProvisioning;
 
-    AosNotifyTerminatedForRegEventWithInitialRegistrationBundle m_objNotifyTerminated;
-
-    AosRegistrationRetryIntervalBundle m_objRegRetryInterval;
+    AosNotifyTerminatedForInitRegBundle m_objNotifyTerminated;
 
     AosRegErrCodeWithRaTimeBundle m_objRegErrCodeWithRaTime;
+
+    AosRegRetryIntervalBundle m_objRegRetryInterval;
 
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;
     AosSubErrCodeForTerminatedBundle m_objSubErrCodeForTerminated;

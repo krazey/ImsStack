@@ -32,9 +32,9 @@ AosNConfiguration::AosNConfiguration() :
         m_objAsset(AosAsset()),
         m_objCarrierConfig(AosCarrierConfig()),
         m_objMmtelProvisioning(AosMmtelRequiresProvisioningBundle()),
-        m_objNotifyTerminated(AosNotifyTerminatedForRegEventWithInitialRegistrationBundle()),
-        m_objRegRetryInterval(AosRegistrationRetryIntervalBundle()),
+        m_objNotifyTerminated(AosNotifyTerminatedForInitRegBundle()),
         m_objRegErrCodeWithRaTime(AosRegErrCodeWithRaTimeBundle()),
+        m_objRegRetryInterval(AosRegRetryIntervalBundle()),
         m_objSubErrCodeForInitReg(AosSubErrCodeForInitRegBundle()),
         m_objSubErrCodeForTerminated(AosSubErrCodeForTerminatedBundle()),
         m_objRegRetry(AosRegistrationRetryBundle()),
@@ -213,7 +213,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::UseWfcCountryCodeAvailabilityCheck() 
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegistrationRetryIntervalsUsedForSubscription() const
 {
-    return m_objRegRetryInterval.bUseRegistrationRetryIntervalForSubscriptionRetry;
+    return m_objRegRetryInterval.bUseRegRetryIntervalForSub;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverIpEnabled() const
@@ -525,12 +525,12 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetGeolocationPidfFormingPolicy() c
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegistrationRetryIntervals()
 {
-    return m_objRegRetryInterval.objRegistrationRetryIntervalSec;
+    return m_objRegRetryInterval.objRegRetryIntervalSec;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegistrationRandomRetryIntervals()
 {
-    return m_objRegRetryInterval.objRegistrationRetryRandomUpperValueSec;
+    return m_objRegRetryInterval.objRegRetryRandomUpperValueSec;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetIpsecAuthenticationAlgorithms()
@@ -764,9 +764,58 @@ PRIVATE VIRTUAL void AosNConfiguration::Init(IN IN IMS_SINT32 nSlotId /* = IMS_S
 PRIVATE
 void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
 {
-    // AosRegErrCodeWithRaTimeBundle
+    // AosNotifyTerminatedForInitRegBundle
     ICarrierConfig* piCcBundle =
-            piCc->GetBundle(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE);
+            piCc->GetBundle(CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState = piCcBundle->GetInt(
+                CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT);
+        m_objNotifyTerminated.objEventForInitRegOnTerminatedState = piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY);
+        m_objNotifyTerminated.objEventWithWtForInitRegOnTerminatedState = piCcBundle->GetIntArray(
+                CarrierConfig::Assets::
+                        KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY);
+        piCcBundle->ReleaseBundle();
+        piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG,
+                "KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE :: "
+                "WTFIROTS(%d)",
+                m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState, 0, 0);
+        IMS_UINT32 nSize = m_objNotifyTerminated.objEventForInitRegOnTerminatedState.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objNotifyTerminated.objEventForInitRegOnTerminatedState.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "EFIROTS(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objNotifyTerminated.objEventWithWtForInitRegOnTerminatedState.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue =
+                    m_objNotifyTerminated.objEventWithWtForInitRegOnTerminatedState.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "ETFWFIROTS(%d), ", nValue, 0, 0);
+        }
+#endif
+        IMSVector<IMS_SINT32>& objNotifyEvents =
+                m_objNotifyTerminated.objEventForInitRegOnTerminatedState;
+        m_nEventForInitRegOnTerminatedState = 0;
+        for (int i = 0; i < objNotifyEvents.GetSize(); i++)
+        {
+            m_nEventForInitRegOnTerminatedState |= 0x1 << (objNotifyEvents.GetAt(i) - 1);
+        }
+
+        IMSVector<IMS_SINT32>& objEventToFollow =
+                m_objNotifyTerminated.objEventWithWtForInitRegOnTerminatedState;
+        m_nEventToFollowWtForInitRegOnTerminatedState = 0;
+        for (int i = 0; i < objEventToFollow.GetSize(); i++)
+        {
+            m_nEventToFollowWtForInitRegOnTerminatedState |= 0x1 << (objEventToFollow.GetAt(i) - 1);
+        }
+    }
+
+    // AosRegErrCodeWithRaTimeBundle
+    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE);
     if (piCcBundle != IMS_NULL)
     {
         m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined = piCcBundle->GetBoolean(
@@ -791,6 +840,36 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         {
             IMS_SINT32 nValue = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RRECWRAT(%d), ", nValue, 0, 0);
+        }
+#endif
+    }
+
+    // AosRegRetryIntervalBundle
+    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objRegRetryInterval.bUseRegRetryIntervalForSub = piCcBundle->GetBoolean(
+                CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL);
+        m_objRegRetryInterval.objRegRetryRandomUpperValueSec = piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY);
+        m_objRegRetryInterval.objRegRetryIntervalSec = piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY);
+        piCcBundle->ReleaseBundle();
+        piCcBundle = IMS_NULL;
+#ifdef __IMS_DEBUG__
+        A_IMS_TRACE_D(LOGTAG, "KEY_REG_RETRY_INTERVAL_BUNDLE :: URRIFSR(%d)",
+                m_objRegRetryInterval.bUseRegRetryIntervalForSub, 0, 0);
+        IMS_UINT32 nSize = m_objRegRetryInterval.objRegRetryRandomUpperValueSec.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegRetryInterval.objRegRetryRandomUpperValueSec.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRRUVS(%d), ", nValue, 0, 0);
+        }
+        nSize = m_objRegRetryInterval.objRegRetryIntervalSec.GetSize();
+        for (int i = 0; i < nSize; i++)
+        {
+            IMS_SINT32 nValue = m_objRegRetryInterval.objRegRetryIntervalSec.GetAt(i);
+            A_IMS_TRACE_D(LOGTAG, "RRIS(%d), ", nValue, 0, 0);
         }
 #endif
     }
@@ -1002,91 +1081,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
             A_IMS_TRACE_D(LOGTAG, "RRRECWIRWSP(%d), ", nValue, 0, 0);
         }
 #endif
-    }
-
-    // AosRegistrationRetryIntervalBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE);
-    if (piCcBundle != IMS_NULL)
-    {
-        m_objRegRetryInterval.objRegistrationRetryRandomUpperValueSec = piCcBundle->GetIntArray(
-                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY);
-        m_objRegRetryInterval.objRegistrationRetryIntervalSec = piCcBundle->GetIntArray(
-                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY);
-        m_objRegRetryInterval.bUseRegistrationRetryIntervalForSubscriptionRetry =
-                piCcBundle->GetBoolean(CarrierConfig::Assets::
-                                KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
-#ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG, "KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE :: URRIFSR(%d)",
-                m_objRegRetryInterval.bUseRegistrationRetryIntervalForSubscriptionRetry, 0, 0);
-        IMS_UINT32 nSize = m_objRegRetryInterval.objRegistrationRetryRandomUpperValueSec.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue =
-                    m_objRegRetryInterval.objRegistrationRetryRandomUpperValueSec.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RRRUVS(%d), ", nValue, 0, 0);
-        }
-        nSize = m_objRegRetryInterval.objRegistrationRetryIntervalSec.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue = m_objRegRetryInterval.objRegistrationRetryIntervalSec.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RRIS(%d), ", nValue, 0, 0);
-        }
-#endif
-    }
-
-    // AosNotifyTerminatedForRegEventWithInitialRegistrationBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::
-                    KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE);
-    if (piCcBundle != IMS_NULL)
-    {
-        m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState = piCcBundle->GetInt(
-                CarrierConfig::Assets::
-                        KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT);
-        m_objNotifyTerminated.objEventForInitRegOnTerminatedState =
-                piCcBundle->GetIntArray(CarrierConfig::Assets::
-                                KEY_EVT_FOR_INIT_REG_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY);
-        m_objNotifyTerminated
-                .objEventToFollowWtForInitRegOnTerminatedState = piCcBundle->GetIntArray(
-                CarrierConfig::Assets::
-                        KEY_EVT_TO_FOLLOW_WAIT_TIME_FOR_INIT_REG_ON_TERM_STATE_OF_REG_EVENT_INT_ARRAY);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
-#ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG,
-                "KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE :: "
-                "WTFIROTS(%d)",
-                m_objNotifyTerminated.nWaitTimeForInitRegOnTerminatedState, 0, 0);
-        IMS_UINT32 nSize = m_objNotifyTerminated.objEventForInitRegOnTerminatedState.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue = m_objNotifyTerminated.objEventForInitRegOnTerminatedState.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "EFIROTS(%d), ", nValue, 0, 0);
-        }
-        nSize = m_objNotifyTerminated.objEventToFollowWtForInitRegOnTerminatedState.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue =
-                    m_objNotifyTerminated.objEventToFollowWtForInitRegOnTerminatedState.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "ETFWFIROTS(%d), ", nValue, 0, 0);
-        }
-#endif
-        IMSVector<IMS_SINT32>& objNotifyEvents =
-                m_objNotifyTerminated.objEventForInitRegOnTerminatedState;
-        m_nEventForInitRegOnTerminatedState = 0;
-        for (int i = 0; i < objNotifyEvents.GetSize(); i++)
-        {
-            m_nEventForInitRegOnTerminatedState |= 0x1 << (objNotifyEvents.GetAt(i) - 1);
-        }
-
-        IMSVector<IMS_SINT32>& objEventToFollow =
-                m_objNotifyTerminated.objEventToFollowWtForInitRegOnTerminatedState;
-        m_nEventToFollowWtForInitRegOnTerminatedState = 0;
-        for (int i = 0; i < objEventToFollow.GetSize(); i++)
-        {
-            m_nEventToFollowWtForInitRegOnTerminatedState |= 0x1 << (objEventToFollow.GetAt(i) - 1);
-        }
     }
 }
 

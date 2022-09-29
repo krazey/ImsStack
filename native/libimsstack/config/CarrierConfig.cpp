@@ -794,6 +794,17 @@ const IMS_CHAR
                 "wfc_reg_event_error_code_by_missing_911_address_int_array";
 
 // Bundle {
+const IMS_CHAR CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE[] =
+        "notify_terminated_for_init_reg_bundle";
+const IMS_CHAR CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT[] =
+        "notify_terminated_for_init_reg_with_wait_time_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY[] =
+        "notify_terminated_for_init_reg_used_event_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY[] =
+                "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
+// }
+// Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE[] =
         "reg_err_code_with_ra_time_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL[] =
@@ -802,6 +813,15 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY[] 
         "reg_err_code_with_ra_time_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY[] =
         "reg_err_code_with_ra_time_for_update_int_array";
+// }
+// Bundle {
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_BUNDLE[] = "reg_retry_interval_bundle";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL[] =
+        "reg_retry_interval_used_for_sub_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY[] =
+        "reg_retry_interval_random_upper_value_sec_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY[] =
+        "reg_retry_interval_sec_int_array";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE[] =
@@ -893,32 +913,7 @@ const IMS_CHAR CarrierConfig::Assets::
         KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[] =
                 "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
 // }
-// Bundle {
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
-                "notify_terminated_for_reg_event_with_initial_registration_bundle";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT[] =
-                "wait_time_for_initial_registration_on_terminated_state_of_reg_event_int";
-const IMS_CHAR
-        CarrierConfig::Assets::KEY_EVT_FOR_INIT_REG_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY[] =
-                "event_for_initial_registration_on_terminated_state_of_reg_event_int_array";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_EVT_TO_FOLLOW_WAIT_TIME_FOR_INIT_REG_ON_TERM_STATE_OF_REG_EVENT_INT_ARRAY[] =
-                "event_to_follow_wait_time_for_initial_registration_on_"
-                "terminated_state_of_reg_event_int_array";
-// }
-// Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE[] =
-        "registration_retry_interval_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY[] =
-        "registration_retry_random_upper_value_sec_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY[] =
-        "registration_retry_interval_sec_int_array";
-const IMS_CHAR
-        CarrierConfig::Assets::KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL[] =
-                "use_registration_retry_interval_for_subscription_retry_bool";
-// }
+
 // Mtc
 const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[] =
         "check_conference_event_package_version_bool";

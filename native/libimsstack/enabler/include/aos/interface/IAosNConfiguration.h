@@ -188,6 +188,10 @@ public:
     /**
      * @brief Returns whether subscription also use the registration retry intervals.
      *
+     *        This function relates to GetRegistrationRetryIntervals() and
+     *        GetRegistrationRandomRetryIntervals()
+     *        Subscription decides whether to follow the mentioned function by this return value.
+     *
      * @return IMS_BOOL Return whether to be applied or not
      */
     virtual IMS_BOOL IsRegistrationRetryIntervalsUsedForSubscription() const = 0;
@@ -609,7 +613,7 @@ public:
      *            if the registration to each known PCSCF is attempted and handled
      *            as temporary failure without Retry-After header.
      *        CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL
-     *            @see KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE
+     *            @see KEY_REG_RETRY_INTERVAL_BUNDLE
      *
      * @return IMS_SINT32 Return the actual wait time policy
      */
@@ -841,6 +845,8 @@ public:
      *        And decide whether to perform initial registration depending on the event.
      *        These events consist of bit masking.
      *        It defines as like NOTIFY_TERMINATED_EXPIRED = 0x01
+     *        This function relates to GetNotifyEventForInitialRegWithWaitTime() if there are values
+     *        in GetNotifyEventForInitialRegWithWaitTime(), use the values.
      *
      * @return IMS_UINT32 Return value whether to perform initial registration
      */
@@ -849,6 +855,8 @@ public:
      * @brief Get the set wait time to perform initial registration by NOTIFY message.
      *
      *        If there is 0, perform initial registration immediately.
+     *        This function relates to GetNotifyEventForInitialRegWithWaitTime() and when it's an
+     *        event taken from GetNotifyEventForInitialRegWithWaitTime() this return value is used
      *
      * @return IMS_SINT32 Return set wait time value
      */
@@ -861,6 +869,8 @@ public:
      *        And decide whether to perform initial registration after the set wait time depending
      *        on the event. These events consist of bit masking.
      *        It defines as like NOTIFY_TERMINATED_EXPIRED = 0x01
+     *        This function relates to GetNotifyWaitTime() and use wait time taken from
+     *        GetNotifyWaitTime() at these return value
      *
      * @return IMS_UINT32 Return value whether to perform initial registration with wait time
      */

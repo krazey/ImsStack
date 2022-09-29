@@ -67,6 +67,18 @@
         <item value="6"/>
     </int-array>
 
+    <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
+    <int name="notify_terminated_for_init_reg_with_wait_time_int" value="60"/>
+    <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="4">
+        <item value="1"/>
+        <item value="2"/>
+        <item value="3"/>
+        <item value="5"/>
+    </int-array>
+    <int-array name="notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="2">
+        <item value="2"/>
+        <item value="5"/>
+    </int-array>
     <!-- KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE -->
     <boolean name="reg_err_code_with_ra_time_only_defined_bool" value="true"/>
     <int-array name="reg_err_code_with_ra_time_int_array" num="5">
@@ -83,6 +95,23 @@
         <item value="503"/>
         <item value="600"/>
     </int-array>
+    <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
+    <int-array name="reg_retry_interval_random_upper_value_sec_int_array" num="6">
+        <item value="0"/>
+        <item value="0"/>
+        <item value="15"/>
+        <item value="0"/>
+        <item value="0"/>
+        <item value="0"/>
+    </int-array>
+    <int-array name="reg_retry_interval_sec_int_array" num="6">
+        <item value="30"/>
+        <item value="30"/>
+        <item value="60"/>
+        <item value="120"/>
+        <item value="480"/>
+        <item value="900"/>
+    </int-array>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
     <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="2"/>
     <int-array name="sub_err_code_for_terminated_int_array" num="4">
@@ -92,18 +121,6 @@
         <item value="420"/>
     </int-array>
 
-    <!-- KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
-    <int-array name="event_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="4">
-        <item value="1"/>
-        <item value="2"/>
-        <item value="3"/>
-        <item value="5"/>
-    </int-array>
-    <int name="wait_time_for_initial_registration_on_terminated_state_of_reg_event_int" value="60"/>
-    <int-array name="event_to_follow_wait_time_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="2">
-        <item value="2"/>
-        <item value="5"/>
-    </int-array>
     <!-- End BUNDLE -->
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="2"/>
@@ -120,24 +137,6 @@
     </int-array>
     <int-array name="specific_registration_error_wait_time_sec_int_array" num="1">
         <item value="30"/>
-    </int-array>
-    <!-- End BUNDLE -->
-    <!-- KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE -->
-    <int-array name="registration_retry_random_upper_value_sec_int_array" num="6">
-        <item value="0"/>
-        <item value="0"/>
-        <item value="15"/>
-        <item value="0"/>
-        <item value="0"/>
-        <item value="0"/>
-    </int-array>
-    <int-array name="registration_retry_interval_sec_int_array" num="6">
-        <item value="30"/>
-        <item value="30"/>
-        <item value="60"/>
-        <item value="120"/>
-        <item value="480"/>
-        <item value="900"/>
     </int-array>
     <!-- End BUNDLE -->
     <!-- KEY_REGISTRATION_RETRY_BUNDLE -->

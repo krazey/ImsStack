@@ -21,6 +21,26 @@
 #include "ImsVector.h"
 #include "CarrierConfig.h"
 
+struct AosNotifyTerminatedForInitRegBundle
+{
+public:
+    AosNotifyTerminatedForInitRegBundle() :
+            nWaitTimeForInitRegOnTerminatedState(0),
+            objEventForInitRegOnTerminatedState(IMSVector<IMS_SINT32>()),
+            objEventWithWtForInitRegOnTerminatedState(IMSVector<IMS_SINT32>())
+    {
+    }
+
+    AosNotifyTerminatedForInitRegBundle(IN const AosNotifyTerminatedForInitRegBundle&) = delete;
+    AosNotifyTerminatedForInitRegBundle& operator=(
+            IN const AosNotifyTerminatedForInitRegBundle&) = delete;
+
+public:
+    IMS_SINT32 nWaitTimeForInitRegOnTerminatedState;
+    IMSVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
+    IMSVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
+};
+
 struct AosRegErrCodeWithRaTimeBundle
 {
 public:
@@ -38,6 +58,25 @@ public:
     IMS_BOOL bRegErrCodeWithRaTimeOnlyDefined;
     IMSVector<IMS_SINT32> objRegErrCodeWithRaTime;
     IMSVector<IMS_SINT32> objRegErrCodeWithRaTimeForUpdate;
+};
+
+struct AosRegRetryIntervalBundle
+{
+public:
+    AosRegRetryIntervalBundle() :
+            bUseRegRetryIntervalForSub(IMS_TRUE),
+            objRegRetryRandomUpperValueSec(IMSVector<IMS_SINT32>()),
+            objRegRetryIntervalSec(IMSVector<IMS_SINT32>())
+    {
+    }
+
+    AosRegRetryIntervalBundle(IN const AosRegRetryIntervalBundle&) = delete;
+    AosRegRetryIntervalBundle& operator=(IN const AosRegRetryIntervalBundle&) = delete;
+
+public:
+    IMS_BOOL bUseRegRetryIntervalForSub;
+    IMSVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
+    IMSVector<IMS_SINT32> objRegRetryIntervalSec;
 };
 
 struct AosSubErrCodeForInitRegBundle

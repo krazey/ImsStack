@@ -559,6 +559,17 @@ public class CarrierConfig {
                         "wfc_reg_event_error_code_by_missing_911_address_int_array";
 
         // Bundle {
+        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE =
+                "notify_terminated_for_init_reg_bundle";
+        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT =
+                "notify_terminated_for_init_reg_with_wait_time_int";
+        public static final String KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY =
+                "notify_terminated_for_init_reg_used_event_int_array";
+        public static final String
+                KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY =
+                        "notify_terminated_for_init_reg_used_event_with_wait_time_int_array";
+        // }
+        // Bundle {
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE =
                 "reg_err_code_with_ra_time_bundle";
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL =
@@ -567,6 +578,16 @@ public class CarrierConfig {
                 "reg_err_code_with_ra_time_int_array";
         public static final String KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY =
                 "reg_err_code_with_ra_time_for_update_int_array";
+        // }
+        // Bundle {
+        public static final String KEY_REG_RETRY_INTERVAL_BUNDLE =
+                "reg_retry_interval_bundle";
+        public static final String KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL =
+                "reg_retry_interval_used_for_sub_bool";
+        public static final String KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY =
+                "reg_retry_interval_random_upper_value_sec_int_array";
+        public static final String KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY =
+                "reg_retry_interval_sec_int_array";
         // }
         // Bundle {
         public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE =
@@ -649,31 +670,6 @@ public class CarrierConfig {
                 "reregistration_error_code_with_call_end_int_array";
         public static final String KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY =
                 "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
-        // }
-        // Bundle {
-        public static final String
-                KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE =
-                        "notify_terminated_for_reg_event_with_initial_registration_bundle";
-        public static final String
-                KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT =
-                        "wait_time_for_initial_registration_on_terminated_state_of_reg_event_int";
-        public static final String
-                KEY_EVT_FOR_INIT_REG_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY =
-                        "event_for_initial_registration_on_terminated_state_of_reg_event_int_array";
-        public static final String
-                KEY_EVT_TO_FOLLOW_WAIT_TIME_FOR_INIT_REG_ON_TERM_STATE_OF_REG_EVENT_INT_ARRAY =
-                        "event_to_follow_wait_time_for_initial_registration_"
-                                + "on_terminated_state_of_reg_event_int_array";
-        // }
-        // Bundle {
-        public static final String KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE =
-                "registration_retry_interval_bundle";
-        public static final String KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY =
-                "registration_retry_random_upper_value_sec_int_array";
-        public static final String KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY =
-                "registration_retry_interval_sec_int_array";
-        public static final String KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL =
-                "use_registration_retry_interval_for_subscription_retry_bool";
         // }
         // Mtc
         public static final String KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL =
@@ -1414,46 +1410,63 @@ public class CarrierConfig {
 
     private void refineBundlesForAssets() {
         // Check the following keys:
+        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE
         // KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE
+        // KEY_REG_RETRY_INTERVAL_BUNDLE
         // KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE
         // KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE
         // KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE
         // KEY_REGISTRATION_RETRY_BUNDLE
         // KEY_REREGISTRATION_RETRY_BUNDLE
         // KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE
-        // KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE
-        // KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE
 
-        final String[] REG_ERR_CODE_WITH_RA_TIME_BUNDLE_KEYS =
-            {
+        final String[] notifyTerminatedForInitRegBundleKeys = {
+                Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT,
+                Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY
+        };
+
+        setBundle(mConfig,
+                Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+                        notifyTerminatedForInitRegBundleKeys);
+
+        final String[] regErrCodeWithRaTimeBundleKeys = {
                 Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL,
                 Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,
                 Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY
-            };
+        };
 
         setBundle(mConfig,
                 Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
-                REG_ERR_CODE_WITH_RA_TIME_BUNDLE_KEYS);
+                regErrCodeWithRaTimeBundleKeys);
 
-        final String[] SUB_ERR_CODE_FOR_INIT_REG_BUNDLE_KEYS =
-            {
+        final String[] regRetryIntervalBundleKeys = {
+                Assets.KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL,
+                Assets.KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
+                Assets.KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY
+        };
+
+        setBundle(mConfig,
+                Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
+                regRetryIntervalBundleKeys);
+
+        final String[] subErrCodeForInitRegBundleKeys = {
                 Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT,
                 Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY
-            };
+        };
 
         setBundle(mConfig,
                 Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
-                SUB_ERR_CODE_FOR_INIT_REG_BUNDLE_KEYS);
+                subErrCodeForInitRegBundleKeys);
 
-        final String[] SUB_ERR_CODE_FOR_TERMINATED_BUNDLE_KEYS =
-            {
+        final String[] subErrCodeForTerminatedBundleKeys = {
                 Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT,
                 Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY
-            };
+        };
 
         setBundle(mConfig,
                 Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
-                SUB_ERR_CODE_FOR_TERMINATED_BUNDLE_KEYS);
+                subErrCodeForTerminatedBundleKeys);
 
         final String[] SPECIFIC_REGISTRATION_ERROR_BUNDLE_KEYS =
             {
@@ -1511,26 +1524,6 @@ public class CarrierConfig {
         setBundle(mConfig,
                 Assets.KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE,
                 REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE_KEYS);
-
-        final String[] notifyTerminatedForRegEventWithInitRegBundleKeys = {
-                Assets.KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT,
-                Assets.KEY_EVT_FOR_INIT_REG_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY,
-                Assets.KEY_EVT_TO_FOLLOW_WAIT_TIME_FOR_INIT_REG_ON_TERM_STATE_OF_REG_EVENT_INT_ARRAY
-        };
-
-        setBundle(mConfig,
-                Assets.KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE,
-                        notifyTerminatedForRegEventWithInitRegBundleKeys);
-
-        final String[] registrationRetryIntervalBundleKeys = {
-                Assets.KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
-                Assets.KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY,
-                Assets.KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL
-        };
-
-        setBundle(mConfig,
-                Assets.KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE,
-                        registrationRetryIntervalBundleKeys);
     }
 
     private static void setBundle(PersistableBundle config,

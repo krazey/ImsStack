@@ -41,45 +41,4 @@ public:
     IMSVector<IMS_SINT32> objCapabilityTypeSms;
 };
 
-struct AosNotifyTerminatedForRegEventWithInitialRegistrationBundle
-{
-public:
-    AosNotifyTerminatedForRegEventWithInitialRegistrationBundle() :
-            nWaitTimeForInitRegOnTerminatedState(0),
-            objEventForInitRegOnTerminatedState(IMSVector<IMS_SINT32>()),
-            objEventToFollowWtForInitRegOnTerminatedState(IMSVector<IMS_SINT32>())
-    {
-    }
-
-    AosNotifyTerminatedForRegEventWithInitialRegistrationBundle(
-            IN const AosNotifyTerminatedForRegEventWithInitialRegistrationBundle&) = delete;
-    AosNotifyTerminatedForRegEventWithInitialRegistrationBundle& operator=(
-            IN const AosNotifyTerminatedForRegEventWithInitialRegistrationBundle&) = delete;
-
-public:
-    IMS_SINT32 nWaitTimeForInitRegOnTerminatedState;
-    IMSVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
-    IMSVector<IMS_SINT32> objEventToFollowWtForInitRegOnTerminatedState;
-};
-
-struct AosRegistrationRetryIntervalBundle
-{
-public:
-    AosRegistrationRetryIntervalBundle() :
-            objRegistrationRetryRandomUpperValueSec(IMSVector<IMS_SINT32>()),
-            objRegistrationRetryIntervalSec(IMSVector<IMS_SINT32>()),
-            bUseRegistrationRetryIntervalForSubscriptionRetry(IMS_TRUE)
-    {
-    }
-
-    AosRegistrationRetryIntervalBundle(IN const AosRegistrationRetryIntervalBundle&) = delete;
-    AosRegistrationRetryIntervalBundle& operator=(
-            IN const AosRegistrationRetryIntervalBundle&) = delete;
-
-public:
-    IMSVector<IMS_SINT32> objRegistrationRetryRandomUpperValueSec;
-    IMSVector<IMS_SINT32> objRegistrationRetryIntervalSec;
-    IMS_BOOL bUseRegistrationRetryIntervalForSubscriptionRetry;
-};
-
 #endif  // AOS_CARRIER_CONFIG_BUNDLE_H_

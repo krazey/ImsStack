@@ -60,19 +60,18 @@
         <item value="2"/>
     </int-array>
 
-    <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
-    <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
-    <int-array name="sub_err_code_for_init_reg_int_array" num="1">
-        <item value="0"/>
-    </int-array>
-
-    <!-- KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
-    <int-array name="event_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="5">
+    <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
+    <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="5">
         <item value="1"/>
         <item value="2"/>
         <item value="3"/>
         <item value="4"/>
         <item value="5"/>
+    </int-array>
+    <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
+    <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
+    <int-array name="sub_err_code_for_init_reg_int_array" num="1">
+        <item value="0"/>
     </int-array>
 
     <!-- Uce -->
