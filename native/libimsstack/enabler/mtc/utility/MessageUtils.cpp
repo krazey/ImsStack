@@ -808,6 +808,9 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
 
         ByteArray objContent;
         objContent = piBodyPart->GetContent();
+        // TODO: remove or check necessity
+        objContent.Append(TextParser::CHAR_CR);
+        objContent.Append(TextParser::CHAR_LF);
 
         ISipMessage* piSipFrag = SipParsingHelper::CreateMessage(objContent);
         if (piSipFrag == IMS_NULL)
