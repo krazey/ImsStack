@@ -38,7 +38,7 @@ public class IUMtcMedia {
     public static final int IMS_MSG_BASE_MEDIA_TEXT_IND = IMS_MEDIA_MSG_IND + 80;
 
     /** Send dtmf digit value to native */
-    public static final int SEND_DTMF = (IMS_MSG_BASE_MEDIA_AUDIO_IND + 14);
+    public static final int SEND_DTMF = (IMS_MSG_BASE_MEDIA_AUDIO_IND + 19);
     /** Set surface buffer to native */
     public static final int SETSURFACE_CMD                  = (IMS_MSG_BASE_MEDIA_VIDEO_IND + 1);
     /** Set camera id to native */
