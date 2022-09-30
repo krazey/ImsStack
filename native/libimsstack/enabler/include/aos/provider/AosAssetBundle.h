@@ -148,59 +148,6 @@ public:
     IMS_BOOL bSpecificReregFailureWithErrCodeInRoaming;
 };
 
-struct AosRegistrationRetryBundle
-{
-public:
-    AosRegistrationRetryBundle() :
-            nRegistrationRetryMinCount(0),
-            nRegistrationRetrySip305CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP),
-            objRegistrationRetryErrorCodeWithoutIpsec(IMSVector<IMS_SINT32>()),
-            nRegistrationRetryTimerFPolicy(CarrierConfig::Assets::TIMER_F_POLICY_NONE),
-            objRegistrationRetryErrorCodeWithDifferentPcscf(IMSVector<IMS_SINT32>()),
-            bRegistrationRetryWithIpVersionFallback(IMS_FALSE),
-            nRegistrationRetryDefaultPolicy(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC),
-            nRegistrationRetrySip503CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP)
-    {
-    }
-
-    AosRegistrationRetryBundle(IN const AosRegistrationRetryBundle&) = delete;
-    AosRegistrationRetryBundle& operator=(IN const AosRegistrationRetryBundle&) = delete;
-
-public:
-    IMS_SINT32 nRegistrationRetryMinCount;
-    IMS_SINT32 nRegistrationRetrySip305CodePolicy;
-    IMSVector<IMS_SINT32> objRegistrationRetryErrorCodeWithoutIpsec;
-    IMS_SINT32 nRegistrationRetryTimerFPolicy;
-    IMSVector<IMS_SINT32> objRegistrationRetryErrorCodeWithDifferentPcscf;
-    IMS_BOOL bRegistrationRetryWithIpVersionFallback;
-    IMS_SINT32 nRegistrationRetryDefaultPolicy;
-    IMS_SINT32 nRegistrationRetrySip503CodePolicy;
-};
-
-struct AosReregistrationRetryBundle
-{
-public:
-    AosReregistrationRetryBundle() :
-            objReregistrationRetryErrorCodeWithInitialRegistration(IMSVector<IMS_SINT32>()),
-            bReregistrationRetryExpireTimeChecked(IMS_FALSE),
-            nReregistrationRetryMaxCountKeptRegistration(0),
-            objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf(
-                    IMSVector<IMS_SINT32>()),
-            nReregistrationRetrySip305CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT)
-    {
-    }
-
-    AosReregistrationRetryBundle(IN const AosReregistrationRetryBundle&) = delete;
-    AosReregistrationRetryBundle& operator=(IN const AosReregistrationRetryBundle&) = delete;
-
-public:
-    IMSVector<IMS_SINT32> objReregistrationRetryErrorCodeWithInitialRegistration;
-    IMS_BOOL bReregistrationRetryExpireTimeChecked;
-    IMS_SINT32 nReregistrationRetryMaxCountKeptRegistration;
-    IMSVector<IMS_SINT32> objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf;
-    IMS_SINT32 nReregistrationRetrySip305CodePolicy;
-};
-
 struct AosReregistrationErrorPolicyDuringCallBundle
 {
 public:

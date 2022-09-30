@@ -33,6 +33,7 @@ public:
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregisterOn3gNetworks(IMS_FALSE),
             bNoInitialRegistrationOnPcscfChange(IMS_FALSE),
+            bRegRetryWithIpVerFallback(IMS_FALSE),
             bRegistrationContactValidation(IMS_FALSE),
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
             bRequireRegAfterImsCallEndOnRegHeld(IMS_FALSE),
@@ -40,6 +41,7 @@ public:
             bRequiredVolteBlockBySetting(IMS_FALSE),
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
+            bReregRetryExpireTimeChecked(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapability(IMS_FALSE),
             bSupportContactUserInfo(IMS_TRUE),
@@ -58,19 +60,30 @@ public:
                     CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION),
             nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nImsSignallingDscp(46),
+            nRegRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
+            nRegRetry503Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
+            nRegRetryDefaultPolicy(0),
+            nRegRetryMinCnt(0),
+            nRegRetryTimerFPolicy(0),
             nRegistrationActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
             nRegistrationOutOfServicePolicy(CarrierConfig::Assets::REGISTRATION_OOS_POLICY_DEFAULT),
             nRegistrationPcscfUpdatePolicy(0),
             nRegistrationRetryCountResetPolicy(0),
             nRegistrationTimerForEmergencyCallMillis(0),
+            nReregRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
+            nReregRetryMaxCntToKeepReg(0),
             nSipMessageThresholdForTransportChange(200),
             objClearPermanentPdnFailure(IMSVector<IMS_SINT32>()),
             objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
             objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>()),
             objRegErrorCodesWithPcscfDiscovery(IMSVector<IMS_SINT32>()),
+            objRegRetryErrCodeWithDiffPcscf(IMSVector<IMS_SINT32>()),
+            objRegRetryErrCodeWithoutIpsec(IMSVector<IMS_SINT32>()),
             objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>()),
             objReregErrorCodesWithImsPdnReactivation(IMSVector<IMS_SINT32>()),
             objReregErrorCodesWithInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
+            objReregRetryErrCodeForInitReg(IMSVector<IMS_SINT32>()),
+            objReregRetryErrCodeForInitRegWithSamePcscf(IMSVector<IMS_SINT32>()),
             objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf(
                     IMSVector<IMS_SINT32>()),
             objSubscriptionErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
@@ -92,6 +105,7 @@ public:
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregisterOn3gNetworks;
     IMS_BOOL bNoInitialRegistrationOnPcscfChange;
+    IMS_BOOL bRegRetryWithIpVerFallback;
     IMS_BOOL bRegistrationContactValidation;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
     IMS_BOOL bRequireRegAfterImsCallEndOnRegHeld;
@@ -99,6 +113,7 @@ public:
     IMS_BOOL bRequiredVolteBlockBySetting;
     IMS_BOOL bRequiredVolteBlockByAirplaneMode;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
+    IMS_BOOL bReregRetryExpireTimeChecked;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapability;
     IMS_BOOL bSupportContactUserInfo;
@@ -115,19 +130,30 @@ public:
     IMS_SINT32 nGeolocationPidfFormingPolicy;
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
+    IMS_SINT32 nRegRetry305Policy;
+    IMS_SINT32 nRegRetry503Policy;
+    IMS_SINT32 nRegRetryDefaultPolicy;
+    IMS_SINT32 nRegRetryMinCnt;
+    IMS_SINT32 nRegRetryTimerFPolicy;
     IMS_SINT32 nRegistrationActualWaitTimePolicy;
     IMS_SINT32 nRegistrationOutOfServicePolicy;
     IMS_SINT32 nRegistrationPcscfUpdatePolicy;
     IMS_SINT32 nRegistrationRetryCountResetPolicy;
     IMS_SINT32 nRegistrationTimerForEmergencyCallMillis;
+    IMS_SINT32 nReregRetry305Policy;
+    IMS_SINT32 nReregRetryMaxCntToKeepReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMSVector<IMS_SINT32> objClearPermanentPdnFailure;
     IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     IMSVector<IMS_SINT32> objPcscfDiscoveryMethodRoaming;
     IMSVector<IMS_SINT32> objRegErrorCodesWithPcscfDiscovery;
+    IMSVector<IMS_SINT32> objRegRetryErrCodeWithDiffPcscf;
+    IMSVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
     IMSVector<IMS_SINT32> objRegistrationPermanentErrorMaxCount;
     IMSVector<IMS_SINT32> objReregErrorCodesWithImsPdnReactivation;
     IMSVector<IMS_SINT32> objReregErrorCodesWithInitRegWithAvailablePcscf;
+    IMSVector<IMS_SINT32> objReregRetryErrCodeForInitReg;
+    IMSVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
     IMSVector<IMS_SINT32> objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf;
     IMSVector<IMS_SINT32> objSubscriptionErrorCodeForStoppingByExpirationTime;
     IMSVector<IMS_SINT32> objSupportedRoamingRats;

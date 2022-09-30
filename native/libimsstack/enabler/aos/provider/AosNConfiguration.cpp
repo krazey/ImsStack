@@ -37,9 +37,7 @@ AosNConfiguration::AosNConfiguration() :
         m_objRegRetryInterval(AosRegRetryIntervalBundle()),
         m_objSubErrCodeForInitReg(AosSubErrCodeForInitRegBundle()),
         m_objSubErrCodeForTerminated(AosSubErrCodeForTerminatedBundle()),
-        m_objRegRetry(AosRegistrationRetryBundle()),
         m_objReregErrPolicyCall(AosReregistrationErrorPolicyDuringCallBundle()),
-        m_objReregRetry(AosReregistrationRetryBundle()),
         m_objSpecificRegErr(AosSpecificRegistrationErrorBundle()),
         m_nEventForInitRegOnTerminatedState(0),
         m_nEventToFollowWtForInitRegOnTerminatedState(0),
@@ -435,7 +433,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyRegistrationTimerMillis
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationRetryDefaultPolicy() const
 {
-    return m_objRegRetry.nRegistrationRetryDefaultPolicy;
+    return m_objAsset.nRegRetryDefaultPolicy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredImsDscp() const
@@ -470,17 +468,17 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportC
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationRetrySip305CodePolicy() const
 {
-    return m_objRegRetry.nRegistrationRetrySip305CodePolicy;
+    return m_objAsset.nRegRetry305Policy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReregistrationRetrySip305CodePolicy() const
 {
-    return m_objReregRetry.nReregistrationRetrySip305CodePolicy;
+    return m_objAsset.nReregRetry305Policy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationRetrySip503CodePolicy() const
 {
-    return m_objRegRetry.nRegistrationRetrySip503CodePolicy;
+    return m_objAsset.nRegRetry503Policy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSpecificRegistrationErrorFinalType() const
@@ -505,7 +503,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryCountResetPolicy() const
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReregRetryMaxCountKeptRegistration() const
 {
-    return m_objReregRetry.nReregistrationRetryMaxCountKeptRegistration;
+    return m_objAsset.nReregRetryMaxCntToKeepReg;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPcscfUpdatePolicy() const
@@ -661,7 +659,7 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSpecificRegErrWaitTi
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
 AosNConfiguration::GetReregRetryErrCodeWithInitialRegWithSamePcscf()
 {
-    return m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf;
+    return m_objAsset.objReregRetryErrCodeForInitRegWithSamePcscf;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrCode()
@@ -987,101 +985,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         }
 #endif
     }
-
-    // AosRegistrationRetryBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_REGISTRATION_RETRY_BUNDLE);
-    if (piCcBundle != IMS_NULL)
-    {
-        m_objRegRetry.nRegistrationRetryMinCount =
-                piCcBundle->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_RETRY_MIN_COUNT_INT);
-        m_objRegRetry.nRegistrationRetrySip305CodePolicy = piCcBundle->GetInt(
-                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_SIP_305_CODE_POLICY_INT);
-        m_objRegRetry.objRegistrationRetryErrorCodeWithoutIpsec = piCcBundle->GetIntArray(
-                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_ERROR_CODE_WITHOUT_IPSEC_INT_ARRAY);
-        m_objRegRetry.nRegistrationRetryTimerFPolicy = piCcBundle->GetInt(
-                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_TIMER_F_POLICY_INT);
-        m_objRegRetry.objRegistrationRetryErrorCodeWithDifferentPcscf =
-                piCcBundle->GetIntArray(CarrierConfig::Assets::
-                                KEY_REGISTRATION_RETRY_ERROR_CODE_WITH_DIFFERENT_PCSCF_INT_ARRAY);
-        m_objRegRetry.bRegistrationRetryWithIpVersionFallback = piCcBundle->GetBoolean(
-                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_WITH_IP_VERSION_FALLBACK_BOOL);
-        m_objRegRetry.nRegistrationRetryDefaultPolicy = piCcBundle->GetInt(
-                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_DEFAULT_POLICY_INT);
-        m_objRegRetry.nRegistrationRetrySip503CodePolicy = piCcBundle->GetInt(
-                CarrierConfig::Assets::KEY_REGISTRATION_RETRY_SIP_503_CODE_POLICY_INT);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
-#ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG, "KEY_REGISTRATION_RETRY_BUNDLE :: RRMC(%d), RRS305CP(%d), RRTFP(%d)",
-                m_objRegRetry.nRegistrationRetryMinCount,
-                m_objRegRetry.nRegistrationRetrySip305CodePolicy,
-                m_objRegRetry.nRegistrationRetryTimerFPolicy);
-        A_IMS_TRACE_D(LOGTAG, "RRWIVFB(%d), RRDP(%d), RRS503CP(%d)",
-                m_objRegRetry.bRegistrationRetryWithIpVersionFallback,
-                m_objRegRetry.nRegistrationRetryDefaultPolicy,
-                m_objRegRetry.nRegistrationRetrySip503CodePolicy);
-        IMS_UINT32 nSize = m_objRegRetry.objRegistrationRetryErrorCodeWithDifferentPcscf.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue =
-                    m_objRegRetry.objRegistrationRetryErrorCodeWithDifferentPcscf.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RRECWDP(%d), ", nValue, 0, 0);
-        }
-        nSize = m_objRegRetry.objRegistrationRetryErrorCodeWithoutIpsec.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue = m_objRegRetry.objRegistrationRetryErrorCodeWithoutIpsec.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RRECWOI(%d), ", nValue, 0, 0);
-        }
-#endif
-    }
-
-    // AosReregistrationRetryBundle
-    piCcBundle = piCc->GetBundle(CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_BUNDLE);
-    if (piCcBundle != IMS_NULL)
-    {
-        m_objReregRetry
-                .objReregistrationRetryErrorCodeWithInitialRegistration = piCcBundle->GetIntArray(
-                CarrierConfig::Assets::
-                        KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY);
-        m_objReregRetry.bReregistrationRetryExpireTimeChecked = piCcBundle->GetBoolean(
-                CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_EXPIRE_TIME_CHECKED_BOOL);
-        m_objReregRetry.nReregistrationRetryMaxCountKeptRegistration = piCcBundle->GetInt(
-                CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_MAX_COUNT_KEPT_REGISTRATION_INT);
-        m_objReregRetry
-                .objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf = piCcBundle->GetIntArray(
-                CarrierConfig::Assets::
-                        KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_WITH_SAME_PCSCF_INT_ARRAY);
-        m_objReregRetry.nReregistrationRetrySip305CodePolicy = piCcBundle->GetInt(
-                CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_SIP_305_CODE_POLICY_INT);
-        piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
-#ifdef __IMS_DEBUG__
-        A_IMS_TRACE_D(LOGTAG,
-                "KEY_REREGISTRATION_RETRY_BUNDLE :: RRRETC(%d), RRRMCKR(%d), RRRS305CP(%d)",
-                m_objReregRetry.bReregistrationRetryExpireTimeChecked,
-                m_objReregRetry.nReregistrationRetryMaxCountKeptRegistration,
-                m_objReregRetry.nReregistrationRetrySip305CodePolicy);
-        IMS_UINT32 nSize =
-                m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistration.GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue =
-                    m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistration.GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RRRECWIR(%d), ", nValue, 0, 0);
-        }
-        nSize = m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf
-                        .GetSize();
-        for (int i = 0; i < nSize; i++)
-        {
-            IMS_SINT32 nValue =
-                    m_objReregRetry
-                            .objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf
-                            .GetAt(i);
-            A_IMS_TRACE_D(LOGTAG, "RRRECWIRWSP(%d), ", nValue, 0, 0);
-        }
-#endif
-    }
 }
 
 PRIVATE
@@ -1223,6 +1126,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL);
     m_objAsset.bNoInitialRegistrationOnPcscfChange = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_NO_INITIAL_REGISTRATION_ON_PCSCF_CHANGE_BOOL);
+    m_objAsset.bRegRetryWithIpVerFallback =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL);
     m_objAsset.bRegistrationContactValidation =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REGISTRATION_CONTACT_VALIDATION_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =
@@ -1237,6 +1142,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL);
     m_objAsset.bRequiredWfcBlockByAirplaneMode =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL);
+    m_objAsset.bReregRetryExpireTimeChecked =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_REREG_RETRY_EXPIRE_TIME_CHECKED_BOOL);
     m_objAsset.bSipOverIpsecEnabledInRoaming =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL);
     m_objAsset.bSmsOverImsAvailableWithoutVoiceCapability = piCc->GetBoolean(
@@ -1272,6 +1179,15 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT);
     m_objAsset.nImsSignallingDscp =
             piCc->GetInt(CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT);
+    m_objAsset.nRegRetry305Policy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_RETRY_305_POLICY_INT);
+    m_objAsset.nRegRetry503Policy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_RETRY_503_POLICY_INT);
+    m_objAsset.nRegRetryDefaultPolicy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_RETRY_DEFAULT_POLICY_INT);
+    m_objAsset.nRegRetryMinCnt = piCc->GetInt(CarrierConfig::Assets::KEY_REG_RETRY_MIN_CNT_INT);
+    m_objAsset.nRegRetryTimerFPolicy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT);
     m_objAsset.nRegistrationActualWaitTimePolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT);
     m_objAsset.nRegistrationOutOfServicePolicy =
@@ -1282,6 +1198,10 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT);
     m_objAsset.nRegistrationTimerForEmergencyCallMillis = piCc->GetInt(
             CarrierConfig::Assets::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT);
+    m_objAsset.nReregRetry305Policy =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT);
+    m_objAsset.nReregRetryMaxCntToKeepReg =
+            piCc->GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
 
@@ -1297,12 +1217,20 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetIntArray(CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY);
     m_objAsset.objRegErrorCodesWithPcscfDiscovery = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY);
+    m_objAsset.objRegRetryErrCodeWithDiffPcscf = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY);
+    m_objAsset.objRegRetryErrCodeWithoutIpsec = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY);
     m_objAsset.objRegistrationPermanentErrorMaxCount = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY);
     m_objAsset.objReregErrorCodesWithImsPdnReactivation = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY);
     m_objAsset.objReregErrorCodesWithInitRegWithAvailablePcscf = piCc->GetIntArray(CarrierConfig::
                     Assets::KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY);
+    m_objAsset.objReregRetryErrCodeForInitReg = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
+    m_objAsset.objReregRetryErrCodeForInitRegWithSamePcscf = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY);
     m_objAsset.objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf =
             piCc->GetIntArray(CarrierConfig::Assets::
                             KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY);

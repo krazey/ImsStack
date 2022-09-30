@@ -460,6 +460,8 @@ public class CarrierConfig {
                 "ims_deregister_on_3g_networks_bool";
         public static final String KEY_NO_INITIAL_REGISTRATION_ON_PCSCF_CHANGE_BOOL =
                 "no_initial_registration_on_pcscf_change_bool";
+        public static final String KEY_REG_RETRY_IP_VER_FALLBACK_BOOL =
+                "reg_retry_with_ip_ver_fallback_bool";
         public static final String KEY_REGISTRATION_CONTACT_VALIDATION_BOOL =
                 "registration_contact_validation_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
@@ -474,6 +476,8 @@ public class CarrierConfig {
                 "required_volte_block_by_airplane_mode_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
                 "required_wfc_block_by_airplane_mode_bool";
+        public static final String KEY_REREG_RETRY_EXPIRE_TIME_CHECKED_BOOL =
+                "rereg_retry_expire_time_checked_bool";
         public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
                 "sip_over_ipsec_enabled_in_roaming_bool";
         public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL =
@@ -508,10 +512,15 @@ public class CarrierConfig {
                 "emergency_preferred_iptype_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
                 "geolocation_pidf_forming_policy_int";
-        public static final String KEY_IMS_PREFERRED_IPTYPE_INT =
-                "ims_preferred_iptype_int";
-        public static final String KEY_IMS_SIGNALLING_DSCP_INT =
-                "ims_signalling_dscp_int";
+        public static final String KEY_IMS_PREFERRED_IPTYPE_INT = "ims_preferred_iptype_int";
+        public static final String KEY_IMS_SIGNALLING_DSCP_INT = "ims_signalling_dscp_int";
+        public static final String KEY_REG_RETRY_305_POLICY_INT = "reg_retry_305_policy_int";
+        public static final String KEY_REG_RETRY_503_POLICY_INT = "reg_retry_503_policy_int";
+        public static final String KEY_REG_RETRY_DEFAULT_POLICY_INT =
+                "reg_retry_default_policy_int";
+        public static final String KEY_REG_RETRY_MIN_CNT_INT = "reg_retry_min_cnt_int";
+        public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =
+                "reg_retry_timer_f_policy_int";
         public static final String KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT =
                 "registration_actual_wait_time_policy_int";
         public static final String KEY_REGISTRATION_OUT_OF_SERVICE_POLICY_INT =
@@ -522,6 +531,10 @@ public class CarrierConfig {
                 "registration_retry_count_reset_policy_int";
         public static final String KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT =
                 "registration_timer_for_emergency_call_millis_int";
+        public static final String KEY_REREG_RETRY_305_POLICY_INT =
+                "rereg_retry_305_policy_int";
+        public static final String KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT =
+                "rereg_retry_max_cnt_to_keep_reg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
                 "sip_message_threshold_for_transport_change_int";
 
@@ -535,6 +548,10 @@ public class CarrierConfig {
                 "permanent_pdn_failure_int_array";
         public static final String KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY =
                 "reg_error_codes_with_pcscf_discovery_int_array";
+        public static final String KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY =
+                "reg_retry_err_code_with_diff_pcscf_int_array";
+        public static final String KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY =
+                "reg_retry_err_code_without_ipsec_int_array";
         public static final String KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY =
                 "registration_permanent_error_max_count_int_array";
         public static final String KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY =
@@ -542,6 +559,10 @@ public class CarrierConfig {
         public static final String
                 KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY =
                         "rereg_error_codes_with_init_reg_with_available_pcscf_int_array";
+        public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
+                "rereg_retry_err_code_for_init_reg_int_array";
+        public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY =
+                "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
         public static final String
                 KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY =
                         "subscription_error_code_for_reg_event_"
@@ -628,40 +649,6 @@ public class CarrierConfig {
                 "specific_registration_error_wait_time_sec_int_array";
         public static final String KEY_SPECIFIC_REREGISTRATION_FAILURE_WITH_ERROR_CODE_IN_ROAMING_BOOL =
                 "specific_reregistration_failure_with_error_code_in_roaming_bool";
-        // }
-        // Bundle {
-        public static final String KEY_REGISTRATION_RETRY_BUNDLE =
-                "registration_retry_bundle";
-        public static final String KEY_REGISTRATION_RETRY_MIN_COUNT_INT =
-                "registration_retry_min_count_int";
-        public static final String KEY_REGISTRATION_RETRY_SIP_305_CODE_POLICY_INT =
-                "registration_retry_sip_305_code_policy_int";
-        public static final String KEY_REGISTRATION_RETRY_ERROR_CODE_WITHOUT_IPSEC_INT_ARRAY =
-                "registration_retry_error_code_without_ipsec_int_array";
-        public static final String KEY_REGISTRATION_RETRY_TIMER_F_POLICY_INT =
-                "registration_retry_timer_f_policy_int";
-        public static final String KEY_REGISTRATION_RETRY_ERROR_CODE_WITH_DIFFERENT_PCSCF_INT_ARRAY =
-                "registration_retry_error_code_with_different_pcscf_int_array";
-        public static final String KEY_REGISTRATION_RETRY_WITH_IP_VERSION_FALLBACK_BOOL =
-                "registration_retry_with_ip_version_fallback_bool";
-        public static final String KEY_REGISTRATION_RETRY_DEFAULT_POLICY_INT =
-                "registration_retry_default_policy_int";
-        public static final String KEY_REGISTRATION_RETRY_SIP_503_CODE_POLICY_INT =
-                "registration_retry_sip_503_code_policy_int";
-        // }
-        // Bundle {
-        public static final String KEY_REREGISTRATION_RETRY_BUNDLE =
-                "reregistration_retry_bundle";
-        public static final String KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY =
-                "reregistration_retry_error_code_with_initial_registration_int_array";
-        public static final String KEY_REREGISTRATION_RETRY_EXPIRE_TIME_CHECKED_BOOL =
-                "reregistration_retry_expire_time_checked_bool";
-        public static final String KEY_REREGISTRATION_RETRY_MAX_COUNT_KEPT_REGISTRATION_INT =
-                "reregistration_retry_max_count_kept_registration_int";
-        public static final String KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_WITH_SAME_PCSCF_INT_ARRAY =
-                "reregistration_retry_error_code_with_initial_registration_with_same_pcscf_int_array";
-        public static final String KEY_REREGISTRATION_RETRY_SIP_305_CODE_POLICY_INT =
-                "reregistration_retry_sip_305_code_policy_int";
         // }
         // Bundle {
         public static final String KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE =
@@ -1416,8 +1403,6 @@ public class CarrierConfig {
         // KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE
         // KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE
         // KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE
-        // KEY_REGISTRATION_RETRY_BUNDLE
-        // KEY_REREGISTRATION_RETRY_BUNDLE
         // KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE
 
         final String[] notifyTerminatedForInitRegBundleKeys = {
@@ -1485,35 +1470,6 @@ public class CarrierConfig {
         setBundle(mConfig,
                 Assets.KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE,
                 SPECIFIC_REGISTRATION_ERROR_BUNDLE_KEYS);
-
-        final String[] REGISTRATION_RETRY_BUNDLE_KEYS =
-            {
-                Assets.KEY_REGISTRATION_RETRY_MIN_COUNT_INT,
-                Assets.KEY_REGISTRATION_RETRY_SIP_305_CODE_POLICY_INT,
-                Assets.KEY_REGISTRATION_RETRY_ERROR_CODE_WITHOUT_IPSEC_INT_ARRAY,
-                Assets.KEY_REGISTRATION_RETRY_TIMER_F_POLICY_INT,
-                Assets.KEY_REGISTRATION_RETRY_ERROR_CODE_WITH_DIFFERENT_PCSCF_INT_ARRAY,
-                Assets.KEY_REGISTRATION_RETRY_WITH_IP_VERSION_FALLBACK_BOOL,
-                Assets.KEY_REGISTRATION_RETRY_DEFAULT_POLICY_INT,
-                Assets.KEY_REGISTRATION_RETRY_SIP_503_CODE_POLICY_INT
-            };
-
-        setBundle(mConfig,
-                Assets.KEY_REGISTRATION_RETRY_BUNDLE,
-                REGISTRATION_RETRY_BUNDLE_KEYS);
-
-        final String[] REREGISTRATION_RETRY_BUNDLE_KEYS =
-            {
-                Assets.KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY,
-                Assets.KEY_REREGISTRATION_RETRY_EXPIRE_TIME_CHECKED_BOOL,
-                Assets.KEY_REREGISTRATION_RETRY_MAX_COUNT_KEPT_REGISTRATION_INT,
-                Assets.KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_WITH_SAME_PCSCF_INT_ARRAY,
-                Assets.KEY_REREGISTRATION_RETRY_SIP_305_CODE_POLICY_INT
-            };
-
-        setBundle(mConfig,
-                Assets.KEY_REREGISTRATION_RETRY_BUNDLE,
-                REREGISTRATION_RETRY_BUNDLE_KEYS);
 
         final String[] REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE_KEYS =
             {

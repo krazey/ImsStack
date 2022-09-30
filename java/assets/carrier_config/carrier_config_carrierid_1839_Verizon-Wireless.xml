@@ -52,8 +52,11 @@
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>
     <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
+    <int name="reg_retry_503_policy_int" value="0"/>
+    <int name="reg_retry_default_policy_int" value="1"/>
     <int name="registration_actual_wait_time_policy_int" value="3"/>
     <int name="registration_pcscf_update_policy_int" value="1"/>
+    <int name="rereg_retry_max_cnt_to_keep_reg_int" value="1"/>
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="2">
         <item value="2"/>
         <item value="2"/>
@@ -138,13 +141,6 @@
     <int-array name="specific_registration_error_wait_time_sec_int_array" num="1">
         <item value="30"/>
     </int-array>
-    <!-- End BUNDLE -->
-    <!-- KEY_REGISTRATION_RETRY_BUNDLE -->
-    <int name="registration_retry_default_policy_int" value="1"/>
-    <int name="registration_retry_sip_503_code_policy_int" value="0"/>
-    <!-- End BUNDLE -->
-    <!-- KEY_REREGISTRATION_RETRY_BUNDLE -->
-    <int name="reregistration_retry_max_count_kept_registration_int" value="1"/>
     <!-- End BUNDLE -->
 
     <!-- MTC default -->
