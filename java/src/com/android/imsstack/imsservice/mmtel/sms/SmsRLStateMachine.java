@@ -16,16 +16,21 @@
 package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.os.Handler;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.uicc.IccUtils;
 
+
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 /**
  * Implements the State Machine of Sms Relay Layer as per 24.011
@@ -46,6 +51,8 @@ public class SmsRLStateMachine {
     public String mPSISmsc;
     public String mDestinationAddress;
     public int mTpMr;
+    public int mTimerTr1;
+    public int mTimerTr2;
 
     protected Runnable mTR1TimerHandler = new Runnable() {
         @Override
@@ -74,23 +81,8 @@ public class SmsRLStateMachine {
         mPSISmsc = psiSmsc;
         mDestinationAddress = destinationAddress;
         mToken = token;
-    }
-
-    @VisibleForTesting
-    public SmsRLStateMachine(SmsRLState state, int token, int messageType,
-                                MtsController mtsController, ImsCallContext context,
-                                SmsRelayLayer.Listener listener, String psiSmsc,
-                                String destinationAddress, Handler handler) {
-
-        mCurrentState = SmsRLState.IDLE;
-        mMtsController  = mtsController;
-        mMessageType = messageType;
-        mContext = context;
-        mHandler = handler;
-        mListener = listener;
-        mPSISmsc = psiSmsc;
-        mDestinationAddress = destinationAddress;
-        mToken = token;
+        mTimerTr1 = getTimerTR1();
+        mTimerTr2 = getTimerTR2();
     }
 
     /**
@@ -237,7 +229,7 @@ public class SmsRLStateMachine {
                 //set TR2 timer
                 if (smsRLStateMachine.mHandler != null) {
                     smsRLStateMachine.mHandler.postDelayed(smsRLStateMachine.mTR2TimerHandler,
-                                                       SmsUtils.TIMER_TR2);
+                                                       smsRLStateMachine.mTimerTr2);
                 } else {
                     smsRLStateMachine.mTR2TimerHandler = null;
                     loge("Handler is null");
@@ -286,7 +278,7 @@ public class SmsRLStateMachine {
                 if (smsRLStateMachine.mHandler != null) {
                     //set TR1 timer
                     smsRLStateMachine.mHandler.postDelayed(smsRLStateMachine.mTR1TimerHandler,
-                                                        SmsUtils.TIMER_TR1M);
+                                                        smsRLStateMachine.mTimerTr1);
                 } else {
                     smsRLStateMachine.mTR1TimerHandler = null;
                     loge("Handler is null");
@@ -316,9 +308,9 @@ public class SmsRLStateMachine {
 
                 int tpMR = smsRLStateMachine.mTpMr;
                 smsRLStateMachine.mListener.notifyRLReportIndication(token, tpMR,
-                                        SmsRPErrorCause.getSendSmsStatusByRPCauseCode(0),
-                                        SmsRPErrorCause.getSendSmsStatusReasonByRPCauseCode(0),
-                                                                 0);
+                                                                    ImsSmsImplBase.SEND_STATUS_OK,
+                                                                    SmsManager.RESULT_ERROR_NONE,
+                                                                    0);
                 smsRLStateMachine.setState(IDLE);
             }
             @Override
@@ -334,6 +326,7 @@ public class SmsRLStateMachine {
                 int causeCode = moRPError.getRPCause();
                 int token = smsRLStateMachine.mToken;
                 int tpMR = smsRLStateMachine.mTpMr;
+                int sendStatus = smsRLStateMachine.getSendStatus(causeCode);
 
                 if (smsRLStateMachine.mHandler != null
                         && smsRLStateMachine.mTR1TimerHandler != null) {
@@ -343,8 +336,8 @@ public class SmsRLStateMachine {
                     loge("Handler is null");
                     smsRLStateMachine.mTR1TimerHandler = null;
                 }
-                smsRLStateMachine.mListener.notifyRLReportIndication(token, tpMR,
-                                SmsRPErrorCause.getSendSmsStatusByRPCauseCode(causeCode),
+
+                smsRLStateMachine.mListener.notifyRLReportIndication(token, tpMR, sendStatus,
                                 SmsRPErrorCause.getSendSmsStatusReasonByRPCauseCode(causeCode),
                                 causeCode);
                 smsRLStateMachine.setState(IDLE);
@@ -489,12 +482,58 @@ public class SmsRLStateMachine {
     }
 
     /**
+     * Gets the SEND_STATUS param from carrier config if any
+     * to indicate framework either to retry over IMS or Fallback
+     *
+     * @param causeCode the RP-Cause in RP-Error from network
+     * @return the sendStatus to be sent to framework indicating the retry mechanism
+     */
+    public int getSendStatus(int causeCode) {
+        int sendStatus = SmsRPErrorCause.getSendSmsStatusByRPCauseCode(causeCode);
+
+        int[] causeValues = getConfigInterface(mContext.getSlotId()).getCarrierConfig()
+                .getIntArray(CarrierConfigManager.ImsSms
+                .KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY);
+        if (causeValues != null
+                && Arrays.stream(causeValues).anyMatch(value -> value == causeCode)) {
+            sendStatus = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
+        }
+        causeValues = getConfigInterface(mContext.getSlotId()).getCarrierConfig()
+                .getIntArray(CarrierConfigManager.ImsSms
+                .KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY);
+        if (causeValues != null
+                && Arrays.stream(causeValues).anyMatch(value -> value == causeCode)) {
+            sendStatus = ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK;
+        }
+        return sendStatus;
+    }
+
+    /**
      * gets the state of state machine
      * @return the state of state machine
      */
     @VisibleForTesting
     public SmsRLState getState() {
         return mCurrentState;
+    }
+
+    /**
+     * gets the TR1 Timer from carrier Config
+     * @return the TR1 Timer in milliseconds
+     */
+    public int getTimerTR1() {
+        return getConfigInterface(mContext.getSlotId()).getCarrierConfig()
+                .getInt(CarrierConfigManager.ImsSms.KEY_SMS_TR1_TIMER_MILLIS_INT);
+
+    }
+
+    /**
+     * gets the TR2 Timer from carrier Config
+     * @return the TR2 Timer in milliseconds
+     */
+    public int getTimerTR2() {
+        return getConfigInterface(mContext.getSlotId()).getCarrierConfig()
+                .getInt(CarrierConfigManager.ImsSms.KEY_SMS_TR2_TIMER_MILLIS_INT);
     }
 
     /**
@@ -572,6 +611,16 @@ public class SmsRLStateMachine {
      */
     public int onSipResponseForRPMessage(boolean isSuccess, int status) {
         return mCurrentState.onSipResponseForRPMessage(this, isSuccess, status);
+    }
+
+    /**
+     * Returns the configuration interface.
+     *
+     * @param slotId The slot-id to be retrieved.
+     * @return A ConfigInterface instance.
+     */
+    public static ConfigInterface getConfigInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
     }
 
     private static void log(String s) {
