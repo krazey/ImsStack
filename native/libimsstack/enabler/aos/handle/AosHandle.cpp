@@ -132,6 +132,11 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
     if (piNConfig != IMS_NULL)
     {
         piNConfig->SetListener(this);
+
+        if (piNConfig->IsDeregisterOn3gNetworks())
+        {
+            m_objHoldingBlocksPolicyForMobile.Append(BLOCK_3G);
+        }
     }
 }
 
@@ -616,6 +621,24 @@ PUBLIC VIRTUAL void AosHandle::NetTracker_StatusChanged()
         }
 
         m_bNetSrvIn = bCurrSrvIn;
+    }
+
+    if (GET_N_CONFIG(m_nSlotId)->IsDeregisterOn3gNetworks())
+    {
+        if (bCurrSrvIn)
+        {
+            if (IsSupportedNetworkType(GetNetworkType()))
+            {
+                if (IsHandleBlocked(BLOCK_3G))
+                {
+                    ProcessBlock(BLOCK_3G, IMS_FALSE);
+                }
+            }
+            else if (Is3G(GetNetworkType()))
+            {
+                ProcessBlock(BLOCK_3G, IMS_TRUE);
+            }
+        }
     }
 
     IMS_BOOL bCurrDataConnected = IsDataConnected();
