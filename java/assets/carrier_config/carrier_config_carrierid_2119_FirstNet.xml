@@ -55,10 +55,18 @@
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="true"/>
     <int name="contact_user_info_policy_for_non_register_message_int" value="2"/>
+    <int name="reg_retry_305_policy_int" value="2"/>
+    <int name="reg_retry_default_policy_int" value="1"/>
     <int name="registration_actual_wait_time_policy_int" value="1"/>
+    <int name="rereg_retry_305_policy_int" value="2"/>
     <int-array name="permanent_pdn_failure_int_array" num="2">
         <item value="28"/>
         <item value="33"/>
+    </int-array>
+    <int-array name="rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array" num="3">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="9"/>
     </int-array>
 
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
@@ -73,18 +81,6 @@
      <int-array name="specific_registration_error_code_int_array" num="2">
         <item value="0"/>
         <item value="2"/>
-    </int-array>
-
-    <!-- KEY_REGISTRATION_RETRY_BUNDLE -->
-    <int name="registration_retry_sip_305_code_policy_int" value="2"/>
-    <int name="registration_retry_default_policy_int" value="1"/>
-
-    <!-- KEY_REREGISTRATION_RETRY_BUNDLE -->
-    <int name="reregistration_retry_sip_305_code_policy_int" value="2"/>
-    <int-array name="reregistration_retry_error_code_with_initial_registration_with_same_pcscf_int_array" num="3">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="9"/>
     </int-array>
 
     <!-- Uce -->

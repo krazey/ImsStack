@@ -189,10 +189,7 @@ private:
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;
     AosSubErrCodeForTerminatedBundle m_objSubErrCodeForTerminated;
 
-    AosRegistrationRetryBundle m_objRegRetry;
-
     AosReregistrationErrorPolicyDuringCallBundle m_objReregErrPolicyCall;
-    AosReregistrationRetryBundle m_objReregRetry;
 
     AosSpecificRegistrationErrorBundle m_objSpecificRegErr;
 

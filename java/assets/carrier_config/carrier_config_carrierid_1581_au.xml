@@ -29,6 +29,7 @@
 
     <!-- Aos -->
     <int name="registration_actual_wait_time_policy_int" value="3"/>
+    <int name="rereg_retry_305_policy_int" value="0"/>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
     <int-array name="reg_retry_interval_sec_int_array" num="1">
         <item value="10"/>
@@ -52,9 +53,6 @@
         <item value="503"/>
         <item value="504"/>
     </int-array>
-    <!-- End BUNDLE -->
-    <!-- KEY_REREGISTRATION_RETRY_BUNDLE -->
-    <int name="reregistration_retry_sip_305_code_policy_int" value="0"/>
     <!-- End BUNDLE -->
 
     <!-- Ut/Xcap AOSP -->

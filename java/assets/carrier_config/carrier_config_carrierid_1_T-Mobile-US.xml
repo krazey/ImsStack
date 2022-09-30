@@ -43,7 +43,11 @@
 
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
     <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
+    <boolean name="required_volte_block_by_airplane_mode_bool" value="true"/>
     <int name="geolocation_pidf_forming_policy_int" value="3"/>
+    <int name="reg_retry_305_policy_int" value="0"/>
+    <int name="reg_retry_503_policy_int" value="0"/>
+    <int name="reg_retry_default_policy_int" value="1"/>
     <int name="registration_actual_wait_time_policy_int" value="2"/>
     <int name="registration_retry_count_reset_policy_int" value="1"/>
     <int name="sip_message_threshold_for_transport_change_int" value="340"/>
@@ -121,13 +125,6 @@
         <item value="503"/>
         <item value="504"/>
     </int-array>
-
-    <!-- KEY_REGISTRATION_RETRY_BUNDLE -->
-    <int name="registration_retry_sip_305_code_policy_int" value="0"/>
-    <int name="registration_retry_default_policy_int" value="1"/>
-    <int name="registration_retry_sip_503_code_policy_int" value="0"/>
-
-    <boolean name="required_volte_block_by_airplane_mode_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="2"/>

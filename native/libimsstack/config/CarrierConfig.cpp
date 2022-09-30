@@ -700,6 +700,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL[] =
         "ims_deregister_on_3g_networks_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_NO_INITIAL_REGISTRATION_ON_PCSCF_CHANGE_BOOL[] =
         "no_initial_registration_on_pcscf_change_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL[] =
+        "reg_retry_with_ip_ver_fallback_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_CONTACT_VALIDATION_BOOL[] =
         "registration_contact_validation_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[] =
@@ -714,6 +716,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_
         "required_volte_block_by_airplane_mode_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
         "required_wfc_block_by_airplane_mode_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_EXPIRE_TIME_CHECKED_BOOL[] =
+        "rereg_retry_expire_time_checked_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL[] =
         "sip_over_ipsec_enabled_in_roaming_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL[] =
@@ -747,6 +751,13 @@ const IMS_CHAR CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[] 
         "geolocation_pidf_forming_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT[] = "ims_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT[] = "ims_signalling_dscp_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_305_POLICY_INT[] = "reg_retry_305_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_503_POLICY_INT[] = "reg_retry_503_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_DEFAULT_POLICY_INT[] =
+        "reg_retry_default_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_MIN_CNT_INT[] = "reg_retry_min_cnt_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT[] =
+        "reg_retry_timer_f_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT[] =
         "registration_actual_wait_time_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_OUT_OF_SERVICE_POLICY_INT[] =
@@ -757,6 +768,10 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_
         "registration_retry_count_reset_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT[] =
         "registration_timer_for_emergency_call_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT[] =
+        "rereg_retry_305_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT[] =
+        "rereg_retry_max_cnt_to_keep_reg_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[] =
         "sip_message_threshold_for_transport_change_int";
 
@@ -770,6 +785,10 @@ const IMS_CHAR CarrierConfig::Assets::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
         "permanent_pdn_failure_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY[] =
         "reg_error_codes_with_pcscf_discovery_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY[] =
+        "reg_retry_err_code_with_diff_pcscf_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY[] =
+        "reg_retry_err_code_without_ipsec_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY[] =
         "registration_permanent_error_max_count_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY[] =
@@ -777,6 +796,11 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIV
 const IMS_CHAR CarrierConfig::Assets::
         KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY[] =
                 "rereg_error_codes_with_init_reg_with_available_pcscf_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY[] =
+        "rereg_retry_err_code_for_init_reg_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY[] =
+                "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY[] =
                 "subscription_error_code_for_reg_event_with_initial_registration_with_next_"
@@ -866,43 +890,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_WAIT_TIME_
 const IMS_CHAR CarrierConfig::Assets::
         KEY_SPECIFIC_REREGISTRATION_FAILURE_WITH_ERROR_CODE_IN_ROAMING_BOOL[] =
                 "specific_reregistration_failure_with_error_code_in_roaming_bool";
-// }
-// Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_BUNDLE[] = "registration_retry_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_MIN_COUNT_INT[] =
-        "registration_retry_min_count_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_SIP_305_CODE_POLICY_INT[] =
-        "registration_retry_sip_305_code_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_ERROR_CODE_WITHOUT_IPSEC_INT_ARRAY[] =
-        "registration_retry_error_code_without_ipsec_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_TIMER_F_POLICY_INT[] =
-        "registration_retry_timer_f_policy_int";
-const IMS_CHAR
-        CarrierConfig::Assets::KEY_REGISTRATION_RETRY_ERROR_CODE_WITH_DIFFERENT_PCSCF_INT_ARRAY[] =
-                "registration_retry_error_code_with_different_pcscf_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_WITH_IP_VERSION_FALLBACK_BOOL[] =
-        "registration_retry_with_ip_version_fallback_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_DEFAULT_POLICY_INT[] =
-        "registration_retry_default_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_SIP_503_CODE_POLICY_INT[] =
-        "registration_retry_sip_503_code_policy_int";
-// }
-// Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_BUNDLE[] =
-        "reregistration_retry_bundle";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
-                "reregistration_retry_error_code_with_initial_registration_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_EXPIRE_TIME_CHECKED_BOOL[] =
-        "reregistration_retry_expire_time_checked_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_MAX_COUNT_KEPT_REGISTRATION_INT[] =
-        "reregistration_retry_max_count_kept_registration_int";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_WITH_SAME_PCSCF_INT_ARRAY[] =
-                "reregistration_retry_error_code_with_initial_registration_with_same_pcscf_int_"
-                "array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_SIP_305_CODE_POLICY_INT[] =
-        "reregistration_retry_sip_305_code_policy_int";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE[] =

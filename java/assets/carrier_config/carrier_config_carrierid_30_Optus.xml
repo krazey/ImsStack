@@ -26,10 +26,8 @@
         <item value="403"/>
     </int-array>
     <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
-    <int name="registration_retry_default_policy_int" value="1"/>
-
-    <!-- KEY_REGISTRATION_RETRY_BUNDLE -->
-    <int-array name="registration_retry_error_code_with_different_pcscf_int_array" num="4">
+    <int name="reg_retry_default_policy_int" value="1"/>
+    <int-array name="reg_retry_err_code_with_diff_pcscf_int_array" num="4">
         <item value="403"/>
         <item value="500"/>
         <item value="503"/>
