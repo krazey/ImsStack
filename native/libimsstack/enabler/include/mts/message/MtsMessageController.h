@@ -17,15 +17,15 @@
 #ifndef MTS_MESSAGE_CONTROLLER_H_
 #define MTS_MESSAGE_CONTROLLER_H_
 
-#include "ICoreService.h"
+#include "IMtsServiceListener.h"
 #include "IPageMessageListener.h"
 #include "ImsActivityEx.h"
-#include "IuMts.h"
 #include "MtsDef.h"
-#include "MtsService.h"
 #include "message/IMtsErrorHandlerListener.h"
 
+class IMessage;
 class IMtsMessage;
+class IMtsService;
 class IPageMessage;
 class MtsDynamicLoader;
 class IMtsErrorHandler;
@@ -41,9 +41,6 @@ public:
             IN MtsDynamicLoader* pMtsDynamicLoader);
     ~MtsMessageController();
 
-    void TerminateAllPendingMessages(IN IMS_BOOL bIs1xCallTerm);
-    void TerminateAllPendingMessagesEx(IN IMS_UINT32 nReason);
-
     // IPageMessageListener
     void PageMessageDelivered(IN IPageMessage* piPageMessage) override;
     void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
@@ -51,7 +48,9 @@ public:
     // IMtsServiceListener
     void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
-    void NotifyMtSms(IN IPageMessage* piMessage) override;
+    void NotifyMtSms(IN IPageMessage* piPageMessage) override;
+    void OnDisconnected() override;
+    void OnSuspended() override;
 
     // IMtsErrorHandlerListener
     void NotifyControlAos(IMS_UINT32 nCommand) override;
@@ -93,8 +92,8 @@ private:
 
     void CleanMtsMessage(IN IMtsMessage* piMtsMessage);
     void CleanOperatorMtsMessage(IN IMS_SINT32 nMrOfRp);
-    void TerminateMessage(IN IMtsMessage* piMtsMessage, IN IMS_BOOL bIs1xCallTerm);
-    void TerminateMessageEx(IN IMtsMessage* piMtsMessage, IN IMS_UINT32 nReason);
+    void TerminateAllMessages();
+    void TerminateMessage(IN IMtsMessage* piMtsMessage);
 
     const AString& GetLastIpsmgwAddr();
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
@@ -122,8 +121,8 @@ private:
     IMS_UINT32 m_nCallTypeMsg;
     IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
-    IMSList<IMtsMessage*> m_objMsgList;
-    IMSList<IMtsMessage*> m_objRPAckedMsgs;
+    ImsList<IMtsMessage*> m_objMsgList;
+    ImsList<IMtsMessage*> m_objRPAckedMsgs;
     IMtsService* m_piMtsService;
     IMtsErrorHandler* m_piMtsErrorHandler;
     MtsDynamicLoader* m_pMtsDynamicLoader;

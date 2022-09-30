@@ -17,20 +17,46 @@
 #ifndef MTS_STRING_DEF_H_
 #define MTS_STRING_DEF_H_
 
-#include "IMSTypeDef.h"
+#include "IImsRadio.h"
+#include "INetworkWatcher.h"
+#include "IIpcan.h"
+#include "ImsTypeDef.h"
 #include "MtsDef.h"
 
 class MtsStringDef
 {
 public:
-    inline static const IMS_CHAR* PS_SmsFormatType(IN SmsFormatType eSmsFormat)
+    inline static const IMS_CHAR* PS_CallState(IN const IMS_UINT32 nState)
     {
-        switch (eSmsFormat)
+        switch (nState)
         {
-            case SmsFormatType::SMSFORMAT_3GPP:
-                return "3GPP";
-            case SmsFormatType::SMSFORMAT_3GPP2:
-                return "3GPP2";
+            case CALL_STATE_IDLE:
+                return "CALL_STATE_IDLE";
+            case CALL_STATE_TERMINATING:
+                return "CALL_STATE_TERMINATING";
+            case CALL_STATE_RINGBACK:
+                return "CALL_STATE_RINGBACK";
+            case CALL_STATE_RINGING:
+                return "CALL_STATE_RINGING";
+            case CALL_STATE_ALERTING:
+                return "CALL_STATE_ALERTING";
+            case CALL_STATE_OFFHOOK:
+                return "CALL_STATE_OFFHOOK";
+            default:
+                return "__INVALID__";
+        }
+    }
+
+    inline static const IMS_CHAR* PS_Ipcan(IN const IMS_UINT32 nIpcan)
+    {
+        switch (nIpcan)
+        {
+            case IIpcan::CATEGORY_MOBILE:
+                return "CATEGORY_MOBILE";
+            case IIpcan::CATEGORY_WLAN:
+                return "CATEGORY_WLAN";
+            case IIpcan::CATEGORY_ANY:
+                return "CATEGORY_ANY";
             default:
                 return "invalid";
         }
@@ -95,30 +121,98 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* PS_CallState(IN const IMS_UINT32 nState)
+    inline static const IMS_CHAR* PS_RadioTechType(IN IMS_SINT32 nRadioTechType)
     {
-        switch (nState)
+        switch (nRadioTechType)
         {
-            case CALL_STATE_IDLE:
-                return "CALL_STATE_IDLE";
-            case CALL_STATE_TERMINATING:
-                return "CALL_STATE_TERMINATING";
-            case CALL_STATE_RINGBACK:
-                return "CALL_STATE_RINGBACK";
-            case CALL_STATE_RINGING:
-                return "CALL_STATE_RINGING";
-            case CALL_STATE_ALERTING:
-                return "CALL_STATE_ALERTING";
-            case CALL_STATE_OFFHOOK:
-                return "CALL_STATE_OFFHOOK";
+            case INetworkWatcher::RADIOTECH_TYPE_INVALID:
+                return "INVALID";
+            case INetworkWatcher::RADIOTECH_TYPE_UNKNOWN:
+                return "UNKNOWN";
+            case INetworkWatcher::RADIOTECH_TYPE_GPRS:
+                return "GPRS";
+            case INetworkWatcher::RADIOTECH_TYPE_EDGE:
+                return "EDGE";
+            case INetworkWatcher::RADIOTECH_TYPE_UMTS:
+                return "UMTS";
+            case INetworkWatcher::RADIOTECH_TYPE_CDMA:
+                return "CDMA";
+            case INetworkWatcher::RADIOTECH_TYPE_EVDO_0:
+                return "EVDO_0";
+            case INetworkWatcher::RADIOTECH_TYPE_EVDO_A:
+                return "EVDO_A";
+            case INetworkWatcher::RADIOTECH_TYPE_1xRTT:
+                return "1xRTT";
+            case INetworkWatcher::RADIOTECH_TYPE_HSDPA:
+                return "HSDPA";
+            case INetworkWatcher::RADIOTECH_TYPE_HSUPA:
+                return "HSUPA";
+            case INetworkWatcher::RADIOTECH_TYPE_HSPA:
+                return "HSPA";
+            case INetworkWatcher::RADIOTECH_TYPE_IDEN:
+                return "IDEN";
+            case INetworkWatcher::RADIOTECH_TYPE_EVDO_B:
+                return "EVDO_B";
+            case INetworkWatcher::RADIOTECH_TYPE_LTE:
+                return "LTE";
+            case INetworkWatcher::RADIOTECH_TYPE_EHRPD:
+                return "EHRPD";
+            case INetworkWatcher::RADIOTECH_TYPE_HSPAP:
+                return "HSPAP";
+            case INetworkWatcher::RADIOTECH_TYPE_GSM:
+                return "GSM";
+            case INetworkWatcher::RADIOTECH_TYPE_TD_SCDMA:
+                return "TD_SCDMA";
+            case INetworkWatcher::RADIOTECH_TYPE_IWLAN:
+                return "IWLAN";
+            case INetworkWatcher::RADIOTECH_TYPE_LTE_CA:
+                return "LTE_CA";
+            case INetworkWatcher::RADIOTECH_TYPE_NR:
+                return "NR";
+            case INetworkWatcher::RADIOTECH_TYPE_MAX:
+                return "MAX";
             default:
-                return "__INVALID__";
+                return "invalid";
+        }
+    }
+
+    inline static const IMS_CHAR* PS_SmsFormatType(IN SmsFormatType eSmsFormat)
+    {
+        switch (eSmsFormat)
+        {
+            case SmsFormatType::SMSFORMAT_3GPP:
+                return "3GPP";
+            case SmsFormatType::SMSFORMAT_3GPP2:
+                return "3GPP2";
+            default:
+                return "invalid";
+        }
+    }
+
+    inline static const IMS_CHAR* PS_TrafficType(IN IMS_UINT32 nTrafficType)
+    {
+        switch (nTrafficType)
+        {
+            case IImsRadio::TRAFFIC_TYPE_SMS:
+                return "SMS";
+            case IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS:
+                return "EMERGENCY_SMS";
+            default:
+                return "invalid";
         }
     }
 };
 
-#ifndef PS_SmsFormatType
-#define PS_SmsFormatType(A) MtsStringDef::PS_SmsFormatType(A)
+#ifndef PS_CallState
+#define PS_CallState(A) MtsStringDef::PS_CallState(A)
+#endif
+
+#ifndef PS_Ipcan
+#define PS_Ipcan(A) MtsStringDef::PS_Ipcan(A)
+#endif
+
+#ifndef PS_MoStatus
+#define PS_MoStatus(A) MtsStringDef::PS_MoStatus(A)
 #endif
 
 #ifndef PS_MtiStringFrom3gpp
@@ -129,12 +223,16 @@ public:
 #define PS_MtiStringFrom3gpp2(A) MtsStringDef::PS_MtiStringFrom3gpp2(A)
 #endif
 
-#ifndef PS_MoStatus
-#define PS_MoStatus(A) MtsStringDef::PS_MoStatus(A)
+#ifndef PS_RadioTechType
+#define PS_RadioTechType(A) MtsStringDef::PS_RadioTechType(A)
 #endif
 
-#ifndef PS_CallState
-#define PS_CallState(A) MtsStringDef::PS_CallState(A)
+#ifndef PS_SmsFormatType
+#define PS_SmsFormatType(A) MtsStringDef::PS_SmsFormatType(A)
+#endif
+
+#ifndef PS_TrafficType
+#define PS_TrafficType(A) MtsStringDef::PS_TrafficType(A)
 #endif
 
 #endif

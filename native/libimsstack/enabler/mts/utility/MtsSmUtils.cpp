@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ImsStrLib.h"
+#include "ServiceTrace.h"
 #include "utility/MtsSmUtils.h"
 
 __IMS_TRACE_TAG_COM_MTS__;

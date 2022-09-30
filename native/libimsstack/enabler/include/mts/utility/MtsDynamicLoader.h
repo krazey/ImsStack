@@ -17,7 +17,6 @@
 #ifndef MTS_DYNAMIC_LOADER_
 #define MTS_DYNAMIC_LOADER_
 
-#include "MtsServiceState.h"
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
 #include "utility/MtsTimer.h"
@@ -30,7 +29,6 @@ public:
 
     void Initialize();
 
-    inline MtsServiceState* GetMtsServiceState() { return m_pMtsServiceState; }
     inline MtsSipFormUtils* GetMtsSipFormUtils() { return m_pMtsSipFormUtils; }
     inline MtsSmUtils* GetMtsSmUtils() { return m_pMtsSmUtils; }
     inline MtsTimer* GetMtsTimer() { return m_pMtsTimer; }
@@ -40,7 +38,6 @@ private:
 
 private:
     IMS_SINT32 m_nSlotId;
-    MtsServiceState* m_pMtsServiceState;
     MtsSipFormUtils* m_pMtsSipFormUtils;
     MtsSmUtils* m_pMtsSmUtils;
     MtsTimer* m_pMtsTimer;

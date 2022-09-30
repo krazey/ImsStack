@@ -17,9 +17,9 @@
 #ifndef MTS_TIMER_H_
 #define MTS_TIMER_H_
 
+#include "ITimer.h"
 #include "ImsMap.h"
 #include "MtsDef.h"
-#include "ServiceTimer.h"
 
 class MtsTimer : public ITimerListener
 {
@@ -28,7 +28,8 @@ public:
     virtual ~MtsTimer();
 
 public:
-    virtual void Timer_TimerExpired(IN ITimer* piExpiredTimer);
+    // ITimerListener implementation
+    void Timer_TimerExpired(IN ITimer* piExpiredTimer) override;
 
     void StartTimer(IN MtsTimerType eType, IN IMS_SINT32 nDuration);
     void StopTimer(IN MtsTimerType eType);
@@ -36,7 +37,7 @@ public:
     inline void SetListener(IN ITimerListener* piListener) { m_piTimerListener = piListener; }
 
 private:
-    IMSMap<MtsTimerType, ITimer*> m_objTimers;
+    ImsMap<MtsTimerType, ITimer*> m_objTimers;
     ITimerListener* m_piTimerListener;
 };
 

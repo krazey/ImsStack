@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include "MtsServiceState.h"
+#include "MtsDef.h"
 
 namespace android
 {

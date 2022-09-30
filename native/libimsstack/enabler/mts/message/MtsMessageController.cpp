@@ -17,9 +17,11 @@
 #include "ServiceConfig.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
+#include "SipAddress.h"
 #include "SipHeaderName.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
+#include "ICoreService.h"
 #include "IMessage.h"
 #include "ISipMessage.h"
 #include "ISipHeader.h"
@@ -28,6 +30,7 @@
 #include "IuMts.h"
 #include "MtsStringDef.h"
 #include "MtsService.h"
+#include "MtsServiceState.h"
 #include "message/IMtsMessage.h"
 #include "message/MtsErrorHandler.h"
 #include "message/MtsMessage.h"
@@ -44,8 +47,8 @@ MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService
         m_nCallTypeMsg(CALL_TYPE_CS),
         m_nSlotId(nSlotId),
         m_strLastRcvIpsmgwAddr(AString::ConstNull()),
-        m_objMsgList(IMSList<IMtsMessage*>()),
-        m_objRPAckedMsgs(IMSList<IMtsMessage*>()),
+        m_objMsgList(ImsList<IMtsMessage*>()),
+        m_objRPAckedMsgs(ImsList<IMtsMessage*>()),
         m_piMtsService(piMtsService),
         m_piMtsErrorHandler(IMS_NULL),
         m_pMtsDynamicLoader(pMtsDynamicLoader)
@@ -67,69 +70,6 @@ PUBLIC MtsMessageController::~MtsMessageController()
     delete m_piMtsErrorHandler;
 }
 
-PUBLIC void MtsMessageController::TerminateAllPendingMessages(IN IMS_BOOL bIs1xCallTerm)
-{
-    IMS_TRACE_I("TerminateAllPendingMessages : messageCount[%d]", m_objMsgList.GetSize(), 0, 0);
-
-    if (m_objMsgList.IsEmpty() == IMS_TRUE)
-    {
-        IMS_TRACE_I("Msg Size is NULL", 0, 0, 0);
-        return;
-    }
-
-    IMS_UINT32 nMsgSize = m_objMsgList.GetSize();
-
-    if (nMsgSize <= 0)
-    {
-        IMS_TRACE_I("Msg Size is NULL", 0, 0, 0);
-        m_bProcessingMsg = IMS_FALSE;
-        return;
-    }
-
-    for (IMS_UINT32 index = 0; index < nMsgSize; index++)
-    {
-        IMtsMessage* piMtsMessage = m_objMsgList.GetAt(index);
-        if (piMtsMessage != IMS_NULL)
-        {
-            TerminateMessage(piMtsMessage, bIs1xCallTerm);
-        }
-    }
-    m_objMsgList.Clear();
-
-    m_bProcessingMsg = IMS_FALSE;
-}
-
-PUBLIC void MtsMessageController::TerminateAllPendingMessagesEx(IN IMS_UINT32 nReason)
-{
-    IMS_TRACE_I("TerminateAllPendingMessagesEx : messageCount[%d]", m_objMsgList.GetSize(), 0, 0);
-
-    if (m_objMsgList.IsEmpty() == IMS_TRUE)
-    {
-        IMS_TRACE_I("Msg Size is NULL", 0, 0, 0);
-        return;
-    }
-
-    IMS_UINT32 nMsgSize = m_objMsgList.GetSize();
-
-    if (nMsgSize <= 0)
-    {
-        IMS_TRACE_I("Msg Size is NULL", 0, 0, 0);
-        return;
-    }
-
-    for (IMS_UINT32 index = 0; index < nMsgSize; index++)
-    {
-        IMtsMessage* piMtsMessage = m_objMsgList.GetAt(index);
-
-        if (piMtsMessage != IMS_NULL)
-        {
-            TerminateMessageEx(piMtsMessage, nReason);
-        }
-    }
-
-    m_objMsgList.Clear();
-}
-
 PUBLIC
 void MtsMessageController::PageMessageDelivered(IN IPageMessage* piPageMessage)
 {
@@ -142,7 +82,7 @@ void MtsMessageController::PageMessageDelivered(IN IPageMessage* piPageMessage)
         return;
     }
 
-    IMSList<IMessage*> objResponses =
+    ImsList<IMessage*> objResponses =
             piPageMessage->GetPreviousResponses(IMessage::PAGEMESSAGE_SEND);
     if (0 == objResponses.GetSize())
     {
@@ -198,7 +138,7 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
         return;
     }
 
-    IMSList<IMessage*> objResponses =
+    ImsList<IMessage*> objResponses =
             piPageMessage->GetPreviousResponses(IMessage::PAGEMESSAGE_SEND);
     if (objResponses.GetSize() == 0)
     {
@@ -246,11 +186,25 @@ PUBLIC void MtsMessageController::NotifyMoSms(IN SmsFormatType eSmsFormat,
     SendMtsMessage(eSmsFormat, objData, strAddress, nSeqId, bEmergency);
 }
 
-PUBLIC void MtsMessageController::NotifyMtSms(IN IPageMessage* piMessage)
+PUBLIC void MtsMessageController::NotifyMtSms(IN IPageMessage* piPageMessage)
 {
     IMS_TRACE_I("NotifyMtSms", 0, 0, 0);
 
-    ReceiveMtsMessage(piMessage, IMS_FALSE);
+    ReceiveMtsMessage(piPageMessage, IMS_FALSE);
+}
+
+PUBLIC void MtsMessageController::OnDisconnected()
+{
+    IMS_TRACE_I("OnDisconnected", 0, 0, 0);
+
+    TerminateAllMessages();
+}
+
+PUBLIC void MtsMessageController::OnSuspended()
+{
+    IMS_TRACE_I("OnSuspended", 0, 0, 0);
+
+    TerminateAllMessages();
 }
 
 PUBLIC void MtsMessageController::NotifyControlAos(IN IMS_UINT32 nCommand)
@@ -490,7 +444,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
 {
     IMS_TRACE_I("ReceiveMtsMessage : bEmergency[%s]", _TRACE_B_(bEmergency), 0, 0);
 
-    if (m_pMtsDynamicLoader->GetMtsServiceState()->IsMtServiceBlocked())
+    if (m_piMtsService->GetIMtsServiceState()->IsMtServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts is NOTREADY STATE", 0, 0, 0);
 
@@ -569,7 +523,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
     IMS_TRACE_I("SendMtsMessage : eSmsFormat[%s], nSeqId[%d], bEmergency[%s]",
             PS_SmsFormatType(eSmsFormat), nSeqId, _TRACE_B_(bEmergency));
 
-    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
+    IMtsServiceState* piMtsServiceState = m_piMtsService->GetIMtsServiceState();
     ICoreService* pMtsICoreService = m_piMtsService->GetICoreService(bEmergency);
     IMS_SINT32 nGsmMti = SMS_MTI_NONE;
     AString strDestination;
@@ -588,14 +542,14 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
         return;
     }
 
-    if (pMtsServiceState->IsMoServiceBlocked())
+    if (piMtsServiceState->IsMoServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts is not READY STATE ", 0, 0, 0);
         ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
         return;
     }
 
-    if (pMtsServiceState->IsTemporaryServiceBlocked())
+    if (piMtsServiceState->IsTemporaryServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts service is temporarily blocked", 0, 0, 0);
         ReportTransmissionResult(MO_IMS_LIMITEDSMSSVCREGI, eSmsFormat);
@@ -852,7 +806,7 @@ PRIVATE
 IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, OUT ByteArray& objSms)
 {
-    IMSList<IMessageBodyPart*> objMessageBodies = IMSList<IMessageBodyPart*>();
+    ImsList<IMessageBodyPart*> objMessageBodies = ImsList<IMessageBodyPart*>();
     SmsFormatType eContentSmsType = SmsFormatType::SMSFORMAT_INVALID;
     AString strTempSmsgw = AString::ConstNull();
 
@@ -876,7 +830,7 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         return IMS_FALSE;
     }
 
-    IMSList<AString> objSipToHeaderList = piMessage->GetHeaders("To");
+    ImsList<AString> objSipToHeaderList = piMessage->GetHeaders("To");
 
     if (objSipToHeaderList.GetSize() <= 0)
     {
@@ -1094,36 +1048,39 @@ void MtsMessageController::CleanOperatorMtsMessage(IMS_SINT32 nMrOfRp)
 }
 
 PRIVATE
-void MtsMessageController::TerminateMessage(IN IMtsMessage* piMtsMessage, IN IMS_BOOL bIs1xCallTerm)
+void MtsMessageController::TerminateAllMessages()
+{
+    IMS_TRACE_I("TerminateAllMessages : messageCount[%d]", m_objMsgList.GetSize(), 0, 0);
+
+    if (m_objMsgList.IsEmpty() == IMS_TRUE)
+    {
+        IMS_TRACE_I("Msg Size is NULL", 0, 0, 0);
+        return;
+    }
+
+    for (IMS_UINT32 index = 0; index < m_objMsgList.GetSize(); index++)
+    {
+        IMtsMessage* piMtsMessage = m_objMsgList.GetAt(index);
+        if (piMtsMessage != IMS_NULL)
+        {
+            TerminateMessage(piMtsMessage);
+        }
+    }
+    m_objMsgList.Clear();
+
+    m_bProcessingMsg = IMS_FALSE;
+}
+
+PRIVATE
+void MtsMessageController::TerminateMessage(IN IMtsMessage* piMtsMessage)
 {
     IMS_TRACE_I("TerminateMessage : Destroy MtsMessage", 0, 0, 0);
 
     if (piMtsMessage->GetTransactionType() != MtsTransactionType::MESSAGE_TYPE_RECEIVE)
     {
         // if it's a sending mo message, then report the permanent error
-        if (bIs1xCallTerm)
-        {
-            ReportTransmissionResult(
-                    MO_IMS_PERM_FAILURE, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
-        }
-        else
-        {
-            ReportTransmissionResult(
-                    MO_IMS_PERM_FAILURE, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
-        }
-    }
-
-    delete piMtsMessage;
-}
-
-PRIVATE
-void MtsMessageController::TerminateMessageEx(IN IMtsMessage* piMtsMessage, IN IMS_UINT32 nReason)
-{
-    IMS_TRACE_I("TerminateMessageEx : Destroy MtsMessage", 0, 0, 0);
-
-    if (piMtsMessage->GetTransactionType() != MtsTransactionType::MESSAGE_TYPE_RECEIVE)
-    {
-        ReportTransmissionResult(nReason, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
+        ReportTransmissionResult(
+                MO_IMS_PERM_FAILURE, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
     }
 
     delete piMtsMessage;
@@ -1170,7 +1127,7 @@ AString MtsMessageController::GetPreviousCallId(IN const ByteArray& objSms)
         {
             IMessage* piPrevMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
-            IMSList<AString> objCallId = piPrevMessage->GetHeaders("Call-ID");
+            ImsList<AString> objCallId = piPrevMessage->GetHeaders("Call-ID");
             if (!objCallId.IsEmpty())
             {
                 strCallId = objCallId.GetAt(0);
@@ -1184,7 +1141,7 @@ AString MtsMessageController::GetPreviousCallId(IN const ByteArray& objSms)
 PRIVATE
 IMS_SINT32 MtsMessageController::GetRetryAfterValue(IN IMessage* piMessage)
 {
-    IMSList<AString> objHeaderList = piMessage->GetHeaders(SipHeaderName::RETRY_AFTER);
+    ImsList<AString> objHeaderList = piMessage->GetHeaders(SipHeaderName::RETRY_AFTER);
 
     if (objHeaderList.IsEmpty())
     {
@@ -1224,7 +1181,7 @@ IMS_BOOL MtsMessageController::GetSmsgwFromReceivedMessage(
         return IMS_FALSE;
     }
 
-    IMSList<AString> objPAssrtIdHdrList = piPageMessage->GetRemoteUserId();
+    ImsList<AString> objPAssrtIdHdrList = piPageMessage->GetRemoteUserId();
 
     if (!objPAssrtIdHdrList.IsEmpty())
     {
@@ -1252,7 +1209,7 @@ IMS_BOOL MtsMessageController::GetSmsgwFromReceivedMessage(
         return IMS_FALSE;
     }
 
-    IMSList<AString> objFromHdrList = piMessage->GetHeaders(SipHeaderName::FROM);
+    ImsList<AString> objFromHdrList = piMessage->GetHeaders(SipHeaderName::FROM);
 
     if (objFromHdrList.IsEmpty())
     {
@@ -1340,7 +1297,7 @@ PRIVATE IMS_BOOL MtsMessageController::IsDeliverMessage(IN IPageMessage* piPageM
         return IMS_FALSE;
     }
 
-    IMSList<IMessageBodyPart*> objMessageBodies = piMessage->GetBodyParts();
+    ImsList<IMessageBodyPart*> objMessageBodies = piMessage->GetBodyParts();
 
     if (objMessageBodies.IsEmpty())
     {

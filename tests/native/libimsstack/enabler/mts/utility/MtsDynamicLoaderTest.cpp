@@ -38,12 +38,6 @@ TEST_F(MtsDynamicLoaderTest, Constructor)
     ASSERT_NE(pMtsDynamicLoader, nullptr);
 }
 
-TEST_F(MtsDynamicLoaderTest, CreateMtsServiceStateAfterInitialize)
-{
-    pMtsDynamicLoader->Initialize();
-    ASSERT_NE(pMtsDynamicLoader->GetMtsServiceState(), nullptr);
-}
-
 TEST_F(MtsDynamicLoaderTest, CreateMtsSipFormUtilsAfterInitialize)
 {
     pMtsDynamicLoader->Initialize();

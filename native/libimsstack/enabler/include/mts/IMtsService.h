@@ -22,23 +22,26 @@
 
 class ICoreService;
 class IMtsServiceListener;
+class IMtsServiceState;
 
 class IMtsService : public INativeEnabler
 {
 public:
     virtual ~IMtsService() {}
 
-    virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId) = 0;
-    virtual void SendMtResult(IN IMS_BOOL bMtResult) = 0;
-
     // MtsMessageController
     virtual ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const = 0;
+    virtual IMtsServiceState* GetIMtsServiceState() = 0;
     virtual void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId) = 0;
     virtual void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData) = 0;
-    virtual void SetListener(IN IMtsServiceListener* piMtsServiceListener) = 0;
     virtual void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) = 0;
+    virtual void SetListener(IN IMtsServiceListener* piMtsServiceListener) = 0;
+
+    // Jni I/F
+    virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId) = 0;
+    virtual void SendMtResult(IN IMS_BOOL bMtResult) = 0;
 };
 
 #endif

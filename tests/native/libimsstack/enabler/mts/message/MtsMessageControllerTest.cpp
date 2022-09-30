@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "ImsTypeDef.h"
 #include "../../include/mts/MockIMtsService.h"
+#include "../../include/mts/MockIMtsServiceState.h"
 #include "core/IPageMessage.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
@@ -41,22 +42,22 @@ class MtsMessageControllerTest : public ::testing::Test
 public:
     MtsMessageController* pMtsMessageController;
     MtsDynamicLoader* pMtsDynamicLoader;
-    MockIMtsService* pMtsService;
+    MockIMtsService* pMockMtsService;
 
 protected:
     virtual void SetUp() override
     {
+        pMockMtsService = new MockIMtsService();
         pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
         pMtsDynamicLoader->Initialize();
-        pMtsService = new MockIMtsService();
         pMtsMessageController =
-                new MtsMessageController(SLOT_ID, pMtsService, pMtsDynamicLoader);
+                new MtsMessageController(SLOT_ID, pMockMtsService, pMtsDynamicLoader);
     }
 
     virtual void TearDown() override
     {
+        delete pMockMtsService;
         delete pMtsDynamicLoader;
-        delete pMtsService;
         delete pMtsMessageController;
     }
 };
@@ -71,9 +72,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
     MockICoreService* pMockCoreService = new MockICoreService();
     MockIMessage* pMockMessage = new MockIMessage();
     MockIPageMessage* pMockPageMessage = new MockIPageMessage();
-    IMSList<IMessage*> objMessages;
+    MockIMtsServiceState* pMockMtsServiceState = new MockIMtsServiceState();
+    ImsList<IMessage*> objMessages;
     objMessages.Append(pMockMessage);
 
+    IMS_BOOL bEmergency = IMS_FALSE;
     AString strTargetAddress = "tel:+12345678901";
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
@@ -81,12 +84,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
-    IMS_BOOL bEmergency = IMS_FALSE;
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
-    pMtsDynamicLoader->GetMtsServiceState()->OnImsConnected();
-    pMtsDynamicLoader->GetMtsServiceState()->UpdateServiceState();
 
-    ON_CALL(*pMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
+    ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
+    ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
+    ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pMockMtsServiceState, IsTemporaryServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(*pMockCoreService, CreatePageMessage(_, _))
             .WillByDefault(Return(pMockPageMessage));
@@ -94,12 +96,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
     ON_CALL(*pMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(*pMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(*pMockPageMessage, SetListener(_)).WillByDefault(Return());
-
     ON_CALL(*pMockPageMessage, GetPreviousResponses(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(objMessages));
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_202));
 
-    EXPECT_CALL(*pMtsService,
+    EXPECT_CALL(*pMockMtsService,
             ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, RETRY_AFTER, SEQ_ID))
             .Times(1);
     pMtsMessageController->NotifyMoSms(
@@ -109,6 +110,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
     delete pMockCoreService;
     delete pMockMessage;
     delete pMockPageMessage;
+    delete pMockMtsServiceState;
 }
 
 TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
@@ -116,9 +118,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
     MockICoreService* pMockCoreService = new MockICoreService();
     MockIMessage* pMockMessage = new MockIMessage();
     MockIPageMessage* pMockPageMessage = new MockIPageMessage();
-    IMSList<IMessage*> objMessages;
+    MockIMtsServiceState* pMockMtsServiceState = new MockIMtsServiceState();
+    ImsList<IMessage*> objMessages;
     objMessages.Append(pMockMessage);
 
+    IMS_BOOL bEmergency = IMS_TRUE;
     AString strTargetAddress = "tel:+12345678901";
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
@@ -126,12 +130,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
-    IMS_BOOL bEmergency = IMS_TRUE;
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
-    pMtsDynamicLoader->GetMtsServiceState()->OnImsConnected();
-    pMtsDynamicLoader->GetMtsServiceState()->UpdateServiceState();
 
-    ON_CALL(*pMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
+    ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
+    ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
+    ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pMockMtsServiceState, IsTemporaryServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(*pMockCoreService, CreatePageMessage(_, _))
             .WillByDefault(Return(pMockPageMessage));
@@ -139,12 +142,11 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
     ON_CALL(*pMockMessage, AddHeader(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(*pMockPageMessage, Send(_, _)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(*pMockPageMessage, SetListener(_)).WillByDefault(Return());
-
     ON_CALL(*pMockPageMessage, GetPreviousResponses(IMessage::PAGEMESSAGE_SEND))
             .WillByDefault(Return(objMessages));
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_202));
 
-    EXPECT_CALL(*pMtsService,
+    EXPECT_CALL(*pMockMtsService,
             ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, RETRY_AFTER, SEQ_ID))
             .Times(1);
     pMtsMessageController->NotifyMoSms(
@@ -154,6 +156,7 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
     delete pMockCoreService;
     delete pMockMessage;
     delete pMockPageMessage;
+    delete pMockMtsServiceState;
 }
 
 TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
@@ -162,7 +165,8 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     MockIMessage* pMockMessage = new MockIMessage();
     MockIMessageBodyPart* pMockMessageBodyPart = new MockIMessageBodyPart();
     MockIPageMessage* pMockPageMessage = new MockIPageMessage();
-    IMSList<IMessage*> objMessages;
+    MockIMtsServiceState* pMockMtsServiceState = new MockIMtsServiceState();
+    ImsList<IMessage*> objMessages;
     objMessages.Append(pMockMessage);
 
     IMS_BOOL bEmergency = IMS_FALSE;
@@ -171,8 +175,8 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
     AString strHeaders = "<sip:+12345678901@ims.google.com>,<sip:+12345678902@ims.google.com>";
-    IMSList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
-    IMSList<IMessageBodyPart*> objMessageBodies = IMSList<IMessageBodyPart*>();
+    ImsList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
+    ImsList<IMessageBodyPart*> objMessageBodies = ImsList<IMessageBodyPart*>();
     objMessageBodies.Append(pMockMessageBodyPart);
 
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
@@ -183,11 +187,11 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     objRpData.Append((IMS_BYTE)0x02);    // message reference
     objRpData.Append((IMS_BYTE)0x0F);    // other required information elements
 
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
-    pMtsDynamicLoader->GetMtsServiceState()->OnImsConnected();
-    pMtsDynamicLoader->GetMtsServiceState()->UpdateServiceState();
-
-    ON_CALL(*pMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
+    ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
+    ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
+    ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pMockMtsServiceState, IsTemporaryServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(*pMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(pMockPageMessage));
     ON_CALL(*pMockPageMessage, GetNextRequest()).WillByDefault(Return(pMockMessage));
@@ -204,20 +208,21 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     ON_CALL(*pMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(*pMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
-    EXPECT_CALL(*pMtsService,
+    EXPECT_CALL(*pMockMtsService,
             ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, RETRY_AFTER, SEQ_ID))
             .Times(1);
     pMtsMessageController->NotifyMoSms(
             SmsFormatType::SMSFORMAT_3GPP, objRpData, strTargetAddress, SEQ_ID, bEmergency);
     pMtsMessageController->PageMessageDelivered(pMockPageMessage);
 
-    EXPECT_CALL(*pMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
+    EXPECT_CALL(*pMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
     pMtsMessageController->NotifyMtSms(pMockPageMessage);
 
     delete pMockCoreService;
     delete pMockMessage;
     delete pMockMessageBodyPart;
     delete pMockPageMessage;
+    delete pMockMtsServiceState;
 }
 
 TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
@@ -226,7 +231,8 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
     MockIMessage* pMockMessage = new MockIMessage();
     MockIMessageBodyPart* pMockMessageBodyPart = new MockIMessageBodyPart();
     MockIPageMessage* pMockPageMessage = new MockIPageMessage();
-    IMSList<IMessage*> objMessages;
+    MockIMtsServiceState* pMockMtsServiceState = new MockIMtsServiceState();
+    ImsList<IMessage*> objMessages;
     objMessages.Append(pMockMessage);
 
     IMS_BOOL bEmergency = IMS_FALSE;
@@ -235,8 +241,8 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
     SipAddress objSipAddress;
     objSipAddress.Create(strTargetAddress);
     AString strHeaders = "<sip:+12345678901@ims.google.com>,<sip:+12345678902@ims.google.com>";
-    IMSList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
-    IMSList<IMessageBodyPart*> objMessageBodies = IMSList<IMessageBodyPart*>();
+    ImsList<AString> objHeaders = strHeaders.Split(TextParser::CHAR_COMMA);
+    ImsList<IMessageBodyPart*> objMessageBodies = ImsList<IMessageBodyPart*>();
     objMessageBodies.Append(pMockMessageBodyPart);
 
     ByteArray objRpData((IMS_BYTE)0x01);  // message type indicator(RP-MT-DATA)
@@ -247,11 +253,11 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
     objRpAck.Append((IMS_BYTE)0x03);     // message reference
     objRpAck.Append((IMS_BYTE)0x0F);     // other required information elements
 
-    pMtsDynamicLoader->GetMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
-    pMtsDynamicLoader->GetMtsServiceState()->OnImsConnected();
-    pMtsDynamicLoader->GetMtsServiceState()->UpdateServiceState();
-
-    ON_CALL(*pMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
+    ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
+    ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
+    ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pMockMtsServiceState, IsTemporaryServiceBlocked()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pMockMtsServiceState, IsMtServiceBlocked()).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockCoreService, CreatePageMessage(_, _)).WillByDefault(Return(pMockPageMessage));
     ON_CALL(*pMockCoreService, GetAuthorizedUserId()).WillByDefault(ReturnRef(objSipAddress));
     ON_CALL(*pMockPageMessage, GetNextRequest()).WillByDefault(Return(pMockMessage));
@@ -266,10 +272,10 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
     ON_CALL(*pMockMessageBodyPart, GetHeader(_)).WillByDefault(Return(strContentType));
     ON_CALL(*pMockMessageBodyPart, GetContent()).WillByDefault(ReturnRef(objRpData));
 
-    EXPECT_CALL(*pMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
+    EXPECT_CALL(*pMockMtsService, ReportMtSms(SmsFormatType::SMSFORMAT_3GPP, _)).Times(1);
     pMtsMessageController->NotifyMtSms(pMockPageMessage);
 
-    EXPECT_CALL(*pMtsService,
+    EXPECT_CALL(*pMockMtsService,
             ReportMoStatus(MO_SUCCESS, SmsFormatType::SMSFORMAT_3GPP, RETRY_AFTER, SEQ_ID))
             .Times(1);
     pMtsMessageController->NotifyMoSms(
@@ -280,6 +286,7 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
     delete pMockMessage;
     delete pMockMessageBodyPart;
     delete pMockPageMessage;
+    delete pMockMtsServiceState;
 }
 
 }  // namespace android

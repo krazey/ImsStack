@@ -17,60 +17,79 @@
 #ifndef MTS_SERVICESTATE_H_
 #define MTS_SERVICESTATE_H_
 
-#include "IMSTypeDef.h"
-#include "message/MtsMessageController.h"
+#include "IMtsServiceState.h"
+#include "ITimer.h"
 
-class MtsServiceState final
+class IImsRadio;
+
+class MtsServiceState final : public IMtsServiceState, public ITimerListener
 {
 public:
     MtsServiceState(IN IMS_SINT32 nSlotId);
     ~MtsServiceState();
 
-    void SetImsRegConnected(IN IMS_BOOL bConnected);
-    void SetImsRegConnected(IN IMS_BOOL bConnected, IMS_BOOL bIsEmergencyType);
-    void SetImsSuspendState(IN IMS_BOOL bState);
-    void SetSmsOverIpState(IN IMS_BOOL bState);
-    void SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked);
-    void SetMtsMessageController(IN MtsMessageController* pMtsMessageController);
-    void SetMtsServiceState(IN IMS_SINT32 nServiceState);
-    void SetConnectedServices(IN IMS_UINT32 nServices);
-
     inline IMS_UINT32 GetConnectedServices() const { return m_nConnectedServices; }
-    inline IMS_BOOL GetImsRegState() const { return m_bIsImsConnected; }
-    inline IMS_BOOL GetImsRegMod() const { return m_bIsAosRegModAdmin; }
-    inline IMS_BOOL GetImsSuspendState() const { return m_bIsImsSuspend; }
+    inline IMS_BOOL GetImsRegState() const { return m_bImsConnected; }
+    inline IMS_BOOL GetImsRegMod() const { return m_bAosRegModAdmin; }
+    inline IMS_BOOL GetImsSuspendState() const { return m_bImsSuspend; }
     inline IMS_SINT32 GetMtsServiceState() const { return m_nMtsServiceState; }
     inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }
-    inline IMS_BOOL GetSmsOverIpState() const { return m_bIsSmsOverIpConf; }
+    inline IMS_BOOL GetSmsOverIpState() const { return m_bSmsOverIpConf; }
 
-    IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService);
-
-    void OnImsConnected();
-    void OnImsDisconnected(IN IMS_UINT32 nReason);
-    void OnImsDisconnecting(IN IMS_UINT32 nReason);
-    void OnImsSuspended(IN IMS_UINT32 nReason);
-    void OnImsResumed();
-    void NotifySpecificMessage(IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
-
-    IMS_SINT32 GetServiceState();
     void UpdateServiceState();
-    IMS_BOOL IsMoServiceBlocked();
-    IMS_BOOL IsMtServiceBlocked();
-    IMS_BOOL IsTemporaryServiceBlocked();
+
+    // IMtsServiceState
+    IMS_BOOL IsMoServiceBlocked() const override;
+    IMS_BOOL IsMtServiceBlocked() const override;
+    IMS_BOOL IsTemporaryServiceBlocked() const override;
+    IMS_BOOL IsImsTrafficAllowed(IN IMS_UINT32 nTrafficType) override;
+    void StartImsTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
+            IN IImsRadioConnectionListener* piListener) override;
+    void TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason) override;
+    void AddListenerForTrafficPriority(IN IImsRadioTrafficPriorityListener* piListener) override;
+    void RemoveListenerForTrafficPriority(
+            IN IImsRadioTrafficPriorityListener* piListener) override;
+    void StartRadioGuardTimer(IN IMS_UINT32 nTrafficType);
+    IMS_BOOL IsRadioGuardTimerActive(IN IMS_UINT32 nTrafficType);
+
+    IMS_SINT32 GetServiceState() override;
+    IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService) override;
+    void NotifySpecificMessage(
+            IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam) override;
+    void OnImsConnected() override;
+    void OnImsDisconnected(IN IMS_UINT32 nReason) override;
+    void OnImsDisconnecting(IN IMS_UINT32 nReason) override;
+    void OnImsSuspended(IN IMS_UINT32 nReason) override;
+    void OnImsResumed() override;
+    void SetConnectedServices(IN IMS_UINT32 nServices) override;
+    void SetImsRegConnected(IN IMS_BOOL bConnected) override;
+    void SetSmsOverIpState(IN IMS_BOOL bState) override;
+
+    // ITmerListener
+    void Timer_TimerExpired(IN ITimer* piTimer);
 
 private:
-    IMS_SINT32 m_nMtsServiceState;
+    void Init();
+    void DeInit();
+    void SetImsSuspendState(IN IMS_BOOL bState);
+    void SetMtsServiceState(IN IMS_SINT32 nServiceState);
+    void SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked);
+    void StopImsTraffic(IN IMS_UINT32 nTrafficType);
+    void StopRadioGuardTimer(IN ITimer* piTimer);
 
+    IMS_SINT32 m_nMtsServiceState;
     // Check Condition for SMS SERVICE MODE
-    IMS_BOOL m_bIsImsConnected;    // if Connected true enable sms mo/mt service.
-    IMS_BOOL m_bIsAosRegModAdmin;  // if Mod Admin true. block mo service.
-    IMS_BOOL m_bIsImsSuspend;      // if IMSAoSApp_IMSSuspended true. block mo service
+    IMS_BOOL m_bImsConnected;    // if Connected true enable sms mo/mt service.
+    IMS_BOOL m_bAosRegModAdmin;  // if Mod Admin true. block mo service.
+    IMS_BOOL m_bImsSuspend;      // if IMSAoSApp_IMSSuspended true. block mo service
     // if sms_over_ip_network Ind is false. block mo service
-    IMS_BOOL m_bIsSmsOverIpConf;
-    IMS_BOOL m_bIsTemporaryBlocked;
+    IMS_BOOL m_bSmsOverIpConf;
+    IMS_BOOL m_bTemporaryBlocked;
     IMS_UINT32 m_nConnectedServices;
     IMS_SINT32 m_nSlotId;
-    MtsMessageController* m_pMtsMessageController;
+    IImsRadio* m_piImsRadio;
+    ITimer* m_piEmergencyRadioGuardTimer;
+    ITimer* m_piRadioGuardTimer;
 };
 
 #endif

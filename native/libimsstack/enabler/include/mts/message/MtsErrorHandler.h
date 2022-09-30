@@ -19,6 +19,8 @@
 
 #include "message/IMtsErrorHandler.h"
 
+class ICarrierConfig;
+
 class MtsErrorHandler final : public IMtsErrorHandler
 {
 public:
