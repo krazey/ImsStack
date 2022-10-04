@@ -47,11 +47,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
 @RunWith(JUnit4.class)
 public class SmsTransferLayerTest {
     private static final String TAG = "[GII-SmsTL Test] ";
     //For status result not applicable
     private static final int STATUS_RESULT_NA = 0;
+
     @Mock ImsCallContext mImsCallContext;
     @Mock SmsTransferLayer.Listener mListener;
     @Mock SmsRelayLayer mSmsRL;
@@ -87,27 +89,34 @@ public class SmsTransferLayerTest {
     private HandlerThread mHt;
     private boolean mReady = false;
     private Object mLock = new Object();
+
     @Before
     public void setUp() throws Exception {
-        mImsCallContext = Mockito.mock(ImsCallContext.class);
         MockitoAnnotations.initMocks(this);
+
         when(mImsCallContext.getUsatInterface()).thenReturn(mMockUsatInterface);
         when(mMockUsatInterface.createMoSmsControlCommand(anyString(), anyString(), anyInt(),
                 any())).thenReturn(mMoSmsCCmd);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
-        mSmsRL = Mockito.mock(SmsRelayLayer.class);
+
         mSmsTransferLayer = new TestSmsTransferLayer(mImsCallContext, mSmsRL);
-        mListener = Mockito.mock(SmsTransferLayer.Listener.class);
         mSmsTransferLayer.setListener(mListener);
     }
+
+    @After
+    public void tearDown() throws Exception {
+        mSmsTransferLayer = null;
+    }
+
     private SmsRelayLayer.Listener setupListener() {
         ArgumentCaptor<SmsRelayLayer.Listener> callbackArg =
                 ArgumentCaptor.forClass(SmsRelayLayer.Listener.class);
         verify(mSmsRL).setListener(callbackArg.capture());
-        SmsRelayLayer.Listener mListener = callbackArg.getValue();
-        assertNotNull(mListener);
-        return mListener;
+        SmsRelayLayer.Listener listener = callbackArg.getValue();
+        assertNotNull(listener);
+        return listener;
     }
+
     @Test
     public void test_sendMoTPdu() {
         assertEquals(SmsUtils.RESULT_SUCCESS, mSmsTransferLayer.sendMoTPdu(mToken,
@@ -117,6 +126,7 @@ public class SmsTransferLayerTest {
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_ACK), eq(mSmsc), eq(null),
                 eq(mPdu), eq(1));
     }
+
     @Test
     public void test_sendMoTPdu_USAT_RESULT_ALLOWED() {
         when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)).thenReturn(true);
@@ -231,6 +241,7 @@ public class SmsTransferLayerTest {
         byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(null);
         assertEquals(newCdmaPdu.length, 0);
     }
+
     @Test
     public void testCdmaPduGenerate() {
         String pduString = "0000021002020702A848D159E24006010008"
@@ -240,6 +251,7 @@ public class SmsTransferLayerTest {
         byte[] newCdmaPdu = mSmsTransferLayer.generateCdmaPdu(pdu);
         assertTrue((newCdmaPdu.length > 0) ? true : false);
     }
+
     @Test
     public void test_sendMoTPduSuccess() {
         int successCause = 0;
@@ -263,6 +275,7 @@ public class SmsTransferLayerTest {
         verify(mSmsRL, timeout(1000).times(1)).sendRPMessage(eq(4), eq(mRpMessageType), eq(mSmsc),
                 eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
     }
+
     private class TestSmsTransferLayer extends SmsTransferLayer {
         TestSmsTransferLayer(ImsCallContext callContext, SmsRelayLayer smsRL) {
             super(callContext, smsRL);
@@ -271,12 +284,14 @@ public class SmsTransferLayerTest {
             return mSmsRLListener;
         }
     }
+
     @Test
     public void test_sendMoTPduFailure() {
         mSmsTransferLayer.sendMoTPdu(mToken, mSmsFormat, mMessageRef, mSmsc, mTpdu);
         int result = mSmsTransferLayer.sendMoTPdu(mToken, mSmsFormat, mMessageRef, mSmsc, mTpdu);
         assertEquals(SmsUtils.SMSTL_RESULT_DUPLICATE_TOKEN, result);
     }
+
     @Test
     public void test_sendReportTPdu() {
         mSmsTransferLayer.sendReportTPdu(mToken, mTlMessageType, mMessageRef, mResult);
@@ -290,6 +305,7 @@ public class SmsTransferLayerTest {
         mListener.notifySmsReceived(mToken, mSmsFormat, mRpMessageType, mPdu);
         verify(mListener).notifySmsReceived(mToken, mSmsFormat, mRpMessageType, mPdu);
     }
+
     @Test
     public void test_notifyRLDataIndication_3GPP2() {
         String pduString = "0000021002020702A848D159E24006010008"
@@ -303,6 +319,7 @@ public class SmsTransferLayerTest {
         verify(mListener).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
                                             eq(SmsUtils.TP_SMS_DELIVER), eq(newCdmaPdu));
     }
+
     @Test
     public void test_notifyRLDataIndication_3GPP2_Failure() {
         //2nd byte of Pdu String has been modified with Invalid parameter ID
@@ -318,6 +335,7 @@ public class SmsTransferLayerTest {
         verify(mListener, times(0)).notifySmsReceived(eq(mToken), eq(SmsUtils.FORMAT_INT_3GPP2),
                                             eq(SmsUtils.TP_SMS_DELIVER), eq(newCdmaPdu));
     }
+
     @Test
     public void test_notifyRLReportIndication() {
         mListener.notifySmsResult(mToken, 1, mResult, mReason, 0);
@@ -357,13 +375,13 @@ public class SmsTransferLayerTest {
             assertEquals(expectedDeliverRequestNotSupportedReport[i],
                     actualDeliverRequestNotSupportedReport[i]);
         }
-    }
 
-    @After
-    public void tearDown() throws Exception {
-        mImsCallContext = null;
-        mSmsRL = null;
-        mSmsTransferLayer = null;
-        mListener = null;
+        //Invalid case i.e. default
+        byte[] expectedDeliver = {0x00,
+                (byte) SmsTransferLayer.TP_FCS_UNSPECIFIED_ERROR_CAUSE, 0x00};
+        byte[] actualDeliver = mSmsTransferLayer.generateDeliverReportPdu(0);
+        for (int i = 0; i < expectedDeliver.length; i++) {
+            assertEquals(expectedDeliver[i], actualDeliver[i]);
+        }
     }
 }

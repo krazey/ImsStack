@@ -147,11 +147,7 @@ public class SmsTransferLayer {
         mCallContext = callContext;
         mSmsHandlerThread.start();
         mSmsHandler = new MessageHandler(mSmsHandlerThread.getLooper());
-        if (smsRL == null) {
-            mSmsRL = new SmsRelayLayer(mCallContext);
-        } else {
-            mSmsRL = smsRL;
-        }
+        mSmsRL = smsRL;
         if (mSmsRL != null) {
             mSmsRL.setListener(mSmsRLListener);
         }
