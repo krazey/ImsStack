@@ -220,14 +220,14 @@ public class AcServiceImpl {
     private ProvisioningData mProvisioningData;
     private AcServiceClientInfo mAcServiceClientInfo;
     private RequestInfo mRequestInfo;
+    private ReconfigManager mReconfigManager;
 
     private int mState;
 
     @VisibleForTesting
     public AcServiceImpl(int slotId, int subId, Context context, Looper looper,
-            ProvisioningData provisioningData,
-            CallbackManager callbackManager,
-            ConfigContainer configContainer) {
+            ProvisioningData provisioningData, CallbackManager callbackManager,
+            ConfigContainer configContainer, ReconfigManager reconfigManager) {
         mSlotId = slotId;
         mSubId = subId;
         mContext = context;
@@ -236,6 +236,7 @@ public class AcServiceImpl {
         mProvisioningData = provisioningData;
         mCallbackManager = callbackManager;
         mConfigContainer = configContainer;
+        mReconfigManager = reconfigManager;
 
         mState = AcService.STATE_TYPE_NONE;
     }
@@ -261,6 +262,7 @@ public class AcServiceImpl {
         mProvisioningData = new ProvisioningData(mContext, mSubId);
         mCallbackManager = new CallbackManager(mSlotId, mSubId);
         mConfigContainer = new ConfigContainer(context, mSlotId, mSubId);
+        mReconfigManager = new ReconfigManager(mSlotId, mHandler);
 
         mState = AcService.STATE_TYPE_NONE;
     }

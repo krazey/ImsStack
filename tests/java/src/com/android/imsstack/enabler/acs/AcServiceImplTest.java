@@ -45,6 +45,7 @@ import com.android.imsstack.enabler.acs.impl.CallbackManager;
 import com.android.imsstack.enabler.acs.impl.ConfigContainer;
 import com.android.imsstack.enabler.acs.impl.IAcServiceImplCallback;
 import com.android.imsstack.enabler.acs.impl.ProvisioningData;
+import com.android.imsstack.enabler.acs.impl.ReconfigManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -158,6 +159,7 @@ public class AcServiceImplTest {
     @Mock ProvisioningData mProvisioningData;
     @Mock CallbackManager mCallbackManager;
     @Mock ConfigContainer mConfigContainer;
+    @Mock ReconfigManager mReconfigManager;
     @Mock IAcServiceImplCallback mIAcServiceImplCallback;
 
     private Handler mHandler;
@@ -303,7 +305,7 @@ public class AcServiceImplTest {
 
     private AcServiceImpl createTarget(int slotId, int subId) {
         return new AcServiceImpl(slotId, subId, mContext, mHandlerThread.getLooper(),
-                mProvisioningData, mCallbackManager, mConfigContainer);
+                mProvisioningData, mCallbackManager, mConfigContainer, mReconfigManager);
     }
 
     private void processAllMessages() {

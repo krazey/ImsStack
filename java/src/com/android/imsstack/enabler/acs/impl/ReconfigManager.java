@@ -53,7 +53,6 @@ public class ReconfigManager {
 
     /**
      * create instance
-     * @param context Context
      * @param slotId SIM slot ID or Phone ID
      * @param handler Handler object
      */
