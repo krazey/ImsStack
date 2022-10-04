@@ -23,6 +23,7 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
+import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,8 +43,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     private int mToken = 1;
     private int mMessageRef = 1;
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
-    private byte[] mPdu = {21, 11, (byte) 0x0A, 81, 78, 56, 34, 12, 10, 00, 00, 06, 66, (byte) 0xB2,
-            99, (byte) 0x6C, 26, 03};
+    private byte[] mPdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
 
     @Before
     public void setUp() throws Exception {
