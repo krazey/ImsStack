@@ -64,7 +64,7 @@ protected:
         ON_CALL(objMtcSession, GetISession())
                 .WillByDefault(ReturnRef(objSession));
 
-        pUpdatingInfo = new UpdatingInfo();
+        pUpdatingInfo = new UpdatingInfo(objContext);
         ON_CALL(objContext, GetUpdatingInfo)
                 .WillByDefault(ReturnRef(*pUpdatingInfo));
 

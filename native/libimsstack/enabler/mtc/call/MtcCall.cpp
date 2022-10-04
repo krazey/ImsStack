@@ -487,7 +487,7 @@ PUBLIC VIRTUAL UpdatingInfo& MtcCall::GetUpdatingInfo()
 {
     if (m_pUpdatingInfo == IMS_NULL)
     {
-        m_pUpdatingInfo = new UpdatingInfo();
+        m_pUpdatingInfo = new UpdatingInfo(*this);
     }
 
     return *m_pUpdatingInfo;

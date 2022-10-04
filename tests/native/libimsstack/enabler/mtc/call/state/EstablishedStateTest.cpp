@@ -122,7 +122,7 @@ TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
     MockIMessage* piMessage = new MockIMessage();
     ON_CALL(objMockISession, GetPreviousRequest(_)).WillByDefault(Return(piMessage));
 
-    UpdatingInfo* pUpdatingInfo = new UpdatingInfo();
+    UpdatingInfo* pUpdatingInfo = new UpdatingInfo(objMockCallContext);
     ON_CALL(objMockCallContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
 
     MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objMockCallContext);

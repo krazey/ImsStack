@@ -18,369 +18,388 @@
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/UpdatingInfo.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
+#include "media/MockIMtcMediaManager.h"
+#include "core/MockISession.h"
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 class UpdatingInfoTest : public ::testing::Test
 {
 public:
-    UpdatingInfo objUpdatingInfo;
+    MockIMtcCallContext objCallContext;
+    MockIMtcSession objSession;
+    MockIMtcMediaManager objMediaManager;
+    MockISession objISession;
+    UpdatingInfo* pUpdatingInfo;
 
 protected:
-    virtual void SetUp() override {}
-    virtual void TearDown() override {}
+    virtual void SetUp() override
+    {
+        ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objSession));
+        ON_CALL(objSession, GetISession()).WillByDefault(ReturnRef(objISession));
+        ON_CALL(objCallContext, GetMediaManager()).WillByDefault(ReturnRef(objMediaManager));
+        pUpdatingInfo = new UpdatingInfo(objCallContext);
+    }
+
+    virtual void TearDown() override { delete pUpdatingInfo; }
 };
 
 TEST_F(UpdatingInfoTest, GetTargetCallTypeReturnsUnknownInitially)
 {
-    EXPECT_EQ(CallType::UNKNOWN, objUpdatingInfo.GetTargetCallType());
+    EXPECT_EQ(CallType::UNKNOWN, pUpdatingInfo->GetTargetCallType());
 }
 
 TEST_F(UpdatingInfoTest, GetTargetCallTypeReturnsSetValue)
 {
     CallType eCallType = CallType::VOIP;
 
-    objUpdatingInfo.SetTargetCallType(eCallType);
+    pUpdatingInfo->SetTargetCallType(eCallType);
 
-    EXPECT_EQ(eCallType, objUpdatingInfo.GetTargetCallType());
+    EXPECT_EQ(eCallType, pUpdatingInfo->GetTargetCallType());
 }
 
 TEST_F(UpdatingInfoTest, GetModifyingInfoReturnsNotNull)
 {
-    EXPECT_NE(nullptr, &objUpdatingInfo.GetModifyingInfo());
+    EXPECT_NE(nullptr, &pUpdatingInfo->GetModifyingInfo());
 }
 
 TEST_F(UpdatingInfoTest, GetAlertingInfoReturnsNotNull)
 {
-    EXPECT_NE(nullptr, &objUpdatingInfo.GetAlertingInfo());
+    EXPECT_NE(nullptr, &pUpdatingInfo->GetAlertingInfo());
 }
 
 TEST_F(UpdatingInfoTest, GetModifiedInfoReturnsNotNull)
 {
-    EXPECT_NE(nullptr, &objUpdatingInfo.GetModifiedInfo());
+    EXPECT_NE(nullptr, &pUpdatingInfo->GetModifiedInfo());
 }
 
 TEST_F(UpdatingInfoTest, IsModifierReturnsFalseInitially)
 {
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsModifier());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsModifier());
 }
 
 TEST_F(UpdatingInfoTest, IsModifierReturnsTrueAfterSet)
 {
-    objUpdatingInfo.SetModifier();
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsModifier());
+    pUpdatingInfo->SetModifier();
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsModifier());
 }
 
 TEST_F(UpdatingInfoTest, IsAlertedReturnsFalseInitially)
 {
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsAlerted());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsAlerted());
 }
 
 TEST_F(UpdatingInfoTest, IsAlertedReturnsTrueAfterSet)
 {
-    objUpdatingInfo.SetAlerted();
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsAlerted());
+    pUpdatingInfo->SetAlerted();
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsAlerted());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToHeld)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
     objModifyingInfo.eADir = DIRECTION_SEND;
 
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToInactive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
     objModifyingInfo.eADir = DIRECTION_INACTIVE;
 
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingReceiveToInactive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_RECEIVE;
     objModifyingInfo.eADir = DIRECTION_INACTIVE;
 
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendReceiveToReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
     objModifiedInfo.eADir = DIRECTION_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendReceiveToInactive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objModifyingInfo.eADir = DIRECTION_INVALID;
 
     objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
     objModifiedInfo.eADir = DIRECTION_INACTIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendToInactive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_SEND;
     objModifiedInfo.eADir = DIRECTION_INACTIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendReceiveToReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     objModifiedInfo.eADir = DIRECTION_INVALID;
 
     objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
     objAlertingInfo.eADir = DIRECTION_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendReceiveToInactive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objModifiedInfo.eADir = DIRECTION_INVALID;
     objModifyingInfo.eADir = DIRECTION_INVALID;
 
     objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
     objAlertingInfo.eADir = DIRECTION_INACTIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendToInactive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     objModifiedInfo.eADir = DIRECTION_INVALID;
 
     objNegotiatedInfo.eADir = DIRECTION_SEND;
     objAlertingInfo.eADir = DIRECTION_INACTIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendToSendReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_SEND;
     objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingInactiveToReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
     objModifyingInfo.eADir = DIRECTION_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingInactiveToSendReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
     objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumedBy());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedReceiveToSendReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
     objModifiedInfo.eADir = DIRECTION_SEND_RECEIVE;
     objNegotiatedInfo.eADir = DIRECTION_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedInactiveToSend)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
     objModifiedInfo.eADir = DIRECTION_SEND;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedInactiveToSendReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objModifyingInfo.eADir = DIRECTION_INVALID;
 
     objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
     objModifiedInfo.eADir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingReceiveToSendReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     objModifiedInfo.eADir = DIRECTION_INVALID;
 
     objNegotiatedInfo.eADir = DIRECTION_RECEIVE;
     objAlertingInfo.eADir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSend)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     objModifiedInfo.eADir = DIRECTION_INVALID;
 
     objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
     objAlertingInfo.eADir = DIRECTION_SEND;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSendReceive)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+    MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objModifiedInfo.eADir = DIRECTION_INVALID;
     objModifyingInfo.eADir = DIRECTION_INVALID;
 
     objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
     objAlertingInfo.eADir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeld());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsHeldBy());
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsResumed());
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsResumedBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsResumed());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsResumedBy());
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfVideoDirectionIsChanging)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
 
     // Not (IsHeldBy() || IsResumedBy())
     objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
@@ -389,205 +408,142 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfVideoDirectionIsChanging)
     objNegotiatedInfo.eVDir = DIRECTION_SEND;
     objAlertingInfo.eVDir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
 }
 
-TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfTextDirectionIsChanging)
+TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoDirectionIsNotChanging)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
-
-    // Not (IsHeldBy() || IsResumedBy())
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
-
-    objNegotiatedInfo.eTDir = DIRECTION_SEND;
-    objAlertingInfo.eTDir = DIRECTION_SEND_RECEIVE;
-
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsNeedToAlert());
-}
-
-TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoTextDirectionIsNotChanging)
-{
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
-    MediaInfo& objAlertingInfo = objUpdatingInfo.GetAlertingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
 
     // Not (IsHeldBy() || IsResumedBy())
     objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
     objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
 
     objNegotiatedInfo.eVDir = objAlertingInfo.eVDir = DIRECTION_SEND;
-    objNegotiatedInfo.eTDir = objAlertingInfo.eTDir = DIRECTION_SEND;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsNeedToAlert());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
+}
+
+TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChanged)
+{
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+
+    // Not (IsHeldBy() || IsResumedBy())
+    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
+    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
+
+    objNegotiatedInfo.eVDir = objAlertingInfo.eVDir = DIRECTION_SEND;
+
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsChanging)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_SEND;
     objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsRequestedHoldResume());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsRequestedHoldResume());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsNotChanging)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = objModifyingInfo.eADir = DIRECTION_SEND;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsRequestedHoldResume());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedHoldResume());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsInvalid)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     objNegotiatedInfo.eADir = DIRECTION_INVALID;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsRequestedHoldResume());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedHoldResume());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfModifyingInfoIsInvalid)
 {
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objModifyingInfo.eADir = DIRECTION_INVALID;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsRequestedModifying());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfAudioDirectionIsChanging)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
     objNegotiatedInfo.eADir = DIRECTION_SEND;
     objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsRequestedModifying());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
 }
 
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfVideoDirectionIsChanging)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objModifyingInfo.eADir = objNegotiatedInfo.eADir = DIRECTION_SEND;
 
     objNegotiatedInfo.eVDir = DIRECTION_SEND;
     objModifyingInfo.eVDir = DIRECTION_SEND_RECEIVE;
 
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsRequestedModifying());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsRequestedModifying());
 }
 
-TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfTextDirectionIsChanging)
+TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfVideoDirectionIsNotChanging)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
-    objNegotiatedInfo.eADir = DIRECTION_SEND;
-    objModifyingInfo.eADir = objNegotiatedInfo.eADir;
-
-    objNegotiatedInfo.eTDir = DIRECTION_SEND;
-    objModifyingInfo.eTDir = DIRECTION_SEND_RECEIVE;
-
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsRequestedModifying());
-}
-
-TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfVideoTextDirectionIsNotChanging)
-{
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifyingInfo = objUpdatingInfo.GetModifyingInfo();
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     objNegotiatedInfo.eADir = objModifyingInfo.eADir = DIRECTION_SEND;
 
     objNegotiatedInfo.eVDir = objModifyingInfo.eVDir = DIRECTION_SEND;
-    objNegotiatedInfo.eTDir = objModifyingInfo.eTDir = DIRECTION_SEND;
 
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsRequestedModifying());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
 }
 
-TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfVideoDirectionIsChangingToInvalid)
+TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfCallTypeIsChanged)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    objNegotiatedInfo.eTDir = objModifiedInfo.eTDir = DIRECTION_SEND;
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    objNegotiatedInfo.eADir = objModifyingInfo.eADir = DIRECTION_SEND;
 
-    objNegotiatedInfo.eVDir = DIRECTION_SEND;
-    objModifiedInfo.eVDir = DIRECTION_INVALID;
+    objNegotiatedInfo.eVDir = objModifyingInfo.eVDir = DIRECTION_SEND;
 
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsModified());
+    pUpdatingInfo->SetTargetCallType(CallType::VOIP);
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsRequestedModifying());
 }
 
-TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfVideoDirectionIsChangingFromInvalid)
+TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfCallTypeIsChanged)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    objNegotiatedInfo.eTDir = objModifiedInfo.eTDir = DIRECTION_SEND;
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
 
-    objNegotiatedInfo.eVDir = DIRECTION_INVALID;
-    objModifiedInfo.eVDir = DIRECTION_SEND;
-
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsModified());
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsModified());
 }
 
-TEST_F(UpdatingInfoTest, IsModifiedReturnsFalseIfVideoDirectionIsChangingNotInvalid)
+TEST_F(UpdatingInfoTest, IsModifiedReturnsFalseIfCallTypeIsNotChanged)
 {
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    objNegotiatedInfo.eTDir = objModifiedInfo.eTDir = DIRECTION_SEND;
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
 
-    objNegotiatedInfo.eVDir = DIRECTION_SEND;
-    objModifiedInfo.eVDir = DIRECTION_SEND_RECEIVE;
-
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsModified());
-}
-
-TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfTextDirectionIsChangingToInvalid)
-{
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    objNegotiatedInfo.eVDir = objModifiedInfo.eVDir = DIRECTION_SEND;
-
-    objNegotiatedInfo.eTDir = DIRECTION_SEND;
-    objModifiedInfo.eTDir = DIRECTION_INVALID;
-
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsModified());
-}
-
-TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfTextDirectionIsChangingFromInvalid)
-{
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    objNegotiatedInfo.eVDir = objModifiedInfo.eVDir = DIRECTION_SEND;
-
-    objNegotiatedInfo.eTDir = DIRECTION_INVALID;
-    objModifiedInfo.eTDir = DIRECTION_SEND;
-
-    EXPECT_EQ(IMS_TRUE, objUpdatingInfo.IsModified());
-}
-
-TEST_F(UpdatingInfoTest, IsModifiedReturnsFalseIfTextDirectionIsChangingNotInvalid)
-{
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-    objNegotiatedInfo.eVDir = objModifiedInfo.eVDir = DIRECTION_SEND;
-
-    objNegotiatedInfo.eTDir = DIRECTION_SEND;
-    objModifiedInfo.eTDir = DIRECTION_SEND_RECEIVE;
-
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsModified());
-}
-
-TEST_F(UpdatingInfoTest, IsModifiedReturnsTrueIfVideoTextDirectionIsNotChanging)
-{
-    MediaInfo& objNegotiatedInfo = objUpdatingInfo.GetNegotiatedInfo();
-    MediaInfo& objModifiedInfo = objUpdatingInfo.GetModifiedInfo();
-
-    objNegotiatedInfo.eVDir = objModifiedInfo.eVDir = DIRECTION_SEND;
-    objNegotiatedInfo.eTDir = objModifiedInfo.eTDir = DIRECTION_SEND;
-
-    EXPECT_EQ(IMS_FALSE, objUpdatingInfo.IsModified());
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsModified());
 }

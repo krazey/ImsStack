@@ -19,11 +19,12 @@
 
 #include "IMtcCall.h"
 #include "MtcDef.h"
+#include "call/IMtcCallContext.h"
 
 class UpdatingInfo final
 {
 public:
-    UpdatingInfo();
+    UpdatingInfo(IN IMtcCallContext& objContext);
     virtual ~UpdatingInfo();
     UpdatingInfo(IN const UpdatingInfo&) = delete;
     UpdatingInfo& operator=(IN const UpdatingInfo&) = delete;
@@ -56,6 +57,10 @@ public:
     inline IMS_BOOL HasPendingUpdate() { return m_bHasPendingUpdate; }
 
 private:
+    CallType GetCurrentCallType() const;
+
+private:
+    IMtcCallContext& m_objContext;
     CallType m_eTargetCallType;
     MediaInfo m_objNegotiatedInfo;
     MediaInfo m_objModifyingInfo;
