@@ -1134,13 +1134,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     public int getPreciseState() {
-        if (mState  == ImsCallSessionImplBase.State.ESTABLISHED) {
+        if (mState == ImsCallSessionImplBase.State.ESTABLISHED) {
             return PreciseCallState.PRECISE_CALL_STATE_ACTIVE;
-        } else if (mState  == ImsCallSessionImplBase.State.ESTABLISHING) {
+        } else if (mState == ImsCallSessionImplBase.State.ESTABLISHING) {
             return PreciseCallState.PRECISE_CALL_STATE_ALERTING;
-        } else if (mState  == ImsCallSessionImplBase.State.TERMINATED) {
+        } else if (mState == ImsCallSessionImplBase.State.TERMINATED) {
             return PreciseCallState.PRECISE_CALL_STATE_DISCONNECTED;
-        } else if (mState  == ImsCallSessionImplBase.State.TERMINATING) {
+        } else if (mState == ImsCallSessionImplBase.State.TERMINATING) {
             return PreciseCallState.PRECISE_CALL_STATE_DISCONNECTING;
         } else if (mCall.isOnHold()) {
             return PreciseCallState.PRECISE_CALL_STATE_HOLDING;

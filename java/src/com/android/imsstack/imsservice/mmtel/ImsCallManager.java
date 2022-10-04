@@ -301,7 +301,6 @@ public class ImsCallManager {
 
     private void addSrvccCall(Set<Map.Entry<String, ImsCallSessionImpl>> entries,
             List<SrvccCall> srvccCalls) {
-
         for (Map.Entry<String, ImsCallSessionImpl> entry : entries) {
             ImsCallSessionImpl callSession = entry.getValue();
 

@@ -251,7 +251,6 @@ public class MtcApp implements Closeable {
 
     @VisibleForTesting
     protected class SrvccStateListener implements MmTelFeatureRegistry.Listener {
-
         @Override
         public void onSrvccStateChanged(int srvccState) {
             logi("onSrvccStateChanged :: SRVCC State = " + srvccState);

@@ -285,8 +285,7 @@ public class MtcAppTest extends ImsStackTest {
         assertTrue(mTestMtcApp.isServiceValid());
 
         MmTelFeatureRegistry.Listener srvccListener = mTestMtcApp.getSrvccListener();
-        //SRVCC_STATE_STARTED
-        srvccListener.onSrvccStateChanged(0);
+        srvccListener.onSrvccStateChanged(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
         processAllMessages();
 
         assertEquals(IUMtcService.SRVCC_STATE_CHANGED, mCommand);
