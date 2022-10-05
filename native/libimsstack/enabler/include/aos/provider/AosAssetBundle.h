@@ -21,6 +21,41 @@
 #include "ImsVector.h"
 #include "CarrierConfig.h"
 
+struct AosExtraRegErrBundle
+{
+public:
+    AosExtraRegErrBundle() :
+            bExtraReregFailureWithErrCodeInRoaming(IMS_FALSE),
+            bExtraRegErrRetryCntSharedForRegAndSub(IMS_FALSE),
+            nExtraRegErrFinalType(0),
+            nExtraRegErrMaxCnt(0),
+            nExtraRegErrMinCnt(0),
+            nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached(0),
+            nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached(0),
+            nExtraRegErrPolicy(0),
+            objExtraRegErrCode(IMSVector<IMS_SINT32>()),
+            objExtraReregErrCode(IMSVector<IMS_SINT32>()),
+            objExtraRegErrWaitTimeSec(IMSVector<IMS_SINT32>())
+    {
+    }
+
+    AosExtraRegErrBundle(IN const AosExtraRegErrBundle&) = delete;
+    AosExtraRegErrBundle& operator=(IN const AosExtraRegErrBundle&) = delete;
+
+public:
+    IMS_BOOL bExtraReregFailureWithErrCodeInRoaming;
+    IMS_BOOL bExtraRegErrRetryCntSharedForRegAndSub;
+    IMS_SINT32 nExtraRegErrFinalType;
+    IMS_SINT32 nExtraRegErrMaxCnt;
+    IMS_SINT32 nExtraRegErrMinCnt;
+    IMS_SINT32 nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached;
+    IMS_SINT32 nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached;
+    IMS_SINT32 nExtraRegErrPolicy;
+    IMSVector<IMS_SINT32> objExtraRegErrCode;
+    IMSVector<IMS_SINT32> objExtraReregErrCode;
+    IMSVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
+};
+
 struct AosNotifyTerminatedForInitRegBundle
 {
 public:
@@ -112,40 +147,6 @@ public:
 public:
     IMS_SINT32 nSubErrCodeForTerminatedRetryMaxCnt;
     IMSVector<IMS_SINT32> objSubErrCodeForTerminated;
-};
-
-struct AosSpecificRegistrationErrorBundle
-{
-public:
-    AosSpecificRegistrationErrorBundle() :
-            nSpecificRegErrFinalType(0),
-            nSpecificRegErrPolicy(0),
-            nSpecificRegErrMaxCount(0),
-            nSpecificRegErrMinCount(0),
-            bSpecificRegErrRetryCountSharedForRegAndRegEvent(IMS_FALSE),
-            objSpecificRegErrNumMultipliedByPcscfNum(IMSVector<IMS_SINT32>()),
-            objSpecificRegErrCode(IMSVector<IMS_SINT32>()),
-            objSpecificReregErrCode(IMSVector<IMS_SINT32>()),
-            objSpecificRegErrWaitTimeSec(IMSVector<IMS_SINT32>()),
-            bSpecificReregFailureWithErrCodeInRoaming(IMS_FALSE)
-    {
-    }
-
-    AosSpecificRegistrationErrorBundle(IN const AosSpecificRegistrationErrorBundle&) = delete;
-    AosSpecificRegistrationErrorBundle& operator=(
-            IN const AosSpecificRegistrationErrorBundle&) = delete;
-
-public:
-    IMS_SINT32 nSpecificRegErrFinalType;
-    IMS_SINT32 nSpecificRegErrPolicy;
-    IMS_SINT32 nSpecificRegErrMaxCount;
-    IMS_SINT32 nSpecificRegErrMinCount;
-    IMS_BOOL bSpecificRegErrRetryCountSharedForRegAndRegEvent;
-    IMSVector<IMS_SINT32> objSpecificRegErrNumMultipliedByPcscfNum;
-    IMSVector<IMS_SINT32> objSpecificRegErrCode;
-    IMSVector<IMS_SINT32> objSpecificReregErrCode;
-    IMSVector<IMS_SINT32> objSpecificRegErrWaitTimeSec;
-    IMS_BOOL bSpecificReregFailureWithErrCodeInRoaming;
 };
 
 struct AosReregistrationErrorPolicyDuringCallBundle

@@ -70,6 +70,22 @@
         <item value="6"/>
     </int-array>
 
+    <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <int name="extra_reg_err_final_type_int" value="2"/>
+    <int name="extra_reg_err_policy_int" value="2"/>
+    <int-array name="extra_reg_err_code_for_update_int_array" num="2">
+        <item value="403"/>
+        <item value="404"/>
+    </int-array>
+    <int-array name="extra_reg_err_code_int_array" num="4">
+        <item value="0"/>
+        <item value="2"/>
+        <item value="403"/>
+        <item value="404"/>
+    </int-array>
+    <int-array name="extra_reg_err_wait_time_sec_int_array" num="1">
+        <item value="30"/>
+    </int-array>
     <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
     <int name="notify_terminated_for_init_reg_with_wait_time_int" value="60"/>
     <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="4">
@@ -123,25 +139,6 @@
         <item value="404"/>
         <item value="420"/>
     </int-array>
-
-    <!-- End BUNDLE -->
-    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
-    <int name="specific_registration_error_final_type_int" value="2"/>
-    <int name="specific_registration_error_policy_int" value="2"/>
-    <int-array name="specific_registration_error_code_int_array" num="4">
-        <item value="0"/>
-        <item value="2"/>
-        <item value="403"/>
-        <item value="404"/>
-    </int-array>
-    <int-array name="specific_reregistration_error_code_int_array" num="2">
-        <item value="403"/>
-        <item value="404"/>
-    </int-array>
-    <int-array name="specific_registration_error_wait_time_sec_int_array" num="1">
-        <item value="30"/>
-    </int-array>
-    <!-- End BUNDLE -->
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>

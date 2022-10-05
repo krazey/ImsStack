@@ -797,6 +797,20 @@ public:
     virtual IMS_SINT32 GetGeolocationPidfFormingPolicy() const = 0;
 
     /**
+     * @brief Get the retry attempt count about pcscfs being discovered in combined network
+     *
+     * @return IMS_SINT32 Return the retry attempt count
+     */
+    virtual IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached() const = 0;
+
+    /**
+     * @brief Get the retry attempt count about pcscfs being discovered in only attached network
+     *
+     * @return IMS_SINT32 Retrurn the retry attempt count
+     */
+    virtual IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached() const = 0;
+
+    /**
      * @brief Get the registration retry intervals for using when registration is failed
      *        as general codes.
      *
@@ -1050,14 +1064,6 @@ public:
      * @return vector rat list
      */
     virtual IMSVector<IMS_SINT32>& GetSmsOverImsSupportedRats() = 0;
-
-    /**
-     * @brief Indicate the retry attempt number in normal and only attached network formula
-     *        is “n (this integer) * <# of PCSCFs being discovered>
-     *
-     * @return vector list
-     */
-    virtual IMSVector<IMS_SINT32>& GetSpecificRegErrNumMultipliedByPcscfNum() = 0;
 
     /**
      * @brief Indicate the error codes for registration

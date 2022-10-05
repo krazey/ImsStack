@@ -818,6 +818,31 @@ const IMS_CHAR
                 "wfc_reg_event_error_code_by_missing_911_address_int_array";
 
 // Bundle {
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_BUNDLE[] = "extra_reg_err_bundle";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL[] =
+                "extra_reg_err_code_as_failure_in_roaming_for_update_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL[] =
+        "extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT[] =
+        "extra_reg_err_final_type_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT[] = "extra_reg_err_max_cnt_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MIN_CNT_INT[] = "extra_reg_err_min_cnt_int";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT[] =
+                "extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT[] =
+                "extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_POLICY_INT[] = "extra_reg_err_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY[] =
+        "extra_reg_err_code_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY[] =
+        "extra_reg_err_code_for_update_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY[] =
+        "extra_reg_err_wait_time_sec_int_array";
+// }
+// Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE[] =
         "notify_terminated_for_init_reg_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT[] =
@@ -862,34 +887,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY
         "sub_err_code_for_terminated_with_retry_max_count_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY[] =
         "sub_err_code_for_terminated_int_array";
-// }
-// Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
-        "specific_registration_error_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_FINAL_TYPE_INT[] =
-        "specific_registration_error_final_type_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_POLICY_INT[] =
-        "specific_registration_error_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_MAX_COUNT_INT[] =
-        "specific_registration_error_max_count_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_MIN_COUNT_INT[] =
-        "specific_registration_error_min_count_int";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SPECIFIC_REGISTRATION_ERROR_RETRY_COUNT_SHARED_FOR_REGISTRATION_AND_REG_EVENT_BOOL[] =
-                "specific_registration_error_retry_count_shared_for_registration_and_reg_event_"
-                "bool";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SPECIFIC_REGISTRATION_ERROR_NUMBER_MULTIPLIED_BY_PCSCF_NUMBER_INT_ARRAY[] =
-                "specific_registration_error_number_multiplied_by_pcscf_number_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_CODE_INT_ARRAY[] =
-        "specific_registration_error_code_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REREGISTRATION_ERROR_CODE_INT_ARRAY[] =
-        "specific_reregistration_error_code_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_WAIT_TIME_SEC_INT_ARRAY[] =
-        "specific_registration_error_wait_time_sec_int_array";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_SPECIFIC_REREGISTRATION_FAILURE_WITH_ERROR_CODE_IN_ROAMING_BOOL[] =
-                "specific_reregistration_failure_with_error_code_in_roaming_bool";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE[] =

@@ -64,6 +64,18 @@
         <item value="2"/>
     </int-array>
 
+    <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <int name="extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int" value="1"/>
+    <int name="extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int" value="2"/>
+    <int name="extra_reg_err_policy_int" value="3"/>
+    <int-array name="extra_reg_err_code_int_array" num="6">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="305"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="504"/>
+    </int-array>
     <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
     <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="5">
         <item value="1"/>
@@ -110,21 +122,6 @@
         <item value="403"/>
     </int-array>
     <int name="sip_status_code_for_rejecting_call_type_change_int" value="200"/>
-
-    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
-    <int name="specific_registration_error_policy_int" value="3"/>
-    <int-array name="specific_registration_error_number_multiplied_by_pcscf_number_int_array" num="2">
-        <item value="2"/>
-        <item value="1"/>
-    </int-array>
-    <int-array name="specific_registration_error_code_int_array" num="6">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="305"/>
-        <item value="500"/>
-        <item value="503"/>
-        <item value="504"/>
-    </int-array>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="2"/>

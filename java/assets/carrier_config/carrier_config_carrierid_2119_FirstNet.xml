@@ -69,18 +69,17 @@
         <item value="9"/>
     </int-array>
 
+    <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <int-array name="extra_reg_err_code_int_array" num="2">
+        <item value="0"/>
+        <item value="2"/>
+    </int-array>
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
     <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
     <int-array name="sub_err_code_for_init_reg_int_array" num="3">
         <item value="403"/>
         <item value="504"/>
         <item value="0"/>
-    </int-array>
-
-    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
-     <int-array name="specific_registration_error_code_int_array" num="2">
-        <item value="0"/>
-        <item value="2"/>
     </int-array>
 
     <!-- Uce -->

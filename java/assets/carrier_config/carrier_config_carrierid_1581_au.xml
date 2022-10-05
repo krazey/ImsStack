@@ -30,20 +30,16 @@
     <!-- Aos -->
     <int name="registration_actual_wait_time_policy_int" value="3"/>
     <int name="rereg_retry_305_policy_int" value="0"/>
-    <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <int-array name="reg_retry_interval_sec_int_array" num="1">
-        <item value="10"/>
-    </int-array>
 
-    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
-    <int name="specific_registration_error_final_type_int" value="1"/>
-    <int name="specific_registration_error_max_count_int" value="5"/>
-    <boolean name="specific_registration_error_retry_count_shared_for_registration_and_reg_event_bool" value="true"/>
-    <int-array name="specific_registration_error_code_int_array" num="2">
+    <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <boolean name="extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="true"/>
+    <int name="extra_reg_err_final_type_int" value="1"/>
+    <int name="extra_reg_err_max_cnt_int" value="5"/>
+    <int-array name="extra_reg_err_code_int_array" num="2">
         <item value="0"/>
         <item value="2"/>
     </int-array>
-    <int-array name="specific_reregistration_error_code_int_array" num="8">
+    <int-array name="extra_reg_err_code_for_update_int_array" num="8">
         <item value="0"/>
         <item value="305"/>
         <item value="403"/>
@@ -53,7 +49,10 @@
         <item value="503"/>
         <item value="504"/>
     </int-array>
-    <!-- End BUNDLE -->
+    <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
+    <int-array name="reg_retry_interval_sec_int_array" num="1">
+        <item value="10"/>
+    </int-array>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>

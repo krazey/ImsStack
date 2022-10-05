@@ -113,6 +113,10 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRegistrationPcscfUpdatePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUserInfoPolicyForNonRegisterMessage, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetGeolocationPidfFormingPolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached, (),
+            (const, override));
+    MOCK_METHOD(IMS_SINT32, GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached, (),
+            (const, override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegistrationRetryIntervals, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegistrationRandomRetryIntervals, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetIpsecAuthenticationAlgorithms, (), (override));
@@ -136,7 +140,6 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSupportedRats, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSupportedRoamingRats, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSmsOverImsSupportedRats, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSpecificRegErrNumMultipliedByPcscfNum, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSpecificRegistrationErrorCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSpecificReregistrationErrorCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSpecificRegErrWaitTime, (), (override));

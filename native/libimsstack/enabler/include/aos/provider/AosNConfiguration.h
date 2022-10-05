@@ -121,6 +121,8 @@ public:
     virtual IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const;
     virtual IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const;
     virtual IMS_SINT32 GetGeolocationPidfFormingPolicy() const;
+    virtual IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached() const;
+    virtual IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached() const;
 
     virtual IMSVector<IMS_SINT32>& GetRegistrationRetryIntervals();
     virtual IMSVector<IMS_SINT32>& GetRegistrationRandomRetryIntervals();
@@ -147,7 +149,6 @@ public:
     virtual IMSVector<IMS_SINT32>& GetSupportedRats();
     virtual IMSVector<IMS_SINT32>& GetSupportedRoamingRats();
     virtual IMSVector<IMS_SINT32>& GetSmsOverImsSupportedRats();
-    virtual IMSVector<IMS_SINT32>& GetSpecificRegErrNumMultipliedByPcscfNum();
     virtual IMSVector<IMS_SINT32>& GetSpecificRegistrationErrorCode();
     virtual IMSVector<IMS_SINT32>& GetSpecificReregistrationErrorCode();
     virtual IMSVector<IMS_SINT32>& GetSpecificRegErrWaitTime();
@@ -180,18 +181,14 @@ private:
 
     AosMmtelRequiresProvisioningBundle m_objMmtelProvisioning;
 
+    AosExtraRegErrBundle m_objExtraRegErr;
     AosNotifyTerminatedForInitRegBundle m_objNotifyTerminated;
-
     AosRegErrCodeWithRaTimeBundle m_objRegErrCodeWithRaTime;
-
     AosRegRetryIntervalBundle m_objRegRetryInterval;
-
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;
     AosSubErrCodeForTerminatedBundle m_objSubErrCodeForTerminated;
 
     AosReregistrationErrorPolicyDuringCallBundle m_objReregErrPolicyCall;
-
-    AosSpecificRegistrationErrorBundle m_objSpecificRegErr;
 
     IMS_UINT32 m_nEventForInitRegOnTerminatedState;
     IMS_UINT32 m_nEventToFollowWtForInitRegOnTerminatedState;
