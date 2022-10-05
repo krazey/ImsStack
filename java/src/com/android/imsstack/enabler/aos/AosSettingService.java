@@ -33,23 +33,32 @@ import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 public class AosSettingService {
 
     private final Object mLock = new Object();
-    private static final int EVENT_NATIVE_BOOT_COMPLETED = 1000;
-    private static final int EVENT_MOBILE_DATA_STATE_CHANGED = 1001;
-    private static final int EVENT_REBOOT = 1002;
-    private static final int EVENT_SHUTDOWN = 1003;
+    @VisibleForTesting
+    protected static final int EVENT_NATIVE_BOOT_COMPLETED = 1000;
+    @VisibleForTesting
+    protected static final int EVENT_MOBILE_DATA_STATE_CHANGED = 1001;
+    @VisibleForTesting
+    protected static final int EVENT_REBOOT = 1002;
+    @VisibleForTesting
+    protected static final int EVENT_SHUTDOWN = 1003;
 
-    private UserMobileDataStateListener mUserMobileDataStateListener = null;
-    private Handler mHandler;
+    @VisibleForTesting
+    protected UserMobileDataStateListener mUserMobileDataStateListener = null;
+    @VisibleForTesting
+    protected Handler mHandler = null;
 
     private int mSlotId = 0;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
     private boolean mMobileDataEnabled = false;
-    private SubscriptionListenerProxy mSubscriptionListener;
-    private IntentReceiverListener mIntentReceiverListener = null;
+    @VisibleForTesting
+    protected SubscriptionListenerProxy mSubscriptionListener = null;
+    @VisibleForTesting
+    protected IntentReceiverListener mIntentReceiverListener = null;
 
     public AosSettingService(int slotId) {
         ImsLog.d(slotId, "");
@@ -71,18 +80,16 @@ public class AosSettingService {
                 mIntentReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
 
         mSubscriptionListener = new SubscriptionListenerProxy();
-        ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+        ISubscription isub = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
         if (isub != null) {
             isub.addListener(mSubscriptionListener);
         }
 
         mSubId = MSimUtils.getSubId(mSlotId);
-        if (mSubId == MSimUtils.INVALID_SUB_ID) {
-            return;
+        if (mSubId != MSimUtils.INVALID_SUB_ID) {
+            mUserMobileDataStateListener = new UserMobileDataStateListener(mSubId);
+            setListener(mUserMobileDataStateListener);
         }
-
-        mUserMobileDataStateListener = new UserMobileDataStateListener(mSubId);
-        setListener(mUserMobileDataStateListener);
     }
 
     public void cleanup() {
@@ -139,9 +146,9 @@ public class AosSettingService {
         ImsLog.d(mSlotId, "");
 
         synchronized (mLock) {
-            int slotId = MSimUtils.getSlotId(subId);
+            int slotId = getSlotId(subId);
             if (mSlotId != slotId) {
-                ISubscription isub = (ISubscription)AgentFactory.getAgent(
+                ISubscription isub = (ISubscription) AgentFactory.getAgent(
                         AgentFactory.SUBSCRIPTION);
                 if (isub == null) {
                     return;
@@ -165,7 +172,7 @@ public class AosSettingService {
         }
     }
 
-    public void handleMobileDataStateChanged(Message msg) {
+    private void handleMobileDataStateChanged(Message msg) {
         boolean enabled = (boolean) msg.obj;
 
         if (mMobileDataEnabled == enabled) {
@@ -189,33 +196,35 @@ public class AosSettingService {
         }
     }
 
+    @VisibleForTesting
+    protected int getSlotId(int subId) {
+        return MSimUtils.getSlotId(subId);
+    }
+
     private final class SettingServiceHandler extends Handler {
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg == null) {
-                ImsLog.d(mSlotId, "msg is null");
-                return;
-            }
+            if (msg != null) {
+                ImsLog.i(mSlotId, "handleMessage :: msg= " + msg.what);
 
-            ImsLog.i(mSlotId, "handleMessage :: msg= " + msg.what);
+                switch (msg.what) {
+                    case EVENT_NATIVE_BOOT_COMPLETED:
+                        handleNativeBootCompleted();
+                        break;
 
-            switch (msg.what) {
-                case EVENT_NATIVE_BOOT_COMPLETED:
-                    handleNativeBootCompleted();
-                    break;
+                    case EVENT_MOBILE_DATA_STATE_CHANGED:
+                        handleMobileDataStateChanged(msg);
+                        break;
 
-                case EVENT_MOBILE_DATA_STATE_CHANGED:
-                    handleMobileDataStateChanged(msg);
-                    break;
+                    case EVENT_REBOOT: // FALL-THROUGH
+                    case EVENT_SHUTDOWN:
+                        notifyPowerOff();
+                        break;
 
-                case EVENT_REBOOT: // FALL-THROUGH
-                case EVENT_SHUTDOWN:
-                    notifyPowerOff();
-                    break;
-
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -228,19 +237,18 @@ public class AosSettingService {
         }
     }
 
-    private final class SubscriptionListenerProxy extends SubscriptionListener {
+    @VisibleForTesting
+    protected final class SubscriptionListenerProxy extends SubscriptionListener {
 
         public SubscriptionListenerProxy() {
         }
 
         @Override
         public void onSimLoadCompleted(int slotId) {
-            if (mSlotId != slotId) {
-                return;
+            if (mSlotId == slotId) {
+                int subId = MSimUtils.getSubId(mSlotId);
+                updateSubscription(subId);
             }
-
-            int subId = MSimUtils.getSubId(mSlotId);
-            updateSubscription(subId);
         }
 
         @Override
@@ -254,7 +262,8 @@ public class AosSettingService {
         }
     }
 
-    private final class UserMobileDataStateListener extends TelephonyCallback implements
+    @VisibleForTesting
+    protected final class UserMobileDataStateListener extends TelephonyCallback implements
             TelephonyCallback.UserMobileDataStateListener {
 
         private final int mSubId;
@@ -275,7 +284,8 @@ public class AosSettingService {
         }
     }
 
-    private class IntentReceiverListener extends BroadcastReceiver {
+    @VisibleForTesting
+    protected class IntentReceiverListener extends BroadcastReceiver {
         IntentFilter mIntentFilter = new IntentFilter();
 
         public IntentReceiverListener() {
@@ -289,11 +299,11 @@ public class AosSettingService {
 
         @Override
         public synchronized void onReceive(Context context, Intent intent) {
+            ImsLog.d(mSlotId, printIntent(intent));
+
             if (intent == null || mHandler == null) {
                 return;
             }
-
-            ImsLog.d(mSlotId, printIntent(intent));
 
             String action = intent.getAction();
             Message msg = Message.obtain();
