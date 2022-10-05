@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.aos;
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,11 +30,12 @@ public class AosFactory {
 
     private static AosFactory sFactory = null;
 
-    private Map<Integer, AosService> mAosServices =
+    @VisibleForTesting
+    protected Map<Integer, AosService> mAosServices =
             new HashMap<Integer, AosService>(MSimUtils.getMaxSimSlot());
-
-    // TODO : This is temp code for TelephonyCallback
-    private AosSettingService aosSettingService = null;
+    @VisibleForTesting
+    protected Map<Integer, AosSettingService> mAosSettingServices =
+            new HashMap<Integer, AosSettingService>(MSimUtils.getMaxSimSlot());
 
     public static AosFactory getInstance() {
         if (sFactory == null) {
@@ -43,70 +45,63 @@ public class AosFactory {
         return sFactory;
     }
 
-    public void init() {
-        ImsLog.d("");
-    }
-
-    public synchronized void start(int slotId) {
+    public synchronized void init(int slotId) {
         ImsLog.d(slotId, "");
 
         AosService aosService = new AosService();
-
-        aosService.start(slotId);
+        aosService.init(slotId);
         mAosServices.put(slotId, aosService);
 
-        /// TODO : This is temp code for TelephonyCallback
-        aosSettingService = new AosSettingService(slotId);
-        aosSettingService.start();
+        AosSettingService aosSettingService = new AosSettingService(slotId);
+        aosSettingService.init();
+        mAosSettingServices.put(slotId, aosSettingService);
     }
 
-    public synchronized void stop(int slotId) {
+    public synchronized void cleanup(int slotId) {
         ImsLog.d(slotId, "");
 
-        // TODO : This is temp code for TelephonyCallback
+        AosSettingService aosSettingService = mAosSettingServices.get(slotId);
         if (aosSettingService != null) {
-            aosSettingService.stop();
-            aosSettingService = null;
+            aosSettingService.cleanup();
+            mAosSettingServices.remove(slotId);
         }
 
-        AosService aosService = (AosService)mAosServices.get(slotId);
+        AosService aosService = mAosServices.get(slotId);
         if (aosService != null) {
-            aosService.stop();
+            aosService.cleanup();
             mAosServices.remove(slotId);
         }
     }
 
     /**
-     * Initialize the AoS service.
+     * Start the AoS service.
      *
-     * @param slotId The slot-id to be initialized.
+     * @param slotId The slot-id to be started.
      */
-    public synchronized void init(int slotId) {
-        AosService aosService = (AosService) mAosServices.get(slotId);
-
+    public synchronized void start(int slotId) {
+        AosService aosService = mAosServices.get(slotId);
         if (aosService != null) {
-            aosService.init();
+            aosService.start();
         }
     }
 
     /**
-     * Clean up the AoS service.
+     * Stop the AoS service.
      *
-     * @param slotId The slot-id to be cleaned up.
+     * @param slotId The slot-id to be stopped.
      */
-    public synchronized void cleanup(int slotId) {
-        AosService aosService = (AosService) mAosServices.get(slotId);
-
+    public synchronized void stop(int slotId) {
+        AosService aosService = mAosServices.get(slotId);
         if (aosService != null) {
-            aosService.cleanup();
+            aosService.stop();
         }
     }
 
     public synchronized IAosRegistration getAosRegistration(int slotId) {
-        return (IAosRegistration)mAosServices.get(slotId);
+        return (IAosRegistration) mAosServices.get(slotId);
     }
 
     public synchronized IAosInfo getAosInfo(int slotId) {
-        return (IAosInfo)mAosServices.get(slotId);
+        return (IAosInfo) mAosServices.get(slotId);
     }
 }

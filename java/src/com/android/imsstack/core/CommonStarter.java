@@ -125,8 +125,6 @@ public class CommonStarter {
         NativeCommands.setDeviceConfig(context);
         SystemInterface.getInstance().init();
 
-        AosFactory.getInstance().init();
-
         JNIUpCallEvtManager.getInstance().init();
 
         AgentFactory.createDefaultAgents();
@@ -158,7 +156,7 @@ public class CommonStarter {
 
         JNIUpCallEvtManager.getInstance().start(slotId);
 
-        AosFactory.getInstance().start(slotId);
+        AosFactory.getInstance().init(slotId);
 
         AgentFactory.createAgents(context, slotId);
         AgentFactory.initAgentsForMIms(context, slotId);
@@ -172,7 +170,7 @@ public class CommonStarter {
 
         notifyPackageReady(slotId);
 
-        AosFactory.getInstance().init(slotId);
+        AosFactory.getInstance().start(slotId);
     }
 
     public void stopAgents(int slotId) {
@@ -182,7 +180,7 @@ public class CommonStarter {
 
         notifyPackageStop(slotId);
 
-        AosFactory.getInstance().cleanup(slotId);
+        AosFactory.getInstance().stop(slotId);
 
         Context context = AppContext.getInstance();
 
@@ -192,7 +190,7 @@ public class CommonStarter {
 
         JNIUpCallEvtManager.getInstance().stop(slotId);
 
-        AosFactory.getInstance().stop(slotId);
+        AosFactory.getInstance().cleanup(slotId);
 
         SystemInterface.getInstance().stop(slotId);
 

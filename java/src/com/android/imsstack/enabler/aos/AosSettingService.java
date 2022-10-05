@@ -56,7 +56,7 @@ public class AosSettingService {
         mSlotId = slotId;
     }
 
-    public void start() {
+    public void init() {
         ImsLog.d(mSlotId, "");
 
         mHandler = new SettingServiceHandler();
@@ -85,7 +85,7 @@ public class AosSettingService {
         setListener(mUserMobileDataStateListener);
     }
 
-    public void stop() {
+    public void cleanup() {
         ImsLog.d(mSlotId, "");
 
         if (mUserMobileDataStateListener != null) {
