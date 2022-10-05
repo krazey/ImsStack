@@ -66,7 +66,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     private int mRegisteredNetworkType = NetworkType.NONE;
 
-    public void start(int slotId) {
+    public void init(int slotId) {
         mSlotId = slotId;
 
         mHandler = new AosServiceHandler();
@@ -85,7 +85,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         isr.addListener(mListener);
     }
 
-    public void stop() {
+    public void cleanup() {
         ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
         isr.removeListener(mListener);
 
@@ -110,9 +110,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     /**
-     * Initialize any necessasry information for AoS service.
+     * Start any necessary information for AoS service.
      */
-    public void init() {
+    public void start() {
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
 
         if (sim != null) {
@@ -122,9 +122,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     /**
-     * Clean up the necessary information that was previously initialized for AoS service.
+     * Stop the necessary information that was previously initialized for AoS service.
      */
-    public void cleanup() {
+    public void stop() {
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
 
         if (sim != null) {
