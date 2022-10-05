@@ -18,6 +18,7 @@
 #include "IIpcan.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
+#include "IuMtsService.h"
 #include "MtsService.h"
 #include "MtsServiceState.h"
 #include "MtsDef.h"
@@ -28,7 +29,9 @@
 #include "utility/MtsDynamicLoader.h"
 #include "../include/mts/MockIMtsServiceListener.h"
 #include "../../interface/aos/MockIImsAos.h"
+#include "../../interface/aos/MockIImsAosInfo.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 namespace android
@@ -44,8 +47,9 @@ public:
     MtsMessageController* pMtsMessageController;
     MtsDynamicLoader* pMtsDynamicLoader;
     MtsService* pMtsService;
-    MockIImsAos* pMockIImsAos;
-    MockIImsAos* pMockIImsEmergencyAos;
+    MockIImsAos objMockIImsAos;
+    MockIImsAos objMockIImsEmergencyAos;
+    MockIImsAosInfo objMockIImsAosInfo;
 
 protected:
     virtual void SetUp() override
@@ -54,11 +58,6 @@ protected:
         pMtsDynamicLoader->Initialize();
         pMtsService = new MtsService(SLOT_ID);
         pMtsMessageController = new MtsMessageController(SLOT_ID, pMtsService, pMtsDynamicLoader);
-        pMockIImsAos = new MockIImsAos();
-        pMockIImsEmergencyAos = new MockIImsAos();
-
-        pMtsService->SetIImsAos(pMockIImsAos);
-        pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
     }
 
     virtual void TearDown() override
@@ -123,7 +122,8 @@ TEST_F(MtsServiceTest, ImsAosMonitorConnected)
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosConnected)
 {
-    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+    pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
+    ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
@@ -132,8 +132,8 @@ TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosConnected)
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosConnecting)
 {
-    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
-    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+    pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
+    ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
@@ -144,8 +144,8 @@ TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosConnecting)
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosDisconnected)
 {
-    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
-    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+    pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
+    ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
@@ -155,8 +155,8 @@ TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosDisconnected)
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosDisconnecting)
 {
-    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
-    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+    pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
+    ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
@@ -166,8 +166,8 @@ TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosDisconnecting)
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsLimitedAfterAosSuspended)
 {
-    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
-    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+    pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
+    ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
@@ -177,14 +177,25 @@ TEST_F(MtsServiceTest, GetServiceStateReturnsLimitedAfterAosSuspended)
 
 TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosResumed)
 {
-    pMtsService->SetIImsEmergencyAos(pMockIImsEmergencyAos);
-    ON_CALL(*pMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
+    pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
+    ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->GetIMtsServiceState()->SetSmsOverIpState(IMS_TRUE);
     pMtsService->ImsAos_Connected(ImsAosFeature::TEXT, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
     pMtsService->ImsAos_Resumed();
     EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_READY);
+}
+
+TEST_F(MtsServiceTest, ForwardScbmNotification)
+{
+    pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
+
+    ON_CALL(objMockIImsEmergencyAos, GetAosInfo()).WillByDefault(Return(&objMockIImsAosInfo));
+    ON_CALL(objMockIImsAosInfo, NotifyScbmState(_)).WillByDefault(Return());
+    EXPECT_CALL(objMockIImsAosInfo, NotifyScbmState(NOTIFY_SCBM_STARTED)).Times(1);
+
+    pMtsService->SendScbmNotification(NOTIFY_SCBM_STARTED);
 }
 
 }  // namespace android

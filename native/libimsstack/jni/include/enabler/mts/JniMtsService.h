@@ -26,6 +26,7 @@ private:
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava);
     void TriggerSendMoSms(IN const android::Parcel& objParcel);
     void NotifyMtResult(IN const android::Parcel& objParcel);
+    void NotifyScbmState(IN const android::Parcel& objParcel);
 
 private:
     IMS_SINT32 m_nSlotId;

@@ -18,6 +18,7 @@
 #include "ICarrierConfig.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
+#include "IuMtsService.h"
 #include "MockICarrierConfig.h"
 #include "MtsDef.h"
 #include "SipStatusCode.h"

@@ -15,6 +15,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "IuMtsService.h"
 #include "MtsStringDef.h"
 
 namespace android

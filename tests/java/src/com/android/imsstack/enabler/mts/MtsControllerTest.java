@@ -176,6 +176,17 @@ public class MtsControllerTest {
                 eq(mSmsFormat), eq(pduData));
     }
 
+    @Test
+    public void testBasicOperation_sendNotificationForScbmState() {
+        mMtsController.sendNotificationForScbmState(MtsController.SCBM_STARTED);
+        mMtsController.sendNotificationForScbmState(MtsController.SCBM_TERMINATED);
+
+        mMtsController.sendNotificationForScbmState(MtsController.SCBM_STARTED);
+        mMtsController.sendNotificationForScbmState(MtsController.SCBM_TERMINATED_BY_ECALL);
+
+        // Nothing to verify here
+    }
+
     private void waitForHandlerActionDelayed(Handler handler, long timeoutMillis, long delayMs) {
         final CountDownLatch lock = new CountDownLatch(1);
         handler.postDelayed(lock::countDown, delayMs);

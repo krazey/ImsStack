@@ -42,6 +42,7 @@ public:
                     IN IMS_SINT32 nSeqId),
             (override));
     MOCK_METHOD(void, SendMtResult, (IN IMS_BOOL bMtResult), (override));
+    MOCK_METHOD(void, SendScbmNotification, (IN IMS_UINT32 nScbmState), (override));
 };
 
 #endif

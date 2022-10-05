@@ -79,6 +79,10 @@ JniMtsService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
             NotifyMtResult(objParcel);
             break;
 
+        case IuMtsService::NOTI_SCBM_STATE:
+            NotifyScbmState(objParcel);
+            break;
+
         default:
             break;
     }
@@ -179,4 +183,20 @@ void JniMtsService::NotifyMtResult(IN const Parcel& objParcel)
     }
 
     piMtsService->SendMtResult(nMtResult);
+}
+
+PRIVATE
+void JniMtsService::NotifyScbmState(IN const Parcel& objParcel)
+{
+    IMS_UINT32 nScbmState = objParcel.readInt32();
+    IMS_TRACE_I("NotifyScbmState : Scbm State (%d)", nScbmState, 0, 0);
+
+    IMtsService* piMtsService = GetNativeService();
+    if (piMtsService == IMS_NULL)
+    {
+        IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
+        return;
+    }
+
+    piMtsService->SendScbmNotification(nScbmState);
 }

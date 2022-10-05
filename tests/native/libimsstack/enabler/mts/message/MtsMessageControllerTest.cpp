@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include "ImsTypeDef.h"
+#include "IuMtsService.h"
 #include "../../include/mts/MockIMtsService.h"
 #include "../../include/mts/MockIMtsServiceState.h"
 #include "core/IPageMessage.h"
