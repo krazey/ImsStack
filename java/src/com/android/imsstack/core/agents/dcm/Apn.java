@@ -1249,19 +1249,14 @@ public abstract class Apn extends Handler implements IApn {
             int networkType = dataConnectionState.getNetworkType();
             int causeCode = dataConnectionState.getLastCauseCode();
 
-            if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-                ImsLog.w(mSlotId, "Unknown network type");
-                return;
-            }
-
             switch (dataState) {
                 case TelephonyManager.DATA_CONNECTED:
-                    if (mPreciseDcState == TelephonyManager.DATA_HANDOVER_IN_PROGRESS) {
-                        if (mNetworkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-                            ImsLog.w(mSlotId, "Not handle handover from unknown network");
-                            break;
-                        }
+                    if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                        ImsLog.w(mSlotId, "Unknown network type");
+                        return;
+                    }
 
+                    if (mPreciseDcState == TelephonyManager.DATA_HANDOVER_IN_PROGRESS) {
                         if (isIpcanChanged(networkType)) {
                             // Notify handover is successful
                             handleHandoverSuccess(networkType);
