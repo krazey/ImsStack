@@ -29,7 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * Implements ImsSmsImplBase to provide Sms over Ims feature.
  */
 public final class ImsSmsImpl extends ImsSmsImplBase {
-    private static final String TAG = "[GII-ImsSmsImpl] ";
+    private static final String TAG = "[GII-ImsSmsImpl]";
     private final ImsCallContext mCallContext;
     private SmsTransferLayer mSmsTL = null;
     private final SmsTLListenerProxy mSmsTLListener = new SmsTLListenerProxy();
@@ -38,21 +38,17 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
 
     public ImsSmsImpl(ImsCallContext callContext) {
         mCallContext = callContext;
+        if (mSmsTL == null) {
+            mSmsTL = new SmsTransferLayer(mCallContext);
+        }
         init();
     }
 
     @VisibleForTesting
     public ImsSmsImpl(ImsCallContext callContext, SmsTransferLayer smsTransferLayer) {
         mCallContext = callContext;
-        if (smsTransferLayer == null) {
-            mSmsTL = new SmsTransferLayer(mCallContext);
-        } else {
-            mSmsTL = smsTransferLayer;
-        }
-
-        if (mSmsTL != null) {
-            mSmsTL.setListener(mSmsTLListener);
-        }
+        mSmsTL = smsTransferLayer;
+        init();
     }
 
     /**
@@ -66,7 +62,6 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
      * Initialises the objects created by this Class
      */
     public void init() {
-        mSmsTL = new SmsTransferLayer(mCallContext);
         if (mSmsTL != null) {
             mSmsTL.setListener(mSmsTLListener);
         }
@@ -80,6 +75,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
         sReady = false;
         mSmsTL.setListener(null);
         mSmsTL.clear();
+        mSmsTL = null;
     }
 
     @Override

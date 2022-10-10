@@ -17,12 +17,23 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.os.Looper;
+import android.os.RemoteException;
+import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
+import android.telephony.ims.aidl.IImsSmsListener;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.sms.SmsUtils;
+import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.util.HexDump;
 
 import org.junit.After;
@@ -32,65 +43,135 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class ImsSmsImplTest extends ImsSmsImplBase {
-    @Mock ImsCallContext mImsCallContext;
-    @Mock SmsTransferLayer mSmsTransferLayer;
     private ImsSmsImpl mImsSmsImpl;
+    private MessageExecutor mExecutor;
+
+    @Mock private SmsTransferLayer mMockSmsTransferLayer;
+    @Mock private ImsCallContext mMockImsCallContext;
+    @Mock private IImsSmsListener mListener;
 
     private int mToken = 1;
-    private int mMessageRef = 1;
+    private int mMessageRef = 10;
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
     private byte[] mPdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
+    private int mFormat = SmsUtils.FORMAT_INT_3GPP;
 
     @Before
     public void setUp() throws Exception {
-        mImsCallContext = Mockito.mock(ImsCallContext.class);
-        mSmsTransferLayer = Mockito.mock(SmsTransferLayer.class);
-        mImsSmsImpl = new ImsSmsImpl(mImsCallContext, mSmsTransferLayer);
-        mImsSmsImpl.onReady();
+        MockitoAnnotations.initMocks(this);
+
+        mExecutor = new MessageExecutor(ImsSmsImpl.class.getSimpleName());
+        when(mMockImsCallContext.getExecutor()).thenReturn(mExecutor);
+        doReturn(Looper.getMainLooper()).when(mMockImsCallContext).getCallLooper();
+
+        mImsSmsImpl = new ImsSmsImpl(mMockImsCallContext, mMockSmsTransferLayer);
+        mImsSmsImpl.registerSmsListener(mListener);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mImsSmsImpl.dispose();
+        mImsSmsImpl = null;
+        mExecutor = null;
+    }
+
+    @Test
+    public void test_sendSms_Success() throws RemoteException {
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
+        verify(mMockSmsTransferLayer).sendMoTPdu(mToken, mMessageRef, mFormat, "1111", mPdu);
+    }
+
+    @Test
+    public void test_sendSms_Error() throws RemoteException {
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, null);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
+                SmsManager.RESULT_ERROR_NULL_PDU, RESULT_NO_NETWORK_ERROR);
+
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP2, null, true, mPdu);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
+                SmsManager.RESULT_INVALID_SMSC_ADDRESS, RESULT_NO_NETWORK_ERROR);
+
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsUtils.FORMAT_STRING[0], null, true, mPdu);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
+                SmsManager.RESULT_INVALID_SMS_FORMAT, RESULT_NO_NETWORK_ERROR);
+
+        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mMessageRef, mFormat,
+                "1111", mPdu)).thenReturn(SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS);
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
+        verify(mListener, times(2)).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
+                SmsManager.RESULT_INVALID_SMSC_ADDRESS, RESULT_NO_NETWORK_ERROR);
+
+        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mMessageRef, mFormat,
+                "1111", mPdu)).thenReturn(SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED);
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
+                SmsManager.RESULT_ENCODING_ERROR, RESULT_NO_NETWORK_ERROR);
+
+        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mMessageRef, mFormat,
+                "1111", mPdu)).thenReturn(SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED);
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, RESULT_NO_NETWORK_ERROR);
     }
 
     @Test
     public void test_acknowledgeSms() {
         mImsSmsImpl.acknowledgeSms(mToken, mMessageRef, mResult);
-        verify(mSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_DELIVER, mMessageRef,
+        verify(mMockSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_DELIVER, mMessageRef,
                 mResult);
     }
 
     @Test
     public void test_acknowledgeSmsReport() {
         mImsSmsImpl.acknowledgeSmsReport(mToken, mMessageRef, mResult);
-        verify(mSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_STATUS_REPORT, mMessageRef,
-                mResult);
+        verify(mMockSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_STATUS_REPORT,
+                mMessageRef, mResult);
     }
 
     private SmsTransferLayer.Listener setupListener() {
         ArgumentCaptor<SmsTransferLayer.Listener> callbackArg =
                 ArgumentCaptor.forClass(SmsTransferLayer.Listener.class);
-        verify(mSmsTransferLayer).setListener(callbackArg.capture());
-        SmsTransferLayer.Listener mListener = callbackArg.getValue();
-        assertNotNull(mListener);
-        return mListener;
+        verify(mMockSmsTransferLayer, atLeastOnce()).setListener(callbackArg.capture());
+        SmsTransferLayer.Listener listener = callbackArg.getValue();
+        assertNotNull(listener);
+        return listener;
     }
 
     @Test
-    public void test_notifySmsReceived() {
-        SmsTransferLayer.Listener mListener = setupListener();
-        mListener.notifySmsReceived(mToken, SmsUtils.FORMAT_INT_3GPP, SmsUtils.TP_SMS_DELIVER,
-                mPdu);
-        mSmsTransferLayer.sendReportTPdu(mToken, SmsUtils.TP_SMS_STATUS_REPORT, mMessageRef,
-                ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
-        verify(mSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_STATUS_REPORT, mMessageRef,
-                ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
+    public void test_notifySmsResult() throws RemoteException {
+        SmsTransferLayer.Listener listener = setupListener();
+        listener.notifySmsResult(mToken, mMessageRef, mResult, SmsManager.RESULT_ERROR_NONE,
+                ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, mResult,
+                SmsManager.RESULT_ERROR_NONE, ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
+
+        mResult = SEND_STATUS_ERROR;
+        listener.notifySmsResult(mToken, mMessageRef, mResult, SmsManager.RESULT_ENCODING_ERROR,
+                ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
+        verify(mListener).onSendSmsResult(mToken, mMessageRef, mResult,
+                SmsManager.RESULT_ENCODING_ERROR, ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
+
     }
 
-    @After
-    public void tearDown() throws Exception {
-        mImsCallContext = null;
-        mImsSmsImpl = null;
-        mSmsTransferLayer = null;
+    @Test
+    public void test_notifySmsReceived() throws RemoteException {
+        SmsTransferLayer.Listener listener = setupListener();
+        listener.notifySmsReceived(mToken, mFormat, SmsUtils.TP_SMS_DELIVER, mPdu);
+        verify(mListener).onSmsReceived(mToken, SmsMessage.FORMAT_3GPP, mPdu);
+
+        listener.notifySmsReceived(mToken, mFormat, SmsUtils.TP_SMS_STATUS_REPORT,
+                mPdu);
+        verify(mListener).onSmsStatusReportReceived(mToken, SmsMessage.FORMAT_3GPP, mPdu);
+
+        when(mMockSmsTransferLayer.sendReportTPdu(anyInt(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(SmsUtils.RESULT_SUCCESS);
+        listener.notifySmsReceived(mToken, mFormat, SmsUtils.TP_SMS_SUBMIT, mPdu);
+        verify(mMockSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_SUBMIT, mMessageRef,
+                ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
+
     }
 }
