@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents.dcm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -650,9 +651,11 @@ public class ApnTest {
     }
 
     @Test
-    public void testHandlePreciseDataConnectionStateChanged_ignoreUnknown() throws Exception {
-        // ignore if network type is NETWORK_TYPE_UNKNOWN
-        assertEquals(TelephonyManager.DATA_UNKNOWN, mApn.mPreciseDcState);
+    public void testHandlePreciseDataConnectionStateChanged_ignoreUnknownNetworktype()
+            throws Exception {
+        // ignore if connected with unknown network type
+        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        mApn.mPreciseDcState = TelephonyManager.DATA_CONNECTING;
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
         msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -660,22 +663,10 @@ public class ApnTest {
         mApn.sendMessage(msg);
         mTestableLooper.processAllMessages();
 
-        assertEquals(TelephonyManager.DATA_UNKNOWN, mApn.mPreciseDcState);
-    }
-
-    @Test
-    public void testHandlePreciseDataConnectionStateChanged_handoverIgnore() throws Exception {
-        // ignore if handover to unknown network type
-        mApn.mNetworkType = TelephonyManager.NETWORK_TYPE_LTE;
-        mApn.mPreciseDcState = TelephonyManager.DATA_HANDOVER_IN_PROGRESS;
-        Message msg = Message.obtain();
-        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
-        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTED,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, DataFailCause.NONE);
-        mApn.sendMessage(msg);
-        mTestableLooper.processAllMessages();
-
-        assertEquals(TelephonyManager.NETWORK_TYPE_LTE, mApn.mNetworkType);
+        assertNotEquals("TestApn", mApn.mApnString);
+        assertNotEquals(ApnSetting.PROTOCOL_IPV6, mApn.mApnProtocol);
+        assertNotEquals(TelephonyManager.NETWORK_TYPE_IWLAN, mApn.mNetworkType);
+        assertNotEquals(TelephonyManager.DATA_CONNECTED, mApn.mPreciseDcState);
     }
 
     @Test
@@ -752,6 +743,23 @@ public class ApnTest {
 
         verify(mMockApnStateListener, times(1)).onHandoverInfoChanged(
                 Apn.HANDOVER_START, TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
+        assertEquals(TelephonyManager.DATA_HANDOVER_IN_PROGRESS, mApn.mPreciseDcState);
+    }
+
+    @Test
+    public void testHandlePreciseDataConnectionStateChanged_handoverFromUnknownNetworktype()
+            throws Exception {
+        mApn.addListener(mMockApnStateListener);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_HANDOVER_IN_PROGRESS,
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockApnStateListener, times(1)).onHandoverInfoChanged(
+                Apn.HANDOVER_START, TelephonyManager.NETWORK_TYPE_UNKNOWN, DataFailCause.NONE);
         assertEquals(TelephonyManager.DATA_HANDOVER_IN_PROGRESS, mApn.mPreciseDcState);
     }
 
