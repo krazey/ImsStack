@@ -39,9 +39,6 @@ protected:
     virtual void InitializeServiceFeature();
     virtual void InitializeFeatureTags();
 
-    virtual IMS_BOOL ProcessImsSuspended(IN IMS_UINT32 nReason = 0);
-    virtual IMS_BOOL ProcessImsResumed(IN IMS_UINT32 nReason = 0);
-
     virtual void CheckSuspended();
     virtual void SetSuspendedReason(IN IMS_UINT32 nReason);
     virtual void ResetSuspendedReason(IN IMS_UINT32 nReason);

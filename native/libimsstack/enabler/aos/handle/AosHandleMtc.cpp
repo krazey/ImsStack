@@ -161,10 +161,9 @@ PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
             0,
     };
     IMS_Sprintf(acLog, 256,
-            "m_bNetSrvIn(%s) -> bCurrSrvIn(%s) , m_nNetworkType(%x) -> nCurrNetworkType(%x) (%s)",
-            (m_bNetSrvIn) ? "IN SRV" : "NO SRV", (bCurrSrvIn) ? "IN SRV" : "NO SRV", m_nNetworkType,
-            nCurrNetworkType,
-            (IsSupportedNetworkTypeForCellular(nCurrNetworkType)) ? "LTE/NR" : "NOT LTE/NR");
+            "m_bNetSrvIn(%s) -> bCurrSrvIn(%s) , m_nNetworkType(%s) -> nCurrNetworkType(%s)",
+            (m_bNetSrvIn) ? "IN SRV" : "NO SRV", (bCurrSrvIn) ? "IN SRV" : "NO SRV",
+            RadioTypeToString(m_nNetworkType), RadioTypeToString(nCurrNetworkType));
 
     A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged :: %s", acLog, 0, 0);
 
@@ -256,110 +255,6 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeFeatureTags()
     {
         UpdateGGsmaRcsTelephonyFeatureTag();
     }
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
-{
-    if (IsImsConnected() == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    A_IMS_TRACE_I(APPPROFILE, "ProcessImsSuspended :: nReason(%d)", nReason, 0, 0);
-
-    if (nReason == AosReason::SUSPEND_NO_SERVICE)
-    {
-        SetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
-    }
-    else if (nReason == AosReason::SUSPEND_NO_LTE_COVERAGE)
-    {
-        SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
-    }
-    else
-    {
-        A_IMS_TRACE_D(APPPROFILE, "ProcessImsSuspended :: Unknown Suspended Reason", 0, 0, 0);
-    }
-
-    if (IsImsSuspended() == IMS_TRUE)
-    {
-        m_nReason = nReason;
-
-        if (m_piListener != IMS_NULL)
-        {
-            m_piListener->ImsAos_Suspended(GetImsAosReasonForSuspend(m_nReason));
-
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
-{
-    if (IsImsConnected() == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    if (IsImsSuspended() == IMS_FALSE)
-    {
-        return IMS_FALSE;
-    }
-
-    A_IMS_TRACE_I(APPPROFILE, "ProcessImsResumed :: nReason(%d)", nReason, 0, 0);
-
-    if (nReason == AosReason::SUSPEND_NO_LTE_COVERAGE)
-    {
-        ResetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
-    }
-    else if (nReason == AosReason::SUSPEND_NO_SERVICE)
-    {
-        ResetSuspendedReason(AosReason::SUSPEND_NO_SERVICE);
-
-        IMS_UINT32 nCurrNetworkType = GetNetworkType();
-
-        if (IsSupportedNetworkType(nCurrNetworkType))
-        {
-            A_IMS_TRACE_I(APPPROFILE, "ProcessImsResumed :: Srv In, LTE or NR", 0, 0, 0);
-            ResetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
-        }
-        else
-        {
-            A_IMS_TRACE_I(APPPROFILE, "ProcessImsResumed :: Srv In, But Not LTE", 0, 0, 0);
-            SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
-        }
-
-        m_nNetworkType = nCurrNetworkType;
-    }
-    else
-    {
-        A_IMS_TRACE_D(APPPROFILE, "ProcessImsResumed :: Unknown Resumed Reason", 0, 0, 0);
-    }
-
-    if (IsImsSuspended() == IMS_FALSE)
-    {
-        m_nReason = nReason;
-
-        if (m_piListener != IMS_NULL)
-        {
-            m_piListener->ImsAos_Resumed();
-
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
 }
 
 /*
