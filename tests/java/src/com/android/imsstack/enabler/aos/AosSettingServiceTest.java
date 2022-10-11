@@ -51,6 +51,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.lang.reflect.Field;
+
 @RunWith(JUnit4.class)
 public class AosSettingServiceTest {
     private static final int MAX_SIM_SLOT = 1;
@@ -64,6 +66,7 @@ public class AosSettingServiceTest {
     private SubscriptionManager mSubscriptionManager;
     private TelephonyManager mTelephonyManager;
     private AosSettingService mAosSettingService;
+    private JNIUpCallEvtManager mBackupJniUpCallEvtManager;
 
     @Mock JNIUpCallEvtManager mMockJniUpCallEvtManager;
     @Mock IJNIUpCallEvt mMockJniUpCallEvt;
@@ -71,7 +74,7 @@ public class AosSettingServiceTest {
     @Mock SubscriptionController mMockSubscriptionController;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
@@ -88,8 +91,10 @@ public class AosSettingServiceTest {
         when(mTelephonyManager.createForSubscriptionId(SUB_ID_0)).thenReturn(mTelephonyManager);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
 
-        JNIUpCallEvtManager.setJniUpCallEvtManager(mMockJniUpCallEvtManager);
+        mBackupJniUpCallEvtManager = JNIUpCallEvtManager.getInstance();
         when(mMockJniUpCallEvtManager.getJNIUpCallEvt(SLOT_0)).thenReturn(mMockJniUpCallEvt);
+        replaceInstance(JNIUpCallEvtManager.class, "sJNIUpCallEvtManager", null,
+                mMockJniUpCallEvtManager);
 
         AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, mMockSubscription);
 
@@ -98,9 +103,12 @@ public class AosSettingServiceTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         mAosSettingService.cleanup();
         AppContext.deinit();
+
+        replaceInstance(JNIUpCallEvtManager.class, "sJNIUpCallEvtManager", null,
+                mBackupJniUpCallEvtManager);
     }
 
     @Test
@@ -265,6 +273,13 @@ public class AosSettingServiceTest {
         mAosSettingService.mIntentReceiverListener.onReceive(mContext, null);
 
         assertFalse(mAosSettingService.mHandler.hasMessagesOrCallbacks());
+    }
+
+    private synchronized void replaceInstance(final Class c, final String instanceName,
+            final Object obj, final Object newValue) throws Exception {
+        Field field = c.getDeclaredField(instanceName);
+        field.setAccessible(true);
+        field.set(obj, newValue);
     }
 
     private class FakeAosSettingService extends AosSettingService {
