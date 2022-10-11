@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
+#include "call/ISilentRedialHelper.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
@@ -42,6 +43,7 @@ public:
     MockIMtcCallContext objContext;
     MockIMtcCallManager objCallManager;
     MockIEctManager objEctManager;
+    MockICallStateProxy objCallStateProxy;
 
 protected:
     virtual void SetUp() override
@@ -52,6 +54,8 @@ protected:
                 .WillByDefault(ReturnRef(objConferenceManager));
         ON_CALL(objContext, GetEctManager)
                 .WillByDefault(Return(&objEctManager));
+        ON_CALL(objContext, GetCallStateProxy)
+                .WillByDefault(ReturnRef(objCallStateProxy));
 
         pCallController = new MtcCallController(objContext);
     }
@@ -635,4 +639,42 @@ TEST_F(MtcCallControllerTest, HandleIpcanChangedCallsAllCalls)
             .WillByDefault(Return(lstCalls));
 
     pCallController->HandleIpcanChanged();
+}
+
+TEST_F(MtcCallControllerTest, GetRedialHelperCreatesSilentRedialHelper)
+{
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
+    ISilentRedialHelper& objRedialHelper = pCallController->GetRedialHelper(objContext, objReason);
+    EXPECT_NE(&objRedialHelper, nullptr);
+}
+
+TEST_F(MtcCallControllerTest, GetRedialHelperWithSameReasonDoesNotCreatesSilentRedialHelper)
+{
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
+    ISilentRedialHelper& objRedialHelper1 = pCallController->GetRedialHelper(objContext, objReason);
+    ISilentRedialHelper& objRedialHelper2 = pCallController->GetRedialHelper(objContext, objReason);
+    EXPECT_EQ(&objRedialHelper1, &objRedialHelper2);
+}
+
+TEST_F(MtcCallControllerTest, GetRedialHelperWithDifferentTypeCreatesSilentRedialHelper)
+{
+    const CallReasonInfo objReason1(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
+    const CallReasonInfo objReason2(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER);
+    ISilentRedialHelper& objRedialHelper1 =
+            pCallController->GetRedialHelper(objContext, objReason1);
+    IMS_UINT32 nType1 = objRedialHelper1.GetType();
+    ISilentRedialHelper& objRedialHelper2 =
+            pCallController->GetRedialHelper(objContext, objReason2);
+    EXPECT_NE(nType1, objRedialHelper2.GetType());
+}
+
+TEST_F(MtcCallControllerTest, ReleaseRedialHelperDeletesSilentRedialHelper)
+{
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
+    ISilentRedialHelper& objRedialHelper1 = pCallController->GetRedialHelper(objContext, objReason);
+    IMS_UINT32 nType1 = objRedialHelper1.GetType();
+    pCallController->ReleaseRedialHelper();
+    ISilentRedialHelper& objRedialHelper2 = pCallController->GetRedialHelper(objContext, objReason);
+    // nothing to check : cannot check address
+    EXPECT_EQ(nType1, objRedialHelper2.GetType());
 }

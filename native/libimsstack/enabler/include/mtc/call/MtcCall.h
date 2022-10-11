@@ -120,7 +120,7 @@ public:
     inline CallKey GetKey() const override { return m_nKey; }
     CallType GetCallType() const override;
     inline CallStateName GetState() const override { return m_objStateMachine.GetState(); }
-    // TODO: TEMP for conference.
+
     inline IMtcCallContext& GetCallContext() const override { return *(IMtcCallContext*)this; }
 
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }

@@ -148,7 +148,6 @@ public:
      */
     virtual State GetState() const = 0;
 
-    // TODO:
     virtual IMtcCallContext& GetCallContext() const = 0;
 };
 

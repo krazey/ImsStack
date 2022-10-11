@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "IMtcCallController.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -34,6 +35,7 @@
 #include "helper/MtcTimerWrapper.h"
 #include "call/IMtcUiNotifier.h"
 #include "call/extension/MtcExtensionSet.h"
+#include "call/SilentRedialHelper.h"
 #include "call/state/OutgoingState.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
 #include "call/termination/StartErrorHandler.h"
@@ -55,7 +57,6 @@ PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
         m_bRemoteAlerted(IMS_FALSE),
-        m_nSilentRedialCount(0),
         m_bTimer100WaitExpired(IMS_FALSE)
 {
 }
@@ -206,7 +207,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
 
     if (objReason.nCode == CODE_INTERNAL_REDIAL)
     {
-        return HandleSilentRetry(objReason);
+        return HandleSilentRedial(piSession, objReason);
     }
 
     OnStartFailed(piSession, objReason);
@@ -650,8 +651,6 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
             OnStartFailed(GetISession(), objReason);
             return CallStateName::TERMINATING;
         }
-        case TimerType::TIMER_RETRY_AFTER:
-            return ContinueSilentRetry();
         default:
             return GetStateName();
     }
@@ -713,69 +712,20 @@ IMS_BOOL OutgoingState::HandleB1TimerAfterTerminate(IN IMtcSession* piMtcSession
 }
 
 PRIVATE
-CallStateName OutgoingState::HandleSilentRetry(IN const CallReasonInfo& objReason)
+CallStateName OutgoingState::HandleSilentRedial(
+        IN ISession* piSession, IN const CallReasonInfo& objReason)
 {
-    IMS_TRACE_D("HandleSilentRetry", 0, 0, 0);
+    IMS_TRACE_D("HandleSilentRedial", 0, 0, 0);
+    IMS_RESULT nResult =
+            m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason).Redial();
 
-    if (m_nSilentRedialCount >=
-            m_objContext.GetConfigurationProxy().GetInt(Feature::SILENT_REDIAL_MAX_RETRY_COUNT))
+    if (nResult == IMS_FAILURE)
     {
-        IMS_TRACE_D("HandleRetrySilent : Max retry count[%d] reached", m_nSilentRedialCount, 0, 0);
-        m_objContext.GetUiNotifier().SendStartFailed(objReason);
-        // TODO: Trigger initial registeration if requird (by config?)
-        return CallStateName::TERMINATING;
-    }
-    m_nSilentRedialCount += 1;
-
-    IMtcSession* pSession = m_objContext.GetSession();
-    if (pSession != IMS_NULL)
-    {
-        m_objContext.RemoveSession(&pSession->GetISession());
-    }
-
-    m_objContext.GetMediaManager().Terminate();
-
-    /* TODO: Policy: retry timer */
-    IMS_SINT32 nRetryAfterSecond = objReason.nExtraCode;
-    if (nRetryAfterSecond <= 0)
-    {
-        return ContinueSilentRetry();
-    }
-    else
-    {
-        m_objContext.GetTimer().Start(TimerType::TIMER_RETRY_AFTER, nRetryAfterSecond * 1000);
-    }
-
-    /* TODO: Policy: LTE
-    m_objContext.GetAosConnector(m_objContext.GetService().GetServiceType())
-            ->Control(ImsAosControl::FALLBACK_TO_LTE_AND_LET_ME_KNOW_IT);
-    */
-
-    return GetStateName();
-}
-
-PRIVATE
-CallStateName OutgoingState::ContinueSilentRetry()
-{
-    IMS_TRACE_D("ContinueSilentRetry", 0, 0, 0);
-
-    IMtcSession* pSession = m_objContext.CreateSession();
-    if (pSession == IMS_NULL)
-    {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
+        OnStartFailed(piSession, objReason);
         return CallStateName::TERMINATING;
     }
 
-    InitMediaSession();
-    m_objContext.GetPreconditionManager().CreateQos(GetISession());
-
-    if (pSession->Start() == IMS_FAILURE)
-    {
-        m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR));
-        return CallStateName::TERMINATING;
-    }
-
-    return GetStateName();
+    return CallStateName::IDLE;
 }
 
 PRIVATE

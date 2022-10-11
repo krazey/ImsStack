@@ -27,6 +27,8 @@
 class IMtcCallManager;
 class IMtcContext;
 class ISession;
+class ISilentRedialHelper;
+class SilentRedialHelper;
 enum class KeyType;
 struct ConfUser;
 union Key;
@@ -85,9 +87,14 @@ public:
 
     void HandleIpcanChanged() override;
 
+    ISilentRedialHelper& GetRedialHelper(
+            IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) override;
+    void ReleaseRedialHelper() override;
+
 private:
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;
+    SilentRedialHelper* m_pRedialHelper;
 };
 
 #endif

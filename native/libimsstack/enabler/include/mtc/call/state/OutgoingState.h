@@ -72,8 +72,7 @@ private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
     IMS_BOOL HandleB1TimerAfterTerminate(IN IMtcSession* piMtcSession,
             IN const CallReasonInfo& objReason);
-    CallStateName HandleSilentRetry(IN const CallReasonInfo& objReason);
-    CallStateName ContinueSilentRetry();
+    CallStateName HandleSilentRedial(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
     void SendProgressing();
     void OnStarted(IN ISession* piSession);
@@ -81,7 +80,6 @@ private:
     void OnSessionForked(IN ISession* piOriginSession);
 
     IMS_BOOL m_bRemoteAlerted;
-    IMS_SINT32 m_nSilentRedialCount;
     IMS_BOOL m_bTimer100WaitExpired;
 };
 

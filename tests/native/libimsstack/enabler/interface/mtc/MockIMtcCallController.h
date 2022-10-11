@@ -25,8 +25,11 @@
 #include "IuMtcService.h"
 #include "call/IMtcCall.h"
 
+class IMtcCallContext;
 class ISession;
+class ISilentRedialHelper;
 enum class KeyType;
+struct CallReasonInfo;
 struct ConfUser;
 union Key;
 
@@ -76,6 +79,9 @@ public:
             (override));
     MOCK_METHOD(void, Transfer, (IN CallKey nCallKey, IN const AString& strTarget), (override));
     MOCK_METHOD(void, HandleIpcanChanged, (), (override));
+    MOCK_METHOD(ISilentRedialHelper&, GetRedialHelper, (
+            IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason), (override));
+    MOCK_METHOD(void, ReleaseRedialHelper, (), (override));
 
     // IEnablerService interface
     MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
