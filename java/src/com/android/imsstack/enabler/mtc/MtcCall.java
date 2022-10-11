@@ -20,10 +20,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.telephony.imsmedia.ImsMediaSession;
 import android.text.TextUtils;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
+import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsArgs;
@@ -426,6 +428,9 @@ public class MtcCall extends Call implements ConferenceTracker {
         mConference.dispose();
 
         mRttListener = null;
+
+        requestCloseSessionToImsMediaSession();
+
         mMediaSession.setRttListener(null);
         mMediaSession.dispose();
 
@@ -1442,6 +1447,29 @@ public class MtcCall extends Call implements ConferenceTracker {
 
     private void updateAutoRejectedCall(boolean autoRejectedCall) {
         setDetails(Details.TERMINATED_BY_AUTO_REJECTED_CALL, autoRejectedCall);
+    }
+
+    private void requestCloseSessionToImsMediaSession() {
+        Parcel parcelAudio = Parcel.obtain();
+        parcelAudio.writeInt(MediaConstants.REQUEST_CLOSE_SESSION);
+        parcelAudio.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        parcelAudio.setDataPosition(0);
+        mMediaSession.onMessage(parcelAudio);
+        parcelAudio.recycle();
+
+        Parcel parcelVideo = Parcel.obtain();
+        parcelVideo.writeInt(MediaConstants.REQUEST_CLOSE_SESSION);
+        parcelVideo.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
+        parcelVideo.setDataPosition(0);
+        mMediaSession.onMessage(parcelVideo);
+        parcelVideo.recycle();
+
+        Parcel parcelText = Parcel.obtain();
+        parcelText.writeInt(MediaConstants.REQUEST_CLOSE_SESSION);
+        parcelText.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
+        parcelText.setDataPosition(0);
+        mMediaSession.onMessage(parcelText);
+        parcelText.recycle();
     }
 
     private static void closeInternal(final MtcCall call) {
