@@ -125,7 +125,7 @@ public final class MSimUtils {
         return SubscriptionManager.getSlotIndex(subId);
     }
 
-    /** Returns the subscription id from the specified phoen id. */
+    /** Returns the subscription id from the specified phone id. */
     public static int getSubId(int phoneId) {
         SubscriptionManager sm =
                 AppContext.getInstance().getSystemService(SubscriptionManager.class);
