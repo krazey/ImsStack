@@ -52,7 +52,6 @@ public class MediaTestUtils {
     private static final int MAX_MTU_BYTES = 1500;
     private static final byte PTIME = 20;
     private static final int MAX_PTIME = 240;
-    private static final byte CMR = 100;
     private static final boolean DTX_ENABLED = true;
     private static final byte DTMF_PAYLOAD = 100;
     private static final byte DTMF_SAMPLING_RATE = 16;
@@ -64,6 +63,7 @@ public class MediaTestUtils {
     // EvsParams
     private static final byte CHANNEL_AWARE_MODE = 7;
     private static final boolean USE_HEADER_FULL_ONLY = true;
+    private static final byte CMR = 100;
 
     // RtcpConfig
     private static final String CANONICAL_NAME = "name";
@@ -141,7 +141,6 @@ public class MediaTestUtils {
                 .setPtimeMillis(PTIME)
                 .setMaxPtimeMillis(MAX_PTIME)
                 .setDtxEnabled(DTX_ENABLED)
-                .setCodecModeRequest(CMR)
                 .setCodecType(AudioConfig.CODEC_EVS)
                 .setTxDtmfPayloadTypeNumber(DTMF_PAYLOAD)
                 .setRxDtmfPayloadTypeNumber(DTMF_PAYLOAD)
@@ -174,6 +173,7 @@ public class MediaTestUtils {
             .setEvsMode(EvsParams.EVS_MODE_8)
             .setChannelAwareMode(CHANNEL_AWARE_MODE)
             .setHeaderFullOnly(USE_HEADER_FULL_ONLY)
+            .setCodecModeRequest(CMR)
             .build();
     }
 

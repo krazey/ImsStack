@@ -311,9 +311,9 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
             nEvsBandwidth = EvsParams::EVS_WIDE_BAND;
         }
         pEvsParams->setEvsBandwidth(nEvsBandwidth);
+        pEvsParams->setCodecModeRequest((int8_t)pFmtp->bSendCmr);
 
         m_objAudioConfig.setEvsParams(*pEvsParams);
-        m_objAudioConfig.setCodecModeRequest((int8_t)pFmtp->bSendCmr);
 
         delete pEvsParams;
 
@@ -323,7 +323,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN AudioProfile* pLocalProfile,
         IMS_TRACE_D("UpdateRtpConfig() - UseHeaderFullOnly[%d]",
                 objEvsParams.getUseHeaderFullOnly(), 0, 0);
         IMS_TRACE_D("UpdateRtpConfig() - EVS nBandwidth[0x%08x], CodecModeRequest[0x%08x]",
-                objEvsParams.getEvsBandwidth(), m_objAudioConfig.getCodecModeRequest(), 0);
+                objEvsParams.getEvsBandwidth(), objEvsParams.getCodecModeRequest(), 0);
     }
     else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU") ||
             pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA"))
