@@ -684,26 +684,18 @@ public class DcApn implements IDcApn {
     private void sendDataConnectionState(int apnType,
             PreciseDataConnectionState dataConnectionState) {
         IApn apn = getApnControl(apnType);
+        if (apn != null) {
+            Message msg = Message.obtain();
+            msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+            msg.obj = dataConnectionState;
 
-        if (apn == null) {
-            ImsLog.w(mSlotId, "Apn " + apnType + " is not supported");
-            return;
+            apn.sendMessage(msg);
         }
-
-        if (dataConnectionState.getState() == TelephonyManager.DATA_SUSPENDED) {
-            return;
-        }
-
-        Message msg = Message.obtain();
-        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
-        msg.obj = dataConnectionState;
-
-        apn.sendMessage(msg);
     }
 
     private void updateSubscription(int subId) {
         synchronized (mLock) {
-            int slotId = MSimUtils.getSlotId(subId);
+            int slotId = getSlotId(subId);
             if (mSlotId != slotId) {
                 ISubscription isub = getSubscription();
 
@@ -757,15 +749,17 @@ public class DcApn implements IDcApn {
                 PreciseDataConnectionState dataConnectionState) {
             ImsLog.d(mSlotId, "onPreciseDataConnectionStateChanged :: " + dataConnectionState);
 
-            ApnSetting apnSetting = dataConnectionState.getApnSetting();
-            int apnTypes = 0;
+            if (dataConnectionState.getState() == TelephonyManager.DATA_SUSPENDED) {
+                return;
+            }
 
+            ApnSetting apnSetting = dataConnectionState.getApnSetting();
             if (apnSetting == null) {
                 ImsLog.i(mSlotId, "Invalid apnSetting");
                 return;
             }
 
-            apnTypes = apnSetting.getApnTypeBitmask();
+            int apnTypes = apnSetting.getApnTypeBitmask();
             if ((apnTypes & ApnSetting.TYPE_IMS) != 0) {
                 sendDataConnectionState(EApnType.IMS.getType(), dataConnectionState);
             }
@@ -785,12 +779,10 @@ public class DcApn implements IDcApn {
 
         @Override
         public void onSimLoadCompleted(int slotId) {
-            if (mSlotId != slotId) {
-                return;
+            if (mSlotId == slotId) {
+                int subId = MSimUtils.getSubId(mSlotId);
+                updateSubscription(subId);
             }
-
-            int subId = MSimUtils.getSubId(mSlotId);
-            updateSubscription(subId);
         }
 
         @Override
@@ -812,5 +804,10 @@ public class DcApn implements IDcApn {
     @VisibleForTesting
     protected ISharedState getSharedState(int slotId) {
         return (ISharedState) AgentFactory.getAgent(AgentFactory.SHARED_STATE, slotId);
+    }
+
+    @VisibleForTesting
+    protected int getSlotId(int subId) {
+        return MSimUtils.getSlotId(subId);
     }
 }
