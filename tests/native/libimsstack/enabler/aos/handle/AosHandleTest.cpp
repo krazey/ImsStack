@@ -1163,16 +1163,10 @@ TEST_F(AosHandleTest, Init_CleanUp)
             AddListener(DYNAMIC_CAST(IAosRegistrationControlListener*, m_pAosHandle)))
             .Times(1);
     EXPECT_CALL(m_objMockIAosService,
-            AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, m_pAosHandle)))
-            .Times(1);
-    EXPECT_CALL(m_objMockIAosService,
             AddListener(DYNAMIC_CAST(IAosServiceSettingListener*, m_pAosHandle)))
             .Times(1);
     EXPECT_CALL(m_objMockIAosService,
             RemoveListener(DYNAMIC_CAST(IAosRegistrationControlListener*, m_pAosHandle)))
-            .Times(1);
-    EXPECT_CALL(m_objMockIAosService,
-            RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, m_pAosHandle)))
             .Times(1);
     EXPECT_CALL(m_objMockIAosService,
             RemoveListener(DYNAMIC_CAST(IAosServiceSettingListener*, m_pAosHandle)))
