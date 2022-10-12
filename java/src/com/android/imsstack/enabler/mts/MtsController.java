@@ -82,51 +82,54 @@ public class MtsController {
         }
     }
 
-    private MtsJni mMtsJni;
     private IBaseContext mContext = null;
+    private int mSlotId = -1;
     private MessageHandler mHandler = null;
     private Listener mListener = null;
+    private MtsJni mMtsJni;
     private boolean mUseDialedNumber = false;
 
     public MtsController(IBaseContext context) {
-        ImsLog.d("");
+        ImsLog.d(context.getSlotId(), "");
 
         mContext = context;
+        mSlotId = mContext.getSlotId();
 
         mHandler = new MessageHandler(mContext.getCallLooper());
 
         ConfigInterface config = AgentFactory.getInstance().getAgent(
-                ConfigInterface.class, mContext.getSlotId());
+                ConfigInterface.class, mSlotId);
 
         if (config != null) {
             CarrierConfig cc = config.getCarrierConfig();
 
             if (cc == null) {
-                ImsLog.w(mContext.getSlotId(), "CarrierConfig is null");
+                ImsLog.w(mSlotId, "CarrierConfig is null");
                 return;
             }
 
             mUseDialedNumber = cc.getBoolean(
                     CarrierConfig.Assets.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL);
         } else {
-            ImsLog.w(mContext.getSlotId(), "config is null");
+            ImsLog.w(mSlotId, "config is null");
             return;
         }
     }
 
     @VisibleForTesting
     public MtsController(IBaseContext context, Looper looper) {
-        ImsLog.d("");
+        ImsLog.d(context.getSlotId(), "");
 
         mContext = context;
+        mSlotId = mContext.getSlotId();
 
         mHandler = new MessageHandler(looper);
     }
 
     public void cleanup() {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
 
-        mMtsJni.release(mContext.getSlotId());
+        mMtsJni.release(mSlotId);
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
@@ -141,16 +144,16 @@ public class MtsController {
     }
 
     public void startNativeConnection() {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
 
         mMtsJni = MtsJni.getInstance();
-        mMtsJni.init(mHandler, mContext.getSlotId());
+        mMtsJni.init(mHandler, mSlotId);
     }
 
     @VisibleForTesting
     public void startNativeConnection(MtsJni mtsJni) {
         mMtsJni = mtsJni;
-        mMtsJni.init(mHandler, mContext.getSlotId());
+        mMtsJni.init(mHandler, mSlotId);
     }
 
     @VisibleForTesting
@@ -160,9 +163,9 @@ public class MtsController {
 
     public boolean sendMessage(
             int smsFormat, byte[] smsData, String psiSmsc, String dialedNumber, int seqId) {
-        ImsLog.d("smsFormat : " + smsFormat + ", smsDataLength = " + smsData.length
+        ImsLog.d(mSlotId, "smsFormat : " + smsFormat + ", smsDataLength = " + smsData.length
                 + ", psiSmsc = " + psiSmsc + ", dialedNumber = " + dialedNumber
-                + ", seqId = " + seqId );
+                + ", seqId = " + seqId);
         String encodedPdu = Base64.encodeToString(smsData, Base64.DEFAULT);
 
         if (encodedPdu == null || psiSmsc == null) {
@@ -172,7 +175,7 @@ public class MtsController {
 
         Parcel parcel = Parcel.obtain();
         if (parcel == null) {
-            ImsLog.e("parcel is null");
+            ImsLog.e(mSlotId, "parcel is null");
             processNotifySendMoSmsError(smsFormat, seqId);
             return false;
         }
@@ -193,15 +196,15 @@ public class MtsController {
         parcel.writeString(encodedPdu);
         parcel.writeString(targetAddress);
         parcel.writeInt(seqId);
-        mMtsJni.sendMessage(parcel, mContext.getSlotId());
+        mMtsJni.sendMessage(parcel, mSlotId);
         return true;
     }
 
     private void processNotifySendMoSmsError(int smsFormat, int seqId) {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
 
         if (mHandler == null) {
-            ImsLog.e("mHandler is null");
+            ImsLog.e(mSlotId, "mHandler is null");
             return;
         }
 
@@ -220,13 +223,13 @@ public class MtsController {
     private int notifySendMtResult(int mtResult) {
         Parcel parcel = Parcel.obtain();
         if (parcel == null) {
-            ImsLog.e("parcel is null");
+            ImsLog.e(mSlotId, "parcel is null");
             return (-1);
         }
 
         parcel.writeInt(MtsJni.NOTI_MTSENABLER_SEND_MT_RESULT);
         parcel.writeInt(mtResult);
-        mMtsJni.sendMessage(parcel, mContext.getSlotId());
+        mMtsJni.sendMessage(parcel, mSlotId);
         return 0;
     }
 
@@ -237,10 +240,10 @@ public class MtsController {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.i("MessageHandler - what=" + msg.what);
+            ImsLog.i(mSlotId, "MessageHandler - what=" + msg.what);
 
             if (mListener == null) {
-                ImsLog.e("mListener is null");
+                ImsLog.e(mSlotId, "mListener is null");
                 return;
             }
 
