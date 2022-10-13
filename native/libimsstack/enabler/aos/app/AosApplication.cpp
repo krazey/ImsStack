@@ -1104,13 +1104,18 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage(IN IMSMSG& obj
 PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage_Connection(IN IMSMSG& objMsg)
 {
     static IMS_BOOL bEpdgEnabled = IMS_FALSE;
+    IMS_UINT32 nType = LONG_TO_INT(objMsg.nWparam);
+
+    if (nType == CONNECTION_DEACTIVATED)
+    {
+        m_piRegistration->RequestCmd(IAosRegistration::CMD_CLEAR_RETRY_COUNT);
+    }
 
     if (!GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
     {
         return IMS_FALSE;
     }
 
-    IMS_UINT32 nType = LONG_TO_INT(objMsg.nWparam);
     IMS_UINT32 nReason = LONG_TO_INT(objMsg.nLparam);
 
     A_IMS_TRACE_I(APPID, "PreprocessStateMessage_Connection :: nType(%d), nReason(%d)", nType,

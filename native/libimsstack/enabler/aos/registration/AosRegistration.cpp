@@ -110,7 +110,6 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_nPcscfPort(0),
         m_nRetryBaseTime(30),
         m_nRetryMaxTime(1800),
-        m_nUpperBoundWaitTime(0),
         m_nConsecutiveFailure(0),
         m_nConsecutiveFailureForPdnReactivated(0),
         m_nForbiddenCount(0),
@@ -337,6 +336,10 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
 
         case CMD_INIT_AWT:
             SetRetryTime();
+            break;
+
+        case CMD_CLEAR_RETRY_COUNT:
+            ClearRetryCount(IMS_TRUE);
             break;
 
         case CMD_SET_IPSEC:
@@ -2504,8 +2507,15 @@ PROTECTED VIRTUAL void AosRegistration::ClearPcscf()
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::ClearRetryCount()
+PROTECTED VIRTUAL void AosRegistration::ClearRetryCount(IN IMS_BOOL bForced /* = IMS_FALSE */)
 {
+    if (bForced == IMS_FALSE &&
+            (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() !=
+                    CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION))
+    {
+        return;
+    }
+
     A_IMS_TRACE_D(REGID, "ClearRetryCount :: (%d) -> (%d)", m_nConsecutiveFailure, 0, 0);
     m_nConsecutiveFailure = 0;
 }
@@ -2517,8 +2527,6 @@ PROTECTED VIRTUAL void AosRegistration::ClearRetryValues(IN IMS_BOOL bRegSuccess
         m_nConsecutiveFailureForPdnReactivated = 0;
         m_nForbiddenCount = 0;
     }
-
-    m_nUpperBoundWaitTime = 0;
 }
 
 PROTECTED VIRTUAL void AosRegistration::ClearAuthChallengedCount()
@@ -4222,7 +4230,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
             CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
     {
-        ClearRetryCount();
+        ClearRetryCount(IMS_TRUE);
     }
 
     if (IsIpsecSupported())
@@ -4318,7 +4326,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
             CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
     {
-        ClearRetryCount();
+        ClearRetryCount(IMS_TRUE);
     }
 
     if (IsIpsecSupported())
@@ -4844,7 +4852,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessSubscription_Success()
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
             CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION)
     {
-        ClearRetryCount();
+        ClearRetryCount(IMS_TRUE);
     }
 }
 
@@ -4864,7 +4872,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegEventRegistered()
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
             CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_NOTIFY)
     {
-        ClearRetryCount();
+        ClearRetryCount(IMS_TRUE);
     }
 }
 

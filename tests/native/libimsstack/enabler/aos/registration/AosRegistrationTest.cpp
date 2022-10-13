@@ -88,6 +88,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, CheckBool);
     FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
     FRIEND_TEST(AosRegistrationTest, BlockChanged);
+    FRIEND_TEST(AosRegistrationTest, RetryCount);
 
 protected:
     inline virtual IRegistration* GetRegistration() { return m_piMockRegistration; }
@@ -123,6 +124,8 @@ public:
     }
 
     inline void SetISipConfigV(ISipConfigV* piSipConfigV) { m_pUtil->SetISipConfigV(piSipConfigV); }
+
+    inline IMS_BOOL IsRetryCountClear() { return m_nConsecutiveFailure == 0; }
 
 private:
     IRegistration* m_piMockRegistration;
@@ -767,4 +770,28 @@ TEST_F(AosRegistrationTest, BlockChanged)
 
     EXPECT_TRUE(m_pTestAosRegistration->IsBlocked());
     EXPECT_FALSE(m_pTestAosRegistration->IsTransactionStarted());
+}
+
+TEST_F(AosRegistrationTest, RetryCount)
+{
+    EXPECT_CALL(m_objMockAosIAosNConfiguration,
+            IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    // TEST_F : IncreaseConsecutiveFailCount
+    m_pTestAosRegistration->IncreaseConsecutiveFailCount();
+    EXPECT_FALSE(m_pTestAosRegistration->IsRetryCountClear());
+
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegRetryCountResetPolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(
+                    Return(CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION));
+
+    // TEST_F : ClearRetryCount
+    m_pTestAosRegistration->ClearRetryCount();
+    EXPECT_FALSE(m_pTestAosRegistration->IsRetryCountClear());
+
+    m_pTestAosRegistration->ClearRetryCount(IMS_TRUE);
+    EXPECT_TRUE(m_pTestAosRegistration->IsRetryCountClear());
 }

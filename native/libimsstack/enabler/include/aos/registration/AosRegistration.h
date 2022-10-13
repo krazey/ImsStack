@@ -229,7 +229,7 @@ protected:
     /// Clear
     virtual void ClearRegParameters(IN IMS_BOOL bClearPcscf = IMS_TRUE);
     virtual void ClearPcscf();
-    virtual void ClearRetryCount();
+    virtual void ClearRetryCount(IN IMS_BOOL bForced = IMS_FALSE);
     virtual void ClearRetryValues(IN IMS_BOOL bRegSuccess = IMS_FALSE);
     virtual void ClearAuthChallengedCount();
     virtual void ClearErrorCount();
@@ -515,7 +515,6 @@ protected:
     /// throttling
     IMS_UINT32 m_nRetryBaseTime;       /// base-time for flow recovery in RFC 5626
     IMS_UINT32 m_nRetryMaxTime;        /// max-time for flow recovery in RFC 5626
-    IMS_UINT32 m_nUpperBoundWaitTime;  /// used for flow recovery in RFC 5626
     IMS_UINT32 m_nConsecutiveFailure;
     IMS_UINT32 m_nConsecutiveFailureForPdnReactivated;
     IMS_UINT32 m_nForbiddenCount;
