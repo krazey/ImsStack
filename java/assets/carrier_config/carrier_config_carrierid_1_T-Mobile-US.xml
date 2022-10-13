@@ -195,7 +195,7 @@
         <item value="606"/>
         <item value="701"/>
     </int-array>
-    <int name="imsvoice.policy_for_403_response_for_invite_int" value="2"/>
+    <int name="imsvoice.policy_for_403_response_for_invite_int" value="4"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="1"/>
     <boolean name="initialize_p_early_media_when_no_header_bool" value="true"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="1"/>
@@ -211,7 +211,7 @@
     <!-- MTC emergency call -->
     <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
     <int name="imsemergency.emergency_tcall_timer_millis_int" value="5000"/>
-    <int name="imsemergency.emergency_ringback_timer_millis_int" value="0"/>
+    <int name="imsemergency.emergency_ringback_timer_millis_int" value="-1"/>
     <int name="imsemergency.emergency_18x_timer_millis_int" value="25000"/>
     <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="1"/>
     <int name="emergency_rtt_guard_timer_millis_int" value="180000"/>

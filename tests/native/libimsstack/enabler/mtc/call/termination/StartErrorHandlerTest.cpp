@@ -367,25 +367,46 @@ TEST_F(StartErrorHandlerTest, Handle4xxResponses)
 TEST_F(StartErrorHandlerTest, Handle403Response)
 {
     SetMessageCode(SipStatusCode::SC_403);
+
+    // SIP_403_POLICY_TERMINATE_CALL case
     ON_CALL(*pConfigurationManager, GetPolicyFor403ResponseForInvite)
-                .WillByDefault(Return(CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL));
+            .WillByDefault(Return(CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL));
     EXPECT_CALL(objAosConnector, Control(_))
             .Times(0);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
 
+    // SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION case
     ON_CALL(*pConfigurationManager, GetPolicyFor403ResponseForInvite)
-                .WillByDefault(Return(
-                CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION));
+            .WillByDefault(Return(
+            CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE))
             .Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
 
+    // SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION case
     ON_CALL(*pConfigurationManager, GetPolicyFor403ResponseForInvite)
-                .WillByDefault(Return(
-                CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION));
+            .WillByDefault(Return(
+            CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REFRESH))
             .Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
+
+    // SIP_403_POLICY_CSFB case
+    ON_CALL(*pConfigurationManager, GetPolicyFor403ResponseForInvite)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB));
+    EXPECT_CALL(objAosConnector, Control(_))
+            .Times(0);
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    // SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION case
+    ON_CALL(*pConfigurationManager, GetPolicyFor403ResponseForInvite)
+            .WillByDefault(
+            Return(CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB))
+            .Times(1);
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle404Response)
@@ -394,7 +415,8 @@ TEST_F(StartErrorHandlerTest, Handle404Response)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_NOT_FOUND, SipStatusCode::SC_404));
 
     objCallInfo.bUssi = IMS_TRUE;
-    EXPECT_TRUE(CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
 TEST_F(StartErrorHandlerTest, Handle407Response)

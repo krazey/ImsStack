@@ -293,6 +293,15 @@ CallReasonInfo StartErrorHandler::Handle403Response() const
         case CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION:
             ControlAos(ImsAosControl::REGISTER_REFRESH);
             break;
+
+        case CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB:
+            return CallReasonInfo(
+                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+
+        case CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION:
+            ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
+            return CallReasonInfo(
+                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
 
     return CallReasonInfo(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403);
@@ -303,7 +312,8 @@ CallReasonInfo StartErrorHandler::Handle404Response() const
 {
     if (m_objContext.GetCallInfo().bUssi)
     {
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
+        return CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
     }
     else
     {
@@ -500,6 +510,8 @@ IMS_BOOL StartErrorHandler::IsConditionCheckRequiredBeforeRetry1x(
         case SipStatusCode::SC_302:
         case SipStatusCode::SC_305:
         case SipStatusCode::SC_380:
+        case SipStatusCode::SC_403:
+        // POLICY_FOR_403_RESPONSE_FOR_INVITE overrides REJECT_CODE_FOR_CSFB
         case SipStatusCode::SC_488:
         case SipStatusCode::SC_503:
         case SipStatusCode::SC_504:

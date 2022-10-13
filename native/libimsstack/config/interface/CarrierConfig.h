@@ -615,7 +615,9 @@ public:
         {
             SIP_403_POLICY_TERMINATE_CALL = 0,
             SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION = 1,
-            SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION = 2
+            SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION = 2,
+            SIP_403_POLICY_CSFB = 3,
+            SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION = 4
         };
 
         // Policy for QoS checking while upgrading call
