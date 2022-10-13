@@ -284,6 +284,37 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISes
     return IMS_FALSE;
 }
 
+PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    IMS_TRACE_I("RequestQos() - nNegoId[%" PFLS_x "], eMediaType[%d]", nNegoId, eMediaType, 0);
+
+    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "RequestQos() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO))
+    {
+        /** TODO: add implementation */
+    }
+
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
+    {
+        /** TODO: add implementation */
+    }
+
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
+    {
+        /** TODO: add implementation */
+    }
+
+    return IMS_TRUE;
+}
+
 PUBLIC VIRTUAL void MediaSession::FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession* pSession)
 {
     IMS_TRACE_I(

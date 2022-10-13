@@ -120,6 +120,17 @@ public:
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) = 0;
 
     /**
+     * @brief request to registering QoS callback of the given session to java layer
+     *
+     * @param nNegoID The identification of the session
+     * @param eMediaType The type of media
+     * @return IMS_BOOL Returns IMS_TRUE when request Qos is done successfully, IMS_FALSE if the
+     * arguments is invalid.
+     */
+    virtual IMS_BOOL RequestQos(
+            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
+
+    /**
      * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
      *
      * @param nNegoID The negotiation id to clean the SDP set

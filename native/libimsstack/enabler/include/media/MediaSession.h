@@ -72,6 +72,8 @@ public:
     virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason);
+    virtual IMS_BOOL RequestQos(
+            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO);
     virtual void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession);
     virtual IMS_BOOL Run(IN IMS_UINTP nNegoID);
     virtual IMS_BOOL Terminate();
