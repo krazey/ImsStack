@@ -46,8 +46,6 @@ public class MtsJni {
     private static final int REQUEST_MTS_RAT_SELECTION = MTSENABLER2JAVA + 10;
     private static final int REQUEST_MTS_EXIT_RAT_SELECTION = MTSENABLER2JAVA + 11;
 
-    protected Handler mHandler = null;
-
     private static MtsJni mMtsJni = null;
     private HashMap<Integer, MtsJniImsListener> mMtsJniImsListenerMap =
             new HashMap<Integer, MtsJniImsListener>();
@@ -71,7 +69,7 @@ public class MtsJni {
             mMtsJniImsListenerMap.put(slotId, new MtsJniImsListener());
             JniImsProxy.setListener(nativeObj, mMtsJniImsListenerMap.get(slotId));
         }
-        mHandler = handler;
+        mMtsJniImsListenerMap.get(slotId).setHandler(handler);
     }
 
     public void release(int slotId) {
@@ -86,10 +84,6 @@ public class MtsJni {
 
         mNativeObjMap.remove(slotId);
         mMtsJniImsListenerMap.remove(slotId);
-
-        if (mMtsJniImsListenerMap.isEmpty() && mNativeObjMap.isEmpty()) {
-            mHandler = null;
-        }
     }
 
     public void sendMessage(Parcel parcel, int slotId) {
@@ -110,6 +104,12 @@ public class MtsJni {
     }
 
     private class MtsJniImsListener implements JniImsListener {
+        private Handler mHandler;
+
+        private void setHandler(Handler handler) {
+            mHandler = handler;
+        }
+
         @Override
         public void onMessage(Parcel parcel) {
             int msgName = parcel.readInt();

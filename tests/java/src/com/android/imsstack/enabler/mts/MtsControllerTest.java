@@ -64,14 +64,10 @@ public class MtsControllerTest {
         }
 
         @Override
-        public void init(Handler handler, int slotId) {
-            mHandler = handler;
-        };
+        public void init(Handler handler, int slotId) {};
 
         @Override
-        public void release(int slotId) {
-            mHandler = null;
-        };
+        public void release(int slotId) {};
 
         @Override
         public void sendMessage(Parcel parcel, int slotId) {
