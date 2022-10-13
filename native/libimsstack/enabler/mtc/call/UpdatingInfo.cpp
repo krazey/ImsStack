@@ -16,11 +16,14 @@
 
 #include "call/UpdatingInfo.h"
 #include "ServiceTrace.h"
+#include "call/IMtcSession.h"
+#include "media/MtcMediaManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-UpdatingInfo::UpdatingInfo() :
+UpdatingInfo::UpdatingInfo(IN IMtcCallContext& objContext) :
+        m_objContext(objContext),
         m_eTargetCallType(CallType::UNKNOWN),
         m_objNegotiatedInfo(MediaInfo()),
         m_objModifyingInfo(MediaInfo()),
@@ -143,8 +146,13 @@ IMS_BOOL UpdatingInfo::IsNeedToAlert()
         return IMS_FALSE;
     }
 
-    if (m_objNegotiatedInfo.eVDir != m_objAlertingInfo.eVDir ||
-            m_objNegotiatedInfo.eTDir != m_objAlertingInfo.eTDir)
+    ISession& objSession = m_objContext.GetSession()->GetISession();
+    if (GetCurrentCallType() != m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession))
+    {
+        return IMS_TRUE;
+    }
+
+    if (m_objNegotiatedInfo.eVDir != m_objAlertingInfo.eVDir)
     {
         return IMS_TRUE;
     }
@@ -171,18 +179,17 @@ IMS_BOOL UpdatingInfo::IsRequestedHoldResume()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsRequestedModifying()
 {
-    if (m_objModifyingInfo.eADir == DIRECTION_INVALID)
+    if (IsRequestedHoldResume())
     {
         return IMS_FALSE;
     }
 
-    if (m_objNegotiatedInfo.eADir != m_objModifyingInfo.eADir)
+    if (GetCurrentCallType() != GetTargetCallType())
     {
-        return IMS_FALSE;
+        return IMS_TRUE;
     }
 
-    if (m_objNegotiatedInfo.eVDir != m_objModifyingInfo.eVDir ||
-            m_objNegotiatedInfo.eTDir != m_objModifyingInfo.eTDir)
+    if (m_objNegotiatedInfo.eVDir != m_objModifyingInfo.eVDir)
     {
         return IMS_TRUE;
     }
@@ -193,19 +200,24 @@ IMS_BOOL UpdatingInfo::IsRequestedModifying()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsModified()
 {
-    if (m_objNegotiatedInfo.eVDir != m_objModifiedInfo.eVDir &&
-            (m_objNegotiatedInfo.eVDir == DIRECTION_INVALID ||
-                    m_objModifiedInfo.eVDir == DIRECTION_INVALID))
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objNegotiatedInfo.eTDir != m_objModifiedInfo.eTDir &&
-            (m_objNegotiatedInfo.eTDir == DIRECTION_INVALID ||
-                    m_objModifiedInfo.eTDir == DIRECTION_INVALID))
+    ISession& objSession = m_objContext.GetSession()->GetISession();
+    if (GetCurrentCallType() != m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession))
     {
         return IMS_TRUE;
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+CallType UpdatingInfo::GetCurrentCallType() const
+{
+    IMtcSession* pSession = m_objContext.GetSession();
+
+    if (!pSession)
+    {
+        return CallType::UNKNOWN;
+    }
+
+    return pSession->GetCallType();
 }
