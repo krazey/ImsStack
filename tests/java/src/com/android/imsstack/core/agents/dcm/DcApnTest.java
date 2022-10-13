@@ -18,16 +18,18 @@ package com.android.imsstack.core.agents.dcm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.InetAddresses;
 import android.net.LinkAddress;
@@ -51,61 +53,62 @@ import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.util.AppContext;
+import com.android.internal.telephony.SubscriptionController;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.FileDescriptor;
-import java.lang.reflect.Field;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.Hashtable;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class DcApnTest {
     private static final int SLOT_0 = 0;
-    private static final int[] SUB_ID = { 1 };
-    static ContextFixture sContext;
-    FakeDcApn mDcApn;
+    private static final int SLOT_1 = 1;
+    private static final int SUB_ID_0 = 1;
+    private static final int SUB_ID_1 = 2;
+    private static final int[] SUB_IDS = { SUB_ID_0 };
+    private static final int INVALID_APN = -1;
 
-    @Mock private Hashtable mMockMapApn;
-    @Mock private IApn mMockIApn;
-    @Mock private ISharedState mMockISharedState;
-    @Mock private ISubscription mMockISubscription;
-    @Mock private Network mMockNetwork;
-    @Mock private WifiManager mMockWifiManager;
-    @Mock private DcApn.PreciseDcStateListener mMockPreciseDcStateListener;
-
+    private Context mContext;
     private TelephonyManager mTelephonyManager;
     private SubscriptionManager mSubscriptionManager;
     private ConnectivityManager mConnectivityManager;
     private WifiManager mWifiManager;
+    private FakeDcApn mDcApn;
 
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
+    @Mock IApn mMockIApn;
+    @Mock ISharedState mMockISharedState;
+    @Mock ISubscription mMockISubscription;
+    @Mock Network mMockNetwork;
+    @Mock WifiManager mMockWifiManager;
+    @Mock SubscriptionController mMockSubscriptionController;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mContext = new ContextFixture().getTestDouble();
+        AppContext.init(mContext);
+
+        mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
+        mMockWifiManager = mContext.getSystemService(WifiManager.class);
+        mSubscriptionManager = mContext.getSystemService(SubscriptionManager.class);
+        mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
+
+        when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(SUB_IDS);
+        when(mTelephonyManager.createForSubscriptionId(SUB_ID_0)).thenReturn(mTelephonyManager);
+
         // create the instance to test
         mDcApn = new FakeDcApn(SLOT_0);
-
-        mTelephonyManager = AppContext.getInstance().getSystemService(TelephonyManager.class);
-        mSubscriptionManager = AppContext.getInstance().getSystemService(SubscriptionManager.class);
-        mConnectivityManager = AppContext.getInstance().getSystemService(ConnectivityManager.class);
-        mMockWifiManager = AppContext.getInstance().getSystemService(WifiManager.class);
+        mDcApn.init(mContext);
     }
 
     @After
@@ -119,36 +122,37 @@ public class DcApnTest {
         mSubscriptionManager = null;
         mConnectivityManager = null;
         mMockWifiManager = null;
-    }
 
-    @AfterClass
-    public static void tearDownOnce() {
         AppContext.deinit();
-        sContext = null;
     }
 
     @Test
-    public void testInitAndCleanup() throws Exception {
-        when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-
-        mDcApn.init(AppContext.getInstance());
-        assertNotNull(mDcApn.mSubscriptionListener);
-        verify(mMockISubscription).addListener(mDcApn.mSubscriptionListener);
-        assertNotNull(mDcApn.mPreciseDcStateListener);
-        verify(mTelephonyManager).registerTelephonyCallback(
-                AppContext.getInstance().getMainExecutor(), mDcApn.mPreciseDcStateListener);
+    public void testInit() throws Exception {
+        assertEquals(mContext, mDcApn.mContext);
         assertNotNull(mDcApn.getApnControl(EApnType.IMS.getType()));
         assertNotNull(mDcApn.getApnControl(EApnType.EMERGENCY.getType()));
         assertNotNull(mDcApn.getApnControl(EApnType.XCAP.getType()));
         assertNotNull(mDcApn.getApnControl(EApnType.INTERNET.getType()));
 
-        DcApn.PreciseDcStateListener backupListener = mDcApn.mPreciseDcStateListener;
+        assertNotNull(mDcApn.mSubscriptionListener);
+        verify(mMockISubscription).addListener(mDcApn.mSubscriptionListener);
+
+        assertNotNull(mDcApn.mPreciseDcStateListener);
+        verify(mTelephonyManager).registerTelephonyCallback(
+                AppContext.getInstance().getMainExecutor(), mDcApn.mPreciseDcStateListener);
+    }
+
+    @Test
+    public void testCleanup() throws Exception {
         mDcApn.cleanup();
+
         verify(mMockISubscription).removeListener(any(SubscriptionListener.class));
         assertNull(mDcApn.mSubscriptionListener);
-        verify(mTelephonyManager).unregisterTelephonyCallback(backupListener);
+
+        verify(mTelephonyManager).unregisterTelephonyCallback(
+                any(DcApn.PreciseDcStateListener.class));
         assertNull(mDcApn.mPreciseDcStateListener);
+
         assertNull(mDcApn.getApnControl(EApnType.IMS.getType()));
         assertNull(mDcApn.getApnControl(EApnType.EMERGENCY.getType()));
         assertNull(mDcApn.getApnControl(EApnType.XCAP.getType()));
@@ -157,90 +161,81 @@ public class DcApnTest {
 
     @Test
     public void testConnect_NativeReady() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
         when(mMockISharedState.isNativeBootCompleted()).thenReturn(true);
-        when(mMockMapApn.get(anyInt()))
-                .thenReturn(null)
-                .thenReturn(mMockIApn);
         when(mMockIApn.connect()).thenReturn(true);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertFalse(mDcApn.connect(EApnType.IMS.getType()));
+        assertFalse(mDcApn.connect(INVALID_APN));
         assertTrue(mDcApn.connect(EApnType.IMS.getType()));
         verify(mMockIApn, times(1)).connect();
     }
 
     @Test
     public void testConnect_NativeNotReady() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
         when(mMockISharedState.isNativeBootCompleted()).thenReturn(false);
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.connect()).thenReturn(true);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertFalse(mDcApn.connect(EApnType.IMS.getType()));
-        verify(mMockIApn, times(0)).connect();
+        verify(mMockIApn, never()).connect();
     }
 
     @Test
     public void testDisconnect() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
-        when(mMockMapApn.get(anyInt()))
-                .thenReturn(null)
-                .thenReturn(mMockIApn);
         when(mMockIApn.disconnect()).thenReturn(true);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertFalse(mDcApn.disconnect(EApnType.IMS.getType()));
+        assertFalse(mDcApn.disconnect(INVALID_APN));
         assertTrue(mDcApn.disconnect(EApnType.IMS.getType()));
         verify(mMockIApn, times(1)).disconnect();
     }
 
     @Test
     public void testGetDataState() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
-        when(mMockMapApn.get(anyInt()))
-                .thenReturn(null)
-                .thenReturn(mMockIApn);
         when(mMockIApn.getDataState()).thenReturn(TelephonyManager.DATA_CONNECTED);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertEquals(EDataState.DATA_STATE_DISCONNECTED.getState(), mDcApn.getDataState(anyInt()));
-        assertEquals(EDataState.DATA_STATE_CONNECTED.getState(), mDcApn.getDataState(anyInt()));
+        assertEquals(EDataState.DATA_STATE_DISCONNECTED.getState(),
+                mDcApn.getDataState(INVALID_APN));
+        assertEquals(EDataState.DATA_STATE_CONNECTED.getState(),
+                mDcApn.getDataState(EApnType.IMS.getType()));
     }
 
     @Test
     public void testIsConnected() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
-        when(mMockMapApn.get(anyInt()))
-                .thenReturn(null)
-                .thenReturn(mMockIApn);
         when(mMockIApn.isConnected()).thenReturn(true);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertFalse(mDcApn.isConnected(anyInt()));
-        assertTrue(mDcApn.isConnected(anyInt()));
+        assertFalse(mDcApn.isConnected(INVALID_APN));
+        assertTrue(mDcApn.isConnected(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetApn() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
-        when(mMockMapApn.get(anyInt()))
-                .thenReturn(null)
-                .thenReturn(mMockIApn);
         when(mMockIApn.getApn()).thenReturn("TestApn");
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertNull(mDcApn.getApn(anyInt()));
-        assertEquals("TestApn", mDcApn.getApn(anyInt()));
+        assertNull(mDcApn.getApn(INVALID_APN));
+        assertEquals("TestApn", mDcApn.getApn(EApnType.IMS.getType()));
     }
 
     @Test
-    public void testGetHostByName_InvalidApn() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
+    public void testGetHostByName_InvalidContext() throws Exception {
+        InetAddress[] inet6Addrs = { (Inet6Address) InetAddresses.parseNumericAddress("2001::1") };
 
-        when(mMockMapApn.get(anyInt())).thenReturn(null);
-        mDcApn.setContext();
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mMockNetwork.getAllByName("TestHost")).thenReturn(inet6Addrs);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+        setContext(null);
+
+        assertNull(mDcApn.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6.getInt(),
+                "TestHost"));
+    }
+
+    @Test
+    public void testGetHostByName_InvalidNetwork() throws Exception {
+        when(mMockIApn.getCachedNetwork()).thenReturn(null);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertNull(mDcApn.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6.getInt(),
                 "TestHost"));
@@ -248,13 +243,16 @@ public class DcApnTest {
 
     @Test
     public void testGetHostByName_InvalidAddress() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
+        InetAddress[] inet6Addrs = {};
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
-        when(mMockNetwork.getAllByName("TestHost")).thenReturn(null);
-        mDcApn.setContext();
+        when(mMockNetwork.getAllByName("TestHost"))
+                .thenReturn(null)
+                .thenReturn(inet6Addrs);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
+        assertNull(mDcApn.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6.getInt(),
+                "TestHost"));
         assertNull(mDcApn.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6.getInt(),
                 "TestHost"));
     }
@@ -262,24 +260,10 @@ public class DcApnTest {
     @Test
     public void testGetHostByName_DifferentIpVersion() throws Exception {
         InetAddress[] inet4Addrs = { (Inet4Address) InetAddresses.parseNumericAddress("1.1.1.1") };
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mMockNetwork.getAllByName("TestHost")).thenReturn(inet4Addrs);
-        mDcApn.setContext();
-        mDcApn.getSubscription();
-        assertNull(mDcApn.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6.getInt(),
-                "TestHost"));
-    }
-
-    @Test
-    public void testGetHostByName_InvalidContext() throws Exception {
-        InetAddress[] inet6Addrs = { (Inet6Address) InetAddresses.parseNumericAddress("2001::1") };
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
-        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
-        when(mMockNetwork.getAllByName("TestHost")).thenReturn(inet6Addrs);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertNull(mDcApn.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6.getInt(),
                 "TestHost"));
@@ -287,64 +271,66 @@ public class DcApnTest {
 
     @Test
     public void testGetHostByName_Success() throws Exception {
+        InetAddress[] inet4Addrs = { (Inet4Address) InetAddresses.parseNumericAddress("1.1.1.1") };
         InetAddress[] inet6Addrs = { (Inet6Address) InetAddresses.parseNumericAddress("2001::1") };
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
-        when(mMockNetwork.getAllByName("TestHost")).thenReturn(inet6Addrs);
-        mDcApn.setContext();
+        when(mMockNetwork.getAllByName("TestHost"))
+                .thenReturn(inet4Addrs)
+                .thenReturn(inet6Addrs);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
+        assertNotNull(mDcApn.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV4.getInt(),
+                "TestHost"));
         assertNotNull(mDcApn.getHostByName(EApnType.IMS.getType(), EIpVersion.IPV6.getInt(),
                 "TestHost"));
     }
 
     @Test
-    public void testGetIfaceId_InvalidApn() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
-        when(mMockMapApn.get(anyInt())).thenReturn(null);
-        mDcApn.setContext();
+    public void testGetIfaceId_InvalidContext() throws Exception {
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mMockNetwork.getNetId()).thenReturn(100);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+        setContext(null);
 
         assertEquals(-1, mDcApn.getIfaceId(EApnType.IMS.getType()));
     }
 
     @Test
-    public void testGetIfaceId_InvalidContext() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
-        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+    public void testGetIfaceId_InvalidNetwork() throws Exception {
+        when(mMockIApn.getCachedNetwork()).thenReturn(null);
         when(mMockNetwork.getNetId()).thenReturn(100);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertEquals(-1, mDcApn.getIfaceId(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetIfaceId_Success() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mMockNetwork.getNetId()).thenReturn(100);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertEquals(100, mDcApn.getIfaceId(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetIfaceName_NullLinkProperties() throws Exception {
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(null);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
         assertNull(mDcApn.getIfaceName(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetIfaceName_NullIfaceName() throws Exception {
         LinkProperties linkProperties = new LinkProperties();
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
+        linkProperties.setInterfaceName(null);
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertNull(mDcApn.getIfaceName(EApnType.IMS.getType()));
     }
@@ -353,84 +339,111 @@ public class DcApnTest {
     public void testGetIfaceName_Success() throws Exception {
         LinkProperties linkProperties = new LinkProperties();
         linkProperties.setInterfaceName("TestIface");
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-        mDcApn.setContext();
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertNotNull(mDcApn.getIfaceName(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetIpcanCategory_InvalidApn() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
+        mDcApn.mMapApn.clear();
 
-        when(mMockMapApn.get(anyInt())).thenReturn(null);
-
+        assertNull(mDcApn.getApnControl(EApnType.IMS.getType()));
         assertEquals(IApn.IPCAN_CATEGORY_MOBILE, mDcApn.getIpcanCategory(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetIpcanCategory_Success() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getIpcanCategory()).thenReturn(IApn.IPCAN_CATEGORY_WLAN);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertEquals(IApn.IPCAN_CATEGORY_WLAN, mDcApn.getIpcanCategory(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetLocalAddress_NullLinkProperties() throws Exception {
+        when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(null);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
         assertNull(mDcApn.getLocalAddress(EApnType.IMS.getType(), 0));
     }
 
     @Test
     public void testGetLocalAddress_EmptyLinkAddresses() throws Exception {
         LinkProperties linkProperties = new LinkProperties();
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertNull(mDcApn.getLocalAddress(EApnType.IMS.getType(), 0));
     }
 
     @Test
-    public void testGetLocalAddress_Success() throws Exception {
+    public void testGetLocalAddress_DifferentIpVersion() throws Exception {
         LinkProperties linkProperties = new LinkProperties();
         linkProperties.addLinkAddress(new LinkAddress("1.1.1.1/8"));
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
+        when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV6.getInt());
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
+
+        mDcApn.mMapLocalIP.put(EApnType.IMS.getType(), "2.2.2.2");
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
+        assertEquals("2.2.2.2", mDcApn.getCachedLocalAddress(EApnType.IMS.getType()));
+        assertNull(mDcApn.getLocalAddress(EApnType.IMS.getType(), -1));
+        assertNull(mDcApn.getCachedLocalAddress(EApnType.IMS.getType()));
+    }
+
+    @Test
+    public void testGetLocalAddress_SuccessButNotCached() throws Exception {
+        LinkProperties linkProperties = new LinkProperties();
+        linkProperties.addLinkAddress(new LinkAddress("1.1.1.1/8"));
+
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertEquals("1.1.1.1", mDcApn.getLocalAddress(EApnType.IMS.getType(), 0));
         assertNull(mDcApn.getCachedLocalAddress(EApnType.IMS.getType()));
     }
 
     @Test
-    public void testGetLocalAddress_SuccessAndCached() throws Exception {
+    public void testGetLocalAddress_SuccessAndCachedIpv4() throws Exception {
         LinkProperties linkProperties = new LinkProperties();
+        linkProperties.addLinkAddress(new LinkAddress("2001::1/63"));
         linkProperties.addLinkAddress(new LinkAddress("1.1.1.1/8"));
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertEquals("1.1.1.1", mDcApn.getLocalAddress(EApnType.IMS.getType(), -1));
         assertEquals("1.1.1.1", mDcApn.getCachedLocalAddress(EApnType.IMS.getType()));
+    }
+
+    @Test
+    public void testGetLocalAddress_SuccessAndCachedIpv6() throws Exception {
+        LinkProperties linkProperties = new LinkProperties();
+        linkProperties.addLinkAddress(new LinkAddress("1.1.1.1/8"));
+        linkProperties.addLinkAddress(new LinkAddress("2001::1/63"));
+
+        when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV6V4.getInt());
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
+        assertEquals("2001::1", mDcApn.getLocalAddress(EApnType.IMS.getType(), -1));
+        assertEquals("2001::1", mDcApn.getCachedLocalAddress(EApnType.IMS.getType()));
     }
 
     @Test
@@ -442,117 +455,139 @@ public class DcApnTest {
 
     @Test
     public void testGetPcscfAddress_NullLinkProperties() throws Exception {
+        when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(null);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
         assertNull(mDcApn.getPcscfAddress(EApnType.IMS.getType(), 0));
     }
 
     @Test
     public void testGetPcscfAddress_EmptyPcscfAddress() throws Exception {
         LinkProperties linkProperties = new LinkProperties();
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertNull(mDcApn.getPcscfAddress(EApnType.IMS.getType(), 0));
     }
 
     @Test
-    public void testGetPcscfAddress_Success() throws Exception {
+    public void testGetPcscfAddress_SuccessIpv4() throws Exception {
+        String[] inet4Addrs = {"1.1.1.1"};
+        LinkProperties linkProperties = new LinkProperties();
+        linkProperties.addPcscfServer(InetAddresses.parseNumericAddress(inet4Addrs[0]));
+
+        when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV6V4.getInt());
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
+        assertEquals(inet4Addrs, mDcApn.getPcscfAddress(EApnType.IMS.getType(), 0));
+    }
+
+    @Test
+    public void testGetPcscfAddress_SuccessIpv6() throws Exception {
         String[] inet6Addrs = {"2001::1"};
         LinkProperties linkProperties = new LinkProperties();
-        linkProperties.addPcscfServer((Inet6Address) InetAddresses.parseNumericAddress("2001::1"));
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
+        linkProperties.addPcscfServer((Inet6Address) InetAddresses.parseNumericAddress(
+                inet6Addrs[0]));
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         assertEquals(inet6Addrs, mDcApn.getPcscfAddress(EApnType.IMS.getType(), 0));
     }
 
     @Test
     public void testGetMtu_NullLinkProperties() throws Exception {
+        when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
+        when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(null);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
         assertEquals(0, mDcApn.getMtu(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetMtu_Success() throws Exception {
+        int testMtu = 1500;
         LinkProperties linkProperties = new LinkProperties();
-        linkProperties.setMtu(1500);
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
+        linkProperties.setMtu(testMtu);
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getIpVersion()).thenReturn(EIpVersion.IPV4V6.getInt());
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         when(mConnectivityManager.getLinkProperties(mMockNetwork)).thenReturn(linkProperties);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertEquals(1500, mDcApn.getMtu(EApnType.IMS.getType()));
+        assertEquals(testMtu, mDcApn.getMtu(EApnType.IMS.getType()));
     }
 
     @Test
     public void testBindSocket_NullNetwork() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
+        FileDescriptor sockFd = new FileDescriptor();
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(null);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertEquals(0, mDcApn.bindSocket(EApnType.IMS.getType(), new FileDescriptor()));
+        assertEquals(0, mDcApn.bindSocket(EApnType.IMS.getType(), sockFd));
     }
 
     @Test
     public void testBindSocket_Success() throws Exception {
-        int sockFd = 100;
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
+        FileDescriptor sockFd = new FileDescriptor();
 
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
-        assertEquals(1, mDcApn.bindSocket(EApnType.IMS.getType(), new FileDescriptor()));
-        //assertEquals(1, mDcApn.bindSocket(EApnType.IMS.getType(), any(FileDescriptor.class)));
+        assertEquals(1, mDcApn.bindSocket(EApnType.IMS.getType(), sockFd));
+        verify(mMockNetwork).bindSocket(sockFd);
     }
 
     @Test
     public void testApnControl() throws Exception {
-        assertNull(mDcApn.getApnControl(EApnType.IMS.getType()));
-        mDcApn.setApn(EApnType.IMS.getType(), null);
-        assertNull(mDcApn.getApnControl(EApnType.IMS.getType()));
+        assertNotEquals(mMockIApn, mDcApn.getApnControl(EApnType.IMS.getType()));
+
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+        assertEquals(mMockIApn, mDcApn.getApnControl(EApnType.IMS.getType()));
+
+        // null apn is not updated
+        mDcApn.setApn(EApnType.IMS.getType(), null);
         assertEquals(mMockIApn, mDcApn.getApnControl(EApnType.IMS.getType()));
     }
 
     @Test
     public void testGetNetworkByCapability_WifiType() throws Exception {
-        when(mMockWifiManager.getCurrentNetwork()).thenReturn(mMockNetwork);
+        WifiManager wifiManager = mContext.getSystemService(WifiManager.class);
+        when(wifiManager.getCurrentNetwork()).thenReturn(mMockNetwork);
 
-        assertNull(mDcApn.getNetworkByCapability(EApnType.WIFI.getType()));
-        mDcApn.setContext();
         assertEquals(mMockNetwork, mDcApn.getNetworkByCapability(EApnType.WIFI.getType()));
+
+        setContext(null);
+        assertNull(mDcApn.getNetworkByCapability(EApnType.WIFI.getType()));
     }
 
     @Test
     public void testGetNetworkByCapability_NonWifiType() throws Exception {
-        replaceInstance(DcApn.class, "mMapApn", mDcApn, mMockMapApn);
-
-        when(mMockMapApn.get(anyInt())).thenReturn(mMockIApn);
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
-        mDcApn.setContext();
+        mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
+        assertNull(mDcApn.getNetworkByCapability(INVALID_APN));
         assertEquals(mMockNetwork, mDcApn.getNetworkByCapability(EApnType.IMS.getType()));
     }
 
     @Test
     public void testChangeApnEmployState() throws Exception {
-        // Do not handle changeApnEmployState() if apntype is null or can not get ApnControl
-        mDcApn.changeApnEmployState(null, true);
-        mDcApn.changeApnEmployState(EApnType.IMS, true);
-
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
+
+        mDcApn.changeApnEmployState(null, true);
+        verify(mMockIApn, never()).employApn();
+
         mDcApn.changeApnEmployState(EApnType.IMS, true);
         verify(mMockIApn, times(1)).employApn();
 
@@ -566,29 +601,10 @@ public class DcApnTest {
                 .setState(TelephonyManager.DATA_CONNECTED)
                 .setNetworkType(TelephonyManager.NETWORK_TYPE_LTE)
                 .build();
-        mDcApn.init(AppContext.getInstance());
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         mDcApn.mPreciseDcStateListener.onPreciseDataConnectionStateChanged(dataConnectionState);
-        verify(mMockIApn, times(0)).sendMessage(any(Message.class));
-    }
-
-    @Test
-    public void testPreciseDataConnectionStateChanged_NullApn() throws Exception {
-        PreciseDataConnectionState dataConnectionState = new PreciseDataConnectionState.Builder()
-                .setState(TelephonyManager.DATA_CONNECTED)
-                .setNetworkType(TelephonyManager.NETWORK_TYPE_LTE)
-                .setApnSetting(new ApnSetting.Builder()
-                        .setApnTypeBitmask(ApnSetting.TYPE_IMS)
-                        .setApnName("TestApn")
-                        .setEntryName("Test")
-                        .setProtocol(ApnSetting.PROTOCOL_IPV6)
-                        .build())
-                .build();
-        mDcApn.init(AppContext.getInstance());
-
-        mDcApn.mPreciseDcStateListener.onPreciseDataConnectionStateChanged(dataConnectionState);
-        verify(mMockIApn, times(0)).sendMessage(any(Message.class));
+        verify(mMockIApn, never()).sendMessage(any(Message.class));
     }
 
     @Test
@@ -603,11 +619,10 @@ public class DcApnTest {
                         .setProtocol(ApnSetting.PROTOCOL_IPV6)
                         .build())
                 .build();
-        mDcApn.init(AppContext.getInstance());
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         mDcApn.mPreciseDcStateListener.onPreciseDataConnectionStateChanged(dataConnectionState);
-        verify(mMockIApn, times(0)).sendMessage(any(Message.class));
+        verify(mMockIApn, never()).sendMessage(any(Message.class));
     }
 
     @Test
@@ -622,7 +637,6 @@ public class DcApnTest {
                         .setProtocol(ApnSetting.PROTOCOL_IPV6)
                         .build())
                 .build();
-        mDcApn.init(AppContext.getInstance());
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
         mDcApn.mPreciseDcStateListener.onPreciseDataConnectionStateChanged(dataConnectionState);
@@ -641,7 +655,6 @@ public class DcApnTest {
                         .setProtocol(ApnSetting.PROTOCOL_IPV6)
                         .build())
                 .build();
-        mDcApn.init(AppContext.getInstance());
         mDcApn.setApn(EApnType.EMERGENCY.getType(), mMockIApn);
 
         mDcApn.mPreciseDcStateListener.onPreciseDataConnectionStateChanged(dataConnectionState);
@@ -660,7 +673,6 @@ public class DcApnTest {
                         .setProtocol(ApnSetting.PROTOCOL_IPV6)
                         .build())
                 .build();
-        mDcApn.init(AppContext.getInstance());
         mDcApn.setApn(EApnType.XCAP.getType(), mMockIApn);
 
         mDcApn.mPreciseDcStateListener.onPreciseDataConnectionStateChanged(dataConnectionState);
@@ -669,17 +681,10 @@ public class DcApnTest {
 
     @Test
     public void testSubscriptionListener_onSimLoadCompleted() throws Exception {
-        int invalidSlotId = -1;
-        int[] changedSubId = { 2 };
+        when(mMockSubscriptionController.getSlotIndex(SUB_ID_0)).thenReturn(SLOT_1);
+        when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
+        when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
 
-        when(mSubscriptionManager.getSubscriptionIds(anyInt()))
-                .thenReturn(SUB_ID)
-                .thenReturn(changedSubId);
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        mDcApn.init(AppContext.getInstance());
-
-        // ignore if slotId is different
-        mDcApn.mSubscriptionListener.onSimLoadCompleted(invalidSlotId);
         mDcApn.mSubscriptionListener.onSimLoadCompleted(SLOT_0);
 
         verify(mTelephonyManager).unregisterTelephonyCallback(mDcApn.mPreciseDcStateListener);
@@ -690,14 +695,11 @@ public class DcApnTest {
 
     @Test
     public void testSubscriptionListener_onDefaultSubscriptionChanged() throws Exception {
-        int changedSubId = 2;
+        when(mMockSubscriptionController.getSlotIndex(SUB_ID_1)).thenReturn(SLOT_1);
+        when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
+        when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
 
-        when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
-        when(mMockISubscription.getSubId(SLOT_0)).thenReturn(changedSubId);
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        mDcApn.init(AppContext.getInstance());
-
-        mDcApn.mSubscriptionListener.onDefaultSubscriptionChanged(changedSubId);
+        mDcApn.mSubscriptionListener.onDefaultSubscriptionChanged(SUB_ID_1);
 
         verify(mTelephonyManager).unregisterTelephonyCallback(mDcApn.mPreciseDcStateListener);
         // register callback when init() and updateSubscription()
@@ -707,19 +709,32 @@ public class DcApnTest {
 
     @Test
     public void testSubscriptionListener_onDefaultDataSubscriptionChanged() throws Exception {
-        int changedSubId = 2;
+        when(mMockSubscriptionController.getSlotIndex(SUB_ID_1)).thenReturn(SLOT_1);
+        when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
+        when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
 
-        when(mSubscriptionManager.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
-        when(mMockISubscription.getSubId(SLOT_0)).thenReturn(changedSubId);
-        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
-        mDcApn.init(AppContext.getInstance());
-
-        mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(changedSubId);
+        mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_1);
 
         verify(mTelephonyManager).unregisterTelephonyCallback(mDcApn.mPreciseDcStateListener);
         // register callback when init() and updateSubscription()
         verify(mTelephonyManager, times(2)).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(), mDcApn.mPreciseDcStateListener);
+    }
+
+
+    @Test
+    public void testSubscriptionListener_updateSubscriptionFail() throws Exception {
+        when(mMockSubscriptionController.getSlotIndex(SUB_ID_0))
+            .thenReturn(SLOT_0)
+            .thenReturn(SLOT_1);
+        mMockISubscription = null;
+
+        mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_0);
+        mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_0);
+
+        verify(mMockSubscriptionController, times(2)).getSlotIndex(SUB_ID_0);
+        verify(mTelephonyManager, never()).unregisterTelephonyCallback(
+                mDcApn.mPreciseDcStateListener);
     }
 
     private class FakeDcApn extends DcApn {
@@ -729,23 +744,24 @@ public class DcApnTest {
 
         @Override
         protected ISubscription getSubscription() {
+            super.getSubscription();
             return mMockISubscription;
         }
 
         @Override
         protected ISharedState getSharedState(int slotId) {
+            super.getSharedState(slotId);
             return mMockISharedState;
         }
 
-        public void setContext() {
-            mContext = AppContext.getInstance();
+        @Override
+        protected int getSlotId(int subId) {
+            super.getSlotId(subId);
+            return mMockSubscriptionController.getSlotIndex(subId);
         }
     }
 
-    private synchronized void replaceInstance(final Class c, final String instanceName,
-            final Object obj, final Object newValue) throws Exception {
-        Field field = c.getDeclaredField(instanceName);
-        field.setAccessible(true);
-        field.set(obj, newValue);
+    private void setContext(Context context) {
+        mDcApn.mContext = context;
     }
 }
