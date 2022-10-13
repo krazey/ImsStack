@@ -91,6 +91,7 @@ class TestAosRegistration : public AosRegistration
 
 protected:
     inline virtual IRegistration* GetRegistration() { return m_piMockRegistration; }
+    inline virtual IMS_BOOL CheckRadioReadyAndSetTxnPending() { return IMS_TRUE; }
 
 public:
     inline void SetMockIRegistration(IN IRegistration* piRegistration)

@@ -33,6 +33,7 @@
 #include "provider/AosStaticProfile.h"
 #include "provider/AosSubscriberManager.h"
 #include "provider/AosRetryRepository.h"
+#include "provider/AosTransaction.h"
 #include "external/AosService.h"
 
 #include "manager/AosBuildDirector.h"
@@ -150,6 +151,7 @@ void AosBuildDirector::ConstructProvider()
     AosProvider::GetInstance()->SetRegStateManager(m_piBuilder->BuildRegStateManager(), m_nSlotId);
     AosProvider::GetInstance()->SetRetryRepository(
             m_piBuilder->BuildRetryRepository(m_nSlotId), m_nSlotId);
+    AosProvider::GetInstance()->SetTransaction(m_piBuilder->BuildTransaction(m_nSlotId), m_nSlotId);
 }
 
 PUBLIC
@@ -187,6 +189,13 @@ void AosBuildDirector::DestructAos()
 PUBLIC
 void AosBuildDirector::DestructProvider()
 {
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+    if (piTransaction != IMS_NULL)
+    {
+        AosProvider::GetInstance()->SetTransaction(IMS_NULL, m_nSlotId);
+        delete DYNAMIC_CAST(AosTransaction*, piTransaction);
+    }
+
     IAosRetryRepository* piRetryRep = AosProvider::GetInstance()->GetRetryRepository(m_nSlotId);
     if (piRetryRep != IMS_NULL)
     {

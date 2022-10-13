@@ -44,5 +44,6 @@ public:
     virtual IAosSubscriberManager* BuildSubscriberManager(IN IMS_SINT32 nSlotId);
     virtual IAosRetryRepository* BuildRetryRepository(IN IMS_SINT32 nSlotId);
     virtual IAosNConfiguration* BuildNConfiguration();
+    virtual IAosTransaction* BuildTransaction(IN IMS_SINT32 nSlotId);
 };
 #endif  // AOS_BUILDER_H_

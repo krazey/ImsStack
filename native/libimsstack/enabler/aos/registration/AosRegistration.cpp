@@ -20,6 +20,7 @@
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 
+#include "IImsRadio.h"
 #include "IIpcan.h"
 #include "ISipConfig.h"
 #include "ISubscriberConfig.h"
@@ -100,6 +101,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_bIsBlocked(IMS_FALSE),
         m_bIsHeldByCall(IMS_FALSE),
         m_bIsAppReady(IMS_FALSE),
+        m_bIsRadioWaiting(IMS_FALSE),
         m_strRegId(strRegId),
         m_eRegType(AosRegistrationType::NORMAL),
         m_nFlowId(0),
@@ -573,6 +575,13 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
     {
         UpdateReason();
         UpdateDetailState(m_nState);
+
+        IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+
+        if (piTransaction != IMS_NULL && !IsRegTrying())
+        {
+            piTransaction->StopTraffic(IAosTransaction::TYPE_REG);
+        }
     }
 }
 
@@ -623,6 +632,12 @@ void AosRegistration::SetImsCall(IN IMS_BOOL bStarted)
 {
     A_IMS_TRACE_I(REGID, "SetImsCall :: (%s)", (bStarted) ? "STARTED" : "TERMINATED", 0, 0);
     m_bIsImsCall = bStarted;
+}
+
+PROTECTED
+void AosRegistration::SetRadioWaiting(IN IMS_BOOL bWaiting)
+{
+    m_bIsRadioWaiting = bWaiting;
 }
 
 PROTECTED
@@ -773,6 +788,12 @@ IMS_BOOL AosRegistration::IsCallStateRequired() const
 }
 
 PROTECTED
+IMS_BOOL AosRegistration::IsRadioWaiting() const
+{
+    return m_bIsRadioWaiting;
+}
+
+PROTECTED
 IMS_SINT32 AosRegistration::GetRegExpires()
 {
     return (m_piRegContact != IMS_NULL) ? m_piRegContact->GetExpires() : -1;
@@ -886,7 +907,7 @@ IMS_UINT32 AosRegistration::GetRegFeatures()
         }
     }
 
-    A_IMS_TRACE_I(REGID, "GetRegFeatures :: (%d)", nFeatures, 0, 0);
+    A_IMS_TRACE_I(REGID, "GetRegFeatures :: (%x)", nFeatures, 0, 0);
 
     return nFeatures;
 }
@@ -1017,11 +1038,20 @@ PROTECTED VIRTUAL void AosRegistration::Init()
             piCt->SetListener(this);
         }
     }
+
+    if (m_eRegType == AosRegistrationType::NORMAL)
+    {
+        IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+        if (piTransaction != IMS_NULL)
+        {
+            piTransaction->SetListener(IAosTransaction::TYPE_REG, this);
+        }
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::InitFeatures()
 {
-    if (GetRegType() == AosRegistrationType::NORMAL)
+    if (m_eRegType == AosRegistrationType::NORMAL)
     {
         if (GET_N_CONFIG(m_nSlotId)->IsSubscription())
         {
@@ -1045,6 +1075,15 @@ PROTECTED VIRTUAL void AosRegistration::CleanUp()
     Destroy();
 
     StopTimer(TIMER_OFFLINE_RECOVER);
+
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+    if (piTransaction != IMS_NULL)
+    {
+        if (m_eRegType == AosRegistrationType::NORMAL)
+        {
+            piTransaction->RemoveListener(IAosTransaction::TYPE_REG, this);
+        }
+    }
 
     IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCt != IMS_NULL)
@@ -1078,7 +1117,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
 {
     IMS_BOOL bRequired = IMS_FALSE;
 
-    if (GetRegType() == AosRegistrationType::NORMAL)
+    if (m_eRegType == AosRegistrationType::NORMAL)
     {
         if (GET_N_CONFIG(m_nSlotId)->IsGeolocationPidfSupported(
                     CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
@@ -1099,7 +1138,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
             }
         }
     }
-    else if (GetRegType() == AosRegistrationType::EMERGENCY)
+    else if (m_eRegType == AosRegistrationType::EMERGENCY)
     {
         if (GET_N_CONFIG(m_nSlotId)->IsGeolocationPidfSupported(
                     CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
@@ -1162,7 +1201,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsHandlingServerSocketErrorRequired(
         IN IMS_SINT32 nReason)
 {
     if ((nReason == IRegistration::REASON_SERVER_SOCKET_ERROR) && IsRegistered() &&
-            (GetRegType() == AosRegistrationType::NORMAL))
+            (m_eRegType == AosRegistrationType::NORMAL))
     {
         return IMS_TRUE;
     }
@@ -2241,7 +2280,7 @@ PROTECTED VIRTUAL void AosRegistration::SetDynamicIpQos()
 
 PROTECTED VIRTUAL void AosRegistration::SetActiveBindingsRestorationUsage()
 {
-    if (GetRegType() != AosRegistrationType::NORMAL)
+    if (m_eRegType != AosRegistrationType::NORMAL)
     {
         return;
     }
@@ -2260,7 +2299,7 @@ PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
     }
     else
     {
-        m_bIsTransactionStarted = !(IsBlocked() || IsHeldByCall());
+        m_bIsTransactionStarted = !(IsBlocked() || IsHeldByCall() || IsRadioWaiting());
     }
 
     A_IMS_TRACE_I(REGID, "UpdateTransactionStarted :: (%s)",
@@ -2522,7 +2561,33 @@ PROTECTED VIRTUAL void AosRegistration::CheckPending()
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckRadioReadyAndSetTxnPending()
 {
-    return IMS_TRUE;
+    if (m_eRegType != AosRegistrationType::NORMAL)
+    {
+        return IMS_TRUE;
+    }
+
+    IAosTransaction* m_piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+
+    if (m_piTransaction == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (!m_piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
+    {
+        // TODO: implement to control priority
+        A_IMS_TRACE_I(REGID, "CheckRadioReadyAndSetTxnPending :: trx is not allowed", 0, 0, 0);
+        return IMS_FALSE;
+    }
+    else
+    {
+        m_piTransaction->StartTraffic(
+                IAosTransaction::TYPE_REG, m_piContext->GetNetTracker()->GetNetworkType());
+        SetRadioWaiting(IMS_TRUE);
+        UpdateTransactionStarted();
+        m_pUtil->AddFeature(PENDING_TRANSACTION, m_nTxnPending);
+        return IMS_FALSE;
+    }
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessSetIpsec(IN IMS_UINT32 nReason)
@@ -5031,7 +5096,7 @@ PROTECTED VIRTUAL void AosRegistration::NConfiguration_NotifyConfigChanged()
 
     if (GET_N_CONFIG(m_nSlotId) != IMS_NULL)
     {
-        if (GetRegType() == AosRegistrationType::NORMAL)
+        if (m_eRegType == AosRegistrationType::NORMAL)
         {
             if (GET_N_CONFIG(m_nSlotId)->IsSubscription())
             {
@@ -5046,6 +5111,38 @@ PROTECTED VIRTUAL void AosRegistration::NConfiguration_NotifyConfigChanged()
         }
     }
 }
+
+PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(IN IMS_UINT32 nFailureReason,
+        IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 /* nWaitTimeMillis */)
+{
+    if (nFailureReason == IImsRadio::REASON_ACCESS_DENIED)
+    {
+        Destroy();
+
+        ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
+        StartTimer(TIMER_OFFLINE_RECOVER, RETRY_DEFAULT_WAIT_TIME * 1000);
+    }
+    else
+    {
+        Transaction_OnConnectionSetupPrepared();
+    }
+}
+
+PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionSetupPrepared()
+{
+    if (IsRadioWaiting())
+    {
+        SetRadioWaiting(IMS_FALSE);
+        UpdateTransactionStarted();
+
+        if (IsTransactionStarted())
+        {
+            ProcessPendingTransaction();
+        }
+    }
+}
+
+PROTECTED VIRTUAL void AosRegistration::Transaction_OnTrafficPriorityChanged() {}
 
 PROTECTED VIRTUAL IMS_RESULT AosRegistration::MessageMediator_AdjustMessage(
         IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage /* = MESSAGE_NORMAL */)
@@ -5377,8 +5474,8 @@ IMS_BOOL AosRegistration::IsPdnReactivationRequired()
 {
     m_nConsecutiveFailureForPdnReactivated++;
 
-    // TODO: check eps_only or nr
-    if ((m_piContext->GetPcscf()->GetPcscfCount() * 2) <= m_nConsecutiveFailureForPdnReactivated)
+    // TODO: check combined
+    if ((m_piContext->GetPcscf()->GetPcscfCount()) <= m_nConsecutiveFailureForPdnReactivated)
     {
         m_nPdnReactivateWaitTime = 0;
         m_nConsecutiveFailureForPdnReactivated = 0;

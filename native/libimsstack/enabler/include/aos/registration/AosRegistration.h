@@ -31,6 +31,7 @@
 #include "interface/IAosNetTrackerListener.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosSubscriptionListener.h"
+#include "interface/IAosTransaction.h"
 
 #include "provider/AosKeepAlive.h"
 #include "provider/AosUtil.h"
@@ -65,7 +66,8 @@ class AosRegistration :
         public IAosNetTrackerListener,
         public ITimerListener,
         public IAosKeepAliveListener,
-        public IMessageMediator
+        public IMessageMediator,
+        public IAosTransactionListener
 {
 public:
     AosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
@@ -107,6 +109,7 @@ protected:
     void SetBlocked(IN IMS_BOOL bBlocked);
     void SetHeldByCall(IN IMS_BOOL bHeld);
     void SetImsCall(IN IMS_BOOL bStarted);
+    void SetRadioWaiting(IN IMS_BOOL bWaiting);
     void SetRetryTime();
 
     void ClearPending();
@@ -129,6 +132,7 @@ protected:
     IMS_BOOL IsNetworkBindingSupported(IN IAosHandle* piHandle);
     IMS_BOOL IsNetworkFeatureBindingSupported(IN IAosHandle* piHandle);
     IMS_BOOL IsCallStateRequired() const;
+    IMS_BOOL IsRadioWaiting() const;
 
     IMS_SINT32 GetRegExpires();
 
@@ -368,6 +372,13 @@ protected:
     /// IAosNetTrackerListener
     virtual void NetTracker_StatusChanged(){};
 
+    /// IAosTransactionListener
+    virtual void Transaction_OnConnectionFailed(
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
+    virtual void Transaction_OnConnectionSetupPrepared();
+    virtual void Transaction_OnTrafficPriorityChanged();
+
+    /// IMessageMediator
     virtual IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
 
@@ -486,6 +497,7 @@ protected:
     IMS_BOOL m_bIsBlocked;
     IMS_BOOL m_bIsHeldByCall;
     IMS_BOOL m_bIsAppReady;
+    IMS_BOOL m_bIsRadioWaiting;
 
     /// reg info
     AString m_strRegId;              /// aos_reg_0

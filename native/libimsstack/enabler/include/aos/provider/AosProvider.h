@@ -19,13 +19,15 @@
 #include "ImsMap.h"
 
 class IMutex;
+
 class IAosCallTracker;
 class IAosLocationStarter;
 class IAosNConfiguration;
 class IAosRegStateManager;
+class IAosRetryRepository;
 class IAosService;
 class IAosSubscriberManager;
-class IAosRetryRepository;
+class IAosTransaction;
 
 class AosDnsQuery;
 class AosKeepAlive;
@@ -52,19 +54,21 @@ public:
     IAosLocationStarter* GetLocationStarter(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosNConfiguration* GetNConfiguration(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosRegStateManager* GetRegStateManager(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IAosRetryRepository* GetRetryRepository(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosService* GetService(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IAosSubscriberManager* GetSubscriberManager(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IAosRetryRepository* GetRetryRepository(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IAosTransaction* GetTransaction(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     void SetCallTracker(IN IAosCallTracker* piCt, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetLocationStarter(IN IAosLocationStarter* piLs, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetNConfiguration(IN IAosNConfiguration* piNc, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetRegStateManager(IN IAosRegStateManager* piRsm, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    void SetRetryRepository(
+            IN IAosRetryRepository* piRetryRepository, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetService(IN IAosService* piService, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetSubscriberManager(
             IN IAosSubscriberManager* piSubscriberManager, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void SetRetryRepository(
-            IN IAosRetryRepository* piRetryRepository, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    void SetTransaction(IN IAosTransaction* piTransaction, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
 private:
     class ProviderParam
@@ -75,9 +79,10 @@ private:
                 m_piLocationStarter(IMS_NULL),
                 m_piNConfiguration(IMS_NULL),
                 m_piRegStateManager(IMS_NULL),
+                m_piRetryRepository(IMS_NULL),
                 m_piService(IMS_NULL),
                 m_piSubscriberManager(IMS_NULL),
-                m_piRetryRepository(IMS_NULL)
+                m_piTransaction(IMS_NULL)
         {
         }
         inline ~ProviderParam() {}
@@ -87,9 +92,10 @@ private:
         IAosLocationStarter* m_piLocationStarter;
         IAosNConfiguration* m_piNConfiguration;
         IAosRegStateManager* m_piRegStateManager;
+        IAosRetryRepository* m_piRetryRepository;
         IAosService* m_piService;
         IAosSubscriberManager* m_piSubscriberManager;
-        IAosRetryRepository* m_piRetryRepository;
+        IAosTransaction* m_piTransaction;
     };
 
     IMutex* m_piLock;

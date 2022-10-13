@@ -21,6 +21,10 @@
 #include "interface/IAosLocationStarter.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegStateManager.h"
+#include "interface/IAosRetryRepository.h"
+#include "interface/IAosService.h"
+#include "interface/IAosSubscriberManager.h"
+#include "interface/IAosTransaction.h"
 
 #include "provider/AosDnsQuery.h"
 #include "provider/AosKeepAlive.h"
@@ -114,6 +118,12 @@ IAosRegStateManager* AosProvider::GetRegStateManager(IN IMS_SINT32 nSlotId /* = 
 }
 
 PUBLIC
+IAosRetryRepository* AosProvider::GetRetryRepository(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+{
+    return m_objParam.GetValue(nSlotId)->m_piRetryRepository;
+}
+
+PUBLIC
 IAosService* AosProvider::GetService(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     return m_objParam.GetValue(nSlotId)->m_piService;
@@ -126,9 +136,9 @@ IAosSubscriberManager* AosProvider::GetSubscriberManager(IN IMS_SINT32 nSlotId /
 }
 
 PUBLIC
-IAosRetryRepository* AosProvider::GetRetryRepository(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+IAosTransaction* AosProvider::GetTransaction(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
-    return m_objParam.GetValue(nSlotId)->m_piRetryRepository;
+    return m_objParam.GetValue(nSlotId)->m_piTransaction;
 }
 
 PUBLIC
@@ -191,6 +201,19 @@ void AosProvider::SetRegStateManager(
 }
 
 PUBLIC
+void AosProvider::SetRetryRepository(
+        IN IAosRetryRepository* piRetryRepository, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+{
+    LockGuard objLock(m_piLock);
+
+    ProviderParam* pParam = m_objParam.GetValue(nSlotId);
+    if (pParam != IMS_NULL)
+    {
+        pParam->m_piRetryRepository = piRetryRepository;
+    }
+}
+
+PUBLIC
 void AosProvider::SetService(IN IAosService* piService, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_piLock);
@@ -216,14 +239,14 @@ void AosProvider::SetSubscriberManager(
 }
 
 PUBLIC
-void AosProvider::SetRetryRepository(
-        IN IAosRetryRepository* piRetryRepository, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+void AosProvider::SetTransaction(
+        IN IAosTransaction* piTransaction, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_piLock);
 
     ProviderParam* pParam = m_objParam.GetValue(nSlotId);
     if (pParam != IMS_NULL)
     {
-        pParam->m_piRetryRepository = piRetryRepository;
+        pParam->m_piTransaction = piTransaction;
     }
 }

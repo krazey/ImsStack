@@ -40,6 +40,7 @@
 #include "provider/AosNConfiguration.h"
 #include "provider/AosSubscriberManager.h"
 #include "provider/AosRetryRepository.h"
+#include "provider/AosTransaction.h"
 #include "external/AosService.h"
 
 #include "manager/AosBuilder.h"
@@ -211,4 +212,11 @@ PUBLIC VIRTUAL IAosNConfiguration* AosBuilder::BuildNConfiguration()
     IMS_TRACE_D("BuildNConfiguration", 0, 0, 0);
 
     return new AosNConfiguration();
+}
+
+PUBLIC VIRTUAL IAosTransaction* AosBuilder::BuildTransaction(IN IMS_SINT32 nSlotId)
+{
+    IMS_TRACE_D("BuildTransaction", 0, 0, 0);
+
+    return new AosTransaction(nSlotId);
 }
