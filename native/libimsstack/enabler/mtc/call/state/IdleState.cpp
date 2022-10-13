@@ -253,7 +253,6 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     }
 
     StartEpsFallbackWatchdogIfNeeded(*piSession->GetPreviousResponse(IMessage::SESSION_START));
-    RunMedia(piSession, piMessage);
     return CallStateName::INCOMING;
 }
 

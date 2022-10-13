@@ -137,11 +137,12 @@ private:
     void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
     void HandleReceivingNetworkToneStarted();
     void HandleReceivingNetworkToneFailed();
+    void RequestToRegisterQosCallback(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eContents);
 
-private:
+protected:
     IMediaReportEventListener* m_pMediaReportListener;
     IMediaQosEventListener* m_pQosListener;
-    MtcMediaProfileManager m_objProfileManager;
+    MtcMediaProfileManager* m_pProfileManager;
     IMtcCallContext& m_objContext;
     MediaInfo* m_pMediaInfo;
     MediaInfo* m_pOldMediaInfo;

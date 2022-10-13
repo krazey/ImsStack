@@ -74,42 +74,38 @@ public:
     virtual ~MtcMediaProfileManager();
 
 public:
-    void CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,
+    virtual void CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,
             IN IMS_BOOL bOriginalProfile, IN MEDIA_CONTENT_TYPE eMediaContents,
             IN IMediaSession* piMediaSession);
-    void DestroyMediaProfile(IN ISession* piSession, IN IMediaSession* piMediaSession);
-    void DestroyAllMediaProfiles(IN IMediaSession* piMediaSession);
+    virtual void DestroyMediaProfile(IN ISession* piSession, IN IMediaSession* piMediaSession);
+    virtual void DestroyAllMediaProfiles(IN IMediaSession* piMediaSession);
 
-    IMS_UINTP GetNegoId(IN ISession* piSession);
-    PemType GetPemType(IN ISession* piSession);
-    IMS_BOOL IsActive(IN ISession* piSession);
-    IMS_BOOL IsConfirmed(IN ISession* piSession);
-    IMS_BOOL IsForked(IN ISession* piSession);
-    IMS_BOOL IsOriginalProfile(IN ISession* piSession);
+    virtual IMS_UINTP GetNegoId(IN ISession* piSession);
+    virtual PemType GetPemType(IN ISession* piSession);
+    virtual IMS_BOOL IsActive(IN ISession* piSession);
+    virtual IMS_BOOL IsConfirmed(IN ISession* piSession);
+    virtual IMS_BOOL IsForked(IN ISession* piSession);
+    virtual IMS_BOOL IsOriginalProfile(IN ISession* piSession);
 
-    void SetPemType(IN ISession* piSession, IN PemType ePemType);
-    void SetActive(IN ISession* piSession, IN IMS_BOOL bActive);
-    void SetConfirmed(IN ISession* piSession, IN IMS_BOOL bConfirmed);
-    void SetForked(IN ISession* piSession, IN IMS_BOOL bForked);
-    void SetAsOriginalProfile(IN ISession* piSession, IN IMS_BOOL bOriginalProfile);
+    virtual void SetPemType(IN ISession* piSession, IN PemType ePemType);
+    virtual void SetActive(IN ISession* piSession, IN IMS_BOOL bActive);
+    virtual void SetConfirmed(IN ISession* piSession, IN IMS_BOOL bConfirmed);
+    virtual void SetForked(IN ISession* piSession, IN IMS_BOOL bForked);
+    virtual void SetAsOriginalProfile(IN ISession* piSession, IN IMS_BOOL bOriginalProfile);
 
-    IMS_BOOL IsPemSendInOtherEarlySession(IN ISession* piSession);  // EarlySession? or ISession?
-    IMS_BOOL IsConfirmedDialogState();
-    void UpdateProfileForMediaActivation(IN ISession* piActiveSession);
+    virtual IMS_BOOL IsPemSendInOtherEarlySession(IN ISession* piSession);
+    virtual IMS_BOOL IsConfirmedDialogState();
+    virtual void UpdateProfileForMediaActivation(IN ISession* piActiveSession);
 
-    ISession* GetSessionWithNegoId(IN IMS_UINTP nNegoId);
-    ISession* GetActiveSession();
+    virtual ISession* GetSessionWithNegoId(IN IMS_UINTP nNegoId);
+    virtual ISession* GetActiveSession();
 
 private:
     IMS_BOOL IsMediaProfilePresent(IN ISession* piSession);
     MediaProfile* GetMediaProfile(IN ISession* piSession);
-    // IMS_BOOL IsCreateMediaProfile(); // does it need..?
-    // IMS_BOOL AddMediaSetWithOriginNegoId(); // does it need...?
 
 private:
-    // MtcMediaManager* m_pMediaManager;
-    // IMS_UINTP pFirstMediaNegoId;
-    IMSMap<ISession*, MediaProfile*> m_objMediaProfiles;
+    ImsMap<ISession*, MediaProfile*> m_objMediaProfiles;
 };
 
 #endif
