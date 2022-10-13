@@ -682,7 +682,6 @@ PROTECTED VIRTUAL void AosHandle::Init()
     if (piAosService != IMS_NULL)
     {
         piAosService->AddListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
-        piAosService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
         piAosService->AddListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
     }
 
@@ -716,7 +715,6 @@ PROTECTED VIRTUAL void AosHandle::CleanUp()
     if (piAosService != IMS_NULL)
     {
         piAosService->RemoveListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
-        piAosService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
         piAosService->RemoveListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
     }
 

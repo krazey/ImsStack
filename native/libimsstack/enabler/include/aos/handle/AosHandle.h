@@ -32,7 +32,6 @@
 #include "handle/AosFeatureTag.h"
 
 class IAosAppContext;
-class AosServicePhoneListener;
 class AosServiceSettingListener;
 
 class AosHandle :
