@@ -82,6 +82,7 @@ public:
     void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
+    void SendScbmNotification(IN IMS_UINT32 nScbmState) override;
 
     // TODO: need to check if it is deprecated or not
     void IMSAoSApp_NotifySpecificMessage(

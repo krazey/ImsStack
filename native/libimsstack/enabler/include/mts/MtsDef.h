@@ -55,26 +55,6 @@ enum class SmsFormatType
 
 enum
 {
-    MO_INVALID = 0,
-    MO_SUCCESS = 1,
-    MO_IMS_TEMP_FAILURE = 2,
-    MO_IMS_PERM_FAILURE = 3,
-    MO_IMS_LIMITEDSMSSVCREGI = 4,
-    MO_RETRY_CS = 5,
-    MO_RETRY_CS_OR_SGS = 6,
-};
-
-enum
-{
-    MT_INVALID = 0,
-    MT_SUCCESS = 1,
-    MT_FAILURE = 2,
-    MT_SMS_FORMAT_FAILURE = 3,
-    MT_SMS_NODATA_FAILURE = 4,
-};
-
-enum
-{
     SMS_MTI_NONE = -1
 };
 

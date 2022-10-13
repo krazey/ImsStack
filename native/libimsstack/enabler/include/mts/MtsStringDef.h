@@ -21,6 +21,7 @@
 #include "INetworkWatcher.h"
 #include "IIpcan.h"
 #include "ImsTypeDef.h"
+#include "IuMtsService.h"
 #include "MtsDef.h"
 
 class MtsStringDef
@@ -176,6 +177,21 @@ public:
         }
     }
 
+    inline static const IMS_CHAR* PS_ScbmState(IN IMS_UINT32 nScbmState)
+    {
+        switch (nScbmState)
+        {
+            case NOTIFY_SCBM_STARTED:
+                return "SCBM_STARTED";
+            case NOTIFY_SCBM_TERMINATED:
+                return "SCBM_TERMINATED";
+            case NOTIFY_SCBM_TERMINATED_BY_ECALL:
+                return "SCBM_TERMINATED_BY_ECALL";
+            default:
+                return "invalid";
+        }
+    }
+
     inline static const IMS_CHAR* PS_SmsFormatType(IN SmsFormatType eSmsFormat)
     {
         switch (eSmsFormat)
@@ -225,6 +241,10 @@ public:
 
 #ifndef PS_RadioTechType
 #define PS_RadioTechType(A) MtsStringDef::PS_RadioTechType(A)
+#endif
+
+#ifndef PS_ScbmState
+#define PS_ScbmState(A) MtsStringDef::PS_ScbmState(A)
 #endif
 
 #ifndef PS_SmsFormatType

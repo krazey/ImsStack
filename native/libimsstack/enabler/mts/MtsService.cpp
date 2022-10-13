@@ -27,6 +27,7 @@
 #include "ImsAosParameter.h"
 #include "ImsCore.h"
 #include "ImsServiceConfig.h"
+#include "IuMtsService.h"
 #include "JniEnablerConnector.h"
 #include "MtsService.h"
 #include "MtsServiceState.h"
@@ -122,6 +123,16 @@ PUBLIC VIRTUAL void MtsService::SendMtResult(IN IMS_BOOL bMtResult)
     IMS_TRACE_I("SendMtResult", 0, 0, 0);
     // TODO(Mts): Call back is being considered
     (void)bMtResult;
+}
+
+PUBLIC VIRTUAL void MtsService::SendScbmNotification(IN IMS_UINT32 nScbmState)
+{
+    IMS_TRACE_I("SendScbmNotification : SCBM State[%s]", PS_ScbmState(nScbmState), 0, 0);
+
+    if (m_piImsEmergencyAos != IMS_NULL)
+    {
+        m_piImsEmergencyAos->GetAosInfo()->NotifyScbmState(nScbmState);
+    }
 }
 
 PUBLIC
