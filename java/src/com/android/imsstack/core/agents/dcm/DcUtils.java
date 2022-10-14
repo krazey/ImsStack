@@ -112,7 +112,7 @@ public class DcUtils implements IDcUtils {
                     ani = getAccessNetworkInfoForLte(nri, ss.getDuplexMode());
                     break;
                 case TelephonyManager.NETWORK_TYPE_NR:
-                    ani = getAccessNetworkInfoForNr(nri, ss.getDuplexMode());
+                    ani = getAccessNetworkInfoForNr(nri, ServiceState.DUPLEX_MODE_TDD);
                     break;
                 case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
                 case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
