@@ -18,10 +18,4 @@
     <!-- Carrier configurations -->
     <!-- Aos -->
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
-
-    <!-- Ut/Xcap AOSP -->
-    <!-- Previous solution was using 80 and TCP. Below values come from VDF/DE because VDF UK
-     doesn't have own requirements -->
-    <int name="imsss.ut_as_server_port_int" value="443"/>
-    <int name="imsss.ut_transport_type_int" value="3"/>
 </carrier_config>
