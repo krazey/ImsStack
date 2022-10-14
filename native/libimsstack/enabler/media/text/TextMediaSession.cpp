@@ -109,9 +109,6 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
 
     pTextConfig->setMediaDirection((int32_t)nTextDerection);
 
-    IMS_TRACE_D("UpdateRtpConfig() - MediaDirection[%d], TxPayload[%d], RxPayload[%d]",
-            pTextConfig->getMediaDirection(), pTextConfig->getTxPayloadTypeNumber(),
-            pTextConfig->getRxPayloadTypeNumber());
     IMS_TRACE_D("UpdateRtpConfig() - RemoteAddress[%s], RemotePort[%d]",
             pTextConfig->getRemoteAddress().c_str(), pTextConfig->getRemotePort(), 0);
 
@@ -136,10 +133,6 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
             continue;
         }
 
-        pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
-        pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
-        pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.nSamplingRate / 1000));
-
         if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("red"))
         {
             TextProfile::RedFmtp* pFmtp = (TextProfile::RedFmtp*)pPayload->pFmtp;
@@ -150,6 +143,9 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
                 continue;
             }
 
+            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
+            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
+            pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.nSamplingRate / 1000));
             pTextConfig->setCodecType(TextConfig::TEXT_T140_RED);
             pTextConfig->setRedundantPayload(pFmtp->nRedPayload);
             pTextConfig->setRedundantLevel(pFmtp->nRedLevel);
@@ -157,10 +153,12 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
         }
         else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("t140"))
         {
+            pTextConfig->setTxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
+            pTextConfig->setRxPayloadTypeNumber((int32_t)pPayload->objRtpMap.nPayloadNum);
+            pTextConfig->setSamplingRateKHz((int8_t)(pPayload->objRtpMap.nSamplingRate / 1000));
             pTextConfig->setCodecType(TextConfig::TEXT_T140);
             pTextConfig->setRedundantPayload(0);
             pTextConfig->setRedundantLevel(0);
-            break;
         }
         else
         {
@@ -171,6 +169,9 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
 
     pTextConfig->setKeepRedundantLevel(pLocalProfile->bKeepRedLevel);
 
+    IMS_TRACE_D("UpdateRtpConfig() - MediaDirection[%d], TxPayload[%d], RxPayload[%d]",
+            pTextConfig->getMediaDirection(), pTextConfig->getTxPayloadTypeNumber(),
+            pTextConfig->getRxPayloadTypeNumber());
     IMS_TRACE_D("UpdateRtpConfig() - CodecType[%d], RedPayload[%d], RedLevel[%d]",
             pTextConfig->getCodecType(), pTextConfig->getRedundantPayload(),
             pTextConfig->getRedundantLevel());
