@@ -65,3 +65,21 @@ PROTECTED VIRTUAL void AosHandleEmergencyMts::InitializeServiceBlock()
 
     A_IMS_TRACE_I(APPPROFILE, "InitializeServiceBlock :: block(%s)", _TRACE_B_(m_bBlocked), 0, 0);
 }
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL void AosHandleEmergencyMts::InitializeServiceFeature()
+{
+    m_objFeatureTagList.Clear();
+
+    if (GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
+    {
+        m_objFeatureTagList.AddFeature(ImsAosFeature::SMSIP);
+    }
+
+    A_IMS_TRACE_I(APPPROFILE, "InitializeServiceFeature :: Features(%x)",
+            m_objFeatureTagList.GetFeatures(), 0, 0);
+}

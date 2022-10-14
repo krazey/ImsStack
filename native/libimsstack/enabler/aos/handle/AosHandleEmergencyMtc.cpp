@@ -16,7 +16,14 @@
 #include "ServiceTrace.h"
 
 #include "interface/IAosAppContext.h"
+#include "interface/IAosNConfiguration.h"
+#include "provider/AosProvider.h"
+
 #include "handle/AosHandleEmergencyMtc.h"
+
+__IMS_TRACE_TAG_USER_DECL__("AOS");
+
+#define APPPROFILE m_strTag.GetStr()
 
 /*
 
@@ -42,4 +49,24 @@ PUBLIC VIRTUAL AosHandleEmergencyMtc::~AosHandleEmergencyMtc()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleEmergencyMtc = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleEmergencyMtc), this);
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL void AosHandleEmergencyMtc::InitializeServiceFeature()
+{
+    m_objFeatureTagList.Clear();
+
+    m_objFeatureTagList.AddFeature(ImsAosFeature::MMTEL);
+
+    if (GET_N_CONFIG(m_nSlotId)->IsRttSupported())
+    {
+        m_objFeatureTagList.AddFeature(ImsAosFeature::TEXT);
+    }
+
+    A_IMS_TRACE_I(APPPROFILE, "InitializeServiceFeature :: Features(%x)",
+            m_objFeatureTagList.GetFeatures(), 0, 0);
 }

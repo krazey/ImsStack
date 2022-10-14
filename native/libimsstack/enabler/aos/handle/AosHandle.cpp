@@ -16,12 +16,10 @@
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
-#include "CarrierConfig.h"
 #include "ImsMessage.h"
 #include "INetworkWatcher.h"
 
 #include "AosReason.h"
-#include "AoSAppRequestType.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 
@@ -601,6 +599,11 @@ Remarks
 */
 PUBLIC VIRTUAL void AosHandle::NetTracker_StatusChanged()
 {
+    if (IsEmergencyService())
+    {
+        return;
+    }
+
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
     IMS_BOOL bCurrSrvIn = !piNetTracker->IsSuspended();
 
@@ -1048,6 +1051,18 @@ IMS_BOOL AosHandle::IsDataConnected()
     IAosConnection* piConnection = m_piAppContext->GetConnection();
 
     return (piConnection->GetState() == IAosConnection::STATE_ACTIVE);
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED
+IMS_BOOL AosHandle::IsEmergencyService()
+{
+    return (m_nServiceType == ImsAosService::EMERGENCY_MTC ||
+            m_nServiceType == ImsAosService::EMERGENCY_MTS);
 }
 
 /*
@@ -2053,6 +2068,11 @@ Remarks
 */
 PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
 {
+    if (IsEmergencyService())
+    {
+        return IMS_FALSE;
+    }
+
     if (IsImsConnected() == IMS_FALSE)
     {
         A_IMS_TRACE_D(APPPROFILE, "ProcessImsSuspended :: ims isn't connected", 0, 0, 0);
@@ -2084,6 +2104,11 @@ Remarks
 */
 PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
 {
+    if (IsEmergencyService())
+    {
+        return IMS_FALSE;
+    }
+
     if (IsImsConnected() == IMS_FALSE)
     {
         A_IMS_TRACE_D(APPPROFILE, "ProcessImsResumed :: ims isn't connected", 0, 0, 0);

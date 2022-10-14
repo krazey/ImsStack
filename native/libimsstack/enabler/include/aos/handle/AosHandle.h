@@ -192,6 +192,7 @@ protected:
     IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature) const;
     IMS_BOOL IsWifiConnected();
     IMS_BOOL IsDataConnected();
+    IMS_BOOL IsEmergencyService();
 
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;

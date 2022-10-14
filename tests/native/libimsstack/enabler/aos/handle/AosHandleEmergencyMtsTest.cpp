@@ -40,6 +40,10 @@ public:
     IAosNConfiguration* m_piAosNConfiguration;
     MockIAosNConfiguration m_objMockIAosNConfiguration;
 
+    const AString m_strAppId = AString("ims.app.mts.emergency.test");
+    const AString m_strServiceId = AString("ims.service.mts.emergency.test");
+    const IMS_UINT32 m_nServiceType = -1;
+
 protected:
     virtual void SetUp() override
     {
@@ -52,17 +56,13 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(ReturnRef(strValue));
 
-        const AString strAppId = AString("ims.app.mts.emergency.test");
-        const AString strServiceId = AString("ims.service.mts.emergency.test");
-        const IMS_UINT32 nServiceType = -1;
-
         m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
         AosProvider::GetInstance()->SetNConfiguration(
                 static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
 
         m_pAosHandleEmergencyMts =
                 new AosHandleEmergencyMts(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
-                        strAppId, strServiceId, nServiceType);
+                        m_strAppId, m_strServiceId, m_nServiceType);
 
         ASSERT_TRUE(m_pAosHandleEmergencyMts != nullptr);
     }
@@ -79,34 +79,38 @@ protected:
     }
 
     void InitializeServiceBlock() { m_pAosHandleEmergencyMts->InitializeServiceBlock(); }
-
+    void InitializeServiceFeature() { m_pAosHandleEmergencyMts->InitializeServiceFeature(); }
     IMS_BOOL IsBlocked() { return m_pAosHandleEmergencyMts->AosHandle::IsBlocked(); }
 };
 
-TEST_F(AosHandleEmergencyMtsTest, InitializeServiceBlock_Test1)
+TEST_F(AosHandleEmergencyMtsTest, InitializeServiceBlock_Test)
 {
-    // Test1: EmergencySmsOverIms not supported
-    // Expectation: blocked
+    // Expectation: Blocked if EmergencySmsOverIms is not supported
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencySmsOverImsSupported())
-            .Times(1)
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
     InitializeServiceBlock();
+    EXPECT_FALSE(IsBlocked());
 
+    InitializeServiceBlock();
     EXPECT_TRUE(IsBlocked());
 }
 
-TEST_F(AosHandleEmergencyMtsTest, InitializeServiceBlock_Test2)
+TEST_F(AosHandleEmergencyMtsTest, InitializeServiceFeature_Test)
 {
-    // Test2: EmergencySmsOverIms supported
-    // Expectation: not blocked
+    // Expectation: SMSIP feature is added if EmergencySmsOverIms supported
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsEmergencySmsOverImsSupported())
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
 
-    InitializeServiceBlock();
+    InitializeServiceFeature();
+    EXPECT_TRUE(m_pAosHandleEmergencyMts->GetFeatureTagList().HasFeature(ImsAosFeature::SMSIP));
 
-    EXPECT_FALSE(IsBlocked());
+    InitializeServiceFeature();
+    EXPECT_FALSE(m_pAosHandleEmergencyMts->GetFeatureTagList().HasFeature(ImsAosFeature::SMSIP));
 }
