@@ -15,6 +15,15 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Ims General -->
+    <boolean name="support_country_param_in_pani_header_bool" value="true"/>
+
+    <!-- Aos -->
+    <int-array name="ims.registration_permanent_error_code_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+    <boolean name="ims_deregister_on_3g_networks_bool" value="true"/>
+
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
