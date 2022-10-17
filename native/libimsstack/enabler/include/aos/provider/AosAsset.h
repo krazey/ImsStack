@@ -61,7 +61,7 @@ public:
             nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nImsSignallingDscp(46),
             nRegRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
-            nRegRetry503Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
+            nRegRetry503Policy(CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT),
             nRegRetryDefaultPolicy(0),
             nRegRetryMinCnt(0),
             nRegRetryTimerFPolicy(0),
@@ -80,6 +80,8 @@ public:
             objRegRetryErrCodeWithDiffPcscf(IMSVector<IMS_SINT32>()),
             objRegRetryErrCodeWithoutIpsec(IMSVector<IMS_SINT32>()),
             objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>()),
+            objReregErrCodeForCallEnd(IMSVector<IMS_SINT32>()),
+            objReregErrCodeForPdnReactivationAfterCallEnd(IMSVector<IMS_SINT32>()),
             objReregErrorCodesWithImsPdnReactivation(IMSVector<IMS_SINT32>()),
             objReregErrorCodesWithInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
             objReregRetryErrCodeForInitReg(IMSVector<IMS_SINT32>()),
@@ -150,6 +152,8 @@ public:
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithDiffPcscf;
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
     IMSVector<IMS_SINT32> objRegistrationPermanentErrorMaxCount;
+    IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
+    IMSVector<IMS_SINT32> objReregErrCodeForPdnReactivationAfterCallEnd;
     IMSVector<IMS_SINT32> objReregErrorCodesWithImsPdnReactivation;
     IMSVector<IMS_SINT32> objReregErrorCodesWithInitRegWithAvailablePcscf;
     IMSVector<IMS_SINT32> objReregRetryErrCodeForInitReg;

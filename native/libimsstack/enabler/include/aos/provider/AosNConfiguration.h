@@ -159,6 +159,8 @@ public:
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime();
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithPcscfDiscovery();
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForCallEnd();
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForPdnReactivationAfterCallEnd();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithInitRegWithAvailablePcscf();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithImsPdnReactivation();
 
@@ -187,8 +189,6 @@ private:
     AosRegRetryIntervalBundle m_objRegRetryInterval;
     AosSubErrCodeForInitRegBundle m_objSubErrCodeForInitReg;
     AosSubErrCodeForTerminatedBundle m_objSubErrCodeForTerminated;
-
-    AosReregistrationErrorPolicyDuringCallBundle m_objReregErrPolicyCall;
 
     IMS_UINT32 m_nEventForInitRegOnTerminatedState;
     IMS_UINT32 m_nEventToFollowWtForInitRegOnTerminatedState;

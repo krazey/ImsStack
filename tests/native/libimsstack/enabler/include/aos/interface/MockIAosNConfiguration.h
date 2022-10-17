@@ -151,6 +151,9 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetEmergencyPcscfRetryWaitTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithPcscfDiscovery, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeForCallEnd, (), (override));
+    MOCK_METHOD(
+            IMSVector<IMS_SINT32>&, GetReregErrCodeForPdnReactivationAfterCallEnd, (), (override));
     MOCK_METHOD(
             IMSVector<IMS_SINT32>&, GetReregErrCodeWithInitRegWithAvailablePcscf, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithImsPdnReactivation, (), (override));
