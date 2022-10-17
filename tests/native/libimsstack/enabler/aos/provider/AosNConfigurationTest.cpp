@@ -599,6 +599,19 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     CarrierConfig::Assets::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY))
             .WillOnce(Return(objRegistrationPermanentErrorMaxCount));
 
+    IMSVector<IMS_SINT32> objReregErrForCallEnd;
+    objReregErrForCallEnd.Clear();
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY))
+            .WillOnce(Return(objReregErrForCallEnd));
+
+    IMSVector<IMS_SINT32> objReregErrForPdnReactivationAfterCallEnd;
+    objReregErrForPdnReactivationAfterCallEnd.Clear();
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::Assets::
+                            KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY))
+            .WillOnce(Return(objReregErrForPdnReactivationAfterCallEnd));
+
     IMSVector<IMS_SINT32> objReregErrorCodesWithImsPdnReactivation;
     objReregErrorCodesWithImsPdnReactivation.Clear();
     EXPECT_CALL(objCarrierConfig,

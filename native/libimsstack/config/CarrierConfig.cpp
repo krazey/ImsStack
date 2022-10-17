@@ -791,6 +791,11 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_A
         "reg_retry_err_code_without_ipsec_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY[] =
         "registration_permanent_error_max_count_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY[] =
+        "rereg_err_code_for_call_end_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[] =
+                "rereg_err_code_for_pdn_reactivation_after_call_end_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY[] =
         "rereg_error_codes_with_ims_pdn_reactivation_int_array";
 const IMS_CHAR CarrierConfig::Assets::
@@ -887,15 +892,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY
         "sub_err_code_for_terminated_with_retry_max_count_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY[] =
         "sub_err_code_for_terminated_int_array";
-// }
-// Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_POLICY_DURING_CALL_BUNDLE[] =
-        "reregistration_error_policy_during_call_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_CODE_WITH_CALL_END_INT_ARRAY[] =
-        "reregistration_error_code_with_call_end_int_array";
-const IMS_CHAR CarrierConfig::Assets::
-        KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[] =
-                "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
 // }
 
 // Mtc

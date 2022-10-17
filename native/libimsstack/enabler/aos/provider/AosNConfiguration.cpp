@@ -38,7 +38,6 @@ AosNConfiguration::AosNConfiguration() :
         m_objRegRetryInterval(AosRegRetryIntervalBundle()),
         m_objSubErrCodeForInitReg(AosSubErrCodeForInitRegBundle()),
         m_objSubErrCodeForTerminated(AosSubErrCodeForTerminatedBundle()),
-        m_objReregErrPolicyCall(AosReregistrationErrorPolicyDuringCallBundle()),
         m_nEventForInitRegOnTerminatedState(0),
         m_nEventToFollowWtForInitRegOnTerminatedState(0),
         m_nClearPermanentPdnFailure(0),
@@ -699,6 +698,17 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithPcscfD
     return m_objAsset.objRegErrorCodesWithPcscfDiscovery;
 }
 
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForCallEnd()
+{
+    return m_objAsset.objReregErrCodeForCallEnd;
+}
+
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
+AosNConfiguration::GetReregErrCodeForPdnReactivationAfterCallEnd()
+{
+    return m_objAsset.objReregErrCodeForPdnReactivationAfterCallEnd;
+}
+
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
 AosNConfiguration::GetReregErrCodeWithInitRegWithAvailablePcscf()
 {
@@ -1224,6 +1234,10 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY);
     m_objAsset.objRegistrationPermanentErrorMaxCount = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY);
+    m_objAsset.objReregErrCodeForCallEnd =
+            piCc->GetIntArray(CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY);
+    m_objAsset.objReregErrCodeForPdnReactivationAfterCallEnd = piCc->GetIntArray(CarrierConfig::
+                    Assets::KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY);
     m_objAsset.objReregErrorCodesWithImsPdnReactivation = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY);
     m_objAsset.objReregErrorCodesWithInitRegWithAvailablePcscf = piCc->GetIntArray(CarrierConfig::

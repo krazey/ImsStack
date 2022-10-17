@@ -1160,6 +1160,22 @@ public:
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithPcscfDiscovery() = 0;
 
     /**
+     * @brief Indicate the list of error codes that result in terminating the IMS call
+     *        when reregistraiton fails.
+     *
+     * @return vector error code
+     */
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForCallEnd() = 0;
+
+    /**
+     * @brief Indicate the list of error codes that results in reactivating IMS PDN
+     *        after terminating the IMS call when reregistraiton fails.
+     *
+     * @return vector error code
+     */
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForPdnReactivationAfterCallEnd() = 0;
+
+    /**
      * @brief Indicate the error codes of the reregistration followed by intital registration
      *        with available PCSCF. If no available PCSCF, IMS PDN is re-activated.
      * @return vector error code

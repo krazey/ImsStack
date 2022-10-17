@@ -149,23 +149,4 @@ public:
     IMSVector<IMS_SINT32> objSubErrCodeForTerminated;
 };
 
-struct AosReregistrationErrorPolicyDuringCallBundle
-{
-public:
-    AosReregistrationErrorPolicyDuringCallBundle() :
-            objReregistrationErrorCodeWithCallEnd(IMSVector<IMS_SINT32>()),
-            objReregistrationErrorCauseWithPdnReactivationAfterCallEnd(IMSVector<IMS_SINT32>())
-    {
-    }
-
-    AosReregistrationErrorPolicyDuringCallBundle(
-            IN const AosReregistrationErrorPolicyDuringCallBundle&) = delete;
-    AosReregistrationErrorPolicyDuringCallBundle& operator=(
-            IN const AosReregistrationErrorPolicyDuringCallBundle&) = delete;
-
-public:
-    IMSVector<IMS_SINT32> objReregistrationErrorCodeWithCallEnd;
-    IMSVector<IMS_SINT32> objReregistrationErrorCauseWithPdnReactivationAfterCallEnd;
-};
-
 #endif  // AOS_ASSET_BUNDLE_H_
