@@ -23,7 +23,6 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IBatteryState;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -44,11 +43,6 @@ public class JNIUpCallEvtManager {
     }
 
     public JNIUpCallEvtManager() {
-    }
-
-    @VisibleForTesting
-    public static void setJniUpCallEvtManager(JNIUpCallEvtManager jniUpCallEvtManager) {
-        sJNIUpCallEvtManager = jniUpCallEvtManager;
     }
 
     public void init() {

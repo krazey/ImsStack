@@ -38,6 +38,7 @@ import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Map;
 import java.util.Set;
@@ -49,22 +50,29 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim.IsimListener {
 
     public static final int EVENT_NATIVE_BOOT_COMPLETED = 1000;
-    private AosServiceHandler mHandler;
+    @VisibleForTesting
+    protected AosServiceHandler mHandler;
 
-    private final Set<IAosRegistrationListener> mAosRegistationListeners =
+    @VisibleForTesting
+    protected final Set<IAosRegistrationListener> mAosRegistationListeners =
             new CopyOnWriteArraySet<IAosRegistrationListener>();
-    private final Set<IAosInfoListener> mAosInfoListeners =
+    @VisibleForTesting
+    protected final Set<IAosInfoListener> mAosInfoListeners =
             new CopyOnWriteArraySet<IAosInfoListener>();
 
-    final ImsServiceRegistryListener mListener = new ImsServiceRegistryListener();
+    @VisibleForTesting
+    protected final ImsServiceRegistryListener mListener = new ImsServiceRegistryListener();
 
-    private CapabilityPairs mCapabilityPairs;
+    @VisibleForTesting
+    protected CapabilityPairs mCapabilityPairs;
 
     private long mNativeObject = 0;
-    private JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
+    @VisibleForTesting
+    protected JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private int mSlotId = MSimUtils.DEFAULT_SLOT_ID;
 
-    private int mRegisteredNetworkType = NetworkType.NONE;
+    @VisibleForTesting
+    protected int mRegisteredNetworkType = NetworkType.NONE;
 
     public void init(int slotId) {
         mSlotId = slotId;
@@ -616,20 +624,17 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg == null) {
-                ImsLog.d(mSlotId, "msg is null");
-                return;
-            }
+            if (msg != null) {
+                ImsLog.i(mSlotId, "handleMessage :: msg= " + msg.what);
 
-            ImsLog.i(mSlotId, "handleMessage :: msg= " + msg.what);
+                switch (msg.what) {
+                    case EVENT_NATIVE_BOOT_COMPLETED:
+                        handleNativeBootCompleted();
+                        break;
 
-            switch (msg.what) {
-                case EVENT_NATIVE_BOOT_COMPLETED:
-                    handleNativeBootCompleted();
-                    break;
-
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -686,14 +691,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     int networkType = parcel.readInt();
                     int featureTagBits = parcel.readInt();
 
-                    int count = parcel.readInt();
-                    if (count <= 0) {
-                        ImsLog.d("No featureTags");
-                        updateRegistered(networkType, featureTagBits, new ArraySet<String>());
-                        break;
-                    }
-
                     Set<String> featureTags = new ArraySet<String>();
+                    int count = parcel.readInt();
                     for (int i = 0; i < count; i++) {
                         featureTags.add(parcel.readString());
                     }
@@ -706,14 +705,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                     int networkType = parcel.readInt();
                     int featureTagBits = parcel.readInt();
 
-                    int count = parcel.readInt();
-                    if (count <= 0) {
-                        ImsLog.d("No featureTags");
-                        updateRegistering(networkType, featureTagBits, new ArraySet<String>());
-                        break;
-                    }
-
                     Set<String> featureTags = new ArraySet<String>();
+                    int count = parcel.readInt();
                     for (int i = 0; i < count; i++) {
                         featureTags.add(parcel.readString());
                     }
