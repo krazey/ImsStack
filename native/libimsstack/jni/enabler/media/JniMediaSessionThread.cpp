@@ -29,8 +29,7 @@ __IMS_TRACE_TAG_USER_DECL__("JNI.MEDIA");
 
 PUBLIC
 JniMediaSessionThread::JniMediaSessionThread() :
-        BaseServiceThread(),
-        m_nSlotId(0)
+        BaseServiceThread()
 {
     IMS_TRACE_D("+JniMediaSessionThread", 0, 0, 0);
 }
@@ -38,12 +37,6 @@ JniMediaSessionThread::JniMediaSessionThread() :
 PUBLIC VIRTUAL JniMediaSessionThread::~JniMediaSessionThread()
 {
     IMS_TRACE_D("~JniMediaSessionThread", 0, 0, 0);
-}
-
-PUBLIC
-void JniMediaSessionThread::SetSlotId(IN IMS_SINT32 nSlotId)
-{
-    m_nSlotId = nSlotId;
 }
 
 PUBLIC
@@ -67,7 +60,7 @@ IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgOpenConfigParam* pPa
         pParam->m_pConfig->writeToParcel(&objParcel);
     }
 
-    SendData2Java(objParcel, IMS_TRUE);
+    SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
 }
@@ -86,7 +79,7 @@ IMS_BOOL JniMediaSessionThread::OnModifySession(IN ImsMediaMsgConfigParam* pPara
     objParcel.writeInt32(IMMedia::REQUEST_MODIFY_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_pConfig->writeToParcel(&objParcel);
-    SendData2Java(objParcel, IMS_TRUE);
+    SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
 }
@@ -104,7 +97,7 @@ IMS_BOOL JniMediaSessionThread::OnCloseSession(IN ImsMediaMsgParamBase* pParam)
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_CLOSE_SESSION);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
-    SendData2Java(objParcel, IMS_TRUE);
+    SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
 }
@@ -123,7 +116,7 @@ IMS_BOOL JniMediaSessionThread::OnAddConfig(IN ImsMediaMsgConfigParam* pParam)
     objParcel.writeInt32(IMMedia::REQUEST_ADD_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_pConfig->writeToParcel(&objParcel);
-    SendData2Java(objParcel, IMS_TRUE);
+    SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
 }
@@ -142,7 +135,7 @@ IMS_BOOL JniMediaSessionThread::OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam
     objParcel.writeInt32(IMMedia::REQUEST_DELETE_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_pConfig->writeToParcel(&objParcel);
-    SendData2Java(objParcel, IMS_TRUE);
+    SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
 }
@@ -160,7 +153,7 @@ IMS_BOOL JniMediaSessionThread::OnConfirmConfig(IN ImsMediaMsgConfigParam* pPara
     objParcel.writeInt32(IMMedia::REQUEST_CONFIRM_CONFIG);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_pConfig->writeToParcel(&objParcel);
-    SendData2Java(objParcel, IMS_TRUE);
+    SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
 }
@@ -179,7 +172,7 @@ IMS_BOOL JniMediaSessionThread::OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam)
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     objParcel.writeByte(pParam->m_dtmfCode);
     objParcel.writeInt32(pParam->m_nDuration);
-    SendData2Java(objParcel, IMS_TRUE);
+    SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
 }
@@ -193,49 +186,61 @@ IMS_BOOL JniMediaSessionThread::OnSetMediaQualityThreshold(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("OnSetMediaQualityThreshold", 0, 0, 0);
+    IMS_TRACE_D("OnSetMediaQualityThreshold - type[%d]", pParam->m_eMediaType, 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_SET_MEDIA_QUALITY);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_objMediaQualityThreshold.writeToParcel(&objParcel);
-    SendData2Java(objParcel, IMS_TRUE);
+    SendData2Java(objParcel);
     delete pParam;
     return IMS_TRUE;
 }
 
 PUBLIC
-IMS_BOOL JniMediaSessionThread::OnSetPreviewSurface()
+IMS_BOOL JniMediaSessionThread::OnRequestQos(IN ImsMediaMsgQosParam* pParam)
+{
+    if (pParam == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_D("OnRequestQos() - type[%d]", pParam->m_eMediaType, 0, 0);
+
+    Parcel objParcel;
+    objParcel.writeInt32(IMMedia::REQUEST_QOS);
+    objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
+    objParcel.writeString16(android::String16(pParam->m_objIpAddress.ToString().GetStr()));
+    objParcel.writeInt32(pParam->m_nPort);
+    SendData2Java(objParcel);
+    delete pParam;
+    return IMS_TRUE;
+}
+
+PUBLIC
+void JniMediaSessionThread::OnSetPreviewSurface()
 {
     IMS_TRACE_D("OnSetPreviewSurface", 0, 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_SET_PREVIEW_SURFACE);
     objParcel.writeInt32((IMS_UINT32)SESSION_TYPE_VIDEO);
-    SendData2Java(objParcel, IMS_TRUE);
-    return IMS_TRUE;
+    SendData2Java(objParcel);
 }
 
 PUBLIC
-IMS_BOOL JniMediaSessionThread::OnSetDisplaySurface()
+void JniMediaSessionThread::OnSetDisplaySurface()
 {
     IMS_TRACE_D("OnSetDisplaySurface", 0, 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IMMedia::REQUEST_SET_DISPLAY_SURFACE);
     objParcel.writeInt32((IMS_UINT32)SESSION_TYPE_VIDEO);
-    SendData2Java(objParcel, IMS_TRUE);
-    return IMS_TRUE;
+    SendData2Java(objParcel);
 }
 
 PROTECTED VIRTUAL IMS_BOOL JniMediaSessionThread::IsThreadSwitchingRequired(
         IN IMS_SINT32 nMsg) const
 {
-    switch (nMsg)
-    {
-        default:
-        case IMMedia::REQUEST_OPEN_SESSION:
-            return IMS_TRUE;
-            break;
-    }
-    return IMS_TRUE;
+    (void)nMsg;
+    return IMS_FALSE;
 }
 
 PRIVATE

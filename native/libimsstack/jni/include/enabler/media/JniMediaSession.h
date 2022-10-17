@@ -23,6 +23,8 @@
 #include "IMediaManager.h"
 #include "IJniEnabler.h"
 
+using namespace android;
+
 class IJniEnablerThread;
 
 class JniMediaSession : public BaseService
@@ -32,7 +34,7 @@ public:
             IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject);
     virtual ~JniMediaSession();
 
-    virtual int SendData(const android::Parcel& objParcel) override;
+    virtual int SendData(const Parcel& objParcel) override;
     void Initialize(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINTP nNativeObject);
     void SetMtcCallId(IN IMS_SINTP nCallKey);
     void NotifyNativeEnablerSet() override;
@@ -41,23 +43,22 @@ public:
 
 protected:
     virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const override;
-    void HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel) override;
+    void HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel) override;
 
 private:
     void SetJniMediaSessionThread();
     IMediaManager* GetMediaManager();
     MEDIA_CONTENT_TYPE ConvertToMediaType(IN SessionType eSessiontype);
-    void OnResponses(
-            IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const android::Parcel& objParcel);
-    void OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnNofityCallQualityChange(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
+    void OnResponses(IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const Parcel& objParcel);
+    void OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNofityCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
     void OnNotifyMediaDetach(IN IMS_SINT32 nMsg);
-    void OnSendDtmf(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnVideoMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
+    void OnSendDtmf(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void OnVideoMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
+    void ConvertString(IN const String16& strSource, OUT AString& strDest);
 
     JniMediaSessionThread* m_pThread;
     AString m_strThreadName;

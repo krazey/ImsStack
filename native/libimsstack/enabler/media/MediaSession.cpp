@@ -55,6 +55,7 @@ PUBLIC VIRTUAL MediaSession::~MediaSession()
     m_objAudioController.CloseSession();
     m_objVideoController.CloseSession();
     m_objTextController.CloseSession();
+    ClearQosParam();
 
     if (m_pEnvironment != IMS_NULL)
     {
@@ -300,27 +301,39 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
 {
     IMS_TRACE_I("RequestQos() - nNegoId[%" PFLS_x "], eMediaType[%d]", nNegoId, eMediaType, 0);
 
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    IMSList<ImsMediaMsgQosParam*>* pListQosParams = FindQosParam(nNegoId);
 
-    if (pMediaNego == IMS_NULL)
+    // check the param respects negoId is already responsed
+    if (pListQosParams != NULL)
     {
-        IMS_TRACE_E(0, "RequestQos() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-        return IMS_FALSE;
+        for (IMS_UINT32 i = 0; i < pListQosParams->GetSize(); i++)
+        {
+            ImsMediaMsgQosParam* pParam = pListQosParams->GetAt(i);
+
+            /** same media type, let's assume that there is no other remote address is responsed in
+             * the same nego id */
+            if (pParam->m_eMediaType & eMediaType)
+            {
+                // it is already responsed
+                if (pParam->m_bCallback == IMS_TRUE)
+                {
+                    IMS_TRACE_D("RequestQos() - eMediaType[%d] has already responsed", eMediaType,
+                            0, 0);
+                    m_pClientListener->MediaSession_NotifyQos(
+                            nNegoId, pParam->m_bResult, pParam->m_eMediaType);
+                }
+            }
+            else
+            {
+                return processRequestQos(nNegoId, pListQosParams, eMediaType);
+            }
+        }
     }
-
-    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO))
+    else  // there is no qos request is done with the nego id
     {
-        /** TODO: add implementation */
-    }
-
-    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
-    {
-        /** TODO: add implementation */
-    }
-
-    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
-    {
-        /** TODO: add implementation */
+        pListQosParams = new IMSList<ImsMediaMsgQosParam*>();
+        m_objMapQosParams.Add(nNegoId, pListQosParams);
+        return processRequestQos(nNegoId, pListQosParams, eMediaType);
     }
 
     return IMS_TRUE;
@@ -733,7 +746,7 @@ MediaNego* MediaSession::FindMediaNego(IN IMS_UINTP nNegoId)
 
     if (nIndex < 0)
     {
-        IMS_TRACE_E(0, "FindMediaNego -- invalid nNegoId[%d]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FindMediaNego() - invalid nNegoId[%d]", nNegoId, 0, 0);
         return IMS_NULL;
     }
 
@@ -804,6 +817,137 @@ void MediaSession::ClearMediaNego()
     m_objMapMediaNego.Clear();
 }
 
+PROTECTED
+IMSList<ImsMediaMsgQosParam*>* MediaSession::FindQosParam(IN IMS_UINTP nNegoId)
+{
+    IMS_SLONG nIndex = m_objMapQosParams.GetIndexOfKey(nNegoId);
+
+    if (nIndex < 0)
+    {
+        return IMS_NULL;
+    }
+
+    IMSList<ImsMediaMsgQosParam*>* pListQosParam = IMS_NULL;
+    pListQosParam = m_objMapQosParams.GetValueAt(nIndex);
+    return pListQosParam;
+}
+
+PROTECTED IMS_BOOL MediaSession::processRequestQos(IN IMS_UINTP nNegoId,
+        IN IMSList<ImsMediaMsgQosParam*>* pListQosParams, IN MEDIA_CONTENT_TYPE eMediaType)
+{
+    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "processRequestQos() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (pListQosParams == NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO))
+    {
+        AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+
+        if (pAudioNego == NULL)
+        {
+            IMS_TRACE_E(0, "processRequestQos() - not ready", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        ImsMediaMsgQosParam* pParam = new ImsMediaMsgQosParam(MEDIA_TYPE_AUDIO);
+
+        if (pParam != IMS_NULL)
+        {
+            pParam->m_objIpAddress = pAudioNego->GetNegotiatedRemoteAddress();
+            pParam->m_nPort = pAudioNego->GetNegotiatedRemotePort();
+            IMS_TRACE_I("processRequestQos() - audio, nPort[%d]", pParam->m_nPort, 0, 0);
+
+            MediaSession_SendMsgToMediaManager(
+                    IMMedia::REQUEST_QOS, new ImsMediaMsgQosParam(*pParam));
+            pListQosParams->Append(pParam);
+        }
+    }
+
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
+    {
+        VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+
+        if (pVideoNego == NULL)
+        {
+            IMS_TRACE_E(0, "processRequestQos() - not ready", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        ImsMediaMsgQosParam* pParam = new ImsMediaMsgQosParam(MEDIA_TYPE_VIDEO);
+
+        if (pParam != IMS_NULL)
+        {
+            pParam->m_objIpAddress = pVideoNego->GetNegotiatedRemoteAddress();
+            pParam->m_nPort = pVideoNego->GetNegotiatedRemotePort();
+            IMS_TRACE_I("processRequestQos() - video, nPort[%d]", pParam->m_nPort, 0, 0);
+
+            MediaSession_SendMsgToMediaManager(
+                    IMMedia::REQUEST_QOS, new ImsMediaMsgQosParam(*pParam));
+            pListQosParams->Append(pParam);
+        }
+    }
+
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
+    {
+        TextNego* pTextNego = pMediaNego->GetTextNego();
+
+        if (pTextNego == NULL)
+        {
+            IMS_TRACE_E(0, "processRequestQos() - not ready", 0, 0, 0);
+            return IMS_FALSE;
+        }
+
+        ImsMediaMsgQosParam* pParam = new ImsMediaMsgQosParam(MEDIA_TYPE_TEXT);
+
+        if (pParam != IMS_NULL)
+        {
+            pParam->m_objIpAddress = pTextNego->GetNegotiatedRemoteAddress();
+            pParam->m_nPort = pTextNego->GetNegotiatedRemotePort();
+            IMS_TRACE_I("processRequestQos() - text, nPort[%d]", pParam->m_nPort, 0, 0);
+
+            MediaSession_SendMsgToMediaManager(
+                    IMMedia::REQUEST_QOS, new ImsMediaMsgQosParam(*pParam));
+            pListQosParams->Append(pParam);
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+void MediaSession::ClearQosParam()
+{
+    IMS_TRACE_D("ClearQosParam() - map size[%d]", m_objMapQosParams.GetSize(), 0, 0);
+
+    IMSList<ImsMediaMsgQosParam*>* pListQosParam = IMS_NULL;
+
+    while (!m_objMapQosParams.IsEmpty())
+    {
+        pListQosParam = m_objMapQosParams.GetValueAt(0);
+
+        IMS_TRACE_D("ClearQosParam() - list size[%d]", pListQosParam->GetSize(), 0, 0);
+
+        while (pListQosParam != IMS_NULL && !pListQosParam->IsEmpty())
+        {
+            pListQosParam->RemoveAt(0);
+        }
+
+        pListQosParam->Clear();
+        delete pListQosParam;
+        m_objMapQosParams.RemoveAt(0);
+    }
+
+    m_objMapQosParams.Clear();
+}
+
 PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
         IN IMS_SINT32 nEvent, IN ImsMediaMsgParamBase* param)
 {
@@ -817,25 +961,6 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
     }
 
     return IMS_FALSE;
-}
-
-PROTECTED
-ImsMediaBasicSessionInfoParam* MediaSession::GetBasicSessionInfofromRemoteArress(
-        IN AString strIpAddr, IN IMS_SINT32 nPort)
-{
-    IMS_UINTP nNegoId;
-    MEDIA_CONTENT_TYPE eMediaType;
-
-    if (MediaNegoUtil::GetMediaNegoInfo(
-                &m_objMapMediaNego, strIpAddr, nPort, nNegoId, eMediaType) == IMS_TRUE)
-    {
-        ImsMediaBasicSessionInfoParam* pBasicSessionInfo = new ImsMediaBasicSessionInfoParam();
-        pBasicSessionInfo->m_nNegoId = nNegoId;
-        pBasicSessionInfo->m_eMediaType = eMediaType;
-        return pBasicSessionInfo;
-    }
-
-    return IMS_NULL;
 }
 
 PROTECTED
@@ -988,29 +1113,49 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
             break;
         case IMMedia::NOTIFY_QOS_INFO:
         {
-            ImsMediaNotifyQosParam* pParam = reinterpret_cast<ImsMediaNotifyQosParam*>(nParam);
+            ImsMediaMsgQosParam* pParam = reinterpret_cast<ImsMediaMsgQosParam*>(nParam);
 
             if (pParam != IMS_NULL)
             {
-                IPAddress objIpAddress = pParam->m_objIpAddr;
+                IPAddress objIpAddress = pParam->m_objIpAddress;
                 IMS_SINT32 nPort = pParam->m_nPort;
                 IMS_BOOL bResult = pParam->m_bResult;
 
                 IMS_TRACE_I("OnNotify() QOS - CallKey[%d], nPort[%d], bResult[%d]", m_nCallKey,
                         nPort, bResult);
 
-                ImsMediaBasicSessionInfoParam* pBasicSessionInfo =
-                        GetBasicSessionInfofromRemoteArress(objIpAddress.ToString(), nPort);
+                IMS_UINTP nNegoId = 0;
 
-                if (pBasicSessionInfo == IMS_NULL)
+                for (IMS_UINT32 index = 0; index < m_objMapQosParams.GetSize(); index++)
                 {
-                    delete pParam;
-                    return IMS_FALSE;
+                    nNegoId = m_objMapQosParams.GetKeyAt(index);
+                    IMSList<ImsMediaMsgQosParam*>* pListParams = FindQosParam(nNegoId);
+
+                    if (pListParams == NULL)
+                    {
+                        return 0;
+                    }
+
+                    ImsMediaMsgQosParam* matchedParam = IMS_NULL;
+
+                    for (IMS_UINT32 i = 0; i < pListParams->GetSize(); i++)
+                    {
+                        matchedParam = pListParams->GetAt(i);
+
+                        if (matchedParam != NULL && matchedParam->m_objIpAddress == objIpAddress &&
+                                matchedParam->m_nPort == nPort &&
+                                matchedParam->m_bCallback == IMS_FALSE)
+                        {
+                            m_pClientListener->MediaSession_NotifyQos(
+                                    nNegoId, bResult, matchedParam->m_eMediaType);
+
+                            // mark that the callback is already invoked
+                            matchedParam->m_bCallback = IMS_TRUE;
+                            matchedParam->m_bResult = bResult;
+                        }
+                    }
                 }
 
-                m_pClientListener->MediaSession_NotifyQos(
-                        pBasicSessionInfo->m_nNegoId, bResult, pParam->m_eMediaType);
-                delete pBasicSessionInfo;
                 delete pParam;
                 return IMS_TRUE;
             }

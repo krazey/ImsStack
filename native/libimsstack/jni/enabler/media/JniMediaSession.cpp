@@ -25,12 +25,17 @@
 #include "JniMediaSession.h"
 #include "JniMediaSessionThread.h"
 #include "SurfaceManager.h"
-#include "TextConfig.h"
+
+#include <AudioConfig.h>
+#include <TextConfig.h>
+#include <TextConfig.h>
+
+using namespace android::telephony::imsmedia;
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MEDIA");
 
-extern int IMSInterface_GetSurface(const android::String8& str8Class,
-        const android::String8& str8SurfaceName, long& nSurfaceObject);
+extern int IMSInterface_GetSurface(
+        const String8& str8Class, const String8& str8SurfaceName, long& nSurfaceObject);
 
 JniMediaSession::JniMediaSession(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId,
         IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject) :
@@ -60,7 +65,7 @@ JniMediaSession::~JniMediaSession()
     }
 }
 
-PUBLIC VIRTUAL int JniMediaSession::SendData(const android::Parcel& objParcel)
+PUBLIC VIRTUAL int JniMediaSession::SendData(const Parcel& objParcel)
 {
     int nMsg = objParcel.readInt32();
 
@@ -83,6 +88,7 @@ void JniMediaSession::Initialize(
     {
         return;
     }
+
     m_strThreadName.Sprintf("JniMediaSessionThread_%08" PFLS_x, reinterpret_cast<IMS_SINTP>(this));
 
     IMS_TRACE_D("Initialize()", 0, 0, 0);
@@ -90,6 +96,7 @@ void JniMediaSession::Initialize(
     {
         return new JniMediaSessionThread();
     };
+
     ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, GetSlotId());
     m_pThread = (JniMediaSessionThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
 
@@ -98,8 +105,8 @@ void JniMediaSession::Initialize(
         IMS_TRACE_E(0, "JniMediaSession : can't create listener thread", 0, 0, 0);
         return;
     }
+
     IMS_TRACE_D("Initialize()", 0, 0, 0);
-    m_pThread->SetSlotId(GetSlotId());
     m_pThread->SetCallback(nNativeObject, pfnSendDataToJava);
 }
 
@@ -126,6 +133,7 @@ PUBLIC GLOBAL IMS_BOOL JniMediaSession::IsMediaMessage(IN IMS_SINT32 nMsg)
     {
         return IMS_TRUE;
     }
+
     return IMS_FALSE;
 }
 
@@ -140,7 +148,7 @@ PROTECTED VIRTUAL IMS_BOOL JniMediaSession::IsThreadSwitchingRequired(IN IMS_SIN
 }
 
 PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
-        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+        IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     IMS_TRACE_D("HandleMessage() MSG[%d]", nMsg, 0, 0);
 
@@ -222,7 +230,7 @@ MEDIA_CONTENT_TYPE JniMediaSession::ConvertToMediaType(IN SessionType eSessionty
 
 PRIVATE
 void JniMediaSession::OnResponses(
-        IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const android::Parcel& objParcel)
+        IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const Parcel& objParcel)
 {
     MEDIA_CONTENT_TYPE eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
 
@@ -263,8 +271,7 @@ void JniMediaSession::OnResponses(
 }
 
 PRIVATE
-void JniMediaSession::OnNofityMediaInactitivy(
-        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+void JniMediaSession::OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     ImsMediaNotifyInactivityParam* pParam = new ImsMediaNotifyInactivityParam();
 
@@ -275,7 +282,7 @@ void JniMediaSession::OnNofityMediaInactitivy(
 }
 
 PRIVATE
-void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     ImsMediaNotifyPacketParam* pParam = new ImsMediaNotifyPacketParam();
 
@@ -286,16 +293,14 @@ void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const android:
 }
 
 PRIVATE
-void JniMediaSession::OnNofityCallQualityChange(
-        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+void JniMediaSession::OnNofityCallQualityChange(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     (void)nMsg;
     (void)objParcel;
 }
 
 PRIVATE
-void JniMediaSession::OnNofityHeaderExtension(
-        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+void JniMediaSession::OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     (void)nMsg;
     (void)objParcel;
@@ -315,14 +320,14 @@ void JniMediaSession::OnNotifyMediaDetach(IN IMS_SINT32 nMsg)
 }
 
 PRIVATE
-void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
-    ImsMediaNotifyQosParam* pParam = new ImsMediaNotifyQosParam();
+    ImsMediaMsgQosParam* pParam = new ImsMediaMsgQosParam();
 
     pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
     AString strIpAddress;
     ConvertString(objParcel.readString16(), strIpAddress);
-    pParam->m_objIpAddr = IPAddress(strIpAddress);
+    pParam->m_objIpAddress = IPAddress(strIpAddress);
     pParam->m_nPort = objParcel.readInt32();
     pParam->m_bResult = (IMS_BOOL)objParcel.readBool();
 
@@ -330,7 +335,7 @@ void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parc
 }
 
 PRIVATE
-void JniMediaSession::OnSendDtmf(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+void JniMediaSession::OnSendDtmf(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     ImsMediaMsgDtmfParam* pParam = new ImsMediaMsgDtmfParam();
 
@@ -340,7 +345,7 @@ void JniMediaSession::OnSendDtmf(IN IMS_SINT32 nMsg, IN const android::Parcel& o
     GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
-void JniMediaSession::OnVideoMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+void JniMediaSession::OnVideoMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
     pParam->nValue = objParcel.readInt32();
@@ -348,8 +353,8 @@ void JniMediaSession::OnVideoMessage(IN IMS_SINT32 nMsg, IN const android::Parce
 }
 
 PRIVATE
-void JniMediaSession::ConvertString(IN const android::String16& strSource, OUT AString& strDest)
+void JniMediaSession::ConvertString(IN const String16& strSource, OUT AString& strDest)
 {
-    android::String8 str8(strSource);
+    String8 str8(strSource);
     strDest = str8.string();
 }

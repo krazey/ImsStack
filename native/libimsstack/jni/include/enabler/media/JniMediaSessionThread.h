@@ -17,43 +17,33 @@
 #ifndef JNI_MEDIA_SESSION_THREAD_H_
 #define JNI_MEDIA_SESSION_THREAD_H_
 
-#include <AudioConfig.h>
 #include <MediaQualityThreshold.h>
 #include "BaseServiceThread.h"
 #include "IMMedia.h"
 #include "IJniMediaSessionThread.h"
 
-using namespace android::telephony::imsmedia;
-
-class JniMediaSessionThread final :
-        public BaseServiceThread,
-        public IJniMediaSessionThread
+class JniMediaSessionThread final : public BaseServiceThread, public IJniMediaSessionThread
 {
 public:
     JniMediaSessionThread();
     virtual ~JniMediaSessionThread();
-
-    void SetSlotId(IN IMS_SINT32 nSlotId);
-
-    IMS_BOOL OnOpenSession(IN ImsMediaMsgOpenConfigParam* pParam);
-    IMS_BOOL OnModifySession(IN ImsMediaMsgConfigParam* pParam);
-    IMS_BOOL OnCloseSession(IN ImsMediaMsgParamBase* pParam);
-    IMS_BOOL OnAddConfig(IN ImsMediaMsgConfigParam* pParam);
-    IMS_BOOL OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam);
-    IMS_BOOL OnConfirmConfig(IN ImsMediaMsgConfigParam* pParam);
-    IMS_BOOL OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam);
-    IMS_BOOL OnSetMediaQualityThreshold(IN ImsMediaMsgSetMediaQualityParam* pParam);
-    IMS_BOOL OnSetPreviewSurface();
-    IMS_BOOL OnSetDisplaySurface();
+    virtual IMS_BOOL OnOpenSession(IN ImsMediaMsgOpenConfigParam* pParam);
+    virtual IMS_BOOL OnModifySession(IN ImsMediaMsgConfigParam* pParam);
+    virtual IMS_BOOL OnCloseSession(IN ImsMediaMsgParamBase* pParam);
+    virtual IMS_BOOL OnAddConfig(IN ImsMediaMsgConfigParam* pParam);
+    virtual IMS_BOOL OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam);
+    virtual IMS_BOOL OnConfirmConfig(IN ImsMediaMsgConfigParam* pParam);
+    virtual IMS_BOOL OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam);
+    virtual IMS_BOOL OnSetMediaQualityThreshold(IN ImsMediaMsgSetMediaQualityParam* pParam);
+    virtual IMS_BOOL OnRequestQos(IN ImsMediaMsgQosParam* pParam);
+    virtual void OnSetPreviewSurface();
+    virtual void OnSetDisplaySurface();
 
 protected:
     virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const;
 
 private:
     SessionType ConvertToSessionType(IN MEDIA_CONTENT_TYPE eMediaType);
-
-private:
-    IMS_SINT32 m_nSlotId;
 };
 
 #endif

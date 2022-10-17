@@ -71,6 +71,9 @@ public:
             case IMMedia::REQUEST_SET_MEDIA_QUALITY:
                 delete static_cast<ImsMediaMsgSetMediaQualityParam*>(pParam);
                 break;
+            case IMMedia::REQUEST_QOS:
+                delete static_cast<ImsMediaMsgQosParam*>(pParam);
+                break;
             default:
                 break;
         }
@@ -125,20 +128,32 @@ protected:
     }
 };
 
+TEST_F(MediaSessionTest, testQosRequest)
+{
+    IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIOVIDEOTEXT);
+    EXPECT_NE(negoId, 0);
+
+    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
+    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_VIDEO), IMS_TRUE);
+    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_TEXT), IMS_TRUE);
+
+    EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
+}
+
 TEST_F(MediaSessionTest, testQosCallback)
 {
     IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
     EXPECT_NE(negoId, 0);
 
-    ImsMediaNotifyQosParam* pParam = new ImsMediaNotifyQosParam();
+    ImsMediaMsgQosParam* pParam = new ImsMediaMsgQosParam();
     pParam->m_eMediaType = MEDIA_TYPE_AUDIO;
-    pParam->m_objIpAddr = IPAddress(REMOTE_IP);
+    pParam->m_objIpAddress = IPAddress(REMOTE_IP);
     pParam->m_nPort = REMOTE_PORT;
     pParam->m_bResult = IMS_TRUE;
 
     EXPECT_EQ(
             m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
-            IMS_FALSE);
+            IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
 }
