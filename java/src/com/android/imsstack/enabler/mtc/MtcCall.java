@@ -383,9 +383,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         if ((callAttributes & FLAG_EMERGENCY) != 0) {
             setCallExtraBoolean(EXTRA_E_CALL, true);
         } else {
-            long nativeCallObject = mMtcJniProxy.getJniInterfaceAndSetListener(
-                        mContext.getSlotId(), IUIMS.MTC_CALL, mNativeListener);
-            super.updateNativeCallObject(nativeCallObject);
+            createNativeCallObject();
         }
 
         if ((callAttributes & FLAG_CONFERENCE) != 0) {
@@ -689,10 +687,6 @@ public class MtcCall extends Call implements ConferenceTracker {
     public void createNativeCallObject() {
         long nativeCallObject = mMtcJniProxy.getJniInterfaceAndSetListener(
                 mContext.getSlotId(), IUIMS.MTC_CALL, mNativeListener);
-        super.updateNativeCallObject(nativeCallObject);
-    }
-
-    public void updateNativeCallObject(long nativeCallObject) {
         super.updateNativeCallObject(nativeCallObject);
     }
 

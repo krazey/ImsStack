@@ -155,7 +155,7 @@ enum class SuppType
     CALLING_NUM_VERIFICATION = 15,
     VRBT = 16,
     TIP = 17,
-    GEOLOCATION = 101,
+    GEOLOCATION = 18,
 };
 
 enum class OipType

@@ -209,15 +209,6 @@ public:
     virtual CallStateName Terminate(IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * @brief Sends
-     *
-     * @param strSignal
-     * @param nDuration
-     * @return
-     */
-    virtual CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) = 0;
-
-    /**
      * @brief Handles
      *
      * @param piSession

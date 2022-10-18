@@ -46,7 +46,6 @@ TEST(NullCallTest, NullCallDoesNothing)
     objCall.RejectUpdate(objReason);
     objCall.CancelUpdate(objReason);
     objCall.Terminate(objReason);
-    objCall.SendDtmf("", 0);
     objCall.SendUssd("");
     objCall.GetCallContext();
 }

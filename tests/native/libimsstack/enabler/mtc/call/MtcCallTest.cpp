@@ -472,19 +472,6 @@ TEST_F(MtcCallTest, TerminateCallsStateForUssi)
     objCall.Terminate(objReason);
 }
 
-TEST_F(MtcCallTest, SendDtmfCallsState)
-{
-    AString strSignal("some_signal");
-    IMS_SINT32 nDuration = 1;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, SendDtmf(strSignal, nDuration)).Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.SendDtmf(strSignal, nDuration);
-}
-
 TEST_F(MtcCallTest, SendUssdCallsState)
 {
     AString strUssd("some_ussd");

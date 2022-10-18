@@ -81,7 +81,7 @@ PUBLIC GLOBAL IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired(IN IMtcCallC
     return objContext.GetConfigurationProxy().Is(
             Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType);
 
-    // TODO: Check if we can remove this SuppType
+    // TODO: need to mix this with a condition above.
     // return objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION)->bValue;
 }
 

@@ -233,16 +233,6 @@ public:
      */
     virtual void Terminate(IN const CallReasonInfo& objReason) = 0;
 
-    // Sends DTMF to the remote.
-
-    /**
-     * @brief Sends
-     *
-     * @param strSignal
-     * @param nDuration
-     */
-    virtual void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) = 0;
-
     // Sends USSD. Does nothing if the call isn't a USSI call.
 
     /**

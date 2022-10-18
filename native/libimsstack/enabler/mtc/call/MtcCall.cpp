@@ -339,17 +339,6 @@ PUBLIC VIRTUAL void MtcCall::Terminate(IN const CallReasonInfo& objReason)
     }
 }
 
-PUBLIC VIRTUAL void MtcCall::SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration)
-{
-    IMS_TRACE_I("SendDtmf : key[%d]", m_nKey, 0, 0);
-
-    m_objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
-            {
-                return pState->SendDtmf(strSignal, nDuration);
-            });
-}
-
 PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
 {
     IMS_TRACE_I("SendUssd : key[%d]", m_nKey, 0, 0);
