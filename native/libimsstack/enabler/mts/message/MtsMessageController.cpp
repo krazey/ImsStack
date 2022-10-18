@@ -48,7 +48,7 @@ MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService
         m_nSlotId(nSlotId),
         m_strLastRcvIpsmgwAddr(AString::ConstNull()),
         m_objMsgList(ImsList<IMtsMessage*>()),
-        m_objRPAckedMsgs(ImsList<IMtsMessage*>()),
+        m_objRpAckedMsgList(ImsList<IMtsMessage*>()),
         m_piMtsService(piMtsService),
         m_piMtsErrorHandler(IMS_NULL),
         m_pMtsDynamicLoader(pMtsDynamicLoader)
@@ -193,14 +193,14 @@ PUBLIC void MtsMessageController::NotifyMtSms(IN IPageMessage* piPageMessage)
     ReceiveMtsMessage(piPageMessage, IMS_FALSE);
 }
 
-PUBLIC void MtsMessageController::OnDisconnected()
+PUBLIC void MtsMessageController::OnServiceDisconnected()
 {
     IMS_TRACE_I("OnDisconnected", 0, 0, 0);
 
     TerminateAllMessages();
 }
 
-PUBLIC void MtsMessageController::OnSuspended()
+PUBLIC void MtsMessageController::OnServiceSuspended()
 {
     IMS_TRACE_I("OnSuspended", 0, 0, 0);
 
@@ -253,17 +253,17 @@ PRIVATE void MtsMessageController::DestroyMtsMessage()
     }
     m_objMsgList.Clear();
 
-    IMS_UINT32 nBlockSize = m_objRPAckedMsgs.GetSize();
+    IMS_UINT32 nBlockSize = m_objRpAckedMsgList.GetSize();
     for (IMS_UINT32 index = 0; index < nBlockSize; index++)
     {
-        IMtsMessage* pDeleteBlock = m_objRPAckedMsgs.GetAt(index);
+        IMtsMessage* pDeleteBlock = m_objRpAckedMsgList.GetAt(index);
 
         if (pDeleteBlock != IMS_NULL)
         {
             delete pDeleteBlock;
         }
     }
-    m_objRPAckedMsgs.Clear();
+    m_objRpAckedMsgList.Clear();
     m_nCallTypeMsg = CALL_TYPE_CS;
     m_nCallStateMsg = CALL_STATE_IDLE;
 }
@@ -301,13 +301,13 @@ PRIVATE void MtsMessageController::Remove(IN IMtsMessage* piMtsMessage)
         }
     }
 
-    for (IMS_UINT32 i = 0; i < m_objRPAckedMsgs.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objRpAckedMsgList.GetSize(); i++)
     {
-        IMtsMessage* piTmpMtsMessage = m_objRPAckedMsgs.GetAt(i);
+        IMtsMessage* piTmpMtsMessage = m_objRpAckedMsgList.GetAt(i);
 
         if (piTmpMtsMessage == piMtsMessage)
         {
-            m_objRPAckedMsgs.RemoveAt(i);
+            m_objRpAckedMsgList.RemoveAt(i);
             break;
         }
     }
@@ -596,9 +596,9 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
         IMS_BOOL bRpAcked = IMS_FALSE;
         IMS_TRACE_I("piMtsMessage != IMS_NULL", 0, 0, 0);
 
-        for (IMS_UINT32 i = 0; i < m_objRPAckedMsgs.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objRpAckedMsgList.GetSize(); i++)
         {
-            if (m_objRPAckedMsgs.GetAt(i) == piMtsMessage)
+            if (m_objRpAckedMsgList.GetAt(i) == piMtsMessage)
             {
                 IMS_TRACE_I("RP_ACK has been received so keep sending the new one", 0, 0, 0);
                 bRpAcked = IMS_TRUE;
@@ -1054,7 +1054,7 @@ void MtsMessageController::TerminateAllMessages()
 
     if (m_objMsgList.IsEmpty() == IMS_TRUE)
     {
-        IMS_TRACE_I("Msg Size is NULL", 0, 0, 0);
+        IMS_TRACE_I("Msg Size is 0", 0, 0, 0);
         return;
     }
 
@@ -1409,7 +1409,7 @@ PRIVATE void MtsMessageController::UpdateRPAckMap(IN IPageMessage* pIPageMessage
 
         if (strCallId.EqualsIgnoreCase(strInReplyTo))
         {
-            m_objRPAckedMsgs.Append(m_objMsgList.GetAt(i));
+            m_objRpAckedMsgList.Append(m_objMsgList.GetAt(i));
             return;
         }
     }
