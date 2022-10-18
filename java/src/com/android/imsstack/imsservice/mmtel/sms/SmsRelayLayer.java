@@ -104,12 +104,7 @@ public class SmsRelayLayer {
     @VisibleForTesting
     public SmsRelayLayer(ImsCallContext callContext, MtsController mtsController) {
         mCallContext = callContext;
-        if (mtsController == null) {
-            mMtsController = new MtsController(mCallContext);
-        } else {
-            mMtsController = mtsController;
-        }
-
+        mMtsController = mtsController;
         if (mMtsController != null) {
             mMtsController.setListener(mMtsControllerListener);
         }
