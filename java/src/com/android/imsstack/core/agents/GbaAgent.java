@@ -41,7 +41,7 @@ import java.util.concurrent.TimeoutException;
  * Provides the APIs for getting key pair of bootstrapped security association.
  */
 public class GbaAgent implements GbaInterface {
-    private int mSlotId = -1;
+    private final int mSlotId;
     private Context mContext;
     private ExecutorService mExecutorService = null;
 
@@ -51,6 +51,8 @@ public class GbaAgent implements GbaInterface {
 
     @Override
     public void init(Context context) {
+        ImsLog.d(mSlotId, "init");
+
         mContext = context;
     }
 
@@ -72,9 +74,9 @@ public class GbaAgent implements GbaInterface {
                 + ", forceBootStrapping : " + forceBootStrapping);
 
         Uri nafUri = getNafUri(gbaMode, isTls, nafFqdn);
-        GbaCredentials credintials = null;
+        GbaCredentials credentials = null;
         try {
-            credintials = requestTelephonyGbaAuthentication(appType, nafUri, securityProtocol,
+            credentials = requestTelephonyGbaAuthentication(appType, nafUri, securityProtocol,
                     forceBootStrapping).get(30L, TimeUnit.SECONDS);
         } catch (CancellationException e) {
             ImsLog.e(mSlotId, "CancellationException");
@@ -84,14 +86,15 @@ public class GbaAgent implements GbaInterface {
             ImsLog.e(mSlotId, "InterruptedException");
         } catch (TimeoutException e) {
             ImsLog.e(mSlotId, "TimeoutException");
+        } catch (IllegalArgumentException e) {
+            ImsLog.e(mSlotId, "IllegalArgumentException : securityProtocol is not supported");
         }
 
-        Pair<String, String> keyPair = null;
-        if (credintials != null) {
-            keyPair = Pair.create(credintials.getTransactionId(), credintials.getKey());
+        if (credentials == null) {
+            return null;
         }
 
-        return keyPair;
+        return Pair.create(credentials.getTransactionId(), credentials.getKey());
     }
 
     private CompletableFuture<GbaCredentials> requestTelephonyGbaAuthentication(int appType,
@@ -102,10 +105,8 @@ public class GbaAgent implements GbaInterface {
             protocol = UaSecurityProtocolIdentifier.UA_SECURITY_PROTOCOL_3GPP_TLS_DEFAULT;
         }
 
-        UaSecurityProtocolIdentifier.Builder uspi =
-                new UaSecurityProtocolIdentifier.Builder()
-                        .setOrg(UaSecurityProtocolIdentifier.ORG_3GPP)
-                        .setProtocol(protocol);
+        UaSecurityProtocolIdentifier.Builder uspi = new UaSecurityProtocolIdentifier.Builder()
+                .setOrg(UaSecurityProtocolIdentifier.ORG_3GPP).setProtocol(protocol);
 
         if (!TextUtils.isEmpty(securityProtocol)) {
             int tlsCipherSuite = UaCipherSuite.getInstance().getCipherSuiteValue(securityProtocol);
@@ -125,8 +126,8 @@ public class GbaAgent implements GbaInterface {
                             credentialsFuture.complete(null);
                         } else {
                             String key = Base64.encodeToString(gbaKey, Base64.NO_WRAP);
-                            GbaCredentials credintials = new GbaCredentials(transactionId, key);
-                            credentialsFuture.complete(credintials);
+                            GbaCredentials credentials = new GbaCredentials(transactionId, key);
+                            credentialsFuture.complete(credentials);
                         }
                     }
 
@@ -149,29 +150,23 @@ public class GbaAgent implements GbaInterface {
     }
 
     private Uri getNafUri(int gbaMode, boolean isTls, String nafFqdn) {
-        String scheme = isTls ? "https" : "http";
-
-        String nafPrefix = "";
-        switch (gbaMode) { // KEY_GBA_MODE_INT
-            case CarrierConfigManager.GBA_ME: // 1
-                nafPrefix = "3GPP-bootstrapping";
-                break;
+        String nafPrefix;
+        switch (gbaMode) {
             case CarrierConfigManager.GBA_U: // 2
                 nafPrefix = "3GPP-bootstrapping-uicc";
                 break;
             case CarrierConfigManager.GBA_DIGEST: // 3
                 nafPrefix = "3GPP-bootstrapping-digest";
                 break;
+            case CarrierConfigManager.GBA_ME: // 1, FALL-THROUGH
             default:
-                // do nothing
+                nafPrefix = "3GPP-bootstrapping";
                 break;
         }
 
+        String scheme = isTls ? "https" : "http";
         String authority = nafPrefix + "@" + nafFqdn;
-        Uri nafUri = new Uri.Builder().scheme(scheme).encodedAuthority(authority).build();
-
-        //ImsLog.d(mSlotId, "nafUri for GBA is " + nafUri);
-        return nafUri;
+        return new Uri.Builder().scheme(scheme).encodedAuthority(authority).build();
     }
 
     private TelephonyManager getTelephonyManager() {
@@ -180,8 +175,8 @@ public class GbaAgent implements GbaInterface {
     }
 
     private class GbaCredentials {
-        private String mTransactionId;
-        private String mKey;
+        private final String mTransactionId;
+        private final String mKey;
 
         private GbaCredentials(String transactionId, String key) {
             this.mTransactionId = transactionId;

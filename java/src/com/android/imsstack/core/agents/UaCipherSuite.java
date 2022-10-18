@@ -44,6 +44,8 @@ public class UaCipherSuite {
         return mUaSecurityProtocolIds.get("TLS_NULL_WITH_NULL_NULL");
     }
 
+    // Currently, some TLS params are not supported. Please refer supported param list in
+    // {@link android.telephony.gba.TlsParam#TlsCipherSuite}
     private void init() {
         // RFC5246 : Cipher suites for TLS v1.2
         mUaSecurityProtocolIds.put("TLS_NULL_WITH_NULL_NULL", 0x0000);
