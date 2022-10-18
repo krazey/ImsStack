@@ -4060,7 +4060,7 @@ PROTECTED VIRTUAL void AosRegistration::RecordImpu()
 
     if (objUris.GetSize() > 0)
     {
-        IAosService* piService = AosProvider::GetInstance()->GetService();
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
         if (piService != IMS_NULL)
         {
             piService->NotifyAssociatedUriChanged(objUris);
