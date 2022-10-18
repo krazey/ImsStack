@@ -21,7 +21,7 @@
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaConfigUtil.h"
-#include "MediaResourceMngr.h"
+#include "MediaResourceManager.h"
 #include "MediaManager.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.TN");
@@ -60,7 +60,7 @@ PUBLIC VIRTUAL TextNego::~TextNego()
 
     if (pMediaManager != IMS_NULL)
     {
-        MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
         if (pResourceMngr != IMS_NULL)
         {
@@ -252,7 +252,7 @@ PUBLIC IMS_BOOL TextNego::SetPort(IN IMS_UINT32 nPort)
         return IMS_FALSE;
     }
 
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr == IMS_NULL)
     {
@@ -488,7 +488,7 @@ void TextNego::copy(IN const TextNego* pTextNego)
         return;
     }
 
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr != IMS_NULL)
     {

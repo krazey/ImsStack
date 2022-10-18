@@ -18,7 +18,7 @@
 #include <ServiceConfig.h>
 #include <audio/AudioController.h>
 #include <audio/MockAudioNego.h>
-#include <MediaConnectionWatcher.h>
+#include <MediaNetworkConnectionWatcher.h>
 #include <MockIMediaSessionListener.h>
 
 using ::testing::_;
@@ -29,7 +29,7 @@ using ::testing::ReturnRef;
 LOCAL IMS_SINT32 DEFAULT_SLOT_ID = 0;
 const AString LOCAL_IP = "127.0.0.1";
 const IMS_UINT32 LOCAL_PORT = 20000;
-const IMS_UINT32 ACCESS_NETWORK = MediaConnectionWatcher::EUTRAN;
+const IMS_UINT32 ACCESS_NETWORK = MediaNetworkConnectionWatcher::EUTRAN;
 
 class AudioControllerTest : public ::testing::Test
 {

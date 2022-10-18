@@ -86,7 +86,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
         return IMS_NULL;
     }
 
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr == IMS_NULL)
     {
@@ -95,27 +95,8 @@ AudioProfile* AudioProfileUtil::CreateProfile(
 
     AudioProfile* pAudioProfile = new AudioProfile();
 
-    // Setting IP address
-    // In IPv6 system, The MediaLogic have to write a modem IPv6 to "c line" of session level.
-    // In Ipv4, this is not necessary.
-    if (pEnvironment->eNetworkType == MEDIA_NETWORK_WIFI)
-    {
-        pAudioProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
-    }
-    else
-    {
-        IMS_SINT32 nPDNType = MediaResourceMngr::PDN_IMS;
-
-        if (pEnvironment->eServiceType == MEDIA_SERVICE_EMERGENCY)
-        {
-            nPDNType = MediaResourceMngr::PDN_EMERGENCY;
-        }
-
-        pResourceMngr->UpdatePdnResource(
-                nPDNType, pEnvironment->pIService->GetIpAddress().IsIPv6Address());
-        // Android IP
-        pAudioProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
-    }
+    // Local IP
+    pAudioProfile->objIpAddr = pEnvironment->pIService->GetIpAddress();
 
     // Setting RTP/RTCP port from resource manager
     if (pAudioProfile->nDataPort > 0)
@@ -129,7 +110,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
     }
     pAudioProfile->nControlPort = pAudioProfile->nDataPort + 1;
 
-    IMS_TRACE_D("CreateProfile() objIpAddr[%s], port[%d]", pAudioProfile->objIpAddr.ToCharString(),
+    IMS_TRACE_D("CreateProfile() IpAddress[%s], port[%d]", pAudioProfile->objIpAddr.ToCharString(),
             pAudioProfile->nDataPort, 0);
 
     pAudioProfile->strTransportType = "RTP/AVP";

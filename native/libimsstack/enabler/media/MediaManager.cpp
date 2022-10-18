@@ -24,6 +24,8 @@
 
 __IMS_TRACE_TAG_USER_DECL__("MED.MM");
 
+#define CALL_KEY_BROADCAST 0
+
 PRIVATE GLOBAL IMSMap<IMS_SINT32, MediaManager*> MediaManager::m_objMapMediaManager;
 
 PRIVATE
@@ -37,7 +39,7 @@ MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
 
     if (m_pResourceMngr == IMS_NULL)
     {
-        m_pResourceMngr = new MediaResourceMngr(m_nSlotId);
+        m_pResourceMngr = new MediaResourceManager(nSlotId);
     }
 
     JniEnablerConnector::GetInstance().SetNativeEnabler(
@@ -149,6 +151,7 @@ void MediaManager::DestroySession(IN MediaSession* pSession)
     for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
     {
         MediaSessionNode* pSessionNode = m_lstSessionNode.GetAt(i);
+
         if (pSessionNode->pMediaSession == pSession)
         {
             DeleteMediaSessionNode(pSessionNode, i);
@@ -161,13 +164,17 @@ PUBLIC
 MediaSession* MediaManager::GetSession(IN IMS_SINTP nCallKey)
 {
     MediaSessionNode* pSessionNode = FindSessionNode(nCallKey);
+
     if (pSessionNode == IMS_NULL)
+    {
         return IMS_NULL;
+    }
+
     return pSessionNode->pMediaSession;
 }
 
 PUBLIC
-MediaResourceMngr* MediaManager::GetResourceManager()
+MediaResourceManager* MediaManager::GetResourceManager()
 {
     return m_pResourceMngr;
 }
@@ -178,19 +185,38 @@ PUBLIC VIRTUAL void MediaManager::SendMessage(
     IMS_TRACE_I(
             "SendMessage() - MSG[%d, %s], CallKey[%d]", nMsg, IMMedia::PrintMsg(nMsg), nCallKey);
 
-    if (SendMessageToSessions(nMsg, nCallKey, pParam) != IMS_TRUE)
+    if (nCallKey == CALL_KEY_BROADCAST)  // broadcast message to the all sessions
     {
-        IMS_TRACE_E(0, "SendMessage() - Fail to process nMsg", 0, 0, 0);
-        return;
+        for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
+        {
+            MediaSessionNode* pSessionNode = (MediaSessionNode*)m_lstSessionNode.GetAt(i);
+
+            if (pSessionNode != IMS_NULL && pSessionNode->pMediaSession != IMS_NULL)
+            {
+                if (pSessionNode->pMediaSession->SendMessage(nMsg, pParam) == IMS_FALSE)
+                {
+                    IMS_TRACE_E(0, "SendMessage() failed MSG[%d, %s], CallKey[%d]", nMsg,
+                            IMMedia::PrintMsg(nMsg), pSessionNode->nCallKey);
+                }
+            }
+        }
+    }
+    else
+    {
+        if (SendMessageToSessions(nMsg, nCallKey, pParam) != IMS_TRUE)
+        {
+            IMS_TRACE_E(0, "SendMessage() - Fail to process nMsg", 0, 0, 0);
+            return;
+        }
     }
 }
 
 PUBLIC
-IMS_BOOL MediaManager::handleRequestMsg(IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey,
-        IN ImsMediaMsgParamBase* param)
+IMS_BOOL MediaManager::handleRequestMsg(
+        IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param)
 {
-    IMS_TRACE_I("handleRequestMsg() - MSG[%d, %s], CallKey[%d]",
-            eEvent, IMMedia::PrintMsg(eEvent), nCallKey);
+    IMS_TRACE_I("handleRequestMsg() - MSG[%d, %s], CallKey[%d]", eEvent, IMMedia::PrintMsg(eEvent),
+            nCallKey);
 
     MediaSessionNode* pNode = FindSessionNode(nCallKey);
 
@@ -220,6 +246,7 @@ void MediaManager::ClearMediaSessionNode()
         pSessionNode = m_lstSessionNode.GetValueAt(0);
         DeleteMediaSessionNode(pSessionNode, 0);
     }
+
     m_lstSessionNode.Clear();
 }
 
@@ -229,11 +256,13 @@ void MediaManager::DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS
     if (pSessionNode)
     {
         IMS_TRACE_D("DeleteMediaSessionNode() - Index[%d]", nIndex, 0, 0);
+
         if (pSessionNode->pMediaSession)
         {
             delete pSessionNode->pMediaSession;
             pSessionNode->pMediaSession = IMS_NULL;
         }
+
         delete pSessionNode;
         pSessionNode = IMS_NULL;
     }
@@ -245,6 +274,7 @@ PRIVATE VIRTUAL MediaManager::MediaSessionNode* MediaManager::FindSessionNode(IN
     for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
     {
         MediaSessionNode* pSessionNode = (MediaSessionNode*)m_lstSessionNode.GetAt(i);
+
         if (pSessionNode != IMS_NULL)
         {
             if (pSessionNode->nCallKey == nCallKey)
@@ -264,9 +294,11 @@ PRIVATE VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
         IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
 {
     MediaSession* pMediaSession = GetSession(nCallKey);
+
     if (pMediaSession != IMS_NULL)
     {
         IMS_TRACE_I("SendMessageToSessions() - nMsg[%d], CallKey[%d]", nMsg, nCallKey, 0);
+
         if (pMediaSession->SendMessage(nMsg, pParam) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "SendMessageToSessions() - failed", 0, 0, 0);

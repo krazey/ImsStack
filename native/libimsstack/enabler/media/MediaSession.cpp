@@ -96,16 +96,18 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(IN MediaEnvironment* pEnvir
     IMS_TRACE_I("SetEnvironment() - CallKey[%d], eServiceType[%d]", m_nCallKey,
             pEnvironment->eServiceType, 0);
 
-    if (pEnvironment->eServiceType == MEDIA_SERVICE_EMERGENCY &&
-            pEnvironment->pIService != IMS_NULL)
-    {
-        IMS_BOOL bIsIPv6 = pEnvironment->pIService->GetIpAddress().IsIPv6Address();
-        MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+    // update pdn
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
-        if (pMediaManager != IMS_NULL)
+    if (pMediaManager != IMS_NULL && pEnvironment->pIService != IMS_NULL)
+    {
+        if (pMediaManager->GetResourceManager()->UpdatePdn(
+                    pEnvironment->eServiceType == MEDIA_SERVICE_EMERGENCY
+                            ? MediaResourceManager::PDN_EMERGENCY
+                            : MediaResourceManager::PDN_IMS,
+                    pEnvironment->pIService->GetIpAddress()) == IMS_FALSE)
         {
-            pMediaManager->GetResourceManager()->UpdatePdnResource(
-                    MediaResourceMngr::PDN_EMERGENCY, bIsIPv6);
+            return IMS_FALSE;
         }
     }
 
@@ -260,10 +262,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISes
 
         if (pMediaManager != IMS_NULL)
         {
-            IMS_UINT32 nNetworkInterfaceID = 0;
-            IpAddress objIPAddress = GetAndroidIP();
-            pMediaManager->GetResourceManager()->GetMediaConnectionWatcherInfo(
-                    objIPAddress, nAccessNetwork, nNetworkInterfaceID);
+            nAccessNetwork = pMediaManager->GetResourceManager()->GetNetworkType();
         }
 
         // audio
@@ -368,10 +367,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
 
     if (pMediaManager != IMS_NULL)
     {
-        IMS_UINT32 nNetworkInterfaceID = 0;
-        IpAddress objIPAddress = GetAndroidIP();
-        pMediaManager->GetResourceManager()->GetMediaConnectionWatcherInfo(
-                objIPAddress, nAccessNetwork, nNetworkInterfaceID);
+        nAccessNetwork = pMediaManager->GetResourceManager()->GetNetworkType();
     }
 
     m_objAudioController.UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
@@ -892,6 +888,12 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
         case IMMedia::CHANGE_ORIENTATION_CMD:
             bRet = m_objVideoController.SendMessage(nMsg, pParam);
             break;
+        case IMMedia::CHANGE_NETWORK_CONNECTION:
+            /** TODO: add implementation */
+            break;
+        case IMMedia::CHANGE_MTU:
+            /** TODO: add implementation */
+            break;
         default:
             break;
     }
@@ -972,7 +974,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 
             if (pParam != IMS_NULL)
             {
-                IPAddress objIpAddr = pParam->m_objIpAddr;
+                IPAddress objIpAddress = pParam->m_objIpAddr;
                 IMS_SINT32 nPort = pParam->m_nPort;
                 IMS_BOOL bResult = pParam->m_bResult;
 
@@ -980,7 +982,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                         nPort, bResult);
 
                 ImsMediaBasicSessionInfoParam* pBasicSessionInfo =
-                        GetBasicSessionInfofromRemoteArress(objIpAddr.ToString(), nPort);
+                        GetBasicSessionInfofromRemoteArress(objIpAddress.ToString(), nPort);
 
                 if (pBasicSessionInfo == IMS_NULL)
                 {

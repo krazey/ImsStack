@@ -267,7 +267,7 @@ public:
         IMS_BOOL bShowModeChangeNeighbor;
         IMS_BOOL bShowBrList;
         IMS_BOOL bShowBwList;
-        IMS_BOOL bSendCmr;  // send cmr option
+        IMS_BOOL bSendCmr;          // send cmr option
         IMS_BOOL bShowModeSetList;  // send ModeSetList option
 
     public:

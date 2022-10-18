@@ -22,8 +22,9 @@
 #include "ImsActivityEx.h"
 #include "MediaMsgHandler.h"
 #include "MediaSession.h"
-#include "MediaResourceMngr.h"
+#include "MediaResourceManager.h"
 #include "IMediaManager.h"
+#include "IMediaNetworkConnectionListener.h"
 
 class MediaManager : public ImsActivityEx, public IMediaManager
 {
@@ -84,11 +85,11 @@ public:
     MediaSession* GetSession(IN IMS_SINTP nCallKey);
 
     /**
-     * @brief Gets the MediaResourceMngr instance
+     * @brief Gets the MediaResourceManager instance
      *
-     * @return MediaResourceMngr*
+     * @return MediaResourceManager*
      */
-    MediaResourceMngr* GetResourceManager();
+    MediaResourceManager* GetResourceManager();
 
     /**
      * @brief Sends a request message from native to java layer
@@ -108,7 +109,6 @@ private:
     virtual ~MediaManager();
     MediaManager(IN const MediaManager& obj);
     MediaManager& operator=(IN const MediaManager& obj);
-
     void ClearMediaSessionNode();
     void DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS_UINT32 nIndex);
 
@@ -135,6 +135,6 @@ protected:
     static IMSMap<IMS_SINT32, MediaManager*> m_objMapMediaManager;
     IMS_SINT32 m_nSlotId;
     IMSList<MediaSessionNode*> m_lstSessionNode;
-    MediaResourceMngr* m_pResourceMngr;
+    MediaResourceManager* m_pResourceMngr;
 };
 #endif /* _MEDIA_MANAGER_H_ */

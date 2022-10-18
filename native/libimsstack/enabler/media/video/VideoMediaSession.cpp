@@ -117,8 +117,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     if (pMediaManager != IMS_NULL)
     {
-        pVideoConfig->setMaxMtuBytes(
-                pMediaManager->GetResourceManager()->GetRtpFragmentSize(m_objLocalAddress));
+        pVideoConfig->setMaxMtuBytes(pMediaManager->GetResourceManager()->GetMtu());
     }
 
     IMS_SINT32 nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_CONFIGURATION1_H_
-#define _MEDIA_CONFIGURATION1_H_
+#ifndef _MEDIA_CONFIGURATION_H_
+#define _MEDIA_CONFIGURATION_H_
 
 #include "MediaDef.h"
 #include "CarrierConfig.h"
@@ -77,67 +77,67 @@ public:
      *
      * @return MEDIA_CONTENT_TYPE Return media session type
      */
-    MEDIA_CONTENT_TYPE GetSessionType() const;
+    virtual MEDIA_CONTENT_TYPE GetSessionType() const;
     /**
      * @brief Get the start index of the rtp port range
      *
      * @return IMS_SINT32 Return port index
      */
-    IMS_SINT32 GetPortRtp() const;
+    virtual IMS_SINT32 GetPortRtp() const;
     /**
      * @brief Get the end index of the rtp port range
      *
      * @return IMS_SINT32 Return the end index
      */
-    IMS_SINT32 GetPortRtpEnd() const;
+    virtual IMS_SINT32 GetPortRtpEnd() const;
     /**
      * @brief Get the rtcp port number (rtp port number + 1)
      *
      * @return IMS_SINT32 Return the rtcp port number
      */
-    IMS_SINT32 GetPortRtcp() const;
+    virtual IMS_SINT32 GetPortRtcp() const;
     /**
      * @brief Get the rtcp interval in live state
      *
      * @return IMS_SINT32 Return the rtcp interval
      */
-    IMS_SINT32 GetRtcpLiveInterval() const;
+    virtual IMS_SINT32 GetRtcpLiveInterval() const;
     /**
      * @brief Get the rtcp interval in hold state
      *
      * @return IMS_SINT32 Return the rtcp interval
      */
-    IMS_SINT32 GetRtcpInterval() const;
+    virtual IMS_SINT32 GetRtcpInterval() const;
     /**
      * @brief Get the as bandwidth kbps
      *
      * @return IMS_SINT32 Return as value
      */
-    IMS_SINT32 GetAsBandwidthKbps() const;
+    virtual IMS_SINT32 GetAsBandwidthKbps() const;
     /**
      * @brief Get the rs bandwidth bps value
      *
      * @return IMS_SINT32 Return rs value
      */
-    IMS_SINT32 GetRsBandwidthBps() const;
+    virtual IMS_SINT32 GetRsBandwidthBps() const;
     /**
      * @brief Get the Rr Bandwidth bps value
      *
      * @return IMS_SINT32 Return rr value
      */
-    IMS_SINT32 GetRrBandwidthBps() const;
+    virtual IMS_SINT32 GetRrBandwidthBps() const;
     /**
      * @brief Get the rtp inactivity timer in milli seconds unit
      *
      * @return IMS_SINT32 Return the rtp inactivitity timer
      */
-    IMS_SINT32 GetRtpInactivityTimerMillis() const;
+    virtual IMS_SINT32 GetRtpInactivityTimerMillis() const;
     /**
      * @brief Get the rtcp inactivity timer in milli seconds unit
      *
      * @return IMS_SINT32  Return the rtp inactivitity timer
      */
-    IMS_SINT32 GetRtcpInactivityTimerMillis() const;
+    virtual IMS_SINT32 GetRtcpInactivityTimerMillis() const;
 
 protected:
     virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
@@ -148,9 +148,9 @@ protected:
     virtual void ToDebugString() const;
     virtual void ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const;
     virtual void Clear();
-    IMS_UINT32 GetCodecType(IN IMS_UINT32 nCodec) const;
-    void SetPorts(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey);
-    void SetRtcpIntervals(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey);
+    virtual IMS_UINT32 GetCodecType(IN IMS_UINT32 nCodec) const;
+    virtual void SetPorts(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey);
+    virtual void SetRtcpIntervals(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey);
 
 public:
     /** Bandwidth type */

@@ -22,7 +22,7 @@
 #include "video/VideoNego.h"
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
-#include "MediaResourceMngr.h"
+#include "MediaResourceManager.h"
 #include "MediaManager.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.VN");
@@ -110,7 +110,7 @@ PUBLIC VIRTUAL void VideoNego::DestroyProfiles()
 
     if (pMediaManager != IMS_NULL)
     {
-        MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
         if (pResourceMngr != IMS_NULL)
         {
@@ -268,7 +268,7 @@ IMS_BOOL VideoNego::SetPort(IN IMS_UINT32 nPort)
         return IMS_FALSE;
     }
 
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr == IMS_NULL)
     {
@@ -494,7 +494,7 @@ void VideoNego::Copy(IN const VideoNego* pVideoNego)
         return;
     }
 
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr != IMS_NULL)
     {

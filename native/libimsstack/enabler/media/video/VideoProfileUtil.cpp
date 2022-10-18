@@ -46,7 +46,7 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
         return IMS_NULL;
     }
 
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr == IMS_NULL)
     {

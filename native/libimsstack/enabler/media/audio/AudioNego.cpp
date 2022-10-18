@@ -22,7 +22,7 @@
 #include "config/MediaSessionConfigFactory.h"
 #include "config/MediaSessionConfig.h"
 #include "config/MediaConfigUtil.h"
-#include "MediaResourceMngr.h"
+#include "MediaResourceManager.h"
 #include "MediaManager.h"
 
 #define MODESET_MAX_AMR      7
@@ -65,7 +65,7 @@ PUBLIC VIRTUAL AudioNego::~AudioNego()
 
     if (pMediaManager != IMS_NULL)
     {
-        MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+        MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
         if (pResourceMngr != IMS_NULL)
         {
@@ -254,7 +254,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::SetPort(IN IMS_UINT32 nPort)
         return IMS_FALSE;
     }
 
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
     if (pResourceMngr == IMS_NULL)
     {
         return IMS_FALSE;
@@ -650,7 +650,7 @@ void AudioNego::copy(IN const AudioNego* pAudioNego)
         return;
     }
 
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    MediaResourceManager* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr != IMS_NULL)
     {
