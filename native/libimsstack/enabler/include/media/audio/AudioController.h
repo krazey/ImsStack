@@ -78,20 +78,24 @@ public:
      * @brief Update session and send modifySesion of confirmConfig based on the update condition
      *
      * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nAccessNetwork AccessNetwork information
+     * @param pNego The negotiated profile to get the negotiated parameter
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL UpdateSession(IN IMS_UINTP nNegoId);
+    IMS_BOOL UpdateSession(
+            const IN IMS_UINTP nNegoId, const IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego);
 
     /**
      * @brief Send AddConfig message
      *
      * @param nNegoId The identification of the target AudioMediaSession instance
+     * @param nAccessNetwork AccessNetwork information
      * @param pNego The negotiated profile to get the negotiated parameter
      * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
      * failed to send
      */
-    IMS_BOOL AddSession(IN IMS_UINTP nNegoId, IN AudioNego* pNego);
+    IMS_BOOL AddSession(IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego);
 
     /**
      * @brief Send confirmConfig message to java
@@ -132,11 +136,13 @@ public:
      * @brief Update rtp config parameters from the negotiation profile
      *
      * @param nNegoId The identification to get the audio profile from negotiated parameter
+     * @param nAccessNetwork AccessNetwork information
      * @param pNego The negotiated profile to get the negotiated parameter
-     * @return IMS_BOOL Returns IMS_TRUE when updates successfully, IMS_FALSE when it is
-     * failed to update
+     * @return IMS_BOOL Returns IMS_TRUE when there is the parameter to updates IMS_FALSE when there
+     * are no parameters updated
      */
-    IMS_BOOL UpdateRtpConfig(IN IMS_UINTP nNegoId, IN AudioNego* pNego);
+    IMS_BOOL UpdateRtpConfig(
+            IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego);
 
     /**
      * @brief Update local address from the parameters of the negotiation profile
@@ -151,9 +157,11 @@ public:
      * @brief Update AccessNetwork information in the RtpConfig
      *
      * @param nNegoId The identification to get the audio profile from negotiated parameter
-     * @param nAccessNetwork : AccessNetwork information
+     * @param nAccessNetwork AccessNetwork information
+     * @return IMS_BOOL Returns IMS_TRUE when there is the parameter to updates IMS_FALSE when there
+     * are no parameters updated
      */
-    void UpdateAccessNetwork(IN IMS_UINTP nNegoId, IN IMS_UINT32 accessNetwork);
+    IMS_BOOL UpdateAccessNetwork(IN IMS_UINTP nNegoId, IN IMS_UINT32 accessNetwork);
 
     /**
      * @brief Update MediaQualityThreshold and send message to java

@@ -69,20 +69,22 @@ public:
 
     /**
      * @brief Set AudioConfig for libimsmedia from src/dest/negotiated profile
+     * @param nAccessNetwork : AccessNetwork information
      * @param pLocalProfile : local profile of the SDP negotiation
      * @param pPeerProfile : peer profile of the SDP negotiation
      * @param pNegoProfile : negotiated profile of the SDP negotiation
-     * return IMS_BOOL : false for error, true for successful
+     * return IMS_BOOL : false for not updated parameter, true for there is updates
      */
-    IMS_BOOL UpdateRtpConfig(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
-            IN AudioProfile* pNegoProfile);
+    IMS_BOOL UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork, IN AudioProfile* pLocalProfile,
+            IN AudioProfile* pPeerProfile, IN AudioProfile* pNegoProfile);
 
     /**
      * @brief Update AccessNetwork information in the RtpConfig
      *
      * @param nAccessNetwork : AccessNetwork information
+     * return IMS_BOOL : false for parameter is same, true if the parameter changed
      */
-    void UpdateAccessNetwork(IMS_UINT32 nAccessNetwork);
+    IMS_BOOL UpdateAccessNetwork(IN const IMS_UINT32 nAccessNetwork);
 
     /**
      * @brief Update MediaQualityThreshold parameters and send it to the java

@@ -18,6 +18,7 @@
 #include <ServiceConfig.h>
 #include <audio/AudioController.h>
 #include <audio/MockAudioNego.h>
+#include <MediaConnectionWatcher.h>
 #include <MockIMediaSessionListener.h>
 
 using ::testing::_;
@@ -28,6 +29,7 @@ using ::testing::ReturnRef;
 LOCAL IMS_SINT32 DEFAULT_SLOT_ID = 0;
 const AString LOCAL_IP = "127.0.0.1";
 const IMS_UINT32 LOCAL_PORT = 20000;
+const IMS_UINT32 ACCESS_NETWORK = MediaConnectionWatcher::EUTRAN;
 
 class AudioControllerTest : public ::testing::Test
 {
@@ -125,11 +127,8 @@ TEST_F(AudioControllerTest, testModifySessionSendDtmf)
     EXPECT_EQ(m_pController->OpenSession(negoId), IMS_TRUE);
 
     m_pController->SetConfirmSession(IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateSession(2000), IMS_FALSE);
-
-    EXPECT_EQ(m_pController->UpdateRtpConfig(negoId, m_pAudioNego), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, m_pAudioNego), IMS_TRUE);
-    EXPECT_EQ(m_pController->UpdateSession(negoId), IMS_TRUE);
+    EXPECT_EQ(m_pController->UpdateSession(2000, ACCESS_NETWORK, m_pAudioNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->UpdateSession(negoId, ACCESS_NETWORK, m_pAudioNego), IMS_TRUE);
 
     EXPECT_EQ(m_pController->SendDtmf('1'), IMS_TRUE);
 }
@@ -143,12 +142,12 @@ TEST_F(AudioControllerTest, testAddSession)
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(negoId), IMS_TRUE);
 
-    EXPECT_EQ(m_pController->AddSession(2000, m_pAudioNego), IMS_FALSE);
+    EXPECT_EQ(m_pController->AddSession(2000, ACCESS_NETWORK, m_pAudioNego), IMS_FALSE);
 
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, 2000, m_pConfig), IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 2);
 
-    EXPECT_EQ(m_pController->AddSession(2000, m_pAudioNego), IMS_TRUE);
+    EXPECT_EQ(m_pController->AddSession(2000, ACCESS_NETWORK, m_pAudioNego), IMS_TRUE);
 }
 
 TEST_F(AudioControllerTest, testConfirmSession)
