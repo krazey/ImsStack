@@ -43,7 +43,7 @@ MtsErrorHandler::~MtsErrorHandler()
 PUBLIC
 IMS_SINT32 MtsErrorHandler::Handle(IN const IMessage* piMessage)
 {
-    IMS_SINT32 nResult = MO_IMS_TEMP_FAILURE;
+    IMS_SINT32 nResult = MO_ERROR_RETRY;
     IMS_SINT32 nStatusCode =
             (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
     ImsVector<IMS_SINT32> objPermanentErrorCodes = m_piCarrierConfig->GetIntArray(
@@ -53,7 +53,7 @@ IMS_SINT32 MtsErrorHandler::Handle(IN const IMessage* piMessage)
     {
         if (objPermanentErrorCodes.GetAt(i) == nStatusCode)
         {
-            nResult = MO_IMS_PERM_FAILURE;
+            nResult = MO_ERROR_GENERIC;
             break;
         }
     }
@@ -214,10 +214,7 @@ IMS_SINT32 MtsErrorHandler::Get503ResponsePolicy(IN const IMessage* piMessage) c
 
             if (strPhrase.MakeUpper().Contains("OUTAGE"))
             {
-                /*
-                 * TODO: Check IMS is connected or not
-                 *       Then report MO_IMS_LIMITEDSMSSVCREGI or MO_IMS_PERM_FAILURE
-                 */
+                // TODO(Mts): Check IMS is connected or not, then report MO_ERROR_GENERIC
                 return nPolicy;
             }
         }

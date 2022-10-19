@@ -48,9 +48,9 @@ enum class MtsTransactionType
 
 enum class SmsFormatType
 {
+    SMSFORMAT_INVALID = 0,
     SMSFORMAT_3GPP = 1,
     SMSFORMAT_3GPP2 = 2,
-    SMSFORMAT_INVALID = 3,
 };
 
 enum

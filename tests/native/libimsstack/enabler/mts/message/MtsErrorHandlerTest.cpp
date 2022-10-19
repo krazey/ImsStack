@@ -90,7 +90,7 @@ TEST_F(MtsErrorHandlerTest, Handle403Error)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::REGISTER_REFRESH)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle404Error)
@@ -119,7 +119,7 @@ TEST_F(MtsErrorHandlerTest, Handle404Error)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::PCSCF_NEXT)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle406Error)
@@ -148,7 +148,7 @@ TEST_F(MtsErrorHandlerTest, Handle406Error)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::IPSEC_DISABLED)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle408Error)
@@ -177,7 +177,7 @@ TEST_F(MtsErrorHandlerTest, Handle408Error)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::RETRY_COUNT_INCREASE)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle500Error)
@@ -204,7 +204,7 @@ TEST_F(MtsErrorHandlerTest, Handle500Error)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::RETRY_COUNT_INCREASE)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle503Error)
@@ -231,7 +231,7 @@ TEST_F(MtsErrorHandlerTest, Handle503Error)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::RETRY_COUNT_INCREASE)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
@@ -260,7 +260,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::REGISTER_REINITIATE)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
@@ -289,7 +289,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
     EXPECT_CALL(*piListener, NotifyControlAos(MTS_REG_RECOVERY_POLICY_NONE)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, Handle504Error)
@@ -316,7 +316,7 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::RETRY_COUNT_INCREASE)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle(pMockMessage);
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 TEST_F(MtsErrorHandlerTest, HandleTimerFExpired)
@@ -340,7 +340,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpired)
     EXPECT_CALL(*piListener, NotifyControlAos(ImsAosControl::RETRY_COUNT_INCREASE)).Times(1);
 
     IMS_SINT32 nResult = pMtsErrorHandler->Handle();
-    EXPECT_EQ(nResult, MO_IMS_PERM_FAILURE);
+    EXPECT_EQ(nResult, MO_ERROR_GENERIC);
 }
 
 }  // namespace android
