@@ -51,12 +51,12 @@
     <int name="registration_actual_wait_time_policy_int" value="2"/>
     <int name="registration_retry_count_reset_policy_int" value="1"/>
     <int name="sip_message_threshold_for_transport_change_int" value="340"/>
-    <int-array name="subscription_error_code_for_reg_event_with_initial_registration_with_next_pcscf_int_array" num="3">
+    <int-array name="sub_err_code_for_init_reg_with_next_pcscf_int_array" num="3">
         <item value="420"/>
         <item value="421"/>
         <item value="422"/>
     </int-array>
-    <int-array name="vowifi_subscription_error_code_with_initial_registration_int_array" num="1">
+    <int-array name="vowifi_sub_error_code_for_init_reg_int_array" num="1">
         <item value="403"/>
     </int-array>
     <int-array name="wfc_reg_event_error_code_by_missing_911_address_int_array" num="2">

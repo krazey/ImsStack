@@ -403,14 +403,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(
-                    CarrierConfig::Assets::
-                            KEY_EMERGENCY_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REGISTRATION_BOOL,
+            GetBoolean(CarrierConfig::Assets::
+                               KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::
-                               KEY_HOLD_REGISTRATION_WHEN_IPCAN_CHANGED_WITH_IMS_ACTIVE_CALL_BOOL,
+            GetBoolean(CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -420,14 +418,13 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_NO_INITIAL_REGISTRATION_ON_PCSCF_CHANGE_BOOL,
-                    IMS_FALSE))
+            GetBoolean(CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_REGISTRATION_CONTACT_VALIDATION_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL, IMS_FALSE))
@@ -471,27 +468,24 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REGISTRATION_BOOL, IMS_FALSE))
+            GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(
-                    CarrierConfig::Assets::
-                            KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL,
+            GetBoolean(CarrierConfig::Assets::
+                               KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
-                               KEY_USE_SECURITY_SERVER_PORT_IN_INITIAL_REGISTRATION_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
-            GetBoolean(
-                    CarrierConfig::Assets::
-                            KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INITIAL_REGISTRATION_BOOL,
+                               KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -517,6 +511,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(1));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT, -1))
             .WillOnce(Return(46));
+    EXPECT_CALL(
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT, -1))
+            .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_305_POLICY_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_503_POLICY_INT, -1))
@@ -531,9 +528,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT, -1))
-            .WillOnce(Return(0));
-    EXPECT_CALL(objCarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_REGISTRATION_OUT_OF_SERVICE_POLICY_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT, -1))
@@ -639,20 +633,19 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                             KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY))
             .WillOnce(Return(objReregRetryErrCodeForInitRegWithSamePcscf));
 
-    IMSVector<IMS_SINT32> objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf;
-    objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf.Clear();
+    IMSVector<IMS_SINT32> objSubErrorCodeForInitRegWithNextPcscf;
+    objSubErrorCodeForInitRegWithNextPcscf.Clear();
     EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY))
-            .WillOnce(Return(
-                    objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf));
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY))
+            .WillOnce(Return(objSubErrorCodeForInitRegWithNextPcscf));
 
-    IMSVector<IMS_SINT32> objSubscriptionErrorCodeForStoppingByExpirationTime;
-    objSubscriptionErrorCodeForStoppingByExpirationTime.Clear();
+    IMSVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;
+    objSubErrorCodeForStoppingByExpirationTime.Clear();
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::
-                            KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY))
-            .WillOnce(Return(objSubscriptionErrorCodeForStoppingByExpirationTime));
+                            KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY))
+            .WillOnce(Return(objSubErrorCodeForStoppingByExpirationTime));
 
     IMSVector<IMS_SINT32> objSupportedRoamingRats;
     objSupportedRoamingRats.Clear();
@@ -660,12 +653,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY))
             .WillOnce(Return(objSupportedRoamingRats));
 
-    IMSVector<IMS_SINT32> objVowifiSubscriptionErrorCodeWithInitialRegistration;
-    objVowifiSubscriptionErrorCodeWithInitialRegistration.Clear();
+    IMSVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
+    objVowifiSubErrorCodeForInitReg.Clear();
     EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_VOWIFI_SUBSCRIPTION_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY))
-            .WillOnce(Return(objVowifiSubscriptionErrorCodeWithInitialRegistration));
+            GetIntArray(CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY))
+            .WillOnce(Return(objVowifiSubErrorCodeForInitReg));
 
     IMSVector<IMS_SINT32> objWfcRegEventErrorByMissing911Address;
     objWfcRegEventErrorByMissing911Address.Clear();
@@ -683,7 +675,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(pAosNConfiguration->IsRegistrationWhenIpcanChangedWithImsActiveCallHeld());
     EXPECT_TRUE(pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
     EXPECT_FALSE(pAosNConfiguration->IsDeregisterOn3gNetworks());
-    // bNoInitialRegistrationOnPcscfChange
+    // bNoInitRegOnPcscfChange
     // bRegRetryWithIpVerFallback
     EXPECT_FALSE(pAosNConfiguration->IsContactUriValidationChecked());
     EXPECT_FALSE(pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
@@ -710,13 +702,13 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(1, pAosNConfiguration->GetGeolocationPidfFormingPolicy());
     EXPECT_EQ(1, pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, pAosNConfiguration->GetImsSignallingDscp());
+    // nRegOutOfServicePolicy
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationRetrySip305CodePolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationRetrySip503CodePolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationRetryDefaultPolicy());
     // nRegRetryMinCnt
     // nRegRetryTimerFPolicy
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationActualWaitTimePolicy());
-    // nRegistrationOutOfServicePolicy
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationPcscfUpdatePolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetRegRetryCountResetPolicy());
     // nRegistrationTimerForEmergencyCallMillis

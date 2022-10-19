@@ -449,21 +449,20 @@ public class CarrierConfig {
                 "destroy_unsecure_tcp_socket_on_accomplishing_registration_bool";
         public static final String KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL =
                 "disable_t3482_for_emergency_bool";
-        public static final String KEY_EMERGENCY_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REGISTRATION_BOOL =
-                "emergency_call_based_on_p_associated_uri_of_normal_registration_bool";
-        public static final String
-                KEY_HOLD_REGISTRATION_WHEN_IPCAN_CHANGED_WITH_IMS_ACTIVE_CALL_BOOL =
-                        "hold_registration_when_ipcan_changed_with_ims_active_call_bool";
+        public static final String KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
+                "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
+        public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
+                "hold_reg_with_ipcan_changed_during_ims_call_bool";
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
                 "ignore_vops_for_volte_enable_bool";
         public static final String KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL =
                 "ims_deregister_on_3g_networks_bool";
-        public static final String KEY_NO_INITIAL_REGISTRATION_ON_PCSCF_CHANGE_BOOL =
-                "no_initial_registration_on_pcscf_change_bool";
+        public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
+                "no_init_reg_on_pcscf_change_bool";
+        public static final String KEY_REG_CONTACT_VALIDATION_BOOL =
+                "reg_contact_validation_bool";
         public static final String KEY_REG_RETRY_IP_VER_FALLBACK_BOOL =
                 "reg_retry_with_ip_ver_fallback_bool";
-        public static final String KEY_REGISTRATION_CONTACT_VALIDATION_BOOL =
-                "registration_contact_validation_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
                 "remove_old_sa_on_establishing_sa_bool";
         public static final String KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
@@ -486,21 +485,20 @@ public class CarrierConfig {
                 "support_contact_user_info_bool";
         public static final String KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL =
                 "support_reg_with_feature_tag_unavailable_bool";
-        public static final String KEY_SUPPORT_VERSTAT_FOR_REGISTRATION_BOOL =
-                "support_verstat_for_registration_bool";
+        public static final String KEY_SUPPORT_VERSTAT_FOR_REG_BOOL =
+                "support_verstat_for_reg_bool";
         public static final String
                 KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
                         "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
         public static final String KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL =
                 "update_registration_with_country_change_bool";
         public static final String
-                KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
-                        "use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
-        public static final String KEY_USE_SECURITY_SERVER_PORT_IN_INITIAL_REGISTRATION_BOOL =
-                "use_security_server_port_in_initial_registration_bool";
-        public static final String
-                KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INITIAL_REGISTRATION_BOOL =
-                        "use_security_server_port_in_reg_contact_of_initial_registration_bool";
+                KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
+                        "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
+        public static final String KEY_USE_SECURITY_SERVER_PORT_IN_INIT_REG_BOOL =
+                "use_security_server_port_in_init_reg_bool";
+        public static final String KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INIT_REG_BOOL =
+                "use_security_server_port_in_reg_contact_of_init_reg_bool";
         public static final String KEY_USE_WFC_COUNTRY_CODE_AVAILABILITY_CHECK_BOOL =
                 "use_wfc_country_code_availability_check_bool";
         public static final String KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL =
@@ -514,6 +512,8 @@ public class CarrierConfig {
                 "geolocation_pidf_forming_policy_int";
         public static final String KEY_IMS_PREFERRED_IPTYPE_INT = "ims_preferred_iptype_int";
         public static final String KEY_IMS_SIGNALLING_DSCP_INT = "ims_signalling_dscp_int";
+        public static final String KEY_REG_OUT_OF_SERVICE_POLICY_INT =
+                "reg_out_of_service_policy_int";
         public static final String KEY_REG_RETRY_305_POLICY_INT = "reg_retry_305_policy_int";
         public static final String KEY_REG_RETRY_503_POLICY_INT = "reg_retry_503_policy_int";
         public static final String KEY_REG_RETRY_DEFAULT_POLICY_INT =
@@ -523,8 +523,6 @@ public class CarrierConfig {
                 "reg_retry_timer_f_policy_int";
         public static final String KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT =
                 "registration_actual_wait_time_policy_int";
-        public static final String KEY_REGISTRATION_OUT_OF_SERVICE_POLICY_INT =
-                "registration_out_of_service_policy_int";
         public static final String KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT =
                 "registration_pcscf_update_policy_int";
         public static final String KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT =
@@ -568,18 +566,14 @@ public class CarrierConfig {
                 "rereg_retry_err_code_for_init_reg_int_array";
         public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY =
                 "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
-        public static final String
-                KEY_SUB_ERR_CODE_FOR_REG_EVENT_WITH_INITIAL_REG_WITH_NEXT_PCSCF_INT_ARRAY =
-                        "subscription_error_code_for_reg_event_"
-                                + "with_initial_registration_with_next_pcscf_int_array";
-        public static final String
-                KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY =
-                        "subscription_error_code_for_stopping_by_expiration_time_int_array";
+        public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY =
+                "sub_err_code_for_init_reg_with_next_pcscf_int_array";
+        public static final String KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY =
+                "sub_err_code_for_stopping_by_expiration_time_int_array";
         public static final String KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY =
                 "supported_roaming_rats_int_array";
-        public static final String
-                KEY_VOWIFI_SUBSCRIPTION_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY =
-                        "vowifi_subscription_error_code_with_initial_registration_int_array";
+        public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
+                "vowifi_sub_error_code_for_init_reg_int_array";
         public static final String
                 KEY_WFC_REG_EVENT_ERROR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY =
                         "wfc_reg_event_error_code_by_missing_911_address_int_array";
