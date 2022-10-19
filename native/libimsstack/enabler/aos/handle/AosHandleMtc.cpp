@@ -68,6 +68,7 @@ AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& st
     m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOLTE_CAPABILITY);
     m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VILTE_CAPABILITY);
     m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOPS);
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_NETWORK);
 
     m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VOWIFI_CAPABILITY);
     m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VIWIFI_CAPABILITY);
@@ -392,7 +393,8 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
         return bBlocked;
     }
 
-    return AosHandle::IsHandleBlocked(BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_NETWORK);
+    return AosHandle::IsHandleBlocked(
+            BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_NETWORK | BLOCK_3G);
 }
 
 /*

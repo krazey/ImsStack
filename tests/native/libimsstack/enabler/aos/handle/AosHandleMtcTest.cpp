@@ -675,7 +675,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test4)
 TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test5)
 {
     // Test5: Srv In, Network changed to 3G(WCDMA) / No unavailable feature policy
-    // Expectation: Suspended reason NONE (cleared when detach), call ImsAos_Suspended()
+    // Expectation: Suspended reason SUSPEND_NONE (cleared when detach), call ImsAos_Suspended()
 
     SetNetSrvIn(IMS_TRUE);
     SetHandleState(AosHandle::STATE_CONNECTED);
@@ -707,7 +707,7 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test5)
 
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
-    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::NONE);
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
 
 TEST_F(AosHandleMtcTest, InitializeServiceBlock_Test)
@@ -1175,12 +1175,13 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test4)
 TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
 {
     // Test5: Epdg not enabled
-    // Expectation: return true if BLOCK_VOPS or BLOCK_VOLTE_CAPABILITY or BLOCK_NETWORK
+    // Expectation: return true if BLOCK_VOPS or BLOCK_VOLTE_CAPABILITY or BLOCK_NETWORK or BLOCK_3G
     //              else return false
 
     AddBlock(AosHandle::BLOCK_VOPS);
     AddBlock(AosHandle::BLOCK_VOLTE_CAPABILITY);
     AddBlock(AosHandle::BLOCK_NETWORK);
+    AddBlock(AosHandle::BLOCK_3G);
     EXPECT_TRUE(IsHandleBlocked());
 
     RemoveBlock(AosHandle::BLOCK_VOPS);
@@ -1190,6 +1191,9 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
     EXPECT_TRUE(IsHandleBlocked());
 
     RemoveBlock(AosHandle::BLOCK_NETWORK);
+    EXPECT_TRUE(IsHandleBlocked());
+
+    RemoveBlock(AosHandle::BLOCK_3G);
     EXPECT_FALSE(IsHandleBlocked());
 }
 
@@ -1366,6 +1370,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
 TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
 {
     // Test1: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=LTE
+    // Blocked BLOCK_NETWORK
     // Expectation: block none
 
     IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
@@ -1379,6 +1384,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
 
     SetCapabilities(objCapabilities);
     SetNetworkType(NW_REPORT_RADIO_LTE);
+    AddBlock(AosHandle::BLOCK_NETWORK);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
@@ -1510,6 +1516,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test4)
             .WillRepeatedly(Return(IMS_TRUE));
 
     ProcessNetworkChanged();
+
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
 }
 
@@ -1518,7 +1525,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test5)
     // Test5: Video mismatch check / LTE->3G->LTE->3G->LTE
     //        Video changed while on 3G
     //        unavailable feature policy is existed.
-    // Expectation: Video blocked after network changed to LTE again. No block network on 3G.
+    // Expectation: Video blocked after network changed to LTE again.
 
     IMSMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoiceVideo;
     objCapabilitiesVoiceVideo.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),

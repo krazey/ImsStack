@@ -53,6 +53,18 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+class TestAosHandle : public AosHandle
+{
+    inline TestAosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_UINT32 nServiceType) :
+            AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
+    {
+    }
+
+    friend class AosHandleTest;
+    FRIEND_TEST(AosHandleTest, Constructor);
+};
+
 class AosHandleTest : public ::testing::Test
 {
 public:
@@ -112,8 +124,6 @@ protected:
         m_piAosRegStateManager = AosProvider::GetInstance()->GetRegStateManager();
         AosProvider::GetInstance()->SetRegStateManager(
                 static_cast<IAosRegStateManager*>(&m_objMockIAosRegStateManager));
-
-        EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
 
         m_pAosHandle = new AosHandle(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 m_strAppId, m_strServiceId, m_nServiceType);
@@ -472,7 +482,44 @@ protected:
 
 TEST_F(AosHandleTest, Constructor)
 {
-    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    MockIAosAppContext objMockIAosAppContext;
+
+    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(AnyNumber()).WillRepeatedly(Return(0));
+
+    const AString strValue = AString("test");
+    EXPECT_CALL(objMockIAosAppContext, GetProfileId())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(strValue));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    TestAosHandle* pTestAosHandle =
+            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
+                    m_strServiceId, m_nServiceType);
+
+    EXPECT_EQ(pTestAosHandle->GetState(), AosHandle::STATE_DISCONNECTED);
+
+    IMS_BOOL bResult = IMS_FALSE;
+    for (IMS_UINT32 i = 0; i < pTestAosHandle->m_objHoldingBlocksPolicyForMobile.GetSize(); i++)
+    {
+        if (pTestAosHandle->m_objHoldingBlocksPolicyForMobile.GetAt(i) == AosHandle::BLOCK_3G)
+        {
+            bResult = IMS_TRUE;
+            break;
+        }
+    }
+
+    EXPECT_TRUE(bResult);
+
+    if (pTestAosHandle != nullptr)
+    {
+        delete pTestAosHandle;
+        pTestAosHandle = nullptr;
+    }
 }
 
 TEST_F(AosHandleTest, Destructor)
@@ -1152,6 +1199,113 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test3)
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
     EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, NetTracker_StatusChanged_Test4)
+{
+    // Test4: BLOCK_3G test.
+    //        IsDeregisterOn3gNetworks() returns false.
+    // Expectation: BLOCK_3G is not blocked
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pAosHandle->NetTracker_StatusChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_3G));
+}
+
+TEST_F(AosHandleTest, NetTracker_StatusChanged_Test5)
+{
+    // Test5: BLOCK_3G test.
+    //        IsDeregisterOn3gNetworks() returns true.
+    //        Srv is not In.
+    // Expectation: BLOCK_3G is not blocked
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_TRUE));
+
+    m_pAosHandle->NetTracker_StatusChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_3G));
+}
+
+TEST_F(AosHandleTest, NetTracker_StatusChanged_Test6)
+{
+    // Test6: BLOCK_3G test.
+    //        IsDeregisterOn3gNetworks() returns true.
+    //        Srv is In. Network type is 2G (Not supported, Not 3g).
+    // Expectation: BLOCK_3G is not blocked
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    m_pAosHandle->NetTracker_StatusChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_3G));
+}
+
+TEST_F(AosHandleTest, NetTracker_StatusChanged_Test7)
+{
+    // Test7: BLOCK_3G test.
+    //        IsDeregisterOn3gNetworks() returns true.
+    //        Srv is In. Network type is supported one(LTE)
+    // Expectation: BLOCK_3G is not blocked regardless of previous state.
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_3G));
+    m_pAosHandle->NetTracker_StatusChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_3G));
+
+    AddBlock(AosHandle::BLOCK_3G);
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_3G));
+    m_pAosHandle->NetTracker_StatusChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_3G));
+}
+
+TEST_F(AosHandleTest, NetTracker_StatusChanged_Test8)
+{
+    // Test8: BLOCK_3G test.
+    //        IsDeregisterOn3gNetworks() returns true.
+    //        Srv is In. Network type is 3G(WCDMA)
+    // Expectation: BLOCK_3G is blocked.
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_WCDMA));
+
+    SetDataConnected(IMS_TRUE);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_3G));
+    m_pAosHandle->NetTracker_StatusChanged();
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_3G));
 }
 
 TEST_F(AosHandleTest, Init_CleanUp)
