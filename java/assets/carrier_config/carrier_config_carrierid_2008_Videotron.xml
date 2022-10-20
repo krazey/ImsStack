@@ -15,6 +15,9 @@
  * limitations under the License.
 -->
 <carrier_config>
+    <!-- Aos -->
+    <int name="reg_retry_305_policy_int" value="3"/>
+
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
