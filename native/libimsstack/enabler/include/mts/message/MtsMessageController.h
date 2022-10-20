@@ -49,8 +49,8 @@ public:
     void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     void NotifyMtSms(IN IPageMessage* piPageMessage) override;
-    void OnDisconnected() override;
-    void OnSuspended() override;
+    void OnServiceDisconnected() override;
+    void OnServiceSuspended() override;
 
     // IMtsErrorHandlerListener
     void NotifyControlAos(IMS_UINT32 nCommand) override;
@@ -122,7 +122,7 @@ private:
     IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
     ImsList<IMtsMessage*> m_objMsgList;
-    ImsList<IMtsMessage*> m_objRPAckedMsgs;
+    ImsList<IMtsMessage*> m_objRpAckedMsgList;
     IMtsService* m_piMtsService;
     IMtsErrorHandler* m_piMtsErrorHandler;
     MtsDynamicLoader* m_pMtsDynamicLoader;

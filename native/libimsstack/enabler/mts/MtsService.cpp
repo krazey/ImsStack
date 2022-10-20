@@ -89,7 +89,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const 
     m_pSmsInfo = new SmsSendRequestInfo();
 
     m_pSmsInfo->eSmsFormat = eSmsFormat;
-    m_pSmsInfo->strAddress = strAddress.GetStr();
+    m_pSmsInfo->strAddress = strAddress;
     m_pSmsInfo->objSmsData = objData;
     m_pSmsInfo->nSeqId = nSeqId;
     m_pSmsInfo->bEmergency = IMS_FALSE;
@@ -284,7 +284,7 @@ void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 
     m_piMtsServiceState->OnImsDisconnected(nReason);
     // if ims data connection is disconnected, terminate all pending messages.
-    m_piMtsServiceListener->OnDisconnected();
+    m_piMtsServiceListener->OnServiceDisconnected();
 }
 
 PUBLIC
@@ -301,7 +301,7 @@ void MtsService::ImsAos_Suspended(IN IMS_UINT32 nReason)
     IMS_TRACE_I("ImsAos_Suspended : Reason[%d]", nReason, 0, 0);
 
     m_piMtsServiceState->OnImsSuspended(nReason);
-    m_piMtsServiceListener->OnSuspended();
+    m_piMtsServiceListener->OnServiceSuspended();
 }
 
 PUBLIC

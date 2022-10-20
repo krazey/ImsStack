@@ -31,8 +31,8 @@ public:
                     IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),
             (override));
     MOCK_METHOD(void, NotifyMtSms, (IN IPageMessage* piMessage), (override));
-    MOCK_METHOD(void, OnDisconnected, (), (override));
-    MOCK_METHOD(void, OnSuspended, (), (override));
+    MOCK_METHOD(void, OnServiceDisconnected, (), (override));
+    MOCK_METHOD(void, OnServiceSuspended, (), (override));
 };
 
 #endif
