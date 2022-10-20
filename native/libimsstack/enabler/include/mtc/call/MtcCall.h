@@ -49,6 +49,7 @@
 #include <functional>
 #include <memory>
 
+class EpsFallbackTrigger;
 class IConferenceManager;
 class IEctManager;
 class IMtcAosConnector;
@@ -145,6 +146,7 @@ public:
         return GetCallManager().GetCallsExcluding(GetKey());
     }
     UpdatingInfo& GetUpdatingInfo() override;
+    EpsFallbackTrigger& GetEpsFallbackTrigger() override;
     IMtcSession* CreateSession(IN ISession* piSession) override;
     IMtcSession* CreateSession() override;
     IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
@@ -296,6 +298,7 @@ private:
     MtcSupplementaryService m_objSupplementaryService;
     MtcMessageMediator m_objMessageMediator;
     UssiController* m_pUssiController;
+    EpsFallbackTrigger* m_pEpsFallbackTrigger;
 };
 
 #endif

@@ -33,6 +33,7 @@
 #include "ServiceTrace.h"
 #include "call/IMtcSession.h"
 #include "helper/MtcTimerWrapper.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcUiNotifier.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/SilentRedialHelper.h"
@@ -187,6 +188,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
         return CallStateName::TERMINATING;
     }
 
+    StartEpsFallbackWatchdogIfNeeded(*piMessage);
     RunMedia(piSession, piMessage);
     OnStarted(piSession);
 
@@ -568,6 +570,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         objPreconditionManager.StartQosTimer(piSession);
     }
 
+    StartEpsFallbackWatchdogIfNeeded(*piMessage);
     RunMedia(piSession, piMessage);
     SendProgressing();
     return GetStateName();
@@ -623,6 +626,20 @@ PROTECTED VIRTUAL CallStateName OutgoingState::SendUpdateBySrvcc(IN UpdateType e
     {
         piMtcSession->SendEarlyUpdate(eType);
     }
+    return GetStateName();
+}
+
+PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
+{
+    IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
+    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
+            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
+    {
+        m_objContext.GetEpsFallbackTrigger().OnEpsFallbackCompleted();
+        return HandleSilentRedial(&m_objContext.GetSession()->GetISession(),
+                CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT));
+    }
+
     return GetStateName();
 }
 
@@ -716,6 +733,14 @@ CallStateName OutgoingState::HandleSilentRedial(
         IN ISession* piSession, IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("HandleSilentRedial", 0, 0, 0);
+
+    if (objReason.nExtraCode == EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK)
+    {
+        m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
+                EpsFallbackReason::NO_NETWORK_RESPONSE);
+        return GetStateName();
+    }
+
     IMS_RESULT nResult =
             m_objContext.GetCallController().GetRedialHelper(m_objContext, objReason).Redial();
 

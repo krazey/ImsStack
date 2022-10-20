@@ -214,6 +214,7 @@ protected:
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const;
     CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
+    void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
     IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const;
 
     IMtcCallContext& m_objContext;

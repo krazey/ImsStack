@@ -22,6 +22,7 @@
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipStatusCode.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -108,7 +109,9 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL:
             nReason = CODE_INTERNAL_REDIAL;
             nExtraCode = EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT;
-            // TODO: triggerepsfallback
+            break;
+        case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT:
+            return HandleRedialByNetworkContext();
             break;
     }
 
@@ -448,6 +451,24 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
     }
 
     return CallReasonInfo(CODE_SIP_SERVER_TIMEOUT, GetDefaultExtraCode(objMessage));
+}
+
+PRIVATE
+CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
+{
+    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
+            m_objContext.GetEpsFallbackTrigger().IsVoNr())
+    {
+        return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
+    }
+
+    if (IMS_FALSE)
+    {
+        // CDMA-less case
+        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+    }
+
+    return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
 }
 
 PRIVATE

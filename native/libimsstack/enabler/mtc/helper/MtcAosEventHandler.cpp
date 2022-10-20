@@ -97,7 +97,6 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
     {
         if (pServiceThread)
         {
-            IMS_TRACE_I("OnConnected pServiceThread is not null", 0, 0, 0);
             pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
         }
         // TODO: this must be called when registration is refreshed?

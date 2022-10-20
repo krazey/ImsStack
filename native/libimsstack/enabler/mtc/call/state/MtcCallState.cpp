@@ -25,6 +25,7 @@
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "ISipServerConnection.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
@@ -458,6 +459,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eSt
 PUBLIC VIRTUAL CallStateName MtcCallState::OnAosStateChanged(
         IN MtcAosState eState, IN IMS_UINT32 eAosReason)
 {
+    IMS_TRACE_I("OnAosStateChanged state[%d]", eState, 0, 0);
     switch (eState)
     {
         case MtcAosState::CONNECTED:
@@ -480,7 +482,14 @@ CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
 {
     if (m_objContext.GetService().GetSrvccState() == SrvccState::STARTED)
     {
-        IMS_TRACE_I("OnAosDisconnection ignore during srvcc", 0, 0, 0);
+        IMS_TRACE_I("HandleAosDisconnected ignore during srvcc", 0, 0, 0);
+        return GetStateName();
+    }
+
+    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
+            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
+    {
+        IMS_TRACE_I("HandleAosDisconnected ignore during EPS Fallback", 0, 0, 0);
         return GetStateName();
     }
 
@@ -1029,6 +1038,33 @@ IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED
+void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const
+{
+    if (objMessage.GetStatusCode() != SipStatusCode::SC_183 &&
+            objMessage.GetStatusCode() != SipStatusCode::SC_200)
+    {
+        return;
+    }
+
+    if (m_objContext.GetMessageUtils().HasSdp(&objMessage) == IMS_FALSE)
+    {
+        return;
+    }
+
+    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) == IMS_FALSE)
+    {
+        return;
+    }
+
+    if (m_objContext.GetEpsFallbackTrigger().IsVoNr() == IMS_FALSE)
+    {
+        return;
+    }
+
+    m_objContext.GetEpsFallbackTrigger().StartWatchdog();
 }
 
 PROTECTED

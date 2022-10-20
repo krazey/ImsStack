@@ -24,6 +24,7 @@
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCall.h"
 #include "call/MtcSession.h"
@@ -64,7 +65,8 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy())),
         m_objMessageMediator(MtcMessageMediator(*this)),
-        m_pUssiController(IMS_NULL)
+        m_pUssiController(IMS_NULL),
+        m_pEpsFallbackTrigger(IMS_NULL)
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
 
@@ -90,6 +92,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
     m_lstSessions.Clear();
 
     delete m_pUssiController;
+    delete m_pEpsFallbackTrigger;
 }
 
 PUBLIC VIRTUAL void MtcCall::HandleIncoming(IN ISession* piSession)
@@ -473,6 +476,16 @@ PUBLIC VIRTUAL UpdatingInfo& MtcCall::GetUpdatingInfo()
     }
 
     return *m_pUpdatingInfo;
+}
+
+PUBLIC VIRTUAL EpsFallbackTrigger& MtcCall::GetEpsFallbackTrigger()
+{
+    if (m_pEpsFallbackTrigger == IMS_NULL)
+    {
+        m_pEpsFallbackTrigger = new EpsFallbackTrigger(*this);
+    }
+
+    return *m_pEpsFallbackTrigger;
 }
 
 PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession(IN ISession* piSession)
