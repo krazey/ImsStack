@@ -287,21 +287,6 @@ void MtcCallController::Transfer(IN CallKey nCallKey, IN const AString& strTarge
 }
 
 PUBLIC
-void MtcCallController::HandleIpcanChanged()
-{
-    IMSList<IMtcCall*> lstCalls = m_objCallManager.GetCalls();
-    for (IMS_UINT32 i = 0; i < lstCalls.GetSize(); i++)
-    {
-        IMtcCall* piCall = lstCalls.GetAt(i);
-
-        if (piCall != IMS_NULL)
-        {
-            piCall->HandleIpcanChanged();
-        }
-    }
-}
-
-PUBLIC
 ISilentRedialHelper& MtcCallController::GetRedialHelper(
         IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason)
 {

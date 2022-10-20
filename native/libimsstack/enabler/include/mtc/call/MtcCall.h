@@ -37,6 +37,7 @@
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
 #include "call/UpdatingInfo.h"
+#include "helper/IMtcAosStateListener.h"
 #include "helper/IMtcTimerListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MtcSupplementaryService.h"
@@ -83,7 +84,8 @@ class MtcCall final :
         public ISipClientConnectionListener,
         public ISipErrorListener,
         public IMediaReportEventListener,
-        public ISrvccStateListener
+        public ISrvccStateListener,
+        public IMtcAosStateListener
 {
 public:
     MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo,
@@ -116,7 +118,6 @@ public:
     void Terminate(IN const CallReasonInfo& objReason) override;
     void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
     void SendUssd(IN const AString& strUssd) override;
-    void HandleIpcanChanged() override;
 
     inline CallKey GetKey() const override { return m_nKey; }
     CallType GetCallType() const override;
@@ -260,6 +261,10 @@ public:
     void OnMediaFailed(IN const CallReasonInfo& objReason) override;
 
     void OnSrvccStateUpdated(IN SrvccState eState) override;
+
+    void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
+            IN IMS_UINT32 eAosReason) override;
+    void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
 
     void RunPendingOperationIfPossible();
 

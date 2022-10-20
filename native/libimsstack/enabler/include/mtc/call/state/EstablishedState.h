@@ -52,11 +52,11 @@ public:
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnVideoLowestBitRate() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
-    CallStateName HandleIpcanChanged() override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction);
 
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
+    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
 private:
     IMS_RESULT HandleUpdate(

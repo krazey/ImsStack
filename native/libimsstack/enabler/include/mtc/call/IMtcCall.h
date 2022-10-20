@@ -128,9 +128,6 @@ public:
     // Sends USSD. Does nothing if the call isn't a USSI call.
     virtual void SendUssd(IN const AString& strUssd) = 0;
 
-    // handles changing RAT during call.
-    virtual void HandleIpcanChanged() = 0;
-
     // Returns a key to uniquely identify this call.
     virtual CallKey GetKey() const = 0;
 

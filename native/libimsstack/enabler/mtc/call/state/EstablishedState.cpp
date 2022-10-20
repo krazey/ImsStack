@@ -342,21 +342,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnMediaFailed(IN const CallReason
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL CallStateName EstablishedState::HandleIpcanChanged()
-{
-    IMS_TRACE_I("HandleIpcanChanged", 0, 0, 0);
-
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-    if (HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(),
-                &objMediaInfo) == IMS_FAILURE)
-    {
-        // TODO
-    }
-
-    return CallStateName::UPDATING;
-}
-
 PUBLIC VIRTUAL CallStateName EstablishedState::QosReserveFailed(
         IN ISession* /* piSession */, IN QosLossPolicy eNextAction)
 {
@@ -389,6 +374,26 @@ PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateTyp
     piMtcSession->Update(eType, IMS_FALSE, SipMethod::UPDATE);
 
     // TODO: check if state transition has no issue.
+    return CallStateName::UPDATING;
+}
+
+PROTECTED VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 /*eIpcan*/)
+{
+    IMS_TRACE_I("OnIpcanChanged", 0, 0, 0);
+
+    if (!m_objContext.GetConfigurationProxy().Is(Feature::ENABLE_SEND_REINVITE_ON_RAT_CHANGE))
+    {
+        return GetStateName();
+    }
+
+    MediaInfo objMediaInfo;
+    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+    if (HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(),
+                &objMediaInfo) == IMS_FAILURE)
+    {
+        // TODO
+    }
+
     return CallStateName::UPDATING;
 }
 

@@ -86,8 +86,6 @@ public:
     // TODO: Consider ECT, SRVCC
     void Transfer(IN CallKey nCallKey, IN const AString& strTarget) override;
 
-    void HandleIpcanChanged() override;
-
     ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) override;
     void ReleaseRedialHelper() override;
