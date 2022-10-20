@@ -1006,6 +1006,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_18
         "policy_for_local_ringback_tone_with_180_response_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL[] =
         "send_180_for_initial_invite_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[] =
+        "eps_fallback_watchdog_time_millis_int";
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =
         "audio_rtp_port_range_int_array";

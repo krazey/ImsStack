@@ -72,7 +72,8 @@ public:
             objMessageTypesSupportGeolocationPidf(IMSVector<IMS_SINT32>()),
             bInitializePemWhenNoHeader(IMS_FALSE),
             nPolicyForLocalRingbackToneWith180Response(0),
-            bSend180ForInitialInvite(IMS_FALSE)
+            bSend180ForInitialInvite(IMS_FALSE),
+            nEpsFallbackWatchDogTime(-1)
     {
     }
     ~AssetItems()
@@ -137,6 +138,7 @@ public:
     IMS_BOOL bInitializePemWhenNoHeader;
     IMS_SINT32 nPolicyForLocalRingbackToneWith180Response;
     IMS_BOOL bSend180ForInitialInvite;
+    IMS_SINT32 nEpsFallbackWatchDogTime;
 };
 
 #endif

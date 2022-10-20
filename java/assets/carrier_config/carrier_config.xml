@@ -462,6 +462,7 @@
     <boolean name="initialize_p_early_media_when_no_header_bool" value="false"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="0"/>
     <boolean name="send_180_for_initial_invite_bool" value="false"/>
+    <int name="eps_fallback_watchdog_time_millis_int" value="-1"/>
 
     <!-- Media -->
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>

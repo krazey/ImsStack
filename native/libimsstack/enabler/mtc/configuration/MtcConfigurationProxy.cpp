@@ -325,6 +325,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_pManager->GetMaximumWaitTimerForGeolocationPidfInfo();
         case Feature::POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE:
             return m_pManager->GetPolicyForLocalRingbackToneWith180Response();
+        case Feature::EPS_FALLBACK_WATCHDOG_TIME:
+            return m_pManager->GetEpsFallbackWatchdogTime();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return IMS_FALSE;

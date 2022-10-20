@@ -348,4 +348,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
             CarrierConfig::Assets::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT);
     objItems.bSend180ForInitialInvite =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL);
+    objItems.nEpsFallbackWatchDogTime =
+            piCc->GetInt(CarrierConfig::Assets::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT);
 }
