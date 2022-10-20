@@ -253,11 +253,23 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::NegotiateSDP(IN IMS_UINTP nNegoId, IN ISes
         IMS_TRACE_I("NegotiateSDP() - DIR = Audio[%d], Video[%d], Text[%d]", *nAudioDirection,
                 *nVideoDirection, *nTextDirection);
 
+        // set Access Network
+        MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
+
+        IMS_SINT32 nAccessNetwork = 0;
+
+        if (pMediaManager != IMS_NULL)
+        {
+            IMS_UINT32 nNetworkInterfaceID = 0;
+            IpAddress objIPAddress = GetAndroidIP();
+            pMediaManager->GetResourceManager()->GetMediaConnectionWatcherInfo(
+                    objIPAddress, nAccessNetwork, nNetworkInterfaceID);
+        }
+
         // audio
         if (pMediaNego->GetAudioNego() != IMS_NULL)
         {
-            m_objAudioController.UpdateRtpConfig(nNegoId, pMediaNego->GetAudioNego());
-            m_objAudioController.AddSession(nNegoId, pMediaNego->GetAudioNego());
+            m_objAudioController.AddSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
         }
 
         // video
@@ -352,31 +364,28 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
     // set Access Network
     MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
-    IMS_SINT32 accessNetwork = 0;
+    IMS_SINT32 nAccessNetwork = 0;
 
     if (pMediaManager != IMS_NULL)
     {
         IMS_UINT32 nNetworkInterfaceID = 0;
         IpAddress objIPAddress = GetAndroidIP();
         pMediaManager->GetResourceManager()->GetMediaConnectionWatcherInfo(
-                objIPAddress, accessNetwork, nNetworkInterfaceID);
+                objIPAddress, nAccessNetwork, nNetworkInterfaceID);
     }
 
-    m_objAudioController.UpdateRtpConfig(nNegoId, pMediaNego->GetAudioNego());
-    m_objAudioController.UpdateAccessNetwork(nNegoId, accessNetwork);
-    m_objAudioController.UpdateQualityThreshold(nNegoId, pMediaNego->GetAudioNego());
-    m_objAudioController.UpdateSession(nNegoId);
+    m_objAudioController.UpdateSession(nNegoId, nAccessNetwork, pMediaNego->GetAudioNego());
 
     if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
     {
         m_objVideoController.UpdateRtpConfig(pMediaNego->GetVideoNego());
-        m_objVideoController.UpdateAccessNetwork(accessNetwork);
+        m_objVideoController.UpdateAccessNetwork(nAccessNetwork);
         m_objVideoController.UpdateQualityThreshold(pMediaNego->GetVideoNego());
         m_objVideoController.UpdateSession();
     }
 
     m_objTextController.UpdateRtpConfig(pMediaNego->GetTextNego());
-    m_objTextController.UpdateAccessNetwork(accessNetwork);
+    m_objTextController.UpdateAccessNetwork(nAccessNetwork);
     m_objTextController.UpdateQualityThreshold(pMediaNego->GetTextNego());
     m_objTextController.UpdateSession();
 

@@ -98,16 +98,25 @@ IMS_BOOL AudioController::CreateSession(
 }
 
 PUBLIC
-IMS_BOOL AudioController::UpdateSession(IN IMS_UINTP nNegoId)
+IMS_BOOL AudioController::UpdateSession(
+        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego)
 {
     if (m_eUpdateCondition == READY_TO_CONFIRM && m_listAudioSession.GetSize() > 1)
     {
+        UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
+        UpdateQualityThreshold(nNegoId, pNego);
         return ConfirmSession(nNegoId);
     }
     else
     {
-        return ModifySession(nNegoId);
+        if (UpdateRtpConfig(nNegoId, nAccessNetwork, pNego) == IMS_TRUE)
+        {
+            UpdateQualityThreshold(nNegoId, pNego);
+            return ModifySession(nNegoId);
+        }
     }
+
+    return IMS_FALSE;
 }
 
 PUBLIC
@@ -137,7 +146,8 @@ IMS_BOOL AudioController::OpenSession(IN IMS_UINTP nNegoId)
 }
 
 PUBLIC
-IMS_BOOL AudioController::AddSession(IN IMS_UINTP nNegoId, IN AudioNego* pNego)
+IMS_BOOL AudioController::AddSession(
+        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego)
 {
     IMS_TRACE_I("AddSession() - nNegoId[%" PFLS_x "], audio list size[%d]", nNegoId,
             m_listAudioSession.GetSize(), 0);
@@ -148,14 +158,16 @@ IMS_BOOL AudioController::AddSession(IN IMS_UINTP nNegoId, IN AudioNego* pNego)
     }
 
     AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-
     IMS_BOOL bResult = IMS_FALSE;
 
     if (pAudioSession != IMS_NULL && m_nAudioSessionState != AudioMediaSession::STATE_NONE)
     {
-        UpdateQualityThreshold(nNegoId, pNego);
-        pAudioSession->SetMediaQuality();
-        bResult = pAudioSession->Add();
+        if (UpdateRtpConfig(nNegoId, nAccessNetwork, pNego) == IMS_TRUE)
+        {
+            UpdateQualityThreshold(nNegoId, pNego);
+            pAudioSession->SetMediaQuality();
+            bResult = pAudioSession->Add();
+        }
     }
 
     if (bResult == IMS_TRUE)
@@ -222,6 +234,7 @@ IMS_BOOL AudioController::ConfirmSession(IN IMS_UINTP nNegoId)
             }
         }
 
+        m_eUpdateCondition = CONFIRMED_SESSION;
         return IMS_TRUE;
     }
 
@@ -295,7 +308,8 @@ IMS_BOOL AudioController::CloseSession()
 }
 
 PUBLIC
-IMS_BOOL AudioController::UpdateRtpConfig(IN IMS_UINTP nNegoId, IN AudioNego* pNego)
+IMS_BOOL AudioController::UpdateRtpConfig(
+        IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego)
 {
     IMS_TRACE_D("UpdateRtpConfig() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId,
             m_listAudioSession.GetSize(), 0);
@@ -310,7 +324,7 @@ IMS_BOOL AudioController::UpdateRtpConfig(IN IMS_UINTP nNegoId, IN AudioNego* pN
 
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->UpdateRtpConfig(pNego->GetNegotiatedLocalProfile(),
+        return pAudioSession->UpdateRtpConfig(nAccessNetwork, pNego->GetNegotiatedLocalProfile(),
                 pNego->GetNegotiatedPeerProfile(), pNego->GetNegotiatedNegoProfile());
     }
 
@@ -319,7 +333,7 @@ IMS_BOOL AudioController::UpdateRtpConfig(IN IMS_UINTP nNegoId, IN AudioNego* pN
 }
 
 PUBLIC
-void AudioController::UpdateAccessNetwork(IN IMS_UINTP nNegoId, IN IMS_UINT32 accessNetwork)
+IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINTP nNegoId, IN IMS_UINT32 accessNetwork)
 {
     IMS_TRACE_I("UpdateAccessNetwork() - nNegoId[%" PFLS_x "], accessNetwork[%d]", nNegoId,
             accessNetwork, 0);
@@ -328,8 +342,10 @@ void AudioController::UpdateAccessNetwork(IN IMS_UINTP nNegoId, IN IMS_UINT32 ac
 
     if (pAudioSession != IMS_NULL)
     {
-        pAudioSession->UpdateAccessNetwork(accessNetwork);
+        return pAudioSession->UpdateAccessNetwork(accessNetwork);
     }
+
+    return IMS_FALSE;
 }
 
 PUBLIC
