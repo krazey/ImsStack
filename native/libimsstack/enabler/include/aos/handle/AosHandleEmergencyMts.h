@@ -28,6 +28,7 @@ public:
 
 protected:
     virtual void InitializeServiceBlock();
+    virtual void InitializeServiceFeature();
 
 private:
     friend class AosHandleEmergencyMtsTest;

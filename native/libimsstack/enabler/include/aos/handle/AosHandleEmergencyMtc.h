@@ -25,6 +25,9 @@ public:
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     virtual ~AosHandleEmergencyMtc();
 
+protected:
+    virtual void InitializeServiceFeature();
+
 private:
     friend class AosHandleEmergencyMtcTest;
 };

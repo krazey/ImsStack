@@ -19,8 +19,11 @@
 
 #include "handle/AosHandleEmergencyMtc.h"
 #include "interface/IAosAppContext.h"
+#include "interface/IAosNConfiguration.h"
+#include "provider/AosProvider.h"
 
 #include "interface/MockIAosAppContext.h"
+#include "interface/MockIAosNConfiguration.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -34,6 +37,13 @@ public:
 
     MockIAosAppContext m_objMockIAosAppContext;
 
+    IAosNConfiguration* m_piAosNConfiguration;
+    MockIAosNConfiguration m_objMockIAosNConfiguration;
+
+    const AString m_strAppId = AString("ims.app.mtc.emergency.test");
+    const AString m_strServiceId = AString("ims.service.mtc.emergency.test");
+    const IMS_UINT32 m_nServiceType = -1;
+
 protected:
     virtual void SetUp() override
     {
@@ -46,13 +56,13 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(ReturnRef(strValue));
 
-        const AString strAppId = AString("ims.app.mtc.emergency.test");
-        const AString strServiceId = AString("ims.service.mtc.emergency.test");
-        const IMS_UINT32 nServiceType = -1;
+        m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        AosProvider::GetInstance()->SetNConfiguration(
+                static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration));
 
         m_pAosHandleEmergencyMtc =
                 new AosHandleEmergencyMtc(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
-                        strAppId, strServiceId, nServiceType);
+                        m_strAppId, m_strServiceId, m_nServiceType);
 
         ASSERT_TRUE(m_pAosHandleEmergencyMtc != nullptr);
     }
@@ -64,9 +74,31 @@ protected:
             delete m_pAosHandleEmergencyMtc;
             m_pAosHandleEmergencyMtc = nullptr;
         }
+
+        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
     }
+
+    void InitializeServiceFeature() { m_pAosHandleEmergencyMtc->InitializeServiceFeature(); }
 };
 
 TEST_F(AosHandleEmergencyMtcTest, Constructor_Test) {}
 
 TEST_F(AosHandleEmergencyMtcTest, Destructor_Test) {}
+
+TEST_F(AosHandleEmergencyMtcTest, InitializeServiceFeature_Test)
+{
+    // Expectation: MMTEL feature is always added. TEXT feature is added if RTT is supported.
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported())
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    InitializeServiceFeature();
+    EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::MMTEL));
+    EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::TEXT));
+
+    InitializeServiceFeature();
+    EXPECT_TRUE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::MMTEL));
+    EXPECT_FALSE(m_pAosHandleEmergencyMtc->GetFeatureTagList().HasFeature(ImsAosFeature::TEXT));
+}

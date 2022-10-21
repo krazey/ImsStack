@@ -18,7 +18,6 @@
 #include <gmock/gmock.h>
 
 #include "AosReason.h"
-#include "CarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ImsEventDef.h"
@@ -63,6 +62,9 @@ class TestAosHandle : public AosHandle
 
     friend class AosHandleTest;
     FRIEND_TEST(AosHandleTest, Constructor);
+    FRIEND_TEST(AosHandleTest, NetTracker_StatusChanged_Test9);
+    FRIEND_TEST(AosHandleTest, IsEmergencyService_Test);
+    FRIEND_TEST(AosHandleTest, ProcessImsSuspended_Test4);
 };
 
 class AosHandleTest : public ::testing::Test
@@ -478,11 +480,14 @@ protected:
     void ReevaluateUnavailableFeature() { m_pAosHandle->ReevaluateUnavailableFeature(); }
 
     IMS_BOOL Is3G(IN IMS_UINT32 nNetworkType) { return m_pAosHandle->Is3G(nNetworkType); }
+
+    IMS_BOOL IsEmergencyService() { return m_pAosHandle->IsEmergencyService(); }
 };
 
 TEST_F(AosHandleTest, Constructor)
 {
     MockIAosAppContext objMockIAosAppContext;
+    MockIAosNConfiguration objMockIAosNConfiguration;
 
     EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(AnyNumber()).WillRepeatedly(Return(0));
 
@@ -491,15 +496,21 @@ TEST_F(AosHandleTest, Constructor)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(strValue));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, SetListener(_)).Times(1);
+    IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+    AosProvider::GetInstance()->SetNConfiguration(
+            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(objMockIAosNConfiguration, SetListener(_)).Times(1);
+
+    EXPECT_CALL(objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
     TestAosHandle* pTestAosHandle =
             new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
                     m_strServiceId, m_nServiceType);
+
+    ASSERT_TRUE(pTestAosHandle != nullptr);
 
     EXPECT_EQ(pTestAosHandle->GetState(), AosHandle::STATE_DISCONNECTED);
 
@@ -520,6 +531,8 @@ TEST_F(AosHandleTest, Constructor)
         delete pTestAosHandle;
         pTestAosHandle = nullptr;
     }
+
+    AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }
 
 TEST_F(AosHandleTest, Destructor)
@@ -1308,6 +1321,37 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test8)
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_3G));
 }
 
+TEST_F(AosHandleTest, NetTracker_StatusChanged_Test9)
+{
+    // Test9: No process for emergency service
+    // Expectation: BLOCK_3G is not blocked.
+
+    MockIAosAppContext objMockIAosAppContext;
+
+    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(AnyNumber()).WillRepeatedly(Return(0));
+
+    const AString strValue = AString("test");
+    EXPECT_CALL(objMockIAosAppContext, GetProfileId())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(strValue));
+
+    TestAosHandle* pTestAosHandleEmergencyMtc =
+            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
+                    m_strServiceId, ImsAosService::EMERGENCY_MTC);
+
+    ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
+
+    pTestAosHandleEmergencyMtc->NetTracker_StatusChanged();
+
+    EXPECT_FALSE(pTestAosHandleEmergencyMtc->AosHandle::IsHandleBlocked(AosHandle::BLOCK_3G));
+
+    if (pTestAosHandleEmergencyMtc != nullptr)
+    {
+        delete pTestAosHandleEmergencyMtc;
+        pTestAosHandleEmergencyMtc = nullptr;
+    }
+}
+
 TEST_F(AosHandleTest, Init_CleanUp)
 {
     EXPECT_CALL(m_objMockIAosNetTracker, SetListener(_)).Times(1);
@@ -1674,6 +1718,58 @@ TEST_F(AosHandleTest, IsServiceFeature_Test)
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::TEXT));
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::USSI));
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VERSTAT));
+}
+
+TEST_F(AosHandleTest, IsEmergencyService_Test)
+{
+    // Expectation: return true if service id is emergency.
+
+    MockIAosAppContext objMockIAosAppContext;
+    MockIAosNConfiguration objMockIAosNConfiguration;
+
+    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(AnyNumber()).WillRepeatedly(Return(0));
+
+    const AString strValue = AString("test");
+    EXPECT_CALL(objMockIAosAppContext, GetProfileId())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(strValue));
+
+    IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+    AosProvider::GetInstance()->SetNConfiguration(
+            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
+
+    EXPECT_CALL(objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    TestAosHandle* pTestAosHandleEmergencyMtc =
+            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
+                    m_strServiceId, ImsAosService::EMERGENCY_MTC);
+
+    TestAosHandle* pTestAosHandleEmergencyMts =
+            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
+                    m_strServiceId, ImsAosService::EMERGENCY_MTS);
+
+    ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
+    ASSERT_TRUE(pTestAosHandleEmergencyMts != nullptr);
+
+    EXPECT_FALSE(IsEmergencyService());
+    EXPECT_TRUE(pTestAosHandleEmergencyMtc->AosHandle::IsEmergencyService());
+    EXPECT_TRUE(pTestAosHandleEmergencyMts->AosHandle::IsEmergencyService());
+
+    if (pTestAosHandleEmergencyMtc != nullptr)
+    {
+        delete pTestAosHandleEmergencyMtc;
+        pTestAosHandleEmergencyMtc = nullptr;
+    }
+
+    if (pTestAosHandleEmergencyMts != nullptr)
+    {
+        delete pTestAosHandleEmergencyMts;
+        pTestAosHandleEmergencyMts = nullptr;
+    }
+
+    AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }
 
 TEST_F(AosHandleTest, GetNetworkType_Test)
@@ -3736,6 +3832,46 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test3)
 
     EXPECT_FALSE(ProcessImsSuspended(AosReason::SUSPEND_NO_SERVICE));
     EXPECT_EQ(m_pAosHandle->GetSuspendedReason(), AosReason::SUSPEND_NO_SERVICE);
+}
+
+TEST_F(AosHandleTest, ProcessImsSuspended_Test4)
+{
+    // Test4: IsEmergencyService true
+    // Expectation: return false
+
+    MockIAosAppContext objMockIAosAppContext;
+    MockIAosNConfiguration objMockIAosNConfiguration;
+
+    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(AnyNumber()).WillRepeatedly(Return(0));
+
+    const AString strValue = AString("test");
+    EXPECT_CALL(objMockIAosAppContext, GetProfileId())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(strValue));
+
+    IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+    AosProvider::GetInstance()->SetNConfiguration(
+            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
+
+    EXPECT_CALL(objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    TestAosHandle* pTestAosHandleEmergencyMtc =
+            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
+                    m_strServiceId, ImsAosService::EMERGENCY_MTC);
+
+    ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
+
+    EXPECT_FALSE(pTestAosHandleEmergencyMtc->ProcessImsSuspended());
+
+    if (pTestAosHandleEmergencyMtc != nullptr)
+    {
+        delete pTestAosHandleEmergencyMtc;
+        pTestAosHandleEmergencyMtc = nullptr;
+    }
+
+    AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }
 
 TEST_F(AosHandleTest, ProcessImsResumed_Test1)
