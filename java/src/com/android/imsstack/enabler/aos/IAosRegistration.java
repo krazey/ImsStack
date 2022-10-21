@@ -123,6 +123,19 @@ public interface IAosRegistration {
         public static final int DATA = 1;
         public static final int RADIO = 2;
         public static final int IMS_SERVICE = 3;
+
+        /* From modem */
+        public static final int RADIO_SIM_REMOVED = 11;
+        public static final int RADIO_SIM_REFRESH = 12;
+        public static final int RADIO_ALLOWED_NETWORK_TYPES_CHANGED = 13;
+
+        /* From framework */
+        public static final int RADIO_POWER_OFF = 21;
+        public static final int NON_IMS_CAPABLE_NETWORK = 22;
+        public static final int DATA_STALL = 23;
+        public static final int HANDOVER_FAILED = 24;
+        public static final int VOPS_NOT_SUPPORTED = 25;
+        public static final int WIFI_OFF = 26;
     }
 
     /**

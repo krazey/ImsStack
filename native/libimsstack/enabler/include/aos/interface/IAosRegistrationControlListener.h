@@ -78,7 +78,20 @@ enum class AosControlCause
     UNKNOWN = 0,
     DATA = 1,
     RADIO = 2,
-    IMS_SERVICE = 3
+    IMS_SERVICE = 3,
+
+    /* From modem */
+    RADIO_SIM_REMOVED = 11,
+    RADIO_SIM_REFRESH = 12,
+    RADIO_ALLOWED_NETWORK_TYPES_CHANGED = 13,
+
+    /* From framework */
+    RADIO_POWER_OFF = 21,
+    NON_IMS_CAPABLE_NETWORK = 22,
+    DATA_STALL = 23,
+    HANDOVER_FAILED = 24,
+    VOPS_NOT_SUPPORTED = 25,
+    WIFI_OFF = 26
 };
 
 #endif  // INTERFACE_AOS_REGISTRATION_CONTROL_LISTENER_H_
