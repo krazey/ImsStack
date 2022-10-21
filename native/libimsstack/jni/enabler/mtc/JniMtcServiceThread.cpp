@@ -78,3 +78,13 @@ void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_ULONG nCallKey)
 
     SendData2Java(objParcel);
 }
+
+PUBLIC
+void JniMtcServiceThread::OnJniReady()
+{
+    IMS_TRACE_D("OnJniReady", 0, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcService::JNI_READY);
+
+    SendData2Java(objParcel);
+}

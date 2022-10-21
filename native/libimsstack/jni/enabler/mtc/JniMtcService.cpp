@@ -92,6 +92,11 @@ void JniMtcService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
     Attach();
 }
 
+PUBLIC VIRTUAL void JniMtcService::NotifyNativeEnablerSet()
+{
+    m_pThread->OnJniReady();
+}
+
 PUBLIC
 IJniEnablerThread* JniMtcService::GetJniThread() const
 {
@@ -152,9 +157,8 @@ void JniMtcService::SetTerminalBasedCallWaiting(IN const android::Parcel& objPar
     {
         return;
     }
-    IMS_BOOL bProvisioned = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
     IMS_BOOL bEnabled = (objParcel.readInt32() == 1) ? IMS_TRUE : IMS_FALSE;
-    piNativeService->SetTerminalBasedCallWaiting(bProvisioned, bEnabled);
+    piNativeService->SetTerminalBasedCallWaiting(bEnabled);
 }
 
 PRIVATE

@@ -742,6 +742,20 @@ public:
         };
     };
 
+    class ImsSs
+    {
+    public:
+        // Public carrier-config - starts
+        static const IMS_CHAR KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY[];
+        // Public carrier-config - ends
+
+        // ut terminal based services
+        enum
+        {
+            SUPPLEMENTARY_SERVICE_CW = 0,
+        };
+    };
+
     class Assets
     {
     public:

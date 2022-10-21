@@ -102,8 +102,9 @@ public class MtcAppTest extends ImsStackTest {
             return mMtcCall;
         }
 
-        public MmTelFeatureRegistry.Listener getSrvccListener() {
-            return mSrvccStateListener = new SrvccStateListener();
+        public MmTelFeatureRegistry.Listener getMmtelFeatureListener() {
+            mMmtelFeatureListener = new MmtelFeatureListener();
+            return mMmtelFeatureListener;
         }
     }
 
@@ -143,6 +144,9 @@ public class MtcAppTest extends ImsStackTest {
         verify(mEmergencyServiceManager, times(1)).init();
         verify(mEmergencyServiceManager, times(1)).setNativeObject(anyLong());
 
+        processAllMessages();
+
+        assertEquals(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING, mCommand);
         assertTrue(mTestMtcApp.isServiceValid());
     }
 
@@ -284,8 +288,8 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.setNativeObj(1);
         assertTrue(mTestMtcApp.isServiceValid());
 
-        MmTelFeatureRegistry.Listener srvccListener = mTestMtcApp.getSrvccListener();
-        srvccListener.onSrvccStateChanged(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
+        MmTelFeatureRegistry.Listener mmtelFeatureListener = mTestMtcApp.getMmtelFeatureListener();
+        mmtelFeatureListener.onSrvccStateChanged(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
         processAllMessages();
 
         assertEquals(IUMtcService.SRVCC_STATE_CHANGED, mCommand);
@@ -296,7 +300,8 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.setNativeObj(1);
         assertTrue(mTestMtcApp.isServiceValid());
 
-        mTestMtcApp.setTerminalBasedCallWaiting(true, true);
+        MmTelFeatureRegistry.Listener mmtelFeatureListener = mTestMtcApp.getMmtelFeatureListener();
+        mmtelFeatureListener.onTerminalBasedCallWaitingStatusChanged();
         processAllMessages();
 
         assertEquals(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING, mCommand);
@@ -370,5 +375,16 @@ public class MtcAppTest extends ImsStackTest {
                 anyInt(), anyInt());
         verify(mServiceStateListener, times(1)).onEmergencyServiceStateChanged(any(MtcApp.class),
                 anyInt(), anyInt());
+
+        mTestMtcApp.setNativeObj(1);
+        Parcel parcel3 = Parcel.obtain();
+        parcel3.writeInt(IUMtcService.JNI_READY);
+        parcel3.setDataPosition(0);
+        mTestMtcApp.getNativeListener().onMessage(parcel3);
+        parcel3.recycle();
+
+        processAllMessages();
+
+        assertEquals(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING, mCommand);
     }
 }

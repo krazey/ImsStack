@@ -92,7 +92,7 @@ public class MtcApp implements Closeable {
     private ServiceStateListener mServiceStateListener = null;
     private CallListener mCallListener = null;
     private MtcJniProxy mMtcJniProxy;
-    protected SrvccStateListener mSrvccStateListener = null;
+    protected MmtelFeatureListener mMmtelFeatureListener = null;
 
     public MtcApp(IBaseContext context) {
         mContext = context;
@@ -125,13 +125,12 @@ public class MtcApp implements Closeable {
         mContext.addCommonPackageListener(mHandler);
         mEmergencyServiceManager.init();
 
-        // SRVCC_STATE_TRACKING
         MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
                 .getMmTelFeatureRegistry();
 
         if (mmtelFr != null) {
-            mSrvccStateListener = new SrvccStateListener();
-            mmtelFr.addListener(mSrvccStateListener);
+            mMmtelFeatureListener = new MmtelFeatureListener();
+            mmtelFr.addListener(mMmtelFeatureListener);
         }
 
         bindJNIService();
@@ -148,13 +147,13 @@ public class MtcApp implements Closeable {
 
         initializeState();
 
-        if (mSrvccStateListener != null) {
+        if (mMmtelFeatureListener != null) {
             MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
                     .getMmTelFeatureRegistry();
             if (mmtelFr != null) {
-                mmtelFr.removeListener(mSrvccStateListener);
+                mmtelFr.removeListener(mMmtelFeatureListener);
             }
-            mSrvccStateListener = null;
+            mMmtelFeatureListener = null;
         }
     }
 
@@ -250,7 +249,12 @@ public class MtcApp implements Closeable {
     }
 
     @VisibleForTesting
-    protected class SrvccStateListener implements MmTelFeatureRegistry.Listener {
+    protected class MmtelFeatureListener implements MmTelFeatureRegistry.Listener {
+        @Override
+        public void onTerminalBasedCallWaitingStatusChanged() {
+            setTerminalBasedCallWaiting();
+        }
+
         @Override
         public void onSrvccStateChanged(int srvccState) {
             logi("onSrvccStateChanged :: SRVCC State = " + srvccState);
@@ -263,13 +267,23 @@ public class MtcApp implements Closeable {
         }
     }
 
-    public void setTerminalBasedCallWaiting(boolean provisioned, boolean enabled) {
-        logi("setTerminalBasedCallWaiting :: provisioned=" + provisioned + ", enabled=" + enabled);
+    /**
+     * Sends received terminal-based call waiting value to the Native.
+     */
+    public void setTerminalBasedCallWaiting() {
+        boolean enabled = false;
+
+        MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
+                .getMmTelFeatureRegistry();
+
+        if (mmtelFr != null) {
+            enabled = mmtelFr.isTerminalBasedCallWaitingEnabled();
+        }
+        logi("setTerminalBasedCallWaiting :: enabled=" + enabled);
 
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IUMtcService.SET_TERMINAL_BASED_CALL_WAITING);
-        parcel.writeInt(provisioned ? 1 : 0);
         parcel.writeInt(enabled ? 1 : 0);
 
         sendNotification(parcel);
@@ -335,6 +349,7 @@ public class MtcApp implements Closeable {
             }
 
             mEmergencyServiceManager.setNativeObject(mNativeObject);
+            setTerminalBasedCallWaiting();
         }
     }
 
@@ -405,7 +420,8 @@ public class MtcApp implements Closeable {
                     onMessageForCallApp(msg, parcel);
                     break;
                 case IUMtcService.SERVICE_CHANGED: // FALL-THROUGH
-                case IUMtcService.E_SERVICE_CHANGED:
+                case IUMtcService.E_SERVICE_CHANGED: // FALL-THROUGH
+                case IUMtcService.JNI_READY:
                     onMessageForRegApp(msg, parcel);
                     break;
                 default:
@@ -491,6 +507,9 @@ public class MtcApp implements Closeable {
                     mServiceStateListener.onEmergencyServiceStateChanged(
                             MtcApp.this, state, reason);
                 }
+            }
+            else if (msg == IUMtcService.JNI_READY) {
+                setTerminalBasedCallWaiting();
             }
         }
     }

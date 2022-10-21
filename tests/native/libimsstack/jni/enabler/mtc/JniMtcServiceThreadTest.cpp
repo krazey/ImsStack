@@ -128,4 +128,16 @@ TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)
     pJniServiceThread->OnPreIncomingCallReceived(1);
 }
 
+TEST_F(JniMtcServiceThreadTest, OnJniReady)
+{
+    IMS_UINT32 eType = IuMtcService::JNI_READY;
+    objParcel.writeInt32(eType);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
+            .Times(1);
+
+    pJniServiceThread->OnJniReady();
+}
+
 }  // namespace android

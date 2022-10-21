@@ -184,6 +184,8 @@
     </int-array>
     <int name="imsss.terminal_based_call_wait_sync_int" value="0"/>
     <boolean name="imsss.terminal_based_call_wait_default_activated_bool" value="true"/>
+    <int-array name="imsss.ut_terminal_based_services_int_array" num="0">
+    </int-array>
 
     <!-- Uce -->
     <int name="imsuce.expire_value_publish_sec_int" value="0"/>

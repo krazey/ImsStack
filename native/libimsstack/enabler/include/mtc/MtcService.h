@@ -61,7 +61,7 @@ public:
     inline SrvccState GetSrvccState() const override { return m_pSrvccStateManager->GetState(); }
 
     void UpdateSrvccState(IN SrvccState eState) override;
-    void SetTerminalBasedCallWaiting(IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled) override;
+    void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) override;
     IMS_BOOL IsTerminalBasedCallWaitingEnabled() const override
     {
         return m_bTerminalBasedCallWaitingEnabled;

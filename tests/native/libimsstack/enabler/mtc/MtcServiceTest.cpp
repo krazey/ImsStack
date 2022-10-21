@@ -15,9 +15,15 @@
  */
 
 #include <gtest/gtest.h>
+#include "CarrierConfig.h"
 #include "IMtcService.h"
 #include "MtcService.h"
+#include "MockICarrierConfig.h"
+#include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
+#include "MockMtcEmergencyServiceManager.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockISrvccStateListener.h"
@@ -28,14 +34,12 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
 #include "call/traffic/MockIMtcCallTrafficChecker.h"
-#include "MockMtcEmergencyServiceManager.h"
 #include "core/MockICoreService.h"
 #include "core/MockIReference.h"
 #include "core/MockISession.h"
 #include "core/MockIMessage.h"
 #include "core/IPageMessage.h"
 #include "service/IReasonInfo.h"
-#include "MockIMtcCallController.h"
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
@@ -88,6 +92,7 @@ public:
     MockICoreService objMockCoreService;
     MockMtcAosEventHandler* pMockAosEventHandler;
     MockSrvccStateManager* pMockSrvccStateManager;
+    TestConfigService objConfigService;
 
     MtcService* pNormalMtcService;
     MtcService* pEmergencyMtcService;
@@ -113,12 +118,17 @@ protected:
         ON_CALL(objMockContext, GetCallTrafficChecker)
                 .WillByDefault(ReturnRef(objMockIMtcCallTrafficChecker));
 
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+
         pNormalMtcService = CreateMtcService(ServiceType::NORMAL);
         pEmergencyMtcService = new MtcService(objMockContext, ServiceType::EMERGENCY);
     }
 
     virtual void TearDown() override
     {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+
         delete pMockEmergencyManager;
         delete pNormalMtcService;
         delete pEmergencyMtcService;
@@ -309,23 +319,30 @@ TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
 
 TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
 {
-    // TODO: configuration
-    EXPECT_TRUE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE, IMS_FALSE);
-    EXPECT_TRUE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE, IMS_TRUE);
-    EXPECT_TRUE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE, IMS_FALSE);
     EXPECT_FALSE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
 
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE, IMS_TRUE);
+    IMSVector<IMS_SINT32> objTbcw;
+    objTbcw.Add(0);
+    IMSVector<IMS_SINT32> objNoTbcw;
+
+    EXPECT_CALL(objConfigService.GetMockCarrierConfig(),
+            GetIntArray(CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))
+            .WillOnce(Return(objNoTbcw))
+            .WillOnce(Return(objTbcw))
+            .WillOnce(Return(objNoTbcw))
+            .WillOnce(Return(objTbcw));
+
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
+    EXPECT_FALSE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
+
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
     EXPECT_TRUE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
 
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE, IMS_FALSE);
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
     EXPECT_TRUE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
+
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
+    EXPECT_FALSE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
 }
 
 TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)

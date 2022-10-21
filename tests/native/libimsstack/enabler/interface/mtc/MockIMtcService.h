@@ -45,8 +45,7 @@ public:
     MOCK_METHOD(IMtcAosConnector*, GetAosConnector, (), (const, override));
     MOCK_METHOD(SrvccState, GetSrvccState, (), (const, override));
     MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState eState), (override));
-    MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled),
-            (override));
+    MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL bEnabled), (override));
     MOCK_METHOD(IMS_BOOL, IsTerminalBasedCallWaitingEnabled, (), (const, override));
     MOCK_METHOD(void, OpenEmergencyService, (), (override));
 

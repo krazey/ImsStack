@@ -32,6 +32,8 @@ public:
     void OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason,
             IN IMS_SINT32 eServiceType) override;  // enum class
     void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
+
+    void OnJniReady();
 };
 
 #endif

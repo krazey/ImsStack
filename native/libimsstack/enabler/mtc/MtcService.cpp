@@ -15,8 +15,10 @@
  */
 
 #include "AString.h"
+#include "CarrierConfig.h"
 #include "Connector.h"
 #include "ICapabilities.h"
+#include "ICarrierConfig.h"
 #include "ICoreService.h"
 #include "IImsAos.h"
 #include "IIpcan.h"
@@ -32,6 +34,7 @@
 #include "IJniMtcServiceThread.h"
 #include "MtcEmergencyServiceManager.h"
 #include "MtcService.h"
+#include "ServiceConfig.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipFactory.h"
@@ -56,8 +59,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_pAosEventHandler(IMS_NULL),
         m_pSrvccStateManager(IMS_NULL),
         m_pRoutingRejectHandler(IMS_NULL),
-        m_bTerminalBasedCallWaitingEnabled(IMS_TRUE/*m_objContext.GetConfigurationProxy().Is(
-                Feature::TERMINAL_BASED_CALL_WAIT_DEFAULT_ENABLED)*/)
+        m_bTerminalBasedCallWaitingEnabled(IMS_FALSE)
 {
     IMS_TRACE_I("+MtcService [slot_%d][type:%d]", m_objContext.GetSlotId(), m_eType, 0);
     Init();
@@ -129,14 +131,22 @@ PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
     m_pAosEventHandler->SetOnSrvcc(eState == SrvccState::STARTED);
 }
 
-PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(
-        IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled)
+PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled)
 {
-    IMS_TRACE_I("SetTerminalBasedCallWaiting bProvisioned[%s] bEnabled[%s]",
-            _TRACE_B_(bProvisioned), _TRACE_B_(bEnabled), 0);
-    if (bProvisioned)
+    IMS_TRACE_I("SetTerminalBasedCallWaiting bEnabled[%s]", _TRACE_B_(bEnabled), 0, 0);
+
+    ImsVector<IMS_SINT32> objTerminalBasedServices =
+            ConfigService::GetConfigService()
+                    ->GetCarrierConfig(m_objContext.GetSlotId())
+                    ->GetIntArray(CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY);
+
+    for (IMS_UINT32 i = 0; i < objTerminalBasedServices.GetSize(); i++)
     {
-        m_bTerminalBasedCallWaitingEnabled = bEnabled;
+        if (objTerminalBasedServices.GetAt(i) == CarrierConfig::ImsSs::SUPPLEMENTARY_SERVICE_CW)
+        {
+            m_bTerminalBasedCallWaitingEnabled = bEnabled;
+            break;
+        }
     }
 }
 

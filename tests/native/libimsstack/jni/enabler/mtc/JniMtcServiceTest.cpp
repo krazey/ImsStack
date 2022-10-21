@@ -91,8 +91,7 @@ TEST_F(JniMtcServiceTest, SendDataSetTbcw)
     objParcel.writeInt32(IuMtcService::SET_TERMINAL_BASED_CALL_WAITING);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockService, SetTerminalBasedCallWaiting(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockService, SetTerminalBasedCallWaiting(_)).Times(1);
 
     pJniService->SendData(objParcel);
 }

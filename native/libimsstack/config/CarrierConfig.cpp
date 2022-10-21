@@ -649,6 +649,13 @@ const IMS_CHAR CarrierConfig::ImsWfc::KEY_REGISTRATION_PRIVATE_HEADER_INT[] =
 const IMS_CHAR CarrierConfig::ImsWfc::KEY_COUNTRY_CODE_INT[] =
         KEY_IMS_WFC_PREFIX "country_code_int";
 
+//// ImsSs
+#define KEY_IMS_SS_PREFIX "imsss."
+// Public carrier-config - starts
+const IMS_CHAR CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY[] =
+        KEY_IMS_SS_PREFIX "ut_terminal_based_services_int_array";
+// Public carrier-config - ends
+
 //// Assets
 // Ims General
 const IMS_CHAR CarrierConfig::Assets::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_BOOL[] =
