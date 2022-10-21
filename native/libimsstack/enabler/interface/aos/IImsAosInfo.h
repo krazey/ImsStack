@@ -170,6 +170,16 @@ public:
      */
     virtual void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized) = 0;
 
+    /**
+     * @brief Notify the call state to be EPS fallback.
+     *
+     * @param nState Indicated the call state to be EPS fallback.
+     *               Possible values are,
+     *               IImsAosInfo::EPSFB_CALL_START
+     *               IImsAosInfo::EPSFB_CALL_FAILED
+     */
+    virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState) = 0;
+
 public:
     enum
     {
@@ -205,6 +215,15 @@ public:
         SCBM_TERMINATED = 2,
         SCBM_TERMINATED_BY_ECALL = 3,
         SCBM_TERMINATED_BY_ESMS = 4
+    };
+
+    enum
+    {
+        /// The registration is destroyed and blocked until LTE is attached
+        EPSFB_CALL_START = 1,
+        /// The registration block for EPS_FB is reset. It's invoked when registration is
+        /// not completed and call is handled as failure
+        EPSFB_CALL_FAILED = 2
     };
 };
 

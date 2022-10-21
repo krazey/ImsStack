@@ -48,6 +48,7 @@ private:
     virtual void NotifyScbmState(IN IMS_UINT32 nState);
     virtual void NotifyPublishState(IN IMS_BOOL bIsStarted);
     virtual void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized);
+    virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState);
 
     IMS_BOOL IsForbiddenBlock();
 

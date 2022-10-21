@@ -45,6 +45,7 @@ public:
     MOCK_METHOD(void, NotifyScbmState, (IN IMS_UINT32 nState), (override));
     MOCK_METHOD(void, NotifyPublishState, (IN IMS_BOOL bIsStarted), (override));
     MOCK_METHOD(void, NotifyEmergencySmsState, (IN IMS_BOOL bIsInitialized), (override));
+    MOCK_METHOD(void, NotifyEpsfbCallState, (IN IMS_UINT32 nState), (override));
 };
 
 #endif  // MOCK_I_IMS_AOS_INFO_H_
