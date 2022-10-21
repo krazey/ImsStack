@@ -29,11 +29,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define CNXID m_strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosConnection::AosConnection(IN IAosAppContext* piAppContext) :
         m_piContext(piAppContext),
@@ -63,11 +58,6 @@ AosConnection::AosConnection(IN IAosAppContext* piAppContext) :
     A_IMS_TRACE_I(CNXID, "AosConnection :: %d", m_nCnxType, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosConnection::~AosConnection()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosConnection = %" PFLS_u "/%" PFLS_x, CNXID,
@@ -83,11 +73,6 @@ PUBLIC VIRTUAL AosConnection::~AosConnection()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosConnection::Activate()
 {
     A_IMS_TRACE_I(CNXID, "Activate :: state(%s)", StateToString(m_nState), 0, 0);
@@ -118,11 +103,6 @@ PUBLIC VIRTUAL IMS_BOOL AosConnection::Activate()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosConnection::Deactivate()
 {
     A_IMS_TRACE_I(CNXID, "Deactivate :: state(%s)", StateToString(m_nState), 0, 0);
@@ -136,32 +116,17 @@ PUBLIC VIRTUAL void AosConnection::Deactivate()
     SetState(STATE_IDLE);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosConnection::GetState()
 {
     A_IMS_TRACE_D(CNXID, "GetState :: state(%s)", StateToString(m_nState), 0, 0);
     return m_nState;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetConnectionType()
 {
     return m_nCnxType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosConnection::SetListener(IN IAosConnectionListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
@@ -180,11 +145,6 @@ PUBLIC VIRTUAL void AosConnection::SetListener(IN IAosConnectionListener* piList
     A_IMS_TRACE_D(CNXID, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosConnection::RemoveListener(IN IAosConnectionListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
@@ -201,11 +161,6 @@ PUBLIC VIRTUAL void AosConnection::RemoveListener(IN IAosConnectionListener* piL
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetMtu()
 {
     if (GetState() == STATE_ACTIVE)
@@ -218,73 +173,38 @@ PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetMtu()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const IPAddress& AosConnection::GetLocalAddress(IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetLocalAddress(nIpVersion);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const AStringArray& AosConnection::GetPcscfAddress(
         IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetPcscfAddress(nIpVersion);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetHostByName(IN const AString& strHostName,
         OUT IMSList<IPAddress>& objIps, IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetHostByName(strHostName, objIps, nIpVersion);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const AString& AosConnection::GetIfaceName()
 {
     return m_piConnection->GetIfaceName();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosConnection::IsEpdgEnabled()
 {
     return m_piConnection->IsePDGEnabled();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetIpcanCategory()
 {
     return IsEpdgEnabled() ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosConnection::StateToString(IN IMS_UINT32 nState)
 {
     switch (nState)
@@ -303,11 +223,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosConnection::StateToString(IN IMS_UINT32 nState)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnection::Notify(IN IMS_UINT32 nType /* = TYPE_STATE_CHANGED */)
 {
@@ -346,44 +261,24 @@ void AosConnection::Notify(IN IMS_UINT32 nType /* = TYPE_STATE_CHANGED */)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnection::IsActivationRequested() const
 {
     return m_bActivationRequested;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnection::IsConnected() const
 {
     return (m_nState == STATE_ACTIVE);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnection::SetActivationRequested(IN IMS_BOOL bRequest)
 {
     m_bActivationRequested = bRequest;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnection::SetState(IN IMS_UINT32 nState)
 {
@@ -394,19 +289,9 @@ void AosConnection::SetState(IN IMS_UINT32 nState)
             StateToString(nState), 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnection::UpdateIpcanForTrm() {}
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnected(
         IN INetworkConnection* piNetConnection)
 {
@@ -424,11 +309,6 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnected(
     Notify();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnDisconnected(
         IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode)
 {
@@ -443,11 +323,6 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnDisconnected(
     Notify();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnectionFailed(
         IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode)
 {
@@ -462,11 +337,6 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnectionFailed(
     Notify(TYPE_CONNECTION_FAILED);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnIpChanged(
         IN INetworkConnection* piNetConnection)
 {
@@ -483,11 +353,6 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnIpChanged(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnIpcanChanged(
         IN INetworkConnection* piNetConnection)
 {
@@ -503,11 +368,6 @@ PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnIpcanChanged(
     Notify(TYPE_IPCAN_CHANGED);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnPcscfChanged(
         IN INetworkConnection* piNetConnection)
 {

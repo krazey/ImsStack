@@ -27,11 +27,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define APPPROFILE m_strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosHandleMts::AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
         IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
@@ -52,22 +47,12 @@ AosHandleMts::AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& st
     m_objServiceFeatures.Append(ImsAosFeature::SMSIP);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosHandleMts::~AosHandleMts()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleMts = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleMts), this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandleMts::NConfiguration_NotifyConfigChanged()
 {
     A_IMS_TRACE_D(APPPROFILE, "NConfiguration_NotifyConfigChanged", 0, 0, 0);
@@ -80,11 +65,6 @@ PUBLIC VIRTUAL void AosHandleMts::NConfiguration_NotifyConfigChanged()
     AosHandle::NConfiguration_NotifyConfigChanged();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandleMts::InitializeSupportedRats()
 {
@@ -117,11 +97,6 @@ void AosHandleMts::InitializeSupportedRats()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMts::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
@@ -130,11 +105,6 @@ PROTECTED VIRTUAL void AosHandleMts::Init()
     AosHandle::Init();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMts::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
@@ -178,11 +148,6 @@ void AosHandleMts::EnableAoS()
 }
 */
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMts::InitializeServiceBlock()
 {
     IAosNConfiguration* piConfig = GET_N_CONFIG(m_nSlotId);
@@ -206,11 +171,6 @@ PROTECTED VIRTUAL void AosHandleMts::InitializeServiceBlock()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMts::InitializeServiceFeature()
 {
     m_objFeatureTagList.Clear();
@@ -221,11 +181,6 @@ PROTECTED VIRTUAL void AosHandleMts::InitializeServiceFeature()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMts::ProcessCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/)
 {
@@ -257,11 +212,6 @@ PROTECTED VIRTUAL void AosHandleMts::ProcessCapabilitiesChanged(
     */
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsHandleBlocked() const
 {
     IMS_BOOL bBlocked = AosHandle::IsHandleBlocked(BLOCK_SMS_CAPABILITY) ||
@@ -270,22 +220,12 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsHandleBlocked() const
     return (bBlocked || m_bMtcBlocked);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsSupportedNetworkTypeForCellular(
         IN IMS_UINT32 nType) const
 {
     return (m_nSupportedRats & nType);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMts::Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked)
 {
     if (nType != ImsAosService::MTC)

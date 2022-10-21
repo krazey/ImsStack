@@ -40,11 +40,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define APPPROFILE m_strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosPcscf::AosPcscf(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
@@ -65,22 +60,12 @@ AosPcscf::AosPcscf(IN IAosAppContext* piAppContext) :
             sizeof(AosPcscf), this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosPcscf::~AosPcscf()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosPcscf = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosPcscf), this);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
@@ -89,11 +74,6 @@ PROTECTED VIRTUAL void AosPcscf::Init()
     m_piAosNConfig = GET_N_CONFIG(m_piAppContext->GetSlotId());
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
@@ -103,11 +83,6 @@ PROTECTED VIRTUAL void AosPcscf::CleanUp()
     CleanAll();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IPAddress::UNKNOWN */)
 {
     A_IMS_TRACE_I(APPPROFILE, "Configure :: nIpVersion(%d)", nIpVersion, 0, 0);
@@ -142,32 +117,17 @@ PUBLIC VIRTUAL void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IPAddress:
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsConfigured() const
 {
     A_IMS_TRACE_I(APPPROFILE, "IsConfigured :: (%s)", _TRACE_B_(m_bIsConfigured), 0, 0);
     return m_bIsConfigured;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsAsyncDnsDiscovery() const
 {
     return (m_eRegType == AosRegistrationType::RCS);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsSinglePcoScheme()
 {
     const ISubscriberConfig* piSubsConfig =
@@ -197,11 +157,6 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsSinglePcoScheme()
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const AStringArray& AosPcscf::GetPcscfs()
 {
     m_objCurrAddresses.RemoveAllElements();
@@ -218,11 +173,6 @@ PUBLIC VIRTUAL const AStringArray& AosPcscf::GetPcscfs()
     return m_objCurrAddresses;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const IMSList<IMS_SINT32>& AosPcscf::GetPcscfsPorts()
 {
     m_objCurrPorts.Clear();
@@ -239,11 +189,6 @@ PUBLIC VIRTUAL const IMSList<IMS_SINT32>& AosPcscf::GetPcscfsPorts()
     return m_objCurrPorts;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
         IN IMSList<IMS_SINT32> objPorts /* = IMSList<IMS_SINT32>() */)
 {
@@ -267,11 +212,6 @@ PUBLIC VIRTUAL void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::HasPcscf(IN IMS_SINT32 nIndex)
 {
     if (nIndex <= (static_cast<IMS_SINT32>(m_objPcscfList.GetSize()) - 1))
@@ -282,21 +222,11 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::HasPcscf(IN IMS_SINT32 nIndex)
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetPcscfCount()
 {
     return m_objPcscfList.GetSize();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::SetCurrentPcscfInvalid(
         IN IMS_BOOL bIsTimer /* = IMS_FALSE */, IN IMS_UINT32 nSeconds /* = 0 */)
 {
@@ -317,11 +247,6 @@ PUBLIC VIRTUAL void AosPcscf::SetCurrentPcscfInvalid(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::RemoveCurrentPcscf()
 {
     if (m_nCurrentPcscfIndex < m_objPcscfList.GetSize())
@@ -336,11 +261,6 @@ PUBLIC VIRTUAL void AosPcscf::RemoveCurrentPcscf()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::SetAllPcscfValid()
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objPcscfList.GetSize(); nAt++)
@@ -353,11 +273,6 @@ PUBLIC VIRTUAL void AosPcscf::SetAllPcscfValid()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsAllPcscfTried()
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objPcscfList.GetSize(); nAt++)
@@ -372,11 +287,6 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsAllPcscfTried()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::SetCurrentPcscfTried()
 {
     if (m_nCurrentPcscfIndex < m_objPcscfList.GetSize())
@@ -389,11 +299,6 @@ PUBLIC VIRTUAL void AosPcscf::SetCurrentPcscfTried()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::ResetAllPcscfTried()
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objPcscfList.GetSize(); nAt++)
@@ -406,11 +311,6 @@ PUBLIC VIRTUAL void AosPcscf::ResetAllPcscfTried()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 {
     if ((m_objPcscfList.GetSize() - 1) < m_nCurrentPcscfIndex)
@@ -439,31 +339,16 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetCurrentPcscf(OUT AString& objPcscf, OUT IMS
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetCurrentIndex() const
 {
     return m_nCurrentPcscfIndex;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsFirstPcscf()
 {
     return (m_nCurrentPcscfIndex == 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetFirstPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 {
     if (m_objPcscfList.IsEmpty())
@@ -487,21 +372,11 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetFirstPcscf(OUT AString& objPcscf, OUT IMS_U
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::HasNextPcscf()
 {
     return (GetNextPcscfIndex() >= 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 AosPcscf::GetNextPcscfIndex()
 {
     if (m_objPcscfList.GetSize() == 0)
@@ -534,11 +409,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosPcscf::GetNextPcscfIndex()
     return -1;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetNextPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 {
     IMS_SINT32 nNextPcscfIndex = GetNextPcscfIndex();
@@ -566,21 +436,11 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetNextPcscf(OUT AString& objPcscf, OUT IMS_UI
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::SetFirstPcscfIndex()
 {
     m_nCurrentPcscfIndex = 0;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::CheckAndProcessChangeFromPco()
 {
     const AStringArray& objCurrPcscfs = GetPcscfs();
@@ -627,21 +487,11 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::CheckAndProcessChangeFromPco()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetChangedType()
 {
     return m_nChangedType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosPcscf::SetListener(IN IAosPcscfListener* piListener)
 {
     A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
@@ -649,11 +499,6 @@ PUBLIC VIRTUAL void AosPcscf::SetListener(IN IAosPcscfListener* piListener)
     m_piListener = piListener;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosPcscf::AddPcscf(IN const AString& strHost, IN IMS_SINT32 nPort)
 {
@@ -664,11 +509,6 @@ void AosPcscf::AddPcscf(IN const AString& strHost, IN IMS_SINT32 nPort)
     m_objPcscfList.Append(pPcscf);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosPcscf::GetChangedPcscfs(OUT AStringArray& objPcscfs, IN IMS_SINT32 nIpVersion)
 {
@@ -711,11 +551,6 @@ IMS_BOOL AosPcscf::GetChangedPcscfs(OUT AStringArray& objPcscfs, IN IMS_SINT32 n
     return (objPcscfs.GetCount() > 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_SINT32 AosPcscf::GetLocalIpVersion()
 {
@@ -728,11 +563,6 @@ IMS_SINT32 AosPcscf::GetLocalIpVersion()
     return nIpVersion;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosPcscf::IsLocalAddressValid(IN IMS_SINT32 nIpVersion)
 {
@@ -740,22 +570,12 @@ IMS_BOOL AosPcscf::IsLocalAddressValid(IN IMS_SINT32 nIpVersion)
     return (!objIpa.IsAnyAddress());
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosPcscf::IsLocalAddressTypeValid(IN IMS_SINT32 nIpVersion) const
 {
     return (nIpVersion == IPAddress::IPV4 || nIpVersion == IPAddress::IPV6);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosPcscf::IsSamePcscf(IN const IPAddress& objPcscfAddress, IN IMS_SINT32 nPort)
 {
@@ -777,33 +597,18 @@ IMS_BOOL AosPcscf::IsSamePcscf(IN const IPAddress& objPcscfAddress, IN IMS_SINT3
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosPcscf::SetConfigured(IN IMS_BOOL bConfigured)
 {
     m_bIsConfigured = bConfigured;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosPcscf::IsFakeDiscoverySchemes() const
 {
     return (m_eRegType == AosRegistrationType::EMERGENCY ||
             m_eRegType == AosRegistrationType::FAKE);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::ProcessDiscovery(IN IMS_SINT32 nIpVersion)
 {
     A_IMS_TRACE_D(APPPROFILE, "ProcessDiscovery :: IPV(%d)", nIpVersion, 0, 0);
@@ -842,11 +647,6 @@ PROTECTED VIRTUAL void AosPcscf::ProcessDiscovery(IN IMS_SINT32 nIpVersion)
     PrintPcscfs();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetNextDiscoveryMethod(OUT IMS_SINT32& nMethod)
 {
     const ISubscriberConfig* piSubsConfig =
@@ -873,11 +673,6 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetNextDiscoveryMethod(OUT IMS_SINT32& nMet
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromPco(IN IMS_SINT32 nIpVersion)
 {
     A_IMS_TRACE_I(APPPROFILE, "GetFromPco :: IPv(%d)", nIpVersion, 0, 0);
@@ -924,11 +719,6 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromPco(IN IMS_SINT32 nIpVersion)
     return (m_objPcscfList.GetSize() > 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
 {
     A_IMS_TRACE_I(APPPROFILE, "GetFromConf :: IPv(%d)", nIpVersion, 0, 0);
@@ -996,11 +786,6 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
     return (m_objPcscfList.GetSize() > 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosPcscf::ProcessDnsQuery(
         IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion)
 {
@@ -1043,32 +828,17 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::ProcessDnsQuery(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL const ISubscriberConfig* AosPcscf::GetSubscriberConfig(
         IN IMS_SINT32 nType /* = -1 */)
 {
     return m_piAppContext->GetSubscriber()->GetSubscriberConfig(nType);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_SINT32 AosPcscf::GetDefaultPcscfPort()
 {
     return m_piAosNConfig->GetPcscfPort();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::CleanAll()
 {
     SetConfigured(IMS_FALSE);
@@ -1077,11 +847,6 @@ PROTECTED VIRTUAL void AosPcscf::CleanAll()
     ClearDiscoveryContents();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::ClearDiscoveryContents()
 {
     ClearTimers();
@@ -1091,11 +856,6 @@ PROTECTED VIRTUAL void AosPcscf::ClearDiscoveryContents()
     m_bOtherIpTypeRequired = IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::ClearPcscfList()
 {
     A_IMS_TRACE_I(APPPROFILE, "ClearPcscfList :: size(%d)", m_objPcscfList.GetSize(), 0, 0);
@@ -1112,11 +872,6 @@ PROTECTED VIRTUAL void AosPcscf::ClearPcscfList()
     m_objPcscfList.Clear();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::ClearRetryHostList()
 {
     A_IMS_TRACE_I(APPPROFILE, "ClearRetryHostList :: size(%d)", m_objRetryHostList.GetSize(), 0, 0);
@@ -1133,11 +888,6 @@ PROTECTED VIRTUAL void AosPcscf::ClearRetryHostList()
     m_objRetryHostList.Clear();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
         IN const AString& strConfName /* = AString::ConstNull() */,
         IN const AString& strExtraParam /* = AString::ConstNull() */)
@@ -1148,11 +898,6 @@ PROTECTED VIRTUAL void AosPcscf::ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
     A_IMS_TRACE_I(APPPROFILE, "ConfigUpdate_NotifyUpdated :: (%d)", nCpi, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosPcscf::PrintPcscfs()
 {
@@ -1179,11 +924,6 @@ void AosPcscf::PrintPcscfs()
     A_IMS_TRACE_D(APPPROFILE, "pcscf list :: (%s)", strLog.GetStr(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_SINT32 AosPcscf::GetPcscfPort()
 {
@@ -1200,11 +940,6 @@ IMS_SINT32 AosPcscf::GetPcscfPort()
     return GetDefaultPcscfPort();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosPcscf::ProcessReorder(IN AString& strCurrentPcscf, IN AStringArray& objNewPcscfs)
 {
@@ -1242,11 +977,6 @@ void AosPcscf::ProcessReorder(IN AString& strCurrentPcscf, IN AStringArray& objN
     UpdatePcscfs(objUpdatePcscfs, GetPcscfPort());
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs, IN IMS_SINT32 nPort)
 {
@@ -1262,11 +992,6 @@ void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs, IN IMS_SINT32 nPor
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosPcscf::ProcessDnsRetryTimerExpired()
 {
@@ -1310,11 +1035,6 @@ void AosPcscf::ProcessDnsRetryTimerExpired()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
     if (nDuration == 0)
@@ -1342,11 +1062,6 @@ PROTECTED VIRTUAL void AosPcscf::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 n
     *ppiTimer = AosUtil::GetInstance()->StartTimer(nDuration, this, TimerToString(nType));
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::StopTimer(IN IMS_UINT32 nType)
 {
     ITimer** ppiTimer = IMS_NULL;
@@ -1369,11 +1084,6 @@ PROTECTED VIRTUAL void AosPcscf::StopTimer(IN IMS_UINT32 nType)
     AosUtil::GetInstance()->StopTimer(*ppiTimer, TimerToString(nType));
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::ClearTimers()
 {
     if (m_piDnsQueryRetryTimer != IMS_NULL)
@@ -1382,11 +1092,6 @@ PROTECTED VIRTUAL void AosPcscf::ClearTimers()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosPcscf::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
@@ -1402,11 +1107,6 @@ PROTECTED VIRTUAL void AosPcscf::Timer_TimerExpired(IN ITimer* piTimer)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED GLOBAL const IMS_CHAR* AosPcscf::TimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)

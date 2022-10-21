@@ -74,11 +74,6 @@ STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateDisconnecting)
 STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateDisconnecting)
 END_STATE_MSG_MAP()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
         IN const AString& strServiceId, IN const IMS_UINT32 nServiceType) :
@@ -138,11 +133,6 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosHandle::~AosHandle()
 {
     IMS_CHAR acLog[256 + 1] = {
@@ -162,61 +152,31 @@ PUBLIC VIRTUAL AosHandle::~AosHandle()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AString& AosHandle::GetAppId()
 {
     return m_strAppId;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AString& AosHandle::GetServiceId()
 {
     return m_strServiceId;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetServiceType()
 {
     return m_nServiceType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IImsAosMonitor* AosHandle::GetMonitor()
 {
     return m_piMonitor;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 AosHandle::GetRequestType()
 {
     return m_nReqType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::SetRequestType(IN IMS_SINT32 nReqType)
 {
     A_IMS_TRACE_I(
@@ -225,21 +185,11 @@ PUBLIC VIRTUAL void AosHandle::SetRequestType(IN IMS_SINT32 nReqType)
     m_nReqType = nReqType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegBinded()
 {
     return m_bBind;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::SetRegBinded(IN IMS_BOOL bBind)
 {
     A_IMS_TRACE_I(APPPROFILE, "SetRegBinded :: [%s]", (bBind) ? "ATTACHED" : "DETACHED", 0, 0);
@@ -247,21 +197,11 @@ PUBLIC VIRTUAL void AosHandle::SetRegBinded(IN IMS_BOOL bBind)
     m_bBind = bBind;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsNetworkRegBinded()
 {
     return m_bNetworkBind;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::SetNetworkRegBinded(IN IMS_BOOL bNetworkBind)
 {
     if (bNetworkBind == m_bNetworkBind)
@@ -275,41 +215,21 @@ PUBLIC VIRTUAL void AosHandle::SetNetworkRegBinded(IN IMS_BOOL bNetworkBind)
     m_bNetworkBind = bNetworkBind;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegFeatureTagRequired()
 {
     return m_bRegFeatureTagRequired;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosFeatureTagList& AosHandle::GetFeatureTagList()
 {
     return m_objFeatureTagList;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosFeatureTagList& AosHandle::GetBindedFeatureTagList()
 {
     return m_objBindedFeatureTagList;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::ProcessFeatureTagChange()
 {
     if (m_objFeatureTagList.Equals(m_objBindedFeatureTagList) == IMS_FALSE)
@@ -334,22 +254,12 @@ PUBLIC VIRTUAL void AosHandle::ProcessFeatureTagChange()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState /* = 0 */)
 {
     (void)nType;
     (void)nState;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam)
 {
     A_IMS_TRACE_I(APPPROFILE, "App_StateChanged :: [state(%d)]", nState, 0, 0);
@@ -370,11 +280,6 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
 {
     if (m_piListener == IMS_NULL)
@@ -419,22 +324,12 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked)
 {
     (void)nType;
     (void)bBlocked;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
 {
     A_IMS_TRACE_I(APPPROFILE, "Control :: Type[%d]", nType, 0, 0);
@@ -442,21 +337,11 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
     return m_piAppContext->GetApp()->RequestCmd(nType);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IImsAosInfo* AosHandle::GetAosInfo()
 {
     return m_piInfo;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetFeatures()
 {
     if (!IsImsConnected())
@@ -468,31 +353,16 @@ PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetFeatures()
             ~(m_objBindedFeatureTagList.GetUnavailableFeatures()));
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetSuspendedReason()
 {
     return m_nSuspendedReason;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsFeatureConnected(IN IMS_UINT32 nFeature)
 {
     return (GetFeatures() & nFeature) > 0;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected()
 {
     IMS_UINT32 nState = GetState();
@@ -503,11 +373,6 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected()
     return (nState == STATE_CONNECTED);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended()
 {
     A_IMS_TRACE_D(APPPROFILE, "IsImsSuspended :: reason(%x)", m_nSuspendedReason, 0, 0);
@@ -515,31 +380,16 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended()
     return (m_nSuspendedReason != AosReason::SUSPEND_NONE);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::SetListener(IN IImsAosListener* piListener)
 {
     m_piListener = piListener;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::SetMonitor(IN IImsAosMonitor* piMonitor)
 {
     m_piMonitor = piMonitor;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService)
 {
     if (nService != ImsAosService::MTC || !bReady)
@@ -560,31 +410,16 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nS
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN IMS_UINT32 /*nFeatures*/)
 {
     // It is for SipController so it will be overridden in AosSipController
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN IMSList<ImsAosFeatureTag*>& /*objFeatureTag*/)
 {
     // It is for SipController so it will be overridden in AosSipControllers
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
 {
     A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: nType=%d, nState=%d", nType,
@@ -592,11 +427,6 @@ PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN 
     // Implemented in child
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::NetTracker_StatusChanged()
 {
     if (IsEmergencyService())
@@ -669,11 +499,6 @@ PUBLIC VIRTUAL void AosHandle::NetTracker_StatusChanged()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::NConfiguration_NotifyConfigChanged()
 {
     A_IMS_TRACE_D(APPPROFILE, "NConfiguration_NotifyConfigChanged", 0, 0, 0);
@@ -689,11 +514,6 @@ PUBLIC VIRTUAL void AosHandle::NConfiguration_NotifyConfigChanged()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
@@ -722,11 +542,6 @@ PROTECTED VIRTUAL void AosHandle::Init()
     OnStateMessage(objMSG);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
@@ -751,11 +566,6 @@ PROTECTED VIRTUAL void AosHandle::CleanUp()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::SetHandleState(IN IMS_UINT32 nState)
 {
@@ -770,22 +580,12 @@ void AosHandle::SetHandleState(IN IMS_UINT32 nState)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::SetReason(IN IMS_UINT32 nReason)
 {
     m_nReason = nReason;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::ClearSuspendedReason()
 {
@@ -793,11 +593,6 @@ void AosHandle::ClearSuspendedReason()
     m_nSuspendedReason = AosReason::SUSPEND_NONE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::CheckAppNotificationAndSetAppState()
 {
@@ -820,11 +615,6 @@ IMS_BOOL AosHandle::CheckAppNotificationAndSetAppState()
     */
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_UINT32 AosHandle::GetAppState()
 {
@@ -847,11 +637,6 @@ IMS_UINT32 AosHandle::GetAppState()
     return nAppState;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
 {
@@ -894,11 +679,6 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
     return nImsAosReason;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_UINT32 AosHandle::GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason)
 {
@@ -921,33 +701,18 @@ IMS_UINT32 AosHandle::GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason)
     return nImsAosReason;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsEpdgEnabled() const
 {
     return m_bEpdgEnabled;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsEqualNetworkType(IN IMS_UINT32 nType, IN AosNetworkType eType) const
 {
     return (nType == static_cast<IMS_UINT32>(eType));
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsCapabilityExisted(
         IN IMS_UINT32 nCapabilities, IN AosCapability eCapability) const
@@ -955,11 +720,6 @@ IMS_BOOL AosHandle::IsCapabilityExisted(
     return (nCapabilities & static_cast<IMS_UINT32>(eCapability));
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsCapabilityExistedForNetworkType(
         IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const
@@ -989,11 +749,6 @@ IMS_BOOL AosHandle::IsCapabilityExistedForNetworkType(
     return IsCapabilityExisted(nCapabilities, eCapability);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const
 {
@@ -1010,11 +765,6 @@ IMS_BOOL AosHandle::IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT3
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsServiceFeature(IN IMS_UINT32 nFeature) const
 {
@@ -1029,22 +779,12 @@ IMS_BOOL AosHandle::IsServiceFeature(IN IMS_UINT32 nFeature) const
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsWifiConnected()
 {
     return (m_piWifiWatcher->GetState() == IWifiWatcher::STATE_CONNECTED);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsDataConnected()
 {
@@ -1053,11 +793,6 @@ IMS_BOOL AosHandle::IsDataConnected()
     return (piConnection->GetState() == IAosConnection::STATE_ACTIVE);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsEmergencyService()
 {
@@ -1065,33 +800,18 @@ IMS_BOOL AosHandle::IsEmergencyService()
             m_nServiceType == ImsAosService::EMERGENCY_MTS);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_UINT32 AosHandle::GetNetworkType() const
 {
     return m_piAppContext->GetNetTracker()->GetNetworkType();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_UINT32 AosHandle::GetMobileNetworkType() const
 {
     return m_piAppContext->GetNetTracker()->GetMobileNetworkType();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_UINT32 AosHandle::GetBlock(IN IMS_UINT32 nEvent)
 {
@@ -1107,11 +827,6 @@ IMS_UINT32 AosHandle::GetBlock(IN IMS_UINT32 nEvent)
     return BLOCK_NONE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
 {
@@ -1142,33 +857,18 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
     return nFeature;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::AddBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks)
 {
     nBlocks |= nBlock;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::RemoveBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks)
 {
     nBlocks &= ~(nBlock);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::SetBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks, IN IMS_BOOL bAdd)
 {
@@ -1182,11 +882,6 @@ void AosHandle::SetBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks, IN IM
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
 {
@@ -1228,11 +923,6 @@ IMS_BOOL AosHandle::PreProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::ProcessBlock(
         IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess /* = IMS_TRUE */)
@@ -1289,11 +979,6 @@ void AosHandle::ProcessBlock(
     ProcessCheckBlock();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::ProcessCheckBlock(IN IMS_BOOL bRunStateMachine /* = IMS_TRUE */)
 {
@@ -1330,11 +1015,6 @@ IMS_BOOL AosHandle::ProcessCheckBlock(IN IMS_BOOL bRunStateMachine /* = IMS_TRUE
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd)
 {
@@ -1353,11 +1033,6 @@ void AosHandle::ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bA
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::ProcessUnavailableFeatureChanged()
 {
@@ -1376,11 +1051,6 @@ void AosHandle::ProcessUnavailableFeatureChanged()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::BackupAllBlocks()
 {
@@ -1395,11 +1065,6 @@ void AosHandle::BackupAllBlocks()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::BackupBlocks(
         IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
@@ -1419,11 +1084,6 @@ void AosHandle::BackupBlocks(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::RestoreBlocks(
         IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
@@ -1443,11 +1103,6 @@ void AosHandle::RestoreBlocks(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
 {
@@ -1499,11 +1154,6 @@ IMS_BOOL AosHandle::HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosHandle::ReevaluateBlocks()
 {
@@ -1519,11 +1169,6 @@ void AosHandle::ReevaluateBlocks()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::UpdateIpcan()
 {
@@ -1537,50 +1182,25 @@ IMS_BOOL AosHandle::UpdateIpcan()
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsHandleBlocked(IN IMS_UINT32& nBlocks, IN IMS_UINT32 nType) const
 {
     return (nBlocks & nType);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosHandle::IsHandleBlocked(IN IMS_UINT32 nType) const
 {
     return (m_nBlocks & nType);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::IsHandleBlocked() const
 {
     return (m_nBlocks != BLOCK_NONE);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::ProcessBlockChanged() {}
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlockForMobile(IN IMS_UINT32 nBlock) const
 {
     for (IMS_UINT32 i = 0; i < m_objHoldingBlocksPolicyForWifi.GetSize(); i++)
@@ -1594,11 +1214,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlockForMobile(IN IMS_UINT32 nBlock) con
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlockForWifi(IN IMS_UINT32 nBlock) const
 {
     for (IMS_UINT32 i = 0; i < m_objHoldingBlocksPolicyForMobile.GetSize(); i++)
@@ -1612,21 +1227,11 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlockForWifi(IN IMS_UINT32 nBlock) const
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::ReevaluateUnavailableFeature()
 {
     // Implemented in child classes
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked)
 {
     if (bBlocked)
@@ -1642,42 +1247,22 @@ PROTECTED VIRTUAL void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN
             m_objFeatureTagList.GetFeatures(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& /* objNewCapabilities */)
 {
     // Implemented in child
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::ProcessNetworkChanged()
 {
     // Implemented in child
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(IN IMS_UINT32 /*nState*/)
 {
     // Implemented in child
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
 {
     A_IMS_TRACE_I(APPPROFILE, "StateDisconnected :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
@@ -1713,11 +1298,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
 {
     A_IMS_TRACE_I(APPPROFILE, "StateConnecting :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
@@ -1783,11 +1363,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
 {
     A_IMS_TRACE_I(APPPROFILE, "StateConnected :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
@@ -1868,11 +1443,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
 {
     A_IMS_TRACE_I(APPPROFILE, "StateDisconnecting :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
@@ -1986,11 +1556,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlocked() const
 {
     A_IMS_TRACE_I(APPPROFILE, "IsBlocked :: (%s)", _TRACE_B_(m_bBlocked), 0, 0);
@@ -1998,31 +1563,16 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlocked() const
     return m_bBlocked;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::IsSupportedNetworkType(IN IMS_UINT32 nType) const
 {
     return AosUtil::GetInstance()->IsSupportedNetworkType(nType);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
 {
     return AosUtil::GetInstance()->IsSupportedNetworkTypeForCellular(nType);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::InitializeServiceBlock()
 {
     /*
@@ -2033,11 +1583,6 @@ PROTECTED VIRTUAL void AosHandle::InitializeServiceBlock()
     */
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::InitializeServiceFeature()
 {
     /*
@@ -2045,11 +1590,6 @@ PROTECTED VIRTUAL void AosHandle::InitializeServiceFeature()
     */
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::InitializeFeatureTags()
 {
     m_objFeatureTagList.ClearFeatureTags();
@@ -2061,11 +1601,6 @@ PROTECTED VIRTUAL void AosHandle::InitializeFeatureTags()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
 {
     if (IsEmergencyService())
@@ -2097,11 +1632,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason 
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
 {
     if (IsEmergencyService())
@@ -2139,11 +1669,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /*
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::CheckSuspended()
 {
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
@@ -2161,11 +1686,6 @@ PROTECTED VIRTUAL void AosHandle::CheckSuspended()
     m_bNetSrvIn = bCurrSrvIn;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::SetSuspendedReason(IN IMS_UINT32 nReason)
 {
     if (nReason == AosReason::SUSPEND_NO_SERVICE)
@@ -2174,11 +1694,6 @@ PROTECTED VIRTUAL void AosHandle::SetSuspendedReason(IN IMS_UINT32 nReason)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::ResetSuspendedReason(IN IMS_UINT32 nReason)
 {
     if (nReason == AosReason::SUSPEND_NO_SERVICE)
@@ -2187,11 +1702,6 @@ PROTECTED VIRTUAL void AosHandle::ResetSuspendedReason(IN IMS_UINT32 nReason)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandle::ReportRegState()
 {
     IAosRegStateManager* piRSM = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
@@ -2214,11 +1724,6 @@ PROTECTED VIRTUAL void AosHandle::ReportRegState()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandle::Is3G(IN IMS_UINT32 nNetworkType) const
 {
     switch (nNetworkType)
@@ -2232,11 +1737,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::Is3G(IN IMS_UINT32 nNetworkType) const
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
         IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
 {
@@ -2264,11 +1764,6 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::RegistrationControl_NotifyCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
 {
@@ -2280,21 +1775,11 @@ PUBLIC VIRTUAL void AosHandle::RegistrationControl_NotifyCapabilitiesChanged(
     ProcessCapabilitiesChanged(objCapabilities);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandle::ServiceSetting_RoamingPreferredVoiceNetworkChanged(
         IN RoamingPreferredVoiceNetwork /*eState*/)
 {
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED GLOBAL const IMS_CHAR* AosHandle::StateToString(IN IMS_UINT32 nState)
 {
     switch (nState)
@@ -2316,11 +1801,6 @@ PROTECTED GLOBAL const IMS_CHAR* AosHandle::StateToString(IN IMS_UINT32 nState)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED GLOBAL const IMS_CHAR* AosHandle::MsgToString(IN IMS_UINT32 nMsg)
 {
     switch (nMsg)
@@ -2336,11 +1816,6 @@ PROTECTED GLOBAL const IMS_CHAR* AosHandle::MsgToString(IN IMS_UINT32 nMsg)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED GLOBAL const IMS_CHAR* AosHandle::RadioTypeToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -2359,11 +1834,6 @@ PROTECTED GLOBAL const IMS_CHAR* AosHandle::RadioTypeToString(IN IMS_UINT32 nTyp
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 const IMS_CHAR* AosHandle::ServiceTypeToString()
 {

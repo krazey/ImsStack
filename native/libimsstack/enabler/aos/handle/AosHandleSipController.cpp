@@ -24,11 +24,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define APPPROFILE m_strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosHandleSipController::AosHandleSipController(IN IAosAppContext* piAosAppContext,
         IN const AString& strAppId, IN const AString& strServiceId,
@@ -39,22 +34,12 @@ AosHandleSipController::AosHandleSipController(IN IAosAppContext* piAosAppContex
             strAppId.GetStr(), sizeof(AosHandleSipController), this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosHandleSipController::~AosHandleSipController()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleSipController = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleSipController), this);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleSipController::InitializeServiceBlock()
 {
     if (!GET_N_CONFIG(m_nSlotId)->IsImsSingleRegistrationRequired())
