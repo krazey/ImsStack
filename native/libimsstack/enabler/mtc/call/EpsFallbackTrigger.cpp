@@ -58,6 +58,12 @@ PUBLIC VIRTUAL EpsFallbackTrigger::~EpsFallbackTrigger()
         m_piTimerEpsFallbackWait->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(m_piTimerEpsFallbackWait);
     }
+
+    if (m_bWaitingEpsFallbackForNoResponse)
+    {
+        m_objContext.GetService().GetAosConnector()->NotifyEpsfbCallState(
+                IImsAosInfo::EPSFB_CALL_FAILED);
+    }
 }
 
 PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::IsRequired(IN MtcConfigurationProxy& objConfigProxy)
@@ -67,7 +73,7 @@ PUBLIC GLOBAL IMS_BOOL EpsFallbackTrigger::IsRequired(IN MtcConfigurationProxy& 
 }
 
 PUBLIC
-IMS_BOOL EpsFallbackTrigger::IsVoNr()
+IMS_BOOL EpsFallbackTrigger::IsVoNr() const
 {
     // check NR network
     if (m_objContext.GetService().IsWlanIpCanType())
@@ -105,6 +111,7 @@ void EpsFallbackTrigger::OnEpsFallbackCompleted()
     {
         m_piTimerEpsFallbackWait->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(m_piTimerEpsFallbackWait);
+        m_piTimerEpsFallbackWait = IMS_NULL;
     }
 }
 

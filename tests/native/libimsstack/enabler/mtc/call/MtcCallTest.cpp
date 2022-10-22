@@ -23,6 +23,7 @@
 #include "MockIMtcCallController.h"
 #include "MtcContextRepository.h"
 #include "MtcDef.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
 #include "call/MockIMtcCallManager.h"
@@ -934,6 +935,16 @@ TEST_F(MtcCallTest, GetUpdatingInfoReturnsSameNotNullInstance)
 
     EXPECT_NE(nullptr, &objUpdatingInfo);
     EXPECT_EQ(&objUpdatingInfo, &objCall.GetUpdatingInfo());
+}
+
+TEST_F(MtcCallTest, GetEpsFallbackTriggerReturnsSameNotNullInstance)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EpsFallbackTrigger& objEpsFbTrigger = objCall.GetEpsFallbackTrigger();
+
+    EXPECT_NE(nullptr, &objEpsFbTrigger);
+    EXPECT_EQ(&objEpsFbTrigger, &objCall.GetEpsFallbackTrigger());
 }
 
 TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)

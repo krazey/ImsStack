@@ -24,6 +24,7 @@
 #include "call/IMtcCallContext.h"
 #include <functional>
 
+class EpsFallbackTrigger;
 class IMtcBlockChecker;
 class IMtcBlockRule;
 class IMtcMediaManager;
@@ -62,6 +63,7 @@ public:
     MOCK_METHOD(MtcTimerWrapper&, GetTimer, (), (override));
     MOCK_METHOD(MtcSupplementaryService&, GetSupplementaryService, (), (override));
     MOCK_METHOD(UpdatingInfo&, GetUpdatingInfo, (), (override));
+    MOCK_METHOD(EpsFallbackTrigger&, GetEpsFallbackTrigger, (), (override));
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));

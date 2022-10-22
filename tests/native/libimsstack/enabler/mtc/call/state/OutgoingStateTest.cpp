@@ -16,11 +16,14 @@
 
 #include <gtest/gtest.h>
 #include "CallReasonInfo.h"
+#include "MockIMtcCallController.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
+#include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
+#include "call/MockISilentRedialHelper.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/OutgoingState.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -48,6 +51,8 @@ public:
     MockISession objSession;
     MockIMtcMediaManager objMockMediaManager;
     MockIMtcPreconditionManager objPreconditionManager;
+    MockIMtcCallController objController;
+    MockISilentRedialHelper objRedialHelper;
     CallInfo objCallInfo;
     MtcTimerWrapper objTimer;
     MockIMtcUiNotifier objNotifier;
@@ -60,6 +65,10 @@ protected:
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
+        ON_CALL(objCallContext, GetCallController)
+                .WillByDefault(ReturnRef(objController));
+        ON_CALL(objController, GetRedialHelper)
+                .WillByDefault(ReturnRef(objRedialHelper));
         ON_CALL(objCallContext, GetUiNotifier)
                 .WillByDefault(ReturnRef(objNotifier));
 
@@ -178,4 +187,46 @@ TEST_F(OutgoingStateTest, SendUpdateBySrvccByFailed)
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_FAILURE)).Times(1);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnSrvccStateUpdated(SrvccState::FAILED));
+}
+
+TEST_F(OutgoingStateTest, HandleSilentRedialInvokesRedial)
+{
+    // TODO: test StartFailed by With SilentRedial
+}
+
+TEST_F(OutgoingStateTest, HandleAosConnectedDoesNothingIfNoWatchdogTimer)
+{
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(-1));
+
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+}
+
+TEST_F(OutgoingStateTest, HandleAosConnectedInvokesEpsFallbackApis)
+{
+    MockEpsFallbackTrigger objEpsFbTrigger(objCallContext);
+    ON_CALL(objCallContext, GetEpsFallbackTrigger)
+            .WillByDefault(ReturnRef(objEpsFbTrigger));
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(-1));
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(6000));
+    ON_CALL(objEpsFbTrigger, IsWaitingEpsFallbackForNoResponse)
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_EQ(CallStateName::OUTGOING,
+            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+
+    ON_CALL(objEpsFbTrigger, IsWaitingEpsFallbackForNoResponse)
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objRedialHelper, Redial)
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objEpsFbTrigger, OnEpsFallbackCompleted);
+    EXPECT_EQ(CallStateName::IDLE,
+            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
