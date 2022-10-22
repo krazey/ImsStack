@@ -171,6 +171,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsInitializePemWhenNoHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPolicyForLocalRingbackToneWith180Response, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSend180ForInitialInvite, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetEpsFallbackWatchdogTime, (), (const, override));
 };
 
 #endif
