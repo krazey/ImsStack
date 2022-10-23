@@ -333,16 +333,21 @@ IMS_BOOL AudioController::UpdateRtpConfig(
 }
 
 PUBLIC
-IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINTP nNegoId, IN IMS_UINT32 accessNetwork)
+IMS_BOOL AudioController::UpdateAccessNetwork(IN IMS_UINT32 accessNetwork)
 {
-    IMS_TRACE_I("UpdateAccessNetwork() - nNegoId[%" PFLS_x "], accessNetwork[%d]", nNegoId,
-            accessNetwork, 0);
+    IMS_TRACE_I("UpdateAccessNetwork() - accessNetwork[%d]", accessNetwork, 0, 0);
 
-    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    AudioMediaSession* pAudioSession = IMS_NULL;
 
-    if (pAudioSession != IMS_NULL)
+    for (IMS_UINT32 nIndex = 0; nIndex < m_listAudioSession.GetSize(); nIndex++)
     {
-        return pAudioSession->UpdateAccessNetwork(accessNetwork);
+        pAudioSession = m_listAudioSession.GetAt(nIndex);
+
+        if (pAudioSession != IMS_NULL && pAudioSession->GetState() == AudioMediaSession::STATE_LIVE)
+        {
+            pAudioSession->UpdateAccessNetwork(accessNetwork);
+            return pAudioSession->Modify();
+        }
     }
 
     return IMS_FALSE;

@@ -154,14 +154,13 @@ public:
     IMS_BOOL UpdateLocalAddress(IN AudioNego* pNego);
 
     /**
-     * @brief Update AccessNetwork information in the RtpConfig
+     * @brief Update AccessNetwork information in the RtpConfig and initiate modifySession
      *
-     * @param nNegoId The identification to get the audio profile from negotiated parameter
      * @param nAccessNetwork AccessNetwork information
      * @return IMS_BOOL Returns IMS_TRUE when there is the parameter to updates IMS_FALSE when there
      * are no parameters updated
      */
-    IMS_BOOL UpdateAccessNetwork(IN IMS_UINTP nNegoId, IN IMS_UINT32 accessNetwork);
+    IMS_BOOL UpdateAccessNetwork(IN IMS_UINT32 accessNetwork);
 
     /**
      * @brief Update MediaQualityThreshold and send message to java

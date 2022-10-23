@@ -388,6 +388,23 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
     return IMS_TRUE;
 }
 
+PROTECTED
+IMS_BOOL MediaSession::OnChangeNetworkConnection(IN IMS_UINT32 nAccessNetwork)
+{
+    m_objAudioController.UpdateAccessNetwork(nAccessNetwork);
+
+    if (m_objVideoController.IsSessionOpened() == IMS_TRUE)
+    {
+        m_objVideoController.UpdateAccessNetwork(nAccessNetwork);
+        m_objVideoController.UpdateSession();
+    }
+
+    m_objTextController.UpdateAccessNetwork(nAccessNetwork);
+    m_objTextController.UpdateSession();
+
+    return IMS_TRUE;
+}
+
 PUBLIC VIRTUAL IMS_BOOL MediaSession::Terminate()
 {
     IMS_TRACE_I(
@@ -889,7 +906,7 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
             bRet = m_objVideoController.SendMessage(nMsg, pParam);
             break;
         case IMMedia::CHANGE_NETWORK_CONNECTION:
-            /** TODO: add implementation */
+            bRet = OnChangeNetworkConnection(pParam);
             break;
         case IMMedia::CHANGE_MTU:
             /** TODO: add implementation */
