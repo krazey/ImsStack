@@ -109,6 +109,7 @@ protected:
     IMS_BOOL OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
     IMS_BOOL OnSendDtmf(IN IMS_UINTP nParam);
     void ReportToClient(IN IMS_SINT32 eError, IN MEDIA_CONTENT_TYPE eMediaType);
+    IMS_BOOL OnChangeNetworkConnection(IN IMS_UINT32 nAccessNetwork);
 
 private:
     IPAddress GetAndroidIP();
