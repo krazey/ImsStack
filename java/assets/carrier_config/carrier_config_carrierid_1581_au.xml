@@ -28,7 +28,7 @@
     </int-array>
 
     <!-- Aos -->
-    <int name="registration_actual_wait_time_policy_int" value="3"/>
+    <int name="reg_actual_wait_time_policy_int" value="3"/>
     <int name="rereg_retry_305_policy_int" value="0"/>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->

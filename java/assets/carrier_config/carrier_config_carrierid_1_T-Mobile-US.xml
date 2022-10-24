@@ -45,11 +45,11 @@
     <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="true"/>
     <int name="geolocation_pidf_forming_policy_int" value="3"/>
+    <int name="reg_actual_wait_time_policy_int" value="2"/>
     <int name="reg_retry_305_policy_int" value="0"/>
     <int name="reg_retry_503_policy_int" value="0"/>
+    <int name="reg_retry_cnt_reset_policy_int" value="1"/>
     <int name="reg_retry_default_policy_int" value="1"/>
-    <int name="registration_actual_wait_time_policy_int" value="2"/>
-    <int name="registration_retry_count_reset_policy_int" value="1"/>
     <int name="sip_message_threshold_for_transport_change_int" value="340"/>
     <int-array name="sub_err_code_for_init_reg_with_next_pcscf_int_array" num="3">
         <item value="420"/>

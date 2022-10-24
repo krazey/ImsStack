@@ -25,29 +25,29 @@ struct AosAsset
 {
 public:
     AosAsset() :
-            bCdmalessFeatureTagRequired(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingRegistration(IMS_FALSE),
-            bDisableT3482ForEmergency(IMS_FALSE),
+            bDisableT3482ForEmc(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
-            bImsDeregisterOn3gNetworks(IMS_FALSE),
+            bImsDeregOn3gNetwork(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
             bRegContactValidation(IMS_FALSE),
             bRegRetryWithIpVerFallback(IMS_FALSE),
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
             bRequireRegAfterImsCallEndOnRegHeld(IMS_FALSE),
-            bRequiredEmergencyRegistrationInRoaming(IMS_FALSE),
+            bRequiredCdmalessFeatureTag(IMS_FALSE),
+            bRequiredEmcRegInRoaming(IMS_FALSE),
             bRequiredVolteBlockBySetting(IMS_FALSE),
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
             bReregRetryExpireTimeChecked(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
-            bSmsOverImsAvailableWithoutVoiceCapability(IMS_FALSE),
+            bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
             bSupportContactUserInfo(IMS_TRUE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
-            bUpdateRegistrationWithCountryChange(IMS_FALSE),
+            bUpdateRegWithCountryChange(IMS_FALSE),
             bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
             bUseSecurityServerPortInInitReg(IMS_FALSE),
             bUseSecurityServerPortInRegContactOfInitReg(IMS_FALSE),
@@ -55,21 +55,21 @@ public:
             bVideoOverWifiSupportedWithoutVoice(IMS_FALSE),
             nContactUserInfoPolicyForNonRegisterMessage(
                     CarrierConfig::Assets::CONTACT_USER_INFO_POLICY_DEFAULT),
-            nEmergencyPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
+            nEmcPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nGeolocationPidfFormingPolicy(
                     CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION),
             nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nImsSignallingDscp(46),
+            nRegActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
             nRegOutOfServicePolicy(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT),
+            nRegPcscfUpdatePolicy(0),
             nRegRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
             nRegRetry503Policy(CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT),
+            nRegRetryCntResetPolicy(0),
             nRegRetryDefaultPolicy(0),
             nRegRetryMinCnt(0),
             nRegRetryTimerFPolicy(0),
-            nRegistrationActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
-            nRegistrationPcscfUpdatePolicy(0),
-            nRegistrationRetryCountResetPolicy(0),
-            nRegistrationTimerForEmergencyCallMillis(0),
+            nRegTimerForEmcCallMillis(0),
             nReregRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
             nReregRetryMaxCntToKeepReg(0),
             nSipMessageThresholdForTransportChange(200),
@@ -77,9 +77,9 @@ public:
             objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
             objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>()),
             objRegErrorCodesWithPcscfDiscovery(IMSVector<IMS_SINT32>()),
+            objRegPermanentErrMaxCnt(IMSVector<IMS_SINT32>()),
             objRegRetryErrCodeWithDiffPcscf(IMSVector<IMS_SINT32>()),
             objRegRetryErrCodeWithoutIpsec(IMSVector<IMS_SINT32>()),
-            objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>()),
             objReregErrCodeForCallEnd(IMSVector<IMS_SINT32>()),
             objReregErrCodeForPdnReactivationAfterCallEnd(IMSVector<IMS_SINT32>()),
             objReregErrorCodesWithImsPdnReactivation(IMSVector<IMS_SINT32>()),
@@ -98,49 +98,49 @@ public:
     AosAsset& operator=(IN const AosAsset&) = delete;
 
 public:
-    IMS_BOOL bCdmalessFeatureTagRequired;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingRegistration;
-    IMS_BOOL bDisableT3482ForEmergency;
+    IMS_BOOL bDisableT3482ForEmc;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
     IMS_BOOL bIgnoreVopsForVolteEnable;
-    IMS_BOOL bImsDeregisterOn3gNetworks;
+    IMS_BOOL bImsDeregOn3gNetwork;
     IMS_BOOL bNoInitRegOnPcscfChange;
     IMS_BOOL bRegContactValidation;
     IMS_BOOL bRegRetryWithIpVerFallback;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
     IMS_BOOL bRequireRegAfterImsCallEndOnRegHeld;
-    IMS_BOOL bRequiredEmergencyRegistrationInRoaming;
+    IMS_BOOL bRequiredCdmalessFeatureTag;
+    IMS_BOOL bRequiredEmcRegInRoaming;
     IMS_BOOL bRequiredVolteBlockBySetting;
     IMS_BOOL bRequiredVolteBlockByAirplaneMode;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
     IMS_BOOL bReregRetryExpireTimeChecked;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
-    IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapability;
+    IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
     IMS_BOOL bSupportContactUserInfo;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatForReg;
-    IMS_BOOL bUpdateRegistrationWithCountryChange;
+    IMS_BOOL bUpdateRegWithCountryChange;
     IMS_BOOL bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType;
     IMS_BOOL bUseSecurityServerPortInInitReg;
     IMS_BOOL bUseSecurityServerPortInRegContactOfInitReg;
     IMS_BOOL bUseWfcCountryCodeAvailabilityCheck;
     IMS_BOOL bVideoOverWifiSupportedWithoutVoice;
     IMS_SINT32 nContactUserInfoPolicyForNonRegisterMessage;
-    IMS_SINT32 nEmergencyPreferredIpType;
+    IMS_SINT32 nEmcPreferredIpType;
     IMS_SINT32 nGeolocationPidfFormingPolicy;
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
+    IMS_SINT32 nRegActualWaitTimePolicy;
     IMS_SINT32 nRegOutOfServicePolicy;
+    IMS_SINT32 nRegPcscfUpdatePolicy;
     IMS_SINT32 nRegRetry305Policy;
     IMS_SINT32 nRegRetry503Policy;
+    IMS_SINT32 nRegRetryCntResetPolicy;
     IMS_SINT32 nRegRetryDefaultPolicy;
     IMS_SINT32 nRegRetryMinCnt;
     IMS_SINT32 nRegRetryTimerFPolicy;
-    IMS_SINT32 nRegistrationActualWaitTimePolicy;
-    IMS_SINT32 nRegistrationPcscfUpdatePolicy;
-    IMS_SINT32 nRegistrationRetryCountResetPolicy;
-    IMS_SINT32 nRegistrationTimerForEmergencyCallMillis;
+    IMS_SINT32 nRegTimerForEmcCallMillis;
     IMS_SINT32 nReregRetry305Policy;
     IMS_SINT32 nReregRetryMaxCntToKeepReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
@@ -148,9 +148,9 @@ public:
     IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     IMSVector<IMS_SINT32> objPcscfDiscoveryMethodRoaming;
     IMSVector<IMS_SINT32> objRegErrorCodesWithPcscfDiscovery;
+    IMSVector<IMS_SINT32> objRegPermanentErrMaxCnt;
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithDiffPcscf;
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
-    IMSVector<IMS_SINT32> objRegistrationPermanentErrorMaxCount;
     IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
     IMSVector<IMS_SINT32> objReregErrCodeForPdnReactivationAfterCallEnd;
     IMSVector<IMS_SINT32> objReregErrorCodesWithImsPdnReactivation;

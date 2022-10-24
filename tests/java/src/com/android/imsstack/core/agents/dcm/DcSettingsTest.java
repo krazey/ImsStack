@@ -170,7 +170,7 @@ public class DcSettingsTest {
     @Test
     public void testGetEmergencyPreferredIpVersion() throws Exception {
         when(mMockCarrierConfig.getInt(
-                eq(CarrierConfig.Assets.KEY_EMERGENCY_PREFERRED_IPTYPE_INT), anyInt()))
+                eq(CarrierConfig.Assets.KEY_EMC_PREFERRED_IPTYPE_INT), anyInt()))
                 .thenReturn(CarrierConfig.Assets.IPV4_PREFERRED)
                 .thenReturn(CarrierConfig.Assets.IPV6_PREFERRED);
 
