@@ -54,7 +54,6 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
                 *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId))),
         m_objCallManager(MtcCallManager(*this)),
         m_objCallController(MtcCallController(*this)),
-        m_objVonrManager(MtcVonrManager()),
         m_objCallStateProxy(CallStateProxy(m_objCallManager)),
         m_objImsEventReceiver(MtcImsEventReceiver(nSlotId)),
         m_objSipInterfaceFactory(MtcSipInterfaceFactory()),
