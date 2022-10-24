@@ -147,7 +147,7 @@ public class DcSettings implements IDcSettings {
     @Override
     public int getEmergencyPreferredIpVersion() {
         if (mCarrierConfig != null) {
-            return mCarrierConfig.getInt(CarrierConfig.Assets.KEY_EMERGENCY_PREFERRED_IPTYPE_INT,
+            return mCarrierConfig.getInt(CarrierConfig.Assets.KEY_EMC_PREFERRED_IPTYPE_INT,
                     CarrierConfig.Assets.IPV6_PREFERRED);
         }
         return CarrierConfig.Assets.IPV6_PREFERRED;

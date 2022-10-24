@@ -253,30 +253,30 @@
     <boolean name="support_ecbm_for_vowifi_bool" value="false"/>
 
     <!-- Aos -->
-    <boolean name="cdmaless_feature_tag_required_bool" value="false"/>
     <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_registration_bool" value="false"/>
-    <boolean name="disable_t3482_for_emergency_bool" value="false"/>
+    <boolean name="disable_t3482_for_emc_bool" value="false"/>
     <boolean name="emc_call_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
     <boolean name="hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
-    <boolean name="ims_deregister_on_3g_networks_bool" value="false"/>
+    <boolean name="ims_dereg_on_3g_network_bool" value="false"/>
     <boolean name="no_init_reg_on_pcscf_change_bool" value="false"/>
     <boolean name="reg_contact_validation_bool" value="false"/>
     <boolean name="reg_retry_with_ip_ver_fallback_bool" value="false"/>
     <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
     <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
-    <boolean name="required_emergency_registration_in_roaming_bool" value="false"/>
+    <boolean name="required_cdmaless_feature_tag_bool" value="false"/>
+    <boolean name="required_emc_reg_in_roaming_bool" value="false"/>
     <boolean name="required_volte_block_by_setting_bool" value="false"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="false"/>
     <boolean name="required_wfc_block_by_airplane_mode_bool" value="false"/>
     <boolean name="rereg_retry_expire_time_checked_bool" value="false"/>
     <boolean name="sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
-    <boolean name="sms_over_ims_available_without_voice_capability_bool" value="true"/>
+    <boolean name="sms_over_ims_available_without_voice_capa_bool" value="true"/>
     <boolean name="support_contact_user_info_bool" value="true"/>
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="false"/>
     <boolean name="support_verstat_for_reg_bool" value="false"/>
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
-    <boolean name="update_registration_with_country_change_bool" value="false"/>
+    <boolean name="update_reg_with_country_change_bool" value="false"/>
     <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <boolean name="use_security_server_port_in_init_reg_bool" value="false"/>
     <boolean name="use_security_server_port_in_reg_contact_of_init_reg_bool" value="false"/>
@@ -284,20 +284,20 @@
     <boolean name="video_over_wifi_supported_without_voice_bool" value="false"/>
 
     <int name="contact_user_info_policy_for_non_register_message_int" value="1"/>
-    <int name="emergency_preferred_iptype_int" value="1"/>
+    <int name="emc_preferred_iptype_int" value="1"/>
     <int name="geolocation_pidf_forming_policy_int" value="1"/>
     <int name="ims_preferred_iptype_int" value="1"/>
     <int name="ims_signalling_dscp_int" value="46"/>
+    <int name="reg_actual_wait_time_policy_int" value="0"/>
     <int name="reg_out_of_service_policy_int" value="0"/>
+    <int name="reg_pcscf_update_policy_int" value="0"/>
     <int name="reg_retry_305_policy_int" value="1"/>
     <int name="reg_retry_503_policy_int" value="1"/>
+    <int name="reg_retry_cnt_reset_policy_int" value="0"/>
     <int name="reg_retry_default_policy_int" value="0"/>
     <int name="reg_retry_min_cnt_int" value="0"/>
     <int name="reg_retry_timer_f_policy_int" value="0"/>
-    <int name="registration_actual_wait_time_policy_int" value="0"/>
-    <int name="registration_pcscf_update_policy_int" value="0"/>
-    <int name="registration_retry_count_reset_policy_int" value="0"/>
-    <int name="registration_timer_for_emergency_call_millis_int" value="0"/>
+    <int name="reg_timer_for_emc_call_millis_int" value="0"/>
     <int name="rereg_retry_305_policy_int" value="1"/>
     <int name="rereg_retry_max_cnt_to_keep_reg_int" value="0"/>
     <int name="sip_message_threshold_for_transport_change_int" value="200"/>
@@ -316,11 +316,11 @@
     </int-array>
     <int-array name="reg_error_codes_with_pcscf_discovery_int_array" num="0">
     </int-array>
+    <int-array name="reg_permanent_err_max_cnt_int_array" num="0">
+    </int-array>
     <int-array name="reg_retry_err_code_with_diff_pcscf_int_array" num="0">
     </int-array>
     <int-array name="reg_retry_err_code_without_ipsec_int_array" num="0">
-    </int-array>
-    <int-array name="registration_permanent_error_max_count_int_array" num="0">
     </int-array>
     <int-array name="rereg_err_code_for_call_end_int_array" num="0">
     </int-array>

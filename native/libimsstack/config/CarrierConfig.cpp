@@ -688,21 +688,19 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_COUNTRY_PARAM_IN_PANI_HEADER_B
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_LOCAL_SESSION_TIMER_BOOL[] =
         "support_local_session_timer_bool";
 // Aos
-const IMS_CHAR CarrierConfig::Assets::KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL[] =
-        "cdmaless_feature_tag_required_bool";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REGISTRATION_BOOL[] =
                 "destroy_unsecure_tcp_socket_on_accomplishing_registration_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL[] =
-        "disable_t3482_for_emergency_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_DISABLE_T3482_FOR_EMC_BOOL[] =
+        "disable_t3482_for_emc_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL[] =
         "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL[] =
         "hold_reg_with_ipcan_changed_during_ims_call_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
         "ignore_vops_for_volte_enable_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL[] =
-        "ims_deregister_on_3g_networks_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL[] =
+        "ims_dereg_on_3g_network_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL[] =
         "no_init_reg_on_pcscf_change_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL[] =
@@ -713,8 +711,10 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[
         "remove_old_sa_on_establishing_sa_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL[] =
         "require_reg_after_ims_call_end_on_reg_held_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL[] =
-        "required_emergency_registration_in_roaming_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL[] =
+        "required_cdmaless_feature_tag_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL[] =
+        "required_emc_reg_in_roaming_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL[] =
         "required_volte_block_by_setting_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
@@ -725,16 +725,16 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_EXPIRE_TIME_CHECKED_BOOL[]
         "rereg_retry_expire_time_checked_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL[] =
         "sip_over_ipsec_enabled_in_roaming_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL[] =
-        "sms_over_ims_available_without_voice_capability_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL[] =
+        "sms_over_ims_available_without_voice_capa_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_CONTACT_USER_INFO_BOOL[] =
         "support_contact_user_info_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL[] =
         "support_reg_with_feature_tag_unavailable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =
         "support_verstat_for_reg_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_UPDATE_REGISTRATION_WITH_COUNTRY_CHANGE_BOOL[] =
-        "update_registration_with_country_change_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_UPDATE_REG_WITH_COUNTRY_CHANGE_BOOL[] =
+        "update_reg_with_country_change_bool";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
                 "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
@@ -750,29 +750,28 @@ const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOIC
 
 const IMS_CHAR CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT[] =
         "contact_user_info_policy_for_non_register_message_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PREFERRED_IPTYPE_INT[] =
-        "emergency_preferred_iptype_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT[] = "emc_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[] =
         "geolocation_pidf_forming_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT[] = "ims_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT[] = "ims_signalling_dscp_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[] =
+        "reg_actual_wait_time_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT[] =
         "reg_out_of_service_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_PCSCF_UPDATE_POLICY_INT[] =
+        "reg_pcscf_update_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_305_POLICY_INT[] = "reg_retry_305_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_503_POLICY_INT[] = "reg_retry_503_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_CNT_RESET_POLICY_INT[] =
+        "reg_retry_cnt_reset_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_DEFAULT_POLICY_INT[] =
         "reg_retry_default_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_MIN_CNT_INT[] = "reg_retry_min_cnt_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT[] =
         "reg_retry_timer_f_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT[] =
-        "registration_actual_wait_time_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_PCSCF_UPDATE_POLICY_INT[] =
-        "registration_pcscf_update_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_COUNT_RESET_POLICY_INT[] =
-        "registration_retry_count_reset_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT[] =
-        "registration_timer_for_emergency_call_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT[] =
+        "reg_timer_for_emc_call_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT[] =
         "rereg_retry_305_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT[] =
@@ -790,12 +789,12 @@ const IMS_CHAR CarrierConfig::Assets::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
         "permanent_pdn_failure_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY[] =
         "reg_error_codes_with_pcscf_discovery_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY[] =
+        "reg_permanent_err_max_cnt_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY[] =
         "reg_retry_err_code_with_diff_pcscf_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY[] =
         "reg_retry_err_code_without_ipsec_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY[] =
-        "registration_permanent_error_max_count_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY[] =
         "rereg_err_code_for_call_end_int_array";
 const IMS_CHAR

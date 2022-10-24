@@ -22,7 +22,7 @@
 
     <!-- Aos -->
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
-    <boolean name="required_emergency_registration_in_roaming_bool" value="true"/>
+    <boolean name="required_emc_reg_in_roaming_bool" value="true"/>
     <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
 
     <!-- Ut/Xcap AOSP -->
