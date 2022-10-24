@@ -36,11 +36,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define APPPROFILE m_strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
         IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
@@ -74,32 +69,17 @@ AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& st
     m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VIWIFI_CAPABILITY);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosHandleMtc::~AosHandleMtc()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleMtc = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleMtc), this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosHandleMtc::App_Notify()
 {
     return AosHandle::App_Notify();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
 {
     if (nType != IAosCallTracker::TYPE_NORMAL)
@@ -142,11 +122,6 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
 {
     if (AosUtil::GetInstance()->IsWifiTest())
@@ -191,11 +166,6 @@ PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceBlock()
 {
     m_bBlocked = IsHandleBlocked();
@@ -203,11 +173,6 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceBlock()
     A_IMS_TRACE_I(APPPROFILE, "InitializeServiceBlock :: block(%s)", _TRACE_B_(m_bBlocked), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceFeature()
 {
     IAosNConfiguration* objConfig = GET_N_CONFIG(m_nSlotId);
@@ -243,11 +208,6 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceFeature()
             m_objFeatureTagList.GetFeatures(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::InitializeFeatureTags()
 {
     AosHandle::InitializeFeatureTags();
@@ -258,11 +218,6 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeFeatureTags()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::CheckSuspended()
 {
     if (AosUtil::GetInstance()->IsWifiTest())
@@ -294,11 +249,6 @@ PROTECTED VIRTUAL void AosHandleMtc::CheckSuspended()
     m_nNetworkType = nCurrNetworkType;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::SetSuspendedReason(IN IMS_UINT32 nReason)
 {
     if (nReason == AosReason::SUSPEND_NO_SERVICE)
@@ -311,11 +261,6 @@ PROTECTED VIRTUAL void AosHandleMtc::SetSuspendedReason(IN IMS_UINT32 nReason)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::ResetSuspendedReason(IN IMS_UINT32 nReason)
 {
     if (nReason == AosReason::SUSPEND_NO_SERVICE)
@@ -328,11 +273,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ResetSuspendedReason(IN IMS_UINT32 nReason)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
@@ -351,11 +291,6 @@ PROTECTED VIRTUAL void AosHandleMtc::Init()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
@@ -371,11 +306,6 @@ PROTECTED VIRTUAL void AosHandleMtc::CleanUp()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
 {
     if (IsEpdgEnabled())
@@ -397,11 +327,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
             BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_NETWORK | BLOCK_3G);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::ProcessFeatureBlock(
         IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked)
 {
@@ -413,11 +338,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessFeatureBlock(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::ProcessBlockChanged()
 {
     if (!GET_N_CONFIG(m_nSlotId)->IsSmsOverImsAvailableWithoutVoiceCapability())
@@ -431,11 +351,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessBlockChanged()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
 {
@@ -473,11 +388,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
 {
     if (IsSupportedNetworkType(m_nNetworkType))
@@ -516,11 +426,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nState)
 {
     if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
@@ -557,11 +462,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nStat
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
 {
     IMS_BOOL bIsVoiceUnavailable = IMS_FALSE;
@@ -600,11 +500,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
 {

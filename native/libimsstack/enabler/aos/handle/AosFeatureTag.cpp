@@ -21,11 +21,6 @@
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosFeatureTag::AosFeatureTag(
         IN const AString& strName, IN const AString& strValue /* = AString::ConstNull() */,
@@ -40,22 +35,12 @@ AosFeatureTag::AosFeatureTag(
             this, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosFeatureTag::~AosFeatureTag()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosFeatureTag = %" PFLS_u "/%" PFLS_x, sizeof(AosFeatureTag),
             this, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTag::SetFeatureTag(
         IN const AString& strName, IN const AString& strValue /* = AString::ConstNull() */)
@@ -64,11 +49,6 @@ void AosFeatureTag::SetFeatureTag(
     m_strValue = strValue;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL AosFeatureTag::Equals(IN AosFeatureTag* pFeatureTag)
 {
@@ -83,11 +63,6 @@ IMS_BOOL AosFeatureTag::Equals(IN AosFeatureTag* pFeatureTag)
     return bResult;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL AosFeatureTag::Equals(
         IN const AString& strName, IN const AString& strValue /*= AString::ConstNull() */)
@@ -102,55 +77,30 @@ IMS_BOOL AosFeatureTag::Equals(
     return bResult;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AString& AosFeatureTag::GetName()
 {
     return m_strName;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AString& AosFeatureTag::GetValue()
 {
     return m_strValue;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_UINT32 AosFeatureTag::GetType()
 {
     return m_nType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_UINT32 AosFeatureTag::GetOption()
 {
     return m_nOption;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosFeatureTagList::AosFeatureTagList() :
         m_nFeatures(ImsAosFeature::NONE),
@@ -162,11 +112,6 @@ AosFeatureTagList::AosFeatureTagList() :
     m_objFeatureTagList.Clear();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosFeatureTagList::~AosFeatureTagList()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosFeatureTagList = %" PFLS_u "/%" PFLS_x,
@@ -175,11 +120,6 @@ PUBLIC VIRTUAL AosFeatureTagList::~AosFeatureTagList()
     Clear();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL AosFeatureTagList::AddFeatureTag(IN const AString& strName,
         IN const AString& strValue /* = AString::ConstNull() */, IN IMS_UINT32 nType /*= 0*/,
@@ -204,11 +144,6 @@ IMS_BOOL AosFeatureTagList::AddFeatureTag(IN const AString& strName,
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL AosFeatureTagList::RemoveFeatureTag(
         IN const AString& strName, IN const AString& strValue /* = AString::ConstNull()*/)
@@ -236,77 +171,42 @@ IMS_BOOL AosFeatureTagList::RemoveFeatureTag(
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::AddFeature(IN IMS_UINT32 nFeature)
 {
     m_nFeatures |= nFeature;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::RemoveFeature(IN IMS_UINT32 nFeature)
 {
     m_nFeatures &= ~(nFeature);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::AddUnavailableFeature(IN IMS_UINT32 nFeature)
 {
     m_nUnavailableFeatures |= nFeature;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::RemoveUnavailableFeature(IN IMS_UINT32 nFeature)
 {
     m_nUnavailableFeatures &= ~(nFeature);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_UINT32 AosFeatureTagList::GetFeatures()
 {
     return m_nFeatures;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_UINT32 AosFeatureTagList::GetUnavailableFeatures()
 {
     return m_nUnavailableFeatures;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::ClearFeatures()
 {
@@ -314,11 +214,6 @@ void AosFeatureTagList::ClearFeatures()
     m_nUnavailableFeatures = ImsAosFeature::NONE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::ClearFeatureTags()
 {
@@ -339,11 +234,6 @@ void AosFeatureTagList::ClearFeatureTags()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::Clear()
 {
@@ -353,11 +243,6 @@ void AosFeatureTagList::Clear()
     ClearFeatures();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL AosFeatureTagList::Equals(IN AosFeatureTagList& objTargetList)
 {
@@ -404,11 +289,6 @@ IMS_BOOL AosFeatureTagList::Equals(IN AosFeatureTagList& objTargetList)
     return bResult;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::Copy(IN AosFeatureTagList& objSourceList)
 {
@@ -426,11 +306,6 @@ void AosFeatureTagList::Copy(IN AosFeatureTagList& objSourceList)
     CopyFeatures(objSourceList);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::CopyFeatures(IN AosFeatureTagList& objSourceList)
 {
@@ -438,11 +313,6 @@ void AosFeatureTagList::CopyFeatures(IN AosFeatureTagList& objSourceList)
     m_nUnavailableFeatures = objSourceList.m_nUnavailableFeatures;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::CopyFeatureTags(IN IMSList<ImsAosFeatureTag*>& objFeatureTag)
 {
@@ -456,55 +326,30 @@ void AosFeatureTagList::CopyFeatureTags(IN IMSList<ImsAosFeatureTag*>& objFeatur
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_UINT32 AosFeatureTagList::GetSize()
 {
     return m_objFeatureTagList.GetSize();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosFeatureTag* AosFeatureTagList::GetAt(IN IMS_UINT32 nIndex)
 {
     return m_objFeatureTagList.GetAt(nIndex);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL AosFeatureTagList::HasUnavailableFeature(IN IMS_UINT32 nFeature) const
 {
     return (m_nUnavailableFeatures & nFeature) > 0;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL AosFeatureTagList::HasFeature(IN IMS_UINT32 nFeature) const
 {
     return (m_nFeatures & nFeature) > 0;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL AosFeatureTagList::HasFeatureTag(
         IN const AString& strName, IN const AString& strValue /* = AString::ConstNull() */) const
@@ -526,11 +371,6 @@ IMS_BOOL AosFeatureTagList::HasFeatureTag(
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void AosFeatureTagList::PrintFeatureTagList()
 {

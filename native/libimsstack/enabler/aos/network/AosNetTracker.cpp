@@ -36,11 +36,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define CNXID m_strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosNetTracker::AosNetTracker(IN IAosAppContext* piAppContext) :
         m_nCnxPolicy(0),
@@ -77,11 +72,6 @@ AosNetTracker::AosNetTracker(IN IAosAppContext* piAppContext) :
             sizeof(AosNetTracker), this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosNetTracker::~AosNetTracker()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosNetTracker = %" PFLS_u "/%" PFLS_x, m_strTag.GetStr(),
@@ -113,11 +103,6 @@ PUBLIC VIRTUAL AosNetTracker::~AosNetTracker()
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsServiceIn(IN IMS_UINT32 nType /* = TYPE_DEFAULT */)
 {
     if (nType == TYPE_WLAN)
@@ -143,41 +128,21 @@ PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsServiceIn(IN IMS_UINT32 nType /* = TYPE
     return m_bIsNetAvailable;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsDataIn()
 {
     return IsServiceAvailable(GetAccessPolicy(), m_nNetServiceType);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsNetworkIn()
 {
     return IsRadioTechAvailable(GetAccessPolicy(), m_nNetRadioType);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsEmergencyLteAttach()
 {
     return m_piNetWatcherInfo->IsLteEmergencyOnly();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsSuspended()
 {
     if (IsEpdgEnabled())
@@ -194,11 +159,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsSuspended()
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsSessionContinuitySupported()
 {
     IMS_UINT32 nPolicy = GetAccessPolicy();
@@ -207,21 +167,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsSessionContinuitySupported()
             ((nPolicy & NW_REPORT_RADIO_LTE) || (nPolicy & NW_REPORT_RADIO_NR)));
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsServiceTimerRunning()
 {
     return ((m_piServiceInTimer != IMS_NULL) || (m_piServiceOutTimer != IMS_NULL));
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosNetTracker::SetListener(IN IAosNetTrackerListener* piListener)
 {
     if (piListener == IMS_NULL)
@@ -248,11 +198,6 @@ PUBLIC VIRTUAL void AosNetTracker::SetListener(IN IAosNetTrackerListener* piList
     piListener->NetTracker_StatusChanged();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosNetTracker::RemoveListener(IN IAosNetTrackerListener* piListener)
 {
     if (piListener == IMS_NULL)
@@ -275,42 +220,21 @@ PUBLIC VIRTUAL void AosNetTracker::RemoveListener(IN IAosNetTrackerListener* piL
     }
 }
 
-/*
-
-Remarks
-
-*/
-
 PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileChangingNetworkType()
 {
     return m_nChangingRat;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileNetworkType()
 {
     return m_nNetRadioType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 AosNetTracker::GetMobileVoiceServiceState()
 {
     return m_piNetWatcherInfo->GetNetVoiceServiceType();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileVoiceNetworkType()
 {
     A_IMS_TRACE_D(CNXID, "GetMobileVoiceNetworkType :: (%s)",
@@ -319,11 +243,6 @@ PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetMobileVoiceNetworkType()
     return m_nNetVoiceRadioType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetNetworkType()
 {
     if (IsEpdgEnabled())
@@ -334,11 +253,6 @@ PUBLIC VIRTUAL IMS_UINT32 AosNetTracker::GetNetworkType()
     return m_nNetRadioType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosNetTracker::SetRatGuardTime(IN IMS_UINT32 nGuardTime)
 {
     m_nRatTime = nGuardTime;
@@ -371,11 +285,6 @@ PUBLIC VIRTUAL void AosNetTracker::SetRatGuardTime(IN IMS_UINT32 nGuardTime)
     A_IMS_TRACE_I(CNXID, "SetRatGuardTime() :: Feature(%s)", FeaturesToString().GetStr(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosNetTracker::SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime)
 {
     m_nServiceOutTime = nGuardTime;
@@ -392,11 +301,6 @@ PUBLIC VIRTUAL void AosNetTracker::SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime)
     A_IMS_TRACE_I(CNXID, "SetSrvOutGuardTime() :: Feature(%s)", FeaturesToString().GetStr(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosNetTracker::SetSrvInGuardTime(IN IMS_UINT32 nGuardTime)
 {
     m_nServiceInTime = nGuardTime;
@@ -413,11 +317,6 @@ PUBLIC VIRTUAL void AosNetTracker::SetSrvInGuardTime(IN IMS_UINT32 nGuardTime)
     A_IMS_TRACE_I(CNXID, "SetSrvInGuardTime() :: Feature(%s)", FeaturesToString().GetStr(), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosNetTracker::NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo)
 {
     if (m_piNetWatcherInfo != piNetWatcherInfo)
@@ -452,11 +351,6 @@ PUBLIC VIRTUAL void AosNetTracker::NetworkWatcher_NotifyStatus(IN INetworkWatche
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosNetTracker::WifiWatcher_NotifyStateChanged(IN IWifiWatcher* piWifiWatcher)
 {
     if (m_piWifiWatcher != piWifiWatcher)
@@ -474,11 +368,6 @@ PUBLIC VIRTUAL void AosNetTracker::WifiWatcher_NotifyStateChanged(IN IWifiWatche
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosNetTracker::Event_NotifyEvent(
         IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
 {
@@ -516,11 +405,6 @@ PUBLIC VIRTUAL void AosNetTracker::Event_NotifyEvent(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosNetTracker::Init()
 {
@@ -529,11 +413,6 @@ void AosNetTracker::Init()
     Update();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::InitConfig()
 {
@@ -585,11 +464,6 @@ void AosNetTracker::InitConfig()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::InitCnxPolicy(IN IMSVector<IMS_SINT32>& objRats)
 {
@@ -614,11 +488,6 @@ void AosNetTracker::InitCnxPolicy(IN IMSVector<IMS_SINT32>& objRats)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::InitRoamingCnxPolicy(IN IMSVector<IMS_SINT32>& objRoamingRats)
 {
@@ -647,11 +516,6 @@ void AosNetTracker::InitRoamingCnxPolicy(IN IMSVector<IMS_SINT32>& objRoamingRat
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::InitObject()
 {
@@ -698,11 +562,6 @@ void AosNetTracker::InitObject()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::Update()
 {
@@ -718,11 +577,6 @@ void AosNetTracker::Update()
     GetStatus(m_nNetServiceType, m_nNetRadioType, m_bIsNetAvailable);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::UpdateVoiceNetwork()
 {
@@ -732,11 +586,6 @@ void AosNetTracker::UpdateVoiceNetwork()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::Notify()
 {
@@ -753,11 +602,6 @@ void AosNetTracker::Notify()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::GetStatus(
         OUT IMS_SINT32& nService, OUT IMS_UINT32& nRadioTech, OUT IMS_BOOL& bIsIn)
@@ -776,11 +620,6 @@ void AosNetTracker::GetStatus(
             ServiceTypeToString(nService), RadioTypeToString(nRadioTech), (bIsIn) ? "IN" : "OUT");
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_UINT32 AosNetTracker::GetAccessPolicy() const
 {
@@ -794,11 +633,6 @@ IMS_UINT32 AosNetTracker::GetAccessPolicy() const
     return m_nCnxPolicy;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::ProcessNetworkChanged(IMS_SINT32 nReason)
 {
@@ -906,11 +740,6 @@ void AosNetTracker::ProcessNetworkChanged(IMS_SINT32 nReason)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::ProcessVoiceNetworkChanged()
 {
@@ -949,33 +778,18 @@ void AosNetTracker::ProcessVoiceNetworkChanged()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsRadioTechAvailable(IN IMS_UINT32 nPolicy, IN IMS_UINT32 nRadioTech)
 {
     return ((nPolicy & 0xffff0000) & (nRadioTech & 0xffff0000));
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsServiceAvailable(IN IMS_UINT32 nPolicy, IN IMS_UINT32 nService)
 {
     return ((nPolicy & 0x000000ff) & (nService & 0x000000ff));
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsNetworkChanged(IN IMS_UINT32 nCurrRat, IN IMS_SINT32 nCurrService)
 {
@@ -998,88 +812,48 @@ IMS_BOOL AosNetTracker::IsNetworkChanged(IN IMS_UINT32 nCurrRat, IN IMS_SINT32 n
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsDataConnected() const
 {
     return m_bIsDataConnected;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsEpdgEnabled() const
 {
     return m_bIsEpdgEnabled;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsCnxTypeEqual(IN IMS_SINT32 nType) const
 {
     return (m_piConnection->GetConnectionType() == nType);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsWlanEnabled() const
 {
     return (GetAccessPolicy() & NW_REPORT_RADIO_WLAN);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsWifiConnected() const
 {
     return m_bIsWifiConnected;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsVonrSupported()
 {
     return m_piAosNConfig->IsImsOverNrEnabled();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL AosNetTracker::IsRoamingAccessPolicyRequired() const
 {
     return ((m_piAosNConfig->GetSupportedRoamingRats()).GetSize() > 0);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::SetDataConnected(IN IMS_BOOL bConnected)
 {
@@ -1091,11 +865,6 @@ void AosNetTracker::SetDataConnected(IN IMS_BOOL bConnected)
     m_bIsDataConnected = bConnected;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::SetEpdgEnabled(IN IMS_BOOL bEnabled)
 {
@@ -1107,11 +876,6 @@ void AosNetTracker::SetEpdgEnabled(IN IMS_BOOL bEnabled)
     m_bIsEpdgEnabled = bEnabled;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::SetWifiConnected(IN IMS_BOOL bConnected)
 {
@@ -1123,11 +887,6 @@ void AosNetTracker::SetWifiConnected(IN IMS_BOOL bConnected)
     m_bIsWifiConnected = bConnected;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::ProcessInTimerExpired()
 {
@@ -1137,11 +896,6 @@ void AosNetTracker::ProcessInTimerExpired()
     Notify();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::ProcessOutTimerExpired()
 {
@@ -1150,11 +904,6 @@ void AosNetTracker::ProcessOutTimerExpired()
     Notify();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::ProcessRatTimerExpired()
 {
@@ -1164,11 +913,6 @@ void AosNetTracker::ProcessRatTimerExpired()
     Notify();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::ProcessVoiceRatTimerExpired()
 {
@@ -1178,11 +922,6 @@ void AosNetTracker::ProcessVoiceRatTimerExpired()
     Notify();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::ClearTimers()
 {
@@ -1192,11 +931,6 @@ void AosNetTracker::ClearTimers()
     StopTimer(TIMER_VOICE_RAT_GUARD);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
@@ -1232,11 +966,6 @@ void AosNetTracker::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
     *ppiTimer = m_pUtil->StartTimer(nDuration, this, TimerToString(nType));
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void AosNetTracker::StopTimer(IN IMS_UINT32 nType)
 {
@@ -1272,11 +1001,6 @@ void AosNetTracker::StopTimer(IN IMS_UINT32 nType)
     m_pUtil->StopTimer(*ppiTimer, TimerToString(nType));
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void AosNetTracker::AosConnection_StateChanged(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_D(CNXID, "AoSConnection_StateChanged :: nState (%d)", nState, 0, 0);
@@ -1297,18 +1021,8 @@ PRIVATE VIRTUAL void AosNetTracker::AosConnection_StateChanged(IN IMS_UINT32 nSt
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void AosNetTracker::AosConnection_IpChanged() {}
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void AosNetTracker::AosConnection_IpcanCatChanged()
 {
     IMS_BOOL bEpdgEnabled = m_piConnection->IsEpdgEnabled();
@@ -1323,25 +1037,10 @@ PRIVATE VIRTUAL void AosNetTracker::AosConnection_IpcanCatChanged()
     Notify();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void AosNetTracker::AosConnection_PcscfChanged() {}
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void AosNetTracker::AosConnection_ConnectionFailed() {}
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void AosNetTracker::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
@@ -1374,11 +1073,6 @@ PRIVATE VIRTUAL void AosNetTracker::Timer_TimerExpired(IN ITimer* piTimer)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 AString AosNetTracker::FeaturesToString()
 {
@@ -1399,11 +1093,6 @@ AString AosNetTracker::FeaturesToString()
     return strFeature;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL const IMS_CHAR* AosNetTracker::RadioTypeToString(IN IMS_UINT32 nState)
 {
     switch (nState)
@@ -1461,11 +1150,6 @@ PRIVATE GLOBAL const IMS_CHAR* AosNetTracker::RadioTypeToString(IN IMS_UINT32 nS
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL const IMS_CHAR* AosNetTracker::ServiceTypeToString(IN IMS_UINT32 nState)
 {
     switch (nState)
@@ -1490,11 +1174,6 @@ PRIVATE GLOBAL const IMS_CHAR* AosNetTracker::ServiceTypeToString(IN IMS_UINT32 
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosNetTracker::TimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)

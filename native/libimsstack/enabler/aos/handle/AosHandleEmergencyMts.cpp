@@ -25,11 +25,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define APPPROFILE m_strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosHandleEmergencyMts::AosHandleEmergencyMts(IN IAosAppContext* piAppContext,
         IN const AString& strAppId, IN const AString& strServiceId,
@@ -40,22 +35,12 @@ AosHandleEmergencyMts::AosHandleEmergencyMts(IN IAosAppContext* piAppContext,
             strAppId.GetStr(), sizeof(AosHandleEmergencyMts), this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosHandleEmergencyMts::~AosHandleEmergencyMts()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleEmergencyMts = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleEmergencyMts), this);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleEmergencyMts::InitializeServiceBlock()
 {
     if (!GET_N_CONFIG(m_nSlotId)->IsEmergencySmsOverImsSupported())
@@ -66,11 +51,6 @@ PROTECTED VIRTUAL void AosHandleEmergencyMts::InitializeServiceBlock()
     A_IMS_TRACE_I(APPPROFILE, "InitializeServiceBlock :: block(%s)", _TRACE_B_(m_bBlocked), 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosHandleEmergencyMts::InitializeServiceFeature()
 {
     m_objFeatureTagList.Clear();

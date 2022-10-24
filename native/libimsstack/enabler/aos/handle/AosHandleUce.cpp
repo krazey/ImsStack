@@ -21,11 +21,6 @@
 
 //__IMS_TRACE_TAG_USER_DECL__("AOS");
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosHandleUce::AosHandleUce(IN IAosAppContext* piAppContext, IN const AString& strAppId,
         IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
@@ -37,11 +32,6 @@ AosHandleUce::AosHandleUce(IN IAosAppContext* piAppContext, IN const AString& st
     m_bRegFeatureTagRequired = IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosHandleUce::~AosHandleUce()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleUce = %" PFLS_u "/%" PFLS_x,

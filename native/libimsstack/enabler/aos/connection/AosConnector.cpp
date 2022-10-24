@@ -34,11 +34,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define APPPROFILE strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
@@ -77,22 +72,12 @@ AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
     m_pUtil = AosUtil::GetInstance();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosConnector::~AosConnector()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosConnector = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosConnector), this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosConnector::Start()
 {
     A_IMS_TRACE_I(APPPROFILE, "Start :: ready (%s) , connector is pending (%s)",
@@ -117,11 +102,6 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::Start()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosConnector::Stop()
 {
     m_piConnection->Deactivate();
@@ -129,11 +109,6 @@ PUBLIC VIRTUAL void AosConnector::Stop()
     Notify(LISTENER_TYPE_DEACTIVATED);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosConnector::Stop(IN IMS_SINT32 nDelayTimeSec)
 {
     A_IMS_TRACE_I(APPPROFILE, "Stop :: delay (%d)", nDelayTimeSec, 0, 0);
@@ -152,21 +127,11 @@ PUBLIC VIRTUAL void AosConnector::Stop(IN IMS_SINT32 nDelayTimeSec)
     StartTimer(TIMER_STOP_DELAY, nDelayTimeSec * 1000);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosConnector::SetListener(IN IAosConnectorListener* piListener)
 {
     m_piListener = piListener;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosConnector::IsReady() const
 {
     if (m_piStopDelayTimer != IMS_NULL)
@@ -177,22 +142,12 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::IsReady() const
     return (m_nState == STATE_READY);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnector::ClearPending()
 {
     m_nPendingFeature = PENDING_NONE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnector::SetState(IN IMS_UINT32 nState)
 {
@@ -218,66 +173,36 @@ void AosConnector::SetState(IN IMS_UINT32 nState)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnector::SetDataConnected(IN IMS_BOOL bConnected)
 {
     m_bDataConnected = bConnected;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnector::SetEmergencyType(IN IMS_BOOL bEmergency)
 {
     m_bEmergencyType = bEmergency;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnector::SetPcscfConfigured(IN IMS_BOOL bConfigured)
 {
     m_bPcscfConfigured = bConfigured;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::IsDataConnected() const
 {
     return m_bDataConnected;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::IsEmergencyType() const
 {
     return m_bEmergencyType;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::IsIpv6DelayRequired()
 {
@@ -306,11 +231,6 @@ IMS_BOOL AosConnector::IsIpv6DelayRequired()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::IsPcscfChangeAvailable()
 {
@@ -328,44 +248,24 @@ IMS_BOOL AosConnector::IsPcscfChangeAvailable()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::IsPcscfConfigured() const
 {
     return m_bPcscfConfigured;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::IsPending() const
 {
     return (m_nPendingFeature != PENDING_NONE);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::IsTerminating() const
 {
     return m_bIsTerminating;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::IsTimerRunning(IN IMS_UINT32 nType) const
 {
@@ -387,11 +287,6 @@ IMS_BOOL AosConnector::IsTimerRunning(IN IMS_UINT32 nType) const
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnector::CheckReadyRecoveryAndSetTimer()
 {
@@ -405,11 +300,6 @@ void AosConnector::CheckReadyRecoveryAndSetTimer()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::CheckIpChangedForEmergency()
 {
@@ -440,11 +330,6 @@ IMS_BOOL AosConnector::CheckIpChangedForEmergency()
     return objIpa.Equals(objCurrIpa);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::CheckIpaAndProcessReadyRecovery()
 {
@@ -487,11 +372,6 @@ IMS_BOOL AosConnector::CheckIpaAndProcessReadyRecovery()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_UINT32 AosConnector::GetActualRecoveryWaitingTime()
 {
@@ -507,11 +387,6 @@ IMS_UINT32 AosConnector::GetActualRecoveryWaitingTime()
             m_nReadyRecoveryCount - READY_RECOVERY_DEFAULT_COUNT);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 IMS_BOOL AosConnector::SelectIpVersion()
 {
@@ -576,11 +451,6 @@ IMS_BOOL AosConnector::SelectIpVersion()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void AosConnector::Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nReason /* = REASON_NONE */)
 {
@@ -608,11 +478,6 @@ void AosConnector::Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nReason /* = REASON
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::CleanAll()
 {
     ClearTimers();
@@ -623,11 +488,6 @@ PROTECTED VIRTUAL void AosConnector::CleanAll()
     SetState(STATE_IDLE);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosConnector::ConfigurePcscf()
 {
     m_piPcscf->Configure();
@@ -636,11 +496,6 @@ PROTECTED VIRTUAL IMS_BOOL AosConnector::ConfigurePcscf()
     return IsPcscfConfigured();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::ProcessIpv6TimerExpired()
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessIpv6TimerExpired", 0, 0, 0);
@@ -679,11 +534,6 @@ PROTECTED VIRTUAL void AosConnector::ProcessIpv6TimerExpired()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::ProcessStopDelayTimerExpired()
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessStopDelayTimerExpired", 0, 0, 0);
@@ -693,11 +543,6 @@ PROTECTED VIRTUAL void AosConnector::ProcessStopDelayTimerExpired()
     Stop();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::ProcessReadyRecoveryTimerExpired()
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessReadyRecoveryTimerExpired", 0, 0, 0);
@@ -709,11 +554,6 @@ PROTECTED VIRTUAL void AosConnector::ProcessReadyRecoveryTimerExpired()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
     ITimer** ppiTimer = IMS_NULL;
@@ -744,11 +584,6 @@ PROTECTED VIRTUAL void AosConnector::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT
     *ppiTimer = m_pUtil->StartTimer(nDuration, this, TimerToString(nType));
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::StopTimer(IN IMS_UINT32 nType)
 {
     ITimer** ppiTimer = IMS_NULL;
@@ -777,11 +612,6 @@ PROTECTED VIRTUAL void AosConnector::StopTimer(IN IMS_UINT32 nType)
     m_pUtil->StopTimer(*ppiTimer, TimerToString(nType));
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::ClearTimers()
 {
     StopTimer(TIMER_IPV6);
@@ -798,11 +628,6 @@ PROTECTED VIRTUAL void AosConnector::ClearTimers()
     StopTimer(TIMER_READY_RECOVERY);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nDataState)
 {
     A_IMS_TRACE_I(APPPROFILE, "AoSConnection_StateChanged :: state(%d)", nDataState, 0, 0);
@@ -869,11 +694,6 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nD
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::AosConnection_IpChanged()
 {
     A_IMS_TRACE_I(APPPROFILE, "AosConnection_IpChanged", 0, 0, 0);
@@ -941,11 +761,6 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_IpChanged()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::AosConnection_IpcanCatChanged()
 {
     A_IMS_TRACE_I(APPPROFILE, "AosConnection_IpcanCatChanged", 0, 0, 0);
@@ -953,11 +768,6 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_IpcanCatChanged()
     Notify(LISTENER_TYPE_UPDATED, REASON_IPCAN_CAT_CHANGED);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::AosConnection_PcscfChanged()
 {
     A_IMS_TRACE_I(APPPROFILE, "AosConnection_PcscfChanged", 0, 0, 0);
@@ -976,11 +786,6 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_PcscfChanged()
     Notify(LISTENER_TYPE_UPDATED, REASON_PCSCF_CHANGED);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::AosConnection_ConnectionFailed()
 {
     A_IMS_TRACE_I(APPPROFILE, "AosConnection_ConnectionFailed", 0, 0, 0);
@@ -989,11 +794,6 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_ConnectionFailed()
     Notify(LISTENER_TYPE_DEACTIVATED, REASON_PERMANENTLY_FAILED);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::Pcscf_NotifyResult(IN IMS_BOOL bResult)
 {
     A_IMS_TRACE_I(APPPROFILE, "Pcscf_NotifyResult :: result(%s)", (bResult) ? "SUCCESS" : "FAILURE",
@@ -1026,11 +826,6 @@ PROTECTED VIRTUAL void AosConnector::Pcscf_NotifyResult(IN IMS_BOOL bResult)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
@@ -1057,11 +852,6 @@ PROTECTED VIRTUAL void AosConnector::Timer_TimerExpired(IN ITimer* piTimer)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void AosConnector::CleanUp()
 {
     A_IMS_TRACE_I(APPPROFILE, "CleanUp", 0, 0, 0);
@@ -1081,11 +871,6 @@ PROTECTED VIRTUAL void AosConnector::CleanUp()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED GLOBAL const IMS_CHAR* AosConnector::TimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)

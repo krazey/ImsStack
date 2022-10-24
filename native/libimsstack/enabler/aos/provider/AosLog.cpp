@@ -166,32 +166,17 @@ public:
     };
 };
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosLog::AosLog()
 {
     IMS_TRACE_D("AosLog()", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosLog::~AosLog()
 {
     IMS_TRACE_D("~AosLog()", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::AppMessageToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -255,11 +240,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppMessageToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::AppPendingToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -290,11 +270,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppPendingToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -343,11 +318,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::AppStateToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -375,11 +345,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppStateToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -413,11 +378,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -460,11 +420,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::RegModeToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -483,11 +438,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegModeToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -518,11 +468,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::RegReasonToString(IN IMS_SINT32 nType)
 {
     switch (nType)
@@ -562,11 +507,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegReasonToString(IN IMS_SINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::RegStateToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -597,11 +537,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegStateToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
@@ -632,11 +567,6 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL const IMS_CHAR* AosLog::EventToString(IN IMS_SINT32 nEvent)
 {
     switch (nEvent)

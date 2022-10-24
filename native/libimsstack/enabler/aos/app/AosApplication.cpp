@@ -1159,21 +1159,11 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateNotReady_Condition(IN IMSMSG& /*
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosApplication::StateNotReady_Connection(IN IMSMSG& /* objMsg */)
 {
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosApplication::StateReady_Condition(IN IMSMSG& /* objMsg */)
 {
     if (!m_pCondition->IsReady())

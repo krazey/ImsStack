@@ -1788,11 +1788,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddOperation_OnSendDeregister()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddOperation_OnNotifyAkaResponse()
 {
     ControlPrivateHeader();
