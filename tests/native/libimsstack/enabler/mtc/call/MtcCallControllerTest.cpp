@@ -86,6 +86,11 @@ protected:
     }
 };
 
+TEST_F(MtcCallControllerTest, NotifyJniEnablerSetDoesNothing)
+{
+    pCallController->NotifyJniEnablerSet();
+}
+
 TEST_F(MtcCallControllerTest, TerminateCallsByNoneKeyTerminatesTargetCalls)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);

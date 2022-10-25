@@ -373,33 +373,43 @@ TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
     pNormalMtcService->OpenEmergencyService();
 }
 
+TEST_F(MtcServiceTest, NotifyJniEnablerSetDoesNothing)
+{
+    pNormalMtcService->NotifyJniEnablerSet();
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
 TEST_F(MtcServiceTest, CoreServicePageMessageReceivedDoesNothing)
 {
-    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
     pNormalMtcService->CoreService_PageMessageReceived(&objMockCoreService, piMessage);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
 TEST_F(MtcServiceTest, CoreServiceReferenceReceivedDoesNothing)
 {
-    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     MockIReference objMockReference;
     pNormalMtcService->CoreService_ReferenceReceived(&objMockCoreService, &objMockReference);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
 TEST_F(MtcServiceTest, CoreServiceServiceClosedDoesNothing)
 {
-    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     IReasonInfo* piReasonInfo = reinterpret_cast<IReasonInfo*>(FAKE_ADDRESS);
     pNormalMtcService->CoreService_ServiceClosed(&objMockCoreService, piReasonInfo);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
+}
+
+TEST_F(MtcServiceTest, CoreServiceUnsolicitedNotifyReceivedDoesNothing)
+{
+    MockIMessage objMessage;
+    pNormalMtcService->CoreService_UnsolicitedNotifyReceived(&objMockCoreService, &objMessage);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
 TEST_F(MtcServiceTest, CoreServiceCapabilityQueryReceivedCallsQueryHandler)
 {
-    // TODO: mock MtcCapabilityQueryHandler.
+    // TODO: mock MtcCapabilityQueryHandler. Currently, being covered by another test.
     // pNormalMtcService->CoreService_CapabilityQueryReceived(&objMockCoreService, );
 }
 
@@ -410,9 +420,8 @@ TEST_F(MtcServiceTest, ImsAosMonitorConnectedInvokesEventHandler)
     EXPECT_CALL(*pMockAosEventHandler, OnServiceConnected(nFeature, nIpcan))
             .Times(1);
 
-    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     pNormalMtcService->ImsAosMonitor_Connected(nFeature, nIpcan);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
 TEST_F(MtcServiceTest, ImsAosMonitorNotifyInvokesEventHandler)
@@ -422,9 +431,8 @@ TEST_F(MtcServiceTest, ImsAosMonitorNotifyInvokesEventHandler)
     EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState))
             .Times(1);
 
-    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
-    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
 }
 
 }  // namespace android
