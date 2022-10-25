@@ -3029,6 +3029,10 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf
 PROTECTED VIRTUAL void AosRegistration::ProcessSubReinitiate()
 {
     DestroySubscription();
+
+    if (!IsRegistered())
+        return;
+
     CreateSubscription();
 }
 
