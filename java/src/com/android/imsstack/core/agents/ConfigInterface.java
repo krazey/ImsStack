@@ -16,11 +16,28 @@
 
 package com.android.imsstack.core.agents;
 
+import android.annotation.NonNull;
 import android.os.PersistableBundle;
 
 import com.android.imsstack.core.config.CarrierConfig;
 
 public interface ConfigInterface extends IAgent {
+    /**
+     * A listener to monitor the change notification when the configuration is changed.
+     */
+    public interface Listener {
+        /**
+         * Notifies the caller that the carrier configuration is changed.
+         *
+         * @param slotId The slot id to notify of the change.
+         * @param subId The subscription id to notify of the change.
+         *              If the subscription is not detected successfully, this subscription id is
+         *              set to {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
+         */
+        default void onCarrierConfigChanged(int slotId, int subId) {
+        }
+    }
+
     /**
      * Returns the carrier configuration of this interface.
      *
@@ -43,4 +60,25 @@ public interface ConfigInterface extends IAgent {
      * @return true if it's successfully written to the file, false otherwise.
      */
     boolean writeTestConfig(PersistableBundle config);
+
+    /**
+     * Checks if the carrier configuration is loaded or not.
+     *
+     * @return {@code true} if the configuration is loaded, {@code false} otherwise.
+     */
+    boolean isConfigLoaded();
+
+    /**
+     * Adds a listener to monitor the change notification of the configuration.
+     *
+     * @param listener A listener to be added.
+     */
+    void addListener(@NonNull Listener listener);
+
+    /**
+     * Removes the listener that was previously added.
+     *
+     * @param listener A listener to be removed.
+     */
+    void removeListener(@NonNull Listener listener);
 }

@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.core.agents;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +32,7 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.IoUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -41,6 +43,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,9 +61,11 @@ public class ConfigAgent implements ConfigInterface {
     private static final String KEY_NAME = "name";
     private static final String KEY_VALUE = "value";
 
+    private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
     private final int mSlotId;
     private final CarrierConfig mCarrierConfig;
     private final IntentReceiver mIntentReceiver;
+    private volatile boolean mConfigLoaded;
     private PersistableBundle mDefaultImsConfig;
     private PersistableBundle mTestConfig;
     private XmlPullParserFactory mFactory;
@@ -80,6 +86,7 @@ public class ConfigAgent implements ConfigInterface {
     @Override
     public void cleanup() {
         mIntentReceiver.unregister();
+        mListeners.clear();
     }
 
     @Override
@@ -141,6 +148,40 @@ public class ConfigAgent implements ConfigInterface {
         }
     }
 
+    @Override
+    public boolean isConfigLoaded() {
+        return mConfigLoaded;
+    }
+
+    @Override
+    public void addListener(@NonNull Listener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Listener must not be null.");
+        }
+
+        mListeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(@NonNull Listener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Listener must not be null.");
+        }
+
+        mListeners.remove(listener);
+    }
+
+    @VisibleForTesting
+    protected void notifyCarrierConfigChanged(int subId) {
+        ImsLog.i("notifyCarrierConfigChanged: slotId=" + mSlotId + ", subId=" + subId);
+
+        AppContext.runTask(() -> {
+            for (Listener l : mListeners) {
+                l.onCarrierConfigChanged(mSlotId, subId);
+            }
+        }, 0);
+    }
+
     public void updateCarrierConfig(int subId, SimCarrierId id) {
         // Loads IMS carrier configuration from CarrierConfigManager.
         PersistableBundle config = getCarrierConfig(subId);
@@ -166,6 +207,12 @@ public class ConfigAgent implements ConfigInterface {
         overrideTestConfigs(config);
 
         mCarrierConfig.setConfig(config, mSlotId);
+
+        if (!mConfigLoaded) {
+            mConfigLoaded = true;
+        }
+
+        notifyCarrierConfigChanged(subId);
     }
 
     private void overrideTestConfigs(PersistableBundle config) {
