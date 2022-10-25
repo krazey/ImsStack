@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef TEST_IMS_RADIO_SERVICE_H_
-#define TEST_IMS_RADIO_SERVICE_H_
+#ifndef MOCK_I_SILENT_REDIAL_HELPER_H_
+#define MOCK_I_SILENT_REDIAL_HELPER_H_
 
-#include "ServiceImsRadio.h"
-#include "MockIImsRadio.h"
+#include <gmock/gmock.h>
+#include "call/ISilentRedialHelper.h"
 
-class TestImsRadioService : public ImsRadioService
+class MockISilentRedialHelper : public ISilentRedialHelper
 {
 public:
-    inline TestImsRadioService() :
-            ImsRadioService(),
-            m_piImsRadio(&m_objImsRadio)
-    {
-    }
+    ~MockISilentRedialHelper() {}
 
-    inline IImsRadio* GetImsRadio(IN IMS_SINT32 /* nSlotId */) override { return m_piImsRadio; }
-
-    inline MockIImsRadio& GetMockImsRadio() { return m_objImsRadio; }
-
-private:
-    MockIImsRadio m_objImsRadio;
-
-    IImsRadio* m_piImsRadio;
+    MOCK_METHOD(IMS_RESULT, Redial, (IN IMS_SINT32), (override));
+    MOCK_METHOD(IMS_UINT32, GetType, (), (override));
 };
 
 #endif

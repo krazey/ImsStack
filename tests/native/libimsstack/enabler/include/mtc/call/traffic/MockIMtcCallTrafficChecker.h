@@ -37,7 +37,6 @@ public:
     MOCK_METHOD(void, StartTrafficChecking,
             (IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi), (override));
     MOCK_METHOD(void, StopTrafficChecking, (TrafficType eTrafficType), (override));
-    MOCK_METHOD(void, HandleIpcanChanged, (IN IMS_UINT32 eIpcan, IMS_BOOL bEmergency), (override));
 };
 
 class MockIMtcCallTrafficCheckerListener : public IMtcCallTrafficCheckerListener

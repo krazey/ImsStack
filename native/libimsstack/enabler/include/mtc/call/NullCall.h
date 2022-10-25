@@ -70,7 +70,6 @@ public:
     inline void Terminate(IN const CallReasonInfo&) override {}
     inline void SendDtmf(IN const AString&, IN IMS_SINT32) override {}
     inline void SendUssd(IN const AString&) override {}
-    inline void HandleIpcanChanged() override {}
 
     inline CallKey GetKey() const override { return CALL_KEY_INVALID; }
     inline CallType GetCallType() const override { return CallType::UNKNOWN; }

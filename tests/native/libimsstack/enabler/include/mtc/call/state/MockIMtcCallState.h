@@ -23,6 +23,7 @@
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
+#include "helper/IMtcAosStateListener.h"
 
 class AString;
 class IReference;
@@ -73,7 +74,6 @@ public:
     MOCK_METHOD(CallStateName, Terminate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(CallStateName, SendDtmf, (IN const AString& strSignal, IN IMS_SINT32 nDuration),
             (override));
-    MOCK_METHOD(CallStateName, HandleIpcanChanged, (), (override));
     MOCK_METHOD(CallStateName, HandleIncomingUssi, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, OnUssiAttached, (), (override));
     MOCK_METHOD(CallStateName, AcceptUssi, (IN CallType eCallType, IN MediaInfo* pMediaInfo),
@@ -141,7 +141,10 @@ public:
     MOCK_METHOD(CallStateName, OnReceivingNetworkToneStarted, (), (override));
     MOCK_METHOD(CallStateName, OnReceivingNetworkToneFailed, (), (override));
     MOCK_METHOD(CallStateName, OnMediaFailed, (IN const CallReasonInfo& objReason), (override));
-    MOCK_METHOD(CallStateName, OnSrvccStateUpdated, (SrvccState eState), (override));
+    MOCK_METHOD(CallStateName, OnSrvccStateUpdated, (IN SrvccState eState), (override));
+    MOCK_METHOD(CallStateName, OnAosStateChanged, (IN MtcAosState eState, IN IMS_UINT32 eAosReason),
+            (override));
+    MOCK_METHOD(CallStateName, OnIpcanChanged, (IN IMS_UINT32 eIpcan), (override));
 };
 
 #endif

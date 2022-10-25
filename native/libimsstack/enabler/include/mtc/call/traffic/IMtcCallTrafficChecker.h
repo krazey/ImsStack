@@ -35,7 +35,6 @@ public:
     virtual void StartTrafficChecking(
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) = 0;
     virtual void StopTrafficChecking(IN TrafficType eTrafficType) = 0;
-    virtual void HandleIpcanChanged(IN IMS_UINT32 eIpcan, IN IMS_BOOL bEmergency) = 0;
 };
 
 class IMtcCallTrafficCheckerListener

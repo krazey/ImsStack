@@ -87,6 +87,7 @@ PUBLIC VIRTUAL void MtcApp::Start()
     InitConfiguration();
     CreateServices();
     InitCallManager();
+    m_objMtcCallTrafficChecker.Init();
 }
 
 PUBLIC VIRTUAL void MtcApp::Stop()

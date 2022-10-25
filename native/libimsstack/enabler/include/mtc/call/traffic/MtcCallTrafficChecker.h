@@ -24,15 +24,18 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/traffic/IMtcCallTrafficChecker.h"
+#include "helper/IMtcAosStateListener.h"
 
 class IMtcContext;
 class IMtcRadioConnectionFailureListener;
+class IMtcService;
 class MtcTrafficInfo;
 
 class MtcCallTrafficChecker final :
         public IMtcCallTrafficChecker,
         public IMtcCallStateListener,
-        public IMtcRadioConnectionListener
+        public IMtcRadioConnectionListener,
+        public IMtcAosStateListener
 {
 public:
     explicit MtcCallTrafficChecker(IN IMtcContext& objContext,
@@ -41,13 +44,18 @@ public:
     MtcCallTrafficChecker(IN const MtcCallTrafficChecker&) = delete;
     MtcCallTrafficChecker& operator=(IN const MtcCallTrafficChecker&) = delete;
 
+    void Init();
+
     void SetTrafficCheckerListener(IN IMtcCallTrafficCheckerListener* pListener) override;
     IMS_BOOL IsTrafficPrepared(IN CallType eCallType, IN IMS_BOOL bEmergency) const override;
     IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const override;
     void StartTrafficChecking(
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) override;
     void StopTrafficChecking(IN TrafficType eTrafficType) override;
-    void HandleIpcanChanged(IN IMS_UINT32 eIpcan, IN IMS_BOOL bEmergency) override;
+
+    // IMtcAosStateListener
+    inline void OnAosStateChanged(IN IMtcService&, IN MtcAosState, IN IMS_UINT32) override {}
+    void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
 
     // IMtcCallStateListener
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
@@ -64,7 +72,6 @@ public:
     ImsList<CallKey>& GetCallKeys(IN TrafficType eTrafficType) const;
 
 private:
-    void Init();
     void DeInit();
     TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
     IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi);

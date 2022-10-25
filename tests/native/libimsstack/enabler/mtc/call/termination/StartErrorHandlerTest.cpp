@@ -21,6 +21,7 @@
 #include "MockIMtcService.h"
 #include "MtcContextRepository.h"
 #include "call/IMtcCall.h"
+#include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -189,6 +190,28 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
             .Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    // EPS Fallback Trigger case test
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT);
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(-1));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(6000));
+    MockEpsFallbackTrigger objEpsFbTrigger(objCallContext);
+    ON_CALL(objCallContext, GetEpsFallbackTrigger)
+            .WillByDefault(ReturnRef(objEpsFbTrigger));
+    ON_CALL(objEpsFbTrigger, IsVoNr)
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    ON_CALL(objEpsFbTrigger, IsVoNr)
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)

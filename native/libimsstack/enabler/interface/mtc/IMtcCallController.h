@@ -173,8 +173,6 @@ public:
     // TODO: Consider ECT, SRVCC
     virtual void Transfer(IN CallKey nCallKey, IN const AString& strTarget) = 0;
 
-    virtual void HandleIpcanChanged() = 0;
-
     virtual ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) = 0;
     virtual void ReleaseRedialHelper() = 0;

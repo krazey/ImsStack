@@ -24,6 +24,7 @@
 class AString;
 class ICoreService;
 class IMtcAosConnector;
+class IMtcAosStateListener;
 class ISrvccStateListener;
 enum class ServiceStatus;
 enum class ServiceType;
@@ -35,12 +36,15 @@ public:
     virtual ~MockIMtcService() {}
 
     MOCK_METHOD(ServiceType, GetServiceType, (), (const, override));
+    MOCK_METHOD(void, AddAosStateListener, (IN IMtcAosStateListener*), (override));
+    MOCK_METHOD(void, RemoveAosStateListener, (IN IMtcAosStateListener*), (override));
     MOCK_METHOD(void, AddSrvccStateListener, (IN ISrvccStateListener* piListener), (override));
     MOCK_METHOD(void, RemoveSrvccStateListener, (IN ISrvccStateListener* piListener), (override));
     MOCK_METHOD(IMS_BOOL, IsActive, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergency, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWlanIpCanType, (), (const, override));
-    MOCK_METHOD(ServiceStatus, GetServiceStatus, (), (const, override));
+    MOCK_METHOD(ServiceStatus, GetOldStatus, (), (const, override));
+    MOCK_METHOD(ServiceStatus, GetStatus, (), (const, override));
     MOCK_METHOD(ICoreService*, GetICoreService, (), (const, override));
     MOCK_METHOD(IMtcAosConnector*, GetAosConnector, (), (const, override));
     MOCK_METHOD(SrvccState, GetSrvccState, (), (const, override));

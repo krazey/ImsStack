@@ -26,6 +26,7 @@ class IMtcService;
 class IJniMtcServiceThread;
 class MtcEmergencyServiceManager;
 class IMtcCallTrafficChecker;
+class IMtcAosStateListener;
 
 class MockMtcAosEventHandler : public MtcAosEventHandler
 {
@@ -36,18 +37,19 @@ public:
     {
     }
     ~MockMtcAosEventHandler() {}
+
+    MOCK_METHOD(void, AddListener, (IN IMtcAosStateListener*), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IMtcAosStateListener*), (override));
     MOCK_METHOD(void, OnConnected,
-            (IN IMS_UINT32, IN IMS_UINT32, IN IJniMtcServiceThread*, IN MtcEmergencyServiceManager*,
-                    IN IMtcCallController&, IN IMtcCallTrafficChecker&),
-            (override));
-    MOCK_METHOD(void, OnDisconnecting, (IN IMS_UINT32, IN IMtcCallController&), (override));
-    MOCK_METHOD(void, OnDisconnected, (IN IMS_UINT32, IN IMtcCallController&,
-            IN IJniMtcServiceThread*, IN MtcEmergencyServiceManager*), (override));
-    MOCK_METHOD(void, OnSuspended, (IN IMS_UINT32, IN IMtcCallController&), (override));
+            (IN IMS_UINT32, IN IMS_UINT32, IN IJniMtcServiceThread*,
+            IN MtcEmergencyServiceManager*), (override));
+    MOCK_METHOD(void, OnDisconnecting, (IN IMS_UINT32), (override));
+    MOCK_METHOD(void, OnDisconnected, (IN IMS_UINT32, IN IJniMtcServiceThread*,
+            IN MtcEmergencyServiceManager*), (override));
+    MOCK_METHOD(void, OnSuspended, (IN IMS_UINT32), (override));
     MOCK_METHOD(void, OnResumed, (), (override));
     MOCK_METHOD(void, OnServiceConnected, (IN IMS_UINT32, IN IMS_UINT32), (override));
     MOCK_METHOD(void, OnEventNotify, (IN IMS_UINT32, IN IMS_UINT32), (override));
-    MOCK_METHOD(void, SetOnSrvcc, (IN IMS_BOOL), (override));
 };
 
 #endif

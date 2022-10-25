@@ -51,6 +51,7 @@ public:
     virtual AString GetSupportedHeaderValue() const = 0;
     virtual AString GetServiceRouteHeaderValue() const = 0;
     virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) = 0;
+    virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState) = 0;
 };
 
 #endif

@@ -15,8 +15,10 @@
  */
 
 #include <gtest/gtest.h>
+#include "IIpcan.h"
 #include "ImsList.h"
 #include "ImsMap.h"
+#include "MockIMtcService.h"
 #include "MtcDef.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/IMtcCall.h"
@@ -24,8 +26,11 @@
 #include "call/state/IMtcCallState.h"
 #include "call/MockIMtcCallContext.h"
 #include "conferencecall/ConferenceDef.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "core/IReference.h"
 #include "core/MockISession.h"
+#include "helper/IMtcAosStateListener.h"
 #include "precondition/QosDef.h"
 #include "sipcore/ISipClientConnection.h"
 #include "sipcore/ISipConnection.h"
@@ -36,25 +41,38 @@ LOCAL CallStateName INITIAL_CALL_STATE = CallStateName::IDLE;
 LOCAL CallType ANY_CALL_TYPE = CallType::VOIP;
 
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 class MtcCallStateTest : public ::testing::Test
 {
 public:
     MtcCallState* pState;
     MockIMtcCallContext objContext;
+    MockIMtcService objService;
     MockISession objISession;
+    MockIMtcConfigurationManager* pConfigurationManager;
+    MtcConfigurationProxy* pConfigurationProxy;
     MediaInfo objMediaInfo;
     CallReasonInfo* pReason;
 
 protected:
     virtual void SetUp() override
     {
+        ON_CALL(objContext, GetService)
+                .WillByDefault(ReturnRef(objService));
+
+        pConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        ON_CALL(objContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
+
         pReason = new CallReasonInfo(CODE_UNSPECIFIED);
         pState = new MtcCallState(INITIAL_CALL_STATE, objContext);
     }
 
     virtual void TearDown() override
     {
+        delete pConfigurationProxy;
         delete pReason;
         delete pState;
     }
@@ -177,12 +195,6 @@ TEST_F(MtcCallStateTest, SendDtmfDoesNothing)
 {
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->SendDtmf("anySignal", 1));
-}
-
-TEST_F(MtcCallStateTest, HandleIpcanChangedDoesNothing)
-{
-    EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->HandleIpcanChanged());
 }
 
 TEST_F(MtcCallStateTest, HandleIncomingUssiDoesNothing)
@@ -507,4 +519,57 @@ TEST_F(MtcCallStateTest, OnMediaFailedDoesNothing)
 {
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->OnMediaFailed(*pReason));
+}
+
+TEST_F(MtcCallStateTest, OnSrvccStateUpdatedDoesNothing)
+{
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnSrvccStateUpdated(SrvccState::IDLE));
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnSrvccStateUpdated(SrvccState::STARTED));
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnSrvccStateUpdated(SrvccState::SUCCEEDED));
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnSrvccStateUpdated(SrvccState::FAILED));
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnSrvccStateUpdated(SrvccState::CANCELED));
+}
+
+TEST_F(MtcCallStateTest, OnAosConnectedDoesNothing)
+{
+    IMS_UINT32 nAnyAosReason = 1;
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
+}
+
+TEST_F(MtcCallStateTest, OnAosSuspendedDoesNothing)
+{
+    IMS_UINT32 nAnyAosReason = 1;
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnAosStateChanged(MtcAosState::SUSPENDED, nAnyAosReason));
+}
+
+TEST_F(MtcCallStateTest, OnAosDisconnectedDoesNothing)
+{
+    IMS_UINT32 nAnyAosReason = 1;
+    ON_CALL(objService, GetSrvccState)
+            .WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(*pConfigurationManager,
+            IsRegistrationDisconnectReasonToTerminateOngoingCall(nAnyAosReason))
+            .WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnAosStateChanged(MtcAosState::DISCONNECTING, nAnyAosReason));
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnAosStateChanged(MtcAosState::DISCONNECTED, nAnyAosReason));
+}
+
+TEST_F(MtcCallStateTest, OnIpcanChangedDoesNothing)
+{
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnIpcanChanged(IIpcan::CATEGORY_MOBILE));
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnIpcanChanged(IIpcan::CATEGORY_WLAN));
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnIpcanChanged(IIpcan::CATEGORY_ANY));
 }

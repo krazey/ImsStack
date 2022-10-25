@@ -27,6 +27,8 @@ using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+LOCAL IMS_UINT32 nAnyIpcan = 1;
+
 class MtcPendingOperationHolderTest : public ::testing::Test
 {
 public:
@@ -47,7 +49,7 @@ protected:
 
         objPendingOperation = [](IMtcCallState* pState)
         {
-            return pState->HandleIpcanChanged();
+            return pState->OnIpcanChanged(nAnyIpcan);
         };
 
         pMtcPendingOperationHolder = new MtcPendingOperationHolder();
@@ -90,7 +92,7 @@ TEST_F(MtcPendingOperationHolderTest, PushPendingOperation_PopPendingOperation)
 
     EXPECT_FALSE(pMtcPendingOperationHolder->HasPendingOperation());
 
-    EXPECT_CALL(*pMockIMtcCallState, HandleIpcanChanged).Times(2);
+    EXPECT_CALL(*pMockIMtcCallState, OnIpcanChanged(nAnyIpcan)).Times(2);
 
     objPendingOperation(pMockIMtcCallState);
     objPopedPendingOperation(pMockIMtcCallState);

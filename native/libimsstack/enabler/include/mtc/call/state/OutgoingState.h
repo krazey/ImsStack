@@ -67,6 +67,7 @@ public:
 
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
+    CallStateName HandleAosConnected() override;
 
 private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);

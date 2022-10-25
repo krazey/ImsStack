@@ -26,6 +26,7 @@
 #include "TestConfigService.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "helper/MockIMtcAosStateListener.h"
 #include "helper/MockISrvccStateListener.h"
 #include "helper/MockMtcAosEventHandler.h"
 #include "helper/MockSrvccStateManager.h"
@@ -155,6 +156,24 @@ TEST_F(MtcServiceTest, GetServiceTypeReturnsNormal)
     EXPECT_EQ(pNormalMtcService->GetServiceType(), ServiceType::NORMAL);
 }
 
+TEST_F(MtcServiceTest, AddAosStateListenerInvokesMtcAosEventHandler)
+{
+    MockIMtcAosStateListener objListener;
+    EXPECT_CALL(*pMockAosEventHandler, AddListener(&objListener))
+            .Times(1);
+
+    pNormalMtcService->AddAosStateListener(&objListener);
+}
+
+TEST_F(MtcServiceTest, RemoveAosStateListenerInvokesMtcAosEventHandler)
+{
+    MockIMtcAosStateListener objListener;
+    EXPECT_CALL(*pMockAosEventHandler, RemoveListener(&objListener))
+            .Times(1);
+
+    pNormalMtcService->RemoveAosStateListener(&objListener);
+}
+
 TEST_F(MtcServiceTest, AddSrvccStateListenerThenBeingNotified)
 {
     MockISrvccStateListener* pSrvccListener = new MockISrvccStateListener();
@@ -163,10 +182,6 @@ TEST_F(MtcServiceTest, AddSrvccStateListenerThenBeingNotified)
     EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED))
             .Times(1);
     EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::SUCCEEDED))
-            .Times(1);
-    EXPECT_CALL(*pMockAosEventHandler, SetOnSrvcc(IMS_TRUE))
-            .Times(1);
-    EXPECT_CALL(*pMockAosEventHandler, SetOnSrvcc(IMS_FALSE))
             .Times(1);
 
     pNormalMtcService->UpdateSrvccState(SrvccState::STARTED);
@@ -200,7 +215,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
     IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
     IMS_UINT32 nIpcan = IIpcan::CATEGORY_MOBILE;
     EXPECT_CALL(*pMockAosEventHandler,
-            OnConnected(nFeature, nIpcan, IMS_NULL, pMockEmergencyManager, _, _))
+            OnConnected(nFeature, nIpcan, IMS_NULL, pMockEmergencyManager))
             .Times(1);
 
     pNormalMtcService->ImsAos_Connected(nFeature, nIpcan);
@@ -210,7 +225,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
 TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosDisconnecting)
 {
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnDisconnecting(nReason, _))
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnecting(nReason))
             .Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
@@ -221,7 +236,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosDisconnecting)
 TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosDisconnected)
 {
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, _, IMS_NULL, pMockEmergencyManager))
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, IMS_NULL, pMockEmergencyManager))
             .Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
@@ -232,7 +247,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosDisconnected)
 TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosSuspended)
 {
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnSuspended(nReason, _))
+    EXPECT_CALL(*pMockAosEventHandler, OnSuspended(nReason))
             .Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
@@ -276,24 +291,31 @@ TEST_F(MtcServiceTest, IsWlanIpCanTypeReturnsFalse)
     EXPECT_EQ(pNormalMtcService->IsWlanIpCanType(), IMS_FALSE);
 }
 
-TEST_F(MtcServiceTest, GetServiceStatusReturnsActiveAfterAosConnected)
-{
-    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    EXPECT_EQ(pNormalMtcService->GetServiceStatus(), ServiceStatus::SERVICE_ACTIVE);
-}
-
-TEST_F(MtcServiceTest, GetServiceStatusReturnsSuspendedfterAosSuspended)
-{
-    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
-    pNormalMtcService->ImsAos_Suspended(ImsAosReason::NONE);
-    EXPECT_EQ(pNormalMtcService->GetServiceStatus(), ServiceStatus::SERVICE_SUSPENDED);
-}
-
-TEST_F(MtcServiceTest, GetServiceStatusReturnsIdleAfterAosDisconnected)
+TEST_F(MtcServiceTest, GetOldStatusReturnsOldStatus)
 {
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
     pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE);
-    EXPECT_EQ(pNormalMtcService->GetServiceStatus(), ServiceStatus::SERVICE_IDLE);
+    EXPECT_EQ(pNormalMtcService->GetOldStatus(), ServiceStatus::SERVICE_ACTIVE);
+}
+
+TEST_F(MtcServiceTest, GetStatusReturnsActiveAfterAosConnected)
+{
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), ServiceStatus::SERVICE_ACTIVE);
+}
+
+TEST_F(MtcServiceTest, GetStatusReturnsSuspendedAfterAosSuspended)
+{
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    pNormalMtcService->ImsAos_Suspended(ImsAosReason::NONE);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), ServiceStatus::SERVICE_SUSPENDED);
+}
+
+TEST_F(MtcServiceTest, GetStatusReturnsIdleAfterAosDisconnected)
+{
+    pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
+    pNormalMtcService->ImsAos_Disconnected(ImsAosReason::NONE);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), ServiceStatus::SERVICE_IDLE);
 }
 
 TEST_F(MtcServiceTest, GetICoreServiceReturnsNotNull)
@@ -353,26 +375,26 @@ TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
 
 TEST_F(MtcServiceTest, CoreServicePageMessageReceivedDoesNothing)
 {
-    ServiceStatus eOldStatus = pNormalMtcService->GetServiceStatus();
+    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
     pNormalMtcService->CoreService_PageMessageReceived(&objMockCoreService, piMessage);
-    EXPECT_EQ(pNormalMtcService->GetServiceStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
 }
 
 TEST_F(MtcServiceTest, CoreServiceReferenceReceivedDoesNothing)
 {
-    ServiceStatus eOldStatus = pNormalMtcService->GetServiceStatus();
+    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     MockIReference objMockReference;
     pNormalMtcService->CoreService_ReferenceReceived(&objMockCoreService, &objMockReference);
-    EXPECT_EQ(pNormalMtcService->GetServiceStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
 }
 
 TEST_F(MtcServiceTest, CoreServiceServiceClosedDoesNothing)
 {
-    ServiceStatus eOldStatus = pNormalMtcService->GetServiceStatus();
+    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     IReasonInfo* piReasonInfo = reinterpret_cast<IReasonInfo*>(FAKE_ADDRESS);
     pNormalMtcService->CoreService_ServiceClosed(&objMockCoreService, piReasonInfo);
-    EXPECT_EQ(pNormalMtcService->GetServiceStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
 }
 
 TEST_F(MtcServiceTest, CoreServiceCapabilityQueryReceivedCallsQueryHandler)
@@ -388,9 +410,9 @@ TEST_F(MtcServiceTest, ImsAosMonitorConnectedInvokesEventHandler)
     EXPECT_CALL(*pMockAosEventHandler, OnServiceConnected(nFeature, nIpcan))
             .Times(1);
 
-    ServiceStatus eOldStatus = pNormalMtcService->GetServiceStatus();
+    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     pNormalMtcService->ImsAosMonitor_Connected(nFeature, nIpcan);
-    EXPECT_EQ(pNormalMtcService->GetServiceStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
 }
 
 TEST_F(MtcServiceTest, ImsAosMonitorNotifyInvokesEventHandler)
@@ -400,9 +422,9 @@ TEST_F(MtcServiceTest, ImsAosMonitorNotifyInvokesEventHandler)
     EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState))
             .Times(1);
 
-    ServiceStatus eOldStatus = pNormalMtcService->GetServiceStatus();
+    ServiceStatus eOldStatus = pNormalMtcService->GetStatus();
     pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
-    EXPECT_EQ(pNormalMtcService->GetServiceStatus(), eOldStatus);
+    EXPECT_EQ(pNormalMtcService->GetStatus(), eOldStatus);
 }
 
 }  // namespace android

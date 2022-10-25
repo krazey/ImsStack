@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-#ifndef TEST_IMS_RADIO_SERVICE_H_
-#define TEST_IMS_RADIO_SERVICE_H_
+#ifndef INTERFACE_MTC_AOS_STATE_LISTENER_H_
+#define INTERFACE_MTC_AOS_STATE_LISTENER_H_
 
-#include "ServiceImsRadio.h"
-#include "MockIImsRadio.h"
+#include "ImsTypeDef.h"
 
-class TestImsRadioService : public ImsRadioService
+class IMtcService;
+
+enum class MtcAosState
+{
+    CONNECTED,
+    SUSPENDED,
+    DISCONNECTING,
+    DISCONNECTED,
+};
+
+class IMtcAosStateListener
 {
 public:
-    inline TestImsRadioService() :
-            ImsRadioService(),
-            m_piImsRadio(&m_objImsRadio)
-    {
-    }
-
-    inline IImsRadio* GetImsRadio(IN IMS_SINT32 /* nSlotId */) override { return m_piImsRadio; }
-
-    inline MockIImsRadio& GetMockImsRadio() { return m_objImsRadio; }
-
-private:
-    MockIImsRadio m_objImsRadio;
-
-    IImsRadio* m_piImsRadio;
+    virtual ~IMtcAosStateListener() {}
+    virtual void OnAosStateChanged(
+            IN IMtcService& objMtcService, IN MtcAosState eState, IN IMS_UINT32 eAosReason) = 0;
+    virtual void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) = 0;
 };
 
 #endif

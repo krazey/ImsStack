@@ -15,6 +15,7 @@
  */
 
 #include "IMessage.h"
+#include "ImsAosReason.h"
 #include "ISipClientConnection.h"
 #include "ISipConnection.h"
 #include "ISipHeader.h"
@@ -24,6 +25,7 @@
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "ISipServerConnection.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
@@ -154,11 +156,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallT
 
 PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
         IN const AString& /* strTarget */, IN const ImsList<ConfUser*>& /* lstUsers */)
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName MtcCallState::HandleIpcanChanged()
 {
     return GetStateName();
 }
@@ -457,6 +454,52 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eSt
         case SrvccState::CANCELED:
             return SendUpdateBySrvcc(UpdateType::SRVCC_RECOVERED_CANCEL);
     }
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnAosStateChanged(
+        IN MtcAosState eState, IN IMS_UINT32 eAosReason)
+{
+    IMS_TRACE_I("OnAosStateChanged state[%d]", eState, 0, 0);
+    switch (eState)
+    {
+        case MtcAosState::CONNECTED:
+            return HandleAosConnected();
+        case MtcAosState::DISCONNECTED:
+        case MtcAosState::DISCONNECTING:
+            return HandleAosDisconnected(eAosReason);
+        case MtcAosState::SUSPENDED:
+            return GetStateName();
+    }
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnIpcanChanged(IN IMS_UINT32 /*eIpcan*/)
+{
+    return GetStateName();
+}
+
+PROTECTED
+CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
+{
+    if (m_objContext.GetService().GetSrvccState() == SrvccState::STARTED)
+    {
+        IMS_TRACE_I("HandleAosDisconnected ignore during srvcc", 0, 0, 0);
+        return GetStateName();
+    }
+
+    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) &&
+            m_objContext.GetEpsFallbackTrigger().IsWaitingEpsFallbackForNoResponse())
+    {
+        IMS_TRACE_I("HandleAosDisconnected ignore during EPS Fallback", 0, 0, 0);
+        return GetStateName();
+    }
+
+    if (m_objContext.GetConfigurationProxy().Is(
+                Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, eAosReason))
+    {
+        const CallReasonInfo objReason(GetCallReasonByAosReason(eAosReason));
+        return Terminate(objReason);
+    }
+    return GetStateName();
 }
 
 PROTECTED
@@ -995,4 +1038,61 @@ IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED
+void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const
+{
+    if (objMessage.GetStatusCode() != SipStatusCode::SC_183 &&
+            objMessage.GetStatusCode() != SipStatusCode::SC_200)
+    {
+        return;
+    }
+
+    if (m_objContext.GetMessageUtils().HasSdp(&objMessage) == IMS_FALSE)
+    {
+        return;
+    }
+
+    if (EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy()) == IMS_FALSE)
+    {
+        return;
+    }
+
+    if (m_objContext.GetEpsFallbackTrigger().IsVoNr() == IMS_FALSE)
+    {
+        return;
+    }
+
+    m_objContext.GetEpsFallbackTrigger().StartWatchdog();
+}
+
+PROTECTED
+IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const
+{
+    switch (nAosReason)
+    {
+        case ImsAosReason::OUT_OF_SERVICE:
+            return CODE_LOCAL_NETWORK_NO_SERVICE;
+        case ImsAosReason::POWER_OFF:
+            return CODE_LOCAL_POWER_OFF;
+        case ImsAosReason::NO_RAT_COVERAGE:
+            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
+        case ImsAosReason::SERVICE_POLICY:
+            return CODE_LOCAL_SERVICE_UNAVAILABLE;
+        case ImsAosReason::SERVICE_BLOCKED:
+            return CODE_LOCAL_SERVICE_UNAVAILABLE;
+        case ImsAosReason::DATA_DISCONNECTED:
+            return CODE_LOCAL_NETWORK_NO_SERVICE;
+        case ImsAosReason::REG_TERMINATED:
+            return CODE_LOCAL_NOT_REGISTERED;
+        case ImsAosReason::REG_NEW_REQUIRED:
+            return CODE_LOCAL_NOT_REGISTERED;
+        case ImsAosReason::SUSPEND_OUT_OF_SERVICE:
+            return CODE_LOCAL_NETWORK_NO_SERVICE;
+        case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
+            return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
+        default:  // NOT_SPECIFIED
+            return CODE_LOCAL_NOT_REGISTERED;
+    }
 }

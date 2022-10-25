@@ -458,6 +458,9 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, GetPolicyForLocalRingbackToneWith180Response)
             .WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE));
+    EXPECT_CALL(*pConfigManager, GetEpsFallbackWatchdogTime)
+            .WillOnce(Return(nValue));
+    EXPECT_EQ(nValue, pConfig->GetInt(Feature::EPS_FALLBACK_WATCHDOG_TIME));
 }
 
 TEST_F(MtcConfigurationProxyTest, GetIntWith2BoolArgReturnsFromConfigManager)

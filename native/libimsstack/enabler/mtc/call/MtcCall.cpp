@@ -24,6 +24,7 @@
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcSession.h"
 #include "call/MtcCall.h"
 #include "call/MtcSession.h"
@@ -31,6 +32,7 @@
 #include "call/message/MessageSender.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
@@ -63,13 +65,15 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy())),
         m_objMessageMediator(MtcMessageMediator(*this)),
-        m_pUssiController(IMS_NULL)
+        m_pUssiController(IMS_NULL),
+        m_pEpsFallbackTrigger(IMS_NULL)
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
 
     m_objTimer.SetListener(this);
     m_objPreconditionManager.SetListener(this);
     m_objMediaManager.SetMediaReportEventListener(this);
+    m_objService.AddAosStateListener(this);
     m_objService.AddSrvccStateListener(this);
 }
 
@@ -77,6 +81,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
 {
     IMS_TRACE_D("~MtcCall key[%d]", m_nKey, 0, 0);
 
+    m_objService.RemoveAosStateListener(this);
     m_objService.RemoveSrvccStateListener(this);
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstSessions.GetSize(); nIndex++)
@@ -87,6 +92,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
     m_lstSessions.Clear();
 
     delete m_pUssiController;
+    delete m_pEpsFallbackTrigger;
 }
 
 PUBLIC VIRTUAL void MtcCall::HandleIncoming(IN ISession* piSession)
@@ -425,27 +431,6 @@ PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::HandleIpcanChanged()
-{
-    IMS_TRACE_I("HandleIpcanChanged", 0, 0, 0);
-
-    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
-    {
-        m_objPendingOperationHolder.PushPendingOperation(
-                [](IMtcCallState* pState)
-                {
-                    return pState->HandleIpcanChanged();
-                });
-        return;
-    }
-
-    m_objStateMachine.RunStateOperation(
-            [&](IMtcCallState* pState)
-            {
-                return pState->HandleIpcanChanged();
-            });
-}
-
 PUBLIC VIRTUAL CallType MtcCall::GetCallType() const
 {
     IMtcSession* pSession = GetSession();
@@ -491,6 +476,16 @@ PUBLIC VIRTUAL UpdatingInfo& MtcCall::GetUpdatingInfo()
     }
 
     return *m_pUpdatingInfo;
+}
+
+PUBLIC VIRTUAL EpsFallbackTrigger& MtcCall::GetEpsFallbackTrigger()
+{
+    if (m_pEpsFallbackTrigger == IMS_NULL)
+    {
+        m_pEpsFallbackTrigger = new EpsFallbackTrigger(*this);
+    }
+
+    return *m_pEpsFallbackTrigger;
 }
 
 PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession(IN ISession* piSession)
@@ -1256,6 +1251,39 @@ PUBLIC VIRTUAL void MtcCall::OnSrvccStateUpdated(IN SrvccState eState)
             [&](IMtcCallState* pState)
             {
                 return pState->OnSrvccStateUpdated(eState);
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnAosStateChanged(
+        IN IMtcService& /*objMtcService*/, IN MtcAosState eState, IN IMS_UINT32 eAosReason)
+{
+    IMS_TRACE_I("OnAosStateChanged State[%d]", eState, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->OnAosStateChanged(eState, eAosReason);
+            });
+}
+
+PUBLIC VIRTUAL void MtcCall::OnIpcanChanged(IN IMtcService& /*objMtcService*/, IN IMS_UINT32 eIpcan)
+{
+    IMS_TRACE_I("OnIpcanChanged IpCan[%d]", 0, 0, 0);
+
+    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
+    {
+        m_objPendingOperationHolder.PushPendingOperation(
+                [&](IMtcCallState* pState)
+                {
+                    return pState->OnIpcanChanged(eIpcan);
+                });
+        return;
+    }
+
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->OnIpcanChanged(eIpcan);
             });
 }
 

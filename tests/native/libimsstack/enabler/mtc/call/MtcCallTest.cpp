@@ -23,6 +23,7 @@
 #include "MockIMtcCallController.h"
 #include "MtcContextRepository.h"
 #include "MtcDef.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
 #include "call/MockIMtcCallManager.h"
@@ -38,6 +39,7 @@
 #include "core/MockIReference.h"
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
+#include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/OperationAsyncRunner.h"
@@ -718,17 +720,6 @@ TEST_F(MtcCallTest, SendUssdCallsState)
     objCall.SendUssd(strUssd);
 }
 
-TEST_F(MtcCallTest, HandleIpcanChangedCallsState)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, HandleIpcanChanged)
-            .Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.HandleIpcanChanged();
-}
-
 TEST_F(MtcCallTest, GetKeyReturnsValidKeyInitially)
 {
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
@@ -944,6 +935,16 @@ TEST_F(MtcCallTest, GetUpdatingInfoReturnsSameNotNullInstance)
 
     EXPECT_NE(nullptr, &objUpdatingInfo);
     EXPECT_EQ(&objUpdatingInfo, &objCall.GetUpdatingInfo());
+}
+
+TEST_F(MtcCallTest, GetEpsFallbackTriggerReturnsSameNotNullInstance)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EpsFallbackTrigger& objEpsFbTrigger = objCall.GetEpsFallbackTrigger();
+
+    EXPECT_NE(nullptr, &objEpsFbTrigger);
+    EXPECT_EQ(&objEpsFbTrigger, &objCall.GetEpsFallbackTrigger());
 }
 
 TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)
@@ -2359,4 +2360,29 @@ TEST_F(MtcCallTest, OnSrvccStateUpdatedCallsState)
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     objCall.OnSrvccStateUpdated(eAnyState);
+}
+
+TEST_F(MtcCallTest, OnAosStateChangedCallsState)
+{
+    MtcAosState eAnyState = MtcAosState::CONNECTED;
+    IMS_UINT32 eAnyReason = 0;
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, OnAosStateChanged(eAnyState, eAnyReason))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.OnAosStateChanged(objService, eAnyState, eAnyReason);
+}
+
+TEST_F(MtcCallTest, OnIpcanChangedCallsState)
+{
+    IMS_UINT32 eAnyType = 0;
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, OnIpcanChanged(eAnyType))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.OnIpcanChanged(objService, eAnyType);
 }

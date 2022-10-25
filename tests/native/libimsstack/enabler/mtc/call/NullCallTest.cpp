@@ -48,7 +48,6 @@ TEST(NullCallTest, NullCallDoesNothing)
     objCall.Terminate(objReason);
     objCall.SendDtmf("", 0);
     objCall.SendUssd("");
-    objCall.HandleIpcanChanged();
     objCall.GetCallContext();
 }
 

@@ -1250,6 +1250,7 @@ TEST_F(MtcConfigurationManagerTest, IsInitializePemWhenNoHeaderReturnsValueInCar
     EXPECT_EQ(pManager->IsInitializePemWhenNoHeader(),
             GetBool(CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL));
 }
+
 TEST_F(MtcConfigurationManagerTest,
         GetPolicyForLocalRingbackToneWith180ResponseReturnsValueInCarrierConfig)
 {
@@ -1262,6 +1263,14 @@ TEST_F(MtcConfigurationManagerTest, IsSend180ForInitialInviteReturnsValueInCarri
 {
     EXPECT_EQ(pManager->IsSend180ForInitialInvite(),
             GetBool(CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL));
+}
+
+TEST_F(MtcConfigurationManagerTest,
+        GetEpsFallbackWatchdogTimeReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->GetEpsFallbackWatchdogTime(),
+            GetInt(CarrierConfig::Assets::
+                            KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT));
 }
 
 }  // namespace android

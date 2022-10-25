@@ -17,6 +17,7 @@
 #include "IIpcan.h"
 #include "IImsRadio.h"
 #include "IMtcContext.h"
+#include "IMtcService.h"
 #include "INetworkWatcher.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
@@ -41,8 +42,6 @@ MtcCallTrafficChecker::MtcCallTrafficChecker(IN IMtcContext& objContext,
         m_objMtcTrafficInfos(ImsMap<TrafficType, MtcTrafficInfo*>())
 {
     IMS_TRACE_D("+MtcCallTrafficChecker", 0, 0, 0);
-
-    Init();
 }
 
 PUBLIC MtcCallTrafficChecker::~MtcCallTrafficChecker()
@@ -50,6 +49,20 @@ PUBLIC MtcCallTrafficChecker::~MtcCallTrafficChecker()
     IMS_TRACE_D("~MtcCallTrafficChecker", 0, 0, 0);
 
     DeInit();
+}
+
+PUBLIC void MtcCallTrafficChecker::Init()
+{
+    m_objContext.GetCallStateProxy().AddListener(this);
+    m_objContext.GetServiceByType(ServiceType::NORMAL)->AddAosStateListener(this);
+    m_objContext.GetServiceByType(ServiceType::EMERGENCY)->AddAosStateListener(this);
+
+    m_objMtcTrafficInfos.Add(IImsRadio::TRAFFIC_TYPE_VOICE,
+            new MtcTrafficInfo(IImsRadio::TRAFFIC_TYPE_VOICE, *this));
+    m_objMtcTrafficInfos.Add(IImsRadio::TRAFFIC_TYPE_VIDEO,
+            new MtcTrafficInfo(IImsRadio::TRAFFIC_TYPE_VIDEO, *this));
+    m_objMtcTrafficInfos.Add(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
+            new MtcTrafficInfo(IImsRadio::TRAFFIC_TYPE_EMERGENCY, *this));
 }
 
 PUBLIC VIRTUAL void MtcCallTrafficChecker::SetTrafficCheckerListener(
@@ -89,8 +102,8 @@ PUBLIC VIRTUAL void MtcCallTrafficChecker::StopTrafficChecking(IN TrafficType eT
     IMS_TRACE_I("StopTrafficChecking TrafficType[%d] ", eTrafficType, 0, 0);
 }
 
-PUBLIC VIRTUAL void MtcCallTrafficChecker::HandleIpcanChanged(
-        IN IMS_UINT32 eIpcan, IN IMS_BOOL bEmergency)
+PUBLIC VIRTUAL void MtcCallTrafficChecker::OnIpcanChanged(
+        IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objMtcTrafficInfos.GetSize(); nIndex++)
     {
@@ -102,6 +115,7 @@ PUBLIC VIRTUAL void MtcCallTrafficChecker::HandleIpcanChanged(
 
         TrafficType eTrafficType = m_objMtcTrafficInfos.GetKeyAt(nIndex);
 
+        IMS_BOOL bEmergency = objMtcService.IsEmergency();
         if ((bEmergency && eTrafficType != IImsRadio::TRAFFIC_TYPE_EMERGENCY) ||
                 (!bEmergency && eTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY))
         {
@@ -191,21 +205,19 @@ PUBLIC ImsList<CallKey>& MtcCallTrafficChecker::GetCallKeys(IN TrafficType eTraf
     return m_objMtcTrafficInfos.GetValue(eTrafficType)->m_objCallKeys;
 }
 
-PRIVATE void MtcCallTrafficChecker::Init()
-{
-    m_objContext.GetCallStateProxy().AddListener(this);
-
-    m_objMtcTrafficInfos.Add(IImsRadio::TRAFFIC_TYPE_VOICE,
-            new MtcTrafficInfo(IImsRadio::TRAFFIC_TYPE_VOICE, *this));
-    m_objMtcTrafficInfos.Add(IImsRadio::TRAFFIC_TYPE_VIDEO,
-            new MtcTrafficInfo(IImsRadio::TRAFFIC_TYPE_VIDEO, *this));
-    m_objMtcTrafficInfos.Add(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
-            new MtcTrafficInfo(IImsRadio::TRAFFIC_TYPE_EMERGENCY, *this));
-}
-
 PRIVATE void MtcCallTrafficChecker::DeInit()
 {
     m_objContext.GetCallStateProxy().RemoveListener(this);
+    IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
+    if (pNormalService)
+    {
+        pNormalService->RemoveAosStateListener(this);
+    }
+    IMtcService* pEmergencyService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
+    if (pEmergencyService)
+    {
+        pEmergencyService->RemoveAosStateListener(this);
+    }
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_objMtcTrafficInfos.GetSize(); nIndex++)
     {

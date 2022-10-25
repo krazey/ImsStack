@@ -102,6 +102,11 @@ public:
         return m_objImsAosInfo.NotifyEmergencyCallState(bIsInitialized);
     }
 
+    inline void NotifyEpsfbCallState(IN IMS_UINT32 nState) override
+    {
+        return m_objImsAosInfo.NotifyEpsfbCallState(nState);
+    }
+
 private:
     IImsAos& m_objImsAos;
     IImsAosInfo& m_objImsAosInfo;

@@ -22,6 +22,7 @@
 #include "ImsTypeDef.h"
 #include "MockIImsRadio.h"
 #include "MockIMtcContext.h"
+#include "MockIMtcService.h"
 #include "MockINetworkWatcher.h"
 #include "PlatformContext.h"
 #include "TestImsRadioService.h"
@@ -29,6 +30,7 @@
 #include "call/IMtcCall.h"
 #include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "call/traffic/MockIMtcRadioConnectionFailureListener.h"
+#include "helper/IMtcAosStateListener.h"
 #include "helper/MockICallStateProxy.h"
 #include "call/traffic/MtcCallTrafficChecker.h"
 
@@ -57,6 +59,8 @@ public:
 
 public:
     MockIMtcContext m_objContext;
+    MockIMtcService m_objNormalService;
+    MockIMtcService m_objEmergencyService;
     MockIMtcRadioConnectionFailureListener m_objConnectionFailureListener;
     MockIMtcCallTrafficCheckerListener m_objIMtcCallTrafficCheckerListener;
     MockICallStateProxy m_objCallStateProxy;
@@ -78,8 +82,16 @@ protected:
         ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
                 .WillByDefault(Return(NW_REPORT_RADIO_LTE));
 
+        ON_CALL(m_objContext, GetServiceByType(ServiceType::NORMAL))
+                .WillByDefault(Return(&m_objNormalService));
+        ON_CALL(m_objNormalService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+        ON_CALL(m_objContext, GetServiceByType(ServiceType::EMERGENCY))
+                .WillByDefault(Return(&m_objEmergencyService));
+        ON_CALL(m_objEmergencyService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+
         m_pMtcCallTrafficChecker =
                 new MtcCallTrafficChecker(m_objContext, m_objConnectionFailureListener);
+        m_pMtcCallTrafficChecker->Init();
     }
 
     virtual void TearDown() override
@@ -197,23 +209,28 @@ TEST_F(MtcCallTrafficCheckerTest, StopTrafficChecking)
     m_pMtcCallTrafficChecker->StopTrafficChecking(IImsRadio::TRAFFIC_TYPE_EMERGENCY);
 }
 
-TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedNoStartImsTraffic)
+TEST_F(MtcCallTrafficCheckerTest, OnAosStateChangedDoesNothing)
+{
+    m_pMtcCallTrafficChecker->OnAosStateChanged(m_objNormalService, MtcAosState::CONNECTED, 0);
+}
+
+TEST_F(MtcCallTrafficCheckerTest, OnIpcanChangedNoStartImsTraffic)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StartImsTraffic(_, _, _)).Times(0);
 
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_TRUE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_FALSE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_WLAN, IMS_TRUE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_WLAN, IMS_FALSE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_WLAN);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_WLAN);
 
     m_pMtcCallTrafficChecker->SetTrafficStatus(IImsRadio::TRAFFIC_TYPE_VOICE, IMS_TRUE);
     m_pMtcCallTrafficChecker->SetTrafficStatus(IImsRadio::TRAFFIC_TYPE_VIDEO, IMS_TRUE);
     m_pMtcCallTrafficChecker->SetTrafficStatus(IImsRadio::TRAFFIC_TYPE_EMERGENCY, IMS_TRUE);
 
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_TRUE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_FALSE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_WLAN, IMS_TRUE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_WLAN, IMS_FALSE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_WLAN);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_WLAN);
 
     m_pMtcCallTrafficChecker->SetTrafficStatus(IImsRadio::TRAFFIC_TYPE_VOICE, IMS_FALSE);
     m_pMtcCallTrafficChecker->SetTrafficStatus(IImsRadio::TRAFFIC_TYPE_VIDEO, IMS_FALSE);
@@ -223,13 +240,13 @@ TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedNoStartImsTraffic)
     m_pMtcCallTrafficChecker->GetCallKeys(IImsRadio::TRAFFIC_TYPE_VIDEO).Append(CALL_KEY1);
     m_pMtcCallTrafficChecker->GetCallKeys(IImsRadio::TRAFFIC_TYPE_EMERGENCY).Append(CALL_KEY1);
 
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_TRUE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_FALSE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_WLAN, IMS_TRUE);
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_WLAN, IMS_FALSE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_WLAN);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_WLAN);
 }
 
-TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedStartImsTrafficNormalLte)
+TEST_F(MtcCallTrafficCheckerTest, OnIpcanChangedStartImsTrafficNormalLte)
 {
     CreateCallsAndTrafficActivateForAllTrafficTypes();
 
@@ -246,10 +263,10 @@ TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedStartImsTrafficNormalLte)
                     IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, _))
             .Times(0);
 
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_FALSE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
 }
 
-TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedStartImsTrafficNormalNr)
+TEST_F(MtcCallTrafficCheckerTest, OnIpcanChangedStartImsTrafficNormalNr)
 {
     CreateCallsAndTrafficActivateForAllTrafficTypes();
 
@@ -268,10 +285,10 @@ TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedStartImsTrafficNormalNr)
                     IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::ACCESS_NETWORK_TYPE_NGRAN, _))
             .Times(0);
 
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_FALSE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_MOBILE);
 }
 
-TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedStartImsTrafficNormalWifi)
+TEST_F(MtcCallTrafficCheckerTest, OnIpcanChangedStartImsTrafficNormalWifi)
 {
     CreateCallsAndTrafficActivateForAllTrafficTypes();
 
@@ -286,10 +303,10 @@ TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedStartImsTrafficNormalWifi)
                     IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::ACCESS_NETWORK_TYPE_IWLAN, _))
             .Times(0);
 
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_WLAN, IMS_FALSE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objNormalService, IIpcan::CATEGORY_WLAN);
 }
 
-TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedStartImsTrafficEmergency)
+TEST_F(MtcCallTrafficCheckerTest, OnIpcanChangedStartImsTrafficEmergency)
 {
     CreateCallsAndTrafficActivateForAllTrafficTypes();
 
@@ -306,7 +323,8 @@ TEST_F(MtcCallTrafficCheckerTest, HandleIpcanChangedStartImsTrafficEmergency)
                     IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, _))
             .Times(1);
 
-    m_pMtcCallTrafficChecker->HandleIpcanChanged(IIpcan::CATEGORY_MOBILE, IMS_TRUE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(
+            m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
 }
 
 TEST_F(MtcCallTrafficCheckerTest, OnCallStateChanged)

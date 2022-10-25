@@ -24,6 +24,7 @@
 class AString;
 class ICoreService;
 class IMtcAosConnector;
+class IMtcAosStateListener;
 class ISrvccStateListener;
 enum class ServiceStatus;
 enum class ServiceType;
@@ -35,13 +36,16 @@ public:
     virtual ~IMtcService() {}
 
     virtual ServiceType GetServiceType() const = 0;
+    virtual void AddAosStateListener(IN IMtcAosStateListener* piListener) = 0;
+    virtual void RemoveAosStateListener(IN IMtcAosStateListener* piListener) = 0;
     virtual void AddSrvccStateListener(IN ISrvccStateListener* piListener) = 0;
     virtual void RemoveSrvccStateListener(IN ISrvccStateListener* piListener) = 0;
 
     virtual IMS_BOOL IsActive() const = 0;
     virtual IMS_BOOL IsEmergency() const = 0;
     virtual IMS_BOOL IsWlanIpCanType() const = 0;
-    virtual ServiceStatus GetServiceStatus() const = 0;
+    virtual ServiceStatus GetOldStatus() const = 0;
+    virtual ServiceStatus GetStatus() const = 0;
     virtual ICoreService* GetICoreService() const = 0;
     virtual IMtcAosConnector* GetAosConnector() const = 0;
     virtual SrvccState GetSrvccState() const = 0;

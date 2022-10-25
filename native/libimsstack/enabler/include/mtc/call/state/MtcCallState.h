@@ -25,6 +25,7 @@
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
+#include "helper/IMtcAosStateListener.h"
 #include "ussi/UssiDef.h"
 
 class AString;
@@ -75,8 +76,6 @@ public:
     CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
     CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
-
-    CallStateName HandleIpcanChanged() override;
 
     CallStateName HandleIncomingUssi(IN ISession* piSession) override;
     CallStateName OnUssiAttached() override;
@@ -145,6 +144,8 @@ public:
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName OnSrvccStateUpdated(IN SrvccState eState) override;
+    CallStateName OnAosStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) override;
+    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
     enum TimerType
     {
@@ -167,7 +168,10 @@ protected:
     inline virtual CallStateName SendUpdateBySrvcc(IN UpdateType /*eType*/)
     {
         return GetStateName();
-    };
+    }
+
+    inline virtual CallStateName HandleAosConnected() { return GetStateName(); }
+    virtual CallStateName HandleAosDisconnected(IN IMS_UINT32 eAosReason);
 
     void HandleTerminate(IN const CallReasonInfo& objReason);
     void NotifyHoldResumeState();
@@ -210,6 +214,8 @@ protected:
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) const;
     CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
+    void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
+    IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const;
 
     IMtcCallContext& m_objContext;
 

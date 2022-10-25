@@ -14,29 +14,22 @@
  * limitations under the License.
  */
 
-#ifndef TEST_IMS_RADIO_SERVICE_H_
-#define TEST_IMS_RADIO_SERVICE_H_
+#ifndef MOCK_I_MTC_AOS_STATE_LISTENER_
+#define MOCK_I_MTC_AOS_STATE_LISTENER_
 
-#include "ServiceImsRadio.h"
-#include "MockIImsRadio.h"
+#include <gmock/gmock.h>
+#include "ImsTypeDef.h"
+#include "helper/IMtcAosStateListener.h"
 
-class TestImsRadioService : public ImsRadioService
+class IMtcService;
+
+class MockIMtcAosStateListener : public IMtcAosStateListener
 {
 public:
-    inline TestImsRadioService() :
-            ImsRadioService(),
-            m_piImsRadio(&m_objImsRadio)
-    {
-    }
-
-    inline IImsRadio* GetImsRadio(IN IMS_SINT32 /* nSlotId */) override { return m_piImsRadio; }
-
-    inline MockIImsRadio& GetMockImsRadio() { return m_objImsRadio; }
-
-private:
-    MockIImsRadio m_objImsRadio;
-
-    IImsRadio* m_piImsRadio;
+    virtual ~MockIMtcAosStateListener() {}
+    MOCK_METHOD(void, OnAosStateChanged, (IN IMtcService&, IN MtcAosState, IN IMS_UINT32),
+            (override));
+    MOCK_METHOD(void, OnIpcanChanged, (IN IMtcService&, IN IMS_UINT32), (override));
 };
 
 #endif

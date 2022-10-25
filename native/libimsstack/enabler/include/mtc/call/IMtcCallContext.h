@@ -24,6 +24,7 @@
 #include "JniCallInfo.h"
 #include "sipcore/SipMethod.h"
 
+class EpsFallbackTrigger;
 class IMtcBlockChecker;
 class IMtcBlockRule;
 class IMtcMediaManager;
@@ -59,6 +60,7 @@ public:
     virtual MtcTimerWrapper& GetTimer() = 0;
     virtual MtcSupplementaryService& GetSupplementaryService() = 0;
     virtual UpdatingInfo& GetUpdatingInfo() = 0;
+    virtual EpsFallbackTrigger& GetEpsFallbackTrigger() = 0;
     virtual UssiController* GetUssiController() = 0;
     virtual ImsList<IMtcCall*> GetOtherCalls() = 0;
 

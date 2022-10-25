@@ -625,22 +625,6 @@ TEST_F(MtcCallControllerTest, TransferCallsEctManager)
     pCallController->Transfer(nCallKey, strTarget);
 }
 
-TEST_F(MtcCallControllerTest, HandleIpcanChangedCallsAllCalls)
-{
-    MockIMtcCall objCall1;
-    MockIMtcCall objCall2;
-    EXPECT_CALL(objCall1, HandleIpcanChanged)
-            .Times(1);
-    EXPECT_CALL(objCall2, HandleIpcanChanged)
-            .Times(1);
-
-    IMSList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(lstCalls));
-
-    pCallController->HandleIpcanChanged();
-}
-
 TEST_F(MtcCallControllerTest, GetRedialHelperCreatesSilentRedialHelper)
 {
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);

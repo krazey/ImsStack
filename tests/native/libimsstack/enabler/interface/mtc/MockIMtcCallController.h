@@ -78,7 +78,6 @@ public:
     MOCK_METHOD(void, RemoveFromConference, (IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers),
             (override));
     MOCK_METHOD(void, Transfer, (IN CallKey nCallKey, IN const AString& strTarget), (override));
-    MOCK_METHOD(void, HandleIpcanChanged, (), (override));
     MOCK_METHOD(ISilentRedialHelper&, GetRedialHelper, (
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, ReleaseRedialHelper, (), (override));

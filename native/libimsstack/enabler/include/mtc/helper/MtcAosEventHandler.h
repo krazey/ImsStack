@@ -17,12 +17,13 @@
 #ifndef MTC_AOS_EVENT_HANDLER_H
 #define MTC_AOS_EVENT_HANDLER_H
 
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "ImsAosReason.h"
+#include "IMtcAosStateListener.h"
 
 class IMessage;
 class AString;
-class IMtcCallController;
 class MtcConfigurationProxy;
 class IMtcCallTrafficChecker;
 class IMtcService;
@@ -38,30 +39,30 @@ public:
     MtcAosEventHandler(IN const MtcAosEventHandler&) = delete;
     MtcAosEventHandler& operator=(IN const MtcAosEventHandler&) = delete;
 
+    virtual void AddListener(IN IMtcAosStateListener* piListener);
+    virtual void RemoveListener(IN IMtcAosStateListener* piListener);
+
     virtual void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
             IN IJniMtcServiceThread* pServiceThread,
-            IN MtcEmergencyServiceManager* pEmergencyServiceManager,
-            IN IMtcCallController& objCallController,
-            IN IMtcCallTrafficChecker& objCallTrafficChecker);
-    virtual void OnDisconnecting(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController);
-    virtual void OnDisconnected(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController,
-            IN IJniMtcServiceThread* pServiceThread,
             IN MtcEmergencyServiceManager* pEmergencyServiceManager);
-    virtual void OnSuspended(IN IMS_UINT32 nReason, IN IMtcCallController& objCallController);
+    virtual void OnDisconnecting(IN IMS_UINT32 nReason);
+    virtual void OnDisconnected(IN IMS_UINT32 nReason, IN IJniMtcServiceThread* pServiceThread,
+            IN MtcEmergencyServiceManager* pEmergencyServiceManager);
+    virtual void OnSuspended(IN IMS_UINT32 nReason);
     virtual void OnResumed();
 
     virtual void OnServiceConnected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan);
     virtual void OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
-    inline virtual void SetOnSrvcc(IN IMS_BOOL bOnSrvcc) { m_bOnSrvcc = bOnSrvcc; }
-
 private:
+    void NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) const;
+    void NotifyIpcanChanged(IN IMS_UINT32 eIpcan) const;
     IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const;
 
     IMtcService& m_objService;
     MtcConfigurationProxy& m_objConfiguration;
     IMS_UINT32 m_nIpcan;
-    IMS_BOOL m_bOnSrvcc;
+    ImsList<IMtcAosStateListener*> m_objListeners;
 };
 
 #endif

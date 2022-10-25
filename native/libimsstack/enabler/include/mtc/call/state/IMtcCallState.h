@@ -21,6 +21,7 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
+#include "helper/IMtcAosStateListener.h"
 
 class AString;
 class IMessage;
@@ -68,7 +69,6 @@ public:
     virtual CallStateName CancelUpdate(IN const CallReasonInfo& objReason) = 0;
     virtual CallStateName Terminate(IN const CallReasonInfo& objReason) = 0;
     virtual CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) = 0;
-    virtual CallStateName HandleIpcanChanged() = 0;
 
     virtual CallStateName HandleIncomingUssi(IN ISession* piSession) = 0;
     virtual CallStateName OnUssiAttached() = 0;
@@ -138,6 +138,8 @@ public:
     virtual CallStateName OnReceivingNetworkToneFailed() = 0;
     virtual CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) = 0;
     virtual CallStateName OnSrvccStateUpdated(IN SrvccState eState) = 0;
+    virtual CallStateName OnAosStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) = 0;
+    virtual CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) = 0;
 };
 
 #endif
