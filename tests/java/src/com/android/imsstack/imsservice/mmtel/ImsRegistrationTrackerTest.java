@@ -253,6 +253,29 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
+    public void testnotifyDeRegistered_WithPLMNError() {
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK);
+        assertEquals(false, mRegTracker.isRegistered());
+        assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
+                mRegTracker.getRegisteredFeatures());
+        assertEquals(false, mRegTracker.isCallRegistered());
+        assertEquals(false, mRegTracker.isCallVideoRegistered());
+        assertEquals(false, mRegTracker.isSmsRegistered());
+        assertEquals(false, mRegTracker.isCallVoiceAndVideoRegistered());
+
+        int capabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_NONE;
+        int removeCapabilities = MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO
+                | MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_SMS;
+
+        mMmTelCapabilities.addCapabilities(capabilities);
+        mMmTelCapabilities.removeCapabilities(removeCapabilities);
+        verify(mMockFeatureCapabilityListener).onFeatureCapabilityChanged(
+                eq(mMmTelCapabilities));
+    }
+
+    @Test
     public void testnotifyTechnologyChangeFailed() {
         assertNotNull(mRegTracker.getRegistration());
         mAosRegListener.notifyTechnologyChangeFailed(IAosRegistrationListener.NetworkType.NONE,

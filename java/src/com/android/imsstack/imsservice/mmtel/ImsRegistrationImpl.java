@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.telephony.DataFailCause;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsRegistrationAttributes;
+import android.telephony.ims.RegistrationManager;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
@@ -68,8 +69,15 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
     }
 
     @Override
-    public void notifyDeregistered(int reason) {
-        onDeregistered(getReasonInfo(reason));
+    public void notifyDeregistered(int networkType, int reason) {
+        int suggestedAction = RegistrationManager.SUGGESTED_ACTION_NONE;
+
+        if (reason == IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK) {
+            suggestedAction = RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK;
+        } else if (reason == IAosRegistrationListener.ReasonCode.CODE_PLMN_BLOCK_WITH_TIMEOUT) {
+            suggestedAction = RegistrationManager.SUGGESTED_ACTION_TRIGGER_PLMN_BLOCK_WITH_TIMEOUT;
+        }
+        onDeregistered(getReasonInfo(reason), suggestedAction, networkType);
     }
 
     @Override
