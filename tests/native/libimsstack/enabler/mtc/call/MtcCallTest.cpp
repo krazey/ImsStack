@@ -949,6 +949,15 @@ TEST_F(MtcCallTest, GetEpsFallbackTriggerReturnsSameNotNullInstance)
     EXPECT_EQ(&objEpsFbTrigger, &objCall.GetEpsFallbackTrigger());
 }
 
+TEST_F(MtcCallTest, GetUdpKeepAliveSenderCreatesInstance)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    UdpKeepAliveSender* pUdpKeepAliveSender = &objCall.GetUdpKeepAliveSender();
+
+    EXPECT_NE(nullptr, pUdpKeepAliveSender);
+}
+
 TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();

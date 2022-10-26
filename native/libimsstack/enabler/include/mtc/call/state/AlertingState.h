@@ -40,6 +40,9 @@ public:
     AlertingState(IN const AlertingState&) = delete;
     AlertingState& operator=(IN const AlertingState&) = delete;
 
+    void OnEnter() override;
+    void OnExit() override;
+
     CallStateName HandleUserAlert() override;
     CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName Reject(IN const CallReasonInfo& objReason) override;

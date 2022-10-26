@@ -38,6 +38,8 @@ public:
     OutgoingState(IN const OutgoingState&) = delete;
     OutgoingState& operator=(IN const OutgoingState&) = delete;
 
+    void OnExit() override;
+
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
@@ -60,6 +62,8 @@ public:
 
     CallStateName UssiStarted(IN ISession* piSession) override;
 
+    CallStateName OnReceivingMediaDataStarted(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnReceivingNetworkToneStarted() override;
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;

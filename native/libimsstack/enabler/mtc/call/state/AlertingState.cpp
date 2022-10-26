@@ -30,6 +30,7 @@
 #include "SipStatusCode.h"
 #include "utility/MessageUtil.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/UdpKeepAliveSender.h"
 #include "precondition/QosDef.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
@@ -46,6 +47,22 @@ AlertingState::AlertingState(IN IMtcCallContext& objContext) :
 }
 
 PUBLIC VIRTUAL AlertingState::~AlertingState() {}
+
+PUBLIC VIRTUAL void AlertingState::OnEnter()
+{
+    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    {
+        m_objContext.GetUdpKeepAliveSender().Start();
+    }
+}
+
+PUBLIC VIRTUAL void AlertingState::OnExit()
+{
+    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    {
+        m_objContext.GetUdpKeepAliveSender().Stop();
+    }
+}
 
 PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 {
