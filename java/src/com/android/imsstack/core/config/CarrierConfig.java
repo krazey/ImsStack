@@ -443,8 +443,8 @@ public class CarrierConfig {
         public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =
                 "support_ecbm_for_vowifi_bool";
         // Aos
-        public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REGISTRATION_BOOL =
-                "destroy_unsecure_tcp_socket_on_accomplishing_registration_bool";
+        public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
+                "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
         public static final String KEY_DISABLE_T3482_FOR_EMC_BOOL =
                 "disable_t3482_for_emc_bool";
         public static final String KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
@@ -463,12 +463,12 @@ public class CarrierConfig {
                 "reg_retry_with_ip_ver_fallback_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
                 "remove_old_sa_on_establishing_sa_bool";
-        public static final String KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
-                "require_reg_after_ims_call_end_on_reg_held_bool";
         public static final String KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL =
                 "required_cdmaless_feature_tag_bool";
         public static final String KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL =
                 "required_emc_reg_in_roaming_bool";
+        public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
+                "required_init_reg_after_ims_call_end_on_reg_held_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL =
                 "required_volte_block_by_setting_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL =
@@ -504,8 +504,8 @@ public class CarrierConfig {
         public static final String KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL =
                 "video_over_wifi_supported_without_voice_bool";
 
-        public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT =
-                "contact_user_info_policy_for_non_register_message_int";
+        public static final String KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT =
+                "contact_user_info_policy_for_non_reg_message_int";
         public static final String KEY_EMC_PREFERRED_IPTYPE_INT =
                 "emc_preferred_iptype_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
@@ -544,8 +544,8 @@ public class CarrierConfig {
                 "pcscf_discovery_method_roaming_int_array";
         public static final String KEY_PERMANENT_PDN_FAILURE_INT_ARRAY =
                 "permanent_pdn_failure_int_array";
-        public static final String KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY =
-                "reg_error_codes_with_pcscf_discovery_int_array";
+        public static final String KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY =
+                "reg_err_code_for_pcscf_discovery_int_array";
         public static final String KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY =
                 "reg_permanent_err_max_cnt_int_array";
         public static final String KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY =
@@ -554,14 +554,14 @@ public class CarrierConfig {
                 "reg_retry_err_code_without_ipsec_int_array";
         public static final String KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY =
                 "rereg_err_code_for_call_end_int_array";
+        public static final String KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY =
+                "rereg_err_code_for_ims_pdn_reactivation_int_array";
+        public static final String
+                KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY =
+                        "rereg_err_code_for_init_reg_with_available_pcscf_int_array";
         public static final String
                 KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY =
                         "rereg_err_code_for_pdn_reactivation_after_call_end_int_array";
-        public static final String KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY =
-                "rereg_error_codes_with_ims_pdn_reactivation_int_array";
-        public static final String
-                KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY =
-                        "rereg_error_codes_with_init_reg_with_available_pcscf_int_array";
         public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
                 "rereg_retry_err_code_for_init_reg_int_array";
         public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY =
@@ -574,9 +574,8 @@ public class CarrierConfig {
                 "supported_roaming_rats_int_array";
         public static final String KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
                 "vowifi_sub_error_code_for_init_reg_int_array";
-        public static final String
-                KEY_WFC_REG_EVENT_ERROR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY =
-                        "wfc_reg_event_error_code_by_missing_911_address_int_array";
+        public static final String KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY =
+                "wfc_sub_err_code_by_missing_911_address_int_array";
 
         // Bundle {
         public static final String KEY_EXTRA_REG_ERR_BUNDLE =

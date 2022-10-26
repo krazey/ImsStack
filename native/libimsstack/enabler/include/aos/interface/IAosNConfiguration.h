@@ -736,9 +736,9 @@ public:
      * @brief Indicate the policy for clearing the registration retry count
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION
-     *        CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION
-     *        CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_NOTIFY
+     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION
+     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION
+     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_NOTIFY
      *
      * @return IMS_SINT32 Return the policy of clearing the retry count for registration
      */
@@ -756,11 +756,11 @@ public:
      *        with address and order.
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::REGISTRATION_PCSCF_UPDATE_POLICY_DEFAULT
+     *        CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_DEFAULT
      *            Indicate that registration is tried with new PCSCF address
      *            only when the current PCSCF address that is used for registration
      *            is not contained in the new PCSCF list.
-     *        CarrierConfig::Assets::REGISTRATION_PCSCF_UPDATE_POLICY_ALL_THE_TIME
+     *        CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME
      *            Indicate that registration or reregistration is always tried
      *            when the PCSCF addresses are changed regardless of the existence
      *            of the current PCSCF address in the new PCSCF list.
@@ -787,10 +787,10 @@ public:
      * @brief Indicate which policy is applied for creating geolocation pidf.
      *
      *        Possible values are,
-     *        CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION
-     *        CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITH_POSITION
-     *        CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITH_POSITION_AND_COUNTRY
-     *        CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_CIVIC
+     *        CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION
+     *        CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION
+     *        CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY
+     *        CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_CIVIC
      *
      * @return IMS_SINT32 Return the policy of setting the user info
      */

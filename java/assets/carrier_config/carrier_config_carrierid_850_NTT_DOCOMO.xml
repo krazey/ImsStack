@@ -40,18 +40,18 @@
     <int name="sip_timer_100_trying_millis_int" value="0"/>
 
     <!-- Aos -->
-    <int name="contact_user_info_policy_for_non_register_message_int" value="2"/>
+    <int name="contact_user_info_policy_for_non_reg_message_int" value="2"/>
     <int name="reg_actual_wait_time_policy_int" value="2"/>
     <int name="reg_retry_default_policy_int" value="1"/>
-    <int-array name="reg_error_codes_with_pcscf_discovery_int_array" num="2">
+    <int-array name="reg_err_code_for_pcscf_discovery_int_array" num="2">
         <item value="0"/>
         <item value="504"/>
     </int-array>
-    <int-array name="rereg_error_codes_with_init_reg_with_available_pcscf_int_array" num="1">
-        <item value="0"/>
-    </int-array>
-    <int-array name="rereg_error_codes_with_ims_pdn_reactivation_int_array" num="1">
+    <int-array name="rereg_err_code_for_ims_pdn_reactivation_int_array" num="1">
         <item value="403"/>
+    </int-array>
+    <int-array name="rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="1">
+        <item value="0"/>
     </int-array>
 
     <!-- MTC -->

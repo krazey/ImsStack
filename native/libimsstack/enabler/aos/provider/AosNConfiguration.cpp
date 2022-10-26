@@ -243,7 +243,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsOldSaOnEstablishingSaRemoved() cons
 PUBLIC VIRTUAL IMS_BOOL
 AosNConfiguration::IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed() const
 {
-    return m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingRegistration;
+    return m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyPdnWithEmergencyCallEndReleased() const
@@ -362,7 +362,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUserInfoInContactSupported() const
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRequiredAfterImsCallEndOnRegHeld() const
 {
-    return m_objAsset.bRequireRegAfterImsCallEndOnRegHeld;
+    return m_objAsset.bRequiredInitRegAfterImsCallEndOnRegHeld;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithFeatureTagUnavailableSupported() const
@@ -512,7 +512,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPcscfUpdatePolicy() 
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUserInfoPolicyForNonRegisterMessage() const
 {
-    return m_objAsset.nContactUserInfoPolicyForNonRegisterMessage;
+    return m_objAsset.nContactUserInfoPolicyForNonRegMessage;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetGeolocationPidfFormingPolicy() const
@@ -584,7 +584,7 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequiredW
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetWfcRegEventErrorByMissing911Address()
 {
-    return m_objAsset.objWfcRegEventErrorByMissing911Address;
+    return m_objAsset.objWfcSubErrByMissing911Address;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRetryCountSubErrorSubTerminated() const
@@ -695,7 +695,7 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryW
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithPcscfDiscovery()
 {
-    return m_objAsset.objRegErrorCodesWithPcscfDiscovery;
+    return m_objAsset.objRegErrCodeForPcscfDiscovery;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForCallEnd()
@@ -712,12 +712,12 @@ AosNConfiguration::GetReregErrCodeForPdnReactivationAfterCallEnd()
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
 AosNConfiguration::GetReregErrCodeWithInitRegWithAvailablePcscf()
 {
-    return m_objAsset.objReregErrorCodesWithInitRegWithAvailablePcscf;
+    return m_objAsset.objReregErrCodeForInitRegWithAvailablePcscf;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithImsPdnReactivation()
 {
-    return m_objAsset.objReregErrorCodesWithImsPdnReactivation;
+    return m_objAsset.objReregErrCodeForImsPdnReactivation;
 }
 
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
@@ -1119,9 +1119,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 PRIVATE
 void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
-    m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingRegistration =
-            piCc->GetBoolean(CarrierConfig::Assets::
-                            KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REGISTRATION_BOOL);
+    m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
     m_objAsset.bDisableT3482ForEmc =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_DISABLE_T3482_FOR_EMC_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
@@ -1140,12 +1139,12 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_IP_VER_FALLBACK_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL);
-    m_objAsset.bRequireRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
     m_objAsset.bRequiredCdmalessFeatureTag =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
     m_objAsset.bRequiredEmcRegInRoaming =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL);
+    m_objAsset.bRequiredInitRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
     m_objAsset.bRequiredVolteBlockBySetting =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL);
     m_objAsset.bRequiredVolteBlockByAirplaneMode =
@@ -1177,8 +1176,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.bVideoOverWifiSupportedWithoutVoice = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL);
 
-    m_objAsset.nContactUserInfoPolicyForNonRegisterMessage = piCc->GetInt(
-            CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT);
+    m_objAsset.nContactUserInfoPolicyForNonRegMessage = piCc->GetInt(
+            CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT);
     m_objAsset.nEmcPreferredIpType =
             piCc->GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT);
     m_objAsset.nGeolocationPidfFormingPolicy =
@@ -1223,8 +1222,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY);
     m_objAsset.objPcscfDiscoveryMethodRoaming =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY);
-    m_objAsset.objRegErrorCodesWithPcscfDiscovery = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY);
+    m_objAsset.objRegErrCodeForPcscfDiscovery = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY);
     m_objAsset.objRegPermanentErrMaxCnt =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY);
     m_objAsset.objRegRetryErrCodeWithDiffPcscf = piCc->GetIntArray(
@@ -1235,10 +1234,10 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetIntArray(CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY);
     m_objAsset.objReregErrCodeForPdnReactivationAfterCallEnd = piCc->GetIntArray(CarrierConfig::
                     Assets::KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY);
-    m_objAsset.objReregErrorCodesWithImsPdnReactivation = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY);
-    m_objAsset.objReregErrorCodesWithInitRegWithAvailablePcscf = piCc->GetIntArray(CarrierConfig::
-                    Assets::KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY);
+    m_objAsset.objReregErrCodeForImsPdnReactivation = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY);
+    m_objAsset.objReregErrCodeForInitRegWithAvailablePcscf = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY);
     m_objAsset.objReregRetryErrCodeForInitReg = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
     m_objAsset.objReregRetryErrCodeForInitRegWithSamePcscf = piCc->GetIntArray(
@@ -1251,8 +1250,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetIntArray(CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY);
     m_objAsset.objVowifiSubErrorCodeForInitReg = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
-    m_objAsset.objWfcRegEventErrorByMissing911Address = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_WFC_REG_EVENT_ERROR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY);
+    m_objAsset.objWfcSubErrByMissing911Address = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY);
 }
 
 PRIVATE

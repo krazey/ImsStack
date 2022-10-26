@@ -785,8 +785,7 @@ TEST_F(AosRegistrationTest, RetryCount)
 
     EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegRetryCountResetPolicy())
             .Times(AnyNumber())
-            .WillRepeatedly(
-                    Return(CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION));
+            .WillRepeatedly(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION));
 
     // TEST_F : ClearRetryCount
     m_pTestAosRegistration->ClearRetryCount();
