@@ -62,7 +62,6 @@ class IMtcPreconditionManager;
 class IMtcService;
 class IMtcSession;
 class IMtcSipInterfaceFactory;
-class IMtcVonrManager;
 class IMutex;
 class IReference;
 class ISession;
@@ -175,7 +174,6 @@ public:
     {
         return m_objContext.GetCallController();
     }
-    inline IMtcVonrManager& GetVonrManager() override { return m_objContext.GetVonrManager(); }
     inline MtcConfigurationProxy& GetConfigurationProxy() override
     {
         return m_objContext.GetConfigurationProxy();

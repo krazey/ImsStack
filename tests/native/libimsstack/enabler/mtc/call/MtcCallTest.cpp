@@ -54,7 +54,6 @@
 #include "sipcore/SipStatusCode.h"
 #include "ussi/UssiConstants.h"
 #include "utility/MessageUtils.h"
-#include "vonr/MockIMtcVonrManager.h"
 
 using ::testing::_;
 using ::testing::Invoke;
@@ -1255,19 +1254,6 @@ TEST_F(MtcCallTest, GetCallControllerCallsMtcContext)
             .WillRepeatedly(ReturnRef(objCallController));
 
     objCall.GetCallController();
-}
-
-TEST_F(MtcCallTest, GetVonrManagerCallsMtcContext)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    MockIMtcVonrManager objVonrManager;
-    EXPECT_CALL(objContext, GetVonrManager)
-            .Times(1)
-            .WillRepeatedly(ReturnRef(objVonrManager));
-
-    objCall.GetVonrManager();
 }
 
 TEST_F(MtcCallTest, GetConfigurationProxyCallsMtcContext)

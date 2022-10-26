@@ -26,7 +26,6 @@
 
 class CallContext;
 class ISession;
-class IDialogEvent;
 class MediaInfo;
 class SuppService;
 class IMtcCallContext;

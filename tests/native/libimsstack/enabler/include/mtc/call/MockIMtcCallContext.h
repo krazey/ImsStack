@@ -84,7 +84,6 @@ public:
     MOCK_METHOD(IMtcCallController&, GetCallController, (), (override));
     MOCK_METHOD(IMtcCallManager&, GetCallManager, (), (override));
     MOCK_METHOD(IMtcCallTrafficChecker&, GetCallTrafficChecker, (), (override));
-    MOCK_METHOD(IMtcVonrManager&, GetVonrManager, (), (override));
     MOCK_METHOD(MtcConfigurationProxy&, GetConfigurationProxy, (), (override));
     MOCK_METHOD(ICallStateProxy&, GetCallStateProxy, (), (override));
     MOCK_METHOD(IMtcImsEventReceiver&, GetImsEventReceiver, (), (override));

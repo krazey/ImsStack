@@ -26,7 +26,6 @@
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 
-class IDialogEvent;
 class IMtcCallContext;
 class ISession;
 class MediaInfo;

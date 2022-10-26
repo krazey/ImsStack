@@ -81,11 +81,9 @@ public:
      * @param strTarget Remote target.
      * @param pMediaInfo Media of the call.
      * @param lstSuppServices Supplementary services.
-     * @param pDialog TODO:
      */
     virtual void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IDialogEvent* pDialog) = 0;
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * Notifies the call that the user is alerted by the incoming call.

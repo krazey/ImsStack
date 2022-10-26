@@ -27,7 +27,6 @@
 class IuMtcService;
 class IMtcService;
 class MtcCall;
-class IDialogEvent;
 
 class IuMtcCall
 {

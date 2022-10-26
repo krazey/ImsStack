@@ -38,7 +38,6 @@ class IMtcMediaManager;
 class IMtcPreconditionManager;
 class IMtcService;
 class IMtcSipInterfaceFactory;
-class IMtcVonrManager;
 class ISession;
 
 class MtcSession final : public IMtcSession

@@ -30,7 +30,6 @@
 #include "call/traffic/MtcCallTrafficChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
-#include "vonr/MtcVonrManager.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "conferencecall/ConferenceManager.h"
 #include "utility/MessageUtils.h"
@@ -41,7 +40,6 @@ class MtcEmergencyServiceManager;
 class IMtcCallController;
 class IMtcCallManager;
 class IMtcDialingPlan;
-class IMtcVonrManager;
 class ICallStateProxy;
 class IMessageUtils;
 class IMtcCallTrafficChecker;
@@ -74,7 +72,6 @@ public:
         return m_objMtcCallTrafficChecker;
     }
     inline IMtcCallManager& GetCallManager() override { return m_objCallManager; }
-    inline IMtcVonrManager& GetVonrManager() override { return m_objVonrManager; }
     inline MtcConfigurationProxy& GetConfigurationProxy() override
     {
         return m_objConfigurationProxy;
@@ -106,7 +103,6 @@ protected:
     MtcDialingPlan m_objDialingPlan;
     MtcCallManager m_objCallManager;
     MtcCallController m_objCallController;
-    MtcVonrManager m_objVonrManager;
     CallStateProxy m_objCallStateProxy;
     MtcImsEventReceiver m_objImsEventReceiver;
     MtcSipInterfaceFactory m_objSipInterfaceFactory;

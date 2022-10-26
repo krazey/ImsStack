@@ -351,8 +351,7 @@ TEST_F(MtcCallControllerTest, StartCallsTargetCall)
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey))
             .WillByDefault(Return(&objCall));
 
-    pCallController->Start(
-            nCallKey, eCallType, strTarget, &objMediaInfo, objSuppServices, IMS_NULL);
+    pCallController->Start(nCallKey, eCallType, strTarget, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcCallControllerTest, HandleUserAlertCallsTargetCall)

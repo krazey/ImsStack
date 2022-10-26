@@ -159,12 +159,6 @@ TEST_F(MtcAppTest, GetCallManagerAfterConstructor)
     ASSERT_NE(piCallManager, nullptr);
 }
 
-TEST_F(MtcAppTest, GetVonrManagerAfterConstructor)
-{
-    IMtcVonrManager* piVonrManager = &pMtcApp->GetVonrManager();
-    ASSERT_NE(piVonrManager, nullptr);
-}
-
 TEST_F(MtcAppTest, GetConfigurationProxyAfterConstructor)
 {
     MtcConfigurationProxy* piConfigProxy = &pMtcApp->GetConfigurationProxy();

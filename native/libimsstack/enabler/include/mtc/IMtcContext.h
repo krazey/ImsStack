@@ -24,7 +24,6 @@
 class IMtcDialingPlan;
 class IMtcCallController;
 class IMtcCallManager;
-class IMtcVonrManager;
 class MtcConfigurationProxy;
 class ICallStateProxy;
 class IMtcAosConnector;
@@ -46,7 +45,6 @@ public:
     virtual IMtcCallController& GetCallController() = 0;
     virtual IMtcCallManager& GetCallManager() = 0;
     virtual IMtcCallTrafficChecker& GetCallTrafficChecker() = 0;
-    virtual IMtcVonrManager& GetVonrManager() = 0;
     virtual MtcConfigurationProxy& GetConfigurationProxy() = 0;
     virtual ICallStateProxy& GetCallStateProxy() = 0;
     virtual IMtcImsEventReceiver& GetImsEventReceiver() = 0;

@@ -46,8 +46,7 @@ public:
     MOCK_METHOD(void, Start,
             (IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
                     IN MediaInfo* pMediaInfo,
-                    (IN const IMSMap<SuppType, SuppService*>& objSuppServices),
-                    IN IDialogEvent* pDialog),
+                    (IN const IMSMap<SuppType, SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(void, HandleUserAlert, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, Accept,

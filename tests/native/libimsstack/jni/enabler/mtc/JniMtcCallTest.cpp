@@ -102,8 +102,7 @@ TEST_F(JniMtcCallTest, SendDataStart)
     objParcel.writeInt32(IuMtcCall::START);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Start(_, _, _, _, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Start(_, _, _, _, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }

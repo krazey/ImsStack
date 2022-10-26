@@ -55,8 +55,8 @@ public:
     void Attach(IN CallKey nCallKey) override;
     void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) override;
     void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IDialogEvent* pDialog) override;
+            IN MediaInfo* pMediaInfo,
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
     void HandleUserAlert(IN CallKey nCallKey) override;
     void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     void Reject(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;

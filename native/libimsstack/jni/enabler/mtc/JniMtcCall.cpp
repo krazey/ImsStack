@@ -271,8 +271,7 @@ void JniMtcCall::Start(IN const android::Parcel& objParcel)
     IMSMap<SuppType, SuppService*> objSuppService =
             JniMtcUtils::ReadSupplementaryService(objParcel);
 
-    m_objCallController.Start(
-            m_nCallKey, eCallType, strTarget, pMediaInfo, objSuppService, IMS_NULL);
+    m_objCallController.Start(m_nCallKey, eCallType, strTarget, pMediaInfo, objSuppService);
 }
 
 PRIVATE
