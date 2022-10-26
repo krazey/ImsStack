@@ -55,6 +55,7 @@ public:
     IMS_BOOL IsRequestedModifying();
     IMS_BOOL IsModified();
     inline IMS_BOOL HasPendingUpdate() { return m_bHasPendingUpdate; }
+    void AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo);
 
 private:
     CallType GetCurrentCallType() const;

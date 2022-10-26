@@ -15,6 +15,8 @@
  */
 
 #include <gtest/gtest.h>
+#include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
@@ -24,9 +26,12 @@
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/ISession.h"
+#include "core/MockIMessage.h"
 #include "core/MockISession.h"
-#include "helper/MtcTimerWrapper.h"
+#include "helper/MockMtcTimerWrapper.h"
+#include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
+#include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/SipMethod.h"
 
 using ::testing::_;
@@ -46,12 +51,17 @@ public:
     MockIMtcSession objMtcSession;
     MockISession objSession;
     MockIMtcUiNotifier objUiNotifier;
+    MtcSupplementaryService* pMtcSupplementaryService;
+    MockIMtcPreconditionManager objMtcPreconditionManager;
+    MockIMessage* pMessage;
+    MockMtcTimerWrapper objTimer;
 
 protected:
     virtual void SetUp() override
     {
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
+        pMtcSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
         ON_CALL(objContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
@@ -72,14 +82,23 @@ protected:
                 .WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objContext, GetSession())
                 .WillByDefault(Return(&objMtcSession));
+        ON_CALL(objContext, GetSupplementaryService())
+                .WillByDefault(ReturnRef(*pMtcSupplementaryService));
+        ON_CALL(objContext, GetPreconditionManager())
+                .WillByDefault(ReturnRef(objMtcPreconditionManager));
+        ON_CALL(objContext, GetTimer).WillByDefault(ReturnRef(objTimer));
 
+        pMessage = new MockIMessage();
         pUpdatingState = new UpdatingState(objContext);
     }
 
     virtual void TearDown() override
     {
         delete pUpdatingState;
+        delete pMessage;
         delete pUpdatingInfo;
+        delete pConfigurationProxy;
+        delete pMtcSupplementaryService;
     }
 };
 
@@ -106,10 +125,55 @@ TEST_F(UpdatingStateTest, OnExitSendsUpdateIfUpdatingInfoHasPendingUpdate)
     pUpdatingState->OnExit();
 }
 
+TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstablished)
+{
+    ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
+    EXPECT_CALL(objMediaManager, GetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
+
+    MediaInfo objMediaInfo;
+    EXPECT_EQ(CallStateName::ESTABLISHED,
+            pUpdatingState->AcceptUpdate(CallType::VOIP, &objMediaInfo));
+}
+
+TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpdate)
+{
+    ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    MediaInfo objMediaInfo;
+    objMediaInfo.eADir = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetAlertingInfo().eADir = DIRECTION_SEND;
+
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(1);
+    EXPECT_CALL(objMtcPreconditionManager, FormPreconditionSdp(_, _)).Times(1);
+    EXPECT_CALL(objMediaManager, GetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
+    EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(pMessage));
+    SipMethod objSipMethod(SipMethod::UPDATE);
+    EXPECT_CALL(*pMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
+    EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
+
+    EXPECT_EQ(CallStateName::ESTABLISHED,
+            pUpdatingState->AcceptUpdate(CallType::VOIP, &objMediaInfo));
+    EXPECT_EQ(DIRECTION_SEND, objMediaInfo.eADir);
+}
+
+TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)
+{
+    ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(pMessage));
+    SipMethod objSipMethod(SipMethod::INVITE);
+    EXPECT_CALL(*pMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
+    MediaInfo objMediaInfo;
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->AcceptUpdate(CallType::VOIP, &objMediaInfo));
+}
+
 TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)
 {
-    MtcTimerWrapper objTimer;
-    ON_CALL(objContext, GetTimer).WillByDefault(ReturnRef(objTimer));
     MockISession objSession;
     ON_CALL(objSession, GetState())
             .WillByDefault(Return(ISession::STATE_RENEGOTIATING));
@@ -117,6 +181,7 @@ TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)
     ON_CALL(objMtcSession, GetISession())
             .WillByDefault(ReturnRef(objSession));
 
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE))).Times(1);
 
     pUpdatingState->OnTimerExpired(MtcCallState::TIMER_CONVERT_USER_RESPONSE);
@@ -124,9 +189,7 @@ TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)
 
 TEST_F(UpdatingStateTest, OnRemoteResponseTimerExpiredCallsCancelUpdate)
 {
-    MtcTimerWrapper objTimer;
-    ON_CALL(objContext, GetTimer).WillByDefault(ReturnRef(objTimer));
-
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE)).Times(1);
     EXPECT_CALL(objMtcSession, CancelUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE)))
             .Times(1);
 
@@ -166,10 +229,8 @@ TEST_F(UpdatingStateTest, OnMediaFailed)
 TEST_F(UpdatingStateTest, HandleSrvccStartedAsModifier)
 {
     pUpdatingInfo->SetModifier();
-    MtcTimerWrapper objTimer;
-    ON_CALL(objContext, GetTimer)
-            .WillByDefault(ReturnRef(objTimer));
 
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE)).Times(1);
     const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
     EXPECT_CALL(objMtcSession, CancelUpdate(objReason))
             .Times(1);
@@ -179,12 +240,9 @@ TEST_F(UpdatingStateTest, HandleSrvccStartedAsModifier)
 
 TEST_F(UpdatingStateTest, HandleSrvccStartedAsNotModifier)
 {
-    ON_CALL(objSession, GetState())
-            .WillByDefault(Return(ISession::STATE_REESTABLISHING));
-    MtcTimerWrapper objTimer;
-    ON_CALL(objContext, GetTimer)
-            .WillByDefault(ReturnRef(objTimer));
+    ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_REESTABLISHING));
 
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
     EXPECT_CALL(objMtcSession, Reject(objReason))
             .Times(1);

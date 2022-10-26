@@ -71,6 +71,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
                 m_objContext.GetSupplementaryService().GetServices());
         return CallStateName::ESTABLISHED;
     }
+    m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(*pMediaInfo);
 
     m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
 
