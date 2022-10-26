@@ -253,7 +253,7 @@
     <boolean name="support_ecbm_for_vowifi_bool" value="false"/>
 
     <!-- Aos -->
-    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_registration_bool" value="false"/>
+    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
     <boolean name="disable_t3482_for_emc_bool" value="false"/>
     <boolean name="emc_call_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
     <boolean name="hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
@@ -263,9 +263,9 @@
     <boolean name="reg_contact_validation_bool" value="false"/>
     <boolean name="reg_retry_with_ip_ver_fallback_bool" value="false"/>
     <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
-    <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
     <boolean name="required_cdmaless_feature_tag_bool" value="false"/>
     <boolean name="required_emc_reg_in_roaming_bool" value="false"/>
+    <boolean name="required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
     <boolean name="required_volte_block_by_setting_bool" value="false"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="false"/>
     <boolean name="required_wfc_block_by_airplane_mode_bool" value="false"/>
@@ -283,7 +283,7 @@
     <boolean name="use_wfc_country_code_availability_check_bool" value="false"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="false"/>
 
-    <int name="contact_user_info_policy_for_non_register_message_int" value="1"/>
+    <int name="contact_user_info_policy_for_non_reg_message_int" value="1"/>
     <int name="emc_preferred_iptype_int" value="1"/>
     <int name="geolocation_pidf_forming_policy_int" value="1"/>
     <int name="ims_preferred_iptype_int" value="1"/>
@@ -314,7 +314,7 @@
     </int-array>
     <int-array name="permanent_pdn_failure_int_array" num="0">
     </int-array>
-    <int-array name="reg_error_codes_with_pcscf_discovery_int_array" num="0">
+    <int-array name="reg_err_code_for_pcscf_discovery_int_array" num="0">
     </int-array>
     <int-array name="reg_permanent_err_max_cnt_int_array" num="0">
     </int-array>
@@ -324,11 +324,11 @@
     </int-array>
     <int-array name="rereg_err_code_for_call_end_int_array" num="0">
     </int-array>
+    <int-array name="rereg_err_code_for_ims_pdn_reactivation_int_array" num="0">
+    </int-array>
+    <int-array name="rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="0">
+    </int-array>
     <int-array name="rereg_err_code_for_pdn_reactivation_after_call_end_int_array" num="0">
-    </int-array>
-    <int-array name="rereg_error_codes_with_ims_pdn_reactivation_int_array" num="0">
-    </int-array>
-    <int-array name="rereg_error_codes_with_init_reg_with_available_pcscf_int_array" num="0">
     </int-array>
     <int-array name="rereg_retry_err_code_for_init_reg_int_array" num="0">
     </int-array>
@@ -342,7 +342,7 @@
     </int-array>
     <int-array name="vowifi_sub_error_code_for_init_reg_int_array" num="0">
     </int-array>
-    <int-array name="wfc_reg_event_error_code_by_missing_911_address_int_array" num="0">
+    <int-array name="wfc_sub_err_code_by_missing_911_address_int_array" num="0">
     </int-array>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->

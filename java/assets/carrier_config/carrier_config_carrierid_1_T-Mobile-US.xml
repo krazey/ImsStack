@@ -42,7 +42,7 @@
     <int name="imswfc.registration_private_header_int" value="2"/>
 
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
-    <boolean name="require_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
+    <boolean name="required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="true"/>
     <int name="geolocation_pidf_forming_policy_int" value="3"/>
     <int name="reg_actual_wait_time_policy_int" value="2"/>
@@ -59,7 +59,7 @@
     <int-array name="vowifi_sub_error_code_for_init_reg_int_array" num="1">
         <item value="403"/>
     </int-array>
-    <int-array name="wfc_reg_event_error_code_by_missing_911_address_int_array" num="2">
+    <int-array name="wfc_sub_err_code_by_missing_911_address_int_array" num="2">
         <item value="1"/>
         <item value="2"/>
     </int-array>

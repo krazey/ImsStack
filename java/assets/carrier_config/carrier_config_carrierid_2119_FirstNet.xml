@@ -49,12 +49,12 @@
         <item value="0"/>
     </int-array>
 
-    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_registration_bool" value="true"/>
+    <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="true"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="true"/>
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="true"/>
     <boolean name="use_security_server_port_in_reg_contact_of_init_reg_bool" value="true"/>
-    <int name="contact_user_info_policy_for_non_register_message_int" value="2"/>
+    <int name="contact_user_info_policy_for_non_reg_message_int" value="2"/>
     <int name="reg_actual_wait_time_policy_int" value="1"/>
     <int name="reg_retry_305_policy_int" value="2"/>
     <int name="reg_retry_default_policy_int" value="1"/>

@@ -740,7 +740,7 @@ PROTECTED VIRTUAL void AosSubscription::RequestCommand(
         IMS_SINT32 nRegistrationRetryResetPolicy =
                 GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryCountResetPolicy();
         if (nRegistrationRetryResetPolicy !=
-                CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
+                CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION)
         {
             if (nCommand == COMMAND_REG_REQUIRED_WITH_NOTI_NO_911_ADDR)
             {

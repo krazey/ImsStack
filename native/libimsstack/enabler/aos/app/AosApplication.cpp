@@ -1660,7 +1660,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionUpdated_Pcscf()
             break;
         case IAosPcscf::TYPE_CHANGED_REORDER:
             if (GET_N_CONFIG(m_nSlotId)->GetRegistrationPcscfUpdatePolicy() ==
-                    CarrierConfig::Assets::REGISTRATION_PCSCF_UPDATE_POLICY_ALL_THE_TIME)
+                    CarrierConfig::Assets::REG_PCSCF_UPDATE_POLICY_ALL_THE_TIME)
             {
                 A_IMS_TRACE_I(
                         APPID, "ProcessConnectionUpdated_Pcscf :: reg will be updated", 0, 0, 0);

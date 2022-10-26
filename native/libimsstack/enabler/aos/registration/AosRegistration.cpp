@@ -2506,7 +2506,7 @@ PROTECTED VIRTUAL void AosRegistration::ClearRetryCount(IN IMS_BOOL bForced /* =
 {
     if (bForced == IMS_FALSE &&
             (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() !=
-                    CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION))
+                    CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION))
     {
         return;
     }
@@ -4227,7 +4227,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
     ClearAuthChallengedCount();
 
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
-            CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
+            CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION)
     {
         ClearRetryCount(IMS_TRUE);
     }
@@ -4323,7 +4323,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
     ClearAuthChallengedCount();
 
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
-            CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_REGISTRATION)
+            CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION)
     {
         ClearRetryCount(IMS_TRUE);
     }
@@ -4849,7 +4849,7 @@ PROTECTED VIRTUAL AosSubscription* AosRegistration::GetSubscription(
 PROTECTED VIRTUAL void AosRegistration::ProcessSubscription_Success()
 {
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
-            CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_SUBSCRIPTION)
+            CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION)
     {
         ClearRetryCount(IMS_TRUE);
     }
@@ -4869,7 +4869,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessSubscription_Terminated(
 PROTECTED VIRTUAL void AosRegistration::ProcessRegEventRegistered()
 {
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
-            CarrierConfig::Assets::REG_RETRY_COUNT_RESET_POLICY_NOTIFY)
+            CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_NOTIFY)
     {
         ClearRetryCount(IMS_TRUE);
     }
@@ -5196,7 +5196,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
     ByteArray objContent;
     IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetGeolocationPidfFormingPolicy();
 
-    if (nPolicy == CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_POSITION)
+    if (nPolicy == CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION)
     {
         if (!pPidfCreator->CreateWithoutPosition(
                     AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent))
@@ -5204,21 +5204,21 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
             return IMS_FALSE;
         }
     }
-    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITH_POSITION)
+    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION)
     {
         if (!pPidfCreator->CreateWithPosition(AString::ConstNull(), objContent))
         {
             return IMS_FALSE;
         }
     }
-    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITH_POSITION_AND_COUNTRY)
+    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_POLICY_WITH_POSITION_AND_COUNTRY)
     {
         if (!pPidfCreator->CreateWithPositionAndCountry(AString::ConstNull(), objContent))
         {
             return IMS_FALSE;
         }
     }
-    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_FORMING_POLICY_WITHOUT_CIVIC)
+    else if (nPolicy == CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_CIVIC)
     {
         if (!pPidfCreator->CreateWithoutCivic(AString::ConstNull(), objContent))
         {

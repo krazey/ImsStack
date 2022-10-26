@@ -393,7 +393,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
 
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
-                               KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REGISTRATION_BOOL,
+                               KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -427,15 +427,16 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_REQUIRE_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::
+                               KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
@@ -495,8 +496,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(IMS_FALSE));
 
     EXPECT_CALL(objCarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REGISTER_MESSAGE_INT,
-                    -1))
+            GetInt(CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_MESSAGE_INT, -1))
             .WillOnce(Return(1));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT, -1))
             .WillOnce(Return(1));
@@ -564,11 +564,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY))
             .WillOnce(Return(objPcscfDiscoveryMethodRoaming));
 
-    IMSVector<IMS_SINT32> objRegErrorCodesWithPcscfDiscovery;
-    objRegErrorCodesWithPcscfDiscovery.Clear();
+    IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
+    objRegErrCodeForPcscfDiscovery.Clear();
     EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_REG_ERROR_CODES_WITH_PCSCF_DISCOVERY_INT_ARRAY))
-            .WillOnce(Return(objRegErrorCodesWithPcscfDiscovery));
+            GetIntArray(CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY))
+            .WillOnce(Return(objRegErrCodeForPcscfDiscovery));
 
     IMSVector<IMS_SINT32> objRegPermanentErrMaxCnt;
     objRegPermanentErrMaxCnt.Clear();
@@ -594,26 +594,26 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY))
             .WillOnce(Return(objReregErrForCallEnd));
 
+    IMSVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
+    objReregErrCodeForImsPdnReactivation.Clear();
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY))
+            .WillOnce(Return(objReregErrCodeForImsPdnReactivation));
+
+    IMSVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
+    objReregErrCodeForInitRegWithAvailablePcscf.Clear();
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(CarrierConfig::Assets::
+                            KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY))
+            .WillOnce(Return(objReregErrCodeForInitRegWithAvailablePcscf));
+
     IMSVector<IMS_SINT32> objReregErrForPdnReactivationAfterCallEnd;
     objReregErrForPdnReactivationAfterCallEnd.Clear();
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::
                             KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY))
             .WillOnce(Return(objReregErrForPdnReactivationAfterCallEnd));
-
-    IMSVector<IMS_SINT32> objReregErrorCodesWithImsPdnReactivation;
-    objReregErrorCodesWithImsPdnReactivation.Clear();
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_REREG_ERROR_CODES_WITH_IMS_PDN_REACTIVATION_INT_ARRAY))
-            .WillOnce(Return(objReregErrorCodesWithImsPdnReactivation));
-
-    IMSVector<IMS_SINT32> objReregErrorCodesWithInitRegWithAvailablePcscf;
-    objReregErrorCodesWithInitRegWithAvailablePcscf.Clear();
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_REREG_ERROR_CODES_WITH_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY))
-            .WillOnce(Return(objReregErrorCodesWithInitRegWithAvailablePcscf));
 
     IMSVector<IMS_SINT32> objReregRetryErrCodeForInitReg;
     objReregRetryErrCodeForInitReg.Clear();
@@ -654,12 +654,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY))
             .WillOnce(Return(objVowifiSubErrorCodeForInitReg));
 
-    IMSVector<IMS_SINT32> objWfcRegEventErrorByMissing911Address;
-    objWfcRegEventErrorByMissing911Address.Clear();
+    IMSVector<IMS_SINT32> objWfcSubErrByMissing911Address;
+    objWfcSubErrByMissing911Address.Clear();
     EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_WFC_REG_EVENT_ERROR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY))
-            .WillOnce(Return(objWfcRegEventErrorByMissing911Address));
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_WFC_SUB_ERR_CODE_BY_MISSING_911_ADDRESS_INT_ARRAY))
+            .WillOnce(Return(objWfcSubErrByMissing911Address));
 
     InitAssetsConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
 
