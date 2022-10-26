@@ -135,6 +135,8 @@ public:
     MOCK_METHOD(CallStateName, Error_NotifyError,
             (IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage),
             (override));
+    MOCK_METHOD(CallStateName, OnReceivingMediaDataStarted,
+            (IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType), (override));
     MOCK_METHOD(CallStateName, OnReceivingMediaDataFailed,
             (IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType), (override));
     MOCK_METHOD(CallStateName, OnVideoLowestBitRate, (), (override));

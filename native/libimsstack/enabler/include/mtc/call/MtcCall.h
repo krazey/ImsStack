@@ -254,6 +254,8 @@ public:
     void Error_NotifyError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
+    void OnReceivingMediaDataStarted(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     void OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     void OnVideoLowestBitRate() override;
     void OnReceivingNetworkToneStarted() override;

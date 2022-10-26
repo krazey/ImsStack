@@ -2317,6 +2317,20 @@ TEST_F(MtcCallTest, Error_NotifyErrorFailsIfConnectionIsNull)
     objCall.Error_NotifyError(IMS_NULL, nCode, strMessage);
 }
 
+TEST_F(MtcCallTest, OnReceivingMediaDataStartedCallsState)
+{
+    IMS_UINT32 eMediaType = 1;
+    IMS_UINT32 eProtocolType = 2;
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, OnReceivingMediaDataStarted(eMediaType, eProtocolType))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.OnReceivingMediaDataStarted(eMediaType, eProtocolType);
+}
+
 TEST_F(MtcCallTest, OnReceivingMediaDataFailedCallsState)
 {
     IMS_UINT32 eMediaType = 1;

@@ -407,6 +407,12 @@ PUBLIC VIRTUAL CallStateName MtcCallState::Error_NotifyError(
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingMediaDataStarted(
+        IN IMS_UINT32 /*eMediaType*/, IN IMS_UINT32 /*eProtocolType*/)
+{
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingMediaDataFailed(
         IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
 {

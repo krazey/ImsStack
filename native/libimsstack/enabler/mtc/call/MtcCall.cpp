@@ -1187,6 +1187,18 @@ PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
     }
 }
 
+PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataStarted(
+        IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
+{
+    IMS_TRACE_I("OnReceivingMediaDataStarted : key[%d]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](IMtcCallState* pState)
+            {
+                return pState->OnReceivingMediaDataStarted(eMediaType, eProtocolType);
+            });
+}
+
 PUBLIC VIRTUAL void MtcCall::OnReceivingMediaDataFailed(
         IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
 {

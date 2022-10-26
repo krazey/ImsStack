@@ -24,6 +24,8 @@
 class MockIMediaReportEventListener : public IMediaReportEventListener
 {
 public:
+    MOCK_METHOD(void, OnReceivingMediaDataStarted,
+            (IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType), (override));
     MOCK_METHOD(void, OnReceivingMediaDataFailed,
             (IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType), (override));
     MOCK_METHOD(void, OnVideoLowestBitRate, (), (override));

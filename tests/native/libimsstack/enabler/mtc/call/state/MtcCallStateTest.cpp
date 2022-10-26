@@ -491,6 +491,12 @@ TEST_F(MtcCallStateTest, ErrorNotifyErrorInvokesClose)
             pState->Error_NotifyError(&objClientConnection, SipStatusCode::SC_420, "anyMessage"));
 }
 
+TEST_F(MtcCallStateTest, OnReceivingMediaDataStartedDoesNothing)
+{
+    EXPECT_EQ(INITIAL_CALL_STATE,
+            pState->OnReceivingMediaDataStarted(0, 0));
+}
+
 TEST_F(MtcCallStateTest, OnReceivingMediaDataFailedDoesNothing)
 {
     EXPECT_EQ(INITIAL_CALL_STATE,

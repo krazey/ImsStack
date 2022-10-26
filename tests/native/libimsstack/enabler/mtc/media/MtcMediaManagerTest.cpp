@@ -78,6 +78,14 @@ TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithCloseSessionReport)
     EXPECT_EQ(MediaState::TERMINATED, pMediaManager->GetState());
 }
 
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithDataReceivedStartedReport)
+{
+    EXPECT_CALL(*pListener, OnReceivingMediaDataStarted(_, _)).Times(2);
+
+    pMediaManager->MediaSession_Notify(REPORT_DATA_RECEIVE_STARTED);
+    pMediaManager->MediaSession_Notify(REPORT_DATA_RECEIVE_STARTED, MEDIA_TYPE_AUDIO);
+}
+
 TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithDataReceivedFailedReport)
 {
     EXPECT_CALL(*pListener, OnReceivingMediaDataFailed(_, _)).Times(2);
