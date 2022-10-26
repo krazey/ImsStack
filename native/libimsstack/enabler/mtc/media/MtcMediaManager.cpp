@@ -774,7 +774,7 @@ void MtcMediaManager::SetNetworkToneRTPTimer(IN IMS_UINT32 eMediaTypes, IN IMS_U
 
     IMS_TRACE_D("SetNetworkToneRTPTimer : MediaType[%d] Duration[%d]", eMediaTypes, nDuration, 0);
 
-    m_piMediaSession->SetNetworkToneRTPTimer(eContents, nDuration);
+    m_piMediaSession->SetNetworkToneRtpTimer(0 /* nNegoId */, eContents, nDuration);
 }
 
 PRIVATE

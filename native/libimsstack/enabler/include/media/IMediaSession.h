@@ -67,28 +67,28 @@ public:
      * is not zero, session will be created as a forking session from the session of the negotiated
      * id
      *
-     * @param nNegoID The identification of the session
+     * @param nNegoId The identification of the session
      * @param eMediaType The type of session
      * @return IMS_UINTP Returns identification of the Audio/Video/TextMediaSession instance
      * represents call dialog
      */
     virtual IMS_UINTP CreateProfile(
-            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
 
     /**
      * @brief Destroy a session instance of the Audio/Video/TextMediaSession with the given
      * negotiation id
      *
-     * @param nNegoID The identification of the session
+     * @param nNegoId The identification of the session
      * @return IMS_BOOL Returns IMS_TRUE when the destroy the profile successfully
      */
-    virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID) = 0;
+    virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoId) = 0;
 
     /**
      * @brief Form the SDP to the target dialog with the direction parameters for each
      * Audio/Video/TestMediaSession
      *
-     * @param nNegoID The identification of the session
+     * @param nNegoId The identification of the session
      * @param pSession The SDP module to put the formed SDP
      * @param eMediaType The type of media
      * @param nAudioDirection The direction of audio m-line in SDP to form
@@ -97,7 +97,7 @@ public:
      * @param bEnforceReofferMode To indicate the SDP should be set using full codec capability
      * @return IMS_BOOL Returns IMS_TRUE when form SDP successfully, IMS_FALSE when it is failed
      */
-    virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
+    virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoId, OUT ISession* pSession,
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
             IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1,
             IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) = 0;
@@ -106,7 +106,7 @@ public:
      * @brief Negotiate the SDP to the target dialog with the direction parameters for each
      * Audio/Video/TestMediaSession
      *
-     * @param nNegoID The identification of the session
+     * @param nNegoId The identification of the session
      * @param pSession The SDP module to get the SDP parameter to negotiated
      * @param eMediaType The type of media
      * @param nAudioDirection The direction of audio m-line in SDP to negotiate
@@ -115,37 +115,37 @@ public:
      * @param errorReason The error reason when the negotiation is failed
      * @return IMS_BOOL Returns IMS_TRUE when negotiate SDP successfully
      */
-    virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
+    virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoId, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
             OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) = 0;
 
     /**
      * @brief request to registering QoS callback of the given session to java layer
      *
-     * @param nNegoID The identification of the session
+     * @param nNegoId The identification of the session
      * @param eMediaType The type of media
      * @return IMS_BOOL Returns IMS_TRUE when request Qos is done successfully, IMS_FALSE if the
      * arguments is invalid.
      */
     virtual IMS_BOOL RequestQos(
-            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) = 0;
 
     /**
      * @brief Remove incomplete SDP negotiation set to keep the negotiation set to certain size
      *
-     * @param nNegoID The negotiation id to clean the SDP set
+     * @param nNegoId The negotiation id to clean the SDP set
      * @param pSession SDP module to remove when it is necessary
      */
-    virtual void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession) = 0;
+    virtual void FinalizeSDP(IN IMS_UINTP nNegoId, IN ISession* pSession) = 0;
 
     /**
      * @brief Runs target dialog to operate open/update/close session
      *
-     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
      * @return IMS_BOOL Returns IMS_TRUE when the opeation is done successfully, IMS_FALSE when it
      * is failed
      */
-    virtual IMS_BOOL Run(IN IMS_UINTP nNegoID) = 0;
+    virtual IMS_BOOL Run(IN IMS_UINTP nNegoId) = 0;
 
     /**
      * @brief Terminate the all media session in the call dialogs
@@ -158,15 +158,15 @@ public:
     /**
      * @brief Get the negotiation state
      *
-     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
      * @return NEGO_STATE The nego state
      */
-    virtual NEGO_STATE GetNegoState(IN IMS_UINTP nNegoID) = 0;
+    virtual NEGO_STATE GetNegoState(IN IMS_UINTP nNegoId) = 0;
 
     /**
      * @brief Get the negotiated media type
      *
-     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
      * @return MEDIA_CONTENT_TYPE The media type
      */
     virtual MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId) = 0;
@@ -174,7 +174,7 @@ public:
     /**
      * @brief Get the negotiated media quality
      *
-     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
      * @param type The negotiated media type
      * @return IMS_SINT32 Returns the quality of the target media type
      */
@@ -183,7 +183,7 @@ public:
     /**
      * @brief Get the negotiated codec bitrate
      *
-     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
      * @param type The negotiated media type
      * @return IMS_SINT32 Returns the bitrate of the negotiated codec
      */
@@ -193,7 +193,7 @@ public:
     /**
      * @brief Get the negotiated direction
      *
-     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
      * @param type The negotiated media type
      * @return MEDIA_DIRECTION Returns media direction
      */
@@ -203,7 +203,7 @@ public:
     /**
      * @brief Set the additional update for the MediaSession
      *
-     * @param nNegoID The target Audio/Video/TextMediaSession identification
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
      * @param type The additional option type
      * @param param1 The optional parameter to set, if there is no optional parameter, it is zero
      * @param param1 The optional parameter to set, if there is no optional parameter, it is zero
@@ -214,11 +214,12 @@ public:
     /**
      * @brief Set the timer of waiting to check the rtp stream is received from the network
      *
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
      * @param eMediaType The media type to set the wait timer
      * @param nRtpTimer The time in sec units to set
      */
-    virtual void SetNetworkToneRTPTimer(
-            IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer) = 0;
+    virtual void SetNetworkToneRtpTimer(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer);
 
     /**
      * @brief Notify the srvcc status to MediaSession to update media stream

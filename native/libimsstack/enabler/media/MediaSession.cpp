@@ -654,11 +654,12 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
     }
 }
 
-PUBLIC VIRTUAL void MediaSession::SetNetworkToneRTPTimer(
-        MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer)
+PUBLIC VIRTUAL void MediaSession::SetNetworkToneRtpTimer(
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer)
 {
+    (void)nNegoId;
     (void)eMediaType; /** TODO do it later */
-    IMS_TRACE_I("SetNetworkToneRTPTimer() - CallKey[%d], eMediaType[%d], nRtpTimer[%d]", m_nCallKey,
+    IMS_TRACE_I("SetNetworkToneRtpTimer() - CallKey[%d], eMediaType[%d], nRtpTimer[%d]", m_nCallKey,
             eMediaType, nRtpTimer);
 
     m_nRtpTimer = nRtpTimer;
