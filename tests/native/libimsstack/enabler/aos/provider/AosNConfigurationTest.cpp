@@ -49,6 +49,7 @@ protected:
     {
         pAosNConfiguration->InitAssetsConfig(piCc);
     }
+    void InitBundleConfig(IN const ICarrierConfig* piCc) { pAosNConfiguration->InitBundle(piCc); }
 };
 
 TEST_F(AosNConfigurationTest, InitConfig)
@@ -716,4 +717,265 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     nReason |= static_cast<IMS_UINT32>(AosNConfiguration::ClearReason::AIRPLANE);
     nReason |= static_cast<IMS_UINT32>(AosNConfiguration::ClearReason::PLMN_CHANGED);
     EXPECT_EQ(nReason, pAosNConfiguration->GetClearReasonForPermanentPdnFailure());
+}
+
+TEST_F(AosNConfigurationTest, InitBundleConfig)
+{
+    MockICarrierConfig objCarrierConfig;
+    MockICarrierConfig objExtraRegErr;
+
+    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objExtraRegErr)));
+
+    EXPECT_CALL(objExtraRegErr,
+            GetBoolean(CarrierConfig::Assets::
+                               KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_CALL(objExtraRegErr,
+            GetBoolean(
+                    CarrierConfig::Assets::KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
+    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_FINAL_TYPE_INT, -1))
+            .WillOnce(Return(0));
+
+    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MAX_CNT_INT, -1))
+            .WillOnce(Return(0));
+
+    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_MIN_CNT_INT, -1))
+            .WillOnce(Return(0));
+
+    EXPECT_CALL(objExtraRegErr,
+            GetInt(CarrierConfig::Assets::
+                            KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
+                    -1))
+            .WillOnce(Return(1));
+
+    EXPECT_CALL(objExtraRegErr,
+            GetInt(CarrierConfig::Assets::
+                            KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
+                    -1))
+            .WillOnce(Return(2));
+
+    EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_POLICY_INT, -1))
+            .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_PCSCF_FAILED));
+
+    IMSVector<IMS_SINT32> objExtraRegErrCode;
+    objExtraRegErrCode.Clear();
+    objExtraRegErrCode.Add(400);
+    EXPECT_CALL(
+            objExtraRegErr, GetIntArray(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY))
+            .WillOnce(Return(objExtraRegErrCode));
+
+    IMSVector<IMS_SINT32> objExtraReregErrCode;
+    objExtraReregErrCode.Clear();
+    objExtraReregErrCode.Add(500);
+    EXPECT_CALL(objExtraRegErr,
+            GetIntArray(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY))
+            .WillOnce(Return(objExtraReregErrCode));
+
+    IMSVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
+    objExtraRegErrWaitTimeSec.Clear();
+    objExtraRegErrWaitTimeSec.Add(30);
+    EXPECT_CALL(objExtraRegErr,
+            GetIntArray(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY))
+            .WillOnce(Return(objExtraRegErrWaitTimeSec));
+
+    EXPECT_CALL(objExtraRegErr, ReleaseBundle()).Times(1);
+
+    MockICarrierConfig objNotifyTerminated;
+
+    EXPECT_CALL(objCarrierConfig,
+            GetBundle(CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objNotifyTerminated)));
+
+    EXPECT_CALL(objNotifyTerminated,
+            GetInt(CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT,
+                    -1))
+            .WillOnce(Return(40));
+
+    // IMS_UINT32 nNotiFeature = 0;
+    // nNotiFeature |= 0x01;
+    // nNotiFeature |= 0x02;
+
+    IMSVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
+    objEventForInitRegOnTerminatedState.Clear();
+    EXPECT_CALL(objNotifyTerminated,
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY))
+            .WillOnce(Return(objEventForInitRegOnTerminatedState));
+
+    IMSVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
+    objEventWithWtForInitRegOnTerminatedState.Clear();
+    EXPECT_CALL(objNotifyTerminated,
+            GetIntArray(CarrierConfig::Assets::
+                            KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY))
+            .WillOnce(Return(objEventWithWtForInitRegOnTerminatedState));
+
+    EXPECT_CALL(objNotifyTerminated, ReleaseBundle()).Times(1);
+
+    MockICarrierConfig objRegErrCodeWithRaTimeBundle;
+
+    EXPECT_CALL(objCarrierConfig,
+            GetBundle(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objRegErrCodeWithRaTimeBundle)));
+
+    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+            GetBoolean(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+
+    IMSVector<IMS_SINT32> objRegErrCodeWithRaTime;
+    objRegErrCodeWithRaTime.Clear();
+    objRegErrCodeWithRaTime.Add(486);
+    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+            GetIntArray(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY))
+            .WillOnce(Return(objRegErrCodeWithRaTime));
+
+    IMSVector<IMS_SINT32> objRegErrCodeWithRaTimeForUpdate;
+    objRegErrCodeWithRaTimeForUpdate.Clear();
+    objRegErrCodeWithRaTimeForUpdate.Add(486);
+    EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
+            GetIntArray(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY))
+            .WillOnce(Return(objRegErrCodeWithRaTimeForUpdate));
+
+    EXPECT_CALL(objRegErrCodeWithRaTimeBundle, ReleaseBundle()).Times(1);
+
+    MockICarrierConfig objRegRetryInterval;
+
+    EXPECT_CALL(objCarrierConfig, GetBundle(CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objRegRetryInterval)));
+
+    EXPECT_CALL(objRegRetryInterval,
+            GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL, IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
+    IMSVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
+    objRegRetryRandomUpperValueSec.Clear();
+    objRegRetryRandomUpperValueSec.Add(0);
+    objRegRetryRandomUpperValueSec.Add(0);
+    objRegRetryRandomUpperValueSec.Add(15);
+    objRegRetryRandomUpperValueSec.Add(0);
+    objRegRetryRandomUpperValueSec.Add(0);
+    objRegRetryRandomUpperValueSec.Add(0);
+    EXPECT_CALL(objRegRetryInterval,
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY))
+            .WillOnce(Return(objRegRetryRandomUpperValueSec));
+
+    IMSVector<IMS_SINT32> objRegRetryIntervalSec;
+    objRegRetryIntervalSec.Clear();
+    objRegRetryIntervalSec.Add(30);
+    objRegRetryIntervalSec.Add(30);
+    objRegRetryIntervalSec.Add(60);
+    objRegRetryIntervalSec.Add(120);
+    objRegRetryIntervalSec.Add(480);
+    objRegRetryIntervalSec.Add(900);
+    EXPECT_CALL(objRegRetryInterval,
+            GetIntArray(CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY))
+            .WillOnce(Return(objRegRetryIntervalSec));
+
+    EXPECT_CALL(objRegRetryInterval, ReleaseBundle()).Times(1);
+
+    MockICarrierConfig objSubErrCodeForInitRegBundle;
+
+    EXPECT_CALL(objCarrierConfig,
+            GetBundle(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE))
+            .WillRepeatedly(Return(static_cast<ICarrierConfig*>(&objSubErrCodeForInitRegBundle)));
+
+    EXPECT_CALL(objSubErrCodeForInitRegBundle,
+            GetInt(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT, -1))
+            .WillOnce(Return(2));
+
+    IMSVector<IMS_SINT32> objSubErrCodeForInitReg;
+    objSubErrCodeForInitReg.Clear();
+    objSubErrCodeForInitReg.Add(408);
+    objSubErrCodeForInitReg.Add(504);
+    EXPECT_CALL(objSubErrCodeForInitRegBundle,
+            GetIntArray(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY))
+            .WillOnce(Return(objSubErrCodeForInitReg));
+
+    EXPECT_CALL(objSubErrCodeForInitRegBundle, ReleaseBundle()).Times(1);
+
+    MockICarrierConfig objSubErrCodeForTerminatedBundle;
+
+    EXPECT_CALL(objCarrierConfig,
+            GetBundle(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE))
+            .WillRepeatedly(
+                    Return(static_cast<ICarrierConfig*>(&objSubErrCodeForTerminatedBundle)));
+
+    EXPECT_CALL(objSubErrCodeForTerminatedBundle,
+            GetInt(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT,
+                    -1))
+            .WillOnce(Return(0));
+
+    IMSVector<IMS_SINT32> objSubErrCodeForTerminated;
+    objSubErrCodeForTerminated.Clear();
+    objSubErrCodeForTerminated.Add(491);
+    objSubErrCodeForTerminated.Add(500);
+    objSubErrCodeForTerminated.Add(606);
+    EXPECT_CALL(objSubErrCodeForTerminatedBundle,
+            GetIntArray(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY))
+            .WillOnce(Return(objSubErrCodeForTerminated));
+
+    EXPECT_CALL(objSubErrCodeForTerminatedBundle, ReleaseBundle()).Times(1);
+
+    InitBundleConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
+
+    // AosExtraRegErrBundle
+    // bExtraReregFailureWithErrCodeInRoaming
+    EXPECT_TRUE(pAosNConfiguration->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired());
+    EXPECT_EQ(0, pAosNConfiguration->GetSpecificRegistrationErrorFinalType());
+    EXPECT_EQ(0, pAosNConfiguration->GetSpecificRegistrationErrorMaxCount());
+    // nExtraRegErrMinCnt
+    EXPECT_EQ(1, pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached());
+    EXPECT_EQ(2, pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached());
+    EXPECT_EQ(CarrierConfig::Assets::ERROR_POLICY_PCSCF_FAILED,
+            pAosNConfiguration->GetSpecificRegistrationErrorPolicy());
+    IMSVector<IMS_SINT32>& objErrCode = pAosNConfiguration->GetSpecificRegistrationErrorCode();
+    EXPECT_EQ(1, objErrCode.GetSize());
+    EXPECT_EQ(400, objErrCode.GetAt(0));
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetSpecificReregistrationErrorCode();
+    EXPECT_EQ(1, objErrCode.GetSize());
+    EXPECT_EQ(500, objErrCode.GetAt(0));
+    IMSVector<IMS_SINT32>& objWaitTime = pAosNConfiguration->GetSpecificRegErrWaitTime();
+    EXPECT_EQ(30, objWaitTime.GetAt(0));
+
+    // AosNotifyTerminatedForInitRegBundle
+    EXPECT_EQ(40, pAosNConfiguration->GetNotifyWaitTime());
+    // objEventForInitRegOnTerminatedState
+    // objEventWithWtForInitRegOnTerminatedState
+
+    // AosRegErrCodeWithRaTimeBundle
+    EXPECT_FALSE(pAosNConfiguration->IsRegErrCodeWithRetryAfterTimeOnlyDefined());
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetRegErrCodeWithRetryAfterTime();
+    EXPECT_EQ(1, objErrCode.GetSize());
+    EXPECT_EQ(486, objErrCode.GetAt(0));
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetReregErrCodeWithRetryAfterTime();
+    EXPECT_EQ(1, objErrCode.GetSize());
+
+    // AosRegRetryIntervalBundle
+    EXPECT_TRUE(pAosNConfiguration->IsRegistrationRetryIntervalsUsedForSubscription());
+    IMSVector<IMS_SINT32>& objRandomInterval =
+            pAosNConfiguration->GetRegistrationRandomRetryIntervals();
+    IMSVector<IMS_SINT32>& objInterval = pAosNConfiguration->GetRegistrationRetryIntervals();
+    EXPECT_EQ(objRandomInterval.GetSize(), objInterval.GetSize());
+
+    // AosSubErrCodeForInitRegBundle
+    EXPECT_EQ(2, pAosNConfiguration->GetRetryCountSubErrorRegRequired());
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetSubErrorRegRequired();
+    EXPECT_EQ(2, objErrCode.GetSize());
+
+    // AosSubErrCodeForTerminatedBundle
+    EXPECT_EQ(0, pAosNConfiguration->GetRetryCountSubErrorSubTerminated());
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetSubErrorSubTerminated();
+    EXPECT_EQ(3, objErrCode.GetSize());
 }
