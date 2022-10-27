@@ -161,12 +161,11 @@ PUBLIC VIRTUAL void AosSubscription::SetRetryTimer(IN IMS_BOOL bCheckRetryAfter)
     }
 
     IMS_BOOL bUseRegsitrationRetryIntervals =
-            GET_N_CONFIG(m_piContext->GetSlotId())
-                    ->IsRegistrationRetryIntervalsUsedForSubscription();
+            GET_N_CONFIG(m_piContext->GetSlotId())->IsRegRetryIntervalsUsedForSub();
     if (bUseRegsitrationRetryIntervals == IMS_TRUE)
     {
         IMSVector<IMS_SINT32>& objRetryIntervals =
-                GET_N_CONFIG(m_piContext->GetSlotId())->GetRegistrationRetryIntervals();
+                GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryIntervals();
 
         StartTimer(static_cast<IMS_UINT32>(GetNextThrottlingTime(objRetryIntervals)));
     }
@@ -438,9 +437,8 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::ProcessFailureResponse_504(IN IMS_BO
 PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsRetryActionDueToRetrycounter(IN IMS_BOOL bIsRefreshed)
 {
     IMS_BOOL bSupported = GET_N_CONFIG(m_piContext->GetSlotId())
-                                  ->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired();
-    IMS_SINT32 nMaxCount =
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetSpecificRegistrationErrorMaxCount();
+                                  ->IsExtraRegErrRetryCntSharedForRegAndSubRequired();
+    IMS_SINT32 nMaxCount = GET_N_CONFIG(m_piContext->GetSlotId())->GetExtraRegErrMaxCount();
     if ((bSupported == IMS_TRUE) && (nMaxCount > 0))
     {
         IMS_BOOL bIncreseRetryCount = AosProvider::GetInstance()
@@ -855,7 +853,7 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetNextThrottlingTime(
     }
 
     IMSVector<IMS_SINT32>& objRetryRandomIntervals =
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetRegistrationRandomRetryIntervals();
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRandomRetryIntervals();
 
     nThrotllingTime = (objInterval.GetAt(nTimeIndex - 1) * 1000) +
             (IMS_SYS_GetRandom(objRetryRandomIntervals.GetAt(nTimeIndex - 1)) * 1000);
@@ -984,9 +982,8 @@ PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Active(IN IMS_SINT32 
     }
 
     IMS_BOOL bSupported = GET_N_CONFIG(m_piContext->GetSlotId())
-                                  ->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired();
-    IMS_SINT32 nMaxCount =
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetSpecificRegistrationErrorMaxCount();
+                                  ->IsExtraRegErrRetryCntSharedForRegAndSubRequired();
+    IMS_SINT32 nMaxCount = GET_N_CONFIG(m_piContext->GetSlotId())->GetExtraRegErrMaxCount();
     if ((bSupported == IMS_TRUE) && (nMaxCount > 0))
     {
         AosProvider::GetInstance()

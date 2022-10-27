@@ -1864,7 +1864,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 {
     m_pConnector->Stop();
 
-    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorFinalType() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType() ==
             CarrierConfig::Assets::ERROR_TYPE_REPEATED)
     {
         // TODO: PLMN block with T3402

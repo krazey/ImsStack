@@ -60,7 +60,7 @@ TEST_F(AosRetryRepositoryTest, IncreaseCount)
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockAosConfig), SLOT_ID);
 
-    EXPECT_CALL(objMockAosConfig, GetSpecificRegistrationErrorMaxCount()).WillRepeatedly(Return(5));
+    EXPECT_CALL(objMockAosConfig, GetExtraRegErrMaxCount()).WillRepeatedly(Return(5));
 
     SetRetryCount(0, 0);
     EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));

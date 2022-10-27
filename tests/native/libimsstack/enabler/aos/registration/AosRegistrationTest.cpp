@@ -774,8 +774,7 @@ TEST_F(AosRegistrationTest, BlockChanged)
 
 TEST_F(AosRegistrationTest, RetryCount)
 {
-    EXPECT_CALL(m_objMockAosIAosNConfiguration,
-            IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired())
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 

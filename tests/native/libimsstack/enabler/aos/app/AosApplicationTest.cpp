@@ -385,7 +385,7 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(IMS_TRUE));
         EXPECT_CALL(m_objMockIAosNConfiguration, RemoveListener(_)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosNConfiguration, GetSpecificRegistrationErrorFinalType())
+        EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED));
         EXPECT_CALL(m_objMockIAosNConfiguration, IsGeolocationPidfSupported(_))

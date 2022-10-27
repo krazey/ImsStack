@@ -63,7 +63,7 @@ public:
     virtual IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const;
     virtual IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const;
     virtual IMS_BOOL UseWfcCountryCodeAvailabilityCheck() const;
-    virtual IMS_BOOL IsRegistrationRetryIntervalsUsedForSubscription() const;
+    virtual IMS_BOOL IsRegRetryIntervalsUsedForSub() const;
     virtual IMS_BOOL IsSmsOverIpEnabled() const;
     virtual IMS_BOOL IsIpsecEnabled() const;
     virtual IMS_BOOL IsSecurityServerPortInRegContactOfInitialRegistrationUsed() const;
@@ -82,7 +82,7 @@ public:
     virtual IMS_BOOL IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const;
     virtual IMS_BOOL IsCdmalessFeatureTagRequired() const;
     virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const;
-    virtual IMS_BOOL IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() const;
+    virtual IMS_BOOL IsExtraRegErrRetryCntSharedForRegAndSubRequired() const;
     virtual IMS_BOOL IsRegistrationEventForCatRequired() const;
     virtual IMS_BOOL IsEmergencyCallbackModeSupported() const;
     virtual IMS_BOOL IsEmergencySmsOverImsSupported() const;
@@ -113,9 +113,10 @@ public:
     virtual IMS_SINT32 GetRegistrationRetrySip305CodePolicy() const;
     virtual IMS_SINT32 GetReregistrationRetrySip305CodePolicy() const;
     virtual IMS_SINT32 GetRegistrationRetrySip503CodePolicy() const;
-    virtual IMS_SINT32 GetSpecificRegistrationErrorFinalType() const;
-    virtual IMS_SINT32 GetSpecificRegistrationErrorPolicy() const;
-    virtual IMS_SINT32 GetSpecificRegistrationErrorMaxCount() const;
+    virtual IMS_SINT32 GetExtraRegErrFinalType() const;
+    virtual IMS_SINT32 GetExtraRegErrPolicy() const;
+    virtual IMS_SINT32 GetExtraRegErrMaxCount() const;
+    virtual IMS_SINT32 GetExtraRegErrMinCount() const;
     virtual IMS_SINT32 GetRegRetryCountResetPolicy() const;
     virtual IMS_SINT32 GetReregRetryMaxCountKeptRegistration() const;
     virtual IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const;
@@ -124,8 +125,8 @@ public:
     virtual IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached() const;
     virtual IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached() const;
 
-    virtual IMSVector<IMS_SINT32>& GetRegistrationRetryIntervals();
-    virtual IMSVector<IMS_SINT32>& GetRegistrationRandomRetryIntervals();
+    virtual IMSVector<IMS_SINT32>& GetRegRetryIntervals();
+    virtual IMSVector<IMS_SINT32>& GetRegRandomRetryIntervals();
     virtual IMSVector<IMS_SINT32>& GetIpsecAuthenticationAlgorithms();
     virtual IMSVector<IMS_SINT32>& GetIpsecEncryptionAlgorithms();
 
@@ -149,9 +150,9 @@ public:
     virtual IMSVector<IMS_SINT32>& GetSupportedRats();
     virtual IMSVector<IMS_SINT32>& GetSupportedRoamingRats();
     virtual IMSVector<IMS_SINT32>& GetSmsOverImsSupportedRats();
-    virtual IMSVector<IMS_SINT32>& GetSpecificRegistrationErrorCode();
-    virtual IMSVector<IMS_SINT32>& GetSpecificReregistrationErrorCode();
-    virtual IMSVector<IMS_SINT32>& GetSpecificRegErrWaitTime();
+    virtual IMSVector<IMS_SINT32>& GetExtraRegErrCode();
+    virtual IMSVector<IMS_SINT32>& GetExtraReregErrCode();
+    virtual IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime();
     virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeWithInitialRegWithSamePcscf();
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrCode();
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount();
