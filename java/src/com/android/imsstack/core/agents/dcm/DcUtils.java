@@ -112,7 +112,7 @@ public class DcUtils implements IDcUtils {
                     ani = getAccessNetworkInfoForLte(nri, ss.getDuplexMode());
                     break;
                 case TelephonyManager.NETWORK_TYPE_NR:
-                    ani = getAccessNetworkInfoForNr(nri, ServiceState.DUPLEX_MODE_TDD);
+                    ani = getAccessNetworkInfoForNr(nri);
                     break;
                 case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
                 case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
@@ -206,15 +206,14 @@ public class DcUtils implements IDcUtils {
     }
 
     @VisibleForTesting
-    protected String[] getAccessNetworkInfoForNr(@NonNull NetworkRegistrationInfo nri,
-            int duplexMode) {
+    protected String[] getAccessNetworkInfoForNr(@NonNull NetworkRegistrationInfo nri) {
         String[] ani = null;
         CellIdentityNr ci = getCellIdentity(nri, CellIdentityNr.class);
 
         if (ci == null) {
             ani = getAccessNetworkInfoFromCache(TelephonyManager.NETWORK_TYPE_NR);
         } else {
-            ani = getAccessNetworkInfoFromCellIdentityNr(ci, duplexMode);
+            ani = getAccessNetworkInfoFromCellIdentityNr(ci, getDuplexModeForNr(ci));
 
             if (ani == null) {
                 ani = getAccessNetworkInfoFromCache(TelephonyManager.NETWORK_TYPE_NR);
@@ -258,6 +257,31 @@ public class DcUtils implements IDcUtils {
         }
 
         return null;
+    }
+
+    private static int getDuplexModeForNr(@NonNull CellIdentityNr ci) {
+        // TODO: Is the arfcn for downlink? Need to check if it could be uplink as well
+        int arfcn = ci.getNrarfcn();
+        if (arfcn == CellInfo.UNAVAILABLE) {
+            return ServiceState.DUPLEX_MODE_TDD;
+        }
+
+        int[] bands = ci.getBands();
+        for (int band : bands) {
+            for (NgranBandArfcnFrequency ngranBand : NgranBandArfcnFrequency.values()) {
+                if (band == ngranBand.getBand()) {
+                    if (isInNrarfcnRange(ngranBand, arfcn)) {
+                        return ngranBand.getDuplexMode();
+                    }
+                }
+            }
+        }
+
+        return ServiceState.DUPLEX_MODE_TDD;
+    }
+
+    private static boolean isInNrarfcnRange(@NonNull NgranBandArfcnFrequency ngranBand, int arfcn) {
+        return arfcn >= ngranBand.getArfcnRangeFirst() && arfcn <= ngranBand.getArfcnRangeLast();
     }
 
     @SuppressWarnings("unchecked")

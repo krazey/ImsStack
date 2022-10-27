@@ -149,7 +149,6 @@ public class DcUtilsTest extends ImsStackTest {
         NetworkRegistrationInfo nri = createNetworkRegistrationInfo(testNetworkType);
 
         when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
-        when(mServiceState.getDuplexMode()).thenReturn(ServiceState.DUPLEX_MODE_TDD);
 
         IDcUtils.AccessNetworkInfo ani = mDcUtils.getAccessNetworkInfo(testNetworkType);
 
@@ -164,7 +163,7 @@ public class DcUtilsTest extends ImsStackTest {
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_MNC], ci.getMncString());
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_CELL_ID], Long.toHexString(ci.getNci()));
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_TAC_OR_LAC], Integer.toHexString(ci.getTac()));
-        assertEquals(ani.mAni[DcUtils.ANI_INDEX_MODE], DcUtils.MODE_TDD);
+        assertEquals(ani.mAni[DcUtils.ANI_INDEX_MODE], DcUtils.MODE_FDD);
     }
 
     @Test
@@ -339,7 +338,7 @@ public class DcUtilsTest extends ImsStackTest {
         mDcUtils.storeAccessNetworkInfoToCache(TelephonyManager.NETWORK_TYPE_NR,
                 new String[] {"310"});
 
-        String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri, ServiceState.DUPLEX_MODE_TDD);
+        String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri);
 
         assertNotNull(networks);
         assertEquals("310", networks[DcUtils.ANI_INDEX_MCC]);
@@ -353,7 +352,7 @@ public class DcUtilsTest extends ImsStackTest {
         mDcUtils.storeAccessNetworkInfoToCache(TelephonyManager.NETWORK_TYPE_NR,
                 new String[] {"310"});
 
-        String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri, ServiceState.DUPLEX_MODE_TDD);
+        String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri);
 
         assertNotNull(networks);
         assertEquals("310", networks[DcUtils.ANI_INDEX_MCC]);
@@ -366,7 +365,7 @@ public class DcUtilsTest extends ImsStackTest {
                 TelephonyManager.NETWORK_TYPE_NR);
         CellIdentityNr ci = getCellIdentity(nri, CellIdentityNr.class);
 
-        String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri, ServiceState.DUPLEX_MODE_FDD);
+        String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri);
 
         assertNotNull(networks);
         assertEquals(DcUtils.ANI_ITEM_SIZE, networks.length);
@@ -488,7 +487,7 @@ public class DcUtilsTest extends ImsStackTest {
                 return new CellIdentityLte(0x1111111, 13, 0x2222, 0, new int[] {}, 0,
                         "001", "01", "Test-SIM", "Test", Collections.emptyList(), null);
             case TelephonyManager.NETWORK_TYPE_NR:
-                return new CellIdentityNr(20, 0x333333, 2, new int[] {},
+                return new CellIdentityNr(20, 0x333333, 423000, new int[] {34, 1},
                         "001", "01", 0x555555555L, "Test-SIM", "Test", Collections.emptyList());
             case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
