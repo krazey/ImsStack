@@ -28,6 +28,8 @@
 #include "conferencecall/IConferenceManager.h"
 #include "configuration/MtcConfigurationManager.h"
 #include "ServiceUtil.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
+#include "utility/IMessageUtils.h"
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
@@ -60,11 +62,13 @@ protected:
 TEST_F(MtcAppTest, Constructor)
 {
     ASSERT_NE(pMtcApp, nullptr);
+    pMtcApp->Stop();
 }
 
 TEST_F(MtcAppTest, GetSlotId)
 {
     EXPECT_EQ(pMtcApp->GetSlotId(), SLOT_ID);
+    pMtcApp->Stop();
 }
 
 TEST_F(MtcAppTest, CreateNormalServiceAfterStart)
@@ -75,6 +79,7 @@ TEST_F(MtcAppTest, CreateNormalServiceAfterStart)
     pMtcApp->Start();
     piService = pMtcApp->GetServiceByType(ServiceType::NORMAL);
     ASSERT_NE(piService, nullptr);
+    pMtcApp->Stop();
 }
 
 TEST_F(MtcAppTest, CreateEmergencyServiceAfterStart)
@@ -85,6 +90,7 @@ TEST_F(MtcAppTest, CreateEmergencyServiceAfterStart)
     pMtcApp->Start();
     piService = pMtcApp->GetServiceByType(ServiceType::EMERGENCY);
     ASSERT_NE(piService, nullptr);
+    pMtcApp->Stop();
 }
 
 TEST_F(MtcAppTest, ReturnNullForGetServiceForUnknownType)
@@ -92,6 +98,7 @@ TEST_F(MtcAppTest, ReturnNullForGetServiceForUnknownType)
     pMtcApp->Start();
     IMtcService* piService = pMtcApp->GetServiceByType(ServiceType::UNKNOWN);
     ASSERT_EQ(piService, nullptr);
+    pMtcApp->Stop();
 }
 
 TEST_F(MtcAppTest, StopWithoutStartNoCrash)
@@ -125,6 +132,7 @@ TEST_F(MtcAppTest, StartTwiceWithoutStopNoDuplicatedServiceCreation)
     pMtcApp->Start();
     IMS_SINT32 nSecondServiceCount = pMtcApp->GetServiceCount();
     EXPECT_EQ(nFirstServiceCount, nSecondServiceCount);
+    pMtcApp->Stop();
 }
 
 TEST_F(MtcAppTest, CreateEctManagerOnlyOnceWhenFirstGetterIsCalled)
@@ -151,6 +159,12 @@ TEST_F(MtcAppTest, GetCallControllerAfterConstructor)
 {
     IMtcCallController* piCallController = &pMtcApp->GetCallController();
     ASSERT_NE(piCallController, nullptr);
+}
+
+TEST_F(MtcAppTest, GetCallTrafficCheckerAfterConstructor)
+{
+    IMtcCallTrafficChecker* piTrafficChecker = &pMtcApp->GetCallTrafficChecker();
+    ASSERT_NE(piTrafficChecker, nullptr);
 }
 
 TEST_F(MtcAppTest, GetCallManagerAfterConstructor)
@@ -199,6 +213,12 @@ TEST_F(MtcAppTest, GetAsyncRunnerAfterConstructor)
     ASSERT_NE(pRunner, nullptr);
     ImsMessage objMessage(0, 0, 0);
     pRunner->OnMessage(objMessage); // to delete pRunner
+}
+
+TEST_F(MtcAppTest, GetMessageUtilsAfterConstructor)
+{
+    IMessageUtils* piMessageUtils = &pMtcApp->GetMessageUtils();
+    ASSERT_NE(piMessageUtils, nullptr);
 }
 
 TEST_F(MtcAppTest, IsWifiTestModeReturnsSameValueOfUtilService)

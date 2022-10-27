@@ -24,6 +24,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/message/MockIMessageSender.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -197,4 +198,10 @@ TEST_F(MtcSessionTest, SecondTerminateReturnsFailure)
 
     EXPECT_EQ(IMS_SUCCESS, pMtcSession->Terminate(IMS_TRUE, objReason));
     EXPECT_EQ(IMS_FAILURE, pMtcSession->Terminate(IMS_TRUE, objReason));
+}
+
+TEST_F(MtcSessionTest, GetExtensionSetReturnsMember)
+{
+    MtcExtensionSet& objExtensionSet = pMtcSession->GetExtensionSet();
+    EXPECT_NE(&objExtensionSet, nullptr);
 }

@@ -31,6 +31,7 @@
 #include "call/NullCall.h"
 #include "call/state/MockIMtcCallState.h"
 #include "call/state/MockMtcCallStateMachine.h"
+#include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/MockIConferenceManager.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -42,6 +43,7 @@
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
@@ -54,6 +56,7 @@
 #include "sipcore/SipStatusCode.h"
 #include "ussi/UssiConstants.h"
 #include "utility/MessageUtils.h"
+#include "utility/MockIMessageUtils.h"
 
 using ::testing::_;
 using ::testing::Invoke;
@@ -1189,6 +1192,22 @@ TEST_F(MtcCallTest, DeleteUpdatingInfoDeletesPreviousOne)
     EXPECT_NE(eChangedCallType, objCall.GetUpdatingInfo().GetTargetCallType());
 }
 
+TEST_F(MtcCallTest, GetTimerReturnsMember)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MtcTimerWrapper* pTimer = &objCall.GetTimer();
+
+    EXPECT_NE(pTimer, nullptr);
+}
+
+TEST_F(MtcCallTest, GetSupplementaryServiceReturnsMember)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MtcSupplementaryService* pSuppService = &objCall.GetSupplementaryService();
+
+    EXPECT_NE(pSuppService, nullptr);
+}
+
 TEST_F(MtcCallTest, GetSlotIdCallsMtcContext)
 {
     ON_CALL(objContext, GetCallStateProxy)
@@ -1241,6 +1260,18 @@ TEST_F(MtcCallTest, GetCallManagerCallsMtcContext)
             .WillRepeatedly(ReturnRef(objCallManager));
 
     objCall.GetCallManager();
+}
+
+TEST_F(MtcCallTest, GetCallTrafficCheckerCallsMtcContext)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    MockIMtcCallTrafficChecker objTrafficChecker;
+    EXPECT_CALL(objContext, GetCallTrafficChecker)
+            .Times(1)
+            .WillRepeatedly(ReturnRef(objTrafficChecker));
+
+    objCall.GetCallTrafficChecker();
 }
 
 TEST_F(MtcCallTest, GetCallControllerCallsMtcContext)
@@ -1362,6 +1393,17 @@ TEST_F(MtcCallTest, GetAsyncRunnerCallsMtcContext)
             .Times(1);
 
     objCall.GetAsyncRunner(objAnyOperation);
+}
+
+TEST_F(MtcCallTest, GetMessageUtilsCallsMtcContext)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MockIMessageUtils objMessageUtils;
+    EXPECT_CALL(objContext, GetMessageUtils)
+            .Times(1)
+            .WillRepeatedly(ReturnRef(objMessageUtils));
+
+    objCall.GetMessageUtils();
 }
 
 TEST_F(MtcCallTest, GetWifiTestModeCallsMtcContext)

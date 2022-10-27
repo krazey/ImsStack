@@ -33,6 +33,7 @@
 #include "helper/MockICallStateProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
+#include <vector>
 
 using ::testing::_;
 using ::testing::Return;
@@ -171,6 +172,27 @@ TEST_F(SilentRedialHelperTest, CallStateChangedToEstablishedInvokesReleaseRedial
 
     pRedialHelper->OnCallStateChanged(
             ANY_CALL_KEY, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_FALSE, 0);
+}
+
+TEST_F(SilentRedialHelperTest, OnTotalCallStateChangedDoesNothing)
+{
+    pRedialHelper = new SilentRedialHelper(
+            objContext, CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION));
+
+    std::vector<IMtcCall::State> objCallStates{
+            IMtcCall::State::IDLE,
+            IMtcCall::State::OUTGOING,
+            IMtcCall::State::INCOMING,
+            IMtcCall::State::ALERTING,
+            IMtcCall::State::ESTABLISHED,
+            IMtcCall::State::UPDATING,
+            IMtcCall::State::TERMINATING
+    };
+
+    for (IMtcCall::State eCallState : objCallStates)
+    {
+        pRedialHelper->OnTotalCallStateChanged(eCallState);
+    }
 }
 
 TEST_F(SilentRedialHelperTest, IsSynchronousCallRequiredReturnsTrue)
