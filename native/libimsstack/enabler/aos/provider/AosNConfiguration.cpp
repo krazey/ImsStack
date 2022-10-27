@@ -208,7 +208,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::UseWfcCountryCodeAvailabilityCheck() 
     return m_objAsset.bUseWfcCountryCodeAvailabilityCheck;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegistrationRetryIntervalsUsedForSubscription() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRetryIntervalsUsedForSub() const
 {
     return m_objRegRetryInterval.bUseRegRetryIntervalForSub;
 }
@@ -329,8 +329,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegErrCodeWithRetryAfterTimeOnlyDef
     return m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined;
 }
 
-PUBLIC VIRTUAL IMS_BOOL
-AosNConfiguration::IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsExtraRegErrRetryCntSharedForRegAndSubRequired() const
 {
     return m_objExtraRegErr.bExtraRegErrRetryCntSharedForRegAndSub;
 }
@@ -480,19 +479,24 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationRetrySip503CodePolic
     return m_objAsset.nRegRetry503Policy;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSpecificRegistrationErrorFinalType() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrFinalType() const
 {
     return m_objExtraRegErr.nExtraRegErrFinalType;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSpecificRegistrationErrorPolicy() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrPolicy() const
 {
     return m_objExtraRegErr.nExtraRegErrPolicy;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSpecificRegistrationErrorMaxCount() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMaxCount() const
 {
     return m_objExtraRegErr.nExtraRegErrMaxCnt;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMinCount() const
+{
+    return m_objExtraRegErr.nExtraRegErrMinCnt;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryCountResetPolicy() const
@@ -532,12 +536,12 @@ AosNConfiguration::GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached() const
     return m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegistrationRetryIntervals()
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegRetryIntervals()
 {
     return m_objRegRetryInterval.objRegRetryIntervalSec;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegistrationRandomRetryIntervals()
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegRandomRetryIntervals()
 {
     return m_objRegRetryInterval.objRegRetryRandomUpperValueSec;
 }
@@ -647,17 +651,17 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSmsOverImsSupportedR
     return m_objCarrierConfig.objSmsOverImsSupportedRats;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSpecificRegistrationErrorCode()
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrCode()
 {
     return m_objExtraRegErr.objExtraRegErrCode;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSpecificReregistrationErrorCode()
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraReregErrCode()
 {
     return m_objExtraRegErr.objExtraReregErrCode;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSpecificRegErrWaitTime()
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrWaitTime()
 {
     return m_objExtraRegErr.objExtraRegErrWaitTimeSec;
 }

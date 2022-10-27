@@ -188,13 +188,13 @@ public:
     /**
      * @brief Returns whether subscription also use the registration retry intervals.
      *
-     *        This function relates to GetRegistrationRetryIntervals() and
-     *        GetRegistrationRandomRetryIntervals()
+     *        This function relates to GetRegRetryIntervals() and
+     *        GetRegRandomRetryIntervals()
      *        Subscription decides whether to follow the mentioned function by this return value.
      *
      * @return IMS_BOOL Return whether to be applied or not
      */
-    virtual IMS_BOOL IsRegistrationRetryIntervalsUsedForSubscription() const = 0;
+    virtual IMS_BOOL IsRegRetryIntervalsUsedForSub() const = 0;
 
     /**
      * @brief Check if SmsOverIp is enabled.
@@ -348,7 +348,7 @@ public:
      * @return IMS_BOOL Return whether to be suppoted retry count shared for registration and
      *         reg event package
      */
-    virtual IMS_BOOL IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() const = 0;
+    virtual IMS_BOOL IsExtraRegErrRetryCntSharedForRegAndSubRequired() const = 0;
 
     /**
      * @brief Returns whether Registration event for CAT(Card Application Toolkit) is supported or
@@ -685,7 +685,7 @@ public:
     virtual IMS_SINT32 GetRegistrationRetrySip503CodePolicy() const = 0;
 
     /**
-     * @brief Indicate the specific error type for registration
+     * @brief Indicate the extra error type for registration
      *
      *        Possible values are,
      *        CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED
@@ -700,12 +700,12 @@ public:
      *            Indicate that it results in blocking PLMN with the specific protocol timer
      *            like T3402.
      *
-     * @return IMS_SINT32 Return the specific error type
+     * @return IMS_SINT32 Return the extra error type
      */
-    virtual IMS_SINT32 GetSpecificRegistrationErrorFinalType() const = 0;
+    virtual IMS_SINT32 GetExtraRegErrFinalType() const = 0;
 
     /**
-     * @brief Indicate the specific error policy for registration
+     * @brief Indicate the extra error policy for registration
      *
      *        Possible values are,
      *        CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED
@@ -713,12 +713,12 @@ public:
      *        CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED
      *        CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED
      *
-     * @return IMS_SINT32 Return the specific error policy
+     * @return IMS_SINT32 Return the extra error policy
      */
-    virtual IMS_SINT32 GetSpecificRegistrationErrorPolicy() const = 0;
+    virtual IMS_SINT32 GetExtraRegErrPolicy() const = 0;
 
     /**
-     * @brief Indicate max of retry count the specific error for registration
+     * @brief Indicate max of retry count the extra error for registration
      *
      *      CarrierConfig::Assets::ERROR_TYPE_REPEATED
      *          Indicate the maximum retry count with the same PCSCF.
@@ -728,9 +728,20 @@ public:
      *          Indicate the number of error response that is included in KEY_ERROR_CODE_INT_ARRAY.
      *          If this number reaches, it is handled as a critical error.
      *
-     * @return IMS_SINT32 Return max of the specific error
+     * @return IMS_SINT32 Return max of the extra error
      */
-    virtual IMS_SINT32 GetSpecificRegistrationErrorMaxCount() const = 0;
+    virtual IMS_SINT32 GetExtraRegErrMaxCount() const = 0;
+
+    /**
+     * @brief Indicate the minimum number for retries when registration or reregistration fails.
+     *
+     *        In case of initial registration, it is retried with the next PCSCF that is available.
+     *        But in case of reregistration, it is retried with the same PCSCF according to
+     *        the minimum number of times.
+     *
+     * @return IMS_SINT32 Return min of the extra error
+     */
+    virtual IMS_SINT32 GetExtraRegErrMinCount() const = 0;
 
     /**
      * @brief Indicate the policy for clearing the registration retry count
@@ -819,20 +830,20 @@ public:
      *
      * @return IMSVector<IMS_SINT32>& Return registration retry intervals.
      */
-    virtual IMSVector<IMS_SINT32>& GetRegistrationRetryIntervals() = 0;
+    virtual IMSVector<IMS_SINT32>& GetRegRetryIntervals() = 0;
 
     /**
      * @brief Get the registration retry random intervals following the registration retry intervals
      *
      *        These values represent plus random value upper bound of the registration retry
-     *        intervals by GetRegistrationRetryIntervals()
+     *        intervals by GetRegRetryIntervals()
      *        So the size of the return value has to be the same as the return value of
-     *        GetRegistrationRetryIntervals()
+     *        GetRegRetryIntervals()
      *        It defines in second.
      *
      * @return IMSVector<IMS_SINT32>& Return random value for registration retry intervals
      */
-    virtual IMSVector<IMS_SINT32>& GetRegistrationRandomRetryIntervals() = 0;
+    virtual IMSVector<IMS_SINT32>& GetRegRandomRetryIntervals() = 0;
 
     /**
      * @brief Get the ipsec authentication algorithms which will be used.
@@ -1086,22 +1097,22 @@ public:
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetSpecificRegistrationErrorCode() = 0;
+    virtual IMSVector<IMS_SINT32>& GetExtraRegErrCode() = 0;
 
     /**
      * @brief Indicate the error codes for reregistration
-     *        see@GetSpecificRegistrationErrorCode
+     *        see@GetExtraRegErrCode
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetSpecificReregistrationErrorCode() = 0;
+    virtual IMSVector<IMS_SINT32>& GetExtraReregErrCode() = 0;
 
     /**
      * @brief Indicate the list of wait-time seconds when registration is retried.
      *
      * @return vector wait time list
      */
-    virtual IMSVector<IMS_SINT32>& GetSpecificRegErrWaitTime() = 0;
+    virtual IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime() = 0;
 
     /**
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF

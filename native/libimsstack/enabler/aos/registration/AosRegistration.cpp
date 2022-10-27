@@ -805,7 +805,7 @@ IMS_SINT32 AosRegistration::GetRegExpires()
 PROTECTED
 void AosRegistration::IncreaseConsecutiveFailCount()
 {
-    if (!GET_N_CONFIG(m_nSlotId)->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired())
+    if (!GET_N_CONFIG(m_nSlotId)->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
     {
         m_nConsecutiveFailure++;
     }
@@ -2309,8 +2309,7 @@ PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetActualWaitTime()
     if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() ==
             CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
-        const IMSVector<IMS_SINT32>& objInterval =
-                GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryIntervals();
+        const IMSVector<IMS_SINT32>& objInterval = GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
         IMS_UINT32 nSize = objInterval.GetSize();
 
         if (nSize > 0)
@@ -2318,7 +2317,7 @@ PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetActualWaitTime()
             IMS_SINT32 nAt = (m_nConsecutiveFailure > nSize) ? nSize : m_nConsecutiveFailure;
 
             const IMSVector<IMS_SINT32>& objUpperRandom =
-                    GET_N_CONFIG(m_nSlotId)->GetRegistrationRandomRetryIntervals();
+                    GET_N_CONFIG(m_nSlotId)->GetRegRandomRetryIntervals();
 
             if (objUpperRandom.GetSize() == nSize)
             {
@@ -2917,7 +2916,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegTerminatedByNotify()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessAuthenticationFailed()
 {
-    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
     {
         if (GetState() == STATE_REGISTERING)
@@ -3071,7 +3070,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessForbiddenFailed(IN IMS_SINT32
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode)
 {
-    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() !=
+    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() !=
             CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED)
     {
         return IMS_FALSE;
@@ -3079,8 +3078,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT3
 
     if (IsRegistered())
     {
-        if (!IsErrorCodeExisted(
-                    GET_N_CONFIG(m_nSlotId)->GetSpecificReregistrationErrorCode(), nStatusCode))
+        if (!IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraReregErrCode(), nStatusCode))
         {
             return IMS_FALSE;
         }
@@ -3099,8 +3097,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT3
     }
     else
     {
-        if (!IsErrorCodeExisted(
-                    GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorCode(), nStatusCode))
+        if (!IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode(), nStatusCode))
         {
             return IMS_FALSE;
         }
@@ -3315,7 +3312,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpec
 {
     IMS_UINT32 nAwt = 0;
 
-    if (GET_N_CONFIG(m_nSlotId)->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired())
+    if (GET_N_CONFIG(m_nSlotId)->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
     {
         if (AosProvider::GetInstance()
                         ->GetRetryRepository(m_piContext->GetSlotId())
@@ -3328,7 +3325,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpec
             else
             {
                 const IMSVector<IMS_SINT32>& objInterval =
-                        GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryIntervals();
+                        GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
 
                 nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0) : RETRY_DEFAULT_WAIT_TIME;
             }
@@ -3432,10 +3429,9 @@ PROTECTED VIRTUAL void
 AosRegistration::ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
         IN IMS_SINT32 nStatusCode, IN IMS_UINT32 nRetryAfter)
 {
-    if (GET_N_CONFIG(m_nSlotId)->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired())
+    if (GET_N_CONFIG(m_nSlotId)->IsExtraRegErrRetryCntSharedForRegAndSubRequired())
     {
-        if (IsErrorCodeExisted(
-                    GET_N_CONFIG(m_nSlotId)->GetSpecificReregistrationErrorCode(), nStatusCode))
+        if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetExtraReregErrCode(), nStatusCode))
         {
             ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
         }
@@ -3449,7 +3445,7 @@ AosRegistration::ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
                 if (nAwt == 0)
                 {
                     const IMSVector<IMS_SINT32>& objInterval =
-                            GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryIntervals();
+                            GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
 
                     nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0)
                                                        : RETRY_DEFAULT_WAIT_TIME;
@@ -3749,7 +3745,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
     {
         if (SipStatusCode::IsFinalFailure(nStatusCode))
@@ -3798,7 +3794,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
     {
         if (IsErrorCodeExistedForSpecificRegistration(
@@ -3849,7 +3845,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_Others(IN IMS_SINT32 
 
     if (nReason == IRegistration::REASON_CLIENT_SOCKET_ERROR)
     {
-        if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() ==
+        if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
                 CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
         {
             if (IsErrorCodeExistedForSpecificRegistration(
@@ -3906,7 +3902,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
             CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
     {
         ProcessDefaultFlowRecovery_Update(nStatusCode);
@@ -3980,7 +3976,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32
 
     if (nReason == IRegistration::REASON_CLIENT_SOCKET_ERROR)
     {
-        if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() ==
+        if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
                 CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
         {
             if (IsErrorCodeExistedForSpecificRegistration(
@@ -5282,7 +5278,7 @@ void AosRegistration::ControlPrivateHeader()
 PRIVATE
 IMS_UINT32 AosRegistration::GetSpecificErrWaitTime()
 {
-    IMSVector<IMS_SINT32>& objErrTime = GET_N_CONFIG(m_nSlotId)->GetSpecificRegErrWaitTime();
+    IMSVector<IMS_SINT32>& objErrTime = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrWaitTime();
     IMS_SINT32 nWaitTime = (objErrTime.GetSize() > 1) ? objErrTime.GetAt(0) : -1;
 
     return ((nWaitTime > 0) ? static_cast<IMS_UINT32>(nWaitTime) : RETRY_DEFAULT_WAIT_TIME);
@@ -5462,8 +5458,7 @@ IMS_BOOL AosRegistration::IsErrorCodeExisted(
 PRIVATE
 IMS_BOOL AosRegistration::IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT32 nCode) const
 {
-    IMSVector<IMS_SINT32>& objErrorCode =
-            GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorCode();
+    IMSVector<IMS_SINT32>& objErrorCode = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode();
 
     for (int i = 0; i < objErrorCode.GetSize(); i++)
     {

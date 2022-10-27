@@ -43,7 +43,7 @@ PUBLIC VIRTUAL AosRetryRepository::~AosRetryRepository()
 PUBLIC VIRTUAL IMS_BOOL AosRetryRepository::IncreaseRetryCount(
         IN IMS_UINT32 nType /* = TYPE_NORMAL */)
 {
-    IMS_SINT32 nMaxCount = GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorMaxCount();
+    IMS_SINT32 nMaxCount = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrMaxCount();
     A_IMS_TRACE_I(AOSTAG, "retryCont: %d, emergencyRetryCount: %d, maxCount: %d", m_nRetryCount,
             m_nEmergencyRetryCount, nMaxCount);
 

@@ -927,22 +927,22 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
 
     // AosExtraRegErrBundle
     // bExtraReregFailureWithErrCodeInRoaming
-    EXPECT_TRUE(pAosNConfiguration->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired());
-    EXPECT_EQ(0, pAosNConfiguration->GetSpecificRegistrationErrorFinalType());
-    EXPECT_EQ(0, pAosNConfiguration->GetSpecificRegistrationErrorMaxCount());
-    // nExtraRegErrMinCnt
+    EXPECT_TRUE(pAosNConfiguration->IsExtraRegErrRetryCntSharedForRegAndSubRequired());
+    EXPECT_EQ(0, pAosNConfiguration->GetExtraRegErrFinalType());
+    EXPECT_EQ(0, pAosNConfiguration->GetExtraRegErrMaxCount());
+    EXPECT_EQ(0, pAosNConfiguration->GetExtraRegErrMinCount());
     EXPECT_EQ(1, pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached());
     EXPECT_EQ(2, pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached());
     EXPECT_EQ(CarrierConfig::Assets::ERROR_POLICY_PCSCF_FAILED,
-            pAosNConfiguration->GetSpecificRegistrationErrorPolicy());
-    IMSVector<IMS_SINT32>& objErrCode = pAosNConfiguration->GetSpecificRegistrationErrorCode();
+            pAosNConfiguration->GetExtraRegErrPolicy());
+    IMSVector<IMS_SINT32>& objErrCode = pAosNConfiguration->GetExtraRegErrCode();
     EXPECT_EQ(1, objErrCode.GetSize());
     EXPECT_EQ(400, objErrCode.GetAt(0));
     objErrCode.Clear();
-    objErrCode = pAosNConfiguration->GetSpecificReregistrationErrorCode();
+    objErrCode = pAosNConfiguration->GetExtraReregErrCode();
     EXPECT_EQ(1, objErrCode.GetSize());
     EXPECT_EQ(500, objErrCode.GetAt(0));
-    IMSVector<IMS_SINT32>& objWaitTime = pAosNConfiguration->GetSpecificRegErrWaitTime();
+    IMSVector<IMS_SINT32>& objWaitTime = pAosNConfiguration->GetExtraRegErrWaitTime();
     EXPECT_EQ(30, objWaitTime.GetAt(0));
 
     // AosNotifyTerminatedForInitRegBundle
@@ -961,10 +961,9 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
     EXPECT_EQ(1, objErrCode.GetSize());
 
     // AosRegRetryIntervalBundle
-    EXPECT_TRUE(pAosNConfiguration->IsRegistrationRetryIntervalsUsedForSubscription());
-    IMSVector<IMS_SINT32>& objRandomInterval =
-            pAosNConfiguration->GetRegistrationRandomRetryIntervals();
-    IMSVector<IMS_SINT32>& objInterval = pAosNConfiguration->GetRegistrationRetryIntervals();
+    EXPECT_TRUE(pAosNConfiguration->IsRegRetryIntervalsUsedForSub());
+    IMSVector<IMS_SINT32>& objRandomInterval = pAosNConfiguration->GetRegRandomRetryIntervals();
+    IMSVector<IMS_SINT32>& objInterval = pAosNConfiguration->GetRegRetryIntervals();
     EXPECT_EQ(objRandomInterval.GetSize(), objInterval.GetSize());
 
     // AosSubErrCodeForInitRegBundle
