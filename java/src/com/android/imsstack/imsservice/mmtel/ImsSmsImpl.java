@@ -189,19 +189,24 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
 
     @Override
     public void acknowledgeSms(int token, int messageRef, int result) {
+        acknowledgeSms(token, messageRef, result, null);
+    }
+
+    @Override
+    public void acknowledgeSms(int token, int messageRef,
+            int result, byte[] pdu) {
         log("acknowledgeSms: token = " + token + " messageRef = " + messageRef
                 + " result = " + result);
         if (!mReady) {
             throw new RuntimeException("Sms Not Ready!");
         }
         try {
-            int tlResult = mSmsTL.sendReportTPdu(token,
-                                      SmsUtils.TP_SMS_DELIVER, messageRef, result);
+            int tlResult = mSmsTL.sendReportTPdu(token, messageRef, result, pdu);
             if (tlResult != SmsUtils.RESULT_SUCCESS) {
                 loge("Sending Acknowledge Failed");
             }
         } catch (RuntimeException e) {
-            loge("acknowledgeSms Failed: " + e.getMessage());
+            loge("acknowledgeSmsWithPdu Failed: " + e.getMessage());
         }
     }
 
@@ -213,8 +218,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
             throw new RuntimeException("Sms Not Ready!");
         }
         try {
-            int tlResult = mSmsTL.sendReportTPdu(token, SmsUtils.TP_SMS_STATUS_REPORT,
-                                                                        messageRef, result);
+            int tlResult = mSmsTL.sendReportTPdu(token, messageRef, result, null);
             if (tlResult != SmsUtils.RESULT_SUCCESS) {
                 loge("Sending Acknowledge Failed");
             }
@@ -271,8 +275,9 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                     return SmsUtils.RESULT_SUCCESS;
                 } else {
                     loge("Invalid Message Type");
-                    return mSmsTL.sendReportTPdu(token, messageType, messageRef,
-                                        ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
+                    return mSmsTL.sendReportTPdu(token, messageRef,
+                                        ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED,
+                                        null);
                 }
             } catch (RuntimeException e) {
                 loge("notifySmsReceived Failed : " + e.getMessage());

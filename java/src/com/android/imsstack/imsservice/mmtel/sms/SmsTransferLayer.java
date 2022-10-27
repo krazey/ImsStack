@@ -255,21 +255,25 @@ public class SmsTransferLayer {
     /**
      * Notifies Relay Layer to Send RP-Ack or RP-Error based on result
      * @param token same as that used when SMS-DELIVER Message is
-     * @param tlMessageType indicates the Message Type to be sent in TPdu
      * @param messageRef indicates the TP-MR with respect to this token
      * @param result indicates the result of SMS-DELIVER receipt
+     * @param deliverReportPdu the DELIVER-REPORT TPDU that is sent from
+     * framework
      *
      * @return result indicating if TPDU is sent successfully to relay layer
      */
-    public int sendReportTPdu(int token, int tlMessageType, int messageRef, int result) {
-        logi("sendReportTPdu: Token = " + token + " tlMessageType = " + tlMessageType
+    public int sendReportTPdu(int token, int messageRef, int result,
+                                    byte[] deliverReportPdu) {
+        logi("sendReportTPdu: Token = " + token
                     + " messageRef = " + messageRef + " result = " + result);
         try {
             int messageType = SmsUtils.RP_ERROR;
             if (result == ImsSmsImplBase.DELIVER_STATUS_OK) {
                 messageType = SmsUtils.RP_ACK;
             }
-            byte[] deliverReportPdu = generateDeliverReportPdu(result);
+            if (deliverReportPdu == null) {
+                deliverReportPdu = generateDeliverReportPdu(result);
+            }
             if (DBG) {
                 log("SMS-DELIVER-REPORT = "
                         + ImsLog.hiddenString(IccUtils.bytesToHexString(deliverReportPdu)));
@@ -302,6 +306,7 @@ public class SmsTransferLayer {
                     cause = TP_FCS_NONE;
                     break;
                 case ImsSmsImplBase.DELIVER_STATUS_ERROR_GENERIC:
+                    // this is same as STATUS_REPORT_STATUS_ERROR
                     cause = TP_FCS_UNSPECIFIED_ERROR_CAUSE;
                     break;
                 case ImsSmsImplBase.DELIVER_STATUS_ERROR_NO_MEMORY:
