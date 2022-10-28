@@ -21,14 +21,17 @@ import android.text.TextUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IPreference;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Locale;
 
 public class SscXui {
     private static SscXui sSscXui = new SscXui();
 
-    private static final String IMPU_FILE_NAME = "impu_list";
-    private static final String IMPU_LIST_SIZE = "size";
+    @VisibleForTesting
+    protected static final String IMPU_FILE_NAME = "impu_list";
+    @VisibleForTesting
+    protected static final String IMPU_LIST_SIZE = "size";
     private static final String XUI_TOP_PREFERRED = "top";
     private static final String XUI_SIP_PREFERRED = "sip";
     private static final String XUI_TEL_PREFERRED = "tel";
@@ -50,15 +53,11 @@ public class SscXui {
                 paidFormat = XUI_SIP_PREFERRED;
             }
 
-            String paid = null;
             if (XUI_TOP_PREFERRED.equalsIgnoreCase(paidFormat)) {
-                paid = getPAssociatedUriValue(slotId, 0);
-                if (paid != null) {
-                    xui = paid;
-                }
+                xui = getPAssociatedUriValue(slotId, 0);
             } else {
                 for (int i = 0; i < paidListSize; i++) {
-                    paid = getPAssociatedUriValue(slotId, i);
+                    String paid = getPAssociatedUriValue(slotId, i);
                     if (paid != null && paid.toLowerCase(Locale.ROOT).startsWith(paidFormat)) {
                         xui = paid;
                         break;
@@ -67,10 +66,7 @@ public class SscXui {
 
                 if (xui == null) {
                     // in case of no xui for preferred type, return top value
-                    paid = getPAssociatedUriValue(slotId, 0);
-                    if (paid != null) {
-                        xui = paid;
-                    }
+                    xui = getPAssociatedUriValue(slotId, 0);
                 }
             }
         }
@@ -92,24 +88,21 @@ public class SscXui {
             return xui;
         }
 
-        if (!xui.toLowerCase(Locale.ROOT).startsWith(XUI_SIP_PREFERRED)) {
+        if (!xui.toLowerCase(Locale.ROOT).startsWith("sip")) {
             ImsLog.e("XUI isn't a SIP URI.");
             return xui;
         }
 
-        String xuiWithPassword;
         String[] tokens = xui.split("@");
         if (tokens.length < 2) {
-            xuiWithPassword = xui + ":" + password;
-        } else {
-            xuiWithPassword = tokens[0] + ":" + password + "@" + tokens[1];
+            return xui; // abnormal uri case
         }
 
-        return xuiWithPassword;
+        return tokens[0] + ":" + password + "@" + tokens[1];
     }
 
     private int getPAssociatedUriSize(int slotId) {
-        IPreference pfa = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
+        IPreference pfa = (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
         if (pfa == null) {
             return 0;
         }
@@ -128,7 +121,7 @@ public class SscXui {
     }
 
     private String getPAssociatedUriValue(int slotId, int index) {
-        IPreference pfa = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
+        IPreference pfa = (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
         if (pfa == null) {
             return null;
         }
