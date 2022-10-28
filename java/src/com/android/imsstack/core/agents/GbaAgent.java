@@ -23,7 +23,6 @@ import android.telephony.TelephonyManager;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Pair;
 
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
@@ -67,7 +66,7 @@ public class GbaAgent implements GbaInterface {
     }
 
     @Override
-    public Pair<String, String> getGbaKey(int appType, int gbaMode, boolean isTls, String nafFqdn,
+    public GbaCredentials getGbaKey(int appType, int gbaMode, boolean isTls, String nafFqdn,
             String securityProtocol, boolean forceBootStrapping) {
         ImsLog.d(mSlotId, "appType : " + appType + ",gbaMode : " + gbaMode + ", isTls : " + isTls
                 + ", nafFqdn : " + nafFqdn + ", Protocol : " + securityProtocol
@@ -80,21 +79,22 @@ public class GbaAgent implements GbaInterface {
                     forceBootStrapping).get(30L, TimeUnit.SECONDS);
         } catch (CancellationException e) {
             ImsLog.e(mSlotId, "CancellationException");
+            credentials = new GbaCredentials(GBA_FAILURE_REASON_CANCELLATION_EXCEPTION);
         } catch (ExecutionException e) {
             ImsLog.e(mSlotId, "ExecutionException");
+            credentials = new GbaCredentials(GBA_FAILURE_REASON_EXECUTION_EXCEPTION);
         } catch (InterruptedException e) {
             ImsLog.e(mSlotId, "InterruptedException");
+            credentials = new GbaCredentials(GBA_FAILURE_REASON_INTERRUPTED_EXCEPTION);
         } catch (TimeoutException e) {
             ImsLog.e(mSlotId, "TimeoutException");
+            credentials = new GbaCredentials(GBA_FAILURE_REASON_TIMEOUT);
         } catch (IllegalArgumentException e) {
             ImsLog.e(mSlotId, "IllegalArgumentException : securityProtocol is not supported");
+            credentials = new GbaCredentials(GBA_FAILURE_REASON_TLS_CIPHERSUITE_NOT_SUPPORTED);
         }
 
-        if (credentials == null) {
-            return null;
-        }
-
-        return Pair.create(credentials.getTransactionId(), credentials.getKey());
+        return credentials;
     }
 
     private CompletableFuture<GbaCredentials> requestTelephonyGbaAuthentication(int appType,
@@ -123,18 +123,18 @@ public class GbaAgent implements GbaInterface {
                     public void onKeysAvailable(byte[] gbaKey, String transactionId) {
                         if (gbaKey == null || TextUtils.isEmpty(transactionId)) {
                             ImsLog.e(mSlotId, "onKeysAvailable with wrong value");
-                            credentialsFuture.complete(null);
+                            credentialsFuture.complete(
+                                    new GbaCredentials(GBA_FAILURE_REASON_KEY_INVALID));
                         } else {
                             String key = Base64.encodeToString(gbaKey, Base64.NO_WRAP);
-                            GbaCredentials credentials = new GbaCredentials(transactionId, key);
-                            credentialsFuture.complete(credentials);
+                            credentialsFuture.complete(new GbaCredentials(transactionId, key));
                         }
                     }
 
                     @Override
                     public void onAuthenticationFailure(int reason) {
                         ImsLog.e(mSlotId, "reason : " + reason);
-                        credentialsFuture.complete(null);
+                        credentialsFuture.complete(new GbaCredentials(reason));
                     }
                 });
 
@@ -172,23 +172,5 @@ public class GbaAgent implements GbaInterface {
     private TelephonyManager getTelephonyManager() {
         int subId = MSimUtils.getSubId(mSlotId);
         return AppContext.getTelephonyManager(subId);
-    }
-
-    private class GbaCredentials {
-        private final String mTransactionId;
-        private final String mKey;
-
-        private GbaCredentials(String transactionId, String key) {
-            this.mTransactionId = transactionId;
-            this.mKey = key;
-        }
-
-        private String getTransactionId() {
-            return mTransactionId;
-        }
-
-        private String getKey() {
-            return mKey;
-        }
     }
 }

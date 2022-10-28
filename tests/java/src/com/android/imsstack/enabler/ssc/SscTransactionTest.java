@@ -37,11 +37,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
-import android.util.Pair;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.GbaInterface;
+import com.android.imsstack.core.agents.GbaInterface.GbaCredentials;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.ImsRadioInterface.ConnectionListener;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -306,7 +306,8 @@ public class SscTransactionTest {
         when(mMockSscAuthAgent.getNafFqdnFromRealm()).thenReturn(nafFqdn);
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
-                eq(securityProtocol), eq(true))).thenReturn(null);
+                eq(securityProtocol), eq(true)))
+                .thenReturn(new GbaCredentials(GbaInterface.GBA_FAILURE_REASON_KEY_INVALID));
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
@@ -327,7 +328,7 @@ public class SscTransactionTest {
     }
 
     @Test
-    public void sendRequest_unauthorizedWithGbaKey() {
+    public void sendRequest_unauthorizedTwiceWithGbaKey() {
         String nafFqdn = "xcap.3gpp.com";
         String securityProtocol = "TLS_NULL_WITH_NULL_NULL";
         int appType = SscConstant.APPTYPE_USIM;
@@ -340,7 +341,7 @@ public class SscTransactionTest {
         when(mMockSscAuthAgent.getCipherSuite()).thenReturn(securityProtocol);
         when(mMockGbaAgent.getGbaKey(eq(appType), eq(mGbaMode), anyBoolean(), eq(nafFqdn),
                 eq(securityProtocol), eq(true)))
-                .thenReturn(new Pair<String, String>("B-TID", "Ks_NAF_KEY"));
+                .thenReturn(new GbaCredentials("B-TID", "Ks_NAF_KEY"));
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();

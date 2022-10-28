@@ -20,10 +20,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.GbaInterface;
+import com.android.imsstack.core.agents.GbaInterface.GbaCredentials;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.ImsRadioInterface.ConnectionListener;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
@@ -441,15 +441,15 @@ public class SscTransaction {
         String nafFqdn = authAgent.getNafFqdnFromRealm();
         String securityProtocol = authAgent.getCipherSuite();
 
-        Pair<String, String> keyPair = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn,
+        GbaCredentials gbaCredentials = gbaAgent.getGbaKey(appType, gbaMode, isTls, nafFqdn,
                 securityProtocol, forceBootStrapping);
-        if (keyPair == null || keyPair.first == null || keyPair.second == null) {
+        if (gbaCredentials == null || gbaCredentials.getResult() == GbaInterface.RESULT_FAILURE) {
             ImsLog.e(mSlotId, "Getting gba key failure");
             authAgent.setIsCredentialInfoUpdated(false);
             return false;
         }
 
-        authAgent.setGbaKeys(keyPair.first, keyPair.second);
+        authAgent.setGbaKeys(gbaCredentials.getTransactionId(), gbaCredentials.getKey());
         return true;
     }
 
