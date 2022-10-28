@@ -59,11 +59,6 @@ public:
     virtual void DeletePolicy(IN IIpSecPolicy* piPolicy) = 0;
 
     /**
-     * @brief Flushes all the IpSec policies.
-     */
-    virtual void FlushPolicies() = 0;
-
-    /**
      * @brief Dumps the security associations.
      *
      * @param piPolicy The IpSec policy to be dumped
@@ -104,16 +99,6 @@ public:
      * @param nSocketId A socket identifier
      */
     virtual void RemoveIpSecTransforms(IN IMS_SINT32 nSocketId) = 0;
-
-    /**
-     * @brief Sets the flag to support SDB flush for Ims IpSec.
-     *
-     * If this flag is enabled, SP/SA will be tracked and those are used to delete SP/SA
-     * toward the kernel when IMS process is abnormally terminated.
-     *
-     * @param bCapability The flush capability flag
-     */
-    virtual void SetSdbFlushCapability(IN IMS_BOOL bCapability) = 0;
 };
 
 #endif

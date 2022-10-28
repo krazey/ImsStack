@@ -77,7 +77,7 @@ public:
     virtual ImsNetworkConnection* CreateNetworkConnection(
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) = 0;
 
-    virtual INetworkIpSec* CreateNetworkIpSec() = 0;
+    virtual INetworkIpSec* CreateNetworkIpSec(IN IMS_SINT32 nSlotId) = 0;
     virtual void DestroyNetworkIpSec(IN INetworkIpSec*& piIpSec) = 0;
 
     virtual IIpcan* CreateIpcan() = 0;

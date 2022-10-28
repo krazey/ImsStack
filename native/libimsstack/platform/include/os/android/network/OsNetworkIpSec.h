@@ -26,7 +26,7 @@ class OsIpSecPolicy;
 class OsNetworkIpSec : public INetworkIpSec
 {
 public:
-    OsNetworkIpSec();
+    explicit OsNetworkIpSec(IN IMS_SINT32 nSlotId);
     virtual ~OsNetworkIpSec();
 
     OsNetworkIpSec(IN const OsNetworkIpSec&) = delete;
@@ -39,25 +39,21 @@ public:
     void DestroyAllPolicies() override;
     IMS_BOOL AddPolicy(IN IIpSecPolicy* piPolicy) override;
     void DeletePolicy(IN IIpSecPolicy* piPolicy) override;
-    void FlushPolicies() override;
     void DumpPolicy(IN IIpSecPolicy* piPolicy) override;
     IIpSecPolicy* GetPolicy(IN IMS_SINT32 nId) const override;
     IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN const SocketAddress& objLocal,
             IN const SocketAddress* pRemote = IMS_NULL) override;
     IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN ISocket* piServerSocket) override;
     void RemoveIpSecTransforms(IN IMS_SINT32 nSocketId) override;
-    void SetSdbFlushCapability(IN IMS_BOOL bCapability) override;
 
 private:
     IMS_SINT32 GetAvailableId();
-    static IMS_SINT32 GetSlotId();
 
 private:
+    IMS_SINT32 m_nSlotId;
     IMS_SINT32 m_nNextAvailableId;
-    IMS_BOOL m_bSdbFlushCapability;
-    IMSList<OsIpSecPolicy*> m_objPolicy;
-
-    IMSMap<IMS_UINTP, IpSecSaParameter> m_objSaParams;
+    ImsList<OsIpSecPolicy*> m_objPolicies;
+    ImsMap<IMS_UINTP, IpSecSaParameter> m_objSaParams;
 };
 
 #endif

@@ -88,7 +88,7 @@ public:
             IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
 
     virtual IIpcan* GetIpcan();
-    virtual INetworkIpSec* GetIpSec();
+    virtual INetworkIpSec* GetIpSec(IN IMS_SINT32 nSlotId);
 
     void DispatchServiceMessage(IN ImsMessage& objMsg);
 

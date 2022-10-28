@@ -2286,7 +2286,8 @@ void OsSocket::BindSocketToIpSecTransform()
         return;
     }
 
-    INetworkIpSec* piIpSec = NetworkService::GetNetworkService()->GetIpSec();
+    INetworkIpSec* piIpSec =
+            NetworkService::GetNetworkService()->GetIpSec(m_piOwnerThread->GetSlotId());
 
     if (piIpSec != IMS_NULL)
     {
@@ -2301,7 +2302,8 @@ void OsSocket::BindSocketToIpSecTransform()
 PROTECTED
 void OsSocket::UnbindSocketFromIpSecTransform(IN IMS_SOCKET hSocket)
 {
-    INetworkIpSec* piIpSec = NetworkService::GetNetworkService()->GetIpSec();
+    INetworkIpSec* piIpSec =
+            NetworkService::GetNetworkService()->GetIpSec(m_piOwnerThread->GetSlotId());
 
     if (piIpSec != IMS_NULL)
     {

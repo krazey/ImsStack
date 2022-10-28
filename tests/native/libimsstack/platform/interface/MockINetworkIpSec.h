@@ -34,7 +34,6 @@ public:
     MOCK_METHOD(void, DestroyAllPolicies, (), (override));
     MOCK_METHOD(IMS_BOOL, AddPolicy, (IN IIpSecPolicy * piPolicy), (override));
     MOCK_METHOD(void, DeletePolicy, (IN IIpSecPolicy * piPolicy), (override));
-    MOCK_METHOD(void, FlushPolicies, (), (override));
     MOCK_METHOD(void, DumpPolicy, (IN IIpSecPolicy * piPolicy), (override));
     MOCK_METHOD(IIpSecPolicy*, GetPolicy, (IN IMS_SINT32 nId), (const, override));
     MOCK_METHOD(IMS_BOOL, ApplyIpSecTransform,
@@ -44,7 +43,6 @@ public:
     MOCK_METHOD(IMS_BOOL, ApplyIpSecTransform, (IN ISocket * piSocket, IN ISocket* piServerSocket),
             (override));
     MOCK_METHOD(void, RemoveIpSecTransforms, (IN IMS_SINT32 nSocketId), (override));
-    MOCK_METHOD(void, SetSdbFlushCapability, (IN IMS_BOOL bCapability), (override));
 };
 
 #endif
