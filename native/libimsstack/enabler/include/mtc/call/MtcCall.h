@@ -68,6 +68,7 @@ class ISession;
 class MessageSender;
 class MessageUtils;
 class MtcConfigurationProxy;
+class UdpKeepAliveSender;
 class UssiController;
 struct CallReasonInfo;
 struct ConfUser;
@@ -146,6 +147,7 @@ public:
     }
     UpdatingInfo& GetUpdatingInfo() override;
     EpsFallbackTrigger& GetEpsFallbackTrigger() override;
+    UdpKeepAliveSender& GetUdpKeepAliveSender() override;
     IMtcSession* CreateSession(IN ISession* piSession) override;
     IMtcSession* CreateSession() override;
     IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
@@ -154,6 +156,7 @@ public:
     void RemoveSession(IN const ISession* piSession) override;
     void RemoveInactiveSessions(IN const ISession* piActiveSession) override;
     void DeleteUpdatingInfo() override;
+
     inline MtcTimerWrapper& GetTimer() override { return m_objTimer; }
     inline MtcSupplementaryService& GetSupplementaryService() override
     {
@@ -254,6 +257,8 @@ public:
     void Error_NotifyError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
+    void OnReceivingMediaDataStarted(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     void OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     void OnVideoLowestBitRate() override;
     void OnReceivingNetworkToneStarted() override;
@@ -297,6 +302,7 @@ private:
     MtcMessageMediator m_objMessageMediator;
     UssiController* m_pUssiController;
     EpsFallbackTrigger* m_pEpsFallbackTrigger;
+    UdpKeepAliveSender* m_pUdpKeepAliveSender;
 };
 
 #endif

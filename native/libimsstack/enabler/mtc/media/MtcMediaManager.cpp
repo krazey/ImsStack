@@ -101,6 +101,8 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
             break;
         case REPORT_DATA_RECEIVE_STARTED:
             HandleReceivingMediaDataStarted(eReportedMediaType);
+            m_pMediaReportListener->OnReceivingMediaDataStarted(
+                    eReportedMediaType, eMediaProtocolType);
             break;
         case REPORT_VIDEO_LOWEST_BIT_RATE:
             m_pMediaReportListener->OnVideoLowestBitRate();

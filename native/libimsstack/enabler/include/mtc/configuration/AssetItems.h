@@ -73,7 +73,8 @@ public:
             bInitializePemWhenNoHeader(IMS_FALSE),
             nPolicyForLocalRingbackToneWith180Response(0),
             bSend180ForInitialInvite(IMS_FALSE),
-            nEpsFallbackWatchDogTime(-1)
+            nEpsFallbackWatchDogTime(-1),
+            nSendUdpKeepAliveIntervalTime(-1)
     {
     }
     ~AssetItems()
@@ -139,6 +140,7 @@ public:
     IMS_SINT32 nPolicyForLocalRingbackToneWith180Response;
     IMS_BOOL bSend180ForInitialInvite;
     IMS_SINT32 nEpsFallbackWatchDogTime;
+    IMS_SINT32 nSendUdpKeepAliveIntervalTime;
 };
 
 #endif

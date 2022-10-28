@@ -45,6 +45,7 @@
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/UdpKeepAliveSender.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "precondition/SdpPreconditionHelper.h"
@@ -63,6 +64,14 @@ OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
 }
 
 PUBLIC VIRTUAL OutgoingState::~OutgoingState() {}
+
+PUBLIC VIRTUAL void OutgoingState::OnExit()
+{
+    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    {
+        m_objContext.GetUdpKeepAliveSender().Stop();
+    }
+}
 
 PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const CallReasonInfo& objReason)
 {
@@ -435,6 +444,13 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     }
     StartTimer(TIMER_MO_NOANSWER);
 
+    // 100 Trying is not a reliable response so UdpKeepAliveSender is started
+    // by receiving any first provisional response.
+    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()) && nIndex == 0)
+    {
+        m_objContext.GetUdpKeepAliveSender().Start();
+    }
+
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
     m_objContext.GetSession(piSession)->HandleResponse(
@@ -580,6 +596,16 @@ PUBLIC VIRTUAL CallStateName OutgoingState::UssiStarted(IN ISession* piSession)
 {
     IMS_TRACE_D("UssiStarted", 0, 0, 0);
     return SessionStarted(piSession);
+}
+
+PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataStarted(
+        IN IMS_UINT32 /*eMediaType*/, IN IMS_UINT32 /*eProtocolType*/)
+{
+    if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
+    {
+        m_objContext.GetUdpKeepAliveSender().Stop();
+    }
+    return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneStarted()

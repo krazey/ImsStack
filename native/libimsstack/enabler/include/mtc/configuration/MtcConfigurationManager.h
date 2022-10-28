@@ -172,6 +172,7 @@ public:
     IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const override;
     IMS_BOOL IsSend180ForInitialInvite() const override;
     IMS_SINT32 GetEpsFallbackWatchdogTime() const override;
+    IMS_SINT32 GetSendUdpKeepAliveIntervalTime() const override;
 
 private:
     IMS_BOOL ContainsValue(IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue) const;

@@ -38,6 +38,7 @@ class MtcTimerWrapper;
 class IMtcUiNotifier;
 class ParticipantInfo;
 class UpdatingInfo;
+class UdpKeepAliveSender;
 class UssiController;
 
 class IMtcCallContext : public IMtcContext
@@ -61,6 +62,7 @@ public:
     virtual MtcSupplementaryService& GetSupplementaryService() = 0;
     virtual UpdatingInfo& GetUpdatingInfo() = 0;
     virtual EpsFallbackTrigger& GetEpsFallbackTrigger() = 0;
+    virtual UdpKeepAliveSender& GetUdpKeepAliveSender() = 0;
     virtual UssiController* GetUssiController() = 0;
     virtual ImsList<IMtcCall*> GetOtherCalls() = 0;
 

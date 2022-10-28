@@ -841,6 +841,12 @@ IMS_SINT32 MtcConfigurationManager::GetEpsFallbackWatchdogTime() const
     return m_objAsset.nEpsFallbackWatchDogTime;
 }
 
+PUBLIC
+IMS_SINT32 MtcConfigurationManager::GetSendUdpKeepAliveIntervalTime() const
+{
+    return m_objAsset.nSendUdpKeepAliveIntervalTime;
+}
+
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
         IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue) const

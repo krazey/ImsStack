@@ -131,6 +131,8 @@ public:
     virtual CallStateName Error_NotifyError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) = 0;
 
+    virtual CallStateName OnReceivingMediaDataStarted(
+            IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
     virtual CallStateName OnReceivingMediaDataFailed(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
     virtual CallStateName OnVideoLowestBitRate() = 0;

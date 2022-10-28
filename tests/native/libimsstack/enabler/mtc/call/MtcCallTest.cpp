@@ -949,6 +949,15 @@ TEST_F(MtcCallTest, GetEpsFallbackTriggerReturnsSameNotNullInstance)
     EXPECT_EQ(&objEpsFbTrigger, &objCall.GetEpsFallbackTrigger());
 }
 
+TEST_F(MtcCallTest, GetUdpKeepAliveSenderCreatesInstance)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    UdpKeepAliveSender* pUdpKeepAliveSender = &objCall.GetUdpKeepAliveSender();
+
+    EXPECT_NE(nullptr, pUdpKeepAliveSender);
+}
+
 TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)
 {
     MockIMtcCallState* pState = new MockIMtcCallState();
@@ -2315,6 +2324,20 @@ TEST_F(MtcCallTest, Error_NotifyErrorFailsIfConnectionIsNull)
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     objCall.Error_NotifyError(IMS_NULL, nCode, strMessage);
+}
+
+TEST_F(MtcCallTest, OnReceivingMediaDataStartedCallsState)
+{
+    IMS_UINT32 eMediaType = 1;
+    IMS_UINT32 eProtocolType = 2;
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    EXPECT_CALL(*pState, OnReceivingMediaDataStarted(eMediaType, eProtocolType))
+            .Times(1);
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.OnReceivingMediaDataStarted(eMediaType, eProtocolType);
 }
 
 TEST_F(MtcCallTest, OnReceivingMediaDataFailedCallsState)

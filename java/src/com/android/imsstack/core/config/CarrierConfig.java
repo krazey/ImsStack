@@ -755,6 +755,8 @@ public class CarrierConfig {
                 "send_180_for_initial_invite_bool";
         public static final String KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT =
                 "eps_fallback_watchdog_time_millis_int";
+        public static final String KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT =
+                "send_udp_keep_alive_interval_time_millis_int";
 
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =

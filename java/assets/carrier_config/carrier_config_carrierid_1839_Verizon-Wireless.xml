@@ -197,6 +197,7 @@
     <boolean name="use_carrier_specific_contact_header_for_options_response_bool" value="true"/>
     <boolean name="use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool" value="true"/>
     <int name="eps_fallback_watchdog_time_millis_int" value="6000"/>
+    <int name="send_udp_keep_alive_interval_time_millis_int" value="2000"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>

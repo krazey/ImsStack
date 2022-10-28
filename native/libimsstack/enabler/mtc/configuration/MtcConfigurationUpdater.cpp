@@ -350,4 +350,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL);
     objItems.nEpsFallbackWatchDogTime =
             piCc->GetInt(CarrierConfig::Assets::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT);
+    objItems.nSendUdpKeepAliveIntervalTime =
+            piCc->GetInt(CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT);
 }

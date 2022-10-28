@@ -186,6 +186,7 @@ public:
     virtual IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const = 0;
     virtual IMS_BOOL IsSend180ForInitialInvite() const = 0;
     virtual IMS_SINT32 GetEpsFallbackWatchdogTime() const = 0;
+    virtual IMS_SINT32 GetSendUdpKeepAliveIntervalTime() const = 0;
 };
 
 #endif

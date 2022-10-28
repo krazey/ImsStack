@@ -1273,4 +1273,12 @@ TEST_F(MtcConfigurationManagerTest,
                             KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT));
 }
 
+TEST_F(MtcConfigurationManagerTest,
+        GetSendUdpKeepAliveIntervalTimeReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->GetSendUdpKeepAliveIntervalTime(),
+            GetInt(CarrierConfig::Assets::
+                            KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT));
+}
+
 }  // namespace android

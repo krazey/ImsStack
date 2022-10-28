@@ -327,6 +327,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_pManager->GetPolicyForLocalRingbackToneWith180Response();
         case Feature::EPS_FALLBACK_WATCHDOG_TIME:
             return m_pManager->GetEpsFallbackWatchdogTime();
+        case Feature::SEND_UDP_KEEP_ALIVE_INTERVAL_TIME:
+            return m_pManager->GetSendUdpKeepAliveIntervalTime();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return IMS_FALSE;

@@ -230,3 +230,8 @@ TEST_F(OutgoingStateTest, HandleAosConnectedInvokesEpsFallbackApis)
     EXPECT_EQ(CallStateName::IDLE,
             pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
+
+TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)
+{
+    // TODO: add unit test.
+}

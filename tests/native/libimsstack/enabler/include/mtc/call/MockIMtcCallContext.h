@@ -39,6 +39,7 @@ class MtcTimerWrapper;
 class IMtcUiNotifier;
 class OperationAsyncRunner;
 class ParticipantInfo;
+class UdpKeepAliveSender;
 class UpdatingInfo;
 class UssiController;
 class IMtcCallTrafficChecker;
@@ -64,6 +65,7 @@ public:
     MOCK_METHOD(MtcSupplementaryService&, GetSupplementaryService, (), (override));
     MOCK_METHOD(UpdatingInfo&, GetUpdatingInfo, (), (override));
     MOCK_METHOD(EpsFallbackTrigger&, GetEpsFallbackTrigger, (), (override));
+    MOCK_METHOD(UdpKeepAliveSender&, GetUdpKeepAliveSender, (), (override));
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
