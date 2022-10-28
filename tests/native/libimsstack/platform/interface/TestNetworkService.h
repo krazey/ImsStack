@@ -84,7 +84,7 @@ public:
     }
 
     inline IIpcan* GetIpcan() override { return m_piIpcan; }
-    inline INetworkIpSec* GetIpSec() override { return m_piIpSec; }
+    inline INetworkIpSec* GetIpSec(IN IMS_SINT32 /*nSlotId*/) override { return m_piIpSec; }
 
     inline MockINetworkConnection& GetMockConnection() { return m_objConnection; }
     inline MockISocket& GetMockSocket() { return m_objSocket; }

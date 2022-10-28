@@ -187,9 +187,9 @@ PUBLIC VIRTUAL ImsNetworkConnection* OsFactory::CreateNetworkConnection(
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL INetworkIpSec* OsFactory::CreateNetworkIpSec()
+PUBLIC VIRTUAL INetworkIpSec* OsFactory::CreateNetworkIpSec(IN IMS_SINT32 nSlotId)
 {
-    return new OsNetworkIpSec();
+    return new OsNetworkIpSec(nSlotId);
 }
 
 PUBLIC VIRTUAL void OsFactory::DestroyNetworkIpSec(IN INetworkIpSec*& piIpSec)

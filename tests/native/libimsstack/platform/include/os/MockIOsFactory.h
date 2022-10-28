@@ -81,7 +81,7 @@ public:
     MOCK_METHOD(ImsNetworkConnection*, CreateNetworkConnection,
             (IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId), (override));
 
-    MOCK_METHOD(INetworkIpSec*, CreateNetworkIpSec, (), (override));
+    MOCK_METHOD(INetworkIpSec*, CreateNetworkIpSec, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(void, DestroyNetworkIpSec, (IN INetworkIpSec * &piIpSec), (override));
 
     MOCK_METHOD(IIpcan*, CreateIpcan, (), (override));

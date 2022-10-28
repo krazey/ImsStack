@@ -23,52 +23,79 @@
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceThread.h"
+#include "SystemConfig.h"
 
 class NetworkServicePrivate
 {
 public:
-    inline NetworkServicePrivate() :
-            m_piIpcan(IMS_NULL),
-            m_piIpSec(IMS_NULL)
-    {
-    }
-    inline ~NetworkServicePrivate()
-    {
-        IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
-        piOsFactory->DestroyIpcan(m_piIpcan);
-        piOsFactory->DestroyNetworkIpSec(m_piIpSec);
-    }
+    NetworkServicePrivate();
+    ~NetworkServicePrivate();
 
     NetworkServicePrivate(IN const NetworkServicePrivate&) = delete;
     NetworkServicePrivate& operator=(IN const NetworkServicePrivate&) = delete;
 
 public:
-    inline IIpcan* GetIpcan()
-    {
-        if (m_piIpcan == IMS_NULL)
-        {
-            IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
-            m_piIpcan = piOsFactory->CreateIpcan();
-        }
+    IIpcan* GetIpcan();
+    INetworkIpSec* GetIpSec(IN IMS_SINT32 nSlotId);
 
-        return m_piIpcan;
-    }
-
-    inline INetworkIpSec* GetIpSec()
-    {
-        if (m_piIpSec == IMS_NULL)
-        {
-            IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
-            m_piIpSec = piOsFactory->CreateNetworkIpSec();
-        }
-
-        return m_piIpSec;
-    }
-
-public:
+private:
     IIpcan* m_piIpcan;
-    INetworkIpSec* m_piIpSec;
+    ImsMap<IMS_SINT32, INetworkIpSec*> m_objIpSecs;
 };
+
+PUBLIC NetworkServicePrivate::NetworkServicePrivate() :
+        m_piIpcan(IMS_NULL)
+{
+    for (IMS_UINT32 i = 0; i < SystemConfig::GetMaxSimSlot(); ++i)
+    {
+        m_objIpSecs.Add(i, IMS_NULL);
+    }
+}
+
+PUBLIC NetworkServicePrivate::~NetworkServicePrivate()
+{
+    IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+    piOsFactory->DestroyIpcan(m_piIpcan);
+
+    for (IMS_UINT32 i = 0; i < m_objIpSecs.GetSize(); ++i)
+    {
+        INetworkIpSec* piIpSec = m_objIpSecs.GetValueAt(i);
+        piOsFactory->DestroyNetworkIpSec(piIpSec);
+    }
+
+    m_objIpSecs.Clear();
+}
+
+PUBLIC IIpcan* NetworkServicePrivate::GetIpcan()
+{
+    if (m_piIpcan == IMS_NULL)
+    {
+        IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+        m_piIpcan = piOsFactory->CreateIpcan();
+    }
+
+    return m_piIpcan;
+}
+
+PUBLIC INetworkIpSec* NetworkServicePrivate::GetIpSec(IN IMS_SINT32 nSlotId)
+{
+    if (nSlotId < 0 || nSlotId >= static_cast<IMS_SINT32>(m_objIpSecs.GetSize()))
+    {
+        return IMS_NULL;
+    }
+
+    INetworkIpSec* piIpSec = m_objIpSecs.GetValue(nSlotId);
+
+    if (piIpSec == IMS_NULL)
+    {
+        IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
+        piIpSec = piOsFactory->CreateNetworkIpSec(nSlotId);
+
+        m_objIpSecs.SetValue(nSlotId, piIpSec);
+    }
+
+    return piIpSec;
+}
 
 PRIVATE
 NetworkService::NetworkService() :
@@ -309,9 +336,9 @@ IIpcan* NetworkService::GetIpcan()
 }
 
 PUBLIC
-INetworkIpSec* NetworkService::GetIpSec()
+INetworkIpSec* NetworkService::GetIpSec(IN IMS_SINT32 nSlotId)
 {
-    return m_pPrivate->GetIpSec();
+    return m_pPrivate->GetIpSec(nSlotId);
 }
 
 PUBLIC

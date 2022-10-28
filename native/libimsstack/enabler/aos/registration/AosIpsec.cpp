@@ -51,7 +51,7 @@ AosIpsec::AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId) :
 
     m_strTag.Sprintf("%d", m_nSlotId);
 
-    m_piNetIpsec = NetworkService::GetNetworkService()->GetIpSec();
+    m_piNetIpsec = NetworkService::GetNetworkService()->GetIpSec(m_nSlotId);
 
     if (m_piNetIpsec == IMS_NULL)
     {

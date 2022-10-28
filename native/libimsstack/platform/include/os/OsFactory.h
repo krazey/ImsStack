@@ -57,7 +57,7 @@ public:
     ImsNetworkConnection* CreateNetworkConnection(
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) override;
 
-    INetworkIpSec* CreateNetworkIpSec() override;
+    INetworkIpSec* CreateNetworkIpSec(IN IMS_SINT32 nSlotId) override;
     void DestroyNetworkIpSec(IN INetworkIpSec*& piIpSec) override;
 
     IIpcan* CreateIpcan() override;

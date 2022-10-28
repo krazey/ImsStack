@@ -270,7 +270,7 @@ PROTECTED
 void SipSocket::ApplyIpSecInternal(IN const SocketAddress& objLocal,
         IN const SocketAddress* pRemote /*= IMS_NULL*/, IN ISocket* piAcceptedSocket /*= IMS_NULL*/)
 {
-    INetworkIpSec* piIpSec = NetworkService::GetNetworkService()->GetIpSec();
+    INetworkIpSec* piIpSec = NetworkService::GetNetworkService()->GetIpSec(GetSlotId());
 
     if (piIpSec != IMS_NULL)
     {

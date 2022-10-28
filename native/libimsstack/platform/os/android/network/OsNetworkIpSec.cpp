@@ -15,9 +15,7 @@
  */
 #include "PlatformContext.h"
 #include "ServiceMemory.h"
-#include "ServiceThread.h"
 #include "ServiceTrace.h"
-#include "SystemConfig.h"
 #include "network/OsIpSecPolicy.h"
 #include "network/OsIpSecSa.h"
 #include "network/OsIpSecSp.h"
@@ -26,11 +24,11 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsNetworkIpSec::OsNetworkIpSec() :
+OsNetworkIpSec::OsNetworkIpSec(IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
         m_nNextAvailableId(1),
-        m_bSdbFlushCapability(IMS_FALSE),
-        m_objPolicy(IMSList<OsIpSecPolicy*>()),
-        m_objSaParams(IMSMap<IMS_UINTP, IpSecSaParameter>())
+        m_objPolicies(ImsList<OsIpSecPolicy*>()),
+        m_objSaParams(ImsMap<IMS_UINTP, IpSecSaParameter>())
 {
 }
 
@@ -42,7 +40,7 @@ PUBLIC VIRTUAL IIpSecPolicy* OsNetworkIpSec::CreatePolicy()
 
     IMS_TRACE_D("CreatePolicy :: Policy(%p:%d)", pPolicy, pPolicy->GetId(), 0);
 
-    m_objPolicy.Append(pPolicy);
+    m_objPolicies.Append(pPolicy);
 
     return pPolicy;
 }
@@ -53,15 +51,15 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyPolicy(IN IIpSecPolicy* piPolicy)
 
     IMS_TRACE_D("DestroyPolicy :: Policy(%p:%d)", piPolicy, pPolicy->GetId(), 0);
 
-    for (IMS_UINT32 i = 0; i < m_objPolicy.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objPolicies.GetSize(); i++)
     {
-        OsIpSecPolicy* pTmpPolicy = m_objPolicy.GetAt(i);
+        OsIpSecPolicy* pTmpPolicy = m_objPolicies.GetAt(i);
 
         if (pTmpPolicy == pPolicy)
         {
             IMS_TRACE_I("DestroyPolicy :: Policy(%p) removed", pPolicy, 0, 0);
             delete pTmpPolicy;
-            m_objPolicy.RemoveAt(i);
+            m_objPolicies.RemoveAt(i);
             return;
         }
     }
@@ -69,11 +67,11 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyPolicy(IN IIpSecPolicy* piPolicy)
 
 PUBLIC VIRTUAL void OsNetworkIpSec::DestroyAllPolicies()
 {
-    IMS_TRACE_D("DestroyAllPolicies :: Policy-size(%d) -- starts", m_objPolicy.GetSize(), 0, 0);
+    IMS_TRACE_D("DestroyAllPolicies :: Policy-size(%d) -- starts", m_objPolicies.GetSize(), 0, 0);
 
-    for (IMS_UINT32 i = 0; i < m_objPolicy.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objPolicies.GetSize(); i++)
     {
-        OsIpSecPolicy* pPolicy = m_objPolicy.GetAt(i);
+        OsIpSecPolicy* pPolicy = m_objPolicies.GetAt(i);
 
         const IMSList<OsIpSecSp*>& objSPs = pPolicy->GetSPs();
         const IMSList<OsIpSecSa*>& objSAs = pPolicy->GetSAs();
@@ -88,7 +86,7 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyAllPolicies()
             const IpSecSaParameter& objSaParam = m_objSaParams.GetValueAt(nIndex);
 
             PlatformContext::GetInstance()->GetSystem()->RemoveIpSecSaParameter(
-                    objSaParam.GetIpSecId(), GetSlotId());
+                    objSaParam.GetIpSecId(), m_nSlotId);
 
             m_objSaParams.RemoveAt(nIndex);
         }
@@ -97,7 +95,7 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyAllPolicies()
         pPolicy = IMS_NULL;
     }
 
-    m_objPolicy.Clear();
+    m_objPolicies.Clear();
 
     IMS_TRACE_D("DestroyAllPolicies -- ends", 0, 0, 0);
 }
@@ -140,8 +138,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIpSecPolicy* piPolicy)
 
     IMS_TRACE_D("SaParameter: %s", objSaParam.ToString().GetStr(), 0, 0);
 
-    if (PlatformContext::GetInstance()->GetSystem()->AddIpSecSaParameter(objSaParam, GetSlotId()) >
-            0)
+    if (PlatformContext::GetInstance()->GetSystem()->AddIpSecSaParameter(objSaParam, m_nSlotId) > 0)
     {
         m_objSaParams.Add(reinterpret_cast<IMS_UINTP>(pPolicy), objSaParam);
     }
@@ -167,17 +164,11 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DeletePolicy(IN IIpSecPolicy* piPolicy)
     const IpSecSaParameter& objSaParam = m_objSaParams.GetValueAt(nIndex);
 
     PlatformContext::GetInstance()->GetSystem()->RemoveIpSecSaParameter(
-            objSaParam.GetIpSecId(), GetSlotId());
+            objSaParam.GetIpSecId(), m_nSlotId);
 
     m_objSaParams.RemoveAt(nIndex);
 
     IMS_TRACE_D("DeletePolicy(SP+SA) -- ends", 0, 0, 0);
-}
-
-PUBLIC VIRTUAL void OsNetworkIpSec::FlushPolicies()
-{
-    IMS_TRACE_I("FlushPolicies :: Delete & Flush SDB - capability=%s, ignored...",
-            _TRACE_B_(m_bSdbFlushCapability), 0, 0);
 }
 
 PUBLIC VIRTUAL void OsNetworkIpSec::DumpPolicy(IN IIpSecPolicy* piPolicy)
@@ -187,9 +178,9 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DumpPolicy(IN IIpSecPolicy* piPolicy)
 
 PUBLIC VIRTUAL IIpSecPolicy* OsNetworkIpSec::GetPolicy(IN IMS_SINT32 nId) const
 {
-    for (IMS_UINT32 i = 0; i < m_objPolicy.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objPolicies.GetSize(); i++)
     {
-        OsIpSecPolicy* pPolicy = m_objPolicy.GetAt(i);
+        OsIpSecPolicy* pPolicy = m_objPolicies.GetAt(i);
 
         if (pPolicy->GetId() == nId)
         {
@@ -254,7 +245,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN ISocket* piSocket
             {
                 if (PlatformContext::GetInstance()->GetSystem()->ApplyIpSecSa(
                             objSaParam.GetIpSecId(), objPolicy.GetSpi(), piSocket->GetSocketId(),
-                            GetSlotId()) > 0)
+                            m_nSlotId) > 0)
                 {
                     objPolicy.SetSocketId(piSocket->GetSocketId());
                 }
@@ -296,7 +287,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
             {
                 if (PlatformContext::GetInstance()->GetSystem()->ApplyIpSecSa(
                             objSaParam.GetIpSecId(), objPolicy.GetSpi(), piSocket->GetSocketId(),
-                            GetSlotId()) > 0)
+                            m_nSlotId) > 0)
                 {
                     objPolicy.AddAcceptedSocketId(piSocket->GetSocketId());
                 }
@@ -329,25 +320,19 @@ PUBLIC VIRTUAL void OsNetworkIpSec::RemoveIpSecTransforms(IN IMS_SINT32 nSocketI
             if (objPolicy.GetSocketId() == nSocketId)
             {
                 PlatformContext::GetInstance()->GetSystem()->RemoveIpSecSa(
-                        objSaParam.GetIpSecId(), objPolicy.GetSpi(), nSocketId, GetSlotId());
+                        objSaParam.GetIpSecId(), objPolicy.GetSpi(), nSocketId, m_nSlotId);
 
                 objPolicy.SetSocketId(IpSecSaParameter::Policy::SOCKET_NOT_SET);
             }
             else if (objPolicy.HasAcceptedSocketId(nSocketId))
             {
                 PlatformContext::GetInstance()->GetSystem()->RemoveIpSecSa(
-                        objSaParam.GetIpSecId(), objPolicy.GetSpi(), nSocketId, GetSlotId());
+                        objSaParam.GetIpSecId(), objPolicy.GetSpi(), nSocketId, m_nSlotId);
 
                 objPolicy.RemoveAcceptedSocketId(nSocketId);
             }
         }
     }
-}
-
-PUBLIC VIRTUAL void OsNetworkIpSec::SetSdbFlushCapability(IN IMS_BOOL bCapability)
-{
-    // Do not flush SDB always...
-    (void)bCapability;
 }
 
 PRIVATE
@@ -362,7 +347,7 @@ IMS_SINT32 OsNetworkIpSec::GetAvailableId()
         m_nNextAvailableId = 1;
     }
 
-    if (m_objPolicy.IsEmpty())
+    if (m_objPolicies.IsEmpty())
     {
         return nNewId;
     }
@@ -383,10 +368,4 @@ IMS_SINT32 OsNetworkIpSec::GetAvailableId()
     }
 
     return nNewId;
-}
-
-PRIVATE GLOBAL IMS_SINT32 OsNetworkIpSec::GetSlotId()
-{
-    return ThreadService::GetCurrentSlotId(
-            SystemConfig::IsMultiSimEnabled() ? IMS_SLOT_ANY : IMS_SLOT_0);
 }
