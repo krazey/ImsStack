@@ -29,19 +29,20 @@ using namespace android;
 __IMS_TRACE_TAG_USER_DECL__("JNI.AOS");
 
 JniAosService::JniAosService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
-        m_nSlotId(nSlotId),
+        BaseService(nSlotId),
         m_pJniAosServiceThread(IMS_NULL)
 {
-    IMS_TRACE_D("+JniAosService SlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_D("+JniAosService SlotId[%d]", nSlotId, 0, 0);
 
     Initialize(pfnSendDataToJava);
 }
 
 JniAosService::~JniAosService()
 {
-    IMS_TRACE_D("~JniAosService SlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_D("~JniAosService SlotId[%d]", GetSlotId(), 0, 0);
 
-    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::AOS_SERVICE, IMS_NULL);
+    JniEnablerConnector::GetInstance().SetJniEnabler(
+            GetSlotId(), EnablerType::AOS_SERVICE, IMS_NULL);
 
     if (m_pJniAosServiceThread != IMS_NULL)
     {
@@ -57,7 +58,7 @@ int JniAosService::SendData(const Parcel& objParcel)
 
     if (IsThreadSwitchingRequired(nMessage))
     {
-        SendDataUsingEnablerThread(objParcel, m_nSlotId);
+        SendDataUsingEnablerThread(objParcel);
     }
     else
     {
@@ -76,7 +77,7 @@ void JniAosService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
     }
 
     AString strThreadName;
-    strThreadName.Sprintf("JniAosServiceThread_%d", m_nSlotId);
+    strThreadName.Sprintf("JniAosServiceThread_%d", GetSlotId());
 
     IMS_TRACE_D("Initialize()", 0, 0, 0);
     auto fnEntry = []() -> BaseThread*
@@ -84,7 +85,7 @@ void JniAosService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
         return new JniAosServiceThread();
     };
 
-    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, m_nSlotId);
+    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
     m_pJniAosServiceThread =
             (JniAosServiceThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
 
@@ -215,7 +216,7 @@ PRIVATE
 void JniAosService::Attach()
 {
     IMS_TRACE_I("Attach()", 0, 0, 0);
-    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::AOS_SERVICE, this);
+    JniEnablerConnector::GetInstance().SetJniEnabler(GetSlotId(), EnablerType::AOS_SERVICE, this);
 }
 
 PRIVATE
@@ -223,7 +224,7 @@ IAosService* JniAosService::GetNativeService()
 {
     return DYNAMIC_CAST(IAosService*,
             JniEnablerConnector::GetInstance().GetNativeEnabler(
-                    m_nSlotId, EnablerType::AOS_SERVICE));
+                    GetSlotId(), EnablerType::AOS_SERVICE));
 }
 
 PRIVATE

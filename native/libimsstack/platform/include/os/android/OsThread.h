@@ -16,9 +16,11 @@
 #ifndef OS_THREAD_H_
 #define OS_THREAD_H_
 
-#include "ImsThread.h"
+#include <pthread.h>
 
-class OsThreadPrivate;
+#include "ImsThread.h"
+#include "ImsVector.h"
+#include "OsMutex.h"
 
 class OsThread : public ImsThread
 {
@@ -34,15 +36,21 @@ public:
     IMS_BOOL Activate() override;
     void Deactivate() override;
     IMS_BOOL Equals(IN const IThread* piThread) const override;
-    const AString& GetName() const override;
-    IMS_BOOL IsRunning() const override;
+    inline const AString& GetName() const override { return m_strName; }
+    inline IMS_BOOL IsRunning() const override { return m_bIsRunning; }
     IMS_BOOL PostMessageI(IN ImsMessage& objMsg) override;
     IMS_BOOL PostMessageI(IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
-    void SetRunnable(IN IRunnable* piListener) override;
+    inline void SetRunnable(IN IRunnable* piListener) override { m_piListener = piListener; }
+    IMS_SINT32 RemoveMessages(IN ImsMessage::IMessageCallback* piCallback,
+            OUT ImsList<ImsMessage>* pImsMsgs = IMS_NULL) override;
 
     // ImsThread class
-    IMS_BOOL Create(IN const AString& strName) override;
-    IMS_ULONG GetThreadId() const override;
+    inline IMS_BOOL Create(IN const AString& strName) override
+    {
+        m_strName = strName;
+        return IMS_TRUE;
+    }
+    inline IMS_ULONG GetThreadId() const override { return static_cast<IMS_ULONG>(m_nThreadId); }
     static IMS_ULONG GetCurrentThreadId();
 
     virtual IMS_ULONG Run();
@@ -54,12 +62,61 @@ protected:
     virtual void OnSystemMessage(IN ImsMessage& objMsg);
     virtual void OnThreadMessage(IN ImsMessage& objMsg);
 
-    void CleanUp();
+    // Overridable methods for accessing "pthread_xxx" functions
+    /**
+     * @brief Creates a pthread.
+     *
+     * @return Returns a thread identifier or 0 if thread creation is failed.
+     */
+    virtual pthread_t CreateThread();
+    /**
+     * @brief Waits for terminating this thread.
+     */
+    virtual void JoinThread();
+    /**
+     * @brief Sends a condition signal to this thread.
+     * @return IMS_TRUE if the signal is successfully sent, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL SendSignal();
+    /**
+     * @brief Waits for thread wake up by a condition signal or timeout.
+     *
+     * @param nMsgCount The message count of this thread's message queue
+     * @return The result of condition waiting.
+     */
+    virtual IMS_SINT32 WaitForSignal(IN IMS_SINT32 nMsgCount);
+
     static IMS_BOOL IsSystemMessage(IN IMS_SINT32 nMessage);
 
 private:
+    // Internal signal flag to avoid timing issue
+    inline void SetSignal() { m_bSignalFlag = IMS_TRUE; }
+    inline void ClearSignal() { m_bSignalFlag = IMS_FALSE; }
+    inline IMS_BOOL IsSignaled() const { return m_bSignalFlag; }
+
+    IMS_SINT32 RemoveMessages(IN_OUT ImsVector<ImsMessage>& objMsgQueue,
+            IN ImsMessage::IMessageCallback* piCallback, OUT ImsList<ImsMessage>* pImsMsgs);
+
+private:
+    // Name of this thread
+    AString m_strName;
+    pthread_t m_nThreadId;
+    IMS_BOOL m_bIsRunning;
+
+    // Signal condition
+    pthread_cond_t m_stCond;
+    OsMutex m_objCondMutex;
+    IMS_BOOL m_bSignalFlag;
+
+    // Message queue
+    ImsVector<ImsMessage> m_objMsgQueue;
+    OsMutex m_objMsgQueueMutex;
+
+    // A message list that is currently processing
+    ImsVector<ImsMessage> m_objProcessingMsgs;
+    OsMutex m_objProcessingMsgsMutex;
+
     IRunnable* m_piListener;
-    OsThreadPrivate* m_pThreadP;
 };
 
 #endif

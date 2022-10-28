@@ -37,19 +37,20 @@ using namespace android;
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTS");
 
 JniMtsService::JniMtsService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
-        m_nSlotId(nSlotId),
+        BaseService(nSlotId),
         m_pJniMtsServiceThread(IMS_NULL)
 {
-    IMS_TRACE_D("+JniMtsService SlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_D("+JniMtsService SlotId[%d]", nSlotId, 0, 0);
 
     Initialize(pfnSendDataToJava);
 }
 
 JniMtsService::~JniMtsService()
 {
-    IMS_TRACE_D("~JniMtsService SlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_D("~JniMtsService SlotId[%d]", GetSlotId(), 0, 0);
 
-    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::MTS_SERVICE, IMS_NULL);
+    JniEnablerConnector::GetInstance().SetJniEnabler(
+            GetSlotId(), EnablerType::MTS_SERVICE, IMS_NULL);
 
     if (m_pJniMtsServiceThread != IMS_NULL)
     {
@@ -65,7 +66,7 @@ int JniMtsService::SendData(const Parcel& objParcel)
 
     if (IsThreadSwitchingRequired(nMessage))
     {
-        SendDataUsingEnablerThread(objParcel, m_nSlotId);
+        SendDataUsingEnablerThread(objParcel);
     }
     else
     {
@@ -107,7 +108,7 @@ JniMtsService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 PRIVATE
 void JniMtsService::Attach()
 {
-    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::MTS_SERVICE, this);
+    JniEnablerConnector::GetInstance().SetJniEnabler(GetSlotId(), EnablerType::MTS_SERVICE, this);
 }
 
 PRIVATE
@@ -115,7 +116,7 @@ IMtsService* JniMtsService::GetNativeService()
 {
     return DYNAMIC_CAST(IMtsService*,
             JniEnablerConnector::GetInstance().GetNativeEnabler(
-                    m_nSlotId, EnablerType::MTS_SERVICE));
+                    GetSlotId(), EnablerType::MTS_SERVICE));
 }
 
 PRIVATE
@@ -127,12 +128,12 @@ void JniMtsService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
     }
 
     AString strThreadName;
-    strThreadName.Sprintf("JniMtsServiceThread_%d", m_nSlotId);
+    strThreadName.Sprintf("JniMtsServiceThread_%d", GetSlotId());
 
     IMS_TRACE_D("Initialize()", 0, 0, 0);
     auto fnEntry = []() -> BaseThread * { return new JniMtsServiceThread(); };
 
-    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, m_nSlotId);
+    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
     m_pJniMtsServiceThread =
             (JniMtsServiceThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
 
@@ -177,7 +178,7 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
     {
         IMS_TRACE_D("MtsEnabler is not bound.", 0, 0, 0);
         m_pJniMtsServiceThread->ReportMoStatus(
-                MO_IMS_TEMP_FAILURE, eSmsFormat, 0, nSeqId, m_nSlotId);
+                MO_IMS_TEMP_FAILURE, eSmsFormat, 0, nSeqId, GetSlotId());
         return;
     }
 

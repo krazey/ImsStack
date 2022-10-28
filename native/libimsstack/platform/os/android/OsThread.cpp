@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 #include <errno.h>
-#include <pthread.h>
 #include <time.h>
 #include <unistd.h>
 
 #include "ImsMessageDef.h"
-#include "ImsQueue.h"
-#include "OsMutex.h"
 #include "OsThread.h"
 #include "ServiceConfig.h"
 #include "ServiceImsRadio.h"
@@ -70,219 +67,74 @@ IMS_PVOID osThread_ThreadProc(void* lpParam)
     return osThread_Run(reinterpret_cast<OsThread*>(lpParam));
 }
 
-class OsThreadPrivate
-{
-public:
-    OsThreadPrivate();
-    virtual ~OsThreadPrivate();
-
-public:
-    IMS_UINT32 GetQueueSize();
-    IMS_BOOL Enqueue(IN const ImsMessage& objMsg);
-    ImsMessage Dequeue();
-    void CleanUp();
-
-    // Internal signal flag to avoid timing issue
-    inline void SetSignal() { m_bSignalFlag = IMS_TRUE; }
-    inline void ClearSignal() { m_bSignalFlag = IMS_FALSE; }
-    inline IMS_BOOL IsSignaled() const { return m_bSignalFlag; }
-
-public:
-    IMS_BOOL m_bIsRunning;
-
-    pthread_t m_nThreadId;
-    pthread_cond_t m_stIpcThreadCond;
-    IMS_BOOL m_bSignalFlag;
-
-    OsMutex m_objMsgQMutex;
-    OsMutex m_objIpcMutex;
-
-    // Name of this thread
-    AString m_strName;
-    ImsQueue<ImsMessage> m_objMsgQ;
-};
-
-PUBLIC
-OsThreadPrivate::OsThreadPrivate() :
-        m_bIsRunning(IMS_FALSE),
-        m_nThreadId(0),
-        m_bSignalFlag(IMS_FALSE),
-        m_strName(AString::ConstNull())
-{
-    if (pthread_cond_init(&m_stIpcThreadCond, NULL) == 0)
-    {
-        // OK
-    }
-}
-
-PUBLIC
-OsThreadPrivate::~OsThreadPrivate()
-{
-    if (pthread_cond_destroy(&m_stIpcThreadCond) == 0)
-    {
-        // OK
-    }
-}
-
-PUBLIC
-IMS_UINT32 OsThreadPrivate::GetQueueSize()
-{
-    IMS_UINT32 nSize = 0;
-
-    m_objMsgQMutex.Lock();
-    nSize = m_objMsgQ.GetSize();
-    m_objMsgQMutex.Unlock();
-
-    return nSize;
-}
-
-PUBLIC
-IMS_BOOL OsThreadPrivate::Enqueue(IN const ImsMessage& objMsg)
-{
-    IMS_UINT32 nOldSize = 0;
-    IMS_UINT32 nNewSize = 0;
-
-    m_objMsgQMutex.Lock();
-    nOldSize = m_objMsgQ.GetSize();
-    m_objMsgQ.Push(objMsg);
-    nNewSize = m_objMsgQ.GetSize();
-    m_objMsgQMutex.Unlock();
-
-    return (nNewSize > nOldSize);
-}
-
-PUBLIC
-ImsMessage OsThreadPrivate::Dequeue()
-{
-    ImsMessage objMsg;
-
-    m_objMsgQMutex.Lock();
-    objMsg = m_objMsgQ.GetFront();
-    m_objMsgQ.Pop();
-    m_objMsgQMutex.Unlock();
-
-    return objMsg;
-}
-
-PUBLIC
-void OsThreadPrivate::CleanUp()
-{
-    m_nThreadId = 0;
-    m_bIsRunning = IMS_FALSE;
-}
-
 PUBLIC
 OsThread::OsThread() :
         ImsThread(),
-        m_piListener(IMS_NULL),
-        m_pThreadP(new OsThreadPrivate())
+        m_strName(AString::ConstNull()),
+        m_nThreadId(0),
+        m_bIsRunning(IMS_FALSE),
+        m_bSignalFlag(IMS_FALSE),
+        m_piListener(IMS_NULL)
 {
+    if (pthread_cond_init(&m_stCond, NULL) == 0)
+    {
+        // OK
+    }
 }
 
 PUBLIC VIRTUAL OsThread::~OsThread()
 {
     if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
     {
-        IMS_TRACE_D("Thread(%s, %x) is destroyed", m_pThreadP->m_strName.GetStr(),
-                m_pThreadP->m_nThreadId, 0);
+        IMS_TRACE_D("Thread(%s, %x) is destroyed", m_strName.GetStr(), m_nThreadId, 0);
     }
 
-    CleanUp();
-
-    if (m_pThreadP != IMS_NULL)
+    if (pthread_cond_destroy(&m_stCond) == 0)
     {
-        delete m_pThreadP;
-        m_pThreadP = IMS_NULL;
+        // OK
     }
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsThread::Activate()
 {
-    if (m_pThreadP->m_bIsRunning)
+    if (IsRunning())
     {
         IMS_TRACE_D("Thread is already running ...", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    IMS_SINT32 nResult = pthread_create(&(m_pThreadP->m_nThreadId), IMS_NULL, osThread_ThreadProc,
-            reinterpret_cast<void*>(this));
+    m_nThreadId = CreateThread();
 
-    // Check the result
-    if (nResult != 0)
+    if (m_nThreadId == 0)
     {
-        if (nResult == EAGAIN)
-        {
-            IMS_TRACE_E(0, "pthread_create - Failed (lack of resource)", 0, 0, 0);
-        }
-        else if (nResult == EINVAL)
-        {
-            IMS_TRACE_E(0, "pthread_create - Failed (invalid attribute)", 0, 0, 0);
-        }
-        else if (nResult == EPERM)
-        {
-            IMS_TRACE_E(0, "pthread_create - Failed (inappropriate permission)", 0, 0, 0);
-        }
-        else
-        {
-            IMS_TRACE_E(0, "pthread_create - Failed (%d)", nResult, 0, 0);
-        }
-
-        m_pThreadP->m_nThreadId = 0x00;
-        m_pThreadP->m_bIsRunning = IMS_FALSE;
-
-        return IMS_FALSE;
+        m_bIsRunning = IMS_FALSE;
     }
     else
     {
-        IMS_TRACE_D("Thread :: Created (%x)", m_pThreadP->m_nThreadId, 0, 0);
+        IMS_TRACE_D("Thread :: Created (%x)", m_nThreadId, 0, 0);
 
-        m_pThreadP->m_bIsRunning = IMS_TRUE;
+        m_bIsRunning = IMS_TRUE;
 
         // Set a start event
         usleep(WAIT_TIMEOUT_FOR_RUN);
         PostMessage(IMS_MSG_START);
     }
 
-    return IMS_TRUE;
+    return IsRunning();
 }
 
 PUBLIC VIRTUAL void OsThread::Deactivate()
 {
-    if (!m_pThreadP->m_bIsRunning)
+    if (!IsRunning())
     {
         IMS_TRACE_D("Thread is not running ...", 0, 0, 0);
         return;
     }
 
-    // Terminate the thread
-    ImsMessage objMsg(IMS_MSG_TERMINATE, 0, 0);
-    PostMessageI(objMsg);
+    // Sends a TERMINATE message to this thread.
+    PostMessage(IMS_MSG_TERMINATE);
 
-    IMS_PVOID pvReturnValue;
-    IMS_SINT32 nResult = pthread_join(m_pThreadP->m_nThreadId, &pvReturnValue);
-
-    if (nResult == 0)
-    {
-        IMS_TRACE_D("pthread_join - success", 0, 0, 0);
-    }
-    else if (nResult == EINVAL)
-    {
-        IMS_TRACE_E(0, "pthread_join - failed (does not refer to a joinable thread)", 0, 0, 0);
-    }
-    else if (nResult == ESRCH)
-    {
-        IMS_TRACE_E(0, "pthread_join - failed (can not found thread id (%x))",
-                m_pThreadP->m_nThreadId, 0, 0);
-    }
-    else
-    {
-        IMS_TRACE_E(0, "pthread_join - failed (%d)", nResult, 0, 0);
-    }
-
-    // RACE_CONDITION_HANDLING
-    // To avoid the race condition between "thread exit" and "message posting"
-    m_pThreadP->m_objIpcMutex.Lock();
-    m_pThreadP->m_objIpcMutex.Unlock();
+    JoinThread();
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsThread::Equals(IN const IThread* piThread) const
@@ -297,21 +149,6 @@ PUBLIC VIRTUAL IMS_BOOL OsThread::Equals(IN const IThread* piThread) const
     return GetName().Equals(pThread->GetName());
 }
 
-PUBLIC VIRTUAL const AString& OsThread::GetName() const
-{
-    return m_pThreadP->m_strName;
-}
-
-PUBLIC VIRTUAL IMS_BOOL OsThread::IsRunning() const
-{
-    return m_pThreadP->m_bIsRunning;
-}
-
-PUBLIC VIRTUAL void OsThread::SetRunnable(IN IRunnable* piListener)
-{
-    m_piListener = piListener;
-}
-
 PUBLIC VIRTUAL IMS_BOOL OsThread::PostMessageI(
         IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
@@ -322,53 +159,45 @@ PUBLIC VIRTUAL IMS_BOOL OsThread::PostMessageI(
 
 PUBLIC VIRTUAL IMS_BOOL OsThread::PostMessageI(IN ImsMessage& objMsg)
 {
-    if (!m_pThreadP->m_bIsRunning)
+    if (!IsRunning())
     {
         return IMS_FALSE;
     }
 
-    IMS_BOOL bResult = m_pThreadP->Enqueue(objMsg);
+    m_objMsgQueueMutex.Lock();
+    IMS_SLONG nExpectedIndex = m_objMsgQueue.GetSize();
+    IMS_SLONG nAddedIndex = m_objMsgQueue.Add(objMsg);
+    m_objMsgQueueMutex.Unlock();
 
-    // Wake up the thread to run the message loop
-    m_pThreadP->m_objIpcMutex.Lock();
-
-    m_pThreadP->SetSignal();
-
-    IMS_SINT32 nResult = pthread_cond_signal(&(m_pThreadP->m_stIpcThreadCond));
-
-    if (nResult != 0)
+    if (SendSignal())
     {
-        IMS_TRACE_E(0, "pthread_cond_signal - error (%d)", nResult, 0, 0);
-    }
-    else
-    {
-        IMS_TRACE_D("PostMessageI() - event (%u), w (%" PFLS_u "), l (%" PFLS_u ")",
-                objMsg.GetName(), objMsg.nWparam, objMsg.nLparam);
+        IMS_TRACE_D("PostMessageI: msg=%u, p1=%" PFLS_u ", p2=%" PFLS_u, objMsg.GetName(),
+                objMsg.nWparam, objMsg.nLparam);
     }
 
-    // Unlock the mutex
-    m_pThreadP->m_objIpcMutex.Unlock();
+    return nExpectedIndex == nAddedIndex;
+}
 
-    return bResult;
+PUBLIC VIRTUAL IMS_SINT32 OsThread::RemoveMessages(IN ImsMessage::IMessageCallback* piCallback,
+        OUT ImsList<ImsMessage>* pImsMsgs /*= IMS_NULL*/)
+{
+    IMS_SINT32 nRemovedMsgCount = 0;
+
+    m_objMsgQueueMutex.Lock();
+    nRemovedMsgCount += RemoveMessages(m_objMsgQueue, piCallback, pImsMsgs);
+    m_objMsgQueueMutex.Unlock();
+
+    m_objProcessingMsgsMutex.Lock();
+    nRemovedMsgCount += RemoveMessages(m_objProcessingMsgs, piCallback, pImsMsgs);
+    m_objProcessingMsgsMutex.Unlock();
+
+    return nRemovedMsgCount;
 }
 
 PUBLIC VIRTUAL void OsThread::PostMessage(IN IMS_UINT32 nMessage)
 {
     ImsMessage objMsg(nMessage, 0, 0);
-
     PostMessageI(objMsg);
-}
-
-PUBLIC VIRTUAL IMS_BOOL OsThread::Create(IN const AString& strName)
-{
-    m_pThreadP->m_strName = strName;
-
-    return IMS_TRUE;
-}
-
-PUBLIC VIRTUAL IMS_ULONG OsThread::GetThreadId() const
-{
-    return static_cast<IMS_ULONG>(m_pThreadP->m_nThreadId);
 }
 
 PUBLIC GLOBAL IMS_ULONG OsThread::GetCurrentThreadId()
@@ -376,66 +205,36 @@ PUBLIC GLOBAL IMS_ULONG OsThread::GetCurrentThreadId()
     return pthread_self();
 }
 
-PROTECTED VIRTUAL IMS_ULONG OsThread::Run()
+PUBLIC VIRTUAL IMS_ULONG OsThread::Run()
 {
-    ImsMessage objMsg;
     IMS_BOOL bLoop = IMS_TRUE;
     IMS_UINT32 nMsgCount = 0;
     IMS_SINT32 nWaitResult = 0;
 
-    IMS_TRACE_I("Thread :: Started (%s, %x)", GetName().GetStr(), m_pThreadP->m_nThreadId, 0);
+    IMS_TRACE_I("Thread :: Started (%s, %x)", GetName().GetStr(), m_nThreadId, 0);
 
     while (bLoop)
     {
-        nMsgCount = m_pThreadP->GetQueueSize();
+        m_objMsgQueueMutex.Lock();
+        nMsgCount = m_objMsgQueue.GetSize();
+        m_objMsgQueueMutex.Unlock();
 
-        // Lock the mutex
-        m_pThreadP->m_objIpcMutex.Lock();
-
-        if (nMsgCount == 0 && !m_pThreadP->IsSignaled())
-        {
-            nWaitResult = pthread_cond_wait(&(m_pThreadP->m_stIpcThreadCond),
-                    reinterpret_cast<pthread_mutex_t*>(m_pThreadP->m_objIpcMutex.GetMutexObj()));
-        }
-        else
-        {
-#if 1  // FOR_O_OS : defined(__IMS_LP64__)
-            struct timeval now;
-            struct timespec ts;
-
-            now.tv_sec = 0;
-            now.tv_usec = 0;
-            gettimeofday(&now, NULL);
-
-            // 1 milli-second
-            long nsec = (now.tv_usec + (1000 * WAIT_TIMEOUT_FOR_IPC)) * 1000;
-
-            ts.tv_sec = now.tv_sec + (nsec / 1000000000L);
-            ts.tv_nsec = (nsec % 1000000000L);
-
-            nWaitResult = pthread_cond_timedwait(&(m_pThreadP->m_stIpcThreadCond),
-                    reinterpret_cast<pthread_mutex_t*>(m_pThreadP->m_objIpcMutex.GetMutexObj()),
-                    &ts);
-#else
-            nWaitResult = pthread_cond_timeout_np(&(m_pThreadP->m_stIpcThreadCond),
-                    reinterpret_cast<pthread_mutex_t*>(m_pThreadP->m_objIpcMutex.GetMutexObj()),
-                    WAIT_TIMEOUT_FOR_IPC);
-#endif
-        }
-
-        m_pThreadP->ClearSignal();
-
-        // Unlock the mutex
-        m_pThreadP->m_objIpcMutex.Unlock();
+        nWaitResult = WaitForSignal(nMsgCount);
 
         if ((nWaitResult == 0) || (nWaitResult == ETIMEDOUT))
         {
-            nMsgCount = m_pThreadP->GetQueueSize();
+            m_objMsgQueueMutex.Lock();
+            m_objProcessingMsgsMutex.Lock();
+            m_objProcessingMsgs = m_objMsgQueue;
+            m_objProcessingMsgsMutex.Unlock();
+            m_objMsgQueue.Clear();
+            m_objMsgQueueMutex.Unlock();
 
-            for (IMS_UINT32 i = 0; i < nMsgCount; i++)
+            m_objProcessingMsgsMutex.Lock();
+
+            for (IMS_UINT32 i = 0; i < m_objProcessingMsgs.GetSize(); i++)
             {
-                objMsg = m_pThreadP->Dequeue();
-
+                ImsMessage& objMsg = m_objProcessingMsgs.GetAt(i);
                 IMS_UINT32 nName = objMsg.GetName();
 
                 if (nName == IMS_MSG_START)
@@ -457,22 +256,17 @@ PROTECTED VIRTUAL IMS_ULONG OsThread::Run()
                     OnThreadMessage(objMsg);
                 }
             }
-        }
-        else if (nWaitResult == EINVAL)
-        {
-            IMS_TRACE_E(0, "pthread_cond_wait failed - invalid parameter", 0, 0, 0);
-        }
-        else
-        {
-            IMS_TRACE_E(0, "pthread_cond_wait failed - error(%d)", nWaitResult, 0, 0);
+
+            m_objProcessingMsgs.Clear();
+            m_objProcessingMsgsMutex.Unlock();
         }
     }
 
-    IMS_TRACE_D("Thread :: Terminated (%x)", m_pThreadP->m_nThreadId, 0, 0);
+    IMS_TRACE_D("Thread :: Terminated (%x)", m_nThreadId, 0, 0);
 
-    m_pThreadP->m_bIsRunning = IMS_FALSE;
+    m_bIsRunning = IMS_FALSE;
 
-    return m_pThreadP->m_nThreadId;
+    return m_nThreadId;
 }
 
 PROTECTED VIRTUAL void OsThread::OnStart(IN ImsMessage& objMsg)
@@ -530,7 +324,7 @@ PROTECTED VIRTUAL void OsThread::OnThreadMessage(IN ImsMessage& objMsg)
 {
     if (objMsg.HasCallback())
     {
-        InvokeMessageCallback(objMsg);
+        objMsg.InvokeCallback();
         return;
     }
 
@@ -543,16 +337,162 @@ PROTECTED VIRTUAL void OsThread::OnThreadMessage(IN ImsMessage& objMsg)
     m_piListener->Runnable_Run(objMsg);
 }
 
-PROTECTED
-void OsThread::CleanUp()
+PROTECTED VIRTUAL pthread_t OsThread::CreateThread()
 {
-    m_pThreadP->CleanUp();
+    pthread_t nThreadId = 0;
+    IMS_SINT32 nResult = pthread_create(
+            &nThreadId, IMS_NULL, osThread_ThreadProc, reinterpret_cast<void*>(this));
+
+    if (nResult != 0)
+    {
+        if (nResult == EAGAIN)
+        {
+            IMS_TRACE_E(0, "pthread_create - Failed (lack of resource)", 0, 0, 0);
+        }
+        else if (nResult == EINVAL)
+        {
+            IMS_TRACE_E(0, "pthread_create - Failed (invalid attribute)", 0, 0, 0);
+        }
+        else if (nResult == EPERM)
+        {
+            IMS_TRACE_E(0, "pthread_create - Failed (inappropriate permission)", 0, 0, 0);
+        }
+        else
+        {
+            IMS_TRACE_E(0, "pthread_create - Failed (%d)", nResult, 0, 0);
+        }
+    }
+
+    return nThreadId;
+}
+
+PROTECTED VIRTUAL void OsThread::JoinThread()
+{
+    IMS_PVOID pvReturnValue = IMS_NULL;
+    IMS_SINT32 nResult = pthread_join(m_nThreadId, &pvReturnValue);
+
+    if (nResult == 0)
+    {
+        IMS_TRACE_D("pthread_join - success", 0, 0, 0);
+    }
+    else if (nResult == EINVAL)
+    {
+        IMS_TRACE_E(0, "pthread_join - failed (does not refer to a joinable thread)", 0, 0, 0);
+    }
+    else if (nResult == ESRCH)
+    {
+        IMS_TRACE_E(0, "pthread_join - failed (can not found thread id (%x))", m_nThreadId, 0, 0);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "pthread_join - failed (%d)", nResult, 0, 0);
+    }
+
+    // RACE_CONDITION_HANDLING
+    // To avoid the race condition between "thread exit" and "message posting"
+    m_objCondMutex.Lock();
+    m_objCondMutex.Unlock();
+}
+
+PROTECTED VIRTUAL IMS_BOOL OsThread::SendSignal()
+{
+    // Wake up this thread to run the message loop
+    m_objCondMutex.Lock();
+
+    SetSignal();
+
+    IMS_SINT32 nResult = pthread_cond_signal(&m_stCond);
+
+    if (nResult != 0)
+    {
+        IMS_TRACE_E(0, "pthread_cond_signal - error (%d)", nResult, 0, 0);
+    }
+
+    m_objCondMutex.Unlock();
+
+    return (nResult == 0);
+}
+
+PROTECTED VIRTUAL IMS_SINT32 OsThread::WaitForSignal(IN IMS_SINT32 nMsgCount)
+{
+    IMS_SINT32 nWaitResult = 0;
+
+    m_objCondMutex.Lock();
+
+    if (nMsgCount == 0 && !IsSignaled())
+    {
+        nWaitResult = pthread_cond_wait(
+                &m_stCond, reinterpret_cast<pthread_mutex_t*>(m_objCondMutex.GetMutexObj()));
+    }
+    else
+    {
+        struct timeval now;
+        struct timespec ts;
+
+        now.tv_sec = 0;
+        now.tv_usec = 0;
+        gettimeofday(&now, NULL);
+
+        // 1 milli-second
+        long nsec = (now.tv_usec + (1000 * WAIT_TIMEOUT_FOR_IPC)) * 1000;
+
+        ts.tv_sec = now.tv_sec + (nsec / 1000000000L);
+        ts.tv_nsec = (nsec % 1000000000L);
+
+        nWaitResult = pthread_cond_timedwait(
+                &m_stCond, reinterpret_cast<pthread_mutex_t*>(m_objCondMutex.GetMutexObj()), &ts);
+    }
+
+    ClearSignal();
+    m_objCondMutex.Unlock();
+
+    if ((nWaitResult == 0) || (nWaitResult == ETIMEDOUT))
+    {
+        // Thread is being waken up successfully.
+    }
+    else if (nWaitResult == EINVAL)
+    {
+        IMS_TRACE_E(0, "pthread_cond_wait failed - invalid parameter", 0, 0, 0);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "pthread_cond_wait failed - error(%d)", nWaitResult, 0, 0);
+    }
+
+    return nWaitResult;
 }
 
 PROTECTED GLOBAL IMS_BOOL OsThread::IsSystemMessage(IN IMS_SINT32 nMsg)
 {
-    return ((nMsg == IMS_MSG_NETWORK) || (nMsg == IMS_MSG_SOCKET) || (nMsg == IMS_MSG_BATTERY) ||
-            (nMsg == IMS_MSG_NETWORK_STATUS) || (nMsg == IMS_MSG_TIMER) ||
-            (nMsg == IMS_MSG_CONFIGURATION) || (nMsg == IMS_MSG_WIFI_STATUS) ||
-            (nMsg == IMS_MSG_ISIM) || (nMsg == IMS_MSG_USIM) || (nMsg == IMS_MSG_RADIO));
+    return (nMsg > IMS_MSG_SYSTEM_BASE) && (nMsg < IMS_MSG_SYSTEM_MAX);
+}
+
+PRIVATE
+IMS_SINT32 OsThread::RemoveMessages(IN_OUT ImsVector<ImsMessage>& objMsgQueue,
+        IN ImsMessage::IMessageCallback* piCallback, OUT ImsList<ImsMessage>* pImsMsgs)
+{
+    IMS_SINT32 nRemovedMsgCount = 0;
+
+    for (IMS_UINT32 i = 0; i < objMsgQueue.GetSize();)
+    {
+        const ImsMessage& objMsg = objMsgQueue.GetAt(i);
+
+        if (objMsg.IsSameCallback(piCallback))
+        {
+            if (pImsMsgs != IMS_NULL)
+            {
+                pImsMsgs->Append(objMsg);
+            }
+
+            nRemovedMsgCount++;
+
+            objMsgQueue.RemoveAt(i);
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+    return nRemovedMsgCount;
 }

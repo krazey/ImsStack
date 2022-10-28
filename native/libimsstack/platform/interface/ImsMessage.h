@@ -79,16 +79,17 @@ public:
 
     inline IMS_SINT32 GetName() const { return nMSG; }
 
-    inline IMS_BOOL HasCallback() const { return piCallback != IMS_NULL; }
-
     inline void SetTarget(IN const IMS_CHAR* pszName)
     {
         IMS_StrCpy(acActivityName, MAX_ACTIVITY_NAME + 1, pszName);
     }
 
+    inline IMS_BOOL HasCallback() const { return piCallback != IMS_NULL; }
+    inline IMS_BOOL IsSameCallback(IN IMessageCallback* piCallback) const
+    {
+        return this->piCallback != IMS_NULL && this->piCallback == piCallback;
+    }
     inline void SetCallback(IN IMessageCallback* piCallback) { this->piCallback = piCallback; }
-
-protected:
     inline void InvokeCallback()
     {
         if (piCallback != IMS_NULL)
@@ -103,8 +104,6 @@ public:
     IMS_UINTP nLparam;
 
 private:
-    friend class ImsThread;
-
     static const IMS_SINT32 MAX_ACTIVITY_NAME = 64;
 
     IMessageCallback* piCallback;

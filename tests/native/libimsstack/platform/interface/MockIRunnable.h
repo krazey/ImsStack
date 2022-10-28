@@ -13,31 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef MOCK_I_RUNNABLE_H_
+#define MOCK_I_RUNNABLE_H_
 
-#ifndef _IMS_UCE_SERVICE_H_
-#define _IMS_UCE_SERVICE_H_
+#include <gmock/gmock.h>
 
-#include "BaseService.h"
+#include "IRunnable.h"
 
-class JniUceServiceThread;
-
-using namespace android;
-
-class JniUceService : public BaseService
+class MockIRunnable : public IRunnable
 {
 public:
-    JniUceService(IN IMS_UINT32 nSimSlot = 0);
-    JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
-    virtual ~JniUceService();
+    inline MockIRunnable() {}
+    inline virtual ~MockIRunnable() {}
 
-    virtual int SendData(const Parcel& pParcel);
-
-private:
-    void HandleMessage(int nMsg, const Parcel& pParcel);
-
-private:
-    JniUceServiceThread* m_pJniUceServiceThread;
-    AString m_strTarget;
+    MOCK_METHOD(IMS_BOOL, Runnable_Run, (IN ImsMessage & objMsg), (override));
 };
 
-#endif  //_IMS_PEOPLE_SERVICE_H_
+#endif

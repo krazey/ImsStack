@@ -17,6 +17,7 @@
 #define INTERFACE_THREAD_H_
 
 #include "AString.h"
+#include "ImsList.h"
 #include "ImsMessage.h"
 #include "IRunnable.h"
 
@@ -41,6 +42,17 @@ public:
             IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;
 
     virtual void SetRunnable(IN IRunnable* piRunnable) = 0;
+
+    /**
+     * @brief Removes the messages from this thread's message queue
+     *        that match the specified callback.
+     *
+     * @param piCallback The callback instance to be compared
+     * @param pImsMsgs A list of matched messages or empty list if this is a non-null
+     * @return The count of the removed ImsMessage.
+     */
+    virtual IMS_SINT32 RemoveMessages(IN ImsMessage::IMessageCallback* piCallback,
+            OUT ImsList<ImsMessage>* pImsMsgs = IMS_NULL) = 0;
 };
 
 #endif

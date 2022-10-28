@@ -61,7 +61,6 @@ private:
 
     JniMediaSessionThread* m_pThread;
     AString m_strThreadName;
-    IMS_SINT32 m_nSlotId;
     IMS_SINTP m_nCallKey;
 };
 

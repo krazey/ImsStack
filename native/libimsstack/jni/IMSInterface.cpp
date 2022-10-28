@@ -393,8 +393,7 @@ static jlong JniIms_nativeGetInterface(
         pService = CoreInterfaceFactory::GetInterface(interfaceType, SendDataToJava, slotId);
     }
 
-    IMS_LOGD("JniIms_nativeGetInterface :: interface=%d, object=%" PFLS_d, interfaceType,
-            reinterpret_cast<IMS_SINTP>(pService));
+    IMS_LOGD("JniIms_nativeGetInterface :: interface=%d, object=%p", interfaceType, pService);
 
     return static_cast<jlong>(reinterpret_cast<long>(pService));
 }
@@ -404,9 +403,9 @@ static void JniIms_nativeReleaseInterface(JNIEnv* /*env*/, jobject /*object*/, j
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
 
 #if defined(__IMS_CLANG__)
-    IMS_LOGD("JniIms_nativeReleaseInterface :: object=%ld", nNativeObject);
+    IMS_LOGD("JniIms_nativeReleaseInterface :: object=%lx", nNativeObject);
 #else
-    IMS_LOGD("JniIms_nativeReleaseInterface :: object=%" PFLS_d, nNativeObject);
+    IMS_LOGD("JniIms_nativeReleaseInterface :: object=%" PFLS_x, nNativeObject);
 #endif
 
     BaseService* pService = reinterpret_cast<BaseService*>(nNativeObject);
@@ -422,7 +421,7 @@ static jint JniIms_nativeSendData(
 {
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
 
-    IMS_TRACE_D("JniIms_nativeSendData :: object=%" PFLS_d, nNativeObject, 0, 0);
+    IMS_TRACE_D("JniIms_nativeSendData :: object=%" PFLS_x, nNativeObject, 0, 0);
 
     BaseService* pService = reinterpret_cast<BaseService*>(nNativeObject);
 
@@ -458,7 +457,7 @@ jbyteArray JniIms_nativeSendDataForSystem(
 
     if (nLogDisplayCount >= MAX_LOG_DISPLAY_COUNT)
     {
-        IMS_TRACE_I("JniIms_nativeSendDataForSystem :: object=%" PFLS_d, nNativeObject, 0, 0);
+        IMS_TRACE_I("JniIms_nativeSendDataForSystem :: object=%" PFLS_x, nNativeObject, 0, 0);
         nLogDisplayCount = 0;
     }
 

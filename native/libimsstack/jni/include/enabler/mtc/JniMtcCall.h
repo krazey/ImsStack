@@ -75,7 +75,6 @@ private:
 private:
     JniMtcCallThread* m_pThread;
     Jni_SendDataToJava m_pfnSendDataToJava;
-    IMS_SINT32 m_nSlotId;
     IMtcCallController& m_objCallController;
     CallKey m_nCallKey;
     JniMediaSession* m_pJniMediaSession;
