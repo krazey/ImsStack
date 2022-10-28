@@ -33,13 +33,13 @@ __IMS_TRACE_TAG_USER_DECL__("IMS_UCE");
 static const AString STR_UCE_LISTENER_THREAD_NAME("JniUceServiceThread");
 
 JniUceService::JniUceService(IN IMS_UINT32 _nSimSlot /* = 0*/) :
-        m_nSimSlot(_nSimSlot)
+        BaseService(_nSimSlot)
 {
     IMS_TRACE_D("UCE_M : JniUceService = %" PFLS_u, sizeof(JniUceService), 0, 0);
     //---------------------------------------------------------------------------------------------
     // m_strTarget.Sprintf("%s.UceApp%02d",
     // EnablerUtils::GetEnablerThreadName(m_nSimSlot), nSlotId);
-    m_strTarget = EnablerUtils::GetEnablerThreadName(m_nSimSlot);
+    m_strTarget = EnablerUtils::GetEnablerThreadName(_nSimSlot);
     m_strTarget.Append(".UceApp");
 
     IMS_TRACE_D("JniUceService [%s]", m_strTarget.GetStr(), 0, 0);
@@ -47,13 +47,13 @@ JniUceService::JniUceService(IN IMS_UINT32 _nSimSlot /* = 0*/) :
 }
 
 JniUceService::JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot /*= 0*/) :
-        m_nSimSlot(nSimSlot)
+        BaseService(nSimSlot)
 {
     IMS_TRACE_D("UCE_M : JniUceService = %" PFLS_u, sizeof(JniUceService), 0, 0);
     //---------------------------------------------------------------------------------------------
     // m_strTarget.Sprintf("%s.UceApp%02d",
     // EnablerUtils::GetEnablerThreadName(m_nSimSlot), nSlotId);
-    m_strTarget = EnablerUtils::GetEnablerThreadName(m_nSimSlot);
+    m_strTarget = EnablerUtils::GetEnablerThreadName(nSimSlot);
     m_strTarget.Append(".UceApp");
     IMS_TRACE_D("JniUceService [%s]", m_strTarget.GetStr(), 0, 0);
 
@@ -62,7 +62,7 @@ JniUceService::JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32
         IMS_TRACE_E(0, "JniUceService:pfnSendDataToJava is null", 0, 0, 0);
     }
     ImsProcess::GetInstance()->LoadAppThread(
-            STR_UCE_LISTENER_THREAD_NAME, JniUceServiceThread::GetInstance, m_nSimSlot);
+            STR_UCE_LISTENER_THREAD_NAME, JniUceServiceThread::GetInstance, nSimSlot);
     m_pJniUceServiceThread = (JniUceServiceThread*)(ImsProcess::GetInstance()->GetApplicationThread(
             STR_UCE_LISTENER_THREAD_NAME));
     if (m_pJniUceServiceThread != NULL)

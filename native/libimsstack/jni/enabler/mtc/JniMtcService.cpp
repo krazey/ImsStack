@@ -29,10 +29,10 @@
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
 JniMtcService::JniMtcService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId) :
-        m_pThread(IMS_NULL),
-        m_nSlotId(nSlotId)
+        BaseService(nSlotId),
+        m_pThread(IMS_NULL)
 {
-    IMS_TRACE_D("+JniMtcService SlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_D("+JniMtcService SlotId[%d]", nSlotId, 0, 0);
 
     Initialize(pfnSendDataToJava);
 }
@@ -45,7 +45,8 @@ JniMtcService::~JniMtcService()
     {
         ImsProcess::GetInstance()->UnloadAppThread(m_pThread->GetName());
     }
-    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::MTC_SERVICE, IMS_NULL);
+    JniEnablerConnector::GetInstance().SetJniEnabler(
+            GetSlotId(), EnablerType::MTC_SERVICE, IMS_NULL);
 }
 
 PUBLIC VIRTUAL int JniMtcService::SendData(IN const android::Parcel& objParcel)
@@ -54,7 +55,7 @@ PUBLIC VIRTUAL int JniMtcService::SendData(IN const android::Parcel& objParcel)
 
     if (IsThreadSwitchingRequired(nMsg))
     {
-        SendDataUsingEnablerThread(objParcel, m_nSlotId);
+        SendDataUsingEnablerThread(objParcel);
     }
     else
     {
@@ -79,7 +80,7 @@ void JniMtcService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
     {
         return new JniMtcServiceThread();
     };
-    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, m_nSlotId);
+    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
     m_pThread = (JniMtcServiceThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
 
     if (m_pThread == IMS_NULL)
@@ -128,14 +129,15 @@ PROTECTED VIRTUAL void JniMtcService::HandleMessage(
 PRIVATE
 void JniMtcService::Attach()
 {
-    JniEnablerConnector::GetInstance().SetJniEnabler(m_nSlotId, EnablerType::MTC_SERVICE, this);
+    JniEnablerConnector::GetInstance().SetJniEnabler(GetSlotId(), EnablerType::MTC_SERVICE, this);
 }
 
 PRIVATE
 IMtcService* JniMtcService::GetNativeService()
 {
-    return DYNAMIC_CAST(IMtcService*, JniEnablerConnector::GetInstance().GetNativeEnabler(
-            m_nSlotId, EnablerType::MTC_SERVICE));
+    return DYNAMIC_CAST(IMtcService*,
+            JniEnablerConnector::GetInstance().GetNativeEnabler(
+                    GetSlotId(), EnablerType::MTC_SERVICE));
 }
 
 PRIVATE

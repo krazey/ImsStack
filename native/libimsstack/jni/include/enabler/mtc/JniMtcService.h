@@ -50,7 +50,6 @@ private:
 
 private:
     JniMtcServiceThread* m_pThread;
-    IMS_SINT32 m_nSlotId;
 };
 
 #endif

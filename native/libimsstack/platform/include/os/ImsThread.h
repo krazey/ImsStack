@@ -40,8 +40,11 @@ public:
         return Create(strName);
     }
 
-protected:
-    inline static void InvokeMessageCallback(IN ImsMessage& objMsg) { objMsg.InvokeCallback(); }
+    inline IMS_SINT32 RemoveMessages(IN ImsMessage::IMessageCallback* /*piCallback*/,
+            OUT ImsList<ImsMessage>* /*pImsMsgs = IMS_NULL*/) override
+    {
+        return 0;
+    }
 
 private:
     IMS_SINT32 m_nSlotId;

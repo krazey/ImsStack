@@ -69,7 +69,6 @@ private:
     static void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 
 private:
-    IMS_SINT32 m_nSlotId;
     JniAosServiceThread* m_pJniAosServiceThread;
 };
 

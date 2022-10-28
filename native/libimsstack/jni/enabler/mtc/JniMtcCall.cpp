@@ -32,14 +32,14 @@
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
 JniMtcCall::JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId /* = 0*/) :
+        BaseService(nSlotId),
         m_pThread(IMS_NULL),
         m_pfnSendDataToJava(pfnSendDataToJava),
-        m_nSlotId(nSlotId),
         m_objCallController(GetCallController()),
         m_nCallKey(IMtcCall::CALL_KEY_INVALID),
         m_pJniMediaSession(IMS_NULL)
 {
-    IMS_TRACE_D("+JniMtcCall SlotId[%d]", m_nSlotId, 0, 0);
+    IMS_TRACE_D("+JniMtcCall SlotId[%d]", nSlotId, 0, 0);
     Initialize();
 }
 
@@ -48,7 +48,7 @@ JniMtcCall::~JniMtcCall()
     IMS_TRACE_D("~JniMtcCall", 0, 0, 0);
 
     JniEnablerConnector::GetInstance().SetJniEnabler(
-            m_nSlotId, EnablerType::MTC_CALL, IMS_NULL, m_nCallKey);
+            GetSlotId(), EnablerType::MTC_CALL, IMS_NULL, m_nCallKey);
     if (m_pThread)
     {
         ImsProcess::GetInstance()->UnloadAppThread(m_pThread->GetName());
@@ -68,7 +68,7 @@ PUBLIC VIRTUAL int JniMtcCall::SendData(IN const android::Parcel& objParcel)
 
     if (IsThreadSwitchingRequired(nMsg))
     {
-        SendDataUsingEnablerThread(objParcel, m_nSlotId);
+        SendDataUsingEnablerThread(objParcel);
     }
     else
     {
@@ -93,7 +93,7 @@ void JniMtcCall::Initialize()
     {
         return new JniMtcCallThread();
     };
-    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, m_nSlotId);
+    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
     m_pThread = (JniMtcCallThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
 
     if (m_pThread == IMS_NULL)
@@ -215,7 +215,7 @@ PRIVATE
 IMtcCallController& JniMtcCall::GetCallController()
 {
     INativeEnabler* piNativeEnabler =
-            JniEnablerConnector::GetInstance().GetNativeEnabler(m_nSlotId, EnablerType::MTC_CALL);
+            JniEnablerConnector::GetInstance().GetNativeEnabler(GetSlotId(), EnablerType::MTC_CALL);
     IMS_ASSERT(piNativeEnabler != IMS_NULL);
     return DYNAMIC_CAST(IMtcCallController&, *piNativeEnabler);
 }
@@ -226,11 +226,11 @@ void JniMtcCall::Attach()
     IMS_TRACE_D("Attach Key[%d]", m_nCallKey, 0, 0);
 
     JniEnablerConnector::GetInstance().SetJniEnabler(
-            m_nSlotId, EnablerType::MTC_CALL, this, m_nCallKey);
+            GetSlotId(), EnablerType::MTC_CALL, this, m_nCallKey);
 
     // TODO: create JniMediaSession in Java thread? Currently, it's done in Enabler thread.
     m_pJniMediaSession = new JniMediaSession(
-            m_pfnSendDataToJava, m_nSlotId, m_nCallKey, reinterpret_cast<IMS_SINTP>(this));
+            m_pfnSendDataToJava, GetSlotId(), m_nCallKey, reinterpret_cast<IMS_SINTP>(this));
     m_objCallController.Attach(m_nCallKey);
 }
 

@@ -34,16 +34,16 @@ extern int IMSInterface_GetSurface(const android::String8& str8Class,
 
 JniMediaSession::JniMediaSession(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId,
         IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject) :
+        BaseService(nSlotId),
         m_pThread(IMS_NULL),
         m_strThreadName(AString::ConstNull()),
-        m_nSlotId(nSlotId),
         m_nCallKey(nCallKey)
 {
-    IMS_TRACE_D("+JniMediaSession SlotId[%d], nCallKey[%d]", m_nSlotId, nCallKey, 0);
+    IMS_TRACE_D("+JniMediaSession SlotId[%d], nCallKey[%d]", nSlotId, nCallKey, 0);
 
     Initialize(pfnSendDataToJava, nNativeObject);
     JniEnablerConnector::GetInstance().SetJniEnabler(
-            m_nSlotId, EnablerType::MEDIA_SESSION, DYNAMIC_CAST(IJniEnabler*, this), m_nCallKey);
+            nSlotId, EnablerType::MEDIA_SESSION, DYNAMIC_CAST(IJniEnabler*, this), m_nCallKey);
 }
 
 JniMediaSession::~JniMediaSession()
@@ -51,7 +51,7 @@ JniMediaSession::~JniMediaSession()
     IMS_TRACE_D("~JniMediaSession", 0, 0, 0);
 
     JniEnablerConnector::GetInstance().SetJniEnabler(
-            m_nSlotId, EnablerType::MEDIA_SESSION, IMS_NULL, m_nCallKey);
+            GetSlotId(), EnablerType::MEDIA_SESSION, IMS_NULL, m_nCallKey);
 
     if (m_pThread != IMS_NULL)
     {
@@ -66,7 +66,7 @@ PUBLIC VIRTUAL int JniMediaSession::SendData(const android::Parcel& objParcel)
 
     if (IsThreadSwitchingRequired(nMsg))
     {
-        SendDataUsingEnablerThread(objParcel, m_nSlotId);
+        SendDataUsingEnablerThread(objParcel);
     }
     else
     {
@@ -90,7 +90,7 @@ void JniMediaSession::Initialize(
     {
         return new JniMediaSessionThread();
     };
-    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, m_nSlotId);
+    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, GetSlotId());
     m_pThread = (JniMediaSessionThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
 
     if (m_pThread == IMS_NULL)
@@ -99,7 +99,7 @@ void JniMediaSession::Initialize(
         return;
     }
     IMS_TRACE_D("Initialize()", 0, 0, 0);
-    m_pThread->SetSlotId(m_nSlotId);
+    m_pThread->SetSlotId(GetSlotId());
     m_pThread->SetCallback(nNativeObject, pfnSendDataToJava);
 }
 
@@ -200,8 +200,9 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
 PRIVATE
 IMediaManager* JniMediaSession::GetMediaManager()
 {
-    return DYNAMIC_CAST(IMediaManager*, JniEnablerConnector::GetInstance().GetNativeEnabler(
-            m_nSlotId, EnablerType::MEDIA_SESSION));
+    return DYNAMIC_CAST(IMediaManager*,
+            JniEnablerConnector::GetInstance().GetNativeEnabler(
+                    GetSlotId(), EnablerType::MEDIA_SESSION));
 }
 
 PRIVATE

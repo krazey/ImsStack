@@ -18,6 +18,7 @@
 
 PUBLIC
 JniSystem::JniSystem(IN JniSystem_SendDataToJava pfnSendDataToJava) :
+        BaseService(IMS_SLOT_ANY),
         m_pfnSendDataToJava(pfnSendDataToJava)
 {
     if (m_pfnSendDataToJava != IMS_NULL)

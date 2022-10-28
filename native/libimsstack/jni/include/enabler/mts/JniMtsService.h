@@ -45,7 +45,6 @@ private:
     void NotifyScbmState(IN const android::Parcel& objParcel);
 
 private:
-    IMS_SINT32 m_nSlotId;
     JniMtsServiceThread* m_pJniMtsServiceThread;
 };
 

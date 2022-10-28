@@ -30,14 +30,14 @@ __IMS_TRACE_TAG_USER_DECL__("IMS_SNC");
 
 JniSipControllerService::JniSipControllerService(Jni_SendDataToJava pfnSendDataToJava,
         IMS_SINTP _nSessionId, IN IMS_UINT32 nSimSlot /*= 0*/) :
-        m_nSlotId(nSimSlot),
+        BaseService(nSimSlot),
         m_strTarget(AString::ConstNull()),
         m_strThreadName(AString::ConstNull()),
         m_nSessionId(_nSessionId)
 {
     IMS_TRACE_D("JniSipControllerService = %" PFLS_u, sizeof(JniSipControllerService), 0, 0);
 
-    m_strTarget = EnablerUtils::GetEnablerThreadName(m_nSlotId);
+    m_strTarget = EnablerUtils::GetEnablerThreadName(nSimSlot);
     m_strTarget.Append(".RcsMessageService");
     IMS_TRACE_D("JniSipControllerService [%s]", m_strTarget.GetStr(), 0, 0);
 
@@ -90,7 +90,7 @@ void JniSipControllerService::LoadThread(IN const AString& strThreadName)
     }
 
     if (!ImsProcess::GetInstance()->LoadAppThread(
-                strThreadName, JniSipControllerServiceThread::GetInstance, m_nSlotId))
+                strThreadName, JniSipControllerServiceThread::GetInstance, GetSlotId()))
     {
         IMS_TRACE_E(0, "LoadThread() : failed to load a thread(%s)", strThreadName.GetStr(), 0, 0);
         return;

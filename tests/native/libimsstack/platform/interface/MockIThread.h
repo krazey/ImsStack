@@ -41,6 +41,9 @@ public:
     MOCK_METHOD(IMS_BOOL, PostMessageI,
             (IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam), (override));
     MOCK_METHOD(void, SetRunnable, (IN IRunnable* piRunnable), (override));
+    MOCK_METHOD(IMS_SINT32, RemoveMessages,
+            (IN ImsMessage::IMessageCallback * piCallback, OUT ImsList<ImsMessage>* pImsMsgs),
+            (override));
 
 private:
     IMS_SINT32 m_nSlotId;

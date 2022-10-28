@@ -32,7 +32,8 @@ typedef int (*JniSystem_SendDataToJava)(
 class BaseService : public IJniEnabler
 {
 public:
-    inline virtual ~BaseService() {}
+    BaseService(IN IMS_SINT32 nSlotId);
+    virtual ~BaseService();
     virtual int SendData(IN const android::Parcel& objParcel) = 0;
     inline virtual int SendData(IN const android::Parcel& /*in*/, android::Parcel& /*out*/)
     {
@@ -41,32 +42,12 @@ public:
 
     inline void NotifyNativeEnablerSet() override {}
     inline IJniEnablerThread* GetJniThread() const { return IMS_NULL; }
+    inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }
 
 protected:
-    inline void MessageCallback_OnMessage(IN ImsMessage& objMsg) override
-    {
-        android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(objMsg.nLparam);
-        pParcel->setDataPosition(0);
-        pParcel->readInt32();  // consumes nMsg
-
-        HandleMessage(objMsg.nMSG, *pParcel);
-        delete pParcel;
-    }
-
-    inline void SendDataUsingEnablerThread(
-            IN const android::Parcel& objParcel, IN IMS_UINT32 nSlotId)
-    {
-        android::Parcel* pParcelOut = new android::Parcel();
-        pParcelOut->write(objParcel.data(), objParcel.dataSize());
-        pParcelOut->setDataPosition(0);
-
-        ImsMessage objMsg(
-                pParcelOut->readInt32(), 0, reinterpret_cast<IMS_UINTP>(pParcelOut), this);
-        IThread* piThread = ImsProcess::GetInstance()
-                                    ->GetThread(EnablerUtils::GetEnablerThreadName(nSlotId))
-                                    ->GetThread();
-        piThread->PostMessageI(objMsg);
-    }
+    void MessageCallback_OnMessage(IN ImsMessage& objMsg) override;
+    IMS_UINT32 RemovePendingMessages();
+    void SendDataUsingEnablerThread(IN const android::Parcel& objParcel);
 
     inline virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 /*nMsg*/) const
     {
@@ -78,6 +59,9 @@ protected:
     {
         // TODO: this will be changed to pure virtual after all services implement this.
     }
+
+private:
+    IMS_SINT32 m_nSlotId;
 };
 
 #endif

@@ -41,7 +41,6 @@ private:
 
 private:
     JniSipControllerServiceThread* m_pJniSipControllerServiceThread;
-    IMS_UINT32 m_nSlotId;
     AString m_strTarget;
     AString m_strThreadName;
     IMS_SINTP m_nSessionId;
