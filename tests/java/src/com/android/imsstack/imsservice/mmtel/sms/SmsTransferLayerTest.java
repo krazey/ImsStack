@@ -284,7 +284,7 @@ public class SmsTransferLayerTest {
 
     @Test
     public void test_sendReportTPdu() {
-        mSmsTransferLayer.sendReportTPdu(mToken, mTlMessageType, mMessageRef, mResult);
+        mSmsTransferLayer.sendReportTPdu(mToken, mMessageRef, mResult, null);
         byte[] deliverReportPdu = mSmsTransferLayer.generateDeliverReportPdu(mResult);
         verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_ACK), eq(null), eq(null),
                 eq(deliverReportPdu), eq(mResult));
