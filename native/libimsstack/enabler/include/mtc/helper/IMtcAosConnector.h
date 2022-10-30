@@ -18,7 +18,7 @@
 #define INTERFACE_MTC_AOS_CONNECTOR_H_
 
 #include "AString.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IMtcAosConnector
 {

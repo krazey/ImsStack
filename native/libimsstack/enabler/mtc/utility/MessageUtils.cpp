@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
+#include "AStringBuffer.h"
 #include "CallReasonInfo.h"
 #include "Const3GPP.h"
-#include "AStringBuffer.h"
-#include "media/IMedia.h"
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
-#include "Ims3gpp.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
-#include "utility/IMessageUtils.h"
-#include "utility/MessageUtils.h"
-#include "utility/MessageUtil.h"
+#include "Ims3gpp.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
 #include "Sip.h"
@@ -37,6 +33,10 @@
 #include "SipStatusCode.h"
 #include "TextParser.h"
 #include "conferencecall/ConferenceDef.h"
+#include "media/IMedia.h"
+#include "utility/IMessageUtils.h"
+#include "utility/MessageUtil.h"
+#include "utility/MessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

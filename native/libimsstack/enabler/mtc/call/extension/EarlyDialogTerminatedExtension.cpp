@@ -17,8 +17,8 @@
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ServiceTrace.h"
-#include "call/extension/MtcExtensionSet.h"
 #include "call/extension/EarlyDialogTerminatedExtension.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

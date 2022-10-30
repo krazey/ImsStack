@@ -17,9 +17,9 @@
 #ifndef OBJECT_ASYNC_DESTROYER_H_
 #define OBJECT_ASYNC_DESTROYER_H_
 
-#include "IMSTypeDef.h"
 #include "ImsActivity.h"
 #include "ImsMessage.h"
+#include "ImsTypeDef.h"
 
 template <typename MtcObject>
 class ObjectAsyncDestroyer final : public ImsActivity

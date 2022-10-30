@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-#include "call/message/EmergencyMessageFormatter.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IImsAosInfo.h"
-#include "ISipHeader.h"
 #include "IMtcApp.h"
 #include "IMtcService.h"
-#include "utility/MessageUtil.h"
+#include "ISipHeader.h"
 #include "ServicePhoneInfo.h"
 #include "Sip.h"
 #include "SipParameter.h"
 #include "TextParser.h"
 #include "call/IMtcCallContext.h"
+#include "call/message/EmergencyMessageFormatter.h"
 #include "helper/IMtcAosConnector.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

@@ -18,10 +18,10 @@
 #define ECT_MANAGER_H_
 
 #include "call/IMtcCallManager.h"
-#include "ect/IEctControllerListener.h"
-#include "ect/IEctManager.h"
 #include "ect/EctController.h"
 #include "ect/EctFactory.h"
+#include "ect/IEctControllerListener.h"
+#include "ect/IEctManager.h"
 #include <memory>
 
 class IMtcContext;

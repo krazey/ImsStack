@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "configuration/MtcConfigurationProxy.h"
 #include "ServiceTrace.h"
-#include "configuration/ConfigDef.h"
 #include "configuration/ConfigCache.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

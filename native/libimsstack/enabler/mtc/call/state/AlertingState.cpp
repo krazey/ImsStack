@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#include "IMessage.h"
+#include "ISession.h"
+#include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
@@ -22,21 +26,17 @@
 #include "call/termination/CancelHandler.h"
 #include "call/termination/TerminationHandler.h"
 #include "configuration/ConfigDef.h"
-#include "helper/MtcTimerWrapper.h"
-#include "IMessage.h"
-#include "ISession.h"
-#include "sipcore/ISipHeader.h"
-#include "sipcore/SipHeaderName.h"
-#include "SipStatusCode.h"
-#include "utility/MessageUtil.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/MtcTimerWrapper.h"
 #include "helper/UdpKeepAliveSender.h"
-#include "precondition/QosDef.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "ServiceTrace.h"
+#include "precondition/QosDef.h"
+#include "sipcore/ISipHeader.h"
+#include "sipcore/SipHeaderName.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -338,8 +338,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::QosReserveFailed(
     if (eNextAction == QosLossPolicy::RELEASE)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
-        return RejectIncomingAndToTerminating(
-                CallReasonInfo(CODE_REJECT_QOS_FAILURE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_QOS_FAILURE));
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)

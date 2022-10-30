@@ -16,26 +16,26 @@
 
 #include "AString.h"
 #include "Configuration.h"
+#include "IMtcService.h"
 #include "ImsList.h"
 #include "ImsServiceConfig.h"
+#include "JniEnablerConnector.h"
+#include "JniMtcCall.h"
+#include "MtcApp.h"
+#include "MtcContextRepository.h"
+#include "MtcEmergencyServiceManager.h"
+#include "MtcImsEventReceiver.h"
+#include "MtcService.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "JniEnablerConnector.h"
-#include "JniMtcCall.h"
-#include "IMtcService.h"
-#include "MtcApp.h"
-#include "MtcContextRepository.h"
-#include "MtcImsEventReceiver.h"
-#include "call/MtcCallManager.h"
-#include "MtcService.h"
-#include "helper/CallStateProxy.h"
-#include "dialingplan/MtcDialingPlan.h"
 #include "call/MtcCallController.h"
+#include "call/MtcCallManager.h"
 #include "conferencecall/ConferenceManager.h"
 #include "configuration/MtcConfigurationManager.h"
+#include "dialingplan/MtcDialingPlan.h"
 #include "ect/EctManager.h"
-#include "MtcEmergencyServiceManager.h"
+#include "helper/CallStateProxy.h"
 #include "helper/OperationAsyncRunner.h"
 #include "utility/MessageUtils.h"
 #include <functional>
@@ -66,7 +66,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
     m_bWifiTestMode = (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
-            ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1);
+                               ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1);
     MtcContextRepository::GetInstance()->AddContext(nSlotId, this);
     Configuration::GetInstance()->SetAppConfig(
             ImsServiceConfig::GetAppName(ImsAppId::MTC), nSlotId);

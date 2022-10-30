@@ -35,8 +35,8 @@ private:
     void HandleServiceIdle();
     void HandleServiceActive();
     void HandleServiceSuspended();
-    void SetState(IN IuMtcService::EmergencyServiceState eState,
-            IN IMS_BOOL bForceNotify = IMS_FALSE);
+    void SetState(
+            IN IuMtcService::EmergencyServiceState eState, IN IMS_BOOL bForceNotify = IMS_FALSE);
     void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason);
 
 private:

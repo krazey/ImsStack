@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "DomDocumentBuilderFactory.h"
 #include "DocumentBuilder.h"
+#include "DomDocumentBuilderFactory.h"
 #include "IDocument.h"
 #include "IElement.h"
 #include "ServiceTrace.h"

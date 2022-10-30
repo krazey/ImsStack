@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "AString.h"
 #include "IMtcContext.h"
+#include "ServiceTrace.h"
 #include "dialingplan/EmergencyDialingPlan.h"
 #include "dialingplan/EmergencyNumberList.h"
 

@@ -15,16 +15,15 @@
  */
 
 #include "IMessage.h"
-#include "ImsList.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "SipMethod.h"
-
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "ussi/UssiConstants.h"
@@ -55,13 +54,13 @@ PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(IN IMessage* piMes
     IMS_BOOL bResult = IMS_TRUE;
 
     if (!MessageUtil::ContainsValue(piMessage, UssiConstants::HEADER_USSD_PACKAGE,
-            ISipHeader::UNKNOWN, UssiConstants::HEADER_RECVINFO))
+                ISipHeader::UNKNOWN, UssiConstants::HEADER_RECVINFO))
     {
         bResult = IMS_FALSE;
     }
 
     if (!MessageUtil::ContainsValue(
-            piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::ACCEPT))
+                piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::ACCEPT))
     {
         bResult = IMS_FALSE;
     }
@@ -98,7 +97,7 @@ IMS_BOOL UssiController::IsByeForUssi(IN IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_FALSE;
     if (MessageUtil::ContainsValue(
-            piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::CONTENT_TYPE))
+                piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::CONTENT_TYPE))
     {
         bResult = IMS_TRUE;
     }
@@ -309,7 +308,7 @@ IMS_RESULT UssiController::FormHeadersForStartUssi(IN IMessage* piMessage)
     }
 
     if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_MULTIPART_MIXED,
-            ISipHeader::CONTENT_TYPE) == IMS_FAILURE)
+                ISipHeader::CONTENT_TYPE) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -358,25 +357,25 @@ IMS_RESULT UssiController::SetAcceptHeader(IN IMessage* piMessage)
 {
     IMS_TRACE_D("SetAcceptHeader", 0, 0, 0);
     if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_SDP,
-            ISipHeader::ACCEPT) == IMS_FAILURE)
+                ISipHeader::ACCEPT) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
     if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_IMSXML,
-            ISipHeader::ACCEPT) == IMS_FAILURE)
+                ISipHeader::ACCEPT) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
     if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_USSDXML,
-            ISipHeader::ACCEPT) == IMS_FAILURE)
+                ISipHeader::ACCEPT) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
     if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_MULTIPART_MIXED,
-            ISipHeader::ACCEPT) == IMS_FAILURE)
+                ISipHeader::ACCEPT) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -394,19 +393,19 @@ IMS_RESULT UssiController::FormHeadersForInfo(IN ISipClientConnection* piSipClie
     }
 
     if (piSipClientConnection->SetHeader(UssiConstants::HEADER_INFO_PACKAGE,
-            UssiConstants::HEADER_USSD_PACKAGE) == IMS_FAILURE)
+                UssiConstants::HEADER_USSD_PACKAGE) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
     if (piSipClientConnection->SetHeader(SipHeaderName::CONTENT_TYPE,
-            UssiConstants::HEADER_APPLICATION_USSDXML) == IMS_FAILURE)
+                UssiConstants::HEADER_APPLICATION_USSDXML) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
     if (piSipClientConnection->SetHeader(SipHeaderName::CONTENT_DISPOSITION,
-            UssiConstants::HEADER_INFO_PACKAGE) == IMS_FAILURE)
+                UssiConstants::HEADER_INFO_PACKAGE) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }

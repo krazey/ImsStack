@@ -17,7 +17,6 @@
 #include "IMessage.h"
 #include "ISipServerConnection.h"
 #include "ServiceTrace.h"
-
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
@@ -29,8 +28,8 @@
 #include "call/block/SrvccBlockRule.h"
 #include "call/state/EstablishedState.h"
 #include "call/termination/TerminationHandler.h"
-#include "conferencecall/IConferenceManager.h"
 #include "conferencecall/IConferenceController.h"
+#include "conferencecall/IConferenceManager.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"

@@ -15,11 +15,11 @@
  */
 
 #include "ServiceTrace.h"
-#include "call/IMtcCallManager.h"
 #include "call/IMtcCallContext.h"
-#include "conferencecall/GroupCallController.h"
+#include "call/IMtcCallManager.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ConferenceOperationQueue.h"
+#include "conferencecall/GroupCallController.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -84,8 +84,7 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser
     CallStartOperationParams* pParams = new CallStartOperationParams(
             CONF_CREATE_START, objCallInfo, objMediaInfo, objUsers, objSuppServices);
 
-    m_objOperationQueue.CreateNPutWithStartParam(
-            CONTROL_OPERATION_CREATE_CONFERENCE_CALL, pParams);
+    m_objOperationQueue.CreateNPutWithStartParam(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, pParams);
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
 

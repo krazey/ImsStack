@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/ConferenceConst.h"
 
 PUBLIC GLOBAL const IMS_CHAR ConferenceConst::LEG_ID[] = "legid";

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+#include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcUiNotifier.h"
 #include "call/state/TerminatingState.h"
 #include "helper/MtcTimerWrapper.h"
-#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

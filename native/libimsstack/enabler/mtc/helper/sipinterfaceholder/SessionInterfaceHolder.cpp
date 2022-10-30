@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-#include "ISession.h"
 #include "ICoreService.h"
-#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include "ISession.h"
+#include "ServiceTrace.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
+#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

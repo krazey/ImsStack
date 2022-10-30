@@ -18,9 +18,9 @@
 #define MTC_MEDIA_PROFILE_MANAGER_H_
 
 #include "IMediaSession.h"
-#include "ImsMap.h"
-#include "IMSTypeDef.h"
 #include "ISession.h"
+#include "ImsMap.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 
 class MediaProfile

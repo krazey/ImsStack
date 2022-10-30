@@ -18,11 +18,11 @@
 #define INTERFACE_MTC_CALL_H_
 
 #include "AString.h"
-#include "ImsList.h"
-#include "MtcDef.h"
-#include "ImsMap.h"
-#include "IMSTypeDef.h"
 #include "IMtcService.h"
+#include "ImsList.h"
+#include "ImsMap.h"
+#include "ImsTypeDef.h"
+#include "MtcDef.h"
 
 class CallContext;
 class ISession;
@@ -197,10 +197,7 @@ public:
                 bUssi == objRhs.bUssi && bConference == objRhs.bConference;
     }
 
-    IMS_BOOL operator!=(const CallInfo& objRhs) const
-    {
-        return !(*this == objRhs);
-    }
+    IMS_BOOL operator!=(const CallInfo& objRhs) const { return !(*this == objRhs); }
 
 public:
     PeerType ePeerType;

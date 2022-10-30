@@ -17,13 +17,13 @@
 #ifndef JNI_MTC_CALL_H_
 #define JNI_MTC_CALL_H_
 
-#include "BaseService.h"
 #include "../media/JniMediaSession.h"
-#include "JniMtcCallThread.h"
-#include "IuMtcCall.h"
-#include "call/IMtcCall.h"
-#include "ImsMap.h"
+#include "BaseService.h"
 #include "IJniEnabler.h"
+#include "ImsMap.h"
+#include "IuMtcCall.h"
+#include "JniMtcCallThread.h"
+#include "call/IMtcCall.h"
 
 class IMtcCallController;
 class IJniEnablerThread;

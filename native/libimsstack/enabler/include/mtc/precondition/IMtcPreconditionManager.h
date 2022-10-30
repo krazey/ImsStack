@@ -17,7 +17,7 @@
 #ifndef INTERFACE_MTC_PRECONDITION_MANAGER_H_
 #define INTERFACE_MTC_PRECONDITION_MANAGER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "precondition/QosDef.h"
 
 class ISession;

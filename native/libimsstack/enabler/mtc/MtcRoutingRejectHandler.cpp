@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "ImsEventDef.h"
 #include "IMtcContext.h"
 #include "INetworkWatcher.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "ImsEventDef.h"
 #include "MtcImsEventReceiver.h"
 #include "MtcRoutingRejectHandler.h"
 #include "ServiceTrace.h"

@@ -17,8 +17,8 @@
 #ifndef MTC_CONFIGURATION_UPDATER_H_
 #define MTC_CONFIGURATION_UPDATER_H_
 
-#include "IMSTypeDef.h"
 #include "ImsMap.h"
+#include "ImsTypeDef.h"
 
 class ICarrierConfig;
 struct CarrierConfigItems;

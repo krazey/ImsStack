@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "call/IMtcCallContext.h"
 #include "IMessage.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
+#include "call/IMtcCallContext.h"
 #include "call/termination/UpdateErrorHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-#include "ServiceTimer.h"
-#include "ServiceTrace.h"
-#include "ect/EctController.h"
-#include "ect/EctFactory.h"
-#include "ect/EctReference.h"
-#include "ect/IEctControllerListener.h"
+#include "CallReasonInfo.h"
+#include "IMtcContext.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
-#include "IMtcContext.h"
+#include "ServiceTimer.h"
+#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcUiNotifier.h"
-#include "CallReasonInfo.h"
+#include "ect/EctController.h"
+#include "ect/EctFactory.h"
+#include "ect/EctReference.h"
+#include "ect/IEctControllerListener.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-EctController::EctController(
-        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener,
-                IN EctFactory& objFactory) :
+EctController::EctController(IN IMtcContext& objContext, IN CallKey nCallKey,
+        IN IEctControllerListener& objListener, IN EctFactory& objFactory) :
         m_objContext(objContext),
         m_nTransfereeKey(nCallKey),
         m_objListener(objListener),

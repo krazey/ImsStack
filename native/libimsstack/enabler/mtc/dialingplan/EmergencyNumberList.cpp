@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+#include "AStringBuffer.h"
+#include "ImsMap.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
-#include "AStringBuffer.h"
 #include "TextParser.h"
-#include "dialingplan/EmergencyNumberList.h"
-
 #include "dialingplan/ConstSosUrn.h"
-#include "ImsMap.h"
+#include "dialingplan/EmergencyNumberList.h"
 
 __IMS_TRACE_TAG_IMS__;
 

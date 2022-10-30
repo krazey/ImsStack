@@ -17,11 +17,10 @@
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
-
 #include "configuration/ConfigDef.h"
-#include "ussi/UssiDataCreator.h"
 #include "ussi/UssiConstants.h"
 #include "ussi/UssiData.h"
+#include "ussi/UssiDataCreator.h"
 #include "ussi/UssiDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

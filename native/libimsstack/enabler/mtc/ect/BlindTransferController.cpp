@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-#include "ect/BlindTransferController.h"
-#include "ect/EctReference.h"
+#include "CallReasonInfo.h"
+#include "IMtcContext.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
-#include "IMtcContext.h"
+#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "CallReasonInfo.h"
+#include "ect/BlindTransferController.h"
+#include "ect/EctReference.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-BlindTransferController::BlindTransferController(
-        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener,
-                IN EctFactory& objFactory) :
+BlindTransferController::BlindTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,
+        IN IEctControllerListener& objListener, IN EctFactory& objFactory) :
         EctController(objContext, nCallKey, objListener, objFactory)
 {
     IMS_TRACE_D("+BlindTransferController", 0, 0, 0);

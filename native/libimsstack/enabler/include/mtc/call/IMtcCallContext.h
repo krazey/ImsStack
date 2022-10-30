@@ -17,10 +17,10 @@
 #ifndef INTERFACE_MTC_CALL_CONTEXT_H_
 #define INTERFACE_MTC_CALL_CONTEXT_H_
 
-#include "ImsList.h"
-#include "ImsTypeDef.h"
 #include "IMtcCall.h"
 #include "IMtcContext.h"
+#include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "JniCallInfo.h"
 #include "sipcore/SipMethod.h"
 

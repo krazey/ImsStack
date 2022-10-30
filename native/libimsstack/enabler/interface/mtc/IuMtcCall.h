@@ -18,10 +18,10 @@
 #define INTERFACE_UI_MTC_CALL_H_
 
 #include "CallReasonInfo.h"
-#include "ImsMessageDef.h"
-#include "ImsMessage.h"
-#include "MtcDef.h"
 #include "ImsMap.h"
+#include "ImsMessage.h"
+#include "ImsMessageDef.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 
 class IuMtcService;

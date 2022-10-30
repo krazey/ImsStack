@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "ImsTrace.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ImsTrace.h"
 #include "ServiceTrace.h"
 #include "SipParsingHelper.h"
 #include "TextParser.h"

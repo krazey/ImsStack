@@ -15,18 +15,17 @@
  */
 
 #define IMS_STL_USE
-#include "ServiceTrace.h"
-#include "ImsProcess.h"
 #include "EnablerUtils.h"
-
-#include "call/IMtcCall.h"
-#include "IMtcCallController.h"
-#include "IuMtcService.h"
 #include "IJniEnablerThread.h"
+#include "IMtcCallController.h"
 #include "INativeEnabler.h"
+#include "ImsProcess.h"
+#include "IuMtcService.h"
 #include "JniEnablerConnector.h"
 #include "JniMtcCall.h"
 #include "JniMtcUtils.h"
+#include "ServiceTrace.h"
+#include "call/IMtcCall.h"
 #include "conferencecall/ConferenceDef.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");

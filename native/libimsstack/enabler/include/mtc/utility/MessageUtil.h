@@ -18,13 +18,13 @@
 #define MESSAGE_UTIL_H_
 
 #include "AString.h"
-#include "Ims3gpp.h"
+#include "IMtcContext.h"
 #include "IMtcService.h"
+#include "Ims3gpp.h"
+#include "MtcContextRepository.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "utility/IMessageUtils.h"
-#include "MtcContextRepository.h"
-#include "IMtcContext.h"
 
 class AStringBuffer;
 class IMessage;

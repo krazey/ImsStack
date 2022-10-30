@@ -18,7 +18,7 @@
 #define MTC_CONFIGURATION_PROXY_H_
 
 #include "AString.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/IMtcConfigurationManager.h"
 #include <memory>

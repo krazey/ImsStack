@@ -17,19 +17,19 @@
 #ifndef CONFERENCE_CONTROLLER_H_
 #define CONFERENCE_CONTROLLER_H_
 
+#include "IMtcCallStateListener.h"
 #include "ServiceTimer.h"
 #include "SipStatusCode.h"
-#include "conferencecall/IConferenceSubscriptionListener.h"
-#include "conferencecall/IConferenceReferenceListener.h"
 #include "call/IMtcUiNotifier.h"
-#include "conferencecall/IConferenceControllerListener.h"
-#include "conferencecall/IConferenceController.h"
-#include "conferencecall/IConferenceOperationQueueListener.h"
-#include "conferencecall/ConferenceParticipantList.h"
-#include "conferencecall/ConferenceSubscription.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceOperationQueue.h"
-#include "IMtcCallStateListener.h"
+#include "conferencecall/ConferenceParticipantList.h"
+#include "conferencecall/ConferenceSubscription.h"
+#include "conferencecall/IConferenceController.h"
+#include "conferencecall/IConferenceControllerListener.h"
+#include "conferencecall/IConferenceOperationQueueListener.h"
+#include "conferencecall/IConferenceReferenceListener.h"
+#include "conferencecall/IConferenceSubscriptionListener.h"
 
 class IMtcContext;
 class IConferenceReference;

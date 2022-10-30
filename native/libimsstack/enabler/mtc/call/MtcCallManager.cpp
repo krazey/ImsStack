@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/MtcCall.h"
 #include "call/MtcCallManager.h"
 #include "call/NullCall.h"
 #include "helper/ICallStateProxy.h"
 #include "interface/mtc/IMtcCallStateListener.h"
-#include "ServiceTrace.h"
 #include <functional>
 #include <memory>
 

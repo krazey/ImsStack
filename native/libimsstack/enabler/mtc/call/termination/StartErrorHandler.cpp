@@ -16,9 +16,9 @@
 
 #include "CarrierConfig.h"
 #include "IMessage.h"
+#include "ISipHeader.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
-#include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipStatusCode.h"
@@ -49,8 +49,7 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
     {
         // TODO: emergency retry must be managed separately
         // check if CODE_SIP_ALTERNATE_EMERGENCY_CALL is valid for emergency call retry case
-        return CallReasonInfo(
-                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
     }
 
     if (IsTransactionTimeout(piMessage))
@@ -546,7 +545,7 @@ PRIVATE
 IMS_BOOL StartErrorHandler::IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const
 {
     if (m_objContext.GetConfigurationProxy().Is(Feature::
-            EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
+                        EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
     {
         return IMS_TRUE;
     }

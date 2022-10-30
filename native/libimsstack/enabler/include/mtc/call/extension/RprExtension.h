@@ -17,7 +17,7 @@
 #ifndef RPR_EXTENSION_H_
 #define RPR_EXTENSION_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/extension/MtcExtension.h"
 
 class IMessage;

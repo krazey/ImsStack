@@ -17,8 +17,8 @@
 #ifndef MTC_ROUTING_REJECT_HANDLER_H_
 #define MTC_ROUTING_REJECT_HANDLER_H_
 
-#include "ImsTypeDef.h"
 #include "ISipRoutingRejectListener.h"
+#include "ImsTypeDef.h"
 #include "SipStatusCode.h"
 
 class IMtcContext;

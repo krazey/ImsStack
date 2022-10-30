@@ -17,8 +17,8 @@
 #ifndef CARRIER_CONFIG_ITEMS_H_
 #define CARRIER_CONFIG_ITEMS_H_
 
-#include "IMSTypeDef.h"
 #include "AString.h"
+#include "ImsTypeDef.h"
 #include "ImsVector.h"
 
 struct CarrierConfigItems

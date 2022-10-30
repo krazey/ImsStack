@@ -18,12 +18,12 @@
 #include "SipAddress.h"
 #include "SipParameter.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
-#include "conferencecall/ConferenceFactory.h"
-#include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceConst.h"
 #include "conferencecall/ConferenceDef.h"
-#include "conferencecall/ConferenceUtils.h"
+#include "conferencecall/ConferenceFactory.h"
+#include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceParticipantList.h"
+#include "conferencecall/ConferenceUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

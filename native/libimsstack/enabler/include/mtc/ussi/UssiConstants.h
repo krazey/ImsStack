@@ -17,7 +17,7 @@
 #ifndef USSI_CONSTANTS_
 #define USSI_CONSTANTS_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class UssiConstants
 {

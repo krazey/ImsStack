@@ -17,8 +17,8 @@
 #ifndef QOS_STATUS_TABLE_H_
 #define QOS_STATUS_TABLE_H_
 
-#include "SdpMedia.h"
 #include "SdpAttribute.h"
+#include "SdpMedia.h"
 #include "offeranswer/SdpPrecondition.h"
 
 class IMedia;

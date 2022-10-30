@@ -126,10 +126,7 @@ public:
         CreateId();
         IMS_TRACE_MEM("MTC", "+ConfUser [%d]", nId, 0, 0);
     }
-    inline ~ConfUser()
-    {
-        IMS_TRACE_MEM("MTC", "~ConfUser [%d]", nId, 0, 0);
-    }
+    inline ~ConfUser() { IMS_TRACE_MEM("MTC", "~ConfUser [%d]", nId, 0, 0); }
 
     IMS_BOOL operator==(const ConfUser& objRhs) const
     {

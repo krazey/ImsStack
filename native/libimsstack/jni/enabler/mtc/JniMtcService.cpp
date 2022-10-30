@@ -15,16 +15,15 @@
  */
 
 #define IMS_STL_USE
-#include "ServiceTrace.h"
-#include "ImsProcess.h"
 #include "EnablerUtils.h"
-
-#include "IuMtcService.h"
+#include "IJniEnablerThread.h"
 #include "IMtcService.h"
+#include "ImsProcess.h"
+#include "IuMtcService.h"
+#include "JniEnablerConnector.h"
 #include "JniMtcService.h"
 #include "JniMtcServiceThread.h"
-#include "JniEnablerConnector.h"
-#include "IJniEnablerThread.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 

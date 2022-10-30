@@ -17,7 +17,7 @@
 #ifndef CONFERENCE_CONST_H_
 #define CONFERENCE_CONST_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ConferenceConst
 {

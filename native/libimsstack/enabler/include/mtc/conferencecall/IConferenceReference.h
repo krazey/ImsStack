@@ -17,7 +17,7 @@
 #ifndef INTERFACE_CONFERENCE_REFERENCE_H_
 #define INTERFACE_CONFERENCE_REFERENCE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class CallConnectionIdManager;
 

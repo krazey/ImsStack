@@ -31,8 +31,8 @@
 #include "call/IMtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/block/CallCountBlockRule.h"
-#include "call/block/CallTypeBlockRule.h"
 #include "call/block/CallTrafficBlockRule.h"
+#include "call/block/CallTypeBlockRule.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/NetworkBlockRule.h"
@@ -50,7 +50,6 @@
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "ussi/UssiController.h"
 #include "ussi/UssiController.h"
 #include "utility/MessageUtil.h"
 #include <memory>
@@ -395,7 +394,7 @@ CallStateName IdleState::ContinueStartUssi()
     InitMediaSession();
 
     if (m_objContext.GetUssiController()->FormStartUssiRequest(
-            m_objContext.GetParticipantInfo().GetRemoteNumber()) == IMS_FAILURE)
+                m_objContext.GetParticipantInfo().GetRemoteNumber()) == IMS_FAILURE)
     {
         m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         return CallStateName::TERMINATING;

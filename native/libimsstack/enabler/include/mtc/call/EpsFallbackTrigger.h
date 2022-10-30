@@ -17,8 +17,8 @@
 #ifndef EPS_FALLBACK_TRIGGER_H_
 #define EPS_FALLBACK_TRIGGER_H_
 
-#include "ImsTypeDef.h"
 #include "ITimer.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
 class IMtcCallContext;

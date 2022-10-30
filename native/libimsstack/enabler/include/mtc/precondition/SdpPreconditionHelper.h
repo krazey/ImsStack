@@ -17,9 +17,8 @@
 #ifndef SDP_PRECONDITION_HELPER_H_
 #define SDP_PRECONDITION_HELPER_H_
 
-#include "ISipMessage.h"
-
 #include "ISession.h"
+#include "ISipMessage.h"
 #include "media/IMediaDescriptor.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/QosStatusTable.h"

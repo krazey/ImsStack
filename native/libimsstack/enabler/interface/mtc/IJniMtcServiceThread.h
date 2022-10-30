@@ -16,8 +16,8 @@
 #ifndef INTERFACE_JNI_MTC_SERVICE_THREAD_H_
 #define INTERFACE_JNI_MTC_SERVICE_THREAD_H_
 
-#include "ImsTypeDef.h"
 #include "IJniEnablerThread.h"
+#include "ImsTypeDef.h"
 
 class IJniMtcServiceThread : public IJniEnablerThread
 {

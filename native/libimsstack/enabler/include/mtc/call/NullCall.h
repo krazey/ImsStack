@@ -18,7 +18,7 @@
 #define NULL_CALL_H_
 
 #include "ImsList.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 

@@ -19,9 +19,9 @@
 
 #include "AString.h"
 #include "IReferenceListener.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/IConferenceReference.h"
-#include "MtcDef.h"
 
 class CallConnectionIdManager;
 class IReference;

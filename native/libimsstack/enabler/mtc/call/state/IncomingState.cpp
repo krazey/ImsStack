@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
+#include "IMessage.h"
+#include "ISession.h"
+#include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/IncomingState.h"
 #include "call/termination/TerminationHandler.h"
-#include "helper/MtcTimerWrapper.h"
-#include "IMessage.h"
-#include "ISession.h"
-#include "ServiceTrace.h"
-#include "SipStatusCode.h"
-#include "utility/MessageUtil.h"
 #include "helper/MtcSupplementaryService.h"
-#include "precondition/QosDef.h"
-#include "precondition/IMtcPreconditionManager.h"
+#include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
+#include "precondition/IMtcPreconditionManager.h"
+#include "precondition/QosDef.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -265,8 +265,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
     IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
     if (eNextAction == QosLossPolicy::RELEASE)
     {
-        return RejectIncomingAndToTerminating(
-                CallReasonInfo(CODE_REJECT_QOS_FAILURE));
+        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_QOS_FAILURE));
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)

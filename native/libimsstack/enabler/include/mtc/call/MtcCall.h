@@ -17,12 +17,12 @@
 #ifndef MTC_CALL_H_
 #define MTC_CALL_H_
 
-#include "ImsList.h"
-#include "ImsTypeDef.h"
 #include "IMtcContext.h"
 #include "ISessionListener.h"
 #include "ISipClientConnectionListener.h"
 #include "ISipErrorListener.h"
+#include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "base/IRefreshListener.h"
 #include "call/IMtcCall.h"
@@ -31,12 +31,12 @@
 #include "call/MtcPendingOperationHolder.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
+#include "call/UpdatingInfo.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/message/MtcMessageMediator.h"
 #include "call/state/CallStateFactory.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallStateMachine.h"
-#include "call/UpdatingInfo.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/IMtcTimerListener.h"
 #include "helper/ISrvccStateListener.h"

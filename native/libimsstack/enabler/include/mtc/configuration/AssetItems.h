@@ -17,8 +17,8 @@
 #ifndef ASSET_ITEMS_H_
 #define ASSET_ITEMS_H_
 
-#include "IMSTypeDef.h"
 #include "AString.h"
+#include "ImsTypeDef.h"
 #include "ImsVector.h"
 
 struct AssetItems

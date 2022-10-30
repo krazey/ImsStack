@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-#include "ImsList.h"
-#include "IMSTypeDef.h"
 #include "IMtcContext.h"
+#include "ImsList.h"
+#include "ImsTypeDef.h"
+#include "ServiceTrace.h"
+#include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
 #include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/IConferenceController.h"
-#include "call/IMtcCall.h"
-#include "call/IMtcCallManager.h"
-#include "call/IMtcCallContext.h"
 #include "helper/ICallStateProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

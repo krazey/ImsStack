@@ -27,6 +27,7 @@ class OperationAsyncRunner : public ImsActivityEx
 {
 public:
     explicit OperationAsyncRunner(IN std::function<void()> objOperation);
+
 private:
     ~OperationAsyncRunner();
 

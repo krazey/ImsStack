@@ -18,11 +18,11 @@
 #define CALL_STATE_PROXY_H_
 
 #include "CallReasonInfo.h"
+#include "IMtcCallStateListener.h"
 #include "ImsActivity.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
-#include "IMtcCallStateListener.h"
 #include "helper/ICallStateProxy.h"
 
 class IMtcCallManager;

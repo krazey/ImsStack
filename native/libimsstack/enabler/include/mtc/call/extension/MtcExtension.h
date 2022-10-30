@@ -18,7 +18,7 @@
 #define MTC_EXTENSION_H_
 
 #include "AString.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/extension/IMtcExtension.h"
 
 class IMessage;

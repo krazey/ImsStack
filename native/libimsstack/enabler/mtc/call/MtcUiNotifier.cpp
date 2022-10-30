@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+#include "IJniMtcCallThread.h"
+#include "IJniMtcServiceThread.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
-#include "IJniMtcCallThread.h"
+#include "JniEnablerConnector.h"
+#include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/MtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
-#include "ServiceTrace.h"
-#include "JniEnablerConnector.h"
-#include "IJniMtcServiceThread.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

@@ -18,7 +18,6 @@
 #define CONFERENCE_INFO_H_
 
 #include "AString.h"
-
 #include "conferencecall/ConferenceDef.h"
 
 class INode;

@@ -17,8 +17,8 @@
 #ifndef EMERGENCY_NUMBER_LIST_H_
 #define EMERGENCY_NUMBER_LIST_H_
 
-#include "ImsMap.h"
 #include "AString.h"
+#include "ImsMap.h"
 
 class AStringBuffer;
 

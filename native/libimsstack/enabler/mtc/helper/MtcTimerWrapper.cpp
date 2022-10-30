@@ -16,7 +16,6 @@
 
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
-
 #include "helper/IMtcTimerListener.h"
 #include "helper/MtcTimerWrapper.h"
 

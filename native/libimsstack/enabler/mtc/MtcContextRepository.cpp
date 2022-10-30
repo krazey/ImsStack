@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "IMSTypeDef.h"
-#include "ServiceThread.h"
 #include "IMtcContext.h"
+#include "ImsTypeDef.h"
 #include "MtcContextRepository.h"
+#include "ServiceThread.h"
 
 MtcContextRepository* MtcContextRepository::s_pThis = IMS_NULL;
 

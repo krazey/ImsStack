@@ -19,8 +19,8 @@
 #include "ect/BlindTransferController.h"
 #include "ect/ConsultativeTransferController.h"
 #include "ect/EctController.h"
-#include "ect/EctManager.h"
 #include "ect/EctFactory.h"
+#include "ect/EctManager.h"
 #include "ect/IEctManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

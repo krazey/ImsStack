@@ -18,8 +18,8 @@
 #define CONFERENCE_SUBSCRIPTION_H_
 
 #include "ISubscriptionListener.h"
-#include "conferencecall/IConferenceSubscriptionListener.h"
 #include "call/IMtcCall.h"
+#include "conferencecall/IConferenceSubscriptionListener.h"
 
 class ConferenceFactory;
 class ConferenceParticipantList;

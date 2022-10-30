@@ -18,9 +18,9 @@
 #define JNI_MTC_SERVICE_THREAD_H_
 
 #include "BaseServiceThread.h"
-#include "MtcDef.h"
-#include "ImsMap.h"
 #include "IJniMtcServiceThread.h"
+#include "ImsMap.h"
+#include "MtcDef.h"
 
 class JniMtcServiceThread final : public BaseServiceThread, public IJniMtcServiceThread
 {

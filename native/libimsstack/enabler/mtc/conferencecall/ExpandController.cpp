@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+#include "IMtcContext.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
-#include "call/IMtcCallManager.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
 #include "call/ParticipantInfo.h"
-#include "conferencecall/ExpandController.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ExpandController.h"
 #include "conferencecall/IConferenceReference.h"
-#include "IMtcContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -205,8 +205,7 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
 
     if (nReferType == REFER_INVITE_SINGLE)  // SKT
     {
-        m_objOperationQueue.CreateNPutWithUsers(
-                CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
+        m_objOperationQueue.CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         m_objOperationQueue.CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE,
                 m_objParticipantList.GetConfUsers().GetAt(nStartIndex));
@@ -393,8 +392,8 @@ void ExpandController::ProcessJoinAfterExpand()
     // Invite other participants when conference session is expanded.
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyJoinFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1),
-                m_objParticipantList);
+        m_objNotifier.NotifyJoinFailed(
+                CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1), m_objParticipantList);
     }
 
     SetState(STATE_JOINING);

@@ -17,7 +17,7 @@
 #ifndef CONST_SOS_URN_H_
 #define CONST_SOS_URN_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ConstSosUrn
 {

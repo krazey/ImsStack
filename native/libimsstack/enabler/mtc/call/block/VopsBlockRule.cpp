@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "ImsEventDef.h"
-#include "IMtcService.h"
 #include "IMtcImsEventReceiver.h"
+#include "IMtcService.h"
+#include "ImsEventDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/block/VopsBlockRule.h"

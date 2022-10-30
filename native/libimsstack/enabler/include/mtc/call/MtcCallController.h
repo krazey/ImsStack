@@ -17,12 +17,12 @@
 #ifndef MTC_CALL_CONTROLLER_H_
 #define MTC_CALL_CONTROLLER_H_
 
+#include "IMtcCallController.h"
+#include "IMtcService.h"
 #include "ImsTypeDef.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "call/IMtcCall.h"
-#include "IMtcCallController.h"
-#include "IMtcService.h"
 #include "call/traffic/MtcCallTrafficChecker.h"
 
 class IMtcCallManager;

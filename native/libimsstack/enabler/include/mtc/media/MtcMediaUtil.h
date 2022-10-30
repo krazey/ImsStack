@@ -17,9 +17,9 @@
 #ifndef MTC_MEDIA_UTIL_H_
 #define MTC_MEDIA_UTIL_H_
 
-#include "ImsTypeDef.h"
 #include "IMtcService.h"
 #include "INetworkWatcher.h"
+#include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "call/IMtcCall.h"
 

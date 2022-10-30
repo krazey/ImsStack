@@ -15,8 +15,8 @@
  */
 
 #include "ServiceTrace.h"
-#include "precondition/QosTimer.h"
 #include "precondition/QosStringDef.h"
+#include "precondition/QosTimer.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

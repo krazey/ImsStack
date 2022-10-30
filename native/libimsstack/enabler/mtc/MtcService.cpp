@@ -22,16 +22,16 @@
 #include "ICoreService.h"
 #include "IImsAos.h"
 #include "IIpcan.h"
-#include "ImsAos.h"
-#include "ImsAosParameter.h"
-#include "ImsCore.h"
-#include "ImsServiceConfig.h"
+#include "IJniMtcServiceThread.h"
 #include "IMtcCallController.h"
 #include "IMtcService.h"
 #include "IServiceFilterCriteria.h"
 #include "ISipRoutingRejectNotifier.h"
+#include "ImsAos.h"
+#include "ImsAosParameter.h"
+#include "ImsCore.h"
+#include "ImsServiceConfig.h"
 #include "JniEnablerConnector.h"
-#include "IJniMtcServiceThread.h"
 #include "MtcEmergencyServiceManager.h"
 #include "MtcService.h"
 #include "ServiceConfig.h"
@@ -41,9 +41,9 @@
 #include "call/traffic/IMtcCallTrafficChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosConnector.h"
+#include "helper/MtcAosEventHandler.h"
 #include "helper/MtcCapabilityQueryHandler.h"
 #include "helper/SrvccStateManager.h"
-#include "helper/MtcAosEventHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -251,7 +251,7 @@ void MtcService::Init()
     AttachAosInterface();
 
     if (m_objContext.GetConfigurationProxy().Is(Feature::
-            USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION))
+                        USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION))
     {
         m_pRoutingRejectHandler = new MtcRoutingRejectHandler(m_objContext,
                 *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(

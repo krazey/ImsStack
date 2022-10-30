@@ -17,7 +17,7 @@
 #ifndef INTERFACE_MTC_IMS_EVENT_RECEIVER_H_
 #define INTERFACE_MTC_IMS_EVENT_RECEIVER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IMtcImsEventListener;
 

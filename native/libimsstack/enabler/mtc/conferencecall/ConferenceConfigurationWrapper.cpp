@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "CarrierConfig.h"
+#include "IMtcContext.h"
+#include "MtcContextRepository.h"
+#include "MtcDef.h"
+#include "ServiceTrace.h"
+#include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
-#include "MtcDef.h"
-#include "MtcContextRepository.h"
-#include "IMtcContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -69,7 +69,7 @@ PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsPaidPreferred()
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsReUseReferToUri()
 {
     return MtcContextRepository::GetContext()->GetConfigurationProxy().GetInt(
-            Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE) ==
+                   Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE) ==
             CarrierConfig::ImsVoice::CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE;
 }
 

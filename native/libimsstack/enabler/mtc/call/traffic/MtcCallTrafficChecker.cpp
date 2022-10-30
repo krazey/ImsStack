@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "IIpcan.h"
 #include "IImsRadio.h"
+#include "IIpcan.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
 #include "INetworkWatcher.h"

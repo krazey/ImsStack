@@ -18,9 +18,9 @@
 #define ALERTING_STATE_H_
 
 #include "ImsList.h"
-#include "IMSTypeDef.h"
-#include "call/state/MtcCallState.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "call/state/MtcCallState.h"
 
 class AString;
 class IMessage;

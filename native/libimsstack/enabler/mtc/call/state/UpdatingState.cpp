@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
+#include "IMessage.h"
+#include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
+#include "call/UpdatingInfo.h"
 #include "call/state/UpdatingState.h"
 #include "call/termination/TerminationHandler.h"
 #include "call/termination/UpdateErrorHandler.h"
-#include "call/UpdatingInfo.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
-#include "IMessage.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "utility/MessageUtil.h"
-#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

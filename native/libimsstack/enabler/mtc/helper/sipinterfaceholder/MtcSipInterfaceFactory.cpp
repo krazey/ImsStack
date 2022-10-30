@@ -15,10 +15,9 @@
  */
 
 #include "ServiceTrace.h"
-
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
-#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
+#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

@@ -17,11 +17,11 @@
 #ifndef INTERFACE_MTC_CALL_MANAGER_H_
 #define INTERFACE_MTC_CALL_MANAGER_H_
 
-#include "ImsList.h"
-#include "IMSTypeDef.h"
-#include "call/IMtcCall.h"
 #include "IMtcService.h"
+#include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 
 // Holds `IMtcCall` objects and provides methods to create, delete and find them.
 class IMtcCallManager

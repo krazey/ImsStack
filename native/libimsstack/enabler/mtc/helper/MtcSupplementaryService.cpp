@@ -25,7 +25,6 @@
 #include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
-
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"

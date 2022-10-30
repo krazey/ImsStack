@@ -19,7 +19,7 @@
 
 #include "AString.h"
 #include "ICarrierConfigListener.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "configuration/AssetItems.h"
 #include "configuration/CarrierConfigItems.h"
 #include "configuration/ConfigDef.h"

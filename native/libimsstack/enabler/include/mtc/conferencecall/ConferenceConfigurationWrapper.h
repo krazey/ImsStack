@@ -17,7 +17,7 @@
 #ifndef CONFERENCE_CONFIGURATION_WRAPPER_H_
 #define CONFERENCE_CONFIGURATION_WRAPPER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 // TODO: this class will be deprecated and replaced by the MtcConfigurationProxy
 class ConferenceConfigurationWrapper

@@ -53,8 +53,8 @@ void JniMtcServiceThread::OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 
 }
 
 PUBLIC
-void JniMtcServiceThread::OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason,
-        IN IMS_SINT32 eServiceType)
+void JniMtcServiceThread::OnEmergencyServiceChanged(
+        IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason, IN IMS_SINT32 eServiceType)
 {
     IMS_TRACE_D("OnEmergencyServiceChanged [%d]", eStatus, 0, 0);
     Parcel objParcel;
@@ -74,7 +74,7 @@ void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_ULONG nCallKey)
     objParcel.writeInt32(IuMtcService::PRE_INCOMING_CALL);
     objParcel.writeInt64(nCallKey);
 
-    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr())); // TODO: Log.
+    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr()));  // TODO: Log.
 
     SendData2Java(objParcel);
 }

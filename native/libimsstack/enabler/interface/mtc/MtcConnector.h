@@ -17,7 +17,7 @@
 #ifndef MTC_CONNECTOR_H_
 #define MTC_CONNECTOR_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IMtcCallStateListener;
 

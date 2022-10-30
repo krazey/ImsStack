@@ -19,12 +19,12 @@
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/MtcCallState.h"
-#include "MtcDef.h"
 #include "precondition/QosDef.h"
-#include <memory>
 #include <functional>
+#include <memory>
 
 class AString;
 class IMessage;

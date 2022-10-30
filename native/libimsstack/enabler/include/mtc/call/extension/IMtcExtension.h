@@ -17,7 +17,7 @@
 #ifndef INTERFACE_MTC_EXTENSION_H_
 #define INTERFACE_MTC_EXTENSION_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/message/IMtcMessageHandler.h"
 
 class AString;
