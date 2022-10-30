@@ -17,14 +17,14 @@
 #ifndef MOCK_ECT_REFERENCE_H_
 #define MOCK_ECT_REFERENCE_H_
 
-#include <gmock/gmock.h>
 #include "AString.h"
 #include "call/IMtcCall.h"
 #include "ect/EctReference.h"
+#include <gmock/gmock.h>
 
 class IEctReferenceListener;
 
-class MockEctReference: public EctReference
+class MockEctReference : public EctReference
 {
 public:
     explicit MockEctReference(IN IMtcContext& objContext, IN CallKey nTransfereeKey,

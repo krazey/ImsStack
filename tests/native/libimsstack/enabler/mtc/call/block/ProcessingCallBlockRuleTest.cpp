@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -40,8 +40,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         objEmergencyCallInfo.bEmergency = IMS_TRUE;
         ON_CALL(objEmergencyCallContext, GetCallInfo)
@@ -65,10 +64,8 @@ protected:
     {
         MockIMtcCall* pCall = new MockIMtcCall();
 
-        ON_CALL(*pCall, GetCallContext)
-                .WillByDefault(ReturnRef(objContext));
-        ON_CALL(*pCall, GetState)
-                .WillByDefault(Return(eState));
+        ON_CALL(*pCall, GetCallContext).WillByDefault(ReturnRef(objContext));
+        ON_CALL(*pCall, GetState).WillByDefault(Return(eState));
 
         return pCall;
     }
@@ -77,8 +74,7 @@ protected:
     {
         MockIMtcCall* pCall = new MockIMtcCall();
 
-        ON_CALL(*pCall, GetCallContext)
-                .WillByDefault(ReturnRef(objEmergencyCallContext));
+        ON_CALL(*pCall, GetCallContext).WillByDefault(ReturnRef(objEmergencyCallContext));
 
         return pCall;
     }
@@ -87,8 +83,7 @@ protected:
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfIdleCallExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -99,8 +94,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfIdleCallExists)
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfIncomingCallExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::INCOMING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -111,8 +105,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfIncomingCallExists)
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfAlertingCallExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ALERTING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -123,8 +116,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfAlertingCallExists)
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfOutgoingCallExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::OUTGOING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -135,8 +127,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfOutgoingCallExists)
 TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedIfUpdatingCallExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -149,8 +140,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMoIfEmergencyCallExist
     objCallInfo.ePeerType = PeerType::MO;
 
     lstOtherCalls.Append(CreateMockIMtcCallEmergency());
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -163,8 +153,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsBlockedForMtIfEmergencyCallExist
     objCallInfo.ePeerType = PeerType::MT;
 
     lstOtherCalls.Append(CreateMockIMtcCallEmergency());
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -176,8 +165,7 @@ TEST_F(ProcessingCallBlockRuleTest, CheckReturnsUnblockedIfNoProcessingCallExist
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ESTABLISHED));
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::TERMINATING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 

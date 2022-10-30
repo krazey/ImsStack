@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "MtcApp.h"
-#include "IMtcService.h"
-#include "ect/IEctManager.h"
-#include "MtcEmergencyServiceManager.h"
-#include "IMtcImsEventReceiver.h"
-#include "call/IMtcCallManager.h"
-#include "helper/ICallStateProxy.h"
-#include "helper/OperationAsyncRunner.h"
-#include "dialingplan/IMtcDialingPlan.h"
 #include "IMtcCallController.h"
+#include "IMtcImsEventReceiver.h"
+#include "IMtcService.h"
+#include "MtcApp.h"
+#include "MtcEmergencyServiceManager.h"
+#include "ServiceUtil.h"
+#include "call/IMtcCallManager.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
 #include "conferencecall/IConferenceManager.h"
 #include "configuration/MtcConfigurationManager.h"
-#include "ServiceUtil.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
+#include "dialingplan/IMtcDialingPlan.h"
+#include "ect/IEctManager.h"
+#include "helper/ICallStateProxy.h"
+#include "helper/OperationAsyncRunner.h"
 #include "utility/IMessageUtils.h"
+#include <gtest/gtest.h>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
@@ -205,14 +205,14 @@ TEST_F(MtcAppTest, GetConferenceManagerAfterConstructor)
 
 TEST_F(MtcAppTest, GetAsyncRunnerAfterConstructor)
 {
-
-    OperationAsyncRunner* pRunner = pMtcApp->GetAsyncRunner([&]()
+    OperationAsyncRunner* pRunner = pMtcApp->GetAsyncRunner(
+            [&]()
             {
                 // do nothing
             });
     ASSERT_NE(pRunner, nullptr);
     ImsMessage objMessage(0, 0, 0);
-    pRunner->OnMessage(objMessage); // to delete pRunner
+    pRunner->OnMessage(objMessage);  // to delete pRunner
 }
 
 TEST_F(MtcAppTest, GetMessageUtilsAfterConstructor)
@@ -224,7 +224,7 @@ TEST_F(MtcAppTest, GetMessageUtilsAfterConstructor)
 TEST_F(MtcAppTest, IsWifiTestModeReturnsSameValueOfUtilService)
 {
     IMS_BOOL bWifiTestMode = UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
-            ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1;
+                                     ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1;
     EXPECT_EQ(bWifiTestMode, pMtcApp->IsWifiTestMode());
 }
 

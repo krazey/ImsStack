@@ -17,8 +17,8 @@
 #ifndef MOCK_I_CONFERENCE_OPERATION_QUEUE_LISTENER_H_
 #define MOCK_I_CONFERENCE_OPERATION_QUEUE_LISTENER_H_
 
-#include <gmock/gmock.h>
 #include "conferencecall/IConferenceOperationQueueListener.h"
+#include <gmock/gmock.h>
 
 class MockIConferenceOperationQueueListener : public IConferenceOperationQueueListener
 {

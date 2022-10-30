@@ -17,9 +17,9 @@
 #ifndef MOCK_I_SRVCC_STATE_LISTENER_
 #define MOCK_I_SRVCC_STATE_LISTENER_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "helper/ISrvccStateListener.h"
+#include <gmock/gmock.h>
 
 class MockISrvccStateListener : public ISrvccStateListener
 {

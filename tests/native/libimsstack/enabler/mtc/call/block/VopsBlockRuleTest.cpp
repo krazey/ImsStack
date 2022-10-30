@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include "ImsEventDef.h"
 #include "IMtcImsEventReceiver.h"
+#include "ImsEventDef.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
 #include "call/MockIMtcCallContext.h"
-#include "call/block/VopsBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
+#include "call/block/VopsBlockRule.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -40,27 +40,20 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetService)
-                .WillByDefault(ReturnRef(objService));
-        ON_CALL(objContext, GetImsEventReceiver)
-                .WillByDefault(ReturnRef(objImsEventReceiver));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
 
         pBlockRule = new VopsBlockRule(objContext);
     }
 
-    virtual void TearDown() override
-    {
-        delete pBlockRule;
-    }
+    virtual void TearDown() override { delete pBlockRule; }
 };
 
 TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedForWfc)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
-            .Times(0);
+    EXPECT_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE)).Times(0);
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -69,8 +62,7 @@ TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedForWfc)
 
 TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedIfVopsSupported)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_SUPPORTED));
@@ -82,8 +74,7 @@ TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedIfVopsSupported)
 
 TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedIfVopsUnknown)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMtcImsEventReceiver::UNKNOWN_VALUE));
@@ -95,8 +86,7 @@ TEST_F(VopsBlockRuleTest, CheckReturnsUnblockedIfVopsUnknown)
 
 TEST_F(VopsBlockRuleTest, CheckReturnsBlockedIfVopsNotSupported)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE))
             .WillByDefault(Return(IMS_VOICE_OVER_PS_NOT_SUPPORTED));

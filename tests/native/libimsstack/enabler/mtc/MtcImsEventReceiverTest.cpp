@@ -23,8 +23,7 @@
 const ImsEvent SUPPORTED_EVENT = IMS_EVENT_IMS_VOICE_OVER_PS_STATE;
 const IMS_SINT32 SLOT_ID = 0;
 
-class TestImsEventListener
-        : public IMtcImsEventListener
+class TestImsEventListener : public IMtcImsEventListener
 {
 public:
     virtual ~TestImsEventListener() {}

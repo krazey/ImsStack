@@ -17,11 +17,11 @@
 #ifndef MOCK_I_MTC_CALL_CONTEXT_H_
 #define MOCK_I_MTC_CALL_CONTEXT_H_
 
-#include <gmock/gmock.h>
-#include "ImsTypeDef.h"
 #include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "JniCallInfo.h"
 #include "call/IMtcCallContext.h"
+#include <gmock/gmock.h>
 #include <functional>
 
 class EpsFallbackTrigger;
@@ -69,7 +69,7 @@ public:
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
-    MOCK_METHOD(IMtcSession*, CreateSession, (IN ISession * piSession), (override));
+    MOCK_METHOD(IMtcSession*, CreateSession, (IN ISession* piSession), (override));
     MOCK_METHOD(IMtcSession*, CreateSession, (), (override));
     MOCK_METHOD(IMtcBlockChecker*, CreateBlockChecker, (IN const ImsList<IMtcBlockRule*>& lstRules),
             (override));

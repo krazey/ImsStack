@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "helper/SrvccStateManager.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockISrvccStateListener.h"
+#include "helper/SrvccStateManager.h"
+#include <gtest/gtest.h>
 
 namespace android
 {
@@ -27,17 +27,10 @@ class SrvccStateManagerTest : public ::testing::Test
 public:
     SrvccStateManager* pManager;
 
-
 protected:
-    virtual void SetUp() override
-    {
-        pManager = new SrvccStateManager();
-    }
+    virtual void SetUp() override { pManager = new SrvccStateManager(); }
 
-    virtual void TearDown() override
-    {
-        delete pManager;
-    }
+    virtual void TearDown() override { delete pManager; }
 };
 
 TEST_F(SrvccStateManagerTest, GetStateReturnsIdleInitially)
@@ -67,8 +60,7 @@ TEST_F(SrvccStateManagerTest, SetStateNotifiesListener)
 {
     SrvccState eAnyState = SrvccState::STARTED;
     MockISrvccStateListener objListener;
-    EXPECT_CALL(objListener, OnSrvccStateUpdated(eAnyState))
-            .Times(1);
+    EXPECT_CALL(objListener, OnSrvccStateUpdated(eAnyState)).Times(1);
 
     pManager->AddListener(&objListener);
 
@@ -79,8 +71,7 @@ TEST_F(SrvccStateManagerTest, SetStateDoesNotNotifyListenerAfterRemoveListener)
 {
     SrvccState eAnyState = SrvccState::STARTED;
     MockISrvccStateListener objListener;
-    EXPECT_CALL(objListener, OnSrvccStateUpdated(eAnyState))
-            .Times(0);
+    EXPECT_CALL(objListener, OnSrvccStateUpdated(eAnyState)).Times(0);
 
     pManager->AddListener(&objListener);
     pManager->RemoveListener(&objListener);
@@ -88,4 +79,4 @@ TEST_F(SrvccStateManagerTest, SetStateDoesNotNotifyListenerAfterRemoveListener)
     pManager->UpdateSrvccState(eAnyState);
 }
 
-} // namespace android
+}  // namespace android

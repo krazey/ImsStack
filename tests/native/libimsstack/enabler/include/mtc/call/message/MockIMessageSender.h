@@ -17,10 +17,10 @@
 #ifndef MOCK_I_MESSAGE_SENDER_H_
 #define MOCK_I_MESSAGE_SENDER_H_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
+#include <gmock/gmock.h>
 
 struct CallReasonInfo;
 

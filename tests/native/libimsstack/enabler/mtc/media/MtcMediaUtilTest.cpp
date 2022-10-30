@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "ImsTypeDef.h"
 #include "IMtcService.h"
 #include "INetworkWatcher.h"
+#include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MockIMtcService.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "media/MtcMediaUtil.h"
+#include <gtest/gtest.h>
 
 using ::testing::AnyNumber;
 using ::testing::Return;

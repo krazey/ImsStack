@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "conferencecall/MergeController.h"
+#include "MockIMtcContext.h"
+#include "MockIMtcService.h"
+#include "MockITimer.h"
+#include "MtcContextRepository.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
+#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceOperationQueue.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
-#include "call/MockIMtcCallManager.h"
-#include "call/IMtcCall.h"
-#include "MockIMtcContext.h"
-#include "MockIMtcService.h"
-#include "call/MockIMtcCall.h"
-#include "call/MockIMtcCallContext.h"
-#include "configuration/MtcConfigurationProxy.h"
-#include "MtcContextRepository.h"
-#include "conferencecall/MockConferenceOperationQueue.h"
+#include "conferencecall/MergeController.h"
 #include "conferencecall/MockCallConnectionIdManager.h"
-#include "conferencecall/MockConferenceFactory.h"
-#include "conferencecall/MockConferenceParticipantList.h"
 #include "conferencecall/MockConferenceEventNotifier.h"
+#include "conferencecall/MockConferenceFactory.h"
+#include "conferencecall/MockConferenceOperationQueue.h"
+#include "conferencecall/MockConferenceParticipantList.h"
+#include "conferencecall/MockConferenceSubscription.h"
 #include "conferencecall/MockIConferenceControllerListener.h"
 #include "conferencecall/MockIConferenceReference.h"
 #include "conferencecall/MockIConferenceSubscriptionListener.h"
-#include "conferencecall/MockConferenceSubscription.h"
 #include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "core/MockICoreService.h"
+#include "helper/MockICallStateProxy.h"
+#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
-#include "helper/MockICallStateProxy.h"
-#include "core/MockICoreService.h"
-#include "MockITimer.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -243,11 +243,9 @@ TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithTwoVtCal
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
 
     MockIMtcCall objCall1;
-    ON_CALL(objCall1, GetCallType)
-            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
     MockIMtcCall objCall2;
-    ON_CALL(objCall2, GetCallType)
-            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VT));
 
     EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
             .WillOnce(Return(&objCall1))
@@ -263,7 +261,7 @@ TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithTwoVtCal
 TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithConfigVoip)
 {
     ON_CALL(*pMockConfigurationManager, GetCallTypeAfterAudioAndVideoCallMerged)
-            .WillByDefault(Return(1)); // VOIP
+            .WillByDefault(Return(1));  // VOIP
 
     ConferenceOperationQueue::ConferenceOperation* pOperation =
             new ConferenceOperationQueue::ConferenceOperation(
@@ -277,11 +275,9 @@ TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithConfigVo
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
 
     MockIMtcCall objCall1;
-    ON_CALL(objCall1, GetCallType)
-            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
     MockIMtcCall objCall2;
-    ON_CALL(objCall2, GetCallType)
-            .WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VOIP));
 
     EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
             .WillOnce(Return(&objCall1))
@@ -297,7 +293,7 @@ TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithConfigVo
 TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithConfigVt)
 {
     ON_CALL(*pMockConfigurationManager, GetCallTypeAfterAudioAndVideoCallMerged)
-            .WillByDefault(Return(2)); // VT
+            .WillByDefault(Return(2));  // VT
 
     ConferenceOperationQueue::ConferenceOperation* pOperation =
             new ConferenceOperationQueue::ConferenceOperation(
@@ -311,11 +307,9 @@ TEST_F(MergeControllerTest, OnOperationReadyWhenNextCreateConferenceWithConfigVt
     ON_CALL(*pMockQueue, GetNextOperation).WillByDefault(Return(pOperation));
 
     MockIMtcCall objCall1;
-    ON_CALL(objCall1, GetCallType)
-            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objCall1, GetCallType).WillByDefault(Return(CallType::VT));
     MockIMtcCall objCall2;
-    ON_CALL(objCall2, GetCallType)
-            .WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objCall2, GetCallType).WillByDefault(Return(CallType::VOIP));
 
     EXPECT_CALL(objMockCallManager, GetCallByCallKey(_))
             .WillOnce(Return(&objCall1))

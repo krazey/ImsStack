@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
@@ -29,6 +28,7 @@
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
 #include "sipcore/SipAddress.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Ref;
@@ -42,24 +42,16 @@ public:
     ParticipantInfo* pParticipantInfo;
 
 protected:
-    virtual void SetUp() override
-    {
-        pParticipantInfo = new ParticipantInfo(objContext);
-    }
+    virtual void SetUp() override { pParticipantInfo = new ParticipantInfo(objContext); }
 
-    virtual void TearDown() override
-    {
-        delete pParticipantInfo;
-    }
+    virtual void TearDown() override { delete pParticipantInfo; }
 };
 
 TEST_F(ParticipantInfoTest, GetLocalNumberReturnsNullIfCoreServiceIsNull)
 {
     MockIMtcService objService;
-    ON_CALL(objService, GetICoreService)
-            .WillByDefault(Return(nullptr));
-    ON_CALL(objContext, GetService)
-            .WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, GetICoreService).WillByDefault(Return(nullptr));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
     EXPECT_TRUE(pParticipantInfo->GetLocalNumber().IsNull());
 }
@@ -71,14 +63,11 @@ TEST_F(ParticipantInfoTest, GetLocalNumberReturnsNumber)
     objSipAddress.SetUser(strUserPart);
 
     MockICoreService objCoreService;
-    ON_CALL(objCoreService, GetAuthorizedUserId)
-            .WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objCoreService, GetAuthorizedUserId).WillByDefault(ReturnRef(objSipAddress));
 
     MockIMtcService objService;
-    ON_CALL(objService, GetICoreService)
-            .WillByDefault(Return(&objCoreService));
-    ON_CALL(objContext, GetService)
-            .WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
     EXPECT_EQ(strUserPart, pParticipantInfo->GetLocalNumber());
 }
@@ -86,10 +75,8 @@ TEST_F(ParticipantInfoTest, GetLocalNumberReturnsNumber)
 TEST_F(ParticipantInfoTest, GetLocalUriReturnsNullIfNotEmergency)
 {
     MockIMtcService objService;
-    ON_CALL(objService, IsEmergency)
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objContext, GetService)
-            .WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
     EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
 }
@@ -97,12 +84,9 @@ TEST_F(ParticipantInfoTest, GetLocalUriReturnsNullIfNotEmergency)
 TEST_F(ParticipantInfoTest, GetLocalUriReturnsNullIfEmergencyAndAosConnectorIsNull)
 {
     MockIMtcService objService;
-    ON_CALL(objService, IsEmergency)
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(nullptr));
-    ON_CALL(objContext, GetService)
-            .WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(nullptr));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
     EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
 }
@@ -114,12 +98,9 @@ TEST_F(ParticipantInfoTest, GetLocalUriReturnsNullIfEmergencyNormalRegistered)
             .WillByDefault(Return(IImsAosInfo::REG_MODE_NORMAL));
 
     MockIMtcService objService;
-    ON_CALL(objService, IsEmergency)
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(&objAosConnector));
-    ON_CALL(objContext, GetService)
-            .WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
     EXPECT_TRUE(pParticipantInfo->GetLocalUri().IsNull());
 }
@@ -131,12 +112,9 @@ TEST_F(ParticipantInfoTest, GetLocalUriReturnsAnonymousIfEmergencyNoUiccRegister
             .WillByDefault(Return(IImsAosInfo::REG_MODE_NOUICC));
 
     MockIMtcService objService;
-    ON_CALL(objService, IsEmergency)
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(&objAosConnector));
-    ON_CALL(objContext, GetService)
-            .WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
     AString objAnonymousUri("Anonymous <sip:anonymous@anonymous.invalid>");
     EXPECT_EQ(objAnonymousUri, pParticipantInfo->GetLocalUri());
@@ -149,12 +127,9 @@ TEST_F(ParticipantInfoTest, GetLocalUriReturnsAnonymousIfEmergencyAdminRegistere
             .WillByDefault(Return(IImsAosInfo::REG_MODE_ADMIN));
 
     MockIMtcService objService;
-    ON_CALL(objService, IsEmergency)
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(&objAosConnector));
-    ON_CALL(objContext, GetService)
-            .WillByDefault(ReturnRef(objService));
+    ON_CALL(objService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
     AString objAnonymousUri("Anonymous <sip:anonymous@anonymous.invalid>");
     EXPECT_EQ(objAnonymousUri, pParticipantInfo->GetLocalUri());
@@ -171,12 +146,10 @@ TEST_F(ParticipantInfoTest, GetRemoteUriReturnsFromDialingPlanForConference)
 
     CallInfo objCallInfo;
     objCallInfo.bConference = IMS_TRUE;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MockIMtcDialingPlan objDialingPlan;
-    ON_CALL(objContext, GetDialingPlan)
-            .WillByDefault(ReturnRef(objDialingPlan));
+    ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
     EXPECT_CALL(objDialingPlan, GetToUri(_, Ref(objCallInfo), _))
             .Times(1)
@@ -191,17 +164,14 @@ TEST_F(ParticipantInfoTest, GetRemoteUriReturnsFromSupplementaryService)
 
     CallInfo objCallInfo;
     objCallInfo.bConference = IMS_FALSE;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
     objSupplementaryService.Add(SuppType::TARGET_URI, strUri);
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_EQ(strUri, pParticipantInfo->GetRemoteUri());
 }
@@ -210,16 +180,13 @@ TEST_F(ParticipantInfoTest, GetRemoteUriReturnsInitialRemoteUri)
 {
     CallInfo objCallInfo;
     objCallInfo.bConference = IMS_FALSE;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_EQ(AString::ConstNull(), pParticipantInfo->GetRemoteUri());
 }
@@ -229,13 +196,11 @@ TEST_F(ParticipantInfoTest, GetRemoteDisplayNameReturnsFromSupplementaryService)
     const AString strCnap("some_cnap");
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
     objSupplementaryService.Add(SuppType::CNAP, strCnap);
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_EQ(strCnap, pParticipantInfo->GetRemoteDisplayName());
 }
@@ -243,12 +208,10 @@ TEST_F(ParticipantInfoTest, GetRemoteDisplayNameReturnsFromSupplementaryService)
 TEST_F(ParticipantInfoTest, GetRemoteDisplayNameReturnsInitialRemoteNumber)
 {
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_EQ(AString::ConstNull(), pParticipantInfo->GetRemoteDisplayName());
 }
@@ -258,13 +221,11 @@ TEST_F(ParticipantInfoTest, GetOipTypeReturnsFromSupplementaryService)
     const OipType eOipType = OipType::IDENTITY;
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
     objSupplementaryService.Add(SuppType::CALLER_ID, static_cast<IMS_SINT32>(eOipType));
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_EQ(eOipType, pParticipantInfo->GetOipType());
 }
@@ -272,12 +233,10 @@ TEST_F(ParticipantInfoTest, GetOipTypeReturnsFromSupplementaryService)
 TEST_F(ParticipantInfoTest, GetOipTypeReturnsNone)
 {
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_EQ(OipType::NONE, pParticipantInfo->GetOipType());
 }
@@ -288,23 +247,18 @@ TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteNumber)
     const AString strToUri = "some_uri";
 
     MockIMtcDialingPlan objDialingPlan;
-    ON_CALL(objDialingPlan, GetToUri(_, _, _))
-            .WillByDefault(Return(strToUri));
-    ON_CALL(objContext, GetDialingPlan)
-            .WillByDefault(ReturnRef(objDialingPlan));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strToUri));
+    ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
     CallInfo objCallInfo;
     objCallInfo.bConference = IMS_FALSE;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     pParticipantInfo->UpdateFromRemoteNumber(strNumber);
 
@@ -317,23 +271,18 @@ TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteUri)
     const AString strToUri = "some_uri";
 
     MockIMtcDialingPlan objDialingPlan;
-    ON_CALL(objDialingPlan, GetToUri(_, _, _))
-            .WillByDefault(Return(strToUri));
-    ON_CALL(objContext, GetDialingPlan)
-            .WillByDefault(ReturnRef(objDialingPlan));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strToUri));
+    ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
     CallInfo objCallInfo;
     objCallInfo.bConference = IMS_FALSE;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     pParticipantInfo->UpdateFromRemoteNumber(strNumber);
 

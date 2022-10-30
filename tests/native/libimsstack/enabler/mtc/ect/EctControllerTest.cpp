@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MockIMtcContext.h"
 #include "MockITimer.h"
 #include "PlatformContext.h"
@@ -28,6 +27,7 @@
 #include "ect/EctFactory.h"
 #include "ect/MockIEctControllerListener.h"
 #include "sipcore/SipStatusCode.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -70,16 +70,13 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallManager)
-                .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objCallManager, GetCallByCallKey(TRANSFEREE_KEY))
                 .WillByDefault(Return(&objTransfereeCall));
         ON_CALL(objTransfereeCall, GetCallContext)
                 .WillByDefault(ReturnRef(objTransfereeCallContext));
-        ON_CALL(objTransfereeCall, GetKey)
-                .WillByDefault(Return(TRANSFEREE_KEY));
-        ON_CALL(objTransfereeCallContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(objNotifier));
+        ON_CALL(objTransfereeCall, GetKey).WillByDefault(Return(TRANSFEREE_KEY));
+        ON_CALL(objTransfereeCallContext, GetUiNotifier).WillByDefault(ReturnRef(objNotifier));
 
         pController = new EctController(objContext, TRANSFEREE_KEY, objListener, objFactory);
     }
@@ -89,10 +86,8 @@ protected:
 
 TEST_F(EctControllerTest, OnReferenceStartedDoesNothing)
 {
-    EXPECT_CALL(objListener, OnEctCompleted)
-            .Times(0);
-    EXPECT_CALL(objTimer, KillTimer)
-            .Times(0);
+    EXPECT_CALL(objListener, OnEctCompleted).Times(0);
+    EXPECT_CALL(objTimer, KillTimer).Times(0);
 
     pController->OnReferenceStarted();
 }
@@ -127,12 +122,9 @@ TEST_F(EctControllerTest, OnReferenceUpdatedFailureNotifiesFailure)
 
 TEST_F(EctControllerTest, TimerExpiredDoesNothingBeforeStartTimer)
 {
-    EXPECT_CALL(objListener, OnEctCompleted)
-            .Times(0);
-    EXPECT_CALL(objNotifier, SendEctCompleted(_, _))
-            .Times(0);
-    EXPECT_CALL(objTimer, KillTimer)
-            .Times(0);
+    EXPECT_CALL(objListener, OnEctCompleted).Times(0);
+    EXPECT_CALL(objNotifier, SendEctCompleted(_, _)).Times(0);
+    EXPECT_CALL(objTimer, KillTimer).Times(0);
 
     pController->Timer_TimerExpired(&objTimer);
 }

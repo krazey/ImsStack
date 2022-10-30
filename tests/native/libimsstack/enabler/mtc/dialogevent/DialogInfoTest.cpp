@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "AString.h"
 #include "call/IMtcCall.h"
 #include "dialogevent/DialogInfo.h"
 #include "dialogevent/DialogInfoProxy.h"
+#include <gtest/gtest.h>
 
 const AString strNotificationBodySample1(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"

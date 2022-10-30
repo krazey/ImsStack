@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

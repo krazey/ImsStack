@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
-#include <binder/Parcel.h>
-
+#include "BaseService.h"
+#include "IuMtcService.h"
 #include "JniEnablerConnector.h"
 #include "JniMtcService.h"
 #include "MockIMtcService.h"
-#include "BaseService.h"
-#include "IuMtcService.h"
+#include <binder/Parcel.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -54,8 +53,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objMockService, NotifyJniEnablerSet)
-                .WillByDefault(Return());
+        ON_CALL(objMockService, NotifyJniEnablerSet).WillByDefault(Return());
         JniEnablerConnector::GetInstance().SetNativeEnabler(
                 SLOT_ID, EnablerType::MTC_SERVICE, &objMockService);
 
@@ -80,8 +78,7 @@ TEST_F(JniMtcServiceTest, SendDataUpdateSrvccState)
     objParcel.writeInt32(IuMtcService::SRVCC_STATE_CHANGED);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockService, UpdateSrvccState(_))
-            .Times(1);
+    EXPECT_CALL(objMockService, UpdateSrvccState(_)).Times(1);
 
     pJniService->SendData(objParcel);
 }
@@ -101,8 +98,7 @@ TEST_F(JniMtcServiceTest, SendDataOpenEmergencyService)
     objParcel.writeInt32(IuMtcService::OPEN_EMERGENCY_SERVICE);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockService, OpenEmergencyService)
-            .Times(1);
+    EXPECT_CALL(objMockService, OpenEmergencyService).Times(1);
 
     pJniService->SendData(objParcel);
 }

@@ -17,8 +17,8 @@
 #ifndef MOCK_CONFERENCE_FACTORY_H_
 #define MOCK_CONFERENCE_FACTORY_H_
 
-#include <gmock/gmock.h>
 #include "conferencecall/ConferenceFactory.h"
+#include <gmock/gmock.h>
 
 class CallConnectionIdManager;
 class ConferenceEventNotifier;
@@ -57,7 +57,7 @@ public:
     MOCK_METHOD(ConferenceParticipantList*, CreateParticipantList, (), (override));
     MOCK_METHOD(ConferenceOperationQueue*, CreateOperationQueue, (), (override));
     MOCK_METHOD(ConferenceEventNotifier*, CreateEventNotifier,
-            (IN IMtcCallContext & objConfCallContext,
+            (IN IMtcCallContext& objConfCallContext,
                     IN CallConnectionIdManager& objConnectionIdManager),
             (override));
     MOCK_METHOD(ConferenceInfoUpdater*, CreateInfoUpdater, (), (override));

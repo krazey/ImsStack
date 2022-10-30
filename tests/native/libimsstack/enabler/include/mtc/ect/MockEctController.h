@@ -17,7 +17,6 @@
 #ifndef MOCK_ECT_CONTROLLER_H_
 #define MOCK_ECT_CONTROLLER_H_
 
-#include <gmock/gmock.h>
 #include "AString.h"
 #include "IMtcContext.h"
 #include "ITimer.h"
@@ -25,8 +24,9 @@
 #include "ect/EctController.h"
 #include "ect/EctFactory.h"
 #include "sipcore/SipStatusCode.h"
+#include <gmock/gmock.h>
 
-class MockEctController: public EctController
+class MockEctController : public EctController
 {
 public:
     explicit MockEctController(IN IMtcContext& objContext, IN CallKey nCallKey,

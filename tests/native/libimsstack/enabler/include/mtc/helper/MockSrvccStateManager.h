@@ -17,9 +17,9 @@
 #ifndef MOCK_SRVCC_STATE_MANAGER_
 #define MOCK_SRVCC_STATE_MANAGER_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "helper/SrvccStateManager.h"
+#include <gmock/gmock.h>
 
 class MockSrvccStateManager : public SrvccStateManager
 {

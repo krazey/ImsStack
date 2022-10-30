@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CallReasonInfo.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcService.h"
@@ -33,6 +32,7 @@
 #include "helper/MtcTimerWrapper.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -65,29 +65,19 @@ protected:
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
-        ON_CALL(objCallContext, GetCallController)
-                .WillByDefault(ReturnRef(objController));
-        ON_CALL(objController, GetRedialHelper)
-                .WillByDefault(ReturnRef(objRedialHelper));
-        ON_CALL(objCallContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(objNotifier));
+        ON_CALL(objCallContext, GetCallController).WillByDefault(ReturnRef(objController));
+        ON_CALL(objController, GetRedialHelper).WillByDefault(ReturnRef(objRedialHelper));
+        ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(objNotifier));
 
-        ON_CALL(objCallContext, GetSession())
-                .WillByDefault(Return(&objMtcSession));
-        ON_CALL(objCallContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
-        ON_CALL(objCallContext, GetService)
-                .WillByDefault(ReturnRef(objService));
-        ON_CALL(objCallContext, GetTimer)
-                .WillByDefault(ReturnRef(objTimer));
-        ON_CALL(objCallContext, GetMediaManager)
-                .WillByDefault(ReturnRef(objMockMediaManager));
+        ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimer));
+        ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
 
-        ON_CALL(objService, GetAosConnector)
-                .WillByDefault(Return(&objAosConnector));
+        ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
-        ON_CALL(objMtcSession, GetISession)
-                .WillByDefault(ReturnRef(objSession));
+        ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
 
         ON_CALL(objCallContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
@@ -104,8 +94,7 @@ protected:
 
 TEST_F(OutgoingStateTest, SessionPRAckDeliveryFailedIgnoredIfConfigOn)
 {
-    ON_CALL(*pConfigurationManager, IsIgnorePrackDeliveryFailure)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsIgnorePrackDeliveryFailure).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPRAckDeliveryFailed(&objSession));
 }
@@ -131,8 +120,7 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfPolicyIsNotWaitForResponse)
 {
     EXPECT_CALL(objAosConnector, Control).Times(0);
 
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
             .WillByDefault(Return(2));
 
@@ -145,8 +133,7 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsHandled)
 {
     EXPECT_CALL(objAosConnector, Control).Times(1);
 
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
             .WillByDefault(Return(1));
 
@@ -196,39 +183,30 @@ TEST_F(OutgoingStateTest, HandleSilentRedialInvokesRedial)
 
 TEST_F(OutgoingStateTest, HandleAosConnectedDoesNothingIfNoWatchdogTimer)
 {
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
-            .WillByDefault(Return(-1));
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(-1));
 
-    EXPECT_EQ(CallStateName::OUTGOING,
-            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(
+            CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
 
 TEST_F(OutgoingStateTest, HandleAosConnectedInvokesEpsFallbackApis)
 {
     MockEpsFallbackTrigger objEpsFbTrigger(objCallContext);
-    ON_CALL(objCallContext, GetEpsFallbackTrigger)
-            .WillByDefault(ReturnRef(objEpsFbTrigger));
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
-            .WillByDefault(Return(-1));
-    EXPECT_EQ(CallStateName::OUTGOING,
-            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(objEpsFbTrigger));
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(-1));
+    EXPECT_EQ(
+            CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
-            .WillByDefault(Return(6000));
-    ON_CALL(objEpsFbTrigger, IsWaitingEpsFallbackForNoResponse)
-            .WillByDefault(Return(IMS_FALSE));
-    EXPECT_EQ(CallStateName::OUTGOING,
-            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
+    ON_CALL(objEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_FALSE));
+    EXPECT_EQ(
+            CallStateName::OUTGOING, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 
-    ON_CALL(objEpsFbTrigger, IsWaitingEpsFallbackForNoResponse)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objEpsFbTrigger, IsWaitingEpsFallbackForNoResponse).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objRedialHelper, Redial)
-            .Times(1)
-            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objRedialHelper, Redial).Times(1).WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objEpsFbTrigger, OnEpsFallbackCompleted);
-    EXPECT_EQ(CallStateName::IDLE,
-            pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
 }
 
 TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)

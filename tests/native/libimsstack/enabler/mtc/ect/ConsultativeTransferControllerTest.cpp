@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockITimer.h"
@@ -33,8 +32,9 @@
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
 #include "sipcore/SipStatusCode.h"
+#include <gtest/gtest.h>
 
-//EctController::TIME_WAIT_OPERATION_COMPLETE
+// EctController::TIME_WAIT_OPERATION_COMPLETE
 LOCAL IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 3000;
 
 using ::testing::_;
@@ -87,30 +87,23 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallManager)
-                .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objCallManager, GetCallByCallKey(TRANSFEREE_KEY))
                 .WillByDefault(Return(&objTransfereeCall));
         ON_CALL(objTransfereeCall, GetCallContext)
                 .WillByDefault(ReturnRef(objTransfereeCallContext));
-        ON_CALL(objTransfereeCall, GetKey)
-                .WillByDefault(Return(TRANSFEREE_KEY));
-        ON_CALL(objTransfereeCallContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(objNotifier));
+        ON_CALL(objTransfereeCall, GetKey).WillByDefault(Return(TRANSFEREE_KEY));
+        ON_CALL(objTransfereeCallContext, GetUiNotifier).WillByDefault(ReturnRef(objNotifier));
 
         ON_CALL(objCallManager, GetCallByCallKey(TRANSFER_TARGET_KEY))
                 .WillByDefault(Return(&objTransferTargetCall));
-        ON_CALL(objTransferTargetCall, GetKey)
-                .WillByDefault(Return(TRANSFER_TARGET_KEY));
+        ON_CALL(objTransferTargetCall, GetKey).WillByDefault(Return(TRANSFER_TARGET_KEY));
 
         pController = new ConsultativeTransferController(
                 objContext, TRANSFEREE_KEY, objListener, objFactory);
     }
 
-    virtual void TearDown() override
-    {
-        objManagedCalls.Clear();
-    }
+    virtual void TearDown() override { objManagedCalls.Clear(); }
 
     MockEctReference* GetMockReference()
     {
@@ -120,8 +113,7 @@ protected:
         pMockReferenceInterfaceHolder = new MockReferenceInterfaceHolder(objMockHolderListener);
         ON_CALL(objMockInterfaceFactory, GetIReferenceHolder)
                 .WillByDefault(Return(pMockReferenceInterfaceHolder));
-        ON_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, _))
-                .WillByDefault(Return());
+        ON_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, _)).WillByDefault(Return());
 
         pReference = std::make_unique<MockEctReference>(objContext, TRANSFEREE_KEY, *pController);
         MockEctReference* pRawPtr = pReference.get();
@@ -133,23 +125,20 @@ protected:
     {
         objManagedCalls.Append(&objTransfereeCall);
         objManagedCalls.Append(&objTransferTargetCall);
-        ON_CALL(objCallManager, GetCalls)
-                .WillByDefault(Return(objManagedCalls));
+        ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objManagedCalls));
     }
 };
 
 TEST_F(ConsultativeTransferControllerTest, TransferFailsIfCallCountIsNotTwo)
 {
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objManagedCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objManagedCalls));
 
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)))
             .Times(1);
     pController->Transfer();
 
     objManagedCalls.Append(&objTransfereeCall);
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objManagedCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objManagedCalls));
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)))
             .Times(1);
     pController->Transfer();
@@ -175,8 +164,7 @@ TEST_F(ConsultativeTransferControllerTest, SuccessfulTransferStartsTimer)
     ON_CALL(*GetMockReference(), SendInvite(TRANSFER_TARGET_KEY))
             .WillByDefault(Return(IMS_SUCCESS));
 
-    EXPECT_CALL(objTimer, SetTimer(TIME_WAIT_OPERATION_COMPLETE, _))
-            .Times(1);
+    EXPECT_CALL(objTimer, SetTimer(TIME_WAIT_OPERATION_COMPLETE, _)).Times(1);
 
     pController->Transfer();
 }
@@ -196,9 +184,7 @@ TEST_F(ConsultativeTransferControllerTest, OnReferenceUpdatedSuccessNotifiesSucc
             Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT)));
     EXPECT_CALL(objTransferTargetCall,
             Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT)));
-    EXPECT_CALL(objTimer, KillTimer)
-            .Times(1);
-
+    EXPECT_CALL(objTimer, KillTimer).Times(1);
 
     pController->OnReferenceUpdated(eAnyFianlSuccess);
 }
@@ -214,8 +200,7 @@ TEST_F(ConsultativeTransferControllerTest, OnReferenceUpdatedFailureNotifiesFail
 
     EXPECT_CALL(objListener, OnEctCompleted);
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)));
-    EXPECT_CALL(objTimer, KillTimer)
-            .Times(1);
+    EXPECT_CALL(objTimer, KillTimer).Times(1);
 
     pController->OnReferenceUpdated(eAnyFianlFailure);
 }

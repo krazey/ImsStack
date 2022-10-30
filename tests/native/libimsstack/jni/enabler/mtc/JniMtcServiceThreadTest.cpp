@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
-#include <binder/Parcel.h>
+#include "ImsProcess.h"
+#include "IuMtcService.h"
+#include "JniMtcServiceThread.h"
+#include "MockIThread.h"
 #include "PlatformContext.h"
 #include "TestThreadService.h"
-#include "JniMtcServiceThread.h"
-#include "IuMtcService.h"
-#include "MockIThread.h"
-#include "ImsProcess.h"
+#include <binder/Parcel.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 
@@ -52,8 +52,7 @@ public:
             pJniServiceThread(IMS_NULL),
             pThreadService(new TestThreadService())
     {
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_THREAD, pThreadService);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, pThreadService);
         pThreadService->SetThread(&objMockThread);
         CreateJniMtcServiceThread();
     }
@@ -79,8 +78,7 @@ protected:
     {
         pJniServiceThread = new JniMtcServiceThread();
         pJniServiceThread->Start("", IMS_SLOT_0);
-        Jni_SendDataToJava pfnSendDataToJava =
-                reinterpret_cast<Jni_SendDataToJava>(0x01);
+        Jni_SendDataToJava pfnSendDataToJava = reinterpret_cast<Jni_SendDataToJava>(0x01);
         pJniServiceThread->SetCallback(0x02, pfnSendDataToJava);
     }
 };
@@ -92,8 +90,8 @@ TEST_F(JniMtcServiceThreadTest, OnServiceChanged)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(
-            MESSAGE_THREAD_SWITCHING , _, IsSameMessageTypeAndState(eType, eState)))
+    EXPECT_CALL(objMockThread,
+            PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageTypeAndState(eType, eState)))
             .Times(1);
 
     pJniServiceThread->OnServiceChanged(eState, 0);
@@ -107,9 +105,9 @@ TEST_F(JniMtcServiceThreadTest, OnEmergencyServiceChanged)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(
-            MESSAGE_THREAD_SWITCHING , _, IsSameMessageTypeAndState(eType,
-                    static_cast<IMS_SINT32>(eState))))
+    EXPECT_CALL(objMockThread,
+            PostMessageI(MESSAGE_THREAD_SWITCHING, _,
+                    IsSameMessageTypeAndState(eType, static_cast<IMS_SINT32>(eState))))
             .Times(1);
 
     pJniServiceThread->OnEmergencyServiceChanged(
@@ -122,7 +120,7 @@ TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniServiceThread->OnPreIncomingCallReceived(1);

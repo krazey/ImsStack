@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
+#include "FeatureCaps.h"
+#include "IImsAosInfo.h"
+#include "MockIMtcService.h"
+#include "MtcContextRepository.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/EmergencyMessageFormatter.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -22,15 +25,12 @@
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
-#include "FeatureCaps.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
-#include "IImsAosInfo.h"
-#include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipParameter.h"
 #include "utility/MessageUtils.h"
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;

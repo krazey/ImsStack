@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 
@@ -459,12 +459,10 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
             .WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE));
 
-    EXPECT_CALL(*pConfigManager, GetEpsFallbackWatchdogTime)
-            .WillOnce(Return(nValue));
+    EXPECT_CALL(*pConfigManager, GetEpsFallbackWatchdogTime).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::EPS_FALLBACK_WATCHDOG_TIME));
 
-    EXPECT_CALL(*pConfigManager, GetSendUdpKeepAliveIntervalTime)
-            .WillOnce(Return(nValue));
+    EXPECT_CALL(*pConfigManager, GetSendUdpKeepAliveIntervalTime).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::SEND_UDP_KEEP_ALIVE_INTERVAL_TIME));
 }
 

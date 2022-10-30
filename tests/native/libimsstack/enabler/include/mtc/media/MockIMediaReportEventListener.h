@@ -17,9 +17,9 @@
 #ifndef MOCK_I_MEDIA_REPORT_EVENT_LISTENER_H_
 #define MOCK_I_MEDIA_REPORT_EVENT_LISTENER_H_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "media/IMediaReportEventListener.h"
+#include <gmock/gmock.h>
 
 class MockIMediaReportEventListener : public IMediaReportEventListener
 {

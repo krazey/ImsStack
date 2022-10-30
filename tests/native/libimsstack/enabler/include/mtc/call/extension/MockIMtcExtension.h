@@ -17,9 +17,9 @@
 #ifndef MOCK_I_MTC_EXTENSION_
 #define MOCK_I_MTC_EXTENSION_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "call/extension/IMtcExtension.h"
+#include <gmock/gmock.h>
 
 class AString;
 
@@ -33,12 +33,12 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRequiredOnRemote, (), (const, override));
     MOCK_METHOD(const AString&, GetOptionTag, (), (const, override));
 
-    MOCK_METHOD(void, FormatRequest, (IN RequestType eType, IN_OUT IMessage& objRequest),
-            (override));
+    MOCK_METHOD(
+            void, FormatRequest, (IN RequestType eType, IN_OUT IMessage& objRequest), (override));
     MOCK_METHOD(void, FormatResponse, (IN ResponseType eType, IN_OUT IMessage& objResponse),
             (override));
-    MOCK_METHOD(void, HandleRequest, (IN RequestType eType, IN const IMessage& objRequest),
-            (override));
+    MOCK_METHOD(
+            void, HandleRequest, (IN RequestType eType, IN const IMessage& objRequest), (override));
     MOCK_METHOD(void, HandleResponse, (IN ResponseType eType, IN const IMessage& objResponse),
             (override));
 };

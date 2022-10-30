@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "precondition/QosTimer.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

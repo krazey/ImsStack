@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "ISipHeader.h"
 #include "MockIMtcContext.h"
 #include "MtcContextRepository.h"
@@ -24,6 +22,8 @@
 #include "core/MockIMessage.h"
 #include "sipcore/MockISipMessage.h"
 #include "utility/MockIMessageUtils.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -43,45 +43,34 @@ protected:
     virtual void SetUp() override
     {
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-        ON_CALL(objContext, GetMessageUtils)
-                .WillByDefault(ReturnRef(objMessageUtils));
-        ON_CALL(objMessage, GetMessage)
-                .WillByDefault(Return(&objSipMessage));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
         pExtension = new EarlyDialogTerminatedExtension();
     }
 
-    virtual void TearDown() override
-    {
-        delete pExtension;
-    }
+    virtual void TearDown() override { delete pExtension; }
 };
 
 TEST_F(EarlyDialogTerminatedExtensionTest, Clone)
 {
     IMtcExtension* pCopiedExtension = pExtension->Clone();
 
-    EXPECT_STREQ(
-            pExtension->GetOptionTag().GetStr(),
-            pCopiedExtension->GetOptionTag().GetStr());
-    EXPECT_EQ(
-            pExtension->IsAvailableOnRemote(),
-            pCopiedExtension->IsAvailableOnRemote());
+    EXPECT_STREQ(pExtension->GetOptionTag().GetStr(), pCopiedExtension->GetOptionTag().GetStr());
+    EXPECT_EQ(pExtension->IsAvailableOnRemote(), pCopiedExtension->IsAvailableOnRemote());
 
     delete pCopiedExtension;
 }
 
 TEST_F(EarlyDialogTerminatedExtensionTest, GetOptionTag)
 {
-    EXPECT_STREQ(
-            MtcExtensionSet::OPTION_TAG_EARLY_DIALOG_TERMINATED.GetStr(),
+    EXPECT_STREQ(MtcExtensionSet::OPTION_TAG_EARLY_DIALOG_TERMINATED.GetStr(),
             pExtension->GetOptionTag().GetStr());
 }
 
 TEST_F(EarlyDialogTerminatedExtensionTest, FormatRequestForSomeMessageDoesNothing)
 {
-    EXPECT_CALL(objSipMessage, AddHeader(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objSipMessage, AddHeader(_, _, _)).Times(0);
 
     pExtension->FormatRequest(RequestType::PRACK, objMessage);
     pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);

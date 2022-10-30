@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <gtest/gtest.h>
 #include "ImsTypeDef.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/termination/UpdateErrorHandler.h"
 #include "core/MockIMessage.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipStatusCode.h"
+#include <gtest/gtest.h>
+#include <array>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -38,11 +38,9 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objMessage, GetMessage)
-                .WillByDefault(Return(&objSipMessage));
+        ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
-        ON_CALL(objContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         pHandler = new UpdateErrorHandler(objContext);
     }
@@ -60,11 +58,10 @@ TEST_F(UpdateErrorHandlerTest, Handle3xxMessageReturnsServerError)
     for (IMS_SINT32 nStatusCode = SipStatusCode::SC_300; nStatusCode < SipStatusCode::SC_400;
             nStatusCode++)
     {
-        ON_CALL(objMessage, GetStatusCode)
-                .WillByDefault(Return(nStatusCode));
+        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
-        EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode),
-                pHandler->Handle(&objMessage));
+        EXPECT_EQ(
+                CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
     }
 }
 
@@ -86,8 +83,7 @@ TEST_F(UpdateErrorHandlerTest, Handle4xxMessageReturnsTerminatedByRemote)
 
     for (IMS_SINT32 nStatusCode : objStatusCodes)
     {
-        ON_CALL(objMessage, GetStatusCode)
-                .WillByDefault(Return(nStatusCode));
+        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
         EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode),
                 pHandler->Handle(&objMessage));
@@ -97,8 +93,7 @@ TEST_F(UpdateErrorHandlerTest, Handle4xxMessageReturnsTerminatedByRemote)
 TEST_F(UpdateErrorHandlerTest, Handle400MessageReturnsServerError)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_400;
-    ON_CALL(objMessage, GetStatusCode)
-            .WillByDefault(Return(nStatusCode));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
 }
@@ -106,8 +101,7 @@ TEST_F(UpdateErrorHandlerTest, Handle400MessageReturnsServerError)
 TEST_F(UpdateErrorHandlerTest, Handle491MessageReturnsRequestPendingForMo)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_491;
-    ON_CALL(objMessage, GetStatusCode)
-            .WillByDefault(Return(nStatusCode));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
     objCallInfo.ePeerType = PeerType::MO;
 
@@ -117,8 +111,7 @@ TEST_F(UpdateErrorHandlerTest, Handle491MessageReturnsRequestPendingForMo)
 TEST_F(UpdateErrorHandlerTest, Handle491MessageReturnsRequestPendingForMt)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_491;
-    ON_CALL(objMessage, GetStatusCode)
-            .WillByDefault(Return(nStatusCode));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
     objCallInfo.ePeerType = PeerType::MT;
 
@@ -134,8 +127,7 @@ TEST_F(UpdateErrorHandlerTest, Handle5xxMessageReturnsTerminatedByRemote)
 
     for (IMS_SINT32 nStatusCode : objStatusCodes)
     {
-        ON_CALL(objMessage, GetStatusCode)
-                .WillByDefault(Return(nStatusCode));
+        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
         EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode),
                 pHandler->Handle(&objMessage));
@@ -145,8 +137,7 @@ TEST_F(UpdateErrorHandlerTest, Handle5xxMessageReturnsTerminatedByRemote)
 TEST_F(UpdateErrorHandlerTest, Handle500MessageReturnsServerError)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_500;
-    ON_CALL(objMessage, GetStatusCode)
-            .WillByDefault(Return(nStatusCode));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
 }
@@ -159,8 +150,7 @@ TEST_F(UpdateErrorHandlerTest, Handle6xxMessageReturnsTerminatedByRemote)
 
     for (IMS_SINT32 nStatusCode : objStatusCodes)
     {
-        ON_CALL(objMessage, GetStatusCode)
-                .WillByDefault(Return(nStatusCode));
+        ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
         EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nStatusCode),
                 pHandler->Handle(&objMessage));
@@ -170,8 +160,7 @@ TEST_F(UpdateErrorHandlerTest, Handle6xxMessageReturnsTerminatedByRemote)
 TEST_F(UpdateErrorHandlerTest, Handle600MessageReturnsServerError)
 {
     IMS_SINT32 nStatusCode = SipStatusCode::SC_600;
-    ON_CALL(objMessage, GetStatusCode)
-            .WillByDefault(Return(nStatusCode));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(nStatusCode));
 
     EXPECT_EQ(CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode), pHandler->Handle(&objMessage));
 }

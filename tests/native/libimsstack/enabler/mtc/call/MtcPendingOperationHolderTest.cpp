@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <gtest/gtest.h>
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
+#include "call/MtcPendingOperationHolder.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MockIMtcCallState.h"
-#include "call/MtcPendingOperationHolder.h"
 #include "core/MockISession.h"
+#include <gtest/gtest.h>
+#include <functional>
 
 using ::testing::AnyNumber;
 using ::testing::Return;

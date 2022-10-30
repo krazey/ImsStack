@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
+#include "../../../engine/interface/core/MockICoreService.h"
+#include "MockIMtcContext.h"
+#include "MockIMtcService.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "conferencecall/ConferenceManager.h"
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceManager.h"
-#include "MockIMtcContext.h"
-#include "MockIMtcService.h"
-#include "call/MockIMtcCall.h"
-#include "call/MockIMtcCallContext.h"
 #include "helper/MockICallStateProxy.h"
-#include "../../../engine/interface/core/MockICoreService.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

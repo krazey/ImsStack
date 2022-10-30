@@ -17,9 +17,9 @@
 #ifndef MOCK_MTC_TIMER_WRAPPER_H_
 #define MOCK_MTC_TIMER_WRAPPER_H_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "helper/MtcTimerWrapper.h"
+#include <gmock/gmock.h>
 
 class IMtcTimerListener;
 class ITimer;

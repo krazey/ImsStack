@@ -17,14 +17,14 @@
 #ifndef MOCK_I_MTC_CALL_H_
 #define MOCK_I_MTC_CALL_H_
 
-#include <gmock/gmock.h>
 #include "AString.h"
+#include "IMtcService.h"
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
-#include "IMtcService.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
+#include <gmock/gmock.h>
 
 class IMtcCallContext;
 class ISession;
@@ -53,12 +53,12 @@ public:
             (IN CallType eCallType, IN const AString& strTarget,
                     IN const ImsList<ConfUser*>& objUsers),
             (override));
-    MOCK_METHOD(void, HandleIncoming, (IN ISession * piSession), (override));
+    MOCK_METHOD(void, HandleIncoming, (IN ISession* piSession), (override));
     MOCK_METHOD(void, HandleUserAlert, (), (override));
     MOCK_METHOD(void, Accept, (IN CallType eCallType, IN MediaInfo* pMediaInfo), (override));
     MOCK_METHOD(void, Reject, (IN const CallReasonInfo& objReason), (override));
-    MOCK_METHOD(void, Hold, (IN MediaInfo * pMediaInfo), (override));
-    MOCK_METHOD(void, Resume, (IN MediaInfo * pMediaInfo), (override));
+    MOCK_METHOD(void, Hold, (IN MediaInfo* pMediaInfo), (override));
+    MOCK_METHOD(void, Resume, (IN MediaInfo* pMediaInfo), (override));
     MOCK_METHOD(void, AcceptResume, (IN CallType eCallType, IN MediaInfo* pMediaInfo), (override));
     MOCK_METHOD(void, RejectResume, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, Update, (IN CallType eCallType, IN MediaInfo* pMediaInfo), (override));

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -43,10 +43,8 @@ protected:
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
 
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
-        ON_CALL(objContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
     }
 
     virtual void TearDown() override
@@ -64,8 +62,7 @@ protected:
     {
         MockIMtcCall* pCall = new MockIMtcCall();
 
-        ON_CALL(*pCall, GetCallType)
-                .WillByDefault(Return(eCallType));
+        ON_CALL(*pCall, GetCallType).WillByDefault(Return(eCallType));
 
         return pCall;
     }
@@ -73,8 +70,7 @@ protected:
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoRttIfNotAllowed)
 {
-    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo).WillByDefault(Return(IMS_FALSE));
 
     CallTypeBlockRule objBlockRule(objContext, CallType::VIDEO_RTT);
     Result objResult = objBlockRule.Check(objListener);
@@ -85,13 +81,11 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoRttIfNotAllowed)
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedIfAllowed)
 {
-    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
             .WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_CALL(objContext, GetOtherCalls)
-            .Times(0);
+    EXPECT_CALL(objContext, GetOtherCalls).Times(0);
 
     CallTypeBlockRule objBlockRuleForVoip(objContext, CallType::VOIP);
     EXPECT_EQ(Result::Status::UNBLOCKED, objBlockRuleForVoip.Check(objListener).eStatus);
@@ -109,11 +103,9 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedIfAllowed)
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoCallIfVoipExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VOIP));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
             .WillByDefault(Return(IMS_FALSE));
 
@@ -141,19 +133,17 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoCallIfVoipExists)
         CallTypeBlockRule objBlockRuleForVideoRtt(objContext, CallType::VIDEO_RTT);
         Result objResultForVideoRtt = objBlockRuleForVideoRtt.Check(objListener);
         EXPECT_EQ(Result::Status::BLOCKED, objResultForVideoRtt.eStatus);
-        EXPECT_EQ(CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED),
-                objResultForVideoRtt.objReason);
+        EXPECT_EQ(
+                CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED), objResultForVideoRtt.objReason);
     }
 }
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVtExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VT));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
             .WillByDefault(Return(IMS_FALSE));
 
@@ -178,11 +168,9 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVtExists)
 TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVoipIfVideoRttExists)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(CallType::VIDEO_RTT));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsAllowTextWithVideo).WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationManager, IsAllowMultipleCallIncludingVideoCall)
             .WillByDefault(Return(IMS_FALSE));
 

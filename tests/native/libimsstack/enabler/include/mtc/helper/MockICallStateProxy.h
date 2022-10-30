@@ -17,10 +17,10 @@
 #ifndef MOCK_I_CALL_STATE_PROXY_H_
 #define MOCK_I_CALL_STATE_PROXY_H_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "helper/ICallStateProxy.h"
+#include <gmock/gmock.h>
 
 class IMtcCallStateListener;
 
@@ -29,8 +29,8 @@ class MockICallStateProxy : public ICallStateProxy
 public:
     virtual ~MockICallStateProxy() {}
 
-    MOCK_METHOD(void, AddListener, (IN IMtcCallStateListener * pListener), (override));
-    MOCK_METHOD(void, RemoveListener, (IN IMtcCallStateListener * pListener), (override));
+    MOCK_METHOD(void, AddListener, (IN IMtcCallStateListener* pListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IMtcCallStateListener* pListener), (override));
     MOCK_METHOD(void, UpdateCallState,
             (IN CallKey nCallkey, IN IMtcCall::State eState, IN CallType eCallType,
                     IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason),

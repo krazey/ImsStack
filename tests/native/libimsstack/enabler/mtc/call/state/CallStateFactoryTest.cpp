@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include "call/MockIMtcCallContext.h"
 #include "call/state/CallStateFactory.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 class CallStateFactoryTest : public ::testing::Test
 {
@@ -26,15 +26,9 @@ public:
     CallStateFactory* pStateFactory;
 
 protected:
-    virtual void SetUp() override
-    {
-        pStateFactory = new CallStateFactory();
-    }
+    virtual void SetUp() override { pStateFactory = new CallStateFactory(); }
 
-    virtual void TearDown() override
-    {
-        delete pStateFactory;
-    }
+    virtual void TearDown() override { delete pStateFactory; }
 };
 
 TEST_F(CallStateFactoryTest, CreateStateReturnsNotNull)

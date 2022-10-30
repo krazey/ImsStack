@@ -17,11 +17,10 @@
 #ifndef MOCK_CONFERENCE_PARTICIPANT_LIST_H_
 #define MOCK_CONFERENCE_PARTICIPANT_LIST_H_
 
-#include <gmock/gmock.h>
-
 #include "ImsList.h"
 #include "MtcDef.h"
 #include "conferencecall/ConferenceParticipantList.h"
+#include <gmock/gmock.h>
 
 class CallConnectionIdManager;
 class IConferenceReference;
@@ -40,21 +39,21 @@ public:
     MOCK_METHOD(void, AddUser, (IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(void, RemoveUser, (IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(
-            ConfUser*, GetConfUser, (IN IConferenceReference * piConfReference), (const, override));
+            ConfUser*, GetConfUser, (IN IConferenceReference* piConfReference), (const, override));
     MOCK_METHOD(IMS_BOOL, IsConnectedUser,
             (IN const ConfUser* pConfUser, IN IMS_BOOL bIncludingConnecting), (const, override));
     MOCK_METHOD(IMSList<ConfUser*>, GetConfUsers, (IN IMS_BOOL bCopy), (const, override));
     MOCK_METHOD(void, SetReference,
-            (IN IConferenceReference * piReference, IN const ConfUser* pConfUser), (override));
+            (IN IConferenceReference* piReference, IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(
             IConferenceReference*, GetReference, (IN const ConfUser* pConfUser), (const, override));
-    MOCK_METHOD(void, ResetReference, (IN IConferenceReference * piConfReference), (override));
+    MOCK_METHOD(void, ResetReference, (IN IConferenceReference* piConfReference), (override));
     MOCK_METHOD(void, SetReferInviteUri,
             (IN AString strReferInviteUri, IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(AString, GetReferInviteUri, (IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(IMS_SINT32, FindParticipant, (IN IMS_UINT32 nConnectionId), (override));
     MOCK_METHOD(void, ReOrder,
-            (IN IMtcCallManager & objCallManager,
+            (IN IMtcCallManager& objCallManager,
                     IN CallConnectionIdManager& objConnectionIdManager),
             ());
     MOCK_METHOD(void, Login, (), ());

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "MockIMtcService.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
-#include "call/block/TerminalBasedCallWaitingBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
+#include "call/block/TerminalBasedCallWaitingBlockRule.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -39,12 +39,10 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetService)
-                .WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
-        objCallInfo.ePeerType = PeerType::MT;   // MT usage only
-        ON_CALL(objContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
+        objCallInfo.ePeerType = PeerType::MT;  // MT usage only
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         pBlockRule = new TerminalBasedCallWaitingBlockRule(objContext);
     }
@@ -64,8 +62,7 @@ protected:
     {
         MockIMtcCall* pCall = new MockIMtcCall();
 
-        ON_CALL(*pCall, GetState)
-                .WillByDefault(Return(eState));
+        ON_CALL(*pCall, GetState).WillByDefault(Return(eState));
 
         return pCall;
     }
@@ -73,26 +70,22 @@ protected:
 
 TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsUnblockedIfNoOtherCalls)
 {
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
-    EXPECT_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .Times(0);
+    EXPECT_CALL(objService, IsTerminalBasedCallWaitingEnabled).Times(0);
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
 TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsUnblockedIfNoOtherActiveCalls)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::TERMINATING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
     Result objResult = pBlockRule->Check(objListener);
 
-    EXPECT_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .Times(0);
+    EXPECT_CALL(objService, IsTerminalBasedCallWaitingEnabled).Times(0);
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
@@ -104,11 +97,9 @@ TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsUnblockedIfActiveCallE
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ALERTING));
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ESTABLISHED));
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled).WillByDefault(Return(IMS_TRUE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -118,11 +109,9 @@ TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsUnblockedIfActiveCallE
 TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfIdleCallExistsAndCwDisabled)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled).WillByDefault(Return(IMS_FALSE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -133,11 +122,9 @@ TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfIdleCallExist
 TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfOutgoingCallExistsAndCwDisabled)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::OUTGOING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled).WillByDefault(Return(IMS_FALSE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -148,11 +135,9 @@ TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfOutgoingCallE
 TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfIncomingCallExistsAndCwDisabled)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::INCOMING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled).WillByDefault(Return(IMS_FALSE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -163,11 +148,9 @@ TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfIncomingCallE
 TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfAlertingCallExistsAndCwDisabled)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ALERTING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled).WillByDefault(Return(IMS_FALSE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -175,14 +158,13 @@ TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfAlertingCallE
     EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CALL_WAITING_DISABLED), objResult.objReason);
 }
 
-TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfEstablishedCallExistsAndCwDisabled)
+TEST_F(TerminalBasedCallWaitingBlockRuleTest,
+        CheckReturnsBlockedIfEstablishedCallExistsAndCwDisabled)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::ESTABLISHED));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled).WillByDefault(Return(IMS_FALSE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -193,11 +175,9 @@ TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfEstablishedCa
 TEST_F(TerminalBasedCallWaitingBlockRuleTest, CheckReturnsBlockedIfHasUpdatingCallAndCwDisabled)
 {
     lstOtherCalls.Append(CreateMockIMtcCall(IMtcCall::State::UPDATING));
-    ON_CALL(objContext, GetOtherCalls)
-            .WillByDefault(Return(lstOtherCalls));
+    ON_CALL(objContext, GetOtherCalls).WillByDefault(Return(lstOtherCalls));
 
-    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsTerminalBasedCallWaitingEnabled).WillByDefault(Return(IMS_FALSE));
 
     Result objResult = pBlockRule->Check(objListener);
 

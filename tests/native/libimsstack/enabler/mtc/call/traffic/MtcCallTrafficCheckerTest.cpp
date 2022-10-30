@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "IImsRadio.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
@@ -30,9 +29,10 @@
 #include "call/IMtcCall.h"
 #include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "call/traffic/MockIMtcRadioConnectionFailureListener.h"
+#include "call/traffic/MtcCallTrafficChecker.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/MockICallStateProxy.h"
-#include "call/traffic/MtcCallTrafficChecker.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -323,8 +323,7 @@ TEST_F(MtcCallTrafficCheckerTest, OnIpcanChangedStartImsTrafficEmergency)
                     IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN, _))
             .Times(1);
 
-    m_pMtcCallTrafficChecker->OnIpcanChanged(
-            m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
+    m_pMtcCallTrafficChecker->OnIpcanChanged(m_objEmergencyService, IIpcan::CATEGORY_MOBILE);
 }
 
 TEST_F(MtcCallTrafficCheckerTest, OnCallStateChanged)

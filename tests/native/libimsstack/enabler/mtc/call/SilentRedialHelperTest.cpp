@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CallReasonInfo.h"
 #include "MockIMtcCallController.h"
 #include "MockITimer.h"
@@ -27,12 +26,13 @@
 #include "call/MockIMtcSession.h"
 #include "call/ParticipantInfo.h"
 #include "call/SilentRedialHelper.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "core/MockISession.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
+#include <gtest/gtest.h>
 #include <vector>
 
 using ::testing::_;
@@ -76,27 +76,19 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallKey)
-                .WillByDefault(Return(ANY_CALL_KEY));
-        ON_CALL(objContext, GetSession())
-                .WillByDefault(Return(&objMtcSession));
-        ON_CALL(objContext, GetMediaManager)
-                .WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objMtcSession, GetISession)
-                .WillByDefault(ReturnRef(objSession));
-        ON_CALL(objContext, GetCallStateProxy)
-                .WillByDefault(ReturnRef(objCallStateProxy));
-        ON_CALL(objContext, GetCallController)
-                .WillByDefault(ReturnRef(objController));
-        ON_CALL(objContext, GetCallManager)
-                .WillByDefault(ReturnRef(objMtcCallManager));
+        ON_CALL(objContext, GetCallKey).WillByDefault(Return(ANY_CALL_KEY));
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+        ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetCallController).WillByDefault(ReturnRef(objController));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objMtcCallManager));
         ON_CALL(objMtcCallManager, GetCallByCallKey(ANY_CALL_KEY))
                 .WillByDefault(Return(&objMtcCall));
 
         pMockConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
@@ -118,10 +110,8 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithRetryAfterType)
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithRequestTimeoutType)
 {
-    ON_CALL(*pMockConfigurationManager, GetSilentRedialInterval)
-            .WillByDefault(Return(2000));
-    ON_CALL(*pMockConfigurationManager, GetSilentRedialMaxRetryCount)
-            .WillByDefault(Return(3));
+    ON_CALL(*pMockConfigurationManager, GetSilentRedialInterval).WillByDefault(Return(2000));
+    ON_CALL(*pMockConfigurationManager, GetSilentRedialMaxRetryCount).WillByDefault(Return(3));
 
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
@@ -179,15 +169,9 @@ TEST_F(SilentRedialHelperTest, OnTotalCallStateChangedDoesNothing)
     pRedialHelper = new SilentRedialHelper(
             objContext, CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION));
 
-    std::vector<IMtcCall::State> objCallStates{
-            IMtcCall::State::IDLE,
-            IMtcCall::State::OUTGOING,
-            IMtcCall::State::INCOMING,
-            IMtcCall::State::ALERTING,
-            IMtcCall::State::ESTABLISHED,
-            IMtcCall::State::UPDATING,
-            IMtcCall::State::TERMINATING
-    };
+    std::vector<IMtcCall::State> objCallStates{IMtcCall::State::IDLE, IMtcCall::State::OUTGOING,
+            IMtcCall::State::INCOMING, IMtcCall::State::ALERTING, IMtcCall::State::ESTABLISHED,
+            IMtcCall::State::UPDATING, IMtcCall::State::TERMINATING};
 
     for (IMtcCall::State eCallState : objCallStates)
     {
@@ -245,11 +229,10 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRetryAfterType)
     pRedialHelper->Redial(10000);
 
     CallInfo objCallInfo;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo)); // initial type is VOIP
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));  // initial type is VOIP
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo)
-            .WillByDefault(ReturnRef(objParticipantInfo)); // empty remote target.
+            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
 
     AString strEmptyNumber;
     EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _));
@@ -261,8 +244,7 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRequestTimeoutType)
 {
     IMS_SINT32 nInterval = 2000;
     IMS_UINT32 nMaxCount = 2;
-    ON_CALL(*pMockConfigurationManager, GetSilentRedialInterval)
-            .WillByDefault(Return(nInterval));
+    ON_CALL(*pMockConfigurationManager, GetSilentRedialInterval).WillByDefault(Return(nInterval));
     ON_CALL(*pMockConfigurationManager, GetSilentRedialMaxRetryCount)
             .WillByDefault(Return(nMaxCount));
 
@@ -271,21 +253,19 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRequestTimeoutType)
     pRedialHelper->Redial();
 
     CallInfo objCallInfo;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo)); // initial type is VOIP
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));  // initial type is VOIP
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo)
-            .WillByDefault(ReturnRef(objParticipantInfo)); // empty remote target.
+            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
 
     AString strEmptyNumber;
-    EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _))
-            .Times(2);
+    EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _)).Times(2);
 
     pRedialHelper->Timer_TimerExpired(&objTimer);
 
     EXPECT_EQ(IMS_SUCCESS, pRedialHelper->Redial());
     pRedialHelper->Timer_TimerExpired(&objTimer);
-    EXPECT_EQ(IMS_FAILURE, pRedialHelper->Redial()); // by nMaxCount
+    EXPECT_EQ(IMS_FAILURE, pRedialHelper->Redial());  // by nMaxCount
 }
 
 TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRedirectionType)
@@ -297,8 +277,7 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRedirectionType)
     pRedialHelper->Redial();
 
     CallInfo objCallInfo;
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo)); // initial type is VOIP
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));  // initial type is VOIP
 
     EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strContactUri, _, _));
 
@@ -315,7 +294,7 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithVideoSdpChangeType)
 
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo)
-            .WillByDefault(ReturnRef(objParticipantInfo)); // empty remote target.
+            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
 
     AString strEmptyNumber;
     EXPECT_CALL(objMtcCall, Start(CallType::VT, strEmptyNumber, _, _));
@@ -333,7 +312,7 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithAudioSdpChangeType)
 
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo)
-            .WillByDefault(ReturnRef(objParticipantInfo)); // empty remote target.
+            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
 
     AString strEmptyNumber;
     EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _));
@@ -351,7 +330,7 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithDowngradeAudioSdpCh
 
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo)
-            .WillByDefault(ReturnRef(objParticipantInfo)); // empty remote target.
+            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
 
     AString strEmptyNumber;
     EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _));

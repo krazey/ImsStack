@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CarrierConfig.h"
 #include "INetworkWatcher.h"
 #include "MockIMtcService.h"
@@ -23,6 +22,7 @@
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcLocationObject.h"
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -39,27 +39,20 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
-        ON_CALL(objContext, GetService)
-                .WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
     }
 
-    virtual void TearDown() override
-    {
-        delete pConfigurationProxy;
-    }
+    virtual void TearDown() override { delete pConfigurationProxy; }
 };
 
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfAosConnectorIsNull)
 {
-    ON_CALL(objService, GetAosConnector())
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objService, GetAosConnector()).WillByDefault(Return(nullptr));
 
     EXPECT_FALSE(MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
@@ -75,8 +68,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNorma
 
     objCallInfo.bEmergency = IMS_FALSE;
 
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
@@ -91,8 +83,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiEmerg
 
     objCallInfo.bEmergency = IMS_TRUE;
 
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
@@ -107,8 +98,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularN
 
     objCallInfo.bEmergency = IMS_FALSE;
 
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
@@ -123,8 +113,7 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularE
 
     objCallInfo.bEmergency = IMS_TRUE;
 
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }

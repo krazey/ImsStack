@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
+#include "MockIMtcContext.h"
+#include "MockIMtcService.h"
+#include "MockITimer.h"
+#include "MtcContextRepository.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
+#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/ConferenceController.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceOperationQueue.h"
-#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
-#include "call/MockIMtcCallManager.h"
-#include "call/IMtcCall.h"
-#include "MockIMtcContext.h"
-#include "MockIMtcService.h"
-#include "call/MockIMtcCall.h"
-#include "call/MockIMtcCallContext.h"
-#include "configuration/MtcConfigurationProxy.h"
-#include "MtcContextRepository.h"
-#include "conferencecall/MockConferenceOperationQueue.h"
 #include "conferencecall/MockCallConnectionIdManager.h"
-#include "conferencecall/MockConferenceFactory.h"
-#include "conferencecall/MockConferenceParticipantList.h"
 #include "conferencecall/MockConferenceEventNotifier.h"
+#include "conferencecall/MockConferenceFactory.h"
+#include "conferencecall/MockConferenceOperationQueue.h"
+#include "conferencecall/MockConferenceParticipantList.h"
+#include "conferencecall/MockConferenceSubscription.h"
 #include "conferencecall/MockIConferenceControllerListener.h"
 #include "conferencecall/MockIConferenceReference.h"
 #include "conferencecall/MockIConferenceSubscriptionListener.h"
-#include "conferencecall/MockConferenceSubscription.h"
 #include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "core/MockICoreService.h"
+#include "helper/MockICallStateProxy.h"
+#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockSubscriptionInterfaceHolder.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
-#include "helper/MockICallStateProxy.h"
-#include "core/MockICoreService.h"
-#include "MockITimer.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -144,9 +144,8 @@ protected:
 
     MockConferenceSubscription* CreateSubscription(MockIConferenceSubscriptionListener& objListener)
     {
-        MockConferenceSubscription* pSubscription = new MockConferenceSubscription(
-                objMockContext, CONFERENCE_CALL_KEY, *pMockParticipantList, objListener,
-                *pMockFactory);
+        MockConferenceSubscription* pSubscription = new MockConferenceSubscription(objMockContext,
+                CONFERENCE_CALL_KEY, *pMockParticipantList, objListener, *pMockFactory);
         ON_CALL(*pMockFactory, CreateSubscription(_, _, _)).WillByDefault(Return(pSubscription));
         ON_CALL(*pSubscription, GetState).WillByDefault(Return(SubscriptionState::ACTIVE));
 
@@ -195,8 +194,7 @@ TEST_F(ConferenceControllerTest, GetIndividualCallStateReturnsJoining)
 
 TEST_F(ConferenceControllerTest, OnConferenceCallStateEstablished)
 {
-    EXPECT_CALL(
-            *pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, _))
+    EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, _))
             .Times(1);
 
     pController->OnCallStateChanged(

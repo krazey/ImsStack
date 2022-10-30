@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "media/MtcMediaProfileManager.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

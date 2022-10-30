@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
 #include "MtcContextRepository.h"
-
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
-#include "call/state/EstablishedState.h"
 #include "call/UpdatingInfo.h"
+#include "call/state/EstablishedState.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/SipMethod.h"
 #include "utility/MockIMessageUtils.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -54,23 +52,16 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objMockCallContext, GetMediaManager)
-                .WillByDefault(ReturnRef(objMockMediaManager));
-        ON_CALL(objMockCallContext, GetSession())
-                .WillByDefault(Return(&objMockMtcSession));
-        ON_CALL(objMockMtcSession, GetISession)
-                .WillByDefault(ReturnRef(objMockISession));
+        ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
+        ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
+        ON_CALL(objMockMtcSession, GetISession).WillByDefault(ReturnRef(objMockISession));
 
-        ON_CALL(objMockCallContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(objUiNotifier));
+        ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
         pEstablishedState = new EstablishedState(objMockCallContext);
     }
 
-    virtual void TearDown() override
-    {
-        delete pEstablishedState;
-    }
+    virtual void TearDown() override { delete pEstablishedState; }
 };
 
 TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
@@ -104,8 +95,8 @@ TEST_F(EstablishedStateTest, SendUpdateBySrvccByCanceled)
             Update(UpdateType::SRVCC_RECOVERED_CANCEL, IMS_FALSE, SipMethod::UPDATE))
             .Times(1);
 
-    EXPECT_EQ(CallStateName::UPDATING,
-            pEstablishedState->OnSrvccStateUpdated(SrvccState::CANCELED));
+    EXPECT_EQ(
+            CallStateName::UPDATING, pEstablishedState->OnSrvccStateUpdated(SrvccState::CANCELED));
 }
 
 TEST_F(EstablishedStateTest, SendUpdateBySrvccByFailed)

@@ -17,10 +17,10 @@
 #ifndef MOCK_MTC_EMERGENCY_SERVICE_MANAGER_
 #define MOCK_MTC_EMERGENCY_SERVICE_MANAGER_
 
-#include <gmock/gmock.h>
+#include "IMtcService.h"
 #include "ImsTypeDef.h"
 #include "MtcEmergencyServiceManager.h"
-#include "IMtcService.h"
+#include <gmock/gmock.h>
 
 class IJniMtcServiceThread;
 

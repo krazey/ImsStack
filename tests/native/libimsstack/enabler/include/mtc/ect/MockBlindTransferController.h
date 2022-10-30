@@ -17,14 +17,14 @@
 #ifndef MOCK_BLIND_CONTROLLER_H_
 #define MOCK_BLIND_CONTROLLER_H_
 
-#include <gmock/gmock.h>
 #include "AString.h"
 #include "IMtcContext.h"
 #include "call/IMtcCall.h"
 #include "ect/BlindTransferController.h"
 #include "ect/EctFactory.h"
+#include <gmock/gmock.h>
 
-class MockBlindTransferController: public BlindTransferController
+class MockBlindTransferController : public BlindTransferController
 {
 public:
     explicit MockBlindTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,

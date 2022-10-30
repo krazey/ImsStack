@@ -17,9 +17,9 @@
 #ifndef MOCK_I_MTC_CONTEXT_H_
 #define MOCK_I_MTC_CONTEXT_H_
 
-#include <gmock/gmock.h>
-#include "ImsTypeDef.h"
 #include "IMtcContext.h"
+#include "ImsTypeDef.h"
+#include <gmock/gmock.h>
 #include <functional>
 
 class IMtcDialingPlan;

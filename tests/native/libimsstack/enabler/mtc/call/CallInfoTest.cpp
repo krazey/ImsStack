@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+#include "call/IMtcCall.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "call/IMtcCall.h"
 
 // TODO: Unit tests of only the uncovered lines are added. The other cases will be added.
 

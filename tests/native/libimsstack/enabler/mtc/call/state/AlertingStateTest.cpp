@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include "MockIMtcService.h"
 #include "MtcContextRepository.h"
-#include "call/state/AlertingState.h"
-#include "call/state/MtcCallState.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
+#include "call/state/AlertingState.h"
+#include "call/state/MtcCallState.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "core/MockIMessage.h"
+#include "core/MockISession.h"
 #include "helper/ISrvccStateListener.h"
-#include "helper/MockMtcTimerWrapper.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "MockIMtcService.h"
-#include "configuration/MockIMtcConfigurationManager.h"
-#include "configuration/MtcConfigurationProxy.h"
-#include "utility/MessageUtil.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/ISipMessage.h"
 #include "sipcore/MockISipMessage.h"
@@ -43,7 +40,10 @@
 #include "sipcore/SipStatusCode.h"
 #include "ussi/UssiConstants.h"
 #include "ussi/UssiController.h"
+#include "utility/MessageUtil.h"
 #include "utility/MockIMessageUtils.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -118,20 +118,19 @@ protected:
     void SetUpForUssi()
     {
         pUssiController = new UssiController(objCallContext);
-        ON_CALL(objCallContext, GetUssiController)
-                .WillByDefault(Return(pUssiController));
-        ON_CALL(objISession, GetNextRequest())
-                .WillByDefault(Return(&objIMessage));
+        ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
+        ON_CALL(objISession, GetNextRequest()).WillByDefault(Return(&objIMessage));
 
         AString strHeaderValue(UssiConstants::HEADER_USSD_PACKAGE);
         AString strHeaderName(SipHeaderName::RECV_INFO);
-        ON_CALL(objMessageUtils, AddValueIfNotExists(&objIMessage, strHeaderValue,
-                ISipHeader::UNKNOWN, strHeaderName))
+        ON_CALL(objMessageUtils,
+                AddValueIfNotExists(
+                        &objIMessage, strHeaderValue, ISipHeader::UNKNOWN, strHeaderName))
                 .WillByDefault(Return(IMS_SUCCESS));
 
         AString strEmptyHeaderName;
-        ON_CALL(objMessageUtils, AddValueIfNotExists(&objIMessage, _,
-                ISipHeader::ACCEPT, strEmptyHeaderName))
+        ON_CALL(objMessageUtils,
+                AddValueIfNotExists(&objIMessage, _, ISipHeader::ACCEPT, strEmptyHeaderName))
                 .WillByDefault(Return(IMS_SUCCESS));
     }
 };
@@ -139,8 +138,7 @@ protected:
 TEST_F(AlertingStateTest, HandleUserAlertSendsProvisonalResponseAndStartAlertingTimer)
 {
     IMS_SINT32 nAnyTime = 60;
-    ON_CALL(*pConfigurationManager, GetRingingTimer)
-            .WillByDefault(Return(nAnyTime));
+    ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
     EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE))
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
@@ -152,8 +150,7 @@ TEST_F(AlertingStateTest, HandleUserAlertSendsProvisonalResponseAndStartAlerting
 TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFails)
 {
     IMS_SINT32 nAnyTime = 60;
-    ON_CALL(*pConfigurationManager, GetRingingTimer)
-            .WillByDefault(Return(nAnyTime));
+    ON_CALL(*pConfigurationManager, GetRingingTimer).WillByDefault(Return(nAnyTime));
     EXPECT_CALL(objMtcSession, SendProvisionalResponse(IMS_TRUE))
             .Times(1)
             .WillOnce(Return(IMS_FAILURE));
@@ -168,12 +165,9 @@ TEST_F(AlertingStateTest, AcceptSameCallTypeInvokesAccept)
 {
     CallType eAcceptCallType = CallType::VOIP;
     MediaInfo objMediaInfo;
-    ON_CALL(objMtcSession, GetCallType)
-            .WillByDefault(Return(eAcceptCallType));
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
     EXPECT_CALL(objTimerWrapper, StopAll);
-    EXPECT_CALL(objMtcSession, Accept)
-            .Times(1)
-            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
 }
@@ -182,19 +176,15 @@ TEST_F(AlertingStateTest, RejectIncomingCallIfAcceptFails)
 {
     CallType eAcceptCallType = CallType::VOIP;
     MediaInfo objMediaInfo;
-    ON_CALL(objMtcSession, GetCallType)
-            .WillByDefault(Return(eAcceptCallType));
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
 
-    EXPECT_CALL(objMtcSession, Accept)
-            .Times(1)
-            .WillOnce(Return(IMS_FAILURE));
+    EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_FAILURE));
 
     const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    EXPECT_EQ(CallStateName::TERMINATING,
-            pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
@@ -202,11 +192,9 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
     CallType eAcceptCallType = CallType::VOIP;
     CallType eCurrentCallType = CallType::VT;
     MediaInfo objMediaInfo;
-    ON_CALL(objMtcSession, GetCallType)
-            .WillByDefault(Return(eCurrentCallType));
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eCurrentCallType));
 
-    EXPECT_CALL(objMtcSession, Accept)
-            .Times(0);
+    EXPECT_CALL(objMtcSession, Accept).Times(0);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL));
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
@@ -234,7 +222,7 @@ TEST_F(AlertingStateTest, RejectIncomingCallIfAlertingTimerExpired)
 TEST_F(AlertingStateTest, QosReserveFailedInvokesRejectIncomingCallIfNextActionIsRelease)
 {
     EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objISession, IMS_TRUE))
-            .Times(2); // TODO: duplicated code.
+            .Times(2);  // TODO: duplicated code.
     const CallReasonInfo objReason(CODE_REJECT_QOS_FAILURE);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
@@ -246,12 +234,9 @@ TEST_F(AlertingStateTest, QosReserveFailedInvokesRejectIncomingCallIfNextActionI
 TEST_F(AlertingStateTest, QosReserveFailedDoesNothingIfNextActionIsModify)
 {
     // TODO: do modify
-    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objISession, IMS_TRUE))
-            .Times(0);
-    EXPECT_CALL(objMtcSession, Reject(_))
-            .Times(0);
-    EXPECT_CALL(objUiNotifier, SendStartFailed(_))
-            .Times(0);
+    EXPECT_CALL(objPreconditionManager, FormPreconditionSdp(&objISession, IMS_TRUE)).Times(0);
+    EXPECT_CALL(objMtcSession, Reject(_)).Times(0);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
 
     EXPECT_EQ(CallStateName::ALERTING,
             pAlertingState->QosReserveFailed(&objISession, QosLossPolicy::MODIFY));
@@ -263,19 +248,16 @@ TEST_F(AlertingStateTest, SessionStartedTransitsStateToEstablished)
     ON_CALL(objCallContext, GetSupplementaryService)
             .WillByDefault(ReturnRef(objSupplementaryService));
 
-    EXPECT_CALL(objUiNotifier, SendStarted(&objCallInfo, _, _))
-            .Times(1);
+    EXPECT_CALL(objUiNotifier, SendStarted(&objCallInfo, _, _)).Times(1);
 
-    EXPECT_EQ(CallStateName::ESTABLISHED,
-            pAlertingState->SessionStarted(&objISession));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->SessionStarted(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfOfferAnswerFails)
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_ACK))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objMessageUtils, HasSdp(&objIMessage))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
@@ -284,59 +266,48 @@ TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfOfferAnswerFails)
             .WillByDefault(Return());
 
     SipMethod objMethod = SipMethod::ACK;
-    ON_CALL(objIMessage, GetMethod)
-            .WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE)));
-    EXPECT_EQ(CallStateName::TERMINATING,
-            pAlertingState->SessionStarted(&objISession));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStarted(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionTerminatedTransitsStateToTerminated)
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_TERMINATE))
             .WillByDefault(Return(nullptr));
-    EXPECT_EQ(CallStateName::TERMINATING,
-            pAlertingState->SessionTerminated(&objISession));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionTerminated(&objISession));
 
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_TERMINATE))
             .WillByDefault(Return(&objIMessage));
     SipMethod objMethod = SipMethod::CANCEL;
-    ON_CALL(objIMessage, GetMethod)
-            .WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
     EXPECT_CALL(objUiNotifier, SendStartFailed(_));
-    EXPECT_EQ(CallStateName::TERMINATING,
-            pAlertingState->SessionTerminated(&objISession));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionTerminated(&objISession));
 }
 
 TEST_F(AlertingStateTest, AcceptIsCalledWhenUpdateIsNotSentBySrvcc)
 {
-    ON_CALL(objISession, GetPreviousResponse(_))
-            .WillByDefault(Return(&objIMessage));
-    ON_CALL(objIMessage, GetState)
-            .WillByDefault(Return(IMessage::STATE_SENT));
+    ON_CALL(objISession, GetPreviousResponse(_)).WillByDefault(Return(&objIMessage));
+    ON_CALL(objIMessage, GetState).WillByDefault(Return(IMessage::STATE_SENT));
 
     const AString strHeaderName(SipHeaderName::REASON);
     ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::UNKNOWN, strHeaderName))
             .WillByDefault(Return(AString::ConstEmpty()));
     EXPECT_CALL(objMtcSession, Accept).Times(1);
-    EXPECT_EQ(CallStateName::ALERTING,
-            pAlertingState->SessionEarlyMediaUpdated(&objISession));
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionEarlyMediaUpdated(&objISession));
 }
 
 TEST_F(AlertingStateTest, NoAcceptIsCalledWhenUpdateIsSentBySrvcc)
 {
-    ON_CALL(objISession, GetPreviousResponse(_))
-            .WillByDefault(Return(&objIMessage));
-    ON_CALL(objIMessage, GetState)
-            .WillByDefault(Return(IMessage::STATE_SENT));
+    ON_CALL(objISession, GetPreviousResponse(_)).WillByDefault(Return(&objIMessage));
+    ON_CALL(objIMessage, GetState).WillByDefault(Return(IMessage::STATE_SENT));
 
     const AString strHeaderName(SipHeaderName::REASON);
     ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::UNKNOWN, strHeaderName))
             .WillByDefault(Return(MessageUtil::STR_REASON_HANDOVER_CANCELLED));
     EXPECT_CALL(objMtcSession, Accept).Times(0);
-    EXPECT_EQ(CallStateName::ALERTING,
-            pAlertingState->SessionEarlyMediaUpdated(&objISession));
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionEarlyMediaUpdated(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionEarlyMediaUpdateFailedNotifiesStartFailed)
@@ -350,8 +321,7 @@ TEST_F(AlertingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objMessageUtils, HasSdp(&objIMessage))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_200));
     pAlertingState->SessionEarlyMediaUpdateReceived(&objISession);
 
@@ -370,29 +340,25 @@ TEST_F(AlertingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objISession, IsSdpNegotiationAllowedForNonRpr)
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMessageUtils, HasSdp(&objIMessage))
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objISession, IsSdpNegotiationAllowedForNonRpr).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_RECEIVED));
 
     EXPECT_CALL(objMtcSession, RespondToEarlyUpdate(SipStatusCode::SC_488));
-    EXPECT_EQ(CallStateName::ALERTING,
-            pAlertingState->SessionEarlyMediaUpdateReceived(&objISession));
+    EXPECT_EQ(
+            CallStateName::ALERTING, pAlertingState->SessionEarlyMediaUpdateReceived(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionPRAckReceivedInvokesRespondToPrack)
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objMessageUtils, HasSdp(&objIMessage))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
-    EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200))
-            .Times(1);
+    EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200)).Times(1);
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionPRAckReceived(&objISession));
 
     // RespondToPrack fails
@@ -409,8 +375,7 @@ TEST_F(AlertingStateTest, SessionPRAckReceivedInvokesRejectIncomingIfOfferAnswer
 {
     ON_CALL(objISession, GetPreviousRequest(IMessage::SESSION_PRACK))
             .WillByDefault(Return(&objIMessage));
-    ON_CALL(objMessageUtils, HasSdp(&objIMessage))
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objIMessage)).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
@@ -419,8 +384,7 @@ TEST_F(AlertingStateTest, SessionPRAckReceivedInvokesRejectIncomingIfOfferAnswer
             .WillByDefault(Return());
 
     SipMethod objMethod = SipMethod::PRACK;
-    ON_CALL(objIMessage, GetMethod)
-            .WillByDefault(ReturnRef(objMethod));
+    ON_CALL(objIMessage, GetMethod).WillByDefault(ReturnRef(objMethod));
 
     const CallReasonInfo objReason(CODE_SIP_NOT_ACCEPTABLE);
     EXPECT_CALL(objMtcSession, RespondToPrack(SipStatusCode::SC_200));
@@ -435,8 +399,7 @@ TEST_F(AlertingStateTest, SessionRPRDeliveryFailedRejectsIncomingCall)
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    EXPECT_EQ(CallStateName::TERMINATING,
-            pAlertingState->SessionRPRDeliveryFailed(&objISession));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionRPRDeliveryFailed(&objISession));
 }
 
 TEST_F(AlertingStateTest, AcceptUssiInvokesAccept)
@@ -446,12 +409,9 @@ TEST_F(AlertingStateTest, AcceptUssiInvokesAccept)
     SetUpForUssi();
 
     EXPECT_CALL(objTimerWrapper, StopAll);
-    EXPECT_CALL(objMtcSession, Accept)
-            .Times(1)
-            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_SUCCESS));
 
-    EXPECT_EQ(CallStateName::ALERTING,
-            pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo));
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
@@ -460,15 +420,13 @@ TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
     MediaInfo objMediaInfo;
     SetUpForUssi();
 
-    EXPECT_CALL(objMtcSession, Accept)
-            .Times(1)
-            .WillOnce(Return(IMS_FAILURE));
+    EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_FAILURE));
     const CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    EXPECT_EQ(CallStateName::TERMINATING,
-            pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo));
+    EXPECT_EQ(
+            CallStateName::TERMINATING, pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
@@ -478,17 +436,14 @@ TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
             .WillByDefault(ReturnRef(objSupplementaryService));
     SetUpForUssi();
 
-    EXPECT_CALL(objUiNotifier, SendStarted(&objCallInfo, _, _))
-            .Times(1);
+    EXPECT_CALL(objUiNotifier, SendStarted(&objCallInfo, _, _)).Times(1);
 
-    EXPECT_EQ(CallStateName::ESTABLISHED,
-            pAlertingState->SessionStarted(&objISession));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pAlertingState->SessionStarted(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionStartFailedNotifiesStartFailed)
 {
-    ON_CALL(objService, GetSrvccState)
-            .WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR)));
 
     EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->SessionStartFailed(&objISession));
@@ -496,16 +451,12 @@ TEST_F(AlertingStateTest, SessionStartFailedNotifiesStartFailed)
 
 TEST_F(AlertingStateTest, SessionStartFailedDoesNotNotifyStartFailedIfSrvccStarted)
 {
-    ON_CALL(objService, GetSrvccState)
-            .WillByDefault(Return(SrvccState::STARTED));
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::STARTED));
     MockIMtcAosConnector objAosConnector;
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(&objAosConnector));
-    ON_CALL(objAosConnector, IsImsConnected)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+    ON_CALL(objAosConnector, IsImsConnected).WillByDefault(Return(IMS_FALSE));
 
-    EXPECT_CALL(objUiNotifier, SendStartFailed(_))
-            .Times(0);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionStartFailed(&objISession));
 }

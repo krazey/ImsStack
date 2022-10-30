@@ -17,9 +17,9 @@
 #ifndef MOCK_I_MTC_IMS_EVENT_RECEIVER_
 #define MOCK_I_MTC_IMS_EVENT_RECEIVER_
 
-#include <gmock/gmock.h>
-#include "ImsTypeDef.h"
 #include "IMtcImsEventReceiver.h"
+#include "ImsTypeDef.h"
+#include <gmock/gmock.h>
 
 class IMtcImsEventListener;
 

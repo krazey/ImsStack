@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
@@ -22,6 +21,7 @@
 #include "core/ISession.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 
@@ -40,28 +40,25 @@ protected:
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedInvalidReturnsTerminatedByRemote)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_INVALID;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
-    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason),
-            objHandler.Handle(objSession));
+    EXPECT_EQ(
+            CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason), objHandler.Handle(objSession));
 }
 
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedUnknownReturnsTerminatedByRemote)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_UNKNOWN;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
-    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason),
-            objHandler.Handle(objSession));
+    EXPECT_EQ(
+            CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason), objHandler.Handle(objSession));
 }
 
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedUserActionReturnsUserTerminated)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_USER_ACTION;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED, nReason), objHandler.Handle(objSession));
 }
@@ -69,18 +66,16 @@ TEST_F(TerminationHandlerTest, HandleSessionTerminatedUserActionReturnsUserTermi
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedRemoteActionReturnsTerminatedByRemote)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_REMOTE_ACTION;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
-    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason),
-            objHandler.Handle(objSession));
+    EXPECT_EQ(
+            CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason), objHandler.Handle(objSession));
 }
 
 TEST_F(TerminationHandlerTest, HandleSessionTerminated488ReturnsRequestTimeout)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_REFRESH_408;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
     EXPECT_EQ(CallReasonInfo(CODE_SIP_REQUEST_TIMEOUT, nReason), objHandler.Handle(objSession));
 }
@@ -88,8 +83,7 @@ TEST_F(TerminationHandlerTest, HandleSessionTerminated488ReturnsRequestTimeout)
 TEST_F(TerminationHandlerTest, HandleSessionTerminated481ReturnsRequestTimeout)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_REFRESH_481;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
     EXPECT_EQ(CallReasonInfo(CODE_SIP_REQUEST_TIMEOUT, nReason), objHandler.Handle(objSession));
 }
@@ -97,18 +91,16 @@ TEST_F(TerminationHandlerTest, HandleSessionTerminated481ReturnsRequestTimeout)
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedRefreshTxnTimeoutReturnsNetworkTimeout)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
     EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
-                objHandler.Handle(objSession));
+            objHandler.Handle(objSession));
 }
 
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedRefreshTimeoutReturnsNetworkTimeout)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_REFRESH_TIMEOUT;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
     EXPECT_EQ(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE),
             objHandler.Handle(objSession));
@@ -117,19 +109,16 @@ TEST_F(TerminationHandlerTest, HandleSessionTerminatedRefreshTimeoutReturnsNetwo
 TEST_F(TerminationHandlerTest, HandleSessionTerminatedServiceClosedReturnsServiceUnavailable)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_SERVICE_CLOSED;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
-    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_NOT_REGISTERED, nReason),
-            objHandler.Handle(objSession));
+    EXPECT_EQ(CallReasonInfo(CODE_LOCAL_NOT_REGISTERED, nReason), objHandler.Handle(objSession));
 }
 
 TEST_F(TerminationHandlerTest, HandleSessionReturnsDefaultReason)
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_UNKNOWN;
-    ON_CALL(objSession, GetTerminationReason)
-            .WillByDefault(Return(nReason));
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
 
-    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason),
-            objHandler.Handle(objSession));
+    EXPECT_EQ(
+            CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason), objHandler.Handle(objSession));
 }

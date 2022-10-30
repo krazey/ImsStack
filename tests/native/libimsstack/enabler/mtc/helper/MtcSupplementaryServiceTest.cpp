@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-
+#include "../../../engine/interface/core/MockIMessage.h"
+#include "../../../engine/interface/sipcore/MockISipMessage.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "MockIMtcContext.h"
@@ -27,8 +26,8 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "utility/MessageUtils.h"
-#include "../../../engine/interface/core/MockIMessage.h"
-#include "../../../engine/interface/sipcore/MockISipMessage.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::AnyNumber;
 using ::testing::Return;
@@ -52,8 +51,7 @@ protected:
     virtual void SetUp() override
     {
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-        ON_CALL(objContext, GetMessageUtils)
-                .WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         pMockIMtcConfigurationManager = new MockIMtcConfigurationManager();
         pMtcConfigurationProxy = new MtcConfigurationProxy(

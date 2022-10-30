@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MockIMtcService.h"
 #include "PlatformContext.h"
 #include "TestTimerService.h"
@@ -23,6 +22,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/UdpKeepAliveSender.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -39,7 +39,8 @@ public:
     inline UdpKeepAliveSenderTest() :
             objTimerService(),
             objTimer(objTimerService.GetMockTimer())
-    {}
+    {
+    }
 
     MockIMtcCallContext objContext;
     MockIMtcService objService;
@@ -57,23 +58,16 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_TIMER, &objTimerService);
 
-        ON_CALL(objContext, GetService)
-                .WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
-        ON_CALL(objService, GetAosConnector)
-                .WillByDefault(Return(&objAosConnector));
-        ON_CALL(objAosConnector, GetLocalAddress)
-                .WillByDefault(Return(LOCAL_IP_ADDRESS));
-        ON_CALL(objAosConnector, GetLocalPort)
-                .WillByDefault(Return(LOCAL_PORT_NUMBER));
-        ON_CALL(objAosConnector, GetPcscfAddress)
-                .WillByDefault(Return(PCSCF_IP_ADDRESS));
-        ON_CALL(objAosConnector, GetPcscfPort)
-                .WillByDefault(Return(PCSCF_PORT_NUMBER));
+        ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+        ON_CALL(objAosConnector, GetLocalAddress).WillByDefault(Return(LOCAL_IP_ADDRESS));
+        ON_CALL(objAosConnector, GetLocalPort).WillByDefault(Return(LOCAL_PORT_NUMBER));
+        ON_CALL(objAosConnector, GetPcscfAddress).WillByDefault(Return(PCSCF_IP_ADDRESS));
+        ON_CALL(objAosConnector, GetPcscfPort).WillByDefault(Return(PCSCF_PORT_NUMBER));
     }
 
     virtual void TearDown() override
@@ -86,16 +80,13 @@ protected:
 
 TEST_F(UdpKeepAliveSenderTest, IsRequiredChecksConfiguration)
 {
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime)
-            .WillByDefault(Return(-1));
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(-1));
     EXPECT_FALSE(pSender->IsRequired(*pConfigurationProxy));
 
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime)
-            .WillByDefault(Return(0));
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(0));
     EXPECT_FALSE(pSender->IsRequired(*pConfigurationProxy));
 
-    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime)
-            .WillByDefault(Return(2000));
+    ON_CALL(*pConfigurationManager, GetSendUdpKeepAliveIntervalTime).WillByDefault(Return(2000));
     EXPECT_TRUE(pSender->IsRequired(*pConfigurationProxy));
 }
 
@@ -122,8 +113,7 @@ TEST_F(UdpKeepAliveSenderTest, TimerExpiredInvokesReStart)
     pSender->Start();
 
     // 1st is by timerexpired, 2nd is by the destructor.
-    EXPECT_CALL(objTimer, KillTimer).
-            Times(2);
+    EXPECT_CALL(objTimer, KillTimer).Times(2);
 
     pSender->Timer_TimerExpired(&objTimer);
 
@@ -135,13 +125,11 @@ TEST_F(UdpKeepAliveSenderTest, InvalidTimerExpiredInvokesNothing)
     pSender = new UdpKeepAliveSender(objContext);
     pSender->Start();
 
-    EXPECT_CALL(objTimer, KillTimer)
-            .Times(0);
+    EXPECT_CALL(objTimer, KillTimer).Times(0);
     pSender->Timer_TimerExpired(IMS_NULL);
     MockITimer* pDiffTimer = new MockITimer();
     pSender->Timer_TimerExpired(pDiffTimer);
 
-    EXPECT_CALL(objTimer, KillTimer)
-            .Times(1);
+    EXPECT_CALL(objTimer, KillTimer).Times(1);
     delete pSender;
 }

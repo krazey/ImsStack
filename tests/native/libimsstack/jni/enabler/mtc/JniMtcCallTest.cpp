@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
-#include <binder/Parcel.h>
-
+#include "BaseService.h"
+#include "IuMtcCall.h"
 #include "JniEnablerConnector.h"
 #include "JniMtcCall.h"
 #include "MockIMtcCallController.h"
-#include "BaseService.h"
-#include "IuMtcCall.h"
+#include <binder/Parcel.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -54,8 +53,7 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objMockController, NotifyJniEnablerSet)
-                .WillByDefault(Return());
+        ON_CALL(objMockController, NotifyJniEnablerSet).WillByDefault(Return());
         JniEnablerConnector::GetInstance().SetNativeEnabler(
                 SLOT_ID, EnablerType::MTC_CALL, &objMockController);
 
@@ -80,8 +78,7 @@ TEST_F(JniMtcCallTest, SendDataOpen)
     objParcel.writeInt32(IuMtcCall::OPEN);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Open(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Open(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -91,8 +88,7 @@ TEST_F(JniMtcCallTest, SendDataAttach)
     objParcel.writeInt32(IuMtcCall::ATTACH);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Attach(_))
-            .Times(1);
+    EXPECT_CALL(objMockController, Attach(_)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -112,8 +108,7 @@ TEST_F(JniMtcCallTest, SendDataUserAlert)
     objParcel.writeInt32(IuMtcCall::USER_ALERT);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, HandleUserAlert(_))
-            .Times(1);
+    EXPECT_CALL(objMockController, HandleUserAlert(_)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -123,8 +118,7 @@ TEST_F(JniMtcCallTest, SendDataAccept)
     objParcel.writeInt32(IuMtcCall::ACCEPT);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Accept(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Accept(_, _, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -134,8 +128,7 @@ TEST_F(JniMtcCallTest, SendDataReject)
     objParcel.writeInt32(IuMtcCall::REJECT);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Reject(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Reject(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -145,8 +138,7 @@ TEST_F(JniMtcCallTest, SendDataHold)
     objParcel.writeInt32(IuMtcCall::HOLD);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Hold(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Hold(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -156,8 +148,7 @@ TEST_F(JniMtcCallTest, SendDataResume)
     objParcel.writeInt32(IuMtcCall::RESUME);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Resume(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Resume(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -167,8 +158,7 @@ TEST_F(JniMtcCallTest, SendDataTerminate)
     objParcel.writeInt32(IuMtcCall::TERMINATE);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Terminate(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Terminate(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -178,8 +168,7 @@ TEST_F(JniMtcCallTest, SendDataUpdate)
     objParcel.writeInt32(IuMtcCall::UPDATE);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Update(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Update(_, _, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -189,8 +178,7 @@ TEST_F(JniMtcCallTest, SendDataAcceptUpdate)
     objParcel.writeInt32(IuMtcCall::ACCEPT_UPDATE);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, AcceptUpdate(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, AcceptUpdate(_, _, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -200,8 +188,7 @@ TEST_F(JniMtcCallTest, SendDataRejectUpdate)
     objParcel.writeInt32(IuMtcCall::REJECT_UPDATE);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, RejectUpdate(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, RejectUpdate(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -211,8 +198,7 @@ TEST_F(JniMtcCallTest, SendDataCancelUpdate)
     objParcel.writeInt32(IuMtcCall::CANCEL_UPDATE);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, CancelUpdate(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, CancelUpdate(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -222,8 +208,7 @@ TEST_F(JniMtcCallTest, SendDataAcceptResume)
     objParcel.writeInt32(IuMtcCall::ACCEPT_RESUME);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, AcceptResume(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, AcceptResume(_, _, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -233,8 +218,7 @@ TEST_F(JniMtcCallTest, SendDataRejectResume)
     objParcel.writeInt32(IuMtcCall::REJECT_RESUME);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, RejectResume(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, RejectResume(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -245,8 +229,7 @@ TEST_F(JniMtcCallTest, SendDataSendUssd)
     objParcel.writeInt32(IuMtcCall::SEND_USSD);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, SendUssd(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, SendUssd(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -255,11 +238,11 @@ TEST_F(JniMtcCallTest, SendDataStartConf)
 {
     objParcel.writeInt32(IuMtcCall::STARTCONF);
     objParcel.setDataPosition(0);
-// TODO: implement logic
-/*
-    EXPECT_CALL(objMockController, (_))
-            .Times(1);
-*/
+    // TODO: implement logic
+    /*
+        EXPECT_CALL(objMockController, (_))
+                .Times(1);
+    */
     pJniCall->SendData(objParcel);
 }
 
@@ -268,8 +251,7 @@ TEST_F(JniMtcCallTest, SendDataConfMerge)
     objParcel.writeInt32(IuMtcCall::CONF_MERGE);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, MergeToConference(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, MergeToConference(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -278,11 +260,11 @@ TEST_F(JniMtcCallTest, SendDataConfExpand)
 {
     objParcel.writeInt32(IuMtcCall::CONF_EXPAND);
     objParcel.setDataPosition(0);
-// TODO: implement logic
-/*
-    EXPECT_CALL(objMockController, (_))
-            .Times(1);
-*/
+    // TODO: implement logic
+    /*
+        EXPECT_CALL(objMockController, (_))
+                .Times(1);
+    */
     pJniCall->SendData(objParcel);
 }
 
@@ -291,8 +273,7 @@ TEST_F(JniMtcCallTest, SendDataConfJoin)
     objParcel.writeInt32(IuMtcCall::CONF_JOIN);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, AddToConference(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, AddToConference(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -302,8 +283,7 @@ TEST_F(JniMtcCallTest, SendDataConfDrop)
     objParcel.writeInt32(IuMtcCall::CONF_DROP);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, RemoveFromConference(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, RemoveFromConference(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -313,8 +293,7 @@ TEST_F(JniMtcCallTest, SendDataEctStart)
     objParcel.writeInt32(IuMtcCall::ECT_START);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Transfer(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Transfer(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }
@@ -324,8 +303,7 @@ TEST_F(JniMtcCallTest, SendDataEctStartBlind)
     objParcel.writeInt32(IuMtcCall::ECT_START_BLIND);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Transfer(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockController, Transfer(_, _)).Times(1);
 
     pJniCall->SendData(objParcel);
 }

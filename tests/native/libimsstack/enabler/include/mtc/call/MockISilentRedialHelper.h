@@ -17,8 +17,8 @@
 #ifndef MOCK_I_SILENT_REDIAL_HELPER_H_
 #define MOCK_I_SILENT_REDIAL_HELPER_H_
 
-#include <gmock/gmock.h>
 #include "call/ISilentRedialHelper.h"
+#include <gmock/gmock.h>
 
 class MockISilentRedialHelper : public ISilentRedialHelper
 {

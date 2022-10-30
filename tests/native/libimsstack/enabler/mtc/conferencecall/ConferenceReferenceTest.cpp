@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include "MtcContextRepository.h"
-#include "conferencecall/ConferenceReference.h"
-#include "conferencecall/ConferenceDef.h"
-#include "conferencecall/MockIConferenceReferenceListener.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "core/MockIReference.h"
-#include "core/MockIMessage.h"
-#include "core/MockISession.h"
-#include "sipcore/MockISipMessage.h"
-#include "helper/MockICallStateProxy.h"
-#include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
-#include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
-#include "conferencecall/MockCallConnectionIdManager.h"
-#include "configuration/MtcConfigurationProxy.h"
-#include "configuration/MockIMtcConfigurationManager.h"
-#include "sipcore/SipStatusCode.h"
-#include "call/MockIMtcCallManager.h"
+#include "MtcContextRepository.h"
+#include "call/IMtcSession.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
-#include "call/IMtcSession.h"
-#include "precondition/MockIMtcPreconditionManager.h"
+#include "conferencecall/ConferenceDef.h"
+#include "conferencecall/ConferenceReference.h"
+#include "conferencecall/MockCallConnectionIdManager.h"
+#include "conferencecall/MockIConferenceReferenceListener.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "core/MockIMessage.h"
+#include "core/MockIReference.h"
+#include "core/MockISession.h"
+#include "helper/MockICallStateProxy.h"
+#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
+#include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
 #include "media/MockIMtcMediaManager.h"
+#include "precondition/MockIMtcPreconditionManager.h"
+#include "sipcore/MockISipMessage.h"
+#include "sipcore/SipStatusCode.h"
 #include "utility/MessageUtils.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -95,8 +95,7 @@ protected:
         pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
-        ON_CALL(objMockContext, GetMessageUtils)
-                .WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objMockContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         ON_CALL(objMockContext, GetCallStateProxy).WillByDefault(ReturnRef(objMockCallStateProxy));
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));

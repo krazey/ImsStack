@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "MtcContextRepository.h"
-#include "MockIMtcContext.h"
 #include "IMtcContext.h"
+#include "MockIMtcContext.h"
+#include "MtcContextRepository.h"
+#include <gtest/gtest.h>
 
 namespace android
 {
