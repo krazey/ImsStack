@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.telephony.CallQuality;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.text.TextUtils;
 
@@ -232,13 +233,61 @@ public class MtcCall extends Call implements ConferenceTracker {
         public void onCallRttAudioIndication(MtcCall call, boolean status) {
             // no-op
         }
+
+        /**
+         * Called when the AudioSession is opened
+         */
+        public void onAudioSessionOpened(MtcCall call) {
+            // no-op
+        }
+
+        /**
+         * Called when the AudioSession is closed
+         */
+        public void onAudioSessionClosed(MtcCall call) {
+            // no-op
+        }
+        /**
+        * Called when the call quality changed report is received
+        *
+        * @param call the object of this {@code MtcCall}
+        * @param quality the call quality report object
+        */
+        public void onCallQualityChanged(MtcCall call, CallQuality quality) {
+            // no-op
+        }
     }
 
+    /**
+     * Listener interface for audio session callback
+     */
+    private class AudioSessionListener extends MtcMediaSession.AudioListener {
+        @Override
+        public void onAudioSessionOpened() {
+            if (mListener != null) {
+                mListener.onAudioSessionOpened(MtcCall.this);
+            }
+        }
+
+        @Override
+        public void onAudioSessionClosed() {
+            if (mListener != null) {
+                mListener.onAudioSessionClosed(MtcCall.this);
+            }
+        }
+
+        @Override
+        public void onCallQualityChanged(CallQuality callQuality) {
+            if (mListener != null) {
+                mListener.onCallQualityChanged(MtcCall.this, callQuality);
+            }
+        }
+    }
 
     /**
      * Listener interface for RTT call
      */
-    private class RttSessionListener extends MtcMediaSession.RttListener {
+    private class TextSessionListener extends MtcMediaSession.TextListener {
         @Override
         public void onRttMessageReceived(MtcMediaSession session, String data) {
             log("onRttMessageReceived");
@@ -307,7 +356,8 @@ public class MtcCall extends Call implements ConferenceTracker {
     private final MtcConference mConference;
     private final MtcMediaSession mMediaSession;
     private MtcCall.Listener mListener = null;
-    private MtcCall.RttSessionListener mRttListener = null;
+    private MtcCall.AudioSessionListener mAudioListener = null;
+    private MtcCall.TextSessionListener mTextListener = null;
     private MtcCallInfo mCallInfo = null;
     private MediaInfo mMediaInfo = null;
     private CallReasonInfo mTerminationReason = null;
@@ -370,9 +420,12 @@ public class MtcCall extends Call implements ConferenceTracker {
         mConference = new MtcConference(mContext.getCallLooper(), this, this);
         mMediaSession = new MtcMediaSession(mContext, this);
 
+        mAudioListener = new AudioSessionListener();
+        mMediaSession.setAudioListener(mAudioListener);
+
         if (CallFeature.isRttSupported(mContext.getSlotId())) {
-            mRttListener = new RttSessionListener();
-            mMediaSession.setRttListener(mRttListener);
+            mTextListener = new TextSessionListener();
+            mMediaSession.setTextListener(mTextListener);
         }
 
         // ConferenceInfo: to manage the participants in the conference call
@@ -427,11 +480,13 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         mConference.dispose();
 
-        mRttListener = null;
+        mAudioListener = null;
+        mTextListener = null;
 
         requestCloseSessionToImsMediaSession();
 
-        mMediaSession.setRttListener(null);
+        mMediaSession.setAudioListener(null);
+        mMediaSession.setTextListener(null);
         mMediaSession.dispose();
 
         Message.obtain(mHandler, MSG_CLEAR_INTERFACE,

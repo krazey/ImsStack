@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.media;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.os.Parcel;
@@ -223,15 +224,9 @@ public class AudioSessionCallbackHandlerTest {
     public void testCallQualityChanged() {
 
         CallQuality callQuality = MediaTestUtils.createCallQuality();
-        Parcel testParcel = Parcel.obtain();
-
-        testParcel.writeInt(MediaConstants.NOTIFY_CALL_QUALITY_CHANGE);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        callQuality.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         mAudioSessionCallbackHandler.callQualityChanged(callQuality);
 
-        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
-        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        verify(mMockMtcMediaSession).callQualityChanged(eq(callQuality));
     }
 
     @Test

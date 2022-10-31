@@ -86,7 +86,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         mMediaSession = mediaSession;
 
         if (mediaSession != null) {
-            mediaSession.setListener(mListenerProxy);
+            mediaSession.setVideoListener(mListenerProxy);
         }
 
         if (callSession != null) {
@@ -195,14 +195,14 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     public void updateMediaSession(MtcMediaSession mediaSession) {
         if (mMediaSession != null) {
-            mMediaSession.setListener(null);
+            mMediaSession.setVideoListener(null);
             mMediaSession = null;
         }
 
         mMediaSession = mediaSession;
 
         if (mMediaSession != null) {
-            mMediaSession.setListener(mListenerProxy);
+            mMediaSession.setVideoListener(mListenerProxy);
         }
     }
 
@@ -212,7 +212,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         }
 
         if (mMediaSession != null) {
-            mMediaSession.setListener(null);
+            mMediaSession.setVideoListener(null);
             mMediaSession = null;
         }
     }
@@ -450,7 +450,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private class MtcMediaSessionListenerProxy extends MtcMediaSession.Listener {
+    private class MtcMediaSessionListenerProxy extends MtcMediaSession.VideoListener {
         @Override
         public void onMediaSessionDataUsageChanged(MtcMediaSession session,
                 long dataSize) {

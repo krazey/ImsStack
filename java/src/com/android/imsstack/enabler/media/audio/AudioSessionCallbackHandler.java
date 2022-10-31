@@ -52,13 +52,16 @@ public class AudioSessionCallbackHandler {
      * @param result result of the open session request
      */
     public void openSessionResponse(@ImsMediaSession.SessionOperationResult int result) {
-        ImsLog.d("openSession Result=" + result);
+        ImsLog.d("openSessionResponse Result=" + result);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.RESPONSE_OPEN_SESSION);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(result);
 
+        if (result == ImsMediaSession.RESULT_SUCCESS) {
+            getMtcMediaInterface().audioSessionOpened();
+        }
         getMtcMediaInterface().sendRequest(parcel);
     }
 
@@ -211,17 +214,19 @@ public class AudioSessionCallbackHandler {
      */
     public void callQualityChanged(CallQuality callQuality) {
         ImsLog.v("callQualityChanged");
-
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(MediaConstants.NOTIFY_CALL_QUALITY_CHANGE);
-        parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        callQuality.writeToParcel(parcel,  Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-
-        getMtcMediaInterface().sendRequest(parcel);
+        getMtcMediaInterface().callQualityChanged(callQuality);
     }
 
     /**
-     * Handles notification when when the ImsMedia service is disconnected
+     * Handles notification when the AudioSession is closed
+     */
+    public void closeSessionResponse() {
+        ImsLog.d("closeSessionResponse");
+        getMtcMediaInterface().audioSessionClosed();
+    }
+
+    /**
+     * Handles notification when the ImsMedia service is disconnected
      */
     public void nofityMediaDetach() {
         ImsLog.v("nofityMediaDetach");

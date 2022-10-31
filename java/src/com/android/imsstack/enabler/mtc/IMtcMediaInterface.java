@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
+import android.telephony.CallQuality;
 
 import com.android.imsstack.enabler.media.IMediaListener;
 
@@ -39,4 +40,20 @@ public interface IMtcMediaInterface {
      * @param rttMessage String containing the received characters.
      */
     void rttMessageReceived(String rttMessage);
+
+    /**
+     * Notified when the audio session opened
+     */
+    void audioSessionOpened();
+
+    /**
+     * Notified when the audio session closed
+     */
+    void audioSessionClosed();
+
+    /**
+     * Notified when the call qualtiy changed
+     * @param callQuality Defined in android.telephony.CallQuality
+     */
+    void callQualityChanged(CallQuality callQuality);
 }
