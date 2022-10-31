@@ -41,11 +41,9 @@ public class MtsController {
     /* GII-SMSImpl Message */
     public static final int MO_INVALID = 0;
     public static final int MO_SUCCESS = 1;
-    public static final int MO_IMS_TEMP_FAILURE = 2;
-    public static final int MO_IMS_PERM_FAILURE = 3;
-    public static final int MO_IMS_LIMITEDSMSSVCREGI = 4;
-    public static final int MO_RETRY_CS = 5;
-    public static final int MO_RETRY_CS_OR_SGS = 6;
+    public static final int MO_ERROR_GENERIC = 2;
+    public static final int MO_ERROR_RETRY = 3;
+    public static final int MO_ERROR_FALLBACK = 4;
 
     public static final int MT_INVALID = 0;
     public static final int MT_SUCCESS = 1;
@@ -57,6 +55,10 @@ public class MtsController {
     public static final int SCBM_TERMINATED = 2;
     public static final int SCBM_TERMINATED_BY_ECALL = 3;
 
+    public static final int SMS_FORMAT_INVALID = 0;
+    public static final int SMS_FORMAT_3GPP = 1;
+    public static final int SMS_FORMAT_3GPP2 = 2;
+
     /* REQUEST_REPORT_MO_STATUS param(bundle) name */
     public static final String REPORTMOSTATUS_REASON = "ReportMOStatus_reason";
     public static final String REPORTMOSTATUS_SMSFORMAT = "ReportMOStatus_smsFormat";
@@ -64,16 +66,37 @@ public class MtsController {
     public static final String REPORTMOSTATUS_SEQID = "ReportMOStatus_seqId";
 
     public static class Listener {
-        /*
+        /**
          * Invokes when SMS enabler gets a response to the sent SIP MESSAGE(SMS-SUBMIT) from
          * IP-SM-GW.
+         *
+         * @param reason
+         *     {@link MtsController#MO_SUCCESS} The message was sent successfully
+         *     {@link MtsController#MO_ERROR_GENERIC} The message was not sent successfully
+         *     UE needs to show the failure to the user
+         *     {@link MtsController#MO_ERROR_RETRY} The message was not sent successfully, and
+         *     it can be retryable
+         *     {@link MtsController#MO_ERROR_FALLBACK} The message was not sent successfully, and
+         *     it shall be sent by using other method
+         * @param format
+         *     {@link MtsController#SMS_FORMAT_3GPP}
+         *     {@link MtsController#SMS_FORMAT_3GPP2}
+         * TODO(Mts): Consider to implement in AP SMS Stack or delete retry-after parameter here
+         * @param retryAfter
+         * @param messageReference the message reference, which may be 1 byte if it is in 3GPP
+         *     format (see TS.123.040) or 2 bytes if it is in 3GPP2 format (see 3GPP2 C.S0015-B).
          */
         public void notifyStatusForOutgoingMessage(int reason, int format, int retryAfter,
                 int messageReference) {
             // no-op
         }
-        /*
+        /**
          * Invokes when SMS enabler receives a SIP MESSAGE(SMS-DELIVERY) from IP-SM-GW.
+         *
+         * @param smsFormat
+         *     {@link MtsController#SMS_FORMAT_3GPP}
+         *     {@link MtsController#SMS_FORMAT_3GPP2}
+         * @param pduData PDU representing the content of the received SIP MESSAGE.
          * This method returns:
          * 1 - MT_SUCCESS
          * 2 - MT_FAILURE
@@ -236,7 +259,7 @@ public class MtsController {
         }
 
         Bundle bundle = new Bundle();
-        bundle.putInt(REPORTMOSTATUS_REASON, MO_IMS_TEMP_FAILURE);
+        bundle.putInt(REPORTMOSTATUS_REASON, MO_ERROR_RETRY);
         bundle.putInt(REPORTMOSTATUS_SMSFORMAT, smsFormat);
         bundle.putInt(REPORTMOSTATUS_RETRYAFTER, 0);
         bundle.putInt(REPORTMOSTATUS_SEQID, seqId);

@@ -107,16 +107,10 @@ public:
         {
             case MO_SUCCESS:
                 return "MO_SUCCESS";
-            case MO_IMS_TEMP_FAILURE:
-                return "MO_IMS_TEMP_FAILURE";
-            case MO_IMS_PERM_FAILURE:
-                return "MO_IMS_PERM_FAILURE";
-            case MO_IMS_LIMITEDSMSSVCREGI:
-                return "MO_IMS_LIMITEDSMSSVCREGI";
-            case MO_RETRY_CS:
-                return "MO_RETRY_CS";
-            case MO_RETRY_CS_OR_SGS:
-                return "MO_RETRY_CS_OR_SGS";
+            case MO_ERROR_GENERIC:
+                return "MO_ERROR_GENERIC";
+            case MO_ERROR_RETRY:
+                return "MO_ERROR_RETRY";
             default:
                 return "MO_INVALID";
         }

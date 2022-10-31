@@ -311,9 +311,11 @@ public class SmsRelayLayer {
                     }
                     mSmsRLStateMachine = mTokenStateTrackerMap.get(token);
 
-                    if (statusResult == MtsController.MO_IMS_TEMP_FAILURE) {
+                    if (statusResult == MtsController.MO_ERROR_GENERIC) {
+                        status = ImsSmsImplBase.SEND_STATUS_ERROR;
+                    } else if (statusResult == MtsController.MO_ERROR_RETRY) {
                         status = ImsSmsImplBase.SEND_STATUS_ERROR_RETRY;
-                    } else if (statusResult == MtsController.MO_IMS_PERM_FAILURE) {
+                    } else if (statusResult == MtsController.MO_ERROR_FALLBACK) {
                         status = ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK;
                     }
                     mTokenStateTrackerMap.remove(token);

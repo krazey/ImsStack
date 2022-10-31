@@ -48,11 +48,8 @@ enum
 {
     MO_INVALID = 0,
     MO_SUCCESS = 1,
-    MO_IMS_TEMP_FAILURE = 2,
-    MO_IMS_PERM_FAILURE = 3,
-    MO_IMS_LIMITEDSMSSVCREGI = 4,
-    MO_RETRY_CS = 5,
-    MO_RETRY_CS_OR_SGS = 6,
+    MO_ERROR_GENERIC = 2,
+    MO_ERROR_RETRY = 3,
 };
 
 enum
@@ -73,9 +70,9 @@ enum
 
 enum
 {
+    SMSFORMAT_INVALID = 0,
     SMSFORMAT_3GPP = 1,
     SMSFORMAT_3GPP2 = 2,
-    SMSFORMAT_INVALID = 3,
 };
 
 #endif

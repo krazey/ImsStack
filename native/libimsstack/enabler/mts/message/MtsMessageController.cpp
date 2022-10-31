@@ -531,35 +531,35 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
     if (strAddress.GetLength() == 0)
     {
         IMS_TRACE_E(0, "Target address is invalid", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         return;
     }
 
     if (objData.GetLength() == 0)
     {
         IMS_TRACE_E(0, "Sending SMS bin Size zero", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         return;
     }
 
     if (piMtsServiceState->IsMoServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts is not READY STATE ", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         return;
     }
 
     if (piMtsServiceState->IsTemporaryServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts service is temporarily blocked", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_LIMITEDSMSSVCREGI, eSmsFormat);
+        ReportTransmissionResult(MO_ERROR_RETRY, eSmsFormat);
         return;
     }
 
     if (pMtsICoreService == IMS_NULL)
     {
         IMS_TRACE_E(0, "Fail to get MtsICoreService instance ", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         return;
     }
 
@@ -574,7 +574,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
     if (strImpu.GetLength() == 0)
     {
         IMS_TRACE_E(0, "Failed to form basic information for sending sms!!", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         return;
     }
 
@@ -611,7 +611,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
             IMS_TRACE_E(
                     0, "there's a sending sms message with the same destination address", 0, 0, 0);
             piMtsMessage->PrintInfo();
-            ReportTransmissionResult(MO_IMS_TEMP_FAILURE, eSmsFormat, nSeqId);
+            ReportTransmissionResult(MO_ERROR_RETRY, eSmsFormat, nSeqId);
             return;
         }
     }
@@ -621,7 +621,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
     if (piPageMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "piPageMessage is null", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         delete piMtsMessage;
         return;
     }
@@ -631,7 +631,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
     IMessage* pIMessage = piPageMessage->GetNextRequest();
     if (ConstructSendMessage(pIMessage, objData, eSmsFormat, bEmergency) == IMS_FALSE)
     {
-        ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         delete piMtsMessage;
         return;
     }
@@ -642,7 +642,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
             IMS_FAILURE)
     {
         IMS_TRACE_E(0, "Failed to send a IPageMessage", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_TEMP_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_RETRY, eSmsFormat, nSeqId);
         delete piMtsMessage;
         return;
     }
@@ -778,7 +778,7 @@ IMS_BOOL MtsMessageController::FormDestinationByMti(IN SmsFormatType eSmsFormat,
                 else
                 {
                     IMS_TRACE_E(0, "MtsMessage is null; MTI[%d]", nGsmMti, 0, 0);
-                    ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+                    ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
                     return IMS_FALSE;
                 }
             }
@@ -795,7 +795,7 @@ IMS_BOOL MtsMessageController::FormDestinationByMti(IN SmsFormatType eSmsFormat,
             strAddress, bIsAckOrError, strLastIpSmgw, strDestination) == IMS_FALSE)
     {
         IMS_TRACE_E(0, "Failed to form the destination!!", 0, 0, 0);
-        ReportTransmissionResult(MO_IMS_PERM_FAILURE, eSmsFormat, nSeqId);
+        ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         return IMS_FALSE;
     }
 
@@ -894,7 +894,6 @@ PRIVATE void MtsMessageController::ReportTransmissionResult(
 
     IMS_SINT32 nResultCode = MO_INVALID;
 
-    // TODO: needs to convert from SIP ERROR to MO result code by each carrier's requirement
     switch (nResponse)
     {
         case SipStatusCode::SC_200:
@@ -902,15 +901,12 @@ PRIVATE void MtsMessageController::ReportTransmissionResult(
             nResultCode = MO_SUCCESS;
             break;
 
-        case MO_IMS_PERM_FAILURE:
-        case MO_IMS_LIMITEDSMSSVCREGI:
-        case MO_RETRY_CS:
-        case MO_RETRY_CS_OR_SGS:
-            nResultCode = nResponse;
+        case MO_ERROR_GENERIC:
+            nResultCode = MO_ERROR_GENERIC;
             break;
 
         default:
-            nResultCode = MO_IMS_TEMP_FAILURE;
+            nResultCode = MO_ERROR_RETRY;
             break;
     }
 
@@ -920,7 +916,7 @@ PRIVATE void MtsMessageController::ReportTransmissionResult(
 PRIVATE void MtsMessageController::ReportTransmissionFailureWithRetryTime(
         IN SmsFormatType eSmsFormat, IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId /*= -1*/)
 {
-    IMS_UINT32 nResultCode = MO_IMS_TEMP_FAILURE;
+    IMS_UINT32 nResultCode = MO_ERROR_RETRY;
     IMS_TRACE_I("ReportTransmissionFailureWithRetryTime : nResultCode[%d], eSmsFormat[%s], "
                 "nRetryTime[%d]",
             nResultCode, PS_SmsFormatType(eSmsFormat), nRetryTime);
@@ -1076,11 +1072,11 @@ void MtsMessageController::TerminateMessage(IN IMtsMessage* piMtsMessage)
 {
     IMS_TRACE_I("TerminateMessage : Destroy MtsMessage", 0, 0, 0);
 
-    if (piMtsMessage->GetTransactionType() != MtsTransactionType::MESSAGE_TYPE_RECEIVE)
+    if (piMtsMessage->GetTransactionType() == MtsTransactionType::MESSAGE_TYPE_SEND)
     {
-        // if it's a sending mo message, then report the permanent error
+        // if it's a sending mo message, then report the mo status reason as MO_ERROR_GENERIC
         ReportTransmissionResult(
-                MO_IMS_PERM_FAILURE, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
+                MO_ERROR_GENERIC, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
     }
 
     delete piMtsMessage;

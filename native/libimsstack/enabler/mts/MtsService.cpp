@@ -351,7 +351,7 @@ void MtsService::ImsRadio_OnConnectionFailed(
 
     if (m_pSmsInfo != IMS_NULL)
     {
-        ReportMoStatus(MO_IMS_TEMP_FAILURE, m_pSmsInfo->eSmsFormat, 0, m_pSmsInfo->nSeqId);
+        ReportMoStatus(MO_ERROR_RETRY, m_pSmsInfo->eSmsFormat, 0, m_pSmsInfo->nSeqId);
         delete m_pSmsInfo;
         m_pSmsInfo = IMS_NULL;
     }
@@ -550,7 +550,7 @@ void MtsService::CheckRadioTraffic(IN IMS_UINT32 nTrafficType)
     }
     else
     {
-        ReportMoStatus(MO_IMS_TEMP_FAILURE, m_pSmsInfo->eSmsFormat, 0, m_pSmsInfo->nSeqId);
+        ReportMoStatus(MO_ERROR_RETRY, m_pSmsInfo->eSmsFormat, 0, m_pSmsInfo->nSeqId);
         delete m_pSmsInfo;
         m_pSmsInfo = IMS_NULL;
     }
