@@ -516,7 +516,7 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
     IMSVector<IMS_SINT32> objErrCodeByNo911Addr;
     objErrCodeByNo911Addr.Clear();
     objErrCodeByNo911Addr.Add(2);
-    EXPECT_CALL(objMockAosConfig, GetWfcRegEventErrorByMissing911Address())
+    EXPECT_CALL(objMockAosConfig, GetWfcSubErrorByMissing911Address())
             .Times(1)
             .WillOnce(ReturnRef(objErrCodeByNo911Addr));
 
@@ -817,7 +817,7 @@ TEST_F(AosSubscriptionTest, IsWfcErrorCodeByMissing911Address)
     IMSVector<IMS_SINT32> objErrDisplayRequired;
     objErrDisplayRequired.Clear();
     objErrDisplayRequired.Add(CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403);
-    EXPECT_CALL(objMockAosConfig, GetWfcRegEventErrorByMissing911Address())
+    EXPECT_CALL(objMockAosConfig, GetWfcSubErrorByMissing911Address())
             .Times(2)
             .WillRepeatedly(ReturnRef(objErrDisplayRequired));
 
@@ -1054,7 +1054,7 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
     IMSVector<IMS_SINT32> objErrDisplayRequired;
     objErrDisplayRequired.Clear();
     objErrDisplayRequired.Add(1);
-    EXPECT_CALL(objMockAosConfig, GetWfcRegEventErrorByMissing911Address())
+    EXPECT_CALL(objMockAosConfig, GetWfcSubErrorByMissing911Address())
             .Times(1)
             .WillOnce(ReturnRef(objErrDisplayRequired));
     EXPECT_CALL(objMockIAosSubscriptionListener,

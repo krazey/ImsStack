@@ -632,8 +632,7 @@ TEST_F(AosRegistrationTest, RequestCmd)
 
     m_pTestAosRegistration->RequestCmd(IAosRegistration::CMD_REFRESH_REGINFO);
 
-    EXPECT_CALL(
-            m_objMockAosIAosNConfiguration, IsRegistrationWhenIpcanChangedWithImsActiveCallHeld())
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, IsRegWithIpcanChangedDuringImsCallHeld())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
     m_pTestAosRegistration->SetImsCall(IMS_TRUE);

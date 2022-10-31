@@ -443,7 +443,7 @@ TEST_F(AosPcscfTest, HasNextPcscf)
 {
     MockIAosNConfiguration objMockIAosNConfiguration;
     SetNConfig(&objMockIAosNConfiguration);
-    EXPECT_CALL(objMockIAosNConfiguration, GetRegistrationRetryDefaultPolicy())
+    EXPECT_CALL(objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
             .Times(AnyNumber())
             .WillRepeatedly(
                     Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
@@ -457,7 +457,7 @@ TEST_F(AosPcscfTest, GetNextPcscfIndex)
 {
     MockIAosNConfiguration objMockIAosNConfiguration;
     SetNConfig(&objMockIAosNConfiguration);
-    EXPECT_CALL(objMockIAosNConfiguration, GetRegistrationRetryDefaultPolicy())
+    EXPECT_CALL(objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
             .Times(AnyNumber())
             .WillRepeatedly(
                     Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
@@ -478,7 +478,7 @@ TEST_F(AosPcscfTest, GetNextPcscf)
     IMS_UINT32 nPort;
     MockIAosNConfiguration objMockIAosNConfiguration;
     SetNConfig(&objMockIAosNConfiguration);
-    EXPECT_CALL(objMockIAosNConfiguration, GetRegistrationRetryDefaultPolicy())
+    EXPECT_CALL(objMockIAosNConfiguration, GetRegRetryDefaultPolicy())
             .Times(AnyNumber())
             .WillRepeatedly(
                     Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF));
