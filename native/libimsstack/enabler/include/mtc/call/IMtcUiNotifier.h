@@ -19,7 +19,7 @@
 
 #include "AString.h"
 #include "ImsList.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 

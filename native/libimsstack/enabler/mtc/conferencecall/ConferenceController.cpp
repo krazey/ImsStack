@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-#include "conferencecall/ConferenceConfigurationWrapper.h"
-#include "conferencecall/ConferenceController.h"
-#include "conferencecall/ConferenceFactory.h"
-#include "conferencecall/ConferenceReference.h"
-#include "conferencecall/CallConnectionIdManager.h"
+#include "ICoreService.h"
 #include "IMessage.h"
-#include "call/IMtcCallManager.h"
 #include "IMtcService.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "IuMtcService.h"
-#include "utility/MessageUtil.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "helper/ICallStateProxy.h"
-#include "call/IMtcSession.h"
 #include "call/IMtcCallContext.h"
-#include "ICoreService.h"
+#include "call/IMtcCallManager.h"
+#include "call/IMtcSession.h"
+#include "conferencecall/CallConnectionIdManager.h"
+#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceController.h"
+#include "conferencecall/ConferenceFactory.h"
+#include "conferencecall/ConferenceReference.h"
+#include "helper/ICallStateProxy.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -388,8 +388,8 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& 
 
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyJoinFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1),
-                m_objParticipantList);
+        m_objNotifier.NotifyJoinFailed(
+                CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1), m_objParticipantList);
         return;
     }
 

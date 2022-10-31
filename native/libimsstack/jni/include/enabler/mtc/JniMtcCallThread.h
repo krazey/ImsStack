@@ -19,10 +19,10 @@
 
 #include "BaseService.h"
 #include "BaseServiceThread.h"
+#include "IJniMtcCallThread.h"
+#include "ImsMap.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
-#include "ImsMap.h"
-#include "IJniMtcCallThread.h"
 
 class MediaInfo;
 class SuppService;

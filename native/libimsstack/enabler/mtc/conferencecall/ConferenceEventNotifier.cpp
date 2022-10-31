@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#include "conferencecall/ConferenceEventNotifier.h"
 #include "IuMtcCall.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcUiNotifier.h"
-#include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/CallConnectionIdManager.h"
-#include "media/IMtcMediaManager.h"
+#include "conferencecall/ConferenceEventNotifier.h"
+#include "conferencecall/ConferenceParticipantList.h"
 #include "helper/MtcSupplementaryService.h"
+#include "media/IMtcMediaManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

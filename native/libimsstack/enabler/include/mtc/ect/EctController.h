@@ -17,11 +17,11 @@
 #ifndef ECT_CONTROLLER_H_
 #define ECT_CONTROLLER_H_
 
+#include "CallReasonInfo.h"
+#include "ITimer.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCallManager.h"
 #include "ect/IEctReferenceListener.h"
-#include "CallReasonInfo.h"
-#include "ITimer.h"
 #include "sipcore/SipStatusCode.h"
 #include <memory>
 

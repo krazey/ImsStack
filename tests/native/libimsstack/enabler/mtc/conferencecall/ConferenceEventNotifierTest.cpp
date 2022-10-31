@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CallReasonInfo.h"
 #include "MtcDef.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcUiNotifier.h"
-#include "conferencecall/MockCallConnectionIdManager.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceEventNotifier.h"
-#include "conferencecall/MockConferenceParticipantList.h"
 #include "conferencecall/ConferenceParticipantList.h"
+#include "conferencecall/MockCallConnectionIdManager.h"
+#include "conferencecall/MockConferenceParticipantList.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -61,21 +61,15 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallStateProxy)
-                .WillByDefault(ReturnRef(objCallStateProxy));
-        ON_CALL(objCallStateProxy, AddListener(_))
-                .WillByDefault(Return());
+        ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objCallStateProxy, AddListener(_)).WillByDefault(Return());
 
         pIdManager = new MockCallConnectionIdManager(objContext);
-        ON_CALL(*pIdManager, OnConferenceParticipantDisconnected(_))
-                .WillByDefault(Return());
-        ON_CALL(objContext, GetMediaManager)
-                .WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objMediaManager, GetMediaInfo(_))
-                .WillByDefault(Return());
+        ON_CALL(*pIdManager, OnConferenceParticipantDisconnected(_)).WillByDefault(Return());
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objMediaManager, GetMediaInfo(_)).WillByDefault(Return());
 
-        ON_CALL(objContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(objUiNotifier));
+        ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
         SetUpMockParticipantList();
 
@@ -98,19 +92,14 @@ protected:
         objUsers.Append(&objUser);
         pParticipantList = new MockConferenceParticipantList();
 
-        ON_CALL(*pParticipantList, GetMaxUserCount)
-                .WillByDefault(Return(MAX_COUNT));
-        ON_CALL(*pParticipantList, GetSize)
-                .WillByDefault(Return(CONF_SIZE));
-        ON_CALL(*pParticipantList, GetConfUsers)
-                .WillByDefault(Return(objUsers));
+        ON_CALL(*pParticipantList, GetMaxUserCount).WillByDefault(Return(MAX_COUNT));
+        ON_CALL(*pParticipantList, GetSize).WillByDefault(Return(CONF_SIZE));
+        ON_CALL(*pParticipantList, GetConfUsers).WillByDefault(Return(objUsers));
 
         pParticipant = new ConferenceParticipantList::ConferenceParticipant();
         pParticipant->SetConfUser(&objUser);
-        ON_CALL(*pParticipantList, GetAt(0))
-                .WillByDefault(Return(pParticipant));
-        ON_CALL(*pParticipantList, RemoveUser(_))
-                .WillByDefault(Return());
+        ON_CALL(*pParticipantList, GetAt(0)).WillByDefault(Return(pParticipant));
+        ON_CALL(*pParticipantList, RemoveUser(_)).WillByDefault(Return());
     }
 };
 
@@ -118,8 +107,7 @@ TEST_F(ConferenceEventNotifierTest, NotifyMerged)
 {
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
-    ON_CALL(objContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_CALL(objUiNotifier, SendMerged(_, _, _, objUsers));
     pNotifier->NotifyMerged(*pParticipantList);
@@ -182,8 +170,8 @@ TEST_F(ConferenceEventNotifierTest, NotifyJoinFailed)
 TEST_F(ConferenceEventNotifierTest, NotifyConferenceInfo)
 {
     AString strEmpty("");
-    EXPECT_CALL(objUiNotifier,
-            SendNotifyConfInfo(strEmpty, strEmpty, MAX_COUNT, CONF_SIZE, strEmpty));
+    EXPECT_CALL(
+            objUiNotifier, SendNotifyConfInfo(strEmpty, strEmpty, MAX_COUNT, CONF_SIZE, strEmpty));
     pNotifier->NotifyConferenceInfo(*pParticipantList);
 }
 
@@ -201,19 +189,15 @@ TEST_F(ConferenceEventNotifierTest, NotifyIndividualCallTerminated)
     MockIMtcCallContext obj1To1CallContext;
     MockIMtcUiNotifier obj1To1CallNotifier;
 
-    ON_CALL(objContext, GetCallManager)
-            .WillByDefault(ReturnRef(objCallManager));
-    ON_CALL(objCallManager, GetCallByCallKey(n1To1Key))
-            .WillByDefault(Return(&obj1To1Call));
-    ON_CALL(obj1To1Call, GetKey)
-            .WillByDefault(Return(n1To1Key));
-    ON_CALL(obj1To1Call, GetCallContext)
-            .WillByDefault(ReturnRef(obj1To1CallContext));
-    ON_CALL(obj1To1CallContext, GetUiNotifier)
-            .WillByDefault(ReturnRef(obj1To1CallNotifier));
+    ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
+    ON_CALL(objCallManager, GetCallByCallKey(n1To1Key)).WillByDefault(Return(&obj1To1Call));
+    ON_CALL(obj1To1Call, GetKey).WillByDefault(Return(n1To1Key));
+    ON_CALL(obj1To1Call, GetCallContext).WillByDefault(ReturnRef(obj1To1CallContext));
+    ON_CALL(obj1To1CallContext, GetUiNotifier).WillByDefault(ReturnRef(obj1To1CallNotifier));
 
-    EXPECT_CALL(obj1To1CallNotifier, SendTerminated(
-            CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, CODE_USER_TERMINATED_BY_REMOTE)));
+    EXPECT_CALL(obj1To1CallNotifier,
+            SendTerminated(CallReasonInfo(
+                    CODE_USER_TERMINATED_BY_REMOTE, CODE_USER_TERMINATED_BY_REMOTE)));
     pNotifier->NotifyIndividualCallTerminated(n1To1Key);
 }
 

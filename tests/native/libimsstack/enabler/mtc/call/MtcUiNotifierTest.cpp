@@ -15,22 +15,22 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
+#include "CallReasonInfo.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "CallReasonInfo.h"
-#include "call/MtcUiNotifier.h"
-#include "call/ParticipantInfo.h"
+#include "JniCallInfo.h"
 #include "JniEnablerConnector.h"
+#include "MockIJniEnabler.h"
 #include "MockIJniMtcCallThread.h"
 #include "MockIJniMtcServiceThread.h"
-#include "MockIJniEnabler.h"
 #include "call/MockIMtcCallContext.h"
-#include "JniCallInfo.h"
+#include "call/MtcUiNotifier.h"
+#include "call/ParticipantInfo.h"
 #include "conferencecall/ConferenceDef.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -64,13 +64,10 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objMockContext, CreateJniCallInfo)
-                .WillByDefault(Return(objJniCallInfo));
-        ON_CALL(objMockContext, GetSlotId)
-                .WillByDefault(Return(SLOT_ID));
+        ON_CALL(objMockContext, CreateJniCallInfo).WillByDefault(Return(objJniCallInfo));
+        ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(SLOT_ID));
 
-        ON_CALL(objMockJniEnabler, GetJniThread)
-                .WillByDefault(Return(&objMockCallThread));
+        ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objMockCallThread));
 
         pConnector = &JniEnablerConnector::GetInstance();
         pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, &objMockJniEnabler);
@@ -93,11 +90,9 @@ TEST_F(MtcUiNotifierTest, SendPreIncomingCallReceived)
 {
     MockIJniMtcServiceThread objMockServiceThread;
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_SERVICE, &objMockJniEnabler);
-    ON_CALL(objMockJniEnabler, GetJniThread)
-            .WillByDefault(Return(&objMockServiceThread));
+    ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objMockServiceThread));
 
-    EXPECT_CALL(objMockServiceThread, OnPreIncomingCallReceived(CALL_KEY))
-            .Times(1);
+    EXPECT_CALL(objMockServiceThread, OnPreIncomingCallReceived(CALL_KEY)).Times(1);
 
     pNotifier->SendPreIncomingCallReceived(CALL_KEY);
 }
@@ -105,246 +100,211 @@ TEST_F(MtcUiNotifierTest, SendPreIncomingCallReceived)
 TEST_F(MtcUiNotifierTest, SendIncomingCallReceived)
 {
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    ON_CALL(objMockContext, GetConfigurationProxy)
-            .WillByDefault(ReturnRef(objConfigurationProxy));
+    ON_CALL(objMockContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
     MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
     ON_CALL(objMockContext, GetSupplementaryService)
             .WillByDefault(ReturnRef(objSupplementaryService));
 
-    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _)).Times(1);
 
     pNotifier->SendIncomingCallReceived(
             CALL_KEY, objCallInfo, objMediaInfo, objSuppServices, *pParticipantInfo);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnIncomingCallReceived(_, _, _, _, _, _)).Times(0);
     pNotifier->SendIncomingCallReceived(
             CALL_KEY, objCallInfo, objMediaInfo, objSuppServices, *pParticipantInfo);
 }
 
 TEST_F(MtcUiNotifierTest, SendStarted)
 {
-    EXPECT_CALL(objMockCallThread, OnStarted(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnStarted(_, _, _)).Times(1);
 
     pNotifier->SendStarted(&objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnStarted(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnStarted(_, _, _)).Times(0);
 
     pNotifier->SendStarted(&objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendStartFailed)
 {
-    EXPECT_CALL(objMockCallThread, OnStartFailed(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(1);
 
     pNotifier->SendStartFailed(*pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnStartFailed(_))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnStartFailed(_)).Times(0);
 
     pNotifier->SendStartFailed(*pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendProgressing)
 {
-    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _, _)).Times(1);
 
     pNotifier->SendProgressing(&objCallInfo, &objMediaInfo, objSuppServices, IMS_TRUE);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _, _)).Times(0);
 
     pNotifier->SendProgressing(&objCallInfo, &objMediaInfo, objSuppServices, IMS_TRUE);
 }
 
 TEST_F(MtcUiNotifierTest, SendHeld)
 {
-    EXPECT_CALL(objMockCallThread, OnHeld(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnHeld(_, _, _)).Times(1);
 
     pNotifier->SendHeld(&objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnHeld(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnHeld(_, _, _)).Times(0);
 
     pNotifier->SendHeld(&objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendHoldFailed)
 {
-    EXPECT_CALL(objMockCallThread, OnHoldFailed(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnHoldFailed(_)).Times(1);
 
     pNotifier->SendHoldFailed(*pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnHoldFailed(_))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnHoldFailed(_)).Times(0);
 
     pNotifier->SendHoldFailed(*pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendResumed)
 {
-    EXPECT_CALL(objMockCallThread, OnResumed(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnResumed(_, _, _)).Times(1);
 
     pNotifier->SendResumed(&objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnResumed(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnResumed(_, _, _)).Times(0);
 
     pNotifier->SendResumed(&objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendResumeFailed)
 {
-    EXPECT_CALL(objMockCallThread, OnResumeFailed(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnResumeFailed(_)).Times(1);
 
     pNotifier->SendResumeFailed(*pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnResumeFailed(_))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnResumeFailed(_)).Times(0);
 
     pNotifier->SendResumeFailed(*pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendHeldBy)
 {
-    EXPECT_CALL(objMockCallThread, OnHeldBy(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnHeldBy(_, _, _)).Times(1);
 
     pNotifier->SendHeldBy(&objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnHeldBy(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnHeldBy(_, _, _)).Times(0);
 
     pNotifier->SendHeldBy(&objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendResumedBy)
 {
-    EXPECT_CALL(objMockCallThread, OnResumedBy(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnResumedBy(_, _, _)).Times(1);
 
     pNotifier->SendResumedBy(&objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnResumedBy(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnResumedBy(_, _, _)).Times(0);
 
     pNotifier->SendResumedBy(&objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendTerminated)
 {
-    EXPECT_CALL(objMockCallThread, OnTerminated(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(1);
 
     pNotifier->SendTerminated(*pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnTerminated(_))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnTerminated(_)).Times(0);
 
     pNotifier->SendTerminated(*pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendIncomingResume)
 {
-    EXPECT_CALL(objMockCallThread, OnIncomingResume(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnIncomingResume(_, _, _)).Times(1);
 
     pNotifier->SendIncomingResume(&objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnIncomingResume(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnIncomingResume(_, _, _)).Times(0);
 
     pNotifier->SendIncomingResume(&objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendIncomingUpdate)
 {
-    EXPECT_CALL(objMockCallThread, OnIncomingUpdate(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnIncomingUpdate(_, _, _)).Times(1);
 
     pNotifier->SendIncomingUpdate(CallType::VOIP, &objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnIncomingUpdate(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnIncomingUpdate(_, _, _)).Times(0);
 
     pNotifier->SendIncomingUpdate(CallType::VOIP, &objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendUpdated)
 {
-    EXPECT_CALL(objMockCallThread, OnUpdated(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnUpdated(_, _, _)).Times(1);
 
     pNotifier->SendUpdated(&objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnUpdated(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnUpdated(_, _, _)).Times(0);
 
     pNotifier->SendUpdated(&objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendUpdateFailed)
 {
-    EXPECT_CALL(objMockCallThread, OnUpdateFailed(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnUpdateFailed(_)).Times(1);
 
     pNotifier->SendUpdateFailed(*pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnUpdateFailed(_))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnUpdateFailed(_)).Times(0);
 
     pNotifier->SendUpdateFailed(*pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendUpdatedBy)
 {
-    EXPECT_CALL(objMockCallThread, OnUpdatedBy(_, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnUpdatedBy(_, _, _)).Times(1);
 
     pNotifier->SendUpdatedBy(&objCallInfo, &objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnUpdatedBy(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnUpdatedBy(_, _, _)).Times(0);
 
     pNotifier->SendUpdatedBy(&objCallInfo, &objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendNotifyInfo)
 {
-    EXPECT_CALL(objMockCallThread, OnInformationNotificationReceived(_, _, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnInformationNotificationReceived(_, _, _, _)).Times(1);
 
     pNotifier->SendNotifyInfo(0, "", -1, IMS_FALSE);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnInformationNotificationReceived(_, _, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnInformationNotificationReceived(_, _, _, _)).Times(0);
 
     pNotifier->SendNotifyInfo(0, "", -1, IMS_FALSE);
 }
@@ -379,66 +339,56 @@ TEST_F(MtcUiNotifierTest, SendExpandedBy)
 TEST_F(MtcUiNotifierTest, SendMerged)
 {
     ImsList<ConfUser*> objUsers;
-    EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, _)).Times(1);
 
     pNotifier->SendMerged(&objCallInfo, &objMediaInfo, objSuppServices, objUsers);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, _)).Times(0);
 
     pNotifier->SendMerged(&objCallInfo, &objMediaInfo, objSuppServices, objUsers);
 }
 
 TEST_F(MtcUiNotifierTest, SendMergeFailed)
 {
-    EXPECT_CALL(objMockCallThread, OnMergeFailed(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnMergeFailed(_)).Times(1);
 
     pNotifier->SendMergeFailed(*pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnMergeFailed(_))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnMergeFailed(_)).Times(0);
 
     pNotifier->SendMergeFailed(*pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendJoined)
 {
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAdded())
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAdded()).Times(1);
 
     pNotifier->SendJoined(IMS_TRUE, *pReason);
 
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAddFailed(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAddFailed(_)).Times(1);
 
     pNotifier->SendJoined(IMS_FALSE, *pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAdded())
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantAdded()).Times(0);
 
     pNotifier->SendJoined(IMS_TRUE, *pReason);
 }
 
 TEST_F(MtcUiNotifierTest, SendDropped)
 {
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoved())
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoved()).Times(1);
 
     pNotifier->SendDropped(IMS_TRUE, *pReason);
 
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoveFailed(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoveFailed(_)).Times(1);
 
     pNotifier->SendDropped(IMS_FALSE, *pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoved())
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantRemoved()).Times(0);
 
     pNotifier->SendDropped(IMS_TRUE, *pReason);
 }
@@ -446,14 +396,12 @@ TEST_F(MtcUiNotifierTest, SendDropped)
 TEST_F(MtcUiNotifierTest, SendNotifyUsersInfo)
 {
     ImsList<ConfUser*> objUsers;
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(_))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(_)).Times(1);
 
     pNotifier->SendNotifyUsersInfo(objUsers);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(_))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnConferenceParticipantsInfoChanged(_)).Times(0);
 
     pNotifier->SendNotifyUsersInfo(objUsers);
 }
@@ -461,14 +409,12 @@ TEST_F(MtcUiNotifierTest, SendNotifyUsersInfo)
 TEST_F(MtcUiNotifierTest, SendNotifyConfInfo)
 {
     ImsList<ConfUser*> objUsers;
-    EXPECT_CALL(objMockCallThread, OnConferenceInfoChanged(_, _, _, _, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnConferenceInfoChanged(_, _, _, _, _)).Times(1);
 
     pNotifier->SendNotifyConfInfo("", "", 6, 1, "");
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnConferenceInfoChanged(_, _, _, _, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnConferenceInfoChanged(_, _, _, _, _)).Times(0);
 
     pNotifier->SendNotifyConfInfo("", "", 6, 1, "");
 }
@@ -484,14 +430,12 @@ TEST_F(MtcUiNotifierTest, SendReplacedBy)
 
 TEST_F(MtcUiNotifierTest, SendEctCompleted)
 {
-    EXPECT_CALL(objMockCallThread, OnEctCompleted(_, _))
-            .Times(1);
+    EXPECT_CALL(objMockCallThread, OnEctCompleted(_, _)).Times(1);
 
     pNotifier->SendEctCompleted(IMS_TRUE, *pReason);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    EXPECT_CALL(objMockCallThread, OnEctCompleted(_, _))
-            .Times(0);
+    EXPECT_CALL(objMockCallThread, OnEctCompleted(_, _)).Times(0);
 
     pNotifier->SendEctCompleted(IMS_TRUE, *pReason);
 }

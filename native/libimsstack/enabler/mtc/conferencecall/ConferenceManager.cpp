@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-
 #include "IMtcContext.h"
-#include "conferencecall/ConferenceManager.h"
-#include "conferencecall/ConferenceFactory.h"
+#include "ServiceTrace.h"
 #include "conferencecall/ConferenceController.h"
-#include "conferencecall/MergeController.h"
-#include "conferencecall/GroupCallController.h"
-#include "conferencecall/ExpandController.h"
 #include "conferencecall/ConferenceDef.h"
+#include "conferencecall/ConferenceFactory.h"
+#include "conferencecall/ConferenceManager.h"
+#include "conferencecall/ExpandController.h"
+#include "conferencecall/GroupCallController.h"
+#include "conferencecall/MergeController.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

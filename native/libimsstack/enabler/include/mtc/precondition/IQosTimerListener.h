@@ -17,7 +17,7 @@
 #ifndef INTERFACE_QOS_TIMER_LISTENER_H_
 #define INTERFACE_QOS_TIMER_LISTENER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class QosTimer;
 

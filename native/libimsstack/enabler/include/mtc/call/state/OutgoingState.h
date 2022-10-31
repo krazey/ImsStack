@@ -18,9 +18,9 @@
 #define OUTGOING_STATE_H_
 
 #include "ImsList.h"
-#include "IMSTypeDef.h"
-#include "call/state/MtcCallState.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "call/state/MtcCallState.h"
 
 class AString;
 class IMessage;
@@ -74,8 +74,8 @@ protected:
 
 private:
     void HandleCancel(IN ISession* piSession, IN const CallReasonInfo& objReason);
-    IMS_BOOL HandleB1TimerAfterTerminate(IN IMtcSession* piMtcSession,
-            IN const CallReasonInfo& objReason);
+    IMS_BOOL HandleB1TimerAfterTerminate(
+            IN IMtcSession* piMtcSession, IN const CallReasonInfo& objReason);
     CallStateName HandleSilentRedial(IN ISession* piSession, IN const CallReasonInfo& objReason);
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
     void SendProgressing();

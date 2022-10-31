@@ -18,9 +18,9 @@
 #define MTC_AOS_CONNECTOR_H_
 
 #include "AString.h"
-#include "IMSTypeDef.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
+#include "ImsTypeDef.h"
 #include "helper/IMtcAosConnector.h"
 
 class MtcAosConnector final : public IMtcAosConnector

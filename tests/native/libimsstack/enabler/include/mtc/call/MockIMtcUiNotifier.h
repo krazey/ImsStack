@@ -17,13 +17,13 @@
 #ifndef MOCK_I_MTC_UI_NOTIFIER_H_
 #define MOCK_I_MTC_UI_NOTIFIER_H_
 
-#include <gmock/gmock.h>
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcUiNotifier.h"
+#include <gmock/gmock.h>
 
 class MediaInfo;
 class ParticipantInfo;
@@ -38,50 +38,59 @@ public:
     virtual ~MockIMtcUiNotifier() {}
 
     MOCK_METHOD(void, SendPreIncomingCallReceived, (IN CallKey), (override));
-    MOCK_METHOD(void, SendIncomingCallReceived, (IN CallKey, IN CallInfo&, IN MediaInfo&,
-            (IN const ImsMap<SuppType, SuppService*>&), IN ParticipantInfo&), (override));
-    MOCK_METHOD(void, SendStarted, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendIncomingCallReceived,
+            (IN CallKey, IN CallInfo&, IN MediaInfo&, (IN const ImsMap<SuppType, SuppService*>&),
+                    IN ParticipantInfo&),
+            (override));
+    MOCK_METHOD(void, SendStarted,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
     MOCK_METHOD(void, SendStartFailed, (IN const CallReasonInfo&), (override));
-    MOCK_METHOD(void, SendProgressing, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&), IN IMS_BOOL), (override));
-    MOCK_METHOD(void, SendHeld, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendProgressing,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&), IN IMS_BOOL),
+            (override));
+    MOCK_METHOD(void, SendHeld,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
     MOCK_METHOD(void, SendHoldFailed, (IN const CallReasonInfo&), (override));
-    MOCK_METHOD(void, SendResumed, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendResumed,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
     MOCK_METHOD(void, SendResumeFailed, (IN const CallReasonInfo&), (override));
-    MOCK_METHOD(void, SendHeldBy, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
-    MOCK_METHOD(void, SendResumedBy, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendHeldBy,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendResumedBy,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
     MOCK_METHOD(void, SendTerminated, (IN const CallReasonInfo&), (override));
-    MOCK_METHOD(void, SendIncomingResume, (IN CallInfo*,
-            IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
-    MOCK_METHOD(void, SendIncomingUpdate, (IN CallType, IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
-    MOCK_METHOD(void, SendUpdated, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendIncomingResume,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendIncomingUpdate,
+            (IN CallType, IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)),
+            (override));
+    MOCK_METHOD(void, SendUpdated,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
     MOCK_METHOD(void, SendUpdateFailed, (IN const CallReasonInfo&), (override));
-    MOCK_METHOD(void, SendUpdatedBy, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
-    MOCK_METHOD(void, SendNotifyInfo, (IN IMS_UINT32, IN const AString, IN IMS_SINT32,
-            IN IMS_BOOL), (override));
-    MOCK_METHOD(void, SendExpanded, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendUpdatedBy,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
+    MOCK_METHOD(void, SendNotifyInfo, (IN IMS_UINT32, IN const AString, IN IMS_SINT32, IN IMS_BOOL),
+            (override));
+    MOCK_METHOD(void, SendExpanded,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&)), (override));
     MOCK_METHOD(void, SendExpandFailed, (IN const CallReasonInfo&), (override));
-    MOCK_METHOD(void, SendExpandedBy, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&), IN IMS_SINTP), (override));
-    MOCK_METHOD(void, SendMerged, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&), IN ImsList<ConfUser*>&), (override));
+    MOCK_METHOD(void, SendExpandedBy,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&), IN IMS_SINTP),
+            (override));
+    MOCK_METHOD(void, SendMerged,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&),
+                    IN ImsList<ConfUser*>&),
+            (override));
     MOCK_METHOD(void, SendMergeFailed, (IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, SendJoined, (IN IMS_BOOL, IN const CallReasonInfo&), (override));
-    MOCK_METHOD(void, SendDropped, (IN IMS_BOOL,IN const CallReasonInfo&), (override));
+    MOCK_METHOD(void, SendDropped, (IN IMS_BOOL, IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, SendNotifyUsersInfo, (IN ImsList<ConfUser*>&), (override));
-    MOCK_METHOD(void, SendNotifyConfInfo, (IN AString, IN AString, IN IMS_SINT32,
-            IN IMS_UINT32, IN const AString), (override));
-    MOCK_METHOD(void, SendReplacedBy, (IN CallInfo*, IN MediaInfo*,
-            (IN const ImsMap<SuppType, SuppService*>&), IN IMS_SINTP, IN IMS_UINTP), (override));
+    MOCK_METHOD(void, SendNotifyConfInfo,
+            (IN AString, IN AString, IN IMS_SINT32, IN IMS_UINT32, IN const AString), (override));
+    MOCK_METHOD(void, SendReplacedBy,
+            (IN CallInfo*, IN MediaInfo*, (IN const ImsMap<SuppType, SuppService*>&), IN IMS_SINTP,
+                    IN IMS_UINTP),
+            (override));
     MOCK_METHOD(void, SendEctCompleted, (IN IMS_RESULT, IN const CallReasonInfo&), (override));
     MOCK_METHOD(void, SendCallPushCompleted, (IN IMS_BOOL, IN const CallReasonInfo&), (override));
 };

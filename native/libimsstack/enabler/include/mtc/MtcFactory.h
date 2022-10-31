@@ -17,9 +17,9 @@
 #ifndef MTC_FACTORY_H_
 #define MTC_FACTORY_H_
 
-#include "ImsMap.h"
-#include "IMSTypeDef.h"
 #include "IMutex.h"
+#include "ImsMap.h"
+#include "ImsTypeDef.h"
 
 class IMtcApp;
 

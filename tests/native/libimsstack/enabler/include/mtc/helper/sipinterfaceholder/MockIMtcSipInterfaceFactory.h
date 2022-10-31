@@ -17,10 +17,9 @@
 #ifndef MOCK_I_MTC_SIP_INTERFACE_FACTORY_H_
 #define MOCK_I_MTC_SIP_INTERFACE_FACTORY_H_
 
-#include <gmock/gmock.h>
-
 #include "ImsTypeDef.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
+#include <gmock/gmock.h>
 
 class SessionInterfaceHolder;
 class ReferenceInterfaceHolder;

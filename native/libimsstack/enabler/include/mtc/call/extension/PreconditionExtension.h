@@ -17,7 +17,7 @@
 #ifndef PRECONDITION_EXTENSION_H_
 #define PRECONDITION_EXTENSION_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/extension/MtcExtension.h"
 
 class IMessage;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "call/block/SrvccBlockRule.h"
 #include "ServiceTrace.h"
+#include "call/block/SrvccBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

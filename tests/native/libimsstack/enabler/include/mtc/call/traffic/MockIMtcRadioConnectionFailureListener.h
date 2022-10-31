@@ -17,10 +17,10 @@
 #ifndef MOCK_I_MTC_RADIO_CONNECTION_FAILED_LISTENER_H_
 #define MOCK_I_MTC_RADIO_CONNECTION_FAILED_LISTENER_H_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/traffic/MtcCallTrafficChecker.h"
+#include <gmock/gmock.h>
 
 class MockIMtcRadioConnectionFailureListener : public IMtcRadioConnectionFailureListener
 {

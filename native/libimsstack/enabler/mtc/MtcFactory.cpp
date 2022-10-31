@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceMutex.h"
-#include "ServiceTrace.h"
-
 #include "IMtcApp.h"
 #include "MtcApp.h"
 #include "MtcFactory.h"
+#include "ServiceMutex.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

@@ -17,21 +17,20 @@
 #ifndef MTC_APP_H_
 #define MTC_APP_H_
 
-#include "ImsApp.h"
-
-#include "MtcImsEventReceiver.h"
-#include "helper/CallStateProxy.h"
 #include "IMtcApp.h"
-#include "call/IMtcCallManager.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
+#include "ImsApp.h"
+#include "MtcImsEventReceiver.h"
+#include "call/IMtcCallManager.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
 #include "call/traffic/MtcCallTrafficChecker.h"
+#include "conferencecall/ConferenceManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
+#include "helper/CallStateProxy.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
-#include "conferencecall/ConferenceManager.h"
 #include "utility/MessageUtils.h"
 #include <functional>
 

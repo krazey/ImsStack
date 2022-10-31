@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "media/MtcMediaProfileManager.h"
 #include "ServiceTrace.h"
+#include "media/MtcMediaProfileManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

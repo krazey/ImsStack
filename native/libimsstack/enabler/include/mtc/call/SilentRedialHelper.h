@@ -18,9 +18,9 @@
 #define SILENT_REDIAL_HELPER_H_
 
 #include "AString.h"
-#include "ImsTypeDef.h"
-#include "ITimer.h"
 #include "IMtcCallStateListener.h"
+#include "ITimer.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/ISilentRedialHelper.h"
 

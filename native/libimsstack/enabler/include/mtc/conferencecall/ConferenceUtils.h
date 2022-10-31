@@ -17,8 +17,8 @@
 #ifndef CONFERENCE_UTILS_H_
 #define CONFERENCE_UTILS_H_
 
-#include "IMSTypeDef.h"
 #include "AString.h"
+#include "ImsTypeDef.h"
 
 class ConferenceUtils
 {

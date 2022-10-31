@@ -17,9 +17,9 @@
 #ifndef MTC_TIMER_WRAPPER_H_
 #define MTC_TIMER_WRAPPER_H_
 
-#include "ServiceTimer.h"
-#include "ImsList.h"
 #include "ITimer.h"
+#include "ImsList.h"
+#include "ServiceTimer.h"
 
 class IMtcTimerListener;
 

@@ -17,9 +17,9 @@
 #ifndef MOCK_CALL_CONNECTION_ID_MANAGER_H_
 #define MOCK_CALL_CONNECTION_ID_MANAGER_H_
 
-#include <gmock/gmock.h>
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "conferencecall/CallConnectionIdManager.h"
+#include <gmock/gmock.h>
 
 class IMtcContext;
 
@@ -36,8 +36,8 @@ public:
     // OnTotalCallStateChanged, (IN State eState), (override)); MOCK_METHOD(IMS_BOOL,
     // IsSynchronousCallRequired, (), (override)); MOCK_METHOD(void, OnConferenceCallStarted, (IN
     // IConferenceController* piController, IN IMS_BOOL bStarted), ());
-    MOCK_METHOD(void, OnConferenceParticipantDisconnected,
-            (IN IMS_UINT32 nConnectionId), (override));
+    MOCK_METHOD(
+            void, OnConferenceParticipantDisconnected, (IN IMS_UINT32 nConnectionId), (override));
     // MOCK_METHOD(IMS_SINT32, GetIndex, (IN CallKey nKey), ());
     MOCK_METHOD(CallKey, GetCallKey, (IN IMS_UINT32 nConnectionId), (override));
     // MOCK_METHOD(IMS_UINT32, GetNewIndex, (), ());

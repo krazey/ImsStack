@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "call/message/EmergencyMessageFormatter.h"
-#include "call/IMtcCallContext.h"
 #include "CallReasonInfo.h"
 #include "ISession.h"
+#include "ServiceTrace.h"
+#include "call/IMtcCallContext.h"
+#include "call/message/EmergencyMessageFormatter.h"
 #include "call/message/MessageSender.h"
 #include "helper/TransactionTimerUpdateHelper.h"
-#include "ServiceTrace.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;

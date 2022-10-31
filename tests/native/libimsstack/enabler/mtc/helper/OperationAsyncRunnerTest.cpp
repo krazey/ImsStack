@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "helper/OperationAsyncRunner.h"
+#include <gtest/gtest.h>
 
 namespace android
 {
@@ -31,7 +31,8 @@ protected:
 TEST_F(OperationAsyncRunnerTest, OperationIsNotRunSynchronously)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
-    OperationAsyncRunner* pRunner = new OperationAsyncRunner([&]()
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(
+            [&]()
             {
                 bUpdated = IMS_TRUE;
             });

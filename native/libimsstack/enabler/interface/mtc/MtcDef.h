@@ -18,8 +18,8 @@
 #define MTC_DEF_H_
 
 #include "AString.h"
-#include "ImsTypeDef.h"
 #include "IMtcService.h"
+#include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 
 // TODO, MTC BUILD
@@ -275,10 +275,7 @@ public:
         CreateId();
         IMS_TRACE_MEM("MTC", "+MediaInfo [%d]", nId, 0, 0);
     }
-    inline ~MediaInfo()
-    {
-        IMS_TRACE_MEM("MTC", "~MediaInfo [%d]", nId, 0, 0);
-    }
+    inline ~MediaInfo() { IMS_TRACE_MEM("MTC", "~MediaInfo [%d]", nId, 0, 0); }
     inline void CreateId()
     {
         static IMS_UINT32 snId = 0;
@@ -286,6 +283,7 @@ public:
         snId += 1;
         nId = snId;
     }
+
 public:
     inline MediaInfo& operator=(IN const MediaInfo& objRhs)
     {

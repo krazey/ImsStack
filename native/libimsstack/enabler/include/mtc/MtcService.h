@@ -22,10 +22,10 @@
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
 #include "IImsAosMonitor.h"
-#include "ImsService.h"
-#include "ImsTypeDef.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
+#include "ImsService.h"
+#include "ImsTypeDef.h"
 #include "MtcRoutingRejectHandler.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/SrvccStateManager.h"
@@ -75,16 +75,13 @@ public:
     inline void NotifyJniEnablerSet() override {}
 
     // ICoreServiceListener implementation
-    inline void CoreService_PageMessageReceived(
-            IN ICoreService*, IN IPageMessage*) override {}
-    inline void CoreService_ReferenceReceived(
-            IN ICoreService*, IN IReference*) override {};
+    inline void CoreService_PageMessageReceived(IN ICoreService*, IN IPageMessage*) override {}
+    inline void CoreService_ReferenceReceived(IN ICoreService*, IN IReference*) override{};
     void CoreService_ServiceClosed(
             IN ICoreService* piService, IN IReasonInfo* piReasonInfo) override;
     void CoreService_SessionInvitationReceived(
             IN ICoreService* piService, IN ISession* piSession) override;
-    inline void CoreService_UnsolicitedNotifyReceived(
-            IN ICoreService*, IN IMessage*) override {};
+    inline void CoreService_UnsolicitedNotifyReceived(IN ICoreService*, IN IMessage*) override{};
     void CoreService_CapabilityQueryReceived(
             IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 

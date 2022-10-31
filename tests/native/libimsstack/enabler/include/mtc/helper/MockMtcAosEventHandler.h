@@ -17,8 +17,8 @@
 #ifndef MOCK_MTC_AOS_EVENT_HANDLER_
 #define MOCK_MTC_AOS_EVENT_HANDLER_
 
-#include <gmock/gmock.h>
 #include "helper/MtcAosEventHandler.h"
+#include <gmock/gmock.h>
 
 class IMtcCallController;
 class MtcConfigurationProxy;
@@ -31,8 +31,8 @@ class IMtcAosStateListener;
 class MockMtcAosEventHandler : public MtcAosEventHandler
 {
 public:
-    explicit MockMtcAosEventHandler(IN IMtcService& objService,
-            IN MtcConfigurationProxy& objConfiguration) :
+    explicit MockMtcAosEventHandler(
+            IN IMtcService& objService, IN MtcConfigurationProxy& objConfiguration) :
             MtcAosEventHandler(objService, objConfiguration)
     {
     }
@@ -42,10 +42,11 @@ public:
     MOCK_METHOD(void, RemoveListener, (IN IMtcAosStateListener*), (override));
     MOCK_METHOD(void, OnConnected,
             (IN IMS_UINT32, IN IMS_UINT32, IN IJniMtcServiceThread*,
-            IN MtcEmergencyServiceManager*), (override));
+                    IN MtcEmergencyServiceManager*),
+            (override));
     MOCK_METHOD(void, OnDisconnecting, (IN IMS_UINT32), (override));
-    MOCK_METHOD(void, OnDisconnected, (IN IMS_UINT32, IN IJniMtcServiceThread*,
-            IN MtcEmergencyServiceManager*), (override));
+    MOCK_METHOD(void, OnDisconnected,
+            (IN IMS_UINT32, IN IJniMtcServiceThread*, IN MtcEmergencyServiceManager*), (override));
     MOCK_METHOD(void, OnSuspended, (IN IMS_UINT32), (override));
     MOCK_METHOD(void, OnResumed, (), (override));
     MOCK_METHOD(void, OnServiceConnected, (IN IMS_UINT32, IN IMS_UINT32), (override));

@@ -18,7 +18,7 @@
 #define EARLY_UPDATE_ERROR_HANDLER_H_
 
 #include "CallReasonInfo.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IMessage;
 class IMtcCallContext;

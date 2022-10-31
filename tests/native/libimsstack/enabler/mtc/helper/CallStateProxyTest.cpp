@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "helper/CallStateProxy.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

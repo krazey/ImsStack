@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "conferencecall/MergeController.h"
+#include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ConferenceDef.h"
-#include "conferencecall/ConferenceUtils.h"
-#include "configuration/MtcConfigurationProxy.h"
-#include "configuration/ConfigDef.h"
-#include "call/IMtcCallContext.h"
-#include "ImsList.h"
 #include "conferencecall/ConferenceOperationQueue.h"
-#include "conferencecall/CallConnectionIdManager.h"
+#include "conferencecall/ConferenceUtils.h"
+#include "conferencecall/MergeController.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -73,9 +73,8 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objU
 
     if (nOldState == STATE_CREATED)
     {
-        m_objOperationQueue.CreateNPutWithUsers(
-                CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
-        //ClearListForConfUsers(objUsers);
+        m_objOperationQueue.CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
+        // ClearListForConfUsers(objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
                 ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired())
@@ -120,8 +119,7 @@ PROTECTED VIRTUAL void MergeController::StartConferenceCall(
         CallKey nkey = m_objConnectionIdManager.GetCallKey(objUsers.GetAt(i)->nConnectionId);
         CallType eIndividualType = m_objCallManager.GetCallByCallKey(nkey)->GetCallType();
 
-        if (eIndividualType == CallType::VT ||
-                eIndividualType == CallType::VIDEO_RTT)
+        if (eIndividualType == CallType::VT || eIndividualType == CallType::VIDEO_RTT)
         {
             bVt = IMS_TRUE;
         }
@@ -215,8 +213,7 @@ void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers)
 
     if (nOldState == STATE_CREATED)
     {
-        m_objOperationQueue.CreateNPutWithUsers(
-                CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
+        m_objOperationQueue.CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
         m_objOperationQueue.SetAddingOperationSetCompleted();
     }

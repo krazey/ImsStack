@@ -17,11 +17,11 @@
 #ifndef MTC_DIALING_PLAN_H_
 #define MTC_DIALING_PLAN_H_
 
+#include "AString.h"
+#include "ImsIdentity.h"
 #include "dialingplan/EmergencyNumberList.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "dialingplan/NormalDialingPlan.h"
-#include "ImsIdentity.h"
-#include "AString.h"
 #include <memory>
 
 class IMtcContext;

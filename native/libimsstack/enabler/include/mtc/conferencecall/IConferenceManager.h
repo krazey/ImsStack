@@ -17,8 +17,8 @@
 #ifndef INTERFACE_CONFERENCE_MANAGER_H_
 #define INTERFACE_CONFERENCE_MANAGER_H_
 
-#include "conferencecall/IConferenceControllerListener.h"
 #include "call/IMtcCall.h"
+#include "conferencecall/IConferenceControllerListener.h"
 
 class IConferenceController;
 enum class ConferenceType;

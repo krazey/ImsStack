@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "MtcDef.h"
+#include "ServiceTrace.h"
 #include "media/IMedia.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/QosStatusTable.h"

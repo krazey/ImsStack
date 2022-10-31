@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MockIMtcContext.h"
 #include "MtcContextRepository.h"
 #include "conferencecall/ConferenceInfo.h"
@@ -24,6 +23,7 @@
 #include "conferencecall/MockConferenceInfo.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -79,8 +79,7 @@ protected:
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
                 .WillByDefault(Return(IMS_TRUE));
         ON_CALL(*pConfigurationManager, IsEnableConferenceSubscribeByParticipant)
@@ -109,17 +108,14 @@ protected:
         pDescription = new MockConferenceDescription(MAX_USER_COUNT);
         pHostInfo = new MockHostInfo("", objUris);
         pState = new MockConferenceState(USER_COUNT);
-        pMedia = new MockMedia(1, DISPLAY_TEXT, ANY_STATE, "anyLabel", ANY_STATUS); // not used
+        pMedia = new MockMedia(1, DISPLAY_TEXT, ANY_STATE, "anyLabel", ANY_STATUS);  // not used
 
         pInfo = new MockConferenceInfo(
                 *pDescription, *pHostInfo, *pState, objUsers, nInfoState, nVersion);
-        ON_CALL(*pFactory, CreateInfo)
-                .WillByDefault(Return(pInfo));
+        ON_CALL(*pFactory, CreateInfo).WillByDefault(Return(pInfo));
 
-        ON_CALL(*pInfo, Parse(ANY_EVENT_PACKAGE_BODY))
-                .WillByDefault(Return(IMS_TRUE));
-        ON_CALL(*pInfo, Parse(MALFORMED_EVENT_PACKAGE_BODY))
-                .WillByDefault(Return(IMS_FALSE));
+        ON_CALL(*pInfo, Parse(ANY_EVENT_PACKAGE_BODY)).WillByDefault(Return(IMS_TRUE));
+        ON_CALL(*pInfo, Parse(MALFORMED_EVENT_PACKAGE_BODY)).WillByDefault(Return(IMS_FALSE));
     }
 
     void AddUserToInfo(IN AString& strEntity, IN IMS_UINT32 nStatus,
@@ -129,8 +125,7 @@ protected:
         // assumption2 : one User entity has only one Endpoint entity
         ImsList<ConferenceInfo::User::EndPoint*> objEps;
         objEps.Append(new MockEndPoint(strEntity, nState, strDisplayText, nStatus));
-        ConferenceInfo::User* pUser =
-                new MockUser(strEntity, nState, strDisplayText, objEps);
+        ConferenceInfo::User* pUser = new MockUser(strEntity, nState, strDisplayText, objEps);
         objUsers.Append(pUser);
     }
 
@@ -156,11 +151,11 @@ protected:
         pUser->strUserEntity = strUserEntity;
         pUser->eStatus = eStatus;
 
-        objParticipantList.AddUser(pUser); // pUser is copied.
+        objParticipantList.AddUser(pUser);  // pUser is copied.
         delete pUser;
 
-        ConfUser* pStoredConfUser
-                = objParticipantList.GetConfUser(objParticipantList.GetSize() - 1);
+        ConfUser* pStoredConfUser =
+                objParticipantList.GetConfUser(objParticipantList.GetSize() - 1);
         objParticipantList.SetReferInviteUri(strInvitedUri, pStoredConfUser);
 
         return pStoredConfUser;
@@ -253,8 +248,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityMatching)
 
     AString strAnyEntity1WithPhone = USER_ENTITY1 + ";user=phone";
     AddUserToInfo(USER_ENTITY1, eStatusAfter1);
-    ConfUser* pUser1 = AddParticipant(
-            strAnyEntity1WithPhone, strAnyEntity1WithPhone, eStatusBefore1);
+    ConfUser* pUser1 =
+            AddParticipant(strAnyEntity1WithPhone, strAnyEntity1WithPhone, eStatusBefore1);
 
     AString strAnyEntity2 = USER_ENTITY2;
     AddUserToInfo(strAnyEntity2, eStatusAfter2);

@@ -17,15 +17,15 @@
 #ifndef MOCK_I_CONFERENCE_CONTROLLER_LISTENER_H_
 #define MOCK_I_CONFERENCE_CONTROLLER_LISTENER_H_
 
-#include <gmock/gmock.h>
 #include "conferencecall/IConferenceControllerListener.h"
+#include <gmock/gmock.h>
 
 class ConferenceController;
 
 class MockIConferenceControllerListener : public IConferenceControllerListener
 {
 public:
-    MOCK_METHOD(void, OnClosed, (IN ConferenceController * pController), (override));
+    MOCK_METHOD(void, OnClosed, (IN ConferenceController* pController), (override));
 };
 
 #endif

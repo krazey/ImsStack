@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "ImsList.h"
 #include "ISipHeader.h"
+#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "call/extension/IMtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"

@@ -17,8 +17,8 @@
 #ifndef MOCK_EPS_FALLBACK_TRIGGER_
 #define MOCK_EPS_FALLBACK_TRIGGER_
 
-#include <gmock/gmock.h>
 #include "call/EpsFallbackTrigger.h"
+#include <gmock/gmock.h>
 
 class IMtcCallContext;
 

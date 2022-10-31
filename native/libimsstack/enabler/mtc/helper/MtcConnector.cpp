@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-
-#include "helper/ICallStateProxy.h"
 #include "IMtcCallStateListener.h"
 #include "IMtcContext.h"
 #include "MtcConnector.h"
 #include "MtcContextRepository.h"
+#include "ServiceTrace.h"
+#include "helper/ICallStateProxy.h"
 
 PUBLIC GLOBAL void MtcConnector::AddCallStateListener(
         IN IMS_SINT32 nSlotId, IN IMtcCallStateListener* pListener)

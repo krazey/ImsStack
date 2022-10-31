@@ -17,11 +17,11 @@
 #ifndef MOCK_I_MTC_DIALING_PLAN_H_
 #define MOCK_I_MTC_DIALING_PLAN_H_
 
-#include <gmock/gmock.h>
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "dialingplan/NormalDialingPlan.h"
+#include <gmock/gmock.h>
 
 struct CallInfo;
 using Scheme = NormalDialingPlan::Scheme;

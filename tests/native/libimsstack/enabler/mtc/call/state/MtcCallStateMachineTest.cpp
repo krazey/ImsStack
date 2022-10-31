@@ -18,9 +18,9 @@
 #include "call/state/MockIMtcCallState.h"
 #include "call/state/MockMtcCallStateMachine.h"
 #include "call/state/MtcCallStateMachine.h"
-#include <memory>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <memory>
 
 using ::testing::Return;
 using State = IMtcCall::State;
@@ -35,10 +35,8 @@ public:
     {
         MockIMtcCallState* pState = new MockIMtcCallState();
 
-        ON_CALL(*pState, GetStateName)
-                .WillByDefault(Return(eState));
-        EXPECT_CALL(*pState, OnEnter)
-                .Times(1);
+        ON_CALL(*pState, GetStateName).WillByDefault(Return(eState));
+        EXPECT_CALL(*pState, OnEnter).Times(1);
 
         return pState;
     }
@@ -51,10 +49,7 @@ public:
     std::unique_ptr<IMtcCallStateFactory> pStateFactory;
 
 protected:
-    virtual void SetUp() override
-    {
-        pStateFactory = std::make_unique<TestCallStateFactory>();
-    }
+    virtual void SetUp() override { pStateFactory = std::make_unique<TestCallStateFactory>(); }
 
     virtual void TearDown() override {}
 };
@@ -120,8 +115,7 @@ TEST_F(MtcCallStateMachineTest, NotifiesWatcherInitially)
     const State eInitialState = State::TERMINATING;
 
     MockIMtcCallStateWatcher objWatcher;
-    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState))
-            .Times(1);
+    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState)).Times(1);
 
     MtcCallStateMachine objStateMachine(
             objContext, eInitialState, std::move(pStateFactory), &objWatcher);
@@ -132,8 +126,7 @@ TEST_F(MtcCallStateMachineTest, NotNotifiesWatcherWhenTransitionToSameState)
     const State eInitialState = State::TERMINATING;
 
     MockIMtcCallStateWatcher objWatcher;
-    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState))
-            .Times(1);
+    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState)).Times(1);
 
     MtcCallStateMachine objStateMachine(
             objContext, eInitialState, std::move(pStateFactory), &objWatcher);
@@ -150,10 +143,8 @@ TEST_F(MtcCallStateMachineTest, NotifiesWatcherWhenTransitionToAnotherState)
     const State eChangedState = State::ESTABLISHED;
 
     MockIMtcCallStateWatcher objWatcher;
-    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState))
-            .Times(1);
-    EXPECT_CALL(objWatcher, OnStateTransition(eChangedState))
-            .Times(1);
+    EXPECT_CALL(objWatcher, OnStateTransition(eInitialState)).Times(1);
+    EXPECT_CALL(objWatcher, OnStateTransition(eChangedState)).Times(1);
 
     MtcCallStateMachine objStateMachine(
             objContext, eInitialState, std::move(pStateFactory), &objWatcher);

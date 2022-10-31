@@ -17,8 +17,8 @@
 #ifndef SRVCC_STATE_MANAGER_H_
 #define SRVCC_STATE_MANAGER_H_
 
-#include "ImsTypeDef.h"
 #include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "helper/ISrvccStateListener.h"
 
 class IMtcContext;

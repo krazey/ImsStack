@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include "ImsList.h"
-#include "ISipHeader.h"
-#include "MockIMtcContext.h"
-#include "MtcContextRepository.h"
 #include "../../../../engine/interface/core/MockIMessage.h"
 #include "../../../../engine/interface/sipcore/MockISipMessage.h"
+#include "ISipHeader.h"
+#include "ImsList.h"
+#include "MockIMtcContext.h"
+#include "MtcContextRepository.h"
 #include "call/extension/MtcExtension.h"
 #include "utility/MessageUtils.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -47,8 +47,7 @@ protected:
     virtual void SetUp() override
     {
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-        ON_CALL(objContext, GetMessageUtils)
-                .WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         pExtension = new MtcExtension(strSomeOptionTag);
 
@@ -56,10 +55,7 @@ protected:
         InitMessageSupportsOptionTag(strSomeOptionTag);
     }
 
-    virtual void TearDown() override
-    {
-        delete pExtension;
-    }
+    virtual void TearDown() override { delete pExtension; }
 
     void InitMessageRequiresOptionTag(IN const AString& strOptionTag)
     {
@@ -96,24 +92,16 @@ TEST_F(MtcExtensionTest, CopyConstructor)
 {
     MtcExtension objCopiedExtension(*pExtension);
 
-    EXPECT_STREQ(
-            pExtension->GetOptionTag().GetStr(),
-            objCopiedExtension.GetOptionTag().GetStr());
-    EXPECT_EQ(
-            pExtension->IsAvailableOnRemote(),
-            objCopiedExtension.IsAvailableOnRemote());
+    EXPECT_STREQ(pExtension->GetOptionTag().GetStr(), objCopiedExtension.GetOptionTag().GetStr());
+    EXPECT_EQ(pExtension->IsAvailableOnRemote(), objCopiedExtension.IsAvailableOnRemote());
 }
 
 TEST_F(MtcExtensionTest, Clone)
 {
     IMtcExtension* pCopiedExtension = pExtension->Clone();
 
-    EXPECT_STREQ(
-            pExtension->GetOptionTag().GetStr(),
-            pCopiedExtension->GetOptionTag().GetStr());
-    EXPECT_EQ(
-            pExtension->IsAvailableOnRemote(),
-            pCopiedExtension->IsAvailableOnRemote());
+    EXPECT_STREQ(pExtension->GetOptionTag().GetStr(), pCopiedExtension->GetOptionTag().GetStr());
+    EXPECT_EQ(pExtension->IsAvailableOnRemote(), pCopiedExtension->IsAvailableOnRemote());
 
     delete pCopiedExtension;
 }
@@ -130,9 +118,7 @@ TEST_F(MtcExtensionTest, IsRequiredOnRemoteReturnsFalseInitially)
 
 TEST_F(MtcExtensionTest, GetOptionTag)
 {
-    EXPECT_STREQ(
-            strSomeOptionTag.GetStr(),
-            pExtension->GetOptionTag().GetStr());
+    EXPECT_STREQ(strSomeOptionTag.GetStr(), pExtension->GetOptionTag().GetStr());
 }
 
 TEST_F(MtcExtensionTest, FormatRequestDoesNothing)

@@ -24,10 +24,10 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/ParticipantInfo.h"
-#include "dialingplan/IMtcDialingPlan.h"
-#include "helper/IMtcAosConnector.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "dialingplan/IMtcDialingPlan.h"
+#include "helper/IMtcAosConnector.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -37,8 +37,7 @@ const AString ParticipantInfo::ANONYMOUS_ADDRESS = "sip:anonymous@anonymous.inva
 const AString ParticipantInfo::ANONYMOUS_DISPLAY_NAME = "Anonymous";
 
 PUBLIC
-ParticipantInfo::ParticipantInfo(
-        IN IMtcCallContext& objContext) :
+ParticipantInfo::ParticipantInfo(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
         m_strRemoteNumber(AString::ConstNull()),
         m_strRemoteUri(AString::ConstNull())

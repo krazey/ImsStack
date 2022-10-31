@@ -17,13 +17,13 @@
 #ifndef MOCK_I_MTC_CALL_STATE_H_
 #define MOCK_I_MTC_CALL_STATE_H_
 
-#include <gmock/gmock.h>
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
 #include "helper/IMtcAosStateListener.h"
+#include <gmock/gmock.h>
 
 class AString;
 class IReference;
@@ -118,9 +118,9 @@ public:
     MOCK_METHOD(CallStateName, SessionTransactionReceived,
             (IN ISession* piSession, IN ISipServerConnection* piSipServerConnection), (override));
     MOCK_METHOD(
-            CallStateName, Refresh_NotifyCompleted, (IN ISipClientConnection * piScc), (override));
+            CallStateName, Refresh_NotifyCompleted, (IN ISipClientConnection* piScc), (override));
     MOCK_METHOD(CallStateName, Refresh_NotifyTerminated, (), (override));
-    MOCK_METHOD(CallStateName, Refresh_NotifyTimerExpired, (OUT IMS_BOOL & bDoImplicitRefresh),
+    MOCK_METHOD(CallStateName, Refresh_NotifyTimerExpired, (OUT IMS_BOOL& bDoImplicitRefresh),
             (override));
     MOCK_METHOD(CallStateName, OnTimerExpired, (IN IMS_SINT32 nType), (override));
     MOCK_METHOD(CallStateName, OnBlockChecked, (IN IMtcBlockChecker::Result objResult), (override));

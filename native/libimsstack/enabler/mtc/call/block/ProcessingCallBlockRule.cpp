@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+#include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/block/ProcessingCallBlockRule.h"
-#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

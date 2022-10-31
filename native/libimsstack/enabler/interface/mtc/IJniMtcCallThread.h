@@ -16,12 +16,12 @@
 #ifndef INTERFACE_JNI_MTC_CALL_THREAD_H_
 #define INTERFACE_JNI_MTC_CALL_THREAD_H_
 
+#include "IJniEnablerThread.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
-#include "ImsMap.h"
-#include "ImsList.h"
 #include "conferencecall/ConferenceDef.h"
-#include "IJniEnablerThread.h"
 
 class SuppService;
 struct CallReasonInfo;

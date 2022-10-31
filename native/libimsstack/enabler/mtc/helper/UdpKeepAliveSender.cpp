@@ -15,8 +15,8 @@
  */
 
 #include "IImsAosInfo.h"
-#include "ImsTypeDef.h"
 #include "IMtcService.h"
+#include "ImsTypeDef.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"

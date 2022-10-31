@@ -17,8 +17,8 @@
 #ifndef MOCK_I_MTC_BLOCK_RULE_H_
 #define MOCK_I_MTC_BLOCK_RULE_H_
 
-#include <gmock/gmock.h>
 #include "call/block/IMtcBlockRule.h"
+#include <gmock/gmock.h>
 
 class MockIMtcBlockRule : public IMtcBlockRule
 {

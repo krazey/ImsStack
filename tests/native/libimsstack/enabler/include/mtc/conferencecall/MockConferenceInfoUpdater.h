@@ -17,11 +17,10 @@
 #ifndef MOCK_CONFERENCE_INFO_UPDATER_H_
 #define MOCK_CONFERENCE_INFO_UPDATER_H_
 
-#include <gmock/gmock.h>
-
-#include "MtcDef.h"
 #include "AString.h"
+#include "MtcDef.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
+#include <gmock/gmock.h>
 
 class ConferenceFactory;
 class ConferenceParticipantList;
@@ -35,7 +34,7 @@ public:
     }
     ~MockConferenceInfoUpdater() {}
     MOCK_METHOD(IMS_UINT32, Update,
-            (IN ConferenceParticipantList * pParticipantList, IN const AString& strEventPackage),
+            (IN ConferenceParticipantList* pParticipantList, IN const AString& strEventPackage),
             (override));
 #if 0
     MOCK_METHOD(IMS_RESULT, ParseConferenceInfo, (IN const AString& strEventPackage), ());

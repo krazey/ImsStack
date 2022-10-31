@@ -17,11 +17,10 @@
 #ifndef MOCK_I_CONFERENCE_REFERENCE_H_
 #define MOCK_I_CONFERENCE_REFERENCE_H_
 
-#include <gmock/gmock.h>
-
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "conferencecall/IConferenceReference.h"
+#include <gmock/gmock.h>
 
 class CallConnectionIdManager;
 
@@ -30,7 +29,7 @@ class MockIConferenceReference : public IConferenceReference
 public:
     ~MockIConferenceReference() {}
     MOCK_METHOD(IMS_RESULT, SendInvite,
-            (OUT AString & strReferToUri, IN CallConnectionIdManager& objConnectionIdManager),
+            (OUT AString& strReferToUri, IN CallConnectionIdManager& objConnectionIdManager),
             (override));
     MOCK_METHOD(IMS_RESULT, SendBye, (IN AString strInvitedUri), (override));
     MOCK_METHOD(IMS_UINT32, GetType, (), (const, override));

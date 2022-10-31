@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "call/MockIMtcCallContext.h"
-#include "call/message/MessageFormatter.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
+#include "FeatureCaps.h"
+#include "MockIMtcService.h"
+#include "MockIPhoneInfoLocation.h"
+#include "MtcContextRepository.h"
+#include "SipStatusCode.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/message/MessageFormatter.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
-#include "FeatureCaps.h"
 #include "helper/MtcSupplementaryService.h"
-#include "MockIMtcService.h"
-#include "MockIPhoneInfoLocation.h"
-#include "MtcContextRepository.h"
 #include "sipcore/MockISipMessage.h"
-#include "SipStatusCode.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
+#include <gtest/gtest.h>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 

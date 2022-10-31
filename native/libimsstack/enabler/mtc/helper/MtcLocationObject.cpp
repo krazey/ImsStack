@@ -144,8 +144,7 @@ ByteArray MtcLocationObject::CreateLocationBody() const
     }
     else  // GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY
     {
-        pPidfCreator->CreateWithoutPosition(
-                AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent);
+        pPidfCreator->CreateWithoutPosition(AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent);
     }
 
     return objContent;

@@ -17,10 +17,10 @@
 #ifndef MOCK_I_CONFERENCE_MANAGER_H_
 #define MOCK_I_CONFERENCE_MANAGER_H_
 
-#include <gmock/gmock.h>
 #include "call/IMtcCall.h"
 #include "conferencecall/IConferenceControllerListener.h"
 #include "conferencecall/IConferenceManager.h"
+#include <gmock/gmock.h>
 
 class IConferenceController;
 enum class ConferenceType;

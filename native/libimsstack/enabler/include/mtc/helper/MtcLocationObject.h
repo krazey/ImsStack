@@ -18,7 +18,7 @@
 #define MTC_LOCATION_OBJECT_H_
 
 #include "ByteArray.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
 class IMessage;

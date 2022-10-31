@@ -15,14 +15,14 @@
  */
 
 #include "AString.h"
-#include "configuration/MtcConfigurationUpdater.h"
-#include "ServiceTrace.h"
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
+#include "ICarrierConfig.h"
+#include "ImsList.h"
+#include "ImsMap.h"
+#include "ServiceTrace.h"
 #include "configuration/AssetItems.h"
 #include "configuration/CarrierConfigItems.h"
-#include "ImsMap.h"
-#include "ImsList.h"
+#include "configuration/MtcConfigurationUpdater.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-#include "call/IMtcCall.h"
-#include "call/IMtcCallContext.h"
-#include "call/message/MessageFormatter.h"
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
-#include "configuration/ConfigDef.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "Const3GPP.h"
-#include "helper/MtcLocationObject.h"
-#include "helper/MtcSupplementaryService.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IMessage.h"
-#include "ImsIdentity.h"
 #include "ISession.h"
 #include "ISipConfig.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ImsIdentity.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "Sip.h"
@@ -39,6 +32,13 @@
 #include "SipHeaderName.h"
 #include "SipProfile.h"
 #include "SipStatusCode.h"
+#include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
+#include "call/message/MessageFormatter.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "helper/MtcLocationObject.h"
+#include "helper/MtcSupplementaryService.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -701,7 +701,7 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
         case CODE_REJECT_INTERNAL_ERROR:
             eStatusCode = SipStatusCode::SC_480;
             break;
-        case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED: // TODO: can be removed?
+        case CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED:  // TODO: can be removed?
         case CODE_REJECT_QOS_FAILURE:
             eStatusCode = SipStatusCode::SC_580;
             break;

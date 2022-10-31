@@ -17,8 +17,8 @@
 #ifndef CALL_INFO_H_
 #define CALL_INFO_H_
 
-#include "IMSTypeDef.h"
 #include "IMtcService.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
 struct JniCallInfo

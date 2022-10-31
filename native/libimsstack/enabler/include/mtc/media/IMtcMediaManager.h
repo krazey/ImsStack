@@ -17,7 +17,7 @@
 #ifndef INTERFACE_MTC_MEDIA_MANAGER_H_
 #define INTERFACE_MTC_MEDIA_MANAGER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "media/MediaNego.h"
 
 class IMediaQosEventListener;

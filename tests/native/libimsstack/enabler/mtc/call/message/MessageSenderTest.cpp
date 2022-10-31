@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
+#include "CallReasonInfo.h"
+#include "MockIMtcService.h"
+#include "MtcContextRepository.h"
+#include "SipStatusCode.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/MessageSender.h"
-#include "CallReasonInfo.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "helper/MtcSupplementaryService.h"
-#include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "sipcore/MockISipMessage.h"
-#include "SipStatusCode.h"
 #include "utility/MessageUtils.h"
+#include <gtest/gtest.h>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
@@ -99,8 +99,7 @@ TEST_F(MessageSenderTest, CreateSenderWithEmergencyFormatter)
     CallInfo objEmergencyCallInfo;
     objEmergencyCallInfo.bEmergency = IMS_TRUE;
 
-    ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objEmergencyCallInfo));
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objEmergencyCallInfo));
 
     MessageSender* pSenderWithEmergencyFormatter = new MessageSender(objContext, objSession);
 
@@ -127,16 +126,16 @@ TEST_F(MessageSenderTest, StartFormFailure)
 
 TEST_F(MessageSenderTest, SendProvisionalResponseWith183)
 {
-    IMS_RESULT nResult = pSender->SendProvisionalResponse(
-            SipStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    IMS_RESULT nResult =
+            pSender->SendProvisionalResponse(SipStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_TRUE);
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
 TEST_F(MessageSenderTest, SendProvisionalResponseWith180)
 {
-    IMS_RESULT nResult = pSender->SendProvisionalResponse(
-            SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_TRUE);
+    IMS_RESULT nResult =
+            pSender->SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_TRUE);
 
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
@@ -145,8 +144,8 @@ TEST_F(MessageSenderTest, SendProvisionalResponseFormFailure)
 {
     ON_CALL(objSession, GetNextResponse).WillByDefault(Return(nullptr));
 
-    IMS_RESULT nResult = pSender->SendProvisionalResponse(
-            SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_TRUE);
+    IMS_RESULT nResult =
+            pSender->SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_TRUE);
 
     EXPECT_EQ(nResult, IMS_FAILURE);
 }

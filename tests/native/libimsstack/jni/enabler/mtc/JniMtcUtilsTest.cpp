@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
-#include <binder/Parcel.h>
 #include "AString.h"
 #include "CallReasonInfo.h"
 #include "ImsList.h"
@@ -25,6 +23,8 @@
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "conferencecall/ConferenceDef.h"
+#include <binder/Parcel.h>
+#include <gtest/gtest.h>
 
 namespace android
 {
@@ -129,13 +129,11 @@ TEST_F(JniMtcUtilsTest, WtiteAndReadSuppServices)
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
     objParcel.setDataPosition(0);
 
-    ImsMap<SuppType, SuppService*> objConvertedSuppServices
-            = JniMtcUtils::ReadSupplementaryService(objParcel);
+    ImsMap<SuppType, SuppService*> objConvertedSuppServices =
+            JniMtcUtils::ReadSupplementaryService(objParcel);
     EXPECT_EQ(objSuppServices.GetSize(), objConvertedSuppServices.GetSize());
-    EXPECT_EQ(*objSuppServices.GetValue(eAnyType1),
-            *objConvertedSuppServices.GetValue(eAnyType1));
-    EXPECT_EQ(*objSuppServices.GetValue(eAnyType2),
-            *objConvertedSuppServices.GetValue(eAnyType2));
+    EXPECT_EQ(*objSuppServices.GetValue(eAnyType1), *objConvertedSuppServices.GetValue(eAnyType1));
+    EXPECT_EQ(*objSuppServices.GetValue(eAnyType2), *objConvertedSuppServices.GetValue(eAnyType2));
 
     objSuppServices.Clear();
 

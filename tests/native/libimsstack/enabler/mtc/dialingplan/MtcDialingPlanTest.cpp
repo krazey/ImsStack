@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MockIMtcContext.h"
-#include "dialingplan/MtcDialingPlan.h"
-#include "configuration/MockIMtcConfigurationManager.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "MockIPhoneInfoSubscriber.h"
 #include "call/IMtcCall.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "dialingplan/MtcDialingPlan.h"
+#include <gtest/gtest.h>
 
 namespace android
 {
@@ -45,8 +45,7 @@ protected:
     {
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         pDialingPlan = new MtcDialingPlan(objContext, objSubscriberInfo);
     }
@@ -73,8 +72,7 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsConferenceUriFromConfig)
     objCallInfo.bConference = IMS_TRUE;
 
     AString strUri = "sip:some_conference_uri";
-    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri)
-            .WillByDefault(Return(strUri));
+    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri).WillByDefault(Return(strUri));
 
     EXPECT_EQ(strUri, pDialingPlan->GetToUri("", objCallInfo));
 }
@@ -85,7 +83,6 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultConferenceUriIfMncIs2Digit)
 
     ON_CALL(*pConfigurationManager, GetConferenceFactoryUri)
             .WillByDefault(Return(AString::ConstEmpty()));
-
 
     const AString strMcc3("123");
     const AString strMnc2("56");

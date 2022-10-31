@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CallReasonInfo.h"
-#include "MockIMtcService.h"
 #include "MediaDef.h"
+#include "MockIMtcService.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
-#include "call/MtcSession.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
-#include "call/message/MockIMessageSender.h"
+#include "call/MtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
+#include "call/message/MockIMessageSender.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -35,6 +34,7 @@
 #include "helper/sipinterfaceholder/MockSessionInterfaceHolder.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -61,20 +61,16 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetMediaManager)
-                .WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objContext, GetCallManager)
-                .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
-        ON_CALL(objContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         pSessionInterfaceHolder = new MockSessionInterfaceHolder(objInterfaceHolderListener);
         ON_CALL(objSipInterfaceFactory, GetISessionHolder)
@@ -82,8 +78,7 @@ protected:
         ON_CALL(objContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
-        ON_CALL(objContext, GetService)
-                .WillByDefault(ReturnRef(objMtcService));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objMtcService));
 
         pMessageSender = new MockIMessageSender();
         pMtcSession = new MtcSession(objContext, objSession, CallType::VOIP, pMessageSender);
@@ -99,15 +94,12 @@ protected:
 
 TEST_F(MtcSessionTest, SendProvisionalResponseSends180NotReliablyWithoutSdp)
 {
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
-    ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _))
-            .WillByDefault(Return());
+    ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
     ImsList<IMtcCall*> objCalls;
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(*pMessageSender,
             SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_FALSE))
@@ -118,15 +110,12 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends180NotReliablyWithoutSdp)
 
 TEST_F(MtcSessionTest, SendProvisionalResponseSends180NotReliablyWithSdp)
 {
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_TRUE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
-    ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _))
-            .WillByDefault(Return());
+    ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
     ImsList<IMtcCall*> objCalls;
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(*pMessageSender,
             SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_TRUE, IMS_FALSE))
@@ -137,15 +126,12 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends180NotReliablyWithSdp)
 
 TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithoutSdp)
 {
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
-    ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _))
-            .WillByDefault(Return());
+    ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
     ImsList<IMtcCall*> objCalls;
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(*pMessageSender,
             SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_FALSE, IMS_FALSE))
@@ -156,15 +142,12 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithoutSdp)
 
 TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
 {
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
-    ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _))
-            .WillByDefault(Return());
+    ON_CALL(objPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
     ImsList<IMtcCall*> objCalls;
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
 
     EXPECT_CALL(*pMessageSender,
             SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_TRUE, IMS_FALSE))
@@ -176,8 +159,7 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
 TEST_F(MtcSessionTest, TerminateWithReasonVccDoesnsInvokeTerminate)
 {
     const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
-    EXPECT_CALL(*pMessageSender, Terminate(_, _))
-            .Times(0);
+    EXPECT_CALL(*pMessageSender, Terminate(_, _)).Times(0);
 
     pMtcSession->Terminate(IMS_TRUE, objReason);
 }
@@ -185,8 +167,7 @@ TEST_F(MtcSessionTest, TerminateWithReasonVccDoesnsInvokeTerminate)
 TEST_F(MtcSessionTest, TerminateWithReasonUserTerminatedInvokesTerminate)
 {
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
-    EXPECT_CALL(*pMessageSender, Terminate(IMS_TRUE, objReason))
-            .Times(1);
+    EXPECT_CALL(*pMessageSender, Terminate(IMS_TRUE, objReason)).Times(1);
 
     pMtcSession->Terminate(IMS_TRUE, objReason);
 }
@@ -194,7 +175,7 @@ TEST_F(MtcSessionTest, TerminateWithReasonUserTerminatedInvokesTerminate)
 TEST_F(MtcSessionTest, SecondTerminateReturnsFailure)
 {
     const CallReasonInfo objReason(CODE_USER_TERMINATED);
-    //ON_CALL(*pMessageSender, Terminate(_, _)).WillByDefault(Return(IMS_SUCCESS));
+    // ON_CALL(*pMessageSender, Terminate(_, _)).WillByDefault(Return(IMS_SUCCESS));
 
     EXPECT_EQ(IMS_SUCCESS, pMtcSession->Terminate(IMS_TRUE, objReason));
     EXPECT_EQ(IMS_FAILURE, pMtcSession->Terminate(IMS_TRUE, objReason));

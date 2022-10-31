@@ -18,7 +18,7 @@
 #define UPDATE_ERROR_HANDLER_H_
 
 #include "CallReasonInfo.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
 class IMessage;

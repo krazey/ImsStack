@@ -17,9 +17,9 @@
 #ifndef MOCK_I_CONFERENCE_CONTROLLER_H_
 #define MOCK_I_CONFERENCE_CONTROLLER_H_
 
-#include <gmock/gmock.h>
 #include "MtcDef.h"
 #include "conferencecall/IConferenceController.h"
+#include <gmock/gmock.h>
 
 class ConferenceParticipantList;
 

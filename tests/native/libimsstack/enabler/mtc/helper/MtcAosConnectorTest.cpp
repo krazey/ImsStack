@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "helper/MtcAosConnector.h"
 #include "../../interface/aos/MockIImsAos.h"
 #include "../../interface/aos/MockIImsAosInfo.h"
+#include "IIpcan.h"
+#include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "ServiceNetworkPolicy.h"
-#include "IIpcan.h"
-#include "INetworkWatcher.h"
+#include "helper/MtcAosConnector.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

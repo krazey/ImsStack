@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
-#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
-#include "core/MockISession.h"
-#include "core/MockIReference.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
+#include "core/MockIReference.h"
+#include "core/MockISession.h"
+#include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
+#include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "sipcore/MockISipServerConnection.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

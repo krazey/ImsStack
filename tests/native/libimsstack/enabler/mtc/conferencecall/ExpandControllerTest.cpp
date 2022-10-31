@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "conferencecall/ExpandController.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

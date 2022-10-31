@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "IMtcService.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
@@ -25,8 +24,8 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "call/ParticipantInfo.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
 #include "core/MockIReference.h"
@@ -40,6 +39,7 @@
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipStatusCode.h"
 #include "utility/MessageUtils.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -97,17 +97,14 @@ protected:
 
         ON_CALL(objMockContext, GetServiceByType(ServiceType::NORMAL))
                 .WillByDefault(Return(&objMtcService));
-        ON_CALL(objMtcService, GetICoreService)
-                .WillByDefault(Return(&objCoreService));
+        ON_CALL(objMtcService, GetICoreService).WillByDefault(Return(&objCoreService));
 
-        ON_CALL(objMockContext, GetCallManager)
-                .WillByDefault(ReturnRef(objMockCallManager));
+        ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
 
         ON_CALL(objMockContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objMockInterfaceFactory));
 
-        ON_CALL(objMockContext, GetMessageUtils)
-                .WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objMockContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         pMockReferenceInterfaceHolder = new MockReferenceInterfaceHolder(objMockHolderListener);
         ON_CALL(objMockInterfaceFactory, GetIReferenceHolder)
@@ -141,22 +138,18 @@ protected:
 
         ON_CALL(objMockCallManager, GetCallByCallKey(ANY_TRANSFER_TARGET_CALL_KEY))
                 .WillByDefault(Return(&objMockTargetCall));
-        ON_CALL(objMockTargetCall, GetCallContext)
-                .WillByDefault(ReturnRef(objMockTargetContext));
-        ON_CALL(objMockTargetContext, GetSession())
-                .WillByDefault(Return(&objMockTargetMtcSession));
+        ON_CALL(objMockTargetCall, GetCallContext).WillByDefault(ReturnRef(objMockTargetContext));
+        ON_CALL(objMockTargetContext, GetSession()).WillByDefault(Return(&objMockTargetMtcSession));
         ON_CALL(objMockTargetMtcSession, GetISession())
                 .WillByDefault(ReturnRef(objMockTargetSession));
     }
 
     void SetUpUriFormatter(IN const AString& strUri)
     {
-        ON_CALL(objMockTargetContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objTargetInfo));
-        objTargetInfo.bConference = IMS_TRUE; // to get Remote Uri from ParticipantInfo easily
+        ON_CALL(objMockTargetContext, GetCallInfo).WillByDefault(ReturnRef(objTargetInfo));
+        objTargetInfo.bConference = IMS_TRUE;  // to get Remote Uri from ParticipantInfo easily
 
-        ON_CALL(objMockTargetContext, GetDialingPlan)
-                .WillByDefault(ReturnRef(objDialingPlan));
+        ON_CALL(objMockTargetContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
         delete pParticipantInfo;
         pParticipantInfo = new ParticipantInfo(objMockTargetContext);
@@ -166,10 +159,8 @@ protected:
         ON_CALL(*pMockConfigurationManager, IsConferenceReferToUriSourcePaid)
                 .WillByDefault(Return(IMS_FALSE));
 
-        ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP))
-                .WillByDefault(Return(strUri));
-        ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::UNKNOWN))
-                .WillByDefault(Return(strUri));
+        ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP)).WillByDefault(Return(strUri));
+        ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::UNKNOWN)).WillByDefault(Return(strUri));
     }
 
     void SetUpForSuccessfulReferenceOperation(IN const AString& strSessionId)
@@ -177,81 +168,61 @@ protected:
         SetUpUriFormatter("sip:anyuri");
         ON_CALL(objMockTransfereeCall, GetState)
                 .WillByDefault(Return(IMtcCall::State::ESTABLISHED));
-        ON_CALL(objMockTransfereeCall, GetKey)
-                .WillByDefault(Return(ANY_TRANSFEREE_CALL_KEY));
-        ON_CALL(objMockTargetSession, GetSessionId)
-                .WillByDefault(ReturnRef(strSessionId));
-        ON_CALL(objCoreService, GetLocalUserId)
-                .WillByDefault(Return("anyUserId"));
-        ON_CALL(objMockReference, GetNextRequest)
-                .WillByDefault(Return(&objMockMessage));
-        ON_CALL(objMockMessage, GetMessage)
-                .WillByDefault(Return(&objMockSipMessage));
-        ON_CALL(objMockSipMessage, AddHeader(_, _, _))
-                .WillByDefault(Return(IMS_SUCCESS));
+        ON_CALL(objMockTransfereeCall, GetKey).WillByDefault(Return(ANY_TRANSFEREE_CALL_KEY));
+        ON_CALL(objMockTargetSession, GetSessionId).WillByDefault(ReturnRef(strSessionId));
+        ON_CALL(objCoreService, GetLocalUserId).WillByDefault(Return("anyUserId"));
+        ON_CALL(objMockReference, GetNextRequest).WillByDefault(Return(&objMockMessage));
+        ON_CALL(objMockMessage, GetMessage).WillByDefault(Return(&objMockSipMessage));
+        ON_CALL(objMockSipMessage, AddHeader(_, _, _)).WillByDefault(Return(IMS_SUCCESS));
     }
 };
 
 TEST_F(EctReferenceTest, DestructorReleaseInterface)
 {
-    EXPECT_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, _))
-            .Times(1);
+    EXPECT_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, _)).Times(1);
 }
 
 TEST_F(EctReferenceTest, ReferenceDeliveredCallsListener)
 {
-    ON_CALL(objMockReference, GetPreviousResponse(_))
-            .WillByDefault(Return(nullptr));
-    EXPECT_CALL(objMockListener, OnReferenceStarted)
-            .Times(1);
+    ON_CALL(objMockReference, GetPreviousResponse(_)).WillByDefault(Return(nullptr));
+    EXPECT_CALL(objMockListener, OnReferenceStarted).Times(1);
     pEctReference->ReferenceDelivered(&objMockReference);
 
-    ON_CALL(objMockReference, GetPreviousResponse(_))
-            .WillByDefault(Return(&objMockMessage));
-    ON_CALL(objMockMessage, GetStatusCode)
-            .WillByDefault(Return(SipStatusCode::SC_202));
-    EXPECT_CALL(objMockListener, OnReferenceStarted)
-            .Times(1);
+    ON_CALL(objMockReference, GetPreviousResponse(_)).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_202));
+    EXPECT_CALL(objMockListener, OnReferenceStarted).Times(1);
     pEctReference->ReferenceDelivered(&objMockReference);
 
-    ON_CALL(objMockMessage, GetStatusCode)
-            .WillByDefault(Return(SipStatusCode::SC_405));
-    EXPECT_CALL(objMockListener, OnReferenceStartFailed)
-            .Times(1);
+    ON_CALL(objMockMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_405));
+    EXPECT_CALL(objMockListener, OnReferenceStartFailed).Times(1);
     pEctReference->ReferenceDelivered(&objMockReference);
 }
 
 TEST_F(EctReferenceTest, ReferenceDeliveryFailedCallsListener)
 {
-    EXPECT_CALL(objMockListener, OnReferenceStartFailed)
-            .Times(1);
+    EXPECT_CALL(objMockListener, OnReferenceStartFailed).Times(1);
     pEctReference->ReferenceDeliveryFailed(&objMockReference);
 }
 
 TEST_F(EctReferenceTest, ReferenceTerminatedDoesNothing)
 {
-    EXPECT_CALL(objMockListener, OnReferenceStarted)
-            .Times(0);
-    EXPECT_CALL(objMockListener, OnReferenceStartFailed)
-            .Times(0);
+    EXPECT_CALL(objMockListener, OnReferenceStarted).Times(0);
+    EXPECT_CALL(objMockListener, OnReferenceStartFailed).Times(0);
     pEctReference->ReferenceTerminated(&objMockReference);
 }
 
 TEST_F(EctReferenceTest, SendInviteWithKeyReturnsFailure)
 {
-    ON_CALL(objMockTransfereeCall, GetState)
-            .WillByDefault(Return(IMtcCall::State::TERMINATING));
+    ON_CALL(objMockTransfereeCall, GetState).WillByDefault(Return(IMtcCall::State::TERMINATING));
     EXPECT_EQ(IMS_FAILURE, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
 
-    ON_CALL(objMockTransfereeCall, GetState)
-            .WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+    ON_CALL(objMockTransfereeCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
 
     SetUpUriFormatter("");
     EXPECT_EQ(IMS_FAILURE, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
 
     SetUpUriFormatter("sip:anyuri");
-    ON_CALL(objMockTransfereeCall, GetKey)
-            .WillByDefault(Return(IMtcCall::CALL_KEY_INVALID));
+    ON_CALL(objMockTransfereeCall, GetKey).WillByDefault(Return(IMtcCall::CALL_KEY_INVALID));
     EXPECT_EQ(IMS_FAILURE, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
 }
 
@@ -260,43 +231,35 @@ TEST_F(EctReferenceTest, SendInviteWithKeyReturnsSuccess)
     AString strAnySessionId("sessionid");
     SetUpForSuccessfulReferenceOperation(strAnySessionId);
 
-    EXPECT_CALL(objMockReference, SetListener(pEctReference))
-            .Times(1);
-    EXPECT_CALL(objMockReference, ReferEx(IMS_TRUE, _))
-            .Times(1);
-    EXPECT_CALL(objMockReference, SetReplaces(strAnySessionId))
-            .Times(1);
+    EXPECT_CALL(objMockReference, SetListener(pEctReference)).Times(1);
+    EXPECT_CALL(objMockReference, ReferEx(IMS_TRUE, _)).Times(1);
+    EXPECT_CALL(objMockReference, SetReplaces(strAnySessionId)).Times(1);
 
     EXPECT_EQ(IMS_SUCCESS, pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY));
 }
 
 TEST_F(EctReferenceTest, SendInviteWithNumberReturnsFailure)
 {
-    ON_CALL(objMockTransfereeCall, GetState)
-            .WillByDefault(Return(IMtcCall::State::TERMINATING));
+    ON_CALL(objMockTransfereeCall, GetState).WillByDefault(Return(IMtcCall::State::TERMINATING));
 
     EXPECT_EQ(IMS_FAILURE, pEctReference->SendInvite(ANY_TRANSFER_TARGET));
 
-    ON_CALL(objMockTransfereeCall, GetState)
-            .WillByDefault(Return(IMtcCall::State::ESTABLISHED));
+    ON_CALL(objMockTransfereeCall, GetState).WillByDefault(Return(IMtcCall::State::ESTABLISHED));
 
     // success case is done by SendInviteWithKeyReturnsSuccess
 }
 
 TEST_F(EctReferenceTest, GetResponseCode)
 {
-    SetUpForSuccessfulReferenceOperation("sessionid"); // to set m_piReference
+    SetUpForSuccessfulReferenceOperation("sessionid");  // to set m_piReference
     pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY);
 
-    ON_CALL(objMockReference, GetPreviousResponse(_))
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objMockReference, GetPreviousResponse(_)).WillByDefault(Return(nullptr));
     EXPECT_EQ(SipStatusCode::SC_INVALID, pEctReference->GetResponseCode());
 
     IMS_SINT32 nAnyCode = SipStatusCode::SC_202;
-    ON_CALL(objMockReference, GetPreviousResponse(_))
-            .WillByDefault(Return(&objMockMessage));
-    ON_CALL(objMockMessage, GetStatusCode)
-            .WillByDefault(Return(nAnyCode));
+    ON_CALL(objMockReference, GetPreviousResponse(_)).WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockMessage, GetStatusCode).WillByDefault(Return(nAnyCode));
     EXPECT_EQ(nAnyCode, pEctReference->GetResponseCode());
 }
 

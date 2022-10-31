@@ -17,13 +17,13 @@
 #ifndef MOCK_CONSULTATIVE_CONTROLLER_H_
 #define MOCK_CONSULTATIVE_CONTROLLER_H_
 
-#include <gmock/gmock.h>
 #include "IMtcContext.h"
 #include "call/IMtcCall.h"
 #include "ect/ConsultativeTransferController.h"
 #include "ect/EctFactory.h"
+#include <gmock/gmock.h>
 
-class MockConsultativeTransferController: public ConsultativeTransferController
+class MockConsultativeTransferController : public ConsultativeTransferController
 {
 public:
     explicit MockConsultativeTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "ussi/UssiController.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

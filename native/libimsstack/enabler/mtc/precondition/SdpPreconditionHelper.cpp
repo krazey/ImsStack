@@ -15,20 +15,19 @@
  */
 
 #include "IMessage.h"
-#include "MtcDef.h"
 #include "ISessionParameter.h"
 #include "ISipMessage.h"
 #include "ISipMessageBodyPart.h"
+#include "MtcDef.h"
 #include "SdpParser.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
-
 #include "media/IMedia.h"
 #include "media/IMediaDescriptor.h"
 #include "offeranswer/SdpPrecondition.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
-#include "precondition/SdpPreconditionHelper.h"
 #include "precondition/QosStringDef.h"
+#include "precondition/SdpPreconditionHelper.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

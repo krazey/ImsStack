@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include "media/IMedia.h"
-#include "precondition/MtcPreconditionManager.h"
-#include "precondition/SdpPreconditionHelper.h"
-#include "media/IMtcMediaManager.h"
-#include "call/IMtcSession.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "Configuration.h"
 #include "ISubscriberConfig.h"
 #include "ServiceTrace.h"
+#include "call/IMtcSession.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "media/IMedia.h"
+#include "media/IMtcMediaManager.h"
+#include "precondition/MtcPreconditionManager.h"
 #include "precondition/QosStringDef.h"
+#include "precondition/SdpPreconditionHelper.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

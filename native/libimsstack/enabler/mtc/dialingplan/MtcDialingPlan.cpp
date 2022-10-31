@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-#include "ImsIdentity.h"
-#include "ImsAccessNetworkInfoType.h"
-#include "ImsLib.h"
+#include "AString.h"
+#include "IMtcContext.h"
 #include "IPhoneInfoSubscriber.h"
+#include "ImsAccessNetworkInfoType.h"
+#include "ImsIdentity.h"
+#include "ImsLib.h"
 #include "ServiceNetwork.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "AString.h"
 #include "Sip.h"
 #include "SipAddress.h"
-#include "IMtcContext.h"
 #include "call/IMtcCall.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "configuration/ConfigDef.h"
-#include "dialingplan/MtcDialingPlan.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/EmergencyDialingPlan.h"
+#include "dialingplan/MtcDialingPlan.h"
 #include "util/TextParser.h"
 #include <memory>
 
@@ -137,8 +137,8 @@ AString MtcDialingPlan::GetConferenceFactoryUri() const
     if (strUri.Contains("[MNC") || strUri.Contains("[MCC"))
     {
         strUri = strUri.Replace("[MCC]", GetMcc())
-                .Replace("[MNC]", GetMnc(3))
-                .Replace("[MNC2]", GetMnc(2));
+                         .Replace("[MNC]", GetMnc(3))
+                         .Replace("[MNC2]", GetMnc(2));
     }
 
     IMS_TRACE_I("GetConferenceFactoryUri [%s]", strUri.GetStr(), 0, 0);

@@ -212,7 +212,7 @@ void JniMtcCallThread::OnConferenceParticipantAdded()
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::CONF_JOINED);
-    objParcel.writeInt32(1); // success
+    objParcel.writeInt32(1);  // success
     SendData2Java(objParcel);
 }
 
@@ -221,7 +221,7 @@ void JniMtcCallThread::OnConferenceParticipantAddFailed(IN const CallReasonInfo&
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::CONF_JOINED);
-    objParcel.writeInt32(0); // failure
+    objParcel.writeInt32(0);  // failure
     JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
     SendData2Java(objParcel);
 }
@@ -231,7 +231,7 @@ void JniMtcCallThread::OnConferenceParticipantRemoved()
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::CONF_DROPPED);
-    objParcel.writeInt32(1); // success
+    objParcel.writeInt32(1);  // success
     SendData2Java(objParcel);
 }
 
@@ -240,7 +240,7 @@ void JniMtcCallThread::OnConferenceParticipantRemoveFailed(IN const CallReasonIn
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::CONF_DROPPED);
-    objParcel.writeInt32(0); // failure
+    objParcel.writeInt32(0);  // failure
     JniMtcUtils::WriteCallReasonInfoToParcel(objReason, objParcel);
     SendData2Java(objParcel);
 }

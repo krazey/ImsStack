@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
-#include "call/UpdatingInfo.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
-#include "media/MockIMtcMediaManager.h"
+#include "call/UpdatingInfo.h"
 #include "core/MockISession.h"
+#include "media/MockIMtcMediaManager.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

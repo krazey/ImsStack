@@ -17,9 +17,9 @@
 #ifndef MOCK_I_ECT_REFERENCE_LISTENER_H_
 #define MOCK_I_ECT_REFERENCE_LISTENER_H_
 
-#include <gmock/gmock.h>
 #include "ect/IEctReferenceListener.h"
 #include "sipcore/SipStatusCode.h"
+#include <gmock/gmock.h>
 
 class MockIEctReferenceListener : public IEctReferenceListener
 {

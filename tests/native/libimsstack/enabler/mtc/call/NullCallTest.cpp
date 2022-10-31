@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CallReasonInfo.h"
 #include "call/NullCall.h"
+#include <gtest/gtest.h>
 
 TEST(NullCallTest, NullCallDoesNothing)
 {

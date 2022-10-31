@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
+#include "call/UpdatingInfo.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/UpdatingState.h"
-#include "call/UpdatingInfo.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/ISession.h"
@@ -33,6 +32,7 @@
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/SipMethod.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -62,26 +62,19 @@ protected:
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         pMtcSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
-        ON_CALL(objContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
-        ON_CALL(objContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(objUiNotifier));
+        ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
-        ON_CALL(objMtcSession, GetISession())
-                .WillByDefault(ReturnRef(objSession));
+        ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
 
         pUpdatingInfo = new UpdatingInfo(objContext);
-        ON_CALL(objContext, GetUpdatingInfo)
-                .WillByDefault(ReturnRef(*pUpdatingInfo));
+        ON_CALL(objContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
 
-        ON_CALL(objContext, GetMediaManager)
-                .WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objContext, GetSession())
-                .WillByDefault(Return(&objMtcSession));
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetSupplementaryService())
                 .WillByDefault(ReturnRef(*pMtcSupplementaryService));
         ON_CALL(objContext, GetPreconditionManager())
@@ -175,11 +168,9 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)
 TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)
 {
     MockISession objSession;
-    ON_CALL(objSession, GetState())
-            .WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
 
-    ON_CALL(objMtcSession, GetISession())
-            .WillByDefault(ReturnRef(objSession));
+    ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE))).Times(1);
@@ -198,9 +189,7 @@ TEST_F(UpdatingStateTest, OnRemoteResponseTimerExpiredCallsCancelUpdate)
 
 TEST_F(UpdatingStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
 {
-    EXPECT_CALL(objMediaManager, IsAudioInactive)
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objMediaManager, IsAudioInactive).Times(1).WillOnce(Return(IMS_TRUE));
 
     CallReasonInfo objTerminateReason(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT);
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objTerminateReason)).Times(1);
@@ -208,9 +197,7 @@ TEST_F(UpdatingStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
     CallReasonInfo objReason(CODE_USER_TERMINATED);
     pUpdatingState->Terminate(objReason);
 
-    EXPECT_CALL(objMediaManager, IsAudioInactive)
-            .Times(1)
-            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMediaManager, IsAudioInactive).Times(1).WillOnce(Return(IMS_FALSE));
 
     objTerminateReason.nExtraCode = -1;
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, objTerminateReason)).Times(1);
@@ -232,8 +219,7 @@ TEST_F(UpdatingStateTest, HandleSrvccStartedAsModifier)
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE)).Times(1);
     const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
-    EXPECT_CALL(objMtcSession, CancelUpdate(objReason))
-            .Times(1);
+    EXPECT_CALL(objMtcSession, CancelUpdate(objReason)).Times(1);
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->OnSrvccStateUpdated(SrvccState::STARTED));
 }
@@ -244,8 +230,7 @@ TEST_F(UpdatingStateTest, HandleSrvccStartedAsNotModifier)
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     const CallReasonInfo objReason(CODE_LOCAL_CALL_VCC_ON_PROGRESSING);
-    EXPECT_CALL(objMtcSession, Reject(objReason))
-            .Times(1);
+    EXPECT_CALL(objMtcSession, Reject(objReason)).Times(1);
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->OnSrvccStateUpdated(SrvccState::STARTED));
 }

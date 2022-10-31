@@ -19,16 +19,14 @@
 
 #include "IMediaSession.h"
 #include "IMessage.h"
-#include "ImsTypeDef.h"
 #include "IUMedia.h"
+#include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MtcDef.h"
-
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
-
-#include "media/IMediaSessionClientListener.h"
 #include "media/IMediaReportEventListener.h"
+#include "media/IMediaSessionClientListener.h"
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaProfileManager.h"
 

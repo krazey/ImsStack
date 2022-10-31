@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "IMtcService.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
@@ -24,6 +23,7 @@
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -41,14 +41,11 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallStateProxy)
-                .WillByDefault(ReturnRef(objCallStateProxy));
-        ON_CALL(objContext, GetServiceByType(_))
-                .WillByDefault(Return(&objService));
+        ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(&objService));
 
         pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         pCallManager = new MtcCallManager(objContext);
     }
@@ -62,8 +59,7 @@ protected:
 
 TEST_F(MtcCallManagerTest, InitRegistersThisToCallStateProxy)
 {
-    EXPECT_CALL(objCallStateProxy, AddListener(pCallManager))
-            .Times(1);
+    EXPECT_CALL(objCallStateProxy, AddListener(pCallManager)).Times(1);
 
     pCallManager->Init();
 }
@@ -86,8 +82,7 @@ TEST_F(MtcCallManagerTest, CreateCallAddsNewCallToList)
 
 TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsNull)
 {
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
 
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
@@ -97,8 +92,7 @@ TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsNull)
 
 TEST_F(MtcCallManagerTest, CreateCallNotAddsNullCallIfServiceIsNull)
 {
-    ON_CALL(objContext, GetServiceByType(_))
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
 
     CallInfo objCallInfo;
     pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
@@ -181,11 +175,9 @@ TEST_F(MtcCallManagerTest, GetCallsByTypeReturnsCallListOfMatchingCall)
 TEST_F(MtcCallManagerTest, GetCallsByServiceTypeReturnsCallListOfMatchingCall)
 {
     MockIMtcService objNormalService;
-    ON_CALL(objNormalService, GetServiceType)
-            .WillByDefault(Return(ServiceType::NORMAL));
+    ON_CALL(objNormalService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
     MockIMtcService objEmergencyService;
-    ON_CALL(objEmergencyService, GetServiceType)
-            .WillByDefault(Return(ServiceType::EMERGENCY));
+    ON_CALL(objEmergencyService, GetServiceType).WillByDefault(Return(ServiceType::EMERGENCY));
 
     ON_CALL(objContext, GetServiceByType(ServiceType::NORMAL))
             .WillByDefault(Return(&objNormalService));

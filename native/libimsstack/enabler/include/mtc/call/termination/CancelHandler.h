@@ -18,7 +18,7 @@
 #define CANCEL_HANDLER_H_
 
 #include "CallReasonInfo.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IMessage;
 

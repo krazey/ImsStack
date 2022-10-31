@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include "ImsEventDef.h"
 #include "IMtcImsEventReceiver.h"
+#include "ImsEventDef.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -40,27 +40,20 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetService)
-                .WillByDefault(ReturnRef(objService));
-        ON_CALL(objContext, GetImsEventReceiver)
-                .WillByDefault(ReturnRef(objImsEventReceiver));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
 
         pBlockRule = new CsCallBlockRule(objContext);
     }
 
-    virtual void TearDown() override
-    {
-        delete pBlockRule;
-    }
+    virtual void TearDown() override { delete pBlockRule; }
 };
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedForEmergencyCall)
 {
-    ON_CALL(objService, GetServiceType)
-            .WillByDefault(Return(ServiceType::EMERGENCY));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::EMERGENCY));
 
-    EXPECT_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
-            .Times(0);
+    EXPECT_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE)).Times(0);
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -69,8 +62,7 @@ TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedForEmergencyCall)
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedIfCsCallStateIdle)
 {
-    ON_CALL(objService, GetServiceType)
-            .WillByDefault(Return(ServiceType::NORMAL));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMS_CSCALL_STATE_IDLE));
@@ -82,8 +74,7 @@ TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedIfCsCallStateIdle)
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedIfCsCallStateUnknown)
 {
-    ON_CALL(objService, GetServiceType)
-            .WillByDefault(Return(ServiceType::NORMAL));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMtcImsEventReceiver::UNKNOWN_VALUE));
@@ -95,8 +86,7 @@ TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedIfCsCallStateUnknown)
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallIncoming)
 {
-    ON_CALL(objService, GetServiceType)
-            .WillByDefault(Return(ServiceType::NORMAL));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMS_CSCALL_STATE_INCOMING));
@@ -109,8 +99,7 @@ TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallIncoming)
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallActive)
 {
-    ON_CALL(objService, GetServiceType)
-            .WillByDefault(Return(ServiceType::NORMAL));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMS_CSCALL_STATE_ACTIVE));
@@ -123,8 +112,7 @@ TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallActive)
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallActiveE911)
 {
-    ON_CALL(objService, GetServiceType)
-            .WillByDefault(Return(ServiceType::NORMAL));
+    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMS_CSCALL_STATE_ACTIVE_E911));

@@ -17,8 +17,8 @@
 #ifndef MOCK_I_ECT_CONTROLLER_LISTENER_H_
 #define MOCK_I_ECT_CONTROLLER_LISTENER_H_
 
-#include <gmock/gmock.h>
 #include "ect/IEctControllerListener.h"
+#include <gmock/gmock.h>
 
 class MockIEctControllerListener : public IEctControllerListener
 {

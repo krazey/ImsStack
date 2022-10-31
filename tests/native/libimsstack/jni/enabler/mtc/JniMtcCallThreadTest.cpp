@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
-#include <binder/Parcel.h>
 #include "BaseServiceThread.h"
+#include "ImsProcess.h"
+#include "IuMtcCall.h"
+#include "JniCallInfo.h"
+#include "JniMtcCallThread.h"
+#include "MockIThread.h"
+#include "MtcDef.h"
 #include "PlatformContext.h"
 #include "TestThreadService.h"
-#include "JniMtcCallThread.h"
-#include "IuMtcCall.h"
-#include "MockIThread.h"
-#include "ImsProcess.h"
-#include "JniCallInfo.h"
-#include "MtcDef.h"
+#include <binder/Parcel.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 
@@ -48,8 +48,7 @@ public:
             pThreadService(new TestThreadService()),
             objReason(CODE_UNSPECIFIED)
     {
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_THREAD, pThreadService);
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, pThreadService);
         pThreadService->SetThread(&objMockThread);
         CreateJniMtcCallThread();
     }
@@ -81,8 +80,7 @@ protected:
     {
         pJniCallThread = new JniMtcCallThread();
         pJniCallThread->Start("", IMS_SLOT_0);
-        Jni_SendDataToJava pfnSendDataToJava =
-                reinterpret_cast<Jni_SendDataToJava>(0x01);
+        Jni_SendDataToJava pfnSendDataToJava = reinterpret_cast<Jni_SendDataToJava>(0x01);
         pJniCallThread->SetCallback(0x02, pfnSendDataToJava);
     }
 };
@@ -93,7 +91,7 @@ TEST_F(JniMtcCallThreadTest, OnStarted)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnStarted(objCallInfo, &objMediaInfo, objSuppServices);
@@ -105,7 +103,7 @@ TEST_F(JniMtcCallThreadTest, OnStartFailed)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnStartFailed(objReason);
@@ -117,7 +115,7 @@ TEST_F(JniMtcCallThreadTest, OnProgressing)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnProgressing(objCallInfo, &objMediaInfo, objSuppServices, IMS_TRUE);
@@ -129,7 +127,7 @@ TEST_F(JniMtcCallThreadTest, OnHeld)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnHeld(objCallInfo, &objMediaInfo, objSuppServices);
@@ -141,7 +139,7 @@ TEST_F(JniMtcCallThreadTest, OnHoldFailed)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnHoldFailed(objReason);
@@ -153,7 +151,7 @@ TEST_F(JniMtcCallThreadTest, OnResumed)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnResumed(objCallInfo, &objMediaInfo, objSuppServices);
@@ -165,7 +163,7 @@ TEST_F(JniMtcCallThreadTest, OnResumeFailed)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnResumeFailed(objReason);
@@ -177,7 +175,7 @@ TEST_F(JniMtcCallThreadTest, OnHeldBy)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnHeldBy(objCallInfo, &objMediaInfo, objSuppServices);
@@ -189,7 +187,7 @@ TEST_F(JniMtcCallThreadTest, OnResumedBy)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnResumedBy(objCallInfo, &objMediaInfo, objSuppServices);
@@ -201,7 +199,7 @@ TEST_F(JniMtcCallThreadTest, OnTerminated)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnTerminated(objReason);
@@ -213,7 +211,7 @@ TEST_F(JniMtcCallThreadTest, OnIncomingResume)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnIncomingResume(objCallInfo, &objMediaInfo, objSuppServices);
@@ -225,7 +223,7 @@ TEST_F(JniMtcCallThreadTest, OnUpdated)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnUpdated(objCallInfo, &objMediaInfo, objSuppServices);
@@ -237,7 +235,7 @@ TEST_F(JniMtcCallThreadTest, OnUpdateFailed)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnUpdateFailed(objReason);
@@ -249,7 +247,7 @@ TEST_F(JniMtcCallThreadTest, OnUpdatedBy)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnUpdatedBy(objCallInfo, &objMediaInfo, objSuppServices);
@@ -261,7 +259,7 @@ TEST_F(JniMtcCallThreadTest, OnMerged)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     ImsList<ConfUser*> objUsers;
@@ -274,7 +272,7 @@ TEST_F(JniMtcCallThreadTest, OnMergeFailed)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnMergeFailed(objReason);
@@ -286,7 +284,7 @@ TEST_F(JniMtcCallThreadTest, OnConferenceParticipantAdded)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnConferenceParticipantAdded();
@@ -298,7 +296,7 @@ TEST_F(JniMtcCallThreadTest, OnConferenceParticipantAddFailed)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnConferenceParticipantAddFailed(objReason);
@@ -310,7 +308,7 @@ TEST_F(JniMtcCallThreadTest, OnConferenceParticipantRemoved)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnConferenceParticipantRemoved();
@@ -322,7 +320,7 @@ TEST_F(JniMtcCallThreadTest, OnConferenceParticipantRemoveFailed)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnConferenceParticipantRemoveFailed(objReason);
@@ -334,7 +332,7 @@ TEST_F(JniMtcCallThreadTest, OnConferenceInfoChanged)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnConferenceInfoChanged("", "", 2, 6, "");
@@ -346,7 +344,7 @@ TEST_F(JniMtcCallThreadTest, OnConferenceParticipantsInfoChanged)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     ImsList<ConfUser*> objUsers;
@@ -359,7 +357,7 @@ TEST_F(JniMtcCallThreadTest, OnEctCompleted)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     pJniCallThread->OnEctCompleted(IMS_SUCCESS, objReason);
@@ -371,7 +369,7 @@ TEST_F(JniMtcCallThreadTest, OnIncomingCallReceived)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     ImsList<ConfUser*> objUsers;
@@ -385,7 +383,7 @@ TEST_F(JniMtcCallThreadTest, OnInformationNotificationReceived)
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING , _, IsSameMessageType(eType)))
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
     ImsList<ConfUser*> objUsers;

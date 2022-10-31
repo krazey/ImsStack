@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "call/block/MockIMtcBlockChecker.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "call/block/MtcBlockChecker.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -32,8 +32,7 @@ MockIMtcBlockRule* CreateMockIMtcBlockRule(Result objResult)
 {
     MockIMtcBlockRule* pRule = new MockIMtcBlockRule();
 
-    ON_CALL(*pRule, Check)
-            .WillByDefault(Return(objResult));
+    ON_CALL(*pRule, Check).WillByDefault(Return(objResult));
 
     return pRule;
 }
@@ -109,8 +108,7 @@ TEST(MtcBlockCheckerTest, ListenerNotNotifiedWhenSomePendingRulesUnblocked)
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
     MockIMtcBlockCheckListener objListener;
-    EXPECT_CALL(objListener, OnBlockChecked(_))
-            .Times(0);
+    EXPECT_CALL(objListener, OnBlockChecked(_)).Times(0);
 
     MtcBlockChecker objChecker(lstRules, &objListener);
     Result objResult = objChecker.Check();
@@ -124,8 +122,7 @@ TEST(MtcBlockCheckerTest, ListenerNotifiedWhenSomePendingRulesBlocked)
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
     MockIMtcBlockCheckListener objListener;
-    EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::BLOCKED, objReason)))
-            .Times(1);
+    EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::BLOCKED, objReason))).Times(1);
 
     MtcBlockChecker objChecker(lstRules, &objListener);
     Result objResult = objChecker.Check();
@@ -139,10 +136,8 @@ TEST(MtcBlockCheckerTest, ListenerNotNotifiedAfterNotifiedOnce)
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
     MockIMtcBlockCheckListener objListener;
-    EXPECT_CALL(objListener, OnBlockChecked(_))
-            .Times(0);
-    EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::BLOCKED, objReason)))
-            .Times(1);
+    EXPECT_CALL(objListener, OnBlockChecked(_)).Times(0);
+    EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::BLOCKED, objReason))).Times(1);
 
     MtcBlockChecker objChecker(lstRules, &objListener);
     Result objResult = objChecker.Check();

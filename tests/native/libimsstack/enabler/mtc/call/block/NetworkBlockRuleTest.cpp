@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "MockIMtcService.h"
 #include "MockINetworkWatcher.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "call/block/NetworkBlockRule.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -38,22 +38,17 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetService)
-                .WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
 
         pBlockRule = new NetworkBlockRule(objContext, objNetworkWatcher);
     }
 
-    virtual void TearDown() override
-    {
-        delete pBlockRule;
-    }
+    virtual void TearDown() override { delete pBlockRule; }
 };
 
 TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfInEpdg)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -62,10 +57,8 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfInEpdg)
 
 TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfLte)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objNetworkWatcher, GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objNetworkWatcher, GetNetRadioTechType()).WillByDefault(Return(NW_REPORT_RADIO_LTE));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -74,10 +67,8 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfLte)
 
 TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfNr)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objNetworkWatcher, GetNetRadioTechType())
-            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objNetworkWatcher, GetNetRadioTechType()).WillByDefault(Return(NW_REPORT_RADIO_NR));
 
     Result objResult = pBlockRule->Check(objListener);
 
@@ -86,10 +77,8 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfNr)
 
 TEST_F(NetworkBlockRuleTest, CheckReturnsBlockedIfNotSupportedNetwork)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(nullptr));
 
     ON_CALL(objNetworkWatcher, GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_INVALID));
@@ -102,10 +91,8 @@ TEST_F(NetworkBlockRuleTest, CheckReturnsBlockedIfNotSupportedNetwork)
 
 TEST_F(NetworkBlockRuleTest, CheckReturnsUnblockedIfWifiTestMode)
 {
-    ON_CALL(objContext, IsWifiTestMode)
-            .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objContext, IsWifiTestMode).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     NetworkBlockRule* pTestBlockRule = new NetworkBlockRule(objContext, objNetworkWatcher);
     Result objResult = pTestBlockRule->Check(objListener);

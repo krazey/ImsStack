@@ -17,11 +17,10 @@
 #ifndef MOCK_CONFERENCE_EVENT_NOTIFIER_H_
 #define MOCK_CONFERENCE_EVENT_NOTIFIER_H_
 
-#include <gmock/gmock.h>
-
-#include "call/IMtcCall.h"
 #include "CallReasonInfo.h"
+#include "call/IMtcCall.h"
 #include "conferencecall/ConferenceEventNotifier.h"
+#include <gmock/gmock.h>
 
 class IMtcCallContext;
 class CallConnectionIdManager;

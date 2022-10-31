@@ -16,8 +16,8 @@
 
 #include "IMessage.h"
 #include "ISipHeader.h"
-#include "SipMethod.h"
 #include "ServiceTrace.h"
+#include "SipMethod.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
 #include "utility/MessageUtil.h"

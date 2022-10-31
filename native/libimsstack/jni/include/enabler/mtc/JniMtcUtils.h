@@ -18,11 +18,11 @@
 #define JNI_MTC_UTILS_H_
 
 #include "AString.h"
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
-#include "ImsMap.h"
 
 class JniMtcUtils final
 {

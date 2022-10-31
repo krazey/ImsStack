@@ -17,9 +17,9 @@
 #ifndef QOS_STRING_DEF_H_
 #define QOS_STRING_DEF_H_
 
-#include "IMSTypeDef.h"
-#include "SdpMedia.h"
+#include "ImsTypeDef.h"
 #include "SdpAttribute.h"
+#include "SdpMedia.h"
 #include "offeranswer/SdpPrecondition.h"
 #include "precondition/QosDef.h"
 

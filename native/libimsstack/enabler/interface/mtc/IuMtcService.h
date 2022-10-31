@@ -18,9 +18,9 @@
 #define INTERFACE_UI_MTC_SERVICE_H_
 
 #include "CallReasonInfo.h"
-#include "ImsMessageDef.h"
 #include "IUBaseParam.h"
 #include "ImsMap.h"
+#include "ImsMessageDef.h"
 
 class ISession;
 

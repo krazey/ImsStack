@@ -17,8 +17,8 @@
 #ifndef MERGE_CONTROLLER_H_
 #define MERGE_CONTROLLER_H_
 
-#include "conferencecall/ConferenceController.h"
 #include "ImsList.h"
+#include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
 class MediaInfo;

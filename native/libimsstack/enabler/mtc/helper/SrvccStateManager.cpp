@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "helper/SrvccStateManager.h"
 #include "ServiceTrace.h"
 #include "helper/ISrvccStateListener.h"
-#include "ImsList.h"
+#include "helper/SrvccStateManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

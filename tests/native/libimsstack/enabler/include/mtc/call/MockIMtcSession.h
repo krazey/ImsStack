@@ -17,10 +17,10 @@
 #ifndef MOCK_I_MTC_SESSION_H_
 #define MOCK_I_MTC_SESSION_H_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
+#include <gmock/gmock.h>
 
 class IMessage;
 class ISession;

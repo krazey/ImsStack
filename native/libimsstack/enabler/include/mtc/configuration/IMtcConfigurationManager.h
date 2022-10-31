@@ -19,7 +19,7 @@
 
 #include "AString.h"
 #include "ConfigDef.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ICarrierConfig;
 

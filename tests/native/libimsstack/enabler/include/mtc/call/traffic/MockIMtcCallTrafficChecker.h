@@ -17,18 +17,17 @@
 #ifndef MOCK_I_MTC_CALL_TRAFFIC_CHECKER_H_
 #define MOCK_I_MTC_CALL_TRAFFIC_CHECKER_H_
 
-#include <gmock/gmock.h>
-
-#include "call/traffic/IMtcCallTrafficChecker.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
+#include <gmock/gmock.h>
 
 class MockIMtcCallTrafficChecker : public IMtcCallTrafficChecker
 {
 public:
     ~MockIMtcCallTrafficChecker() = default;
 
-    MOCK_METHOD(void, SetTrafficCheckerListener, (IN IMtcCallTrafficCheckerListener * pListener),
+    MOCK_METHOD(void, SetTrafficCheckerListener, (IN IMtcCallTrafficCheckerListener* pListener),
             (override));
     MOCK_METHOD(IMS_BOOL, IsTrafficPrepared, (CallType eCallType, IMS_BOOL bEmergency),
             (const, override));

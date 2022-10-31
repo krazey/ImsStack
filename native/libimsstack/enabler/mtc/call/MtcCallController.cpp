@@ -15,24 +15,23 @@
  */
 
 #include "IMessage.h"
-#include "ImsList.h"
-#include "call/IMtcCallContext.h"
-#include "call/IMtcCallManager.h"
 #include "IMtcContext.h"
+#include "IMtcService.h"
 #include "ISession.h"
 #include "ISipHeader.h"
-#include "IMtcService.h"
-#include "utility/MessageUtil.h"
+#include "ImsList.h"
+#include "IuMtcService.h"
+#include "MtcDef.h"
+#include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
 #include "call/ISilentRedialHelper.h"
 #include "call/MtcCallController.h"
 #include "call/SilentRedialHelper.h"
-#include "MtcDef.h"
-#include "ussi/UssiConstants.h"
-#include "IuMtcService.h"
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceManager.h"
-#include "IMtcContext.h"
 #include "ect/IEctManager.h"
+#include "ussi/UssiConstants.h"
+#include "utility/MessageUtil.h"
 
 PUBLIC
 MtcCallController::MtcCallController(IN IMtcContext& objContext) :

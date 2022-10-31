@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
 #include "call/MockIMtcCallContext.h"
@@ -28,6 +27,7 @@
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -62,21 +62,14 @@ protected:
                 .WillByDefault(ReturnRef(*pSupplementaryService));
 
         pParticipantInfo = new ParticipantInfo(objCallContext);
-        ON_CALL(objCallContext, GetParticipantInfo)
-                .WillByDefault(ReturnRef(*pParticipantInfo));
+        ON_CALL(objCallContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
 
-        ON_CALL(objCallContext, GetDialingPlan)
-                .WillByDefault(ReturnRef(objDialingPlan));
-        ON_CALL(objCallContext, GetCallInfo)
-                .WillByDefault(ReturnRef(objCallInfo));
-        ON_CALL(objCallContext, GetService)
-                .WillByDefault(ReturnRef(objService));
-        ON_CALL(objCallContext, GetMediaManager)
-                .WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objCallContext, GetImsEventReceiver)
-                .WillByDefault(ReturnRef(objImsEventReceiver));
-        ON_CALL(objCallContext, GetCallManager)
-                .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objCallContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
+        ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
+        ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objCallContext, GetCallTrafficChecker)
                 .WillByDefault(ReturnRef(objMockIMtcCallTrafficChecker));
 
@@ -101,15 +94,12 @@ TEST_F(IdleStateTest, StartSetsUpCallInfo)
     ImsMap<SuppType, SuppService*> objSuppServices;
     IMS_BOOL bUssi = IMS_FALSE;
 
-    ON_CALL(objCallContext, IsUssi)
-            .WillByDefault(Return(bUssi));
-    ON_CALL(objCallContext, CreateBlockChecker)
-            .WillByDefault(Return(pBlockChecker));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
+    ON_CALL(objCallContext, CreateBlockChecker).WillByDefault(Return(pBlockChecker));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
-    ON_CALL(objDialingPlan, GetToUri(_, _, _))
-            .WillByDefault(Return(strTarget));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
 
     pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
 
@@ -127,15 +117,12 @@ TEST_F(IdleStateTest, StartSetsUpParticipantInfo)
     MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
     ImsMap<SuppType, SuppService*> objSuppServices;
 
-    ON_CALL(objCallContext, IsUssi)
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objCallContext, CreateBlockChecker)
-            .WillByDefault(Return(pBlockChecker));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, CreateBlockChecker).WillByDefault(Return(pBlockChecker));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
-    ON_CALL(objDialingPlan, GetToUri(_, _, _))
-            .WillByDefault(Return(strTarget));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
 
     pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
 
@@ -153,15 +140,12 @@ TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
     ImsMap<SuppType, SuppService*> objSuppServices;
     objSuppServices.Add(eSuppType, new SuppService());
 
-    ON_CALL(objCallContext, IsUssi)
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objCallContext, CreateBlockChecker)
-            .WillByDefault(Return(pBlockChecker));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, CreateBlockChecker).WillByDefault(Return(pBlockChecker));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
-    ON_CALL(objDialingPlan, GetToUri(_, _, _))
-            .WillByDefault(Return(strTarget));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
 
     pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
 
@@ -176,18 +160,14 @@ TEST_F(IdleStateTest, StartSetsUpMediaManager)
     MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
     ImsMap<SuppType, SuppService*> objSuppServices;
 
-    ON_CALL(objCallContext, IsUssi)
-            .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objCallContext, CreateBlockChecker)
-            .WillByDefault(Return(pBlockChecker));
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objCallContext, CreateBlockChecker).WillByDefault(Return(pBlockChecker));
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
-    ON_CALL(objDialingPlan, GetToUri(_, _, _))
-            .WillByDefault(Return(strTarget));
+    ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
 
-    EXPECT_CALL(objMediaManager, SetMediaInfo(*pMediaInfo))
-            .Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(*pMediaInfo)).Times(1);
 
     pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
 }

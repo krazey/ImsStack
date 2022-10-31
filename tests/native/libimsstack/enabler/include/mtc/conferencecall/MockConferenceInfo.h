@@ -17,11 +17,10 @@
 #ifndef MOCK_CONFERENCE_INFO_H_
 #define MOCK_CONFERENCE_INFO_H_
 
-#include <gmock/gmock.h>
-
-#include "MtcDef.h"
 #include "AString.h"
+#include "MtcDef.h"
 #include "conferencecall/ConferenceInfo.h"
+#include <gmock/gmock.h>
 
 class ConferenceParticipantList;
 
@@ -39,7 +38,7 @@ private:
     IMS_UINT32 m_nMaxUserCount;
 };
 
-class MockHostInfo: public ConferenceInfo::HostInfo
+class MockHostInfo : public ConferenceInfo::HostInfo
 {
 public:
     explicit MockHostInfo(IN AString strDisplayText, IN ImsList<AString> objUris) :
@@ -56,7 +55,7 @@ private:
     ImsList<AString> m_objUris;
 };
 
-class MockConferenceState: public ConferenceInfo::ConferenceState
+class MockConferenceState : public ConferenceInfo::ConferenceState
 {
 public:
     explicit MockConferenceState(IN IMS_UINT32 nUserCount) :
@@ -70,7 +69,7 @@ private:
     IMS_UINT32 m_nUserCount;
 };
 
-class MockEndPoint: public ConferenceInfo::User::EndPoint
+class MockEndPoint : public ConferenceInfo::User::EndPoint
 {
 public:
     explicit MockEndPoint(IN AString strEntity, IN IMS_UINT32 nState, IN AString strDisplayText,
@@ -94,7 +93,7 @@ private:
     IMS_UINT32 m_nStatus;
 };
 
-class MockMedia: public ConferenceInfo::User::Media
+class MockMedia : public ConferenceInfo::User::Media
 {
 public:
     explicit MockMedia(IN IMS_UINT32 nId, IN AString strDisplayText, IN IMS_UINT32 nType,
@@ -121,7 +120,7 @@ private:
     IMS_UINT32 m_nStatus;
 };
 
-class MockUser: public ConferenceInfo::User
+class MockUser : public ConferenceInfo::User
 {
 public:
     explicit MockUser(IN AString strEntity, IN IMS_UINT32 nState, IN AString strDisplayText,
@@ -132,10 +131,7 @@ public:
             m_objEndPoints(objEndPoints)
     {
     }
-    ~MockUser()
-    {
-        m_objEndPoints.Clear();
-    }
+    ~MockUser() { m_objEndPoints.Clear(); }
     inline const AString& GetEntity() const override { return m_strEntity; }
     inline IMS_UINT32 GetState() const override { return m_nState; }
     inline const AString& GetDisplayText() const override { return m_strDisplayText; }
@@ -152,10 +148,9 @@ class MockConferenceInfo : public ConferenceInfo
 {
 public:
     explicit MockConferenceInfo(IN ConferenceInfo::ConferenceDescription& objDescripiption,
-            IN ConferenceInfo::HostInfo& objHostInfo,
-            IN ConferenceInfo::ConferenceState& objState,
-            IN ImsList<ConferenceInfo::User*>& objUsers,
-            IN IMS_UINT32 nState, IN IMS_SINT32 nVersion) :
+            IN ConferenceInfo::HostInfo& objHostInfo, IN ConferenceInfo::ConferenceState& objState,
+            IN ImsList<ConferenceInfo::User*>& objUsers, IN IMS_UINT32 nState,
+            IN IMS_SINT32 nVersion) :
             m_objDescription(objDescripiption),
             m_objHostInfo(objHostInfo),
             m_objState(objState),
@@ -164,12 +159,11 @@ public:
             m_nVersion(nVersion)
     {
     }
-    ~MockConferenceInfo()
-    {
-        m_objUsers.Clear();
-    }
+    ~MockConferenceInfo() { m_objUsers.Clear(); }
     inline const ConferenceDescription& GetConferenceDescription() const override
-    { return m_objDescription; }
+    {
+        return m_objDescription;
+    }
     inline const HostInfo& GetHostInfo() const override { return m_objHostInfo; }
     inline const ConferenceState& GetConferenceState() const override { return m_objState; }
     inline const ImsList<User*>& GetUsers() const override { return m_objUsers; }

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "helper/IMtcAosConnector.h"
-#include "IJniMtcServiceThread.h"
 #include "IJniEnabler.h"
+#include "IJniMtcServiceThread.h"
 #include "ImsAosParameter.h"
 #include "JniEnablerConnector.h"
 #include "MtcEmergencyServiceManager.h"
 #include "ServiceTrace.h"
+#include "helper/IMtcAosConnector.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -31,7 +31,7 @@ MtcEmergencyServiceManager::MtcEmergencyServiceManager(IN IMtcContext& objContex
 {
     IMS_TRACE_I("+MtcEmergencyServiceManager", 0, 0, 0);
 
-    m_objContext.GetSlotId(); // TODO
+    m_objContext.GetSlotId();  // TODO
 }
 
 PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
@@ -115,8 +115,8 @@ void MtcEmergencyServiceManager::HandleServiceSuspended()
 }
 
 PRIVATE
-void MtcEmergencyServiceManager::SetState(IN IuMtcService::EmergencyServiceState eState,
-            IN IMS_BOOL bForceNotify /* = IMS_FALSE */)
+void MtcEmergencyServiceManager::SetState(
+        IN IuMtcService::EmergencyServiceState eState, IN IMS_BOOL bForceNotify /* = IMS_FALSE */)
 {
     IMS_TRACE_D("SetState :: [%d] -> [%d]", m_eState, eState, 0);
 
@@ -154,6 +154,6 @@ void MtcEmergencyServiceManager::NotifyEmergencyServiceChanged(IN IMS_SINT32 eRe
 
     ServiceType eServiceType = ServiceType::EMERGENCY;
 
-    piServiceThread->OnEmergencyServiceChanged(static_cast<IMS_SINT32>(m_eState), -1,
-            static_cast<IMS_SINT32>(eServiceType));
+    piServiceThread->OnEmergencyServiceChanged(
+            static_cast<IMS_SINT32>(m_eState), -1, static_cast<IMS_SINT32>(eServiceType));
 }

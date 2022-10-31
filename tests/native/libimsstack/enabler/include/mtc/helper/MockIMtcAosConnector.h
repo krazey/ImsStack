@@ -17,10 +17,10 @@
 #ifndef MOCK_I_MTC_AOS_CONNECTOR_H_
 #define MOCK_I_MTC_AOS_CONNECTOR_H_
 
-#include <gmock/gmock.h>
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "helper/IMtcAosConnector.h"
+#include <gmock/gmock.h>
 
 class MockIMtcAosConnector : public IMtcAosConnector
 {

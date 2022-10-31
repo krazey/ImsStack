@@ -17,10 +17,10 @@
 #ifndef SESSION_INTERFACE_HOLDER_H_
 #define SESSION_INTERFACE_HOLDER_H_
 
-#include "ServiceTimer.h"
+#include "ISessionListener.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "ISessionListener.h"
+#include "ServiceTimer.h"
 
 class ISession;
 class ICoreService;

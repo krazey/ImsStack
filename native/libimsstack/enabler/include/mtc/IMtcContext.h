@@ -17,8 +17,8 @@
 #ifndef INTERFACE_MTC_CONTEXT_H_
 #define INTERFACE_MTC_CONTEXT_H_
 
-#include "IMSTypeDef.h"
 #include "IMtcService.h"
+#include "ImsTypeDef.h"
 #include <functional>
 
 class IMtcDialingPlan;

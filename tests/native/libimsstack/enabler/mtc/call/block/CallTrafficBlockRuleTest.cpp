@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include "call/IMtcCall.h"
 #include "ImsTypeDef.h"
-#include "call/MockIMtcCallContext.h"
 #include "MockIMtcService.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/block/CallTrafficBlockRule.h"
-#include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "call/block/MockIMtcBlockRule.h"
+#include "call/traffic/MockIMtcCallTrafficChecker.h"
+#include <gmock/gmock.h>
 
 using ::testing::_;
 using ::testing::Eq;

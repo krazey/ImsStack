@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "MockISession.h"
 #include "MtcContextRepository.h"
-#include "call/message/MtcMessageMediator.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
+#include "call/message/MtcMessageMediator.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "sipcore/MockISipMessage.h"
-#include "sipcore/ISipHeader.h"
-#include "media/MockIMediaDescriptor.h"
 #include "media/MockIMedia.h"
+#include "media/MockIMediaDescriptor.h"
+#include "sipcore/ISipHeader.h"
+#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

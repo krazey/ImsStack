@@ -17,10 +17,10 @@
 #ifndef REFERENCE_INTERFACE_HOLDER_H_
 #define REFERENCE_INTERFACE_HOLDER_H_
 
-#include "ImsList.h"
-#include "ServiceTimer.h"
-#include "ImsMap.h"
 #include "IReferenceListener.h"
+#include "ImsList.h"
+#include "ImsMap.h"
+#include "ServiceTimer.h"
 
 class ISession;
 class ICoreService;

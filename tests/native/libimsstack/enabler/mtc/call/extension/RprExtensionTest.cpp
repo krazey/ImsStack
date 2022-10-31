@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include "ImsList.h"
 #include "ISipHeader.h"
+#include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MtcContextRepository.h"
 #include "call/extension/MtcExtensionSet.h"
@@ -25,6 +23,8 @@
 #include "core/MockIMessage.h"
 #include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -48,22 +48,17 @@ protected:
     virtual void SetUp() override
     {
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-        ON_CALL(objContext, GetMessageUtils)
-                .WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         pExtension = new RprExtension();
 
-        ON_CALL(objMessage, GetMessage)
-                .WillByDefault(Return(&objSipMessage));
+        ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
         InitMessageRequiresOptionTag(MtcExtensionSet::OPTION_TAG_RPR);
         InitMessageSupportsOptionTag(MtcExtensionSet::OPTION_TAG_RPR);
     }
 
-    virtual void TearDown() override
-    {
-        delete pExtension;
-    }
+    virtual void TearDown() override { delete pExtension; }
 
     void InitMessageRequiresOptionTag(IN const AString& strOptionTag)
     {
@@ -71,13 +66,11 @@ protected:
         ImsList<AString> lstRequiredHeaders;
         lstRequiredHeaders.Append(strOptionTag);
 
-        ON_CALL(objSipMessageRequiresRpr, GetHeaders(_, _))
-                .WillByDefault(Return(lstEmptyHeaders));
+        ON_CALL(objSipMessageRequiresRpr, GetHeaders(_, _)).WillByDefault(Return(lstEmptyHeaders));
         ON_CALL(objSipMessageRequiresRpr, GetHeaders(ISipHeader::REQUIRE, _))
                 .WillByDefault(Return(lstRequiredHeaders));
 
-        ON_CALL(objMessageRequiresRpr, GetMessage)
-                .WillByDefault(Return(&objSipMessageRequiresRpr));
+        ON_CALL(objMessageRequiresRpr, GetMessage).WillByDefault(Return(&objSipMessageRequiresRpr));
     }
 
     void InitMessageSupportsOptionTag(IN const AString& strOptionTag)
@@ -86,13 +79,11 @@ protected:
         ImsList<AString> lstSupportedHeaders;
         lstSupportedHeaders.Append(strOptionTag);
 
-        ON_CALL(objSipMessageSupportsRpr, GetHeaders(_, _))
-                .WillByDefault(Return(lstEmptyHeaders));
+        ON_CALL(objSipMessageSupportsRpr, GetHeaders(_, _)).WillByDefault(Return(lstEmptyHeaders));
         ON_CALL(objSipMessageSupportsRpr, GetHeaders(ISipHeader::SUPPORTED, _))
                 .WillByDefault(Return(lstSupportedHeaders));
 
-        ON_CALL(objMessageSupportsRpr, GetMessage)
-                .WillByDefault(Return(&objSipMessageSupportsRpr));
+        ON_CALL(objMessageSupportsRpr, GetMessage).WillByDefault(Return(&objSipMessageSupportsRpr));
     }
 };
 
@@ -100,27 +91,20 @@ TEST_F(RprExtensionTest, Clone)
 {
     IMtcExtension* pCopiedExtension = pExtension->Clone();
 
-    EXPECT_STREQ(
-            pExtension->GetOptionTag().GetStr(),
-            pCopiedExtension->GetOptionTag().GetStr());
-    EXPECT_EQ(
-            pExtension->IsAvailableOnRemote(),
-            pCopiedExtension->IsAvailableOnRemote());
+    EXPECT_STREQ(pExtension->GetOptionTag().GetStr(), pCopiedExtension->GetOptionTag().GetStr());
+    EXPECT_EQ(pExtension->IsAvailableOnRemote(), pCopiedExtension->IsAvailableOnRemote());
 
     delete pCopiedExtension;
 }
 
 TEST_F(RprExtensionTest, GetOptionTag)
 {
-    EXPECT_STREQ(
-            MtcExtensionSet::OPTION_TAG_RPR.GetStr(),
-            pExtension->GetOptionTag().GetStr());
+    EXPECT_STREQ(MtcExtensionSet::OPTION_TAG_RPR.GetStr(), pExtension->GetOptionTag().GetStr());
 }
 
 TEST_F(RprExtensionTest, FormatRequestForSomeMessageDoesNothing)
 {
-    EXPECT_CALL(objSipMessage, AddHeader(_, _, _))
-            .Times(0);
+    EXPECT_CALL(objSipMessage, AddHeader(_, _, _)).Times(0);
 
     pExtension->FormatRequest(RequestType::PRACK, objMessage);
     pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);

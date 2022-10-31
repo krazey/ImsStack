@@ -18,17 +18,16 @@
 #define MTC_PRECONDITION_MANAGER_H_
 
 #include "ImsMap.h"
-#include "IMSTypeDef.h"
-
-#include "call/IMtcCallContext.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "call/IMtcCallContext.h"
 #include "media/IMediaDescriptor.h"
 #include "media/IMediaQosEventListener.h"
 #include "precondition/IMtcPreconditionListener.h"
 #include "precondition/IMtcPreconditionManager.h"
+#include "precondition/QosDef.h"
 #include "precondition/QosStatusTable.h"
 #include "precondition/QosTimer.h"
-#include "precondition/QosDef.h"
 
 class QosData
 {

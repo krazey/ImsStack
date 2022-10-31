@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+#include "ICarrierConfig.h"
+#include "ServiceConfig.h"
+#include "ServiceThread.h"
+#include "ServiceTrace.h"
 #include "configuration/MtcConfigurationManager.h"
 #include "configuration/MtcConfigurationUpdater.h"
-#include "ServiceTrace.h"
-#include "ServiceThread.h"
-#include "ServiceConfig.h"
-#include "ICarrierConfig.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -702,9 +702,8 @@ PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRegistrationDisconnectReasonToTerminateOngoingCall(
         IN IMS_SINT32 nReason) const
 {
-    if (ContainsValue(
-            m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls,
-            TERMINATE_BY_ANY_AOS_REASON))
+    if (ContainsValue(m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls,
+                TERMINATE_BY_ANY_AOS_REASON))
     {
         return IMS_TRUE;
     }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
@@ -22,10 +21,11 @@
 #include "MtcContextRepository.h"
 #include "call/termination/CancelHandler.h"
 #include "core/MockIMessage.h"
+#include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipHeaderName.h"
-#include "sipcore/ISipHeader.h"
 #include "utility/MessageUtils.h"
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -43,11 +43,9 @@ protected:
     virtual void SetUp() override
     {
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-        ON_CALL(objContext, GetMessageUtils)
-                .WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        ON_CALL(objMessage, GetMessage)
-                .WillByDefault(Return(&objSipMessage));
+        ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
     }
 
     virtual void TearDown() override {}

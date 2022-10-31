@@ -16,11 +16,8 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-
 #include "SipAddress.h"
-
 #include "call/IMtcCallManager.h"
-
 #include "conferencecall/ConferenceUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

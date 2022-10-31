@@ -17,7 +17,7 @@
 #ifndef MTC_MESSAGE_MEDIATOR_H_
 #define MTC_MESSAGE_MEDIATOR_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
 

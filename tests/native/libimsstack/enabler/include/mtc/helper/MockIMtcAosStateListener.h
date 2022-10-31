@@ -17,9 +17,9 @@
 #ifndef MOCK_I_MTC_AOS_STATE_LISTENER_
 #define MOCK_I_MTC_AOS_STATE_LISTENER_
 
-#include <gmock/gmock.h>
 #include "ImsTypeDef.h"
 #include "helper/IMtcAosStateListener.h"
+#include <gmock/gmock.h>
 
 class IMtcService;
 
@@ -27,8 +27,8 @@ class MockIMtcAosStateListener : public IMtcAosStateListener
 {
 public:
     virtual ~MockIMtcAosStateListener() {}
-    MOCK_METHOD(void, OnAosStateChanged, (IN IMtcService&, IN MtcAosState, IN IMS_UINT32),
-            (override));
+    MOCK_METHOD(
+            void, OnAosStateChanged, (IN IMtcService&, IN MtcAosState, IN IMS_UINT32), (override));
     MOCK_METHOD(void, OnIpcanChanged, (IN IMtcService&, IN IMS_UINT32), (override));
 };
 

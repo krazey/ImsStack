@@ -17,8 +17,8 @@
 #ifndef NORMAL_DIALING_PLAN_H_
 #define NORMAL_DIALING_PLAN_H_
 
-#include "ImsIdentity.h"
 #include "AString.h"
+#include "ImsIdentity.h"
 
 class IMtcContext;
 

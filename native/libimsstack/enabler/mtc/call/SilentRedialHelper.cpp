@@ -15,8 +15,8 @@
  */
 
 #include "CallReasonInfo.h"
-#include "ImsTypeDef.h"
 #include "IMtcCallController.h"
+#include "ImsTypeDef.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"

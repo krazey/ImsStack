@@ -17,10 +17,10 @@
 #ifndef USSI_CONTROLLER_H_
 #define USSI_CONTROLLER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCallContext.h"
-#include "ussi/UssiEventNotifier.h"
 #include "ussi/UssiData.h"
+#include "ussi/UssiEventNotifier.h"
 
 class IMessage;
 class ISipClientConnection;

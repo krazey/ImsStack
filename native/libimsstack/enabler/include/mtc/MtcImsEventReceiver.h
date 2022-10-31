@@ -18,10 +18,10 @@
 #define MTC_IMS_EVENT_RECEIVER_H_
 
 #include "IEventListener.h"
+#include "IMtcImsEventReceiver.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "IMSTypeDef.h"
-#include "IMtcImsEventReceiver.h"
+#include "ImsTypeDef.h"
 
 /*
  * This class receives event from Java layer defined in ImsEventDef.h. The users can read

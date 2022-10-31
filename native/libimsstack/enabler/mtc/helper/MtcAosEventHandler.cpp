@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#include "ImsTypeDef.h"
-#include "ServiceTrace.h"
-#include "IJniMtcServiceThread.h"
 #include "AString.h"
 #include "IIpcan.h"
+#include "IJniMtcServiceThread.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
+#include "ImsTypeDef.h"
 #include "IuMtcService.h"
 #include "MtcEmergencyServiceManager.h"
+#include "ServiceTrace.h"
 #include "call/traffic/IMtcCallTrafficChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/MtcAosEventHandler.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/MtcAosEventHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

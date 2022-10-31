@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "helper/MtcCapabilityQueryHandler.h"
+#include "ImsAosParameter.h"
 #include "MockIMtcContext.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "ImsAosParameter.h"
+#include "core/MockICapabilities.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
-#include "core/MockICapabilities.h"
+#include "helper/MtcCapabilityQueryHandler.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipAddress.h"
 #include "util/IpAddress.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -54,8 +54,7 @@ protected:
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         ON_CALL(objMockContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
-        ON_CALL(objMockContext, GetSlotId)
-                .WillByDefault(Return(1));
+        ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(1));
 
         pCapaQueryHandler = new MtcCapabilityQueryHandler(objMockContext);
     }
@@ -69,37 +68,36 @@ protected:
 
 TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsFailureIfICapabilitiesIsNull)
 {
-    EXPECT_EQ(IMS_FAILURE, pCapaQueryHandler->HandleIncomingCapabilityQuery(&objMockCoreService,
-            IMS_NULL, "", "", 0));
+    EXPECT_EQ(IMS_FAILURE,
+            pCapaQueryHandler->HandleIncomingCapabilityQuery(
+                    &objMockCoreService, IMS_NULL, "", "", 0));
 }
 
 TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsFailureIfGetNextResponseReturnsNull)
 {
-    ON_CALL(objMockCapabilities, GetNextResponse)
-            .WillByDefault(Return(nullptr));
+    ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(nullptr));
 
-    EXPECT_EQ(IMS_FAILURE, pCapaQueryHandler->HandleIncomingCapabilityQuery(&objMockCoreService,
-            &objMockCapabilities, "", "", 0));
+    EXPECT_EQ(IMS_FAILURE,
+            pCapaQueryHandler->HandleIncomingCapabilityQuery(
+                    &objMockCoreService, &objMockCapabilities, "", "", 0));
 }
 
 TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccess)
 {
     ON_CALL(*pConfigurationManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
             .WillByDefault(Return(IMS_FALSE));
-    ON_CALL(objMockCapabilities, GetNextResponse)
-            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
 
     SipAddress objSipAddress("sip:1234@1.1.1.1");
-    ON_CALL(objMockCoreService, GetAuthorizedUserId)
-            .WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId).WillByDefault(ReturnRef(objSipAddress));
 
     IpAddress objIpAddress(100);
-    ON_CALL(objMockCoreService, GetIpAddress)
-            .WillByDefault(ReturnRef(objIpAddress));
+    ON_CALL(objMockCoreService, GetIpAddress).WillByDefault(ReturnRef(objIpAddress));
 
     // TODO: because IMediaConfig is null in UT, setting SDP cannot be done by Enabler.
-    EXPECT_EQ(IMS_SUCCESS, pCapaQueryHandler->HandleIncomingCapabilityQuery(&objMockCoreService,
-            &objMockCapabilities, "ims.app.mtc", "ims.service.mtc", 0));
+    EXPECT_EQ(IMS_SUCCESS,
+            pCapaQueryHandler->HandleIncomingCapabilityQuery(&objMockCoreService,
+                    &objMockCapabilities, "ims.app.mtc", "ims.service.mtc", 0));
 }
 
 TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfig)
@@ -108,19 +106,17 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfig)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported)
             .WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objMockCapabilities, GetNextResponse)
-            .WillByDefault(Return(&objMockMessage));
+    ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
 
     SipAddress objSipAddress("sip:1234@1.1.1.1");
-    ON_CALL(objMockCoreService, GetAuthorizedUserId)
-            .WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId).WillByDefault(ReturnRef(objSipAddress));
 
     IpAddress objIpAddress(100);
-    ON_CALL(objMockCoreService, GetIpAddress)
-            .WillByDefault(ReturnRef(objIpAddress));
+    ON_CALL(objMockCoreService, GetIpAddress).WillByDefault(ReturnRef(objIpAddress));
 
-    EXPECT_EQ(IMS_SUCCESS, pCapaQueryHandler->HandleIncomingCapabilityQuery(&objMockCoreService,
-            &objMockCapabilities, "ims.app.mtc", "ims.service.mtc", ImsAosFeature::VIDEO));
+    EXPECT_EQ(IMS_SUCCESS,
+            pCapaQueryHandler->HandleIncomingCapabilityQuery(&objMockCoreService,
+                    &objMockCapabilities, "ims.app.mtc", "ims.service.mtc", ImsAosFeature::VIDEO));
 }
 
 TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfigWithoutVideo)
@@ -128,20 +124,18 @@ TEST_F(MtcCapabilityQueryHandlerTest, HandleReturnsSuccessWithVzwConfigWithoutVi
     ON_CALL(*pConfigurationManager, IsUseCarrierSpecificContactHeaderForOptionsResponse)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pConfigurationManager, IsVoiceQosPreconditionSupported)
-            .WillByDefault(Return(IMS_FALSE)); // for line coverage.
-    ON_CALL(objMockCapabilities, GetNextResponse)
-            .WillByDefault(Return(&objMockMessage));
+            .WillByDefault(Return(IMS_FALSE));  // for line coverage.
+    ON_CALL(objMockCapabilities, GetNextResponse).WillByDefault(Return(&objMockMessage));
 
     SipAddress objSipAddress("sip:1234@1.1.1.1");
-    ON_CALL(objMockCoreService, GetAuthorizedUserId)
-            .WillByDefault(ReturnRef(objSipAddress));
+    ON_CALL(objMockCoreService, GetAuthorizedUserId).WillByDefault(ReturnRef(objSipAddress));
 
     IpAddress objIpAddress(100);
-    ON_CALL(objMockCoreService, GetIpAddress)
-            .WillByDefault(ReturnRef(objIpAddress));
+    ON_CALL(objMockCoreService, GetIpAddress).WillByDefault(ReturnRef(objIpAddress));
 
-    EXPECT_EQ(IMS_SUCCESS, pCapaQueryHandler->HandleIncomingCapabilityQuery(&objMockCoreService,
-            &objMockCapabilities, "ims.app.mtc", "ims.service.mtc", 0));
+    EXPECT_EQ(IMS_SUCCESS,
+            pCapaQueryHandler->HandleIncomingCapabilityQuery(&objMockCoreService,
+                    &objMockCapabilities, "ims.app.mtc", "ims.service.mtc", 0));
 }
 
 TEST_F(MtcCapabilityQueryHandlerTest, AdjustMessageDeleteTextFeatureTag)
@@ -149,11 +143,11 @@ TEST_F(MtcCapabilityQueryHandlerTest, AdjustMessageDeleteTextFeatureTag)
     MockISipMessage objSipMessage;
     AString strContactHeader("<sip:1234@1.1.1.1>;text");
     AString strContactHeaderWithoutText("<sip:1234@1.1.1.1>");
-    ON_CALL(objSipMessage, GetHeader(_, _, _))
-            .WillByDefault(Return(strContactHeader));
+    ON_CALL(objSipMessage, GetHeader(_, _, _)).WillByDefault(Return(strContactHeader));
 
-    EXPECT_CALL(objSipMessage, SetHeader(
-            ISipHeader::CONTACT_NORMAL, strContactHeaderWithoutText, AString::ConstNull()))
+    EXPECT_CALL(objSipMessage,
+            SetHeader(
+                    ISipHeader::CONTACT_NORMAL, strContactHeaderWithoutText, AString::ConstNull()))
             .Times(1);
 
     pCapaQueryHandler->MessageMediator_AdjustMessage(&objSipMessage, 0);

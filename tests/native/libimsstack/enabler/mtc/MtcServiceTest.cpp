@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CarrierConfig.h"
+#include "IIpcan.h"
 #include "IMtcService.h"
-#include "MtcService.h"
+#include "ImsAosParameter.h"
 #include "MockICarrierConfig.h"
 #include "MockIMtcCallController.h"
 #include "MockIMtcContext.h"
 #include "MockMtcEmergencyServiceManager.h"
+#include "MtcService.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
+#include "call/MockIMtcCallManager.h"
+#include "call/MtcCallController.h"
+#include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "core/IPageMessage.h"
+#include "core/MockICoreService.h"
+#include "core/MockIMessage.h"
+#include "core/MockIReference.h"
+#include "core/MockISession.h"
 #include "helper/MockIMtcAosStateListener.h"
 #include "helper/MockISrvccStateListener.h"
 #include "helper/MockMtcAosEventHandler.h"
 #include "helper/MockSrvccStateManager.h"
-#include "ImsAosParameter.h"
-#include "IIpcan.h"
-#include "call/MockIMtcCallManager.h"
-#include "call/MtcCallController.h"
-#include "call/traffic/MockIMtcCallTrafficChecker.h"
-#include "core/MockICoreService.h"
-#include "core/MockIReference.h"
-#include "core/MockISession.h"
-#include "core/MockIMessage.h"
-#include "core/IPageMessage.h"
 #include "service/IReasonInfo.h"
+#include <gtest/gtest.h>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
@@ -112,10 +112,8 @@ protected:
         ON_CALL(objMockContext, GetEmergencyServiceManager)
                 .WillByDefault(Return(pMockEmergencyManager));
 
-        ON_CALL(objMockContext, GetCallManager)
-                .WillByDefault(ReturnRef(objMockCallManager));
-        ON_CALL(objMockContext, GetCallController)
-                .WillByDefault(ReturnRef(objMockCallController));
+        ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
+        ON_CALL(objMockContext, GetCallController).WillByDefault(ReturnRef(objMockCallController));
         ON_CALL(objMockContext, GetCallTrafficChecker)
                 .WillByDefault(ReturnRef(objMockIMtcCallTrafficChecker));
 
@@ -140,7 +138,7 @@ protected:
     {
         TestMtcService* pService = new TestMtcService(objMockContext, eType);
 
-        //pService->ReplaceAosConnector();
+        // pService->ReplaceAosConnector();
 
         pMockAosEventHandler = new MockMtcAosEventHandler(*pService, *pConfigurationProxy);
         pService->ReplaceAosEventHandler(pMockAosEventHandler);
@@ -159,8 +157,7 @@ TEST_F(MtcServiceTest, GetServiceTypeReturnsNormal)
 TEST_F(MtcServiceTest, AddAosStateListenerInvokesMtcAosEventHandler)
 {
     MockIMtcAosStateListener objListener;
-    EXPECT_CALL(*pMockAosEventHandler, AddListener(&objListener))
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, AddListener(&objListener)).Times(1);
 
     pNormalMtcService->AddAosStateListener(&objListener);
 }
@@ -168,8 +165,7 @@ TEST_F(MtcServiceTest, AddAosStateListenerInvokesMtcAosEventHandler)
 TEST_F(MtcServiceTest, RemoveAosStateListenerInvokesMtcAosEventHandler)
 {
     MockIMtcAosStateListener objListener;
-    EXPECT_CALL(*pMockAosEventHandler, RemoveListener(&objListener))
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, RemoveListener(&objListener)).Times(1);
 
     pNormalMtcService->RemoveAosStateListener(&objListener);
 }
@@ -179,10 +175,8 @@ TEST_F(MtcServiceTest, AddSrvccStateListenerThenBeingNotified)
     MockISrvccStateListener* pSrvccListener = new MockISrvccStateListener();
     pNormalMtcService->AddSrvccStateListener(pSrvccListener);
 
-    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED))
-            .Times(1);
-    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::SUCCEEDED))
-            .Times(1);
+    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::STARTED)).Times(1);
+    EXPECT_CALL(*pSrvccListener, OnSrvccStateUpdated(SrvccState::SUCCEEDED)).Times(1);
 
     pNormalMtcService->UpdateSrvccState(SrvccState::STARTED);
     pNormalMtcService->UpdateSrvccState(SrvccState::SUCCEEDED);
@@ -214,8 +208,8 @@ TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
 {
     IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
     IMS_UINT32 nIpcan = IIpcan::CATEGORY_MOBILE;
-    EXPECT_CALL(*pMockAosEventHandler,
-            OnConnected(nFeature, nIpcan, IMS_NULL, pMockEmergencyManager))
+    EXPECT_CALL(
+            *pMockAosEventHandler, OnConnected(nFeature, nIpcan, IMS_NULL, pMockEmergencyManager))
             .Times(1);
 
     pNormalMtcService->ImsAos_Connected(nFeature, nIpcan);
@@ -225,8 +219,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
 TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosDisconnecting)
 {
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnDisconnecting(nReason))
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnecting(nReason)).Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
     pNormalMtcService->ImsAos_Disconnecting(nReason);
@@ -247,8 +240,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosDisconnected)
 TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosSuspended)
 {
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnSuspended(nReason))
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnSuspended(nReason)).Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
     pNormalMtcService->ImsAos_Suspended(nReason);
@@ -257,8 +249,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosSuspended)
 
 TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosResumed)
 {
-    EXPECT_CALL(*pMockAosEventHandler, OnResumed)
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnResumed).Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
     pNormalMtcService->ImsAos_Suspended(ImsAosReason::NONE);
@@ -333,8 +324,7 @@ TEST_F(MtcServiceTest, GetAosConnectorReturnsNull)
 
 TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
 {
-    ON_CALL(*pMockSrvccStateManager, GetState)
-            .WillByDefault(Return(SrvccState::STARTED));
+    ON_CALL(*pMockSrvccStateManager, GetState).WillByDefault(Return(SrvccState::STARTED));
 
     EXPECT_EQ(pNormalMtcService->GetSrvccState(), SrvccState::STARTED);
 }
@@ -417,8 +407,7 @@ TEST_F(MtcServiceTest, ImsAosMonitorConnectedInvokesEventHandler)
 {
     IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
     IMS_UINT32 nIpcan = IIpcan::CATEGORY_MOBILE;
-    EXPECT_CALL(*pMockAosEventHandler, OnServiceConnected(nFeature, nIpcan))
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnServiceConnected(nFeature, nIpcan)).Times(1);
 
     pNormalMtcService->ImsAosMonitor_Connected(nFeature, nIpcan);
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());
@@ -428,8 +417,7 @@ TEST_F(MtcServiceTest, ImsAosMonitorNotifyInvokesEventHandler)
 {
     IMS_UINT32 nType = IImsAosMonitor::TYPE_IPCAN;
     IMS_UINT32 nState = IIpcan::CATEGORY_WLAN;
-    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState))
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnEventNotify(nType, nState)).Times(1);
 
     pNormalMtcService->ImsAosMonitor_Notify(nType, nState);
     EXPECT_EQ(pNormalMtcService->GetStatus(), pNormalMtcService->GetOldStatus());

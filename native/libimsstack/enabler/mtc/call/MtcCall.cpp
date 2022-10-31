@@ -15,10 +15,10 @@
  */
 
 #include "IMessage.h"
-#include "ImsTypeDef.h"
 #include "IReference.h"
 #include "ISession.h"
 #include "ISipClientConnection.h"
+#include "ImsTypeDef.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "ServiceMutex.h"
@@ -109,7 +109,7 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(IN ISession* piSession)
     }
 
     if (UssiController::IsNetworkInitiatedUssi(
-            piSession->GetPreviousRequest(IMessage::SESSION_START)))
+                piSession->GetPreviousRequest(IMessage::SESSION_START)))
     {
         m_pUssiController = new UssiController(*this);
         m_objStateMachine.RunStateOperation(

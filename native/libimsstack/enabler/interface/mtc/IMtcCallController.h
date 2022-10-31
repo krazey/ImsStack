@@ -18,8 +18,8 @@
 #define INTERFACE_MTC_CALL_CONTROLLER_H_
 
 #include "IMtcService.h"
-#include "call/IMtcCall.h"
 #include "INativeEnabler.h"
+#include "call/IMtcCall.h"
 
 class IMtcCallContext;
 class ISilentRedialHelper;

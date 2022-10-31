@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include "call/MockIMtcCallContext.h"
-#include "media/MtcMediaManager.h"
 #include "media/MockIMediaReportEventListener.h"
+#include "media/MtcMediaManager.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

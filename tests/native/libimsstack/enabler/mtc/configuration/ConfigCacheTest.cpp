@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "configuration/ConfigCache.h"
 #include "configuration/ConfigDef.h"
+#include <gtest/gtest.h>
 
 namespace android
 {

@@ -17,7 +17,7 @@
 #ifndef MTC_CAPABILITY_QUERY_HANDLER_H_
 #define MTC_CAPABILITY_QUERY_HANDLER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "base/IMessageMediator.h"
 
 class IMessage;

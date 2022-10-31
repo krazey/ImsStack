@@ -17,9 +17,9 @@
 #ifndef INTERFACE_MTC_SERVICE_H_
 #define INTERFACE_MTC_SERVICE_H_
 
-#include "IMSTypeDef.h"
-#include "helper/ISrvccStateListener.h"
 #include "INativeEnabler.h"
+#include "ImsTypeDef.h"
+#include "helper/ISrvccStateListener.h"
 
 class AString;
 class ICoreService;

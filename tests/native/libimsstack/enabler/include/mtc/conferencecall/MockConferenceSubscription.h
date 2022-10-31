@@ -17,10 +17,9 @@
 #ifndef MOCK_CONFERENCE_SUBSCRIPTION_H_
 #define MOCK_CONFERENCE_SUBSCRIPTION_H_
 
-#include <gmock/gmock.h>
-
-#include "conferencecall/ConferenceSubscription.h"
 #include "call/IMtcCall.h"
+#include "conferencecall/ConferenceSubscription.h"
+#include <gmock/gmock.h>
 
 class ConferenceFactory;
 class ConferenceParticipantList;
@@ -42,10 +41,10 @@ public:
     ~MockConferenceSubscription() {}
     MOCK_METHOD(void, SubscriptionForkedNotify, (IN ISubscription*, IN ISubscription*), (override));
     MOCK_METHOD(void, SubscriptionNotify,
-            (IN ISubscription * piSubscription, IN IMessage* piNotify), (override));
-    MOCK_METHOD(void, SubscriptionStarted, (IN ISubscription * piSubscription), (override));
-    MOCK_METHOD(void, SubscriptionStartFailed, (IN ISubscription * piSubscription), (override));
-    MOCK_METHOD(void, SubscriptionTerminated, (IN ISubscription * piSubscription), (override));
+            (IN ISubscription* piSubscription, IN IMessage* piNotify), (override));
+    MOCK_METHOD(void, SubscriptionStarted, (IN ISubscription* piSubscription), (override));
+    MOCK_METHOD(void, SubscriptionStartFailed, (IN ISubscription* piSubscription), (override));
+    MOCK_METHOD(void, SubscriptionTerminated, (IN ISubscription* piSubscription), (override));
     MOCK_METHOD(IMS_RESULT, Subscribe, (IN const AString& strTo), (override));
     MOCK_METHOD(void, UnSubscribe, (), (override));
     MOCK_METHOD(SubscriptionState, GetState, (), (override));
@@ -55,11 +54,11 @@ public:
     MOCK_METHOD(void, ReSubscribe, (), ());
     MOCK_METHOD(void, Initialize, (), ());
     MOCK_METHOD(void, SetHeaders, (), ());
-    MOCK_METHOD(void, UpdateConferenceInfo, (IN IMessage * piNotify), ());
+    MOCK_METHOD(void, UpdateConferenceInfo, (IN IMessage* piNotify), ());
     MOCK_METHOD(void, HandleUpdateResult, (IN IMS_UINT32 nResult), ());
     MOCK_METHOD(void, Notify, (), ());
-    MOCK_METHOD(IMS_BOOL, OnReceiving403, (IN ISubscription * piSubscription), ());
-    MOCK_METHOD(IMS_BOOL, OnReceiving423, (IN ISubscription * piSubscription), ());
+    MOCK_METHOD(IMS_BOOL, OnReceiving403, (IN ISubscription* piSubscription), ());
+    MOCK_METHOD(IMS_BOOL, OnReceiving423, (IN ISubscription* piSubscription), ());
     MOCK_METHOD(void, ReleaseISubscription, (), ());
 };
 

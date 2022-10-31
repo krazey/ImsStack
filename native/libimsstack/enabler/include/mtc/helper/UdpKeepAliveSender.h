@@ -17,8 +17,8 @@
 #ifndef UDP_KEEP_ALIVE_SENDER_H_
 #define UDP_KEEP_ALIVE_SENDER_H_
 
-#include "ImsTypeDef.h"
 #include "ITimer.h"
+#include "ImsTypeDef.h"
 #include "sipcore/ISipKeepAliveHelper.h"
 
 class IMtcCallContext;

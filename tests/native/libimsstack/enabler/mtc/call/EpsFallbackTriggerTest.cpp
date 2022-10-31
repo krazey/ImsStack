@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CallReasonInfo.h"
 #include "IImsAosInfo.h"
 #include "MockIMtcService.h"
@@ -26,8 +25,8 @@
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
-#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -35,6 +34,7 @@
 #include "helper/MockIMtcAosConnector.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -46,7 +46,8 @@ public:
     inline EpsFallbackTriggerTest() :
             objTimerService(),
             objTimer(objTimerService.GetMockTimer())
-    {}
+    {
+    }
 
     MockIMtcCallContext objContext;
     MockIMtcService objService;
@@ -68,12 +69,10 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &objImsRadioService);
 
-        ON_CALL(objContext, GetService)
-                .WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
 
         pEpsFbTrigger = new EpsFallbackTrigger(objContext);
     }
@@ -91,30 +90,25 @@ protected:
 
 TEST_F(EpsFallbackTriggerTest, IsRequiredChecksWatchdogTimeConfiguration)
 {
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
-            .WillByDefault(Return(-1));
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(-1));
     EXPECT_FALSE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
-            .WillByDefault(Return(0));
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(0));
     EXPECT_FALSE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
 
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
-            .WillByDefault(Return(6000));
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
     EXPECT_TRUE(pEpsFbTrigger->IsRequired(*pConfigurationProxy));
 }
 
 TEST_F(EpsFallbackTriggerTest, IsVoNrChecksWifiFirst)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
     EXPECT_FALSE(pEpsFbTrigger->IsVoNr());
 }
 
 TEST_F(EpsFallbackTriggerTest, IsVoNrChecksRadioInfo)
 {
-    ON_CALL(objService, IsWlanIpCanType)
-            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
             .WillByDefault(Return(NW_REPORT_RADIO_LTE));
@@ -144,14 +138,11 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredInvokesTriggerEpsFall
 
     MockIMtcSession objMtcSession;
     MockISession objSession;
-    ON_CALL(objContext, GetSession())
-            .WillByDefault(Return(&objMtcSession));
-    ON_CALL(objMtcSession, GetISession)
-            .WillByDefault(ReturnRef(objSession));
+    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
 
     MockIMtcPreconditionManager objPreconditionManager;
-    ON_CALL(objContext, GetPreconditionManager)
-            .WillByDefault(ReturnRef(objPreconditionManager));
+    ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
 
     ON_CALL(objPreconditionManager, IsResourceReserved(&objSession, QosCheckType::LOCAL_STATUS))
             .WillByDefault(Return(IMS_FALSE));
@@ -170,20 +161,15 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredDoesNotInvokeTriggerE
 
     MockIMtcSession objMtcSession;
     MockISession objSession;
-    ON_CALL(objContext, GetSession())
-            .WillByDefault(Return(&objMtcSession));
-    ON_CALL(objMtcSession, GetISession)
-            .WillByDefault(ReturnRef(objSession));
+    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
 
     MockIMtcPreconditionManager objPreconditionManager;
-    ON_CALL(objContext, GetPreconditionManager)
-            .WillByDefault(ReturnRef(objPreconditionManager));
+    ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
 
     ON_CALL(objPreconditionManager, IsResourceReserved(&objSession, QosCheckType::LOCAL_STATUS))
             .WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
-            TriggerEpsFallback(_))
-            .Times(0);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
 }
 
@@ -194,8 +180,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackSetsTimerAndTriggersE
             .WillByDefault(Return(nAnyNoResponseTime));
 
     MockIMtcAosConnector objAosConnector;
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(&objAosConnector));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_START));
     EXPECT_CALL(objTimer, SetTimer(nAnyNoResponseTime, pEpsFbTrigger));
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
@@ -218,8 +203,7 @@ TEST_F(EpsFallbackTriggerTest, OnEpsFallbackCompletedAfterTriggerEpsfbStopsTimer
             .WillByDefault(Return(nAnyNoResponseTime));
 
     MockIMtcAosConnector objAosConnector;
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(&objAosConnector));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
 
@@ -237,8 +221,7 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTermin
             .WillByDefault(Return(nAnyNoResponseTime));
 
     MockIMtcAosConnector objAosConnector;
-    ON_CALL(objService, GetAosConnector)
-            .WillByDefault(Return(&objAosConnector));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
 
@@ -246,12 +229,9 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTermin
     MockIMtcCall objCall;
 
     CallKey nAnyKey = 1;
-    ON_CALL(objContext, GetCallManager)
-            .WillByDefault(ReturnRef(objManager));
-    ON_CALL(objContext, GetCallKey)
-            .WillByDefault(Return(nAnyKey));
-    ON_CALL(objManager, GetCallByCallKey(nAnyKey))
-            .WillByDefault(Return(&objCall));
+    ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objManager));
+    ON_CALL(objContext, GetCallKey).WillByDefault(Return(nAnyKey));
+    ON_CALL(objManager, GetCallByCallKey(nAnyKey)).WillByDefault(Return(&objCall));
 
     EXPECT_CALL(objCall,
             Terminate(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE)));

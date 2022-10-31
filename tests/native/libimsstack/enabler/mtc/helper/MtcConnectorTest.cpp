@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "IMtcCallStateListener.h"
+#include "MockIMtcContext.h"
 #include "MtcConnector.h"
 #include "MtcContextRepository.h"
-#include "MockIMtcContext.h"
 #include "helper/MockICallStateProxy.h"
+#include <gtest/gtest.h>
 
 using ::testing::ReturnRef;
 
@@ -38,8 +38,7 @@ protected:
     virtual void SetUp() override
     {
         MtcContextRepository::GetInstance()->AddContext(SLOT_ID, &objContext);
-        ON_CALL(objContext, GetCallStateProxy)
-                .WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
     }
 
     virtual void TearDown() override {}
@@ -48,16 +47,14 @@ protected:
 TEST_F(MtcConnectorTest, AddCallStateListener)
 {
     IMtcCallStateListener* pListener = reinterpret_cast<IMtcCallStateListener*>(0x01);
-    EXPECT_CALL(objCallStateProxy, AddListener(pListener))
-            .Times(1);
+    EXPECT_CALL(objCallStateProxy, AddListener(pListener)).Times(1);
     MtcConnector::AddCallStateListener(SLOT_ID, pListener);
 }
 
 TEST_F(MtcConnectorTest, RemoveCallStateListener)
 {
     IMtcCallStateListener* pListener = reinterpret_cast<IMtcCallStateListener*>(0x01);
-    EXPECT_CALL(objCallStateProxy, RemoveListener(pListener))
-            .Times(1);
+    EXPECT_CALL(objCallStateProxy, RemoveListener(pListener)).Times(1);
     MtcConnector::RemoveCallStateListener(SLOT_ID, pListener);
 }
 

@@ -15,9 +15,8 @@
  */
 
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServiceTimer.h"
-
+#include "ServiceTrace.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

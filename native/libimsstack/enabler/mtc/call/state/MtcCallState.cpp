@@ -15,16 +15,16 @@
  */
 
 #include "IMessage.h"
-#include "ImsAosReason.h"
 #include "ISipClientConnection.h"
 #include "ISipConnection.h"
 #include "ISipHeader.h"
+#include "ISipServerConnection.h"
+#include "ImsAosReason.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
-#include "ISipServerConnection.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
@@ -616,7 +616,7 @@ void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
 PROTECTED
 CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason)
 {
-    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED || // TODO: remove?
+    if (objReason.nCode == CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED ||  // TODO: remove?
             objReason.nCode == CODE_REJECT_QOS_FAILURE)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(
@@ -925,7 +925,7 @@ void MtcCallState::SendInfoForUssi(
     }
 
     if (m_objContext.GetUssiController()->FormInfoRequest(
-            piConnection, strUssdString, eErrorCode) == IMS_SUCCESS)
+                piConnection, strUssdString, eErrorCode) == IMS_SUCCESS)
     {
         piConnection->Send();
     }

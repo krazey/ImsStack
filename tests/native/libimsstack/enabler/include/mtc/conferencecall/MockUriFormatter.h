@@ -17,10 +17,9 @@
 #ifndef MOCK_URI_FORMATTER_H_
 #define MOCK_URI_FORMATTER_H_
 
-#include <gmock/gmock.h>
-
 #include "ImsTypeDef.h"
 #include "UriFormatter.h"
+#include <gmock/gmock.h>
 
 class MockUriFormatter : public UriFormatter
 {

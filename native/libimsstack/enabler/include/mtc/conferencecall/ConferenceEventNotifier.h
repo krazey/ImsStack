@@ -17,8 +17,8 @@
 #ifndef CONFERENCE_EVENT_NOTIFIER_H_
 #define CONFERENCE_EVENT_NOTIFIER_H_
 
-#include "call/IMtcCall.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 
 class IMtcCallContext;
 class CallConnectionIdManager;

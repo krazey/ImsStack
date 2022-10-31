@@ -17,13 +17,13 @@
 #ifndef MTC_SESSION_H_
 #define MTC_SESSION_H_
 
-#include <memory>
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
-#include "call/message/IMessageSender.h"
 #include "call/extension/MtcExtensionSet.h"
+#include "call/message/IMessageSender.h"
+#include <memory>
 
 class IMessage;
 class IConferenceManager;

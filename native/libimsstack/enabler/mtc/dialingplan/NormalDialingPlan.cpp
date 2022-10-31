@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-#include "ImsIdentity.h"
+#include "AString.h"
+#include "CarrierConfig.h"
+#include "IMtcContext.h"
 #include "ImsAccessNetworkInfoType.h"
+#include "ImsIdentity.h"
 #include "ImsLib.h"
 #include "ServiceNetwork.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "AString.h"
-#include "CarrierConfig.h"
-
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "IMtcContext.h"
 #include "dialingplan/NormalDialingPlan.h"
-#include "util/TextParser.h"
 #include "helper/IMtcAosConnector.h"
+#include "util/TextParser.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

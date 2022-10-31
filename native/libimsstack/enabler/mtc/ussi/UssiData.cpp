@@ -20,7 +20,6 @@
 #include "IElement.h"
 #include "IText.h"
 #include "ServiceTrace.h"
-
 #include "ussi/UssiConstants.h"
 #include "ussi/UssiData.h"
 

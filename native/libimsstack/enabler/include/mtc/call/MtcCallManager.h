@@ -17,13 +17,13 @@
 #ifndef MTC_CALL_MANAGER_H_
 #define MTC_CALL_MANAGER_H_
 
+#include "IMtcCallStateListener.h"
+#include "IMtcService.h"
 #include "ImsList.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
+#include "IuMtcService.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallManager.h"
-#include "IMtcService.h"
-#include "IuMtcService.h"
-#include "IMtcCallStateListener.h"
 
 class ICoreService;
 class IMtcContext;

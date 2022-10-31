@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "call/UpdatingInfo.h"
 #include "ServiceTrace.h"
 #include "call/IMtcSession.h"
+#include "call/UpdatingInfo.h"
 #include "media/MtcMediaManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

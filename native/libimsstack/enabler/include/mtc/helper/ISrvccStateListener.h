@@ -17,8 +17,8 @@
 #ifndef INTERFACE_SRVCC_STATE_LISTENER_H_
 #define INTERFACE_SRVCC_STATE_LISTENER_H_
 
-#include "IMSTypeDef.h"
 #include "IMtcService.h"
+#include "ImsTypeDef.h"
 
 enum class SrvccState
 {

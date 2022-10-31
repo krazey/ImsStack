@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
 #include "AStringBuffer.h"
+#include "ServiceTrace.h"
 #include "call/IMtcCallManager.h"
-#include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/CallConnectionIdManager.h"
+#include "conferencecall/ConferenceParticipantList.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

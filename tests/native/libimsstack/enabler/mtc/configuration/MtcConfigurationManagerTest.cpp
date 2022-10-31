@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include "configuration/MtcConfigurationManager.h"
-#include "ICarrierConfig.h"
 #include "CarrierConfig.h"
-#include "ServiceConfig.h"
-#include "MockICarrierConfig.h"
-#include "configuration/ConfigDef.h"
+#include "ICarrierConfig.h"
 #include "ImsAosReason.h"
+#include "MockICarrierConfig.h"
+#include "ServiceConfig.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationManager.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -1069,8 +1069,8 @@ TEST_F(MtcConfigurationManagerTest,
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
 
-    EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
-            ImsAosReason::NONE));
+    EXPECT_FALSE(
+            pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(ImsAosReason::NONE));
     EXPECT_TRUE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
             ImsAosReason::POWER_OFF));
     EXPECT_FALSE(pManager->IsRegistrationDisconnectReasonToTerminateOngoingCall(
@@ -1265,20 +1265,16 @@ TEST_F(MtcConfigurationManagerTest, IsSend180ForInitialInviteReturnsValueInCarri
             GetBool(CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL));
 }
 
-TEST_F(MtcConfigurationManagerTest,
-        GetEpsFallbackWatchdogTimeReturnsValueInCarrierConfig)
+TEST_F(MtcConfigurationManagerTest, GetEpsFallbackWatchdogTimeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetEpsFallbackWatchdogTime(),
-            GetInt(CarrierConfig::Assets::
-                            KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT));
+            GetInt(CarrierConfig::Assets::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT));
 }
 
-TEST_F(MtcConfigurationManagerTest,
-        GetSendUdpKeepAliveIntervalTimeReturnsValueInCarrierConfig)
+TEST_F(MtcConfigurationManagerTest, GetSendUdpKeepAliveIntervalTimeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetSendUdpKeepAliveIntervalTime(),
-            GetInt(CarrierConfig::Assets::
-                            KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT));
+            GetInt(CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT));
 }
 
 }  // namespace android

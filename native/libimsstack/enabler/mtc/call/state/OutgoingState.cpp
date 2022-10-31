@@ -14,44 +14,44 @@
  * limitations under the License.
  */
 
-#include "IMtcCallController.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
-#include "configuration/ConfigDef.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "ICoreService.h"
-#include "call/IMtcCallContext.h"
-#include "media/IMtcMediaManager.h"
-#include "ImsAosParameter.h"
+#include "IMtcCallController.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
+#include "ImsAosParameter.h"
 #include "IuMtcService.h"
 #include "MediaDef.h"
-#include "utility/MessageUtil.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
-#include "call/IMtcSession.h"
-#include "helper/MtcTimerWrapper.h"
+#include "SipAddress.h"
+#include "SipHeaderName.h"
+#include "SipStatusCode.h"
 #include "call/EpsFallbackTrigger.h"
+#include "call/IMtcCallContext.h"
+#include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
-#include "call/extension/MtcExtensionSet.h"
 #include "call/SilentRedialHelper.h"
+#include "call/extension/MtcExtensionSet.h"
 #include "call/state/OutgoingState.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
 #include "call/termination/StartErrorHandler.h"
 #include "call/termination/TerminationHandler.h"
+#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "core/IMessage.h"
-#include "SipAddress.h"
-#include "SipHeaderName.h"
-#include "SipStatusCode.h"
+#include "dialingplan/IMtcDialingPlan.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/MtcTimerWrapper.h"
 #include "helper/UdpKeepAliveSender.h"
+#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "precondition/SdpPreconditionHelper.h"
-#include "dialingplan/IMtcDialingPlan.h"
-#include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
-#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -423,7 +423,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDeliveryFailed(IN ISessi
     CallReasonInfo objReason = CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK);
     if (nStatusCode != SipStatusCode::SC_INVALID)
     {
-        objReason.nCode = CODE_SIP_METHOD_NOT_ALLOWED; // TODO: convert response code?
+        objReason.nCode = CODE_SIP_METHOD_NOT_ALLOWED;  // TODO: convert response code?
     }
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
@@ -514,7 +514,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
     pSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
     if (m_objContext.GetConfigurationProxy().Is(
-            Feature::STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY) &&
+                Feature::STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY) &&
             piMessage->GetStatusCode() == SipStatusCode::SC_183 && MessageUtil::HasSdp(piMessage))
     {
         StopTimer(TIMER_MO_NOANSWER);
@@ -719,8 +719,8 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const CallReasonInfo
 }
 
 PRIVATE
-IMS_BOOL OutgoingState::HandleB1TimerAfterTerminate(IN IMtcSession* piMtcSession,
-        IN const CallReasonInfo& objReason)
+IMS_BOOL OutgoingState::HandleB1TimerAfterTerminate(
+        IN IMtcSession* piMtcSession, IN const CallReasonInfo& objReason)
 {
     if (objReason.nCode != CODE_USER_TERMINATED)
     {
@@ -840,7 +840,7 @@ PRIVATE
 void OutgoingState::OnSessionForked(IN ISession* piOriginSession)
 {
     if (m_objContext.GetConfigurationProxy().Is(
-            Feature::MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING))
+                Feature::MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING))
     {
         return;
     }

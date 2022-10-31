@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "CarrierConfig.h"
 #include "MtcContextRepository.h"
 #include "call/MockIMtcCallContext.h"
@@ -24,6 +23,7 @@
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;
@@ -52,45 +52,35 @@ protected:
     {
         MtcContextRepository::GetInstance()->AddContext(0, &objContext);
 
-        ON_CALL(objContext, GetDialingPlan)
-                .WillByDefault(ReturnRef(objDialingPlan));
-        ON_CALL(objContext, GetCallInfo)
-            .WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
+        ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        ON_CALL(objContext, GetConfigurationProxy)
-                .WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
     }
 
-    virtual void TearDown() override
-    {
-        delete pConfigurationProxy;
-    }
+    virtual void TearDown() override { delete pConfigurationProxy; }
 };
 
 TEST_F(UriFormatterTest, GetReferToForInvite)
 {
     // TODO: test for PAID should be added
-    objCallInfo.bConference = IMS_TRUE; // to get Remote Uri from ParticipantInfo easily
+    objCallInfo.bConference = IMS_TRUE;  // to get Remote Uri from ParticipantInfo easily
 
     ParticipantInfo objParticipantInfo(objContext);
-    ON_CALL(objContext, GetParticipantInfo)
-            .WillByDefault(ReturnRef(objParticipantInfo));
+    ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));
     ON_CALL(*pConfigurationManager, IsConferenceReferToUriSourcePaid)
             .WillByDefault(Return(IMS_FALSE));
 
-    ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP))
-            .WillByDefault(Return(ANY_SIP_URI));
-    ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::UNKNOWN))
-            .WillByDefault(Return(ANY_SIP_URI));
+    ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP)).WillByDefault(Return(ANY_SIP_URI));
+    ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::UNKNOWN)).WillByDefault(Return(ANY_SIP_URI));
 
     AString strUri;
     UriFormatter::GetReferToForInvite(strUri, objContext, IMS_FALSE);
     EXPECT_STREQ(strUri.GetStr(), ANY_SIP_URI_WITH_USER.GetStr());
 
-    ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::TEL))
-            .WillByDefault(Return(ANY_TEL_URI));
+    ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::TEL)).WillByDefault(Return(ANY_TEL_URI));
     UriFormatter::GetReferToForInvite(strUri, objContext, IMS_FALSE);
     EXPECT_STREQ(strUri.GetStr(), ANY_SIP_URI_WITH_USER.GetStr());
 }
@@ -143,7 +133,7 @@ TEST_F(UriFormatterTest, GetReferToForBye)
     strUri = "";
     ON_CALL(*pConfigurationManager, GetConferenceDropReferToUriSourceType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::
-                    CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE));
+                            CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE));
     pConfUser->strTarget = "sip:anotherUri";
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
@@ -152,7 +142,7 @@ TEST_F(UriFormatterTest, GetReferToForBye)
     strUri = "";
     ON_CALL(*pConfigurationManager, GetConferenceDropReferToUriSourceType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::
-                    CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE));
+                            CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE));
     pConfUser->strTarget = ANONYMOUS_URI;
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());

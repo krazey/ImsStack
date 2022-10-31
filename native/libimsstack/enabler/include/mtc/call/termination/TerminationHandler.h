@@ -18,7 +18,7 @@
 #define TERMINATION_HANDLER_H_
 
 #include "CallReasonInfo.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ISession;
 

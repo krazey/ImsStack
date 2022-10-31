@@ -17,9 +17,9 @@
 #ifndef MOCK_MTC_CALL_STATE_MACHINE_H_
 #define MOCK_MTC_CALL_STATE_MACHINE_H_
 
-#include <gmock/gmock.h>
 #include "call/IMtcCall.h"
 #include "call/state/MtcCallStateMachine.h"
+#include <gmock/gmock.h>
 
 class IMtcCallContext;
 class IMtcCallState;

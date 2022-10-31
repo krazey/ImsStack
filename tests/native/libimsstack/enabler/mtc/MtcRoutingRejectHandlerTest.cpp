@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "ImsEventDef.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
@@ -23,6 +22,7 @@
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/MockISipServerConnection.h"
 #include "sipcore/SipMethod.h"
+#include <gtest/gtest.h>
 
 using ::testing::Return;
 using ::testing::ReturnRef;

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#include "ImsTypeDef.h"
-#include "ServiceTrace.h"
 #include "AString.h"
+#include "Configuration.h"
+#include "ICarrierConfig.h"
+#include "IConfigurable.h"
+#include "ImsTypeDef.h"
+#include "ServiceConfig.h"
+#include "ServiceTrace.h"
+#include "call/IMtcCallContext.h"
+#include "common/ISipConfigV.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/TransactionTimerUpdateHelper.h"
-#include "common/ISipConfigV.h"
-#include "IConfigurable.h"
-#include "Configuration.h"
-#include "ServiceConfig.h"
-#include "ICarrierConfig.h"
-#include "call/IMtcCallContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -113,9 +113,8 @@ void TransactionTimerUpdateHelper::UpdateTimer(IN IMS_BOOL bInviteTransaction, I
 PRIVATE
 IMS_BOOL TransactionTimerUpdateHelper::IsNeedToUpdate() const
 {
-    Feature eFeature = m_bWifi
-            ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
-            : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
+    Feature eFeature = m_bWifi ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
+                               : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
     return m_objConfiguration.GetInt(eFeature) !=
             CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE;
 }

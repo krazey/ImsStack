@@ -17,7 +17,7 @@
 #ifndef EMERGENCY_DIALING_PLAN_H_
 #define EMERGENCY_DIALING_PLAN_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class AString;
 class IMtcContext;

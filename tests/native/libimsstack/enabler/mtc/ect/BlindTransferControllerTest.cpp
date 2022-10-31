@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockITimer.h"
@@ -33,8 +32,9 @@
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
 #include "sipcore/SipStatusCode.h"
+#include <gtest/gtest.h>
 
-//EctController::TIME_WAIT_OPERATION_COMPLETE
+// EctController::TIME_WAIT_OPERATION_COMPLETE
 LOCAL IMS_UINT32 TIME_WAIT_OPERATION_COMPLETE = 3000;
 
 using ::testing::_;
@@ -86,25 +86,19 @@ public:
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetCallManager)
-                .WillByDefault(ReturnRef(objCallManager));
+        ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objCallManager, GetCallByCallKey(TRANSFEREE_KEY))
                 .WillByDefault(Return(&objTransfereeCall));
         ON_CALL(objTransfereeCall, GetCallContext)
                 .WillByDefault(ReturnRef(objTransfereeCallContext));
-        ON_CALL(objTransfereeCall, GetKey)
-                .WillByDefault(Return(TRANSFEREE_KEY));
-        ON_CALL(objTransfereeCallContext, GetUiNotifier)
-                .WillByDefault(ReturnRef(objNotifier));
+        ON_CALL(objTransfereeCall, GetKey).WillByDefault(Return(TRANSFEREE_KEY));
+        ON_CALL(objTransfereeCallContext, GetUiNotifier).WillByDefault(ReturnRef(objNotifier));
 
-        pController = new BlindTransferController(
-                objContext, TRANSFEREE_KEY, objListener, objFactory);
+        pController =
+                new BlindTransferController(objContext, TRANSFEREE_KEY, objListener, objFactory);
     }
 
-    virtual void TearDown() override
-    {
-        objManagedCalls.Clear();
-    }
+    virtual void TearDown() override { objManagedCalls.Clear(); }
 
     MockEctReference* GetMockReference()
     {
@@ -114,8 +108,7 @@ protected:
         pMockReferenceInterfaceHolder = new MockReferenceInterfaceHolder(objMockHolderListener);
         ON_CALL(objMockInterfaceFactory, GetIReferenceHolder)
                 .WillByDefault(Return(pMockReferenceInterfaceHolder));
-        ON_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, _))
-                .WillByDefault(Return());
+        ON_CALL(*pMockReferenceInterfaceHolder, ReleaseIReference(_, _)).WillByDefault(Return());
 
         pReference = std::make_unique<MockEctReference>(objContext, TRANSFEREE_KEY, *pController);
         MockEctReference* pRawPtr = pReference.get();
@@ -126,8 +119,7 @@ protected:
 
 TEST_F(BlindTransferControllerTest, TransferFailsIfCallCountIsNotOne)
 {
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objManagedCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objManagedCalls));
 
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)))
             .Times(1);
@@ -136,8 +128,7 @@ TEST_F(BlindTransferControllerTest, TransferFailsIfCallCountIsNotOne)
     MockIMtcCall objCall;
     objManagedCalls.Append(&objCall);
     objManagedCalls.Append(&objCall);
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objManagedCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objManagedCalls));
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)))
             .Times(1);
     pController->Transfer(ANY_TARGET_NUMBER);
@@ -146,11 +137,9 @@ TEST_F(BlindTransferControllerTest, TransferFailsIfCallCountIsNotOne)
 TEST_F(BlindTransferControllerTest, TransferFailsIfSendingReferenceFailed)
 {
     objManagedCalls.Append(&objTransfereeCall);
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objManagedCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objManagedCalls));
 
-    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER))
-            .WillByDefault(Return(IMS_FAILURE));
+    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER)).WillByDefault(Return(IMS_FAILURE));
 
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)))
             .Times(1);
@@ -161,14 +150,11 @@ TEST_F(BlindTransferControllerTest, TransferFailsIfSendingReferenceFailed)
 TEST_F(BlindTransferControllerTest, SuccessfulTransferStartsTimer)
 {
     objManagedCalls.Append(&objTransfereeCall);
-    ON_CALL(objCallManager, GetCalls)
-            .WillByDefault(Return(objManagedCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objManagedCalls));
 
-    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER))
-            .WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER)).WillByDefault(Return(IMS_SUCCESS));
 
-    EXPECT_CALL(objTimer, SetTimer(TIME_WAIT_OPERATION_COMPLETE, _))
-            .Times(1);
+    EXPECT_CALL(objTimer, SetTimer(TIME_WAIT_OPERATION_COMPLETE, _)).Times(1);
 
     pController->Transfer(ANY_TARGET_NUMBER);
 }
@@ -176,11 +162,9 @@ TEST_F(BlindTransferControllerTest, SuccessfulTransferStartsTimer)
 TEST_F(BlindTransferControllerTest, OnReferenceStartedNotifiesCompleted)
 {
     objManagedCalls.Append(&objTransfereeCall);
-    ON_CALL(objCallManager, GetCalls)
-                .WillByDefault(Return(objManagedCalls));
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objManagedCalls));
 
-    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER))
-            .WillByDefault(Return(IMS_SUCCESS));
+    ON_CALL(*GetMockReference(), SendInvite(ANY_TARGET_NUMBER)).WillByDefault(Return(IMS_SUCCESS));
 
     pController->Transfer(ANY_TARGET_NUMBER);
 
@@ -188,8 +172,7 @@ TEST_F(BlindTransferControllerTest, OnReferenceStartedNotifiesCompleted)
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_SUCCESS, CallReasonInfo(CODE_USER_TERMINATED)));
     EXPECT_CALL(objTransfereeCall,
             Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT)));
-    EXPECT_CALL(objTimer, KillTimer)
-            .Times(1);
+    EXPECT_CALL(objTimer, KillTimer).Times(1);
 
     pController->OnReferenceStarted();
 }

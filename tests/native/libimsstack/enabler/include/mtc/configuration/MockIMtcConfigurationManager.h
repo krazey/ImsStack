@@ -17,11 +17,10 @@
 #ifndef MOCK_I_MTC_CONFIGURATION_MANAGER_H_
 #define MOCK_I_MTC_CONFIGURATION_MANAGER_H_
 
-#include <gmock/gmock.h>
-
 #include "AString.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "configuration/IMtcConfigurationManager.h"
+#include <gmock/gmock.h>
 
 class ICarrierConfig;
 
@@ -30,7 +29,7 @@ class MockIMtcConfigurationManager : public IMtcConfigurationManager
 public:
     ~MockIMtcConfigurationManager() {}
     MOCK_METHOD(void, Init, (), (override));
-    MOCK_METHOD(void, UpdateFullConfig, (ICarrierConfig * piCc), (override));
+    MOCK_METHOD(void, UpdateFullConfig, (ICarrierConfig* piCc), (override));
     MOCK_METHOD(IMS_SINT32, GetRequestUriType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportGeolocationPidfInSipInvite, (IN IMS_SINT32 nType),
             (const, override));

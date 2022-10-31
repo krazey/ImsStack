@@ -17,9 +17,9 @@
 #ifndef MOCK_I_ECT_MANAGER_H_
 #define MOCK_I_ECT_MANAGER_H_
 
-#include <gmock/gmock.h>
 #include "call/IMtcCall.h"
 #include "ect/IEctManager.h"
+#include <gmock/gmock.h>
 
 class MockIEctManager : public IEctManager
 {

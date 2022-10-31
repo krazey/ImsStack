@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
+#include "IMtcApp.h"
 #include "ServiceTrace.h"
-
 #include "Sip.h"
 #include "SipAddress.h"
 #include "TextParser.h"
-
-#include "utility/MessageUtil.h"
-#include "dialingplan/IMtcDialingPlan.h"
-#include "IMtcApp.h"
-
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/ParticipantInfo.h"
-#include "conferencecall/ConferenceDef.h"
-#include "conferencecall/ConferenceConst.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConst.h"
+#include "conferencecall/ConferenceDef.h"
 #include "conferencecall/UriFormatter.h"
+#include "dialingplan/IMtcDialingPlan.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
