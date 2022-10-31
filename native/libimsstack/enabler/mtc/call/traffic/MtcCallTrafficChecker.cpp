@@ -89,15 +89,15 @@ PUBLIC VIRTUAL void MtcCallTrafficChecker::StartTrafficChecking(
 {
     TrafficType eTrafficType = ConvertCallTypeToTrafficType(eCallType, bEmergency);
 
-    m_piImsRadio->StartImsTraffic(
-            eTrafficType, ConvertNetworkType(bWifi), m_objMtcTrafficInfos.GetValue(eTrafficType));
+    m_piImsRadio->StartImsTraffic(eTrafficType, ConvertNetworkType(bWifi), IImsRadio::DIRECTION_MO,
+            m_objMtcTrafficInfos.GetValue(eTrafficType));
 
     IMS_TRACE_I("StartTrafficChecking TrafficType[%d] ", eTrafficType, 0, 0);
 }
 
 PUBLIC VIRTUAL void MtcCallTrafficChecker::StopTrafficChecking(IN TrafficType eTrafficType)
 {
-    m_piImsRadio->StopImsTraffic(eTrafficType);
+    m_piImsRadio->StopImsTraffic(m_objMtcTrafficInfos.GetValue(eTrafficType));
 
     IMS_TRACE_I("StopTrafficChecking TrafficType[%d] ", eTrafficType, 0, 0);
 }
@@ -123,7 +123,7 @@ PUBLIC VIRTUAL void MtcCallTrafficChecker::OnIpcanChanged(
         }
 
         m_piImsRadio->StartImsTraffic(eTrafficType,
-                ConvertNetworkType(eIpcan == IIpcan::CATEGORY_WLAN),
+                ConvertNetworkType(eIpcan == IIpcan::CATEGORY_WLAN), IImsRadio::DIRECTION_MO,
                 m_objMtcTrafficInfos.GetValue(eTrafficType));
     }
 }

@@ -39,7 +39,9 @@ MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_piImsRadio(IMS_NULL),
         m_piEmergencyRadioGuardTimer(IMS_NULL),
-        m_piRadioGuardTimer(IMS_NULL)
+        m_piRadioGuardTimer(IMS_NULL),
+        m_piCnxListener(IMS_NULL),
+        m_piCnxEmcListener(IMS_NULL)
 {
     IMS_TRACE_I("+MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
 
@@ -322,7 +324,17 @@ void MtsServiceState::StartImsTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 
 {
     IMS_TRACE_I("StartImsTraffic : nTrafficType[%s]", PS_TrafficType(nTrafficType), 0, 0);
 
-    m_piImsRadio->StartImsTraffic(nTrafficType, nAccessNetworkType, piListener);
+    if (nTrafficType == IImsRadio::TRAFFIC_TYPE_SMS)
+    {
+        m_piCnxListener = piListener;
+    }
+    else
+    {
+        m_piCnxEmcListener = piListener;
+    }
+
+    m_piImsRadio->StartImsTraffic(
+            nTrafficType, nAccessNetworkType, IImsRadio::DIRECTION_MO, piListener);
 }
 
 PUBLIC
@@ -435,7 +447,10 @@ void MtsServiceState::StopImsTraffic(IN IMS_UINT32 nTrafficType)
 {
     IMS_TRACE_I("StopImsTraffic : nTrafficType[%s]", PS_TrafficType(nTrafficType), 0, 0);
 
-    m_piImsRadio->StopImsTraffic(nTrafficType);
+    IImsRadioConnectionListener* piListener =
+            (nTrafficType == IImsRadio::TRAFFIC_TYPE_SMS) ? m_piCnxListener : m_piCnxEmcListener;
+
+    m_piImsRadio->StopImsTraffic(piListener);
 }
 
 PRIVATE

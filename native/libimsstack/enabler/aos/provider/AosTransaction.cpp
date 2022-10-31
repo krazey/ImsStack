@@ -33,6 +33,7 @@ AosTransaction::AosTransaction(IN IMS_SINT32 nSlotId) :
         m_bIsEmergencyStartUpdated(IMS_FALSE),
         m_bIsStartUpdated(IMS_FALSE),
         m_nSlotId(nSlotId),
+        m_nStartType(TYPE_NONE),
         m_nTraffics(TYPE_NONE),
         m_piImsRadio(IMS_NULL),
         m_piStopTimer(IMS_NULL),
@@ -56,6 +57,8 @@ AosTransaction::AosTransaction(IN IMS_SINT32 nSlotId) :
 PUBLIC VIRTUAL AosTransaction::~AosTransaction()
 {
     A_IMS_TRACE_D(AOSTAG, "~AosTransaction()", 0, 0, 0);
+
+    StopTimer();
 
     for (IMS_UINT32 i = 0; i < m_objTraffics.GetSize(); ++i)
     {
@@ -206,8 +209,10 @@ PUBLIC VIRTUAL void AosTransaction::StartTraffic(IN IMS_UINT32 nType, IN IMS_UIN
     else
     {
         m_bIsStartUpdated = IMS_TRUE;
+        m_nStartType = nType;
         m_piImsRadio->StartImsTraffic(IImsRadio::TRAFFIC_TYPE_REGISTRATION,
-                GetAccessNetworkType(nRadioType), m_objTraffics.GetValueAt(nIndex));
+                GetAccessNetworkType(nRadioType), IImsRadio::DIRECTION_MO,
+                m_objTraffics.GetValueAt(nIndex));
     }
 }
 
@@ -228,7 +233,7 @@ PUBLIC VIRTUAL void AosTransaction::StartEmergencyTraffic(IN IMS_UINT32 nRadioTy
     if (!m_bIsEmergencyStartUpdated)
     {
         m_bIsEmergencyStartUpdated = IMS_TRUE;
-        m_piImsRadio->StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
+        m_piImsRadio->StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MO,
                 GetAccessNetworkType(nRadioType), m_objTraffics.GetValueAt(nIndex));
     }
 }
@@ -251,12 +256,18 @@ PUBLIC VIRTUAL void AosTransaction::StopTraffic(IN IMS_UINT32 nType)
     }
 }
 
-PUBLIC VIRTUAL void AosTransaction::StopEmergencyTaffic(IN IMS_UINT32 /* nType */)
+PUBLIC VIRTUAL void AosTransaction::StopEmergencyTaffic(IN IMS_UINT32 nType)
 {
     if (m_bIsEmergencyStartUpdated)
     {
         m_bIsEmergencyStartUpdated = IMS_FALSE;
-        m_piImsRadio->StopImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY);
+
+        IMS_SLONG nIndex = m_objTraffics.GetIndexOfKey(nType);
+
+        if (nIndex > 0)
+        {
+            m_piImsRadio->StopImsTraffic(m_objTraffics.GetValueAt(nIndex));
+        }
     }
 }
 
@@ -353,7 +364,13 @@ PRIVATE void AosTransaction::ProcessTimerExpired()
         {
             A_IMS_TRACE_I(AOSTAG, "ProcessTimerExpired :: set end to transaction", 0, 0, 0);
             m_bIsStartUpdated = IMS_FALSE;
-            m_piImsRadio->StopImsTraffic(IImsRadio::TRAFFIC_TYPE_REGISTRATION);
+
+            IMS_SLONG nIndex = m_objTraffics.GetIndexOfKey(m_nStartType);
+
+            if (nIndex > 0)
+            {
+                m_piImsRadio->StopImsTraffic(m_objTraffics.GetValueAt(nIndex));
+            }
         }
     }
 }

@@ -37,8 +37,8 @@ public:
     IMS_BOOL IsImsTrafficAllowed(IN IMS_UINT32 nTrafficType) override;
 
     void StartImsTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
-            IN IImsRadioConnectionListener* piListener) override;
-    void StopImsTraffic(IN IMS_UINT32 nTrafficType) override;
+            IN IMS_UINT32 nDirection, IN IImsRadioConnectionListener* piListener) override;
+    void StopImsTraffic(IN IImsRadioConnectionListener* piListener) override;
 
     void TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason) override;
 
@@ -49,13 +49,16 @@ protected:
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
 
 private:
-    void NotifyConnectionSetupPrepared(IN IMS_UINT32 nImsTrafficType);
+    IMS_UINT32 GetId();
+    void NotifyConnectionSetupPrepared(IN IMS_UINT32 nId);
     static const IMS_CHAR* EventToString(IN IMS_UINT32 nEvent);
 
 private:
     IThread* m_piOwnerThread;
     ImsMap<IMS_UINT32, IImsRadioConnectionListener*> m_objConnectionListeners;
     ImsList<IImsRadioTrafficPriorityListener*> m_objTrafficPriorityListeners;
+
+    static const IMS_UINT32 ID_MAX = 0xFFFFFFFF;
 };
 
 #endif

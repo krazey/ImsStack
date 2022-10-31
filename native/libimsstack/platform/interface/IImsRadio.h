@@ -69,11 +69,11 @@ public:
      *
      * @param nTrafficType The type for IMS traffic (@ImsTrafficType)
      * @param nAccessNetworkType The type for radio access network type (@RadioAccessNetworkType)
-     * @param piListener The listener to be added. It will be overwritten if multiple times
-     *                   are invoked with the same type.
+     * @param nDirection The direction for IMS traffic (@Direction)
+     * @param piListener The listener to be added
      */
     virtual void StartImsTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
-            IN IImsRadioConnectionListener* piListener) = 0;
+            IN IMS_UINT32 nDirection, IN IImsRadioConnectionListener* piListener) = 0;
 
     /**
      * @brief Indicates IMS traffic has been stopped. For all IMS traffic,
@@ -81,9 +81,9 @@ public:
      *        when it completes the traffic. The reference listener registered
      *        from StartImsTraffic() is removed.
      *
-     * @param nTrafficType The type for IMS traffic (@ImsTrafficType)
+     * @param piListener The listener to be removed
      */
-    virtual void StopImsTraffic(IN IMS_UINT32 nTrafficType) = 0;
+    virtual void StopImsTraffic(IN IImsRadioConnectionListener* piListener) = 0;
 
     /**
      * @brief Triggers the EPS fallback procedure by UE for the case where the user is trying to
@@ -129,6 +129,13 @@ public:
         ACCESS_NETWORK_TYPE_EUTRAN,
         ACCESS_NETWORK_TYPE_NGRAN,
         ACCESS_NETWORK_TYPE_IWLAN
+    };
+
+    /// Direction
+    enum
+    {
+        DIRECTION_MO = 0,
+        DIRECTION_MT = 1
     };
 
     /// ConnectionFailureReason

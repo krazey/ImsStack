@@ -121,6 +121,7 @@ private:
     IMS_BOOL m_bIsStartUpdated;
 
     IMS_SINT32 m_nSlotId;
+    IMS_UINT32 m_nStartType;
     IMS_UINT32 m_nTraffics;
 
     IImsRadio* m_piImsRadio;

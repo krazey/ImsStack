@@ -44,12 +44,12 @@ class ConnectionSetupPreparedParam : public OsImsRadioParam
 public:
     inline ConnectionSetupPreparedParam() :
             OsImsRadioParam(EVENT_CONNECTION_SETUP_PREPARED),
-            m_nImsTrafficType(0)
+            m_nId(0)
     {
     }
     inline virtual ~ConnectionSetupPreparedParam() {}
 
-    IMS_UINT32 m_nImsTrafficType;
+    IMS_UINT32 m_nId;
 };
 
 LOCAL
@@ -84,30 +84,62 @@ PUBLIC VIRTUAL IMS_BOOL OsImsRadio::IsImsTrafficAllowed(IN IMS_UINT32 /* nTraffi
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 nTrafficType,
-        IN IMS_UINT32 /* nAccessNetworkType */, IN IImsRadioConnectionListener* piListener)
+PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 /* nTrafficType */,
+        IN IMS_UINT32 /* nAccessNetworkType */, IN IMS_UINT32 /* nDirection */,
+        IN IImsRadioConnectionListener* piListener)
 {
-    if (piListener != IMS_NULL)
+    if (piListener == IMS_NULL)
     {
-        IMS_SLONG nIndex = m_objConnectionListeners.GetIndexOfKey(nTrafficType);
+        return;
+    }
 
-        if (nIndex < 0)
+    IMS_SLONG nIndex = -1;
+
+    for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
+    {
+        IImsRadioConnectionListener* piCurrListener = m_objConnectionListeners.GetValueAt(i);
+        if (piCurrListener == piListener)
         {
-            m_objConnectionListeners.Add(nTrafficType, piListener);
-        }
-        else
-        {
-            m_objConnectionListeners.SetValueAt(nTrafficType, piListener);
+            nIndex = i;
+            break;
         }
     }
 
+    IMS_UINT32 nId = 0;
+
+    if (nIndex < 0)
+    {
+        nId = GetId();
+        m_objConnectionListeners.Add(nId, piListener);
+    }
+    else
+    {
+        nId = m_objConnectionListeners.GetKeyAt(nIndex);
+    }
+
     ConnectionSetupPreparedParam* pParam = new ConnectionSetupPreparedParam();
-    pParam->m_nImsTrafficType = nTrafficType;
+    pParam->m_nId = nId;
 
     osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
 }
 
-PUBLIC VIRTUAL void OsImsRadio::StopImsTraffic(IN IMS_UINT32 /* nTrafficType */) {}
+PUBLIC VIRTUAL void OsImsRadio::StopImsTraffic(IN IImsRadioConnectionListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
+    {
+        IImsRadioConnectionListener* piCurrListener = m_objConnectionListeners.GetValueAt(i);
+        if (piCurrListener == piListener)
+        {
+            m_objConnectionListeners.RemoveAt(i);
+            break;
+        }
+    }
+}
 
 PUBLIC VIRTUAL void OsImsRadio::TriggerEpsFallback(IN IMS_UINT32 /* nEpsfbReason */) {}
 
@@ -168,16 +200,28 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
             ConnectionSetupPreparedParam* pParam =
                     reinterpret_cast<ConnectionSetupPreparedParam*>(pImsRadioParam);
 
-            NotifyConnectionSetupPrepared(pParam->m_nImsTrafficType);
+            NotifyConnectionSetupPrepared(pParam->m_nId);
         }
 
         delete pImsRadioParam;
     }
 }
 
-PRIVATE void OsImsRadio::NotifyConnectionSetupPrepared(IN IMS_UINT32 nImsTrafficType)
+PRIVATE IMS_UINT32 OsImsRadio::GetId()
 {
-    IMS_SLONG nIndex = m_objConnectionListeners.GetIndexOfKey(nImsTrafficType);
+    static IMS_UINT32 s_nId = 0;
+
+    if (s_nId == ID_MAX)
+    {
+        s_nId = 0;
+    }
+
+    return ++s_nId;
+}
+
+PRIVATE void OsImsRadio::NotifyConnectionSetupPrepared(IN IMS_UINT32 nId)
+{
+    IMS_SLONG nIndex = m_objConnectionListeners.GetIndexOfKey(nId);
 
     if (nIndex >= 0)
     {

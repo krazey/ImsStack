@@ -90,6 +90,10 @@ private:
     IImsRadio* m_piImsRadio;
     ITimer* m_piEmergencyRadioGuardTimer;
     ITimer* m_piRadioGuardTimer;
+
+    /// temp code
+    IImsRadioConnectionListener* m_piCnxListener;
+    IImsRadioConnectionListener* m_piCnxEmcListener;
 };
 
 #endif
