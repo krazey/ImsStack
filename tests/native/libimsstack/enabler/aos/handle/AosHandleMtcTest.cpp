@@ -707,6 +707,42 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test5)
 
     m_pAosHandleMtc->NetTracker_StatusChanged();
 
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+    EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
+}
+
+TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test6)
+{
+    // Test6: Srv Out, Network changed to 3G(WCDMA) / No unavailable feature policy
+    // Expectation: Suspended reason SUSPEND_NONE (cleared when detach), Blocked BLOCK_NETWORK
+
+    SetNetSrvIn(IMS_TRUE);
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    SetDataConnected(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_WCDMA));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IAosConnection::STATE_ACTIVE));
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pAosHandleMtc->NetTracker_StatusChanged();
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
 }
 

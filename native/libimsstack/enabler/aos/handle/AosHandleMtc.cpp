@@ -145,19 +145,24 @@ PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
 
     AosHandle::NetTracker_StatusChanged();
 
-    if ((bCurrSrvIn) && (nCurrNetworkType != m_nNetworkType))
+    if (nCurrNetworkType != m_nNetworkType)
     {
-        // 3G to 4G/5G/WLAN
-        if (IsSupportedNetworkType(nCurrNetworkType))
+        if (bCurrSrvIn)
         {
-            A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged :: LTE/NR/WLAN Coverage", 0, 0, 0);
-            ProcessImsResumed(AosReason::SUSPEND_NO_LTE_COVERAGE);
-        }
-        // 4G/5G/WLAN to 3G, etc
-        else
-        {
-            A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged :: Out Of LTE Coverage", 0, 0, 0);
-            ProcessImsSuspended(AosReason::SUSPEND_NO_LTE_COVERAGE);
+            // 3G to 4G/5G/WLAN
+            if (IsSupportedNetworkType(nCurrNetworkType))
+            {
+                A_IMS_TRACE_I(
+                        APPPROFILE, "NetTracker_StatusChanged :: LTE/NR/WLAN Coverage", 0, 0, 0);
+                ProcessImsResumed(AosReason::SUSPEND_NO_LTE_COVERAGE);
+            }
+            // 4G/5G/WLAN to 3G, etc
+            else
+            {
+                A_IMS_TRACE_I(
+                        APPPROFILE, "NetTracker_StatusChanged :: Out Of LTE Coverage", 0, 0, 0);
+                ProcessImsSuspended(AosReason::SUSPEND_NO_LTE_COVERAGE);
+            }
         }
 
         m_nNetworkType = nCurrNetworkType;
@@ -241,7 +246,9 @@ PROTECTED VIRTUAL void AosHandleMtc::CheckSuspended()
 
     if (!IsSupportedNetworkType(nCurrNetworkType))
     {
-        A_IMS_TRACE_I(APPPROFILE, "IMS_CONNECTED, but Network is not in LTE or NR", 0, 0, 0);
+        A_IMS_TRACE_I(APPPROFILE, "IMS_CONNECTED, but Network is not LTE or NR. (%s)",
+                RadioTypeToString(nCurrNetworkType), 0, 0);
+
         SetSuspendedReason(AosReason::SUSPEND_NO_LTE_COVERAGE);
     }
 

@@ -1829,6 +1829,10 @@ PROTECTED GLOBAL const IMS_CHAR* AosHandle::RadioTypeToString(IN IMS_UINT32 nTyp
         case NW_REPORT_RADIO_NR:
             return "NR";
 
+        case NW_REPORT_RADIO_WCDMA:  // FALL-THROUGH
+        case NW_REPORT_RADIO_HSPA:
+            return "3G";
+
         default:
             return "__INVALID__";
     }

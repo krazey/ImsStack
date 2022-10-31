@@ -4191,6 +4191,8 @@ TEST_F(AosHandleTest, RadioTypeToString_Test)
     EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_WLAN), "WLAN");
     EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_LTE), "LTE");
     EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_NR), "NR");
+    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_WCDMA), "3G");
+    EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_HSPA), "3G");
     EXPECT_STREQ(RadioTypeToString(NW_REPORT_RADIO_CDMA), "__INVALID__");
 }
 
