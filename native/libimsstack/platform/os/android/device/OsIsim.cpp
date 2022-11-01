@@ -551,12 +551,13 @@ void OsIsimDigestAka::NotifyResponse(
 PUBLIC
 OsIsim::OsIsim(IN IMS_SINT32 nSlotId) :
         ImsIsim(nSlotId),
-        m_objIsimListeners(IMSList<IIsimListener*>()),
-        m_objDigestAkas(IMSList<OsIsimDigestAka*>()),
+        m_objIsimListeners(ImsList<IIsimListener*>()),
+        m_objDigestAkas(ImsList<OsIsimDigestAka*>()),
         m_bInitialized(IMS_FALSE),
+        m_bReadFileAttributesInProgress(IMS_FALSE),
         m_piOwnerThread(IMS_NULL),
         m_nState(STATE_IDLE),
-        m_objEfContents(IMSMap<IMS_SINT32, IsimEfContent>()),
+        m_objEfContents(ImsMap<IMS_SINT32, IsimEfContent>()),
         m_nCountForAuthFailed(0)
 {
     IMS_TRACE_D("Constructor :: ISIM%02d", nSlotId, 0, 0);
@@ -743,6 +744,12 @@ PUBLIC VIRTUAL void OsIsim::Release()
 
 PUBLIC VIRTUAL IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEFs /*= EF_ALL*/)
 {
+    if (m_bReadFileAttributesInProgress)
+    {
+        IMS_TRACE_I("Reading file attributes is in progress.", 0, 0, 0);
+        return IMS_SUCCESS;
+    }
+
     IMS_SINT32 nState = GetState();
 
     if ((nState != STATE_INIT) && (nState != STATE_REFRESHED))
@@ -785,6 +792,8 @@ PUBLIC VIRTUAL IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEFs /*= EF_ALL*/)
     {
         return IMS_FAILURE;
     }
+
+    m_bReadFileAttributesInProgress = IMS_TRUE;
 
     return IMS_SUCCESS;
 }
@@ -1233,6 +1242,8 @@ void OsIsim::SetRecordAttributes(
         return;
     }
 
+    m_bReadFileAttributesInProgress = IMS_FALSE;
+
     if (GetState() == STATE_REFRESHED)
     {
         IMS_TRACE_I("All ISIM attributes are ready in REFRESHED", 0, 0, 0);
@@ -1258,6 +1269,7 @@ void OsIsim::SetState(IN IMS_SINT32 nState)
     if (nState == STATE_IDLE)
     {
         m_nState = STATE_IDLE;
+        m_bReadFileAttributesInProgress = IMS_FALSE;
         IMS_TRACE_I("ISIM state is IDLE", 0, 0, 0);
     }
     else if (nState == STATE_INIT)
@@ -1269,6 +1281,7 @@ void OsIsim::SetState(IN IMS_SINT32 nState)
         }
 
         m_nState = STATE_INIT;
+        m_bReadFileAttributesInProgress = IMS_FALSE;
         IMS_TRACE_I("ISIM state is INIT", 0, 0, 0);
     }
     else if (nState == STATE_READY)
