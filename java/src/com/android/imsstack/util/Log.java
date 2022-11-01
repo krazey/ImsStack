@@ -28,6 +28,7 @@ public final class Log {
 
     private static int sDebug = -1;
     private static int sImsDebug = -1;
+    private static int sLogOptions = -1;
 
     static {
         if (!"user".equals(android.os.Build.TYPE)) {
@@ -50,27 +51,39 @@ public final class Log {
     }
 
     public static void d(String tag, String msg) {
-        android.util.Log.d(tag, msg);
+        if (isLogEnabled(LogUtils.TRACE_OPTION_D)) {
+            android.util.Log.d(tag, msg);
+        }
     }
 
     public static void e(String tag, String msg) {
-        android.util.Log.e(tag, msg);
+        if (isLogEnabled(LogUtils.TRACE_OPTION_E)) {
+            android.util.Log.e(tag, msg);
+        }
     }
 
     public static void e(String tag, String msg, Throwable t) {
-        android.util.Log.e(tag, msg, t);
+        if (isLogEnabled(LogUtils.TRACE_OPTION_E)) {
+            android.util.Log.e(tag, msg, t);
+        }
     }
 
     public static void i(String tag, String msg) {
-        android.util.Log.i(tag, msg);
+        if (isLogEnabled(LogUtils.TRACE_OPTION_I)) {
+            android.util.Log.i(tag, msg);
+        }
     }
 
     public static void v(String tag, String msg) {
-        android.util.Log.v(tag, msg);
+        if (isLogEnabled(LogUtils.TRACE_OPTION_D)) {
+            android.util.Log.v(tag, msg);
+        }
     }
 
     public static void w(String tag, String msg) {
-        android.util.Log.w(tag, msg);
+        if (isLogEnabled(LogUtils.TRACE_OPTION_I)) {
+            android.util.Log.w(tag, msg);
+        }
     }
 
     // Conditional logging {
@@ -210,5 +223,13 @@ public final class Log {
 
             return s.substring(start, end);
         }
+    }
+
+    private static boolean isLogEnabled(int option) {
+        if (sLogOptions == -1) {
+            sLogOptions = LogUtils.getLogOptions(0);
+        }
+
+        return (sLogOptions & option) == option;
     }
 }

@@ -34,6 +34,9 @@ public:
         /// Option - logging medium
         OPT_MEDIUM_SERIAL = 0x00010000,
 
+        /// Default trace options
+        OPT_DEFAULT = (OPT_CAT_ALL | OPT_MEDIUM_SERIAL),
+
         OPT_MAX = 0x7FFFFFFF
     };
 };

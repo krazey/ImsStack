@@ -40,7 +40,7 @@ PRIVATE GLOBAL const IMS_CHAR* ImsTrace::END[ITrace::TEXT_MAX] = {
 
 PUBLIC
 ImsTrace::ImsTrace() :
-        m_nOption(ITraceOption::OPT_CAT_ALL | ITraceOption::OPT_MEDIUM_SERIAL),
+        m_nOption(ITraceOption::OPT_DEFAULT),
         m_nTracedModules(IMS_TRACE_MODULE_ALL)
 {
 }

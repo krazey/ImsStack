@@ -51,6 +51,10 @@ public class ImsStackApp extends Application {
     public void onCreate() {
         super.onCreate();
 
+        // AppContext will be used globally,
+        // so it should be initialized first at the creation time of ImsStack application.
+        AppContext.init(this);
+
         Log.i(TAG, "onCreate");
         init();
     }
@@ -58,7 +62,6 @@ public class ImsStackApp extends Application {
     @Override
     public void onTerminate() {
         super.onTerminate();
-
         Log.i(TAG, "onTerminate");
         deinit();
     }
@@ -73,10 +76,6 @@ public class ImsStackApp extends Application {
     }
 
     private void init() {
-        // AppContext will be used globally,
-        // so it should be initialized first at the creation time of ImsStack application.
-        AppContext.init(this);
-
         // Initialize any static data
         ImsUtils.init();
 

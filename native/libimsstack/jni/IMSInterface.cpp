@@ -37,22 +37,6 @@
 
 using namespace android;
 
-#if defined(ALOGD)
-#define IMS_LOGD ALOGD
-#elif defined(LOGD)
-#define IMS_LOGD LOGD
-#else
-#warning LOGD macro is not defined
-#endif
-
-#if defined(ALOGE)
-#define IMS_LOGE ALOGE
-#elif defined(LOGE)
-#define IMS_LOGE LOGE
-#else
-#warning LOGE macro is not defined
-#endif
-
 __IMS_TRACE_TAG_ADAPT__;
 
 #define JNI_IMS_OK    (0)
@@ -93,7 +77,7 @@ static int SendDataToJava(long nNativeObject, const android::Parcel& objParcel)
     JNIEnv* env;
     jlong jNativeObject = nNativeObject;
 
-    IMS_TRACE_D("SendDataToJava :: object=%" PFLS_d, nNativeObject, 0, 0);
+    IMS_TRACE_D("SendDataToJava: object=%" PFLS_x, nNativeObject, 0, 0);
 
     if ((s_classJniIms == NULL) || (s_methodSendDataToJava == NULL))
     {
@@ -139,13 +123,13 @@ int SendDataToJavaForSystem(
 
     if (nLogDisplayCount >= MAX_LOG_DISPLAY_COUNT)
     {
-        IMS_TRACE_D("SendDataToJavaForSystem :: object=%" PFLS_d, nNativeObject, 0, 0);
+        IMS_TRACE_D("SendDataToJavaForSystem: object=%" PFLS_x, nNativeObject, 0, 0);
         nLogDisplayCount = 0;
     }
 
     if ((s_classJniIms == NULL) || (s_methodSendDataToJavaForSystem == NULL))
     {
-        IMS_TRACE_E(0, "SendDataToJavaForSystem : Method is null", 0, 0, 0);
+        IMS_TRACE_E(0, "SendDataToJavaForSystem: Method is null", 0, 0, 0);
         return 0;
     }
 
@@ -153,7 +137,7 @@ int SendDataToJavaForSystem(
 
     if (jvm->AttachCurrentThread(&env, NULL) != JNI_OK)
     {
-        IMS_TRACE_E(0, "SendDataToJavaForSystem : AttachCurrentThread fail", 0, 0, 0);
+        IMS_TRACE_E(0, "SendDataToJavaForSystem: AttachCurrentThread fail", 0, 0, 0);
         return 0;
     }
 
@@ -183,7 +167,7 @@ int SendDataToJavaForSystem(
 
     if (jResultData == NULL)
     {
-        IMS_TRACE_I("SendDataToJavaForSystem :: Result is null", 0, 0, 0);
+        IMS_TRACE_I("SendDataToJavaForSystem: Result is null", 0, 0, 0);
         parcelOut.writeInt32(0);
         parcelOut.setDataPosition(0);
         return 1;
@@ -197,7 +181,7 @@ int SendDataToJavaForSystem(
 
         if (nBuffSize == 0)
         {
-            IMS_TRACE_D("SendDataToJavaForSystem :: Result(buffer-length) is zero", 0, 0, 0);
+            IMS_TRACE_D("SendDataToJavaForSystem: Result(buffer-length) is zero", 0, 0, 0);
             parcelOut.writeInt32(1);
         }
         else
@@ -209,7 +193,7 @@ int SendDataToJavaForSystem(
     }
     else
     {
-        IMS_TRACE_D("SendDataToJavaForSystem :: Result(buffer) is null", 0, 0, 0);
+        IMS_TRACE_D("SendDataToJavaForSystem: Result(buffer) is null", 0, 0, 0);
         parcelOut.writeInt32(0);
     }
 
@@ -357,7 +341,7 @@ static NativeThreadMethods s_objNativeThreadMethods;
 
 static void JniIms_nativeInit(JNIEnv* /*env*/, jobject /*object*/)
 {
-    IMS_LOGD("JniIms_nativeInit");
+    IMS_TRACE_I("JniIms_nativeInit", 0, 0, 0);
     ImsMain::Initialize();
     ThreadService::SetNativeThreadMethods(&s_objNativeThreadMethods);
     ImsMain::Start();
@@ -365,7 +349,7 @@ static void JniIms_nativeInit(JNIEnv* /*env*/, jobject /*object*/)
 
 static void JniIms_nativeDeInit(JNIEnv* /*env*/, jobject /*object*/)
 {
-    IMS_LOGD("JniIms_nativeDeInit");
+    IMS_TRACE_I("JniIms_nativeDeInit", 0, 0, 0);
     ImsMain::Stop();
     ImsMain::Uninitialize();
 }
@@ -393,7 +377,7 @@ static jlong JniIms_nativeGetInterface(
         pService = CoreInterfaceFactory::GetInterface(interfaceType, SendDataToJava, slotId);
     }
 
-    IMS_LOGD("JniIms_nativeGetInterface :: interface=%d, object=%p", interfaceType, pService);
+    IMS_TRACE_I("JniIms_nativeGetInterface: interface=%d, object=%p", interfaceType, pService, 0);
 
     return static_cast<jlong>(reinterpret_cast<long>(pService));
 }
@@ -403,9 +387,9 @@ static void JniIms_nativeReleaseInterface(JNIEnv* /*env*/, jobject /*object*/, j
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
 
 #if defined(__IMS_CLANG__)
-    IMS_LOGD("JniIms_nativeReleaseInterface :: object=%lx", nNativeObject);
+    IMS_TRACE_I("JniIms_nativeReleaseInterface: object=%lx", nNativeObject, 0, 0);
 #else
-    IMS_LOGD("JniIms_nativeReleaseInterface :: object=%" PFLS_x, nNativeObject);
+    IMS_TRACE_I("JniIms_nativeReleaseInterface: object=%" PFLS_x, nNativeObject, 0, 0);
 #endif
 
     BaseService* pService = reinterpret_cast<BaseService*>(nNativeObject);
@@ -457,7 +441,7 @@ jbyteArray JniIms_nativeSendDataForSystem(
 
     if (nLogDisplayCount >= MAX_LOG_DISPLAY_COUNT)
     {
-        IMS_TRACE_I("JniIms_nativeSendDataForSystem :: object=%" PFLS_x, nNativeObject, 0, 0);
+        IMS_TRACE_I("JniIms_nativeSendDataForSystem: object=%" PFLS_x, nNativeObject, 0, 0);
         nLogDisplayCount = 0;
     }
 
@@ -582,7 +566,7 @@ jint IMSInterface_OnLoad(JavaVM* vm, JNIEnv* env)
 
     if (jclassIms == NULL)
     {
-        IMS_LOGE("IMSInterface_OnLoad: FindClass failed");
+        ALOGE("IMSInterface_OnLoad: FindClass failed");
         return -1;
     }
 
@@ -591,7 +575,7 @@ jint IMSInterface_OnLoad(JavaVM* vm, JNIEnv* env)
     if (jniRegisterNativeMethods(
                 env, s_szClassJniImsPath, s_jniImsMethods, NELEM(s_jniImsMethods)) < 0)
     {
-        IMS_LOGE("IMSInterface_OnLoad: RegisterNatives failed");
+        ALOGE("IMSInterface_OnLoad: RegisterNatives failed");
         return -1;
     }
 
@@ -601,7 +585,7 @@ jint IMSInterface_OnLoad(JavaVM* vm, JNIEnv* env)
 
     if ((s_methodSendDataToJava == NULL) || (s_methodSendDataToJavaForSystem == NULL))
     {
-        IMS_LOGE("IMSInterface_OnLoad: GetStaticMethodID failed");
+        ALOGE("IMSInterface_OnLoad: GetStaticMethodID failed");
         return -1;
     }
 

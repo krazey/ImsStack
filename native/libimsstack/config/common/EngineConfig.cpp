@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IImsPrivateProperty.h"
 #include "ITraceOption.h"
 #include "ServiceTrace.h"
 
 #include "private/EngineConfig.h"
 
+__IMS_TRACE_TAG_CONF__;
+
 PUBLIC
 EngineConfig::EngineConfig(IN IMS_SINT32 nSlotId) :
         ConfigBase(nSlotId),
-        m_nTraceOption(ITraceOption::OPT_CAT_ALL | ITraceOption::OPT_MEDIUM_SERIAL),
-        m_nTraceModule(0xFFFFFFFF)
+        m_nTraceOption(ITraceOption::OPT_DEFAULT),
+        m_nTraceModule(IMS_TRACE_MODULE_ALL)
 {
 }
 
@@ -30,5 +33,27 @@ PUBLIC VIRTUAL EngineConfig::~EngineConfig() {}
 
 PUBLIC VIRTUAL void EngineConfig::Refresh()
 {
+    ReadFrom();
     TraceService::GetTraceService()->SetOption(GetTraceOption(), GetTraceModule());
+}
+
+PROTECTED VIRTUAL IMS_BOOL EngineConfig::ReadFrom()
+{
+    IImsPrivateProperty* piProperty = GetPrivateProperty();
+    AString strLogOptions = piProperty->GetPersistent(
+            ImsPrivateProperties::Persistent::KEY_TEST_LOG_OPTIONS, IMS_SLOT_0);
+
+    if (strLogOptions.GetLength() > 0)
+    {
+        IMS_BOOL bOk = IMS_FALSE;
+        IMS_UINT32 nLogOptions = strLogOptions.ToInt32(&bOk, 16);
+
+        if (bOk)
+        {
+            IMS_TRACE_I("TraceOption: %08X >> %08X", m_nTraceOption, nLogOptions, 0);
+            m_nTraceOption = nLogOptions;
+        }
+    }
+
+    return IMS_TRUE;
 }
