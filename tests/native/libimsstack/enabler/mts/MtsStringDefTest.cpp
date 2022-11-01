@@ -41,7 +41,7 @@ TEST_F(MtsStringDefTest, PS_SmsFormatType)
 {
     EXPECT_STREQ(PS_SmsFormatType(SmsFormatType::SMSFORMAT_3GPP), "3GPP");
     EXPECT_STREQ(PS_SmsFormatType(SmsFormatType::SMSFORMAT_3GPP2), "3GPP2");
-    EXPECT_STREQ(PS_SmsFormatType(SmsFormatType::SMSFORMAT_INVALID), "invalid");
+    EXPECT_STREQ(PS_SmsFormatType(SmsFormatType::SMSFORMAT_INVALID), "__INVALID__");
 }
 
 TEST_F(MtsStringDefTest, PS_MtiStringFrom3gpp)
@@ -56,7 +56,7 @@ TEST_F(MtsStringDefTest, PS_MtiStringFrom3gpp)
     EXPECT_STREQ(
             PS_MtiStringFrom3gpp(SMS_3GPP_MTI_RP_ERROR_FROM_N), "SMS_3GPP_MTI_RP_ERROR_FROM_N");
     EXPECT_STREQ(PS_MtiStringFrom3gpp(SMS_3GPP_MTI_RP_SMMA), "SMS_3GPP_MTI_RP_SMMA");
-    EXPECT_STREQ(PS_MtiStringFrom3gpp(SMS_MTI_NONE), "SMS 3GPP MTI INFO INVALID");
+    EXPECT_STREQ(PS_MtiStringFrom3gpp(SMS_MTI_NONE), "__INVALID__");
 }
 
 TEST_F(MtsStringDefTest, PS_MtiStringFrom3gpp2)
@@ -65,7 +65,7 @@ TEST_F(MtsStringDefTest, PS_MtiStringFrom3gpp2)
             PS_MtiStringFrom3gpp2(SMS_3GPP2_MTI_POINT_TO_POINT), "SMS_3GPP2_MTI_POINT_TO_POINT");
     EXPECT_STREQ(PS_MtiStringFrom3gpp2(SMS_3GPP2_MTI_BROADCAST), "SMS_3GPP2_MTI_BROADCAST");
     EXPECT_STREQ(PS_MtiStringFrom3gpp2(SMS_3GPP2_MTI_ACKNOWLEDGE), "SMS_3GPP2_MTI_ACKNOWLEDGE");
-    EXPECT_STREQ(PS_MtiStringFrom3gpp2(SMS_MTI_NONE), "SMS 3GPP2 MTI INFO INVALID");
+    EXPECT_STREQ(PS_MtiStringFrom3gpp2(SMS_MTI_NONE), "__INVALID__");
 }
 
 TEST_F(MtsStringDefTest, PS_MoStatus)
@@ -73,7 +73,7 @@ TEST_F(MtsStringDefTest, PS_MoStatus)
     EXPECT_STREQ(PS_MoStatus(MO_SUCCESS), "MO_SUCCESS");
     EXPECT_STREQ(PS_MoStatus(MO_ERROR_RETRY), "MO_ERROR_RETRY");
     EXPECT_STREQ(PS_MoStatus(MO_ERROR_GENERIC), "MO_ERROR_GENERIC");
-    EXPECT_STREQ(PS_MoStatus(MO_INVALID), "MO_INVALID");
+    EXPECT_STREQ(PS_MoStatus(MO_INVALID), "__INVALID__");
 }
 
 TEST_F(MtsStringDefTest, PS_CallState)

@@ -27,6 +27,23 @@
 class MtsStringDef
 {
 public:
+    inline static const IMS_CHAR* PS_AccessNetworkType(IN IMS_UINT32 nAccessNetworkType)
+    {
+        switch (nAccessNetworkType)
+        {
+            case IImsRadio::ACCESS_NETWORK_TYPE_UTRAN:
+                return "UTRAN";
+            case IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN:
+                return "EUTRAN";
+            case IImsRadio::ACCESS_NETWORK_TYPE_NGRAN:
+                return "NGRAN";
+            case IImsRadio::ACCESS_NETWORK_TYPE_IWLAN:
+                return "IWLAN";
+            default:
+                return "__INVALID__";
+        }
+    }
+
     inline static const IMS_CHAR* PS_CallState(IN const IMS_UINT32 nState)
     {
         switch (nState)
@@ -59,7 +76,7 @@ public:
             case IIpcan::CATEGORY_ANY:
                 return "CATEGORY_ANY";
             default:
-                return "invalid";
+                return "__INVALID__";
         }
     }
 
@@ -82,7 +99,7 @@ public:
             case SMS_3GPP_MTI_RP_SMMA:
                 return "SMS_3GPP_MTI_RP_SMMA";
             default:
-                return "SMS 3GPP MTI INFO INVALID";
+                return "__INVALID__";
         }
     }
 
@@ -97,7 +114,7 @@ public:
             case SMS_3GPP2_MTI_ACKNOWLEDGE:
                 return "SMS_3GPP2_MTI_ACKNOWLEDGE";
             default:
-                return "SMS 3GPP2 MTI INFO INVALID";
+                return "__INVALID__";
         }
     }
 
@@ -112,7 +129,7 @@ public:
             case MO_ERROR_RETRY:
                 return "MO_ERROR_RETRY";
             default:
-                return "MO_INVALID";
+                return "__INVALID__";
         }
     }
 
@@ -120,8 +137,6 @@ public:
     {
         switch (nRadioTechType)
         {
-            case INetworkWatcher::RADIOTECH_TYPE_INVALID:
-                return "INVALID";
             case INetworkWatcher::RADIOTECH_TYPE_UNKNOWN:
                 return "UNKNOWN";
             case INetworkWatcher::RADIOTECH_TYPE_GPRS:
@@ -167,7 +182,7 @@ public:
             case INetworkWatcher::RADIOTECH_TYPE_MAX:
                 return "MAX";
             default:
-                return "invalid";
+                return "__INVALID__";
         }
     }
 
@@ -182,7 +197,7 @@ public:
             case NOTIFY_SCBM_TERMINATED_BY_ECALL:
                 return "SCBM_TERMINATED_BY_ECALL";
             default:
-                return "invalid";
+                return "__INVALID__";
         }
     }
 
@@ -195,7 +210,20 @@ public:
             case SmsFormatType::SMSFORMAT_3GPP2:
                 return "3GPP2";
             default:
-                return "invalid";
+                return "__INVALID__";
+        }
+    }
+
+    inline static const IMS_CHAR* PS_TrafficDirection(IN IMS_UINT32 nTrafficDirection)
+    {
+        switch (nTrafficDirection)
+        {
+            case IImsRadio::DIRECTION_MO:
+                return "MO";
+            case IImsRadio::DIRECTION_MT:
+                return "MT";
+            default:
+                return "__INVALID__";
         }
     }
 
@@ -208,10 +236,14 @@ public:
             case IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS:
                 return "EMERGENCY_SMS";
             default:
-                return "invalid";
+                return "__INVALID__";
         }
     }
 };
+
+#ifndef PS_AccessNetworkType
+#define PS_AccessNetworkType(A) MtsStringDef::PS_AccessNetworkType(A)
+#endif
 
 #ifndef PS_CallState
 #define PS_CallState(A) MtsStringDef::PS_CallState(A)
@@ -243,6 +275,10 @@ public:
 
 #ifndef PS_SmsFormatType
 #define PS_SmsFormatType(A) MtsStringDef::PS_SmsFormatType(A)
+#endif
+
+#ifndef PS_TrafficDirection
+#define PS_TrafficDirection(A) MtsStringDef::PS_TrafficDirection(A)
 #endif
 
 #ifndef PS_TrafficType

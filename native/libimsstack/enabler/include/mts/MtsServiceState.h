@@ -18,11 +18,8 @@
 #define MTS_SERVICESTATE_H_
 
 #include "IMtsServiceState.h"
-#include "ITimer.h"
 
-class IImsRadio;
-
-class MtsServiceState final : public IMtsServiceState, public ITimerListener
+class MtsServiceState final : public IMtsServiceState
 {
 public:
     MtsServiceState(IN IMS_SINT32 nSlotId);
@@ -42,15 +39,6 @@ public:
     IMS_BOOL IsMoServiceBlocked() const override;
     IMS_BOOL IsMtServiceBlocked() const override;
     IMS_BOOL IsTemporaryServiceBlocked() const override;
-    IMS_BOOL IsImsTrafficAllowed(IN IMS_UINT32 nTrafficType) override;
-    void StartImsTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
-            IN IImsRadioConnectionListener* piListener) override;
-    void TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason) override;
-    void AddListenerForTrafficPriority(IN IImsRadioTrafficPriorityListener* piListener) override;
-    void RemoveListenerForTrafficPriority(
-            IN IImsRadioTrafficPriorityListener* piListener) override;
-    void StartRadioGuardTimer(IN IMS_UINT32 nTrafficType);
-    IMS_BOOL IsRadioGuardTimerActive(IN IMS_UINT32 nTrafficType);
 
     IMS_SINT32 GetServiceState() override;
     IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService) override;
@@ -65,17 +53,12 @@ public:
     void SetImsRegConnected(IN IMS_BOOL bConnected) override;
     void SetSmsOverIpState(IN IMS_BOOL bState) override;
 
-    // ITmerListener
-    void Timer_TimerExpired(IN ITimer* piTimer);
-
 private:
     void Init();
     void DeInit();
     void SetImsSuspendState(IN IMS_BOOL bState);
     void SetMtsServiceState(IN IMS_SINT32 nServiceState);
     void SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked);
-    void StopImsTraffic(IN IMS_UINT32 nTrafficType);
-    void StopRadioGuardTimer(IN ITimer* piTimer);
 
     IMS_SINT32 m_nMtsServiceState;
     // Check Condition for SMS SERVICE MODE
@@ -87,13 +70,6 @@ private:
     IMS_BOOL m_bTemporaryBlocked;
     IMS_UINT32 m_nConnectedServices;
     IMS_SINT32 m_nSlotId;
-    IImsRadio* m_piImsRadio;
-    ITimer* m_piEmergencyRadioGuardTimer;
-    ITimer* m_piRadioGuardTimer;
-
-    /// temp code
-    IImsRadioConnectionListener* m_piCnxListener;
-    IImsRadioConnectionListener* m_piCnxEmcListener;
 };
 
 #endif
