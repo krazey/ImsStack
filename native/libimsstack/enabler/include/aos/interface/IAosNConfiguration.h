@@ -155,7 +155,7 @@ public:
      *       emergency registration should be performed in the roaming network
      *       regardless of whether emergency registration is used in the home network.
      */
-    virtual IMS_BOOL IsRequiredEmergencyRegistrationInRoaming() const = 0;
+    virtual IMS_BOOL IsRequiredEmcRegInRoaming() const = 0;
 
     /**
      * @brief Check if VoLTE service block by setting is required.
@@ -216,14 +216,14 @@ public:
      *
      * @return IMS_BOOL Return wherther to be applied or not
      */
-    virtual IMS_BOOL IsSecurityServerPortInRegContactOfInitialRegistrationUsed() const = 0;
+    virtual IMS_BOOL IsSecurityServerPortInRegContactOfInitRegUsed() const = 0;
 
     /**
      * @brief Returns whether the security server port is used in initial registration.
      *
      * @return IMS_BOOL Return wherther to be applied or not
      */
-    virtual IMS_BOOL IsSecurityServerPortInInitialRegistrationUsed() const = 0;
+    virtual IMS_BOOL IsSecurityServerPortInInitRegUsed() const = 0;
 
     /**
      * @brief Returns whether the old security association is removed on establishing
@@ -238,7 +238,7 @@ public:
      *
      * @return IMS_BOOL Return wherther to be applied or not
      */
-    virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed() const = 0;
+    virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const = 0;
 
     /**
      * @brief Returns whether emergency PDN shall be released after the E911 call is ended.
@@ -282,7 +282,7 @@ public:
      *
      * @return IMS_BOOL Return wherther to be held or not
      */
-    virtual IMS_BOOL IsRegistrationWhenIpcanChangedWithImsActiveCallHeld() const = 0;
+    virtual IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const = 0;
 
     /**
      * @brief Flag specifying whether IMS de-registers if the network is changed to 3G
@@ -543,7 +543,7 @@ public:
      *
      * @return IMS_SINT32 Return the default policy for the registration retry
      */
-    virtual IMS_SINT32 GetRegistrationRetryDefaultPolicy() const = 0;
+    virtual IMS_SINT32 GetRegRetryDefaultPolicy() const = 0;
 
     /**
      * @brief Indicate whether DSCP(Differentiated Services (Diffserv) Codepoint)
@@ -617,7 +617,7 @@ public:
      *
      * @return IMS_SINT32 Return the actual wait time policy
      */
-    virtual IMS_SINT32 GetRegistrationActualWaitTimePolicy() const = 0;
+    virtual IMS_SINT32 GetRegActualWaitTimePolicy() const = 0;
 
     /**
      * @brief Get the SIP message threshold size caused by the transport change
@@ -648,7 +648,7 @@ public:
      *
      * @return IMS_SINT32 Return the SIP 305 response policy
      */
-    virtual IMS_SINT32 GetRegistrationRetrySip305CodePolicy() const = 0;
+    virtual IMS_SINT32 GetRegRetrySip305CodePolicy() const = 0;
 
     /**
      * @brief Indicate the SIP 305 response policy for reregistration
@@ -668,7 +668,7 @@ public:
      *
      * @return IMS_SINT32 Return the SIP 305 response policy
      */
-    virtual IMS_SINT32 GetReregistrationRetrySip305CodePolicy() const = 0;
+    virtual IMS_SINT32 GetReregRetrySip305CodePolicy() const = 0;
 
     /**
      * @brief Indicate the SIP 503 response policy for registration
@@ -682,7 +682,7 @@ public:
      *
      * @return IMS_SINT32 Return the SIP 503 response policy
      */
-    virtual IMS_SINT32 GetRegistrationRetrySip503CodePolicy() const = 0;
+    virtual IMS_SINT32 GetRegRetrySip503CodePolicy() const = 0;
 
     /**
      * @brief Indicate the extra error type for registration
@@ -930,7 +930,7 @@ public:
     virtual IMSVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() = 0;
 
     /**
-     * @brief Get error codes of reg event package by missing 911 Address
+     * @brief Get error codes of reg event package(SUBSCRIBE msg) by missing 911 Address
      *
      *        This function called when it comes to the below defined situation.
      *        WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED = 1,
@@ -938,7 +938,7 @@ public:
      *
      * @return IMSVector<IMS_SINT32>&  return array list for error codes
      */
-    virtual IMSVector<IMS_SINT32>& GetWfcRegEventErrorByMissing911Address() = 0;
+    virtual IMSVector<IMS_SINT32>& GetWfcSubErrorByMissing911Address() = 0;
     /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to terminate
      *        its subscription.

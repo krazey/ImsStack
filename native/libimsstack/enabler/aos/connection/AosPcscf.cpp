@@ -393,7 +393,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosPcscf::GetNextPcscfIndex()
         }
     }
 
-    if (m_piAosNConfig->GetRegistrationRetryDefaultPolicy() ==
+    if (m_piAosNConfig->GetRegRetryDefaultPolicy() ==
             CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF)
     {
         for (int nAt = 0; nAt <= m_nCurrentPcscfIndex; nAt++)

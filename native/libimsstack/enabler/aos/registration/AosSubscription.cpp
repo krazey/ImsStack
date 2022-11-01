@@ -703,7 +703,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorCodeByMissing911Address(IN IM
     }
 
     IMSVector<IMS_SINT32>& objErrDisplayRequired =
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetWfcRegEventErrorByMissing911Address();
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetWfcSubErrorByMissing911Address();
     for (IMS_UINT32 i = 0; i < objErrDisplayRequired.GetSize(); i++)
     {
         if (nErrorCode == objErrDisplayRequired.GetAt(i))

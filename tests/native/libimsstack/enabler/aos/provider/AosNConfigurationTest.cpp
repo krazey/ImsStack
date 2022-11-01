@@ -665,10 +665,10 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     InitAssetsConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
 
     EXPECT_FALSE(pAosNConfiguration->IsCdmalessFeatureTagRequired());
-    EXPECT_FALSE(pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed());
+    EXPECT_FALSE(pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
     // bDisableT3482ForEmc
     EXPECT_FALSE(pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
-    EXPECT_FALSE(pAosNConfiguration->IsRegistrationWhenIpcanChangedWithImsActiveCallHeld());
+    EXPECT_FALSE(pAosNConfiguration->IsRegWithIpcanChangedDuringImsCallHeld());
     EXPECT_TRUE(pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
     EXPECT_FALSE(pAosNConfiguration->IsDeregisterOn3gNetworks());
     // bNoInitRegOnPcscfChange
@@ -676,7 +676,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(pAosNConfiguration->IsContactUriValidationChecked());
     EXPECT_FALSE(pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
     EXPECT_TRUE(pAosNConfiguration->IsRegRequiredAfterImsCallEndOnRegHeld());
-    EXPECT_FALSE(pAosNConfiguration->IsRequiredEmergencyRegistrationInRoaming());
+    EXPECT_FALSE(pAosNConfiguration->IsRequiredEmcRegInRoaming());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockBySetting());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredWfcBlockByAirplaneMode());
@@ -688,8 +688,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(pAosNConfiguration->IsVerstatForRegistrationSupported());
     // bUpdateRegWithCountryChange
     EXPECT_FALSE(pAosNConfiguration->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType());
-    EXPECT_FALSE(pAosNConfiguration->IsSecurityServerPortInInitialRegistrationUsed());
-    EXPECT_FALSE(pAosNConfiguration->IsSecurityServerPortInRegContactOfInitialRegistrationUsed());
+    EXPECT_FALSE(pAosNConfiguration->IsSecurityServerPortInInitRegUsed());
+    EXPECT_FALSE(pAosNConfiguration->IsSecurityServerPortInRegContactOfInitRegUsed());
     EXPECT_FALSE(pAosNConfiguration->UseWfcCountryCodeAvailabilityCheck());
     EXPECT_FALSE(pAosNConfiguration->IsVideoOverWifiSupportedWithoutVoice());
 
@@ -699,16 +699,16 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(1, pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, pAosNConfiguration->GetImsSignallingDscp());
     // nRegOutOfServicePolicy
-    EXPECT_EQ(0, pAosNConfiguration->GetRegistrationRetrySip305CodePolicy());
-    EXPECT_EQ(0, pAosNConfiguration->GetRegistrationRetrySip503CodePolicy());
-    EXPECT_EQ(0, pAosNConfiguration->GetRegistrationRetryDefaultPolicy());
+    EXPECT_EQ(0, pAosNConfiguration->GetRegRetrySip305CodePolicy());
+    EXPECT_EQ(0, pAosNConfiguration->GetRegRetrySip503CodePolicy());
+    EXPECT_EQ(0, pAosNConfiguration->GetRegRetryDefaultPolicy());
     // nRegRetryMinCnt
     // nRegRetryTimerFPolicy
-    EXPECT_EQ(0, pAosNConfiguration->GetRegistrationActualWaitTimePolicy());
+    EXPECT_EQ(0, pAosNConfiguration->GetRegActualWaitTimePolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationPcscfUpdatePolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetRegRetryCountResetPolicy());
     // nRegTimerForEmcCallMillis
-    EXPECT_EQ(0, pAosNConfiguration->GetReregistrationRetrySip305CodePolicy());
+    EXPECT_EQ(0, pAosNConfiguration->GetReregRetrySip305CodePolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetReregRetryMaxCountKeptRegistration());
     EXPECT_EQ(200, pAosNConfiguration->GetSipMessageThresholdForTransportChange());
 

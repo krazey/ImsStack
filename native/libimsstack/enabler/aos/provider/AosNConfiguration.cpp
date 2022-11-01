@@ -183,7 +183,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsAvailableWithoutVoiceCapa
     return m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredEmergencyRegistrationInRoaming() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredEmcRegInRoaming() const
 {
     return m_objAsset.bRequiredEmcRegInRoaming;
 }
@@ -224,13 +224,12 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIpsecEnabled() const
     return m_objCarrierConfig.bSipOverIpsecEnabled;
 }
 
-PUBLIC VIRTUAL IMS_BOOL
-AosNConfiguration::IsSecurityServerPortInRegContactOfInitialRegistrationUsed() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSecurityServerPortInRegContactOfInitRegUsed() const
 {
     return m_objAsset.bUseSecurityServerPortInRegContactOfInitReg;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSecurityServerPortInInitialRegistrationUsed() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSecurityServerPortInInitRegUsed() const
 {
     return m_objAsset.bUseSecurityServerPortInInitReg;
 }
@@ -240,8 +239,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsOldSaOnEstablishingSaRemoved() cons
     return m_objAsset.bRemoveOldSaOnEstablishingSa;
 }
 
-PUBLIC VIRTUAL IMS_BOOL
-AosNConfiguration::IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const
 {
     return m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg;
 }
@@ -280,8 +278,7 @@ AosNConfiguration::IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() cons
     return m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg;
 }
 
-PUBLIC VIRTUAL IMS_BOOL
-AosNConfiguration::IsRegistrationWhenIpcanChangedWithImsActiveCallHeld() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithIpcanChangedDuringImsCallHeld() const
 {
     return m_objAsset.bHoldRegWithIpcanChangedDuringImsCall;
 }
@@ -429,7 +426,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyRegistrationTimerMillis
     return m_objCarrierConfig.nEmergencyRegistrationTimerMillis;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationRetryDefaultPolicy() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryDefaultPolicy() const
 {
     return m_objAsset.nRegRetryDefaultPolicy;
 }
@@ -454,7 +451,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPrivateHeader() cons
     return m_objCarrierConfig.nRegistrationPrivateHeader;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationActualWaitTimePolicy() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegActualWaitTimePolicy() const
 {
     return m_objAsset.nRegActualWaitTimePolicy;
 }
@@ -464,17 +461,17 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportC
     return m_objAsset.nSipMessageThresholdForTransportChange;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationRetrySip305CodePolicy() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetrySip305CodePolicy() const
 {
     return m_objAsset.nRegRetry305Policy;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReregistrationRetrySip305CodePolicy() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReregRetrySip305CodePolicy() const
 {
     return m_objAsset.nReregRetry305Policy;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationRetrySip503CodePolicy() const
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetrySip503CodePolicy() const
 {
     return m_objAsset.nRegRetry503Policy;
 }
@@ -586,7 +583,7 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequiredW
     return m_objAsset.objSubErrorCodeForInitRegWithNextPcscf;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetWfcRegEventErrorByMissing911Address()
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetWfcSubErrorByMissing911Address()
 {
     return m_objAsset.objWfcSubErrByMissing911Address;
 }

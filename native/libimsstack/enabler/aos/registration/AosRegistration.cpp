@@ -2306,7 +2306,7 @@ PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
 
 PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetActualWaitTime()
 {
-    if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
             CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
         const IMSVector<IMS_SINT32>& objInterval = GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
@@ -2628,8 +2628,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessIpcanChanged()
 {
     A_IMS_TRACE_I(REGID, "ProcessIpcanChanged()", 0, 0, 0);
 
-    if (GET_N_CONFIG(m_nSlotId)->IsRegistrationWhenIpcanChangedWithImsActiveCallHeld() &&
-            IsImsCall())
+    if (GET_N_CONFIG(m_nSlotId)->IsRegWithIpcanChangedDuringImsCallHeld() && IsImsCall())
     {
         // if required not to update while calling,
         // then add feature PENDING_UPDATE.
@@ -3185,7 +3184,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
 {
     A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start", 0, 0, 0);
 
-    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy();
+    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
     IMS_UINT32 nRetryAfter = 0;
     IMS_UINT32 nAwt = 0;
 
@@ -3380,7 +3379,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Update(
 {
     A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Update", 0, 0, 0);
 
-    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy();
+    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
     IMS_UINT32 nRetryAfter = 0;
 
     if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDefined())
@@ -3517,7 +3516,7 @@ AosRegistration::ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessStartFailed_305()
 {
-    IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetRegistrationRetrySip305CodePolicy();
+    IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetRegRetrySip305CodePolicy();
 
     if (nPolicy == CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP)
     {
@@ -3647,7 +3646,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_503()
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUpdateFailed_305()
 {
-    IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetReregistrationRetrySip305CodePolicy();
+    IMS_SINT32 nPolicy = GET_N_CONFIG(m_nSlotId)->GetReregRetrySip305CodePolicy();
 
     if (nPolicy == CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP)
     {
@@ -3737,7 +3736,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
         }
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetRegistrationRetrySip503CodePolicy() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetRegRetrySip503CodePolicy() ==
                     CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP &&
             nStatusCode == SipStatusCode::SC_503)
     {
@@ -3909,7 +3908,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         return;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() !=
+    if (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() !=
             CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
         switch (nStatusCode)
@@ -3959,7 +3958,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()
 
 PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
 {
-    if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() ==
+    if (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
             CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
         ProcessDefaultFlowRecovery_Update();

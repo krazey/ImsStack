@@ -474,12 +474,12 @@ TEST_F(AosIpsecHelperTest, Create)
             .WillRepeatedly(ReturnRef(objEncryptionAlgs));
 
     // SetSecurityServerPortInRegistration()
-    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInInitialRegistrationUsed())
+    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInInitRegUsed())
             .Times(2)
             .WillOnce(Return(IMS_TRUE));
 
     // SetSecurityServerPortInRegContact - call if bInitial == IMS_TRUE
-    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInRegContactOfInitialRegistrationUsed())
+    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInRegContactOfInitRegUsed())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
@@ -688,7 +688,7 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
 
     // CloseUnsecureTCPSocket();
     // bUnsecureTcpSocketDestroyed = IMS_FALSE
-    EXPECT_CALL(objMockAosConfig, IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed())
+    EXPECT_CALL(objMockAosConfig, IsUnsecureTcpSocketOnAccomplishingRegDestroyed())
             .Times(3)
             .WillOnce(Return(IMS_FALSE))
             .WillRepeatedly(Return(IMS_TRUE));
@@ -831,7 +831,7 @@ TEST_F(AosIpsecHelperTest, IsEstablished)
 
 TEST_F(AosIpsecHelperTest, SetSecurityServerPortInRegContact)
 {
-    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInRegContactOfInitialRegistrationUsed())
+    EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInRegContactOfInitRegUsed())
             .Times(2)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));

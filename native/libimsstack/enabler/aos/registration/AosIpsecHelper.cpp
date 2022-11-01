@@ -397,8 +397,7 @@ PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::IsEstablished()
 PUBLIC VIRTUAL void AosIpsecHelper::SetSecurityServerPortInRegContact()
 {
     IMS_BOOL bServerPortInRegContact =
-            GET_N_CONFIG(m_piContext->GetSlotId())
-                    ->IsSecurityServerPortInRegContactOfInitialRegistrationUsed();
+            GET_N_CONFIG(m_piContext->GetSlotId())->IsSecurityServerPortInRegContactOfInitRegUsed();
     if (bServerPortInRegContact == IMS_TRUE)
     {
         A_IMS_TRACE_I(REGID, "SetSecurityServerPortInRegContact", 0, 0, 0);
@@ -418,7 +417,7 @@ PUBLIC VIRTUAL void AosIpsecHelper::IgnoreCurrentPolicyExpired()
 PROTECTED VIRTUAL void AosIpsecHelper::SetSecurityServerPortInRegistration()
 {
     IMS_BOOL bServerPortInRegistration =
-            GET_N_CONFIG(m_piContext->GetSlotId())->IsSecurityServerPortInInitialRegistrationUsed();
+            GET_N_CONFIG(m_piContext->GetSlotId())->IsSecurityServerPortInInitRegUsed();
     if (bServerPortInRegistration == IMS_TRUE)
     {
         m_piRegParameter->SetPort(
@@ -567,7 +566,7 @@ void AosIpsecHelper::CloseUnsecureTCPSocket()
 {
     IMS_BOOL bUnsecureTcpSocketDestroyed =
             GET_N_CONFIG(m_piContext->GetSlotId())
-                    ->IsUnsecureTcpSocketOnAccomplishingRegistrationDestroyed();
+                    ->IsUnsecureTcpSocketOnAccomplishingRegDestroyed();
     if (bUnsecureTcpSocketDestroyed == IMS_FALSE)
     {
         return;
