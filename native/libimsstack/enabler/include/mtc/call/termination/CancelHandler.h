@@ -20,12 +20,13 @@
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
 
+class IMtcCallContext;
 class IMessage;
 
 class CancelHandler final
 {
 public:
-    explicit CancelHandler();
+    explicit CancelHandler(IN IMtcCallContext& objContext);
     ~CancelHandler();
     CancelHandler(const CancelHandler&) = delete;
     CancelHandler& operator=(const CancelHandler&) = delete;
@@ -39,6 +40,8 @@ private:
 
     CallReasonInfo GetCallReasonInfoFromReasonHeader(
             IN IMS_SINT32 nCause, IN const AString& strText) const;
+
+    IMtcCallContext& m_objContext;
 };
 
 #endif

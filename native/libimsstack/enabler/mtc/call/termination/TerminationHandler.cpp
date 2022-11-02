@@ -15,10 +15,16 @@
  */
 
 #include "ISession.h"
+#include "call/IMtcCallContext.h"
 #include "call/termination/TerminationHandler.h"
+#include "core/IMessage.h"
+#include "utility/IMessageUtils.h"
 
 PUBLIC
-TerminationHandler::TerminationHandler() {}
+TerminationHandler::TerminationHandler(IN IMtcCallContext& objContext) :
+        m_objContext(objContext)
+{
+}
 
 PUBLIC
 TerminationHandler::~TerminationHandler() {}
@@ -26,7 +32,20 @@ TerminationHandler::~TerminationHandler() {}
 PUBLIC
 CallReasonInfo TerminationHandler::Handle(IN const ISession& objSession) const
 {
-    return GetCallReasonInfoFromSessionTerminationReason(objSession.GetTerminationReason());
+    CallReasonInfo objReasonInfo =
+            GetCallReasonInfoFromSessionTerminationReason(objSession.GetTerminationReason());
+
+    if (objReasonInfo.nCode == CODE_USER_TERMINATED_BY_REMOTE)
+    {
+        IMessage* piMessage = objSession.GetPreviousRequest(IMessage::SESSION_TERMINATE);
+        if (piMessage != IMS_NULL)
+        {
+            ReasonHeaderValue objValue =
+                    m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(piMessage);
+            objReasonInfo.strExtraMessage = objValue.strText;
+        }
+    }
+    return objReasonInfo;
 }
 
 PRIVATE

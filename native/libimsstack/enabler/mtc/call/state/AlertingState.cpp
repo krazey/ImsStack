@@ -200,8 +200,8 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionTerminated(IN ISession* piSes
     }
 
     m_objContext.GetUiNotifier().SendStartFailed(piMessage->GetMethod().Equals(SipMethod::CANCEL)
-                    ? CancelHandler().Handle(*piMessage)
-                    : TerminationHandler().Handle(*piSession));
+                    ? CancelHandler(m_objContext).Handle(*piMessage)
+                    : TerminationHandler(m_objContext).Handle(*piSession));
 
     return CallStateName::TERMINATING;
 }

@@ -20,12 +20,13 @@
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
 
+class IMtcCallContext;
 class ISession;
 
 class TerminationHandler final
 {
 public:
-    explicit TerminationHandler();
+    explicit TerminationHandler(IN IMtcCallContext& objContext);
     ~TerminationHandler();
     TerminationHandler(const TerminationHandler&) = delete;
     TerminationHandler& operator=(const TerminationHandler&) = delete;
@@ -35,6 +36,8 @@ public:
 private:
     CallReasonInfo GetCallReasonInfoFromSessionTerminationReason(
             IN IMS_SINT32 nTerminationReason) const;
+
+    IMtcCallContext& m_objContext;
 };
 
 #endif

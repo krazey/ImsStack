@@ -17,22 +17,45 @@
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/termination/TerminationHandler.h"
+#include "core/IMessage.h"
 #include "core/ISession.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
+#include "utility/IMessageUtils.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 class TerminationHandlerTest : public ::testing::Test
 {
 public:
+    inline TerminationHandlerTest() :
+            objHandler(objContext)
+    {
+    }
+
+    MockIMtcCallContext objContext;
     MockISession objSession;
+    MockIMessage objMessage;
+    MockIMessageUtils objMessageUtils;
     TerminationHandler objHandler;
 
 protected:
-    virtual void SetUp() override {}
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_TERMINATE))
+                .WillByDefault(Return(&objMessage));
+
+        ReasonHeaderValue objValue;
+        ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
+                .WillByDefault(Return(objValue));
+    }
 
     virtual void TearDown() override {}
 };
@@ -121,4 +144,19 @@ TEST_F(TerminationHandlerTest, HandleSessionReturnsDefaultReason)
 
     EXPECT_EQ(
             CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason), objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, HandleSessionReturnsDefaultReasonAndMessageHasReasonHeader)
+{
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_UNKNOWN;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+    AString strReason("any reason");
+    ReasonHeaderValue objValue;
+    objValue.nCause = 10;
+    objValue.strText = strReason;
+    ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
+            .WillByDefault(Return(objValue));
+
+    EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strReason),
+            objHandler.Handle(objSession));
 }

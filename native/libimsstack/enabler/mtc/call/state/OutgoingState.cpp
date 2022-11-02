@@ -229,7 +229,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionTerminated(IN ISession* piSes
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
-    CallReasonInfo objReason = TerminationHandler().Handle(*piSession);
+    CallReasonInfo objReason = TerminationHandler(m_objContext).Handle(*piSession);
     OnStartFailed(piSession, objReason);
 
     return CallStateName::TERMINATING;

@@ -59,7 +59,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSes
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
-    m_objContext.GetUiNotifier().SendStartFailed(TerminationHandler().Handle(*piSession));
+    m_objContext.GetUiNotifier().SendStartFailed(
+            TerminationHandler(m_objContext).Handle(*piSession));
     return CallStateName::TERMINATING;
 }
 

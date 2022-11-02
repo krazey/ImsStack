@@ -17,111 +17,93 @@
 #include "AString.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MockIMtcContext.h"
 #include "MtcContextRepository.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/termination/CancelHandler.h"
 #include "core/MockIMessage.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipHeaderName.h"
-#include "utility/MessageUtils.h"
+#include "utility/IMessageUtils.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
 class CancelHandlerTest : public ::testing::Test
 {
 public:
+    inline CancelHandlerTest() :
+            objHandler(objContext)
+    {
+    }
+
+    MockIMtcCallContext objContext;
     MockISipMessage objSipMessage;
     MockIMessage objMessage;
+    MockIMessageUtils objMessageUtils;
     CancelHandler objHandler;
-    MockIMtcContext objContext;
-    MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
     }
 
     virtual void TearDown() override {}
+
+    void SetUpReasonHeader(IN IMS_SINT32 nCause, IN AString strText)
+    {
+        ReasonHeaderValue objValue;
+        objValue.nCause = nCause;
+        objValue.strText = strText;
+        ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
+                .WillByDefault(Return(objValue));
+    }
 };
 
 TEST_F(CancelHandlerTest, HandleMessageWithNoReasonReturnsDefaultReason)
 {
-    ImsList<AString> lstReasonHeaders;
-    AString strReasonHeaderName(SipHeaderName::REASON);
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(lstReasonHeaders));
+    SetUpReasonHeader(-1, "");
 
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageReturnsDefaultReason)
 {
-    AString strReason = "SIP;cause=999;text=\"any_text\"";
-
-    ImsList<AString> lstReasonHeaders;
-    lstReasonHeaders.Append(strReason);
-    AString strReasonHeaderName(SipHeaderName::REASON);
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(lstReasonHeaders));
+    SetUpReasonHeader(999, "\"any_text\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith200CallCompletedReturnsAnsweredElsewhere)
 {
-    AString strReason = "SIP;cause=200;text=\"call completed elsewhere\"";
-
-    ImsList<AString> lstReasonHeaders;
-    lstReasonHeaders.Append(strReason);
-    AString strReasonHeaderName(SipHeaderName::REASON);
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(lstReasonHeaders));
+    SetUpReasonHeader(200, "\"call completed elsewhere\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith600BusyEverywhereReturnsRejectedElsewhere)
 {
-    AString strReason = "SIP;cause=600;text=\"busy everywhere\"";
-
-    ImsList<AString> lstReasonHeaders;
-    lstReasonHeaders.Append(strReason);
-    AString strReasonHeaderName(SipHeaderName::REASON);
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(lstReasonHeaders));
+    SetUpReasonHeader(600, "\"busy everywhere\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageWith603DeclinedReturnsRejectedElsewhere)
 {
-    AString strReason = "SIP;cause=603;text=\"declined\"";
-
-    ImsList<AString> lstReasonHeaders;
-    lstReasonHeaders.Append(strReason);
-    AString strReasonHeaderName(SipHeaderName::REASON);
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(lstReasonHeaders));
+    SetUpReasonHeader(603, "\"declined\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
 TEST_F(CancelHandlerTest, HandleMessageCheckReasonTextCaseInsensitive)
 {
-    AString strReason = "SIP;cause=603;text=\"DECLINED\"";
-
-    ImsList<AString> lstReasonHeaders;
-    lstReasonHeaders.Append(strReason);
-    AString strReasonHeaderName(SipHeaderName::REASON);
-    ON_CALL(objSipMessage, GetHeaders(ISipHeader::UNKNOWN, strReasonHeaderName))
-            .WillByDefault(Return(lstReasonHeaders));
+    SetUpReasonHeader(603, "\"DECLINED\"");
 
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }

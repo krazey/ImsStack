@@ -16,8 +16,9 @@
 
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
+#include "call/IMtcCallContext.h"
 #include "call/termination/CancelHandler.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -27,7 +28,10 @@ const AString CancelHandler::REASON_TEXT_CALL_COMPLETED = "call completed elsewh
 const AString CancelHandler::REASON_TEXT_CALL_DECLINED = "declined";
 
 PUBLIC
-CancelHandler::CancelHandler() {}
+CancelHandler::CancelHandler(IN IMtcCallContext& objContext) :
+        m_objContext(objContext)
+{
+}
 
 PUBLIC
 CancelHandler::~CancelHandler() {}
@@ -35,23 +39,24 @@ CancelHandler::~CancelHandler() {}
 PUBLIC
 CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nReasonCause = 0;
-    AString strReasonText;
-    if (MessageUtil::GetCauseAndTextFromReasonHeader(&objMessage, nReasonCause, strReasonText) ==
-            IMS_FAILURE)
+    ReasonHeaderValue objValue =
+            m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
+    if (objValue.nCause == -1)
     {
         IMS_TRACE_D("Handle : No Reason header", 0, 0, 0);
         return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);
     }
 
-    return GetCallReasonInfoFromReasonHeader(nReasonCause, strReasonText);
+    IMS_TRACE_D("Handle : [%d] [%s]", objValue.nCause, objValue.strText.GetStr(), 0);
+
+    return GetCallReasonInfoFromReasonHeader(objValue.nCause, objValue.strText);
 }
 
 PRIVATE
 CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
         IN IMS_SINT32 nCause, IN const AString& strText) const
 {
-    AString strNormalizedText = strText.SimplifyWsp().MakeLower();
+    const AString strNormalizedText = strText.SimplifyWsp().MakeLower();
 
     if (nCause == SipStatusCode::SC_200 && strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED))
     {

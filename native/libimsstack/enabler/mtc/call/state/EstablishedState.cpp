@@ -126,7 +126,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* pi
 
     m_objContext.GetUiNotifier().SendTerminated(IsConferenceCallParticipant()
                     ? CallReasonInfo(CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE)
-                    : TerminationHandler().Handle(*piSession));
+                    : TerminationHandler(m_objContext).Handle(*piSession));
 
     return CallStateName::TERMINATING;
 }
@@ -206,7 +206,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSes
     pUssiController->ParseUssiBodyAndCheckResult(
             piMessage->GetMessage(), piMessage->GetMethod().ToInt());
 
-    m_objContext.GetUiNotifier().SendTerminated(TerminationHandler().Handle(*piSession));
+    m_objContext.GetUiNotifier().SendTerminated(
+            TerminationHandler(m_objContext).Handle(*piSession));
 
     return CallStateName::TERMINATING;
 }
