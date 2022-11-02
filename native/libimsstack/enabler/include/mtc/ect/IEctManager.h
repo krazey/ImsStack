@@ -31,7 +31,20 @@ public:
 
     virtual ~IEctManager() {}
 
+    /**
+     * @brief Transfers
+     *
+     * @param nCallKey
+     * @param strNumber
+     * @return
+     */
     virtual IMS_RESULT Transfer(IN CallKey nCallKey, IN const AString& strNumber) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual State GetState() = 0;
 };
 

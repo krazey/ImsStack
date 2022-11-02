@@ -28,8 +28,22 @@ class IConferenceManager
 public:
     virtual ~IConferenceManager() {}
 
+    /**
+     * @brief Creates
+     *
+     * @param nCallKey
+     * @param eType
+     * @return
+     */
     virtual IConferenceController& CreateController(
             IN CallKey nCallKey, IN ConferenceType eType) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param nCallKey
+     * @return
+     */
     virtual IConferenceController* GetController(IN IMS_UINTP nCallKey) const = 0;
 };
 

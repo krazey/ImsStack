@@ -39,22 +39,126 @@ class IMtcCallTrafficChecker;
 class IMtcContext
 {
 public:
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_SINT32 GetSlotId() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param eServiceType
+     * @return
+     */
     virtual IMtcService* GetServiceByType(IN ServiceType eServiceType) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcDialingPlan& GetDialingPlan() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcCallController& GetCallController() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcCallManager& GetCallManager() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcCallTrafficChecker& GetCallTrafficChecker() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual MtcConfigurationProxy& GetConfigurationProxy() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ICallStateProxy& GetCallStateProxy() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcImsEventReceiver& GetImsEventReceiver() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param eServiceType
+     * @return
+     */
     virtual IMtcAosConnector* GetAosConnector(IN ServiceType eServiceType) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcSipInterfaceFactory& GetSipInterfaceFactory() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IConferenceManager& GetConferenceManager() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IEctManager* GetEctManager() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual MtcEmergencyServiceManager* GetEmergencyServiceManager() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param objOperation
+     * @return
+     */
     virtual OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMessageUtils& GetMessageUtils() = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsWifiTestMode() = 0;
 };
 

@@ -99,6 +99,11 @@ public:
      */
     virtual IMS_BOOL HasPreconditionCapability(IN ISession* piSession) = 0;
 
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsPreconditionSupportedInLocal() = 0;
 
     /**

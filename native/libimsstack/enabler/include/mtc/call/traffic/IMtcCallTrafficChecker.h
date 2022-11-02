@@ -29,11 +29,46 @@ class IMtcCallTrafficChecker
 public:
     ~IMtcCallTrafficChecker() = default;
 
+    /**
+     * @brief Sets
+     *
+     * @param pListener
+     */
     virtual void SetTrafficCheckerListener(IN IMtcCallTrafficCheckerListener* pListener) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param eCallType
+     * @param bEmergency
+     * @return
+     */
     virtual IMS_BOOL IsTrafficPrepared(IN CallType eCallType, IN IMS_BOOL bEmergency) const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param eCallType
+     * @param bEmergency
+     * @return
+     */
     virtual IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const = 0;
+
+    /**
+     * @brief Starts
+     *
+     * @param eCallType
+     * @param bEmergency
+     * @param bWifi
+     */
     virtual void StartTrafficChecking(
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) = 0;
+
+    /**
+     * @brief Stops
+     *
+     * @param eTrafficType
+     */
     virtual void StopTrafficChecking(IN TrafficType eTrafficType) = 0;
 };
 
@@ -42,7 +77,16 @@ class IMtcCallTrafficCheckerListener
 public:
     ~IMtcCallTrafficCheckerListener() = default;
 
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnConnectionFailed() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnConnectionSetupPrepared() = 0;
 };
 
@@ -51,8 +95,22 @@ class IMtcRadioConnectionListener
 public:
     ~IMtcRadioConnectionListener() = default;
 
+    /**
+     * @brief Notifies
+     *
+     * @param eTrafficType
+     * @param nFailureReason
+     * @param nCauseCode
+     * @param nWaitTimeMillis
+     */
     virtual void OnConnectionFailed(IN TrafficType eTrafficType, IN IMS_UINT32 nFailureReason,
             IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param eTrafficType
+     */
     virtual void OnConnectionSetupPrepared(IN TrafficType eTrafficType) = 0;
 };
 

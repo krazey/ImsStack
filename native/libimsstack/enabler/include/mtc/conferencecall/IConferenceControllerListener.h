@@ -22,6 +22,11 @@ class ConferenceController;
 class IConferenceControllerListener
 {
 public:
+    /**
+     * @brief Notifies
+     *
+     * @param pController
+     */
     virtual void OnClosed(IN ConferenceController* pController) = 0;
 };
 

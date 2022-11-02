@@ -26,9 +26,30 @@ public:
     using State = IMtcCall::State;
     using Type = CallType;
 
+    /**
+     * @brief Notifies
+     *
+     * @param nCallKey
+     * @param eState
+     * @param eType
+     * @param bEmergency
+     * @param nReason
+     */
     virtual void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param eState
+     */
     virtual void OnTotalCallStateChanged(IN State eState) = 0;
+
+    /**
+     * @brief Is
+     *
+     * @return
+     */
     inline virtual IMS_BOOL IsSynchronousCallRequired() { return IMS_FALSE; }
 };
 

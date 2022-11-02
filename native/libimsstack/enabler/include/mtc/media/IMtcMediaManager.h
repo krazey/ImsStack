@@ -49,11 +49,47 @@ public:
      */
     virtual void SetQosListener(IN IMediaQosEventListener* pListener) = 0;
 
+    /**
+     * @brief Sets
+     *
+     * @param objInfo
+     */
     virtual void SetMediaInfo(IN const MediaInfo& objInfo) = 0;
+
+    /**
+     * @brief Updates
+     *
+     * @param eMediaType
+     * @param eDir
+     */
     virtual void UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) = 0;
+
+    /**
+     * @brief Updates
+     *
+     * @param eMediaType
+     * @param eQuality
+     */
     virtual void UpdateMediaQuality(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param objInfo
+     */
     virtual void GetMediaInfo(OUT MediaInfo& objInfo) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param objInfo
+     */
     virtual void GetOldMediaInfo(OUT MediaInfo& objInfo) = 0;
+
+    /**
+     * @brief Restores
+     *
+     */
     virtual void RestoreMediaInfo() = 0;
 
     /**
@@ -78,6 +114,11 @@ public:
     virtual void CreateMediaProfile(
             IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile) = 0;
 
+    /**
+     * @brief Destroys
+     *
+     * @param piSession
+     */
     virtual void DestroyMediaProfile(IN ISession* piSession) = 0;
 
     /**
@@ -87,7 +128,18 @@ public:
      */
     virtual IMS_BOOL IsLocalTone() = 0;
 
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual MediaState GetState() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual MediaState GetOldState() = 0;
 
     /**
@@ -159,12 +211,32 @@ public:
      */
     virtual void RequestVideoDataUsage() = 0;
 
+    /**
+     * @brief Sets
+     *
+     * @param ISession*
+     * @param IMS_UINT32
+     * @param IMS_SINT32
+     */
     virtual void SetEnforcedDirection(
             /* IN ISession* piSession, */ IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir) = 0;
     virtual IMS_BOOL GetCvoResult(IN ISession* piSession) = 0;
+
+    /**
+     * @brief Sends
+     *
+     * @param piSession
+     */
     virtual void SendFastVideoUpdate(/* IN ISession* piSession */) = 0;
     virtual void SetConferenceCall(/* IN ISession* piSession, */ IN IMS_BOOL bConference) = 0;
     virtual void SetConfirmedSession(IN ISession* piSession) = 0;
+
+    /**
+     * @brief Updates
+     *
+     * @param piSession
+     * @param eAction
+     */
     virtual void UpdateStatsReportOption(/* IN ISession* piSession, */ IN IMS_UINT32 eAction) = 0;
 
     /**
@@ -197,9 +269,27 @@ public:
 
     /* Provide information of MtcMediaManager */
     virtual IMS_BOOL IsAudioQualityHd() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @return
+     */
     virtual PemType GetPemType(IN ISession* piSession) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsAudioMediaActivated() = 0;
 
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsAudioInactive() = 0;
 };
 

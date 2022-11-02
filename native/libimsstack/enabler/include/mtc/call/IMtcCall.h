@@ -69,65 +69,195 @@ public:
     virtual ~IMtcCall(){};
 
     // Sets thread to interact with the Java layer. Nothing happens if the thread is null.
+
+    /**
+     * @brief Attachs
+     *
+     */
     virtual void Attach() = 0;
 
     // Starts an outgoing call.
+
+    /**
+     * @brief Starts
+     *
+     * @param eCallType
+     * @param strTarget
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
+    /**
+     * @brief Starts
+     *
+     * @param eCallType
+     * @param strTarget
+     * @param pMediaInfo
+     * @param objSuppServices
+     * @param objUsers
+     */
     virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) = 0;
 
+    /**
+     * @brief Starts
+     *
+     * @param eCallType
+     * @param strTarget
+     * @param objUsers
+     */
     virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& objUsers) = 0;
 
     // Handles an incoming call.
+
+    /**
+     * @brief Handles
+     *
+     * @param piSession
+     */
     virtual void HandleIncoming(IN ISession* piSession) = 0;
 
     // Notifies that the user alerting for this call is started.
+
+    /**
+     * @brief Handles
+     *
+     */
     virtual void HandleUserAlert() = 0;
 
     // Accepts the incoming call.
+
+    /**
+     * @brief Accepts
+     *
+     * @param eCallType
+     * @param pMediaInfo
+     */
     virtual void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects the incoming call.
+
+    /**
+     * @brief Rejects
+     *
+     * @param objReason
+     */
     virtual void Reject(IN const CallReasonInfo& objReason) = 0;
 
     // Holds the call.
+
+    /**
+     * @brief Holds
+     *
+     * @param pMediaInfo
+     */
     virtual void Hold(IN MediaInfo* pMediaInfo) = 0;
 
     // Resumes the call.
+
+    /**
+     * @brief Resumes
+     *
+     * @param pMediaInfo
+     */
     virtual void Resume(IN MediaInfo* pMediaInfo) = 0;
 
     // Accepts the resume request from the remote.
+
+    /**
+     * @brief Accepts
+     *
+     * @param eCallType
+     * @param pMediaInfo
+     */
     virtual void AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects the resume request from the remote.
+
+    /**
+     * @brief Rejects
+     *
+     * @param objReason
+     */
     virtual void RejectResume(IN const CallReasonInfo& objReason) = 0;
 
     // Requests call updating(converting) to the remote.
+
+    /**
+     * @brief Updates
+     *
+     * @param eCallType
+     * @param pMediaInfo
+     */
     virtual void Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Accepts the call updating(converting) request from the remote.
+
+    /**
+     * @brief Accepts
+     *
+     * @param eCallType
+     * @param pMediaInfo
+     */
     virtual void AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects the call updating(converting) request from the remote.
+
+    /**
+     * @brief Rejects
+     *
+     * @param objReason
+     */
     virtual void RejectUpdate(IN const CallReasonInfo& objReason) = 0;
 
     // Cancels the ongoing call updating(converting) request.
+
+    /**
+     * @brief Cancels
+     *
+     * @param objReason
+     */
     virtual void CancelUpdate(IN const CallReasonInfo& objReason) = 0;
 
     // Terminates the call.
+
+    /**
+     * @brief Terminates
+     *
+     * @param objReason
+     */
     virtual void Terminate(IN const CallReasonInfo& objReason) = 0;
 
     // Sends DTMF to the remote.
+
+    /**
+     * @brief Sends
+     *
+     * @param strSignal
+     * @param nDuration
+     */
     virtual void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) = 0;
 
     // Sends USSD. Does nothing if the call isn't a USSI call.
+
+    /**
+     * @brief Sends
+     *
+     * @param strUssd
+     */
     virtual void SendUssd(IN const AString& strUssd) = 0;
 
     // Returns a key to uniquely identify this call.
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual CallKey GetKey() const = 0;
 
     /**
@@ -144,6 +274,11 @@ public:
      */
     virtual State GetState() const = 0;
 
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcCallContext& GetCallContext() const = 0;
 };
 

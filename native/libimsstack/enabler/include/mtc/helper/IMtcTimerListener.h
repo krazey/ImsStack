@@ -20,6 +20,11 @@
 class IMtcTimerListener
 {
 public:
+    /**
+     * @brief Notifies
+     *
+     * @param nType
+     */
     virtual void OnTimerExpired(IN IMS_SINT32 nType) = 0;
 };
 #endif

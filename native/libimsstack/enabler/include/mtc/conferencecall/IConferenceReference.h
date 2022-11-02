@@ -33,11 +33,44 @@ class IConferenceReference
 {
 public:
     virtual ~IConferenceReference() {}
+
+    /**
+     * @brief Sends
+     *
+     * @param strReferToUri
+     * @param objConnectionIdManager
+     * @return
+     */
     virtual IMS_RESULT SendInvite(
             OUT AString& strReferToUri, IN CallConnectionIdManager& objConnectionIdManager) = 0;
+
+    /**
+     * @brief Sends
+     *
+     * @param strInvitedUri
+     * @return
+     */
     virtual IMS_RESULT SendBye(IN AString strInvitedUri = AString::ConstEmpty()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetType() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetResponseCode() const = 0;
+
+    /**
+     * @brief Sets
+     *
+     * @param bTerminate
+     */
     virtual void SetForceToTerminateInterface(IN IMS_BOOL bTerminate) = 0;
 };
 

@@ -35,24 +35,122 @@ class IMtcService : public INativeEnabler
 public:
     virtual ~IMtcService() {}
 
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ServiceType GetServiceType() const = 0;
+
+    /**
+     * @brief Adds
+     *
+     * @param piListener
+     */
     virtual void AddAosStateListener(IN IMtcAosStateListener* piListener) = 0;
+
+    /**
+     * @brief Removes
+     *
+     * @param piListener
+     */
     virtual void RemoveAosStateListener(IN IMtcAosStateListener* piListener) = 0;
+
+    /**
+     * @brief Adds
+     *
+     * @param piListener
+     */
     virtual void AddSrvccStateListener(IN ISrvccStateListener* piListener) = 0;
+
+    /**
+     * @brief Removes
+     *
+     * @param piListener
+     */
     virtual void RemoveSrvccStateListener(IN ISrvccStateListener* piListener) = 0;
 
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsActive() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsEmergency() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsWlanIpCanType() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ServiceStatus GetOldStatus() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ServiceStatus GetStatus() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ICoreService* GetICoreService() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcAosConnector* GetAosConnector() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual SrvccState GetSrvccState() const = 0;
 
+    /**
+     * @brief Updates
+     *
+     * @param eState
+     */
     virtual void UpdateSrvccState(IN SrvccState eState) = 0;
+
+    /**
+     * @brief Sets
+     *
+     * @param bEnabled
+     */
     virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsTerminalBasedCallWaitingEnabled() const = 0;
+
+    /**
+     * @brief Opens
+     *
+     */
     virtual void OpenEmergencyService() = 0;
 };
 

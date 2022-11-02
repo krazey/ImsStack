@@ -29,9 +29,29 @@ public:
     virtual ~ICallStateProxy() {}
 
 public:
+    /**
+     * @brief Adds
+     *
+     * @param pListener
+     */
     virtual void AddListener(IN IMtcCallStateListener* pListener) = 0;
+
+    /**
+     * @brief Removes
+     *
+     * @param pListener
+     */
     virtual void RemoveListener(IN IMtcCallStateListener* pListener) = 0;
 
+    /**
+     * @brief Updates
+     *
+     * @param nCallkey
+     * @param eState
+     * @param eCallType
+     * @param bEmergency
+     * @param nReason
+     */
     virtual void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState,
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE) = 0;
 };

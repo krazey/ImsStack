@@ -27,7 +27,20 @@ class IMtcPreconditionListener
 public:
     virtual ~IMtcPreconditionListener(){};
 
+    /**
+     * @brief Qoss
+     *
+     * @param piSession
+     * @param eMediaType
+     */
     virtual void QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
+
+    /**
+     * @brief Qoss
+     *
+     * @param piSession
+     * @param eNextAction
+     */
     virtual void QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) = 0;
 };
 

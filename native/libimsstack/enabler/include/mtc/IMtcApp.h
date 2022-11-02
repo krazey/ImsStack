@@ -21,7 +21,17 @@ class IMtcApp
 {
 public:
     virtual ~IMtcApp(){};
+
+    /**
+     * @brief Starts
+     *
+     */
     virtual void Start() = 0;
+
+    /**
+     * @brief Stops
+     *
+     */
     virtual void Stop() = 0;
 };
 

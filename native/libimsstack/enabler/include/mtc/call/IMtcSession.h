@@ -32,29 +32,151 @@ class IMtcSession : public IMtcMessageHandler
 public:
     virtual ~IMtcSession() {}
 
+    /**
+     * @brief Starts
+     *
+     * @return
+     */
     virtual IMS_RESULT Start() = 0;
+
+    /**
+     * @brief Sends
+     *
+     * @param bUserAlert
+     * @return
+     */
     virtual IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert) = 0;
+
+    /**
+     * @brief Sends
+     *
+     * @return
+     */
     virtual IMS_RESULT SendPrack() = 0;
+
+    /**
+     * @brief Responds
+     *
+     * @param eStatusCode
+     * @return
+     */
     virtual IMS_RESULT RespondToPrack(IN IMS_SINT32 eStatusCode) = 0;
+
+    /**
+     * @brief Sends
+     *
+     * @param eUpdateType
+     * @return
+     */
     virtual IMS_RESULT SendEarlyUpdate(IN UpdateType eUpdateType) = 0;
+
+    /**
+     * @brief Responds
+     *
+     * @param eStatusCode
+     * @return
+     */
     virtual IMS_RESULT RespondToEarlyUpdate(IN IMS_SINT32 eStatusCode) = 0;
+
+    /**
+     * @brief Sends
+     *
+     * @return
+     */
     virtual IMS_RESULT SendAck() = 0;
+
+    /**
+     * @brief Accepts
+     *
+     * @return
+     */
     virtual IMS_RESULT Accept() = 0;
+
+    /**
+     * @brief Rejects
+     *
+     * @param objReason
+     * @return
+     */
     virtual IMS_RESULT Reject(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Updates
+     *
+     * @param eUpdateType
+     * @param bIncludeAlertInfo
+     * @param eMethod
+     * @return
+     */
     virtual IMS_RESULT Update(
             IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo, IN IMS_SINT32 eMethod) = 0;
+
+    /**
+     * @brief Accepts
+     *
+     * @return
+     */
     virtual IMS_RESULT AcceptUpdate() = 0;
+
+    /**
+     * @brief Cancels
+     *
+     * @param objReason
+     * @return
+     */
     virtual IMS_RESULT CancelUpdate(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Terminates
+     *
+     * @param CallReasonInfo&
+     * @return
+     */
     virtual IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) = 0;
 
     void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
     void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
+    /**
+     * @brief Sets
+     *
+     * @param eCallType
+     */
     virtual void SetCallType(IN CallType eCallType) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual CallType GetCallType() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ISession& GetISession() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual MtcExtensionSet& GetExtensionSet() = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsVideoCapable() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsRttCapable() const = 0;
 };
 
