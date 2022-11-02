@@ -47,13 +47,13 @@ public final class SscConfig {
     public static void init(int slotId) {
         ImsLog.d("init(" + slotId + ")");
 
-        ConfigAgent ca = (ConfigAgent)AgentFactory.getInstance().getAgent(ConfigInterface.class,
+        ConfigAgent ca = (ConfigAgent) AgentFactory.getInstance().getAgent(ConfigInterface.class,
                 slotId);
         setConfigAgent(slotId, ca);
     }
 
     @VisibleForTesting
-    public static void setConfigAgent(int slotId, ConfigAgent configAgent) {
+    protected static void setConfigAgent(int slotId, ConfigAgent configAgent) {
         if (configAgent == null) {
             return;
         }

@@ -115,6 +115,7 @@ public class SscServiceImpl implements IUtInterface {
         }
 
         setNetworkType();
+        SscXmlGov.getInstance(mSlotId).init();
 
         mSscServiceThread = new SscServiceThread();
         mSscServiceThread.start();

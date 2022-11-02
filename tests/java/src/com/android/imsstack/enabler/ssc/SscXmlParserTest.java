@@ -31,6 +31,7 @@ import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
 import com.android.imsstack.enabler.ssc.data.OipServiceData;
 import com.android.imsstack.enabler.ssc.data.OirServiceData;
 import com.android.imsstack.enabler.ssc.data.SscRuleData;
+import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.TipServiceData;
 import com.android.imsstack.enabler.ssc.data.TirServiceData;
@@ -65,6 +66,17 @@ public class SscXmlParserTest {
     @After
     public void tearDown() {
         SscXmlFormat.clear(SLOT_0);
+    }
+
+    @Test
+    public void getSscServicefromDoc_docIsNull() {
+        SscServiceQueryData queryData = getQueryData(ESsType.OIP, SscConstant.CONDITION_INVALID,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
+        queryData.setResponseCode(SscConstant.HTTP_OK);
+
+        SscServiceData data = mSscXmlParser.getSscServiceFromDoc(queryData, null, null);
+
+        assertNull(data);
     }
 
     @Test

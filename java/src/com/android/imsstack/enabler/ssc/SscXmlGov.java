@@ -16,9 +16,12 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import android.annotation.NonNull;
+
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,19 +35,21 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 public class SscXmlGov {
-    private static HashMap<Integer, SscXmlGov> sUtXmlGovs = new HashMap<>();
-    private int mSlotId = 0;
-    private SscXmlParser mSscXmlParser = null;
-    private SscXmlCreator mSscXmlCreator = null;
-    private Document mSimservDoc = null;
-    private Document mSimservDocForUpdate = null;
+    @VisibleForTesting
+    protected static final HashMap<Integer, SscXmlGov> sSscXmlGovs = new HashMap<>();
+    private final int mSlotId;
+    private final SscXmlCreator mSscXmlCreator;
+    private final SscXmlParser mSscXmlParser;
+    @VisibleForTesting
+    protected Document mSimservDoc = null;
+    @VisibleForTesting
+    protected Document mSimservDocForUpdate = null;
 
     private SscXmlGov(int slotId) {
         ImsLog.d("");
@@ -54,25 +59,31 @@ public class SscXmlGov {
     }
 
     protected static SscXmlGov getInstance(int slotId) {
-        if (!sUtXmlGovs.containsKey(slotId)) {
-            sUtXmlGovs.put(slotId, new SscXmlGov(slotId));
+        if (!sSscXmlGovs.containsKey(slotId)) {
+            sSscXmlGovs.put(slotId, new SscXmlGov(slotId));
         }
-        return sUtXmlGovs.get(slotId);
+        return sSscXmlGovs.get(slotId);
+    }
+
+    protected void init() {
+        SscXmlFormat.init(mSlotId);
     }
 
     protected void clear() {
+        SscXmlFormat.clear(mSlotId);
         cacheXmlData(null);
+        mSimservDocForUpdate = null;
     }
 
     protected void syncCachedDataWithUpdatedData(int responseCode) {
-        if (responseCode >= 200 || responseCode < 300) {
+        if (responseCode >= 200 && responseCode < 300) {
             mSimservDoc = mSimservDocForUpdate;
         }
         mSimservDocForUpdate = null;
     }
 
     /**
-     * This method is used for updating rule ID and tags after HTTP PUT request with new rule
+     * This method is used for updating rule IDs and tags after HTTP PUT request with new rule
      */
     protected void updateTagsAndRules() {
         if (mSimservDoc == null) {
@@ -82,27 +93,12 @@ public class SscXmlGov {
     }
 
     protected boolean isXmlDataPresent() {
-        return (mSimservDoc != null) ? true : false;
+        return mSimservDoc != null;
     }
 
-    protected SscServiceData parseXmlStream(SscServiceData updateData, Document document) {
-        SscServiceQueryData convertedData = new SscServiceQueryData(updateData.getSlotId(),
-                updateData.getSsType(), updateData.getEventNumber(), updateData.getTransactionId(),
-                updateData.getServiceClass());
-        convertedData.setResponseCode(updateData.getResponseCode());
-        return parseXmlStream(convertedData, document);
-    }
-
-    protected SscServiceData parseXmlStream(SscServiceQueryData queryData, Document document) {
-        if (document == null) {
-            return null;
-        }
-
+    protected SscServiceData parseXmlStream(@NonNull SscServiceQueryData queryData,
+            @NonNull Document document) {
         Element rootElement = document.getDocumentElement();
-        if (rootElement == null) {
-            return null;
-        }
-
         String strDocument = getStringFromDoc(rootElement);
 
         int slotId = queryData.getSlotId();
@@ -131,16 +127,19 @@ public class SscXmlGov {
 
         ImsLog.d(slotId, "\n" + strDocument);
 
-        SscServiceData data = mSscXmlParser.getSscServiceFromDoc(queryData, document, mSimservDoc);
-        if (data == null) {
-            ImsLog.e("SscServiceData is null");
-            return null;
-        }
-
-        return data;
+        return mSscXmlParser.getSscServiceFromDoc(queryData, document, mSimservDoc);
     }
 
-    protected String createXmlStream(SscServiceData data) {
+    protected SscServiceData parseXmlStream(@NonNull SscServiceData updateData,
+            @NonNull Document document) {
+        SscServiceQueryData convertedData = new SscServiceQueryData(updateData.getSlotId(),
+                updateData.getSsType(), updateData.getEventNumber(), updateData.getTransactionId(),
+                updateData.getServiceClass());
+        convertedData.setResponseCode(updateData.getResponseCode());
+        return parseXmlStream(convertedData, document);
+    }
+
+    protected String createXmlStream(@NonNull SscServiceData data) {
         if (mSimservDoc == null) {
             ImsLog.e(data.getSlotId(), "mSimservDoc is null");
             return null;
@@ -172,7 +171,7 @@ public class SscXmlGov {
             return null;
         }
 
-        String output = null;
+        String output;
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer;
         try {
@@ -183,13 +182,8 @@ public class SscXmlGov {
             StringWriter writer = new StringWriter();
             transformer.transform(new DOMSource(xmlElement), new StreamResult(writer));
             output = writer.getBuffer().toString();
-        } catch (TransformerConfigurationException e) {
-            ImsLog.e(e.toString());
-            e.printStackTrace();
-            return null;
         } catch (TransformerException e) {
             ImsLog.e(e.toString());
-            e.printStackTrace();
             return null;
         }
 
@@ -201,7 +195,7 @@ public class SscXmlGov {
             return null;
         }
 
-        Document doc = null;
+        Document doc;
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setNamespaceAware(false);
@@ -210,7 +204,6 @@ public class SscXmlGov {
             doc = builder.parse(is);
         } catch (Exception e) {
             ImsLog.e(e.toString());
-            e.printStackTrace();
             return null;
         }
 
@@ -218,7 +211,7 @@ public class SscXmlGov {
     }
 
     private Document getNewDoc() {
-        Document doc = null;
+        Document doc;
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -226,7 +219,6 @@ public class SscXmlGov {
             doc.setXmlStandalone(true);
         } catch (Exception e) {
             ImsLog.e(e.toString());
-            e.printStackTrace();
             return null;
         }
 

@@ -19,6 +19,7 @@ package com.android.imsstack.enabler.ssc;
 import android.text.TextUtils;
 
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 
@@ -113,7 +114,8 @@ public class SscXmlFormat {
         }
     };
 
-    private static HashMap<Integer, XcapServerFormat> sServerFormats = new HashMap<>();
+    @VisibleForTesting
+    protected static final HashMap<Integer, XcapServerFormat> sServerFormats = new HashMap<>();
 
     public static final String NS_SS_PREFIX = "ss:";
     public static final String NS_CP_PREFIX = "cp:";

@@ -49,7 +49,6 @@ public class SscServiceState {
         ImsLog.d("");
         mSlotId = slotId;
         mHandler = new SscServiceStateHandler();
-        SscXmlFormat.init(mSlotId);
 
         IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
@@ -186,8 +185,6 @@ public class SscServiceState {
 
         stopUtBlockTimer(true);
         updateUtServiceFeature();
-
-        SscXmlFormat.clear(mSlotId);
     }
 
     private void setUtBlock(int nBlockReason) {

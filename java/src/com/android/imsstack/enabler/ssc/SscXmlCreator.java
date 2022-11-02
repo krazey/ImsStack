@@ -31,7 +31,7 @@ import org.w3c.dom.NodeList;
 import java.util.Hashtable;
 
 public class SscXmlCreator {
-    protected Hashtable<ESsType, IXmlCreator> mXmlCreatorTable = null;
+    private final Hashtable<ESsType, IXmlCreator> mXmlCreatorTable;
 
     public SscXmlCreator() {
         ImsLog.d("");
@@ -79,10 +79,6 @@ public class SscXmlCreator {
 
     private Element updateServiceElement(Document doc, int slotId, String serviceName, int state) {
         Element rootElement = doc.getDocumentElement();
-        if (rootElement == null) {
-            return null;
-        }
-
         String serviceTag = SscXmlFormat.getSsElement(slotId, serviceName);
         Element serviceElement = getElementByTagName(rootElement, serviceTag);
         if (serviceElement == null) {
@@ -440,10 +436,6 @@ public class SscXmlCreator {
             ImsLog.d(slotId, "");
 
             Element rootElement = doc.getDocumentElement();
-            if (rootElement == null) {
-                return null;
-            }
-
             String noReplyTimerTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER);
             Element noReplyTimerElement = getElementByTagName(rootElement, noReplyTimerTag);
             if (noReplyTimerElement == null) {
@@ -486,10 +478,6 @@ public class SscXmlCreator {
             ImsLog.d(slotId, "");
 
             Element rootElement = doc.getDocumentElement();
-            if (rootElement == null) {
-                return null;
-            }
-
             String serviceTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.CD);
             Element cfServiceElement = getElementByTagName(rootElement, serviceTag);
             if (cfServiceElement == null) {

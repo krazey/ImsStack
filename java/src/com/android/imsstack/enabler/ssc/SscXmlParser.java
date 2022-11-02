@@ -56,6 +56,11 @@ public class SscXmlParser {
         int slotId = queryData.getSlotId();
         ImsLog.d(slotId, "");
 
+        if (doc == null) {
+            ImsLog.e(slotId, "document is null");
+            return null;
+        }
+
         int responseCode = queryData.getResponseCode();
         if (responseCode < 200 || responseCode >= 300) {
             return getErrorData(queryData, doc);
@@ -117,16 +122,11 @@ public class SscXmlParser {
     }
 
     private void updateCachedDoc(SscServiceQueryData queryData, Document doc, Document cachedDoc) {
-        int slotId = queryData.getSlotId();
-        Node newElement = doc.getDocumentElement();
-        if (newElement == null) {
-            return;
-        }
-
         if (cachedDoc == null) {
             return;
         }
 
+        int slotId = queryData.getSlotId();
         NodeList serviceElementList = cachedDoc.getElementsByTagName(
                 SscXmlFormat.getSsElement(slotId, queryData.getSsType().getSsName()));
         if (serviceElementList.getLength() == 0) {
@@ -139,8 +139,9 @@ public class SscXmlParser {
             return;
         }
 
-        serviceElement.getParentNode().replaceChild(cachedDoc.importNode(newElement, true),
-                serviceElement);
+        Node newElement = doc.getDocumentElement();
+        serviceElement.getParentNode()
+                .replaceChild(cachedDoc.importNode(newElement, true), serviceElement);
     }
 
     private void updateTags(int slotId, Node element) {
@@ -244,10 +245,6 @@ public class SscXmlParser {
         int slotId = queryData.getSlotId();
 
         Element rootElement = doc.getDocumentElement();
-        if (rootElement == null) {
-            return null;
-        }
-
         String errorPhrase = getErrorPhrase(rootElement);
         ErrorResponseData data = new ErrorResponseData(slotId,
                 queryData.getSsType(), queryData.getEventNumber(),

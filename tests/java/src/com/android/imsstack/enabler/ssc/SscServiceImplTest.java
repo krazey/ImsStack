@@ -119,7 +119,6 @@ public class SscServiceImplTest {
         mQueryCount = 1;
         mUpdateCount = 1;
         mSscServiceImpl = new SscServiceImpl(SLOT_0);
-        SscXmlFormat.init(SLOT_0);
 
         // mockConfigAgent should be set before starting SscServiceImpl
         SscConfig.setConfigAgent(SLOT_0, mockConfigAgent);

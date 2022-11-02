@@ -16,8 +16,19 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CfServiceQueryData;
@@ -35,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mockito;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -51,22 +63,257 @@ public class SscXmlGovTest {
 
     private SscXmlGov mSscXmlGov;
 
-    // test configurations
-    protected static boolean sTimerInCfnr = false;
-
     @Before
     public void setup() {
-        SscXmlFormat.init(SLOT_0);
         mSscXmlGov = SscXmlGov.getInstance(SLOT_0);
+        mSscXmlGov.init();
     }
 
     @After
     public void tearDown() {
+        mSscXmlGov.clear();
     }
 
     @Test
-    public void test() {
+    public void initAndClear() {
+        // init() is called in setup()
+        assertEquals(1, mSscXmlGov.sSscXmlGovs.size());
+        assertEquals(1, SscXmlFormat.sServerFormats.size());
 
+        mSscXmlGov.mSimservDoc = createEmptyXmlDoc();
+        mSscXmlGov.mSimservDocForUpdate = createEmptyXmlDoc();
+        mSscXmlGov.clear();
+
+        assertEquals(0, SscXmlFormat.sServerFormats.size());
+        assertNull(mSscXmlGov.mSimservDoc);
+        assertNull(mSscXmlGov.mSimservDocForUpdate);
+    }
+
+    @Test
+    public void syncCachedDataWithUpdatedData_responseCode100() {
+        Document xmlDoc = createEmptyXmlDoc();
+        mSscXmlGov.mSimservDocForUpdate = xmlDoc;
+
+        mSscXmlGov.syncCachedDataWithUpdatedData(100);
+
+        assertNull(mSscXmlGov.mSimservDoc);
+        assertNull(mSscXmlGov.mSimservDocForUpdate);
+    }
+
+    @Test
+    public void syncCachedDataWithUpdatedData_responseCode200() {
+        Document xmlDoc = createEmptyXmlDoc();
+        mSscXmlGov.mSimservDocForUpdate = xmlDoc;
+
+        mSscXmlGov.syncCachedDataWithUpdatedData(200);
+
+        assertEquals(xmlDoc, mSscXmlGov.mSimservDoc);
+        assertNull(mSscXmlGov.mSimservDocForUpdate);
+    }
+
+    @Test
+    public void syncCachedDataWithUpdatedData_responseCode300() {
+        Document xmlDoc = createEmptyXmlDoc();
+        mSscXmlGov.mSimservDocForUpdate = xmlDoc;
+
+        mSscXmlGov.syncCachedDataWithUpdatedData(300);
+
+        assertNull(mSscXmlGov.mSimservDoc);
+        assertNull(mSscXmlGov.mSimservDocForUpdate);
+    }
+
+    @Test
+    public void updateTagsAndRules_whenCachedDocIsNull() {
+        SscXmlParser mockParser = Mockito.mock(SscXmlParser.class);
+        replaceInstance(SscXmlGov.class, "XML_PARSER", null, mockParser);
+
+        mSscXmlGov.updateTagsAndRules();
+
+        verify(mockParser, never()).updateTagsAndRules(eq(SLOT_0), any());
+    }
+
+    @Test
+    public void updateTagsAndRules_whenCachedDocIsNotNull() {
+        Document xmlDoc = createEmptyXmlDoc();
+        SscXmlParser mockParser = Mockito.mock(SscXmlParser.class);
+        replaceInstance(SscXmlGov.class, "XML_PARSER", null, mockParser);
+        mSscXmlGov.mSimservDoc = xmlDoc;
+
+        mSscXmlGov.updateTagsAndRules();
+
+        verify(mockParser).updateTagsAndRules(SLOT_0, xmlDoc);
+    }
+
+    @Test
+    public void isXmlDataPresent() {
+        mSscXmlGov.mSimservDoc = createEmptyXmlDoc();
+        assertTrue(mSscXmlGov.isXmlDataPresent());
+
+        mSscXmlGov.mSimservDoc = null;
+        assertFalse(mSscXmlGov.isXmlDataPresent());
+    }
+
+    @Test
+    public void parserXmlStream_documentQueryDataOmittingNsOfRootElement() {
+        Document xmlDoc = createEntireXmlDoc();
+        SscServiceQueryData queryData = createDocumentQueryData();
+        queryData.setResponseCode(SscConstant.HTTP_OK);
+        SscServiceData parsedData = new SscServiceData(SLOT_0, queryData.getSsType(),
+                queryData.getEventNumber(), queryData.getTransactionId(), 1);
+
+        SscXmlParser mockParser = Mockito.mock(SscXmlParser.class);
+        replaceInstance(SscXmlGov.class, "XML_PARSER", null, mockParser);
+        when(mockParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
+
+        CarrierConfig mockCarrierConfig = Mockito.mock(CarrierConfig.class);
+        ConfigAgent mockConfigAgent = Mockito.mock(ConfigAgent.class);
+        SscConfig.setConfigAgent(SLOT_0, mockConfigAgent);
+        when(mockConfigAgent.getCarrierConfig()).thenReturn(mockCarrierConfig);
+        when(mockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
+                .thenReturn(false);
+        when(mockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
+                .thenReturn(false);
+        when(mockCarrierConfig
+                .getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
+                .thenReturn(true);
+
+        SscServiceData result = mSscXmlGov.parseXmlStream(queryData, xmlDoc);
+
+        assertEquals(parsedData, result);
+        assertNotNull(mSscXmlGov.mSimservDoc);
+        verify(mockParser).getSscServiceFromDoc(any(), any(), any());
+
+        NodeList nodeList = mSscXmlGov.mSimservDoc.getElementsByTagName("ss:simservs");
+        assertEquals(0, nodeList.getLength());
+    }
+
+    @Test
+    public void parserXmlStream_documentQueryDataOmittingAllNs() {
+        Document xmlDoc = createEntireXmlDoc();
+        SscServiceQueryData queryData = createDocumentQueryData();
+        queryData.setResponseCode(SscConstant.HTTP_OK);
+        SscServiceData parsedData = new SscServiceData(SLOT_0, queryData.getSsType(),
+                queryData.getEventNumber(), queryData.getTransactionId(), 1);
+
+        SscXmlParser mockParser = Mockito.mock(SscXmlParser.class);
+        replaceInstance(SscXmlGov.class, "XML_PARSER", null, mockParser);
+        when(mockParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
+
+        CarrierConfig mockCarrierConfig = Mockito.mock(CarrierConfig.class);
+        ConfigAgent mockConfigAgent = Mockito.mock(ConfigAgent.class);
+        SscConfig.setConfigAgent(SLOT_0, mockConfigAgent);
+        when(mockConfigAgent.getCarrierConfig()).thenReturn(mockCarrierConfig);
+        when(mockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL))
+                .thenReturn(true);
+        when(mockCarrierConfig.getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL))
+                .thenReturn(true);
+        when(mockCarrierConfig
+                .getBoolean(CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL))
+                .thenReturn(false);
+
+        SscServiceData result = mSscXmlGov.parseXmlStream(queryData, xmlDoc);
+
+        assertEquals(parsedData, result);
+        assertNotNull(mSscXmlGov.mSimservDoc);
+        verify(mockParser).getSscServiceFromDoc(any(), any(), any());
+
+        NodeList cwList = mSscXmlGov.mSimservDoc.getElementsByTagName("ss:communication-waiting");
+        assertEquals(0, cwList.getLength());
+        NodeList ruleList = mSscXmlGov.mSimservDoc.getElementsByTagName("cp:rule");
+        assertEquals(0, ruleList.getLength());
+    }
+
+    @Test
+    public void parserXmlStream_documentQueryDataNotCachedWhenError() {
+        Document xmlDoc = createEntireXmlDoc();
+        SscServiceQueryData queryData = createDocumentQueryData();
+        queryData.setResponseCode(SscConstant.HTTP_CONFLICT);
+        SscServiceData parsedData = new SscServiceData(SLOT_0, queryData.getSsType(),
+                queryData.getEventNumber(), queryData.getTransactionId(), 1);
+
+        SscXmlParser mockParser = Mockito.mock(SscXmlParser.class);
+        replaceInstance(SscXmlGov.class, "XML_PARSER", null, mockParser);
+        when(mockParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
+
+        SscServiceData result = mSscXmlGov.parseXmlStream(queryData, xmlDoc);
+
+        assertEquals(parsedData, result);
+        assertNull(mSscXmlGov.mSimservDoc);
+        verify(mockParser).getSscServiceFromDoc(any(), any(), any());
+    }
+
+    @Test
+    public void parserXmlStream_serviceQueryDataNotCached() {
+        Document xmlDoc = createEntireXmlDoc();
+        SscServiceQueryData queryData = createQueryData(ESsType.CF, 0, SscConstant.CONDITION_CFNR,
+                SscServiceClassUtil.SERVICE_CLASS_NONE);
+        queryData.setResponseCode(SscConstant.HTTP_CONFLICT);
+        SscServiceData parsedData = new SscServiceData(SLOT_0, queryData.getSsType(),
+                queryData.getEventNumber(), queryData.getTransactionId(), 1);
+
+        SscXmlParser mockParser = Mockito.mock(SscXmlParser.class);
+        replaceInstance(SscXmlGov.class, "XML_PARSER", null, mockParser);
+        when(mockParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
+
+        SscServiceData result = mSscXmlGov.parseXmlStream(queryData, xmlDoc);
+
+        assertEquals(parsedData, result);
+        assertNull(mSscXmlGov.mSimservDoc);
+        verify(mockParser).getSscServiceFromDoc(any(), any(), any());
+    }
+
+    @Test
+    public void parserXmlStream_updateData() {
+        Document xmlDoc = createEntireXmlDoc();
+        SscServiceData updateData = createUpdateData(ESsType.CF, 0, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+        updateData.setResponseCode(SscConstant.HTTP_CONFLICT);
+        SscServiceData parsedData = new SscServiceData(SLOT_0, updateData.getSsType(),
+                updateData.getEventNumber(), updateData.getTransactionId(), 1);
+
+        SscXmlParser mockParser = Mockito.mock(SscXmlParser.class);
+        replaceInstance(SscXmlGov.class, "XML_PARSER", null, mockParser);
+        when(mockParser.getSscServiceFromDoc(any(), any(), any())).thenReturn(parsedData);
+
+        SscServiceData result = mSscXmlGov.parseXmlStream(updateData, xmlDoc);
+
+        assertEquals(parsedData, result);
+        assertNull(mSscXmlGov.mSimservDoc);
+        verify(mockParser).getSscServiceFromDoc(any(), any(), any());
+    }
+
+    @Test
+    public void createXmlStream_noCachedData() {
+        SscServiceData updateData = createUpdateData(ESsType.CF, 0, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+        SscXmlCreator mockCreator = Mockito.mock(SscXmlCreator.class);
+        replaceInstance(SscXmlGov.class, "XML_CREATOR", null, mockCreator);
+        when(mockCreator.createXml(any(), any()))
+                .thenReturn(createEmptyXmlDoc().getDocumentElement());
+
+        String xml = mSscXmlGov.createXmlStream(updateData);
+
+        assertNull(xml);
+        assertNull(mSscXmlGov.mSimservDocForUpdate);
+        verify(mockCreator, never()).createXml(any(), any());
+    }
+
+    @Test
+    public void createXmlStream() {
+        SscServiceData updateData = createUpdateData(ESsType.CF, 0, SscConstant.ACTION_ACTIVATION,
+                SscConstant.CONDITION_CFNR, null, SscServiceClassUtil.SERVICE_CLASS_NONE, 0);
+        SscXmlCreator mockCreator = Mockito.mock(SscXmlCreator.class);
+        replaceInstance(SscXmlGov.class, "XML_CREATOR", null, mockCreator);
+        when(mockCreator.createXml(any(), any()))
+                .thenReturn(createEmptyXmlDoc().getDocumentElement());
+        mSscXmlGov.mSimservDoc = createEntireXmlDoc();
+
+        String xml = mSscXmlGov.createXmlStream(updateData);
+
+        assertNotNull(xml);
+        assertTrue(xml.contains("ss:simservs"));
+        assertNotNull(mSscXmlGov.mSimservDocForUpdate);
+        verify(mockCreator).createXml(any(), eq(updateData));
     }
 
     protected static SscServiceQueryData createDocumentQueryData() {
@@ -580,5 +827,16 @@ public class SscXmlGovTest {
         }
 
         return document;
+    }
+
+    private synchronized void replaceInstance(final Class c, final String instanceName,
+            final Object obj, final Object newValue) {
+        try {
+            java.lang.reflect.Field field = c.getDeclaredField(instanceName);
+            field.setAccessible(true);
+            field.set(obj, newValue);
+        } catch (Exception e) {
+            org.junit.Assert.fail(e.toString());
+        }
     }
 }
