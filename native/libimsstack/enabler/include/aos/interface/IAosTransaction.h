@@ -37,7 +37,7 @@ public:
 
     virtual IMS_BOOL IsTransactionAllowed(IN IMS_UINT32 nType) = 0;
 
-    virtual void StartTraffic(IN IMS_UINT32 nType, IN IMS_UINT32 nRadioType) = 0;
+    virtual IMS_BOOL StartTraffic(IN IMS_UINT32 nType, IN IMS_UINT32 nRadioType) = 0;
     virtual void StartEmergencyTraffic(IN IMS_UINT32 nRadioType) = 0;
     virtual void StopTraffic(IN IMS_UINT32 nType) = 0;
     virtual void StopEmergencyTaffic(IN IMS_UINT32 nType) = 0;

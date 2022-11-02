@@ -1369,6 +1369,8 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
     ClearPending();
     ClearNetworkBindingFeatures();
 
+    SetRadioWaiting(IMS_FALSE);
+
     DestroyIpsecHelper();
 
     if (m_pSubscription != IMS_NULL)
@@ -2572,7 +2574,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckRadioReadyAndSetTxnPending()
 
     if (m_piTransaction == IMS_NULL)
     {
-        return IMS_FALSE;
+        return IMS_TRUE;
     }
 
     if (!m_piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
@@ -2583,8 +2585,12 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckRadioReadyAndSetTxnPending()
     }
     else
     {
-        m_piTransaction->StartTraffic(
-                IAosTransaction::TYPE_REG, m_piContext->GetNetTracker()->GetNetworkType());
+        if (m_piTransaction->StartTraffic(
+                    IAosTransaction::TYPE_REG, m_piContext->GetNetTracker()->GetNetworkType()))
+        {
+            return IMS_TRUE;
+        }
+
         SetRadioWaiting(IMS_TRUE);
         UpdateTransactionStarted();
         m_pUtil->AddFeature(PENDING_TRANSACTION, m_nTxnPending);
@@ -3029,7 +3035,9 @@ PROTECTED VIRTUAL void AosRegistration::ProcessSubReinitiate()
     DestroySubscription();
 
     if (!IsRegistered())
+    {
         return;
+    }
 
     CreateSubscription();
 }

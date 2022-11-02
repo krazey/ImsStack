@@ -83,25 +83,38 @@ public:
 
     IMS_BOOL IsTransactionAllowed(IN IMS_UINT32 nType) override;
 
-    virtual void StartTraffic(IN IMS_UINT32 nType, IN IMS_UINT32 nRadioType) override;
+    virtual IMS_BOOL StartTraffic(IN IMS_UINT32 nType, IN IMS_UINT32 nRadioType) override;
     virtual void StartEmergencyTraffic(IN IMS_UINT32 nRadioType) override;
     virtual void StopTraffic(IN IMS_UINT32 nType) override;
     virtual void StopEmergencyTaffic(IN IMS_UINT32 nType) override;
 
+protected:
+    IMS_BOOL IsResponseWaiting(IN IMS_UINT32 nType) const;
+    IMS_BOOL IsStarted() const;
+    IMS_BOOL IsStarted(IN IMS_UINT32 nType) const;
+    IMS_BOOL IsStartUpdated() const;
+    IMS_BOOL IsTimerRunning() const;
+    IMS_BOOL IsTrafficResponseWaiting() const;
+
+    // ITimerListener Interface
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+
 private:
     IMS_UINT32 GetAccessNetworkType(IN IMS_UINT32 nRadioType);
 
-    IMS_BOOL IsStarted();
-    IMS_BOOL IsStarted(IN IMS_UINT32 nType);
-
+    void NotifyConnectionFailed(IN IN IMS_UINT32 nType, IN IMS_UINT32 nFailureReason,
+            IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
+    void NotifyConnectionSetupPrepared(IN IMS_UINT32 nType);
     void NotifyTrafficPriorityChanged(IN IMS_UINT32 nType);
 
     void Start(IN IMS_UINT32 nType);
     void Stop(IN IMS_UINT32 nType);
 
+    void AddForWaitingResponse(IN IMS_UINT32 nType);
+    void RemoveForWaitingResponse(IN IMS_UINT32 nType);
+
     void StartTimer(IN IMS_UINT32 nDuration);
     void StopTimer();
-
     void ProcessTimerExpired();
 
     // IAosTrafficListener
@@ -113,19 +126,19 @@ private:
     // IImsRadioTrafficPriorityListener
     void ImsRadio_OnTrafficPriorityChanged() override;
 
-    // ITimerListener Interface
-    void Timer_TimerExpired(IN ITimer* piTimer) override;
+protected:
+    IImsRadio* m_piImsRadio;
+    ITimer* m_piStopTimer;
 
 private:
     IMS_BOOL m_bIsEmergencyStartUpdated;
     IMS_BOOL m_bIsStartUpdated;
+    IMS_BOOL m_bIsTrafficResponseWaiting;
 
+    IMS_UINT32 m_nResponseWaitingTraffics;
     IMS_SINT32 m_nSlotId;
     IMS_UINT32 m_nStartType;
     IMS_UINT32 m_nTraffics;
-
-    IImsRadio* m_piImsRadio;
-    ITimer* m_piStopTimer;
 
     ImsMap<IMS_UINT32, ImsList<IAosTransactionListener*>> m_objListeners;
     ImsMap<IMS_UINT32, AosTraffic*> m_objTraffics;

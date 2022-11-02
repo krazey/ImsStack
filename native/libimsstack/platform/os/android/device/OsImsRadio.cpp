@@ -98,6 +98,7 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 /* nTrafficType */
     for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
     {
         IImsRadioConnectionListener* piCurrListener = m_objConnectionListeners.GetValueAt(i);
+
         if (piCurrListener == piListener)
         {
             nIndex = i;
@@ -111,6 +112,8 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 /* nTrafficType */
     {
         nId = GetId();
         m_objConnectionListeners.Add(nId, piListener);
+        IMS_TRACE_D("OsImsRadio :: StartImsTraffic - slotId=%d, size=%d", GetSlotId(),
+                m_objConnectionListeners.GetSize(), 0);
     }
     else
     {
@@ -133,9 +136,12 @@ PUBLIC VIRTUAL void OsImsRadio::StopImsTraffic(IN IImsRadioConnectionListener* p
     for (IMS_UINT32 i = 0; i < m_objConnectionListeners.GetSize(); i++)
     {
         IImsRadioConnectionListener* piCurrListener = m_objConnectionListeners.GetValueAt(i);
+
         if (piCurrListener == piListener)
         {
             m_objConnectionListeners.RemoveAt(i);
+            IMS_TRACE_D("OsImsRadio :: StopImsTraffic - slotId=%d, size=%d", GetSlotId(),
+                    m_objConnectionListeners.GetSize(), 0);
             break;
         }
     }
@@ -226,6 +232,7 @@ PRIVATE void OsImsRadio::NotifyConnectionSetupPrepared(IN IMS_UINT32 nId)
     if (nIndex >= 0)
     {
         IImsRadioConnectionListener* piListener = m_objConnectionListeners.GetValueAt(nIndex);
+
         if (piListener != IMS_NULL)
         {
             piListener->ImsRadio_OnConnectionSetupPrepared();
