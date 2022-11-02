@@ -715,11 +715,8 @@ void AosCondition::ProcessAirPlaneEvent(IN IMS_BOOL bIsOn)
     {
         RequestCommand(REQUEST_STOP, AosReason::AIRPLANE_MODE);
 
-        if (IsClearReason(IAosNConfiguration::ClearReason::AIRPLANE))
-        {
-            ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
-            ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
-        }
+        ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
+        ProcessBlockReason(IMS_FALSE, BLOCK_AUTHENTICATION_FAILED);
     }
 }
 
@@ -747,10 +744,7 @@ void AosCondition::ProcessRoamingEvent(IN IMS_UINT32 nPsState, IN IMS_UINT32 nCs
 PRIVATE
 void AosCondition::ProcessPlmnEvent()
 {
-    if (IsClearReason(IAosNConfiguration::ClearReason::PLMN_CHANGED))
-    {
-        ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
-    }
+    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
 }
 
 PRIVATE
@@ -762,10 +756,7 @@ void AosCondition::ProcessPhoneNumberAvailableEvent(
         return;
     }
 
-    if (IsClearReason(IAosNConfiguration::ClearReason::SIM_STATE))
-    {
-        ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
-    }
+    ProcessBlockReason(IMS_FALSE, BLOCK_PERMANENT_DATA_FAILED);
 }
 
 PRIVATE
@@ -897,13 +888,6 @@ void AosCondition::SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState
             m_pAvailableWiFi->HandleEvent(eEvent, nState, nStateEx);
         }
     }
-}
-
-PRIVATE
-IMS_BOOL AosCondition::IsClearReason(IN IAosNConfiguration::ClearReason eReason) const
-{
-    return (GET_N_CONFIG(m_nSlotId)->GetClearReasonForPermanentPdnFailure() &
-            static_cast<IMS_UINT32>(eReason));
 }
 
 PRIVATE

@@ -778,12 +778,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT[] 
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[] =
         "sip_message_threshold_for_transport_change_int";
 
-const IMS_CHAR CarrierConfig::Assets::KEY_CLEAR_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
-        "clear_permanent_pdn_failure_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY[] =
         "emergency_pcscf_retry_wait_time_sec_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY[] =
-        "pcscf_discovery_method_roaming_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
         "permanent_pdn_failure_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY[] =

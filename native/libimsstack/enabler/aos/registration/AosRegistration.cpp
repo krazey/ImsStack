@@ -3716,7 +3716,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
 {
     A_IMS_TRACE_I(REGID, "ProcessStartFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
-    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithPcscfDiscovery(), nStatusCode))
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeForPcscfDiscovery(), nStatusCode))
     {
         m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
         ProcessStandardPcscfSelection();
@@ -3785,7 +3785,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
 
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
 {
-    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithPcscfDiscovery(),
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeForPcscfDiscovery(),
                 CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
     {
         m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
@@ -3882,7 +3882,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
     }
 
     if (IsErrorCodeExisted(
-                GET_N_CONFIG(m_nSlotId)->GetReregErrCodeWithImsPdnReactivation(), nStatusCode))
+                GET_N_CONFIG(m_nSlotId)->GetReregErrCodeForImsPdnReactivation(), nStatusCode))
     {
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
         return;
@@ -3893,8 +3893,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         return;
     }
 
-    if (IsErrorCodeExisted(
-                GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeWithInitialRegWithSamePcscf(),
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeForInitRegWithSamePcscf(),
                 CarrierConfig::Assets::REG_ERROR_CODE_ALL_RESP))
     {
         ProcessDefaultFlowRecovery_Update(nStatusCode);
@@ -3946,7 +3945,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()
         return;
     }
 
-    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregErrCodeWithInitRegWithAvailablePcscf(),
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregErrCodeForInitRegWithAvailablePcscf(),
                 CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
     {
         ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
@@ -3965,8 +3964,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32
         return;
     }
 
-    if (IsErrorCodeExisted(
-                GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeWithInitialRegWithSamePcscf(),
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregRetryErrCodeForInitRegWithSamePcscf(),
                 CarrierConfig::Assets::REG_ERROR_CODE_OTHER))
     {
         ProcessDefaultFlowRecovery_Update();

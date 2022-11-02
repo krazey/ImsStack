@@ -62,7 +62,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallBasedOnPauOfNormalRegistrationSupported, (),
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegWithIpcanChangedDuringImsCallHeld, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsDeregisterOn3gNetworks, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsDeregOn3gNetwork, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoOverWifiSupportedWithoutVoice, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGeolocationPidfSupported, (IN IMS_SINT32 nGeolocationPidfType),
             (const, override));
@@ -129,10 +129,8 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRetryCountSubErrorSubTerminated, (), (const, override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSubErrorStoppingResub, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetVowifiSubErrorRegRequired, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetClearReasonForPermanentPdnFailure, (), (const, override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetImsIdentityPriority, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetPcscfDiscoveryMethod, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRoamingPcscfDiscoveryMethod, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetUpdateRegistrationWithRatChange, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSupportedRats, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetSupportedRoamingRats, (), (override));
@@ -140,20 +138,20 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraRegErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraReregErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraRegErrWaitTime, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregRetryErrCodeWithInitialRegWithSamePcscf, (),
-            (override));
+    MOCK_METHOD(
+            IMSVector<IMS_SINT32>&, GetReregRetryErrCodeForInitRegWithSamePcscf, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegPermanentErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegPermanentErrMaxCount, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetEmergencyPcscfRetryWaitTime, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithPcscfDiscovery, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeForPcscfDiscovery, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeForCallEnd, (), (override));
     MOCK_METHOD(
             IMSVector<IMS_SINT32>&, GetReregErrCodeForPdnReactivationAfterCallEnd, (), (override));
     MOCK_METHOD(
-            IMSVector<IMS_SINT32>&, GetReregErrCodeWithInitRegWithAvailablePcscf, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithImsPdnReactivation, (), (override));
+            IMSVector<IMS_SINT32>&, GetReregErrCodeForInitRegWithAvailablePcscf, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeForImsPdnReactivation, (), (override));
 
     MOCK_METHOD(void, Init, (IN IMS_SINT32 nSlotId), (override));
 };

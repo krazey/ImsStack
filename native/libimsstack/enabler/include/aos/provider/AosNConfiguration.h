@@ -76,7 +76,7 @@ public:
     virtual IMS_BOOL IsVerstatForRegistrationSupported() const;
     virtual IMS_BOOL IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const;
     virtual IMS_BOOL IsRegWithIpcanChangedDuringImsCallHeld() const;
-    virtual IMS_BOOL IsDeregisterOn3gNetworks() const;
+    virtual IMS_BOOL IsDeregOn3gNetwork() const;
     virtual IMS_BOOL IsVideoOverWifiSupportedWithoutVoice() const;
     virtual IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const;
     virtual IMS_BOOL IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const;
@@ -142,10 +142,8 @@ public:
     virtual IMS_SINT32 GetRetryCountSubErrorSubTerminated() const;
     virtual IMSVector<IMS_SINT32>& GetSubErrorStoppingResub();
     virtual IMSVector<IMS_SINT32>& GetVowifiSubErrorRegRequired();
-    virtual IMS_UINT32 GetClearReasonForPermanentPdnFailure() const;
     virtual IMSVector<IMS_SINT32>& GetImsIdentityPriority();
     virtual IMSVector<IMS_SINT32>& GetPcscfDiscoveryMethod();
-    virtual IMSVector<IMS_SINT32>& GetRoamingPcscfDiscoveryMethod();
     virtual IMSVector<IMS_SINT32>& GetUpdateRegistrationWithRatChange();
     virtual IMSVector<IMS_SINT32>& GetSupportedRats();
     virtual IMSVector<IMS_SINT32>& GetSupportedRoamingRats();
@@ -153,17 +151,17 @@ public:
     virtual IMSVector<IMS_SINT32>& GetExtraRegErrCode();
     virtual IMSVector<IMS_SINT32>& GetExtraReregErrCode();
     virtual IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime();
-    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeWithInitialRegWithSamePcscf();
+    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf();
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrCode();
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount();
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime();
-    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithPcscfDiscovery();
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeForCallEnd();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeForPdnReactivationAfterCallEnd();
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithInitRegWithAvailablePcscf();
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithImsPdnReactivation();
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf();
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation();
 
 private:
     friend class AosBuildDirector;
@@ -193,7 +191,6 @@ private:
 
     IMS_UINT32 m_nEventForInitRegOnTerminatedState;
     IMS_UINT32 m_nEventToFollowWtForInitRegOnTerminatedState;
-    IMS_UINT32 m_nClearPermanentPdnFailure;
 
     IMSList<IAosNConfigurationListener*> m_objListeners;
 
