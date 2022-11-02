@@ -19,6 +19,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/block/CallTrafficBlockRule.h"
 #include "call/block/IMtcBlockRule.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -33,32 +34,30 @@ CallTrafficBlockRule::CallTrafficBlockRule(IN IMtcCallContext& objContext, IN Ca
 {
 }
 
-PUBLIC VIRTUAL CallTrafficBlockRule::~CallTrafficBlockRule() {}
+PUBLIC VIRTUAL CallTrafficBlockRule::~CallTrafficBlockRule()
+{
+    m_objMtcCallTrafficChecker.SetTrafficCheckerListener(IMS_NULL);
+}
 
 PUBLIC VIRTUAL CallTrafficBlockRule::Result CallTrafficBlockRule::Check(
         IN IMtcBlockRuleCheckListener& objListener)
 {
-    if (m_ePeerType == PeerType::MT)
-    {
-        m_objMtcCallTrafficChecker.StartTrafficChecking(m_eCallType, m_bEmergency, m_bWifi);
-        return Result(Result::Status::UNBLOCKED);
-    }
-
-    if (m_objMtcCallTrafficChecker.IsTrafficPrepared(m_eCallType, m_bEmergency))
-    {
-        return Result(Result::Status::UNBLOCKED);
-    }
-
-    if (m_objMtcCallTrafficChecker.IsTrafficAllowed(m_eCallType, m_bEmergency) == IMS_FALSE)
-    {
-        return Result(Result::Status::BLOCKED, CODE_LOCAL_NETWORK_NO_SERVICE);
-    }
-
     m_piMtcBlockRuleCheckListener = &objListener;
     m_objMtcCallTrafficChecker.SetTrafficCheckerListener(this);
-    m_objMtcCallTrafficChecker.StartTrafficChecking(m_eCallType, m_bEmergency, m_bWifi);
 
-    return Result(Result::Status::PENDING);
+    CheckResult eCheckResult =
+            m_objMtcCallTrafficChecker.Check(m_eCallType, m_bEmergency, m_ePeerType, m_bWifi);
+
+    switch (eCheckResult)
+    {
+        case CheckResult::UNBLOCKED:
+        case CheckResult::PENDING:
+            return Result(static_cast<IMtcBlockRule::Result::Status>(eCheckResult));
+
+        case CheckResult::BLOCKED:
+            return Result(static_cast<IMtcBlockRule::Result::Status>(eCheckResult),
+                    CODE_LOCAL_NETWORK_NO_SERVICE);
+    }
 }
 
 PUBLIC VIRTUAL void CallTrafficBlockRule::OnConnectionSetupPrepared()

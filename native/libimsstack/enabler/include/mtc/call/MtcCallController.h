@@ -23,7 +23,7 @@
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "call/IMtcCall.h"
-#include "call/traffic/MtcCallTrafficChecker.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
 
 class IMtcCallManager;
 class IMtcContext;

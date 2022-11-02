@@ -26,6 +26,34 @@
 #include "call/traffic/IMtcCallTrafficChecker.h"
 #include "helper/IMtcAosStateListener.h"
 
+class IMtcRadioConnectionListener
+{
+public:
+    ~IMtcRadioConnectionListener() = default;
+
+    /**
+     * @brief Notifies
+     *
+     * @param eTrafficType
+     * @param eCallDirection
+     * @param nFailureReason
+     * @param nCauseCode
+     * @param nWaitTimeMillis
+     */
+    virtual void OnConnectionFailed(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
+            IN IMS_UINT32 nWaitTimeMillis) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param eTrafficType
+     * @param eCallDirection
+     */
+    virtual void OnConnectionSetupPrepared(
+            IN TrafficType eTrafficType, IN CallDirection eCallDirection) = 0;
+};
+
 class IMtcContext;
 class IMtcRadioConnectionFailureListener;
 class IMtcService;
@@ -47,11 +75,8 @@ public:
     void Init();
 
     void SetTrafficCheckerListener(IN IMtcCallTrafficCheckerListener* pListener) override;
-    IMS_BOOL IsTrafficPrepared(IN CallType eCallType, IN IMS_BOOL bEmergency) const override;
-    IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const override;
-    void StartTrafficChecking(
-            IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) override;
-    void StopTrafficChecking(IN TrafficType eTrafficType) override;
+    CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
+            IN IMS_BOOL bWifi) override;
 
     // IMtcAosStateListener
     inline void OnAosStateChanged(IN IMtcService&, IN MtcAosState, IN IMS_UINT32) override {}
@@ -63,22 +88,36 @@ public:
     void OnTotalCallStateChanged(IN State eState) override;
 
     // IMtcRadioConnectionListener
-    void OnConnectionFailed(IN TrafficType eTrafficType, IN IMS_UINT32 nFailureReason,
-            IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis) override;
-    void OnConnectionSetupPrepared(IN TrafficType eTrafficType) override;
+    void OnConnectionFailed(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
+            IN IMS_UINT32 nWaitTimeMillis) override;
+    void OnConnectionSetupPrepared(
+            IN TrafficType eTrafficType, IN CallDirection eCallDirection) override;
 
     // for test
-    void SetTrafficStatus(IN TrafficType eTrafficType, IN IMS_BOOL bActive);
-    ImsList<CallKey>& GetCallKeys(IN TrafficType eTrafficType) const;
+    void CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
+            IN CallDirection eCallDirection, IN IMS_BOOL bActive, IN CallKey nCallKeyIn);
 
 private:
     void DeInit();
     TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
-    IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi);
-    void AddCallKeyIfNeeded(IN TrafficType eTrafficType, IN CallKey nCallKey);
+    IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi) const;
+    void AddCallKeyIfNeeded(
+            IN TrafficType eTrafficType, IN CallDirection eCallDirection, IN CallKey nCallKeyIn);
     void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKey);
-    void NotifyRadioConnectionFailedListener(IN TrafficType eTrafficType);
-    void NotifyTrafficCheckerListenerIfPossible(IN IMS_BOOL bReady);
+    void NotifyRadioConnectionFailedListener(
+            IN TrafficType eTrafficType, IN CallDirection eCallDirection);
+    void NotifyTrafficCheckerListener(IN IMS_BOOL bReady);
+    MtcTrafficInfo* GetCallTrafficInfo(
+            IN TrafficType eTrafficType, IN CallDirection eCallDirection) const;
+    MtcTrafficInfo* CreateCallTrafficInfo(
+            IN TrafficType eTrafficType, IN CallDirection eCallDirection);
+    IMS_BOOL IsTrafficPrepared(
+            IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const;
+    IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
+    void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
+            IN IMS_BOOL bWifi);
+    void StopTrafficChecking(IN TrafficType eTrafficType, IN CallDirection eCallDirection);
 
 private:
     IMtcContext& m_objContext;
@@ -86,15 +125,16 @@ private:
     INetworkWatcher* m_piNetworkWatcher;
     IImsRadio* m_piImsRadio;
     IMtcCallTrafficCheckerListener* m_piMtcCallTrafficCheckerListener;
-    ImsMap<TrafficType, MtcTrafficInfo*> m_objMtcTrafficInfos;
+    ImsList<MtcTrafficInfo*> m_objMtcTrafficInfos;
 };
 
 class MtcTrafficInfo final : public IImsRadioConnectionListener
 {
 public:
-    explicit MtcTrafficInfo(IN TrafficType eTrafficType,
+    explicit MtcTrafficInfo(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
             IN IMtcRadioConnectionListener& objMtcRadioConnectionListener) :
             m_eTrafficType(eTrafficType),
+            m_eCallDirection(eCallDirection),
             m_objMtcRadioConnectionListener(objMtcRadioConnectionListener),
             m_objCallKeys(),
             m_bTrafficActive(IMS_FALSE)
@@ -113,17 +153,10 @@ private:
     friend class MtcCallTrafficChecker;
 
     TrafficType m_eTrafficType;
+    CallDirection m_eCallDirection;
     IMtcRadioConnectionListener& m_objMtcRadioConnectionListener;
     ImsList<CallKey> m_objCallKeys;
     IMS_BOOL m_bTrafficActive;
-};
-
-class IMtcRadioConnectionFailureListener
-{
-public:
-    ~IMtcRadioConnectionFailureListener() = default;
-
-    virtual void OnConnectionFailed(IN CallKey nCallKey) = 0;
 };
 
 #endif

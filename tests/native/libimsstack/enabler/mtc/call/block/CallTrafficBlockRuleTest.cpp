@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/CallTrafficBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
 #include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include <gmock/gmock.h>
 
@@ -65,79 +67,43 @@ protected:
     }
 };
 
-TEST_F(CallTrafficBlockRuleTest, CheckMt)
+TEST_F(CallTrafficBlockRuleTest, Check)
 {
     CreateCallTrafficBlockRuleWithGivenValue(CallType::VOIP, PeerType::MT, IMS_FALSE);
 
+    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, SetTrafficCheckerListener(_)).Times(4);
+
     EXPECT_CALL(m_objMockIMtcCallTrafficChecker,
-            StartTrafficChecking(CallType::VOIP, IMS_FALSE, IMS_FALSE))
-            .Times(1);
+            Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE))
+            .Times(3)
+            .WillOnce(Return(CheckResult::UNBLOCKED))
+            .WillOnce(Return(CheckResult::PENDING))
+            .WillOnce(Return(CheckResult::BLOCKED));
 
-    EXPECT_EQ(Result(Result::Status::UNBLOCKED),
+    EXPECT_EQ(Result(static_cast<Result::Status>(CheckResult::UNBLOCKED)),
             m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
-}
-
-TEST_F(CallTrafficBlockRuleTest, CheckMoTrafficPrepared)
-{
-    CreateCallTrafficBlockRuleWithGivenValue(CallType::VOIP, PeerType::MO, IMS_FALSE);
-
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, IsTrafficPrepared(_, _))
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_EQ(Result(Result::Status::UNBLOCKED),
+    EXPECT_EQ(Result(static_cast<Result::Status>(CheckResult::PENDING)),
             m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
-}
-
-TEST_F(CallTrafficBlockRuleTest, CheckMoTrafficAllowed)
-{
-    CreateCallTrafficBlockRuleWithGivenValue(CallType::VOIP, PeerType::MO, IMS_FALSE);
-
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, IsTrafficAllowed(_, _))
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_EQ(Result(Result::Status::BLOCKED, CODE_LOCAL_NETWORK_NO_SERVICE),
-            m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
-}
-
-TEST_F(CallTrafficBlockRuleTest, CheckMoStartTrafficChecking)
-{
-    EXPECT_CALL(m_objMtcService, IsWlanIpCanType).Times(1).WillOnce(Return(IMS_TRUE));
-
-    CreateCallTrafficBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
-
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, IsTrafficPrepared(_, _))
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, IsTrafficAllowed(_, _))
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, SetTrafficCheckerListener(m_pCallTrafficBlockRule))
-            .Times(1);
-    EXPECT_CALL(
-            m_objMockIMtcCallTrafficChecker, StartTrafficChecking(CallType::VT, IMS_TRUE, IMS_TRUE))
-            .Times(1);
-
-    EXPECT_EQ(Result(Result::Status::PENDING),
+    EXPECT_EQ(Result(static_cast<Result::Status>(CheckResult::BLOCKED),
+                      CODE_LOCAL_NETWORK_NO_SERVICE),
             m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
 }
 
 TEST_F(CallTrafficBlockRuleTest, IMtcCallTrafficCheckerListener)
 {
-    // Assume that CheckMoStartTrafficChecking passed.
+    // Assume that Check() done.
     CreateCallTrafficBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, IsTrafficPrepared(_, _))
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, IsTrafficAllowed(_, _))
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_EQ(Result(Result::Status::PENDING),
-            m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
+    m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener);
 
-    EXPECT_CALL(m_BlockRuleCheckListener, OnBlockRuleChecked(Result(Result::Status::UNBLOCKED)))
+    EXPECT_CALL(m_BlockRuleCheckListener,
+            OnBlockRuleChecked(Result(static_cast<Result::Status>(CheckResult::UNBLOCKED))))
             .Times(1);
 
     m_pCallTrafficBlockRule->OnConnectionSetupPrepared();
 
     EXPECT_CALL(m_BlockRuleCheckListener,
-            OnBlockRuleChecked(Result(Result::Status::BLOCKED, CODE_LOCAL_NETWORK_NO_SERVICE)))
+            OnBlockRuleChecked(Result(static_cast<Result::Status>(CheckResult::BLOCKED),
+                    CODE_LOCAL_NETWORK_NO_SERVICE)))
             .Times(1);
 
     m_pCallTrafficBlockRule->OnConnectionFailed();
