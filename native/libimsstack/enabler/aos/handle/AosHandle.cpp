@@ -126,7 +126,7 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
     {
         piNConfig->SetListener(this);
 
-        if (piNConfig->IsDeregisterOn3gNetworks())
+        if (piNConfig->IsDeregOn3gNetwork())
         {
             m_objHoldingBlocksPolicyForMobile.Append(BLOCK_3G);
         }
@@ -456,7 +456,7 @@ PUBLIC VIRTUAL void AosHandle::NetTracker_StatusChanged()
         m_bNetSrvIn = bCurrSrvIn;
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->IsDeregisterOn3gNetworks())
+    if (GET_N_CONFIG(m_nSlotId)->IsDeregOn3gNetwork())
     {
         if (bCurrSrvIn)
         {

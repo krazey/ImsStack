@@ -290,7 +290,7 @@ public:
      *
      * @return IMS_BOOL Return wherther IMS de-registers or not.
      */
-    virtual IMS_BOOL IsDeregisterOn3gNetworks() const = 0;
+    virtual IMS_BOOL IsDeregOn3gNetwork() const = 0;
 
     /**
      * @brief Flag specifying if video call is supported over wifi when voice call is unavailable.
@@ -979,20 +979,6 @@ public:
     virtual IMSVector<IMS_SINT32>& GetVowifiSubErrorRegRequired() = 0;
 
     /**
-     * @brief Get a bit for reasons to clear service block for permanent PDN failures.
-     *
-     * @return IMS_UINT32 return bit value to clear service blocks.
-     *         {0x01} : IMSVector{0} SIM state is changed
-     *         {0x02} : IMSVector{1} Airplane mode is changed
-     *         {0x04} : IMSVector{2} Network operator is changed
-     *         {0x08} : IMSVector{3} Radio access technology is changed
-     *         {0x10} : IMSVector{4} WiFi connection state is changed
-     *         {0x20} : IMSVector{5} VoLTE settings is changed
-     *         {0x40} : IMSVector{6} VoWiFi settings is changed
-     */
-    virtual IMS_UINT32 GetClearReasonForPermanentPdnFailure() const = 0;
-
-    /**
      * @brief Get a priority of ISIM and USIM provisioning to obtain IMS Identity.
      *
      * @return vector list
@@ -1013,17 +999,6 @@ public:
      * @see CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_PCO
      */
     virtual IMSVector<IMS_SINT32>& GetPcscfDiscoveryMethod() = 0;
-
-    /**
-     * @brief Get a P-CSCF address discovery methods in roaming area and its preference order.
-     *        For example, {0(PCO), 1(CONF)} means it supports two P-CSCF discovery methods.
-     *        It uses P-CSCF address in PCO field if present.
-     *        otherwise, it uses the pre-configured P-CSCF address.
-     *
-     * @return vector list
-     * @see CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_PCO
-     */
-    virtual IMSVector<IMS_SINT32>& GetRoamingPcscfDiscoveryMethod() = 0;
 
     /**
      * @brief Indicate the list of RATs where registration is updated with RAT change.
@@ -1119,7 +1094,7 @@ public:
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeWithInitialRegWithSamePcscf() = 0;
+    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf() = 0;
 
     /**
      * @brief Indicate the list of error responses. It shall not attempt any more IMS registrations
@@ -1131,6 +1106,14 @@ public:
 
     /**
      * @brief Indicate the number of error code considered the final result.
+     *
+     *        This function relates to GetRegPermanentErrCode()
+     *        The UE check if how many registration will be sent through this function  when the UE
+     *        receives error message that is in the GetRegPermanentErrCode()
+     *
+     *        This value is indicated by two numbers if the value is different in the home and
+     *        roaming network. This value is indicated by a single number if the value is the same
+     *        in the home and roaming network.
      *
      * @return vector max count list
      */
@@ -1168,7 +1151,7 @@ public:
      *        when PCSCF is unavailable.
      * @return vector error code
      */
-    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithPcscfDiscovery() = 0;
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() = 0;
 
     /**
      * @brief Indicate the list of error codes that result in terminating the IMS call
@@ -1191,14 +1174,14 @@ public:
      *        with available PCSCF. If no available PCSCF, IMS PDN is re-activated.
      * @return vector error code
      */
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithInitRegWithAvailablePcscf() = 0;
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() = 0;
 
     /**
      * @brief Indicate the error codes of the reregistration followed by IMS PDN reactivation
      *
      * @return vector error code
      */
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithImsPdnReactivation() = 0;
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() = 0;
 
     enum
     {
@@ -1207,17 +1190,6 @@ public:
         NOTIFY_TERMINATED_PROBATION = 0x04,
         NOTIFY_TERMINATED_UNREGITERED = 0x08,
         NOTIFY_TERMINATED_REJECTED = 0x10
-    };
-
-    enum class ClearReason
-    {
-        SIM_STATE = 0x01,
-        AIRPLANE = 0x02,
-        PLMN_CHANGED = 0x04,
-        RAT_CHANGED = 0x08,
-        WIFI_CHANGED = 0x10,
-        VOLTE_SETTING = 0x20,
-        WFC_SETTING = 0x40
     };
 
 private:

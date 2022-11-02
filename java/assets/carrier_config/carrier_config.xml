@@ -302,15 +302,7 @@
     <int name="rereg_retry_max_cnt_to_keep_reg_int" value="0"/>
     <int name="sip_message_threshold_for_transport_change_int" value="200"/>
 
-    <int-array name="clear_permanent_pdn_failure_int_array" num="3">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="2"/>
-    </int-array>
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="0">
-    </int-array>
-    <int-array name="pcscf_discovery_method_roaming_int_array" num="1">
-        <item value="0"/>
     </int-array>
     <int-array name="permanent_pdn_failure_int_array" num="0">
     </int-array>

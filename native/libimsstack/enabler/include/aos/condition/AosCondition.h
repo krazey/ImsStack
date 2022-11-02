@@ -174,7 +174,6 @@ private:
     void SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx = -1,
             IN SERVICE_TYPE eServiceType = SERVICE_WHOLE);
 
-    IMS_BOOL IsClearReason(IN IAosNConfiguration::ClearReason eReason) const;
     IMS_BOOL RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) const;
 
     void UpdateRegistrationMode() const;

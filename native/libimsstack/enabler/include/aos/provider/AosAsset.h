@@ -73,9 +73,7 @@ public:
             nReregRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
             nReregRetryMaxCntToKeepReg(0),
             nSipMessageThresholdForTransportChange(200),
-            objClearPermanentPdnFailure(IMSVector<IMS_SINT32>()),
             objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
-            objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>()),
             objRegErrCodeForPcscfDiscovery(IMSVector<IMS_SINT32>()),
             objRegPermanentErrMaxCnt(IMSVector<IMS_SINT32>()),
             objRegRetryErrCodeWithDiffPcscf(IMSVector<IMS_SINT32>()),
@@ -144,9 +142,7 @@ public:
     IMS_SINT32 nReregRetry305Policy;
     IMS_SINT32 nReregRetryMaxCntToKeepReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
-    IMSVector<IMS_SINT32> objClearPermanentPdnFailure;
     IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
-    IMSVector<IMS_SINT32> objPcscfDiscoveryMethodRoaming;
     IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     IMSVector<IMS_SINT32> objRegPermanentErrMaxCnt;
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithDiffPcscf;

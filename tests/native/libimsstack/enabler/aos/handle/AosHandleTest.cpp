@@ -502,7 +502,7 @@ TEST_F(AosHandleTest, Constructor)
 
     EXPECT_CALL(objMockIAosNConfiguration, SetListener(_)).Times(1);
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
@@ -1217,10 +1217,10 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test3)
 TEST_F(AosHandleTest, NetTracker_StatusChanged_Test4)
 {
     // Test4: BLOCK_3G test.
-    //        IsDeregisterOn3gNetworks() returns false.
+    //        IsDeregOn3gNetwork() returns false.
     // Expectation: BLOCK_3G is not blocked
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
 
@@ -1231,11 +1231,11 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test4)
 TEST_F(AosHandleTest, NetTracker_StatusChanged_Test5)
 {
     // Test5: BLOCK_3G test.
-    //        IsDeregisterOn3gNetworks() returns true.
+    //        IsDeregOn3gNetwork() returns true.
     //        Srv is not In.
     // Expectation: BLOCK_3G is not blocked
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
@@ -1248,11 +1248,11 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test5)
 TEST_F(AosHandleTest, NetTracker_StatusChanged_Test6)
 {
     // Test6: BLOCK_3G test.
-    //        IsDeregisterOn3gNetworks() returns true.
+    //        IsDeregOn3gNetwork() returns true.
     //        Srv is In. Network type is 2G (Not supported, Not 3g).
     // Expectation: BLOCK_3G is not blocked
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
@@ -1269,11 +1269,11 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test6)
 TEST_F(AosHandleTest, NetTracker_StatusChanged_Test7)
 {
     // Test7: BLOCK_3G test.
-    //        IsDeregisterOn3gNetworks() returns true.
+    //        IsDeregOn3gNetwork() returns true.
     //        Srv is In. Network type is supported one(LTE)
     // Expectation: BLOCK_3G is not blocked regardless of previous state.
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
@@ -1298,11 +1298,11 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test7)
 TEST_F(AosHandleTest, NetTracker_StatusChanged_Test8)
 {
     // Test8: BLOCK_3G test.
-    //        IsDeregisterOn3gNetworks() returns true.
+    //        IsDeregOn3gNetwork() returns true.
     //        Srv is In. Network type is 3G(WCDMA)
     // Expectation: BLOCK_3G is blocked.
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
@@ -1738,7 +1738,7 @@ TEST_F(AosHandleTest, IsEmergencyService_Test)
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
@@ -3853,7 +3853,7 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test4)
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsDeregisterOn3gNetworks())
+    EXPECT_CALL(objMockIAosNConfiguration, IsDeregOn3gNetwork())
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 

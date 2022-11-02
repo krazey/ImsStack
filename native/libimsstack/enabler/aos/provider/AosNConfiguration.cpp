@@ -40,7 +40,6 @@ AosNConfiguration::AosNConfiguration() :
         m_objSubErrCodeForTerminated(AosSubErrCodeForTerminatedBundle()),
         m_nEventForInitRegOnTerminatedState(0),
         m_nEventToFollowWtForInitRegOnTerminatedState(0),
-        m_nClearPermanentPdnFailure(0),
         m_objListeners(IMSList<IAosNConfigurationListener*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosNConfiguration = %" PFLS_u "/%" PFLS_x,
@@ -283,7 +282,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithIpcanChangedDuringImsCallHel
     return m_objAsset.bHoldRegWithIpcanChangedDuringImsCall;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDeregisterOn3gNetworks() const
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDeregOn3gNetwork() const
 {
     return m_objAsset.bImsDeregOn3gNetwork;
 }
@@ -608,11 +607,6 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetVowifiSubErrorRegReq
     return m_objAsset.objVowifiSubErrorCodeForInitReg;
 }
 
-PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetClearReasonForPermanentPdnFailure() const
-{
-    return m_nClearPermanentPdnFailure;
-}
-
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetImsIdentityPriority()
 {
     return m_objCarrierConfig.objImsIdentityPriority;
@@ -621,11 +615,6 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetImsIdentityPriority(
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetPcscfDiscoveryMethod()
 {
     return m_objCarrierConfig.objPcscfDiscoveryMethod;
-}
-
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRoamingPcscfDiscoveryMethod()
-{
-    return m_objAsset.objPcscfDiscoveryMethodRoaming;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetUpdateRegistrationWithRatChange()
@@ -664,7 +653,7 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrWaitTime(
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
-AosNConfiguration::GetReregRetryErrCodeWithInitialRegWithSamePcscf()
+AosNConfiguration::GetReregRetryErrCodeForInitRegWithSamePcscf()
 {
     return m_objAsset.objReregRetryErrCodeForInitRegWithSamePcscf;
 }
@@ -694,7 +683,7 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryW
     return m_objAsset.objEmergencyPcscfRetryWaitTimeSec;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithPcscfDiscovery()
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeForPcscfDiscovery()
 {
     return m_objAsset.objRegErrCodeForPcscfDiscovery;
 }
@@ -711,12 +700,12 @@ AosNConfiguration::GetReregErrCodeForPdnReactivationAfterCallEnd()
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
-AosNConfiguration::GetReregErrCodeWithInitRegWithAvailablePcscf()
+AosNConfiguration::GetReregErrCodeForInitRegWithAvailablePcscf()
 {
     return m_objAsset.objReregErrCodeForInitRegWithAvailablePcscf;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithImsPdnReactivation()
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForImsPdnReactivation()
 {
     return m_objAsset.objReregErrCodeForImsPdnReactivation;
 }
@@ -1213,16 +1202,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
 
-    m_objAsset.objClearPermanentPdnFailure =
-            piCc->GetIntArray(CarrierConfig::Assets::KEY_CLEAR_PERMANENT_PDN_FAILURE_INT_ARRAY);
-    for (int i = 0; i < m_objAsset.objClearPermanentPdnFailure.GetSize(); i++)
-    {
-        m_nClearPermanentPdnFailure |= 0x1 << m_objAsset.objClearPermanentPdnFailure.GetAt(i);
-    }
     m_objAsset.objEmergencyPcscfRetryWaitTimeSec = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY);
-    m_objAsset.objPcscfDiscoveryMethodRoaming =
-            piCc->GetIntArray(CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY);
     m_objAsset.objRegErrCodeForPcscfDiscovery = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY);
     m_objAsset.objRegPermanentErrMaxCnt =

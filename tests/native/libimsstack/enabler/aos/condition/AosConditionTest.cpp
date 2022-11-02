@@ -1020,32 +1020,9 @@ TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_ClearReasonSimStat
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
 
-    EXPECT_CALL(objMockIAosNConfiguration, GetClearReasonForPermanentPdnFailure())
-            .WillRepeatedly(
-                    Return(static_cast<IMS_UINT32>(IAosNConfiguration::ClearReason::SIM_STATE)));
-
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    ServicePhone_PhoneNumberStateChanged(PhoneNumberState::RETRY_SUCCESS);
-}
-
-TEST_F(AosConditionTest, ServicePhone_PhoneNumberStateChanged_ClearReasonNotSimState)
-{
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, GetClearReasonForPermanentPdnFailure())
-            .WillRepeatedly(
-                    Return(static_cast<IMS_UINT32>(IAosNConfiguration::ClearReason::AIRPLANE)));
-
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
 
@@ -1058,31 +1035,9 @@ TEST_F(AosConditionTest, ServicePhone_PlmnChanged_ClearReaconPlmlChanged)
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
 
-    EXPECT_CALL(objMockIAosNConfiguration, GetClearReasonForPermanentPdnFailure())
-            .WillRepeatedly(
-                    Return(static_cast<IMS_UINT32>(IAosNConfiguration::ClearReason::PLMN_CHANGED)));
-
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(1);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    ServicePhone_PlmnChanged();
-}
-
-TEST_F(AosConditionTest, ServicePhone_PlmnChanged_ClearReaconNotPlmlChanged)
-{
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, GetClearReasonForPermanentPdnFailure())
-            .WillRepeatedly(Return(0));
-
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
 
@@ -1131,37 +1086,9 @@ TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_True_MatchedClearReason)
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
 
-    EXPECT_CALL(objMockIAosNConfiguration, GetClearReasonForPermanentPdnFailure())
-            .WillRepeatedly(
-                    Return(static_cast<IMS_UINT32>(IAosNConfiguration::ClearReason::AIRPLANE)));
-
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
     EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(2);
-
-    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
-
-    ServiceSetting_AirplaneChanged(IMS_TRUE);
-}
-
-TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_True_NotMatchedClearReason)
-{
-    MockIAosConditionListener objMockIAosConditionListener;
-    EXPECT_CALL(objMockIAosConditionListener, Condition_RequestCommand(_, _)).Times(1);
-
-    m_pAosCondition->SetListener(
-            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
-
-    MockIAosNConfiguration objMockIAosNConfiguration;
-    AosProvider::GetInstance()->SetNConfiguration(
-            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, GetClearReasonForPermanentPdnFailure())
-            .WillRepeatedly(Return(0));
-
-    MockIAosBlock objMockIAosBlock;
-    EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
-    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
 
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
 
@@ -1179,10 +1106,6 @@ TEST_F(AosConditionTest, ServiceSetting_AirplaneChanged_False)
     MockIAosNConfiguration objMockIAosNConfiguration;
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration), 0);
-
-    EXPECT_CALL(objMockIAosNConfiguration, GetClearReasonForPermanentPdnFailure())
-            .WillRepeatedly(
-                    Return(static_cast<IMS_UINT32>(IAosNConfiguration::ClearReason::AIRPLANE)));
 
     MockIAosBlock objMockIAosBlock;
     EXPECT_CALL(objMockIAosBlock, SetBlockReason(_, _)).Times(0);
