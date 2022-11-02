@@ -23,7 +23,7 @@ import com.android.imsstack.util.ImsLog;
 import java.util.HashMap;
 
 public class SscXmlFormat {
-    private static class UtXmlData {
+    private static class XcapServerFormat {
         private boolean mIsNoReplyTimerOmitted = false;
         private boolean mIsNoReplyTimerInRule = false;
         private boolean mIsCfnlExistInServer = false;
@@ -37,7 +37,7 @@ public class SscXmlFormat {
         private HashMap<String, HashMap<Integer, String>> mVideoRuleIds = new HashMap<>();
 
         /**
-         * mCfProvisionStatus and mCbProvisionStatus are used to check whether the conditioins are
+         * mCfProvisionStatus and mCbProvisionStatus are used to check whether the conditions are
          * provisioned by XCAP server only when creating ruleset and rule element to support IR.92
          * v9.0. If not provisioned, UE will not create rule element for condition.
          * The params consist of condition and provisioned status
@@ -46,16 +46,16 @@ public class SscXmlFormat {
         private HashMap<Integer, Boolean> mCbProvisionStatus = new HashMap<>();
 
         /**
-         * mCfMeidaCapability and mCbMeidaCapability are used to check whether the media
+         * mCfMediaCapability and mCbMediaCapability are used to check whether the media
          * capabilities are supported by XCAP server only when creating ruleset and rule
          * element to support IR.92 v9.0. If not supported, UE will not create media element for
          * media type.
          * The params consist of media type and status
          */
-        private HashMap<Integer, Boolean> mCfMeidaCapability = new HashMap<>();
-        private HashMap<Integer, Boolean> mCbMeidaCapability = new HashMap<>();
+        private HashMap<Integer, Boolean> mCfMediaCapability = new HashMap<>();
+        private HashMap<Integer, Boolean> mCbMediaCapability = new HashMap<>();
 
-        private UtXmlData() {
+        private XcapServerFormat() {
             mCfProvisionStatus.put(SscConstant.CONDITION_CFU, true);
             mCfProvisionStatus.put(SscConstant.CONDITION_CFB, true);
             mCfProvisionStatus.put(SscConstant.CONDITION_CFNR, true);
@@ -69,11 +69,11 @@ public class SscXmlFormat {
             mCbProvisionStatus.put(SscConstant.CONDITION_BIC_WR, true);
             mCbProvisionStatus.put(SscConstant.CONDITION_ACR, true);
 
-            mCfMeidaCapability.put(MEDIA_TYPE_AUDIO, false);
-            mCfMeidaCapability.put(MEDIA_TYPE_VIDEO, false);
+            mCfMediaCapability.put(MEDIA_TYPE_AUDIO, false);
+            mCfMediaCapability.put(MEDIA_TYPE_VIDEO, false);
 
-            mCbMeidaCapability.put(MEDIA_TYPE_AUDIO, false);
-            mCbMeidaCapability.put(MEDIA_TYPE_VIDEO, false);
+            mCbMediaCapability.put(MEDIA_TYPE_AUDIO, false);
+            mCbMediaCapability.put(MEDIA_TYPE_VIDEO, false);
         }
 
         private void setIsNoReplyTimerOmitted(boolean isNoReplyTimerOmitted) {
@@ -113,7 +113,7 @@ public class SscXmlFormat {
         }
     };
 
-    private static HashMap<Integer, UtXmlData> mXmlDatas = new HashMap<>();
+    private static HashMap<Integer, XcapServerFormat> sServerFormats = new HashMap<>();
 
     public static final String NS_SS_PREFIX = "ss:";
     public static final String NS_CP_PREFIX = "cp:";
@@ -230,36 +230,37 @@ public class SscXmlFormat {
     public static final int MEDIA_TYPE_VIDEO = 1;
 
     protected static void init(int slotId) {
-        ImsLog.d("init (" + slotId + ")");
+        ImsLog.d(slotId, "");
 
-        setUtXmlData(slotId, new UtXmlData());
-    }
-
-    private static void setUtXmlData(int slotId, UtXmlData data) {
-        mXmlDatas.remove(slotId);
-        mXmlDatas.put(slotId, data);
+        setXcapServerFormat(slotId, new XcapServerFormat());
     }
 
     protected static void clear(int slotId) {
-        UtXmlData xmlData  = getXmlData(slotId);
-        if (xmlData != null) {
-            xmlData.getTags().clear();
-            xmlData.getAudioRuleIds().clear();
-            xmlData.getVideoRuleIds().clear();
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf != null) {
+            xsf.getTags().clear();
+            xsf.getAudioRuleIds().clear();
+            xsf.getVideoRuleIds().clear();
+            sServerFormats.remove(slotId);
         }
     }
 
-    private static UtXmlData getXmlData(int slotId) {
-        if (!mXmlDatas.containsKey(slotId)) {
+    private static XcapServerFormat getXcapServerFormat(int slotId) {
+        if (!sServerFormats.containsKey(slotId)) {
             ImsLog.w("wrong slot - " + slotId );
             return null;
         }
 
-        return mXmlDatas.get(slotId);
+        return sServerFormats.get(slotId);
     }
 
-    private static String getTag(UtXmlData xmlData, String elementName) {
-        HashMap<String, String> tags = xmlData.getTags();
+    private static void setXcapServerFormat(int slotId, XcapServerFormat format) {
+        clear(slotId);
+        sServerFormats.put(slotId, format);
+    }
+
+    private static String getTag(XcapServerFormat format, String elementName) {
+        HashMap<String, String> tags = format.getTags();
         if (!tags.containsKey(elementName)) {
             return null;
         }
@@ -273,20 +274,20 @@ public class SscXmlFormat {
     }
 
     protected static void setTag(int slotId, String tagName, String namespace) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return;
         }
 
         if (NS_SS_PREFIX.equals(namespace + ":")) {
-            xmlData.mNsSsPrefix = NS_SS_PREFIX;
+            xsf.mNsSsPrefix = NS_SS_PREFIX;
         }
 
         if (NS_CP_PREFIX.equals(namespace + ":")) {
-            xmlData.mNsCpPrefix = NS_CP_PREFIX;
+            xsf.mNsCpPrefix = NS_CP_PREFIX;
         }
 
-        xmlData.getTags().put(tagName, namespace);
+        xsf.getTags().put(tagName, namespace);
     }
 
     protected static String getSsElement(int slotId, String elementName) {
@@ -294,14 +295,14 @@ public class SscXmlFormat {
             return elementName;
         }
 
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return NS_SS_PREFIX + elementName;
         }
 
-        String tag = getTag(xmlData, elementName);
+        String tag = getTag(xsf, elementName);
         if (tag == null) {
-            return xmlData.mNsSsPrefix + elementName;
+            return xsf.mNsSsPrefix + elementName;
         }
 
         return tag;
@@ -312,41 +313,41 @@ public class SscXmlFormat {
             return elementName;
         }
 
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return NS_CP_PREFIX + elementName;
         }
 
-        String tag = getTag(xmlData, elementName);
+        String tag = getTag(xsf, elementName);
         if (tag == null) {
-            return xmlData.mNsCpPrefix + elementName;
+            return xsf.mNsCpPrefix + elementName;
         }
 
         return tag;
     }
 
     protected static void displayTags(int slotId) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             ImsLog.d("wrong slot - " + slotId);
             return;
         }
 
-        xmlData.getTags().forEach((name, ns) -> { ImsLog.d( "Name:" + name + ", NS: " + ns ); });
+        xsf.getTags().forEach((name, ns) -> ImsLog.d(slotId, "Name:" + name + ", NS: " + ns));
     }
 
     protected static void setRuleId(int slotId, int mediaType, String serviceName, int condition,
             String ruleId) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return;
         }
 
-        HashMap<String, HashMap<Integer, String>> services = null;
+        HashMap<String, HashMap<Integer, String>> services;
         if (mediaType == MEDIA_TYPE_AUDIO) {
-            services = xmlData.getAudioRuleIds();
+            services = xsf.getAudioRuleIds();
         } else { // MEDIA_TYPE_VIDEO
-            services = xmlData.getVideoRuleIds();
+            services = xsf.getVideoRuleIds();
         }
 
         if (!services.containsKey(serviceName)) {
@@ -361,16 +362,16 @@ public class SscXmlFormat {
 
     protected static String getRuleId(int slotId, int mediaType, String serviceName,
             int condition) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return null;
         }
 
-        HashMap<String, HashMap<Integer, String>> services = null;
+        HashMap<String, HashMap<Integer, String>> services;
         if (mediaType == MEDIA_TYPE_AUDIO) {
-            services = xmlData.getAudioRuleIds();
+            services = xsf.getAudioRuleIds();
         } else {
-            services = xmlData.getVideoRuleIds();
+            services = xsf.getVideoRuleIds();
         }
 
         if (!services.containsKey(serviceName)) {
@@ -493,7 +494,7 @@ public class SscXmlFormat {
         }
 
         if (TextUtils.isEmpty(ruleConditionTag)) {
-            // in case of unconditional, no rule condition tag
+            // For unconditional, empty condition tag is used
             return "";
         }
 
@@ -501,72 +502,72 @@ public class SscXmlFormat {
     }
 
     protected static boolean getIsNoReplyTimerOmitted(int slotId) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return false;
         }
 
-        return xmlData.getIsNoReplyTimerOmitted();
+        return xsf.getIsNoReplyTimerOmitted();
     }
 
     protected static void setIsNoReplyTimerOmitted(int slotId, boolean isNoReplyTimerOmitted) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return;
         }
 
-        xmlData.setIsNoReplyTimerOmitted(isNoReplyTimerOmitted);
+        xsf.setIsNoReplyTimerOmitted(isNoReplyTimerOmitted);
     }
 
     protected static boolean getIsNoReplyTimerInRule(int slotId) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return false;
         }
 
-        return xmlData.getIsNoReplyTimerInRule();
+        return xsf.getIsNoReplyTimerInRule();
     }
 
     protected static void setIsNoReplyTimerInRule(int slotId, boolean isNoReplyTimerInRule) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return;
         }
 
-        xmlData.setIsNoReplyTimerInRule(isNoReplyTimerInRule);
+        xsf.setIsNoReplyTimerInRule(isNoReplyTimerInRule);
     }
 
     protected static boolean getCfnlExist(int slotId) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return false;
         }
 
-        return xmlData.getIsCfnlExist();
+        return xsf.getIsCfnlExist();
     }
 
     protected static void setCfnlExist(int slotId, boolean isCfnlExist) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return;
         }
 
-        xmlData.setIsCfnlExist(isCfnlExist);
+        xsf.setIsCfnlExist(isCfnlExist);
     }
 
     protected static boolean getProvisionStatus(int slotId, String serviceName, int condition) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return false;
         }
 
         if (SC_CD.equals(serviceName)) {
-            if (xmlData.mCfProvisionStatus.containsKey(condition)) {
-                return xmlData.mCfProvisionStatus.get(condition);
+            if (xsf.mCfProvisionStatus.containsKey(condition)) {
+                return xsf.mCfProvisionStatus.get(condition);
             }
         } else if (SC_CB.equals(serviceName)) {
-            if (xmlData.mCbProvisionStatus.containsKey(condition)) {
-                return xmlData.mCbProvisionStatus.get(condition);
+            if (xsf.mCbProvisionStatus.containsKey(condition)) {
+                return xsf.mCbProvisionStatus.get(condition);
             }
         }
 
@@ -575,50 +576,50 @@ public class SscXmlFormat {
 
     protected static void setProvisionStatus(int slotId, String serviceName, int condition,
             boolean provisioned) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return;
         }
 
         if (SC_CD.equals(serviceName)) {
-            xmlData.mCfProvisionStatus.put(condition, provisioned);
+            xsf.mCfProvisionStatus.put(condition, provisioned);
         } else if (SC_CB.equals(serviceName)) {
-            xmlData.mCbProvisionStatus.put(condition, provisioned);
+            xsf.mCbProvisionStatus.put(condition, provisioned);
         }
     }
 
     protected static boolean isNamespaceSsSupported(int slotId) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return false;
         }
 
-        return NS_SS_PREFIX.equals(xmlData.mNsSsPrefix);
+        return NS_SS_PREFIX.equals(xsf.mNsSsPrefix);
     }
 
     protected static boolean isNamespaceCpSupported(int slotId) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return false;
         }
 
-        return NS_CP_PREFIX.equals(xmlData.mNsCpPrefix);
+        return NS_CP_PREFIX.equals(xsf.mNsCpPrefix);
     }
 
     protected static boolean getMediaCapability(int slotId, String serviceName,
             int mediaType) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return false;
         }
 
         if (SC_CD.equals(serviceName)) {
-            if (xmlData.mCfMeidaCapability.containsKey(mediaType)) {
-                return xmlData.mCfMeidaCapability.get(mediaType);
+            if (xsf.mCfMediaCapability.containsKey(mediaType)) {
+                return xsf.mCfMediaCapability.get(mediaType);
             }
         } else if (SC_CB.equals(serviceName)) {
-            if (xmlData.mCbMeidaCapability.containsKey(mediaType)) {
-                return xmlData.mCbMeidaCapability.get(mediaType);
+            if (xsf.mCbMediaCapability.containsKey(mediaType)) {
+                return xsf.mCbMediaCapability.get(mediaType);
             }
         }
 
@@ -627,15 +628,15 @@ public class SscXmlFormat {
 
     protected static void setMediaCapability(int slotId, String serviceName, int mediaType,
             boolean mediaCapability) {
-        UtXmlData xmlData = getXmlData(slotId);
-        if (xmlData == null) {
+        XcapServerFormat xsf = getXcapServerFormat(slotId);
+        if (xsf == null) {
             return;
         }
 
         if (SC_CD.equals(serviceName)) {
-            xmlData.mCfMeidaCapability.put(mediaType, mediaCapability);
+            xsf.mCfMediaCapability.put(mediaType, mediaCapability);
         } else if (SC_CB.equals(serviceName)) {
-            xmlData.mCbMeidaCapability.put(mediaType, mediaCapability);
+            xsf.mCbMediaCapability.put(mediaType, mediaCapability);
         }
     }
 }
