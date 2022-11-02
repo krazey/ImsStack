@@ -23,8 +23,27 @@
 class IConferenceReferenceListener
 {
 public:
+    /**
+     * @brief Notifies
+     *
+     * @param piConfRef
+     */
     virtual void OnReferenceStarted(IN IConferenceReference* piConfRef) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param pConfRef
+     */
     virtual void OnReferenceStartFailed(IN IConferenceReference* pConfRef) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param piConfRef
+     * @param nSipFragCode
+     * @param eState
+     */
     virtual void OnReferenceUpdated(IN IConferenceReference* piConfRef,
             IN SipStatusCode nSipFragCode, IN ReferSubscriptionState eState) = 0;
 };

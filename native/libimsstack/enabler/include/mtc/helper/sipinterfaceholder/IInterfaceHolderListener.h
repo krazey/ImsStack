@@ -21,8 +21,23 @@ class IInterfaceHolderListener
 {
 public:
     virtual ~IInterfaceHolderListener(){};
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnSessionInterfaceCleared() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnReferenceInterfaceCleared() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnSubscriptionInterfaceCleared() = 0;
 };
 

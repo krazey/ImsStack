@@ -20,6 +20,10 @@
 class IEctControllerListener
 {
 public:
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnEctCompleted() = 0;
 };
 

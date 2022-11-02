@@ -32,52 +32,238 @@ class IJniMtcCallThread : public IJniEnablerThread
 public:
     virtual ~IJniMtcCallThread() {}
 
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnStarted(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnStartFailed(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     * @param bAlerted
+     */
     virtual void OnProgressing(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_BOOL bAlerted = IMS_FALSE) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnHeld(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnHoldFailed(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnResumed(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnResumeFailed(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnHeldBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnResumedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnTerminated(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnIncomingResume(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnIncomingUpdate(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnUpdated(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnUpdateFailed(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     */
     virtual void OnUpdatedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
+    /**
+     * @brief Notifies
+     *
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     * @param objUsers
+     */
     virtual void OnMerged(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnMergeFailed(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnConferenceParticipantAdded() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnConferenceParticipantAddFailed(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnConferenceParticipantRemoved() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnConferenceParticipantRemoveFailed(IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param strDisplayText
+     * @param strSubject
+     * @param nUserCount
+     * @param nMaxUserCount
+     * @param strHost
+     */
     virtual void OnConferenceInfoChanged(IN const AString& strDisplayText,
             IN const AString strSubject, IN IMS_UINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
             IN const AString& strHost) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objUsers
+     */
     virtual void OnConferenceParticipantsInfoChanged(IN const ImsList<ConfUser*>& objUsers) = 0;
 
+    /**
+     * @brief Notifies
+     *
+     * @param nResult
+     * @param objReason
+     */
     virtual void OnEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) = 0;
 
+    /**
+     * @brief Notifies
+     *
+     * @param nCallKey
+     * @param objCallInfo
+     * @param pMediaInfo
+     * @param objSuppServices
+     * @param eOipType
+     * @param strRemoteNumber
+     */
     virtual void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
             IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN OipType eOipType, IN const AString& strRemoteNumber) = 0;
 
+    /**
+     * @brief Notifies
+     *
+     * @param nType
+     * @param strValue
+     * @param nValue
+     * @param bValue
+     */
     virtual void OnInformationNotificationReceived(IN IMS_UINT32 nType, IN const AString strValue,
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) = 0;
 };

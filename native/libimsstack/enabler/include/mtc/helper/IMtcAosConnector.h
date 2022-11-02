@@ -26,31 +26,178 @@ public:
     virtual ~IMtcAosConnector() {}
 
     // IImsAos interface wrappers.
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetFeatures() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetSuspendedReason() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param nFeature
+     * @return
+     */
     virtual IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsImsConnected() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsImsSuspended() const = 0;
+
+    /**
+     * @brief Sets
+     *
+     * @param bReady
+     * @param nService
+     */
     virtual void SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) const = 0;
+
+    /**
+     * @brief Updates
+     *
+     * @param nFeatures
+     */
     virtual void UpdateFeature(IN IMS_UINT32 nFeatures) const = 0;
+
+    /**
+     * @brief Controls
+     *
+     * @param nType
+     * @return
+     */
     virtual IMS_BOOL Control(IN IMS_UINT32 nType) const = 0;
 
     // IImsAosInfo interface wrappers.
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual AString GetAssociatedUri() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetConnectionType() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetImsState() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetIpcanType() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual AString GetLastPathHeaderValue() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual AString GetLocalAddress() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetLocalPort() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetRegisteredNetworkType() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual AString GetPathHeaderValue() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual AString GetPcscfAddress() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetPcscfPort() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetRegistrationMode() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual AString GetSupportedHeaderValue() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual AString GetServiceRouteHeaderValue() const = 0;
+
+    /**
+     * @brief Notifys
+     *
+     * @param bIsInitialized
+     */
     virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) = 0;
+
+    /**
+     * @brief Notifys
+     *
+     * @param nState
+     */
     virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState) = 0;
 };
 

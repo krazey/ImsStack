@@ -33,8 +33,23 @@ class IMtcAosStateListener
 {
 public:
     virtual ~IMtcAosStateListener() {}
+
+    /**
+     * @brief Notifies
+     *
+     * @param objMtcService
+     * @param eState
+     * @param eAosReason
+     */
     virtual void OnAosStateChanged(
             IN IMtcService& objMtcService, IN MtcAosState eState, IN IMS_UINT32 eAosReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objMtcService
+     * @param eIpcan
+     */
     virtual void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) = 0;
 };
 

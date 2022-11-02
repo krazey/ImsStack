@@ -43,11 +43,41 @@ public:
         JOINED
     };
     virtual ~IConferenceController() {}
+
+    /**
+     * @brief Processs
+     *
+     * @param nCmd
+     * @param objUsers
+     * @param objCallInfo
+     * @param objMediaInfo
+     * @param objSuppServices
+     */
     virtual void ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
             IN IMSMap<SuppType, SuppService*>& objSuppServices) = 0;
+
+    /**
+     * @brief Processs
+     *
+     * @param nCmd
+     * @param objUsers
+     */
     virtual void ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_SINT32 GetState() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param nKey
+     * @return
+     */
     virtual IndividualCallState GetCallStatusInConference(IN CallKey nKey) const = 0;
 };
 

@@ -29,8 +29,25 @@ class IMtcSipInterfaceFactory
 public:
     virtual ~IMtcSipInterfaceFactory() {}
 
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual SessionInterfaceHolder* GetISessionHolder() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ReferenceInterfaceHolder* GetIReferenceHolder() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual SubscriptionInterfaceHolder* GetISubscriptionHolder() = 0;
 };
 

@@ -33,6 +33,12 @@ class ISrvccStateListener
 {
 public:
     virtual ~ISrvccStateListener() {}  // for Unit Test
+
+    /**
+     * @brief Notifies
+     *
+     * @param eState
+     */
     virtual void OnSrvccStateUpdated(IN SrvccState eState) = 0;
 };
 

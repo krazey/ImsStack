@@ -29,6 +29,11 @@ enum class SubscriptionUpdateType
 class IConferenceSubscriptionListener
 {
 public:
+    /**
+     * @brief Notifies
+     *
+     * @param eType
+     */
     virtual void OnSubscriptionUpdated(IN SubscriptionUpdateType eType) = 0;
 };
 

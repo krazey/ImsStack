@@ -24,13 +24,48 @@ class IMediaReportEventListener
 {
 public:
     virtual ~IMediaReportEventListener(){};
+
+    /**
+     * @brief Notifies
+     *
+     * @param eMediaType
+     * @param eProtocolType
+     */
     virtual void OnReceivingMediaDataStarted(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param eMediaType
+     * @param eProtocolType
+     */
     virtual void OnReceivingMediaDataFailed(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnVideoLowestBitRate() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnReceivingNetworkToneStarted() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnReceivingNetworkToneFailed() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param objReason
+     */
     virtual void OnMediaFailed(IN const CallReasonInfo& objReason) = 0;
 };
 

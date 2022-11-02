@@ -34,92 +34,513 @@ class IMessageUtils
 public:
     virtual ~IMessageUtils() {}
 
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @param eServiceMethod
+     * @param nResponseIndex
+     * @return
+     */
     virtual IMessage* GetPreviousResponse(IN const ISession* piSession,
             IN IMS_SINT32 eServiceMethod, IN IMS_SINT32 nResponseIndex = -1) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @param eServiceMethod
+     * @param bIsUac
+     * @param nResponseIndex
+     * @return
+     */
     virtual IMessage* GetRemotePreviousMessage(IN ISession* piSession, IN IMS_SINT32 eServiceMethod,
             IN IMS_BOOL bIsUac, IN IMS_SINT32 nResponseIndex = -1) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @param eServiceMethod
+     * @param nResponseIndex
+     * @return
+     */
     virtual IMS_SINT32 GetResponseStatusCode(IN ISession* piSession, IN IMS_SINT32 eServiceMethod,
             IN IMS_SINT32 nResponseIndex = -1) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @param ePeerType
+     * @return
+     */
     virtual ImsList<AString> GetRemoteUris(IN ISession* piSession, IN PeerType ePeerType) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @param ePeerType
+     * @return
+     */
     virtual AString GetRemoteUri(IN ISession* piSession, IN PeerType ePeerType) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @return
+     */
     virtual AString GetSessionId(IN ISession* piSession) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual ImsList<AString> GetHeaders(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetHeader(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetHeaderValue(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual IMS_SINT32 GetHeaderValueInt(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param strParameterName
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetParameterValue(IN const IMessage* piMessage,
             IN const AString& strParameterName, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual ImsList<AString> GetUserParts(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetUserPart(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual ImsList<AString> GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual ImsList<AString> GetDisplayNames(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetDisplayName(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual ImsList<AString> GetHosts(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetHost(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param strParameterName
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetParameterValueFromUri(IN IMessage* piMessage,
             IN const AString& strParameterName, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param bWithParameters
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual ImsList<AString> GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param bWithParameters
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual AString GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual IMS_SINT32 GetFeatures(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual IMS_SINT32 GetSosTypeFromServiceUrn(IN const IMessage* piMessage,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param strProtocol
+     * @return
+     */
     virtual IMS_SINT32 GetCauseFromReasonHeader(
             IN const IMessage* piMessage, IN const AString& strProtocol = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param strProtocol
+     * @return
+     */
     virtual ReasonHeaderValue GetCauseAndTextFromReasonHeader(
             IN const IMessage* piMessage, IN const AString& strProtocol = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @return
+     */
     virtual IMS_SINT32 GetSupportedFeatures(IN IMessage* piMessage) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @return
+     */
     virtual IMS_SINT32 GetRequireFeatures(IN IMessage* piMessage) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param objIms3gpp
+     * @return
+     */
     virtual Ims3gpp& GetIms3gppFromBody(IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @return
+     */
     virtual IMS_SINT32 GetStatusCodeInNotify(IN IMessage* piMessage) = 0;
+
+    /**
+     * @brief Hass
+     *
+     * @param piMessage
+     * @return
+     */
     virtual IMS_BOOL HasSdp(IN const IMessage* piMessage) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param piMessage
+     * @return
+     */
     virtual IMS_BOOL IsFocusConf(IN const IMessage* piMessage) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param piMessage
+     * @return
+     */
     virtual IMS_BOOL IsInitialRegistrationRequired(IN const IMessage* piMessage) = 0;
+
+    /**
+     * @brief Containss
+     *
+     * @param piMessage
+     * @param strValue
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual IMS_BOOL ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Hass
+     *
+     * @param piMessage
+     * @param strValue
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual IMS_BOOL HasValue(IN const IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param piMessage
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual IMS_BOOL IsHeaderPresent(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Containss
+     *
+     * @param strHeader
+     * @param strTag
+     * @return
+     */
     virtual IMS_BOOL ContainsTag(IN const AString& strHeader, IN const AString& strTag) = 0;
+
+    /**
+     * @brief Containss
+     *
+     * @param piMessage
+     * @param strAddress
+     * @return
+     */
     virtual IMS_BOOL ContainsAddressInPaid(
             IN const IMessage* piMessage, IN const AString& strAddress) = 0;
+
+    /**
+     * @brief Sets
+     *
+     * @param piMessage
+     * @param strValue
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual IMS_RESULT SetHeader(IN IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Adds
+     *
+     * @param piMessage
+     * @param strValue
+     * @param eHeaderType
+     * @param strHeaderName
+     * @return
+     */
     virtual IMS_RESULT AddValueIfNotExists(IN IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull()) = 0;
+
+    /**
+     * @brief Generates
+     *
+     * @param strHost
+     * @param bAngleQuote
+     * @return
+     */
     virtual AString GenerateContentId(
             IN const AString& strHost, IN IMS_BOOL bAngleQuote = IMS_FALSE) = 0;
+
+    /**
+     * @brief Sets
+     *
+     * @param piMessage
+     * @param strContentId
+     * @param lstConfUser
+     * @param bMultiPart
+     * @param bCopyControl
+     * @return
+     */
     virtual IMS_RESULT SetResourceListByConfUser(IN_OUT IMessage* piMessage,
             IN const AString& strContentId, IN ImsList<ConfUser*>& lstConfUser,
             IN IMS_BOOL bMultiPart, IN IMS_BOOL bCopyControl = IMS_TRUE) = 0;
+
+    /**
+     * @brief Sets
+     *
+     * @param piMessage
+     * @param strContentId
+     * @param lstEntryUri
+     * @param bMultiPart
+     * @param bCopyControl
+     * @return
+     */
     virtual IMS_RESULT SetResourceListByEntryUri(IN_OUT IMessage* piMessage,
             IN const AString& strContentId, IN ImsList<AString>& lstEntryUri,
             IN IMS_BOOL bMultiPart, IN IMS_BOOL bCopyControl = IMS_TRUE) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param piMessage
+     * @return
+     */
     virtual IMS_BOOL IsVideoFeatureIncluded(IN const IMessage* piMessage) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param piMessage
+     * @return
+     */
     virtual IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @param piSession
+     * @param bPeerView
+     * @return
+     */
     virtual CallType GetCallType(
             IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @param bNegoSdp
+     * @param bPeerView
+     * @param bCheckPort
+     * @param //
+     * @param change
+     * @param of
+     * @return
+     */
     virtual CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp,
             IN IMS_BOOL bPeerView,
             IN IMS_BOOL bCheckPort = IMS_TRUE) = 0;  // TODO: change name of bPeerView
+
+    /**
+     * @brief Checks
+     *
+     * @param piSession
+     * @param nStatusCode
+     * @return
+     */
     virtual IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode) = 0;
 };
 

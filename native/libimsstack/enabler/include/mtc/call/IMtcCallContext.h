@@ -46,36 +46,196 @@ class IMtcCallContext : public IMtcContext
 public:
     virtual ~IMtcCallContext(){};
 
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINTP GetCallKey() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsHeldByMe() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
     virtual IMS_BOOL IsUssi() const = 0;
 
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual CallInfo& GetCallInfo() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ParticipantInfo& GetParticipantInfo() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @return
+     */
     virtual IMtcSession* GetSession(IN const ISession* piSession) const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcSession* GetSession() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcService& GetService() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcUiNotifier& GetUiNotifier() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcMediaManager& GetMediaManager() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcPreconditionManager& GetPreconditionManager() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual MtcTimerWrapper& GetTimer() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual MtcSupplementaryService& GetSupplementaryService() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual UpdatingInfo& GetUpdatingInfo() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual EpsFallbackTrigger& GetEpsFallbackTrigger() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual UdpKeepAliveSender& GetUdpKeepAliveSender() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual UssiController* GetUssiController() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual ImsList<IMtcCall*> GetOtherCalls() = 0;
 
+    /**
+     * @brief Sets
+     *
+     * @param bHeldByMe
+     */
     virtual void SetHeldByMe(IN IMS_BOOL bHeldByMe) = 0;
 
+    /**
+     * @brief Creates
+     *
+     * @param piSession
+     * @return
+     */
     virtual IMtcSession* CreateSession(IN ISession* piSession) = 0;
+
+    /**
+     * @brief Creates
+     *
+     * @return
+     */
     virtual IMtcSession* CreateSession() = 0;
+
+    /**
+     * @brief Creates
+     *
+     * @param lstRules
+     * @return
+     */
     virtual IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) = 0;
+
+    /**
+     * @brief Creates
+     *
+     * @return
+     */
     virtual JniCallInfo CreateJniCallInfo() = 0;
+
+    /**
+     * @brief Creates
+     *
+     * @param eMethod
+     * @return
+     */
     virtual ISipClientConnection* CreateClientConnection(IN SipMethod eMethod) = 0;
 
+    /**
+     * @brief Removes
+     *
+     * @param piSession
+     */
     virtual void RemoveSession(IN const ISession* piSession) = 0;
+
+    /**
+     * @brief Removes
+     *
+     * @param piActiveSession
+     */
     virtual void RemoveInactiveSessions(IN const ISession* piActiveSession) = 0;
+
+    /**
+     * @brief Deletes
+     *
+     */
     virtual void DeleteUpdatingInfo() = 0;
 };
 

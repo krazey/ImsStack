@@ -20,6 +20,10 @@
 class IConferenceOperationQueueListener
 {
 public:
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnOperationReady() = 0;
 };
 

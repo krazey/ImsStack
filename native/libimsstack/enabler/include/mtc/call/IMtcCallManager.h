@@ -32,37 +32,98 @@ public:
     virtual ~IMtcCallManager(){};
 
     // Creates a new call and starts to manage it. Returns the created call.
+
+    /**
+     * @brief Creates
+     *
+     * @param eServiceType
+     * @param objCallInfo
+     * @return
+     */
     virtual IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) = 0;
 
     // Deletes the call matching the given call key. Does nothing if the call doesn't exist.
+
+    /**
+     * @brief Removes
+     *
+     * @param nCallKey
+     */
     virtual void RemoveCall(IN CallKey nCallKey) = 0;
 
     // Returns a call matching the given call key.
     // Returns new `UnknownCall` instance if the call doesn't exist.
+
+    /**
+     * @brief Gets
+     *
+     * @param nCallKey
+     * @return
+     */
     virtual IMtcCall* GetCallByCallKey(IN CallKey nCallKey) = 0;
 
     // Returns a list of all calls.
     // The list is sorted in the order in which the calls were created.
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMSList<IMtcCall*> GetCalls() = 0;
 
     // Returns a list of all calls excluding a given one.
     // The list is sorted in the order in which the calls were created.
+
+    /**
+     * @brief Gets
+     *
+     * @param nExcludingCallKey
+     * @return
+     */
     virtual IMSList<IMtcCall*> GetCallsExcluding(IN CallKey nExcludingCallKey) = 0;
 
     // Returns a list of calls matching the given session type.
     // The list is sorted in the order in which the calls were created.
+
+    /**
+     * @brief Gets
+     *
+     * @param eCallType
+     * @return
+     */
     virtual IMSList<IMtcCall*> GetCallsByType(IN CallType eCallType) = 0;
 
     // Returns a list of calls matching the given service type.
     // The list is sorted in the order in which the calls were created.
+
+    /**
+     * @brief Gets
+     *
+     * @param eServiceType
+     * @return
+     */
     virtual IMSList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) = 0;
 
     // Returns a list of conference calls.
     // The list is sorted in the order in which the calls were created.
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMSList<IMtcCall*> GetCallsInConference() = 0;
 
     // Returns a list of calls that in the specific state.
     // The list is sorted in the order in which the calls were created.
+
+    /**
+     * @brief Gets
+     *
+     * @param eState
+     * @return
+     */
     virtual IMSList<IMtcCall*> GetCallsByState(IN State eState) = 0;
 };
 

@@ -24,9 +24,29 @@ class IJniMtcServiceThread : public IJniEnablerThread
 public:
     virtual ~IJniMtcServiceThread() {}
 
+    /**
+     * @brief Notifies
+     *
+     * @param eStatus
+     * @param eReason
+     */
     virtual void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param eStatus
+     * @param eReason
+     * @param eServiceType
+     */
     virtual void OnEmergencyServiceChanged(
             IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason, IN IMS_SINT32 eServiceType) = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param nCallKey
+     */
     virtual void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) = 0;
 };
 

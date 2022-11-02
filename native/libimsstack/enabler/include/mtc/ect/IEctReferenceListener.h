@@ -22,8 +22,23 @@
 class IEctReferenceListener
 {
 public:
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnReferenceStarted() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     */
     virtual void OnReferenceStartFailed() = 0;
+
+    /**
+     * @brief Notifies
+     *
+     * @param nSipFragCode
+     */
     virtual void OnReferenceUpdated(IN SipStatusCode nSipFragCode) = 0;
 };
 

@@ -24,9 +24,21 @@ class ISilentRedialHelper
 public:
     virtual ~ISilentRedialHelper() {}
 
+    /**
+     * @brief Redials
+     *
+     * @param nIntervalInMillis
+     * @return
+     */
     virtual IMS_RESULT Redial(IN IMS_SINT32 nIntervalInMillis = INTERVAL_BY_TYPE) = 0;
 
     // unit test purpose only
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMS_UINT32 GetType() = 0;
 
     static const IMS_SINT32 INTERVAL_BY_TYPE = -1;

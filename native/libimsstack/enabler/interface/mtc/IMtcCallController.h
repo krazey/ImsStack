@@ -94,67 +94,155 @@ public:
 
     // Accepts an incoming call.
     // - nIMSKey: Key of the call to be manipulated.
+
+    /**
+     * @brief Accepts
+     *
+     * @param nCallKey
+     * @param eCallType
+     * @param pMediaInfo
+     */
     virtual void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects an incoming call.
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
     // - pMediaInfo: `MediaInfo`
+
+    /**
+     * @brief Rejects
+     *
+     * @param nCallKey
+     * @param objReason
+     */
     virtual void Reject(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
     // Holds a call.
     // - nIMSKey: Key of the call to be manipulated.
     // - pMediaInfo: `MediaInfo`
+
+    /**
+     * @brief Holds
+     *
+     * @param nCallKey
+     * @param pMediaInfo
+     */
     virtual void Hold(IN CallKey nCallKey, IN MediaInfo* pMediaInfo) = 0;
 
     // Resumes a call.
     // - nIMSKey: Key of the call to be manipulated.
     // - pMediaInfo: `MediaInfo`
+
+    /**
+     * @brief Resumes
+     *
+     * @param nCallKey
+     * @param pMediaInfo
+     */
     virtual void Resume(IN CallKey nCallKey, IN MediaInfo* pMediaInfo) = 0;
 
     // Accepts the resume request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
     // - pMediaInfo: `MediaInfo`
+
+    /**
+     * @brief Accepts
+     *
+     * @param nCallKey
+     * @param eCallType
+     * @param pMediaInfo
+     */
     virtual void AcceptResume(
             IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects the resume request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
     // - objReason: Rejected reason.
+
+    /**
+     * @brief Rejects
+     *
+     * @param nCallKey
+     * @param objReason
+     */
     virtual void RejectResume(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
     // Terminates a call.
     // - nIMSKey: Key of the call to be manipulated.
     // - objReason: Terminate reason.
+
+    /**
+     * @brief Terminates
+     *
+     * @param nCallKey
+     * @param objReason
+     */
     virtual void Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
     // Modifies media parameters of a call.
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
     // - pMediaInfo: `MediaInfo`
+
+    /**
+     * @brief Updates
+     *
+     * @param nCallKey
+     * @param eCallType
+     * @param pMediaInfo
+     */
     virtual void Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Cancels the ongoing modification request.
     // - nIMSKey: Key of the call to be manipulated.
     // - objReason: Canceled reason.
+
+    /**
+     * @brief Cancels
+     *
+     * @param nCallKey
+     * @param objReason
+     */
     virtual void CancelUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
     // Accepts the modification request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
     // - pMediaInfo: `MediaInfo`
+
+    /**
+     * @brief Accepts
+     *
+     * @param nCallKey
+     * @param eCallType
+     * @param pMediaInfo
+     */
     virtual void AcceptUpdate(
             IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
 
     // Rejects the modification request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
     // - objReason: Rejected reason.
+
+    /**
+     * @brief Rejects
+     *
+     * @param nCallKey
+     * @param objReason
+     */
     virtual void RejectUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) = 0;
 
     // Sends USSD. Nothing happens if the specified call isn't a USSI session.
     // - nIMSKey: Key of the call to be manipulated.
     // - aStrUSSD: USSD string.
+
+    /**
+     * @brief Sends
+     *
+     * @param nCallKey
+     * @param strUssd
+     */
     virtual void SendUssd(IN CallKey nCallKey, IN const AString& strUssd) = 0;
 
     // Handles conference call related IMS messages.
@@ -164,15 +252,54 @@ public:
             IN IMSMap<SuppType, SuppService*>& objSuppServices);
     */
 
+    /**
+     * @brief Merges
+     *
+     * @param nCallKey
+     * @param objUsers
+     */
     virtual void MergeToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) = 0;
+
+    /**
+     * @brief Adds
+     *
+     * @param nCallKey
+     * @param objUsers
+     */
     virtual void AddToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) = 0;
+
+    /**
+     * @brief Removes
+     *
+     * @param nCallKey
+     * @param objUsers
+     */
     virtual void RemoveFromConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) = 0;
 
     // TODO: Consider ECT, SRVCC
+
+    /**
+     * @brief Transfers
+     *
+     * @param nCallKey
+     * @param strTarget
+     */
     virtual void Transfer(IN CallKey nCallKey, IN const AString& strTarget) = 0;
 
+    /**
+     * @brief Gets
+     *
+     * @param objContext
+     * @param objReason
+     * @return
+     */
     virtual ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) = 0;
+
+    /**
+     * @brief Releases
+     *
+     */
     virtual void ReleaseRedialHelper() = 0;
 };
 

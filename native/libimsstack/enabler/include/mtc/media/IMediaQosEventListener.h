@@ -27,6 +27,13 @@ class IMediaQosEventListener
 public:
     virtual ~IMediaQosEventListener(){};
 
+    /**
+     * @brief Notifies
+     *
+     * @param piSession
+     * @param eStatus
+     * @param eMediaType
+     */
     virtual void OnQosStatusChanged(
             IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) = 0;
 };
