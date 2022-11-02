@@ -42,7 +42,7 @@ public:
             m_bReady(IMS_FALSE),
             m_nCount(0),
             m_nIndexToRead(1),
-            m_objRecords(IMSList<ByteArray>())
+            m_objRecords(ImsList<ByteArray>())
     {
     }
     inline IsimEfContent(IN const IsimEfContent& other) :
@@ -96,7 +96,7 @@ public:
 
     inline IMS_SINT32 GetCount() const { return m_nCount; }
     inline IMS_SINT32 GetIndexToRead() const { return m_nIndexToRead; }
-    inline const IMSList<ByteArray>& GetRecords() const { return m_objRecords; }
+    inline const ImsList<ByteArray>& GetRecords() const { return m_objRecords; }
 
     inline IMS_SINT32 GetType() const { return m_nType; }
     inline IMS_BOOL IsAllRecordsReadCompleted() const
@@ -131,7 +131,7 @@ private:
     // For read operation (tracking the current index to read)
     IMS_SINT32 m_nIndexToRead;
     // Data of EF record
-    IMSList<ByteArray> m_objRecords;
+    ImsList<ByteArray> m_objRecords;
 };
 
 class OsIsimDigestAka : public IDigestAka
@@ -238,15 +238,16 @@ public:
     static const IMS_SINT32 NOTIFICATION_ISIM_AUTH = 105;
 
 private:
-    IMSList<IIsimListener*> m_objIsimListeners;
-    IMSList<OsIsimDigestAka*> m_objDigestAkas;
+    ImsList<IIsimListener*> m_objIsimListeners;
+    ImsList<OsIsimDigestAka*> m_objDigestAkas;
 
     IMS_BOOL m_bInitialized;
+    IMS_BOOL m_bReadFileAttributesInProgress;
     // ISIM interworking via Android Telephony Framework (using TelephonyManager)
     IThread* m_piOwnerThread;
     IMS_SINT32 m_nState;
     // <EF id, EF content>
-    IMSMap<IMS_SINT32, IsimEfContent> m_objEfContents;
+    ImsMap<IMS_SINT32, IsimEfContent> m_objEfContents;
 
     // Count of authentication failure
     enum

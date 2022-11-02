@@ -16,7 +16,6 @@
 #include "ServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
-#include "ServiceSystemTime.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
@@ -181,6 +180,8 @@ PUBLIC VIRTUAL IMS_BOOL SubscriberConfig::Init()
 
 PUBLIC VIRTUAL void SubscriberConfig::Refresh()
 {
+    IMS_TRACE_D("Refresh", 0, 0, 0);
+
     m_nSubscriptionAttributes = SUBSCRIPTION_ATTRIBUTE_IMS | SUBSCRIPTION_ATTRIBUTE_ISIM;
     m_bFlagRequestPending = IMS_FALSE;
     m_nConfiguredIsimRecords = ISIM_DONE;
@@ -207,12 +208,6 @@ PUBLIC VIRTUAL void SubscriberConfig::Refresh()
     SetState(STATE_INIT);
 
     UpdateAllConfigs(IMS_TRUE);
-
-    if (IsIsimSupported())
-    {
-        // FIXME: synchronization
-        IMS_SYS_Sleep(10);
-    }
 }
 
 PUBLIC
@@ -2376,6 +2371,10 @@ void SubscriberConfig::RefreshIsimProvisioning(IN IMS_BOOL bEnforceIsimRefresh)
                 // Reset the all items
                 ResetIsimRecord(m_nConfiguredIsimRecords);
                 ReadIsimProvisioning();
+            }
+            else if (m_piIsim->GetState() == IIsim::STATE_INIT)
+            {
+                StartProvisioning(IMS_TRUE);
             }
             else
             {
