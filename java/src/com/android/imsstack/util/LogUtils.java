@@ -20,6 +20,7 @@ public final class LogUtils {
     public static final int TRACE_OPTION_E = 0x00000002;
     public static final int TRACE_OPTION_I = 0x00000004;
 
+    // logcat + all levels(D / E / I / TEXT)
     public static final String DEFAULT_LOG_OPTIONS = "0x0001000F";
 
     /**

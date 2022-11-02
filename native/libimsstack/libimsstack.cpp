@@ -24,35 +24,19 @@
 #include <utils/Log.h>
 #include <nativehelper/JNIHelp.h>
 
-#if defined(ALOGD)
-#define IMS_LOGD            ALOGD
-#elif defined(LOGD)
-#define IMS_LOGD            LOGD
-#else
-#warning LOGD macro is not defined
-#endif
-
-#if defined(ALOGE)
-#define IMS_LOGE            ALOGE
-#elif defined(LOGE)
-#define IMS_LOGE            LOGE
-#else
-#warning LOGE macro is not defined
-#endif
-
 extern jint IMSInterface_OnLoad(JavaVM* vm, JNIEnv* env);
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
     (void) reserved;
 
-    IMS_LOGD("JNI_OnLoad: libimsstack");
+    ALOGD("JNI_OnLoad");
 
     JNIEnv* env = NULL;
 
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK)
     {
-        IMS_LOGE("JNI_OnLoad: GetEnv failed");
+        ALOGE("JNI_OnLoad: GetEnv failed");
         return (-1);
     }
 
@@ -60,7 +44,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     if (IMSInterface_OnLoad(vm, env) < 0)
     {
-        IMS_LOGE("JNI_OnLoad: IMSInterface_OnLoad failed");
+        ALOGE("JNI_OnLoad: IMSInterface_OnLoad failed");
         return (-1);
     }
 

@@ -35,7 +35,7 @@ public:
     inline IMS_UINT32 GetTraceModule() const { return m_nTraceModule; }
 
 protected:
-    inline IMS_BOOL ReadFrom() override { return IMS_TRUE; }
+    IMS_BOOL ReadFrom() override;
 
 private:
     IMS_UINT32 m_nTraceOption;

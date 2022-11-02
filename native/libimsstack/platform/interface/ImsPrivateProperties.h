@@ -68,6 +68,11 @@ public:
         static const IMS_CHAR KEY_CONFIG_IMPI[];
         static const IMS_CHAR KEY_CONFIG_IMPU_LIST[];
         static const IMS_CHAR KEY_CONFIG_HOME_DOMAIN_NAME[];
+
+        /**
+         * Test configurations.
+         */
+        static const IMS_CHAR KEY_TEST_LOG_OPTIONS[];
     };
 };
 

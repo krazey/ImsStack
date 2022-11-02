@@ -36,6 +36,7 @@ public:
     const IMS_CHAR* GetFileName(
             IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) const;
     const ImsTraceTag& GetTraceTag(IN IMS_SINT32 nTag) const;
+    IMS_UINT32 GetOption() const;
     void SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule);
     void PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
             IN const IMS_CHAR* pszFormat, IN const IMS_CHAR* pszFileName, IN IMS_UINT32 nLine,
