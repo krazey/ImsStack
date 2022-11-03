@@ -111,7 +111,6 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT:
             return HandleRedialByNetworkContext();
-            break;
     }
 
     return CallReasonInfo(nReason, nExtraCode);
