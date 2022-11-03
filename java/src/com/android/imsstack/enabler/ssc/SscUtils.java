@@ -35,7 +35,7 @@ import java.util.Locale;
  * Provides the APIs for obtaining optimized data
  */
 public class SscUtils {
-    private static SscUtils sSscUtils = new SscUtils();
+    private static final SscUtils sSscUtils = new SscUtils();
     protected static SscUtils getInstance() {
         return sSscUtils;
     }

@@ -31,11 +31,11 @@ public class SscXmlFormat {
         private String mNsSsPrefix = "";
         private String mNsCpPrefix = "";
         // namespace, tag name
-        private HashMap<String, String> mTags = new HashMap<>();
+        private final HashMap<String, String> mTags = new HashMap<>();
         // service name, condition, rule ID for audio
-        private HashMap<String, HashMap<Integer, String>> mAudioRuleIds = new HashMap<>();
+        private final HashMap<String, HashMap<Integer, String>> mAudioRuleIds = new HashMap<>();
         // service name, condition, rule ID for video
-        private HashMap<String, HashMap<Integer, String>> mVideoRuleIds = new HashMap<>();
+        private final HashMap<String, HashMap<Integer, String>> mVideoRuleIds = new HashMap<>();
 
         /**
          * mCfProvisionStatus and mCbProvisionStatus are used to check whether the conditions are
@@ -43,8 +43,8 @@ public class SscXmlFormat {
          * v9.0. If not provisioned, UE will not create rule element for condition.
          * The params consist of condition and provisioned status
          */
-        private HashMap<Integer, Boolean> mCfProvisionStatus = new HashMap<>();
-        private HashMap<Integer, Boolean> mCbProvisionStatus = new HashMap<>();
+        private final HashMap<Integer, Boolean> mCfProvisionStatus = new HashMap<>();
+        private final HashMap<Integer, Boolean> mCbProvisionStatus = new HashMap<>();
 
         /**
          * mCfMediaCapability and mCbMediaCapability are used to check whether the media
@@ -53,8 +53,8 @@ public class SscXmlFormat {
          * media type.
          * The params consist of media type and status
          */
-        private HashMap<Integer, Boolean> mCfMediaCapability = new HashMap<>();
-        private HashMap<Integer, Boolean> mCbMediaCapability = new HashMap<>();
+        private final HashMap<Integer, Boolean> mCfMediaCapability = new HashMap<>();
+        private final HashMap<Integer, Boolean> mCbMediaCapability = new HashMap<>();
 
         private XcapServerFormat() {
             mCfProvisionStatus.put(SscConstant.CONDITION_CFU, true);

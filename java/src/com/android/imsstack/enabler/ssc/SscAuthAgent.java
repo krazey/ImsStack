@@ -33,12 +33,12 @@ public class SscAuthAgent implements ISscAuthAgent {
     private String mETag = "";
 
     private boolean mIsCredentialInfoUpdated = false;
-    private SSCAuthCredentials mSSCAuthCredentials;
+    private final SscAuthCredentials mSscAuthCredentials;
 
     private SscAuthAgent(int slotId) {
         ImsLog.d(slotId, "");
         mSlotId = slotId;
-        mSSCAuthCredentials = new SSCAuthCredentials();
+        mSscAuthCredentials = new SscAuthCredentials();
     }
 
     public static ISscAuthAgent getInstance(int slotId) {
@@ -52,24 +52,24 @@ public class SscAuthAgent implements ISscAuthAgent {
     public boolean calculateResponse(String method, String uri, String body) {
         ImsLog.d("");
 
-        mSSCAuthCredentials.setUri(uri);
-        return mSSCAuthCredentials.calculateResponse(method, body);
+        mSscAuthCredentials.setUri(uri);
+        return mSscAuthCredentials.calculateResponse(method, body);
     }
 
     @Override
     public String getCredentialInfoString() {
-        return mSSCAuthCredentials.getAuthInfoString();
+        return mSscAuthCredentials.getAuthInfoString();
     }
 
     @Override
     public String getRealm() {
-        return mSSCAuthCredentials.getRealm();
+        return mSscAuthCredentials.getRealm();
     }
 
     @Override
     public void setGbaKeys(String username, String password) {
-        mSSCAuthCredentials.setUsername(username);
-        mSSCAuthCredentials.setPassword(password);
+        mSscAuthCredentials.setUsername(username);
+        mSscAuthCredentials.setPassword(password);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class SscAuthAgent implements ISscAuthAgent {
 
     @Override
     public String getNafFqdnFromRealm() {
-        String realm = mSSCAuthCredentials.getRealm();
+        String realm = mSscAuthCredentials.getRealm();
         if (TextUtils.isEmpty(realm) == true) {
             ImsLog.d("realm is invalid");
             return null;
@@ -129,44 +129,40 @@ public class SscAuthAgent implements ISscAuthAgent {
 
         String[] tokens = tmp.split(",");
 
-        for (int i = 0; i < tokens.length; ++i) {
-            String[] nameValue = tokens[i].split("=");
-            for (int j = 0; j < nameValue.length ; j++) {
-                ImsLog.d("nameValue[" + j + "] : " + nameValue[j]);
-            }
-
+        for (String token : tokens) {
+            String[] nameValue = token.split("=");
             if ("realm".equalsIgnoreCase(nameValue[0])) {
                 String temp_realm = nameValue[1].replaceAll("\"", "");
-                String realm_send[] = temp_realm.split(";");
-                mSSCAuthCredentials.setRealm(realm_send[0]);
+                String[] realm_send = temp_realm.split(";");
+                mSscAuthCredentials.setRealm(realm_send[0]);
                 ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
-                        + ", getRealm() : " + mSSCAuthCredentials.getRealm());
+                        + ", getRealm() : " + mSscAuthCredentials.getRealm());
             } else if ("nonce".equalsIgnoreCase(nameValue[0])) {
-                String temp_nonce = tokens[i].replaceAll("(?i)nonce=","");
-                mSSCAuthCredentials.setNonce(temp_nonce.replaceAll("\"",""));
+                String temp_nonce = token.replaceAll("(?i)nonce=", "");
+                mSscAuthCredentials.setNonce(temp_nonce.replaceAll("\"", ""));
                 ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
-                        + ", getNonce() : " + mSSCAuthCredentials.getNonce());
+                        + ", getNonce() : " + mSscAuthCredentials.getNonce());
             } else if ("nextnonce".equalsIgnoreCase(nameValue[0])) {
                 // nonce can include '=' character...
-                nameValue[1] = tokens[i].replaceAll(nameValue[0] + "=", "");
-                mSSCAuthCredentials.setNonce(nameValue[1].replaceAll("\"", ""));
+                nameValue[1] = token.replaceAll(nameValue[0] + "=", "");
+                mSscAuthCredentials.setNonce(nameValue[1].replaceAll("\"", ""));
                 ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
-                        + ", getNonce() : " + mSSCAuthCredentials.getNonce());
+                        + ", getNonce() : " + mSscAuthCredentials.getNonce());
             } else if ("qop".equalsIgnoreCase(nameValue[0])) {
-                mSSCAuthCredentials.setQop(nameValue[1].replaceAll("\"", ""));
-                mSSCAuthCredentials.setQopExist(true);
+                mSscAuthCredentials.setQop(nameValue[1].replaceAll("\"", ""));
+                mSscAuthCredentials.setQopExist(true);
                 ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
-                        + ", getQos() : " + mSSCAuthCredentials.getQop()
-                        + ", isQopExist : " + mSSCAuthCredentials.isQopExist());
+                        + ", getQos() : " + mSscAuthCredentials.getQop()
+                        + ", isQopExist : " + mSscAuthCredentials.isQopExist());
             } else if ("opaque".equalsIgnoreCase(nameValue[0])) {
-                nameValue[1] = tokens[i].replaceAll("opaque=", "");
-                mSSCAuthCredentials.setOpaque(nameValue[1].replaceAll("\"", ""));
+                nameValue[1] = token.replaceAll("opaque=", "");
+                mSscAuthCredentials.setOpaque(nameValue[1].replaceAll("\"", ""));
                 ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
-                        + ", getOpaque() : " + mSSCAuthCredentials.getOpaque());
+                        + ", getOpaque() : " + mSscAuthCredentials.getOpaque());
             } else if ("algorithm".equalsIgnoreCase(nameValue[0])) {
-                mSSCAuthCredentials.setAlgorithm(nameValue[1].replaceAll("\"", ""));
+                mSscAuthCredentials.setAlgorithm(nameValue[1].replaceAll("\"", ""));
                 ImsLog.d("nameValue :" + nameValue[0] + "/" + nameValue[1]
-                        + ", getAlgorithm() : " + mSSCAuthCredentials.getAlgorithm());
+                        + ", getAlgorithm() : " + mSscAuthCredentials.getAlgorithm());
             }
         }
 
@@ -181,7 +177,7 @@ public class SscAuthAgent implements ISscAuthAgent {
 
         if (!mIsCredentialInfoUpdated) {
             mCipherSuite = "";
-            mSSCAuthCredentials.clear();
+            mSscAuthCredentials.clear();
         }
     }
 
@@ -190,7 +186,7 @@ public class SscAuthAgent implements ISscAuthAgent {
         return mIsCredentialInfoUpdated;
     }
 
-    private class SSCAuthCredentials {
+    private static class SscAuthCredentials {
         private String mUsername = null;
         private String mPassword = null;
         private String mRealm = null;

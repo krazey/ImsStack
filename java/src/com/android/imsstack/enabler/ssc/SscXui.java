@@ -26,7 +26,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.Locale;
 
 public class SscXui {
-    private static SscXui sSscXui = new SscXui();
+    private static final SscXui sSscXui = new SscXui();
 
     @VisibleForTesting
     protected static final String IMPU_FILE_NAME = "impu_list";
