@@ -322,6 +322,17 @@ protected:
     {
         return m_pAosHandleMtc->GetVideoBlockReasonForIpcan();
     }
+
+    IMS_BOOL IsHoldingBlockForMobile(IN IMS_UINT32 nBlock)
+    {
+        return m_pAosHandleMtc->AosHandle::IsHandleBlocked(
+                m_pAosHandleMtc->m_nHoldingBlocksForMobile, nBlock);
+    }
+
+    void AddHoldingBlockForMobile(IN IMS_UINT32 nBlock)
+    {
+        m_pAosHandleMtc->AddBlock(nBlock, m_pAosHandleMtc->m_nHoldingBlocksForMobile);
+    }
 };
 
 TEST_F(AosHandleMtcTest, Constructor)
@@ -1724,6 +1735,94 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test8)
     SetNetworkType(NW_REPORT_RADIO_LTE);
     ProcessNetworkChanged();
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+}
+
+TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test9)
+{
+    // Test9: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=3G
+    // Data not connected / epdg not enabled
+    // Expectation: Hold block network on 3G but LTE
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    SetCapabilities(objCapabilities);
+    SetNetworkType(NW_REPORT_RADIO_WCDMA);
+    SetDataConnected(IMS_FALSE);
+    SetEpdgEnabled(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    ProcessNetworkChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_NETWORK));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    ProcessNetworkChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_NETWORK));
+}
+
+TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test10)
+{
+    // Test10: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=WLAN
+    // Epdg enabled
+    // Expectation: Holding block network is maintained on WLAN
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::VOICE) |
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+    objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    SetCapabilities(objCapabilities);
+    SetNetworkType(NW_REPORT_RADIO_WLAN);
+    SetEpdgEnabled(IMS_TRUE);
+    AddHoldingBlockForMobile(AosHandle::BLOCK_NETWORK);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsAvailableWithoutVoiceCapability())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    ProcessNetworkChanged();
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_NETWORK));
 }
 
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test1)

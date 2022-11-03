@@ -399,9 +399,13 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
 {
     if (IsSupportedNetworkType(m_nNetworkType))
     {
-        if (AosHandle::IsHandleBlocked(BLOCK_NETWORK))
+        if (!IsEpdgEnabled())
         {
-            ProcessBlock(BLOCK_NETWORK, IMS_FALSE);
+            if (AosHandle::IsHandleBlocked(BLOCK_NETWORK) ||
+                    AosHandle::IsHandleBlocked(m_nHoldingBlocksForMobile, BLOCK_NETWORK))
+            {
+                ProcessBlock(BLOCK_NETWORK, IMS_FALSE);
+            }
         }
 
         IMS_BOOL bIsVoiceCapable =
