@@ -141,6 +141,10 @@ public:
         return m_objPreconditionManager;
     }
     inline UssiController* GetUssiController() override { return m_pUssiController; }
+    inline MtcPendingOperationHolder& GetPendingOperationHolder() override
+    {
+        return m_objPendingOperationHolder;
+    }
     inline IMtcCall& GetCall() override { return *(IMtcCall*)this; }
     inline ImsList<IMtcCall*> GetOtherCalls() override
     {
@@ -157,6 +161,7 @@ public:
     void RemoveSession(IN const ISession* piSession) override;
     void RemoveInactiveSessions(IN const ISession* piActiveSession) override;
     void DeleteUpdatingInfo() override;
+    void RunPendingOperationIfPossible() override;
 
     inline MtcTimerWrapper& GetTimer() override { return m_objTimer; }
     inline MtcSupplementaryService& GetSupplementaryService() override
@@ -272,8 +277,6 @@ public:
             IN IMS_UINT32 eAosReason) override;
     void OnIpcanChanged(IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan) override;
 
-    void RunPendingOperationIfPossible();
-
 private:
     static IMutex* s_pKeyCreationLock;
 
@@ -287,7 +290,6 @@ private:
     CallKey m_nKey;
 
     IMS_BOOL m_bHeldByMe;
-    IMS_BOOL m_bRunningPendingOperation;
 
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;

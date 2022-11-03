@@ -26,6 +26,7 @@
 #include "call/IMtcSession.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCall.h"
+#include "call/MtcPendingOperationHolder.h"
 #include "call/NullCall.h"
 #include "call/state/MockIMtcCallState.h"
 #include "call/state/MockMtcCallStateMachine.h"
@@ -401,77 +402,6 @@ TEST_F(MtcCallTest, HoldFailsIfMediaInfoIsNull)
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     objCall.Hold(pMediaInfo);
-}
-
-TEST_F(MtcCallTest, HoldIsPendedInUpdatingState)
-{
-    MediaInfo* pMediaInfo = new MediaInfo();
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::UPDATING));
-    EXPECT_CALL(*pState, Hold(_)).Times(0);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.Hold(pMediaInfo);
-}
-
-TEST_F(MtcCallTest, HoldIsNotPendedInEstablishedState)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::ESTABLISHED));
-
-    EXPECT_CALL(*pState, Hold(_)).Times(1).WillRepeatedly(Return(CallStateName::ESTABLISHED));
-
-    MediaInfo objMediaInfo;
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    objCall.Hold(&objMediaInfo);
-}
-
-TEST_F(MtcCallTest, HoldIsPendedIfSessionIsRefreshing)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::ESTABLISHED));
-
-    MockISession objSession;
-    ON_CALL(objSession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
-    EXPECT_CALL(*pState, Hold(_)).Times(0);
-
-    MediaInfo objMediaInfo;
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-    objCall.CreateSession(&objSession);
-    objCall.Hold(&objMediaInfo);
-}
-
-TEST_F(MtcCallTest, RunPendingOperationByRefreshCompleted)
-{
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    ON_CALL(*pState, GetStateName).WillByDefault(Return(CallStateName::ESTABLISHED));
-    ON_CALL(*pState, Refresh_NotifyCompleted(_)).WillByDefault(Return(CallStateName::ESTABLISHED));
-
-    MockISession objSession;
-    EXPECT_CALL(objSession, IsSessionRefreshInProgress)
-            .Times(2)
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
-
-    EXPECT_CALL(*pState, Hold(_)).Times(1).WillRepeatedly(Return(CallStateName::ESTABLISHED));
-
-    MediaInfo objMediaInfo;
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    std::function<void()> objOperation = [&]()
-    {
-        return objCall.RunPendingOperationIfPossible();
-    };
-    OperationAsyncRunner* pRunner = new OperationAsyncRunner(objOperation);
-    ON_CALL(objContext, GetAsyncRunner(_)).WillByDefault(Return(pRunner));
-
-    objCall.CreateSession(&objSession);
-    objCall.Hold(&objMediaInfo);
-    objCall.Refresh_NotifyCompleted(reinterpret_cast<ISipClientConnection*>(0x1));
-    ImsMessage objMessage(0, 0, 0);
-    pRunner->OnMessage(objMessage);
 }
 
 TEST_F(MtcCallTest, ResumeCallsState)
@@ -858,6 +788,13 @@ TEST_F(MtcCallTest, GetUssiControllerInitiallyReturnsNull)
     EXPECT_EQ(nullptr, objCall.GetUssiController());
 }
 
+TEST_F(MtcCallTest, GetPendingOperationHolderReturnsNotNull)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    EXPECT_NE(nullptr, &objCall.GetPendingOperationHolder());
+}
+
 TEST_F(MtcCallTest, GetOtherCallsReturnsExcludingMe)
 {
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
@@ -940,6 +877,16 @@ TEST_F(MtcCallTest, CreateSessionCreatesMtcSession)
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
     EXPECT_NE(nullptr, objCall.CreateSession(&objSession));
+}
+
+TEST_F(MtcCallTest, CreateSessionGetsISessionFromInterfaceFactory)
+{
+    EXPECT_CALL(*pSessionInterfaceHolder, GetISession(_, _, _));
+
+    MockIMtcCallState* pState = new MockIMtcCallState();
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
+
+    objCall.CreateSession();
 }
 
 TEST_F(MtcCallTest, CreateBlockCheckerReturnsNotNull)

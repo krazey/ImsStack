@@ -30,15 +30,16 @@ class IMtcBlockRule;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
 class IMtcService;
+class IMtcSession;
+class IMtcUiNotifier;
 class ISession;
 class ISipClientConnection;
-class IMtcSession;
+class MtcPendingOperationHolder;
 class MtcSupplementaryService;
 class MtcTimerWrapper;
-class IMtcUiNotifier;
 class ParticipantInfo;
-class UpdatingInfo;
 class UdpKeepAliveSender;
+class UpdatingInfo;
 class UssiController;
 
 class IMtcCallContext : public IMtcContext
@@ -171,6 +172,13 @@ public:
      *
      * @return
      */
+    virtual MtcPendingOperationHolder& GetPendingOperationHolder() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcCall& GetCall() = 0;
 
     /**
@@ -243,6 +251,12 @@ public:
      *
      */
     virtual void DeleteUpdatingInfo() = 0;
+
+    /**
+     * @brief
+     *
+     */
+    virtual void RunPendingOperationIfPossible() = 0;
 };
 
 #endif

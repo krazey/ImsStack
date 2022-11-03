@@ -19,7 +19,9 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
+#include "call/MockMtcPendingOperationHolder.h"
 #include "call/state/AlertingState.h"
+#include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallState.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -468,6 +470,18 @@ TEST_F(AlertingStateTest, OnMediaFailed)
     EXPECT_CALL(objMtcSession, Reject(CallReasonInfo(CODE_MEDIA_INIT_FAILED))).Times(1);
 
     pAlertingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+}
+
+TEST_F(AlertingStateTest, OnIpcanChangedPushesPendingOperation)
+{
+    MockMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    IMS_UINT32 eIpcan = 1;
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+
+    pAlertingState->OnIpcanChanged(eIpcan);
 }
 
 TEST_F(AlertingStateTest, TerminateInvokesTerminate)

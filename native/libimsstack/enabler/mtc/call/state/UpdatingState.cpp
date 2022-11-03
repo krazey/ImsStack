@@ -19,7 +19,9 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
+#include "call/MtcPendingOperationHolder.h"
 #include "call/UpdatingInfo.h"
+#include "call/state/IMtcCallState.h"
 #include "call/state/UpdatingState.h"
 #include "call/termination/TerminationHandler.h"
 #include "call/termination/UpdateErrorHandler.h"
@@ -52,6 +54,36 @@ PUBLIC VIRTUAL void UpdatingState::OnExit()
         m_objContext.GetSession()->Update(UpdateType::REFRESH, IMS_FALSE, SipMethod::INVALID);
     }
     m_objContext.DeleteUpdatingInfo();
+}
+
+PUBLIC VIRTUAL CallStateName UpdatingState::Hold(IN MediaInfo* pMediaInfo)
+{
+    m_objContext.GetPendingOperationHolder().PushPendingOperation(
+            [pMediaInfo](IMtcCallState* pState)
+            {
+                return pState->Hold(pMediaInfo);
+            });
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName UpdatingState::Resume(IN MediaInfo* pMediaInfo)
+{
+    m_objContext.GetPendingOperationHolder().PushPendingOperation(
+            [pMediaInfo](IMtcCallState* pState)
+            {
+                return pState->Resume(pMediaInfo);
+            });
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName UpdatingState::Update(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+{
+    m_objContext.GetPendingOperationHolder().PushPendingOperation(
+            [=](IMtcCallState* pState)
+            {
+                return pState->Update(eCallType, pMediaInfo);
+            });
+    return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
@@ -278,6 +310,16 @@ PUBLIC VIRTUAL CallStateName UpdatingState::QosReserveFailed(
         // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
     }
 
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName UpdatingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
+{
+    m_objContext.GetPendingOperationHolder().PushPendingOperation(
+            [eIpcan](IMtcCallState* pState)
+            {
+                return pState->OnIpcanChanged(eIpcan);
+            });
     return GetStateName();
 }
 

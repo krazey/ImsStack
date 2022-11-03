@@ -52,7 +52,6 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objService(objService),
         m_nKey(CreateCallKey()),
         m_bHeldByMe(IMS_FALSE),
-        m_bRunningPendingOperation(IMS_FALSE),
         m_objCallInfo(objCallInfo),
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
@@ -252,16 +251,6 @@ PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo* pMediaInfo)
         return;
     }
 
-    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
-    {
-        m_objPendingOperationHolder.PushPendingOperation(
-                [pMediaInfo](IMtcCallState* pState)
-                {
-                    return pState->Hold(pMediaInfo);
-                });
-        return;
-    }
-
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
@@ -276,16 +265,6 @@ PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo* pMediaInfo)
     if (pMediaInfo == IMS_NULL)
     {
         OnInternalFailure();
-        return;
-    }
-
-    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
-    {
-        m_objPendingOperationHolder.PushPendingOperation(
-                [pMediaInfo](IMtcCallState* pState)
-                {
-                    return pState->Resume(pMediaInfo);
-                });
         return;
     }
 
@@ -331,16 +310,6 @@ PUBLIC VIRTUAL void MtcCall::Update(IN CallType eCallType, IN MediaInfo* pMediaI
     if (pMediaInfo == IMS_NULL)
     {
         OnInternalFailure();
-        return;
-    }
-
-    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
-    {
-        m_objPendingOperationHolder.PushPendingOperation(
-                [eCallType, pMediaInfo](IMtcCallState* pState)
-                {
-                    return pState->Update(eCallType, pMediaInfo);
-                });
         return;
     }
 
@@ -625,6 +594,15 @@ PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
 {
     delete m_pUpdatingInfo;
     m_pUpdatingInfo = IMS_NULL;
+}
+
+PUBLIC VIRTUAL void MtcCall::RunPendingOperationIfPossible()
+{
+    if (m_objPendingOperationHolder.HasPendingOperation())
+    {
+        IMS_TRACE_I("RunPendingOperationIfPossible : key[%d]", m_nKey, 0, 0);
+        m_objStateMachine.RunStateOperation(m_objPendingOperationHolder.PopPendingOperation());
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::SessionAlerting(IN ISession* piSession)
@@ -1053,8 +1031,6 @@ PUBLIC VIRTUAL void MtcCall::Refresh_NotifyCompleted(IN ISipClientConnection* pi
             {
                 return pState->Refresh_NotifyCompleted(piScc);
             });
-
-    RunPendingOperationIfPossible();
 }
 
 PUBLIC VIRTUAL void MtcCall::Refresh_NotifyTerminated()
@@ -1140,7 +1116,6 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
             "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
     GetCallStateProxy().UpdateCallState(m_nKey, eState, GetCallType(), m_objCallInfo.bEmergency);
-    RunPendingOperationIfPossible();
 }
 
 PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
@@ -1294,16 +1269,6 @@ PUBLIC VIRTUAL void MtcCall::OnIpcanChanged(IN IMtcService& /*objMtcService*/, I
 {
     IMS_TRACE_I("OnIpcanChanged IpCan[%d]", 0, 0, 0);
 
-    if (m_objPendingOperationHolder.IsNeedToAdd(GetState(), *this))
-    {
-        m_objPendingOperationHolder.PushPendingOperation(
-                [&](IMtcCallState* pState)
-                {
-                    return pState->OnIpcanChanged(eIpcan);
-                });
-        return;
-    }
-
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
@@ -1311,49 +1276,18 @@ PUBLIC VIRTUAL void MtcCall::OnIpcanChanged(IN IMtcService& /*objMtcService*/, I
             });
 }
 
-PUBLIC void MtcCall::RunPendingOperationIfPossible()
-{
-    IMS_TRACE_I(
-            "RunPendingOperationIfPossible : state[%d]", static_cast<IMS_SINT32>(GetState()), 0, 0);
-
-    if (GetState() == CallStateName::ESTABLISHED && !m_bRunningPendingOperation)
-    {
-        m_bRunningPendingOperation = IMS_TRUE;
-
-        while (m_objPendingOperationHolder.HasPendingOperation() &&
-                GetState() == CallStateName::ESTABLISHED)
-        {
-            if (m_objPendingOperationHolder.IsNeedToAdd(CallStateName::ESTABLISHED, *this))
-            {
-                m_objContext.GetAsyncRunner(
-                        [&]()
-                        {
-                            return RunPendingOperationIfPossible();
-                        });
-                break;
-            }
-            else
-            {
-                m_objStateMachine.RunStateOperation(
-                        m_objPendingOperationHolder.PopPendingOperation());
-            }
-        }
-        m_bRunningPendingOperation = IMS_FALSE;
-    }
-}
-
 PRIVATE
 CallKey MtcCall::CreateCallKey()
 {
     LockGuard objLock(s_pKeyCreationLock);
-    static CallKey nKey = 0;
+    static CallKey s_nKey = 0;
 
-    nKey += 1;
-    if (nKey == CALL_KEY_INVALID)
+    s_nKey += 1;
+    if (s_nKey == CALL_KEY_INVALID)
     {
-        nKey += 1;
+        s_nKey += 1;
     }
-    return nKey;
+    return s_nKey;
 }
 
 PRIVATE

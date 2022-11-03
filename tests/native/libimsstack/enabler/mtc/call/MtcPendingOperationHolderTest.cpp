@@ -62,23 +62,6 @@ protected:
     }
 };
 
-TEST_F(MtcPendingOperationHolderTest, IsNeedToAdd)
-{
-    EXPECT_CALL(objMockISession, IsSessionRefreshInProgress)
-            .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    EXPECT_TRUE(
-            pMtcPendingOperationHolder->IsNeedToAdd(IMtcCall::State::ESTABLISHED, objMockContext));
-    EXPECT_FALSE(
-            pMtcPendingOperationHolder->IsNeedToAdd(IMtcCall::State::ESTABLISHED, objMockContext));
-    EXPECT_TRUE(pMtcPendingOperationHolder->IsNeedToAdd(IMtcCall::State::UPDATING, objMockContext));
-    EXPECT_TRUE(pMtcPendingOperationHolder->IsNeedToAdd(IMtcCall::State::OUTGOING, objMockContext));
-    EXPECT_TRUE(pMtcPendingOperationHolder->IsNeedToAdd(IMtcCall::State::ALERTING, objMockContext));
-    EXPECT_TRUE(pMtcPendingOperationHolder->IsNeedToAdd(IMtcCall::State::INCOMING, objMockContext));
-}
-
 TEST_F(MtcPendingOperationHolderTest, PushPendingOperation_PopPendingOperation)
 {
     EXPECT_FALSE(pMtcPendingOperationHolder->HasPendingOperation());

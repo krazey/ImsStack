@@ -51,13 +51,11 @@ public:
     CallStateName SessionPRAckReceived(IN ISession* piSession) override;
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
     CallStateName SessionStartFailed(IN ISession* piSession) override;
-
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
-
     CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
-
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
+    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;

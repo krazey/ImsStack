@@ -27,22 +27,23 @@
 class EpsFallbackTrigger;
 class IMtcBlockChecker;
 class IMtcBlockRule;
+class IMtcCallTrafficChecker;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
 class IMtcService;
+class IMtcSession;
+class IMtcUiNotifier;
 class ISession;
 class ISipClientConnection;
-class IMtcSession;
 class MessageUtils;
+class MtcPendingOperationHolder;
 class MtcSupplementaryService;
 class MtcTimerWrapper;
-class IMtcUiNotifier;
 class OperationAsyncRunner;
 class ParticipantInfo;
 class UdpKeepAliveSender;
 class UpdatingInfo;
 class UssiController;
-class IMtcCallTrafficChecker;
 struct CallInfo;
 
 class MockIMtcCallContext : public IMtcCallContext
@@ -67,6 +68,7 @@ public:
     MOCK_METHOD(EpsFallbackTrigger&, GetEpsFallbackTrigger, (), (override));
     MOCK_METHOD(UdpKeepAliveSender&, GetUdpKeepAliveSender, (), (override));
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
+    MOCK_METHOD(MtcPendingOperationHolder&, GetPendingOperationHolder, (), (override));
     MOCK_METHOD(IMtcCall&, GetCall, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
@@ -79,6 +81,7 @@ public:
     MOCK_METHOD(void, RemoveSession, (IN const ISession* piSession), (override));
     MOCK_METHOD(void, RemoveInactiveSessions, (IN const ISession* piActiveSession), (override));
     MOCK_METHOD(void, DeleteUpdatingInfo, (), (override));
+    MOCK_METHOD(void, RunPendingOperationIfPossible, (), (override));
 
     // IMtcContext
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (override));

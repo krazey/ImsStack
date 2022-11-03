@@ -67,6 +67,7 @@ public:
     CallStateName OnReceivingNetworkToneStarted() override;
     CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
+    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
