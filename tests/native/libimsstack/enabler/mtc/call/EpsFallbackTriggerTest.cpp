@@ -234,7 +234,8 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTermin
     ON_CALL(objManager, GetCallByCallKey(nAnyKey)).WillByDefault(Return(&objCall));
 
     EXPECT_CALL(objCall,
-            Terminate(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE)));
+            Terminate(CallReasonInfo(
+                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL)));
 
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_FAILED));
 

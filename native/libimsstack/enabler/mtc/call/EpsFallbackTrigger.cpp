@@ -139,7 +139,8 @@ PUBLIC VIRTUAL void EpsFallbackTrigger::Timer_TimerExpired(IN ITimer* piTimer)
 
         m_objContext.GetCallManager()
                 .GetCallByCallKey(m_objContext.GetCallKey())
-                ->Terminate(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+                ->Terminate(CallReasonInfo(
+                        CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
         m_objContext.GetService().GetAosConnector()->NotifyEpsfbCallState(
                 IImsAosInfo::EPSFB_CALL_FAILED);
     }
