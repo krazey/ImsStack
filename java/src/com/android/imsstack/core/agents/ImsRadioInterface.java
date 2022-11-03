@@ -60,7 +60,7 @@ public interface ImsRadioInterface extends IAgent {
     }
 
     /**
-     * Ims traffic type
+     * IMS traffic type
      */
     int TRAFFIC_TYPE_EMERGENCY = 1;
     int TRAFFIC_TYPE_EMERGENCY_SMS = 2;
@@ -100,6 +100,19 @@ public interface ImsRadioInterface extends IAgent {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AccessNetworkType {}
+
+    /**
+     * IMS traffic direction
+     */
+    int DIRECTION_MO = 0;
+    int DIRECTION_MT = 1;
+
+    @IntDef(value = {
+        DIRECTION_MO,
+        DIRECTION_MT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Direction {}
 
     /**
      * Connection failure reason
@@ -157,8 +170,15 @@ public interface ImsRadioInterface extends IAgent {
      * @param trafficType The type for IMS traffic (@see TRAFFIC_TYPE_XXX)
      * @param accessNetworkType The type for radio access network type
      *                          (@see ACCESS_NETWORK_TYPE_XXX)
+     * @param direction The direction for IMS traffic (@see DIRECTION_XXX)
      * @param listener The listener to be added. It will be overwritten if multiple times
      *                 are invoked with the same type.
+     */
+    void startImsTraffic(@TrafficType int trafficType, @AccessNetworkType int accessNetworkType,
+            @Direction int direction, ConnectionListener listener);
+
+    /**
+     * @deprecated use startImsTraffic(int, int, int, ConnectionListener)
      */
     void startImsTraffic(@TrafficType int trafficType, @AccessNetworkType int accessNetworkType,
             ConnectionListener listener);
@@ -169,7 +189,12 @@ public interface ImsRadioInterface extends IAgent {
      * when it completes the traffic. The reference listener registered from startImsTraffic()
      * is removed.
      *
-     * @param trafficType The type for IMS traffic (@see TRAFFIC_TYPE_XXX)
+     * @param listener The listener to be removed
+     */
+    void stopImsTraffic(ConnectionListener listener);
+
+    /**
+     * @deprecated use stopImsTraffic(ConnectionListener)
      */
     void stopImsTraffic(@TrafficType int trafficType);
 

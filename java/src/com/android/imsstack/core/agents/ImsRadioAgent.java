@@ -23,6 +23,7 @@ import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This provides the implementation of the ims radio interface for notifying the IMS traffic
@@ -31,11 +32,15 @@ import java.util.Map;
  */
 public class ImsRadioAgent implements ImsRadioInterface {
     private final int mSlotId;
+    private AtomicInteger mIdGenerator = new AtomicInteger(ID_MIN);
     private ImsRadioHandler mHandler;
     private Map<Integer, ConnectionListener> mConnectionListeners =
                 new HashMap<Integer, ConnectionListener>();
 
     private static final int EVENT_CONNECTION_SETUP_PREPARED = 100;
+
+    private static final int ID_MIN = 1000000;
+    private static final int ID_MAX = 1100000;
 
     public ImsRadioAgent(int slotId) {
         mSlotId = slotId;
@@ -57,12 +62,47 @@ public class ImsRadioAgent implements ImsRadioInterface {
     }
 
     @Override
+    public void startImsTraffic(int trafficType, int accessNetworkType, int direction,
+            ConnectionListener listener) {
+        int id = -1;
+
+        for (Integer i : mConnectionListeners.keySet()) {
+            if (mConnectionListeners.get(i) == listener) {
+                id = i;
+                break;
+            }
+        }
+
+        if (id < 0) {
+            id = getId();
+            mConnectionListeners.put(id, listener);
+        }
+
+        ImsLog.d(mSlotId, "startImsTraffic - type=" + trafficType + ", network type="
+                + accessNetworkType + ", id=" + id + ", size=" + mConnectionListeners.size());
+
+        final int key = id;
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                ConnectionListener listener = mConnectionListeners.get(key);
+
+                if (listener != null) {
+                    listener.onConnectionSetupPrepared();
+                }
+            }
+        });
+    }
+
+    // deprecated
+    @Override
     public void startImsTraffic(int trafficType, int accessNetworkType,
             ConnectionListener listener) {
 
-        mConnectionListeners.put(trafficType, listener);
+        ImsLog.d(mSlotId, "startImsTraffic - type=" + trafficType);
 
-        ImsLog.d(mSlotId, "startImsTraffic");
+        mConnectionListeners.put(trafficType, listener);
 
         mHandler.post(new Runnable() {
             @Override
@@ -77,7 +117,23 @@ public class ImsRadioAgent implements ImsRadioInterface {
     }
 
     @Override
+    public void stopImsTraffic(ConnectionListener listener) {
+        for (Integer i : mConnectionListeners.keySet()) {
+            if (mConnectionListeners.get(i) == listener) {
+                mConnectionListeners.remove(i);
+                break;
+            }
+        }
+
+        ImsLog.d(mSlotId, "stopImsTraffic - size=" + mConnectionListeners.size());
+    }
+
+    // deprecated
+    @Override
     public void stopImsTraffic(int trafficType) {
+        ImsLog.d(mSlotId, "stopImsTraffic - type=" + trafficType);
+
+        mConnectionListeners.remove(trafficType);
     }
 
     @Override
@@ -86,6 +142,17 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     @Override
     public void removeListenerForTrafficPriority(TrafficPriorityListener listener) {
+    }
+
+    private int getId() {
+        int id = mIdGenerator.incrementAndGet();
+
+        if (id > ID_MAX) {
+            mIdGenerator.set(ID_MIN);
+            return ID_MIN;
+        }
+
+        return id;
     }
 
     private final class ImsRadioHandler extends Handler {

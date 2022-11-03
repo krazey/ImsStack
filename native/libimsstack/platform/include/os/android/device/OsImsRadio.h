@@ -54,11 +54,12 @@ private:
     static const IMS_CHAR* EventToString(IN IMS_UINT32 nEvent);
 
 private:
+    IMS_UINT32 m_nId;
     IThread* m_piOwnerThread;
     ImsMap<IMS_UINT32, IImsRadioConnectionListener*> m_objConnectionListeners;
     ImsList<IImsRadioTrafficPriorityListener*> m_objTrafficPriorityListeners;
 
-    static const IMS_UINT32 ID_MAX = 0xFFFFFFFF;
+    static const IMS_UINT32 ID_MAX = 100000;
 };
 
 #endif
