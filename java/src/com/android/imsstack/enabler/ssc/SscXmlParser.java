@@ -85,7 +85,6 @@ public class SscXmlParser {
                 break;
             case OCB:
             case ICB:
-            case ICBA:
                 data = getCbServiceData(queryData, doc);
                 break;
             case CW:
@@ -224,7 +223,7 @@ public class SscXmlParser {
         }
 
         Element timerElement = (Element) timerList.item(0);
-        if (timerElement.getParentNode().getParentNode().isEqualNode(rootElement) == false) {
+        if (!timerElement.getParentNode().getParentNode().isEqualNode(rootElement)) {
             SscXmlFormat.setIsNoReplyTimerInRule(slotId, true);
         } else {
             SscXmlFormat.setIsNoReplyTimerInRule(slotId, false);
@@ -482,11 +481,11 @@ public class SscXmlParser {
     private SscServiceData getCbServiceData(SscServiceQueryData queryData, Document doc) {
         int slotId = queryData.getSlotId();
 
-        NodeList cbNodeList = null;
+        NodeList cbNodeList;
         if (queryData.getSsType() == ESsType.ICB) {
             cbNodeList =
                     doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.ICB));
-        } else if (queryData.getSsType() == ESsType.OCB) {
+        } else { // ESsType.OCB
             cbNodeList =
                     doc.getElementsByTagName(SscXmlFormat.getSsElement(slotId, SscXmlFormat.OCB));
         }
@@ -605,57 +604,6 @@ public class SscXmlParser {
 
         return data;
     }
-
-/*
-    protected SscServiceData getICBAServerData(SscServiceQueryData queryData,
-            Document doc, XPath xpath) {
-        ImsLog.d("");
-
-        int slotId = queryData.getSlotId();
-
-        String strTopExpression = "//";
-        strTopExpression += SscXmlFormat.getXMLSS(slotId) + queryData.getSsType().getSsName();
-
-        String expression = strTopExpression;
-
-        Node node = getNode(expression, doc, xpath);
-        if (node == null) {
-            ImsLog.e("target node is null");
-            return null;
-        }
-
-        String cbActive = getActiveNodeText(node);
-
-        expression = "//" + SscXmlFormat.getRuleSet(slotId) + "/*";
-        ImsLog.d("expression : " + expression);
-
-        NodeList nodeList = getNodeList(expression, doc, xpath);
-        if (nodeList == null) {
-            ImsLog.e("nodeList is null");
-            return null;
-        }
-
-        ArrayList<SscRuleData> ruleSet = null;
-        if (SscConfig.isGetRuleSetByRuleID(slotId)) {
-            ruleSet = getRuleSetDataByRuleID(queryData, nodeList, xpath);
-        }
-        if (ruleSet == null) {
-            ruleSet = getRuleSetData(queryData, nodeList, xpath);
-        }
-
-        CbServiceData data = new CbServiceData(slotId,
-                                            queryData.getSsType(),
-                                            queryData.getEventNumber(),
-                                            queryData.getTransactionId(),
-                                            (cbActive.equalsIgnoreCase("true") ? 1 : 0),
-                                            queryData.getCondition(),
-                                            ruleSet);
-        ImsLog.d(data.toString());
-
-        return data;
-
-    }
-*/
 
     private String getErrorPhrase(Node node) {
         if (node.getNodeType() == Node.ELEMENT_NODE) {
@@ -850,7 +798,7 @@ public class SscXmlParser {
             if (strCondition == null) {
                 if (requestType == ESsType.OCB) {
                     return SscConstant.CONDITION_BAOC;
-                } else if (requestType == ESsType.ICB || requestType == ESsType.ICBA) {
+                } else if (requestType == ESsType.ICB) {
                     return SscConstant.CONDITION_BAIC;
                 }
             }
@@ -980,7 +928,7 @@ public class SscXmlParser {
 
     private boolean getProvisionedAttribute(Element element) {
         String provisioned = element.getAttribute(SscXmlFormat.PROVISIONED);
-        return "false".equalsIgnoreCase(provisioned) ? false : true;
+        return !"false".equalsIgnoreCase(provisioned);
     }
 
     private int getNoPeplyTimer(int slotId, Element element) {

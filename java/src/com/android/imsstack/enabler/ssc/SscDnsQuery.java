@@ -110,13 +110,7 @@ public final class SscDnsQuery {
             }
         }
 
-        String pdntype = SscConfig.getUtPdnType(slotId);
-        if (!TextUtils.isEmpty(pdntype) && pdntype.equals("mobile_xcap")) {
-            resolveUtXcapFqdn(slotId, fqdn, DcConstants.TYPE_XCAP, isBsfAddress);
-        }
-        else {
-            resolveUtXcapFqdn(slotId, fqdn, DcConstants.TYPE_INTERNET, isBsfAddress);
-        }
+        resolveUtXcapFqdn(slotId, fqdn, DcConstants.TYPE_XCAP, isBsfAddress);
 
         if (isBsfAddress == false) {
             mNAFIndexList.add(getSRVIndexForNAF());

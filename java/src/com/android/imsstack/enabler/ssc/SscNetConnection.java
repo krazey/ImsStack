@@ -273,13 +273,13 @@ public class SscNetConnection implements ISscNetConnection {
     private void startTimer(int eventNum, long duration) {
         ImsLog.d("EventNumber : " + eventNum + ", Time : " + duration);
 
-        IAlarmTimer atm = getAlarmTimer();
-        if (atm == null) {
-            ImsLog.e("AlamTimerManager is null");
+        IAlarmTimer alarmTimer = getAlarmTimer();
+        if (alarmTimer == null) {
+            ImsLog.e("alarmTimer is null");
             return;
         }
 
-        int timerId = atm.getTimerId();
+        int timerId = alarmTimer.getTimerId();
         if (timerId <= 0) {
             ImsLog.e("Retry timer id is invalid");
             return;
@@ -291,10 +291,10 @@ public class SscNetConnection implements ISscNetConnection {
             mTimerIdTable.remove(eventNum);
         }
 
-        atm.registerForTimerExpired(timerId, mSscNetConnectionHandler, eventNum, null);
+        alarmTimer.registerForTimerExpired(timerId, mSscNetConnectionHandler, eventNum, null);
 
-        if (!atm.startTimer(timerId, duration)) {
-            atm.unregisterForTimerExpired(timerId, mSscNetConnectionHandler);
+        if (!alarmTimer.startTimer(timerId, duration)) {
+            alarmTimer.unregisterForTimerExpired(timerId, mSscNetConnectionHandler);
             ImsLog.e("Starting a timer failed");
             return;
         }
@@ -312,14 +312,14 @@ public class SscNetConnection implements ISscNetConnection {
             return;
         }
 
-        IAlarmTimer atm = getAlarmTimer();
-        if (atm == null) {
-            ImsLog.e(" AlamTimerManager is null");
+        IAlarmTimer alarmTimer = getAlarmTimer();
+        if (alarmTimer == null) {
+            ImsLog.e(" alarmTimer is null");
             return;
         }
 
-        atm.stopTimer(timerId);
-        atm.unregisterForTimerExpired(timerId, mSscNetConnectionHandler);
+        alarmTimer.stopTimer(timerId);
+        alarmTimer.unregisterForTimerExpired(timerId, mSscNetConnectionHandler);
         mTimerIdTable.remove(eventNum);
     }
 

@@ -22,8 +22,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.HashMap;
 
 public class SscServiceStateAgent {
-    private static SscServiceStateAgent sSscServiceStateAgent = new SscServiceStateAgent();
-    private HashMap<Integer, SscServiceState> mSscServiceState = new HashMap<>();
+    private static final SscServiceStateAgent sSscServiceStateAgent = new SscServiceStateAgent();
+    private final HashMap<Integer, SscServiceState> mSscServiceState = new HashMap<>();
 
     protected static SscServiceStateAgent getInstance() {
         return sSscServiceStateAgent;
@@ -43,7 +43,7 @@ public class SscServiceStateAgent {
 
     @VisibleForTesting
     protected SscServiceState getSscServiceState(int slotId) {
-        if (mSscServiceState.containsKey(slotId) != true) {
+        if (!mSscServiceState.containsKey(slotId)) {
             ImsLog.w("SscServiceState for#" + slotId + " is not set...");
             return null;
         }

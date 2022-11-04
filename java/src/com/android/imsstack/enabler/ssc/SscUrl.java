@@ -27,15 +27,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class SscUrl {
-    private final String URI_HTTP = "http://";
-    private final String URI_HTTPS = "https://";
+    private static final String URI_HTTP = "http://";
+    private static final String URI_HTTPS = "https://";
 
-    private final String URI_AUID = "/simservs.ngn.etsi.org";
-    private final String URI_USERS = "/users";
-    private final String URI_DOC = "/simservs.xml";
-    private final String URI_NODE_SELECTOR_SEPARATOR = "/~~";
+    private static final String URI_AUID = "/simservs.ngn.etsi.org";
+    private static final String URI_USERS = "/users";
+    private static final String URI_DOC = "/simservs.xml";
+    private static final String URI_NODE_SELECTOR_SEPARATOR = "/~~";
 
-    private static SscUrl sSscUrl = new SscUrl();
+    private static final SscUrl sSscUrl = new SscUrl();
 
     protected static SscUrl getInstance() {
         return sSscUrl;
@@ -112,7 +112,6 @@ public class SscUrl {
                 break;
             case ICB:
             case OCB:
-            case ICBA:
                 if (data.getEventNumber() == SscConstant.EVENT_SSC_INSERT_CB) {
                     updateUri += getServiceUri(data);
                 } else {

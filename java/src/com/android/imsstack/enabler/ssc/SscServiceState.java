@@ -150,20 +150,20 @@ public class SscServiceState {
     }
 
     protected boolean getPdnConnectionFailed() {
-        return isUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
+        return isUtBlocked(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
                 | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
     }
 
     protected boolean getDnsQueryFailed() {
-        return isUtBlock(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE);
+        return isUtBlocked(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE);
     }
 
     protected boolean getGbaRequestFailed() {
-        return isUtBlock(SscConstant.BLOCK_REASON_GBA_FAILURE);
+        return isUtBlocked(SscConstant.BLOCK_REASON_GBA_FAILURE);
     }
 
     protected boolean getPdnConnectionTimeout() {
-        return isUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT);
+        return isUtBlocked(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT);
     }
 
     protected boolean getAllSrvAddrTried() {
@@ -171,7 +171,7 @@ public class SscServiceState {
     }
 
     protected boolean getSocketConnectionExpired() {
-        return isUtBlock(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT);
+        return isUtBlocked(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT);
     }
 
     protected void resetAllUtStatus() {
@@ -187,25 +187,25 @@ public class SscServiceState {
         updateUtServiceFeature();
     }
 
-    private void setUtBlock(int nBlockReason) {
-        if ((mUtBlockReason & nBlockReason) > 0) {
+    private void setUtBlock(int blockReason) {
+        if ((mUtBlockReason & blockReason) > 0) {
             // Already blocked reason
             return;
         }
 
-        ImsLog.d("SetReason : " + getBlockedReasonString(nBlockReason));
+        ImsLog.d("SetReason : " + getBlockedReasonString(blockReason));
 
         if (!SscConfig.isCsfbSupported(mSlotId)) {
-            if (nBlockReason != SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM
-                    && nBlockReason != SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP
-                    && nBlockReason != SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM) {
+            if (blockReason != SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM
+                    && blockReason != SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP
+                    && blockReason != SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM) {
                 // do not block unless specific error reasons when CSFB not supported
                 return;
             }
         }
 
         long blockTimeMilliSeconds = 0;
-        switch (nBlockReason) {
+        switch (blockReason) {
             case SscConstant.BLOCK_REASON_GBA_FAILURE : // fall-through
             case SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE : // fall-through
             case SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT : // fall-through
@@ -213,7 +213,7 @@ public class SscServiceState {
                 blockTimeMilliSeconds = SscConfig.getTimerForTempBlockWithAnyReason(mSlotId);
                 if (blockTimeMilliSeconds > 0) {
                     startUtBlockTimer(blockTimeMilliSeconds);
-                    mUtBlockReason |= nBlockReason;
+                    mUtBlockReason |= blockReason;
                     updateUtServiceFeature();
                 }
                 break;
@@ -222,41 +222,41 @@ public class SscServiceState {
                 blockTimeMilliSeconds = SscConfig.getTimerForTempBlock(mSlotId);
                 if (blockTimeMilliSeconds > 0) {
                     startUtBlockTimer(blockTimeMilliSeconds);
-                    mUtBlockReason |= nBlockReason;
+                    mUtBlockReason |= blockReason;
                     updateUtServiceFeature();
                 }
                 break;
             case SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM : // fall-through
             case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM :
                 // don't start timer
-                mUtBlockReason |= nBlockReason;
+                mUtBlockReason |= blockReason;
                 updateUtServiceFeature();
                 break;
             default :
-                ImsLog.e("worng block reason");
+                ImsLog.e("wrong block reason");
                 break;
         }
     }
 
-    private void resetUtBlock(int nBlockReason) {
-        if ((mUtBlockReason & nBlockReason) == 0) {
+    private void resetUtBlock(int blockReason) {
+        if ((mUtBlockReason & blockReason) == 0) {
             // not blocked reason
             return;
         }
 
-        ImsLog.d("ResetReason : " + getBlockedReasonString(nBlockReason));
-        mUtBlockReason &= ~nBlockReason;
+        ImsLog.d("ResetReason : " + getBlockedReasonString(blockReason));
+        mUtBlockReason &= ~blockReason;
         updateUtServiceFeature();
     }
 
-    private boolean isUtBlock(int nBlockReason) {
-        return ((mUtBlockReason & nBlockReason) > 0) ? true : false;
+    private boolean isUtBlocked(int blockReason) {
+        return (mUtBlockReason & blockReason) > 0;
     }
 
     private void startUtBlockTimer(long duration) {
-        IAlarmTimer atm = getTimerAgent();
-        if (atm == null) {
-            ImsLog.e("AlamTimerManager is null");
+        IAlarmTimer alarmTimer = getTimerAgent();
+        if (alarmTimer == null) {
+            ImsLog.e("alarmTimer is null");
             return;
         }
 
@@ -264,15 +264,16 @@ public class SscServiceState {
             stopUtBlockTimer(false);
         }
 
-        mUtBlockTimerId = atm.getTimerId();
+        mUtBlockTimerId = alarmTimer.getTimerId();
         if (mUtBlockTimerId <= 0) {
             ImsLog.e("Retry timer id is invalid");
             return;
         }
 
-        atm.registerForTimerExpired(mUtBlockTimerId, mHandler, EVENT_UT_BLOCK_TIMER_EXPIRED, null);
+        alarmTimer.registerForTimerExpired(mUtBlockTimerId, mHandler, EVENT_UT_BLOCK_TIMER_EXPIRED,
+                null);
 
-        if (!atm.startTimer(mUtBlockTimerId, duration)) {
+        if (!alarmTimer.startTimer(mUtBlockTimerId, duration)) {
             stopUtBlockTimer(false);
             ImsLog.e(" Starting a validity timer failed");
             return;
@@ -287,17 +288,17 @@ public class SscServiceState {
             return;
         }
 
-        IAlarmTimer atm = getTimerAgent();
-        if (atm == null) {
-            ImsLog.e(" AlamTimerManager is null");
+        IAlarmTimer alarmTimer = getTimerAgent();
+        if (alarmTimer == null) {
+            ImsLog.e("alarmTimer is null");
             return;
         }
 
         if (stopRequired) {
-            atm.stopTimer(mUtBlockTimerId);
+            alarmTimer.stopTimer(mUtBlockTimerId);
         }
 
-        atm.unregisterForTimerExpired(mUtBlockTimerId, mHandler);
+        alarmTimer.unregisterForTimerExpired(mUtBlockTimerId, mHandler);
         mUtBlockTimerId = (-1);
     }
 

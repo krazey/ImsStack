@@ -327,18 +327,13 @@ public final class SscConfig {
 
     // Temporary APIs
     public static boolean isTrustAllHosts(int slotId) {
-        // TODO: Is this functation really needed?
+        // TODO: Is this function really needed?
         return false;
     }
 
     public static String getTargetAddrScheme(int slotId) {
-        // TODO: Is this functation really needed?
+        // TODO: Is this function really needed?
         return "tel";
-    }
-
-    public static String getUtPdnType(int slotId) {
-        // TODO: could be removed?
-        return "mobile_xcap";
     }
 
     /* TODO: If there is an error, this method will be used.
@@ -347,110 +342,9 @@ public final class SscConfig {
     }
      */
 
-    /*
-    public static boolean isIgnoreActiveInOir(int slotId) {
-        if (ImsGlobal.isOperatorCountry(slotId, "TMO", "US") || ImsGlobal.isOperator(slotId, "MPCS")) {
-            return true;
-        }
-
-        if (ImsGlobal.isOperator(slotId, "MBK")) {
-            return true;
-        }
-        return false;
-    }
-
-    public static String getDefaultOIR(int slotId) {
-        if (ImsGlobal.isOperator(slotId, "MBK")) {
-            return SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
-        }
-
-        return null;
-    }
-     */
-
     public static boolean isPdnConnCheckedByDataState(int slotId) {
         // TODO:
         //return ImsGlobal.isOperatorCountry(slotId, "RJIL", "IN")  ? true : false;
         return false;
     }
-
-    /*
-    // Will be added to Carrier Config
-    // getHttpTempBlockErrorCodes
-    public static boolean isTempUtBlockCode(int slotId, int responseCode) {
-        if (ImsGlobal.isOperator(slotId, "ORG") || ImsGlobal.isOperator(slotId, "NJU")
-                || ImsGlobal.isOperator(slotId, "TLS")) {
-            if (responseCode == 403 || (responseCode >= 500 && responseCode < 600)) {
-                return true;
-            }
-            return false;
-        }
-
-        return false;
-    }
-     */
-
-    /*
-    // Will be added to Carrier Config
-    // getHttpPermBlockErrorCodes
-    public static boolean isPermUtBlockCode(int slotId, int responseCode) {
-        if (ImsGlobal.isOperator(slotId, "ATT") || ImsGlobal.isOperator(slotId, "XPM")
-                || ImsGlobal.isOperator(slotId, "KDDI")
-                || ImsGlobal.isOperatorCountry(slotId, "SAA", "AS")) {
-            return false; // do not block the UT
-        } else if (ImsGlobal.isOperator(slotId, "VDF") || ImsGlobal.isOperator(slotId, "TEL")) {
-            if (responseCode == 403 || (responseCode >= 500 && responseCode < 600)) {
-                return true;
-            }
-
-            if (ImsGlobal.isOperatorCountry(slotId, "VDF", "CH")) {
-                if (responseCode == 404) {
-                    return true;
-                }
-            }
-
-            return false;
-        } else if (ImsGlobal.isOperator(slotId, "EEO")) {
-            if (responseCode == 404 || responseCode == 408) {
-                return true;
-            }
-
-            return false;
-        }
-
-        return (responseCode == 403) ? true : false; // 3GPP 24.623 5.3.1.2.2
-    }
-     */
-
-    /*
-    // Will be added to Carrier Config
-    // getTimerForTempBlock
-    public static int getUtBlockTimerByResponseCode(int slotId) {
-        final int minute = 60 * 1000;
-        if (ImsGlobal.isOperator(slotId, "ORG") || ImsGlobal.isOperator(slotId, "NJU")) {
-            return 4 * 60 * minute; // 4 hours
-        } else if (ImsGlobal.isOperator(slotId, "TLS")) {
-            return 5 * minute; // 5 minutes
-        }
-
-        return minute; // 1 minute
-    }
-     */
-
-    /*
-    // Asset - KEY_UT_XCAP_APN_INACTIVITY_TIMER_SECOND_INT
-    // getXcapApnInactivityTimer
-    public static long getConnectionInactivityTimer(int slotId) {
-        if (ImsGlobal.isOperator(slotId, "KDDI")) {
-            return 300 * 1000;
-        } else if (ImsGlobal.isOperator(slotId, "VDF")) {
-            return 10 * 1000;
-        } else if (ImsGlobal.isOperator(slotId, "EEO")) {
-            return 240 * 1000;
-        }
-
-        // following IR92.v13 4.3.1
-        return 120 * 1000;
-    }
-     */
 }

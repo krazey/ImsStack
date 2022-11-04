@@ -22,18 +22,22 @@ public enum ESsType {
      * NONE
      */
     NONE(null , null),
+
     /**
      * Originating Identification Presentation
      */
     OIP(SscXmlFormat.OIP, "oip_oir.xsd"),
+
     /**
      * Originating Identification Restriction
      */
     OIR(SscXmlFormat.OIR, "oip_oir.xsd"),
+
     /**
      * Terminating Identification Presentation
      */
     TIP(SscXmlFormat.TIP, "tip_tir.xsd"),
+
     /**
      * Termination Identification Restriction
      */
@@ -43,6 +47,7 @@ public enum ESsType {
      * Communication Diversion
      */
     CF(SscXmlFormat.CD, "cf.xsd"),
+
     /**
      * Communication Diversion - Service Capability
      */
@@ -53,11 +58,7 @@ public enum ESsType {
      */
     OCB(SscXmlFormat.OCB, "cb.xsd"),
     ICB(SscXmlFormat.ICB, "cb.xsd"),
-    /**
-     * FIXME :: To Handle icb for KDDI
-     * Rename : ICB --> ICBA
-     */
-    ICBA(SscXmlFormat.ICB, "cb.xsd"),
+
     /**
      * Communication Barring - Service Capability
      */
@@ -73,17 +74,16 @@ public enum ESsType {
      */
     XE(SscXmlFormat.XCAPERROR, "xe.xsd");
 
+    private final String mSsName;
+    private final String mSchemaFileName;
 
-    private String mSSName = null;
-    private String mSchemaFileName = null;
-
-    private ESsType(String name, String xsd) {
-        this.mSSName = name;
+    ESsType(String name, String xsd) {
+        this.mSsName = name;
         this.mSchemaFileName = xsd;
     }
 
     public String getSsName() {
-        return this.mSSName;
+        return this.mSsName;
     }
 
     public String getSchema() {

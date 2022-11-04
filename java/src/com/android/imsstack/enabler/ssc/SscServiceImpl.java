@@ -26,10 +26,6 @@ import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ISubscription;
-import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.enabler.ssc.data.CbServiceData;;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
@@ -109,7 +105,7 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        if (SscConfig.isUtSupported(mSlotId) == false) {
+        if (!SscConfig.isUtSupported(mSlotId)) {
             ImsLog.w("XCAP/Ut is disabled");
             return;
         }
@@ -130,13 +126,6 @@ public class SscServiceImpl implements IUtInterface {
             }
         } catch (InterruptedException ie) {
             ie.printStackTrace();
-        }
-
-        //Register for DDS Change Event
-        ISubscription subscription
-                = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION, mSlotId);
-        if (subscription != null) {
-            subscription.addListener(mDataSubListener);
         }
     }
 
@@ -163,13 +152,6 @@ public class SscServiceImpl implements IUtInterface {
 
         SscConfig.clear(mSlotId);
         SscXmlGov.getInstance(mSlotId).clear();
-
-        ISubscription subscription
-                = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION, mSlotId);
-        if (subscription != null) {
-            subscription.removeListener(mDataSubListener);
-        }
-
         SscServiceStateAgent.getInstance().deInit(mSlotId);
 
         if (mSscTransaction != null) {
@@ -184,36 +166,12 @@ public class SscServiceImpl implements IUtInterface {
         mSscRequestQueue.clear();
     }
 
-    private SubscriptionListener mDataSubListener = new SubscriptionListener() {
-        public void onDefaultDataSubscriptionChanged(int subId) {
-            ISubscription isub
-                    = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION, mSlotId);
-            ImsLog.i("onDefaultDataSubscriptionChanged :: subId=" + subId);
-
-            if (isub == null) {
-                ImsLog.i("onDefaultDataSubscriptionChanged :: isub is null");
-                return;
-            }
-
-            SscAuthAgent.getInstance(mSlotId).setIsCredentialInfoUpdated(false);
-        }
-    };
-
     private void setNetworkType() {
         ISscNetConnectionGov netConnGov = SscNetConnectionGov.getInstance();
-        ISscHttpConnectionGov httpConnectionGov = SscHttpConnectionGov.getInstance();
+        netConnGov.init(mSlotId, EApnType.XCAP);
 
-        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
-                SubsInfoInterface.class, mSlotId);
-        String pdntype = SscConfig.getUtPdnType(mSlotId);
-        ImsLog.d("pdntype = " + pdntype);
-        if (pdntype != null && pdntype.equals("mobile_internet")) {
-            netConnGov.init(mSlotId, EApnType.INTERNET);
-            httpConnectionGov.open(mSlotId, EApnType.INTERNET);
-        } else {
-            netConnGov.init(mSlotId, EApnType.XCAP);
-            httpConnectionGov.open(mSlotId, EApnType.XCAP);
-        }
+        ISscHttpConnectionGov httpConnectionGov = SscHttpConnectionGov.getInstance();
+        httpConnectionGov.open(mSlotId, EApnType.XCAP);
     }
 
     private void handleInvalidRequest(int tId, int requestType) {
@@ -259,7 +217,7 @@ public class SscServiceImpl implements IUtInterface {
     public void queryCallBarringForServiceClass(int tId, int condition, int serviceClass) {
         // Check valid service class or not
         boolean isValid = SscServiceClassUtil.isValid(serviceClass);
-        if (isValid == false) {
+        if (!isValid) {
             ImsLog.e(mSlotId, "Invalid serviceclass " + serviceClass);
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
             return;
@@ -270,7 +228,7 @@ public class SscServiceImpl implements IUtInterface {
 
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -307,7 +265,7 @@ public class SscServiceImpl implements IUtInterface {
     private void queryCallForwardForServiceClass(int tId, int condition, String number,
             int serviceClass) {
         if (condition == SscConstant.CONDITION_CFA || condition == SscConstant.CONDITION_CFAC) {
-            if (SscConfig.isCfQueryAllAndCfAllConditionalSupported(mSlotId) == false) {
+            if (!SscConfig.isCfQueryAllAndCfAllConditionalSupported(mSlotId)) {
                 ImsLog.d(mSlotId, "isCfQueryAllAndCfAllConditionalSupported is false");
                 handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
                 return;
@@ -316,7 +274,7 @@ public class SscServiceImpl implements IUtInterface {
 
         // Check valid service class or not
         boolean isValid = SscServiceClassUtil.isValid(serviceClass);
-        if (isValid == false) {
+        if (!isValid) {
             ImsLog.e(mSlotId, "Invalid serviceClass " + serviceClass);
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
             return;
@@ -327,7 +285,7 @@ public class SscServiceImpl implements IUtInterface {
 
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -356,7 +314,7 @@ public class SscServiceImpl implements IUtInterface {
     public void queryCallWaiting(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -371,7 +329,7 @@ public class SscServiceImpl implements IUtInterface {
     public void queryCLIR(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -386,7 +344,7 @@ public class SscServiceImpl implements IUtInterface {
     public void queryCLIP(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -401,7 +359,7 @@ public class SscServiceImpl implements IUtInterface {
     public void queryCOLR(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -416,7 +374,7 @@ public class SscServiceImpl implements IUtInterface {
     public void queryCOLP(int tId) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -450,7 +408,7 @@ public class SscServiceImpl implements IUtInterface {
 
         // Check valid service class or not
         boolean isValid = SscServiceClassUtil.isValid(serviceClass);
-        if (isValid == false) {
+        if (!isValid) {
             ImsLog.e(mSlotId, "Invalid serviceClass: " + serviceClass);
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
             return;
@@ -461,7 +419,7 @@ public class SscServiceImpl implements IUtInterface {
 
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -493,7 +451,7 @@ public class SscServiceImpl implements IUtInterface {
     public void updateCallForward(int tId, int action, int condition, String number,
             int serviceClass, int timeSeconds) {
         if (action == SscConstant.ACTION_ERASURE) {
-            if (SscConfig.isCfActionErasureSupported(mSlotId) == false) {
+            if (!SscConfig.isCfActionErasureSupported(mSlotId)) {
                 ImsLog.e(mSlotId, "isCfActionErasureSupported is false");
                 handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
                 return;
@@ -531,7 +489,7 @@ public class SscServiceImpl implements IUtInterface {
 
         // Check valid service class or not
         boolean isValid = SscServiceClassUtil.isValid(serviceClass);
-        if (isValid == false) {
+        if (!isValid) {
             ImsLog.e(mSlotId, "Invalid serviceClass " + serviceClass);
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
             return;
@@ -542,7 +500,7 @@ public class SscServiceImpl implements IUtInterface {
 
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -583,7 +541,7 @@ public class SscServiceImpl implements IUtInterface {
     public void updateCallWaiting(int tId, boolean enable, int serviceClass) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -598,7 +556,7 @@ public class SscServiceImpl implements IUtInterface {
     public void updateCLIR(int tId, int clirMode) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -613,7 +571,7 @@ public class SscServiceImpl implements IUtInterface {
     public void updateCLIP(int tId, boolean enable) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -628,7 +586,7 @@ public class SscServiceImpl implements IUtInterface {
     public void updateCOLR(int tId, int presentation) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -643,7 +601,7 @@ public class SscServiceImpl implements IUtInterface {
     public void updateCOLP(int tId, boolean enable) {
         SscRequestData requestData = new SscRequestData(tId);
 
-        if (SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
+        if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
             requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
@@ -683,7 +641,7 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        if (isUtAvailable() == false) {
+        if (!isUtAvailable()) {
             ImsLog.w(mSlotId, "Clear pending data due to Ut is not available");
             postFailResponseMessage(sscData);
         } else if (sscData.getSsType() != ESsType.NONE
@@ -832,20 +790,20 @@ public class SscServiceImpl implements IUtInterface {
             int resultState = rr.getResultState();
             if (resultState == SscConstant.REQUEST_FAILURE) {
                 if (rr.getCode() == SscConstant.HTTP_PRECONDITION_FAILURE) {
-                    if (handlePreconditionFailure(requestData) == true) {
+                    if (handlePreconditionFailure(requestData)) {
                         ImsLog.d(mSlotId, "handlePreconditionFailure");
                         return;
                     }
                 }
 
-                if (handleRetryWhenFailure(requestData) == true) {
+                if (handleRetryWhenFailure(requestData)) {
                     ImsLog.d(mSlotId, "Need to retry. retryCount = " + requestData.getRetryCount());
                     return;
                 }
             }
 
             if (resultState == SscConstant.REQUEST_SUCCESS) {
-                if (handleAdditionalRequestWhenSuccess(requestData) == true) {
+                if (handleAdditionalRequestWhenSuccess(requestData)) {
                     ImsLog.d(mSlotId, "Need to send additional request");
                     return;
                 }
@@ -910,8 +868,8 @@ public class SscServiceImpl implements IUtInterface {
                                 cfUpdateData.getServiceClass()));
                     }
                 } else if (cfUpdateData.getCondition() == SscConstant.CONDITION_CFNR) {
-                    if (SscXmlFormat.getIsNoReplyTimerInRule(mSlotId) == false &&
-                            cfUpdateData.getReplyTimer() > 0) {
+                    if (!SscXmlFormat.getIsNoReplyTimerInRule(mSlotId)
+                            && cfUpdateData.getReplyTimer() > 0) {
                         requestData.offerSscDataFirst(new CfServiceUpdateData(mSlotId, ESsType.CF,
                                 SscConstant.EVENT_SSC_UPDATE_CF, cfUpdateData.getTransactionId(),
                                 cfUpdateData.getState(), SscConstant.CONDITION_CFNR_TIMER,
@@ -995,60 +953,6 @@ public class SscServiceImpl implements IUtInterface {
             mUtListener.utConfigurationUpdateFailed(id, ri);
         }
 
-        /*
-        private Bundle getUtConfigurationQueryICBBundle(SscServiceData data) {
-            ImsLog.d("");
-
-            Bundle bundle = new Bundle();
-            if (data == null) {
-                ImsLog.e("SscServiceData is null");
-                return bundle;
-            }
-
-            ICBAServiceData cbData = (ICBAServiceData)data;
-            ArrayList<SscRuleDataICB> ruleSet = cbData.getRuleSet();
-            if (ruleSet == null) {
-                ImsLog.e("ruleSet is null");
-                return bundle;
-            }
-
-            int ruleSetSize = ruleSet.size();
-            if (ruleSetSize == 0) {
-                ImsLog.e("Ruleset length is null");
-                return bundle;
-            }
-
-            ImsLog.d("Ruleset length: " + ruleSetSize);
-            ImsIcbInfo ssInfo[] = new ImsIcbInfo[ruleSetSize];
-
-            int type = 0;
-            int state = 0;
-            String condition = null;
-            String ruleId = null;
-
-            for (int i = 0; i < ruleSetSize; i++) {
-                SscRuleDataICB ruleSetICB = ruleSet.get(i);
-
-                type = ruleSetICB.getICBType();
-                state = ruleSetICB.getRuleState();
-                if (ruleSet.get(i).getICBType() == SscRuleDataICB.TYPE_ANONYMOUS) {
-                    condition = "anonymous";
-                    ruleId = "anonymous-call-rejection";
-                }
-                else {
-                    condition = ruleSetICB.getOneId();
-                    ruleId = ruleSetICB.getRuleId();
-                }
-
-                ssInfo[i] = new ImsIcbInfo(type, state, condition, ruleId);
-            }
-
-            bundle.putParcelableArray(ImsIcbInfo.class.getSimpleName(), ssInfo);
-
-            return bundle;
-        }
-        */
-
         private void onConfigurationQueried(final int id, SscServiceData data) {
             if (mUtListener == null) {
                 ImsLog.d(mSlotId, "IUtListener is null");
@@ -1081,17 +985,9 @@ public class SscServiceImpl implements IUtInterface {
                     final ImsSsInfo ssInfo = createLineIdentificationInfo(data);
                     mUtListener.lineIdentificationSupplementaryServiceResponse(id, ssInfo);
                     break;
-                case ICBA:
-                    /*
-                    final ImsIcbInfo[] icbInfo = createExtendCallBarringInfo(data);
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArray("ImsIcbInfo", icbInfo);
-                    mUtListener.utConfigurationQueried(id, bundle);
-                     */
-                    break;
                 default:
                     ImsLog.e(mSlotId, "Invalid SscServiceData");
-                    return;
+                    break;
             }
         }
 
@@ -1138,63 +1034,6 @@ public class SscServiceImpl implements IUtInterface {
 
             return cbInfo;
         }
-/*
-        private ImsIcbInfo[] createExtendCallBarringInfo(SscServiceData data) {
-            ImsLog.d("");
-
-            if (data == null) {
-                ImsLog.e("SscServiceData is null !!!");
-                return null;
-            }
-
-            if (data.getSsType() != ESsType.ICBA) {
-                ImsLog.e("Invalid SStype");
-                return null;
-            }
-
-            CbServiceData icbData = (CbServiceData)data;
-            if (icbData.getRuleSet() == null) {
-                ImsLog.e("CB ruleset is null !!!");
-                ImsIcbInfo icbInfo[] = new ImsIcbInfo[1];
-
-                // No RuleSet case
-                //icbInfo[0] = new ImsIcbInfo()
-                icbInfo[0] = new ImsIcbInfo(0, 0, null, null);
-                // Disabled
-                //icbInfo[0].mStatus = 0;
-                return icbInfo;
-            }
-
-            int ruleSetSize = icbData.getRuleSet().size();
-            if (ruleSetSize <= 0) {
-                ImsLog.e("CallBarring Data is null !!!");
-                return null;
-            }
-
-            ImsIcbInfo icbInfo[] = new ImsIcbInfo[ruleSetSize];
-
-            // 1. Setting RuleSet
-            for (int i = 0; i < ruleSetSize; i++) {
-                //icbInfo[i] = new ImsIcbInfo();
-                icbInfo[i] = new ImsIcbInfo(0, 0, null, null);
-                SscRuleData ruleData = icbData.getRuleSet().get(i);
-                setIncomingCallBarringInfo(icbInfo[i], ruleData);
-            }
-
-            return icbInfo;
-        }
-*/
-/*
-        private void setIncomingCallBarringInfo(ImsIcbInfo ssInfo, SscRuleData ruleData) {
-            if (ssInfo != null && ruleData != null) {
-                //ssInfo.state = ruleData.getState();
-                //ImsLog.d("ICB.mStatus : " + ssInfo.mStatus);
-            }
-            else {
-                ImsLog.e("ImsIcbInfo and SscRuleData are null");
-            }
-        }
-*/
 
         private ImsCallForwardInfo[] createCallForwardInfo(SscServiceData data) {
             ImsLog.d(mSlotId, "");
