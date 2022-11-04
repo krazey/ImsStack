@@ -178,12 +178,6 @@ public interface ImsRadioInterface extends IAgent {
             @Direction int direction, ConnectionListener listener);
 
     /**
-     * @deprecated use startImsTraffic(int, int, int, ConnectionListener)
-     */
-    void startImsTraffic(@TrafficType int trafficType, @AccessNetworkType int accessNetworkType,
-            ConnectionListener listener);
-
-    /**
      * Indicates IMS traffic has been stopped. For all IMS traffic,
      * notified with startImsTraffic, IMS service shall notify stopImsTraffic
      * when it completes the traffic. The reference listener registered from startImsTraffic()
@@ -192,11 +186,6 @@ public interface ImsRadioInterface extends IAgent {
      * @param listener The listener to be removed
      */
     void stopImsTraffic(ConnectionListener listener);
-
-    /**
-     * @deprecated use stopImsTraffic(ConnectionListener)
-     */
-    void stopImsTraffic(@TrafficType int trafficType);
 
     /**
      * Adds the listener to be notified when the traffic priority is changed
