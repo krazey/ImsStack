@@ -30,6 +30,7 @@
 #include "core/IReference.h"
 #include "core/MockISession.h"
 #include "helper/IMtcAosStateListener.h"
+#include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "sipcore/ISipClientConnection.h"
 #include "sipcore/ISipConnection.h"
@@ -472,6 +473,11 @@ TEST_F(MtcCallStateTest, OnSrvccStateUpdatedDoesNothing)
 TEST_F(MtcCallStateTest, OnAosConnectedDoesNothing)
 {
     IMS_UINT32 nAnyAosReason = 1;
+
+    MockIMtcPreconditionManager objPreconditionManager;
+    ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
+    EXPECT_CALL(objPreconditionManager, HandleQosOnIpcanChanged).Times(1);
+
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnAosStateChanged(MtcAosState::CONNECTED, nAnyAosReason));
 }
 

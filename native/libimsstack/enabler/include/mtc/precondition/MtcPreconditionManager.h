@@ -93,14 +93,16 @@ public:
     virtual void RemovePreconditionSdp(IN ISession* piSession) override;
     virtual IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession) override;
     virtual void SetRemoteResourceAvailable(IN ISession* piSession) override;
+    virtual void HandleQosOnIpcanChanged() override;
 
 public:
     virtual void OnQosStatusChanged(
             IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) override;
 
-    virtual void OnWaitTimerExpired(IN QosTimer* pTimer);
-    virtual void OnGuardInactiveTimerExpired(IN QosTimer* pTimer);
-    virtual void OnForceAvailableTimerExpired(IN QosTimer* pTimer);
+    virtual void OnWaitTimerExpired(IN QosTimer* pTimer) override;
+    virtual void OnGuardInactiveTimerExpired(IN QosTimer* pTimer) override;
+    virtual void OnForceAvailableTimerExpired(IN QosTimer* pTimer) override;
+    virtual void OnWaitTimerAfterHandOverExpired(IN QosTimer* pTimer) override;
 
 private:
     void CreateQosTimer(IN ISession* piSession);
@@ -142,14 +144,16 @@ private:
     IMS_BOOL IsNeedToUpdateQosStatus(IN QosStatus eCurrStatus, IN QosStatus eNewStatus);
     IMS_BOOL IsPreconditionSupportedInLocal(IN IMS_UINT32 eMediaType);
     IMS_BOOL IsConfirmedDialog(IN const ISession* piSession);
+    void SetOnWlan(IN IMS_BOOL bOnWlan);
 
 private:
-    IMSMap<ISession*, QosData*> m_objQosDatas;
-    IMSMap<ISession*, QosTimer*> m_objQosTimers;
-    IMSMap<ISession*, QosStatusTable*> m_objStatusTables;
-    IMSMap<ISession*, IMS_BOOL> m_objCapabilities;
+    ImsMap<ISession*, QosData*> m_objQosDatas;
+    ImsMap<ISession*, QosTimer*> m_objQosTimers;
+    ImsMap<ISession*, QosStatusTable*> m_objStatusTables;
+    ImsMap<ISession*, IMS_BOOL> m_objCapabilities;
     IMtcPreconditionListener* m_pListener;
     IMtcCallContext& m_objContext;
+    IMS_BOOL m_bOnWlan;
 };
 
 #endif

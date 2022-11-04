@@ -484,6 +484,14 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnIpcanChanged(IN IMS_UINT32 /*eIpcan
 }
 
 PROTECTED
+CallStateName MtcCallState::HandleAosConnected()
+{
+    IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
+    m_objContext.GetPreconditionManager().HandleQosOnIpcanChanged();
+    return GetStateName();
+}
+
+PROTECTED
 CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
 {
     if (m_objContext.GetService().GetSrvccState() == SrvccState::STARTED)

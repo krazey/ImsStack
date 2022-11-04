@@ -44,5 +44,7 @@ public:
      * @param pQosTimer The QosTimer instance which has the expired timer.
      */
     virtual void OnForceAvailableTimerExpired(IN QosTimer* pQosTimer) = 0;
+
+    virtual void OnWaitTimerAfterHandOverExpired(IN QosTimer* pQosTimer) = 0;
 };
 #endif

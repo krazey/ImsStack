@@ -29,12 +29,13 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcPreconditionManager::MtcPreconditionManager(IN IMtcCallContext& objContext) :
-        m_objQosDatas(IMSMap<ISession*, QosData*>()),
-        m_objQosTimers(IMSMap<ISession*, QosTimer*>()),
-        m_objStatusTables(IMSMap<ISession*, QosStatusTable*>()),
-        m_objCapabilities(IMSMap<ISession*, IMS_BOOL>()),
+        m_objQosDatas(ImsMap<ISession*, QosData*>()),
+        m_objQosTimers(ImsMap<ISession*, QosTimer*>()),
+        m_objStatusTables(ImsMap<ISession*, QosStatusTable*>()),
+        m_objCapabilities(ImsMap<ISession*, IMS_BOOL>()),
         m_pListener(IMS_NULL),
-        m_objContext(objContext)
+        m_objContext(objContext),
+        m_bOnWlan(objContext.GetService().IsWlanIpCanType())
 {
     IMS_TRACE_D("+MtcPreconditionManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
     m_objContext.GetMediaManager().SetQosListener(this);
@@ -204,6 +205,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::StopAllQosTimer(IN ISession* piSessi
     StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE);
     StopQosTimer(piSession, QosTimerType::GUARD_INACTIVE);
     StopQosTimer(piSession, QosTimerType::FORCE_AVAILABLE);
+    StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER);
 }
 
 PUBLIC VIRTUAL void MtcPreconditionManager::UpdatePreconditionCapability(
@@ -282,7 +284,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::UpdateQosAttributesFromSdp(IN ISessi
 
     UpdateStatusRecords(piSession);
 
-    IMSList<IMedia*> lstMedias = piSession->GetMedia();
+    ImsList<IMedia*> lstMedias = piSession->GetMedia();
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
         IMedia* piMedia = lstMedias.GetAt(index);
@@ -322,7 +324,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
         return;
     }
 
-    IMSList<IMedia*> lstMedias = piSession->GetMedia();
+    ImsList<IMedia*> lstMedias = piSession->GetMedia();
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
         IMedia* piMedia = lstMedias.GetAt(index);
@@ -427,7 +429,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISessi
         return;
     }
 
-    IMSList<IMedia*> lstMedias = piSession->GetMedia();
+    ImsList<IMedia*> lstMedias = piSession->GetMedia();
     IMS_UINT32 nSize = lstMedias.GetSize();
 
     IMS_TRACE_D("SetRemoteResourceAvailable : media size[%d]", nSize, 0, 0);
@@ -450,6 +452,47 @@ PUBLIC VIRTUAL void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISessi
     }
 }
 
+PUBLIC VIRTUAL void MtcPreconditionManager::HandleQosOnIpcanChanged()
+{
+    IMS_BOOL bPreviousOnWlan = m_bOnWlan;
+    SetOnWlan(m_objContext.GetService().IsWlanIpCanType());
+    if (bPreviousOnWlan == m_bOnWlan)  // NR to LTE case.
+    {
+        return;
+    }
+
+    IMS_TRACE_D("HandleQosOnIpcanChanged : on WLAN [%s]", _TRACE_B_(m_bOnWlan), 0, 0);
+
+    for (IMS_UINT32 index = 0; index < m_objQosTimers.GetSize(); index++)
+    {
+        ISession* piSession = m_objQosTimers.GetKeyAt(index);
+
+        if (m_bOnWlan == IMS_FALSE)
+        {
+            StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE);
+            StartQosTimer(piSession, QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER);
+        }
+        else
+        {
+            IMS_UINT32 eMediaTypes = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
+            if (eMediaTypes & MEDIATYPE_AUDIO)
+            {
+                OnQosStatusChanged(piSession, QosStatus::AVAILABLE, MEDIATYPE_AUDIO);
+            }
+
+            if (eMediaTypes & MEDIATYPE_VIDEO)
+            {
+                OnQosStatusChanged(piSession, QosStatus::AVAILABLE, MEDIATYPE_VIDEO);
+            }
+
+            if (eMediaTypes & MEDIATYPE_TEXT)
+            {
+                OnQosStatusChanged(piSession, QosStatus::AVAILABLE, MEDIATYPE_TEXT);
+            }
+        }
+    }
+}
+
 PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
         IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType)
 {
@@ -457,6 +500,16 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
     {
         IMS_TRACE_D("OnQosStatusChanged : ISession is null", 0, 0, 0);
         return;
+    }
+
+    IMS_TRACE_D("OnQosStatusChanged : status[%d] media type[%d]", eStatus, eMediaType, 0);
+
+    SetOnWlan(m_objContext.GetService().IsWlanIpCanType());
+
+    if (m_bOnWlan == IMS_TRUE || eStatus == QosStatus::AVAILABLE)
+    {
+        eStatus = QosStatus::AVAILABLE;
+        StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER);
     }
 
     // 1. Update QosData and check QosStatus if it needs to be updated or not.
@@ -468,8 +521,6 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
         IMS_TRACE_D("OnQosStatusChanged : there's no update for status.", 0, 0, 0);
         return;
     }
-
-    IMS_TRACE_D("OnQosStatusChanged", 0, 0, 0);
 
     SetQosStatus(piSession, eStatus, eMediaType);
 
@@ -499,8 +550,22 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnWaitTimerExpired(IN QosTimer* pTim
 
 PUBLIC VIRTUAL void MtcPreconditionManager::OnGuardInactiveTimerExpired(IN QosTimer* pTimer)
 {
-    IMS_TRACE_D("OnGuardInactiveTimerExpired", 0, 0, 0);
-    HandleReservationFailureByTimerExpiration(pTimer);
+    SetOnWlan(m_objContext.GetService().IsWlanIpCanType());
+    if (m_bOnWlan == IMS_FALSE)
+    {
+        IMS_TRACE_D("OnGuardInactiveTimerExpired", 0, 0, 0);
+        return HandleReservationFailureByTimerExpiration(pTimer);
+    }
+
+    for (IMS_UINT32 index = 0; index < m_objQosTimers.GetSize(); index++)
+    {
+        if (m_objQosTimers.GetValueAt(index) == pTimer)
+        {
+            IMS_TRACE_D("OnGuardInactiveTimerExpired : Local resources[%d] are available on WLAN.",
+                    SetLocalResourceAvailable(m_objQosTimers.GetKeyAt(index)), 0, 0);
+            return;
+        }
+    }
 }
 
 PUBLIC VIRTUAL void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pTimer)
@@ -539,6 +604,12 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosT
     {
         m_pListener->QosReserved(piSession, MEDIATYPE_TEXT);
     }
+}
+
+PUBLIC VIRTUAL void MtcPreconditionManager::OnWaitTimerAfterHandOverExpired(IN QosTimer* pTimer)
+{
+    IMS_TRACE_D("OnWaitTimerAfterHandOverExpired", 0, 0, 0);
+    HandleReservationFailureByTimerExpiration(pTimer);
 }
 
 PRIVATE
@@ -877,8 +948,9 @@ void MtcPreconditionManager::HandleQosTimer(
     {
         if (IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
         {
-            StopQosTimer(piSession);
+            StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE);
             StopQosTimer(piSession, QosTimerType::FORCE_AVAILABLE);
+            StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER);
         }
     }
     else if (eCurrStatus == QosStatus::AVAILABLE && eNewStatus == QosStatus::LOST)
@@ -1195,4 +1267,14 @@ IMS_BOOL MtcPreconditionManager::IsConfirmedDialog(IN const ISession* piSession)
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+void MtcPreconditionManager::SetOnWlan(IN IMS_BOOL bOnWlan)
+{
+    if (bOnWlan != m_bOnWlan)
+    {
+        IMS_TRACE_D("SetOnWlan : OnWlan [%s]->[%s]", _TRACE_B_(m_bOnWlan), _TRACE_B_(bOnWlan), 0);
+        m_bOnWlan = bOnWlan;
+    }
 }

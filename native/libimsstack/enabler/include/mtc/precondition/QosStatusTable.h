@@ -17,6 +17,7 @@
 #ifndef QOS_STATUS_TABLE_H_
 #define QOS_STATUS_TABLE_H_
 
+#include "ImsList.h"
 #include "SdpAttribute.h"
 #include "SdpMedia.h"
 #include "offeranswer/SdpPrecondition.h"
@@ -145,14 +146,14 @@ private:
     void UpdateCurrentStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
     void UpdateDesiredStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
 
-    IMSList<QosStatusRecord*>& GetStatusRecords(IN IMS_SINT32 eSdpMediaType);
-    IMSList<QosStatusRecord*> GetStatusRecords(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
+    ImsList<QosStatusRecord*>& GetStatusRecords(IN IMS_SINT32 eSdpMediaType);
+    ImsList<QosStatusRecord*> GetStatusRecords(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
             IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag = SdpPrecondition::DIRECTION_NONE);
-    void ClearStatusRecords(IN IMSList<QosStatusRecord*>& lstRecords);
+    void ClearStatusRecords(IN ImsList<QosStatusRecord*>& lstRecords);
 
 private:
-    IMSList<QosStatusRecord*> m_lstAudioRecords;
-    IMSList<QosStatusRecord*> m_lstVideoRecords;
-    IMSList<QosStatusRecord*> m_lstTextRecords;
+    ImsList<QosStatusRecord*> m_lstAudioRecords;
+    ImsList<QosStatusRecord*> m_lstVideoRecords;
+    ImsList<QosStatusRecord*> m_lstTextRecords;
 };
 #endif

@@ -22,7 +22,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 QosTimer::QosTimer(IN IQosTimerListener* pListener) :
-        m_objTimers(IMSMap<QosTimerType, ITimer*>()),
+        m_objTimers(ImsMap<QosTimerType, ITimer*>()),
         m_pQosTimerListener(pListener)
 {
     IMS_TRACE_D("+QosTimer", 0, 0, 0);
@@ -80,6 +80,10 @@ PUBLIC VIRTUAL void QosTimer::Timer_TimerExpired(IN ITimer* piExpiredTimer)
         else if (eTimerType == QosTimerType::FORCE_AVAILABLE)
         {
             m_pQosTimerListener->OnForceAvailableTimerExpired(this);
+        }
+        else if (eTimerType == QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER)
+        {
+            m_pQosTimerListener->OnWaitTimerAfterHandOverExpired(this);
         }
 
         m_objTimers.Remove(eTimerType);

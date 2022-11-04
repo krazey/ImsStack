@@ -27,9 +27,9 @@ class QoSStatusRecord;
 
 PUBLIC
 QosStatusTable::QosStatusTable() :
-        m_lstAudioRecords(IMSList<QosStatusRecord*>()),
-        m_lstVideoRecords(IMSList<QosStatusRecord*>()),
-        m_lstTextRecords(IMSList<QosStatusRecord*>())
+        m_lstAudioRecords(ImsList<QosStatusRecord*>()),
+        m_lstVideoRecords(ImsList<QosStatusRecord*>()),
+        m_lstTextRecords(ImsList<QosStatusRecord*>())
 {
     IMS_TRACE_D("+QosStatusTable", 0, 0, 0);
 }
@@ -157,7 +157,7 @@ PUBLIC
 IMS_SINT32 QosStatusTable::GetDirectionTag(
         IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType, IN IMS_SINT32 eStatusType)
 {
-    IMSList<QosStatusRecord*> lstRecords = GetStatusRecords(eSdpMediaType, eAttrType, eStatusType);
+    ImsList<QosStatusRecord*> lstRecords = GetStatusRecords(eSdpMediaType, eAttrType, eStatusType);
     IMS_SINT32 eDirTag = SdpPrecondition::DIRECTION_INVALID;
 
     for (IMS_UINT32 index = 0; index < lstRecords.GetSize(); index++)
@@ -189,7 +189,7 @@ PUBLIC
 IMS_SINT32 QosStatusTable::GetStrengthTag(
         IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag)
 {
-    IMSList<QosStatusRecord*> lstRecords =
+    ImsList<QosStatusRecord*> lstRecords =
             GetStatusRecords(eSdpMediaType, SdpAttribute::DES, eStatusType, eDirTag);
 
     if (lstRecords.IsEmpty())
@@ -207,7 +207,7 @@ PUBLIC
 void QosStatusTable::SetDirectionTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
         IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag)
 {
-    IMSList<QosStatusRecord*> objRecords = GetStatusRecords(eSdpMediaType, eAttrType, eStatusType);
+    ImsList<QosStatusRecord*> objRecords = GetStatusRecords(eSdpMediaType, eAttrType, eStatusType);
 
     if (objRecords.IsEmpty())
     {
@@ -232,7 +232,7 @@ PUBLIC
 void QosStatusTable::SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType,
         IN IMS_SINT32 eDirTag, IN IMS_SINT32 eStrengthTag)
 {
-    IMSList<QosStatusRecord*> lstRecords =
+    ImsList<QosStatusRecord*> lstRecords =
             GetStatusRecords(eSdpMediaType, SdpAttribute::DES, eStatusType, eDirTag);
 
     if (lstRecords.IsEmpty())
@@ -259,7 +259,7 @@ void QosStatusTable::SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 e
 PUBLIC
 void QosStatusTable::CreateStatusRecords(IN IMS_SINT32 eSdpMediaType)
 {
-    IMSList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
+    ImsList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
 
     for (IMS_UINT32 index = 0; index < lstStatusRecords.GetSize(); index++)
     {
@@ -279,7 +279,7 @@ void QosStatusTable::CreateStatusRecords(IN IMS_SINT32 eSdpMediaType)
 PUBLIC
 IMS_BOOL QosStatusTable::IsStatusRecordsListEmpty(IN IMS_SINT32 eSdpMediaType)
 {
-    IMSList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
+    ImsList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
     return lstStatusRecords.IsEmpty();
 }
 
@@ -308,7 +308,7 @@ void QosStatusTable::RemoveUnusedStatusRecords(IN IMS_UINT32 eMediaTypes)
 PRIVATE
 void QosStatusTable::AddStatusRecord(IN IMS_SINT32 eSdpMediaType)
 {
-    IMSList<QosStatusRecord*>& lstRecords = GetStatusRecords(eSdpMediaType);
+    ImsList<QosStatusRecord*>& lstRecords = GetStatusRecords(eSdpMediaType);
 
     // curr - local
     lstRecords.Append(
@@ -345,7 +345,7 @@ void QosStatusTable::InitializeDesChecked(IN IMS_SINT32 eSdpMediaType)
 {
     IMS_TRACE_D("InitializeDesChecked : %s", PS_SdpMediaType(eSdpMediaType), 0, 0);
 
-    IMSList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
+    ImsList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
 
     for (IMS_UINT32 index = 0; index < lstStatusRecords.GetSize(); index++)
     {
@@ -374,7 +374,7 @@ void QosStatusTable::UpdateCurrentStatus(
 
     // curr:qos remote direction
     // update remote current status based on local detail infos.
-    const IMSList<SdpPrecondition::DetailInfo>& lstLocalDetails = pCurr->GetLocalDetails();
+    const ImsList<SdpPrecondition::DetailInfo>& lstLocalDetails = pCurr->GetLocalDetails();
     IMS_UINT32 nSize = lstLocalDetails.GetSize();
 
     IMS_SINT32 eRemoteCurrDir =
@@ -411,11 +411,11 @@ void QosStatusTable::UpdateDesiredStatus(
         return;
     }
 
-    IMSList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
+    ImsList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
 
     // des:qos strength local direction
     // update strength of local desired status based on remote detail infos.
-    const IMSList<SdpPrecondition::DetailInfo>& lstRemoteDetails = pDes->GetRemoteDetails();
+    const ImsList<SdpPrecondition::DetailInfo>& lstRemoteDetails = pDes->GetRemoteDetails();
 
     IMS_TRACE_D("UpdateDesiredStatus : update local desired status, size [%d]",
             lstRemoteDetails.GetSize(), 0, 0);
@@ -440,7 +440,7 @@ void QosStatusTable::UpdateDesiredStatus(
 
     // des:qos strength remote direction
     // update strength of remote desired status based on local detail infos.
-    const IMSList<SdpPrecondition::DetailInfo>& lstLocalDetails = pDes->GetLocalDetails();
+    const ImsList<SdpPrecondition::DetailInfo>& lstLocalDetails = pDes->GetLocalDetails();
     IMS_TRACE_D("UpdateDesiredStatus : update remote desired status, size [%d]",
             lstLocalDetails.GetSize(), 0, 0);
 
@@ -475,7 +475,7 @@ void QosStatusTable::UpdateDesiredStatus(
 }
 
 PRIVATE
-IMSList<QosStatusRecord*>& QosStatusTable::GetStatusRecords(IN IMS_SINT32 eSdpMediaType)
+ImsList<QosStatusRecord*>& QosStatusTable::GetStatusRecords(IN IMS_SINT32 eSdpMediaType)
 {
     if (eSdpMediaType == SdpMedia::TYPE_AUDIO)
     {
@@ -492,12 +492,12 @@ IMSList<QosStatusRecord*>& QosStatusTable::GetStatusRecords(IN IMS_SINT32 eSdpMe
 }
 
 PRIVATE
-IMSList<QosStatusRecord*> QosStatusTable::GetStatusRecords(IN IMS_SINT32 eSdpMediaType,
+ImsList<QosStatusRecord*> QosStatusTable::GetStatusRecords(IN IMS_SINT32 eSdpMediaType,
         IN IMS_SINT32 eAttrType, IN IMS_SINT32 eStatusType,
         IN IMS_SINT32 eDirTag /*= SdpPrecondition::DIRECTION_NONE*/)
 {
-    IMSList<QosStatusRecord*> lstStatusRecords;
-    IMSList<QosStatusRecord*>& lstTempRecords = GetStatusRecords(eSdpMediaType);
+    ImsList<QosStatusRecord*> lstStatusRecords;
+    ImsList<QosStatusRecord*>& lstTempRecords = GetStatusRecords(eSdpMediaType);
 
     for (IMS_UINT32 index = 0; index < lstTempRecords.GetSize(); index++)
     {
@@ -514,7 +514,7 @@ IMSList<QosStatusRecord*> QosStatusTable::GetStatusRecords(IN IMS_SINT32 eSdpMed
 }
 
 PRIVATE
-void QosStatusTable::ClearStatusRecords(IN IMSList<QosStatusRecord*>& lstRecords)
+void QosStatusTable::ClearStatusRecords(IN ImsList<QosStatusRecord*>& lstRecords)
 {
     IMS_UINT32 nSize = lstRecords.GetSize();
     IMS_TRACE_D("ClearStatusRecords : size[%d]", nSize, 0, 0);

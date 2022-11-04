@@ -43,6 +43,7 @@ enum class QosTimerType
     WAIT_AVAILABLE = 0,
     GUARD_INACTIVE = 1,
     FORCE_AVAILABLE = 2,
+    WAIT_AVAILABLE_AFTER_HANDOVER = 3,
 };
 
 #endif
