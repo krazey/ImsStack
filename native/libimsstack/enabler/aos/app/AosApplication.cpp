@@ -1844,7 +1844,16 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegAuthenticationFailed()
     CleanAll(AosReason::IMS_DISABLED);
     Report_StateChanged(IMS_FALSE);
 
-    // TODO: PLMN block after checking configuration
+    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType() ==
+            CarrierConfig::Assets::ERROR_TYPE_CRITICAL)
+    {
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+        if (piService != IMS_NULL)
+        {
+            piService->NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
+            A_IMS_TRACE_I(APPID, "ProcessRegAuthenticationFailed :: PLMN is blocked", 0, 0, 0);
+        }
+    }
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegTerminated()
@@ -1864,11 +1873,17 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 {
     m_pConnector->Stop();
 
-    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType() ==
-            CarrierConfig::Assets::ERROR_TYPE_REPEATED)
+    IMS_UINT32 nFinalErr = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType();
+
+    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED ||
+            nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
     {
-        // TODO: PLMN block with T3402
-        A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: PLMN is blocked with timer", 0, 0, 0);
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+        if (piService != IMS_NULL)
+        {
+            piService->NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+            A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: PLMN is blocked with timer", 0, 0, 0);
+        }
     }
 }
 

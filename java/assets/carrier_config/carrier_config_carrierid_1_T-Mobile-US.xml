@@ -65,6 +65,7 @@
     </int-array>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
+    <int name="extra_reg_err_final_type_int" value="4"/>
     <int name="extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int" value="1"/>
     <int name="extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int" value="2"/>
     <int name="extra_reg_err_policy_int" value="3"/>
