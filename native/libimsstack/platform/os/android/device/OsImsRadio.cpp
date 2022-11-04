@@ -70,6 +70,7 @@ void osImsRadio_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsIm
 PUBLIC
 OsImsRadio::OsImsRadio(IN IMS_SINT32 nSlotId) :
         ImsRadio(nSlotId),
+        m_nId(0),
         m_piOwnerThread(IMS_NULL),
         m_objConnectionListeners(ImsMap<IMS_UINT32, IImsRadioConnectionListener*>()),
         m_objTrafficPriorityListeners(ImsList<IImsRadioTrafficPriorityListener*>())
@@ -215,14 +216,12 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
 
 PRIVATE IMS_UINT32 OsImsRadio::GetId()
 {
-    static IMS_UINT32 s_nId = 0;
-
-    if (s_nId == ID_MAX)
+    if (m_nId == ID_MAX)
     {
-        s_nId = 0;
+        m_nId = 0;
     }
 
-    return ++s_nId;
+    return ++m_nId;
 }
 
 PRIVATE void OsImsRadio::NotifyConnectionSetupPrepared(IN IMS_UINT32 nId)
