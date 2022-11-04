@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -118,7 +119,7 @@ public class SscTransactionTest {
                 connectionListener.onConnectionSetupPrepared();
             }
             return null;
-        }).when(mMockImsRadioInterface).startImsTraffic(anyInt(), anyInt(),
+        }).when(mMockImsRadioInterface).startImsTraffic(anyInt(), anyInt(), anyInt(),
                 mConnectionListenerCaptor.capture());
 
         AgentFactory.getInstance()
@@ -133,7 +134,7 @@ public class SscTransactionTest {
 
     @After
     public void tearDown() {
-        AgentFactory.getInstance().setAgent(null, mMockImsRadioInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(ImsRadioInterface.class, null, SLOT_0);
         mSscTransaction.close();
     }
 
@@ -145,7 +146,7 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false, false);
     }
 
     @Test
@@ -157,7 +158,7 @@ public class SscTransactionTest {
         sleepToWaitThreadRun();
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_DISCONNECTED);
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false, false);
     }
 
     @Test
@@ -169,7 +170,7 @@ public class SscTransactionTest {
         sleepToWaitThreadRun();
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT);
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false, false);
     }
 
     @Test
@@ -181,17 +182,18 @@ public class SscTransactionTest {
         sleepToWaitThreadRun();
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_CONNECTION_FAILED);
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false, false);
     }
 
     @Test
     public void startTransaction_imsRadioNull() {
         AgentFactory.getInstance().setAgent(ImsRadioInterface.class, null, SLOT_0);
+        mSscTransaction = new FakeSscTransaction(SLOT_0, mMockCallbackHandler);
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false, false);
     }
 
     @Test
@@ -202,7 +204,7 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false, false);
     }
 
     @Test
@@ -213,13 +215,13 @@ public class SscTransactionTest {
                 connectionListener.onConnectionFailed(0, 0, 0);
             }
             return null;
-        }).when(mMockImsRadioInterface).startImsTraffic(anyInt(), anyInt(),
+        }).when(mMockImsRadioInterface).startImsTraffic(anyInt(), anyInt(), anyInt(),
                 mConnectionListenerCaptor.capture());
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false, false);
     }
 
     @Test
@@ -235,7 +237,7 @@ public class SscTransactionTest {
                 connectionListener.onConnectionSetupPrepared(); // 2nd
             }
             return null;
-        }).when(mMockImsRadioInterface).startImsTraffic(anyInt(), anyInt(),
+        }).when(mMockImsRadioInterface).startImsTraffic(anyInt(), anyInt(), anyInt(),
                 mConnectionListenerCaptor.capture());
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
@@ -254,18 +256,21 @@ public class SscTransactionTest {
                 .thenReturn(ImsRadioInterface.ACCESS_NETWORK_TYPE_EUTRAN);
         when(mMockSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_IWLAN))
                 .thenReturn(ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN);
-        doNothing().when(mMockImsRadioInterface).startImsTraffic(anyInt(), anyInt(), any());
+        doNothing().when(mMockImsRadioInterface)
+                .startImsTraffic(anyInt(), anyInt(), anyInt(), any());
 
         mSscTransaction.startGetTransaction(getQueryData(SscConstant.CONDITION_CFU));
         sleepToWaitThreadRun();
 
         verify(mMockImsRadioInterface).startImsTraffic(eq(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP),
-                eq(ImsRadioInterface.ACCESS_NETWORK_TYPE_EUTRAN), any());
+                eq(ImsRadioInterface.ACCESS_NETWORK_TYPE_EUTRAN),
+                eq(ImsRadioInterface.DIRECTION_MO), any());
 
         triggerCallbackMessage(SscNetConnection.EVENT_PDN_IPCAN_CHANGED);
 
         verify(mMockImsRadioInterface).startImsTraffic(eq(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP),
-                eq(ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN), any());
+                eq(ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN),
+                eq(ImsRadioInterface.DIRECTION_MO), any());
     }
 
     @Test
@@ -277,7 +282,7 @@ public class SscTransactionTest {
 
         verify(mMockSscXui).getXui(eq(SLOT_0), eq(null));
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -289,7 +294,7 @@ public class SscTransactionTest {
 
         verify(mMockSscUrl).getQueryUri(any(), anyString());
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -324,7 +329,7 @@ public class SscTransactionTest {
         verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
         verify(mMockSscServiceStateAgent).setGbaRequestFailed(eq(SLOT_0), eq(true));
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -356,7 +361,7 @@ public class SscTransactionTest {
                 SscHttpConnection.HTTP_GET_REQUEST, mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -371,7 +376,7 @@ public class SscTransactionTest {
                 mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscServiceStateAgent).setSocketConnectionExpired(eq(SLOT_0), eq(true));
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -387,7 +392,7 @@ public class SscTransactionTest {
                 mDefaultRequestUri, mDefaultXui, "");
         verify(mMockSscServiceStateAgent).setDnsQueryFailed(eq(SLOT_0), eq(true));
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -410,7 +415,7 @@ public class SscTransactionTest {
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
         verify(mMockSscXmlGov).parseXmlStream(eq(queryData), any());
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, true);
     }
 
     @Test
@@ -428,7 +433,7 @@ public class SscTransactionTest {
         verify(mMockSscServiceStateAgent).setErrorResponseCode(eq(SLOT_0), eq(httpErrorResponse));
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -445,7 +450,7 @@ public class SscTransactionTest {
         verify(mMockSscAuthAgent).setIsCredentialInfoUpdated(eq(false));
         verify(mMockSscServiceStateAgent).setErrorResponseCode(eq(SLOT_0), eq(httpErrorResponse));
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -461,7 +466,7 @@ public class SscTransactionTest {
         mSscTransaction.startGetTransaction(queryData);
         sleepToWaitThreadRun();
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_QUERY_CF, true, false);
     }
 
     @Test
@@ -502,7 +507,7 @@ public class SscTransactionTest {
 
         verify(mMockSscXmlGov).createXmlStream(eq(updateData));
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CF, false);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CF, true, false);
     }
 
     @Test
@@ -528,7 +533,7 @@ public class SscTransactionTest {
         verify(mMockSscHttpConnectionGov).getInputStream(eq(SLOT_0));
         verify(mMockSscXmlGov).parseXmlStream(eq(updateData), any());
 
-        verifyTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CF, true);
+        verifyTransactionFailure(SscConstant.EVENT_SSC_UPDATE_CF, true, true);
     }
 
     @Test
@@ -647,11 +652,14 @@ public class SscTransactionTest {
         } else if (requestType == SscHttpConnection.HTTP_PUT_REQUEST) {
             assertNull(rr.getSscServiceData());
         }
+
+        verify(mMockImsRadioInterface).stopImsTraffic(any());
         verifyNoMoreInteractions(mMockCallbackHandler);
         verifyNoMoreInteractions(mMockSscServiceStateAgent);
     }
 
-    private void verifyTransactionFailure(int requestedEventNum, boolean isErrorPhraseExist) {
+    private void verifyTransactionFailure(int requestedEventNum, boolean xcapTrafficNotified,
+            boolean isErrorPhraseExist) {
         verify(mMockCallbackHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
 
         Message msg = mMessageCaptor.getValue();
@@ -667,6 +675,13 @@ public class SscTransactionTest {
             SscServiceData errorPhraseData = rr.getSscServiceData();
             assertNotNull(errorPhraseData);
         }
+
+        if (xcapTrafficNotified) {
+            verify(mMockImsRadioInterface).stopImsTraffic(any());
+        } else {
+            verify(mMockImsRadioInterface, never()).stopImsTraffic(any());
+        }
+
         verifyNoMoreInteractions(mMockCallbackHandler);
     }
 

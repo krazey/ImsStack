@@ -95,27 +95,6 @@ public class ImsRadioAgent implements ImsRadioInterface {
         });
     }
 
-    // deprecated
-    @Override
-    public void startImsTraffic(int trafficType, int accessNetworkType,
-            ConnectionListener listener) {
-
-        ImsLog.d(mSlotId, "startImsTraffic - type=" + trafficType);
-
-        mConnectionListeners.put(trafficType, listener);
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                ConnectionListener listener = mConnectionListeners.get(trafficType);
-
-                if (listener != null) {
-                    listener.onConnectionSetupPrepared();
-                }
-            }
-        });
-    }
-
     @Override
     public void stopImsTraffic(ConnectionListener listener) {
         for (Integer i : mConnectionListeners.keySet()) {
@@ -126,14 +105,6 @@ public class ImsRadioAgent implements ImsRadioInterface {
         }
 
         ImsLog.d(mSlotId, "stopImsTraffic - size=" + mConnectionListeners.size());
-    }
-
-    // deprecated
-    @Override
-    public void stopImsTraffic(int trafficType) {
-        ImsLog.d(mSlotId, "stopImsTraffic - type=" + trafficType);
-
-        mConnectionListeners.remove(trafficType);
     }
 
     @Override

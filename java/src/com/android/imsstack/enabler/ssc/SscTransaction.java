@@ -56,6 +56,30 @@ public class SscTransaction {
     private Thread mSscTransactionThread = null;
     private HttpTransaction mTransaction = null;
 
+    /**
+     * This is listener to check if the XCAP traffic can be processed now.
+     */
+    private final ConnectionListener mConnectionListener = new ConnectionListener() {
+        @Override
+        public void onConnectionFailed(int failureReason, int causeCode, int waitTimeMillis) {
+            ImsLog.e(mSlotId, "starting XCAP traffic failed. failureReason = " + failureReason
+                    + ", causeCode = " + causeCode);
+            sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+        }
+
+        @Override
+        public void onConnectionSetupPrepared() {
+            if (!mXcapTrafficStarted) {
+                if (mTransactionHandler != null) {
+                    // mXcapTrafficStarted will never be false once it's set as true to prevent
+                    // unintended HTTP requests for one XCAP transaction
+                    mXcapTrafficStarted = true;
+                    mTransactionHandler.sendEmptyMessage(EVENT_SEND_HTTP_REQUEST);
+                }
+            }
+        }
+    };
+
     public SscTransaction(int slotId, Handler handler) {
         mSlotId = slotId;
         mXmlGov = getSscXmlGov();
@@ -72,7 +96,7 @@ public class SscTransaction {
 
         if (mImsRadio != null) {
             if (mXcapTrafficNotified) {
-                mImsRadio.stopImsTraffic(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP);
+                mImsRadio.stopImsTraffic(mConnectionListener);
                 mXcapTrafficNotified = false;
             }
         }
@@ -461,27 +485,7 @@ public class SscTransaction {
             ImsLog.d(mSlotId, "access network type is : " + convertedNetworkType);
 
             mImsRadio.startImsTraffic(ImsRadioInterface.TRAFFIC_TYPE_UT_XCAP, convertedNetworkType,
-                    new ConnectionListener() {
-                        @Override
-                        public void onConnectionFailed(int failureReason, int causeCode,
-                                int waitTimeMillis) {
-                            ImsLog.e(mSlotId, "starting XCAP traffic failed. failureReason = "
-                                    + failureReason + ", causeCode = " + causeCode);
-                            sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-                        }
-
-                        @Override
-                        public void onConnectionSetupPrepared() {
-                            if (!mXcapTrafficStarted) {
-                                if (mTransactionHandler != null) {
-                                    // mXcapTrafficStarted will never be false once it's set as true
-                                    // to prevent unintended HTTP requests for one XCAP transaction
-                                    mXcapTrafficStarted = true;
-                                    mTransactionHandler.sendEmptyMessage(EVENT_SEND_HTTP_REQUEST);
-                                }
-                            }
-                        }
-                    });
+                    ImsRadioInterface.DIRECTION_MO, mConnectionListener);
             mXcapTrafficNotified = true;
         }
     }
