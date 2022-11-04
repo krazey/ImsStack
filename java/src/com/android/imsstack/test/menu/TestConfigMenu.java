@@ -338,7 +338,7 @@ public class TestConfigMenu extends PreferenceActivity {
                 if ("1".equals(value)) {
                     ImsLog.d(mSlotId, "TestConfig: restart ImsStack.");
 
-                    Toast.makeText(getApplicationContext(),
+                    Toast.makeText(TestConfigMenu.this,
                             "ImsStack restarted...", Toast.LENGTH_SHORT).show();
                     android.os.Process.killProcess(android.os.Process.myPid());
                 }
