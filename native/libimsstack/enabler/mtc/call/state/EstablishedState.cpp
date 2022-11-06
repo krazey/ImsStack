@@ -64,9 +64,11 @@ PUBLIC VIRTUAL void EstablishedState::OnEnter()
                 {
                     return m_objContext.RunPendingOperationIfPossible();
                 });
-        return;
     }
-    m_objContext.RunPendingOperationIfPossible();
+    else
+    {
+        m_objContext.RunPendingOperationIfPossible();
+    }
 }
 
 PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
@@ -366,11 +368,11 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingMediaDataFailed(
     CallType eCallType = m_objContext.GetSession()->GetCallType();
     if (eMediaType == MEDIATYPE_VIDEO && eCallType == CallType::VT)
     {
-        // TODO: downgrade to voip
+        return Downgrade(CallType::VOIP);
     }
     else if (eMediaType == MEDIATYPE_TEXT && eCallType == CallType::RTT)
     {
-        // TODO: downgrade to voip
+        return Downgrade(CallType::VOIP);
     }
     // TODO: check VIDEO_RTT case
 
@@ -635,7 +637,7 @@ void EstablishedState::AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer)
 }
 
 PRIVATE
-IMS_BOOL EstablishedState::IsConferenceCallParticipant()
+IMS_BOOL EstablishedState::IsConferenceCallParticipant() const
 {
     IMSList<IMtcCall*> objConfCalls = m_objContext.GetCallManager().GetCallsInConference();
     if (objConfCalls.GetSize() == 0)
@@ -674,6 +676,38 @@ IMSList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
 }
 
 PRIVATE
+CallStateName EstablishedState::Downgrade(IN CallType eCallType)
+{
+    IMS_TRACE_I("Downgrade [%d]", eCallType, 0, 0);
+
+    MediaInfo objMediaInfo;
+    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+    MediaInfo* pMediaInfo = new MediaInfo(objMediaInfo);
+
+    // Assumption : no case to downgrade from VIDEO_RTT to VOIP directly
+    if (eCallType == CallType::VOIP || eCallType == CallType::VT)
+    {
+        pMediaInfo->eTDir = DIRECTION_INVALID;
+        pMediaInfo->eGTTMode = GTT_MODE_INVALID;
+    }
+
+    if (eCallType == CallType::VOIP || eCallType == CallType::RTT)
+    {
+        pMediaInfo->eVDir = DIRECTION_INVALID;
+        pMediaInfo->eVQuality = VIDEO_QUALITY_NONE;
+    }
+
+    return Update(eCallType, pMediaInfo);
+}
+
+PRIVATE
+IMS_BOOL EstablishedState::IsRefreshInProgress() const
+{
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    return piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress();
+}
+
+PRIVATE
 CallStateName EstablishedState::TerminateUssiAfterInfoTransaction()
 {
     IMS_TRACE_D("TerminateUssiAfterInfoTransaction", 0, 0, 0);
@@ -684,11 +718,4 @@ CallStateName EstablishedState::TerminateUssiAfterInfoTransaction()
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
     return CallStateName::TERMINATING;
-}
-
-PRIVATE
-IMS_BOOL EstablishedState::IsRefreshInProgress() const
-{
-    IMtcSession* piMtcSession = m_objContext.GetSession();
-    return piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress();
 }
