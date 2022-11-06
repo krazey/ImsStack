@@ -26,7 +26,6 @@
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
-#include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -225,13 +224,8 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTermin
 
     pEpsFbTrigger->TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_RESPONSE);
 
-    MockIMtcCallManager objManager;
     MockIMtcCall objCall;
-
-    CallKey nAnyKey = 1;
-    ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objManager));
-    ON_CALL(objContext, GetCallKey).WillByDefault(Return(nAnyKey));
-    ON_CALL(objManager, GetCallByCallKey(nAnyKey)).WillByDefault(Return(&objCall));
+    ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objCall));
 
     EXPECT_CALL(objCall,
             Terminate(CallReasonInfo(

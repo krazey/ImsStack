@@ -24,7 +24,6 @@
 #include "ServiceTrace.h"
 #include "call/EpsFallbackTrigger.h"
 #include "call/IMtcCallContext.h"
-#include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -137,10 +136,8 @@ PUBLIC VIRTUAL void EpsFallbackTrigger::Timer_TimerExpired(IN ITimer* piTimer)
         m_piTimerEpsFallbackWait = IMS_NULL;
         m_bWaitingEpsFallbackForNoResponse = IMS_FALSE;
 
-        m_objContext.GetCallManager()
-                .GetCallByCallKey(m_objContext.GetCallKey())
-                ->Terminate(CallReasonInfo(
-                        CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+        m_objContext.GetCall().Terminate(CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
         m_objContext.GetService().GetAosConnector()->NotifyEpsfbCallState(
                 IImsAosInfo::EPSFB_CALL_FAILED);
     }

@@ -171,8 +171,14 @@ public:
      *
      * @return
      */
-    virtual ImsList<IMtcCall*> GetOtherCalls() = 0;
+    virtual IMtcCall& GetCall() = 0;
 
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual ImsList<IMtcCall*> GetOtherCalls() = 0;
     /**
      * @brief Sets
      *

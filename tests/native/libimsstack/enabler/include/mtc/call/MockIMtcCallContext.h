@@ -67,6 +67,7 @@ public:
     MOCK_METHOD(EpsFallbackTrigger&, GetEpsFallbackTrigger, (), (override));
     MOCK_METHOD(UdpKeepAliveSender&, GetUdpKeepAliveSender, (), (override));
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
+    MOCK_METHOD(IMtcCall&, GetCall, (), (override));
     MOCK_METHOD(ImsList<IMtcCall*>, GetOtherCalls, (), (override));
     MOCK_METHOD(void, SetHeldByMe, (IMS_BOOL), (override));
     MOCK_METHOD(IMtcSession*, CreateSession, (IN ISession* piSession), (override));

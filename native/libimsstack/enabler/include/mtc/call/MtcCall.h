@@ -141,6 +141,7 @@ public:
         return m_objPreconditionManager;
     }
     inline UssiController* GetUssiController() override { return m_pUssiController; }
+    inline IMtcCall& GetCall() override { return *(IMtcCall*)this; }
     inline ImsList<IMtcCall*> GetOtherCalls() override
     {
         return GetCallManager().GetCallsExcluding(GetKey());
