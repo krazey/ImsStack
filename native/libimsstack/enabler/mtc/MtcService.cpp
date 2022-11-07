@@ -59,7 +59,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_pAosEventHandler(IMS_NULL),
         m_pSrvccStateManager(IMS_NULL),
         m_pRoutingRejectHandler(IMS_NULL),
-        m_bTerminalBasedCallWaitingEnabled(IMS_FALSE)
+        m_eTbcwStatus(TbcwStatus::UNPROVISIONED)
 {
     IMS_TRACE_I("+MtcService [slot_%d][type:%d]", m_objContext.GetSlotId(), m_eType, 0);
     Init();
@@ -153,7 +153,9 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled
     {
         if (objTerminalBasedServices.GetAt(i) == CarrierConfig::ImsSs::SUPPLEMENTARY_SERVICE_CW)
         {
-            m_bTerminalBasedCallWaitingEnabled = bEnabled;
+            IMS_TRACE_I("SetTerminalBasedCallWaiting provisioned", 0, 0, 0);
+            m_eTbcwStatus =
+                    bEnabled ? TbcwStatus::PROVISIONED_ENABLED : TbcwStatus::PROVISIONED_DISABLED;
             break;
         }
     }

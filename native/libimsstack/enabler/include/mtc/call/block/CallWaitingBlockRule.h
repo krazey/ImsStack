@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef TERMINAL_BASED_CALL_WAITING_BLOCK_RULE_H_
-#define TERMINAL_BASED_CALL_WAITING_BLOCK_RULE_H_
+#ifndef CALL_WAITING_BLOCK_RULE_H_
+#define CALL_WAITING_BLOCK_RULE_H_
 
 #include "ImsTypeDef.h"
 #include "call/block/IMtcBlockRule.h"
@@ -24,14 +24,13 @@ class IMtcCall;
 class IMtcCallContext;
 class IMtcCallManager;
 
-class TerminalBasedCallWaitingBlockRule final : public IMtcBlockRule
+class CallWaitingBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit TerminalBasedCallWaitingBlockRule(IN IMtcCallContext& objContext);
-    virtual ~TerminalBasedCallWaitingBlockRule();
-    TerminalBasedCallWaitingBlockRule(IN const TerminalBasedCallWaitingBlockRule&) = delete;
-    TerminalBasedCallWaitingBlockRule& operator=(
-            IN const TerminalBasedCallWaitingBlockRule&) = delete;
+    explicit CallWaitingBlockRule(IN IMtcCallContext& objContext);
+    virtual ~CallWaitingBlockRule();
+    CallWaitingBlockRule(IN const CallWaitingBlockRule&) = delete;
+    CallWaitingBlockRule& operator=(IN const CallWaitingBlockRule&) = delete;
 
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 

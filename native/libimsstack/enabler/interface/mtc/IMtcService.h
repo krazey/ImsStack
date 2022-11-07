@@ -29,6 +29,7 @@ class ISrvccStateListener;
 enum class ServiceStatus;
 enum class ServiceType;
 enum class SrvccState;
+enum class TbcwStatus;
 
 class IMtcService : public INativeEnabler
 {
@@ -145,7 +146,7 @@ public:
      *
      * @return
      */
-    virtual IMS_BOOL IsTerminalBasedCallWaitingEnabled() const = 0;
+    virtual TbcwStatus GetTbcwStatus() const = 0;
 
     /**
      * @brief Opens
@@ -166,6 +167,13 @@ enum class ServiceType
     UNKNOWN = 0,
     NORMAL = 1 << 0,
     EMERGENCY = 1 << 1,
+};
+
+enum class TbcwStatus
+{
+    UNPROVISIONED,
+    PROVISIONED_ENABLED,
+    PROVISIONED_DISABLED,
 };
 
 #endif
