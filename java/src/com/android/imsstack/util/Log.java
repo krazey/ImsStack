@@ -127,6 +127,19 @@ public final class Log {
         sImsDebug = imsDebug ? 1 : 0;
     }
 
+    /** Sets the log options. */
+    public static void setLogOptions(int logOptions) {
+        sLogOptions = logOptions;
+    }
+
+    private static boolean isLogEnabled(int option) {
+        if (sLogOptions == -1) {
+            // All logs are available as default if it's not initialized.
+            return true;
+        }
+        return (sLogOptions & option) == option;
+    }
+
     /**
      * Returns a string that is a substring of this string.
      * The substring begins at the start of this string and
@@ -223,13 +236,5 @@ public final class Log {
 
             return s.substring(start, end);
         }
-    }
-
-    private static boolean isLogEnabled(int option) {
-        if (sLogOptions == -1) {
-            sLogOptions = LogUtils.getLogOptions(0);
-        }
-
-        return (sLogOptions & option) == option;
     }
 }

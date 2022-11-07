@@ -36,6 +36,7 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
+import com.android.imsstack.util.LogUtils;
 import com.android.imsstack.util.MSimUtils;
 
 /**
@@ -54,6 +55,8 @@ public class ImsStackApp extends Application {
         // AppContext will be used globally,
         // so it should be initialized first at the creation time of ImsStack application.
         AppContext.init(this);
+        // Sets the log options once when ImsStack is created.
+        Log.setLogOptions(LogUtils.getLogOptions(0));
 
         Log.i(TAG, "onCreate");
         init();
