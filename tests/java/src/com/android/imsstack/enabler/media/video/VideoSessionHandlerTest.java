@@ -133,6 +133,8 @@ public class VideoSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         testParcel.writeString(LOCAL_RTP_ADDRESS);
         testParcel.writeInt(LOCAL_RTP_PORT);
+        VideoConfig videoConfig = MediaTestUtils.createVideoConfig();
+        videoConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
         // OpenSession Received
         mVideoSessionHandler.setVideoSession(null);
@@ -141,7 +143,7 @@ public class VideoSessionHandlerTest {
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockImsMediaManager).openSession(eq(mMockRtpSocket), eq(mMockRtpSocket),
-                eq(ImsMediaSession.SESSION_TYPE_VIDEO), eq(null), eq(mMockExecutor),
+                eq(ImsMediaSession.SESSION_TYPE_VIDEO), eq(videoConfig), eq(mMockExecutor),
                 eq(mVideoSessionCallback));
     }
 

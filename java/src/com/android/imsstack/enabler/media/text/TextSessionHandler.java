@@ -58,6 +58,7 @@ public class TextSessionHandler  {
     private QosAgent mTextQosAgent;
     private TextImsQosCallback mTextImsQosCallback;
     private InetSocketAddress mRemoteAddress;
+    private Object mLock = new Object();
 
     public TextSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
@@ -121,7 +122,29 @@ public class TextSessionHandler  {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.v("msg.what= " + msg.what);
+            ImsLog.v("messageType = " + msg.what);
+
+            // Till open session response is received, handling other commands has to wait
+            try {
+                synchronized (mLock) {
+                    if (mTextSession == null && msg.what != MediaConstants.REQUEST_OPEN_SESSION
+                                && msg.what != MediaConstants.RESPONSE_OPEN_SESSION) {
+                        ImsLog.d(Thread.currentThread().getName()
+                                + " is waiting for Text openSession response");
+                        mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
+                        if (mTextSession == null) {
+                            ImsLog.d("Text openSession response timeout");
+                            handleOpenSessionResponse(null, ImsMediaSession.RESULT_NOT_READY);
+                            return;
+                        }
+                        ImsLog.d(Thread.currentThread().getName()
+                                + " received Text openSession response");
+                    }
+                }
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+
             switch (msg.what) {
                 case MediaConstants.REQUEST_OPEN_SESSION:
                 {
@@ -196,6 +219,11 @@ public class TextSessionHandler  {
 
         @Override
         public void onOpenSessionSuccess(ImsMediaSession session) {
+            // Release the wait as OpenSession Response is received
+            synchronized (mLock) {
+                mTextSession = (ImsTextSession) session;
+                mLock.notifyAll();
+            }
             Message.obtain(mTextMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     ImsMediaSession.RESULT_SUCCESS, UNUSED, session).sendToTarget();
         }
@@ -203,7 +231,10 @@ public class TextSessionHandler  {
         @Override
         public void onOpenSessionFailure(final @ImsMediaSession.SessionOperationResult int error) {
             ImsLog.d("error=" + error);
-
+            // Release the wait as OpenSession Response is received
+            synchronized (mLock) {
+                mLock.notifyAll();
+            }
             Message.obtain(mTextMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     error, UNUSED, null).sendToTarget();
         }
@@ -412,6 +443,9 @@ public class TextSessionHandler  {
             }
             mTextSession.modifySession(textConfig);
         }
+        else {
+            handleModifySessionResponse(textConfig, ImsMediaSession.RESULT_NOT_READY);
+        }
     }
 
     private void handleSendRtt(String rttMessage) {
@@ -437,7 +471,6 @@ public class TextSessionHandler  {
                 return;
             }
 
-            mTextSession = (ImsTextSession) session;
             mTextSessionId = mTextSession.getSessionId();
             ImsLog.d("Text Session created: SessionId=" + mTextSessionId);
         }
