@@ -29,6 +29,7 @@ const AString MtcExtensionSet::OPTION_TAG_HISTORY_INFO = "histinfo";
 const AString MtcExtensionSet::OPTION_TAG_PRECONDITION = "precondition";
 const AString MtcExtensionSet::OPTION_TAG_REPLACES = "replaces";
 const AString MtcExtensionSet::OPTION_TAG_RPR = "100rel";
+const AString MtcExtensionSet::OPTION_TAG_SESSION_TIMER = "timer";
 const AString MtcExtensionSet::OPTION_TAG_TARGET_DIALOG = "tdialog";
 
 PUBLIC
@@ -98,7 +99,7 @@ IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& pMessag
         if (!IsAvailableOnLocal(strOptionTag))
         {
             IMS_TRACE_I(
-                    "IsSupportRequiredExtensions : Not support %s", strOptionTag.GetStr(), 0, 0);
+                    "IsSupportRequiredExtensions : Not support [%s]", strOptionTag.GetStr(), 0, 0);
             return IMS_FALSE;
         }
     }
