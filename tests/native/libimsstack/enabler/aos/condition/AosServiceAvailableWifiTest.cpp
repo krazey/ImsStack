@@ -43,23 +43,23 @@ using ::testing::StrEq;
 class AosServiceAvailableWifiTest : public ::testing::Test
 {
 public:
-    AosServiceAvailableWifi* pAosServiceAvailableWifi;
+    AosServiceAvailableWifi* m_pAosServiceAvailableWifi;
     IAosNConfiguration* m_piOriginConfiguration;
 
 protected:
     virtual void SetUp() override
     {
-        pAosServiceAvailableWifi = new AosServiceAvailableWifi();
-        ASSERT_TRUE(pAosServiceAvailableWifi != nullptr);
+        m_pAosServiceAvailableWifi = new AosServiceAvailableWifi();
+        ASSERT_TRUE(m_pAosServiceAvailableWifi != nullptr);
 
         m_piOriginConfiguration = AosProvider::GetInstance()->GetNConfiguration();
     }
 
     virtual void TearDown() override
     {
-        if (pAosServiceAvailableWifi)
+        if (m_pAosServiceAvailableWifi)
         {
-            delete pAosServiceAvailableWifi;
+            delete m_pAosServiceAvailableWifi;
         }
 
         AosProvider::GetInstance()->SetNConfiguration(m_piOriginConfiguration, 0);
@@ -67,83 +67,92 @@ protected:
 
     void SetCallTracker(IN IAosCallTracker* piCallTracker)
     {
-        pAosServiceAvailableWifi->m_piCallTracker = piCallTracker;
+        m_pAosServiceAvailableWifi->m_piCallTracker = piCallTracker;
     }
 
-    IAosCallTracker* GetCallTracker() { return pAosServiceAvailableWifi->m_piCallTracker; }
+    IAosCallTracker* GetCallTracker() { return m_pAosServiceAvailableWifi->m_piCallTracker; }
 
     void SetRegistration(IN IAosRegistration* piRegistration)
     {
-        pAosServiceAvailableWifi->m_piRegistration = piRegistration;
+        m_pAosServiceAvailableWifi->m_piRegistration = piRegistration;
     }
 
-    IAosRegistration* GetRegistration() { return pAosServiceAvailableWifi->m_piRegistration; }
+    IAosRegistration* GetRegistration() { return m_pAosServiceAvailableWifi->m_piRegistration; }
 
     void SetConnection(IN IAosConnection* piConnection)
     {
-        pAosServiceAvailableWifi->m_piConnection = piConnection;
+        m_pAosServiceAvailableWifi->m_piConnection = piConnection;
     }
 
-    IAosConnection* GetConnection() { return pAosServiceAvailableWifi->m_piConnection; }
+    IAosConnection* GetConnection() { return m_pAosServiceAvailableWifi->m_piConnection; }
 
     void SetBadNetworkState(IN IMS_UINT32 nState)
     {
-        pAosServiceAvailableWifi->m_nBadNetworkState = nState;
+        m_pAosServiceAvailableWifi->m_nBadNetworkState = nState;
     }
 
-    IMS_UINT32 GetBadNetworkState() { return pAosServiceAvailableWifi->m_nBadNetworkState; }
+    IMS_UINT32 GetBadNetworkState() { return m_pAosServiceAvailableWifi->m_nBadNetworkState; }
 
-    void SetWifiState(IN IMS_BOOL bState) { pAosServiceAvailableWifi->m_bWiFiState = bState; }
+    void SetWifiState(IN IMS_BOOL bState) { m_pAosServiceAvailableWifi->m_bWiFiState = bState; }
 
-    IMS_BOOL GetWifiState() { return pAosServiceAvailableWifi->m_bWiFiState; }
+    IMS_BOOL GetWifiState() { return m_pAosServiceAvailableWifi->m_bWiFiState; }
 
-    void SetCountry(IN AString& strCountry) { pAosServiceAvailableWifi->m_strCountry = strCountry; }
+    void SetCountry(IN AString& strCountry)
+    {
+        m_pAosServiceAvailableWifi->m_strCountry = strCountry;
+    }
 
-    AString& GetCountry() { return pAosServiceAvailableWifi->m_strCountry; }
+    AString& GetCountry() { return m_pAosServiceAvailableWifi->m_strCountry; }
 
-    void SetAosBlock(IN IAosBlock* piBlock) { pAosServiceAvailableWifi->m_piBlock = piBlock; }
+    void SetAosBlock(IN IAosBlock* piBlock) { m_pAosServiceAvailableWifi->m_piBlock = piBlock; }
 
     void SetTestLocation(IN ILocationProperties* piTestLocation)
     {
-        pAosServiceAvailableWifi->m_piTestLocation = piTestLocation;
+        m_pAosServiceAvailableWifi->m_piTestLocation = piTestLocation;
     }
 
     void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher)
     {
-        pAosServiceAvailableWifi->WifiWatcher_NotifyStateChanged(pIWifiWatcher);
+        m_pAosServiceAvailableWifi->WifiWatcher_NotifyStateChanged(pIWifiWatcher);
     }
 
     void NetworkPing_NotifyResult(IN INetworkPing* piPing, IN IMS_SINT32 nResult)
     {
-        pAosServiceAvailableWifi->NetworkPing_NotifyResult(piPing, nResult);
+        m_pAosServiceAvailableWifi->NetworkPing_NotifyResult(piPing, nResult);
     }
 
     void HandleCallStateChanged(IN IMS_UINT32 nState, IN CallState eStateEx)
     {
-        pAosServiceAvailableWifi->HandleCallStateChanged(nState, static_cast<IMS_SINT32>(eStateEx));
+        m_pAosServiceAvailableWifi->HandleCallStateChanged(
+                nState, static_cast<IMS_SINT32>(eStateEx));
     }
 
     void HandleRoamingChanged(IN IMS_UINT32 nState)
     {
-        pAosServiceAvailableWifi->HandleRoamingChanged(nState);
+        m_pAosServiceAvailableWifi->HandleRoamingChanged(nState);
     }
 
     void HandleAirplaneModeChanged(IN IMS_UINT32 nState)
     {
-        pAosServiceAvailableWifi->HandleAirplaneModeChanged(nState);
+        m_pAosServiceAvailableWifi->HandleAirplaneModeChanged(nState);
+    }
+
+    void HandleWiFiConnectionChanged()
+    {
+        m_pAosServiceAvailableWifi->HandleWiFiConnectionChanged();
     }
 
     void ProcessBadConnectionReported()
     {
-        pAosServiceAvailableWifi->ProcessBadConnectionReported();
+        m_pAosServiceAvailableWifi->ProcessBadConnectionReported();
     }
 
     const IMS_CHAR* PingResultToString(IN IMS_SINT32 nResult)
     {
-        return pAosServiceAvailableWifi->PingResultToString(nResult);
+        return m_pAosServiceAvailableWifi->PingResultToString(nResult);
     }
 
-    void HandleLocationInfoChanged() { pAosServiceAvailableWifi->HandleLocationInfoChanged(); }
+    void HandleLocationInfoChanged() { m_pAosServiceAvailableWifi->HandleLocationInfoChanged(); }
 };
 
 TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_CallTrackerNull)
@@ -151,7 +160,7 @@ TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_CallTrackerNul
     SetCallTracker(IMS_NULL);
     EXPECT_EQ(GetCallTracker(), nullptr);
 
-    EXPECT_FALSE(pAosServiceAvailableWifi->StartToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StartToCheckNetworkConnection());
 }
 
 TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_EmergencyActive)
@@ -164,7 +173,7 @@ TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_EmergencyActiv
     SetCallTracker(static_cast<IAosCallTracker*>(&objMockIAosCallTracker));
     EXPECT_NE(GetCallTracker(), nullptr);
 
-    EXPECT_FALSE(pAosServiceAvailableWifi->StartToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StartToCheckNetworkConnection());
 }
 
 TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_RegistrationNull)
@@ -180,7 +189,7 @@ TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_RegistrationNu
     SetRegistration(IMS_NULL);
     EXPECT_EQ(GetRegistration(), nullptr);
 
-    EXPECT_FALSE(pAosServiceAvailableWifi->StartToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StartToCheckNetworkConnection());
 }
 
 TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_RegistrationRegistered)
@@ -201,7 +210,7 @@ TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_RegistrationRe
     SetRegistration(static_cast<IAosRegistration*>(&objMockIAosRegistration));
     EXPECT_NE(GetRegistration(), nullptr);
 
-    EXPECT_FALSE(pAosServiceAvailableWifi->StartToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StartToCheckNetworkConnection());
 }
 
 TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_BadNetworkState)
@@ -223,10 +232,10 @@ TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_BadNetworkStat
     EXPECT_NE(GetRegistration(), nullptr);
 
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_CHECKING);
-    EXPECT_FALSE(pAosServiceAvailableWifi->StartToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StartToCheckNetworkConnection());
 
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
-    EXPECT_FALSE(pAosServiceAvailableWifi->StartToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StartToCheckNetworkConnection());
 }
 
 TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_NormalCallActive)
@@ -262,36 +271,55 @@ TEST_F(AosServiceAvailableWifiTest, StartToCheckNetworkConnection_NormalCallActi
 
     SetConnection(static_cast<IAosConnection*>(&objMockIAosConnection));
 
-    EXPECT_FALSE(pAosServiceAvailableWifi->StartToCheckNetworkConnection());
-    EXPECT_TRUE(pAosServiceAvailableWifi->StartToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StartToCheckNetworkConnection());
+    EXPECT_TRUE(m_pAosServiceAvailableWifi->StartToCheckNetworkConnection());
 }
 
 TEST_F(AosServiceAvailableWifiTest, StopToCheckNetworkConnection_BadNetworkNone)
 {
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
-    EXPECT_FALSE(pAosServiceAvailableWifi->StopToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StopToCheckNetworkConnection());
 }
 
 TEST_F(AosServiceAvailableWifiTest, StopToCheckNetworkConnection_BadNetworkDetected)
 {
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
-    EXPECT_TRUE(pAosServiceAvailableWifi->StopToCheckNetworkConnection());
+    EXPECT_TRUE(m_pAosServiceAvailableWifi->StopToCheckNetworkConnection());
 }
 
 TEST_F(AosServiceAvailableWifiTest, StopToCheckNetworkConnection_BadNetworkChecking)
 {
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_CHECKING);
-    EXPECT_FALSE(pAosServiceAvailableWifi->StopToCheckNetworkConnection());
+    EXPECT_FALSE(m_pAosServiceAvailableWifi->StopToCheckNetworkConnection());
+}
+
+TEST_F(AosServiceAvailableWifiTest, WifiWatcher_NotifyStateChanged_IWifiWatcherIsNull)
+{
+    // Test : IWifiWatcher is NULL
+    SetWifiState(IMS_TRUE);
+    WifiWatcher_NotifyStateChanged(IMS_NULL);
+    EXPECT_TRUE(GetWifiState());
+
+    SetWifiState(IMS_FALSE);
+    WifiWatcher_NotifyStateChanged(IMS_NULL);
+    EXPECT_FALSE(GetWifiState());
 }
 
 TEST_F(AosServiceAvailableWifiTest, WifiWatcher_NotifyStateChanged_WifiWatcherConnected)
 {
     MockIWifiWatcher objMockIWifiWatcher;
     EXPECT_CALL(objMockIWifiWatcher, GetState())
-            .Times(1)
-            .WillOnce(Return(IWifiWatcher::STATE_CONNECTED));
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
 
+    // Test1 : m_bWiFiState is IMS_FALSE
     SetWifiState(IMS_FALSE);
+    WifiWatcher_NotifyStateChanged(static_cast<IWifiWatcher*>(&objMockIWifiWatcher));
+
+    EXPECT_TRUE(GetWifiState());
+
+    // Test2 : m_bWiFiState is IMS_TRUE
+    SetWifiState(IMS_TRUE);
     WifiWatcher_NotifyStateChanged(static_cast<IWifiWatcher*>(&objMockIWifiWatcher));
 
     EXPECT_TRUE(GetWifiState());
@@ -301,10 +329,17 @@ TEST_F(AosServiceAvailableWifiTest, WifiWatcher_NotifyStateChanged_WifiWatcherDi
 {
     MockIWifiWatcher objMockIWifiWatcher;
     EXPECT_CALL(objMockIWifiWatcher, GetState())
-            .Times(1)
-            .WillOnce(Return(IWifiWatcher::STATE_DISCONNECTED));
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
 
+    // Test1 : m_bWiFiState is IMS_TRUE
     SetWifiState(IMS_TRUE);
+    WifiWatcher_NotifyStateChanged(static_cast<IWifiWatcher*>(&objMockIWifiWatcher));
+
+    EXPECT_FALSE(GetWifiState());
+
+    // Test2 : m_bWiFiState is IMS_FALSE
+    SetWifiState(IMS_FALSE);
     WifiWatcher_NotifyStateChanged(static_cast<IWifiWatcher*>(&objMockIWifiWatcher));
 
     EXPECT_FALSE(GetWifiState());
@@ -463,6 +498,64 @@ TEST_F(AosServiceAvailableWifiTest, HandleAirplaneModeChanged_AirplaneModeFalse)
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
 
     HandleAirplaneModeChanged(0);
+}
+
+TEST_F(AosServiceAvailableWifiTest, HandleWiFiConnectionChanged)
+{
+    // Test1 : WifiState is IMS_FALSE, BadNetworkState is STATE_BAD_NETWORK_DETECTED.
+    MockIAosBlock objMockIAosBlock1;
+    SetWifiState(IMS_FALSE);
+    SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
+
+    EXPECT_CALL(objMockIAosBlock1, SetBlockReason(BLOCK_WIFI_NO_WIFI, _)).Times(1);
+    EXPECT_CALL(objMockIAosBlock1, SetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _)).Times(1);
+    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock1));
+
+    HandleWiFiConnectionChanged();
+
+    // Test2 : WifiState is IMS_TRUE, BadNetworkState is not STATE_BAD_NETWORK_DETECTED.
+    MockIAosBlock objMockIAosBlock2;
+    SetWifiState(IMS_TRUE);
+    SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
+
+    EXPECT_CALL(objMockIAosBlock2, ResetBlockReason(BLOCK_WIFI_NO_WIFI, _)).Times(1);
+    EXPECT_CALL(objMockIAosBlock2, ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _)).Times(1);
+    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock2));
+
+    HandleWiFiConnectionChanged();
+
+    // Test3 : WifiState is IMS_FALSE, BadNetworkState is not STATE_BAD_NETWORK_DETECTED
+    MockIAosBlock objMockIAosBlock3;
+    SetWifiState(IMS_FALSE);
+    SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
+
+    EXPECT_CALL(objMockIAosBlock3, SetBlockReason(BLOCK_WIFI_NO_WIFI, _)).Times(1);
+    EXPECT_CALL(objMockIAosBlock3, ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _)).Times(1);
+    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock3));
+
+    HandleWiFiConnectionChanged();
+
+    // Test4 : WifiState is IMS_TRUE, BadNetworkState is STATE_BAD_NETWORK_DETECTED.
+    MockIAosBlock objMockIAosBlock4;
+    SetWifiState(IMS_TRUE);
+    SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
+
+    EXPECT_CALL(objMockIAosBlock4, ResetBlockReason(BLOCK_WIFI_NO_WIFI, _)).Times(1);
+    EXPECT_CALL(objMockIAosBlock4, SetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _)).Times(1);
+    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock4));
+
+    HandleWiFiConnectionChanged();
+}
+
+TEST_F(AosServiceAvailableWifiTest, HandleLocationInfoChanged_TestLocationIsNull)
+{
+    SetTestLocation(IMS_NULL);
+
+    MockIAosBlock objMockIAosBlock;
+    EXPECT_CALL(objMockIAosBlock, ResetBlockReason(_, _)).Times(0);
+    SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
+
+    HandleLocationInfoChanged();
 }
 
 TEST_F(AosServiceAvailableWifiTest, HandleLocationInfoChanged_CountryNotSame)
