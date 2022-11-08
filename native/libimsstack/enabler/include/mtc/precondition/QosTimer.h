@@ -45,7 +45,7 @@ private:
     ITimer* GetTimer(IN QosTimerType eType);
 
 protected:
-    IMSMap<QosTimerType, ITimer*> m_objTimers;
+    ImsMap<QosTimerType, ITimer*> m_objTimers;
     IQosTimerListener* m_pQosTimerListener;
 };
 #endif

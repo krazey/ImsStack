@@ -48,6 +48,7 @@ public:
     MOCK_METHOD(void, RemovePreconditionSdp, (IN ISession* piSession), (override));
     MOCK_METHOD(IMS_UINT32, SetLocalResourceAvailable, (IN ISession* piSession), (override));
     MOCK_METHOD(void, SetRemoteResourceAvailable, (IN ISession* piSession), (override));
+    MOCK_METHOD(void, HandleQosOnIpcanChanged, (), (override));
 };
 
 #endif

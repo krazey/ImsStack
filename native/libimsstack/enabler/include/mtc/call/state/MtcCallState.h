@@ -172,7 +172,7 @@ protected:
         return GetStateName();
     }
 
-    inline virtual CallStateName HandleAosConnected() { return GetStateName(); }
+    virtual CallStateName HandleAosConnected();
     virtual CallStateName HandleAosDisconnected(IN IMS_UINT32 eAosReason);
 
     void HandleTerminate(IN const CallReasonInfo& objReason);

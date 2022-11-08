@@ -143,6 +143,8 @@ public:
      * @param piSession ISession instance to find the QosStatusTable.
      */
     virtual void SetRemoteResourceAvailable(IN ISession* piSession) = 0;
+
+    virtual void HandleQosOnIpcanChanged() = 0;
 };
 
 #endif

@@ -40,7 +40,7 @@ PUBLIC GLOBAL void SdpPreconditionHelper::FormPreconditionSdp(
         return;
     }
 
-    IMSList<IMedia*> lstMedias = piSession->GetMedia();
+    ImsList<IMedia*> lstMedias = piSession->GetMedia();
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
         IMedia* piMedia = lstMedias.GetAt(index);
@@ -91,7 +91,7 @@ PUBLIC GLOBAL void SdpPreconditionHelper::RemovePreconditionSdp(IN ISession* piS
         return;
     }
 
-    IMSList<IMedia*> lstMedias = piSession->GetMedia();
+    ImsList<IMedia*> lstMedias = piSession->GetMedia();
     IMS_UINT32 nSize = lstMedias.GetSize();
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
@@ -166,7 +166,7 @@ PUBLIC GLOBAL IMS_UINT32 SdpPreconditionHelper::GetMediaTypesBySdp(IN ISession* 
         return eMediaTypes;
     }
 
-    IMSList<IMedia*> lstMedias = piSession->GetMedia();
+    ImsList<IMedia*> lstMedias = piSession->GetMedia();
 
     IMS_UINT32 eLocalTypes = MEDIATYPE_NONE;
     IMS_UINT32 eRemoteTypes = MEDIATYPE_NONE;
@@ -222,7 +222,7 @@ PUBLIC GLOBAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN ISe
         return bResult;
     }
 
-    IMSList<IMedia*> lstMedias = piSession->GetMedia();
+    ImsList<IMedia*> lstMedias = piSession->GetMedia();
 
     for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
@@ -280,7 +280,7 @@ PUBLIC GLOBAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
         IMS_TRACE_D("IsLocalResourceReservedInSdp : Check QoS attributes from Response[%d]",
                 nServiceMethod, 0, 0);
 
-        IMSList<IMessage*> lstResponseMessages = piSession->GetPreviousResponses(nServiceMethod);
+        ImsList<IMessage*> lstResponseMessages = piSession->GetPreviousResponses(nServiceMethod);
         if (lstResponseMessages.GetSize() <= 0)
         {
             IMS_TRACE_D("IsLocalResourceReservedInSdp : no responses", 0, 0, 0);
@@ -532,7 +532,7 @@ PRIVATE GLOBAL IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
         return IMS_FALSE;
     }
 
-    const IMSList<SdpMediaDescription>& lstMediaDescriptions = objParser.GetMediaDescriptions();
+    const ImsList<SdpMediaDescription>& lstMediaDescriptions = objParser.GetMediaDescriptions();
 
     for (IMS_UINT32 i = 0; i < lstMediaDescriptions.GetSize(); i++)
     {
@@ -554,7 +554,7 @@ PRIVATE GLOBAL IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
             return IMS_FALSE;
         }
 
-        IMSList<SdpAttribute> objAttributes = objMediaDescription.GetAttributes(SdpAttribute::CURR);
+        ImsList<SdpAttribute> objAttributes = objMediaDescription.GetAttributes(SdpAttribute::CURR);
         if (objAttributes.GetSize() <= 0)
         {
             IMS_TRACE_D("HasReservedResourceInSdp : There's no Current attributes.", 0, 0, 0);

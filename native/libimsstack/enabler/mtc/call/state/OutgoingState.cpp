@@ -666,6 +666,7 @@ PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
                 CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT));
     }
 
+    m_objContext.GetPreconditionManager().HandleQosOnIpcanChanged();
     return GetStateName();
 }
 
