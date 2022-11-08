@@ -37,7 +37,7 @@
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/NetworkBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
-#include "call/block/TerminalBasedCallWaitingBlockRule.h"
+#include "call/block/CallWaitingBlockRule.h"
 #include "call/block/VopsBlockRule.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/IdleState.h"
@@ -453,7 +453,7 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new CallTypeBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
-    lstRules.Append(new TerminalBasedCallWaitingBlockRule(m_objContext));
+    lstRules.Append(new CallWaitingBlockRule(m_objContext));
     lstRules.Append(
             new CallTrafficBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     return lstRules;

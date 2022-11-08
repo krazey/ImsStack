@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
+#include "IMtcService.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
-#include "call/block/TerminalBasedCallWaitingBlockRule.h"
+#include "call/block/CallWaitingBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-TerminalBasedCallWaitingBlockRule::TerminalBasedCallWaitingBlockRule(
-        IN IMtcCallContext& objContext) :
+CallWaitingBlockRule::CallWaitingBlockRule(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
         m_objService(objContext.GetService())
 {
     IMS_ASSERT(objContext.GetCallInfo().ePeerType == PeerType::MT);
 }
 
-PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::~TerminalBasedCallWaitingBlockRule() {}
+PUBLIC VIRTUAL CallWaitingBlockRule::~CallWaitingBlockRule() {}
 
-PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitingBlockRule::Check(
+PUBLIC VIRTUAL CallWaitingBlockRule::Result CallWaitingBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
     if (!IsActiveCallExists(m_objContext.GetOtherCalls()))
@@ -40,7 +40,8 @@ PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitin
         return Result(Result::Status::UNBLOCKED);
     }
 
-    if (m_objService.IsTerminalBasedCallWaitingEnabled())
+    if (m_objService.GetTbcwStatus() == TbcwStatus::UNPROVISIONED ||
+            m_objService.GetTbcwStatus() == TbcwStatus::PROVISIONED_ENABLED)
     {
         return Result(Result::Status::UNBLOCKED);
     }
@@ -52,8 +53,7 @@ PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitin
 }
 
 PRIVATE
-IMS_BOOL TerminalBasedCallWaitingBlockRule::IsActiveCallExists(
-        IN const IMSList<IMtcCall*> lstCalls) const
+IMS_BOOL CallWaitingBlockRule::IsActiveCallExists(IN const IMSList<IMtcCall*> lstCalls) const
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {

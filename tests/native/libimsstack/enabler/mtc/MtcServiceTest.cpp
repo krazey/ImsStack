@@ -331,7 +331,7 @@ TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
 
 TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
 {
-    EXPECT_FALSE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
+    EXPECT_EQ(TbcwStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
 
     IMSVector<IMS_SINT32> objTbcw;
     objTbcw.Add(0);
@@ -344,17 +344,17 @@ TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
             .WillOnce(Return(objNoTbcw))
             .WillOnce(Return(objTbcw));
 
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
-    EXPECT_FALSE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
-
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
-    EXPECT_TRUE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
+    EXPECT_EQ(TbcwStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
 
     pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
-    EXPECT_TRUE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
+    EXPECT_EQ(TbcwStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
 
-    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_FALSE);
-    EXPECT_FALSE(pNormalMtcService->IsTerminalBasedCallWaitingEnabled());
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
+    EXPECT_EQ(TbcwStatus::PROVISIONED_DISABLED, pNormalMtcService->GetTbcwStatus());
+
+    pNormalMtcService->SetTerminalBasedCallWaiting(IMS_TRUE);
+    EXPECT_EQ(TbcwStatus::PROVISIONED_ENABLED, pNormalMtcService->GetTbcwStatus());
 }
 
 TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)

@@ -66,10 +66,7 @@ public:
 
     void UpdateSrvccState(IN SrvccState eState) override;
     void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) override;
-    IMS_BOOL IsTerminalBasedCallWaitingEnabled() const override
-    {
-        return m_bTerminalBasedCallWaitingEnabled;
-    }
+    TbcwStatus GetTbcwStatus() const override { return m_eTbcwStatus; }
     void OpenEmergencyService() override;
 
     inline void NotifyJniEnablerSet() override {}
@@ -117,7 +114,7 @@ protected:
     MtcAosEventHandler* m_pAosEventHandler;
     SrvccStateManager* m_pSrvccStateManager;
     MtcRoutingRejectHandler* m_pRoutingRejectHandler;
-    IMS_BOOL m_bTerminalBasedCallWaitingEnabled;
+    TbcwStatus m_eTbcwStatus;
 };
 
 #endif
