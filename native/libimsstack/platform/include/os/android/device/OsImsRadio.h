@@ -23,7 +23,7 @@
 
 class IThread;
 
-class OsImsRadio : public ImsRadio
+class OsImsRadio : public ImsRadio, public ISystemListener
 {
 public:
     OsImsRadio(IN IMS_SINT32 nSlotId);
@@ -47,9 +47,14 @@ public:
 
 protected:
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
 private:
+    IImsRadioConnectionListener* GetConnectionListener(IN IMS_UINT32 nId);
     IMS_UINT32 GetId();
+    void NotifyConnectionFailed(IN IMS_UINT32 nId, IN IMS_UINT32 nFailureReason,
+            IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
     void NotifyConnectionSetupPrepared(IN IMS_UINT32 nId);
     static const IMS_CHAR* EventToString(IN IMS_UINT32 nEvent);
 

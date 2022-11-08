@@ -24,6 +24,11 @@ public interface ISystem {
     public void setSystemCallInterface(SystemCallInterface systemCall);
 
     /**
+     * set system radio interface
+     */
+    void setSystemRadioInterface(SystemRadioInterface systemRadio);
+
+    /**
      * set system interface
      */
     public void setISystemAPICallInfo(ISystemAPICallInfo api);
@@ -188,4 +193,24 @@ public interface ISystem {
      * @param owner The owner of this request.
      */
     void notifyUsimAuthenticationResponse(int event, String response, long owner);
+
+    /**
+     * Notifies the reason of the connection setup failure corresponding with the IMS traffic type.
+     *
+     * @param event The current event.
+     * @param id The identification for IMS traffic.
+     * @param failureReason The reason of connection failure based on IMS traffic type.
+     * @param causeCode Failure cause code from network or modem specific to the failure.
+     * @param waitTimeMillis Retry wait time provided by network in milliseconds
+     */
+    void notifyRadioConnectionFailed(int event, int id, int failureReason, int causeCode,
+            int waitTimeMillis);
+
+    /**
+     * Notifies the preparation of the connection setup corresponding with the IMS traffic type.
+     *
+     * @param event The current event.
+     * @param id The identification for IMS traffic.
+     */
+    void notifyRadioConnectionSetupPrepared(int event, int id);
 }

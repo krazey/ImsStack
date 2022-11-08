@@ -87,8 +87,8 @@ public:
 
     /**
      * @brief Triggers the EPS fallback procedure by UE for the case where the user is trying to
-     *        place an voice call in NR network and the voice call is not established
-     *        within several seconds
+     *        place a voice call in NR network and the voice call is not established
+     *        within several seconds.
      *
      * @param nEpsfbReason Specifies the reason that causes EPS fallback (@EpsFallbackReason)
      */

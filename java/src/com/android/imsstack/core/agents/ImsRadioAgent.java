@@ -19,6 +19,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
+import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.system.SystemRadioInterface;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
@@ -30,14 +33,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * activities to modem, getting NAS/RRC connection setup result details from modem and
  * triggering EPS fallback to modem.
  */
-public class ImsRadioAgent implements ImsRadioInterface {
+public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     private final int mSlotId;
     private AtomicInteger mIdGenerator = new AtomicInteger(ID_MIN);
     private ImsRadioHandler mHandler;
     private Map<Integer, ConnectionListener> mConnectionListeners =
                 new HashMap<Integer, ConnectionListener>();
 
-    private static final int EVENT_CONNECTION_SETUP_PREPARED = 100;
+    private static final int EVENT_CONNECTION_FAILED = 1;
+    private static final int EVENT_CONNECTION_SETUP_PREPARED = 2;
+    private static final int EVENT_SSAC_STATE_CHANGED = 3;
 
     private static final int ID_MIN = 1000000;
     private static final int ID_MAX = 1100000;
@@ -46,13 +51,28 @@ public class ImsRadioAgent implements ImsRadioInterface {
         mSlotId = slotId;
     }
 
+    /**
+     * Set the system radio interface.
+     *
+     * @param systemRadio The system radio interface
+     */
+    public void setSystemRadioInterface(SystemRadioInterface systemRadio) {
+        ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+
+        if (system != null) {
+            system.setSystemRadioInterface(systemRadio);
+        }
+    }
+
     @Override
     public void init(Context context) {
         mHandler = new ImsRadioHandler();
+        setSystemRadioInterface(this);
     }
 
     @Override
     public void cleanup() {
+        setSystemRadioInterface(null);
         mHandler.removeCallbacksAndMessages(null);
     }
 
@@ -113,6 +133,36 @@ public class ImsRadioAgent implements ImsRadioInterface {
 
     @Override
     public void removeListenerForTrafficPriority(TrafficPriorityListener listener) {
+    }
+
+    @Override
+    public int startImsTraffic(int id, int trafficType, int accessNetworkType, int direction) {
+        ImsLog.d(mSlotId, "startImsTraffic - id=" + id + ", type=" + trafficType
+                + ", network type=" + accessNetworkType + ", dir=" + direction);
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+
+                if (system != null) {
+                    system.notifyRadioConnectionSetupPrepared(EVENT_CONNECTION_SETUP_PREPARED, id);
+                }
+            }
+        });
+
+        return SystemRadioInterface.RESULT_OK;
+    }
+
+    @Override
+    public void stopImsTraffic(int id) {
+        ImsLog.d(mSlotId, "stopImsTraffic - id=" + id);
+    }
+
+    @Override
+    public int triggerEpsFallback(int reason) {
+        ImsLog.d(mSlotId, "triggerEpsFallback - reason=" + reason);
+        return SystemRadioInterface.RESULT_OK;
     }
 
     private int getId() {

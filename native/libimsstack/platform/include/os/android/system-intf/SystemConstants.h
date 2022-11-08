@@ -74,6 +74,7 @@ public:
     static const IMS_UINT32 CATEGORY_EVENT = 0x00400000;
     static const IMS_UINT32 CATEGORY_ISIM = 0x00800000;
     static const IMS_UINT32 CATEGORY_USIM = 0x01000000;
+    static const IMS_UINT32 CATEGORY_RADIO = 0x02000000;
     ////
     // Methods for the system information's notification (Java to Native)
     ////
@@ -93,6 +94,7 @@ public:
     static const IMS_UINT32 NOTIFY_USIM_EVENT = CATEGORY_USIM + 14;
     static const IMS_UINT32 NOTIFY_DATA_CONNECTION_IPCAN_CHANGED = CATEGORY_NETWORK + 15;
     static const IMS_UINT32 NOTIFY_VOICE_NETWORK_TYPE_CHANGED = CATEGORY_NETWORK + 16;
+    static const IMS_UINT32 NOTIFY_RADIO_EVENT = CATEGORY_RADIO + 17;
 
     ////
     // Methods for the system access (Native to Java)
@@ -215,6 +217,13 @@ public:
     static const IMS_UINT32 STOP_LOCATION_INFO = CATEGORY_BASE + 1202;
     static const IMS_UINT32 GET_LOCATION_INFO = CATEGORY_BASE + 1203;
     static const IMS_UINT32 MAKE_INSTATNT_LOCATION_INFO = CATEGORY_BASE + 1204;
+
+    ////
+    // Ims radio interface
+    ////
+    static const IMS_UINT32 START_IMS_TRAFFIC = CATEGORY_BASE + 1301;
+    static const IMS_UINT32 STOP_IMS_TRAFFIC = CATEGORY_BASE + 1302;
+    static const IMS_UINT32 TRIGGER_EPS_FALLBACK = CATEGORY_BASE + 1303;
 
     ////
     // IpSec

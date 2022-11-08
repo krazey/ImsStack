@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 #include "ImsMessageDef.h"
+#include "OsParcel.h"
+#include "PlatformContext.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "device/OsImsRadio.h"
+#include "system-intf/SystemConstants.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 
@@ -33,10 +36,30 @@ public:
     enum
     {
         EVENT_CONNECTION_FAILED = 1,
-        EVENT_CONNECTION_SETUP_PREPARED = 2
+        EVENT_CONNECTION_SETUP_PREPARED = 2,
+        EVENT_SSAC_STATE_CHANGED = 3,
     };
 
     IMS_UINT32 m_nEvent;
+};
+
+class ConnectionFailedParam : public OsImsRadioParam
+{
+public:
+    inline ConnectionFailedParam() :
+            OsImsRadioParam(EVENT_CONNECTION_FAILED),
+            m_nId(0),
+            m_nFailureReason(0),
+            m_nCauseCode(0),
+            m_nWaitTimeMillis(0)
+    {
+    }
+    inline virtual ~ConnectionFailedParam() {}
+
+    IMS_UINT32 m_nId;
+    IMS_UINT32 m_nFailureReason;
+    IMS_UINT32 m_nCauseCode;
+    IMS_UINT32 m_nWaitTimeMillis;
 };
 
 class ConnectionSetupPreparedParam : public OsImsRadioParam
@@ -76,17 +99,24 @@ OsImsRadio::OsImsRadio(IN IMS_SINT32 nSlotId) :
         m_objTrafficPriorityListeners(ImsList<IImsRadioTrafficPriorityListener*>())
 {
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
+
+    PlatformContext::GetInstance()->GetSystem()->AddListener(
+            SystemConstants::CATEGORY_RADIO, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL OsImsRadio::~OsImsRadio() {}
+PUBLIC VIRTUAL OsImsRadio::~OsImsRadio()
+{
+    PlatformContext::GetInstance()->GetSystem()->RemoveListener(
+            SystemConstants::CATEGORY_RADIO, this, GetSlotId());
+}
 
 PUBLIC VIRTUAL IMS_BOOL OsImsRadio::IsImsTrafficAllowed(IN IMS_UINT32 /* nTrafficType */)
 {
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 /* nTrafficType */,
-        IN IMS_UINT32 /* nAccessNetworkType */, IN IMS_UINT32 /* nDirection */,
+PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 nTrafficType,
+        IN IMS_UINT32 nAccessNetworkType, IN IMS_UINT32 nDirection,
         IN IImsRadioConnectionListener* piListener)
 {
     if (piListener == IMS_NULL)
@@ -121,10 +151,11 @@ PUBLIC VIRTUAL void OsImsRadio::StartImsTraffic(IN IMS_UINT32 /* nTrafficType */
         nId = m_objConnectionListeners.GetKeyAt(nIndex);
     }
 
-    ConnectionSetupPreparedParam* pParam = new ConnectionSetupPreparedParam();
-    pParam->m_nId = nId;
-
-    osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
+    if (PlatformContext::GetInstance()->GetSystem()->StartImsTraffic(
+                nId, nTrafficType, nAccessNetworkType, nDirection, GetSlotId()) <= 0)
+    {
+        IMS_TRACE_I("OsImsRadio :: [%d] StartImsTraffic is failed", GetSlotId(), 0, 0);
+    }
 }
 
 PUBLIC VIRTUAL void OsImsRadio::StopImsTraffic(IN IImsRadioConnectionListener* piListener)
@@ -140,15 +171,26 @@ PUBLIC VIRTUAL void OsImsRadio::StopImsTraffic(IN IImsRadioConnectionListener* p
 
         if (piCurrListener == piListener)
         {
+            IMS_UINT32 nId = m_objConnectionListeners.GetKeyAt(i);
             m_objConnectionListeners.RemoveAt(i);
-            IMS_TRACE_D("OsImsRadio :: StopImsTraffic - slotId=%d, size=%d", GetSlotId(),
-                    m_objConnectionListeners.GetSize(), 0);
+
+            IMS_TRACE_D("OsImsRadio :: StopImsTraffic - slotId=%d, id=%d, size=%d", GetSlotId(),
+                    nId, m_objConnectionListeners.GetSize());
+
+            PlatformContext::GetInstance()->GetSystem()->StopImsTraffic(nId, GetSlotId());
             break;
         }
     }
 }
 
-PUBLIC VIRTUAL void OsImsRadio::TriggerEpsFallback(IN IMS_UINT32 /* nEpsfbReason */) {}
+PUBLIC VIRTUAL void OsImsRadio::TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason)
+{
+    if (PlatformContext::GetInstance()->GetSystem()->TriggerEpsFallback(
+                nEpsfbReason, GetSlotId()) <= 0)
+    {
+        IMS_TRACE_I("OsImsRadio :: [%d] TriggerEpsFallback is failed", GetSlotId(), 0, 0);
+    }
+}
 
 PUBLIC VIRTUAL void OsImsRadio::AddListenerForTrafficPriority(
         IN IImsRadioTrafficPriorityListener* piListener)
@@ -209,9 +251,66 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
 
             NotifyConnectionSetupPrepared(pParam->m_nId);
         }
+        else if (pImsRadioParam->m_nEvent == OsImsRadioParam::EVENT_CONNECTION_FAILED)
+        {
+            ConnectionFailedParam* pParam =
+                    reinterpret_cast<ConnectionFailedParam*>(pImsRadioParam);
+
+            NotifyConnectionFailed(pParam->m_nId, pParam->m_nFailureReason, pParam->m_nCauseCode,
+                    pParam->m_nWaitTimeMillis);
+        }
 
         delete pImsRadioParam;
     }
+}
+
+PROTECTED VIRTUAL void OsImsRadio::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP /* nWParam */, IN IMS_UINTP nLParam)
+{
+    IMS_TRACE_D("OsImsRadio :: System_NotifyEvent - slotId=%d, event=%s", GetSlotId(),
+            EventToString(nEvent), 0);
+
+    android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(nLParam);
+
+    if (pParcel == IMS_NULL)
+    {
+        return;
+    }
+
+    switch (nEvent)
+    {
+        case OsImsRadioParam::EVENT_CONNECTION_FAILED:
+        {
+            ConnectionFailedParam* pParam = new ConnectionFailedParam();
+            pParam->m_nId = pParcel->readInt32();
+            pParam->m_nFailureReason = pParcel->readInt32();
+            pParam->m_nCauseCode = pParcel->readInt32();
+            pParam->m_nWaitTimeMillis = pParcel->readInt32();
+
+            osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
+            break;
+        }
+        case OsImsRadioParam::EVENT_CONNECTION_SETUP_PREPARED:
+        {
+            ConnectionSetupPreparedParam* pParam = new ConnectionSetupPreparedParam();
+            pParam->m_nId = pParcel->readInt32();
+
+            osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
+            break;
+        }
+        default:
+        {
+            // no-op
+            break;
+        }
+    }
+}
+
+PRIVATE IImsRadioConnectionListener* OsImsRadio::GetConnectionListener(IN IMS_UINT32 nId)
+{
+    IMS_SLONG nIndex = m_objConnectionListeners.GetIndexOfKey(nId);
+
+    return (nIndex >= 0) ? m_objConnectionListeners.GetValueAt(nIndex) : IMS_NULL;
 }
 
 PRIVATE IMS_UINT32 OsImsRadio::GetId()
@@ -226,16 +325,22 @@ PRIVATE IMS_UINT32 OsImsRadio::GetId()
 
 PRIVATE void OsImsRadio::NotifyConnectionSetupPrepared(IN IMS_UINT32 nId)
 {
-    IMS_SLONG nIndex = m_objConnectionListeners.GetIndexOfKey(nId);
+    IImsRadioConnectionListener* piListener = GetConnectionListener(nId);
 
-    if (nIndex >= 0)
+    if (piListener != IMS_NULL)
     {
-        IImsRadioConnectionListener* piListener = m_objConnectionListeners.GetValueAt(nIndex);
+        piListener->ImsRadio_OnConnectionSetupPrepared();
+    }
+}
 
-        if (piListener != IMS_NULL)
-        {
-            piListener->ImsRadio_OnConnectionSetupPrepared();
-        }
+PRIVATE void OsImsRadio::NotifyConnectionFailed(IN IMS_UINT32 nId, IN IMS_UINT32 nFailureReason,
+        IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
+{
+    IImsRadioConnectionListener* piListener = GetConnectionListener(nId);
+
+    if (piListener != IMS_NULL)
+    {
+        piListener->ImsRadio_OnConnectionFailed(nFailureReason, nCauseCode, nWaitTimeMillis);
     }
 }
 
@@ -248,6 +353,9 @@ PRIVATE GLOBAL const IMS_CHAR* OsImsRadio::EventToString(IN IMS_UINT32 nEvent)
 
         case OsImsRadioParam::EVENT_CONNECTION_SETUP_PREPARED:
             return "EVENT_CONNECTION_SETUP_PREPARED";
+
+        case OsImsRadioParam::EVENT_SSAC_STATE_CHANGED:
+            return "EVENT_SSAC_STATE_CHANGED";
 
         default:
             return "__INVALID__";

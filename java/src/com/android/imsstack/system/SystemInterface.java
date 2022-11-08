@@ -806,6 +806,12 @@ public class SystemInterface implements JniSystemListener {
                 "APPLY_IPSEC_SA");
         sMethodToString.put(SystemConstants.REMOVE_IPSEC_SA,
                 "REMOVE_IPSEC_SA");
+        sMethodToString.put(SystemConstants.START_IMS_TRAFFIC,
+                "START_IMS_TRAFFIC");
+        sMethodToString.put(SystemConstants.STOP_IMS_TRAFFIC,
+                "STOP_IMS_TRAFFIC");
+        sMethodToString.put(SystemConstants.TRIGGER_EPS_FALLBACK,
+                "TRIGGER_EPS_FALLBACK");
     }
 
     private void sendData2Native(long nCmd, Parcel parcel) {
@@ -848,6 +854,7 @@ public class SystemInterface implements JniSystemListener {
 
         private int mSlotId = 0;
         private SystemCallInterface mSystemCall = null;
+        private SystemRadioInterface mSystemRadio = null;
 
         public System(int slotId) {
             mSlotId = slotId;
@@ -869,6 +876,11 @@ public class SystemInterface implements JniSystemListener {
         @Override
         public void setSystemCallInterface(SystemCallInterface systemCall) {
             mSystemCall = systemCall;
+        }
+
+        @Override
+        public void setSystemRadioInterface(SystemRadioInterface systemRadio) {
+            mSystemRadio = systemRadio;
         }
 
         @Override
@@ -1343,6 +1355,54 @@ public class SystemInterface implements JniSystemListener {
             });
         }
 
+        @Override
+        public void notifyRadioConnectionFailed(int event, int id, int failureReason, int causeCode,
+                int waitTimeMillis) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_RADIO_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(id);
+                    parcel.writeInt(failureReason);
+                    parcel.writeInt(causeCode);
+                    parcel.writeInt(waitTimeMillis);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+        public void notifyRadioConnectionSetupPrepared(int event, int id) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_RADIO_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(id);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
         // Private/Protected methods ---------------------------------
         public boolean isEventRegistered(final int event) {
             synchronized (mLockObj) {
@@ -1447,6 +1507,11 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_LOCATION_INFO: //FALL-THROUGH
                     case SystemConstants.MAKE_INSTATNT_LOCATION_INFO:
                         result = handleSystemAPILocation(method, parcel);
+                        break;
+                    case SystemConstants.START_IMS_TRAFFIC: //FALL-THROUGH
+                    case SystemConstants.STOP_IMS_TRAFFIC: //FALL-THROUGH
+                    case SystemConstants.TRIGGER_EPS_FALLBACK:
+                        result = handleSystemApiRadio(method, parcel);
                         break;
                     case SystemConstants.ADD_IPSEC_SA_PARAMETER: // FALL-THROUGH
                     case SystemConstants.REMOVE_IPSEC_SA_PARAMETER: // FALL-THROUGH
@@ -1920,6 +1985,44 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
+        private Parcel handleSystemApiRadio(int method, Parcel parcel) {
+            if (mSystemRadio == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+
+            switch (method) {
+                case SystemConstants.START_IMS_TRAFFIC: {
+                    int id = parcel.readInt();
+                    int trafficType = parcel.readInt();
+                    int accessNetworkType = parcel.readInt();
+                    int direction = parcel.readInt();
+
+                    result.writeInt(mSystemRadio.startImsTraffic(id, trafficType,
+                            accessNetworkType, direction));
+                    break;
+                }
+                case SystemConstants.STOP_IMS_TRAFFIC: {
+                    int id = parcel.readInt();
+
+                    mSystemRadio.stopImsTraffic(id);
+                    break;
+                }
+                case SystemConstants.TRIGGER_EPS_FALLBACK: {
+                    int reason = parcel.readInt();
+
+                    result.writeInt(mSystemRadio.triggerEpsFallback(reason));
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
+            }
+
+            return result;
+        }
+
         // IpSec
         private Parcel handleSystemApiIpSec(int method, Parcel parcel, FileDescriptor fd) {
             if (mSystemCall == null) {
@@ -1928,31 +2031,31 @@ public class SystemInterface implements JniSystemListener {
 
             Parcel result = Parcel.obtain();
             switch (method) {
-            case SystemConstants.ADD_IPSEC_SA_PARAMETER: {
-                IpSecSaParameter param = IpSecSaParameter.CREATOR.createFromParcel(parcel);
-                result.writeInt(mSystemCall.addIpSecSaParameter(param));
-                break;
-            }
-            case SystemConstants.REMOVE_IPSEC_SA_PARAMETER:
-                mSystemCall.removeIpSecSaParameter(parcel.readInt());
-                break;
-            case SystemConstants.APPLY_IPSEC_SA: {
-                int ipsecId = parcel.readInt();
-                int spi = parcel.readInt();
-                int intFd = parcel.readInt();
-                result.writeInt(mSystemCall.applyIpSecSa(ipsecId, spi, intFd, fd));
-                break;
-            }
-            case SystemConstants.REMOVE_IPSEC_SA: {
-                int ipsecId = parcel.readInt();
-                int spi = parcel.readInt();
-                int intFd = parcel.readInt();
-                mSystemCall.removeIpSecSa(ipsecId, spi, intFd, fd);
-                break;
-            }
-             default:
-                result.recycle();
-                return null;
+                case SystemConstants.ADD_IPSEC_SA_PARAMETER: {
+                    IpSecSaParameter param = IpSecSaParameter.CREATOR.createFromParcel(parcel);
+                    result.writeInt(mSystemCall.addIpSecSaParameter(param));
+                    break;
+                }
+                case SystemConstants.REMOVE_IPSEC_SA_PARAMETER:
+                    mSystemCall.removeIpSecSaParameter(parcel.readInt());
+                    break;
+                case SystemConstants.APPLY_IPSEC_SA: {
+                    int ipsecId = parcel.readInt();
+                    int spi = parcel.readInt();
+                    int intFd = parcel.readInt();
+                    result.writeInt(mSystemCall.applyIpSecSa(ipsecId, spi, intFd, fd));
+                    break;
+                }
+                case SystemConstants.REMOVE_IPSEC_SA: {
+                    int ipsecId = parcel.readInt();
+                    int spi = parcel.readInt();
+                    int intFd = parcel.readInt();
+                    mSystemCall.removeIpSecSa(ipsecId, spi, intFd, fd);
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
             }
 
             return result;

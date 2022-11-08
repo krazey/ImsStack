@@ -71,6 +71,7 @@ SystemListenerHolder::SystemListenerHolder() :
             SystemConstants::CATEGORY_EVENT,
             SystemConstants::CATEGORY_ISIM,
             SystemConstants::CATEGORY_USIM,
+            SystemConstants::CATEGORY_RADIO,
     };
     IMS_UINT32 nCategoryCount = sizeof(nCategories) / sizeof(nCategories[0]);
 
@@ -216,6 +217,8 @@ PRIVATE GLOBAL const IMS_CHAR* SystemListenerHolder::CategoryToString(IN IMS_UIN
             return "CATEGORY_ISIM";
         case SystemConstants::CATEGORY_USIM:
             return "CATEGORY_USIM";
+        case SystemConstants::CATEGORY_RADIO:
+            return "CATEGORY_RADIO";
         default:
             return "__UNKNOWN__";
     }
@@ -366,6 +369,10 @@ void System::NotifyData(IN const android::Parcel& in, OUT android::Parcel& out)
     {
         NotifySimCategory(nSlotId, nCmd, SystemConstants::CATEGORY_USIM, in);
     }
+    else if ((nCmd & SystemConstants::CATEGORY_RADIO) == SystemConstants::CATEGORY_RADIO)
+    {
+        NotifyRadioCategory(nSlotId, nCmd, in);
+    }
     else
     {
         out.writeInt32(0);
@@ -396,6 +403,7 @@ void System::AddListener(
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_EVENT, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_ISIM, piListener, nSlotId);
     AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_USIM, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_RADIO, piListener, nSlotId);
 }
 
 PUBLIC
@@ -424,6 +432,8 @@ void System::RemoveListener(
             nCategory, SystemConstants::CATEGORY_EVENT, piListener, nSlotId);
     RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_ISIM, piListener, nSlotId);
     RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_USIM, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(
+            nCategory, SystemConstants::CATEGORY_RADIO, piListener, nSlotId);
 }
 
 PUBLIC
@@ -1426,6 +1436,45 @@ IMS_BOOL System::MakeInstantLocationInfo(IN IMS_SINT32 nSlotId)
     return (GetInt(SystemConstants::MAKE_INSTATNT_LOCATION_INFO, 0, nSlotId) == 1);
 }
 
+PUBLIC
+IMS_SINT32 System::StartImsTraffic(IN IMS_UINT32 nId, IN IMS_UINT32 nTrafficType,
+        IN IMS_UINT32 nAccessNetworkType, IN IMS_UINT32 nDirection, IN IMS_SINT32 nSlotId)
+{
+    if (m_pCallback == IMS_NULL)
+    {
+        return -1;
+    }
+
+    android::Parcel in;
+    android::Parcel out;
+
+    in.writeInt32(nSlotId);
+    in.writeInt32(SystemConstants::START_IMS_TRAFFIC);
+    in.writeInt32(nId);
+    in.writeInt32(nTrafficType);
+    in.writeInt32(nAccessNetworkType);
+    in.writeInt32(nDirection);
+
+    if (m_pCallback->SendDataToJava(in, out) == 1)
+    {
+        return out.readInt32();
+    }
+
+    return -1;
+}
+
+PUBLIC
+void System::StopImsTraffic(IN IMS_UINT32 nId, IN IMS_SINT32 nSlotId)
+{
+    GetInt2(SystemConstants::STOP_IMS_TRAFFIC, nId, 0, nSlotId);
+}
+
+PUBLIC
+IMS_SINT32 System::TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason, IN IMS_SINT32 nSlotId)
+{
+    return (GetInt2(SystemConstants::TRIGGER_EPS_FALLBACK, nEpsfbReason, -1, nSlotId));
+}
+
 PRIVATE
 IMS_SINT32 System::GetInt(IN IMS_SINT32 nOperation, IN IMS_SINT32 nDefaultValue /*= 0*/,
         IN IMS_SINT32 nSlotId /*= IMS_SLOT_0*/)
@@ -2006,6 +2055,42 @@ void System::NotifySimCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 /*nCmd*/,
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
     IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(nCategory);
+
+    if (pListeners == IMS_NULL)
+    {
+        return;
+    }
+
+    android::Parcel& objParcel = const_cast<android::Parcel&>(in);
+
+    for (IMS_UINT32 i = 0; i < pListeners->GetSize(); ++i)
+    {
+        ISystemListener* piListener = pListeners->GetAt(i);
+
+        if (piListener == IMS_NULL)
+        {
+            continue;
+        }
+
+        IMS_SINT32 nEvent = objParcel.readInt32();
+
+        piListener->System_NotifyEvent(nEvent, 0, reinterpret_cast<IMS_UINTP>(&objParcel));
+
+        objParcel.setDataPosition(0);
+
+        // Consume a slot id
+        objParcel.readInt32();
+        // Consume a command
+        objParcel.readInt32();
+    }
+}
+
+PRIVATE
+void System::NotifyRadioCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 /*nCmd*/, IN const android::Parcel& in)
+{
+    SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_RADIO);
 
     if (pListeners == IMS_NULL)
     {
