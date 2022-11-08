@@ -26,6 +26,7 @@ import android.telephony.TelephonyManager;
 import android.util.SparseArray;
 
 import com.android.imsstack.core.CommonStarter;
+import com.android.imsstack.core.ConfigLoader;
 import com.android.imsstack.core.NativeCommands;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.Sim;
@@ -210,7 +211,10 @@ public class ImsStackApp extends Application {
 
         if (!carrierChanged) {
             if (slotState.isServiceStarted()) {
-                Log.d(TAG, "SimState: carrier is not changed.");
+                if (slotState.isCarrierConfigChanged()) {
+                    Log.d(TAG, "SimState: carrier-config is changed while running.");
+                    ConfigLoader.updateCarrierConfig(slotId);
+                }
             } else {
                 loadConfigAndStartServices(slotId);
                 slotState.setServiceStarted(true);
@@ -234,9 +238,12 @@ public class ImsStackApp extends Application {
                 TelephonyManager.UNKNOWN_CARRIER_ID);
         int specificCarrierId = intent.getIntExtra(TelephonyManager.EXTRA_SPECIFIC_CARRIER_ID,
                 TelephonyManager.UNKNOWN_CARRIER_ID);
+        boolean rebroadcastOnUnlock = intent.getBooleanExtra(
+                CarrierConfigManager.EXTRA_REBROADCAST_ON_UNLOCK, false);
 
         Log.d(TAG, "handleCarrierConfigChanged :: slotId=" + slotId + ", subId=" + subId
-                + ", carrierId=" + carrierId + ", specificCarrierId=" + specificCarrierId);
+                + ", carrierId=" + carrierId + ", specificCarrierId=" + specificCarrierId
+                + ", rebroadcastOnUnlock=" + rebroadcastOnUnlock);
 
         ImsCarrierResolver.Carrier carrier =
                 resolveImsCarrier(slotId, subId, carrierId, specificCarrierId);
@@ -251,7 +258,15 @@ public class ImsStackApp extends Application {
 
         displayCarrierConfigs(slotId, subId);
 
-        processCarrierConfigState(slotId, subId, carrierId, specificCarrierId);
+        if (rebroadcastOnUnlock) {
+            processCarrierConfigState(slotId, subId, carrierId, specificCarrierId);
+        } else {
+            SlotState slotState = getSlotState(slotId);
+            slotState.setCarrierConfigChanged(true);
+            processCarrierConfigState(slotId, subId, carrierId, specificCarrierId);
+            slotState.setCarrierConfigChanged(false);
+        }
+
         processCarrierConfigStateForOtherSlots(slotId);
     }
 
@@ -410,7 +425,8 @@ public class ImsStackApp extends Application {
     private final class SlotState {
         private final int mSlotId;
         private boolean mServiceStarted;
-        private boolean mCarrierChanged;
+        // This holds a flag briefly while processing the carrier configuration changed event.
+        private boolean mCarrierConfigChanged;
         private @Sim.State int mSimState = Sim.STATE_INVALID;
         private @Sim.State int mOldSimState = Sim.STATE_INVALID;
 
@@ -430,12 +446,12 @@ public class ImsStackApp extends Application {
             mServiceStarted = started;
         }
 
-        public boolean isCarrierChanged() {
-            return mCarrierChanged;
+        public boolean isCarrierConfigChanged() {
+            return mCarrierConfigChanged;
         }
 
-        public void setCarrierChanged(boolean changed) {
-            mCarrierChanged = changed;
+        public void setCarrierConfigChanged(boolean changed) {
+            mCarrierConfigChanged = changed;
         }
 
         public @Sim.State int getSimState() {
@@ -461,8 +477,8 @@ public class ImsStackApp extends Application {
             sb.append(mSlotId);
             sb.append(", serviceStarted=");
             sb.append(mServiceStarted);
-            sb.append(", carrierChanged=");
-            sb.append(mCarrierChanged);
+            sb.append(", carrierConfigChanged=");
+            sb.append(mCarrierConfigChanged);
             sb.append(", simState=");
             sb.append(Sim.stateToString(mSimState));
             sb.append(", oldSimState=");
