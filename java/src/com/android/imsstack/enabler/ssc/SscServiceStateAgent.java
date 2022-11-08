@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import android.os.Looper;
+
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -29,8 +31,8 @@ public class SscServiceStateAgent {
         return sSscServiceStateAgent;
     }
 
-    protected void init(int slotId) {
-        setSscServiceState(slotId, new SscServiceState());
+    protected void init(int slotId, Looper looper) {
+        setSscServiceState(slotId, new SscServiceState(), looper);
     }
 
     protected void deInit(int slotId) {
@@ -52,9 +54,9 @@ public class SscServiceStateAgent {
     }
 
     @VisibleForTesting
-    public void setSscServiceState(int slotId, SscServiceState sscServiceState) {
+    public void setSscServiceState(int slotId, SscServiceState sscServiceState, Looper looper) {
         deInit(slotId);
-        sscServiceState.init(slotId);
+        sscServiceState.init(slotId, looper);
         mSscServiceState.put(slotId, sscServiceState);
     }
 

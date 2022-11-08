@@ -18,9 +18,9 @@ package com.android.imsstack.enabler.ssc;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
@@ -62,10 +62,11 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  */
 public class SscServiceImpl implements IUtInterface {
     private static final int EVENT_UT_TRANSACTION_STARTED = 1001;
-    private static final int EVENT_UT_INITIALIZE_MODULES = 1002;
-
     private static final int REQUEST_TYPE_QUERY = 0;
     private static final int REQUEST_TYPE_UPDATE = 1;
+
+    private final int mSlotId;
+    private final ConcurrentLinkedDeque<SscRequestData> mSscRequestQueue;
 
     private Context mContext = null;
     private IUtListener mUtListener = null;
@@ -73,15 +74,10 @@ public class SscServiceImpl implements IUtInterface {
     private SscTransactionFactory mSscTransactionFactory = null;
     private SscTransaction mSscTransaction = null;
 
-    private SscServiceThread mSscServiceThread = null;
+    private HandlerThread mSscServiceThread = null;
     private SscRequestHandler mSscRequestHandler = null;
     private SscCallbackHandler mSscCallbackHandler = null;
 
-    private ConcurrentLinkedDeque<SscRequestData> mSscRequestQueue = null;
-
-    private Object lock = new Object();
-
-    private int mSlotId = -1;
 
     public SscServiceImpl(int slotId) {
         mSlotId = slotId;
@@ -113,20 +109,12 @@ public class SscServiceImpl implements IUtInterface {
         setNetworkType();
         SscXmlGov.getInstance(mSlotId).init();
 
-        mSscServiceThread = new SscServiceThread();
+        mSscServiceThread = new HandlerThread("SscServiceImplThread");
         mSscServiceThread.start();
 
-        // To Avoid race condition we are making current thread to wait
-        // till all handlers are Initialized
-        try {
-            synchronized (lock) {
-                ImsLog.d("Current thread is blocked::startService");
-                lock.wait(3000);
-                ImsLog.d("Current thread lock is released::startService");
-            }
-        } catch (InterruptedException ie) {
-            ie.printStackTrace();
-        }
+        mSscRequestHandler = new SscRequestHandler(mSscServiceThread.getLooper());
+        mSscCallbackHandler = new SscCallbackHandler(mSscServiceThread.getLooper());
+        SscServiceStateAgent.getInstance().init(mSlotId, mSscServiceThread.getLooper());
     }
 
     @Override
@@ -159,8 +147,9 @@ public class SscServiceImpl implements IUtInterface {
             mSscTransaction = null;
         }
 
-        if (mSscRequestHandler != null) {
-            mSscRequestHandler.getLooper().quit();
+        if (mSscServiceThread != null) {
+            mSscServiceThread.quit();
+            mSscServiceThread = null;
         }
 
         mSscRequestQueue.clear();
@@ -194,17 +183,17 @@ public class SscServiceImpl implements IUtInterface {
     }
 
     @VisibleForTesting
-    public void setSscTransactionFactory(SscTransactionFactory transactionFactory) {
+    protected void setSscTransactionFactory(SscTransactionFactory transactionFactory) {
         mSscTransactionFactory = transactionFactory;
     }
 
     @VisibleForTesting
-    public SscRequestHandler getRequestHandler() {
-        return mSscRequestHandler;
+    protected HandlerThread getServiceHandlerThread() {
+        return mSscServiceThread;
     }
 
     @VisibleForTesting
-    public SscCallbackHandler getCallBackHandler() {
+    protected SscCallbackHandler getCallBackHandler() {
         return mSscCallbackHandler;
     }
 
@@ -740,17 +729,6 @@ public class SscServiceImpl implements IUtInterface {
                     }
                     break;
                 }
-                case EVENT_UT_INITIALIZE_MODULES: {
-                    SscServiceStateAgent.getInstance().init(mSlotId);
-
-                    // Release the Lock afer the module Initialization
-                    // to avoid initializers malfunction
-                    synchronized (lock) {
-                        lock.notifyAll();
-                        ImsLog.d(mSlotId, "Lock is released from handleMessage::SscRequestHandler");
-                    }
-                    break;
-                }
                 default:
                     ImsLog.w(mSlotId, "Invalid Message");
                     break;
@@ -1150,24 +1128,6 @@ public class SscServiceImpl implements IUtInterface {
             ImsLog.d(mSlotId, "reasonCode = " + reasonCode + ", errorPhrase = " + errorPhrase);
 
             return new ImsReasonInfo(reasonCode, ImsReasonInfo.CODE_UNSPECIFIED, errorPhrase);
-        }
-    }
-
-    private final class SscServiceThread extends Thread {
-        public SscServiceThread() {
-            super("SSCService");
-        }
-
-        public void run() {
-            Looper.prepare();
-
-            ImsLog.d(mSlotId, "SscServiceThread is running ... (" + Process.myTid() + ")");
-
-            mSscRequestHandler = new SscRequestHandler(Looper.myLooper());
-            mSscCallbackHandler = new SscCallbackHandler(Looper.myLooper());
-            mSscRequestHandler.sendEmptyMessage(EVENT_UT_INITIALIZE_MODULES);
-
-            Looper.loop();
         }
     }
 }
