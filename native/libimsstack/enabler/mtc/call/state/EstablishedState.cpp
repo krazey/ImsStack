@@ -21,6 +21,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
+#include "call/MtcPendingOperationHolder.h"
 #include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
@@ -34,8 +35,10 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
+#include "helper/OperationAsyncRunner.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
+#include "sipcore/ISipClientConnection.h"
 #include "sipcore/SipStatusCode.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
@@ -52,9 +55,32 @@ EstablishedState::EstablishedState(IN IMtcCallContext& objContext) :
 
 PUBLIC VIRTUAL EstablishedState::~EstablishedState() {}
 
+PUBLIC VIRTUAL void EstablishedState::OnEnter()
+{
+    if (IsRefreshInProgress())
+    {
+        m_objContext.GetAsyncRunner(
+                [&]()
+                {
+                    return m_objContext.RunPendingOperationIfPossible();
+                });
+        return;
+    }
+    m_objContext.RunPendingOperationIfPossible();
+}
+
 PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Hold", 0, 0, 0);
+    if (IsRefreshInProgress())
+    {
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [pMediaInfo](IMtcCallState* pState)
+                {
+                    return pState->Hold(pMediaInfo);
+                });
+        return GetStateName();
+    }
 
     MediaInfo objMediaInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
@@ -80,6 +106,16 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
 PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Resume", 0, 0, 0);
+    if (IsRefreshInProgress())
+    {
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [pMediaInfo](IMtcCallState* pState)
+                {
+                    return pState->Resume(pMediaInfo);
+                });
+        return GetStateName();
+    }
+
     if (HandleUpdate(UpdateType::RESUME, m_objContext.GetSession()->GetCallType(), pMediaInfo) ==
             IMS_FAILURE)
     {
@@ -94,6 +130,15 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Update(
         IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Update", 0, 0, 0);
+    if (IsRefreshInProgress())
+    {
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [=](IMtcCallState* pState)
+                {
+                    return pState->Update(eCallType, pMediaInfo);
+                });
+        return GetStateName();
+    }
 
     m_objContext.GetUpdatingInfo().SetTargetCallType(eCallType);
 
@@ -291,6 +336,19 @@ PUBLIC VIRTUAL CallStateName EstablishedState::NotifyErrorToUssiInfo(
     return eState;
 }
 
+PUBLIC VIRTUAL CallStateName EstablishedState::Refresh_NotifyCompleted(
+        IN ISipClientConnection* /*piScc*/)
+{
+    IMS_TRACE_D("Refresh_NotifyCompleted", 0, 0, 0);
+    m_objContext.GetAsyncRunner(
+            [&]()
+            {
+                return m_objContext.RunPendingOperationIfPossible();
+            });
+
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingMediaDataFailed(
         IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType)
 {
@@ -363,26 +421,22 @@ PUBLIC VIRTUAL CallStateName EstablishedState::QosReserveFailed(
     return GetStateName();
 }
 
-PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateType eType)
-{
-    IMtcSession* piMtcSession = m_objContext.GetSession();
-    if (piMtcSession == IMS_NULL)
-    {
-        return GetStateName();
-    }
-
-    piMtcSession->Update(eType, IMS_FALSE, SipMethod::UPDATE);
-
-    // TODO: check if state transition has no issue.
-    return CallStateName::UPDATING;
-}
-
-PROTECTED VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 /*eIpcan*/)
+PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
 {
     IMS_TRACE_I("OnIpcanChanged", 0, 0, 0);
 
     if (!m_objContext.GetConfigurationProxy().Is(Feature::ENABLE_SEND_REINVITE_ON_RAT_CHANGE))
     {
+        return GetStateName();
+    }
+
+    if (IsRefreshInProgress())
+    {
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [eIpcan](IMtcCallState* pState)
+                {
+                    return pState->OnIpcanChanged(eIpcan);
+                });
         return GetStateName();
     }
 
@@ -394,6 +448,18 @@ PROTECTED VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 /
         // TODO
     }
 
+    return CallStateName::UPDATING;
+}
+
+PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateType eType)
+{
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    if (piMtcSession == IMS_NULL)
+    {
+        return GetStateName();
+    }
+
+    piMtcSession->Update(eType, IMS_FALSE, SipMethod::UPDATE);
     return CallStateName::UPDATING;
 }
 
@@ -618,4 +684,11 @@ CallStateName EstablishedState::TerminateUssiAfterInfoTransaction()
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
 
     return CallStateName::TERMINATING;
+}
+
+PRIVATE
+IMS_BOOL EstablishedState::IsRefreshInProgress() const
+{
+    IMtcSession* piMtcSession = m_objContext.GetSession();
+    return piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress();
 }

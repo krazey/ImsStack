@@ -22,6 +22,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
 #include "call/IMtcUiNotifier.h"
+#include "call/MtcPendingOperationHolder.h"
 #include "call/state/AlertingState.h"
 #include "call/termination/CancelHandler.h"
 #include "call/termination/TerminationHandler.h"
@@ -354,6 +355,16 @@ PUBLIC VIRTUAL CallStateName AlertingState::OnMediaFailed(IN const CallReasonInf
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
 
     return RejectIncomingAndToTerminating(objReason);
+}
+
+PUBLIC VIRTUAL CallStateName AlertingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
+{
+    m_objContext.GetPendingOperationHolder().PushPendingOperation(
+            [eIpcan](IMtcCallState* pState)
+            {
+                return pState->OnIpcanChanged(eIpcan);
+            });
+    return GetStateName();
 }
 
 PROTECTED VIRTUAL CallStateName AlertingState::SendUpdateBySrvcc(IN UpdateType eType)

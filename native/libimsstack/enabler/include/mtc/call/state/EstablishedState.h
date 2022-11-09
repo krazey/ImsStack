@@ -21,6 +21,8 @@
 #include "MtcDef.h"
 #include "call/state/MtcCallState.h"
 
+class ISipClientConnection;
+
 class EstablishedState : public MtcCallState
 {
 public:
@@ -30,6 +32,8 @@ public:
     EstablishedState& operator=(IN const EstablishedState&) = delete;
 
 public:
+    void OnEnter() override;
+
     CallStateName Hold(IN MediaInfo* pMediaInfo) override;
     CallStateName Resume(IN MediaInfo* pMediaInfo) override;
     CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
@@ -47,16 +51,16 @@ public:
             IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
     CallStateName NotifyErrorToUssiInfo(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
-
+    CallStateName Refresh_NotifyCompleted(IN ISipClientConnection* piScc) override;
     CallStateName OnReceivingMediaDataFailed(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnVideoLowestBitRate() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction);
+    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
-    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
 private:
     IMS_RESULT HandleUpdate(
@@ -67,6 +71,7 @@ private:
     void AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer);
     IMS_BOOL IsConferenceCallParticipant();
     IMSList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
+    IMS_BOOL IsRefreshInProgress() const;
 
     CallStateName TerminateUssiAfterInfoTransaction();
 };

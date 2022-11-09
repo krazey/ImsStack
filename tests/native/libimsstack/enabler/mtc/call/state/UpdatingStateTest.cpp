@@ -19,6 +19,7 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
+#include "call/MockMtcPendingOperationHolder.h"
 #include "call/UpdatingInfo.h"
 #include "call/state/MtcCallState.h"
 #include "call/state/UpdatingState.h"
@@ -55,6 +56,7 @@ public:
     MockIMtcPreconditionManager objMtcPreconditionManager;
     MockIMessage* pMessage;
     MockMtcTimerWrapper objTimer;
+    MockMtcPendingOperationHolder objPendingOperationHolder;
 
 protected:
     virtual void SetUp() override
@@ -80,6 +82,9 @@ protected:
         ON_CALL(objContext, GetPreconditionManager())
                 .WillByDefault(ReturnRef(objMtcPreconditionManager));
         ON_CALL(objContext, GetTimer).WillByDefault(ReturnRef(objTimer));
+
+        ON_CALL(objContext, GetPendingOperationHolder)
+                .WillByDefault(ReturnRef(objPendingOperationHolder));
 
         pMessage = new MockIMessage();
         pUpdatingState = new UpdatingState(objContext);
@@ -116,6 +121,31 @@ TEST_F(UpdatingStateTest, OnExitSendsUpdateIfUpdatingInfoHasPendingUpdate)
 
     pUpdatingInfo->SetPendingUpdate(IMS_TRUE);
     pUpdatingState->OnExit();
+}
+
+TEST_F(UpdatingStateTest, HoldPushesPendingOperation)
+{
+    MediaInfo objMediaInfo;
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+
+    pUpdatingState->Hold(&objMediaInfo);
+}
+
+TEST_F(UpdatingStateTest, ResumePushesPendingOperation)
+{
+    MediaInfo objMediaInfo;
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+
+    pUpdatingState->Resume(&objMediaInfo);
+}
+
+TEST_F(UpdatingStateTest, UpdatePushesPendingOperation)
+{
+    MediaInfo objMediaInfo;
+    CallType eAnyType = CallType::VT;
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+
+    pUpdatingState->Update(eAnyType, &objMediaInfo);
 }
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstablished)
@@ -211,6 +241,14 @@ TEST_F(UpdatingStateTest, OnMediaFailed)
             .Times(1);
 
     pUpdatingState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+}
+
+TEST_F(UpdatingStateTest, OnIpcanChangedPushesPendingOperation)
+{
+    IMS_UINT32 eIpcan = 1;
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+
+    pUpdatingState->OnIpcanChanged(eIpcan);
 }
 
 TEST_F(UpdatingStateTest, HandleSrvccStartedAsModifier)

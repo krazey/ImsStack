@@ -28,16 +28,13 @@ class IMtcCallState;
 class MtcPendingOperationHolder
 {
 public:
-    class MtcPendingOperation;
-
     explicit MtcPendingOperationHolder();
-    ~MtcPendingOperationHolder();
+    virtual ~MtcPendingOperationHolder();
     MtcPendingOperationHolder(IN const MtcPendingOperationHolder&) = delete;
     MtcPendingOperationHolder& operator=(IN const MtcPendingOperationHolder&) = delete;
 
-    IMS_BOOL IsNeedToAdd(IN IMtcCall::State eState, IMtcCallContext& objCallContext) const;
     IMS_BOOL HasPendingOperation() const;
-    void PushPendingOperation(
+    virtual void PushPendingOperation(
             IN std::function<IMtcCall::State(IMtcCallState*)> objPendingOperation);
     std::function<IMtcCall::State(IMtcCallState*)> PopPendingOperation();
 

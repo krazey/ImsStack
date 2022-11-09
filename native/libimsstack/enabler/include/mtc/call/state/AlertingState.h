@@ -47,10 +47,8 @@ public:
     CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName Reject(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
-
     CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName UssiStarted(IN ISession* piSession) override;
-
     CallStateName SessionStarted(IN ISession* piSession) override;
     CallStateName SessionTerminated(IN ISession* piSession) override;
     CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
@@ -59,12 +57,10 @@ public:
     CallStateName SessionPRAckReceived(IN ISession* piSession) override;
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
     CallStateName SessionStartFailed(IN ISession* piSession) override;
-
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
-
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
-
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
+    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
 protected:
     CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;

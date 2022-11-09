@@ -19,7 +19,13 @@
 
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "call/state/MtcCallState.h"
+#include "core/ISession.h"
+#include "precondition/QosDef.h"
+
+class MediaInfo;
+struct CallReasonInfo;
 
 class UpdatingState : public MtcCallState
 {
@@ -32,6 +38,9 @@ public:
 public:
     void OnExit() override;
 
+    CallStateName Hold(IN MediaInfo* pMediaInfo) override;
+    CallStateName Resume(IN MediaInfo* pMediaInfo) override;
+    CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
@@ -50,6 +59,7 @@ public:
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
+    CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
 protected:
     CallStateName HandleSrvccStarted() override;

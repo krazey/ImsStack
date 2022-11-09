@@ -38,33 +38,6 @@ PUBLIC MtcPendingOperationHolder::~MtcPendingOperationHolder()
     }
 }
 
-PUBLIC IMS_BOOL MtcPendingOperationHolder::IsNeedToAdd(
-        IN IMtcCall::State eState, IMtcCallContext& objCallContext) const
-{
-    if (eState == IMtcCall::State::UPDATING)
-    {
-        IMS_TRACE_D("IsNeedToAdd :: updating", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    IMtcSession* piMtcSession = objCallContext.GetSession();
-    if (piMtcSession && piMtcSession->GetISession().IsSessionRefreshInProgress())
-    {
-        IMS_TRACE_D("IsNeedToAdd :: refreshing", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    if (eState == IMtcCall::State::OUTGOING || eState == IMtcCall::State::ALERTING ||
-            eState == IMtcCall::State::INCOMING)
-    {
-        IMS_TRACE_D(
-                "IsNeedToAdd :: ongoing setup, state[%d]", static_cast<IMS_SINT32>(eState), 0, 0);
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
 PUBLIC IMS_BOOL MtcPendingOperationHolder::HasPendingOperation() const
 {
     return m_objPendingOperations.GetSize() > 0;
@@ -83,5 +56,6 @@ MtcPendingOperationHolder::PopPendingOperation()
     std::function<IMtcCall::State(IMtcCallState*)> objPendingOperation =
             m_objPendingOperations.GetAt(0);
     m_objPendingOperations.RemoveAt(0);
+    IMS_TRACE_D("PopPendingOperation :: remain[%d]", m_objPendingOperations.GetSize(), 0, 0);
     return objPendingOperation;
 }

@@ -21,10 +21,15 @@
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
+#include "call/MockMtcPendingOperationHolder.h"
 #include "call/UpdatingInfo.h"
 #include "call/state/EstablishedState.h"
+#include "call/state/MtcCallState.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/SipMethod.h"
@@ -48,6 +53,11 @@ public:
     MockIMtcSession objMockMtcSession;
     MockIMtcUiNotifier objUiNotifier;
     MockISession objMockISession;
+    MockIMtcConfigurationManager* pMockConfigurationManager;
+    MockIMtcPreconditionManager objMockPreconditionManager;
+    MockMtcTimerWrapper objTimerWrapper;
+    MtcConfigurationProxy* pConfigurationProxy;
+    UpdatingInfo* pUpdatingInfo;
 
 protected:
     virtual void SetUp() override
@@ -58,11 +68,48 @@ protected:
 
         ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
+        pMockConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
+        ON_CALL(objMockCallContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        pUpdatingInfo = new UpdatingInfo(objMockCallContext);
+        ON_CALL(objMockCallContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+        ON_CALL(objMockCallContext, GetPreconditionManager)
+                .WillByDefault(ReturnRef(objMockPreconditionManager));
+        ON_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::VOIP, IMS_TRUE))
+                .WillByDefault(Return(IMS_SUCCESS));
+
+        ON_CALL(objMockPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
+
+        ON_CALL(objMockCallContext, GetTimer).WillByDefault(ReturnRef(objTimerWrapper));
+
         pEstablishedState = new EstablishedState(objMockCallContext);
     }
 
-    virtual void TearDown() override { delete pEstablishedState; }
+    virtual void TearDown() override
+    {
+        delete pConfigurationProxy;
+        delete pUpdatingInfo;
+        delete pEstablishedState;
+    }
 };
+
+TEST_F(EstablishedStateTest, OnEnterRunsPendingOperationSynchronously)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMockCallContext, RunPendingOperationIfPossible());
+    pEstablishedState->OnEnter();
+}
+
+TEST_F(EstablishedStateTest, OnEnterRunsPendingOperationAsynchronouslyIfOnRefreshing)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMockCallContext, GetAsyncRunner(_));
+    pEstablishedState->OnEnter();
+}
 
 TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
 {
@@ -87,6 +134,55 @@ TEST_F(EstablishedStateTest, OnMediaFailed)
             .Times(1);
 
     pEstablishedState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+}
+
+TEST_F(EstablishedStateTest, OnIpcanChangedNotHandledIfConfigurationIsOff)
+{
+    ON_CALL(*pMockConfigurationManager, IsEnableSendReinviteOnRatChange)
+            .WillByDefault(Return(IMS_FALSE));
+
+    MockMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
+
+    IMS_UINT32 eIpcan = 1;
+    pEstablishedState->OnIpcanChanged(eIpcan);
+}
+
+TEST_F(EstablishedStateTest, OnIpcanChangedDoesNotPushPendingOperationIfNoSessionRefreshing)
+{
+    ON_CALL(*pMockConfigurationManager, IsEnableSendReinviteOnRatChange)
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+
+    MockMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
+    EXPECT_CALL(objMockMtcSession, Update(_, _, _));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _));
+
+    IMS_UINT32 eIpcan = 1;
+    pEstablishedState->OnIpcanChanged(eIpcan);
+}
+
+TEST_F(EstablishedStateTest, OnIpcanChangedPushesPendingOperation)
+{
+    ON_CALL(*pMockConfigurationManager, IsEnableSendReinviteOnRatChange)
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
+
+    MockMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+
+    IMS_UINT32 eIpcan = 1;
+    pEstablishedState->OnIpcanChanged(eIpcan);
 }
 
 TEST_F(EstablishedStateTest, SendUpdateBySrvccByCanceled)
@@ -135,9 +231,6 @@ TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
 
-    MockIMtcPreconditionManager objMockPreconditionManager;
-    ON_CALL(objMockCallContext, GetPreconditionManager)
-            .WillByDefault(ReturnRef(objMockPreconditionManager));
     EXPECT_CALL(objMockPreconditionManager, FormPreconditionSdp(_, IMS_FALSE)).Times(1);
 
     EXPECT_CALL(objMockMtcSession, AcceptUpdate()).Times(1).WillOnce(Return(IMS_SUCCESS));
