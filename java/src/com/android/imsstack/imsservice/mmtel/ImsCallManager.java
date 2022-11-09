@@ -37,6 +37,7 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.internal.SrvccStateTracker;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +47,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ImsCallManager {
     private static final int MAX_CALL_ID = Integer.MAX_VALUE;
-    private ConcurrentHashMap<String, ImsCallSessionImpl> mSessions
+    protected ConcurrentHashMap<String, ImsCallSessionImpl> mSessions
             = new ConcurrentHashMap<String, ImsCallSessionImpl>(8, 0.9f, 1);
-    private ConcurrentHashMap<String, ImsCallSessionImpl> mPendingSessions
+    protected ConcurrentHashMap<String, ImsCallSessionImpl> mPendingSessions
             = new ConcurrentHashMap<String, ImsCallSessionImpl>(4, 0.9f, 1);
     private final Object mLock = new Object();
     private final ICallContext mCallContext;
@@ -57,8 +58,8 @@ public class ImsCallManager {
     private int mCallId = 1;
     private ImsCallTracker mCT = new ImsCallTracker();
     private MtcAppCallListenerProxy mCallListener = new MtcAppCallListenerProxy();
-    private WifiCallWakeLock mWifiCallWakeLock = null;
-    private ImsCallProfile mIncomingCallInfo = null;
+    protected WifiCallWakeLock mWifiCallWakeLock = null;
+    protected ImsCallProfile mIncomingCallInfo = null;
 
     public ImsCallManager(ICallContext callContext, MtcApp mtcApp, IMmTelCallListener listener) {
         mCallContext = callContext;
@@ -66,6 +67,18 @@ public class ImsCallManager {
         mMmTelCallListener = listener;
 
         init();
+    }
+
+    /***
+     * return ImsCallSessionImpl
+     */
+    @VisibleForTesting
+    public ImsCallSessionImpl createImsCallSession(ICallContext callContext,
+            CallTracker ct, MtcCall call,
+            String callId, ImsCallProfile profile, boolean isMO) {
+
+        return new ImsCallSessionImpl(
+                mCallContext, ct, call, callId, profile, true);
     }
 
     public void dispose() {
@@ -76,7 +89,6 @@ public class ImsCallManager {
 
     public void init() {
         log("init");
-
         mMtcApp.setCallListener(mCallListener);
 
         if (isCallOverWifiSupported()) {
@@ -127,9 +139,9 @@ public class ImsCallManager {
 
             // ECBM
             checkAndExitEcbm();
-             //To-Do:- Need to find the way Emergency call Over VoWiFi
-                //sessionAttributes |=  MtcCall.FLAG_WIFI_EMERGENCY;
-                //wifi = true;
+            //To-Do:- Need to find the way Emergency call Over VoWiFi
+            //sessionAttributes |=  MtcCall.FLAG_WIFI_EMERGENCY;
+            //wifi = true;
         } else if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_NORMAL) {
             if (profile.getCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING, -1)
                     == ImsCallProfile.DIALSTRING_USSD) {
@@ -151,10 +163,10 @@ public class ImsCallManager {
         if (call == null) {
             loge("Creating a MtcCall failed", null);
             // EXCEPTION_HANDLING: Call UI stuck
-            return new ImsCallSessionImpl(mCallContext, mCT, null, callId, profile, true);
+            return createImsCallSession(mCallContext, mCT, null, callId, profile, true);
         }
 
-        ImsCallSessionImpl callSession = new ImsCallSessionImpl(
+        ImsCallSessionImpl callSession = createImsCallSession(
                 mCallContext, mCT, call, callId, profile, true);
 
         onCallCreate(callSession);
@@ -324,14 +336,12 @@ public class ImsCallManager {
             synchronized (mLock) {
                 newId = mCallId;
                 mCallId++;
-
                 if (mCallId == MAX_CALL_ID) {
                     mCallId = 1;
                 }
             }
 
             newCallId = String.valueOf(newId);
-
             synchronized (mSessions) {
                 if (mSessions.get(newCallId) != null) {
                     log("createCallId: collision in active sessions - newId=" + newCallId);
@@ -350,7 +360,7 @@ public class ImsCallManager {
         return newCallId;
     }
 
-    private boolean isCallOverWifiSupported() {
+    protected boolean isCallOverWifiSupported() {
         return ImsGlobal.isWfcEnabled(mCallContext.getContext(), mCallContext.getSlotId());
     }
 
@@ -422,7 +432,7 @@ public class ImsCallManager {
 
             // SRVCC_STATE_TRACKING
             if (mSessions.size() == 1) {
-                SrvccStateTracker sst = (SrvccStateTracker)mCallContext.getSrvccStateTracker();
+                SrvccStateTracker sst = (SrvccStateTracker) mCallContext.getSrvccStateTracker();
 
                 if (sst != null) {
                     sst.start();
@@ -451,7 +461,6 @@ public class ImsCallManager {
             if ((s != null) && (s != session)) {
                 log("onCallDestroy :: " + session +
                         " is not associated with key(" + key + ")");
-
                 mSessions.put(key, s);
 
                 for (Map.Entry<String, ImsCallSessionImpl> entry : mSessions.entrySet()) {
@@ -473,7 +482,7 @@ public class ImsCallManager {
                 }
 
                 // SRVCC_STATE_TRACKING
-                SrvccStateTracker sst = (SrvccStateTracker)mCallContext.getSrvccStateTracker();
+                SrvccStateTracker sst = (SrvccStateTracker) mCallContext.getSrvccStateTracker();
 
                 if (sst != null) {
                     sst.stop();
@@ -582,7 +591,7 @@ public class ImsCallManager {
             }
 
             for (Map.Entry<String, ImsCallSessionImpl> entry : mSessions.entrySet()) {
-                onCallDestroy((ImsCallSessionImpl)entry.getValue());
+                onCallDestroy((ImsCallSessionImpl) entry.getValue());
             }
         }
     }
@@ -706,9 +715,14 @@ public class ImsCallManager {
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private class WifiCallWakeLock implements ImsStateStore.Listener {
+    protected class WifiCallWakeLock implements ImsStateStore.Listener {
         private int mCallState = ImsStateStore.STATE_INACTIVE;
-        private ImsWakeLock mWakeLock = null;
+        protected ImsWakeLock mWakeLock = null;
+
+        @VisibleForTesting
+        public WifiCallWakeLock(ImsWakeLock imsWakeLock) {
+            mWakeLock = imsWakeLock;
+        }
 
         public WifiCallWakeLock() {
             init();
@@ -771,7 +785,7 @@ public class ImsCallManager {
         }
     }
 
-    private class ImsCallTracker implements CallTracker {
+    protected class ImsCallTracker implements CallTracker {
         @Override
         public String createCallId() {
             return ImsCallManager.this.createCallId();
@@ -817,7 +831,7 @@ public class ImsCallManager {
         }
     }
 
-    private class MtcAppCallListenerProxy extends MtcApp.CallListener {
+    protected class MtcAppCallListenerProxy extends MtcApp.CallListener {
         @Override
         public void onDialogStateChanged(MtcApp app, DialogsInfo dialogsInfo) {
             //To-Do: Once MultiEndPoint implementation done will call its method.
@@ -835,11 +849,12 @@ public class ImsCallManager {
             ImsCallProfile profile = new ImsCallProfile();
             String callId = createCallId();
 
-            ImsCallSessionImpl callSession = new ImsCallSessionImpl(
+            ImsCallSessionImpl callSession =  createImsCallSession(
                     mCallContext, mCT, call, callId, profile, false);
 
             onCallPreIncomingReceived(callSession);
         }
+
         @Override
         public void onIncomingCallInfoReceived(IncomingCallInfo incomingCallInfo) {
             logi("onIncomingCallInfoReceived");
