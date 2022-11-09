@@ -17,6 +17,7 @@
 package com.android.imsstack.enabler.ssc;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -31,6 +32,7 @@ import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 public class SscServiceState {
+    private static final int EVENT_INITIALIZATION_DONE = 1000;
     @VisibleForTesting
     public static final int EVENT_UT_BLOCK_TIMER_EXPIRED = 1001;
     @VisibleForTesting
@@ -45,25 +47,22 @@ public class SscServiceState {
     @VisibleForTesting
     public Handler mHandler = null;
 
-    protected void init(int slotId) {
+    protected void init(int slotId, Looper looper) {
         ImsLog.d("");
         mSlotId = slotId;
-        mHandler = new SscServiceStateHandler();
+        mHandler = new SscServiceStateHandler(looper);
 
         IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
             dnw.registerForAirplaneModeChanged(mHandler, EVENT_AIRPLANE_MODE_CHANGED, null);
-        } else {
-            ImsLog.e("DcNetWatcher is null");
         }
 
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
-
         if (sim != null) {
             sim.addListener((SscServiceStateHandler) mHandler);
         }
 
-        updateUtServiceFeature();
+        mHandler.sendEmptyMessage(EVENT_INITIALIZATION_DONE);
     }
 
     protected void deInit() {
@@ -320,6 +319,10 @@ public class SscServiceState {
     }
 
     private class SscServiceStateHandler extends Handler implements Sim.Listener {
+        SscServiceStateHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void onSimCardStateChanged() {
             SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
@@ -339,6 +342,9 @@ public class SscServiceState {
 
             ImsLog.d("Message : " + msg.what);
             switch(msg.what) {
+                case EVENT_INITIALIZATION_DONE:
+                    updateUtServiceFeature();
+                    break;
                 case EVENT_UT_BLOCK_TIMER_EXPIRED:
                     int allTempBlockReasons = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
                             | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT

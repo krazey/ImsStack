@@ -63,7 +63,7 @@ public class SscServiceStateTest {
         }
 
         mSscServiceState = new FakeSscServiceState();
-        mSscServiceState.init(SLOT_0);
+        mSscServiceState.init(SLOT_0, Looper.myLooper());
 
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
         when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);

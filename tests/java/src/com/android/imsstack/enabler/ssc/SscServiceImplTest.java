@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallForwardInfo;
@@ -75,7 +76,7 @@ public class SscServiceImplTest {
     private int mQueryCount; // increase after every startGetTransaction case
     private int mUpdateCount; // increase after every startPutTransaction case
     private Handler mCallbackHandler;
-    private Handler mRequestHandler;
+    private HandlerThread mServiceThreadHandler;
     private TestableLooper mLooper;
 
     @Mock private Context mockContext;
@@ -130,21 +131,20 @@ public class SscServiceImplTest {
         mSscServiceImpl.setListener(mMockUtListener);
         mSscServiceImpl.setSscTransactionFactory(mockSscTransactionFactory);
 
-        SscServiceStateAgent.getInstance().setSscServiceState(SLOT_0, mockSscServiceState);
-        when(mockSscServiceState.isUtAvailable()).thenReturn(true);
-
-        mRequestHandler = mSscServiceImpl.getRequestHandler();
+        HandlerThread serviceThreadHandler = mSscServiceImpl.getServiceHandlerThread();
         try {
-            mLooper = new TestableLooper(mRequestHandler.getLooper());
+            mLooper = new TestableLooper(serviceThreadHandler.getLooper());
         } catch (Exception e) {
             fail("Fail to get looper from handler");
         }
 
-        mLooper.processAllMessages();
-
         mCallbackHandler = mSscServiceImpl.getCallBackHandler();
         when(mockSscTransactionFactory.getSscTransaction(eq(SLOT_0), any()))
                 .thenReturn(mockSscTransaction);
+
+        SscServiceStateAgent.getInstance()
+                .setSscServiceState(SLOT_0, mockSscServiceState, serviceThreadHandler.getLooper());
+        when(mockSscServiceState.isUtAvailable()).thenReturn(true);
     }
 
     @After

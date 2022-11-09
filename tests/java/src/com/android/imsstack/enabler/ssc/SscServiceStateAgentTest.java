@@ -47,9 +47,9 @@ public class SscServiceStateAgentTest {
         }
 
         mSscServiceStateAgent = SscServiceStateAgent.getInstance();
-        mSscServiceStateAgent.init(SLOT_0);
+        mSscServiceStateAgent.init(SLOT_0, Looper.myLooper());
 
-        mSscServiceStateAgent.setSscServiceState(SLOT_0, mockSscServiceState);
+        mSscServiceStateAgent.setSscServiceState(SLOT_0, mockSscServiceState, Looper.myLooper());
     }
 
     @After
