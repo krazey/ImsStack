@@ -34,6 +34,7 @@ public class SystemConstants {
     public static final int CATEGORY_EVENT = 0x00400000;
     public static final int CATEGORY_ISIM_EVENT = 0x00800000;
     public static final int CATEGORY_USIM_EVENT = 0x01000000;
+    public static final int CATEGORY_RADIO = 0x02000000;
 
     /**
      * Methods for the system information's notification (Java to Native)
@@ -54,6 +55,7 @@ public class SystemConstants {
     public static final int NOTIFY_USIM_EVENT = CATEGORY_USIM_EVENT + 14;
     public static final int NOTIFY_DATA_CONNECTION_IPCAN_CHANGED = CATEGORY_NETWORK + 15;
     public static final int NOTIFY_VOICE_NETWORK_TYPE_CHANGED = CATEGORY_NETWORK + 16;
+    public static final int NOTIFY_RADIO_EVENT = CATEGORY_RADIO + 17;
 
     /**
      * Methods for the system access (Native to Java)
@@ -177,6 +179,13 @@ public class SystemConstants {
     public static final int STOP_LOCATION_INFO = CATEGORY_BASE + 1202;
     public static final int GET_LOCATION_INFO = CATEGORY_BASE + 1203;
     public static final int MAKE_INSTATNT_LOCATION_INFO = CATEGORY_BASE + 1204;
+
+    /**
+     * Ims radio interface
+     */
+    public static final int START_IMS_TRAFFIC = CATEGORY_BASE + 1301;
+    public static final int STOP_IMS_TRAFFIC = CATEGORY_BASE + 1302;
+    public static final int TRIGGER_EPS_FALLBACK = CATEGORY_BASE + 1303;
 
     ////
     // IpSec

@@ -171,6 +171,14 @@ public:
     virtual IMS_BOOL MakeInstantLocationInfo(IN IMS_SINT32 nSlotId) = 0;
 
     ////
+    // Ims radio interface
+    ////
+    virtual IMS_SINT32 StartImsTraffic(IN IMS_UINT32 nId, IN IMS_UINT32 nTrafficType,
+            IN IMS_UINT32 nAccessNetworkType, IN IMS_UINT32 nDirection, IN IMS_SINT32 nSlotId) = 0;
+    virtual void StopImsTraffic(IN IMS_UINT32 nId, IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason, IN IMS_SINT32 nSlotId) = 0;
+
+    ////
     // IpSec
     ////
     virtual IMS_SINT32 AddIpSecSaParameter(

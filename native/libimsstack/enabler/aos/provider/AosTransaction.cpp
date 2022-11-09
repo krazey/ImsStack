@@ -373,7 +373,7 @@ PRIVATE IMS_UINT32 AosTransaction::GetAccessNetworkType(IN IMS_UINT32 nRadioType
 PRIVATE void AosTransaction::NotifyConnectionFailed(IN IN IMS_UINT32 nType,
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
 {
-    A_IMS_TRACE_D(AOSTAG, "NotifyConnectionFailed :: type(%d), reason(%d) , wtm(%d)", nType,
+    A_IMS_TRACE_D(AOSTAG, "NotifyConnectionFailed :: type(%d), reason(%d), wtm(%d)", nType,
             nFailureReason, nWaitTimeMillis);
 
     IMS_SLONG nIndex = m_objListeners.GetIndexOfKey(nType);

@@ -205,6 +205,17 @@ public:
     MOCK_METHOD(IMS_BOOL, MakeInstantLocationInfo, (IN IMS_SINT32 nSlotId), (override));
 
     ////
+    // Ims radio interface
+    ////
+    MOCK_METHOD(IMS_SINT32, StartImsTraffic,
+            (IN IMS_UINT32 nId, IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
+                    IN IMS_UINT32 nDirection, IN IMS_SINT32 nSlotId),
+            (override));
+    MOCK_METHOD(void, StopImsTraffic, (IN IMS_UINT32 nId, IN IMS_SINT32 nSlotId), (override));
+    MOCK_METHOD(IMS_SINT32, TriggerEpsFallback, (IN IMS_UINT32 nEpsfbReason, IN IMS_SINT32 nSlotId),
+            (override));
+
+    ////
     // IpSec
     ////
     MOCK_METHOD(IMS_SINT32, AddIpSecSaParameter,

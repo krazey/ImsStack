@@ -184,6 +184,15 @@ public:
     IMS_BOOL MakeInstantLocationInfo(IN IMS_SINT32 nSlotId) override;
 
     ////
+    // Ims radio interface
+    ////
+    IMS_SINT32 StartImsTraffic(IN IMS_UINT32 nId, IN IMS_UINT32 nTrafficType,
+            IN IMS_UINT32 nAccessNetworkType, IN IMS_UINT32 nDirection,
+            IN IMS_SINT32 nSlotId) override;
+    void StopImsTraffic(IN IMS_UINT32 nId, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason, IN IMS_SINT32 nSlotId) override;
+
+    ////
     // IpSec
     ////
     IMS_SINT32 AddIpSecSaParameter(
@@ -225,8 +234,7 @@ private:
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
     void NotifySimCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN IMS_UINT32 nCategory,
             IN const android::Parcel& in);
-    void NotifyTrmCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyVoNrCategory(
+    void NotifyRadioCategory(
             IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
 
 private:
