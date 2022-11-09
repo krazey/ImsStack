@@ -63,6 +63,7 @@ public class AudioSessionHandler  {
     private QosAgent mAudioQosAgent;
     private AudioImsQosCallback mAudioImsQosCallback;
     private InetSocketAddress mRemoteAddress;
+    private Object mLock = new Object();
 
     public AudioSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
@@ -127,7 +128,29 @@ public class AudioSessionHandler  {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.v("msg.what= " + msg.what);
+            ImsLog.v("messageType = " + msg.what);
+
+            // Till open session response is received, handling other commands has to wait
+            try {
+                synchronized (mLock) {
+                    if (mAudioSession == null && msg.what != MediaConstants.REQUEST_OPEN_SESSION
+                                && msg.what != MediaConstants.RESPONSE_OPEN_SESSION) {
+                        ImsLog.d(Thread.currentThread().getName()
+                                + " is waiting for Audio openSession response");
+                        mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
+                        if (mAudioSession == null) {
+                            ImsLog.d("Audio openSession response timeout");
+                            handleOpenSessionResponse(null, ImsMediaSession.RESULT_NOT_READY);
+                            return;
+                        }
+                        ImsLog.d(Thread.currentThread().getName()
+                                + " received Audio openSession response");
+                    }
+                }
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+
             switch (msg.what) {
                 case MediaConstants.REQUEST_OPEN_SESSION:
                 {
@@ -268,6 +291,11 @@ public class AudioSessionHandler  {
 
         @Override
         public void onOpenSessionSuccess(ImsMediaSession session) {
+            // Release the wait as OpenSession Response is received
+            synchronized (mLock) {
+                mAudioSession = (ImsAudioSession) session;
+                mLock.notifyAll();
+            }
             Message.obtain(mAudioMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     ImsMediaSession.RESULT_SUCCESS, UNUSED, session).sendToTarget();
         }
@@ -275,7 +303,10 @@ public class AudioSessionHandler  {
         @Override
         public void onOpenSessionFailure(final @ImsMediaSession.SessionOperationResult int error) {
             ImsLog.d("error=" + error);
-
+            // Release the wait as OpenSession Response is received
+            synchronized (mLock) {
+                mLock.notifyAll();
+            }
             Message.obtain(mAudioMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     error, UNUSED, null).sendToTarget();
         }
@@ -566,11 +597,17 @@ public class AudioSessionHandler  {
             }
             mAudioSession.modifySession(audioConfig);
         }
+        else {
+            handleModifySessionResponse(audioConfig, ImsMediaSession.RESULT_NOT_READY);
+        }
     }
 
     private void handleAudioAddConfig(AudioConfig audioConfig) {
         if (mAudioSession != null) {
             mAudioSession.addConfig(audioConfig);
+        }
+        else {
+            handleAddConfigResponse(audioConfig, ImsMediaSession.RESULT_NOT_READY);
         }
     }
 
@@ -615,7 +652,6 @@ public class AudioSessionHandler  {
                 return ;
             }
 
-            mAudioSession = (ImsAudioSession) session;
             mAudioSessionId = mAudioSession.getSessionId();
             ImsLog.d("Audio Session created: SessionId=" + mAudioSessionId);
         }

@@ -65,6 +65,7 @@ public class VideoSessionHandler {
     private QosAgent mVideoQosAgent;
     private VideoImsQosCallback mVideoImsQosCallback;
     private InetSocketAddress mRemoteAddress;
+    private Object mLock = new Object();
 
     public VideoSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface,
@@ -133,7 +134,29 @@ public class VideoSessionHandler {
 
         @Override
         public void handleMessage(Message msg) {
-            ImsLog.v("msg.what= " + msg.what);
+            ImsLog.v("messageType = " + msg.what);
+
+            // Till open session response is received, handling other commands has to wait
+            try {
+                synchronized (mLock) {
+                    if (mVideoSession == null && msg.what != MediaConstants.REQUEST_OPEN_SESSION
+                                && msg.what != MediaConstants.RESPONSE_OPEN_SESSION) {
+                        ImsLog.d(Thread.currentThread().getName()
+                                + " is waiting for Video openSession response");
+                        mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
+                        if (mVideoSession == null) {
+                            ImsLog.d("Video openSession response timeout");
+                            handleVideoOpenSessionResponse(null, ImsMediaSession.RESULT_NOT_READY);
+                            return;
+                        }
+                        ImsLog.d(Thread.currentThread().getName()
+                                + " received Video openSession response");
+                    }
+                }
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+
             switch (msg.what) {
                 case MediaConstants.REQUEST_OPEN_SESSION:
                 {
@@ -244,7 +267,11 @@ public class VideoSessionHandler {
 
         @Override
         public void onOpenSessionSuccess(ImsMediaSession session) {
-
+            // Release the wait as OpenSession Response is received
+            synchronized (mLock) {
+                mVideoSession = (ImsVideoSession) session;
+                mLock.notifyAll();
+            }
             Message.obtain(mVideoMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     ImsMediaSession.RESULT_SUCCESS, UNUSED, session).sendToTarget();
         }
@@ -252,7 +279,10 @@ public class VideoSessionHandler {
         @Override
         public void onOpenSessionFailure(final @ImsMediaSession.SessionOperationResult int error) {
             ImsLog.d("error=" + error);
-
+            // Release the wait as OpenSession Response is received
+            synchronized (mLock) {
+                mLock.notifyAll();
+            }
             Message.obtain(mVideoMessageHandler, MediaConstants.RESPONSE_OPEN_SESSION,
                     error, UNUSED, null).sendToTarget();
         }
@@ -476,7 +506,9 @@ public class VideoSessionHandler {
     }
 
     private void closeSockets() {
+        if (mRtpSocket != null) {
         mVideoQosAgent.destroyQosConnection(mRtpSocket.first, mRtpSocket.second);
+        }
     }
 
     private void handleVideoModifySession(VideoConfig videoConfig) {
@@ -493,6 +525,9 @@ public class VideoSessionHandler {
                 }
             }
             mVideoSession.modifySession(videoConfig);
+        }
+        else {
+            handleVideoModifySessionResponse(videoConfig, ImsMediaSession.RESULT_NOT_READY);
         }
     }
 
@@ -537,7 +572,6 @@ public class VideoSessionHandler {
                 return;
             }
 
-            mVideoSession = (ImsVideoSession) session;
             mVideoSessionId = mVideoSession.getSessionId();
             ImsLog.d("Video Session created: SessionId=" + mVideoSessionId);
             if (!mPreviewSurfaceSet) {

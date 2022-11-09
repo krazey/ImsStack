@@ -24,6 +24,7 @@ public class MediaConstants {
     // Maximum sockets that can be opened
     public static final int SOCKETS_MAX = 40;
     public static final int IMS_MSG_BASE_MEDIA = 1400;
+    public static final int RESPONSE_WAIT_TIMEOUT = 1000;
 
     // Requests
     public static final int IMSMEDIA_REQUEST              = IMS_MSG_BASE_MEDIA;
