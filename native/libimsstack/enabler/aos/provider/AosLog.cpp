@@ -473,7 +473,7 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegReasonToString(IN IMS_SINT32 nType)
     switch (nType)
     {
         case IRegistration::REASON_NONE:
-            return "RESULT_NONE";
+            return "REASON_NONE";
 
         case IRegistration::REASON_STATUS_CODE:
             return "REASON_STATUS_CODE";
