@@ -37,6 +37,7 @@ public:
     static const AString OPTION_TAG_PRECONDITION;
     static const AString OPTION_TAG_REPLACES;
     static const AString OPTION_TAG_RPR;
+    static const AString OPTION_TAG_SESSION_TIMER;
     static const AString OPTION_TAG_TARGET_DIALOG;
 
     explicit MtcExtensionSet(IN const ImsList<IMtcExtension*>& lstExtensions);

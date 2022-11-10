@@ -31,6 +31,7 @@
 #include "call/extension/MtcExtension.h"
 #include "call/extension/PreconditionExtension.h"
 #include "call/extension/RprExtension.h"
+#include "call/extension/SessionTimerExtension.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
@@ -337,6 +338,7 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
     lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
     lstExtensions.Append(new EarlyDialogTerminatedExtension());
     lstExtensions.Append(new RprExtension());
+    lstExtensions.Append(new SessionTimerExtension());
 
     // TODO: check CallType.
     if (!m_objContext.GetCallInfo().bUssi &&
