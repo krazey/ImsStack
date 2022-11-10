@@ -38,6 +38,7 @@
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
+#include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -65,10 +66,8 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
 
     UpdateSessionProperty();
 
-    m_bVideoCapable =
-            IsRegisteredFeature(ImsAosFeature::MMTEL) && IsRegisteredFeature(ImsAosFeature::VIDEO);
-    m_bRttCapable =
-            IsRegisteredFeature(ImsAosFeature::MMTEL) && IsRegisteredFeature(ImsAosFeature::TEXT);
+    m_bVideoCapable = IsRegisteredFeature(ImsAosFeature::VIDEO);
+    m_bRttCapable = IsRegisteredFeature(ImsAosFeature::TEXT);
 
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MO &&
             m_objContext.GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
@@ -368,7 +367,8 @@ void MtcSession::UpdateSessionProperty()
 PRIVATE
 void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage)
 {
-    CallType eNewCallType = MessageUtil::GetCallType(&objMessage, &m_objSession, IMS_TRUE);
+    CallType eNewCallType =
+            m_objContext.GetMessageUtils().GetCallType(&objMessage, &m_objSession, IMS_TRUE);
     if (eNewCallType != CallType::UNKNOWN)
     {
         m_eCallType = eNewCallType;
@@ -389,20 +389,17 @@ void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
     else if (m_objContext.GetConfigurationProxy().Is(
                      Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_TTA_VOLTE_INFO))
     {
-        AString strAvchange;
-        MessageUtil::GetHeader(
-                &objMessage, ISipHeader::UNKNOWN, strAvchange, MessageUtil::STR_P_TTA_VOLTE_INFO);
+        AString strAvchange = m_objContext.GetMessageUtils().GetHeader(
+                &objMessage, ISipHeader::UNKNOWN, MessageUtil::STR_P_TTA_VOLTE_INFO);
         m_bVideoCapable = strAvchange.Equals(MessageUtil::STR_AVCHANGE);
     }
     else
     {
-        m_bVideoCapable = IsRegisteredFeature(ImsAosFeature::MMTEL) &&
-                IsRegisteredFeature(ImsAosFeature::VIDEO) &&
-                MessageUtil::IsVideoFeatureIncluded(&objMessage);
+        m_bVideoCapable = IsRegisteredFeature(ImsAosFeature::VIDEO) &&
+                m_objContext.GetMessageUtils().IsVideoFeatureIncluded(&objMessage);
     }
-    m_bRttCapable = IsRegisteredFeature(ImsAosFeature::MMTEL) &&
-            IsRegisteredFeature(ImsAosFeature::TEXT) &&
-            MessageUtil::IsTextFeatureIncluded(&objMessage);
+    m_bRttCapable = IsRegisteredFeature(ImsAosFeature::TEXT) &&
+            m_objContext.GetMessageUtils().IsTextFeatureIncluded(&objMessage);
 
     IMS_TRACE_D("UpdateCapabilityFromMessage : Video[%s] Rtt[%s]", _TRACE_B_(m_bVideoCapable),
             _TRACE_B_(m_bRttCapable), 0);
@@ -411,9 +408,8 @@ void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
 PRIVATE
 void MtcSession::UpdateSessionIdFromMessage(IN const IMessage& objMessage)
 {
-    AString strSessionIdHeader;
-    MessageUtil::GetHeader(
-            &objMessage, ISipHeader::UNKNOWN, strSessionIdHeader, SipHeaderName::SESSION_ID);
+    AString strSessionIdHeader = m_objContext.GetMessageUtils().GetHeader(
+            &objMessage, ISipHeader::UNKNOWN, SipHeaderName::SESSION_ID);
 
     if (strSessionIdHeader.GetLength() <= 0)
     {
@@ -431,16 +427,15 @@ void MtcSession::SetInConference(IN const IMessage& objMessage)
     {
         return;
     }
-    m_objContext.GetCallInfo().bConference = MessageUtil::IsFocusConf(&objMessage);
+    m_objContext.GetCallInfo().bConference =
+            m_objContext.GetMessageUtils().IsFocusConf(&objMessage);
 }
 
 PRIVATE
 void MtcSession::CheckCallTypeWithRegisteredFeature()
 {
-    IMS_BOOL bVideoFeature =
-            IsRegisteredFeature(ImsAosFeature::MMTEL) && IsRegisteredFeature(ImsAosFeature::VIDEO);
-    IMS_BOOL bTextFeature =
-            IsRegisteredFeature(ImsAosFeature::MMTEL) && IsRegisteredFeature(ImsAosFeature::TEXT);
+    IMS_BOOL bVideoFeature = IsRegisteredFeature(ImsAosFeature::VIDEO);
+    IMS_BOOL bTextFeature = IsRegisteredFeature(ImsAosFeature::TEXT);
 
     if ((m_eCallType == CallType::VT && !bVideoFeature) ||
             (m_eCallType == CallType::RTT && !bTextFeature))
