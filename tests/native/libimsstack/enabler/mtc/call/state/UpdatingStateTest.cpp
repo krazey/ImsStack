@@ -235,6 +235,14 @@ TEST_F(UpdatingStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
     pUpdatingState->Terminate(objReason);
 }
 
+TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedWithVideoPushesPendingOperation)
+{
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+
+    ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(CallType::VT));
+    pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_VIDEO, MEDIA_PROTOCOL_RTP);
+}
+
 TEST_F(UpdatingStateTest, OnMediaFailed)
 {
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_MEDIA_INIT_FAILED)))

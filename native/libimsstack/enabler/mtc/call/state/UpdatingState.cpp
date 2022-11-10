@@ -279,6 +279,11 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(
         return CallStateName::TERMINATING;
     }
 
+    m_objContext.GetPendingOperationHolder().PushPendingOperation(
+            [=](IMtcCallState* pState)
+            {
+                return pState->OnReceivingMediaDataFailed(eMediaType, eProtocolType);
+            });
     return GetStateName();
 }
 

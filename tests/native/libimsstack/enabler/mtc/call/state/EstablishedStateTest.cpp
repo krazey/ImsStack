@@ -32,6 +32,7 @@
 #include "helper/MockMtcTimerWrapper.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
+#include "sipcore/ISipClientConnection.h"
 #include "sipcore/SipMethod.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
@@ -56,15 +57,20 @@ public:
     MockIMtcConfigurationManager* pMockConfigurationManager;
     MockIMtcPreconditionManager objMockPreconditionManager;
     MockMtcTimerWrapper objTimerWrapper;
+    MockIMessage objMessage;
+    MockIMessageUtils objMessageUtils;
     MtcConfigurationProxy* pConfigurationProxy;
     UpdatingInfo* pUpdatingInfo;
 
 protected:
     virtual void SetUp() override
     {
+        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objMockCallContext);
+
         ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
         ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
         ON_CALL(objMockMtcSession, GetISession).WillByDefault(ReturnRef(objMockISession));
+        ON_CALL(objMockISession, GetPreviousRequest(_)).WillByDefault(Return(&objMessage));
 
         ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
@@ -79,6 +85,8 @@ protected:
                 .WillByDefault(ReturnRef(objMockPreconditionManager));
         ON_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::VOIP, IMS_TRUE))
                 .WillByDefault(Return(IMS_SUCCESS));
+
+        ON_CALL(objMockCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         ON_CALL(objMockPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
 
@@ -126,6 +134,29 @@ TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
     CallReasonInfo objReason(CODE_USER_TERMINATED);
     pEstablishedState->Terminate(objReason);
     pEstablishedState->Terminate(objReason);
+}
+
+TEST_F(EstablishedStateTest, RefreshNotifyCompletedRunsPendingOperationAsynchronously)
+{
+    EXPECT_CALL(objMockCallContext, GetAsyncRunner(_));
+
+    ISipClientConnection* piFakeConnection = reinterpret_cast<ISipClientConnection*>(0x1);
+    pEstablishedState->Refresh_NotifyCompleted(piFakeConnection);
+}
+
+TEST_F(EstablishedStateTest, OnReceivingMediaDataFailedWithVideoInvokesDowngrade)
+{
+    EXPECT_CALL(objMockMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE))
+            .Times(2)
+            .WillOnce(Return(IMS_SUCCESS))
+            .WillOnce(Return(IMS_FAILURE));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _)).Times(2);
+
+    ON_CALL(objMockMtcSession, GetCallType).WillByDefault(Return(CallType::VT));
+    pEstablishedState->OnReceivingMediaDataFailed(MEDIATYPE_VIDEO, MEDIA_PROTOCOL_RTP);
+
+    ON_CALL(objMockMtcSession, GetCallType).WillByDefault(Return(CallType::RTT));
+    pEstablishedState->OnReceivingMediaDataFailed(MEDIATYPE_TEXT, MEDIA_PROTOCOL_RTP);
 }
 
 TEST_F(EstablishedStateTest, OnMediaFailed)
@@ -206,25 +237,12 @@ TEST_F(EstablishedStateTest, SendUpdateBySrvccByFailed)
 
 TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
 {
-    MockIMessage* piMessage = new MockIMessage();
-    ON_CALL(objMockISession, GetPreviousRequest(_)).WillByDefault(Return(piMessage));
-
-    UpdatingInfo* pUpdatingInfo = new UpdatingInfo(objMockCallContext);
-    ON_CALL(objMockCallContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
-
-    MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objMockCallContext);
-
-    MockIMessageUtils objMessageUtils;
-    ON_CALL(objMockCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
     ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
-
-    ON_CALL(objMessageUtils, HasSdp(piMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
 
     SipMethod objSipMethod(SipMethod::INVITE);
-    ON_CALL(*piMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
-
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
     ON_CALL(objMockCallContext, IsHeldByMe).WillByDefault(Return(IMS_FALSE));
-
     ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
 
     EXPECT_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::VOIP, IMS_TRUE))
@@ -236,9 +254,6 @@ TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
     EXPECT_CALL(objMockMtcSession, AcceptUpdate()).Times(1).WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
-
-    delete piMessage;
-    delete pUpdatingInfo;
 }
 
 }  // namespace android

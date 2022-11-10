@@ -69,8 +69,9 @@ private:
     IMS_RESULT HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
     IMS_RESULT FormAutoAccept(IN IMS_BOOL bWithoutOffer);
     void AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer);
-    IMS_BOOL IsConferenceCallParticipant();
+    IMS_BOOL IsConferenceCallParticipant() const;
     IMSList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
+    CallStateName Downgrade(IN CallType eCallType);
     IMS_BOOL IsRefreshInProgress() const;
 
     CallStateName TerminateUssiAfterInfoTransaction();
