@@ -20,9 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallProfile;
@@ -30,6 +32,10 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 
+
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
@@ -43,7 +49,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
@@ -55,27 +63,63 @@ public class ImsCallUtilsTest {
     private static final String SOS_SERVICE_URN_FIRE = "urn:service:sos.fire";
     private static final String SOS_SERVICE_URN_MARINE = "urn:service:sos.marine";
     private static final String SOS_SERVICE_URN_MOUNTAIN = "urn:service:sos.mountain";
-    public static final String EXTRA_CONFERENCE_USER_ID = "conference_user_id";
     private static final String SOS_SERVICE_URN_GENERIC = "urn:service:sos";
+    public static final String EXTRA_CONFERENCE_USER_ID = "conference_user_id";
     public static final String ANONYMOUS = "anonymous";
+    private static final int SLOT_ID = 0;
 
-    private ICallContext mContext;
-    private Context mMockContext;
+    //Mocked classes
+    @Mock CarrierConfig mMockCarrierConfig;
+    @Mock ConfigInterface mMockConfigInterface;
+    @Mock ICallContext mContext;
+    @Mock Context mMockContext;
 
     @Before
     public void setUp() {
-        mContext = Mockito.mock(ICallContext.class);
-        mMockContext = Mockito.mock(Context.class);
+        MockitoAnnotations.initMocks(this);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
     }
 
     @After
-    public void tearDown() {
-        mContext = null;
-        mMockContext = null;
+    public void tearDown() throws Exception {
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
     }
 
     @Test
-    public void testProfileCreationClone() {
+    public void testCreateCallProfileFromCallInfo() {
+        CallInfo callInfo = Mockito.mock(CallInfo.class);
+        MediaInfo mediaInfo = Mockito.mock(MediaInfo.class);
+
+        callInfo.videoCapable = true;
+        when(mMockCarrierConfig.getBoolean(CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL, false))
+                .thenReturn(true);
+        ImsCallProfile profile = ImsCallUtils.createCallProfileFromCallInfo(mContext,
+                callInfo, mediaInfo);
+        assertEquals(ImsCallProfile.CALL_RESTRICT_CAUSE_HD, profile.getRestrictCause());
+        assertEquals(true, profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE));
+        assertEquals(false, profile.getCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL));
+
+        callInfo.isConf = true;
+        mediaInfo.AQuality = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB;
+        profile = ImsCallUtils.createCallProfileFromCallInfo(mContext, callInfo, mediaInfo);
+        assertEquals(ImsCallProfile.CALL_RESTRICT_CAUSE_NONE, profile.getRestrictCause());
+        assertEquals(true, profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE));
+
+        callInfo.serviceType = ImsCallProfile.SERVICE_TYPE_NORMAL;
+        profile = ImsCallUtils.createCallProfileFromCallInfo(mContext,
+            callInfo, mediaInfo);
+        assertEquals(ImsCallProfile.SERVICE_TYPE_NORMAL, profile.mServiceType);
+
+        callInfo.callType = ImsCallProfile.CALL_TYPE_VT;
+        callInfo.serviceType = ImsCallProfile.SERVICE_TYPE_EMERGENCY;
+        profile = ImsCallUtils.createCallProfileFromCallInfo(mContext, callInfo, mediaInfo);
+        assertEquals(ImsCallProfile.CALL_TYPE_VT, profile.mCallType);
+        assertEquals(ImsCallProfile.SERVICE_TYPE_EMERGENCY, profile.mServiceType);
+    }
+
+    @Test
+    public void testCloneCallProfile() {
         int serviceType = IUMtcCall.SERVICETYPE_NORMAL;
         int callType = ImsCallProfile.CALL_TYPE_VOICE;
         int audioQuality = ImsStreamMediaProfile.AUDIO_QUALITY_QCELP13K;
@@ -92,7 +136,24 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testConfParticipantsBundle() {
+    public void testCreateCallProfile() {
+        int serviceType = IUMtcCall.SERVICETYPE_NORMAL;
+        int callType = ImsCallProfile.CALL_TYPE_VOICE;
+        int audioQuality = ImsStreamMediaProfile.AUDIO_QUALITY_NONE;
+        int audioDirection = ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
+        int videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_NONE;
+        int videoDirection =  ImsStreamMediaProfile.DIRECTION_INVALID;
+        int rttMode = ImsStreamMediaProfile.RTT_MODE_DISABLED;
+        ImsCallProfile actualProfile = new ImsCallProfile(serviceType, callType);
+        ImsCallProfile expectedprofile = ImsCallUtils.createCallProfile(
+                serviceType, callType, audioQuality, audioDirection, videoQuality, videoDirection,
+                    rttMode);
+        assertEquals(actualProfile.mServiceType, expectedprofile.mServiceType);
+        assertEquals(actualProfile.mCallType, expectedprofile.mCallType);
+    }
+
+    @Test
+    public void testCreateConferenceParticipant() {
         String user = "sip:anonymousX@example.com";
         String endpoint = "full";
         String displayText = "display text";
@@ -111,7 +172,7 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testReasonInfo() {
+    public void testCreateReasonInfo() {
         CallReasonInfo info = new CallReasonInfo();
         ImsReasonInfo reasonInfoExtra = ImsCallUtils.createReasonInfo(info,
                 ImsCallUtils.FLAG_REASON_INFO_EXTRA_CODE);
@@ -191,7 +252,24 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testGetCalltypeFromProfile() {
+    public void testGetCallExtraBooleanFromOemExtras() {
+        ImsCallProfile profile = new ImsCallProfile();
+
+        String key = "EXTRA_CALL_BOOL";
+        boolean defaultValue = false;
+        Bundle extras = new Bundle();
+        extras.putBoolean(key, true);
+        profile.mCallExtras.putBundle(ImsCallProfile.EXTRA_OEM_EXTRAS, extras);
+        assertTrue(ImsCallUtils.getCallExtraBooleanFromOemExtras(profile, key, defaultValue));
+
+        defaultValue = true;
+        extras.putBoolean(key, false);
+        profile.mCallExtras.putBundle(ImsCallProfile.EXTRA_OEM_EXTRAS, extras);
+        assertFalse(ImsCallUtils.getCallExtraBooleanFromOemExtras(profile, key, defaultValue));
+    }
+
+    @Test
+    public void testGetCallTypeFromProfile() {
         int ret = ImsCallUtils.getCallTypeFromProfile(ImsCallProfile.CALL_TYPE_VOICE, true);
         assertEquals(IUMtcCall.CALLTYPE_RTT, ret);
 
@@ -210,7 +288,7 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testSosUrn() {
+    public void testGetSosUrnFromECallServiceCategory() {
         String ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
                 EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE);
         assertEquals(ret, SOS_SERVICE_URN_POLICE);
@@ -230,12 +308,24 @@ public class ImsCallUtilsTest {
         ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
                 EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE);
         assertEquals(ret, SOS_SERVICE_URN_MOUNTAIN);
+
+        ret = ImsCallUtils.getSosUrnFromECallServiceCategory(
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
+        assertEquals(ret, SOS_SERVICE_URN_GENERIC);
+    }
+
+    @Test
+    public void testGetDisconnectedCauseFromUserStatus() {
+        assertEquals(UsersInfo.USER_STATUS_NOTSUPPORTED,
+                ImsCallUtils.getDisconnectedCauseFromUserStatus(
+                    UsersInfo.USER_STATUS_NOTSUPPORTED));
+        assertEquals(0, ImsCallUtils.getDisconnectedCauseFromUserStatus(
+                UsersInfo.USER_STATUS_FAIL));
     }
 
     @Test
     public void testGetExtraCodeFromMtc() {
         int reason = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-
         int extraCode = -1;
         int result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
         int resultCode = ImsReasonInfo.CODE_UNSPECIFIED;
@@ -244,6 +334,15 @@ public class ImsCallUtilsTest {
         reason = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
         result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
         assertEquals(resultCode, result);
+
+        reason = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
+        extraCode = CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
+        result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
+        assertEquals(CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL, result);
+
+        reason = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+        result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
+        assertEquals(ImsReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL, result);
     }
 
     @Test
@@ -282,6 +381,25 @@ public class ImsCallUtilsTest {
     }
 
     @Test
+    public void testGetTerminateCallReasonInfoCodeFromImsReasonInfo() {
+        int result = ImsCallUtils.getTerminateCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_USER_TERMINATED);
+        assertEquals(result, CallReasonInfo.CODE_USER_TERMINATED);
+
+        result = ImsCallUtils.getTerminateCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_LOCAL_POWER_OFF);
+        assertEquals(result, CallReasonInfo.CODE_LOCAL_POWER_OFF);
+
+        result = ImsCallUtils.getTerminateCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_LOW_BATTERY);
+        assertEquals(result, CallReasonInfo.CODE_LOCAL_LOW_BATTERY);
+
+        result = ImsCallUtils.getTerminateCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_LOCAL_ILLEGAL_ARGUMENT);
+        assertEquals(result, CallReasonInfo.CODE_UNSPECIFIED);
+    }
+
+    @Test
     public void testIsGoogleNativeCompliant() {
         boolean ret = ImsCallUtils.isGoogleNativeCompliant(mContext);
         assertEquals(ret, ImsConstants.USE_GOOGLE_NATIVE_APPS);
@@ -304,6 +422,38 @@ public class ImsCallUtilsTest {
 
         callProfile.mServiceType = ImsCallProfile.SERVICE_TYPE_NORMAL;
         ret = ImsCallUtils.isEmergencyCall(callProfile);
+        assertFalse(ret);
+    }
+
+    @Test
+    public void testIsAlternateEmergencyCall() {
+        CallReasonInfo info = Mockito.mock(CallReasonInfo.class);
+        info.mCode = ImsReasonInfo.CODE_SIP_ALTERNATE_EMERGENCY_CALL;
+        boolean ret = ImsCallUtils.isAlternateEmergencyCall(info);
+        assertTrue(ret);
+
+        info.mCode = ImsReasonInfo.CODE_UNSPECIFIED;
+        ret = ImsCallUtils.isAlternateEmergencyCall(info);
+        assertFalse(ret);
+    }
+
+    @Test
+    public void testIsHoldMediaOnVideoCall() {
+        boolean ret = ImsCallUtils.isHoldMediaOnVideoCall(mContext, null, null, null);
+        assertFalse(ret);
+
+        ret = ImsCallUtils.isHoldMediaOnVideoCall(mContext, new ImsCallProfile(), new CallInfo(),
+                new MediaInfo());
+        assertFalse(ret);
+    }
+
+    @Test
+    public void testIsUnholdMediaOnVideoCall() {
+        boolean ret = ImsCallUtils.isUnholdMediaOnVideoCall(mContext, null, null, null);
+        assertFalse(ret);
+
+        ret = ImsCallUtils.isUnholdMediaOnVideoCall(mContext, new ImsCallProfile(), new CallInfo(),
+                new MediaInfo());
         assertFalse(ret);
     }
 
@@ -384,7 +534,7 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void updateCallProfileForEmergency() {
+    public void testUpdateCallProfileForEmergency() {
         ImsCallProfile profile = new ImsCallProfile();
         profile.mCallType = ImsCallProfile.CALL_TYPE_VOICE;
         CallInfo ci = new CallInfo();
@@ -437,11 +587,21 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void updateCallProfileOnSessionProgressing() {
+    public void testUpdateCallProfileFromSuppInfoExtension() {
+        ImsCallProfile profile = new ImsCallProfile();
+        SuppInfo suppInfo = new SuppInfo();
+        suppInfo.addService_int(SuppInfo.TYPE_CDIV_CAUSE, 1);
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)).thenReturn(true);
+        ImsCallUtils.updateCallProfileFromSuppInfoExtension(mContext, profile, suppInfo);
+        assertEquals(1, profile.getCallExtraInt(ImsCallUtils.EXTRA_CDIV_CAUSE));
+    }
+
+    @Test
+    public void testUpdateCallProfileOnSessionProgressing() {
         ImsCallProfile profile = new ImsCallProfile();
         profile.mCallType = ImsCallProfile.CALL_TYPE_VOICE;
         SuppInfo suppInfo = new SuppInfo();
-
         SuppInfo suppInfo2 = new SuppInfo(suppInfo);
         CallInfo ci = new CallInfo();
         ci.serviceType = IUMtcCall.SERVICETYPE_EMERGENCY;
@@ -452,6 +612,12 @@ public class ImsCallUtilsTest {
         suppInfo2.addService_bool(SuppInfo.TYPE_MMC, true);
         ImsCallUtils.updateCallProfileOnSessionProgressing(mContext, profile, ci, suppInfo2);
         Assert.assertEquals(ImsCallProfile.CALL_TYPE_VOICE, profile.getCallType());
+
+        ci.callType = IUMtcCall.CALLTYPE_VT;
+        suppInfo.addService_int_str(SuppInfo.TYPE_VRBT, SuppInfo.TIP_IDENTITY,
+                "Testing Demo,sip:+12345678902");
+        ImsCallUtils.updateCallProfileOnSessionProgressing(mContext, profile, ci, suppInfo);
+        assertEquals(ImsCallProfile.CALL_TYPE_VT, profile.getCallType());
     }
 
     @Test
@@ -468,7 +634,42 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void isEmergencyPdnUsedForEmergencyCallViaWfc() {
+    public void testGetRejectCallReasonInfoCodeFromImsReasonInfo() {
+        int result = ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_LOCAL_CALL_EXCEEDED);
+        assertEquals(result, CallReasonInfo.CODE_LOCAL_CALL_EXCEEDED);
+
+        result = ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_LOCAL_CALL_BUSY);
+        assertEquals(result, CallReasonInfo.CODE_LOCAL_CALL_BUSY);
+
+        result = ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_USER_NOANSWER);
+        assertEquals(result, CallReasonInfo.CODE_USER_NOANSWER);
+
+        result = ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_USER_DECLINE);
+        assertEquals(result, CallReasonInfo.CODE_USER_DECLINE);
+
+        result = ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_LOW_BATTERY);
+        assertEquals(result, CallReasonInfo.CODE_LOW_BATTERY);
+
+        result = ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_USER_IGNORE);
+        assertEquals(result, CallReasonInfo.CODE_USER_IGNORE);
+
+        result = ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
+        assertEquals(result, CallReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
+
+        result = ImsCallUtils.getRejectCallReasonInfoCodeFromImsReasonInfo(
+                ImsReasonInfo.CODE_LOCAL_ILLEGAL_ARGUMENT);
+        assertEquals(result, CallReasonInfo.CODE_UNSPECIFIED);
+    }
+
+    @Test
+    public void testIsEmergencyPdnUsedForEmergencyCallViaWfc() {
         Mockito.when(mContext.getContext()).thenReturn(mMockContext);
         boolean callViaEPdn = ImsCallUtils.isEmergencyPdnUsedForEmergencyCallViaWfc(mContext);
         assertFalse(callViaEPdn);
@@ -498,23 +699,6 @@ public class ImsCallUtilsTest {
     }
 
     @Test
-    public void testUpdateCallProfileOnSessionProgressing() {
-        CallInfo ci = new CallInfo();
-        ci.serviceType = IUMtcCall.SERVICETYPE_EMERGENCY;
-        ci.callType = IUMtcCall.CALLTYPE_VT;
-        ci.isConf = true;
-        ci.videoCapable = true;
-        ci.confSub = true;
-        ci.rttCapable = true;
-        ImsCallProfile profile = new ImsCallProfile();
-        SuppInfo suppInfo = new SuppInfo();
-        suppInfo.addService_int_str(SuppInfo.TYPE_VRBT, SuppInfo.TIP_IDENTITY,
-                "Testing Demo,sip:+12345678902");
-        ImsCallUtils.updateCallProfileOnSessionProgressing(mContext, profile, ci, suppInfo);
-        assertEquals(ImsCallProfile.CALL_TYPE_VT, profile.getCallType());
-    }
-
-    @Test
     public void testGetEmergencyRoutingFromCallProfile() {
         ImsCallProfile callProfile = new ImsCallProfile();
         callProfile.setEmergencyCallRouting(EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
@@ -529,7 +713,6 @@ public class ImsCallUtilsTest {
     @Test
     public void testSetSosUrnFromCallReasonInfo() {
         List emergencyUrn;
-        int emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE;
         ImsCallProfile callProfile = new ImsCallProfile();
         ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_POLICE,
                 callProfile);
@@ -537,6 +720,34 @@ public class ImsCallUtilsTest {
                 callProfile.getEmergencyServiceCategories());
         emergencyUrn = callProfile.getEmergencyUrns();
         assertEquals(SOS_SERVICE_URN_POLICE, emergencyUrn.get(0));
+
+        ImsCallUtils.setSosUrnFromCallReasonInfo(
+                CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE, callProfile);
+        assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE,
+                callProfile.getEmergencyServiceCategories());
+        emergencyUrn = callProfile.getEmergencyUrns();
+        assertEquals(SOS_SERVICE_URN_AMBULANCE, emergencyUrn.get(0));
+
+        ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_FIRE,
+                callProfile);
+        assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE,
+                callProfile.getEmergencyServiceCategories());
+        emergencyUrn = callProfile.getEmergencyUrns();
+        assertEquals(SOS_SERVICE_URN_FIRE, emergencyUrn.get(0));
+
+        ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MARINE,
+                callProfile);
+        assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD,
+                callProfile.getEmergencyServiceCategories());
+        emergencyUrn = callProfile.getEmergencyUrns();
+        assertEquals(SOS_SERVICE_URN_MARINE, emergencyUrn.get(0));
+
+        ImsCallUtils.setSosUrnFromCallReasonInfo(
+                CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN, callProfile);
+        assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE,
+                callProfile.getEmergencyServiceCategories());
+        emergencyUrn = callProfile.getEmergencyUrns();
+        assertEquals(SOS_SERVICE_URN_MOUNTAIN, emergencyUrn.get(0));
 
         ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_INVALID,
                 callProfile);
