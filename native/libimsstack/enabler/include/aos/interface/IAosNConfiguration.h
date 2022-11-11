@@ -179,6 +179,13 @@ public:
     virtual IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const = 0;
 
     /**
+     * @brief Returns whether IPSec is enabled for SIP messages in roaming networks.
+     *
+     * @return IMS_BOOL Return whether to be applied or not
+     */
+    virtual IMS_BOOL IsSipOverIpsecInRoamingEnabled() const = 0;
+
+    /**
      * @brief Check if conuntry code availability check for wfc is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.
@@ -241,6 +248,16 @@ public:
     virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const = 0;
 
     /**
+     * @brief Returns whether UE needs to disable the T3482 timer for emergency PDN or not.
+     *
+     *        If this is set as TRUE,  UE will wait for the expiration of the emergency registration
+     *        timer regardless that T3482 timer is expired.
+     *
+     * @return IMS_BOOL Return wherther to be applied or not
+     */
+    virtual IMS_BOOL IsT3482ForEmcDisabled() const = 0;
+
+    /**
      * @brief Returns whether emergency PDN shall be released after the E911 call is ended.
      *
      * @return IMS_BOOL Return wherther to be applied or not
@@ -260,13 +277,6 @@ public:
      * @return IMS_BOOL Return wherther to be enabled or not
      */
     virtual IMS_BOOL IsImsOverNrEnabled() const = 0;
-
-    /**
-     * @brief Flag specifying if verstat is supported for registration or not
-     *
-     * @return IMS_BOOL Return wherther to be supported or not
-     */
-    virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
 
     /**
      * @brief Flag indicating whether the authorized IMPU from P-Associated-URI header in 200 OK
@@ -291,6 +301,15 @@ public:
      * @return IMS_BOOL Return wherther IMS de-registers or not.
      */
     virtual IMS_BOOL IsDeregOn3gNetwork() const = 0;
+
+    /**
+     * @brief Returns whether UE doesn't send initial registration due to pcscf change
+     *
+     *        If this is set as TRUE, UE doesn't send initial registration due to pcscf change.
+     *
+     * @return IMS_BOOL Return whether the logic is applied or not.
+     */
+    virtual IMS_BOOL IsNoInitRegOnPcscfChange() const = 0;
 
     /**
      * @brief Flag specifying if video call is supported over wifi when voice call is unavailable.
@@ -384,6 +403,14 @@ public:
     virtual IMS_BOOL IsContactUriValidationChecked() const = 0;
 
     /**
+     * @brief Returns whether IMS registration is retried based on IP version fallback
+     *        from IPv6 to IPv4
+     *
+     * @return IMS_BOOL Return whether to be applied or not
+     */
+    virtual IMS_BOOL IsRegRetryWithIpVerFallback() const = 0;
+
+    /**
      * @brief Flag indicating whether the User Info is included or not in contact
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
@@ -405,6 +432,13 @@ public:
      * @return IMS_BOOL Return wherther the feature tag is included.
      */
     virtual IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const = 0;
+
+    /**
+     * @brief Flag specifying if verstat is supported for registration or not
+     *
+     * @return IMS_BOOL Return wherther to be supported or not
+     */
+    virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
 
     /**
      * @brief Get the registration retry base-time
@@ -432,6 +466,35 @@ public:
      * @return IMS_UINT32 Returns ISIM index for IMPU.
      */
     virtual IMS_UINT32 GetIsimIndexForImpu() = 0;
+
+    /**
+     * @brief Indicate whether DSCP(Differentiated Services (Diffserv) Codepoint)
+     *        for SIP packets is set or not.
+     *
+     *        Specify the preferred ipcan for SIP Packets.
+     *        Possible values are,
+     *        CarrierConfig::Ims::PREFERRED_DSCP_NONE
+     *        CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR
+     *        CarrierConfig::Ims::PREFERRED_DSCP_WIFI
+     *        CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR_WIFI
+     *
+     * @return IMS_SINT32 Return the preferred IP-CAN type for SIP Packets
+     */
+    virtual IMS_SINT32 GetPreferredImsDscp() const = 0;
+
+    /**
+     * @brief Indicate whether the g.3gpp.accesstype feature tag indicating the access type
+     *        in contact header of SIP REGISTER is included based on 3GPP TS 24.292.
+     *
+     *        Specify the preferred access feature tag of SIP REGISTER.
+     *        Possible values are,
+     *        CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED
+     *        CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED
+     *        CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE
+     *
+     * @return IMS_SINT32 Return the preferred IP-CAN type for SIP Packets
+     */
+    virtual IMS_SINT32 GetRegistrationPreferredAccessTypeFeatureTag() const = 0;
 
     /**
      * @brief Get USSD preference method.
@@ -533,34 +596,6 @@ public:
     virtual IMS_SINT32 GetEmergencyRegistrationTimerMillis() const = 0;
 
     /**
-     * @brief Get the default policy for the registration retry with pcscf selection.
-     *
-     *        Specify the default retry policy about how to use the PCSCF address selection.
-     *        Possible values are,
-     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC
-     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF
-     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_NEXT_PCSCF
-     *
-     * @return IMS_SINT32 Return the default policy for the registration retry
-     */
-    virtual IMS_SINT32 GetRegRetryDefaultPolicy() const = 0;
-
-    /**
-     * @brief Indicate whether DSCP(Differentiated Services (Diffserv) Codepoint)
-     *        for SIP packets is set or not.
-     *
-     *        Specify the preferred ipcan for SIP Packets.
-     *        Possible values are,
-     *        CarrierConfig::Ims::PREFERRED_DSCP_NONE
-     *        CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR
-     *        CarrierConfig::Ims::PREFERRED_DSCP_WIFI
-     *        CarrierConfig::Ims::PREFERRED_DSCP_CELLULAR_WIFI
-     *
-     * @return IMS_SINT32 Return the preferred IP-CAN type for SIP Packets
-     */
-    virtual IMS_SINT32 GetPreferredImsDscp() const = 0;
-
-    /**
      * @brief Indicate the DSCP for IMS signalling
      *
      *        If GetPreferredImsDscp() is not PREFERRED_DSCP_NONE, it will be set
@@ -570,20 +605,6 @@ public:
      * @return IMS_SINT32 Return the DSCP value for IMS signalling
      */
     virtual IMS_SINT32 GetImsSignallingDscp() const = 0;
-
-    /**
-     * @brief Indicate whether the g.3gpp.accesstype feature tag indicating the access type
-     *        in contact header of SIP REGISTER is included based on 3GPP TS 24.292.
-     *
-     *        Specify the preferred access feature tag of SIP REGISTER.
-     *        Possible values are,
-     *        CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED
-     *        CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED
-     *        CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE
-     *
-     * @return IMS_SINT32 Return the preferred IP-CAN type for SIP Packets
-     */
-    virtual IMS_SINT32 GetRegistrationPreferredAccessTypeFeatureTag() const = 0;
 
     /**
      * @brief Indicate whether private header like P-Cellular-Network-Info or
@@ -618,6 +639,22 @@ public:
      * @return IMS_SINT32 Return the actual wait time policy
      */
     virtual IMS_SINT32 GetRegActualWaitTimePolicy() const = 0;
+
+    /**
+     * @brief Get the out of service policy object
+     *
+     *        CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT
+     *            Indicate that reregistration is not tried during OOS and
+     *            reregistratioin is attempted after network service state is changed to in service
+     *            and registration is not expired.
+     *        CarrierConfig::Assets::REG_OOS_POLICY_DESTROY
+     *            Indicate that registration is terminated if registration is refreshed during OOS.
+     *            When network service state is changed to in service,
+     *            the initial registration is tried.
+     *
+     * @return IMS_SINT32 Return the out of service policy
+     */
+    virtual IMS_SINT32 GetRegOutOfServicePolicy() const = 0;
 
     /**
      * @brief Get the SIP message threshold size caused by the transport change
@@ -685,6 +722,48 @@ public:
     virtual IMS_SINT32 GetRegRetrySip503CodePolicy() const = 0;
 
     /**
+     * @brief Indicate the policy for clearing the registration retry count
+     *
+     *        Possible values are,
+     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION
+     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION
+     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_NOTIFY
+     *
+     * @return IMS_SINT32 Return the policy of clearing the retry count for registration
+     */
+    virtual IMS_SINT32 GetRegRetryCountResetPolicy() const = 0;
+
+    /**
+     * @brief Get the default policy for the registration retry with pcscf selection.
+     *
+     *        Specify the default retry policy about how to use the PCSCF address selection.
+     *        Possible values are,
+     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC
+     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF
+     *        CarrierConfig::Assets::DEFAULT_RETRY_POLICY_NEXT_PCSCF
+     *
+     * @return IMS_SINT32 Return the default policy for the registration retry
+     */
+    virtual IMS_SINT32 GetRegRetryDefaultPolicy() const = 0;
+
+    /**
+     * @brief Get minimum number of registration retries
+     *
+     *        Indicate the number of minimum retry if P-CSCF count is less than this number.
+     *        If the value is 0, it is not applicable..
+     *
+     * @return IMS_SINT32 Return retry minimum count
+     */
+    virtual IMS_SINT32 GetRegRetryMinCount() const = 0;
+
+    /**
+     * @brief Get the Reg Retry Timer F Policy object
+     *
+     * @return IMS_SINT32
+     */
+    virtual IMS_SINT32 GetRegRetryTimerFPolicy() const = 0;
+
+    /**
      * @brief Indicate the extra error type for registration
      *
      *        Possible values are,
@@ -742,18 +821,6 @@ public:
      * @return IMS_SINT32 Return min of the extra error
      */
     virtual IMS_SINT32 GetExtraRegErrMinCount() const = 0;
-
-    /**
-     * @brief Indicate the policy for clearing the registration retry count
-     *
-     *        Possible values are,
-     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION
-     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION
-     *        CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_NOTIFY
-     *
-     * @return IMS_SINT32 Return the policy of clearing the retry count for registration
-     */
-    virtual IMS_SINT32 GetRegRetryCountResetPolicy() const = 0;
 
     /**
      * @brief Indicate to maintain the registration until the retry count

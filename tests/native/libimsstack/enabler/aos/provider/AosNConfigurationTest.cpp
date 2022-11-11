@@ -513,30 +513,30 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(0));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_OUT_OF_SERVICE_POLICY_INT, -1))
-            .WillOnce(Return(0));
+            .WillOnce(Return(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_PCSCF_UPDATE_POLICY_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_305_POLICY_INT, -1))
-            .WillOnce(Return(0));
+            .WillOnce(Return(arrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_503_POLICY_INT, -1))
-            .WillOnce(Return(0));
+            .WillOnce(Return(arrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_CNT_RESET_POLICY_INT, -1))
-            .WillOnce(Return(0));
+            .WillOnce(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_DEFAULT_POLICY_INT, -1))
-            .WillOnce(Return(0));
+            .WillOnce(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_MIN_CNT_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT, -1))
-            .WillOnce(Return(0));
+            .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_NONE));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT, -1))
-            .WillOnce(Return(0));
+            .WillOnce(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT, -1))
             .WillOnce(Return(0));
@@ -666,14 +666,14 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
 
     EXPECT_FALSE(pAosNConfiguration->IsCdmalessFeatureTagRequired());
     EXPECT_FALSE(pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
-    // bDisableT3482ForEmc
+    EXPECT_FALSE(pAosNConfiguration->IsT3482ForEmcDisabled());
     EXPECT_FALSE(pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
     EXPECT_FALSE(pAosNConfiguration->IsRegWithIpcanChangedDuringImsCallHeld());
     EXPECT_TRUE(pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
     EXPECT_FALSE(pAosNConfiguration->IsDeregOn3gNetwork());
-    // bNoInitRegOnPcscfChange
-    // bRegRetryWithIpVerFallback
+    EXPECT_FALSE(pAosNConfiguration->IsNoInitRegOnPcscfChange());
     EXPECT_FALSE(pAosNConfiguration->IsContactUriValidationChecked());
+    EXPECT_FALSE(pAosNConfiguration->IsRegRetryWithIpVerFallback());
     EXPECT_FALSE(pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
     EXPECT_TRUE(pAosNConfiguration->IsRegRequiredAfterImsCallEndOnRegHeld());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredEmcRegInRoaming());
@@ -681,7 +681,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredWfcBlockByAirplaneMode());
     // bReregRetryExpireTimeChecked
-    // bSipOverIpsecEnabledInRoaming
+    EXPECT_TRUE(pAosNConfiguration->IsSipOverIpsecInRoamingEnabled());
     EXPECT_TRUE(pAosNConfiguration->IsSmsOverImsAvailableWithoutVoiceCapability());
     EXPECT_TRUE(pAosNConfiguration->IsUserInfoInContactSupported());
     EXPECT_FALSE(pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
@@ -698,17 +698,25 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(1, pAosNConfiguration->GetGeolocationPidfFormingPolicy());
     EXPECT_EQ(1, pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, pAosNConfiguration->GetImsSignallingDscp());
-    // nRegOutOfServicePolicy
-    EXPECT_EQ(0, pAosNConfiguration->GetRegRetrySip305CodePolicy());
-    EXPECT_EQ(0, pAosNConfiguration->GetRegRetrySip503CodePolicy());
-    EXPECT_EQ(0, pAosNConfiguration->GetRegRetryDefaultPolicy());
-    // nRegRetryMinCnt
-    // nRegRetryTimerFPolicy
     EXPECT_EQ(0, pAosNConfiguration->GetRegActualWaitTimePolicy());
+    EXPECT_EQ(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT,
+            pAosNConfiguration->GetRegOutOfServicePolicy());
+    EXPECT_EQ(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT,
+            pAosNConfiguration->GetRegRetrySip305CodePolicy());
+    EXPECT_EQ(CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT,
+            pAosNConfiguration->GetRegRetrySip503CodePolicy());
+    EXPECT_EQ(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION,
+            pAosNConfiguration->GetRegRetryCountResetPolicy());
+    EXPECT_EQ(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC,
+            pAosNConfiguration->GetRegRetryDefaultPolicy());
+    EXPECT_EQ(0, pAosNConfiguration->GetRegRetryMinCount());
+    EXPECT_EQ(CarrierConfig::Assets::TIMER_F_POLICY_NONE,
+            pAosNConfiguration->GetRegRetryTimerFPolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationPcscfUpdatePolicy());
-    EXPECT_EQ(0, pAosNConfiguration->GetRegRetryCountResetPolicy());
+
     // nRegTimerForEmcCallMillis
-    EXPECT_EQ(0, pAosNConfiguration->GetReregRetrySip305CodePolicy());
+    EXPECT_EQ(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT,
+            pAosNConfiguration->GetReregRetrySip305CodePolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetReregRetryMaxCountKeptRegistration());
     EXPECT_EQ(200, pAosNConfiguration->GetSipMessageThresholdForTransportChange());
 

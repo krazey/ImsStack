@@ -202,6 +202,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredWfcBlockByAirplaneMode() co
     return m_objAsset.bRequiredWfcBlockByAirplaneMode;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSipOverIpsecInRoamingEnabled() const
+{
+    return m_objAsset.bSipOverIpsecEnabledInRoaming;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::UseWfcCountryCodeAvailabilityCheck() const
 {
     return m_objAsset.bUseWfcCountryCodeAvailabilityCheck;
@@ -243,6 +248,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUnsecureTcpSocketOnAccomplishingReg
     return m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsT3482ForEmcDisabled() const
+{
+    return m_objAsset.bDisableT3482ForEmc;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyPdnWithEmergencyCallEndReleased() const
 {
     return m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallEnd;
@@ -266,11 +276,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsImsOverNrEnabled() const
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() const
-{
-    return m_objAsset.bSupportVerstatForReg;
-}
-
 PUBLIC VIRTUAL IMS_BOOL
 AosNConfiguration::IsEmergencyCallBasedOnPauOfNormalRegistrationSupported() const
 {
@@ -285,6 +290,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithIpcanChangedDuringImsCallHel
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDeregOn3gNetwork() const
 {
     return m_objAsset.bImsDeregOn3gNetwork;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsNoInitRegOnPcscfChange() const
+{
+    return m_objAsset.bNoInitRegOnPcscfChange;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVideoOverWifiSupportedWithoutVoice() const
@@ -350,6 +360,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsContactUriValidationChecked() const
     return m_objAsset.bRegContactValidation;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegRetryWithIpVerFallback() const
+{
+    return m_objAsset.bRegRetryWithIpVerFallback;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUserInfoInContactSupported() const
 {
     return m_objAsset.bSupportContactUserInfo;
@@ -365,6 +380,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegWithFeatureTagUnavailableSupport
     return m_objAsset.bSupportRegWithFeatureTagUnavailable;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() const
+{
+    return m_objAsset.bSupportVerstatForReg;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -378,6 +398,16 @@ PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryMaxTime()
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetIsimIndexForImpu()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nIsimIndexForImpu);
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredImsDscp() const
+{
+    return m_objCarrierConfig.nPreferredImsDscp;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPreferredAccessTypeFeatureTag() const
+{
+    return m_objCarrierConfig.nRegistrationPreferredAccesstypeFeatureTag;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetUssdMethod() const
@@ -425,24 +455,9 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetEmergencyRegistrationTimerMillis
     return m_objCarrierConfig.nEmergencyRegistrationTimerMillis;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryDefaultPolicy() const
-{
-    return m_objAsset.nRegRetryDefaultPolicy;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredImsDscp() const
-{
-    return m_objCarrierConfig.nPreferredImsDscp;
-}
-
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsSignallingDscp() const
 {
     return m_objAsset.nImsSignallingDscp;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPreferredAccessTypeFeatureTag() const
-{
-    return m_objCarrierConfig.nRegistrationPreferredAccesstypeFeatureTag;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPrivateHeader() const
@@ -453,6 +468,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPrivateHeader() cons
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegActualWaitTimePolicy() const
 {
     return m_objAsset.nRegActualWaitTimePolicy;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegOutOfServicePolicy() const
+{
+    return m_objAsset.nRegOutOfServicePolicy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportChange() const
@@ -475,6 +495,26 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetrySip503CodePolicy() const
     return m_objAsset.nRegRetry503Policy;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryCountResetPolicy() const
+{
+    return m_objAsset.nRegRetryCntResetPolicy;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryDefaultPolicy() const
+{
+    return m_objAsset.nRegRetryDefaultPolicy;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryMinCount() const
+{
+    return m_objAsset.nRegRetryMinCnt;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryTimerFPolicy() const
+{
+    return m_objAsset.nRegRetryTimerFPolicy;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrFinalType() const
 {
     return m_objExtraRegErr.nExtraRegErrFinalType;
@@ -493,11 +533,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMaxCount() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMinCount() const
 {
     return m_objExtraRegErr.nExtraRegErrMinCnt;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryCountResetPolicy() const
-{
-    return m_objAsset.nRegRetryCntResetPolicy;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReregRetryMaxCountKeptRegistration() const
