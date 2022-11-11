@@ -17,8 +17,8 @@
 #include "ServiceTrace.h"
 #include "MediaMsgHandler.h"
 #include "JniEnablerConnector.h"
-#include "IJniEnabler.h"
 #include "IJniMediaSessionThread.h"
+#include "IJniEnabler.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.MH");
 
@@ -44,16 +44,26 @@ void MediaMsgHandler::SetListener(IN CONST AString& strName)
 }
 
 PUBLIC
-IMS_BOOL MediaMsgHandler::SendMessageToMediaService(
-        IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam)
+IMS_BOOL MediaMsgHandler::SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam)
 {
-    IMS_TRACE_I("SendMessageToMediaService() eEvent[%d], strListenerThread[%s]", eEvent,
+    IMS_TRACE_I("SendMessageToJava() - eEvent[%d], strListenerThread[%s]", eEvent,
             m_strListenerThread.GetStr(), 0);
 
-    IJniMediaSessionThread* piThread = GetJniThread();
+    IJniEnabler* piJniMediaSession = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_nSlotId, EnablerType::MEDIA_SESSION, m_nCallKey);
+
+    if (piJniMediaSession == IMS_NULL)
+    {
+        IMS_TRACE_D("SendMessageToJava() - piJniMediaSession is null", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    IJniMediaSessionThread* piThread =
+            static_cast<IJniMediaSessionThread*>(piJniMediaSession->GetJniThread());
+
     if (piThread == IMS_NULL)
     {
-        IMS_TRACE_D("SendMessageToMediaService piThread is null", 0, 0, 0);
+        IMS_TRACE_D("SendMessageToJava() - piThread is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -76,24 +86,18 @@ IMS_BOOL MediaMsgHandler::SendMessageToMediaService(
         case IMMedia::REQUEST_SET_MEDIA_QUALITY:
             return piThread->OnSetMediaQualityThreshold(
                     static_cast<ImsMediaMsgSetMediaQualityParam*>(pParam));
+        case IMMedia::REQUEST_QOS:
+            return piThread->OnRequestQos(static_cast<ImsMediaMsgQosParam*>(pParam));
         case IMMedia::REQUEST_SET_PREVIEW_SURFACE:
-            return piThread->OnSetPreviewSurface();
+            piThread->OnSetPreviewSurface();
+            break;
         case IMMedia::REQUEST_SET_DISPLAY_SURFACE:
-            return piThread->OnSetDisplaySurface();
+            piThread->OnSetDisplaySurface();
+            break;
         default:
-            IMS_TRACE_E(0, "SendMessageToMediaService() eEvent[%d], not handled", eEvent, 0, 0);
-            return IMS_TRUE;
+            IMS_TRACE_E(0, "SendMessageToJava() - eEvent[%d], not handled", eEvent, 0, 0);
+            return IMS_FALSE;
     }
-}
 
-PRIVATE
-IJniMediaSessionThread* MediaMsgHandler::GetJniThread()
-{
-    IJniEnabler* piJniMediaSession = JniEnablerConnector::GetInstance().GetJniEnabler(
-            m_nSlotId, EnablerType::MEDIA_SESSION, m_nCallKey);
-    if (piJniMediaSession == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-    return reinterpret_cast<IJniMediaSessionThread*>(piJniMediaSession->GetJniThread());
+    return IMS_TRUE;
 }

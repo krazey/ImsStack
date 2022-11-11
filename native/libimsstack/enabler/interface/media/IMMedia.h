@@ -50,6 +50,7 @@ public:
             IMMEDIA_CASE_ENUM(REQUEST_SEND_DTMF);
             IMMEDIA_CASE_ENUM(REQUEST_SET_MEDIA_QUALITY);
             IMMEDIA_CASE_ENUM(REQUEST_HEADER_EXTENSION);
+            IMMEDIA_CASE_ENUM(REQUEST_QOS);
             IMMEDIA_CASE_ENUM(REQUEST_SET_PREVIEW_SURFACE);
             IMMEDIA_CASE_ENUM(REQUEST_SET_DISPLAY_SURFACE);
             IMMEDIA_CASE_ENUM(REQUEST_VIDEO_DATA_USAGE);
@@ -100,6 +101,8 @@ public:
     static const IMS_SINT32 REQUEST_SET_MEDIA_QUALITY = IMMEDIA + 8;
     /** send header extension payload to rtp header */
     static const IMS_SINT32 REQUEST_HEADER_EXTENSION = IMMEDIA + 9;
+    /** send request qos callback */
+    static const IMS_SINT32 REQUEST_QOS = IMMEDIA + 10;
     static const IMS_SINT32 MEDIA_MESSAGE_AUDIO_COMMON_IDX_END = IMMEDIA + 49;
 
     // Requests to ImsMedia VideoSession
@@ -296,17 +299,16 @@ public:
     IMS_SINT32 m_nDuration;
 };
 
-class ImsMediaResponseParamBase
+class ImsMediaResponseParamBase : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaResponseParamBase() :
-            m_eResult(RtpError::NO_ERROR),
-            m_eMediaType(MEDIA_TYPE_INVALID){};
+    ImsMediaResponseParamBase(MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
+            ImsMediaMsgParamBase(type),
+            m_eResult(RtpError::NO_ERROR){};
     virtual ~ImsMediaResponseParamBase() {}
 
 public:
     IMS_SINT32 m_eResult;
-    MEDIA_CONTENT_TYPE m_eMediaType;
 };
 
 class ImsMediaResponseConfigParam : public ImsMediaResponseParamBase
@@ -334,17 +336,36 @@ public:
     RtpConfig* m_pConfig;
 };
 
-class ImsMediaNotifyQosParam : public ImsMediaResponseParamBase
+class ImsMediaMsgQosParam : public ImsMediaResponseParamBase
 {
 public:
-    ImsMediaNotifyQosParam() :
-            m_objIpAddr(IPAddress::IPv6NONE),
+    ImsMediaMsgQosParam(MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
+            ImsMediaResponseParamBase(type),
+            m_objIpAddress(IPAddress::IPv6NONE),
             m_nPort(0),
+            m_bCallback(IMS_FALSE),
             m_bResult(IMS_FALSE){};
 
+    bool operator==(const ImsMediaMsgQosParam& param)
+    {
+        return (this->m_eMediaType == param.m_eMediaType &&
+                this->m_objIpAddress == param.m_objIpAddress && this->m_nPort == param.m_nPort);
+    }
+
+    ImsMediaMsgQosParam(const ImsMediaMsgQosParam& param)
+    {
+        this->m_eMediaType = param.m_eMediaType;
+        this->m_eResult = param.m_eResult;
+        this->m_objIpAddress = param.m_objIpAddress;
+        this->m_nPort = param.m_nPort;
+        this->m_bCallback = param.m_bCallback;
+        this->m_bResult = param.m_bResult;
+    }
+
 public:
-    IPAddress m_objIpAddr;
+    IPAddress m_objIpAddress;
     IMS_SINT32 m_nPort;
+    IMS_BOOL m_bCallback;
     IMS_BOOL m_bResult;
 };
 
@@ -367,18 +388,6 @@ public:
 
 public:
     IMS_SINT32 m_nResponse;
-};
-
-class ImsMediaBasicSessionInfoParam
-{
-public:
-    ImsMediaBasicSessionInfoParam() :
-            m_nNegoId(0),
-            m_eMediaType(MEDIA_TYPE_AUDIO){};
-
-public:
-    IMS_UINTP m_nNegoId;
-    MEDIA_CONTENT_TYPE m_eMediaType;
 };
 
 class ImsMediaVideoParam : public ImsMediaMsgParamBase

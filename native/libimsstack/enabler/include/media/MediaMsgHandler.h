@@ -19,8 +19,6 @@
 
 #include "IMMedia.h"
 
-class IJniMediaSessionThread;
-
 class MediaMsgHandler
 {
 public:
@@ -42,14 +40,11 @@ public:
      * @return IMS_BOOL Returns IMS_TRUE when the message deliverd without error, IMS_FALSE when it
      * is failed to send
      */
-    virtual IMS_BOOL SendMessageToMediaService(
-            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam);
+    virtual IMS_BOOL SendMessageToJava(IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam);
 
 private:
-    IJniMediaSessionThread* GetJniThread();
-
     IMS_SINT32 m_nSlotId;
     AString m_strListenerThread;
-    IMS_SINTP m_nCallKey; // TODO: IMS_ULONG
+    IMS_SINTP m_nCallKey;  // TODO: IMS_ULONG
 };
 #endif /* _MEDIA_MSG_HANDLER_H_ */

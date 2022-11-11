@@ -97,12 +97,14 @@ protected:
     void ConfirmMediaNego(IN IMS_UINTP nNegoId);
     IMS_BOOL DeleteMediaNego(IN IMS_UINTP nNegoId);
     void ClearMediaNego();
+    IMSList<ImsMediaMsgQosParam*>* FindQosParam(IN IMS_UINTP nNegoId);
+    IMS_BOOL processRequestQos(IN IMS_UINTP nNegoId,
+            IN IMSList<ImsMediaMsgQosParam*>* pListQosParams, IN MEDIA_CONTENT_TYPE eMediaType);
+    void ClearQosParam();
     // IMediaSessionListener
     virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param);
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
-    ImsMediaBasicSessionInfoParam* GetBasicSessionInfofromRemoteArress(
-            IN AString strIpAddr, IN IMS_SINT32 nPort);
     IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
     void SetMediaQuality(IN AudioMediaSession* pAudioSession);
     IMS_BOOL OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
@@ -121,6 +123,7 @@ protected:
     IMediaSessionClientListener* m_pClientListener;
     MediaEnvironment* m_pEnvironment;
     IMSMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
+    IMSMap<IMS_UINTP, IMSList<ImsMediaMsgQosParam*>*> m_objMapQosParams;
     AudioController m_objAudioController;
     VideoController m_objVideoController;
     TextController m_objTextController;

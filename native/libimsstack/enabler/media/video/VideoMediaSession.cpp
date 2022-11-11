@@ -496,7 +496,7 @@ IMS_BOOL VideoMediaSession::Modify()
         {
             case VideoConfig::VIDEO_MODE_PREVIEW:
                 m_nState = STATE_PREVIEW;
-                break;
+                return IMS_TRUE;
             case VideoConfig::VIDEO_MODE_RECORDING:
                 if (GetDirection() == MEDIA_DIRECTION_RECEIVE)
                 {
@@ -516,6 +516,7 @@ IMS_BOOL VideoMediaSession::Modify()
                 {
                     m_nState = STATE_PAUSE_IMAGE;
                 }
+                break;
         }
 
         if (MEDIA_DIRECTION_IS_VIDEO_HOLD(GetDirection()))
@@ -523,6 +524,7 @@ IMS_BOOL VideoMediaSession::Modify()
             m_nState = STATE_PAUSED;
         }
     }
+
     return IMS_TRUE;
 }
 

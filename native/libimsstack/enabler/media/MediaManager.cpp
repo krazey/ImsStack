@@ -225,7 +225,7 @@ IMS_BOOL MediaManager::handleRequestMsg(
         return IMS_FALSE;
     }
 
-    if (pNode->pMessageHandler->SendMessageToMediaService(eEvent, param))
+    if (pNode->pMessageHandler->SendMessageToJava(eEvent, param))
     {
         return IMS_TRUE;
     }
