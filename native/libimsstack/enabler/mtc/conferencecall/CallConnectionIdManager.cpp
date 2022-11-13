@@ -19,8 +19,6 @@
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
-#include "call/IMtcCallContext.h"
-#include "call/IMtcCallManager.h"
 #include "conferencecall/CallConnectionIdManager.h"
 #include "conferencecall/IConferenceController.h"
 #include "helper/ICallStateProxy.h"
@@ -30,8 +28,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 CallConnectionIdManager::CallConnectionIdManager(IN IMtcContext& objContext) :
         m_objContext(objContext),
-        m_objCallKeyConnections(IMSList<CallKeyConnection*>()),
-        m_objControllers(IMSList<IConferenceController*>())
+        m_objCallKeyConnections(ImsList<CallKeyConnection*>()),
+        m_objControllers(ImsList<IConferenceController*>())
 {
     IMS_TRACE_D("+CallConnectionIdManager", 0, 0, 0);
     m_objContext.GetCallStateProxy().AddListener(this);
@@ -139,7 +137,7 @@ void CallConnectionIdManager::OnConferenceParticipantDisconnected(IN IMS_UINT32 
 }
 
 PUBLIC
-IMS_SINT32 CallConnectionIdManager::GetIndex(IN CallKey nKey)
+IMS_SINT32 CallConnectionIdManager::GetIndex(IN CallKey nKey) const
 {
     for (IMS_UINT32 i = 0; i < m_objCallKeyConnections.GetSize(); i++)
     {
@@ -153,7 +151,7 @@ IMS_SINT32 CallConnectionIdManager::GetIndex(IN CallKey nKey)
 }
 
 PUBLIC
-CallKey CallConnectionIdManager::GetCallKey(IN IMS_UINT32 nConnectionId)
+CallKey CallConnectionIdManager::GetCallKey(IN IMS_UINT32 nConnectionId) const
 {
     for (IMS_UINT32 i = 0; i < m_objCallKeyConnections.GetSize(); i++)
     {

@@ -41,8 +41,8 @@ public:
     void OnConferenceCallStarted(IN IConferenceController* piController, IN IMS_BOOL bStarted);
     virtual void OnConferenceParticipantDisconnected(IN IMS_UINT32 nConnectionId);
 
-    IMS_SINT32 GetIndex(IN CallKey nKey);
-    virtual CallKey GetCallKey(IN IMS_UINT32 nConnectionId);
+    IMS_SINT32 GetIndex(IN CallKey nKey) const;
+    virtual CallKey GetCallKey(IN IMS_UINT32 nConnectionId) const;
 
 private:
     // TODO: GetNewConnectionId?
@@ -75,8 +75,8 @@ private:
     };
 
     IMtcContext& m_objContext;
-    IMSList<CallKeyConnection*> m_objCallKeyConnections;
-    IMSList<IConferenceController*> m_objControllers;
+    ImsList<CallKeyConnection*> m_objCallKeyConnections;
+    ImsList<IConferenceController*> m_objControllers;
 };
 
 #endif
