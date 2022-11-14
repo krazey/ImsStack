@@ -16,8 +16,6 @@
 
 #include "CarrierConfig.h"
 #include "ServiceConfig.h"
-#include "ServiceImsRadio.h"
-#include "ServiceTimer.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "ImsAos.h"
@@ -36,12 +34,7 @@ MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
         m_bSmsOverIpConf(IMS_FALSE),
         m_bTemporaryBlocked(IMS_FALSE),
         m_nConnectedServices(ImsAosService::NONE),
-        m_nSlotId(nSlotId),
-        m_piImsRadio(IMS_NULL),
-        m_piEmergencyRadioGuardTimer(IMS_NULL),
-        m_piRadioGuardTimer(IMS_NULL),
-        m_piCnxListener(IMS_NULL),
-        m_piCnxEmcListener(IMS_NULL)
+        m_nSlotId(nSlotId)
 {
     IMS_TRACE_I("+MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
 
@@ -54,77 +47,6 @@ MtsServiceState::~MtsServiceState()
     IMS_TRACE_I("~MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
 
     DeInit();
-}
-
-PUBLIC void MtsServiceState::Timer_TimerExpired(IN ITimer* piTimer)
-{
-    IMS_TRACE_I("Timer_TimerExpired", 0, 0, 0);
-
-    if (piTimer == IMS_NULL)
-    {
-        return;
-    }
-    else if (piTimer == m_piRadioGuardTimer)
-    {
-        StopImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS);
-    }
-    else if (piTimer == m_piEmergencyRadioGuardTimer)
-    {
-        StopImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS);
-    }
-    else
-    {
-        IMS_TRACE_I("Timer_TimerExpired : can't find the expired timer", 0, 0, 0);
-        return;
-    }
-
-    StopRadioGuardTimer(piTimer);
-}
-
-PUBLIC
-void MtsServiceState::StartRadioGuardTimer(IN IMS_UINT32 nTrafficType)
-{
-    IMS_TRACE_I("StartRadioGuardTimer : nTrafficType[%s]", PS_TrafficType(nTrafficType), 0, 0);
-
-    if (nTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS)
-    {
-        if (m_piEmergencyRadioGuardTimer != IMS_NULL)
-        {
-            TimerService::GetTimerService()->DestroyTimer(m_piEmergencyRadioGuardTimer);
-        }
-
-        m_piEmergencyRadioGuardTimer = TimerService::GetTimerService()->CreateTimer();
-        m_piEmergencyRadioGuardTimer->SetTimer(MTS_RADIO_GUARD_TIME, this);
-    }
-    else
-    {
-        if (m_piRadioGuardTimer != IMS_NULL)
-        {
-            TimerService::GetTimerService()->DestroyTimer(m_piRadioGuardTimer);
-        }
-
-        m_piRadioGuardTimer = TimerService::GetTimerService()->CreateTimer();
-        m_piRadioGuardTimer->SetTimer(MTS_RADIO_GUARD_TIME, this);
-    }
-}
-
-PUBLIC
-IMS_BOOL MtsServiceState::IsRadioGuardTimerActive(IN IMS_UINT32 nTrafficType)
-{
-    IMS_BOOL bResult;
-
-    if (nTrafficType == IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS)
-    {
-        bResult = (m_piEmergencyRadioGuardTimer != IMS_NULL) ? IMS_TRUE : IMS_FALSE;
-    }
-    else
-    {
-        bResult = (m_piRadioGuardTimer != IMS_NULL) ? IMS_TRUE : IMS_FALSE;
-    }
-
-    IMS_TRACE_I("IsRadioGuardTimerActive : bResult[%s]", _TRACE_B_(bResult), 0, 0);
-
-    return bResult;
 }
 
 PUBLIC
@@ -307,68 +229,10 @@ IMS_BOOL MtsServiceState::IsTemporaryServiceBlocked() const
     return m_bTemporaryBlocked;
 }
 
-PUBLIC
-IMS_BOOL MtsServiceState::IsImsTrafficAllowed(IN IMS_UINT32 nTrafficType)
-{
-    IMS_BOOL bResult = m_piImsRadio->IsImsTrafficAllowed(nTrafficType);
-
-    IMS_TRACE_I("IsImsTrafficAllowed : nTrafficType[%s], bResult[%s]",
-            PS_TrafficType(nTrafficType), _TRACE_B_(bResult), 0);
-
-    return bResult;
-}
-
-PUBLIC
-void MtsServiceState::StartImsTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
-        IN IImsRadioConnectionListener* piListener)
-{
-    IMS_TRACE_I("StartImsTraffic : nTrafficType[%s]", PS_TrafficType(nTrafficType), 0, 0);
-
-    if (nTrafficType == IImsRadio::TRAFFIC_TYPE_SMS)
-    {
-        m_piCnxListener = piListener;
-    }
-    else
-    {
-        m_piCnxEmcListener = piListener;
-    }
-
-    m_piImsRadio->StartImsTraffic(
-            nTrafficType, nAccessNetworkType, IImsRadio::DIRECTION_MO, piListener);
-}
-
-PUBLIC
-void MtsServiceState::TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason)
-{
-    IMS_TRACE_I("TriggerEpsFallback", 0, 0, 0);
-
-    m_piImsRadio->TriggerEpsFallback(nEpsfbReason);
-}
-
-PUBLIC
-void MtsServiceState::AddListenerForTrafficPriority(
-        IN IImsRadioTrafficPriorityListener* piListener)
-{
-    IMS_TRACE_I("AddListenerForTrafficPriority", 0, 0, 0);
-
-    m_piImsRadio->AddListenerForTrafficPriority(piListener);
-}
-
-PUBLIC
-void MtsServiceState::RemoveListenerForTrafficPriority(
-        IN IImsRadioTrafficPriorityListener* piListener)
-{
-    IMS_TRACE_I("RemoveListenerForTrafficPriority", 0, 0, 0);
-
-    m_piImsRadio->RemoveListenerForTrafficPriority(piListener);
-}
-
 PRIVATE
 void MtsServiceState::Init()
 {
     IMS_TRACE_I("Init", 0, 0, 0);
-
-    m_piImsRadio = ImsRadioService::GetImsRadioService()->GetImsRadio(m_nSlotId);
 
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
     IMS_BOOL bSmsOverIpNetwork =
@@ -400,16 +264,6 @@ PRIVATE
 void MtsServiceState::DeInit()
 {
     IMS_TRACE_I("DeInit", 0, 0, 0);
-
-    if (m_piRadioGuardTimer != IMS_NULL)
-    {
-        TimerService::GetTimerService()->DestroyTimer(m_piRadioGuardTimer);
-    }
-
-    if (m_piEmergencyRadioGuardTimer != IMS_NULL)
-    {
-        TimerService::GetTimerService()->DestroyTimer(m_piRadioGuardTimer);
-    }
 }
 
 PRIVATE
@@ -440,33 +294,4 @@ void MtsServiceState::SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked)
 
     IMS_TRACE_I("SetTemporaryServiceBlocked : Service Blocked State is [%s]",
             _TRACE_B_(m_bTemporaryBlocked), 0, 0);
-}
-
-PRIVATE
-void MtsServiceState::StopImsTraffic(IN IMS_UINT32 nTrafficType)
-{
-    IMS_TRACE_I("StopImsTraffic : nTrafficType[%s]", PS_TrafficType(nTrafficType), 0, 0);
-
-    IImsRadioConnectionListener* piListener =
-            (nTrafficType == IImsRadio::TRAFFIC_TYPE_SMS) ? m_piCnxListener : m_piCnxEmcListener;
-
-    m_piImsRadio->StopImsTraffic(piListener);
-}
-
-PRIVATE
-void MtsServiceState::StopRadioGuardTimer(IN ITimer* piTimer)
-{
-    if (m_piEmergencyRadioGuardTimer == piTimer)
-    {
-        IMS_TRACE_I("StopRadioGuardTimer : m_piEmergencyRadioGuardTimer", 0, 0, 0);
-        m_piEmergencyRadioGuardTimer = IMS_NULL;
-    }
-    else if (m_piRadioGuardTimer == piTimer)
-    {
-        IMS_TRACE_I("StopRadioGuardTimer : m_piRadioGuardTimer", 0, 0, 0);
-        m_piRadioGuardTimer = IMS_NULL;
-    }
-
-    piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(piTimer);
 }

@@ -31,19 +31,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsTemporaryServiceBlocked, (), (const, override));
 
     // MtsService
-    MOCK_METHOD(IMS_BOOL, IsImsTrafficAllowed, (IN IMS_UINT32 nTrafficType), (override));
-    MOCK_METHOD(void, StartImsTraffic,
-            (IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nAccessNetworkType,
-                    IN IImsRadioConnectionListener* piListener),
-            (override));
-    MOCK_METHOD(void, TriggerEpsFallback, (IN IMS_UINT32 nEpsfbReason), (override));
-    MOCK_METHOD(void, AddListenerForTrafficPriority,
-            (IN IImsRadioTrafficPriorityListener* piListener), (override));
-    MOCK_METHOD(void, RemoveListenerForTrafficPriority,
-            (IN IImsRadioTrafficPriorityListener* piListener), (override));
-    MOCK_METHOD(void, StartRadioGuardTimer, (IN IMS_UINT32 nTrafficType), (override));
-    MOCK_METHOD(IMS_BOOL, IsRadioGuardTimerActive, (IN IMS_UINT32 nTrafficType), (override));
-
     MOCK_METHOD(void, SetSmsOverIpState, (IN IMS_BOOL bState), (override));
     MOCK_METHOD(void, SetConnectedServices, (IN IMS_UINT32 nServices), (override));
     MOCK_METHOD(void, OnImsConnected, (), (override));

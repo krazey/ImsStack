@@ -22,19 +22,20 @@
 #include "IImsAosMonitor.h"
 #include "IMtsService.h"
 #include "ImsService.h"
-#include "ServiceImsRadio.h"
+#include "IMtsTrafficListener.h"
 
 class IImsAos;
+class IImsRadio;
 class IJniMtsServiceThread;
+class IMtsTraffic;
 class INetworkWatcher;
 
 class MtsService final :
         public ICoreServiceListener,
         public IImsAosListener,
         public IImsAosMonitor,
-        public IImsRadioConnectionListener,
-        public IImsRadioTrafficPriorityListener,
         public IMtsService,
+        public IMtsTrafficListener,
         public ImsService
 {
 public:
@@ -62,14 +63,6 @@ public:
     void ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan) override;
     void ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
 
-    // IImsRadioConnectionListener
-    void ImsRadio_OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
-            IN IMS_UINT32 nWaitTimeMillis) override;
-    void ImsRadio_OnConnectionSetupPrepared() override;
-
-    // IImsRadioTrafficPriorityListener
-    void ImsRadio_OnTrafficPriorityChanged() override;
-
     // IMtsService
     ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
     inline IMtsServiceState* GetIMtsServiceState() override { return m_piMtsServiceState; }
@@ -83,6 +76,13 @@ public:
             IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
     void SendScbmNotification(IN IMS_UINT32 nScbmState) override;
+
+    // IMtsTrafficListener
+    void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
+            IN IMS_UINT32 nWaitTimeMillis) override;
+    void Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
+    void Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
 
     // TODO: need to check if it is deprecated or not
     void IMSAoSApp_NotifySpecificMessage(
@@ -99,11 +99,13 @@ private:
     void AttachJni();
     void AttachAos();
     void AttachCoreService();
-    void CheckRadioTraffic(IN IMS_UINT32 nTrafficType);
     IMS_UINT32 ConvertToAccessNetworkType(
             IN IMS_UINT32 nTrafficType, IN IMS_SINT32 nReportedNetwork);
+    IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
     IJniMtsServiceThread* GetJniThread();
     IMS_BOOL IsEccNumber(IN const AString& strDstAddr);
+    void StartRadioTraffic(IN IMtsTraffic* piMtsTraffic);
+
     void Init();
     void DeInit();
 
@@ -117,6 +119,8 @@ private:
     ICoreService* m_piEmergencyCoreService;
     IMtsServiceListener* m_piMtsServiceListener;
     IMtsServiceState* m_piMtsServiceState;
+    IImsRadio* m_piImsRadio;
+    ImsList<IMtsTraffic*> m_objMtsTraffics;
     SmsSendRequestInfo* m_pSmsInfo;
 };
 
