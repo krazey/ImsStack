@@ -518,9 +518,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_PCSCF_UPDATE_POLICY_INT, -1))
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_305_POLICY_INT, -1))
-            .WillOnce(Return(arrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
+            .WillOnce(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_503_POLICY_INT, -1))
-            .WillOnce(Return(arrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT));
+            .WillOnce(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_CNT_RESET_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
