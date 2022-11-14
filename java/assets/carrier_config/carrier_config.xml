@@ -456,6 +456,13 @@
     <boolean name="send_180_for_initial_invite_bool" value="false"/>
     <int name="eps_fallback_watchdog_time_millis_int" value="-1"/>
     <int name="send_udp_keep_alive_interval_time_millis_int" value="-1"/>
+    <boolean name="suppinfo_cdiv_cause_required_bool" value="false"/>
+    <boolean name="one_way_video_call_by_local_end_supported_bool" value="true"/>
+    <boolean name="one_way_video_call_by_remote_end_supported_bool" value="true"/>
+    <boolean name="notify_conf_state_when_anonymous_user_bool" value="false"/>
+    <int name="geolocation_policy_for_location_based_call" value="0"/>
+    <int-array name="location_based_number_list_int_array" num="0">
+    </int-array>
 
     <!-- Media -->
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>
@@ -517,6 +524,7 @@
     <int name="text_codec_redundancy_level_int" value="-1"/>
     <int name="text_rtp_inactivity_timer_millis_int" value="-1"/>
     <int name="text_rtcp_inactivity_timer_millis_int" value="20000"/>
+    <boolean name="dynamic_video_quality_supported_bool" value="false"/>
 
     <!-- TODO Media - to testcases-->
     <int-array name="asset_evs_payload_type_int_array" num="0">

@@ -17,9 +17,14 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 import android.telephony.ims.ImsCallProfile;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 
@@ -28,49 +33,76 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 @RunWith(JUnit4.class)
 public class ImsSuppInfoUtilsTest {
     private static final String TAG = "[ImsSuppInfoUtilsTest]";
-    private ImsSuppInfoUtils mImsSuppInfoUtils;
-
-    @Mock ICallContext mContext;
+    private static final int SLOT_ID = 0;
 
     private int mInfo = 1;
+    private int mCode = 1;
+    private ImsSuppInfoUtils mImsSuppInfoUtils;
     private SuppInfo mSuppInfo;
-    private ImsCallProfile mProfile;
-    int mCode = 1;
+    private ImsCallProfile mCallProfile;
+    private ICallContext mMockContext;
+    private CarrierConfig mMockCarrierConfig;
+    private ConfigInterface mMockConfigInterface;
 
     @Before
     public void setUp() throws Exception {
         mImsSuppInfoUtils = new ImsSuppInfoUtils();
-        mProfile = new ImsCallProfile();
+        mCallProfile = new ImsCallProfile();
         mSuppInfo = new SuppInfo();
-        mContext = Mockito.mock(ICallContext.class);
-    }
-
-    @Test
-    public void test_getCallExtraNameForBoolean() {
-        assertEquals(null, ImsSuppInfoUtils.getCallExtraNameForBoolean(mContext, mInfo));
-    }
-
-    @Test
-    public void test_getCallExtraNameForInt() {
-        assertEquals(null, ImsSuppInfoUtils.getCallExtraNameForInt(mContext, mInfo));
-    }
-
-    @Test
-    public void test_getCallExtraNameForString() {
-        assertEquals(null, ImsSuppInfoUtils.getCallExtraNameForString(mContext, mInfo));
+        mMockContext = Mockito.mock(ICallContext.class);
+        mMockCarrierConfig = Mockito.mock(CarrierConfig.class);
+        mMockConfigInterface = Mockito.mock(ConfigInterface.class);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
     }
 
     @After
     public void tearDown() throws Exception {
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
         mImsSuppInfoUtils = null;
-        mProfile = null;
+        mCallProfile = null;
         mSuppInfo = null;
-        mContext = null;
+    }
+
+    @Test
+    public void test_getCallExtraNameForBoolean() {
+        assertEquals(null, ImsSuppInfoUtils.getCallExtraNameForBoolean(mMockContext, mInfo));
+    }
+
+    @Test
+    public void test_getCallExtraNameForInt() {
+        assertEquals(null, ImsSuppInfoUtils.getCallExtraNameForInt(mMockContext, mInfo));
+    }
+
+    @Test
+    public void test_getCallExtraNameForString() {
+        assertEquals(null, ImsSuppInfoUtils.getCallExtraNameForString(mMockContext, mInfo));
+    }
+
+    @Test
+    public void test_addCallExtraForApp() {
+        mSuppInfo.addService_int(SuppInfo.TYPE_CDIV_CAUSE, 1);
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL)).thenReturn(true);
+        ImsSuppInfoUtils.addCallExtraForApp(mMockContext, mSuppInfo, mCallProfile);
+        assertEquals(1, mCallProfile.getCallExtraInt(ImsCallUtils.EXTRA_CDIV_CAUSE));
+
+        mSuppInfo = new SuppInfo();
+        ImsSuppInfoUtils.addCallExtraForApp(mMockContext, mSuppInfo, mCallProfile);
+        assertEquals(-1, mCallProfile.getCallExtraInt(ImsCallUtils.EXTRA_CDIV_CAUSE));
+    }
+
+    @Test
+    public void test_addSuppInfoForIms() {
+        mCallProfile.setCallExtraBoolean(ImsSuppInfoUtils.EXTRA_GEOLOCATION, true);
+        ImsSuppInfoUtils.addSuppInfoForIms(mMockContext, mCallProfile, mSuppInfo);
+        SuppInfo.SuppService ss = mSuppInfo.getService(SuppInfo.TYPE_GEOLOCATION);
+        assertNotNull(ss);
+        assertEquals(true, ss.boolValue);
     }
 }

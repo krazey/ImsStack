@@ -95,6 +95,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     public static final int CF_VIDEO_HOLD_WITH_INACTIVE = 3;
     public static final int CF_TEXT_HOLD_WITH_INACTIVE = 4;
     public static final int CF_INCOMING_RESUME_EVENT = 5;
+    public static final int CF_ONE_WAY_VIDEO_LOCAL = 6;
+    public static final int CF_ONE_WAY_VIDEO_REMOTE = 7;
+    public static final int CF_CONF_USER_ANONYMOUS = 8;
 
     private final Object mLock = new Object();
     private final ICallContext mCallContext;
@@ -800,11 +803,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                             == ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE)) {
                     log("Video direction :: RECEIVE by cam off");
                     videoDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
-                } else if (!ImsGlobal.isOperator(slotId, "VZW")
+                } else if (isCallFeatureSupported(CF_ONE_WAY_VIDEO_LOCAL)
                         && mVideoCallSession.isCameraOn() && mCall.is1WayVideo()) {
                     log("Video direction :: SEND by 1 way video");
                     videoDirection = ImsStreamMediaProfile.DIRECTION_SEND;
-                } else if (!ImsGlobal.isOperator(slotId, "VZW")
+                } else if (isCallFeatureSupported(CF_ONE_WAY_VIDEO_REMOTE)
                         && mVideoCallSession.isCameraOn() && mCall.is1WayVideoByRemoteEnd()) {
                     log("Video direction :: RECEIVE by 1 way video by remote end");
                     videoDirection = ImsStreamMediaProfile.DIRECTION_RECEIVE;
@@ -1343,6 +1346,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return CallFeature.isTextDirectionInactiveOnRttCallHold(slotId);
             case CF_INCOMING_RESUME_EVENT:
                 return CallFeature.isIncomingResumeEventSupported(slotId);
+            case CF_ONE_WAY_VIDEO_LOCAL:
+                return CallFeature.isOneWayVideoCallByLocalEndSupported(slotId);
+            case CF_ONE_WAY_VIDEO_REMOTE:
+                return CallFeature.isOneWayVideoCallByRemoteEndSupported(slotId);
+            case CF_CONF_USER_ANONYMOUS:
+                return CallFeature.isNotifyConfStateWhenAnonymousUser(slotId);
             default:
                 return false;
         }
@@ -4777,8 +4786,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         ConferenceInfo.User.STATUS_DIALING_IN);
             }
 
-            if (ImsGlobal.isOperator(mCallContext.getSlotId(), "VZW")
-                    && !hostCallL.isConference()) {
+            if (isCallFeatureSupported(CF_CONF_USER_ANONYMOUS) && !hostCallL.isConference()) {
                 String hostConfUserId = hostCallL.getConferenceUserId();
                 String peerConfUserId = peerCallL.getConferenceUserId();
 

@@ -19,11 +19,16 @@ package com.android.imsstack.imsservice.mmtel;
 import android.content.Context;
 import android.telephony.ims.ImsCallProfile;
 
-import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.base.ICallLocationPolicy;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,20 +73,15 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
     public ImsCallLocationPolicy(IBaseContext context) {
         mContext = context;
 
-        initForGlobal();
+        init();
 
         logi("LocationPolicy :: slotId=" + mContext.getSlotId()
                 + ", flags=0x" + Integer.toHexString(mFlags));
     }
 
     public static boolean isLocationRequired(Context context, int slotId) {
-        String op = ImsGlobal.getOperator(slotId);
-        String co = ImsGlobal.getCountry(slotId);
-
-        return ImsGlobal.equalsOperatorCountry("ORG", "FR", op, co)
-                || ImsGlobal.equalsOperatorCountry("ORG", "SK", op, co)
-                || ImsGlobal.equalsOperatorCountry("EEO", "GB", op, co)
-                || ImsGlobal.equalsOperatorCountry("BT", "GB", op, co);
+        int locationFlag = getGeolocationPolicy(slotId);
+        return (locationFlag & FLAG_LOCATION_REQUIRED) == FLAG_LOCATION_REQUIRED;
     }
 
     @Override
@@ -111,50 +111,35 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
         return mWaitingTimeForLocationFix;
     }
 
-    private void initForGlobal() {
-        String op = ImsGlobal.getOperator(mContext.getSlotId());
-        String co = ImsGlobal.getCountry(mContext.getSlotId());
+    private void init() {
+        int slotId = mContext.getSlotId();
+        int locationFlag = getGeolocationPolicy(slotId);
+        setFlag(locationFlag);
+        int[] numbers = getLocationBasedNumbersFromConfig(slotId);
+        logi("Location based number String= " + Arrays.toString(numbers)
+                + ", GeolocationPolicy=" + locationFlag
+                + ", flags=0x" + Integer.toHexString(mFlags));
 
-        if (ImsGlobal.equalsOperatorCountry("ORG", "FR", op, co)) {
-            setFlag(FLAG_LOCATION_REQUIRED);
-            setFlag(FLAG_WIFI_CALL_ONLY);
-
-            // 24 hours (as nanos)
-            mValidityPeriod = 24 * 60 * 60 * 1000 * 1000000L;
-            // 5 seconds (as milli-seconds)
-            mWaitingTimeForLocationFix = 5 * 1000L;
-
-            final String[] numbers = { "112", "15", "17", "18", "115", "119",
-                    "191", "196", "197", "116000", "116117" };
-
-            for (int i = 0; i < numbers.length; ++i) {
-                mNumberSet.add(numbers[i]);
+        if (numbers != null) {
+            for (int num : numbers) {
+                mNumberSet.add(Integer.toString(num));
             }
-        } else if (ImsGlobal.equalsOperatorCountry("ORG", "SK", op, co)) {
-            setFlag(FLAG_LOCATION_REQUIRED);
-            setFlag(FLAG_WIFI_CALL_ONLY);
-
-            // 24 hours
-            mValidityPeriod = 24 * 60 * 60 * 1000 * 1000000L;
-            // 5 seconds (as milli-seconds)
-            mWaitingTimeForLocationFix = 5 * 1000L;
-
-            final String[] numbers = { "112", "150", "155", "158", "159" };
-
-            for (int i = 0; i < numbers.length; ++i) {
-                mNumberSet.add(numbers[i]);
-            }
-        } else if (ImsGlobal.equalsOperatorCountry("EEO", "GB", op, co)
-                  || ImsGlobal.equalsOperatorCountry("BT", "GB", op, co)) {
-            setFlag(FLAG_LOCATION_REQUIRED);
-            setFlag(FLAG_WIFI_CALL_ONLY);
-            setFlag(FLAG_EMERGENCY_CALL_ONLY);
-
-            // 24 hours
-            mValidityPeriod = 24 * 60 * 60 * 1000 * 1000000L;
-            // 5 seconds (as milli-seconds)
-            mWaitingTimeForLocationFix = 5 * 1000L;
         }
+
+        // 24 hours
+        mValidityPeriod = 24 * 60 * 60 * 1000 * 1000000L;
+        // 5 seconds (as milli-seconds)
+        mWaitingTimeForLocationFix = 5 * 1000L;
+    }
+
+    private static int[] getLocationBasedNumbersFromConfig(int slotId) {
+        return getConfigInterface(slotId).getCarrierConfig()
+                .getIntArray(CarrierConfig.Assets.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY);
+    }
+
+    private static int getGeolocationPolicy(int slotId) {
+        return getConfigInterface(slotId).getCarrierConfig().getInt(
+                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_TYPE_INT);
     }
 
     private boolean isLocationRequiredForECallOnly() {
@@ -172,13 +157,13 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
     private boolean isLocationRequiredFromCallInfo(ImsCallProfile profile) {
         if (isLocationRequiredForECallOnly() && isLocationRequiredForWifiCallOnly()) {
             mDebugLog |= (LOG_E_CALL | LOG_WIFI_CALL);
-            return isEmergencyCall(profile) && isWifiCall(mContext, profile);
+            return isEmergencyCall(profile) && isWifiCall(mContext);
         } else if (isLocationRequiredForECallOnly() && !isLocationRequiredForNumberListAndECall()) {
             mDebugLog |= LOG_E_CALL;
             return isEmergencyCall(profile);
         } else if (isLocationRequiredForWifiCallOnly()) {
             mDebugLog |= LOG_WIFI_CALL;
-            return isWifiCall(mContext, profile);
+            return isWifiCall(mContext);
         }
 
         return true;
@@ -196,10 +181,12 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
         if (mNumberSet.contains(callee)) {
             mDebugLog |= LOG_NUMBER_LIST;
             return isLocationRequiredFromCallInfo(profile);
+            //Currently from nowhere isLocationRequiredForNumberListAndECall is set.
+            //So is this really required ?
         } else if (isLocationRequiredForNumberListAndECall()) {
             if (isLocationRequiredForWifiCallOnly()) {
                 mDebugLog |= (LOG_E_CALL | LOG_WIFI_CALL);
-                return isWifiCall(mContext, profile) && isEmergencyCall(profile);
+                return isWifiCall(mContext) && isEmergencyCall(profile);
             } else {
                 mDebugLog |= LOG_E_CALL;
                 return isEmergencyCall(profile);
@@ -249,18 +236,34 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
         return false;
     }
 
-    private static boolean isWifiCall(IBaseContext context, ImsCallProfile profile) {
-        if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            //To-Do:- Need to find the way Emergency call Over VoWiFi
-            return true;
-        } else if (ImsRegUtils.isImsRegisteredOnWifi(context)) {
-            return true;
+    private static boolean isWifiCall(IBaseContext context) {
+        boolean isNetworkTypeWifi = false;
+       //To-Do:- Need to find the way Emergency call Over VoWiFi
+        ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(context.getPhoneId());
+        ImsRegistrationTracker regTracker = (serviceRecord != null)
+                ? serviceRecord.getRegistrationTracker() : null;
+
+        if ((regTracker != null) && (regTracker.isCallRegistered())) {
+            int regNetworkType = regTracker.getRegisteredNetworkType();
+
+            if (regNetworkType == IAosRegistrationListener.NetworkType.IWLAN) {
+                isNetworkTypeWifi = true;
+            }
         }
 
-        return false;
+        return isNetworkTypeWifi;
     }
 
     private static void logi(String s) {
         ImsLog.i("[GII-IMPL] " + s);
+    }
+
+    @VisibleForTesting
+    public Set<String> getNumberSet() {
+        return mNumberSet;
+    }
+
+    private static ConfigInterface getConfigInterface(int slotId) {
+        return AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
     }
 }
