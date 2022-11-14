@@ -47,6 +47,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySetting, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredWfcBlockByAirplaneMode, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSipOverIpsecInRoamingEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, UseWfcCountryCodeAvailabilityCheck, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRetryIntervalsUsedForSub, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverIpEnabled, (), (const, override));
@@ -55,14 +56,15 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSecurityServerPortInInitRegUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsOldSaOnEstablishingSaRemoved, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUnsecureTcpSocketOnAccomplishingRegDestroyed, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsT3482ForEmcDisabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyPdnWithEmergencyCallEndReleased, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsOverNrEnabled, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsVerstatForRegistrationSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallBasedOnPauOfNormalRegistrationSupported, (),
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegWithIpcanChangedDuringImsCallHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsDeregOn3gNetwork, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsNoInitRegOnPcscfChange, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoOverWifiSupportedWithoutVoice, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGeolocationPidfSupported, (IN IMS_SINT32 nGeolocationPidfType),
             (const, override));
@@ -75,13 +77,17 @@ public:
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallbackModeSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencySmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsContactUriValidationChecked, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsRegRetryWithIpVerFallback, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUserInfoInContactSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRequiredAfterImsCallEndOnRegHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegWithFeatureTagUnavailableSupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsVerstatForRegistrationSupported, (), (const, override));
 
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetIsimIndexForImpu, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetPreferredImsDscp, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegistrationPreferredAccessTypeFeatureTag, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUssdMethod, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredIpType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyPreferredIpType, (), (const, override));
@@ -91,21 +97,22 @@ public:
     MOCK_METHOD(IMS_SINT32, GetIpv6MtuSize, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredEmergencyRegistration, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetEmergencyRegistrationTimerMillis, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetRegRetryDefaultPolicy, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetPreferredImsDscp, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetImsSignallingDscp, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetRegistrationPreferredAccessTypeFeatureTag, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPrivateHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegActualWaitTimePolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegOutOfServicePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSipMessageThresholdForTransportChange, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetrySip305CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetReregRetrySip305CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetrySip503CodePolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegRetryCountResetPolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegRetryDefaultPolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegRetryMinCount, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegRetryTimerFPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrFinalType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrMaxCount, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrMinCount, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetRegRetryCountResetPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetReregRetryMaxCountKeptRegistration, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPcscfUpdatePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUserInfoPolicyForNonRegisterMessage, (), (const, override));
