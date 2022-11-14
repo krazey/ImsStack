@@ -476,7 +476,7 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
 {
     if (bEarly && m_objContext.GetCallInfo().ePeerType == PeerType::MO)
     {
-        UpdateLocalTone(piSession);
+        UpdateLocalTone(piSession, piMessage);
     }
 
     if (GetNegotiationState(piSession) != NegotiationState::STATE_NEGOTIATED)
@@ -496,11 +496,6 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
 
     if (!IsNecessaryToRunMedia(piSession, piMessage))
     {
-        if (IsLocalTone())
-        {
-            SetNetworkToneRTPTimer(MEDIATYPE_AUDIO, nTimeWaitingNetworkTone);
-        }
-
         return;
     }
 
@@ -734,7 +729,7 @@ void MtcMediaManager::FinalizeMediaInfo(IN IMS_UINTP nNegoId)
 }
 
 PRIVATE
-void MtcMediaManager::UpdateLocalTone(IN ISession* piSession)
+void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage)
 {
     IMS_TRACE_D("UpdateLocalTone", 0, 0, 0);
     IMS_BOOL bUseLocalTone = IMS_FALSE;
@@ -770,7 +765,10 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession)
             case LOCAL_TONE_WITH_180_BY_FORCE:
             {
                 // Verizon
-                bUseLocalTone = IMS_TRUE;
+                IMS_SINT32 eCode =
+                        (piMessage) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
+
+                bUseLocalTone = (eCode == SipStatusCode::SC_180);
                 break;
             }
             default:
@@ -811,12 +809,6 @@ IMS_BOOL MtcMediaManager::IsNecessaryToRunMedia(IN ISession* piSession, IN IMess
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
     {
         IMS_TRACE_D("IsNecessaryToRunMedia MT case", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (IsLocalTone())
-    {
-        IMS_TRACE_D("IsNecessaryToRunMedia local tone should be played.", 0, 0, 0);
         return IMS_FALSE;
     }
 
