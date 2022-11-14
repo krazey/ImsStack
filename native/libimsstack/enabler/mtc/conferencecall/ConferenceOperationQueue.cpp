@@ -75,7 +75,7 @@ void ConferenceOperationQueue::CreateNPut(
 
 PUBLIC
 void ConferenceOperationQueue::CreateNPutWithUsers(IN IMS_UINT32 nType,
-        IN IMSList<ConfUser*> objUsers, IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
+        IN ImsList<ConfUser*> objUsers, IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetConfUsers(objUsers);
@@ -142,11 +142,6 @@ ConferenceOperationQueue::ConferenceOperation* ConferenceOperationQueue::GetNext
     }
 
     ConferenceOperation* pFirstOperation = m_objOperationQueue.GetAt(0);
-    if (pFirstOperation == IMS_NULL)
-    {
-        return IMS_NULL;
-    }
-
     if (pFirstOperation->GetDelayMilliSec() > DELAY_IMMEDIATELY)
     {
         StartTimer(pFirstOperation->GetDelayMilliSec());
@@ -204,7 +199,7 @@ IMS_UINT32 ConferenceOperationQueue::GetTypeOfCurrentOperation() const
 }
 
 PUBLIC
-const IMSList<ConfUser*>& ConferenceOperationQueue::GetUsersOfCurrentOperation() const
+const ImsList<ConfUser*>& ConferenceOperationQueue::GetUsersOfCurrentOperation() const
 {
     return m_objOperationQueue.GetAt(ACTIVE_OPERATION_NUMBER)->GetUsers();
 }
@@ -224,82 +219,6 @@ IMS_BOOL ConferenceOperationQueue::HasPendingOperation() const
 
     IMS_TRACE_D("HasPendingOperation : Nothing Pended!", 0, 0, 0);
     return IMS_FALSE;
-}
-
-PUBLIC
-void ConferenceOperationQueue::Remove(IN ConferenceOperation* pOperation)
-{
-    IMS_UINT32 nType = pOperation->GetType();
-
-    for (IMS_UINT32 i = 0; i < m_objOperationQueue.GetSize(); i++)
-    {
-        ConferenceOperation* pTempOperation = m_objOperationQueue.GetAt(i);
-        if (pTempOperation->GetType() != nType)
-        {
-            continue;
-        }
-
-        switch (nType)
-        {
-            case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
-                if (pOperation->GetParam() != pTempOperation->GetParam())
-                {
-                    continue;
-                }
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_SUBSCRIBE:
-                // nothing to check.
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_UNSUBSCRIBE:
-                // nothing to check.
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_REFER_INVITE:
-                // TODO: to check all users in the list?
-                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER) !=
-                        pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
-                {
-                    continue;
-                }
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_REFER_BYE:
-                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER) !=
-                        pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
-                {
-                    continue;
-                }
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_CHECK_CONNECTED:
-                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER) !=
-                        pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
-                {
-                    continue;
-                }
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_NOTIFY_RESULT_TO_UI:
-                // nothing to check.
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_TERMINATE_1TO1_CALL:
-                if (pOperation->GetConnectionId() != pTempOperation->GetConnectionId())
-                {
-                    continue;
-                }
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_TERMINATE_CONFERENCE:
-                if (pOperation->GetTerminateReason() != pTempOperation->GetTerminateReason())
-                {
-                    continue;
-                }
-                __IMS_FALLTHROUGH__
-            case CONTROL_OPERATION_DESTROY_CONTROLLER:
-                // nothing to check.
-                __IMS_FALLTHROUGH__
-            default:
-                // invalid operation type
-                delete pTempOperation;
-                // stop timer?????
-                break;
-        }
-    }
 }
 
 PUBLIC
@@ -382,11 +301,6 @@ PRIVATE
 IMS_RESULT ConferenceOperationQueue::StartTimer(IN IMS_SINT32 nDuration)
 {
     IMS_TRACE_D("StartTimer : duration[%d]", nDuration, 0, 0);
-
-    if (nDuration <= 0)
-    {
-        return IMS_SUCCESS;
-    }
 
     if (m_pIDelayedOperationTimer == IMS_NULL)
     {

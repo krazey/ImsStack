@@ -42,7 +42,7 @@
 #include "configuration/ConfigDef.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -319,15 +319,15 @@ PRIVATE
 void ConferenceSubscription::UpdateConferenceInfo(IN IMessage* piNotify)
 {
     IMS_TRACE_I("UpdateConferenceInfo", 0, 0, 0);
-    AString strSubState;
-    MessageUtil::GetHeaderValue(piNotify, ISipHeader::SUBSCRIPTION_STATE, strSubState);
+    AString strSubState =
+            m_objContext.GetMessageUtils().GetHeaderValue(piNotify, ISipHeader::SUBSCRIPTION_STATE);
     if (strSubState.Equals("terminated"))
     {
         // TODO: needed? static final const value.
         return;
     }
 
-    IMSList<IMessageBodyPart*> objBodyParts = piNotify->GetBodyParts();
+    ImsList<IMessageBodyPart*> objBodyParts = piNotify->GetBodyParts();
 
     if (objBodyParts.IsEmpty())
     {
@@ -424,9 +424,7 @@ IMS_BOOL ConferenceSubscription::OnReceiving403(IN ISubscription* piSubscription
 PRIVATE
 IMS_BOOL ConferenceSubscription::OnReceiving423(IN ISubscription* piSubscription)
 {
-    IMS_SINT32 nExpires = -1;
-
-    nExpires = MessageUtil::GetHeaderValueInt(
+    IMS_SINT32 nExpires = m_objContext.GetMessageUtils().GetHeaderValueInt(
             piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE),
             ISipHeader::MIN_EXPIRES);
 

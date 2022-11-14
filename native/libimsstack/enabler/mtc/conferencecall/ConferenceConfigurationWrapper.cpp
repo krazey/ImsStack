@@ -18,17 +18,9 @@
 #include "IMtcContext.h"
 #include "MtcContextRepository.h"
 #include "MtcDef.h"
-#include "ServiceTrace.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-
-__IMS_TRACE_TAG_COM_MTC__;
-
-PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsSupported()
-{
-    return IMS_TRUE;
-}
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired()
 {
@@ -97,25 +89,10 @@ PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsSubscriptionForParticip
             Feature::ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT);
 }
 
-PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationWrapper::GetWaitTimeInitiation()
-{
-    return 2000;
-}
-
-PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationWrapper::GetWaitTimeNotifyActive()
-{
-    return 2000;
-}
-
 PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationWrapper::GetWaitTimeNotifyTerminated()
 {
     // if this value is less than 0, no Un-Subscription
     return 3000;
-}
-
-PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationWrapper::GetWaitTimeSipFrag()
-{
-    return 2000;
 }
 
 PUBLIC GLOBAL IMS_SINT32 ConferenceConfigurationWrapper::GetReferTypeForInvite()

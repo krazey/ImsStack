@@ -100,61 +100,101 @@ TEST_F(UriFormatterTest, GetReferToForInviteWithConfUser)
     UriFormatter::GetReferToForInvite(strUri, objContext, pConfUser);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
 
+    ON_CALL(objDialingPlan, GetToUri(ANY_NUMBER, _, Scheme::SIP))
+            .WillByDefault(Return(ANY_SIP_URI));
+    pConfUser->strTarget = ANY_TEL_URI;
+    UriFormatter::GetReferToForInvite(strUri, objContext, pConfUser);
+    EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
+
+    pConfUser->strTarget = ANY_NUMBER;
+    UriFormatter::GetReferToForInvite(strUri, objContext, pConfUser);
+    EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
+
+    pConfUser->strTarget = ANONYMOUS_URI;
+    UriFormatter::GetReferToForInvite(strUri, objContext, pConfUser);
+    EXPECT_STREQ(ANONYMOUS_URI.GetStr(), strUri.GetStr());
+
     delete pConfUser;
 }
 
-TEST_F(UriFormatterTest, GetReferToForBye)
+TEST_F(UriFormatterTest, GetReferToForByeUserNull)
 {
-    // ConfUser null
+    // ConfUser null -> Invited URI
     ConfUser* pConfUser = IMS_NULL;
     AString strUri;
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
+    delete pConfUser;
+}
 
-    // user entity empty
-    strUri = "";
-    pConfUser = new ConfUser();
+TEST_F(UriFormatterTest, GetReferToForByeEmptyUserEntity)
+{
+    // emnpty User Entity -> Invited URI
+    AString strUri;
+    ConfUser* pConfUser = new ConfUser();
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
+}
 
-    // real anonymous
-    strUri = "";
+TEST_F(UriFormatterTest, GetReferToForByeAnonymous)
+{
+    // real anonymous -> User Entity
+    AString strAnonymousUserEntiry("sip:anonymous1@anonymous.invalid");
+    AString strUri;
+    ConfUser* pConfUser = new ConfUser();
+    pConfUser->strUserEntity = strAnonymousUserEntiry;
     pConfUser->strTarget = ANY_SIP_URI_WITH_USER;
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANONYMOUS_URI);
-    EXPECT_STREQ(ANONYMOUS_URI.GetStr(), strUri.GetStr());
+    EXPECT_STREQ(strAnonymousUserEntiry.GetStr(), strUri.GetStr());
+}
 
-    // tel uri
-    strUri = "";
+TEST_F(UriFormatterTest, GetReferToForByeTelUri)
+{
+    // TEL URI -> SIP URI
+    AString strUri;
+    ConfUser* pConfUser = new ConfUser();
+    pConfUser->strUserEntity = "tel:12345";
     pConfUser->strTarget = ANY_TEL_URI;
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
+}
 
-    // reuse uri for refere invite
-    strUri = "";
+TEST_F(UriFormatterTest, GetReferToForByeReuseUri)
+{
+    // Invited URI by configuration.
+    AString strUri;
     ON_CALL(*pConfigurationManager, GetConferenceDropReferToUriSourceType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::
                             CONFERENCE_DROP_REFER_TO_URI_SOURCE_REFER_TO_URI_FOR_INVITE));
+
+    ConfUser* pConfUser = new ConfUser();
+    pConfUser->strUserEntity = "sip:anyUri";
     pConfUser->strTarget = "sip:anotherUri";
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
+}
 
-    // invalid anonymous
-    strUri = "";
+TEST_F(UriFormatterTest, GetReferToForByeInvalidAnonymous)
+{
+    // invalid anonymous -> Invited URI
+    AString strUri;
     ON_CALL(*pConfigurationManager, GetConferenceDropReferToUriSourceType)
             .WillByDefault(Return(CarrierConfig::ImsVoice::
                             CONFERENCE_DROP_REFER_TO_URI_SOURCE_USER_ENTITY_IN_CONFERENCE_EVENT_PACKAGE));
+
+    ConfUser* pConfUser = new ConfUser();
+    pConfUser->strUserEntity = "sip:anonymous@anonymous.invalid";
     pConfUser->strTarget = ANONYMOUS_URI;
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
+}
 
-    // return strInvitedUri
-    strUri = "";
-    pConfUser->strTarget = ANY_SIP_URI_WITH_USER;
-    UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
-    EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
-
-    // return strUri
-    strUri = ANY_SIP_URI_WITH_USER;
+TEST_F(UriFormatterTest, GetReferToForBye)
+{
+    // User Entity with user=phone
+    AString strUri;
+    ConfUser* pConfUser = new ConfUser();
+    pConfUser->strUserEntity = ANY_SIP_URI;
     pConfUser->strTarget = ANY_SIP_URI_WITH_USER;
     UriFormatter::GetReferToForBye(strUri, pConfUser, ANY_SIP_URI_WITH_USER);
     EXPECT_STREQ(ANY_SIP_URI_WITH_USER.GetStr(), strUri.GetStr());
