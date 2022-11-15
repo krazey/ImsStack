@@ -30,6 +30,7 @@
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegistration.h"
 #include "provider/AosProvider.h"
+#include "provider/AosString.h"
 
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosApplication.h"
@@ -205,6 +206,7 @@ protected:
     {
         return m_pAosHandleMtc->m_objFeatureTagList.AddFeatureTag(strName, strValue);
     }
+
     IMS_BOOL AddBindedFeatureTag(IN const AString& strName, IN const AString& strValue)
     {
         return m_pAosHandleMtc->m_objBindedFeatureTagList.AddFeatureTag(strName, strValue);
@@ -344,6 +346,10 @@ protected:
     {
         m_pAosHandleMtc->AddBlock(nBlock, m_pAosHandleMtc->m_nHoldingBlocksForWifi);
     }
+
+    IMS_BOOL IsCsFeatureTagRequired() { return m_pAosHandleMtc->IsCsFeatureTagRequired(); }
+
+    IMS_BOOL IsInvalidMobileNetwork() { return m_pAosHandleMtc->IsInvalidMobileNetwork(); }
 };
 
 TEST_F(AosHandleMtcTest, Constructor)
@@ -489,20 +495,22 @@ TEST_F(AosHandleMtcTest, CallTracker_StateChanged_Test6)
     // Expectation: "cs" in idle, "cs,volte" in offhook
 
     AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
     AddBindedFeature(ImsAosFeature::VIDEO);
-    AddBindedFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
     SetEpdgEnabled(IMS_TRUE);
 
     AosFeatureTagList objExpectedFeatureTagListIdle;
     objExpectedFeatureTagListIdle.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListIdle.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    objExpectedFeatureTagListIdle.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
     AosFeatureTagList objExpectedFeatureTagListOffhook;
     objExpectedFeatureTagListOffhook.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListOffhook.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    objExpectedFeatureTagListOffhook.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+    objExpectedFeatureTagListOffhook.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagListOffhook.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
             .Times(AnyNumber())
@@ -845,8 +853,8 @@ TEST_F(AosHandleMtcTest, InitializeFeatureTags_Test)
     AosFeatureTagList objExpectedFeatureTagList;
     objExpectedFeatureTagList.AddFeature(ImsAosFeature::MMTEL);
     objExpectedFeatureTagList.AddFeatureTag("+cdmaless");
-    objExpectedFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    objExpectedFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+    objExpectedFeatureTagList.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagList.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
             .Times(1)
@@ -872,20 +880,22 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test1)
     // Expectation: "cs" in idle, "cs,volte" in offhook
 
     AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
     AddBindedFeature(ImsAosFeature::VIDEO);
-    AddBindedFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    AddBindedFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
     SetEpdgEnabled(IMS_TRUE);
 
     AosFeatureTagList objExpectedFeatureTagListIdle;
     objExpectedFeatureTagListIdle.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListIdle.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    objExpectedFeatureTagListIdle.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
     AosFeatureTagList objExpectedFeatureTagListOffhook;
     objExpectedFeatureTagListOffhook.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListOffhook.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    objExpectedFeatureTagListOffhook.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+    objExpectedFeatureTagListOffhook.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagListOffhook.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
@@ -919,20 +929,21 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test2)
 
     AddFeature(ImsAosFeature::MMTEL);
     AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     SetEpdgEnabled(IMS_TRUE);
 
     AosFeatureTagList objExpectedFeatureTagListMmtel;
     objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::MMTEL);
     objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+    objExpectedFeatureTagListMmtel.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagListMmtel.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     AosFeatureTagList objExpectedFeatureTagListVideo;
     objExpectedFeatureTagListVideo.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListVideo.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    objExpectedFeatureTagListVideo.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
     AosFeatureTagList objExpectedFeatureTagListNoFeature;
     objExpectedFeatureTagListNoFeature.Clear();
@@ -978,20 +989,21 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test3)
 
     AddFeature(ImsAosFeature::MMTEL);
     AddFeature(ImsAosFeature::VIDEO);
-    AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     SetEpdgEnabled(IMS_TRUE);
 
     AosFeatureTagList objExpectedFeatureTagListMmtel;
     objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::MMTEL);
     objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+    objExpectedFeatureTagListMmtel.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagListMmtel.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     AosFeatureTagList objExpectedFeatureTagListVideo;
     objExpectedFeatureTagListVideo.AddFeature(ImsAosFeature::VIDEO);
-    objExpectedFeatureTagListVideo.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+    objExpectedFeatureTagListVideo.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
 
     AosFeatureTagList objExpectedFeatureTagListNoFeature;
     objExpectedFeatureTagListNoFeature.Clear();
@@ -1012,6 +1024,70 @@ TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test3)
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    // Video
+    RemoveFeature(ImsAosFeature::MMTEL);
+    UpdateGGsmaRcsTelephonyFeatureTag();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListVideo));
+
+    // Mmtel
+    AddFeature(ImsAosFeature::MMTEL);
+    UpdateGGsmaRcsTelephonyFeatureTag();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListMmtel));
+
+    // No mmtel and video
+    RemoveFeature(ImsAosFeature::MMTEL);
+    RemoveFeature(ImsAosFeature::VIDEO);
+    UpdateGGsmaRcsTelephonyFeatureTag();
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoFeature));
+}
+
+TEST_F(AosHandleMtcTest, UpdateGGsmaRcsTelephonyFeatureTag_Test4)
+{
+    // Test4: VZW VoWiFi IMS Registration Table Test - Changing to Wifi Only.
+    // Expectation: "cs,volte" if mmtel / "cs" if no mmtel but video / none if no mmtel and video
+
+    AddFeature(ImsAosFeature::MMTEL);
+    AddFeature(ImsAosFeature::VIDEO);
+    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+
+    SetEpdgEnabled(IMS_TRUE);
+
+    AosFeatureTagList objExpectedFeatureTagListMmtel;
+    objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::MMTEL);
+    objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListMmtel.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagListMmtel.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
+
+    AosFeatureTagList objExpectedFeatureTagListVideo;
+    objExpectedFeatureTagListVideo.AddFeature(ImsAosFeature::VIDEO);
+    objExpectedFeatureTagListVideo.AddFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
+
+    AosFeatureTagList objExpectedFeatureTagListNoFeature;
+    objExpectedFeatureTagListNoFeature.Clear();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
 
     // Video
     RemoveFeature(ImsAosFeature::MMTEL);
@@ -1207,6 +1283,10 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test3)
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
 
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
     EXPECT_TRUE(IsHandleBlocked());
 }
 
@@ -1255,6 +1335,30 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
     EXPECT_FALSE(IsHandleBlocked());
 }
 
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test6)
+{
+    // Test6: Epdg enabled, BLOCK_VOWIFI_CAPABILITY
+    //        ViWiFi without Voice supported, Changing to invalid network
+    // Expectation: return true
+
+    SetEpdgEnabled(IMS_TRUE);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
+
+    EXPECT_FALSE(IsHandleBlocked());
+}
+
 TEST_F(AosHandleMtcTest, ProcessFeatureBlock_Test)
 {
     EXPECT_CALL(m_objMockIAosNConfiguration,
@@ -1269,8 +1373,8 @@ TEST_F(AosHandleMtcTest, ProcessFeatureBlock_Test)
     AosFeatureTagList objExpectedFeatureTagListNoMmtel;
     AosFeatureTagList objExpectedFeatureTagListMmtel;
     objExpectedFeatureTagListMmtel.AddFeature(ImsAosFeature::MMTEL);
-    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-    objExpectedFeatureTagListMmtel.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+    objExpectedFeatureTagListMmtel.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+    objExpectedFeatureTagListMmtel.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
     EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetFeatures(), ImsAosFeature::NONE);
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().Equals(objExpectedFeatureTagListNoMmtel));
@@ -2221,4 +2325,52 @@ TEST_F(AosHandleMtcTest, GetVideoBlockReasonForIpcan_Test)
 
     SetNetworkType(NW_REPORT_RADIO_WLAN);
     EXPECT_EQ(GetVideoBlockReasonForIpcan(), AosHandle::BLOCK_VIWIFI_CAPABILITY);
+}
+
+TEST_F(AosHandleMtcTest, IsCsFeatureTagRequired_Test)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_FALSE(IsCsFeatureTagRequired());
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    RemoveFeature(ImsAosFeature::VIDEO);
+    EXPECT_FALSE(IsCsFeatureTagRequired());
+
+    AddFeature(ImsAosFeature::VIDEO);
+    SetEpdgEnabled(IMS_FALSE);
+    EXPECT_FALSE(IsCsFeatureTagRequired());
+
+    SetEpdgEnabled(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .Times(2)
+            .WillOnce(Return(NW_REPORT_RADIO_LTE))
+            .WillOnce(Return(NW_REPORT_RADIO_GSM));
+    EXPECT_FALSE(IsCsFeatureTagRequired());
+    EXPECT_TRUE(IsCsFeatureTagRequired());
+}
+
+TEST_F(AosHandleMtcTest, IsInvalidMobileNetwork_Test)
+{
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(4)
+            .WillOnce(Return(NW_REPORT_RADIO_LTE))
+            .WillOnce(Return(NW_REPORT_RADIO_LTE))
+            .WillOnce(Return(NW_REPORT_RADIO_GSM))
+            .WillOnce(Return(NW_REPORT_RADIO_GSM));
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
+            .Times(2)
+            .WillOnce(Return(NW_REPORT_RADIO_LTE))
+            .WillOnce(Return(NW_REPORT_RADIO_GSM));
+
+    EXPECT_FALSE(IsInvalidMobileNetwork());
+    EXPECT_TRUE(IsInvalidMobileNetwork());
+    EXPECT_TRUE(IsInvalidMobileNetwork());
+    EXPECT_TRUE(IsInvalidMobileNetwork());
 }

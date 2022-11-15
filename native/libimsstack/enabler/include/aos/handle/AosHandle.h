@@ -196,6 +196,7 @@ protected:
 
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;
+    IMS_UINT32 GetMobileChangingNetworkType() const;
     IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent);
     IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock);
 
