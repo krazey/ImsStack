@@ -33,7 +33,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 public class SscHttpsConnection extends SscHttpConnection {
-    private SscSslSocketFactory mSscSocketFactory = null;
+    private final SscSslSocketFactory mSscSocketFactory;
 
     public SscHttpsConnection(int slotId, EApnType apntype) {
         super(slotId, apntype);

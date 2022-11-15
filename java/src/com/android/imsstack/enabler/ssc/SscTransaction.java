@@ -159,7 +159,7 @@ public class SscTransaction {
             return false;
         }
         if (responseCode < 200 || responseCode >= 500 ||
-                responseCode == SscHttpConnection.REQUEST_FAILED) {
+                responseCode == ISscHttpConnection.HTTP_REQUEST_FAILED) {
             SscDnsQuery.getInstance().setNAFFailed(true);
             return true;
         }
@@ -262,17 +262,21 @@ public class SscTransaction {
                 return;
             }
             */
-            if (responseCode == SscHttpConnection.REQUEST_FAILED) {
-                ImsLog.e(mSlotId, "Connection failed");
-                getSscServiceStateAgent().setSocketConnectionExpired(mSlotId, true);
+
+            if (responseCode < ISscHttpConnection.HTTP_REQUEST_FAILED_MAX) {
+                if (responseCode == ISscHttpConnection.HTTP_REQUEST_FAILED_BY_DNS) {
+                    ImsLog.e(mSlotId, "DNS failed");
+                    getSscServiceStateAgent().setDnsQueryFailed(mSlotId, true);
+                } else if (responseCode == ISscHttpConnection.HTTP_REQUEST_FAILED_BY_TIMEOUT) {
+                    ImsLog.e(mSlotId, "Connection failed");
+                    getSscServiceStateAgent().setSocketConnectionExpired(mSlotId, true);
+                }
+
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 return;
-            } else if (responseCode == SscHttpConnection.REQUEST_FAILED_BY_DNS) {
-                ImsLog.e(mSlotId, "DNS failed");
-                getSscServiceStateAgent().setDnsQueryFailed(mSlotId, true);
-                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-                return;
-            } else if (responseCode == SscConstant.HTTP_UNAUTHORIZED // 401 again
+            }
+
+            if (responseCode == SscConstant.HTTP_UNAUTHORIZED // 401 again
                     || responseCode == SscConstant.HTTP_FORBIDDEN) {
                 getSscAuthAgent().setIsCredentialInfoUpdated(false);
             }
@@ -290,7 +294,7 @@ public class SscTransaction {
 
         @Override
         protected int getRequestType() {
-            return SscHttpConnection.HTTP_GET_REQUEST;
+            return ISscHttpConnection.HTTP_REQUEST_GET;
         }
 
         @Override
@@ -344,7 +348,7 @@ public class SscTransaction {
 
         @Override
         protected int getRequestType() {
-            return SscHttpConnection.HTTP_PUT_REQUEST;
+            return ISscHttpConnection.HTTP_REQUEST_PUT;
         }
 
         @Override

@@ -31,9 +31,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,55 +42,49 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class SscHttpConnection implements ISscHttpConnection {
-    protected static final int REQUEST_FAILED = -1;
-    protected static final int REQUEST_FAILED_BY_DNS = -2;
-
-    protected static final int HTTP_GET_REQUEST = 10000;
-    protected static final int HTTP_PUT_REQUEST = 10001;
-    protected static final int HTTP_DELETE_REQUEST = 10002;
-
     private static final int HTTP_CONNECTION_TIMEOUT = 30 * 1000;
     private static final int HTTP_READ_TIMEOUT = 20 * 1000;
 
+    protected final int mSlotId;
+    private final EApnType mApnType;
     protected HttpURLConnection mConnection = null;
-    protected EApnType mApnType = null;
-    protected String mHost = null;
+    @VisibleForTesting
     protected Document mDoc = null;
 
-    protected int mSlotId = -1;
-
-    public SscHttpConnection(int slotId, EApnType apntype) {
-        ImsLog.d("slotId/context/apntype : " + slotId + "/" + apntype);
+    public SscHttpConnection(int slotId, EApnType apnType) {
+        ImsLog.d(slotId, "apnType : " + apnType);
 
         mSlotId = slotId;
-        mApnType = apntype;
+        mApnType = apnType;
     }
 
     @Override
     public void close() {
-        ImsLog.w("HttpConnection - close()");
-        if (mConnection != null) {
-            mConnection.disconnect();
-            mConnection = null;
-        }
+        ImsLog.w(mSlotId, "HttpConnection - close()");
     }
 
     @Override
-    public int sendRequest(int requestType, String requestUri, String xui, String body) {
-        ImsLog.d("requestType : " + requestType + ", body : \n" + body);
+    public int sendRequest(@HttpRequestType int requestType, String requestUri, String xui,
+            String body) {
+        ImsLog.d(mSlotId, "requestType : " + requestType + ", body : \n" + body);
 
-        if (TextUtils.isEmpty(requestUri) || TextUtils.isEmpty(xui)) {
+        if (TextUtils.isEmpty(requestUri)) {
             ImsLog.e("requestUri or xui is invalid");
-            return REQUEST_FAILED;
+            return HTTP_REQUEST_FAILED_BY_INVALID_URI;
+        }
+
+        if (TextUtils.isEmpty(xui)) {
+            ImsLog.e(mSlotId, "requestUri or xui is invalid");
+            return HTTP_REQUEST_FAILED_BY_INVALID_XUI;
         }
 
         URL connectionUrl = getSscUrl().getConnectionUrl(mSlotId, requestUri);
         if (connectionUrl == null) {
-            ImsLog.e("URL is null");
-            return REQUEST_FAILED;
+            ImsLog.e(mSlotId, "URL is null");
+            return HTTP_REQUEST_FAILED_BY_INVALID_XCAP_ROOT_URI;
         }
 
-        int responseCode = REQUEST_FAILED;
+        int responseCode = HTTP_REQUEST_FAILED_UNSPECIFIED;
         try {
             Network nw = null;
             IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
@@ -99,14 +93,14 @@ public class SscHttpConnection implements ISscHttpConnection {
             }
 
             if (nw == null) {
-                ImsLog.e("Network is null; apnType=" + mApnType);
-                return REQUEST_FAILED;
+                ImsLog.e(mSlotId, "Network is null; apnType=" + mApnType);
+                return HTTP_REQUEST_FAILED_BY_NO_NETWORK;
             }
 
             mConnection = (HttpURLConnection) nw.openConnection(connectionUrl);
             if (mConnection == null) {
-                ImsLog.e("HTTP URL Connection is null");
-                return REQUEST_FAILED;
+                ImsLog.e(mSlotId, "HTTP URL Connection is null");
+                return HTTP_REQUEST_FAILED_BY_CONNECTION;
             }
 
             setSocketFactory();
@@ -119,20 +113,20 @@ public class SscHttpConnection implements ISscHttpConnection {
             setAuthorizationHeader(requestType, requestUri, body);
 
             int bodyLength = 0;
-            if (!TextUtils.isEmpty(body))  {
+            if (!TextUtils.isEmpty(body)) {
                 bodyLength = body.length();
             }
 
             setExtraHeaders(connectionUrl, xui, bodyLength);
 
             ISscAuthAgent authAgent = getSscAuthAgent();
-            if (requestType == HTTP_GET_REQUEST) {
+            if (requestType == HTTP_REQUEST_GET) {
                 mConnection.setRequestMethod("GET");
                 mConnection.setRequestProperty("Connection", "Keep-Alive");
                 mConnection.setDoInput(true);
                 displayHeaders(connectionUrl, true, body);
                 mConnection.connect();
-            } else if (requestType == HTTP_PUT_REQUEST) {
+            } else { // HTTP_REQUEST_PUT
                 mConnection.setRequestMethod("PUT");
                 mConnection.setDoOutput(true);
                 if (!TextUtils.isEmpty(authAgent.getETag())) {
@@ -142,16 +136,13 @@ public class SscHttpConnection implements ISscHttpConnection {
                 writeContentAndConnect(body);
             }
 
-            ImsLog.i("Connect");
+            ImsLog.i(mSlotId, "Connect");
 
             responseCode = mConnection.getResponseCode();
-            ImsLog.i("Response Code : " + responseCode);
-
-            String strResponse = mConnection.getResponseMessage();
-            ImsLog.d("Response Message : " + strResponse);
+            ImsLog.i(mSlotId, "Response Code : " + responseCode);
 
             if (!TextUtils.isEmpty(mConnection.getHeaderField("ETag"))) {
-               authAgent.setETag(mConnection.getHeaderField("ETag"));
+                authAgent.setETag(mConnection.getHeaderField("ETag"));
             }
 
             authAgent.setCipherSuite(getCipherSuiteFromConn());
@@ -167,31 +158,34 @@ public class SscHttpConnection implements ISscHttpConnection {
             }
 
             if (mConnection.getContentLength() > 0) {
-                ImsLog.w("getContentLength > 0");
+                ImsLog.w(mSlotId, "getContentLength > 0");
                 if ((responseCode >= 200) && (responseCode < 300)) {
-                    readInputStream(mConnection.getInputStream());
+                    mDoc = readInputStream(mConnection.getInputStream());
                 } else {
-                    readInputStream(mConnection.getErrorStream());
+                    mDoc = readInputStream(mConnection.getErrorStream());
                 }
             } else if (("chunked").equalsIgnoreCase(
                     mConnection.getHeaderField("Transfer-Encoding"))) {
-                ImsLog.w("Transfer Encoding : chunked");
+                ImsLog.w(mSlotId, "Transfer Encoding : chunked");
                 if ((responseCode >= 200) && (responseCode < 300)) {
-                    readInputStream(mConnection.getInputStream());
+                    mDoc = readInputStream(mConnection.getInputStream());
                 } else {
-                    readInputStream(mConnection.getErrorStream());
+                    mDoc = readInputStream(mConnection.getErrorStream());
                 }
             } else {
                 mDoc = null;
             }
 
             displayHeaders(connectionUrl, false, "");
+        } catch (SocketTimeoutException e) {
+            ImsLog.e(mSlotId, e.toString());
+            return HTTP_REQUEST_FAILED_BY_TIMEOUT;
         } catch (UnknownHostException e) {
-            ImsLog.e(e.toString());
-            return REQUEST_FAILED_BY_DNS;
+            ImsLog.e(mSlotId, e.toString());
+            return HTTP_REQUEST_FAILED_BY_DNS;
         } catch (Exception e) {
-            ImsLog.e(e.toString());
-            return REQUEST_FAILED;
+            ImsLog.e(mSlotId, e.toString());
+            return HTTP_REQUEST_FAILED_UNSPECIFIED;
         } finally {
             if (mConnection != null) {
                 mConnection.disconnect();
@@ -221,7 +215,7 @@ public class SscHttpConnection implements ISscHttpConnection {
      * This method MUST be called after all the connection information setting is complete.
      */
     private void displayHeaders(URL connectionUrl, boolean isRequest, String body) {
-        ImsLog.d("\nTEXT_HTTP_START\n\n");
+        ImsLog.d(mSlotId, "TEXT_HTTP_START\n\n");
 
         if (isRequest) {
             ImsLog.d(mConnection.getRequestMethod() + " "
@@ -229,64 +223,46 @@ public class SscHttpConnection implements ISscHttpConnection {
                     + ":" + connectionUrl.getPort(), "")) + " HTTP/1.1");
 
             Map<String, List<String>> properties = mConnection.getRequestProperties();
-            if (properties == null) {
-                return;
-            }
-
             Set<String> names = properties.keySet();
-            if (names == null) {
-                return;
-            }
-
-            Iterator<String> iterator = names.iterator();
-            while (iterator.hasNext()) {
-                String name = iterator.next();
+            for (String name : names) {
                 List<String> values = properties.get(name);
                 if (values == null) {
                     continue;
                 }
 
-                ImsLog.d(name + ": " + values.get(0));
+                for (String value : values) {
+                    ImsLog.d(name + ": " + value);
+                }
             }
-
-            ImsLog.d("\n");
         } else {
             try {
-                ImsLog.d("HTTP/1.1 " + mConnection.getResponseCode() + " " +
-                        mConnection.getResponseMessage());
+                ImsLog.d("HTTP/1.1 " + mConnection.getResponseCode() + " "
+                        + mConnection.getResponseMessage());
             } catch (IOException e) {
-                ImsLog.e("Connnection is null");
-                e.printStackTrace();
+                ImsLog.e(mSlotId, e.toString());
                 return;
             }
 
-            int pos = 0;
-            String name = null;
-            String value = null;
-
-            while (((name = mConnection.getHeaderFieldKey(pos)) != null)
-                    && ((value = mConnection.getHeaderField(pos)) != null)) {
-
-                ImsLog.d(name + ": " + value);
-                ++pos;
+            String name;
+            for (int i = 0; (name = mConnection.getHeaderFieldKey(i)) != null; ++i) {
+                String value = mConnection.getHeaderField(i);
+                ImsLog.d(name + ": " + (TextUtils.isEmpty(value) ? "" : value));
             }
-
-            ImsLog.d("\n");
         }
 
         if (!TextUtils.isEmpty(body)) {
-            ImsLog.d(body);
+            ImsLog.d(mSlotId, "\n" + body);
         }
 
-        ImsLog.d("\nTEXT_HTTP_END\n\n");
+        ImsLog.d(mSlotId, "\nTEXT_HTTP_END\n\n");
     }
 
     private void writeContentAndConnect(String body) throws IOException {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
 
         if (!TextUtils.isEmpty(body)) {
             OutputStream os = mConnection.getOutputStream();
-            os.write(body.getBytes("utf-8"));
+            os.write(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));
             os.flush();
             os.close();
         }
@@ -294,21 +270,21 @@ public class SscHttpConnection implements ISscHttpConnection {
 
     private void setAuthorizationHeader(int requestType, String requestUri, String body) {
         ISscAuthAgent authAgent = getSscAuthAgent();
-        if (authAgent.isCredentialInfoUpdated() == false) {
+        if (!authAgent.isCredentialInfoUpdated()) {
             return;
         }
 
-        String mothod = (requestType == HTTP_GET_REQUEST) ? "GET" : "PUT";
-        if (authAgent.calculateResponse(mothod, requestUri, body) == false) {
+        String method = (requestType == HTTP_REQUEST_GET) ? "GET" : "PUT";
+        if (!authAgent.calculateResponse(method, requestUri, body)) {
             return;
         }
 
-        ImsLog.d("Credentials :: " + authAgent.getCredentialInfoString());
+        ImsLog.d(mSlotId, "Credentials :: " + authAgent.getCredentialInfoString());
         mConnection.setRequestProperty("Authorization", authAgent.getCredentialInfoString());
     }
 
     private void setExtraHeaders(URL connectionUrl, String xui, int bodyLength) {
-        ImsLog.d("");
+        ImsLog.d(mSlotId, "");
 
         mConnection.setRequestProperty("X-3GPP-Intended-Identity", "\"" + xui + "\"");
 
@@ -338,29 +314,29 @@ public class SscHttpConnection implements ISscHttpConnection {
         mConnection.setRequestProperty("Content-Length", Integer.toString(bodyLength));
     }
 
-    private void readInputStream(InputStream in) {
+    private Document readInputStream(InputStream in) {
         if (in == null) {
-            ImsLog.d("InputStream is null");
-            mDoc = null;
-            return;
+            ImsLog.d(mSlotId, "InputStream is null");
+            return null;
         }
 
+        Document document;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            mDoc = builder.parse(in);
+            document = builder.parse(in);
         } catch (Exception e) {
-            ImsLog.e(e.toString());
-            e.printStackTrace();
-            mDoc = null;
+            ImsLog.e(mSlotId, e.toString());
+            return null;
         } finally {
             try {
                 in.close();
             } catch (IOException e) {
-                ImsLog.e(e.toString());
-                e.printStackTrace();
+                ImsLog.e(mSlotId, e.toString());
             }
         }
+
+        return document;
     }
 
     protected void setSocketFactory() {
