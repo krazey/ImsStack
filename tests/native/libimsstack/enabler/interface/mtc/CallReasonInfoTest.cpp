@@ -50,6 +50,38 @@ TEST(CallReasonInfoTest, AssignOperator)
     EXPECT_STREQ(objReason.strExtraMessage.GetStr(), objAssignedReason.strExtraMessage.GetStr());
 }
 
+TEST(CallReasonInfoTest, EqualToOperator)
+{
+    CallReasonInfo objReasonToCompare(1, 1, AString("Extra Value"));
+    CallReasonInfo objReason(1, 1, AString("Extra Value"));
+
+    EXPECT_TRUE(objReasonToCompare == objReason);
+}
+
+TEST(CallReasonInfoTest, EqualToOperatorByAddress)
+{
+    CallReasonInfo objReason(1);
+    CallReasonInfo* pReason = &objReason;
+    EXPECT_EQ(objReason, *pReason);
+}
+
+TEST(CallReasonInfoTest, NotEqualToOperator)
+{
+    CallReasonInfo objReasonToCompare(0);
+    CallReasonInfo objReason(1, 1, AString("Extra Value"));
+    EXPECT_TRUE(objReasonToCompare != objReason);
+}
+
+TEST(CallReasonInfoTest, IsTerminateRequiredChecksCodes)
+{
+    EXPECT_FALSE(CallReasonInfo::IsTerminateRequired(CODE_LOCAL_NOT_REGISTERED));
+    EXPECT_FALSE(CallReasonInfo::IsTerminateRequired(CODE_LOCAL_NETWORK_NO_SERVICE));
+    EXPECT_FALSE(CallReasonInfo::IsTerminateRequired(CODE_LOCAL_NETWORK_NO_LTE_COVERAGE));
+    EXPECT_FALSE(CallReasonInfo::IsTerminateRequired(CODE_LOCAL_CALL_VCC_ON_PROGRESSING));
+
+    EXPECT_TRUE(CallReasonInfo::IsTerminateRequired(CODE_UNSPECIFIED));
+}
+
 TEST(CallReasonInfoTest, ToStringReturnsValidLogString)
 {
     CallReasonInfo objReason(1, 1, AString("Extra Value"));
