@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "conferencecall/ConferenceFactory.h"
@@ -55,7 +56,7 @@ PUBLIC VIRTUAL IConferenceReference* ConferenceFactory::CreateReference(IN CallK
 }
 
 PUBLIC VIRTUAL IConferenceReference* ConferenceFactory::CreateReference(IN CallKey nConfCallKey,
-        IN IMSList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener)
+        IN ImsList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener)
 {
     return new ConferenceReference(m_objContext, nConfCallKey, objConfUsers, objListener);
 }

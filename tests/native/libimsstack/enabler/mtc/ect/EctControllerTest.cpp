@@ -129,4 +129,11 @@ TEST_F(EctControllerTest, TimerExpiredDoesNothingBeforeStartTimer)
     pController->Timer_TimerExpired(&objTimer);
 }
 
+TEST_F(EctControllerTest, TransferDoesNothing)
+{
+    AString strNumber("12345");
+    pController->Transfer(strNumber);
+    pController->Transfer();
+}
+
 }  // namespace android
