@@ -35,6 +35,9 @@ public:
             (override));
     MOCK_METHOD(void, StopImsTraffic, (IN IImsRadioConnectionListener*), (override));
     MOCK_METHOD(void, TriggerEpsFallback, (IN IMS_UINT32), (override));
+    MOCK_METHOD(const SsacInfo&, GetSsacInfo, (), (const, override));
+    MOCK_METHOD(void, AddListenerForSsac, (IN IImsRadioSsacListener*), (override));
+    MOCK_METHOD(void, RemoveListenerForSsac, (IN IImsRadioSsacListener*), (override));
     MOCK_METHOD(void, AddListenerForTrafficPriority, (IN IImsRadioTrafficPriorityListener*),
             (override));
     MOCK_METHOD(void, RemoveListenerForTrafficPriority, (IN IImsRadioTrafficPriorityListener*),

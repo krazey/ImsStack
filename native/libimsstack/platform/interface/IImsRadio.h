@@ -18,6 +18,25 @@
 
 #include "ImsTypeDef.h"
 
+/**
+ * @brief Data type for SSAC(Service Specific Access Control)
+ *
+ * nBarringFactorForVoice/Video
+ *     The conditional barring factor as a percentage 0-100, which is the probability
+ *     of a random device being barred for the service type.
+ *     In case that a factor is 100, the session is exempted from barring.
+ * nBarringTimeSecForVoice/Video
+ *     The conditional barring time seconds, which is the interval between successive evaluations
+ *     for conditional barring based on the barring factor.
+ */
+struct SsacInfo
+{
+    IMS_SINT32 nBarringFactorForVoice;
+    IMS_SINT32 nBarringTimeSecForVoice;
+    IMS_SINT32 nBarringFactorForVideo;
+    IMS_SINT32 nBarringTimeSecForVideo;
+};
+
 class IImsRadioConnectionListener
 {
 public:
@@ -37,6 +56,18 @@ public:
      *        with the IMS traffic type
      */
     virtual void ImsRadio_OnConnectionSetupPrepared() = 0;
+};
+
+class IImsRadioSsacListener
+{
+public:
+    /**
+     * @brief Notifies that SSAC is changed.
+     *
+     * @param objSsacInfo SSAC information with barring factor and time based on the service type.
+     *
+     */
+    virtual void ImsRadio_OnSsacChanged(IN const SsacInfo& objSsacInfo) = 0;
 };
 
 class IImsRadioTrafficPriorityListener
@@ -93,6 +124,27 @@ public:
      * @param nEpsfbReason Specifies the reason that causes EPS fallback (@EpsFallbackReason)
      */
     virtual void TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason) = 0;
+
+    /**
+     * @brief Gets SSAC information with barring factor and time based on the service type.
+     *
+     * @return Returns SSAC information.
+     */
+    virtual const SsacInfo& GetSsacInfo() const = 0;
+
+    /**
+     * @brief Adds the listener to be notified when SSAC is changed
+     *
+     * @param piListener The listener to be added
+     */
+    virtual void AddListenerForSsac(IN IImsRadioSsacListener* piListener) = 0;
+
+    /**
+     * @brief Removes the listener to be notified when when SSAC is changed
+     *
+     * @param piListener The listener to be removed
+     */
+    virtual void RemoveListenerForSsac(IN IImsRadioSsacListener* piListener) = 0;
 
     /**
      * @brief Adds the listener to be notified when the traffic priority is changed

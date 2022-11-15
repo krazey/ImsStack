@@ -75,6 +75,25 @@ public:
     IMS_UINT32 m_nId;
 };
 
+class SsacInfoParam : public OsImsRadioParam
+{
+public:
+    inline SsacInfoParam() :
+            OsImsRadioParam(EVENT_SSAC_STATE_CHANGED),
+            m_nBarringFactorForVoice(100),
+            m_nBarringTimeSecForVoice(0),
+            m_nBarringFactorForVideo(100),
+            m_nBarringTimeSecForVideo(0)
+    {
+    }
+    inline virtual ~SsacInfoParam() {}
+
+    IMS_SINT32 m_nBarringFactorForVoice;
+    IMS_SINT32 m_nBarringTimeSecForVoice;
+    IMS_SINT32 m_nBarringFactorForVideo;
+    IMS_SINT32 m_nBarringTimeSecForVideo;
+};
+
 LOCAL
 void osImsRadio_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsImsRadioParam* pParam)
 {
@@ -95,13 +114,20 @@ OsImsRadio::OsImsRadio(IN IMS_SINT32 nSlotId) :
         ImsRadio(nSlotId),
         m_nId(0),
         m_piOwnerThread(IMS_NULL),
+        m_objSsacInfo(),
         m_objConnectionListeners(ImsMap<IMS_UINT32, IImsRadioConnectionListener*>()),
+        m_objSsacListeners(ImsList<IImsRadioSsacListener*>()),
         m_objTrafficPriorityListeners(ImsList<IImsRadioTrafficPriorityListener*>())
 {
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
     PlatformContext::GetInstance()->GetSystem()->AddListener(
             SystemConstants::CATEGORY_RADIO, this, GetSlotId());
+
+    m_objSsacInfo.nBarringFactorForVoice = 100;
+    m_objSsacInfo.nBarringTimeSecForVoice = 0;
+    m_objSsacInfo.nBarringFactorForVideo = 100;
+    m_objSsacInfo.nBarringTimeSecForVideo = 0;
 }
 
 PUBLIC VIRTUAL OsImsRadio::~OsImsRadio()
@@ -192,6 +218,50 @@ PUBLIC VIRTUAL void OsImsRadio::TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason)
     }
 }
 
+PUBLIC VIRTUAL const SsacInfo& OsImsRadio::GetSsacInfo() const
+{
+    return m_objSsacInfo;
+}
+
+PUBLIC VIRTUAL void OsImsRadio::AddListenerForSsac(IN IImsRadioSsacListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objSsacListeners.GetSize(); ++i)
+    {
+        IImsRadioSsacListener* pTmpListener = m_objSsacListeners.GetAt(i);
+
+        if (pTmpListener == piListener)
+        {
+            return;
+        }
+    }
+
+    m_objSsacListeners.Append(piListener);
+}
+
+PUBLIC VIRTUAL void OsImsRadio::RemoveListenerForSsac(IN IImsRadioSsacListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objSsacListeners.GetSize(); ++i)
+    {
+        IImsRadioSsacListener* pTmpListener = m_objSsacListeners.GetAt(i);
+
+        if (pTmpListener == piListener)
+        {
+            m_objSsacListeners.RemoveAt(i);
+            return;
+        }
+    }
+}
+
 PUBLIC VIRTUAL void OsImsRadio::AddListenerForTrafficPriority(
         IN IImsRadioTrafficPriorityListener* piListener)
 {
@@ -258,6 +328,14 @@ PROTECTED VIRTUAL void OsImsRadio::DispatchServiceMessage(IN IMS_UINTP /* nWpara
 
             NotifyConnectionFailed(pParam->m_nId, pParam->m_nFailureReason, pParam->m_nCauseCode,
                     pParam->m_nWaitTimeMillis);
+        }
+        else if (pImsRadioParam->m_nEvent == OsImsRadioParam::EVENT_SSAC_STATE_CHANGED)
+        {
+            SsacInfoParam* pParam = reinterpret_cast<SsacInfoParam*>(pImsRadioParam);
+
+            NotifySsacInfoChanged(pParam->m_nBarringFactorForVoice,
+                    pParam->m_nBarringTimeSecForVoice, pParam->m_nBarringFactorForVideo,
+                    pParam->m_nBarringTimeSecForVideo);
         }
 
         delete pImsRadioParam;
@@ -341,6 +419,28 @@ PRIVATE void OsImsRadio::NotifyConnectionFailed(IN IMS_UINT32 nId, IN IMS_UINT32
     if (piListener != IMS_NULL)
     {
         piListener->ImsRadio_OnConnectionFailed(nFailureReason, nCauseCode, nWaitTimeMillis);
+    }
+}
+
+PRIVATE void OsImsRadio::NotifySsacInfoChanged(IN IMS_SINT32 nFactorForVoice,
+        IN IMS_SINT32 nTimeSecForVoice, IN IMS_SINT32 nFactorForVideo,
+        IN IMS_SINT32 nTimeSecForVideo)
+{
+    m_objSsacInfo.nBarringFactorForVoice = nFactorForVoice;
+    m_objSsacInfo.nBarringTimeSecForVoice = nTimeSecForVoice;
+    m_objSsacInfo.nBarringFactorForVideo = nFactorForVideo;
+    m_objSsacInfo.nBarringTimeSecForVideo = nTimeSecForVideo;
+
+    for (IMS_UINT32 i = 0; i < m_objSsacListeners.GetSize(); ++i)
+    {
+        IImsRadioSsacListener* pTmpListener = m_objSsacListeners.GetAt(i);
+
+        if (pTmpListener == IMS_NULL)
+        {
+            continue;
+        }
+
+        pTmpListener->ImsRadio_OnSsacChanged(m_objSsacInfo);
     }
 }
 

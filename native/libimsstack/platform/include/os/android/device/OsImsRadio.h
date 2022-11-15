@@ -42,6 +42,11 @@ public:
 
     void TriggerEpsFallback(IN IMS_UINT32 nEpsfbReason) override;
 
+    const SsacInfo& GetSsacInfo() const override;
+
+    void AddListenerForSsac(IN IImsRadioSsacListener* piListener) override;
+    void RemoveListenerForSsac(IN IImsRadioSsacListener* piListener) override;
+
     void AddListenerForTrafficPriority(IN IImsRadioTrafficPriorityListener* piListener) override;
     void RemoveListenerForTrafficPriority(IN IImsRadioTrafficPriorityListener* piListener) override;
 
@@ -56,12 +61,16 @@ private:
     void NotifyConnectionFailed(IN IMS_UINT32 nId, IN IMS_UINT32 nFailureReason,
             IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
     void NotifyConnectionSetupPrepared(IN IMS_UINT32 nId);
+    void NotifySsacInfoChanged(IN IMS_SINT32 nFactorForVoice, IN IMS_SINT32 nTimeSecForVoice,
+            IN IMS_SINT32 nFactorForVideo, IN IMS_SINT32 nTimeSecForVideo);
     static const IMS_CHAR* EventToString(IN IMS_UINT32 nEvent);
 
 private:
     IMS_UINT32 m_nId;
     IThread* m_piOwnerThread;
+    SsacInfo m_objSsacInfo;
     ImsMap<IMS_UINT32, IImsRadioConnectionListener*> m_objConnectionListeners;
+    ImsList<IImsRadioSsacListener*> m_objSsacListeners;
     ImsList<IImsRadioTrafficPriorityListener*> m_objTrafficPriorityListeners;
 
     static const IMS_UINT32 ID_MAX = 100000;
