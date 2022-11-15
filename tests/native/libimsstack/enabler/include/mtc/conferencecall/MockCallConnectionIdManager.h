@@ -39,7 +39,7 @@ public:
     MOCK_METHOD(
             void, OnConferenceParticipantDisconnected, (IN IMS_UINT32 nConnectionId), (override));
     // MOCK_METHOD(IMS_SINT32, GetIndex, (IN CallKey nKey), ());
-    MOCK_METHOD(CallKey, GetCallKey, (IN IMS_UINT32 nConnectionId), (override));
+    MOCK_METHOD(CallKey, GetCallKey, (IN IMS_UINT32 nConnectionId), (const, override));
     // MOCK_METHOD(IMS_UINT32, GetNewIndex, (), ());
     // MOCK_METHOD(IMS_SINT32, GetListIndexByCallKey, (IN CallKey nCallKey), ());
     // MOCK_METHOD(IMS_SINT32, GetListIndexByConnectionId, (IN IMS_UINT32 nConnectionId), ());
