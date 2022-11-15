@@ -1004,6 +1004,9 @@ const IMS_CHAR CarrierConfig::Assets::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[
         "eps_fallback_watchdog_time_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[] =
         "send_udp_keep_alive_interval_time_millis_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[] =
+        "call_reject_code_for_not_acceptable_call_type_int";
+
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =
         "audio_rtp_port_range_int_array";

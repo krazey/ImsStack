@@ -356,6 +356,22 @@ TEST_F(MessageFormatterTest, FormTerminateMessageWithCodeUserTerminated)
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
+TEST_F(MessageFormatterTest, FormTerminateMessageWithCodeUserTerminatedAndSipTimeout)
+{
+    CallReasonInfo objReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_SIP_TIMEOUT);
+    IMS_RESULT nResult = pFormatter->FormTerminateMessage(objReasonInfo);
+
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
+TEST_F(MessageFormatterTest, FormTerminateMessageWithCodeUserTerminatedAndRtpTimeout)
+{
+    CallReasonInfo objReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_AND_RTP_TIMEOUT);
+    IMS_RESULT nResult = pFormatter->FormTerminateMessage(objReasonInfo);
+
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
 TEST_F(MessageFormatterTest, FormTerminateMessageFailureCase)
 {
     ON_CALL(objSession, GetNextRequest).WillByDefault(Return(nullptr));
@@ -486,6 +502,7 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_MAX_CALL_LIMIT_REACHED), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_EXCEEDED), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_BUSY), SipStatusCode::SC_486);
+    EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_DECLINE), SipStatusCode::SC_603);
     EXPECT_EQ(GetRejectStatusCode(CODE_USER_IGNORE), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_UNSUPPORTED_SIP_HEADERS), SipStatusCode::SC_420);
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE), SipStatusCode::SC_406);
@@ -495,6 +512,10 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
             SipStatusCode::SC_488);
     EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_SIP_606),
             SipStatusCode::SC_606);
+    ON_CALL(*pConfigurationManager, GetCallRejectCodeForNotAcceptableCallType)
+            .WillByDefault(Return(nTestStatusCode));
+    EXPECT_EQ(GetRejectStatusCode(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            nTestStatusCode);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_ONGOING_CALL_UPGRADE), SipStatusCode::SC_486);
     EXPECT_EQ(GetRejectStatusCode(CODE_REJECT_INTERNAL_ERROR), SipStatusCode::SC_480);
     EXPECT_EQ(GetRejectStatusCode(CODE_LOCAL_CALL_RESOURCE_RESERVATION_FAILED),
@@ -506,6 +527,8 @@ TEST_F(MessageFormatterTest, GetRejectStatusCode)
     EXPECT_EQ(GetRejectStatusCode(CODE_TIMEOUT_NO_ANSWER), nTestStatusCode);
     EXPECT_EQ(GetRejectStatusCode(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE), SipStatusCode::SC_603);
     EXPECT_EQ(GetRejectStatusCode(CODE_NETWORK_RESP_TIMEOUT), SipStatusCode::SC_500);
+    EXPECT_EQ(GetRejectStatusCode(CODE_BLACKLISTED_CALL_ID), SipStatusCode::SC_603);
+    EXPECT_EQ(GetRejectStatusCode(CODE_USER_REJECTED_SESSION_MODIFICATION), SipStatusCode::SC_603);
 }
 
 TEST_F(MessageFormatterTest, GetRejectPhrase)

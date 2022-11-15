@@ -752,6 +752,8 @@ public class CarrierConfig {
                 "eps_fallback_watchdog_time_millis_int";
         public static final String KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT =
                 "send_udp_keep_alive_interval_time_millis_int";
+        public static final String KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT =
+                "call_reject_code_for_not_acceptable_call_type_int";
         public static final String KEY_SUPPINFO_CDIV_CAUSE_REQUIRED_BOOL =
                 "suppinfo_cdiv_cause_required_bool";
         public static final String KEY_ONE_WAY_VIDEO_BY_LOCAL_END_SUPPORTED_BOOL =

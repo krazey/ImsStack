@@ -1277,4 +1277,11 @@ TEST_F(MtcConfigurationManagerTest, GetSendUdpKeepAliveIntervalTimeReturnsValueI
             GetInt(CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT));
 }
 
+TEST_F(MtcConfigurationManagerTest,
+        GetCallRejectCodeForNotAcceptableCallTypeReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->GetCallRejectCodeForNotAcceptableCallType(),
+            GetInt(CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT));
+}
+
 }  // namespace android

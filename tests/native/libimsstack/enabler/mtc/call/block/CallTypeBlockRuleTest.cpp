@@ -76,7 +76,8 @@ TEST_F(CallTypeBlockRuleTest, CheckReturnsBlockedForVideoRttIfNotAllowed)
     Result objResult = objBlockRule.Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
-    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE), objResult.objReason);
+    EXPECT_EQ(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE),
+            objResult.objReason);
 }
 
 TEST_F(CallTypeBlockRuleTest, CheckReturnsUnblockedIfAllowed)

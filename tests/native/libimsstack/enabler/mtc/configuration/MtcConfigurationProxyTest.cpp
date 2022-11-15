@@ -464,6 +464,10 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
 
     EXPECT_CALL(*pConfigManager, GetSendUdpKeepAliveIntervalTime).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::SEND_UDP_KEEP_ALIVE_INTERVAL_TIME));
+
+    EXPECT_CALL(*pConfigManager, GetCallRejectCodeForNotAcceptableCallType)
+            .WillOnce(Return(nValue));
+    EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE));
 }
 
 TEST_F(MtcConfigurationProxyTest, GetIntWith2BoolArgReturnsFromConfigManager)

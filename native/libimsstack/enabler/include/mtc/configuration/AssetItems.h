@@ -74,7 +74,8 @@ public:
             nPolicyForLocalRingbackToneWith180Response(0),
             bSend180ForInitialInvite(IMS_FALSE),
             nEpsFallbackWatchDogTime(-1),
-            nSendUdpKeepAliveIntervalTime(-1)
+            nSendUdpKeepAliveIntervalTime(-1),
+            nCallRejectCodeForNotAcceptableCallType(488)
     {
     }
     ~AssetItems()
@@ -141,6 +142,7 @@ public:
     IMS_BOOL bSend180ForInitialInvite;
     IMS_SINT32 nEpsFallbackWatchDogTime;
     IMS_SINT32 nSendUdpKeepAliveIntervalTime;
+    IMS_SINT32 nCallRejectCodeForNotAcceptableCallType;
 };
 
 #endif

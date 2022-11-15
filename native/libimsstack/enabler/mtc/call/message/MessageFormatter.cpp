@@ -690,6 +690,11 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             {
                 eStatusCode = SipStatusCode::SC_606;
             }
+            else if (objReason.nExtraCode == EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE)
+            {
+                eStatusCode = m_objContext.GetConfigurationProxy().GetInt(
+                        Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE);
+            }
             else
             {
                 eStatusCode = SipStatusCode::SC_406;
@@ -921,7 +926,6 @@ IMS_RESULT MessageFormatter::SetNextMessage()
         break;
         default:
             return IMS_FAILURE;
-            break;
     }
 
     return IMS_SUCCESS;

@@ -456,6 +456,7 @@
     <boolean name="send_180_for_initial_invite_bool" value="false"/>
     <int name="eps_fallback_watchdog_time_millis_int" value="-1"/>
     <int name="send_udp_keep_alive_interval_time_millis_int" value="-1"/>
+    <int name="call_reject_code_for_not_acceptable_call_type_int" value="488"/>
     <boolean name="suppinfo_cdiv_cause_required_bool" value="false"/>
     <boolean name="one_way_video_call_by_local_end_supported_bool" value="true"/>
     <boolean name="one_way_video_call_by_remote_end_supported_bool" value="true"/>
@@ -463,7 +464,6 @@
     <int name="geolocation_policy_for_location_based_call" value="0"/>
     <int-array name="location_based_number_list_int_array" num="0">
     </int-array>
-
     <!-- Media -->
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>
     <boolean name="media_session_level_bandwidth_bool" value="false"/>
