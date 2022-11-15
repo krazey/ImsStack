@@ -161,10 +161,10 @@ public class CommonStarter {
         AgentFactory.createAgents(context, slotId);
         AgentFactory.initAgentsForMIms(context, slotId);
 
+        ConfigLoader.updateCarrierConfig(slotId);
+
         DcFactory.createDc(context, slotId);
         DcFactory.initDc(context, slotId);
-
-        ConfigLoader.updateCarrierConfig(slotId);
 
         setStateOnStart(slotId);
 
