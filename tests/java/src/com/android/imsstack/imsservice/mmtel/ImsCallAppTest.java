@@ -186,12 +186,10 @@ public class ImsCallAppTest {
         assertEquals(ImsCallProfile.SERVICE_TYPE_NORMAL, callProfile.mServiceType);
         assertEquals(ImsCallProfile.CALL_TYPE_VOICE, callProfile.mCallType);
 
-
         callProfile = mImsCallApp.createCallProfile(
                 ImsCallProfile.SERVICE_TYPE_EMERGENCY, ImsCallProfile.CALL_TYPE_VOICE);
         assertEquals(ImsCallProfile.SERVICE_TYPE_EMERGENCY, callProfile.mServiceType);
         assertEquals(ImsCallProfile.CALL_TYPE_VOICE, callProfile.mCallType);
-
 
         callProfile = mImsCallApp.createCallProfile(
                 ImsCallProfile.SERVICE_TYPE_NONE, ImsCallProfile.CALL_TYPE_VOICE);
@@ -272,7 +270,6 @@ public class ImsCallAppTest {
         when(mMockImsCallContext.getDcNetWatcher()).thenReturn(dcnw);
         when(dcnw.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_UNKNOWN);
         when(mRegTracker.isCallVoiceAndVideoRegistered()).thenReturn(true);
-
         when(mMockImsCallContext.hasAccessBearerCapabilitiesForHDCall()).thenReturn(true);
 
         callProfile = mImsCallApp.createCallProfile(
