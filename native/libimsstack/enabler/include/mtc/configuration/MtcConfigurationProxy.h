@@ -30,7 +30,7 @@ class MtcConfigurationProxy
 {
 public:
     MtcConfigurationProxy(IN IMtcConfigurationManager* pManager);
-    ~MtcConfigurationProxy();
+    virtual ~MtcConfigurationProxy();
     MtcConfigurationProxy(IN const MtcConfigurationProxy&) = delete;
     MtcConfigurationProxy& operator=(IN const MtcConfigurationProxy&) = delete;
 
@@ -43,11 +43,11 @@ public:
     IMS_SINT32 GetInt(IN Feature eFeature, IN IMS_BOOL bWParam, IN IMS_BOOL bLParam) const;
     const AString GetStr(IN Feature eFeature, IN IMS_SINT32 nAdditionalInfo) const;
 
-    void PutConfigCache(IN Feature eFeature, IN IMS_SINT32 nValue);
-    void PutConfigCache(IN Feature eFeature, IN IMS_BOOL bValue);
-    void PutConfigCache(IN Feature eFeature, IN const AString& strValue);
+    virtual void PutConfigCache(IN Feature eFeature, IN IMS_SINT32 nValue);
+    virtual void PutConfigCache(IN Feature eFeature, IN IMS_BOOL bValue);
+    virtual void PutConfigCache(IN Feature eFeature, IN const AString& strValue);
 
-    void OnRegistrationRefreshed();  // called by MtcService.
+    virtual void OnRegistrationRefreshed();
 
 private:
     std::unique_ptr<IMtcConfigurationManager> m_pManager;

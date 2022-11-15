@@ -57,7 +57,6 @@ public:
 private:
     void NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) const;
     void NotifyIpcanChanged(IN IMS_UINT32 eIpcan) const;
-    IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const;
 
     IMtcService& m_objService;
     MtcConfigurationProxy& m_objConfiguration;
