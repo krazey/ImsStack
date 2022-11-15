@@ -40,8 +40,7 @@ PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
         m_nCameraId(CAMERA_ID_NONE),
         m_nCameraZoom(-1),
         m_bPreviewSurfaceSet(IMS_FALSE),
-        m_bDisplaySurfaceSet(IMS_FALSE),
-        m_nPrevVideoMode(-1)
+        m_bDisplaySurfaceSet(IMS_FALSE)
 {
     IMS_TRACE_I("+VideoMediaSession() - state[%d]", m_nState, 0, 0);
 
@@ -657,18 +656,24 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
             switch (m_nState)
             {
                 case STATE_OPENED:
+                    // start preview mode
                     pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_PREVIEW);
                     pVideoConfig->setCameraId(m_nCameraId);
-                    this->Modify();  // start preview mode
+                    this->Modify();
                     break;
-                case STATE_PAUSE_IMAGE:  // recovery from pause state
-                    if (m_nPrevVideoMode == STATE_RECORDING)
-                    {
-                        pVideoConfig->setVideoMode(STATE_RECORDING);
-                        this->Modify();
-                    }
+                case STATE_PAUSE_IMAGE:
+                    // recovery from pause state
+                    pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_RECORDING);
+                    pVideoConfig->setCameraId(m_nCameraId);
+                    this->Modify();
+                    break;
+                case STATE_RECORDING:
+                    // change camera
+                    pVideoConfig->setCameraId(m_nCameraId);
+                    this->Modify();
                     break;
                 default:
+                    IMS_TRACE_E(0, "OnSelectCameraCmd() - invalid state[%d]", m_nState, 0, 0);
                     break;
             }
         }
@@ -676,7 +681,6 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
         {
             if (m_nState == STATE_RECORDING)
             {
-                m_nPrevVideoMode = VideoConfig::VIDEO_MODE_RECORDING;
                 pVideoConfig->setVideoMode(VideoConfig::VIDEO_MODE_PAUSE_IMAGE);
                 pVideoConfig->setCameraId(m_nCameraId);
                 this->Modify();

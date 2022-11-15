@@ -135,7 +135,6 @@ private:
     IMS_SINT32 m_nCameraZoom;
     IMS_BOOL m_bPreviewSurfaceSet;
     IMS_BOOL m_bDisplaySurfaceSet;
-    IMS_SINT32 m_nPrevVideoMode;
 };
 
 #endif /* End of _IMS_VIDEO_MEDIA_SESSION_H_*/
