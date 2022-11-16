@@ -78,7 +78,7 @@ public class ImsCallManager {
             String callId, ImsCallProfile profile, boolean isMO) {
 
         return new ImsCallSessionImpl(
-                mCallContext, ct, call, callId, profile, true);
+                mCallContext, ct, call, callId, profile, isMO);
     }
 
     public void dispose() {
