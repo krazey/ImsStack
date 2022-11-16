@@ -162,7 +162,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
     // RTCP
     RtcpConfig objRtcpConfig;
     objRtcpConfig.setCanonicalName(android::String8("Canonical_Name"));  // TODO_MEDIA
-    objRtcpConfig.setTransmitPort(pNegoProfile->nControlPort);
+    objRtcpConfig.setTransmitPort(pPeerProfile->nControlPort);
 
     if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
     {
