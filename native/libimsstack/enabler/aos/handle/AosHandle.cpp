@@ -956,14 +956,14 @@ void AosHandle::ProcessBlock(
 
         if (!bAdded)
         {
-            if (IsHandleBlocked(nBlock, m_nHoldingBlocksForMobile))
+            if (IsHandleBlocked(m_nHoldingBlocksForMobile, nBlock))
             {
                 A_IMS_TRACE_D(APPPROFILE,
                         "ProcessBlock :: Remove block from m_nHoldingBlocksForMobile", 0, 0, 0);
                 RemoveBlock(nBlock, m_nHoldingBlocksForMobile);
             }
 
-            if (IsHandleBlocked(nBlock, m_nHoldingBlocksForWifi))
+            if (IsHandleBlocked(m_nHoldingBlocksForWifi, nBlock))
             {
                 A_IMS_TRACE_D(APPPROFILE,
                         "ProcessBlock :: Remove block from m_nHoldingBlocksForWifi", 0, 0, 0);

@@ -387,11 +387,36 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
 
     if (IsSupportedNetworkType(m_nNetworkType))
     {
+        // Manage current blocks
         ProcessBlock(GetVoiceBlockReasonForIpcan(),
                 !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VOICE));
 
         ProcessBlock(GetVideoBlockReasonForIpcan(),
                 !IsCapabilityExistedForNetworkType(m_nNetworkType, AosCapability::VIDEO));
+
+        // Manage holding blocks
+        if (IsEpdgEnabled())
+        {
+            IMS_UINT32 nMobileNetworkType = GetMobileNetworkType();
+
+            if (IsSupportedNetworkTypeForCellular(nMobileNetworkType))
+            {
+                ProcessBlock(BLOCK_VOLTE_CAPABILITY,
+                        !IsCapabilityExistedForNetworkType(
+                                nMobileNetworkType, AosCapability::VOICE));
+                ProcessBlock(BLOCK_VILTE_CAPABILITY,
+                        !IsCapabilityExistedForNetworkType(
+                                nMobileNetworkType, AosCapability::VIDEO));
+            }
+        }
+        else
+        {
+            ProcessBlock(BLOCK_VOWIFI_CAPABILITY,
+                    !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
+
+            ProcessBlock(BLOCK_VIWIFI_CAPABILITY,
+                    !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
+        }
     }
 }
 
