@@ -240,6 +240,8 @@ public:
                 strExtraMessage.Equals(objRhs.strExtraMessage);
     }
 
+    IMS_BOOL operator!=(const CallReasonInfo& objRhs) const { return !(*this == objRhs); }
+
     inline static IMS_BOOL IsTerminateRequired(IN IMS_SINT32 nCode)
     {
         switch (nCode)
@@ -253,8 +255,6 @@ public:
                 return IMS_TRUE;
         }
     }
-
-    IMS_BOOL operator!=(const CallReasonInfo& objRhs) const { return !(*this == objRhs); }
 
     AString ToString() const
     {
