@@ -93,7 +93,7 @@ TEST_F(MtcCallStateTest, StartDoesNothing)
 {
     ImsMap<SuppType, SuppService*> objSuppServices;
     EXPECT_EQ(INITIAL_CALL_STATE,
-            pState->Start(ANY_CALL_TYPE, "anyTarget", &objMediaInfo, objSuppServices));
+            pState->Start(ANY_CALL_TYPE, "anyTarget", objMediaInfo, objSuppServices));
 }
 
 TEST_F(MtcCallStateTest, StartConference1DoesNothing)
@@ -102,7 +102,7 @@ TEST_F(MtcCallStateTest, StartConference1DoesNothing)
     ImsList<ConfUser*> lstUsers;
     EXPECT_EQ(INITIAL_CALL_STATE,
             pState->StartConference(
-                    ANY_CALL_TYPE, "anyTarget", &objMediaInfo, objSuppServices, lstUsers));
+                    ANY_CALL_TYPE, "anyTarget", objMediaInfo, objSuppServices, lstUsers));
 }
 
 TEST_F(MtcCallStateTest, StartConference2DoesNothing)
@@ -123,7 +123,7 @@ TEST_F(MtcCallStateTest, HandleUserAlertDoesNothing)
 
 TEST_F(MtcCallStateTest, AcceptDoesNothing)
 {
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->Accept(ANY_CALL_TYPE, &objMediaInfo));
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->Accept(ANY_CALL_TYPE, objMediaInfo));
 }
 
 TEST_F(MtcCallStateTest, RejectDoesNothing)
@@ -133,17 +133,17 @@ TEST_F(MtcCallStateTest, RejectDoesNothing)
 
 TEST_F(MtcCallStateTest, HoldDoesNothing)
 {
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->Hold(&objMediaInfo));
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->Hold(objMediaInfo));
 }
 
 TEST_F(MtcCallStateTest, ResumeDoesNothing)
 {
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->Resume(&objMediaInfo));
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->Resume(objMediaInfo));
 }
 
 TEST_F(MtcCallStateTest, AcceptResumeDoesNothing)
 {
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->AcceptResume(ANY_CALL_TYPE, &objMediaInfo));
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->AcceptResume(ANY_CALL_TYPE, objMediaInfo));
 }
 
 TEST_F(MtcCallStateTest, RejectResumeDoesNothing)
@@ -153,12 +153,12 @@ TEST_F(MtcCallStateTest, RejectResumeDoesNothing)
 
 TEST_F(MtcCallStateTest, UpdateDoesNothing)
 {
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->Update(ANY_CALL_TYPE, &objMediaInfo));
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->Update(ANY_CALL_TYPE, objMediaInfo));
 }
 
 TEST_F(MtcCallStateTest, AcceptUpdateDoesNothing)
 {
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->AcceptUpdate(ANY_CALL_TYPE, &objMediaInfo));
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->AcceptUpdate(ANY_CALL_TYPE, objMediaInfo));
 }
 
 TEST_F(MtcCallStateTest, RejectUpdateDoesNothing)
@@ -193,7 +193,7 @@ TEST_F(MtcCallStateTest, OnUssiAttachedDoesNothing)
 
 TEST_F(MtcCallStateTest, AcceptUssiDoesNothing)
 {
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->AcceptUssi(ANY_CALL_TYPE, &objMediaInfo));
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->AcceptUssi(ANY_CALL_TYPE, objMediaInfo));
 }
 
 TEST_F(MtcCallStateTest, UssiStartedDoesNothing)

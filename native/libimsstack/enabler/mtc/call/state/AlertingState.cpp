@@ -77,7 +77,8 @@ PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName AlertingState::Accept(
+        IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("Accept", 0, 0, 0);
     IMtcSession* pSession = m_objContext.GetSession();
@@ -86,7 +87,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(IN CallType eCallType, IN Med
     pSession->SetCallType(eCallType);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    objMediaManager.SetMediaInfo(*pMediaInfo);
+    objMediaManager.SetMediaInfo(objMediaInfo);
 
     m_objContext.GetTimer().StopAll();
     if (bCallTypeChanged)
@@ -125,13 +126,13 @@ PUBLIC VIRTUAL CallStateName AlertingState::Terminate(IN const CallReasonInfo& o
 }
 
 PUBLIC VIRTUAL CallStateName AlertingState::AcceptUssi(
-        IN CallType eCallType, IN MediaInfo* pMediaInfo)
+        IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("AcceptUssi", 0, 0, 0);
     IMtcSession* pSession = m_objContext.GetSession();
 
     pSession->SetCallType(eCallType);
-    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
+    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     m_objContext.GetTimer().StopAll();
 

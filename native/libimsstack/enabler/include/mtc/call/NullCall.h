@@ -42,12 +42,12 @@ public:
 
     inline void Attach() override {}
 
-    inline void Start(IN CallType, IN const AString&, IN MediaInfo*,
+    inline void Start(IN CallType, IN const AString&, IN MediaInfo&,
             IN const ImsMap<SuppType, SuppService*>&) override
     {
     }
 
-    inline void StartConference(IN CallType, IN const AString&, IN MediaInfo*,
+    inline void StartConference(IN CallType, IN const AString&, IN MediaInfo&,
             IN const ImsMap<SuppType, SuppService*>&, IN const ImsList<ConfUser*>&) override
     {
     }
@@ -57,14 +57,14 @@ public:
     }
     inline void HandleIncoming(IN ISession*) override {}
     inline void HandleUserAlert() override {}
-    inline void Accept(IN CallType, IN MediaInfo*) override {}
+    inline void Accept(IN CallType, IN MediaInfo&) override {}
     inline void Reject(IN const CallReasonInfo&) override {}
-    inline void Hold(IN MediaInfo*) override {}
-    inline void Resume(IN MediaInfo*) override {}
-    inline void AcceptResume(IN CallType, IN MediaInfo*) override {}
+    inline void Hold(IN MediaInfo&) override {}
+    inline void Resume(IN MediaInfo&) override {}
+    inline void AcceptResume(IN CallType, IN MediaInfo&) override {}
     inline void RejectResume(IN const CallReasonInfo&) override {}
-    inline void Update(IN CallType, IN MediaInfo*) override {}
-    inline void AcceptUpdate(IN CallType, IN MediaInfo*) override {}
+    inline void Update(IN CallType, IN MediaInfo&) override {}
+    inline void AcceptUpdate(IN CallType, IN MediaInfo&) override {}
     inline void RejectUpdate(IN const CallReasonInfo&) override {}
     inline void CancelUpdate(IN const CallReasonInfo&) override {}
     inline void Terminate(IN const CallReasonInfo&) override {}

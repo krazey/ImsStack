@@ -143,11 +143,11 @@ void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* pi
 
 PUBLIC
 void MtcCallController::Start(IN CallKey nCallKey, IN CallType eCallType,
-        IN const AString& strTarget, IN MediaInfo* pMediaInfo,
+        IN const AString& strTarget, IN MediaInfo& objMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->Start(
-            eCallType, strTarget, pMediaInfo, objSuppServices);
+            eCallType, strTarget, objMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -157,9 +157,10 @@ void MtcCallController::HandleUserAlert(IN CallKey nCallKey)
 }
 
 PUBLIC
-void MtcCallController::Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
+void MtcCallController::Accept(
+        IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->Accept(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Accept(eCallType, objMediaInfo);
 }
 
 PUBLIC
@@ -169,22 +170,22 @@ void MtcCallController::Reject(IN CallKey nCallKey, IN const CallReasonInfo& obj
 }
 
 PUBLIC
-void MtcCallController::Hold(IN CallKey nCallKey, IN MediaInfo* pMediaInfo)
+void MtcCallController::Hold(IN CallKey nCallKey, IN MediaInfo& objMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->Hold(pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Hold(objMediaInfo);
 }
 
 PUBLIC
-void MtcCallController::Resume(IN CallKey nCallKey, IN MediaInfo* pMediaInfo)
+void MtcCallController::Resume(IN CallKey nCallKey, IN MediaInfo& objMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->Resume(pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Resume(objMediaInfo);
 }
 
 PUBLIC
 void MtcCallController::AcceptResume(
-        IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
+        IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->AcceptResume(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->AcceptResume(eCallType, objMediaInfo);
 }
 
 PUBLIC
@@ -200,9 +201,10 @@ void MtcCallController::Terminate(IN CallKey nCallKey, IN const CallReasonInfo& 
 }
 
 PUBLIC
-void MtcCallController::Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
+void MtcCallController::Update(
+        IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->Update(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Update(eCallType, objMediaInfo);
 }
 
 PUBLIC
@@ -213,9 +215,9 @@ void MtcCallController::CancelUpdate(IN CallKey nCallKey, IN const CallReasonInf
 
 PUBLIC
 void MtcCallController::AcceptUpdate(
-        IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
+        IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->AcceptUpdate(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->AcceptUpdate(eCallType, objMediaInfo);
 }
 
 PUBLIC

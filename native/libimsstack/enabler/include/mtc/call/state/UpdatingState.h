@@ -38,10 +38,10 @@ public:
 public:
     void OnExit() override;
 
-    CallStateName Hold(IN MediaInfo* pMediaInfo) override;
-    CallStateName Resume(IN MediaInfo* pMediaInfo) override;
-    CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName Hold(IN MediaInfo& objMediaInfo) override;
+    CallStateName Resume(IN MediaInfo& objMediaInfo) override;
+    CallStateName Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;

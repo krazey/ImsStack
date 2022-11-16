@@ -45,10 +45,10 @@ public:
     IdleState& operator=(IN const IdleState&) = delete;
 
     CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
+            IN MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& lstUsers) override;

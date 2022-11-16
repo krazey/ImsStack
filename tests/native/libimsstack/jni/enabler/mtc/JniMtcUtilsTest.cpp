@@ -102,9 +102,8 @@ TEST_F(JniMtcUtilsTest, WtiteAndReadMediaInfo)
     JniMtcUtils::WriteMediaInfoToParcel(&objAnyMediaInfo, objParcel);
     objParcel.setDataPosition(0);
 
-    MediaInfo* pConvertedMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel);
-    EXPECT_EQ(*pConvertedMediaInfo, objAnyMediaInfo);
-    delete pConvertedMediaInfo;
+    MediaInfo objConvertedMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel, objConvertedMediaInfo);
+    EXPECT_EQ(objConvertedMediaInfo, objAnyMediaInfo);
 }
 
 TEST_F(JniMtcUtilsTest, WtiteAndReadSuppServices)

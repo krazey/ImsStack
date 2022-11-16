@@ -174,15 +174,15 @@ TEST_F(MtcCallTest, StartCallsState)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
     ImsMap<SuppType, SuppService*> objSuppServices;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Start(eCallType, strTarget, pMediaInfo, Ref(objSuppServices))).Times(1);
+    EXPECT_CALL(*pState, Start(eCallType, strTarget, objMediaInfo, Ref(objSuppServices))).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+    objCall.Start(eCallType, strTarget, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcCallTest, StartCallsStateForUssi)
@@ -191,66 +191,34 @@ TEST_F(MtcCallTest, StartCallsStateForUssi)
 
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
     ImsMap<SuppType, SuppService*> objSuppServices;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Start(eCallType, strTarget, pMediaInfo, Ref(objSuppServices))).Times(1);
+    EXPECT_CALL(*pState, Start(eCallType, strTarget, objMediaInfo, Ref(objSuppServices))).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.Start(eCallType, strTarget, pMediaInfo, objSuppServices);
-}
-
-TEST_F(MtcCallTest, StartFailsIfMediaInfoIsNull)
-{
-    CallType eCallType = CallType::VOIP;
-    AString strTarget("some_target");
-    MediaInfo* pMediaInfo = IMS_NULL;
-    ImsMap<SuppType, SuppService*> objSuppServices;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Start(_, _, _, _)).Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure).Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+    objCall.Start(eCallType, strTarget, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcCallTest, StartConference5CallsState)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
     ImsMap<SuppType, SuppService*> objSuppServices;
     ImsList<ConfUser*> lstUsers;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
     EXPECT_CALL(*pState,
-            StartConference(eCallType, strTarget, pMediaInfo, Ref(objSuppServices), Ref(lstUsers)))
+            StartConference(
+                    eCallType, strTarget, objMediaInfo, Ref(objSuppServices), Ref(lstUsers)))
             .Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.StartConference(eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
-}
-
-TEST_F(MtcCallTest, StartConference5FailsIfMediaInfoIsNull)
-{
-    CallType eCallType = CallType::VOIP;
-    AString strTarget("some_target");
-    MediaInfo* pMediaInfo = IMS_NULL;
-    ImsMap<SuppType, SuppService*> objSuppServices;
-    ImsList<ConfUser*> lstUsers;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, StartConference(_, _, _, _, _)).Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure).Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.StartConference(eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
+    objCall.StartConference(eCallType, strTarget, objMediaInfo, objSuppServices, lstUsers);
 }
 
 TEST_F(MtcCallTest, StartConference3CallsState)
@@ -342,14 +310,14 @@ TEST_F(MtcCallTest, HandleUserAlertDoesNothingForUssi)
 TEST_F(MtcCallTest, AcceptCallsState)
 {
     CallType eCallType = CallType::VOIP;
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Accept(eCallType, pMediaInfo)).Times(1);
+    EXPECT_CALL(*pState, Accept(eCallType, objMediaInfo)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.Accept(eCallType, pMediaInfo);
+    objCall.Accept(eCallType, objMediaInfo);
 }
 
 TEST_F(MtcCallTest, AcceptCallsStateForUssi)
@@ -357,14 +325,14 @@ TEST_F(MtcCallTest, AcceptCallsStateForUssi)
     objCallInfo.bUssi = IMS_TRUE;
 
     CallType eCallType = CallType::VOIP;
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, AcceptUssi(eCallType, pMediaInfo)).Times(1);
+    EXPECT_CALL(*pState, AcceptUssi(eCallType, objMediaInfo)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.Accept(eCallType, pMediaInfo);
+    objCall.Accept(eCallType, objMediaInfo);
 }
 
 TEST_F(MtcCallTest, RejectCallsState)
@@ -381,79 +349,39 @@ TEST_F(MtcCallTest, RejectCallsState)
 
 TEST_F(MtcCallTest, HoldCallsState)
 {
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Hold(pMediaInfo)).Times(1);
+    EXPECT_CALL(*pState, Hold(objMediaInfo)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.Hold(pMediaInfo);
-}
-
-TEST_F(MtcCallTest, HoldFailsIfMediaInfoIsNull)
-{
-    MediaInfo* pMediaInfo = IMS_NULL;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Hold(_)).Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure).Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.Hold(pMediaInfo);
+    objCall.Hold(objMediaInfo);
 }
 
 TEST_F(MtcCallTest, ResumeCallsState)
 {
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Resume(pMediaInfo)).Times(1);
+    EXPECT_CALL(*pState, Resume(objMediaInfo)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.Resume(pMediaInfo);
-}
-
-TEST_F(MtcCallTest, ResumeFailsIfMediaInfoIsNull)
-{
-    MediaInfo* pMediaInfo = IMS_NULL;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Resume(_)).Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure).Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.Resume(pMediaInfo);
+    objCall.Resume(objMediaInfo);
 }
 
 TEST_F(MtcCallTest, AcceptResumeCallsState)
 {
     CallType eCallType = CallType::VOIP;
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, AcceptResume(eCallType, pMediaInfo)).Times(1);
+    EXPECT_CALL(*pState, AcceptResume(eCallType, objMediaInfo)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.AcceptResume(eCallType, pMediaInfo);
-}
-
-TEST_F(MtcCallTest, AcceptResumeFailsIfMediaInfoIsNull)
-{
-    CallType eCallType = CallType::VOIP;
-    MediaInfo* pMediaInfo = IMS_NULL;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, AcceptResume(_, _)).Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure).Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.AcceptResume(eCallType, pMediaInfo);
+    objCall.AcceptResume(eCallType, objMediaInfo);
 }
 
 TEST_F(MtcCallTest, RejectResumeCallsState)
@@ -471,55 +399,27 @@ TEST_F(MtcCallTest, RejectResumeCallsState)
 TEST_F(MtcCallTest, UpdateCallsState)
 {
     CallType eCallType = CallType::VOIP;
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Update(eCallType, pMediaInfo)).Times(1);
+    EXPECT_CALL(*pState, Update(eCallType, objMediaInfo)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.Update(eCallType, pMediaInfo);
-}
-
-TEST_F(MtcCallTest, UpdateFailsIfMediaInfoIsNull)
-{
-    CallType eCallType = CallType::VOIP;
-    MediaInfo* pMediaInfo = IMS_NULL;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, Update(_, _)).Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure).Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.Update(eCallType, pMediaInfo);
+    objCall.Update(eCallType, objMediaInfo);
 }
 
 TEST_F(MtcCallTest, AcceptUpdateCallsState)
 {
     CallType eCallType = CallType::VOIP;
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
 
     MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, AcceptUpdate(eCallType, pMediaInfo)).Times(1);
+    EXPECT_CALL(*pState, AcceptUpdate(eCallType, objMediaInfo)).Times(1);
 
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    objCall.AcceptUpdate(eCallType, pMediaInfo);
-}
-
-TEST_F(MtcCallTest, AcceptUpdateFailsIfMediaInfoIsNull)
-{
-    CallType eCallType = CallType::VOIP;
-    MediaInfo* pMediaInfo = IMS_NULL;
-
-    MockIMtcCallState* pState = new MockIMtcCallState();
-    EXPECT_CALL(*pState, AcceptUpdate(_, _)).Times(0);
-    EXPECT_CALL(*pState, OnInternalFailure).Times(1);
-
-    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
-
-    objCall.AcceptUpdate(eCallType, pMediaInfo);
+    objCall.AcceptUpdate(eCallType, objMediaInfo);
 }
 
 TEST_F(MtcCallTest, RejectUpdateCallsState)

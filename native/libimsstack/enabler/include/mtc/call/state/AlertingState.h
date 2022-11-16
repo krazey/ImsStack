@@ -44,10 +44,10 @@ public:
     void OnExit() override;
 
     CallStateName HandleUserAlert() override;
-    CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName Reject(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
-    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName UssiStarted(IN ISession* piSession) override;
     CallStateName SessionStarted(IN ISession* piSession) override;
     CallStateName SessionTerminated(IN ISession* piSession) override;

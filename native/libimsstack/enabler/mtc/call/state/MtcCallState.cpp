@@ -70,7 +70,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncoming(IN ISession* /* piSess
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::Start(IN CallType /* eCallType */,
-        IN const AString& /* strTarget */, IN MediaInfo* /* pMediaInfo */,
+        IN const AString& /* strTarget */, IN MediaInfo& /* pMediaInfo */,
         IN const IMSMap<SuppType, SuppService*>& /* lstSuppServices */)
 {
     return GetStateName();
@@ -82,7 +82,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleUserAlert()
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::Accept(
-        IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
+        IN CallType /* eCallType */, IN MediaInfo& /* pMediaInfo */)
 {
     return GetStateName();
 }
@@ -92,18 +92,18 @@ PUBLIC VIRTUAL CallStateName MtcCallState::Reject(IN const CallReasonInfo& /* ob
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::Hold(IN MediaInfo* /* pMediaInfo */)
+PUBLIC VIRTUAL CallStateName MtcCallState::Hold(IN MediaInfo& /* pMediaInfo */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::Resume(IN MediaInfo* /* pMediaInfo */)
+PUBLIC VIRTUAL CallStateName MtcCallState::Resume(IN MediaInfo& /* pMediaInfo */)
 {
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::AcceptResume(
-        IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
+        IN CallType /* eCallType */, IN MediaInfo& /* pMediaInfo */)
 {
     return GetStateName();
 }
@@ -114,13 +114,13 @@ PUBLIC VIRTUAL CallStateName MtcCallState::RejectResume(IN const CallReasonInfo&
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::Update(
-        IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
+        IN CallType /* eCallType */, IN MediaInfo& /* pMediaInfo */)
 {
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::AcceptUpdate(
-        IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
+        IN CallType /* eCallType */, IN MediaInfo& /* pMediaInfo */)
 {
     return GetStateName();
 }
@@ -147,7 +147,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SendDtmf(
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
-        IN const AString&, IN MediaInfo* /* pMediaInfo */,
+        IN const AString&, IN MediaInfo& /* pMediaInfo */,
         IN const ImsMap<SuppType, SuppService*>& /* lstSuppServices */,
         IN const ImsList<ConfUser*>& /* lstUsers */)
 {
@@ -176,7 +176,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::UssiStarted(IN ISession* /* piSession
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::AcceptUssi(
-        IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
+        IN CallType /* eCallType */, IN MediaInfo& /* pMediaInfo */)
 {
     return GetStateName();
 }

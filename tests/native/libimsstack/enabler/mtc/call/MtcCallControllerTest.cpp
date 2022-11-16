@@ -312,11 +312,11 @@ TEST_F(MtcCallControllerTest, StartCallsTargetCall)
 
     // TODO: Make a matcher for IMSMap<SuppType, SuppService*>
     MockIMtcCall objCall;
-    EXPECT_CALL(objCall, Start(eCallType, strTarget, &objMediaInfo, _)).Times(1);
+    EXPECT_CALL(objCall, Start(eCallType, strTarget, objMediaInfo, _)).Times(1);
 
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    pCallController->Start(nCallKey, eCallType, strTarget, &objMediaInfo, objSuppServices);
+    pCallController->Start(nCallKey, eCallType, strTarget, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcCallControllerTest, HandleUserAlertCallsTargetCall)
@@ -338,11 +338,11 @@ TEST_F(MtcCallControllerTest, AcceptCallsTargetCall)
     MediaInfo objMediaInfo;
 
     MockIMtcCall objCall;
-    EXPECT_CALL(objCall, Accept(eCallType, &objMediaInfo)).Times(1);
+    EXPECT_CALL(objCall, Accept(eCallType, objMediaInfo)).Times(1);
 
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    pCallController->Accept(nCallKey, eCallType, &objMediaInfo);
+    pCallController->Accept(nCallKey, eCallType, objMediaInfo);
 }
 
 TEST_F(MtcCallControllerTest, RejectCallsTargetCall)
@@ -364,11 +364,11 @@ TEST_F(MtcCallControllerTest, HoldCallsTargetCall)
     MediaInfo objMediaInfo;
 
     MockIMtcCall objCall;
-    EXPECT_CALL(objCall, Hold(&objMediaInfo)).Times(1);
+    EXPECT_CALL(objCall, Hold(objMediaInfo)).Times(1);
 
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    pCallController->Hold(nCallKey, &objMediaInfo);
+    pCallController->Hold(nCallKey, objMediaInfo);
 }
 
 TEST_F(MtcCallControllerTest, ResumeCallsTargetCall)
@@ -377,11 +377,11 @@ TEST_F(MtcCallControllerTest, ResumeCallsTargetCall)
     MediaInfo objMediaInfo;
 
     MockIMtcCall objCall;
-    EXPECT_CALL(objCall, Resume(&objMediaInfo)).Times(1);
+    EXPECT_CALL(objCall, Resume(objMediaInfo)).Times(1);
 
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    pCallController->Resume(nCallKey, &objMediaInfo);
+    pCallController->Resume(nCallKey, objMediaInfo);
 }
 
 TEST_F(MtcCallControllerTest, TerminateCallsTargetCall)
@@ -404,11 +404,11 @@ TEST_F(MtcCallControllerTest, UpdateCallsTargetCall)
     MediaInfo objMediaInfo;
 
     MockIMtcCall objCall;
-    EXPECT_CALL(objCall, Update(eCallType, &objMediaInfo)).Times(1);
+    EXPECT_CALL(objCall, Update(eCallType, objMediaInfo)).Times(1);
 
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    pCallController->Update(nCallKey, eCallType, &objMediaInfo);
+    pCallController->Update(nCallKey, eCallType, objMediaInfo);
 }
 
 TEST_F(MtcCallControllerTest, CancelUpdateCallsTargetCall)
@@ -431,11 +431,11 @@ TEST_F(MtcCallControllerTest, AcceptUpdateCallsTargetCall)
     MediaInfo objMediaInfo;
 
     MockIMtcCall objCall;
-    EXPECT_CALL(objCall, AcceptUpdate(eCallType, &objMediaInfo)).Times(1);
+    EXPECT_CALL(objCall, AcceptUpdate(eCallType, objMediaInfo)).Times(1);
 
     ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
 
-    pCallController->AcceptUpdate(nCallKey, eCallType, &objMediaInfo);
+    pCallController->AcceptUpdate(nCallKey, eCallType, objMediaInfo);
 }
 
 TEST_F(MtcCallControllerTest, RejectUpdateCallsTargetCall)

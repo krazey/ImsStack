@@ -55,23 +55,23 @@ public:
     inline CallStateName GetStateName() const override { return m_eStateName; }
 
     CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
+            IN MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& lstUsers) override;
     CallStateName HandleIncoming(IN ISession* piSession) override;
     CallStateName HandleUserAlert() override;
-    CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName Reject(IN const CallReasonInfo& objReason) override;
-    CallStateName Hold(IN MediaInfo* pMediaInfo) override;
-    CallStateName Resume(IN MediaInfo* pMediaInfo) override;
-    CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName Hold(IN MediaInfo& objMediaInfo) override;
+    CallStateName Resume(IN MediaInfo& objMediaInfo) override;
+    CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName RejectResume(IN const CallReasonInfo& objReason) override;
-    CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
@@ -79,7 +79,7 @@ public:
 
     CallStateName HandleIncomingUssi(IN ISession* piSession) override;
     CallStateName OnUssiAttached() override;
-    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName UssiStarted(IN ISession* piSession) override;
     CallStateName TerminateUssi(IN const CallReasonInfo& objReason) override;
     CallStateName UssiTerminated(IN ISession* piSession) override;

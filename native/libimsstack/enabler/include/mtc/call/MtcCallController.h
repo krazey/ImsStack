@@ -55,21 +55,21 @@ public:
     void Attach(IN CallKey nCallKey) override;
     void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) override;
     void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
+            IN MediaInfo& objMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
     void HandleUserAlert(IN CallKey nCallKey) override;
-    void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void Reject(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
-    void Hold(IN CallKey nCallKey, IN MediaInfo* pMediaInfo) override;
-    void Resume(IN CallKey nCallKey, IN MediaInfo* pMediaInfo) override;
+    void Hold(IN CallKey nCallKey, IN MediaInfo& objMediaInfo) override;
+    void Resume(IN CallKey nCallKey, IN MediaInfo& objMediaInfo) override;
     void AcceptResume(
-            IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+            IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void RejectResume(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
     void Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
-    void Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    void Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void CancelUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
     void AcceptUpdate(
-            IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+            IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void RejectUpdate(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
     void SendUssd(IN CallKey nCallKey, IN const AString& strUssd) override;
 

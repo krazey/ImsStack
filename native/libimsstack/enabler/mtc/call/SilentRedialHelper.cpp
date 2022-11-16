@@ -149,7 +149,7 @@ void SilentRedialHelper::ReStart()
 
     m_objContext.GetCallManager()
             .GetCallByCallKey(m_nCallKey)
-            ->Start(eType, strTarget, new MediaInfo(objMediaInfo), objSuppServices);
+            ->Start(eType, strTarget, objMediaInfo, objSuppServices);
 }
 
 PRIVATE

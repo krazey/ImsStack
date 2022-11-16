@@ -43,11 +43,11 @@ public:
     MOCK_METHOD(void, OnExit, (), (override));
     MOCK_METHOD(CallStateName, GetStateName, (), (const, override));
     MOCK_METHOD(CallStateName, Start,
-            (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
+            (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
                     (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(CallStateName, StartConference,
-            (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
+            (IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
                     (IN const ImsMap<SuppType, SuppService*>& objSuppServices),
                     IN const ImsList<ConfUser*>& lstUsers),
             (override));
@@ -58,16 +58,16 @@ public:
     MOCK_METHOD(CallStateName, HandleIncoming, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, HandleUserAlert, (), (override));
     MOCK_METHOD(
-            CallStateName, Accept, (IN CallType eCallType, IN MediaInfo* pMediaInfo), (override));
+            CallStateName, Accept, (IN CallType eCallType, IN MediaInfo& objMediaInfo), (override));
     MOCK_METHOD(CallStateName, Reject, (IN const CallReasonInfo& objReason), (override));
-    MOCK_METHOD(CallStateName, Hold, (IN MediaInfo* pMediaInfo), (override));
-    MOCK_METHOD(CallStateName, Resume, (IN MediaInfo* pMediaInfo), (override));
-    MOCK_METHOD(CallStateName, AcceptResume, (IN CallType eCallType, IN MediaInfo* pMediaInfo),
+    MOCK_METHOD(CallStateName, Hold, (IN MediaInfo & objMediaInfo), (override));
+    MOCK_METHOD(CallStateName, Resume, (IN MediaInfo & objMediaInfo), (override));
+    MOCK_METHOD(CallStateName, AcceptResume, (IN CallType eCallType, IN MediaInfo& objMediaInfo),
             (override));
     MOCK_METHOD(CallStateName, RejectResume, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(
-            CallStateName, Update, (IN CallType eCallType, IN MediaInfo* pMediaInfo), (override));
-    MOCK_METHOD(CallStateName, AcceptUpdate, (IN CallType eCallType, IN MediaInfo* pMediaInfo),
+            CallStateName, Update, (IN CallType eCallType, IN MediaInfo& objMediaInfo), (override));
+    MOCK_METHOD(CallStateName, AcceptUpdate, (IN CallType eCallType, IN MediaInfo& objMediaInfo),
             (override));
     MOCK_METHOD(CallStateName, RejectUpdate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(CallStateName, CancelUpdate, (IN const CallReasonInfo& objReason), (override));
@@ -76,7 +76,7 @@ public:
             (override));
     MOCK_METHOD(CallStateName, HandleIncomingUssi, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, OnUssiAttached, (), (override));
-    MOCK_METHOD(CallStateName, AcceptUssi, (IN CallType eCallType, IN MediaInfo* pMediaInfo),
+    MOCK_METHOD(CallStateName, AcceptUssi, (IN CallType eCallType, IN MediaInfo& objMediaInfo),
             (override));
     MOCK_METHOD(CallStateName, UssiStarted, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, TerminateUssi, (IN const CallReasonInfo& objReason), (override));

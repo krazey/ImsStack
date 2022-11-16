@@ -56,18 +56,17 @@ PUBLIC GLOBAL JniCallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
     return objCallInfo;
 }
 
-PUBLIC GLOBAL MediaInfo* JniMtcUtils::ReadMediaInfo(IN const Parcel& objParcel)
+PUBLIC GLOBAL MediaInfo& JniMtcUtils::ReadMediaInfo(
+        IN const Parcel& objParcel, IN_OUT MediaInfo& objMediaInfo)
 {
-    MediaInfo* pMediaInfo = new MediaInfo();
+    objMediaInfo.eAQuality = objParcel.readInt32();
+    objMediaInfo.eVQuality = objParcel.readInt32();
+    objMediaInfo.eADir = objParcel.readInt32();
+    objMediaInfo.eVDir = objParcel.readInt32();
+    objMediaInfo.eTDir = objParcel.readInt32();
+    objMediaInfo.eGTTMode = objParcel.readInt32();
 
-    pMediaInfo->eAQuality = objParcel.readInt32();
-    pMediaInfo->eVQuality = objParcel.readInt32();
-    pMediaInfo->eADir = objParcel.readInt32();
-    pMediaInfo->eVDir = objParcel.readInt32();
-    pMediaInfo->eTDir = objParcel.readInt32();
-    pMediaInfo->eGTTMode = objParcel.readInt32();
-
-    return pMediaInfo;
+    return objMediaInfo;
 }
 
 PUBLIC GLOBAL ImsMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryService(

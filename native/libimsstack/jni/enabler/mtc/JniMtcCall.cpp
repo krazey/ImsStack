@@ -266,11 +266,11 @@ void JniMtcCall::Start(IN const android::Parcel& objParcel)
 
     AString strTarget;
     JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
-    MediaInfo* pMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel);
-    IMSMap<SuppType, SuppService*> objSuppService =
+    MediaInfo objMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo);
+    ImsMap<SuppType, SuppService*> objSuppService =
             JniMtcUtils::ReadSupplementaryService(objParcel);
 
-    m_objCallController.Start(m_nCallKey, eCallType, strTarget, pMediaInfo, objSuppService);
+    m_objCallController.Start(m_nCallKey, eCallType, strTarget, objMediaInfo, objSuppService);
 }
 
 PRIVATE
@@ -282,8 +282,9 @@ void JniMtcCall::OnUserAlert(IN const android::Parcel& /*objParcel*/)
 PRIVATE
 void JniMtcCall::Accept(IN const android::Parcel& objParcel)
 {
+    MediaInfo objMediaInfo;
     m_objCallController.Accept(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
-            JniMtcUtils::ReadMediaInfo(objParcel));
+            JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
@@ -295,13 +296,15 @@ void JniMtcCall::Reject(IN const android::Parcel& objParcel)
 PRIVATE
 void JniMtcCall::Hold(IN const android::Parcel& objParcel)
 {
-    m_objCallController.Hold(m_nCallKey, JniMtcUtils::ReadMediaInfo(objParcel));
+    MediaInfo objMediaInfo;
+    m_objCallController.Hold(m_nCallKey, JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
 void JniMtcCall::Resume(IN const android::Parcel& objParcel)
 {
-    m_objCallController.Resume(m_nCallKey, JniMtcUtils::ReadMediaInfo(objParcel));
+    MediaInfo objMediaInfo;
+    m_objCallController.Resume(m_nCallKey, JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
@@ -313,15 +316,17 @@ void JniMtcCall::Terminate(IN const android::Parcel& objParcel)
 PRIVATE
 void JniMtcCall::Update(IN const android::Parcel& objParcel)
 {
+    MediaInfo objMediaInfo;
     m_objCallController.Update(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
-            JniMtcUtils::ReadMediaInfo(objParcel));
+            JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
 void JniMtcCall::AcceptUpdate(IN const android::Parcel& objParcel)
 {
+    MediaInfo objMediaInfo;
     m_objCallController.AcceptUpdate(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
-            JniMtcUtils::ReadMediaInfo(objParcel));
+            JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
@@ -339,8 +344,9 @@ void JniMtcCall::CancelUpdate(IN const android::Parcel& objParcel)
 PRIVATE
 void JniMtcCall::AcceptResume(IN const android::Parcel& objParcel)
 {
+    MediaInfo objMediaInfo;
     m_objCallController.AcceptResume(m_nCallKey, JniMtcUtils::ReadCallType(objParcel),
-            JniMtcUtils::ReadMediaInfo(objParcel));
+            JniMtcUtils::ReadMediaInfo(objParcel, objMediaInfo));
 }
 
 PRIVATE
@@ -366,7 +372,7 @@ void JniMtcCall::StartGroupCall(IN const android::Parcel& /*objParcel*/)
     AString strTarget;
     JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
     MediaInfo* pMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel);
-    IMSMap<SuppType, SuppService*> objSuppService = JniMtcUtils::ReadSupplementaryService(
+    ImsMap<SuppType, SuppService*> objSuppService = JniMtcUtils::ReadSupplementaryService(
             objParcel);
 
     m_objCallController.StartGroupCall(m_nCallKey, eCallType, strTarget,
@@ -378,7 +384,7 @@ PRIVATE
 void JniMtcCall::MergeToConference(IN const android::Parcel& objParcel)
 {
     // TODO: delete pointers after function call.
-    IMSList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
+    ImsList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
         IMS_TRACE_D("MergeToConference connectionId=[%d]", objUsers.GetAt(i)->nConnectionId, 0, 0);
@@ -395,7 +401,7 @@ void JniMtcCall::ExpandToConference(IN const android::Parcel& /*objParcel*/)
 PRIVATE
 void JniMtcCall::AddToConference(IN const android::Parcel& objParcel)
 {
-    IMSList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
+    ImsList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
         IMS_TRACE_D("AddToConference nConnectionId=[%d]", objUsers.GetAt(i)->nConnectionId, 0, 0);
@@ -406,7 +412,7 @@ void JniMtcCall::AddToConference(IN const android::Parcel& objParcel)
 PRIVATE
 void JniMtcCall::RemoveFromConference(IN const android::Parcel& objParcel)
 {
-    IMSList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
+    ImsList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
         IMS_TRACE_D(
