@@ -14,18 +14,215 @@
  * limitations under the License.
  */
 
+#include "IIpcan.h"
+#include "IMtcContext.h"
+#include "ImsAosParameter.h"
+#include "MockIJniMtcServiceThread.h"
+#include "MockIMtcContext.h"
+#include "MockIMtcService.h"
+#include "MockMtcEmergencyServiceManager.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MockMtcConfigurationProxy.h"
+#include "helper/IMtcAosStateListener.h"
+#include "helper/MockIMtcAosStateListener.h"
 #include "helper/MtcAosEventHandler.h"
 #include <gtest/gtest.h>
+
+using ::testing::_;
+using ::testing::Return;
 
 namespace android
 {
 
+MATCHER_P(IsEqualMtcService, serviceAddress, "")
+{
+    return &arg == serviceAddress;
+}
+
 class MtcAosEventHandlerTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    MtcAosEventHandler* pEventHandler;
 
-    virtual void TearDown() override {}
+    MockIMtcContext objContext;
+    MockIMtcService objMtcService;
+    MockIMtcConfigurationManager* pConfigManager;
+    MockMtcConfigurationProxy* pConfigProxy;
+    MockIJniMtcServiceThread objJniThread;
+    MockMtcEmergencyServiceManager* pEmergencyServiceManager;
+
+protected:
+    virtual void SetUp() override
+    {
+        pConfigManager = new MockIMtcConfigurationManager();
+        pConfigProxy = new MockMtcConfigurationProxy(pConfigManager);
+        pEmergencyServiceManager = new MockMtcEmergencyServiceManager(objContext);
+        pEventHandler = new MtcAosEventHandler(objMtcService, *pConfigProxy);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pEmergencyServiceManager;
+        delete pConfigProxy;
+        delete pEventHandler;
+    }
 };
+
+TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesJni)
+{
+    IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO + ImsAosFeature::TEXT;
+    EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures - ImsAosFeature::TEXT, 0));
+    EXPECT_CALL(*pConfigProxy, OnRegistrationRefreshed).Times(3);
+    pEventHandler->OnConnected(
+            nFeatures, IIpcan::CATEGORY_MOBILE, &objJniThread, pEmergencyServiceManager);
+
+    nFeatures = ImsAosFeature::MMTEL;
+    EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures, 0));
+    pEventHandler->OnConnected(
+            nFeatures, IIpcan::CATEGORY_MOBILE, &objJniThread, pEmergencyServiceManager);
+
+    nFeatures = ImsAosFeature::VIDEO;
+    EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures, 0));
+    pEventHandler->OnConnected(
+            nFeatures, IIpcan::CATEGORY_MOBILE, &objJniThread, pEmergencyServiceManager);
+}
+
+TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemoveListener)
+{
+    MockIMtcAosStateListener objListener1;
+    MockIMtcAosStateListener objListener2;
+    pEventHandler->AddListener(&objListener1);
+    pEventHandler->AddListener(&objListener1);  // to check duplicated case
+    pEventHandler->AddListener(&objListener2);
+
+    IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO;
+    EXPECT_CALL(objListener1,
+            OnAosStateChanged(
+                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE))
+            .Times(1);
+    EXPECT_CALL(objListener2,
+            OnAosStateChanged(
+                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE))
+            .Times(1);
+    pEventHandler->OnConnected(
+            nFeatures, IIpcan::CATEGORY_MOBILE, &objJniThread, pEmergencyServiceManager);
+
+    pEventHandler->RemoveListener(&objListener1);
+    pEventHandler->RemoveListener(&objListener2);
+    pEventHandler->RemoveListener(&objListener2);  // to check not matching case
+
+    EXPECT_CALL(objListener1, OnAosStateChanged(_, _, _)).Times(0);
+    EXPECT_CALL(objListener2, OnAosStateChanged(_, _, _)).Times(0);
+    pEventHandler->OnConnected(
+            nFeatures, IIpcan::CATEGORY_MOBILE, &objJniThread, pEmergencyServiceManager);
+}
+
+TEST_F(MtcAosEventHandlerTest, OnConnectedWithDifferentIpcanNotifiesListener)
+{
+    MockIMtcAosStateListener objListener;
+    pEventHandler->AddListener(&objListener);
+
+    IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO;
+    pEventHandler->OnConnected(
+            nFeatures, IIpcan::CATEGORY_MOBILE, &objJniThread, pEmergencyServiceManager);
+
+    EXPECT_CALL(
+            objListener, OnIpcanChanged(IsEqualMtcService(&objMtcService), IIpcan::CATEGORY_WLAN))
+            .Times(1);
+    pEventHandler->OnConnected(
+            nFeatures, IIpcan::CATEGORY_WLAN, &objJniThread, pEmergencyServiceManager);
+}
+
+TEST_F(MtcAosEventHandlerTest,
+        OnConnectedAndDisconnectedByEmergencyServiceCallsEmergencyServiceManager)
+{
+    ON_CALL(objMtcService, IsEmergency).WillByDefault(Return(IMS_TRUE));
+    IMS_UINT32 nFeatures = ImsAosFeature::MMTEL;
+    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
+
+    EXPECT_CALL(*pEmergencyServiceManager, HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE));
+    pEventHandler->OnConnected(
+            nFeatures, IIpcan::CATEGORY_MOBILE, &objJniThread, pEmergencyServiceManager);
+
+    EXPECT_CALL(*pEmergencyServiceManager, HandleServiceStatus(ServiceStatus::SERVICE_IDLE));
+    pEventHandler->OnDisconnected(1, &objJniThread, pEmergencyServiceManager);
+}
+
+TEST_F(MtcAosEventHandlerTest, OnDisconnectedNotifiesJni)
+{
+    MockIMtcAosStateListener objListener;
+    pEventHandler->AddListener(&objListener);
+
+    IMS_UINT32 nAnyReason = 1;
+    EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::SERVICE_NONE, 0));
+    EXPECT_CALL(objListener,
+            OnAosStateChanged(
+                    IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTED, nAnyReason));
+
+    pEventHandler->OnDisconnected(nAnyReason, &objJniThread, pEmergencyServiceManager);
+}
+
+TEST_F(MtcAosEventHandlerTest, OnDisconnectingNotifiesListenerOnly)
+{
+    MockIMtcAosStateListener objListener;
+    pEventHandler->AddListener(&objListener);
+
+    IMS_UINT32 nAnyReason = 1;
+    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
+    EXPECT_CALL(objListener,
+            OnAosStateChanged(
+                    IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTING, nAnyReason));
+
+    pEventHandler->OnDisconnecting(nAnyReason);
+}
+
+TEST_F(MtcAosEventHandlerTest, OnSuspendedNotifiesListenerOnly)
+{
+    MockIMtcAosStateListener objListener;
+    pEventHandler->AddListener(&objListener);
+
+    IMS_UINT32 nAnyReason = 1;
+    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
+    EXPECT_CALL(objListener,
+            OnAosStateChanged(
+                    IsEqualMtcService(&objMtcService), MtcAosState::SUSPENDED, nAnyReason));
+
+    pEventHandler->OnSuspended(nAnyReason);
+}
+
+TEST_F(MtcAosEventHandlerTest, OnResumedNotifiesListenerOnly)
+{
+    MockIMtcAosStateListener objListener;
+    pEventHandler->AddListener(&objListener);
+
+    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
+    EXPECT_CALL(objListener,
+            OnAosStateChanged(
+                    IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE));
+
+    pEventHandler->OnResumed();
+}
+
+TEST_F(MtcAosEventHandlerTest, OnServiceConnectedDoesNothing)
+{
+    MockIMtcAosStateListener objListener;
+    pEventHandler->AddListener(&objListener);
+
+    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
+    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _)).Times(0);
+
+    pEventHandler->OnServiceConnected(1, 1);
+}
+
+TEST_F(MtcAosEventHandlerTest, OnEventNotifyDoesNothing)
+{
+    MockIMtcAosStateListener objListener;
+    pEventHandler->AddListener(&objListener);
+
+    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
+    EXPECT_CALL(objListener, OnAosStateChanged(_, _, _)).Times(0);
+
+    pEventHandler->OnEventNotify(1, 1);
+}
 
 }  // namespace android
