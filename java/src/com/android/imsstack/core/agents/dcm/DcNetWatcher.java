@@ -35,6 +35,7 @@ import android.telephony.VopsSupportInfo;
 
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.ICallSetting;
 import com.android.imsstack.core.agents.IPhoneState;
 import com.android.imsstack.core.agents.IPhoneStateNotifier;
@@ -91,6 +92,7 @@ public class DcNetWatcher implements IDcNetWatcher {
     protected Handler mDcNetWatcherHandler;
     @VisibleForTesting
     protected DcNetWatcherPhoneStateListener mPhoneStateListener = null;
+    protected DcNetWatcherConfigListener mConfigListener = null;
 
     private RegistrantList mStateDataConnectionState = new RegistrantList();
     private RegistrantList mDataServiceStateChangedRegistrants = new RegistrantList();
@@ -195,11 +197,24 @@ public class DcNetWatcher implements IDcNetWatcher {
 
         mPhoneStateListener = new DcNetWatcherPhoneStateListener();
         mPhoneStateListener.setListener();
+
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mSlotId);
+        if (config != null) {
+            mConfigListener = new DcNetWatcherConfigListener();
+            config.addListener(mConfigListener);
+        }
     }
 
     @Override
     public void cleanup() {
         ImsLog.d(mSlotId, "");
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mSlotId);
+        if (config != null && mConfigListener != null) {
+            config.removeListener(mConfigListener);
+            mConfigListener = null;
+        }
 
         if (mDcNetWatcherHandler != null) {
             mDcNetWatcherHandler.removeCallbacksAndMessages(null);
@@ -1133,6 +1148,14 @@ public class DcNetWatcher implements IDcNetWatcher {
                 Message.obtain(mDcNetWatcherHandler, EVENT_AIRPLANE_MODE_CHANGED, intent)
                         .sendToTarget();
             }
+        }
+    }
+
+    private class DcNetWatcherConfigListener implements ConfigInterface.Listener {
+        @Override
+        public void onCarrierConfigChanged(int slotId, int subId) {
+            ImsLog.i(mSlotId, "carrier config is changed");
+            setRatPolicy();
         }
     }
 

@@ -27,7 +27,6 @@ import android.content.Context;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 
-import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -47,14 +46,11 @@ public class DcSettingsTest {
 
     @Mock private Context mMockContext;
     @Mock private CarrierConfig mMockCarrierConfig;
-    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private IDcNetWatcher mMockIDcNetWatcher;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
 
         mDcSettingsUT = new FakeDcSettings(SLOT_0);
         mDcSettingsUT.init(mMockContext);
@@ -201,7 +197,7 @@ public class DcSettingsTest {
     public void testFailToGetCarrierConfig() throws Exception {
         int permanentFailureCause = 33;
 
-        when(mMockConfigInterface.getCarrierConfig()).thenReturn(null);
+        mMockCarrierConfig = null;
         mDcSettingsUT.init(mMockContext);
 
         assertTrue(mDcSettingsUT.isRoamingAllowed());
@@ -221,8 +217,8 @@ public class DcSettingsTest {
         }
 
         @Override
-        protected ConfigInterface getConfigInterface(int slotId) {
-            return mMockConfigInterface;
+        protected CarrierConfig getCarrierConfig(int slotId) {
+            return mMockCarrierConfig;
         }
 
         @Override

@@ -32,15 +32,9 @@ import com.android.internal.annotations.VisibleForTesting;
  * This class provide interface to get carrier configurations
  */
 public class DcSettings implements IDcSettings {
-    // Constants--------------------------------------------------
-
-    // Variables--------------------------------------------------
     private Context mContext;
     private int mSlotId = 0;
-    private CarrierConfig mCarrierConfig = null;
 
-    // Static loading materials ----------------------------------
-    // Public methods --------------------------------------------
     public DcSettings(int slotId) {
         mSlotId = slotId;
     }
@@ -48,42 +42,33 @@ public class DcSettings implements IDcSettings {
     @Override
     public void init(Context context) {
         mContext = context;
-
-        ConfigInterface config = getConfigInterface(mSlotId);
-
-        if (config != null) {
-            mCarrierConfig = config.getCarrierConfig();
-
-            if (mCarrierConfig == null) {
-                ImsLog.w(mSlotId, "mCarrierConfig is null");
-            }
-        } else {
-            ImsLog.w(mSlotId, "config is null");
-        }
     }
 
     @Override
     public void cleanup() {
     }
 
-    // Interface implementation methods --------------------------
-
     @Override
     public boolean isRoamingAllowed() {
-        if (mCarrierConfig == null) {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config == null) {
             return true;
         }
-        return mCarrierConfig.getBoolean(
+
+        return config.getBoolean(
                 CarrierConfigManager.ImsVoice.KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL, true);
     }
 
     @Override
     public boolean isVopsRequired() {
-        if (mCarrierConfig == null) {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config == null) {
             return true;
         }
 
-        boolean ignoreVops = mCarrierConfig.getBoolean(
+        boolean ignoreVops = config.getBoolean(
                 CarrierConfig.Assets.KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL, false);
         if (ignoreVops && !isVopsRequiredForPdn()) {
             return false;
@@ -94,11 +79,13 @@ public class DcSettings implements IDcSettings {
 
     @Override
     public boolean isVopsRequiredForPdn() {
-        if (mCarrierConfig == null) {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config == null) {
             return true;
         }
 
-        int[] noVopsRequired = mCarrierConfig.getIntArray(
+        int[] noVopsRequired = config.getIntArray(
                 CarrierConfigManager.Ims.KEY_IMS_PDN_ENABLED_IN_NO_VOPS_SUPPORT_INT_ARRAY);
         IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
 
@@ -121,8 +108,10 @@ public class DcSettings implements IDcSettings {
 
     @Override
     public int[] getImsSupportedRats() {
-        if (mCarrierConfig != null) {
-            int[] supportedRats = mCarrierConfig.getIntArray(
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            int[] supportedRats = config.getIntArray(
                     CarrierConfigManager.Ims.KEY_SUPPORTED_RATS_INT_ARRAY);
             if (supportedRats != null) {
                 return supportedRats;
@@ -130,24 +119,29 @@ public class DcSettings implements IDcSettings {
                 ImsLog.w(mSlotId, "supportedRats is null");
             }
         } else {
-            ImsLog.w(mSlotId, "mCarrierConfig is null");
+            ImsLog.w(mSlotId, "config is null");
         }
         return new int[]{};
     }
 
     @Override
     public int getPreferredIpVersion() {
-        if (mCarrierConfig != null) {
-            return mCarrierConfig.getInt(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT,
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getInt(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT,
                     CarrierConfig.Assets.IPV6_PREFERRED);
         }
+
         return CarrierConfig.Assets.IPV6_PREFERRED;
     }
 
     @Override
     public int getEmergencyPreferredIpVersion() {
-        if (mCarrierConfig != null) {
-            return mCarrierConfig.getInt(CarrierConfig.Assets.KEY_EMC_PREFERRED_IPTYPE_INT,
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getInt(CarrierConfig.Assets.KEY_EMC_PREFERRED_IPTYPE_INT,
                     CarrierConfig.Assets.IPV6_PREFERRED);
         }
         return CarrierConfig.Assets.IPV6_PREFERRED;
@@ -155,11 +149,13 @@ public class DcSettings implements IDcSettings {
 
     @Override
     public boolean isPermanentFailure(EApnType apnType, int causeCode) {
-        if (mCarrierConfig != null) {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
             int[] permanentFailure = null;
 
             if (apnType == EApnType.IMS) {
-                permanentFailure = mCarrierConfig.getIntArray(
+                permanentFailure = config.getIntArray(
                         CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
             } else {
                 return false;
@@ -177,15 +173,21 @@ public class DcSettings implements IDcSettings {
         return false;
     }
 
-    // Private/Protected methods ---------------------------------
-    @VisibleForTesting
-    protected ConfigInterface getConfigInterface(int slotId) {
-        return AgentFactory.getInstance().getAgent(ConfigInterface.class, slotId);
-    }
-
     @VisibleForTesting
     protected IDcNetWatcher getDcNetWatcher(int slotId) {
         return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, slotId);
     }
-    //----------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the CarrierConfig for the specified slot.
+     *
+     * @param slotId The slot-id to be retrieved.
+     * @return The CarrierConfig instance.
+     */
+    @VisibleForTesting
+    protected CarrierConfig getCarrierConfig(int slotId) {
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, slotId);
+        return (config != null) ? config.getCarrierConfig() : null;
+    }
 }
