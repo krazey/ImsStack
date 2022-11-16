@@ -65,6 +65,7 @@ class TestAosHandle : public AosHandle
     FRIEND_TEST(AosHandleTest, NetTracker_StatusChanged_Test9);
     FRIEND_TEST(AosHandleTest, IsEmergencyService_Test);
     FRIEND_TEST(AosHandleTest, ProcessImsSuspended_Test4);
+    FRIEND_TEST(AosHandleTest, ProcessImsResumed_Test6);
 };
 
 class AosHandleTest : public ::testing::Test
@@ -330,12 +331,18 @@ protected:
         m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VOLTE_CAPABILITY);
         m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VILTE_CAPABILITY);
         m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VOPS);
+        m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_NETWORK);
     }
 
     void SetHoldingBlocksPolicyForWifi()
     {
         m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Append(AosHandle::BLOCK_VOWIFI_CAPABILITY);
         m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Append(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+    }
+
+    void SetHoldingBlocksPolicyForTest()
+    {
+        m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Append(AosHandle::BLOCK_SMS_CAPABILITY);
     }
 
     void ClearHoldingBlocksPolicyForMobile()
@@ -386,6 +393,37 @@ protected:
     }
 
     void ProcessUnavailableFeatureChanged() { m_pAosHandle->ProcessUnavailableFeatureChanged(); }
+
+    void BackupAllBlocks() { m_pAosHandle->BackupAllBlocks(); }
+
+    void BackupBlocksForMobile()
+    {
+        m_pAosHandle->BackupBlocks(m_pAosHandle->m_objHoldingBlocksPolicyForMobile,
+                m_pAosHandle->m_nHoldingBlocksForMobile);
+    }
+
+    void BackupBlocksForWifi()
+    {
+        m_pAosHandle->BackupBlocks(m_pAosHandle->m_objHoldingBlocksPolicyForWifi,
+                m_pAosHandle->m_nHoldingBlocksForWifi);
+    }
+
+    void RestoreBlocksForMobile()
+    {
+        m_pAosHandle->RestoreBlocks(m_pAosHandle->m_objHoldingBlocksPolicyForMobile,
+                m_pAosHandle->m_nHoldingBlocksForMobile);
+    }
+
+    void RestoreBlocksForWifi()
+    {
+        m_pAosHandle->RestoreBlocks(m_pAosHandle->m_objHoldingBlocksPolicyForWifi,
+                m_pAosHandle->m_nHoldingBlocksForWifi);
+    }
+
+    IMS_BOOL HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded)
+    {
+        return m_pAosHandle->HoldBlockForInvalidNetwork(nBlock, bAdded);
+    }
 
     IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const
     {
@@ -455,6 +493,11 @@ protected:
     IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
     {
         return m_pAosHandle->IsSupportedNetworkTypeForCellular(nType);
+    }
+
+    const IMS_CHAR* StateToString(IN IMS_UINT32 nState)
+    {
+        return m_pAosHandle->StateToString(nState);
     }
 
     const IMS_CHAR* MsgToString(IN IMS_UINT32 nMsg) { return m_pAosHandle->MsgToString(nMsg); }
@@ -1817,6 +1860,326 @@ TEST_F(AosHandleTest, GetAosFeature_Test)
     EXPECT_EQ(GetAosFeature(AosHandle::BLOCK_SMS_OVER_IP_NETWORK_INDICATION), ImsAosFeature::SMSIP);
 
     EXPECT_EQ(GetAosFeature(AosHandle::BLOCK_NONE), ImsAosFeature::NONE);
+}
+
+TEST_F(AosHandleTest, BackupAllBlocks_Test1)
+{
+    // Test1: Valid cellular, wfc unavailable
+    // Expectation: No backup
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_FALSE));
+
+    BackupAllBlocks();
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, BackupAllBlocks_Test2)
+{
+    // Test2: Invalid cellular network, wifi connected
+    // Expectation: Backup mobile only
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_TRUE));
+
+    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    EXPECT_CALL(m_objMockIWifiWatcher, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
+
+    BackupAllBlocks();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, BackupAllBlocks_Test3)
+{
+    // Test3: Valid cellular network, wfc available & wifi disconnected
+    // Expectation: Backup wifi only
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_TRUE));
+
+    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    EXPECT_CALL(m_objMockIWifiWatcher, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
+
+    BackupAllBlocks();
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, BackupAllBlocks_Test4)
+{
+    // Test4: Invalid cellular network, wfc available & wifi disconnected
+    // Expectation: Backup both mobile and wifi
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_TRUE));
+
+    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    EXPECT_CALL(m_objMockIWifiWatcher, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
+
+    BackupAllBlocks();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, BackupBlocks_Test)
+{
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    AddBlock(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VILTE_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    BackupBlocksForMobile();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    BackupBlocksForWifi();
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, RestoreBlocks_Test)
+{
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    AddHoldingBlockForMobile(AosHandle::BLOCK_VOPS);
+    AddHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY);
+    AddHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    RestoreBlocksForMobile();
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+
+    RestoreBlocksForWifi();
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test1)
+{
+    // Test1: Block for mobile, valid network(LTE)
+    // Expectation: return false, no change in holding block
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
+    AddHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY);
+
+    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOPS, IMS_TRUE));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+
+    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_FALSE));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test2)
+{
+    // Test2: Block for mobile, Invalid network
+    // Expectation: return false if the block reason has been blocked, otherwise return true
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_INVALID));
+
+    AddHoldingBlockForMobile(AosHandle::BLOCK_VOPS);
+    AddBlock(AosHandle::BLOCK_VOPS);
+
+    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOPS, IMS_FALSE));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOPS));
+
+    EXPECT_TRUE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VILTE_CAPABILITY, IMS_TRUE));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test3)
+{
+    // Test3: Block for Wifi, Wfc not available
+    // Expectation: return false
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test4)
+{
+    // Test4: Block for Wifi, Wfc available, Wifi connected
+    // Expectation: return false
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    EXPECT_CALL(m_objMockIWifiWatcher, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IWifiWatcher::STATE_CONNECTED));
+
+    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_TRUE));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test5)
+{
+    // Test5: Block for Wifi, Wfc available, Wifi disconnected
+    // Expectation: return false if the block reason has been blocked, otherwise return true
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    SetWifiWatcher(static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+    EXPECT_CALL(m_objMockIWifiWatcher, GetState())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IWifiWatcher::STATE_DISCONNECTED));
+
+    AddHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY);
+    AddHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+    AddBlock(AosHandle::BLOCK_VIWIFI_CAPABILITY);
+
+    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VIWIFI_CAPABILITY, IMS_FALSE));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    EXPECT_TRUE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_VOWIFI_CAPABILITY, IMS_TRUE));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+}
+
+TEST_F(AosHandleTest, HoldBlockForInvalidNetwork_Test6)
+{
+    // Test6: Block for nither mobile nor wifi
+    // Expectation: return false
+
+    SetHoldingBlocksPolicyForTest();
+
+    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_SMS_CAPABILITY, IMS_TRUE));
+    EXPECT_FALSE(HoldBlockForInvalidNetwork(AosHandle::BLOCK_SMS_CAPABILITY, IMS_FALSE));
 }
 
 TEST_F(AosHandleTest, ReevaluateBlocks_Test1)
@@ -3328,6 +3691,21 @@ TEST_F(AosHandleTest, StateDisconnected_Test3)
     EXPECT_FALSE(GetNotify());
 }
 
+TEST_F(AosHandleTest, StateDisconnected_Test4)
+{
+    // Test4: Invalid msg
+    // Expectation: state-disconnected, no need to notify.
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    SetNotify(IMS_FALSE);
+
+    IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_EQ(GetState(), AosHandle::STATE_DISCONNECTED);
+    EXPECT_FALSE(GetNotify());
+}
+
 TEST_F(AosHandleTest, StateConnecting_Test1)
 {
     // Test1: HANDLE_MSG_BLOCK_STATUS, Handle blocked
@@ -3437,6 +3815,20 @@ TEST_F(AosHandleTest, StateConnecting_Test6)
     SetNotify(IMS_FALSE);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_DISCONNECTING, 0);
+
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnecting_Test7)
+{
+    // Test7: Invalid msg
+    // Expectation: no need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    SetNotify(IMS_FALSE);
+
+    IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
 
     EXPECT_FALSE(GetNotify());
 }
@@ -3598,6 +3990,19 @@ TEST_F(AosHandleTest, StateConnected_Test9)
     SetHandleState(AosHandle::STATE_CONNECTED);
 
     m_pAosHandle->App_StateChanged(IAosApplication::APP_UPDATING, 0);
+
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateConnected_Test10)
+{
+    // Test10: Invalid msg
+    // Expectation: no need to notify
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
 
     EXPECT_FALSE(GetNotify());
 }
@@ -3780,6 +4185,38 @@ TEST_F(AosHandleTest, StateDisconnecting_Test11)
     EXPECT_TRUE(GetNotify());
 }
 
+TEST_F(AosHandleTest, StateDisconnecting_Test12)
+{
+    // Test10: HANDLE_MSG_APP_STATUS, invalid app status
+    // Expectation: no need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    IMSMSG objMSG(1 /*AosHandle::HANDLE_MSG_APP_STATUS*/, 4 /*Invalid app status*/, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_FALSE(GetNotify());
+}
+
+TEST_F(AosHandleTest, StateDisconnecting_Test13)
+{
+    // Test10: Invalid msg
+    // Expectation: no need to notify
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    m_pAosHandle->SetRegBinded(IMS_FALSE);
+    SetBlocked(IMS_FALSE);
+    SetNotify(IMS_FALSE);
+
+    IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_APP_INVALID*/, 0, 0);
+    m_pAosHandle->OnStateMessage(objMSG);
+
+    EXPECT_FALSE(GetNotify());
+}
+
 TEST_F(AosHandleTest, IsBlocked_Test)
 {
     // Expectation: return m_bBlocked value as set
@@ -3959,6 +4396,46 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test5)
     ClearSuspendedReason();
     m_pAosHandle->SetListener(IMS_NULL);
     SetReason(AosReason::SUSPEND_NONE);
+}
+
+TEST_F(AosHandleTest, ProcessImsResumed_Test6)
+{
+    // Test6: Emergency service.
+    // Expectation: return false
+
+    MockIAosAppContext objMockIAosAppContext;
+    MockIAosNConfiguration objMockIAosNConfiguration;
+
+    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(AnyNumber()).WillRepeatedly(Return(0));
+
+    const AString strValue = AString("test");
+    EXPECT_CALL(objMockIAosAppContext, GetProfileId())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(strValue));
+
+    IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+    AosProvider::GetInstance()->SetNConfiguration(
+            static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
+
+    EXPECT_CALL(objMockIAosNConfiguration, IsDeregOn3gNetwork())
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    TestAosHandle* pTestAosHandleEmergencyMtc =
+            new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
+                    m_strServiceId, ImsAosService::EMERGENCY_MTC);
+
+    ASSERT_TRUE(pTestAosHandleEmergencyMtc != nullptr);
+
+    EXPECT_FALSE(pTestAosHandleEmergencyMtc->ProcessImsResumed());
+
+    if (pTestAosHandleEmergencyMtc != nullptr)
+    {
+        delete pTestAosHandleEmergencyMtc;
+        pTestAosHandleEmergencyMtc = nullptr;
+    }
+
+    AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }
 
 TEST_F(AosHandleTest, CheckSuspended_Test1)
@@ -4188,6 +4665,15 @@ TEST_F(AosHandleTest, ServiceSetting_RoamingPreferredVoiceNetworkChanged_Test)
 {
     m_pAosHandle->ServiceSetting_RoamingPreferredVoiceNetworkChanged(
             RoamingPreferredVoiceNetwork::CELLULAR);
+}
+
+TEST_F(AosHandleTest, StateToString_Test)
+{
+    EXPECT_STREQ(StateToString(0 /*STATE_DISCONNECTED*/), "STATE_DISCONNECTED");
+    EXPECT_STREQ(StateToString(1 /*STATE_CONNECTING*/), "STATE_CONNECTING");
+    EXPECT_STREQ(StateToString(2 /*STATE_CONNECTED*/), "STATE_CONNECTED");
+    EXPECT_STREQ(StateToString(3 /*STATE_DISCONNECTING*/), "STATE_DISCONNECTING");
+    EXPECT_STREQ(StateToString(4 /*invalid*/), "__INVALID__");
 }
 
 TEST_F(AosHandleTest, MsgToString_Test)
