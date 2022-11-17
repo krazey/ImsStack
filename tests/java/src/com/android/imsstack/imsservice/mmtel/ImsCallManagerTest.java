@@ -365,6 +365,40 @@ public class ImsCallManagerTest {
     }
 
     @Test
+    public void getConnectingSessionReturnsRingbackSessionTest() {
+        when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
+        ImsCallSessionImpl implSession = mImsCallManager.getConnectingSession();
+        Assert.assertNotNull(mImsCallManager.getSession().isEmpty());
+        Assert.assertNull(implSession);
+
+        when(mMockMtcCall.isOnHold()).thenReturn(false);
+        when(mMockMtcCall.isInCall()).thenReturn(false);
+        when(mMockImsCallSession.getMtcCall()).thenReturn(mMockMtcCall);
+        mImsCallManager.getSession().put(mMockImsCallSession.getCallId(), mMockImsCallSession);
+        implSession = mImsCallManager.getConnectingSession();
+        Assert.assertEquals(mMockImsCallSession, implSession);
+        verify(mMockImsCallSession).getMtcCall();
+        verify(mMockMtcCall).isInCall();
+        verify(mMockMtcCall).isOnHold();
+    }
+
+    @Test
+    public void getConnectingSessionReturnsRingingSessionTest() {
+        when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
+        ImsCallSessionImpl implSession = mImsCallManager.getConnectingSession();
+        Assert.assertNotNull(mImsCallManager.getPendingSession().isEmpty());
+        Assert.assertNull(implSession);
+
+        when(mMockImsCallSession.getMtcCall()).thenReturn(mMockMtcCall);
+        mImsCallManager.getPendingSession().put(mMockImsCallSession.getCallId(),
+                mMockImsCallSession);
+        implSession = mImsCallManager.getConnectingSession();
+        Assert.assertNotNull(implSession);
+        Assert.assertEquals(mMockImsCallSession, implSession);
+        verify(mMockImsCallSession).getMtcCall();
+    }
+
+    @Test
     public void getActiveSessionTest() {
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
         ImsCallSessionImpl implSession = mImsCallManager.getActiveSession();

@@ -50,8 +50,10 @@ public:
     MOCK_METHOD(SrvccState, GetSrvccState, (), (const, override));
     MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState eState), (override));
     MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL bEnabled), (override));
-    MOCK_METHOD(TbcwStatus, GetTbcwStatus, (), (const, override));
     MOCK_METHOD(void, OpenEmergencyService, (), (override));
+    MOCK_METHOD(
+            void, ProcessTestCommand, (IN IMS_SINT32, IN IMS_SINT32, IN IMS_SINT32), (override));
+    MOCK_METHOD(TbcwStatus, GetTbcwStatus, (), (const, override));
 
     // IEnablerService
     MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));

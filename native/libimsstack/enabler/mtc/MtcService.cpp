@@ -166,6 +166,23 @@ PUBLIC VIRTUAL void MtcService::OpenEmergencyService()
     m_objContext.GetEmergencyServiceManager()->OpenEmergencyService();
 }
 
+PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
+        IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam)
+{
+    IMS_TRACE_I("ProcessTestCommand [%d %d %d]", nCommand, nWParam, nLParam);
+    switch (nCommand)
+    {
+        case TEST_COMMAND_AOS_CONNECTED:
+            ImsAos_Connected((IMS_UINT32)nWParam, (IMS_UINT32)nLParam);
+            break;
+        case TEST_COMMAND_AOS_DISCONNECTED:
+            ImsAos_Disconnected((IMS_UINT32)nWParam);
+            break;
+        default:
+            break;
+    }
+}
+
 PUBLIC VIRTUAL void MtcService::CoreService_ServiceClosed(
         IN ICoreService* /*piService*/, IN IReasonInfo* /*piReasonInfo*/)
 {

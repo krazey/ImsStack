@@ -315,7 +315,7 @@ public class MtcApp implements Closeable {
         mNativeObject = natieObj;
     }
 
-    private long getJNIService() {
+    public long getJNIService() {
         return mNativeObject;
     }
 

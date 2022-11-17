@@ -142,17 +142,25 @@ public:
     virtual void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) = 0;
 
     /**
-     * @brief Checks
-     *
-     * @return
-     */
-    virtual TbcwStatus GetTbcwStatus() const = 0;
-
-    /**
      * @brief Opens
      *
      */
     virtual void OpenEmergencyService() = 0;
+
+    /**
+     * @brief Sends
+     *
+     * @return
+     */
+    virtual void ProcessTestCommand(
+            IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual TbcwStatus GetTbcwStatus() const = 0;
 };
 
 enum class ServiceStatus
