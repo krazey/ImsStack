@@ -202,6 +202,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredWfcBlockByAirplaneMode() co
     return m_objAsset.bRequiredWfcBlockByAirplaneMode;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsReregRetryWithChangedCountryOnWifi() const
+{
+    return m_objAsset.bReregWithChangedCountryOnWifi;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSipOverIpsecInRoamingEnabled() const
 {
     return m_objAsset.bSipOverIpsecEnabledInRoaming;
@@ -333,6 +338,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsCdmalessFeatureTagRequired() const
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegErrCodeWithRetryAfterTimeOnlyDefined() const
 {
     return m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsExtraReregErrInRoamingAsFailureHandled() const
+{
+    return m_objExtraRegErr.bExtraReregFailureWithErrCodeInRoaming;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsExtraRegErrRetryCntSharedForRegAndSubRequired() const
@@ -515,6 +525,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetryTimerFPolicy() const
     return m_objAsset.nRegRetryTimerFPolicy;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegTimerForEmcCall() const
+{
+    return m_objAsset.nRegTimerForEmcCallMillis;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrFinalType() const
 {
     return m_objExtraRegErr.nExtraRegErrFinalType;
@@ -687,6 +702,11 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrWaitTime(
     return m_objExtraRegErr.objExtraRegErrWaitTimeSec;
 }
 
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregRetryErrCodeForInitReg()
+{
+    return m_objAsset.objReregRetryErrCodeForInitReg;
+}
+
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
 AosNConfiguration::GetReregRetryErrCodeForInitRegWithSamePcscf()
 {
@@ -703,6 +723,16 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrMaxCo
     return m_objAsset.objRegPermanentErrMaxCnt;
 }
 
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithDiffPcscf()
+{
+    return m_objAsset.objRegRetryErrCodeWithDiffPcscf;
+}
+
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithoutIpsec()
+{
+    return m_objAsset.objRegRetryErrCodeWithoutIpsec;
+}
+
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryAfterTime()
 {
     return m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime;
@@ -710,7 +740,7 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryA
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetryAfterTime()
 {
-    return m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate;
+    return m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryWaitTime()
@@ -924,7 +954,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL);
         m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY);
-        m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate = piCcBundle->GetIntArray(
+        m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
@@ -937,10 +967,10 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
             IMS_SINT32 nValue = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RECWRAT(%d), ", nValue, 0, 0);
         }
-        nSize = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate.GetSize();
+        nSize = m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime.GetSize();
         for (int i = 0; i < nSize; i++)
         {
-            IMS_SINT32 nValue = m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTimeForUpdate.GetAt(i);
+            IMS_SINT32 nValue = m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime.GetAt(i);
             A_IMS_TRACE_D(LOGTAG, "RRECWRAT(%d), ", nValue, 0, 0);
         }
 #endif
@@ -1176,8 +1206,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL);
     m_objAsset.bRequiredWfcBlockByAirplaneMode =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL);
-    m_objAsset.bReregRetryExpireTimeChecked =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_REREG_RETRY_EXPIRE_TIME_CHECKED_BOOL);
+    m_objAsset.bReregWithChangedCountryOnWifi =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL);
     m_objAsset.bSipOverIpsecEnabledInRoaming =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL);
     m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa = piCc->GetBoolean(
@@ -1188,8 +1218,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILABLE_BOOL);
     m_objAsset.bSupportVerstatForReg =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL);
-    m_objAsset.bUpdateRegWithCountryChange =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_UPDATE_REG_WITH_COUNTRY_CHANGE_BOOL);
     m_objAsset.bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(CarrierConfig::
                     Assets::KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
     m_objAsset.bUseSecurityServerPortInInitReg =

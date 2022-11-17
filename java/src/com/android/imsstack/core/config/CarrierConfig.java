@@ -475,8 +475,8 @@ public class CarrierConfig {
                 "required_volte_block_by_airplane_mode_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
                 "required_wfc_block_by_airplane_mode_bool";
-        public static final String KEY_REREG_RETRY_EXPIRE_TIME_CHECKED_BOOL =
-                "rereg_retry_expire_time_checked_bool";
+        public static final String KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL =
+                "rereg_with_changed_country_on_wifi_bool";
         public static final String KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL =
                 "sip_over_ipsec_enabled_in_roaming_bool";
         public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL =
@@ -490,8 +490,6 @@ public class CarrierConfig {
         public static final String
                 KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL =
                         "support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool";
-        public static final String KEY_UPDATE_REG_WITH_COUNTRY_CHANGE_BOOL =
-                "update_reg_with_country_change_bool";
         public static final String
                 KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
                         "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";

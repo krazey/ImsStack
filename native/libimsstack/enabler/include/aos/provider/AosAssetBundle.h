@@ -82,7 +82,7 @@ public:
     AosRegErrCodeWithRaTimeBundle() :
             bRegErrCodeWithRaTimeOnlyDefined(IMS_FALSE),
             objRegErrCodeWithRaTime(IMSVector<IMS_SINT32>()),
-            objRegErrCodeWithRaTimeForUpdate(IMSVector<IMS_SINT32>())
+            objReregErrCodeWithRaTime(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -92,7 +92,7 @@ public:
 public:
     IMS_BOOL bRegErrCodeWithRaTimeOnlyDefined;
     IMSVector<IMS_SINT32> objRegErrCodeWithRaTime;
-    IMSVector<IMS_SINT32> objRegErrCodeWithRaTimeForUpdate;
+    IMSVector<IMS_SINT32> objReregErrCodeWithRaTime;
 };
 
 struct AosRegRetryIntervalBundle

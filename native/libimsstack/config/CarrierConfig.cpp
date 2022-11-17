@@ -720,8 +720,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_
         "required_volte_block_by_airplane_mode_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
         "required_wfc_block_by_airplane_mode_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_EXPIRE_TIME_CHECKED_BOOL[] =
-        "rereg_retry_expire_time_checked_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL[] =
+        "rereg_with_changed_country_on_wifi_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL[] =
         "sip_over_ipsec_enabled_in_roaming_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPA_BOOL[] =
@@ -732,8 +732,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_REG_WITH_FEATURE_TAG_UNAVAILAB
         "support_reg_with_feature_tag_unavailable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL[] =
         "support_verstat_for_reg_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_UPDATE_REG_WITH_COUNTRY_CHANGE_BOOL[] =
-        "update_reg_with_country_change_bool";
 const IMS_CHAR CarrierConfig::Assets::
         KEY_USE_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
                 "use_rcs_telephony_feature_tag_as_available_voice_call_type_bool";

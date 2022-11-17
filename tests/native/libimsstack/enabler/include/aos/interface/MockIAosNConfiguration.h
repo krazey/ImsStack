@@ -47,6 +47,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySetting, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredWfcBlockByAirplaneMode, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsReregRetryWithChangedCountryOnWifi, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSipOverIpsecInRoamingEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, UseWfcCountryCodeAvailabilityCheck, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegRetryIntervalsUsedForSub, (), (const, override));
@@ -72,6 +73,7 @@ public:
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsCdmalessFeatureTagRequired, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegErrCodeWithRetryAfterTimeOnlyDefined, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsExtraReregErrInRoamingAsFailureHandled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsExtraRegErrRetryCntSharedForRegAndSubRequired, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegistrationEventForCatRequired, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallbackModeSupported, (), (const, override));
@@ -109,6 +111,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRegRetryDefaultPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryMinCount, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryTimerFPolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegTimerForEmcCall, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrFinalType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrMaxCount, (), (const, override));
@@ -145,10 +148,13 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraRegErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraReregErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraRegErrWaitTime, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregRetryErrCodeForInitReg, (), (override));
     MOCK_METHOD(
             IMSVector<IMS_SINT32>&, GetReregRetryErrCodeForInitRegWithSamePcscf, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegPermanentErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegPermanentErrMaxCount, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithDiffPcscf, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithoutIpsec, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetEmergencyPcscfRetryWaitTime, (), (override));

@@ -179,6 +179,13 @@ public:
     virtual IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const = 0;
 
     /**
+     * @brief Returns whether re-registration is sent on Wifi when the country is changed.
+     *
+     * @return IMS_BOOL Return whether to be sent re-registration or not
+     */
+    virtual IMS_BOOL IsReregRetryWithChangedCountryOnWifi() const = 0;
+
+    /**
      * @brief Returns whether IPSec is enabled for SIP messages in roaming networks.
      *
      * @return IMS_BOOL Return whether to be applied or not
@@ -359,6 +366,14 @@ public:
      * @return IMS_BOOL Return wherther the defined error codes is used.
      */
     virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const = 0;
+
+    /**
+     * @brief Returns whether the registration is handled as a failure when the UE receives
+     *        an error response against re-registration in roaming
+     *
+     * @return IMS_BOOL Return wherther to be handled as a failure or not.
+     */
+    virtual IMS_BOOL IsExtraReregErrInRoamingAsFailureHandled() const = 0;
 
     /**
      * @brief Flag indicating whether the retry counter should be shared between REGISTER and
@@ -750,7 +765,7 @@ public:
      * @brief Get minimum number of registration retries
      *
      *        Indicate the number of minimum retry if P-CSCF count is less than this number.
-     *        If the value is 0, it is not applicable..
+     *        If the value is 0, it is not applicable.
      *
      * @return IMS_SINT32 Return retry minimum count
      */
@@ -759,9 +774,19 @@ public:
     /**
      * @brief Get the Reg Retry Timer F Policy object
      *
-     * @return IMS_SINT32
+     * @return IMS_SINT32 Return retry policy
      */
     virtual IMS_SINT32 GetRegRetryTimerFPolicy() const = 0;
+
+    /**
+     * @brief Get a waiting max timer to proceed IMS registration for an emergency call.
+     *
+     *        After the timer expires, the emergency call is handled as failure.
+     *        Indicate the number as millisecond.
+     *
+     * @return IMS_SINT32 Return a waiting reg timer for an emergency call
+     */
+    virtual IMS_SINT32 GetRegTimerForEmcCall() const = 0;
 
     /**
      * @brief Indicate the extra error type for registration
@@ -1157,6 +1182,13 @@ public:
     virtual IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime() = 0;
 
     /**
+     * @brief Indicate the error codes to attempt the initial registration
+     *
+     * @return vector error code list
+     */
+    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitReg() = 0;
+
+    /**
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF
      *
      * @return vector error code list
@@ -1185,6 +1217,22 @@ public:
      * @return vector max count list
      */
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount() = 0;
+
+    /**
+     * @brief Indicate the list of error codes to attempt initial registration with different pcscf.
+     *
+     *        In case of Retry-After header usage, see KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE.
+     *
+     * @return vector error code list
+     */
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithDiffPcscf() = 0;
+
+    /**
+     * @brief Inidicate the list of error codes to attempt initial registration without ipsec.
+     *
+     * @return vector error code list
+     */
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() = 0;
 
     /**
      * @brief Indicate the list of the error response with time value containing Retry-After header

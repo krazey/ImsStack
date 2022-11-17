@@ -269,14 +269,13 @@
     <boolean name="required_volte_block_by_setting_bool" value="false"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="false"/>
     <boolean name="required_wfc_block_by_airplane_mode_bool" value="false"/>
-    <boolean name="rereg_retry_expire_time_checked_bool" value="false"/>
+    <boolean name="rereg_with_changed_country_on_wifi_bool" value="false"/>
     <boolean name="sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
     <boolean name="sms_over_ims_available_without_voice_capa_bool" value="true"/>
     <boolean name="support_contact_user_info_bool" value="true"/>
     <boolean name="support_reg_with_feature_tag_unavailable_bool" value="false"/>
     <boolean name="support_verstat_for_reg_bool" value="false"/>
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="false"/>
-    <boolean name="update_reg_with_country_change_bool" value="false"/>
     <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <boolean name="use_security_server_port_in_init_reg_bool" value="false"/>
     <boolean name="use_security_server_port_in_reg_contact_of_init_reg_bool" value="false"/>

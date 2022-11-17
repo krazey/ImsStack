@@ -41,13 +41,12 @@ public:
             bRequiredVolteBlockBySetting(IMS_FALSE),
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
-            bReregRetryExpireTimeChecked(IMS_FALSE),
+            bReregWithChangedCountryOnWifi(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
             bSmsOverImsAvailableWithoutVoiceCapa(IMS_FALSE),
             bSupportContactUserInfo(IMS_TRUE),
             bSupportRegWithFeatureTagUnavailable(IMS_FALSE),
             bSupportVerstatForReg(IMS_FALSE),
-            bUpdateRegWithCountryChange(IMS_FALSE),
             bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
             bUseSecurityServerPortInInitReg(IMS_FALSE),
             bUseSecurityServerPortInRegContactOfInitReg(IMS_FALSE),
@@ -112,13 +111,12 @@ public:
     IMS_BOOL bRequiredVolteBlockBySetting;
     IMS_BOOL bRequiredVolteBlockByAirplaneMode;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
-    IMS_BOOL bReregRetryExpireTimeChecked;
+    IMS_BOOL bReregWithChangedCountryOnWifi;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
     IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapa;
     IMS_BOOL bSupportContactUserInfo;
     IMS_BOOL bSupportRegWithFeatureTagUnavailable;
     IMS_BOOL bSupportVerstatForReg;
-    IMS_BOOL bUpdateRegWithCountryChange;
     IMS_BOOL bUseRcsTelephonyFeatureTagAsAvailableVoiceCallType;
     IMS_BOOL bUseSecurityServerPortInInitReg;
     IMS_BOOL bUseSecurityServerPortInRegContactOfInitReg;

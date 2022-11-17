@@ -450,7 +450,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_REREG_RETRY_EXPIRE_TIME_CHECKED_BOOL, IMS_FALSE))
+            GetBoolean(
+                    CarrierConfig::Assets::KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(
@@ -469,9 +470,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REG_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_UPDATE_REG_WITH_COUNTRY_CHANGE_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
@@ -568,12 +566,14 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
 
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithDiffPcscf;
     objRegRetryErrCodeWithDiffPcscf.Clear();
+    objRegRetryErrCodeWithDiffPcscf.Add(486);
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY))
             .WillOnce(Return(objRegRetryErrCodeWithDiffPcscf));
 
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
     objRegRetryErrCodeWithoutIpsec.Clear();
+    objRegRetryErrCodeWithoutIpsec.Add(406);
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY))
             .WillOnce(Return(objRegRetryErrCodeWithoutIpsec));
@@ -609,6 +609,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
 
     IMSVector<IMS_SINT32> objReregRetryErrCodeForInitReg;
     objReregRetryErrCodeForInitReg.Clear();
+    objReregRetryErrCodeForInitReg.Add(503);
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY))
             .WillOnce(Return(objReregRetryErrCodeForInitReg));
@@ -680,13 +681,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockBySetting());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredWfcBlockByAirplaneMode());
-    // bReregRetryExpireTimeChecked
+    EXPECT_FALSE(pAosNConfiguration->IsReregRetryWithChangedCountryOnWifi());
     EXPECT_TRUE(pAosNConfiguration->IsSipOverIpsecInRoamingEnabled());
     EXPECT_TRUE(pAosNConfiguration->IsSmsOverImsAvailableWithoutVoiceCapability());
     EXPECT_TRUE(pAosNConfiguration->IsUserInfoInContactSupported());
     EXPECT_FALSE(pAosNConfiguration->IsRegWithFeatureTagUnavailableSupported());
     EXPECT_FALSE(pAosNConfiguration->IsVerstatForRegistrationSupported());
-    // bUpdateRegWithCountryChange
     EXPECT_FALSE(pAosNConfiguration->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType());
     EXPECT_FALSE(pAosNConfiguration->IsSecurityServerPortInInitRegUsed());
     EXPECT_FALSE(pAosNConfiguration->IsSecurityServerPortInRegContactOfInitRegUsed());
@@ -714,7 +714,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             pAosNConfiguration->GetRegRetryTimerFPolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationPcscfUpdatePolicy());
 
-    // nRegTimerForEmcCallMillis
+    EXPECT_EQ(0, pAosNConfiguration->GetRegTimerForEmcCall());
     EXPECT_EQ(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT,
             pAosNConfiguration->GetReregRetrySip305CodePolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetReregRetryMaxCountKeptRegistration());
@@ -726,8 +726,12 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(408, objErrCode.GetAt(0));
     IMSVector<IMS_SINT32> objCount = pAosNConfiguration->GetRegPermanentErrMaxCount();
     EXPECT_EQ(1, objCount.GetSize());
-    // objRegRetryErrCodeWithDiffPcscf
-    // objRegRetryErrCodeWithoutIpsec
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetRegErrCodeWithDiffPcscf();
+    EXPECT_EQ(1, objErrCode.GetSize());
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetRegErrCodeWithoutIpsec();
+    EXPECT_EQ(406, objErrCode.GetAt(0));
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetReregErrCodeForCallEnd();
     IMS_UINT32 cnt = 0;
@@ -746,7 +750,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetReregErrCodeForInitRegWithAvailablePcscf();
     EXPECT_EQ(0, objErrCode.GetSize());
-    // objReregRetryErrCodeForInitReg
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetReregRetryErrCodeForInitReg();
+    EXPECT_EQ(503, objErrCode.GetAt(0));
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetReregRetryErrCodeForInitRegWithSamePcscf();
     EXPECT_EQ(407, objErrCode.GetAt(0));
@@ -899,12 +905,12 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
             GetIntArray(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY))
             .WillOnce(Return(objRegErrCodeWithRaTime));
 
-    IMSVector<IMS_SINT32> objRegErrCodeWithRaTimeForUpdate;
-    objRegErrCodeWithRaTimeForUpdate.Clear();
-    objRegErrCodeWithRaTimeForUpdate.Add(486);
+    IMSVector<IMS_SINT32> objReregErrCodeWithRaTime;
+    objReregErrCodeWithRaTime.Clear();
+    objReregErrCodeWithRaTime.Add(486);
     EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
             GetIntArray(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY))
-            .WillOnce(Return(objRegErrCodeWithRaTimeForUpdate));
+            .WillOnce(Return(objReregErrCodeWithRaTime));
 
     EXPECT_CALL(objRegErrCodeWithRaTimeBundle, ReleaseBundle()).Times(1);
 
@@ -990,7 +996,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
     InitBundleConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
 
     // AosExtraRegErrBundle
-    // bExtraReregFailureWithErrCodeInRoaming
+    EXPECT_FALSE(pAosNConfiguration->IsExtraReregErrInRoamingAsFailureHandled());
     EXPECT_TRUE(pAosNConfiguration->IsExtraRegErrRetryCntSharedForRegAndSubRequired());
     EXPECT_EQ(0, pAosNConfiguration->GetExtraRegErrFinalType());
     EXPECT_EQ(0, pAosNConfiguration->GetExtraRegErrMaxCount());

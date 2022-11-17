@@ -62,6 +62,7 @@ public:
     virtual IMS_BOOL IsRequiredVolteBlockBySetting() const;
     virtual IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const;
     virtual IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const;
+    virtual IMS_BOOL IsReregRetryWithChangedCountryOnWifi() const;
     virtual IMS_BOOL IsSipOverIpsecInRoamingEnabled() const;
     virtual IMS_BOOL UseWfcCountryCodeAvailabilityCheck() const;
     virtual IMS_BOOL IsRegRetryIntervalsUsedForSub() const;
@@ -84,6 +85,7 @@ public:
     virtual IMS_BOOL IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const;
     virtual IMS_BOOL IsCdmalessFeatureTagRequired() const;
     virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const;
+    virtual IMS_BOOL IsExtraReregErrInRoamingAsFailureHandled() const;
     virtual IMS_BOOL IsExtraRegErrRetryCntSharedForRegAndSubRequired() const;
     virtual IMS_BOOL IsRegistrationEventForCatRequired() const;
     virtual IMS_BOOL IsEmergencyCallbackModeSupported() const;
@@ -121,6 +123,7 @@ public:
     virtual IMS_SINT32 GetRegRetryDefaultPolicy() const;
     virtual IMS_SINT32 GetRegRetryMinCount() const;
     virtual IMS_SINT32 GetRegRetryTimerFPolicy() const;
+    virtual IMS_SINT32 GetRegTimerForEmcCall() const;
     virtual IMS_SINT32 GetExtraRegErrFinalType() const;
     virtual IMS_SINT32 GetExtraRegErrPolicy() const;
     virtual IMS_SINT32 GetExtraRegErrMaxCount() const;
@@ -158,9 +161,12 @@ public:
     virtual IMSVector<IMS_SINT32>& GetExtraRegErrCode();
     virtual IMSVector<IMS_SINT32>& GetExtraReregErrCode();
     virtual IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime();
+    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitReg();
     virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf();
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrCode();
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount();
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithDiffPcscf();
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec();
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime();
