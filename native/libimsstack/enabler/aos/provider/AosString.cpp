@@ -28,6 +28,9 @@ const IMS_CHAR AosString::STR_ACCESS_TYPE_CELLULAR2[] = "\"cellular2\"";
 const IMS_CHAR AosString::STR_ACCESS_TYPE_WLAN[] = "\"wlan\"";
 const IMS_CHAR AosString::STR_ACCESS_TYPE_WLAN1[] = "\"wlan1\"";
 const IMS_CHAR AosString::STR_P_LAST_ACCESS_NETWORK_INFO[] = "P-Last-Access-Network-Info";
+const IMS_CHAR AosString::STR_CS[] = "cs";
+const IMS_CHAR AosString::STR_CS_WITH_DQ[] = "\"cs\"";
+const IMS_CHAR AosString::STR_VOLTE[] = "volte";
 
 const IMS_CHAR* FeatureTags::STANDALONE_MSG[4] = {
         "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.oma.cpm.msg\"",
@@ -67,3 +70,4 @@ const IMS_CHAR FeatureTags::MMTEL[] =
 const IMS_CHAR FeatureTags::VIDEO[] = "video";
 const IMS_CHAR FeatureTags::PRESENCE[] =
         "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.dp\"";
+const IMS_CHAR FeatureTags::RCS_TELEPHONY[] = "+g.gsma.rcs.telephony";

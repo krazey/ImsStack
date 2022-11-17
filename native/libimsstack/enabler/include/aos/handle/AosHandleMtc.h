@@ -61,6 +61,8 @@ private:
     void UpdateGGsmaRcsTelephonyFeatureTag();
     IMS_UINT32 GetVoiceBlockReasonForIpcan();
     IMS_UINT32 GetVideoBlockReasonForIpcan();
+    IMS_BOOL IsCsFeatureTagRequired();
+    IMS_BOOL IsInvalidMobileNetwork() const;
 
 private:
     friend class AosHandleMtcTest;

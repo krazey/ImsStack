@@ -813,6 +813,12 @@ IMS_UINT32 AosHandle::GetMobileNetworkType() const
 }
 
 PROTECTED
+IMS_UINT32 AosHandle::GetMobileChangingNetworkType() const
+{
+    return m_piAppContext->GetNetTracker()->GetMobileChangingNetworkType();
+}
+
+PROTECTED
 IMS_UINT32 AosHandle::GetBlock(IN IMS_UINT32 nEvent)
 {
     switch (nEvent)

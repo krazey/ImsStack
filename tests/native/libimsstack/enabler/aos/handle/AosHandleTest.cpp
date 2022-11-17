@@ -297,6 +297,11 @@ protected:
 
     IMS_UINT32 GetMobileNetworkType() const { return m_pAosHandle->GetMobileNetworkType(); }
 
+    IMS_UINT32 GetMobileChangingNetworkType() const
+    {
+        return m_pAosHandle->GetMobileChangingNetworkType();
+    }
+
     IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent) { return m_pAosHandle->GetBlock(nEvent); }
 
     IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock) { return m_pAosHandle->GetAosFeature(nBlock); }
@@ -1782,6 +1787,12 @@ TEST_F(AosHandleTest, GetMobileNetworkType_Test)
 {
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(1);
     GetMobileNetworkType();
+}
+
+TEST_F(AosHandleTest, GetMobileChangingNetworkType_Test)
+{
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType()).Times(1);
+    GetMobileChangingNetworkType();
 }
 
 TEST_F(AosHandleTest, GetBlock_Test)

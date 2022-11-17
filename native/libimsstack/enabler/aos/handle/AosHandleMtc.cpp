@@ -29,6 +29,7 @@
 #include "interface/IAosService.h"
 
 #include "provider/AosProvider.h"
+#include "provider/AosString.h"
 #include "provider/AosUtil.h"
 #include "handle/AosHandleMtc.h"
 
@@ -324,7 +325,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
             // VZW Reqs. - VZ_REQ_VOWIFI_6230394
             bBlocked = bBlocked &&
                     (AosHandle::IsHandleBlocked(BLOCK_VIWIFI_CAPABILITY) ||
-                            IsSupportedNetworkTypeForCellular(GetMobileNetworkType()));
+                            !IsInvalidMobileNetwork());
         }
 
         return bBlocked;
@@ -546,33 +547,33 @@ void AosHandleMtc::UpdateGGsmaRcsTelephonyFeatureTag()
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
     {
-        if (m_objBindedFeatureTagList.HasFeatureTag("+g.gsma.rcs.telephony", "\"cs\""))
+        if (m_objBindedFeatureTagList.HasFeatureTag(
+                    FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ))
         {
-            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
-            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+            m_objFeatureTagList.RemoveFeatureTag(
+                    FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
+            m_objFeatureTagList.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+            m_objFeatureTagList.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
         }
     }
     else
     {
         if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
         {
-            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
-            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+            m_objFeatureTagList.RemoveFeatureTag(
+                    FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
+            m_objFeatureTagList.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+            m_objFeatureTagList.AddFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
         }
         else
         {
-            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "cs");
-            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "volte");
+            m_objFeatureTagList.RemoveFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_CS);
+            m_objFeatureTagList.RemoveFeatureTag(FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE);
 
-            if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+            if (IsCsFeatureTagRequired())
             {
-                if (m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO) && IsEpdgEnabled() &&
-                        !IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
-                {
-                    m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
-                }
+                m_objFeatureTagList.AddFeatureTag(
+                        FeatureTags::RCS_TELEPHONY, AosString::STR_CS_WITH_DQ);
             }
         }
     }
@@ -592,4 +593,46 @@ IMS_UINT32 AosHandleMtc::GetVideoBlockReasonForIpcan()
 {
     return (m_nNetworkType == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
                                                     : BLOCK_VILTE_CAPABILITY;
+}
+
+PRIVATE
+IMS_BOOL AosHandleMtc::IsCsFeatureTagRequired()
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+    {
+        return IMS_FALSE;
+    }
+
+    if (!m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO))
+    {
+        return IMS_FALSE;
+    }
+
+    if (!IsEpdgEnabled())
+    {
+        return IMS_FALSE;
+    }
+
+    if (!IsInvalidMobileNetwork())
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL AosHandleMtc::IsInvalidMobileNetwork() const
+{
+    if (!IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
+    {
+        return IMS_TRUE;
+    }
+
+    if (!IsSupportedNetworkTypeForCellular(GetMobileChangingNetworkType()))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
