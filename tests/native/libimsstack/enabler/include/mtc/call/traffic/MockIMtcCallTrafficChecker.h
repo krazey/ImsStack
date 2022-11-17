@@ -20,6 +20,7 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/traffic/IMtcCallTrafficChecker.h"
+#include "call/traffic/MtcCallTrafficChecker.h"
 #include <gmock/gmock.h>
 
 class MockIMtcCallTrafficChecker : public IMtcCallTrafficChecker
@@ -29,13 +30,10 @@ public:
 
     MOCK_METHOD(void, SetTrafficCheckerListener, (IN IMtcCallTrafficCheckerListener* pListener),
             (override));
-    MOCK_METHOD(IMS_BOOL, IsTrafficPrepared, (CallType eCallType, IMS_BOOL bEmergency),
-            (const, override));
-    MOCK_METHOD(IMS_BOOL, IsTrafficAllowed, (CallType eCallType, IMS_BOOL bEmergency),
-            (const, override));
-    MOCK_METHOD(void, StartTrafficChecking,
-            (IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi), (override));
-    MOCK_METHOD(void, StopTrafficChecking, (TrafficType eTrafficType), (override));
+    MOCK_METHOD(CheckResult, Check,
+            (IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
+                    IN IMS_BOOL bWifi),
+            (override));
 };
 
 class MockIMtcCallTrafficCheckerListener : public IMtcCallTrafficCheckerListener
@@ -53,10 +51,12 @@ public:
     ~MockIMtcRadioConnectionListener() = default;
 
     MOCK_METHOD(void, OnConnectionFailed,
-            (TrafficType eTrafficType, IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
+            (IN TrafficType eTrafficType, IN CallDirection eCallDirection,
+                    IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
                     IN IMS_UINT32 nWaitTimeMillis),
             (override));
-    MOCK_METHOD(void, OnConnectionSetupPrepared, (TrafficType eTrafficType), (override));
+    MOCK_METHOD(void, OnConnectionSetupPrepared,
+            (IN TrafficType eTrafficType, IN CallDirection eCallDirection), (override));
 };
 
 #endif

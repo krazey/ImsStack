@@ -19,7 +19,7 @@
 
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "call/traffic/MtcCallTrafficChecker.h"
+#include "call/traffic/IMtcCallTrafficChecker.h"
 #include <gmock/gmock.h>
 
 class MockIMtcRadioConnectionFailureListener : public IMtcRadioConnectionFailureListener
