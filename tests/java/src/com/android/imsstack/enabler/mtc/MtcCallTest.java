@@ -193,7 +193,8 @@ public class MtcCallTest extends ImsStackTest {
 
         verify(mMtcConference, times(1)).dispose();
         verify(mMtcMediaSession, times(3)).onMessage(any(Parcel.class));
-        verify(mMtcMediaSession, times(1)).setRttListener(eq(null));
+        verify(mMtcMediaSession, times(1)).setAudioListener(eq(null));
+        verify(mMtcMediaSession, times(1)).setTextListener(eq(null));
         verify(mMtcMediaSession, times(1)).dispose();
         assertTrue(mClearInterface);
         verify(mCT, times(1)).updateCallState(

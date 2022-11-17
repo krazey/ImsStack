@@ -613,11 +613,12 @@ public class AudioSessionHandler  {
 
     private void handleAudioDisconnection() {
         if (mAudioSession != null) {
-            closeSockets();
-            mAudioSession = null;
             if (mAudioSessionCallbackHandler != null) {
                 mAudioSessionCallbackHandler.nofityMediaDetach();
+                mAudioSessionCallbackHandler.closeSessionResponse();
             }
+            closeSockets();
+            mAudioSession = null;
         }
     }
 
@@ -787,7 +788,12 @@ public class AudioSessionHandler  {
     }
 
     private void handleSessionClosed() {
-        closeSockets();
+        if (mAudioSession != null) {
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.closeSessionResponse();
+            }
+            closeSockets();
+        }
         mAudioSession = null;
         mAudioSessionId = 0;
     }

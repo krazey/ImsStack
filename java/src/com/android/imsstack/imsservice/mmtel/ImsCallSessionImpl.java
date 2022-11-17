@@ -24,6 +24,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telecom.Connection.RttModifyStatus;
+import android.telephony.CallQuality;
 import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
@@ -3434,6 +3435,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
+            log("onCallTerminated(), call=" + ImsCallSessionImpl.this);
+
             if (mCallDetails.is(CallDetails.CLOSE_PENDING)
                     && mCallDetails.is(CallDetails.IMPLICIT_TERMINATED)) {
                 mCallDetails.clear(CallDetails.CLOSE_PENDING);
@@ -3454,7 +3457,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             checkAndHandleTransferOnCallTerminated(callReasonInfo);
 
             if (getState() == ImsCallSessionImplBase.State.TERMINATED) {
-                log("Call is already terminated; call=" + this);
+                log("Call is already terminated; call=" + ImsCallSessionImpl.this);
                 return;
             }
 
@@ -4366,6 +4369,25 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             profile.setReceivingRttAudio(status);
 
             mCallback.invokeRttAudioIndicatorChanged(ImsCallSessionImpl.this, profile);
+        }
+
+        @Override
+        public void onAudioSessionOpened(MtcCall call) {
+            logi("onAudioSessionOpened");
+            // TODO: add implementation
+        }
+
+        @Override
+        public void onAudioSessionClosed(MtcCall call) {
+            logi("onAudioSessionClosed");
+            // TODO: add implementation
+        }
+
+        @Override
+        public void onCallQualityChanged(MtcCall call, CallQuality callQuality) {
+            if (call.equals(mCall)) {
+                mCallback.invokeCallQualityChanged(callQuality);
+            }
         }
 
         //// FIXME: IMPL_REQUIRED

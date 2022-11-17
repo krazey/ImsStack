@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.mtc;
 
 import android.content.Context;
 import android.os.Parcel;
+import android.telephony.CallQuality;
 import android.view.Surface;
 
 import com.android.imsstack.enabler.IBaseContext;
@@ -31,13 +32,37 @@ import com.android.imsstack.util.ImsLog;
  * and invoke jni methods to libimsstack
  */
 public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInterface {
+
     /**
-     * Listener for events relating to an MTC media session.
-     * <p>
-     * Many of these events are also received by {@link MtcMediaSession.Listener}.
-     * </p>
+     * Listener to send callback message from audio session to call
      */
-    public static class Listener {
+    public static class AudioListener {
+        /**
+         * Called when the audio session opened
+         */
+        public void onAudioSessionOpened() {
+            // no-op
+        }
+
+        /**
+         * Called when the audio session close
+         */
+        public void onAudioSessionClosed() {
+            // no-op
+        }
+
+        /**
+         * Called when the audio call quality changed message received
+         */
+        public void onCallQualityChanged(CallQuality callQuality) {
+            // no-op
+        }
+    }
+
+    /**
+     * Listener to send callback message from video session to video provider
+     */
+    public static class VideoListener {
         public void onMediaSessionDataUsageChanged(MtcMediaSession session,
                 long dataSize) {
             // no-op
@@ -67,7 +92,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
     }
 
-    public static class RttListener {
+    /**
+     * Listener to send callback message from text session to call
+     */
+    public static class TextListener {
         /**
          * Called when Rx RTT text is received from peer.
          */
@@ -139,8 +167,9 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     private final Object mLock = new Object();
     private Context mContext;
     private Call mCall;
-    private MtcMediaSession.Listener mListener = null;
-    private MtcMediaSession.RttListener mRttListener = null;
+    private MtcMediaSession.AudioListener mAudioListener = null;
+    private MtcMediaSession.VideoListener mVideoListener = null;
+    private MtcMediaSession.TextListener mTextListener = null;
     private IMediaListener mMediaListener = null;
     private MediaInfoEvent mMediaInfoEvent = null;
     public int mPrevOrientation = 0;
@@ -159,28 +188,50 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
         synchronized (mLock) {
             mCall = null;
-            mListener = null;
-            mRttListener = null;
+            mAudioListener = null;
+            mVideoListener = null;
+            mTextListener = null;
             mMediaListener = null;
             mMediaInfoEvent = null;
         }
     }
 
-    public void setListener(MtcMediaSession.Listener listener) {
-        synchronized (mLock) {
-            mListener = listener;
-        }
-    }
-
-    public void setRttListener(MtcMediaSession.RttListener listener) {
-        synchronized (mLock) {
-            mRttListener = listener;
-        }
-    }
-
+    /**
+     * Set the IMediaListener to send callback
+     */
     public void setMediaListener(IMediaListener listener) {
         synchronized (mLock) {
             mMediaListener = listener;
+        }
+    }
+
+    /**
+     * Set the AudioListener to send callback from audio session
+     */
+    public void setAudioListener(MtcMediaSession.AudioListener listener) {
+        synchronized (mLock) {
+            log("setAudioListener :: listener=" + listener);
+            mAudioListener = listener;
+        }
+    }
+
+    /**
+     * Set the VideoListener to send callback from video session
+     */
+    public void setVideoListener(MtcMediaSession.VideoListener listener) {
+        synchronized (mLock) {
+            log("setVideoListener :: listener=" + listener);
+            mVideoListener = listener;
+        }
+    }
+
+    /**
+     * Set the TextListener to send callback from text session
+     */
+    public void setTextListener(MtcMediaSession.TextListener listener) {
+        synchronized (mLock) {
+            log("setTextListener :: listener=" + listener);
+            mTextListener = listener;
         }
     }
 
@@ -257,7 +308,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     public void peerDimensionChanged(final int width, final int height) {
         log("peerDimensionChanged width[" + width + "] height[" + height + "]");
 
-        mListener.onMediaSessionPeerDimensionsChanged(this, width, height);
+        mVideoListener.onMediaSessionPeerDimensionsChanged(this, width, height);
     }
 
     /**
@@ -266,8 +317,32 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
      */
     public void rttMessageReceived(final String rttMessage) {
         log("rttMessageReceived");
-        if (mRttListener != null) {
-            mRttListener.onRttMessageReceived(this, rttMessage);
+        if (mTextListener != null) {
+            mTextListener.onRttMessageReceived(this, rttMessage);
+        }
+    }
+
+    @Override
+    public void audioSessionOpened() {
+        log("audioSessionOpened");
+        if (mAudioListener != null) {
+            mAudioListener.onAudioSessionOpened();
+        }
+    }
+
+    @Override
+    public void audioSessionClosed() {
+        log("audioSessionClosed");
+        if (mAudioListener != null) {
+            mAudioListener.onAudioSessionClosed();
+        }
+    }
+
+    @Override
+    public void callQualityChanged(CallQuality callQuality) {
+        log("callQualityChanged");
+        if (mAudioListener != null) {
+            mAudioListener.onCallQualityChanged(callQuality);
         }
     }
 
@@ -333,10 +408,10 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     }
 
     public void notifyMediaInfoChanged(int mediaInfo, int intParam, String strParam) {
-        Listener listener = null;
+        VideoListener listener = null;
 
         synchronized (mLock) {
-            listener = mListener;
+            listener = mVideoListener;
         }
 
         if (listener != null) {

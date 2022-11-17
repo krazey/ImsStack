@@ -17,6 +17,7 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import android.os.DeadObjectException;
+import android.telephony.CallQuality;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsConferenceState;
@@ -864,6 +865,30 @@ public class ImsCallSessionCallback {
             }
         });
     }
+
+    /**
+     * Called to report a change of call quality.
+     *
+     * @param callQuality Defined in android.telephony.CallQuality
+     *
+    */
+    public void invokeCallQualityChanged(CallQuality callQuality) {
+        postAndRunTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (mListener == null) {
+                        return;
+                    }
+
+                    mListener.callQualityChanged(callQuality);
+                } catch (Throwable t) {
+                    log(t, "invokeCallQualityChanged");
+                }
+            }
+        });
+    }
+
 
     private void closeSession(ImsCallSessionImplBase session, Throwable t) {
         Throwable cause = t.getCause();
