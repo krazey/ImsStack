@@ -1323,15 +1323,25 @@ PROTECTED VIRTUAL void SubscriberConfig::CarrierConfig_NotifyConfigChanged(IN IM
             "SubscriberConfig: CarrierConfigChanged(%d) on %s", nSlotId, m_strConfName.GetStr(), 0);
 
     IMS_SINT32 nOldState = GetState();
+    IMS_BOOL bWasProvisioned = (nOldState == STATE_PROVISIONED);
 
-    UpdateAllConfigs(IMS_FALSE);
+    UpdateAllConfigs(bWasProvisioned);
 
-    if (!IsIsimSupported())
+    if (IsIsimSupported())
+    {
+        if (bWasProvisioned)
+        {
+            IMS_TRACE_I("SubscriberConfig(%d): ISIM refresh started", nSlotId, 0, 0);
+            SetState(STATE_REFRESHING);
+            NotifyRefreshStarted();
+        }
+    }
+    else
     {
         CallSubscriberInfoListener(SUBSCRIBER_INFO_ADD);
     }
 
-    if (nOldState != STATE_INIT)
+    if (!bWasProvisioned && (nOldState != STATE_INIT))
     {
         SetState(nOldState);
     }
