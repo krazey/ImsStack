@@ -531,30 +531,29 @@ void MtcCallState::HandleTerminate(IN const CallReasonInfo& objReason)
 PROTECTED
 void MtcCallState::NotifyHoldResumeState()
 {
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+    const MediaInfo& objMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
 
     if (m_objContext.GetUpdatingInfo().IsHeld())
     {
         m_objContext.SetHeldByMe(IMS_TRUE);
-        m_objContext.GetUiNotifier().SendHeld(&(m_objContext.GetCallInfo()), &objMediaInfo,
+        m_objContext.GetUiNotifier().SendHeld(&(m_objContext.GetCallInfo()), objMediaInfo,
                 m_objContext.GetSupplementaryService().GetServices());
     }
     else if (m_objContext.GetUpdatingInfo().IsResumed())
     {
         m_objContext.SetHeldByMe(IMS_FALSE);
-        m_objContext.GetUiNotifier().SendResumed(&(m_objContext.GetCallInfo()), &objMediaInfo,
+        m_objContext.GetUiNotifier().SendResumed(&(m_objContext.GetCallInfo()), objMediaInfo,
                 m_objContext.GetSupplementaryService().GetServices());
     }
 
     if (m_objContext.GetUpdatingInfo().IsHeldBy())
     {
-        m_objContext.GetUiNotifier().SendHeldBy(&(m_objContext.GetCallInfo()), &objMediaInfo,
+        m_objContext.GetUiNotifier().SendHeldBy(&(m_objContext.GetCallInfo()), objMediaInfo,
                 m_objContext.GetSupplementaryService().GetServices());
     }
     else if (m_objContext.GetUpdatingInfo().IsResumedBy())
     {
-        m_objContext.GetUiNotifier().SendResumedBy(&(m_objContext.GetCallInfo()), &objMediaInfo,
+        m_objContext.GetUiNotifier().SendResumedBy(&(m_objContext.GetCallInfo()), objMediaInfo,
                 m_objContext.GetSupplementaryService().GetServices());
     }
 }
@@ -647,11 +646,8 @@ void MtcCallState::SendPreIncomingCallReceived()
 PROTECTED
 void MtcCallState::SendIncomingCallReceived()
 {
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
     m_objContext.GetUiNotifier().SendIncomingCallReceived(m_objContext.GetCallKey(),
-            m_objContext.GetCallInfo(), objMediaInfo,
+            m_objContext.GetCallInfo(), m_objContext.GetMediaManager().GetMediaInfo(),
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo());
 }
@@ -659,10 +655,8 @@ void MtcCallState::SendIncomingCallReceived()
 PROTECTED
 void MtcCallState::SendStarted()
 {
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendStarted(&m_objContext.GetCallInfo(), &objMediaInfo,
+    m_objContext.GetUiNotifier().SendStarted(&m_objContext.GetCallInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(),
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -674,7 +668,7 @@ void MtcCallState::SendIncomingUpdate(IN CallType eCallType)
     m_objContext.GetUpdatingInfo().SetAlerted();
 
     m_objContext.GetUiNotifier().SendIncomingUpdate(eCallType, &m_objContext.GetCallInfo(),
-            &m_objContext.GetUpdatingInfo().GetAlertingInfo(),
+            m_objContext.GetUpdatingInfo().GetAlertingInfo(),
             m_objContext.GetSupplementaryService().GetServices());
 
     m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,

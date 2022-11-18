@@ -63,6 +63,7 @@ public:
     CallInfo objCallInfo;
     MtcSupplementaryService* pSupplementaryService;
     ParticipantInfo* pParticipantInfo;
+    MediaInfo objMediaInfo;
 
 protected:
     virtual void SetUp() override
@@ -78,6 +79,7 @@ protected:
         ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
 
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 

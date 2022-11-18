@@ -136,14 +136,14 @@ PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteMediaInfoToParcel(
-        IN MediaInfo* pMediaInfo, IN_OUT Parcel& objParcel)
+        IN const MediaInfo& objMediaInfo, IN_OUT Parcel& objParcel)
 {
-    objParcel.writeInt32(pMediaInfo->eAQuality);
-    objParcel.writeInt32(pMediaInfo->eVQuality);
-    objParcel.writeInt32(pMediaInfo->eADir);
-    objParcel.writeInt32(pMediaInfo->eVDir);
-    objParcel.writeInt32(pMediaInfo->eTDir);
-    objParcel.writeInt32(pMediaInfo->eGTTMode);
+    objParcel.writeInt32(objMediaInfo.eAQuality);
+    objParcel.writeInt32(objMediaInfo.eVQuality);
+    objParcel.writeInt32(objMediaInfo.eADir);
+    objParcel.writeInt32(objMediaInfo.eVDir);
+    objParcel.writeInt32(objMediaInfo.eTDir);
+    objParcel.writeInt32(objMediaInfo.eGTTMode);
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(

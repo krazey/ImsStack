@@ -70,6 +70,7 @@ public:
     MockMtcTimerWrapper objTimerWrapper;
     UssiController* pUssiController;
     CallInfo objCallInfo;
+    MediaInfo objMediaInfo;
 
 protected:
     virtual void SetUp() override
@@ -91,6 +92,7 @@ protected:
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
 
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
 
         ON_CALL(objCallContext, GetPreconditionManager)
                 .WillByDefault(ReturnRef(objPreconditionManager));
@@ -166,7 +168,6 @@ TEST_F(AlertingStateTest, HandleUserAlertRejectCallIfSendsProvisonalResponseFail
 TEST_F(AlertingStateTest, AcceptSameCallTypeInvokesAccept)
 {
     CallType eAcceptCallType = CallType::VOIP;
-    MediaInfo objMediaInfo;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
     EXPECT_CALL(objTimerWrapper, StopAll);
     EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_SUCCESS));
@@ -177,7 +178,6 @@ TEST_F(AlertingStateTest, AcceptSameCallTypeInvokesAccept)
 TEST_F(AlertingStateTest, RejectIncomingCallIfAcceptFails)
 {
     CallType eAcceptCallType = CallType::VOIP;
-    MediaInfo objMediaInfo;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eAcceptCallType));
 
     EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_FAILURE));
@@ -193,7 +193,6 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
 {
     CallType eAcceptCallType = CallType::VOIP;
     CallType eCurrentCallType = CallType::VT;
-    MediaInfo objMediaInfo;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eCurrentCallType));
 
     EXPECT_CALL(objMtcSession, Accept).Times(0);
@@ -407,7 +406,6 @@ TEST_F(AlertingStateTest, SessionRPRDeliveryFailedRejectsIncomingCall)
 TEST_F(AlertingStateTest, AcceptUssiInvokesAccept)
 {
     // TODO: Mocking UssiController may be needed.
-    MediaInfo objMediaInfo;
     SetUpForUssi();
 
     EXPECT_CALL(objTimerWrapper, StopAll);
@@ -419,7 +417,6 @@ TEST_F(AlertingStateTest, AcceptUssiInvokesAccept)
 TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
 {
     // TODO: Mocking UssiController may be needed.
-    MediaInfo objMediaInfo;
     SetUpForUssi();
 
     EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_FAILURE));

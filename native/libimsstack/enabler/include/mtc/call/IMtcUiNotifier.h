@@ -52,17 +52,18 @@ public:
      * @param objParticipantInfo
      */
     virtual void SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const MediaInfo& objMediaInfo,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN ParticipantInfo& objParticipantInfo) = 0;
 
     /**
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendStarted(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendStarted(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -76,11 +77,11 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param bAlerted
      */
-    virtual void SendProgressing(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendProgressing(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_BOOL bAlerted = IMS_FALSE) = 0;
 
@@ -88,10 +89,10 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendHeld(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendHeld(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -105,10 +106,10 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendResumed(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendResumed(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -122,20 +123,20 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendHeldBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendHeldBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendResumedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendResumedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -149,10 +150,10 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendIncomingResume(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendIncomingResume(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -160,20 +161,21 @@ public:
      *
      * @param eCallTypeToUpdate
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
     virtual void SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInfo* pCallInfo,
-            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const MediaInfo& objMediaInfo,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendUpdated(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendUpdated(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -187,10 +189,10 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendUpdatedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendUpdatedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -209,10 +211,10 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void SendExpanded(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendExpanded(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -226,11 +228,11 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param nReplaceKey
      */
-    virtual void SendExpandedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendExpandedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_SINTP nReplaceKey = 0) = 0;
 
@@ -238,11 +240,11 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param lstConfUser
      */
-    virtual void SendMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendMerged(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN ImsList<ConfUser*>& lstConfUser) = 0;
 
@@ -292,13 +294,13 @@ public:
      * @brief Sends
      *
      * @param pCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param nReplaceKey
      * @param IMS_UINTP
      * @param 0
      */
-    virtual void SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void SendReplacedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nReplaceKey = 0,
             IN IMS_UINTP nType = 0) = 0;
 

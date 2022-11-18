@@ -75,9 +75,8 @@ public:
     /**
      * @brief Gets
      *
-     * @param objInfo
      */
-    virtual void GetMediaInfo(OUT MediaInfo& objInfo) = 0;
+    virtual const MediaInfo& GetMediaInfo() const = 0;
 
     /**
      * @brief Gets
@@ -291,6 +290,14 @@ public:
      * @return
      */
     virtual IMS_BOOL IsAudioInactive() = 0;
+
+    /**
+     * @brief Adjusts
+     *
+     * @param bSendOffer
+     * @param bHeldByMe
+     */
+    virtual void AdjustDirectionForAutoAccept(IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe) = 0;
 };
 
 enum class MediaState

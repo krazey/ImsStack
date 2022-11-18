@@ -50,10 +50,9 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
 
     objParticipantList.Login();
 
-    MediaInfo objMediaInfo;
-    m_objConfCallContext.GetMediaManager().GetMediaInfo(objMediaInfo);
     ImsList<ConfUser*> objUsers = objParticipantList.GetConfUsers();
-    m_objConfCallContext.GetUiNotifier().SendMerged(IMS_NULL, &objMediaInfo,
+    m_objConfCallContext.GetUiNotifier().SendMerged(IMS_NULL,
+            m_objConfCallContext.GetMediaManager().GetMediaInfo(),
             m_objConfCallContext.GetSupplementaryService().GetServices(), objUsers);
 }
 

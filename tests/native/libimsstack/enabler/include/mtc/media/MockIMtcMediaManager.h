@@ -42,7 +42,7 @@ public:
             void, UpdateMediaDirection, (IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir), (override));
     MOCK_METHOD(void, UpdateMediaQuality, (IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality),
             (override));
-    MOCK_METHOD(void, GetMediaInfo, (OUT MediaInfo& objInfo), (override));
+    MOCK_METHOD(const MediaInfo&, GetMediaInfo, (), (const, override));
     MOCK_METHOD(void, GetOldMediaInfo, (OUT MediaInfo& objInfo), (override));
     MOCK_METHOD(void, RestoreMediaInfo, (), (override));
     MOCK_METHOD(void, CreateMediaSession, (), (override));
@@ -84,6 +84,8 @@ public:
     MOCK_METHOD(PemType, GetPemType, (IN ISession* piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsAudioMediaActivated, (), (override));
     MOCK_METHOD(IMS_BOOL, IsAudioInactive, (), (override));
+    MOCK_METHOD(void, AdjustDirectionForAutoAccept, (IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe),
+            (override));
 };
 
 #endif

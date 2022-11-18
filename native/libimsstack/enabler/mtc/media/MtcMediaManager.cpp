@@ -217,16 +217,10 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaQuality(
     }
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::GetMediaInfo(OUT MediaInfo& objInfo)
+PUBLIC VIRTUAL const MediaInfo& MtcMediaManager::GetMediaInfo() const
 {
     IMS_TRACE_D("GetMediaInfo", 0, 0, 0);
-    objInfo = *m_pMediaInfo;
-
-    if (!m_pProfileManager->IsConfirmedDialogState() &&
-            m_objContext.GetCallInfo().ePeerType == PeerType::MO && IsLocalTone())
-    {
-        objInfo.eADir = DIRECTION_INACTIVE;
-    }
+    return *m_pMediaInfo;
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::GetOldMediaInfo(OUT MediaInfo& objInfo)
@@ -433,7 +427,7 @@ void MtcMediaManager::FinalizeSdp(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IMessage* piMessage)
 {
-    IMSList<AString> lstHeaders;
+    ImsList<AString> lstHeaders;
     MessageUtil::GetHeaders(piMessage, ISipHeader::P_EARLY_MEDIA, lstHeaders);
 
     PemType ePemType = PemType::NONE;
@@ -682,6 +676,41 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioMediaActivated()
 PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioInactive()
 {
     return m_bAudioInactive;
+}
+
+PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoAccept(
+        IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe)
+{
+    IMS_SINT32 eNewDir = m_pMediaInfo->eADir;
+
+    if (bSendOffer)
+    {
+        eNewDir = DIRECTION_SEND_RECEIVE;
+    }
+
+    if (bHeldByMe)
+    {
+        if (eNewDir == DIRECTION_SEND_RECEIVE)
+        {
+            eNewDir = DIRECTION_SEND;
+        }
+        else if (eNewDir == DIRECTION_RECEIVE)
+        {
+            eNewDir = DIRECTION_INACTIVE;
+        }
+    }
+
+    m_pMediaInfo->eADir = eNewDir;
+
+    if (m_pMediaInfo->eVDir != DIRECTION_INVALID)
+    {
+        m_pMediaInfo->eVDir = eNewDir;
+    }
+
+    if (m_pMediaInfo->eTDir != DIRECTION_INVALID)
+    {
+        m_pMediaInfo->eTDir = eNewDir;
+    }
 }
 
 PRIVATE

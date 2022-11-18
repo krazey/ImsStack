@@ -30,6 +30,7 @@
 #include "core/IReference.h"
 #include "core/MockISession.h"
 #include "helper/IMtcAosStateListener.h"
+#include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "sipcore/ISipClientConnection.h"
@@ -52,6 +53,7 @@ public:
     MockIMtcService objService;
     MockISession objISession;
     MockIMtcConfigurationManager* pConfigurationManager;
+    MockIMtcMediaManager objMediaManager;
     MtcConfigurationProxy* pConfigurationProxy;
     MediaInfo objMediaInfo;
     CallReasonInfo* pReason;
@@ -60,6 +62,8 @@ protected:
     virtual void SetUp() override
     {
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+        ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);

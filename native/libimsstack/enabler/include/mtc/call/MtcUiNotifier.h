@@ -47,44 +47,45 @@ public:
 
     void SendPreIncomingCallReceived(IN CallKey nKey) override;
     void SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
-            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN const MediaInfo& objMediaInfo,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN ParticipantInfo& objParticipantInfo) override;
-    void SendStarted(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendStarted(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendStartFailed(IN const CallReasonInfo& objReason) override;
-    void SendProgressing(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendProgressing(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_BOOL bAlerted = IMS_FALSE) override;
-    void SendHeld(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendHeld(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendHoldFailed(IN const CallReasonInfo& objReason) override;
-    void SendResumed(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendResumed(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendResumeFailed(IN const CallReasonInfo& objReason) override;
-    void SendHeldBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendHeldBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
-    void SendResumedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendResumedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendTerminated(IN const CallReasonInfo& objReason) override;
-    void SendIncomingResume(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendIncomingResume(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInfo* pCallInfo,
-            IN MediaInfo* pMediaInfo,
+            IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
-    void SendUpdated(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendUpdated(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendUpdateFailed(IN const CallReasonInfo& objReason) override;
-    void SendUpdatedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendUpdatedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendNotifyInfo(IN IMS_UINT32 eType, IN AString strValue = AString::ConstNull(),
             IN IMS_SINT32 nValue = -1, IN IMS_BOOL bValue = IMS_FALSE) override;
-    void SendExpanded(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendExpanded(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendExpandFailed(IN const CallReasonInfo& objReason) override;
-    void SendExpandedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendExpandedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_SINTP nReplaceKey = 0) override;
-    void SendMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendMerged(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN ImsList<ConfUser*>& lstConfUser) override;
     void SendMergeFailed(IN const CallReasonInfo& objReason) override;
@@ -94,7 +95,7 @@ public:
     void SendNotifyConfInfo(IN AString strDisplayText, IN AString strSubject,
             IN IMS_SINT32 nMaxUserCount, IN IMS_UINT32 nUserCount,
             IN AString strHostEntity) override;
-    void SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void SendReplacedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nReplaceKey = 0,
             IN IMS_UINTP nType = 0) override;
     void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;

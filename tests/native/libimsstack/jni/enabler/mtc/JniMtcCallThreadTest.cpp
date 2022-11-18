@@ -94,7 +94,7 @@ TEST_F(JniMtcCallThreadTest, OnStarted)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnStarted(objCallInfo, &objMediaInfo, objSuppServices);
+    pJniCallThread->OnStarted(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnStartFailed)
@@ -118,7 +118,7 @@ TEST_F(JniMtcCallThreadTest, OnProgressing)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnProgressing(objCallInfo, &objMediaInfo, objSuppServices, IMS_TRUE);
+    pJniCallThread->OnProgressing(objCallInfo, objMediaInfo, objSuppServices, IMS_TRUE);
 }
 
 TEST_F(JniMtcCallThreadTest, OnHeld)
@@ -130,7 +130,7 @@ TEST_F(JniMtcCallThreadTest, OnHeld)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnHeld(objCallInfo, &objMediaInfo, objSuppServices);
+    pJniCallThread->OnHeld(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnHoldFailed)
@@ -154,7 +154,7 @@ TEST_F(JniMtcCallThreadTest, OnResumed)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnResumed(objCallInfo, &objMediaInfo, objSuppServices);
+    pJniCallThread->OnResumed(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnResumeFailed)
@@ -178,7 +178,7 @@ TEST_F(JniMtcCallThreadTest, OnHeldBy)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnHeldBy(objCallInfo, &objMediaInfo, objSuppServices);
+    pJniCallThread->OnHeldBy(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnResumedBy)
@@ -190,7 +190,7 @@ TEST_F(JniMtcCallThreadTest, OnResumedBy)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnResumedBy(objCallInfo, &objMediaInfo, objSuppServices);
+    pJniCallThread->OnResumedBy(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnTerminated)
@@ -214,7 +214,7 @@ TEST_F(JniMtcCallThreadTest, OnIncomingResume)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnIncomingResume(objCallInfo, &objMediaInfo, objSuppServices);
+    pJniCallThread->OnIncomingResume(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnUpdated)
@@ -226,7 +226,7 @@ TEST_F(JniMtcCallThreadTest, OnUpdated)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnUpdated(objCallInfo, &objMediaInfo, objSuppServices);
+    pJniCallThread->OnUpdated(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnUpdateFailed)
@@ -250,7 +250,7 @@ TEST_F(JniMtcCallThreadTest, OnUpdatedBy)
     EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
             .Times(1);
 
-    pJniCallThread->OnUpdatedBy(objCallInfo, &objMediaInfo, objSuppServices);
+    pJniCallThread->OnUpdatedBy(objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(JniMtcCallThreadTest, OnMerged)
@@ -263,7 +263,7 @@ TEST_F(JniMtcCallThreadTest, OnMerged)
             .Times(1);
 
     ImsList<ConfUser*> objUsers;
-    pJniCallThread->OnMerged(objCallInfo, &objMediaInfo, objSuppServices, objUsers);
+    pJniCallThread->OnMerged(objCallInfo, objMediaInfo, objSuppServices, objUsers);
 }
 
 TEST_F(JniMtcCallThreadTest, OnMergeFailed)
@@ -374,7 +374,7 @@ TEST_F(JniMtcCallThreadTest, OnIncomingCallReceived)
 
     ImsList<ConfUser*> objUsers;
     pJniCallThread->OnIncomingCallReceived(
-            1, objCallInfo, &objMediaInfo, objSuppServices, OipType::NONE, "");
+            1, objCallInfo, objMediaInfo, objSuppServices, OipType::NONE, "");
 }
 
 TEST_F(JniMtcCallThreadTest, OnInformationNotificationReceived)

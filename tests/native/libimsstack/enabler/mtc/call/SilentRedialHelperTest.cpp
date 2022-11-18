@@ -72,6 +72,7 @@ public:
     MockIMtcConfigurationManager* pMockConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
+    MediaInfo objMediaInfo;
 
 protected:
     virtual void SetUp() override
@@ -79,6 +80,7 @@ protected:
         ON_CALL(objContext, GetCallKey).WillByDefault(Return(ANY_CALL_KEY));
         ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
+        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
         ON_CALL(objContext, GetCallController).WillByDefault(ReturnRef(objController));

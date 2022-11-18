@@ -88,6 +88,24 @@ enum
 
 enum
 {
+    AUDIO_QUALITY_NONE = 0,
+
+    AUDIO_QUALITY_AMR_NB = 1,
+    AUDIO_QUALITY_AMR_WB = 2,
+    AUDIO_QUALITY_EVS = 3,
+    AUDIO_QUALITY_G711_PCMU = 4,
+    AUDIO_QUALITY_G711_PCMA = 5,
+    AUDIO_QUALITY_EVS_NB = 6,
+    AUDIO_QUALITY_EVS_WB = 7,
+    AUDIO_QUALITY_EVS_SWB = 8,
+    AUDIO_QUALITY_EVS_FB = 9,
+    AUDIO_QUALITY_MAX = 10,
+
+    AUDIO_QUALITY_NOTUSED = 99,
+};
+
+enum
+{
     VIDEO_QUALITY_NONE = 0,
 
     VIDEO_QUALITY_QCIF = 1,
@@ -106,24 +124,6 @@ enum
     VIDEO_QUALITY_HD_PR = 14,
 
     VIDEO_QUALITY_NOTUSED = 99,
-};
-
-enum
-{
-    AUDIO_QUALITY_NONE = 0,
-
-    AUDIO_QUALITY_AMR_NB = 1,
-    AUDIO_QUALITY_AMR_WB = 2,
-    AUDIO_QUALITY_EVS = 3,
-    AUDIO_QUALITY_G711_PCMU = 4,
-    AUDIO_QUALITY_G711_PCMA = 5,
-    AUDIO_QUALITY_EVS_NB = 6,
-    AUDIO_QUALITY_EVS_WB = 7,
-    AUDIO_QUALITY_EVS_SWB = 8,
-    AUDIO_QUALITY_EVS_FB = 9,
-    AUDIO_QUALITY_MAX = 10,
-
-    AUDIO_QUALITY_NOTUSED = 99,
 };
 
 enum
@@ -241,12 +241,12 @@ class MediaInfo
 {
 public:
     inline MediaInfo() :
-            eADir(-1),
-            eVDir(-1),
-            eTDir(-1),
-            eAQuality(0),
-            eVQuality(0),
-            eGTTMode(-1)
+            eADir(DIRECTION_INVALID),
+            eVDir(DIRECTION_INVALID),
+            eTDir(DIRECTION_INVALID),
+            eAQuality(AUDIO_QUALITY_NONE),
+            eVQuality(VIDEO_QUALITY_NONE),
+            eGTTMode(GTT_MODE_INVALID)
     {
         // TODO: temp for logging / memory leak check.
         CreateId();

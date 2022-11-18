@@ -85,12 +85,11 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo& objMediaInfo)
         return GetStateName();
     }
 
-    MediaInfo objOldMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objOldMediaInfo);
+    const MediaInfo& objOldMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
     if (objOldMediaInfo.eADir == DIRECTION_INACTIVE)
     {
         m_objContext.SetHeldByMe(IMS_TRUE);
-        m_objContext.GetUiNotifier().SendHeld(&(m_objContext.GetCallInfo()), &objOldMediaInfo,
+        m_objContext.GetUiNotifier().SendHeld(&(m_objContext.GetCallInfo()), objOldMediaInfo,
                 m_objContext.GetSupplementaryService().GetServices());
         return GetStateName();
     }
@@ -182,7 +181,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
 
     m_objContext.GetSession()->HandleRequest(RequestType::UPDATE, *piMessage);
-    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+    m_objContext.GetUpdatingInfo().GetNegotiatedInfo() =
+            m_objContext.GetMediaManager().GetMediaInfo();
     m_objContext.GetUpdatingInfo().SetTargetCallType(
             MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE));
 
@@ -439,8 +439,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpc
         return GetStateName();
     }
 
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+    const MediaInfo& objMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
     if (HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(), objMediaInfo) ==
             IMS_FAILURE)
     {
@@ -464,13 +463,13 @@ PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateTyp
 
 PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(
-        IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo& objMediaInfo)
+        IN UpdateType eUpdateType, IN CallType eCallType, IN const MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("HandleUpdate", 0, 0, 0);
     m_objContext.GetUpdatingInfo().SetModifier();
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    objMediaManager.GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+    m_objContext.GetUpdatingInfo().GetNegotiatedInfo() = objMediaManager.GetMediaInfo();
     objMediaManager.SetMediaInfo(objMediaInfo);
 
     IMtcSession* pSession = m_objContext.GetSession();
@@ -483,7 +482,7 @@ IMS_RESULT EstablishedState::HandleUpdate(
     m_objContext.GetPreconditionManager().FormPreconditionSdp(
             &(pSession->GetISession()), IMS_FALSE);
 
-    objMediaManager.GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
+    m_objContext.GetUpdatingInfo().GetModifyingInfo() = objMediaManager.GetMediaInfo();
 
     if (pSession->Update(eUpdateType, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
     {
@@ -506,7 +505,8 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
         // TODO
     }
 
-    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetAlertingInfo());
+    m_objContext.GetUpdatingInfo().GetAlertingInfo() =
+            m_objContext.GetMediaManager().GetMediaInfo();
 
     m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(&objSession);
 
@@ -568,9 +568,8 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
     IMS_TRACE_D("FormAutoAccept", 0, 0, 0);
     IMtcSession* pSession = m_objContext.GetSession();
 
-    AdjustDirectionWithHeldByMe(bWithoutOffer);
-
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
+    objMediaManager.AdjustDirectionForAutoAccept(bWithoutOffer, m_objContext.IsHeldByMe());
     if (objMediaManager.FormSdp(
                 &(pSession->GetISession()), pSession->GetCallType(), bWithoutOffer) == IMS_FAILURE)
     {
@@ -582,55 +581,14 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
 
     if (bWithoutOffer)
     {
-        objMediaManager.GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
+        m_objContext.GetUpdatingInfo().GetModifyingInfo() = objMediaManager.GetMediaInfo();
     }
     else
     {
-        objMediaManager.GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifiedInfo());
+        m_objContext.GetUpdatingInfo().GetModifiedInfo() = objMediaManager.GetMediaInfo();
     }
 
     return IMS_SUCCESS;
-}
-
-PRIVATE
-void EstablishedState::AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer)
-{
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
-    IMS_SINT32 eNewAudioDir = objMediaInfo.eADir;
-    if (bWithoutOffer)
-    {
-        eNewAudioDir = DIRECTION_SEND_RECEIVE;
-    }
-
-    if (m_objContext.IsHeldByMe())
-    {
-        if (eNewAudioDir == DIRECTION_SEND_RECEIVE)
-        {
-            eNewAudioDir = DIRECTION_SEND;
-        }
-        else if (eNewAudioDir == DIRECTION_RECEIVE)
-        {
-            eNewAudioDir = DIRECTION_INACTIVE;
-        }
-    }
-
-    objMediaInfo.eADir = eNewAudioDir;
-
-    // TODO
-    /*
-    if (objMediaInfo.eVDir != DIRECTION_INVALID)
-    {
-        objMediaInfo.eVDir = ???;
-    }
-    */
-    if (objMediaInfo.eTDir != DIRECTION_INVALID)
-    {
-        objMediaInfo.eTDir = eNewAudioDir;
-    }
-
-    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 }
 
 PRIVATE
@@ -677,9 +635,7 @@ CallStateName EstablishedState::Downgrade(IN CallType eCallType)
 {
     IMS_TRACE_I("Downgrade [%d]", eCallType, 0, 0);
 
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-    MediaInfo objNewMediaInfo = objMediaInfo;
+    MediaInfo objNewMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
 
     // Assumption : no case to downgrade from VIDEO_RTT to VOIP directly
     if (eCallType == CallType::VOIP || eCallType == CallType::VT)

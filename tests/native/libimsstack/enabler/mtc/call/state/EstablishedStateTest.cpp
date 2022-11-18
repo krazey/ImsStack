@@ -61,6 +61,7 @@ public:
     MockIMessageUtils objMessageUtils;
     MtcConfigurationProxy* pConfigurationProxy;
     UpdatingInfo* pUpdatingInfo;
+    MediaInfo objMediaInfo;
 
 protected:
     virtual void SetUp() override
@@ -68,6 +69,7 @@ protected:
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objMockCallContext);
 
         ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
+        ON_CALL(objMockMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
         ON_CALL(objMockMtcSession, GetISession).WillByDefault(ReturnRef(objMockISession));
         ON_CALL(objMockISession, GetPreviousRequest(_)).WillByDefault(Return(&objMessage));

@@ -36,10 +36,10 @@ public:
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnStarted(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnStarted(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -53,11 +53,11 @@ public:
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param bAlerted
      */
-    virtual void OnProgressing(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnProgressing(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_BOOL bAlerted = IMS_FALSE) = 0;
 
@@ -65,10 +65,10 @@ public:
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnHeld(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnHeld(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -82,10 +82,10 @@ public:
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnResumed(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnResumed(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -99,20 +99,20 @@ public:
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnHeldBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnHeldBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnResumedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnResumedBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -126,30 +126,32 @@ public:
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnIncomingResume(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnIncomingResume(IN const JniCallInfo& objCallInfo,
+            IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnIncomingUpdate(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnIncomingUpdate(IN const JniCallInfo& objCallInfo,
+            IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnUpdated(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnUpdated(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -163,21 +165,21 @@ public:
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void OnUpdatedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnUpdatedBy(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Notifies
      *
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param objUsers
      */
-    virtual void OnMerged(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+    virtual void OnMerged(IN const JniCallInfo& objCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) = 0;
 
@@ -247,14 +249,15 @@ public:
      *
      * @param nCallKey
      * @param objCallInfo
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param eOipType
      * @param strRemoteNumber
      */
     virtual void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
-            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN OipType eOipType, IN const AString& strRemoteNumber) = 0;
+            IN const MediaInfo& objMediaInfo,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
+            IN const AString& strRemoteNumber) = 0;
 
     /**
      * @brief Notifies

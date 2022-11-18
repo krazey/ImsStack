@@ -121,12 +121,12 @@ TEST_F(MtcUiNotifierTest, SendStarted)
 {
     EXPECT_CALL(objMockCallThread, OnStarted(_, _, _)).Times(1);
 
-    pNotifier->SendStarted(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendStarted(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnStarted(_, _, _)).Times(0);
 
-    pNotifier->SendStarted(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendStarted(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendStartFailed)
@@ -145,24 +145,24 @@ TEST_F(MtcUiNotifierTest, SendProgressing)
 {
     EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _, _)).Times(1);
 
-    pNotifier->SendProgressing(&objCallInfo, &objMediaInfo, objSuppServices, IMS_TRUE);
+    pNotifier->SendProgressing(&objCallInfo, objMediaInfo, objSuppServices, IMS_TRUE);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnProgressing(_, _, _, _)).Times(0);
 
-    pNotifier->SendProgressing(&objCallInfo, &objMediaInfo, objSuppServices, IMS_TRUE);
+    pNotifier->SendProgressing(&objCallInfo, objMediaInfo, objSuppServices, IMS_TRUE);
 }
 
 TEST_F(MtcUiNotifierTest, SendHeld)
 {
     EXPECT_CALL(objMockCallThread, OnHeld(_, _, _)).Times(1);
 
-    pNotifier->SendHeld(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendHeld(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnHeld(_, _, _)).Times(0);
 
-    pNotifier->SendHeld(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendHeld(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendHoldFailed)
@@ -181,12 +181,12 @@ TEST_F(MtcUiNotifierTest, SendResumed)
 {
     EXPECT_CALL(objMockCallThread, OnResumed(_, _, _)).Times(1);
 
-    pNotifier->SendResumed(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendResumed(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnResumed(_, _, _)).Times(0);
 
-    pNotifier->SendResumed(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendResumed(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendResumeFailed)
@@ -205,24 +205,24 @@ TEST_F(MtcUiNotifierTest, SendHeldBy)
 {
     EXPECT_CALL(objMockCallThread, OnHeldBy(_, _, _)).Times(1);
 
-    pNotifier->SendHeldBy(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendHeldBy(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnHeldBy(_, _, _)).Times(0);
 
-    pNotifier->SendHeldBy(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendHeldBy(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendResumedBy)
 {
     EXPECT_CALL(objMockCallThread, OnResumedBy(_, _, _)).Times(1);
 
-    pNotifier->SendResumedBy(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendResumedBy(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnResumedBy(_, _, _)).Times(0);
 
-    pNotifier->SendResumedBy(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendResumedBy(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendTerminated)
@@ -241,36 +241,36 @@ TEST_F(MtcUiNotifierTest, SendIncomingResume)
 {
     EXPECT_CALL(objMockCallThread, OnIncomingResume(_, _, _)).Times(1);
 
-    pNotifier->SendIncomingResume(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendIncomingResume(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnIncomingResume(_, _, _)).Times(0);
 
-    pNotifier->SendIncomingResume(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendIncomingResume(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendIncomingUpdate)
 {
     EXPECT_CALL(objMockCallThread, OnIncomingUpdate(_, _, _)).Times(1);
 
-    pNotifier->SendIncomingUpdate(CallType::VOIP, &objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendIncomingUpdate(CallType::VOIP, &objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnIncomingUpdate(_, _, _)).Times(0);
 
-    pNotifier->SendIncomingUpdate(CallType::VOIP, &objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendIncomingUpdate(CallType::VOIP, &objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendUpdated)
 {
     EXPECT_CALL(objMockCallThread, OnUpdated(_, _, _)).Times(1);
 
-    pNotifier->SendUpdated(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendUpdated(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnUpdated(_, _, _)).Times(0);
 
-    pNotifier->SendUpdated(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendUpdated(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendUpdateFailed)
@@ -289,12 +289,12 @@ TEST_F(MtcUiNotifierTest, SendUpdatedBy)
 {
     EXPECT_CALL(objMockCallThread, OnUpdatedBy(_, _, _)).Times(1);
 
-    pNotifier->SendUpdatedBy(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendUpdatedBy(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnUpdatedBy(_, _, _)).Times(0);
 
-    pNotifier->SendUpdatedBy(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendUpdatedBy(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendNotifyInfo)
@@ -312,10 +312,10 @@ TEST_F(MtcUiNotifierTest, SendNotifyInfo)
 TEST_F(MtcUiNotifierTest, SendExpanded)
 {
     // TODO: implement logic.
-    pNotifier->SendExpanded(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendExpanded(&objCallInfo, objMediaInfo, objSuppServices);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    pNotifier->SendExpanded(&objCallInfo, &objMediaInfo, objSuppServices);
+    pNotifier->SendExpanded(&objCallInfo, objMediaInfo, objSuppServices);
 }
 
 TEST_F(MtcUiNotifierTest, SendExpandFailed)
@@ -330,10 +330,10 @@ TEST_F(MtcUiNotifierTest, SendExpandFailed)
 TEST_F(MtcUiNotifierTest, SendExpandedBy)
 {
     // TODO: implement logic.
-    pNotifier->SendExpandedBy(&objCallInfo, &objMediaInfo, objSuppServices, 0);
+    pNotifier->SendExpandedBy(&objCallInfo, objMediaInfo, objSuppServices, 0);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    pNotifier->SendExpandedBy(&objCallInfo, &objMediaInfo, objSuppServices, 0);
+    pNotifier->SendExpandedBy(&objCallInfo, objMediaInfo, objSuppServices, 0);
 }
 
 TEST_F(MtcUiNotifierTest, SendMerged)
@@ -341,12 +341,12 @@ TEST_F(MtcUiNotifierTest, SendMerged)
     ImsList<ConfUser*> objUsers;
     EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, _)).Times(1);
 
-    pNotifier->SendMerged(&objCallInfo, &objMediaInfo, objSuppServices, objUsers);
+    pNotifier->SendMerged(&objCallInfo, objMediaInfo, objSuppServices, objUsers);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
     EXPECT_CALL(objMockCallThread, OnMerged(_, _, _, _)).Times(0);
 
-    pNotifier->SendMerged(&objCallInfo, &objMediaInfo, objSuppServices, objUsers);
+    pNotifier->SendMerged(&objCallInfo, objMediaInfo, objSuppServices, objUsers);
 }
 
 TEST_F(MtcUiNotifierTest, SendMergeFailed)
@@ -422,10 +422,10 @@ TEST_F(MtcUiNotifierTest, SendNotifyConfInfo)
 TEST_F(MtcUiNotifierTest, SendReplacedBy)
 {
     // TODO: implement logic
-    pNotifier->SendReplacedBy(&objCallInfo, &objMediaInfo, objSuppServices, 1, 1);
+    pNotifier->SendReplacedBy(&objCallInfo, objMediaInfo, objSuppServices, 1, 1);
 
     pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
-    pNotifier->SendReplacedBy(&objCallInfo, &objMediaInfo, objSuppServices, 1, 1);
+    pNotifier->SendReplacedBy(&objCallInfo, objMediaInfo, objSuppServices, 1, 1);
 }
 
 TEST_F(MtcUiNotifierTest, SendEctCompleted)

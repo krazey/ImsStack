@@ -56,7 +56,7 @@ public:
     virtual void UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
     virtual void UpdateMediaQuality(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality) override;
     // using enum values defined in MtcDef.h
-    virtual void GetMediaInfo(OUT MediaInfo& objInfo) override;
+    virtual const MediaInfo& GetMediaInfo() const override;
     virtual void GetOldMediaInfo(OUT MediaInfo& objInfo) override;
     virtual void RestoreMediaInfo() override;
 
@@ -122,6 +122,8 @@ public:
     virtual IMS_BOOL IsAudioMediaActivated() override;
 
     virtual IMS_BOOL IsAudioInactive() override;
+    virtual void AdjustDirectionForAutoAccept(
+            IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe) override;
 
 private:
     void SetState(IN MediaState eState);

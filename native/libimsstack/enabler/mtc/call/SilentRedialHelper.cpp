@@ -133,8 +133,7 @@ void SilentRedialHelper::ReStart()
     const AString strTarget = GetRemoteTarget();
 
     // MediaInfo
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+    MediaInfo objMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
 
     // SuppService list
     ImsMap<SuppType, SuppService*> objSuppServices;

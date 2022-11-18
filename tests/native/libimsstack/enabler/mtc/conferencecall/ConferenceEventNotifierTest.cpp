@@ -57,6 +57,7 @@ public:
     ImsList<ConfUser*> objUsers;
     ConfUser objUser;
     CallReasonInfo* pAnyReason;
+    MediaInfo objMediaInfo;
 
 protected:
     virtual void SetUp() override
@@ -67,7 +68,7 @@ protected:
         pIdManager = new MockCallConnectionIdManager(objContext);
         ON_CALL(*pIdManager, OnConferenceParticipantDisconnected(_)).WillByDefault(Return());
         ON_CALL(objContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
-        ON_CALL(objMediaManager, GetMediaInfo(_)).WillByDefault(Return());
+        ON_CALL(objMediaManager, GetMediaInfo()).WillByDefault(ReturnRef(objMediaInfo));
 
         ON_CALL(objContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
 

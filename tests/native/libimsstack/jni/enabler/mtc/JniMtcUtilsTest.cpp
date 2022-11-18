@@ -99,7 +99,7 @@ TEST_F(JniMtcUtilsTest, WtiteAndReadMediaInfo)
     objAnyMediaInfo.eGTTMode = GTT_MODE_FULL;
 
     Parcel objParcel;
-    JniMtcUtils::WriteMediaInfoToParcel(&objAnyMediaInfo, objParcel);
+    JniMtcUtils::WriteMediaInfoToParcel(objAnyMediaInfo, objParcel);
     objParcel.setDataPosition(0);
 
     MediaInfo objConvertedMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel, objConvertedMediaInfo);

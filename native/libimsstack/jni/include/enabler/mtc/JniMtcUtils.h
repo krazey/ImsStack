@@ -39,7 +39,8 @@ public:
 
     static void WriteCallInfoToParcel(
             IN const JniCallInfo& objCallInfo, IN_OUT android::Parcel& objParcel);
-    static void WriteMediaInfoToParcel(IN MediaInfo* pMediaInfo, IN_OUT android::Parcel& objParcel);
+    static void WriteMediaInfoToParcel(
+            IN const MediaInfo& objMediaInfo, IN_OUT android::Parcel& objParcel);
     static void WriteSuppServicesToParcel(IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN_OUT android::Parcel& objParcel);
     static void WriteConfUsersToParcel(

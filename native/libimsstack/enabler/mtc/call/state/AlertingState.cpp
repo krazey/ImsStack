@@ -86,8 +86,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
     IMS_BOOL bCallTypeChanged = pSession->GetCallType() != eCallType;
     pSession->SetCallType(eCallType);
 
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    objMediaManager.SetMediaInfo(objMediaInfo);
+    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     m_objContext.GetTimer().StopAll();
     if (bCallTypeChanged)

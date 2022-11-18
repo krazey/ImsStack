@@ -818,10 +818,13 @@ void OutgoingState::SendProgressing()
 {
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
 
-    MediaInfo objMediaInfo;
-    objMediaManager.GetMediaInfo(objMediaInfo);
+    MediaInfo objMediaInfo = objMediaManager.GetMediaInfo();
+    if (objMediaManager.IsLocalTone())
+    {
+        objMediaInfo.eADir = DIRECTION_INACTIVE;
+    }
 
-    m_objContext.GetUiNotifier().SendProgressing(&m_objContext.GetCallInfo(), &objMediaInfo,
+    m_objContext.GetUiNotifier().SendProgressing(&m_objContext.GetCallInfo(), objMediaInfo,
             m_objContext.GetSupplementaryService().GetServices(), m_bRemoteAlerted);
 }
 

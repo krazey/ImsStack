@@ -60,7 +60,7 @@ void MtcUiNotifier::SendPreIncomingCallReceived(IN CallKey nKey)
 
 PUBLIC
 void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
-        IN MediaInfo& objMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+        IN const MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
         IN ParticipantInfo& objParticipantInfo)
 {
     IJniMtcCallThread* piThread = GetCallThread();
@@ -73,13 +73,13 @@ void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCa
     JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
     objJniCallInfo.bUssi = objCallInfo.bUssi;
 
-    piThread->OnIncomingCallReceived(nKey, objJniCallInfo, &objMediaInfo, objSuppServices,
+    piThread->OnIncomingCallReceived(nKey, objJniCallInfo, objMediaInfo, objSuppServices,
             objParticipantInfo.GetOipType(), objParticipantInfo.GetRemoteNumber());
 }
 
 PUBLIC
-void MtcUiNotifier::SendStarted(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendStarted(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendStarted", 0, 0, 0);
 
@@ -89,7 +89,7 @@ void MtcUiNotifier::SendStarted(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
         return;
     }
 
-    piThread->OnStarted(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnStarted(m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -107,8 +107,8 @@ void MtcUiNotifier::SendStartFailed(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
-void MtcUiNotifier::SendProgressing(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+void MtcUiNotifier::SendProgressing(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices,
         IN IMS_BOOL bAlerted /*= IMS_FALSE */)
 {
     IMS_TRACE_I("SendProgressing", 0, 0, 0);
@@ -120,12 +120,12 @@ void MtcUiNotifier::SendProgressing(IN CallInfo* /* pCallInfo */, IN MediaInfo* 
     }
 
     piThread->OnProgressing(
-            m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices, bAlerted);
+            m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices, bAlerted);
 }
 
 PUBLIC
-void MtcUiNotifier::SendHeld(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendHeld(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendHeld", 0, 0, 0);
 
@@ -135,7 +135,7 @@ void MtcUiNotifier::SendHeld(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaI
         return;
     }
 
-    piThread->OnHeld(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnHeld(m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -153,8 +153,8 @@ void MtcUiNotifier::SendHoldFailed(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
-void MtcUiNotifier::SendResumed(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendResumed(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendResumed", 0, 0, 0);
 
@@ -164,7 +164,7 @@ void MtcUiNotifier::SendResumed(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
         return;
     }
 
-    piThread->OnResumed(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnResumed(m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -182,8 +182,8 @@ void MtcUiNotifier::SendResumeFailed(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
-void MtcUiNotifier::SendHeldBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendHeldBy(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendHeldBy", 0, 0, 0);
 
@@ -193,12 +193,12 @@ void MtcUiNotifier::SendHeldBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMedi
         return;
     }
 
-    piThread->OnHeldBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnHeldBy(m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices);
 }
 
 PUBLIC
-void MtcUiNotifier::SendResumedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendResumedBy(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendResumedBy", 0, 0, 0);
 
@@ -208,7 +208,7 @@ void MtcUiNotifier::SendResumedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pM
         return;
     }
 
-    piThread->OnResumedBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnResumedBy(m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -226,8 +226,8 @@ void MtcUiNotifier::SendTerminated(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
-void MtcUiNotifier::SendIncomingResume(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendIncomingResume(IN CallInfo* /* pCallInfo */,
+        IN const MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendIncomingResume", 0, 0, 0);
 
@@ -237,12 +237,12 @@ void MtcUiNotifier::SendIncomingResume(IN CallInfo* /* pCallInfo */, IN MediaInf
         return;
     }
 
-    piThread->OnIncomingResume(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnIncomingResume(m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices);
 }
 
 PUBLIC
 void MtcUiNotifier::SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInfo* /* pCallInfo */,
-        IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+        IN const MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendIncomingUpdate", 0, 0, 0);
 
@@ -255,12 +255,12 @@ void MtcUiNotifier::SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInf
     JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
     objJniCallInfo.eCallType = eCallTypeToUpdate;
 
-    piThread->OnIncomingUpdate(objJniCallInfo, pMediaInfo, objSuppServices);
+    piThread->OnIncomingUpdate(objJniCallInfo, objMediaInfo, objSuppServices);
 }
 
 PUBLIC
-void MtcUiNotifier::SendUpdated(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendUpdated(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendUpdated", 0, 0, 0);
 
@@ -270,7 +270,7 @@ void MtcUiNotifier::SendUpdated(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMed
         return;
     }
 
-    piThread->OnUpdated(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnUpdated(m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -288,8 +288,8 @@ void MtcUiNotifier::SendUpdateFailed(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
-void MtcUiNotifier::SendUpdatedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+void MtcUiNotifier::SendUpdatedBy(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("SendUpdatedBy", 0, 0, 0);
 
@@ -299,7 +299,7 @@ void MtcUiNotifier::SendUpdatedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pM
         return;
     }
 
-    piThread->OnUpdatedBy(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices);
+    piThread->OnUpdatedBy(m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices);
 }
 
 PUBLIC
@@ -320,8 +320,8 @@ void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType,
 }
 
 PUBLIC
-void MtcUiNotifier::SendExpanded(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*pMediaInfo*/,
-        IN const IMSMap<SuppType, SuppService*>& /*objSuppServices*/)
+void MtcUiNotifier::SendExpanded(IN CallInfo* /*pCallInfo*/, IN const MediaInfo& /*objMediaInfo*/,
+        IN const ImsMap<SuppType, SuppService*>& /*objSuppServices*/)
 {
     IMS_TRACE_I("SendExpanded", 0, 0, 0);
 
@@ -345,8 +345,8 @@ void MtcUiNotifier::SendExpandFailed(IN const CallReasonInfo& objReason)
 }
 
 PUBLIC
-void MtcUiNotifier::SendExpandedBy(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*pMediaInfo*/,
-        IN const IMSMap<SuppType, SuppService*>& /*objSuppServices*/,
+void MtcUiNotifier::SendExpandedBy(IN CallInfo* /*pCallInfo*/, IN const MediaInfo& /*objMediaInfo*/,
+        IN const ImsMap<SuppType, SuppService*>& /*objSuppServices*/,
         IN IMS_SINTP /*nReplaceKey = 0 */)
 {
     IMS_TRACE_I("SendExpandedBy", 0, 0, 0);
@@ -359,9 +359,9 @@ void MtcUiNotifier::SendExpandedBy(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*p
 }
 
 PUBLIC
-void MtcUiNotifier::SendMerged(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN IMSList<ConfUser*>& lstConfUser)
+void MtcUiNotifier::SendMerged(IN CallInfo* /* pCallInfo */, IN const MediaInfo& objMediaInfo,
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+        IN ImsList<ConfUser*>& lstConfUser)
 {
     IMS_TRACE_I("SendMerged", 0, 0, 0);
 
@@ -371,7 +371,8 @@ void MtcUiNotifier::SendMerged(IN CallInfo* /* pCallInfo */, IN MediaInfo* pMedi
         return;
     }
 
-    piThread->OnMerged(m_objContext.CreateJniCallInfo(), pMediaInfo, objSuppServices, lstConfUser);
+    piThread->OnMerged(
+            m_objContext.CreateJniCallInfo(), objMediaInfo, objSuppServices, lstConfUser);
 }
 
 PUBLIC
@@ -431,7 +432,7 @@ void MtcUiNotifier::SendDropped(IN IMS_BOOL bResult, IN const CallReasonInfo& ob
 }
 
 PUBLIC
-void MtcUiNotifier::SendNotifyUsersInfo(IN IMSList<ConfUser*>& lstConfUser)
+void MtcUiNotifier::SendNotifyUsersInfo(IN ImsList<ConfUser*>& lstConfUser)
 {
     IMS_TRACE_I("SendNotifyUsersInfo : Size[%d]", lstConfUser.GetSize(), 0, 0);
 
@@ -463,8 +464,8 @@ void MtcUiNotifier::SendNotifyConfInfo(IN AString strDisplayText, IN AString str
 }
 
 PUBLIC
-void MtcUiNotifier::SendReplacedBy(IN CallInfo* /*pCallInfo*/, IN MediaInfo* /*pMediaInfo*/,
-        IN const IMSMap<SuppType, SuppService*>& /*objSuppServices*/, IN IMS_SINTP nKey,
+void MtcUiNotifier::SendReplacedBy(IN CallInfo* /*pCallInfo*/, IN const MediaInfo& /*objMediaInfo*/,
+        IN const ImsMap<SuppType, SuppService*>& /*objSuppServices*/, IN IMS_SINTP nKey,
         IN IMS_UINTP /*nType*/)
 {
     IMS_TRACE_I("SendReplacedBy : Key[%" PFLS_u "]", nKey, 0, 0);

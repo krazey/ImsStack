@@ -293,3 +293,51 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpContainsText)
 
     pMediaManager->NegotiateSdp(&objISession);
 }
+
+TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForNormalCase)
+{
+    MediaInfo objRefMediaInfo;
+    objRefMediaInfo.eADir = DIRECTION_SEND;
+    objRefMediaInfo.eVDir = DIRECTION_SEND;
+    objRefMediaInfo.eTDir = DIRECTION_SEND;
+    pMediaManager->SetMediaInfo(objRefMediaInfo);
+
+    pMediaManager->AdjustDirectionForAutoAccept(IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eADir, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eVDir, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eTDir, DIRECTION_SEND);
+}
+
+TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForOfferlessReinvite)
+{
+    MediaInfo objRefMediaInfo;
+    objRefMediaInfo.eADir = DIRECTION_SEND;
+    objRefMediaInfo.eVDir = DIRECTION_SEND;
+    objRefMediaInfo.eTDir = DIRECTION_SEND;
+    pMediaManager->SetMediaInfo(objRefMediaInfo);
+
+    pMediaManager->AdjustDirectionForAutoAccept(IMS_TRUE, IMS_FALSE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eADir, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eVDir, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eTDir, DIRECTION_SEND_RECEIVE);
+}
+
+TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForHeldByMeCase)
+{
+    MediaInfo objRefMediaInfo;
+    objRefMediaInfo.eADir = DIRECTION_SEND;
+    pMediaManager->SetMediaInfo(objRefMediaInfo);
+
+    pMediaManager->AdjustDirectionForAutoAccept(IMS_FALSE, IMS_TRUE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eADir, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eVDir, DIRECTION_INVALID);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eTDir, DIRECTION_INVALID);
+
+    objRefMediaInfo.eADir = DIRECTION_RECEIVE;
+    pMediaManager->SetMediaInfo(objRefMediaInfo);
+
+    pMediaManager->AdjustDirectionForAutoAccept(IMS_FALSE, IMS_TRUE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eADir, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eVDir, DIRECTION_INVALID);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eTDir, DIRECTION_INVALID);
+}

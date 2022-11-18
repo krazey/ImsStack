@@ -98,9 +98,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     ISession& objSession = pSession->GetISession();
     if (objSession.GetState() == ISession::STATE_ESTABLISHED)
     {
-        MediaInfo objMediaInfo;
-        m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()), &objMediaInfo,
+        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
+                m_objContext.GetMediaManager().GetMediaInfo(),
                 m_objContext.GetSupplementaryService().GetServices());
         return CallStateName::ESTABLISHED;
     }
@@ -115,7 +114,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
 
     m_objContext.GetPreconditionManager().FormPreconditionSdp(&objSession, IMS_FALSE);
 
-    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifiedInfo());
+    m_objContext.GetUpdatingInfo().GetModifiedInfo() =
+            m_objContext.GetMediaManager().GetMediaInfo();
 
     if (pSession->AcceptUpdate() == IMS_FAILURE)
     {
@@ -126,7 +126,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::UPDATE))
     {
         m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
-                &m_objContext.GetUpdatingInfo().GetModifiedInfo(),
+                m_objContext.GetUpdatingInfo().GetModifiedInfo(),
                 m_objContext.GetSupplementaryService().GetServices());
         return CallStateName::ESTABLISHED;
     }
@@ -371,7 +371,8 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
         // TODO
     }
 
-    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifiedInfo());
+    m_objContext.GetUpdatingInfo().GetModifiedInfo() =
+            m_objContext.GetMediaManager().GetMediaInfo();
     m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(piSession);
 
     return IMS_SUCCESS;
@@ -465,9 +466,8 @@ CallStateName UpdatingState::HandleRequestedModificationSucceeded()
 
     UpdateCallType();
 
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-    m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()), &objMediaInfo,
+    m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
+            m_objContext.GetMediaManager().GetMediaInfo(),
             m_objContext.GetSupplementaryService().GetServices());
 
     return CallStateName::ESTABLISHED;
@@ -478,14 +478,12 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
 {
     IMS_TRACE_D("HandleReceivedModificationSucceeded", 0, 0, 0);
 
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
     if (m_objContext.GetUpdatingInfo().IsAlerted())
     {
         UpdateCallType();
 
-        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()), &objMediaInfo,
+        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
+                m_objContext.GetMediaManager().GetMediaInfo(),
                 m_objContext.GetSupplementaryService().GetServices());
 
         return CallStateName::ESTABLISHED;
@@ -503,7 +501,8 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
         return CallStateName::ESTABLISHED;
     }
 
-    m_objContext.GetUiNotifier().SendUpdatedBy(&m_objContext.GetCallInfo(), &objMediaInfo,
+    m_objContext.GetUiNotifier().SendUpdatedBy(&m_objContext.GetCallInfo(),
+            m_objContext.GetMediaManager().GetMediaInfo(),
             m_objContext.GetSupplementaryService().GetServices());
 
     return CallStateName::ESTABLISHED;

@@ -153,10 +153,10 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstabli
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
-    EXPECT_CALL(objMediaManager, GetMediaInfo(_)).Times(1);
+    MediaInfo objMediaInfo;
+    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
     EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
 
-    MediaInfo objMediaInfo;
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
 }
@@ -172,7 +172,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
     EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
     EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(1);
     EXPECT_CALL(objMtcPreconditionManager, FormPreconditionSdp(_, _)).Times(1);
-    EXPECT_CALL(objMediaManager, GetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(pMessage));
     SipMethod objSipMethod(SipMethod::UPDATE);
@@ -191,6 +191,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)
     SipMethod objSipMethod(SipMethod::INVITE);
     EXPECT_CALL(*pMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
     MediaInfo objMediaInfo;
+    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
 }
