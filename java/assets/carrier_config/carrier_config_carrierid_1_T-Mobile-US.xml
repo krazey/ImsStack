@@ -303,6 +303,10 @@
     <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
     <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <int-array name="imsvoice.audio_rtcp_interval_int_array" num="2">
+        <item value="2"/>
+        <item value="2"/>
+    </int-array>
     <int name="video_cvo_value_int" value="4"/>
     <int name="video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
     <boolean name="video_avpf_enable_bool" value="true"/>
@@ -323,10 +327,18 @@
     <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="5200"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="6000"/>
+    <int-array name="imsvt.video_rtcp_interval_int_array"" num="2">
+        <item value="2"/>
+        <item value="2"/>
+    </int-array>
     <int name="asset_t140_payload_type_int" value="111"/>
     <int name="asset_red_payload_type_int" value="112"/>
     <boolean name="text_codec_empty_redundant_bool" value="true"/>
     <int name="text_codec_redundancy_level_int" value="3"/>
+    <int-array name="imsrtt.text_rtcp_interval_int_array" num="2">
+        <item value="2"/>
+        <item value="2"/>
+    </int-array>
     <int name="text_rtp_inactivity_timer_millis_int" value="-1"/>
     <int name="text_rtcp_inactivity_timer_millis_int" value="20000"/>
 
