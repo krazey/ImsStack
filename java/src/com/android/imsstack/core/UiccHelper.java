@@ -15,7 +15,6 @@
  */
 package com.android.imsstack.core;
 
-import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IPreference;
 import com.android.imsstack.core.agents.SimInterface;
@@ -27,7 +26,10 @@ import com.android.imsstack.util.ImsLog;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
-public class UICCHelper {
+/**
+ *  This class provides an interface for the CAT event IMS Registration command.
+ */
+public class UiccHelper {
     // Constants--------------------------------------------------
     private static final int IMS_REG_NOTIFY_STATE_ACTIVE = 1;
     private static final int IMS_REG_NOTIFY_STATE_INVALID = 2;
@@ -35,50 +37,53 @@ public class UICCHelper {
     private static final int IMPU_LENGTH_MINIMUM = 15;
 
     // PREFIX
-    private static final byte PREFIX = (byte)0x80;
+    private static final byte PREFIX = (byte) 0x80;
 
     // TAG
-    private static final byte EVENT_DOWNLOAD_TAG = (byte)0xD6;
+    private static final byte EVENT_DOWNLOAD_TAG = (byte) 0xD6;
 
     // EVENT LIST
-    private static final byte EVENT_LIST = (byte)0x19;
-    private static final byte CALL_CONNECTED = (byte)0x01;
-    private static final byte CALL_DISCONNECTED = (byte)0x02;
-    private static final byte IMS_REGISTRATION_EVENT = (byte)0x17;
+    private static final byte EVENT_LIST = (byte) 0x19;
+    private static final byte CALL_CONNECTED = (byte) 0x01;
+    private static final byte CALL_DISCONNECTED = (byte) 0x02;
+    private static final byte IMS_REGISTRATION_EVENT = (byte) 0x17;
 
     // DEVICE IDENTITIES
-    private static final byte DEVICE_IDENTITIES = (byte)0x02;
-    private static final byte DEVICE_ID_UICC = (byte)0x81;
-    private static final byte DEVICE_ID_TERMINAL = (byte)0x82;
-    private static final byte DEVICE_ID_NETWORK = (byte)0x83;
+    private static final byte DEVICE_IDENTITIES = (byte) 0x02;
+    private static final byte DEVICE_ID_UICC = (byte) 0x81;
+    private static final byte DEVICE_ID_TERMINAL = (byte) 0x82;
+    private static final byte DEVICE_ID_NETWORK = (byte) 0x83;
 
     // TRANSACTION IDENTIFIER
-    private static final byte TRANSACTION_IDENTIFIER = (byte)0x1C;
+    private static final byte TRANSACTION_IDENTIFIER = (byte) 0x1C;
 
     // IMS CALL DISCONNECTION CAUSE
-    private static final byte IMS_CALL_DISCONNECTION_CAUSE = (byte)0x55;
+    private static final byte IMS_CALL_DISCONNECTION_CAUSE = (byte) 0x55;
 
     // IMPU_LIST
-    private static final byte IMPU_LIST = (byte)0x77;
+    private static final byte IMPU_LIST = (byte) 0x77;
     // URI_TLV
-    private static final byte URI_TLV = (byte)0x80;
+    private static final byte URI_TLV = (byte) 0x80;
     // IMS_STATUS_CODE
-    private static final byte IMS_STATUS_CODE = (byte)0x78;
+    private static final byte IMS_STATUS_CODE = (byte) 0x78;
 
-    public static String getStringForIMSRegEvent(int regRespCode, int nSlotID, int reason) {
+    /**
+     * Get ims reg event information.
+     */
+    public static String getStringForImsRegEvent(int regRespCode, int slotId, int reason) {
         ImsLog.d("IMS Reg Status code = " + regRespCode);
 
         if (regRespCode <= 0) {
             return null;
         }
 
-        if ((ImsTestMode.getInstance().getTestMode(nSlotID).getExtraTestmask() &
-                ImsTestMode.TEST_MASK_IMS_STATUS_TO_UICC_OFF) > 0) {
+        if ((ImsTestMode.getInstance().getTestMode(slotId).getExtraTestmask()
+                & ImsTestMode.TEST_MASK_IMS_STATUS_TO_UICC_OFF) > 0) {
             return null;
         }
 
         SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
-                SubsInfoInterface.class, nSlotID);
+                SubsInfoInterface.class, slotId);
         if (subsInfo != null) {
             if (!subsInfo.isIsimEnabled()) {
                 return null;
@@ -89,7 +94,7 @@ public class UICCHelper {
         String intStatusCodeToString = String.valueOf(regRespCode);
 
         // ASCII Array
-        char[] aSCIIStatusCode = intStatusCodeToString.toCharArray();
+        char[] asciiStatusCode = intStatusCodeToString.toCharArray();
 
         // impu_list or status_code
         byte addInfoLength = 0x00;
@@ -100,23 +105,20 @@ public class UICCHelper {
             if (reason == IMS_REG_NOTIFY_STATE_INVALID) {
                 addInfoLength = 0x0;
             } else {
-                if (ImsGlobal.isOperator(nSlotID, "ATT")) {
-                    impu = getContactUriFromNotify(nSlotID);
-                } else {
-                    impu = getSelectedImpu(nSlotID);
-                }
+                // Todo: call getContactUriFromNotify()
+                impu = getSelectedImpu(slotId);
 
                 if (impu == null) {
                     ImsLog.w("impu is null");
                     return null;
                 }
 
-                addInfoLength = (byte)impu.length();
+                addInfoLength = (byte) impu.length();
             }
 
             ImsLog.d("IMPU = " + impu + " , LENGTH = " + addInfoLength);
         } else {
-            addInfoLength = (byte)intStatusCodeToString.length();
+            addInfoLength = (byte) intStatusCodeToString.length();
             ImsLog.d("STATUS CODE LENGTH = " + addInfoLength);
         }
 
@@ -161,8 +163,8 @@ public class UICCHelper {
             objImsStatus.write(addInfoLength);
 
             for (int i = 0; i < intStatusCodeToString.length(); i++) {
-                if (aSCIIStatusCode[i] != 0) {
-                    objImsStatus.write(aSCIIStatusCode[i]);
+                if (asciiStatusCode[i] != 0) {
+                    objImsStatus.write(asciiStatusCode[i]);
                 }
             }
         }
@@ -173,7 +175,8 @@ public class UICCHelper {
         /*
         ImsLog.d("IMS STATUS : ");
         for (int i = 0; i < aImsStatus.length; i++) {
-            ImsLog.i(TAG, " " + i + " " + aImsStatus[i] + " " + String.format("0x%02X ", aImsStatus[i]));
+            ImsLog.i(TAG, " " + i + " " + aImsStatus[i] + " " +
+                    String.format("0x%02X ", aImsStatus[i]));
         }
         */
 
@@ -191,21 +194,25 @@ public class UICCHelper {
         return strImsStatus.toString();
     }
 
-    public static String getContactUriFromNotify(int nSlotID) {
+    /**
+     *  Get contact uri information from NOTIFY.
+     */
+    public static String getContactUriFromNotify(int slotId) {
         final String strREG_NOTIFY_STATUS = "reg_notify_info";
         final String strCONTACT_URI = "contact_uri";
         String strUriFromNotify = null;
 
-        IPreference pfa = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE, nSlotID);
+        IPreference pfa = (IPreference) AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
         if (pfa != null) {
-            strUriFromNotify = pfa.getPreferenceStrValue(strREG_NOTIFY_STATUS, strCONTACT_URI, nSlotID);
+            strUriFromNotify = pfa.getPreferenceStrValue(strREG_NOTIFY_STATUS, strCONTACT_URI,
+                    slotId);
         }
 
         return (strUriFromNotify == null) ? "" : strUriFromNotify;
     }
 
-    private static String getSelectedImpu(int nSlotID) {
-        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, nSlotID);
+    private static String getSelectedImpu(int slotId) {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
 
         if (sim == null) {
             ImsLog.d("SimInterface is null");
@@ -240,7 +247,10 @@ public class UICCHelper {
         return impu;
     }
 
-    public static String getStringForCallConnected(int callConnectionId, boolean isMO) {
+    /**
+     *  Get event information for call connected
+     */
+    public static String getStringForCallConnected(int callConnectionId, boolean isMo) {
         ByteArrayOutputStream objImsStatus = new ByteArrayOutputStream();
 
         // Event download tag
@@ -256,7 +266,7 @@ public class UICCHelper {
         // B : Device identities
         objImsStatus.write(DEVICE_IDENTITIES); // Device identities tag
         objImsStatus.write(0x02); // Length
-        if (isMO) {
+        if (isMo) {
             objImsStatus.write(DEVICE_ID_NETWORK);  // Source device identity
             objImsStatus.write(DEVICE_ID_UICC);  // Destination device identity
         } else {
@@ -274,9 +284,9 @@ public class UICCHelper {
         // bit 8 = TI flag.
         // - TI flag is:
         // - Call connected event: "1"
-        byte identifier = (byte)(callConnectionId);
-        identifier = (byte)(identifier << 4);
-        identifier = (byte)(identifier | 0x80);
+        byte identifier = (byte) (callConnectionId);
+        identifier = (byte) (identifier << 4);
+        identifier = (byte) (identifier | 0x80);
         objImsStatus.write(identifier);
 
         return getHexString(objImsStatus);
@@ -324,12 +334,12 @@ public class UICCHelper {
         // bit 8 = TI flag.
         // - TI flag is:
         // - Call disconnected event: "0" if caller disconnects the call, "1" otherwise
-        byte identifier = (byte)(callConnectionId);
-        identifier = (byte)(identifier << 4);
+        byte identifier = (byte) (callConnectionId);
+        identifier = (byte) (identifier << 4);
         if (reason == CallReasonInfo.CODE_USER_TERMINATED) {
-            identifier = (byte)(identifier & 0x7F);
+            identifier = (byte) (identifier & 0x7F);
         } else {
-            identifier = (byte)(identifier | 0x80);
+            identifier = (byte) (identifier | 0x80);
         }
         objImsStatus.write(identifier);
 
