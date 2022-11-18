@@ -56,38 +56,39 @@ PUBLIC VIRTUAL void UpdatingState::OnExit()
     m_objContext.DeleteUpdatingInfo();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::Hold(IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName UpdatingState::Hold(IN MediaInfo& objMediaInfo)
 {
     m_objContext.GetPendingOperationHolder().PushPendingOperation(
-            [pMediaInfo](IMtcCallState* pState)
+            [objMediaInfo](IMtcCallState* pState) mutable
             {
-                return pState->Hold(pMediaInfo);
+                return pState->Hold(objMediaInfo);
             });
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::Resume(IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName UpdatingState::Resume(IN MediaInfo& objMediaInfo)
 {
     m_objContext.GetPendingOperationHolder().PushPendingOperation(
-            [pMediaInfo](IMtcCallState* pState)
+            [objMediaInfo](IMtcCallState* pState) mutable
             {
-                return pState->Resume(pMediaInfo);
+                return pState->Resume(objMediaInfo);
             });
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName UpdatingState::Update(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName UpdatingState::Update(
+        IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     m_objContext.GetPendingOperationHolder().PushPendingOperation(
-            [=](IMtcCallState* pState)
+            [=](IMtcCallState* pState) mutable
             {
-                return pState->Update(eCallType, pMediaInfo);
+                return pState->Update(eCallType, objMediaInfo);
             });
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
-        IN CallType eCallType, IN MediaInfo* pMediaInfo)
+        IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("AcceptUpdate", 0, 0, 0);
 
@@ -103,9 +104,9 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
                 m_objContext.GetSupplementaryService().GetServices());
         return CallStateName::ESTABLISHED;
     }
-    m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(*pMediaInfo);
+    m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(objMediaInfo);
 
-    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
+    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     if (m_objContext.GetMediaManager().FormSdp(&objSession, eCallType) == IMS_FAILURE)
     {

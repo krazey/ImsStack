@@ -34,9 +34,9 @@ public:
 public:
     void OnEnter() override;
 
-    CallStateName Hold(IN MediaInfo* pMediaInfo) override;
-    CallStateName Resume(IN MediaInfo* pMediaInfo) override;
-    CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName Hold(IN MediaInfo& objMediaInfo) override;
+    CallStateName Resume(IN MediaInfo& objMediaInfo) override;
+    CallStateName Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;
@@ -64,7 +64,7 @@ protected:
 
 private:
     IMS_RESULT HandleUpdate(
-            IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo);
+            IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo& objMediaInfo);
     IMS_RESULT HandleReceivedUpdate(OUT CallStateName& eStateName);
     IMS_RESULT HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
     IMS_RESULT FormAutoAccept(IN IMS_BOOL bWithoutOffer);

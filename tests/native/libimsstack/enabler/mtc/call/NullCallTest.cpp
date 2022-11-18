@@ -30,19 +30,19 @@ TEST(NullCallTest, NullCallDoesNothing)
     CallReasonInfo objReason(CODE_UNSPECIFIED);
 
     objCall.Attach();
-    objCall.Start(eCallType, "", &objMediaInfo, objSuppServices);
-    objCall.StartConference(eCallType, "", &objMediaInfo, objSuppServices, objUsers);
+    objCall.Start(eCallType, "", objMediaInfo, objSuppServices);
+    objCall.StartConference(eCallType, "", objMediaInfo, objSuppServices, objUsers);
     objCall.StartConference(eCallType, "", objUsers);
     objCall.HandleIncoming(piSession);
     objCall.HandleUserAlert();
-    objCall.Accept(eCallType, &objMediaInfo);
+    objCall.Accept(eCallType, objMediaInfo);
     objCall.Reject(objReason);
-    objCall.Hold(&objMediaInfo);
-    objCall.Resume(&objMediaInfo);
-    objCall.AcceptResume(eCallType, &objMediaInfo);
+    objCall.Hold(objMediaInfo);
+    objCall.Resume(objMediaInfo);
+    objCall.AcceptResume(eCallType, objMediaInfo);
     objCall.RejectResume(objReason);
-    objCall.Update(eCallType, &objMediaInfo);
-    objCall.AcceptUpdate(eCallType, &objMediaInfo);
+    objCall.Update(eCallType, objMediaInfo);
+    objCall.AcceptUpdate(eCallType, objMediaInfo);
     objCall.RejectUpdate(objReason);
     objCall.CancelUpdate(objReason);
     objCall.Terminate(objReason);

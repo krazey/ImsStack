@@ -219,6 +219,7 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaQuality(
 
 PUBLIC VIRTUAL void MtcMediaManager::GetMediaInfo(OUT MediaInfo& objInfo)
 {
+    IMS_TRACE_D("GetMediaInfo", 0, 0, 0);
     objInfo = *m_pMediaInfo;
 
     if (!m_pProfileManager->IsConfirmedDialogState() &&
@@ -235,6 +236,7 @@ PUBLIC VIRTUAL void MtcMediaManager::GetOldMediaInfo(OUT MediaInfo& objInfo)
 
 PUBLIC VIRTUAL void MtcMediaManager::RestoreMediaInfo()
 {
+    IMS_TRACE_D("RestoreMediaInfo", 0, 0, 0);
     MediaInfo objOldMediaInfo(*m_pOldMediaInfo);
     SetMediaInfo(objOldMediaInfo);
 }
@@ -408,6 +410,7 @@ PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSe
 
 PUBLIC VIRTUAL void MtcMediaManager::RestoreSdp(IN ISession* piSession)
 {
+    IMS_TRACE_D("RestoreSdp", 0, 0, 0);
     RestoreMediaInfo();
     FinalizeSdp(piSession);
     piSession->Restore();

@@ -138,15 +138,9 @@ PUBLIC VIRTUAL void MtcCall::Attach()
 }
 
 PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
+        IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("Start : key[%d]", m_nKey, 0, 0);
-
-    if (pMediaInfo == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
 
     if (IsUssi())
     {
@@ -156,27 +150,21 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
-                return pState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+                return pState->Start(eCallType, strTarget, objMediaInfo, objSuppServices);
             });
 }
 
 PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+        IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
         IN const ImsList<ConfUser*>& lstUsers)
 {
     IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
-
-    if (pMediaInfo == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
                 return pState->StartConference(
-                        eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
+                        eCallType, strTarget, objMediaInfo, objSuppServices, lstUsers);
             });
 }
 
@@ -208,7 +196,7 @@ PUBLIC VIRTUAL void MtcCall::HandleUserAlert()
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_I("Accept : key[%d]", m_nKey, 0, 0);
 
@@ -217,7 +205,7 @@ PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
         m_objStateMachine.RunStateOperation(
                 [&](IMtcCallState* pState)
                 {
-                    return pState->AcceptUssi(eCallType, pMediaInfo);
+                    return pState->AcceptUssi(eCallType, objMediaInfo);
                 });
     }
     else
@@ -225,7 +213,7 @@ PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
         m_objStateMachine.RunStateOperation(
                 [&](IMtcCallState* pState)
                 {
-                    return pState->Accept(eCallType, pMediaInfo);
+                    return pState->Accept(eCallType, objMediaInfo);
                 });
     }
 }
@@ -241,54 +229,36 @@ PUBLIC VIRTUAL void MtcCall::Reject(IN const CallReasonInfo& objReason)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_I("Hold : key[%d]", m_nKey, 0, 0);
 
-    if (pMediaInfo == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
-                return pState->Hold(pMediaInfo);
+                return pState->Hold(objMediaInfo);
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_I("Resume : key[%d]", m_nKey, 0, 0);
 
-    if (pMediaInfo == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
-                return pState->Resume(pMediaInfo);
+                return pState->Resume(objMediaInfo);
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_I("AcceptResume : key[%d]", m_nKey, 0, 0);
-
-    if (pMediaInfo == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
-                return pState->AcceptResume(eCallType, pMediaInfo);
+                return pState->AcceptResume(eCallType, objMediaInfo);
             });
 }
 
@@ -303,37 +273,25 @@ PUBLIC VIRTUAL void MtcCall::RejectResume(IN const CallReasonInfo& objReason)
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::Update(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Update(IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_I("Update : key[%d]", m_nKey, 0, 0);
 
-    if (pMediaInfo == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
-
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
-                return pState->Update(eCallType, pMediaInfo);
+                return pState->Update(eCallType, objMediaInfo);
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo)
 {
     IMS_TRACE_I("AcceptUpdate : key[%d]", m_nKey, 0, 0);
-
-    if (pMediaInfo == IMS_NULL)
-    {
-        OnInternalFailure();
-        return;
-    }
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
-                return pState->AcceptUpdate(eCallType, pMediaInfo);
+                return pState->AcceptUpdate(eCallType, objMediaInfo);
             });
 }
 

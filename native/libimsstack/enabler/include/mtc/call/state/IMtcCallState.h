@@ -68,25 +68,26 @@ public:
      *
      * @param eCallType
      * @param strTarget
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @return
      */
     virtual CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo& objMediaInfo,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * @brief Starts
      *
      * @param eCallType
      * @param strTarget
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param lstUsers
      * @return
      */
     virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) = 0;
 
     /**
@@ -119,10 +120,10 @@ public:
      * @brief Accepts
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @return
      */
-    virtual CallStateName Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual CallStateName Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     /**
      * @brief Rejects
@@ -135,27 +136,27 @@ public:
     /**
      * @brief Holds
      *
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @return
      */
-    virtual CallStateName Hold(IN MediaInfo* pMediaInfo) = 0;
+    virtual CallStateName Hold(IN MediaInfo& objMediaInfo) = 0;
 
     /**
      * @brief Resumes
      *
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @return
      */
-    virtual CallStateName Resume(IN MediaInfo* pMediaInfo) = 0;
+    virtual CallStateName Resume(IN MediaInfo& objMediaInfo) = 0;
 
     /**
      * @brief Accepts
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @return
      */
-    virtual CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual CallStateName AcceptResume(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     /**
      * @brief Rejects
@@ -169,19 +170,19 @@ public:
      * @brief Updates
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @return
      */
-    virtual CallStateName Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual CallStateName Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     /**
      * @brief Accepts
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @return
      */
-    virtual CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual CallStateName AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     /**
      * @brief Rejects
@@ -235,10 +236,10 @@ public:
      * @brief Accepts
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @return
      */
-    virtual CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     /**
      * @brief Ussis

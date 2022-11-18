@@ -79,11 +79,12 @@ public:
      * @param nCallKey Key of the call to be manipulated.
      * @param eCallType Type of the call.
      * @param strTarget Remote target.
-     * @param pMediaInfo Media of the call.
+     * @param objMediaInfo Media of the call.
      * @param lstSuppServices Supplementary services.
      */
     virtual void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN MediaInfo& objMediaInfo,
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * Notifies the call that the user is alerted by the incoming call.
@@ -100,14 +101,14 @@ public:
      *
      * @param nCallKey
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     // Rejects an incoming call.
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
-    // - pMediaInfo: `MediaInfo`
+    // - objMediaInfo: `MediaInfo`
 
     /**
      * @brief Rejects
@@ -119,42 +120,42 @@ public:
 
     // Holds a call.
     // - nIMSKey: Key of the call to be manipulated.
-    // - pMediaInfo: `MediaInfo`
+    // - objMediaInfo: `MediaInfo`
 
     /**
      * @brief Holds
      *
      * @param nCallKey
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void Hold(IN CallKey nCallKey, IN MediaInfo* pMediaInfo) = 0;
+    virtual void Hold(IN CallKey nCallKey, IN MediaInfo& objMediaInfo) = 0;
 
     // Resumes a call.
     // - nIMSKey: Key of the call to be manipulated.
-    // - pMediaInfo: `MediaInfo`
+    // - objMediaInfo: `MediaInfo`
 
     /**
      * @brief Resumes
      *
      * @param nCallKey
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void Resume(IN CallKey nCallKey, IN MediaInfo* pMediaInfo) = 0;
+    virtual void Resume(IN CallKey nCallKey, IN MediaInfo& objMediaInfo) = 0;
 
     // Accepts the resume request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
-    // - pMediaInfo: `MediaInfo`
+    // - objMediaInfo: `MediaInfo`
 
     /**
      * @brief Accepts
      *
      * @param nCallKey
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
     virtual void AcceptResume(
-            IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+            IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     // Rejects the resume request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
@@ -183,16 +184,16 @@ public:
     // Modifies media parameters of a call.
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
-    // - pMediaInfo: `MediaInfo`
+    // - objMediaInfo: `MediaInfo`
 
     /**
      * @brief Updates
      *
      * @param nCallKey
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual void Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     // Cancels the ongoing modification request.
     // - nIMSKey: Key of the call to be manipulated.
@@ -209,17 +210,17 @@ public:
     // Accepts the modification request from the remote.
     // - nIMSKey: Key of the call to be manipulated.
     // - eSessionType: See MtcDef::SESSIONTYPE_*
-    // - pMediaInfo: `MediaInfo`
+    // - objMediaInfo: `MediaInfo`
 
     /**
      * @brief Accepts
      *
      * @param nCallKey
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
     virtual void AcceptUpdate(
-            IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+            IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     // Rejects the modification request from the remote.
     // - nIMSKey: Key of the call to be manipulated.

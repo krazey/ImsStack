@@ -67,7 +67,7 @@ IdleState::IdleState(IN IMtcCallContext& objContext) :
 PUBLIC VIRTUAL IdleState::~IdleState() {}
 
 PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
+        IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_D("Start", 0, 0, 0);
 
@@ -75,8 +75,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
-    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
-    delete pMediaInfo;
+    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     if (m_objContext.IsUssi())
     {
@@ -99,7 +98,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
 }
 
 PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
-        IN const AString& strTarget, IN MediaInfo* pMediaInfo,
+        IN const AString& strTarget, IN MediaInfo& objMediaInfo,
         IN const ImsMap<SuppType, SuppService*>& objSuppServices,
         IN const ImsList<ConfUser*>& lstUsers)
 {
@@ -110,8 +109,7 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
-    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
-    delete pMediaInfo;
+    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     m_objOperationAfterBlockCheck = [&]()
     {

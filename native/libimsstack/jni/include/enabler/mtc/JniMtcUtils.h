@@ -31,7 +31,8 @@ public:
     static CallType ReadCallType(IN const android::Parcel& objParcel);
     static ServiceType ReadServiceType(IN const android::Parcel& objParcel);
     static JniCallInfo ReadCallInfo(IN const android::Parcel& objParcel);
-    static MediaInfo* ReadMediaInfo(IN const android::Parcel& objParcel);
+    static MediaInfo& ReadMediaInfo(
+            IN const android::Parcel& objParcel, IN_OUT MediaInfo& objMediaInfo);
     static IMSMap<SuppType, SuppService*> ReadSupplementaryService(
             IN const android::Parcel& objParcel);
     static IMSList<ConfUser*> ReadConferenceParticipants(IN const android::Parcel& objParcel);

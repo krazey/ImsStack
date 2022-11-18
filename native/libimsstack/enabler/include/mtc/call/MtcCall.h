@@ -97,23 +97,23 @@ public:
 
     void Attach() override;
 
-    void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
+    void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& lstUsers) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& objUsers) override;
     void HandleIncoming(IN ISession* piSession) override;
     void HandleUserAlert() override;
-    void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    void Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void Reject(IN const CallReasonInfo& objReason) override;
-    void Hold(IN MediaInfo* pMediaInfo) override;
-    void Resume(IN MediaInfo* pMediaInfo) override;
-    void AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    void Hold(IN MediaInfo& objMediaInfo) override;
+    void Resume(IN MediaInfo& objMediaInfo) override;
+    void AcceptResume(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void RejectResume(IN const CallReasonInfo& objReason) override;
-    void Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
-    void AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    void Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
+    void AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void RejectUpdate(IN const CallReasonInfo& objReason) override;
     void CancelUpdate(IN const CallReasonInfo& objReason) override;
     void Terminate(IN const CallReasonInfo& objReason) override;

@@ -128,7 +128,7 @@ TEST_F(UpdatingStateTest, HoldPushesPendingOperation)
     MediaInfo objMediaInfo;
     EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
 
-    pUpdatingState->Hold(&objMediaInfo);
+    pUpdatingState->Hold(objMediaInfo);
 }
 
 TEST_F(UpdatingStateTest, ResumePushesPendingOperation)
@@ -136,7 +136,7 @@ TEST_F(UpdatingStateTest, ResumePushesPendingOperation)
     MediaInfo objMediaInfo;
     EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
 
-    pUpdatingState->Resume(&objMediaInfo);
+    pUpdatingState->Resume(objMediaInfo);
 }
 
 TEST_F(UpdatingStateTest, UpdatePushesPendingOperation)
@@ -145,7 +145,7 @@ TEST_F(UpdatingStateTest, UpdatePushesPendingOperation)
     CallType eAnyType = CallType::VT;
     EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
 
-    pUpdatingState->Update(eAnyType, &objMediaInfo);
+    pUpdatingState->Update(eAnyType, objMediaInfo);
 }
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstablished)
@@ -157,8 +157,8 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenISessionStateEstabli
     EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
 
     MediaInfo objMediaInfo;
-    EXPECT_EQ(CallStateName::ESTABLISHED,
-            pUpdatingState->AcceptUpdate(CallType::VOIP, &objMediaInfo));
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
 }
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpdate)
@@ -179,8 +179,8 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
     EXPECT_CALL(*pMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
     EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
 
-    EXPECT_EQ(CallStateName::ESTABLISHED,
-            pUpdatingState->AcceptUpdate(CallType::VOIP, &objMediaInfo));
+    EXPECT_EQ(
+            CallStateName::ESTABLISHED, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
     EXPECT_EQ(DIRECTION_SEND, objMediaInfo.eADir);
 }
 
@@ -192,7 +192,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)
     EXPECT_CALL(*pMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
     MediaInfo objMediaInfo;
 
-    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->AcceptUpdate(CallType::VOIP, &objMediaInfo));
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
 }
 
 TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)

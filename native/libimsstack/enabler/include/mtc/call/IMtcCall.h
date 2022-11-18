@@ -83,10 +83,11 @@ public:
      *
      * @param eCallType
      * @param strTarget
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      */
-    virtual void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
+    virtual void Start(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
@@ -94,12 +95,12 @@ public:
      *
      * @param eCallType
      * @param strTarget
-     * @param pMediaInfo
+     * @param objMediaInfo
      * @param objSuppServices
      * @param objUsers
      */
     virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
+            IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN const ImsList<ConfUser*>& objUsers) = 0;
 
     /**
@@ -135,9 +136,9 @@ public:
      * @brief Accepts
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual void Accept(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     // Rejects the incoming call.
 
@@ -153,18 +154,18 @@ public:
     /**
      * @brief Holds
      *
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void Hold(IN MediaInfo* pMediaInfo) = 0;
+    virtual void Hold(IN MediaInfo& objMediaInfo) = 0;
 
     // Resumes the call.
 
     /**
      * @brief Resumes
      *
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void Resume(IN MediaInfo* pMediaInfo) = 0;
+    virtual void Resume(IN MediaInfo& objMediaInfo) = 0;
 
     // Accepts the resume request from the remote.
 
@@ -172,9 +173,9 @@ public:
      * @brief Accepts
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual void AcceptResume(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     // Rejects the resume request from the remote.
 
@@ -191,9 +192,9 @@ public:
      * @brief Updates
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void Update(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual void Update(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     // Accepts the call updating(converting) request from the remote.
 
@@ -201,9 +202,9 @@ public:
      * @brief Accepts
      *
      * @param eCallType
-     * @param pMediaInfo
+     * @param objMediaInfo
      */
-    virtual void AcceptUpdate(IN CallType eCallType, IN MediaInfo* pMediaInfo) = 0;
+    virtual void AcceptUpdate(IN CallType eCallType, IN MediaInfo& objMediaInfo) = 0;
 
     // Rejects the call updating(converting) request from the remote.
 

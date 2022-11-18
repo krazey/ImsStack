@@ -171,7 +171,7 @@ TEST_F(AlertingStateTest, AcceptSameCallTypeInvokesAccept)
     EXPECT_CALL(objTimerWrapper, StopAll);
     EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_SUCCESS));
 
-    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, RejectIncomingCallIfAcceptFails)
@@ -186,7 +186,7 @@ TEST_F(AlertingStateTest, RejectIncomingCallIfAcceptFails)
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->Accept(eAcceptCallType, objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
@@ -199,7 +199,7 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
     EXPECT_CALL(objMtcSession, Accept).Times(0);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL));
 
-    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, &objMediaInfo));
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->Accept(eAcceptCallType, objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, RejectInvokesRejectIncoming)
@@ -413,7 +413,7 @@ TEST_F(AlertingStateTest, AcceptUssiInvokesAccept)
     EXPECT_CALL(objTimerWrapper, StopAll);
     EXPECT_CALL(objMtcSession, Accept).Times(1).WillOnce(Return(IMS_SUCCESS));
 
-    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo));
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->AcceptUssi(CallType::VOIP, objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
@@ -427,8 +427,7 @@ TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
     EXPECT_CALL(objMtcSession, Reject(objReason));
     EXPECT_CALL(objUiNotifier, SendStartFailed(objReason));
 
-    EXPECT_EQ(
-            CallStateName::TERMINATING, pAlertingState->AcceptUssi(CallType::VOIP, &objMediaInfo));
+    EXPECT_EQ(CallStateName::TERMINATING, pAlertingState->AcceptUssi(CallType::VOIP, objMediaInfo));
 }
 
 TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)

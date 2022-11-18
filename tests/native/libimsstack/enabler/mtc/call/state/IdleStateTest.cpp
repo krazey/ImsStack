@@ -89,7 +89,7 @@ TEST_F(IdleStateTest, StartSetsUpCallInfo)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
     MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
     ImsMap<SuppType, SuppService*> objSuppServices;
     IMS_BOOL bUssi = IMS_FALSE;
@@ -101,7 +101,7 @@ TEST_F(IdleStateTest, StartSetsUpCallInfo)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
     ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
 
-    pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+    pIdleState->Start(eCallType, strTarget, objMediaInfo, objSuppServices);
 
     EXPECT_EQ(eCallType, objCallInfo.eInitialCallType);
     EXPECT_EQ(PeerType::MO, objCallInfo.ePeerType);
@@ -113,7 +113,7 @@ TEST_F(IdleStateTest, StartSetsUpParticipantInfo)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
     MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
     ImsMap<SuppType, SuppService*> objSuppServices;
 
@@ -124,7 +124,7 @@ TEST_F(IdleStateTest, StartSetsUpParticipantInfo)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
     ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
 
-    pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+    pIdleState->Start(eCallType, strTarget, objMediaInfo, objSuppServices);
 
     EXPECT_EQ(strTarget, pParticipantInfo->GetRemoteNumber());
 }
@@ -133,7 +133,7 @@ TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
     MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
 
     SuppType eSuppType = SuppType::GEOLOCATION;
@@ -147,7 +147,7 @@ TEST_F(IdleStateTest, StartSetsUpSupplementaryService)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
     ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
 
-    pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+    pIdleState->Start(eCallType, strTarget, objMediaInfo, objSuppServices);
 
     EXPECT_NE(nullptr, pSupplementaryService->Get(eSuppType));
 }
@@ -156,7 +156,7 @@ TEST_F(IdleStateTest, StartSetsUpMediaManager)
 {
     CallType eCallType = CallType::VOIP;
     AString strTarget("some_target");
-    MediaInfo* pMediaInfo = new MediaInfo();
+    MediaInfo objMediaInfo;
     MockIMtcBlockChecker* pBlockChecker = new MockIMtcBlockChecker();
     ImsMap<SuppType, SuppService*> objSuppServices;
 
@@ -167,7 +167,7 @@ TEST_F(IdleStateTest, StartSetsUpMediaManager)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
     ON_CALL(objDialingPlan, GetToUri(_, _, _)).WillByDefault(Return(strTarget));
 
-    EXPECT_CALL(objMediaManager, SetMediaInfo(*pMediaInfo)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(objMediaInfo)).Times(1);
 
-    pIdleState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+    pIdleState->Start(eCallType, strTarget, objMediaInfo, objSuppServices);
 }
