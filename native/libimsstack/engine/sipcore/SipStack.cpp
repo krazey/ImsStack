@@ -52,7 +52,7 @@ public:
             return SIP_FALSE;
         }
 
-        SipTxnContext* pTxnContext = (SipTxnContext*)pUserData->GetUserData();
+        SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(pUserData->GetUserData());
 
         if (pTxnContext == IMS_NULL)
         {
@@ -60,7 +60,8 @@ public:
             return SIP_FALSE;
         }
 
-        SipTxnContextData* pTxnContextData = (SipTxnContextData*)pTxnContext->pTxnContextData;
+        SipTxnContextData* pTxnContextData =
+                static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
 
         if (pTxnContextData == IMS_NULL)
         {
@@ -782,16 +783,18 @@ GLOBAL IMS_BOOL DecodeMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen
         pMessage = new ::SipMessage();
     }
 
+    SIP_CHAR* pszSipBuffer = reinterpret_cast<SIP_CHAR*>(const_cast<IMS_BYTE*>(pBuffer));
+
     if (nOptions == SipPrivate::OPTIONS_D_PARTIAL)
     {
-        if (pMessage->DecodeFragmentMsg((SIP_CHAR*)pBuffer, nBuffLen) == SIP_FALSE)
+        if (pMessage->DecodeFragmentMsg(pszSipBuffer, nBuffLen) == SIP_FALSE)
         {
             pMessage->SipDelete();
             pMessage = IMS_NULL;
             return IMS_FALSE;
         }
     }
-    else if (pMessage->DecCompleteMsg((SIP_CHAR*)pBuffer, nBuffLen) == SIP_FALSE)
+    else if (pMessage->DecCompleteMsg(pszSipBuffer, nBuffLen) == SIP_FALSE)
     {
         pMessage->SipDelete();
         pMessage = IMS_NULL;
@@ -2312,7 +2315,8 @@ GLOBAL IMS_SINT32 GetDestinationTransport(IN ::SipMessage* pMessage)
 GLOBAL IMS_BOOL GetEventHeader(
         IN ::SipMessage* pMessage, OUT AString& strEvent, OUT AString& strEventId)
 {
-    SipEventHeader* pHeader = (SipEventHeader*)GetHeader(pMessage, SipHeaderBase::EVENT);
+    SipEventHeader* pHeader =
+            DYNAMIC_CAST(SipEventHeader*, GetHeader(pMessage, SipHeaderBase::EVENT));
 
     if (!IsValidHeader(pHeader))
     {

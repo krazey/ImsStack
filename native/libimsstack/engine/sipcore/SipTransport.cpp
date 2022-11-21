@@ -981,7 +981,8 @@ IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32
     // don't send the packet via Socket.
     if (SipRtConfigUtils::IsFeatureSipTxPacketBlockedEnabled(GetSlotId()))
     {
-        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, (const IMS_CHAR*)pBuffer, nBuffLen);
+        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, reinterpret_cast<const IMS_CHAR*>(pBuffer),
+                nBuffLen);
         return IMS_TRUE;
     }
 
@@ -990,7 +991,8 @@ IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32
 
     // DEBUGGING message ...
     {
-        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, (const IMS_CHAR*)pBuffer, nBuffLen);
+        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, reinterpret_cast<const IMS_CHAR*>(pBuffer),
+                nBuffLen);
     }
 
     if (nSentBytes == ISocket::RESULT_ERROR)

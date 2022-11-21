@@ -161,7 +161,7 @@ LOCAL SIP_VOID SIPStackTxnLayer_DisplayTxnKey(IN SIP_VOID* pvTxnKey)
 
 LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 nTimerType)
 {
-    SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
+    SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(pUserData->GetUserData());
 
     // Clear user data to avoid double memory free by aborting the transaction
     // when SIP transaction timer is expired.
@@ -180,7 +180,8 @@ LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IM
 
     if (pTxnContext != IMS_NULL)
     {
-        SipTxnContextData* pTxnContextData = (SipTxnContextData*)pTxnContext->pTxnContextData;
+        SipTxnContextData* pTxnContextData =
+                static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
 
         if (pTxnContextData != IMS_NULL)
         {

@@ -939,7 +939,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
             return SipPrivate::MESSAGE_FAILED;
     }
 
-    SipTxnContext* pTxnContext = (SipTxnContext*)objUserData.GetUserData();
+    SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(objUserData.GetUserData());
 
     if (pTxnContext == IMS_NULL)
     {
@@ -947,7 +947,8 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
         return SipPrivate::MESSAGE_FAILED;
     }
 
-    SipTxnContextData* pTxnContextData = (SipTxnContextData*)pTxnContext->pTxnContextData;
+    SipTxnContextData* pTxnContextData =
+            static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
 
     if (pTxnContextData == IMS_NULL)
     {

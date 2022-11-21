@@ -197,8 +197,8 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
         pTxnContextData->SetTxnState(this);
     }
 
-    pTxnContext->pTxnContextData = (SIP_VOID*)pTxnContextData;
-    ISipUserData objUserData((SIP_VOID*)pTxnContext);
+    pTxnContext->pTxnContextData = static_cast<SIP_VOID*>(pTxnContextData);
+    ISipUserData objUserData(static_cast<SIP_VOID*>(pTxnContext));
 
     /* BSP_TODO::
     To send internal 100 Trying on received of new INVITE, user data is required otherwise
