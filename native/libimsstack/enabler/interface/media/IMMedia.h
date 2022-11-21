@@ -228,7 +228,7 @@ enum
 class ImsMediaMsgParamBase
 {
 public:
-    ImsMediaMsgParamBase(MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_INVALID) :
+    ImsMediaMsgParamBase(const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_INVALID) :
             m_eMediaType(eType){};
     virtual ~ImsMediaMsgParamBase() {}
 
@@ -239,7 +239,7 @@ public:
 class ImsMediaMsgSetMediaQualityParam : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaMsgSetMediaQualityParam(MEDIA_CONTENT_TYPE eType) :
+    ImsMediaMsgSetMediaQualityParam(const MEDIA_CONTENT_TYPE eType) :
             ImsMediaMsgParamBase(eType),
             m_objMediaQualityThreshold(MediaQualityThreshold()){};
 
@@ -250,7 +250,7 @@ public:
 class ImsMediaMsgConfigParam : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaMsgConfigParam(MEDIA_CONTENT_TYPE eType) :
+    ImsMediaMsgConfigParam(const MEDIA_CONTENT_TYPE eType) :
             ImsMediaMsgParamBase(eType),
             m_pConfig(IMS_NULL){};
     virtual ~ImsMediaMsgConfigParam()
@@ -275,7 +275,7 @@ public:
 class ImsMediaMsgOpenConfigParam : public ImsMediaMsgConfigParam
 {
 public:
-    ImsMediaMsgOpenConfigParam(MEDIA_CONTENT_TYPE type) :
+    ImsMediaMsgOpenConfigParam(const MEDIA_CONTENT_TYPE type) :
             ImsMediaMsgConfigParam(type),
             m_objLocalAddress(IPAddress::IPv6NONE),
             m_nLocalPort(0){};
@@ -302,7 +302,7 @@ public:
 class ImsMediaResponseParamBase : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaResponseParamBase(MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
+    ImsMediaResponseParamBase(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
             ImsMediaMsgParamBase(type),
             m_eResult(RtpError::NO_ERROR){};
     virtual ~ImsMediaResponseParamBase() {}
@@ -339,12 +339,15 @@ public:
 class ImsMediaMsgQosParam : public ImsMediaResponseParamBase
 {
 public:
-    ImsMediaMsgQosParam(MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
+    ImsMediaMsgQosParam(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO,
+            const IPAddress& address = IPAddress(IPAddress::IPv6NONE), const IMS_SINT32 port = 0) :
             ImsMediaResponseParamBase(type),
-            m_objIpAddress(IPAddress::IPv6NONE),
-            m_nPort(0),
+            m_objIpAddress(address),
+            m_nPort(port),
             m_bCallback(IMS_FALSE),
-            m_bResult(IMS_FALSE){};
+            m_bResult(IMS_FALSE)
+    {
+    }
 
     bool operator==(const ImsMediaMsgQosParam& param)
     {
