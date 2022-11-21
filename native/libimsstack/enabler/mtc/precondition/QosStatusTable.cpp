@@ -266,7 +266,6 @@ void QosStatusTable::CreateStatusRecords(IN IMS_SINT32 eSdpMediaType)
         QosStatusRecord* pRemoveRecord = lstStatusRecords.GetAt(index);
 
         delete pRemoveRecord;
-        pRemoveRecord = IMS_NULL;
     }
 
     lstStatusRecords.Clear();

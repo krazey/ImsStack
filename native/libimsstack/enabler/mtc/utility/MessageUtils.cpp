@@ -1215,14 +1215,14 @@ PUBLIC CallType MessageUtils::GetCallTypeFromSdp(IN ISession* piSession, IN IMS_
             return CallType::UNKNOWN;
         }
 
-        SdpMedia* pSdpMedia = IMS_NULL;
+        const SdpMedia* pSdpMedia = IMS_NULL;
         if (bPeerView)
         {
-            pSdpMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
+            pSdpMedia = pDescriptor->GetMediaDescriptionEx();
         }
         else
         {
-            pSdpMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionExAsLocal();
+            pSdpMedia = pDescriptor->GetMediaDescriptionExAsLocal();
         }
         if (pSdpMedia == IMS_NULL)
         {

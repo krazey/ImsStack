@@ -425,7 +425,7 @@ CallStateName UpdatingState::HandleModificationSucceeded()
 
     NotifyHoldResumeState();
 
-    CallStateName eCallStateName = CallStateName::ESTABLISHED;
+    CallStateName eCallStateName;
 
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {

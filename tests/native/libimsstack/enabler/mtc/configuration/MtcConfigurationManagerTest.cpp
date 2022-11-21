@@ -35,7 +35,6 @@ class MtcConfigurationManagerTest : public ::testing::Test
 {
 public:
     MtcConfigurationManager* pManager;
-    ICarrierConfig* piCc;
 
 protected:
     virtual void SetUp() override

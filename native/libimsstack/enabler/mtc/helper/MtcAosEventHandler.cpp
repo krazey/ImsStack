@@ -83,9 +83,9 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
             nIpcan, 0);
 
     IMS_UINT32 nMmtelConnected =
-            nFeatures & ImsAosFeature::MMTEL ? ImsAosFeature::MMTEL : ImsAosFeature::NONE;
+            (nFeatures & ImsAosFeature::MMTEL) ? ImsAosFeature::MMTEL : ImsAosFeature::NONE;
     IMS_UINT32 nVideoConnected =
-            nFeatures & ImsAosFeature::VIDEO ? ImsAosFeature::VIDEO : ImsAosFeature::NONE;
+            (nFeatures & ImsAosFeature::VIDEO) ? ImsAosFeature::VIDEO : ImsAosFeature::NONE;
 
     IMS_BOOL bEmergency = m_objService.IsEmergency();
 

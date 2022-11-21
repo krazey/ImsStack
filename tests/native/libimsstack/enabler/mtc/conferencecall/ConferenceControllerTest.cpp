@@ -469,7 +469,7 @@ TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsUnsubscribe)
     EXPECT_CALL(*pSubscription, UnSubscribe).Times(1);
 
     pController->OnOperationReady();
-    delete pSubscribeOperation;
+    delete pUnsubscribeOperation;
 
     delete pMockHolderListener;
 }

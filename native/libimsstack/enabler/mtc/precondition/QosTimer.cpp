@@ -40,16 +40,10 @@ PUBLIC VIRTUAL QosTimer::~QosTimer()
         {
             piTimer->KillTimer();
             TimerService::GetTimerService()->DestroyTimer(piTimer);
-            piTimer = IMS_NULL;
         }
     }
 
     m_objTimers.Clear();
-
-    if (m_pQosTimerListener)
-    {
-        m_pQosTimerListener = IMS_NULL;
-    }
 }
 
 PUBLIC VIRTUAL void QosTimer::Timer_TimerExpired(IN ITimer* piExpiredTimer)

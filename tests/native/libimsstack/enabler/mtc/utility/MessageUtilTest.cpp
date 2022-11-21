@@ -80,11 +80,6 @@ public:
         ON_CALL(*piSession, GetPreviousRequest(eServiceMethod)).WillByDefault(Return(piMessage));
     }
 
-    void SetUpPreviousResponse(IN IMS_SINT32 eServiceMethod = IMessage::SESSION_START)
-    {
-        ON_CALL(*piSession, GetPreviousResponse(eServiceMethod)).WillByDefault(Return(piMessage));
-    }
-
     void SetUpPreviousResponses(IN IMS_SINT32 eServiceMethod = IMessage::SESSION_START)
     {
         objMessages.Append(piMessage);

@@ -15,6 +15,7 @@
  */
 
 #include "CallReasonInfo.h"
+#include "ICoreService.h"
 #include "ISipHeader.h"
 #include "MediaManager.h"
 #include "ServicePhoneInfo.h"
@@ -272,7 +273,7 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
     pEnvironment->eNetworkType =
             MtcMediaUtil::GetMediaNetworkType(&m_objContext.GetService(), eRadioType);
     pEnvironment->eServiceType = eMediaServiceType;
-    pEnvironment->pIService = (IService*)m_objContext.GetService().GetICoreService();
+    pEnvironment->pIService = m_objContext.GetService().GetICoreService();
 
     if (!m_piMediaSession->SetEnvironment(pEnvironment))
     {
@@ -291,7 +292,7 @@ PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
     }
 
     IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
-    pMediaManager->DestroySession((MediaSession*)m_piMediaSession);
+    pMediaManager->DestroySession(static_cast<MediaSession*>(m_piMediaSession));
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(

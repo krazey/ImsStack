@@ -47,7 +47,10 @@ public:
     inline SilentRedialHelperTest() :
             pRedialHelper(IMS_NULL),
             pTimerService(new TestTimerService()),
-            objTimer(pTimerService->GetMockTimer())
+            objTimer(pTimerService->GetMockTimer()),
+            pMockConfigurationManager(IMS_NULL),
+            pConfigurationProxy(IMS_NULL),
+            pSupplementaryService(IMS_NULL)
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, pTimerService);
     }

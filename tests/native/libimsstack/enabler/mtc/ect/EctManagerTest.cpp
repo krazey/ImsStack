@@ -32,7 +32,7 @@ LOCAL CallKey ANY_CALL_KEY = 100;
 class TestEctManager : public EctManager
 {
 public:
-    inline TestEctManager(IN IMtcContext& objContext) :
+    inline explicit TestEctManager(IN IMtcContext& objContext) :
             EctManager(objContext)
     {
     }

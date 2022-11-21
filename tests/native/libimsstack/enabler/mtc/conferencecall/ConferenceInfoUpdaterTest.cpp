@@ -129,15 +129,6 @@ protected:
         objUsers.Append(pUser);
     }
 
-    void ResetInfo()
-    {
-        delete pDescription;
-        delete pHostInfo;
-        delete pState;
-        delete pMedia;
-        delete pInfo;
-    }
-
     void SetUpDefaultUsers()
     {
         AddUserToInfo(USER_ENTITY1, ANY_STATUS, ANY_STATE);
@@ -145,7 +136,7 @@ protected:
     }
 
     ConfUser* AddParticipant(
-            IN AString& strUserEntity, IN AString& strInvitedUri, IN IMS_UINT32 eStatus)
+            IN const AString& strUserEntity, IN const AString& strInvitedUri, IN IMS_UINT32 eStatus)
     {
         ConfUser* pUser = new ConfUser();
         pUser->strUserEntity = strUserEntity;
