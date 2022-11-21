@@ -63,6 +63,7 @@ public class TextSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        testParcel.recycle();
     }
 
     @Test
@@ -77,6 +78,7 @@ public class TextSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        testParcel.recycle();
     }
 
     @Test
@@ -95,6 +97,7 @@ public class TextSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        testParcel.recycle();
     }
 
     @Test
@@ -128,6 +131,7 @@ public class TextSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        testParcel.recycle();
     }
 
     @Test
@@ -146,5 +150,6 @@ public class TextSessionCallbackHandlerTest {
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+        testParcel.recycle();
     }
 }

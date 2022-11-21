@@ -23,6 +23,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -147,6 +148,7 @@ public class VideoSessionHandlerTest {
         verify(mMockImsMediaManager).openSession(eq(mMockRtpSocket), eq(mMockRtpSocket),
                 eq(ImsMediaSession.SESSION_TYPE_VIDEO), eq(videoConfig), eq(mMockExecutor),
                 eq(mVideoSessionCallback));
+        testParcel.recycle();
     }
 
     @Test
@@ -170,6 +172,15 @@ public class VideoSessionHandlerTest {
         verify(mMockVideoSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_PORT_UNAVAILABLE));
 
+        // ImsMediaManager is not connected
+        mVideoSessionHandler.setVideoSession(null);
+        mMediaManager.setImsMediaConnected(false);
+        testParcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockVideoSessionCallbackHandler)
+                .openSessionResponse(eq(ImsMediaSession.RESULT_NOT_READY));
+
         /**
          * VideoSession was opened already, but OpenVideoSession requested again
          * for same session
@@ -179,16 +190,8 @@ public class VideoSessionHandlerTest {
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockVideoSessionCallbackHandler)
-                .openSessionResponse(eq(ImsMediaSession.RESULT_NOT_SUPPORTED));
-
-        // ImsMediaManager is not connected
-        mVideoSessionHandler.setVideoSession(null);
-        mMediaManager.setImsMediaConnected(false);
-        testParcel.setDataPosition(0);
-        mMediaListener.onMediaMessage(testParcel);
-        processAllMessages();
-        verify(mMockVideoSessionCallbackHandler)
-                .openSessionResponse(eq(ImsMediaSession.RESULT_NOT_READY));
+            .openSessionResponse(eq(ImsMediaSession.RESULT_NOT_SUPPORTED));
+        testParcel.recycle();
     }
 
     @Test
@@ -222,9 +225,16 @@ public class VideoSessionHandlerTest {
         testParcel.setDataPosition(0);
         mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
         mVideoSessionHandler.setRtpSocket(mRtpSocketPair);
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockImsMediaManager).closeSession(eq(mMockVideoSession));
+
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        testParcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockVideoSession));
+        testParcel.recycle();
     }
 
     @Test
@@ -236,9 +246,15 @@ public class VideoSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         videoConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockVideoSession).modifySession(eq(videoConfig));
+
+        testParcel.setDataPosition(0);
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockVideoSession, times(1)).modifySession(eq(videoConfig));
 
         // Modify Session Response - SUCCESS
         mVideoSessionCallback.onModifySessionResponse(videoConfig, RESULT_SUCCESS);
@@ -251,6 +267,7 @@ public class VideoSessionHandlerTest {
         processAllMessages();
         verify(mMockVideoSessionCallbackHandler)
                 .modifySessionResponse(eq(videoConfig), eq(RESULT_FAILURE));
+        testParcel.recycle();
     }
 
     @Test
@@ -263,11 +280,13 @@ public class VideoSessionHandlerTest {
         testParcel.writeInt(REMOTE_RTP_PORT);
         testParcel.setDataPosition(0);
         mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mVideoSessionHandler.setRtpSocket(mRtpSocketPair);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
                 eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+        testParcel.recycle();
     }
 
     @Test
@@ -296,9 +315,11 @@ public class VideoSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         threshold.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockVideoSession).setMediaQualityThreshold(eq(threshold));
+        testParcel.recycle();
     }
 
     @Test

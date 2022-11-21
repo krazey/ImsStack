@@ -48,7 +48,7 @@ import java.util.List;
  * This manages audio session by communicating between ImsStack (media enabler native)
  * and {@link ImsMediaManager}
  */
-public class AudioSessionHandler  {
+public class AudioSessionHandler extends MediaState {
 
     static final int UNUSED = -1;
 
@@ -68,6 +68,7 @@ public class AudioSessionHandler  {
 
     public AudioSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
+        super(ImsMediaSession.SESSION_TYPE_AUDIO);
         mContext = context;
         mMediaManager = mediaManager;
         mAudioSessionCallbackHandler = new AudioSessionCallbackHandler(mtcMediaInterface);
@@ -81,6 +82,7 @@ public class AudioSessionHandler  {
     public AudioSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             @NonNull AudioSessionCallbackHandler audioCallbackHandler,
             @NonNull ImsAudioSession audioSession) {
+        super(ImsMediaSession.SESSION_TYPE_AUDIO);
         mContext = context;
         mMediaManager = mediaManager;
         mAudioSessionCallbackHandler = audioCallbackHandler;
@@ -158,7 +160,7 @@ public class AudioSessionHandler  {
                                 + " is waiting for Audio openSession response");
                         mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
                         if (mAudioSession == null) {
-                            ImsLog.d("Audio openSession response timeout");
+                            ImsLog.e("Audio openSession response timeout");
                             handleOpenSessionResponse(null, ImsMediaSession.RESULT_NOT_READY);
                             return;
                         }
@@ -459,6 +461,7 @@ public class AudioSessionHandler  {
             /** Requests (ImsStack -> ImsMedia) */
             case MediaConstants.REQUEST_OPEN_SESSION:
             {
+                setMediaState(MEDIA_STATE_OPENING);
                 String localIpAddress = parcel.readString();
                 int localPortNumber = parcel.readInt();
                 ImsLog.v("localIpAddress= " + localIpAddress
@@ -537,10 +540,23 @@ public class AudioSessionHandler  {
 
             default:
             {
+                parcel.recycle();
                 ImsLog.e("Invalid RequestType");
             }
             break;
         }
+    }
+
+    /**
+     * Informs whether requestType is valid or not
+     *
+     * @param requestType type of the request
+     * @return true if requestType is valid
+     */
+    public boolean isValidRequest(final int requestType) {
+        return ((isIdle() && (requestType == MediaConstants.REQUEST_OPEN_SESSION))
+                || ((!isIdle() && (requestType != MediaConstants.REQUEST_OPEN_SESSION))
+                && !isClosed()));
     }
 
     private void createQosAgent(int slotId) {
@@ -573,6 +589,7 @@ public class AudioSessionHandler  {
                         mAudioSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
+                    setMediaState(MEDIA_STATE_IDLE);
                     return;
                 } else if (rtpSocket.first == null || rtpSocket.second == null) {
                     ImsLog.e("rtp socket creation failed");
@@ -581,11 +598,13 @@ public class AudioSessionHandler  {
                         mAudioSessionCallbackHandler.openSessionResponse(
                                 ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
+                    setMediaState(MEDIA_STATE_IDLE);
                     return;
                 }
 
                 mMediaManager.openSession(rtpSocket.first, rtpSocket.second,
                         ImsMediaSession.SESSION_TYPE_AUDIO, null, mAudioSessionCallback);
+                setMediaState(MEDIA_STATE_OPENING);
             }
             else {
                 ImsLog.d("ImsMediaManager is not ready");
@@ -593,10 +612,11 @@ public class AudioSessionHandler  {
                     mAudioSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_NOT_READY);
                 }
+                setMediaState(MEDIA_STATE_IDLE);
             }
         }
         else {
-            ImsLog.d("Audio Session is already created: SessionId="
+            ImsLog.w("Audio Session is already created: SessionId="
                 + mAudioSession.getSessionId());
             if (mAudioSessionCallbackHandler != null) {
                 mAudioSessionCallbackHandler.openSessionResponse(
@@ -608,6 +628,7 @@ public class AudioSessionHandler  {
     private void handleAudioCloseSession() {
         if (mAudioSession != null) {
             mMediaManager.closeSession(mAudioSession);
+            setMediaState(MEDIA_STATE_CLOSED);
         }
     }
 
@@ -619,6 +640,7 @@ public class AudioSessionHandler  {
             }
             closeSockets();
             mAudioSession = null;
+            setMediaState(MEDIA_STATE_IDLE);
         }
     }
 
@@ -775,11 +797,16 @@ public class AudioSessionHandler  {
                     mAudioSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_NO_MEMORY);
                 }
+                setMediaState(MEDIA_STATE_IDLE);
                 return ;
             }
 
             mAudioSessionId = mAudioSession.getSessionId();
+            setMediaState(MEDIA_STATE_LIVE);
             ImsLog.d("Audio Session created: SessionId=" + mAudioSessionId);
+        }
+        else {
+            setMediaState(MEDIA_STATE_IDLE);
         }
 
         if (mAudioSessionCallbackHandler != null) {
@@ -794,6 +821,7 @@ public class AudioSessionHandler  {
             }
             closeSockets();
         }
+        setMediaState(MEDIA_STATE_IDLE);
         mAudioSession = null;
         mAudioSessionId = 0;
     }

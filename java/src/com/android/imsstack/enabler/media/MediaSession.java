@@ -60,6 +60,10 @@ public class MediaSession implements IMediaConnectionObserver {
         if (mVideoSessionHandler != null) {
             mVideoSessionHandler.onImsMediaVideoMessage(MediaConstants.NOTIFY_MEDIA_DETACH, null);
         }
+
+        if (mTextSessionHandler != null) {
+            mTextSessionHandler.onImsMediaTextMessage(MediaConstants.NOTIFY_MEDIA_DETACH, null);
+        }
     }
 
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession) {
@@ -147,29 +151,37 @@ public class MediaSession implements IMediaConnectionObserver {
             switch (sessionType) {
                 case ImsMediaSession.SESSION_TYPE_AUDIO: {
                     createAudioSession();
-                    if (mAudioSessionHandler != null) {
+                    if (mAudioSessionHandler != null
+                                && mAudioSessionHandler.isValidRequest(requestType)) {
                         mAudioSessionHandler.onImsMediaAudioMessage(requestType, parcel);
                     }
                 }
                     break;
 
                 case ImsMediaSession.SESSION_TYPE_VIDEO: {
-                    createVideoSession();
-                    if (mVideoSessionHandler != null) {
+                    if (requestType == MediaConstants.REQUEST_OPEN_SESSION) {
+                        createVideoSession();
+                    }
+                    if (mVideoSessionHandler != null
+                            && mVideoSessionHandler.isValidRequest(requestType)) {
                         mVideoSessionHandler.onImsMediaVideoMessage(requestType, parcel);
                     }
                 }
                     break;
 
                 case ImsMediaSession.SESSION_TYPE_RTT: {
-                    createTextSession();
-                    if (mTextSessionHandler != null) {
+                    if (requestType == MediaConstants.REQUEST_OPEN_SESSION) {
+                        createTextSession();
+                    }
+                    if (mTextSessionHandler != null
+                            && mTextSessionHandler.isValidRequest(requestType)) {
                         mTextSessionHandler.onImsMediaTextMessage(requestType, parcel);
                     }
                 }
                     break;
 
                 default: {
+                    parcel.recycle();
                     ImsLog.e("Invalid SessionType");
                 }
                     break;

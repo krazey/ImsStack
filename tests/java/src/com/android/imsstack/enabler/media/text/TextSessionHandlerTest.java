@@ -23,6 +23,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -148,6 +149,7 @@ public class TextSessionHandlerTest {
         verify(mMockImsMediaManager).openSession(eq(mMockRtpSocket), eq(mMockRtpSocket),
                 eq(ImsMediaSession.SESSION_TYPE_RTT), eq(null), eq(mMockExecutor),
                 eq(mTextSessionCallback));
+        testParcel.recycle();
     }
 
     @Test
@@ -171,6 +173,15 @@ public class TextSessionHandlerTest {
         verify(mMockTextSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_PORT_UNAVAILABLE));
 
+        // ImsMediaManager is not connected
+        mTextSessionHandler.setTextSession(null);
+        mMediaManager.setImsMediaConnected(false);
+        testParcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockTextSessionCallbackHandler).openSessionResponse(
+                eq(ImsMediaSession.RESULT_NOT_READY));
+
         /**
          * TextSession was opened already, but OpenTextSession requested again
          * for same session
@@ -181,15 +192,7 @@ public class TextSessionHandlerTest {
         processAllMessages();
         verify(mMockTextSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_NOT_SUPPORTED));
-
-        // ImsMediaManager is not connected
-        mTextSessionHandler.setTextSession(null);
-        mMediaManager.setImsMediaConnected(false);
-        testParcel.setDataPosition(0);
-        mMediaListener.onMediaMessage(testParcel);
-        processAllMessages();
-        verify(mMockTextSessionCallbackHandler).openSessionResponse(
-                eq(ImsMediaSession.RESULT_NOT_READY));
+        testParcel.recycle();
     }
 
     @Test
@@ -223,9 +226,16 @@ public class TextSessionHandlerTest {
         testParcel.setDataPosition(0);
         mTextSessionHandler.setTextQosAgent(mMockQosAgent);
         mTextSessionHandler.setRtpSocket(mRtpSocketPair);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockImsMediaManager).closeSession(eq(mMockTextSession));
+
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        testParcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockTextSession));
+        testParcel.recycle();
     }
 
     @Test
@@ -237,9 +247,15 @@ public class TextSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
         textConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockTextSession).modifySession(eq(textConfig));
+
+        testParcel.setDataPosition(0);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockTextSession, times(1)).modifySession(eq(textConfig));
 
         // Modify Session Response - SUCCESS
         mTextSessionCallback.onModifySessionResponse(textConfig, RESULT_SUCCESS);
@@ -252,6 +268,7 @@ public class TextSessionHandlerTest {
         processAllMessages();
         verify(mMockTextSessionCallbackHandler).modifySessionResponse(eq(textConfig),
                 eq(RESULT_FAILURE));
+        testParcel.recycle();
     }
 
     @Test
@@ -262,9 +279,16 @@ public class TextSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
         testParcel.writeString(RTT_MESSAGE);
         testParcel.setDataPosition(0);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockTextSession).sendRtt(eq(RTT_MESSAGE));
+
+        testParcel.setDataPosition(0);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockTextSession, times(1)).sendRtt(eq(RTT_MESSAGE));
+        testParcel.recycle();
     }
 
     @Test
@@ -277,11 +301,13 @@ public class TextSessionHandlerTest {
         testParcel.writeInt(REMOTE_RTP_PORT);
         testParcel.setDataPosition(0);
         mTextSessionHandler.setTextQosAgent(mMockQosAgent);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mTextSessionHandler.setRtpSocket(mRtpSocketPair);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
                 eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+        testParcel.recycle();
     }
 
     @Test
@@ -293,9 +319,11 @@ public class TextSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
         threshold.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockTextSession).setMediaQualityThreshold(eq(threshold));
+        testParcel.recycle();
     }
 
     @Test

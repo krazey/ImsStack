@@ -46,7 +46,7 @@ import java.util.List;
  * This manages video session by communicating between ImsStack (media enabler native)
  * and {@link ImsMediaManager}
  */
-public class VideoSessionHandler {
+public class VideoSessionHandler extends MediaState {
 
     static final int UNUSED = -1;
 
@@ -70,6 +70,7 @@ public class VideoSessionHandler {
     public VideoSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface,
             IMtcMediaVideoCallProvider mtcMediaVideoCallProvider) {
+        super(ImsMediaSession.SESSION_TYPE_VIDEO);
         mContext = context;
         mMediaManager = mediaManager;
         mMtcMediaVideoCallProvider = mtcMediaVideoCallProvider;
@@ -85,6 +86,7 @@ public class VideoSessionHandler {
             IMtcMediaVideoCallProvider mtcMediaVideoCallProvider,
             @NonNull VideoSessionCallbackHandler videoCallbackHandler,
             @NonNull ImsVideoSession videoSession) {
+        super(ImsMediaSession.SESSION_TYPE_VIDEO);
         mContext = context;
         mMediaManager = mediaManager;
         mMtcMediaVideoCallProvider = mtcMediaVideoCallProvider;
@@ -150,7 +152,7 @@ public class VideoSessionHandler {
                                 + " is waiting for Video openSession response");
                         mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
                         if (mVideoSession == null) {
-                            ImsLog.d("Video openSession response timeout");
+                            ImsLog.e("Video openSession response timeout");
                             handleVideoOpenSessionResponse(null, ImsMediaSession.RESULT_NOT_READY);
                             return;
                         }
@@ -403,6 +405,7 @@ public class VideoSessionHandler {
             /** Requests (ImsStack -> ImsMedia) */
             case MediaConstants.REQUEST_OPEN_SESSION:
             {
+                setMediaState(MEDIA_STATE_OPENING);
                 mLocalIpAddress = parcel.readString();
                 mLocalPortNumber = parcel.readInt();
                 VideoConfig videoConfig = VideoConfig.CREATOR.createFromParcel(parcel);
@@ -454,10 +457,23 @@ public class VideoSessionHandler {
 
             default:
             {
+                parcel.recycle();
                 ImsLog.e("Invalid RequestType");
             }
                 break;
         }
+    }
+
+    /**
+     * Informs whether requestType is valid or not
+     *
+     * @param requestType type of the request
+     * @return true if requestType is valid
+     */
+    public boolean isValidRequest(final int requestType) {
+        return ((isIdle() && (requestType == MediaConstants.REQUEST_OPEN_SESSION))
+                || ((!isIdle() && (requestType != MediaConstants.REQUEST_OPEN_SESSION))
+                && !isClosed()));
     }
 
     private void createQosAgent(int slotId) {
@@ -482,6 +498,7 @@ public class VideoSessionHandler {
                         mVideoSessionCallbackHandler.openSessionResponse(
                                 ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
+                    setMediaState(MEDIA_STATE_IDLE);
                     return;
                 } else if (mRtpSocket.first == null || mRtpSocket.second == null) {
                     ImsLog.e("rtp socket creation failed");
@@ -490,6 +507,7 @@ public class VideoSessionHandler {
                         mVideoSessionCallbackHandler.openSessionResponse(
                                 ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
+                    setMediaState(MEDIA_STATE_IDLE);
                     return;
                 }
 
@@ -497,15 +515,17 @@ public class VideoSessionHandler {
                 mDisplaySurfaceSet = true;
                 mMediaManager.openSession(mRtpSocket.first, mRtpSocket.second,
                         ImsMediaSession.SESSION_TYPE_VIDEO, videoConfig, mVideoSessionCallback);
+                setMediaState(MEDIA_STATE_OPENING);
             } else {
                 ImsLog.d("ImsMediaManager is not ready");
                 if (mVideoSessionCallbackHandler != null) {
                     mVideoSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_NOT_READY);
                 }
+                setMediaState(MEDIA_STATE_IDLE);
             }
         } else {
-            ImsLog.d("Video Session is already created: SessionId=" + mVideoSession.getSessionId());
+            ImsLog.w("Video Session is already created: SessionId=" + mVideoSession.getSessionId());
             if (mVideoSessionCallbackHandler != null) {
                 mVideoSessionCallbackHandler.openSessionResponse(
                         ImsMediaSession.RESULT_NOT_SUPPORTED);
@@ -517,6 +537,7 @@ public class VideoSessionHandler {
 
         if (mVideoSession != null) {
             mMediaManager.closeSession(mVideoSession);
+            setMediaState(MEDIA_STATE_CLOSED);
         }
     }
 
@@ -524,6 +545,7 @@ public class VideoSessionHandler {
         if (mVideoSession != null) {
             closeSockets();
             mVideoSession = null;
+            setMediaState(MEDIA_STATE_IDLE);
         }
     }
 
@@ -590,10 +612,12 @@ public class VideoSessionHandler {
                     mVideoSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_NO_MEMORY);
                 }
+                setMediaState(MEDIA_STATE_IDLE);
                 return;
             }
 
             mVideoSessionId = mVideoSession.getSessionId();
+            setMediaState(MEDIA_STATE_LIVE);
             ImsLog.d("Video Session created: SessionId=" + mVideoSessionId);
             if (!mPreviewSurfaceSet) {
                 Message.obtain(mVideoMessageHandler, MediaConstants.REQUEST_SET_PREVIEW_SURFACE)
@@ -605,6 +629,9 @@ public class VideoSessionHandler {
                         .sendToTarget();
             }
         }
+        else {
+            setMediaState(MEDIA_STATE_IDLE);
+        }
 
         if (mVideoSessionCallbackHandler != null) {
             mVideoSessionCallbackHandler.openSessionResponse(result);
@@ -613,6 +640,7 @@ public class VideoSessionHandler {
 
     private void handleVideoSessionClosed() {
         closeSockets();
+        setMediaState(MEDIA_STATE_IDLE);
         mVideoSession = null;
         mVideoSessionId = 0;
     }

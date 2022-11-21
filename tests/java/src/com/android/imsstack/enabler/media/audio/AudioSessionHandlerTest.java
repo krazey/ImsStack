@@ -23,6 +23,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -152,6 +153,7 @@ public class AudioSessionHandlerTest {
         verify(mMockImsMediaManager).openSession(eq(mMockRtpSocket), eq(mMockRtpSocket),
                 eq(ImsMediaSession.SESSION_TYPE_AUDIO), eq(null), eq(mMockExecutor),
                 eq(mAudioSessionCallback));
+        testParcel.recycle();
     }
 
     @Test
@@ -175,6 +177,15 @@ public class AudioSessionHandlerTest {
         verify(mMockAudioSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_PORT_UNAVAILABLE));
 
+        // ImsMediaManager is not connected
+        mAudioSessionHandler.setAudioSession(null);
+        mMediaManager.setImsMediaConnected(false);
+        testParcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockAudioSessionCallbackHandler).openSessionResponse(
+                eq(ImsMediaSession.RESULT_NOT_READY));
+
         /**
          * AudioSession was opened already, but OpenAudioSession requested again
          * for same session
@@ -186,14 +197,7 @@ public class AudioSessionHandlerTest {
         verify(mMockAudioSessionCallbackHandler).openSessionResponse(
                 eq(ImsMediaSession.RESULT_NOT_SUPPORTED));
 
-        // ImsMediaManager is not connected
-        mAudioSessionHandler.setAudioSession(null);
-        mMediaManager.setImsMediaConnected(false);
-        testParcel.setDataPosition(0);
-        mMediaListener.onMediaMessage(testParcel);
-        processAllMessages();
-        verify(mMockAudioSessionCallbackHandler).openSessionResponse(
-                eq(ImsMediaSession.RESULT_NOT_READY));
+        testParcel.recycle();
     }
 
     @Test
@@ -227,9 +231,16 @@ public class AudioSessionHandlerTest {
         testParcel.setDataPosition(0);
         mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
         mAudioSessionHandler.setRtpSocket(mRtpSocketPair);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockImsMediaManager).closeSession(eq(mMockAudioSession));
+
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        testParcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockImsMediaManager, times(1)).closeSession(eq(mMockAudioSession));
+        testParcel.recycle();
     }
 
     @Test
@@ -241,9 +252,15 @@ public class AudioSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockAudioSession).modifySession(eq(audioConfig));
+
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_CLOSED);
+        testParcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockAudioSession, times(1)).modifySession(eq(audioConfig));
 
         // Modify Session Response - SUCCESS
         mAudioSessionCallback.onModifySessionResponse(audioConfig, RESULT_SUCCESS);
@@ -256,6 +273,7 @@ public class AudioSessionHandlerTest {
         processAllMessages();
         verify(mMockAudioSessionCallbackHandler).modifySessionResponse(eq(audioConfig),
                 eq(RESULT_FAILURE));
+        testParcel.recycle();
     }
 
     @Test
@@ -267,9 +285,15 @@ public class AudioSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_OPENING);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockAudioSession).addConfig(eq(audioConfig));
+
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_IDLE);
+        testParcel.setDataPosition(0);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockAudioSession, times(1)).addConfig(eq(audioConfig));
 
         // Add Config Response - SUCCESS
         mAudioSessionCallback.onAddConfigResponse(audioConfig,
@@ -284,6 +308,7 @@ public class AudioSessionHandlerTest {
         processAllMessages();
         verify(mMockAudioSessionCallbackHandler).addConfigResponse(eq(audioConfig),
                 eq(RESULT_FAILURE));
+        testParcel.recycle();
     }
 
     @Test
@@ -297,10 +322,12 @@ public class AudioSessionHandlerTest {
         testParcel.setDataPosition(0);
         mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
         mAudioSessionHandler.setLocalAddress(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockQosAgent).createQosConnection(eq(LOCAL_RTP_ADDRESS), eq(LOCAL_RTP_PORT),
                 eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+        testParcel.recycle();
     }
 
     @Test
@@ -315,10 +342,49 @@ public class AudioSessionHandlerTest {
         mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
         mAudioSessionHandler.setRtpSocket(mRtpSocketPair);
         mAudioSessionHandler.setQosUpdateRequired(true);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
                 eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+        testParcel.recycle();
+    }
+
+    @Test
+    public void testOpenAndQosRequests() {
+
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_OPEN_SESSION);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeString(LOCAL_RTP_ADDRESS);
+        testParcel.writeInt(LOCAL_RTP_PORT);
+        testParcel.setDataPosition(0);
+
+        Parcel testQosParcel = Parcel.obtain();
+        testQosParcel.writeInt(MediaConstants.REQUEST_QOS);
+        testQosParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testQosParcel.writeString(REMOTE_RTP_ADDRESS);
+        testQosParcel.writeInt(REMOTE_RTP_PORT);
+        testQosParcel.setDataPosition(0);
+
+        // OpenSession Request
+        mAudioSessionHandler.setAudioSession(null);
+        mMediaManager.setImsMediaConnected(true);
+        mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
+        mMediaListener.onMediaMessage(testParcel);
+
+        // QoS Request
+        mMediaListener.onMediaMessage(testQosParcel);
+        processAllMessages();
+
+        verify(mMockQosAgent).createQosConnection(eq(LOCAL_RTP_ADDRESS), eq(LOCAL_RTP_PORT));
+        verify(mMockImsMediaManager, times(1)).openSession(eq(mMockRtpSocket), eq(mMockRtpSocket),
+                eq(ImsMediaSession.SESSION_TYPE_AUDIO), eq(null), eq(mMockExecutor),
+                eq(mAudioSessionCallback));
+        verify(mMockQosAgent).updateQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket),
+                eq(REMOTE_RTP_ADDRESS), eq(REMOTE_RTP_PORT));
+        testParcel.recycle();
+        testQosParcel.recycle();
     }
 
     @Test
@@ -330,9 +396,11 @@ public class AudioSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockAudioSession).deleteConfig(eq(audioConfig));
+        testParcel.recycle();
     }
 
     @Test
@@ -344,6 +412,7 @@ public class AudioSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockAudioSession).confirmConfig(eq(audioConfig));
@@ -361,6 +430,7 @@ public class AudioSessionHandlerTest {
         processAllMessages();
         verify(mMockAudioSessionCallbackHandler).confirmConfigResponse(eq(audioConfig),
                 eq(RESULT_FAILURE));
+        testParcel.recycle();
     }
 
     @Test
@@ -372,9 +442,11 @@ public class AudioSessionHandlerTest {
         testParcel.writeInt(DTMF_DIGIT);
         testParcel.writeInt(DTMF_DURATION);
         testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockAudioSession).sendDtmf(eq(DTMF_DIGIT), eq(DTMF_DURATION));
+        testParcel.recycle();
     }
 
     @Test
@@ -386,9 +458,11 @@ public class AudioSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         threshold.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockAudioSession).setMediaQualityThreshold(eq(threshold));
+        testParcel.recycle();
     }
 
     @Test
@@ -407,6 +481,7 @@ public class AudioSessionHandlerTest {
             }
         }
         testParcel.setDataPosition(0);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockAudioSession).sendHeaderExtension(eq(rtpExtensions));
@@ -415,6 +490,7 @@ public class AudioSessionHandlerTest {
         mAudioSessionCallback.onHeaderExtensionReceived(rtpExtensions);
         processAllMessages();
         verify(mMockAudioSessionCallbackHandler).headerExtensionReceived(eq(rtpExtensions));
+        testParcel.recycle();
     }
 
     @Test

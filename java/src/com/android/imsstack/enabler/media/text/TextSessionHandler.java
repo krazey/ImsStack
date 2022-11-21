@@ -43,7 +43,7 @@ import java.net.InetSocketAddress;
 /**
  * This manages text session by communicating between ImsStack and {@link ImsMediaManager}
  */
-public class TextSessionHandler  {
+public class TextSessionHandler extends MediaState {
 
     static final int UNUSED = -1;
 
@@ -62,6 +62,7 @@ public class TextSessionHandler  {
 
     public TextSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
+        super(ImsMediaSession.SESSION_TYPE_RTT);
         mContext = context;
         mMediaManager = mediaManager;
         mTextSessionCallbackHandler = new TextSessionCallbackHandler(mtcMediaInterface);
@@ -75,6 +76,7 @@ public class TextSessionHandler  {
     public TextSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             @NonNull TextSessionCallbackHandler textCallbackHandler,
             @NonNull ImsTextSession textSession) {
+        super(ImsMediaSession.SESSION_TYPE_RTT);
         mContext = context;
         mMediaManager = mediaManager;
         mTextSessionCallbackHandler = textCallbackHandler;
@@ -138,7 +140,7 @@ public class TextSessionHandler  {
                                 + " is waiting for Text openSession response");
                         mLock.wait(MediaConstants.RESPONSE_WAIT_TIMEOUT);
                         if (mTextSession == null) {
-                            ImsLog.d("Text openSession response timeout");
+                            ImsLog.e("Text openSession response timeout");
                             handleOpenSessionResponse(null, ImsMediaSession.RESULT_NOT_READY);
                             return;
                         }
@@ -323,6 +325,7 @@ public class TextSessionHandler  {
             /** Requests (ImsStack -> ImsMedia) */
             case MediaConstants.REQUEST_OPEN_SESSION:
             {
+                setMediaState(MEDIA_STATE_OPENING);
                 String localIpAddress = parcel.readString();
                 int localPortNumber = parcel.readInt();
                 ImsLog.v("localIpAddress= " + localIpAddress
@@ -381,10 +384,23 @@ public class TextSessionHandler  {
 
             default:
             {
+                parcel.recycle();
                 ImsLog.e("Invalid RequestType");
             }
                 break;
         }
+    }
+
+    /**
+     * Informs whether requestType is valid or not
+     *
+     * @param requestType type of the request
+     * @return true if requestType is valid
+     */
+    public boolean isValidRequest(final int requestType) {
+        return ((isIdle() && (requestType == MediaConstants.REQUEST_OPEN_SESSION))
+                || ((!isIdle() && (requestType != MediaConstants.REQUEST_OPEN_SESSION))
+                && !isClosed()));
     }
 
     private void createQosAgent(int slotId) {
@@ -410,6 +426,7 @@ public class TextSessionHandler  {
                         mTextSessionCallbackHandler.openSessionResponse(
                                 ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
+                    setMediaState(MEDIA_STATE_IDLE);
                     return;
                 } else if (mRtpSocket.first == null || mRtpSocket.second == null) {
                     ImsLog.e("rtp socket creation failed");
@@ -418,20 +435,23 @@ public class TextSessionHandler  {
                         mTextSessionCallbackHandler.openSessionResponse(
                                 ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
+                    setMediaState(MEDIA_STATE_IDLE);
                     return;
                 }
 
                 mMediaManager.openSession(mRtpSocket.first, mRtpSocket.second,
                         ImsMediaSession.SESSION_TYPE_RTT, null, mTextSessionCallback);
+                setMediaState(MEDIA_STATE_OPENING);
             } else {
                 ImsLog.d("ImsMediaManager is not ready");
                 if (mTextSessionCallbackHandler != null) {
                     mTextSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_NOT_READY);
                 }
+                setMediaState(MEDIA_STATE_IDLE);
             }
         } else {
-            ImsLog.d("Text Session is already created: SessionId="
+            ImsLog.w("Text Session is already created: SessionId="
                     + mTextSession.getSessionId());
             if (mTextSessionCallbackHandler != null) {
                 mTextSessionCallbackHandler.openSessionResponse(
@@ -443,6 +463,7 @@ public class TextSessionHandler  {
     private void handleTextCloseSession() {
         if (mTextSession != null) {
             mMediaManager.closeSession(mTextSession);
+            setMediaState(MEDIA_STATE_CLOSED);
         }
     }
 
@@ -491,11 +512,16 @@ public class TextSessionHandler  {
                     mTextSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_NO_MEMORY);
                 }
+                setMediaState(MEDIA_STATE_IDLE);
                 return;
             }
 
             mTextSessionId = mTextSession.getSessionId();
+            setMediaState(MEDIA_STATE_LIVE);
             ImsLog.d("Text Session created: SessionId=" + mTextSessionId);
+        }
+        else {
+            setMediaState(MEDIA_STATE_IDLE);
         }
 
         if (mTextSessionCallbackHandler != null) {
@@ -505,6 +531,7 @@ public class TextSessionHandler  {
 
     private void handleTextSessionClosed() {
         closeSockets();
+        setMediaState(MEDIA_STATE_IDLE);
         mTextSession = null;
         mTextSessionId = 0;
     }
