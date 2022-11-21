@@ -114,7 +114,7 @@ void CertificateHelper::CreateCertificate()
         return;
     }
 
-    piFile->Write((void*)objCertificate.GetData(), objCertificate.GetLength());
+    piFile->Write(static_cast<void*>(objCertificate.GetData()), objCertificate.GetLength());
 
     piFile->Close();
 

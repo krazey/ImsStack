@@ -645,12 +645,12 @@ IMS_BOOL OsWifiConnection::CacheLocalAddress()
 
     ifcfg.ifc_buf = IMS_NULL;
     ifcfg.ifc_len = sizeof(struct ifreq) * MAX_INTERFACE_REQ;
-    ifcfg.ifc_buf = (char*)malloc(ifcfg.ifc_len);
+    ifcfg.ifc_buf = static_cast<char*>(malloc(ifcfg.ifc_len));
 
     for (IMS_SINT32 i = 0; i < MAX_IOCTL_LOOKUP; ++i)
     {
         ifcfg.ifc_len = sizeof(struct ifreq) * MAX_INTERFACE_REQ;
-        ifcfg.ifc_buf = (char*)realloc(ifcfg.ifc_buf, ifcfg.ifc_len);
+        ifcfg.ifc_buf = static_cast<char*>(realloc(ifcfg.ifc_buf, ifcfg.ifc_len));
 
         if (ioctl(nSockFd, SIOCGIFCONF, (void*)&ifcfg) < 0)
         {

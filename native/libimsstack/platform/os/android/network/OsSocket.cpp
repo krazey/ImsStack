@@ -341,7 +341,7 @@ PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
         stSockAddr.sin6_port = htons((u_short)nPort);
 
         if (inet_pton(AF_INET6, objIpAddr.ToString().GetStr(),
-                    (void*)stSockAddr.sin6_addr.s6_addr) != 1)
+                    static_cast<void*>(stSockAddr.sin6_addr.s6_addr)) != 1)
         {
             IMS_TRACE_E(0, "inet_pton(%s, %d) failed", objIpAddr.ToCharString(), nPort, 0);
             close(hSocket);
@@ -721,7 +721,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
 
         // 4 Why the specified IPv6 address can't bind the socket ??
         if (inet_pton(AF_INET6, objSocketAddress.ToString().GetStr(),
-                    (void*)stSockAddr.sin6_addr.s6_addr) != 1)
+                    static_cast<void*>(stSockAddr.sin6_addr.s6_addr)) != 1)
         {
             IMS_TRACE_E(
                     0, "inet_pton(%s, %d) failed", objSocketAddress.ToCharString(), nSocketPort, 0);
@@ -838,7 +838,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
 
             if (pHost != NULL)
             {
-                stSockAddr.sin_addr.s_addr = ((struct in_addr*)pHost->h_addr)->s_addr;
+                stSockAddr.sin_addr.s_addr =
+                        reinterpret_cast<struct in_addr*>(pHost->h_addr)->s_addr;
             }
             else
             {
@@ -943,7 +944,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
         stSockAddr.sin6_port = htons((u_short)nHostPort);
 
         if (inet_pton(AF_INET6, objHostAddress.ToString().GetStr(),
-                    (void*)stSockAddr.sin6_addr.s6_addr) != 1)
+                    static_cast<void*>(stSockAddr.sin6_addr.s6_addr)) != 1)
         {
             IMS_TRACE_E(0, "inet_pton(%s, %d) failed", objHostAddress.ToCharString(), nHostPort, 0);
             return RESULT_ERROR;
@@ -1122,7 +1123,7 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SIN
 
     IMS_SINT32 nReadBytes;
 
-    if ((nReadBytes = recv(m_hSocket, (void*)pBuffer, nBuffLen, 0)) == SOCKET_ERROR)
+    if ((nReadBytes = recv(m_hSocket, static_cast<void*>(pBuffer), nBuffLen, 0)) == SOCKET_ERROR)
     {
         IMS_SINT32 nError = errno;
 
@@ -1192,7 +1193,8 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_S
 
     IMS_SINT32 nWrittenBytes;
 
-    if ((nWrittenBytes = send(m_hSocket, (const void*)pBuffer, nBuffLen, 0)) == SOCKET_ERROR)
+    if ((nWrittenBytes = send(m_hSocket, static_cast<const void*>(pBuffer), nBuffLen, 0)) ==
+            SOCKET_ERROR)
     {
         IMS_SINT32 nError = errno;
 
@@ -1272,8 +1274,8 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS
         pstSockAddr = (struct sockaddr*)&stAddr6;
     }
 
-    IMS_SINT32 nReadBytes =
-            recvfrom(m_hSocket, (void*)pBuffer, nBuffLen, 0, pstSockAddr, &nSockAddrLen);
+    IMS_SINT32 nReadBytes = recvfrom(
+            m_hSocket, static_cast<void*>(pBuffer), nBuffLen, 0, pstSockAddr, &nSockAddrLen);
 
     if (nReadBytes != SOCKET_ERROR)
     {
@@ -1369,7 +1371,8 @@ RETRY_SENDTO:
 
                 if (pHost != IMS_NULL)
                 {
-                    stSockAddr.sin_addr.s_addr = ((struct in_addr*)pHost->h_addr)->s_addr;
+                    stSockAddr.sin_addr.s_addr =
+                            reinterpret_cast<struct in_addr*>(pHost->h_addr)->s_addr;
                 }
                 else
                 {
@@ -1381,7 +1384,7 @@ RETRY_SENDTO:
 
         stSockAddr.sin_port = htons((u_short)nHostPort);
 
-        nWrittenBytes = sendto(m_hSocket, (const void*)pBuffer, nBuffLen, 0,
+        nWrittenBytes = sendto(m_hSocket, static_cast<const void*>(pBuffer), nBuffLen, 0,
                 (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
     }
     // IPv6 address format
@@ -1400,13 +1403,13 @@ RETRY_SENDTO:
         stSockAddr.sin6_port = htons((u_short)nHostPort);
 
         if (inet_pton(AF_INET6, objHostAddress.ToString().GetStr(),
-                    (void*)stSockAddr.sin6_addr.s6_addr) != 1)
+                    static_cast<void*>(stSockAddr.sin6_addr.s6_addr)) != 1)
         {
             IMS_TRACE_E(0, "inet_pton(%s, %d) failed", objHostAddress.ToCharString(), nHostPort, 0);
             return RESULT_ERROR;
         }
 
-        nWrittenBytes = sendto(m_hSocket, (const void*)pBuffer, nBuffLen, 0,
+        nWrittenBytes = sendto(m_hSocket, static_cast<const void*>(pBuffer), nBuffLen, 0,
                 (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
     }
 

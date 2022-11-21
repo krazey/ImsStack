@@ -486,7 +486,7 @@ GLOBAL IMS_CHAR* IMS_StrDup(IN const IMS_CHAR* pszSrc)
     }
 
     IMS_UINT32 nSrcLen = IMS_StrLen(pszSrc);
-    IMS_CHAR* pszTarget = (IMS_CHAR*)IMS_MEM_Malloc(nSrcLen + 1);
+    IMS_CHAR* pszTarget = static_cast<IMS_CHAR*>(IMS_MEM_Malloc(nSrcLen + 1));
 
     if (pszTarget == IMS_NULL)
     {
@@ -1345,7 +1345,7 @@ GLOBAL IMS_UINT32 IMS_Utf8ToEuckr(OUT IMS_CHAR* pszEuckr, IN const IMS_CHAR* psz
     IMS_WCHAR w2ByteStr;
     IMS_WCHAR wcJohap;
 
-    IMS_WCHAR* pwszUcs = (IMS_WCHAR*)IMS_MEM_Malloc((IMS_StrLen(pszUtf8) * 2) + 2);
+    IMS_WCHAR* pwszUcs = static_cast<IMS_WCHAR*>(IMS_MEM_Malloc((IMS_StrLen(pszUtf8) * 2) + 2));
     IMS_UINT32 nUcs = IMS_Utf8ToUcs(pwszUcs, pszUtf8);
 
     for (nEuckr = 0, n2ByteStr = 0; n2ByteStr < nUcs; n2ByteStr++)
@@ -1383,7 +1383,7 @@ GLOBAL IMS_UINT32 IMS_EuckrToUtf8(OUT IMS_CHAR* pszUtf8, IN const IMS_CHAR* pszE
     IMS_WCHAR w2ByteStr;
     IMS_WCHAR wcJohap;
     IMS_UINT32 nLenEuckr = IMS_StrLen(pszEuckr);
-    IMS_WCHAR* pwszUcs = (IMS_WCHAR*)IMS_MEM_Malloc((nLenEuckr * 2) + 2);
+    IMS_WCHAR* pwszUcs = static_cast<IMS_WCHAR*>(IMS_MEM_Malloc((nLenEuckr * 2) + 2));
 
     for (nEuckr = 0, nUcs = 0; nEuckr < nLenEuckr; nUcs++)
     {
@@ -1772,7 +1772,7 @@ LOCAL IMS_SINT32 str_UniVsprintf(
                     pszS = NULLSTR;
                 }
 
-                nLen = IMS_UcStrLen((IMS_WCHAR*)pszS);
+                nLen = IMS_UcStrLen(pszS);
                 nLen = (nLen > nPrecision) ? nLen : nPrecision;
 
                 if (!(nFlags & SU_LEFT))

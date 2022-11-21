@@ -43,7 +43,7 @@ void ImsHashMap::InitHashTable(IN IMS_UINT32 nHashTableSize, IN IMS_BOOL bAlloc 
 
     if (bAlloc == IMS_TRUE)
     {
-        m_ppHashTable = (Element**)new Element*[m_nHashTableSize];
+        m_ppHashTable = static_cast<Element**>(new Element*[m_nHashTableSize]);
 
         if (m_ppHashTable != IMS_NULL)
         {
