@@ -38,8 +38,8 @@ private:
     IDocument* CreateDocument(IN xmlDocPtr pstDoc);
     IMS_RESULT CreateElement(IN DocumentImpl* pDocument, IN xmlDocPtr pstDoc);
     IMS_RESULT CreateChildNode(
-            IN IDocument* pDocument, IN INode* piParentNode, IN xmlNodePtr pstNode);
-    INode* CreateNodeInstance(IN xmlNodePtr pstNode);
+            IN IDocument* piDocument, IN INode* piParentNode, IN xmlNodePtr pstNode);
+    static INode* CreateNodeInstance(IN xmlNodePtr pstNode);
 };
 
 PUBLIC
