@@ -214,6 +214,17 @@ PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
     }
 }
 
+PROTECTED VIRTUAL IMS_BOOL JniMtcCall::IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const
+{
+    switch (nMsg)
+    {
+        case IuMtcCall::TERMINATE:
+            return IMS_FALSE;
+        default:
+            return IMS_TRUE;
+    }
+}
+
 PRIVATE
 IMtcCallController& JniMtcCall::GetCallController()
 {

@@ -42,6 +42,7 @@ public:
 
 protected:
     void HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel) override;
+    IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const override;
 
 private:
     IMtcCallController& GetCallController();

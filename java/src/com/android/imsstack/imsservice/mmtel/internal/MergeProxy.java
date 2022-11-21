@@ -73,10 +73,7 @@ public class MergeProxy extends ConferenceProxy {
         if (isInitialConferenceExtension()
                 && (getConferenceCall() != null)
                 && (state != STATE_MERGED)) {
-            if (state == STATE_MERGE_WAITING) {
-                terminateConferenceSession();
-            }
-
+            terminateConferenceSession();
             closeConferenceSession();
         }
 
