@@ -57,9 +57,9 @@ Node::Node(IN xmlNodePtr pstNode) :
         m_piPreviousNode(IMS_NULL),
         m_piNextNode(IMS_NULL),
         m_nNodeType(INode::INVALID_NODE),
-        m_strLocalName((const IMS_CHAR*)pstNode->name),
-        m_strNodeName((const IMS_CHAR*)pstNode->name),
-        m_strNodeValue((const IMS_CHAR*)pstNode->content),
+        m_strLocalName(reinterpret_cast<const IMS_CHAR*>(pstNode->name)),
+        m_strNodeName(reinterpret_cast<const IMS_CHAR*>(pstNode->name)),
+        m_strNodeValue(reinterpret_cast<const IMS_CHAR*>(pstNode->content)),
         m_strTextContent(AString::ConstNull()),
         m_strNameSpaceUri(AString::ConstNull()),
         m_strPrefix(AString::ConstNull()),
@@ -71,8 +71,8 @@ Node::Node(IN xmlNodePtr pstNode) :
 
     if (m_pstNode->nsDef != IMS_NULL)
     {
-        m_strNameSpaceUri = (const IMS_CHAR*)m_pstNode->nsDef->href;
-        m_strPrefix = (const IMS_CHAR*)m_pstNode->nsDef->prefix;
+        m_strNameSpaceUri = reinterpret_cast<const IMS_CHAR*>(m_pstNode->nsDef->href);
+        m_strPrefix = reinterpret_cast<const IMS_CHAR*>(m_pstNode->nsDef->prefix);
     }
 
     m_nNodeType = ConvertXmlNodeType(m_pstNode->type);
@@ -97,8 +97,8 @@ Node::Node(IN xmlDocPtr pstDoc) :
         m_piPreviousNode(IMS_NULL),
         m_piNextNode(IMS_NULL),
         m_nNodeType(INode::INVALID_NODE),
-        m_strLocalName((const IMS_CHAR*)pstDoc->name),
-        m_strNodeName((const IMS_CHAR*)pstDoc->name),
+        m_strLocalName(reinterpret_cast<const IMS_CHAR*>(pstDoc->name)),
+        m_strNodeName(reinterpret_cast<const IMS_CHAR*>(pstDoc->name)),
         m_strNodeValue(AString::ConstNull()),
         m_strTextContent(AString::ConstNull()),
         m_strNameSpaceUri(AString::ConstNull()),
@@ -111,8 +111,8 @@ Node::Node(IN xmlDocPtr pstDoc) :
 
     if (pstDoc->oldNs != IMS_NULL)
     {
-        m_strNameSpaceUri = (const IMS_CHAR*)pstDoc->oldNs->href;
-        m_strPrefix = (const IMS_CHAR*)pstDoc->oldNs->prefix;
+        m_strNameSpaceUri = reinterpret_cast<const IMS_CHAR*>(pstDoc->oldNs->href);
+        m_strPrefix = reinterpret_cast<const IMS_CHAR*>(pstDoc->oldNs->prefix);
     }
 
     m_nNodeType = ConvertXmlNodeType(pstDoc->type);
@@ -127,8 +127,8 @@ Node::Node(IN xmlAttrPtr pstAttr) :
         m_piPreviousNode(IMS_NULL),
         m_piNextNode(IMS_NULL),
         m_nNodeType(INode::INVALID_NODE),
-        m_strLocalName((const IMS_CHAR*)pstAttr->name),
-        m_strNodeName((const IMS_CHAR*)pstAttr->name),
+        m_strLocalName(reinterpret_cast<const IMS_CHAR*>(pstAttr->name)),
+        m_strNodeName(reinterpret_cast<const IMS_CHAR*>(pstAttr->name)),
         m_strNodeValue(AString::ConstNull()),
         m_strTextContent(AString::ConstNull()),
         m_strNameSpaceUri(AString::ConstNull()),
@@ -141,13 +141,13 @@ Node::Node(IN xmlAttrPtr pstAttr) :
 
     if (pstAttr->children != IMS_NULL)
     {
-        m_strNodeValue = (const IMS_CHAR*)pstAttr->children->content;
+        m_strNodeValue = reinterpret_cast<const IMS_CHAR*>(pstAttr->children->content);
     }
 
     if (pstAttr->ns != IMS_NULL)
     {
-        m_strNameSpaceUri = (const IMS_CHAR*)pstAttr->ns->href;
-        m_strPrefix = (const IMS_CHAR*)pstAttr->ns->prefix;
+        m_strNameSpaceUri = reinterpret_cast<const IMS_CHAR*>(pstAttr->ns->href);
+        m_strPrefix = reinterpret_cast<const IMS_CHAR*>(pstAttr->ns->prefix);
     }
 
     m_nNodeType = ConvertXmlNodeType(pstAttr->type);

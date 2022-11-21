@@ -29,7 +29,7 @@ CharacterData::CharacterData(IN xmlNodePtr pstNode) :
 {
     if (pstNode->content != IMS_NULL)
     {
-        m_strCharacterData = (const IMS_CHAR*)pstNode->content;
+        m_strCharacterData = reinterpret_cast<const IMS_CHAR*>(pstNode->content);
     }
 }
 
