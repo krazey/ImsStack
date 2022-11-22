@@ -87,13 +87,11 @@ protected:
     ImsVector<TestAttribute> m_objNotEqualsTestAttributes2;
 };
 
-SdpAttributeTest::SdpAttributeTest()
+SdpAttributeTest::SdpAttributeTest() :
+        m_objTestAttr(TestAttribute("a=rtpmap:100 AMR/8000/1\r\n", "rtpmap:100 AMR/8000/1",
+                SdpAttribute::RTPMAP, "rtpmap", "100 AMR/8000/1"))
 {
     // clang-format off
-    m_objTestAttr = TestAttribute(
-            "a=rtpmap:100 AMR/8000/1\r\n", "rtpmap:100 AMR/8000/1",
-            SdpAttribute::RTPMAP, "rtpmap", "100 AMR/8000/1");
-
     m_objNormalTestAttributes.Add(TestAttribute(
             "a=rtpmap:100 AMR/8000/1\r\n", "rtpmap:100 AMR/8000/1",
             SdpAttribute::RTPMAP, "rtpmap", "100 AMR/8000/1"));

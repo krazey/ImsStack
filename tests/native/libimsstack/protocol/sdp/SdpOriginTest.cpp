@@ -101,15 +101,12 @@ protected:
     ImsVector<TestOrigin> m_objAbnormalTestOrigins;
 };
 
-SdpOriginTest::SdpOriginTest()
+SdpOriginTest::SdpOriginTest() :
+        m_objTestOrigin(TestOrigin("o=ims 2890844526 2890842807 IN IP4 10.47.16.5\r\n",
+                "ims 2890844526 2890842807 IN IP4 10.47.16.5", "ims", "2890844526", "2890842807",
+                Sdp::ADDR_TYPE_IP4, "IP4", "10.47.16.5"))
 {
     // clang-format off
-    m_objTestOrigin = TestOrigin(
-            "o=ims 2890844526 2890842807 IN IP4 10.47.16.5\r\n",
-            "ims 2890844526 2890842807 IN IP4 10.47.16.5",
-            "ims", "2890844526", "2890842807", Sdp::ADDR_TYPE_IP4, "IP4",
-            "10.47.16.5");
-
     m_objNormalTestOrigins.Add(m_objTestOrigin);
     m_objNormalTestOrigins.Add(TestOrigin(
             "o=ims 3866718292 3866718292 IN IP6 fc01:abab:cdcd:efe0::1\r\n",

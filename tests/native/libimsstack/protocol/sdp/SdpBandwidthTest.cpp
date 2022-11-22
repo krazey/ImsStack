@@ -87,12 +87,11 @@ protected:
     ImsVector<TestBandwidth> m_objNotEqualsTestBandwidths2;
 };
 
-SdpBandwidthTest::SdpBandwidthTest()
+SdpBandwidthTest::SdpBandwidthTest() :
+        m_objTestBw(TestBandwidth(
+                "b=AS:100\r\n", "AS:100", SdpBandwidth::TYPE_AS, SdpBandwidth::TOKEN_AS, 100))
 {
     // clang-format off
-    m_objTestBw = TestBandwidth(
-            "b=AS:100\r\n", "AS:100", SdpBandwidth::TYPE_AS, SdpBandwidth::TOKEN_AS, 100);
-
     m_objNormalTestBandwidths.Add(TestBandwidth(
             "b=AS:100\r\n", "AS:100", SdpBandwidth::TYPE_AS, SdpBandwidth::TOKEN_AS, 100));
     m_objNormalTestBandwidths.Add(TestBandwidth(

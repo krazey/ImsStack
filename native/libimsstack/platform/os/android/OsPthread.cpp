@@ -69,10 +69,10 @@ public:
 
 PUBLIC
 OsPthreadPrivate::OsPthreadPrivate() :
-        m_bIsRunning(IMS_FALSE)
+        m_bIsRunning(IMS_FALSE),
+        m_nThreadId(0),
+        m_strName(AString::ConstNull())
 {
-    m_strName = AString::ConstNull();
-    m_nThreadId = 0;
 }
 
 PUBLIC

@@ -19,11 +19,38 @@
 
 namespace android
 {
+// clang-format off
+static const IMS_CHAR CONFIG_DATA[] = {
+    "[test.capabilities]\n"
+    "stream_audio_count=3\n"
+    "stream_audio_0=m=audio 0 RTP/AVP 96 100\n"
+    "stream_audio_1=a=rtpmap:96 AMR/8000/1\n"
+    "stream_audio_2=a=rtpmap:100 AMR-WB/16000/1\n"
+    "stream_video_count=3a\n"
+    "stream_video_0=m=video 0 RTP/AVP 102\n"
+    "stream_video_1=a=rtpmap:102 H264/90000\n"
+    "stream_video_2=a=fmtp:102 profile-level-id=42C016\n"
+    "\n"
+    "[test.service]\n"
+    "stream_audio_count=3\n"
+    "stream_audio_0=m=audio 0 RTP/AVP 96 100\n"
+    "stream_audio_1=a=rtpmap:96 AMR/8000/1\n"
+    "stream_audio_2=a=rtpmap:100 AMR-WB/16000/1\n"
+    "stream_video_count=3\n"
+    "stream_video_0=m=video 0 RTP/AVP 102 34\n"
+    "stream_video_1=a=rtpmap:102 H264/90000\n"
+    "stream_video_2=a=fmtp:102 profile-level-id=42800D\n"
+    "\n"
+};
+// clang-format on
 
 class ConfigFileBufferTest : public ::testing::Test
 {
 public:
-    ConfigFileBufferTest();
+    inline ConfigFileBufferTest() :
+            m_strConfigData(CONFIG_DATA)
+    {
+    }
 
 protected:
     virtual void SetUp() override {}
@@ -32,32 +59,6 @@ protected:
 protected:
     AString m_strConfigData;
 };
-
-ConfigFileBufferTest::ConfigFileBufferTest()
-{
-    // clang-format off
-    m_strConfigData = "[test.capabilities]\n"
-            "stream_audio_count=3\n"
-            "stream_audio_0=m=audio 0 RTP/AVP 96 100\n"
-            "stream_audio_1=a=rtpmap:96 AMR/8000/1\n"
-            "stream_audio_2=a=rtpmap:100 AMR-WB/16000/1\n"
-            "stream_video_count=3a\n"
-            "stream_video_0=m=video 0 RTP/AVP 102\n"
-            "stream_video_1=a=rtpmap:102 H264/90000\n"
-            "stream_video_2=a=fmtp:102 profile-level-id=42C016\n"
-            "\n"
-            "[test.service]\n"
-            "stream_audio_count=3\n"
-            "stream_audio_0=m=audio 0 RTP/AVP 96 100\n"
-            "stream_audio_1=a=rtpmap:96 AMR/8000/1\n"
-            "stream_audio_2=a=rtpmap:100 AMR-WB/16000/1\n"
-            "stream_video_count=3\n"
-            "stream_video_0=m=video 0 RTP/AVP 102 34\n"
-            "stream_video_1=a=rtpmap:102 H264/90000\n"
-            "stream_video_2=a=fmtp:102 profile-level-id=42800D\n"
-            "\n";
-    // clang-format on
-}
 
 TEST_F(ConfigFileBufferTest, ReadKeyCount)
 {
