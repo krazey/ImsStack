@@ -427,8 +427,9 @@ void SipMessageFraming::ParseContentLength()
 PRIVATE
 void SipMessageFraming::ParseMessageBody()
 {
-    IMS_CHAR* pBodyStart = (IMS_CHAR*)(m_objMessageBuffer.GetData() + m_nOffset);
-    IMS_CHAR* pBodyEnd = (IMS_CHAR*)(m_objMessageBuffer.GetData() + m_objMessageBuffer.GetLength());
+    IMS_CHAR* pBodyStart = reinterpret_cast<IMS_CHAR*>(m_objMessageBuffer.GetData() + m_nOffset);
+    IMS_CHAR* pBodyEnd = reinterpret_cast<IMS_CHAR*>(
+            m_objMessageBuffer.GetData() + m_objMessageBuffer.GetLength());
     IMS_CHAR* pCurrentPos = pBodyStart;
 
     if (m_bGotBodyStart == IMS_FALSE)
