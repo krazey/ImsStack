@@ -97,7 +97,7 @@ protected:
 
     IMS_BOOL GetWifiState() { return m_pAosServiceAvailableWifi->m_bWiFiState; }
 
-    void SetCountry(IN AString& strCountry)
+    void SetCountry(IN const AString& strCountry)
     {
         m_pAosServiceAvailableWifi->m_strCountry = strCountry;
     }

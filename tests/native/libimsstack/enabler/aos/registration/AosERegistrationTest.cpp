@@ -386,10 +386,9 @@ protected:
                 .WillRepeatedly(Return(m_strHeader));
 
         const IMSList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
-        AosServiceProfile* pServiceProfile = IMS_NULL;
         if (objProfiles.GetSize() > 0)
         {
-            pServiceProfile = objProfiles.GetAt(0);
+            AosServiceProfile* pServiceProfile = objProfiles.GetAt(0);
             m_objHandles.Add(pServiceProfile->GetServiceId(), &m_objMockIAosHandle);
             EXPECT_CALL(m_objMockIAosHandle, GetAppId())
                     .Times(AnyNumber())

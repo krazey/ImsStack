@@ -226,7 +226,6 @@ void AosFeatureTagList::ClearFeatureTags()
             if (pFeatureTag != IMS_NULL)
             {
                 delete pFeatureTag;
-                pFeatureTag = IMS_NULL;
             }
         }
 

@@ -56,8 +56,8 @@ TEST_F(ImsAosTest, GetImsAos)
     EXPECT_LE(0, objImsAosList.GetSize());
 
     IMSList<IImsAos*> objImsAosList2 = ImsAos::GetImsAosList("ims.app.mtc", SLOT_ID);
-    EXPECT_LE(0, objImsAosList.GetSize());
+    EXPECT_LE(0, objImsAosList2.GetSize());
 
     objImsAosList2 = ImsAos::GetImsAosList("ims.app.mts", SLOT_ID);
-    EXPECT_LE(0, objImsAosList.GetSize());
+    EXPECT_LE(0, objImsAosList2.GetSize());
 }

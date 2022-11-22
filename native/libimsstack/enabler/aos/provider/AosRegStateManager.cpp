@@ -62,10 +62,7 @@ PUBLIC VIRTUAL void AosRegStateManager::SetSlotId(IN IMS_SINT32 nSlotId)
 
 PUBLIC VIRTUAL void AosRegStateManager::SetImsRegState(IN IMS_UINT32 nState, IN IMS_BOOL bLimited)
 {
-    if (m_nRegState != nState)
-    {
-        m_nRegState = nState;
-    }
+    m_nRegState = nState;
 
     if (nState == IMS_REG_ON)
     {

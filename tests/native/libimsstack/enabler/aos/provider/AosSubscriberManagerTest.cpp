@@ -104,7 +104,7 @@ protected:
         return m_pAosSubscriberManager->m_objMonitorListeners;
     }
 
-    void SetPuids(IN IMS_BOOL bIsFake, IN AStringArray& objPuids)
+    void SetPuids(IN IMS_BOOL bIsFake, IN const AStringArray& objPuids)
     {
         if (bIsFake)
         {

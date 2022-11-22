@@ -864,7 +864,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objExtraRegErr.objExtraRegErrWaitTimeSec = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY);
         piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG, "KEY_EXTRA_REG_ERR_BUNDLE :: FinalType(%d), Policy(%d), MaxCnt(%d)",
                 m_objExtraRegErr.nExtraRegErrFinalType, m_objExtraRegErr.nExtraRegErrPolicy,
@@ -909,7 +908,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 CarrierConfig::Assets::
                         KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY);
         piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG,
                 "KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE :: "
@@ -957,7 +955,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY);
         piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG, "KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE :: RECWRATOD(%d)",
                 m_objRegErrCodeWithRaTime.bRegErrCodeWithRaTimeOnlyDefined, 0, 0);
@@ -987,7 +984,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objRegRetryInterval.objRegRetryIntervalSec = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY);
         piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG, "KEY_REG_RETRY_INTERVAL_BUNDLE :: URRIFSR(%d)",
                 m_objRegRetryInterval.bUseRegRetryIntervalForSub, 0, 0);
@@ -1015,7 +1011,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objSubErrCodeForInitReg.objSubErrCodeForInitReg = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
         piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG,
                 "KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE :: "
@@ -1039,7 +1034,6 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objSubErrCodeForTerminated.objSubErrCodeForTerminated = piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY);
         piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
 #ifdef __IMS_DEBUG__
         A_IMS_TRACE_D(LOGTAG, "KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE :: STECRM(%d)",
                 m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt, 0, 0);

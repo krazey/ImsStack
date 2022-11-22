@@ -147,7 +147,7 @@ protected:
 
     IMSMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandleMtc->m_objCapabilities; }
 
-    void SetCapabilities(IN IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    void SetCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
     {
         m_pAosHandleMtc->m_objCapabilities = objNewCapabilities;
     }
@@ -173,8 +173,6 @@ protected:
     }
 
     IMS_UINT32 GetHoldingVopsState() { return m_pAosHandleMtc->m_nHoldingVopsState; }
-
-    void SetVopsState(IN IMS_UINT32 nState) { m_pAosHandleMtc->m_nVopsState = nState; }
 
     IMS_UINT32 GetVopsState() { return m_pAosHandleMtc->m_nVopsState; }
 

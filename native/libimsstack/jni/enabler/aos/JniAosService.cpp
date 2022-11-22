@@ -87,7 +87,7 @@ void JniAosService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
 
     ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
     m_pJniAosServiceThread =
-            (JniAosServiceThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
+            DYNAMIC_CAST(JniAosServiceThread*, ImsProcess::GetInstance()->GetThread(strThreadName));
 
     if (m_pJniAosServiceThread == IMS_NULL)
     {

@@ -183,11 +183,6 @@ protected:
 
     IMS_SINT32 GetAorState() { return pAosSubscription->m_nAorState; }
 
-    IAosSubscriptionListener* GetAosSubscriptionListener()
-    {
-        return pAosSubscription->m_piListener;
-    }
-
     void SetTerminated(IN IMS_BOOL bTerminated) { pAosSubscription->SetTerminated(bTerminated); }
 
     IMS_BOOL IsSubtrying() { return pAosSubscription->IsSubTrying(); }

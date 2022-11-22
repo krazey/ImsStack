@@ -3779,7 +3779,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
         case SipStatusCode::SC_421:
             ProcessStartFailed_421();
             break;
-            break;
         // 423
         case SipStatusCode::SC_423:
             ProcessStartFailed_423();

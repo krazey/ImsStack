@@ -74,7 +74,6 @@ PUBLIC VIRTUAL AosTransaction::~AosTransaction()
             }
 
             delete pTraffic;
-            pTraffic = IMS_NULL;
         }
     }
     m_objTraffics.Clear();

@@ -163,7 +163,6 @@ void AosBuildDirector::DestructAos()
         if (piContext != IMS_NULL)
         {
             delete DYNAMIC_CAST(AosAppContext*, piContext);
-            piContext = IMS_NULL;
         }
     }
 

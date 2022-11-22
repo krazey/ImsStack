@@ -56,24 +56,7 @@ protected:
         pAosIpsec->m_bIgnorePolicyExpired = bIgnorePolicyExpired;
     }
 
-    IMS_BOOL GetIgnorePolicyExpired() { return pAosIpsec->m_bIgnorePolicyExpired; }
-
-    void SetSecurityProtocol(IN IMS_UINT32 nSecurityProtocol)
-    {
-        pAosIpsec->m_nSecuProto = nSecurityProtocol;
-    }
-
     IMS_UINT32 GetSecurityProtocol() { return pAosIpsec->m_nSecuProto; }
-
-    void SetIntegrityAlgorithm(IN IMS_UINT32 nIntegrityAlgorithm)
-    {
-        pAosIpsec->m_nAuthAlgo = nIntegrityAlgorithm;
-    }
-
-    void SetEncryptionlgorithm(IN IMS_UINT32 nEncryptionlgorithm)
-    {
-        pAosIpsec->m_nEncrAlgo = nEncryptionlgorithm;
-    }
 
     IMS_UINT32 GetEncryptionlgorithm() { return pAosIpsec->m_nEncrAlgo; }
 
