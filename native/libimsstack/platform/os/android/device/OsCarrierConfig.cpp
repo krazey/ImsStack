@@ -404,7 +404,7 @@ void OsCarrierConfig::DisplayCarrierConfig()
     std::set<String16>::iterator it;
     std::set<String16> booleanKeys = m_objConfig.getBooleanKeys();
 
-    for (it = booleanKeys.begin(); it != booleanKeys.end(); it++)
+    for (it = booleanKeys.begin(); it != booleanKeys.end(); ++it)
     {
         bool out = false;
         m_objConfig.getBoolean(*it, &out);
@@ -415,7 +415,7 @@ void OsCarrierConfig::DisplayCarrierConfig()
 
     std::set<String16> intKeys = m_objConfig.getIntKeys();
 
-    for (it = intKeys.begin(); it != intKeys.end(); it++)
+    for (it = intKeys.begin(); it != intKeys.end(); ++it)
     {
         int32_t out = -1;
         m_objConfig.getInt(*it, &out);
@@ -426,7 +426,7 @@ void OsCarrierConfig::DisplayCarrierConfig()
 
     std::set<String16> longKeys = m_objConfig.getLongKeys();
 
-    for (it = longKeys.begin(); it != longKeys.end(); it++)
+    for (it = longKeys.begin(); it != longKeys.end(); ++it)
     {
         int64_t out = -1L;
         m_objConfig.getLong(*it, &out);
@@ -437,7 +437,7 @@ void OsCarrierConfig::DisplayCarrierConfig()
 
     std::set<String16> stringKeys = m_objConfig.getStringKeys();
 
-    for (it = stringKeys.begin(); it != stringKeys.end(); it++)
+    for (it = stringKeys.begin(); it != stringKeys.end(); ++it)
     {
         String16 out;
         m_objConfig.getString(*it, &out);
@@ -449,7 +449,7 @@ void OsCarrierConfig::DisplayCarrierConfig()
 
     std::set<String16> intVectorKeys = m_objConfig.getIntVectorKeys();
 
-    for (it = intVectorKeys.begin(); it != intVectorKeys.end(); it++)
+    for (it = intVectorKeys.begin(); it != intVectorKeys.end(); ++it)
     {
         std::vector<int32_t> out;
         m_objConfig.getIntVector(*it, &out);
@@ -475,7 +475,7 @@ void OsCarrierConfig::DisplayCarrierConfig()
 
     std::set<String16> stringVectorKeys = m_objConfig.getStringVectorKeys();
 
-    for (it = stringVectorKeys.begin(); it != stringVectorKeys.end(); it++)
+    for (it = stringVectorKeys.begin(); it != stringVectorKeys.end(); ++it)
     {
         std::vector<String16> out;
         m_objConfig.getStringVector(*it, &out);
