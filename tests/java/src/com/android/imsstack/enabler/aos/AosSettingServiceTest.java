@@ -40,7 +40,6 @@ import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.AppContext;
-import com.android.internal.telephony.SubscriptionController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -71,7 +70,6 @@ public class AosSettingServiceTest {
     @Mock JNIUpCallEvtManager mMockJniUpCallEvtManager;
     @Mock IJNIUpCallEvt mMockJniUpCallEvt;
     @Mock ISubscription mMockSubscription;
-    @Mock SubscriptionController mMockSubscriptionController;
 
     @Before
     public void setup() throws Exception {
@@ -191,24 +189,20 @@ public class AosSettingServiceTest {
     @Test
     public void subscriptionListenerProxy_onSimLoadCompleted() {
         TelephonyCallback callback = mAosSettingService.mUserMobileDataStateListener;
-        when(mMockSubscriptionController.getSlotIndex(SUB_ID_0)).thenReturn(SLOT_0);
 
         mAosSettingService.mSubscriptionListener.onSimLoadCompleted(SLOT_0);
 
-        verify(mMockSubscriptionController).getSlotIndex(SUB_ID_0);
         verify(mTelephonyManager, never()).unregisterTelephonyCallback(callback);
     }
 
     @Test
     public void subscriptionListenerProxy_onDefaultSubscriptionChanged() {
         TelephonyCallback oldCallback = mAosSettingService.mUserMobileDataStateListener;
-        when(mMockSubscriptionController.getSlotIndex(SUB_ID_1)).thenReturn(SLOT_1);
         when(mMockSubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
         when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
 
         mAosSettingService.mSubscriptionListener.onDefaultSubscriptionChanged(SUB_ID_1);
 
-        verify(mMockSubscriptionController).getSlotIndex(SUB_ID_1);
         verify(mSubscriptionManager).getSubscriptionIds(SLOT_0);
         verify(mTelephonyManager).unregisterTelephonyCallback(oldCallback);
         verify(mTelephonyManager).createForSubscriptionId(SUB_ID_1);
@@ -221,13 +215,11 @@ public class AosSettingServiceTest {
     @Test
     public void subscriptionListenerProxy_onDefaultDataSubscriptionChanged() {
         TelephonyCallback oldCallback = mAosSettingService.mUserMobileDataStateListener;
-        when(mMockSubscriptionController.getSlotIndex(SUB_ID_1)).thenReturn(SLOT_1);
         when(mMockSubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
         when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
 
         mAosSettingService.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_1);
 
-        verify(mMockSubscriptionController).getSlotIndex(SUB_ID_1);
         verify(mSubscriptionManager).getSubscriptionIds(SLOT_0);
         verify(mTelephonyManager).unregisterTelephonyCallback(oldCallback);
         verify(mTelephonyManager).createForSubscriptionId(SUB_ID_1);
@@ -291,7 +283,13 @@ public class AosSettingServiceTest {
         @Override
         protected int getSlotId(int subId) {
             super.getSlotId(subId);
-            return mMockSubscriptionController.getSlotIndex(subId);
+            if (subId == SUB_ID_0) {
+                return SLOT_0;
+            } else if (subId == SUB_ID_1) {
+                return SLOT_1;
+            }
+
+            return SLOT_0;
         }
     }
 }

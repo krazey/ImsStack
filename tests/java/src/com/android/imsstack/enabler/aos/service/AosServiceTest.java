@@ -217,11 +217,13 @@ public class AosServiceTest extends ImsStackTest {
 
     @Test
     public void changeCapabilities_sameCapability() {
-        CapabilityPairs pairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
-                IAosRegistrationListener.Capability.VIDEO);
-        mAosService.mCapabilityPairs = pairs;
+        CapabilityPairs oldPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.UT);
+        CapabilityPairs newPairs = new CapabilityPairs(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.UT);
+        mAosService.mCapabilityPairs = oldPairs;
 
-        mAosService.changeCapabilities(pairs);
+        mAosService.changeCapabilities(newPairs);
 
         verify(mMockJniIms, never()).sendData(eq(mNativeObject), any());
     }
@@ -844,6 +846,17 @@ public class AosServiceTest extends ImsStackTest {
 
         verifyNoMoreInteractions(mMockAosRegistrationListener);
         verifyNoMoreInteractions(mMockAosInfoListener);
+    }
+
+    @Test
+    public void hashCodeInIAosRegistration() {
+        CapabilityPairs oldPairs = new CapabilityPairs(NetworkType.LTE, Capability.UT);
+        oldPairs.addCapability(NetworkType.NR, Capability.CALL_COMPOSER);
+        CapabilityPairs newPairs = new CapabilityPairs(NetworkType.NR, Capability.CALL_COMPOSER);
+        newPairs.addCapability(NetworkType.LTE, Capability.UT);
+
+        assertTrue(oldPairs.hashCode() == newPairs.hashCode());
+        assertTrue(oldPairs.equals(newPairs));
     }
 
     private byte[] createBytes(int... parcelData) {

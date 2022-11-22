@@ -17,6 +17,7 @@ package com.android.imsstack.enabler.aos.service;
 
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.util.ArraySet;
@@ -77,7 +78,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     public void init(int slotId) {
         mSlotId = slotId;
 
-        mHandler = new AosServiceHandler();
+        mHandler = new AosServiceHandler(Looper.myLooper());
 
         mNativeObject = JniImsProxy.getInterface(IUIMS.AOS_SERVICE, mSlotId);
         if (mNativeObject != 0) {
@@ -621,6 +622,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private final class AosServiceHandler extends Handler {
+        private AosServiceHandler(Looper looper) {
+            super(looper);
+        }
 
         @Override
         public void handleMessage(Message msg) {

@@ -19,8 +19,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
@@ -68,7 +68,7 @@ public class AosSettingService {
     public void init() {
         ImsLog.d(mSlotId, "");
 
-        mHandler = new SettingServiceHandler();
+        mHandler = new SettingServiceHandler(Looper.myLooper());
 
         IJNIUpCallEvt jniEvt = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
         if (jniEvt != null) {
@@ -202,6 +202,9 @@ public class AosSettingService {
     }
 
     private final class SettingServiceHandler extends Handler {
+        private SettingServiceHandler(Looper looper) {
+            super(looper);
+        }
 
         @Override
         public void handleMessage(Message msg) {
@@ -326,15 +329,6 @@ public class AosSettingService {
 
             StringBuilder sb = new StringBuilder();
             sb.append("intent=" + intent.getAction());
-            sb.append(", extra=[");
-
-            Bundle extras = intent.getExtras();
-            if (extras != null) {
-                for (String key : extras.keySet()) {
-                    sb.append(key + "=" + extras.get(key) + " ");
-                }
-            }
-            sb.append("]");
 
             return sb.toString();
         }

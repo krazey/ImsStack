@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class provides the interworking interface between Java and native layer
@@ -69,22 +70,19 @@ public interface IAosRegistration {
      * If the capabilities changed by calling this method is not updated,
      * the following API is called. {@link IAosRegistrationListener#notifyCapabilitiesUpdateFailed}
      *
-     * @param capabilityPairs Type of {@link CapabilityPairs},
-     *     a pair of capabilities and network Type. (@code capabilityPairs} contains
-     *     all enabled capabilities for each network type.
-     * @see {@link IAosRegistrationListener.Capability}
-     * @see {@link IAosRegistrationListener.NetworkType}
+     * @param capabilityPairs Type of {@link CapabilityPairs}, a pair of capabilities and network
+     * Type. {@code capabilityPairs} contains all enabled capabilities for each network type.
+     * See {@link IAosRegistrationListener.Capability} and
+     * {@link IAosRegistrationListener.NetworkType}
      */
     public void changeCapabilities(CapabilityPairs capabilityPairs);
 
     /**
      * This method is called when controlling registration.
      *
-     * @param requestType Type of int {@link RequestType},
-     * @param pcscfOrder Type of int {@link Pcscf},
-     * @see {@link #IAosRegistration.RequestType}
-     * @see {@link #IAosRegistration.Pcscf}
-     * @see {@link #IAosRegistration.Cause}
+     * @param requestType Type of int {@link RequestType}.
+     * @param pcscfOrder Type of int {@link Pcscf}.
+     * @param cause Type of int {@link Cause}.
      */
     void controlRegistration(int requestType, int pcscfOrder, int cause);
 
@@ -144,10 +142,10 @@ public interface IAosRegistration {
     public final class CapabilityPairs {
 
         /**
-         * The key of Map<Integer, Integer> is networkType.
+         * The key of {@code Map<Integer, Integer>} is networkType.
          * {@link IAosRegistrationListener.NetworkType}
          *
-         * The value of Map<Integer, Integer> is Capability.
+         * The value of {@code Map<Integer, Integer>} is Capability.
          * {@link IAosRegistrationListener.Capability}
          */
         private final Map<Integer, Integer> mCapabilities;
@@ -167,13 +165,13 @@ public interface IAosRegistration {
         }
 
         public boolean hasCapability(Integer networkType, Integer capability) {
-            return ((mCapabilities.getOrDefault(networkType, 0) & capability) > 0) ? true : false;
+            return (mCapabilities.getOrDefault(networkType, 0) & capability) > 0;
         }
 
         /**
          * This method returns a pair of capabilities.
          *
-         * @return mCapabilities is type of Map<Integer, Integer>.
+         * @return mCapabilities is type of {@code Map<Integer, Integer>}.
          */
         public Map<Integer, Integer> getCapabilities() {
             return mCapabilities;
@@ -200,13 +198,22 @@ public interface IAosRegistration {
         }
 
         @Override
-        public String toString() {
-            StringBuffer sb = new StringBuffer();
+        public int hashCode() {
+            int code = 0;
+            for (Map.Entry<Integer, Integer> entry : this.getCapabilities().entrySet()) {
+                code += Objects.hash(entry.getKey(), entry.getValue());
+            }
 
-            sb.append("{ Size=" + getCapabilities().size() + ", ");
+            return code;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{ Size=").append(getCapabilities().size()).append(", ");
             for (Map.Entry<Integer, Integer> entry : getCapabilities().entrySet()) {
-                sb.append("( Network=" + entry.getKey() + ", ");
-                sb.append("Capabilities=" + entry.getValue() + " )");
+                sb.append("( Network=").append(entry.getKey()).append(", Capabilities=")
+                        .append(entry.getValue()).append(" )");
             }
             sb.append(" }");
 

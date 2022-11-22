@@ -24,15 +24,14 @@ public interface IAosInfo {
     /**
      * Registers a new Listener to receive AoS Information updates.
      *
-     * @param {@code listener} to listen to the events of this object.
-     * @see {@link IAosInfoListener}
+     * @param listener {@link IAosInfoListener} to listen to the events of this object.
      */
     public void addListener(IAosInfoListener listener);
 
     /**
      * Removes a listener previously registered with {@link #addListener(IAosInfoListener)}.
      *
-     * @param  {@code listener} previously registered.
+     * @param listener {@link IAosInfoListener} previously registered.
      */
     public void removeListener(IAosInfoListener listener);
 
@@ -40,7 +39,7 @@ public interface IAosInfo {
      * Called to notify the change of airplane setting.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code isOn} is {@code true} if on, {@code false} if off.
+     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
     public void notifyAirplaneSetting(boolean isOn);
 
@@ -48,7 +47,7 @@ public interface IAosInfo {
      * Called to notify the change of data roaming setting.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code isAllowed} is {@code true} if allowed, {@code false} if not allowed.
+     * @param isAllowed {@code isAllowed} is {@code true} if allowed, {@code false} if not allowed.
      */
     public void notifyDataRoamingSetting(boolean isAllowed);
 
@@ -56,7 +55,7 @@ public interface IAosInfo {
      * Called to notify the change of mobile data setting.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code isOn} is {@code true} if on, {@code false} if off.
+     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
     public void notifyMobileDataSetting(boolean isOn);
 
@@ -64,8 +63,7 @@ public interface IAosInfo {
      * Called to notify the change of roaming preferred voice network.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code state} is type of {@code RoamingPreferredVoiceNetwork}.
-     * @see class {@link IAosInfo.RoamingPreferredVoiceNetwork}.
+     * @param state {@code state} is type of {@link RoamingPreferredVoiceNetwork}.
      */
     public void notifyRoamingPreferredVoiceNetwork(int state);
 
@@ -73,12 +71,10 @@ public interface IAosInfo {
      * Called to notify the change of service setting.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code state} is type of ServiceSetting.
-     * @param  {@code serviceBits} : bits an integer. Valid values are the following :
-     *     M_APP_UC(0x00000001), M_APP_SMS(0x00000002), M_APP_VT(0x00000004),
-     *     M_SERVICE_ALL(0xFFFFFFFF)
-     * @see class {@link IAosInfo.ServiceSetting}
-     * @see class {@link com.android.imsstack.enabler.IUIMS}
+     * @param state {@code state} is type of {@link ServiceSetting}.
+     * @param serviceBits {@code serviceBits} is one of {@link com.android.imsstack.enabler.IUIMS}.
+     *          Valid values are the following : M_APP_UC(0x00000001), M_APP_SMS(0x00000002),
+     *          M_APP_VT(0x00000004), M_SERVICE_ALL(0xFFFFFFFF)
      */
     public void notifyServiceSetting(int state, int serviceBits);
 
@@ -86,7 +82,7 @@ public interface IAosInfo {
      * Called to notify the change of TTY setting.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code isOn} is {@code true} if on, {@code false} if off.
+     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
     public void notifyTtySetting(boolean isOn);
 
@@ -94,7 +90,7 @@ public interface IAosInfo {
      * Called to notify the change of video setting.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code isOn} is {@code true} if on, {@code false} if off.
+     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
     public void notifyVideoSetting(boolean isOn);
 
@@ -102,7 +98,7 @@ public interface IAosInfo {
      * Called to notify the change of VoLTE setting.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code isOn} is {@code true} if on, {@code false} if off.
+     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
     public void notifyVolteSetting(boolean isOn);
 
@@ -110,7 +106,7 @@ public interface IAosInfo {
      * Called to notify the change of WFC setting.
      * Native Listener : IAosServiceSettingListener.
      *
-     * @param  {@code isOn} is {@code true} if on, {@code false} if off.
+     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
     public void notifyWfcSetting(boolean isOn);
 
@@ -118,7 +114,6 @@ public interface IAosInfo {
     /**
      * Called to notify the start of AoS Service.
      * Native Listener : IAosServicePhoneListener.
-     *
      */
     public void notifyAosStart();
 
@@ -126,10 +121,9 @@ public interface IAosInfo {
      * Called to notify the failure of IPCAN Handover.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param  {@code targetNetwork} is the technology that has failed to be changed to.
-     * @param  {@code causeCode} is cause code of handover failure
-     * @see {@link IApn.IPCAN_CATEGORY_MOBILE} and {@link IApn.IPCAN_CATEGORY_WLAN}
-     * @see class {@link android.telephony.DataFailCause}
+     * @param targetNetwork {@code targetNetwork} is the technology that has failed to be changed
+     * to. One of {@link com.android.imsstack.core.agents.dcmif.IApn#IPCAN_CATEGORY_XXX}.
+     * @param causeCode handover failure cause code. one of {@link android.telephony.DataFailCause}.
      */
     public void notifyIpcanHandoverFailure(int targetNetwork, int causeCode);
 
@@ -137,8 +131,7 @@ public interface IAosInfo {
      * Called to notify the change of ISIM state.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param  {@code state} is type of {@code IsimState}.
-     * @see class {@link IAosInfo.IsimState}
+     * @param state {@code state} is type of {@link IsimState}.
      */
     public void notifyIsimState(int state);
 
@@ -146,8 +139,7 @@ public interface IAosInfo {
      * Called to notify the change of location information.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param  {@code state} is type of {@code LocationInfo}.
-     * @see class {@link IAosInfo.LocationInfo}
+     * @param state {@code state} is type of {@link LocationInfo}.
      */
     public void notifyLocationInfo(int state);
 
@@ -155,7 +147,7 @@ public interface IAosInfo {
      * Called to notify the change of mobile data limit.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param  {@code isLimited} is {@code true} if limited, {@code false} if not limited.
+     * @param isLimited {@code isLimited} is {@code true} if limited, {@code false} if not limited.
      */
     public void notifyMobileDataLimit(boolean isLimited);
 
@@ -163,7 +155,7 @@ public interface IAosInfo {
      * Called to notify the change of network capability.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param  {@code isOn} is {@code true} if on, {@code false} if off.
+     * @param isOn {@code isOn} is {@code true} if on, {@code false} if off.
      */
     public void notifyNetworkVideoCapability(boolean isOn);
 
@@ -171,9 +163,9 @@ public interface IAosInfo {
      * Called to notify the change of phone number state.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param  {@code isRefresh} {@code true} if refresh action, {@code false} if initial action.
-     * @param  {@code state} is type of {@code phoneNumberState}.
-     * @see class {@link IAosInfo.phoneNumberState}
+     * @param isRefresh {@code isRefresh} {@code true} if refresh action, {@code false} if initial
+     * action.
+     * @param state {@code state} is type of {@link PhoneNumberState}
      */
     public void notifyPhoneNumberState(boolean isRefresh, int state);
 
@@ -195,8 +187,7 @@ public interface IAosInfo {
      * Called to notify the change of precise call state.
      * Native Listener : IAosServicePhoneListener.
      *
-     * @param  {@code state} is type of {@code PreciseCallState}.
-     * @see class {@link IAosInfo.PreciseCallState}
+     * @param state {@code state} is type of {@link PreciseCallState}.
      */
     public void notifyPreciseCallState(int state);
 
