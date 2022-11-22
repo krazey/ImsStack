@@ -763,13 +763,13 @@ GLOBAL SipHeaderBase* DecodeHeader(
 
         if (pHeader->DecodeHdr(pszTmpBody, nBodyLen) == SIP_FALSE)
         {
-            Free(pszTmpBody);
+            IMS_MEM_Free(pszTmpBody);
             FreeHeaderEx(pHeader);
             IMS_TRACE_D("Decoding header is failed", 0, 0, 0);
             return IMS_NULL;
         }
 
-        Free(pszTmpBody);
+        IMS_MEM_Free(pszTmpBody);
     }
 
     return pHeader;
@@ -1340,12 +1340,6 @@ GLOBAL IMSList<SipParameter*> ExtractParameters(IN const AString& strParams, IN 
     }
 
     return objParams;
-}
-
-GLOBAL void FreeMemBlock(IN void*& pvMemBlock)
-{
-    IMS_MEM_Free(pvMemBlock);
-    pvMemBlock = IMS_NULL;
 }
 
 GLOBAL void FreeAddrSpec(IN SipAddrSpec*& pAddrSpec)
@@ -2246,72 +2240,6 @@ GLOBAL IMS_UINT32 GetCSeqNumber(IN ::SipMessage* pMessage)
     return nSeqNum;
 }
 
-GLOBAL IMS_BOOL GetRAckHeader(IN ::SipMessage* pMessage, OUT IMS_UINT32& nResponseNum,
-        OUT IMS_UINT32& nCseqNum, OUT SipMethod& objMethod)
-{
-    SIPStackError(EERR_NOERR);
-
-    if (pMessage == IMS_NULL)
-    {
-        SIPStackError(EERR_INVALIDPARAM);
-        return IMS_FALSE;
-    }
-
-    SipHeaderBase* pHeader = SipStack::GetHeader(pMessage, SipHeaderBase::RACK);
-
-    if ((pHeader == IMS_NULL) || (pHeader->GetHdrType() != SipHeaderBase::RACK))
-    {
-        FreeHeader(pHeader);
-        return IMS_FALSE;
-    }
-
-    SipRAcKHeader* pRAckHeader = DYNAMIC_CAST(SipRAcKHeader*, pHeader);
-
-    // Get the response number from RAck header
-    nResponseNum = pRAckHeader->GetResponseNum();
-    // Get the response number from CSeqNum from header
-    nCseqNum = pRAckHeader->GetCSeqNum();
-
-    objMethod = pRAckHeader->GetMethod();
-
-    FreeHeader(pHeader);
-
-    return IMS_TRUE;
-}
-
-GLOBAL IMS_SINT32 GetDestinationTransport(IN ::SipMessage* pMessage)
-{
-    // Check if the addr-spec which is set in the topmost Route header contains SIPS URI
-    SipAddrSpec* pAddrSpec = GetAddrSpec(pMessage, SipHeaderBase::ROUTE, 0);
-
-    if (pAddrSpec != IMS_NULL)
-    {
-        if ((pAddrSpec->GetUriScheme() == SipUri::SCHEME_SIPS) &&
-                HasParameter(pAddrSpec, AString(Sip::STR_LR)))
-        {
-            FreeAddrSpec(pAddrSpec);
-            return Sip::TRANSPORT_TLS;
-        }
-
-        FreeAddrSpec(pAddrSpec);
-    }
-
-    pAddrSpec = GetRequestUri(pMessage);
-
-    if (pAddrSpec != IMS_NULL)
-    {
-        if (pAddrSpec->GetUriScheme() == SipUri::SCHEME_SIPS)
-        {
-            FreeAddrSpec(pAddrSpec);
-            return Sip::TRANSPORT_TLS;
-        }
-
-        FreeAddrSpec(pAddrSpec);
-    }
-
-    return Sip::TRANSPORT_ANY;
-}
-
 GLOBAL IMS_BOOL GetEventHeader(
         IN ::SipMessage* pMessage, OUT AString& strEvent, OUT AString& strEventId)
 {
@@ -2770,55 +2698,6 @@ GLOBAL AString GetParameter(
     DeleteStackString(pszValue);
 
     return strValue;
-}
-
-GLOBAL IMS_SINT32 GetParameterCount(IN SipAddrSpec* pAddrSpec)
-{
-    SIPStackError(EERR_NOERR);
-
-    if ((pAddrSpec->GetUriScheme() == SipUri::SCHEME_SIP) ||
-            (pAddrSpec->GetUriScheme() == SipUri::SCHEME_SIPS))
-    {
-        SipUri* pSipUri = pAddrSpec->GetSipUri();
-
-        if (pSipUri == IMS_NULL)
-        {
-            return 0;
-        }
-
-        IMS_SINT32 nParamCount = pSipUri->GetUriParamCount();
-
-        pSipUri->SipDelete();
-
-        return nParamCount;
-    }
-    else
-    {
-        SIPStackError(EERR_NOEXISTS);
-
-        // FIXME: Tel URL
-    }
-
-    return 0;
-}
-
-GLOBAL IMS_SINT32 GetParameterCount(IN SipHeaderBase* pHeader)
-{
-    SIPStackError(EERR_NOERR);
-
-    if (pHeader == IMS_NULL)
-    {
-        return 0;
-    }
-
-    SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
-
-    if (pParams == IMS_NULL)
-    {
-        return 0;
-    }
-
-    return pParams->GetParamCount();
 }
 
 GLOBAL SipAddrSpec* GetRequestUri(IN ::SipMessage* pMessage)
@@ -3294,44 +3173,6 @@ GLOBAL IMS_BOOL InsertHeader(
     }
 
     return IMS_TRUE;
-}
-
-GLOBAL IMS_BOOL IsCompactHeaderNameSupported(
-        IN IMS_SINT32 nType, IN const AString& strName /*= AString::ConstNull()*/)
-{
-    (void)strName;
-
-    switch (nType)
-    {
-        case SipHeaderBase::CALL_ID:              // FALL-THROUGH
-        case SipHeaderBase::CONTACT:              // FALL-THROUGH
-        case SipHeaderBase::CONTACT_WILD:         // FALL-THROUGH
-        case SipHeaderBase::CONTACT_ANY:          // FALL-THROUGH
-        case SipHeaderBase::CONTENT_ENCODING:     // FALL-THROUGH
-        case SipHeaderBase::CONTENT_LENGTH:       // FALL-THROUGH
-        case SipHeaderBase::CONTENT_TYPE:         // FALL-THROUGH
-        case SipHeaderBase::FROM:                 // FALL-THROUGH
-        case SipHeaderBase::SUPPORTED:            // FALL-THROUGH
-        case SipHeaderBase::TO:                   // FALL-THROUGH
-        case SipHeaderBase::VIA:                  // FALL-THROUGH
-        case SipHeaderBase::EVENT:                // FALL-THROUGH
-        case SipHeaderBase::ALLOW_EVENTS:         // FALL-THROUGH
-        case SipHeaderBase::REFER_TO:             // FALL-THROUGH
-        case SipHeaderBase::REFERRED_BY:          // FALL-THROUGH
-        case SipHeaderBase::REQUEST_DISPOSITION:  // FALL-THROUGH
-        case SipHeaderBase::ACCEPT_CONTACT:       // FALL-THROUGH
-        case SipHeaderBase::REJECT_CONTACT:       // FALL-THROUGH
-        case SipHeaderBase::SESSION_EXPIRES:      // FALL-THROUGH
-        case SipHeaderBase::SUBJECT:              // FALL-THROUGH
-        case SipHeaderBase::IDENTITY:             // FALL-THROUGH
-        case SipHeaderBase::IDENTITY_INFO:
-            return IMS_TRUE;
-
-        default:
-            break;
-    }
-
-    return IMS_FALSE;
 }
 
 GLOBAL IMS_BOOL IsHeaderPresent(IN ::SipMessage* pMessage, IN IMS_SINT32 nType)

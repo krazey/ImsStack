@@ -214,7 +214,6 @@ GLOBAL IMSList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 GLOBAL IMSList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec);
 GLOBAL IMSList<SipParameter*> ExtractParameters(IN const AString& strParams, IN IMS_CHAR cSep);
 
-GLOBAL void FreeMemBlock(IN void*& pvMemBlock);
 GLOBAL void FreeAddrSpec(IN SipAddrSpec*& pAddrSpec);
 GLOBAL void FreeHeader(IN SipHeaderBase* pHeader);
 GLOBAL void FreeHeaderEx(IN SipHeaderBase*& pHeader);
@@ -235,9 +234,6 @@ GLOBAL AString GetChallengeScheme(IN SipHeaderBase* pHeader);
 GLOBAL IMS_BOOL GetContent(
         IN SipMsgBody* pMsgBody, OUT IMS_BYTE*& pContent, OUT IMS_SINT32& nContentLength);
 GLOBAL IMS_UINT32 GetCSeqNumber(IN ::SipMessage* pMessage);
-GLOBAL IMS_BOOL GetRAckHeader(IN ::SipMessage* pMessage, OUT IMS_UINT32& nResponseNum,
-        OUT IMS_UINT32& nCseqNum, OUT SipMethod& objMethod);
-GLOBAL IMS_SINT32 GetDestinationTransport(IN ::SipMessage* pMessage);
 GLOBAL IMS_BOOL GetEventHeader(
         IN ::SipMessage* pMessage, OUT AString& strEvent, OUT AString& strEventId);
 GLOBAL SipHeaderBase* GetHeader(
@@ -259,8 +255,6 @@ GLOBAL AString GetParameter(
         IN SipAddrSpec* pAddrSpec, IN const AString& strName, IN IMS_UINT32 nIndex = 0);
 GLOBAL AString GetParameter(
         IN SipHeaderBase* pHeader, IN const AString& strName, IN IMS_UINT32 nIndex = 0);
-GLOBAL IMS_SINT32 GetParameterCount(IN SipAddrSpec* pAddrSpec);
-GLOBAL IMS_SINT32 GetParameterCount(IN SipHeaderBase* pHeader);
 GLOBAL SipAddrSpec* GetRequestUri(IN ::SipMessage* pMessage);
 GLOBAL AString GetSentByFromVia(IN SipHeaderBase* pHeader);
 GLOBAL AString GetSentProtocolFromVia(IN SipHeaderBase* pHeader);
@@ -283,8 +277,6 @@ GLOBAL IMS_BOOL HasSdpMessageBody(IN ::SipMessage* pMessage);
 
 GLOBAL IMS_BOOL InsertHeader(
         IN SipHeaderBase* pHeader, IN IMS_UINT32 nIndex, IN_OUT ::SipMessage*& pMessage);
-GLOBAL IMS_BOOL IsCompactHeaderNameSupported(
-        IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull());
 GLOBAL IMS_BOOL IsHeaderPresent(IN ::SipMessage* pMessage, IN IMS_SINT32 nType);
 GLOBAL IMS_BOOL IsMessageBodyCompressed(IN ::SipMessage* pMessage);
 GLOBAL IMS_BOOL UncompressMessageBody(IN ::SipMessage* pMessage);
@@ -383,11 +375,5 @@ GLOBAL const IMS_CHAR* GetLogString(IN const IMS_CHAR* pszInput, IN_OUT IMS_CHAR
         IN IMS_SINT32 nOutSize /* > 3, excluding null char*/,
         IN const IMS_CHAR cDelimiter = 0 /*no delimiter*/);
 }  // namespace SipStack
-
-template <typename T>
-inline void SipStack::Free(IN T& pMemBlock)
-{
-    SipStack::FreeMemBlock(reinterpret_cast<void*&>(pMemBlock));
-}
 
 #endif

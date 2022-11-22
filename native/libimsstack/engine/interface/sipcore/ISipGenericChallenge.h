@@ -100,13 +100,6 @@ public:
      * @param strNonce Nonce value of this challenge
      */
     virtual void SetNonce(IN const AString& strNonce) = 0;
-
-    /**
-     * @brief Sets the nonce count.
-     *
-     * @param nNonceCount Nonce count of this challenge
-     */
-    virtual void SetNonceCount(IN IMS_UINT32 nNonceCount) = 0;
 };
 
 #endif

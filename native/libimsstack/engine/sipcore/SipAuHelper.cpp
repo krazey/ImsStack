@@ -47,20 +47,8 @@ public:
     inline IMS_SINT32 GetType() const override { return m_nType; }
     inline void IncreaseNonceCount() override { m_nNonceCount++; }
     inline void SetNonce(IN const AString& strNonce) override { m_strNonce = strNonce; }
-    inline void SetNonceCount(IN IMS_UINT32 nNonceCount) override
-    {
-        if (m_nNonceCount >= nNonceCount)
-        {
-            return;
-        }
 
-        m_nNonceCount = nNonceCount;
-    }
-
-    inline const AString& GetDomain() const { return m_strDomain; }
     inline const AString& GetOpaque() const { return m_strOpaque; }
-    inline const AString& GetStale() const { return m_strStale; }
-
     inline void SetAlgorithm(IN const AString& strAlgorithm) { m_strAlgorithm = strAlgorithm; }
     inline void SetRealm(IN const AString& strRealm) { m_strRealm = strRealm; }
     inline void SetScheme(IN const AString& strScheme) { m_strScheme = strScheme; }

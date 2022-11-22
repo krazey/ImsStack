@@ -54,7 +54,6 @@ public:
         m_nScore = 0;
     }
     inline IMS_SINT32 GetNpf() const { return m_nNpf; }
-    inline IMS_SINT32 GetNcf() const { return m_nNcf; }
     inline IMS_SINT32 GetNvm() const { return m_nNvm; }
     inline IMS_SINT32 GetNvmCs() const { return m_nNvmForCs; }
     inline IMS_SINT32 GetScore() const { return m_nScore; }
