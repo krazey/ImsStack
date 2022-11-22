@@ -27,12 +27,6 @@
     </int-array>
     <boolean name="use_wfc_country_code_availability_check_bool" value="true"/>
     <int name="reg_retry_default_policy_int" value="1"/>
-    <int-array name="reg_retry_err_code_with_diff_pcscf_int_array" num="4">
-        <item value="403"/>
-        <item value="500"/>
-        <item value="503"/>
-        <item value="504"/>
-    </int-array>
 
     <!-- Ut/Xcap Assets -->
     <boolean name="ut_display_error_phrase_with_409_error_bool" value="true"/>
