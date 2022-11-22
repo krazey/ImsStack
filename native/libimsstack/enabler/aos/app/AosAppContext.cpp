@@ -56,7 +56,6 @@ PUBLIC VIRTUAL AosAppContext::~AosAppContext()
         {
             piHandle->CleanUp();
             delete DYNAMIC_CAST(AosHandle*, piHandle);
-            piHandle = IMS_NULL;
         }
     }
 

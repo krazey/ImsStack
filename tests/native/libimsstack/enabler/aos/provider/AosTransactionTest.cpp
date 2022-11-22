@@ -34,7 +34,7 @@ const IMS_SINT32 SLOT_ID = 0;
 
 class TestAosTransaction : public AosTransaction
 {
-    inline TestAosTransaction(IN IMS_SINT32 nSlotId) :
+    inline explicit TestAosTransaction(IN IMS_SINT32 nSlotId) :
             AosTransaction(nSlotId),
             piOriginRadio(IMS_NULL)
     {

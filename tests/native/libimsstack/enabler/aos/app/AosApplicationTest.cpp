@@ -129,7 +129,7 @@ enum
 
 class TestAosCondition : public AosCondition
 {
-    inline TestAosCondition(IN IAosAppContext* piAppContext) :
+    inline explicit TestAosCondition(IN IAosAppContext* piAppContext) :
             AosCondition(piAppContext),
             m_bReady(IMS_FALSE)
     {
@@ -147,7 +147,7 @@ private:
 
 class TestAosConnector : public AosConnector
 {
-    inline TestAosConnector(IN IAosAppContext* piAppContext) :
+    inline explicit TestAosConnector(IN IAosAppContext* piAppContext) :
             AosConnector(piAppContext)
     {
     }

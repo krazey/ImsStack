@@ -101,8 +101,6 @@ PUBLIC GLOBAL void AosFactory::Stop(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
     if (pAoSMngr != IMS_NULL)
     {
         delete pAoSMngr;
-        pAoSMngr = IMS_NULL;
-
         m_objManagers.Remove(nSlotId);
     }
 }

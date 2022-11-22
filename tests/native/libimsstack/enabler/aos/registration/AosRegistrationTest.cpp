@@ -378,10 +378,9 @@ TEST_F(AosRegistrationTest, StartAndDestroy)
 
     IMSMap<AString, IAosHandle*> objHandles;
     const IMSList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
-    AosServiceProfile* pServiceProfile = IMS_NULL;
     if (objProfiles.GetSize() > 0)
     {
-        pServiceProfile = objProfiles.GetAt(0);
+        AosServiceProfile* pServiceProfile = objProfiles.GetAt(0);
         objHandles.Add(pServiceProfile->GetServiceId(), &m_objMockIAosHandle);
         EXPECT_CALL(m_objMockIAosHandle, GetAppId())
                 .Times(AnyNumber())

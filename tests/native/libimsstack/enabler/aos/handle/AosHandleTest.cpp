@@ -179,8 +179,6 @@ protected:
 
     void ClearHoldingBlocksForWifi() { m_pAosHandle->m_nHoldingBlocksForWifi = 0; }
 
-    IMS_UINT32 GetBlocks() { return m_pAosHandle->m_nBlocks; }
-
     IMS_BOOL IsHandleBlocked() { return m_pAosHandle->IsHandleBlocked(); }
 
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nBlock) { return m_pAosHandle->IsHandleBlocked(nBlock); }
@@ -312,12 +310,12 @@ protected:
         m_pAosHandle->m_bRegFeatureTagRequired = bRequired;
     }
 
-    void SetFeatureTagList(IN AosFeatureTagList& objFeatureTagList)
+    void SetFeatureTagList(IN const AosFeatureTagList& objFeatureTagList)
     {
         m_pAosHandle->m_objFeatureTagList = objFeatureTagList;
     }
 
-    void SetBindedFeatureTagList(IN AosFeatureTagList& objBindedFeatureTagList)
+    void SetBindedFeatureTagList(IN const AosFeatureTagList& objBindedFeatureTagList)
     {
         m_pAosHandle->m_objBindedFeatureTagList = objBindedFeatureTagList;
     }
@@ -520,7 +518,7 @@ protected:
 
     IMSMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandle->m_objCapabilities; }
 
-    void SetCapabilities(IN IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    void SetCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
     {
         m_pAosHandle->m_objCapabilities = objNewCapabilities;
     }
@@ -574,11 +572,7 @@ TEST_F(AosHandleTest, Constructor)
 
     EXPECT_TRUE(bResult);
 
-    if (pTestAosHandle != nullptr)
-    {
-        delete pTestAosHandle;
-        pTestAosHandle = nullptr;
-    }
+    delete pTestAosHandle;
 
     AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }
@@ -1393,11 +1387,7 @@ TEST_F(AosHandleTest, NetTracker_StatusChanged_Test9)
 
     EXPECT_FALSE(pTestAosHandleEmergencyMtc->AosHandle::IsHandleBlocked(AosHandle::BLOCK_3G));
 
-    if (pTestAosHandleEmergencyMtc != nullptr)
-    {
-        delete pTestAosHandleEmergencyMtc;
-        pTestAosHandleEmergencyMtc = nullptr;
-    }
+    delete pTestAosHandleEmergencyMtc;
 }
 
 TEST_F(AosHandleTest, Init_CleanUp)
@@ -1805,17 +1795,8 @@ TEST_F(AosHandleTest, IsEmergencyService_Test)
     EXPECT_TRUE(pTestAosHandleEmergencyMtc->AosHandle::IsEmergencyService());
     EXPECT_TRUE(pTestAosHandleEmergencyMts->AosHandle::IsEmergencyService());
 
-    if (pTestAosHandleEmergencyMtc != nullptr)
-    {
-        delete pTestAosHandleEmergencyMtc;
-        pTestAosHandleEmergencyMtc = nullptr;
-    }
-
-    if (pTestAosHandleEmergencyMts != nullptr)
-    {
-        delete pTestAosHandleEmergencyMts;
-        pTestAosHandleEmergencyMts = nullptr;
-    }
+    delete pTestAosHandleEmergencyMtc;
+    delete pTestAosHandleEmergencyMts;
 
     AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }
@@ -4313,11 +4294,7 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test4)
 
     EXPECT_FALSE(pTestAosHandleEmergencyMtc->ProcessImsSuspended());
 
-    if (pTestAosHandleEmergencyMtc != nullptr)
-    {
-        delete pTestAosHandleEmergencyMtc;
-        pTestAosHandleEmergencyMtc = nullptr;
-    }
+    delete pTestAosHandleEmergencyMtc;
 
     AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }

@@ -31,7 +31,7 @@ PUBLIC GLOBAL IMS_UINT32 AosDnsQuery::m_nIdentity = 0;
 class AosDnsQueryPrivate : public IThreadImpListener
 {
 public:
-    AosDnsQueryPrivate(IN AosDnsQuery* pDnsQueryer);
+    explicit AosDnsQueryPrivate(IN AosDnsQuery* pDnsQueryer);
     virtual ~AosDnsQueryPrivate();
 
 private:
@@ -49,7 +49,7 @@ private:
     IMS_BOOL ResetEvent(IN IMS_UINT32 nEvent);
     IMS_BOOL SetEvent(IN IMS_UINT32 nEvent);
 
-    void SetDomainName(IN AString& strDomainName) { m_strDomainName = strDomainName; };
+    void SetDomainName(IN const AString& strDomainName) { m_strDomainName = strDomainName; };
     void SetNetConnection(IN INetworkConnection* piConnection) { m_piConnection = piConnection; };
 
 private:
