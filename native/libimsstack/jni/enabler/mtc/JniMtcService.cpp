@@ -80,7 +80,8 @@ void JniMtcService::Initialize(IN Jni_SendDataToJava pfnSendDataToJava)
         return new JniMtcServiceThread();
     };
     ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
-    m_pThread = (JniMtcServiceThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
+    m_pThread = reinterpret_cast<JniMtcServiceThread*>(
+            ImsProcess::GetInstance()->GetThread(strThreadName));
 
     if (m_pThread == IMS_NULL)
     {

@@ -32,7 +32,8 @@ LOCAL IMS_SINT32 SLOT_ID = 0;
 class TestJniMtcCall : public JniMtcCall
 {
 public:
-    inline TestJniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId = 0) :
+    inline explicit TestJniMtcCall(
+            IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId = 0) :
             JniMtcCall(pfnSendDataToJava, nSlotId)
     {
     }

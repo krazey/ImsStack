@@ -93,7 +93,8 @@ void JniMtcCall::Initialize()
         return new JniMtcCallThread();
     };
     ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
-    m_pThread = (JniMtcCallThread*)(ImsProcess::GetInstance()->GetThread(strThreadName));
+    m_pThread = reinterpret_cast<JniMtcCallThread*>(
+            ImsProcess::GetInstance()->GetThread(strThreadName));
 
     if (m_pThread == IMS_NULL)
     {

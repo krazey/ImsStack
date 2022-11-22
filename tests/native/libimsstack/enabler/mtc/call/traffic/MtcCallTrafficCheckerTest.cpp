@@ -53,7 +53,8 @@ public:
             m_objConnectionFailureListener(),
             m_objCallStateProxy(),
             m_objPhoneInfoService(),
-            m_objImsRadioService()
+            m_objImsRadioService(),
+            m_pMtcCallTrafficChecker(IMS_NULL)
     {
     }
 

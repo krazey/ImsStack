@@ -33,7 +33,7 @@ LOCAL IMS_UINTP NEGO_ID = 100;
 class TestMtcMediaManager : public MtcMediaManager
 {
 public:
-    inline TestMtcMediaManager(IN IMtcCallContext& objContext) :
+    inline explicit TestMtcMediaManager(IN IMtcCallContext& objContext) :
             MtcMediaManager(objContext)
     {
     }

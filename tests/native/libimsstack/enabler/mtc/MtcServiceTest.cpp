@@ -59,12 +59,6 @@ public:
     {
     }
 
-    inline void ReplaceAosConnector(IN MtcAosConnector* pAosConnector)
-    {
-        delete m_pAosConnector;
-        m_pAosConnector = pAosConnector;
-    }
-
     inline void ReplaceAosEventHandler(IN MtcAosEventHandler* pAosEventHandler)
     {
         delete m_pAosEventHandler;
@@ -137,8 +131,6 @@ protected:
     MtcService* CreateMtcService(IN ServiceType eType)
     {
         TestMtcService* pService = new TestMtcService(objMockContext, eType);
-
-        // pService->ReplaceAosConnector();
 
         pMockAosEventHandler = new MockMtcAosEventHandler(*pService, *pConfigurationProxy);
         pService->ReplaceAosEventHandler(pMockAosEventHandler);

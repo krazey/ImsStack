@@ -37,8 +37,11 @@ class UdpKeepAliveSenderTest : public ::testing::Test
 {
 public:
     inline UdpKeepAliveSenderTest() :
+            pConfigurationManager(IMS_NULL),
+            pConfigurationProxy(IMS_NULL),
             objTimerService(),
-            objTimer(objTimerService.GetMockTimer())
+            objTimer(objTimerService.GetMockTimer()),
+            pSender(IMS_NULL)
     {
     }
 

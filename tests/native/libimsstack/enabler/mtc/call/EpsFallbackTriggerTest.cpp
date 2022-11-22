@@ -43,8 +43,11 @@ class EpsFallbackTriggerTest : public ::testing::Test
 {
 public:
     inline EpsFallbackTriggerTest() :
+            pConfigurationManager(IMS_NULL),
+            pConfigurationProxy(IMS_NULL),
             objTimerService(),
-            objTimer(objTimerService.GetMockTimer())
+            objTimer(objTimerService.GetMockTimer()),
+            pEpsFbTrigger(IMS_NULL)
     {
     }
 
