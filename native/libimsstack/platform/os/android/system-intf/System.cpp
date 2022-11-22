@@ -671,7 +671,7 @@ IMS_SINT32 System::GetDigestSha1(IN const AString& strIn, OUT AString& strOut)
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
         String16 str16Sha1 = out.readString16();
-        String8 str8Sha1((const char16_t*)str16Sha1);
+        String8 str8Sha1(str16Sha1);
 
         strOut = AString(str8Sha1.string());
 
@@ -748,7 +748,7 @@ IMS_SINT32 System::GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType,
         for (IMS_SINT32 i = 0; i < nCount; i++)
         {
             String16 str16Address = out.readString16();
-            String8 str8Address((const char16_t*)str16Address);
+            String8 str8Address(str16Address);
             AString strAddress(str8Address.string());
             objAccessNetInfo.AddElement(strAddress);
         }
@@ -785,7 +785,7 @@ AStringArray System::GetLastAccessNetworkInfo(IN IMS_SINT32 nNetworkType, IN IMS
         for (IMS_SINT32 i = 0; i < nCount; i++)
         {
             String16 str16Temp = out.readString16();
-            String8 str8Temp((const char16_t*)str16Temp);
+            String8 str8Temp(str16Temp);
             AString strAddress(str8Temp.string());
             objLanInfo.AddElement(strAddress);
         }
@@ -925,7 +925,7 @@ AString System::GetApnName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
         String16 str16Apn = out.readString16();
-        String8 str8Apn((const char16_t*)str16Apn);
+        String8 str8Apn(str16Apn);
 
         return AString(str8Apn.string());
     }
@@ -968,7 +968,7 @@ AStringArray System::GetHostByName(IN const AString& strHost, IN IMS_SINT32 nIpV
         for (IMS_SINT32 i = 0; i < nCount; i++)
         {
             String16 str16Address = out.readString16();
-            String8 str8Address((const char16_t*)str16Address);
+            String8 str8Address(str16Address);
             objIpAddrs.AddElement(AString(str8Address.string()));
         }
 
@@ -1002,7 +1002,7 @@ AString System::GetIfaceName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
         String16 str16Iface = out.readString16();
-        String8 str8Iface((const char16_t*)str16Iface);
+        String8 str8Iface(str16Iface);
         return AString(str8Iface.string());
     }
 
@@ -1037,7 +1037,7 @@ AString System::GetLocalAddress(
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
         String16 str16Ip = out.readString16();
-        String8 str8Ip((const char16_t*)str16Ip);
+        String8 str8Ip(str16Ip);
 
         return AString(str8Ip.string());
     }
@@ -1071,7 +1071,7 @@ AStringArray System::GetPcscfAddresses(
         for (IMS_SINT32 i = 0; i < nCount; i++)
         {
             String16 str16Address = out.readString16();
-            String8 str8Address((const char16_t*)str16Address);
+            String8 str8Address(str16Address);
             objPcscfAddresses.AddElement(AString(str8Address.string()));
         }
 
@@ -1188,7 +1188,7 @@ IMS_SINT32 System::GetPreference(IN const AString& strFileName, IN const AString
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
         String16 str16Value = out.readString16();
-        String8 str8Value((const char16_t*)str16Value);
+        String8 str8Value(str16Value);
 
         strValue = AString(str8Value.string());
 
@@ -1253,7 +1253,7 @@ AString System::GetPrivateProperty(
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
         String16 str16 = out.readString16();
-        String8 str8((const char16_t*)str16);
+        String8 str8(str16);
 
         return AString(str8.string());
     }
@@ -1420,7 +1420,7 @@ IMS_SINT32 System::GetLocationInformation(
         for (IMS_SINT32 i = 0; i < nCount; i++)
         {
             String16 str16Address = out.readString16();
-            String8 str8Address((const char16_t*)str16Address);
+            String8 str8Address(str16Address);
             AString strLocationParam(str8Address.string());
             objLocationInfo.AddElement(strLocationParam);
         }
@@ -1540,7 +1540,7 @@ IMS_SINT32 System::GetString(
     if (m_pCallback->SendDataToJava(in, out) == 1)
     {
         String16 str16 = out.readString16();
-        String8 str8((const char16_t*)str16);
+        String8 str8(str16);
         strValue = AString(str8.string());
         return 1;
     }
@@ -1870,7 +1870,7 @@ void System::NotifyCallCategory(
         nWParam = in.readInt32();
 
         String16 str16Number = in.readString16();
-        String8 str8Number((const char16_t*)str16Number);
+        String8 str8Number(str16Number);
 
         IMS_StrCpy(szNumber, 20 + 1, str8Number.string());
         nLParam = reinterpret_cast<IMS_UINTP>(szNumber);

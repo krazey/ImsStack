@@ -186,7 +186,7 @@ int SendDataToJavaForSystem(
         }
         else
         {
-            parcelOut.setData((const uint8_t*)pBuffer, nBuffSize);
+            parcelOut.setData(reinterpret_cast<const uint8_t*>(pBuffer), nBuffSize);
         }
 
         env->ReleaseByteArrayElements(jResultData, pBuffer, 0);
@@ -222,7 +222,7 @@ IMS_UINTP GetCommandParam(IN JNIEnv* env, IN jint cmd, IN jbyteArray jData)
 
     android::Parcel objData;
 
-    objData.setData((const uint8_t*)pData, nDataLen);
+    objData.setData(reinterpret_cast<const uint8_t*>(pData), nDataLen);
     objData.setDataPosition(0);
 
     env->ReleaseByteArrayElements(jData, pData, 0);
@@ -287,7 +287,7 @@ void JniAttachNativeThread(const char* threadName)
 
     JavaVMAttachArgs args;
     args.version = JNI_VERSION_1_4;
-    args.name = (char*)threadName;
+    args.name = threadName;
     args.group = NULL;
 
     JNIEnv* env;
@@ -420,7 +420,7 @@ static jint JniIms_nativeSendData(
     int nBuffSize = env->GetArrayLength(jData);
 
     android::Parcel parcel;
-    parcel.setData((const uint8_t*)pBuff, nBuffSize);
+    parcel.setData(reinterpret_cast<const uint8_t*>(pBuff), nBuffSize);
     parcel.setDataPosition(0);
 
     int nResult = pService->SendData(parcel);
@@ -460,7 +460,7 @@ jbyteArray JniIms_nativeSendDataForSystem(
         jbyte* pBuff = env->GetByteArrayElements(jData, NULL);
         int nBuffSize = env->GetArrayLength(jData);
 
-        parcel.setData((const uint8_t*)pBuff, nBuffSize);
+        parcel.setData(reinterpret_cast<const uint8_t*>(pBuff), nBuffSize);
         parcel.setDataPosition(0);
 
         pService->SendData(parcel, parcelOut);
@@ -474,7 +474,8 @@ jbyteArray JniIms_nativeSendDataForSystem(
     }
 
     jbyteArray byteArray = env->NewByteArray(parcelOut.dataSize());
-    env->SetByteArrayRegion(byteArray, 0, parcelOut.dataSize(), (jbyte*)parcelOut.data());
+    env->SetByteArrayRegion(byteArray, 0, parcelOut.dataSize(),
+            reinterpret_cast<jbyte*>(const_cast<uint8_t*>(parcelOut.data())));
 
     return byteArray;
 }
@@ -522,7 +523,8 @@ int IMSInterface_GetSurface(
                 : pEnv->GetFieldID(surfaceClass, "mNativeObject", "J");
         Surface* pSurface = (surfaceNativeObject == NULL)
                 ? NULL
-                : (Surface*)pEnv->GetLongField(surfaceObject, surfaceNativeObject);
+                : reinterpret_cast<Surface*>(
+                          pEnv->GetLongField(surfaceObject, surfaceNativeObject));
 
         if (pSurface == NULL)
         {

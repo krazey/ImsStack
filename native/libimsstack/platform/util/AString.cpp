@@ -2742,7 +2742,7 @@ AString& AString::Vsprintf(IN const IMS_CHAR* pszFormat, va_list ap)
 {
     if (pszFormat == IMS_NULL)
     {
-        (*this) = (const IMS_CHAR*)IMS_NULL;
+        (*this) = reinterpret_cast<const IMS_CHAR*>(IMS_NULL);
         return (*this);
     }
 
@@ -3075,7 +3075,7 @@ AString& AString::Vsprintf(IN const IMS_CHAR* pszFormat, va_list ap)
             }
             case 's':
             {
-                strSubStr.Append((IMS_CHAR*)va_arg(ap, const IMS_CHAR*));
+                strSubStr.Append(va_arg(ap, const IMS_CHAR*));
 
                 if (nPrecision != -1)
                 {
