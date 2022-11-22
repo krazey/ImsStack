@@ -123,6 +123,7 @@ public interface IAosRegistration {
         public static final int DATA = 1;
         public static final int RADIO = 2;
         public static final int IMS_SERVICE = 3;
+        public static final int IMS_SUBSCRIBER = 4;
 
         /* From modem */
         public static final int RADIO_SIM_REMOVED = 11;

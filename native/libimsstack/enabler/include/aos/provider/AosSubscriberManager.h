@@ -19,6 +19,7 @@
 #include "ServiceTimer.h"
 #include "ISubscriberConfigListener.h"
 #include "IConfigUpdateListener.h"
+#include "interface/IAosNConfiguration.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosSubscriber.h"
@@ -52,7 +53,7 @@ public:
     const ISubscriberConfig* GetSubscriberConfig(
             IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const override;
 
-private:
+protected:
     /// Priority of Ims Identities
     enum class Index
     {
@@ -68,7 +69,7 @@ private:
         TIMER_PHONE_RESTART_RECOVERY
     };
 
-private:
+protected:
     void Init();
     void Restart();
     void CleanUp();
@@ -113,8 +114,7 @@ private:
     void ProcessIsimRecoveryTimerExpired();
     void ProcessPhoneRestartRecoveryTimerExpired();
 
-    void SetConfigUpdateListener();
-    void RemoveConfigUpdateListener();
+    IMS_BOOL UpdateNConfiguration();
 
     void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
     void StopTimer(IN IMS_UINT32 nType);
@@ -125,6 +125,7 @@ private:
 
     IMS_BOOL IsPrimaryImpuValid(IN const AStringArray& objImpus) const;
     IMS_BOOL IsSipUri(IN const AString& strImpu) const;
+    void RequestStop() const;
 
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;
@@ -149,11 +150,13 @@ private:
     void ServicePhone_IsimStateChanged(IN IsimState eState) override;
 
     // Log
+    const IMS_CHAR* IdentityPriorityToString();
+    static const IMS_CHAR* PrintIdentity(IN IMS_UINT32 nIdentity);
     static const IMS_CHAR* UpdateEventToString(IN IMS_UINT32 nEvent);
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
-private:
+protected:
     IMS_SINT32 m_nSlotId;
 
     IMSList<IAosSubscriberManagerListener*> m_objListeners;
@@ -178,6 +181,13 @@ private:
     AStringArray m_objPuids;
     AStringArray m_objPuidsForFake;
 
+    IAosNConfiguration* m_piNConfig;
+
+    // Carrier Configuration
+    IMS_UINT32 m_nIsimIndexForImpu;
+    IMS_BOOL m_bSupportLimitedAdminSmsMode;
+    IMSVector<IMS_SINT32> m_objImsIdentityPriority;
+
     static const IMS_UINT32 ISIM_RECOVERY_MAX_COUNT = 2;
     static const IMS_UINT32 ISIM_RECOVERY_DEFAULT_INTERVAL = 2;
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;
@@ -185,9 +195,6 @@ private:
     static const IMS_SINT32 USIM_MSISDN_LENGTH = 10;
 
     AString m_strTag;
-
-private:
-    friend class AosSubscriberManagerTest;
 };
 
 #endif  // AOS_SUBSCRIBER_MANAGERH_
