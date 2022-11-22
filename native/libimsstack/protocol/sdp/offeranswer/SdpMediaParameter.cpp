@@ -204,6 +204,11 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
         const IMSList<SdpMediaFormat*>* pOfferedMediaFormats = IMS_NULL;
         const IMSList<SdpMediaFormat*>* pAnsweredMediaFormats = IMS_NULL;
 
+// MEDIA_FORMAT_PREFERENCE_ORDER_BY_REMOTE_ENDPOINT
+#ifdef __IMS_MEDIA_FORMAT_PREFERENCE_ORDER_BY_REMOTE_ENDPOINT__
+        pOfferedMediaFormats = &(pPeerParam->m_objMediaFormats);
+        pAnsweredMediaFormats = &m_objMediaFormats;
+#else
         if (bIsOffer)
         {
             pOfferedMediaFormats = &(pPeerParam->m_objMediaFormats);
@@ -211,15 +216,10 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
         }
         else
         {
-            // MEDIA_FORMAT_PREFERENCE_ORDER_BY_REMOTE_ENDPOINT
-#ifdef __IMS_MEDIA_FORMAT_PREFERENCE_ORDER_BY_REMOTE_ENDPOINT__
-            pOfferedMediaFormats = &(pPeerParam->m_objMediaFormats);
-            pAnsweredMediaFormats = &m_objMediaFormats;
-#else
             pOfferedMediaFormats = &m_objMediaFormats;
             pAnsweredMediaFormats = &(pPeerParam->m_objMediaFormats);
-#endif
         }
+#endif
 
         SdpMediaFormat* pLocalMediaFormat = IMS_NULL;
         SdpMediaFormat* pPeerMediaFormat = IMS_NULL;

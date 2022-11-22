@@ -908,14 +908,8 @@ PRIVATE GLOBAL IMS_SINT32 Media::ConvertDirectionMediaToSdp(IN IMS_SINT32 nDirec
     {
         return Sdp::DIRECTION_SENDRECV;
     }
-    else if (nDirection == DIRECTION_NONE)
-    {
-        return Sdp::DIRECTION_NONE;
-    }
-    else
-    {
-        return Sdp::DIRECTION_NONE;
-    }
+
+    return Sdp::DIRECTION_NONE;
 }
 
 PRIVATE GLOBAL const IMS_CHAR* Media::StateToString(IN IMS_SINT32 nState)
