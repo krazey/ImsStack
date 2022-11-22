@@ -93,7 +93,6 @@ public:
     IMS_BOOL CreateSocket(IN IMS_SOCKET hSocket);
     IMS_BOOL Connect();
     IMS_BOOL Initialize();
-    IMS_BOOL IsDataAvailable();
     IMS_SINT32 Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen);
     IMS_SINT32 Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen);
     void ShutDown();
@@ -350,18 +349,6 @@ IMS_BOOL OsSsl::Connect()
     }
 
     return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL OsSsl::IsDataAvailable()
-{
-    if (m_pstSsl == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "SSL is null", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    return (SSL_pending(m_pstSsl) > 0);
 }
 
 PUBLIC

@@ -37,12 +37,10 @@ public:
     inline ~OsPowerInfoPrivate() {}
 
     POWERLEVEL_ENTYPE GetPowerLevel();
-    IMS_SINT32 GetPowerValue();
     void SetPowerInfo(IN OsPowerInfo* pPowerInfo);
     void Update();
     void UpdateValue();
 
-    void SetPowerLevel(IN POWERLEVEL_ENTYPE eLevel);
     void SetPowerValue(IN IMS_SINT32 nValue);
     void UpdatePowerLevel();
     void UpdatePowerValue();
@@ -75,11 +73,6 @@ PUBLIC VIRTUAL POWERLEVEL_ENTYPE OsPowerInfoPrivate::GetPowerLevel()
     return m_ePowerLevel;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 OsPowerInfoPrivate::GetPowerValue()
-{
-    return m_nPowerValue;
-}
-
 PUBLIC
 void OsPowerInfoPrivate::SetPowerInfo(IN OsPowerInfo* pPowerInfo)
 {
@@ -90,12 +83,6 @@ PUBLIC
 void OsPowerInfoPrivate::Update()
 {
     NotifyPowerEvent(m_ePowerLevel);
-}
-
-PUBLIC
-void OsPowerInfoPrivate::SetPowerLevel(IN POWERLEVEL_ENTYPE eLevel)
-{
-    m_ePowerLevel = eLevel;
 }
 
 PUBLIC
@@ -170,11 +157,6 @@ PUBLIC VIRTUAL POWERLEVEL_ENTYPE OsPowerInfo::GetPowerLevel()
     }
 
     return m_pPowerInfoP->GetPowerLevel();
-}
-
-PUBLIC VIRTUAL IMS_UINT32 OsPowerInfo::GetPowerValue()
-{
-    return PlatformContext::GetInstance()->GetSystem()->GetPowerLevel();
 }
 
 PUBLIC VIRTUAL void OsPowerInfo::System_NotifyEvent(

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define IMS_STL_USE
-#include <gui/Surface.h>
 #include <utils/String8.h>
 
 #include "ServiceTrace.h"
@@ -24,7 +22,6 @@
 #include "JniEnablerConnector.h"
 #include "JniMediaSession.h"
 #include "JniMediaSessionThread.h"
-#include "SurfaceManager.h"
 
 #include <AudioConfig.h>
 #include <TextConfig.h>
@@ -33,9 +30,6 @@
 using namespace android::telephony::imsmedia;
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MEDIA");
-
-extern int IMSInterface_GetSurface(
-        const String8& str8Class, const String8& str8SurfaceName, long& nSurfaceObject);
 
 JniMediaSession::JniMediaSession(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId,
         IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject) :

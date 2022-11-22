@@ -35,7 +35,6 @@ public:
 public:
     // IPowerInfo class
     POWERLEVEL_ENTYPE GetPowerLevel() override;
-    IMS_UINT32 GetPowerValue() override;
 
     // ISystemListener
     void System_NotifyEvent(

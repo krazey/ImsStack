@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <android/file_descriptor_jni.h>
 #include <binder/Parcel.h>
-#include <gui/Surface.h>
 #include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
@@ -53,23 +52,6 @@ static JavaVM* s_javaVm = NULL;
 static JavaVM* GetJavaVm()
 {
     return s_javaVm;
-}
-
-static JNIEnv* GetJniEnv()
-{
-    if (s_javaVm == NULL)
-    {
-        return NULL;
-    }
-
-    JNIEnv* env = NULL;
-
-    if (s_javaVm->GetEnv((void**)&env, JNI_VERSION_1_4) != JNI_OK)
-    {
-        return NULL;
-    }
-
-    return env;
 }
 
 static int SendDataToJava(long nNativeObject, const android::Parcel& objParcel)
@@ -492,74 +474,6 @@ static JNINativeMethod s_jniImsMethods[] = {
         { "nativeSendCommand",       "(II[B)I", (void*)JniIms_nativeSendCommand       },
 };
 // clang-format on
-
-int IMSInterface_GetSurface(
-        const String8& str8Class, const String8& str8SurfaceName, long& nSurfaceObject)
-{
-    JNIEnv* pEnv = GetJniEnv();
-
-    if (pEnv == NULL)
-    {
-        IMS_TRACE_E(0, "JNIEnv is null", 0, 0, 0);
-        return (-1);
-    }
-
-    nSurfaceObject = 0;
-
-    // Find Surface member variable in UCMediaSession
-    jclass clazz = pEnv->FindClass(str8Class.string());
-    jfieldID surfaceFid = (clazz == NULL)
-            ? NULL
-            : pEnv->GetStaticFieldID(clazz, str8SurfaceName.string(), "Landroid/view/Surface;");
-    jobject surfaceObject =
-            (surfaceFid == NULL) ? NULL : pEnv->GetStaticObjectField(clazz, surfaceFid);
-
-    if (surfaceObject != NULL)
-    {
-        // Find a native object from android.view.Surface
-        jclass surfaceClass = pEnv->FindClass("android/view/Surface");
-        jfieldID surfaceNativeObject = (surfaceClass == NULL)
-                ? NULL
-                : pEnv->GetFieldID(surfaceClass, "mNativeObject", "J");
-        Surface* pSurface = (surfaceNativeObject == NULL)
-                ? NULL
-                : reinterpret_cast<Surface*>(
-                          pEnv->GetLongField(surfaceObject, surfaceNativeObject));
-
-        if (pSurface == NULL)
-        {
-            nSurfaceObject = 0;
-        }
-        else
-        {
-            pSurface->incStrong(0);
-            nSurfaceObject = reinterpret_cast<long>(pSurface);
-        }
-    }
-
-    IMS_TRACE_D("IMSInterface_GetSurface - class=%s, surface=%s(%" PFLS_x ")",
-            str8Class.getPathLeaf().string(), str8SurfaceName.string(), nSurfaceObject);
-
-    return 1;
-}
-
-void IMSInterface_ReleaseSurface(long nSurface)
-{
-    if (nSurface == 0)
-    {
-        return;
-    }
-
-    Surface* pSurface = reinterpret_cast<Surface*>(nSurface);
-
-    if (pSurface != NULL)
-    {
-        IMS_TRACE_D(
-                "IMSInterface_ReleaseSurface - strongCount=%d", pSurface->getStrongCount(), 0, 0);
-
-        pSurface->decStrong(0);
-    }
-}
 
 jint IMSInterface_OnLoad(JavaVM* vm, JNIEnv* env)
 {

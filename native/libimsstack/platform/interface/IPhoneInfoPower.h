@@ -42,7 +42,6 @@ class IPowerInfo
 {
 public:
     virtual POWERLEVEL_ENTYPE GetPowerLevel() = 0;
-    virtual IMS_UINT32 GetPowerValue() = 0;
 
 public:
     inline void RegisterObserver(IN IPowerInfoListener* piListener)

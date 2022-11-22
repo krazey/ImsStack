@@ -62,13 +62,7 @@ cc_library_static {
         "**/*.cpp",
     ],
     include_dirs: [
-        "frameworks/native/libs/arect/include",
-        "frameworks/native/libs/nativebase/include",
-        "frameworks/native/libs/nativewindow/include",
-        "frameworks/native/libs/ui/include",
-        "system/libhidl/base/include",
-        "system/libhidl/transport/token/1.0/utils/include",
-        "system/libvintf/include",
+        "system/libbase/include",
     ],
     header_libs: [
         "libimsmedia_config_headers",
@@ -105,11 +99,6 @@ cc_library_static {
         "include/system",
     ],
     shared_libs: [
-        "android.hardware.graphics.bufferqueue@1.0",
-        "android.hardware.graphics.bufferqueue@2.0",
-        "android.hardware.graphics.common@1.1",
-        "android.hardware.graphics.common@1.2",
-        "libgui",
         "libnativehelper",
     ],
 }

@@ -36,7 +36,6 @@ public:
     inline virtual ~MockIPowerInfo() {}
 
     MOCK_METHOD(POWERLEVEL_ENTYPE, GetPowerLevel, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetPowerValue, (), (override));
 };
 
 #endif

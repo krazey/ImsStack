@@ -35,7 +35,6 @@ cc_library_shared {
         "libandroid_runtime",
         "libbinder",
         "libcutils",
-        "libgui",
         "liblog",
         "libnativehelper",
         "libutils",
