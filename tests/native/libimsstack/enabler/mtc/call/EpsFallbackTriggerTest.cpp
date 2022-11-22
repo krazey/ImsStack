@@ -174,14 +174,10 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredDoesNotInvokeTriggerE
 
 TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackSetsTimerAndTriggersEpsFallback)
 {
-    IMS_SINT32 nAnyNoResponseTime = 6000;
-    ON_CALL(*pConfigurationManager, GetMoCallRequestTimeout)
-            .WillByDefault(Return(nAnyNoResponseTime));
-
     MockIMtcAosConnector objAosConnector;
     ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
     EXPECT_CALL(objAosConnector, NotifyEpsfbCallState(IImsAosInfo::EPSFB_CALL_START));
-    EXPECT_CALL(objTimer, SetTimer(nAnyNoResponseTime, pEpsFbTrigger));
+    EXPECT_CALL(objTimer, SetTimer(12000, pEpsFbTrigger));
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_RESPONSE));
 
@@ -197,10 +193,6 @@ TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackSetsTimerAndTriggersE
 
 TEST_F(EpsFallbackTriggerTest, OnEpsFallbackCompletedAfterTriggerEpsfbStopsTimer)
 {
-    IMS_SINT32 nAnyNoResponseTime = 6000;
-    ON_CALL(*pConfigurationManager, GetMoCallRequestTimeout)
-            .WillByDefault(Return(nAnyNoResponseTime));
-
     MockIMtcAosConnector objAosConnector;
     ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
@@ -215,10 +207,6 @@ TEST_F(EpsFallbackTriggerTest, OnEpsFallbackCompletedAfterTriggerEpsfbStopsTimer
 
 TEST_F(EpsFallbackTriggerTest, TriggerNoResponseEpsFallbackAndTimerExpiredTerminatesCall)
 {
-    IMS_SINT32 nAnyNoResponseTime = 6000;
-    ON_CALL(*pConfigurationManager, GetMoCallRequestTimeout)
-            .WillByDefault(Return(nAnyNoResponseTime));
-
     MockIMtcAosConnector objAosConnector;
     ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 

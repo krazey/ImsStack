@@ -164,9 +164,7 @@ void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason)
                 IImsAosInfo::EPSFB_CALL_START);
 
         m_piTimerEpsFallbackWait = TimerService::GetTimerService()->CreateTimer();
-        m_piTimerEpsFallbackWait->SetTimer(
-                m_objContext.GetConfigurationProxy().GetInt(Feature::MO_CALL_REQUEST_TIMEOUT),
-                this);
+        m_piTimerEpsFallbackWait->SetTimer(EPS_FALLBACK_COMPLETE_INTERVAL, this);
     }
 
     ImsRadioService::GetImsRadioService()

@@ -55,6 +55,7 @@ private:
     ITimer* m_piTimerWatchdogWait;
     ITimer* m_piTimerEpsFallbackWait;
     IMS_BOOL m_bWaitingEpsFallbackForNoResponse;
+    static const IMS_UINT32 EPS_FALLBACK_COMPLETE_INTERVAL = 12000;
 };
 
 #endif
