@@ -44,16 +44,16 @@ PUBLIC VIRTUAL UpdatingInfo::~UpdatingInfo()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsHeld()
 {
-    if (m_objNegotiatedInfo.eADir == DIRECTION_SEND_RECEIVE)
+    if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
     {
-        if (m_objModifyingInfo.eADir == DIRECTION_SEND ||
-                m_objModifyingInfo.eADir == DIRECTION_INACTIVE)
+        if (m_objModifyingInfo.eAudioDirection == DIRECTION_SEND ||
+                m_objModifyingInfo.eAudioDirection == DIRECTION_INACTIVE)
         {
             return IMS_TRUE;
         }
     }
-    else if (m_objNegotiatedInfo.eADir == DIRECTION_RECEIVE &&
-            m_objModifyingInfo.eADir == DIRECTION_INACTIVE)
+    else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_RECEIVE &&
+            m_objModifyingInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
         return IMS_TRUE;
     }
@@ -64,24 +64,26 @@ IMS_BOOL UpdatingInfo::IsHeld()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsHeldBy()
 {
-    IMS_SINT32 eNewADir = m_objModifiedInfo.eADir;
-    if (eNewADir == DIRECTION_INVALID)
+    IMS_SINT32 eNewAudioDirection = m_objModifiedInfo.eAudioDirection;
+    if (eNewAudioDirection == DIRECTION_INVALID)
     {
-        eNewADir = m_objAlertingInfo.eADir;
+        eNewAudioDirection = m_objAlertingInfo.eAudioDirection;
     }
 
-    if (m_objNegotiatedInfo.eADir == DIRECTION_SEND_RECEIVE)
+    if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
     {
-        if (eNewADir == DIRECTION_RECEIVE)
+        if (eNewAudioDirection == DIRECTION_RECEIVE)
         {
             return IMS_TRUE;
         }
-        else if (eNewADir == DIRECTION_INACTIVE && m_objModifyingInfo.eADir != DIRECTION_INACTIVE)
+        else if (eNewAudioDirection == DIRECTION_INACTIVE &&
+                m_objModifyingInfo.eAudioDirection != DIRECTION_INACTIVE)
         {
             return IMS_TRUE;
         }
     }
-    else if (m_objNegotiatedInfo.eADir == DIRECTION_SEND && eNewADir == DIRECTION_INACTIVE)
+    else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND &&
+            eNewAudioDirection == DIRECTION_INACTIVE)
     {
         return IMS_TRUE;
     }
@@ -92,15 +94,15 @@ IMS_BOOL UpdatingInfo::IsHeldBy()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsResumed()
 {
-    if (m_objNegotiatedInfo.eADir == DIRECTION_SEND &&
-            m_objModifyingInfo.eADir == DIRECTION_SEND_RECEIVE)
+    if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND &&
+            m_objModifyingInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
     {
         return IMS_TRUE;
     }
-    else if (m_objNegotiatedInfo.eADir == DIRECTION_INACTIVE)
+    else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
-        if (m_objModifyingInfo.eADir == DIRECTION_RECEIVE ||
-                m_objModifyingInfo.eADir == DIRECTION_SEND_RECEIVE)
+        if (m_objModifyingInfo.eAudioDirection == DIRECTION_RECEIVE ||
+                m_objModifyingInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
         {
             return IMS_TRUE;
         }
@@ -112,24 +114,25 @@ IMS_BOOL UpdatingInfo::IsResumed()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsResumedBy()
 {
-    IMS_SINT32 eNewADir = m_objModifiedInfo.eADir;
-    if (eNewADir == DIRECTION_INVALID)
+    IMS_SINT32 eNewAudioDirection = m_objModifiedInfo.eAudioDirection;
+    if (eNewAudioDirection == DIRECTION_INVALID)
     {
-        eNewADir = m_objAlertingInfo.eADir;
+        eNewAudioDirection = m_objAlertingInfo.eAudioDirection;
     }
 
-    if (m_objNegotiatedInfo.eADir == DIRECTION_RECEIVE && eNewADir == DIRECTION_SEND_RECEIVE)
+    if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_RECEIVE &&
+            eNewAudioDirection == DIRECTION_SEND_RECEIVE)
     {
         return IMS_TRUE;
     }
-    else if (m_objNegotiatedInfo.eADir == DIRECTION_INACTIVE)
+    else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
-        if (eNewADir == DIRECTION_SEND)
+        if (eNewAudioDirection == DIRECTION_SEND)
         {
             return IMS_TRUE;
         }
-        else if (eNewADir == DIRECTION_SEND_RECEIVE &&
-                m_objModifyingInfo.eADir != DIRECTION_SEND_RECEIVE)
+        else if (eNewAudioDirection == DIRECTION_SEND_RECEIVE &&
+                m_objModifyingInfo.eAudioDirection != DIRECTION_SEND_RECEIVE)
         {
             return IMS_TRUE;
         }
@@ -151,7 +154,7 @@ IMS_BOOL UpdatingInfo::IsNeedToAlert()
         return IMS_FALSE;
     }
 
-    if (m_objNegotiatedInfo.eVDir != m_objAlertingInfo.eVDir)
+    if (m_objNegotiatedInfo.eVideoDirection != m_objAlertingInfo.eVideoDirection)
     {
         return IMS_TRUE;
     }
@@ -162,12 +165,12 @@ IMS_BOOL UpdatingInfo::IsNeedToAlert()
 PUBLIC
 IMS_BOOL UpdatingInfo::IsRequestedHoldResume()
 {
-    if (m_objModifyingInfo.eADir == DIRECTION_INVALID)
+    if (m_objModifyingInfo.eAudioDirection == DIRECTION_INVALID)
     {
         return IMS_FALSE;
     }
 
-    if (m_objNegotiatedInfo.eADir == m_objModifyingInfo.eADir)
+    if (m_objNegotiatedInfo.eAudioDirection == m_objModifyingInfo.eAudioDirection)
     {
         return IMS_FALSE;
     }
@@ -188,7 +191,7 @@ IMS_BOOL UpdatingInfo::IsRequestedModifying()
         return IMS_TRUE;
     }
 
-    if (m_objNegotiatedInfo.eVDir != m_objModifyingInfo.eVDir)
+    if (m_objNegotiatedInfo.eVideoDirection != m_objModifyingInfo.eVideoDirection)
     {
         return IMS_TRUE;
     }
@@ -211,19 +214,19 @@ IMS_BOOL UpdatingInfo::IsModified()
 PUBLIC
 void UpdatingInfo::AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo)
 {
-    if (objMediaInfo.eADir != DIRECTION_INVALID)
+    if (objMediaInfo.eAudioDirection != DIRECTION_INVALID)
     {
-        objMediaInfo.eADir = m_objAlertingInfo.eADir;
+        objMediaInfo.eAudioDirection = m_objAlertingInfo.eAudioDirection;
     }
 
-    if (objMediaInfo.eVDir != DIRECTION_INVALID)
+    if (objMediaInfo.eVideoDirection != DIRECTION_INVALID)
     {
-        objMediaInfo.eVDir = m_objAlertingInfo.eVDir;
+        objMediaInfo.eVideoDirection = m_objAlertingInfo.eVideoDirection;
     }
 
-    if (objMediaInfo.eTDir != DIRECTION_INVALID)
+    if (objMediaInfo.eTextDirection != DIRECTION_INVALID)
     {
-        objMediaInfo.eTDir = m_objAlertingInfo.eTDir;
+        objMediaInfo.eTextDirection = m_objAlertingInfo.eTextDirection;
     }
 }
 

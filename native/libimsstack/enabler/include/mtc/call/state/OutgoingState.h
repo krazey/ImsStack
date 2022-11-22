@@ -26,7 +26,6 @@ class AString;
 class IMessage;
 class IMtcCalContext;
 class IMtcSession;
-class MediaInfo;
 class SuppService;
 enum class QosLossPolicy;
 

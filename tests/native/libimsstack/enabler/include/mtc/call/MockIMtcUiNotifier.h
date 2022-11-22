@@ -25,12 +25,12 @@
 #include "call/IMtcUiNotifier.h"
 #include <gmock/gmock.h>
 
-class MediaInfo;
 class ParticipantInfo;
 class SuppService;
 struct CallInfo;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 class MockIMtcUiNotifier : public IMtcUiNotifier
 {

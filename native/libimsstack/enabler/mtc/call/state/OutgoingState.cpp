@@ -821,7 +821,7 @@ void OutgoingState::SendProgressing()
     MediaInfo objMediaInfo = objMediaManager.GetMediaInfo();
     if (objMediaManager.IsLocalTone())
     {
-        objMediaInfo.eADir = DIRECTION_INACTIVE;
+        objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
     }
 
     m_objContext.GetUiNotifier().SendProgressing(&m_objContext.GetCallInfo(), objMediaInfo,

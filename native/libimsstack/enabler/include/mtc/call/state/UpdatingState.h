@@ -24,8 +24,8 @@
 #include "core/ISession.h"
 #include "precondition/QosDef.h"
 
-class MediaInfo;
 struct CallReasonInfo;
+struct MediaInfo;
 
 class UpdatingState : public MtcCallState
 {

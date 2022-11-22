@@ -104,8 +104,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToHeld)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
-    objModifyingInfo.eADir = DIRECTION_SEND;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND;
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -118,8 +118,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendReceiveToInactive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
-    objModifyingInfo.eADir = DIRECTION_INACTIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_INACTIVE;
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -132,8 +132,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingReceiveToInactive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_RECEIVE;
-    objModifyingInfo.eADir = DIRECTION_INACTIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_RECEIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_INACTIVE;
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -146,8 +146,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendReceiveToReceive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
-    objModifiedInfo.eADir = DIRECTION_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objModifiedInfo.eAudioDirection = DIRECTION_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
@@ -162,10 +162,10 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendReceiveToInactive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objModifyingInfo.eADir = DIRECTION_INVALID;
+    objModifyingInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
-    objModifiedInfo.eADir = DIRECTION_INACTIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objModifiedInfo.eAudioDirection = DIRECTION_INACTIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
@@ -180,8 +180,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedSendToInactive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND;
-    objModifiedInfo.eADir = DIRECTION_INACTIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND;
+    objModifiedInfo.eAudioDirection = DIRECTION_INACTIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
@@ -196,10 +196,10 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendReceiveToReceive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
-    objModifiedInfo.eADir = DIRECTION_INVALID;
+    objModifiedInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
-    objAlertingInfo.eADir = DIRECTION_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objAlertingInfo.eAudioDirection = DIRECTION_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
@@ -215,11 +215,11 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendReceiveToInactive)
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objModifiedInfo.eADir = DIRECTION_INVALID;
-    objModifyingInfo.eADir = DIRECTION_INVALID;
+    objModifiedInfo.eAudioDirection = DIRECTION_INVALID;
+    objModifyingInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND_RECEIVE;
-    objAlertingInfo.eADir = DIRECTION_INACTIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objAlertingInfo.eAudioDirection = DIRECTION_INACTIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
@@ -234,10 +234,10 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingSendToInactive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
-    objModifiedInfo.eADir = DIRECTION_INVALID;
+    objModifiedInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND;
-    objAlertingInfo.eADir = DIRECTION_INACTIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND;
+    objAlertingInfo.eAudioDirection = DIRECTION_INACTIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsHeldBy());
@@ -252,8 +252,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingSendToSendReceive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND;
-    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -266,8 +266,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingInactiveToReceive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objModifyingInfo.eADir = DIRECTION_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -280,8 +280,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifyingInactiveToSendReceive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -294,8 +294,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedReceiveToSendReceive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
-    objModifiedInfo.eADir = DIRECTION_SEND_RECEIVE;
-    objNegotiatedInfo.eADir = DIRECTION_RECEIVE;
+    objModifiedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -310,8 +310,8 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedInactiveToSend)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objModifiedInfo.eADir = DIRECTION_SEND;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objModifiedInfo.eAudioDirection = DIRECTION_SEND;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -326,10 +326,10 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfModifiedInactiveToSendReceive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objModifyingInfo.eADir = DIRECTION_INVALID;
+    objModifyingInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objModifiedInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objModifiedInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -344,10 +344,10 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingReceiveToSendReceive)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
-    objModifiedInfo.eADir = DIRECTION_INVALID;
+    objModifiedInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_RECEIVE;
-    objAlertingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_RECEIVE;
+    objAlertingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -362,10 +362,10 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSend)
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
-    objModifiedInfo.eADir = DIRECTION_INVALID;
+    objModifiedInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objAlertingInfo.eADir = DIRECTION_SEND;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objAlertingInfo.eAudioDirection = DIRECTION_SEND;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -381,11 +381,11 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSendReceive)
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objModifiedInfo.eADir = DIRECTION_INVALID;
-    objModifyingInfo.eADir = DIRECTION_INVALID;
+    objModifiedInfo.eAudioDirection = DIRECTION_INVALID;
+    objModifyingInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objAlertingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objAlertingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -402,11 +402,11 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfVideoDirectionIsChanging)
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
 
     // Not (IsHeldBy() || IsResumedBy())
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
-    objNegotiatedInfo.eVDir = DIRECTION_SEND;
-    objAlertingInfo.eVDir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eVideoDirection = DIRECTION_SEND;
+    objAlertingInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
 }
@@ -418,10 +418,10 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoDirectionIsNotChanging)
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
 
     // Not (IsHeldBy() || IsResumedBy())
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
-    objNegotiatedInfo.eVDir = objAlertingInfo.eVDir = DIRECTION_SEND;
+    objNegotiatedInfo.eVideoDirection = objAlertingInfo.eVideoDirection = DIRECTION_SEND;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
@@ -433,10 +433,10 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChanged)
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
 
     // Not (IsHeldBy() || IsResumedBy())
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
-    objNegotiatedInfo.eVDir = objAlertingInfo.eVDir = DIRECTION_SEND;
+    objNegotiatedInfo.eVideoDirection = objAlertingInfo.eVideoDirection = DIRECTION_SEND;
 
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
     ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
@@ -451,11 +451,11 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfCallTypeIsChangedAndResumedBy
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
     MediaInfo& objModifiedInfo = pUpdatingInfo->GetModifiedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objModifiedInfo.eADir = DIRECTION_INVALID;
-    objModifyingInfo.eADir = DIRECTION_INVALID;
+    objModifiedInfo.eAudioDirection = DIRECTION_INVALID;
+    objModifyingInfo.eAudioDirection = DIRECTION_INVALID;
 
-    objNegotiatedInfo.eADir = DIRECTION_INACTIVE;
-    objAlertingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objAlertingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeld());
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsHeldBy());
@@ -474,8 +474,8 @@ TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsChang
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND;
-    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsRequestedHoldResume());
 }
@@ -485,7 +485,7 @@ TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsNotCh
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = objModifyingInfo.eADir = DIRECTION_SEND;
+    objNegotiatedInfo.eAudioDirection = objModifyingInfo.eAudioDirection = DIRECTION_SEND;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedHoldResume());
 }
@@ -493,7 +493,7 @@ TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsNotCh
 TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsInvalid)
 {
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
-    objNegotiatedInfo.eADir = DIRECTION_INVALID;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INVALID;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedHoldResume());
 }
@@ -501,7 +501,7 @@ TEST_F(UpdatingInfoTest, IsRequestedHoldResumeReturnsTrueIfAudioDirectionIsInval
 TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfModifyingInfoIsInvalid)
 {
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objModifyingInfo.eADir = DIRECTION_INVALID;
+    objModifyingInfo.eAudioDirection = DIRECTION_INVALID;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
 }
@@ -511,8 +511,8 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfAudioDirectionIsChang
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
 
-    objNegotiatedInfo.eADir = DIRECTION_SEND;
-    objModifyingInfo.eADir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eAudioDirection = DIRECTION_SEND;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
 }
@@ -521,10 +521,10 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfVideoDirectionIsChangi
 {
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objModifyingInfo.eADir = objNegotiatedInfo.eADir = DIRECTION_SEND;
+    objModifyingInfo.eAudioDirection = objNegotiatedInfo.eAudioDirection = DIRECTION_SEND;
 
-    objNegotiatedInfo.eVDir = DIRECTION_SEND;
-    objModifyingInfo.eVDir = DIRECTION_SEND_RECEIVE;
+    objNegotiatedInfo.eVideoDirection = DIRECTION_SEND;
+    objModifyingInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsRequestedModifying());
 }
@@ -533,9 +533,9 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsFalseIfVideoDirectionIsNotCh
 {
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objNegotiatedInfo.eADir = objModifyingInfo.eADir = DIRECTION_SEND;
+    objNegotiatedInfo.eAudioDirection = objModifyingInfo.eAudioDirection = DIRECTION_SEND;
 
-    objNegotiatedInfo.eVDir = objModifyingInfo.eVDir = DIRECTION_SEND;
+    objNegotiatedInfo.eVideoDirection = objModifyingInfo.eVideoDirection = DIRECTION_SEND;
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsRequestedModifying());
 }
@@ -544,9 +544,9 @@ TEST_F(UpdatingInfoTest, IsRequestedModifyingReturnsTrueIfCallTypeIsChanged)
 {
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
-    objNegotiatedInfo.eADir = objModifyingInfo.eADir = DIRECTION_SEND;
+    objNegotiatedInfo.eAudioDirection = objModifyingInfo.eAudioDirection = DIRECTION_SEND;
 
-    objNegotiatedInfo.eVDir = objModifyingInfo.eVDir = DIRECTION_SEND;
+    objNegotiatedInfo.eVideoDirection = objModifyingInfo.eVideoDirection = DIRECTION_SEND;
 
     pUpdatingInfo->SetTargetCallType(CallType::VOIP);
     ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));

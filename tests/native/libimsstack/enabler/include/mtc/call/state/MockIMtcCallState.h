@@ -31,10 +31,10 @@ class ISession;
 class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
-class MediaInfo;
 enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 class MockIMtcCallState : public IMtcCallState
 {

@@ -26,12 +26,12 @@
 
 class CallContext;
 class ISession;
-class MediaInfo;
 class SuppService;
 class IMtcCallContext;
 enum class UpdateType;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 using CallKey = IMS_ULONG;
 

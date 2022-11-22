@@ -171,24 +171,24 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaDirection(
 {
     if (eMediaType == MEDIATYPE_AUDIO)
     {
-        m_pOldMediaInfo->eADir = m_pMediaInfo->eADir;
-        m_pMediaInfo->eADir = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : audio [%d]->[%d]", m_pOldMediaInfo->eADir,
-                m_pMediaInfo->eADir, 0);
+        m_pOldMediaInfo->eAudioDirection = m_pMediaInfo->eAudioDirection;
+        m_pMediaInfo->eAudioDirection = eDir;
+        IMS_TRACE_D("UpdateMediaDirection : audio [%d]->[%d]", m_pOldMediaInfo->eAudioDirection,
+                m_pMediaInfo->eAudioDirection, 0);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
-        m_pOldMediaInfo->eVDir = m_pMediaInfo->eVDir;
-        m_pMediaInfo->eVDir = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : video [%d]->[%d]", m_pOldMediaInfo->eVDir,
-                m_pMediaInfo->eVDir, 0);
+        m_pOldMediaInfo->eVideoDirection = m_pMediaInfo->eVideoDirection;
+        m_pMediaInfo->eVideoDirection = eDir;
+        IMS_TRACE_D("UpdateMediaDirection : video [%d]->[%d]", m_pOldMediaInfo->eVideoDirection,
+                m_pMediaInfo->eVideoDirection, 0);
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
-        m_pOldMediaInfo->eTDir = m_pMediaInfo->eTDir;
-        m_pMediaInfo->eTDir = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : text [%d]->[%d]", m_pOldMediaInfo->eTDir,
-                m_pMediaInfo->eTDir, 0);
+        m_pOldMediaInfo->eTextDirection = m_pMediaInfo->eTextDirection;
+        m_pMediaInfo->eTextDirection = eDir;
+        IMS_TRACE_D("UpdateMediaDirection : text [%d]->[%d]", m_pOldMediaInfo->eTextDirection,
+                m_pMediaInfo->eTextDirection, 0);
     }
 }
 
@@ -197,24 +197,24 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaQuality(
 {
     if (eMediaType == MEDIATYPE_AUDIO)
     {
-        m_pOldMediaInfo->eAQuality = m_pMediaInfo->eAQuality;
-        m_pMediaInfo->eAQuality = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : audio [%d]->[%d]", m_pOldMediaInfo->eAQuality,
-                m_pMediaInfo->eAQuality, 0);
+        m_pOldMediaInfo->eAudioQuality = m_pMediaInfo->eAudioQuality;
+        m_pMediaInfo->eAudioQuality = eQuality;
+        IMS_TRACE_D("UpdateMediaQuality : audio [%d]->[%d]", m_pOldMediaInfo->eAudioQuality,
+                m_pMediaInfo->eAudioQuality, 0);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
-        m_pOldMediaInfo->eVQuality = m_pMediaInfo->eVQuality;
-        m_pMediaInfo->eVQuality = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : video [%d]->[%d]", m_pOldMediaInfo->eVQuality,
-                m_pMediaInfo->eVQuality, 0);
+        m_pOldMediaInfo->eVideoQuality = m_pMediaInfo->eVideoQuality;
+        m_pMediaInfo->eVideoQuality = eQuality;
+        IMS_TRACE_D("UpdateMediaQuality : video [%d]->[%d]", m_pOldMediaInfo->eVideoQuality,
+                m_pMediaInfo->eVideoQuality, 0);
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
-        m_pOldMediaInfo->eGTTMode = m_pMediaInfo->eGTTMode;
-        m_pMediaInfo->eGTTMode = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : text [%d]->[%d]", m_pOldMediaInfo->eGTTMode,
-                m_pMediaInfo->eGTTMode, 0);
+        m_pOldMediaInfo->eGttMode = m_pMediaInfo->eGttMode;
+        m_pMediaInfo->eGttMode = eQuality;
+        IMS_TRACE_D("UpdateMediaQuality : text [%d]->[%d]", m_pOldMediaInfo->eGttMode,
+                m_pMediaInfo->eGttMode, 0);
     }
 }
 
@@ -356,8 +356,9 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromCallType(eCallType);
     IMS_UINTP nNegoId = GetMediaNegoId(piSession);
 
-    IMS_BOOL bResult = m_piMediaSession->FormSDP(nNegoId, piSession, eContents, m_pMediaInfo->eADir,
-            m_pMediaInfo->eVDir, m_pMediaInfo->eTDir, bAnswerForOfferlessReInvite);
+    IMS_BOOL bResult = m_piMediaSession->FormSDP(nNegoId, piSession, eContents,
+            m_pMediaInfo->eAudioDirection, m_pMediaInfo->eVideoDirection,
+            m_pMediaInfo->eTextDirection, bAnswerForOfferlessReInvite);
 
     if (!bResult)
     {
@@ -374,13 +375,14 @@ PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN Ca
 PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSession)
 {
     MediaNego::MediaNegoResult eErrorReason = MediaNego::MediaNegoResult::NO_ERROR;
-    IMS_SINT32 eADir = DIRECTION_INVALID;
-    IMS_SINT32 eVDir = DIRECTION_INVALID;
-    IMS_SINT32 eTDir = DIRECTION_INVALID;
+    IMS_SINT32 eAudioDirection = DIRECTION_INVALID;
+    IMS_SINT32 eVideoDirection = DIRECTION_INVALID;
+    IMS_SINT32 eTextDirection = DIRECTION_INVALID;
 
     IMS_UINTP nNegoId = GetMediaNegoId(piSession);
 
-    m_piMediaSession->NegotiateSDP(nNegoId, piSession, &eADir, &eVDir, &eTDir, eErrorReason);
+    m_piMediaSession->NegotiateSDP(
+            nNegoId, piSession, &eAudioDirection, &eVideoDirection, &eTextDirection, eErrorReason);
 
     IMS_TRACE_D("NegotiateSdp : %d", eErrorReason, 0, 0);
 
@@ -389,7 +391,8 @@ PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSe
         return eErrorReason;
     }
 
-    MediaInfo objInfo(eADir, eVDir, eTDir, GetNegotiatedQuality(piSession, MEDIATYPE_AUDIO),
+    MediaInfo objInfo(eAudioDirection, eVideoDirection, eTextDirection,
+            GetNegotiatedQuality(piSession, MEDIATYPE_AUDIO),
             GetNegotiatedQuality(piSession, MEDIATYPE_VIDEO),
             MtcMediaUtil::GetGttModeFromTextQuality(
                     GetNegotiatedQuality(piSession, MEDIATYPE_TEXT)));
@@ -648,7 +651,7 @@ PUBLIC VIRTUAL CallType MtcMediaManager::GetNegotiatedCallType(IN ISession* piSe
 
 PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioQualityHd()
 {
-    switch (m_pMediaInfo->eAQuality)
+    switch (m_pMediaInfo->eAudioQuality)
     {
         case AUDIO_QUALITY_AMR_WB:
         case AUDIO_QUALITY_EVS:
@@ -671,7 +674,7 @@ PUBLIC VIRTUAL PemType MtcMediaManager::GetPemType(IN ISession* piSession)
 
 PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioMediaActivated()
 {
-    return (m_pMediaInfo->eADir != DIRECTION_INACTIVE) ? IMS_TRUE : IMS_FALSE;
+    return (m_pMediaInfo->eAudioDirection != DIRECTION_INACTIVE) ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioInactive()
@@ -682,35 +685,35 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioInactive()
 PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoAccept(
         IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe)
 {
-    IMS_SINT32 eNewDir = m_pMediaInfo->eADir;
+    IMS_SINT32 eNewDirection = m_pMediaInfo->eAudioDirection;
 
     if (bSendOffer)
     {
-        eNewDir = DIRECTION_SEND_RECEIVE;
+        eNewDirection = DIRECTION_SEND_RECEIVE;
     }
 
     if (bHeldByMe)
     {
-        if (eNewDir == DIRECTION_SEND_RECEIVE)
+        if (eNewDirection == DIRECTION_SEND_RECEIVE)
         {
-            eNewDir = DIRECTION_SEND;
+            eNewDirection = DIRECTION_SEND;
         }
-        else if (eNewDir == DIRECTION_RECEIVE)
+        else if (eNewDirection == DIRECTION_RECEIVE)
         {
-            eNewDir = DIRECTION_INACTIVE;
+            eNewDirection = DIRECTION_INACTIVE;
         }
     }
 
-    m_pMediaInfo->eADir = eNewDir;
+    m_pMediaInfo->eAudioDirection = eNewDirection;
 
-    if (m_pMediaInfo->eVDir != DIRECTION_INVALID)
+    if (m_pMediaInfo->eVideoDirection != DIRECTION_INVALID)
     {
-        m_pMediaInfo->eVDir = eNewDir;
+        m_pMediaInfo->eVideoDirection = eNewDirection;
     }
 
-    if (m_pMediaInfo->eTDir != DIRECTION_INVALID)
+    if (m_pMediaInfo->eTextDirection != DIRECTION_INVALID)
     {
-        m_pMediaInfo->eTDir = eNewDir;
+        m_pMediaInfo->eTextDirection = eNewDirection;
     }
 }
 
@@ -885,7 +888,7 @@ IMS_UINT32 MtcMediaManager::GetDurationWaitingNetworkTone(
 {
     if (m_pProfileManager->IsConfirmed(piSession))
     {
-        if (m_pMediaInfo->eADir != DIRECTION_RECEIVE)
+        if (m_pMediaInfo->eAudioDirection != DIRECTION_RECEIVE)
         {
             return TIME_NO_WAIT_NW_TONE_RTP;
         }

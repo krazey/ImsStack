@@ -21,7 +21,6 @@
 
 class IMtcCallContext;
 class IConferenceReference;
-class MediaInfo;
 class SuppService;
 struct CallInfo;
 struct CallStartOperationParams;

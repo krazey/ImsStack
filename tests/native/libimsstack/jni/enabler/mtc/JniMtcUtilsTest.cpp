@@ -91,12 +91,12 @@ TEST_F(JniMtcUtilsTest, WtiteAndReadCallInfo)
 TEST_F(JniMtcUtilsTest, WtiteAndReadMediaInfo)
 {
     MediaInfo objAnyMediaInfo;
-    objAnyMediaInfo.eAQuality = AUDIO_QUALITY_EVS;
-    objAnyMediaInfo.eVQuality = VIDEO_QUALITY_VGA_PR;
-    objAnyMediaInfo.eADir = DIRECTION_SEND_RECEIVE;
-    objAnyMediaInfo.eVDir = DIRECTION_SEND_RECEIVE;
-    objAnyMediaInfo.eTDir = DIRECTION_SEND_RECEIVE;
-    objAnyMediaInfo.eGTTMode = GTT_MODE_FULL;
+    objAnyMediaInfo.eAudioQuality = AUDIO_QUALITY_EVS;
+    objAnyMediaInfo.eVideoQuality = VIDEO_QUALITY_VGA_PR;
+    objAnyMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objAnyMediaInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
+    objAnyMediaInfo.eTextDirection = DIRECTION_SEND_RECEIVE;
+    objAnyMediaInfo.eGttMode = GTT_MODE_FULL;
 
     Parcel objParcel;
     JniMtcUtils::WriteMediaInfoToParcel(objAnyMediaInfo, objParcel);

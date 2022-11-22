@@ -400,8 +400,8 @@ IMS_RESULT UpdatingState::SendUpdate()
             m_objContext.GetUpdatingInfo().GetNegotiatedInfo();
     m_objContext.GetUpdatingInfo().GetNegotiatedInfo() =
             m_objContext.GetUpdatingInfo().GetModifiedInfo();
-    m_objContext.GetUpdatingInfo().GetAlertingInfo().eADir = DIRECTION_INVALID;
-    m_objContext.GetUpdatingInfo().GetModifiedInfo().eADir = DIRECTION_INVALID;
+    m_objContext.GetUpdatingInfo().GetAlertingInfo().eAudioDirection = DIRECTION_INVALID;
+    m_objContext.GetUpdatingInfo().GetModifiedInfo().eAudioDirection = DIRECTION_INVALID;
 
     m_objContext.GetUpdatingInfo().SetModifier();
     m_objContext.GetMediaManager().SetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());

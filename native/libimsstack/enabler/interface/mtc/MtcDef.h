@@ -237,40 +237,41 @@ enum
     CONF_CREATE_EXPANDED_BY = 5,
 };
 
-class MediaInfo
+struct MediaInfo
 {
 public:
     inline MediaInfo() :
-            eADir(DIRECTION_INVALID),
-            eVDir(DIRECTION_INVALID),
-            eTDir(DIRECTION_INVALID),
-            eAQuality(AUDIO_QUALITY_NONE),
-            eVQuality(VIDEO_QUALITY_NONE),
-            eGTTMode(GTT_MODE_INVALID)
+            eAudioDirection(DIRECTION_INVALID),
+            eVideoDirection(DIRECTION_INVALID),
+            eTextDirection(DIRECTION_INVALID),
+            eAudioQuality(AUDIO_QUALITY_NONE),
+            eVideoQuality(VIDEO_QUALITY_NONE),
+            eGttMode(GTT_MODE_INVALID)
     {
         // TODO: temp for logging / memory leak check.
         CreateId();
         IMS_TRACE_MEM("MTC", "+MediaInfo [%d]", nId, 0, 0);
     }
     inline MediaInfo(IN const MediaInfo& objRhs) :
-            eADir(objRhs.eADir),
-            eVDir(objRhs.eVDir),
-            eTDir(objRhs.eTDir),
-            eAQuality(objRhs.eAQuality),
-            eVQuality(objRhs.eVQuality),
-            eGTTMode(objRhs.eGTTMode)
+            eAudioDirection(objRhs.eAudioDirection),
+            eVideoDirection(objRhs.eVideoDirection),
+            eTextDirection(objRhs.eTextDirection),
+            eAudioQuality(objRhs.eAudioQuality),
+            eVideoQuality(objRhs.eVideoQuality),
+            eGttMode(objRhs.eGttMode)
     {
         CreateId();
         IMS_TRACE_MEM("MTC", "+MediaInfo [%d]", nId, 0, 0);
     }
-    inline MediaInfo(IN IMS_SINT32 eInitADir, IN IMS_SINT32 eInitVDir, IN IMS_SINT32 eInitTDir,
-            IN IMS_UINT32 eInitAQuality, IN IMS_UINT32 eInitVQuality, IN IMS_SINT32 eInitGTTMode) :
-            eADir(eInitADir),
-            eVDir(eInitVDir),
-            eTDir(eInitTDir),
-            eAQuality(eInitAQuality),
-            eVQuality(eInitVQuality),
-            eGTTMode(eInitGTTMode)
+    inline MediaInfo(IN IMS_SINT32 eInitAudioDirection, IN IMS_SINT32 eInitVideoDirection,
+            IN IMS_SINT32 eInitTextDirection, IN IMS_UINT32 eInitAudioQuality,
+            IN IMS_UINT32 eInitVideoQuality, IN IMS_SINT32 eInitGttMode) :
+            eAudioDirection(eInitAudioDirection),
+            eVideoDirection(eInitVideoDirection),
+            eTextDirection(eInitTextDirection),
+            eAudioQuality(eInitAudioQuality),
+            eVideoQuality(eInitVideoQuality),
+            eGttMode(eInitGttMode)
     {
         CreateId();
         IMS_TRACE_MEM("MTC", "+MediaInfo [%d]", nId, 0, 0);
@@ -289,12 +290,12 @@ public:
     {
         if (this != &objRhs)
         {
-            eADir = objRhs.eADir;
-            eVDir = objRhs.eVDir;
-            eTDir = objRhs.eTDir;
-            eAQuality = objRhs.eAQuality;
-            eVQuality = objRhs.eVQuality;
-            eGTTMode = objRhs.eGTTMode;
+            eAudioDirection = objRhs.eAudioDirection;
+            eVideoDirection = objRhs.eVideoDirection;
+            eTextDirection = objRhs.eTextDirection;
+            eAudioQuality = objRhs.eAudioQuality;
+            eVideoQuality = objRhs.eVideoQuality;
+            eGttMode = objRhs.eGttMode;
         }
 
         return (*this);
@@ -307,22 +308,21 @@ public:
             return IMS_TRUE;
         }
 
-        return eADir == objRhs.eADir && eVDir == objRhs.eVDir && eTDir == objRhs.eTDir &&
-                eAQuality == objRhs.eAQuality && eVQuality == objRhs.eVQuality &&
-                eGTTMode == objRhs.eGTTMode;
+        return eAudioDirection == objRhs.eAudioDirection &&
+                eVideoDirection == objRhs.eVideoDirection &&
+                eTextDirection == objRhs.eTextDirection && eAudioQuality == objRhs.eAudioQuality &&
+                eVideoQuality == objRhs.eVideoQuality && eGttMode == objRhs.eGttMode;
     }
 
     IMS_BOOL operator!=(const MediaInfo& objRhs) const { return !(*this == objRhs); }
 
 public:
-    IMS_SINT32 eADir;
-    IMS_SINT32 eVDir;
-    IMS_SINT32 eTDir;
-
-    IMS_UINT32 eAQuality;
-    IMS_UINT32 eVQuality;
-
-    IMS_SINT32 eGTTMode;
+    IMS_SINT32 eAudioDirection;
+    IMS_SINT32 eVideoDirection;
+    IMS_SINT32 eTextDirection;
+    IMS_UINT32 eAudioQuality;
+    IMS_UINT32 eVideoQuality;
+    IMS_SINT32 eGttMode;
 
     IMS_UINT32 nId;
 };

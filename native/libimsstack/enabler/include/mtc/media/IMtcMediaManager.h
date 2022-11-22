@@ -24,10 +24,10 @@ class IMediaQosEventListener;
 class IMediaReportEventListener;
 class IMessage;
 class ISession;
-class MediaInfo;
 enum class CallType;
 enum class MediaState;
 enum class PemType;
+struct MediaInfo;
 
 using NegotiationResult = MediaNego::MediaNegoResult;
 using NegotiationState = NEGO_STATE;

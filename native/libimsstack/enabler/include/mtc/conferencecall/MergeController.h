@@ -21,7 +21,6 @@
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
-class MediaInfo;
 class SuppService;
 struct CallInfo;
 struct CallStartOperationParams;
