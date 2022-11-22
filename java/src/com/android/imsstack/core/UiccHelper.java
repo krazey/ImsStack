@@ -17,14 +17,12 @@ package com.android.imsstack.core;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IPreference;
-import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
 
 import java.io.ByteArrayOutputStream;
-import java.util.List;
 
 /**
  *  This class provides an interface for the CAT event IMS Registration command.
@@ -34,7 +32,6 @@ public class UiccHelper {
     private static final int IMS_REG_NOTIFY_STATE_ACTIVE = 1;
     private static final int IMS_REG_NOTIFY_STATE_INVALID = 2;
     private static final int REG_SUCCESS_RESP = 200;
-    private static final int IMPU_LENGTH_MINIMUM = 15;
 
     // PREFIX
     private static final byte PREFIX = (byte) 0x80;
@@ -105,8 +102,7 @@ public class UiccHelper {
             if (reason == IMS_REG_NOTIFY_STATE_INVALID) {
                 addInfoLength = 0x0;
             } else {
-                // Todo: call getContactUriFromNotify()
-                impu = getSelectedImpu(slotId);
+                impu = getContactUriFromNotify(slotId);
 
                 if (impu == null) {
                     ImsLog.w("impu is null");
@@ -209,42 +205,6 @@ public class UiccHelper {
         }
 
         return (strUriFromNotify == null) ? "" : strUriFromNotify;
-    }
-
-    private static String getSelectedImpu(int slotId) {
-        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
-
-        if (sim == null) {
-            ImsLog.d("SimInterface is null");
-            return null;
-        }
-
-        List<String> impuList = sim.getIsimImpu();
-
-        if (impuList.isEmpty()) {
-            return null;
-        }
-
-        ImsLog.w("IMPUs Size = " + impuList.size());
-
-        String impu = impuList.get(0);
-
-        if ((impu == null) || (impu.length() < IMPU_LENGTH_MINIMUM)) {
-            return null;
-        }
-
-        if (impuList.size() == 1) {
-            return impu;
-        }
-
-        impu = impuList.get(1);
-
-        if ((impu == null) || (impu.length() < IMPU_LENGTH_MINIMUM)) {
-            ImsLog.w("impus[1] is invalid");
-            return null;
-        }
-
-        return impu;
     }
 
     /**
