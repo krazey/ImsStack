@@ -598,25 +598,25 @@ void EstablishedState::AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer)
     MediaInfo objMediaInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
 
-    IMS_SINT32 eNewDir = objMediaInfo.eADir;
+    IMS_SINT32 eNewAudioDir = objMediaInfo.eADir;
     if (bWithoutOffer)
     {
-        eNewDir = DIRECTION_SEND_RECEIVE;
+        eNewAudioDir = DIRECTION_SEND_RECEIVE;
     }
 
     if (m_objContext.IsHeldByMe())
     {
-        if (eNewDir == DIRECTION_SEND_RECEIVE)
+        if (eNewAudioDir == DIRECTION_SEND_RECEIVE)
         {
-            eNewDir = DIRECTION_SEND;
+            eNewAudioDir = DIRECTION_SEND;
         }
-        else if (eNewDir == DIRECTION_RECEIVE)
+        else if (eNewAudioDir == DIRECTION_RECEIVE)
         {
-            eNewDir = DIRECTION_INACTIVE;
+            eNewAudioDir = DIRECTION_INACTIVE;
         }
     }
 
-    objMediaInfo.eADir = eNewDir;
+    objMediaInfo.eADir = eNewAudioDir;
 
     // TODO
     /*
@@ -624,11 +624,11 @@ void EstablishedState::AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer)
     {
         objMediaInfo.eVDir = ???;
     }
+    */
     if (objMediaInfo.eTDir != DIRECTION_INVALID)
     {
-        objMediaInfo.eTDir = eNewDir;
+        objMediaInfo.eTDir = eNewAudioDir;
     }
-    */
 
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 }
