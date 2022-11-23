@@ -502,8 +502,7 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
         return;
     }
 
-    nMtResult = ReportMtSms(
-            piMtsMessage->GetSmsFormat(), objSms.GetLength(), (const IMS_BYTE*)objSms.GetData());
+    nMtResult = ReportMtSms(piMtsMessage->GetSmsFormat(), objSms.GetLength(), objSms.GetData());
 
     if (RespondReceivedMessage(piPageMessage, piMtsMessage, nMtResult, IMS_TRUE) != IMS_TRUE)
     {
@@ -806,8 +805,6 @@ PRIVATE
 IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, OUT ByteArray& objSms)
 {
-    ImsList<IMessageBodyPart*> objMessageBodies = ImsList<IMessageBodyPart*>();
-    SmsFormatType eContentSmsType = SmsFormatType::SMSFORMAT_INVALID;
     AString strTempSmsgw = AString::ConstNull();
 
     if (piPageMessage == IMS_NULL)
@@ -842,7 +839,7 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         return IMS_FALSE;
     }
 
-    objMessageBodies = piMessage->GetBodyParts();
+    ImsList<IMessageBodyPart*> objMessageBodies = piMessage->GetBodyParts();
 
     if (0 == objMessageBodies.GetSize())
     {
@@ -860,7 +857,7 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
      */
     AString strContentType = objMessageBodies.GetAt(0)->GetHeader(AString("Content-Type"));
 
-    eContentSmsType =
+    SmsFormatType eContentSmsType =
             m_pMtsDynamicLoader->GetMtsSipFormUtils()->FormContentTypeStrToEnum(strContentType);
 
     if (eContentSmsType == SmsFormatType::SMSFORMAT_INVALID)
@@ -950,7 +947,6 @@ IMS_BOOL MtsMessageController::RespondReceivedMessage(IN IPageMessage* piPageMes
             }
 
             return IMS_TRUE;
-            break;
         }
         case MT_SMS_FORMAT_FAILURE:
         {
@@ -959,7 +955,6 @@ IMS_BOOL MtsMessageController::RespondReceivedMessage(IN IPageMessage* piPageMes
             piPageMessage->Reject(415, 0);
 
             return IMS_FALSE;
-            break;
         }
         case MT_SMS_NODATA_FAILURE:
         {
@@ -968,7 +963,6 @@ IMS_BOOL MtsMessageController::RespondReceivedMessage(IN IPageMessage* piPageMes
             piPageMessage->Reject(400, 0);
 
             return IMS_FALSE;
-            break;
         }
         case MT_FAILURE:
         {
@@ -977,7 +971,6 @@ IMS_BOOL MtsMessageController::RespondReceivedMessage(IN IPageMessage* piPageMes
             piPageMessage->Reject(480);
 
             return IMS_FALSE;
-            break;
         }
         default:
         {
@@ -986,7 +979,6 @@ IMS_BOOL MtsMessageController::RespondReceivedMessage(IN IPageMessage* piPageMes
             piPageMessage->Reject(500);
 
             return IMS_FALSE;
-            break;
         }
     }
 }
@@ -1008,7 +1000,7 @@ void MtsMessageController::Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessag
 
     ProcessReceivedMessage(piPageMessage, piMtsMessage, objSms);
 
-    nMtResult = ReportMtSms(eSmsFormat, objSms.GetLength(), (const IMS_BYTE*)objSms.GetData());
+    nMtResult = ReportMtSms(eSmsFormat, objSms.GetLength(), objSms.GetData());
 
     if (RespondReceivedMessage(piPageMessage, piMtsMessage, nMtResult, IMS_FALSE) != IMS_TRUE)
     {

@@ -108,7 +108,6 @@ IMS_BOOL MtsFactory::DestroyMtsApp(IN IMS_SINT32 nSlotId)
     MtsApp* pMtsApp = DYNAMIC_CAST(MtsApp*, piMtsApp);
 
     delete pMtsApp;
-    pMtsApp = IMS_NULL;
 
     m_objMtsApp.RemoveAt(nIndex);
     return IMS_TRUE;
@@ -120,10 +119,10 @@ MtsApp* MtsFactory::GetMtsApp(IN IMS_SINT32 nSlotId)
     IMS_TRACE_D("GetMtsApp[%d]", nSlotId, 0, 0);
 
     IMS_SLONG nIndex = m_objMtsApp.GetIndexOfKey(nSlotId);
-    IMtsApp* pApp = IMS_NULL;
+
     if (nIndex >= 0)
     {
-        pApp = m_objMtsApp.GetValueAt(nIndex);
+        IMtsApp* pApp = m_objMtsApp.GetValueAt(nIndex);
         return DYNAMIC_CAST(MtsApp*, pApp);
     }
 

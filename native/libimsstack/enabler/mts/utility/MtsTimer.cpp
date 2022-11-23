@@ -40,16 +40,10 @@ PUBLIC VIRTUAL MtsTimer::~MtsTimer()
         {
             piTimer->KillTimer();
             TimerService::GetTimerService()->DestroyTimer(piTimer);
-            piTimer = IMS_NULL;
         }
     }
 
     m_objTimers.Clear();
-
-    if (m_piTimerListener)
-    {
-        m_piTimerListener = IMS_NULL;
-    }
 }
 
 PUBLIC VIRTUAL void MtsTimer::Timer_TimerExpired(IN ITimer* piExpiredTimer)
