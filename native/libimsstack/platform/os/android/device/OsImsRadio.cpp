@@ -26,7 +26,7 @@ __IMS_TRACE_TAG_ADAPT__;
 class OsImsRadioParam
 {
 public:
-    inline OsImsRadioParam(IN IMS_UINT32 nEvent) :
+    inline explicit OsImsRadioParam(IN IMS_UINT32 nEvent) :
             m_nEvent(nEvent)
     {
     }

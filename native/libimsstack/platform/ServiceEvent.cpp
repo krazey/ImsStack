@@ -105,7 +105,7 @@ PRIVATE VIRTUAL IMS_BOOL EventActivity::DispatchMessage(IN ImsMessage& objMsg)
 class EventHolder : public IEventReceiverListener
 {
 public:
-    EventHolder(IN IMS_SINT32 nSlotId);
+    explicit EventHolder(IN IMS_SINT32 nSlotId);
     virtual ~EventHolder();
 
     EventHolder(IN const EventHolder&) = delete;

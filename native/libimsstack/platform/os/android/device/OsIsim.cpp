@@ -34,7 +34,7 @@ __IMS_TRACE_TAG_ADAPT__;
 class OsIsimParam
 {
 public:
-    inline OsIsimParam(IN IMS_SINT32 nType = 0) :
+    inline explicit OsIsimParam(IN IMS_SINT32 nType = 0) :
             m_nType(nType)
     {
     }

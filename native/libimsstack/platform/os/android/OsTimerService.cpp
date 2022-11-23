@@ -58,7 +58,7 @@ IMS_BOOL osTimerService_SetAlarm(IN IMS_UINTP nTimerId, IN IMS_UINT32 nDuration)
 class OsTimerWrapper
 {
 public:
-    inline OsTimerWrapper(IN OsTimer* pTimer) :
+    inline explicit OsTimerWrapper(IN OsTimer* pTimer) :
             m_bTimerExpired(IMS_FALSE),
             m_pTimer(pTimer)
     {
