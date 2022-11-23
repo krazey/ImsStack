@@ -3956,9 +3956,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleRequestToUpdate(IN ISipServerConnect
 
             // 140818, CONDITION_ACK_WAITING_STATE
             // It needs to properly handle UPDATE request(session refresh) before receiving ACK.
-            if ((piResponse == IMS_NULL) ||
-                    ((piResponse != IMS_NULL) &&
-                            (piResponse->GetStatusCode() < SipStatusCode::SC_200)) ||
+            if ((piResponse == IMS_NULL) || (piResponse->GetStatusCode() < SipStatusCode::SC_200) ||
                     (GetState() == STATE_REESTABLISHING))
             {
                 // 4 check SDP presentity

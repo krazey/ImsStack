@@ -433,11 +433,10 @@ PUBLIC GLOBAL const AString ImsIdentity::GetPhoneContext(IN IMS_SINT32 nDialingP
         AString strPc(AString::ConstNull());
 
         if ((pAni == IMS_NULL) ||
-                ((pAni != IMS_NULL) &&
-                        (((pAni->nClass == AccessNetworkInfo::CLASS_NONE) &&
-                                 (pAni->nType == AccessNetworkInfo::TYPE_NONE)) ||
-                                ((pAni->nClass != AccessNetworkInfo::CLASS_NONE) &&
-                                        (pAni->nType != AccessNetworkInfo::TYPE_NONE)))))
+                ((pAni->nClass == AccessNetworkInfo::CLASS_NONE) &&
+                        (pAni->nType == AccessNetworkInfo::TYPE_NONE)) ||
+                ((pAni->nClass != AccessNetworkInfo::CLASS_NONE) &&
+                        (pAni->nType != AccessNetworkInfo::TYPE_NONE)))
         {
             strPc.Sprintf("geo-local.%s", strHdn.GetStr());
         }

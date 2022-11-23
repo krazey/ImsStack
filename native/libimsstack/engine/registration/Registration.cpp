@@ -1329,8 +1329,7 @@ PRIVATE VIRTUAL void Registration::ConnectionNotifierError_NotifyError(
         // If the loss of data connection detects,
         // the error doesn't need to notify the application.
         if ((piConnection == IMS_NULL) ||
-                ((piConnection != IMS_NULL) &&
-                        (piConnection->GetState() != INetworkConnection::STATE_CONNECTED)))
+                (piConnection->GetState() != INetworkConnection::STATE_CONNECTED))
         {
             IMS_TRACE_D("Registration :: Restoration(for active bindings) is enabled", 0, 0, 0);
             return;
