@@ -25,10 +25,10 @@ class IMediaQosEventListener;
 class IMediaReportEventListener;
 class IMessage;
 class ISession;
-class MediaInfo;
 enum class CallType;
 enum class MediaState;
 enum class PemType;
+struct MediaInfo;
 
 class MockIMtcMediaManager : public IMtcMediaManager
 {

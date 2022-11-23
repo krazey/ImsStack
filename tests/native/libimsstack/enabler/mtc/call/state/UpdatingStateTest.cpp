@@ -165,8 +165,8 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
 {
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
     MediaInfo objMediaInfo;
-    objMediaInfo.eADir = DIRECTION_SEND_RECEIVE;
-    pUpdatingInfo->GetAlertingInfo().eADir = DIRECTION_SEND;
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetAlertingInfo().eAudioDirection = DIRECTION_SEND;
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
@@ -181,7 +181,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
 
     EXPECT_EQ(
             CallStateName::ESTABLISHED, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
-    EXPECT_EQ(DIRECTION_SEND, objMediaInfo.eADir);
+    EXPECT_EQ(DIRECTION_SEND, objMediaInfo.eAudioDirection);
 }
 
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)

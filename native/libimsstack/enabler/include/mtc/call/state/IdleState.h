@@ -29,9 +29,9 @@
 class AString;
 class IMessage;
 class IMtcCallContext;
-class MediaInfo;
 class SuppService;
 struct ConfUser;
+struct MediaInfo;
 
 /**
  * Represents the state that any messages have not been sent to the remote.

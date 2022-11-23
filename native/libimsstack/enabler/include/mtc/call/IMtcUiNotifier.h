@@ -24,11 +24,11 @@
 #include "call/IMtcCall.h"
 
 class ParticipantInfo;
-class MediaInfo;
 class SuppService;
 struct CallInfo;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 class IMtcUiNotifier
 {

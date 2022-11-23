@@ -27,11 +27,11 @@
 class IMtcCallContext;
 class ParticipantInfo;
 class IJniMtcCallThread;
-class MediaInfo;
 class SuppService;
 struct CallInfo;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 // TODO: remove unused parameter
 // TODO: get SuppService from the context

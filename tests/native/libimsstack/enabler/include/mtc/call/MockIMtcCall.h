@@ -28,11 +28,11 @@
 
 class IMtcCallContext;
 class ISession;
-class MediaInfo;
 class SuppService;
 enum class UpdateType;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 class MockIMtcCall : public IMtcCall
 {

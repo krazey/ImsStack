@@ -86,7 +86,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo& objMediaInfo)
     }
 
     const MediaInfo& objOldMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
-    if (objOldMediaInfo.eADir == DIRECTION_INACTIVE)
+    if (objOldMediaInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
         m_objContext.SetHeldByMe(IMS_TRUE);
         m_objContext.GetUiNotifier().SendHeld(&(m_objContext.GetCallInfo()), objOldMediaInfo,
@@ -640,14 +640,14 @@ CallStateName EstablishedState::Downgrade(IN CallType eCallType)
     // Assumption : no case to downgrade from VIDEO_RTT to VOIP directly
     if (eCallType == CallType::VOIP || eCallType == CallType::VT)
     {
-        objNewMediaInfo.eTDir = DIRECTION_INVALID;
-        objNewMediaInfo.eGTTMode = GTT_MODE_INVALID;
+        objNewMediaInfo.eTextDirection = DIRECTION_INVALID;
+        objNewMediaInfo.eGttMode = GTT_MODE_INVALID;
     }
 
     if (eCallType == CallType::VOIP || eCallType == CallType::RTT)
     {
-        objNewMediaInfo.eVDir = DIRECTION_INVALID;
-        objNewMediaInfo.eVQuality = VIDEO_QUALITY_NONE;
+        objNewMediaInfo.eVideoDirection = DIRECTION_INVALID;
+        objNewMediaInfo.eVideoQuality = VIDEO_QUALITY_NONE;
     }
 
     return Update(eCallType, objNewMediaInfo);

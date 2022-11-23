@@ -59,12 +59,12 @@ PUBLIC GLOBAL JniCallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
 PUBLIC GLOBAL MediaInfo& JniMtcUtils::ReadMediaInfo(
         IN const Parcel& objParcel, IN_OUT MediaInfo& objMediaInfo)
 {
-    objMediaInfo.eAQuality = objParcel.readInt32();
-    objMediaInfo.eVQuality = objParcel.readInt32();
-    objMediaInfo.eADir = objParcel.readInt32();
-    objMediaInfo.eVDir = objParcel.readInt32();
-    objMediaInfo.eTDir = objParcel.readInt32();
-    objMediaInfo.eGTTMode = objParcel.readInt32();
+    objMediaInfo.eAudioQuality = objParcel.readInt32();
+    objMediaInfo.eVideoQuality = objParcel.readInt32();
+    objMediaInfo.eAudioDirection = objParcel.readInt32();
+    objMediaInfo.eVideoDirection = objParcel.readInt32();
+    objMediaInfo.eTextDirection = objParcel.readInt32();
+    objMediaInfo.eGttMode = objParcel.readInt32();
 
     return objMediaInfo;
 }
@@ -138,12 +138,12 @@ PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
 PUBLIC GLOBAL void JniMtcUtils::WriteMediaInfoToParcel(
         IN const MediaInfo& objMediaInfo, IN_OUT Parcel& objParcel)
 {
-    objParcel.writeInt32(objMediaInfo.eAQuality);
-    objParcel.writeInt32(objMediaInfo.eVQuality);
-    objParcel.writeInt32(objMediaInfo.eADir);
-    objParcel.writeInt32(objMediaInfo.eVDir);
-    objParcel.writeInt32(objMediaInfo.eTDir);
-    objParcel.writeInt32(objMediaInfo.eGTTMode);
+    objParcel.writeInt32(objMediaInfo.eAudioQuality);
+    objParcel.writeInt32(objMediaInfo.eVideoQuality);
+    objParcel.writeInt32(objMediaInfo.eAudioDirection);
+    objParcel.writeInt32(objMediaInfo.eVideoDirection);
+    objParcel.writeInt32(objMediaInfo.eTextDirection);
+    objParcel.writeInt32(objMediaInfo.eGttMode);
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(

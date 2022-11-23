@@ -36,12 +36,12 @@ TEST(MtcDefTest, MediaInfoConstructorWithParams)
     MediaInfo objMediaInfo(
             ANY_A_DIR, ANY_V_DIR, ANY_T_DIR, ANY_A_QUALITY, ANY_V_QUALITY, ANY_GTT_MODE);
 
-    EXPECT_EQ(objMediaInfo.eADir, ANY_A_DIR);
-    EXPECT_EQ(objMediaInfo.eVDir, ANY_V_DIR);
-    EXPECT_EQ(objMediaInfo.eTDir, ANY_T_DIR);
-    EXPECT_EQ(objMediaInfo.eAQuality, ANY_A_QUALITY);
-    EXPECT_EQ(objMediaInfo.eVQuality, ANY_V_QUALITY);
-    EXPECT_EQ(objMediaInfo.eGTTMode, ANY_GTT_MODE);
+    EXPECT_EQ(objMediaInfo.eAudioDirection, ANY_A_DIR);
+    EXPECT_EQ(objMediaInfo.eVideoDirection, ANY_V_DIR);
+    EXPECT_EQ(objMediaInfo.eTextDirection, ANY_T_DIR);
+    EXPECT_EQ(objMediaInfo.eAudioQuality, ANY_A_QUALITY);
+    EXPECT_EQ(objMediaInfo.eVideoQuality, ANY_V_QUALITY);
+    EXPECT_EQ(objMediaInfo.eGttMode, ANY_GTT_MODE);
 }
 
 TEST(MtcDefTest, MediaInfoAssignOperator)
@@ -50,12 +50,12 @@ TEST(MtcDefTest, MediaInfoAssignOperator)
     MediaInfo objRightHandSide(ANY_A_DIR, ANY_V_DIR, 3, 1, 2, 1);
     objMediaInfo = objRightHandSide;
 
-    EXPECT_EQ(objMediaInfo.eADir, objRightHandSide.eADir);
-    EXPECT_EQ(objMediaInfo.eVDir, objRightHandSide.eVDir);
-    EXPECT_EQ(objMediaInfo.eTDir, objRightHandSide.eTDir);
-    EXPECT_EQ(objMediaInfo.eAQuality, objRightHandSide.eAQuality);
-    EXPECT_EQ(objMediaInfo.eVQuality, objRightHandSide.eVQuality);
-    EXPECT_EQ(objMediaInfo.eGTTMode, objRightHandSide.eGTTMode);
+    EXPECT_EQ(objMediaInfo.eAudioDirection, objRightHandSide.eAudioDirection);
+    EXPECT_EQ(objMediaInfo.eVideoDirection, objRightHandSide.eVideoDirection);
+    EXPECT_EQ(objMediaInfo.eTextDirection, objRightHandSide.eTextDirection);
+    EXPECT_EQ(objMediaInfo.eAudioQuality, objRightHandSide.eAudioQuality);
+    EXPECT_EQ(objMediaInfo.eVideoQuality, objRightHandSide.eVideoQuality);
+    EXPECT_EQ(objMediaInfo.eGttMode, objRightHandSide.eGttMode);
 }
 
 TEST(MtcDefTest, MediaInfoEqualToOperator)

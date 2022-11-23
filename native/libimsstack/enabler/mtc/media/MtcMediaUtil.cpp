@@ -231,23 +231,23 @@ PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(IN IMtcServic
 
 PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetGttModeFromTextQuality(IN IMS_UINT32 eTextQuality)
 {
-    IMS_SINT32 eGTTMode = GTT_MODE_INVALID;
+    IMS_SINT32 eGttMode = GTT_MODE_INVALID;
 
     switch (eTextQuality)  // This Text Quality is matched with the values defined in TextDef.h.
     {
         case TEXT_QUALITY_NONE:
-            eGTTMode = GTT_MODE_INVALID;
+            eGttMode = GTT_MODE_INVALID;
             break;
         case TEXT_QUALITY_T140:
         case TEXT_QUALITY_T140_RED:
-            eGTTMode = GTT_MODE_FULL;
+            eGttMode = GTT_MODE_FULL;
             break;
         case TEXT_QUALITY_NOTUSED:
-            eGTTMode = GTT_MODE_INVALID;
+            eGttMode = GTT_MODE_INVALID;
             break;
         default:
             break;
     }
 
-    return eGTTMode;
+    return eGttMode;
 }

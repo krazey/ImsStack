@@ -25,11 +25,11 @@
 #include "MtcDef.h"
 #include <binder/Parcel.h>
 
-class MediaInfo;
 class SuppService;
 struct CallReasonInfo;
 struct ConfUser;
 struct JniCallInfo;
+struct MediaInfo;
 
 class JniMtcCallThread final : public BaseServiceThread, public IJniMtcCallThread
 {

@@ -25,9 +25,9 @@
 class AString;
 class IMessage;
 class IMtcCalContext;
-class MediaInfo;
 class SuppService;
 enum class QosLossPolicy;
+struct MediaInfo;
 
 /**
  * Represents the state that a call is incoming and it have alerted to the UI.

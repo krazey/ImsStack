@@ -305,16 +305,17 @@ IMS_BOOL DialogInfo::IsPullableDialog(Dialog* pDialog) const
 {
     if (GetDialogCallState(pDialog) == Dialog::State::STATE_CONFIRMED &&
             pDialog->m_objExtraInfo.m_strExclusive.EqualsIgnoreCase("false") &&
-            (pDialog->m_objExtraInfo.m_objMediaInfo.eAQuality == AUDIO_QUALITY_AMR_WB &&
-                    pDialog->m_objExtraInfo.m_objMediaInfo.eADir == DIRECTION_SEND_RECEIVE))
+            (pDialog->m_objExtraInfo.m_objMediaInfo.eAudioQuality == AUDIO_QUALITY_AMR_WB &&
+                    pDialog->m_objExtraInfo.m_objMediaInfo.eAudioDirection ==
+                            DIRECTION_SEND_RECEIVE))
     {
-        if (pDialog->m_objExtraInfo.m_objMediaInfo.eVQuality == VIDEO_QUALITY_NONE ||
-                pDialog->m_objExtraInfo.m_objMediaInfo.eVQuality == VIDEO_QUALITY_NOTUSED)
+        if (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_NONE ||
+                pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_NOTUSED)
         {
             return IMS_TRUE;
         }
-        else if (pDialog->m_objExtraInfo.m_objMediaInfo.eVQuality == VIDEO_QUALITY_QVGA_PR &&
-                pDialog->m_objExtraInfo.m_objMediaInfo.eVDir == DIRECTION_SEND_RECEIVE)
+        else if (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_QVGA_PR &&
+                pDialog->m_objExtraInfo.m_objMediaInfo.eVideoDirection == DIRECTION_SEND_RECEIVE)
         {
             return IMS_TRUE;
         }
@@ -332,9 +333,9 @@ IMS_UINT32 DialogInfo::GetDialogCallState(Dialog* pDialog) const
 PRIVATE
 IMS_UINT32 DialogInfo::GetDialogCallType(Dialog* pDialog) const
 {
-    if (pDialog->m_objExtraInfo.m_objMediaInfo.eAQuality == AUDIO_QUALITY_AMR_WB)
+    if (pDialog->m_objExtraInfo.m_objMediaInfo.eAudioQuality == AUDIO_QUALITY_AMR_WB)
     {
-        if (pDialog->m_objExtraInfo.m_objMediaInfo.eVQuality == VIDEO_QUALITY_QVGA_PR)
+        if (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_QVGA_PR)
         {
             return static_cast<IMS_UINT32>(CallType::VT);
         }
@@ -642,36 +643,36 @@ void Dialog::ExtraInfo::HandleMediaInfo(IN const IElement* piElementLocal)
                 {
                     if (DialogInfo::IsElementExist(piElement, EXTRA_ELEMENT_PORT0))
                     {
-                        m_objMediaInfo.eAQuality = AUDIO_QUALITY_NOTUSED;
+                        m_objMediaInfo.eAudioQuality = AUDIO_QUALITY_NOTUSED;
                     }
                     else
                     {
-                        m_objMediaInfo.eAQuality = AUDIO_QUALITY_AMR_WB;
+                        m_objMediaInfo.eAudioQuality = AUDIO_QUALITY_AMR_WB;
                     }
 
                     if (DialogInfo::GetSubElementValue(
                                 piElement, EXTRA_ELEMENT_MEDIADIRECTION, strMediaDirection)
                                     .GetLength() > 0)
                     {
-                        m_objMediaInfo.eADir = ConvertMediaDirection(strMediaDirection);
+                        m_objMediaInfo.eAudioDirection = ConvertMediaDirection(strMediaDirection);
                     }
                 }
                 else if (strMediaType.EqualsIgnoreCase("video"))
                 {
                     if (DialogInfo::IsElementExist(piElement, EXTRA_ELEMENT_PORT0))
                     {
-                        m_objMediaInfo.eVQuality = VIDEO_QUALITY_NOTUSED;
+                        m_objMediaInfo.eVideoQuality = VIDEO_QUALITY_NOTUSED;
                     }
                     else
                     {
-                        m_objMediaInfo.eVQuality = VIDEO_QUALITY_QVGA_PR;
+                        m_objMediaInfo.eVideoQuality = VIDEO_QUALITY_QVGA_PR;
                     }
 
                     if (DialogInfo::GetSubElementValue(
                                 piElement, EXTRA_ELEMENT_MEDIADIRECTION, strMediaDirection)
                                     .GetLength() > 0)
                     {
-                        m_objMediaInfo.eVDir = ConvertMediaDirection(strMediaDirection);
+                        m_objMediaInfo.eVideoDirection = ConvertMediaDirection(strMediaDirection);
                     }
                 }
             }

@@ -24,10 +24,10 @@
 
 class AString;
 class ISession;
-class MediaInfo;
 class SuppService;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 /**
  * This class represents the call that doesn't exist. It has no states and basically does nothing.

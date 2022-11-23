@@ -27,7 +27,6 @@ class IMessage;
 class IMtcCallContext;
 class IMtcCallStateManager;
 class ISession;
-class MediaInfo;
 class MtcSession;
 class SuppService;
 

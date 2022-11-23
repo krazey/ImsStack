@@ -31,11 +31,11 @@ class ISession;
 class ISipClientConnection;
 class ISipConnection;
 class ISipServerConnection;
-class MediaInfo;
 class MtcSession;
 enum class QosLossPolicy;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 
 using CallStateName = IMtcCall::State;
 
