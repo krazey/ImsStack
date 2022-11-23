@@ -41,7 +41,6 @@ import java.util.concurrent.TimeoutException;
  */
 public class GbaAgent implements GbaInterface {
     private final int mSlotId;
-    private Context mContext;
     private ExecutorService mExecutorService = null;
 
     public GbaAgent(int slotId) {
@@ -51,8 +50,6 @@ public class GbaAgent implements GbaInterface {
     @Override
     public void init(Context context) {
         ImsLog.d(mSlotId, "init");
-
-        mContext = context;
     }
 
     @Override
