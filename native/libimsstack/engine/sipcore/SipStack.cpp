@@ -4630,7 +4630,7 @@ GLOBAL const IMS_CHAR* GetLogString(IN const IMS_CHAR* pszInput, IN_OUT IMS_CHAR
     IMS_SINT32 i = 0;
     IMS_SINT32 nMaxSize = nOutSize - 3;
 
-    while ((pszInput[i] != '\0') && (i < nMaxSize))
+    while ((i < nMaxSize) && (pszInput[i] != '\0'))
     {
         if ((cDelimiter > 0) && (pszInput[i] == cDelimiter))
             break;
