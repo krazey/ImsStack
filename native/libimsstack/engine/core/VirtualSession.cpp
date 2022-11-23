@@ -926,11 +926,9 @@ void VirtualSession::CleanupMedia()
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnAnswerReceived(IN IMS_SINT32 nTrigger)
 {
-    Media* pMedia;
-
     for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        pMedia = m_objMedias.GetAt(i);
+        Media* pMedia = m_objMedias.GetAt(i);
 
         if (pMedia == IMS_NULL)
         {
@@ -947,11 +945,9 @@ IMS_BOOL VirtualSession::UpdateMediaOnAnswerReceived(IN IMS_SINT32 nTrigger)
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger)
 {
-    Media* pMedia;
-
     for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        pMedia = m_objMedias.GetAt(i);
+        Media* pMedia = m_objMedias.GetAt(i);
 
         if (pMedia == IMS_NULL)
         {
@@ -1061,11 +1057,9 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger)
 {
-    Media* pMedia;
-
     for (IMS_UINT32 i = 0; i < m_objMedias.GetSize(); ++i)
     {
-        pMedia = m_objMedias.GetAt(i);
+        Media* pMedia = m_objMedias.GetAt(i);
 
         if (pMedia == IMS_NULL)
         {

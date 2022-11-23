@@ -744,7 +744,6 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
     // with full capabilities.
 
     IMSList<IMS_SINT32> objMids;
-    SdpMediaParameter* pMediaParam;
     IMS_SINT32 nSdpDirection = ConvertDirectionMediaToSdp(m_nDirection);
 
     if (nCountOfDescriptor == 0)
@@ -754,6 +753,8 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
     {
         for (IMS_SINT32 i = 0; i < nCountOfDescriptor; ++i)
         {
+            SdpMediaParameter* pMediaParam;
+
             nResult = m_piOaState->CreateMediaParameter(pMediaParam);
 
             if (nResult != ISdpOaState::RESULT_SUCCESS)

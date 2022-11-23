@@ -285,12 +285,10 @@ void SipMessageFraming::ParseContentLength()
         return;
     }
 
-    IMS_CHAR* pHeaderStart;
-
     do
     {
         // LOOKUP HEADER NAME -- starts
-        pHeaderStart = pCurrentPos;
+        IMS_CHAR* pHeaderStart = pCurrentPos;
 
         while (pCurrentPos < pEnd)
         {

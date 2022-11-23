@@ -131,13 +131,11 @@ SipUnknownHeaders::SipUnknownHeaders() {}
 PUBLIC
 SipUnknownHeaders::SipUnknownHeaders(IN const SipUnknownHeaders& other)
 {
-    Header* pNewHeader;
-
     for (IMS_UINT32 i = 0; i < other.m_objHeaders.GetSize(); ++i)
     {
         const Header* pHeader = other.m_objHeaders.GetAt(i);
 
-        pNewHeader = new Header(*pHeader);
+        Header* pNewHeader = new Header(*pHeader);
 
         if (pNewHeader != IMS_NULL)
         {
@@ -157,15 +155,12 @@ SipUnknownHeaders& SipUnknownHeaders::operator=(IN const SipUnknownHeaders& othe
 {
     if (this != &other)
     {
-        Header* pNewHeader;
-
         Clear();
 
         for (IMS_UINT32 i = 0; i < other.m_objHeaders.GetSize(); ++i)
         {
             const Header* pHeader = other.m_objHeaders.GetAt(i);
-
-            pNewHeader = new Header(*pHeader);
+            Header* pNewHeader = new Header(*pHeader);
 
             if (pNewHeader != IMS_NULL)
             {
