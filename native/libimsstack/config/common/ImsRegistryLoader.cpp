@@ -50,7 +50,8 @@ public:
             IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL AddConnectionProperty(
             IN const IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
-    static IMS_BOOL ValidateUniqueness(IN IMS_SINT32 nPropertyCount[ImsProperty::PKEY_MAX]);
+    static IMS_BOOL ValidateUniqueness(
+            IN const IMS_SINT32 (&nPropertyCount)[ImsProperty::PKEY_MAX]);
 
 public:
     // IMSRegistry is used for section name & parameter name
@@ -321,7 +322,7 @@ PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddConnectionProperty(
 }
 
 PUBLIC GLOBAL IMS_BOOL RegistryLoader::ValidateUniqueness(
-        IN IMS_SINT32 nPropertyCount[ImsProperty::PKEY_MAX])
+        IN const IMS_SINT32 (&nPropertyCount)[ImsProperty::PKEY_MAX])
 {
     if (nPropertyCount[ImsProperty::PKEY_STREAM] > 1)
     {

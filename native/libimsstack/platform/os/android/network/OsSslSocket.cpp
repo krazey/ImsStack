@@ -79,7 +79,7 @@ LOCAL void osSslSocket_DisplayCiphers(IN SSL* pstSsl)
 class OsSsl
 {
 public:
-    explicit OsSsl(IN SslCertificate* pCertificate);
+    explicit OsSsl(IN const SslCertificate* pCertificate);
     ~OsSsl();
 
     OsSsl(IN const OsSsl&) = delete;
@@ -125,7 +125,7 @@ PRIVATE GLOBAL const IMS_CHAR OsSsl::DEFAULT_PASSWORD[] = "";
 PRIVATE GLOBAL IMS_BOOL OsSsl::s_bSslLibInitialized = IMS_FALSE;
 
 PUBLIC
-OsSsl::OsSsl(IN SslCertificate* pCertificate) :
+OsSsl::OsSsl(IN const SslCertificate* pCertificate) :
         m_pstCtx(IMS_NULL),
         m_pstSsl(IMS_NULL),
         m_pstSocket(IMS_NULL)

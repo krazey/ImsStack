@@ -41,7 +41,7 @@ public:
 
 public:
     void AddListener(IN IMS_UINT32 nCategory, IN ISystemListener* piListener);
-    void RemoveListener(IN IMS_UINT32 nCategory, IN ISystemListener* piListener);
+    void RemoveListener(IN IMS_UINT32 nCategory, const IN ISystemListener* piListener);
     IMSList<ISystemListener*>* GetListeners(IN IMS_UINT32 nCategory);
 
     static const IMS_CHAR* CategoryToString(IN IMS_UINT32 nCategory);
@@ -158,7 +158,8 @@ void SystemListenerHolder::AddListener(IN IMS_UINT32 nCategory, IN ISystemListen
 }
 
 PRIVATE
-void SystemListenerHolder::RemoveListener(IN IMS_UINT32 nCategory, IN ISystemListener* piListener)
+void SystemListenerHolder::RemoveListener(
+        IN IMS_UINT32 nCategory, IN const ISystemListener* piListener)
 {
     LockGuard objLock(m_piLock);
 
