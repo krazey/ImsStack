@@ -152,10 +152,10 @@ PUBLIC GLOBAL IMS_BOOL CoreServiceConfigPrivate::AddCoreServiceProperty(
     }
 
     // Create a feature sets from feature tags
-    for (IMS_UINT32 i = 0; i < pConfigPrivate->m_objFeatureTags.GetSize(); ++i)
+    for (IMS_UINT32 j = 0; j < pConfigPrivate->m_objFeatureTags.GetSize(); ++j)
     {
         FeatureSet* pFeatureSet =
-                FeatureSet::FromServiceIdentifier(pConfigPrivate->m_objFeatureTags.GetAt(i));
+                FeatureSet::FromServiceIdentifier(pConfigPrivate->m_objFeatureTags.GetAt(j));
 
         if (pFeatureSet != IMS_NULL)
         {

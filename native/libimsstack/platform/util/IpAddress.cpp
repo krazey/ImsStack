@@ -72,7 +72,6 @@ IMS_BOOL ipAddress_ParseIpv6(IN const AString& strIp6, OUT IMS_BYTE* pIp6)
 
     IMS_SINT32 nMaxCount = Ipv6Address::MAX_SIZE;
     IMS_SINT32 nReducedCount = 9 - nCount;
-    AString strValue;
 
     for (IMS_SINT32 i = nCount - 1; i >= 0; --i)
     {
