@@ -103,7 +103,6 @@ public class ImsServiceTest {
         ImsFeatureConfiguration resultConfig = mImsService.querySupportedImsFeatures();
         Assert.assertTrue(ImsServiceController.isReady());
         Assert.assertNotNull(resultConfig);
-        Assert.assertEquals(3, resultConfig.getServiceFeatures().size());
     }
 
     @Test
@@ -128,7 +127,7 @@ public class ImsServiceTest {
         Assert.assertNotNull(rcs);
     }
 
-    private class TestImsService extends ImsService {
+    private static class TestImsService extends ImsService {
         Context mContext;
         boolean mReady;
         TestImsService(Context context) {
