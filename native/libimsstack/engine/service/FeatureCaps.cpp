@@ -112,13 +112,12 @@ PUBLIC VIRTUAL void FeatureCaps::AddFeature(IN const AString& strName, IN const 
         return;
     }
 
-    CallerCapability* pFeatures = IMS_NULL;
     Feature objFeature(strName, strValue);
 
     if (nMessageType == ISipMessage::TYPE_ANY)
     {
         // REQUEST
-        pFeatures = GetFeaturesForRequest(nSipMethod, IMS_TRUE);
+        CallerCapability* pFeatures = GetFeaturesForRequest(nSipMethod, IMS_TRUE);
 
         if (pFeatures != IMS_NULL)
         {
@@ -135,7 +134,7 @@ PUBLIC VIRTUAL void FeatureCaps::AddFeature(IN const AString& strName, IN const 
     }
     else if (nMessageType == ISipMessage::TYPE_REQUEST)
     {
-        pFeatures = GetFeaturesForRequest(nSipMethod, IMS_TRUE);
+        CallerCapability* pFeatures = GetFeaturesForRequest(nSipMethod, IMS_TRUE);
 
         if (pFeatures != IMS_NULL)
         {
@@ -144,7 +143,7 @@ PUBLIC VIRTUAL void FeatureCaps::AddFeature(IN const AString& strName, IN const 
     }
     else if (nMessageType == ISipMessage::TYPE_RESPONSE)
     {
-        pFeatures = GetFeaturesForResponse(nSipMethod, IMS_TRUE);
+        CallerCapability* pFeatures = GetFeaturesForResponse(nSipMethod, IMS_TRUE);
 
         if (pFeatures != IMS_NULL)
         {
@@ -184,13 +183,12 @@ PUBLIC VIRTUAL void FeatureCaps::RemoveFeature(IN const AString& strName,
         return;
     }
 
-    CallerCapability* pFeatures = IMS_NULL;
     Feature objFeature(strName, strValue);
 
     if (nMessageType == ISipMessage::TYPE_ANY)
     {
         // REQUEST
-        pFeatures = GetFeaturesForRequest(nSipMethod);
+        CallerCapability* pFeatures = GetFeaturesForRequest(nSipMethod);
 
         if (pFeatures != IMS_NULL)
         {
@@ -207,7 +205,7 @@ PUBLIC VIRTUAL void FeatureCaps::RemoveFeature(IN const AString& strName,
     }
     else if (nMessageType == ISipMessage::TYPE_REQUEST)
     {
-        pFeatures = GetFeaturesForRequest(nSipMethod);
+        CallerCapability* pFeatures = GetFeaturesForRequest(nSipMethod);
 
         if (pFeatures != IMS_NULL)
         {
@@ -216,7 +214,7 @@ PUBLIC VIRTUAL void FeatureCaps::RemoveFeature(IN const AString& strName,
     }
     else if (nMessageType == ISipMessage::TYPE_RESPONSE)
     {
-        pFeatures = GetFeaturesForResponse(nSipMethod);
+        CallerCapability* pFeatures = GetFeaturesForResponse(nSipMethod);
 
         if (pFeatures != IMS_NULL)
         {

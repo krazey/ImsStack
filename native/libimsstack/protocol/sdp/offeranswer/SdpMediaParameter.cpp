@@ -1717,8 +1717,8 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyPrecondition(
         return IMS_TRUE;
     }
 
-    SdpE2EPrecondition* pE2E = IMS_NULL;
-    SdpSegmentedPrecondition* pSegmented = IMS_NULL;
+    SdpE2EPrecondition* pE2E;
+    SdpSegmentedPrecondition* pSegmented;
 
     if (objMediaParam.m_pCurrentStatus != IMS_NULL)
     {

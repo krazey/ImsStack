@@ -516,11 +516,11 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeaderInMessage(IN const ISipHead
         }
     }
 
-    ISipHeader* piOtherHeader = IMS_NULL;
     IMS_SINT32 nMatchResult = SPT_MATCH_NONE;
 
     for (IMS_UINT32 i = 0; i < objValues.GetSize(); ++i)
     {
+        ISipHeader* piOtherHeader;
         const AString& strHeader = objValues.GetAt(i);
 
         if (piHeader->GetType() != ISipHeader::UNKNOWN)

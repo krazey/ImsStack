@@ -79,7 +79,6 @@ PreviousMessage::~PreviousMessage()
             if (pResponse != IMS_NULL)
             {
                 delete pResponse;
-                pResponse = IMS_NULL;
             }
         }
 

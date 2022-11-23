@@ -1049,7 +1049,6 @@ IMS_BOOL SipServerTransactionState::InitResponse(
                         return IMS_FALSE;
                     }
 
-                    pSipHdr = IMS_NULL;
                     bContactHeaderInserted = IMS_TRUE;
                 }
             }

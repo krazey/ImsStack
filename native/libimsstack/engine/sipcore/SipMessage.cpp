@@ -989,7 +989,7 @@ IMS_BOOL SipMessage::ExtractBodyParts()
         return IMS_TRUE;
     }
 
-    SipMessageBodyPart* pBodyPart = IMS_NULL;
+    SipMessageBodyPart* pBodyPart;
 
     if (nBodyCount == 1)
     {
