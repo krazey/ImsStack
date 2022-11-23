@@ -56,7 +56,6 @@
     <int name="reg_pcscf_update_policy_int" value="1"/>
     <int name="reg_retry_503_policy_int" value="0"/>
     <int name="reg_retry_default_policy_int" value="1"/>
-    <int name="rereg_retry_max_cnt_to_keep_reg_int" value="1"/>
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="2">
         <item value="2"/>
         <item value="2"/>
