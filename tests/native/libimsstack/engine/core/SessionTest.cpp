@@ -44,7 +44,7 @@ public:
 class TestSession : public Session
 {
 public:
-    inline TestSession(IN Service* pService) :
+    inline explicit TestSession(IN Service* pService) :
             Session(pService),
             m_pTestRefreshHelper(IMS_NULL)
     {

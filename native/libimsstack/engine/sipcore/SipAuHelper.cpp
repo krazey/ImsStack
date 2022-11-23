@@ -27,7 +27,7 @@ __IMS_TRACE_TAG_SIP__;
 class SipGenericChallenge : public ISipGenericChallenge
 {
 public:
-    SipGenericChallenge(IN IMS_SINT32 nType = ISipHeader::WWW_AUTHENTICATE);
+    explicit SipGenericChallenge(IN IMS_SINT32 nType = ISipHeader::WWW_AUTHENTICATE);
     SipGenericChallenge(IN const SipGenericChallenge& other);
     virtual ~SipGenericChallenge();
 
