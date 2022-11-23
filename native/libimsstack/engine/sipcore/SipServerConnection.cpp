@@ -448,9 +448,8 @@ IMS_RESULT SipServerConnection::InitRequest()
     // Case 3) If the dialog (created by SUBSCRIBE)  is in INIT state & NOTIFY request is received
     //       or NOTIFY request to forked SUBSCRIBE request
     if ((nState != SipDState::STATE_INIT) ||
-            ((nState == SipDState::STATE_INIT) &&
-                    (SipDialogBase::IsDialogCreatable(m_pMessage->GetMethod()) ||
-                            m_pMessage->GetMethod().Equals(SipMethod::NOTIFY))))
+            SipDialogBase::IsDialogCreatable(m_pMessage->GetMethod()) ||
+            m_pMessage->GetMethod().Equals(SipMethod::NOTIFY))
     {
         m_pDialog = new SipDialog(pDialogEx);
 

@@ -1143,9 +1143,7 @@ void SessionRefreshHelper::UpdateTimerOptionOnRequestReceived(IN const ISipConne
     // Checks if the initial INVITE/re-INVITE/UPDATE request supports
     // the session timer or not... (Supported header)
     if (objMethod.Equals(SipMethod::INVITE) &&
-            ((piDialog == IMS_NULL) ||
-                    ((piDialog != IMS_NULL) &&
-                            (piDialog->GetState() != ISipDialog::STATE_CONFIRMED))))
+            ((piDialog == IMS_NULL) || (piDialog->GetState() != ISipDialog::STATE_CONFIRMED)))
     {
         if (piSipMsg->IsOptionSupported(STR_TIMER))
         {

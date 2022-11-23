@@ -847,8 +847,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
         CollectSdpFieldsFromRegistry(
                 pAppConfig, bRequest, CapProperty::SECTOR_SESSION, objSessionSdpFields);
 
-        if (!bCheckMediaCapability ||
-                (bCheckMediaCapability && pAppConfig->IsStreamMediaAudioSupported()))
+        if (!bCheckMediaCapability || pAppConfig->IsStreamMediaAudioSupported())
         {
             bStreamAudioSupported = IMS_TRUE;
 
@@ -858,8 +857,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
                     pAppConfig, bRequest, CapProperty::SECTOR_STREAM_AUDIO, objAudioSdpFields);
         }
 
-        if (!bCheckMediaCapability ||
-                (bCheckMediaCapability && pAppConfig->IsStreamMediaVideoSupported()))
+        if (!bCheckMediaCapability || pAppConfig->IsStreamMediaVideoSupported())
         {
             bStreamVideoSupported = IMS_TRUE;
 
@@ -869,8 +867,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
                     pAppConfig, bRequest, CapProperty::SECTOR_STREAM_VIDEO, objVideoSdpFields);
         }
 
-        if (!bCheckMediaCapability ||
-                (bCheckMediaCapability && pAppConfig->IsFramedMediaSupported()))
+        if (!bCheckMediaCapability || pAppConfig->IsFramedMediaSupported())
         {
             bFramedMediaSupported = IMS_TRUE;
 
