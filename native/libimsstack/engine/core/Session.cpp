@@ -2872,7 +2872,7 @@ PROTECTED VIRTUAL IMS_BOOL Session::SendRequestToChallenge(IN ISipClientConnecti
         return IMS_TRUE;
     }
 
-    IMS_SINT32 nServiceMethod = IMessage::SESSION_START;
+    IMS_SINT32 nServiceMethod;
 
     if (GetState() == STATE_NEGOTIATING)
     {

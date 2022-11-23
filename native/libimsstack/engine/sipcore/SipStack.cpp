@@ -2380,7 +2380,7 @@ GLOBAL IMS_BOOL GetHostNPortFromViaHeader(
 
     strHost = pViaHeader->GetHost();
 
-    IMS_SINT32 nPos = AString::NPOS;
+    IMS_SINT32 nPos;
 
     if ((nPos = strHost.GetIndexOf(TextParser::CHAR_LSBRACKET)) != AString::NPOS)
     {
