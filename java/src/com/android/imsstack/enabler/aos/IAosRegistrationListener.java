@@ -24,30 +24,25 @@ public interface IAosRegistrationListener {
     /**
      * Notify the application that the device is connected to the IMS network.
      *
-     * @param networkType The radio access technology.
-     * @param featureTagBits Type of bits an integer.
-     * @param featureTags Type of Set<String>.
-     * @see {@link NetworkType}
-     * @see {@link FeatureTagMask}
+     * @param networkType The radio access technology. See {@link NetworkType}.
+     * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}
+     * @param featureTags Type of {@code Set<String>}.
      */
     public void notifyRegistered(int networkType, int featureTagBits,
             Set<String> featureTags);
     /**
      * Notify the application that the device is connected to the IMS network.
      *
-     * @param networkType The radio access technology.
-     * @param featureTagBits Type of bits an integer.
-     * @param featureTags Type of Set<String>.
-     * @see {@link NetworkType}
-     * @see {@link FeatureTagMask}
+     * @param networkType The radio access technology. See {@link NetworkType}.
+     * @param featureTagBits Type of bits an integer. See {@link FeatureTagMask}
+     * @param featureTags Type of {@code Set<String>}.
      */
     public void notifyRegistering(int networkType, int featureTagBits,
             Set<String> featureTags);
     /**
      * Notify the application that the device is disconnected from the IMS network.
      *
-     * @param reason associated with why registration was disconnected.
-     * @see {@link ReasonCode}
+     * @param reason associated with why registration was disconnected. See {@link ReasonCode}.
      */
     public void notifyDeregistered(int reason);
 
@@ -55,10 +50,8 @@ public interface IAosRegistrationListener {
      * Notify the framework that the handover from the current radio technology to the other
      * technology has failed.
      *
-     * @param networkType The technology that has failed to be changed to.
-     * @param causeCode The handover failure cause.
-     * @see {@link NetworkType}
-     * @see {@link android.telephony.DataFailCause}
+     * @param networkType The technology that has failed to be changed to. See {@link NetworkType}.
+     * @param causeCode The handover failure cause. See {@link android.telephony.DataFailCause}.
      */
     public void notifyTechnologyChangeFailed(int networkType, int causeCode);
 
@@ -74,12 +67,9 @@ public interface IAosRegistrationListener {
      * This method is called when capability update fails after
      * {@link IAosRegistration#changeCapabilities} is called.
      *
-     * @param capabilities capabilities that failed to update.
-     * @param networkType Type of {@link NetworkType}.
-     * @param reason Reason for update failure.
-     * @see {@link Capability}
-     * @see {@link NetworkType}
-     * @see {@link CapabilityReason}
+     * @param capabilities capabilities that failed to update. See {@link Capability}.
+     * @param networkType The radio access technology. See {@link NetworkType}.
+     * @param reason Reason for update failure. See {@link CapabilityReason}.
      */
     public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
 
@@ -101,7 +91,7 @@ public interface IAosRegistrationListener {
     class Capability {
 
         public static final int NONE = 0;
-        public static final int VOICE = 1 << 0;
+        public static final int VOICE = 1;
         public static final int VIDEO = 1 << 1;
         public static final int UT = 1 << 2;
         public static final int SMS = 1 << 3;
