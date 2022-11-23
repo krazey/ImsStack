@@ -7299,11 +7299,7 @@ void Session::Start2xxRetransmission()
 
     while (1)
     {
-        if (nTimerValue == nT2)
-        {
-            nTimerValue = nT2;
-        }
-        else
+        if (nTimerValue != nT2)
         {
             nTimerValue = IMS_MIN(nMultiplier * nT1, nT2);
             nMultiplier *= 2;
