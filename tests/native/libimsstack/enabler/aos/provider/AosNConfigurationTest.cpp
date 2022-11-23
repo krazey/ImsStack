@@ -398,9 +398,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_DISABLE_T3482_FOR_EMC_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
                                KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL,
                     IMS_FALSE))
@@ -438,9 +435,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                                KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL,
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
-    EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL,
                     IMS_FALSE))
@@ -536,9 +530,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
     EXPECT_CALL(objCarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT, -1))
-            .WillOnce(Return(0));
-    EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
             .WillOnce(Return(200));
 
@@ -563,13 +554,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY))
             .WillOnce(Return(objRegPermanentErrMaxCnt));
-
-    IMSVector<IMS_SINT32> objRegRetryErrCodeWithDiffPcscf;
-    objRegRetryErrCodeWithDiffPcscf.Clear();
-    objRegRetryErrCodeWithDiffPcscf.Add(486);
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY))
-            .WillOnce(Return(objRegRetryErrCodeWithDiffPcscf));
 
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
     objRegRetryErrCodeWithoutIpsec.Clear();
@@ -606,13 +590,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::
                             KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY))
             .WillOnce(Return(objReregErrForPdnReactivationAfterCallEnd));
-
-    IMSVector<IMS_SINT32> objReregRetryErrCodeForInitReg;
-    objReregRetryErrCodeForInitReg.Clear();
-    objReregRetryErrCodeForInitReg.Add(503);
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY))
-            .WillOnce(Return(objReregRetryErrCodeForInitReg));
 
     IMSVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
     objReregRetryErrCodeForInitRegWithSamePcscf.Clear();
@@ -667,7 +644,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
 
     EXPECT_FALSE(pAosNConfiguration->IsCdmalessFeatureTagRequired());
     EXPECT_FALSE(pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
-    EXPECT_FALSE(pAosNConfiguration->IsT3482ForEmcDisabled());
     EXPECT_FALSE(pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
     EXPECT_FALSE(pAosNConfiguration->IsRegWithIpcanChangedDuringImsCallHeld());
     EXPECT_TRUE(pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
@@ -678,7 +654,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
     EXPECT_TRUE(pAosNConfiguration->IsRegRequiredAfterImsCallEndOnRegHeld());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredEmcRegInRoaming());
-    EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockBySetting());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredWfcBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsReregRetryWithChangedCountryOnWifi());
@@ -717,7 +692,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(0, pAosNConfiguration->GetRegTimerForEmcCall());
     EXPECT_EQ(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT,
             pAosNConfiguration->GetReregRetrySip305CodePolicy());
-    EXPECT_EQ(0, pAosNConfiguration->GetReregRetryMaxCountKeptRegistration());
     EXPECT_EQ(200, pAosNConfiguration->GetSipMessageThresholdForTransportChange());
 
     IMSVector<IMS_SINT32> objWaitTime = pAosNConfiguration->GetEmergencyPcscfRetryWaitTime();
@@ -726,9 +700,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(408, objErrCode.GetAt(0));
     IMSVector<IMS_SINT32> objCount = pAosNConfiguration->GetRegPermanentErrMaxCount();
     EXPECT_EQ(1, objCount.GetSize());
-    objErrCode.Clear();
-    objErrCode = pAosNConfiguration->GetRegErrCodeWithDiffPcscf();
-    EXPECT_EQ(1, objErrCode.GetSize());
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetRegErrCodeWithoutIpsec();
     EXPECT_EQ(406, objErrCode.GetAt(0));
@@ -750,9 +721,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetReregErrCodeForInitRegWithAvailablePcscf();
     EXPECT_EQ(0, objErrCode.GetSize());
-    objErrCode.Clear();
-    objErrCode = pAosNConfiguration->GetReregRetryErrCodeForInitReg();
-    EXPECT_EQ(503, objErrCode.GetAt(0));
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetReregRetryErrCodeForInitRegWithSamePcscf();
     EXPECT_EQ(407, objErrCode.GetAt(0));
@@ -1065,6 +1033,5 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
 
 TEST_F(AosNConfigurationTest, TempConfig)
 {
-    EXPECT_FALSE(pAosNConfiguration->IsDataEnableChangeIgnoredForVideoCalls());
     EXPECT_TRUE(pAosNConfiguration->IsWfcRoamingEnabled());
 }

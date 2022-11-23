@@ -26,7 +26,6 @@ struct AosAsset
 public:
     AosAsset() :
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
-            bDisableT3482ForEmc(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
@@ -38,7 +37,6 @@ public:
             bRequiredCdmalessFeatureTag(IMS_FALSE),
             bRequiredEmcRegInRoaming(IMS_FALSE),
             bRequiredInitRegAfterImsCallEndOnRegHeld(IMS_FALSE),
-            bRequiredVolteBlockBySetting(IMS_FALSE),
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
             bReregWithChangedCountryOnWifi(IMS_FALSE),
@@ -70,18 +68,15 @@ public:
             nRegRetryTimerFPolicy(CarrierConfig::Assets::TIMER_F_POLICY_NONE),
             nRegTimerForEmcCallMillis(0),
             nReregRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
-            nReregRetryMaxCntToKeepReg(0),
             nSipMessageThresholdForTransportChange(200),
             objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
             objRegErrCodeForPcscfDiscovery(IMSVector<IMS_SINT32>()),
             objRegPermanentErrMaxCnt(IMSVector<IMS_SINT32>()),
-            objRegRetryErrCodeWithDiffPcscf(IMSVector<IMS_SINT32>()),
             objRegRetryErrCodeWithoutIpsec(IMSVector<IMS_SINT32>()),
             objReregErrCodeForCallEnd(IMSVector<IMS_SINT32>()),
             objReregErrCodeForImsPdnReactivation(IMSVector<IMS_SINT32>()),
             objReregErrCodeForInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
             objReregErrCodeForPdnReactivationAfterCallEnd(IMSVector<IMS_SINT32>()),
-            objReregRetryErrCodeForInitReg(IMSVector<IMS_SINT32>()),
             objReregRetryErrCodeForInitRegWithSamePcscf(IMSVector<IMS_SINT32>()),
             objSubErrorCodeForInitRegWithNextPcscf(IMSVector<IMS_SINT32>()),
             objSubErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
@@ -96,7 +91,6 @@ public:
 
 public:
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
-    IMS_BOOL bDisableT3482ForEmc;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
     IMS_BOOL bIgnoreVopsForVolteEnable;
@@ -108,7 +102,6 @@ public:
     IMS_BOOL bRequiredCdmalessFeatureTag;
     IMS_BOOL bRequiredEmcRegInRoaming;
     IMS_BOOL bRequiredInitRegAfterImsCallEndOnRegHeld;
-    IMS_BOOL bRequiredVolteBlockBySetting;
     IMS_BOOL bRequiredVolteBlockByAirplaneMode;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
     IMS_BOOL bReregWithChangedCountryOnWifi;
@@ -138,18 +131,15 @@ public:
     IMS_SINT32 nRegRetryTimerFPolicy;
     IMS_SINT32 nRegTimerForEmcCallMillis;
     IMS_SINT32 nReregRetry305Policy;
-    IMS_SINT32 nReregRetryMaxCntToKeepReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     IMSVector<IMS_SINT32> objRegPermanentErrMaxCnt;
-    IMSVector<IMS_SINT32> objRegRetryErrCodeWithDiffPcscf;
     IMSVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
     IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
     IMSVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
     IMSVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
     IMSVector<IMS_SINT32> objReregErrCodeForPdnReactivationAfterCallEnd;
-    IMSVector<IMS_SINT32> objReregRetryErrCodeForInitReg;
     IMSVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
     IMSVector<IMS_SINT32> objSubErrorCodeForInitRegWithNextPcscf;
     IMSVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;

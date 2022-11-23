@@ -49,7 +49,6 @@ public:
     virtual IMS_BOOL IsVoLteAvailable() const;
     virtual IMS_BOOL IsVoLteRoamingAvailable() const;
     virtual IMS_BOOL IsVtAvailable() const;
-    virtual IMS_BOOL IsDataEnableChangeIgnoredForVideoCalls() const;
     virtual IMS_BOOL IsWfcImsAvailable() const;
     virtual IMS_BOOL IsWfcRoamingEnabled() const;
     virtual IMS_BOOL IsImsSingleRegistrationRequired() const;
@@ -59,7 +58,6 @@ public:
     virtual IMS_BOOL IsVopsIgnoredForVolteEnabled() const;
     virtual IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const;
     virtual IMS_BOOL IsRequiredEmcRegInRoaming() const;
-    virtual IMS_BOOL IsRequiredVolteBlockBySetting() const;
     virtual IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const;
     virtual IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const;
     virtual IMS_BOOL IsReregRetryWithChangedCountryOnWifi() const;
@@ -72,7 +70,6 @@ public:
     virtual IMS_BOOL IsSecurityServerPortInInitRegUsed() const;
     virtual IMS_BOOL IsOldSaOnEstablishingSaRemoved() const;
     virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const;
-    virtual IMS_BOOL IsT3482ForEmcDisabled() const;
     virtual IMS_BOOL IsEmergencyPdnWithEmergencyCallEndReleased() const;
     virtual IMS_BOOL IsSmsOverImsSupported() const;
     virtual IMS_BOOL IsImsOverNrEnabled() const;
@@ -128,7 +125,6 @@ public:
     virtual IMS_SINT32 GetExtraRegErrPolicy() const;
     virtual IMS_SINT32 GetExtraRegErrMaxCount() const;
     virtual IMS_SINT32 GetExtraRegErrMinCount() const;
-    virtual IMS_SINT32 GetReregRetryMaxCountKeptRegistration() const;
     virtual IMS_SINT32 GetRegistrationPcscfUpdatePolicy() const;
     virtual IMS_SINT32 GetUserInfoPolicyForNonRegisterMessage() const;
     virtual IMS_SINT32 GetGeolocationPidfFormingPolicy() const;
@@ -161,11 +157,9 @@ public:
     virtual IMSVector<IMS_SINT32>& GetExtraRegErrCode();
     virtual IMSVector<IMS_SINT32>& GetExtraReregErrCode();
     virtual IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime();
-    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitReg();
     virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf();
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrCode();
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount();
-    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithDiffPcscf();
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec();
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime();

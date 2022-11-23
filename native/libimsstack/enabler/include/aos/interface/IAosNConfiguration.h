@@ -85,13 +85,6 @@ public:
     virtual IMS_BOOL IsVtAvailable() const = 0;
 
     /**
-     * @brief Check if Mobile data setting is required for Video calling enable.
-     *
-     * @return IMS_TRUE if not required, IMS_FALSE if required.
-     */
-    virtual IMS_BOOL IsDataEnableChangeIgnoredForVideoCalls() const = 0;
-
-    /**
      * @brief Check if WFC is supported.
      *
      * @return IMS_TRUE if supported, IMS_FALSE if not supported.
@@ -156,13 +149,6 @@ public:
      *       regardless of whether emergency registration is used in the home network.
      */
     virtual IMS_BOOL IsRequiredEmcRegInRoaming() const = 0;
-
-    /**
-     * @brief Check if VoLTE service block by setting is required.
-     *
-     * @return IMS_TRUE if required, IMS_FALSE if not required.
-     */
-    virtual IMS_BOOL IsRequiredVolteBlockBySetting() const = 0;
 
     /**
      * @brief Check if VoLTE service block by Airplane mode is required.
@@ -253,16 +239,6 @@ public:
      * @return IMS_BOOL Return wherther to be applied or not
      */
     virtual IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const = 0;
-
-    /**
-     * @brief Returns whether UE needs to disable the T3482 timer for emergency PDN or not.
-     *
-     *        If this is set as TRUE,  UE will wait for the expiration of the emergency registration
-     *        timer regardless that T3482 timer is expired.
-     *
-     * @return IMS_BOOL Return wherther to be applied or not
-     */
-    virtual IMS_BOOL IsT3482ForEmcDisabled() const = 0;
 
     /**
      * @brief Returns whether emergency PDN shall be released after the E911 call is ended.
@@ -848,13 +824,6 @@ public:
     virtual IMS_SINT32 GetExtraRegErrMinCount() const = 0;
 
     /**
-     * @brief Indicate to maintain the registration until the retry count
-     *
-     * @return IMS_SINT32 Return the retry count for maintaining the registered state
-     */
-    virtual IMS_SINT32 GetReregRetryMaxCountKeptRegistration() const = 0;
-
-    /**
      * @brief Indicate which the PCSCF address  to use when the PCSCF address are changed
      *        with address and order.
      *
@@ -1182,13 +1151,6 @@ public:
     virtual IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime() = 0;
 
     /**
-     * @brief Indicate the error codes to attempt the initial registration
-     *
-     * @return vector error code list
-     */
-    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitReg() = 0;
-
-    /**
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF
      *
      * @return vector error code list
@@ -1217,15 +1179,6 @@ public:
      * @return vector max count list
      */
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount() = 0;
-
-    /**
-     * @brief Indicate the list of error codes to attempt initial registration with different pcscf.
-     *
-     *        In case of Retry-After header usage, see KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE.
-     *
-     * @return vector error code list
-     */
-    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithDiffPcscf() = 0;
 
     /**
      * @brief Inidicate the list of error codes to attempt initial registration without ipsec.

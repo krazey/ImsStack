@@ -34,7 +34,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVoLteAvailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVoLteRoamingAvailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVtAvailable, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsDataEnableChangeIgnoredForVideoCalls, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWfcImsAvailable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWfcRoamingEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsSingleRegistrationRequired, (), (const, override));
@@ -44,7 +43,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVopsIgnoredForVolteEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsAvailableWithoutVoiceCapability, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredEmcRegInRoaming, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySetting, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredWfcBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReregRetryWithChangedCountryOnWifi, (), (const, override));
@@ -57,7 +55,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSecurityServerPortInInitRegUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsOldSaOnEstablishingSaRemoved, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUnsecureTcpSocketOnAccomplishingRegDestroyed, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsT3482ForEmcDisabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyPdnWithEmergencyCallEndReleased, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsOverNrEnabled, (), (const, override));
@@ -116,7 +113,6 @@ public:
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrMaxCount, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrMinCount, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetReregRetryMaxCountKeptRegistration, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPcscfUpdatePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUserInfoPolicyForNonRegisterMessage, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetGeolocationPidfFormingPolicy, (), (const, override));
@@ -148,12 +144,10 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraRegErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraReregErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetExtraRegErrWaitTime, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregRetryErrCodeForInitReg, (), (override));
     MOCK_METHOD(
             IMSVector<IMS_SINT32>&, GetReregRetryErrCodeForInitRegWithSamePcscf, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegPermanentErrCode, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegPermanentErrMaxCount, (), (override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithDiffPcscf, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithoutIpsec, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithRetryAfterTime, (), (override));

@@ -254,7 +254,6 @@
 
     <!-- Aos -->
     <boolean name="destroy_unsecure_tcp_socket_on_accomplishing_reg_bool" value="false"/>
-    <boolean name="disable_t3482_for_emc_bool" value="false"/>
     <boolean name="emc_call_based_on_p_associated_uri_of_normal_reg_bool" value="false"/>
     <boolean name="hold_reg_with_ipcan_changed_during_ims_call_bool" value="false"/>
     <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
@@ -265,8 +264,7 @@
     <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
     <boolean name="required_cdmaless_feature_tag_bool" value="false"/>
     <boolean name="required_emc_reg_in_roaming_bool" value="false"/>
-    <boolean name="required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
-    <boolean name="required_volte_block_by_setting_bool" value="false"/>
+    <boolean name="required_init_reg_after_ims_call_end_on_reg_held_bool" value="false"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="false"/>
     <boolean name="required_wfc_block_by_airplane_mode_bool" value="false"/>
     <boolean name="rereg_with_changed_country_on_wifi_bool" value="false"/>
@@ -298,7 +296,6 @@
     <int name="reg_retry_timer_f_policy_int" value="0"/>
     <int name="reg_timer_for_emc_call_millis_int" value="0"/>
     <int name="rereg_retry_305_policy_int" value="1"/>
-    <int name="rereg_retry_max_cnt_to_keep_reg_int" value="0"/>
     <int name="sip_message_threshold_for_transport_change_int" value="200"/>
 
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="0">
@@ -309,8 +306,6 @@
     </int-array>
     <int-array name="reg_permanent_err_max_cnt_int_array" num="0">
     </int-array>
-    <int-array name="reg_retry_err_code_with_diff_pcscf_int_array" num="0">
-    </int-array>
     <int-array name="reg_retry_err_code_without_ipsec_int_array" num="0">
     </int-array>
     <int-array name="rereg_err_code_for_call_end_int_array" num="0">
@@ -320,8 +315,6 @@
     <int-array name="rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="0">
     </int-array>
     <int-array name="rereg_err_code_for_pdn_reactivation_after_call_end_int_array" num="0">
-    </int-array>
-    <int-array name="rereg_retry_err_code_for_init_reg_int_array" num="0">
     </int-array>
     <int-array name="rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array" num="0">
     </int-array>

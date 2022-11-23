@@ -445,8 +445,6 @@ public class CarrierConfig {
         // Aos
         public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
                 "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
-        public static final String KEY_DISABLE_T3482_FOR_EMC_BOOL =
-                "disable_t3482_for_emc_bool";
         public static final String KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
                 "emc_call_based_on_p_associated_uri_of_normal_reg_bool";
         public static final String KEY_HOLD_REG_WITH_IPCAN_CHANGED_DURING_IMS_CALL_BOOL =
@@ -469,8 +467,6 @@ public class CarrierConfig {
                 "required_emc_reg_in_roaming_bool";
         public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
                 "required_init_reg_after_ims_call_end_on_reg_held_bool";
-        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL =
-                "required_volte_block_by_setting_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL =
                 "required_volte_block_by_airplane_mode_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
@@ -529,8 +525,6 @@ public class CarrierConfig {
                 "reg_timer_for_emc_call_millis_int";
         public static final String KEY_REREG_RETRY_305_POLICY_INT =
                 "rereg_retry_305_policy_int";
-        public static final String KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT =
-                "rereg_retry_max_cnt_to_keep_reg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
                 "sip_message_threshold_for_transport_change_int";
 
@@ -542,8 +536,6 @@ public class CarrierConfig {
                 "reg_err_code_for_pcscf_discovery_int_array";
         public static final String KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY =
                 "reg_permanent_err_max_cnt_int_array";
-        public static final String KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY =
-                "reg_retry_err_code_with_diff_pcscf_int_array";
         public static final String KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY =
                 "reg_retry_err_code_without_ipsec_int_array";
         public static final String KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY =
@@ -556,8 +548,6 @@ public class CarrierConfig {
         public static final String
                 KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY =
                         "rereg_err_code_for_pdn_reactivation_after_call_end_int_array";
-        public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY =
-                "rereg_retry_err_code_for_init_reg_int_array";
         public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY =
                 "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
         public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY =

@@ -134,12 +134,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVtAvailable() const
     return m_objCarrierConfig.bCarrierVtAvailable;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDataEnableChangeIgnoredForVideoCalls() const
-{
-    // TODO: KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS
-    return IMS_FALSE;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsWfcImsAvailable() const
 {
     return m_objCarrierConfig.bCarrierWfcImsAvailable;
@@ -168,7 +162,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSupportLimitedAdminSmsMode() const
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTtySupported() const
 {
-    // TODO: KEY_TTY_SUPPORTED_BOOL (?)
     return m_objCarrierConfig.bCarrierVolteTtySupported;
 }
 
@@ -185,11 +178,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsAvailableWithoutVoiceCapa
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredEmcRegInRoaming() const
 {
     return m_objAsset.bRequiredEmcRegInRoaming;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockBySetting() const
-{
-    return m_objAsset.bRequiredVolteBlockBySetting;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockByAirplaneMode() const
@@ -251,11 +239,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsOldSaOnEstablishingSaRemoved() cons
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const
 {
     return m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsT3482ForEmcDisabled() const
-{
-    return m_objAsset.bDisableT3482ForEmc;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyPdnWithEmergencyCallEndReleased() const
@@ -550,11 +533,6 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetExtraRegErrMinCount() const
     return m_objExtraRegErr.nExtraRegErrMinCnt;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetReregRetryMaxCountKeptRegistration() const
-{
-    return m_objAsset.nReregRetryMaxCntToKeepReg;
-}
-
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegistrationPcscfUpdatePolicy() const
 {
     return m_objAsset.nRegPcscfUpdatePolicy;
@@ -702,11 +680,6 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrWaitTime(
     return m_objExtraRegErr.objExtraRegErrWaitTimeSec;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregRetryErrCodeForInitReg()
-{
-    return m_objAsset.objReregRetryErrCodeForInitReg;
-}
-
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
 AosNConfiguration::GetReregRetryErrCodeForInitRegWithSamePcscf()
 {
@@ -721,11 +694,6 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrCode(
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrMaxCount()
 {
     return m_objAsset.objRegPermanentErrMaxCnt;
-}
-
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithDiffPcscf()
-{
-    return m_objAsset.objRegRetryErrCodeWithDiffPcscf;
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithoutIpsec()
@@ -1170,8 +1138,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
-    m_objAsset.bDisableT3482ForEmc =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_DISABLE_T3482_FOR_EMC_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL);
     m_objAsset.bHoldRegWithIpcanChangedDuringImsCall = piCc->GetBoolean(
@@ -1194,8 +1160,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL);
     m_objAsset.bRequiredInitRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
-    m_objAsset.bRequiredVolteBlockBySetting =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SETTING_BOOL);
     m_objAsset.bRequiredVolteBlockByAirplaneMode =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL);
     m_objAsset.bRequiredWfcBlockByAirplaneMode =
@@ -1254,8 +1218,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT);
     m_objAsset.nReregRetry305Policy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT);
-    m_objAsset.nReregRetryMaxCntToKeepReg =
-            piCc->GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_MAX_CNT_TO_KEEP_REG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
 
@@ -1265,8 +1227,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY);
     m_objAsset.objRegPermanentErrMaxCnt =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY);
-    m_objAsset.objRegRetryErrCodeWithDiffPcscf = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITH_DIFF_PCSCF_INT_ARRAY);
     m_objAsset.objRegRetryErrCodeWithoutIpsec = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY);
     m_objAsset.objReregErrCodeForCallEnd =
@@ -1277,8 +1237,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY);
     m_objAsset.objReregErrCodeForInitRegWithAvailablePcscf = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY);
-    m_objAsset.objReregRetryErrCodeForInitReg = piCc->GetIntArray(
-            CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_INT_ARRAY);
     m_objAsset.objReregRetryErrCodeForInitRegWithSamePcscf = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY);
     m_objAsset.objSubErrorCodeForInitRegWithNextPcscf = piCc->GetIntArray(
