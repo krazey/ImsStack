@@ -177,14 +177,13 @@ void ImsHashMap::RemoveAll()
     if (m_ppHashTable != IMS_NULL)
     {
         ImsIterator iterator;
-        Element* pElement;
         void* pvKey;
         void* pvValue;
 
         iterator = GetStartPosition();
         while (iterator != IMS_NULL)
         {
-            pElement = reinterpret_cast<Element*>(iterator);
+            Element* pElement = reinterpret_cast<Element*>(iterator);
 
             GetNext(iterator, pvKey, pvValue);
 
