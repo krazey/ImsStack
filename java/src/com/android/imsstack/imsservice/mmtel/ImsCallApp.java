@@ -29,6 +29,7 @@ import com.android.imsstack.imsservice.mmtel.base.ImsApp;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
 import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.util.MSimUtils;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
 public class ImsCallApp extends ImsApp {
@@ -63,6 +64,22 @@ public class ImsCallApp extends ImsApp {
         mFeatureManager.setRegistrationTracker(mRegTracker);
         // Service feature capabilities updates
         mFeatureManager.updateFeaturesOnServiceUpDown(true);
+
+        mInitCompleted = true;
+    }
+
+    @VisibleForTesting
+    public ImsCallApp(int phoneId, Context context, Executor executor,
+            ImsRegistrationTracker regTracker,
+            IMmTelFeatureCapabilityListener featureCapabilityListener,
+            IMmTelCallListener callListener, ImsCallContext callContext,
+            ImsCallManager callManager, ImsFeatureManager featureManager) {
+        super(phoneId);
+
+        mCallContext = callContext;
+        mRegTracker = regTracker;
+        mFeatureManager = featureManager;
+        mCallManager = callManager;
 
         mInitCompleted = true;
     }

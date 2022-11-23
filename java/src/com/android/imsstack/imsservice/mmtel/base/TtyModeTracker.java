@@ -23,7 +23,7 @@ import com.android.imsstack.util.ImsLog;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public final class TtyModeTracker {
+public class TtyModeTracker {
     /**
      * Listener to monitor the TTY mode changes
      */
