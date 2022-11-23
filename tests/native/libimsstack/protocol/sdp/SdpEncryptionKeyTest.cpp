@@ -78,15 +78,12 @@ protected:
     ImsVector<TestEncryptionKey> m_objTestEncryptionKeys;
 };
 
-SdpEncryptionKeyTest::SdpEncryptionKeyTest()
+SdpEncryptionKeyTest::SdpEncryptionKeyTest() :
+        m_objTestKey(TestEncryptionKey("k=base64:U0RQIGVuY3J5cHRpb24ga2V5IQ==\r\n",
+                "base64:U0RQIGVuY3J5cHRpb24ga2V5IQ==", SdpEncryptionKey::METHOD_BASE64,
+                "U0RQIGVuY3J5cHRpb24ga2V5IQ=="))
 {
     // clang-format off
-    m_objTestKey = TestEncryptionKey(
-            "k=base64:U0RQIGVuY3J5cHRpb24ga2V5IQ==\r\n",
-            "base64:U0RQIGVuY3J5cHRpb24ga2V5IQ==",
-            SdpEncryptionKey::METHOD_BASE64,
-            "U0RQIGVuY3J5cHRpb24ga2V5IQ==");
-
     m_objTestEncryptionKeys.Add(m_objTestKey);
     m_objTestEncryptionKeys.Add(TestEncryptionKey(
             "k=clear:SDP encryption key!\r\n",

@@ -84,13 +84,11 @@ protected:
     ImsVector<TestConnection> m_objAbnormalTestConnections;
 };
 
-SdpConnectionTest::SdpConnectionTest()
+SdpConnectionTest::SdpConnectionTest() :
+        m_objTestConnection(TestConnection("c=IN IP4 10.47.16.5\r\n", "IN IP4 10.47.16.5",
+                Sdp::ADDR_TYPE_IP4, "IP4", "10.47.16.5"))
 {
     // clang-format off
-    m_objTestConnection = TestConnection(
-            "c=IN IP4 10.47.16.5\r\n",
-            "IN IP4 10.47.16.5", Sdp::ADDR_TYPE_IP4, "IP4", "10.47.16.5");
-
     m_objNormalTestConnections.Add(m_objTestConnection);
     m_objNormalTestConnections.Add(TestConnection(
             "c=IN IP6 fc01:abab:cdcd:efe0::1\r\n",
