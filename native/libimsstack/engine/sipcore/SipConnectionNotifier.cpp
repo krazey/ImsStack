@@ -1023,7 +1023,7 @@ void SipConnectionNotifier::ExtractProperties(IN const AString& strParams)
     // Look up "type" & "transport" parameters
     for (i = 0; i < m_objParameters.GetSize(); ++i)
     {
-        const SipParameter* pParameter = m_objParameters.GetAt(i);
+        pParameter = m_objParameters.GetAt(i);
 
         if (pParameter != IMS_NULL)
         {
@@ -1044,7 +1044,7 @@ void SipConnectionNotifier::ExtractProperties(IN const AString& strParams)
 
     for (i = 0; i < m_objParameters.GetSize(); ++i)
     {
-        const SipParameter* pParameter = m_objParameters.GetAt(i);
+        pParameter = m_objParameters.GetAt(i);
 
         if (pParameter != IMS_NULL)
         {

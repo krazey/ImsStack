@@ -1065,7 +1065,7 @@ AString SipAddress::ToString() const
 
         for (IMS_UINT32 i = 1; i < m_objHeaders.GetSize(); ++i)
         {
-            const ISipHeader* piHeader = m_objHeaders.GetAt(i);
+            piHeader = m_objHeaders.GetAt(i);
 
             if (piHeader != IMS_NULL)
             {

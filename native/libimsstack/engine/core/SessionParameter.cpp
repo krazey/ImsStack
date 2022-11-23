@@ -233,8 +233,7 @@ void SessionParameter::RemoveMediaParameter(IN IMS_UINT32 nMid, IN IMS_BOOL bRej
         {
             for (IMS_UINT32 i = nMid + 1; i < m_objMediaParams.GetSize(); ++i)
             {
-                SdpMediaParameter* pMediaParam = m_objMediaParams.GetAt(i);
-
+                pMediaParam = m_objMediaParams.GetAt(i);
                 pMediaParam->SetMid(i - 1);
             }
 

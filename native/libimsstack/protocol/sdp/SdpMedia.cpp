@@ -179,11 +179,11 @@ PUBLIC VIRTUAL IMS_BOOL SdpMedia::Decode(IN const AString& strValue)
     {
         if (m_strTransportProtocol.Contains(TextParser::CHAR_SLASH))
         {
-            IMSList<AString> objTokens = m_strTransportProtocol.Split(TextParser::CHAR_SLASH);
+            IMSList<AString> objProtoTokens = m_strTransportProtocol.Split(TextParser::CHAR_SLASH);
 
-            for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
+            for (IMS_UINT32 i = 0; i < objProtoTokens.GetSize(); ++i)
             {
-                const AString& strToken = objTokens.GetAt(i);
+                const AString& strToken = objProtoTokens.GetAt(i);
 
                 if (!Sdp::IsTokenString(strToken))
                 {

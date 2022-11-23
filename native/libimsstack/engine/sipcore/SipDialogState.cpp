@@ -690,7 +690,7 @@ IMS_BOOL SipDialogState::InitRequest(IN const SipMethod& objMethod, IN_OUT ::Sip
     // Route
     for (IMS_UINT32 i = 0; i < m_objRouteSet.GetSize(); ++i)
     {
-        SipHeaderBase* pSipHdr = m_objRouteSet.GetAt(i);
+        pSipHdr = m_objRouteSet.GetAt(i);
 
         if (pSipHdr != IMS_NULL)
         {

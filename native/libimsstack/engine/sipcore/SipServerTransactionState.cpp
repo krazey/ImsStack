@@ -316,8 +316,6 @@ IMS_SINT32 SipServerTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg)
     then stack drop the message by returning ignore request */
     if ((m_pTxnKey != IMS_NULL) && (m_pTxnKey->GetTxnType() == SipTxn::INV_SER_TXN))
     {
-        SipMethod objMethod = SipStack::GetMethod(m_pSipMsg);
-
         if (objMethod.Equals(SipMethod::ACK) && (m_pTxnKey->GetRespCode() >= SipStatusCode::SC_300))
         {
             IMS_TRACE_I("__UAS__ :: ___ ACK (%s) TO UNSUCCESSFUL FINAL RESPONSE ___",

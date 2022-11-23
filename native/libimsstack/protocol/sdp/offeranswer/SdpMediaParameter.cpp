@@ -356,7 +356,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
             // so if new media format is present, then add it to the accepted media formats.
             for (IMS_UINT32 j = 0; j < pPeerParam->m_objMediaFormats.GetSize(); ++j)
             {
-                SdpMediaFormat* pPeerMediaFormat = pPeerParam->m_objMediaFormats.GetAt(j);
+                pPeerMediaFormat = pPeerParam->m_objMediaFormats.GetAt(j);
 
                 // Check the payload type and if it is duplicate format,
                 // then skip the media format

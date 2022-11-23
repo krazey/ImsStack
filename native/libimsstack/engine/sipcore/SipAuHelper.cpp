@@ -559,9 +559,9 @@ IMS_BOOL SipAuHelperPrivate::CalculateResponse()
             {
                 AStringArray objTokens = pChallenge->GetQop().Split(TextParser::CHAR_COMMA);
 
-                for (IMS_SINT32 i = 0; i < objTokens.GetCount(); ++i)
+                for (IMS_SINT32 j = 0; j < objTokens.GetCount(); ++j)
                 {
-                    const AString& strToken = objTokens.GetElementAt(i);
+                    const AString& strToken = objTokens.GetElementAt(j);
 
                     // Digest (QoP) : auth
                     if (strToken.EqualsIgnoreCase(STR_QOP_AUTH))

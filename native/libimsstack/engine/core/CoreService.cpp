@@ -611,9 +611,9 @@ PRIVATE VIRTUAL IMS_BOOL CoreService::ServerConnection_NotifyRequest(IN ISipServ
             {
                 IMS_TRACE_D("Refer-To :: method parameter does not exist", 0, 0, 0);
 
-                SipMethod objMethod(SipMethod::INVITE);
-                pMethod =
-                        new Reference(this, pAddress->GetUri(), objMethod.ToString(), objReplaces);
+                SipMethod objReferToMethod(SipMethod::INVITE);
+                pMethod = new Reference(
+                        this, pAddress->GetUri(), objReferToMethod.ToString(), objReplaces);
             }
             else
             {

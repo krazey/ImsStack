@@ -1677,9 +1677,9 @@ IMS_BOOL Service::ValidateRequestUriForIpAndPort(IN const SipAddress& objRequest
 
         if (pContact != IMS_NULL)
         {
-            IPAddress objIpForContact(pContact->GetHost());
+            IPAddress objIpForContact2(pContact->GetHost());
 
-            if (objIpForRUri.Equals(objIpForContact) &&
+            if (objIpForRUri.Equals(objIpForContact2) &&
                     (objRequestUri.GetPort() == pContact->GetPort()))
             {
                 IMS_TRACE_D("R-URI matches for IP/port", 0, 0, 0);

@@ -1320,7 +1320,7 @@ IMS_RESULT Session::RemoveMedia(IN IMS_UINT32 nIndex)
     {
         for (IMS_UINT32 j = nIndex; j < m_objMedias.GetSize(); j++)
         {
-            Media* pMedia = m_objMedias.GetAt(j);
+            pMedia = m_objMedias.GetAt(j);
             pMedia->SetMid(j);
         }
     }
@@ -3160,11 +3160,11 @@ PROTECTED VIRTUAL IMS_BOOL Session::Cancellable_NotifyRequest(IN ISipServerConne
     {
         IMS_BOOL bRUriMatched = IMS_FALSE;
         IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_START);
-        ISipMessage* piSipMsg = (piMessage != IMS_NULL) ? piMessage->GetMessage() : IMS_NULL;
+        ISipMessage* piOrigSipMsg = (piMessage != IMS_NULL) ? piMessage->GetMessage() : IMS_NULL;
 
-        if (piSipMsg != IMS_NULL)
+        if (piOrigSipMsg != IMS_NULL)
         {
-            SipAddress objOrigRUri(piSipMsg->GetRequestUri());
+            SipAddress objOrigRUri(piOrigSipMsg->GetRequestUri());
             bRUriMatched = objRequestUri.Equals(objOrigRUri);
         }
 
@@ -5607,12 +5607,9 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
     }
     else if (nOaResult == SdpOfferAnswer::RESULT_NOT_FOUND)
     {
-        // Original status code: 606, KDDI: 488
-        IMS_SINT32 nStatusCode = SipStatusCode::SC_488;
+        IMS_TRACE_I("Rejecting SDP Offer/Answer with 488 (Not Acceptable Here)", 0, 0, 0);
 
-        IMS_TRACE_I("Rejecting SDP Offer/Answer with %d (Not Acceptable) ...", nStatusCode, 0, 0);
-
-        if (GetService()->CreateResponse(piSsc, nStatusCode) == IMS_FALSE)
+        if (GetService()->CreateResponse(piSsc, SipStatusCode::SC_488) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "Rejecting SDP Offer/Answer failed", 0, 0, 0);
 
@@ -7619,13 +7616,13 @@ IMS_BOOL Session::CreateMediaFromSdp()
 
                     for (IMS_UINT32 j = 0; j < objGroupMediaParams.GetSize(); ++j)
                     {
-                        const SdpMediaParameter* pMediaParam = objGroupMediaParams.GetAt(j);
+                        const SdpMediaParameter* pGroupMediaParam = objGroupMediaParams.GetAt(j);
 
                         IMS_TRACE_I("New media type(%s, %s) added",
-                                pMediaParam->GetMedia().GetTypeEx().GetStr(),
-                                pMediaParam->GetMedia().GetTransportProtocolEx().GetStr(), 0);
+                                pGroupMediaParam->GetMedia().GetTypeEx().GetStr(),
+                                pGroupMediaParam->GetMedia().GetTransportProtocolEx().GetStr(), 0);
 
-                        objMids.Append(pMediaParam->GetMid());
+                        objMids.Append(pGroupMediaParam->GetMid());
                     }
 
                     // New media; Create and add to the current session.
@@ -7758,13 +7755,13 @@ IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 
                     for (IMS_UINT32 j = 0; j < objGroupMediaParams.GetSize(); ++j)
                     {
-                        const SdpMediaParameter* pMediaParam = objGroupMediaParams.GetAt(j);
+                        const SdpMediaParameter* pGroupMediaParam = objGroupMediaParams.GetAt(j);
 
                         IMS_TRACE_I("New media type(%s, %s) added",
-                                pMediaParam->GetMedia().GetTypeEx().GetStr(),
-                                pMediaParam->GetMedia().GetTransportProtocolEx().GetStr(), 0);
+                                pGroupMediaParam->GetMedia().GetTypeEx().GetStr(),
+                                pGroupMediaParam->GetMedia().GetTransportProtocolEx().GetStr(), 0);
 
-                        objMids.Append(pMediaParam->GetMid());
+                        objMids.Append(pGroupMediaParam->GetMid());
                     }
 
                     // New media; Create and add to the current session.

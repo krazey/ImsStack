@@ -423,9 +423,9 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
 
     if (bMidSyncRequired)
     {
-        for (IMS_UINT32 j = nIndex; j < m_objMedias.GetSize(); j++)
+        for (IMS_UINT32 j = nIndex; j < m_objMedias.GetSize(); ++j)
         {
-            Media* pMedia = m_objMedias.GetAt(j);
+            pMedia = m_objMedias.GetAt(j);
             pMedia->SetMid(j);
         }
     }
@@ -1011,13 +1011,13 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 
                     for (IMS_UINT32 j = 0; j < objGroupMediaParams.GetSize(); ++j)
                     {
-                        const SdpMediaParameter* pMediaParam = objGroupMediaParams.GetAt(j);
+                        const SdpMediaParameter* pGroupMediaParam = objGroupMediaParams.GetAt(j);
 
                         IMS_TRACE_I("New media type(%s, %s) added",
-                                pMediaParam->GetMedia().GetTypeEx().GetStr(),
-                                pMediaParam->GetMedia().GetTransportProtocolEx().GetStr(), 0);
+                                pGroupMediaParam->GetMedia().GetTypeEx().GetStr(),
+                                pGroupMediaParam->GetMedia().GetTransportProtocolEx().GetStr(), 0);
 
-                        objMids.Append(pMediaParam->GetMid());
+                        objMids.Append(pGroupMediaParam->GetMid());
                     }
 
                     // New media; Create and add to the current session.
