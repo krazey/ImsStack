@@ -23,21 +23,15 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_INFO[] = "conference-info";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_DESCRIPTION[] =
-        "conference-description";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_HOST_INFO[] = "host-info";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_STATE[] = "conference-state";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_USERS[] = "users";
+LOCAL const IMS_CHAR ELEMENT_CONFERENCE_INFO[] = "conference-info";
+LOCAL const IMS_CHAR ELEMENT_CONFERENCE_DESCRIPTION[] = "conference-description";
+LOCAL const IMS_CHAR ELEMENT_USERS[] = "users";
+LOCAL const IMS_CHAR ELEMENT_DISPLAY_TEXT[] = "display-text";
+LOCAL const IMS_CHAR ELEMENT_STATUS[] = "status";
 
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_DISPLAY_TEXT[] = "display-text";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_ENTRY[] = "entry";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_URI[] = "uri";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_STATUS[] = "status";
-
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ATTR_VERSION[] = "version";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ATTR_STATE[] = "state";
-PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ATTR_ENTITY[] = "entity";
+LOCAL const IMS_CHAR ATTR_VERSION[] = "version";
+LOCAL const IMS_CHAR ATTR_STATE[] = "state";
+LOCAL const IMS_CHAR ATTR_ENTITY[] = "entity";
 
 PUBLIC
 ConferenceInfo::User::~User()
@@ -54,26 +48,11 @@ ConferenceInfo::User::~User()
 PUBLIC
 ConferenceInfo::ConferenceInfo() :
         m_objConferenceDescription(ConferenceDescription()),
-        m_objHostInfo(HostInfo()),
-        m_objConferenceState(ConferenceState()),
-        m_objUsers(IMSList<User*>()),
+        m_objUsers(ImsList<User*>()),
         m_nState(STATE_INVALID),
         m_nVersion(0)
 {
     IMS_TRACE_I("+ConferenceInfo", 0, 0, 0);
-}
-
-PUBLIC
-ConferenceInfo::ConferenceInfo(IN const AString& strConferenceInfo) :
-        m_objConferenceDescription(ConferenceDescription()),
-        m_objHostInfo(HostInfo()),
-        m_objConferenceState(ConferenceState()),
-        m_objUsers(IMSList<User*>()),
-        m_nState(STATE_INVALID),
-        m_nVersion(0)
-{
-    IMS_TRACE_I("+ConferenceInfo", 0, 0, 0);
-    Parse(strConferenceInfo);
 }
 
 PUBLIC
@@ -95,19 +74,7 @@ const ConferenceInfo::ConferenceDescription& ConferenceInfo::GetConferenceDescri
 }
 
 PUBLIC
-const ConferenceInfo::HostInfo& ConferenceInfo::GetHostInfo() const
-{
-    return m_objHostInfo;
-}
-
-PUBLIC
-const ConferenceInfo::ConferenceState& ConferenceInfo::GetConferenceState() const
-{
-    return m_objConferenceState;
-}
-
-PUBLIC
-const IMSList<ConferenceInfo::User*>& ConferenceInfo::GetUsers() const
+const ImsList<ConferenceInfo::User*>& ConferenceInfo::GetUsers() const
 {
     return m_objUsers;
 }
@@ -115,15 +82,8 @@ const IMSList<ConferenceInfo::User*>& ConferenceInfo::GetUsers() const
 PUBLIC
 IMS_BOOL ConferenceInfo::Parse(IN const AString& strConferenceInfoPackage)
 {
-    IMS_TRACE_I("Parse", 0, 0, 0);
-
     DomDocumentBuilderFactory* pBuilderFactory = DomDocumentBuilderFactory::GetInstance();
     DocumentBuilder* pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
-
-    if (pDocumentBuilder == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
 
     IDocument* piDocument = pDocumentBuilder->Parse(strConferenceInfoPackage);
     pBuilderFactory->DestroyDocumentBuilder(pDocumentBuilder);
@@ -153,7 +113,7 @@ IMS_BOOL ConferenceInfo::Parse(IN const AString& strConferenceInfoPackage)
         return IMS_FALSE;
     }
 
-    CreateConferenceInfo(piElement);
+    CreateConferenceInfo(*piElement);
 
     piDocument->DestroyDocument();
 
@@ -162,39 +122,28 @@ IMS_BOOL ConferenceInfo::Parse(IN const AString& strConferenceInfoPackage)
 }
 
 PRIVATE
-void ConferenceInfo::CreateConferenceInfo(IN const IElement* piElement)
+void ConferenceInfo::CreateConferenceInfo(IN const IElement& objElement)
 {
     // "state" attribute
-    m_nState = ConvertState(piElement->GetAttribute(ATTR_STATE));
+    m_nState = ConvertState(objElement.GetAttribute(ATTR_STATE));
 
     // "version" attribute
-    m_nVersion = piElement->GetAttribute(ATTR_VERSION).ToInt32();
+    m_nVersion = objElement.GetAttribute(ATTR_VERSION).ToInt32();
 
-    INode* piNode = piElement->GetFirstChild();
+    INode* piNode = objElement.GetFirstChild();
     while (piNode != IMS_NULL)
     {
         const AString& strName = piNode->GetLocalName();
 
         if (strName.EqualsIgnoreCase(ELEMENT_CONFERENCE_DESCRIPTION))
         {
-            CreateConferenceDescription(piNode);
-        }
-        else if (strName.EqualsIgnoreCase(ELEMENT_HOST_INFO))
-        {
-            CreateHostInfo(piNode);
-        }
-        else if (strName.EqualsIgnoreCase(ELEMENT_CONFERENCE_STATE))
-        {
-            CreateConferenceState(piNode);
+            CreateConferenceDescription(*piNode);
         }
         else if (strName.EqualsIgnoreCase(ELEMENT_USERS))
         {
-            CreateUsers(piNode);
+            CreateUsers(*piNode);
         }
-        else
-        {
-            IMS_TRACE_E(0, "invalid element", 0, 0, 0);
-        }
+
         piNode = piNode->GetNextSibling();
     }
 
@@ -202,135 +151,29 @@ void ConferenceInfo::CreateConferenceInfo(IN const IElement* piElement)
 }
 
 PRIVATE
-void ConferenceInfo::CreateConferenceDescription(IN const INode* piNode)
+void ConferenceInfo::CreateConferenceDescription(IN const INode& objNode)
 {
     const IMS_CHAR ELEMENT_MAX_USER_COUNT[] = "maximum-user-count";
-    const IMS_CHAR ELEMENT_CONF_URIS[] = "conf-uris";
-    const IMS_CHAR ELEMENT_PURPOSE[] = "purpose";
 
-    if (piNode == IMS_NULL)
-    {
-        IMS_TRACE_I("CreateConferenceDescription : piNode is null", 0, 0, 0);
-        return;
-    }
-
-    IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+    IElement& objElement = DYNAMIC_CAST(IElement&, objNode);
     AString strMaxUserCount;
-    if (GetSubElementValue(piElement, ELEMENT_MAX_USER_COUNT, strMaxUserCount).GetLength() > 0)
+    if (GetSubElementValue(objElement, ELEMENT_MAX_USER_COUNT, strMaxUserCount).GetLength() > 0)
     {
         m_objConferenceDescription.nMaxUserCount = strMaxUserCount.ToInt32();
         IMS_TRACE_I("CreateConferenceDescription : maximum-user-count=%d",
                 m_objConferenceDescription.nMaxUserCount, 0, 0);
     }
-
-    const IElement* pConfUrisElement = GetSubElement(piElement, ELEMENT_CONF_URIS);
-    if (pConfUrisElement == IMS_NULL)
-    {
-        return;
-    }
-
-    // TEMP parse conf-uris element. this information is useless.
-    IMSList<IElement*> objEntries;
-    if (GetSubElements(pConfUrisElement, ELEMENT_ENTRY, objEntries).IsEmpty())
-    {
-        IMS_TRACE_I("CreateConferenceDescription : no Entry elements", 0, 0, 0);
-        return;
-    }
-
-    for (IMS_UINT32 i = 0; i < objEntries.GetSize(); i++)
-    {
-        AString strUri;
-        AString strDisplayText;
-        AString strPurpose;
-
-        IElement* piTemp = objEntries.GetAt(i);
-        GetSubElementValue(piTemp, ELEMENT_URI, strUri);
-        GetSubElementValue(piTemp, ELEMENT_DISPLAY_TEXT, strDisplayText);
-        GetSubElementValue(piTemp, ELEMENT_PURPOSE, strPurpose);
-
-        IMS_TRACE_I("CreateConferenceDescription : uri=[%s] display=[%s] purpose=[%s]",
-                strUri.GetStr(), strDisplayText.GetStr(), strPurpose.GetStr());
-    }
 }
 
 PRIVATE
-void ConferenceInfo::CreateHostInfo(IN const INode* piNode)
-{
-    // IMS_TRACE_I("CreateHostInfo", 0, 0, 0);
-    const IMS_CHAR ELEMET_URIS[] = "uris";
-
-    if (piNode == IMS_NULL)
-    {
-        IMS_TRACE_I("CreateHostInfo : piNode is null", 0, 0, 0);
-        return;
-    }
-
-    IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
-    GetSubElementValue(piElement, ELEMENT_DISPLAY_TEXT, m_objHostInfo.strDisplayText);
-    IMS_TRACE_I("CreateHostInfo : display-text=[%s]", m_objHostInfo.strDisplayText.GetStr(), 0, 0);
-
-    const IElement* pUrisElement = GetSubElement(piElement, ELEMET_URIS);
-    if (pUrisElement == IMS_NULL)
-    {
-        return;
-    }
-
-    // TEMP parse conf-uris element. this information is useless.
-    IMSList<IElement*> objEntries;
-    if (GetSubElements(pUrisElement, ELEMENT_ENTRY, objEntries).IsEmpty())
-    {
-        IMS_TRACE_I("CreateHostInfo : no Entry elements", 0, 0, 0);
-        return;
-    }
-
-    AString strUri;
-    IElement* piTemp = objEntries.GetAt(0);  // only the first host uri is required.
-    GetSubElementValue(piTemp, ELEMENT_URI, strUri);
-    m_objHostInfo.objUris.Append(strUri);
-
-    IMS_TRACE_I("CreateHostInfo : uri=[%s]", m_objHostInfo.objUris.GetAt(0).GetStr(), 0, 0);
-}
-
-PRIVATE
-void ConferenceInfo::CreateConferenceState(IN const INode* piNode)
-{
-    const IMS_CHAR ELEMENT_USER_COUNT[] = "user-count";
-
-    if (piNode == IMS_NULL)
-    {
-        IMS_TRACE_I("CreateConferenceState : piNode is null", 0, 0, 0);
-        return;
-    }
-
-    IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
-    AString strUserCount;
-    if (GetSubElementValue(piElement, ELEMENT_USER_COUNT, strUserCount).GetLength() > 0)
-    {
-        m_objConferenceState.nUserCount = strUserCount.ToInt32();
-        IMS_TRACE_I(
-                "CreateConferenceState : user-count=[%d]", m_objConferenceState.nUserCount, 0, 0);
-    }
-}
-
-PRIVATE
-void ConferenceInfo::CreateUsers(IN const INode* piNode)
+void ConferenceInfo::CreateUsers(IN const INode& objNode)
 {
     const IMS_CHAR ELEMENT_USER[] = "user";
 
-    if (piNode == IMS_NULL)
-    {
-        IMS_TRACE_I("CreateUsers : piNode is null", 0, 0, 0);
-        return;
-    }
+    IElement& objElement = DYNAMIC_CAST(IElement&, objNode);
 
-    IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
-
-    IMSList<IElement*> objUserElements;
-    if (GetSubElements(piElement, ELEMENT_USER, objUserElements).IsEmpty())
-    {
-        IMS_TRACE_I("CreateUsers : no User elements", 0, 0, 0);
-        return;
-    }
+    ImsList<IElement*> objUserElements;
+    GetSubElements(objElement, ELEMENT_USER, objUserElements);
 
     for (IMS_UINT32 i = 0; i < objUserElements.GetSize(); i++)
     {
@@ -339,34 +182,24 @@ void ConferenceInfo::CreateUsers(IN const INode* piNode)
         User* pUser = new User();
         pUser->strEntity = piUserElement->GetAttribute(ATTR_ENTITY);
         pUser->nState = ConvertState(piUserElement->GetAttribute(ATTR_STATE));
-        GetSubElementValue(piUserElement, ELEMENT_DISPLAY_TEXT, pUser->strDisplayText);
+        GetSubElementValue(*piUserElement, ELEMENT_DISPLAY_TEXT, pUser->strDisplayText);
 
         IMS_TRACE_I("CreateUsers : entity=[%s] state=[%d] display-text=[%s]",
                 pUser->strEntity.GetStr(), pUser->nState, pUser->strDisplayText.GetStr());
 
-        CreateEndPointEntity(piUserElement, pUser);
+        CreateEndPointEntity(*piUserElement, *pUser);
 
         m_objUsers.Append(pUser);
     }
 }
 
 PRIVATE
-void ConferenceInfo::CreateEndPointEntity(IN const IElement* piUserElement, IN User* pUser)
+void ConferenceInfo::CreateEndPointEntity(IN const IElement& objUserElement, IN User& objUser)
 {
     const IMS_CHAR ELEMENT_ENDPOINT[] = "endpoint";
 
-    if (piUserElement == IMS_NULL)
-    {
-        IMS_TRACE_I("CreateEndPointEntity : no user elements", 0, 0, 0);
-        return;
-    }
-
-    IMSList<IElement*> objEndPointElements;
-    if (GetSubElements(piUserElement, ELEMENT_ENDPOINT, objEndPointElements).IsEmpty())
-    {
-        IMS_TRACE_I("CreateEndPointEntity : no endpoint elements", 0, 0, 0);
-        return;
-    }
+    ImsList<IElement*> objEndPointElements;
+    GetSubElements(objUserElement, ELEMENT_ENDPOINT, objEndPointElements);
 
     for (IMS_UINT32 i = 0; i < objEndPointElements.GetSize(); i++)
     {
@@ -379,69 +212,24 @@ void ConferenceInfo::CreateEndPointEntity(IN const IElement* piUserElement, IN U
 
         AString strStatus;
         pEndPoint->nStatus =
-                ConvertStatus(GetSubElementValue(piEndPointElement, ELEMENT_STATUS, strStatus));
+                ConvertStatus(GetSubElementValue(*piEndPointElement, ELEMENT_STATUS, strStatus));
 
-        GetSubElementValue(piEndPointElement, ELEMENT_DISPLAY_TEXT, pEndPoint->strDisplayText);
+        GetSubElementValue(*piEndPointElement, ELEMENT_DISPLAY_TEXT, pEndPoint->strDisplayText);
 
         IMS_TRACE_I("CreateEndPointEntity : entity=[%s] state=[%d]", pEndPoint->strEntity.GetStr(),
                 pEndPoint->nState, 0);
         IMS_TRACE_I("CreateEndPointEntity : status=[%d] display-text=[%s]", pEndPoint->nStatus,
                 pEndPoint->strDisplayText.GetStr(), 0);
 
-        CreateMedia(piEndPointElement, pEndPoint);
-        CreateCallInfo(piEndPointElement, pEndPoint);
-
-        pUser->objEndPoints.Append(pEndPoint);
+        objUser.objEndPoints.Append(pEndPoint);
     }
 }
 
 PRIVATE
-void ConferenceInfo::CreateMedia(IN const IElement* piEndPointElement, IN User::EndPoint* pEndPoint)
+const ImsList<IElement*>& ConferenceInfo::GetSubElements(const IN IElement& objElement,
+        IN const IMS_CHAR* pszSubElementName, OUT ImsList<IElement*>& objSubElements)
 {
-    (void)pEndPoint;
-    (void)piEndPointElement;
-    // TODO: Create media.
-}
-
-PRIVATE
-void ConferenceInfo::CreateCallInfo(
-        IN const IElement* piEndPointElement, IN User::EndPoint* pEndPoint)
-{
-    (void)pEndPoint;
-    (void)piEndPointElement;
-    // TODO: Create Call Info
-}
-
-PRIVATE
-const IElement* ConferenceInfo::GetSubElement(
-        IN const IElement* piElement, IN const IMS_CHAR* pszSubElementName)
-{
-    INode* piNode = piElement->GetFirstChild();
-
-    while (piNode != IMS_NULL)
-    {
-        if (piNode->GetLocalName().EqualsIgnoreCase(pszSubElementName))
-        {
-            return DYNAMIC_CAST(IElement*, piNode);
-        }
-
-        piNode = piNode->GetNextSibling();
-    }
-    return IMS_NULL;
-}
-
-PRIVATE
-const IMSList<IElement*>& ConferenceInfo::GetSubElements(const IN IElement* piElement,
-        IN const IMS_CHAR* pszSubElementName, OUT IMSList<IElement*>& objSubElements)
-{
-    // IMS_TRACE_I("GetSubElements : (%s)", pszSubElementName, 0, 0);
-    if (piElement == IMS_NULL)
-    {
-        IMS_TRACE_I("GetSubElements : element is null", 0, 0, 0);
-        return objSubElements;
-    }
-
-    INode* piNode = piElement->GetFirstChild();
+    INode* piNode = objElement.GetFirstChild();
 
     while (piNode != IMS_NULL)
     {
@@ -457,10 +245,10 @@ const IMSList<IElement*>& ConferenceInfo::GetSubElements(const IN IElement* piEl
 }
 
 PRIVATE
-const AString& ConferenceInfo::GetSubElementValue(IN const IElement* piElement,
+const AString& ConferenceInfo::GetSubElementValue(IN const IElement& objElement,
         IN const IMS_CHAR* pszSubElementName, OUT AString& strSubElementValue)
 {
-    INode* piNode = piElement->GetFirstChild();
+    INode* piNode = objElement.GetFirstChild();
 
     while (piNode != IMS_NULL)
     {

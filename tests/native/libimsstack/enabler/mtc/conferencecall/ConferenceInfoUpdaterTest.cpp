@@ -34,7 +34,6 @@ LOCAL AString MALFORMED_EVENT_PACKAGE_BODY = "malformed";
 LOCAL IMS_UINT32 MAX_USER_COUNT = 6;
 LOCAL AString DISPLAY_TEXT = "anyDisplayText";
 LOCAL AString LOCAL_URI = "sip:anyLocalUri@ims.google.com";
-LOCAL IMS_UINT32 USER_COUNT = 2;
 
 LOCAL AString USER_ENTITY1 = "sip:anyEntity1@ims.google.com";
 LOCAL AString EP_ENTITY1 = "sip:anyEntity1Ep@ims.google.com";
@@ -57,10 +56,7 @@ class ConferenceInfoUpdaterTest : public ::testing::Test
 public:
     MockConferenceInfo* pInfo;
     MockConferenceDescription* pDescription;
-    MockHostInfo* pHostInfo;
     ImsList<AString> objUris;
-    MockConferenceState* pState;
-    MockMedia* pMedia;
     ImsList<ConferenceInfo::User*> objUsers;
 
     MockIMtcContext objContext;
@@ -95,9 +91,6 @@ protected:
     {
         // pInfo is deleted in ~ConferenceInfoUpdater()
         delete pDescription;
-        delete pHostInfo;
-        delete pState;
-        delete pMedia;
         delete pConfigurationProxy;
         delete pUpdater;
         delete pFactory;
@@ -106,12 +99,8 @@ protected:
     void SetUpConferenceInfo(IN IMS_UINT32 nInfoState, IMS_SINT32 nVersion = DEFAULT_VERSION)
     {
         pDescription = new MockConferenceDescription(MAX_USER_COUNT);
-        pHostInfo = new MockHostInfo("", objUris);
-        pState = new MockConferenceState(USER_COUNT);
-        pMedia = new MockMedia(1, DISPLAY_TEXT, ANY_STATE, "anyLabel", ANY_STATUS);  // not used
 
-        pInfo = new MockConferenceInfo(
-                *pDescription, *pHostInfo, *pState, objUsers, nInfoState, nVersion);
+        pInfo = new MockConferenceInfo(*pDescription, objUsers, nInfoState, nVersion);
         ON_CALL(*pFactory, CreateInfo).WillByDefault(Return(pInfo));
 
         ON_CALL(*pInfo, Parse(ANY_EVENT_PACKAGE_BODY)).WillByDefault(Return(IMS_TRUE));
