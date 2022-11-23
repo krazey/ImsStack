@@ -79,6 +79,7 @@ enum class AosControlCause
     DATA = 1,
     RADIO = 2,
     IMS_SERVICE = 3,
+    IMS_SUBSCRIBER = 4,
 
     /* From modem */
     RADIO_SIM_REMOVED = 11,
