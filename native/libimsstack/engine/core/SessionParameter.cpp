@@ -668,7 +668,7 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer, I
         IN const SessionParameter* pPeerParam, OUT SessionParameter*& pProposalView,
         OUT SessionParameter*& pPeerView)
 {
-    IMS_SINT32 nMatchResult = SdpOfferAnswer::RESULT_NOT_DONE;
+    IMS_SINT32 nMatchResult;
     IMS_BOOL bAtLeastOneMatched = IMS_FALSE;
     IMS_BOOL bQosPreconditionPresent = IMS_FALSE;
 
@@ -680,9 +680,6 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer, I
         if (pProposalMedia == IMS_NULL)
         {
             IMS_TRACE_E(0, "Instantiating a SDP media parameter failed", 0, 0, 0);
-
-            nMatchResult = SdpOfferAnswer::RESULT_FAILURE;
-
             break;
         }
 
@@ -697,7 +694,6 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer, I
             {
                 // 4 Does it need to check media_type?
                 bAtLeastOneMatched = IMS_TRUE;
-                nMatchResult = SdpOfferAnswer::RESULT_SUCCESS;
 
                 // Newly added media stream
                 (*pProposalMedia) = (*pPeerMedia);
@@ -780,7 +776,6 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer, I
         else
         {
             bAtLeastOneMatched = IMS_TRUE;
-            nMatchResult = SdpOfferAnswer::RESULT_SUCCESS;
 
             // Newly added media stream
             (*pProposalMedia) = (*pPeerMedia);
@@ -805,11 +800,13 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer, I
 
     if (bAtLeastOneMatched)
     {
-        nMatchResult = SdpOfferAnswer::RESULT_SUCCESS;
-
         if (bQosPreconditionPresent)
         {
             nMatchResult = SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT;
+        }
+        else
+        {
+            nMatchResult = SdpOfferAnswer::RESULT_SUCCESS;
         }
     }
     else
