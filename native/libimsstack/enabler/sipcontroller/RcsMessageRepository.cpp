@@ -51,11 +51,9 @@ IMS_BOOL RcsMessageRepository::Add(IN RcsMessageTracker* pRcsMessage)
 PUBLIC
 IMS_BOOL RcsMessageRepository::Remove(IN IMS_UINTP nSessionId)
 {
-    RcsMessageTracker* pRcsMessage = IMS_NULL;
-
     for (IMS_UINT32 nIndex = 0; nIndex < GetSize(); nIndex++)
     {
-        pRcsMessage = objRcsMessageTrackers.GetAt(nIndex);
+        RcsMessageTracker* pRcsMessage = objRcsMessageTrackers.GetAt(nIndex);
 
         if (pRcsMessage == IMS_NULL)
         {
@@ -81,11 +79,9 @@ IMS_BOOL RcsMessageRepository::Remove(IN IMS_UINTP nSessionId)
 PUBLIC
 RcsMessageTracker* RcsMessageRepository::Get(IN IMS_UINTP nSessionId)
 {
-    RcsMessageTracker* pRcsMessage = IMS_NULL;
-
     for (IMS_UINT32 nIndex = 0; nIndex < GetSize(); nIndex++)
     {
-        pRcsMessage = objRcsMessageTrackers.GetAt(nIndex);
+        RcsMessageTracker* pRcsMessage = objRcsMessageTrackers.GetAt(nIndex);
 
         if (pRcsMessage == IMS_NULL)
         {
@@ -117,16 +113,13 @@ IMS_UINT32 RcsMessageRepository::GetSize() const
 PUBLIC
 void RcsMessageRepository::Clear()
 {
-    RcsMessageTracker* pRcsMessage = IMS_NULL;
-
     while (!objRcsMessageTrackers.IsEmpty())
     {
-        pRcsMessage = objRcsMessageTrackers.GetAt(0);
+        RcsMessageTracker* pRcsMessage = objRcsMessageTrackers.GetAt(0);
 
         if (pRcsMessage != IMS_NULL)
         {
             delete pRcsMessage;
-            pRcsMessage = IMS_NULL;
         }
         objRcsMessageTrackers.RemoveAt(0);
     }

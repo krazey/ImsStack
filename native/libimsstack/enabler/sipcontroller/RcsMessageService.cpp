@@ -349,7 +349,6 @@ IMS_BOOL RcsMessageService::HandleOpenMSG(IN IMSMSG& objMSG)
     }
 
     delete pParam;
-    pParam = IMS_NULL;
     return IMS_TRUE;
 }
 
@@ -377,8 +376,6 @@ IMS_BOOL RcsMessageService::HandleSessionMSG(IN IMSMSG& objMSG)
         IMS_TRACE_E(0, "HandleSessionMSG : NOT HANDLED! [%" PFLS_u "]", pParam->nSessionID, 0, 0);
 
         delete pParam;
-        pParam = IMS_NULL;
-
         return IMS_FALSE;
     }
     return IMS_TRUE;
@@ -395,7 +392,6 @@ IMS_BOOL RcsMessageService::HandleCloseSessionMSG(IN IMSMSG& objMSG)
         CloseSession(pParam->nSessionID);
 
         delete pParam;
-        pParam = IMS_NULL;
     }
     else
     {
@@ -428,8 +424,6 @@ IMS_BOOL RcsMessageService::HandleNotifyReceiveErrorMSG(IN IMSMSG& objMSG)
         IMS_TRACE_E(0, "HandleSessionMSG : NOT HANDLED! [%" PFLS_u "]", pParam->nSessionID, 0, 0);
 
         delete pParam;
-        pParam = IMS_NULL;
-
         return IMS_FALSE;
     }
     return IMS_TRUE;

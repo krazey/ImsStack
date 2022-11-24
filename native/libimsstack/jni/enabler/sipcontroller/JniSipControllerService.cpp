@@ -95,8 +95,8 @@ void JniSipControllerService::LoadThread(IN const AString& strThreadName)
         IMS_TRACE_E(0, "LoadThread() : failed to load a thread(%s)", strThreadName.GetStr(), 0, 0);
         return;
     }
-    m_pJniSipControllerServiceThread = (JniSipControllerServiceThread*)((
-            ImsProcess::GetInstance()->GetApplicationThread(strThreadName)));
+    m_pJniSipControllerServiceThread = DYNAMIC_CAST(JniSipControllerServiceThread*,
+            ImsProcess::GetInstance()->GetApplicationThread(strThreadName));
 }
 
 int JniSipControllerService::SendData(const Parcel& pParcel)
