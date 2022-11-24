@@ -405,8 +405,8 @@ IMS_BOOL ConfigurationHolder::CreateSubscriberConfig(IN IMS_SINT32 nId)
 PRIVATE
 IMS_BOOL ConfigurationHolder::CreateSubscriberConfigIfNotPresent(IN IMS_SINT32 nId)
 {
-    const AString strConfName = SUBSCRIBER_CONFIG_NAMES;
-    IMSList<AString> objConfNames = strConfName.Split(',');
+    const AString strConfNames = SUBSCRIBER_CONFIG_NAMES;
+    IMSList<AString> objConfNames = strConfNames.Split(',');
 
     if (objConfNames.IsEmpty())
     {
