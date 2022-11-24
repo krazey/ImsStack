@@ -342,7 +342,7 @@ public class SscServiceImplTest {
     @Test
     public void testQueryCallBarringForServiceClass_invalidCondition() {
         int tId = 1;
-        int invalidCondition = SscConstant.CONDITION_BSIC + 10;
+        int invalidCondition = SscConstant.CONDITION_ACR + 10;
 
         mSscServiceImpl.queryCallBarringForServiceClass(tId, invalidCondition,
                 SscServiceClassUtil.SERVICE_CLASS_NONE);
@@ -745,7 +745,7 @@ public class SscServiceImplTest {
     @Test
     public void testUpdateCallBarringWithPassword_invalidCondition() {
         int tId = 1;
-        int invalidCondition = SscConstant.CONDITION_BSIC + 1;
+        int invalidCondition = SscConstant.CONDITION_ACR + 1;
 
         mSscServiceImpl.updateCallBarringWithPassword(tId, invalidCondition,
                 SscConstant.STATUS_ENABLE, null, SscServiceClassUtil.SERVICE_CLASS_NONE, null);
