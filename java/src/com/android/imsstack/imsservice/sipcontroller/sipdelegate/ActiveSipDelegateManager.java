@@ -131,7 +131,7 @@ public class ActiveSipDelegateManager {
     /**
      * Get all the delegate supported feature tags
      *
-     * @return total list of feture tags supported by sip delegates
+     * @return total list of feature tags supported by sip delegates
      */
     public Set<String> getAllSipDelegatSupportedFeatureTags() {
         Log.i(LOG_TAG, "getAllSipDelegatSupportedFeatureTags");
@@ -140,7 +140,7 @@ public class ActiveSipDelegateManager {
             Log.i(LOG_TAG, "supported for feature tag:" +
                     sipDelegate.getSupportedFeatureTags());
             if (sipDelegate.getSupportedFeatureTags() != null) {
-                sipDelegate.getSupportedFeatureTags().addAll(allSupportedTags);
+                allSupportedTags.addAll(sipDelegate.getSupportedFeatureTags());
             }
         }
         Log.i(LOG_TAG, "allSupportedTags:" + allSupportedTags);
