@@ -239,6 +239,38 @@ public class ImsCallManager {
         return null;
     }
 
+    /**
+     * Gets ImsCallSessionImpl which is in CallTracker.CALL_STATE_RINGING or
+     * CallTracker.CALL_STATE_RINGBACK state.
+     *
+     * @return ImsCallSessionImpl
+     */
+    public ImsCallSessionImpl getConnectingSession() {
+        synchronized (mSessions) {
+            if (!mSessions.isEmpty()) {
+                for (Map.Entry<String, ImsCallSessionImpl> entry : mSessions.entrySet()) {
+                    MtcCall call = entry.getValue().getMtcCall();
+
+                    if ((call != null) && !call.isInCall() && !call.isOnHold()) {
+                        return entry.getValue();
+                    }
+                }
+            }
+
+            if (!mPendingSessions.isEmpty()) {
+                for (Map.Entry<String, ImsCallSessionImpl> entry : mPendingSessions.entrySet()) {
+                    MtcCall call = entry.getValue().getMtcCall();
+
+                    if ((call != null)) {
+                        return entry.getValue();
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     public ImsCallSessionImpl getActiveSession() {
         synchronized (mSessions) {
             if (mSessions.isEmpty()) {
