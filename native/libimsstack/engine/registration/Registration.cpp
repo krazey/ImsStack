@@ -2628,7 +2628,7 @@ IMS_BOOL Registration::RespondToPendingChallenge(IN const Credential& objCredent
         // RFC5626_FLOW_CONTROL
         // MULTI_REG_TRANSPORT
         IMS_SINT32 nPortUs = GetPortUs();
-        IMS_SINT32 nPortFlowControl = Sip::PORT_UNSPECIFIED;
+        IMS_SINT32 nPortFlowControl;
         IMS_SINT32 nTransportExt = m_pRegParam->GetTransportExtForRegOnly();
 
         if (nPrevState == STATE_INIT)
