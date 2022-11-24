@@ -32,7 +32,8 @@ LOCAL IMS_SINT32 SLOT_ID = 0;
 class TestJniMtcService : public JniMtcService
 {
 public:
-    inline TestJniMtcService(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId = 0) :
+    inline explicit TestJniMtcService(
+            IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId = 0) :
             JniMtcService(pfnSendDataToJava, nSlotId)
     {
     }
