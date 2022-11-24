@@ -26,6 +26,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.telephony.DataFailCause;
 import android.telephony.PreciseDataConnectionState;
@@ -60,8 +61,8 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Collection;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -92,10 +93,10 @@ public abstract class Apn extends Handler implements IApn {
     protected static final int FEATURE_IPV6_DELAY = 0x00000001;
 
     // Variables--------------------------------------------------
-    protected static final Hashtable<Integer, String> sEventToString;
+    protected static final LinkedHashMap<Integer, String> sEventToString;
 
     static {
-        sEventToString = new Hashtable<Integer, String>();
+        sEventToString = new LinkedHashMap<Integer, String>();
 
         // Network callbacks
         sEventToString.put(EVENT_NETWORK_AVAILABLE,
@@ -146,8 +147,8 @@ public abstract class Apn extends Handler implements IApn {
     protected int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     protected int mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
     protected int mIpcanCategory = IPCAN_CATEGORY_MOBILE;
-    protected Hashtable<Integer, MsgProcInterface> mMapMsgHandler =
-            new Hashtable<Integer, MsgProcInterface>();
+    protected LinkedHashMap<Integer, MsgProcInterface> mMapMsgHandler =
+            new LinkedHashMap<Integer, MsgProcInterface>();
     protected ImsNetworkCallback mNetworkCallback = null;
     protected ImsNetworkCallback mNetworkMonitoringCallback = null;
     protected int mApnEmployCount = 0;
@@ -158,6 +159,8 @@ public abstract class Apn extends Handler implements IApn {
             new CopyOnWriteArraySet<ApnStateListener>();
 
     protected Apn(Context context, int slotId) {
+        super(Looper.myLooper());
+
         mContext = context;
         mSlotId = slotId;
         mDcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, mSlotId);
@@ -613,8 +616,7 @@ public abstract class Apn extends Handler implements IApn {
      * @see HandleDataStateChanged
      *
      * @param apnType IMS,Emergency...
-     * @param state Data state to be updated
-     * @return
+     * @param dataState Data state to be updated
      */
     protected void sendDataStateUpdateMessage(EApnType apnType, EDataState dataState) {
         ImsLog.i(mSlotId, "apnType : " + apnType + ", state : " + dataState);
@@ -916,7 +918,6 @@ public abstract class Apn extends Handler implements IApn {
             }
 
             String[] cachedAddress = null;
-            String[] newAddress = null;
 
             if (mCachedLinkProperties != null) {
                 Collection<LinkAddress> cachedlinkAddresses =
@@ -942,7 +943,7 @@ public abstract class Apn extends Handler implements IApn {
                 return false;
             }
 
-            newAddress = getIpAddress(newlinkAddresses);
+            String[] newAddress = getIpAddress(newlinkAddresses);
 
             if ((cachedAddress == null) || (newAddress == null)) {
                 return false;
@@ -983,8 +984,6 @@ public abstract class Apn extends Handler implements IApn {
                 return false;
             }
 
-            String[] cachedAddress = null;
-            String[] newAddress = null;
 
             Collection<InetAddress> cachedInetAddresses = mCachedLinkProperties.getPcscfServers();
             if (cachedInetAddresses.isEmpty()) {
@@ -999,15 +998,14 @@ public abstract class Apn extends Handler implements IApn {
                 return false;
             }
 
-            cachedAddress = getPcscfAddress(cachedInetAddresses);
-
             Collection<InetAddress> newInetAddresses = newLinkProperties.getPcscfServers();
             if (newInetAddresses.isEmpty()) {
                 ImsLog.d(mSlotId, "new Pcscf Server is empty");
                 return false;
             }
 
-            newAddress = getPcscfAddress(newInetAddresses);
+            String[] cachedAddress = getPcscfAddress(cachedInetAddresses);
+            String[] newAddress = getPcscfAddress(newInetAddresses);
 
             if (cachedAddress == null || newAddress == null) {
                 return false;
@@ -1123,13 +1121,8 @@ public abstract class Apn extends Handler implements IApn {
                 return null;
             }
 
-            Iterator<InetAddress> iterator = inetAddresses.iterator();
-
-            if (iterator == null) {
-                return null;
-            }
-
             String[] addr = new String[inetAddresses.size()];
+            Iterator<InetAddress> iterator = inetAddresses.iterator();
 
             int i = 0;
             while (iterator.hasNext()) {
@@ -1179,16 +1172,16 @@ public abstract class Apn extends Handler implements IApn {
                 @NonNull LinkProperties right) {
             final Collection<InetAddress> leftAddresses = left.getAddresses();
             final Collection<InetAddress> rightAddresses = right.getAddresses();
-            return (leftAddresses.size() == rightAddresses.size())
-                    ? leftAddresses.containsAll(rightAddresses) : false;
+            return leftAddresses.size() == rightAddresses.size()
+                    && leftAddresses.containsAll(rightAddresses);
         }
 
         private void printAddress(String prifix, String[] addresses) {
-            StringBuffer sb = new StringBuffer();
-            sb.append(prifix + " : ");
+            StringBuilder sb = new StringBuilder();
+            sb.append(prifix).append(" : ");
 
-            for (int i = 0; i < addresses.length; i++) {
-                sb.append(addresses[i] + " / ");
+            for (String address : addresses) {
+                sb.append(address).append(" / ");
             }
 
             ImsLog.d(mSlotId, sb.toString());

@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
@@ -171,7 +172,7 @@ public class DcNetWatcher implements IDcNetWatcher {
         setRatPolicy();
         setAirplaneMode();
 
-        mDcNetWatcherHandler = new DcNetWatcherHandler();
+        mDcNetWatcherHandler = new DcNetWatcherHandler(Looper.myLooper());
 
         mSystem = SystemInterface.getInstance().getSystem(mSlotId);
         if (mSystem == null) {
@@ -1341,6 +1342,10 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     // -----------------------------------------------------------
     private class DcNetWatcherHandler extends Handler {
+        DcNetWatcherHandler(Looper looper) {
+            super(looper);
+        }
+
         public void handleMessage(Message msg) {
             if (msg != null) {
                 ImsLog.i(mSlotId, "Message(" + msg.what + ")");
@@ -1350,10 +1355,10 @@ public class DcNetWatcher implements IDcNetWatcher {
                         handleAirplaneModeChanged(msg);
                         break;
                     case EVENT_VOLTE_LTE_STATE_INFO:
-                        handleVolteLteStateInfo(msg);
+                        // TODO: will be implemented
                         break;
                     case EVENT_NATIVE_BOOT_COMPLETED:
-                        handleNativeBootCompleted(msg);
+                        handleNativeBootCompleted();
                         break;
                     case EVENT_NR_REGISTRATION_INFO:
                         handleNrRegistrationInfo(msg.arg1, msg.arg2);
@@ -1436,37 +1441,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             }
         }
 
-        private void handleVolteLteStateInfo(Message msg) {
-            // TODO : update and notify LTE state Info
-            /*
-            Intent intent = (Intent)msg.obj;
-
-            if (intent == null) {
-                return;
-            }
-
-            int code = intent.getIntExtra(LTE_STATE_INFO, 0);
-            int oldCode = mLteStateInfo.getCode();
-            mDetachReasonCode = intent.getIntExtra(LTE_DETACH_CAUSE, 0);
-
-            ImsLog.i(mSlotId, "LteStateInfo :: " +
-                    LteStateInfo.fromInt(oldCode) +
-                    " >> " + LteStateInfo.fromInt(code));
-
-            mLteStateInfo = LteStateInfo.fromInt(code);
-            int lteUpdateResult = intent.getIntExtra(LTE_UPDATE_RESULT, 0);
-
-            if (oldCode != code || mLteUpdateResult != lteUpdateResult) {
-                mLteUpdateResult = lteUpdateResult;
-                mDataServiceStateChangedRegistrants.notifyResult(
-                        Integer.valueOf(mDataServiceState));
-
-                notifyLteInfo(code, mLteUpdateResult);
-            }
-            */
-        }
-
-        private void handleNativeBootCompleted(Message msg) {
+        private void handleNativeBootCompleted() {
             if (mAosInfo != null) {
                 mAosInfo.notifyAirplaneSetting(mAirplaneMode);
             }
@@ -1479,7 +1454,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             notifyRoamingState(mDataRoaming, mVoiceRoaming);
 
             handleVoiceServiceStateChanged();
-            notifyLteInfo(0, mLteUpdateResult);
+            notifyLteInfo(mLteUpdateResult);
         }
 
         private void handleNrRegistrationInfo(int state, int reason) {
@@ -1495,7 +1470,7 @@ public class DcNetWatcher implements IDcNetWatcher {
             }
         }
 
-        private void notifyLteInfo(int code, int updateResult) {
+        private void notifyLteInfo(int updateResult) {
             int state = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
 
             // TODO: check attach type

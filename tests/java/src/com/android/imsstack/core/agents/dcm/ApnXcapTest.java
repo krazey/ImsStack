@@ -40,7 +40,6 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDcSettings;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.util.AppContext;
 
@@ -65,7 +64,6 @@ public class ApnXcapTest {
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
     @Mock private IDcApn mMockIDcApn;
     @Mock private IDcNetWatcher mMockIDcNetWatcher;
-    @Mock private IDcSettings mMockIDcSettings;
     @Mock private ISystem mMockISystem;
 
     private TestableLooper mTestableLooper;

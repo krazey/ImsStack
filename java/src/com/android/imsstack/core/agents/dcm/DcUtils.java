@@ -260,11 +260,12 @@ public class DcUtils implements IDcUtils {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T getCellIdentity(@NonNull NetworkRegistrationInfo nri, Class<T> clazz) {
         try {
             return (T) nri.getCellIdentity();
         } catch (ClassCastException e) {
-            ImsLog.d("getCellIdentity: " + e);
+            ImsLog.d("getCellIdentity: " + e + " class: " + clazz.getName());
             return null;
         }
     }

@@ -53,7 +53,6 @@ import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.util.AppContext;
-import com.android.internal.telephony.SubscriptionController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -81,7 +80,6 @@ public class DcApnTest {
     private TelephonyManager mTelephonyManager;
     private SubscriptionManager mSubscriptionManager;
     private ConnectivityManager mConnectivityManager;
-    private WifiManager mWifiManager;
     private FakeDcApn mDcApn;
 
     @Mock IApn mMockIApn;
@@ -89,7 +87,6 @@ public class DcApnTest {
     @Mock ISubscription mMockISubscription;
     @Mock Network mMockNetwork;
     @Mock WifiManager mMockWifiManager;
-    @Mock SubscriptionController mMockSubscriptionController;
 
     @Before
     public void setUp() throws Exception {
@@ -681,7 +678,7 @@ public class DcApnTest {
 
     @Test
     public void testSubscriptionListener_onSimLoadCompleted() throws Exception {
-        when(mMockSubscriptionController.getSlotIndex(SUB_ID_0)).thenReturn(SLOT_1);
+        mDcApn.mFakeSlotIndex = SLOT_1;
         when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
         when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
 
@@ -695,7 +692,7 @@ public class DcApnTest {
 
     @Test
     public void testSubscriptionListener_onDefaultSubscriptionChanged() throws Exception {
-        when(mMockSubscriptionController.getSlotIndex(SUB_ID_1)).thenReturn(SLOT_1);
+        mDcApn.mFakeSlotIndex = SLOT_1;
         when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
         when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
 
@@ -709,7 +706,7 @@ public class DcApnTest {
 
     @Test
     public void testSubscriptionListener_onDefaultDataSubscriptionChanged() throws Exception {
-        when(mMockSubscriptionController.getSlotIndex(SUB_ID_1)).thenReturn(SLOT_1);
+        mDcApn.mFakeSlotIndex = SLOT_1;
         when(mMockISubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
         when(mTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(mTelephonyManager);
 
@@ -724,20 +721,19 @@ public class DcApnTest {
 
     @Test
     public void testSubscriptionListener_updateSubscriptionFail() throws Exception {
-        when(mMockSubscriptionController.getSlotIndex(SUB_ID_0))
-            .thenReturn(SLOT_0)
-            .thenReturn(SLOT_1);
         mMockISubscription = null;
 
         mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_0);
+        mDcApn.mFakeSlotIndex = SLOT_1;
         mDcApn.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_0);
 
-        verify(mMockSubscriptionController, times(2)).getSlotIndex(SUB_ID_0);
         verify(mTelephonyManager, never()).unregisterTelephonyCallback(
                 mDcApn.mPreciseDcStateListener);
     }
 
     private class FakeDcApn extends DcApn {
+        int mFakeSlotIndex = SLOT_0;
+
         FakeDcApn(int slotId) {
             super(slotId);
         }
@@ -757,7 +753,7 @@ public class DcApnTest {
         @Override
         protected int getSlotId(int subId) {
             super.getSlotId(subId);
-            return mMockSubscriptionController.getSlotIndex(subId);
+            return mFakeSlotIndex;
         }
     }
 

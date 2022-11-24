@@ -42,7 +42,6 @@ import android.net.NetworkRequest;
 import android.os.Message;
 import android.telephony.DataFailCause;
 import android.telephony.PreciseDataConnectionState;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.testing.AndroidTestingRunner;
@@ -99,8 +98,6 @@ public class ApnTest {
     @Mock private MsgProcInterface mMockMsgProc;
 
     private TestableLooper mTestableLooper;
-    private TelephonyManager mTelephonyManager;
-    private SubscriptionManager mSubscriptionManager;
     private ConnectivityManager mConnectivityManager;
     private SubscriptionListener mSubscriptionListener;
     private PreciseDataConnectionState mPreciseDataConnectionState;
@@ -118,8 +115,6 @@ public class ApnTest {
         // create the instance to test
         mApn = new FakeApn(AppContext.getInstance(), SLOT_0);
         mApn.mType = EApnType.IMS;
-        mTelephonyManager = AppContext.getInstance().getSystemService(TelephonyManager.class);
-        mSubscriptionManager = AppContext.getInstance().getSystemService(SubscriptionManager.class);
         mConnectivityManager = AppContext.getInstance().getSystemService(ConnectivityManager.class);
 
         mTestableLooper = TestableLooper.get(ApnTest.this);
@@ -1057,7 +1052,7 @@ public class ApnTest {
         verify(mMockMsgProc, times(0)).procMsg(any(Message.class));
     }
 
-    private class FakeApn extends Apn {
+    private static class FakeApn extends Apn {
         FakeApn(Context context, int slotId) {
             super(context, slotId);
         }
