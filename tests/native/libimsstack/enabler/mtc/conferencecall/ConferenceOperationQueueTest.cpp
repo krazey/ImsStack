@@ -25,6 +25,7 @@
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/MockIConferenceOperationQueueListener.h"
 #include <gtest/gtest.h>
+#include <vector>
 
 namespace android
 {

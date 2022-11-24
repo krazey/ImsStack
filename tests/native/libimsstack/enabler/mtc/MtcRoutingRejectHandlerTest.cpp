@@ -23,6 +23,7 @@
 #include "sipcore/MockISipServerConnection.h"
 #include "sipcore/SipMethod.h"
 #include <gtest/gtest.h>
+#include <vector>
 
 using ::testing::Return;
 using ::testing::ReturnRef;
