@@ -1001,7 +1001,7 @@ SipSocket* SipTransportHelper::LookupSocket(
 
                 // CASE :: system socket is already closed (no socket handle)
                 // To avoid the crash, it just checks the address of socket object.
-                if ((pSocket != pOtherSocket) && (nPort == 0) && (nOtherPort == 0))
+                if ((pSocket != pOtherSocket) && (nPort == 0))
                 {
                     // It's different socket...
                     continue;
