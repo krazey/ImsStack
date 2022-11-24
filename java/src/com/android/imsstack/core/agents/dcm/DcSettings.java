@@ -32,8 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * This class provide interface to get carrier configurations
  */
 public class DcSettings implements IDcSettings {
-    private Context mContext;
-    private int mSlotId = 0;
+    private final int mSlotId;
 
     public DcSettings(int slotId) {
         mSlotId = slotId;
@@ -41,7 +40,6 @@ public class DcSettings implements IDcSettings {
 
     @Override
     public void init(Context context) {
-        mContext = context;
     }
 
     @Override

@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.os.Message;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -68,8 +67,6 @@ public class ApnEmergencyTest {
     @Mock private ISystem mMockISystem;
 
     private TestableLooper mTestableLooper;
-    private TelephonyManager mTelephonyManager;
-    private SubscriptionManager mSubscriptionManager;
     private ConnectivityManager mConnectivityManager;
 
     @BeforeClass
@@ -84,8 +81,6 @@ public class ApnEmergencyTest {
 
         // create the instance to test
         mApnEmergency = new ApnEmergency(AppContext.getInstance(), SLOT_0);
-        mTelephonyManager = AppContext.getInstance().getSystemService(TelephonyManager.class);
-        mSubscriptionManager = AppContext.getInstance().getSystemService(SubscriptionManager.class);
         mConnectivityManager = AppContext.getInstance().getSystemService(ConnectivityManager.class);
 
         mTestableLooper = TestableLooper.get(ApnEmergencyTest.this);

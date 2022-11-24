@@ -51,8 +51,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 /**
@@ -65,7 +65,7 @@ public class DcApn implements IDcApn {
 
     // Variables--------------------------------------------------
     private final Object mLock = new Object();
-    private int mSlotId = 0;
+    private final int mSlotId;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
 
     @VisibleForTesting
@@ -73,11 +73,11 @@ public class DcApn implements IDcApn {
 
     // APN controllers
     @VisibleForTesting
-    protected Hashtable<Integer, IApn> mMapApn = new Hashtable<Integer, IApn>();
+    protected LinkedHashMap<Integer, IApn> mMapApn = new LinkedHashMap<Integer, IApn>();
 
     // Local IP addresses
     @VisibleForTesting
-    protected Hashtable<Integer, String> mMapLocalIP = new Hashtable<Integer, String>();
+    protected LinkedHashMap<Integer, String> mMapLocalIP = new LinkedHashMap<Integer, String>();
 
     @VisibleForTesting
     protected PreciseDcStateListener mPreciseDcStateListener = null;
@@ -415,7 +415,7 @@ public class DcApn implements IDcApn {
     public int bindSocket(int apnType, FileDescriptor sockFd) {
         Network network = getNetworkByCapability(apnType);
 
-        ImsLog.d(mSlotId, "bindSocket: network=" + network + ", sockFd=" + sockFd);
+        ImsLog.d(mSlotId, "bindSocket: network=" + network);
 
         if (network != null && sockFd != null) {
             try {

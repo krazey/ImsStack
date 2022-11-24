@@ -35,7 +35,7 @@ public interface IDcApn extends IDc {
      *                DcConstants.TYPE_EMERGENCY
      *                DcConstants.TYPE_INTERNET
      *                DcConstants.TYPE_XCAP
-     * @return true: It already opened or we called "requestNetwork" (android api)
+     * @return true: It already opened, or we called "requestNetwork" (android api)
      *               regardless of result to connect apn.
      *         false: we cannot call "requestNetwork".
      *                It is expected current apn type to be disconnected at this moment.
@@ -127,7 +127,6 @@ public interface IDcApn extends IDc {
      */
     int getIfaceId(int apnType);
 
-    // jaesik.kong 20140319 - get APN IfaceName START
     /**
      * getIfaceName
      *
@@ -140,7 +139,6 @@ public interface IDcApn extends IDc {
      *
      */
     String getIfaceName(int apnType);
-    // jaesik.kong 20140319 - get APN IfaceName END
 
     /**
      * Returns IPCAN category of this APN.
@@ -237,23 +235,24 @@ public interface IDcApn extends IDc {
 
     /**
      * setApn
-     *
-     * @return
      */
     void setApn(int apnType, IApn apn);
 
     /**
      * getApnControl
      *
-     * @return
+     * @return Returns Apn according to apnType, such as
+     * {@link com.android.imsstack.core.agents.dcm.ApnIms} for IMS type or
+     * {@link com.android.imsstack.core.agents.dcm.ApnEmergency} for EMERGENCY type.
+     * @see EApnType
      */
     IApn getApnControl(int apnType);
 
     /**
      * getNetworkByCapability
      *
-     * getNetworkForType() API in connectivityManager is going to deprecated in API level 23
-     * This API can be replace with getAllNetworks() in ConnectivityManager.
+     * getNetworkForType() API in connectivityManager is going to be deprecated in API level 23
+     * This API can be replaced with getAllNetworks() in ConnectivityManager.
      *
      * Network capability information is required to use new API as getNetworkForType() API.
      * And Network capability information is added in EApnType class.
@@ -274,13 +273,16 @@ public interface IDcApn extends IDc {
      *
      * This API is made to change Apn Permission for operator/service specific.
      * This API can be called whenever after DCApn & Apn objected is created.
-     * It change block reason in target apn's connect() request.
+     * It changes block reason in target apn's connect() request.
      * so, if apn is not employed, that apn doesn't request network to connect.
      *
-     * @param
-     *         EApnType apnType
-     *         boolean enable
-     * @return
+     * @param apnType
+     *             EApnType.IMS.getType()
+     *             EApnType.INTERNET.getType()
+     *             EApnType.XCAP.getType()
+     *             EApnType.EMERGENCY.getType()
+     * @param enable If true, increases Apn Employment count. If false, decreases Apn employment
+     * count.
      */
     void changeApnEmployState(EApnType apnType, boolean enable);
 }

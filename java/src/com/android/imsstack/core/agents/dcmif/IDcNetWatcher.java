@@ -44,9 +44,6 @@ public interface IDcNetWatcher extends IDc {
      *
      * Only subject class can invoke this API.
      * DO NOT allow to accessed by observer class
-     *
-     * @param
-     * @return
      */
     void notifyResult(EApnType eApnType, EDataState eDataState);
 
@@ -238,7 +235,7 @@ public interface IDcNetWatcher extends IDc {
      *        and "obj" of IDcNetWatcher.NotiObj
      *
      *        Typical usage.
-     *        class Example extends Handler{
+     *        {@code class Example extends Handler{
      *            Example{
      *                registerForDataStateChanged(this, EVENT_NAME, null);
      *            }
@@ -251,9 +248,8 @@ public interface IDcNetWatcher extends IDc {
      *                EApnType apnType = res.eApnType;
      *                EDataState state = res.eDataState;
      *                int smCause = res.mSmCause;
-            }
-     * @param
-     * @return
+     *            }
+     *        }}
      */
     void registerForDataStateChanged(Handler h, int what, Object obj);
 

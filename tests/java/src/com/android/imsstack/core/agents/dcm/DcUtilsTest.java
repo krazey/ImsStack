@@ -530,6 +530,7 @@ public class DcUtilsTest extends ImsStackTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T getCellIdentity(NetworkRegistrationInfo nri, Class<T> clazz) {
         try {
             return (T) nri.getCellIdentity();
