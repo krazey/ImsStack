@@ -149,8 +149,4 @@ public final class ImsConfigImpl extends ImsConfigImplBase {
     private static void log(String s) {
         ImsLog.d("[GII-IMPL] " + s);
     }
-
-    private static void loge(String s) {
-        ImsLog.e("[GII-IMPL] " + s);
-    }
 }
