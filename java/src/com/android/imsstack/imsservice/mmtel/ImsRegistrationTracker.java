@@ -353,14 +353,6 @@ public class ImsRegistrationTracker {
         }
     }
 
-    private static void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
-    }
-
-    private static void loge(String s) {
-        ImsLog.e("[GII-IMPL] " + s);
-    }
-
     private static void logi(String s) {
         ImsLog.i("[GII-IMPL] " + s);
     }
