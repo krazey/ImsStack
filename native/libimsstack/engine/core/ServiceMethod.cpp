@@ -33,7 +33,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 class PreviousMessage
 {
 public:
-    PreviousMessage(IN Message* pRequest);
+    explicit PreviousMessage(IN Message* pRequest);
     ~PreviousMessage();
 
     PreviousMessage(IN const PreviousMessage&) = delete;
