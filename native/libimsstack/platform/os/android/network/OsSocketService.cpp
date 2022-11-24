@@ -502,7 +502,7 @@ PUBLIC GLOBAL IMS_SINT32 SocketFdManager::ConvertEvent(IN IMS_SLONG nEvent)
 class OsSocketThread : public IThreadImpListener
 {
 public:
-    OsSocketThread(IN OsSocketService* pService);
+    explicit OsSocketThread(IN OsSocketService* pService);
     virtual ~OsSocketThread();
 
     OsSocketThread(IN const OsSocketThread&) = delete;

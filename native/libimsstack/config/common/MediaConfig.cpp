@@ -31,7 +31,7 @@ public:
             m_nType(IMediaConfig::MEDIA_INVALID)
     {
     }
-    inline MediaProfileParameter(IN IMS_SINT32 nType) :
+    inline explicit MediaProfileParameter(IN IMS_SINT32 nType) :
             m_nType(nType)
     {
     }

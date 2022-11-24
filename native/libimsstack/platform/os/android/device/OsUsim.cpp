@@ -32,7 +32,7 @@ __IMS_TRACE_TAG_ADAPT__;
 class OsUsimParam
 {
 public:
-    inline OsUsimParam(IN IMS_SINT32 nType = 0) :
+    inline explicit OsUsimParam(IN IMS_SINT32 nType = 0) :
             m_nType(nType)
     {
     }

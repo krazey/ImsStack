@@ -25,7 +25,7 @@ __IMS_TRACE_TAG_CONF__;
 class CoreServiceConfigPrivate
 {
 public:
-    CoreServiceConfigPrivate(IN const AString& strServiceId);
+    explicit CoreServiceConfigPrivate(IN const AString& strServiceId);
     ~CoreServiceConfigPrivate();
 
     CoreServiceConfigPrivate(IN const CoreServiceConfigPrivate&) = delete;
