@@ -145,31 +145,26 @@ PROTECTED VIRTUAL IMS_BOOL UceService::OnMessage(IN IMSMSG& objMSG)
     {
         case IUUceService::UCE_SEND_PUBLISH_CMD:
         {
-            IUcePubCmdPrm* pParam = (IUcePubCmdPrm*)objMSG.nLparam;
-            return SendPublishRequest(pParam);
+            return SendPublishRequest(reinterpret_cast<IUcePubCmdPrm*>(objMSG.nLparam));
         }
         break;
         case IUUceService::UCE_SEND_SINGLE_SUBSCRIBE_CMD:
         {
-            IUceSingleSubCmdPrm* pParam = (IUceSingleSubCmdPrm*)objMSG.nLparam;
-            return QuerySingleCapability(pParam);
+            return QuerySingleCapability(reinterpret_cast<IUceSingleSubCmdPrm*>(objMSG.nLparam));
         }
         case IUUceService::UCE_SEND_LIST_SUBSCRIBE_CMD:
         {
-            IUceListSubCmdPrm* pParam = (IUceListSubCmdPrm*)objMSG.nLparam;
-            return QueryMultiCapability(pParam);
+            return QueryMultiCapability(reinterpret_cast<IUceListSubCmdPrm*>(objMSG.nLparam));
         }
         break;
         case IUUceService::UCE_SEND_OPTIONS_CMD:
         {
-            IUceOptionsCmdPrm* pParam = (IUceOptionsCmdPrm*)objMSG.nLparam;
-            return SendOptionsRequest(pParam);
+            return SendOptionsRequest(reinterpret_cast<IUceOptionsCmdPrm*>(objMSG.nLparam));
         }
         break;
         case IUUceService::UCE_SEND_OPTIONS_RESP_CMD:
         {
-            IUceOptionsRespCmdPrm* pParam = (IUceOptionsRespCmdPrm*)objMSG.nLparam;
-            return SendOptionsResponse(pParam);
+            return SendOptionsResponse(reinterpret_cast<IUceOptionsRespCmdPrm*>(objMSG.nLparam));
         }
         break;
         default:

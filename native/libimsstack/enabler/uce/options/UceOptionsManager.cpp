@@ -49,24 +49,21 @@ PUBLIC VIRTUAL UceOptionsManager::~UceOptionsManager()
 {
     IMS_TRACE_D("UCE_F : UceOptionsManager = %" PFLS_u, sizeof(UceOptionsManager), 0, 0);
     IMS_TRACE_I("~UceOptionsManager", 0, 0, 0);
-    UceOptions* pUceOptions = IMS_NULL;
     for (IMS_UINT32 i = 0; i < m_objSentUceOptionsMap.GetSize(); i++)
     {
-        pUceOptions = m_objSentUceOptionsMap.GetValueAt(i);
+        UceOptions* pUceOptions = m_objSentUceOptionsMap.GetValueAt(i);
         if (pUceOptions != IMS_NULL)
         {
             delete pUceOptions;
-            pUceOptions = IMS_NULL;
         }
     }
     m_objSentUceOptionsMap.Clear();
     for (IMS_UINT32 i = 0; i < m_objReceivedUceOptionsMap.GetSize(); i++)
     {
-        pUceOptions = m_objReceivedUceOptionsMap.GetValueAt(i);
+        UceOptions* pUceOptions = m_objReceivedUceOptionsMap.GetValueAt(i);
         if (pUceOptions != IMS_NULL)
         {
             delete pUceOptions;
-            pUceOptions = IMS_NULL;
         }
     }
     m_objReceivedUceOptionsMap.Clear();
@@ -110,7 +107,6 @@ IMS_BOOL UceOptionsManager::SendOptionsResponse(IN IMS_UINT32 nKey, IN IMS_UINT3
     pOptions->SendOptionsResponse(nResponse, reason, ownCapabilities);
     m_objReceivedUceOptionsMap.Remove(nKey);
     delete pOptions;
-    pOptions = IMS_NULL;
     return IMS_TRUE;
 }
 
@@ -153,10 +149,9 @@ void UceOptionsManager::AoSDisconnected()
 void UceOptionsManager::ClosedService()
 {
     IMS_TRACE_D("ClosedService", 0, 0, 0);
-    UceOptions* pUceOptions = IMS_NULL;
     for (IMS_UINT32 i = 0; i < m_objSentUceOptionsMap.GetSize(); i++)
     {
-        pUceOptions = m_objSentUceOptionsMap.GetValueAt(i);
+        UceOptions* pUceOptions = m_objSentUceOptionsMap.GetValueAt(i);
         if (pUceOptions != IMS_NULL)
         {
             pUceOptions->AoSDisconnected();
@@ -188,7 +183,6 @@ PROTECTED VIRTUAL IMS_BOOL UceOptionsManager::OnMessage(IN IMSMSG& objMsg)
     }
     m_objSentUceOptionsMap.Remove(nKey);
     delete pOptions;
-    pOptions = IMS_NULL;
     return IMS_TRUE;
 }
 

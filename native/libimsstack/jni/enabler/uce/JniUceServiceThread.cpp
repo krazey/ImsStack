@@ -88,7 +88,8 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
     {
         case IUUceService::UCE_PUBLISH_RESPONSE_IND:
         {
-            IUcePubResponseIndPrm* pParam = (IUcePubResponseIndPrm*)objMSG.nLparam;
+            IUcePubResponseIndPrm* pParam =
+                    reinterpret_cast<IUcePubResponseIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -105,7 +106,7 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_PUBLISH_UPDATED_IND:
         {
-            IUcePubUpdatedIndPrm* pParam = (IUcePubUpdatedIndPrm*)objMSG.nLparam;
+            IUcePubUpdatedIndPrm* pParam = reinterpret_cast<IUcePubUpdatedIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt64(pParam->m_nCapability);
@@ -121,7 +122,8 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_PUBLISH_CMD_ERROR_IND:
         {
-            IUcePubCmdErrorIndPrm* pParam = (IUcePubCmdErrorIndPrm*)objMSG.nLparam;
+            IUcePubCmdErrorIndPrm* pParam =
+                    reinterpret_cast<IUcePubCmdErrorIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -132,7 +134,8 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_SUBSCRIBE_RESPONSE_IND:
         {
-            IUceSubResponseIndPrm* pParam = (IUceSubResponseIndPrm*)objMSG.nLparam;
+            IUceSubResponseIndPrm* pParam =
+                    reinterpret_cast<IUceSubResponseIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -146,7 +149,7 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_PRESENCE_NOTIFY_IND:
         {
-            IUcePreNotifyIndPrm* pParam = (IUcePreNotifyIndPrm*)objMSG.nLparam;
+            IUcePreNotifyIndPrm* pParam = reinterpret_cast<IUcePreNotifyIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -162,7 +165,8 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_SUBSCRIBE_CMD_ERROR_IND:
         {
-            IUceSubCmdErrorIndPrm* pParam = (IUceSubCmdErrorIndPrm*)objMSG.nLparam;
+            IUceSubCmdErrorIndPrm* pParam =
+                    reinterpret_cast<IUceSubCmdErrorIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -174,7 +178,7 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         case IUUceService::UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND:
         {
             IUceSubResourceTerminatedIndPrm* pParam =
-                    (IUceSubResourceTerminatedIndPrm*)objMSG.nLparam;
+                    reinterpret_cast<IUceSubResourceTerminatedIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -187,7 +191,6 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
                         parcel.writeString16(
                                 android::String16(pTempContact->m_strContact.GetStr()));
                         parcel.writeString16(android::String16(pTempContact->m_strReason.GetStr()));
-                        pTempContact = null;
                     }
                     else
                     {
@@ -202,7 +205,8 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_SUBSCRIBE_TERMINATED_IND:
         {
-            IUceSubTerminatedIndPrm* pParam = (IUceSubTerminatedIndPrm*)objMSG.nLparam;
+            IUceSubTerminatedIndPrm* pParam =
+                    reinterpret_cast<IUceSubTerminatedIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -214,7 +218,8 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_OPTIONS_RESPONSE_IND:
         {
-            IUceOptionsResponseIndPrm* pParam = (IUceOptionsResponseIndPrm*)objMSG.nLparam;
+            IUceOptionsResponseIndPrm* pParam =
+                    reinterpret_cast<IUceOptionsResponseIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -227,7 +232,8 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_OPTIONS_CMD_ERROR_IND:
         {
-            IUceOptionsCmdErrorIndPrm* pParam = (IUceOptionsCmdErrorIndPrm*)objMSG.nLparam;
+            IUceOptionsCmdErrorIndPrm* pParam =
+                    reinterpret_cast<IUceOptionsCmdErrorIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);
@@ -238,7 +244,8 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         break;
         case IUUceService::UCE_OPTIONS_RECEIVED_IND:
         {
-            IUceOptionsReceivedIndPrm* pParam = (IUceOptionsReceivedIndPrm*)objMSG.nLparam;
+            IUceOptionsReceivedIndPrm* pParam =
+                    reinterpret_cast<IUceOptionsReceivedIndPrm*>(objMSG.nLparam);
             if (pParam != IMS_NULL)
             {
                 parcel.writeInt32(pParam->m_nKey);

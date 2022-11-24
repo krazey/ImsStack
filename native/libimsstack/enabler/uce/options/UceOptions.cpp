@@ -494,7 +494,7 @@ PROTECTED VIRTUAL void UceOptions::CapabilityQueryDeliveryFailed(IN ICapabilitie
 PRIVATE
 void UceOptions::SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIPMessage)
 {
-    IService* piService = (IService*)m_piCoreService;
+    IService* piService = m_piCoreService;
     AString strMyContact = AString::ConstEmpty();
 
     if (piService->GetPublicGruu() == IMS_NULL)
