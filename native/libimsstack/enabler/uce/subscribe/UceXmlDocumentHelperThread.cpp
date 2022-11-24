@@ -224,7 +224,6 @@ PUBLIC VIRTUAL void UceXmlDocumentHelperThread::Uninitialize()
         if (piXMLTransaction != IMS_NULL)
         {
             m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
-            piXMLTransaction = IMS_NULL;
         }
     }
     m_objTransactionQueue.Clear();
@@ -291,13 +290,12 @@ PRIVATE VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Runnable_Run(IN IMSMSG& obj
 IMS_RESULT UceXmlDocumentHelperThread::XMLDataTokenization(IN const ByteArray& objBytes)
 {
     IMS_TRACE_D("XMLDataTokenization()", 0, 0, 0);
-    IXmlRequest* piXMLRequest = IMS_NULL;
     //---------------------------------------------------------------------------------------------
     IXmlTransaction* piXMLTransaction = m_pXMLTransactionProvider->CreateTransaction();
 
     if (piXMLTransaction != IMS_NULL)
     {
-        piXMLRequest = piXMLTransaction->GetRequest();
+        IXmlRequest* piXMLRequest = piXMLTransaction->GetRequest();
 
         if (piXMLRequest != IMS_NULL)
         {
@@ -328,7 +326,7 @@ IMS_BOOL UceXmlDocumentHelperThread::TerminateMessageHandler(IMSMSG& objMsg)
 
 IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& objMsg)
 {
-    m_pUceNotifyMessageBody = (UceNotifyMessageBody*)objMsg.nLparam;
+    m_pUceNotifyMessageBody = reinterpret_cast<UceNotifyMessageBody*>(objMsg.nLparam);
     if (m_pUceNotifyMessageBody == IMS_NULL)
     {
         IMS_TRACE_I("ReceivedRlmiNotifyMessageHandler:UceNotifyMessageBody is null", 0, 0, 0);

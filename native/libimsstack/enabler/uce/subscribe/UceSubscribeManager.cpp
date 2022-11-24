@@ -97,14 +97,12 @@ IMS_BOOL UceSubscribeManager::AosDisConnected()
         return IMS_TRUE;
     }
 
-    UceSubscribe* pUceSubscribe = IMS_NULL;
     for (IMS_UINT32 i = 0; i < m_objUceSubscribeList.GetSize(); i++)
     {
-        pUceSubscribe = (UceSubscribe*)m_objUceSubscribeList.GetAt(i);
+        UceSubscribe* pUceSubscribe = m_objUceSubscribeList.GetAt(i);
         if (pUceSubscribe != IMS_NULL)
         {
             pUceSubscribe->AosDisConnected();
-            pUceSubscribe = IMS_NULL;
         }
     }
     return IMS_TRUE;
@@ -118,14 +116,12 @@ void UceSubscribeManager::ClosedService()
         return;
     }
 
-    UceSubscribe* pUceSubscribe = IMS_NULL;
     for (IMS_UINT32 i = 0; i < m_objUceSubscribeList.GetSize(); i++)
     {
-        pUceSubscribe = (UceSubscribe*)m_objUceSubscribeList.GetAt(i);
+        UceSubscribe* pUceSubscribe = m_objUceSubscribeList.GetAt(i);
         if (pUceSubscribe != IMS_NULL)
         {
             pUceSubscribe->AosDisConnected();
-            pUceSubscribe = IMS_NULL;
         }
     }
 }
@@ -156,7 +152,6 @@ IMS_BOOL UceSubscribeManager::RemoveSubscribe(IN UceSubscribe* subscribe)
         {
             IMS_TRACE_D("RemoveSubscribe:Find[%d]", i, 0, 0);
             delete subscribe;
-            subscribe = IMS_NULL;
             m_objUceSubscribeList.RemoveAt(i);
             return IMS_TRUE;
         }
@@ -173,14 +168,12 @@ IMS_BOOL UceSubscribeManager::ClearSubscribeList()
         return IMS_TRUE;
     }
 
-    UceSubscribe* pUceSubscribe = IMS_NULL;
     for (IMS_UINT32 i = 0; i < m_objUceSubscribeList.GetSize(); i++)
     {
-        pUceSubscribe = (UceSubscribe*)m_objUceSubscribeList.GetAt(i);
+        UceSubscribe* pUceSubscribe = m_objUceSubscribeList.GetAt(i);
         if (pUceSubscribe != IMS_NULL)
         {
             delete pUceSubscribe;
-            pUceSubscribe = IMS_NULL;
         }
     }
     m_objUceSubscribeList.Clear();

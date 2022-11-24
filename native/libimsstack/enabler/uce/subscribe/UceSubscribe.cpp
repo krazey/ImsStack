@@ -216,7 +216,6 @@ IMS_RESULT UceSubscribe::MessageMediator_AdjustMessage(
             strContactHeaderValue.Append(TextParser::CHAR_COMMA);
         }
         strContactHeaderValue.Append(UceTag::TAG_STANDALONE_LARGE_MESSAGING);
-        bNeedToComma = IMS_TRUE;
     }
     if (bAppendICSITag == IMS_TRUE)
     {
@@ -359,13 +358,11 @@ IMS_RESULT UceSubscribe::MessageMediator_AdjustMessage(
             strContactHeaderValue.Append(TextParser::CHAR_COMMA);
         }
         strContactHeaderValue.Append(UceTag::TAG_CHATBOT_STANDALONE_MESSAGE);
-        bNeedToComma = IMS_TRUE;
     }
     if (bAppendIARITag == IMS_TRUE)
     {
         strContactHeaderValue.Append(TextParser::STR_DQUOTE);
     }
-    bNeedToComma = IMS_FALSE;
 
     if (strContactHeader.Contains(UceTag::TAG_CHATBOT_VERSION_V1) == IMS_FALSE &&
             (m_nConnectedServices & CONNECTED_SERVICE_CHATBOT_V1) == CONNECTED_SERVICE_CHATBOT_V1)
@@ -830,7 +827,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_NotifyReceived(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("StateSUBSCRIBING_NotifyReceived", 0, 0, 0);
     StopRetryAfterTimer();
-    IMessage* piNotify = (IMessage*)objMsg.nWparam;
+    IMessage* piNotify = reinterpret_cast<IMessage*>(objMsg.nWparam);
     if (piNotify == IMS_NULL)
     {
         IMS_TRACE_I("StateSUBSCRIBING_NotifyReceived:piNotify is null", 0, 0, 0);
@@ -897,7 +894,7 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBED_NotifyReceived(IN IMSMSG& objMsg)
     {
         StopWaitingNotifyMessageTimer();
     }
-    IMessage* piNotify = (IMessage*)objMsg.nWparam;
+    IMessage* piNotify = reinterpret_cast<IMessage*>(objMsg.nWparam);
     if (piNotify == IMS_NULL)
     {
         IMS_TRACE_I("StateSUBSCRIBED_NotifyReceived:piNotify is null", 0, 0, 0);
@@ -1095,7 +1092,6 @@ void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUs
             reason->m_strContact = user->GetId();
             reason->m_strReason = user->GetReason();
             delete user;
-            user = IMS_NULL;
             nCount++;
             pParam->m_lstTerminateContacts.Append(reason);
         }

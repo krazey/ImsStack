@@ -248,7 +248,6 @@ IMS_RESULT UcePublishManager::MessageMediator_AdjustMessage(
             strContactHeaderValue.Append(TextParser::CHAR_COMMA);
         }
         strContactHeaderValue.Append(UceTag::TAG_STANDALONE_LARGE_MESSAGING);
-        bNeedToComma = IMS_TRUE;
     }
     if (bAppendICSITag == IMS_TRUE)
     {
@@ -392,13 +391,11 @@ IMS_RESULT UcePublishManager::MessageMediator_AdjustMessage(
             strContactHeaderValue.Append(TextParser::CHAR_COMMA);
         }
         strContactHeaderValue.Append(UceTag::TAG_CHATBOT_STANDALONE_MESSAGE);
-        bNeedToComma = IMS_TRUE;
     }
     if (bAppendIARITag == IMS_TRUE)
     {
         strContactHeaderValue.Append(TextParser::STR_DQUOTE);
     }
-    bNeedToComma = IMS_FALSE;
 
     if (strContactHeader.Contains(UceTag::TAG_CHATBOT_VERSION_V1) == IMS_FALSE &&
             (m_nConnectedServices & CONNECTED_SERVICE_CHATBOT_V1) == CONNECTED_SERVICE_CHATBOT_V1)
@@ -617,7 +614,7 @@ void UcePublishManager::Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefr
 IMS_BOOL UcePublishManager::StateIDLE_PublishRequested(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("StateIDLE_PublishRequested ", 0, 0, 0);
-    IPublicationData* pPublicationData = (IPublicationData*)objMsg.nLparam;
+    IPublicationData* pPublicationData = reinterpret_cast<IPublicationData*>(objMsg.nLparam);
     if (pPublicationData == IMS_NULL)
     {
         IMS_TRACE_I("StateIDLE_PublishRequested - pPublicationData is null", 0, 0, 0);
@@ -648,7 +645,7 @@ IMS_BOOL UcePublishManager::StateIDLE_AoSConnected(IN IMSMSG& objMsg)
 IMS_BOOL UcePublishManager::StateON_PublishRequested(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("StateON_PublishRequested ", 0, 0, 0);
-    IPublicationData* pPublicationData = (IPublicationData*)objMsg.nLparam;
+    IPublicationData* pPublicationData = reinterpret_cast<IPublicationData*>(objMsg.nLparam);
     if (pPublicationData == IMS_NULL)
     {
         IMS_TRACE_E(0, "StateON_PublishRequested:IPublicationData is null", 0, 0, 0);
@@ -708,7 +705,7 @@ IMS_BOOL UcePublishManager::StateON_AoSDisConnected(IN IMSMSG& objMsg)
 IMS_BOOL UcePublishManager::StatePUBLISHING_PublishRequested(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("StatePUBLISHING_PublishCmd ", 0, 0, 0);
-    IPublicationData* pPublicationData = (IPublicationData*)objMsg.nLparam;
+    IPublicationData* pPublicationData = reinterpret_cast<IPublicationData*>(objMsg.nLparam);
     if (pPublicationData == IMS_NULL)
     {
         IMS_TRACE_I("StatePUBLISHING_PublishCmd - pPublicationData is null", 0, 0, 0);
@@ -886,7 +883,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
 IMS_BOOL UcePublishManager::StatePUBLISHED_PublishRequested(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("StatePUBLISHED_PublishRequested", 0, 0, 0);
-    IPublicationData* pPublicationData = (IPublicationData*)objMsg.nLparam;
+    IPublicationData* pPublicationData = reinterpret_cast<IPublicationData*>(objMsg.nLparam);
     if (pPublicationData == IMS_NULL)
     {
         IMS_TRACE_E(0, "StatePUBLISHED_PublishRequested:IPublicationData is null", 0, 0, 0);
@@ -973,7 +970,8 @@ IMS_BOOL UcePublishManager::StateREFRESHING_PublishRequested(IN IMSMSG& objMsg)
 {
     (void)objMsg;
     IMS_TRACE_I("StateREFRESHING_PublishRequested ", 0, 0, 0);
-    IPublicationData* pPublicationData = (IPublicationData*)objMsg.nLparam;
+
+    IPublicationData* pPublicationData = reinterpret_cast<IPublicationData*>(objMsg.nLparam);
     if (pPublicationData == IMS_NULL)
     {
         IMS_TRACE_I("StateREFRESHING_PublishRequested - pPublicationData is null", 0, 0, 0);
@@ -1189,7 +1187,7 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailedWithNoResponse(IN IMSMS
 IMS_BOOL UcePublishManager::StateTERMINATING_PublishRequested(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("StateTERMINATING_PublishRequested", 0, 0, 0);
-    IPublicationData* pPublicationData = (IPublicationData*)objMsg.nLparam;
+    IPublicationData* pPublicationData = reinterpret_cast<IPublicationData*>(objMsg.nLparam);
     if (pPublicationData == IMS_NULL)
     {
         IMS_TRACE_I("StateTERMINATING_PublishRequested - pPublicationData is null", 0, 0, 0);
@@ -1362,7 +1360,6 @@ void UcePublishManager::SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResp
             }
             pParam->m_nCapability = m_nCapability;
             pParam->m_nResponseCode = nResponseCode;
-            pParam->m_strReason = strReason;
             pParam->m_strReason = strReason;
             pParam->m_nReasonHeaderCause = nReasonHeaderCause;
             pParam->m_strReasonHeaderText = strReasonHeaderText;

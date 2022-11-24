@@ -63,8 +63,8 @@ JniUceService::JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32
     }
     ImsProcess::GetInstance()->LoadAppThread(
             STR_UCE_LISTENER_THREAD_NAME, JniUceServiceThread::GetInstance, nSimSlot);
-    m_pJniUceServiceThread = (JniUceServiceThread*)(ImsProcess::GetInstance()->GetApplicationThread(
-            STR_UCE_LISTENER_THREAD_NAME));
+    m_pJniUceServiceThread = DYNAMIC_CAST(JniUceServiceThread*,
+            ImsProcess::GetInstance()->GetApplicationThread(STR_UCE_LISTENER_THREAD_NAME));
     if (m_pJniUceServiceThread != NULL)
     {
         m_pJniUceServiceThread->SetCallback(reinterpret_cast<IMS_UINTP>(this), pfnSendDataToJava);
@@ -111,7 +111,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
             pCmdParam->m_nKey = pParcel.readInt32();
 
             String16 str16PidfXml = pParcel.readString16();
-            String8 str8PidfXml((const char16_t*)str16PidfXml);
+            String8 str8PidfXml(str16PidfXml);
             pCmdParam->m_strPidfXml = str8PidfXml.string();
 
             pCmdParam->m_nExtended = pParcel.readInt32();
@@ -120,7 +120,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
             if (pParcel.readInt32() == 1)
             {
                 String16 str16ETag = pParcel.readString16();
-                String8 str8ETag((const char16_t*)str16ETag);
+                String8 str8ETag(str16ETag);
                 pCmdParam->m_strEtag = str8ETag.string();
             }
 
@@ -136,7 +136,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
             pCmdParam->m_nSize = pParcel.readInt32();
 
             String16 str16User = pParcel.readString16();
-            String8 str8User((const char16_t*)str16User);
+            String8 str8User(str16User);
             pCmdParam->m_strUser = str8User.string();
 
             IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
@@ -152,7 +152,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
             for (IMS_SINT32 i = 0; i < pCmdParam->m_nSize; i++)
             {
                 String16 str16User = pParcel.readString16();
-                String8 str8User((const char16_t*)str16User);
+                String8 str8User(str16User);
                 AString szUser = str8User.string();
                 pCmdParam->userList.Append(szUser);
             }
@@ -167,7 +167,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
             pCmdParam->m_nKey = pParcel.readInt32();
 
             String16 str16RemoteUri = pParcel.readString16();
-            String8 str8RemoteUri((const char16_t*)str16RemoteUri);
+            String8 str8RemoteUri(str16RemoteUri);
             pCmdParam->m_strRemoteUri = str8RemoteUri.string();
 
             pCmdParam->m_nMyCaps = pParcel.readInt32();
@@ -184,7 +184,8 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
             pCmdParam->m_nResponseCode = pParcel.readInt32();
 
             String16 str16Reason = pParcel.readString16();
-            String8 str8Reason((const char16_t*)str16Reason);
+            String8 str8Reason(str16Reason);
+
             pCmdParam->m_strReason = str8Reason.string();
 
             pCmdParam->m_nMyCaps = pParcel.readInt32();
