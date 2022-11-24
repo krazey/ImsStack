@@ -55,14 +55,15 @@ public class AudioSessionHandler extends MediaState {
     private final AudioSessionCallbackProxy mAudioSessionCallback;
     private ImsAudioSession mAudioSession;
     private int mAudioSessionId;
-    private ArrayList<Pair<DatagramSocket, DatagramSocket>> mRtpSocketList = new ArrayList<>();
+    private final ArrayList<Pair<DatagramSocket, DatagramSocket>> mRtpSocketList =
+            new ArrayList<>();
     private final AudioSessionCallbackHandler mAudioSessionCallbackHandler;
     private final MediaManagerHelper mMediaManager;
     private final AudioMessageHandler mAudioMessageHandler;
     private final IBaseContext mContext;
     private QosAgent mAudioQosAgent;
     private AudioImsQosCallback mAudioImsQosCallback;
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     private boolean mQosUpdateRequired;
     private Pair<String, Integer> mLocalAddress;
 
@@ -169,7 +170,7 @@ public class AudioSessionHandler extends MediaState {
                     }
                 }
             } catch (InterruptedException ie) {
-                ie.printStackTrace();
+                ImsLog.e("unexpectedly interrupted while waiting" + ie.getMessage());
             }
 
             switch (msg.what) {
@@ -648,7 +649,6 @@ public class AudioSessionHandler extends MediaState {
         synchronized (mRtpSocketList) {
             for (Pair<DatagramSocket, DatagramSocket> rtpSocket : mRtpSocketList) {
                 mAudioQosAgent.destroyQosConnection(rtpSocket.first, rtpSocket.second);
-                mRtpSocketList.remove(rtpSocket);
             }
             mRtpSocketList.clear();
         }
@@ -692,17 +692,6 @@ public class AudioSessionHandler extends MediaState {
 
     private void handleAudioAddConfig(AudioConfig audioConfig) {
         if (mAudioSession != null) {
-            Pair<DatagramSocket, DatagramSocket> rtpSocket;
-            InetSocketAddress remoteRtpAddress = audioConfig.getRemoteRtpAddress();
-            if (remoteRtpAddress != null) {
-                InetAddress remoteInetAddress = remoteRtpAddress.getAddress();
-                int remotePort = remoteRtpAddress.getPort();
-                if (remoteInetAddress != null && remotePort != 0) {
-                    rtpSocket = getRtpSocketFromList(
-                            remoteInetAddress.getHostAddress(), remotePort);
-                }
-            }
-
             // TODO : rtpSocket has to be sent via addConfig
             mAudioSession.addConfig(audioConfig);
         }

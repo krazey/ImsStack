@@ -21,8 +21,6 @@ package com.android.imsstack.enabler.media;
  */
 public class MediaConstants {
 
-    // Maximum sockets that can be opened
-    public static final int SOCKETS_MAX = 40;
     public static final int IMS_MSG_BASE_MEDIA = 1400;
     public static final int RESPONSE_WAIT_TIMEOUT = 1000;
 
@@ -77,4 +75,4 @@ public class MediaConstants {
     public static final int NOTIFY_RTT_RECEIVED           = (IMSMEDIA_RTT_RESPONSE + 1);
 
     public static final int IMSMEDIA_MAX                  = (IMSMEDIA_RESPONSE + 100);
-};
+}

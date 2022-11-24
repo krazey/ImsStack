@@ -64,8 +64,7 @@ public class VideoSessionHandler extends MediaState {
     private final IBaseContext mContext;
     private QosAgent mVideoQosAgent;
     private VideoImsQosCallback mVideoImsQosCallback;
-    private InetSocketAddress mRemoteAddress;
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
 
     public VideoSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface,
@@ -161,7 +160,7 @@ public class VideoSessionHandler extends MediaState {
                     }
                 }
             } catch (InterruptedException ie) {
-                ie.printStackTrace();
+                ImsLog.e("unexpectedly interrupted while waiting" + ie.getMessage());
             }
 
             switch (msg.what) {

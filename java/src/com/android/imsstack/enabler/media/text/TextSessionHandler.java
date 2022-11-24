@@ -57,8 +57,7 @@ public class TextSessionHandler extends MediaState {
     private final IBaseContext mContext;
     private QosAgent mTextQosAgent;
     private TextImsQosCallback mTextImsQosCallback;
-    private InetSocketAddress mRemoteAddress;
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
 
     public TextSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
@@ -149,7 +148,7 @@ public class TextSessionHandler extends MediaState {
                     }
                 }
             } catch (InterruptedException ie) {
-                ie.printStackTrace();
+                ImsLog.e("unexpectedly interrupted while waiting" + ie.getMessage());
             }
 
             switch (msg.what) {
