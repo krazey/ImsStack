@@ -38,7 +38,6 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipFactory.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcAosEventHandler.h"

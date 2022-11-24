@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_I_MTC_CALL_TRAFFIC_CHECKER_H_
-#define MOCK_I_MTC_CALL_TRAFFIC_CHECKER_H_
+#ifndef MOCK_I_MTC_RADIO_CHECKER_H_
+#define MOCK_I_MTC_RADIO_CHECKER_H_
 
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
-#include "call/traffic/MtcCallTrafficChecker.h"
+#include "call/radio/IMtcRadioChecker.h"
+#include "call/radio/MtcRadioChecker.h"
 #include <gmock/gmock.h>
 
-class MockIMtcCallTrafficChecker : public IMtcCallTrafficChecker
+class MockIMtcRadioChecker : public IMtcRadioChecker
 {
 public:
-    ~MockIMtcCallTrafficChecker() = default;
+    ~MockIMtcRadioChecker() = default;
 
-    MOCK_METHOD(void, SetTrafficCheckerListener, (IN IMtcCallTrafficCheckerListener* pListener),
-            (override));
+    MOCK_METHOD(
+            void, SetTrafficCheckerListener, (IN IMtcRadioCheckerListener * pListener), (override));
     MOCK_METHOD(CheckResult, Check,
             (IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
                     IN IMS_BOOL bWifi),
             (override));
 };
 
-class MockIMtcCallTrafficCheckerListener : public IMtcCallTrafficCheckerListener
+class MockIMtcRadioCheckerListener : public IMtcRadioCheckerListener
 {
 public:
-    ~MockIMtcCallTrafficCheckerListener() = default;
+    ~MockIMtcRadioCheckerListener() = default;
 
     MOCK_METHOD(void, OnConnectionFailed, (), (override));
     MOCK_METHOD(void, OnConnectionSetupPrepared, (), (override));

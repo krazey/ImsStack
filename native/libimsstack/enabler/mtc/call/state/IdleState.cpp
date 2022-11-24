@@ -31,7 +31,7 @@
 #include "call/IMtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/block/CallCountBlockRule.h"
-#include "call/block/CallTrafficBlockRule.h"
+#include "call/block/RadioBlockRule.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
@@ -451,8 +451,7 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new CallTypeBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     lstRules.Append(new CallWaitingBlockRule(m_objContext));
-    lstRules.Append(
-            new CallTrafficBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
+    lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     return lstRules;
 }
 
@@ -469,8 +468,7 @@ IMSList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
-    lstRules.Append(
-            new CallTrafficBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
+    lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
 
     return lstRules;
 }

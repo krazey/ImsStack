@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef MTC_CALL_TRAFFIC_CHECKER_H_
-#define MTC_CALL_TRAFFIC_CHECKER_H_
+#ifndef MTC_RADIO_CHECKER_H_
+#define MTC_RADIO_CHECKER_H_
 
 #include "IImsRadio.h"
 #include "IMtcCallStateListener.h"
 #include "INetworkWatcher.h"
+#include "ITimer.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include "helper/IMtcAosStateListener.h"
+
+using TrafficType = IMS_UINT32;
+using CallDirection = IMS_UINT32;
 
 class IMtcRadioConnectionListener
 {
 public:
-    ~IMtcRadioConnectionListener() = default;
+    virtual ~IMtcRadioConnectionListener() = default;
 
     /**
      * @brief Notifies
@@ -59,22 +63,23 @@ class IMtcRadioConnectionFailureListener;
 class IMtcService;
 class MtcTrafficInfo;
 
-class MtcCallTrafficChecker final :
-        public IMtcCallTrafficChecker,
+class MtcRadioChecker final :
+        public IMtcRadioChecker,
         public IMtcCallStateListener,
         public IMtcRadioConnectionListener,
-        public IMtcAosStateListener
+        public IMtcAosStateListener,
+        public ITimerListener
 {
 public:
-    explicit MtcCallTrafficChecker(IN IMtcContext& objContext,
+    explicit MtcRadioChecker(IN IMtcContext& objContext,
             IN IMtcRadioConnectionFailureListener& objMtcRadioConnectionFailureListener);
-    ~MtcCallTrafficChecker();
-    MtcCallTrafficChecker(IN const MtcCallTrafficChecker&) = delete;
-    MtcCallTrafficChecker& operator=(IN const MtcCallTrafficChecker&) = delete;
+    ~MtcRadioChecker();
+    MtcRadioChecker(IN const MtcRadioChecker&) = delete;
+    MtcRadioChecker& operator=(IN const MtcRadioChecker&) = delete;
 
     void Init();
 
-    void SetTrafficCheckerListener(IN IMtcCallTrafficCheckerListener* pListener) override;
+    void SetTrafficCheckerListener(IN IMtcRadioCheckerListener* pListener) override;
     CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi) override;
 
@@ -94,6 +99,9 @@ public:
     void OnConnectionSetupPrepared(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) override;
 
+    // ITimerListener
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+
     // for test
     void CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
             IN CallDirection eCallDirection, IN IMS_BOOL bActive, IN CallKey nCallKeyIn);
@@ -102,8 +110,8 @@ private:
     void DeInit();
     TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
     IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi) const;
-    void AddCallKeyIfNeeded(
-            IN TrafficType eTrafficType, IN CallDirection eCallDirection, IN CallKey nCallKeyIn);
+    void AddCallKeyIfNeeded(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
+            IN CallKey nCallKeyIn) const;
     void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKey);
     void NotifyRadioConnectionFailedListener(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection);
@@ -115,6 +123,10 @@ private:
     IMS_BOOL IsTrafficPrepared(
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const;
     IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
+    IMS_BOOL IsSsacBarred(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
+            IN IMS_BOOL bWifi);
+    IMS_BOOL IsSsacTimerRunning(IN CallType eCallType) const;
+    IMS_BOOL StartSsacTimer(IN CallType eCallType);
     void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi);
     void StopTrafficChecking(IN TrafficType eTrafficType, IN CallDirection eCallDirection);
@@ -124,8 +136,10 @@ private:
     IMtcRadioConnectionFailureListener& m_objMtcRadioConnectionFailureListener;
     INetworkWatcher* m_piNetworkWatcher;
     IImsRadio* m_piImsRadio;
-    IMtcCallTrafficCheckerListener* m_piMtcCallTrafficCheckerListener;
+    IMtcRadioCheckerListener* m_piMtcRadioCheckerListener;
     ImsList<MtcTrafficInfo*> m_objMtcTrafficInfos;
+    ITimer* m_piSsacVoiceBarringTimer;
+    ITimer* m_piSsacVideoBarringTimer;
 };
 
 class MtcTrafficInfo final : public IImsRadioConnectionListener
@@ -150,7 +164,7 @@ public:
     void ImsRadio_OnConnectionSetupPrepared() override;
 
 private:
-    friend class MtcCallTrafficChecker;
+    friend class MtcRadioChecker;
 
     TrafficType m_eTrafficType;
     CallDirection m_eCallDirection;

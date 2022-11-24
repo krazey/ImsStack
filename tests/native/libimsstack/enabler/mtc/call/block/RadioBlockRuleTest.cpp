@@ -19,14 +19,13 @@
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
-#include "call/block/CallTrafficBlockRule.h"
+#include "call/block/RadioBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
-#include "call/traffic/MockIMtcCallTrafficChecker.h"
+#include "call/radio/IMtcRadioChecker.h"
+#include "call/radio/MockIMtcRadioChecker.h"
 #include <gmock/gmock.h>
 
 using ::testing::_;
-using ::testing::Eq;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using Result = IMtcBlockRule::Result;
@@ -34,78 +33,75 @@ using Result = IMtcBlockRule::Result;
 namespace android
 {
 
-class CallTrafficBlockRuleTest : public ::testing::Test
+class RadioBlockRuleTest : public ::testing::Test
 {
 public:
     MockIMtcCallContext m_objContext;
-    MockIMtcCallTrafficChecker m_objMockIMtcCallTrafficChecker;
+    MockIMtcRadioChecker m_objMockIMtcRadioChecker;
     CallInfo m_objCallInfo;
     MockIMtcService m_objMtcService;
     MockIMtcBlockRuleCheckListener m_BlockRuleCheckListener;
-    CallTrafficBlockRule* m_pCallTrafficBlockRule;
+    RadioBlockRule* m_pRadioBlockRule;
 
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(m_objContext, GetCallTrafficChecker)
-                .WillByDefault(ReturnRef(m_objMockIMtcCallTrafficChecker));
+        ON_CALL(m_objContext, GetRadioChecker).WillByDefault(ReturnRef(m_objMockIMtcRadioChecker));
         ON_CALL(m_objContext, GetCallInfo).WillByDefault(ReturnRef(m_objCallInfo));
         ON_CALL(m_objContext, GetService).WillByDefault(ReturnRef(m_objMtcService));
 
         ON_CALL(m_objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     }
 
-    virtual void TearDown() override { delete m_pCallTrafficBlockRule; }
+    virtual void TearDown() override { delete m_pRadioBlockRule; }
 
-    void CreateCallTrafficBlockRuleWithGivenValue(
+    void CreateRadioBlockRuleWithGivenValue(
             IN CallType eCallType, IN PeerType ePeerTypeIn, IN IMS_BOOL bEmergencyIn)
     {
         m_objCallInfo.ePeerType = ePeerTypeIn;
         m_objCallInfo.bEmergency = bEmergencyIn;
 
-        m_pCallTrafficBlockRule = new CallTrafficBlockRule(m_objContext, eCallType);
+        m_pRadioBlockRule = new RadioBlockRule(m_objContext, eCallType);
     }
 };
 
-TEST_F(CallTrafficBlockRuleTest, Check)
+TEST_F(RadioBlockRuleTest, Check)
 {
-    CreateCallTrafficBlockRuleWithGivenValue(CallType::VOIP, PeerType::MT, IMS_FALSE);
+    CreateRadioBlockRuleWithGivenValue(CallType::VOIP, PeerType::MT, IMS_FALSE);
 
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker, SetTrafficCheckerListener(_)).Times(4);
+    EXPECT_CALL(m_objMockIMtcRadioChecker, SetTrafficCheckerListener(_)).Times(4);
 
-    EXPECT_CALL(m_objMockIMtcCallTrafficChecker,
-            Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE))
+    EXPECT_CALL(
+            m_objMockIMtcRadioChecker, Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE))
             .Times(3)
             .WillOnce(Return(CheckResult::UNBLOCKED))
             .WillOnce(Return(CheckResult::PENDING))
             .WillOnce(Return(CheckResult::BLOCKED));
 
-    EXPECT_EQ(Result(Result::Status::UNBLOCKED),
-            m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
-    EXPECT_EQ(Result(Result::Status::PENDING),
-            m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
+    EXPECT_EQ(
+            Result(Result::Status::UNBLOCKED), m_pRadioBlockRule->Check(m_BlockRuleCheckListener));
+    EXPECT_EQ(Result(Result::Status::PENDING), m_pRadioBlockRule->Check(m_BlockRuleCheckListener));
     EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)),
-            m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
+            m_pRadioBlockRule->Check(m_BlockRuleCheckListener));
 }
 
-TEST_F(CallTrafficBlockRuleTest, IMtcCallTrafficCheckerListener)
+TEST_F(RadioBlockRuleTest, IMtcRadioCheckerListener)
 {
     // Assume that Check() done.
-    CreateCallTrafficBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
-    m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener);
+    CreateRadioBlockRuleWithGivenValue(CallType::VT, PeerType::MO, IMS_TRUE);
+    m_pRadioBlockRule->Check(m_BlockRuleCheckListener);
 
-    EXPECT_CALL(m_BlockRuleCheckListener,
-            OnBlockRuleChecked(Result(static_cast<Result::Status>(CheckResult::UNBLOCKED))))
+    EXPECT_CALL(m_BlockRuleCheckListener, OnBlockRuleChecked(Result(Result::Status::UNBLOCKED)))
             .Times(1);
 
-    m_pCallTrafficBlockRule->OnConnectionSetupPrepared();
+    m_pRadioBlockRule->OnConnectionSetupPrepared();
 
     EXPECT_CALL(m_BlockRuleCheckListener,
             OnBlockRuleChecked(
                     Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE))))
             .Times(1);
 
-    m_pCallTrafficBlockRule->OnConnectionFailed();
+    m_pRadioBlockRule->OnConnectionFailed();
 }
 
 }  // namespace android

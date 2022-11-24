@@ -20,8 +20,8 @@
 #include "call/MockIMtcCallManager.h"
 #include "call/ParticipantInfo.h"
 #include "call/block/MockIMtcBlockChecker.h"
+#include "call/radio/MockIMtcRadioChecker.h"
 #include "call/state/IdleState.h"
-#include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
@@ -48,7 +48,7 @@ public:
     MockIMtcImsEventReceiver objImsEventReceiver;
     MockIMtcCallManager objCallManager;
     CallInfo objCallInfo;
-    MockIMtcCallTrafficChecker objMockIMtcCallTrafficChecker;
+    MockIMtcRadioChecker objMockIMtcRadioChecker;
 
 protected:
     virtual void SetUp() override
@@ -70,8 +70,7 @@ protected:
         ON_CALL(objCallContext, GetMediaManager).WillByDefault(ReturnRef(objMediaManager));
         ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objCallContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
-        ON_CALL(objCallContext, GetCallTrafficChecker)
-                .WillByDefault(ReturnRef(objMockIMtcCallTrafficChecker));
+        ON_CALL(objCallContext, GetRadioChecker).WillByDefault(ReturnRef(objMockIMtcRadioChecker));
 
         pIdleState = new IdleState(objCallContext);
     }

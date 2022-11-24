@@ -34,7 +34,7 @@ class IEctManager;
 class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
 class IMessageUtils;
-class IMtcCallTrafficChecker;
+class IMtcRadioChecker;
 
 class IMtcContext
 {
@@ -80,7 +80,7 @@ public:
      *
      * @return
      */
-    virtual IMtcCallTrafficChecker& GetCallTrafficChecker() = 0;
+    virtual IMtcRadioChecker& GetRadioChecker() = 0;
 
     /**
      * @brief Gets

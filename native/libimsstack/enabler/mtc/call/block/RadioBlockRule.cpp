@@ -17,16 +17,16 @@
 #include "CallReasonInfo.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
-#include "call/block/CallTrafficBlockRule.h"
 #include "call/block/IMtcBlockRule.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
+#include "call/block/RadioBlockRule.h"
+#include "call/radio/IMtcRadioChecker.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-CallTrafficBlockRule::CallTrafficBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType) :
+RadioBlockRule::RadioBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType) :
         m_piMtcBlockRuleCheckListener(IMS_NULL),
-        m_objMtcCallTrafficChecker(objContext.GetCallTrafficChecker()),
+        m_objMtcRadioChecker(objContext.GetRadioChecker()),
         m_ePeerType(objContext.GetCallInfo().ePeerType),
         m_bEmergency(objContext.GetCallInfo().bEmergency),
         m_bWifi(objContext.GetService().IsWlanIpCanType()),
@@ -34,19 +34,19 @@ CallTrafficBlockRule::CallTrafficBlockRule(IN IMtcCallContext& objContext, IN Ca
 {
 }
 
-PUBLIC VIRTUAL CallTrafficBlockRule::~CallTrafficBlockRule()
+PUBLIC VIRTUAL RadioBlockRule::~RadioBlockRule()
 {
-    m_objMtcCallTrafficChecker.SetTrafficCheckerListener(IMS_NULL);
+    m_objMtcRadioChecker.SetTrafficCheckerListener(IMS_NULL);
 }
 
-PUBLIC VIRTUAL CallTrafficBlockRule::Result CallTrafficBlockRule::Check(
+PUBLIC VIRTUAL RadioBlockRule::Result RadioBlockRule::Check(
         IN IMtcBlockRuleCheckListener& objListener)
 {
     m_piMtcBlockRuleCheckListener = &objListener;
-    m_objMtcCallTrafficChecker.SetTrafficCheckerListener(this);
+    m_objMtcRadioChecker.SetTrafficCheckerListener(this);
 
     CheckResult eCheckResult =
-            m_objMtcCallTrafficChecker.Check(m_eCallType, m_bEmergency, m_ePeerType, m_bWifi);
+            m_objMtcRadioChecker.Check(m_eCallType, m_bEmergency, m_ePeerType, m_bWifi);
 
     switch (eCheckResult)
     {
@@ -61,12 +61,12 @@ PUBLIC VIRTUAL CallTrafficBlockRule::Result CallTrafficBlockRule::Check(
     }
 }
 
-PUBLIC VIRTUAL void CallTrafficBlockRule::OnConnectionSetupPrepared()
+PUBLIC VIRTUAL void RadioBlockRule::OnConnectionSetupPrepared()
 {
     m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(Result(Result::Status::UNBLOCKED));
 }
 
-PUBLIC VIRTUAL void CallTrafficBlockRule::OnConnectionFailed()
+PUBLIC VIRTUAL void RadioBlockRule::OnConnectionFailed()
 {
     m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(
             Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)));

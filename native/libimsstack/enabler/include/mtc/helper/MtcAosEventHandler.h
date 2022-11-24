@@ -25,7 +25,6 @@
 class IMessage;
 class AString;
 class MtcConfigurationProxy;
-class IMtcCallTrafficChecker;
 class IMtcService;
 class IJniMtcServiceThread;
 class MtcEmergencyServiceManager;

@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MTC_CALL_TRAFFIC_CHECKER_H_
-#define INTERFACE_MTC_CALL_TRAFFIC_CHECKER_H_
+#ifndef INTERFACE_MTC_RADIO_CHECKER_H_
+#define INTERFACE_MTC_RADIO_CHECKER_H_
 
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 
-using TrafficType = IMS_UINT32;
-using CallDirection = IMS_UINT32;
-
-class IMtcCallTrafficCheckerListener;
+class IMtcRadioCheckerListener;
 enum class CheckResult;
 
-class IMtcCallTrafficChecker
+class IMtcRadioChecker
 {
 public:
-    ~IMtcCallTrafficChecker() = default;
+    virtual ~IMtcRadioChecker() = default;
 
     /**
      * @brief Sets
      *
      * @param pListener
      */
-    virtual void SetTrafficCheckerListener(IN IMtcCallTrafficCheckerListener* pListener) = 0;
+    virtual void SetTrafficCheckerListener(IN IMtcRadioCheckerListener* pListener) = 0;
 
     /**
      * @brief Starts
@@ -50,10 +47,10 @@ public:
             IN IMS_BOOL bWifi) = 0;
 };
 
-class IMtcCallTrafficCheckerListener
+class IMtcRadioCheckerListener
 {
 public:
-    ~IMtcCallTrafficCheckerListener() = default;
+    virtual ~IMtcRadioCheckerListener() = default;
 
     /**
      * @brief Notifies
@@ -71,7 +68,7 @@ public:
 class IMtcRadioConnectionFailureListener
 {
 public:
-    ~IMtcRadioConnectionFailureListener() = default;
+    virtual ~IMtcRadioConnectionFailureListener() = default;
 
     /**
      * @brief Notifies

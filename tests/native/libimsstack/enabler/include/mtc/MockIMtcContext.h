@@ -22,21 +22,21 @@
 #include <gmock/gmock.h>
 #include <functional>
 
-class IMtcDialingPlan;
-class IMtcCallController;
-class IMtcCallManager;
-class MtcConfigurationProxy;
 class ICallStateProxy;
-class IMtcAosConnector;
-class IMtcImsEventReceiver;
-class IMtcSipInterfaceFactory;
-class IMtcService;
 class IConferenceManager;
 class IEctManager;
+class IMtcAosConnector;
+class IMtcCallController;
+class IMtcCallManager;
+class IMtcDialingPlan;
+class IMtcImsEventReceiver;
+class IMtcRadioChecker;
+class IMtcService;
+class IMtcSipInterfaceFactory;
+class MessageUtils;
+class MtcConfigurationProxy;
 class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
-class MessageUtils;
-class IMtcCallTrafficChecker;
 
 class MockIMtcContext : public IMtcContext
 {
@@ -48,7 +48,7 @@ public:
     MOCK_METHOD(IMtcDialingPlan&, GetDialingPlan, (), (override));
     MOCK_METHOD(IMtcCallController&, GetCallController, (), (override));
     MOCK_METHOD(IMtcCallManager&, GetCallManager, (), (override));
-    MOCK_METHOD(IMtcCallTrafficChecker&, GetCallTrafficChecker, (), (override));
+    MOCK_METHOD(IMtcRadioChecker&, GetRadioChecker, (), (override));
     MOCK_METHOD(MtcConfigurationProxy&, GetConfigurationProxy, (), (override));
     MOCK_METHOD(ICallStateProxy&, GetCallStateProxy, (), (override));
     MOCK_METHOD(IMtcImsEventReceiver&, GetImsEventReceiver, (), (override));

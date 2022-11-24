@@ -21,7 +21,7 @@
 #include "MtcEmergencyServiceManager.h"
 #include "ServiceUtil.h"
 #include "call/IMtcCallManager.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include "conferencecall/IConferenceManager.h"
 #include "configuration/MtcConfigurationManager.h"
 #include "dialingplan/IMtcDialingPlan.h"
@@ -161,9 +161,9 @@ TEST_F(MtcAppTest, GetCallControllerAfterConstructor)
     ASSERT_NE(piCallController, nullptr);
 }
 
-TEST_F(MtcAppTest, GetCallTrafficCheckerAfterConstructor)
+TEST_F(MtcAppTest, GetRadioCheckerAfterConstructor)
 {
-    IMtcCallTrafficChecker* piTrafficChecker = &pMtcApp->GetCallTrafficChecker();
+    IMtcRadioChecker* piTrafficChecker = &pMtcApp->GetRadioChecker();
     ASSERT_NE(piTrafficChecker, nullptr);
 }
 

@@ -20,13 +20,13 @@
 #include "helper/MtcAosEventHandler.h"
 #include <gmock/gmock.h>
 
-class IMtcCallController;
-class MtcConfigurationProxy;
-class IMtcService;
 class IJniMtcServiceThread;
-class MtcEmergencyServiceManager;
-class IMtcCallTrafficChecker;
 class IMtcAosStateListener;
+class IMtcCallController;
+class IMtcRadioChecker;
+class IMtcService;
+class MtcConfigurationProxy;
+class MtcEmergencyServiceManager;
 
 class MockMtcAosEventHandler : public MtcAosEventHandler
 {
