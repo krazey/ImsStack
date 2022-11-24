@@ -71,3 +71,4 @@ const IMS_CHAR FeatureTags::VIDEO[] = "video";
 const IMS_CHAR FeatureTags::PRESENCE[] =
         "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.dp\"";
 const IMS_CHAR FeatureTags::RCS_TELEPHONY[] = "+g.gsma.rcs.telephony";
+const IMS_CHAR FeatureTags::CDMALESS[] = "+cdmaless";

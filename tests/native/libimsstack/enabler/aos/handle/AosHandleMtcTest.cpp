@@ -113,7 +113,7 @@ protected:
 
         EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
                 .Times(AnyNumber())
-                .WillRepeatedly(Return(IMS_TRUE));
+                .WillRepeatedly(Return(IMS_FALSE));
 
         EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
                 .Times(AnyNumber())
@@ -130,6 +130,7 @@ protected:
         ASSERT_TRUE(m_pAosHandleMtc != nullptr);
 
         m_pAosHandleMtc->m_bDataConnected = IMS_TRUE;
+        m_pAosHandleMtc->m_bVopsIgnoredForVolteEnabled = IMS_FALSE;
     }
 
     virtual void TearDown() override
@@ -175,6 +176,18 @@ protected:
     IMS_UINT32 GetHoldingVopsState() { return m_pAosHandleMtc->m_nHoldingVopsState; }
 
     IMS_UINT32 GetVopsState() { return m_pAosHandleMtc->m_nVopsState; }
+
+    void SetVopsState(IN IMS_UINT32 nState) { m_pAosHandleMtc->m_nVopsState = nState; }
+
+    void SetVopsIgnoredForVolteEnabled(IN IMS_BOOL bIgnored)
+    {
+        m_pAosHandleMtc->m_bVopsIgnoredForVolteEnabled = bIgnored;
+    }
+
+    IMS_BOOL IsVopsIgnoredForVolteEnabled()
+    {
+        return m_pAosHandleMtc->m_bVopsIgnoredForVolteEnabled;
+    }
 
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nBlock)
     {
@@ -225,6 +238,8 @@ protected:
     {
         m_pAosHandleMtc->RemoveBlock(nBlock, m_pAosHandleMtc->m_nBlocks);
     }
+
+    void InitializeHoldingBlocksPolicy() { m_pAosHandleMtc->InitializeHoldingBlocksPolicy(); }
 
     void InitializeServiceBlock() { m_pAosHandleMtc->InitializeServiceBlock(); }
 
@@ -296,9 +311,9 @@ protected:
 
     void ProcessNetworkChanged() { m_pAosHandleMtc->ProcessNetworkChanged(); }
 
-    void ProcessVopsStateChanged(IN IMS_UINT32 nState)
+    void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE)
     {
-        m_pAosHandleMtc->ProcessVopsStateChanged(nState);
+        m_pAosHandleMtc->ProcessVopsStateChanged(nState, bUpdateState);
     }
 
     void SetDataConnected(IN IMS_BOOL bConnected)
@@ -348,6 +363,16 @@ protected:
     IMS_BOOL IsCsFeatureTagRequired() { return m_pAosHandleMtc->IsCsFeatureTagRequired(); }
 
     IMS_BOOL IsInvalidMobileNetwork() { return m_pAosHandleMtc->IsInvalidMobileNetwork(); }
+
+    IMSList<IMS_UINT32> GetHoldingBlocksPolicyForWifi()
+    {
+        return m_pAosHandleMtc->m_objHoldingBlocksPolicyForWifi;
+    }
+
+    void NConfiguration_NotifyConfigChanged()
+    {
+        m_pAosHandleMtc->NConfiguration_NotifyConfigChanged();
+    }
 };
 
 TEST_F(AosHandleMtcTest, Constructor)
@@ -375,12 +400,6 @@ TEST_F(AosHandleMtcTest, Constructor)
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::TEXT));
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::USSI));
     EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VERSTAT));
-
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
-    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOPS));
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
-    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 }
 
 TEST_F(AosHandleMtcTest, Destructor)
@@ -772,6 +791,29 @@ TEST_F(AosHandleMtcTest, NetTracker_StatusChanged_Test6)
 
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_NETWORK));
     EXPECT_EQ(m_pAosHandleMtc->GetSuspendedReason(), AosReason::SUSPEND_NONE);
+}
+
+TEST_F(AosHandleMtcTest, InitializeHoldingBlocksPolicy_Test)
+{
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    InitializeHoldingBlocksPolicy();
+
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_3G));
+    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_3G));
+    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VIWIFI_CAPABILITY));
 }
 
 TEST_F(AosHandleMtcTest, InitializeServiceBlock_Test)
@@ -1226,9 +1268,33 @@ TEST_F(AosHandleMtcTest, Init_CleanUp_Test)
     EXPECT_CALL(m_objMockIAosNConfiguration,
             IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
+            .WillRepeatedly(Return(IMS_TRUE));
 
     Init();
+
+    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetFeatures(),
+            (ImsAosFeature::MMTEL | ImsAosFeature::VIDEO | ImsAosFeature::TEXT));
+
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeatureTag(FeatureTags::CDMALESS));
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_CS));
+    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeatureTag(
+            FeatureTags::RCS_TELEPHONY, AosString::STR_VOLTE));
+
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_VOPS));
+    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_VOPS));
+    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsBlockForMobile(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+
+    EXPECT_FALSE(IsVopsIgnoredForVolteEnabled());
+
     CleanUp();
 }
 
@@ -1460,9 +1526,12 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test1)
 
 TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
 {
-    // Test2: No capability(LTE,IWLAN,NR), Current network=LTE
+    // Test2: No capability(LTE,IWLAN,NR), Current network=LTE, Wfc available
     // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
+    //              No block but holding block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY
     //              set none capa for the network.
+
+    Init();
 
     IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
@@ -1488,15 +1557,22 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
 
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
     EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
 {
-    // Test3: no capability(LTE,IWLAN,NR), Current network=WLAN
+    // Test3: no capability(LTE,IWLAN,NR), Current network=WLAN & LTE
     // Expectation: block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY,
+    //              No block but holding block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
     //              set none capa for the network.
+
+    Init();
 
     IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
@@ -1508,8 +1584,12 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
             static_cast<IMS_UINT32>(AosCapability::NONE));
 
     SetNetworkType(NW_REPORT_RADIO_WLAN);
-
     SetEpdgEnabled(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+
     EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
@@ -1521,6 +1601,10 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
 
     ProcessCapabilitiesChanged(objNewCapabilities);
 
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
@@ -1710,6 +1794,93 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test8)
 
     EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
     EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objNewCapabilities));
+}
+
+TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test9)
+{
+    // Test9: No capability(LTE,IWLAN,NR), Current network=LTE, Wfc unavailable
+    // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
+    //              No block/holding block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY
+    //              set none capa for the network.
+
+    Init();
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    ProcessCapabilitiesChanged(objNewCapabilities);
+
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForWifi(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
+    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
+}
+
+TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test10)
+{
+    // Test10: no capability(LTE,IWLAN,NR), Current network=WLAN & invalid cellular
+    // Expectation: block BLOCK_VOWIFI_CAPABILITY, BLOCK_VIWIFI_CAPABILITY,
+    //              No block/holding block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
+    //              set none capa for the network.
+
+    Init();
+
+    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+    objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
+            static_cast<IMS_UINT32>(AosCapability::NONE));
+
+    SetNetworkType(NW_REPORT_RADIO_WLAN);
+    SetEpdgEnabled(IMS_TRUE);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    ProcessCapabilitiesChanged(objNewCapabilities);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VOLTE_CAPABILITY));
+    EXPECT_FALSE(IsHoldingBlockForMobile(AosHandle::BLOCK_VILTE_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOWIFI_CAPABILITY));
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VIWIFI_CAPABILITY));
+    EXPECT_TRUE(IsEqualCapabilities(GetCapabilities(), objExpectedCapabilities));
+    EXPECT_EQ(m_pAosHandleMtc->GetFeatureTagList().GetUnavailableFeatures(), ImsAosFeature::NONE);
 }
 
 TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
@@ -2210,6 +2381,76 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test3)
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 }
 
+TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test4)
+{
+    // Test4: ignore_vops config is true, vops changed to on/off
+    // Expectation: no block BLOCK_VOPS, only the vops state is updated
+
+    SetVopsIgnoredForVolteEnabled(IMS_TRUE);
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+}
+
+TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test5)
+{
+    // Test5: ignore_vops config is true/false, no update state,
+    // Expectation: set/reset block BLOCK_VOPS as the state
+    //              No change m_nVopsState
+    //              No change m_nHoldingVopsState
+
+    EXPECT_CALL(m_objMockIAosCallTracker, IsNormalCallActive())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration,
+            IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    SetVopsIgnoredForVolteEnabled(IMS_TRUE);
+    SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, IMS_FALSE);
+    EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, IMS_FALSE);
+    EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+
+    SetVopsIgnoredForVolteEnabled(IMS_TRUE);
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, IMS_FALSE);
+    EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, IMS_FALSE);
+    EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+}
+
 TEST_F(AosHandleMtcTest, ReevaluateUnavailableFeature_Test1)
 {
     // Test1: Vops change / Video Capable
@@ -2371,4 +2612,94 @@ TEST_F(AosHandleMtcTest, IsInvalidMobileNetwork_Test)
     EXPECT_TRUE(IsInvalidMobileNetwork());
     EXPECT_TRUE(IsInvalidMobileNetwork());
     EXPECT_TRUE(IsInvalidMobileNetwork());
+}
+
+TEST_F(AosHandleMtcTest, NConfiguration_NotifyConfigChanged_Test1)
+{
+    // Test1: VopsIgnoredForVolteEnabled not changed
+    // Expectation: No action
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+            .Times(2)
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
+    SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    NConfiguration_NotifyConfigChanged();
+    EXPECT_FALSE(IsVopsIgnoredForVolteEnabled());
+
+    SetVopsIgnoredForVolteEnabled(IMS_TRUE);
+    NConfiguration_NotifyConfigChanged();
+    EXPECT_TRUE(IsVopsIgnoredForVolteEnabled());
+}
+
+TEST_F(AosHandleMtcTest, NConfiguration_NotifyConfigChanged_Test2)
+{
+    // Test2: VopsIgnoredForVolteEnabled changed, invalid network
+    // Expectation: update with the config value
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+            .Times(2)
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
+    SetNetworkType(NW_REPORT_RADIO_GSM);
+
+    SetVopsIgnoredForVolteEnabled(IMS_TRUE);
+    NConfiguration_NotifyConfigChanged();
+    EXPECT_FALSE(IsVopsIgnoredForVolteEnabled());
+
+    SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    NConfiguration_NotifyConfigChanged();
+    EXPECT_TRUE(IsVopsIgnoredForVolteEnabled());
+}
+
+TEST_F(AosHandleMtcTest, NConfiguration_NotifyConfigChanged_Test3)
+{
+    // Test3: VopsIgnoredForVolteEnabled changed, valid network, vops supported
+    // Expectation: update with the config value
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+            .Times(2)
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    SetVopsState(IMS_VOICE_OVER_PS_SUPPORTED);
+
+    SetVopsIgnoredForVolteEnabled(IMS_TRUE);
+    NConfiguration_NotifyConfigChanged();
+    EXPECT_FALSE(IsVopsIgnoredForVolteEnabled());
+
+    SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    NConfiguration_NotifyConfigChanged();
+    EXPECT_TRUE(IsVopsIgnoredForVolteEnabled());
+}
+
+TEST_F(AosHandleMtcTest, NConfiguration_NotifyConfigChanged_Test4)
+{
+    // Test4: VopsIgnoredForVolteEnabled changed, valid network, vops not supported
+    // Expectation: update with the config value
+    //              Set/Reset BLOCK_VOPS if the config is false/true
+    //              No update for vops state
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsVopsIgnoredForVolteEnabled())
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    AddBlock(AosHandle::BLOCK_VOPS);
+
+    SetVopsIgnoredForVolteEnabled(IMS_FALSE);
+    NConfiguration_NotifyConfigChanged();
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_TRUE(IsVopsIgnoredForVolteEnabled());
+
+    NConfiguration_NotifyConfigChanged();
+    EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    EXPECT_FALSE(IsVopsIgnoredForVolteEnabled());
 }

@@ -63,6 +63,7 @@ public:
     static const IMS_CHAR VIDEO[];
     static const IMS_CHAR PRESENCE[];
     static const IMS_CHAR RCS_TELEPHONY[];
+    static const IMS_CHAR CDMALESS[];
 };
 
 #endif  // AOS_STRING_H_

@@ -36,8 +36,9 @@
 #include "interface/IAosRegStateManager.h"
 #include "interface/IAosService.h"
 
-#include "provider/AosProvider.h"
 #include "provider/AosLog.h"
+#include "provider/AosProvider.h"
+#include "provider/AosString.h"
 #include "provider/AosUtil.h"
 #include "handle/AosFeatureTag.h"
 #include "handle/AosInfo.h"
@@ -99,6 +100,7 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_nHoldingBlocksForWifi(BLOCK_NONE),
         m_nHoldingVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
         m_nVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
+        m_bVopsIgnoredForVolteEnabled(IMS_TRUE),
         m_bEpdgEnabled(IMS_FALSE),
         m_bDataConnected(IMS_FALSE),
         m_bNetSrvIn(IMS_FALSE),
@@ -125,11 +127,6 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
     if (piNConfig != IMS_NULL)
     {
         piNConfig->SetListener(this);
-
-        if (piNConfig->IsDeregOn3gNetwork())
-        {
-            m_objHoldingBlocksPolicyForMobile.Append(BLOCK_3G);
-        }
     }
 }
 
@@ -505,6 +502,7 @@ PUBLIC VIRTUAL void AosHandle::NConfiguration_NotifyConfigChanged()
 
     if (GET_N_CONFIG(m_nSlotId) != IMS_NULL)
     {
+        InitializeHoldingBlocksPolicy();
         InitializeServiceBlock();
         InitializeServiceFeature();
         InitializeFeatureTags();
@@ -534,6 +532,7 @@ PROTECTED VIRTUAL void AosHandle::Init()
     m_piInfo = new AosInfo(m_piAppContext);
     m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
 
+    InitializeHoldingBlocksPolicy();
     InitializeServiceBlock();
     InitializeServiceFeature();
     InitializeFeatureTags();
@@ -1264,7 +1263,8 @@ PROTECTED VIRTUAL void AosHandle::ProcessNetworkChanged()
     // Implemented in child
 }
 
-PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(IN IMS_UINT32 /*nState*/)
+PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(
+        IN IMS_UINT32 /*nState*/, IN IMS_BOOL /*bUpdateState = IMS_TRUE*/)
 {
     // Implemented in child
 }
@@ -1579,6 +1579,17 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::IsSupportedNetworkTypeForCellular(IN IMS_U
     return AosUtil::GetInstance()->IsSupportedNetworkTypeForCellular(nType);
 }
 
+PROTECTED VIRTUAL void AosHandle::InitializeHoldingBlocksPolicy()
+{
+    m_objHoldingBlocksPolicyForMobile.Clear();
+    m_objHoldingBlocksPolicyForWifi.Clear();
+
+    if (GET_N_CONFIG(m_nSlotId)->IsDeregOn3gNetwork())
+    {
+        m_objHoldingBlocksPolicyForMobile.Append(BLOCK_3G);
+    }
+}
+
 PROTECTED VIRTUAL void AosHandle::InitializeServiceBlock()
 {
     /*
@@ -1603,7 +1614,7 @@ PROTECTED VIRTUAL void AosHandle::InitializeFeatureTags()
     // VZW Req. - VZ_REQ_IMS_22939
     if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired())
     {
-        m_objFeatureTagList.AddFeatureTag("+cdmaless");
+        m_objFeatureTagList.AddFeatureTag(FeatureTags::CDMALESS);
     }
 }
 

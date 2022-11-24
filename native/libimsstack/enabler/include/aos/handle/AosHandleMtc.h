@@ -35,6 +35,7 @@ public:
     virtual void NetTracker_StatusChanged();
 
 protected:
+    virtual void InitializeHoldingBlocksPolicy();
     virtual void InitializeServiceBlock();
     virtual void InitializeServiceFeature();
     virtual void InitializeFeatureTags();
@@ -53,7 +54,7 @@ protected:
     virtual void ProcessCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
-    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState);
+    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
 
     virtual void ReevaluateUnavailableFeature();
 
@@ -63,6 +64,9 @@ private:
     IMS_UINT32 GetVideoBlockReasonForIpcan();
     IMS_BOOL IsCsFeatureTagRequired();
     IMS_BOOL IsInvalidMobileNetwork() const;
+
+    // IAosNConfigurationListener
+    void NConfiguration_NotifyConfigChanged() override;
 
 private:
     friend class AosHandleMtcTest;
