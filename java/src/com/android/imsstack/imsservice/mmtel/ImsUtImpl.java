@@ -40,7 +40,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
     private final IBaseContext mContext;
     @VisibleForTesting
-    protected ImsUtListener mListener = null;
+    ImsUtListener mListener = null;
     private IUtInterface mUt = null;
     private IUtListener mUtListenerProxy = null;
     private int mTransactionId = 1;
