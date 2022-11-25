@@ -342,8 +342,8 @@ public class SscTransaction {
     private final class PutTransaction extends HttpTransaction {
         SscServiceData mData = null;
 
-        public PutTransaction(SscData SscData) {
-            this.mData = (SscServiceData) SscData;
+        PutTransaction(SscData sscData) {
+            this.mData = (SscServiceData) sscData;
         }
 
         @Override

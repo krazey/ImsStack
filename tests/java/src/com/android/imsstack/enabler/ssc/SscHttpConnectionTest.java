@@ -101,12 +101,13 @@ public class SscHttpConnectionTest {
     }
 
     @Test
-    public void close_disconnectConnection() {
+    public void close_shouldDisconnectConnection() {
         int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
                 mRequestUri, mXui, "");
         mSscHttpConnection.close();
 
         verify(mMockConnection).disconnect();
+        assertEquals(ISscHttpConnection.HTTP_REQUEST_FAILED_UNSPECIFIED, result);
     }
 
     @Test
@@ -162,8 +163,7 @@ public class SscHttpConnectionTest {
 
     @Test
     public void sendRequest_setAuthHeaderWhenCredentialNotUpdated() {
-        int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "");
 
         verify(mMockConnection, times(0)).setRequestProperty(eq("Authorization"), any());
     }
@@ -174,8 +174,7 @@ public class SscHttpConnectionTest {
         when(mMockSscAuthAgent.calculateResponse(anyString(), anyString(), anyString()))
                 .thenReturn(false);
 
-        int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "");
 
         verify(mMockConnection, times(0)).setRequestProperty(eq("Authorization"), any());
     }
@@ -187,8 +186,7 @@ public class SscHttpConnectionTest {
                 .thenReturn(true);
         when(mMockSscAuthAgent.getCredentialInfoString()).thenReturn("credentialInfo");
 
-        int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, "");
+        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui, "");
 
         verify(mMockConnection).setRequestProperty("Authorization", "credentialInfo");
     }
@@ -202,8 +200,8 @@ public class SscHttpConnectionTest {
                 .thenReturn("ImsClient");
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
-        int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET,
-                mRequestUri, mXui, xmlBody);
+        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui,
+                xmlBody);
 
         verify(mMockConnection).setRequestProperty("X-3GPP-Intended-Identity", identity);
         verify(mMockConnection).setRequestProperty("Host", mFqdn);
@@ -224,8 +222,8 @@ public class SscHttpConnectionTest {
                 .thenReturn("ImsClient");
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
-        int result = mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_PUT,
-                mRequestUri, mXui, xmlBody);
+        mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_PUT, mRequestUri, mXui,
+                xmlBody);
 
         verify(mMockConnection).setRequestProperty("X-3GPP-Intended-Identity", identity);
         verify(mMockConnection).setRequestProperty("Host", mFqdn);

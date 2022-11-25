@@ -41,7 +41,7 @@ public class CfServiceData extends SscServiceData {
     }
 
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (mRuleSet != null) {
             for(SscRuleData ruleData : mRuleSet) {
                 sb.append(ruleData.toString());

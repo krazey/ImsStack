@@ -94,9 +94,10 @@ public class SscRuleData {
     }
 
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Rule ID : " + mRuleId + ", Status : " + mState + ", target number : "
-                + mForwardToNumber + ", ServiceClass :" + mServiceClass + "\n");
+        StringBuilder sb = new StringBuilder();
+        sb.append("Rule ID : ").append(mRuleId).append(", Status : ").append(mState)
+                .append(", target number : ").append(mForwardToNumber).append(", ServiceClass :")
+                .append(mServiceClass).append("\n");
 
         if (mRuleConditionList != null && mRuleConditionList.size() > 0) {
             sb.append("<< Condition >>\n");

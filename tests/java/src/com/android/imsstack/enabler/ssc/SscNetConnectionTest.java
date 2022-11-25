@@ -57,12 +57,12 @@ import java.util.HashMap;
 @RunWith(JUnit4.class)
 public class SscNetConnectionTest {
     private static final int SLOT_0 = 0;
+    private static final EApnType APN_TYPE = EApnType.XCAP;
+    private static final int INACTIVITY_TIME_SEC = 100;
+    private static final int TIMER_ID = 1;
 
     private SscNetConnection mSscNetConnection = null;
     private Handler mSscNetConnectionHandler = null;
-    private EApnType mApnType = EApnType.XCAP;
-    private int mInactivityTimer = 100;
-    private int mTimerId = 1;
 
     @Mock private IAlarmTimer mMockAlarmTimer;
     @Mock private IApn mMockApn;
@@ -83,17 +83,17 @@ public class SscNetConnectionTest {
         when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getInt(
                 CarrierConfig.Assets.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT))
-                .thenReturn(mInactivityTimer);
+                .thenReturn(INACTIVITY_TIME_SEC);
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
-        when(mMockDcApn.getApnControl(mApnType.getType())).thenReturn(mMockApn);
+        when(mMockDcApn.getApnControl(APN_TYPE.getType())).thenReturn(mMockApn);
         HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(2);
         dcs.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);
         dcs.put(DcFactory.APN, mMockDcApn);
         DcFactory.setObjects(SLOT_0, dcs);
 
         mSscNetConnection = new FakeSscNetConnection(SLOT_0);
-        mSscNetConnection.init(mApnType);
+        mSscNetConnection.init(APN_TYPE);
         mSscNetConnection.setCallbackHandler(mMockSscTransactionHandler);
         mSscNetConnectionHandler = mSscNetConnection.mSscNetConnectionHandler;
     }
@@ -112,14 +112,14 @@ public class SscNetConnectionTest {
                 SscNetConnection.EVENT_PDN_CONNECTION_FAILED, null);
         verify(mMockApn).addListener(any());
 
-        assertEquals(mInactivityTimer * 1000, mSscNetConnection.mConnectionInactivityTimer);
+        assertEquals(INACTIVITY_TIME_SEC * 1000, mSscNetConnection.mConnectionInactivityTimer);
     }
 
     @Test
     public void cleanup_unregisterEvents() {
         mSscNetConnection.cleanup();
 
-        verify(mMockDcApn).disconnect(eq(mApnType.getType()));
+        verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         verify(mMockApn).removeListener(any());
         verify(mMockDcNetWatcher).unregisterForDataServiceStateChanged(mSscNetConnectionHandler);
         verify(mMockDcNetWatcher).unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
@@ -131,7 +131,7 @@ public class SscNetConnectionTest {
 
         boolean isConnected = mSscNetConnection.isConnected();
         assertEquals(false, isConnected);
-        verify(mMockDcApn, never()).getDataState(mApnType.getType());
+        verify(mMockDcApn, never()).getDataState(APN_TYPE.getType());
     }
 
     @Test
@@ -140,26 +140,26 @@ public class SscNetConnectionTest {
 
         boolean isConnected = mSscNetConnection.isConnected();
         assertEquals(false, isConnected);
-        verify(mMockDcApn, never()).getDataState(mApnType.getType());
+        verify(mMockDcApn, never()).getDataState(APN_TYPE.getType());
     }
 
     @Test
     public void isConnected_getDataStateConnected() {
-        when(mMockDcApn.getDataState(mApnType.getType()))
+        when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_CONNECTED);
 
         boolean isConnected = mSscNetConnection.isConnected();
-        verify(mMockDcApn).getDataState(mApnType.getType());
+        verify(mMockDcApn).getDataState(APN_TYPE.getType());
         assertEquals(true, isConnected);
     }
 
     @Test
     public void isConnected_getDataStateDisconnected() {
-        when(mMockDcApn.getDataState(mApnType.getType()))
+        when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
 
         boolean isConnected = mSscNetConnection.isConnected();
-        verify(mMockDcApn).getDataState(mApnType.getType());
+        verify(mMockDcApn).getDataState(APN_TYPE.getType());
         assertEquals(false, isConnected);
     }
 
@@ -169,23 +169,23 @@ public class SscNetConnectionTest {
 
         boolean result = mSscNetConnection.connect();
         assertEquals(false, result);
-        verify(mMockDcApn, never()).connect(mApnType.getType());
+        verify(mMockDcApn, never()).connect(APN_TYPE.getType());
     }
 
     @Test
     public void connect_alreadyConnected() {
-        when(mMockDcApn.getDataState(mApnType.getType()))
+        when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_CONNECTED);
 
         boolean result = mSscNetConnection.connect();
-        verify(mMockDcApn).getDataState(mApnType.getType());
+        verify(mMockDcApn).getDataState(APN_TYPE.getType());
         assertEquals(true, result);
     }
 
     @Test
     public void connect_getDcApnNull() {
         DcFactory.setObjects(SLOT_0, null);
-        when(mMockDcApn.getDataState(mApnType.getType()))
+        when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
 
         boolean result = mSscNetConnection.connect();
@@ -194,9 +194,9 @@ public class SscNetConnectionTest {
 
     @Test
     public void connect_requestConnectionFailure() {
-        when(mMockDcApn.getDataState(mApnType.getType()))
+        when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
-        when(mMockDcApn.connect(eq(mApnType.getType()))).thenReturn(false);
+        when(mMockDcApn.connect(eq(APN_TYPE.getType()))).thenReturn(false);
 
         boolean result = mSscNetConnection.connect();
         assertEquals(false, result);
@@ -204,20 +204,20 @@ public class SscNetConnectionTest {
 
     @Test
     public void connect_requestConnectionSuccess() {
-        when(mMockDcApn.getDataState(mApnType.getType()))
+        when(mMockDcApn.getDataState(APN_TYPE.getType()))
                 .thenReturn(TelephonyManager.DATA_DISCONNECTED);
-        when(mMockDcApn.connect(eq(mApnType.getType()))).thenReturn(true);
-        when(mMockAlarmTimer.getTimerId()).thenReturn(mTimerId);
-        when(mMockAlarmTimer.startTimer(mTimerId, SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER))
+        when(mMockDcApn.connect(eq(APN_TYPE.getType()))).thenReturn(true);
+        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
+        when(mMockAlarmTimer.startTimer(TIMER_ID, SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER))
                 .thenReturn(true);
 
         boolean result = mSscNetConnection.connect();
 
-        verify(mMockAlarmTimer).registerForTimerExpired(mTimerId, mSscNetConnectionHandler,
+        verify(mMockAlarmTimer).registerForTimerExpired(TIMER_ID, mSscNetConnectionHandler,
                 SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT, null);
-        verify(mMockAlarmTimer).startTimer(mTimerId, SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER);
+        verify(mMockAlarmTimer).startTimer(TIMER_ID, SscNetConnection.PDN_CONNECTION_TIMEOUT_TIMER);
 
-        assertEquals(Integer.valueOf(mTimerId),
+        assertEquals(Integer.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT));
         assertEquals(true, result);
     }
@@ -233,7 +233,7 @@ public class SscNetConnectionTest {
 
         mSscNetConnection.disconnect();
 
-        verify(mMockDcApn, never()).disconnect(mApnType.getType());
+        verify(mMockDcApn, never()).disconnect(APN_TYPE.getType());
     }
 
     @Test
@@ -242,7 +242,7 @@ public class SscNetConnectionTest {
 
         mSscNetConnection.disconnect();
 
-        verify(mMockDcApn, never()).disconnect(mApnType.getType());
+        verify(mMockDcApn, never()).disconnect(APN_TYPE.getType());
     }
 
     @Test
@@ -262,7 +262,7 @@ public class SscNetConnectionTest {
         verify(mMockAlarmTimer).stopTimer(timerIdForConnectionExpired);
         verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForConnectionExpired,
                 mSscNetConnectionHandler);
-        verify(mMockDcApn).disconnect(eq(mApnType.getType()));
+        verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         assertEquals(null,
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT));
         assertEquals(null,
@@ -271,7 +271,7 @@ public class SscNetConnectionTest {
 
     @Test
     public void getNetwork_typeMobile() {
-        when(mMockDcApn.getIpcanCategory(mApnType.getType()))
+        when(mMockDcApn.getIpcanCategory(APN_TYPE.getType()))
                 .thenReturn(IApn.IPCAN_CATEGORY_MOBILE);
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
 
@@ -282,7 +282,7 @@ public class SscNetConnectionTest {
 
     @Test
     public void getNetwork_typeIwlan() {
-        when(mMockDcApn.getIpcanCategory(mApnType.getType())).thenReturn(IApn.IPCAN_CATEGORY_WLAN);
+        when(mMockDcApn.getIpcanCategory(APN_TYPE.getType())).thenReturn(IApn.IPCAN_CATEGORY_WLAN);
 
         int networkType = mSscNetConnection.getNetworkType();
 
@@ -292,18 +292,18 @@ public class SscNetConnectionTest {
 
     @Test
     public void refreshConnectionTimer_stopPreviousTimer() {
-        int timerIdForConnectionExpired = mTimerId + 1; // different value from mTimerId
+        int timerIdForConnectionExpired = TIMER_ID + 1; // different value from TIMER_ID
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED,
                 timerIdForConnectionExpired);
 
-        when(mMockAlarmTimer.getTimerId()).thenReturn(mTimerId);
-        when(mMockAlarmTimer.startTimer(mTimerId, mInactivityTimer * 1000)).thenReturn(true);
+        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
+        when(mMockAlarmTimer.startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000)).thenReturn(true);
 
         mSscNetConnection.refreshConnectionTimer();
 
         verify(mMockAlarmTimer).stopTimer(timerIdForConnectionExpired);
-        verify(mMockAlarmTimer).startTimer(mTimerId, mInactivityTimer * 1000);
-        assertEquals(Integer.valueOf(mTimerId),
+        verify(mMockAlarmTimer).startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000);
+        assertEquals(Integer.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
     }
 
@@ -313,7 +313,7 @@ public class SscNetConnectionTest {
         ApnStateListener apnStateListener = mApnStateListenerCaptor.getValue();
         assertNotNull(apnStateListener);
 
-        apnStateListener.onIpcanCategoryChanged(mApnType.getType(), IApn.IPCAN_CATEGORY_WLAN);
+        apnStateListener.onIpcanCategoryChanged(APN_TYPE.getType(), IApn.IPCAN_CATEGORY_WLAN);
 
         verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
         Message msg = mMessageCaptor.getValue();
@@ -323,12 +323,12 @@ public class SscNetConnectionTest {
 
     @Test
     public void handleMessage_connectionConnected() {
-        int timerIdForRequestTimeout = mTimerId + 1;
+        int timerIdForRequestTimeout = TIMER_ID + 1;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
 
-        when(mMockAlarmTimer.startTimer(mTimerId, mInactivityTimer * 1000)).thenReturn(true);
-        when(mMockAlarmTimer.getTimerId()).thenReturn(mTimerId);
+        when(mMockAlarmTimer.startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000)).thenReturn(true);
+        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
 
         IDcNetWatcher.NotiObj notiObj = new IDcNetWatcher.NotiObj(EApnType.XCAP,
                 EDataState.DATA_STATE_CONNECTED, -1);
@@ -336,8 +336,8 @@ public class SscNetConnectionTest {
         triggerEventHandler(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, ar);
 
         verify(mMockAlarmTimer).stopTimer(timerIdForRequestTimeout);
-        verify(mMockAlarmTimer).startTimer(mTimerId, mInactivityTimer * 1000);
-        assertEquals(Integer.valueOf(mTimerId),
+        verify(mMockAlarmTimer).startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000);
+        assertEquals(Integer.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
         verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
         Message msg = mMessageCaptor.getValue();
@@ -347,21 +347,21 @@ public class SscNetConnectionTest {
 
     @Test
     public void handleMessage_connectionDisconnected() {
-        int timerIdForRequestTimeout = mTimerId + 1;
+        int timerIdForRequestTimeout = TIMER_ID + 1;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
 
-        when(mMockAlarmTimer.startTimer(mTimerId, SscNetConnection.DISCONNECTION_DELAY))
+        when(mMockAlarmTimer.startTimer(TIMER_ID, SscNetConnection.DISCONNECTION_DELAY))
                 .thenReturn(true);
-        when(mMockAlarmTimer.getTimerId()).thenReturn(mTimerId);
+        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
 
         IDcNetWatcher.NotiObj notiObj = new IDcNetWatcher.NotiObj(EApnType.XCAP,
                 EDataState.DATA_STATE_DISCONNECTED, -1);
         AsyncResult ar = new AsyncResult(null, notiObj, null);
         triggerEventHandler(SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED, ar);
 
-        verify(mMockAlarmTimer).startTimer(mTimerId, SscNetConnection.DISCONNECTION_DELAY);
-        assertEquals(Integer.valueOf(mTimerId),
+        verify(mMockAlarmTimer).startTimer(TIMER_ID, SscNetConnection.DISCONNECTION_DELAY);
+        assertEquals(Integer.valueOf(TIMER_ID),
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
         verify(mMockSscTransactionHandler).sendMessageAtTime(mMessageCaptor.capture(), anyLong());
         Message msg = mMessageCaptor.getValue();
@@ -392,7 +392,7 @@ public class SscNetConnectionTest {
         verify(mMockAlarmTimer).stopTimer(timerIdForRequestTimeout);
         verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForRequestTimeout,
                 mSscNetConnectionHandler);
-        verify(mMockDcApn).disconnect(eq(mApnType.getType()));
+        verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         assertEquals(null,
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT));
     }
@@ -413,7 +413,7 @@ public class SscNetConnectionTest {
         verify(mMockAlarmTimer).stopTimer(timerIdForRequestTimeout);
         verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForRequestTimeout,
                 mSscNetConnectionHandler);
-        verify(mMockDcApn).disconnect(eq(mApnType.getType()));
+        verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         assertEquals(null,
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT));
     }
@@ -429,19 +429,19 @@ public class SscNetConnectionTest {
         verify(mMockAlarmTimer).stopTimer(timerIdForConnectionExpired);
         verify(mMockAlarmTimer).unregisterForTimerExpired(timerIdForConnectionExpired,
                 mSscNetConnectionHandler);
-        verify(mMockDcApn).disconnect(eq(mApnType.getType()));
+        verify(mMockDcApn).disconnect(eq(APN_TYPE.getType()));
         assertEquals(null,
                 mSscNetConnection.mTimerIdTable.get(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED));
     }
 
     @Test
     public void startTimer_invalidTimerId() {
-        int timerIdForConnectionExpired = mTimerId + 1; // different value from mTimerId
+        int timerIdForConnectionExpired = TIMER_ID + 1; // different value from TIMER_ID
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_CONNECTION_EXPIRED,
                 timerIdForConnectionExpired);
 
-        when(mMockAlarmTimer.getTimerId()).thenReturn(mTimerId);
-        when(mMockAlarmTimer.startTimer(mTimerId, mInactivityTimer * 1000)).thenReturn(true);
+        when(mMockAlarmTimer.getTimerId()).thenReturn(TIMER_ID);
+        when(mMockAlarmTimer.startTimer(TIMER_ID, INACTIVITY_TIME_SEC * 1000)).thenReturn(true);
 
         mSscNetConnection.refreshConnectionTimer();
     }

@@ -979,8 +979,7 @@ public class SscXmlParserTest {
         SscServiceQueryData queryData = getQueryData(ESsType.CW, SscConstant.CONDITION_INVALID,
                 SscServiceClassUtil.SERVICE_CLASS_NONE);
         queryData.setResponseCode(SscConstant.HTTP_OK);
-        CwServiceData data = (CwServiceData) mSscXmlParser.getSscServiceFromDoc(queryData,
-                getDocumentFromString(xml), cachedDoc);
+        mSscXmlParser.getSscServiceFromDoc(queryData, getDocumentFromString(xml), cachedDoc);
 
         assertEquals("false", cachedDoc.getDocumentElement().getAttribute("active"));
     }

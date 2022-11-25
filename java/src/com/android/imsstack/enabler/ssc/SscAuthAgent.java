@@ -21,7 +21,6 @@ import android.text.TextUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.SystemUtils;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -95,7 +94,7 @@ public class SscAuthAgent implements ISscAuthAgent {
     @Override
     public String getNafFqdnFromRealm() {
         String realm = mSscAuthCredentials.getRealm();
-        if (TextUtils.isEmpty(realm) == true) {
+        if (TextUtils.isEmpty(realm)) {
             ImsLog.d("realm is invalid");
             return null;
         }
@@ -262,10 +261,9 @@ public class SscAuthAgent implements ISscAuthAgent {
         }
 
         private String generateCnonce() {
-            String date = "" + new Date().getTime();
-            String cnonce = SystemUtils.calculateMessageDigest("MD5", date);
+            String date = "" + System.currentTimeMillis();
 
-            return cnonce;
+            return SystemUtils.calculateMessageDigest("MD5", date);
         }
 
         private String calculateResponse(String varHA1, String nonce, String nc,

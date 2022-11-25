@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -76,7 +75,6 @@ public class SscServiceImplTest {
     private int mQueryCount; // increase after every startGetTransaction case
     private int mUpdateCount; // increase after every startPutTransaction case
     private Handler mCallbackHandler;
-    private HandlerThread mServiceThreadHandler;
     private TestableLooper mLooper;
 
     @Mock private Context mockContext;
@@ -114,7 +112,7 @@ public class SscServiceImplTest {
     private int mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         mQueryCount = 1;
@@ -132,11 +130,7 @@ public class SscServiceImplTest {
         mSscServiceImpl.setSscTransactionFactory(mockSscTransactionFactory);
 
         HandlerThread serviceThreadHandler = mSscServiceImpl.getServiceHandlerThread();
-        try {
-            mLooper = new TestableLooper(serviceThreadHandler.getLooper());
-        } catch (Exception e) {
-            fail("Fail to get looper from handler");
-        }
+        mLooper = new TestableLooper(serviceThreadHandler.getLooper());
 
         mCallbackHandler = mSscServiceImpl.getCallBackHandler();
         when(mockSscTransactionFactory.getSscTransaction(eq(SLOT_0), any()))

@@ -53,7 +53,7 @@ public final class SscConfig {
     }
 
     @VisibleForTesting
-    protected static void setConfigAgent(int slotId, ConfigAgent configAgent) {
+    static void setConfigAgent(int slotId, ConfigAgent configAgent) {
         if (configAgent == null) {
             return;
         }
@@ -104,122 +104,122 @@ public final class SscConfig {
     }
 
     // From CarrierConfigManager
-    public static boolean isUtSupported(int slotId) {
+    static boolean isUtSupported(int slotId) {
         return getBoolean(slotId, CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL);
     }
 
-    public static String getImsUserAgent(int slotId) {
+    static String getImsUserAgent(int slotId) {
         return getString(slotId, CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
     }
 
-    public static int getGbaMode(int slotId) {
+    static int getGbaMode(int slotId) {
         return getInt(slotId, CarrierConfigManager.KEY_GBA_MODE_INT);
     }
 
-    public static int[] getServerBasedServices(int slotId) {
+    static int[] getServerBasedServices(int slotId) {
         return getIntArray(slotId,
                 CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY);
     }
 
-    public static boolean isCsfbSupported(int slotId) {
+    static boolean isCsfbSupported(int slotId) {
         return getBoolean(slotId,
                 CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL);
     }
 
-    public static String getUtServerFqdn(int slotId) {
+    static String getUtServerFqdn(int slotId) {
         return getString(slotId, CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING);
     }
 
-    public static int getUtServerPort(int slotId) {
+    static int getUtServerPort(int slotId) {
         return getInt(slotId, CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_PORT_INT);
     }
 
-    public static int getUtTransportType(int slotId) {
+    static int getUtTransportType(int slotId) {
         return getInt(slotId, CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT);
     }
 
     // CarrierConfig
-    public static String getAuidPrefix(int slotId) {
+    static String getAuidPrefix(int slotId) {
         return getString(slotId, CarrierConfig.ImsSs.KEY_XCAP_AUID_PREFIX_STRING);
     }
 
-    public static int[] getSmCausePermBlock(int slotId) {
+    static int[] getSmCausePermBlock(int slotId) {
         return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_PERMANENT_BLOCK_INT_ARRAY);
     }
 
-    public static int[] getHttpPermBlockErrorCodes(int slotId) {
+    static int[] getHttpPermBlockErrorCodes(int slotId) {
         return getIntArray(slotId, CarrierConfig.ImsSs.KEY_UT_HTTP_PERMANENT_ERROR_CODE_INT_ARRAY);
     }
 
     // Asset
-    protected static boolean isSrvRecordsRequired(int slotId) {
+    static boolean isSrvRecordsRequired(int slotId) {
         return getBoolean(slotId, CarrierConfig.Assets.KEY_XCAP_ROOT_URI_REQUIRES_SRV_QUERY_BOOL);
     }
 
-    protected static int[] getSmCauseTempBlock(int slotId) {
+    static int[] getSmCauseTempBlock(int slotId) {
         return getIntArray(slotId, CarrierConfig.Assets.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY);
     }
 
-    protected static int[] getHttpTempBlockErrorCodes(int slotId) {
+    static int[] getHttpTempBlockErrorCodes(int slotId) {
         return getIntArray(slotId, CarrierConfig.Assets.KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY);
     }
 
-    protected static int getMaxRetryCount(int slotId) {
+    static int getMaxRetryCount(int slotId) {
         return getInt(slotId, CarrierConfig.Assets.KEY_UT_MAX_RETRY_COUNT_INT);
     }
 
-    protected static int getTimerForTempBlock(int slotId) {
+    static int getTimerForTempBlock(int slotId) {
         return getInt(slotId, CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_MIN_INT) * 60
                 * 1000;
     }
 
-    protected static boolean isCfActionErasureSupported(int slotId) {
+    static boolean isCfActionErasureSupported(int slotId) {
         return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL);
     }
 
-    protected static boolean isCfQueryAllAndCfAllConditionalSupported(int slotId) {
+    static boolean isCfQueryAllAndCfAllConditionalSupported(int slotId) {
         return getBoolean(slotId,
                 CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL);
     }
 
-    protected static int getOirNetworkDefaultOperation(int slotId) {
+    static int getOirNetworkDefaultOperation(int slotId) {
         return getInt(slotId, CarrierConfig.Assets.KEY_UT_OIR_NETWORK_DEFAULT_OPERATION_INT);
     }
 
-    protected static boolean isOirTirAlwaysTemporaryMode(int slotId) {
+    static boolean isOirTirAlwaysTemporaryMode(int slotId) {
         return getBoolean(slotId,
                 CarrierConfig.Assets.KEY_UT_OIR_TIR_ALWAYS_TEMPORARY_MODE_BOOL);
     }
 
-    protected static int getTimerForTempBlockWithAnyReason(int slotId) {
+    static int getTimerForTempBlockWithAnyReason(int slotId) {
         return getInt(slotId,
                 CarrierConfig.Assets.KEY_UT_TEMPORARY_BLOCK_TIMER_WITH_ANY_REASON_SEC_INT) * 1000;
     }
 
-    protected static String getPhoneContextForTargetAddress(int slotId) {
+    static String getPhoneContextForTargetAddress(int slotId) {
         return getString(slotId, CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING);
     }
 
-    protected static String getCountryCodeToReplaceCountryCodeWithZero(int slotId) {
+    static String getCountryCodeToReplaceCountryCodeWithZero(int slotId) {
         return getString(slotId,
                 CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING);
     }
 
-    protected static String getCountryCodeToReplaceZeroWithCountryCode(int slotId) {
+    static String getCountryCodeToReplaceZeroWithCountryCode(int slotId) {
         return getString(slotId,
                 CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING);
     }
 
-    protected static boolean isOmitNamespaceOfDocumentElement(int slotId) {
+    static boolean isOmitNamespaceOfDocumentElement(int slotId) {
         return getBoolean(slotId,
                 CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL);
     }
 
-    protected static boolean isOmitNamespaceSs(int slotId) {
+    static boolean isOmitNamespaceSs(int slotId) {
         return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL);
     }
 
-    protected static boolean isOmitNamespaceCp(int slotId) {
+    static boolean isOmitNamespaceCp(int slotId) {
         return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL);
     }
 
@@ -230,47 +230,44 @@ public final class SscConfig {
     }
     */
 
-    protected static int getXcapApnInactivityTimer(int slotId) {
+    static int getXcapApnInactivityTimer(int slotId) {
         return getInt(slotId, CarrierConfig.Assets.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT) * 1000;
     }
 
-    protected static boolean isErrorPhraseDisplayedWith409(int slotId) {
+    static boolean isErrorPhraseDisplayedWith409(int slotId) {
         return getBoolean(slotId,
                 CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL);
     }
 
-    protected static boolean insertNewRule(int slotId) {
+    static boolean insertNewRule(int slotId) {
         return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL);
     }
 
     // Specific APIs
-    protected static boolean isCfnlOverUtSupported(int slotId) {
+    static boolean isCfnlOverUtSupported(int slotId) {
         int[] serverBasedServices = getServerBasedServices(slotId);
         if (serverBasedServices == null) {
             return false;
         }
 
-        return Arrays.stream(serverBasedServices).anyMatch(value -> {
-            return value == CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFNL;
-        });
+        return Arrays.stream(serverBasedServices).anyMatch(value ->
+                value == CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFNL);
     }
 
-    protected static boolean isTls(int slotId) {
+    static boolean isTls(int slotId) {
         return getUtTransportType(slotId) == CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TLS;
     }
 
-    protected static boolean isPermanentBlockSmCause(int slotId, int smCause) {
+    static boolean isPermanentBlockSmCause(int slotId, int smCause) {
         int[] permBlockCauses = getSmCausePermBlock(slotId);
         if (permBlockCauses == null) {
             return false;
         }
 
-        return Arrays.stream(permBlockCauses).anyMatch(value -> {
-            return value == smCause;
-        });
+        return Arrays.stream(permBlockCauses).anyMatch(value -> value == smCause);
     }
 
-    protected static boolean isTemporaryBlockSmCause(int slotId, int smCause) {
+    static boolean isTemporaryBlockSmCause(int slotId, int smCause) {
         int[] tempBlockCauses = getSmCauseTempBlock(slotId);
         if (tempBlockCauses == null) {
             return false;
@@ -284,7 +281,7 @@ public final class SscConfig {
         });
     }
 
-    protected static boolean isPermanentErrorCode(int slotId, int responseCode) {
+    static boolean isPermanentErrorCode(int slotId, int responseCode) {
         int[] permBlockCodes = getHttpPermBlockErrorCodes(slotId);
         if (permBlockCodes == null) {
             return false;
@@ -300,7 +297,7 @@ public final class SscConfig {
         });
     }
 
-    protected static boolean isTemporaryErrorCode(int slotId, int responseCode) {
+    static boolean isTemporaryErrorCode(int slotId, int responseCode) {
         int[] tempBlockCodes = getHttpTempBlockErrorCodes(slotId);
         if (tempBlockCodes == null) {
             return false;
@@ -316,22 +313,19 @@ public final class SscConfig {
         });
     }
 
-    protected static boolean isGbaSupported(int slotId) {
+    static boolean isGbaSupported(int slotId) {
         int gbaType = SscConfig.getGbaMode(slotId);
-        if (gbaType == GBA_ME || gbaType == GBA_U) {
-            return true;
-        }
 
-        return false;
+        return (gbaType == GBA_ME) || (gbaType == GBA_U);
     }
 
     // Temporary APIs
-    public static boolean isTrustAllHosts(int slotId) {
+    static boolean isTrustAllHosts(int slotId) {
         // TODO: Is this function really needed?
         return false;
     }
 
-    public static String getTargetAddrScheme(int slotId) {
+    static String getTargetAddrScheme(int slotId) {
         // TODO: Is this function really needed?
         return "tel";
     }
@@ -342,7 +336,7 @@ public final class SscConfig {
     }
      */
 
-    public static boolean isPdnConnCheckedByDataState(int slotId) {
+    static boolean isPdnConnCheckedByDataState(int slotId) {
         // TODO:
         //return ImsGlobal.isOperatorCountry(slotId, "RJIL", "IN")  ? true : false;
         return false;

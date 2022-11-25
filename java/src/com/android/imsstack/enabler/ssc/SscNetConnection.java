@@ -36,7 +36,7 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 
 public class SscNetConnection implements ISscNetConnection {
     protected static final int EVENT_PDN_DATA_STATE_CHANGED = 1001;
@@ -59,11 +59,11 @@ public class SscNetConnection implements ISscNetConnection {
     private final int mSlotId;
     private EApnType mApnType = null;
     @VisibleForTesting
-    protected long mConnectionInactivityTimer = 120 * 1000;
+    protected int mConnectionInactivityTimer = 120 * 1000;
     private final ApnStateListener mApnStateListener = new ApnStateListenerImpl();
 
     @VisibleForTesting
-    protected Hashtable<Integer, Integer> mTimerIdTable = new Hashtable<Integer, Integer>();
+    protected LinkedHashMap<Integer, Integer> mTimerIdTable = new LinkedHashMap<Integer, Integer>();
 
     protected SscNetConnection(int slotId) {
         mSlotId = slotId;

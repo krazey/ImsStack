@@ -21,8 +21,6 @@ import android.text.TextUtils;
 import com.android.imsstack.core.agents.dcmif.DcConstants;
 import com.android.imsstack.util.ImsLog;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -130,8 +128,8 @@ public final class SscDnsQuery {
 
     private QueryObjectImpl getNextQueryObject(int slotId, boolean isBsfAddress) {
 
-        ImsLog.d("getNextQueryObject:: isBsfAddress = " + isBsfAddress);
-        int index = 0;
+        ImsLog.d(slotId, "getNextQueryObject:: isBsfAddress = " + isBsfAddress);
+        //int index = 0;
         QueryObjectImpl queryObject = null;
 
         /* ImsStack-Build_DNS
@@ -201,7 +199,8 @@ public final class SscDnsQuery {
     private void resolveUtXcapFqdn(int slotId, String fqdn,
             int interfaceType, boolean isBsfAddress)
     {
-        ImsLog.d("NAPTR interface to be used: " + interfaceType);
+        ImsLog.d(slotId, "NAPTR interface to be used: " + interfaceType + ", FQDN : " + fqdn
+                + ", interfaceType : " + interfaceType + ", isBsfAddress : " + isBsfAddress);
         /* ImsStack-Build_DNS
         Record[] naptrRecords = performLookup(fqdn, Type.NAPTR, interfaceType);
 
@@ -265,6 +264,7 @@ public final class SscDnsQuery {
         ImsLog.d("XCAP configuration: " + sNafIPAddress + ":" + sNafPort + ";");
     }
 
+    /* TODO : will be replaced if NAPTR query is needed
     private void getPortFromDB(int slotId, boolean isBsfAddress, String fqdn) {
 
         if (isBsfAddress == false) {
@@ -281,6 +281,7 @@ public final class SscDnsQuery {
                 //Don't Update  so that GBA would use mcc mnc based urls in GBAService module
         }
     }
+    */
     /* ImsStack-Build_DNS
     private Record[] performLookup(String domain, int type, int interfaceType) {
 
@@ -311,6 +312,7 @@ public final class SscDnsQuery {
         }
     }*/
 
+    /* TODO : will be replaced if NAPTR query is needed
     private String getDnsA(String domain) {
 
         try {
@@ -321,6 +323,7 @@ public final class SscDnsQuery {
             return null;
         }
     }
+     */
 
     /* ImsStack-Build_DNS
     private SRVRecord getBestDnsSRV(Record[] records, boolean isBsfAddress) {
@@ -379,7 +382,7 @@ public final class SscDnsQuery {
         String getIP();
     }
 
-    private class QueryObjectImpl implements IQueryObject {
+    private static class QueryObjectImpl implements IQueryObject {
         private int port = 0;
         private String ipAddress = null;
         QueryObjectImpl(int port, String ipAddress) {

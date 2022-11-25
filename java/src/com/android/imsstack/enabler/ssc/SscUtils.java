@@ -241,7 +241,7 @@ public class SscUtils {
      * Converts network type from TelephonyManager#NETWORK_TYPE_XXX to
      * ImsRadioInterface#ACCESS_NETWORK_TYPE_XXX
      *
-     * @param network type. See {@link TelephonyManager#NETWORK_TYPE_XXX}
+     * @param networkType See {@link TelephonyManager#NETWORK_TYPE_XXX}
      * @return Matched network type of {@link ImsRadioInterface.AccessNetworkType}
      */
     protected int convertToImsRadioNetworkType(@NetworkType int networkType) {

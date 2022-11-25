@@ -18,49 +18,95 @@ package com.android.imsstack.enabler.ssc.data;
 
 import java.util.ArrayDeque;
 
+/**
+ * This class stores request data to process from the framework. It handles transaction id, retry
+ * count, and supplementary service configuration data that needs to update via Ut interface.
+ */
 public class SscRequestData {
-    private int mTransactionId = 0;
+    private final int mTransactionId;
     private int mRetryCount = 0;
     private int mPreconditionFailedCount = 0;
-    private ArrayDeque<SscData> mSscDatas = new ArrayDeque<>();
+    private final ArrayDeque<SscData> mSscDataDeque = new ArrayDeque<>();
 
+    /**
+     * The default constructor
+     *
+     * @param transactionId The unique id to communicate with framework.
+     */
     public SscRequestData(int transactionId) {
         this.mTransactionId = transactionId;
     }
 
+    /**
+     * Returns transaction ID.
+     */
     public int getTransactionId() {
         return mTransactionId;
     }
 
+    /**
+     * Increases the number of retry.
+     */
     public void increaseRetryCount() {
         mRetryCount++;
     }
 
+    /**
+     * Returns the number of retry.
+     */
     public int getRetryCount() {
         return mRetryCount;
     }
 
+    /**
+     * Increases the number of precondition failure.
+     */
     public void increasePreconditionFailedCount() {
         mPreconditionFailedCount++;
     }
 
+    /**
+     * Returns the number of precondition failure.
+     */
     public int getPreconditionFailedCount() {
         return mPreconditionFailedCount;
     }
 
-    public void offerSscDataFirst(SscData SscData) {
-        mSscDatas.offerFirst(SscData);
+    /**
+     * Inserts SscData at the front of mSscDataDeque to handle first.
+     *
+     * @param sscData See {@link SscData}.
+     */
+    public void offerSscDataFirst(SscData sscData) {
+        mSscDataDeque.offerFirst(sscData);
     }
 
-    public void offerSscData(SscData SscData) {
-        mSscDatas.offerLast(SscData);
+    /**
+     * Inserts SscData at the end of mSscDataDeque.
+     *
+     * @param sscData See {@link SscData}.
+     */
+    public void offerSscData(SscData sscData) {
+        mSscDataDeque.offerLast(sscData);
     }
 
+    /**
+     * Retrieves, but does not remove, the last element of mSscDataDeque, or returns null if
+     * mSscDataDeque is empty.
+     *
+     * @return See {@link SscData}.
+     */
     public SscData peakSscData() {
-        return mSscDatas.peekFirst();
+        return mSscDataDeque.peekFirst();
     }
 
+    /**
+     * Retrieves and removes the first element of mSscDataDeque, or returns null if mSscDataDeque is
+     * empty.
+     *
+     * @return See {@link SscData}.
+     */
     public SscData pollSscData() {
-        return mSscDatas.pollFirst();
+        return mSscDataDeque.pollFirst();
     }
 }

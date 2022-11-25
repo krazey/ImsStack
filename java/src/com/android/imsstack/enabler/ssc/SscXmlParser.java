@@ -112,7 +112,7 @@ public class SscXmlParser {
     }
 
     protected void updateTagsAndRules(int slotId, Document doc) {
-        Element rootElement = (Element) doc.getDocumentElement();
+        Element rootElement = doc.getDocumentElement();
         updateTags(slotId, rootElement);
         updateRuleIds(slotId, rootElement);
         checkCfnrTimerPosition(slotId, rootElement);

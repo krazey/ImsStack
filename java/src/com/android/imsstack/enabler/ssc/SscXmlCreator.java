@@ -28,15 +28,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 
 public class SscXmlCreator {
-    private final Hashtable<ESsType, IXmlCreator> mXmlCreatorTable;
+    private final LinkedHashMap<ESsType, IXmlCreator> mXmlCreatorTable;
 
     public SscXmlCreator() {
         ImsLog.d("");
 
-        mXmlCreatorTable = new Hashtable<ESsType, IXmlCreator>();
+        mXmlCreatorTable = new LinkedHashMap<ESsType, IXmlCreator>();
         mXmlCreatorTable.put(ESsType.OIP, new XmlCreatorOip());
         mXmlCreatorTable.put(ESsType.OIR, new XmlCreatorOir());
         mXmlCreatorTable.put(ESsType.TIP, new XmlCreatorTip());

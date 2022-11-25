@@ -27,10 +27,10 @@ import android.telephony.ims.ImsSsInfo;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.dcmif.EApnType;
-import com.android.imsstack.enabler.ssc.data.CbServiceData;;
+import com.android.imsstack.enabler.ssc.data.CbServiceData;
 import com.android.imsstack.enabler.ssc.data.CbServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
-import com.android.imsstack.enabler.ssc.data.CfServiceData;;
+import com.android.imsstack.enabler.ssc.data.CfServiceData;
 import com.android.imsstack.enabler.ssc.data.CfServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CwServiceData;
@@ -41,7 +41,6 @@ import com.android.imsstack.enabler.ssc.data.SscData;
 import com.android.imsstack.enabler.ssc.data.SscRequestData;
 import com.android.imsstack.enabler.ssc.data.SscRequestResult;
 import com.android.imsstack.enabler.ssc.data.SscRuleData;
-import com.android.imsstack.enabler.ssc.data.SscRuleElement;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.TipServiceData;
@@ -53,7 +52,6 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -77,7 +75,6 @@ public class SscServiceImpl implements IUtInterface {
     private HandlerThread mSscServiceThread = null;
     private SscRequestHandler mSscRequestHandler = null;
     private SscCallbackHandler mSscCallbackHandler = null;
-
 
     public SscServiceImpl(int slotId) {
         mSlotId = slotId;
@@ -792,9 +789,9 @@ public class SscServiceImpl implements IUtInterface {
                 if (resultState == SscConstant.REQUEST_FAILURE) {
                     // set actual event requested
                     requestData.pollSscData();
-                    SscData SscData = requestData.peakSscData();
-                    if (SscData != null) {
-                        eventNum = SscData.getEventNumber();
+                    SscData sscData = requestData.peakSscData();
+                    if (sscData != null) {
+                        eventNum = sscData.getEventNumber();
                     }
                 }
             }
@@ -992,7 +989,7 @@ public class SscServiceImpl implements IUtInterface {
                 return null;
             }
 
-            CbServiceData cbData = (CbServiceData)data;
+            CbServiceData cbData = (CbServiceData) data;
             if (cbData.getRuleSet() == null || cbData.getRuleSet().size() <= 0) {
                 ImsLog.e(mSlotId, "CB ruleset is null or empty");
                 ImsSsInfo cbInfo[] = new ImsSsInfo[1];
@@ -1064,22 +1061,6 @@ public class SscServiceImpl implements IUtInterface {
             }
 
             return cfInfo;
-        }
-
-        private String getValueOfElement(String key, ArrayList<SscRuleElement> elementList) {
-            if (key == null || elementList == null) {
-                ImsLog.e(mSlotId, "key or elementList is null");
-                return null;
-            }
-
-            for (int i = 0; i < elementList.size(); i++) {
-                SscRuleElement element = elementList.get(i);
-                if (element.getKey().endsWith(key)) {
-                    return element.getValue();
-                }
-            }
-
-            return null;
         }
 
         private ImsSsInfo[] createCallWaitingInfo(SscServiceData data) {

@@ -34,7 +34,6 @@ public class SscXui {
     protected static final String IMPU_LIST_SIZE = "size";
     private static final String XUI_TOP_PREFERRED = "top";
     private static final String XUI_SIP_PREFERRED = "sip";
-    private static final String XUI_TEL_PREFERRED = "tel";
 
     private SscXui() {
     }
