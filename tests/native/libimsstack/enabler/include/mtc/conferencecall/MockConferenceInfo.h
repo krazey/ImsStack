@@ -38,37 +38,6 @@ private:
     IMS_UINT32 m_nMaxUserCount;
 };
 
-class MockHostInfo : public ConferenceInfo::HostInfo
-{
-public:
-    explicit MockHostInfo(IN AString strDisplayText, IN ImsList<AString> objUris) :
-            m_strDisplayText(strDisplayText),
-            m_objUris(objUris)
-    {
-    }
-    ~MockHostInfo() { m_objUris.Clear(); }
-    inline const AString& GetDisplayText() const override { return m_strDisplayText; }
-    inline const ImsList<AString> GetUris() const override { return m_objUris; }
-
-private:
-    AString m_strDisplayText;
-    ImsList<AString> m_objUris;
-};
-
-class MockConferenceState : public ConferenceInfo::ConferenceState
-{
-public:
-    explicit MockConferenceState(IN IMS_UINT32 nUserCount) :
-            m_nUserCount(nUserCount)
-    {
-    }
-    ~MockConferenceState() {}
-    inline IMS_UINT32 GetUserCount() const override { return m_nUserCount; }
-
-private:
-    IMS_UINT32 m_nUserCount;
-};
-
 class MockEndPoint : public ConferenceInfo::User::EndPoint
 {
 public:
@@ -90,33 +59,6 @@ private:
     AString m_strEntity;
     IMS_UINT32 m_nState;
     AString m_strDisplayText;
-    IMS_UINT32 m_nStatus;
-};
-
-class MockMedia : public ConferenceInfo::User::Media
-{
-public:
-    explicit MockMedia(IN IMS_UINT32 nId, IN AString strDisplayText, IN IMS_UINT32 nType,
-            IN AString strLabel, IN IMS_UINT32 nStatus) :
-            m_nId(nId),
-            m_strDisplayText(strDisplayText),
-            m_nType(nType),
-            m_strLabel(strLabel),
-            m_nStatus(nStatus)
-    {
-    }
-    ~MockMedia() {}
-    inline IMS_UINT32 GetId() const override { return m_nId; }
-    inline const AString& GetDisplayText() const override { return m_strDisplayText; }
-    inline IMS_UINT32 GetType() const override { return m_nType; }
-    inline const AString& GetLabel() const override { return m_strLabel; }
-    inline IMS_UINT32 GetStatus() const override { return m_nStatus; }
-
-private:
-    IMS_UINT32 m_nId;
-    AString m_strDisplayText;
-    IMS_UINT32 m_nType;
-    AString m_strLabel;
     IMS_UINT32 m_nStatus;
 };
 
@@ -148,12 +90,9 @@ class MockConferenceInfo : public ConferenceInfo
 {
 public:
     explicit MockConferenceInfo(IN ConferenceInfo::ConferenceDescription& objDescripiption,
-            IN ConferenceInfo::HostInfo& objHostInfo, IN ConferenceInfo::ConferenceState& objState,
             IN ImsList<ConferenceInfo::User*>& objUsers, IN IMS_UINT32 nState,
             IN IMS_SINT32 nVersion) :
             m_objDescription(objDescripiption),
-            m_objHostInfo(objHostInfo),
-            m_objState(objState),
             m_objUsers(objUsers),
             m_nState(nState),
             m_nVersion(nVersion)
@@ -164,8 +103,6 @@ public:
     {
         return m_objDescription;
     }
-    inline const HostInfo& GetHostInfo() const override { return m_objHostInfo; }
-    inline const ConferenceState& GetConferenceState() const override { return m_objState; }
     inline const ImsList<User*>& GetUsers() const override { return m_objUsers; }
     inline IMS_UINT32 GetState() const override { return m_nState; }
     inline IMS_SINT32 GetVersion() const override { return m_nVersion; }
@@ -173,8 +110,6 @@ public:
 
 private:
     ConferenceInfo::ConferenceDescription& m_objDescription;
-    ConferenceInfo::HostInfo& m_objHostInfo;
-    ConferenceInfo::ConferenceState& m_objState;
     ImsList<ConferenceInfo::User*>& m_objUsers;
     IMS_UINT32 m_nState;
     IMS_SINT32 m_nVersion;
