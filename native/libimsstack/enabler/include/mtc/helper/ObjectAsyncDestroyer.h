@@ -32,7 +32,7 @@ public:
 
     // ImsActivity implementation
     inline IImsActivityController* GetController() override { return IMS_NULL; }
-    inline IMS_BOOL DispatchMessage(IN IMSMSG& objMsg) override;
+    inline IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     inline void Destroy(IN MtcObject* pObject);
 
@@ -41,7 +41,7 @@ private:
 };
 
 PUBLIC VIRTUAL template <typename MtcObject>
-inline IMS_BOOL ObjectAsyncDestroyer<MtcObject>::DispatchMessage(IN IMSMSG& objMsg)
+inline IMS_BOOL ObjectAsyncDestroyer<MtcObject>::DispatchMessage(IN ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
     {
