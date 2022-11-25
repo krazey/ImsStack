@@ -104,8 +104,6 @@ public class RcsCapEventListenerCallBackTest {
         remoteCapabilities.add(FEATURE_VIDEO);
         mRcsCapEventListenerCallBack.onRemoteCapabilityRequest(Uri.parse(TEST_PHONE_NUMBER),
                 remoteCapabilities, callback);
-        mListener.onRemoteCapabilityRequest(Uri.parse(TEST_PHONE_NUMBER),
-                remoteCapabilities, optionsCallback);
         Mockito.verify(mListener).onRemoteCapabilityRequest(Uri.parse(TEST_PHONE_NUMBER),
                 remoteCapabilities, optionsCallback);
         doThrow(ImsException.class).when(mListener).onRemoteCapabilityRequest(

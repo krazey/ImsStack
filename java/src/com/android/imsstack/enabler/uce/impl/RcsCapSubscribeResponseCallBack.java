@@ -41,11 +41,13 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
     /**
      * set callback SubscribeResponseCallback of subscribe request
      * to send the response from the network back to the framework
+     *
      * @param subscribeCallback The callback of the subscribe request
      */
     public void setCallBack(SubscribeResponseCallback subscribeCallback) {
         mSubscribeResponseCallBack = subscribeCallback;
     }
+
     /**
      * Notify the framework of the latest XML PIDF documents included in the network response
      * for the requested contacts' capabilities requested by the Framework.
@@ -68,7 +70,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
                 mSubscribeResponseCallBack.onNotifyCapabilitiesUpdate(pidfXmls);
                 Log.d(LOG_TAG, "onNotifyCapabilitiesUpdate pidfXmls is sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onNotifyCapabilitiesUpdate exception = " + e.toString());
             }
         });
     }
@@ -100,7 +102,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
                 mSubscribeResponseCallBack.onCommandError(code);
                 Log.d(LOG_TAG, "onCommandError SubscribeResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onCommandError exception = " + e.toString());
             }
         });
     }
@@ -119,7 +121,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      * @param sipCode The SIP response code sent from the network for the operation
      * token specified.
      * @param reason The optional reason response from the network. If the network
-     *  provided no reason with the sip code, the string should be empty.
+     * provided no reason with the sip code, the string should be empty.
      */
     @Override
     public void onNetworkResponse(int sipCode, String reason) {
@@ -132,7 +134,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
                 mSubscribeResponseCallBack.onNetworkResponse(sipCode, reason);
                 Log.d(LOG_TAG, "onNetworkResponse SubscribeResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onNetworkResponse exception = " + e.toString());
             }
         });
     }
@@ -164,7 +166,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
                         reasonHeaderText);
                 Log.d(LOG_TAG, "onNetworkResponse SubscribeResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onNetworkResponse exception = " + e.toString());
             }
         });
     }
@@ -175,7 +177,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
      * NOTIFY response due to the subscription expiring, but this may also happen due to a
      * network error.
      *
-     * @param reason The reason for the request being unable to process.
+     * @param reason the reason for the request being unable to process.
      * @param retryAfterMilliseconds The time in milliseconds the requesting application should
      * wait before retrying, if non-zero.
      */
@@ -190,7 +192,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
                 mSubscribeResponseCallBack.onTerminated(reason, retryAfterMilliseconds);
                 Log.d(LOG_TAG, "onTerminated SubscribeResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onTerminated exception = " + e.toString());
             }
         });
     }
@@ -217,7 +219,7 @@ public class RcsCapSubscribeResponseCallBack implements SubscribeResponse {
                 mSubscribeResponseCallBack.onResourceTerminated(uriTerminatedReason);
                 Log.d(LOG_TAG, "onResourceTerminated SubscribeResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onResourceTerminated exception = " + e.toString());
             }
         });
     }
