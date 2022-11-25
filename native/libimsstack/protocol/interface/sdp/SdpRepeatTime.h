@@ -74,7 +74,7 @@ public:
      * @brief Sets all the parameters for the repeat-time line.
      */
     IMS_BOOL SetValue(IN IMS_UINT32 nInterval, IN IMS_UINT32 nActiveDuration,
-            IN IMS_UINT32 nFirstOffset, IN ImsList<IMS_UINT32>& objAdditionalOffsets);
+            IN IMS_UINT32 nFirstOffset, IN const ImsList<IMS_UINT32>& objAdditionalOffsets);
 
 private:
     IMS_BOOL IsValid() const;

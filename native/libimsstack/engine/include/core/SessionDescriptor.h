@@ -23,7 +23,7 @@ class ISessionState;
 class SessionDescriptor : public ISessionDescriptor
 {
 public:
-    SessionDescriptor(IN ISessionState* piSessionState_);
+    SessionDescriptor(IN ISessionState* piSessionState);
     virtual ~SessionDescriptor();
 
     SessionDescriptor(IN const SessionDescriptor&) = delete;

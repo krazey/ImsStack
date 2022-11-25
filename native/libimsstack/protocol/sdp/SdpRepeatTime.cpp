@@ -181,7 +181,7 @@ PUBLIC VIRTUAL AString SdpRepeatTime::GetValue() const
 
 PUBLIC
 IMS_BOOL SdpRepeatTime::SetValue(IN IMS_UINT32 nInterval, IN IMS_UINT32 nActiveDuration,
-        IN IMS_UINT32 nFirstOffset, IN ImsList<IMS_UINT32>& objOffsets)
+        IN IMS_UINT32 nFirstOffset, IN const ImsList<IMS_UINT32>& objAdditionalOffsets)
 {
     if (nInterval == 0)
     {
@@ -191,7 +191,7 @@ IMS_BOOL SdpRepeatTime::SetValue(IN IMS_UINT32 nInterval, IN IMS_UINT32 nActiveD
     m_nRepeatInterval = nInterval;
     m_nActiveDuration = nActiveDuration;
     m_nFirstOffset = nFirstOffset;
-    m_objAdditionalOffsets = objOffsets;
+    m_objAdditionalOffsets = objAdditionalOffsets;
 
     return IMS_TRUE;
 }
