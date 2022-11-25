@@ -275,7 +275,7 @@ public class AosSettingServiceTest {
         field.set(obj, newValue);
     }
 
-    private class FakeAosSettingService extends AosSettingService {
+    private static class FakeAosSettingService extends AosSettingService {
         FakeAosSettingService(int slotId) {
             super(slotId);
         }
