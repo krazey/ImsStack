@@ -34,7 +34,7 @@ private:
 
 public:
     DocumentBuilder* NewDocumentBuilder() override;
-    void DestroyDocumentBuilder(IN DocumentBuilder*& pDocumentBuilder);
+    static void DestroyDocumentBuilder(IN DocumentBuilder*& pDocumentBuilder);
 
     static DomDocumentBuilderFactory* GetInstance();
 };

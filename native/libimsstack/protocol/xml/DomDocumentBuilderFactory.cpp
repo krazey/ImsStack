@@ -48,7 +48,7 @@ PUBLIC GLOBAL DomDocumentBuilderFactory* DomDocumentBuilderFactory::GetInstance(
     return pDomDocumentBuilderFactory;
 }
 
-PUBLIC VIRTUAL void DomDocumentBuilderFactory::DestroyDocumentBuilder(
+PUBLIC GLOBAL void DomDocumentBuilderFactory::DestroyDocumentBuilder(
         IN DocumentBuilder*& pDocumentBuilder)
 {
     DomDocumentBuilder* pBuilder = DYNAMIC_CAST(DomDocumentBuilder*, pDocumentBuilder);
