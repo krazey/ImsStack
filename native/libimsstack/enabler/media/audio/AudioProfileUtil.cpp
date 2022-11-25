@@ -499,11 +499,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
             IMS_SINT32 nCurrAs = 0;
             IMS_SINT32 nTempCodecMode = pEvsConfig->GetEvsModeSwitch();
 
-            if (nTempCodecMode == 1)
-            {
-                nTempCodecMode = 1;
-            }
-            else
+            if (nTempCodecMode != 1)
             {
                 nTempCodecMode = 0;
             }

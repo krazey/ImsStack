@@ -831,12 +831,9 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfigu
     else
     {
         // MT's Bandwidth Setting
-        pNegotiatedProfile->nBandwidthAs = pLocalProfile->nBandwidthAs;
         // 1. Set Negotiated AS Value
         if (nAsValueOfNegoticatedCodec > 0)
         {
-            pNegotiatedProfile->nBandwidthAs = nAsValueOfNegoticatedCodec;
-
             // if GetBandwidthNegoOption is BW_OPTION_NEGOTIATED_VALUE, use lower AS value
             if (pConfig->GetBandwidthNegoOption() ==
                             MediaConfiguration::BW_OPTION_NEGOTIATED_VALUE &&
@@ -845,15 +842,17 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileUtil::MakeNegotiatedBandwidth(IN VideoConfigu
             {
                 pNegotiatedProfile->nBandwidthAs = pPeerProfile->nBandwidthAs;
             }
-        }
-
-        if (pPeerProfile->nBandwidthAs > pLocalProfile->nBandwidthAs)
-        {
-            pNegotiatedProfile->nBandwidthAs = pLocalProfile->nBandwidthAs;
+            else
+            {
+                pNegotiatedProfile->nBandwidthAs = nAsValueOfNegoticatedCodec;
+            }
         }
         else
         {
-            pNegotiatedProfile->nBandwidthAs = pPeerProfile->nBandwidthAs;
+            pNegotiatedProfile->nBandwidthAs =
+                    (pPeerProfile->nBandwidthAs > pLocalProfile->nBandwidthAs)
+                    ? pLocalProfile->nBandwidthAs
+                    : pPeerProfile->nBandwidthAs;
         }
 
         // 3. Set RS/RR Value

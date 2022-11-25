@@ -1393,7 +1393,7 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             pProfile->nBandwidthRs, pProfile->nBandwidthRr);
 
     // Setting transport type (for supporting AVPF)
-    SdpMedia* pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
+    SdpMedia* pSDPMedia = const_cast<SdpMedia*>(pDescriptor->GetMediaDescriptionEx());
 
     if (pSDPMedia != IMS_NULL)
     {
@@ -1492,7 +1492,7 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             // Create AVPF attributes
             if ((pProfile->bSupportAvpf == IMS_TRUE) || (pProfile->bSupportCapaNegoForAvpf))
             {
-                if (GetAvpfFromAttributes((SdpMediaFormat*)pSdpCodec, &pProfile->objCapaNego,
+                if (GetAvpfFromAttributes(pSdpCodec, &pProfile->objCapaNego,
                             &pPayload->objRtcpFbAttr) == IMS_FALSE)
                 {
                     GetAvpfFromAttributes_EX(
@@ -1514,7 +1514,7 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             // Create AVPF attributes
             if (pProfile->bSupportAvpf == IMS_TRUE)
             {
-                if (GetAvpfFromAttributes((SdpMediaFormat*)pSdpCodec, &pProfile->objCapaNego,
+                if (GetAvpfFromAttributes(pSdpCodec, &pProfile->objCapaNego,
                             &pPayload->objRtcpFbAttr) == IMS_FALSE)
                 {
                     GetAvpfFromAttributes_EX(
@@ -2192,10 +2192,9 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                 for (IMS_UINT32 nLocalIndex = 0; nLocalIndex < pLocalProfile->lstPayload.GetSize();
                         nLocalIndex++)
                 {
-                    VideoProfile::Payload* pLocalPayload =
-                            pLocalProfile->lstPayload.GetAt(nLocalIndex);
+                    VideoProfile::Payload* pPayload = pLocalProfile->lstPayload.GetAt(nLocalIndex);
                     VideoProfile::AvcFmtp* pTempLocalFmtp =
-                            reinterpret_cast<VideoProfile::AvcFmtp*>(pLocalPayload->pFmtp);
+                            reinterpret_cast<VideoProfile::AvcFmtp*>(pPayload->pFmtp);
 
                     if (pTempLocalFmtp->nLevel <= pAvcFmtp->nLevel)
                     {
@@ -2618,7 +2617,6 @@ VideoProfile::Payload* VideoNego::FindPayloadInProfile(
         return IMS_NULL;
     }
 
-    VideoProfile::Payload* pOriginPayload = IMS_NULL;  // payload from profile which whil be checked
     VideoProfile::Payload* pTempPayload = IMS_NULL;    // To keep secondary payload
 
     if (m_pConfig == IMS_NULL)
@@ -2628,7 +2626,7 @@ VideoProfile::Payload* VideoNego::FindPayloadInProfile(
 
     for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
     {
-        pOriginPayload = pProfile->lstPayload.GetAt(i);
+        VideoProfile::Payload* pOriginPayload = pProfile->lstPayload.GetAt(i);
         if (pOriginPayload == IMS_NULL)
         {
             continue;
@@ -3431,7 +3429,7 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes(IN SdpMediaFormat* pMediaForma
 
         if (pMediaParam->GetAttribute() == SdpAttribute::RTCP_FB)
         {
-            SdpRtcpFeedback* pRtcpParam = (SdpRtcpFeedback*)pMediaParam;
+            SdpRtcpFeedback* pRtcpParam = static_cast<SdpRtcpFeedback*>(pMediaParam);
             if (pRtcpParam->GetType().Equals("trr-int"))
             {
                 pRtcpFbAttr->bTrrSupported = IMS_TRUE;
@@ -3783,36 +3781,17 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                         IMS_TRACE_I("MakeNegotiatedCapaNego() strDestAttributeCapa [%s]",
                                 strDestAttributeCapa.GetStr(), 0, 0);
 
-                        if (strDestAttributeCapa.Contains("trr-int") == IMS_TRUE)
+                        if (strDestAttributeCapa.Contains("trr-int") == IMS_TRUE ||
+                                strDestAttributeCapa.Contains("nack") == IMS_TRUE)
                         {
                             cnt++;
                             pNegotiatedCapaNego->mapAttributeCapa.Add(
                                     lstSplitComma.GetAt(k).ToInt32(), strDestAttributeCapa);
                         }
-                        else if (strDestAttributeCapa.Contains("nack") == IMS_TRUE)
-                        {
-                            if (strDestAttributeCapa.Contains("pli") == IMS_TRUE)
-                            {
-                                cnt++;
-                                pNegotiatedCapaNego->mapAttributeCapa.Add(
-                                        lstSplitComma.GetAt(k).ToInt32(), strDestAttributeCapa);
-                            }
-                            else
-                            {
-                                cnt++;
-                                pNegotiatedCapaNego->mapAttributeCapa.Add(
-                                        lstSplitComma.GetAt(k).ToInt32(), strDestAttributeCapa);
-                            }
-                        }
                         else if (strDestAttributeCapa.Contains("ccm") == IMS_TRUE)
                         {
-                            if (strDestAttributeCapa.Contains("fir") == IMS_TRUE)
-                            {
-                                cnt++;
-                                pNegotiatedCapaNego->mapAttributeCapa.Add(
-                                        lstSplitComma.GetAt(k).ToInt32(), strDestAttributeCapa);
-                            }
-                            else if (strDestAttributeCapa.Contains("tmmbr") == IMS_TRUE)
+                            if (strDestAttributeCapa.Contains("fir") == IMS_TRUE ||
+                                    strDestAttributeCapa.Contains("tmmbr") == IMS_TRUE)
                             {
                                 cnt++;
                                 pNegotiatedCapaNego->mapAttributeCapa.Add(
@@ -3903,14 +3882,12 @@ PRIVATE IMS_BOOL VideoNego::CheckAvpfFromProfile(IN VideoProfile* pProfile)
 
 PRIVATE VideoNego::OaModel* VideoNego::GetNegotiatedOaModel()
 {
-    OaModel* pLatestOaModel = IMS_NULL;
-
     IMS_UINT32 nOaModelCount = m_listOaModel.GetSize();
     IMS_UINT32 nTempOaModelCount = nOaModelCount;
 
     while (nTempOaModelCount > 0)
     {
-        pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
+        OaModel* pLatestOaModel = m_listOaModel.GetAt(nTempOaModelCount - 1);
 
         if (pLatestOaModel != IMS_NULL)
         {

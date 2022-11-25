@@ -214,7 +214,6 @@ IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
         IMS_TRACE_E(0, "Creating an audio configuration failed", 0, 0, 0);
 
         delete pConfig;
-        pConfig = IMS_NULL;
         return IMS_FALSE;
     }
 
@@ -240,7 +239,6 @@ IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
         IMS_TRACE_E(0, "Creating an video configuration failed", 0, 0, 0);
 
         delete pConfig;
-        pConfig = IMS_NULL;
         return IMS_FALSE;
     }
 
@@ -266,7 +264,6 @@ IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
         IMS_TRACE_E(0, "Creating an text configuration failed", 0, 0, 0);
 
         delete pConfig;
-        pConfig = IMS_NULL;
         return IMS_FALSE;
     }
 

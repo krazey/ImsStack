@@ -92,7 +92,8 @@ void JniMediaSession::Initialize(
     };
 
     ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, GetSlotId());
-    m_pThread = (JniMediaSessionThread*)(ImsProcess::GetInstance()->GetThread(m_strThreadName));
+    m_pThread = reinterpret_cast<JniMediaSessionThread*>(
+            ImsProcess::GetInstance()->GetThread(m_strThreadName));
 
     if (m_pThread == IMS_NULL)
     {

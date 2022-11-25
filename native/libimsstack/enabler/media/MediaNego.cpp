@@ -223,7 +223,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                 return IMS_FALSE;
             }
 
-            SdpMedia* pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
+            SdpMedia* pSDPMedia = const_cast<SdpMedia*>(pDescriptor->GetMediaDescriptionEx());
 
             if (pSDPMedia == IMS_NULL)
             {
@@ -247,8 +247,6 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
 
                         bAudioMLineSetted = IMS_TRUE;
                     }
-
-                    bAudioMLineSetted = IMS_TRUE;
                     break;
                 case SdpMedia::TYPE_VIDEO:
                     if (bVideoMLineSetted == IMS_FALSE)
@@ -292,8 +290,6 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                             {
                                 continue;
                             }
-                            bAudioMLineSetted = IMS_TRUE;
-                            pSDPMedia->SetType(SdpMedia::TYPE_AUDIO);
                         }
 
                         bAudioMLineSetted = IMS_TRUE;
@@ -477,7 +473,7 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
             continue;
         }
 
-        SdpMedia* pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
+        SdpMedia* pSDPMedia = const_cast<SdpMedia*>(pDescriptor->GetMediaDescriptionEx());
 
         if (pSDPMedia == IMS_NULL)
         {
@@ -891,7 +887,7 @@ void MediaNego::SetSessionType(IN ISession* pSession)
             return;
         }
 
-        SdpMedia* pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
+        SdpMedia* pSDPMedia = const_cast<SdpMedia*>(pDescriptor->GetMediaDescriptionEx());
         if (pSDPMedia != IMS_NULL && pSDPMedia->GetType() == SdpMedia::TYPE_AUDIO &&
                 pSDPMedia->GetPort() != -1)
         {

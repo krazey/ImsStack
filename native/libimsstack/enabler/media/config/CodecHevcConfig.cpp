@@ -67,7 +67,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_
     {
         IMS_TRACE_E(0, "Create - piCcSubBundle is NULL", 0, 0, 0);
         piCcBundle->ReleaseBundle();
-        piCcBundle = IMS_NULL;
+
         return IMS_FALSE;
     }
 
@@ -104,10 +104,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_
     //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_AVC_FRAME_SIZE_STRING);
 
     piCcSubBundle->ReleaseBundle();
-    piCcSubBundle = IMS_NULL;
-
     piCcBundle->ReleaseBundle();
-    piCcBundle = IMS_NULL;
 
     return IMS_TRUE;
 }

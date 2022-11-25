@@ -104,7 +104,6 @@ void MediaSessionConfigFactory::DestroyListSessionConfig(IN IMS_SINT32 nSlotId)
 
         pListMediaSessionConfig->Clear();
         delete pListMediaSessionConfig;
-        pListMediaSessionConfig = IMS_NULL;
     }
 }
 

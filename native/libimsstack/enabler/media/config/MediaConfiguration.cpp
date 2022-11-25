@@ -58,10 +58,9 @@ PUBLIC VIRTUAL IMS_BOOL MediaConfiguration::Update(IN ICarrierConfig* piCc)
 
 PUBLIC VIRTUAL CodecConfig* MediaConfiguration::GetCodecConfig(IN IMS_UINT32 nCodec) const
 {
-    CodecConfig* pCodecConfig = IMS_NULL;
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); i++)
     {
-        pCodecConfig = objCodecConfigs.GetAt(i);
+        CodecConfig* pCodecConfig = objCodecConfigs.GetAt(i);
 
         if (pCodecConfig->GetCodec() == nCodec)
         {
@@ -279,7 +278,6 @@ PROTECTED VIRTUAL void MediaConfiguration::Clear()
         if (pCodecConfig != IMS_NULL)
         {
             delete pCodecConfig;
-            pCodecConfig = IMS_NULL;
         }
     }
 

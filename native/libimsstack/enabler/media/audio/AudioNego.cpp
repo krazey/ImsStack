@@ -564,11 +564,10 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::HasNegotiatedDtmf(void)
             return IMS_FALSE;
         }
 
-        AudioProfile::Payload* pPayload = IMS_NULL;
-
         for (IMS_UINT32 i = 0; i < pLatestOaModel->pNegotiatedProfile->lstPayload.GetSize(); i++)
         {
-            pPayload = pLatestOaModel->pNegotiatedProfile->lstPayload.GetAt(i);
+            AudioProfile::Payload* pPayload =
+                    pLatestOaModel->pNegotiatedProfile->lstPayload.GetAt(i);
             if (pPayload == IMS_NULL)
             {
                 continue;
@@ -2040,7 +2039,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 pAMR->SetRtpMap(pPayload->objRtpMap);
                 AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp(
                         *reinterpret_cast<AudioProfile::AmrFmtp*>(pPayload->pFmtp));
-                pAMR->pFmtp = (void*)pAmrFmtp;
+                pAMR->pFmtp = static_cast<void*>(pAmrFmtp);
                 templstNegotiatedPayloads.Append(pAMR);
             }
         }
@@ -2055,7 +2054,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
                 AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp(
                         *reinterpret_cast<AudioProfile::EvsFmtp*>(pPayload->pFmtp));
-                pEVS->pFmtp = (void*)pEvsFmtp;
+                pEVS->pFmtp = static_cast<void*>(pEvsFmtp);
 
                 templstNegotiatedPayloads.Append(pEVS);
             }
@@ -2115,7 +2114,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 pAmrFmtp->bShowModeChangePeriod = pSrc_Fmtp->bShowModeChangePeriod;
                 pAmrFmtp->nModeChangePeriod = pSrc_Fmtp->nModeChangePeriod;
 
-                pAMR->pFmtp = (void*)pAmrFmtp;
+                pAMR->pFmtp = static_cast<void*>(pAmrFmtp);
                 pNegotiatedProfile->lstPayload.Append(pAMR);
                 lstNegotiatedPayloads.Append(pAMR);
 
@@ -2208,7 +2207,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                 // CMR on/off, if bitrate is not range set, disable CMR send option
                 IMS_UINT32 nCount = 0;
                 IMS_UINT32 nTempBrList = pEvsFmtp->nBrList;
-                for (int i = 0; i < 16; i++)
+                for (IMS_UINT32 l = 0; l < 16; l++)
                 {
                     if (nTempBrList & 0x01)
                     {
@@ -2241,7 +2240,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                     }
                 }
 
-                pEVS->pFmtp = (void*)pEvsFmtp;
+                pEVS->pFmtp = static_cast<void*>(pEvsFmtp);
                 pNegotiatedProfile->lstPayload.Append(pEVS);
                 lstNegotiatedPayloads.Append(pEVS);
 
@@ -2292,7 +2291,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                             new AudioProfile::TelephoneEventFmtp(
                                     *reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(
                                             pDestPayload->pFmtp));
-                    pTelephoneEvent->pFmtp = (void*)pTelephoneFmtp;
+                    pTelephoneEvent->pFmtp = static_cast<void*>(pTelephoneFmtp);
                     pNegotiatedProfile->lstPayload.Append(pTelephoneEvent);
                     bProperNegotiatedTe = IMS_TRUE;
                     break;
@@ -2370,7 +2369,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                             new AudioProfile::TelephoneEventFmtp(
                                     *reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(
                                             pDestPayload->pFmtp));
-                    pTelephoneEvent->pFmtp = (void*)pTelephoneFmtp;
+                    pTelephoneEvent->pFmtp = static_cast<void*>(pTelephoneFmtp);
                     pNegotiatedProfile->lstPayload.Append(pTelephoneEvent);
                 }
             }
@@ -4364,13 +4363,11 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::MakeNegotiatedCapaNegoProfile(
 PRIVATE
 AudioNego::OaModel* AudioNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
 {
-    OaModel* pLatestOaModel = IMS_NULL;
-
     IMS_UINT32 nOaModelCount = m_lstOaModel.GetSize();
     IMS_UINT32 nTempOaModelCount = nOaModelCount;
     while (nTempOaModelCount > 0)
     {
-        pLatestOaModel = m_lstOaModel.GetAt(nTempOaModelCount - 1);
+        OaModel* pLatestOaModel = m_lstOaModel.GetAt(nTempOaModelCount - 1);
         if (pLatestOaModel != IMS_NULL)
         {
             if (pLatestOaModel->IsAllProfileExist() == IMS_TRUE && bCheckConfirmed == IMS_FALSE)

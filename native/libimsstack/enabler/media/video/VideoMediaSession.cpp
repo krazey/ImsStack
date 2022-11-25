@@ -643,10 +643,7 @@ IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
 
         VideoConfig* pVideoConfig = REINTERPRET_CAST(VideoConfig*, m_pRtpConfig);
 
-        if (m_nCameraId != param->nValue)
-        {
-            m_nCameraId = param->nValue;
-        }
+        m_nCameraId = param->nValue;
 
         delete param;
 

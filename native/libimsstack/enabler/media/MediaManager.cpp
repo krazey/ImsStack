@@ -189,7 +189,7 @@ PUBLIC VIRTUAL void MediaManager::SendMessage(
     {
         for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
         {
-            MediaSessionNode* pSessionNode = (MediaSessionNode*)m_lstSessionNode.GetAt(i);
+            MediaSessionNode* pSessionNode = m_lstSessionNode.GetAt(i);
 
             if (pSessionNode != IMS_NULL && pSessionNode->pMediaSession != IMS_NULL)
             {
@@ -239,11 +239,9 @@ void MediaManager::ClearMediaSessionNode()
     IMS_TRACE_D(
             "ClearMediaSessionNode() m_lstSessionNode size=%d", m_lstSessionNode.GetSize(), 0, 0);
 
-    MediaSessionNode* pSessionNode = IMS_NULL;
-
     while (m_lstSessionNode.GetSize() > 0)
     {
-        pSessionNode = m_lstSessionNode.GetValueAt(0);
+        MediaSessionNode* pSessionNode = m_lstSessionNode.GetValueAt(0);
         DeleteMediaSessionNode(pSessionNode, 0);
     }
 
@@ -273,7 +271,7 @@ PRIVATE VIRTUAL MediaManager::MediaSessionNode* MediaManager::FindSessionNode(IN
 {
     for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
     {
-        MediaSessionNode* pSessionNode = (MediaSessionNode*)m_lstSessionNode.GetAt(i);
+        MediaSessionNode* pSessionNode = m_lstSessionNode.GetAt(i);
 
         if (pSessionNode != IMS_NULL)
         {

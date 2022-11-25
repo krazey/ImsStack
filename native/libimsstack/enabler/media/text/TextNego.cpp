@@ -1146,7 +1146,7 @@ PRIVATE IMS_BOOL TextNego::MakeProfileFromSDP(IN ISessionDescriptor* pSessionDes
 
             for (IMS_UINT32 j = 0; j < lstMediaFormat.GetSize(); j++)
             {
-                SdpAvCodec* pSDPCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(j));
+                pSDPCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(j));
                 if (pSDPCodec == IMS_NULL)
                     continue;
 
@@ -1275,7 +1275,7 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
                 {
                     TextProfile::RedFmtp* pRedFmtp = new TextProfile::RedFmtp(
                             *reinterpret_cast<TextProfile::RedFmtp*>(pPayload->pFmtp));
-                    pT140->pFmtp = (void*)pRedFmtp;
+                    pT140->pFmtp = reinterpret_cast<void*>(pRedFmtp);
                 }
 
                 pNegotiatedProfile->lstPayload.Append(pT140);
@@ -1476,15 +1476,13 @@ PRIVATE MEDIA_DIRECTION TextNego::UpdateDirectionToMine(IN MEDIA_DIRECTION ePeer
 
 PRIVATE TextNego::OaModel* TextNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
 {
-    OaModel* pLatestOaModel = IMS_NULL;
     OaModel* pFoundOaModel = IMS_NULL;
-
     IMS_UINT32 nOaModelCount = m_listOaModel.GetSize();
 
     // remake function - find negotiated payload is existed OA model
     while (nOaModelCount > 0)
     {
-        pLatestOaModel = m_listOaModel.GetAt(nOaModelCount - 1);
+        OaModel* pLatestOaModel = m_listOaModel.GetAt(nOaModelCount - 1);
         if (pLatestOaModel != IMS_NULL)
         {
             if (pLatestOaModel->IsAllProfileExist() == IMS_TRUE)

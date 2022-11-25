@@ -789,7 +789,6 @@ IMS_BOOL MediaSession::DeleteMediaNego(IN IMS_UINTP nNegoId)
     }
 
     delete pMediaNego;
-    pMediaNego = IMS_NULL;
 
     return IMS_TRUE;
 }
@@ -799,16 +798,13 @@ void MediaSession::ClearMediaNego()
 {
     IMS_TRACE_D("ClearMediaNego() m_objMapMediaNego size[%d]", m_objMapMediaNego.GetSize(), 0, 0);
 
-    MediaNego* pMediaNego = IMS_NULL;
-
     while (m_objMapMediaNego.GetSize() > 0)
     {
-        pMediaNego = m_objMapMediaNego.GetValueAt(0);
+        MediaNego* pMediaNego = m_objMapMediaNego.GetValueAt(0);
 
         if (pMediaNego != IMS_NULL)
         {
             delete pMediaNego;
-            pMediaNego = IMS_NULL;
         }
 
         m_objMapMediaNego.RemoveAt(0);
@@ -822,14 +818,7 @@ IMSList<ImsMediaMsgQosParam*>* MediaSession::FindQosParam(IN IMS_UINTP nNegoId)
 {
     IMS_SLONG nIndex = m_objMapQosParams.GetIndexOfKey(nNegoId);
 
-    if (nIndex < 0)
-    {
-        return IMS_NULL;
-    }
-
-    IMSList<ImsMediaMsgQosParam*>* pListQosParam = IMS_NULL;
-    pListQosParam = m_objMapQosParams.GetValueAt(nIndex);
-    return pListQosParam;
+    return (nIndex >= 0) ? m_objMapQosParams.GetValueAt(nIndex) : IMS_NULL;
 }
 
 PROTECTED IMS_BOOL MediaSession::processRequestQos(IN IMS_UINTP nNegoId,
@@ -927,21 +916,27 @@ void MediaSession::ClearQosParam()
 {
     IMS_TRACE_D("ClearQosParam() - map size[%d]", m_objMapQosParams.GetSize(), 0, 0);
 
-    IMSList<ImsMediaMsgQosParam*>* pListQosParam = IMS_NULL;
-
     while (!m_objMapQosParams.IsEmpty())
     {
-        pListQosParam = m_objMapQosParams.GetValueAt(0);
+        IMSList<ImsMediaMsgQosParam*>* pListQosParam = m_objMapQosParams.GetValueAt(0);
 
         IMS_TRACE_D("ClearQosParam() - list size[%d]", pListQosParam->GetSize(), 0, 0);
 
-        while (pListQosParam != IMS_NULL && !pListQosParam->IsEmpty())
+        if (pListQosParam != IMS_NULL)
         {
-            pListQosParam->RemoveAt(0);
-        }
+            while (!pListQosParam->IsEmpty())
+            {
+                ImsMediaMsgQosParam* pParam = pListQosParam->GetAt(0);
+                if (pParam != IMS_NULL)
+                {
+                    delete pParam;
+                }
+                pListQosParam->RemoveAt(0);
+            }
 
-        pListQosParam->Clear();
-        delete pListQosParam;
+            pListQosParam->Clear();
+            delete pListQosParam;
+        }
         m_objMapQosParams.RemoveAt(0);
     }
 
@@ -1136,11 +1131,9 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                         return 0;
                     }
 
-                    ImsMediaMsgQosParam* matchedParam = IMS_NULL;
-
                     for (IMS_UINT32 i = 0; i < pListParams->GetSize(); i++)
                     {
-                        matchedParam = pListParams->GetAt(i);
+                        ImsMediaMsgQosParam* matchedParam = pListParams->GetAt(i);
 
                         if (matchedParam != NULL && matchedParam->m_objIpAddress == objIpAddress &&
                                 matchedParam->m_nPort == nPort &&

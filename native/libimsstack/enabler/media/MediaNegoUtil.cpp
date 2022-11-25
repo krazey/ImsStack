@@ -32,20 +32,13 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
         return IMS_FALSE;
     }
 
-    IMS_UINT32 nIndex = 0;
-
-    MediaNego* pMediaNego = IMS_NULL;
-    AudioNego* pAudioNego = IMS_NULL;
-    VideoNego* pVideoNego = IMS_NULL;
-    TextNego* pTextNego = IMS_NULL;
-
-    for (nIndex = 0; nIndex < pMediaNegoMap->GetSize(); nIndex++)
+    for (IMS_UINT32 nIndex = 0; nIndex < pMediaNegoMap->GetSize(); nIndex++)
     {
-        pMediaNego = pMediaNegoMap->GetValueAt(nIndex);
+        MediaNego* pMediaNego = pMediaNegoMap->GetValueAt(nIndex);
 
         if (pMediaNego != IMS_NULL)
         {
-            pAudioNego = pMediaNego->GetAudioNego();
+            AudioNego* pAudioNego = pMediaNego->GetAudioNego();
 
             if (pAudioNego != IMS_NULL)
             {
@@ -58,7 +51,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
                 }
             }
 
-            pVideoNego = pMediaNego->GetVideoNego();
+            VideoNego* pVideoNego = pMediaNego->GetVideoNego();
 
             if (pVideoNego != IMS_NULL)
             {
@@ -71,7 +64,7 @@ IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMedi
                 }
             }
 
-            pTextNego = pMediaNego->GetTextNego();
+            TextNego* pTextNego = pMediaNego->GetTextNego();
 
             if (pTextNego != IMS_NULL)
             {
