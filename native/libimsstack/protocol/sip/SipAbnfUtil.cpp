@@ -29,7 +29,7 @@ SIP_BOOL HasSpace(const SIP_CHAR* pszValue)
     return SIP_FALSE;
 }
 
-SIP_CHAR* SipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_CHAR* SipSkipRwWSP(const SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /*NULL validation*/
     if ((pStartPt == SIP_NULL) || (pEndPt == SIP_NULL))
@@ -55,7 +55,7 @@ SIP_BOOL SipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTem
         /*Preventing the case of Feature Prm and quoted text*/
         if ((*pStartPt == DQUOTE) && (*pPrevPt != BACKSLASH))
         {
-            bDQuote = (SIP_BOOL)!bDQuote;
+            bDQuote = static_cast<SIP_BOOL>(!bDQuote);
         }
         if (*pStartPt == cDelimiter)
         {
@@ -95,7 +95,7 @@ SIP_VOID SipEnc_UpdateCurrPos(IN_OUT SIP_CHAR** ppMsgBuffer)
     }
 }
 
-SIP_BOOL SipFindLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
+SIP_BOOL SipFindLWS(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
 {
     SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
     SIP_CHAR* pNext2Pt = pStartPt + SIP_TWO;
@@ -114,7 +114,7 @@ SIP_BOOL SipFindLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
     return SIP_FALSE;
 }
 
-SIP_CHAR* SipSkipRwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_CHAR* SipSkipRwLWS(const SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     if ((pStartPt == SIP_NULL) || (pEndPt == SIP_NULL))
     {
@@ -177,7 +177,7 @@ SIP_CHAR* SipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 }
 
 SIP_BOOL SipFindPostDelimiter(
-        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter)
+        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter)
 {
     while (pStartPt <= pEndPt)
     {
@@ -192,7 +192,7 @@ SIP_BOOL SipFindPostDelimiter(
 }
 
 SIP_BOOL SipFindPreDelimiter(
-        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter)
+        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter)
 {
     SIP_BOOL bDQuote = SIP_FALSE;
     SIP_CHAR* pPrevPt = pStartPt;
@@ -257,7 +257,7 @@ SIP_BOOL SipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
 }
 
 SIP_BOOL SipFindTerminatingCRLF(
-        SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd)
+        SIP_CHAR* pStartPoint, const SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd)
 {
     /* To check two consecutive CRLF */
     SIP_UINT32 nStrlen = pEndPoint - pStartPoint;

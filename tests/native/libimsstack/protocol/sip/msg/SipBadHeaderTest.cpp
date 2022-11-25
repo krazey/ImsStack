@@ -70,7 +70,6 @@ TEST_F(SipBadHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 }
 
 }  // namespace android

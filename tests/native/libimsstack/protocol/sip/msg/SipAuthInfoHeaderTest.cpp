@@ -35,7 +35,7 @@ TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty buffer, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
 
     const int BUFFER_SIZE = 4096;
     char aBuffer[BUFFER_SIZE] = {
@@ -50,8 +50,9 @@ TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
     /* Single info, success */
-    EXPECT_EQ(
-            SIP_TRUE, pHeader->DecodeHdr((char*)"nextnonce=\"123456789abcde123456789abcde\"", 40));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(
+                    const_cast<char*>("nextnonce=\"123456789abcde123456789abcde\""), 40));
 
     const SipNameValue* pNmVl = pHeader->GetAiInfoVal(0);
     ASSERT_TRUE(pNmVl != nullptr);
@@ -83,7 +84,9 @@ TEST_F(SipAuthInfoHeaderTest, DecodeAndEncodeHdr)
     /* multiple info, success */
     EXPECT_EQ(SIP_TRUE,
             pHeader->DecodeHdr(
-                    (char*)"nextnonce=\"123456789abcde123456789abcde\",nonce-count=\"3\"", 56));
+                    const_cast<char*>(
+                            "nextnonce=\"123456789abcde123456789abcde\",nonce-count=\"3\""),
+                    56));
 
     pCopyHeader = reinterpret_cast<SipAuthInfoHeader*>(
             SipAuthInfoHeader::GetNewObj(SipHeaderBase::AUTHENTICATION_INFO, pHeader));

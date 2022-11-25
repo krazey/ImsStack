@@ -409,7 +409,7 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
     if (pSipMsg != SIP_NULL)
     {
         /* Update Via Hdr of Sip Message from UDP to TCP */
-        SipViaHeader* pViaHdr = (SipViaHeader*)pSipMsg->GetHdrObj(SipHeaderBase::VIA);
+        SipViaHeader* pViaHdr = static_cast<SipViaHeader*>(pSipMsg->GetHdrObj(SipHeaderBase::VIA));
         if (pViaHdr == SIP_NULL)
         {
             SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP, "Memory allocation fail", SIP_ZERO, SIP_ZERO);

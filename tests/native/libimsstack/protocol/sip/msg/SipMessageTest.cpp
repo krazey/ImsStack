@@ -45,10 +45,10 @@ protected:
         SipAddrSpec* pSipAddrSpec = new SipAddrSpec();
         ASSERT_TRUE(pSipAddrSpec != nullptr);
 
-        EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec((char*)"sip:user@host", 13));
+        EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(const_cast<char*>("sip:user@host"), 13));
 
         SipRequestLine* pRequestLine =
-                new SipRequestLine((char*)"INVITE", pSipAddrSpec, SIP_SIPVER);
+                new SipRequestLine(const_cast<char*>("INVITE"), pSipAddrSpec, SIP_SIPVER);
         ASSERT_TRUE(pRequestLine != nullptr);
 
         pMessage->SetRequestline(pRequestLine);
@@ -79,14 +79,16 @@ protected:
         pToHeader = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TO);
         ASSERT_TRUE(pToHeader != nullptr);
 
-        char* via = (char*)"SIP/2.0/TCP "
-                           "[2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;branch="
-                           "z9hG4bK1422bd448-755bfe94";
-        char* callid = (char*)"13217132a-3c0d31f9@2409:4031:241d:5ff5:b54d:c29a:ecea:88b8";
-        char* cseq = (char*)"3 INVITE";
-        char* from = (char*)"<sip:405861079851317@ims.mnc861.mcc405.3gppnetwork.org>;tag="
-                            "544671422bd42c-2899e679";
-        char* to = (char*)"<sip:user@host>";
+        char* via = const_cast<char*>("SIP/2.0/TCP "
+                                      "[2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;branch="
+                                      "z9hG4bK1422bd448-755bfe94");
+        char* callid =
+                const_cast<char*>("13217132a-3c0d31f9@2409:4031:241d:5ff5:b54d:c29a:ecea:88b8");
+        char* cseq = const_cast<char*>("3 INVITE");
+        char* from =
+                const_cast<char*>("<sip:405861079851317@ims.mnc861.mcc405.3gppnetwork.org>;tag="
+                                  "544671422bd42c-2899e679");
+        char* to = const_cast<char*>("<sip:user@host>");
 
         EXPECT_EQ(SIP_TRUE, pViaHeader->DecodeHdr(via, strlen(via)));
         EXPECT_EQ(SIP_TRUE, pCallIdHeader->DecodeHdr(callid, strlen(callid)));
@@ -123,7 +125,7 @@ TEST_F(SipMessageTest, SetRequestline)
     pSipAddrSpec->SipDelete();
     pRequestLine->SipDelete();
 
-    pRequestLine = new SipRequestLine((char*)"TEST-METHOD", nullptr, SIP_SIPVER);
+    pRequestLine = new SipRequestLine(const_cast<char*>("TEST-METHOD"), nullptr, SIP_SIPVER);
     ASSERT_TRUE(pRequestLine != nullptr);
 
     pMessage->SetRequestline(pRequestLine);
@@ -149,8 +151,9 @@ TEST_F(SipMessageTest, SetHeader)
     /* Empty Via, fail */
     EXPECT_EQ(SIP_FALSE, pMessage->SetHeader(pViaHdr));
 
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                             branch=z9hG4bK1422bd448-755bfe94";
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                             branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pMessage->SetHeader(pViaHdr));
@@ -226,8 +229,9 @@ TEST_F(SipMessageTest, AppendHeader)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
 
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                             branch=z9hG4bK1422bd448-755bfe94";
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                             branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pMessage->AppendHeader(pViaHdr));
@@ -246,8 +250,9 @@ TEST_F(SipMessageTest, InsertHeader)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
 
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                             branch=z9hG4bK1422bd448-755bfe94";
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                             branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pMessage->InsertHeader(pViaHdr, 0));
@@ -270,7 +275,7 @@ TEST_F(SipMessageTest, GetMethodType)
     pCSeqHeader = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CSEQ);
     ASSERT_TRUE(pCSeqHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pCSeqHeader->DecodeHdr((char*)"3 INVALIDMETHOD", 10));
+    EXPECT_EQ(SIP_TRUE, pCSeqHeader->DecodeHdr(const_cast<char*>("3 INVALIDMETHOD"), 10));
 
     pMessage->SetHeader(pCSeqHeader);
     pCSeqHeader->SipDelete();
@@ -280,7 +285,7 @@ TEST_F(SipMessageTest, GetMethodType)
     pCSeqHeader = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CSEQ);
     ASSERT_TRUE(pCSeqHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pCSeqHeader->DecodeHdr((char*)"3 REGISTER", 10));
+    EXPECT_EQ(SIP_TRUE, pCSeqHeader->DecodeHdr(const_cast<char*>("3 REGISTER"), 10));
 
     pMessage->SetHeader(pCSeqHeader);
     pCSeqHeader->SipDelete();
@@ -330,7 +335,8 @@ TEST_F(SipMessageTest, HasMIMEMessageBody)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"multipart/mixed;boundary=\"boundary1\"", 36));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(const_cast<char*>("multipart/mixed;boundary=\"boundary1\""), 36));
     pMessage->SetHeader(pHeader);
 
     pHeader->SipDelete();
@@ -343,7 +349,7 @@ TEST_F(SipMessageTest, HasMIMEMessageBody)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"application/sdp", 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("application/sdp"), 15));
     pMessage->SetHeader(pHeader);
 
     pHeader->SipDelete();
@@ -359,7 +365,8 @@ TEST_F(SipMessageTest, HasSDPMessageBody)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"multipart/mixed;boundary=\"boundary1\"", 36));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(const_cast<char*>("multipart/mixed;boundary=\"boundary1\""), 36));
     pMessage->SetHeader(pHeader);
 
     pHeader->SipDelete();
@@ -372,7 +379,7 @@ TEST_F(SipMessageTest, HasSDPMessageBody)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"application/sdp", 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("application/sdp"), 15));
     pMessage->SetHeader(pHeader);
 
     pHeader->SipDelete();
@@ -399,8 +406,8 @@ TEST_F(SipMessageTest, SetHdrList_GetHdrList)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
 
-    char* pViaValue = (char*)"SIP/2.0/TLS [2001::4]:8090;\
-                             branch=z9hG4bK1422bd448-755bfe94";
+    char* pViaValue = const_cast<char*>("SIP/2.0/TLS [2001::4]:8090;\
+                             branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
 
@@ -426,7 +433,7 @@ TEST_F(SipMessageTest, DecMultiPartBody)
 
     FillMandatoryHeaders();
 
-    char* pContentTypeValue = (char*)"multipart/mixed;boundary=\"abcxz\"";
+    char* pContentTypeValue = const_cast<char*>("multipart/mixed;boundary=\"abcxz\"");
 
     SipContentTypeHeader* pContentTypeHdr = new SipContentTypeHeader();
     ASSERT_TRUE(pContentTypeHdr != nullptr);
@@ -437,7 +444,7 @@ TEST_F(SipMessageTest, DecMultiPartBody)
 
     pContentTypeHdr->SipDelete();
 
-    char* pMimeBody = (char*)"--abcxz\r\n\
+    char* pMimeBody = const_cast<char*>("--abcxz\r\n\
 Content-Type: application/body1\r\n\
 \r\n\
 Test message body 1\r\n\
@@ -447,7 +454,7 @@ Content-Type: application/body2\r\n\
 \r\n\
 Test message body 2\r\n\
 \r\n\
---abcxz--\r\n";
+--abcxz--\r\n");
 
     unsigned int nLen = strlen(pMimeBody);
 
@@ -466,7 +473,7 @@ TEST_F(SipMessageTest, DecodeFragmentMsg)
     EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(nullptr, 0));
 
     /* Only request line, success */
-    char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n";
+    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n");
 
     EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, 0));
 
@@ -475,7 +482,7 @@ TEST_F(SipMessageTest, DecodeFragmentMsg)
     pDecodeMessage->SipDelete();
 
     /* Only response line, success */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n";
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -485,7 +492,7 @@ TEST_F(SipMessageTest, DecodeFragmentMsg)
     pDecodeMessage->SipDelete();
 
     /* Only response line with 2 CRLFs, success */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\r\n";
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -495,7 +502,7 @@ TEST_F(SipMessageTest, DecodeFragmentMsg)
     pDecodeMessage->SipDelete();
 
     /* Only response line with 3 CRLFs, fail */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\r\n\r\n";
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\r\n\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -505,9 +512,9 @@ TEST_F(SipMessageTest, DecodeFragmentMsg)
     pDecodeMessage->SipDelete();
 
     /* response line with 2 CRLFs and a header, fail */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 \r\n\
-Call-ID: callid\r\n";
+Call-ID: callid\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -517,9 +524,9 @@ Call-ID: callid\r\n";
     pDecodeMessage->SipDelete();
 
     /* response line with 2 CRLFs and a message body, fail */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 \r\n\
-Hello!";
+Hello!");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -529,7 +536,7 @@ Hello!";
     pDecodeMessage->SipDelete();
 
     /* Invalid request line, fail */
-    pMsg = (char*)"INVITE SIP/2.0\r\n";
+    pMsg = const_cast<char*>("INVITE SIP/2.0\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -539,7 +546,7 @@ Hello!";
     pDecodeMessage->SipDelete();
 
     /* request line with not ending CRLF, fail */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0";
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -549,7 +556,7 @@ Hello!";
     pDecodeMessage->SipDelete();
 
     /* message contains only CRLFs, fail */
-    pMsg = (char*)"\r\n";
+    pMsg = const_cast<char*>("\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -559,7 +566,7 @@ Hello!";
     pDecodeMessage->SipDelete();
 
     /* message contains only CRLFs, fail */
-    pMsg = (char*)"\r\n\r";
+    pMsg = const_cast<char*>("\r\n\r");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -569,7 +576,7 @@ Hello!";
     pDecodeMessage->SipDelete();
 
     /* message contains only CRLFs ans SPACEs, fail */
-    pMsg = (char*)"\r\n    \r\n";
+    pMsg = const_cast<char*>("\r\n    \r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -579,7 +586,7 @@ Hello!";
     pDecodeMessage->SipDelete();
 
     /* Invalid status line, fail */
-    pMsg = (char*)"SIP/2.0\r\n";
+    pMsg = const_cast<char*>("SIP/2.0\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -589,10 +596,10 @@ Hello!";
     pDecodeMessage->SipDelete();
 
     /* Only headers, success */
-    pMsg = (char*)"Via: SIP/2.0/TCP host;branch=test-br\r\n\
+    pMsg = const_cast<char*>("Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
-Call-ID: callid\r\n";
+Call-ID: callid\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -602,7 +609,7 @@ Call-ID: callid\r\n";
     pDecodeMessage->SipDelete();
 
     /* One header ending with 2 CRLFs, success */
-    pMsg = (char*)"Via: SIP/2.0/TCP host;branch=test-br\r\n\r\n";
+    pMsg = const_cast<char*>("Via: SIP/2.0/TCP host;branch=test-br\r\n\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -612,10 +619,10 @@ Call-ID: callid\r\n";
     pDecodeMessage->SipDelete();
 
     /* Only headers ending with 2 CRLFs, success */
-    pMsg = (char*)"Via: SIP/2.0/TCP host;branch=test-br\r\n\
+    pMsg = const_cast<char*>("Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
-Call-ID: callid\r\n\r\n";
+Call-ID: callid\r\n\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -625,10 +632,10 @@ Call-ID: callid\r\n\r\n";
     pDecodeMessage->SipDelete();
 
     /* Only headers with no ending CRLF, fail */
-    pMsg = (char*)"Via: SIP/2.0/TCP host;branch=test-br\r\n\
+    pMsg = const_cast<char*>("Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
-Call-ID: callid";
+Call-ID: callid");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -638,10 +645,10 @@ Call-ID: callid";
     pDecodeMessage->SipDelete();
 
     /* invalid via header, fail */
-    pMsg = (char*)"Via: SIP/2.0 host;branch=test-br\r\n\
+    pMsg = const_cast<char*>("Via: SIP/2.0 host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
-Call-ID: callid\r\n";
+Call-ID: callid\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -651,11 +658,11 @@ Call-ID: callid\r\n";
     pDecodeMessage->SipDelete();
 
     /* request line and headers, success */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
-Call-ID: callid\r\n";
+Call-ID: callid\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -665,7 +672,7 @@ Call-ID: callid\r\n";
     pDecodeMessage->SipDelete();
 
     /* request line, headers and message body, success */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -673,7 +680,7 @@ Call-ID: callid\r\n\
 Content-Type: application/simple-message-example\r\n\
 Content-Length: 23\r\n\
 \r\n\
-Messages-Waiting: yes\r\n";
+Messages-Waiting: yes\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -683,7 +690,7 @@ Messages-Waiting: yes\r\n";
     pDecodeMessage->SipDelete();
 
     /* headers and gzip message body, success */
-    pMsg = (char*)"Via: SIP/2.0/TCP host;branch=test-br\r\n\
+    pMsg = const_cast<char*>("Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
@@ -692,7 +699,7 @@ Content-Type: application/pidf+xml\r\n\
 Content-Encoding: gzip\r\n\
 Content-Length: 19\r\n\
 \r\n\
-gzip message body\r\n";
+gzip message body\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -702,7 +709,7 @@ gzip message body\r\n";
     pDecodeMessage->SipDelete();
 
     /* headers and multipart message body, success */
-    pMsg = (char*)"\r\nINVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("\r\nINVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=abcd\r\n\
@@ -722,7 +729,7 @@ Content-Type: application/body2\r\n\
 \r\n\
 Test message body 2\r\n\
 \r\n\
---abcxz--\r\n";
+--abcxz--\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -775,7 +782,7 @@ TEST_F(SipMessageTest, EncodeMsgAndDecCompleteMessage)
     pDecodeMessage->SipDelete();
 
     /* With single message body and mandatory headers, success */
-    char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -784,7 +791,7 @@ CSeq: 3 INVITE\r\n\
 Content-Type: application/simple-message-example\r\n\
 Content-Length: 23\r\n\
 \r\n\
-Messages-Waiting: yes\r\n";
+Messages-Waiting: yes\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -822,7 +829,7 @@ Messages-Waiting: yes\r\n";
     pCopyMessage->SipDelete();
 
     /* With gzip message body and mandatory headers, success */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -832,7 +839,7 @@ Content-Type: application/pidf+xml\r\n\
 Content-Encoding: gzip\r\n\
 Content-Length: 19\r\n\
 \r\n\
-gzip message body\r\n";
+gzip message body\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -869,7 +876,7 @@ gzip message body\r\n";
     pCopyMessage->SipDelete();
 
     /* With message summary message body and mandatory headers, success */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=abcd\r\n\
@@ -877,7 +884,7 @@ Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Type: application/simple-message-summary\r\n\
 Content-Length: 22\r\n\r\n\
-Messages-Waiting: No\r\n";
+Messages-Waiting: No\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -906,7 +913,7 @@ Messages-Waiting: No\r\n";
     pCopyMessage->SipDelete();
 
     /* With multipart message body and mandatory headers, success */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=abcd\r\n\
@@ -926,7 +933,7 @@ Content-Type: application/body2\r\n\
 \r\n\
 Test message body 2\r\n\
 \r\n\
---abcxz--\r\n";
+--abcxz--\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -971,7 +978,7 @@ Test message body 2\r\n\
 
     EXPECT_EQ(SIP_TRUE, pCopyMessage->EncodeMsg(&pBuff, &sipMsgLength, 0));
 
-    char* pContentLengthLastHdr = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    char* pContentLengthLastHdr = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=abcd\r\n\
@@ -991,14 +998,14 @@ Content-Type: application/body2\r\n\
 \r\n\
 Test message body 2\r\n\
 \r\n\
---abcxz--\r\n";
+--abcxz--\r\n");
 
     EXPECT_STREQ(pBuff, pContentLengthLastHdr);
 
     pCopyMessage->SipDelete();
 
     /* response type messagewith multipart message body and mandatory headers, success */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=abcd\r\n\
@@ -1015,7 +1022,7 @@ Content-Type: application/body1\r\n\
 Content-Type: application/body2\r\n\
 \r\nTest message body 6\r\n\
 \r\n\
---abcxz--\r\n";
+--abcxz--\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1068,7 +1075,7 @@ Content-Type: application/body2\r\n\
     pCopyMessage->SipDelete();
 
     /* With bad headers and buffer statrs with \r\n, success */
-    pMsg = (char*)"\r\nINVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("\r\nINVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 Via: BadVia\r\n\
 Accept: BadAccept\r\n\
@@ -1078,7 +1085,7 @@ Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Type: application/simple-message-example\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1111,7 +1118,7 @@ Content-Length: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* Invalid message with no terminating CRLF, fail */
-    pMsg = (char*)"Invalid Message";
+    pMsg = const_cast<char*>("Invalid Message");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1121,7 +1128,7 @@ Content-Length: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* Invalid message with terminating CRLF and no SPACE in request line, fail */
-    pMsg = (char*)"InvalidMessage\r\n";
+    pMsg = const_cast<char*>("InvalidMessage\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1131,7 +1138,7 @@ Content-Length: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* Invalid message with terminating CRLF and invalid request line, fail */
-    pMsg = (char*)"Invalid RequestLine\r\n";
+    pMsg = const_cast<char*>("Invalid RequestLine\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1141,7 +1148,7 @@ Content-Length: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* Invalid message with terminating CRLF and invalid status line, fail */
-    pMsg = (char*)"SIP/2.0 InvalidRequestLine\r\n";
+    pMsg = const_cast<char*>("SIP/2.0 InvalidRequestLine\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1151,8 +1158,8 @@ Content-Length: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* No proper header end with CRLF, fail */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
-Via: SIP/2.0/TCP host;branch=test-br";
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TCP host;branch=test-br");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1162,8 +1169,8 @@ Via: SIP/2.0/TCP host;branch=test-br";
     pDecodeMessage->SipDelete();
 
     /* No header end in message with 2 CRLF's, fail */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
-Via: SIP/2.0/TCP host;branch=test-br\r\n";
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1173,7 +1180,7 @@ Via: SIP/2.0/TCP host;branch=test-br\r\n";
     pDecodeMessage->SipDelete();
 
     /* CSeq and Request line method mismatch, fail */
-    pMsg = (char*)"\r\nINVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("\r\nINVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 Via: BadVia\r\n\
 Accept: BadAccept\r\n\
@@ -1183,7 +1190,7 @@ Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Type: application/simple-message-example\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1193,7 +1200,7 @@ Content-Length: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* Content length larger than message body, fail */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=abcd\r\n\
@@ -1210,7 +1217,7 @@ Content-Type: application/body1\r\n\
 Content-Type: application/body2\r\n\
 \r\nTest message body 6\r\n\
 \r\n\
---abcxz--\r\n";
+--abcxz--\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1220,7 +1227,7 @@ Content-Type: application/body2\r\n\
     pDecodeMessage->SipDelete();
 
     /* multipart body and content type not having boundary, fail */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=abcd\r\n\
@@ -1237,7 +1244,7 @@ Content-Type: application/body1\r\n\
 Content-Type: application/body2\r\n\
 \r\nTest message body 6\r\n\
 \r\n\
---abcxz--\r\n";
+--abcxz--\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1247,7 +1254,7 @@ Content-Type: application/body2\r\n\
     pDecodeMessage->SipDelete();
 
     /* PRACK with no RAck header - decode success but hasMandatoryHeaders fail, fail */
-    pMsg = (char*)"PRACK sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("PRACK sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 Accept: BadAccept\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
@@ -1255,7 +1262,7 @@ To: <sip:userA@host>;tag=abcd\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 PRACK\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1266,7 +1273,7 @@ Content-Length: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* With message body and no content-type header, fail */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
@@ -1274,7 +1281,7 @@ Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 23\r\n\
 \r\n\
-Messages-Waiting: yes\r\n";
+Messages-Waiting: yes\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1284,7 +1291,7 @@ Messages-Waiting: yes\r\n";
     pDecodeMessage->SipDelete();
 
     /* With compact form of header name & few other headers, success */
-    pMsg = (char*)"SIP/2.0 500 Internal Server Error\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 500 Internal Server Error\r\n\
 v: SIP/2.0/TCP host;branch=test-br\r\n\
 f: <sip:user@host>;tag=abcd\r\n\
 t: <sip:userA@host>\r\n\
@@ -1296,7 +1303,7 @@ Retry-After: 5\r\n\
 z: unknown\r\n\
 qwertyuioasdfghjklzxcvbnmqwetyydfgh: badheader\r\n\
 l: 0\r\n\
-\r\n";
+\r\n");
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
@@ -1308,7 +1315,7 @@ l: 0\r\n\
     EXPECT_EQ(SipHeaderBase::TYPE_INVALID, SipGetHdrType(SIP_NULL));
 
     /* message contains only CRLFs, fail */
-    pMsg = (char*)"\r\n";
+    pMsg = const_cast<char*>("\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1318,7 +1325,7 @@ l: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* message contains only CRLFs, fail */
-    pMsg = (char*)"\r\n\r";
+    pMsg = const_cast<char*>("\r\n\r");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
@@ -1328,7 +1335,7 @@ l: 0\r\n\
     pDecodeMessage->SipDelete();
 
     /* message contains only CRLFs ans SPACEs, fail */
-    pMsg = (char*)"\r\n    \r\n";
+    pMsg = const_cast<char*>("\r\n    \r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);

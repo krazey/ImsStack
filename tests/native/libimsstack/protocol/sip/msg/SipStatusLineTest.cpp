@@ -94,22 +94,23 @@ TEST_F(SipStatusLineTest, DecodeStatusLine)
     ASSERT_TRUE(pStatusLine != nullptr);
 
     /* Empty buffer, fail */
-    EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine((char*)"", 0));
+    EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine(const_cast<char*>(""), 0));
     /* only sip version present, fail */
-    EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine((char*)"SIP/2.0", 7));
+    EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine(const_cast<char*>("SIP/2.0"), 7));
     EXPECT_EQ(SIP_SC_INVALID, pStatusLine->GetStatusCodeAsInt());
     SIP_INT16 nStatusCode;
     EXPECT_FALSE(pStatusLine->GetStatusCode(&nStatusCode));
     EXPECT_EQ(0, nStatusCode);
 
     /* reason phrase missing, fail */
-    EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine((char*)"SIP/2.0 480", 11));
+    EXPECT_EQ(SIP_FALSE, pStatusLine->DecodeStatusLine(const_cast<char*>("SIP/2.0 480"), 11));
     pStatusLine->SipDelete();
 
     pStatusLine = new SipStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);
     /* sip version, status code and reason phrase present, success */
-    EXPECT_EQ(SIP_TRUE, pStatusLine->DecodeStatusLine((char*)"SIP/2.0 480 Unavailable", 23));
+    EXPECT_EQ(SIP_TRUE,
+            pStatusLine->DecodeStatusLine(const_cast<char*>("SIP/2.0 480 Unavailable"), 23));
     EXPECT_EQ(480, pStatusLine->GetStatusCodeAsInt());
     EXPECT_STREQ("480", pStatusLine->GetStatusCode());
     EXPECT_STREQ("SIP/2.0", pStatusLine->GetSipVersion());

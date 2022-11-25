@@ -94,7 +94,7 @@ protected:
 
         SIP_INT32 eMsgType = pMessage->GetMsgType();
         SIP_INT32 eMethodType = pMessage->GetMethodType();
-        SIP_INT32 eTxnType = SipTxn::INVALID_TXN;
+        SIP_INT32 eTxnType;
 
         if (eMsgType == SipMessage::REQ_TYPE)
         {
@@ -139,14 +139,14 @@ TEST_F(SipTransportHandlerTest, OnSendTransp)
     SipTransportHandler objTranspHandler;
     SipTransportInfo* pTranspInfo = SIP_NULL;
 
-    char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     unsigned int nLength = strlen(pMsg);
 
@@ -180,14 +180,14 @@ Content-Length: 0\r\n\
 TEST_F(SipTransportHandlerTest, OnRecvTransp)
 {
     /* INVITE Request */
-    char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     FillTransportParameters(pMsg);
 
@@ -265,14 +265,14 @@ Content-Length: 0\r\n\
     ClearTransportParameters();
 
     /* Non-Invite request message */
-    pMsg = (char*)"REGISTER sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     FillTransportParameters(pMsg);
 
@@ -304,14 +304,14 @@ Content-Length: 0\r\n\
     ClearTransportParameters();
 
     /* Non-Invite response message */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 REGISTER\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     FillTransportParameters(pMsg);
 
@@ -343,14 +343,14 @@ Content-Length: 0\r\n\
     ClearTransportParameters();
 
     /* Invite response message */
-    pMsg = (char*)"SIP/2.0 200 OK\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 Via: SIP/2.0/UDP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:user@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     FillTransportParameters(pMsg);
 
@@ -389,14 +389,14 @@ TEST_F(SipTransportHandlerTest, OnRecvTanspError)
 
     SipTransportInfo* pNewTranspInfo = SIP_NULL;
 
-    char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     unsigned int nLength = strlen(pMsg);
 
@@ -538,14 +538,14 @@ Content-Length: 0\r\n\
     delete pTranspHandler;
 
     /* Transport protocol is not TCP/UDP */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TLS host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     nLength = strlen(pMsg);
 
@@ -601,13 +601,13 @@ Content-Length: 0\r\n\
     delete pTranspHandler;
 
     /* No Via header to update transport header, fail */
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 INVITE\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     nLength = strlen(pMsg);
 
@@ -667,14 +667,14 @@ TEST_F(SipTransportHandlerTest, IsInviteTxnPresentForAckTxn)
 {
     unsigned short nError = 0;
 
-    char* pMsg = (char*)"ACK sip:user@host SIP/2.0\r\n\
+    char* pMsg = const_cast<char*>("ACK sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/TCP host;branch=test-br\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=Totag\r\n\
 Call-ID: callid\r\n\
 CSeq: 3 ACK\r\n\
 Content-Length: 0\r\n\
-\r\n";
+\r\n");
 
     unsigned int nLength = strlen(pMsg);
 

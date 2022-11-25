@@ -126,23 +126,6 @@ typedef SIP_UINT32 SIP_TXN_HANDLE_KEY;
 typedef SIP_UINT32 SIP_MSG_HANDLE;
 typedef SIP_UINT32 SIP_TIMER_HANDLE;
 
-#ifdef IMS_RTTI_ENABLED
-
-#define SIP_CONST_CAST(TYPE, VALUE)       (const_cast<TYPE>(VALUE))
-#define SIP_DYNAMIC_CAST(TYPE, VALUE)     (dynamic_cast<TYPE>(VALUE))
-#define SIP_REINTERPRET_CAST(TYPE, VALUE) (reinterpret_cast<TYPE>(VALUE))
-#define SIP_STATIC_CAST(TYPE, VALUE)      (static_cast<TYPE>(VALUE))
-
-#else
-
-// C-style type casting
-#define SIP_CONST_CAST(TYPE, VALUE)       (const_cast<TYPE>(VALUE))
-#define SIP_DYNAMIC_CAST(TYPE, VALUE)     ((TYPE)(VALUE))
-#define SIP_REINTERPRET_CAST(TYPE, VALUE) (reinterpret_cast<TYPE>(VALUE))
-#define SIP_STATIC_CAST(TYPE, VALUE)      (static_cast<TYPE>(VALUE))
-
-#endif  // IMS_RTTI_ENABLED
-
 #if defined(__LP64__)
 
 #ifndef SIP_SIZE_T

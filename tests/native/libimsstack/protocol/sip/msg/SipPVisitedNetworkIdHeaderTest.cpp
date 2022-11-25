@@ -53,33 +53,30 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Decode ; value */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)";", 1));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(";"), 1));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPVisitedNetworkIdHeader*>(
             SipPVisitedNetworkIdHeader::GetNewObj(SipHeaderBase::P_VISITED_NETWORK_ID, nullptr));
 
     /* any value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"any", 3));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("any"), 3));
     EXPECT_STREQ("any", pHeader->GetValue());
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPVisitedNetworkIdHeader*>(
             SipPVisitedNetworkIdHeader::GetNewObj(SipHeaderBase::P_VISITED_NETWORK_ID, nullptr));
-    SIP_CHAR* pValue = (char*)"other.net";
+    SIP_CHAR* pValue = const_cast<char*>("other.net");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ(pValue, pHeader->GetValue());
     EXPECT_TRUE(nullptr == pHeader->GetParameters());
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPVisitedNetworkIdHeader*>(
             SipPVisitedNetworkIdHeader::GetNewObj(SipHeaderBase::P_VISITED_NETWORK_ID, nullptr));
 
     /* Decode valid value */
-    pValue = (char*)"Visited network number 1;level=7";
+    pValue = const_cast<char*>("Visited network number 1;level=7");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ("Visited network number 1", pHeader->GetValue());
     SipParameters* pParameters = pHeader->GetParameters();
@@ -91,18 +88,16 @@ TEST_F(SipPVisitedNetworkIdHeaderTest, DecodeHdr)
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("7", pNameVal->m_valueList.GetAt(0));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPVisitedNetworkIdHeader*>(
             SipPVisitedNetworkIdHeader::GetNewObj(SipHeaderBase::P_VISITED_NETWORK_ID, nullptr));
 
     /* Decode valid value within quotes */
-    pValue = (char*)"\"Visited network number 1\"";
+    pValue = const_cast<char*>("\"Visited network number 1\"");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_STREQ("Visited network number 1", pHeader->GetValue());
     EXPECT_TRUE(nullptr == pHeader->GetParameters());
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 }
 
 }  // namespace android

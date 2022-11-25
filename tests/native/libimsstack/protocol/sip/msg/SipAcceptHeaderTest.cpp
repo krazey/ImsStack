@@ -186,16 +186,15 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Decode only value and no parameter */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"application/sdp", 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("application/sdp"), 15));
     EXPECT_STREQ("application", pHeader->GetMType());
     EXPECT_STREQ("sdp", pHeader->GetMSubType());
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* Decode only value and parameters */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"application/sdp;q=0.4;level=1", 29));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("application/sdp;q=0.4;level=1"), 29));
     EXPECT_STREQ("application", pHeader->GetMType());
     EXPECT_STREQ("sdp", pHeader->GetMSubType());
 
@@ -216,14 +215,12 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr)
     EXPECT_STREQ("1", pNameVal->m_valueList.GetAt(0));
 
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     /* Decode invalid media range - MType is '*' and MSubType is not '*' */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"*/sdp", 5));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("*/sdp"), 5));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 }
 
 }  // namespace android

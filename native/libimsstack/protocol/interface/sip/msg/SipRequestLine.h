@@ -31,7 +31,7 @@ public:
     /*Constructor*/
     SipRequestLine();
 
-    SipRequestLine(SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* pszSipVersion);
+    SipRequestLine(const SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* pszSipVersion);
     SipRequestLine(const SipRequestLine& objHeader);
     /*Destructor*/
     ~SipRequestLine();

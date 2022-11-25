@@ -28,7 +28,7 @@ SipRequestLine::SipRequestLine() :
 }
 
 SipRequestLine::SipRequestLine(
-        SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* /*pszSipVersion*/) :
+        const SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* /*pszSipVersion*/) :
         m_pszMethod(SipPf_Strdup(pszMethod)),
         m_pReqUri(pReqUri),
         m_pszSipVersion(SipPf_Strdup(SIP_SIPVER))

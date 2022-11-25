@@ -273,7 +273,7 @@ SipHeaderBase* SipHeaderList::GetNewListObj(SIP_INT32 eHdr, SipHeaderBase* pHead
 {
     if (pHeaderList != SIP_NULL)
     {
-        return new SipHeaderList(*((SipHeaderList*)pHeaderList));
+        return new SipHeaderList(*(static_cast<SipHeaderList*>(pHeaderList)));
     }
     return new SipHeaderList(eHdr);
 }

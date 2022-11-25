@@ -78,12 +78,10 @@ GLOBAL SIP_BOOL Sip_Cbk_StopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData)
 
 GLOBAL SIP_VOID Sip_Cbk_OnTimerExpired(IN ISipUserData* pUserData, IN SIP_INT32 enTimerType)
 {
-    if (s_objSipStackCallbacks.pfnOnTimerExpired == IMS_NULL)
+    if (s_objSipStackCallbacks.pfnOnTimerExpired != IMS_NULL)
     {
-        return;
+        (s_objSipStackCallbacks.pfnOnTimerExpired)(pUserData, enTimerType);
     }
-
-    return (s_objSipStackCallbacks.pfnOnTimerExpired)(pUserData, enTimerType);
 }
 
 GLOBAL SIP_VOID* Sip_Cbk_CreateAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData)
@@ -99,32 +97,26 @@ GLOBAL SIP_VOID* Sip_Cbk_CreateAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserDat
 GLOBAL SIP_VOID Sip_Cbk_PreProcessMessageSentByStack(
         IN SIP_VOID* pvSipMsg, IN ISipUserData* pUserData)
 {
-    if (s_objSipStackCallbacks.pfnPreProcessMessageSentByStack == IMS_NULL)
+    if (s_objSipStackCallbacks.pfnPreProcessMessageSentByStack != IMS_NULL)
     {
-        return;
+        (s_objSipStackCallbacks.pfnPreProcessMessageSentByStack)(pvSipMsg, pUserData);
     }
-
-    (s_objSipStackCallbacks.pfnPreProcessMessageSentByStack)(pvSipMsg, pUserData);
 }
 
 GLOBAL SIP_VOID Sip_Cbk_PostProcessMessageSentByStack(IN SIP_VOID* pvSipMsg, IN SIP_CHAR* pBuffer,
         IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData)
 {
-    if (s_objSipStackCallbacks.pfnPostProcessMessageSentByStack == IMS_NULL)
+    if (s_objSipStackCallbacks.pfnPostProcessMessageSentByStack != IMS_NULL)
     {
-        return;
+        (s_objSipStackCallbacks.pfnPostProcessMessageSentByStack)(
+                pvSipMsg, pBuffer, nBufferLen, pUserData);
     }
-
-    (s_objSipStackCallbacks.pfnPostProcessMessageSentByStack)(
-            pvSipMsg, pBuffer, nBufferLen, pUserData);
 }
 
 GLOBAL SIP_VOID Sip_Cbk_DisplayTxnKey(IN SIP_VOID* pvTxnKey)
 {
-    if (s_objSipStackCallbacks.pfnDisplayTxnKey == IMS_NULL)
+    if (s_objSipStackCallbacks.pfnDisplayTxnKey != IMS_NULL)
     {
-        return;
+        (s_objSipStackCallbacks.pfnDisplayTxnKey)(pvTxnKey);
     }
-
-    (s_objSipStackCallbacks.pfnDisplayTxnKey)(pvTxnKey);
 }

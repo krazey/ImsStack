@@ -36,7 +36,7 @@ static SIP_BOOL NonInvSerFsm_NullFxn(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16*
 static SIP_BOOL NonInvSer_Send2xx6xxResp(
         SipTxn* pTxn, void* pvData, SIP_UINT16* pnNewTxnState, SIP_UINT16* pnError)
 {
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SipTransportParameter* pTransparam = pFsmData->m_pTranspParam;
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
@@ -95,7 +95,7 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
     /* TxnObj is added to hash, hence increment ref count */
     pTxn->Increment();
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     /* Set user data in Txn Obj */
     if (pFsmData->m_pUserData != SIP_NULL)
     {
@@ -146,7 +146,6 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
                             "\n",
                             SIP_ZERO, SIP_ZERO);
                 }
-                pINVTxnKey = SIP_NULL;
             }
             else
             {
@@ -181,7 +180,7 @@ static SIP_BOOL NonInvSerFsm_TryingStRecvNonInvReqEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* This is receive of re-transmitted non-INVITE request.
        since previous req is already passed to TU and response is not been send, ignore the request
@@ -197,7 +196,7 @@ static SIP_BOOL NonInvSerFsm_TryingStSend1xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Fill FSM data for stack manager */
     pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
@@ -220,7 +219,7 @@ static SIP_BOOL NonInvSerFsm_TryingStSend2xx6xxRespEvt(
         return SIP_FALSE;
     }
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     /* Fill FSM data for stack manager */
     if (nNewTxnState == SipTxn::NON_INV_SER_TERMINATED_ST)
     {
@@ -248,7 +247,7 @@ static SIP_BOOL NonInvSerFsm_ProceedingStRecvNonInvReqEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* This is receive of re-transmitted non-INVITE request.
        stack manager to send last response */
@@ -265,7 +264,7 @@ static SIP_BOOL NonInvSerFsm_ProceedingStSend1xxRespEvt(
 {
     (void)pTxn;
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
@@ -287,7 +286,7 @@ static SIP_BOOL NonInvSerFsm_ProceedingStSend2xx6xxRespEvt(
         return SIP_FALSE;
     }
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     /* Fill FSM data for stack manager */
     if (nNewTxnState == SipTxn::NON_INV_SER_TERMINATED_ST)
     {
@@ -314,7 +313,7 @@ static SIP_BOOL NonInvSerFsm_CompletedStRecvNonInvReqEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* This is receive of re-transmitted non-INVITE request.
        stack manager to send last response */
@@ -339,7 +338,7 @@ static SIP_BOOL NonInvSerFsm_CompletedStTranspErrorEvt(
 static SIP_BOOL NonInvSerFsm_CompletedStTimer_J_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvData;
+    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
 
     (void)pnError;
     (void)pTimeoutData;

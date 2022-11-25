@@ -55,8 +55,8 @@ SIP_BOOL SipAcceptHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) con
 
     if ((m_pszMType == SIP_NULL) || (m_pszMSubType == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Missing media type or sub-type", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Missing media type or sub-type", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

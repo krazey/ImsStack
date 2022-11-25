@@ -157,32 +157,16 @@ SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defaul
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing Host ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    if ((m_eHostType == SipAddrSpec::HOST_IPV4) || (m_eHostType == SipAddrSpec::HOST_IPV6))
-    {
-        if (m_eHostType == SipAddrSpec::HOST_IPV6)
-        {
-            // Left Square and Right Square Bracket already included in Host
-            SipPf_Strcpy(*ppCurrPos, m_pszHost);
-            SipEnc_UpdateCurrPos(ppCurrPos);
-        }
-        /*Case of IPV4*/
-        else
-        {
-            SipPf_Strcpy(*ppCurrPos, m_pszHost);
-            SipEnc_UpdateCurrPos(ppCurrPos);
-        }
-    }
-    /*Case of Host name*/
-    else
-    {
-        SipPf_Strcpy(*ppCurrPos, m_pszHost);
-        SipEnc_UpdateCurrPos(ppCurrPos);
-    }
+
+    // In case of IPv6 - Left Square and Right Square Bracket already included in Host
+    SipPf_Strcpy(*ppCurrPos, m_pszHost);
+    SipEnc_UpdateCurrPos(ppCurrPos);
+
 #define MAX_PORT_LEN 20
     if (m_nPort != SIP_ZERO)
     {
         SIP_CHAR szTmp[MAX_PORT_LEN];
-        SipPf_Sprintf(szTmp, (SIP_CHAR*)"%u", m_nPort);
+        SipPf_Sprintf(szTmp, "%u", m_nPort);
 
         SIP_ENC_COLON(*ppCurrPos);
 
@@ -402,7 +386,6 @@ SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pTempPre = pTempPre + SIP_ONE;
     pStartPt = SipSkipFwLWS(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
-    pTempNext = SIP_NULL;
 
     /*Now check for the Via Prm*/
     if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)

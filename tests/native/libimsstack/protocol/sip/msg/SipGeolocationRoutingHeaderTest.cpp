@@ -34,7 +34,7 @@ TEST_F(SipGeolocationRoutingHeaderTest, DecodeAndEncodeHdr)
             SipGeolocationRoutingHeader::GetNewObj(SipHeaderBase::GEOLOCATION_ROUTING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
 
     const int BUFFER_SIZE = 64;
     char aBuffer[BUFFER_SIZE] = {
@@ -47,7 +47,7 @@ TEST_F(SipGeolocationRoutingHeaderTest, DecodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"no", 2));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("no"), 2));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
 
@@ -65,7 +65,7 @@ TEST_F(SipGeolocationRoutingHeaderTest, DecodeAndEncodeHdr)
             SipGeolocationRoutingHeader::GetNewObj(SipHeaderBase::GEOLOCATION_ROUTING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"name=value", 10));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("name=value"), 10));
 
     SipGeolocationRoutingHeader* pCopyHeader = reinterpret_cast<SipGeolocationRoutingHeader*>(
             SipGeolocationRoutingHeader::GetNewObj(SipHeaderBase::GEOLOCATION_ROUTING, pHeader));

@@ -42,12 +42,13 @@ TEST_F(SipInfoBaseTest, EncodeHdrAndDecodeHdr)
     char* pBuff = &(aBuffer[0]);
     AStringBuffer objBuffer(64);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
     /* only value and no params, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"<http://www.example.com/audio/xyz.wav>", 38));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(const_cast<char*>("<http://www.example.com/audio/xyz.wav>"), 38));
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ("<http://www.example.com/audio/xyz.wav>", &(aBuffer[0]));
@@ -69,7 +70,8 @@ TEST_F(SipInfoBaseTest, EncodeHdrAndDecodeHdr)
 
     /* value and params, success */
     EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr((char*)"<http://www.example.com/audio/xyz.wav>;appearance=2", 51));
+            pHeader->DecodeHdr(
+                    const_cast<char*>("<http://www.example.com/audio/xyz.wav>;appearance=2"), 51));
 
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);

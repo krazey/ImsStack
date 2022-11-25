@@ -35,7 +35,7 @@ TEST_F(SipUserAgentHeaderTest, Encode)
             SipUserAgentHeader::GetNewObj(SipHeaderBase::USER_AGENT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"ims (comment) abcd", 18));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ims (comment) abcd"), 18));
 
     AStringBuffer objValue(64);
 
@@ -57,10 +57,10 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
 
     /* Empty buffer, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
 
     /* no comment and only value, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"ims", 3));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ims"), 3));
 
     SipUserAgentHeader* pCopyHeader = reinterpret_cast<SipUserAgentHeader*>(
             SipUserAgentHeader::GetNewObj(SipHeaderBase::USER_AGENT, pHeader));
@@ -86,7 +86,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* value and comment present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"ims (comment message)", 21));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ims (comment message)"), 21));
 
     pCopyHeader = reinterpret_cast<SipUserAgentHeader*>(
             SipUserAgentHeader::GetNewObj(SipHeaderBase::USER_AGENT, pHeader));
@@ -98,7 +98,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
-    EXPECT_STREQ((char*)"ims (comment message)", &(aBuffer[0]));
+    EXPECT_STREQ(const_cast<char*>("ims (comment message)"), &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
 
@@ -107,7 +107,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* only comment present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"(comment message)", 17));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("(comment message)"), 17));
 
     pCopyHeader = reinterpret_cast<SipUserAgentHeader*>(
             SipUserAgentHeader::GetNewObj(SipHeaderBase::USER_AGENT, pHeader));
@@ -128,7 +128,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* value, comment and value present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"ims (comment message) 2.0", 25));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ims (comment message) 2.0"), 25));
 
     pCopyHeader = reinterpret_cast<SipUserAgentHeader*>(
             SipUserAgentHeader::GetNewObj(SipHeaderBase::USER_AGENT, pHeader));
@@ -140,7 +140,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
-    EXPECT_STREQ((char*)"ims (comment message) 2.0", &(aBuffer[0]));
+    EXPECT_STREQ(const_cast<char*>("ims (comment message) 2.0"), &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
 
@@ -149,7 +149,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* value, empty comment and value present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"ims () user-agent", 17));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ims () user-agent"), 17));
 
     pCopyHeader = reinterpret_cast<SipUserAgentHeader*>(
             SipUserAgentHeader::GetNewObj(SipHeaderBase::USER_AGENT, pHeader));
@@ -161,7 +161,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
 
     EXPECT_EQ(SIP_TRUE, pCopyHeader->EncodeHdr(&pBuff));
-    EXPECT_STREQ((char*)"ims () user-agent", &(aBuffer[0]));
+    EXPECT_STREQ(const_cast<char*>("ims () user-agent"), &(aBuffer[0]));
 
     pCopyHeader->SipDelete();
 
@@ -170,7 +170,7 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* value, comment not properly closed, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"ims (comment not closed", 23));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("ims (comment not closed"), 23));
 
     pHeader->SipDelete();
 
@@ -179,7 +179,8 @@ TEST_F(SipUserAgentHeaderTest, EncodeHdrAndDecodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     /* value, comment with no opening parenthesis, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"ims comment with no opening parenthesis)", 40));
+    EXPECT_EQ(SIP_FALSE,
+            pHeader->DecodeHdr(const_cast<char*>("ims comment with no opening parenthesis)"), 40));
 
     pHeader->SipDelete();
 }

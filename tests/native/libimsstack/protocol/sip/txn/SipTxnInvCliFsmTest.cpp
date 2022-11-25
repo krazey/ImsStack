@@ -44,30 +44,30 @@ protected:
 
         pSipMsg = new SipMessage();
         pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
-        char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+        char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
         EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
         pRespSipMsg = new SipMessage();
         pRespSipMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-        pMsg = (char*)"SIP/2.0 183 Ringing\r\n\
+        pMsg = const_cast<char*>("SIP/2.0 183 Ringing\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=too\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
         EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
         SipHeaderBase* pRespRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
         ASSERT_TRUE(pRespRSeqHdr != nullptr);
-        EXPECT_EQ(SIP_TRUE, pRespRSeqHdr->DecodeHdr((SIP_CHAR*)"2", 1));
+        EXPECT_EQ(SIP_TRUE, pRespRSeqHdr->DecodeHdr(const_cast<char*>("2"), 1));
 
         EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRespRSeqHdr));
         pRespRSeqHdr->SipDelete();
@@ -111,7 +111,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
 
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
@@ -131,7 +131,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
     delete pTxnKey;
 
     pSipTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
@@ -170,13 +170,13 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -210,14 +210,14 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     delete pTxn;
 
     pSipTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_TCP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -241,7 +241,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
 
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pSipSendTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -274,13 +274,13 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_ProceedingState)
     SIP_UINT16 nError = 0;
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     SipTransportParameter* pSipTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
     SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     SipTransportParameter* pSipSendTranspParam = new SipTransportParameter(
-            (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+            const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
 
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
@@ -293,14 +293,14 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_ProceedingState)
     SipMessage* pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-    char* pMsg = (char*)"SIP/2.0 183 Ringing\r\n\
+    char* pMsg = const_cast<char*>("SIP/2.0 183 Ringing\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=too\r\n\
 Call-ID: 1332\r\n\
 CSeq: 1 INVITE\r\n\
 RSeq: 2\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     delete pTxnFsmData;
     pTxnFsmData = new SipTxnFsmData(pTempSipMsg, pSipTranspParam, pSipUserData);
@@ -316,8 +316,8 @@ RSeq: 2\r\n\
     SipHeaderBase* pCallIDHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::CALL_ID);
     ASSERT_TRUE(pCallIDHdr != nullptr);
 
-    SIP_CHAR* pCallIdValue = (SIP_CHAR*)"1332a-3c0d31@2409:192.168.35.156";
-    SIP_CHAR* pFromValue = (SIP_CHAR*)"<sip:user@host>;tag=a89";
+    SIP_CHAR* pCallIdValue = const_cast<char*>("1332a-3c0d31@2409:192.168.35.156");
+    SIP_CHAR* pFromValue = const_cast<char*>("<sip:user@host>;tag=a89");
 
     EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, strlen(pFromValue)));
     EXPECT_EQ(SIP_TRUE, pCallIDHdr->DecodeHdr(pCallIdValue, strlen(pCallIdValue)));
@@ -340,8 +340,8 @@ RSeq: 2\r\n\
     SipHeaderBase* pToHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TO);
     ASSERT_TRUE(pToHdr != nullptr);
 
-    SIP_CHAR* pToValue = (SIP_CHAR*)"<sip:userA@host>;tag=one";
-    pFromValue = (SIP_CHAR*)"<sip:user@host>;tag=abcd";
+    SIP_CHAR* pToValue = const_cast<char*>("<sip:userA@host>;tag=one");
+    pFromValue = const_cast<char*>("<sip:user@host>;tag=abcd");
 
     EXPECT_EQ(SIP_TRUE, pFromHdr->DecodeHdr(pFromValue, strlen(pFromValue)));
     EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
@@ -364,9 +364,9 @@ RSeq: 2\r\n\
     SipHeaderBase* pRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
     ASSERT_TRUE(pRSeqHdr != nullptr);
 
-    pToValue = (SIP_CHAR*)"<sip:userA@host>;tag=too";
+    pToValue = const_cast<char*>("<sip:userA@host>;tag=too");
     EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
-    EXPECT_EQ(SIP_TRUE, pRSeqHdr->DecodeHdr((SIP_CHAR*)"90", 1));
+    EXPECT_EQ(SIP_TRUE, pRSeqHdr->DecodeHdr(const_cast<char*>("90"), 1));
 
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pToHdr));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pRSeqHdr));

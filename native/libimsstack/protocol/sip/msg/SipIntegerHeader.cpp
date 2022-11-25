@@ -51,7 +51,7 @@ SIP_BOOL SipIntegerHeader::SetValueInt(const SIP_UINT32 nValue)
     }
 
     SIP_CHAR szValue[MAX_LEN];
-    SipPf_Sprintf(szValue, (SIP_CHAR*)"%u", nValue);
+    SipPf_Sprintf(szValue, "%u", nValue);
     return SetValue(szValue);
 }
 

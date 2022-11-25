@@ -31,7 +31,7 @@ SIP_BOOL Mock_FetchTransaction(
 {
     if (nOption == TXN_OPT_CREATE)
     {
-        if (strcmp((((SipTxnKey*)pvTxnKey))->GetMethod(), "BYE") == 0)
+        if (strcmp((static_cast<SipTxnKey*>(pvTxnKey))->GetMethod(), "BYE") == 0)
         {
             return SIP_FALSE;
         }
@@ -45,21 +45,21 @@ SIP_BOOL Mock_FetchTransaction(
     {
         SIP_UINT16 nError;
 
-        SIP_INT32 eMsgType = ((SipTxnKey*)pvTxnKey)->GetMsgType();
+        SIP_INT32 eMsgType = (static_cast<SipTxnKey*>(pvTxnKey))->GetMsgType();
         switch (eMsgType)
         {
             case SipMessage::REQ_TYPE:
             {
-                if (strcmp((((SipTxnKey*)pvTxnKey))->GetMethod(), "CANCEL") == 0)
+                if (strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "CANCEL") == 0)
                 {
                     return SIP_TRUE;
                 }
 
-                if (strcmp((((SipTxnKey*)pvTxnKey))->GetMethod(), "UPDATE") == 0)
+                if (strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "UPDATE") == 0)
                 {
                     SipMessage* pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, (SipTxnKey*)pvTxnKey, pTempSipMsg,
-                            SIP_NULL, &nError);
+                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
+                            pTempSipMsg, SIP_NULL, &nError);
                     delete pTempSipMsg;
                     return SIP_TRUE;
                 }
@@ -71,7 +71,8 @@ SIP_BOOL Mock_FetchTransaction(
 
                     if (pTxn != SIP_NULL)
                     {
-                        if (((SipTxnKey*)pvTxnKey)->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                        if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) ==
+                                SIP_MATCHES)
                         {
                             if (ppvTxn != SIP_NULL)
                             {
@@ -84,26 +85,26 @@ SIP_BOOL Mock_FetchTransaction(
                 return SIP_FALSE;
             }
             case SipMessage::TYPE_INVALID:
-                ((SipTxnKey*)pvTxnKey)->CompareKeys(SIP_NULL);
-                ((SipTxnKey*)pvTxnKey)->CompareKeysForRPR(SIP_NULL);
+                (static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(SIP_NULL);
+                (static_cast<SipTxnKey*>(pvTxnKey))->CompareKeysForRPR(SIP_NULL);
                 return SIP_FALSE;
             case SipMessage::RESP_TYPE:
             {
-                if (((((SipTxnKey*)pvTxnKey))->GetRespCode() == 202) ||
-                        (((SipTxnKey*)pvTxnKey))->GetRespCode() == 603)
+                if ((((static_cast<SipTxnKey*>(pvTxnKey)))->GetRespCode() == 202) ||
+                        ((static_cast<SipTxnKey*>(pvTxnKey)))->GetRespCode() == 603)
                 {
                     return SIP_FALSE;
                 }
-                else if ((((SipTxnKey*)pvTxnKey))->GetRespCode() == 420)
+                else if (((static_cast<SipTxnKey*>(pvTxnKey)))->GetRespCode() == 420)
                 {
                     return SIP_TRUE;
                 }
                 SipMessage* pTempSipMsg;
-                if ((((SipTxnKey*)pvTxnKey))->GetRespCode() == 480)
+                if (((static_cast<SipTxnKey*>(pvTxnKey)))->GetRespCode() == 480)
                 {
                     pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, (SipTxnKey*)pvTxnKey, pTempSipMsg,
-                            SIP_NULL, &nError);
+                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
+                            pTempSipMsg, SIP_NULL, &nError);
                     objTxnList.Add((SipTxn*)*ppvTxn);
                     pTempSipMsg->SipDelete();
                     return SIP_TRUE;
@@ -111,8 +112,8 @@ SIP_BOOL Mock_FetchTransaction(
                 else if (bFromRecvTxn == SIP_TRUE)
                 {
                     pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INV_CLI_TXN, (SipTxnKey*)pvTxnKey, pTempSipMsg,
-                            SIP_NULL, &nError);
+                    *ppvTxn = new SipTxn(SipTxn::INV_CLI_TXN, static_cast<SipTxnKey*>(pvTxnKey),
+                            pTempSipMsg, SIP_NULL, &nError);
                     SipTxn* pTempTxn = (SipTxn*)*ppvTxn;
                     pTempTxn->SetTxnState(SipTxn::INV_CLI_CALLING_ST);
                     pTempSipMsg->SipDelete();
@@ -128,7 +129,8 @@ SIP_BOOL Mock_FetchTransaction(
 
                     if (pTxn != SIP_NULL)
                     {
-                        if (((SipTxnKey*)pvTxnKey)->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                        if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) ==
+                                SIP_MATCHES)
                         {
                             if (ppvTxn != SIP_NULL)
                             {
@@ -139,8 +141,8 @@ SIP_BOOL Mock_FetchTransaction(
                     }
                 }
                 pTempSipMsg = new SipMessage();
-                *ppvTxn = new SipTxn(
-                        SipTxn::INV_SER_TXN, (SipTxnKey*)pvTxnKey, pTempSipMsg, SIP_NULL, &nError);
+                *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
+                        pTempSipMsg, SIP_NULL, &nError);
                 SipTxn* pTempTxn = (SipTxn*)*ppvTxn;
                 pTempTxn->SetTxnState(SipTxn::INV_SER_PROCEEDING_ST);
                 pTempSipMsg->SipDelete();
@@ -163,7 +165,7 @@ SIP_BOOL Mock_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID* pvData, SIP_VOI
 SIP_BOOL Mock_ReleaseTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID** ppvOutTxnKey, SIP_VOID** ppvTxn)
 {
-    if ((((SipTxnKey*)pvTxnKey)->GetMsgType() == SipMessage::TYPE_INVALID))
+    if (((static_cast<SipTxnKey*>(pvTxnKey))->GetMsgType() == SipMessage::TYPE_INVALID))
     {
         return SIP_FALSE;
     }
@@ -175,7 +177,7 @@ SIP_BOOL Mock_ReleaseTransaction(
 
         if (pTxn != SIP_NULL)
         {
-            if (((SipTxnKey*)pvTxnKey)->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+            if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
             {
                 objTxnList.RemoveAt(i);
                 if (ppvTxn != SIP_NULL)
@@ -210,33 +212,33 @@ protected:
         pSipMsg = new SipMessage();
         pSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
-        char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+        char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=11df\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
         EXPECT_EQ(SIP_TRUE, pSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
         // Response Msg
         pRespSipMsg = new SipMessage();
         pRespSipMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-        pMsg = (char*)"SIP/2.0 406 Not Acceptable\r\n\
+        pMsg = const_cast<char*>("SIP/2.0 406 Not Acceptable\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
         EXPECT_EQ(SIP_TRUE, pRespSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
         pSipTxnContext = new SipTxnContext();
         pSipUserData = new ISipUserData(pSipTxnContext);
 
         pSipTranspParam = new SipTransportParameter(
-                (SIP_CHAR*)"192.168.35.156", 5060, SipTransportInfo::PROTOCOL_UDP);
+                const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
 
         static const SipStackCallbacks stTestCallbacks = {
                 &Mock_FetchTransaction,
@@ -429,7 +431,7 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
             pTxnHandler->OnSendTxn(
                     pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
 
-    SipCSeqHeader* pCSeq = (SipCSeqHeader*)pRespSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
+    SipCSeqHeader* pCSeq = static_cast<SipCSeqHeader*>(pRespSipMsg->GetHdrObj(SipHeaderBase::CSEQ));
 
     if (pCSeq != IMS_NULL)
     {
@@ -461,12 +463,12 @@ TEST_F(SipTxnHandlerTest, OnRecvTxn_Invalid)
     EXPECT_EQ(
             SIP_FALSE, pTxnHandler->OnRecvTxn(pTempMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
 
-    char* pMsg = (char*)"SIP/2.0 406 Not Acceptable\r\n\
+    char* pMsg = const_cast<char*>("SIP/2.0 406 Not Acceptable\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     /* Calling with invalid SipMessage : without To header */
@@ -477,12 +479,12 @@ CSeq: 1 INVITE\r\n\
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
-    pMsg = (char*)"SIP/2.0 406 Not Acceptable\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 406 Not Acceptable\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 To: <sip:user@host>;tag=abcd\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     /* Calling with invalid SipMessage : without From header */
     EXPECT_EQ(
@@ -493,12 +495,12 @@ CSeq: 1 INVITE\r\n\
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-    pMsg = (char*)"SIP/2.0 406 Not Acceptable\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 406 Not Acceptable\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 To: <sip:user@host>;tag=abcd\r\n\
 From: <sip:user@host>;\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     /* Calling with invalid SipMessage : without Callid header */
     EXPECT_EQ(
@@ -509,12 +511,12 @@ CSeq: 1 INVITE\r\n\
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-    pMsg = (char*)"SIP/2.0 406 Not Acceptable\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 406 Not Acceptable\r\n\
 To: <sip:user@host>;tag=abcd\r\n\
 From: <sip:user@host>;\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     /* Calling with invalid SipMessage : without Via header */
     EXPECT_EQ(
@@ -524,12 +526,12 @@ CSeq: 1 INVITE\r\n\
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::RESP_TYPE);
-    pMsg = (char*)"SIP/2.0 406 Not Acceptable\r\n\
+    pMsg = const_cast<char*>("SIP/2.0 406 Not Acceptable\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 To: <sip:user@host>;tag=abcd\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     /* Calling with invalid SipMessage : without CSeq header */
     EXPECT_EQ(
@@ -562,13 +564,13 @@ TEST_F(SipTxnHandlerTest, OnRecvTxn_Request)
 
     SipMessage* pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::REQ_TYPE);
-    char* pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    char* pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: callid\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
     /* Calling with different callid for key comparison to mismatch */
@@ -578,13 +580,13 @@ CSeq: 1 INVITE\r\n\
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::REQ_TYPE);
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=tag\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
     /* Calling with different from tag for key comparison to mismatch */
@@ -594,13 +596,13 @@ CSeq: 1 INVITE\r\n\
 
     pTempMsg = new SipMessage();
     pTempMsg->SetMessageType(SipMessage::REQ_TYPE);
-    pMsg = (char*)"INVITE sip:user@host SIP/2.0\r\n\
+    pMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>;tag=990\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 INVITE\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pTempMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
     pTxnKey = new SipTxnKey(pTempMsg, &nError);
     EXPECT_STREQ("990", pTxnKey->GetToTag());
@@ -672,13 +674,13 @@ TEST_F(SipTxnHandlerTest, OnRecvTxn_Response)
     SipMessage* pNonInvSipMsg = new SipMessage();
     pNonInvSipMsg->SetMessageType(SipMessage::RESP_TYPE);
 
-    char* pMsg = (char*)"SIP/2.0 200 Ok\r\n\
+    char* pMsg = const_cast<char*>("SIP/2.0 200 Ok\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 MESSAGE\r\n\
-\r\n";
+\r\n");
 
     EXPECT_EQ(SIP_TRUE, pNonInvSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
@@ -706,7 +708,7 @@ CSeq: 1 MESSAGE\r\n\
 
     SipHeaderBase* pRSeqHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ);
     ASSERT_TRUE(pRSeqHdr != nullptr);
-    EXPECT_EQ(SIP_TRUE, pRSeqHdr->DecodeHdr((SIP_CHAR*)"10", 2));
+    EXPECT_EQ(SIP_TRUE, pRSeqHdr->DecodeHdr(const_cast<char*>("10"), 2));
     EXPECT_EQ(SIP_TRUE, pRespSipMsg->SetHeader(pRSeqHdr));
 
     /* Calling with valid 183 response message */
@@ -783,13 +785,13 @@ TEST_F(SipTxnHandlerTest, OnRecvTranspError)
     SipMessage* pNonInvSipMsg = new SipMessage();
     pNonInvSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
-    char* pMsg = (char*)"REGISTER sip:user@host SIP/2.0\r\n\
+    char* pMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
 Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bs8\r\n\
 From: <sip:user@host>;tag=abcd\r\n\
 To: <sip:userA@host>\r\n\
 Call-ID: 1332a-3c0d31@2409:192.168.35.156\r\n\
 CSeq: 1 REGISTER\r\n\
-\r\n";
+\r\n");
     EXPECT_EQ(SIP_TRUE, pNonInvSipMsg->DecCompleteMsg(pMsg, strlen(pMsg)));
 
     /* Calling with valid SipTxnKey by creating with NON INVITE req message
@@ -828,15 +830,14 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->OnSendTranspError(pTxnKey));
     delete pTxnKey;
-    pTxnKey = SIP_NULL;
 
     SipMessage* pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
-    SIP_CHAR* pReqUri = (SIP_CHAR*)"sip:2222@ims.mnc861.mcc405.3gppnetwork.org";
+    SIP_CHAR* pReqUri = const_cast<char*>("sip:2222@ims.mnc861.mcc405.3gppnetwork.org");
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, strlen(pReqUri)));
-    SipRequestLine* pobjReqLine = new SipRequestLine((SIP_CHAR*)"INVITE", pAddrSpec, "SIP/2.0");
+    SipRequestLine* pobjReqLine = new SipRequestLine("INVITE", pAddrSpec, "SIP/2.0");
     ASSERT_TRUE(pobjReqLine != nullptr);
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetRequestline(pobjReqLine));
 
@@ -844,8 +845,8 @@ TEST_F(SipTxnHandlerTest, OnSendTranspError)
     SipHeaderBase* pToHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::TO);
     ASSERT_TRUE(pViaHdr != nullptr);
     ASSERT_TRUE(pToHdr != nullptr);
-    SIP_CHAR* pViaValue = (SIP_CHAR*)"SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
-    SIP_CHAR* pToValue = (SIP_CHAR*)"<sip:1111@ims.mnc861.mcc405.3gppnetwork.org>";
+    SIP_CHAR* pViaValue = const_cast<char*>("SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8");
+    SIP_CHAR* pToValue = const_cast<char*>("<sip:1111@ims.mnc861.mcc405.3gppnetwork.org>");
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pToHdr->DecodeHdr(pToValue, strlen(pToValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
@@ -874,21 +875,20 @@ TEST_F(SipTxnHandlerTest, TerminateTxn)
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->TerminateTxn(pTxnKey));
     delete pTxnKey;
-    pTxnKey = SIP_NULL;
 
     SipMessage* pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
-    SIP_CHAR* pReqUri = (SIP_CHAR*)"sip:2222@ims.mnc861.mcc405.3gppnetwork.org";
+    SIP_CHAR* pReqUri = const_cast<char*>("sip:2222@ims.mnc861.mcc405.3gppnetwork.org");
     SipAddrSpec* pAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pAddrSpec->DecodeAddrSpec(pReqUri, strlen(pReqUri)));
-    SipRequestLine* pobjReqLine = new SipRequestLine((SIP_CHAR*)"INVITE", pAddrSpec, "SIP/2.0");
+    SipRequestLine* pobjReqLine = new SipRequestLine("INVITE", pAddrSpec, "SIP/2.0");
     ASSERT_TRUE(pobjReqLine != nullptr);
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetRequestline(pobjReqLine));
 
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
-    SIP_CHAR* pViaValue = (SIP_CHAR*)"SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
+    SIP_CHAR* pViaValue = const_cast<char*>("SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8");
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
 
@@ -920,14 +920,13 @@ TEST_F(SipTxnHandlerTest, DeleteTxn)
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->DeleteTxn(pTxnKey));
     delete pTxnKey;
-    pTxnKey = SIP_NULL;
 
     SipMessage* pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::REQ_TYPE);
 
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
-    SIP_CHAR* pViaValue = (SIP_CHAR*)"SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8";
+    SIP_CHAR* pViaValue = const_cast<char*>("SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8");
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
     EXPECT_EQ(SIP_TRUE, pTempSipMsg->SetHeader(pViaHdr));
 
@@ -961,7 +960,6 @@ TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
     pTxnKey = new SipTxnKey();
     EXPECT_EQ(SIP_FALSE, pTxnHandler->UpdateTxnDetails(pTxnKey, pTranspInfo, &nError));
     delete pTxnKey;
-    pTxnKey = SIP_NULL;
 
     SipStatusLine* pStatusLine = pRespSipMsg->GetStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);

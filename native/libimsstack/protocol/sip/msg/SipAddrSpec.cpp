@@ -175,8 +175,7 @@ SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
 {
     if (m_pszUser != SIP_NULL)
     {
-        SIP_CHAR* pszTempUser =
-                SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, (SIP_CHAR*)SIP_USER);
+        SIP_CHAR* pszTempUser = SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, SIP_USER);
         objBuffer += pszTempUser;
         delete[] pszTempUser;
 
@@ -273,8 +272,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
        userinfo = ( user / telephone-subscriber ) [ ":" password ] "@"  */
     if (m_pszUser != SIP_NULL)
     {
-        SIP_CHAR* pszTempUser =
-                SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, (SIP_CHAR*)SIP_USER);
+        SIP_CHAR* pszTempUser = SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, SIP_USER);
         SipPf_Strcpy(*ppCurrPos, pszTempUser);
         delete[] pszTempUser;
 
@@ -326,7 +324,7 @@ SIP_BOOL SipUri::EncodeSipUri(SIP_CHAR** ppCurrPos)
             // TODO Percent Encoding
             SIP_CHAR szTmp[MAX_PORT_LEN];
             memset(szTmp, 0x0, sizeof(szTmp));
-            SipPf_Sprintf(szTmp, (SIP_CHAR*)"%u", m_nPort);
+            SipPf_Sprintf(szTmp, "%u", m_nPort);
 
             SIP_ENC_COLON(*ppCurrPos);
 

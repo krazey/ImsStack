@@ -64,8 +64,8 @@
 #define IS_DIGIT(ch)               ((ch) >= 48 && (ch) <= 57)
 #define IS_OCTAL(ch)               ((ch) >= 48 && (ch) <= 55)
 #define IS_BINARY(ch)              ((ch) >= 48 && (ch) <= 49)
-#define IS_HEXDIG(ch) \
-    (((ch) >= 65 && (ch) <= 70) || ((ch) >= 97 && (ch) <= 102) || IS_DIGIT((ch)))
+#define IS_HEXDIG(ch)              (((ch) >= 65 && (ch) <= 70) || \
+                                   ((ch) >= 97 && (ch) <= 102) || IS_DIGIT((ch)))
 #define IS_HEXL(ch)                (((ch) >= 0x61 && (ch) <= 0x66) || IS_DIGIT((ch)))
 #define IS_ALPHANUM(ch)            (IS_ALPHA((ch)) || IS_DIGIT((ch)))
 
@@ -157,8 +157,8 @@
 
 #define IS_ESCAPED(ch1, ch2, ch3) (((ch1) == '%') && (IS_HEXDIG((ch2))) && (IS_HEXDIG((ch3))))
 
-#define IS_SCHEME(ch) \
-    (IS_ALPHANUM((ch)) || ((ch) == '+') || ((ch) == '-') || ((ch) == '.'))
+#define IS_SCHEME(ch)             (IS_ALPHANUM((ch)) || \
+                                  ((ch) == '+') || ((ch) == '-') || ((ch) == '.'))
 
 #define SIP_COLLECT_TEMP_POS(pch1, pch2) \
     (pch1) = (pch2);                     \
@@ -192,31 +192,31 @@
 
 SIP_BOOL HasSpace(const SIP_CHAR* pszValue);
 
-SIP_CHAR* SipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+SIP_CHAR* SipSkipRwWSP(const SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
 SIP_BOOL SipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
         SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter);
 
 SIP_VOID SipEnc_UpdateCurrPos(SIP_CHAR** ppMsgBuffer /*in -out param*/);
 
-SIP_BOOL SipFindLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
+SIP_BOOL SipFindLWS(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
 
 SIP_CHAR* SipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-SIP_CHAR* SipSkipRwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+SIP_CHAR* SipSkipRwLWS(const SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
 SIP_BOOL SipFindPostDelimiter(
-        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
+        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
 
 SIP_BOOL SipFindPreDelimiter(
-        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
+        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter);
 
 SIP_CHAR* SipCreateString(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
 SIP_BOOL SipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
 
-SIP_BOOL SipFindTerminatingCRLF(
-        SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd);
+SIP_BOOL SipFindTerminatingCRLF(SIP_CHAR* pStartPoint, const SIP_CHAR* pEndPoint,
+        SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd);
 
 SIP_CHAR* SkipConsecutiveCRLFs(SIP_CHAR* pStartPt);
 

@@ -35,7 +35,7 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, CopyConstructor)
                     SipPChargingFunctionAddressesHeader::GetNewObj(
                             SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"ccf=192.0.8.1", 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ccf=192.0.8.1"), 13));
 
     SipPChargingFunctionAddressesHeader* pCopyHeader =
             reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
@@ -80,24 +80,22 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode)
     /* Empty value not allowed */
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_TRUE));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
 
     /* Invalid value */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"=value", strlen("=value")));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("=value"), strlen("=value")));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_TRUE));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
 
     /* Valid value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"ccf=192.0.8.1", 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("ccf=192.0.8.1"), 13));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("ccf=192.0.8.1", objBuffer.GetCharString());
 
@@ -116,13 +114,12 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
     /* Invalid value*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"=invalid", strlen("=invalid")));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("=invalid"), strlen("=invalid")));
 
     const int BUFFER_SIZE = 4096;
     char aBuffer[BUFFER_SIZE] = {
@@ -133,36 +130,33 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
     /* Decode invalid value */
-    SIP_CHAR* pValue = (char*)"ccf;";
+    SIP_CHAR* pValue = const_cast<char*>("ccf;");
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
 
     /* Decode valid value */
-    pValue = (char*)"ccf=192.0.8.1;ecf=192.0.8.3";
+    pValue = const_cast<char*>("ccf=192.0.8.1;ecf=192.0.8.3");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
 
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingFunctionAddressesHeader*>(
             SipPChargingFunctionAddressesHeader::GetNewObj(
                     SipHeaderBase::P_CHRG_FUN_ADDR, nullptr));
     /* Decode valid value */
-    pValue = (char*)"ccf-2=192.0.8.1;ecf-2=192.0.8.3";
+    pValue = const_cast<char*>("ccf-2=192.0.8.1;ecf-2=192.0.8.3");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
@@ -171,7 +165,6 @@ TEST_F(SipPChargingFunctionAddressesHeaderTest, Encode_DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 }
 
 }  // namespace android

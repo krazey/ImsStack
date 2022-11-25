@@ -66,7 +66,7 @@ SIP_BOOL SipRAcKHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
         return SIP_FALSE;
     }
 
-    SipPf_Sprintf(*ppCurrPos, (SIP_CHAR*)"%u %u %s", m_nResponseNum, m_nCSeqNum, m_pszMethod);
+    SipPf_Sprintf(*ppCurrPos, "%u %u %s", m_nResponseNum, m_nCSeqNum, m_pszMethod);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
     return SIP_TRUE;

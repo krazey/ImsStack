@@ -186,7 +186,7 @@ SIP_INT32 SipGetMsgType(SIP_CHAR* pszStartPoint)
                                                                      : SipMessage::REQ_TYPE;
 }
 
-SIP_INT32 SipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_INT32 SipGetUriType(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_ONE;
     if (SipPf_Memcmp(pStartPt, SIP_SIP, nSize) == 0)
@@ -249,7 +249,7 @@ SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 #endif
 
 SIP_CHAR* SipFindBodyEnd(
-        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
+        SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
 {
     if (pStartPt == SIP_NULL)
     {
@@ -388,7 +388,7 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
 
     /*Content header are separately parsed based Content headers array gaszSipContentHdr
       and treated as known headers */
-    if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR*)"Content", SIP_SEVEN) == SIP_ZERO)
+    if (SipPf_Strnicmp(pszRcvdHdrName, "Content", SIP_SEVEN) == SIP_ZERO)
     {
         SIP_BOOL isContHdrFound = SIP_FALSE;
         for (SIP_INT32 nNContHdr = SIP_ZERO; nNContHdr < SIP_CONTENT_HDRS_LEN; nNContHdr++)
@@ -405,15 +405,15 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
             return SipHeaderBase::UNKNOWN;
         }
     }  // Conversion for Expires / Retry-After Headers
-    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR*)"Expires", SIP_SEVEN) == SIP_ZERO)
+    else if (SipPf_Strnicmp(pszRcvdHdrName, "Expires", SIP_SEVEN) == SIP_ZERO)
     {
         return SipHeaderBase::EXPIRES_SEC;
     }
-    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR*)"Retry-After", SIP_11) == SIP_ZERO)
+    else if (SipPf_Strnicmp(pszRcvdHdrName, "Retry-After", SIP_11) == SIP_ZERO)
     {
         return SipHeaderBase::RETRY_AFTER_SEC;
     }
-    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR*)"Feature-Caps", SIP_12) == SIP_ZERO)
+    else if (SipPf_Strnicmp(pszRcvdHdrName, "Feature-Caps", SIP_12) == SIP_ZERO)
     {
         return SipHeaderBase::UNKNOWN;
     }
@@ -441,7 +441,7 @@ SIP_INT32 SIPHdrAccess::GetHdrTypeCompact(SIP_CHAR RcvdHdrName)
         return SipHeaderBase::UNKNOWN;
     }
 
-    SIP_CHAR* psztemp = (SIP_CHAR*)gaszSipHdrCompact;
+    const SIP_CHAR* psztemp = gaszSipHdrCompact;
     for (SIP_INT32 i = 0; (*psztemp != '\0'); i++)
     {
         if (*psztemp == lowHdrName)

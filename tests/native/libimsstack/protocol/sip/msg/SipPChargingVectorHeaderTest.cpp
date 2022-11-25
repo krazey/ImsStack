@@ -33,7 +33,7 @@ TEST_F(SipPChargingVectorHeaderTest, CopyConstructor)
     SipPChargingVectorHeader* pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"icid-value=1234", 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("icid-value=1234"), 15));
 
     SipPChargingVectorHeader* pCopyHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, pHeader));
@@ -72,22 +72,20 @@ TEST_F(SipPChargingVectorHeaderTest, Encode)
     /* Empty value not allowed */
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_TRUE));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, nullptr));
 
     /* Invalid value */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"=value", strlen("=value")));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("=value"), strlen("=value")));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_TRUE));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, nullptr));
 
     /* Valid value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"icid-value=1234", 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("icid-value=1234"), 15));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("icid-value=1234", objBuffer.GetCharString());
 
@@ -104,13 +102,12 @@ TEST_F(SipPChargingVectorHeaderTest, Encode_DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
     EXPECT_EQ(SIP_FALSE, pHeader->IsValidHeader());
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, nullptr));
 
     /* Invalid value*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"=value", strlen("=value")));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("=value"), strlen("=value")));
 
     const int BUFFER_SIZE = 4096;
     char aBuffer[BUFFER_SIZE] = {
@@ -121,33 +118,31 @@ TEST_F(SipPChargingVectorHeaderTest, Encode_DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, nullptr));
     /* Decode invalid value */
-    SIP_CHAR* pValue = (char*)"icid;";
+    SIP_CHAR* pValue = const_cast<char*>("icid;");
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, nullptr));
 
     /* Decode valid value */
-    pValue = (char*)"icid-value=1234bc9876e";
+    pValue = const_cast<char*>("icid-value=1234bc9876e");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
 
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPChargingVectorHeader*>(
             SipPChargingVectorHeader::GetNewObj(SipHeaderBase::P_CHARGING_VECTOR, nullptr));
     /* Decode valid value */
-    pValue = (char*)"icid-value=1234bc9876e;icid-generated-at=192.0.6.8;orig-ioi=home1.net";
+    pValue = const_cast<char*>(
+            "icid-value=1234bc9876e;icid-generated-at=192.0.6.8;orig-ioi=home1.net");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     EXPECT_EQ(SIP_TRUE, pHeader->IsValidHeader());
 
@@ -169,7 +164,6 @@ TEST_F(SipPChargingVectorHeaderTest, Encode_DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 }
 
 }  // namespace android

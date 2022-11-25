@@ -72,7 +72,7 @@ static SIP_BOOL InvSerFsm_IdleStRecvInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
     pTxn->Increment();
 
     /* Set Userdata into Txn object */
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     if (pFsmData->m_pUserData != SIP_NULL)
     {
         SIP_VOID* pvTUdata = pFsmData->m_pUserData->GetUserData();
@@ -101,7 +101,7 @@ static SIP_BOOL InvSerFsm_ProceedingStRecvInvReqEvt(
 {
     (void)pnError;
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     /* This is receive of re-transmitted INVITE request. stack manager to send last response */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
     pFsmData->m_pTranspInfo = pTxn->GetTranspInfo();
@@ -131,7 +131,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSendNon100ProvRespEvt(
     pTxn->InitRetransmissionInfo();
 
     /*Check whether RSeq header present or not*/
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SipMessage* pMsgIn = pFsmData->m_pSipMsgIn;
     SIP_BOOL bRSeqExist = pMsgIn->HasHeader(SipHeaderBase::RSEQ);
 
@@ -210,7 +210,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt(
     SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
     SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMERH);
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
     SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
 
@@ -262,7 +262,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend2xxSuccessRespEvt(
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
     SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMERH);
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     if (pTxn->StartTxnTimer(SipTxn::TIMERH, nDurationTH, pnError) != SIP_FALSE)
     {
         pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
@@ -293,7 +293,7 @@ static SIP_BOOL InvSerFsm_ProceedingStTranspErrorEvt(
 static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvData;
+    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
 
     if (pTimeoutData == SIP_NULL)
     {
@@ -364,7 +364,7 @@ static SIP_BOOL InvSerFsm_CompletedStRecvInvReqEvt(
 {
     (void)pnError;
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* This is receive of re-transmitted INVITE request. stack manager to send last response */
     pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
@@ -397,7 +397,7 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
     SIP_UINT16 nNextState;
     SIP_UINT32 nDurationTI = 0;
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     /* For Unreliable Transport */
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
@@ -504,7 +504,7 @@ static SIP_BOOL InvSerFsm_ConfirmedStRecvAckReqEvt(
 {
     (void)pnError;
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Absorb ACK retranmsissions.*/
     /* RFC 3261: 17.2.1 INVITE Server Transaction

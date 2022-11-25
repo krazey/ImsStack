@@ -154,18 +154,18 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* Decode only value and no parameter */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"application/sdp", 15));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("application/sdp"), 15));
     EXPECT_STREQ("application", pHeader->GetMediaType());
     EXPECT_STREQ("sdp", pHeader->GetSubMediaType());
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     /* Decode only value and parameters, with double quote included for param
      * value */
     EXPECT_EQ(SIP_TRUE,
-            pHeader->DecodeHdr((char*)"application/sdp;boundary=\"unique-boundary-1\"", 44));
+            pHeader->DecodeHdr(
+                    const_cast<char*>("application/sdp;boundary=\"unique-boundary-1\""), 44));
     EXPECT_STREQ("application", pHeader->GetMediaType());
     EXPECT_STREQ("sdp", pHeader->GetSubMediaType());
 
@@ -186,8 +186,9 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr)
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     /* Decode only value and parameters, without double quote included for param
      * value */
-    EXPECT_EQ(
-            SIP_TRUE, pHeader->DecodeHdr((char*)"application/sdp;boundary=unique-boundary-2", 42));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(
+                    const_cast<char*>("application/sdp;boundary=unique-boundary-2"), 42));
     EXPECT_STREQ("application", pHeader->GetMediaType());
     EXPECT_STREQ("sdp", pHeader->GetSubMediaType());
 

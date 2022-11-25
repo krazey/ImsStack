@@ -18,7 +18,7 @@
 
 #include "SipDatatypes.h"
 
-typedef SIP_VOID (*SipTimerCallback)(SIP_VOID* pvData, SIP_VOID* pvTimerId);
+typedef SIP_VOID (*SipTimerCallback)(SIP_VOID* pvData, const SIP_VOID* pvTimerId);
 
 class ISipTimerUtil
 {

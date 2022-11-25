@@ -32,7 +32,7 @@
 
 void SipPf_Snprintf(SIP_CHAR* pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR* pszFormat, ...);
 void SipPf_Sprintf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, ...);
-void SipPf_Sscanf(SIP_CHAR* pszBuffer, SIP_CHAR* pszFormat, SIP_CHAR* pszCharAdd);
+void SipPf_Sscanf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, SIP_CHAR* pszCharAdd);
 
 SIP_INT32 SipPf_Strlen(const SIP_CHAR* pszSource);
 

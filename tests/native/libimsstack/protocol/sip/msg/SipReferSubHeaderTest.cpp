@@ -53,47 +53,42 @@ TEST_F(SipReferSubHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
 
     /* ; value */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)";", 1));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(";"), 1));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipReferSubHeader*>(
             SipReferSubHeader::GetNewObj(SipHeaderBase::REFER_SUB, nullptr));
 
     /* any value other than true/false*/
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"*", 1));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("*"), 1));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     /* Decode true valid value */
     pHeader = reinterpret_cast<SipReferSubHeader*>(
             SipReferSubHeader::GetNewObj(SipHeaderBase::REFER_SUB, nullptr));
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"true", 4));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("true"), 4));
 
     const int BUFFER_SIZE = 4096;
     char aBuffer[BUFFER_SIZE] = {
             0,
     };
     char* pBuff = &(aBuffer[0]);
-
-    pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
+
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ("true", &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipReferSubHeader*>(
             SipReferSubHeader::GetNewObj(SipHeaderBase::REFER_SUB, nullptr));
 
     /* Decode false valid value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"false", 5));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("false"), 5));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ("false", &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 }
 
 }  // namespace android

@@ -194,7 +194,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
     SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
     SIP_UINT32 nDurationTF = objSipTxnTimers.GetTimerValue(SipTxn::TIMERF);
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
     SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
 
@@ -260,7 +260,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
 static SIP_BOOL NonInvCliFsm_TryingStTimer_E_F_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvData;
+    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
 
     (void)pTimeoutData;
 
@@ -280,7 +280,7 @@ static SIP_BOOL NonInvCliFsm_TryingStRecv1xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Fill FSM data for stack manager */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
@@ -303,7 +303,7 @@ static SIP_BOOL NonInvCliFsm_TryingStRecv2xx6xxRespEvt(
         return SIP_FALSE;
     }
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     /* Fill FSM data for stack manager */
     if (nNewTxnState == SipTxn::NON_INV_CLI_TERMINATED_ST)
     {
@@ -332,7 +332,7 @@ static SIP_BOOL NonInvCliFsm_TryingStTranspErrorEvt(
 static SIP_BOOL NonInvCliFsm_ProceedingStTimer_E_F_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvData;
+    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
     (void)pTimeoutData;
 
     /* handling of timeout and state transition occure inside the function */
@@ -353,7 +353,7 @@ static SIP_BOOL NonInvCliFsm_ProceedingStRecv1xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Fill FSM data for stack manager */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
@@ -379,7 +379,7 @@ static SIP_BOOL NonInvCliFsm_ProceedingStRecv2xx6xxRespEvt(
         return SIP_FALSE;
     }
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     /* Fill FSM data for stack manager */
     if (nNewTxnState == SipTxn::NON_INV_CLI_TERMINATED_ST)
     {
@@ -406,7 +406,7 @@ static SIP_BOOL NonInvCliFsm_CompletedStTimer_K_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvData;
+    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
     (void)pTimeoutData;
 
     /* State Transition */
@@ -418,7 +418,7 @@ static SIP_BOOL NonInvCliFsm_CompletedStRecv1xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Fill FSM data for stack manager */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
@@ -432,7 +432,7 @@ static SIP_BOOL NonInvCliFsm_CompletedStRecv2xx6xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Fill FSM data for stack manager */
     pFsmData->m_pOutUserData = pTxn->GetUserData();

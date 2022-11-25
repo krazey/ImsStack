@@ -119,10 +119,10 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(nullptr, 0));
 
     /* Only namespace present, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"namespace", 9));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("namespace"), 9));
 
     /* Only namespace(DOT) without r-priority, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"namespace.", 10));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("namespace."), 10));
     pHeader->SipDelete();
     pHeader = nullptr;
 
@@ -131,7 +131,7 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, DecodeHdr)
                     SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* Only (DOT)r-priority present, fail */
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)".r-priority", 11));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(".r-priority"), 11));
     pHeader->SipDelete();
     pHeader = nullptr;
 
@@ -140,9 +140,9 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, DecodeHdr)
                     SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* Both namespace and r-priority present, success */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"namespace.r-priority", 20));
-    EXPECT_STREQ((char*)"namespace", pHeader->GetNameSpace());
-    EXPECT_STREQ((char*)"r-priority", pHeader->GetResourcePriority());
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("namespace.r-priority"), 20));
+    EXPECT_STREQ(const_cast<char*>("namespace"), pHeader->GetNameSpace());
+    EXPECT_STREQ(const_cast<char*>("r-priority"), pHeader->GetResourcePriority());
     pHeader->SipDelete();
 }
 

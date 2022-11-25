@@ -60,12 +60,12 @@ TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnAgent((char*)"Warn-Agent"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnAgent("Warn-Agent"));
 
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objValue, SIP_FALSE));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnText((char*)"Warn-Text"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnText("Warn-Text"));
 
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objValue, SIP_TRUE));
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -80,8 +80,8 @@ TEST_F(SipWarningHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pHeader != nullptr);
 
     pHeader->SetWarnCode(300);
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnAgent((char*)"Warn-Agent"));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnText((char*)"Warn Text"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnAgent("Warn-Agent"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetWarnText("Warn Text"));
 
     objValue = AString::ConstNull();
     pBuff = &(aBuffer[0]);
@@ -102,17 +102,9 @@ TEST_F(SipWarningHeaderTest, DecodeHdr)
             SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"no-delimiter-space", 18));
-
-    pHeader->SipDelete();
-
-    pHeader = reinterpret_cast<SipWarningHeader*>(
-            SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
-    ASSERT_TRUE(pHeader != nullptr);
-
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"99 code-less-than-3digit", 24));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("no-delimiter-space"), 18));
 
     pHeader->SipDelete();
 
@@ -120,7 +112,7 @@ TEST_F(SipWarningHeaderTest, DecodeHdr)
             SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"1234 code-more-than-3digit", 26));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("99 code-less-than-3digit"), 24));
 
     pHeader->SipDelete();
 
@@ -128,7 +120,7 @@ TEST_F(SipWarningHeaderTest, DecodeHdr)
             SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"301 no-warn-text", 16));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("1234 code-more-than-3digit"), 26));
 
     pHeader->SipDelete();
 
@@ -136,7 +128,15 @@ TEST_F(SipWarningHeaderTest, DecodeHdr)
             SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"301 warn-agent warn-text", 24));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("301 no-warn-text"), 16));
+
+    pHeader->SipDelete();
+
+    pHeader = reinterpret_cast<SipWarningHeader*>(
+            SipWarningHeader::GetNewObj(SipHeaderBase::WARNING, nullptr));
+    ASSERT_TRUE(pHeader != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("301 warn-agent warn-text"), 24));
 
     EXPECT_EQ(301, pHeader->GetWarnCode());
     EXPECT_STREQ("warn-agent", pHeader->GetWarnAgent());

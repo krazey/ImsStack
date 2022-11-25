@@ -34,7 +34,7 @@ void SipPf_Sprintf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, ...)
     return;
 }
 
-void SipPf_Sscanf(SIP_CHAR* pszBuffer, SIP_CHAR* pszFormat, SIP_CHAR* pszCharAdd)
+void SipPf_Sscanf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, SIP_CHAR* pszCharAdd)
 {
     sscanf(pszBuffer, pszFormat, pszCharAdd);
     return;
@@ -295,7 +295,7 @@ SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSrc, SIP_CHAR cChar)
     {
         if (*pszSrc == cChar)
         {
-            pszDest = (SIP_CHAR*)pszSrc;
+            pszDest = pszSrc;
         }
 
         if ((*pszSrc) == SIP_NULL)

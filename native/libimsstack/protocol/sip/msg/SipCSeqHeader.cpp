@@ -66,7 +66,7 @@ SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
     }
 
     SIP_CHAR szBuf[MAX_CSEQ_LEN];
-    SipPf_Sprintf(szBuf, (SIP_CHAR*)"%u", m_nSeq);
+    SipPf_Sprintf(szBuf, "%u", m_nSeq);
 
     SipPf_Strcpy(*ppCurrPos, szBuf);
     SipEnc_UpdateCurrPos(ppCurrPos);

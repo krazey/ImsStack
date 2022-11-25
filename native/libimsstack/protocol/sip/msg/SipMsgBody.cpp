@@ -96,7 +96,7 @@ SIP_BOOL SipMIMEHdrs::SetMimeHdrs(SipHeaderBase* pHdr)
             {
                 m_pContentType->SipDelete();
             }
-            m_pContentType = (SipContentTypeHeader*)pHdr;
+            m_pContentType = static_cast<SipContentTypeHeader*>(pHdr);
             pHdr->Increment();
             break;
 
@@ -453,7 +453,7 @@ SIP_BOOL SipMsgBody::EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos)
     }
 
     /*Get The content type to get the boundary*/
-    SipContentTypeHeader* pContentType = SIP_STATIC_CAST(SipContentTypeHeader*, GetContentType());
+    SipContentTypeHeader* pContentType = static_cast<SipContentTypeHeader*>(GetContentType());
     if (pContentType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Content Type Not Present", SIP_ZERO, SIP_ZERO);
@@ -581,8 +581,8 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     /*Update the start point to the start of Actual Message body Buffer*/
     pStartPt = pStartPt + SIP_TWO;
     /*Now Get Type of Body*/
-    SipContentTypeHeader* pContentType = SIP_STATIC_CAST(
-            SipContentTypeHeader*, m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
+    SipContentTypeHeader* pContentType = static_cast<SipContentTypeHeader*>(
+            m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
     if (pContentType == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
@@ -629,7 +629,6 @@ SIP_BOOL SipMsgBody::DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
             return SIP_FALSE;
         }
         delete[] pszBoundary;
-        pszBoundary = SIP_NULL;
     }
     /*Case of Single Body*/
     else
@@ -687,8 +686,8 @@ SipContentTypeHeader* SipMsgBody::GetContentType()
 {
     if (m_pMIMEHdrs != SIP_NULL)
     {
-        return SIP_DYNAMIC_CAST(
-                SipContentTypeHeader*, m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
+        return static_cast<SipContentTypeHeader*>(
+                m_pMIMEHdrs->GetMimeHdrObj(SipMIMEHdrs::CONTENT_TYPE));
     }
 
     return SIP_NULL;

@@ -220,7 +220,8 @@ SIP_BOOL SipTxn::AbortTxn()
     ISipTimerUtil* pTimer = pUtil->GetTimer();
     if (m_pvTimerId != SIP_NULL)
     {
-        SipTimeoutData* pTimeoutData = (SipTimeoutData*)pTimer->StopTimerEx(m_pvTimerId);
+        SipTimeoutData* pTimeoutData =
+                static_cast<SipTimeoutData*>(pTimer->StopTimerEx(m_pvTimerId));
         m_pvTimerId = SIP_NULL;
 
         if (pTimeoutData != SIP_NULL)
@@ -315,7 +316,7 @@ SIP_BOOL SipTxn::StopTxnTimer()
     }
 
     SipTimeoutData* pTimeoutData = SIP_NULL;
-    pTimeoutData = (SipTimeoutData*)pTimer->StopTimerEx(m_pvTimerId);
+    pTimeoutData = static_cast<SipTimeoutData*>(pTimer->StopTimerEx(m_pvTimerId));
     m_pvTimerId = SIP_NULL;
     delete pTimeoutData;
 
@@ -350,7 +351,8 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
     }
 
     /* Set 'From'     from INVITE Request */
-    SipNameAddrHeader* pFromHdr = (SipNameAddrHeader*)pSipRespMsg->GetHdrObj(SipHeaderBase::FROM);
+    SipNameAddrHeader* pFromHdr =
+            static_cast<SipNameAddrHeader*>(pSipRespMsg->GetHdrObj(SipHeaderBase::FROM));
     if (SIP_NULL != pFromHdr)
     {
         SipNameAddrHeader* pFrom = new SipNameAddrHeader(*pFromHdr);
@@ -379,8 +381,7 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
         {
             SipAddrSpec* pNewObjReqUri = new SipAddrSpec(*pReqUri);
             pReqUri->SipDelete();
-            SipRequestLine* pReqLine = new SipRequestLine(
-                    (SIP_CHAR*)ACK_METHOD, pNewObjReqUri, (SIP_CHAR*)SIP_SIPVERSION);
+            pReqLine = new SipRequestLine(ACK_METHOD, pNewObjReqUri, SIP_SIPVERSION);
             if (pReqLine == SIP_NULL)
             {
                 SIP_DEBUG_WARNING(
@@ -393,7 +394,8 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
     }
 
     /* Set 'To' from INVITE Response */
-    SipNameAddrHeader* pToHdr = (SipNameAddrHeader*)pSipRespMsg->GetHdrObj(SipHeaderBase::TO);
+    SipNameAddrHeader* pToHdr =
+            static_cast<SipNameAddrHeader*>(pSipRespMsg->GetHdrObj(SipHeaderBase::TO));
     if (pToHdr != SIP_NULL)
     {
         SipNameAddrHeader* pTo = new SipNameAddrHeader(*pToHdr);
@@ -410,7 +412,7 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
     }
 
     /* Set 'Via' from INVITE Request    */
-    SipViaHeader* pViaHdr = (SipViaHeader*)m_pSipMsg->GetHdrObj(SipHeaderBase::VIA);
+    SipViaHeader* pViaHdr = static_cast<SipViaHeader*>(m_pSipMsg->GetHdrObj(SipHeaderBase::VIA));
     if (pViaHdr != SIP_NULL)
     {
         SipViaHeader* pVia = new SipViaHeader(*pViaHdr);
@@ -428,14 +430,15 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
     }
 
     /* Set CSeq    -Num    from INVITE Request */
-    SipCSeqHeader* pCSeqHdr = (SipCSeqHeader*)m_pSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
+    SipCSeqHeader* pCSeqHdr =
+            static_cast<SipCSeqHeader*>(m_pSipMsg->GetHdrObj(SipHeaderBase::CSEQ));
     if (pCSeqHdr != SIP_NULL)
     {
         SipCSeqHeader* pCseq = new SipCSeqHeader(*pCSeqHdr);
         pCSeqHdr->SipDelete();
 
-        /* Set CSeq-Method     as ACk */
-        pCseq->SetMethod((SIP_CHAR*)"ACK");
+        /* Set CSeq-Method as ACk */
+        pCseq->SetMethod("ACK");
 
         bStatus = pSipAckMsg->SetHeader(pCseq);
         pCseq->SipDelete();
@@ -453,7 +456,7 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
     SIP_CHAR szMaxFwdValue[SIP_CONTLEN_LEN] = {
             0,
     };
-    SipPf_Sprintf(szMaxFwdValue, (SIP_CHAR*)"%d", SIP_MAX_HOP);
+    SipPf_Sprintf(szMaxFwdValue, "%d", SIP_MAX_HOP);
     pMaxForward->SetValue(szMaxFwdValue);
     bStatus = pSipAckMsg->SetHeader(pMaxForward);
     pMaxForward->SipDelete();
@@ -467,7 +470,7 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
 
     /* Set UserAgent from INVITE Request */
     SipUserAgentHeader* pUserAgentHdr =
-            (SipUserAgentHeader*)m_pSipMsg->GetHdrObj(SipHeaderBase::USER_AGENT);
+            static_cast<SipUserAgentHeader*>(m_pSipMsg->GetHdrObj(SipHeaderBase::USER_AGENT));
     if (pUserAgentHdr != SIP_NULL)
     {
         SipUserAgentHeader* pUserAgent = new SipUserAgentHeader(*pUserAgentHdr);
@@ -661,9 +664,9 @@ SIP_VOID SipTxn::SetRespCode(SIP_UINT16 nRespCode)
     }
 }
 
-SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId)
+SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 {
-    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvobjTimeoutData;
+    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvobjTimeoutData);
     if (pTimeoutData == SIP_NULL)
     {
         SIP_DEBUG_WARNING(

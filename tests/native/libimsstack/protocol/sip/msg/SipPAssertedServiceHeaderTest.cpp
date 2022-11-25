@@ -52,13 +52,12 @@ TEST_F(SipPAssertedServiceHeaderTest, DecodeHdr)
     /* Empty header not allowed*/
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(SIP_NULL, 0));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPAssertedServiceHeader*>(
             SipPAssertedServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
 
     /* Decode in complete value */
-    SIP_CHAR* pValue = (char*)"urn:urn-8";
+    SIP_CHAR* pValue = const_cast<char*>("urn:urn-8");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
 
     const int BUFFER_SIZE = 4096;
@@ -70,11 +69,10 @@ TEST_F(SipPAssertedServiceHeaderTest, DecodeHdr)
     EXPECT_STREQ(pValue, &(aBuffer[0]));
 
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPAssertedServiceHeader*>(
             SipPAssertedServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
-    pValue = (char*)"urn:urn-7:gpp-serv##ice.";
+    pValue = const_cast<char*>("urn:urn-7:gpp-serv##ice.");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
 
     pBuff = &(aBuffer[0]);
@@ -82,32 +80,29 @@ TEST_F(SipPAssertedServiceHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     pHeader = reinterpret_cast<SipPAssertedServiceHeader*>(
             SipPAssertedServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
 
     /* Decode incomplete subservice value */
-    pValue = (char*)"urn:urn-7:3gpp-service.ims.icsi.mmtel:.";
+    pValue = const_cast<char*>("urn:urn-7:3gpp-service.ims.icsi.mmtel:.");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 
     /* Decode complete value */
     pHeader = reinterpret_cast<SipPAssertedServiceHeader*>(
             SipPAssertedServiceHeader::GetNewObj(SipHeaderBase::P_ASSERTED_SERVICE, nullptr));
-    pValue = (char*)"urn:urn-7:3gpp-service.ims.icsi.mmtel";
+    pValue = const_cast<char*>("urn:urn-7:3gpp-service.ims.icsi.mmtel");
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(pValue, strlen(pValue)));
     pBuff = &(aBuffer[0]);
     memset(pBuff, 0, BUFFER_SIZE);
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_STREQ(pValue, &(aBuffer[0]));
     pHeader->SipDelete();
-    pHeader = SIP_NULL;
 }
 
 }  // namespace android

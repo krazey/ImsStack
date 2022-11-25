@@ -51,15 +51,15 @@ SIP_BOOL SipAcceptResourcePriorityHeader::Encode(
 {
     if ((m_pszNameSpace == SIP_NULL) && (m_pszRPriority == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing namespace and priority",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Missing namespace and priority", SIP_ZERO, SIP_ZERO);
         return SIP_TRUE;
     }
 
     if ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing namespace or priority",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Missing namespace or priority", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

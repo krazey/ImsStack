@@ -304,7 +304,7 @@ public:
 };
 
 /*Timer Callback API*/
-SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId);
+SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId);
 
 SIP_VOID SipTxn_RemoveFromTxnPool(SipTxnKey* pTxnKey);
 

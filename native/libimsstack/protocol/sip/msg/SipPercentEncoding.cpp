@@ -33,8 +33,9 @@ SIP_CHAR* SipPercentEncoding::DoPercentDecoding(SIP_CHAR* pszString)
         if ((*pszStringTemp == PERCENT) && (nLength >= SIP_THREE))
         {
             SIP_INT32 nConvertedChar = SIP_ZERO;
-            SipPf_Sscanf(pszStringTemp + SIP_ONE, (SIP_CHAR*)"%2X", (SIP_CHAR*)&nConvertedChar);
-            SipPf_Sprintf(pszDecodedString, (SIP_CHAR*)"%c", (SIP_CHAR)nConvertedChar);
+            SipPf_Sscanf(
+                    pszStringTemp + SIP_ONE, "%2X", reinterpret_cast<SIP_CHAR*>(&nConvertedChar));
+            SipPf_Sprintf(pszDecodedString, "%c", static_cast<SIP_CHAR>(nConvertedChar));
             nLength = nLength - SIP_THREE;
             pszStringTemp = pszStringTemp + SIP_THREE;
             bIsPercentDecoded = SIP_TRUE;
@@ -66,7 +67,7 @@ SIP_CHAR* SipPercentEncoding::DoPercentDecoding(SIP_CHAR* pszString)
     return pszDecodedString;
 }
 
-SIP_CHAR* SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pszString, SIP_CHAR* pType)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pszString, const SIP_CHAR* pType)
 {
     /**
      * user = 1*( unreserved / escaped / user-unreserved )
@@ -89,8 +90,8 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pszString, SIP_CH
     while (*(pCurrPt) != SIP_NULL)
     {
         if (IS_UNRESERVED(*pCurrPt) ||
-                ((SipPf_Strcmp(pType, (SIP_CHAR*)SIP_USER) == 0) && IS_USER_UNRESERVED(*pCurrPt)) ||
-                ((SipPf_Strcmp(pType, (SIP_CHAR*)SIP_HEADERS) == 0) && IS_HNV_UNRESERVED(*pCurrPt)))
+                ((SipPf_Strcmp(pType, SIP_USER) == 0) && IS_USER_UNRESERVED(*pCurrPt)) ||
+                ((SipPf_Strcmp(pType, SIP_HEADERS) == 0) && IS_HNV_UNRESERVED(*pCurrPt)))
         {
             *pEncodedString = *pCurrPt;
             pCurrPt++;
@@ -109,7 +110,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pszString, SIP_CH
         {
             *pEncodedString = PERCENT;
             pEncodedString++;
-            SipPf_Sprintf(pEncodedString, (SIP_CHAR*)"%02X", *pCurrPt);
+            SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
             SipEnc_UpdateCurrPos(&pEncodedString);
             pCurrPt++;
         }
@@ -155,7 +156,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_Password(SIP_CHAR* pszString)
         {
             *pEncodedString = PERCENT;
             pEncodedString++;
-            SipPf_Sprintf(pEncodedString, (SIP_CHAR*)"%02X", *pCurrPt);
+            SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
             SipEnc_UpdateCurrPos(&pEncodedString);
             pCurrPt++;
         }
@@ -187,7 +188,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_Host(SIP_CHAR* pszString)
         {
             *pEncodedString = PERCENT;
             pEncodedString++;
-            SipPf_Sprintf(pEncodedString, (SIP_CHAR*)"%02X", *pCurrPt);
+            SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
             SipEnc_UpdateCurrPos(&pEncodedString);
             pCurrPt++;
         }
@@ -217,7 +218,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_TokenParam(SIP_CHAR* pszString)
         {
             *pEncodedString = PERCENT;
             pEncodedString++;
-            SipPf_Sprintf(pEncodedString, (SIP_CHAR*)"%02X", *pCurrPt);
+            SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
             SipEnc_UpdateCurrPos(&pEncodedString);
             pCurrPt++;
         }
@@ -247,7 +248,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_TtlParam(SIP_CHAR* pszString)
         {
             *pEncodedString = PERCENT;
             pEncodedString++;
-            SipPf_Sprintf(pEncodedString, (SIP_CHAR*)"%02X", *pCurrPt);
+            SipPf_Sprintf(pEncodedString, "%02X", *pCurrPt);
             SipEnc_UpdateCurrPos(&pEncodedString);
             pCurrPt++;
         }
@@ -296,7 +297,7 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_Param(SIP_CHAR* pszName, SIP_CHAR* pszVal
     }
     else if (SipPf_Stricmp(pszName, SIP_HEADERS) == 0)
     {
-        return DoPerEnc_UserAndHeader(pszValue, (SIP_CHAR*)SIP_HEADERS);
+        return DoPerEnc_UserAndHeader(pszValue, SIP_HEADERS);
     }
     return DoPerEnc_OtherParam(pszValue);
 }

@@ -60,7 +60,7 @@ SIP_BOOL SipRetryAfterHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     SIP_CHAR szLen[MAX_RETRY_AFTER_LEN];
-    SipPf_Sprintf(szLen, (SIP_CHAR*)"%u", m_nDeltaSec);
+    SipPf_Sprintf(szLen, "%u", m_nDeltaSec);
 
     SipPf_Strcpy(*ppCurrPos, szLen);
     SipEnc_UpdateCurrPos(ppCurrPos);

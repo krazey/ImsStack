@@ -23,7 +23,7 @@ SIP_BOOL MockFsm_FetchTransaction(
 {
     if (nOption == TXN_OPT_CREATE)
     {
-        if (strcmp((((SipTxnKey*)pvTxnKey))->GetMethod(), "BYE") == 0)
+        if (strcmp((static_cast<SipTxnKey*>(pvTxnKey))->GetMethod(), "BYE") == 0)
         {
             return SIP_FALSE;
         }
@@ -43,7 +43,8 @@ SIP_BOOL MockFsm_FetchTransaction(
 
             if (pTxn != SIP_NULL)
             {
-                if (((SipTxnKey*)pvTxnKey)->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+                if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) ==
+                        SIP_MATCHES)
                 {
                     if (ppvTxn != SIP_NULL)
                     {
@@ -54,13 +55,13 @@ SIP_BOOL MockFsm_FetchTransaction(
             }
         }
 
-        SIP_INT32 eMsgType = ((SipTxnKey*)pvTxnKey)->GetMsgType();
+        SIP_INT32 eMsgType = (static_cast<SipTxnKey*>(pvTxnKey))->GetMsgType();
 
         switch (eMsgType)
         {
             case SipMessage::REQ_TYPE:
             {
-                if (strcmp((((SipTxnKey*)pvTxnKey))->GetMethod(), "CANCEL") == 0)
+                if (strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "CANCEL") == 0)
                 {
                     return SIP_TRUE;
                 }
@@ -68,12 +69,12 @@ SIP_BOOL MockFsm_FetchTransaction(
             }
             case SipMessage::RESP_TYPE:
             {
-                if (strcmp((((SipTxnKey*)pvTxnKey))->GetMethod(), "INVITE") == 0)
+                if (strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "INVITE") == 0)
                 {
                     SIP_UINT16 nError;
                     SipMessage* pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, (SipTxnKey*)pvTxnKey, pTempSipMsg,
-                            SIP_NULL, &nError);
+                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
+                            pTempSipMsg, SIP_NULL, &nError);
                     delete pTempSipMsg;
                     return SIP_TRUE;
                 }
@@ -109,7 +110,7 @@ SIP_BOOL MockFsm_ReleaseTransaction(SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID**, S
 
         if (pTxn != SIP_NULL)
         {
-            if (((SipTxnKey*)pvTxnKey)->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+            if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
             {
                 objFsmTxnList.RemoveAt(i);
                 return SIP_TRUE;

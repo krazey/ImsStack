@@ -45,7 +45,7 @@ TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetProtocolName((SIP_CHAR*)"SIP"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetProtocolName("SIP"));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
@@ -53,7 +53,7 @@ TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetProtocolVer((SIP_CHAR*)"2.0"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetProtocolVer("2.0"));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
@@ -61,7 +61,7 @@ TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetTransport((SIP_CHAR*)"TCP"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetTransport("TCP"));
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
 
@@ -69,9 +69,9 @@ TEST_F(SipViaHeaderTest, EncodeAndEncodeHdr)
     memset(pBuff, 0, BUFFER_SIZE);
     objBuffer = AString::ConstNull();
 
-    EXPECT_EQ(SIP_TRUE, pHeader->SetHost((SIP_CHAR*)"[2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetHost("[2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]"));
     EXPECT_EQ(SIP_TRUE, pHeader->SetPortNum((SIP_UINT16)39002));
-    EXPECT_EQ(SIP_TRUE, pHeader->SetBranchParam((SIP_CHAR*)"z9hG4bK1422bd448-755bfe94"));
+    EXPECT_EQ(SIP_TRUE, pHeader->SetBranchParam("z9hG4bK1422bd448-755bfe94"));
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_TRUE, pHeader->Encode(objBuffer, SIP_TRUE));
@@ -93,71 +93,73 @@ TEST_F(SipViaHeaderTest, DecodeHdr)
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"SIP", 3));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("SIP"), 3));
     pHeader->SipDelete();
 
     pHeader =
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"SIP/2.0", 7));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("SIP/2.0"), 7));
     pHeader->SipDelete();
 
     pHeader =
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP", 11));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP"), 11));
     pHeader->SipDelete();
 
     pHeader =
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP 192.168.1.2", 23));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP 192.168.1.2"), 23));
     pHeader->SipDelete();
 
     pHeader =
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP 192.168.1.2:8080", 28));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP 192.168.1.2:8080"), 28));
     pHeader->SipDelete();
 
     pHeader =
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP [2001::1]", 21));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP [2001::1]"), 21));
     pHeader->SipDelete();
 
     pHeader =
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP [2001::1]:9192", 26));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP [2001::1]:9192"), 26));
     pHeader->SipDelete();
 
     pHeader =
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP 192.168.1.2:8080;branch=abc", 39));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP 192.168.1.2:8080;branch=abc"), 39));
     pHeader->SipDelete();
 
     pHeader =
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP [2001::1]:9192;branch=xyz", 37));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP [2001::1]:9192;branch=xyz"), 37));
     EXPECT_STREQ("SIP", pHeader->GetProtocolName());
     EXPECT_STREQ("2.0", pHeader->GetProtocolVer());
     EXPECT_STREQ("TCP", pHeader->GetTransport());
     EXPECT_STREQ("[2001::1]", pHeader->GetHost());
     EXPECT_EQ(9192, pHeader->GetPort());
-    char* pBranch = (char*)pHeader->GetBranch();
+    char* pBranch = const_cast<char*>(pHeader->GetBranch());
     EXPECT_STREQ("xyz", pBranch);
     delete[] pBranch;
     pHeader->SipDelete();
@@ -166,13 +168,14 @@ TEST_F(SipViaHeaderTest, DecodeHdr)
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP [2001::1];branch=xyz", 32));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP [2001::1];branch=xyz"), 32));
     EXPECT_STREQ("SIP", pHeader->GetProtocolName());
     EXPECT_STREQ("2.0", pHeader->GetProtocolVer());
     EXPECT_STREQ("TCP", pHeader->GetTransport());
     EXPECT_STREQ("[2001::1]", pHeader->GetHost());
     EXPECT_EQ(0, pHeader->GetPort());
-    pBranch = (char*)pHeader->GetBranch();
+    pBranch = const_cast<char*>(pHeader->GetBranch());
     EXPECT_STREQ("xyz", pBranch);
     delete[] pBranch;
     pHeader->SipDelete();
@@ -181,13 +184,14 @@ TEST_F(SipViaHeaderTest, DecodeHdr)
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TLS ims.sip.com:5061;branch=a1b", 39));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TLS ims.sip.com:5061;branch=a1b"), 39));
     EXPECT_STREQ("SIP", pHeader->GetProtocolName());
     EXPECT_STREQ("2.0", pHeader->GetProtocolVer());
     EXPECT_STREQ("TLS", pHeader->GetTransport());
     EXPECT_STREQ("ims.sip.com", pHeader->GetHost());
     EXPECT_EQ(5061, pHeader->GetPort());
-    pBranch = (char*)pHeader->GetBranch();
+    pBranch = const_cast<char*>(pHeader->GetBranch());
     EXPECT_STREQ("a1b", pBranch);
     delete[] pBranch;
     pHeader->SipDelete();
@@ -196,13 +200,14 @@ TEST_F(SipViaHeaderTest, DecodeHdr)
             reinterpret_cast<SipViaHeader*>(SipViaHeader::GetNewObj(SipHeaderBase::VIA, SIP_NULL));
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"SIP/2.0/TCP ims.sip.com;branch=xyz", 34));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(const_cast<char*>("SIP/2.0/TCP ims.sip.com;branch=xyz"), 34));
     EXPECT_STREQ("SIP", pHeader->GetProtocolName());
     EXPECT_STREQ("2.0", pHeader->GetProtocolVer());
     EXPECT_STREQ("TCP", pHeader->GetTransport());
     EXPECT_STREQ("ims.sip.com", pHeader->GetHost());
     EXPECT_EQ(0, pHeader->GetPort());
-    pBranch = (char*)pHeader->GetBranch();
+    pBranch = const_cast<char*>(pHeader->GetBranch());
     EXPECT_STREQ("xyz", pBranch);
     delete[] pBranch;
     pHeader->SipDelete();

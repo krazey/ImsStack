@@ -125,7 +125,7 @@ static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
     const SipTxnTimerValues& pSipTxnTimers = pTxn->GetSipTxnTimers();
     SIP_UINT32 nDurationT1 = pSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
     SIP_UINT32 nDurationTB = pSipTxnTimers.GetTimerValue(SipTxn::TIMERB);
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
     SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
 
@@ -179,7 +179,7 @@ static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
 static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvData;
+    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
 
     (void)pTimeoutData;
 
@@ -260,7 +260,7 @@ static SIP_BOOL InvCliFsm_CallingStRecv1xxRespEvt(
     pTxn->StopTxnTimer();
 
     /* Get user data */
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     pFsmData->m_pOutUserData = pTxn->GetUserData();
 
     /* Fill FSM data for stack manager */
@@ -311,7 +311,7 @@ static SIP_BOOL InvCliFsm_CallingStRecv2xxRespEvt(
     pTxn->StopTxnTimer();
 
     /* Get user data */
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     pFsmData->m_pOutUserData = pTxn->GetUserData();
 
     /* Fill FSM data for stack manager */
@@ -332,7 +332,7 @@ static SIP_BOOL InvCliFsm_CallingStRecv3xx6xxRespEvt(
 
     /* Prepare failure ACK message and fill into pTxnFsmData.
        state txn is done in this fxn */
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SIP_UINT16 nNewTxnState = SIP_ZERO;
 
     if (sipInvCli_HandleFailureResp(pTxn, pFsmData, &nNewTxnState, pnError) == SIP_FALSE)
@@ -377,7 +377,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Get user data */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
@@ -406,7 +406,6 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
                 if (pTempTxnKey != SIP_NULL)
                 {
                     delete pTempTxnKey;
-                    pTempTxnKey = SIP_NULL;
                 }
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                         "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Retransmitted message.",
@@ -419,7 +418,6 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
                 {
                     SIP_UINT32 nRseq = pTempTxnKey->GetRSeq();
                     delete pTempTxnKey;
-                    pTempTxnKey = SIP_NULL;
                     if (pINVTxnKey->GetRSeq() + 1 != nRseq)
                     {
                         pFsmData->eTxnStatus = SipTxn::STATUS_STRAY_RESP;
@@ -438,7 +436,6 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(
                     if (SipTxnUtil::AddTxnKey(pTempTxnKey) == SIP_FALSE)
                     {
                         delete pTempTxnKey;
-                        pTempTxnKey = SIP_NULL;
                         SIP_DEBUG_WARNING(
                                 ESIPTRACE_MODTXN, "TxnKey insertion failed", SIP_ZERO, SIP_ZERO);
                     }
@@ -459,7 +456,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv2xxRespEvt(
     SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
 
     /* Fill FSM data for stack manager */
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     pFsmData->m_pOutUserData = pTxn->GetUserData();
     pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
     pFsmData->bTxnTerminated = SIP_TRUE;
@@ -475,7 +472,7 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv3xx6xxRespEvt(
 {
     SipTxnUtil::DeleteTxnKey(pTxn->GetTxnKey());
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SIP_UINT16 nNewTxnState = SIP_ZERO;
     /* Prepare failure ACK message and fill into pTxnFsmData.
        state txn is done in this fxn */
@@ -518,7 +515,7 @@ static SIP_BOOL InvCliFsm_ProceedingStTranspErrorEvt(
 static SIP_BOOL InvCliFsm_CompletedStTimerD_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvData;
+    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
 
     (void)pnError;
     (void)pTimeoutData;
@@ -533,7 +530,7 @@ static SIP_BOOL InvCliFsm_CompletedStRecv1xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* Old response received , simply obsorved the messages*/
 
@@ -548,7 +545,7 @@ static SIP_BOOL InvCliFsm_CompletedStRecv3xx6xxRespEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
+    SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
 
     /* This is receive of re-transmitted failure response. Failure ACK shall be sent */
     pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;

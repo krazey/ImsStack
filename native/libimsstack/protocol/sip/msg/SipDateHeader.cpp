@@ -230,13 +230,13 @@ SIP_BOOL SipDateHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
     **ppCurrPos = SPACE;
     (*ppCurrPos)++;
 
-    SipPf_Sprintf(*ppCurrPos, (SIP_CHAR*)"%02u %s %4u", m_nDate, gaszMonth[m_eMonth], m_nYear);
+    SipPf_Sprintf(*ppCurrPos, "%02u %s %4u", m_nDate, gaszMonth[m_eMonth], m_nYear);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
     **ppCurrPos = SPACE;
     (*ppCurrPos)++;
 
-    SipPf_Sprintf(*ppCurrPos, (SIP_CHAR*)"%02u:%02u:%02u", m_nHour, m_nMin, m_nSec);
+    SipPf_Sprintf(*ppCurrPos, "%02u:%02u:%02u", m_nHour, m_nMin, m_nSec);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
     **ppCurrPos = SPACE;

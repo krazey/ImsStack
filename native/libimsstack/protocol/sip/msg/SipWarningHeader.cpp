@@ -88,7 +88,7 @@ SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
     }
 
     SIP_CHAR szLen[MAX_WARN_LEN];
-    SipPf_Sprintf(szLen, (SIP_CHAR*)"%u", m_nWarnCode);
+    SipPf_Sprintf(szLen, "%u", m_nWarnCode);
 
     SipPf_Strcpy(*ppCurrPos, szLen);
     SipEnc_UpdateCurrPos(ppCurrPos);

@@ -45,9 +45,9 @@ TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr)
     EXPECT_EQ(SIP_FALSE,
             pHeader->EncodeHdr(&pBuff, SIP_TRUE, SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM));
     EXPECT_EQ(SIP_FALSE, pHeader->Encode(objBuffer, SIP_FALSE));
-    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr(const_cast<char*>(""), 0));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"event-package", 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("event-package"), 13));
 
     SipHeaderBase* pCopyHeader =
             SipAllowEventsHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, pHeader);
@@ -65,7 +65,7 @@ TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr)
     pHeader = SipAllowEventsHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"event-package.event-template", 28));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("event-package.event-template"), 28));
 
     pCopyHeader = SipAllowEventsHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);

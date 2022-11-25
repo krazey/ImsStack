@@ -83,7 +83,7 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
     }
 
     /* Fetch Branch : Branch can be null */
-    SipViaHeader* pViaHdr = (SipViaHeader*)pSipMsg->GetHdrObj(SipHeaderBase::VIA);
+    SipViaHeader* pViaHdr = static_cast<SipViaHeader*>(pSipMsg->GetHdrObj(SipHeaderBase::VIA));
     if (pViaHdr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnKey Constructor: ViaHdr is NULL Txn\n", SIP_ZERO,
@@ -130,7 +130,8 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
         m_pszMethod = SipPf_Strdup(pReqLine->GetMethod());
 
         /* Fetch CSeq Num */
-        SipCSeqHeader* pCseqHdr = (SipCSeqHeader*)pSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
+        SipCSeqHeader* pCseqHdr =
+                static_cast<SipCSeqHeader*>(pSipMsg->GetHdrObj(SipHeaderBase::CSEQ));
         if (pCseqHdr != SIP_NULL)
         {
             m_nCseqNum = pCseqHdr->GetCSeq();
@@ -140,7 +141,8 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
     else
     {
         /* Fetch Method */
-        SipCSeqHeader* pCseqHdr = (SipCSeqHeader*)pSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
+        SipCSeqHeader* pCseqHdr =
+                static_cast<SipCSeqHeader*>(pSipMsg->GetHdrObj(SipHeaderBase::CSEQ));
         if (pCseqHdr != SIP_NULL)
         {
             m_pszMethod = SipPf_Strdup(pCseqHdr->GetMethod());
@@ -153,7 +155,8 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
     }
 
     /* Fetch To-Tag */
-    SipNameAddrHeader* pToHdr = (SipNameAddrHeader*)pSipMsg->GetHdrObj(SipHeaderBase::TO);
+    SipNameAddrHeader* pToHdr =
+            static_cast<SipNameAddrHeader*>(pSipMsg->GetHdrObj(SipHeaderBase::TO));
     if (pToHdr == SIP_NULL)
     {
         *pnError = EMSGERR_TOMISSING;
@@ -164,7 +167,8 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
     pToHdr->SipDelete();
 
     /* Fetch From-Tag */
-    SipNameAddrHeader* pFromHdr = (SipNameAddrHeader*)pSipMsg->GetHdrObj(SipHeaderBase::FROM);
+    SipNameAddrHeader* pFromHdr =
+            static_cast<SipNameAddrHeader*>(pSipMsg->GetHdrObj(SipHeaderBase::FROM));
     if (pFromHdr == SIP_NULL)
     {
         *pnError = EMSGERR_FROMMISSING;
@@ -182,7 +186,8 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
         pCallHdr->SipDelete();
     }
 
-    SipIntegerHeader* pRSeqhdr = (SipIntegerHeader*)pSipMsg->GetHdrObj(SipHeaderBase::RSEQ);
+    SipIntegerHeader* pRSeqhdr =
+            static_cast<SipIntegerHeader*>(pSipMsg->GetHdrObj(SipHeaderBase::RSEQ));
     if (pRSeqhdr != SIP_NULL)
     {
         SetRSeq(pRSeqhdr->GetValueInt());
@@ -210,7 +215,7 @@ SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
     m_eTxnType = pTxnKey->m_eTxnType;
     m_nRules = pTxnKey->m_nRules;
 
-    m_pszViaBranchParam = (SIP_CHAR*)SipPf_Strdup((SIP_CHAR*)pTxnKey->m_pszViaBranchParam);
+    m_pszViaBranchParam = SipPf_Strdup(pTxnKey->m_pszViaBranchParam);
     if (m_pszViaBranchParam == SIP_NULL)
     {
         *pnError = E_ERR_PF_MALLOCFAILED;
@@ -218,7 +223,7 @@ SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
                 ESIPTRACE_MODTXN, "SipTxnKey::Init: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return;
     }
-    m_pszViaHost = (SIP_CHAR*)SipPf_Strdup((SIP_CHAR*)pTxnKey->m_pszViaHost);
+    m_pszViaHost = SipPf_Strdup(pTxnKey->m_pszViaHost);
     if (m_pszViaHost == SIP_NULL)
     {
         *pnError = E_ERR_PF_MALLOCFAILED;
@@ -228,7 +233,7 @@ SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
         return;
     }
     m_nViaHostPort = pTxnKey->m_nViaHostPort;
-    m_pszMethod = (SIP_CHAR*)SipPf_Strdup((SIP_CHAR*)pTxnKey->m_pszMethod);
+    m_pszMethod = SipPf_Strdup(pTxnKey->m_pszMethod);
     if (m_pszMethod == SIP_NULL)
     {
         *pnError = E_ERR_PF_MALLOCFAILED;
@@ -255,7 +260,7 @@ SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
 
     if (pTxnKey->m_pszToTag != SIP_NULL)
     {
-        m_pszToTag = (SIP_CHAR*)SipPf_Strdup((SIP_CHAR*)pTxnKey->m_pszToTag);
+        m_pszToTag = SipPf_Strdup(pTxnKey->m_pszToTag);
         if (m_pszToTag == SIP_NULL)
         {
             *pnError = E_ERR_PF_MALLOCFAILED;
@@ -266,7 +271,7 @@ SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
         }
     }
 
-    m_pszFromTag = (SIP_CHAR*)SipPf_Strdup((SIP_CHAR*)pTxnKey->m_pszFromTag);
+    m_pszFromTag = SipPf_Strdup(pTxnKey->m_pszFromTag);
     if (m_pszFromTag == SIP_NULL)
     {
         *pnError = E_ERR_PF_MALLOCFAILED;
@@ -275,7 +280,7 @@ SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
         Clear();
         return;
     }
-    m_pszCallId = (SIP_CHAR*)SipPf_Strdup((SIP_CHAR*)pTxnKey->m_pszCallId);
+    m_pszCallId = SipPf_Strdup(pTxnKey->m_pszCallId);
     if (m_pszCallId == SIP_NULL)
     {
         *pnError = E_ERR_PF_MALLOCFAILED;
@@ -293,7 +298,7 @@ SIP_VOID SipTxnKey::SetMethod(const SIP_CHAR* pszMethod)
         delete[] m_pszMethod;
     }
 
-    m_pszMethod = (SIP_CHAR*)SipPf_Strdup(pszMethod);
+    m_pszMethod = SipPf_Strdup(pszMethod);
 }
 
 SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)

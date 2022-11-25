@@ -513,7 +513,6 @@ PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(
         return SipTxn::INVALID_TXN;
     }
 
-    SIP_INT32 eTxnType = SipTxn::INVALID_TXN;
     if (eMsgDir == SipTxn::SEND)
     {
         if (eMsgType == SipMessage::REQ_TYPE)
@@ -521,22 +520,22 @@ PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(
             if ((eMethodType == SipMessage::METHOD_INVITE) ||
                     (eMethodType == SipMessage::METHOD_ACK))
             {
-                eTxnType = SipTxn::INV_CLI_TXN;
+                return SipTxn::INV_CLI_TXN;
             }
             else
             {
-                eTxnType = SipTxn::NON_INV_CLI_TXN;
+                return SipTxn::NON_INV_CLI_TXN;
             }
         }
         else
         {
             if (eMethodType == SipMessage::METHOD_INVITE)
             {
-                eTxnType = SipTxn::INV_SER_TXN;
+                return SipTxn::INV_SER_TXN;
             }
             else
             {
-                eTxnType = SipTxn::NON_INV_SER_TXN;
+                return SipTxn::NON_INV_SER_TXN;
             }
         }
     }
@@ -547,27 +546,27 @@ PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(
             if ((eMethodType == SipMessage::METHOD_INVITE) ||
                     (eMethodType == SipMessage::METHOD_ACK))
             {
-                eTxnType = SipTxn::INV_SER_TXN;
+                return SipTxn::INV_SER_TXN;
             }
             else
             {
-                eTxnType = SipTxn::NON_INV_SER_TXN;
+                return SipTxn::NON_INV_SER_TXN;
             }
         }
         else
         {
             if (eMethodType == SipMessage::METHOD_INVITE)
             {
-                eTxnType = SipTxn::INV_CLI_TXN;
+                return SipTxn::INV_CLI_TXN;
             }
             else
             {
-                eTxnType = SipTxn::NON_INV_CLI_TXN;
+                return SipTxn::NON_INV_CLI_TXN;
             }
         }
     }
 
-    return eTxnType;
+    return SipTxn::INVALID_TXN;
 }
 
 PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(
@@ -619,7 +618,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnSend(IN SIP_INT32 eTxnType, IN Si
         SIP_VOID* pUserData = pTxnFsmData->m_pUserData->GetUserData();
         if (pUserData != SIP_NULL)
         {
-            pSipTimerContext = ((SipTxnContext*)pUserData)->pSipTimerContext;
+            pSipTimerContext = (static_cast<SipTxnContext*>(pUserData))->pSipTimerContext;
         }
     }
 
@@ -717,7 +716,8 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnSend(IN SIP_INT32 eTxnType, IN Si
 
         if (pUserData != SIP_NULL)
         {
-            SipTimerContext* pTimerContext = ((SipTxnContext*)pUserData)->pSipTimerContext;
+            SipTimerContext* pTimerContext =
+                    (static_cast<SipTxnContext*>(pUserData))->pSipTimerContext;
 
             if (pTimerContext != SIP_NULL)
             {
@@ -838,7 +838,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
             SIP_VOID* objUserData = pTxnFsmData->m_pUserData->GetUserData();
             if (objUserData != SIP_NULL)
             {
-                pSipTimerContext = ((SipTxnContext*)objUserData)->pSipTimerContext;
+                pSipTimerContext = (static_cast<SipTxnContext*>(objUserData))->pSipTimerContext;
             }
         }
 

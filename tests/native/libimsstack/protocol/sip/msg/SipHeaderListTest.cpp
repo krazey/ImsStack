@@ -114,12 +114,12 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     ASSERT_TRUE(pHeaderList != nullptr);
 
     /* Allow empty header allowed, success */
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr(const_cast<char*>(""), 0));
     EXPECT_EQ(SIP_FALSE, pHeaderList->EncodeHdr(nullptr));
     AStringBuffer objBuffer(256);
     EXPECT_EQ(SIP_TRUE, pHeaderList->Encode(objBuffer, SIP_TRUE));
 
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr((char*)"INVITE,ACK,UPDATE,REFER", 26));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr(const_cast<char*>("INVITE,ACK,UPDATE,REFER"), 26));
 
     EXPECT_EQ(4, pHeaderList->GetSize());
 
@@ -149,7 +149,7 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
                     (SipConfiguration::MSG_OPT_ENCODE_MULTI_LINE |
                             SipConfiguration::MSG_OPT_ENCODE_SHORT_FORM)));
 
-    char* pData = (char*)"INVITE\r\nAllow: ACK\r\nAllow: UPDATE\r\nAllow: REFER";
+    char* pData = const_cast<char*>("INVITE\r\nAllow: ACK\r\nAllow: UPDATE\r\nAllow: REFER");
     EXPECT_STREQ(pData, &(aBuffer[0]));
 
     pCopyHeaderList->SipDelete();
@@ -160,8 +160,9 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
 
     /* Authentication Info header should be considered as one complete header, success */
     EXPECT_EQ(SIP_TRUE,
-            pHeaderList->DecodeHdr((char*)"nextnonce=\"abcdefgh\",nonce-count=\"3\"", 37));
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr((char*)"nonce-count=\"2\"", 15));
+            pHeaderList->DecodeHdr(
+                    const_cast<char*>("nextnonce=\"abcdefgh\",nonce-count=\"3\""), 37));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr(const_cast<char*>("nonce-count=\"2\""), 15));
 
     EXPECT_EQ(2, pHeaderList->GetSize());
 
@@ -176,8 +177,8 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
 
     EXPECT_EQ(SIP_TRUE, pCopyHeaderList->EncodeHdr(&pBuff));
 
-    pData = (char*)"nextnonce=\"abcdefgh\",nonce-count=\"3\"\r\n\
-Authentication-Info: nonce-count=\"2\"";
+    pData = const_cast<char*>("nextnonce=\"abcdefgh\",nonce-count=\"3\"\r\n\
+Authentication-Info: nonce-count=\"2\"");
 
     EXPECT_STREQ(pData, &(aBuffer[0]));
 

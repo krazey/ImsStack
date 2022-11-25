@@ -62,9 +62,10 @@ TEST_F(SipHeadersTest, CopyHdrs)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                             branch=z9hG4bK1422bd448-755bfe94";
+    char* pMaxForwardsValue = const_cast<char*>("70");
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                             branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
@@ -105,9 +106,10 @@ TEST_F(SipHeadersTest, CloneHdrObject)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                      branch=z9hG4bK1422bd448-755bfe94";
+    char* pMaxForwardsValue = const_cast<char*>("70");
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                      branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
@@ -137,9 +139,10 @@ TEST_F(SipHeadersTest, GetHdrObj)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                      branch=z9hG4bK1422bd448-755bfe94";
+    char* pMaxForwardsValue = const_cast<char*>("70");
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                      branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
@@ -186,8 +189,8 @@ TEST_F(SipHeadersTest, OverWriteHdrObj)
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::UNKNOWN));
     ASSERT_TRUE(pUnknownHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
-    char* pSecurityClientValue = (char*)"ipsec-3gpp;alg=hmac-md5-96;prot=esp;mod=trans;\
+    char* pMaxForwardsValue = const_cast<char*>("70");
+    char* pSecurityClientValue = const_cast<char*>("ipsec-3gpp;alg=hmac-md5-96;prot=esp;mod=trans;\
                                         ealg=des-ede3-cbc;spi-c=768058;spi-s=768059;port-c=38003;\
                                         port-s=39002, ipsec-3gpp;alg=hmac-md5-96;prot=esp;\
                                         mod=trans;ealg=aes-cbc;spi-c=768058;spi-s=768059;\
@@ -200,7 +203,7 @@ TEST_F(SipHeadersTest, OverWriteHdrObj)
                                         spi-c=768058;spi-s=768059;port-c=38003;port-s=39002, \
                                         ipsec-3gpp;alg=hmac-sha-1-96;prot=esp;mod=trans;\
                                         ealg=null;spi-c=768058;spi-s=768059;port-c=38003;\
-                                        port-s=39002";
+                                        port-s=39002");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE,
@@ -228,12 +231,13 @@ TEST_F(SipHeadersTest, OverWriteHdrObj)
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::UNKNOWN));
     ASSERT_TRUE(pUnknownNewHdr != nullptr);
 
-    char* pMaxForwardsNewValue = (char*)"95";
-    char* pSecurityClientNewValue = (char*)"ipsec-3gpp;alg=hmac-md5-96;prot=esp;mod=trans;\
+    char* pMaxForwardsNewValue = const_cast<char*>("95");
+    char* pSecurityClientNewValue =
+            const_cast<char*>("ipsec-3gpp;alg=hmac-md5-96;prot=esp;mod=trans;\
                                     ealg=des-ede3-cbc;spi-c=768058;spi-s=768059;port-c=38003;\
                                     port-s=39002, ipsec-3gpp;alg=hmac-md5-96;prot=esp;mod=trans;\
                                     ealg=aes-cbc;spi-c=768058;spi-s=768059;port-c=38003;\
-                                    port-s=39002";
+                                    port-s=39002");
 
     EXPECT_EQ(SIP_TRUE,
             pMaxForwardsNewHdr->DecodeHdr(pMaxForwardsNewValue, strlen(pMaxForwardsNewValue)));
@@ -291,9 +295,10 @@ TEST_F(SipHeadersTest, GetHdrObj_Index)
     SipHeaderBase* pViaHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                      branch=z9hG4bK1422bd448-755bfe94";
+    char* pMaxForwardsValue = const_cast<char*>("70");
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                      branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
@@ -336,7 +341,7 @@ TEST_F(SipHeadersTest, GetNewHdrObj)
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS));
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
+    char* pMaxForwardsValue = const_cast<char*>("70");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pHdrs->SetHdr(pMaxForwardsHdr));
@@ -371,7 +376,7 @@ TEST_F(SipHeadersTest, RemoveHdr)
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS));
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
+    char* pMaxForwardsValue = const_cast<char*>("70");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pHdrs->SetHdr(pMaxForwardsHdr));
@@ -396,9 +401,10 @@ TEST_F(SipHeadersTest, SetHdr)
     SipHeaderBase* pMaxForwardsHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                             branch=z9hG4bK1422bd448-755bfe94";
+    char* pMaxForwardsValue = const_cast<char*>("70");
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                             branch=z9hG4bK1422bd448-755bfe94");
 
     SipHeaders* pHdrs = new SipHeaders();
     ASSERT_TRUE(pHdrs != nullptr);
@@ -429,14 +435,15 @@ TEST_F(SipHeadersTest, SetHdr)
 
     SipHeaderBase* pMaxForwardsNewHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsNewHdr != nullptr);
-    char* pMaxForwardsNewValue = (char*)"90";
+    char* pMaxForwardsNewValue = const_cast<char*>("90");
     EXPECT_EQ(SIP_TRUE,
             pMaxForwardsNewHdr->DecodeHdr(pMaxForwardsNewValue, strlen(pMaxForwardsNewValue)));
 
     SipHeaderBase* pViaNewHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaNewHdr != nullptr);
-    char* pViaNewValue = (char*)"SIP/2.0/UDP [2449:4431:241d:5ff5:b54d:c29a:ecea:88b8]:36007;\
-                       branch=z9hG4bK1422bd448-755bfe95";
+    char* pViaNewValue =
+            const_cast<char*>("SIP/2.0/UDP [2449:4431:241d:5ff5:b54d:c29a:ecea:88b8]:36007;\
+                       branch=z9hG4bK1422bd448-755bfe95");
     EXPECT_EQ(SIP_TRUE, pViaNewHdr->DecodeHdr(pViaNewValue, strlen(pViaNewValue)));
 
     EXPECT_EQ(SIP_TRUE, pHdrs->SetHdr(pMaxForwardsNewHdr));
@@ -466,9 +473,10 @@ TEST_F(SipHeadersTest, AppendHdr)
     SipHeaderBase* pMaxForwardsHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                             branch=z9hG4bK1422bd448-755bfe94";
+    char* pMaxForwardsValue = const_cast<char*>("70");
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                             branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
@@ -497,14 +505,15 @@ TEST_F(SipHeadersTest, AppendHdr)
 
     SipHeaderBase* pMaxForwardsNewHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsNewHdr != nullptr);
-    char* pMaxForwardsNewValue = (char*)"90";
+    char* pMaxForwardsNewValue = const_cast<char*>("90");
     EXPECT_EQ(SIP_TRUE,
             pMaxForwardsNewHdr->DecodeHdr(pMaxForwardsNewValue, strlen(pMaxForwardsNewValue)));
 
     SipHeaderBase* pViaNewHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaNewHdr != nullptr);
-    char* pViaNewValue = (char*)"SIP/2.0/UDP [2449:4431:241d:5ff5:b54d:c29a:ecea:88b8]:36007;\
-                       branch=z9hG4bK1422bd448-755bfe95";
+    char* pViaNewValue =
+            const_cast<char*>("SIP/2.0/UDP [2449:4431:241d:5ff5:b54d:c29a:ecea:88b8]:36007;\
+                       branch=z9hG4bK1422bd448-755bfe95");
     EXPECT_EQ(SIP_TRUE, pViaNewHdr->DecodeHdr(pViaNewValue, strlen(pViaNewValue)));
 
     EXPECT_EQ(SIP_TRUE, pHdrs->AppendHdr(pMaxForwardsNewHdr));
@@ -540,9 +549,10 @@ TEST_F(SipHeadersTest, InsertHdr)
     SipHeaderBase* pMaxForwardsHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsHdr != nullptr);
 
-    char* pMaxForwardsValue = (char*)"70";
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                             branch=z9hG4bK1422bd448-755bfe94";
+    char* pMaxForwardsValue = const_cast<char*>("70");
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                             branch=z9hG4bK1422bd448-755bfe94");
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pViaHdr->DecodeHdr(pViaValue, strlen(pViaValue)));
@@ -571,14 +581,15 @@ TEST_F(SipHeadersTest, InsertHdr)
 
     SipHeaderBase* pMaxForwardsNewHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS);
     ASSERT_TRUE(pMaxForwardsNewHdr != nullptr);
-    char* pMaxForwardsNewValue = (char*)"90";
+    char* pMaxForwardsNewValue = const_cast<char*>("90");
     EXPECT_EQ(SIP_TRUE,
             pMaxForwardsNewHdr->DecodeHdr(pMaxForwardsNewValue, strlen(pMaxForwardsNewValue)));
 
     SipHeaderBase* pViaNewHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaNewHdr != nullptr);
-    char* pViaNewValue = (char*)"SIP/2.0/UDP [2449:4431:241d:5ff5:b54d:c29a:ecea:88b8]:36007;\
-                       branch=z9hG4bK1422bd448-755bfe95";
+    char* pViaNewValue =
+            const_cast<char*>("SIP/2.0/UDP [2449:4431:241d:5ff5:b54d:c29a:ecea:88b8]:36007;\
+                       branch=z9hG4bK1422bd448-755bfe95");
     EXPECT_EQ(SIP_TRUE, pViaNewHdr->DecodeHdr(pViaNewValue, strlen(pViaNewValue)));
 
     EXPECT_EQ(SIP_TRUE, pHdrs->InsertHdr(pMaxForwardsNewHdr, 0));
@@ -642,16 +653,18 @@ TEST_F(SipHeadersTest, EncodeHdrs)
     SipHeaderBase* pFromHdr = SipHeaders::CreateCoreHdrObj(SipHeaderBase::FROM);
     ASSERT_TRUE(pFromHdr != nullptr);
 
-    char* pCallIdValue = (char*)"13217132a-3c0d31f9@2409:4031:241d:5ff5:b54d:c29a:ecea:88b8";
-    char* pCSeqValue = (char*)"3 REGISTER";
-    char* pContentTypeValue = (char*)"application/sdp";
-    char* pSupportedValue = (char*)"path, eventlist, sec-agree";
-    char* pViaValue = (char*)"SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
-                      branch=z9hG4bK1422bd448-755bfe94";
-    char* pFromValue = (char*)"<sip:405861079851317@ims.mnc861.mcc405.3gppnetwork.org>;\
-                       tag=544671422bd42c-2899e679";
-    char* pToValue = (char*)"<sip:405861079851317@ims.mnc861.mcc405.3gppnetwork.org>";
-    char* pContentLengthValue = (char*)"120";
+    char* pCallIdValue =
+            const_cast<char*>("13217132a-3c0d31f9@2409:4031:241d:5ff5:b54d:c29a:ecea:88b8");
+    char* pCSeqValue = const_cast<char*>("3 REGISTER");
+    char* pContentTypeValue = const_cast<char*>("application/sdp");
+    char* pSupportedValue = const_cast<char*>("path, eventlist, sec-agree");
+    char* pViaValue =
+            const_cast<char*>("SIP/2.0/TCP [2409:4031:241d:5ff5:b54d:c29a:ecea:88b8]:39002;\
+                      branch=z9hG4bK1422bd448-755bfe94");
+    char* pFromValue = const_cast<char*>("<sip:405861079851317@ims.mnc861.mcc405.3gppnetwork.org>;\
+                       tag=544671422bd42c-2899e679");
+    char* pToValue = const_cast<char*>("<sip:405861079851317@ims.mnc861.mcc405.3gppnetwork.org>");
+    char* pContentLengthValue = const_cast<char*>("120");
 
     pUnknownHdr->SetHeaderName("UnknownHeaderName");
     pUnknownHdr->SetHeaderValue("UnknownHeaderValue");
@@ -709,7 +722,7 @@ TEST_F(SipHeadersTest, EncodeHdrs)
 
     const int NUM_OF_HEADERS = 9;
 
-    SIP_INT32 arHeadersOrder[NUM_OF_HEADERS] = {
+    const SIP_INT32 arHeadersOrder[NUM_OF_HEADERS] = {
             SipHeaderBase::VIA,
             SipHeaderBase::FROM,
             SipHeaderBase::TO,
@@ -787,7 +800,7 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     char* pszHeaderBody = nullptr;
     SipHeaders* pHdrs = new SipHeaders();
 
-    char* pHeaderBuffer = (char*)"Content-Type: application/sdp";
+    char* pHeaderBuffer = const_cast<char*>("Content-Type: application/sdp");
     EXPECT_EQ(SIP_TRUE,
             pHdrs->DecodeHdrs(
                     pHeaderBuffer, strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
@@ -803,7 +816,7 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     pszHeaderName = nullptr;
     pszHeaderBody = nullptr;
 
-    pHeaderBuffer = (char*)"UnknownHeaderName: UnknownHeaderBody";
+    pHeaderBuffer = const_cast<char*>("UnknownHeaderName: UnknownHeaderBody");
     EXPECT_EQ(SIP_TRUE,
             pHdrs->DecodeHdrs(
                     pHeaderBuffer, strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
@@ -819,7 +832,7 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     pszHeaderName = nullptr;
     pszHeaderBody = nullptr;
 
-    pHeaderBuffer = (char*)"UnknownHeaderName    :       UnknownHeaderBody";
+    pHeaderBuffer = const_cast<char*>("UnknownHeaderName    :       UnknownHeaderBody");
     EXPECT_EQ(SIP_TRUE,
             pHdrs->DecodeHdrs(
                     pHeaderBuffer, strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
@@ -835,23 +848,24 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     pszHeaderName = nullptr;
     pszHeaderBody = nullptr;
 
-    pHeaderBuffer = (char*)"ThisIsNotHeader";
+    pHeaderBuffer = const_cast<char*>("ThisIsNotHeader");
     EXPECT_EQ(SIP_FALSE,
             pHdrs->DecodeHdrs(
                     pHeaderBuffer, strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
 
-    pHeaderBuffer = (char*)"UnknownHeaderWithNoValue:";
+    pHeaderBuffer = const_cast<char*>("UnknownHeaderWithNoValue:");
     EXPECT_EQ(SIP_TRUE,
             pHdrs->DecodeHdrs(
                     pHeaderBuffer, strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
 
-    pHeaderBuffer = (char*)": HeaderValueWithoutName";
+    pHeaderBuffer = const_cast<char*>(": HeaderValueWithoutName");
     EXPECT_EQ(SIP_FALSE,
             pHdrs->DecodeHdrs(
                     pHeaderBuffer, strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
 
     EXPECT_EQ(SIP_FALSE, pHdrs->DecodeHdrs(nullptr, 0, &pszHeaderName, &pszHeaderBody));
-    EXPECT_EQ(SIP_FALSE, pHdrs->DecodeHdrs((char*)"", 0, &pszHeaderName, &pszHeaderBody));
+    EXPECT_EQ(
+            SIP_FALSE, pHdrs->DecodeHdrs(const_cast<char*>(""), 0, &pszHeaderName, &pszHeaderBody));
 
     delete pHdrs;
 }

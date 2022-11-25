@@ -52,8 +52,8 @@ SIP_BOOL SipTriggerConsentHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bPar
 
     if (m_pSipUri->Encode(objBuffer, SIP_TRUE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Encode: Encoding SipUri failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Encode: Encoding SipUri failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

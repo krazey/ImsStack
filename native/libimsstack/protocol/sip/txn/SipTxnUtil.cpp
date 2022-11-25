@@ -142,10 +142,9 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
     }
 
     SIP_UINT32 nIndex = SIP_ZERO;
-    SipTxnKey* pStoredTxnKey = SIP_NULL;
     while (nIndex < nSize)
     {
-        pStoredTxnKey = s_txnKeyList.GetAt(nIndex++);
+        SipTxnKey* pStoredTxnKey = s_txnKeyList.GetAt(nIndex++);
         if (pStoredTxnKey == SIP_NULL)
         {
             pUserTxnkey->SetRules(nStoredRules);
@@ -157,7 +156,7 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
 
         if (IsTxnKeyMatched(pUserTxnkey, pStoredTxnKey) == SIP_TRUE)
         {
-            Sip_Cbk_DisplayTxnKey((SIP_VOID*)pStoredTxnKey);
+            Sip_Cbk_DisplayTxnKey(static_cast<SIP_VOID*>(pStoredTxnKey));
             pStoredTxnKey->SipDelete();
             s_txnKeyList.RemoveAt(nIndex - SIP_ONE);
             // Check again if further elements matches for the same txn key.
