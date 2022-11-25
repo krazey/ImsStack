@@ -25,7 +25,7 @@ class INamedNodeMap;
 class ElementImpl : public IElement
 {
 public:
-    ElementImpl(IN xmlNodePtr pstNode);
+    explicit ElementImpl(IN xmlNodePtr pstNode);
     virtual ~ElementImpl();
 
     ElementImpl(IN const ElementImpl&) = delete;

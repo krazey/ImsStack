@@ -24,7 +24,7 @@ class Text : public CharacterData
 {
 public:
     Text();
-    Text(IN xmlNodePtr pstNode);
+    explicit Text(IN xmlNodePtr pstNode);
     virtual ~Text();
 
     Text(IN const Text&) = delete;

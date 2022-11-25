@@ -29,9 +29,9 @@ class Node : public INode
 {
 public:
     Node();
-    Node(IN xmlNodePtr pstNode);
-    Node(IN xmlDocPtr pstDoc);
-    Node(IN xmlAttrPtr pstAttr);
+    explicit Node(IN xmlNodePtr pstNode);
+    explicit Node(IN xmlDocPtr pstDoc);
+    explicit Node(IN xmlAttrPtr pstAttr);
     virtual ~Node();
 
     Node(IN const Node&) = delete;

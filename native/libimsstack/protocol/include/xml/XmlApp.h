@@ -48,7 +48,7 @@ public:
     };
 
 public:
-    XmlApp(IN IXmlTransactionProvider* piTransactionProvider);
+    explicit XmlApp(IN IXmlTransactionProvider* piTransactionProvider);
     ~XmlApp();
 
     XmlApp(IN const XmlApp&) = delete;

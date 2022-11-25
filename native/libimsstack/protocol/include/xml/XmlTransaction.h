@@ -26,7 +26,7 @@ class XmlResponse;
 class XmlTransaction : public IXmlTransaction
 {
 public:
-    XmlTransaction(IN XmlApp* pXmlApp);
+    explicit XmlTransaction(IN XmlApp* pXmlApp);
     virtual ~XmlTransaction();
 
     XmlTransaction(IN const XmlTransaction&) = delete;
