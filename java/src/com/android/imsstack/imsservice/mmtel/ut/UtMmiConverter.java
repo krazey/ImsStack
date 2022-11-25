@@ -24,13 +24,13 @@ import com.android.imsstack.enabler.ssc.SscServiceClassUtil;
  * Provides API that convert supplementary service configuration to MMI code according to TS 22.030
  */
 public final class UtMmiConverter {
-    protected static final int CATEGORY_CB = 0;
-    protected static final int CATEGORY_CF = 1;
-    protected static final int CATEGORY_CW = 2;
-    protected static final int CATEGORY_OIR = 3;
-    protected static final int CATEGORY_OIP = 4;
-    protected static final int CATEGORY_TIR = 5;
-    protected static final int CATEGORY_TIP = 6;
+    static final int CATEGORY_CB = 0;
+    static final int CATEGORY_CF = 1;
+    static final int CATEGORY_CW = 2;
+    static final int CATEGORY_OIR = 3;
+    static final int CATEGORY_OIP = 4;
+    static final int CATEGORY_TIR = 5;
+    static final int CATEGORY_TIP = 6;
 
     private static final String CODE_END = "#";
     private static final String CODE_SEPARATOR = "*";
@@ -59,9 +59,6 @@ public final class UtMmiConverter {
     private static final String SC_CFA = "002";
     private static final String SC_CFAC = "004";
 
-    // Call Forwarding unconditional Timer
-    private static final String SC_CFUT = "22";
-
     // Call Waiting
     private static final String SC_CW = "43";
 
@@ -71,12 +68,6 @@ public final class UtMmiConverter {
     private static final String SC_BOIC_EXHC = "332";
     private static final String SC_BAIC = "35";
     private static final String SC_BIC_WR = "351";
-    private static final String SC_BAC = "330";
-    private static final String SC_BA_MO = "333";
-    private static final String SC_BA_MT = "353";
-
-    // Incoming/Anonymous call barring
-    private static final String SC_BS_MT = "156";
     private static final String SC_ACR = "157";
 
     // line presentation/restriction
@@ -91,7 +82,7 @@ public final class UtMmiConverter {
 
     private static final String[][] SERVICE_CODE = {
             { // CATEGORY_CB, SscConstant CB Condition params value order
-                null, SC_BAIC, SC_BAOC, SC_BOIC, SC_BOIC_EXHC, SC_BIC_WR, SC_ACR, SC_BAC
+                null, SC_BAIC, SC_BAOC, SC_BOIC, SC_BOIC_EXHC, SC_BIC_WR, SC_ACR
             },
             { // CATEGORY_CF, SscConstant CF Condition params value order
                 SC_CFU, SC_CFB, SC_CFNR, SC_CFNRC, SC_CFA, SC_CFAC

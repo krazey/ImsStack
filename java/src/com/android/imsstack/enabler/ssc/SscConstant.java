@@ -74,9 +74,6 @@ public class SscConstant {
     public static final int CONDITION_BIC_WR
             = ImsUtImplBase.CALL_BLOCKING_INCOMING_WHEN_ROAMING; // 5
     public static final int CONDITION_ACR = ImsUtImplBase.CALL_BARRING_ANONYMOUS_INCOMING; // 6
-    public static final int CONDITION_BAC = ImsUtImplBase.CALL_BARRING_ALL; // 7, not used
-    public static final int CONDITION_BSIC
-            = ImsUtImplBase.CALL_BARRING_SPECIFIC_INCOMING_CALLS; // 10, not used
 
     // 'm' parameter shows the subscriber CLIR/OIR service status in the network from TS 27.007 7.7
     public static final int OIR_NOT_PROVISIONED = ImsSsInfo.CLIR_STATUS_NOT_PROVISIONED; // 0

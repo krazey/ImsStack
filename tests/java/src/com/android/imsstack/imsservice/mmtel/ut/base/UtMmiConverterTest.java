@@ -189,7 +189,6 @@ public class UtMmiConverterTest {
         int category = UtMmiConverter.CATEGORY_CF;
         int action = SscConstant.ACTION_INTERROGATION;
         int condition = SscConstant.CONDITION_CFA;
-        String targetNumber = null;
 
         String mmiCode = UtMmiConverter.getMmiCode(category, action, condition);
         assertEquals("*#002#", mmiCode);
@@ -200,7 +199,6 @@ public class UtMmiConverterTest {
         int category = UtMmiConverter.CATEGORY_CF;
         int action = SscConstant.ACTION_INTERROGATION;
         int condition = SscConstant.CONDITION_CFAC;
-        String targetNumber = null;
 
         String mmiCode = UtMmiConverter.getMmiCode(category, action, condition);
         assertEquals("*#004#", mmiCode);
