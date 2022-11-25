@@ -115,7 +115,7 @@ public final class UtMmiConverter {
      * returns a dial code that matches an XCAP operation.
      * @param category service category
      * @param action action
-     * @param condition
+     * @param condition condition
      * @return converted MMI code
      */
     public static String getMmiCode(int category, int action, int condition) {
