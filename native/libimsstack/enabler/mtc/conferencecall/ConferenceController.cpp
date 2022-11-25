@@ -19,6 +19,7 @@
 #include "IMtcService.h"
 #include "ISession.h"
 #include "ISipHeader.h"
+#include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"

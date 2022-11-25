@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
 #include "IuMtcCall.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"

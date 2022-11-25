@@ -18,6 +18,7 @@
 #define SILENT_REDIAL_HELPER_H_
 
 #include "AString.h"
+#include "CallReasonInfo.h"
 #include "IMtcCallStateListener.h"
 #include "ITimer.h"
 #include "ImsTypeDef.h"
@@ -26,7 +27,6 @@
 
 class IMtcCallContext;
 class ParticipantInfo;
-struct CallReasonInfo;
 
 class SilentRedialHelper :
         public ISilentRedialHelper,

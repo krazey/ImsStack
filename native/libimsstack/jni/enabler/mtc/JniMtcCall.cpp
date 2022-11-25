@@ -15,6 +15,7 @@
  */
 
 #define IMS_STL_USE
+#include "CallReasonInfo.h"
 #include "EnablerUtils.h"
 #include "IJniEnablerThread.h"
 #include "IMtcCallController.h"
