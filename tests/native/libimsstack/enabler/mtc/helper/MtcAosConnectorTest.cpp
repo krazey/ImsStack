@@ -222,6 +222,14 @@ TEST_F(MtcAosConnectorTest, GetPcscfAddressInvokesImsAosInfoApi)
     EXPECT_STREQ(pConnector->GetPcscfAddress().GetStr(), strPcscfAddress.GetStr());
 }
 
+TEST_F(MtcAosConnectorTest, GetPcscfPortInvokesImsAosInfoApi)
+{
+    IMS_UINT32 nPort = 12345;
+    ON_CALL(objMockIImsAosInfo, GetPcscfPort()).WillByDefault(Return(nPort));
+
+    EXPECT_EQ(pConnector->GetPcscfPort(), nPort);
+}
+
 TEST_F(MtcAosConnectorTest, GetRegistrationModeInvokesImsAosInfoApi)
 {
     IMS_ASSERT(IImsAosInfo::REG_MODE_UNKNOWN < IImsAosInfo::REG_MODE_NOUICC);
@@ -249,13 +257,21 @@ TEST_F(MtcAosConnectorTest, GetServiceRouteHeaderValueInvokesImsAosInfoApi)
     EXPECT_STREQ(pConnector->GetServiceRouteHeaderValue().GetStr(), strSrHeader.GetStr());
 }
 
-TEST_F(MtcAosConnectorTest, NotifyEmergencyCallStateImsAosInfoApi)
+TEST_F(MtcAosConnectorTest, NotifyEmergencyCallStateInvokesImsAosInfoApi)
 {
     EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencyCallState(IMS_TRUE)).Times(1);
     EXPECT_CALL(objMockIImsAosInfo, NotifyEmergencyCallState(IMS_FALSE)).Times(1);
 
     pConnector->NotifyEmergencyCallState(IMS_TRUE);
     pConnector->NotifyEmergencyCallState(IMS_FALSE);
+}
+
+TEST_F(MtcAosConnectorTest, NotifyEpsfbCallStateInvokesImsAosInfoApi)
+{
+    IMS_UINT32 nAnyState = 0;
+    EXPECT_CALL(objMockIImsAosInfo, NotifyEpsfbCallState(nAnyState)).Times(1);
+
+    pConnector->NotifyEpsfbCallState(nAnyState);
 }
 
 }  // namespace android
