@@ -27,8 +27,8 @@ private:
 public:
     static CertificateHelper* GetInstance();
 
-    inline const AString& GetCertificateName() { return m_strCertificateName; }
-    inline const AString& GetFingerPrint() { return m_strFingerPrint; }
+    inline const AString& GetCertificateName() const { return m_strCertificateName; }
+    inline const AString& GetFingerPrint() const { return m_strFingerPrint; }
 
 private:
     void Init();

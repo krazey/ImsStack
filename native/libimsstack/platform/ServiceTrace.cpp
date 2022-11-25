@@ -174,9 +174,9 @@ void TraceService::PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR* p
             0,
     };
     pTrace->OutP(nCategory, pszTag, nModule, pszFormat, pszFileName, nLine,
-            pTrace->EncryptPrivacyLog(_buffer_A1, pszArg1),
-            pTrace->EncryptPrivacyLog(_buffer_A2, pszArg2),
-            pTrace->EncryptPrivacyLog(_buffer_A3, pszArg3));
+            ImsTrace::EncryptPrivacyLog(_buffer_A1, pszArg1),
+            ImsTrace::EncryptPrivacyLog(_buffer_A2, pszArg2),
+            ImsTrace::EncryptPrivacyLog(_buffer_A3, pszArg3));
 }
 
 PUBLIC

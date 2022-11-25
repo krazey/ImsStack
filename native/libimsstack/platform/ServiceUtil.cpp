@@ -68,16 +68,15 @@ IZLib* UtilService::GetZLib()
     return piZLib;
 }
 
-PUBLIC
-void UtilService::SetDebugOn(IN IMS_BOOL bDebugOn)
-{
-    PlatformApi::SetDebugOn(bDebugOn);
-}
-
 PUBLIC GLOBAL UtilService* UtilService::GetUtilService()
 {
     return DYNAMIC_CAST(UtilService*,
             PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_UTIL));
+}
+
+PUBLIC GLOBAL void UtilService::SetDebugOn(IN IMS_BOOL bDebugOn)
+{
+    PlatformApi::SetDebugOn(bDebugOn);
 }
 
 /**

@@ -92,6 +92,17 @@ PUBLIC VIRTUAL IMS_BOOL ImsTrace::IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS
 }
 
 PUBLIC
+void ImsTrace::OutP(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
+        IN const IMS_CHAR* pszFormat, ...)
+{
+    va_list args;
+
+    va_start(args, pszFormat);
+    OutV(nCategory, pszTag, nModule, pszFormat, args);
+    va_end(args);
+}
+
+PUBLIC
 IMS_CHAR* ImsTrace::EncryptPrivacyLog(IN_OUT IMS_CHAR* pszPrivacy, IN const IMS_CHAR* pszArg)
 {
     IMS_UINT32 nLength = IMS_StrLen(pszArg);
@@ -110,17 +121,6 @@ IMS_CHAR* ImsTrace::EncryptPrivacyLog(IN_OUT IMS_CHAR* pszPrivacy, IN const IMS_
     HideArgs("%s", pszPrivacy, 0);
 
     return pszPrivacy;
-}
-
-PUBLIC
-void ImsTrace::OutP(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-        IN const IMS_CHAR* pszFormat, ...)
-{
-    va_list args;
-
-    va_start(args, pszFormat);
-    OutV(nCategory, pszTag, nModule, pszFormat, args);
-    va_end(args);
 }
 
 PUBLIC GLOBAL IMS_SINT32 ImsTrace::IsLoggable(IN IMS_SINT32 nCategory)
@@ -149,7 +149,7 @@ PROTECTED VIRTUAL void ImsTrace::OutputString(
 }
 
 PROTECTED
-IMS_BOOL ImsTrace::IsModuleEnabled(IN IMS_UINT32 nModule)
+IMS_BOOL ImsTrace::IsModuleEnabled(IN IMS_UINT32 nModule) const
 {
     // Check the trace filter
     if ((m_nTracedModules & nModule) != 0)
@@ -161,7 +161,7 @@ IMS_BOOL ImsTrace::IsModuleEnabled(IN IMS_UINT32 nModule)
 }
 
 PROTECTED
-IMS_BOOL ImsTrace::IsOptionEnabled(IN IMS_SINT32 nCategory)
+IMS_BOOL ImsTrace::IsOptionEnabled(IN IMS_SINT32 nCategory) const
 {
 #if 0
     // Check the trace category
@@ -403,10 +403,4 @@ void ImsTrace::HideArgs(
         }
     }
     *pszCursor = '\0';
-}
-
-PRIVATE
-IMS_WCHAR ImsTrace::RotateLeft(IN IMS_WCHAR bits, IN IMS_UINT32 shift)
-{
-    return ((bits << shift) | (bits >> (16 - shift)));
 }

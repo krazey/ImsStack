@@ -37,9 +37,6 @@ PUBLIC
 OsUtil::~OsUtil() {}
 
 PUBLIC
-void OsUtil::InitializeOnImsThread() {}
-
-PUBLIC
 void OsUtil::InitializeReadOnlyProperties()
 {
     IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {
