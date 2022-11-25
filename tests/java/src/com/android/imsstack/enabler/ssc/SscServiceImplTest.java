@@ -512,8 +512,8 @@ public class SscServiceImplTest {
         ImsSsInfo ssInfo = captorSsInfo.getValue();
         assertNotNull(ssInfo);
 
-        int outGoingState = (mDefaultBehaviour == SscXmlFormat.PRESENTATION_NOT_RESTRICTED
-                ? SscConstant.OIR_SUPPRESSION : SscConstant.OIR_INVOCATION);
+        int outGoingState = SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equals(mDefaultBehaviour)
+                ? SscConstant.OIR_SUPPRESSION : SscConstant.OIR_INVOCATION;
         assertEquals(ssInfo.getClirOutgoingState(), outGoingState);
 
         verify(mockSscTransaction).close();
@@ -582,8 +582,8 @@ public class SscServiceImplTest {
         ImsSsInfo ssInfo = captorSsInfo.getValue();
         assertNotNull(ssInfo);
 
-        int provisionedStatus = (mDefaultBehaviour == SscXmlFormat.PRESENTATION_NOT_RESTRICTED
-                ? SscConstant.TIR_NOT_PROVISIONED : SscConstant.TIR_PROVISIONED);
+        int provisionedStatus = SscXmlFormat.PRESENTATION_NOT_RESTRICTED.equals(mDefaultBehaviour)
+                ? SscConstant.TIR_NOT_PROVISIONED : SscConstant.TIR_PROVISIONED;
         assertEquals(ssInfo.getProvisionStatus(), provisionedStatus);
 
         verify(mockSscTransaction).close();
