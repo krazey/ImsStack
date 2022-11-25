@@ -15,6 +15,7 @@
  */
 
 #include "ImsActivity.h"
+#include "ImsMap.h"
 #include "ImsMessage.h"
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
@@ -27,8 +28,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 CallStateProxy::CallStateProxy(IN IMtcCallManager& objCallManager) :
         ImsActivity(),
-        m_objSynchronousListeners(IMSList<IMtcCallStateListener*>()),
-        m_objAsynchronousListeners(IMSList<IMtcCallStateListener*>()),
+        m_objSynchronousListeners(ImsList<IMtcCallStateListener*>()),
+        m_objAsynchronousListeners(ImsList<IMtcCallStateListener*>()),
         m_objCallManager(objCallManager),
         m_eTotalState(IMtcCall::State::IDLE)
 {
@@ -119,7 +120,7 @@ void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eSt
     }
 }
 
-PROTECTED VIRTUAL IMS_BOOL CallStateProxy::DispatchMessage(IN IMSMSG& objMsg)
+PUBLIC VIRTUAL IMS_BOOL CallStateProxy::DispatchMessage(IN ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
     {
@@ -134,7 +135,7 @@ PROTECTED VIRTUAL IMS_BOOL CallStateProxy::DispatchMessage(IN IMSMSG& objMsg)
             break;
     }
 
-    return IMS_TRUE;
+    return IMS_FALSE;
 }
 
 PRIVATE
@@ -153,7 +154,7 @@ IMS_BOOL CallStateProxy::UpdateTotalCallState()
 PRIVATE
 IMtcCall::State CallStateProxy::CalculateTotalCallState()
 {
-    IMSList<IMtcCall*> objCalls = m_objCallManager.GetCalls();
+    ImsList<IMtcCall*> objCalls = m_objCallManager.GetCalls();
     IMtcCall::State eTotalState = IMtcCall::State::IDLE;
 
     for (IMS_UINT32 i = 0; i < objCalls.GetSize(); i++)
@@ -187,7 +188,7 @@ void CallStateProxy::NotifyToListeners(
         IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails, IN IMS_BOOL bTotalCallStateUpdated)
 {
     IMS_TRACE_D("NotifyToListeners sync[%s]", _TRACE_B_(bSynchronous), 0, 0);
-    IMSList<IMtcCallStateListener*> pListener =
+    ImsList<IMtcCallStateListener*> pListener =
             bSynchronous ? m_objSynchronousListeners : m_objAsynchronousListeners;
 
     NotifyCallState(pListener, pDetails);
@@ -199,7 +200,7 @@ void CallStateProxy::NotifyToListeners(
 
 PRIVATE
 void CallStateProxy::NotifyCallState(
-        IN IMSList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails)
+        IN ImsList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails)
 {
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i++)
     {
@@ -209,7 +210,7 @@ void CallStateProxy::NotifyCallState(
 }
 
 PRIVATE
-void CallStateProxy::NotifyTotalCallState(IN IMSList<IMtcCallStateListener*> objListeners)
+void CallStateProxy::NotifyTotalCallState(IN ImsList<IMtcCallStateListener*> objListeners)
 {
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i++)
     {
