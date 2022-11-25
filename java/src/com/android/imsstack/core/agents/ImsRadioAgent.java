@@ -17,6 +17,7 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import com.android.imsstack.system.ISystem;
@@ -40,9 +41,9 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     private Map<Integer, ConnectionListener> mConnectionListeners =
                 new HashMap<Integer, ConnectionListener>();
 
-    private static final int EVENT_CONNECTION_FAILED = 1;
+    //private static final int EVENT_CONNECTION_FAILED = 1;
     private static final int EVENT_CONNECTION_SETUP_PREPARED = 2;
-    private static final int EVENT_SSAC_STATE_CHANGED = 3;
+    //private static final int EVENT_SSAC_STATE_CHANGED = 3;
 
     private static final int ID_MIN = 1000000;
     private static final int ID_MAX = 1100000;
@@ -66,7 +67,7 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
 
     @Override
     public void init(Context context) {
-        mHandler = new ImsRadioHandler();
+        mHandler = new ImsRadioHandler(Looper.myLooper());
         setSystemRadioInterface(this);
     }
 
@@ -176,7 +177,11 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         return id;
     }
 
-    private final class ImsRadioHandler extends Handler {
+    private static final class ImsRadioHandler extends Handler {
+        ImsRadioHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
         }

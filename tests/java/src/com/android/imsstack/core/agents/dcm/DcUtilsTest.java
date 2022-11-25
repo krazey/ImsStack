@@ -535,7 +535,7 @@ public class DcUtilsTest extends ImsStackTest {
         try {
             return (T) nri.getCellIdentity();
         } catch (ClassCastException e) {
-            fail("getCellIdentity : " + e);
+            fail("getCellIdentity : " + e + " class: " + clazz.getName());
             return null;
         }
     }
