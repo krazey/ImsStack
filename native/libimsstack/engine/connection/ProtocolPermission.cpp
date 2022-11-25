@@ -48,15 +48,3 @@ Protocol* ProtocolPermission::Lookup(IN const AString& strName)
 
     return IMS_NULL;
 }
-
-PUBLIC GLOBAL ProtocolPermission* ProtocolPermission::GetInstance()
-{
-    static ProtocolPermission* s_pPotocolPermission = IMS_NULL;
-
-    if (s_pPotocolPermission == IMS_NULL)
-    {
-        s_pPotocolPermission = new ProtocolPermission();
-    }
-
-    return s_pPotocolPermission;
-}

@@ -81,19 +81,6 @@ PUBLIC GLOBAL SipPortManager* SipPortManager::GetInstance()
 }
 
 PRIVATE
-IMS_BOOL SipPortManager::IsPortAvailable(IN const IPAddress& objIp, IN IMS_SINT32 nPort) const
-{
-    NetworkService* pNetworkService = NetworkService::GetNetworkService();
-
-    if (pNetworkService == IMS_NULL)
-    {
-        return IMS_TRUE;
-    }
-
-    return pNetworkService->CheckIpAndPortAvailability(objIp, nPort, ISocket::TYPE_STREAM);
-}
-
-PRIVATE
 IMS_SINT32 SipPortManager::SelectNextPortC(IN const IPAddress& objIp) const
 {
     IMS_SINT32 nSelectedPort = 0;
@@ -149,4 +136,17 @@ void SipPortManager::SetNextPortC(IN IMS_SINT32 nPort) const
 
         m_nNextPortC = nPort;
     }
+}
+
+PRIVATE
+IMS_BOOL SipPortManager::IsPortAvailable(IN const IpAddress& objIp, IN IMS_SINT32 nPort)
+{
+    NetworkService* pNetworkService = NetworkService::GetNetworkService();
+
+    if (pNetworkService == IMS_NULL)
+    {
+        return IMS_TRUE;
+    }
+
+    return pNetworkService->CheckIpAndPortAvailability(objIp, nPort, ISocket::TYPE_STREAM);
 }

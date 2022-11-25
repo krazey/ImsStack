@@ -754,7 +754,8 @@ void SdpParameter::UpdateDirection(IN const SdpParameter& objParam)
 }
 
 PUBLIC
-void SdpParameter::UpdateDirection(IN const SdpParameter& objPeer, OUT SdpParameter& objProposal)
+void SdpParameter::UpdateDirection(
+        IN const SdpParameter& objPeer, OUT SdpParameter& objProposal) const
 {
     // Special Case
     // If the peer is provided with "sendrecv" and our direction is "sendonly" / "recvonly",

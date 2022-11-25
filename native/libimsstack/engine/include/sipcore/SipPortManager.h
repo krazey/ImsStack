@@ -44,9 +44,9 @@ public:
 
 private:
     inline IMS_SINT32 GetNextPortC() const { return m_nNextPortC; }
-    IMS_BOOL IsPortAvailable(IN const IPAddress& objIp, IN IMS_SINT32 nPort) const;
     IMS_SINT32 SelectNextPortC(IN const IPAddress& objIp) const;
     void SetNextPortC(IN IMS_SINT32 nPort) const;
+    static IMS_BOOL IsPortAvailable(IN const IpAddress& objIp, IN IMS_SINT32 nPort);
 
 private:
     /// Port range as a default (not-inclusive).

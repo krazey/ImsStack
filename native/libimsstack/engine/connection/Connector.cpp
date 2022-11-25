@@ -58,7 +58,7 @@ IConnection* Connector::Open(IN const AString& strName)
     AString strScheme = strUri.Left(nIndexOfColon).Trim();
 
     // Look up the protocol to determine if this URI scheme supports or not
-    Protocol* pProtocol = ProtocolPermission::GetInstance()->Lookup(strScheme);
+    Protocol* pProtocol = ProtocolPermission::Lookup(strScheme);
 
     if (pProtocol == IMS_NULL)
     {
@@ -78,7 +78,7 @@ IConnection* Connector::Open(
     AString strTmpScheme = strScheme.Trim();
 
     // Look up the protocol to determine if this URI scheme supports or not
-    Protocol* pProtocol = ProtocolPermission::GetInstance()->Lookup(strTmpScheme);
+    Protocol* pProtocol = ProtocolPermission::Lookup(strTmpScheme);
 
     if (pProtocol == IMS_NULL)
     {
