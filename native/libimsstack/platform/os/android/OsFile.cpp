@@ -260,28 +260,28 @@ PUBLIC VIRTUAL IMS_BOOL OsFileUtil::ChangeMode(
 }
 
 PUBLIC VIRTUAL IMS_BOOL OsFileUtil::ChangeOwner(
-        IN const AString& strFileName, IN IMS_SINT32 nUID, IN IMS_SINT32 nGID) const
+        IN const AString& strFileName, IN IMS_SINT32 nUid, IN IMS_SINT32 nGid) const
 {
     // (-1) : no changes
     uid_t nOwner = -1;
     gid_t nGroup = -1;
 
     // owner id
-    if (nUID == UID_ROOT)
+    if (nUid == UID_ROOT)
     {
         nOwner = AID_ROOT;
     }
-    else if (nUID == UID_SYSTEM)
+    else if (nUid == UID_SYSTEM)
     {
         nOwner = AID_SYSTEM;
     }
 
     // group id
-    if (nGID == GID_ROOT)
+    if (nGid == GID_ROOT)
     {
         nGroup = AID_ROOT;
     }
-    else if (nGID == GID_SYSTEM)
+    else if (nGid == GID_SYSTEM)
     {
         nGroup = AID_SYSTEM;
     }

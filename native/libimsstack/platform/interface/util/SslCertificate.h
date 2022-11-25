@@ -31,7 +31,8 @@ public:
 
 public:
     SslCertificate();
-    explicit SslCertificate(IN const AString& strKeyFile, IN IMS_SINT32 nFileType = FILETYPE_PEM);
+    explicit SslCertificate(
+            IN const AString& strKeyFile, IN IMS_SINT32 nKeyFileType = FILETYPE_PEM);
     SslCertificate(IN const SslCertificate& other);
     inline ~SslCertificate() {}
 

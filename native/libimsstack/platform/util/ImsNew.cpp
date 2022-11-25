@@ -109,14 +109,14 @@ GLOBAL void* IMS_MEM_Memset(IN_OUT void* pvMem, IN IMS_SINT32 nChar, IN IMS_SIZE
     return memset(pvMem, nChar, nCount);
 }
 
-GLOBAL void* IMS_MEM_Memcpy(IN_OUT void* pvDest, IN const void* pvSrc, IN IMS_SIZE_T nCount)
+GLOBAL void* IMS_MEM_Memcpy(IN_OUT void* pvDst, IN const void* pvSrc, IN IMS_SIZE_T nCount)
 {
-    return memcpy(pvDest, pvSrc, nCount);
+    return memcpy(pvDst, pvSrc, nCount);
 }
 
-GLOBAL void* IMS_MEM_Memmove(IN_OUT void* pvDest, IN const void* pvSrc, IN IMS_SIZE_T nCount)
+GLOBAL void* IMS_MEM_Memmove(IN_OUT void* pvDst, IN const void* pvSrc, IN IMS_SIZE_T nCount)
 {
-    return memmove(pvDest, pvSrc, nCount);
+    return memmove(pvDst, pvSrc, nCount);
 }
 
 GLOBAL IMS_SINT32 IMS_MEM_Memcmp(IN const void* pvMem1, IN const void* pvMem2, IN IMS_SIZE_T nCount)

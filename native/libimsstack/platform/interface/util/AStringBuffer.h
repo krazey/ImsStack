@@ -32,7 +32,7 @@ public:
     AStringBuffer& operator=(IN const IMS_CHAR c);
     AStringBuffer& operator=(IN const IMS_CHAR* pszValue);
     AStringBuffer& operator=(IN const AString& strValue);
-    AStringBuffer& operator+=(IN const AStringBuffer& objAb);
+    AStringBuffer& operator+=(IN const AStringBuffer& other);
     inline AStringBuffer& operator+=(IN const IMS_CHAR c) { return Append(c); }
     inline AStringBuffer& operator+=(IN const IMS_CHAR* pszValue) { return Append(pszValue); }
     inline AStringBuffer& operator+=(IN const AString& strValue) { return Append(strValue); }
