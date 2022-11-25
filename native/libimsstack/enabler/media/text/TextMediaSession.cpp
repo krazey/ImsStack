@@ -114,7 +114,7 @@ PUBLIC IMS_BOOL TextMediaSession::UpdateRtpConfig(
 
     RtcpConfig objRtcpConfig;
     objRtcpConfig.setCanonicalName(android::String8("Canonical_Name")); /** TODO_MEDIA */
-    objRtcpConfig.setTransmitPort(pNegoProfile->nControlPort);
+    objRtcpConfig.setTransmitPort(pPeerProfile->nControlPort);
     objRtcpConfig.setIntervalSec(pNegoProfile->nRtcpInterval);
     objRtcpConfig.setRtcpXrBlockTypes(0);
     pTextConfig->setRtcpConfig(objRtcpConfig);

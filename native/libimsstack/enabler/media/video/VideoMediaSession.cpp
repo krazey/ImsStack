@@ -157,7 +157,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(IN VideoProfile* pLocalProfil
 
     RtcpConfig objRtcpConfig;
     objRtcpConfig.setCanonicalName(android::String8("Canonical_Name"));
-    objRtcpConfig.setTransmitPort(pNegoProfile->nControlPort);
+    objRtcpConfig.setTransmitPort(pPeerProfile->nControlPort);
 
     if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
     {
