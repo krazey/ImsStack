@@ -35,6 +35,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockIReference.h"
 #include "core/MockISession.h"
+#include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosStateListener.h"
 #include "helper/MockISrvccStateListener.h"
 #include "helper/MockMtcAosEventHandler.h"

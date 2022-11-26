@@ -28,6 +28,7 @@
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/MtcSupplementaryService.h"
 #include "media/IMtcMediaManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

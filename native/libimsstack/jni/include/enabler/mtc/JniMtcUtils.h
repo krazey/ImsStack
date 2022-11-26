@@ -18,11 +18,14 @@
 #define JNI_MTC_UTILS_H_
 
 #include "AString.h"
+#include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
+
+struct ConfUser;
 
 class JniMtcUtils final
 {
@@ -33,18 +36,18 @@ public:
     static JniCallInfo ReadCallInfo(IN const android::Parcel& objParcel);
     static MediaInfo& ReadMediaInfo(
             IN const android::Parcel& objParcel, IN_OUT MediaInfo& objMediaInfo);
-    static IMSMap<SuppType, SuppService*> ReadSupplementaryService(
+    static ImsMap<SuppType, SuppService*> ReadSupplementaryService(
             IN const android::Parcel& objParcel);
-    static IMSList<ConfUser*> ReadConferenceParticipants(IN const android::Parcel& objParcel);
+    static ImsList<ConfUser*> ReadConferenceParticipants(IN const android::Parcel& objParcel);
 
     static void WriteCallInfoToParcel(
             IN const JniCallInfo& objCallInfo, IN_OUT android::Parcel& objParcel);
     static void WriteMediaInfoToParcel(
             IN const MediaInfo& objMediaInfo, IN_OUT android::Parcel& objParcel);
-    static void WriteSuppServicesToParcel(IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+    static void WriteSuppServicesToParcel(IN const ImsMap<SuppType, SuppService*>& objSuppServices,
             IN_OUT android::Parcel& objParcel);
     static void WriteConfUsersToParcel(
-            IN const IMSList<ConfUser*>& objUsers, IN_OUT android::Parcel& objParcel);
+            IN const ImsList<ConfUser*>& objUsers, IN_OUT android::Parcel& objParcel);
     // static void WriteDialogInfoToParcel(IN DialogInfo* pInfo, IN_OUT android::Parcel& objParcel);
     static void WriteCallReasonInfoToParcel(
             IN const CallReasonInfo& objReason, IN_OUT android::Parcel& objParcel);

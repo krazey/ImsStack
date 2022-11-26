@@ -28,6 +28,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "helper/IMtcAosConnector.h"
+#include "helper/MtcSupplementaryService.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

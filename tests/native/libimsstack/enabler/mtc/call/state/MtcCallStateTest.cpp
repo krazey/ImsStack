@@ -30,6 +30,7 @@
 #include "core/IReference.h"
 #include "core/MockISession.h"
 #include "helper/IMtcAosStateListener.h"
+#include "helper/ISrvccStateListener.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "precondition/QosDef.h"

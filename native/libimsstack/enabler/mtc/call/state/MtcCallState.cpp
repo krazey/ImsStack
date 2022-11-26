@@ -37,6 +37,7 @@
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
+#include "helper/ISrvccStateListener.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"

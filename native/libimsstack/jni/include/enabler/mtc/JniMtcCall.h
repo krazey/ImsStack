@@ -20,12 +20,12 @@
 #include "../media/JniMediaSession.h"
 #include "BaseService.h"
 #include "IJniEnabler.h"
+#include "IMtcCallController.h"
 #include "ImsMap.h"
 #include "IuMtcCall.h"
 #include "JniMtcCallThread.h"
 #include "call/IMtcCall.h"
 
-class IMtcCallController;
 class IJniEnablerThread;
 
 class JniMtcCall : public BaseService

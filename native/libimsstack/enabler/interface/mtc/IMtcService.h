@@ -19,7 +19,6 @@
 
 #include "INativeEnabler.h"
 #include "ImsTypeDef.h"
-#include "helper/ISrvccStateListener.h"
 
 class AString;
 class ICoreService;

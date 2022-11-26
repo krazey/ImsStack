@@ -16,6 +16,7 @@
 
 #include "ServiceTrace.h"
 #include "call/block/SrvccBlockRule.h"
+#include "helper/ISrvccStateListener.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

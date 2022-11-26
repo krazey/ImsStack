@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef CALLER_INFO_H_
-#define CALLER_INFO_H_
+#ifndef PARTICIPANT_INFO_H_
+#define PARTICIPANT_INFO_H_
 
 #include "AString.h"
 #include "ImsTypeDef.h"
 #include "call/message/IMtcMessageHandler.h"
-#include "helper/MtcSupplementaryService.h"
 
 class IMessage;
 class IMtcCallContext;

@@ -17,20 +17,24 @@
 #ifndef MOCK_I_MTC_CALL_CONTROLLER_H_
 #define MOCK_I_MTC_CALL_CONTROLLER_H_
 
-#include <gmock/gmock.h>
-#include "ImsTypeDef.h"
 #include "IMtcCallController.h"
 #include "IMtcService.h"
-#include "IuMtcCall.h"
-#include "IuMtcService.h"
-#include "call/IMtcCall.h"
+#include "ImsMap.h"
+#include "ImsTypeDef.h"
+#include <gmock/gmock.h>
 
+class AString;
 class IMtcCallContext;
 class ISession;
 class ISilentRedialHelper;
+class SuppService;
+enum class CallType;
 enum class KeyType;
+enum class SuppType;
+struct CallInfo;
 struct CallReasonInfo;
 struct ConfUser;
+struct MediaInfo;
 union Key;
 
 class MockIMtcCallController : public IMtcCallController
@@ -46,7 +50,7 @@ public:
     MOCK_METHOD(void, Start,
             (IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
                     IN MediaInfo& objMediaInfo,
-                    (IN const IMSMap<SuppType, SuppService*>& objSuppServices)),
+                    (IN const ImsMap<SuppType, SuppService*>& objSuppServices)),
             (override));
     MOCK_METHOD(void, HandleUserAlert, (IN CallKey nCallKey), (override));
     MOCK_METHOD(void, Accept,

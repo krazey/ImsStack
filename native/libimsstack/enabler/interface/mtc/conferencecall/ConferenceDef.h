@@ -17,7 +17,7 @@
 #ifndef CONFERENCE_DEF_H_
 #define CONFERENCE_DEF_H_
 
-#include "MtcDef.h"
+#include "AString.h"
 #include "ServiceTrace.h"
 
 //
@@ -91,6 +91,13 @@ enum
     CONF_SUBSCRIPTION_DIALOG_TYPE_IN = 0,
     CONF_SUBSCRIPTION_DIALOG_TYPE_OUT = 1,
     CONF_SUBSCRIPTION_DIALOG_TYPE_FALLBACK = 2  // IN failed, so OUT is being used.
+};
+
+enum
+{
+    COPYCONTROLTYPE_TO = 0,
+    COPYCONTROLTYPE_CC = 1,
+    COPYCONTROLTYPE_BCC = 2,
 };
 
 struct ConfUser

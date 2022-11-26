@@ -17,8 +17,8 @@
 #ifndef UPDATING_INFO_H_
 #define UPDATING_INFO_H_
 
-#include "IMtcCall.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 
 class UpdatingInfo final

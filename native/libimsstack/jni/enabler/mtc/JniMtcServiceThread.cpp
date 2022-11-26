@@ -21,7 +21,6 @@
 #include "JniMtcServiceThread.h"
 #include "JniMtcUtils.h"
 #include "ServiceTrace.h"
-#include "call/ParticipantInfo.h"
 #include <binder/Parcel.h>
 
 using namespace android;

@@ -19,11 +19,22 @@
 
 #include "IMtcService.h"
 #include "INativeEnabler.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "call/IMtcCall.h"
 
+class AString;
 class IMtcCallContext;
+class ISession;
 class ISilentRedialHelper;
+class SuppService;
+enum class CallType;
 enum class KeyType;
+enum class SuppType;
+struct CallInfo;
+struct CallReasonInfo;
+struct ConfUser;
+struct MediaInfo;
 union Key;
 
 class IMtcCallController : public INativeEnabler
@@ -84,7 +95,7 @@ public:
      */
     virtual void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo& objMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices) = 0;
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) = 0;
 
     /**
      * Notifies the call that the user is alerted by the incoming call.
@@ -248,9 +259,9 @@ public:
 
     // Handles conference call related IMS messages.
     /*
-    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers,
+    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN IMSMap<SuppType, SuppService*>& objSuppServices);
+            IN ImsMap<SuppType, SuppService*>& objSuppServices);
     */
 
     /**
@@ -259,7 +270,7 @@ public:
      * @param nCallKey
      * @param objUsers
      */
-    virtual void MergeToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) = 0;
+    virtual void MergeToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) = 0;
 
     /**
      * @brief Adds
@@ -267,7 +278,7 @@ public:
      * @param nCallKey
      * @param objUsers
      */
-    virtual void AddToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) = 0;
+    virtual void AddToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) = 0;
 
     /**
      * @brief Removes
@@ -275,7 +286,7 @@ public:
      * @param nCallKey
      * @param objUsers
      */
-    virtual void RemoveFromConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) = 0;
+    virtual void RemoveFromConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) = 0;
 
     // TODO: Consider ECT, SRVCC
 

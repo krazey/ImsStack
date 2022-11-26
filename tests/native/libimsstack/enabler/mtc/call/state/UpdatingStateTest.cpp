@@ -28,6 +28,7 @@
 #include "core/ISession.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
+#include "helper/ISrvccStateListener.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"

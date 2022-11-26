@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef CALL_INFO_H_
-#define CALL_INFO_H_
+#ifndef JNI_CALL_INFO_H_
+#define JNI_CALL_INFO_H_
 
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 
 struct JniCallInfo

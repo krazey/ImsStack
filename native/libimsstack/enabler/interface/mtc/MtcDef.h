@@ -41,13 +41,6 @@ enum class UpdateType
 
 enum
 {
-    COPYCONTROLTYPE_TO = 0,
-    COPYCONTROLTYPE_CC = 1,
-    COPYCONTROLTYPE_BCC = 2,
-};
-
-enum
-{
     FEATURE_NONE = 0,
     FEATURE_TIMER = (0x00000001),
     FEATURE_100REL = (0x00000002),

@@ -29,6 +29,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
+#include "helper/ISrvccStateListener.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"

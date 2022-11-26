@@ -26,6 +26,8 @@
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/IConferenceOperationQueueListener.h"
 
+struct CallInfo;
+
 struct CallStartOperationParams
 {
 public:
