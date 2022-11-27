@@ -37,11 +37,6 @@ PUBLIC GLOBAL IMS_BOOL PlatformProperty::Initialize()
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL void PlatformProperty::InitializeOnImsThread()
-{
-    OsUtil::GetInstance()->InitializeOnImsThread();
-}
-
 PUBLIC GLOBAL void PlatformProperty::Start()
 {
     // Start up the timer thread

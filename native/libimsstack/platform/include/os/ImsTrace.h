@@ -37,10 +37,10 @@ public:
 
     void SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule);
     virtual IMS_BOOL IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS_UINT32 nModule);
-    IMS_CHAR* EncryptPrivacyLog(IN_OUT IMS_CHAR* pszPrivacy, IN const IMS_CHAR* pszArg);
     void OutP(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
             IN const IMS_CHAR* pszFormat, ...);
 
+    static IMS_CHAR* EncryptPrivacyLog(IN_OUT IMS_CHAR* pszPrivacy, IN const IMS_CHAR* pszArg);
     static IMS_SINT32 IsLoggable(IN IMS_SINT32 nCategory);
 
 protected:
@@ -48,8 +48,8 @@ protected:
     virtual void OutputString(
             IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength);
 
-    IMS_BOOL IsModuleEnabled(IN IMS_UINT32 nModule);
-    IMS_BOOL IsOptionEnabled(IN IMS_SINT32 nCategory);
+    IMS_BOOL IsModuleEnabled(IN IMS_UINT32 nModule) const;
+    IMS_BOOL IsOptionEnabled(IN IMS_SINT32 nCategory) const;
 
 private:
     void Out(IN const IMS_CHAR* pszFormat, ...) override;
@@ -63,8 +63,8 @@ private:
             IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize,
             IN IMS_BOOL bBinaryBody = IMS_FALSE) override;
 
-    void HideArgs(IN const IMS_CHAR* pszFormat, OUT IMS_CHAR* pszBuffer, IN IMS_SINT32 nIgnore = 2);
-    IMS_WCHAR RotateLeft(IN IMS_WCHAR bits, IN IMS_UINT32 shift);
+    static void HideArgs(
+            IN const IMS_CHAR* pszFormat, OUT IMS_CHAR* pszBuffer, IN IMS_SINT32 nIgnore = 2);
 
 private:
     enum

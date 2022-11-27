@@ -38,10 +38,9 @@ public:
     virtual ISystemProperty* GetSystemProperty();
     virtual IZLib* GetZLib();
 
-    // Sets the debugging flag
-    void SetDebugOn(IN IMS_BOOL bDebugOn);
-
     static UtilService* GetUtilService();
+    // Sets the debugging flag
+    static void SetDebugOn(IN IMS_BOOL bDebugOn);
     // Return value: strOutput (user mode & config-debug-off), strInput (non-user mode)
     static const AString& GetLogString(IN const AString& strInput, IN_OUT AString& strOutput,
             IN IMS_SINT32 nOutSize, IN IMS_CHAR cDelimiter = 0 /* no delimiter */);

@@ -22,7 +22,6 @@ class PlatformProperty
 {
 public:
     static IMS_BOOL Initialize();
-    static void InitializeOnImsThread();
     static void Start();
     static void Stop();
     static void Uninitialize();

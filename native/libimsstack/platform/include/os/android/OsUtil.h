@@ -30,7 +30,6 @@ public:
     OsUtil& operator=(IN const OsUtil&) = delete;
 
 public:
-    void InitializeOnImsThread();
     void InitializeReadOnlyProperties();
     void SetDebugOn(IN IMS_BOOL bDebugOn);
 
