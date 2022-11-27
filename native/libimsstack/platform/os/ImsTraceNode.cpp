@@ -24,6 +24,8 @@ ImsTraceNode::ImsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag) :
         m_nLength(0),
         m_pBuffer(&m_acBuffer[0])
 {
+    IMS_MEM_Memset(m_acBuffer, 0, MAX_BUFF_SIZE + 1);
+
     // IMS prefix
     m_pBuffer[0] = 'I';
     m_pBuffer[1] = 'M';
