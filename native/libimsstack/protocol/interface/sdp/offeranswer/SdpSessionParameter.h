@@ -98,6 +98,11 @@ private:
      */
     void Clear() override;
 
+    /**
+     * @brief Clears the properties for the session-level parameter.
+     */
+    void ClearAllSessionParameters();
+
 private:
     // Version
     SdpVersion m_objVersion;

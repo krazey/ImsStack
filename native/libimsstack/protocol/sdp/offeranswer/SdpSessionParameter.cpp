@@ -69,7 +69,7 @@ SdpSessionParameter::SdpSessionParameter(IN const SdpSessionParameter& other) :
 PUBLIC
 SdpSessionParameter::~SdpSessionParameter()
 {
-    Clear();
+    ClearAllSessionParameters();
 }
 
 PUBLIC
@@ -401,7 +401,12 @@ void SdpSessionParameter::UpdateProperties(IN const SdpSessionParameter& objSess
 PRIVATE VIRTUAL void SdpSessionParameter::Clear()
 {
     SdpParameter::Clear();
+    ClearAllSessionParameters();
+}
 
+PRIVATE
+void SdpSessionParameter::ClearAllSessionParameters()
+{
     if (m_pUri != IMS_NULL)
     {
         delete m_pUri;
