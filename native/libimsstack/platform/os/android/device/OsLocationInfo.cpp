@@ -28,19 +28,19 @@ public:
     LocationProperties();
     virtual ~LocationProperties();
 
-    inline virtual const AString& GetLatitude() const { return m_strLatitude; }
-    inline virtual const AString& GetLongitude() const { return m_strLongitude; }
-    inline virtual const AString& GetRadius() const { return m_strRadius; }
-    inline virtual const AString& GetShape() const { return m_strShape; }
-    inline virtual const AString& GetConfidence() const { return m_strConfidence; }
-    inline virtual const AString& GetCurrentTime() const { return m_strCurrentTime; }
-    inline virtual const AString& GetMethod() const { return m_strMethod; }
-    inline virtual const AString& GetCountry() const { return m_strCountry; }
-    inline virtual const AString& GetState() const { return m_strState; }
-    inline virtual const AString& GetCity() const { return m_strCity; }
-    inline virtual const AString& GetPostal() const { return m_strPostal; }
-    inline virtual const AString& GetAltitude() const { return m_strAltitude; }
-    inline virtual const AString& GetVerticalAccuracy() const { return m_strVerticalAccuracy; }
+    inline const AString& GetLatitude() const override { return m_strLatitude; }
+    inline const AString& GetLongitude() const override { return m_strLongitude; }
+    inline const AString& GetRadius() const override { return m_strRadius; }
+    inline const AString& GetShape() const override { return m_strShape; }
+    inline const AString& GetConfidence() const override { return m_strConfidence; }
+    inline const AString& GetCurrentTime() const override { return m_strCurrentTime; }
+    inline const AString& GetMethod() const override { return m_strMethod; }
+    inline const AString& GetCountry() const override { return m_strCountry; }
+    inline const AString& GetState() const override { return m_strState; }
+    inline const AString& GetCity() const override { return m_strCity; }
+    inline const AString& GetPostal() const override { return m_strPostal; }
+    inline const AString& GetAltitude() const override { return m_strAltitude; }
+    inline const AString& GetVerticalAccuracy() const override { return m_strVerticalAccuracy; }
 
     inline void SetLatitude(IN const AString& strLatitude) { m_strLatitude = strLatitude; }
     inline void SetLongitude(IN const AString& strLongitude) { m_strLongitude = strLongitude; }

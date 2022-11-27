@@ -30,13 +30,13 @@ public:
 
 protected:
     // IIpcan class
-    virtual void GetAccessInfo(IN IMS_SINT32 nSlotId, IN_OUT AccessNetworkInfo& objAni);
-    virtual void GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni);
-    virtual void GetLastAccessInfo(IN IMS_SINT32 nSlotId, OUT AccessNetworkInfo& objAni,
-            OUT AString& strTimestamp, OUT AString& strCellInfoAge);
-    virtual void GetLastAccessInfoForWiFi(
-            OUT AccessNetworkInfo& objAni, OUT AString& strTimestamp, OUT AString& strCellInfoAge);
-    virtual IMS_SINT32 GetNetworkType(IN IMS_SINT32 nSlotId);
+    void GetAccessInfo(IN IMS_SINT32 nSlotId, IN_OUT AccessNetworkInfo& objAni) override;
+    void GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni) override;
+    void GetLastAccessInfo(IN IMS_SINT32 nSlotId, OUT AccessNetworkInfo& objAni,
+            OUT AString& strTimestamp, OUT AString& strCellInfoAge) override;
+    void GetLastAccessInfoForWiFi(OUT AccessNetworkInfo& objAni, OUT AString& strTimestamp,
+            OUT AString& strCellInfoAge) override;
+    IMS_SINT32 GetNetworkType(IN IMS_SINT32 nSlotId) override;
 
 private:
     static AccessNetworkInfo CreateAccessNetworkInfo(
