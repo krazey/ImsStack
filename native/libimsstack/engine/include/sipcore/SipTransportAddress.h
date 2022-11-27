@@ -30,7 +30,7 @@ public:
     SipTransportAddress& operator=(IN const SipTransportAddress& other);
 
 public:
-    IMS_BOOL Equals(IN const SipTransportAddress& objTAddr) const;
+    IMS_BOOL Equals(IN const SipTransportAddress& other) const;
 
     inline const IPAddress& GetIpAddress() const { return m_objIpAddr; }
     inline IMS_SINT32 GetPort() const { return m_nPort; }
