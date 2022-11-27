@@ -3417,13 +3417,13 @@ PUBLIC GLOBAL AString AString::FromBase64(IN const AString& strBase64)
     return strTmp;
 }
 
-PUBLIC GLOBAL AString AString::FromRawData(IN const IMS_CHAR* pValue, IN IMS_SINT32 nSize)
+PUBLIC GLOBAL AString AString::FromRawData(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nSize)
 {
     Data* pNewData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data)));
 
-    if (pValue != IMS_NULL)
+    if (pszValue != IMS_NULL)
     {
-        pNewData->pValue = const_cast<IMS_CHAR*>(pValue);
+        pNewData->pValue = const_cast<IMS_CHAR*>(pszValue);
     }
     else
     {

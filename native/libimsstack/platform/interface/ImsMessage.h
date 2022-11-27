@@ -85,7 +85,7 @@ public:
     }
 
     inline IMS_BOOL HasCallback() const { return piCallback != IMS_NULL; }
-    inline IMS_BOOL IsSameCallback(IN IMessageCallback* piCallback) const
+    inline IMS_BOOL IsSameCallback(IN const IMessageCallback* piCallback) const
     {
         return this->piCallback != IMS_NULL && this->piCallback == piCallback;
     }

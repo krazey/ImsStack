@@ -25,7 +25,7 @@ class TextParser
 {
 public:
     static const IMS_CHAR* BooleanToString(IN IMS_BOOL bValue, IN IMS_BOOL bLowerCase = IMS_TRUE);
-    static AString CharToHexString(IN const IMS_CHAR cChar);
+    static AString CharToHexString(IN const IMS_CHAR c);
     static IMS_SINT32 HexStringToChar(IN const AString& strHex);
     static IMS_BOOL IsTokenCharacter(IN const IMS_CHAR c);
     static IMS_BOOL IsValidMediaType(IN const AString& strMediaType);
