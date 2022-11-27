@@ -39,13 +39,14 @@ PUBLIC GLOBAL const SipMethod SipMethod::INVALID_METHOD;
 
 PUBLIC
 SipMethod::SipMethod(IN const IMS_SINT32 nMethod /* = SipMethod::INVALID*/) :
-        m_nMethod(nMethod)
+        m_nMethod(nMethod),
+        m_strMethod(ConvertMethodToString(nMethod))
 {
-    m_strMethod = ConvertMethodToString(nMethod);
 }
 
 PUBLIC
 SipMethod::SipMethod(IN const IMS_CHAR* pszMethod) :
+        m_nMethod(INVALID),
         m_strMethod(pszMethod)
 {
     m_nMethod = ConvertStringToMethod(m_strMethod);
@@ -53,9 +54,9 @@ SipMethod::SipMethod(IN const IMS_CHAR* pszMethod) :
 
 PUBLIC
 SipMethod::SipMethod(IN const AString& strMethod) :
+        m_nMethod(ConvertStringToMethod(strMethod)),
         m_strMethod(strMethod)
 {
-    m_nMethod = ConvertStringToMethod(m_strMethod);
 }
 
 PUBLIC
