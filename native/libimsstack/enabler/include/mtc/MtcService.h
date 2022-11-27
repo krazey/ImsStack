@@ -27,7 +27,6 @@
 #include "ImsService.h"
 #include "ImsTypeDef.h"
 #include "MtcRoutingRejectHandler.h"
-#include "helper/MtcAosConnector.h"
 #include "helper/SrvccStateManager.h"
 
 class IMtcAosConnector;
@@ -112,7 +111,7 @@ protected:
     ServiceStatus m_eOldStatus;
     ServiceStatus m_eStatus;
     ICoreService* m_piCoreService;
-    MtcAosConnector* m_pAosConnector;
+    IMtcAosConnector* m_pAosConnector;
     MtcAosEventHandler* m_pAosEventHandler;
     SrvccStateManager* m_pSrvccStateManager;
     MtcRoutingRejectHandler* m_pRoutingRejectHandler;
