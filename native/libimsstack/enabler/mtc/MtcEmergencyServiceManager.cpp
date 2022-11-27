@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-#include "IJniEnabler.h"
 #include "IJniMtcServiceThread.h"
 #include "ImsAosParameter.h"
-#include "JniEnablerConnector.h"
 #include "MtcEmergencyServiceManager.h"
 #include "ServiceTrace.h"
 #include "helper/IMtcAosConnector.h"
@@ -30,8 +28,6 @@ MtcEmergencyServiceManager::MtcEmergencyServiceManager(IN IMtcContext& objContex
         m_eState(IuMtcService::EmergencyServiceState::IDLE)
 {
     IMS_TRACE_I("+MtcEmergencyServiceManager", 0, 0, 0);
-
-    m_objContext.GetSlotId();  // TODO
 }
 
 PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
@@ -40,14 +36,16 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
 }
 
 PUBLIC
-void MtcEmergencyServiceManager::OpenEmergencyService()
+void MtcEmergencyServiceManager::OpenEmergencyService(IN IJniMtcServiceThread* pThread)
 {
     IMS_TRACE_D("OpenEmergencyService", 0, 0, 0);
 
+    IMS_BOOL bStateChanged = IMS_FALSE;
     if (m_eState == IuMtcService::EmergencyServiceState::OPENED ||
             m_eState == IuMtcService::EmergencyServiceState::IN_CALL)
     {
-        SetState(IuMtcService::EmergencyServiceState::OPENED, IMS_TRUE);
+        SetState(IuMtcService::EmergencyServiceState::OPENED, bStateChanged);
+        NotifyEmergencyServiceChanged(-1, pThread);
         return;
     }
 
@@ -58,102 +56,96 @@ void MtcEmergencyServiceManager::OpenEmergencyService()
     }
 
     pAosConnector->Control(ImsAosControl::REGISTER_START);
-    SetState(IuMtcService::EmergencyServiceState::OPENING);
+    SetState(IuMtcService::EmergencyServiceState::OPENING, bStateChanged);
+    if (bStateChanged)
+    {
+        NotifyEmergencyServiceChanged(-1, pThread);
+    }
 }
 
 PUBLIC
-void MtcEmergencyServiceManager::HandleServiceStatus(IN ServiceStatus eStatus)
+void MtcEmergencyServiceManager::HandleServiceStatus(
+        IN ServiceStatus eStatus, IN IJniMtcServiceThread* pThread)
 {
     IMS_TRACE_D("HandleServiceStatus :: %d", eStatus, 0, 0);
+
+    IMS_BOOL bStateChanged = IMS_FALSE;
 
     switch (eStatus)
     {
         case ServiceStatus::SERVICE_IDLE:
-            HandleServiceIdle();
+            HandleServiceIdle(bStateChanged);
             break;
         case ServiceStatus::SERVICE_ACTIVE:
-            HandleServiceActive();
+            HandleServiceActive(bStateChanged);
             break;
         case ServiceStatus::SERVICE_SUSPENDED:
-            HandleServiceSuspended();
+            HandleServiceSuspended(bStateChanged);
             break;
         default:
             break;
     }
+
+    if (bStateChanged)
+    {
+        NotifyEmergencyServiceChanged(-1, pThread);
+    }
 }
 
 PRIVATE
-void MtcEmergencyServiceManager::HandleServiceIdle()
+void MtcEmergencyServiceManager::HandleServiceIdle(IN IMS_BOOL& bStateChanged)
 {
     IMS_TRACE_D("HandleServiceIdle", 0, 0, 0);
 
     if (m_eState == IuMtcService::EmergencyServiceState::OPENING)
     {
-        SetState(IuMtcService::EmergencyServiceState::UNAVAILABLE);
+        SetState(IuMtcService::EmergencyServiceState::UNAVAILABLE, bStateChanged);
     }
     else
     {
-        SetState(IuMtcService::EmergencyServiceState::IDLE);
+        SetState(IuMtcService::EmergencyServiceState::IDLE, bStateChanged);
     }
 }
 
 PRIVATE
-void MtcEmergencyServiceManager::HandleServiceActive()
+void MtcEmergencyServiceManager::HandleServiceActive(IN IMS_BOOL& bStateChanged)
 {
     IMS_TRACE_D("HandleServiceActive", 0, 0, 0);
 
     if (m_eState == IuMtcService::EmergencyServiceState::OPENING)
     {
-        SetState(IuMtcService::EmergencyServiceState::OPENED);
+        SetState(IuMtcService::EmergencyServiceState::OPENED, bStateChanged);
     }
 }
 
 PRIVATE
-void MtcEmergencyServiceManager::HandleServiceSuspended()
+void MtcEmergencyServiceManager::HandleServiceSuspended(IN IMS_BOOL& bStateChanged)
 {
     IMS_TRACE_D("HandleServiceSuspended", 0, 0, 0);
+    bStateChanged = IMS_FALSE;
 }
 
 PRIVATE
 void MtcEmergencyServiceManager::SetState(
-        IN IuMtcService::EmergencyServiceState eState, IN IMS_BOOL bForceNotify /* = IMS_FALSE */)
+        IN IuMtcService::EmergencyServiceState eState, OUT IMS_BOOL& bChanged)
 {
     IMS_TRACE_D("SetState :: [%d] -> [%d]", m_eState, eState, 0);
 
-    if ((m_eState == eState) && !bForceNotify)
-    {
-        return;
-    }
-
+    bChanged = (m_eState != eState);
     m_eState = eState;
-
-    NotifyEmergencyServiceChanged(-1);
 }
 
 PRIVATE
-void MtcEmergencyServiceManager::NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason)
+void MtcEmergencyServiceManager::NotifyEmergencyServiceChanged(
+        IN IMS_SINT32 eReason, IN IJniMtcServiceThread* pThread)
 {
-    IMS_TRACE_D("NotifyEmergencyServiceChanged :: %d, %d", m_eState, eReason, 0);
-
-    // TODO: make GetJniServiceThread() in IMtcService?
-    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
-            m_objContext.GetSlotId(), EnablerType::MTC_SERVICE);
-    if (piJniEnabler == IMS_NULL)
+    IMS_TRACE_D("NotifyEmergencyServiceChanged :: state=%d, reason=%d", m_eState, eReason, 0);
+    if (pThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "JniMtcServiceThread is null", 0, 0, 0);
+        IMS_TRACE_E(0, "IJniMtcServiceThread is null", 0, 0, 0);
         return;
     }
 
-    IJniMtcServiceThread* piServiceThread =
-            reinterpret_cast<IJniMtcServiceThread*>(piJniEnabler->GetJniThread());
-
-    if (piServiceThread == IMS_NULL)
-    {
-        return;
-    }
-
-    ServiceType eServiceType = ServiceType::EMERGENCY;
-
-    piServiceThread->OnEmergencyServiceChanged(
-            static_cast<IMS_SINT32>(m_eState), -1, static_cast<IMS_SINT32>(eServiceType));
+    pThread->OnEmergencyServiceChanged(
+            static_cast<IMS_SINT32>(m_eState), -1, static_cast<IMS_SINT32>(ServiceType::EMERGENCY));
 }

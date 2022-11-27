@@ -20,6 +20,8 @@
 #include "IMtcContext.h"
 #include "IuMtcService.h"
 
+class IJniMtcServiceThread;
+
 class MtcEmergencyServiceManager
 {
 public:
@@ -28,19 +30,20 @@ public:
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    virtual void OpenEmergencyService();
-    virtual void HandleServiceStatus(IN ServiceStatus eStatus);
+    virtual void OpenEmergencyService(IN IJniMtcServiceThread* pThread);
+    virtual void HandleServiceStatus(IN ServiceStatus eStatus, IN IJniMtcServiceThread* pThread);
 
 private:
-    void HandleServiceIdle();
-    void HandleServiceActive();
-    void HandleServiceSuspended();
-    void SetState(
-            IN IuMtcService::EmergencyServiceState eState, IN IMS_BOOL bForceNotify = IMS_FALSE);
-    void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason);
+    void HandleServiceIdle(OUT IMS_BOOL& bStateChanged);
+    void HandleServiceActive(OUT IMS_BOOL& bStateChanged);
+    void HandleServiceSuspended(OUT IMS_BOOL& bStateChanged);
+    void SetState(IN IuMtcService::EmergencyServiceState eState, OUT IMS_BOOL& bChanged);
+    void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason, IN IJniMtcServiceThread* pThread);
 
-private:
     IMtcContext& m_objContext;
+
+protected:
+    // open to unit test
     IuMtcService::EmergencyServiceState m_eState;
 };
 

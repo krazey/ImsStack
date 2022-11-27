@@ -163,7 +163,7 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled
 
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService()
 {
-    m_objContext.GetEmergencyServiceManager()->OpenEmergencyService();
+    m_objContext.GetEmergencyServiceManager()->OpenEmergencyService(GetJniThread());
 }
 
 PUBLIC VIRTUAL void MtcService::ProcessTestCommand(

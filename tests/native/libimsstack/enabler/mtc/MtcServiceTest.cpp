@@ -351,7 +351,7 @@ TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
 
 TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
 {
-    EXPECT_CALL(*pMockEmergencyManager, OpenEmergencyService).Times(1);
+    EXPECT_CALL(*pMockEmergencyManager, OpenEmergencyService(_)).Times(1);
     pNormalMtcService->OpenEmergencyService();
 }
 
