@@ -23,17 +23,10 @@ class Protocol;
 class ProtocolPermission
 {
 private:
-    inline ProtocolPermission() {}
-    inline ~ProtocolPermission() {}
+    ProtocolPermission() = delete;
 
 public:
-    ProtocolPermission(IN const ProtocolPermission&) = delete;
-    ProtocolPermission& operator=(IN const ProtocolPermission&) = delete;
-
-public:
-    Protocol* Lookup(IN const AString& strName);
-
-    static ProtocolPermission* GetInstance();
+    static Protocol* Lookup(IN const AString& strName);
 };
 
 #endif

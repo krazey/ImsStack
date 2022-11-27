@@ -211,9 +211,12 @@ PUBLIC VIRTUAL AString SdpConnection::GetValue() const
 }
 
 PUBLIC
-IMSList<AString> SdpConnection::GetAddresses() const
+ImsList<AString> SdpConnection::GetAddresses() const
 {
-    return IMSList<AString>();
+    ImsList<AString> objAddresses;
+    objAddresses.Append(m_strAddress);
+    // TODO: add extra addresses
+    return objAddresses;
 }
 
 PUBLIC

@@ -63,7 +63,7 @@ public:
     /**
      * @brief Returns the address in the connection line.
      */
-    IMSList<AString> GetAddresses() const;
+    ImsList<AString> GetAddresses() const;
 
     /**
      * @brief Sets the connection parameters.

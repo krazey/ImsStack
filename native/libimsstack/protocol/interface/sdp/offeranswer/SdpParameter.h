@@ -229,7 +229,7 @@ public:
     /**
      * @brief Updates the direction according to the peer & proposal SDP parameter.
      */
-    void UpdateDirection(IN const SdpParameter& objPeer, OUT SdpParameter& objProposal);
+    void UpdateDirection(IN const SdpParameter& objPeer, OUT SdpParameter& objProposal) const;
 
     /**
      * @brief Validates the direction according to the peer SDP parameter.
