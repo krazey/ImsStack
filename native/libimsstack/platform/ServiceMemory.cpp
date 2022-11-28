@@ -33,13 +33,10 @@ void* MemService::Realloc(IN void* pMem, IN IMS_SIZE_T nSize)
 PUBLIC
 void MemService::Free(IN void* pMem)
 {
-    if (pMem == IMS_NULL)
+    if (pMem != IMS_NULL)
     {
-        return;
+        free(pMem);
     }
-
-    free(pMem);
-    pMem = IMS_NULL;
 }
 
 PUBLIC

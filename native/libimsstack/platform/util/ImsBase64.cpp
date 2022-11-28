@@ -203,8 +203,6 @@ GLOBAL IMS_SINT32 ImsBase64_Encode(IN const IMS_BYTE* pSrcData, IN IMS_SIZE_T nS
 GLOBAL IMS_SINT32 ImsBase64_Decode(IN const IMS_CHAR* pszSrcData, IN IMS_SIZE_T nSrcLen,
         OUT IMS_BYTE* pDest, IN IMS_SIZE_T nDestLen)
 {
-    IMS_CHAR c8bit;
-    IMS_CHAR c8bit1;
     IMS_BYTE* pDecBuffer = pDest;
 
     (void)nDestLen;
@@ -221,7 +219,7 @@ GLOBAL IMS_SINT32 ImsBase64_Decode(IN const IMS_CHAR* pszSrcData, IN IMS_SIZE_T 
             nPos += 2;
         }
 
-        c8bit = (IMS_CHAR)BASE64_DECODING_TABLE[(IMS_UINT8)pszSrcData[nPos]];
+        IMS_UCHAR c8bit = BASE64_DECODING_TABLE[(IMS_UINT8)pszSrcData[nPos]];
         ++nPos;
 
         if (pszSrcData[nPos] == LF)
@@ -234,7 +232,7 @@ GLOBAL IMS_SINT32 ImsBase64_Decode(IN const IMS_CHAR* pszSrcData, IN IMS_SIZE_T 
             nPos += 2;
         }
 
-        c8bit1 = (IMS_CHAR)BASE64_DECODING_TABLE[(IMS_UINT8)pszSrcData[nPos]];
+        IMS_UCHAR c8bit1 = BASE64_DECODING_TABLE[(IMS_UINT8)pszSrcData[nPos]];
         c8bit = (c8bit << 2) | ((c8bit1 >> 4) & 0x03);
         (*pDecBuffer) = c8bit;
         pDecBuffer++;
@@ -257,7 +255,7 @@ GLOBAL IMS_SINT32 ImsBase64_Decode(IN const IMS_CHAR* pszSrcData, IN IMS_SIZE_T 
                 break;
             }
 
-            c8bit = (IMS_CHAR)BASE64_DECODING_TABLE[(IMS_UINT8)pszSrcData[nPos]];
+            c8bit = BASE64_DECODING_TABLE[(IMS_UINT8)pszSrcData[nPos]];
             c8bit1 = ((c8bit1 << 4) & 0xF0) | ((c8bit >> 2) & 0x0F);
             (*pDecBuffer) = c8bit1;
             pDecBuffer++;
@@ -281,7 +279,7 @@ GLOBAL IMS_SINT32 ImsBase64_Decode(IN const IMS_CHAR* pszSrcData, IN IMS_SIZE_T 
                 break;
             }
 
-            c8bit1 = (IMS_CHAR)BASE64_DECODING_TABLE[(IMS_UINT8)pszSrcData[nPos]];
+            c8bit1 = BASE64_DECODING_TABLE[(IMS_UINT8)pszSrcData[nPos]];
             c8bit = ((c8bit << 6) & 0xC0) | c8bit1;
             (*pDecBuffer) = c8bit;
             pDecBuffer++;

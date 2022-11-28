@@ -3445,13 +3445,13 @@ PUBLIC GLOBAL IMS_UINT32 AString::GetHashCode(IN const IMS_CHAR* pszValue)
     }
 
     IMS_UINT32 nHValue = 0;
-    IMS_UINT32 nHTmp = 0;
 
     while (*pszValue)
     {
         nHValue = (nHValue << 4) + *pszValue++;
 
-        if ((nHTmp = nHValue & 0xF0000000L) != 0)
+        IMS_UINT32 nHTmp = (nHValue & 0xF0000000L);
+        if (nHTmp != 0)
         {
             nHValue ^= (nHTmp >> 24);
         }

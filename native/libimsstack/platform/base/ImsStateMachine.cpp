@@ -28,7 +28,6 @@ IMS_BOOL ImsStateMachine::OnStateMessage(IN ImsMessage& objMsg)
 {
     const StateMap* pStateMap = GetStateMap();
     IMS_UINT32 nStateIndex = 0;
-    IMS_UINT32 nMsgIndex = 0;
     IMS_BOOL bStateFound = IMS_FALSE;
 
     while (pStateMap[nStateIndex].nState != IMS_INVALID_STATE)
@@ -47,6 +46,8 @@ IMS_BOOL ImsStateMachine::OnStateMessage(IN ImsMessage& objMsg)
 
         if (pStateMsgMap != IMS_NULL)
         {
+            IMS_UINT32 nMsgIndex = 0;
+
             while (pStateMsgMap[nMsgIndex].nMsg != IMS_INVALID_MSG)
             {
                 if (pStateMsgMap[nMsgIndex].nMsg == static_cast<IMS_UINT32>(objMsg.GetName()))

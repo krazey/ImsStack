@@ -208,18 +208,16 @@ PUBLIC GLOBAL IMS_ULONG OsThread::GetCurrentThreadId()
 PUBLIC VIRTUAL IMS_ULONG OsThread::Run()
 {
     IMS_BOOL bLoop = IMS_TRUE;
-    IMS_UINT32 nMsgCount = 0;
-    IMS_SINT32 nWaitResult = 0;
 
     IMS_TRACE_I("Thread :: Started (%s, %x)", GetName().GetStr(), m_nThreadId, 0);
 
     while (bLoop)
     {
         m_objMsgQueueMutex.Lock();
-        nMsgCount = m_objMsgQueue.GetSize();
+        IMS_UINT32 nMsgCount = m_objMsgQueue.GetSize();
         m_objMsgQueueMutex.Unlock();
 
-        nWaitResult = WaitForSignal(nMsgCount);
+        IMS_SINT32 nWaitResult = WaitForSignal(nMsgCount);
 
         if ((nWaitResult == 0) || (nWaitResult == ETIMEDOUT))
         {

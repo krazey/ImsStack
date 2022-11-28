@@ -34,15 +34,13 @@ IMS_BOOL ipAddress_ParseIpv4(IN const AString& strIp4, OUT IMS_UINT32* pnIp4)
 
     IMS_UINT32 nIp4 = 0;
     IMS_BOOL bOk;
-    IMS_UINT32 nByteValue;
 
     for (IMS_SINT32 i = 0; i < 4; ++i)
     {
         bOk = IMS_FALSE;
 
         const AString& strValue = objIpv4.GetAt(i);
-
-        nByteValue = strValue.ToUInt32(&bOk);
+        IMS_UINT32 nByteValue = strValue.ToUInt32(&bOk);
 
         if (!bOk || (nByteValue > 0xff))
         {

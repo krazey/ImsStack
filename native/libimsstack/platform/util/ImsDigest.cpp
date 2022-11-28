@@ -149,11 +149,9 @@ GLOBAL void ImsDigest_CalculateResponse(IN const HASHHEX hA1,  // H(A1)
 
 LOCAL void imsDigest_ConvertBinToHex(IN const HASH hBin, OUT HASHHEX hHex)
 {
-    IMS_UCHAR ucTemp;
-
     for (IMS_UINT32 i = 0; i < HASH_SIZE; i++)
     {
-        ucTemp = (hBin[i] >> 4) & 0x0F;
+        IMS_UCHAR ucTemp = (hBin[i] >> 4) & 0x0F;
 
         if (ucTemp <= 9)
         {

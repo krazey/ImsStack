@@ -245,9 +245,6 @@ GLOBAL IMS_SINT32 IMS_StrNCmp(
 
 GLOBAL IMS_SINT32 IMS_StrICmp(IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* pszStrB)
 {
-    IMS_CHAR ch1;
-    IMS_CHAR ch2;
-
     if ((pszStrA == IMS_NULL) && (pszStrB == IMS_NULL))
     {
         return 0;
@@ -263,8 +260,8 @@ GLOBAL IMS_SINT32 IMS_StrICmp(IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* psz
 
     while (*pszStrA && *pszStrB)
     {
-        ch1 = IMS_TOLOWER(*pszStrA);
-        ch2 = IMS_TOLOWER(*pszStrB);
+        IMS_CHAR ch1 = IMS_TOLOWER(*pszStrA);
+        IMS_CHAR ch2 = IMS_TOLOWER(*pszStrB);
 
         if (ch1 != ch2)
         {
