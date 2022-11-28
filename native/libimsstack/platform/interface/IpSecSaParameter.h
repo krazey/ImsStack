@@ -94,7 +94,7 @@ public:
         SocketAddress m_objLocalAddress;
         SocketAddress m_objRemoteAddress;
         IMS_SINT32 m_nSocketId;
-        IMSList<IMS_SINT32> m_objAcceptedSocketIds;
+        ImsList<IMS_SINT32> m_objAcceptedSocketIds;
     };
 
 public:
