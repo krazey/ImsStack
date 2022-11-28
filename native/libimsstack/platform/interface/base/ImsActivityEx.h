@@ -22,7 +22,7 @@ class ImsActivityEx : public ImsActivity
 {
 public:
     // When giving the activity name, the name MUST not contain the dot ('.').
-    inline ImsActivityEx(IN const AString& strName = AString::ConstNull()) :
+    inline explicit ImsActivityEx(IN const AString& strName = AString::ConstNull()) :
             ImsActivity(strName)
     {
     }

@@ -26,7 +26,7 @@ class GeolocationPidfCreator
     : public ImsSlot
 {
 public:
-    GeolocationPidfCreator(IN IMS_SINT32 nSlotId);
+    explicit GeolocationPidfCreator(IN IMS_SINT32 nSlotId);
     virtual ~GeolocationPidfCreator();
 
     GeolocationPidfCreator(IN const GeolocationPidfCreator&) = delete;

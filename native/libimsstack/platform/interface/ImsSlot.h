@@ -21,11 +21,7 @@
 class ImsSlot
 {
 public:
-    inline ImsSlot() __IMS_DEPRECATED__("Use ImsSlot(IMS_SINT32) instead") :
-            m_nSlotId(IMS_SLOT_0)
-    {
-    }
-    inline ImsSlot(IN IMS_SINT32 nSlotId) :
+    inline explicit ImsSlot(IN IMS_SINT32 nSlotId) :
             m_nSlotId(nSlotId)
     {
     }

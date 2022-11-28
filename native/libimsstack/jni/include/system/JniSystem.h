@@ -22,7 +22,7 @@
 class JniSystem : public BaseService, public SystemCallback
 {
 public:
-    JniSystem(IN JniSystem_SendDataToJava pfnSendDataToJava);
+    explicit JniSystem(IN JniSystem_SendDataToJava pfnSendDataToJava);
     virtual ~JniSystem();
 
     JniSystem(IN const JniSystem&) = delete;

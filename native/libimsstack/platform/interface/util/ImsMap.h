@@ -33,7 +33,7 @@ public:
             m_objPair(std::pair<K, V>(k, v))
     {
     }
-    inline MapPair(const K& k) :
+    inline explicit MapPair(const K& k) :
             m_objPair(std::pair<K, V>())
     {
         m_objPair.first = k;

@@ -50,7 +50,7 @@ private:
 class OsUsim : public ImsUsim, public ISystemListener
 {
 public:
-    OsUsim(IN IMS_SINT32 nSlotId);
+    explicit OsUsim(IN IMS_SINT32 nSlotId);
     virtual ~OsUsim();
 
     OsUsim(IN const OsUsim&) = delete;

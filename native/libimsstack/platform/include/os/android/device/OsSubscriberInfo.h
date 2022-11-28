@@ -23,7 +23,7 @@
 class OsSubscriberInfo : public ImsSlot, public ISubscriberInfo
 {
 public:
-    OsSubscriberInfo(IN IMS_SINT32 nSlotId);
+    explicit OsSubscriberInfo(IN IMS_SINT32 nSlotId);
     virtual ~OsSubscriberInfo();
 
     OsSubscriberInfo(IN const OsSubscriberInfo&) = delete;

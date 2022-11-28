@@ -23,7 +23,7 @@ class OsMutexPrivate;
 class OsMutex : public ImsMutex
 {
 public:
-    OsMutex(IN IMS_SINT32 nType = ATTRIBUTE_RECURSIVE);
+    explicit OsMutex(IN IMS_SINT32 nType = ATTRIBUTE_RECURSIVE);
     virtual ~OsMutex();
 
     OsMutex(IN const OsMutex&) = delete;

@@ -23,7 +23,7 @@
 class ConfigApp : public ImsApp, public IEventListener
 {
 public:
-    ConfigApp(IN const AString& strAppName);
+    explicit ConfigApp(IN const AString& strAppName);
     virtual ~ConfigApp();
 
 public:

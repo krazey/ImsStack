@@ -49,7 +49,7 @@ protected:
     };
 
 public:
-    ImsHashMap(IN IMS_UINT32 nHashTableSize = DEFAULT_SIZE);
+    explicit ImsHashMap(IN IMS_UINT32 nHashTableSize = DEFAULT_SIZE);
     virtual ~ImsHashMap();
 
 public:

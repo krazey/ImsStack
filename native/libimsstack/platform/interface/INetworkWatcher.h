@@ -237,7 +237,7 @@ private:
     class ObserverList
     {
     public:
-        inline ObserverList(IN INetworkWatcherListener* piListener)
+        inline explicit ObserverList(IN INetworkWatcherListener* piListener)
         {
             m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
             m_objListeners.Append(piListener);

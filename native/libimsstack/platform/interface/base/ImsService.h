@@ -25,7 +25,7 @@ class ImsService : public ImsActivity, public ImsStateObject
     DECLARE_STATE_MAP()
 
 public:
-    ImsService(IN const AString& strName);
+    explicit ImsService(IN const AString& strName);
     inline virtual ~ImsService() {}
 
 protected:

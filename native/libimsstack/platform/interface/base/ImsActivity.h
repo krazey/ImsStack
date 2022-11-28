@@ -24,7 +24,7 @@ class ImsActivity
 {
 public:
     // When giving the activity name, the name MUST not contain the dot ('.').
-    ImsActivity(IN const AString& strName = AString::ConstNull());
+    explicit ImsActivity(IN const AString& strName = AString::ConstNull());
     virtual ~ImsActivity();
 
     ImsActivity(IN const ImsActivity&) = delete;

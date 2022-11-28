@@ -66,7 +66,7 @@ protected:
     class Configurable : public IConfigurable
     {
     public:
-        inline Configurable(IN ConfigBase* pConfig) :
+        inline explicit Configurable(IN ConfigBase* pConfig) :
                 m_pConfig(pConfig)
         {
         }
