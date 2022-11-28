@@ -239,7 +239,6 @@ IpAddressPrivate::IpAddressPrivate() :
         m_nType(TYPE_UNKNOWN),
         m_nA(0)
 {
-    IMS_MEM_Memset(&m_objA6, 0x00, sizeof(Ipv6Address));
 }
 
 PUBLIC
@@ -273,6 +272,28 @@ void IpAddressPrivate::SetAddress(IN const Ipv6Address& objAddress)
 {
     m_nType = TYPE_IPv6;
     m_objA6 = objAddress;
+}
+
+PUBLIC
+Ipv6Address::Ipv6Address()
+{
+    IMS_MEM_Memset(aIp6, 0x00, MAX_SIZE);
+}
+
+PUBLIC
+Ipv6Address::Ipv6Address(IN const Ipv6Address& other)
+{
+    IMS_MEM_Memcpy(aIp6, other.aIp6, MAX_SIZE);
+}
+
+PUBLIC
+Ipv6Address& Ipv6Address::operator=(IN const Ipv6Address& other)
+{
+    if (this != &other)
+    {
+        IMS_MEM_Memcpy(aIp6, other.aIp6, MAX_SIZE);
+    }
+    return (*this);
 }
 
 PUBLIC

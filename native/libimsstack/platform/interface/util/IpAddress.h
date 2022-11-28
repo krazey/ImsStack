@@ -25,6 +25,12 @@ class IpAddressPrivate;
 class Ipv6Address
 {
 public:
+    Ipv6Address();
+    Ipv6Address(IN const Ipv6Address& other);
+
+    Ipv6Address& operator=(IN const Ipv6Address& other);
+
+public:
     IMS_BYTE& operator[](IN IMS_SINT32 i);
     IMS_BYTE operator[](IN IMS_SINT32 i) const;
     const IMS_BYTE* GetAddress() const;
