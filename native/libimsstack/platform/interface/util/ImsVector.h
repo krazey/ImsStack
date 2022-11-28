@@ -220,7 +220,6 @@ PUBLIC
 template <class T>
 inline const T& ImsVector<T>::Top() const
 {
-    IMS_ASSERT(!m_objVector.empty());
     return m_objVector.back();
 }
 
@@ -235,7 +234,6 @@ PUBLIC
 template <class T>
 inline T& ImsVector<T>::Top()
 {
-    IMS_ASSERT(!m_objVector.empty());
     return m_objVector.back();
 }
 
