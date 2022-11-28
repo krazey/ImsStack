@@ -75,7 +75,7 @@ public:
     IElement* GetOwnerElement() const override;
     IMS_BOOL GetSpecified() const override;
     const AString& GetValue() const override;
-    IMS_BOOL IsId() const;
+    IMS_BOOL IsId() const override;
     void SetValue(IN const AString& strValue) override;
 
 private:

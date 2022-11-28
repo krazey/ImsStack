@@ -47,7 +47,7 @@ public:
 
 public:
     // EngineActivity class
-    virtual IMS_BOOL DispatchMessage(IN ImsMessage& objMsg);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     // Only SipConnectionNotifier
     void Clear();

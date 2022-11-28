@@ -55,7 +55,7 @@ protected:
     // Handle the incoming request / outgoing response message
     IMS_BOOL NotifySipRequest(IN ISipServerConnection* piSsc) override;
     // Handle to the outgoing request / incoming response message
-    void NotifySipResponse(IN ISipClientConnection* piScc);
+    void NotifySipResponse(IN ISipClientConnection* piScc) override;
     void NotifySipError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 

@@ -87,15 +87,15 @@ private:
             IN IMS_SINT32 nStatusCode, IN const AString& strReason = AString::ConstNull()) override;
     IMS_RESULT RespondToPrack(
             IN IMS_SINT32 nStatusCode, IN const AString& strReason = AString::ConstNull()) override;
-    IMS_RESULT SendAck();
-    IMS_RESULT SendPrack();
+    IMS_RESULT SendAck() override;
+    IMS_RESULT SendPrack() override;
     IMS_RESULT SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
-            IN const AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0);
+            IN const AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0) override;
     IMS_RESULT SendRpr(IN IMS_SINT32 nStatusCode,
             IN const AString& strReason = AString::ConstNull(), IN IMS_BOOL bSdp = IMS_TRUE,
-            IN IMS_SINT32 nFlags = 0);
-    IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference);
-    void SetConfiguration(IN IMS_SINT32 nConfigValue);
+            IN IMS_SINT32 nFlags = 0) override;
+    IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference) override;
+    void SetConfiguration(IN IMS_SINT32 nConfigValue) override;
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
     IMS_RESULT SetContactParameter(IN const AString& strParameter,
             IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */) override;

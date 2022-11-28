@@ -38,9 +38,9 @@ public:
 
 private:
     // ServiceProtocol class
-    virtual IService* CreateService(IN const AString& strAppId, IN const AString& strServiceId,
-            IN const AString& strUserId);
-    inline virtual const IMS_CHAR* GetConnectionScheme() const
+    IService* CreateService(IN const AString& strAppId, IN const AString& strServiceId,
+            IN const AString& strUserId) override;
+    inline const IMS_CHAR* GetConnectionScheme() const override
     {
         return ImsCore::CONNECTION_SCHEME;
     }

@@ -33,9 +33,9 @@ public:
     ServiceProtocol& operator=(IN const ServiceProtocol&) = delete;
 
 public:
-    virtual IConnection* OpenPrim(IN const AString& strName);
-    virtual IConnection* OpenPrim(
-            IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams);
+    IConnection* OpenPrim(IN const AString& strName) override;
+    IConnection* OpenPrim(IN const AString& strScheme, IN const AString& strTarget,
+            IN const AString& strParams) override;
 
 protected:
     virtual IService* CreateService(IN const AString& strAppId, IN const AString& strServiceId,

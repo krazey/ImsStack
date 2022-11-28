@@ -150,8 +150,8 @@ public:
 
 private:
     // ISipServerConnectionListener interface
-    virtual void ServerConnection_NotifyRequest(
-            IN ISipConnectionNotifier* piScn, IN IMS_BOOL bIsForked = IMS_FALSE);
+    void ServerConnection_NotifyRequest(
+            IN ISipConnectionNotifier* piScn, IN IMS_BOOL bIsForked = IMS_FALSE) override;
 
     void AddReference(IN const AString& strKey);
     IMS_SINT32 RemoveReference(IN const AString& strKey);

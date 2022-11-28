@@ -33,8 +33,8 @@ public:
 
 protected:
     // ImsActivity class
-    inline virtual IImsActivityController* GetController() { return IMS_NULL; }
-    virtual IMS_BOOL DispatchMessage(IN ImsMessage& objMsg);
+    inline IImsActivityController* GetController() override { return IMS_NULL; }
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     virtual void OnDestroy();
 

@@ -53,9 +53,9 @@ public:
 
 private:
     // IRegInfoParserListener interface
-    virtual void RegInfoParser_ParsingCompleted(
-            IN RegInfoParser* pParser, IN IDocument* piDocument);
-    virtual void RegInfoParser_ParsingFailed(IN RegInfoParser* pParser);
+    void RegInfoParser_ParsingCompleted(
+            IN RegInfoParser* pParser, IN IDocument* piDocument) override;
+    void RegInfoParser_ParsingFailed(IN RegInfoParser* pParser) override;
 
     IMS_BOOL AddRegInfoParser(IN RegInfoParser* pParser);
     void RemoveRegInfoParser(IN RegInfoParser*& pParser);

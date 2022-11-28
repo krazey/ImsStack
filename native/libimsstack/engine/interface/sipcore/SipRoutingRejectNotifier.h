@@ -58,8 +58,8 @@ public:
 
 private:
     // ISipRoutingRejectNotifier class
-    virtual void AddListener(IN ISipRoutingRejectListener* piListener);
-    virtual void RemoveListener(IN ISipRoutingRejectListener* piListener);
+    void AddListener(IN ISipRoutingRejectListener* piListener) override;
+    void RemoveListener(IN ISipRoutingRejectListener* piListener) override;
 
 private:
     IMSList<ISipRoutingRejectListener*> m_objListeners;

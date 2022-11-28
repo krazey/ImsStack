@@ -148,7 +148,7 @@ protected:
     void NotifySipResponse(IN ISipClientConnection* piScc) override;
     void NotifySipError(
             IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
-    IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piScc);
+    IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piScc) override;
     IMS_BOOL SetReferredMessageListener(IN IReferredMessageListener* piListener) override;
 
     // ISessionState interface

@@ -35,9 +35,9 @@ public:
 
 private:
     // Protocol class
-    virtual IConnection* OpenPrim(IN const AString& strName);
-    virtual IConnection* OpenPrim(
-            IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams);
+    IConnection* OpenPrim(IN const AString& strName) override;
+    IConnection* OpenPrim(IN const AString& strScheme, IN const AString& strTarget,
+            IN const AString& strParams) override;
 
     IConnection* CreateConnectionNotifier(IN IMS_SINT32 nScheme, IN IMS_SINT32 nPort,
             IN const AString& strParams, IN IMS_BOOL bSharedMode = IMS_FALSE);
