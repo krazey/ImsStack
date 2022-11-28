@@ -46,6 +46,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -384,7 +385,7 @@ public class ImsRegistrationTrackerTest {
                 .thenReturn(ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
 
         mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
-        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+        assertEquals(new CapabilityPairs(), mRegTracker.createCapabilityPairsFromCapabilities());
 
         when(mSp.getInt(eq("VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE"), anyInt()))
                 .thenReturn(ProvisioningManager.PROVISIONING_VALUE_DISABLED);
@@ -398,6 +399,14 @@ public class ImsRegistrationTrackerTest {
                 .thenReturn(ProvisioningManager.PROVISIONING_VALUE_ENABLED);
         when(mSp.getInt(eq("VOICE_OVER_WIFI_MODE_OVERRIDE"), anyInt()))
                 .thenReturn(ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
+
+        mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
+        assertEquals(new CapabilityPairs(), mRegTracker.createCapabilityPairsFromCapabilities());
+
+        when(mSp.getInt(eq("VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE"), anyInt()))
+                .thenReturn(ProvisioningManager.PROVISIONING_VALUE_ENABLED);
+        when(mSp.getInt(eq("VOICE_OVER_WIFI_MODE_OVERRIDE"), anyInt()))
+                .thenReturn(ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
 
         mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
@@ -588,7 +597,7 @@ public class ImsRegistrationTrackerTest {
         assertNotNull(listener);
 
         listener.onCommonPackageReady(0);
-        verify(mMockIDcNetWatcher).registerForVoiceRoamingStateChanged(
+        verify(mMockIDcNetWatcher, times(2)).registerForVoiceRoamingStateChanged(
                 mRegTracker.getMessageHandler(), 1, null);
     }
 
@@ -600,6 +609,35 @@ public class ImsRegistrationTrackerTest {
         listener.onCommonPackageStop(0);
         verify(mMockIDcNetWatcher).unregisterForVoiceRoamingStateChanged(
                 mRegTracker.getMessageHandler());
+    }
+
+    public void testConfigListener() {
+        when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(true);
+
+        List<CapabilityPair> enableCapabilities = new ArrayList<>();
+        enableCapabilities.add(new CapabilityPair(
+                MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+
+        CapabilityPairs capabilityPairs = new CapabilityPairs();
+        capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                IAosRegistrationListener.Capability.VOICE);
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        ImsServiceRecord isr = ImsServiceManager.getServiceRecord(0);
+        ImsConfigImpl configImpl = isr.getConfig();
+
+        configImpl.setConfig(
+                ProvisioningManager.KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE,
+                ProvisioningManager.PROVISIONING_VALUE_DISABLED);
+
+        assertEquals(new CapabilityPairs(), mRegTracker.createCapabilityPairsFromCapabilities());
+
+        configImpl.setConfig(
+                ProvisioningManager.KEY_VOICE_OVER_WIFI_MODE_OVERRIDE,
+                ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
+
+        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
     }
 
     private class FakeImsRegistrationTracker extends ImsRegistrationTracker {

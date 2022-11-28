@@ -43,6 +43,7 @@ import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
+import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -70,9 +71,24 @@ public class ImsRegistrationTracker {
     private RegTracker mRegTracker;
     private int mFeatures = FeatureTagMask.NONE;
     private List<Pair<Integer, Integer>> mCapabilities;
+    private ConfigListener mConfigListener = null;
 
     @VisibleForTesting
     public MessageHandler mHandler = null;
+
+    private class ConfigListener extends ConfigurationListener {
+        @Override
+        public void onImsConfigurationChanged(int item) {
+            if ((item == ProvisioningManager.KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE)
+                    || (item == ProvisioningManager.KEY_VOICE_OVER_WIFI_MODE_OVERRIDE)) {
+                logi("onImsConfigurationChanged:: changed item" + item);
+                CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
+                if (capabilityPairs != null) {
+                    mRegTracker.changeCapabilities(capabilityPairs);
+                }
+            }
+        }
+    };
 
     public ImsRegistrationTracker(IContext context, ImsRegistrationImpl regImpl) {
         mContext = context;
@@ -86,6 +102,14 @@ public class ImsRegistrationTracker {
 
         if (isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming()) {
             mHandler = new MessageHandler();
+            ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+            if (isr != null) {
+                ImsConfigImpl configImpl = isr.getConfig();
+                if (configImpl != null) {
+                    mConfigListener = new ConfigListener();
+                    configImpl.addListener(mConfigListener);
+                }
+            }
         }
     }
 
@@ -98,6 +122,13 @@ public class ImsRegistrationTracker {
 
         if (mHandler != null) {
             mHandler.clear();
+        }
+        ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+        if (isr != null && mConfigListener != null) {
+            ImsConfigImpl configImpl = isr.getConfig();
+            if (configImpl != null) {
+                configImpl.removeListener(mConfigListener);
+            }
         }
     }
 
@@ -571,6 +602,16 @@ public class ImsRegistrationTracker {
                     mHandler = new MessageHandler();
                 } else {
                     mHandler.init();
+                }
+                ImsServiceRecord isr = ImsServiceManager.getServiceRecord(mContext.getPhoneId());
+                if (isr != null) {
+                    ImsConfigImpl configImpl = isr.getConfig();
+                    if (configImpl != null) {
+                        if (mConfigListener == null) {
+                            mConfigListener = new ConfigListener();
+                        }
+                        configImpl.addListener(mConfigListener);
+                    }
                 }
             }
 
