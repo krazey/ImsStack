@@ -25,7 +25,7 @@ class StreamMediaProposalImpl;
 class StreamMediaImpl : public MediaImpl, public IMedia, public IOnMediaListener
 {
 public:
-    StreamMediaImpl(IN StreamMedia* pStreamMedia);
+    explicit StreamMediaImpl(IN StreamMedia* pStreamMedia);
     virtual ~StreamMediaImpl();
 
     StreamMediaImpl(IN const StreamMediaImpl&) = delete;

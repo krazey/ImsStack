@@ -76,7 +76,7 @@ public:
     };
 
 public:
-    SdpPrecondition(IN IMS_SINT32 nType = TYPE_QOS, IN IMS_SINT32 nSubType = SUBTYPE_E2E);
+    explicit SdpPrecondition(IN IMS_SINT32 nType = TYPE_QOS, IN IMS_SINT32 nSubType = SUBTYPE_E2E);
     SdpPrecondition(IN const SdpPrecondition& other);
     virtual ~SdpPrecondition();
 

@@ -30,7 +30,7 @@ class SipConnectionFactory :
         public ISipConnectionFactory
 {
 public:
-    SipConnectionFactory(IN Service* pService);
+    explicit SipConnectionFactory(IN Service* pService);
     SipConnectionFactory(IN Service* pService, IN ISipServerConnection* piSsc);
     virtual ~SipConnectionFactory();
 

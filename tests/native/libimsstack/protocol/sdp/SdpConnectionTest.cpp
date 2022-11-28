@@ -122,7 +122,7 @@ TEST_F(SdpConnectionTest, Constructor)
     SdpConnection objConnection;
     EXPECT_EQ(objConnection.GetAddressType(), AString(Sdp::STR_ADDR_TYPE_IP6));
     EXPECT_EQ(objConnection.GetAddress(), AString::ConstNull());
-    EXPECT_TRUE(objConnection.GetAddresses().IsEmpty());
+    EXPECT_EQ(objConnection.GetAddresses().GetSize(), 1);
 }
 
 TEST_F(SdpConnectionTest, CopyConstructor)

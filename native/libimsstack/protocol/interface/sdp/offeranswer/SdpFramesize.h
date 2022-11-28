@@ -21,8 +21,8 @@
 class SdpFramesize : public SdpMediaFormatParameter
 {
 public:
-    SdpFramesize(IN IMS_SINT32 nPayloadTypeNumber);
-    SdpFramesize(IN const AString& strOtherFormat);
+    explicit SdpFramesize(IN IMS_SINT32 nPayloadTypeNumber);
+    explicit SdpFramesize(IN const AString& strOtherFormat);
     SdpFramesize(IN const SdpFramesize& other);
     virtual ~SdpFramesize();
 
