@@ -51,12 +51,13 @@ PUBLIC VIRTUAL CallTrafficBlockRule::Result CallTrafficBlockRule::Check(
     switch (eCheckResult)
     {
         case CheckResult::UNBLOCKED:
+            return Result(IMtcBlockRule::Result::Status::UNBLOCKED);
         case CheckResult::PENDING:
-            return Result(static_cast<IMtcBlockRule::Result::Status>(eCheckResult));
+            return Result(IMtcBlockRule::Result::Status::PENDING);
 
         case CheckResult::BLOCKED:
-            return Result(static_cast<IMtcBlockRule::Result::Status>(eCheckResult),
-                    CODE_LOCAL_NETWORK_NO_SERVICE);
+            return Result(IMtcBlockRule::Result::Status::BLOCKED,
+                    CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE));
     }
 }
 
@@ -68,5 +69,5 @@ PUBLIC VIRTUAL void CallTrafficBlockRule::OnConnectionSetupPrepared()
 PUBLIC VIRTUAL void CallTrafficBlockRule::OnConnectionFailed()
 {
     m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(
-            Result(Result::Status::BLOCKED, CODE_LOCAL_NETWORK_NO_SERVICE));
+            Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)));
 }

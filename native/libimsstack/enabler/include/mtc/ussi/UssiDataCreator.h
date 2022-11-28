@@ -28,7 +28,7 @@ public:
             IN UssiError eErrorCode = UssiError::CODE_NONE);
 
 private:
-    static const AString CreateStartElement(IN const AString& strElementName);
+    static const AString CreateStartElement(IN const AString& strStartElementName);
     static const AString CreateAttribute(
             IN const AString& strAttributeName, IN const AString& strValue);
     static const AString CreateEndElement(IN const AString& strEndElementName);

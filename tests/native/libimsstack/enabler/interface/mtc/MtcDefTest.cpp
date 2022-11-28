@@ -60,10 +60,6 @@ TEST(MtcDefTest, MediaInfoAssignOperator)
 
 TEST(MtcDefTest, MediaInfoEqualToOperator)
 {
-    MediaInfo objMediaInfo;
-    MediaInfo* pMediaInfo = &objMediaInfo;
-    EXPECT_TRUE(&objMediaInfo == pMediaInfo);
-
     MediaInfo objMediaInfoWithValues(
             ANY_A_DIR, ANY_V_DIR, ANY_T_DIR, ANY_A_QUALITY, ANY_V_QUALITY, ANY_GTT_MODE);
     MediaInfo objMediaInfoWithValuesToCompare(
@@ -111,12 +107,8 @@ TEST(MtcDefTest, SuppServiceAssignOperator)
     EXPECT_EQ(objSuppService.bValue, objRightHandSide.bValue);
 }
 
-TEST(CallReasonInfoTest, SuppServiceEqualToOperator)
+TEST(MtcDefTest, SuppServiceEqualToOperator)
 {
-    SuppService objSuppService;
-    SuppService* pSuppService = &objSuppService;
-    EXPECT_TRUE(&objSuppService == pSuppService);
-
     SuppService objSuppServiceWithValues;
     objSuppServiceWithValues.strValue = ANY_SUPP_STR;
     objSuppServiceWithValues.nValue = ANY_SUPP_INT;

@@ -205,7 +205,7 @@ public:
     {
     }
 
-    CallReasonInfo(IN IMS_SINT32 _nCode) :
+    explicit CallReasonInfo(IN IMS_SINT32 _nCode) :
             CallReasonInfo(_nCode, -1)
     {
     }

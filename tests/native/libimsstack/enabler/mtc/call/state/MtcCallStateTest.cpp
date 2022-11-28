@@ -372,8 +372,8 @@ TEST_F(MtcCallStateTest, OnTimerExpiredDoesNothing)
 
 TEST_F(MtcCallStateTest, OnBlockCheckedDoesNothing)
 {
-    EXPECT_EQ(
-            INITIAL_CALL_STATE, pState->OnBlockChecked(IMtcBlockChecker::Result::Status::BLOCKED));
+    IMtcBlockChecker::Result objResult(IMtcBlockChecker::Result::Status::BLOCKED);
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnBlockChecked(objResult));
 }
 
 TEST_F(MtcCallStateTest, QosReservedDoesNothing)

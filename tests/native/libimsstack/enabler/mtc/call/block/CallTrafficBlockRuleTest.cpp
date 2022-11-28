@@ -80,12 +80,11 @@ TEST_F(CallTrafficBlockRuleTest, Check)
             .WillOnce(Return(CheckResult::PENDING))
             .WillOnce(Return(CheckResult::BLOCKED));
 
-    EXPECT_EQ(Result(static_cast<Result::Status>(CheckResult::UNBLOCKED)),
+    EXPECT_EQ(Result(Result::Status::UNBLOCKED),
             m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
-    EXPECT_EQ(Result(static_cast<Result::Status>(CheckResult::PENDING)),
+    EXPECT_EQ(Result(Result::Status::PENDING),
             m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
-    EXPECT_EQ(Result(static_cast<Result::Status>(CheckResult::BLOCKED),
-                      CODE_LOCAL_NETWORK_NO_SERVICE),
+    EXPECT_EQ(Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)),
             m_pCallTrafficBlockRule->Check(m_BlockRuleCheckListener));
 }
 
@@ -102,8 +101,8 @@ TEST_F(CallTrafficBlockRuleTest, IMtcCallTrafficCheckerListener)
     m_pCallTrafficBlockRule->OnConnectionSetupPrepared();
 
     EXPECT_CALL(m_BlockRuleCheckListener,
-            OnBlockRuleChecked(Result(static_cast<Result::Status>(CheckResult::BLOCKED),
-                    CODE_LOCAL_NETWORK_NO_SERVICE)))
+            OnBlockRuleChecked(
+                    Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE))))
             .Times(1);
 
     m_pCallTrafficBlockRule->OnConnectionFailed();

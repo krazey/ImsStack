@@ -29,7 +29,7 @@ class IMtcConfigurationManager;
 class MtcConfigurationProxy
 {
 public:
-    MtcConfigurationProxy(IN IMtcConfigurationManager* pManager);
+    explicit MtcConfigurationProxy(IN IMtcConfigurationManager* pManager);
     virtual ~MtcConfigurationProxy();
     MtcConfigurationProxy(IN const MtcConfigurationProxy&) = delete;
     MtcConfigurationProxy& operator=(IN const MtcConfigurationProxy&) = delete;

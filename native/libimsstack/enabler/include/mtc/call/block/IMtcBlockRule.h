@@ -45,7 +45,7 @@ public:
         {
         }
 
-        Result(IN Status _eStatus) :
+        explicit Result(IN Status _eStatus) :
                 Result(_eStatus, CallReasonInfo(CODE_NONE))
         {
         }
@@ -84,7 +84,7 @@ public:
 class IMtcBlockRuleCheckListener
 {
 public:
-    ~IMtcBlockRuleCheckListener() {}
+    virtual ~IMtcBlockRuleCheckListener() {}
 
     /**
      * Notifies the block check result.
