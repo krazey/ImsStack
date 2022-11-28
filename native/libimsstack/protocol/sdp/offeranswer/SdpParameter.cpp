@@ -79,7 +79,7 @@ SdpParameter::SdpParameter(IN const SdpParameter& other) :
 
 PUBLIC VIRTUAL SdpParameter::~SdpParameter()
 {
-    SdpParameter::Clear();
+    ClearAllParameters();
 }
 
 PUBLIC
@@ -839,6 +839,12 @@ IMS_BOOL SdpParameter::ValidateDirection(IN const SdpParameter* pPeer) const
 }
 
 PROTECTED VIRTUAL void SdpParameter::Clear()
+{
+    ClearAllParameters();
+}
+
+PROTECTED
+void SdpParameter::ClearAllParameters()
 {
     if (m_pInformation != IMS_NULL)
     {

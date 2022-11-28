@@ -248,6 +248,11 @@ protected:
     inline virtual IMS_BOOL IsDirectionAttributeRequired() const { return IMS_TRUE; }
 
     /**
+     * @brief Clears all the properties for the current SDP parameter.
+     */
+    void ClearAllParameters();
+
+    /**
      * @brief Checks if the specified type contains or not.
      */
     IMS_BOOL Contains(IN IMS_SINT32 nType) const;
