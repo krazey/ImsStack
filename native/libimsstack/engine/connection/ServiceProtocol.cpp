@@ -64,14 +64,14 @@ PUBLIC VIRTUAL IConnection* ServiceProtocol::OpenPrim(
         return IMS_NULL;
     }
 
-    IMS_SINT32 nPos;
     IMSList<AString> objTokens = strParams.Split(TextParser::CHAR_SEMICOLON);
 
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
     {
         const AString& strToken = objTokens.GetAt(i);
+        IMS_SINT32 nPos = strToken.GetIndexOf(TextParser::CHAR_EQUAL);
 
-        if ((nPos = strToken.GetIndexOf(TextParser::CHAR_EQUAL)) != AString::NPOS)
+        if (nPos != AString::NPOS)
         {
             AString strName = strToken.GetSubStr(0, nPos);
 

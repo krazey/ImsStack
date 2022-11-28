@@ -174,11 +174,10 @@ PUBLIC GLOBAL IMS_BOOL Sdp::SplitLine(
     }
 
     IMS_SINT32 nStartOffset = 0;
-    IMS_SINT32 nEndOffset = 0;
 
     for (IMS_SINT32 i = 0; i < nNumOfParts - 1; ++i)
     {
-        nEndOffset = strValue.GetIndexOf(TextParser::CHAR_SP, nStartOffset);
+        IMS_SINT32 nEndOffset = strValue.GetIndexOf(TextParser::CHAR_SP, nStartOffset);
 
         if (nEndOffset == AString::NPOS)
         {

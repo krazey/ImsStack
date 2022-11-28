@@ -740,19 +740,17 @@ PRIVATE GLOBAL void TriggerPoint::SplitLines(
         IN const AString& strSdp, OUT AStringArray& objSdpLines)
 {
     IMS_SINT32 nLineStart = 0;
-    IMS_SINT32 nEndOfLine = 0;
-    IMS_SINT32 nNextLineStart = 0;
 
     while (nLineStart < strSdp.GetLength())
     {
-        nEndOfLine = strSdp.GetIndexOf(TextParser::CHAR_LF, nLineStart);
+        IMS_SINT32 nEndOfLine = strSdp.GetIndexOf(TextParser::CHAR_LF, nLineStart);
 
         if (nEndOfLine == AString::NPOS)
         {
             nEndOfLine = strSdp.GetLength();
         }
 
-        nNextLineStart = nEndOfLine + 1;
+        IMS_SINT32 nNextLineStart = nEndOfLine + 1;
 
         if ((nEndOfLine > 0) && (strSdp[nEndOfLine - 1] == TextParser::CHAR_CR))
         {

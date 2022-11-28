@@ -108,7 +108,6 @@ PUBLIC GLOBAL AString SipUtils::GenerateViaBranch(IN const IMS_CHAR* pszToTag,
 {
     const IMS_UCHAR COLON[2] = {':', '\0'};
     ImsMd5Context objMd5Ctx;
-    IMS_UCHAR ucTemp;
     IMS_UCHAR aucBranch[16];
     IMS_CHAR acViaBranch[32 + 1] = {
             0,
@@ -149,7 +148,7 @@ PUBLIC GLOBAL AString SipUtils::GenerateViaBranch(IN const IMS_CHAR* pszToTag,
 
     for (IMS_UINT32 i = 0; i < 16; i++)
     {
-        ucTemp = (aucBranch[i] >> 4) & 0x0F;
+        IMS_UCHAR ucTemp = (aucBranch[i] >> 4) & 0x0F;
 
         if (ucTemp <= 9)
         {

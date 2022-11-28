@@ -211,14 +211,10 @@ PUBLIC VIRTUAL void SipStreamSocket::GetSockName(OUT IPAddress& objIp, OUT IMS_U
 }
 
 PUBLIC VIRTUAL IMS_SINT32 SipStreamSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-        IN IMS_UINT32 nPort /*= 0*/, IN const IPAddress& objIp /*= IPAddress::NONE*/)
+        IN IMS_UINT32 /*nPort = 0*/, IN const IPAddress& /*objIp = IPAddress::NONE*/)
 {
     IMS_SINT32 nTotalSentBytes = 0;
-    IMS_SINT32 nSentBytes;
     IMS_SINT32 nSendingBytes = nBuffLen;
-
-    (void)nPort;
-    (void)objIp;
 
     if (GetState() != STATE_CONNECTED)
     {
@@ -230,7 +226,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipStreamSocket::Send(IN const IMS_BYTE* pBuffer, IN I
 
     while (IMS_TRUE)
     {
-        nSentBytes = m_piSocket->Send(&pBuffer[nTotalSentBytes], nSendingBytes);
+        IMS_SINT32 nSentBytes = m_piSocket->Send(&pBuffer[nTotalSentBytes], nSendingBytes);
 
         if (nSentBytes == ISocket::RESULT_ERROR)
         {

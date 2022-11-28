@@ -87,8 +87,6 @@ PUBLIC
 IMS_BOOL SdpParser::DecodeWithoutSession(IN const AString& strSdp)
 {
     AStringArray objSdpLines;
-    IMS_SINT32 nStartLine = 0;
-    IMS_SINT32 nEndLine = -1;
 
     SplitLines(strSdp, objSdpLines);
 
@@ -99,13 +97,13 @@ IMS_BOOL SdpParser::DecodeWithoutSession(IN const AString& strSdp)
         return IMS_FALSE;
     }
 
-    nEndLine = objMediaLines.GetAt(0);
+    IMS_SINT32 nEndLine = objMediaLines.GetAt(0);
 
     for (IMS_UINT32 i = 0; i < objMediaLines.GetSize(); ++i)
     {
         SdpMediaDescription objMediaDescription;
 
-        nStartLine = nEndLine;
+        IMS_SINT32 nStartLine = nEndLine;
 
         if ((i + 1) < objMediaLines.GetSize())
         {
@@ -190,19 +188,17 @@ PRIVATE GLOBAL IMSList<IMS_SINT32> SdpParser::GetMediaIndexes(IN const AStringAr
 PRIVATE GLOBAL void SdpParser::SplitLines(IN const AString& strSdp, OUT AStringArray& objSdpLines)
 {
     IMS_SINT32 nLineStart = 0;
-    IMS_SINT32 nEndOfLine = 0;
-    IMS_SINT32 nNextLineStart = 0;
 
     while (nLineStart < strSdp.GetLength())
     {
-        nEndOfLine = strSdp.GetIndexOf(TextParser::CHAR_LF, nLineStart);
+        IMS_SINT32 nEndOfLine = strSdp.GetIndexOf(TextParser::CHAR_LF, nLineStart);
 
         if (nEndOfLine == AString::NPOS)
         {
             nEndOfLine = strSdp.GetLength();
         }
 
-        nNextLineStart = nEndOfLine + 1;
+        IMS_SINT32 nNextLineStart = nEndOfLine + 1;
 
         if ((nEndOfLine > 0) && (strSdp[nEndOfLine - 1] == TextParser::CHAR_CR))
         {
