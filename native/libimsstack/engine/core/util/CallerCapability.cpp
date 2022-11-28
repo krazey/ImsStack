@@ -172,14 +172,13 @@ IMS_BOOL CallerCapability::Create(IN const AppConfig* pAppConfig,
         }
 
         // ICSIs : "+g.3gpp.icsi-ref"
-        IMS_UINT32 j = 0;
         const IMSList<ServiceIdentifier>& objIcsis = piServiceConfig->GetIcsis();
 
         if (!objIcsis.IsEmpty())
         {
             AString strTag(Feature::OTHER_G_3GPP_ICSI_REF);
 
-            for (j = 0; j < objIcsis.GetSize(); ++j)
+            for (IMS_UINT32 j = 0; j < objIcsis.GetSize(); ++j)
             {
                 AddFeature(strTag, objIcsis.GetAt(j).GetName());
             }
@@ -193,7 +192,7 @@ IMS_BOOL CallerCapability::Create(IN const AppConfig* pAppConfig,
             AString strTag;
             AString strValue;
 
-            for (j = 0; j < objFeatureTags.GetSize(); ++j)
+            for (IMS_UINT32 j = 0; j < objFeatureTags.GetSize(); ++j)
             {
                 const AString& strFTag = objFeatureTags.GetAt(j).GetName();
                 IMS_SINT32 nCount = strFTag.SplitF(TextParser::CHAR_EQUAL, strTag, strValue);
