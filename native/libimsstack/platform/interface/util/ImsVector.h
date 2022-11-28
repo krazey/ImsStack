@@ -320,7 +320,8 @@ inline IMS_SLONG ImsVector<T>::ReplaceAt(IN IMS_UINT32 nIndex)
         return (-1);
     }
 
-    m_objVector.at(nIndex) = std::is_pointer<T>::value ? null : T();
+    auto element = std::is_pointer<T>::value ? null : T();
+    m_objVector.at(nIndex) = element;
     return nIndex;
 }
 
