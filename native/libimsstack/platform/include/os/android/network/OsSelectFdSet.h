@@ -32,7 +32,7 @@ public:
 
 public:
     // ImsFdSet class
-    IMS_SINT32 ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent);
+    IMS_SINT32 ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent) override;
     void CopyFrom(IN const ImsFdSet* pFdSet) override;
     IMS_SINT32 GetSignaledEvents(IN IMS_SINT32 nFd, IN_OUT IMS_SINT32& nSignaledCount) override;
     IMS_BOOL IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent) override;

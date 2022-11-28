@@ -36,7 +36,7 @@ public:
     inline IMS_UINT32 GetOption() const { return m_nOption; }
 
     void SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule);
-    virtual IMS_BOOL IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS_UINT32 nModule);
+    IMS_BOOL IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS_UINT32 nModule) override;
     void OutP(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
             IN const IMS_CHAR* pszFormat, ...);
 

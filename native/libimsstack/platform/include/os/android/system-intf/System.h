@@ -73,7 +73,7 @@ public:
 
     // For UICC (ISIM)
     AString GetIsimState(IN IMS_SINT32 nSlotId) override;
-    IMS_SINT32 ReadIsimFileAttributes(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 ReadIsimFileAttributes(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId) override;
     IMS_SINT32 ReadIsimRecord(
             IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId) override;
     IMS_RESULT RequestIsimAuthentication(

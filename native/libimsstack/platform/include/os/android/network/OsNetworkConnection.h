@@ -98,8 +98,8 @@ private:
     IMS_SINT32 GetApnType() const override;
 
     // ISystemListener class
-    virtual void System_NotifyEvent(
-            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam);
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
     IMS_BOOL AdjustPreferredLocalAddress();
     IMS_CONNECTION AttachNetworkConnection();

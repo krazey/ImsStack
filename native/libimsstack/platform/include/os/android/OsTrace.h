@@ -32,8 +32,8 @@ public:
     OsTrace& operator=(IN const OsTrace&) = delete;
 
 public:
-    virtual void OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-            IN const IMS_CHAR* pszFormat, IN va_list args);
+    void OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
+            IN const IMS_CHAR* pszFormat, IN va_list args) override;
 
     const IMS_CHAR* GetFileName(IN const IMS_CHAR* pszFileName) override;
     const IMS_CHAR* GetFileName(

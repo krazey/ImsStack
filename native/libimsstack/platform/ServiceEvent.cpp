@@ -43,8 +43,8 @@ public:
 
 private:
     // ImsActivity class
-    virtual IImsActivityController* GetController();
-    virtual IMS_BOOL DispatchMessage(IN ImsMessage& objMsg);
+    IImsActivityController* GetController() override;
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
 private:
     IMS_SINT32 m_nEvent;
@@ -118,8 +118,8 @@ public:
 
 private:
     // IEventReceiverListener class
-    virtual IMS_BOOL EventReceiver_NotifyEvent(
-            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
+    IMS_BOOL EventReceiver_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
 private:
     IMutex* m_piLock;

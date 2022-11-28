@@ -29,23 +29,23 @@ public:
 
 public:
     // Ephemeral properties : cleared whenever IMS process starts
-    virtual AString Get(IN const AString& strKey, IN IMS_SINT32 nSlotId);
-    virtual IMS_BOOL GetBoolean(IN const AString& strKey, IN IMS_SINT32 nSlotId);
-    virtual IMS_SINT32 GetInt(IN const AString& strKey, IN IMS_SINT32 nSlotId);
-    virtual void Set(IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId);
-    virtual void SetBoolean(IN const AString& strKey, IN IMS_BOOL bValue, IN IMS_SINT32 nSlotId);
-    virtual void SetInt(IN const AString& strKey, IN IMS_SINT32 nValue, IN IMS_SINT32 nSlotId);
+    AString Get(IN const AString& strKey, IN IMS_SINT32 nSlotId) override;
+    IMS_BOOL GetBoolean(IN const AString& strKey, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetInt(IN const AString& strKey, IN IMS_SINT32 nSlotId) override;
+    void Set(IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId) override;
+    void SetBoolean(IN const AString& strKey, IN IMS_BOOL bValue, IN IMS_SINT32 nSlotId) override;
+    void SetInt(IN const AString& strKey, IN IMS_SINT32 nValue, IN IMS_SINT32 nSlotId) override;
 
     // Persistent properties : preserved even though device or IMS re-starts
-    virtual AString GetPersistent(IN const AString& strKey, IN IMS_SINT32 nSlotId);
-    virtual IMS_BOOL GetPersistentBoolean(IN const AString& strKey, IN IMS_SINT32 nSlotId);
-    virtual IMS_SINT32 GetPersistentInt(IN const AString& strKey, IN IMS_SINT32 nSlotId);
-    virtual void SetPersistent(
-            IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId);
-    virtual void SetPersistentBoolean(
-            IN const AString& strKey, IN IMS_BOOL bValue, IN IMS_SINT32 nSlotId);
-    virtual void SetPersistentInt(
-            IN const AString& strKey, IN IMS_SINT32 nValue, IN IMS_SINT32 nSlotId);
+    AString GetPersistent(IN const AString& strKey, IN IMS_SINT32 nSlotId) override;
+    IMS_BOOL GetPersistentBoolean(IN const AString& strKey, IN IMS_SINT32 nSlotId) override;
+    IMS_SINT32 GetPersistentInt(IN const AString& strKey, IN IMS_SINT32 nSlotId) override;
+    void SetPersistent(
+            IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId) override;
+    void SetPersistentBoolean(
+            IN const AString& strKey, IN IMS_BOOL bValue, IN IMS_SINT32 nSlotId) override;
+    void SetPersistentInt(
+            IN const AString& strKey, IN IMS_SINT32 nValue, IN IMS_SINT32 nSlotId) override;
 };
 
 #endif
