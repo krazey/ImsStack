@@ -17,12 +17,8 @@
 #ifndef INTERFACE_UI_MTC_SERVICE_H_
 #define INTERFACE_UI_MTC_SERVICE_H_
 
-#include "CallReasonInfo.h"
-#include "IUBaseParam.h"
-#include "ImsMap.h"
 #include "ImsMessageDef.h"
-
-class ISession;
+#include "ImsTypeDef.h"
 
 class IuMtcService
 {
@@ -101,11 +97,6 @@ public:
         ES_UNAVAILABLE_REASON_NO_CSFB = 1,
         ES_UNAVAILABLE_REASON_SSAC = 2
     };
-
-    inline static IMS_BOOL IsMsg(IN IMS_SINT32 nMsg)
-    {
-        return ((nMsg > EVENT_U2I) && (nMsg < MAXIMUM));
-    }
 };
 
 #endif

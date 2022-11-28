@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CallReasonInfo.h"
 #include "IJniMtcCallThread.h"
 #include "IJniMtcServiceThread.h"
 #include "IuMtcCall.h"

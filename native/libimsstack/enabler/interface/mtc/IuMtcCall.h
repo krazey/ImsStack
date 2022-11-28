@@ -17,16 +17,9 @@
 #ifndef INTERFACE_UI_MTC_CALL_H_
 #define INTERFACE_UI_MTC_CALL_H_
 
-#include "CallReasonInfo.h"
-#include "ImsMap.h"
-#include "ImsMessage.h"
 #include "ImsMessageDef.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
-#include "call/IMtcCall.h"
-
-class IuMtcService;
-class IMtcService;
-class MtcCall;
 
 class IuMtcCall
 {
@@ -113,148 +106,6 @@ public:
     static const IMS_SINT32 CALL_PUSH_COMPLETED = (EVENT_ECT_I2U + 3);
 
     static const IMS_SINT32 CODEC_INFO_UPDATED = (EVENT_MEDIA_I2U + 1);
-
-    inline static IMS_BOOL IsMsg(IN IMS_SINT32 nMsg)
-    {
-        return ((nMsg > EVENT_U2I) && (nMsg < MAXIMUM));
-    }
 };
 
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-inline const IMS_CHAR* UCStrSessionEvtU2I(IN IMS_SINT32 eEvent)
-{
-    switch (eEvent)
-    {
-        case IuMtcCall::START:
-            return "START";
-        case IuMtcCall::STARTCONF:
-            return "STARTCONF";
-        case IuMtcCall::USER_ALERT:
-            return "USER_ALERT";
-        case IuMtcCall::ACCEPT:
-            return "ACCEPT";
-        case IuMtcCall::REJECT:
-            return "REJECT";
-        case IuMtcCall::HOLD:
-            return "HOLD";
-        case IuMtcCall::RESUME:
-            return "RESUME";
-        case IuMtcCall::SEND_DTMF:
-            return "SEND_DTMF";
-        case IuMtcCall::TERMINATE:
-            return "TERMINATE";
-        case IuMtcCall::UPDATE:
-            return "UPDATE";
-        case IuMtcCall::ACCEPT_UPDATE:
-            return "ACCEPT_UPDATE";
-        case IuMtcCall::REJECT_UPDATE:
-            return "REJECT_UPDATE";
-        case IuMtcCall::CANCEL_UPDATE:
-            return "CANCEL_UPDATE";
-        case IuMtcCall::ACCEPT_RESUME:
-            return "ACCEPT_RESUME";
-        case IuMtcCall::REJECT_RESUME:
-            return "REJECT_RESUME";
-        case IuMtcCall::SEND_USSD:
-            return "SEND_USSD";
-        case IuMtcCall::CONF_EXPAND:
-            return "CONF_EXPAND";
-        case IuMtcCall::CONF_MERGE:
-            return "CONF_MERGE";
-        case IuMtcCall::CONF_JOIN:
-            return "CONF_JOIN";
-        case IuMtcCall::CONF_DROP:
-            return "CONF_DROP";
-        case IuMtcCall::CONF_DELETE:
-            return "CONF_DELETE";
-        case IuMtcCall::ATTACH:
-            return "ATTACH";
-        case IuMtcCall::PUSH_CALL:
-            return "PUSH_CALL";
-        case IuMtcCall::CANCEL_CALL_PUSH:
-            return "CANCEL_CALL_PUSH";
-        case IuMtcCall::ECT_START:
-            return "ECT_START";
-        case IuMtcCall::ECT_START_BLIND:
-            return "ECT_START_BLIND";
-
-        default:
-            return "__INVALID__";
-    }
-}
-
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-inline const IMS_CHAR* UCStrSessionEvtI2U(IN IMS_SINT32 eEvent)
-{
-    switch (eEvent)
-    {
-        case IuMtcCall::STARTED:
-            return "STARTED";
-        case IuMtcCall::START_FAILED:
-            return "START_FAILED";
-        case IuMtcCall::PROGRESSING:
-            return "PROGRESSING";
-        case IuMtcCall::HELD:
-            return "HELD";
-        case IuMtcCall::HOLD_FAILED:
-            return "HOLD_FAILED";
-        case IuMtcCall::HELD_BY:
-            return "HELD_BY";
-        case IuMtcCall::RESUMED:
-            return "RESUMED";
-        case IuMtcCall::RESUME_FAILED:
-            return "RESUME_FAILED";
-        case IuMtcCall::RESUMED_BY:
-            return "RESUMED_BY";
-        case IuMtcCall::TERMINATED:
-            return "TERMINATED";
-        case IuMtcCall::INCOMING_UPDATE:
-            return "INCOMING_UPDATE";
-        case IuMtcCall::UPDATED:
-            return "UPDATED";
-        case IuMtcCall::UPDATE_FAILED:
-            return "UPDATE_FAILED";
-        case IuMtcCall::UPDATED_BY:
-            return "UPDATED_BY";
-        case IuMtcCall::NOTIFY_INFO:
-            return "NOTIFY_INFO";
-        case IuMtcCall::INCOMING_RESUME:
-            return "INCOMING_RESUME";
-        case IuMtcCall::SET_PROPERTY:
-            return "SET_PROPERTY";
-        case IuMtcCall::CONF_EXPANDED:
-            return "CONF_EXPANDED";
-        case IuMtcCall::CONF_EXPANDFAILED:
-            return "CONF_EXPANDFAILED";
-        case IuMtcCall::CONF_EXPANDED_BY:
-            return "CONF_EXPANDED_BY";
-        case IuMtcCall::CONF_MERGED:
-            return "CONF_MERGED";
-        case IuMtcCall::CONF_MERGEFAILED:
-            return "CONF_MERGEFAILED";
-        case IuMtcCall::CONF_JOINED:
-            return "CONF_JOINED";
-        case IuMtcCall::CONF_DROPPED:
-            return "CONF_DROPPED";
-        case IuMtcCall::CONF_DELETED:
-            return "CONF_DELETED";
-        case IuMtcCall::CONF_NOTIFY_USERS_INFO:
-            return "CONF_NOTIFY_USERS_INFO";
-        case IuMtcCall::CONF_NOTIFY_CONF_INFO:
-            return "CONF_NOTIFY_CONF_INFO";
-        case IuMtcCall::CALL_PUSH_COMPLETED:
-            return "CALL_PUSH_COMPLETED";
-        case IuMtcCall::ECT_COMPLETED:
-            return "ECT_COMPLETED";
-        case IuMtcCall::REPLACED_BY:
-            return "REPLACED_BY";
-        case IuMtcCall::CODEC_INFO_UPDATED:
-            return "CODEC_INFO_UPDATED";
-
-        default:
-            return "__INVALID__";
-    }
-}
-#endif  // INTERFACE_UI_MTC_CALL_H_
+#endif

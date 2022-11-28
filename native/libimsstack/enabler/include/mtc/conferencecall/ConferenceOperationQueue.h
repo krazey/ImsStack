@@ -17,11 +17,12 @@
 #ifndef CONFERENCE_OPERATION_QUEUE_H_
 #define CONFERENCE_OPERATION_QUEUE_H_
 
+#include "CallReasonInfo.h"
 #include "ITimer.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "IuMtcCall.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/IConferenceOperationQueueListener.h"
 

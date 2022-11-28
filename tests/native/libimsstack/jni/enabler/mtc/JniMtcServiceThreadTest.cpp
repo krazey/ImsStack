@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ImsProcess.h"
+#include "ImsTypeDef.h"
 #include "IuMtcService.h"
 #include "JniMtcServiceThread.h"
 #include "MockIThread.h"
