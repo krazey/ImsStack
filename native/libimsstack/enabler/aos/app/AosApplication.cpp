@@ -239,6 +239,10 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             PostMessage(MSG_REG_RECOVER, 0, 0);
             break;
 
+        case ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT:
+            PostMessage(MSG_PLMN_BLOCK_WITH_TIMEOUT, 0, 0);
+            break;
+
         default:
             bResult = IMS_FALSE;
             break;
@@ -384,6 +388,17 @@ void AosApplication::ResetBlock(IN BLOCK_REASON nReason)
     if (m_pCondition->IsReasonBlocked(nReason))
     {
         m_pCondition->ResetBlock(nReason);
+    }
+}
+
+PROTECTED
+void AosApplication::NotifyDeregistered(IN AosReasonCode eReason)
+{
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piService != IMS_NULL)
+    {
+        A_IMS_TRACE_D(APPID, "NotifyDeregistered :: Reason(%d)", eReason, 0, 0);
+        piService->NotifyDeregistered(eReason);
     }
 }
 
@@ -888,6 +903,10 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::ProcessMessage(IN IMSMSG& objMsg)
 
         case MSG_SCSCF_RESTORATION:
             ProcessScscfRestoration(objMsg);
+            break;
+
+        case MSG_PLMN_BLOCK_WITH_TIMEOUT:
+            ProcessPlmnBlockWithTimeout();
             break;
 
         case MSG_OTHERS:
@@ -1842,12 +1861,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegAuthenticationFailed()
     if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType() ==
             CarrierConfig::Assets::ERROR_TYPE_CRITICAL)
     {
-        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-        if (piService != IMS_NULL)
-        {
-            piService->NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
-            A_IMS_TRACE_I(APPID, "ProcessRegAuthenticationFailed :: PLMN is blocked", 0, 0, 0);
-        }
+        A_IMS_TRACE_I(APPID, "ProcessRegAuthenticationFailed :: PLMN is blocked", 0, 0, 0);
+        NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
     }
 }
 
@@ -1873,12 +1888,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED ||
             nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
     {
-        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-        if (piService != IMS_NULL)
-        {
-            piService->NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
-            A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: PLMN is blocked with timer", 0, 0, 0);
-        }
+        A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: PLMN is blocked with timeout", 0, 0, 0);
+        NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
     }
 }
 
@@ -2016,14 +2027,9 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
 
     StopTimer(TIMER_IMS_ESTABLISHMENT);
 
-    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
-    if (piService != IMS_NULL)
-    {
-        A_IMS_TRACE_I(APPID, "ProcessImsEstablishmentTimerExpired :: PLMN is blocked with timeout",
-                0, 0, 0);
-
-        piService->NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
-    }
+    A_IMS_TRACE_I(
+            APPID, "ProcessImsEstablishmentTimerExpired :: PLMN is blocked with timeout", 0, 0, 0);
+    NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnBlock() {}
@@ -2101,6 +2107,22 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
                 APPID, "ProcessImsEstablishmentStart :: ims est time (%d sec)", nEstTime, 0, 0);
 
         StartTimer(TIMER_IMS_ESTABLISHMENT, nEstTime * 1000);
+    }
+}
+
+PROTECTED VIRTUAL void AosApplication::ProcessPlmnBlockWithTimeout()
+{
+    if (IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
+    {
+        A_IMS_TRACE_D(APPID,
+                "ProcessPlmnBlockWithTimeout :: Stop Ims Estb. Timer due to plmn block request", 0,
+                0, 0);
+        ProcessImsEstablishmentTimerExpired();
+    }
+    else
+    {
+        m_pConnector->Stop();
+        NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
     }
 }
 

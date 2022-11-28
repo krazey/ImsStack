@@ -70,7 +70,10 @@ public:
 
         /// Tear down the full IMS registration and re-register again for SipDelegate.
         /// This is the replace of ImsRegistrationImplBase.triggerFullNetworkRegistration().
-        TRIGGER_FULL_NETWORK_REGISTRATION
+        TRIGGER_FULL_NETWORK_REGISTRATION,
+
+        /// Current plmn is blocked with timeout
+        PLMN_BLOCK_WITH_TIMEOUT
     };
 };
 

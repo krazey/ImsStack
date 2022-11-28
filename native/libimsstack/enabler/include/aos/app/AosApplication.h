@@ -42,6 +42,8 @@ class AosCondition;
 class AosConnector;
 class AosUtil;
 
+enum class AosReasonCode;
+
 class AosApplication :
         public ImsActivityEx,
         public ImsStateMachine,
@@ -95,6 +97,7 @@ protected:
     void SetRegRecoveryHeld(IN IMS_BOOL bHeld);
 
     void ResetBlock(IN BLOCK_REASON nReason);
+    void NotifyDeregistered(IN AosReasonCode eReason);
 
     IMS_BOOL IsEmergency() const;
     IMS_BOOL IsStateMessage(IN IMS_UINT32 nMsg) const;
@@ -215,6 +218,7 @@ protected:
     virtual void ProcessPdnBlockWithTime();
 
     virtual void ProcessImsEstablishmentStart();
+    virtual void ProcessPlmnBlockWithTimeout();
 
     // Report to Handle
     virtual void Report_StateChanged(IN IMS_BOOL bIsStateChecked = IMS_TRUE);
@@ -296,6 +300,7 @@ protected:
         MSG_AC_CONFIGURED,
         MSG_PCSCF_RECOVER,
         MSG_SCSCF_RESTORATION,
+        MSG_PLMN_BLOCK_WITH_TIMEOUT,
         MSG_OTHERS
     };
 

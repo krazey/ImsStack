@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceTrace.h"
-#include "ServiceEvent.h"
-#include "ServiceNetworkPolicy.h"
+
 #include "CarrierConfig.h"
 #include "INetworkWatcher.h"
+#include "ServiceEvent.h"
+#include "ServiceImsRadio.h"
+#include "ServiceNetworkPolicy.h"
+#include "ServiceTimer.h"
+#include "ServiceTrace.h"
 
 #include "AosReason.h"
 
 #include "IImsAosListener.h"
 #include "interface/IAosAppContext.h"
+#include "interface/IAosApplication.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
@@ -31,6 +35,7 @@
 #include "provider/AosProvider.h"
 #include "provider/AosString.h"
 #include "provider/AosUtil.h"
+
 #include "handle/AosHandleMtc.h"
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
@@ -40,7 +45,11 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
         IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
-        AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
+        AosHandle(piAppContext, strAppId, strServiceId, nServiceType),
+        m_piImsRadio(IMS_NULL),
+        m_piVolteHysTimer(IMS_NULL),
+        m_bSsacBarred(IMS_FALSE),
+        m_bSsacHeld(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMtc = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
             sizeof(AosHandleMtc), this);
@@ -82,6 +91,9 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
 
     if (eState == CallState::IDLE)
     {
+        IMS_BOOL bIsHoldingVopsChanged = IMS_FALSE;
+        IMS_BOOL bIsHoldingSsacChanged = IMS_FALSE;
+
         if (!m_bVopsIgnoredForVolteEnabled)
         {
             if (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
@@ -92,15 +104,44 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
 
                 m_nVopsState = m_nHoldingVopsState;
                 m_nHoldingVopsState = IMS_VOICE_OVER_PS_SUPPORTED;
+                bIsHoldingVopsChanged = IMS_TRUE;
+            }
+        }
 
-                if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
-                {
-                    ReevaluateUnavailableFeature();
-                }
-                else
-                {
-                    ProcessBlock(BLOCK_VOPS, IMS_TRUE);
-                }
+        if (m_bSsacHeld)
+        {
+            A_IMS_TRACE_D(APPPROFILE,
+                    "CallTracker_StateChanged :: handle ssac voice block, state(%s)",
+                    _TRACE_B_(m_bSsacHeld), 0, 0);
+
+            m_bSsacBarred = IMS_TRUE;
+            m_bSsacHeld = IMS_FALSE;
+            bIsHoldingSsacChanged = IMS_TRUE;
+        }
+
+        if (bIsHoldingVopsChanged || bIsHoldingSsacChanged)
+        {
+            if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+            {
+                ReevaluateUnavailableFeature();
+                return;
+            }
+
+            if (IsPlmnBlockCondition())
+            {
+                A_IMS_TRACE_I(APPPROFILE,
+                        "CallTracker_StateChanged :: PLMN is blocked with timeout", 0, 0, 0);
+                m_piAppContext->GetApp()->RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT);
+            }
+
+            if (bIsHoldingVopsChanged)
+            {
+                ProcessBlock(BLOCK_VOPS, IMS_TRUE);
+            }
+
+            if (bIsHoldingSsacChanged)
+            {
+                ProcessBlock(BLOCK_SSAC, IMS_TRUE);
             }
         }
     }
@@ -122,8 +163,7 @@ PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
         return;
     }
 
-    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
-    IMS_BOOL bCurrSrvIn = !piNetTracker->IsSuspended();
+    IMS_BOOL bCurrSrvIn = !m_piAppContext->GetNetTracker()->IsSuspended();
     IMS_UINT32 nCurrNetworkType = GetNetworkType();
 
     IMS_CHAR acLog[256 + 1] = {
@@ -171,6 +211,7 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeHoldingBlocksPolicy()
     m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOLTE_CAPABILITY);
     m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VILTE_CAPABILITY);
     m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOPS);
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_SSAC);
     m_objHoldingBlocksPolicyForMobile.Append(BLOCK_NETWORK);
 
     m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VOWIFI_CAPABILITY);
@@ -236,8 +277,7 @@ PROTECTED VIRTUAL void AosHandleMtc::CheckSuspended()
         return;
     }
 
-    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
-    IMS_BOOL bCurrSrvIn = !piNetTracker->IsSuspended();
+    IMS_BOOL bCurrSrvIn = !m_piAppContext->GetNetTracker()->IsSuspended();
 
     A_IMS_TRACE_I(APPPROFILE, "CheckSuspended :: service (%s) >> (%s)",
             (m_bNetSrvIn) ? "IN_SERVICE" : "OUT_OF_SERVICE",
@@ -293,12 +333,26 @@ PROTECTED VIRTUAL void AosHandleMtc::Init()
     AosHandle::Init();
 
     m_bVopsIgnoredForVolteEnabled = GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled();
+
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
+    IMS_EVENT_AddListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
 
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
     {
         piCallTracker->SetListener(this);
+    }
+
+    m_piImsRadio = ImsRadioService::GetImsRadioService()->GetImsRadio(m_nSlotId);
+    if (m_piImsRadio != IMS_NULL)
+    {
+        m_piImsRadio->AddListenerForSsac(this);
+    }
+
+    IAosService* piAosService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piAosService != IMS_NULL)
+    {
+        piAosService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
     }
 }
 
@@ -309,11 +363,23 @@ PROTECTED VIRTUAL void AosHandleMtc::CleanUp()
     AosHandle::CleanUp();
 
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
+    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
 
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
     {
         piCallTracker->RemoveListener(this);
+    }
+
+    if (m_piImsRadio != IMS_NULL)
+    {
+        m_piImsRadio->RemoveListenerForSsac(this);
+    }
+
+    IAosService* piAosService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piAosService != IMS_NULL)
+    {
+        piAosService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
     }
 }
 
@@ -335,7 +401,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
     }
 
     return AosHandle::IsHandleBlocked(
-            BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_NETWORK | BLOCK_3G);
+            BLOCK_VOLTE_CAPABILITY | BLOCK_VOPS | BLOCK_SSAC | BLOCK_NETWORK | BLOCK_3G);
 }
 
 PROTECTED VIRTUAL void AosHandleMtc::ProcessFeatureBlock(
@@ -480,26 +546,12 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(
         return;
     }
 
-    if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+    if (ProcessHoldingVopsState(nState))
     {
-        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
-
-        if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
-        {
-            A_IMS_TRACE_I(APPPROFILE,
-                    "ProcessVopsStateChanged :: pending the block feature, state(%d)", nState, 0,
-                    0);
-            m_nHoldingVopsState = nState;
-            return;
-        }
-    }
-    else  // IMS_VOICE_OVER_PS_SUPPORTED
-    {
-        if (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
-        {
-            m_nHoldingVopsState = nState;
-            return;
-        }
+        A_IMS_TRACE_I(APPPROFILE,
+                "ProcessVopsStateChanged :: handled for holding state. m_nHoldingVopsState(%d)",
+                m_nHoldingVopsState, 0, 0);
+        return;
     }
 
     if (bUpdateState)
@@ -510,10 +562,36 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(
     if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
     {
         ReevaluateUnavailableFeature();
+        return;
+    }
+
+    if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+    {
+        StopVolteHysTimer();
+
+        if (IsPlmnBlockCondition())
+        {
+            A_IMS_TRACE_I(
+                    APPPROFILE, "ProcessVopsStateChanged :: PLMN is blocked with timeout", 0, 0, 0);
+            m_piAppContext->GetApp()->RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT);
+        }
+
+        ProcessBlock(BLOCK_VOPS, IMS_TRUE);
     }
     else
     {
-        ProcessBlock(BLOCK_VOPS, (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED));
+        if (AosHandle::IsHandleBlocked(BLOCK_VOPS))
+        {
+            IMS_SINT32 nVolteHysTime = GET_N_CONFIG(m_nSlotId)->GetVolteHysTime();
+            if (nVolteHysTime > 0 && IsSupportedNetworkTypeForCellular(m_nNetworkType) &&
+                    !AosHandle::IsHandleBlocked(BLOCK_SSAC))
+            {
+                StartVolteHysTimer(nVolteHysTime);
+                return;
+            }
+        }
+
+        ProcessBlock(BLOCK_VOPS, IMS_FALSE);
     }
 }
 
@@ -527,6 +605,11 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
         if (!m_bVopsIgnoredForVolteEnabled)
         {
             bIsVoiceUnavailable = (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+        }
+
+        if (m_nNetworkType == NW_REPORT_RADIO_LTE)
+        {
+            bIsVoiceUnavailable = (bIsVoiceUnavailable || m_bSsacBarred);
         }
     }
     else if (Is3G(m_nNetworkType))
@@ -613,7 +696,7 @@ IMS_UINT32 AosHandleMtc::GetVideoBlockReasonForIpcan()
 }
 
 PRIVATE
-IMS_BOOL AosHandleMtc::IsCsFeatureTagRequired()
+IMS_BOOL AosHandleMtc::IsCsFeatureTagRequired() const
 {
     if (!GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
     {
@@ -655,7 +738,130 @@ IMS_BOOL AosHandleMtc::IsInvalidMobileNetwork() const
 }
 
 PRIVATE
-void AosHandleMtc::NConfiguration_NotifyConfigChanged()
+IMS_BOOL AosHandleMtc::IsPlmnBlockCondition() const
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsPlmnBlockWithTimeoutOnVoiceCallUnavailable())
+    {
+        return IMS_FALSE;
+    }
+
+    if (!IsSupportedNetworkTypeForCellular(m_nNetworkType))
+    {
+        return IMS_FALSE;
+    }
+
+    if (IsRoaming() && m_bCombinedAttach)
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL AosHandleMtc::ProcessHoldingVopsState(IN IMS_UINT32 nState)
+{
+    if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+    {
+        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+        if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
+        {
+            m_nHoldingVopsState = nState;
+            return IMS_TRUE;
+        }
+    }
+    else  // IMS_VOICE_OVER_PS_SUPPORTED
+    {
+        if (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+        {
+            m_nHoldingVopsState = nState;
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL AosHandleMtc::ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice)
+{
+    if (nBarringFactorForVoice == 0)
+    {
+        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+        if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
+        {
+            m_bSsacHeld = IMS_TRUE;
+            return IMS_TRUE;
+        }
+    }
+    else
+    {
+        if (m_bSsacHeld)
+        {
+            m_bSsacHeld = IMS_FALSE;
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+void AosHandleMtc::ProcessVolteHysTimerExpired()
+{
+    A_IMS_TRACE_D(APPPROFILE, "ProcessVolteHysTimerExpired", 0, 0, 0);
+
+    StopVolteHysTimer();
+
+    if (m_nVopsState == IMS_VOICE_OVER_PS_SUPPORTED && AosHandle::IsHandleBlocked(BLOCK_VOPS))
+    {
+        ProcessBlock(BLOCK_VOPS, IMS_FALSE);
+        return;
+    }
+
+    if (!m_bSsacBarred && AosHandle::IsHandleBlocked(BLOCK_SSAC))
+    {
+        ProcessBlock(BLOCK_SSAC, IMS_FALSE);
+    }
+}
+
+PRIVATE
+IMS_BOOL AosHandleMtc::StartVolteHysTimer(IN IMS_UINT32 nDuration)
+{
+    if (nDuration == 0)
+    {
+        return IMS_FALSE;
+    }
+
+    if (m_piVolteHysTimer != IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    m_piVolteHysTimer =
+            AosUtil::GetInstance()->StartTimer(nDuration * 1000, this, "TIMER_VOLTE_HYS");
+
+    return IMS_TRUE;
+}
+
+PRIVATE
+void AosHandleMtc::StopVolteHysTimer()
+{
+    if (m_piVolteHysTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    AosUtil::GetInstance()->StopTimer(m_piVolteHysTimer, "TIMER_VOLTE_HYS");
+}
+
+PRIVATE
+IMS_BOOL AosHandleMtc::IsVolteHysTimerRunning() const
+{
+    return (m_piVolteHysTimer != IMS_NULL);
+}
+
+PRIVATE VIRTUAL void AosHandleMtc::NConfiguration_NotifyConfigChanged()
 {
     AosHandle::NConfiguration_NotifyConfigChanged();
 
@@ -680,5 +886,102 @@ void AosHandleMtc::NConfiguration_NotifyConfigChanged()
         }
 
         m_bVopsIgnoredForVolteEnabled = bIsVopsIgnoredForVolteEnabled;
+    }
+}
+
+PRIVATE VIRTUAL void AosHandleMtc::ImsRadio_OnSsacChanged(IN const SsacInfo& objSsacInfo)
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac())
+    {
+        return;
+    }
+
+    A_IMS_TRACE_I(APPPROFILE, "ImsRadio_OnSsacChanged :: BarringFactorForVoice(%d)",
+            objSsacInfo.nBarringFactorForVoice, 0, 0);
+
+    if (ProcessHoldingSsacState(objSsacInfo.nBarringFactorForVoice))
+    {
+        A_IMS_TRACE_D(APPPROFILE, "ImsRadio_OnSsacChanged :: Proceeded holding state", 0, 0, 0);
+        return;
+    }
+
+    if (objSsacInfo.nBarringFactorForVoice == 0)
+    {
+        if (m_nNetworkType != NW_REPORT_RADIO_LTE)
+        {
+            return;
+        }
+
+        StopVolteHysTimer();
+        m_bSsacBarred = IMS_TRUE;
+
+        if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+        {
+            ReevaluateUnavailableFeature();
+            return;
+        }
+
+        if (IsPlmnBlockCondition())
+        {
+            A_IMS_TRACE_I(
+                    APPPROFILE, "ImsRadio_OnSsacChanged :: PLMN is blocked with timeout", 0, 0, 0);
+            m_piAppContext->GetApp()->RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT);
+        }
+
+        ProcessBlock(BLOCK_SSAC, IMS_TRUE);
+    }
+    else
+    {
+        m_bSsacBarred = IMS_FALSE;
+
+        if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
+        {
+            ReevaluateUnavailableFeature();
+            return;
+        }
+
+        if (AosHandle::IsHandleBlocked(BLOCK_SSAC))
+        {
+            IMS_SINT32 nVolteHysTime = GET_N_CONFIG(m_nSlotId)->GetVolteHysTime();
+            if (nVolteHysTime > 0 && m_nNetworkType == NW_REPORT_RADIO_LTE &&
+                    !AosHandle::IsHandleBlocked(BLOCK_VOPS))
+            {
+                A_IMS_TRACE_I(APPPROFILE,
+                        "ImsRadio_OnSsacChanged :: Start VoLTE_Hys timer for (%d) secs",
+                        nVolteHysTime, 0, 0);
+                StartVolteHysTimer(nVolteHysTime);
+                return;
+            }
+        }
+
+        ProcessBlock(BLOCK_SSAC, IMS_FALSE);
+    }
+}
+
+PRIVATE VIRTUAL void AosHandleMtc::ServicePhone_PlmnChanged()
+{
+    if (!IsSupportedNetworkTypeForCellular(m_nNetworkType))
+    {
+        return;
+    }
+
+    if (IsVolteHysTimerRunning())
+    {
+        A_IMS_TRACE_I(APPPROFILE, "ServicePhone_PlmnChanged :: Stop VoLTE_Hys timer", 0, 0, 0);
+        ProcessVolteHysTimerExpired();
+    }
+}
+
+PRIVATE VIRTUAL void AosHandleMtc::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    if (piTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    if (piTimer == m_piVolteHysTimer)
+    {
+        ProcessVolteHysTimerExpired();
+        return;
     }
 }

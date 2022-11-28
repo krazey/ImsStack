@@ -58,6 +58,7 @@ public:
     IMS_BOOL IsVopsIgnoredForVolteEnabled() const override;
     IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const override;
     IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const override;
+    IMS_BOOL IsRequiredVolteBlockBySsac() const override;
     IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const override;
     IMS_BOOL IsReregRetryWithChangedCountryOnWifi() const override;
     IMS_BOOL IsSipOverIpsecInRoamingEnabled() const override;
@@ -92,6 +93,7 @@ public:
     IMS_BOOL IsRegRequiredAfterImsCallEndOnRegHeld() const override;
     IMS_BOOL IsRegWithFeatureTagUnavailableSupported() const override;
     IMS_BOOL IsVerstatForRegistrationSupported() const override;
+    IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const override;
 
     IMS_UINT32 GetRegistrationRetryBaseTime() override;
     IMS_UINT32 GetRegistrationRetryMaxTime() override;
@@ -114,6 +116,7 @@ public:
     IMS_SINT32 GetRegOutOfServicePolicy() const override;
     IMS_SINT32 GetRoamingPreferredEmcReg() const override;
     IMS_SINT32 GetSipMessageThresholdForTransportChange() const override;
+    IMS_SINT32 GetVolteHysTime() const override;
     IMS_SINT32 GetRegRetrySip305CodePolicy() const override;
     IMS_SINT32 GetReregRetrySip305CodePolicy() const override;
     IMS_SINT32 GetRegRetrySip503CodePolicy() const override;

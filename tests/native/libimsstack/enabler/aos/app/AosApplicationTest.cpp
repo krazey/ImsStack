@@ -99,6 +99,7 @@ enum
     MSG_AC_CONFIGURED,
     MSG_PCSCF_RECOVER,
     MSG_SCSCF_RESTORATION,
+    MSG_PLMN_BLOCK_WITH_TIMEOUT,
     MSG_OTHERS
 };
 
@@ -712,8 +713,10 @@ TEST_F(AosApplicationTest, RequestCmd)
 
     // ImsAosControl::IPSEC_DISABLED
     EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(_, _)).Times(AnyNumber());
-
     EXPECT_TRUE(m_pTestAosApplication->RequestCmd(ImsAosControl::IPSEC_DISABLED));
+
+    // ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT
+    EXPECT_TRUE(m_pTestAosApplication->RequestCmd(ImsAosControl::PLMN_BLOCK_WITH_TIMEOUT));
 
     // etc
     EXPECT_TRUE(m_pTestAosApplication->RequestCmd(ImsAosControl::RETRY_COUNT_INCREASE));
@@ -844,6 +847,13 @@ TEST_F(AosApplicationTest, ProcessMessage)
     m_pTestAosApplication->SetRegRecoveryHeld(IMS_FALSE);
     EXPECT_TRUE(m_pTestAosApplication->ProcessMessage(objMessage));
     m_pTestAosApplication->ClearPending();
+
+    // MSG_PLMN_BLOCK_WITH_TIMEOUT
+    // TEST_F : ProcessPlmnBlockWithTimeout
+    objMessage.nMSG = MSG_PLMN_BLOCK_WITH_TIMEOUT;
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            .Times(1);
+    EXPECT_TRUE(m_pTestAosApplication->ProcessMessage(objMessage));
 
     // MSG_OTHERS
     // TEST_F : ProcessOthers
