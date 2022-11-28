@@ -33,7 +33,8 @@ IpSecSaParameter::Policy::Policy() :
         m_nTransportProtocol(TRANSPORT_PROTOCOL_UDP),
         m_objLocalAddress(SocketAddress()),
         m_objRemoteAddress(SocketAddress()),
-        m_nSocketId(SOCKET_NOT_SET)
+        m_nSocketId(SOCKET_NOT_SET),
+        m_objAcceptedSocketIds(ImsList<IMS_SINT32>())
 {
 }
 
@@ -47,7 +48,8 @@ IpSecSaParameter::Policy::Policy(IN IMS_SINT32 nSpi, IN IMS_SINT32 nDirection, I
         m_nTransportProtocol(nTransportProtocol),
         m_objLocalAddress(objLocalAddress),
         m_objRemoteAddress(objRemoteAddress),
-        m_nSocketId(SOCKET_NOT_SET)
+        m_nSocketId(SOCKET_NOT_SET),
+        m_objAcceptedSocketIds(ImsList<IMS_SINT32>())
 {
 }
 
@@ -62,7 +64,8 @@ IpSecSaParameter::Policy::Policy(IN IMS_SINT32 nSpi, IN IMS_SINT32 nDirection, I
         m_nTransportProtocol(nTransportProtocol),
         m_objLocalAddress(SocketAddress(objLocalIpAddress, nLocalPort)),
         m_objRemoteAddress(SocketAddress(objRemoteIpAddress, nRemotePort)),
-        m_nSocketId(SOCKET_NOT_SET)
+        m_nSocketId(SOCKET_NOT_SET),
+        m_objAcceptedSocketIds(ImsList<IMS_SINT32>())
 {
 }
 
@@ -74,7 +77,8 @@ IpSecSaParameter::Policy::Policy(IN const IpSecSaParameter::Policy& other) :
         m_nTransportProtocol(other.m_nTransportProtocol),
         m_objLocalAddress(other.m_objLocalAddress),
         m_objRemoteAddress(other.m_objRemoteAddress),
-        m_nSocketId(other.m_nSocketId)
+        m_nSocketId(other.m_nSocketId),
+        m_objAcceptedSocketIds(other.m_objAcceptedSocketIds)
 {
 }
 
@@ -91,6 +95,7 @@ IpSecSaParameter::Policy& IpSecSaParameter::Policy::operator=(
         m_objLocalAddress = other.m_objLocalAddress;
         m_objRemoteAddress = other.m_objRemoteAddress;
         m_nSocketId = other.m_nSocketId;
+        m_objAcceptedSocketIds = other.m_objAcceptedSocketIds;
     }
 
     return *this;
