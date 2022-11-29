@@ -23,7 +23,7 @@
 class OsNetworkWatcher : public ImsSlot, public INetworkWatcher, public ISystemListener
 {
 public:
-    OsNetworkWatcher(IN IMS_SINT32 nSlotId);
+    explicit OsNetworkWatcher(IN IMS_SINT32 nSlotId);
     virtual ~OsNetworkWatcher();
 
     OsNetworkWatcher(IN const OsNetworkWatcher&) = delete;

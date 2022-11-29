@@ -21,7 +21,8 @@
 class ServerAddress
 {
 public:
-    inline ServerAddress(IN const AString& strAddress, IN IMS_SINT32 nPort = PORT_UNSPECIFIED) :
+    inline explicit ServerAddress(
+            IN const AString& strAddress, IN IMS_SINT32 nPort = PORT_UNSPECIFIED) :
             m_strAddress(strAddress),
             m_nPort(nPort)
     {

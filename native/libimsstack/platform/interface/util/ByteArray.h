@@ -43,8 +43,8 @@ public:
 
 public:
     ByteArray();
-    ByteArray(IN IMS_BYTE byte);
-    ByteArray(IN const IMS_CHAR* pValue);
+    explicit ByteArray(IN IMS_BYTE byte);
+    explicit ByteArray(IN const IMS_CHAR* pValue);
     ByteArray(IN const AString& strValue);
     ByteArray(IN const IMS_BYTE* pValue, IN IMS_SINT32 nSize);
     ByteArray(IN const ByteArray& other);

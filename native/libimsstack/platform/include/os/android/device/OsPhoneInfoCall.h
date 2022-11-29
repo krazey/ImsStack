@@ -22,7 +22,7 @@
 class OsPhoneInfoCall : public ImsSlot, public ICallInfo
 {
 public:
-    OsPhoneInfoCall(IN IMS_SINT32 nSlotId);
+    explicit OsPhoneInfoCall(IN IMS_SINT32 nSlotId);
     virtual ~OsPhoneInfoCall();
 
     OsPhoneInfoCall(IN const OsPhoneInfoCall&) = delete;

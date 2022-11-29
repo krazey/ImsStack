@@ -36,7 +36,7 @@ public:
     };
 
 public:
-    inline IsimEfContent(IN IMS_SINT32 nType = EF_TRANSPARENT) :
+    inline explicit IsimEfContent(IN IMS_SINT32 nType = EF_TRANSPARENT) :
             m_nType(nType),
             m_bReadRequested(IMS_FALSE),
             m_bReady(IMS_FALSE),
@@ -161,7 +161,7 @@ private:
 class OsIsim : public ImsIsim, public ISystemListener
 {
 public:
-    OsIsim(IN IMS_SINT32 nSlotId);
+    explicit OsIsim(IN IMS_SINT32 nSlotId);
     virtual ~OsIsim();
 
     OsIsim(IN const OsIsim&) = delete;

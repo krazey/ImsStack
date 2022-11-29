@@ -25,7 +25,7 @@ class ImsStateMachine : public ImsStateObject
     DECLARE_STATE_MAP()
 
 public:
-    ImsStateMachine(IN IMS_UINT32 nState = IMS_INVALID_STATE);
+    explicit ImsStateMachine(IN IMS_UINT32 nState = IMS_INVALID_STATE);
     inline virtual ~ImsStateMachine() {}
 
     ImsStateMachine(IN const ImsStateMachine&) = delete;

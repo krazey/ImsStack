@@ -23,7 +23,7 @@
 class OsEventReceiver : public ImsSlot, public IEventReceiver, public ISystemListener
 {
 public:
-    OsEventReceiver(IN IMS_SINT32 nSlotId);
+    explicit OsEventReceiver(IN IMS_SINT32 nSlotId);
     virtual ~OsEventReceiver();
 
 private:

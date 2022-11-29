@@ -26,7 +26,7 @@ class IThread;
 class OsImsRadio : public ImsRadio, public ISystemListener
 {
 public:
-    OsImsRadio(IN IMS_SINT32 nSlotId);
+    explicit OsImsRadio(IN IMS_SINT32 nSlotId);
     virtual ~OsImsRadio();
 
     OsImsRadio(IN const OsImsRadio&) = delete;

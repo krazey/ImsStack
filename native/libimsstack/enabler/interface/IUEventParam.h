@@ -25,7 +25,7 @@ public:
     IMS_SINT32 nEventName;
 
 public:
-    inline IUEventParam(IUEventParam* pParam = IMS_NULL) :
+    inline explicit IUEventParam(IUEventParam* pParam = IMS_NULL) :
             nAppId(-1),
             nEventName(-1)
     {

@@ -29,7 +29,7 @@ class IIPSecPolicyListener;
 class OsIpSecPolicy : public IIpSecPolicy, public ITimerListener
 {
 public:
-    OsIpSecPolicy(IN IMS_SINT32 nId);
+    explicit OsIpSecPolicy(IN IMS_SINT32 nId);
     virtual ~OsIpSecPolicy();
 
     // IIpSecPolicy Interface

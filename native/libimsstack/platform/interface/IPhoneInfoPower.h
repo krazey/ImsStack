@@ -163,7 +163,7 @@ private:
     class ObserverList
     {
     public:
-        inline ObserverList(IN IPowerInfoListener* piListener)
+        inline explicit ObserverList(IN IPowerInfoListener* piListener)
         {
             m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
             m_objListeners.Append(piListener);

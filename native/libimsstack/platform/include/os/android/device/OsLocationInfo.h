@@ -24,7 +24,7 @@ class LocationProperties;
 class OsLocationInfo : public ImsSlot, public ILocationInfo
 {
 public:
-    OsLocationInfo(IN IMS_SINT32 nSlotId);
+    explicit OsLocationInfo(IN IMS_SINT32 nSlotId);
     virtual ~OsLocationInfo();
 
     OsLocationInfo(IN const OsLocationInfo&) = delete;

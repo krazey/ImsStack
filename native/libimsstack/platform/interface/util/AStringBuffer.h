@@ -23,7 +23,7 @@ class AStringBuffer
 public:
     AStringBuffer();
     explicit AStringBuffer(IN IMS_SINT32 nSize);
-    AStringBuffer(IN const AString& strValue);
+    explicit AStringBuffer(IN const AString& strValue);
     AStringBuffer(IN const AStringBuffer& other);
     inline ~AStringBuffer() {}
 

@@ -309,7 +309,7 @@ inline IMS_BOOL operator<(IN const AString& objA1, IN const AString& objA2)
 class WCharPtr : public RcObject
 {
 public:
-    WCharPtr(IN const AString& str);
+    explicit WCharPtr(IN const AString& str);
     WCharPtr(IN const WCharPtr& other);
     virtual ~WCharPtr();
 

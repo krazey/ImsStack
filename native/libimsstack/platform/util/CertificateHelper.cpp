@@ -66,7 +66,7 @@ PRIVATE
 void CertificateHelper::CreateCertificate()
 {
     ByteArray objCertificate;
-    objCertificate.Append(
+    objCertificate.Append(ByteArray(
             "-----BEGIN CERTIFICATE-----\n"
             "MIICEzCCAXwCCQD9XU1OoCVDrjANBgkqhkiG9w0BAQUFADBNMQswCQYDVQQGEwJF\n"
             "UzEPMA0GA1UECBMGTWFkcmlkMQ8wDQYDVQQHEwZNYWRyaWQxDDAKBgNVBAoTA1ZE\n"
@@ -94,7 +94,7 @@ void CertificateHelper::CreateCertificate()
             "UQBHzWvB/JrNkqCFVhjCvYd3t7/zUSgAiuJAzPZDC9Fqv4UVtrxiflTHjQJAEl5B\n"
             "y4XV8pcqq+qLsyPBIdLinKMAtK1KlH8yJIxGs4JAsWKjOHR30LW+WUSgtzl2WzD7\n"
             "TOEOlAPr1bR754YLJQJBANL+IdR345Bd11OSOFfcOWxaKXWDw1zkiLH+dmm5RlnZ\n"
-            "cytgUbWfUDmqIXiEVVFNLjCZ3Z4XOoOJtd8iY34Zsdg=\n-----END RSA PRIVATE KEY-----");
+            "cytgUbWfUDmqIXiEVVFNLjCZ3Z4XOoOJtd8iY34Zsdg=\n-----END RSA PRIVATE KEY-----"));
 
     if (IMS_FILE_Exist(CERTIFICATE))
     {
