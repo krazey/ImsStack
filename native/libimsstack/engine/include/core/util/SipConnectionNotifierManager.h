@@ -35,7 +35,7 @@ public:
 
 public:
     ISipConnectionNotifier* CreateConnectionNotifier(IN const AString& strScheme,
-            IN const IPAddress& objpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+            IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFlowControl, IN const AString& strParams,
             IN const SipAddress& objUserId);
     ISipConnectionNotifier* GetConnectionNotifier(

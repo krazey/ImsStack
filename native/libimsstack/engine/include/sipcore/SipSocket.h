@@ -62,7 +62,7 @@ public:
     virtual void NotifyForceClosed();
 
     void GetPeerName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort);
-    IMS_SINT32 RemoveListener(IN ISipSocketListener* piListener_);
+    IMS_SINT32 RemoveListener(IN ISipSocketListener* piListener);
     inline void SetKeepAliveListener(IN ISipKeepAliveListener* piKeepAliveListener)
     {
         m_piKeepAliveListener = piKeepAliveListener;

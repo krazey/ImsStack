@@ -30,10 +30,10 @@ public:
     Attr& operator=(IN const Attr&) = delete;
 
     // Node
-    void SetNextSibling(IN INode* piNextNode) override;
-    void SetPreviousSibling(IN INode* piPreviousNode) override;
-    void SetParent(IN INode* piParenetNode) override;
-    IMS_RESULT SetChildren(IN INode* piChildNode) override;
+    void SetNextSibling(IN INode* piNode) override;
+    void SetPreviousSibling(IN INode* piNode) override;
+    void SetParent(IN INode* piNode) override;
+    IMS_RESULT SetChildren(IN INode* piNode) override;
 
     // Attr
     virtual const AString& GetName() const;

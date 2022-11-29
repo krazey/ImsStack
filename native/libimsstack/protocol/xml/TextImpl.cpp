@@ -249,7 +249,7 @@ PUBLIC VIRTUAL AString TextImpl::SubstringData(IN IMS_SINT32 nOffSet, IN IMS_SIN
     return m_pText->SubstringData(nOffSet, nCount);
 }
 
-PUBLIC VIRTUAL IText* TextImpl::SplitText(IN IMS_SINT32 nOffSet)
+PUBLIC VIRTUAL IText* TextImpl::SplitText(IN IMS_SINT32 nOffset)
 {
-    return m_pText->SplitText(nOffSet);
+    return m_pText->SplitText(nOffset);
 }

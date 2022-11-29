@@ -40,8 +40,7 @@ public:
             IN const IMSList<FeatureSet*>& objExtraFeatures);
 
 private:
-    static void AddFeature(
-            IN const AString& strFeature, OUT IMSList<PreferenceHeader*>& objHeaders);
+    static void AddFeature(IN const AString& strTag, OUT IMSList<PreferenceHeader*>& objHeaders);
     static void AddFeature(IN const AString& strTag, IN const AString& strValue,
             OUT IMSList<PreferenceHeader*>& objHeaders);
     static void AddFeature(IN const AString& strTag, IN const AString& strValue,

@@ -54,7 +54,7 @@ protected:
     // Handle to the outgoing request / incoming response message
     void NotifySipResponse(IN ISipClientConnection* piScc) override;
     void NotifySipError(
-            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
 private:
     void SetState(IN IMS_SINT32 nState);
