@@ -145,7 +145,7 @@ void SipSocket::GetPeerName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort)
 }
 
 PUBLIC
-IMS_SINT32 SipSocket::RemoveListener(IN ISipSocketListener* piListener)
+IMS_SINT32 SipSocket::RemoveListener(IN const ISipSocketListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {

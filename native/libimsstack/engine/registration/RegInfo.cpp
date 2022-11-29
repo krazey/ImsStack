@@ -101,7 +101,7 @@ void RegInfo::AddListener(IN IRegInfoListener* piListener)
 }
 
 PUBLIC
-void RegInfo::RemoveListener(IN IRegInfoListener* piListener)
+void RegInfo::RemoveListener(IN const IRegInfoListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {

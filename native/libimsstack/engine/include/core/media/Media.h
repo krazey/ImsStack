@@ -54,7 +54,7 @@ public:
     void RemoveMediaDescriptor(IN IMS_UINT32 nPosition);
     void SetMid(IN IMS_SINT32 nMid);
 
-    IMS_BOOL Equals(IN Media* pMedia) const;
+    IMS_BOOL Equals(IN const Media* pMedia) const;
     inline IMS_BOOL IsDirectionOnlyUpdated() const { return m_bDirectionOnlyUpdated; }
     inline IMS_BOOL IsInitializationDone() const { return m_bInitializationDone; }
 

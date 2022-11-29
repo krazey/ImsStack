@@ -177,7 +177,7 @@ void Media::SetMid(IN IMS_SINT32 nMid)
 }
 
 PUBLIC
-IMS_BOOL Media::Equals(IN Media* pMedia) const
+IMS_BOOL Media::Equals(IN const Media* pMedia) const
 {
     if (pMedia == IMS_NULL)
     {
