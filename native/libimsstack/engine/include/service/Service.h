@@ -172,7 +172,7 @@ public:
     IMS_BOOL ValidateMethod(IN const SipMethod& objMethod);
     IMS_BOOL ValidateRequestUri(IN const SipAddress& objRequestUri,
             IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
-    IMS_BOOL ValidateRequestUriForIpAndPort(IN const SipAddress& objRequestURI,
+    IMS_BOOL ValidateRequestUriForIpAndPort(IN const SipAddress& objRequestUri,
             IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
 
     static IMS_BOOL ValidateFromAndTo(

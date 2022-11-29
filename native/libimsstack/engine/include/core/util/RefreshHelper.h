@@ -60,7 +60,7 @@ protected:
 
     inline virtual IMS_BOOL IsSessionTimerUpdateRequiredByReInvite() const { return IMS_TRUE; }
 
-    void Refreshable_RefreshCompleted(IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0);
+    void Refreshable_RefreshCompleted(IN ISipClientConnection* piScc, IN IMS_SINT32 nCode = 0);
     IMS_BOOL Refreshable_RefreshStarted();
     void Refreshable_RefreshTerminated();
 

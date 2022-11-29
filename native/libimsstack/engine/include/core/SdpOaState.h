@@ -89,7 +89,7 @@ public:
     void CompleteExchange();
     IMS_BOOL RestoreState();
     IMS_BOOL UpdateState(IN const ISipMessage* piSipMsg, IN IMS_SINT32 nMessageFlow,
-            IN IMS_BOOL bIsCallEstablished, IN IMS_BOOL bAllowOAForNonRPR = IMS_FALSE);
+            IN IMS_BOOL bIsCallEstablished, IN IMS_BOOL bAllowOaForNonRpr = IMS_FALSE);
     void UpdateStateOnTransactionCompleted(
             IN const ISipMessage* piSipMsg, IN IMS_SINT32 nMessageFlow);
 
