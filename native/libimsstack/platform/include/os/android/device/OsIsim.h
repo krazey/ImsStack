@@ -208,7 +208,7 @@ public:
 
     // Digest AKA
     void DestroyDigestAka(IN OsIsimDigestAka* pDigestAka);
-    IMS_BOOL IsDigestAkaPresent(IN OsIsimDigestAka* pDigestAka);
+    IMS_BOOL IsDigestAkaPresent(IN const OsIsimDigestAka* pDigestAka);
 
 public:
     static IMS_SINT32 ConvertSimStateToEnum(IN const AString& strState);

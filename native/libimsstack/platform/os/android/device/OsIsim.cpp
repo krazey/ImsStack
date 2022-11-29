@@ -1336,7 +1336,7 @@ void OsIsim::DestroyDigestAka(IN OsIsimDigestAka* pDigestAka)
 }
 
 PUBLIC
-IMS_BOOL OsIsim::IsDigestAkaPresent(IN OsIsimDigestAka* pDigestAka)
+IMS_BOOL OsIsim::IsDigestAkaPresent(IN const OsIsimDigestAka* pDigestAka)
 {
     if (pDigestAka == IMS_NULL)
     {

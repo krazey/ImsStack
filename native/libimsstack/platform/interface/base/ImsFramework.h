@@ -32,7 +32,7 @@ public:
 
 public:
     void AddListener(IN IFrameworkThreadListener* piListener);
-    void RemoveListener(IN IFrameworkThreadListener* piListener);
+    void RemoveListener(IN const IFrameworkThreadListener* piListener);
 
 protected:
     IMS_BOOL Initialize() override;

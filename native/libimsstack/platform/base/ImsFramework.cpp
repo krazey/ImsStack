@@ -57,7 +57,7 @@ void ImsFramework::AddListener(IN IFrameworkThreadListener* piListener)
 }
 
 PUBLIC
-void ImsFramework::RemoveListener(IN IFrameworkThreadListener* piListener)
+void ImsFramework::RemoveListener(IN const IFrameworkThreadListener* piListener)
 {
     if (piListener == IMS_NULL)
     {

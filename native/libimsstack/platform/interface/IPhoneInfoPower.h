@@ -67,7 +67,7 @@ public:
         m_objObserverLists.Append(new ObserverList(piListener));
     }
 
-    inline void RemoveObserver(IN IPowerInfoListener* piListener)
+    inline void RemoveObserver(IN const IPowerInfoListener* piListener)
     {
         IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -169,7 +169,10 @@ private:
             m_objListeners.Append(piListener);
         }
 
-        inline IMS_BOOL operator==(IN IThread* piThread) { return piThread == m_piOwnerThread; }
+        inline IMS_BOOL operator==(IN const IThread* piThread)
+        {
+            return piThread == m_piOwnerThread;
+        }
 
     public:
         IThread* m_piOwnerThread;
