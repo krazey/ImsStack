@@ -94,7 +94,9 @@ public class MtcServiceStateTrackerTest extends ImsStackTest {
                     mMsgWhat = EVENT_SERVICE_STATE_CHANGED;
                     AsyncResult ar = (AsyncResult) msg.obj;
                     ImsServiceState ss = (ar != null) ? (ImsServiceState) ar.result : null;
-                    mServiceType = (ss != null) ? ss.mServiceType : null;
+                    if (ss != null) {
+                        mServiceType = ss.mServiceType;
+                    }
                     break;
                 }
                 default:

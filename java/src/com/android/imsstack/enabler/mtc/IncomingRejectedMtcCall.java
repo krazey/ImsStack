@@ -75,4 +75,15 @@ public class IncomingRejectedMtcCall extends IncomingMtcCall implements Parcelab
                 + " ArcReason : " + rejectedReason
                  );
     }
+
+    public static final Parcelable.Creator<IncomingRejectedMtcCall> CREATOR =
+            new Parcelable.Creator<IncomingRejectedMtcCall>() {
+        public IncomingRejectedMtcCall createFromParcel(Parcel source) {
+            return new IncomingRejectedMtcCall(source);
+        }
+
+        public IncomingRejectedMtcCall[] newArray(int size) {
+            return new IncomingRejectedMtcCall[size];
+        }
+    };
 }
