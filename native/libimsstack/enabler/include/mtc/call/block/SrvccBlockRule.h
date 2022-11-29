@@ -19,6 +19,7 @@
 
 #include "ImsTypeDef.h"
 #include "call/block/IMtcBlockRule.h"
+#include "helper/ISrvccStateListener.h"
 
 class SrvccBlockRule final : public IMtcBlockRule
 {
