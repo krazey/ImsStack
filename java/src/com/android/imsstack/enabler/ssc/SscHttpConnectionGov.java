@@ -24,67 +24,67 @@ import org.w3c.dom.Document;
 import java.util.HashMap;
 
 public class SscHttpConnectionGov implements ISscHttpConnectionGov {
-    private static SscHttpConnectionGov sSscHttpConnectionGov = null;
-
-    private HashMap<Integer, SscHttpConnection> mSscHttpConnection = new HashMap<>();
+    private static final SscHttpConnectionGov sSscHttpConnectionGov = new SscHttpConnectionGov();
+    private static final HashMap<Integer, ISscHttpConnection> sSscHttpConnections = new HashMap<>();
 
     public static ISscHttpConnectionGov getInstance() {
-        if (sSscHttpConnectionGov == null) {
-            sSscHttpConnectionGov = new SscHttpConnectionGov();
-        }
-
         return sSscHttpConnectionGov;
     }
 
     @Override
-    public void open(int slotId, EApnType apntype) {
-        SscHttpConnection httpConnection = null;
+    public void open(int slotId, EApnType apnType) {
+        final ISscHttpConnection httpConnection;
+
         if (SscConfig.isTls(slotId)) {
-            httpConnection = new SscHttpsConnection(slotId, apntype);
+            httpConnection = new SscHttpsConnection(slotId, apnType);
         } else {
-            httpConnection = new SscHttpConnection(slotId, apntype);
+            httpConnection = new SscHttpConnection(slotId, apnType);
         }
 
-        mSscHttpConnection.put(slotId, httpConnection);
+        setHttpConnectionForSlot(slotId, httpConnection);
     }
 
     @Override
     public void close(int slotId) {
-        ISscHttpConnection httpConnection = get(slotId);
+        ISscHttpConnection httpConnection = sSscHttpConnections.get(slotId);
         if (httpConnection == null) {
-            ImsLog.i("close()");
+            ImsLog.e(slotId, "close()");
             return;
         }
+
         httpConnection.close();
+        sSscHttpConnections.remove(slotId);
     }
 
     @Override
     public int sendRequest(int slotId, int requestType, String requestUri, String xui,
             String body) {
-        ISscHttpConnection httpConnection = get(slotId);
+        ISscHttpConnection httpConnection = sSscHttpConnections.get(slotId);
         if (httpConnection == null) {
-            ImsLog.i("sendRequest()");
-            return -1;
+            ImsLog.e(slotId, "sendRequest()");
+            return ISscHttpConnection.HTTP_REQUEST_FAILED_UNSPECIFIED;
         }
+
         return httpConnection.sendRequest(requestType, requestUri, xui, body);
     }
 
     @Override
     public Document getInputStream(int slotId) {
-        ISscHttpConnection httpConnection = get(slotId);
+        ISscHttpConnection httpConnection = sSscHttpConnections.get(slotId);
         if (httpConnection == null) {
-            ImsLog.i("getInputStream()");
+            ImsLog.e(slotId, "getInputStream()");
             return null;
         }
+
         return httpConnection.getInputStream();
     }
 
-    private ISscHttpConnection get(int slotId) {
-        if (!mSscHttpConnection.containsKey(slotId)) {
-            ImsLog.w("");
-            return null;
+    private void setHttpConnectionForSlot(int slotId, ISscHttpConnection sscHttpConnection) {
+        ISscHttpConnection httpConnection = sSscHttpConnections.get(slotId);
+        if (httpConnection != null) {
+            httpConnection.close();
         }
 
-        return mSscHttpConnection.get(slotId);
+        sSscHttpConnections.put(slotId, sscHttpConnection);
     }
 }
