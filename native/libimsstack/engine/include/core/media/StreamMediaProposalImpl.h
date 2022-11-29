@@ -22,7 +22,7 @@
 class StreamMediaProposalImpl : public IMedia
 {
 public:
-    inline StreamMediaProposalImpl(IN StreamMediaProposal* pMediaProposal) :
+    inline explicit StreamMediaProposalImpl(IN StreamMediaProposal* pMediaProposal) :
             m_pMediaProposal(pMediaProposal)
     {
     }

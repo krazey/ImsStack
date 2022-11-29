@@ -25,7 +25,7 @@ class SdpTimeDescription
 {
 public:
     SdpTimeDescription();
-    SdpTimeDescription(IN SdpTime* pTime);
+    explicit SdpTimeDescription(IN SdpTime* pTime);
     SdpTimeDescription(IN const SdpTimeDescription& other);
     ~SdpTimeDescription();
 

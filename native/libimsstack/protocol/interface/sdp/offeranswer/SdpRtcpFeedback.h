@@ -21,7 +21,7 @@
 class SdpRtcpFeedback : public SdpMediaFormatParameter
 {
 public:
-    SdpRtcpFeedback(IN IMS_SINT32 nPayloadTypeNumber);
+    explicit SdpRtcpFeedback(IN IMS_SINT32 nPayloadTypeNumber);
     SdpRtcpFeedback(IN IMS_SINT32 nPayloadTypeNumber, IN const AString& strType,
             IN const AString& strParamName = AString::ConstNull(),
             IN const AString& strParamValue = AString::ConstNull());

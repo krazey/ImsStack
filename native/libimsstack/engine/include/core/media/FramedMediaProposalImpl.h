@@ -22,7 +22,7 @@
 class FramedMediaProposalImpl : public IMedia
 {
 public:
-    inline FramedMediaProposalImpl(IN FramedMediaProposal* pMediaProposal) :
+    inline explicit FramedMediaProposalImpl(IN FramedMediaProposal* pMediaProposal) :
             m_pMediaProposal(pMediaProposal)
     {
     }

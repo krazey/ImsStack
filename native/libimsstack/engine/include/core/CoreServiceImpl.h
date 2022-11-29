@@ -30,7 +30,7 @@ class CoreServiceImpl :
         public IOnDirectCoreServiceListener
 {
 public:
-    CoreServiceImpl(IN CoreService* pCoreService);
+    explicit CoreServiceImpl(IN CoreService* pCoreService);
     virtual ~CoreServiceImpl();
 
     CoreServiceImpl(IN const CoreServiceImpl&) = delete;

@@ -25,7 +25,7 @@ class FramedMediaProposalImpl;
 class FramedMediaImpl : public MediaImpl, public IMedia, public IOnMediaListener
 {
 public:
-    FramedMediaImpl(IN FramedMedia* pFramedMedia);
+    explicit FramedMediaImpl(IN FramedMedia* pFramedMedia);
     virtual ~FramedMediaImpl();
 
     FramedMediaImpl(IN const FramedMediaImpl&) = delete;

@@ -25,8 +25,8 @@ class SipMethod
 {
 public:
     SipMethod(IN IMS_SINT32 nMethod = SipMethod::INVALID);
-    SipMethod(IN const IMS_CHAR* pszMethod);
-    SipMethod(IN const AString& strMethod);
+    explicit SipMethod(IN const IMS_CHAR* pszMethod);
+    explicit SipMethod(IN const AString& strMethod);
     SipMethod(IN const SipMethod& other);
     ~SipMethod();
 

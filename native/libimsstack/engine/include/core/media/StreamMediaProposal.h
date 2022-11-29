@@ -21,7 +21,7 @@
 class StreamMediaProposal : public MediaProposal
 {
 public:
-    inline StreamMediaProposal(IN ISdpOaState* piOaState) :
+    inline explicit StreamMediaProposal(IN ISdpOaState* piOaState) :
             MediaProposal(piOaState)
     {
     }

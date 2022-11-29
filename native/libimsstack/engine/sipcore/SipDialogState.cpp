@@ -636,7 +636,7 @@ PUBLIC
 IMS_BOOL SipDialogState::InitRequest(IN const SipMethod& objMethod, IN_OUT ::SipMessage*& pSipMsg)
 {
     // Method
-    SipStack::SetMethod(objMethod.ToString(), pSipMsg);
+    SipStack::SetMethod(objMethod, pSipMsg);
 
     // Request-URI : Set the remote target URI
     SipAddrSpec* pAddrSpec = SipStack::GetAddrSpec(m_pRemoteTargetUri);

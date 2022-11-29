@@ -21,7 +21,7 @@
 class FramedMediaProposal : public MediaProposal
 {
 public:
-    inline FramedMediaProposal(IN ISdpOaState* piOaState) :
+    inline explicit FramedMediaProposal(IN ISdpOaState* piOaState) :
             MediaProposal(piOaState)
     {
     }
