@@ -86,7 +86,7 @@ protected:
      */
     virtual IMS_SINT32 WaitForSignal(IN IMS_SINT32 nMsgCount);
 
-    static IMS_BOOL IsSystemMessage(IN IMS_SINT32 nMessage);
+    static IMS_BOOL IsSystemMessage(IN IMS_SINT32 nMsg);
 
 private:
     // Internal signal flag to avoid timing issue

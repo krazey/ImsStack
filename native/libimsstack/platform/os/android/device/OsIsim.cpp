@@ -582,12 +582,12 @@ PUBLIC VIRTUAL OsIsim::~OsIsim()
             SystemConstants::CATEGORY_ISIM, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL void OsIsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PUBLIC VIRTUAL void OsIsim::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
     IMS_TRACE_I("ISIM :: DispatchServiceMessage - slotId=%d, wp=%" PFLS_u ", lp=%" PFLS_u,
-            GetSlotId(), nWParam, nLParam);
+            GetSlotId(), nWparam, nLparam);
 
-    osIsim_HandleIsimEvent(GetSlotId(), reinterpret_cast<OsIsimParam*>(nLParam));
+    osIsim_HandleIsimEvent(GetSlotId(), reinterpret_cast<OsIsimParam*>(nLparam));
 }
 
 PUBLIC VIRTUAL void OsIsim::ClearRecords()
@@ -742,7 +742,7 @@ PUBLIC VIRTUAL void OsIsim::Release()
     ReleaseUimClient(IMS_TRUE);
 }
 
-PUBLIC VIRTUAL IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEFs /*= EF_ALL*/)
+PUBLIC VIRTUAL IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEfs /*= EF_ALL*/)
 {
     if (m_bReadFileAttributesInProgress)
     {
@@ -766,28 +766,28 @@ PUBLIC VIRTUAL IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEFs /*= EF_ALL*/)
         objContent.Clear();
     }
 
-    if (GetFileAttributes(nEFs, EF_IMPI, EF_ID_IMPI) != IMS_SUCCESS)
+    if (GetFileAttributes(nEfs, EF_IMPI, EF_ID_IMPI) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    if (GetFileAttributes(nEFs, EF_IMPU, EF_ID_IMPU) != IMS_SUCCESS)
+    if (GetFileAttributes(nEfs, EF_IMPU, EF_ID_IMPU) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    if (GetFileAttributes(nEFs, EF_DOMAIN, EF_ID_DOMAIN) != IMS_SUCCESS)
+    if (GetFileAttributes(nEfs, EF_DOMAIN, EF_ID_DOMAIN) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    if (GetFileAttributes(nEFs, EF_IST, EF_ID_IST, IMS_TRUE, IsimEfContent::EF_TRANSPARENT) !=
+    if (GetFileAttributes(nEfs, EF_IST, EF_ID_IST, IMS_TRUE, IsimEfContent::EF_TRANSPARENT) !=
             IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    if (GetFileAttributes(nEFs, EF_PCSCF, EF_ID_PCSCF, IMS_TRUE, IsimEfContent::EF_LINEAR_FIXED) !=
+    if (GetFileAttributes(nEfs, EF_PCSCF, EF_ID_PCSCF, IMS_TRUE, IsimEfContent::EF_LINEAR_FIXED) !=
             IMS_SUCCESS)
     {
         return IMS_FAILURE;
@@ -882,15 +882,15 @@ PUBLIC VIRTUAL void OsIsim::System_NotifyEvent(
 }
 
 PUBLIC
-IMS_RESULT OsIsim::GetFileAttributes(IN IMS_SINT32 nRequiredEFs, IN IMS_SINT32 nEF,
+IMS_RESULT OsIsim::GetFileAttributes(IN IMS_SINT32 nRequiredEfs, IN IMS_SINT32 nEf,
         IN IMS_SINT32 nFileId, IN IMS_BOOL bOptionalField /*= IMS_FALSE*/,
-        IN IMS_SINT32 nEFContentType /*= IsimEfContent::EF_TRANSPARENT*/)
+        IN IMS_SINT32 nEfContentType /*= IsimEfContent::EF_TRANSPARENT*/)
 {
-    if ((nRequiredEFs & nEF) != 0)
+    if ((nRequiredEfs & nEf) != 0)
     {
         if (bOptionalField)
         {
-            m_objEfContents.SetValue(nFileId, IsimEfContent(nEFContentType));
+            m_objEfContents.SetValue(nFileId, IsimEfContent(nEfContentType));
         }
 
         if (PlatformContext::GetInstance()->GetSystem()->ReadIsimFileAttributes(

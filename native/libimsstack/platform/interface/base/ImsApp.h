@@ -22,7 +22,7 @@
 class ImsApp : public ImsActivity
 {
 public:
-    explicit ImsApp(IN const AString& strAppName);
+    explicit ImsApp(IN const AString& strName);
     virtual ~ImsApp();
 
     ImsApp(IN const ImsApp&) = delete;

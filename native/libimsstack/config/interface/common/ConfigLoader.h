@@ -24,7 +24,7 @@ public:
     ConfigLoader() = delete;
 
 public:
-    static IConfigBuffer* GetConfig(IN const AString& strConfData);
+    static IConfigBuffer* GetConfig(IN const AString& strContent);
 };
 
 #endif

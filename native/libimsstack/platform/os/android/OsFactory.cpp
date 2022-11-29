@@ -348,16 +348,16 @@ PUBLIC VIRTUAL ICallInfo* OsFactory::CreateCallInfo(IN IMS_SINT32 nSlotId)
     return new OsPhoneInfoCall(nSlotId);
 }
 
-PUBLIC VIRTUAL void OsFactory::DestroyCallInfo(IN ICallInfo*& piPhoneInfoCall)
+PUBLIC VIRTUAL void OsFactory::DestroyCallInfo(IN ICallInfo*& piCallInfo)
 {
-    OsPhoneInfoCall* pPhoneInfoCall = DYNAMIC_CAST(OsPhoneInfoCall*, piPhoneInfoCall);
+    OsPhoneInfoCall* pPhoneInfoCall = DYNAMIC_CAST(OsPhoneInfoCall*, piCallInfo);
 
     if (pPhoneInfoCall != IMS_NULL)
     {
         delete pPhoneInfoCall;
     }
 
-    piPhoneInfoCall = IMS_NULL;
+    piCallInfo = IMS_NULL;
 }
 
 PUBLIC VIRTUAL ILocationInfo* OsFactory::CreateLocationInfo(IN IMS_SINT32 nSlotId)

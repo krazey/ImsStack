@@ -342,12 +342,12 @@ PROTECTED VIRTUAL IDigestAka* OsUsim::CreateDigestAka()
     return pDigestAka;
 }
 
-PROTECTED VIRTUAL void OsUsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PROTECTED VIRTUAL void OsUsim::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
     IMS_TRACE_I("USIM :: DispatchServiceMessage - slotId=%d, wp=%" PFLS_u ", lp=%" PFLS_u,
-            GetSlotId(), nWParam, nLParam);
+            GetSlotId(), nWparam, nLparam);
 
-    osUsim_HandleUsimEvent(GetSlotId(), reinterpret_cast<OsUsimParam*>(nLParam));
+    osUsim_HandleUsimEvent(GetSlotId(), reinterpret_cast<OsUsimParam*>(nLparam));
 }
 
 PROTECTED VIRTUAL void OsUsim::System_NotifyEvent(

@@ -1579,9 +1579,9 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetSockName(
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL IMS_BOOL OsSocket::Equals(IN const ISocket* piNetSocket)
+PROTECTED VIRTUAL IMS_BOOL OsSocket::Equals(IN const ISocket* piSocket)
 {
-    const OsSocket* pSocket = DYNAMIC_CAST(const OsSocket*, piNetSocket);
+    const OsSocket* pSocket = DYNAMIC_CAST(const OsSocket*, piSocket);
 
     if (pSocket == IMS_NULL)
     {

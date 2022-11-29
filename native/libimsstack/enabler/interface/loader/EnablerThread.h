@@ -46,7 +46,7 @@ protected:
     void InitializeGlobals();
     void UninitializeGlobals();
 
-    void ControlEnablersInternal(IN IMS_SINT32 nFlags);
+    void ControlEnablersInternal(IN IMS_SINT32 nCtrlFlags);
     void NotifyEnablerStartCompleted();
     void SetState(IN IMS_SINT32 nState);
     IMS_BOOL StartEnablers();
