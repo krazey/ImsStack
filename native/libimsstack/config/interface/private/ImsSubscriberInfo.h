@@ -41,7 +41,7 @@ public:
     }
     inline const AString& GetPrivateUserId() const override { return m_strPrivateUserId; }
     const AString& GetPublicUserId(
-            IN IMS_SINT32 nType = IImsSubscriberInfo::IMPU_REF_INDEX) const override;
+            IN IMS_SINT32 nImpuType = IImsSubscriberInfo::IMPU_REF_INDEX) const override;
     inline const AStringArray& GetPublicUserIds() const override { return m_objPublicUserIds; }
 
     inline const AString& GetScscfAddress() const

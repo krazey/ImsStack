@@ -872,20 +872,20 @@ void OsSocketService::SendControlEvent()
 }
 
 PRIVATE
-void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEvent)
+void OsSocketService::DoNotificationCallback(IN SOCKET nSocket, IN IMS_SLONG nEvent)
 {
-    if (hSocket == INVALID_SOCKET)
+    if (nSocket == INVALID_SOCKET)
     {
         IMS_TRACE_E(0, "Invalid Socket", 0, 0, 0);
         return;
     }
 
-    OsSocketBase* pSocket = LookupHandle(hSocket);
+    OsSocketBase* pSocket = LookupHandle(nSocket);
 
     if (pSocket == IMS_NULL)
     {
         // MUST be in the middle of an Accept call
-        IMS_TRACE_E(0, "Socket(%d) is null", hSocket, 0, 0);
+        IMS_TRACE_E(0, "Socket(%d) is null", nSocket, 0, 0);
         return;
     }
 
@@ -894,7 +894,7 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
 
     if (nErrorCode != 0)
     {
-        IMS_TRACE_D("DoNotificationCallback - socket=%d, error=%d", hSocket, nErrorCode, 0);
+        IMS_TRACE_D("DoNotificationCallback - socket=%d, error=%d", nSocket, nErrorCode, 0);
     }
 
     switch (nEvent)
@@ -918,14 +918,14 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
 
                     if (nState == OsSocketBase::SOCKET_STATE_CLOSED)
                     {
-                        OsSocketBase* pTmpSocket = LookupHandle(hSocket);
+                        OsSocketBase* pTmpSocket = LookupHandle(nSocket);
 
                         if (pTmpSocket == IMS_NULL)
                         {
                             IMS_TRACE_E(0,
                                     "TCP socket (%d) is already dead "
                                     "on IMS_SOCKET_DATA_RECEIVED",
-                                    hSocket, 0, 0);
+                                    nSocket, 0, 0);
                         }
                         else
                         {
@@ -985,12 +985,12 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
         }
         case IMS_SOCKET_CLOSED:
         {
-            OsSocketBase* pTmpSocket = LookupHandle(hSocket);
+            OsSocketBase* pTmpSocket = LookupHandle(nSocket);
 
             if (pTmpSocket == IMS_NULL)
             {
                 IMS_TRACE_E(
-                        0, "TCP socket (%d) is already dead on IMS_SOCKET_CLOSED", hSocket, 0, 0);
+                        0, "TCP socket (%d) is already dead on IMS_SOCKET_CLOSED", nSocket, 0, 0);
                 break;
             }
 

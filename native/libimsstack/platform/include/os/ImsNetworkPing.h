@@ -55,7 +55,7 @@ protected:
     IMS_SINT32 GetState() const;
     void SetState(IN IMS_SINT32 nState);
 
-    static IMS_SINT32 GetRandomPort(IN const IPAddress& objAddr);
+    static IMS_SINT32 GetRandomPort(IN const IPAddress& objIp);
 
 private:
     enum
