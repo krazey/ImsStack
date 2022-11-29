@@ -91,7 +91,8 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
 
     if (bEmergency)
     {
-        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE);
+        pEmergencyServiceManager->HandleServiceStatus(
+                ServiceStatus::SERVICE_ACTIVE, pServiceThread);
     }
     else
     {
@@ -130,7 +131,7 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
 
     if (m_objService.IsEmergency())
     {
-        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_IDLE);
+        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_IDLE, pServiceThread);
     }
     else
     {

@@ -140,11 +140,13 @@ TEST_F(MtcAosEventHandlerTest,
     IMS_UINT32 nFeatures = ImsAosFeature::MMTEL;
     EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
 
-    EXPECT_CALL(*pEmergencyServiceManager, HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE));
+    EXPECT_CALL(*pEmergencyServiceManager,
+            HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE, &objJniThread));
     pEventHandler->OnConnected(
             nFeatures, IIpcan::CATEGORY_MOBILE, &objJniThread, pEmergencyServiceManager);
 
-    EXPECT_CALL(*pEmergencyServiceManager, HandleServiceStatus(ServiceStatus::SERVICE_IDLE));
+    EXPECT_CALL(*pEmergencyServiceManager,
+            HandleServiceStatus(ServiceStatus::SERVICE_IDLE, &objJniThread));
     pEventHandler->OnDisconnected(1, &objJniThread, pEmergencyServiceManager);
 }
 

@@ -32,8 +32,9 @@ public:
     {
     }
 
-    MOCK_METHOD(void, OpenEmergencyService, (), (override));
-    MOCK_METHOD(void, HandleServiceStatus, (IN ServiceStatus), (override));
+    MOCK_METHOD(void, OpenEmergencyService, (IN IJniMtcServiceThread*), (override));
+    MOCK_METHOD(
+            void, HandleServiceStatus, (IN ServiceStatus, IN IJniMtcServiceThread*), (override));
 };
 
 #endif
