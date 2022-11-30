@@ -411,7 +411,7 @@ PROTECTED
 IMS_SINT32 ConferenceInfoUpdater::FindParticipantByOrder(
         IN IMS_UINT32 nIndexInXml, IN const ConferenceInfo::User* pUser)
 {
-    const AString strUserEntity = pUser->GetEntity();
+    const AString& strUserEntity = pUser->GetEntity();
     IMS_TRACE_I("FindParticipantByOrder : user-entity=[%s]", strUserEntity.GetStr(), 0, 0);
 
     if (!m_bHostInfoInUsers && IsLocalUri(pUser->GetEntity()))
@@ -451,7 +451,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByOrder(
 PROTECTED
 IMS_SINT32 ConferenceInfoUpdater::FindParticipantByOrderLegId(IN const ConferenceInfo::User* pUser)
 {
-    const AString strUserEntity = pUser->GetEntity();
+    const AString& strUserEntity = pUser->GetEntity();
     IMS_TRACE_I("FindParticipantByOrderLegId : user-entity=[%s]", strUserEntity.GetStr(), 0, 0);
 
     SipAddress objSIPAddress(strUserEntity);

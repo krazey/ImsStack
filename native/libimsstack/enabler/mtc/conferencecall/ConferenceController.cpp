@@ -330,7 +330,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
 
     if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_REFER_INVITE)
     {
-        const IMSList<ConfUser*> objUsers = m_objOperationQueue.GetCurrentOperation()->GetUsers();
+        const IMSList<ConfUser*>& objUsers = m_objOperationQueue.GetCurrentOperation()->GetUsers();
         for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
         {
             if (nKey == m_objConnectionIdManager.GetCallKey(objUsers.GetAt(i)->nConnectionId))
