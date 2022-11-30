@@ -175,7 +175,7 @@ protected:
     virtual CallStateName HandleAosConnected();
     virtual CallStateName HandleAosDisconnected(IN IMS_UINT32 eAosReason);
 
-    void HandleTerminate(IN const CallReasonInfo& objReason);
+    void HandleTerminate(IN const CallReasonInfo& objReason) const;
     void NotifyHoldResumeState();
 
     ISession* GetISession();

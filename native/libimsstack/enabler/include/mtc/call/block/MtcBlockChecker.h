@@ -53,7 +53,7 @@ public:
     void OnBlockRuleChecked(IN IMtcBlockRule::Result objResult) override;
 
 private:
-    IMS_BOOL IsResultNotified();
+    IMS_BOOL IsResultNotified() const;
 
     IMtcBlockCheckListener* m_pListener;
     IMSList<IMtcBlockRule*> m_lstRules;

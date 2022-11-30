@@ -55,7 +55,7 @@ public:
     void Delete(IN SuppType eType);
     void DeleteServices();
     const SuppService* Get(IN SuppType eType);
-    const IMSMap<SuppType, SuppService*>& GetServices();
+    const IMSMap<SuppType, SuppService*>& GetServices() const;
     void Add(IN SuppType eSuppType, IN AString strValue);
     void Add(IN SuppType eSuppType, IN IMS_SINT32 nValue);
     void Add(IN SuppType eSuppType, IN IMS_BOOL bValue);

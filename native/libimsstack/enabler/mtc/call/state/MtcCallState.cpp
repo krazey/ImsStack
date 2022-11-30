@@ -518,7 +518,7 @@ CallStateName MtcCallState::HandleAosDisconnected(IN IMS_UINT32 eAosReason)
 }
 
 PROTECTED
-void MtcCallState::HandleTerminate(IN const CallReasonInfo& objReason)
+void MtcCallState::HandleTerminate(IN const CallReasonInfo& objReason) const
 {
     IMtcSession* pSession = m_objContext.GetSession();
     if (pSession == IMS_NULL)

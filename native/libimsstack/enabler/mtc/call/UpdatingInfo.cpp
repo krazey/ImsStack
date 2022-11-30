@@ -42,7 +42,7 @@ PUBLIC VIRTUAL UpdatingInfo::~UpdatingInfo()
 }
 
 PUBLIC
-IMS_BOOL UpdatingInfo::IsHeld()
+IMS_BOOL UpdatingInfo::IsHeld() const
 {
     if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
     {
@@ -62,7 +62,7 @@ IMS_BOOL UpdatingInfo::IsHeld()
 }
 
 PUBLIC
-IMS_BOOL UpdatingInfo::IsHeldBy()
+IMS_BOOL UpdatingInfo::IsHeldBy() const
 {
     IMS_SINT32 eNewAudioDirection = m_objModifiedInfo.eAudioDirection;
     if (eNewAudioDirection == DIRECTION_INVALID)
@@ -92,7 +92,7 @@ IMS_BOOL UpdatingInfo::IsHeldBy()
 }
 
 PUBLIC
-IMS_BOOL UpdatingInfo::IsResumed()
+IMS_BOOL UpdatingInfo::IsResumed() const
 {
     if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND &&
             m_objModifyingInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
@@ -112,7 +112,7 @@ IMS_BOOL UpdatingInfo::IsResumed()
 }
 
 PUBLIC
-IMS_BOOL UpdatingInfo::IsResumedBy()
+IMS_BOOL UpdatingInfo::IsResumedBy() const
 {
     IMS_SINT32 eNewAudioDirection = m_objModifiedInfo.eAudioDirection;
     if (eNewAudioDirection == DIRECTION_INVALID)
@@ -142,7 +142,7 @@ IMS_BOOL UpdatingInfo::IsResumedBy()
 }
 
 PUBLIC
-IMS_BOOL UpdatingInfo::IsNeedToAlert()
+IMS_BOOL UpdatingInfo::IsNeedToAlert() const
 {
     if (IsModified())
     {
@@ -163,7 +163,7 @@ IMS_BOOL UpdatingInfo::IsNeedToAlert()
 }
 
 PUBLIC
-IMS_BOOL UpdatingInfo::IsRequestedHoldResume()
+IMS_BOOL UpdatingInfo::IsRequestedHoldResume() const
 {
     if (m_objModifyingInfo.eAudioDirection == DIRECTION_INVALID)
     {
@@ -179,7 +179,7 @@ IMS_BOOL UpdatingInfo::IsRequestedHoldResume()
 }
 
 PUBLIC
-IMS_BOOL UpdatingInfo::IsRequestedModifying()
+IMS_BOOL UpdatingInfo::IsRequestedModifying() const
 {
     if (IsRequestedHoldResume())
     {
@@ -200,7 +200,7 @@ IMS_BOOL UpdatingInfo::IsRequestedModifying()
 }
 
 PUBLIC
-IMS_BOOL UpdatingInfo::IsModified()
+IMS_BOOL UpdatingInfo::IsModified() const
 {
     ISession& objSession = m_objContext.GetSession()->GetISession();
     if (GetCurrentCallType() != m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession))
@@ -212,7 +212,7 @@ IMS_BOOL UpdatingInfo::IsModified()
 }
 
 PUBLIC
-void UpdatingInfo::AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo)
+void UpdatingInfo::AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const
 {
     if (objMediaInfo.eAudioDirection != DIRECTION_INVALID)
     {

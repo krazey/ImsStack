@@ -46,16 +46,16 @@ public:
         m_bHasPendingUpdate = bHasPendingUpdate;
     }
 
-    IMS_BOOL IsHeld();
-    IMS_BOOL IsHeldBy();
-    IMS_BOOL IsResumed();
-    IMS_BOOL IsResumedBy();
-    IMS_BOOL IsNeedToAlert();
-    IMS_BOOL IsRequestedHoldResume();
-    IMS_BOOL IsRequestedModifying();
-    IMS_BOOL IsModified();
-    inline IMS_BOOL HasPendingUpdate() { return m_bHasPendingUpdate; }
-    void AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo);
+    IMS_BOOL IsHeld() const;
+    IMS_BOOL IsHeldBy() const;
+    IMS_BOOL IsResumed() const;
+    IMS_BOOL IsResumedBy() const;
+    IMS_BOOL IsNeedToAlert() const;
+    IMS_BOOL IsRequestedHoldResume() const;
+    IMS_BOOL IsRequestedModifying() const;
+    IMS_BOOL IsModified() const;
+    inline IMS_BOOL HasPendingUpdate() const { return m_bHasPendingUpdate; }
+    void AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const;
 
 private:
     CallType GetCurrentCallType() const;

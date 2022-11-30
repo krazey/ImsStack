@@ -45,7 +45,7 @@ public:
     }
     virtual ~TestMtcApp() {}
 
-    IMS_SINT32 GetServiceCount() { return m_lstServices.GetSize(); }
+    IMS_SINT32 GetServiceCount() const { return m_lstServices.GetSize(); }
 };
 
 class MtcAppTest : public ::testing::Test

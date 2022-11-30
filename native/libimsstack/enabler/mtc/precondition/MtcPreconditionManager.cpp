@@ -1031,7 +1031,7 @@ const SdpMedia* MtcPreconditionManager::GetSdpMedia(IN IMedia* piMedia, IN IMS_B
 }
 
 PRIVATE
-IMS_SINT32 MtcPreconditionManager::GetSdpMediaType(IN IMS_UINT32 eMediaType)
+IMS_SINT32 MtcPreconditionManager::GetSdpMediaType(IN IMS_UINT32 eMediaType) const
 {
     IMS_SINT32 eSdpMediaType = SdpMedia::TYPE_INVALID;
 
@@ -1054,7 +1054,7 @@ IMS_SINT32 MtcPreconditionManager::GetSdpMediaType(IN IMS_UINT32 eMediaType)
 }
 
 PRIVATE
-IMS_UINT32 MtcPreconditionManager::GetMediaTypesFromCallType()
+IMS_UINT32 MtcPreconditionManager::GetMediaTypesFromCallType() const
 {
     IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
     CallType eCallType = m_objContext.GetSession()->GetCallType();
@@ -1087,7 +1087,7 @@ IMS_UINT32 MtcPreconditionManager::GetMediaTypesFromCallType()
 }
 
 PRIVATE
-IMS_BOOL MtcPreconditionManager::IsDefaultBearerUsed(IN IMS_UINT32 eMediaType)
+IMS_BOOL MtcPreconditionManager::IsDefaultBearerUsed(IN IMS_UINT32 eMediaType) const
 {
     IMS_BOOL bUseDefaultBearer = IMS_FALSE;
     if (eMediaType == MEDIATYPE_AUDIO)

@@ -210,7 +210,7 @@ void CallStateProxy::NotifyCallState(
 }
 
 PRIVATE
-void CallStateProxy::NotifyTotalCallState(IN ImsList<IMtcCallStateListener*> objListeners)
+void CallStateProxy::NotifyTotalCallState(IN ImsList<IMtcCallStateListener*> objListeners) const
 {
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i++)
     {
