@@ -84,7 +84,7 @@ public:
             IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN OipType eOipType,
             IN const AString& strRemoteNumber) override;
 
-    void OnInformationNotificationReceived(IN IMS_UINT32 nType, IN const AString strValue,
+    void OnInformationNotificationReceived(IN IMS_UINT32 eType, IN const AString strValue,
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) override;
 
 private:

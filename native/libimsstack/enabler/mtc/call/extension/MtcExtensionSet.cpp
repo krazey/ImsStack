@@ -88,10 +88,10 @@ IMS_BOOL MtcExtensionSet::IsRequiredOnRemote(IN const AString& strOptionTag) con
 }
 
 PUBLIC
-IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& pMessage) const
+IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& objMessage) const
 {
     ImsList<AString> lstRequiredExtensions;
-    MessageUtil::GetHeaders(&pMessage, ISipHeader::REQUIRE, lstRequiredExtensions);
+    MessageUtil::GetHeaders(&objMessage, ISipHeader::REQUIRE, lstRequiredExtensions);
 
     for (IMS_UINT32 nIndex = 0; nIndex < lstRequiredExtensions.GetSize(); nIndex++)
     {

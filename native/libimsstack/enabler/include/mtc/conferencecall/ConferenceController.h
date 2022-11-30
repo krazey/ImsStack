@@ -146,7 +146,7 @@ protected:
     virtual IMS_BOOL IsStartFinalSipfragWaitTimer() const;
     virtual void Recover();
 
-    virtual void OnCallUpdated(IN IMS_UINT32 nEvent, IN IMS_UINTP nCallKey);
+    virtual void OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey);
     virtual void OnIndividualCallTerminated(IN IMS_UINTP nCallKey);
     void SendClosed();
     void NotifyResultToConferenceCall();

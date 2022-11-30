@@ -309,12 +309,12 @@ IMS_RESULT ConferenceReference::SendInviteForMultipleUser(OUT AString& strReferT
 }
 
 PRIVATE
-void ConferenceReference::GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1to1Call) const
+void ConferenceReference::GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1To1Call) const
 {
     // Send Refer with Session..
-    if (pi1to1Call != IMS_NULL)
+    if (pi1To1Call != IMS_NULL)
     {
-        UriFormatter::GetReferToForInvite(strUri, pi1to1Call->GetCallContext());
+        UriFormatter::GetReferToForInvite(strUri, pi1To1Call->GetCallContext());
     }
     // Send Refer with Target number - single refer
     else if (m_pConfUser != IMS_NULL)
@@ -331,15 +331,15 @@ void ConferenceReference::GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1to1
 }
 
 PRIVATE
-void ConferenceReference::SetReplaces(IN IMtcCall* piCall)
+void ConferenceReference::SetReplaces(IN IMtcCall* pi1To1Call)
 {
-    if (piCall == IMS_NULL)
+    if (pi1To1Call == IMS_NULL)
     {
         return;
     }
     AString strSessionId;
     MessageUtil::GetSessionId(
-            &(piCall->GetCallContext().GetSession()->GetISession()), strSessionId);
+            &(pi1To1Call->GetCallContext().GetSession()->GetISession()), strSessionId);
     m_piReference->SetReplaces(strSessionId);
 }
 

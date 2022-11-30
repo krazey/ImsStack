@@ -66,7 +66,7 @@ public:
 
     /* Media Profile */
     virtual void CreateMediaProfile(
-            IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile) override;
+            IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOrigin) override;
     virtual void DestroyMediaProfile(IN ISession* piSession) override;
     void DestroyAllMediaProfiles();  // called when terminate media
 

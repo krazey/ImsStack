@@ -267,7 +267,7 @@ public:
      * @param nValue
      * @param bValue
      */
-    virtual void OnInformationNotificationReceived(IN IMS_UINT32 nType, IN const AString strValue,
+    virtual void OnInformationNotificationReceived(IN IMS_UINT32 eType, IN const AString strValue,
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) = 0;
 };
 
