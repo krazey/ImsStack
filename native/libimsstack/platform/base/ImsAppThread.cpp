@@ -111,7 +111,7 @@ void ImsAppThread::DetachApp(IN const AString& strName, IN IMS_BOOL bDestroy /*=
 
 PROTECTED
 void ImsAppThread::ControlAppAsync(IN IMS_SINT32 nParam, IN const AString& strName,
-        IN ImsApp_Creator pfnCreator /*= IMS_NULL*/)
+        IN ImsApp_Creator pfnCreator /*= IMS_NULL*/) const
 {
     IThread* piThread = GetThread();
 

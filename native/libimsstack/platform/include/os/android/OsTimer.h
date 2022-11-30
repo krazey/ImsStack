@@ -42,7 +42,7 @@ public:
     inline IMS_UINT32 GetInternalTimerId() const { return m_nInternalTimerId; }
 
 private:
-    IMS_UINTP CreateTimerId();
+    IMS_UINTP CreateTimerId() const;
 
 private:
     enum

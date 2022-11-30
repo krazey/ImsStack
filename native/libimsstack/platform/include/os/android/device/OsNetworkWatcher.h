@@ -76,8 +76,8 @@ public:
      * @see #STATE_EMERGENCY_ONLY
      * @see #STATE_POWER_OFF
      */
-    IMS_SINT32 GetServiceStateType();
-    IMS_SINT32 GetVoiceServiceStateType();
+    IMS_SINT32 GetServiceStateType() const;
+    IMS_SINT32 GetVoiceServiceStateType() const;
 
 private:
     static const IMS_CHAR* RadioTechToString(IN IMS_UINT32 nType);

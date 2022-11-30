@@ -35,29 +35,29 @@ public:
 public:
     // This method creates PIDF for Geolocation with country only.
     IMS_BOOL Create(IN const AString& strEntityUri, IN const AString& strCountry,
-            OUT ByteArray& objContent);
+            OUT ByteArray& objContent) const;
     // This method creates PIDF for Geolocation based on the option (country info.),
     // but if country is not determined, then don't create PIDF.
     IMS_BOOL Create(IN const AString& strEntityUri, IN IMS_BOOL bUnknownCountryAllowed,
-            OUT ByteArray& objContent);
+            OUT ByteArray& objContent) const;
     // This method creates PIDF for Geolocation with country only or country and state.
     // but if country is not determined, then don't create PIDF.
     IMS_BOOL CreateWithoutPosition(IN const AString& strEntityUri,
             IN IMS_BOOL bUnknownCountryAllowed, IN IMS_BOOL bIncludeState,
-            OUT ByteArray& objContent);
+            OUT ByteArray& objContent) const;
     // This method creates PIDF for Geolocation with position information.
     // If position is not available, it returns IMS_FALSE.
     IMS_BOOL CreateWithPosition(IN const AString& strEntityUri, OUT ByteArray& objContent,
-            IN IMS_SINT32 nConfidence = 0);
+            IN IMS_SINT32 nConfidence = 0) const;
     // This method creates PIDF for Geolocation with position and country information.
     // The PIDF will not have City, State, and Zip code information.
     // If position is not available, it returns IMS_FALSE.
     IMS_BOOL CreateWithPositionAndCountry(IN const AString& strEntityUri, OUT ByteArray& objContent,
-            IN IMS_SINT32 nConfidence = 0);
+            IN IMS_SINT32 nConfidence = 0) const;
     // This method creates PIDF for Geolocation with position information without CIVIC.
     // If position is not available, it returns IMS_FALSE.
     IMS_BOOL CreateWithoutCivic(IN const AString& strEntityUri, OUT ByteArray& objContent,
-            IN IMS_SINT32 nConfidence = 0);
+            IN IMS_SINT32 nConfidence = 0) const;
 
     // FEATURE_XXX
     inline void ClearFeatures(IN IMS_SINT32 nFeatures) { m_nFeatures &= ~nFeatures; }
