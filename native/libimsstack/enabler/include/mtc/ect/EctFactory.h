@@ -49,8 +49,8 @@ public:
         {
             return std::move(m_pBlindController);
         }
-        return std::move(std::make_unique<BlindTransferController>(
-                objContext, nTransfereeKey, objListener, *this));
+        return std::make_unique<BlindTransferController>(
+                objContext, nTransfereeKey, objListener, *this);
     }
     inline void SetBlindController(IN std::unique_ptr<BlindTransferController> pController)
     {
@@ -64,8 +64,8 @@ public:
         {
             return std::move(m_pConsultativeController);
         }
-        return std::move(std::make_unique<ConsultativeTransferController>(
-                objContext, nTransfereeKey, objListener, *this));
+        return std::make_unique<ConsultativeTransferController>(
+                objContext, nTransfereeKey, objListener, *this);
     }
     inline void SetConsultativeController(
             IN std::unique_ptr<ConsultativeTransferController> pController)
@@ -80,7 +80,7 @@ public:
         {
             return std::move(m_pReference);
         }
-        return std::move(std::make_unique<EctReference>(objContext, nTransfereeKey, objListener));
+        return std::make_unique<EctReference>(objContext, nTransfereeKey, objListener);
     }
     inline void SetReference(IN std::unique_ptr<EctReference> pReference)
     {
