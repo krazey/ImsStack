@@ -217,7 +217,6 @@ IMtcCallController& JniMtcCall::GetCallController()
 {
     INativeEnabler* piNativeEnabler =
             JniEnablerConnector::GetInstance().GetNativeEnabler(GetSlotId(), EnablerType::MTC_CALL);
-    IMS_ASSERT(piNativeEnabler != IMS_NULL);
     return DYNAMIC_CAST(IMtcCallController&, *piNativeEnabler);
 }
 
