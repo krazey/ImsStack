@@ -76,7 +76,6 @@ cc_library_static {
         "libimsstack_platform_headers",
         "libimsstack_platform_os_android_system-intf_headers",
     ] + [
-        "libimsstack_enabler_mtc_headers",
         "libimsstack_enabler_mts_headers",
         "libimsstack_enabler_aos_headers",
     ],

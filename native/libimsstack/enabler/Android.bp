@@ -39,14 +39,7 @@ cc_library_headers {
     ],
 }
 
-// JniConnector
-cc_library_headers {
-    name: "libimsstack_enabler_mtc_headers",
-    export_include_dirs: [
-        "include/mtc",
-    ],
-}
-
+// Jni to native Enabler
 cc_library_headers {
     name: "libimsstack_enabler_mts_headers",
     export_include_dirs: [
