@@ -98,11 +98,6 @@ public:
     virtual void CreateMediaSession() = 0;
 
     /**
-     * @brief This method is to destroy a media session through MediaManager.
-     */
-    virtual void DestroyMediaSession() = 0;
-
-    /**
      * @brief This method to create a media profile.
      *        It can be called when a dialog is added like outgoing call, incoming call,
      *        forking case, and early-session case(video ring back tone).

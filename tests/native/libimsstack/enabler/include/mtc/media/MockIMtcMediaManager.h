@@ -46,7 +46,6 @@ public:
     MOCK_METHOD(void, GetOldMediaInfo, (OUT MediaInfo& objInfo), (override));
     MOCK_METHOD(void, RestoreMediaInfo, (), (override));
     MOCK_METHOD(void, CreateMediaSession, (), (override));
-    MOCK_METHOD(void, DestroyMediaSession, (), (override));
     MOCK_METHOD(void, CreateMediaProfile,
             (IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile),
             (override));

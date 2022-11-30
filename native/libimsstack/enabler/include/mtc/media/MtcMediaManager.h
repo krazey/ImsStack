@@ -62,7 +62,6 @@ public:
 
     /* MediaSession */
     virtual void CreateMediaSession() override;
-    virtual void DestroyMediaSession() override;
 
     /* Media Profile */
     virtual void CreateMediaProfile(
@@ -126,6 +125,7 @@ public:
             IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe) override;
 
 private:
+    void DestroyMediaSession();
     void SetState(IN MediaState eState);
     void FinalizeMediaInfo(IN IMS_UINTP nNegoId);
     void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);

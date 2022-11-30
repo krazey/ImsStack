@@ -63,6 +63,8 @@ public:
     };
 
 private:
+    void Clear();
+
     // TODO: IMSMap<type, timer> would be better.
     ImsList<MtcTimer*> m_lstTimers;
     IMtcTimerListener* m_piListener;

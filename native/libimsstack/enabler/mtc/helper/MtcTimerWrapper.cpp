@@ -33,7 +33,7 @@ PUBLIC
 MtcTimerWrapper::~MtcTimerWrapper()
 {
     IMS_TRACE_D("~MtcTimerWrapper", 0, 0, 0);
-    StopAll();
+    Clear();
 }
 
 PUBLIC VIRTUAL void MtcTimerWrapper::Timer_TimerExpired(IN ITimer* piTimer)
@@ -112,16 +112,7 @@ void MtcTimerWrapper::Stop(IN IMS_UINT32 eType)
 PUBLIC
 void MtcTimerWrapper::StopAll()
 {
-    IMS_UINT32 nSize = m_lstTimers.GetSize();
-
-    IMS_TRACE_I("StopAll : Size[%d]", nSize, 0, 0);
-
-    for (IMS_UINT32 i = 0; i < nSize; i++)
-    {
-        delete m_lstTimers.GetAt(i);
-    }
-
-    m_lstTimers.Clear();
+    Clear();
 }
 
 PUBLIC
@@ -136,4 +127,19 @@ IMS_BOOL MtcTimerWrapper::IsActive(IN IMS_UINT32 eType)
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+void MtcTimerWrapper::Clear()
+{
+    IMS_UINT32 nSize = m_lstTimers.GetSize();
+
+    IMS_TRACE_I("StopAll : Size[%d]", nSize, 0, 0);
+
+    for (IMS_UINT32 i = 0; i < nSize; i++)
+    {
+        delete m_lstTimers.GetAt(i);
+    }
+
+    m_lstTimers.Clear();
 }

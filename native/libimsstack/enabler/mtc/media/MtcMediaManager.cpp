@@ -56,7 +56,10 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
 {
     IMS_TRACE_D("~MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 
-    Terminate();
+    if (m_piMediaSession)
+    {
+        m_piMediaSession->Terminate();
+    }
 
     m_pMediaReportListener = IMS_NULL;
     m_pQosListener = IMS_NULL;
@@ -73,7 +76,6 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
         delete m_pOldMediaInfo;
     }
 
-    DestroyAllMediaProfiles();
     DestroyMediaSession();
 }
 
@@ -274,19 +276,6 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
         IMS_TRACE_D("Setting media environment is failed.", 0, 0, 0);
         delete pEnvironment;
     }
-}
-
-PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
-{
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_objContext.GetSlotId());
-    if (!pMediaManager)
-    {
-        IMS_TRACE_D("DestroyMediaSession : Failed to destroy Media Session.", 0, 0, 0);
-        return;
-    }
-
-    IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
-    pMediaManager->DestroySession(static_cast<MediaSession*>(m_piMediaSession));
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(
@@ -715,6 +704,20 @@ PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoAccept(
     {
         m_pMediaInfo->eTextDirection = eNewDirection;
     }
+}
+
+PRIVATE
+void MtcMediaManager::DestroyMediaSession()
+{
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_objContext.GetSlotId());
+    if (!pMediaManager)
+    {
+        IMS_TRACE_D("DestroyMediaSession : Failed to destroy Media Session.", 0, 0, 0);
+        return;
+    }
+
+    IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
+    pMediaManager->DestroySession(static_cast<MediaSession*>(m_piMediaSession));
 }
 
 PRIVATE

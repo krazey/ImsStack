@@ -70,7 +70,8 @@ PUBLIC VIRTUAL void UdpKeepAliveSender::Timer_TimerExpired(IN ITimer* piTimer)
     Start();
 }
 
-PUBLIC VIRTUAL void UdpKeepAliveSender::Start()
+PUBLIC
+void UdpKeepAliveSender::Start()
 {
     IMS_TRACE_D("Start", 0, 0, 0);
     SendDummyPacket();
@@ -85,7 +86,8 @@ PUBLIC VIRTUAL void UdpKeepAliveSender::Start()
             this);
 }
 
-PUBLIC VIRTUAL void UdpKeepAliveSender::Stop()
+PUBLIC
+void UdpKeepAliveSender::Stop()
 {
     IMS_TRACE_D("Stop", 0, 0, 0);
     if (m_piTimer == IMS_NULL)

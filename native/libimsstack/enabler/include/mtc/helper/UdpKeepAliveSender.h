@@ -35,8 +35,8 @@ public:
     static IMS_BOOL IsRequired(IN MtcConfigurationProxy& objConfigProxy);
 
     void Timer_TimerExpired(IN ITimer* piTimer) override;
-    virtual void Start();
-    virtual void Stop();
+    void Start();
+    void Stop();
 
 private:
     void SetTransportInfo();
