@@ -27,6 +27,8 @@
 class IAosTrafficListener
 {
 public:
+    virtual ~IAosTrafficListener(){};
+
     virtual void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nFailureReason,
             IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis) = 0;
 

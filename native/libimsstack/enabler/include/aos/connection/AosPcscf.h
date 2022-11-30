@@ -28,7 +28,6 @@
 class ISubscriberConfig;
 class IAosAppContext;
 class IAosPcscfListener;
-class ITimerListener;
 
 class Pcscf : public ITimerListener
 {

@@ -26,6 +26,8 @@ class AosFeatureTagList;
 class IAosHandle
 {
 public:
+    virtual ~IAosHandle(){};
+
     virtual AString& GetAppId() = 0;
     virtual AString& GetServiceId() = 0;
     virtual IMS_UINT32 GetServiceType() = 0;

@@ -29,6 +29,8 @@
 class IAosApplication
 {
 public:
+    virtual ~IAosApplication(){};
+
     virtual void Reconfig() = 0;
 
     virtual IMS_BOOL RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) = 0;

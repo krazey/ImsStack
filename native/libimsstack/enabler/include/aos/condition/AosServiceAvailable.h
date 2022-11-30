@@ -95,7 +95,7 @@ protected:
 private:
     IMS_BOOL m_bAvailableLastNotified;
 
-    static IMSList<IMS_UINT32> m_objBlockReasonsLastNotified;
+    IMSList<IMS_UINT32> m_objBlockReasonsLastNotified;
     IMSList<IAosServiceAvailableListener*> m_objListeners;
 
 private:

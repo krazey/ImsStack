@@ -17,11 +17,14 @@
 #define INTERFACE_AOS_CALL_TRACKER_LISTENER_H_
 
 #include "IMSTypeDef.h"
-#include "IAosCallTracker.h"
+
+enum class CallState;
 
 class IAosCallTrackerListener
 {
 public:
+    virtual ~IAosCallTrackerListener(){};
+
     virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) = 0;
 };
 

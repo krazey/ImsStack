@@ -23,6 +23,8 @@ class IAosNetTrackerListener;
 class IAosNetTracker
 {
 public:
+    virtual ~IAosNetTracker(){};
+
     virtual IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT) = 0;
     virtual IMS_BOOL IsDataIn() = 0;
     virtual IMS_BOOL IsNetworkIn() = 0;

@@ -21,6 +21,8 @@
 class IAosSubscriberListener
 {
 public:
+    virtual ~IAosSubscriberListener(){};
+
     virtual void Subscriber_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam = 0) = 0;
 };
 #endif  // INTERFACE_AOS_SUBSCRIBER_LISTENER_H_

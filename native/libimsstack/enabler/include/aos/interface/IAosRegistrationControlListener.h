@@ -27,6 +27,8 @@ enum class AosControlCause;
 class IAosRegistrationControlListener
 {
 public:
+    virtual ~IAosRegistrationControlListener(){};
+
     virtual void RegistrationControl_UpdateSipDelegateRegistration() = 0;
     virtual void RegistrationControl_TriggerSipDelegateDeregistration() = 0;
     virtual void RegistrationControl_TriggerFullNetworkRegistration(

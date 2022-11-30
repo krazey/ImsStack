@@ -21,6 +21,8 @@
 class IAosConnectorListener
 {
 public:
+    virtual ~IAosConnectorListener(){};
+
     virtual void Connector_Activated() = 0;
     virtual void Connector_Deactivated(IN IMS_UINT32 nReason) = 0;
     virtual void Connector_Updated(IN IMS_UINT32 nReason) = 0;

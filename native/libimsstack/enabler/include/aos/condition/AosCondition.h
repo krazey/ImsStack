@@ -33,8 +33,6 @@
 class IAosConditionListener;
 class AosServiceAvailableCellular;
 class AosServiceAvailableWifi;
-class AosServicePhoneListener;
-class AosServiceSettingListener;
 
 class AosCondition :
         public IEventListener,

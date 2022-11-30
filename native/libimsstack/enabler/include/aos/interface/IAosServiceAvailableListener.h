@@ -24,6 +24,8 @@
 class IAosServiceAvailableListener
 {
 public:
+    virtual ~IAosServiceAvailableListener(){};
+
     /**
      * @brief Notifies if any service is available under the current conditions.
      *

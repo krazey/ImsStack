@@ -34,6 +34,8 @@ class IAosPcscf;
 class IAosAppContext
 {
 public:
+    virtual ~IAosAppContext(){};
+
     virtual IMS_SINT32 GetSlotId() const = 0;
     virtual const AString& GetProfileId() const = 0;
 

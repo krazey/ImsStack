@@ -397,6 +397,7 @@ protected:
     IMS_BOOL m_bIsImsCall;
     IMS_BOOL m_bIsPublished;
     IMS_BOOL m_bIsActivated;
+    IMS_BOOL m_bEpdgEnabled;
 
     AString m_strTag;
 

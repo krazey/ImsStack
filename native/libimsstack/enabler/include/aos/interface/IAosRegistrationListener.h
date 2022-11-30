@@ -21,6 +21,8 @@
 class IAosRegistrationListener
 {
 public:
+    virtual ~IAosRegistrationListener(){};
+
     virtual void Registration_StateChanged(IN IMS_UINT32 nResult, IN IMS_UINT32 nReason = 0) = 0;
 
     virtual void Registration_PreNotify(IN IMS_UINT32 nPreReason) = 0;

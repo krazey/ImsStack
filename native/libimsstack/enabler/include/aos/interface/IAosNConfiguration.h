@@ -29,6 +29,8 @@ class IAosNConfigurationListener;
 class IAosNConfiguration
 {
 public:
+    virtual ~IAosNConfiguration(){};
+
     /**
      * @brief Get the slot id to be retrieved.
      *

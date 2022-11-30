@@ -31,6 +31,7 @@
 class IImsAosMonitor
 {
 public:
+    virtual ~IImsAosMonitor(){};
     /**
      * @brief Indicate the services that are registered with features over IPCAN type.
      *

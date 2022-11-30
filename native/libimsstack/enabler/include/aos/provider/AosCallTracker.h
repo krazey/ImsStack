@@ -24,8 +24,6 @@
 #include "interface/IAosServicePhoneListener.h"
 #include "../../interface/mtc/IMtcCallStateListener.h"
 
-class AosServicePhoneListener;
-
 class AosCallTracker :
         public IAosCallTracker,
         public IEventListener,

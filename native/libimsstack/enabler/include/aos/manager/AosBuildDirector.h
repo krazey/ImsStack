@@ -17,8 +17,7 @@
 #define AOS_BUILD_DIRECTOR_H_
 
 #include "ImsMap.h"
-
-class AString;
+#include "AString.h"
 
 class IAosBuilder;
 class IAosAppContext;

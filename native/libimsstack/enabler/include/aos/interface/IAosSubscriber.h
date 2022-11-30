@@ -25,6 +25,8 @@ class ISubscriberConfig;
 class IAosSubscriber
 {
 public:
+    virtual ~IAosSubscriber(){};
+
     virtual IMS_BOOL IsReady() const = 0;
 
     virtual void SetListener(IN IAosSubscriberListener* piListener) = 0;

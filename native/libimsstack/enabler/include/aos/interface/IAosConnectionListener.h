@@ -21,6 +21,8 @@
 class IAosConnectionListener
 {
 public:
+    virtual ~IAosConnectionListener(){};
+
     virtual void AosConnection_StateChanged(IN IMS_UINT32 nState) = 0;
     virtual void AosConnection_IpChanged() = 0;
     virtual void AosConnection_IpcanCatChanged() = 0;

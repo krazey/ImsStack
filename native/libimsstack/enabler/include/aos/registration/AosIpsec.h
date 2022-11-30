@@ -234,6 +234,8 @@ private:
 class IAosIpsecListener
 {
 public:
+    virtual ~IAosIpsecListener(){};
+
     /**
      * @brief Notify to AosIpsecHelper when the duration of the ipsec policy is expired.
      *

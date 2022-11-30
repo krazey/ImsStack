@@ -20,6 +20,7 @@
 
 #include "ImsActivityEx.h"
 #include "IpAddress.h"
+#include "SipProfile.h"
 
 #include "IRegistrationListener.h"
 #include "base/IMessageMediator.h"
@@ -42,14 +43,12 @@ class IRegParameter;
 class IRegSubscription;
 
 class RegistrationManager;
-class SipProfile;
 
 class IAosAppContext;
 class IAosHandle;
 class IAosRegistrationListener;
 
 class AosIpsecHelper;
-class AosStaticProfile;
 class AosSubscription;
 
 enum class AosNetworkType;

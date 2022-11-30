@@ -28,9 +28,6 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define AOSTAG m_strTag.GetStr()
 
-PRIVATE GLOBAL IMSList<IMS_UINT32> AosServiceAvailable::m_objBlockReasonsLastNotified =
-        IMSList<IMS_UINT32>();
-
 PROTECTED
 AosServiceAvailable::AosServiceAvailable(AString strName) :
         m_piAppContext(IMS_NULL),
@@ -43,6 +40,7 @@ AosServiceAvailable::AosServiceAvailable(AString strName) :
         m_bAirplaneMode(IMS_FALSE),
         m_bRoamingState(IMS_FALSE),
         m_bAvailableLastNotified(IMS_FALSE),
+        m_objBlockReasonsLastNotified(IMSList<IMS_UINT32>()),
         m_objListeners(IMSList<IAosServiceAvailableListener*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosServiceAvailable = %" PFLS_u "/%" PFLS_x,

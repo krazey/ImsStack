@@ -21,9 +21,6 @@
 
 class IAosAppContext;
 class IAosSubscriberManager;
-class AosStaticProfile;
-class AosUtil;
-class AosServicePhoneListener;
 
 class AosSubscriber : public IAosSubscriber, public IAosSubscriberManagerListener
 {
