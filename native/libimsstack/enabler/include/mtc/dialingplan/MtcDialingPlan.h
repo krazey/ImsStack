@@ -61,10 +61,10 @@ private:
     struct TemporaryServiceUrn final
     {
     public:
-        TemporaryServiceUrn(IN AString strNumber_, IN AString strUrn_)
+        TemporaryServiceUrn(IN AString strNumber_, IN AString strUrn_) :
+                strNumber(strNumber_),
+                strUrn(strUrn_)
         {
-            strNumber = strNumber_;
-            strUrn = strUrn_;
         }
         TemporaryServiceUrn(IN const TemporaryServiceUrn&) = delete;
         TemporaryServiceUrn& operator=(IN const TemporaryServiceUrn&) = delete;

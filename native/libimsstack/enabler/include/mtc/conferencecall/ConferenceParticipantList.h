@@ -31,15 +31,15 @@ public:
     struct ConferenceParticipant
     {
     public:
-        inline ConferenceParticipant()
+        inline ConferenceParticipant() :
+                m_pConfUser(IMS_NULL),
+                m_pIReference(IMS_NULL),
+                m_strReferInviteUri(AString::ConstEmpty()),
+                m_bInfoUpdated(IMS_FALSE),
+                m_bMatchingCompleted(IMS_FALSE),
+                m_bDisconnectionNotified(IMS_FALSE),
+                m_bDisconnectedExplicitly(IMS_FALSE)
         {
-            m_pConfUser = IMS_NULL;
-            m_pIReference = IMS_NULL;
-            m_strReferInviteUri = AString::ConstEmpty();
-            m_bInfoUpdated = IMS_FALSE;
-            m_bMatchingCompleted = IMS_FALSE;
-            m_bDisconnectionNotified = IMS_FALSE;
-            m_bDisconnectedExplicitly = IMS_FALSE;
         }
         ~ConferenceParticipant();
         ConferenceParticipant(IN const ConferenceParticipant&) = delete;
