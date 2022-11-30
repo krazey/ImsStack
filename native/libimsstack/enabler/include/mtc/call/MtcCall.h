@@ -124,7 +124,10 @@ public:
     CallType GetCallType() const override;
     inline CallStateName GetState() const override { return m_objStateMachine.GetState(); }
 
-    inline IMtcCallContext& GetCallContext() const override { return *(IMtcCallContext*)this; }
+    inline IMtcCallContext& GetCallContext() override
+    {
+        return *(static_cast<IMtcCallContext*>(this));
+    }
 
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }
     inline IMS_BOOL IsHeldByMe() const override { return m_bHeldByMe; }
@@ -145,7 +148,7 @@ public:
     {
         return m_objPendingOperationHolder;
     }
-    inline IMtcCall& GetCall() override { return *(IMtcCall*)this; }
+    inline IMtcCall& GetCall() override { return *(static_cast<IMtcCall*>(this)); }
     inline ImsList<IMtcCall*> GetOtherCalls() override
     {
         return GetCallManager().GetCallsExcluding(GetKey());

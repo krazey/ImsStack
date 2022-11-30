@@ -280,7 +280,7 @@ public:
      *
      * @return
      */
-    virtual IMtcCallContext& GetCallContext() const = 0;
+    virtual IMtcCallContext& GetCallContext() = 0;
 };
 
 struct CallInfo
