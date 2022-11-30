@@ -17,7 +17,6 @@
 #ifndef UCE_NOTIFY_MESSAGE_BODY_H_
 #define UCE_NOTIFY_MESSAGE_BODY_H_
 
-#include "AString.h"
 #include "UceNotifyBodyPartData.h"
 
 class UceNotifyMessageBody

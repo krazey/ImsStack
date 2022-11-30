@@ -37,9 +37,10 @@ public:
     ---------------------------------------------------------------------------------------------
   */
 public:
-    AString ComposeRLMIList(IN IMSList<AString>& pContactInfoList);  //
+    AString ComposeRLMIList(IN IMSList<AString>& pContactInfoList);
+
 private:
-    void EncodeResourceXMLNameSpace(IN IXmlStreamWriter*& piWriter);  //
+    static void EncodeResourceXMLNameSpace(IN IXmlStreamWriter*& piWriter);
     /* ------------------------------------------------------------------------------------------
         Variables
     ---------------------------------------------------------------------------------------------

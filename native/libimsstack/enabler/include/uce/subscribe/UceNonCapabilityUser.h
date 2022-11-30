@@ -17,8 +17,6 @@
 #ifndef UCE_NON_CAPABILITY_USER_H_
 #define UCE_NON_CAPABILITY_USER_H_
 
-#include "AString.h"
-
 class UceNonCapabilityUser
 {
 public:

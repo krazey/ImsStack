@@ -19,6 +19,7 @@
 #include "ICarrierConfig.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
+#include "config/UceAssetItems.h"
 
 __IMS_TRACE_TAG_USER_DECL__("CONF");
 
@@ -256,84 +257,6 @@ IMS_BOOL UceConfig::IsImsRegistrationRequired(
     return IMS_FALSE;
 }
 
-void UceConfig::toString(IN IMS_SINT32 nSimSlot)
-{
-    if (m_objAssetMap.GetIndexOfKey(nSimSlot) < 0)
-    {
-        return;
-    }
-    IMS_TRACE_D("toString:slotId[%d]", nSimSlot, 0, 0);
-    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
-    IMS_TRACE_D("ExpireValuePublish[%d], ExtendedExpireValuePublish[%d], PublishRefreshRatio[%d]",
-            objUceAssetItems->m_nExpireValuePublish,
-            objUceAssetItems->m_nExtendedExpireValuePublish,
-            objUceAssetItems->m_nPublishRefreshRatio);
-    IMS_TRACE_D("ExpireValueListSubscribe[%d], RlsUri[%s], SubscribeIndepedentOfPublish[%d]",
-            objUceAssetItems->m_nExpireValueListSubscribe, objUceAssetItems->m_strRlsUri.GetStr(),
-            objUceAssetItems->m_bSubscribeIndepedentOfPublish);
-    IMS_TRACE_D("AnonymousFetchMethod[%d], EncodePublishBody[%d], EncodeSubscribeBody[%d]",
-            objUceAssetItems->m_nAnonymousFetchMethod, objUceAssetItems->m_bEncodePublishBody,
-            objUceAssetItems->m_bEncodeSubscribeBody);
-    IMS_TRACE_D("SupportOptions[%d]", objUceAssetItems->m_bSupportOptions, 0, 0);
-    IMS_TRACE_D("UseContactHeaderInPublish[%d], UseContactHeaderInSubscribe[%d], "
-                "AddVideoTagContactHeaderInPublish[%d]",
-            objUceAssetItems->m_bUseContactHeaderInPublish,
-            objUceAssetItems->m_bUseContactHeaderInSubscribe,
-            objUceAssetItems->m_bAddVideoTagContactHeaderInPublish);
-
-    IMS_TRACE_D("ImmediatelyRetryPublishResponse size[%d]",
-            objUceAssetItems->m_objImmediatelyRetryPublishResponse.GetSize(), 0, 0);
-    for (IMS_UINT32 i = 0; i < objUceAssetItems->m_objImmediatelyRetryPublishResponse.GetSize();
-            i++)
-    {
-        IMS_TRACE_D("ImmediatelyRetryPublishResponse index[%d], value[%d]", i,
-                objUceAssetItems->m_objImmediatelyRetryPublishResponse.GetValueAt(i), 0);
-    }
-    IMS_TRACE_D("ImmediatelyRetryPublishResponseMaxCount[%d]",
-            objUceAssetItems->m_nImmediatelyRetryPublishResponseMaxCount, 0, 0);
-
-    IMS_TRACE_D("RetryPublishResponse size[%d]",
-            objUceAssetItems->m_objRetryPublishResponse.GetSize(), 0, 0);
-    for (IMS_UINT32 i = 0; i < objUceAssetItems->m_objRetryPublishResponse.GetSize(); i++)
-    {
-        IMS_TRACE_D("RetryPublishResponse index[%d], value[%d]", i,
-                objUceAssetItems->m_objRetryPublishResponse.GetValueAt(i), 0);
-    }
-    IMS_TRACE_D("RetryPublishResponseMaxCount[%d], RetryPublishResponseTimeSec[%d]",
-            objUceAssetItems->m_nRetryPublishResponseMaxCount,
-            objUceAssetItems->m_nRetryPublishResponseTimeSec, 0);
-
-    IMS_TRACE_D("VariableRetryPublishResponse size[%d]",
-            objUceAssetItems->m_objVariableRetryPublishResponse.GetSize(), 0, 0);
-    for (IMS_UINT32 i = 0; i < objUceAssetItems->m_objVariableRetryPublishResponse.GetSize(); i++)
-    {
-        IMS_TRACE_D("VariableRetryPublishResponse index[%d], value[%d]", i,
-                objUceAssetItems->m_objVariableRetryPublishResponse.GetValueAt(i), 0);
-    }
-    IMS_TRACE_D("VariableRetryPublishResponseMaxCount[%d]",
-            objUceAssetItems->m_nVariableRetryPublishResponseMaxCount, 0, 0);
-    IMS_TRACE_D("VariableRetryPublishResponseTimeSec size[%d]",
-            objUceAssetItems->m_objVariableRetryPublishResponseTimeSec.GetSize(), 0, 0);
-    for (IMS_UINT32 i = 0; i < objUceAssetItems->m_objVariableRetryPublishResponseTimeSec.GetSize();
-            i++)
-    {
-        IMS_TRACE_D("VariableRetryPublishResponseTimeSec index[%d], value[%d]", i,
-                objUceAssetItems->m_objVariableRetryPublishResponseTimeSec.GetValueAt(i), 0);
-    }
-    for (IMS_UINT32 i = 0;
-            i < objUceAssetItems->m_objReAttemptRegistrationPublishResponse.GetSize(); i++)
-    {
-        IMS_TRACE_D("ReAttemptRegistrationPublishResponse index[%d], value[%d]", i,
-                objUceAssetItems->m_objReAttemptRegistrationPublishResponse.GetValueAt(i), 0);
-    }
-    for (IMS_UINT32 i = 0;
-            i < objUceAssetItems->m_objReAttemptRegistrationSubscribeResponse.GetSize(); i++)
-    {
-        IMS_TRACE_D("ReAttemptRegistrationSubscribeResponse index[%d], value[%d]", i,
-                objUceAssetItems->m_objReAttemptRegistrationSubscribeResponse.GetValueAt(i), 0);
-    }
-}
-
 PUBLIC VIRTUAL void UceConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
@@ -385,58 +308,57 @@ const IMS_CHAR* UceConfig::GetKeyString(IN KEY_UCE_INT eKey)
 
 void UceConfig::Update(IN ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot)
 {
-    UceAssetItems* objUceAssetItems = new UceAssetItems();
-    objUceAssetItems->m_nExpireValuePublish =
+    UceAssetItems* objNew = new UceAssetItems();
+    objNew->m_nExpireValuePublish =
             piCc->GetInt(CarrierConfig::ImsUce::KEY_EXPIRE_VALUE_PUBLISH_SEC_INT);
-    objUceAssetItems->m_nExtendedExpireValuePublish =
+    objNew->m_nExtendedExpireValuePublish =
             piCc->GetInt(CarrierConfig::ImsUce::KEY_EXTENDED_EXPIRE_VALUE_PUBLISH_SEC_INT);
-    objUceAssetItems->m_nPublishRefreshRatio =
+    objNew->m_nPublishRefreshRatio =
             piCc->GetInt(CarrierConfig::ImsUce::KEY_PUBLISH_REFRESH_RATIO_INT);
-    objUceAssetItems->m_nExpireValueListSubscribe =
+    objNew->m_nExpireValueListSubscribe =
             piCc->GetInt(CarrierConfig::ImsUce::KEY_EXPIRE_VALUE_LIST_SUBSCRIBE_SEC_INT);
-    objUceAssetItems->m_strRlsUri = piCc->GetString(CarrierConfig::ImsUce::KEY_RLS_URI_STRING);
-    objUceAssetItems->m_bSubscribeIndepedentOfPublish =
+    objNew->m_strRlsUri = piCc->GetString(CarrierConfig::ImsUce::KEY_RLS_URI_STRING);
+    objNew->m_bSubscribeIndepedentOfPublish =
             piCc->GetBoolean(CarrierConfig::ImsUce::KEY_SUBSCRIBE_INDEPENDENT_OF_PUBLISH_BOOL);
-    objUceAssetItems->m_nAnonymousFetchMethod =
+    objNew->m_nAnonymousFetchMethod =
             piCc->GetInt(CarrierConfig::ImsUce::KEY_ANONYMOUS_FETCH_METHOD_INT);
-    objUceAssetItems->m_bEncodePublishBody =
+    objNew->m_bEncodePublishBody =
             piCc->GetBoolean(CarrierConfig::ImsUce::KEY_ENCODE_PUBLISH_BODY_BOOL);
-    objUceAssetItems->m_bEncodeSubscribeBody =
+    objNew->m_bEncodeSubscribeBody =
             piCc->GetBoolean(CarrierConfig::ImsUce::KEY_ENCODE_SUBSCRIBE_BODY_BOOL);
-    objUceAssetItems->m_bSupportOptions =
-            piCc->GetBoolean(CarrierConfig::ImsUce::KEY_SUPPORT_OPTIONS_BOOL);
-    objUceAssetItems->m_bUseContactHeaderInPublish =
+    objNew->m_bSupportOptions = piCc->GetBoolean(CarrierConfig::ImsUce::KEY_SUPPORT_OPTIONS_BOOL);
+    objNew->m_bUseContactHeaderInPublish =
             piCc->GetBoolean(CarrierConfig::ImsUce::KEY_USE_CONTACT_HEADER_IN_PUBLISH_BOOL);
-    objUceAssetItems->m_bUseContactHeaderInSubscribe =
+    objNew->m_bUseContactHeaderInSubscribe =
             piCc->GetBoolean(CarrierConfig::ImsUce::KEY_USE_CONTACT_HEADER_IN_SUBSCRIBE_BOOL);
-    objUceAssetItems->m_objImmediatelyRetryPublishResponse = piCc->GetIntArray(
+    objNew->m_objImmediatelyRetryPublishResponse = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_IMMEDIATELY_RETRY_PUBLISH_RESPONSE_INT_ARRAY);
-    objUceAssetItems->m_nImmediatelyRetryPublishResponseMaxCount = piCc->GetInt(
+    objNew->m_nImmediatelyRetryPublishResponseMaxCount = piCc->GetInt(
             CarrierConfig::ImsUce::KEY_IMMEDIATELY_RETRY_PUBLISH_RESPONSE_MAX_COUNT_INT);
-    objUceAssetItems->m_objRetryPublishResponse = piCc->GetIntArray(
+    objNew->m_objRetryPublishResponse = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_FIXED_TIME_RETRY_PUBLISH_RESPONSE_INT_ARRAY);
-    objUceAssetItems->m_nRetryPublishResponseMaxCount = piCc->GetInt(
+    objNew->m_nRetryPublishResponseMaxCount = piCc->GetInt(
             CarrierConfig::ImsUce::KEY_FIXED_TIME_RETRY_PUBLISH_RESPONSE_MAX_COUNT_INT);
-    objUceAssetItems->m_nRetryPublishResponseTimeSec =
+    objNew->m_nRetryPublishResponseTimeSec =
             piCc->GetInt(CarrierConfig::ImsUce::KEY_FIXED_TIME_RETRY_PUBLISH_RESPONSE_TIME_SEC_INT);
-    objUceAssetItems->m_objVariableRetryPublishResponse = piCc->GetIntArray(
+    objNew->m_objVariableRetryPublishResponse = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_INT_ARRAY);
-    objUceAssetItems->m_nVariableRetryPublishResponseMaxCount = piCc->GetInt(
+    objNew->m_nVariableRetryPublishResponseMaxCount = piCc->GetInt(
             CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_MAX_COUNT_INT);
-    objUceAssetItems->m_objVariableRetryPublishResponseTimeSec = piCc->GetIntArray(
+    objNew->m_objVariableRetryPublishResponseTimeSec = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_TIME_SEC_INT_ARRAY);
-    objUceAssetItems->m_objReAttemptRegistrationPublishResponse = piCc->GetIntArray(
+    objNew->m_objReAttemptRegistrationPublishResponse = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_REATTEMPT_REGISTRATION_PUBLISH_RESPONSE_INT_ARRAY);
-    objUceAssetItems->m_objReAttemptRegistrationSubscribeResponse = piCc->GetIntArray(
+    objNew->m_objReAttemptRegistrationSubscribeResponse = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_REATTEMPT_REGISTRATION_SUBSCRIBE_RESPONSE_INT_ARRAY);
 
-    if (m_objAssetMap.GetIndexOfKey(nSimSlot) >= 0)
+    IMS_SLONG nIndex = m_objAssetMap.GetIndexOfKey(nSimSlot);
+    if (nIndex < 0)
     {
-        UceAssetItems* objOld = m_objAssetMap.GetValue(nSimSlot);
-        if (objOld != IMS_NULL)
-        {
-            delete objOld;
-        }
+        m_objAssetMap.SetValue(nSimSlot, objNew);
     }
-    m_objAssetMap.SetValue(nSimSlot, objUceAssetItems);
+    else
+    {
+        m_objAssetMap.SetValueAt(nIndex, objNew);
+    }
 }

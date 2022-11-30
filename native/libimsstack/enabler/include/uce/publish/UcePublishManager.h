@@ -32,7 +32,6 @@
 class ICoreService;
 class IPublication;
 class ISipMessage;
-class ISipClientConnection;
 
 class IPublicationData  // internal Param
 {
