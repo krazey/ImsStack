@@ -1344,7 +1344,7 @@ PRIVATE void MessageUtils::GetParameterValueFromUnknownHeaderBody(
     ImsList<AString> lstParameters = strBody.Split(TextParser::CHAR_SEMICOLON);
     for (IMS_UINT32 i = 0; i < lstParameters.GetSize(); i++)
     {
-        AString& strParameter = lstParameters.GetAt(i);
+        const AString& strParameter = lstParameters.GetAt(i);
         IMS_SINT32 nEqualPosition =
                 TextParser::GetIndexOfDelimiter(strParameter, TextParser::CHAR_EQUAL);
 

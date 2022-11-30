@@ -162,7 +162,7 @@ void SilentRedialHelper::SetRedialDetail()
             return;
         case EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT:
         {
-            MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+            const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
 
             m_nInterval = objConfig.GetInt(Feature::SILENT_REDIAL_INTERVAL);
             m_nMaxCount = objConfig.GetInt(Feature::SILENT_REDIAL_MAX_RETRY_COUNT);

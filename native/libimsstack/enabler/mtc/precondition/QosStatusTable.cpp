@@ -278,7 +278,7 @@ void QosStatusTable::CreateStatusRecords(IN IMS_SINT32 eSdpMediaType)
 PUBLIC
 IMS_BOOL QosStatusTable::IsStatusRecordsListEmpty(IN IMS_SINT32 eSdpMediaType)
 {
-    ImsList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
+    const ImsList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
     return lstStatusRecords.IsEmpty();
 }
 

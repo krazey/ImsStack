@@ -487,7 +487,7 @@ void MessageFormatter::SetCallerIdHeader()
 
     if (pSuppService->nValue == CALLERID_RESTRICTED)
     {
-        MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+        const MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
         if (objConfig.GetInt(Feature::SESSION_PRIVACY_TYPE) ==
                 CarrierConfig::ImsVoice::SESSION_PRIVACY_TYPE_HEADER)
         {

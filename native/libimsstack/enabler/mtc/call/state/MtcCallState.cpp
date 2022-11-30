@@ -968,7 +968,7 @@ IMS_BOOL MtcCallState::IsCallEndNeededByAudioInactivity(
         return bNeedToEnd;
     }
 
-    UpdatingInfo& objUpdatingInfo = m_objContext.GetUpdatingInfo();
+    const UpdatingInfo& objUpdatingInfo = m_objContext.GetUpdatingInfo();
     IMS_SINT32 nAdditionalInfo = -1;
 
     if (objUpdatingInfo.IsHeld() || objUpdatingInfo.IsHeldBy())
