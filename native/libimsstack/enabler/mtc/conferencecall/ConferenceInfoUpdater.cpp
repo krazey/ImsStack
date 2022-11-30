@@ -105,7 +105,7 @@ const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(IN MatchingPolicy e
             return "ORDER";
         case MatchingPolicy::REFER_TO_URI:
             return "REFER_TO_URI";
-        case MatchingPolicy::USERENTITY:
+        default:  // MatchingPolicy::USERENTITY:
             return "USERENTITY";
     }
 }
@@ -402,7 +402,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipant(
         case MatchingPolicy::USERENTITY:
             return FindParticipantByUserEntity(pUser);
 
-        case MatchingPolicy::REFER_TO_URI:
+        default:  // MatchingPolicy::REFER_TO_URI:
             return FindParticipantByReferToUri(pUser);
     }
 }

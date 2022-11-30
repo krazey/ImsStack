@@ -44,7 +44,7 @@ PUBLIC VIRTUAL IMtcCallState* CallStateFactory::CreateState(
             return new EstablishedState(objContext);
         case CallStateName::UPDATING:
             return new UpdatingState(objContext);
-        case CallStateName::TERMINATING:
+        default:  // CallStateName::TERMINATING
             return new TerminatingState(objContext);
     }
 }
