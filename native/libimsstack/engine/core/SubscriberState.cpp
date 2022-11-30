@@ -181,7 +181,7 @@ PROTECTED VIRTUAL const SipHeaderProperty* SubscriberState::GetRestrictedHeaders
 }
 
 PRIVATE
-IMS_SINT32 SubscriberState::TranslateMessage(IN const ISipMessage* piSipMsg)
+IMS_SINT32 SubscriberState::TranslateMessage(IN const ISipMessage* piSipMsg) const
 {
     IMS_SINT32 nMsgType = piSipMsg->GetType();
     const SipMethod& objMethod = piSipMsg->GetMethod();

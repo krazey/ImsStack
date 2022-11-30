@@ -169,7 +169,7 @@ public:
     void RegisterMethod(IN Method* pMethod);
     void DeregisterMethod(IN Method* pMethod);
 
-    IMS_BOOL ValidateMethod(IN const SipMethod& objMethod);
+    IMS_BOOL ValidateMethod(IN const SipMethod& objMethod) const;
     IMS_BOOL ValidateRequestUri(IN const SipAddress& objRequestUri,
             IN ISipDialog* piDialog = IMS_NULL, IN IMS_BOOL bIsMidDialogRequest = IMS_FALSE);
     IMS_BOOL ValidateRequestUriForIpAndPort(IN const SipAddress& objRequestUri,
@@ -224,7 +224,8 @@ private:
     {
         return (IsImsConnected() && (m_piRegBinding != IMS_NULL));
     }
-    IMS_BOOL SetPPreferredIdentityHeader(IN IMS_SINT32 nPreferredId, IN_OUT ISipMessage*& piSipMsg);
+    IMS_BOOL SetPPreferredIdentityHeader(
+            IN IMS_SINT32 nPreferredId, IN_OUT ISipMessage*& piSipMsg) const;
     void SetRegBinding(IN IRegBinding* piRegBinding);
     void UpdateAuthorizedUserIds();
     void UpdateCallerCapabilityNPreference();
