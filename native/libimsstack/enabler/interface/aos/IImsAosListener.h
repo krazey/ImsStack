@@ -31,6 +31,8 @@
 class IImsAosListener
 {
 public:
+    virtual ~IImsAosListener(){};
+
     /**
      * @brief Indicate that the service is connected.
      *

@@ -21,6 +21,8 @@
 class IAosConditionListener
 {
 public:
+    virtual ~IAosConditionListener(){};
+
     virtual void Condition_Changed(IN IMS_UINT32 nReason = 0) = 0;
     virtual void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) = 0;
 };

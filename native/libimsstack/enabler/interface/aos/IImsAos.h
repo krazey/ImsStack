@@ -37,6 +37,8 @@ class ImsAosFeatureTag;
 class IImsAos
 {
 public:
+    virtual ~IImsAos(){};
+
     /**
      * @brief Control the operation for registration
      *

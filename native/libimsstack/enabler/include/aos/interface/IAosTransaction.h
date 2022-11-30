@@ -21,6 +21,8 @@
 class IAosTransactionListener
 {
 public:
+    virtual ~IAosTransactionListener(){};
+
     virtual void Transaction_OnConnectionFailed(IN IMS_UINT32 nFailureReason,
             IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis) = 0;
 
@@ -32,6 +34,8 @@ public:
 class IAosTransaction
 {
 public:
+    virtual ~IAosTransaction(){};
+
     virtual void SetListener(IN IMS_UINT32 nType, IN IAosTransactionListener* piListener) = 0;
     virtual void RemoveListener(IN IMS_UINT32 nType, IN IAosTransactionListener* piListener) = 0;
 

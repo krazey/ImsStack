@@ -94,6 +94,8 @@ private:
 class IAosKeepAliveListener
 {
 public:
+    virtual ~IAosKeepAliveListener(){};
+
     virtual void KeepAlive_DetectedFlowFailed() = 0;
 };
 

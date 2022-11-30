@@ -21,6 +21,8 @@
 class IAosSubscriberManagerListener
 {
 public:
+    virtual ~IAosSubscriberManagerListener(){};
+
     virtual void AosSubscriberManager_NotifyState(IMS_UINT32 nState) = 0;
 };
 

@@ -125,7 +125,8 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_bRegRecoveryHeld(IMS_FALSE),
         m_bIsImsCall(IMS_FALSE),
         m_bIsPublished(IMS_FALSE),
-        m_bIsActivated(IMS_TRUE)
+        m_bIsActivated(IMS_TRUE),
+        m_bEpdgEnabled(IMS_FALSE)
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, strAppId.GetStr());
 
@@ -1125,7 +1126,6 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage(IN IMSMSG& obj
 
 PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage_Connection(IN IMSMSG& objMsg)
 {
-    static IMS_BOOL bEpdgEnabled = IMS_FALSE;
     IMS_UINT32 nType = LONG_TO_INT(objMsg.nWparam);
 
     if (nType == CONNECTION_DEACTIVATED)
@@ -1148,11 +1148,11 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage_Connection(IN 
     {
         IMS_BOOL bCurrEpdgEnabled = m_piContext->GetConnection()->IsEpdgEnabled();
 
-        if (bEpdgEnabled != bCurrEpdgEnabled)
+        if (m_bEpdgEnabled != bCurrEpdgEnabled)
         {
-            bEpdgEnabled = bCurrEpdgEnabled;
+            m_bEpdgEnabled = bCurrEpdgEnabled;
             UpdateMonitorNotify(IImsAosMonitor::TYPE_IPCAN,
-                    (bEpdgEnabled) ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE);
+                    (m_bEpdgEnabled) ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE);
         }
 
         m_piRegistration->RequestCmd(IAosRegistration::CMD_UPDATE_IPCAN);

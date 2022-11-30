@@ -20,7 +20,6 @@
 
 class AString;
 class IAosRegistrationListener;
-class AosStaticProfile;
 
 /**
  * @brief This class provides the interface for AosRegistration.
@@ -29,6 +28,8 @@ class AosStaticProfile;
 class IAosRegistration
 {
 public:
+    virtual ~IAosRegistration(){};
+
     /**
      * @brief Start the initial registration.
      */

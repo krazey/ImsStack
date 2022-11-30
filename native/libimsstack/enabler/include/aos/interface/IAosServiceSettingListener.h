@@ -22,6 +22,8 @@ enum class ServiceSetting;
 class IAosServiceSettingListener
 {
 public:
+    virtual ~IAosServiceSettingListener(){};
+
     /**
      * Called to notify the change of airplane setting.
      * Called by AosService (Java)

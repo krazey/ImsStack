@@ -19,6 +19,8 @@
 class IAosNConfigurationListener
 {
 public:
+    virtual ~IAosNConfigurationListener(){};
+
     virtual void NConfiguration_NotifyConfigChanged() = 0;
 };
 #endif

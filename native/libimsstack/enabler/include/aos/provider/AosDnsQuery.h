@@ -78,6 +78,8 @@ private:
 class IAosDnsQueryListener
 {
 public:
+    virtual ~IAosDnsQueryListener(){};
+
     virtual void DnsQuery_Ready() = 0;
     virtual void DnsQuery_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIps) = 0;
 };

@@ -30,6 +30,8 @@
 class IImsAosInfo
 {
 public:
+    virtual ~IImsAosInfo(){};
+
     /**
      * @brief Get the associated URI that is the topmost one and authorized and registered.
      *

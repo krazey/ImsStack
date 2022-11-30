@@ -24,6 +24,8 @@ enum class PreciseCallState;
 class IAosServicePhoneListener
 {
 public:
+    virtual ~IAosServicePhoneListener(){};
+
     /**
      * Called to notify the start of AoS Service.
      * Called by AosService (Java)

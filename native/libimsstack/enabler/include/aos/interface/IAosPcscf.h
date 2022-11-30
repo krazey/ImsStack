@@ -26,6 +26,8 @@ class IAosPcscfListener;
 class IAosPcscf
 {
 public:
+    virtual ~IAosPcscf(){};
+
     virtual void Configure(IN IMS_UINT32 nIpVersion = IPAddress::UNKNOWN) = 0;
     virtual IMS_BOOL IsConfigured() const = 0;
 
@@ -90,6 +92,8 @@ protected:
 class IAosPcscfListener
 {
 public:
+    virtual ~IAosPcscfListener(){};
+
     virtual void Pcscf_NotifyResult(IN IMS_BOOL bResult) = 0;
 };
 

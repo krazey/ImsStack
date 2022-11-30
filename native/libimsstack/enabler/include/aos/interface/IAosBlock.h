@@ -113,6 +113,8 @@ typedef enum
 class IAosBlock
 {
 public:
+    virtual ~IAosBlock(){};
+
     /**
      * @brief
      *

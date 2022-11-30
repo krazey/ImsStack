@@ -22,7 +22,6 @@
 #include "../../interface/mtc/MtcConnector.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosCallTrackerListener.h"
-#include "interface/IAosNConfiguration.h"
 #include "interface/IAosService.h"
 #include "provider/AosUtil.h"
 #include "provider/AosCallTracker.h"

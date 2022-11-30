@@ -32,7 +32,6 @@
 #include "handle/AosFeatureTag.h"
 
 class IAosAppContext;
-class AosServiceSettingListener;
 
 class AosHandle :
         public IAosHandle,

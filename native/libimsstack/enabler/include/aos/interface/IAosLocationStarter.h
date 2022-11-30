@@ -23,6 +23,8 @@ class IAosAppContext;
 class IAosLocationStarter
 {
 public:
+    virtual ~IAosLocationStarter(){};
+
     virtual IMS_SINT32 GetSlotId() const = 0;
     virtual void SetSlotId(IN IMS_SINT32 nSlotId) = 0;
 

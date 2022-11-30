@@ -19,6 +19,8 @@
 class IAosRetryRepository
 {
 public:
+    virtual ~IAosRetryRepository(){};
+
     /**
      * @brief increase retry count
      *
