@@ -31,7 +31,7 @@ class IJniEnablerThread;
 class JniMtcCall : public BaseService
 {
 public:
-    JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId = 0);
+    explicit JniMtcCall(IN Jni_SendDataToJava pfnSendDataToJava, IN IMS_SINT32 nSlotId = 0);
     virtual ~JniMtcCall();
 
     virtual IMS_SINT32 SendData(IN const android::Parcel& objParcel) override;

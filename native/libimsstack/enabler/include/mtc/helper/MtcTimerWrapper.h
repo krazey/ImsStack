@@ -26,7 +26,7 @@ class IMtcTimerListener;
 class MtcTimerWrapper : public ITimerListener
 {
 public:
-    explicit MtcTimerWrapper();
+    MtcTimerWrapper();
     virtual ~MtcTimerWrapper();
     MtcTimerWrapper(IN const MtcTimerWrapper&) = delete;
     MtcTimerWrapper& operator=(IN const MtcTimerWrapper&) = delete;
@@ -42,7 +42,7 @@ public:
 
     struct MtcTimer
     {
-        MtcTimer(IN IMS_UINT32 eType) :
+        explicit MtcTimer(IN IMS_UINT32 eType) :
                 eType(eType),
                 piTimer(TimerService::GetTimerService()->CreateTimer())
         {

@@ -24,7 +24,7 @@
 class TerminatingState : public MtcCallState
 {
 public:
-    TerminatingState(IN IMtcCallContext& objContext);
+    explicit TerminatingState(IN IMtcCallContext& objContext);
     virtual ~TerminatingState();
     TerminatingState(IN const TerminatingState&) = delete;
     TerminatingState& operator=(IN const TerminatingState&) = delete;

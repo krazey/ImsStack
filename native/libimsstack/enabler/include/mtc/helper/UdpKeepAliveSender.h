@@ -27,7 +27,7 @@ class MtcConfigurationProxy;
 class UdpKeepAliveSender : public ITimerListener
 {
 public:
-    UdpKeepAliveSender(IN IMtcCallContext& objContext);
+    explicit UdpKeepAliveSender(IN IMtcCallContext& objContext);
     virtual ~UdpKeepAliveSender();
     UdpKeepAliveSender(IN const UdpKeepAliveSender&) = delete;
     UdpKeepAliveSender& operator=(IN const UdpKeepAliveSender&) = delete;

@@ -33,7 +33,7 @@
 class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListener
 {
 public:
-    MtcMediaManager(IN IMtcCallContext& objContext);
+    explicit MtcMediaManager(IN IMtcCallContext& objContext);
     virtual ~MtcMediaManager();
 
 public: /* IMediaSessionClientListener */

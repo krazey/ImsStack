@@ -35,7 +35,7 @@ class MtcCallManager final : public IMtcCallManager, public IMtcCallStateListene
 public:
     static NullCall* const s_pNullCall;
 
-    MtcCallManager(IN IMtcContext& objContext);
+    explicit MtcCallManager(IN IMtcContext& objContext);
     virtual ~MtcCallManager();
     MtcCallManager(IN const MtcCallManager&) = delete;
     MtcCallManager& operator=(IN const MtcCallManager&) = delete;

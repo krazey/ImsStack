@@ -30,7 +30,7 @@ struct MediaInfo;
 class UpdatingState : public MtcCallState
 {
 public:
-    UpdatingState(IN IMtcCallContext& objContext);
+    explicit UpdatingState(IN IMtcCallContext& objContext);
     virtual ~UpdatingState();
     UpdatingState(IN const UpdatingState&) = delete;
     UpdatingState& operator=(IN const UpdatingState&) = delete;

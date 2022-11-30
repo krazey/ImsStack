@@ -30,7 +30,7 @@ class AStringArray;
 class MtcCapabilityQueryHandler : public IMessageMediator
 {
 public:
-    MtcCapabilityQueryHandler(IN IMtcContext& objContext);
+    explicit MtcCapabilityQueryHandler(IN IMtcContext& objContext);
     virtual ~MtcCapabilityQueryHandler();
     MtcCapabilityQueryHandler(IN const MtcCapabilityQueryHandler&) = delete;
     MtcCapabilityQueryHandler& operator=(IN const MtcCapabilityQueryHandler&) = delete;

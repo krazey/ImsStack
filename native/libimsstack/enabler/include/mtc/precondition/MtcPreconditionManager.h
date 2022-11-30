@@ -65,7 +65,7 @@ class MtcPreconditionManager :
         public IQosTimerListener
 {
 public:
-    MtcPreconditionManager(IN IMtcCallContext& objContext);
+    explicit MtcPreconditionManager(IN IMtcCallContext& objContext);
     virtual ~MtcPreconditionManager();
 
 private:

@@ -26,7 +26,7 @@ class ISipClientConnection;
 class EstablishedState : public MtcCallState
 {
 public:
-    EstablishedState(IN IMtcCallContext& objContext);
+    explicit EstablishedState(IN IMtcCallContext& objContext);
     virtual ~EstablishedState();
     EstablishedState(IN const EstablishedState&) = delete;
     EstablishedState& operator=(IN const EstablishedState&) = delete;
