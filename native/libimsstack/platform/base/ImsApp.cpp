@@ -50,7 +50,7 @@ IMS_BOOL ImsApp::AttachService(IN ImsService* pService)
 }
 
 PUBLIC
-void ImsApp::DetachService(IN ImsService* pService)
+void ImsApp::DetachService(IN const ImsService* pService)
 {
     if (pService == IMS_NULL)
     {

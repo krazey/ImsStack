@@ -30,7 +30,7 @@ public:
 
 public:
     IMS_BOOL Attach(IN ImsActivity* pActivity);
-    void Detach(IN ImsActivity* pActivity);
+    void Detach(IN const ImsActivity* pActivity);
     ImsActivity* Get(IN const AString& strActivityName);
     AString GenerateName(IN const AString& strThreadName, IN const AString& strName);
     IMS_BOOL HandleMessage(IN ImsMessage& objMsg);

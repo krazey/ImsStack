@@ -36,7 +36,7 @@ IMS_BOOL ImsActivityManager::Attach(IN ImsActivity* pActivity)
 }
 
 PUBLIC
-void ImsActivityManager::Detach(IN ImsActivity* pActivity)
+void ImsActivityManager::Detach(IN const ImsActivity* pActivity)
 {
     for (IMS_UINT32 i = 0; i < m_objActivities.GetSize(); ++i)
     {

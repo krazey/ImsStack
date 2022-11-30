@@ -395,7 +395,7 @@ PROTECTED VIRTUAL void OsUsim::System_NotifyEvent(
 }
 
 PUBLIC
-IMS_BOOL OsUsim::IsDigestAkaPresent(IN OsUsimDigestAka* pDigestAka)
+IMS_BOOL OsUsim::IsDigestAkaPresent(IN const OsUsimDigestAka* pDigestAka)
 {
     if (pDigestAka == IMS_NULL)
     {

@@ -94,7 +94,7 @@ IMS_BOOL AsyncConfigHelper::SendTo(
 }
 
 PUBLIC
-void AsyncConfigHelper::Unregister(IN IAsyncConfig* piConfig)
+void AsyncConfigHelper::Unregister(IN const IAsyncConfig* piConfig)
 {
     for (IMS_UINT32 i = 0; i < m_objAsyncConfigs.GetSize(); ++i)
     {
@@ -146,7 +146,7 @@ PROTECTED VIRTUAL IMS_BOOL AsyncConfigHelper::OnMessage(IN ImsMessage& objMsg)
 }
 
 PROTECTED
-IMS_BOOL AsyncConfigHelper::IsRegisteredConfig(IN IAsyncConfig* piConfig)
+IMS_BOOL AsyncConfigHelper::IsRegisteredConfig(IN const IAsyncConfig* piConfig)
 {
     for (IMS_UINT32 i = 0; i < m_objAsyncConfigs.GetSize(); ++i)
     {

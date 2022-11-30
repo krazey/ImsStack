@@ -31,7 +31,7 @@ public:
     // Add a time interval; in milli-seconds
     IMS_BOOL AddValue(IN IMS_UINT32 nInterval);
     // Adds the set of time intervals; in milli-seconds
-    IMS_BOOL AddValues(IN ImsList<IMS_UINT32>& objIntervals);
+    IMS_BOOL AddValues(IN const ImsList<IMS_UINT32>& objIntervals);
     // Returns the next time interval; in milli-seconds
     IMS_UINT32 GetNextInterval() const;
     inline IMS_SINT32 GetState() const { return m_nState; }

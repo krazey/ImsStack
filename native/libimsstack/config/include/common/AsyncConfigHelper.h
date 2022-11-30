@@ -31,12 +31,12 @@ public:
     void Register(IN IAsyncConfig* piConfig);
     IMS_BOOL SendTo(IN IAsyncConfig* piConfig, IN IMS_SINT32 nMsg, IN IMS_SINTP nParam1,
             IN IMS_SINTP nParam2);
-    void Unregister(IN IAsyncConfig* piConfig);
+    void Unregister(IN const IAsyncConfig* piConfig);
 
 protected:
     // ImsActivityEx class
     IMS_BOOL OnMessage(IN ImsMessage& objMsg) override;
-    IMS_BOOL IsRegisteredConfig(IN IAsyncConfig* piConfig);
+    IMS_BOOL IsRegisteredConfig(IN const IAsyncConfig* piConfig);
 
 private:
     /// This message will be used in the first argument in SendTo(...) method

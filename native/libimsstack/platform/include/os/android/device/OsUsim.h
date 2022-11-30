@@ -72,7 +72,7 @@ protected:
 
 public:
     // Digest AKA
-    IMS_BOOL IsDigestAkaPresent(IN OsUsimDigestAka* pDigestAka);
+    IMS_BOOL IsDigestAkaPresent(IN const OsUsimDigestAka* pDigestAka);
 
 private:
     // Result of REQUEST_USIM_AUTH(String nonce, int owner)

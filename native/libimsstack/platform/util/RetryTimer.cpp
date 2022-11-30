@@ -60,7 +60,7 @@ IMS_BOOL RetryTimer::AddValue(IN IMS_UINT32 nInterval)
  * @brief Adds the set of time intervals in milli-seconds.
  */
 PUBLIC
-IMS_BOOL RetryTimer::AddValues(IN ImsList<IMS_UINT32>& objIntervals)
+IMS_BOOL RetryTimer::AddValues(IN const ImsList<IMS_UINT32>& objIntervals)
 {
     if (m_nState == STATE_ACTIVE)
     {
