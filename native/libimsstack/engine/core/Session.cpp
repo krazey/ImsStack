@@ -1258,8 +1258,8 @@ IMS_RESULT Session::RemoveMedia(IN Media* pMedia)
     {
         for (IMS_UINT32 j = i; j < m_objMedias.GetSize(); j++)
         {
-            Media* pMedia = m_objMedias.GetAt(j);
-            pMedia->SetMid(j);
+            Media* pTempMedia = m_objMedias.GetAt(j);
+            pTempMedia->SetMid(j);
         }
     }
 
