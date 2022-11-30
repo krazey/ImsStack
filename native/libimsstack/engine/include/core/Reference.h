@@ -43,7 +43,7 @@ public:
 
     public:
         inline void AddScc(IN ISipClientConnection* piScc) { m_objSccs.Append(piScc); }
-        void RemoveScc(IN ISipClientConnection* piScc);
+        void RemoveScc(IN const ISipClientConnection* piScc);
 
     private:
         IMSList<ISipClientConnection*> m_objSccs;

@@ -157,7 +157,7 @@ private:
     IMS_SINT32 RemoveReference(IN const AString& strKey);
     ISipConnectionNotifier* GetConnectionNotifier(IN const AString& strKey);
     SipServerConnectionListenerProxy* GetServerConnectionListener(IN IMS_SINT32 nSlotId);
-    IMS_BOOL IsConnectionNotifierPresent(IN ISipConnectionNotifier* piScn) const;
+    IMS_BOOL IsConnectionNotifierPresent(IN const ISipConnectionNotifier* piScn) const;
 
     static IMS_BOOL CheckMessageValidity(IN ISipMessage* piSipMsg, OUT AString& strReason);
     static AString CreateConnectionNotifierKey(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort);
@@ -435,7 +435,7 @@ SipServerConnectionListenerProxy* SipConnectionNotifierManagerPrivate::GetServer
 
 PRIVATE
 IMS_BOOL SipConnectionNotifierManagerPrivate::IsConnectionNotifierPresent(
-        IN ISipConnectionNotifier* piScn) const
+        IN const ISipConnectionNotifier* piScn) const
 {
     LockGuard objLock(m_piLock);
 

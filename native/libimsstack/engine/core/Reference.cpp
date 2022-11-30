@@ -71,7 +71,7 @@ Reference::NotifierState::~NotifierState()
 }
 
 PUBLIC
-void Reference::NotifierState::RemoveScc(IN ISipClientConnection* piScc)
+void Reference::NotifierState::RemoveScc(IN const ISipClientConnection* piScc)
 {
     for (IMS_UINT32 i = 0; i < m_objSccs.GetSize(); ++i)
     {

@@ -38,7 +38,7 @@ public:
     IMSList<IRegInfoRegistration*> GetRegistrations() const override;
 
     void AddListener(IN IRegInfoListener* piListener);
-    void RemoveListener(IN IRegInfoListener* piListener);
+    void RemoveListener(IN const IRegInfoListener* piListener);
     IMS_BOOL Update(IN IDocument* piDocument);
 
     void DisplayRegInfo();

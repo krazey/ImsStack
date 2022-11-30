@@ -37,11 +37,11 @@ protected:
 public:
     IMS_BOOL Create(IN IRegistrationEx* piRegEx);
     void Destroy();
-    inline IMS_BOOL IsSameContact(IN IRegContact* piContact) const
+    inline IMS_BOOL IsSameContact(IN const IRegContact* piContact) const
     {
         return (m_piContact != piContact) ? IMS_FALSE : IMS_TRUE;
     }
-    inline IMS_BOOL IsSameRegistration(IN IRegistrationEx* piRegEx) const
+    inline IMS_BOOL IsSameRegistration(IN const IRegistrationEx* piRegEx) const
     {
         return (m_piRegEx != piRegEx) ? IMS_FALSE : IMS_TRUE;
     }
