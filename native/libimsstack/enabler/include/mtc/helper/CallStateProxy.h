@@ -17,11 +17,10 @@
 #ifndef CALL_STATE_PROXY_H_
 #define CALL_STATE_PROXY_H_
 
-#include "CallReasonInfo.h"
 #include "IMtcCallStateListener.h"
 #include "ImsActivity.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "helper/ICallStateProxy.h"
 
@@ -73,8 +72,7 @@ public:
     void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState, IN CallType eCallType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = CODE_NONE) override;
 
-protected:
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMsg) override;
+    IMS_BOOL DispatchMessage(IN IMSMSG& objMsg) override;
 
 private:
     IMS_BOOL UpdateTotalCallState();
@@ -83,12 +81,12 @@ private:
     void NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails,
             IN IMS_BOOL bTotalCallStateUpdated);
     void NotifyCallState(
-            IN IMSList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails);
-    void NotifyTotalCallState(IN IMSList<IMtcCallStateListener*> objListeners);
+            IN ImsList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails);
+    void NotifyTotalCallState(IN ImsList<IMtcCallStateListener*> objListeners);
 
 private:
-    IMSList<IMtcCallStateListener*> m_objSynchronousListeners;
-    IMSList<IMtcCallStateListener*> m_objAsynchronousListeners;
+    ImsList<IMtcCallStateListener*> m_objSynchronousListeners;
+    ImsList<IMtcCallStateListener*> m_objAsynchronousListeners;
     IMtcCallManager& m_objCallManager;
     IMtcCall::State m_eTotalState;
     static const IMS_UINT32 MESSAGE_ASYNC_NOTIFY = 0;
