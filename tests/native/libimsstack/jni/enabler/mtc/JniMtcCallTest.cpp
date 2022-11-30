@@ -38,7 +38,7 @@ public:
     {
     }
 
-    inline virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 /*nMsg*/) const
+    inline virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 /*nMsg*/) const override
     {
         return IMS_FALSE;
     }

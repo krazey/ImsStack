@@ -39,9 +39,9 @@ public:
     MtcRoutingRejectHandler& operator=(const MtcRoutingRejectHandler&) = delete;
 
     IMS_BOOL RoutingReject_NotifyRequest(
-            IN ISipMessage* pSipMessage, IN_OUT SipStatusCode& objStatusCode);
-    IMS_BOOL RoutingReject_NotifyRequest(
-            IN ISipServerConnection* pSipServerConnection, IN_OUT SipStatusCode& objStatusCode);
+            IN ISipMessage* pSipMessage, IN_OUT SipStatusCode& objStatusCode) override;
+    IMS_BOOL RoutingReject_NotifyRequest(IN ISipServerConnection* pSipServerConnection,
+            IN_OUT SipStatusCode& objStatusCode) override;
 
 private:
     SipStatusCode GetRoutingRejectCodeForInvite(IN const SipStatusCode& objDefaultStatusCode) const;

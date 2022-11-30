@@ -248,7 +248,7 @@ public:
 
     void Refresh_NotifyCompleted(IN ISipClientConnection* piScc) override;
     void Refresh_NotifyTerminated() override;
-    void Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
+    void Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
 
     void OnTimerExpired(IN IMS_SINT32 nType) override;
 

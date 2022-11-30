@@ -61,7 +61,7 @@ public:
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     inline void OnTotalCallStateChanged(IN State) override {}
-    inline IMS_BOOL IsSynchronousCallRequired() { return IMS_TRUE; }
+    inline IMS_BOOL IsSynchronousCallRequired() override { return IMS_TRUE; }
 
     // IConferenceSubscriptionListener interface implementation
     void OnSubscriptionUpdated(IN SubscriptionUpdateType eType) override;

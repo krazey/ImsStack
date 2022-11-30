@@ -32,7 +32,7 @@ public:
     MtcTimerWrapper& operator=(IN const MtcTimerWrapper&) = delete;
 
     // ITimerListener implementation
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     virtual void SetListener(IN IMtcTimerListener* piListener);
     virtual void Start(IN IMS_UINT32 eType, IN IMS_SINT32 nDuration);

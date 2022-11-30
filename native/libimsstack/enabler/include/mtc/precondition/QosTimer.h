@@ -34,7 +34,7 @@ private:
     QosTimer& operator=(IN const QosTimer& objRHS);
 
 public:
-    virtual void Timer_TimerExpired(IN ITimer* piExpiredTimer);
+    void Timer_TimerExpired(IN ITimer* piExpiredTimer) override;
 
     void StartQosTimer(IN QosTimerType eType, IN IMS_SINT32 nDuration);
     void StopQosTimer(IN QosTimerType eType);

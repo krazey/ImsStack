@@ -36,10 +36,10 @@ public:
     MtcImsEventReceiver(const MtcImsEventReceiver&) = delete;
     MtcImsEventReceiver& operator=(const MtcImsEventReceiver&) = delete;
 
-    IMS_UINT32 GetWParam(IN ImsEvent nEvent);
-    IMS_UINT32 GetLParam(IN ImsEvent nEvent);
-    void AddListener(IN IMtcImsEventListener* pListener, IN ImsEvent nEvent);
-    void RemoveListener(IN IMtcImsEventListener* pListener, IN ImsEvent nEvent);
+    IMS_UINT32 GetWParam(IN ImsEvent nEvent) override;
+    IMS_UINT32 GetLParam(IN ImsEvent nEvent) override;
+    void AddListener(IN IMtcImsEventListener* pListener, IN ImsEvent nEvent) override;
+    void RemoveListener(IN IMtcImsEventListener* pListener, IN ImsEvent nEvent) override;
 
     void Event_NotifyEvent(
             IN ImsEvent nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;

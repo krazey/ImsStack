@@ -28,8 +28,8 @@ class TestImsEventListener : public IMtcImsEventListener
 public:
     virtual ~TestImsEventListener() {}
 
-    virtual void OnImsEventNotified(
-            IN ImsEvent nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
+    inline void OnImsEventNotified(
+            IN ImsEvent nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override
     {
         m_nNotifyCount += 1;
         m_nEvent = nEvent;
