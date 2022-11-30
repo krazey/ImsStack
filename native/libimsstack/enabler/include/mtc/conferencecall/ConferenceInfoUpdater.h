@@ -23,6 +23,14 @@
 class ConferenceFactory;
 class ConferenceParticipantList;
 
+enum class MatchingPolicy
+{
+    ORDER_LEG_ID = 0,
+    ORDER = 1,
+    REFER_TO_URI = 2,
+    USERENTITY = 3
+};
+
 class ConferenceInfoUpdater
 {
 public:
@@ -35,12 +43,15 @@ public:
     virtual IMS_UINT32 Update(
             IN ConferenceParticipantList* pParticipantList, IN const AString& strEventPackage);
 
+    const IMS_CHAR* ConvertPolicyToString(IN MatchingPolicy ePolicy) const;
+    const IMS_CHAR* ConvertStatusToString(IN IMS_SINT32 nStatus) const;
+
 protected:
     IMS_RESULT ParseConferenceInfo(IN const AString& strEventPackage);
     IMS_RESULT CheckValidVersion() const;
     IMS_RESULT UpdateDescription();
     IMS_RESULT UpdateParticipantList();
-    IMS_BOOL FindAndUpdate(IN IMS_UINT32 nPolicy);
+    IMS_BOOL FindAndUpdate(IN MatchingPolicy ePolicy);
     IMS_BOOL UpdateParticipant(IN ConferenceInfo::User* pUser, IN IMS_SINT32 nParticipantIndex);
     void SetParticipantsMatchingStarted();
     void SetDeletedParticipantToDisconnected();
@@ -57,7 +68,6 @@ protected:
 
     void Clear();
 
-    IMS_BOOL HasLegId(IN const AString& strUserEntity) const;
     IMS_BOOL IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
             IN IMS_BOOL bAllowPrefix = IMS_TRUE) const;
     IMS_BOOL IsLocalUri(IN const AString& strUserEntity) const;
@@ -71,8 +81,6 @@ protected:
     IMS_BOOL IsInitialNotifyWithoutUsers() const;
 
     IMS_BOOL IsConnectedStatusCategory(IN IMS_UINT32 nStatus) const;
-    const IMS_CHAR* ConvertPolicyToString(IN IMS_SINT32 nPolicy) const;
-    const IMS_CHAR* ConvertStatusToString(IN IMS_SINT32 nStatus) const;
 
 private:
     void ModifyParticipantInfoByConfig(IN ConfUser* pConfUser);
@@ -88,22 +96,12 @@ public:
         RESULT_AMBIGUOUS = 5
     };
 
-    enum
-    {
-        MATCH_POLICY_NOT_DEFINED = 0,
-        MATCH_POLICY_ORDER_LEG_ID = 1,
-        MATCH_POLICY_ORDER = 2,
-        MATCH_POLICY_REFER_TO_URI = 3,
-        MATCH_POLICY_USERENTITY = 4,
-        MATCH_POLICY_INVALID_ANONYMOUS = 5
-    };
-
 private:
     ConferenceInfo* m_pConferenceInfo;
     ConferenceFactory& m_objFactory;
     ConferenceParticipantList* m_pParticipantList;
     IMS_UINT32 m_nInfoState;
-    IMS_UINT32 m_nCurrentMatchPolicy;
+    MatchingPolicy m_eCurrentMatchPolicy;
     IMSList<ConferenceInfo::User*> m_objNotMatchedUsers;
     IMS_BOOL m_bHostInfoInUsers;
 };

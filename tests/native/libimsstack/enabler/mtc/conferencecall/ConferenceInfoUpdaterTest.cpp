@@ -159,7 +159,7 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByStateDeleted)
             pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
 }
 
-TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInValidVersionInFullState)
+TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInvalidVersionInFullState)
 {
     SetUpDefaultUsers();
     SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 5);
@@ -169,13 +169,52 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInValidVersionInFullState)
             pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
 }
 
-TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInValidVersionInPartialState)
+TEST_F(ConferenceInfoUpdaterTest, UpdateFailsByInvalidVersionInPartialState)
 {
     SetUpDefaultUsers();
     SetUpConferenceInfo(ConferenceInfo::STATE_PARTIAL, 12);
     objParticipantList.SetXmlVersion(10);
 
     EXPECT_EQ(ConferenceInfoUpdater::RESULT_INVALID_VERSION,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsEvenInvalidVersionIfConfigurationOff)
+{
+    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+            .WillByDefault(Return(IMS_FALSE));
+
+    SetUpDefaultUsers();
+    SetUpConferenceInfo(ConferenceInfo::STATE_PARTIAL, 12);
+    objParticipantList.SetXmlVersion(10);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsIfValidVersionWithPartialState)
+{
+    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+            .WillByDefault(Return(IMS_FALSE));
+
+    SetUpDefaultUsers();
+    SetUpConferenceInfo(ConferenceInfo::STATE_PARTIAL, 11);
+    objParticipantList.SetXmlVersion(10);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateSucceedsIfValidVersionWithFullState)
+{
+    ON_CALL(*pConfigurationManager, IsCheckConferenceEventPackageVersion)
+            .WillByDefault(Return(IMS_FALSE));
+
+    SetUpDefaultUsers();
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 20);
+    objParticipantList.SetXmlVersion(10);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
             pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
 }
 
@@ -202,6 +241,9 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByUserEntityWithLegid)
     IMS_UINT32 eStatusBefore2 = STATUS_IDLE;
     IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
     IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
+
+    // to cover 'IsLocalUri is true' case
+    AddUserToInfo(LOCAL_URI, STATUS_CONNECTED);
 
     AString strAnyEntityWithLegid1 = USER_ENTITY1 + ";legid=1";
     AddUserToInfo(strAnyEntityWithLegid1, eStatusAfter1);
@@ -267,6 +309,8 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatching)
     IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
     IMS_UINT32 eStatusAfter2 = STATUS_ON_HOLD;
 
+    AddUserToInfo(LOCAL_URI, STATUS_CONNECTED);
+
     AddUserToInfo(ANONYMOUS1_URI, eStatusAfter1);
     ConfUser* pUser1 = AddParticipant(USER_ENTITY1, USER_ENTITY1, eStatusBefore1);
 
@@ -281,6 +325,31 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatching)
     EXPECT_STREQ(pUser1->strUserEntity.GetStr(), ANONYMOUS1_URI.GetStr());
     EXPECT_EQ(pUser2->eStatus, eStatusAfter2);
     EXPECT_STREQ(pUser2->strUserEntity.GetStr(), ANONYMOUS2_URI.GetStr());
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdateByOrderMatchingOnParticipant)
+{
+    ON_CALL(*pConfigurationManager, IsEnableConferenceSubscribeByParticipant)
+            .WillByDefault(Return(IMS_TRUE));
+
+    IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
+    IMS_UINT32 eStatusAfter2 = STATUS_CONNECTED;
+
+    AddUserToInfo(USER_ENTITY1, eStatusAfter1);
+    AddUserToInfo(USER_ENTITY2, eStatusAfter2);
+
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+
+    // adding is made in reverse order
+    EXPECT_EQ(objParticipantList.GetAt(1)->GetConfUser()->eStatus, eStatusAfter1);
+    EXPECT_STREQ(objParticipantList.GetAt(1)->GetConfUser()->strUserEntity.GetStr(),
+            USER_ENTITY1.GetStr());
+    EXPECT_EQ(objParticipantList.GetAt(0)->GetConfUser()->eStatus, eStatusAfter2);
+    EXPECT_STREQ(objParticipantList.GetAt(0)->GetConfUser()->strUserEntity.GetStr(),
+            USER_ENTITY2.GetStr());
 }
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateByReferToMatching)
@@ -304,6 +373,24 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateByReferToMatching)
     EXPECT_STREQ(pUser1->strUserEntity.GetStr(), USER_ENTITY1.GetStr());
     EXPECT_EQ(pUser2->eStatus, eStatusAfter2);
     EXPECT_STREQ(pUser2->strUserEntity.GetStr(), USER_ENTITY2.GetStr());
+}
+
+TEST_F(ConferenceInfoUpdaterTest, UpdatebyUserEntityWithPrefix)
+{
+    IMS_UINT32 eStatusBefore1 = STATUS_IDLE;
+    IMS_UINT32 eStatusAfter1 = STATUS_CONNECTED;
+
+    AString strUriWithPrefix("sip:+1123456");
+    AString strUri("sip:123456");
+    AddUserToInfo(strUriWithPrefix, eStatusAfter1);
+    ConfUser* pUser1 = AddParticipant(strUri, strUri, eStatusBefore1);
+
+    SetUpConferenceInfo(ConferenceInfo::STATE_FULL, 1);
+
+    EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
+            pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
+    EXPECT_EQ(pUser1->eStatus, eStatusAfter1);
+    EXPECT_STREQ(pUser1->strUserEntity.GetStr(), strUriWithPrefix.GetStr());
 }
 
 TEST_F(ConferenceInfoUpdaterTest, UpdateDoesNotSetDisconnectedBeforeConnected)
@@ -392,6 +479,29 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDisconnectingStatusAsDisconnected)
     EXPECT_EQ(ConferenceInfoUpdater::RESULT_UPDATED,
             pUpdater->Update(&objParticipantList, ANY_EVENT_PACKAGE_BODY));
     EXPECT_EQ(pUser1->eStatus, eStatusAfterModified1);
+}
+
+TEST_F(ConferenceInfoUpdaterTest, ConvertPolicyToStringReturnsCorrespondingString)
+{
+    EXPECT_STREQ(pUpdater->ConvertPolicyToString(MatchingPolicy::ORDER_LEG_ID), "ORDER_LEG_ID");
+    EXPECT_STREQ(pUpdater->ConvertPolicyToString(MatchingPolicy::ORDER), "ORDER");
+    EXPECT_STREQ(pUpdater->ConvertPolicyToString(MatchingPolicy::REFER_TO_URI), "REFER_TO_URI");
+    EXPECT_STREQ(pUpdater->ConvertPolicyToString(MatchingPolicy::USERENTITY), "USERENTITY");
+}
+
+TEST_F(ConferenceInfoUpdaterTest, ConvertStatusToStringReturnsCorrespondingString)
+{
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_CONNECTED), "connected");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_DISCONNECTED), "disconnected");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_ON_HOLD), "on-hold");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_MUTED_VIA_FOCUS), "muted-via-focus");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_PENDING), "pending");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_ALERTING), "alerting");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_DIALING_IN), "dialing-in");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_DIALING_OUT), "dialing-out");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_DISCONNECTING), "disconnecting");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_FAIL), "connect-fail");
+    EXPECT_STREQ(pUpdater->ConvertStatusToString(-1), "__STATUS_IDLE__");
 }
 
 }  // namespace android

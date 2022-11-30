@@ -33,7 +33,7 @@ ConferenceInfoUpdater::ConferenceInfoUpdater(IN ConferenceFactory& objFactory) :
         m_objFactory(objFactory),
         m_pParticipantList(IMS_NULL),
         m_nInfoState(ConferenceInfo::STATE_INVALID),
-        m_nCurrentMatchPolicy(MATCH_POLICY_NOT_DEFINED),
+        m_eCurrentMatchPolicy(MatchingPolicy::ORDER_LEG_ID),
         m_bHostInfoInUsers(IMS_FALSE)
 {
     IMS_TRACE_I("+ConferenceInfoUpdater", 0, 0, 0);
@@ -92,6 +92,53 @@ IMS_UINT32 ConferenceInfoUpdater::Update(
 
     Clear();
     return RESULT_UPDATED;
+}
+
+PUBLIC
+const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(IN MatchingPolicy ePolicy) const
+{
+    switch (ePolicy)
+    {
+        case MatchingPolicy::ORDER_LEG_ID:
+            return "ORDER_LEG_ID";
+        case MatchingPolicy::ORDER:
+            return "ORDER";
+        case MatchingPolicy::REFER_TO_URI:
+            return "REFER_TO_URI";
+        case MatchingPolicy::USERENTITY:
+            return "USERENTITY";
+    }
+}
+
+PUBLIC
+const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStatus) const
+{
+    switch (nStatus)
+    {
+        case STATUS_CONNECTED:
+            return ConferenceConst::STR_STATUS_CONNECTED;
+        case STATUS_DISCONNECTED:
+            return ConferenceConst::STR_STATUS_DISCONNECTED;
+        case STATUS_ON_HOLD:
+            return ConferenceConst::STR_STATUS_ON_HOLD;
+        case STATUS_MUTED_VIA_FOCUS:
+            return ConferenceConst::STR_STATUS_MUTED_VIA_FOCUS;
+        case STATUS_PENDING:
+            return ConferenceConst::STR_STATUS_PENDING;
+        case STATUS_ALERTING:
+            return ConferenceConst::STR_STATUS_ALERTING;
+        case STATUS_DIALING_IN:
+            return ConferenceConst::STR_STATUS_DIALING_IN;
+        case STATUS_DIALING_OUT:
+            return ConferenceConst::STR_STATUS_DIALING_OUT;
+        case STATUS_DISCONNECTING:
+            return ConferenceConst::STR_STATUS_DISCONNECTING;
+        case STATUS_FAIL:
+            return ConferenceConst::STR_STATUS_CONNECT_FAIL;
+
+        default:
+            return "__STATUS_IDLE__";
+    }
 }
 
 PROTECTED
@@ -162,16 +209,16 @@ IMS_RESULT ConferenceInfoUpdater::UpdateParticipantList()
 
     SetParticipantsMatchingStarted();
 
-    if (FindAndUpdate(MATCH_POLICY_ORDER_LEG_ID))
+    if (FindAndUpdate(MatchingPolicy::ORDER_LEG_ID))
     {
     }
-    else if (FindAndUpdate(MATCH_POLICY_USERENTITY))
+    else if (FindAndUpdate(MatchingPolicy::USERENTITY))
     {
     }
-    else if (FindAndUpdate(MATCH_POLICY_REFER_TO_URI))
+    else if (FindAndUpdate(MatchingPolicy::REFER_TO_URI))
     {
     }
-    else if (FindAndUpdate(MATCH_POLICY_ORDER))
+    else if (FindAndUpdate(MatchingPolicy::ORDER))
     {
     }
     else
@@ -189,11 +236,11 @@ IMS_RESULT ConferenceInfoUpdater::UpdateParticipantList()
 }
 
 PROTECTED
-IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN IMS_UINT32 nPolicy)
+IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN MatchingPolicy ePolicy)
 {
-    IMS_TRACE_I("FindAndUpdate : policy[%s] - START", ConvertPolicyToString(nPolicy), 0, 0);
+    IMS_TRACE_I("FindAndUpdate : policy[%s] - START", ConvertPolicyToString(ePolicy), 0, 0);
 
-    m_nCurrentMatchPolicy = nPolicy;
+    m_eCurrentMatchPolicy = ePolicy;
     IMS_BOOL bCompleted = IMS_TRUE;
 
     ImsList<ConferenceInfo::User*> objUsers;
@@ -240,10 +287,13 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN IMS_UINT32 nPolicy)
         }
     }
 
-    if ((m_nCurrentMatchPolicy == MATCH_POLICY_ORDER) &&
+    // For 'Joined & subscription' case.
+    if ((m_eCurrentMatchPolicy == MatchingPolicy::ORDER) &&
             (m_pConferenceInfo->GetState() == ConferenceInfo::STATE_FULL) &&
             ConferenceConfigurationWrapper::IsSubscriptionForParticipantRequired())
     {
+        IMS_TRACE_I("FindAndUpdate : subscription by participant case [%d]",
+                m_objNotMatchedUsers.GetSize(), 0, 0);
         for (IMS_SINT32 index = (m_objNotMatchedUsers.GetSize() - 1); index >= 0; index--)
         {
             ConferenceInfo::User* pNotMatchedUser = m_objNotMatchedUsers.GetAt(index);
@@ -257,7 +307,8 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN IMS_UINT32 nPolicy)
         }
     }
 
-    IMS_TRACE_I("FindAndUpdate : policy[%s] - END", ConvertPolicyToString(nPolicy), 0, 0);
+    IMS_TRACE_I("FindAndUpdate : policy[%s] complete[%s] - END", ConvertPolicyToString(ePolicy),
+            _TRACE_B_(bCompleted), 0);
     return bCompleted;
 }
 
@@ -340,28 +391,20 @@ PROTECTED
 IMS_SINT32 ConferenceInfoUpdater::FindParticipant(
         IN const ConferenceInfo::User* pUser, IN IMS_UINT32 nIndexInXml)
 {
-    switch (m_nCurrentMatchPolicy)
+    switch (m_eCurrentMatchPolicy)
     {
-        case MATCH_POLICY_ORDER_LEG_ID:
+        case MatchingPolicy::ORDER_LEG_ID:
             return FindParticipantByOrderLegId(pUser);
 
-        case MATCH_POLICY_ORDER:
+        case MatchingPolicy::ORDER:
             return FindParticipantByOrder(nIndexInXml, pUser);
 
-        case MATCH_POLICY_USERENTITY:
+        case MatchingPolicy::USERENTITY:
             return FindParticipantByUserEntity(pUser);
 
-        case MATCH_POLICY_REFER_TO_URI:
+        case MatchingPolicy::REFER_TO_URI:
             return FindParticipantByReferToUri(pUser);
-
-        case MATCH_POLICY_NOT_DEFINED:  // FALL-THROUGH
-        case MATCH_POLICY_INVALID_ANONYMOUS:
-        default:
-            return FindParticipantByReferToUri(pUser);
-            break;
     }
-
-    return -1;
 }
 
 PROTECTED
@@ -627,27 +670,11 @@ void ConferenceInfoUpdater::Clear()
 }
 
 PROTECTED
-IMS_BOOL ConferenceInfoUpdater::HasLegId(IN const AString& strUserEntity) const
-{
-    if (strUserEntity.MakeLower().Contains(ConferenceConst::LEG_ID))
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PROTECTED
 IMS_BOOL ConferenceInfoUpdater::IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
         IN IMS_BOOL bAllowPrefix /* = IMS_TRUE*/) const
 {
     IMS_SINT32 nLengthA = strUriA.GetLength();
     IMS_SINT32 nLengthB = strUriB.GetLength();
-
-    if (nLengthA <= 0 || nLengthB <= 0)
-    {
-        return IMS_FALSE;
-    }
 
     IMS_UINT32 nLongerLength = nLengthA > nLengthB ? nLengthA : nLengthB;
     IMS_UINT32 nMargin = bAllowPrefix ? 3 : 0;
@@ -668,6 +695,7 @@ IMS_BOOL ConferenceInfoUpdater::IsLocalUri(IN const AString& strUserEntity) cons
     AString strUserPart;
     if (ConferenceUtils::GetUserPart(strUserEntity, strUserPart).GetLength() == 0)
     {
+        IMS_TRACE_D("IsLocalUri : length 0", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -675,6 +703,7 @@ IMS_BOOL ConferenceInfoUpdater::IsLocalUri(IN const AString& strUserEntity) cons
     if (ConferenceUtils::GetUserPart(m_pParticipantList->GetLocalUri(), strLocalUserPart)
                     .GetLength() == 0)
     {
+        IMS_TRACE_D("IsLocalUri : length 0", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -869,59 +898,6 @@ IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus)
             return IMS_TRUE;
         default:
             return IMS_FALSE;
-    }
-}
-
-PROTECTED
-const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(IN IMS_SINT32 nPolicy) const
-{
-    switch (nPolicy)
-    {
-        case MATCH_POLICY_NOT_DEFINED:
-            return "MATCH_POLICY_NOT_DEFINED";
-        case MATCH_POLICY_ORDER_LEG_ID:
-            return "MATCH_POLICY_ORDER_LEG_ID";
-        case MATCH_POLICY_ORDER:
-            return "MATCH_POLICY_ORDER";
-        case MATCH_POLICY_REFER_TO_URI:
-            return "MATCH_POLICY_REFER_TO_URI";
-        case MATCH_POLICY_USERENTITY:
-            return "MATCH_POLICY_USERENTITY";
-        case MATCH_POLICY_INVALID_ANONYMOUS:
-            return "MATCH_POLICY_INVALID_ANONYMOUS";
-        default:
-            return "__POLICY_INVALID__";
-    }
-}
-
-PROTECTED
-const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStatus) const
-{
-    switch (nStatus)
-    {
-        case STATUS_CONNECTED:
-            return ConferenceConst::STR_STATUS_CONNECTED;
-        case STATUS_DISCONNECTED:
-            return ConferenceConst::STR_STATUS_DISCONNECTED;
-        case STATUS_ON_HOLD:
-            return ConferenceConst::STR_STATUS_ON_HOLD;
-        case STATUS_MUTED_VIA_FOCUS:
-            return ConferenceConst::STR_STATUS_MUTED_VIA_FOCUS;
-        case STATUS_PENDING:
-            return ConferenceConst::STR_STATUS_PENDING;
-        case STATUS_ALERTING:
-            return ConferenceConst::STR_STATUS_ALERTING;
-        case STATUS_DIALING_IN:
-            return ConferenceConst::STR_STATUS_DIALING_IN;
-        case STATUS_DIALING_OUT:
-            return ConferenceConst::STR_STATUS_DIALING_OUT;
-        case STATUS_DISCONNECTING:
-            return ConferenceConst::STR_STATUS_DISCONNECTING;
-        case STATUS_FAIL:
-            return ConferenceConst::STR_STATUS_CONNECT_FAIL;
-
-        default:
-            return "__STATUS_IDLE__";
     }
 }
 
