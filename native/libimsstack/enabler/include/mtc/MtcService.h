@@ -22,17 +22,17 @@
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
 #include "IImsAosMonitor.h"
-#include "IMtcContext.h"
 #include "IMtcService.h"
 #include "ImsService.h"
 #include "ImsTypeDef.h"
-#include "MtcRoutingRejectHandler.h"
 #include "helper/SrvccStateManager.h"
 
-class IMtcAosConnector;
-class MtcAosEventHandler;
 class IJniMtcServiceThread;
+class IMtcAosConnector;
 class IMtcAosStateListener;
+class IMtcContext;
+class MtcAosEventHandler;
+class MtcRoutingRejectHandler;
 
 class MtcService :
         public ImsService,

@@ -22,6 +22,8 @@ class ConferenceController;
 class IConferenceControllerListener
 {
 public:
+    virtual ~IConferenceControllerListener() = default;
+
     /**
      * @brief Notifies
      *

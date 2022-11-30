@@ -18,7 +18,6 @@
 #define MTC_DEF_H_
 
 #include "AString.h"
-#include "IMtcService.h"
 #include "ImsTypeDef.h"
 
 // TODO, MTC BUILD

@@ -20,6 +20,8 @@
 class IEctControllerListener
 {
 public:
+    virtual ~IEctControllerListener() = default;
+
     /**
      * @brief Notifies
      *

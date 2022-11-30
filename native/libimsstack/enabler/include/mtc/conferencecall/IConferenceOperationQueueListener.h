@@ -20,6 +20,8 @@
 class IConferenceOperationQueueListener
 {
 public:
+    virtual ~IConferenceOperationQueueListener() = default;
+
     /**
      * @brief Notifies
      *

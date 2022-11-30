@@ -21,12 +21,12 @@
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
-#include "call/IMtcCall.h"
 #include "sipcore/SipMethod.h"
 
 class EpsFallbackTrigger;
 class IMtcBlockChecker;
 class IMtcBlockRule;
+class IMtcCall;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
 class IMtcService;

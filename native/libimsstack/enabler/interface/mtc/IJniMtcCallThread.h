@@ -23,7 +23,6 @@
 #include "MtcDef.h"
 #include "conferencecall/ConferenceDef.h"
 
-class SuppService;
 struct CallReasonInfo;
 struct JniCallInfo;
 

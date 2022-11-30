@@ -20,6 +20,8 @@
 class IMtcTimerListener
 {
 public:
+    virtual ~IMtcTimerListener() = default;
+
     /**
      * @brief Notifies
      *
