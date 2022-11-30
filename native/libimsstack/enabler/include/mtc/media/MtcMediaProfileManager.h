@@ -72,6 +72,8 @@ class MtcMediaProfileManager
 public:
     MtcMediaProfileManager();
     virtual ~MtcMediaProfileManager();
+    MtcMediaProfileManager(IN const MtcMediaProfileManager&) = delete;
+    MtcMediaProfileManager& operator=(IN const MtcMediaProfileManager&) = delete;
 
 public:
     virtual void CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,

@@ -35,6 +35,8 @@ class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListe
 public:
     MtcMediaManager(IN IMtcCallContext& objContext);
     virtual ~MtcMediaManager();
+    MtcMediaManager(IN const MtcMediaManager&) = delete;
+    MtcMediaManager& operator=(IN const MtcMediaManager&) = delete;
 
 public: /* IMediaSessionClientListener */
     virtual void MediaSession_Notify(IN IMS_UINT32 eReportType,
