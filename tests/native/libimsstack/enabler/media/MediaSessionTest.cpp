@@ -15,6 +15,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <MediaSession.h>
 #include <MediaEnvironment.h>
 #include <IMMedia.h>
@@ -22,6 +23,7 @@
 #include <MockIMediaSessionClientListener.h>
 #include <MockISession.h>
 
+using ::testing::Return;
 using ::testing::ReturnRef;
 
 const AString LOCAL_IP = "127.0.0.1";
@@ -90,7 +92,8 @@ public:
     MockISession* m_pIsession;
     MockICoreService m_objMockICoreService;
     MockIMediaSessionClientListener m_objClientListener;
-    IPAddress m_objIpAddr;
+    IPAddress m_objLocalIpAddress;
+    IPAddress m_objRemoteIpAddress;
 
     IMS_UINTP createAudioSession()
     {
@@ -106,8 +109,10 @@ public:
 protected:
     virtual void SetUp() override
     {
-        m_objIpAddr = IPAddress(LOCAL_IP);
-        ON_CALL(m_objMockICoreService, GetIpAddress()).WillByDefault(ReturnRef(m_objIpAddr));
+        m_objLocalIpAddress = IpAddress(LOCAL_IP);
+        m_objRemoteIpAddress = IpAddress(REMOTE_IP);
+        ON_CALL(m_objMockICoreService, GetIpAddress())
+                .WillByDefault(ReturnRef(m_objLocalIpAddress));
 
         m_pEnvironment = new MediaEnvironment();
         m_pEnvironment->eNetworkType = MEDIA_NETWORK_LTE;
@@ -145,10 +150,8 @@ TEST_F(MediaSessionTest, testQosCallback)
     IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
     EXPECT_NE(negoId, 0);
 
-    ImsMediaMsgQosParam* pParam = new ImsMediaMsgQosParam();
-    pParam->m_eMediaType = MEDIA_TYPE_AUDIO;
-    pParam->m_objIpAddress = IPAddress(REMOTE_IP);
-    pParam->m_nPort = REMOTE_PORT;
+    ImsMediaMsgQosParam* pParam =
+            new ImsMediaMsgQosParam(MEDIA_TYPE_AUDIO, m_objRemoteIpAddress, REMOTE_PORT);
     pParam->m_bResult = IMS_TRUE;
 
     EXPECT_EQ(

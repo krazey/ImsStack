@@ -317,9 +317,9 @@ void JniMediaSession::OnNotifyMediaDetach(IN IMS_SINT32 nMsg)
 PRIVATE
 void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
-    ImsMediaMsgQosParam* pParam = new ImsMediaMsgQosParam();
+    ImsMediaMsgQosParam* pParam =
+            new ImsMediaMsgQosParam(ConvertToMediaType((SessionType)objParcel.readInt32()));
 
-    pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
     AString strIpAddress;
     ConvertString(objParcel.readString16(), strIpAddress);
     pParam->m_objIpAddress = IPAddress(strIpAddress);

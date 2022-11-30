@@ -17,6 +17,8 @@
 #ifndef _MEDIA_DEF_H_
 #define _MEDIA_DEF_H_
 
+#include <IpAddress.h>
+
 /** Service Type */
 typedef enum
 {
@@ -146,6 +148,45 @@ enum MEDIA_SRVCC_STATUS
     MEDIA_SRVCC_FAILED,
     /** SRVCC transition has been canceled */
     MEDIA_SRVCC_CANCELED
+};
+
+struct QosRequestParam
+{
+public:
+    QosRequestParam(const MEDIA_CONTENT_TYPE type, const IPAddress& address, const IMS_SINT32 port,
+            const IMS_BOOL callback = IMS_FALSE) :
+            m_eMediaType(type),
+            m_objIpAddress(address),
+            m_nPort(port),
+            m_bCallback(callback),
+            m_bResult(IMS_FALSE)
+    {
+    }
+
+    bool operator==(const QosRequestParam& param)
+    {
+        return (this->m_eMediaType == param.m_eMediaType &&
+                this->m_objIpAddress == param.m_objIpAddress && this->m_nPort == param.m_nPort);
+    }
+
+    QosRequestParam(const QosRequestParam& param)
+    {
+        this->m_eMediaType = param.m_eMediaType;
+        this->m_objIpAddress = param.m_objIpAddress;
+        this->m_nPort = param.m_nPort;
+        this->m_bCallback = param.m_bCallback;
+        this->m_bResult = param.m_bResult;
+    }
+
+    void AddNegoId(const IMS_UINTP id) { m_objListNegoId.Append(id); }
+
+public:
+    MEDIA_CONTENT_TYPE m_eMediaType;
+    IPAddress m_objIpAddress;
+    IMS_SINT32 m_nPort;
+    IMS_BOOL m_bCallback;
+    IMS_BOOL m_bResult;
+    IMSList<IMS_UINTP> m_objListNegoId;
 };
 
 #define MEDIA_IS_CONTAINED_THIS_TYPE(eDst, eSrc) ((eDst & eSrc) != 0)
