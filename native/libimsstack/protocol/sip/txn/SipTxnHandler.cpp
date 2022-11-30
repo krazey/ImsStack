@@ -22,11 +22,6 @@
 #include "SipStackError.h"
 #include "SipTxnContext.h"
 
-#ifdef SIP_TRACE_ENABLE
-static SIP_CHAR gszTxnTypeStr[SipTxn::INVALID_TXN + 1][SIP_20] = {
-        "INV-CLI-TXN", "INV-SER-TXN", "NON-INV-CLI-TXN", "NON-INV-SER-TXN", "INVALID-TXN"};
-#endif
-
 static SIP_INT32 GetNonInvCliFsmEvt(SIP_UINT16 nStatusCode);
 static SIP_INT32 GetNonInvSerFsmEvt(SIP_UINT16 nStatusCode);
 static SIP_INT32 GetInvCliFsmEvt(SIP_UINT16 nStatusCode);

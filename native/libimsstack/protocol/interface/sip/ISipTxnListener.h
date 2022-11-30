@@ -18,6 +18,8 @@
 
 #include "SipDatatypes.h"
 
+class ISipUserData;
+
 class ISipTxnListener
 {
 public:

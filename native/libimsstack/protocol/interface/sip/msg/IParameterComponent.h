@@ -31,6 +31,7 @@ public:
             m_eComponentType(NORMAL)
     {
     }
+    virtual ~IParameterComponent() {}
 
     inline SIP_VOID SetComponentType(SIP_INT32 eType) { m_eComponentType = eType; }
 

@@ -21,8 +21,8 @@
 #include "SipDatatypes.h"
 #include "msg/SipParameters.h"
 #include "msg/SipAddrSpec.h"
-#include "SipPercentEncoding.h"
-#include "msg/IParameterComponent.h"
+
+class IParameterComponent;
 
 class SipHeaderBase : public SipRefBase
 {

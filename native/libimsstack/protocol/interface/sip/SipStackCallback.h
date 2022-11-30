@@ -17,10 +17,10 @@
 #define SIP_STACK_CALLBACK_H_
 
 #include "ImsTypeDef.h"
-
 #include "ISipTimerUtil.h"
-#include "ISipUserData.h"
-#include "txn/SipTxn.h"
+
+class ISipUserData;
+class SipTxn;
 
 // Definition of function prototypes for SIP stack transaction layer
 typedef SIP_BOOL (*SipStack_FetchTransaction)(

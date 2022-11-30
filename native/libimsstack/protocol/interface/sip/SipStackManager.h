@@ -17,11 +17,13 @@
 #define __SIP_STACK_MANAGER_H__
 
 #include "SipDatatypes.h"
-#include "msg/SipMessage.h"
-#include "txn/SipTxnKey.h"
-#include "transport/SipTransportInfo.h"
 
+class SipMessage;
+class SipTxnKey;
 class SipUtil;
+class ISipUserData;
+class SipTransportInfo;
+class SipTransportParameter;
 
 /**
   This is the entry point for the SIP stack. This can handle transaction and transport.

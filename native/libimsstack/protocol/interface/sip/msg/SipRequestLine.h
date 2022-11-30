@@ -17,8 +17,8 @@
 #define __SIP_REQUEST_LINE_H__
 
 #include "SipRefBase.h"
-#include "SipPercentEncoding.h"
-#include "msg/IParameterComponent.h"
+
+class SipPercentEncoding;
 
 class SipRequestLine : public SipRefBase
 {

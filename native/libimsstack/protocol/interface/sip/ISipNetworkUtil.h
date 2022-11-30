@@ -17,9 +17,10 @@
 #define __ISIPNETWORKUTIL_H__
 
 #include "SipDatatypes.h"
-#include "ISipUserData.h"
-#include "transport/SipTransportBuffer.h"
-#include "transport/SipTransportParameter.h"
+
+class ISipUserData;
+class SipTransportBuffer;
+class SipTransportParameter;
 
 class ISipNetworkUtil
 {

@@ -17,6 +17,8 @@
 #include "SipDefNetworkUtil.h"
 #include "SipUtil.h"
 
+class ISipTimerUtil;
+
 class SipTransactionListener : public ISipTxnListener
 {
 public:

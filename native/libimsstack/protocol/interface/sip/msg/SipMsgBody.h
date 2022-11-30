@@ -22,7 +22,6 @@
 #include "msg/SipHeaderList.h"
 
 class SipMsgBody;
-class SipMessageSummary;
 
 class SipMIMEHdrs : public SipRefBase
 {

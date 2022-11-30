@@ -23,41 +23,6 @@
 #include "txn/SipTimeoutData.h"
 #include "SipStackError.h"
 
-#ifdef SIP_TRACE_ENABLE
-static SIP_CHAR szInvClientTxnFsmSt[SipTxn::INV_CLI_INVALID_ST + 1][SIP_15] = {
-        "IdleSt", "CallingSt", "ProceedingSt", "CompletedSt", "TerminatedSt", "InvalidSt"};
-
-static SIP_CHAR szInvClientTxnFsmEvt[SipTxn::INV_CLI_INVALID_EVT + 1][SIP_20] = {"SendInvReqEvt",
-        "TimerA_B_TimeoutEvt", "TimerD_TimeoutEvt", "Recv1xxRespEvt", "Recv2xxRespEvt",
-        "Recv3xx6xxRespEvt", "TranspErrorEvt", "InvalidEvt"};
-
-static SIP_CHAR szInvSerTxnFsmSt[SipTxn::INV_SER_INVALID_ST + 1][SIP_15] = {
-        "IdleSt", "ProceedingSt", "CompletedSt", "ConfirmedSt", "TerminatedSt", "InvalidSt"};
-
-static SIP_CHAR szInvSerTxnFsmEvt[SipTxn::INV_SER_INVALID_EVT + 1][SIP_25] = {"RecvInvReqEvt",
-        "SendNon100ProvRespEvt", "Send3xx6xxFailureRespEvt", "Send2xxSuccessRespEvt",
-        "TranspErrorEvt", "RecvAckReqEvt", "TimerG_H_TimeoutEvt", "TimerI_TimeoutEvt",
-        "InvalidEvt"};
-
-static SIP_CHAR szNonInvClientTxnFsmSt[SipTxn::NON_INV_CLI_INVALID_ST + 1][SIP_15] = {
-        "IdleSt", "TryingSt", "ProceedingSt", "CompletedSt", "TerminatedSt", "InvalidSt"};
-
-static SIP_CHAR szNonInvClientTxnFsmEvt[SipTxn::NON_INV_CLI_INVALID_EVT + 1][SIP_22] = {
-        "SendNonInvReq_Evt", "Timer_E_F_TimeoutEvt", "Recv1xxRespEvt", "Recv2xx6xxRespEvt",
-        "TranspErrorEvt", "Timer_K_TimeoutEvt", "InvalidEvt"};
-
-static SIP_CHAR szSipNonInvSerTxnFsmSt[SipTxn::NON_INV_SER_INVALID_ST + 1][SIP_15] = {
-        "IdleSt", "TryingSt", "ProceedingSt", "CompletedSt", "TerminatedSt", "InvalidSt"};
-
-static SIP_CHAR szSipNonInvSerTxnFsmEvt[SipTxn::NON_INV_SER_INVALID_EVT + 1][SIP_20] = {
-        "RecvNonInvReqEvt", "Send1xxRespEvt", "Send2xx6xxRespEvt", "TranspErrorEvt",
-        "Timer_J_TimeoutEvt", "InvalidEvt"};
-
-static SIP_CHAR szSipTxnTimer[SipTxn::TIMER_TYPE_INVALID + 1][SIP_14] = {"Timer1", "Timer2",
-        "Timer4", "TimerA", "TimerB", "TimerC", "TimerD", "TimerE", "TimerF", "TimerG", "TimerH",
-        "TimerI", "TimerJ", "TimerK", "TimerOther", "TimerInvalid"};
-#endif  // #ifdef SIP_TRACE_ENABLE
-
 SipTxn::SipTxn() :
         m_eTxnType(SipTxn::INVALID_TXN),
         m_pTxnKey(SIP_NULL),
