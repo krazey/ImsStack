@@ -53,6 +53,7 @@ public:
 protected:
     virtual void SetUp() override
     {
+        pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
