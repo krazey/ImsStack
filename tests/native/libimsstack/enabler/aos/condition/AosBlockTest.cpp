@@ -486,56 +486,44 @@ TEST_F(AosBlockTest, IsCleared_Whole) {
 }
 
 TEST_F(AosBlockTest, BlockReasonToString_ParamInvalid) {
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_MAX), "INVALID");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_MAX), "INVALID");
 }
 
 TEST_F(AosBlockTest, BlockReasonToString_ParamValid) {
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_AC_INCOMPLETED),
-            "AC_INCOMPLETED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_AUTHENTICATION_FAILED),
-            "AUTHENTICATION_FAILED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_AOS_INCOMPLETED),
-            "AOS_INCOMPLETED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CSCALL_STARTED),
-            "CSCALL_STARTED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_PERMANENT_DATA_FAILED),
-            "PERMANENT_DATA_FAILED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_ENABLER_DETACHED),
-            "ENABLER_DETACHED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_IMS_DISABLED),
-            "IMS_DISABLED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_PERMANENT_REG_FAILED),
-            "PERMANENT_REG_FAILED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_POWER_OFF),
-            "POWER_OFF");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_SERVICE_CONNECTING),
-            "SERVICE_CONNECTING");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_SUBSCRIBER_INCOMPLETED),
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_AC_INCOMPLETED), "AC_INCOMPLETED");
+    EXPECT_STREQ(
+            m_pAosBlock->BlockReasonToString(BLOCK_AUTHENTICATION_FAILED), "AUTHENTICATION_FAILED");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_AOS_INCOMPLETED), "AOS_INCOMPLETED");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CSCALL_STARTED), "CSCALL_STARTED");
+    EXPECT_STREQ(
+            m_pAosBlock->BlockReasonToString(BLOCK_PERMANENT_DATA_FAILED), "PERMANENT_DATA_FAILED");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_ENABLER_DETACHED), "ENABLER_DETACHED");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_IMS_DISABLED), "IMS_DISABLED");
+    EXPECT_STREQ(
+            m_pAosBlock->BlockReasonToString(BLOCK_PERMANENT_REG_FAILED), "PERMANENT_REG_FAILED");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_POWER_OFF), "POWER_OFF");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_SERVICE_CONNECTING), "SERVICE_CONNECTING");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_SUBSCRIBER_INCOMPLETED),
             "SUBSCRIBER_INCOMPLETED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_TTY_MODE_ON),
-            "TTY_MODE_ON");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_TEMPORARY_DATA_DEACTIVATED),
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_TTY_MODE_ON), "TTY_MODE_ON");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_TEMPORARY_DATA_DEACTIVATED),
             "TEMPORARY_DATA_DEACTIVATED");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_AIRPLANE_MODE_ON),
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_AIRPLANE_MODE_ON),
             "CELLULAR_AIRPLANE_MODE_ON");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_NO_NETWORK),
-            "CELLULAR_NO_NETWORK");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_OUT_OF_SERVICE),
+    EXPECT_STREQ(
+            m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_NO_NETWORK), "CELLULAR_NO_NETWORK");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_OUT_OF_SERVICE),
             "CELLULAR_OUT_OF_SERVICE");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_ROAMING),
-            "CELLULAR_ROAMING");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_VOPS_OFF),
-            "CELLULAR_VOPS_OFF");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_BAD_CONNECTION),
-            "WIFI_BAD_CONNECTION");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE),
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_ROAMING), "CELLULAR_ROAMING");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_CELLULAR_VOPS_OFF), "CELLULAR_VOPS_OFF");
+    EXPECT_STREQ(
+            m_pAosBlock->BlockReasonToString(BLOCK_WIFI_BAD_CONNECTION), "WIFI_BAD_CONNECTION");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE),
             "WIFI_COUNTRY_CODE_UNAVAILABLE");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_AIRPLANE_MODE_ON),
-            "WIFI_AIRPLANE_MODE_ON");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_NO_WIFI),
-            "WIFI_NO_WIFI");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_ROAMING),
-            "WIFI_ROAMING");
-    EXPECT_EQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_TEMPORARILY_BLOCKED),
+    EXPECT_STREQ(
+            m_pAosBlock->BlockReasonToString(BLOCK_WIFI_AIRPLANE_MODE_ON), "WIFI_AIRPLANE_MODE_ON");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_NO_WIFI), "WIFI_NO_WIFI");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_ROAMING), "WIFI_ROAMING");
+    EXPECT_STREQ(m_pAosBlock->BlockReasonToString(BLOCK_WIFI_TEMPORARILY_BLOCKED),
             "WIFI_TEMPORARILY_BLOCKED");
 }
