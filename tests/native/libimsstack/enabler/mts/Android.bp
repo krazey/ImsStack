@@ -24,6 +24,9 @@ cc_test {
     srcs: [
         "**/*.cpp",
     ],
-
+    include_dirs: [
+        "packages/modules/ImsStack/tests/native/libimsstack/enabler/include/mts",
+        "packages/modules/ImsStack/tests/native/libimsstack/enabler/interface/mts",
+    ],
     test_config: "ImsStackNativeEnablerMtsTests.xml",
 }
