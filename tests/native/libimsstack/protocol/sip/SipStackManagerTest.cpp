@@ -490,8 +490,8 @@ Content-Length: 0\r\n\
 
     /* Pass valid arguments, success */
     EXPECT_EQ(SIP_TRUE,
-            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
-                    &pTxnKey, &nError));
+            pSipStackManager->SendMsg(pRespSipMessage, &objTransportParam, &objUserData, pRespMsg,
+                    nLength, &pTxnKey, &nError));
 
     pRespSipMessage->SipDelete();
 
