@@ -513,7 +513,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyAttachSupported()
  * @see #STATE_POWER_OFF
  */
 PUBLIC
-IMS_SINT32 OsNetworkWatcher::GetServiceStateType()
+IMS_SINT32 OsNetworkWatcher::GetServiceStateType() const
 {
     return PlatformContext::GetInstance()->GetSystem()->GetServiceState(GetSlotId());
 }
@@ -525,7 +525,7 @@ IMS_SINT32 OsNetworkWatcher::GetServiceStateType()
  * @see #STATE_POWER_OFF
  */
 PUBLIC
-IMS_SINT32 OsNetworkWatcher::GetVoiceServiceStateType()
+IMS_SINT32 OsNetworkWatcher::GetVoiceServiceStateType() const
 {
     return PlatformContext::GetInstance()->GetSystem()->GetVoiceServiceState(GetSlotId());
 }

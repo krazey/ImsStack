@@ -476,8 +476,8 @@ GeolocationPidfCreator::~GeolocationPidfCreator()
 
 // This method creates PIDF for Geolocation with country only.
 PUBLIC
-IMS_BOOL GeolocationPidfCreator::Create(
-        IN const AString& strEntityUri, IN const AString& strCountry, OUT ByteArray& objContent)
+IMS_BOOL GeolocationPidfCreator::Create(IN const AString& strEntityUri,
+        IN const AString& strCountry, OUT ByteArray& objContent) const
 {
     ISystemTime* piSystemTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
     AString strTimeStamp = piSystemTime->GetUtcFormat();
@@ -498,7 +498,7 @@ IMS_BOOL GeolocationPidfCreator::Create(
 // but if country is not determined, then don't create PIDF.
 PUBLIC
 IMS_BOOL GeolocationPidfCreator::Create(IN const AString& strEntityUri,
-        IN IMS_BOOL bUnknownCountryAllowed, OUT ByteArray& objContent)
+        IN IMS_BOOL bUnknownCountryAllowed, OUT ByteArray& objContent) const
 {
     ILocationProperties* piLocation = GetLocationProperties();
 
@@ -556,7 +556,8 @@ IMS_BOOL GeolocationPidfCreator::Create(IN const AString& strEntityUri,
 // but if country is not determined, then don't create PIDF.
 PUBLIC
 IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString& strEntityUri,
-        IN IMS_BOOL bUnknownCountryAllowed, IN IMS_BOOL bIncludeState, OUT ByteArray& objContent)
+        IN IMS_BOOL bUnknownCountryAllowed, IN IMS_BOOL bIncludeState,
+        OUT ByteArray& objContent) const
 {
     IMS_SINT32 nType = ILocationInfo::LOCATION_ALL;
 
@@ -600,7 +601,7 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutPosition(IN const AString& strEnti
 // If position is not available, it returns IMS_FALSE.
 PUBLIC
 IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString& strEntityUri,
-        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/)
+        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/) const
 {
     ILocationProperties* piLocation = GetLocationProperties();
 
@@ -664,7 +665,7 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString& strEntityU
 // If position is not available, it returns IMS_FALSE.
 PUBLIC
 IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString& strEntityUri,
-        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/)
+        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/) const
 {
     ILocationProperties* piLocation =
             GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
@@ -726,7 +727,7 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString& 
 // If position is not available, it returns IMS_FALSE.
 PUBLIC
 IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString& strEntityUri,
-        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/)
+        OUT ByteArray& objContent, IN IMS_SINT32 nConfidence /*= 0*/) const
 {
     ILocationProperties* piLocation = GetLocationProperties(ILocationInfo::LOCATION_POSITION);
 

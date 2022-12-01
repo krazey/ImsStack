@@ -61,7 +61,7 @@ protected:
     IMS_BOOL AttachApp(IN ImsApp* pApp);
     void DetachApp(IN const AString& strName, IN IMS_BOOL bDestroy = IMS_FALSE);
     void ControlAppAsync(IN IMS_SINT32 nParam, IN const AString& strName,
-            IN ImsApp_Creator pfnCreator = IMS_NULL);
+            IN ImsApp_Creator pfnCreator = IMS_NULL) const;
 
 private:
     void UnloadAllApp();

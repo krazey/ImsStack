@@ -36,7 +36,7 @@ public:
     }
     inline ~OsPowerInfoPrivate() {}
 
-    POWERLEVEL_ENTYPE GetPowerLevel();
+    POWERLEVEL_ENTYPE GetPowerLevel() const;
     void SetPowerInfo(IN OsPowerInfo* pPowerInfo);
     void Update();
     void UpdateValue();
@@ -68,7 +68,7 @@ void osPowerInfo_NotifyEvent(IN OsPowerInfo* pPowerInfo, IN POWERLEVEL_ENTYPE eP
     }
 }
 
-PUBLIC VIRTUAL POWERLEVEL_ENTYPE OsPowerInfoPrivate::GetPowerLevel()
+PUBLIC VIRTUAL POWERLEVEL_ENTYPE OsPowerInfoPrivate::GetPowerLevel() const
 {
     return m_ePowerLevel;
 }

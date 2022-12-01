@@ -169,7 +169,7 @@ private:
             m_objListeners.Append(piListener);
         }
 
-        inline IMS_BOOL operator==(IN const IThread* piThread)
+        inline IMS_BOOL operator==(IN const IThread* piThread) const
         {
             return piThread == m_piOwnerThread;
         }

@@ -131,7 +131,7 @@ PUBLIC VIRTUAL void OsTimer::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS
 }
 
 PRIVATE
-IMS_UINTP OsTimer::CreateTimerId()
+IMS_UINTP OsTimer::CreateTimerId() const
 {
     return reinterpret_cast<IMS_UINTP>(this);
 }

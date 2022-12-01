@@ -40,7 +40,7 @@ public:
 
 private:
     void SetLastKnownCountry(IN const AString& strCountry);
-    AString GetCountryIso(IN IMS_BOOL bFromUicc = IMS_FALSE);
+    AString GetCountryIso(IN IMS_BOOL bFromUicc = IMS_FALSE) const;
 
 private:
     static const IMS_CHAR COUNTRY_ISO_UNKNOWN[];

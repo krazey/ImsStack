@@ -38,7 +38,7 @@ public:
     EventActivity& operator=(IN const EventActivity&) = delete;
 
 public:
-    IMS_BOOL IsSameListener(IN const IEventListener* piListener);
+    IMS_BOOL IsSameListener(IN const IEventListener* piListener) const;
     void NotifyEvent(IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
 
 private:
@@ -62,7 +62,7 @@ EventActivity::EventActivity(IN IMS_SINT32 nEvent, IN IEventListener* piListener
 PUBLIC VIRTUAL EventActivity::~EventActivity() {}
 
 PUBLIC
-IMS_BOOL EventActivity::IsSameListener(IN const IEventListener* piListener)
+IMS_BOOL EventActivity::IsSameListener(IN const IEventListener* piListener) const
 {
     if (m_piListener == piListener)
     {
