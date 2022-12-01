@@ -53,6 +53,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_eType(eType),
         m_objContext(objContext),
         m_strServiceName(GetServiceName(eType)),
+        m_eOldStatus(ServiceStatus::SERVICE_IDLE),
         m_eStatus(ServiceStatus::SERVICE_IDLE),
         m_piCoreService(IMS_NULL),
         m_pAosConnector(IMS_NULL),
