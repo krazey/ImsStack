@@ -72,6 +72,7 @@ protected:
     {
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
         pInfo = IMS_NULL;
+        pDescription = IMS_NULL;
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
