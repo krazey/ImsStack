@@ -1364,7 +1364,7 @@ void Service::DeregisterMethod(IN Method* pMethod)
 }
 
 PUBLIC
-IMS_BOOL Service::ValidateMethod(IN const SipMethod& objMethod)
+IMS_BOOL Service::ValidateMethod(IN const SipMethod& objMethod) const
 {
     // Handle a specific behavior for an incoming INVITE request
     if (objMethod.Equals(SipMethod::INVITE))
@@ -2137,7 +2137,7 @@ void Service::CreateDefaultPublicUserId()
 
 PRIVATE
 IMS_BOOL Service::SetPPreferredIdentityHeader(
-        IN IMS_SINT32 nPreferredId, IN_OUT ISipMessage*& piSipMsg)
+        IN IMS_SINT32 nPreferredId, IN_OUT ISipMessage*& piSipMsg) const
 {
     const AStringArray& objAssociatedUris = IsRegBindingOnActive()
             ? GetAssociatedUris()

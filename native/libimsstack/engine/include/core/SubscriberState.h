@@ -39,7 +39,7 @@ protected:
     const SipHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32& nCount) const override;
 
 private:
-    IMS_SINT32 TranslateMessage(IN const ISipMessage* piSipMsg);
+    IMS_SINT32 TranslateMessage(IN const ISipMessage* piSipMsg) const;
     IMS_BOOL UpdateOnNotifyRequest(IN const ISipMessage* piSipMsg);
     IMS_BOOL UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg);
     IMS_BOOL UpdateOnSubscribeRequest(IN const ISipMessage* piSipMsg);

@@ -35,7 +35,7 @@ public:
     IMS_BOOL UpdateState(IN const ISipMessage* piSipMsg) override;
 
 private:
-    IMS_SINT32 TranslateMessage(IN const ISipMessage* piSipMsg);
+    IMS_SINT32 TranslateMessage(IN const ISipMessage* piSipMsg) const;
     IMS_BOOL UpdateOnNotifyRequest(IN const ISipMessage* piSipMsg);
     IMS_BOOL UpdateOnNotifyResponse(IN const ISipMessage* piSipMsg);
     IMS_BOOL UpdateOnReferRequest(IN const ISipMessage* piSipMsg);

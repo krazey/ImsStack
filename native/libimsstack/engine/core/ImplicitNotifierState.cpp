@@ -135,7 +135,7 @@ PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN const ISipMessage*
 }
 
 PRIVATE
-IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN const ISipMessage* piSipMsg)
+IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN const ISipMessage* piSipMsg) const
 {
     IMS_SINT32 nMsgType = piSipMsg->GetType();
     const SipMethod& objMethod = piSipMsg->GetMethod();
