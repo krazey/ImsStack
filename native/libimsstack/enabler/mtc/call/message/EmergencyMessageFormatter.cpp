@@ -35,7 +35,9 @@ __IMS_TRACE_TAG_COM_MTC__;
 ------------------------------------------------------------------------------------------------- */
 EmergencyMessageFormatter::EmergencyMessageFormatter(
         IN IMtcCallContext& objContext, IN ISession& objSession) :
-        MessageFormatter(objContext, objSession)
+        MessageFormatter(objContext, objSession),
+        m_eNormalAosRegMode(IImsAosInfo::REG_MODE_UNKNOWN),
+        m_eEmergencyAosRegMode(IImsAosInfo::REG_MODE_UNKNOWN)
 {
     IMS_TRACE_I("+EmergencyMessageFormatter", 0, 0, 0);
 }
