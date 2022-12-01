@@ -720,8 +720,7 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN IMSList<ConfU
 {
     IMS_TRACE_D("InviteParticipants : [%d] users", objUsers.GetSize(), 0, 0);
 
-    IMS_SINT32 nReferTypeForInvite = REFER_INVITE_SINGLE;
-    // ConferenceConfigurationWrapper::GetReferTypeForInvite();
+    IMS_SINT32 nReferTypeForInvite = ConferenceConfigurationWrapper::GetReferTypeForInvite();
     ClearOngoingReferences();
 
     if (nReferTypeForInvite == REFER_INVITE_SINGLE)
