@@ -48,7 +48,7 @@ protected:
     IMS_BOOL IsStartFinalSipfragWaitTimer() const override;
     void Recover() override;
 
-    void OnCallUpdated(IN IMS_UINT32 nEvent, IN IMS_UINTP nCallKey) override;
+    void OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey) override;
     void UpdateUserStatusByReferResult(IN ConfUser* pUser, IN IConferenceReference* piConfRef,
             IN SipStatusCode nStatusCode = SipStatusCode::SC_200) override;
 

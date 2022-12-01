@@ -103,10 +103,10 @@ public:
      *        forking case, and early-session case(video ring back tone).
      * @param piSession ISession instance is used for managing the media profile.
      * @param bForked Set IMS_TRUE if it is forking case, otherwise set IMS_FALSE.
-     * @param bOriginalProfile Set IMS_FALSE if it is an early-session case, otherwise set IMS_TRUE.
+     * @param bOrigin Set IMS_FALSE if it is an early-session case, otherwise set IMS_TRUE.
      */
     virtual void CreateMediaProfile(
-            IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile) = 0;
+            IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOrigin) = 0;
 
     /**
      * @brief Destroys

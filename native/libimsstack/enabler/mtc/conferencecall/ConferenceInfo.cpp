@@ -194,12 +194,12 @@ void ConferenceInfo::CreateUsers(IN const INode& objNode)
 }
 
 PRIVATE
-void ConferenceInfo::CreateEndPointEntity(IN const IElement& objUserElement, IN User& objUser)
+void ConferenceInfo::CreateEndPointEntity(IN const IElement& objElement, IN User& objUser)
 {
     const IMS_CHAR ELEMENT_ENDPOINT[] = "endpoint";
 
     ImsList<IElement*> objEndPointElements;
-    GetSubElements(objUserElement, ELEMENT_ENDPOINT, objEndPointElements);
+    GetSubElements(objElement, ELEMENT_ENDPOINT, objEndPointElements);
 
     for (IMS_UINT32 i = 0; i < objEndPointElements.GetSize(); i++)
     {

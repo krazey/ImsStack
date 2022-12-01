@@ -101,7 +101,7 @@ public:
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-            IN const ImsList<ConfUser*>& lstUsers) override;
+            IN const ImsList<ConfUser*>& objUsers) override;
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const ImsList<ConfUser*>& objUsers) override;
     void HandleIncoming(IN ISession* piSession) override;

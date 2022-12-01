@@ -62,7 +62,7 @@ public:
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     virtual ISession* GetISession(
-            IN ICoreService* pICoreService, IN const AString& strFrom, IN const AString& strTo);
+            IN ICoreService* piCoreService, IN const AString& strFrom, IN const AString& strTo);
     virtual void AddISession(IN ISession* piSession);
     virtual void ReleaseISession(IN ISession* piSession, IN IMS_BOOL bTerminated = IMS_FALSE);
 

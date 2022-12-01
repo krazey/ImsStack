@@ -96,7 +96,7 @@ public:
             IN IMS_SINT32 nMaxUserCount, IN IMS_UINT32 nUserCount,
             IN AString strHostEntity) override;
     void SendReplacedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
-            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nReplaceKey = 0,
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nKey = 0,
             IN IMS_UINTP nType = 0) override;
     void SendEctCompleted(IN IMS_RESULT nResult, IN const CallReasonInfo& objReason) override;
     void SendCallPushCompleted(IN IMS_BOOL bResult, IN const CallReasonInfo& objReason) override;

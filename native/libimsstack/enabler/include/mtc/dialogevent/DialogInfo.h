@@ -233,7 +233,7 @@ public:
 
     private:
         void HandleMediaInfo(IN const IElement* piElementDialog);
-        IMS_SINT32 ConvertMediaDirection(IN const AString& strState);
+        IMS_SINT32 ConvertMediaDirection(IN const AString& strMediaDirection);
 
     private:
         friend class DialogInfo;

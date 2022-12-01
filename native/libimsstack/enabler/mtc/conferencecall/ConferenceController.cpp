@@ -611,16 +611,16 @@ void ConferenceController::ClearOngoingReferences()
 }
 
 PROTECTED
-void ConferenceController::RemoveReference(IN IConferenceReference* piConfRef)
+void ConferenceController::RemoveReference(IN IConferenceReference* piReference)
 {
-    IMS_TRACE_I("RemoveReference [%" PFLS_u "]", piConfRef, 0, 0);
+    IMS_TRACE_I("RemoveReference [%" PFLS_u "]", piReference, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_objIConfReferences.GetSize(); i++)
     {
-        if (m_objIConfReferences.GetAt(i) == piConfRef)
+        if (m_objIConfReferences.GetAt(i) == piReference)
         {
-            m_objParticipantList.ResetReference(piConfRef);
-            delete piConfRef;
+            m_objParticipantList.ResetReference(piReference);
+            delete piReference;
             m_objIConfReferences.RemoveAt(i);
             break;
         }

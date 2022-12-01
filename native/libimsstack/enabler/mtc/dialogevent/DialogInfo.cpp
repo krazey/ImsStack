@@ -623,9 +623,9 @@ void Dialog::ExtraInfo::Update(IN const IElement* piElementDialog)
 }
 
 PRIVATE
-void Dialog::ExtraInfo::HandleMediaInfo(IN const IElement* piElementLocal)
+void Dialog::ExtraInfo::HandleMediaInfo(IN const IElement* piElementDialog)
 {
-    INode* piNode = piElementLocal->GetFirstChild();
+    INode* piNode = piElementDialog->GetFirstChild();
 
     while (piNode != IMS_NULL)
     {

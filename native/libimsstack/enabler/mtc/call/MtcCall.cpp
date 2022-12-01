@@ -156,7 +156,7 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
 
 PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const AString& strTarget,
         IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices,
-        IN const ImsList<ConfUser*>& lstUsers)
+        IN const ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
 
@@ -164,19 +164,19 @@ PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const ASt
             [&](IMtcCallState* pState)
             {
                 return pState->StartConference(
-                        eCallType, strTarget, objMediaInfo, objSuppServices, lstUsers);
+                        eCallType, strTarget, objMediaInfo, objSuppServices, objUsers);
             });
 }
 
 PUBLIC VIRTUAL void MtcCall::StartConference(
-        IN CallType eCallType, IN const AString& strTarget, IN const ImsList<ConfUser*>& lstUsers)
+        IN CallType eCallType, IN const AString& strTarget, IN const ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](IMtcCallState* pState)
             {
-                return pState->StartConference(eCallType, strTarget, lstUsers);
+                return pState->StartConference(eCallType, strTarget, objUsers);
             });
 }
 
