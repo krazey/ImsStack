@@ -95,7 +95,7 @@ TEST(MtcBlockCheckerTest, ListenerNotifiedWhenAllPendingRulesUnblocked)
             .Times(1);
 
     MtcBlockChecker objChecker(lstRules, &objListener);
-    Result objResult = objChecker.Check();
+    objChecker.Check();
 
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
@@ -111,7 +111,7 @@ TEST(MtcBlockCheckerTest, ListenerNotNotifiedWhenSomePendingRulesUnblocked)
     EXPECT_CALL(objListener, OnBlockChecked(_)).Times(0);
 
     MtcBlockChecker objChecker(lstRules, &objListener);
-    Result objResult = objChecker.Check();
+    objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
 }
 
@@ -125,7 +125,7 @@ TEST(MtcBlockCheckerTest, ListenerNotifiedWhenSomePendingRulesBlocked)
     EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::BLOCKED, objReason))).Times(1);
 
     MtcBlockChecker objChecker(lstRules, &objListener);
-    Result objResult = objChecker.Check();
+    objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
 }
 
@@ -140,7 +140,7 @@ TEST(MtcBlockCheckerTest, ListenerNotNotifiedAfterNotifiedOnce)
     EXPECT_CALL(objListener, OnBlockChecked(Result(Result::Status::BLOCKED, objReason))).Times(1);
 
     MtcBlockChecker objChecker(lstRules, &objListener);
-    Result objResult = objChecker.Check();
+    objChecker.Check();
     objChecker.OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
     objChecker.OnBlockRuleChecked(Result(Result::Status::UNBLOCKED, objDefaultReason));
 }
