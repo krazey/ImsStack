@@ -4937,13 +4937,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 updateConferenceSession(ImsCallSessionImpl.this, transientConfSession,
                         usersInfo, conferenceParticipants);
 
-                // Notify the conference state first before call merge completed event.
-                // It enables to create ImsConference with the participants in Telephony layer.
+                mCallback.invokeMergeComplete(ImsCallSessionImpl.this, transientConfSession);
+
                 logi("Conference participants notified in initial merge");
                 notifyCallSessionConferenceStateUpdated(
                         transientConfSession.getMtcCall().getCallId());
-
-                mCallback.invokeMergeComplete(ImsCallSessionImpl.this, transientConfSession);
             } else if (mCall.isConference()) {
                 updateCallProfile(callInfo, mediaInfo);
                 mCallback.invokeMergeComplete(ImsCallSessionImpl.this, null);
