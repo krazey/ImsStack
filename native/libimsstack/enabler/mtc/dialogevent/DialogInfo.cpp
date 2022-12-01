@@ -172,11 +172,11 @@ PUBLIC GLOBAL IElement* DialogInfo::GetSubElement(
     while (piNode != IMS_NULL)
     {
         const AString& strName = piNode->GetLocalName();
-        IElement* piElement = DYNAMIC_CAST(IElement*, piNode);
+        IElement* piSubElement = DYNAMIC_CAST(IElement*, piNode);
 
         if (strName.EqualsIgnoreCase(pszElement))
         {
-            return piElement;
+            return piSubElement;
         }
         piNode = piNode->GetNextSibling();
     }
