@@ -30,7 +30,7 @@ class ISipServerConnection;
 class UssiController
 {
 public:
-    UssiController(IN IMtcCallContext& objContext);
+    explicit UssiController(IN IMtcCallContext& objContext);
     virtual ~UssiController();
 
 private:

@@ -36,7 +36,7 @@ class SuppService;
 class IncomingState : public MtcCallState
 {
 public:
-    IncomingState(IN IMtcCallContext& objContext);
+    explicit IncomingState(IN IMtcCallContext& objContext);
     virtual ~IncomingState();
     IncomingState(IN const IncomingState&) = delete;
     IncomingState& operator=(IN const IncomingState&) = delete;

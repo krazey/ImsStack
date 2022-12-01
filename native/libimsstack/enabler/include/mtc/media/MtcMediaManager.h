@@ -33,7 +33,7 @@
 class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListener
 {
 public:
-    MtcMediaManager(IN IMtcCallContext& objContext);
+    explicit MtcMediaManager(IN IMtcCallContext& objContext);
     virtual ~MtcMediaManager();
     MtcMediaManager(IN const MtcMediaManager&) = delete;
     MtcMediaManager& operator=(IN const MtcMediaManager&) = delete;

@@ -32,7 +32,7 @@ enum class EpsFallbackReason
 class EpsFallbackTrigger : public ITimerListener
 {
 public:
-    EpsFallbackTrigger(IN IMtcCallContext& objContext);
+    explicit EpsFallbackTrigger(IN IMtcCallContext& objContext);
     virtual ~EpsFallbackTrigger();
     EpsFallbackTrigger(IN const EpsFallbackTrigger&) = delete;
     EpsFallbackTrigger& operator=(IN const EpsFallbackTrigger&) = delete;

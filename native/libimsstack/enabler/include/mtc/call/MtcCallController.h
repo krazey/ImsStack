@@ -41,7 +41,7 @@ union Key;
 class MtcCallController final : public IMtcCallController, public IMtcRadioConnectionFailureListener
 {
 public:
-    MtcCallController(IN IMtcContext& objContext);
+    explicit MtcCallController(IN IMtcContext& objContext);
     virtual ~MtcCallController();
     MtcCallController(IN const MtcCallController&) = delete;
     MtcCallController& operator=(IN const MtcCallController&) = delete;

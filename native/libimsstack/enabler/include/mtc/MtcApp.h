@@ -52,7 +52,7 @@ class OperationAsyncRunner;
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
 {
 public:
-    MtcApp(IN IMS_SINT32 nSlotId);
+    explicit MtcApp(IN IMS_SINT32 nSlotId);
     virtual ~MtcApp();
     MtcApp(IN const MtcApp&) = delete;
     MtcApp& operator=(IN const MtcApp&) = delete;
