@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-#ifndef CALL_TRAFFIC_BLOCK_RULE_H_
-#define CALL_TRAFFIC_BLOCK_RULE_H_
+#ifndef RADIO_BLOCK_RULE_H_
+#define RADIO_BLOCK_RULE_H_
 
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
+#include "call/radio/IMtcRadioChecker.h"
 
 class IMtcCallContext;
 
-class CallTrafficBlockRule final : public IMtcBlockRule, public IMtcCallTrafficCheckerListener
+class RadioBlockRule final : public IMtcBlockRule, public IMtcRadioCheckerListener
 {
 public:
-    explicit CallTrafficBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
-    virtual ~CallTrafficBlockRule();
-    CallTrafficBlockRule(IN const CallTrafficBlockRule&) = delete;
-    CallTrafficBlockRule& operator=(IN const CallTrafficBlockRule&) = delete;
+    explicit RadioBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType);
+    virtual ~RadioBlockRule();
+    RadioBlockRule(IN const RadioBlockRule&) = delete;
+    RadioBlockRule& operator=(IN const RadioBlockRule&) = delete;
 
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
-    // IMtcCallTrafficCheckerListener
+    // IMtcRadioCheckerListener
     void OnConnectionSetupPrepared() override;
     void OnConnectionFailed() override;
 
 private:
     IMtcBlockRuleCheckListener* m_piMtcBlockRuleCheckListener;
-    IMtcCallTrafficChecker& m_objMtcCallTrafficChecker;
+    IMtcRadioChecker& m_objMtcRadioChecker;
     PeerType m_ePeerType;
     IMS_BOOL m_bEmergency;
     IMS_BOOL m_bWifi;

@@ -30,7 +30,7 @@
 #include "TestConfigService.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcCallController.h"
-#include "call/traffic/MockIMtcCallTrafficChecker.h"
+#include "call/radio/MockIMtcRadioChecker.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/IPageMessage.h"
@@ -95,7 +95,7 @@ public:
     MockMtcEmergencyServiceManager* pMockEmergencyManager;
     MockIMtcCallManager objMockCallManager;
     MockIMtcCallController objMockCallController;
-    MockIMtcCallTrafficChecker objMockIMtcCallTrafficChecker;
+    MockIMtcRadioChecker objMockIMtcRadioChecker;
     MockICoreService objMockCoreService;
     MockMtcAosEventHandler* pMockAosEventHandler;
     MockSrvccStateManager* pMockSrvccStateManager;
@@ -125,8 +125,7 @@ protected:
 
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
         ON_CALL(objMockContext, GetCallController).WillByDefault(ReturnRef(objMockCallController));
-        ON_CALL(objMockContext, GetCallTrafficChecker)
-                .WillByDefault(ReturnRef(objMockIMtcCallTrafficChecker));
+        ON_CALL(objMockContext, GetRadioChecker).WillByDefault(ReturnRef(objMockIMtcRadioChecker));
 
         pConnector = &JniEnablerConnector::GetInstance();
         pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_SERVICE, &objMockJniEnabler);

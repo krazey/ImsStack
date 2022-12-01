@@ -47,7 +47,7 @@ public:
 class IMtcBlockCheckListener
 {
 public:
-    ~IMtcBlockCheckListener() {}
+    virtual ~IMtcBlockCheckListener() {}
 
     /**
      * Notifies the block check result.

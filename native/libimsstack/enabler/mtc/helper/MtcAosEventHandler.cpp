@@ -23,7 +23,6 @@
 #include "IuMtcService.h"
 #include "MtcEmergencyServiceManager.h"
 #include "ServiceTrace.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/MtcAosEventHandler.h"

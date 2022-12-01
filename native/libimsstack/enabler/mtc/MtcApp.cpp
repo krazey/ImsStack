@@ -61,8 +61,8 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_pEctManager(IMS_NULL),
         m_pEmergencyServiceManager(IMS_NULL),
         m_objMessageUtils(MessageUtils()),
-        m_bWifiTestMode(IMS_FALSE),
-        m_objMtcCallTrafficChecker(*this, m_objCallController)
+        m_objMtcRadioChecker(*this, m_objCallController),
+        m_bWifiTestMode(IMS_FALSE)
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
     m_bWifiTestMode = (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
@@ -86,7 +86,7 @@ PUBLIC VIRTUAL void MtcApp::Start()
     InitConfiguration();
     CreateServices();
     InitCallManager();
-    m_objMtcCallTrafficChecker.Init();
+    m_objMtcRadioChecker.Init();
 }
 
 PUBLIC VIRTUAL void MtcApp::Stop()

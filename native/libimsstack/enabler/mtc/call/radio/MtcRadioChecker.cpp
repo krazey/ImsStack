@@ -20,53 +20,63 @@
 #include "IMtcService.h"
 #include "INetworkWatcher.h"
 #include "ImsList.h"
+#include "ImsTypeCast.h"
 #include "ImsTypeDef.h"
 #include "ServiceImsRadio.h"
 #include "ServicePhoneInfo.h"
+#include "ServiceSystemTime.h"
+#include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
-#include "call/traffic/MtcCallTrafficChecker.h"
+#include "call/radio/MtcRadioChecker.h"
 #include "helper/ICallStateProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcCallTrafficChecker::MtcCallTrafficChecker(IN IMtcContext& objContext,
+MtcRadioChecker::MtcRadioChecker(IN IMtcContext& objContext,
         IN IMtcRadioConnectionFailureListener& objMtcRadioConnectionFailureListener) :
         m_objContext(objContext),
         m_objMtcRadioConnectionFailureListener(objMtcRadioConnectionFailureListener),
         m_piNetworkWatcher(PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
                 m_objContext.GetSlotId())),
         m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId())),
-        m_piMtcCallTrafficCheckerListener(IMS_NULL),
-        m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>())
+        m_piMtcRadioCheckerListener(IMS_NULL),
+        m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>()),
+        m_piSsacVoiceBarringTimer(IMS_NULL),
+        m_piSsacVideoBarringTimer(IMS_NULL)
 {
-    IMS_TRACE_D("+MtcCallTrafficChecker", 0, 0, 0);
+    IMS_TRACE_D("+MtcRadioChecker", 0, 0, 0);
 }
 
-PUBLIC MtcCallTrafficChecker::~MtcCallTrafficChecker()
+PUBLIC MtcRadioChecker::~MtcRadioChecker()
 {
-    IMS_TRACE_D("~MtcCallTrafficChecker", 0, 0, 0);
+    IMS_TRACE_D("~MtcRadioChecker", 0, 0, 0);
 
     DeInit();
 }
 
-PUBLIC void MtcCallTrafficChecker::Init()
+PUBLIC void MtcRadioChecker::Init()
 {
     m_objContext.GetCallStateProxy().AddListener(this);
     m_objContext.GetServiceByType(ServiceType::NORMAL)->AddAosStateListener(this);
     m_objContext.GetServiceByType(ServiceType::EMERGENCY)->AddAosStateListener(this);
 }
 
-PUBLIC VIRTUAL void MtcCallTrafficChecker::SetTrafficCheckerListener(
-        IN IMtcCallTrafficCheckerListener* pListener)
+PUBLIC VIRTUAL void MtcRadioChecker::SetTrafficCheckerListener(
+        IN IMtcRadioCheckerListener* pListener)
 {
-    m_piMtcCallTrafficCheckerListener = pListener;
+    m_piMtcRadioCheckerListener = pListener;
 }
 
-PUBLIC VIRTUAL CheckResult MtcCallTrafficChecker::Check(
+PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(
         IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType, IN IMS_BOOL bWifi)
 {
+    if (IsSsacBarred(eCallType, bEmergency, ePeerType, bWifi))
+    {
+        return CheckResult::BLOCKED;
+    }
+
     if (IsTrafficPrepared(eCallType, bEmergency, ePeerType))
     {
         return CheckResult::UNBLOCKED;
@@ -87,7 +97,7 @@ PUBLIC VIRTUAL CheckResult MtcCallTrafficChecker::Check(
     return CheckResult::PENDING;
 }
 
-PUBLIC VIRTUAL void MtcCallTrafficChecker::OnIpcanChanged(
+PUBLIC VIRTUAL void MtcRadioChecker::OnIpcanChanged(
         IN IMtcService& objMtcService, IN IMS_UINT32 eIpcan)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objMtcTrafficInfos.GetSize(); nIndex++)
@@ -114,7 +124,7 @@ PUBLIC VIRTUAL void MtcCallTrafficChecker::OnIpcanChanged(
     }
 }
 
-PUBLIC VIRTUAL void MtcCallTrafficChecker::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
+PUBLIC VIRTUAL void MtcRadioChecker::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
         IN Type eType, IN IMS_BOOL bEmergency, IN IMS_SINT32 /* nReason */)
 {
     switch (eState)
@@ -141,12 +151,12 @@ PUBLIC VIRTUAL void MtcCallTrafficChecker::OnCallStateChanged(IN CallKey nCallKe
     }
 }
 
-PUBLIC VIRTUAL void MtcCallTrafficChecker::OnTotalCallStateChanged(IN State /* eState */)
+PUBLIC VIRTUAL void MtcRadioChecker::OnTotalCallStateChanged(IN State /* eState */)
 {
     // do nothing
 }
 
-PUBLIC VIRTUAL void MtcCallTrafficChecker::OnConnectionFailed(IN TrafficType eTrafficType,
+PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficType,
         IN CallDirection eCallDirection, IN IMS_UINT32 nFailureReason,
         IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 /* nWaitTimeMillis */)
 {
@@ -174,14 +184,40 @@ PUBLIC VIRTUAL void MtcCallTrafficChecker::OnConnectionFailed(IN TrafficType eTr
     }
 }
 
-PUBLIC VIRTUAL void MtcCallTrafficChecker::OnConnectionSetupPrepared(
+PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionSetupPrepared(
         IN TrafficType eTrafficType, IN CallDirection /* eCallDirection */)
 {
     IMS_TRACE_D("OnConnectionSetupPrepared TrafficType[%d]", eTrafficType, 0, 0);
     NotifyTrafficCheckerListener(IMS_TRUE);
 }
 
-PUBLIC void MtcCallTrafficChecker::CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
+PUBLIC VIRTUAL void MtcRadioChecker::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    if (piTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    if (m_piSsacVoiceBarringTimer == piTimer)
+    {
+        IMS_TRACE_D("Timer_TimerExpired - voice barring", 0, 0, 0);
+        m_piSsacVoiceBarringTimer = IMS_NULL;
+    }
+    else if (m_piSsacVideoBarringTimer == piTimer)
+    {
+        IMS_TRACE_D("Timer_TimerExpired - video barring", 0, 0, 0);
+        m_piSsacVideoBarringTimer = IMS_NULL;
+    }
+    else
+    {
+        return;
+    }
+
+    piTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(piTimer);
+}
+
+PUBLIC void MtcRadioChecker::CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
         IN CallDirection eCallDirection, IN IMS_BOOL bActive, IN CallKey nCallKeyIn)
 {
     MtcTrafficInfo* pMtcTrafficInfo = CreateCallTrafficInfo(eTrafficType, eCallDirection);
@@ -193,7 +229,7 @@ PUBLIC void MtcCallTrafficChecker::CreateCallTrafficInfoWithGivenValue(IN Traffi
     }
 }
 
-PRIVATE void MtcCallTrafficChecker::DeInit()
+PRIVATE void MtcRadioChecker::DeInit()
 {
     m_objContext.GetCallStateProxy().RemoveListener(this);
     IMtcService* pNormalService = m_objContext.GetServiceByType(ServiceType::NORMAL);
@@ -219,9 +255,21 @@ PRIVATE void MtcCallTrafficChecker::DeInit()
     }
 
     m_objMtcTrafficInfos.Clear();
+
+    if (m_piSsacVoiceBarringTimer)
+    {
+        m_piSsacVoiceBarringTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piSsacVoiceBarringTimer);
+    }
+
+    if (m_piSsacVideoBarringTimer)
+    {
+        m_piSsacVideoBarringTimer->KillTimer();
+        TimerService::GetTimerService()->DestroyTimer(m_piSsacVideoBarringTimer);
+    }
 }
 
-PRIVATE TrafficType MtcCallTrafficChecker::ConvertCallTypeToTrafficType(
+PRIVATE TrafficType MtcRadioChecker::ConvertCallTypeToTrafficType(
         IN CallType eCallType, IN IMS_BOOL bEmergency) const
 {
     if (bEmergency)
@@ -242,7 +290,7 @@ PRIVATE TrafficType MtcCallTrafficChecker::ConvertCallTypeToTrafficType(
     }
 }
 
-PRIVATE IMS_UINT32 MtcCallTrafficChecker::ConvertNetworkType(IN IMS_BOOL bWifi) const
+PRIVATE IMS_UINT32 MtcRadioChecker::ConvertNetworkType(IN IMS_BOOL bWifi) const
 {
     if (bWifi)
     {
@@ -260,8 +308,8 @@ PRIVATE IMS_UINT32 MtcCallTrafficChecker::ConvertNetworkType(IN IMS_BOOL bWifi) 
     }
 }
 
-PRIVATE void MtcCallTrafficChecker::AddCallKeyIfNeeded(
-        IN TrafficType eTrafficType, IN CallDirection eCallDirection, IN CallKey nCallKeyIn)
+PRIVATE void MtcRadioChecker::AddCallKeyIfNeeded(
+        IN TrafficType eTrafficType, IN CallDirection eCallDirection, IN CallKey nCallKeyIn) const
 {
     MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
 
@@ -287,8 +335,7 @@ PRIVATE void MtcCallTrafficChecker::AddCallKeyIfNeeded(
             eCallDirection, nCallKeyIn);
 }
 
-PRIVATE void MtcCallTrafficChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(
-        IN CallKey nCallKeyIn)
+PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn)
 {
     for (IMS_UINT32 nInfoIndex = 0; nInfoIndex < m_objMtcTrafficInfos.GetSize(); nInfoIndex++)
     {
@@ -326,7 +373,7 @@ PRIVATE void MtcCallTrafficChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(
     }
 }
 
-PRIVATE void MtcCallTrafficChecker::NotifyRadioConnectionFailedListener(
+PRIVATE void MtcRadioChecker::NotifyRadioConnectionFailedListener(
         IN TrafficType eTrafficType, IN CallDirection eCallDirection)
 {
     MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
@@ -344,24 +391,24 @@ PRIVATE void MtcCallTrafficChecker::NotifyRadioConnectionFailedListener(
     }
 }
 
-PRIVATE void MtcCallTrafficChecker::NotifyTrafficCheckerListener(IN IMS_BOOL bReady)
+PRIVATE void MtcRadioChecker::NotifyTrafficCheckerListener(IN IMS_BOOL bReady)
 {
-    if (m_piMtcCallTrafficCheckerListener == IMS_NULL)
+    if (m_piMtcRadioCheckerListener == IMS_NULL)
     {
         return;
     }
 
     if (bReady)
     {
-        m_piMtcCallTrafficCheckerListener->OnConnectionSetupPrepared();
+        m_piMtcRadioCheckerListener->OnConnectionSetupPrepared();
     }
     else
     {
-        m_piMtcCallTrafficCheckerListener->OnConnectionFailed();
+        m_piMtcRadioCheckerListener->OnConnectionFailed();
     }
 }
 
-PRIVATE MtcTrafficInfo* MtcCallTrafficChecker::GetCallTrafficInfo(
+PRIVATE MtcTrafficInfo* MtcRadioChecker::GetCallTrafficInfo(
         IN TrafficType eTrafficType, IN CallDirection eCallDirection) const
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objMtcTrafficInfos.GetSize(); nIndex++)
@@ -378,7 +425,7 @@ PRIVATE MtcTrafficInfo* MtcCallTrafficChecker::GetCallTrafficInfo(
     return IMS_NULL;
 }
 
-PRIVATE MtcTrafficInfo* MtcCallTrafficChecker::CreateCallTrafficInfo(
+PRIVATE MtcTrafficInfo* MtcRadioChecker::CreateCallTrafficInfo(
         IN TrafficType eTrafficType, IN CallDirection eCallDirection)
 {
     MtcTrafficInfo* pMtcTrafficInfo = new MtcTrafficInfo(eTrafficType, eCallDirection, *this);
@@ -387,7 +434,7 @@ PRIVATE MtcTrafficInfo* MtcCallTrafficChecker::CreateCallTrafficInfo(
     return pMtcTrafficInfo;
 }
 
-PRIVATE IMS_BOOL MtcCallTrafficChecker::IsTrafficPrepared(
+PRIVATE IMS_BOOL MtcRadioChecker::IsTrafficPrepared(
         IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const
 {
     MtcTrafficInfo* pMtcTrafficInfo =
@@ -402,13 +449,95 @@ PRIVATE IMS_BOOL MtcCallTrafficChecker::IsTrafficPrepared(
     return pMtcTrafficInfo->m_bTrafficActive;
 }
 
-PRIVATE IMS_BOOL MtcCallTrafficChecker::IsTrafficAllowed(
+PRIVATE IMS_BOOL MtcRadioChecker::IsTrafficAllowed(
         IN CallType eCallType, IN IMS_BOOL bEmergency) const
 {
     return m_piImsRadio->IsImsTrafficAllowed(ConvertCallTypeToTrafficType(eCallType, bEmergency));
 }
 
-PRIVATE void MtcCallTrafficChecker::StartTrafficChecking(
+PRIVATE IMS_BOOL MtcRadioChecker::IsSsacBarred(
+        IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType, IN IMS_BOOL bWifi)
+{
+    if (ePeerType == PeerType::MT || bEmergency || bWifi)
+    {
+        return IMS_FALSE;
+    }
+
+    if (IsSsacTimerRunning(eCallType))
+    {
+        return IMS_TRUE;
+    }
+
+    return StartSsacTimer(eCallType);
+}
+
+PRIVATE IMS_BOOL MtcRadioChecker::IsSsacTimerRunning(IN CallType eCallType) const
+{
+    if (m_piSsacVoiceBarringTimer)
+    {
+        return IMS_TRUE;
+    }
+
+    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
+    {
+        return m_piSsacVideoBarringTimer;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE IMS_BOOL MtcRadioChecker::StartSsacTimer(IN CallType eCallType)
+{
+    if (eCallType == CallType::UNKNOWN)
+    {
+        return IMS_FALSE;
+    }
+
+    const SsacInfo& objSsacInfo = m_piImsRadio->GetSsacInfo();
+    IMS_SINT32 nBarringFactor;
+    IMS_SINT32 nBarringTimeSec;
+
+    if (eCallType == CallType::VOIP || eCallType == CallType::RTT)
+    {
+        nBarringFactor = objSsacInfo.nBarringFactorForVoice;
+        nBarringTimeSec = objSsacInfo.nBarringTimeSecForVoice;
+    }
+    else
+    {
+        nBarringFactor = objSsacInfo.nBarringFactorForVideo;
+        nBarringTimeSec = objSsacInfo.nBarringTimeSecForVideo;
+    }
+
+    if (nBarringFactor >= 100 || nBarringTimeSec <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_UINT32 nRandom = IMS_SYS_GetRandom(100);
+    if (nRandom <= STATIC_CAST(IMS_UINT32, nBarringFactor))
+    {
+        return IMS_FALSE;
+    }
+
+    nRandom = IMS_SYS_GetRandom(10);
+    IMS_DOUBLE nCalculatedBarringTime = (0.7 + 0.6 * (nRandom / 10.0)) * nBarringTimeSec;
+
+    ITimer* m_piSsacBarringTimer = TimerService::GetTimerService()->CreateTimer();
+    m_piSsacBarringTimer->SetTimer(nCalculatedBarringTime * 1000, this);
+
+    if (eCallType == CallType::VOIP || eCallType == CallType::RTT)
+    {
+        m_piSsacVoiceBarringTimer = m_piSsacBarringTimer;
+    }
+    else if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
+    {
+        m_piSsacVideoBarringTimer = m_piSsacBarringTimer;
+    }
+
+    return IMS_TRUE;
+}
+
+PRIVATE void MtcRadioChecker::StartTrafficChecking(
         IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType, IN IMS_BOOL bWifi)
 {
     TrafficType eTrafficType = ConvertCallTypeToTrafficType(eCallType, bEmergency);
@@ -436,7 +565,7 @@ PRIVATE void MtcCallTrafficChecker::StartTrafficChecking(
             eCallDirection, 0);
 }
 
-PRIVATE void MtcCallTrafficChecker::StopTrafficChecking(
+PRIVATE void MtcRadioChecker::StopTrafficChecking(
         IN TrafficType eTrafficType, IN CallDirection eCallDirection)
 {
     MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);

@@ -27,7 +27,7 @@
 class EpsFallbackTrigger;
 class IMtcBlockChecker;
 class IMtcBlockRule;
-class IMtcCallTrafficChecker;
+class IMtcRadioChecker;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
 class IMtcService;
@@ -89,7 +89,7 @@ public:
     MOCK_METHOD(IMtcDialingPlan&, GetDialingPlan, (), (override));
     MOCK_METHOD(IMtcCallController&, GetCallController, (), (override));
     MOCK_METHOD(IMtcCallManager&, GetCallManager, (), (override));
-    MOCK_METHOD(IMtcCallTrafficChecker&, GetCallTrafficChecker, (), (override));
+    MOCK_METHOD(IMtcRadioChecker&, GetRadioChecker, (), (override));
     MOCK_METHOD(MtcConfigurationProxy&, GetConfigurationProxy, (), (override));
     MOCK_METHOD(ICallStateProxy&, GetCallStateProxy, (), (override));
     MOCK_METHOD(IMtcImsEventReceiver&, GetImsEventReceiver, (), (override));

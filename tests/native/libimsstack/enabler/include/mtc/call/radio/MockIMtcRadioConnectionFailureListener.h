@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_I_MTC_RADIO_CONNECTION_FAILED_LISTENER_H_
-#define MOCK_I_MTC_RADIO_CONNECTION_FAILED_LISTENER_H_
+#ifndef MOCK_I_MTC_RADIO_CONNECTION_FAILURE_LISTENER_H_
+#define MOCK_I_MTC_RADIO_CONNECTION_FAILURE_LISTENER_H_
 
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
-#include "call/traffic/IMtcCallTrafficChecker.h"
+#include "call/radio/IMtcRadioChecker.h"
 #include <gmock/gmock.h>
 
 class MockIMtcRadioConnectionFailureListener : public IMtcRadioConnectionFailureListener

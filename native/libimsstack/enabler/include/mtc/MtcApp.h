@@ -25,7 +25,7 @@
 #include "call/IMtcCallManager.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
-#include "call/traffic/MtcCallTrafficChecker.h"
+#include "call/radio/MtcRadioChecker.h"
 #include "conferencecall/ConferenceManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
@@ -41,9 +41,9 @@ class IMtcCallManager;
 class IMtcDialingPlan;
 class ICallStateProxy;
 class IMessageUtils;
-class IMtcCallTrafficChecker;
-class IMtcImsEventReceiver;
 class IMtcAosConnector;
+class IMtcImsEventReceiver;
+class IMtcRadioChecker;
 class IMtcSipInterfaceFactory;
 class IConferenceManager;
 class IEctManager;
@@ -66,10 +66,7 @@ public:
     IMtcService* GetServiceByType(IN ServiceType eServiceType) override;
     inline IMtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }
     inline IMtcCallController& GetCallController() override { return m_objCallController; }
-    inline IMtcCallTrafficChecker& GetCallTrafficChecker() override
-    {
-        return m_objMtcCallTrafficChecker;
-    }
+    inline IMtcRadioChecker& GetRadioChecker() override { return m_objMtcRadioChecker; }
     inline IMtcCallManager& GetCallManager() override { return m_objCallManager; }
     inline MtcConfigurationProxy& GetConfigurationProxy() override
     {
@@ -109,9 +106,9 @@ protected:
     EctManager* m_pEctManager;
     MtcEmergencyServiceManager* m_pEmergencyServiceManager;
     MessageUtils m_objMessageUtils;
+    MtcRadioChecker m_objMtcRadioChecker;
 
     IMS_BOOL m_bWifiTestMode;
-    MtcCallTrafficChecker m_objMtcCallTrafficChecker;
 };
 
 #endif

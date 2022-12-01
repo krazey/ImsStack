@@ -28,9 +28,9 @@
 #include "call/MtcCall.h"
 #include "call/MtcPendingOperationHolder.h"
 #include "call/NullCall.h"
+#include "call/radio/MockIMtcRadioChecker.h"
 #include "call/state/MockIMtcCallState.h"
 #include "call/state/MockMtcCallStateMachine.h"
-#include "call/traffic/MockIMtcCallTrafficChecker.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/MockIConferenceManager.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -1049,16 +1049,14 @@ TEST_F(MtcCallTest, GetCallManagerCallsMtcContext)
     objCall.GetCallManager();
 }
 
-TEST_F(MtcCallTest, GetCallTrafficCheckerCallsMtcContext)
+TEST_F(MtcCallTest, GetRadioCheckerCallsMtcContext)
 {
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
 
-    MockIMtcCallTrafficChecker objTrafficChecker;
-    EXPECT_CALL(objContext, GetCallTrafficChecker)
-            .Times(1)
-            .WillRepeatedly(ReturnRef(objTrafficChecker));
+    MockIMtcRadioChecker objTrafficChecker;
+    EXPECT_CALL(objContext, GetRadioChecker).Times(1).WillRepeatedly(ReturnRef(objTrafficChecker));
 
-    objCall.GetCallTrafficChecker();
+    objCall.GetRadioChecker();
 }
 
 TEST_F(MtcCallTest, GetCallControllerCallsMtcContext)
