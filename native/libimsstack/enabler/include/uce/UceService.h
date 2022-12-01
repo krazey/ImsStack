@@ -17,15 +17,18 @@
 #ifndef _UCE_SERVICE_H_
 #define _UCE_SERVICE_H_
 
-#include "ICoreService.h"
 #include "ICoreServiceListener.h"
 #include "ImsService.h"
 #include "IUce.h"
 
+class ICoreService;
 class UceSubscribeManager;
 class UcePublishManager;
 class UceOptionsManager;
-class IImsActivityController;
+class ICapabilities;
+class IPageMessage;
+class IReference;
+class ISession;
 
 class UceService : public ImsService, public ICoreServiceListener
 {

@@ -29,6 +29,7 @@
 #include "SipStatusCode.h"
 #include "TextParser.h"
 #include "config/UceConfig.h"
+#include "IUce.h"
 #include "def/UceDef.h"
 #include "subscribe/UceNonCapabilityUser.h"
 #include "subscribe/UceNotifyBodyPartData.h"

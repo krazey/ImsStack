@@ -16,10 +16,6 @@
 #ifndef UCE_ASSET_ITEMS_H_
 #define UCE_ASSET_ITEMS_H_
 
-#include "AString.h"
-#include "IMSTypeDef.h"
-#include "ImsVector.h"
-
 class UceAssetItems
 {
 public:

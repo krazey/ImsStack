@@ -16,12 +16,12 @@
 #ifndef __UCE_CONFIG_H_
 #define __UCE_CONFIG_H_
 
-#include "AString.h"
 #include "ICarrierConfigListener.h"
 #include "ImsMap.h"
-#include "UceAssetItems.h"
+#include "AString.h"
 
 class ICarrierConfig;
+class UceAssetItems;
 class UceConfig : public ICarrierConfigListener
 {
 public:
@@ -86,15 +86,13 @@ public:
     IMS_UINT32 GetPublishRetryType(IN IMS_SINT32 nResponseCode, IN IMS_SINT32 nSimSlot = 0);
     IMS_BOOL IsImsRegistrationRequired(
             IN IMS_BOOL isPublish, IN IMS_SINT32 nResponseCode, IN IMS_SINT32 nSimSlot = 0);
-    void toString(IN IMS_SINT32 nSimSlot);
 
 protected:
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
 private:
-    const IMS_CHAR* GetKeyString(IN KEY_UCE_BOOL eKey);
-    const IMS_CHAR* GetKeyString(IN KEY_UCE_INT eKey);
-    const IMS_CHAR* GetKeyString(IN KEY_UCE_STRING eKey);
+    static const IMS_CHAR* GetKeyString(IN KEY_UCE_BOOL eKey);
+    static const IMS_CHAR* GetKeyString(IN KEY_UCE_INT eKey);
     void Update(IN ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot = 0);
 
 private:

@@ -17,7 +17,7 @@
 #ifndef _UCE_DEF_H_
 #define _UCE_DEF_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ImsMessageDef.h"
 
 #define MSG_THREAD_BASE                 0   // for thread operation

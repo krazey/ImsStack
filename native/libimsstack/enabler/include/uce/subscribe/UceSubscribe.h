@@ -21,12 +21,10 @@
 #include "ImsStateMachine.h"
 #include "ISubscriptionListener.h"
 #include "ITimer.h"
-#include "IUce.h"
 #include "base/IMessageMediator.h"
 
 class ICoreService;
 class ISubscription;
-class Subscription;
 class ITimer;
 class ISipMessage;
 class UceXmlDocumentHelperThread;

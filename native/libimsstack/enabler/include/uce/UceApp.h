@@ -19,14 +19,10 @@
 #include "ImsApp.h"
 #include "INetworkWatcher.h"
 #include "ITimer.h"
-#include "IUce.h"
-#include "ImsMessageDef.h"
-#include "def/UceDef.h"
 #include "aos/IImsAosListener.h"
 #include "aos/IImsAosMonitor.h"
 
 class IImsAos;
-class ImsService;
 class UceService;
 
 class UceApp :
