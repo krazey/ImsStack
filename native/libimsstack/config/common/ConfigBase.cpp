@@ -176,13 +176,15 @@ void ConfigBase::RemoveListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* pi
         }
     }
 
+    IMS_UINT32 nRemainingListeners = objListeners.GetSize();
+
     if (objListeners.IsEmpty())
     {
         m_objConfigUpdateListeners.RemoveAt(nIndex);
     }
 
     IMS_TRACE_D("ConfigUpdateListener :: remove - %d / %p / %d",
-            m_objConfigUpdateListeners.GetSize(), piListener, objListeners.GetSize());
+            m_objConfigUpdateListeners.GetSize(), piListener, nRemainingListeners);
 }
 
 PROTECTED
