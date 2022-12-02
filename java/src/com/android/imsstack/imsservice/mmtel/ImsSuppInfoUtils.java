@@ -70,15 +70,6 @@ public final class ImsSuppInfoUtils {
         return null;
     }
 
-    private static String getCallExtra(Bundle callExtras,
-            String key, String defaultValue) {
-        if (callExtras == null) {
-            return defaultValue;
-        }
-
-        return callExtras.getString(key, defaultValue);
-    }
-
     private static boolean getCallExtraBoolean(Bundle callExtras,
             String key, boolean defaultValue) {
         if (callExtras == null) {
@@ -88,47 +79,12 @@ public final class ImsSuppInfoUtils {
         return callExtras.getBoolean(key, defaultValue);
     }
 
-    private static int getCallExtraInt(Bundle callExtras,
-            String key, int defaultValue) {
-        if (callExtras == null) {
-            return defaultValue;
-        }
-
-        return callExtras.getInt(key, defaultValue);
-    }
-
     private static boolean hasCallExtra(Bundle callExtras, String key) {
         if (callExtras == null) {
             return false;
         }
 
         return callExtras.containsKey(key);
-    }
-
-    private static void setCallExtra(SuppInfo si, int type,
-            String key, ImsCallProfile outProfile) {
-        SuppInfo.SuppService ss = si.getService(type);
-
-        if (ss != null) {
-            outProfile.setCallExtra(key, ss.strValue);
-        } else {
-            if (outProfile.getCallExtras() != null) {
-                outProfile.getCallExtras().remove(key);
-            }
-        }
-    }
-
-    private static void setCallExtraBoolean(SuppInfo si, int type,
-            String key, ImsCallProfile outProfile) {
-        SuppInfo.SuppService ss = si.getService(type);
-
-        if (ss != null) {
-            outProfile.setCallExtraBoolean(key, ss.boolValue);
-        } else {
-            if (outProfile.getCallExtras() != null) {
-                outProfile.getCallExtras().remove(key);
-            }
-        }
     }
 
     private static void setCallExtraInt(SuppInfo si, int type,

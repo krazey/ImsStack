@@ -586,12 +586,6 @@ public class ImsServiceManager {
         }
     }
 
-    // @Deprecated
-    private static int getPhoneId(int phoneId) {
-        // If the device supports single SIM only, then we don't use phone id.
-        return MSimUtils.isMultiSimEnabled() ? phoneId : MSimUtils.INVALID_PHONE_ID;
-    }
-
     private static int getActivePhoneId() {
         ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
         return (isub != null) ? isub.getPhoneId() : MSimUtils.DEFAULT_PHONE_ID;

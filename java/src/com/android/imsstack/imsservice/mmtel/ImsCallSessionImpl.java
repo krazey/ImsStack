@@ -1640,20 +1640,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 || mCallDetails.is(CallDetails.MERGED_N_DETACHED));
     }
 
-    private boolean isSilentCSRedialRequired(final ImsReasonInfo reasonInfo) {
-        // FIXME: add more detailed state
-        if (ImsCallUtils.isVoiceCall(mCallProfile.getCallType())) {
-            if ((reasonInfo.getCode() == ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED)
-                    && (reasonInfo.getExtraCode()
-                        == ImsReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL)) {
-                return true;
-            }
-        } else {
-        }
-
-        return false;
-    }
-
     private boolean isTerminationReasonPresent() {
         return (mTerminationReason != ImsReasonInfo.CODE_UNSPECIFIED);
     }
@@ -4388,24 +4374,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if (call.equals(mCall)) {
                 mCallback.invokeCallQualityChanged(callQuality);
             }
-        }
-
-        //// FIXME: IMPL_REQUIRED
-        public void onCallSessionHandover(MtcCall call,
-                int srcAccessTech, int targetAccessTech, CallReasonInfo callReasonInfo) {
-        }
-
-        public void onCallSessionHandoverFailed(MtcCall call,
-                int srcAccessTech, int targetAccessTech, CallReasonInfo callReasonInfo) {
-        }
-
-        public void onCallSessionTtyModeReceived(MtcCall call, int mode) {
-        }
-
-        public void onCallSessionDeflected(MtcCall call) {
-        }
-
-        public void onCallSessionDeflectFailed(MtcCall call, CallReasonInfo callReasonInfo) {
         }
 
         private void onVideoCallHoldReceived(final MtcCall call,

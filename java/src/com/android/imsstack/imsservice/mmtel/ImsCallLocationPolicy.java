@@ -200,10 +200,6 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
         return (mFlags & flag) == flag;
     }
 
-    private void clearFlag(int flag) {
-        mFlags &= (~flag);
-    }
-
     private void setFlag(int flag) {
         mFlags |= flag;
     }

@@ -220,10 +220,6 @@ public class ImsServiceController {
             super(createLooper(name));
         }
 
-        public MessageExecutor(Looper looper) {
-            super(looper);
-        }
-
         @Override
         public void execute(Runnable r) {
             Message m = Message.obtain(this, 0 /* don't care */, r);
