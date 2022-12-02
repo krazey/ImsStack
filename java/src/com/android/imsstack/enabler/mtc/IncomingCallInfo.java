@@ -74,7 +74,8 @@ public class IncomingCallInfo implements Parcelable
         return 0;
     }
 
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<IncomingCallInfo> CREATOR =
+            new Parcelable.Creator<IncomingCallInfo>() {
         public IncomingCallInfo createFromParcel(Parcel in) {
             return new IncomingCallInfo(in);
         }

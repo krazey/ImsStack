@@ -58,7 +58,7 @@ public class MtcCallTest extends ImsStackTest {
     private final String mCallee = "123";
     private final String mActualCallee = "456";
 
-    @Mock private IBaseContext mContext;
+    @Mock private IBaseContext mBaseContext;
     @Mock private CallTracker mCT;
     @Mock private MtcConference mMtcConference;
     @Mock private MtcMediaSession mMtcMediaSession;
@@ -131,14 +131,14 @@ public class MtcCallTest extends ImsStackTest {
         MockitoAnnotations.initMocks(this);
 
         mTestMtcJniProxy = new TestMtcJniProxy();
-        mTestMtcCall = new TestMtcCall(mContext, mCT, 0, "", Looper.myLooper(),
+        mTestMtcCall = new TestMtcCall(mBaseContext, mCT, 0, "", Looper.myLooper(),
                 mMtcConference, mMtcMediaSession, mTestMtcJniProxy, mCallInfo, mMediaInfo);
-        mTestMtcCallWithMockJniProxy = new TestMtcCall(mContext, mCT, 0, "", Looper.myLooper(),
+        mTestMtcCallWithMockJniProxy = new TestMtcCall(mBaseContext, mCT, 0, "", Looper.myLooper(),
                 mMtcConference, mMtcMediaSession, mMtcJniProxy, mCallInfo, mMediaInfo);
 
         doReturn((long) 1).when(mMtcJniProxy).getJniInterfaceAndSetListener(
                     anyInt(), anyInt(), any());
-        doReturn(0).when(mContext).getSlotId();
+        doReturn(0).when(mBaseContext).getSlotId();
     }
 
     @After

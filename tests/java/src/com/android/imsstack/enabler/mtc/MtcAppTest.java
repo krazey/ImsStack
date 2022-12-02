@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class MtcAppTest extends ImsStackTest {
-    @Mock private IBaseContext mContext;
+    @Mock private IBaseContext mBaseContext;
     @Mock private IMtcCallManager mCM;
     @Mock private MtcEmergencyServiceManager mEmergencyServiceManager;
     @Mock private MtcApp.ServiceStateListener mServiceStateListener;
@@ -115,7 +115,7 @@ public class MtcAppTest extends ImsStackTest {
         MockitoAnnotations.initMocks(this);
 
         mTestMtcJniProxy = new TestMtcJniProxy();
-        mTestMtcApp = new TestMtcApp(mContext, mCM, Looper.myLooper(),
+        mTestMtcApp = new TestMtcApp(mBaseContext, mCM, Looper.myLooper(),
                 mEmergencyServiceManager, mTestMtcJniProxy);
         mTestMtcApp.setCallListener(mCallListener);
         mTestMtcApp.setServiceStateListener(mServiceStateListener);
@@ -130,9 +130,9 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testInit() {
-        doReturn(0).when(mContext).getSlotId();
-        doReturn(true).when(mContext).isCommonPackageReady();
-        doReturn(mSharedState).when(mContext).getSharedState();
+        doReturn(0).when(mBaseContext).getSlotId();
+        doReturn(true).when(mBaseContext).isCommonPackageReady();
+        doReturn(mSharedState).when(mBaseContext).getSharedState();
         doReturn(true).when(mSharedState).isNativeBootCompleted();
 
         assertFalse(mTestMtcApp.isServiceValid());
@@ -140,7 +140,7 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.init();
 
         verify(mCM, times(1)).init();
-        verify(mContext, times(1)).addCommonPackageListener(any());
+        verify(mBaseContext, times(1)).addCommonPackageListener(any());
         verify(mEmergencyServiceManager, times(1)).init();
         verify(mEmergencyServiceManager, times(1)).setNativeObject(anyLong());
 
@@ -152,9 +152,9 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testInitFailCommonPackageNotReady() {
-        doReturn(0).when(mContext).getSlotId();
-        doReturn(false).when(mContext).isCommonPackageReady();
-        doReturn(mSharedState).when(mContext).getSharedState();
+        doReturn(0).when(mBaseContext).getSlotId();
+        doReturn(false).when(mBaseContext).isCommonPackageReady();
+        doReturn(mSharedState).when(mBaseContext).getSharedState();
         doReturn(true).when(mSharedState).isNativeBootCompleted();
 
         assertFalse(mTestMtcApp.isServiceValid());
@@ -162,7 +162,7 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.init();
 
         verify(mCM, times(1)).init();
-        verify(mContext, times(1)).addCommonPackageListener(any());
+        verify(mBaseContext, times(1)).addCommonPackageListener(any());
         verify(mEmergencyServiceManager, times(1)).init();
         verify(mEmergencyServiceManager, times(0)).setNativeObject(anyLong());
 
@@ -171,9 +171,9 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testInitFailNotNativeBootCompleted() {
-        doReturn(0).when(mContext).getSlotId();
-        doReturn(true).when(mContext).isCommonPackageReady();
-        doReturn(mSharedState).when(mContext).getSharedState();
+        doReturn(0).when(mBaseContext).getSlotId();
+        doReturn(true).when(mBaseContext).isCommonPackageReady();
+        doReturn(mSharedState).when(mBaseContext).getSharedState();
         doReturn(false).when(mSharedState).isNativeBootCompleted();
 
         assertFalse(mTestMtcApp.isServiceValid());
@@ -181,7 +181,7 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.init();
 
         verify(mCM, times(1)).init();
-        verify(mContext, times(1)).addCommonPackageListener(any());
+        verify(mBaseContext, times(1)).addCommonPackageListener(any());
         verify(mEmergencyServiceManager, times(1)).init();
         verify(mEmergencyServiceManager, times(0)).setNativeObject(anyLong());
         verify(mSharedState, times(1)).unregisterForNativeBootComplete(any());
@@ -198,9 +198,9 @@ public class MtcAppTest extends ImsStackTest {
 
         verify(mEmergencyServiceManager, times(0)).setNativeObject(anyLong());
 
-        verify(mContext, times(1)).removeCommonPackageListener(any());
+        verify(mBaseContext, times(1)).removeCommonPackageListener(any());
         verify(mEmergencyServiceManager, times(1)).clear();
-        verify(mContext, times(1)).removeCommonPackageListener(any());
+        verify(mBaseContext, times(1)).removeCommonPackageListener(any());
         verify(mCM, times(1)).clear();
 
         assertFalse(mTestMtcApp.isServiceValid());
@@ -216,9 +216,9 @@ public class MtcAppTest extends ImsStackTest {
 
         verify(mEmergencyServiceManager, times(1)).setNativeObject(anyLong());
 
-        verify(mContext, times(1)).removeCommonPackageListener(any());
+        verify(mBaseContext, times(1)).removeCommonPackageListener(any());
         verify(mEmergencyServiceManager, times(1)).clear();
-        verify(mContext, times(1)).removeCommonPackageListener(any());
+        verify(mBaseContext, times(1)).removeCommonPackageListener(any());
         verify(mCM, times(1)).clear();
 
         assertFalse(mTestMtcApp.isServiceValid());
@@ -309,9 +309,9 @@ public class MtcAppTest extends ImsStackTest {
 
     @Test
     public void testMsgNativeBootCompletedMsgCommonPackageReady() {
-        doReturn(0).when(mContext).getSlotId();
-        doReturn(true).when(mContext).isCommonPackageReady();
-        doReturn(mSharedState).when(mContext).getSharedState();
+        doReturn(0).when(mBaseContext).getSlotId();
+        doReturn(true).when(mBaseContext).isCommonPackageReady();
+        doReturn(mSharedState).when(mBaseContext).getSharedState();
         doReturn(true).when(mSharedState).isNativeBootCompleted();
 
         assertFalse(mTestMtcApp.isServiceValid());
