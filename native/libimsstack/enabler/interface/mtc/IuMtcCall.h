@@ -19,7 +19,6 @@
 
 #include "ImsMessageDef.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 
 class IuMtcCall
 {

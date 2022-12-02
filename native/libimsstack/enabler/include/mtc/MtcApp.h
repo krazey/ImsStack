@@ -22,7 +22,6 @@
 #include "IMtcService.h"
 #include "ImsApp.h"
 #include "MtcImsEventReceiver.h"
-#include "call/IMtcCallManager.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"
 #include "call/radio/MtcRadioChecker.h"
@@ -35,18 +34,18 @@
 #include <functional>
 
 class EctManager;
-class MtcEmergencyServiceManager;
+class ICallStateProxy;
+class IConferenceManager;
+class IEctManager;
+class IMessageUtils;
+class IMtcAosConnector;
 class IMtcCallController;
 class IMtcCallManager;
 class IMtcDialingPlan;
-class ICallStateProxy;
-class IMessageUtils;
-class IMtcAosConnector;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
 class IMtcSipInterfaceFactory;
-class IConferenceManager;
-class IEctManager;
+class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext

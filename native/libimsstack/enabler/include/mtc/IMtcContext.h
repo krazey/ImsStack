@@ -39,6 +39,8 @@ class IMtcRadioChecker;
 class IMtcContext
 {
 public:
+    virtual ~IMtcContext() = default;
+
     /**
      * @brief Gets
      *

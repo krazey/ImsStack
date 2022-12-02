@@ -17,7 +17,6 @@
 #ifndef INTERFACE_MTC_CALL_STATE_LISTENER_H_
 #define INTERFACE_MTC_CALL_STATE_LISTENER_H_
 
-#include "IMtcService.h"
 #include "call/IMtcCall.h"
 
 class IMtcCallStateListener
@@ -25,6 +24,8 @@ class IMtcCallStateListener
 public:
     using State = IMtcCall::State;
     using Type = CallType;
+
+    virtual ~IMtcCallStateListener() = default;
 
     /**
      * @brief Notifies

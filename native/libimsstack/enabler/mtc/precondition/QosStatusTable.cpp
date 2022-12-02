@@ -23,8 +23,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-class QoSStatusRecord;
-
 PUBLIC
 QosStatusTable::QosStatusTable() :
         m_lstAudioRecords(ImsList<QosStatusRecord*>()),

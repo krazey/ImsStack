@@ -17,10 +17,10 @@
 #ifndef MTC_EMERGENCY_SERVICE_MANAGER_H_
 #define MTC_EMERGENCY_SERVICE_MANAGER_H_
 
-#include "IMtcContext.h"
 #include "IuMtcService.h"
 
 class IJniMtcServiceThread;
+class IMtcContext;
 
 class MtcEmergencyServiceManager
 {

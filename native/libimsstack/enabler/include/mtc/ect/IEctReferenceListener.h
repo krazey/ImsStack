@@ -22,6 +22,8 @@
 class IEctReferenceListener
 {
 public:
+    virtual ~IEctReferenceListener() = default;
+
     /**
      * @brief Notifies
      *

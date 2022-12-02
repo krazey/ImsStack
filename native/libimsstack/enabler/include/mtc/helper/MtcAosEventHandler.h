@@ -17,16 +17,15 @@
 #ifndef MTC_AOS_EVENT_HANDLER_H
 #define MTC_AOS_EVENT_HANDLER_H
 
-#include "IMtcAosStateListener.h"
 #include "ImsAosReason.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "helper/IMtcAosStateListener.h"
 
-class IMessage;
-class AString;
-class MtcConfigurationProxy;
-class IMtcService;
 class IJniMtcServiceThread;
+class IMessage;
+class IMtcService;
+class MtcConfigurationProxy;
 class MtcEmergencyServiceManager;
 
 class MtcAosEventHandler

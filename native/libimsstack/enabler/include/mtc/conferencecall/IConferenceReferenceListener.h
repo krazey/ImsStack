@@ -23,6 +23,8 @@
 class IConferenceReferenceListener
 {
 public:
+    virtual ~IConferenceReferenceListener() = default;
+
     /**
      * @brief Notifies
      *

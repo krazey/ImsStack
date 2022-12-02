@@ -29,6 +29,8 @@ enum class SubscriptionUpdateType
 class IConferenceSubscriptionListener
 {
 public:
+    virtual ~IConferenceSubscriptionListener() = default;
+
     /**
      * @brief Notifies
      *

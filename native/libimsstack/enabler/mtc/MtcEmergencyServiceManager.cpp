@@ -15,6 +15,7 @@
  */
 
 #include "IJniMtcServiceThread.h"
+#include "IMtcContext.h"
 #include "ImsAosParameter.h"
 #include "MtcEmergencyServiceManager.h"
 #include "ServiceTrace.h"
