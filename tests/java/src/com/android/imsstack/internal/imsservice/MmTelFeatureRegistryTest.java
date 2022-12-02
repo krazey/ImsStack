@@ -31,7 +31,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +41,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class MmTelFeatureRegistryTest {
     private static final int SLOT0 = 0;
-    private static final int WAIT_TIME_FOR_LISTENER = 40; // milli-seconds
+    private static final int WAIT_TIME_FOR_LISTENER = 100; // milli-seconds
 
     @Mock Context mContext;
     @Mock MmTelFeatureRegistry.Listener mListener;
@@ -60,10 +59,6 @@ public class MmTelFeatureRegistryTest {
 
     @After
     public void tearDown() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
         AppContext.deinit();
     }
 
