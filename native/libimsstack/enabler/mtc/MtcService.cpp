@@ -351,7 +351,7 @@ IJniMtcServiceThread* MtcService::GetJniThread()
 }
 
 PRIVATE
-void MtcService::SetServiceFilterCriteria()
+void MtcService::SetServiceFilterCriteria() const
 {
     IServiceFilterCriteria* piSfc = m_piCoreService->GetFilterCriteria();
 

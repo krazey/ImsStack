@@ -113,7 +113,7 @@ void MtcBlockChecker::OnBlockRuleChecked(IN IMtcBlockChecker::Result objResult)
 }
 
 PRIVATE
-IMS_BOOL MtcBlockChecker::IsResultNotified()
+IMS_BOOL MtcBlockChecker::IsResultNotified() const
 {
     return m_nPendingCount <= 0;
 }

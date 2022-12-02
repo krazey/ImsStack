@@ -65,7 +65,7 @@ public:
         {
             m_strReferInviteUri = strReferInviteUri;
         }
-        inline const AString& GetReferInviteUri() { return m_strReferInviteUri; }
+        inline const AString& GetReferInviteUri() const { return m_strReferInviteUri; }
 
         inline void SetInfoUpdated(IN IMS_BOOL bInfoUpdated) { m_bInfoUpdated = bInfoUpdated; }
         inline IMS_BOOL IsInfoUpdated() { return m_bInfoUpdated; }

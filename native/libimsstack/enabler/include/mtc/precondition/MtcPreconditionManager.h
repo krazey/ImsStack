@@ -42,9 +42,9 @@ public:
     inline virtual ~QosData() {}
 
 public:
-    inline QosStatus GetAudioStatus() { return eAudioStatus; }
-    inline QosStatus GetVideoStatus() { return eVideoStatus; }
-    inline QosStatus GetTextStatus() { return eTextStatus; }
+    inline QosStatus GetAudioStatus() const { return eAudioStatus; }
+    inline QosStatus GetVideoStatus() const { return eVideoStatus; }
+    inline QosStatus GetTextStatus() const { return eTextStatus; }
 
     inline void SetAudioStatus(IN QosStatus eStatus) { eAudioStatus = eStatus; }
     inline void SetVideoStatus(IN QosStatus eStatus) { eVideoStatus = eStatus; }
@@ -133,9 +133,9 @@ private:
     IMediaDescriptor* GetMediaDescriptor(IN IMedia* piMedia);
     const SdpMedia* GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote);
 
-    IMS_SINT32 GetSdpMediaType(IN IMS_UINT32 eMediaType);
-    IMS_UINT32 GetMediaTypesFromCallType();
-    IMS_BOOL IsDefaultBearerUsed(IN IMS_UINT32 eMediaType);
+    IMS_SINT32 GetSdpMediaType(IN IMS_UINT32 eMediaType) const;
+    IMS_UINT32 GetMediaTypesFromCallType() const;
+    IMS_BOOL IsDefaultBearerUsed(IN IMS_UINT32 eMediaType) const;
     void InitializeCapability(IN ISession* piSession);
     QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType);
     QosStatus GetQosStatus(IN ISession* piSession, IN IMS_UINT32 eMediaType);

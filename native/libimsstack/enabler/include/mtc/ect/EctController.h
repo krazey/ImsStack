@@ -61,7 +61,7 @@ protected:
 
     void NotifyResult(IN IMS_RESULT nResult, IN IMS_SINT32 nReason = CODE_NONE) const;
     void CreateReference();
-    void TerminateTransfereeCall();
+    void TerminateTransfereeCall() const;
 
     void StartTimer();
     void StopTimer();

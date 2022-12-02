@@ -378,7 +378,7 @@ const SuppService* MtcSupplementaryService::Get(IN SuppType eType)
 }
 
 PUBLIC
-const IMSMap<SuppType, SuppService*>& MtcSupplementaryService::GetServices()
+const IMSMap<SuppType, SuppService*>& MtcSupplementaryService::GetServices() const
 {
     return m_objSuppService;
 }

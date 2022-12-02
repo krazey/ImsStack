@@ -40,7 +40,7 @@ public:
     {
     }
 
-    inline IuMtcService::EmergencyServiceState GetState() { return m_eState; }
+    inline IuMtcService::EmergencyServiceState GetState() const { return m_eState; }
     inline void SetState(IN IuMtcService::EmergencyServiceState eState) { m_eState = eState; }
 };
 

@@ -101,7 +101,7 @@ private:
     void AttachCoreServiceInterface();
     void AttachAosInterface();
     IJniMtcServiceThread* GetJniThread();
-    void SetServiceFilterCriteria();
+    void SetServiceFilterCriteria() const;
     void SetAosReady(IN IMS_BOOL);
 
 protected:

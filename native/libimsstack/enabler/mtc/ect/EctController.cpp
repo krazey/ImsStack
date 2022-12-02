@@ -135,7 +135,7 @@ void EctController::CreateReference()
 }
 
 PROTECTED
-void EctController::TerminateTransfereeCall()
+void EctController::TerminateTransfereeCall() const
 {
     IMS_TRACE_I("TerminateTransfereeCall", 0, 0, 0);
     GetTransferee()->Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT));
