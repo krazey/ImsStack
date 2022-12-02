@@ -137,7 +137,7 @@ public class ImsGarbageCalls {
         ImsLog.d("[GII-IMPL] " + s);
     }
 
-    private class Call {
+    private static class Call {
         public int mSlotId;
         public ImsCallSessionImplBase mSession;
 

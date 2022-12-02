@@ -50,7 +50,7 @@ public class ConferenceProxyTest {
     private static final String LOG_TAG = "ConferenceProxyTest";
     ConferenceProxyWrapperClass mConfProxyWrapper = null;
 
-    public class ConferenceProxyWrapperClass extends ConferenceProxy {
+    public static class ConferenceProxyWrapperClass extends ConferenceProxy {
         boolean mHoldListenerCalled = false;
         boolean mUnholdListenerCalled = false;
         boolean mCallTerminatedrCalled = false;

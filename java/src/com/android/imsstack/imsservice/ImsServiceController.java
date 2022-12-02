@@ -211,7 +211,7 @@ public class ImsServiceController {
     /**
      * Executes the tasks in the other thread rather than the calling thread.
      */
-    private class MessageExecutor extends Handler implements Executor {
+    private static class MessageExecutor extends Handler implements Executor {
         public MessageExecutor() {
             super();
         }

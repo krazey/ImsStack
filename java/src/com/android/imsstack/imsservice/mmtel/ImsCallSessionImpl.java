@@ -2364,7 +2364,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
      * This class describes the detail information of this call.
      */
     @VisibleForTesting
-    protected final class CallDetails {
+    protected static final class CallDetails {
         public static final int NONE = 0x00000000;
         /**
          * MO call
