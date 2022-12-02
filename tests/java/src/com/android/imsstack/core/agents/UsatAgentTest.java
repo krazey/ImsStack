@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,21 +70,21 @@ public class UsatAgentTest {
 
     private static ContextFixture sContext = null;
 
-    @Mock TelephonyManager mTelephonyManager;
     @Mock SimInterface mSimInterface;
     @Mock Usat.Listener mListener;
+    private TelephonyManager mTelephonyManager;
     private UsatAgent mUsatAgent;
 
     @BeforeClass
     public static void setUpOnce() {
         sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
     }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        AppContext.init(sContext.getTestDouble());
         SubscriptionManager sm =
                 sContext.getTestDouble().getSystemService(SubscriptionManager.class);
         when(sm.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
@@ -105,11 +106,14 @@ public class UsatAgentTest {
         }
         mUsatAgent = null;
         mListener = null;
+        mSimInterface = null;
+
+        AppContext.deinit();
     }
 
     @AfterClass
     public static void tearDownOnce() {
-        AppContext.deinit();
+        sContext = null;
     }
 
     @Test
@@ -212,7 +216,7 @@ public class UsatAgentTest {
     @Test
     @SmallTest
     public void sendCommand_callControlAllowed() {
-        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_OK);
+        doReturn(SEND_ENVELOPE_OK).when(mTelephonyManager).sendEnvelopeWithStatus(any());
 
         Usat.CallControlCommand cmd = mUsatAgent.createCallControlCommand(
                 Usat.CALL_CONTROL_TYPE_MO_CALL, DIALED_STRING,
@@ -233,7 +237,7 @@ public class UsatAgentTest {
     @Test
     @SmallTest
     public void sendCommand_callControlNotAllowed() {
-        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_ERROR);
+        doReturn(SEND_ENVELOPE_ERROR).when(mTelephonyManager).sendEnvelopeWithStatus(any());
 
         Usat.CallControlCommand cmd = mUsatAgent.createCallControlCommand(
                 Usat.CALL_CONTROL_TYPE_MO_CALL, DIALED_STRING,
@@ -254,7 +258,7 @@ public class UsatAgentTest {
     @Test
     @SmallTest
     public void sendCommand_smsPpDownloadOk() {
-        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_OK);
+        doReturn(SEND_ENVELOPE_OK).when(mTelephonyManager).sendEnvelopeWithStatus(any());
 
         Usat.SmsPpDownloadCommand cmd = mUsatAgent.createSmsPpDownloadCommand(SMSC_ORIGIN_ADDRESS,
                 true, SMS_TPDU, ORIGIN_ADDRESS, mListener);
@@ -274,7 +278,7 @@ public class UsatAgentTest {
     @Test
     @SmallTest
     public void sendCommand_smsPpDownloadError() {
-        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_ERROR);
+        doReturn(SEND_ENVELOPE_ERROR).when(mTelephonyManager).sendEnvelopeWithStatus(any());
 
         Usat.SmsPpDownloadCommand cmd = mUsatAgent.createSmsPpDownloadCommand(SMSC_ORIGIN_ADDRESS,
                 true, SMS_TPDU, ORIGIN_ADDRESS, mListener);
@@ -294,7 +298,7 @@ public class UsatAgentTest {
     @Test
     @SmallTest
     public void sendCommand_moSmsControlAllowed() {
-        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_OK);
+        doReturn(SEND_ENVELOPE_OK).when(mTelephonyManager).sendEnvelopeWithStatus(any());
 
         Usat.MoSmsControlCommand cmd = mUsatAgent.createMoSmsControlCommand(TARGET_NUMBER,
                 SMSC_DEST_ADDRESS, TelephonyManager.NETWORK_TYPE_LTE, mListener);
@@ -314,7 +318,7 @@ public class UsatAgentTest {
     @Test
     @SmallTest
     public void sendCommand_moSmsControlNotAllowed() {
-        when(mTelephonyManager.sendEnvelopeWithStatus(any())).thenReturn(SEND_ENVELOPE_ERROR);
+        doReturn(SEND_ENVELOPE_ERROR).when(mTelephonyManager).sendEnvelopeWithStatus(any());
 
         Usat.MoSmsControlCommand cmd = mUsatAgent.createMoSmsControlCommand(TARGET_NUMBER,
                 SMSC_DEST_ADDRESS, TelephonyManager.NETWORK_TYPE_LTE, mListener);
