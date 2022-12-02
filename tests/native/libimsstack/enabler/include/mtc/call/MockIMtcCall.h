@@ -73,7 +73,7 @@ public:
     MOCK_METHOD(CallKey, GetKey, (), (const, override));
     MOCK_METHOD(CallType, GetCallType, (), (const, override));
     MOCK_METHOD(State, GetState, (), (const, override));
-    MOCK_METHOD(IMtcCallContext&, GetCallContext, (), (const, override));
+    MOCK_METHOD(IMtcCallContext&, GetCallContext, (), (override));
 };
 
 #endif

@@ -74,7 +74,10 @@ public:
     inline CallKey GetKey() const override { return CALL_KEY_INVALID; }
     inline CallType GetCallType() const override { return CallType::UNKNOWN; }
     inline State GetState() const override { return State::IDLE; }
-    inline IMtcCallContext& GetCallContext() const override { return *(IMtcCallContext*)this; }
+    inline IMtcCallContext& GetCallContext() override
+    {
+        return *(reinterpret_cast<IMtcCallContext*>(this));
+    }
 };
 
 #endif

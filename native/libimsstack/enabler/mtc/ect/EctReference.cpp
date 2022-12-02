@@ -195,7 +195,7 @@ IMS_RESULT EctReference::SendRefer(
 }
 
 PRIVATE
-AString EctReference::GetReferToUri(IN const IMtcCall* piTransferTargetCall) const
+AString EctReference::GetReferToUri(IN IMtcCall* piTransferTargetCall) const
 {
     AString strUri;
     return UriFormatter::GetReferToForInvite(strUri, piTransferTargetCall->GetCallContext());
