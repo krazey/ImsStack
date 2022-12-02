@@ -458,7 +458,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnSrvccStateUpdated(IN SrvccState eSt
         }
         case SrvccState::FAILED:
             return SendUpdateBySrvcc(UpdateType::SRVCC_RECOVERED_FAILURE);
-        case SrvccState::CANCELED:
+        default:  // SrvccState::CANCELED:
             return SendUpdateBySrvcc(UpdateType::SRVCC_RECOVERED_CANCEL);
     }
 }
@@ -474,7 +474,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnAosStateChanged(
         case MtcAosState::DISCONNECTED:
         case MtcAosState::DISCONNECTING:
             return HandleAosDisconnected(eAosReason);
-        case MtcAosState::SUSPENDED:
+        default:  // case MtcAosState::SUSPENDED:
             return GetStateName();
     }
 }
