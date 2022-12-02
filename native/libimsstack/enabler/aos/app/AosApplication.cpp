@@ -109,6 +109,7 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_piAppConnectedTimer(IMS_NULL),
         m_piAppTerminatedTimer(IMS_NULL),
         m_piPdnBlockedTimer(IMS_NULL),
+        m_piImsEstablishmentTimer(IMS_NULL),
         m_strAppId(strAppId),
         m_nAppType(TYPE_NORMAL),
         m_nOffReason(AosReason::NONE),
@@ -477,6 +478,11 @@ IMS_BOOL AosApplication::IsTimerRunning(IN IMS_UINT32 nType) const
         return (m_piPdnBlockedTimer != IMS_NULL);
     }
 
+    if (nType == TIMER_IMS_ESTABLISHMENT)
+    {
+        return (m_piImsEstablishmentTimer != IMS_NULL);
+    }
+
     return IMS_FALSE;
 }
 
@@ -609,8 +615,6 @@ PROTECTED VIRTUAL void AosApplication::SetAppState(IN IMS_UINT32 nState)
     SetState(nState);
 
     m_piRegistration->SetAppReady((IsUpdateAvailable()) ? IMS_TRUE : IMS_FALSE);
-
-    OnAppStateChanged();
 }
 
 PROTECTED VIRTUAL void AosApplication::SetCleanState()
@@ -1464,6 +1468,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegTrying_StateConnecting(IN IMS_U
     {
         piRsm->UpdateRegistration();
     }
+
+    ProcessImsEstablishmentStart();
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateConnecting(IN IMS_UINT32 nReason)
@@ -1701,22 +1707,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessConnectionUpdated_Pcscf()
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegSucceeded(IN IMS_UINT32 /* nReason */)
 {
-    IMS_BOOL bEnforceUpdate = IMS_FALSE;
-
-    if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
-    {
-        if (IsRegTypeNormal() && GetState() == STATE_UPDATING)
-        {
-            bEnforceUpdate = IMS_TRUE;
-        }
-    }
-
+    StopTimer(TIMER_IMS_ESTABLISHMENT);
     ClearOffReason();
     SetAppState(STATE_CONNECTED);
     UpdateRegisteredRat(m_piContext->GetNetTracker()->GetNetworkType());
     Report_StateChanged();
 
-    UpdateConnectedServices(bEnforceUpdate);
+    UpdateConnectedServices(IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_Start(IN IMS_UINT32 /* nReason */)
@@ -2037,6 +2034,22 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnBlockedTimerExpired()
     m_pCondition->ResetBlock(BLOCK_TEMPORARY_DATA_DEACTIVATED);
 }
 
+PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
+{
+    m_pConnector->Stop();
+
+    StopTimer(TIMER_IMS_ESTABLISHMENT);
+
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piService != IMS_NULL)
+    {
+        A_IMS_TRACE_I(APPID, "ProcessImsEstablishmentTimerExpired :: PLMN is blocked with timeout",
+                0, 0, 0);
+
+        piService->NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+    }
+}
+
 PROTECTED VIRTUAL void AosApplication::ProcessPdnBlock() {}
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnBlockWithTime()
@@ -2055,7 +2068,65 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnBlockWithTime()
     m_pConnector->Stop();
 }
 
-PROTECTED VIRTUAL void AosApplication::OnAppStateChanged() {}
+PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
+{
+    if (IsRegTypeNormal())
+    {
+        IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime();
+
+        if (nEstTime <= 0)
+        {
+            return;
+        }
+
+        if (m_piContext->GetConnection()->IsEpdgEnabled() || IsOn())
+        {
+            StopTimer(TIMER_IMS_ESTABLISHMENT);
+            return;
+        }
+
+        IMS_UINT32 nNewRat = m_piNetTracker->GetMobileNetworkType();
+
+        if (!m_pUtil->IsSupportedNetworkTypeForCellular(nNewRat))
+        {
+            StopTimer(TIMER_IMS_ESTABLISHMENT);
+            return;
+        }
+
+        if (!m_piNetTracker->IsImsVoiceCallSupported())
+        {
+            StopTimer(TIMER_IMS_ESTABLISHMENT);
+            return;
+        }
+
+        if (m_pCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+        {
+            StopTimer(TIMER_IMS_ESTABLISHMENT);
+            return;
+        }
+
+        if (IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
+        {
+            if (m_nRat == nNewRat || !m_pUtil->IsSupportedNetworkTypeForCellular(m_nRat))
+            {
+                return;
+            }
+        }
+
+        A_IMS_TRACE_D(
+                APPID, "ProcessImsEstablishmentStart :: ims est time (%d sec)", nEstTime, 0, 0);
+
+        StartTimer(TIMER_IMS_ESTABLISHMENT, nEstTime * 1000);
+    }
+}
 
 PROTECTED VIRTUAL void AosApplication::Report_StateChanged(
         IN IMS_BOOL bIsStateChecked /* = IMS_TRUE */)
@@ -2215,6 +2286,10 @@ PROTECTED VIRTUAL void AosApplication::StartTimer(IN IMS_UINT32 nType, IN IMS_UI
             ppiTimer = &m_piPdnBlockedTimer;
             break;
 
+        case TIMER_IMS_ESTABLISHMENT:
+            ppiTimer = &m_piImsEstablishmentTimer;
+            break;
+
         default:
             return;
     }
@@ -2266,6 +2341,10 @@ PROTECTED VIRTUAL void AosApplication::StopTimer(IN IMS_UINT32 nType)
             ppiTimer = &m_piPdnBlockedTimer;
             break;
 
+        case TIMER_IMS_ESTABLISHMENT:
+            ppiTimer = &m_piImsEstablishmentTimer;
+            break;
+
         default:
             return;
     }
@@ -2280,7 +2359,9 @@ PROTECTED VIRTUAL void AosApplication::StopTimer(IN IMS_UINT32 nType)
 
 PROTECTED VIRTUAL void AosApplication::ClearTimers()
 {
-    // TIMER_RECONFIG_GUARD and TIMER_PDN_BLOCKED should not be stopped
+    /*
+        NOT STOP TIMER : TIMER_RECONFIG_GUARD, TIMER_PDN_BLOCKED, TIMER_IMS_ESTABLISHMENT
+    */
     if (m_piMsgConditionTimer != IMS_NULL)
     {
         StopTimer(TIMER_MSG_CONITION);
@@ -2545,6 +2626,8 @@ PROTECTED VIRTUAL void AosApplication::NetTracker_StatusChanged()
         return;
     }
 
+    ProcessImsEstablishmentStart();
+
     if (m_nRat == nNewRat)
     {
         return;
@@ -2670,6 +2753,12 @@ PROTECTED VIRTUAL void AosApplication::Timer_TimerExpired(IN ITimer* piTimer)
     if (piTimer == m_piPdnBlockedTimer)
     {
         ProcessPdnBlockedTimerExpired();
+        return;
+    }
+
+    if (piTimer == m_piImsEstablishmentTimer)
+    {
+        ProcessImsEstablishmentTimerExpired();
         return;
     }
 }

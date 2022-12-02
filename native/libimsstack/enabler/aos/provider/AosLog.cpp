@@ -98,7 +98,8 @@ public:
         TIMER_APP_ACTIVATED,
         TIMER_APP_CONNECTED,
         TIMER_APP_TERMINATED,
-        TIMER_PDN_BLOCKED
+        TIMER_PDN_BLOCKED,
+        TIMER_IMS_ESTABLISHMENT
     };
 };
 
@@ -372,6 +373,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
 
         case Application::TIMER_PDN_BLOCKED:
             return "TIMER_PDN_BLOCKED";
+
+        case Application::TIMER_IMS_ESTABLISHMENT:
+            return "TIMER_IMS_ESTABLISHMENT";
 
         default:
             return "__INVALID__";

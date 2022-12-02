@@ -746,6 +746,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_CONTACT_USER_INFO_POLICY_FOR_NON_REG_M
 const IMS_CHAR CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT[] = "emc_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT[] =
         "geolocation_pidf_forming_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT[] =
+        "ims_establishment_time_sec_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT[] = "ims_preferred_iptype_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT[] = "ims_signalling_dscp_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT[] =

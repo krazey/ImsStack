@@ -209,12 +209,12 @@ protected:
     virtual void ProcessRegBlockedTimerExpired();
     virtual void ProcessRegStopTimerExpired();
     virtual void ProcessPdnBlockedTimerExpired();
+    virtual void ProcessImsEstablishmentTimerExpired();
 
     virtual void ProcessPdnBlock();
     virtual void ProcessPdnBlockWithTime();
 
-    // Report to Other Context
-    virtual void OnAppStateChanged();
+    virtual void ProcessImsEstablishmentStart();
 
     // Report to Handle
     virtual void Report_StateChanged(IN IMS_BOOL bIsStateChecked = IMS_TRUE);
@@ -328,7 +328,8 @@ protected:
         TIMER_APP_ACTIVATED,
         TIMER_APP_CONNECTED,
         TIMER_APP_TERMINATED,
-        TIMER_PDN_BLOCKED
+        TIMER_PDN_BLOCKED,
+        TIMER_IMS_ESTABLISHMENT
     };
 
     enum
@@ -378,6 +379,7 @@ protected:
     ITimer* m_piAppConnectedTimer;
     ITimer* m_piAppTerminatedTimer;
     ITimer* m_piPdnBlockedTimer;
+    ITimer* m_piImsEstablishmentTimer;
 
     AString m_strAppId;
     IMS_UINT32 m_nAppType;

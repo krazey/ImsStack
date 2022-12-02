@@ -85,6 +85,7 @@ public:
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetIsimIndexForImpu, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetImsEstablishmentTime, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPreferredImsDscp, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegistrationPreferredAccessTypeFeatureTag, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUssdMethod, (), (const, override));

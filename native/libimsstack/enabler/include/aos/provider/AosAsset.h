@@ -55,6 +55,7 @@ public:
             nEmcPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nGeolocationPidfFormingPolicy(
                     CarrierConfig::Assets::GEOLOCATION_POLICY_WITHOUT_POSITION),
+            nImsEstablishmentTimeSec(0),
             nImsPreferredIpType(CarrierConfig::Assets::IP_VERSION_6),
             nImsSignallingDscp(46),
             nRegActualWaitTimePolicy(CarrierConfig::Assets::AWT_POLICY_RFC_RULE),
@@ -118,6 +119,7 @@ public:
     IMS_SINT32 nContactUserInfoPolicyForNonRegMessage;
     IMS_SINT32 nEmcPreferredIpType;
     IMS_SINT32 nGeolocationPidfFormingPolicy;
+    IMS_SINT32 nImsEstablishmentTimeSec;
     IMS_SINT32 nImsPreferredIpType;
     IMS_SINT32 nImsSignallingDscp;
     IMS_SINT32 nRegActualWaitTimePolicy;
