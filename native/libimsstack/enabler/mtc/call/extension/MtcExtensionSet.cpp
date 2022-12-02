@@ -88,7 +88,8 @@ IMS_BOOL MtcExtensionSet::IsRequiredOnRemote(IN const AString& strOptionTag) con
 }
 
 PUBLIC
-IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& objMessage) const
+IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(
+        IN const IMessage& objMessage, OUT AString& strNotSupportedExtension) const
 {
     ImsList<AString> lstRequiredExtensions;
     MessageUtil::GetHeaders(&objMessage, ISipHeader::REQUIRE, lstRequiredExtensions);
@@ -98,6 +99,7 @@ IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& objMess
         const AString& strOptionTag = lstRequiredExtensions.GetAt(nIndex);
         if (!IsAvailableOnLocal(strOptionTag))
         {
+            strNotSupportedExtension = strOptionTag;
             IMS_TRACE_I(
                     "IsSupportRequiredExtensions : Not support [%s]", strOptionTag.GetStr(), 0, 0);
             return IMS_FALSE;

@@ -136,7 +136,10 @@ TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsTrueForNotAvailableE
     MockIMessage objMessageRequiresRpr;
     ON_CALL(objMessageRequiresRpr, GetMessage).WillByDefault(Return(&objSipMessageRequiresRpr));
 
-    EXPECT_TRUE(objExtensionSet.IsSupportRequiredExtensions(objMessageRequiresRpr));
+    AString strNotSupportedExtension;
+    EXPECT_TRUE(objExtensionSet.IsSupportRequiredExtensions(
+            objMessageRequiresRpr, strNotSupportedExtension));
+    EXPECT_TRUE(strNotSupportedExtension.GetLength() == 0);
 }
 
 TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsFalseForNotAvailableExtension)
@@ -159,7 +162,10 @@ TEST(MtcExtensionSetTest, IsSupportRequiredExtensionsReturnsFalseForNotAvailable
     ON_CALL(objMessageRequiresTdialog, GetMessage)
             .WillByDefault(Return(&objSipMessageRequiresTdialog));
 
-    EXPECT_FALSE(objExtensionSet.IsSupportRequiredExtensions(objMessageRequiresTdialog));
+    AString strNotSupportedExtension;
+    EXPECT_FALSE(objExtensionSet.IsSupportRequiredExtensions(
+            objMessageRequiresTdialog, strNotSupportedExtension));
+    EXPECT_EQ(strNotSupportedExtension, MtcExtensionSet::OPTION_TAG_TARGET_DIALOG);
 }
 
 TEST(MtcExtensionSetTest, FormatRequestCallsEachExtensions)

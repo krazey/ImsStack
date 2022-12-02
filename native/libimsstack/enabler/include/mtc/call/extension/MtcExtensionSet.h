@@ -75,7 +75,8 @@ public:
      * @param pMessage Message containing required extensions.
      * @return True if all extensions are available.
      */
-    IMS_BOOL IsSupportRequiredExtensions(IN const IMessage& objMessage) const;
+    IMS_BOOL IsSupportRequiredExtensions(
+            IN const IMessage& objMessage, OUT AString& strNotSupportedExtension) const;
 
     void FormatRequest(IN RequestType eType, IN_OUT IMessage& objRequest) override;
     void FormatResponse(IN ResponseType eType, IN_OUT IMessage& objResponse) override;

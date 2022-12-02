@@ -163,9 +163,12 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
     m_objContext.GetParticipantInfo().HandleRequest(RequestType::START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
 
-    if (!pSession->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
+    AString strNotSupportedExtension;
+    if (!pSession->GetExtensionSet().IsSupportRequiredExtensions(
+                *piMessage, strNotSupportedExtension))
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SIP_HEADERS));
+        return RejectIncomingAndToTerminating(
+                CallReasonInfo(CODE_REJECT_UNSUPPORTED_SIP_HEADERS, -1, strNotSupportedExtension));
     }
 
     if (m_objContext.GetConfigurationProxy().Is(Feature::REJECT_OFFERLESS_INVITE) &&
@@ -295,9 +298,12 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
     m_objContext.GetParticipantInfo().HandleRequest(RequestType::START, *piMessage);
 
-    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
+    AString strNotSupportedExtension;
+    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(
+                *piMessage, strNotSupportedExtension))
     {
-        return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_UNSUPPORTED_SIP_HEADERS));
+        return RejectIncomingAndToTerminating(
+                CallReasonInfo(CODE_REJECT_UNSUPPORTED_SIP_HEADERS, -1, strNotSupportedExtension));
     }
 
     m_objContext.GetCallInfo().eInitialCallType = m_objContext.GetSession()->GetCallType();
