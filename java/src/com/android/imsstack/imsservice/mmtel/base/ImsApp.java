@@ -52,4 +52,8 @@ public abstract class ImsApp {
     protected static void logi(String s) {
         ImsLog.i("[GII-IMPL] " + s);
     }
+
+    protected static void loge(String s) {
+        ImsLog.e("[GII-IMPL] " + s);
+    }
 }

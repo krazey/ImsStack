@@ -107,7 +107,7 @@ public class ImsCallApp extends ImsApp {
             try {
                 mUt.close();
             } catch (Throwable t) {
-                t.printStackTrace();
+                loge("UtInterface Exception:" + t.toString());
             }
 
             mFeatureManager.setUtInterface(null);

@@ -29,6 +29,7 @@ import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsConstants;
+import com.android.imsstack.util.ImsLog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -82,8 +83,7 @@ public class VideoCallUtils {
 
         if (vqSet != null) {
             for (Map.Entry<Integer, Integer> entry : vqSet) {
-                com.android.imsstack.util.ImsLog.w(
-                        "VideoQuality :: key=" + entry.getKey().intValue()
+                ImsLog.w("VideoQuality :: key=" + entry.getKey().intValue()
                         + ", value=" + entry.getValue().intValue());
             }
         }
@@ -120,9 +120,9 @@ public class VideoCallUtils {
 
             pfd.close();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            ImsLog.e(e.toString(), e);
         } catch (IOException e) {
-            e.printStackTrace();
+            ImsLog.e(e.toString(), e);
         }
 
         if (bitmap == null) {

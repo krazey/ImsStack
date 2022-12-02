@@ -645,7 +645,7 @@ public class ImsCallManager {
                     callSession.close();
                     count++;
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    loge("terminateAllSessions Exception" + t.toString(), t);
                 }
             }
 
@@ -670,7 +670,7 @@ public class ImsCallManager {
                         callSession.close();
                         count++;
                     } catch (Throwable t) {
-                        t.printStackTrace();
+                        loge("terminateAllPendingSessions exception:" + t.toString(), t);
                     }
                 }
             }

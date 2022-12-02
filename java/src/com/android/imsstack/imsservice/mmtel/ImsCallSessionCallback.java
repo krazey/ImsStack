@@ -898,7 +898,7 @@ public class ImsCallSessionCallback {
             try {
                 session.close();
             } catch (Throwable tt) {
-                tt.printStackTrace();
+                log(tt, "closeSession Exception: " + tt.toString());
             }
         }
     }

@@ -170,7 +170,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
             setUpdateState(UPDATE_STATE_SENT);
             mCallSession.update(callType, mediaProfile);
         } catch (Throwable t) {
-            t.printStackTrace();
+            loge(t.toString(), t);
         }
     }
 
@@ -497,7 +497,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         try {
             return mCallSession.getCallProfile();
         } catch (Throwable t) {
-            t.printStackTrace();
+            loge("CallProfile Exception:" + t.toString(), t);
         }
 
         return null;
@@ -516,7 +516,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
                 log("acceptSessionModification :: ignored...");
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            loge("acceptSessionModification Exception:" + t.toString(), t);
         }
     }
 
@@ -532,7 +532,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
                 log("rejectSessionModification :: ignored...");
             }
         } catch (Throwable t) {
-            t.printStackTrace();
+            loge("rejectSessionModification Exception:" + t.toString(), t);
         }
     }
 
@@ -628,5 +628,9 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
     private static void logi(String s) {
         ImsLog.i("[GII-IMPL] " + s);
+    }
+
+    private void loge(String message, Throwable t) {
+        ImsLog.e("[GII-IMPL] " + message, t);
     }
 }

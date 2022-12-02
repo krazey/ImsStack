@@ -404,7 +404,7 @@ public class ImsMmTelService extends MmTelFeature
                             + ", " + capabilities.toString());
                     notifyCapabilitiesStatusChanged(capabilities);
                 } catch (IllegalStateException e) {
-                    e.printStackTrace();
+                    loge("onFeatureCapabilityChanged Exception:" + e.toString());
                 }
             });
         }
