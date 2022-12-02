@@ -22,6 +22,8 @@
 class IMtsErrorHandlerListener
 {
 public:
+    virtual ~IMtsErrorHandlerListener() {}
+
     virtual void NotifyControlAos(IN IMS_UINT32 nCommand) = 0;
 };
 
