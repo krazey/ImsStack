@@ -133,14 +133,14 @@ protected:
             delete pAosNewIpsec;
         }
 
-        if (pRegId)
-        {
-            delete pRegId;
-        }
-
         if (pAosStaticProfile)
         {
             delete pAosStaticProfile;
+        }
+
+        if (pAosIpsecHelper)
+        {
+            delete pAosIpsecHelper;
         }
 
         if (pMockAosAppContext)
@@ -148,9 +148,9 @@ protected:
             delete pMockAosAppContext;
         }
 
-        if (pAosIpsecHelper)
+        if (pRegId)
         {
-            delete pAosIpsecHelper;
+            delete pRegId;
         }
     }
 
@@ -446,6 +446,8 @@ TEST_F(AosIpsecHelperTest, Create)
     IPAddress objIpAddr(IPADDR1);
     EXPECT_CALL(objMockIRegContact, GetIpAddress()).Times(3).WillRepeatedly(ReturnRef(objIpAddr));
 
+    EXPECT_CALL(objMockIRegContact, SetPort(_)).Times(AnyNumber());
+
     // SetSecurityClientHeader() return IMS_FALSE;
     IMSVector<IMS_SINT32> objAuthenticationAlgs;
     objAuthenticationAlgs.Clear();
@@ -453,6 +455,7 @@ TEST_F(AosIpsecHelperTest, Create)
             .Times(AnyNumber())
             .WillOnce(ReturnRef(objAuthenticationAlgs));
     EXPECT_FALSE(pAosIpsecHelper->Create(IMS_TRUE));
+    DestroyIpsec(NEW_IPSEC);
 
     // SetSecurityClientHeader() return IMS_TRUE;
     objAuthenticationAlgs.Clear();
@@ -473,10 +476,15 @@ TEST_F(AosIpsecHelperTest, Create)
             .Times(2)
             .WillRepeatedly(ReturnRef(objEncryptionAlgs));
 
+    EXPECT_CALL(objMockIRegParameter, RemoveSecurityClients()).Times(2);
+    EXPECT_CALL(objMockIRegParameter, AddSecurityClient(_)).Times(12);
+
     // SetSecurityServerPortInRegistration()
     EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInInitRegUsed())
             .Times(2)
             .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMockIRegParameter, SetPort(_)).Times(2);
 
     // SetSecurityServerPortInRegContact - call if bInitial == IMS_TRUE
     EXPECT_CALL(objMockAosConfig, IsSecurityServerPortInRegContactOfInitRegUsed())
@@ -485,6 +493,7 @@ TEST_F(AosIpsecHelperTest, Create)
 
     // create m_pNewIpsec
     EXPECT_TRUE(pAosIpsecHelper->Create(IMS_TRUE));
+    DestroyIpsec(NEW_IPSEC);
 
     EXPECT_TRUE(pAosIpsecHelper->Create(IMS_FALSE));
 
