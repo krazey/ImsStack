@@ -85,6 +85,10 @@ protected:
     {
         MtcContextRepository::GetInstance()->AddContext(SLOT_ID, &objMockContext);
 
+        pMockIdManager = IMS_NULL;
+        pMockInterfaceFactory = IMS_NULL;
+        pMockSubsHolder = IMS_NULL;
+
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
         ON_CALL(objMockContext, GetCallStateProxy).WillByDefault(ReturnRef(objMockCallStateProxy));
 
