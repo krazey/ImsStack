@@ -39,7 +39,7 @@ import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsConstants;
 
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -113,8 +113,8 @@ public class ImsCallUtils {
      */
     public static final String EXTRA_SUBADDRESS = "subaddress";
 
-    private static final Hashtable<Integer, Integer> sMtcReasonToImsReason;
-    private static final Hashtable<Integer, String> sUserStatusToString;
+    private static final LinkedHashMap<Integer, Integer> sMtcReasonToImsReason;
+    private static final LinkedHashMap<Integer, String> sUserStatusToString;
 
     public static ImsCallProfile cloneCallProfile(final ImsCallProfile profile) {
         ImsCallProfile newProfile = new ImsCallProfile(profile.getServiceType(),
@@ -896,7 +896,7 @@ public class ImsCallUtils {
 
     static {
         // Reason codes: from MtcCall to ImsCall
-        sMtcReasonToImsReason = new Hashtable<Integer, Integer>();
+        sMtcReasonToImsReason = new LinkedHashMap<Integer, Integer>();
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_UNSPECIFIED,
                 ImsReasonInfo.CODE_UNSPECIFIED);
         sMtcReasonToImsReason.put(CallReasonInfo.CODE_LOCAL_ILLEGAL_ARGUMENT,
@@ -1099,7 +1099,7 @@ public class ImsCallUtils {
                 ImsReasonInfo.CODE_REJECT_ONGOING_CS_CALL);
 
         // User's status: from user status (int) to user status (string)
-        sUserStatusToString = new Hashtable<Integer, String>();
+        sUserStatusToString = new LinkedHashMap<Integer, String>();
         // "progressing" / "connect-fail" will be handled by the application
         // comparing to the previous status,
         // Ims just passes "disconnected" status in both cases.
