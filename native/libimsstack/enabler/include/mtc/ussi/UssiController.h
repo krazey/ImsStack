@@ -40,22 +40,22 @@ private:
 public:
     static IMS_BOOL IsNetworkInitiatedUssi(IN IMessage* piMessage);
 
-    IMS_BOOL HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage);
-    IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
-    IMS_BOOL IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection);
-    IMS_BOOL HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection);
+    virtual IMS_BOOL HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage);
+    virtual IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
+    virtual IMS_BOOL IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection);
+    virtual IMS_BOOL HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection);
 
-    UssiResult ParseUssiBodyAndCheckResult(
+    virtual UssiResult ParseUssiBodyAndCheckResult(
             IN ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod);
 
-    IMS_RESULT FormStartUssiRequest(IN const AString& strTargetNumber);
-    IMS_RESULT FormAcceptUssi();
-    IMS_RESULT FormInfoRequest(IN ISipClientConnection* piSipClientConnection,
+    virtual IMS_RESULT FormStartUssiRequest(IN const AString& strTargetNumber);
+    virtual IMS_RESULT FormAcceptUssi();
+    virtual IMS_RESULT FormInfoRequest(IN ISipClientConnection* piSipClientConnection,
             IN const AString& strUssdString, IN UssiError eErrorCode);
 
-    void SetNextActionByTerminateUssi();
+    virtual void SetNextActionByTerminateUssi();
 
-    UssiResult GetLastResult() const;
+    virtual UssiResult GetLastResult() const;
 
 private:
     IMS_RESULT FormHeadersForStartUssi(IN IMessage* piMessage);

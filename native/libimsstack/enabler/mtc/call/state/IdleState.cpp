@@ -294,6 +294,8 @@ PUBLIC VIRTUAL CallStateName IdleState::OnUssiAttached()
     ISession* piSession = GetISession();
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
+
+    // TODO: need to check
     m_objContext.GetSession()->HandleRequest(RequestType::START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
     m_objContext.GetParticipantInfo().HandleRequest(RequestType::START, *piMessage);
