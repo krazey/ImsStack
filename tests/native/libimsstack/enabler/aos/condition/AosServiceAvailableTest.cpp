@@ -39,7 +39,6 @@ class AosServiceAvailableTest : public ::testing::Test
 {
 public:
     AosServiceAvailable* pAosServiceAvailable;
-    AosBlock* pAosBlock;
 
     IAosCallTracker* pOriginAosCallTracker;
     MockIAosCallTracker objMockAosCallTracker;
@@ -62,10 +61,6 @@ protected:
         if (pAosServiceAvailable)
         {
             delete pAosServiceAvailable;
-        }
-        if (pAosBlock)
-        {
-            delete pAosBlock;
         }
     }
 
