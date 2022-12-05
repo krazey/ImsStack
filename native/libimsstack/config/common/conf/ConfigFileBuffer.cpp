@@ -452,9 +452,9 @@ PROTECTED VIRTUAL IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
         return IMS_FALSE;
     }
 
-    IMS_UINT32 nReadSize = 0;
+    IMS_UINT32 nReadSize;
 
-    if ((nReadSize = piFile->Read(reinterpret_cast<void*>(pcBuffer), nBuffSize)) <= 0)
+    if ((nReadSize = piFile->Read(reinterpret_cast<void*>(pcBuffer), nBuffSize)) == 0)
     {
         IMS_TRACE_E(0, "Reading the configuration (%s) failed", strConfName.GetStr(), 0, 0);
 
