@@ -35,7 +35,7 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    IMS_BOOL IsActiveCallExists(IN const IMSList<IMtcCall*> lstCalls) const;
+    static IMS_BOOL IsActiveCallExists(IN const IMSList<IMtcCall*> lstCalls);
 
     IMtcCallContext& m_objContext;
     IMtcService& m_objService;

@@ -49,7 +49,7 @@ public:
             IN const AString& strNumber, IN const AString& strServiceUrn) override;
 
 private:
-    IMS_BOOL IsUriForm(IN const AString& strNumber) const;
+    static IMS_BOOL IsUriForm(IN const AString& strNumber);
     AString GetConferenceFactoryUri() const;
     AString GetMcc() const;
     AString GetMnc(IN IMS_UINT32 nLength) const;

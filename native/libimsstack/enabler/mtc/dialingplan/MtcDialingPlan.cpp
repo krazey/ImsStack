@@ -106,7 +106,7 @@ void MtcDialingPlan::OnCountrySpecificServiceUrnReceived(
 }
 
 PRIVATE
-IMS_BOOL MtcDialingPlan::IsUriForm(IN const AString& strNumber) const
+IMS_BOOL MtcDialingPlan::IsUriForm(IN const AString& strNumber)
 {
     SipAddress objSipAddress;
     objSipAddress.Create(strNumber);

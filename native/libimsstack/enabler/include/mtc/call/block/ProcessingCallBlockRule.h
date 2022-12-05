@@ -34,9 +34,9 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    IMS_BOOL IsCallSetupProcessing(IN const IMSList<IMtcCall*>& lstCalls) const;
-    IMS_BOOL IsCallUpdating(IN const IMSList<IMtcCall*>& lstCalls) const;
-    IMS_BOOL IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls) const;
+    static IMS_BOOL IsCallSetupProcessing(IN const IMSList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsCallUpdating(IN const IMSList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls);
 
     IMtcCallContext& m_objContext;
 };

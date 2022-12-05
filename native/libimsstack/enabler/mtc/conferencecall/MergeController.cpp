@@ -183,9 +183,6 @@ PROTECTED VIRTUAL void MergeController::Recover()
         case CONTROL_OPERATION_REFER_BYE:
             // to be handled in OnReferenceStartFailed.
             break;
-        case CONTROL_OPERATION_SUBSCRIBE:
-            RecoverOnSubscribing();
-            break;
 
         default:
             IMS_TRACE_I("Recover : not handled.", 0, 0, 0);
@@ -298,12 +295,6 @@ void MergeController::RecoverOnReferring()
         SetState(STATE_IDLE);
         return;
     }
-}
-
-PRIVATE
-void MergeController::RecoverOnSubscribing()
-{
-    // TODO: remove.
 }
 
 PRIVATE

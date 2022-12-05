@@ -70,8 +70,7 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoForResponse(IN const IMessag
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor3xxResponse(
-        IN const IMessage& objMessage) const
+CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor3xxResponse(IN const IMessage& objMessage)
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -108,8 +107,7 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor4xxResponse(
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor5xxResponse(
-        IN const IMessage& objMessage) const
+CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor5xxResponse(IN const IMessage& objMessage)
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -124,8 +122,7 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor5xxResponse(
 }
 
 PRIVATE
-CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor6xxResponse(
-        IN const IMessage& objMessage) const
+CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor6xxResponse(IN const IMessage& objMessage)
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
 
@@ -139,7 +136,7 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor6xxResponse(
 }
 
 PRIVATE
-IMS_UINT32 UpdateErrorHandler::GetGlareTimeMillisecond(IN PeerType ePeerType) const
+IMS_UINT32 UpdateErrorHandler::GetGlareTimeMillisecond(IN PeerType ePeerType)
 {
     IMS_UINT32 nUpperT = 0;
     IMS_UINT32 nBaseT = 0;

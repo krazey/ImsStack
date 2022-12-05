@@ -94,7 +94,7 @@ private:
 
     IMS_SINT32 GetRejectStatusCode(IN const CallReasonInfo& objReason);
     void GetRejectPhrase(IN const CallReasonInfo& objReason, OUT AString& strPhrase);
-    void GetUpdateReason(IN UpdateType eUpdateType, OUT AString& strReason);
+    static void GetUpdateReason(IN UpdateType eUpdateType, OUT AString& strReason);
     void GetTerminateReason(IN const CallReasonInfo& objReason, OUT AString& strReason);
     AString GetTerminateReason(IN TerminateType eType);
     AString GetRejectPhrase(IN RejectType eType);

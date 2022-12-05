@@ -44,7 +44,7 @@ public:
     CallReasonInfo Handle(IN const IMessage* piMessage) const;
 
 private:
-    IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage) const;
+    static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
 };
 
 #endif

@@ -43,7 +43,7 @@ CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage) con
 }
 
 PRIVATE
-IMS_BOOL EarlyUpdateErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage) const
+IMS_BOOL EarlyUpdateErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
 {
     if (piMessage == IMS_NULL)
     {

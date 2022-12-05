@@ -129,13 +129,13 @@ private:
 
     void CreateEndPointEntity(IN const IElement& objElement, IN User& objUser);
 
-    const ImsList<IElement*>& GetSubElements(IN const IElement& objElement,
+    static const ImsList<IElement*>& GetSubElements(IN const IElement& objElement,
             IN const IMS_CHAR* pszSubElementName, OUT ImsList<IElement*>& objSubElements);
-    const AString& GetSubElementValue(IN const IElement& objElement,
+    static const AString& GetSubElementValue(IN const IElement& objElement,
             IN const IMS_CHAR* pszSubElementName, OUT AString& strSubElementValue);
 
-    IMS_UINT32 ConvertState(IN const AString& strState);
-    IMS_UINT32 ConvertStatus(IN const AString& strStatus);
+    static IMS_UINT32 ConvertState(IN const AString& strState);
+    static IMS_UINT32 ConvertStatus(IN const AString& strStatus);
 
 public:
     enum

@@ -95,7 +95,7 @@ IMS_UINT32 ConferenceInfoUpdater::Update(
 }
 
 PUBLIC
-const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(IN MatchingPolicy ePolicy) const
+const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(IN MatchingPolicy ePolicy)
 {
     switch (ePolicy)
     {
@@ -111,7 +111,7 @@ const IMS_CHAR* ConferenceInfoUpdater::ConvertPolicyToString(IN MatchingPolicy e
 }
 
 PUBLIC
-const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStatus) const
+const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStatus)
 {
     switch (nStatus)
     {
@@ -610,7 +610,7 @@ IMS_SINT32 ConferenceInfoUpdater::FindParticipantByUserEntity(IN const Conferenc
 
 PROTECTED
 IMS_UINT32 ConferenceInfoUpdater::GetMatchingScore(
-        IN const AString& strUriA, IN const AString& strUriB) const
+        IN const AString& strUriA, IN const AString& strUriB)
 {
     if (IsAnonymousUri(strUriA) && IsAnonymousUri(strUriB))
     {
@@ -622,7 +622,7 @@ IMS_UINT32 ConferenceInfoUpdater::GetMatchingScore(
 
 PROTECTED
 IMS_UINT32 ConferenceInfoUpdater::GetMatchingCount(
-        IN const AString& strUriA, IN const AString& strUriB) const
+        IN const AString& strUriA, IN const AString& strUriB)
 {
     AString strA;
     if (ConferenceUtils::GetUserPart(strUriA, strA).GetLength() == 0)
@@ -714,7 +714,7 @@ IMS_BOOL ConferenceInfoUpdater::IsLocalUri(IN const AString& strUserEntity) cons
 }
 
 PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsAnonymousUri(IN const AString& strUserEntity) const
+IMS_BOOL ConferenceInfoUpdater::IsAnonymousUri(IN const AString& strUserEntity)
 {
     if (strUserEntity.MakeLower().Contains(ConferenceConst::ANONYMOUS))
     {
@@ -882,7 +882,7 @@ IMS_BOOL ConferenceInfoUpdater::IsInitialNotifyWithoutUsers() const
 }
 
 PROTECTED
-IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus) const
+IMS_BOOL ConferenceInfoUpdater::IsConnectedStatusCategory(IN IMS_UINT32 nStatus)
 {
     switch (nStatus)
     {

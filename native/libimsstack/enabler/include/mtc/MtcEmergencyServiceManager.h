@@ -36,7 +36,6 @@ public:
 private:
     void HandleServiceIdle(OUT IMS_BOOL& bStateChanged);
     void HandleServiceActive(OUT IMS_BOOL& bStateChanged);
-    void HandleServiceSuspended(OUT IMS_BOOL& bStateChanged);
     void SetState(IN IuMtcService::EmergencyServiceState eState, OUT IMS_BOOL& bChanged);
     void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason, IN IJniMtcServiceThread* pThread);
 

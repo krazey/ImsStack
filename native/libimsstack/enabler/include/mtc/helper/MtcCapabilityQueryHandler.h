@@ -49,7 +49,7 @@ private:
     IMS_RESULT SetSessionLevelDescription(IN ICoreService* piService, OUT AString& strDesc);
 
     // if EVS is supported by default, this should be removed.
-    AString GetAdjustedCodecList(IN const AStringArray& objAudioCaps);
+    static AString GetAdjustedCodecList(IN const AStringArray& objAudioCaps);
 
     IMtcContext& m_objContext;
 };

@@ -54,7 +54,7 @@ CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
 
 PRIVATE
 CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
-        IN IMS_SINT32 nCause, IN const AString& strText) const
+        IN IMS_SINT32 nCause, IN const AString& strText)
 {
     const AString strNormalizedText = strText.SimplifyWsp().MakeLower();
 

@@ -41,7 +41,7 @@ private:
 
     IMS_BOOL IsOtherCallExists();
     IMS_BOOL HasVideoCall(IN const IMSList<IMtcCall*>& lstCalls);
-    IMS_BOOL IsVideoCall(IN CallType eCallType);
+    static IMS_BOOL IsVideoCall(IN CallType eCallType);
 };
 
 #endif

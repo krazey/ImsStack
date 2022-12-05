@@ -176,8 +176,8 @@ public:
     IMS_SINT32 GetCallRejectCodeForNotAcceptableCallType() const override;
 
 private:
-    IMS_BOOL ContainsValue(IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue) const;
-    IMS_BOOL ContainsValue(IN const IMSVector<AString>& lstList, IN const AString& strValue) const;
+    static IMS_BOOL ContainsValue(IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue);
+    static IMS_BOOL ContainsValue(IN const IMSVector<AString>& lstList, IN const AString& strValue);
 
     CarrierConfigItems m_objCarrierConfig;
     AssetItems m_objAsset;

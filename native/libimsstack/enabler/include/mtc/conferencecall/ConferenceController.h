@@ -109,7 +109,7 @@ protected:
     IMS_UINT32 AddUserToParticipantList(
             IN IMSList<ConfUser*>& objConfUsers, IN IMS_BOOL bReOrder = IMS_FALSE);
 
-    void ClearListForConfUsers(IN IMSList<ConfUser*>& objUsers);
+    static void ClearListForConfUsers(IN IMSList<ConfUser*>& objUsers);
 
     // real operations.
     virtual IMS_BOOL CreateSubscription();
@@ -158,7 +158,7 @@ protected:
     IMS_BOOL IsReadyToPerformCmd() const;
     IMS_BOOL IsConditionMet(IN IMS_UINT32 nCondition) const;
     void SetState(IN IMS_SINT32 nState);
-    const IMS_CHAR* ConvertStateToString(IN IMS_SINT32 nState) const;
+    static const IMS_CHAR* ConvertStateToString(IN IMS_SINT32 nState);
 
 public:
     enum

@@ -41,10 +41,9 @@ public:
     static IMS_BOOL IsNetworkInitiatedUssi(IN IMessage* piMessage);
 
     virtual IMS_BOOL HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage);
-    virtual IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
+    static IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
     virtual IMS_BOOL IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection);
     virtual IMS_BOOL HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection);
-
     virtual UssiResult ParseUssiBodyAndCheckResult(
             IN ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod);
 

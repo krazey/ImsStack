@@ -1133,7 +1133,7 @@ void ConferenceController::SetState(IN IMS_SINT32 nState)
 }
 
 PROTECTED
-const IMS_CHAR* ConferenceController::ConvertStateToString(IN IMS_SINT32 nState) const
+const IMS_CHAR* ConferenceController::ConvertStateToString(IN IMS_SINT32 nState)
 {
     switch (nState)
     {

@@ -38,8 +38,8 @@ private:
     static const AString REASON_TEXT_CALL_COMPLETED;
     static const AString REASON_TEXT_CALL_DECLINED;
 
-    CallReasonInfo GetCallReasonInfoFromReasonHeader(
-            IN IMS_SINT32 nCause, IN const AString& strText) const;
+    static CallReasonInfo GetCallReasonInfoFromReasonHeader(
+            IN IMS_SINT32 nCause, IN const AString& strText);
 
     IMtcCallContext& m_objContext;
 };

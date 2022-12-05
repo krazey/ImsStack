@@ -484,25 +484,30 @@ TEST_F(ConferenceInfoUpdaterTest, UpdateDisconnectingStatusAsDisconnected)
 
 TEST_F(ConferenceInfoUpdaterTest, ConvertPolicyToStringReturnsCorrespondingString)
 {
-    EXPECT_STREQ(pUpdater->ConvertPolicyToString(MatchingPolicy::ORDER_LEG_ID), "ORDER_LEG_ID");
-    EXPECT_STREQ(pUpdater->ConvertPolicyToString(MatchingPolicy::ORDER), "ORDER");
-    EXPECT_STREQ(pUpdater->ConvertPolicyToString(MatchingPolicy::REFER_TO_URI), "REFER_TO_URI");
-    EXPECT_STREQ(pUpdater->ConvertPolicyToString(MatchingPolicy::USERENTITY), "USERENTITY");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertPolicyToString(MatchingPolicy::ORDER_LEG_ID),
+            "ORDER_LEG_ID");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertPolicyToString(MatchingPolicy::ORDER), "ORDER");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertPolicyToString(MatchingPolicy::REFER_TO_URI),
+            "REFER_TO_URI");
+    EXPECT_STREQ(
+            ConferenceInfoUpdater::ConvertPolicyToString(MatchingPolicy::USERENTITY), "USERENTITY");
 }
 
 TEST_F(ConferenceInfoUpdaterTest, ConvertStatusToStringReturnsCorrespondingString)
 {
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_CONNECTED), "connected");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_DISCONNECTED), "disconnected");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_ON_HOLD), "on-hold");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_MUTED_VIA_FOCUS), "muted-via-focus");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_PENDING), "pending");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_ALERTING), "alerting");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_DIALING_IN), "dialing-in");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_DIALING_OUT), "dialing-out");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_DISCONNECTING), "disconnecting");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(STATUS_FAIL), "connect-fail");
-    EXPECT_STREQ(pUpdater->ConvertStatusToString(-1), "__STATUS_IDLE__");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_CONNECTED), "connected");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_DISCONNECTED), "disconnected");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_ON_HOLD), "on-hold");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_MUTED_VIA_FOCUS),
+            "muted-via-focus");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_PENDING), "pending");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_ALERTING), "alerting");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_DIALING_IN), "dialing-in");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_DIALING_OUT), "dialing-out");
+    EXPECT_STREQ(
+            ConferenceInfoUpdater::ConvertStatusToString(STATUS_DISCONNECTING), "disconnecting");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(STATUS_FAIL), "connect-fail");
+    EXPECT_STREQ(ConferenceInfoUpdater::ConvertStatusToString(-1), "__STATUS_IDLE__");
 }
 
 }  // namespace android

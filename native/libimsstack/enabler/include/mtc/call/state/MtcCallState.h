@@ -199,7 +199,7 @@ protected:
     IMS_BOOL IsRprSupported() const;
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
-    IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
+    static IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage);
     IMS_BOOL IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const;
 
     // TODO: move these into MtcTimerWrapper? Is it used by All MTC classes?
@@ -209,7 +209,7 @@ protected:
 
     void SendInfoForUssi(
             IN const AString& strUssdString, IN UssiError eErrorCode = UssiError::CODE_NONE);
-    void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
+    static void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
             IN IMS_UINT32 nResponseCode, IN const AString& strPhrase = AString::ConstEmpty());
 
     IMS_BOOL IsCallEndNeededByAudioInactivity(
@@ -217,7 +217,7 @@ protected:
     CallReasonInfo GetAudioInactivityReasonOnTermination(IN const CallReasonInfo& objReason);
     IMS_BOOL IsNeedToIgnoreStartFailure() const;
     void StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) const;
-    IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const;
+    static IMS_SINT32 GetCallReasonByAosReason(IN IMS_UINT32 nAosReason);
 
     IMtcCallContext& m_objContext;
 

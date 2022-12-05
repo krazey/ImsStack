@@ -333,7 +333,7 @@ void ConferenceOperationQueue::StopTimer()
 }
 
 PRIVATE
-const IMS_CHAR* ConferenceOperationQueue::ConvertOperationToString(IN IMS_SINT32 nOperation) const
+const IMS_CHAR* ConferenceOperationQueue::ConvertOperationToString(IN IMS_SINT32 nOperation)
 {
     switch (nOperation)
     {

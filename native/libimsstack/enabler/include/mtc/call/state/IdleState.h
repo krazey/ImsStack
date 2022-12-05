@@ -67,8 +67,8 @@ private:
     CallStateName ContinueStartUssi();
 
     AString GenerateSessionId();
-    ImsList<AString> GetEntryUrisFromConferenceUsers(IN const ImsList<ConfUser*>& lstUsers);
-    void SetResourceListForConference(
+    static ImsList<AString> GetEntryUrisFromConferenceUsers(IN const ImsList<ConfUser*>& lstUsers);
+    static void SetResourceListForConference(
             IN_OUT IMessage& objMessage, IN const ImsList<AString>& lstEntryUris);
     ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();
     ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();

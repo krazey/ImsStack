@@ -162,7 +162,7 @@ private:
     IMS_RESULT StartTimer(IN IMS_SINT32 nDuration);
     void StopTimer();
 
-    const IMS_CHAR* ConvertOperationToString(IN IMS_SINT32 nOperation) const;
+    static const IMS_CHAR* ConvertOperationToString(IN IMS_SINT32 nOperation);
 
 private:
     static const IMS_UINT32 DELAY_IMMEDIATELY = 0;

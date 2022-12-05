@@ -323,7 +323,7 @@ CallReasonInfo StartErrorHandler::Handle404Response() const
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::Handle407Response() const
+CallReasonInfo StartErrorHandler::Handle407Response()
 {
     // TODO: an initial INVITE must be sent with Authorization.
     return CallReasonInfo(CODE_SIP_PROXY_AUTHENTICATION_REQUIRED, SipStatusCode::SC_407);
@@ -501,7 +501,7 @@ IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(IN const IMessage& objMessage)
 }
 
 PRIVATE
-IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage) const
+IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
 {
     if (piMessage == IMS_NULL)
     {
@@ -519,8 +519,7 @@ IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& ob
 }
 
 PRIVATE
-IMS_BOOL StartErrorHandler::IsConditionCheckRequiredBeforeRetry1x(
-        IN const IMessage& objMessage) const
+IMS_BOOL StartErrorHandler::IsConditionCheckRequiredBeforeRetry1x(IN const IMessage& objMessage)
 {
     switch (objMessage.GetStatusCode())
     {

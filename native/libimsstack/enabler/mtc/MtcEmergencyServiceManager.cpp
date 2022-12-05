@@ -80,9 +80,6 @@ void MtcEmergencyServiceManager::HandleServiceStatus(
         case ServiceStatus::SERVICE_ACTIVE:
             HandleServiceActive(bStateChanged);
             break;
-        case ServiceStatus::SERVICE_SUSPENDED:
-            HandleServiceSuspended(bStateChanged);
-            break;
         default:
             break;
     }
@@ -117,13 +114,6 @@ void MtcEmergencyServiceManager::HandleServiceActive(IN IMS_BOOL& bStateChanged)
     {
         SetState(IuMtcService::EmergencyServiceState::OPENED, bStateChanged);
     }
-}
-
-PRIVATE
-void MtcEmergencyServiceManager::HandleServiceSuspended(IN IMS_BOOL& bStateChanged)
-{
-    IMS_TRACE_D("HandleServiceSuspended", 0, 0, 0);
-    bStateChanged = IMS_FALSE;
 }
 
 PRIVATE

@@ -292,7 +292,7 @@ void MtcService::SetStatus(IN ServiceStatus eStatus)
 }
 
 PRIVATE
-AString MtcService::GetServiceName(IN ServiceType eType) const
+AString MtcService::GetServiceName(IN ServiceType eType)
 {
     if (eType == ServiceType::EMERGENCY)
     {

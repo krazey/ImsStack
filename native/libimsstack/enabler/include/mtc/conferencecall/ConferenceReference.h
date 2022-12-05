@@ -63,7 +63,7 @@ private:
     void GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1To1Call) const;
     void SetReplaces(IN IMtcCall* pi1To1Call);
     void SetReferredByHeader();
-    void SetHeadersForReferTo(OUT AString& strHeadersForReferTo);
+    static void SetHeadersForReferTo(OUT AString& strHeadersForReferTo);
     IMtcCall* GetConferenceCall();
     IReference* GetIReference(IN const AString& strInvitedUri, IN const AString& strMethod);
 

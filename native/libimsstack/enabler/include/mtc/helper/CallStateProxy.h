@@ -80,7 +80,7 @@ private:
 
     void NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails,
             IN IMS_BOOL bTotalCallStateUpdated);
-    void NotifyCallState(
+    static void NotifyCallState(
             IN ImsList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails);
     void NotifyTotalCallState(IN ImsList<IMtcCallStateListener*> objListeners) const;
 

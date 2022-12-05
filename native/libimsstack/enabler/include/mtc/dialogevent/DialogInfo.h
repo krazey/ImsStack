@@ -48,16 +48,16 @@ public:
     static IMS_BOOL IsAttrExist(IN const IElement* piElement, IN const IMS_CHAR* pszAttrName);
 
 private:
-    IMS_UINT32 ConvertState(IN const AString& strState);
+    static IMS_UINT32 ConvertState(IN const AString& strState);
     void Clear();
     IMS_SLONG GetIndexOfKeyHasSameId(IN const AString& strDialogId);
-    AString GetDialogId(Dialog* pDialog) const;
-    AString GetDialogRemoteAddress(Dialog* pDialog) const;
-    AString GetDialogLocalAddress(Dialog* pDialog) const;
+    static AString GetDialogId(Dialog* pDialog);
+    static AString GetDialogRemoteAddress(Dialog* pDialog);
+    static AString GetDialogLocalAddress(Dialog* pDialog);
     IMS_BOOL IsPullableDialog(Dialog* pDialog) const;
-    IMS_UINT32 GetDialogCallState(Dialog* pDialog) const;
-    IMS_UINT32 GetDialogCallType(Dialog* pDialog) const;
-    IMS_BOOL IsHeldDialog(Dialog* pDialog) const;
+    static IMS_UINT32 GetDialogCallState(Dialog* pDialog);
+    static IMS_UINT32 GetDialogCallType(Dialog* pDialog);
+    static IMS_BOOL IsHeldDialog(Dialog* pDialog);
 
 public:
     enum
@@ -93,8 +93,8 @@ public:
         void Update(IN const IElement* piElementState);
 
     private:
-        IMS_UINT32 ConvertDialogState(IN const AString& strState);
-        IMS_UINT32 ConvertDialogStateEvent(IN const AString& strStateEvent);
+        static IMS_UINT32 ConvertDialogState(IN const AString& strState);
+        static IMS_UINT32 ConvertDialogStateEvent(IN const AString& strStateEvent);
 
     public:
         enum
@@ -233,7 +233,7 @@ public:
 
     private:
         void HandleMediaInfo(IN const IElement* piElementDialog);
-        IMS_SINT32 ConvertMediaDirection(IN const AString& strMediaDirection);
+        static IMS_SINT32 ConvertMediaDirection(IN const AString& strMediaDirection);
 
     private:
         friend class DialogInfo;
@@ -265,7 +265,7 @@ public:
     IMS_RESULT Update(IN IElement* piElementDialog);
 
 private:
-    IMS_UINT32 ConvertDirection(IN const AString& strState);
+    static IMS_UINT32 ConvertDirection(IN const AString& strState);
 
 public:
     enum
