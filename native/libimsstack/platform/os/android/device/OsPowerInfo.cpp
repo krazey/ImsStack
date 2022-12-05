@@ -100,7 +100,7 @@ void OsPowerInfoPrivate::UpdatePowerLevel()
     {
         m_ePowerLevel = POWERLEVEL_LOW;
     }
-    else if (m_nPowerValue >= BATTERY_THRESHOLDS[2])
+    else
     {
         m_ePowerLevel = POWERLEVEL_HIGH;
     }

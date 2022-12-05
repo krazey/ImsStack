@@ -305,7 +305,7 @@ IMS_SINT32 OsTrace::GetTraceNodeCount()
 PRIVATE
 IMS_BOOL OsTrace::IsLogging()
 {
-    IMS_BOOL bLoggingL = IMS_FALSE;
+    IMS_BOOL bLoggingL;
 
     if (m_piMutex != IMS_NULL)
     {

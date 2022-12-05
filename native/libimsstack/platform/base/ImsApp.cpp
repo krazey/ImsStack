@@ -92,10 +92,8 @@ ImsService* ImsApp::GetService(IN const AString& strServiceName)
 
 PRIVATE VIRTUAL IMS_BOOL ImsApp::DispatchMessage(IN ImsMessage& objMsg)
 {
-    IMS_BOOL bResult = IMS_FALSE;
-
     (void)OnPreprocess(objMsg);
-    bResult = OnMessage(objMsg);
+    IMS_BOOL bResult = OnMessage(objMsg);
     (void)OnPostprocess(objMsg);
 
     return bResult;
