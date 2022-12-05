@@ -104,7 +104,7 @@ IMS_RESULT SessionEx::RespondToEarlyUpdate(
     if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
         IMS_SINT32 nState = GetState();
-        IMS_BOOL bSessionTimerControlRequired = IMS_FALSE;
+        IMS_BOOL bSessionTimerControlRequired;
         AString strRequestSe(AString::ConstNull());
 
         if ((nState == STATE_RENEGOTIATING) || (nState == STATE_REESTABLISHING))
