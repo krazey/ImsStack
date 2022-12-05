@@ -805,7 +805,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::HandleSipRequest(
     // SIP request received within a SIP dialog
     if (bRequestWithinDialog)
     {
-        IMS_BOOL bHandled = IMS_FALSE;
+        IMS_BOOL bHandled;
 
         if (bIsForked)
         {

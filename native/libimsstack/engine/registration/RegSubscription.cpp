@@ -1138,10 +1138,8 @@ IMS_BOOL RegSubscription::CopyHeadersAndBodyParts(IN_OUT ISipMessage*& piSipMsg)
     // Copy the headers from the application
     if (m_piNextRequest != IMS_NULL)
     {
-        IMS_BOOL bGruuRequired = IMS_FALSE;
         const AString strGruu(Sip::STR_GRUU);
-
-        bGruuRequired = piSipMsg->IsOptionSupported(strGruu);
+        IMS_BOOL bGruuRequired = piSipMsg->IsOptionSupported(strGruu);
 
         // Set the headers and body parts if application already sets
         if (piSipMsg->CopyHeadersAndBodyParts(m_piNextRequest) != IMS_SUCCESS)
