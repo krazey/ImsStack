@@ -20,6 +20,7 @@
 #include "ImsTypeDef.h"
 
 class QosTimer;
+enum class QosTimerType;
 
 class IQosTimerListener
 {
@@ -27,24 +28,11 @@ public:
     virtual ~IQosTimerListener(){};
 
     /**
-     * @brief This method is to notify the timer expiration waiting for the QoS connection.
-     * @param pQosTimer The QosTimer instance which has the expired timer.
+     * @brief Notifies the timer expiration for the QoS.
+     *
+     * @param pTimer QosTimer instance received the expiration notification from ITimer
+     * @param eType QosTimerType what the type of the timer
      */
-    virtual void OnWaitTimerExpired(IN QosTimer* pQosTimer) = 0;
-
-    /**
-     * @brief This method is to notify the timer expiration guarding the QoS inactivation.
-     * @param pQosTimer The QosTimer instance which has the expired timer.
-     */
-    virtual void OnGuardInactiveTimerExpired(IN QosTimer* pQosTimer) = 0;
-
-    /**
-     * @brief This method is to notify the timer expiration to enable the QoS by force.
-     *        It is called only in Test Mode.
-     * @param pQosTimer The QosTimer instance which has the expired timer.
-     */
-    virtual void OnForceAvailableTimerExpired(IN QosTimer* pQosTimer) = 0;
-
-    virtual void OnWaitTimerAfterHandOverExpired(IN QosTimer* pQosTimer) = 0;
+    virtual void OnTimerExpired(IN QosTimer* pTimer, IN QosTimerType eType) = 0;
 };
 #endif

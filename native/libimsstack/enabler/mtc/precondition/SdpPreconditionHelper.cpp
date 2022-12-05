@@ -459,32 +459,30 @@ PRIVATE GLOBAL void SdpPreconditionHelper::FormConfirmAttribute(
 PUBLIC GLOBAL IMS_UINT32 SdpPreconditionHelper::GetMediaType(
         IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState)
 {
-    IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
+    IMS_UINT32 eMediaType = MEDIATYPE_NONE;
 
     if (pSdpMedia == IMS_NULL || pSdpMedia->GetPort() == 0)
     {
-        return eMediaTypes;
+        return eMediaType;
     }
 
     if (pSdpMedia->GetType() == SdpMedia::TYPE_AUDIO)
     {
-        eMediaTypes |= MEDIATYPE_AUDIO;
+        eMediaType = MEDIATYPE_AUDIO;
     }
-
-    if (nMediaState != IMedia::STATE_DELETED)
+    else if (nMediaState != IMedia::STATE_DELETED)
     {
         if (pSdpMedia->GetType() == SdpMedia::TYPE_VIDEO)
         {
-            eMediaTypes |= MEDIATYPE_VIDEO;
+            eMediaType = MEDIATYPE_VIDEO;
         }
-
-        if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT)
+        else if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT)
         {
-            eMediaTypes |= MEDIATYPE_TEXT;
+            eMediaType = MEDIATYPE_TEXT;
         }
     }
 
-    return eMediaTypes;
+    return eMediaType;
 }
 
 PRIVATE GLOBAL IMediaDescriptor* SdpPreconditionHelper::GetMediaDescriptor(IN IMedia* piMedia)

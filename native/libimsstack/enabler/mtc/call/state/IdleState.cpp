@@ -225,19 +225,14 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     objPreconditionManager.CreateQos(piSession);
-    UpdatePreconditionCapability(piSession, piMessage, IMS_FALSE);
+    UpdateSupportingPrecondition(piSession, piMessage, IMS_FALSE);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
-    // TODO: OnPreconditionReceived()
-    // need to check the nego state?
-    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
-    {
-        objPreconditionManager.StartQosTimer(piSession);
-    }
+    objPreconditionManager.StartQosTimer(piSession);
 
     if (IsRprSupported() &&
             !m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE))

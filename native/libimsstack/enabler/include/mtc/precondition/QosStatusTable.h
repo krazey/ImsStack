@@ -149,7 +149,7 @@ private:
     ImsList<QosStatusRecord*>& GetStatusRecords(IN IMS_SINT32 eSdpMediaType);
     ImsList<QosStatusRecord*> GetStatusRecords(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
             IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag = SdpPrecondition::DIRECTION_NONE);
-    void ClearStatusRecords(IN ImsList<QosStatusRecord*>& lstRecords);
+    static void ClearStatusRecords(IN ImsList<QosStatusRecord*>& lstRecords);
 
 private:
     ImsList<QosStatusRecord*> m_lstAudioRecords;

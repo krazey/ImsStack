@@ -414,7 +414,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::QosReserveFailed(
 
     if (eNextAction == QosLossPolicy::MODIFY)
     {
-        // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
+        return Downgrade(CallType::VOIP);
     }
 
     return GetStateName();
@@ -508,7 +508,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
 
-    m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(&objSession);
+    m_objContext.GetPreconditionManager().UpdateQosAttributesFromRemoteSdp(&objSession);
 
     eStateName = CallStateName::UPDATING;
 

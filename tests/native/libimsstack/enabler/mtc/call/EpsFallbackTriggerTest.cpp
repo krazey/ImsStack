@@ -146,7 +146,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredInvokesTriggerEpsFall
     MockIMtcPreconditionManager objPreconditionManager;
     ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
 
-    ON_CALL(objPreconditionManager, IsResourceReserved(&objSession, QosCheckType::LOCAL_STATUS))
+    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
             TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER))
@@ -169,7 +169,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredDoesNotInvokeTriggerE
     MockIMtcPreconditionManager objPreconditionManager;
     ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
 
-    ON_CALL(objPreconditionManager, IsResourceReserved(&objSession, QosCheckType::LOCAL_STATUS))
+    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
