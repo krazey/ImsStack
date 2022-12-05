@@ -1096,9 +1096,6 @@ TEST_F(AosApplicationTest, Process)
 
 TEST_F(AosApplicationTest, Callback)
 {
-    // TEST_F : OnAppStateChanged
-    m_pTestAosApplication->OnAppStateChanged();
-
     // TEST_F : Report_Request
     m_pTestAosApplication->Report_Request(0, 0);
 

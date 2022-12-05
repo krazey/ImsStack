@@ -150,7 +150,7 @@ public:
     MOCK_METHOD(void, ProcessPdnBlockedTimerExpired, (), (override));
     MOCK_METHOD(void, ProcessPdnBlock, (), (override));
     MOCK_METHOD(void, ProcessPdnBlockWithTime, (), (override));
-    MOCK_METHOD(void, OnAppStateChanged, (), (override));
+    MOCK_METHOD(void, ProcessImsEstablishmentStart, (), (override));
     MOCK_METHOD(void, Report_StateChanged, (IN IMS_BOOL bIsStateChecked), (override));
     MOCK_METHOD(void, Report_Notify, (), (override));
     MOCK_METHOD(void, Report_Request, (IN IMS_UINT32 nType, IN IMS_UINT32 nState), (override));

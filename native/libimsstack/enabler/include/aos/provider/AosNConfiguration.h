@@ -97,6 +97,7 @@ public:
     virtual IMS_UINT32 GetRegistrationRetryBaseTime();
     virtual IMS_UINT32 GetRegistrationRetryMaxTime();
     virtual IMS_UINT32 GetIsimIndexForImpu();
+    virtual IMS_SINT32 GetImsEstablishmentTime() const;
     virtual IMS_SINT32 GetPreferredImsDscp() const;
     virtual IMS_SINT32 GetRegistrationPreferredAccessTypeFeatureTag() const;
     virtual IMS_SINT32 GetUssdMethod() const;

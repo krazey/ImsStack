@@ -52,6 +52,7 @@
     <boolean name="support_vowifi_capability_when_wifi_only_or_preferred_in_roaming_bool" value="true"/>
     <boolean name="use_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
+    <int name="ims_establishment_time_sec_int" value="120"/>
     <int name="reg_actual_wait_time_policy_int" value="3"/>
     <int name="reg_pcscf_update_policy_int" value="1"/>
     <int name="reg_retry_503_policy_int" value="0"/>

@@ -461,6 +461,13 @@ public:
     virtual IMS_UINT32 GetIsimIndexForImpu() = 0;
 
     /**
+     * @brief Get the IMS establishment time.
+     *
+     * @return IMS_SINT32 Returns IMS establishment time.
+     */
+    virtual IMS_SINT32 GetImsEstablishmentTime() const = 0;
+
+    /**
      * @brief Indicate whether DSCP(Differentiated Services (Diffserv) Codepoint)
      *        for SIP packets is set or not.
      *

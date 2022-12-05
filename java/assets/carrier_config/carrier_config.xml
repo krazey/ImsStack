@@ -283,6 +283,7 @@
     <int name="contact_user_info_policy_for_non_reg_message_int" value="1"/>
     <int name="emc_preferred_iptype_int" value="1"/>
     <int name="geolocation_pidf_forming_policy_int" value="1"/>
+    <int name="ims_establishment_time_sec_int" value="0"/>
     <int name="ims_preferred_iptype_int" value="1"/>
     <int name="ims_signalling_dscp_int" value="46"/>
     <int name="reg_actual_wait_time_policy_int" value="0"/>

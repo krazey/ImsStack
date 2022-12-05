@@ -172,6 +172,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsServiceTimerRunning()
     return ((m_piServiceInTimer != IMS_NULL) || (m_piServiceOutTimer != IMS_NULL));
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsImsVoiceCallSupported()
+{
+    return m_piNetWatcherInfo->IsImsVoiceCallSupported();
+}
+
 PUBLIC VIRTUAL void AosNetTracker::SetListener(IN IAosNetTrackerListener* piListener)
 {
     if (piListener == IMS_NULL)

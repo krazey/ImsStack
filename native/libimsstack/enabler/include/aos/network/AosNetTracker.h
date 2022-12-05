@@ -49,6 +49,7 @@ public:
     virtual IMS_BOOL IsSuspended();
     virtual IMS_BOOL IsSessionContinuitySupported();
     virtual IMS_BOOL IsServiceTimerRunning();
+    virtual IMS_BOOL IsImsVoiceCallSupported();
 
     virtual IMS_UINT32 GetMobileChangingNetworkType();
     virtual IMS_UINT32 GetMobileNetworkType();

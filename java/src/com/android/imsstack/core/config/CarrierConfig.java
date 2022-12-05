@@ -504,6 +504,8 @@ public class CarrierConfig {
                 "emc_preferred_iptype_int";
         public static final String KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT =
                 "geolocation_pidf_forming_policy_int";
+        public static final String KEY_IMS_ESTABLISHMENT_TIME_SEC_INT =
+                "ims_establishment_time_sec_int";
         public static final String KEY_IMS_PREFERRED_IPTYPE_INT = "ims_preferred_iptype_int";
         public static final String KEY_IMS_SIGNALLING_DSCP_INT = "ims_signalling_dscp_int";
         public static final String KEY_REG_ACTUAL_WAIT_TIME_POLICY_INT =

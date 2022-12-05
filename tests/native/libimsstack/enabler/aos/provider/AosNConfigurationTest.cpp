@@ -496,6 +496,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT, -1))
             .WillOnce(Return(1));
+    EXPECT_CALL(
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT, -1))
+            .WillOnce(Return(120));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT, -1))
             .WillOnce(Return(1));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_IMS_SIGNALLING_DSCP_INT, -1))
@@ -671,6 +674,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(1, pAosNConfiguration->GetUserInfoPolicyForNonRegisterMessage());
     EXPECT_EQ(1, pAosNConfiguration->GetEmergencyPreferredIpType());
     EXPECT_EQ(1, pAosNConfiguration->GetGeolocationPidfFormingPolicy());
+    EXPECT_EQ(120, pAosNConfiguration->GetImsEstablishmentTime());
     EXPECT_EQ(1, pAosNConfiguration->GetPreferredIpType());
     EXPECT_EQ(46, pAosNConfiguration->GetImsSignallingDscp());
     EXPECT_EQ(0, pAosNConfiguration->GetRegActualWaitTimePolicy());

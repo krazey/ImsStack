@@ -393,6 +393,11 @@ PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetIsimIndexForImpu()
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nIsimIndexForImpu);
 }
 
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetImsEstablishmentTime() const
+{
+    return m_objAsset.nImsEstablishmentTimeSec;
+}
+
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetPreferredImsDscp() const
 {
     return m_objCarrierConfig.nPreferredImsDscp;
@@ -1193,6 +1198,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_EMC_PREFERRED_IPTYPE_INT);
     m_objAsset.nGeolocationPidfFormingPolicy =
             piCc->GetInt(CarrierConfig::Assets::KEY_GEOLOCATION_PIDF_FORMING_POLICY_INT);
+    m_objAsset.nImsEstablishmentTimeSec =
+            piCc->GetInt(CarrierConfig::Assets::KEY_IMS_ESTABLISHMENT_TIME_SEC_INT);
     m_objAsset.nImsPreferredIpType =
             piCc->GetInt(CarrierConfig::Assets::KEY_IMS_PREFERRED_IPTYPE_INT);
     m_objAsset.nImsSignallingDscp =

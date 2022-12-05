@@ -32,6 +32,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSuspended, (), (override));
     MOCK_METHOD(IMS_BOOL, IsSessionContinuitySupported, (), (override));
     MOCK_METHOD(IMS_BOOL, IsServiceTimerRunning, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsImsVoiceCallSupported, (), (override));
     MOCK_METHOD(IMS_UINT32, GetMobileChangingNetworkType, (), (override));
     MOCK_METHOD(IMS_UINT32, GetMobileNetworkType, (), (override));
     MOCK_METHOD(IMS_SINT32, GetMobileVoiceServiceState, (), (override));
