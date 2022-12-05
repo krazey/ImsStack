@@ -325,7 +325,7 @@ public class Call implements Closeable {
             String nativeCallId = callId.substring(index + 1);
             return Long.valueOf(nativeCallId).longValue();
         } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+            ImsLog.e(e.getMessage());
         }
 
         return 0;

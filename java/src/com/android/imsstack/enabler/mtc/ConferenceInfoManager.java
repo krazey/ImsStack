@@ -28,7 +28,7 @@ public final class ConferenceInfoManager {
     private static ConferenceInfoManager sConferenceInfoManager = new ConferenceInfoManager();
 
     // List of conference-info
-    private List<ConferenceInfo> mConferenceInfos = new ArrayList<ConferenceInfo>();
+    private final List<ConferenceInfo> mConferenceInfos = new ArrayList<ConferenceInfo>();
 
     private ConferenceInfoManager() {
     }

@@ -386,7 +386,7 @@ public final class ConferenceInfo {
 
     // Call identifier of the conference focus
     private String mCcid;
-    private List<User> mUsers = new ArrayList<User>();
+    private final List<User> mUsers = new ArrayList<User>();
 
     public ConferenceInfo(String ccid) {
         mCcid = ccid;
