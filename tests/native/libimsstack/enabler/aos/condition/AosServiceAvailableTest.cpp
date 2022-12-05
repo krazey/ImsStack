@@ -20,32 +20,45 @@
 #include "AosReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
+#include "interface/IAosCallTracker.h"
 #include "interface/IAosServiceAvailableListener.h"
 #include "condition/AosBlock.h"
 #include "condition/AosCondition.h"
 #include "condition/AosServiceAvailable.h"
+#include "provider/AosProvider.h"
 
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosBlock.h"
+#include "interface/MockIAosCallTracker.h"
 #include "interface/MockIAosServiceAvailableListener.h"
 
 using ::testing::_;
 
+const IMS_SINT32 SLOT_ID = 0;
 class AosServiceAvailableTest : public ::testing::Test
 {
 public:
     AosServiceAvailable* pAosServiceAvailable;
     AosBlock* pAosBlock;
 
+    IAosCallTracker* pOriginAosCallTracker;
+    MockIAosCallTracker objMockAosCallTracker;
+
 protected:
     virtual void SetUp() override
     {
         pAosServiceAvailable = new AosServiceAvailable(AString("AosServiceAvailable"));
         ASSERT_TRUE(pAosServiceAvailable != nullptr);
+
+        // save origin pointer
+        pOriginAosCallTracker = AosProvider::GetInstance()->GetCallTracker();
+        AosProvider::GetInstance()->SetCallTracker(
+                static_cast<IAosCallTracker*>(&objMockAosCallTracker), SLOT_ID);
     }
 
     virtual void TearDown() override
     {
+        AosProvider::GetInstance()->SetCallTracker(pOriginAosCallTracker, SLOT_ID);
         if (pAosServiceAvailable)
         {
             delete pAosServiceAvailable;
@@ -93,6 +106,8 @@ TEST_F(AosServiceAvailableTest, Init_MemberContextIsNull)
     MockIAosAppContext objMockIAosAppContext;
     EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(1);
     EXPECT_CALL(objMockIAosAppContext, GetBlock()).Times(1);
+    EXPECT_CALL(objMockIAosAppContext, GetRegistration()).Times(1);
+    EXPECT_CALL(objMockIAosAppContext, GetConnection()).Times(1);
 
     pAosServiceAvailable->Init(static_cast<IAosAppContext*>(&objMockIAosAppContext));
 }
@@ -102,6 +117,8 @@ TEST_F(AosServiceAvailableTest, Init_MemberContextIsNotNull)
     MockIAosAppContext objMockIAosAppContext;
     EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(0);
     EXPECT_CALL(objMockIAosAppContext, GetBlock()).Times(0);
+    EXPECT_CALL(objMockIAosAppContext, GetRegistration()).Times(0);
+    EXPECT_CALL(objMockIAosAppContext, GetConnection()).Times(0);
 
     SetAppContext(static_cast<IAosAppContext*>(&objMockIAosAppContext));
 
