@@ -80,7 +80,7 @@ public:
             nConvertUserResponseTimer(20000),
             nPolicyOnVideoQosDeactivation(2),
             bSupportEarlySession(IMS_FALSE),
-            bAllowTextWithVideo(IMS_FALSE),
+            nPolicyForTextWithVideo(0),
             nMinimumBatteryLevelForLimitVideoCall(0),
             bTextOnDefaultBearerSupported(IMS_FALSE),
             bTextQosPreconditionSupported(IMS_TRUE),
@@ -173,7 +173,7 @@ public:
     IMS_SINT32 nConvertUserResponseTimer;
     IMS_SINT32 nPolicyOnVideoQosDeactivation;
     IMS_BOOL bSupportEarlySession;
-    IMS_BOOL bAllowTextWithVideo;
+    IMS_SINT32 nPolicyForTextWithVideo;
     IMS_SINT32 nMinimumBatteryLevelForLimitVideoCall;
 
     // rtt configurations

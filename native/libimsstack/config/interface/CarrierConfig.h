@@ -711,7 +711,7 @@ public:
         static const IMS_CHAR KEY_CONVERT_USER_RESPONSE_TIMER_MILLIS_INT[];
         static const IMS_CHAR KEY_POLICY_ON_VIDEO_QOS_DEACTIVATION_INT[];
         static const IMS_CHAR KEY_SUPPORT_EARLY_SESSION_BOOL[];
-        static const IMS_CHAR KEY_ALLOW_TEXT_WITH_VIDEO_BOOL[];
+        static const IMS_CHAR KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT[];
         static const IMS_CHAR KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[];
         // Media
         static const IMS_CHAR KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY[];
@@ -723,6 +723,14 @@ public:
         static const IMS_CHAR KEY_VIDEO_CODEC_FRAME_SIZE_STRING_ARRAY[];
         static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_PROFILE_INT_ARRAY[];
         static const IMS_CHAR KEY_VIDEO_CODEC_HEVC_LEVEL_INT_ARRAY[];
+
+        // Policy of supporting text and video media in a call
+        enum
+        {
+            TEXT_VIDEO_NOT_ALLOWED = 0,
+            TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE = 1,
+            TEXT_VIDEO_ALLOWED = 2,
+        };
     };
 
     class ImsWfc

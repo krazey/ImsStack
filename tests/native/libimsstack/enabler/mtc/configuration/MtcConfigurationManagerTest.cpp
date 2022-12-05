@@ -674,10 +674,10 @@ TEST_F(MtcConfigurationManagerTest, IsSupportEarlySessionReturnsValueInCarrierCo
             GetBool(CarrierConfig::ImsVt::KEY_SUPPORT_EARLY_SESSION_BOOL));
 }
 
-TEST_F(MtcConfigurationManagerTest, IsAllowTextWithVideoReturnsValueInCarrierConfig)
+TEST_F(MtcConfigurationManagerTest, GetPolicyForTextWithVideoReturnsValueInCarrierConfig)
 {
-    EXPECT_EQ(pManager->IsAllowTextWithVideo(),
-            GetBool(CarrierConfig::ImsVt::KEY_ALLOW_TEXT_WITH_VIDEO_BOOL));
+    EXPECT_EQ(pManager->GetPolicyForTextWithVideo(),
+            GetInt(CarrierConfig::ImsVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT));
 }
 
 TEST_F(MtcConfigurationManagerTest,

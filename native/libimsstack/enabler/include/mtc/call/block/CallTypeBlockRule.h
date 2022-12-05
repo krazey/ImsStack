@@ -17,6 +17,7 @@
 #ifndef CALL_TYPE_BLOCK_RULE_H_
 #define CALL_TYPE_BLOCK_RULE_H_
 
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
@@ -27,7 +28,7 @@ class MtcConfigurationProxy;
 class CallTypeBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit CallTypeBlockRule(IN IMtcCallContext& objContext, CallType eCallTypeToCheck);
+    explicit CallTypeBlockRule(IN IMtcCallContext& objContext);
     virtual ~CallTypeBlockRule();
     CallTypeBlockRule(IN const CallTypeBlockRule&) = delete;
     CallTypeBlockRule& operator=(IN const CallTypeBlockRule&) = delete;
@@ -35,13 +36,13 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
+    Result CheckSupportTextVideo();
+    Result CheckSupportVideoMultipleCall();
+    static IMS_BOOL HasVideoCall(IN const ImsList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsVideoCall(IN CallType eCallType);
+
     IMtcCallContext& m_objContext;
     MtcConfigurationProxy& m_objConfiguration;
-    CallType m_eCallTypeToCheck;
-
-    IMS_BOOL IsOtherCallExists();
-    IMS_BOOL HasVideoCall(IN const IMSList<IMtcCall*>& lstCalls);
-    static IMS_BOOL IsVideoCall(IN CallType eCallType);
 };
 
 #endif

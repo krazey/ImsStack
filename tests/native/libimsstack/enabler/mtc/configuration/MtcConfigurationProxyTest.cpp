@@ -106,9 +106,6 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, IsSupportEarlySession).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::SUPPORT_EARLY_SESSION));
 
-    EXPECT_CALL(*pConfigManager, IsAllowTextWithVideo).WillOnce(Return(bValue));
-    EXPECT_EQ(bValue, pConfig->Is(Feature::ALLOW_TEXT_WITH_VIDEO));
-
     EXPECT_CALL(*pConfigManager, IsTextOnDefaultBearerSupported).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::TEXT_ON_DEFAULT_BEARER_SUPPORTED));
 
@@ -403,6 +400,9 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
 
     EXPECT_CALL(*pConfigManager, GetPolicyOnVideoQosDeactivation).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_ON_VIDEO_QOS_DEACTIVATION));
+
+    EXPECT_CALL(*pConfigManager, GetPolicyForTextWithVideo).WillOnce(Return(nValue));
+    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_TEXT_WITH_VIDEO));
 
     EXPECT_CALL(*pConfigManager, GetMinimumBatteryLevelForLimitVideoCall).WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL));

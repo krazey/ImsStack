@@ -181,7 +181,7 @@
     <boolean name="reject_vowifi_voice_call_when_vowifi_setting_off_bool" value="true"/>
     <boolean name="support_canid_info_bool" value="true"/>
     <boolean name="ignore_180_after_183_response_bool" value="false"/>
-    <boolean name="imsvt.allow_text_with_video_bool" value="false"/>
+    <int name="imsvt.policy_for_text_with_video_int" value="0"/>
     <int name="imsvoice.silent_redial_max_retry_count_int" value="1"/>
     <int name="imsvoice.silent_redial_interval_millis_int" value="0"/>
     <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>

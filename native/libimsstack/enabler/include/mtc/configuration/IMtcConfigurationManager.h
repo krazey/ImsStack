@@ -475,11 +475,11 @@ public:
     virtual IMS_BOOL IsSupportEarlySession() const = 0;
 
     /**
-     * @brief Checks
+     * @brief Gets
      *
      * @return
      */
-    virtual IMS_BOOL IsAllowTextWithVideo() const = 0;
+    virtual IMS_SINT32 GetPolicyForTextWithVideo() const = 0;
 
     /**
      * @brief Gets

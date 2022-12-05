@@ -90,7 +90,7 @@
     <int name="imsemergency.policy_for_emergency_urn_escv_mapping_int" value="0"/>
     <boolean name="imsvt.support_early_session_bool" value="false"/>
     <int name="imsvoice.policy_for_checking_qos_while_call_upgrading_int" value="0"/>
-    <boolean name="imsvt.allow_text_with_video_bool" value="false"/>
+    <int name="imsvt.policy_for_text_with_video_int" value="1"/>
     <boolean name="imsvoice.reject_offerless_invite_bool" value="false"/>
     <int name="imsvt.minimum_battery_level_for_limit_video_call_int" value="0"/>
     <int name="imsvoice.call_max_count_int" value="3"/>

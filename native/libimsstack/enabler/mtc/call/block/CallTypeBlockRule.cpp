@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "ImsList.h"
+#include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcSession.h"
+#include "call/UpdatingInfo.h"
 #include "call/block/CallTypeBlockRule.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-CallTypeBlockRule::CallTypeBlockRule(IN IMtcCallContext& objContext, CallType eCallTypeToCheck) :
+CallTypeBlockRule::CallTypeBlockRule(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
-        m_objConfiguration(objContext.GetConfigurationProxy()),
-        m_eCallTypeToCheck(eCallTypeToCheck)
+        m_objConfiguration(objContext.GetConfigurationProxy())
 {
 }
 
@@ -34,42 +39,98 @@ PUBLIC VIRTUAL CallTypeBlockRule::~CallTypeBlockRule() {}
 PUBLIC VIRTUAL CallTypeBlockRule::Result CallTypeBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (!m_objConfiguration.Is(Feature::ALLOW_TEXT_WITH_VIDEO))
+    Result objResult = CheckSupportTextVideo();
+    if (objResult.eStatus != Result::Status::UNBLOCKED)
     {
-        if (m_eCallTypeToCheck == CallType::VIDEO_RTT)
-        {
-            IMS_TRACE_I("Check : Video RTT is not supported", 0, 0, 0);
-            return Result(Result::Status::BLOCKED,
-                    CallReasonInfo(
-                            CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE));
-        }
+        return objResult;
     }
 
-    if (!m_objConfiguration.Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL))
+    return CheckSupportVideoMultipleCall();
+}
+
+PRIVATE CallTypeBlockRule::Result CallTypeBlockRule::CheckSupportTextVideo()
+{
+    IMS_SINT32 nPolicyForTextAndVideo =
+            m_objConfiguration.GetInt(Feature::POLICY_FOR_TEXT_WITH_VIDEO);
+    if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED)
     {
-        IMSList<IMtcCall*> lstOtherCalls = m_objContext.GetOtherCalls();
-
-        if (HasVideoCall(lstOtherCalls) ||
-                (IsVideoCall(m_eCallTypeToCheck) && !lstOtherCalls.IsEmpty()))
-        {
-            IMS_TRACE_I("Check : Video call cannot be placed with another call", 0, 0, 0);
-
-            if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
-            {
-                return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED));
-            }
-            else
-            {
-                return Result(Result::Status::BLOCKED,
-                        CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED));
-            }
-        }
+        return Result(Result::Status::UNBLOCKED);
     }
 
+    CallType eTargetCallToCheck;
+    if (m_objContext.GetCall().GetState() == IMtcCall::State::IDLE)
+    {
+        eTargetCallToCheck = m_objContext.GetSession()->GetCallType();
+    }
+    else if (nPolicyForTextAndVideo == CarrierConfig::ImsVt::TEXT_VIDEO_NOT_ALLOWED)
+    {
+        // not supporting text and video media description simultaneously irrespective of port
+        // eg. VZW
+        eTargetCallToCheck = m_objContext.GetMessageUtils().GetCallTypeFromSdp(
+                &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE, IMS_FALSE);
+    }
+    else  // TEXT_VIDEO_NOT_ALLOWED_IF_ACTIVE
+    {
+        // not supporting text and video media description simultaneously.
+        // port 0 media is not included.
+        // eg. ATT
+        eTargetCallToCheck = m_objContext.GetUpdatingInfo().GetTargetCallType();
+    }
+
+    if (eTargetCallToCheck == CallType::VIDEO_RTT)
+    {
+        IMS_TRACE_I("CheckSupportTextVideo : Video RTT is not supported", 0, 0, 0);
+        return Result(Result::Status::BLOCKED,
+                CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, EXTRA_CODE_NOT_ACCEPTABLE_BY_CALL_TYPE));
+    }
     return Result(Result::Status::UNBLOCKED);
 }
 
-PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoCall(IN const IMSList<IMtcCall*>& lstCalls)
+PRIVATE CallTypeBlockRule::Result CallTypeBlockRule::CheckSupportVideoMultipleCall()
+{
+    if (m_objConfiguration.Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL))
+    {
+        return Result(Result::Status::UNBLOCKED);
+    }
+
+    ImsList<IMtcCall*> lstOtherCalls = m_objContext.GetOtherCalls();
+    if (lstOtherCalls.IsEmpty())
+    {
+        return Result(Result::Status::UNBLOCKED);
+    }
+
+    if (!HasVideoCall(lstOtherCalls))
+    {
+        CallType eTargetCallToCheck;
+        if (m_objContext.GetCall().GetState() == IMtcCall::State::ESTABLISHED)
+        {
+            eTargetCallToCheck = m_objContext.GetUpdatingInfo().GetTargetCallType();
+        }
+        else
+        {
+            eTargetCallToCheck = m_objContext.GetSession()->GetCallType();
+        }
+
+        if (!IsVideoCall(eTargetCallToCheck))
+        {
+            return Result(Result::Status::UNBLOCKED);
+        }
+    }
+
+    IMS_TRACE_I("CheckSupportVideoMultipleCall : Video call cannot be placed with another call", 0,
+            0, 0);
+
+    if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
+    {
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_CALL_EXCEEDED));
+    }
+    else
+    {
+        return Result(Result::Status::BLOCKED, CallReasonInfo(CODE_REJECT_MAX_CALL_LIMIT_REACHED));
+    }
+}
+
+PRIVATE IMS_BOOL CallTypeBlockRule::HasVideoCall(IN const ImsList<IMtcCall*>& lstCalls)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
