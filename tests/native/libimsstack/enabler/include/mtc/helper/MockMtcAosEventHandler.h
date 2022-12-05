@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MTC_AOS_EVENT_HANDLER_
-#define MOCK_MTC_AOS_EVENT_HANDLER_
+#ifndef MOCK_MTC_AOS_EVENT_HANDLER_H_
+#define MOCK_MTC_AOS_EVENT_HANDLER_H_
 
 #include "helper/MtcAosEventHandler.h"
 #include <gmock/gmock.h>

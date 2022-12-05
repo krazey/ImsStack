@@ -1028,9 +1028,12 @@ IMS_BOOL MtcCallState::IsNeedToIgnoreStartFailure() const
     IMtcAosConnector* pConnector = m_objContext.GetService().GetAosConnector();
     if (pConnector == IMS_NULL || pConnector->IsImsConnected() == IMS_TRUE)
     {
+        IMS_TRACE_D("IsNeedToIgnoreStartFailure invoked by remote so terminate", 0, 0, 0);
         return IMS_FALSE;
     }
 
+    IMS_TRACE_D("IsNeedToIgnoreStartFailure invoked by AoS disconnected so wait by SRVCC completed",
+            0, 0, 0);
     return IMS_TRUE;
 }
 

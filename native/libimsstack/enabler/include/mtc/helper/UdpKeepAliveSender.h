@@ -35,12 +35,13 @@ public:
     static IMS_BOOL IsRequired(IN const MtcConfigurationProxy& objConfigProxy);
 
     void Timer_TimerExpired(IN ITimer* piTimer) override;
-    void Start();
-    void Stop();
+    virtual void Start();
+    virtual void Stop();
 
 private:
     void SetTransportInfo();
     void SendDummyPacket();
+    void StopTimer();
 
     IMtcCallContext& m_objContext;
     ITimer* m_piTimer;
