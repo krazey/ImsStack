@@ -16,6 +16,8 @@
 
 package com.android.imsstack.imsservice.mmtel.base;
 
+import android.annotation.Nullable;
+
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
 
@@ -30,27 +32,27 @@ public interface ICallContext extends IBaseContext {
 
     /**
      * Returns call location policy to contain the device's location information
-     * when making a call.
-     * @Nullable
+     * when making a call
      */
+    @Nullable
     public ICallLocationPolicy getCallLocationPolicy();
 
     /**
      * Returns emergency call state tracker if it's required for this call context.
-     * @Nullable
      */
+    @Nullable
     public IECallStateTracker getECallStateTracker();
 
     /**
      * Returns SRVCC state tracker if it's required for this call context.
-     * @Nullable
      */
+    @Nullable
     public ISrvccStateTracker getSrvccStateTracker();
 
     /**
      * Return TTY mode tracker if it's required for this call context.
-     * @Nullable
      */
+    @Nullable
     public TtyModeTracker getTtyModeTracker();
 
     /**
