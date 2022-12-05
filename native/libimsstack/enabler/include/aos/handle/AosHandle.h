@@ -233,7 +233,7 @@ protected:
     virtual void ProcessCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
-    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState);
+    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
 
     // State Machine
     virtual IMS_BOOL StateDisconnected(IN IMSMSG& objMSG);
@@ -245,6 +245,7 @@ protected:
     virtual IMS_BOOL IsSupportedNetworkType(IN IMS_UINT32 nType) const;
     virtual IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const;
 
+    virtual void InitializeHoldingBlocksPolicy();
     virtual void InitializeServiceBlock();
     virtual void InitializeServiceFeature();
     virtual void InitializeFeatureTags();
@@ -314,6 +315,7 @@ protected:
     IMS_UINT32 m_nHoldingBlocksForWifi;
     IMS_UINT32 m_nHoldingVopsState;
     IMS_UINT32 m_nVopsState;
+    IMS_BOOL m_bVopsIgnoredForVolteEnabled;
 
     IMSMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
     IMSList<IMS_UINT32> m_objServiceFeatures;

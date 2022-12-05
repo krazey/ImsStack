@@ -32,6 +32,7 @@
 #include "interface/IAosRegistration.h"
 #include "interface/IAosRegStateManager.h"
 #include "provider/AosProvider.h"
+#include "provider/AosString.h"
 
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosApplication.h"
@@ -324,12 +325,22 @@ protected:
 
     IMS_BOOL UpdateIpcan() { return m_pAosHandle->UpdateIpcan(); }
 
+    ImsList<IMS_UINT32> GetHoldingBlocksPolicyForMobile()
+    {
+        return m_pAosHandle->m_objHoldingBlocksPolicyForMobile;
+    }
+
     void SetHoldingBlocksPolicyForMobile()
     {
         m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VOLTE_CAPABILITY);
         m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VILTE_CAPABILITY);
         m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_VOPS);
         m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_NETWORK);
+    }
+
+    ImsList<IMS_UINT32> GetHoldingBlocksPolicyForWifi()
+    {
+        return m_pAosHandle->m_objHoldingBlocksPolicyForWifi;
     }
 
     void SetHoldingBlocksPolicyForWifi()
@@ -434,6 +445,8 @@ protected:
     }
 
     IMS_BOOL IsBlocked() const { return m_pAosHandle->m_bBlocked; }
+
+    void InitializeHoldingBlocksPolicy() { m_pAosHandle->InitializeHoldingBlocksPolicy(); }
 
     void InitializeFeatureTags() { m_pAosHandle->InitializeFeatureTags(); }
 
@@ -548,10 +561,6 @@ TEST_F(AosHandleTest, Constructor)
 
     EXPECT_CALL(objMockIAosNConfiguration, SetListener(_)).Times(1);
 
-    EXPECT_CALL(objMockIAosNConfiguration, IsDeregOn3gNetwork())
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
-
     TestAosHandle* pTestAosHandle =
             new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
                     m_strServiceId, m_nServiceType);
@@ -559,18 +568,6 @@ TEST_F(AosHandleTest, Constructor)
     ASSERT_TRUE(pTestAosHandle != nullptr);
 
     EXPECT_EQ(pTestAosHandle->GetState(), AosHandle::STATE_DISCONNECTED);
-
-    IMS_BOOL bResult = IMS_FALSE;
-    for (IMS_UINT32 i = 0; i < pTestAosHandle->m_objHoldingBlocksPolicyForMobile.GetSize(); i++)
-    {
-        if (pTestAosHandle->m_objHoldingBlocksPolicyForMobile.GetAt(i) == AosHandle::BLOCK_3G)
-        {
-            bResult = IMS_TRUE;
-            break;
-        }
-    }
-
-    EXPECT_TRUE(bResult);
 
     delete pTestAosHandle;
 
@@ -1414,9 +1411,16 @@ TEST_F(AosHandleTest, Init_CleanUp)
             .Times(1)
             .WillRepeatedly(Return(IMS_TRUE));
 
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
+
     Init();
 
     EXPECT_TRUE(GetAosInfo() != nullptr);
+    EXPECT_TRUE(HasFeatureTag(FeatureTags::CDMALESS, AString::ConstNull()));
+    EXPECT_TRUE(IsBlockForMobile(AosHandle::BLOCK_3G));
+    EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_3G));
 
     CleanUp();
 
@@ -4209,6 +4213,49 @@ TEST_F(AosHandleTest, IsBlocked_Test)
     EXPECT_FALSE(IsBlocked());
 }
 
+TEST_F(AosHandleTest, InitializeHoldingBlocksPolicy_Test1)
+{
+    // Test1: IsDeregOn3gNetwork is false
+    // Expectation: empty list
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    EXPECT_TRUE(GetHoldingBlocksPolicyForMobile().GetSize() > 0);
+    EXPECT_TRUE(GetHoldingBlocksPolicyForWifi().GetSize() > 0);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    InitializeHoldingBlocksPolicy();
+
+    EXPECT_FALSE(GetHoldingBlocksPolicyForMobile().GetSize() > 0);
+    EXPECT_FALSE(GetHoldingBlocksPolicyForWifi().GetSize() > 0);
+}
+
+TEST_F(AosHandleTest, InitializeHoldingBlocksPolicy_Test2)
+{
+    // Test2: IsDeregOn3gNetwork is true
+    // Expectation: BLOCK_3G is in mobile polity
+
+    SetHoldingBlocksPolicyForMobile();
+    SetHoldingBlocksPolicyForWifi();
+
+    EXPECT_TRUE(GetHoldingBlocksPolicyForMobile().GetSize() > 0);
+    EXPECT_TRUE(GetHoldingBlocksPolicyForWifi().GetSize() > 0);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsDeregOn3gNetwork())
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    InitializeHoldingBlocksPolicy();
+
+    ASSERT_TRUE(GetHoldingBlocksPolicyForMobile().GetSize() == 1);
+    EXPECT_EQ(GetHoldingBlocksPolicyForMobile().GetAt(0), AosHandle::BLOCK_3G);
+    EXPECT_FALSE(GetHoldingBlocksPolicyForWifi().GetSize() > 0);
+}
+
 TEST_F(AosHandleTest, InitializeFeatureTags_Test)
 {
     // Expectation: +cdmaless if the config is set
@@ -4219,10 +4266,10 @@ TEST_F(AosHandleTest, InitializeFeatureTags_Test)
             .WillOnce(Return(IMS_FALSE));
 
     InitializeFeatureTags();
-    EXPECT_TRUE(HasFeatureTag("+cdmaless", AString::ConstNull()));
+    EXPECT_TRUE(HasFeatureTag(FeatureTags::CDMALESS, AString::ConstNull()));
 
     InitializeFeatureTags();
-    EXPECT_FALSE(HasFeatureTag("+cdmaless", AString::ConstNull()));
+    EXPECT_FALSE(HasFeatureTag(FeatureTags::CDMALESS, AString::ConstNull()));
 }
 
 TEST_F(AosHandleTest, ProcessImsSuspended_Test1)
@@ -4281,10 +4328,6 @@ TEST_F(AosHandleTest, ProcessImsSuspended_Test4)
     IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsDeregOn3gNetwork())
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
 
     TestAosHandle* pTestAosHandleEmergencyMtc =
             new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,
@@ -4393,10 +4436,6 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test6)
     IAosNConfiguration* piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
     AosProvider::GetInstance()->SetNConfiguration(
             static_cast<IAosNConfiguration*>(&objMockIAosNConfiguration));
-
-    EXPECT_CALL(objMockIAosNConfiguration, IsDeregOn3gNetwork())
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
 
     TestAosHandle* pTestAosHandleEmergencyMtc =
             new TestAosHandle(static_cast<IAosAppContext*>(&objMockIAosAppContext), m_strAppId,

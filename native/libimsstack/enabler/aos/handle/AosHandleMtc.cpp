@@ -60,14 +60,6 @@ AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& st
     m_objServiceFeatures.Append(ImsAosFeature::TEXT);
     m_objServiceFeatures.Append(ImsAosFeature::USSI);
     m_objServiceFeatures.Append(ImsAosFeature::VERSTAT);
-
-    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOLTE_CAPABILITY);
-    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VILTE_CAPABILITY);
-    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOPS);
-    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_NETWORK);
-
-    m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VOWIFI_CAPABILITY);
-    m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VIWIFI_CAPABILITY);
 }
 
 PUBLIC VIRTUAL AosHandleMtc::~AosHandleMtc()
@@ -90,7 +82,7 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, 
 
     if (eState == CallState::IDLE)
     {
-        if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
+        if (!m_bVopsIgnoredForVolteEnabled)
         {
             if (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
             {
@@ -170,6 +162,19 @@ PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
 
         ProcessNetworkChanged();
     }
+}
+
+PROTECTED VIRTUAL void AosHandleMtc::InitializeHoldingBlocksPolicy()
+{
+    AosHandle::InitializeHoldingBlocksPolicy();
+
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOLTE_CAPABILITY);
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VILTE_CAPABILITY);
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_VOPS);
+    m_objHoldingBlocksPolicyForMobile.Append(BLOCK_NETWORK);
+
+    m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VOWIFI_CAPABILITY);
+    m_objHoldingBlocksPolicyForWifi.Append(BLOCK_VIWIFI_CAPABILITY);
 }
 
 PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceBlock()
@@ -287,10 +292,8 @@ PROTECTED VIRTUAL void AosHandleMtc::Init()
 
     AosHandle::Init();
 
-    if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
-    {
-        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
-    }
+    m_bVopsIgnoredForVolteEnabled = GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled();
+    IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
 
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
@@ -412,11 +415,16 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
         }
         else
         {
-            ProcessBlock(BLOCK_VOWIFI_CAPABILITY,
-                    !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
+            if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
+            {
+                ProcessBlock(BLOCK_VOWIFI_CAPABILITY,
+                        !IsCapabilityExistedForNetworkType(
+                                NW_REPORT_RADIO_WLAN, AosCapability::VOICE));
 
-            ProcessBlock(BLOCK_VIWIFI_CAPABILITY,
-                    !IsCapabilityExistedForNetworkType(NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
+                ProcessBlock(BLOCK_VIWIFI_CAPABILITY,
+                        !IsCapabilityExistedForNetworkType(
+                                NW_REPORT_RADIO_WLAN, AosCapability::VIDEO));
+            }
         }
     }
 }
@@ -463,8 +471,15 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
     }
 }
 
-PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(
+        IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState /* = IMS_TRUE */)
 {
+    if (m_bVopsIgnoredForVolteEnabled && bUpdateState)
+    {
+        m_nVopsState = nState;
+        return;
+    }
+
     if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
         IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
@@ -487,7 +502,10 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nStat
         }
     }
 
-    m_nVopsState = nState;
+    if (bUpdateState)
+    {
+        m_nVopsState = nState;
+    }
 
     if (GET_N_CONFIG(m_nSlotId)->IsRegWithFeatureTagUnavailableSupported())
     {
@@ -507,7 +525,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
 
     if (IsSupportedNetworkTypeForCellular(m_nNetworkType))
     {
-        if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
+        if (!m_bVopsIgnoredForVolteEnabled)
         {
             bIsVoiceUnavailable = (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED);
         }
@@ -635,4 +653,33 @@ IMS_BOOL AosHandleMtc::IsInvalidMobileNetwork() const
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+void AosHandleMtc::NConfiguration_NotifyConfigChanged()
+{
+    AosHandle::NConfiguration_NotifyConfigChanged();
+
+    IMS_BOOL bIsVopsIgnoredForVolteEnabled =
+            GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled();
+
+    if (m_bVopsIgnoredForVolteEnabled != bIsVopsIgnoredForVolteEnabled)
+    {
+        A_IMS_TRACE_D(APPPROFILE, "NConfiguration_NotifyConfigChanged :: \
+                IsVopsIgnoredForVolteEnabled(%s), m_nVopsState(%d)",
+                _TRACE_B_(bIsVopsIgnoredForVolteEnabled), m_nVopsState, 0);
+
+        if (IsSupportedNetworkTypeForCellular(m_nNetworkType))
+        {
+            if (m_nVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+            {
+                ProcessVopsStateChanged(bIsVopsIgnoredForVolteEnabled
+                                ? IMS_VOICE_OVER_PS_SUPPORTED
+                                : IMS_VOICE_OVER_PS_NOT_SUPPORTED,
+                        IMS_FALSE);
+            }
+        }
+
+        m_bVopsIgnoredForVolteEnabled = bIsVopsIgnoredForVolteEnabled;
+    }
 }
