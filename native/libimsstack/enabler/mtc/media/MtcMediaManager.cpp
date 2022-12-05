@@ -674,35 +674,15 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioInactive()
 PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoAccept(
         IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe)
 {
-    IMS_SINT32 eNewDirection = m_pMediaInfo->eAudioDirection;
-
     if (bSendOffer)
     {
-        eNewDirection = DIRECTION_SEND_RECEIVE;
+        AdjustDirectionForAutoOffer(bHeldByMe);
     }
-
-    if (bHeldByMe)
+    else if (bHeldByMe)
     {
-        if (eNewDirection == DIRECTION_SEND_RECEIVE)
-        {
-            eNewDirection = DIRECTION_SEND;
-        }
-        else if (eNewDirection == DIRECTION_RECEIVE)
-        {
-            eNewDirection = DIRECTION_INACTIVE;
-        }
-    }
-
-    m_pMediaInfo->eAudioDirection = eNewDirection;
-
-    if (m_pMediaInfo->eVideoDirection != DIRECTION_INVALID)
-    {
-        m_pMediaInfo->eVideoDirection = eNewDirection;
-    }
-
-    if (m_pMediaInfo->eTextDirection != DIRECTION_INVALID)
-    {
-        m_pMediaInfo->eTextDirection = eNewDirection;
+        AdjustDirectionForAutoAnswerIfHeldByMe(m_pMediaInfo->eAudioDirection);
+        AdjustDirectionForAutoAnswerIfHeldByMe(m_pMediaInfo->eVideoDirection);
+        AdjustDirectionForAutoAnswerIfHeldByMe(m_pMediaInfo->eTextDirection);
     }
 }
 
@@ -834,6 +814,36 @@ void MtcMediaManager::SendAudioInfoToJava(IN const ISession* piSession)
 {
     UNUSED_PARAM(piSession);
     // IMS_EVENT_CALL_MEIDA_INFO, SlotId, MediaSession::GetNegotiatedQuality(), CodecBitrate()
+}
+
+PRIVATE
+void MtcMediaManager::AdjustDirectionForAutoOffer(IN IMS_BOOL bHeldByMe)
+{
+    IMS_SINT32 eNewDirection = bHeldByMe ? DIRECTION_SEND : DIRECTION_SEND_RECEIVE;
+
+    m_pMediaInfo->eAudioDirection = eNewDirection;
+    if (m_pMediaInfo->eVideoDirection != DIRECTION_INVALID)
+    {
+        m_pMediaInfo->eVideoDirection = eNewDirection;
+    }
+
+    if (m_pMediaInfo->eTextDirection != DIRECTION_INVALID)
+    {
+        m_pMediaInfo->eTextDirection = eNewDirection;
+    }
+}
+
+PRIVATE
+void MtcMediaManager::AdjustDirectionForAutoAnswerIfHeldByMe(IN_OUT IMS_SINT32& eDirection)
+{
+    if (eDirection == DIRECTION_SEND_RECEIVE)
+    {
+        eDirection = DIRECTION_SEND;
+    }
+    else if (eDirection == DIRECTION_RECEIVE)
+    {
+        eDirection = DIRECTION_INACTIVE;
+    }
 }
 
 PRIVATE

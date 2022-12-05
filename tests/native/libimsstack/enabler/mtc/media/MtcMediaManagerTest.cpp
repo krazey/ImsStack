@@ -294,7 +294,7 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpContainsText)
     pMediaManager->NegotiateSdp(&objISession);
 }
 
-TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForNormalCase)
+TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerForNormalCase)
 {
     MediaInfo objRefMediaInfo;
     objRefMediaInfo.eAudioDirection = DIRECTION_SEND;
@@ -308,7 +308,7 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForNormalCase)
     EXPECT_EQ(pMediaManager->GetMediaInfo().eTextDirection, DIRECTION_SEND);
 }
 
-TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForOfferlessReinvite)
+TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoOffer)
 {
     MediaInfo objRefMediaInfo;
     objRefMediaInfo.eAudioDirection = DIRECTION_SEND;
@@ -322,7 +322,7 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForOfferlessReinvite)
     EXPECT_EQ(pMediaManager->GetMediaInfo().eTextDirection, DIRECTION_SEND_RECEIVE);
 }
 
-TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForHeldByMeCase)
+TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerForHeldByMeCase)
 {
     MediaInfo objRefMediaInfo;
     objRefMediaInfo.eAudioDirection = DIRECTION_SEND;
@@ -339,5 +339,32 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAcceptForHeldByMeCase)
     pMediaManager->AdjustDirectionForAutoAccept(IMS_FALSE, IMS_TRUE);
     EXPECT_EQ(pMediaManager->GetMediaInfo().eAudioDirection, DIRECTION_INACTIVE);
     EXPECT_EQ(pMediaManager->GetMediaInfo().eVideoDirection, DIRECTION_INVALID);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eTextDirection, DIRECTION_INVALID);
+}
+
+TEST_F(MtcMediaManagerTest,
+        AdjustDirectionForAutoAnswerForHeldByMeIfAudioAndVideoDirectionDifferent)
+{
+    MediaInfo objRefMediaInfo;
+    objRefMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objRefMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
+    pMediaManager->SetMediaInfo(objRefMediaInfo);
+
+    pMediaManager->AdjustDirectionForAutoAccept(IMS_FALSE, IMS_TRUE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eAudioDirection, DIRECTION_SEND);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eVideoDirection, DIRECTION_INACTIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eTextDirection, DIRECTION_INVALID);
+}
+
+TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerIfAudioAndVideoDirectionDifferent)
+{
+    MediaInfo objRefMediaInfo;
+    objRefMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objRefMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
+    pMediaManager->SetMediaInfo(objRefMediaInfo);
+
+    pMediaManager->AdjustDirectionForAutoAccept(IMS_FALSE, IMS_FALSE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eAudioDirection, DIRECTION_SEND_RECEIVE);
+    EXPECT_EQ(pMediaManager->GetMediaInfo().eVideoDirection, DIRECTION_INACTIVE);
     EXPECT_EQ(pMediaManager->GetMediaInfo().eTextDirection, DIRECTION_INVALID);
 }
