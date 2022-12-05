@@ -45,7 +45,7 @@ public final class TelephonyCallState {
     }
 
     /**
-     * @param the call state
+     * @param state
      *      TelephonyManager#CALL_STATE_IDLE (0)
      *      TelephonyManager#CALL_STATE_RINGING (1)
      *      TelephonyManager#CALL_STATE_OFFHOOK (2)
