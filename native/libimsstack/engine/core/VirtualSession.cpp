@@ -52,8 +52,14 @@ VirtualSession::VirtualSession(IN Service* pService, IN const SipAddress* pUserA
 
 PUBLIC
 VirtualSession::VirtualSession(IN const VirtualSession& other) :
-        RcObject(other)
+        RcObject(other),
+        m_pService(other.m_pService),
+        m_objUserAor(other.m_objUserAor),
+        m_nState(STATE_CREATED),
+        m_pOaState(IMS_NULL),
+        m_pSessionDescriptor(IMS_NULL)
 {
+    Init(&m_objUserAor);
 }
 
 PUBLIC VIRTUAL VirtualSession::~VirtualSession()
