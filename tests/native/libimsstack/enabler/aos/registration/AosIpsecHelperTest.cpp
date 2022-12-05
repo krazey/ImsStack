@@ -133,11 +133,6 @@ protected:
             delete pAosNewIpsec;
         }
 
-        if (pAosStaticProfile)
-        {
-            delete pAosStaticProfile;
-        }
-
         if (pAosIpsecHelper)
         {
             delete pAosIpsecHelper;
@@ -146,6 +141,11 @@ protected:
         if (pMockAosAppContext)
         {
             delete pMockAosAppContext;
+        }
+
+        if (pAosStaticProfile)
+        {
+            delete pAosStaticProfile;
         }
 
         if (pRegId)
