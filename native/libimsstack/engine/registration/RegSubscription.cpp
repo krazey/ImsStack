@@ -1680,6 +1680,8 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
         }
     }
 
+    const SipAddress& objContact = m_pRegStateTracker->GetContactAddress();
+
     if (pContact == IMS_NULL)
     {
         IMS_TRACE_D("No contacts in the dialog; use the default contact address...", 0, 0, 0);
@@ -1688,8 +1690,7 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
 
         if (pContact == IMS_NULL)
         {
-            const SipAddress& objContactURI = m_pRegStateTracker->GetContactAddress();
-            pContact = &objContactURI;
+            pContact = &objContact;
         }
     }
 
@@ -1697,8 +1698,6 @@ IMS_BOOL RegSubscription::ValidateRequestUri(
     {
         return IMS_TRUE;
     }
-
-    const SipAddress& objContact = m_pRegStateTracker->GetContactAddress();
 
     if (objContact.Equals(objRequestUri))
     {
