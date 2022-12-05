@@ -137,14 +137,14 @@ protected:
             delete pContactAddress;
         }
 
-        if (pAosStaticProfile)
-        {
-            delete pAosStaticProfile;
-        }
-
         if (pMockAosAppContext)
         {
             delete pMockAosAppContext;
+        }
+
+        if (pAosStaticProfile)
+        {
+            delete pAosStaticProfile;
         }
 
         if (pAosSubscription)
