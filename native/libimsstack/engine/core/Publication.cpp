@@ -136,12 +136,12 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
     piSipMsg->SetHeader(ISipHeader::EVENT, GetEvent());
 
     // Accept, Allow-Events, Expires
-    IMS_BOOL bDefaultExpiresRequired = IMS_FALSE;
 
     // Basically, Expires header will be automatically added according to the event package,
-    // but IMS engine will not add the EXpires header even though it's not present and it will
+    // but IMS engine will not add the Expires header even though it's not present and it will
     // be controlled by the enabler.
-    if (bDefaultExpiresRequired && !piSipMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
+#if 0
+    if (!piSipMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
     {
         // Expires header ?
         AString strExpires;
@@ -157,6 +157,7 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
 
         piSipMsg->SetHeader(ISipHeader::EXPIRES_ANY, strExpires);
     }
+#endif
 
     // OPERATION_MODIFY
     if (m_nState == STATE_ACTIVE)

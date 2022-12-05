@@ -4408,19 +4408,7 @@ IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSipMsg)
         {
 #ifdef __IMS_SEND_ACK_IN_TERMINATING_STATE__
             // Send ACK
-            IMS_SINT32 nState = GetState();
-            IMS_SINT32 nServiceMethod = IMessage::SERVICEMETHOD_INVALID;
-
-            if (nState == STATE_NEGOTIATING)
-            {
-                nServiceMethod = IMessage::SESSION_START;
-            }
-            else if (nState == STATE_RENEGOTIATING)
-            {
-                nServiceMethod = IMessage::SESSION_UPDATE;
-            }
-
-            ISipClientConnection* piScc = GetClientConnection(nServiceMethod);
+            ISipClientConnection* piScc = GetClientConnection(IMessage::SESSION_START);
 
             if ((piScc != IMS_NULL) && (piSipMsg->GetMethod().Equals(SipMethod::INVITE)))
             {
@@ -4448,7 +4436,7 @@ IMS_BOOL Session::CheckNTerminateSession(IN ISipMessage* piSipMsg)
                     RestoreOfferAnswerState();
                 }
 
-                SendRequestToAck(piScc, nServiceMethod);
+                SendRequestToAck(piScc, IMessage::SESSION_START);
             }
 #endif  // __IMS_SEND_ACK_IN_TERMINATING_STATE__
 

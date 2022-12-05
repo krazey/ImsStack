@@ -141,7 +141,7 @@ PUBLIC VIRTUAL void FeatureCaps::AddFeature(IN const AString& strName, IN const 
             pFeatures->AddFeature(&objFeature);
         }
     }
-    else if (nMessageType == ISipMessage::TYPE_RESPONSE)
+    else  // ISipMessage::TYPE_RESPONSE
     {
         CallerCapability* pFeatures = GetFeaturesForResponse(nSipMethod, IMS_TRUE);
 
@@ -212,7 +212,7 @@ PUBLIC VIRTUAL void FeatureCaps::RemoveFeature(IN const AString& strName,
             pFeatures->RemoveFeature(&objFeature);
         }
     }
-    else if (nMessageType == ISipMessage::TYPE_RESPONSE)
+    else  // ISipMessage::TYPE_RESPONSE
     {
         CallerCapability* pFeatures = GetFeaturesForResponse(nSipMethod);
 
