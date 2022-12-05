@@ -18,7 +18,7 @@
 
 #include "ImsTimer.h"
 
-class OsTimer : public ImsTimer
+class OsTimer final : public ImsTimer
 {
 public:
     OsTimer();
