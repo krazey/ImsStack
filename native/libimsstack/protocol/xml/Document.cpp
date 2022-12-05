@@ -21,9 +21,9 @@
 PUBLIC
 Document::Document(xmlDocPtr pstDoc, xmlXPathContextPtr pstXpathContext) :
         Node(pstDoc),
-        m_strVersion((const IMS_CHAR*)pstDoc->version),
-        m_strEncoding((const IMS_CHAR*)pstDoc->encoding),
-        m_strUrl((const IMS_CHAR*)pstDoc->URL),
+        m_strVersion(reinterpret_cast<const IMS_CHAR*>(pstDoc->version)),
+        m_strEncoding(reinterpret_cast<const IMS_CHAR*>(pstDoc->encoding)),
+        m_strUrl(reinterpret_cast<const IMS_CHAR*>(pstDoc->URL)),
         m_pstDoc(pstDoc),
         m_pstXpathContext(pstXpathContext)
 {
