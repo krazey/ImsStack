@@ -206,8 +206,9 @@ PRIVATE
 AString OsIpSecSa::DecryptPrintKey(IN const AString& strInKey)
 {
     AString strDecodedKey = AString::ConstNull();
-    IMS_CHAR CODE_DECYPHER[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    IMS_CHAR CODE_DECYPHER_SPECIAL[] = {10, 11, 12, 13, 14, 15, 16};
+    const IMS_CHAR CODE_DECYPHER[] =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const IMS_CHAR CODE_DECYPHER_SPECIAL[] = {10, 11, 12, 13, 14, 15, 16};
 
     for (IMS_SINT32 i = 0; i < strInKey.GetLength(); ++i)
     {
