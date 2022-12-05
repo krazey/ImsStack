@@ -74,14 +74,14 @@ public class TextSessionHandler extends MediaState {
     @VisibleForTesting
     public TextSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             @NonNull TextSessionCallbackHandler textCallbackHandler,
-            @NonNull ImsTextSession textSession) {
+            @NonNull ImsTextSession textSession, Looper looper) {
         super(ImsMediaSession.SESSION_TYPE_RTT);
         mContext = context;
         mMediaManager = mediaManager;
         mTextSessionCallbackHandler = textCallbackHandler;
         mTextSession = textSession;
         mTextSessionCallback = new TextSessionCallbackProxy();
-        mTextMessageHandler = new TextMessageHandler(Looper.getMainLooper());
+        mTextMessageHandler = new TextMessageHandler(looper);
         ImsLog.d("TextSessionHandler created");
     }
 
