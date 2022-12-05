@@ -30,7 +30,7 @@ class ExtraHeaders;
 class ImsSubscriberInfo;
 class SipSecurityHeader;
 
-class RegParameter : public ImsSlot, public IRegParameter
+class RegParameter final : public ImsSlot, public IRegParameter
 {
 public:
     explicit RegParameter(IN IMS_SINT32 nSlotId);
