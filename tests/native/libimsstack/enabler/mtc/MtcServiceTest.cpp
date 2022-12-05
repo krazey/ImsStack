@@ -15,9 +15,12 @@
  */
 
 #include "CarrierConfig.h"
+#include "Configuration.h"
 #include "IIpcan.h"
 #include "IMtcService.h"
 #include "ImsAosParameter.h"
+#include "ImsServiceConfig.h"
+#include "ImsServiceConfigTypeDef.h"
 #include "JniEnablerConnector.h"
 #include "MockICarrierConfig.h"
 #include "MockIJniEnabler.h"
@@ -137,6 +140,11 @@ protected:
 
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_CONFIG, &objConfigService);
+
+        // to make Connector::Open() return valid IConnector even though MtcApp is not created
+        // during the test.
+        Configuration::GetInstance()->SetAppConfig(
+                ImsServiceConfig::GetAppName(ImsAppId::MTC), SLOT_ID);
 
         pNormalMtcService = CreateNormalService();
         pEmergencyMtcService = CreateEmergencyService();
