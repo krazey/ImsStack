@@ -25,14 +25,6 @@ namespace android
 
 class PlatformContextTest : public ::testing::Test
 {
-public:
-    inline PlatformContextTest()
-    {
-        // If full test is running, the PlatformContext object can be allocated by other test,
-        // so the destroy operation is run first.
-        PlatformContext::DestroyInstance();
-    }
-
 protected:
     virtual void SetUp() override {}
     virtual void TearDown() override {}
