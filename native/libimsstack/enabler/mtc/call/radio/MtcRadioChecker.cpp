@@ -246,10 +246,10 @@ PRIVATE void MtcRadioChecker::DeInit()
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_objMtcTrafficInfos.GetSize(); nIndex++)
     {
-        const MtcTrafficInfo* pMtcTrafficInfo = m_objMtcTrafficInfos.GetAt(nIndex);
+        MtcTrafficInfo* pMtcTrafficInfo = m_objMtcTrafficInfos.GetAt(nIndex);
         if (pMtcTrafficInfo)
         {
-            StopTrafficChecking(pMtcTrafficInfo->m_eTrafficType, pMtcTrafficInfo->m_eCallDirection);
+            StopTrafficChecking(*pMtcTrafficInfo);
             delete pMtcTrafficInfo;
         }
     }
@@ -285,7 +285,7 @@ PRIVATE TrafficType MtcRadioChecker::ConvertCallTypeToTrafficType(
         case CallType::VT:
         case CallType::VIDEO_RTT:
             return IImsRadio::TRAFFIC_TYPE_VIDEO;
-        case CallType::UNKNOWN:
+        default:  //  CallType::UNKNOWN:
             return IImsRadio::TRAFFIC_TYPE_VOICE;
     }
 }
@@ -362,8 +362,7 @@ PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN Cal
 
                 if (objCallKeys.IsEmpty())
                 {
-                    StopTrafficChecking(
-                            pMtcTrafficInfo->m_eTrafficType, pMtcTrafficInfo->m_eCallDirection);
+                    StopTrafficChecking(*pMtcTrafficInfo);
                     delete pMtcTrafficInfo;
                     m_objMtcTrafficInfos.RemoveAt(nInfoIndex);
                 }
@@ -565,20 +564,12 @@ PRIVATE void MtcRadioChecker::StartTrafficChecking(
             eCallDirection, 0);
 }
 
-PRIVATE void MtcRadioChecker::StopTrafficChecking(
-        IN TrafficType eTrafficType, IN CallDirection eCallDirection)
+PRIVATE void MtcRadioChecker::StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo)
 {
-    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
+    m_piImsRadio->StopImsTraffic(&objTrafficInfo);
 
-    if (pMtcTrafficInfo == IMS_NULL)
-    {
-        return;
-    }
-
-    m_piImsRadio->StopImsTraffic(pMtcTrafficInfo);
-
-    IMS_TRACE_I("StopTrafficChecking TrafficType[%d] CallDirection[%d]", eTrafficType,
-            eCallDirection, 0);
+    IMS_TRACE_I("StopTrafficChecking TrafficType[%d] CallDirection[%d]",
+            objTrafficInfo.m_eTrafficType, objTrafficInfo.m_eCallDirection, 0);
 }
 
 PRIVATE void MtcTrafficInfo::ImsRadio_OnConnectionFailed(

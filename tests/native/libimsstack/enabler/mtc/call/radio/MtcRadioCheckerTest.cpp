@@ -122,21 +122,6 @@ protected:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_SYSTEM_TIME, IMS_NULL);
     }
-
-    IMS_BOOL IsCallKeyExist(IN ImsList<CallKey>& objCallKeys, IN CallKey nCallKeyIn) const
-    {
-        for (IMS_UINT32 nIndex = 0; nIndex < objCallKeys.GetSize(); nIndex++)
-        {
-            const CallKey nCallKey = objCallKeys.GetAt(nIndex);
-
-            if (nCallKey == nCallKeyIn)
-            {
-                return IMS_TRUE;
-            }
-        }
-
-        return IMS_FALSE;
-    }
 };
 
 TEST_F(MtcRadioCheckerTest, CheckSsacDoesNothingWhenMt)
