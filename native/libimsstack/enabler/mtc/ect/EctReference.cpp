@@ -206,6 +206,7 @@ AString EctReference::GetReferToUri(IN const AString& strTransferTarget) const
 {
     return m_objContext.GetDialingPlan().GetToUri(strTransferTarget, CallInfo(), Scheme::SIP);
 }
+
 PRIVATE
 void EctReference::SetReplaces(IN IMtcCall* piTransferTargetCall)
 {

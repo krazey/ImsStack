@@ -251,7 +251,8 @@ TEST_F(EctReferenceTest, SendInviteWithNumberReturnsFailure)
 
 TEST_F(EctReferenceTest, GetResponseCode)
 {
-    SetUpForSuccessfulReferenceOperation("sessionid");  // to set m_piReference
+    AString strAnySessionId("sessionid");
+    SetUpForSuccessfulReferenceOperation(strAnySessionId);  // to set m_piReference
     pEctReference->SendInvite(ANY_TRANSFER_TARGET_CALL_KEY);
 
     ON_CALL(objMockReference, GetPreviousResponse(_)).WillByDefault(Return(nullptr));
