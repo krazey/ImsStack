@@ -54,8 +54,7 @@ PUBLIC VIRTUAL RadioBlockRule::Result RadioBlockRule::Check(
             return Result(IMtcBlockRule::Result::Status::UNBLOCKED);
         case CheckResult::PENDING:
             return Result(IMtcBlockRule::Result::Status::PENDING);
-
-        case CheckResult::BLOCKED:
+        default:  //  CheckResult::BLOCKED:
             return Result(IMtcBlockRule::Result::Status::BLOCKED,
                     CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE));
     }

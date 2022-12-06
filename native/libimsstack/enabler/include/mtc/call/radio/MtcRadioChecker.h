@@ -112,7 +112,7 @@ private:
     IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi) const;
     void AddCallKeyIfNeeded(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
             IN CallKey nCallKeyIn) const;
-    void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKey);
+    void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn);
     void NotifyRadioConnectionFailedListener(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection);
     void NotifyTrafficCheckerListener(IN IMS_BOOL bReady);
@@ -129,7 +129,7 @@ private:
     IMS_BOOL StartSsacTimer(IN CallType eCallType);
     void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi);
-    void StopTrafficChecking(IN TrafficType eTrafficType, IN CallDirection eCallDirection);
+    void StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo);
 
 private:
     IMtcContext& m_objContext;
