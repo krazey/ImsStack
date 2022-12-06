@@ -76,10 +76,6 @@ public:
     MergeController* pController;
     MtcConfigurationProxy* pConfigurationProxy;
 
-    MockIMtcSipInterfaceFactory* pMockInterfaceFactory;
-    MockSubscriptionInterfaceHolder* pMockSubsHolder;
-    MockIInterfaceHolderListener* pMockHolderListener;
-
 protected:
     virtual void SetUp() override
     {
@@ -114,9 +110,6 @@ protected:
 
         delete piMockConferenceCall;
         delete pController;
-
-        delete pMockInterfaceFactory;
-        delete pMockSubsHolder;
         delete pConfigurationProxy;
     }
 
