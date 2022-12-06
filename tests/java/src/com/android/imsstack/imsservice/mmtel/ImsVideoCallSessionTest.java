@@ -40,7 +40,6 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
-import com.android.imsstack.imsservice.mmtel.videocall.base.ImsVideoCallProviderBase;
 
 import org.junit.After;
 import org.junit.Before;
@@ -62,7 +61,6 @@ public class ImsVideoCallSessionTest {
     @Mock private ImsCallContext mCallContext;
     @Mock private ImsCallSessionImpl mImsCallSession;
     @Mock private ImsVideoCallProvider mVideoCallProvider;
-    @Mock private ImsVideoCallProviderBase mImsVideoCallProviderBase;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigInterface mMockConfigInterface;
 
