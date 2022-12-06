@@ -20,7 +20,7 @@
 
 class OsFilePrivate;
 
-class OsFile : public ImsFile
+class OsFile final : public ImsFile
 {
 public:
     OsFile();

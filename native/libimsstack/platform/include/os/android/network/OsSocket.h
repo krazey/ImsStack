@@ -49,7 +49,7 @@ protected:
             IN ADDRESS_FAMILY_ENTYPE eAddressFamily = ADDRESS_FAMILY_INET) override;
     SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
             IN ADDRESS_FAMILY_ENTYPE eAddressFamily = ADDRESS_FAMILY_INET) override;
-    SOCKET_RESULT Close() override;
+    SOCKET_RESULT Close() override final;
     void SetListener(IN ISocketListener* piListener) override;
     ISocket* Accept() override;
     SOCKET_RESULT Bind(IN const IPAddress& objSocketAddress, IN IMS_UINT32 nSocketPort) override;
