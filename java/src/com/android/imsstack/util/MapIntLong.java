@@ -15,30 +15,22 @@
  */
 package com.android.imsstack.util;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.Set;
+import android.util.SparseArray;
 
 public final class MapIntLong {
     public final static int INVALID_KEY = (-1);
     public final static long INVALID_VALUE = (-1);
 
     private final static boolean DBG = false;
-    private static int sNextKey = 1;
-    private final Object mLock = new Object();
-    private Hashtable<Integer, Long> mIntLong = new Hashtable<Integer, Long>();
+    private final SparseArray<Long> mIntLong = new SparseArray<>();
+    private int mNextKey = 1;
 
     public MapIntLong() {
     }
 
     public void add(int key, long value) {
-        synchronized(mLock) {
-            Long v = mIntLong.put(Integer.valueOf(key), Long.valueOf(value));
-
-            if (v != null) {
-                ImsLog.d("add :: k=" + key + ", v(prev)=" + v + ", size=" + mIntLong.size());
-            }
+        synchronized (mIntLong) {
+            mIntLong.put(key, Long.valueOf(value));
 
             if (DBG) {
                 ImsLog.d("add :: k=" + key + ", v=" + value + ", size=" + mIntLong.size());
@@ -47,78 +39,62 @@ public final class MapIntLong {
     }
 
     public boolean contains(int key) {
-        synchronized(mLock) {
-            return mIntLong.containsKey(Integer.valueOf(key));
+        synchronized (mIntLong) {
+            return mIntLong.contains(key);
         }
     }
 
     public int getNewKey() {
-        synchronized(mLock) {
+        synchronized (mIntLong) {
             do {
-                Integer key = Integer.valueOf(sNextKey);
+                int key = mNextKey;
 
-                sNextKey++;
+                mNextKey++;
 
-                if (sNextKey == Integer.MAX_VALUE) {
-                    sNextKey = 1;
+                if (mNextKey == Integer.MAX_VALUE) {
+                    mNextKey = 1;
                 }
 
-                if (mIntLong.get(key) == null) {
-                    return key.intValue();
+                if (!mIntLong.contains(key)) {
+                    return key;
                 }
             } while (true);
         }
     }
 
     public int getKey(long value) {
-        synchronized(mLock) {
-            if (!mIntLong.contains(Long.valueOf(value))) {
-                // no specified object
-                ImsLog.d("getKey :: no value; v=" + value);
-                return INVALID_KEY;
-            }
-
-            Set<Entry<Integer, Long>> entries = mIntLong.entrySet();
-
-            if (entries != null) {
-                Iterator<Entry<Integer, Long>> iterator = entries.iterator();
-
-                while (iterator.hasNext()) {
-                    Entry<Integer, Long> entry = iterator.next();
-
-                    if (entry.getValue().longValue() == value) {
-                        return entry.getKey().intValue();
-                    }
+        synchronized (mIntLong) {
+            for (int i = 0; i < mIntLong.size(); ++i) {
+                if (value == mIntLong.valueAt(i)) {
+                    return mIntLong.keyAt(i);
                 }
             }
-
-            return INVALID_KEY;
         }
+
+        // no specified object
+        ImsLog.d("getKey :: no value; v=" + value);
+        return INVALID_KEY;
     }
 
     public long getValue(int key) {
-        synchronized(mLock) {
-            Long v = mIntLong.get(Integer.valueOf(key));
-            return (v == null) ? INVALID_VALUE : v.longValue();
+        synchronized (mIntLong) {
+            Long v = mIntLong.get(key);
+            return (v == null) ? INVALID_VALUE : v;
         }
     }
 
     public void remove(int key) {
-        synchronized(mLock) {
-            if (DBG) {
-                ImsLog.d("remove :: k=" + key + ", size(b)=" + mIntLong.size());
-            }
-
-            Long v = mIntLong.remove(Integer.valueOf(key));
+        synchronized (mIntLong) {
+            mIntLong.remove(key);
 
             if (DBG) {
-                ImsLog.d("remove :: k=" + key + ", v=" + v + ", size(a)=" + mIntLong.size());
+                ImsLog.d("remove :: k=" + key + ", size(a)=" + mIntLong.size());
             }
         }
     }
 
     public void removeAll() {
-        synchronized(mLock) {
+        synchronized (mIntLong) {
             if (DBG) {
                 ImsLog.d("removeAll :: size(b)=" + mIntLong.size());
             }
@@ -128,36 +104,25 @@ public final class MapIntLong {
     }
 
     public void removeValue(long value) {
-        synchronized(mLock) {
-            if (!mIntLong.contains(Long.valueOf(value))) {
-                // no specified object
-                ImsLog.d("removeValue :: no value; v=" + value);
-                return;
-            }
-
-            Set<Entry<Integer, Long>> entries = mIntLong.entrySet();
-
-            if (entries != null) {
-                Iterator<Entry<Integer, Long>> iterator = entries.iterator();
-
-                while (iterator.hasNext()) {
-                    Entry<Integer, Long> entry = iterator.next();
-
-                    if (entry.getValue().longValue() == value) {
-                        if (DBG) {
-                            ImsLog.d("removeValue :: k=" + entry.getKey()
-                                    + ", v=" + value + ", size(b)=" + mIntLong.size());
-                        }
-
-                        mIntLong.remove(entry.getKey());
-
-                        if (DBG) {
-                            ImsLog.d("removeValue :: size(a)=" + mIntLong.size());
-                        }
-                        break;
+        synchronized (mIntLong) {
+            for (int i = 0; i < mIntLong.size(); ++i) {
+                if (value == mIntLong.valueAt(i)) {
+                    if (DBG) {
+                        ImsLog.d("removeValue :: k=" + mIntLong.keyAt(i)
+                                + ", v=" + value + ", size(b)=" + mIntLong.size());
                     }
+
+                    mIntLong.removeAt(i);
+
+                    if (DBG) {
+                        ImsLog.d("removeValue :: size(a)=" + mIntLong.size());
+                    }
+                    return;
                 }
             }
         }
+
+        // no specified object
+        ImsLog.d("removeValue :: no value; v=" + value);
     }
 }
