@@ -332,4 +332,4 @@ public class SuppInfo implements Parcelable {
             return new SuppInfo[size];
         }
     };
-};
+}

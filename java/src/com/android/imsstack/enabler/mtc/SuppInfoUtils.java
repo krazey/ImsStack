@@ -16,7 +16,7 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 
 /**
  * This class provides the utility methods to control items of SuppInfo.
@@ -26,10 +26,10 @@ public final class SuppInfoUtils {
     public static final int TYPE_INT = 2;
     public static final int TYPE_STRING = 3;
 
-    private static final Hashtable<Integer, String> sTypeToKey
-            = new Hashtable<Integer, String>();
-    private static final Hashtable<Integer, Integer> sTypeToValueType
-            = new Hashtable<Integer, Integer>();
+    private static final LinkedHashMap<Integer, String> sTypeToKey =
+            new LinkedHashMap<Integer, String>();
+    private static final LinkedHashMap<Integer, Integer> sTypeToValueType =
+            new LinkedHashMap<Integer, Integer>();
 
     public static void addKey(int type, String key) {
         sTypeToKey.put(type, key);

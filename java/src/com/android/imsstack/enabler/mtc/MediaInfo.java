@@ -176,4 +176,4 @@ public class MediaInfo implements Parcelable {
             return new MediaInfo[size];
         }
     };
-};
+}

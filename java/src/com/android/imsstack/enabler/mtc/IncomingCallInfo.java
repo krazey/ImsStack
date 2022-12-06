@@ -84,4 +84,4 @@ public class IncomingCallInfo implements Parcelable
             return new IncomingCallInfo[size];
         }
     };
-};
+}

@@ -273,4 +273,4 @@ public class UsersInfo implements Parcelable {
             return new UsersInfo[size];
         }
     };
-};
+}

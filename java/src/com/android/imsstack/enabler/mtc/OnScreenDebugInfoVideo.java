@@ -112,4 +112,4 @@ public class OnScreenDebugInfoVideo implements Parcelable {
             return new OnScreenDebugInfoVideo[size];
         }
     };
-};
+}
