@@ -33,6 +33,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
     private CapabilityExchangeEventListener mEventListener = null;
     private MessageExecutor mMessageExecutor;
     private MessageExecutor mRequestExecutor;
+
     public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
             MessageExecutor messageExecutor, MessageExecutor requestExecutor) {
         mEventListener = listener;
@@ -44,39 +45,40 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
      * Trigger the framework to provide a capability update using
      * {@link IUceApi##publishCapabilities}.
      *
-     *      CAPABILITY_UPDATE_TRIGGER_UNKNOWN = 0 (The reason for the request is unknown)
-     *      CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 1 (When the Entity Tag (ETag) is  expiring)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED = 2
-     *                  (requested due to moving to LTE with VoPS disabled)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED = 3
-     *                  (requested due to moving to LTE with VoPS enabled)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD = 4 (requested due to moving to eHRPD)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_HSPAPLUS = 5 (requested due to moving to HSPA+)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G = 6 (requested due to moving to 3G)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G = 7 (requested due to moving to 2G)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN = 8 (requested due to moving to WLAN)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN = 9 (requested due to moving to IWAL)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED = 10
-     *                (due to moving to 5G NR with VoPS disabled)
-     *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11
-     *                (due to moving to 5G NR with VoPS enabled)
+     * CAPABILITY_UPDATE_TRIGGER_UNKNOWN = 0 (The reason for the request is unknown)
+     * CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 1 (When the Entity Tag (ETag) is  expiring)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED = 2
+     * (requested due to moving to LTE with VoPS disabled)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED = 3
+     * (requested due to moving to LTE with VoPS enabled)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD = 4 (requested due to moving to eHRPD)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_HSPAPLUS = 5 (requested due to moving to HSPA+)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G = 6 (requested due to moving to 3G)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G = 7 (requested due to moving to 2G)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN = 8 (requested due to moving to WLAN)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN = 9 (requested due to moving to IWAL)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED = 10
+     * (due to moving to 5G NR with VoPS disabled)
+     * CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11
+     * (due to moving to 5G NR with VoPS enabled)
      *
      * This is typically used when trying to generate an initial PUBLISH for a new subscription to
      * the network. The device will cache all presence publications after boot until this method is
      * called the first time.
+     *
      * @param publishTriggerType The reason for the capability update request.
      */
     public void onRequestPublishCapabilities(int publishTriggerType) {
         if (mEventListener == null) {
-            Log.d(LOG_TAG,"mEventListener is null");
+            Log.d(LOG_TAG, "mEventListener is null");
             return;
         }
-        postAndRunTask(()-> {
+        postAndRunTask(() -> {
             try {
                 mEventListener.onRequestPublishCapabilities(publishTriggerType);
-                Log.d(LOG_TAG,"onRequestPublishCapabilities is sent to framework");
+                Log.d(LOG_TAG, "onRequestPublishCapabilities is sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onRequestPublishCapabilities Exception = " + e.getMessage());
             }
         });
     }
@@ -88,7 +90,7 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
      * keep the AOSP stack up to date.
      *
      * @param reasonCode : The SIP response code sent from the network
-     * @param reasonPharse: The optional reason response from the network. If the
+     * @param reasonPharse : The optional reason response from the network. If the
      * network provided no reason with the sip code, the string should be empty.
      * @param reasonHeaderCause : The “cause” parameter of the “reason” header
      * included in the SIP message.
@@ -97,19 +99,19 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
      */
     @Override
     public void onPublishUpdated(int reasonCode, String reasonPharse,
-        int reasonHeaderCause, String reasonHeadertext) {
-        Log.i(LOG_TAG,"onPublishUpdated ");
+            int reasonHeaderCause, String reasonHeadertext) {
+        Log.i(LOG_TAG, "onPublishUpdated ");
         if (mEventListener == null) {
-            Log.d(LOG_TAG,"mEventListener is null ");
+            Log.d(LOG_TAG, "mEventListener is null ");
             return;
         }
-        postAndRunTask(()->{
+        postAndRunTask(() -> {
             try {
                 mEventListener.onPublishUpdated(reasonCode, reasonPharse,
                         reasonHeaderCause, reasonHeadertext);
                 Log.d(LOG_TAG, "onPublishUpdated sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onPublishUpdated Exception = " + e.getMessage());
             }
         });
     }
@@ -121,49 +123,51 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
     @Override
     public void onUnPublish() {
         if (mEventListener == null) {
-            Log.d(LOG_TAG,"mEventListener is null ");
+            Log.d(LOG_TAG, "mEventListener is null ");
             return;
         }
-        postAndRunTask(()->{
-        try {
-            mEventListener.onUnpublish();
-            Log.d(LOG_TAG, "onUnPublish  sent to framework");
-        } catch (ImsException e) {
-            e.printStackTrace();
-        }
+        postAndRunTask(() -> {
+            try {
+                mEventListener.onUnpublish();
+                Log.d(LOG_TAG, "onUnPublish  sent to framework");
+            } catch (ImsException e) {
+                Log.e(LOG_TAG, "onUnPublish Exception = " + e.getMessage());
+            }
         });
     }
 
     /**
      * Notify the framework that the ImsService has received an Options request from the Remote.
-     *{@link IUceApi#sendOptionsCapabilityRequest}.
-     * @param contactUri         The URI associated with the remote contact that is
-     *                           requesting capabilities.
+     * {@link IUceApi#sendOptionsCapabilityRequest}.
+     *
+     * @param contactUri The URI associated with the remote contact that is
+     * requesting capabilities.
      * @param remoteCapabilities The remote contact's capability information. The capability
-     *                           information is in the format defined in RCC.07 section 2.6.1.3.
+     * information is in the format defined in RCC.07 section 2.6.1.3.
      * @param remoteOptionsCallback The callback of Options request which is received from
-     *                              Remote user.
+     * Remote user.
      */
     @Override
     public void onRemoteCapabilityRequest(Uri contactUri, Set<String> remoteCapabilities,
             RemoteOptionsCallback remoteOptionsCallback) {
         if (mEventListener == null) {
-            Log.d(LOG_TAG,"mEventListener is null");
+            Log.d(LOG_TAG, "mEventListener is null");
             return;
         }
         RcsCapOptionsRequestCallback rcsOptionsRequestCallback =
                 new RcsCapOptionsRequestCallback(remoteOptionsCallback, mRequestExecutor);
 
-        postAndRunTask(()->{
+        postAndRunTask(() -> {
             try {
                 mEventListener.onRemoteCapabilityRequest(
                         contactUri, remoteCapabilities, rcsOptionsRequestCallback);
-                Log.d(LOG_TAG,"onRemoteCapabilityRequest is sent to framework");
+                Log.d(LOG_TAG, "onRemoteCapabilityRequest is sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onRemoteCapabilityRequest Exception = " + e.getMessage());
             }
         });
     }
+
     private void postAndRunTask(Runnable task) {
         if (mMessageExecutor != null) {
             mMessageExecutor.execute(task);
