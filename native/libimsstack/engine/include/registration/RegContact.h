@@ -25,7 +25,7 @@
 class IRegCapabilityChangeListener;
 class SipProfile;
 
-class RegContact : public ImsSlot, public IRegContact
+class RegContact final : public ImsSlot, public IRegContact
 {
 public:
     RegContact(IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort,

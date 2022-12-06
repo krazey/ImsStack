@@ -20,7 +20,7 @@
 
 #include "IServiceFilterCriteria.h"
 
-class ServiceFilterCriteria : public IServiceFilterCriteria
+class ServiceFilterCriteria final : public IServiceFilterCriteria
 {
 public:
     ServiceFilterCriteria();
