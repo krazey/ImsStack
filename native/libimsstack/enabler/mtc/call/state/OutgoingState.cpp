@@ -457,7 +457,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
     m_objContext.GetSession(piSession)->HandleResponse(
             ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
-    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
+    AString strNotSupportedExtension;
+    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(
+                *piMessage, strNotSupportedExtension))
     {
         CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
@@ -525,7 +527,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         StartTimer(TIMER_MO_NOANSWER);
     }
 
-    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
+    AString strNotSupportedExtension;
+    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(
+                *piMessage, strNotSupportedExtension))
     {
         CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);

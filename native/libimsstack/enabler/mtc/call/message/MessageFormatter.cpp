@@ -207,6 +207,13 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormRejectMessage(
         SetLocation();
     }
 
+    if (objReason.nCode == CODE_REJECT_UNSUPPORTED_SIP_HEADERS &&
+            objReason.strExtraMessage.GetLength() > 0)
+    {
+        m_objContext.GetMessageUtils().AddValueIfNotExists(
+                m_piNextMessage, objReason.strExtraMessage, ISipHeader::UNSUPPORTED);
+    }
+
     return IMS_SUCCESS;
 }
 
