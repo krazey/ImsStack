@@ -38,19 +38,10 @@ public:
             IN const ByteArray& objAuthKey, IN const ByteArray& objEncryptionKey) override;
     void DoneSa() override;
 
-    void* GetKey();
     IMS_UINT32 GetSpi() const;
     void DisplayInfo();
 
     IpSecSaParameter CreateSaParameter(IN IMS_SINT32 nId) const;
-
-private:
-    IMS_BOOL SetIpAddress();
-    void MakeSa();
-    void SetAuthenticationKey();
-    void SetEncryptionKey();
-    AString EncryptPrintKey(IN const AString& strInKey);
-    AString DecryptPrintKey(IN const AString& strInKey);
 
 private:
     OsIpSecSaPrivate* m_pIpSecSaP;

@@ -103,14 +103,7 @@ PUBLIC VIRTUAL void OsIpSecSp::SetSecurityAlgorithmInfo(IN IMS_UINT32 nSecurityP
 
 PUBLIC VIRTUAL void OsIpSecSp::DoneSp()
 {
-    SetTransportInfo();
-    SetSecurityAlgorithmInfo();
-}
-
-PUBLIC
-void* OsIpSecSp::GetConf()
-{
-    return IMS_NULL;
+    IMS_TRACE_D("IPSEC-SP done.", 0, 0, 0);
 }
 
 PUBLIC
@@ -148,30 +141,3 @@ IpSecSaParameter::Policy OsIpSecSp::CreateSaPolicy() const
             m_pIpSecSpP->m_nSrcPort, m_pIpSecSpP->m_objDstIp, m_pIpSecSpP->m_nDstPort);
     return objPolicy;
 }
-
-PRIVATE
-IMS_BOOL OsIpSecSp::SetIpAddress()
-{
-    AString strSrcIp = m_pIpSecSpP->m_objSrcIp.ToString();
-    AString strDstIp = m_pIpSecSpP->m_objDstIp.ToString();
-
-    if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-    {
-        IMS_TRACE_D("IPSecSP :: src-ip=%s, dst-ip=%s", strSrcIp.GetStr(), strDstIp.GetStr(), 0);
-    }
-
-    return IMS_TRUE;
-}
-
-PRIVATE
-void OsIpSecSp::SetTransportInfo()
-{
-    // IP address : src-ip / dst-ip
-    if (!SetIpAddress())
-    {
-        return;
-    }
-}
-
-PRIVATE
-void OsIpSecSp::SetSecurityAlgorithmInfo() {}

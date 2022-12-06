@@ -40,16 +40,10 @@ public:
             IN IMS_UINT32 nEncryptionAlgorithm) override;
     void DoneSp() override;
 
-    void* GetConf();
     IMS_UINT32 GetSpi() const;
     void DisplayInfo();
 
     IpSecSaParameter::Policy CreateSaPolicy() const;
-
-private:
-    IMS_BOOL SetIpAddress();
-    void SetTransportInfo();
-    void SetSecurityAlgorithmInfo();
 
 public:
     enum

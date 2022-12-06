@@ -109,7 +109,6 @@ private:
     IMS_SINT32 GetDataState();
     void GetAccessNetworkInfoForWiFi(OUT AccessNetworkInfo& objAccessNetInfo);
     IMS_BOOL IsConnected();
-    IMS_BOOL IsDisconnected();
     void NotifyDataConnected(IN IMS_SINT32 nErrorCode);
     void NotifyDataDisconnected(IN IMS_SINT32 nErrorCode);
     void NotifyDataConnectionFailed(IN IMS_SINT32 nErrorCode);

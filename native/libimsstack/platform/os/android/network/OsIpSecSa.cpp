@@ -23,11 +23,6 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-PRIVATE LOCAL const IMS_CHAR CODE_CYPHER[] =
-        "CUVEFGHLMKeQRPo78pTXYWZcd5aOnSNb26fgjkhiwxmlq34rstuvyz0IABJ1D9";
-
-PRIVATE LOCAL const IMS_CHAR CODE_CYPHER_SPECIAL[] = {20, 21, 22, 23, 24, 25, 26};
-
 class OsIpSecSaPrivate
 {
 public:
@@ -101,13 +96,7 @@ PUBLIC VIRTUAL void OsIpSecSa::SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32
 
 PUBLIC VIRTUAL void OsIpSecSa::DoneSa()
 {
-    MakeSa();
-}
-
-PUBLIC
-void* OsIpSecSa::GetKey()
-{
-    return IMS_NULL;
+    IMS_TRACE_D("IPSEC-SA done.", 0, 0, 0);
 }
 
 PUBLIC
@@ -121,13 +110,6 @@ void OsIpSecSa::DisplayInfo()
 {
     if (IMS_UTIL_SYS_PROP_IS_USER_MODE())
     {
-        AString strIk = m_pIpSecSaP->m_objAuthKey.ToHexString();
-        AString strCk = m_pIpSecSaP->m_objEncryptionKey.ToHexString();
-
-        AString strEncodedIk = EncryptPrintKey(strIk);
-        AString strEncodedCk = EncryptPrintKey(strCk);
-
-        IMS_TRACE_D("IMS_IPSEC: IK=%s,CK=%s", strEncodedIk.GetStr(), strEncodedCk.GetStr(), 0);
         return;
     }
 
@@ -159,117 +141,4 @@ IpSecSaParameter OsIpSecSa::CreateSaParameter(IN IMS_SINT32 nId) const
             m_pIpSecSaP->m_objEncryptionKey);
 
     return objSaParam;
-}
-
-PRIVATE
-IMS_BOOL OsIpSecSa::SetIpAddress()
-{
-    AString strSrcIp = m_pIpSecSaP->m_objSrcIp.ToString();
-    AString strDstIp = m_pIpSecSaP->m_objDstIp.ToString();
-
-    if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-    {
-        IMS_TRACE_D("IPSecSA :: src-ip=%s, dst-ip=%s", strSrcIp.GetStr(), strDstIp.GetStr(), 0);
-    }
-
-    return IMS_TRUE;
-}
-
-PRIVATE
-void OsIpSecSa::MakeSa()
-{
-    // IP address : src-ip / dst-ip
-    if (!SetIpAddress())
-    {
-        return;
-    }
-
-    // Integrity algorithm & key
-    SetAuthenticationKey();
-
-    // Encryption algorithm & key
-    IMS_UINT32 nEncryptionKeyLen = m_pIpSecSaP->m_objEncryptionKey.GetLength();
-
-    if (nEncryptionKeyLen != 0)
-    {
-        SetEncryptionKey();
-    }
-}
-
-PRIVATE
-void OsIpSecSa::SetAuthenticationKey() {}
-
-PRIVATE
-void OsIpSecSa::SetEncryptionKey() {}
-
-PRIVATE
-AString OsIpSecSa::DecryptPrintKey(IN const AString& strInKey)
-{
-    AString strDecodedKey = AString::ConstNull();
-    const IMS_CHAR CODE_DECYPHER[] =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const IMS_CHAR CODE_DECYPHER_SPECIAL[] = {10, 11, 12, 13, 14, 15, 16};
-
-    for (IMS_SINT32 i = 0; i < strInKey.GetLength(); ++i)
-    {
-        // Find a character's position from codeCypher
-        if ((strInKey[i] >= 'A' && strInKey[i] <= 'Z') ||
-                (strInKey[i] >= 'a' && strInKey[i] <= 'z') ||
-                (strInKey[i] >= '0' && strInKey[i] <= '9'))
-        {
-            IMS_SINT32 nPos = 0;
-
-            while (1)
-            {
-                if (CODE_CYPHER[nPos] == strInKey[i])
-                {
-                    strDecodedKey += CODE_DECYPHER[nPos];
-                    break;
-                }
-                nPos++;
-            }
-        }
-        else if ((strInKey[i] >= 20) && (strInKey[i] <= 26))
-        {
-            IMS_SINT32 nPos = 0;
-
-            while (1)
-            {
-                if (CODE_CYPHER_SPECIAL[nPos] == strInKey[i])
-                {
-                    strDecodedKey += CODE_DECYPHER_SPECIAL[nPos];
-                    break;
-                }
-                nPos++;
-            }
-        }
-    }
-    return strDecodedKey;
-}
-
-PRIVATE
-AString OsIpSecSa::EncryptPrintKey(IN const AString& strInKey)
-{
-    AString strEncodedKey = AString::ConstNull();
-    for (IMS_SINT32 i = 0; i < strInKey.GetLength(); i++)
-    {
-        if (strInKey[i] >= 'A' && strInKey[i] <= 'Z')
-        {
-            strEncodedKey += CODE_CYPHER[strInKey[i] - 'A'];
-        }
-        else if (strInKey[i] >= 'a' && strInKey[i] <= 'z')
-        {
-            strEncodedKey += CODE_CYPHER[strInKey[i] - 'a' + 26];
-        }
-        else if (strInKey[i] >= '0' && strInKey[i] <= '9')
-        {
-            strEncodedKey += CODE_CYPHER[strInKey[i] - '0' + 26 + 26];
-        }
-        else if (strInKey[i] >= 10 && strInKey[i] <= 16)
-        {
-            strEncodedKey += CODE_CYPHER_SPECIAL[strInKey[i] - 10];
-        }
-    }
-
-    return strEncodedKey;
 }

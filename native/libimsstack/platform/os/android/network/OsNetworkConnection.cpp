@@ -964,12 +964,6 @@ IMS_BOOL OsNetworkConnection::IsConnected()
 }
 
 PRIVATE
-IMS_BOOL OsNetworkConnection::IsDisconnected()
-{
-    return (GetDataState() == DATA_DISCONNECTED);
-}
-
-PRIVATE
 void OsNetworkConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
 {
     if (m_nState == STATE_ACTIVE)
