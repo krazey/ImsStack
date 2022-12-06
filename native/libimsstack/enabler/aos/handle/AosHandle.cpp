@@ -511,6 +511,11 @@ PROTECTED VIRTUAL void AosHandle::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
+    InitializeHoldingBlocksPolicy();
+    InitializeServiceBlock();
+    InitializeServiceFeature();
+    InitializeFeatureTags();
+
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
     if (piNetTracker != IMS_NULL)
     {
@@ -526,11 +531,6 @@ PROTECTED VIRTUAL void AosHandle::Init()
 
     m_piInfo = new AosInfo(m_piAppContext);
     m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
-
-    InitializeHoldingBlocksPolicy();
-    InitializeServiceBlock();
-    InitializeServiceFeature();
-    InitializeFeatureTags();
 
     IMSMSG objMSG(HANDLE_MSG_BLOCK_STATUS, 0, 0);
     OnStateMessage(objMSG);
