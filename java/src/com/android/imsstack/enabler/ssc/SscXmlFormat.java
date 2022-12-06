@@ -23,7 +23,11 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 
-public class SscXmlFormat {
+/**
+ * SscXmlFormat manages XML schema and data format which stored in XCAP server. These are used to
+ * parse and create XML when sending and receiving HTTP request.
+ */
+public final class SscXmlFormat {
     private static class XcapServerFormat {
         private boolean mIsNoReplyTimerOmitted = false;
         private boolean mIsNoReplyTimerInRule = false;
@@ -41,17 +45,16 @@ public class SscXmlFormat {
          * mCfProvisionStatus and mCbProvisionStatus are used to check whether the conditions are
          * provisioned by XCAP server only when creating ruleset and rule element to support IR.92
          * v9.0. If not provisioned, UE will not create rule element for condition.
-         * The params consist of condition and provisioned status
+         * The params consist of condition and provisioned status.
          */
         private final HashMap<Integer, Boolean> mCfProvisionStatus = new HashMap<>();
         private final HashMap<Integer, Boolean> mCbProvisionStatus = new HashMap<>();
 
         /**
          * mCfMediaCapability and mCbMediaCapability are used to check whether the media
-         * capabilities are supported by XCAP server only when creating ruleset and rule
-         * element to support IR.92 v9.0. If not supported, UE will not create media element for
-         * media type.
-         * The params consist of media type and status
+         * capabilities are supported by XCAP server only when creating ruleset and rule element to
+         * support IR.92 v9.0. If not supported, UE will not create media element for media type.
+         * The params consist of media type and status.
          */
         private final HashMap<Integer, Boolean> mCfMediaCapability = new HashMap<>();
         private final HashMap<Integer, Boolean> mCbMediaCapability = new HashMap<>();
@@ -75,6 +78,16 @@ public class SscXmlFormat {
 
             mCbMediaCapability.put(MEDIA_TYPE_AUDIO, false);
             mCbMediaCapability.put(MEDIA_TYPE_VIDEO, false);
+        }
+
+        private void clear() {
+            mTags.clear();
+            mAudioRuleIds.clear();
+            mVideoRuleIds.clear();
+            mCfProvisionStatus.clear();
+            mCbProvisionStatus.clear();
+            mCfMediaCapability.clear();
+            mCbMediaCapability.clear();
         }
 
         private void setIsNoReplyTimerOmitted(boolean isNoReplyTimerOmitted) {
@@ -115,7 +128,7 @@ public class SscXmlFormat {
     };
 
     @VisibleForTesting
-    protected static final HashMap<Integer, XcapServerFormat> sServerFormats = new HashMap<>();
+    static final HashMap<Integer, XcapServerFormat> sServerFormats = new HashMap<>();
 
     public static final String NS_SS_PREFIX = "ss:";
     public static final String NS_CP_PREFIX = "cp:";
@@ -231,18 +244,16 @@ public class SscXmlFormat {
     public static final int MEDIA_TYPE_AUDIO = 0;
     public static final int MEDIA_TYPE_VIDEO = 1;
 
-    protected static void init(int slotId) {
+    static void init(int slotId) {
         ImsLog.d(slotId, "");
 
         setXcapServerFormat(slotId, new XcapServerFormat());
     }
 
-    protected static void clear(int slotId) {
+    static void clear(int slotId) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf != null) {
-            xsf.getTags().clear();
-            xsf.getAudioRuleIds().clear();
-            xsf.getVideoRuleIds().clear();
+            xsf.clear();
             sServerFormats.remove(slotId);
         }
     }
@@ -275,7 +286,7 @@ public class SscXmlFormat {
         return namespace + ":" + elementName;
     }
 
-    protected static void setTag(int slotId, String tagName, String namespace) {
+    static void setTag(int slotId, String tagName, String namespace) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return;
@@ -292,7 +303,7 @@ public class SscXmlFormat {
         xsf.getTags().put(tagName, namespace);
     }
 
-    protected static String getSsElement(int slotId, String elementName) {
+    static String getSsElement(int slotId, String elementName) {
         if (SscConfig.isOmitNamespaceSs(slotId)) {
             return elementName;
         }
@@ -310,7 +321,7 @@ public class SscXmlFormat {
         return tag;
     }
 
-    protected static String getCpElement(int slotId, String elementName) {
+    static String getCpElement(int slotId, String elementName) {
         if (SscConfig.isOmitNamespaceCp(slotId)) {
             return elementName;
         }
@@ -328,7 +339,7 @@ public class SscXmlFormat {
         return tag;
     }
 
-    protected static void displayTags(int slotId) {
+    static void displayTags(int slotId) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             ImsLog.d("wrong slot - " + slotId);
@@ -338,7 +349,7 @@ public class SscXmlFormat {
         xsf.getTags().forEach((name, ns) -> ImsLog.d(slotId, "Name:" + name + ", NS: " + ns));
     }
 
-    protected static void setRuleId(int slotId, int mediaType, String serviceName, int condition,
+    static void setRuleId(int slotId, int mediaType, String serviceName, int condition,
             String ruleId) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
@@ -362,8 +373,7 @@ public class SscXmlFormat {
                 ", condition : " + condition + ", ruleId : " + ruleId);
     }
 
-    protected static String getRuleId(int slotId, int mediaType, String serviceName,
-            int condition) {
+    static String getRuleId(int slotId, int mediaType, String serviceName, int condition) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return null;
@@ -384,8 +394,7 @@ public class SscXmlFormat {
         return services.get(serviceName).get(condition);
     }
 
-    protected static String getDefaultRuleId(int slotId, int mediaType, String serviceName,
-            int condition) {
+    static String getDefaultRuleId(int slotId, int mediaType, String serviceName, int condition) {
         String ruleId = null;
         if (CD.equals(serviceName)) {
             switch (condition) {
@@ -448,7 +457,7 @@ public class SscXmlFormat {
         return ruleId;
     }
 
-    protected static String getRuleConditionTag(int slotId, String serviceName, int condition) {
+    static String getRuleConditionTag(int slotId, String serviceName, int condition) {
         String ruleConditionTag = null;
         if (CD.equals(serviceName)) {
             switch (condition) {
@@ -503,7 +512,7 @@ public class SscXmlFormat {
         return getSsElement(slotId, ruleConditionTag);
     }
 
-    protected static boolean getIsNoReplyTimerOmitted(int slotId) {
+    static boolean getIsNoReplyTimerOmitted(int slotId) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return false;
@@ -512,7 +521,7 @@ public class SscXmlFormat {
         return xsf.getIsNoReplyTimerOmitted();
     }
 
-    protected static void setIsNoReplyTimerOmitted(int slotId, boolean isNoReplyTimerOmitted) {
+    static void setIsNoReplyTimerOmitted(int slotId, boolean isNoReplyTimerOmitted) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return;
@@ -521,7 +530,7 @@ public class SscXmlFormat {
         xsf.setIsNoReplyTimerOmitted(isNoReplyTimerOmitted);
     }
 
-    protected static boolean getIsNoReplyTimerInRule(int slotId) {
+    static boolean getIsNoReplyTimerInRule(int slotId) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return false;
@@ -530,7 +539,7 @@ public class SscXmlFormat {
         return xsf.getIsNoReplyTimerInRule();
     }
 
-    protected static void setIsNoReplyTimerInRule(int slotId, boolean isNoReplyTimerInRule) {
+    static void setIsNoReplyTimerInRule(int slotId, boolean isNoReplyTimerInRule) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return;
@@ -539,7 +548,7 @@ public class SscXmlFormat {
         xsf.setIsNoReplyTimerInRule(isNoReplyTimerInRule);
     }
 
-    protected static boolean getCfnlExist(int slotId) {
+    static boolean getCfnlExist(int slotId) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return false;
@@ -548,7 +557,7 @@ public class SscXmlFormat {
         return xsf.getIsCfnlExist();
     }
 
-    protected static void setCfnlExist(int slotId, boolean isCfnlExist) {
+    static void setCfnlExist(int slotId, boolean isCfnlExist) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return;
@@ -557,7 +566,7 @@ public class SscXmlFormat {
         xsf.setIsCfnlExist(isCfnlExist);
     }
 
-    protected static boolean getProvisionStatus(int slotId, String serviceName, int condition) {
+    static boolean getProvisionStatus(int slotId, String serviceName, int condition) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return false;
@@ -576,7 +585,7 @@ public class SscXmlFormat {
         return false;
     }
 
-    protected static void setProvisionStatus(int slotId, String serviceName, int condition,
+    static void setProvisionStatus(int slotId, String serviceName, int condition,
             boolean provisioned) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
@@ -590,7 +599,7 @@ public class SscXmlFormat {
         }
     }
 
-    protected static boolean isNamespaceSsSupported(int slotId) {
+    static boolean isNamespaceSsSupported(int slotId) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return false;
@@ -599,7 +608,7 @@ public class SscXmlFormat {
         return NS_SS_PREFIX.equals(xsf.mNsSsPrefix);
     }
 
-    protected static boolean isNamespaceCpSupported(int slotId) {
+    static boolean isNamespaceCpSupported(int slotId) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return false;
@@ -608,8 +617,7 @@ public class SscXmlFormat {
         return NS_CP_PREFIX.equals(xsf.mNsCpPrefix);
     }
 
-    protected static boolean getMediaCapability(int slotId, String serviceName,
-            int mediaType) {
+    static boolean getMediaCapability(int slotId, String serviceName, int mediaType) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
             return false;
@@ -628,7 +636,7 @@ public class SscXmlFormat {
         return false;
     }
 
-    protected static void setMediaCapability(int slotId, String serviceName, int mediaType,
+    static void setMediaCapability(int slotId, String serviceName, int mediaType,
             boolean mediaCapability) {
         XcapServerFormat xsf = getXcapServerFormat(slotId);
         if (xsf == null) {
