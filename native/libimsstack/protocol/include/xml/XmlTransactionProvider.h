@@ -22,7 +22,7 @@
 
 class XmlApp;
 
-class XmlTransactionProvider : public ImsActivityEx, public IXmlTransactionProvider
+class XmlTransactionProvider final : public ImsActivityEx, public IXmlTransactionProvider
 {
 public:
     XmlTransactionProvider();
