@@ -22,7 +22,7 @@
 
 class ImsStateMachine : public ImsStateObject
 {
-    DECLARE_STATE_MAP()
+    DECLARE_STATE_MAP_BASE()
 
 public:
     explicit ImsStateMachine(IN IMS_UINT32 nState = IMS_INVALID_STATE);

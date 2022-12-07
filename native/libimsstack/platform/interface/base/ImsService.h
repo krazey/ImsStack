@@ -22,7 +22,7 @@
 
 class ImsService : public ImsActivity, public ImsStateObject
 {
-    DECLARE_STATE_MAP()
+    DECLARE_STATE_MAP_BASE()
 
 public:
     explicit ImsService(IN const AString& strName);

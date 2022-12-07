@@ -23,9 +23,13 @@
 #define IMS_INVALID_MSG   0xFFFFFFFF
 
 // clang-format off
+#define DECLARE_STATE_MAP_BASE() \
+protected:                       \
+    virtual const StateMap* GetStateMap() const;
+
 #define DECLARE_STATE_MAP() \
 protected:                  \
-    virtual const StateMap* GetStateMap() const;
+    const StateMap* GetStateMap() const override;
 
 #define BEGIN_STATE_MAP(THIS_CLASS)                           \
     PROTECTED const StateMap* THIS_CLASS::GetStateMap() const \
