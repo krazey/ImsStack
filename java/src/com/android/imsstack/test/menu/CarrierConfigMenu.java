@@ -331,7 +331,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
                                         provisioningStatus);
                             }
                         } catch (Throwable t) {
-                            t.printStackTrace();
+                            ImsLog.e(mSlotId, "setProvisioningValue: " + t);
                         }
                     }
                 }
@@ -645,7 +645,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
         try {
             intValue = Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            ImsLog.w("parseInt: value=" + value + ", " + e);
         }
 
         return intValue;

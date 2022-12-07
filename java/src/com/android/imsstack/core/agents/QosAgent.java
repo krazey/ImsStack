@@ -415,7 +415,7 @@ public class QosAgent {
         try {
             return InetAddress.getByName(address);
         } catch (IOException e) {
-            e.printStackTrace();
+            ImsLog.e("getByName: " + e);
         }
 
         return null;

@@ -459,7 +459,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                             dialedString = new String(value, "UTF-8");
                         }
                     } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
+                        ImsLog.e(getSlotId(), "USAT: " + e);
                     }
                 } else if (tag == TAG_MEDIA_TYPE || tag == (TAG_MEDIA_TYPE | 0x80)) {
                     if (value.length != 0) {

@@ -26,7 +26,7 @@ public final class IoUtils {
             } catch (RuntimeException rethrown) {
                throw rethrown;
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(Log.TAG, "close: " + e);
             }
         }
     }

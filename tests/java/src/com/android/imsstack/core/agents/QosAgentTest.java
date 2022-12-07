@@ -20,7 +20,8 @@ import static org.junit.Assert.assertEquals;
 
 import android.util.Pair;
 
-import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.ContextFixture;
+import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,17 +36,23 @@ import java.net.InetSocketAddress;
 
 @RunWith(JUnit4.class)
 public class QosAgentTest {
+    private static final int SLOT0 = 0;
 
-    public static final String TAG = "QosAgentTest";
-    private int mSlotId;
+    private ContextFixture mContextFixture;
     private QosAgent mQosAgent;
 
     @Before
     public void setUp() throws Exception {
-        mSlotId = 0;
-        ImsLog.e(mSlotId, "Start of the Unit Test for QosAgentTest");
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
 
-        mQosAgent = new QosAgent(mSlotId);
+        mQosAgent = new QosAgent(SLOT0);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        AppContext.deinit();
+        mContextFixture = null;
     }
 
     @Test
@@ -86,50 +93,36 @@ public class QosAgentTest {
     }
 
     @Test
-    public void testUpdateQosConnection() {
+    public void testUpdateQosConnection() throws IOException {
         final String strLocalAddr = "111.11.11.11";
         final int localPort = 1111;
         final String strRemoteAddr = "122.22.22.22";
         final int remotePort = 2222;
 
-        try {
-            InetAddress localAddress = InetAddress.parseNumericAddress(strLocalAddr);
-            InetAddress remoteAddress = InetAddress.parseNumericAddress(strRemoteAddr);
-            DatagramSocket rtpSocket = new DatagramSocket(localPort, localAddress);
-            DatagramSocket rtcpSocket = new DatagramSocket(remotePort, remoteAddress);
+        InetAddress localAddress = InetAddress.parseNumericAddress(strLocalAddr);
+        InetAddress remoteAddress = InetAddress.parseNumericAddress(strRemoteAddr);
+        DatagramSocket rtpSocket = new DatagramSocket(localPort, localAddress);
+        DatagramSocket rtcpSocket = new DatagramSocket(remotePort, remoteAddress);
 
-            final boolean mRetResult =
-                    mQosAgent.updateQosConnection(rtpSocket, rtcpSocket, strRemoteAddr, remotePort);
+        final boolean mRetResult =
+                mQosAgent.updateQosConnection(rtpSocket, rtcpSocket, strRemoteAddr, remotePort);
 
-            assertEquals(true, mRetResult);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        assertEquals(true, mRetResult);
     }
 
     @Test
-    public void testdestroyQosConnection() {
+    public void testDestroyQosConnection() throws IOException {
         final String strLocalAddr = "111.11.11.11";
         final int tpLocalPort = 1111;
 
-        try {
-            InetAddress localAddress = InetAddress.parseNumericAddress(strLocalAddr);
+        InetAddress localAddress = InetAddress.parseNumericAddress(strLocalAddr);
 
-            DatagramSocket rtpSocket = new DatagramSocket(tpLocalPort, localAddress);
-            DatagramSocket rtcpSocket = new DatagramSocket(tpLocalPort + 1, localAddress);
+        DatagramSocket rtpSocket = new DatagramSocket(tpLocalPort, localAddress);
+        DatagramSocket rtcpSocket = new DatagramSocket(tpLocalPort + 1, localAddress);
 
-            mQosAgent.destroyQosConnection(rtpSocket, rtcpSocket);
+        mQosAgent.destroyQosConnection(rtpSocket, rtcpSocket);
 
-            assertEquals("", rtpSocket);
-            assertEquals("", rtcpSocket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        mSlotId = 0;
-        ImsLog.e(mSlotId, "End of the Unit Test for mQosAgentTest");
+        assertEquals("", rtpSocket);
+        assertEquals("", rtcpSocket);
     }
 }
