@@ -85,7 +85,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     /**
      * @param slotId This id is intended to manage Sip Messages for multi-SIMs
-     * @return To deliver the object for each sim to the sipcontroller
+     * @return To deliver the object for each sim to the sipController
      */
     public static SipControllerAgent getInstance(int slotId) {
         synchronized (sAgentArray) {
@@ -103,7 +103,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     /**
      * @param slotId This id is intended to manage Sip Messages for multi-SIMs
      * @param subId The ID of the Subscription associated with slot ID.
-     * @return To deliver the object for each sim to the sipcontroller
+     * @return To deliver the object for each sim to the sipController
      */
     @VisibleForTesting
     public static SipControllerAgent getInstance(int slotId, int subId) {

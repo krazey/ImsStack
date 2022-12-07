@@ -21,7 +21,7 @@
 class RcsMessageParsingUtils
 {
 public:
-    RcsMessageParsingUtils(IN IMS_SINT32 nSimSlot);
+    explicit RcsMessageParsingUtils(IN IMS_SINT32 nSimSlot);
     virtual ~RcsMessageParsingUtils();
 };
 #endif  // RCS_MESSAGE_PARSING_UTILS_H_

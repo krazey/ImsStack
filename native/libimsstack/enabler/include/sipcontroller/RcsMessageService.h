@@ -25,7 +25,6 @@
 #include "ISipMessage.h"
 #include "RcsMessageRepository.h"
 
-class RcsMessageTracker;
 class RcsMessageService :
         public ImsService,
         public IDirectCoreServiceListener,
