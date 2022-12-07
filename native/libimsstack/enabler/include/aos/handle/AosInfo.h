@@ -29,26 +29,26 @@ public:
 
 private:
     // IImsAosInfo
-    virtual AString GetAssociatedUri();
-    virtual IMS_SINT32 GetConnectionType();
-    virtual IMS_UINT32 GetImsFeatures();
-    virtual IMS_UINT32 GetImsState();
-    virtual IMS_SINT32 GetIpcanType();
-    virtual AString GetLastPathHeaderValue();
-    virtual AString GetLocalAddress();
-    virtual IMS_UINT32 GetLocalPort();
-    virtual IMS_UINT32 GetRegisteredNetworkType();
-    virtual AString GetPathHeaderValue();
-    virtual AString GetPcscfAddress();
-    virtual IMS_UINT32 GetPcscfPort();
-    virtual IMS_UINT32 GetRegistrationMode();
-    virtual AString GetSupportedHeaderValue();
-    virtual AString GetServiceRouteHeaderValue();
-    virtual void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized);
-    virtual void NotifyScbmState(IN IMS_UINT32 nState);
-    virtual void NotifyPublishState(IN IMS_BOOL bIsStarted);
-    virtual void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized);
-    virtual void NotifyEpsfbCallState(IN IMS_UINT32 nState);
+    AString GetAssociatedUri() override;
+    IMS_SINT32 GetConnectionType() override;
+    IMS_UINT32 GetImsFeatures() override;
+    IMS_UINT32 GetImsState() override;
+    IMS_SINT32 GetIpcanType() override;
+    AString GetLastPathHeaderValue() override;
+    AString GetLocalAddress() override;
+    IMS_UINT32 GetLocalPort() override;
+    IMS_UINT32 GetRegisteredNetworkType() override;
+    AString GetPathHeaderValue() override;
+    AString GetPcscfAddress() override;
+    IMS_UINT32 GetPcscfPort() override;
+    IMS_UINT32 GetRegistrationMode() override;
+    AString GetSupportedHeaderValue() override;
+    AString GetServiceRouteHeaderValue() override;
+    void NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized) override;
+    void NotifyScbmState(IN IMS_UINT32 nState) override;
+    void NotifyPublishState(IN IMS_BOOL bIsStarted) override;
+    void NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized) override;
+    void NotifyEpsfbCallState(IN IMS_UINT32 nState) override;
 
     IMS_BOOL IsForbiddenBlock();
 

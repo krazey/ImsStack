@@ -26,24 +26,24 @@ public:
     virtual ~AosBuilder();
 
     /// AosAppContext
-    virtual IAosAppContext* BuildAppContext(IN AosStaticProfile* pProflie);
-    virtual IAosApplication* BuildApp(IN IAosAppContext* piAppContext);
-    virtual IAosHandle* BuildHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
-            IN const AString& strSrvId);
-    virtual IAosRegistration* BuildRegistration(IN IAosAppContext* piAppContext);
-    virtual IAosSubscriber* BuildSubscriber(IN IAosAppContext* piAppContext);
-    virtual IAosPcscf* BuildPcscf(IN IAosAppContext* piAppContext);
-    virtual IAosBlock* BuildBlock(IN IAosAppContext* piAppContext);
-    virtual IAosConnection* BuildConnection(IN IAosAppContext* piAppContext);
-    virtual IAosNetTracker* BuildNetTracker(IN IAosAppContext* piAppContext);
+    IAosAppContext* BuildAppContext(IN AosStaticProfile* pProflie) override;
+    IAosApplication* BuildApp(IN IAosAppContext* piAppContext) override;
+    IAosHandle* BuildHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strSrvId) override;
+    IAosRegistration* BuildRegistration(IN IAosAppContext* piAppContext) override;
+    IAosSubscriber* BuildSubscriber(IN IAosAppContext* piAppContext) override;
+    IAosPcscf* BuildPcscf(IN IAosAppContext* piAppContext) override;
+    IAosBlock* BuildBlock(IN IAosAppContext* piAppContext) override;
+    IAosConnection* BuildConnection(IN IAosAppContext* piAppContext) override;
+    IAosNetTracker* BuildNetTracker(IN IAosAppContext* piAppContext) override;
 
     /// AoSProvider
-    virtual IAosCallTracker* BuildCallTracker(IN IMS_SINT32 nSlotId);
-    virtual IAosRegStateManager* BuildRegStateManager();
-    virtual IAosService* BuildService(IN IMS_SINT32 nSlotId);
-    virtual IAosSubscriberManager* BuildSubscriberManager(IN IMS_SINT32 nSlotId);
-    virtual IAosRetryRepository* BuildRetryRepository(IN IMS_SINT32 nSlotId);
-    virtual IAosNConfiguration* BuildNConfiguration();
-    virtual IAosTransaction* BuildTransaction(IN IMS_SINT32 nSlotId);
+    IAosCallTracker* BuildCallTracker(IN IMS_SINT32 nSlotId) override;
+    IAosRegStateManager* BuildRegStateManager() override;
+    IAosService* BuildService(IN IMS_SINT32 nSlotId) override;
+    IAosSubscriberManager* BuildSubscriberManager(IN IMS_SINT32 nSlotId) override;
+    IAosRetryRepository* BuildRetryRepository(IN IMS_SINT32 nSlotId) override;
+    IAosNConfiguration* BuildNConfiguration() override;
+    IAosTransaction* BuildTransaction(IN IMS_SINT32 nSlotId) override;
 };
 #endif  // AOS_BUILDER_H_

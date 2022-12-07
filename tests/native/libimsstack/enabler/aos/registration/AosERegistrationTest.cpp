@@ -98,7 +98,7 @@ class TestAosERegistration : public AosERegistration
     {
     }
 
-    inline virtual IRegistration* GetRegistration() { return piMockRegistration; }
+    inline IRegistration* GetRegistration() override { return piMockRegistration; }
 
     friend class AosERegistrationTest;
     FRIEND_TEST(AosERegistrationTest, Start);

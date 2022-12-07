@@ -73,31 +73,31 @@ public:
     virtual ~AosRegistration();
 
     /// IAosRegistration
-    virtual void Start();
-    virtual void Stop();
-    virtual void Update(
-            IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE, IN IMS_BOOL bExplicitUpdate = IMS_TRUE);
-    virtual void Reconfig();
+    void Start() override;
+    void Stop() override;
+    void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
+            IN IMS_BOOL bExplicitUpdate = IMS_TRUE) override;
+    void Reconfig() override;
 
-    virtual void Destroy();
+    void Destroy() override;
 
-    virtual void SetListener(IN IAosRegistrationListener* piRegListener);
+    void SetListener(IN IAosRegistrationListener* piRegListener) override;
 
-    virtual void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0);
+    void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) override;
 
-    virtual IMS_UINT32 GetMode();
-    virtual IMS_UINT32 GetProperty(
-            IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue);
-    virtual IMS_UINT32 GetState();
-    virtual AosRegistrationType GetRegType();
+    IMS_UINT32 GetMode() override;
+    IMS_UINT32 GetProperty(
+            IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) override;
+    IMS_UINT32 GetState() override;
+    AosRegistrationType GetRegType() override;
 
-    virtual IMS_BOOL IsRegistered();
-    virtual IMS_BOOL IsRefreshing();
-    virtual IMS_BOOL IsRetryTimer();
-    virtual IMS_BOOL IsRetryHeld();
-    virtual IMS_BOOL IsTerminated();
+    IMS_BOOL IsRegistered() override;
+    IMS_BOOL IsRefreshing() override;
+    IMS_BOOL IsRetryTimer() override;
+    IMS_BOOL IsRetryHeld() override;
+    IMS_BOOL IsTerminated() override;
 
-    virtual void SetAppReady(IN IMS_BOOL bReady);
+    void SetAppReady(IN IMS_BOOL bReady) override;
 
 protected:
     void SetState(IN IMS_UINT32 nState);
@@ -154,10 +154,10 @@ protected:
     virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
 
     /// Initialize
-    virtual void Init();
+    void Init() override;
     virtual void InitFeatures();
 
-    virtual void CleanUp();
+    void CleanUp() override;
     virtual void DestroyEx();
 
     virtual IMS_BOOL IsGeolocationInfoRequired();
@@ -298,17 +298,17 @@ protected:
     virtual void RecordImpu();
 
     /// IRegistrationListener
-    virtual void Registration_AuthenticationChallenged(
-            IN IMS_SINT32 nAlgorithm, OUT IMS_BOOL& bResponseToChallenge);
-    virtual void Registration_NotifyAkaResponse(IN IMS_SINT32 nResult, IN const ByteArray& objIK,
-            IN const ByteArray& objCK, OUT IMS_BOOL& bResultOfSA);
-    virtual void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
-    virtual void Registration_Started();
-    virtual void Registration_StartFailed(IN IMS_SINT32 nReason);
-    virtual void Registration_Updated();
-    virtual void Registration_UpdateFailed(IN IMS_SINT32 nReason);
-    virtual void Registration_Removed();
-    virtual void Registration_Terminated(IN IMS_SINT32 nReason);
+    void Registration_AuthenticationChallenged(
+            IN IMS_SINT32 nAlgorithm, OUT IMS_BOOL& bResponseToChallenge) override;
+    void Registration_NotifyAkaResponse(IN IMS_SINT32 nResult, IN const ByteArray& objIK,
+            IN const ByteArray& objCK, OUT IMS_BOOL& bResultOfSA) override;
+    void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
+    void Registration_Started() override;
+    void Registration_StartFailed(IN IMS_SINT32 nReason) override;
+    void Registration_Updated() override;
+    void Registration_UpdateFailed(IN IMS_SINT32 nReason) override;
+    void Registration_Removed() override;
+    void Registration_Terminated(IN IMS_SINT32 nReason) override;
 
     /// Timer
     virtual void ProcessOfflineRecoverTimerExpired();
@@ -325,7 +325,7 @@ protected:
     virtual void ClearTimers();
 
     /// ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     // Subscription
     virtual IMS_BOOL CreateSubscription();
@@ -343,10 +343,10 @@ protected:
     virtual void UpdateReason();
 
     /// IAosSubscriptionListener
-    virtual void Subscription_StateChanged(IN IMS_SINT32 nState, IN IMS_SINT32 nReason = 0);
-    virtual IMS_BOOL Subscription_CanBeTransmitted();
-    virtual void Subscription_NotifyReceived(IN IMS_SINT32 nEvent);
-    virtual void Subscription_Request(IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
+    void Subscription_StateChanged(IN IMS_SINT32 nState, IN IMS_SINT32 nReason = 0) override;
+    IMS_BOOL Subscription_CanBeTransmitted() override;
+    void Subscription_NotifyReceived(IN IMS_SINT32 nEvent) override;
+    void Subscription_Request(IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0) override;
 
     /// Ipsec Helper
     virtual void CreateIpsecHelper();
@@ -357,29 +357,29 @@ protected:
     virtual void StopKeepAlive();
 
     /// IAosKeepAliveListener
-    virtual void KeepAlive_DetectedFlowFailed();
+    void KeepAlive_DetectedFlowFailed() override;
 
     /// IAosBlockListener
-    virtual void Block_Changed(IN IMS_UINT32 nType = 0, IN IMS_UINT32 nParam = 0);
+    void Block_Changed(IN IMS_UINT32 nType = 0, IN IMS_UINT32 nParam = 0) override;
 
     /// IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
+    void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
 
     /// IAosNConfigurationListener
-    virtual void NConfiguration_NotifyConfigChanged();
+    void NConfiguration_NotifyConfigChanged() override;
 
     /// IAosNetTrackerListener
-    virtual void NetTracker_StatusChanged(){};
+    void NetTracker_StatusChanged() override{};
 
     /// IAosTransactionListener
-    virtual void Transaction_OnConnectionFailed(
-            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis);
-    virtual void Transaction_OnConnectionSetupPrepared();
-    virtual void Transaction_OnTrafficPriorityChanged();
+    void Transaction_OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
+            IN IMS_UINT32 nWaitTimeMillis) override;
+    void Transaction_OnConnectionSetupPrepared() override;
+    void Transaction_OnTrafficPriorityChanged() override;
 
     /// IMessageMediator
-    virtual IMS_RESULT MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
+    IMS_RESULT MessageMediator_AdjustMessage(
+            IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) override;
 
     virtual IMS_BOOL AddLocationHeaderBody(
             IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);

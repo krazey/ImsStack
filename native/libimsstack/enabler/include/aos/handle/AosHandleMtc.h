@@ -26,37 +26,38 @@ public:
     virtual ~AosHandleMtc();
 
     // IAosHandle
-    virtual IMS_BOOL App_Notify();
+    IMS_BOOL App_Notify() override;
 
     // IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
+    void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
 
     // IAosNetTrackerListener
-    virtual void NetTracker_StatusChanged();
+    void NetTracker_StatusChanged() override;
 
 protected:
-    virtual void InitializeHoldingBlocksPolicy();
-    virtual void InitializeServiceBlock();
-    virtual void InitializeServiceFeature();
-    virtual void InitializeFeatureTags();
+    void InitializeHoldingBlocksPolicy() override;
+    void InitializeServiceBlock() override;
+    void InitializeServiceFeature() override;
+    void InitializeFeatureTags() override;
 
-    virtual void CheckSuspended();
-    virtual void SetSuspendedReason(IN IMS_UINT32 nReason);
-    virtual void ResetSuspendedReason(IN IMS_UINT32 nReason);
+    void CheckSuspended() override;
+    void SetSuspendedReason(IN IMS_UINT32 nReason) override;
+    void ResetSuspendedReason(IN IMS_UINT32 nReason) override;
 
-    virtual void Init();
-    virtual void CleanUp();
+    void Init() override;
+    void CleanUp() override;
 
-    virtual IMS_BOOL IsHandleBlocked() const;
+    IMS_BOOL IsHandleBlocked() const override;
 
-    virtual void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
-    virtual void ProcessBlockChanged();
-    virtual void ProcessCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
-    virtual void ProcessNetworkChanged();
-    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
+    void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked) override;
+    void ProcessBlockChanged() override;
+    void ProcessCapabilitiesChanged(
+            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities) override;
+    void ProcessNetworkChanged() override;
+    void ProcessVopsStateChanged(
+            IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE) override;
 
-    virtual void ReevaluateUnavailableFeature();
+    void ReevaluateUnavailableFeature() override;
 
 private:
     void UpdateGGsmaRcsTelephonyFeatureTag();

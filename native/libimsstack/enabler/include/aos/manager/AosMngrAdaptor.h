@@ -35,10 +35,10 @@ private:
     AosMngrAdaptor& operator=(IN const AosMngrAdaptor& objRhs);
 
 public:
-    virtual IImsAos* GetImsAos(IN const AString& strAppId, IN const AString& strServiceId);
-    virtual IMSList<IImsAos*> GetImsAosList(
-            IN const AString& strAppId, IN const AString& strServiceId);
-    virtual IMSList<IImsAos*> GetImsAosList(IN const AString& strAppId);
+    IImsAos* GetImsAos(IN const AString& strAppId, IN const AString& strServiceId) override;
+    IMSList<IImsAos*> GetImsAosList(
+            IN const AString& strAppId, IN const AString& strServiceId) override;
+    IMSList<IImsAos*> GetImsAosList(IN const AString& strAppId) override;
 
 private:
     IMS_SINT32 m_nSlotId;

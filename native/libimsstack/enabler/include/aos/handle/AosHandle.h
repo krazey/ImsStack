@@ -64,73 +64,73 @@ public:
     virtual ~AosHandle();
 
     // IAosHandle
-    virtual AString& GetAppId();
-    virtual AString& GetServiceId();
-    virtual IMS_UINT32 GetServiceType();
+    AString& GetAppId() override;
+    AString& GetServiceId() override;
+    IMS_UINT32 GetServiceType() override;
 
-    virtual IImsAosMonitor* GetMonitor();
+    IImsAosMonitor* GetMonitor() override;
 
-    virtual IMS_SINT32 GetRequestType();
-    virtual void SetRequestType(IN IMS_SINT32 nReqType);
+    IMS_SINT32 GetRequestType() override;
+    void SetRequestType(IN IMS_SINT32 nReqType) override;
 
-    virtual IMS_BOOL IsRegBinded();
-    virtual void SetRegBinded(IN IMS_BOOL bBind);
+    IMS_BOOL IsRegBinded() override;
+    void SetRegBinded(IN IMS_BOOL bBind) override;
 
-    virtual IMS_BOOL IsNetworkRegBinded();
-    virtual void SetNetworkRegBinded(IN IMS_BOOL bNetworkBind);
+    IMS_BOOL IsNetworkRegBinded() override;
+    void SetNetworkRegBinded(IN IMS_BOOL bNetworkBind) override;
 
-    virtual IMS_BOOL IsRegFeatureTagRequired();
+    IMS_BOOL IsRegFeatureTagRequired() override;
 
-    virtual AosFeatureTagList& GetFeatureTagList();
-    virtual AosFeatureTagList& GetBindedFeatureTagList();
+    AosFeatureTagList& GetFeatureTagList() override;
+    AosFeatureTagList& GetBindedFeatureTagList() override;
 
-    virtual void ProcessFeatureTagChange();
+    void ProcessFeatureTagChange() override;
 
-    virtual void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0);
+    void Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState = 0) override;
 
-    virtual IMS_BOOL App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam);
-    virtual IMS_BOOL App_Notify();
+    IMS_BOOL App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam) override;
+    IMS_BOOL App_Notify() override;
 
-    virtual void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked);
+    virtual void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked) override;
 
     // IImsAos
-    virtual IMS_BOOL Control(IN IMS_UINT32 nType);
-    virtual IImsAosInfo* GetAosInfo();
-    virtual IMS_UINT32 GetFeatures();
-    virtual IMS_UINT32 GetSuspendedReason();
-    virtual IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature);
-    virtual IMS_BOOL IsImsConnected();
-    virtual IMS_BOOL IsImsSuspended();
-    virtual void SetListener(IN IImsAosListener* piListener);
-    virtual void SetMonitor(IN IImsAosMonitor* piMonitor);
-    virtual IMS_BOOL SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService);
-    virtual void UpdateFeature(IN IMS_UINT32 nFeatures);
-    virtual void UpdateFeature(IN IMSList<ImsAosFeatureTag*>& objFeatureTag);
+    IMS_BOOL Control(IN IMS_UINT32 nType) override;
+    IImsAosInfo* GetAosInfo() override;
+    IMS_UINT32 GetFeatures() override;
+    IMS_UINT32 GetSuspendedReason() override;
+    IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) override;
+    IMS_BOOL IsImsConnected() override;
+    IMS_BOOL IsImsSuspended() override;
+    void SetListener(IN IImsAosListener* piListener) override;
+    void SetMonitor(IN IImsAosMonitor* piMonitor) override;
+    IMS_BOOL SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) override;
+    void UpdateFeature(IN IMS_UINT32 nFeatures) override;
+    void UpdateFeature(IN IMSList<ImsAosFeatureTag*>& objFeatureTag) override;
 
     // IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
+    void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
 
     // IAosNetTrackerListener
-    virtual void NetTracker_StatusChanged();
+    void NetTracker_StatusChanged() override;
 
     // IAosNConfigurationListener
-    virtual void NConfiguration_NotifyConfigChanged();
+    void NConfiguration_NotifyConfigChanged() override;
 
     // IEventListener
-    virtual void Event_NotifyEvent(
-            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
+    void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
     // IAosRegistrationControlListener
-    inline virtual void RegistrationControl_UpdateSipDelegateRegistration(){};
-    inline virtual void RegistrationControl_TriggerSipDelegateDeregistration(){};
-    inline virtual void RegistrationControl_TriggerFullNetworkRegistration(
-            IN IMS_SINT32 /*nSipCode*/, IN const AString& /*strTarget*/){};
-    virtual void RegistrationControl_NotifyCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/);
+    inline void RegistrationControl_UpdateSipDelegateRegistration() override{};
+    inline void RegistrationControl_TriggerSipDelegateDeregistration() override{};
+    inline void RegistrationControl_TriggerFullNetworkRegistration(
+            IN IMS_SINT32 /*nSipCode*/, IN const AString& /*strTarget*/) override{};
+    void RegistrationControl_NotifyCapabilitiesChanged(
+            IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override;
 
     // IAosServiceSettingListener
-    virtual void ServiceSetting_RoamingPreferredVoiceNetworkChanged(
-            IN RoamingPreferredVoiceNetwork eState);
+    void ServiceSetting_RoamingPreferredVoiceNetworkChanged(
+            IN RoamingPreferredVoiceNetwork eState) override;
 
     enum
     {
@@ -169,8 +169,8 @@ public:
     };
 
 protected:
-    virtual void Init();
-    virtual void CleanUp();
+    void Init() override;
+    void CleanUp() override;
 
     void SetHandleState(IN IMS_UINT32 nState);
     void SetReason(IN IMS_UINT32 nReason);

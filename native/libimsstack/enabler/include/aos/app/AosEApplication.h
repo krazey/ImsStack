@@ -32,41 +32,41 @@ public:
     virtual ~AosEApplication();
 
     // IAosApplication
-    virtual IMS_BOOL RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0);
-    virtual void GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue);
+    IMS_BOOL RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) override;
+    void GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) override;
 
 protected:
     // Clean
-    virtual void ClearConnection();
+    void ClearConnection() override;
     virtual void ProcessCleanAll(IN IMS_UINT32 nReason = 0);
 
     // Message
-    virtual IMS_BOOL ProcessMessage(IN IMSMSG& objMsg);
-    virtual void ProcessRegStart(IN IMSMSG& objMsg);
-    virtual void ProcessRegStop(IN IMSMSG& objMsg);
+    IMS_BOOL ProcessMessage(IN IMSMSG& objMsg) override;
+    void ProcessRegStart(IN IMSMSG& objMsg) override;
+    void ProcessRegStop(IN IMSMSG& objMsg) override;
 
     // StateMachine
-    virtual IMS_BOOL StateNotReady_Condition(IN IMSMSG& objMsg);
-    virtual IMS_BOOL StateReady_Connection(IN IMSMSG& objMsg);
-    virtual IMS_BOOL StateReady_Condition(IN IMSMSG& objMsg);
+    IMS_BOOL StateNotReady_Condition(IN IMSMSG& objMsg) override;
+    IMS_BOOL StateReady_Connection(IN IMSMSG& objMsg) override;
+    IMS_BOOL StateReady_Condition(IN IMSMSG& objMsg) override;
 
-    virtual void ProcessRegFailed_StateConnecting(IN IMS_UINT32 nReason);
-    virtual void ProcessRegFailed_StateConnected(IN IMS_UINT32 nReason);
-    virtual void ProcessConnectionUpdated_StateDisconnecting(IN IMS_UINT32 nReason);
-    virtual void ProcessRegFailed_StateUpdating(IN IMS_UINT32 nReason);
+    void ProcessRegFailed_StateConnecting(IN IMS_UINT32 nReason) override;
+    void ProcessRegFailed_StateConnected(IN IMS_UINT32 nReason) override;
+    void ProcessConnectionUpdated_StateDisconnecting(IN IMS_UINT32 nReason) override;
+    void ProcessRegFailed_StateUpdating(IN IMS_UINT32 nReason) override;
 
-    virtual void ProcessConnectionDeactivated(IN IMS_UINT32 nReason);
-    virtual void ProcessConnectionUpdated(IN IMS_UINT32 nReason);
+    void ProcessConnectionDeactivated(IN IMS_UINT32 nReason) override;
+    void ProcessConnectionUpdated(IN IMS_UINT32 nReason) override;
 
-    virtual void ProcessRegSucceeded(IN IMS_UINT32 nReason);
+    void ProcessRegSucceeded(IN IMS_UINT32 nReason) override;
 
-    virtual void ProcessRegFailed_Start(IN IMS_UINT32 nReason);
-    virtual void ProcessRegFailed_Update(IN IMS_UINT32 nReason);
+    void ProcessRegFailed_Start(IN IMS_UINT32 nReason) override;
+    void ProcessRegFailed_Update(IN IMS_UINT32 nReason) override;
 
-    virtual void ProcessAppActivatedTimerExpired();
-    virtual void ProcessAppConnectedTimerExpired();
-    virtual void ProcessAppTerminatedTimerExpired();
-    virtual void ProcessReconfigTimerExpired();
+    void ProcessAppActivatedTimerExpired() override;
+    void ProcessAppConnectedTimerExpired() override;
+    void ProcessAppTerminatedTimerExpired() override;
+    void ProcessReconfigTimerExpired() override;
 
     virtual IMS_BOOL IsEmergencyBlocked();
     virtual IMS_BOOL IsWIFIConnected();
@@ -77,14 +77,14 @@ protected:
     virtual void ProcessECallTerminating();
 
     // To External Interface
-    virtual void UpdateRegState();
-    virtual IMS_UINT32 UpdateConnectedServices(IN IMS_BOOL bEnforceUpdateRegService);
+    void UpdateRegState() override;
+    IMS_UINT32 UpdateConnectedServices(IN IMS_BOOL bEnforceUpdateRegService) override;
 
     // IAoSConditionListener
-    virtual void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0);
+    void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) override;
 
     // IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
+    void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
 
     static const IMS_UINT32 EPDN_RELEASE_DELAY_TIME_MILLIS = 2000;
 

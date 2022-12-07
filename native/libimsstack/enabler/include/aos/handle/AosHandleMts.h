@@ -27,23 +27,23 @@ public:
     virtual ~AosHandleMts();
 
     // IAosNConfigurationListener
-    virtual void NConfiguration_NotifyConfigChanged();
+    void NConfiguration_NotifyConfigChanged() override;
 
 protected:
     void InitializeSupportedRats();
 
-    virtual void Init();
-    virtual void CleanUp();
+    void Init() override;
+    void CleanUp() override;
 
-    virtual void InitializeServiceBlock();
-    virtual void InitializeServiceFeature();
+    void InitializeServiceBlock() override;
+    void InitializeServiceFeature() override;
 
-    virtual void ProcessCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
+    void ProcessCapabilitiesChanged(
+            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
 
-    virtual IMS_BOOL IsHandleBlocked() const;
-    virtual IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const;
-    virtual void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked);
+    IMS_BOOL IsHandleBlocked() const override;
+    IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const override;
+    void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked) override;
 
 private:
     IMS_BOOL m_bMtcBlocked;

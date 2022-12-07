@@ -26,7 +26,7 @@ public:
     virtual ~AosHandleEmergencyMtc();
 
 protected:
-    virtual void InitializeServiceFeature();
+    void InitializeServiceFeature() override;
 
 private:
     friend class AosHandleEmergencyMtcTest;

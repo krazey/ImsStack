@@ -91,8 +91,8 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, RetryCount);
 
 protected:
-    inline virtual IRegistration* GetRegistration() { return m_piMockRegistration; }
-    inline virtual IMS_BOOL CheckRadioReadyAndSetTxnPending() { return IMS_TRUE; }
+    inline IRegistration* GetRegistration() override { return m_piMockRegistration; }
+    inline IMS_BOOL CheckRadioReadyAndSetTxnPending() override { return IMS_TRUE; }
 
 public:
     inline void SetMockIRegistration(IN IRegistration* piRegistration)

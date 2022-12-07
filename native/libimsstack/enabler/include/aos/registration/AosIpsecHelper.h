@@ -65,7 +65,7 @@ protected:
     virtual void ProcessPolicyExpired(IN AosIpsec* pIpsec);
 
     // IAosIpsecListener
-    virtual void IPSecPolicyExpired(IN AosIpsec* pIpsec);
+    void IPSecPolicyExpired(IN AosIpsec* pIpsec) override;
 
     void Destroy();
 

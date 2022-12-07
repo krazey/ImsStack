@@ -42,37 +42,37 @@ public:
 
 public:
     // IAosNetTracker
-    virtual IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT);
-    virtual IMS_BOOL IsDataIn();
-    virtual IMS_BOOL IsNetworkIn();
-    virtual IMS_BOOL IsEmergencyLteAttach();
-    virtual IMS_BOOL IsSuspended();
-    virtual IMS_BOOL IsSessionContinuitySupported();
-    virtual IMS_BOOL IsServiceTimerRunning();
-    virtual IMS_BOOL IsImsVoiceCallSupported();
+    IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT) override;
+    IMS_BOOL IsDataIn() override;
+    IMS_BOOL IsNetworkIn() override;
+    IMS_BOOL IsEmergencyLteAttach() override;
+    IMS_BOOL IsSuspended() override;
+    IMS_BOOL IsSessionContinuitySupported() override;
+    IMS_BOOL IsServiceTimerRunning() override;
+    IMS_BOOL IsImsVoiceCallSupported() override;
 
-    virtual IMS_UINT32 GetMobileChangingNetworkType();
-    virtual IMS_UINT32 GetMobileNetworkType();
-    virtual IMS_SINT32 GetMobileVoiceServiceState();
-    virtual IMS_UINT32 GetMobileVoiceNetworkType();
-    virtual IMS_UINT32 GetNetworkType();
+    IMS_UINT32 GetMobileChangingNetworkType() override;
+    IMS_UINT32 GetMobileNetworkType() override;
+    IMS_SINT32 GetMobileVoiceServiceState() override;
+    IMS_UINT32 GetMobileVoiceNetworkType() override;
+    IMS_UINT32 GetNetworkType() override;
 
-    virtual void SetRatGuardTime(IN IMS_UINT32 nGuardTime);
-    virtual void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime);
-    virtual void SetSrvInGuardTime(IN IMS_UINT32 nGuardTime);
+    void SetRatGuardTime(IN IMS_UINT32 nGuardTime) override;
+    void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime) override;
+    void SetSrvInGuardTime(IN IMS_UINT32 nGuardTime) override;
 
-    virtual void SetListener(IN IAosNetTrackerListener* piListener);
-    virtual void RemoveListener(IN IAosNetTrackerListener* piListener);
+    void SetListener(IN IAosNetTrackerListener* piListener) override;
+    void RemoveListener(IN IAosNetTrackerListener* piListener) override;
 
     // INetworkWatcherListener
-    virtual void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo);
+    void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo) override;
 
     // IWifiWatcherListener
-    virtual void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* piWifiWatcher);
+    void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* piWifiWatcher) override;
 
     // IEventListener
-    virtual void Event_NotifyEvent(
-            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
+    void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
     enum
     {
@@ -134,14 +134,14 @@ private:
     void StopTimer(IN IMS_UINT32 nType);
 
     // IAosConnectionListener
-    virtual void AosConnection_StateChanged(IN IMS_UINT32 nState);
-    virtual void AosConnection_IpChanged();
-    virtual void AosConnection_IpcanCatChanged();
-    virtual void AosConnection_PcscfChanged();
-    virtual void AosConnection_ConnectionFailed();
+    void AosConnection_StateChanged(IN IMS_UINT32 nState) override;
+    void AosConnection_IpChanged() override;
+    void AosConnection_IpcanCatChanged() override;
+    void AosConnection_PcscfChanged() override;
+    void AosConnection_ConnectionFailed() override;
 
     // ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     // LOG
     AString FeaturesToString();
@@ -151,7 +151,7 @@ private:
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
 protected:
-    virtual void Init();
+    void Init() override;
 
 private:
     enum

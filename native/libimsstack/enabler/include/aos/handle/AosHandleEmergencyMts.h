@@ -27,8 +27,8 @@ public:
     virtual ~AosHandleEmergencyMts();
 
 protected:
-    virtual void InitializeServiceBlock();
-    virtual void InitializeServiceFeature();
+    void InitializeServiceBlock() override;
+    void InitializeServiceFeature() override;
 
 private:
     friend class AosHandleEmergencyMtsTest;

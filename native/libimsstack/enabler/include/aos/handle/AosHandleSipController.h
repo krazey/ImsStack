@@ -27,7 +27,7 @@ public:
     virtual ~AosHandleSipController();
 
 protected:
-    virtual void InitializeServiceBlock();
+    void InitializeServiceBlock() override;
 
 private:
     friend class AosHandleSipControllerTest;

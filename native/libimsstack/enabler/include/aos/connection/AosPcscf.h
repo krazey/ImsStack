@@ -103,7 +103,7 @@ public:
         AosUtil::GetInstance()->StopTimer(m_piTimer, "PCSCF_BLOCK_TIMER");
     }
 
-    inline virtual void Timer_TimerExpired(IN ITimer* piTimer)
+    inline void Timer_TimerExpired(IN ITimer* piTimer) override
     {
         if (piTimer == IMS_NULL)
         {
@@ -155,48 +155,48 @@ public:
     explicit AosPcscf(IN IAosAppContext* piAppContext);
     virtual ~AosPcscf();
 
-    virtual void Init();
-    virtual void CleanUp();
+    void Init() override;
+    void CleanUp() override;
 
-    virtual void Configure(IN IMS_UINT32 nIpVersion = IPAddress::UNKNOWN);
-    virtual IMS_BOOL IsConfigured() const;
+    void Configure(IN IMS_UINT32 nIpVersion = IPAddress::UNKNOWN) override;
+    IMS_BOOL IsConfigured() const override;
 
-    virtual IMS_BOOL IsAsyncDnsDiscovery() const;
-    virtual IMS_BOOL IsSinglePcoScheme();
+    IMS_BOOL IsAsyncDnsDiscovery() const override;
+    IMS_BOOL IsSinglePcoScheme() override;
 
-    virtual const AStringArray& GetPcscfs();
-    virtual const IMSList<IMS_SINT32>& GetPcscfsPorts();
-    virtual void UpdatePcscfs(IN const AStringArray& objPcscfs,
-            IN IMSList<IMS_SINT32> objPorts = IMSList<IMS_SINT32>());
+    const AStringArray& GetPcscfs() override;
+    const IMSList<IMS_SINT32>& GetPcscfsPorts() override;
+    void UpdatePcscfs(IN const AStringArray& objPcscfs,
+            IN IMSList<IMS_SINT32> objPorts = IMSList<IMS_SINT32>()) override;
 
-    virtual IMS_BOOL HasPcscf(IN IMS_SINT32 nIndex);
-    virtual IMS_UINT32 GetPcscfCount();
+    IMS_BOOL HasPcscf(IN IMS_SINT32 nIndex) override;
+    IMS_UINT32 GetPcscfCount() override;
 
-    virtual void SetCurrentPcscfInvalid(
-            IN IMS_BOOL bIsTimer = IMS_FALSE, IN IMS_UINT32 nSeconds = 0);
-    virtual void RemoveCurrentPcscf();
-    virtual void SetAllPcscfValid();
+    void SetCurrentPcscfInvalid(
+            IN IMS_BOOL bIsTimer = IMS_FALSE, IN IMS_UINT32 nSeconds = 0) override;
+    void RemoveCurrentPcscf() override;
+    void SetAllPcscfValid() override;
 
-    virtual IMS_BOOL IsAllPcscfTried();
-    virtual void SetCurrentPcscfTried();
-    virtual void ResetAllPcscfTried();
+    IMS_BOOL IsAllPcscfTried() override;
+    void SetCurrentPcscfTried() override;
+    void ResetAllPcscfTried() override;
 
-    virtual IMS_BOOL GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort);
-    virtual IMS_UINT32 GetCurrentIndex() const;
+    IMS_BOOL GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort) override;
+    IMS_UINT32 GetCurrentIndex() const override;
 
-    virtual IMS_BOOL IsFirstPcscf();
-    virtual IMS_BOOL GetFirstPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort);
+    IMS_BOOL IsFirstPcscf() override;
+    IMS_BOOL GetFirstPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort) override;
 
-    virtual IMS_BOOL HasNextPcscf();
-    virtual IMS_SINT32 GetNextPcscfIndex();
-    virtual IMS_BOOL GetNextPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort);
+    IMS_BOOL HasNextPcscf() override;
+    IMS_SINT32 GetNextPcscfIndex() override;
+    IMS_BOOL GetNextPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort) override;
 
-    virtual void SetFirstPcscfIndex();
+    void SetFirstPcscfIndex() override;
 
-    virtual IMS_BOOL CheckAndProcessChangeFromPco();
-    virtual IMS_UINT32 GetChangedType();
+    IMS_BOOL CheckAndProcessChangeFromPco() override;
+    IMS_UINT32 GetChangedType() override;
 
-    virtual void SetListener(IN IAosPcscfListener* piListener);
+    void SetListener(IN IAosPcscfListener* piListener) override;
 
 protected:
     void AddPcscf(IN const AString& strHost, IN IMS_SINT32 nPort);
@@ -240,7 +240,7 @@ protected:
             IN const AString& strExtraParam = AString::ConstNull());
 
     // ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     // Log
     void PrintPcscfs();

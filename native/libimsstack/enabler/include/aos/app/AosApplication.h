@@ -70,20 +70,20 @@ public:
     virtual ~AosApplication();
 
     // IAosApplication
-    virtual void Reconfig();
-    virtual IMS_BOOL RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0);
+    void Reconfig() override;
+    IMS_BOOL RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) override;
 
-    virtual const AString& GetActivityName();
-    virtual void GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue);
-    virtual IMS_UINT32 GetAppState();
-    virtual IMS_UINT32 GetOffReason();
+    const AString& GetActivityName() override;
+    void GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) override;
+    IMS_UINT32 GetAppState() override;
+    IMS_UINT32 GetOffReason() override;
 
-    virtual IMS_BOOL IsActivated();
-    virtual IMS_BOOL IsOn();
+    IMS_BOOL IsActivated() override;
+    IMS_BOOL IsOn() override;
 
-    virtual void SetActivation(IN IMS_BOOL bActivation);
-    virtual void NotifyEpsFallbackCallState(IN IMS_UINT32 nState);
-    virtual void NotifyPublishState(IN IMS_BOOL bStart);
+    void SetActivation(IN IMS_BOOL bActivation) override;
+    void NotifyEpsFallbackCallState(IN IMS_UINT32 nState) override;
+    void NotifyPublishState(IN IMS_BOOL bStart) override;
 
 protected:
     void ClearOffReason();
@@ -236,37 +236,37 @@ protected:
     virtual void UpdateMonitorNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
     // IAosConditionListener
-    virtual void Condition_Changed(IN IMS_UINT32 nReason = 0);
-    virtual void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0);
+    void Condition_Changed(IN IMS_UINT32 nReason = 0) override;
+    void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) override;
 
     // IAosConnectorListener
-    virtual void Connector_Activated();
-    virtual void Connector_Deactivated(IN IMS_UINT32 nReason);
-    virtual void Connector_Updated(IN IMS_UINT32 nReason);
+    void Connector_Activated() override;
+    void Connector_Deactivated(IN IMS_UINT32 nReason) override;
+    void Connector_Updated(IN IMS_UINT32 nReason) override;
 
     // IAosRegistrationListener
-    virtual void Registration_StateChanged(IN IMS_UINT32 nResult, IN IMS_UINT32 nReason = 0);
-    virtual void Registration_PreNotify(IN IMS_UINT32 nPreReason);
+    void Registration_StateChanged(IN IMS_UINT32 nResult, IN IMS_UINT32 nReason = 0) override;
+    void Registration_PreNotify(IN IMS_UINT32 nPreReason) override;
 
     // IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
+    void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
 
     // IAosNetTrackerListener
-    virtual void NetTracker_StatusChanged();
+    void NetTracker_StatusChanged() override;
 
     // IAosNConfigurationListener
-    virtual void NConfiguration_NotifyConfigChanged();
+    void NConfiguration_NotifyConfigChanged() override;
 
     // IEventListener
-    virtual void Event_NotifyEvent(
-            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
+    void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
     // ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     // AosRegistrationControlListener
-    virtual void RegistrationControl_ControlRegistration(
-            IN AosRegRequestType eType, IN AosPcscfOrder eOrder, IN AosControlCause eCause);
+    void RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
+            IN AosPcscfOrder eOrder, IN AosControlCause eCause) override;
 
 protected:
     enum
@@ -359,8 +359,8 @@ protected:
     };
 
 protected:
-    virtual void Init();
-    virtual void CleanUp();
+    void Init() override;
+    void CleanUp() override;
 
 protected:
     IAosAppContext* m_piContext;

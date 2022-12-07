@@ -30,23 +30,23 @@ public:
     explicit AosConnection(IN IAosAppContext* piAppContext);
     virtual ~AosConnection();
 
-    virtual IMS_BOOL Activate();
-    virtual void Deactivate();
-    virtual IMS_UINT32 GetState();
+    IMS_BOOL Activate() override;
+    void Deactivate() override;
+    IMS_UINT32 GetState() override;
 
-    virtual IMS_SINT32 GetConnectionType();
+    IMS_SINT32 GetConnectionType() override;
 
-    virtual void SetListener(IN IAosConnectionListener* piListener);
-    virtual void RemoveListener(IN IAosConnectionListener* piListener);
+    void SetListener(IN IAosConnectionListener* piListener) override;
+    void RemoveListener(IN IAosConnectionListener* piListener) override;
 
-    virtual IMS_SINT32 GetMtu();
-    virtual const IPAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0);
-    virtual const AStringArray& GetPcscfAddress(IN IMS_SINT32 nIpVersion = 0);
-    virtual IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IPAddress>& objIps,
-            IN IMS_SINT32 nIpVersion = 0);
-    virtual const AString& GetIfaceName();
-    virtual IMS_BOOL IsEpdgEnabled();
-    virtual IMS_SINT32 GetIpcanCategory();
+    IMS_SINT32 GetMtu() override;
+    const IPAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0) override;
+    const AStringArray& GetPcscfAddress(IN IMS_SINT32 nIpVersion = 0) override;
+    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IPAddress>& objIps,
+            IN IMS_SINT32 nIpVersion = 0) override;
+    const AString& GetIfaceName() override;
+    IMS_BOOL IsEpdgEnabled() override;
+    IMS_SINT32 GetIpcanCategory() override;
 
     // Log
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
@@ -63,14 +63,14 @@ protected:
     void UpdateIpcanForTrm();
 
     // INetworkConnectionListener
-    virtual void NetworkConnection_OnConnected(IN INetworkConnection* piNetConnection);
-    virtual void NetworkConnection_OnDisconnected(
-            IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode);
-    virtual void NetworkConnection_OnConnectionFailed(
-            IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode);
-    virtual void NetworkConnection_OnIpChanged(IN INetworkConnection* piNetConnection);
-    virtual void NetworkConnection_OnIpcanChanged(IN INetworkConnection* piNetConnection);
-    virtual void NetworkConnection_OnPcscfChanged(IN INetworkConnection* piNetConnection);
+    void NetworkConnection_OnConnected(IN INetworkConnection* piNetConnection) override;
+    void NetworkConnection_OnDisconnected(
+            IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode) override;
+    void NetworkConnection_OnConnectionFailed(
+            IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode) override;
+    void NetworkConnection_OnIpChanged(IN INetworkConnection* piNetConnection) override;
+    void NetworkConnection_OnIpcanChanged(IN INetworkConnection* piNetConnection) override;
+    void NetworkConnection_OnPcscfChanged(IN INetworkConnection* piNetConnection) override;
 
     enum
     {

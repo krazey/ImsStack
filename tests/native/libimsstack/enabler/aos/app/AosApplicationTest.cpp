@@ -155,8 +155,8 @@ class TestAosConnector : public AosConnector
     friend class AosApplicationTest;
 
 public:
-    inline virtual IMS_BOOL Start() { return IMS_TRUE; }
-    inline virtual void Stop() {}
+    inline IMS_BOOL Start() override { return IMS_TRUE; }
+    inline void Stop() override {}
 
 private:
 };

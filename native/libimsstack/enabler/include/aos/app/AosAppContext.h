@@ -29,35 +29,35 @@ private:
     AosAppContext& operator=(IN const AosAppContext& objRHS);
 
 public:
-    virtual IMS_SINT32 GetSlotId() const;
+    IMS_SINT32 GetSlotId() const override;
 
-    virtual const AString& GetProfileId() const;
+    const AString& GetProfileId() const override;
 
-    virtual IAosHandle* GetHandle(IN const AString& strSrvId) const;
-    virtual IAosHandle* GetHandle(IN IMS_UINT32 nServiceType);
-    virtual IMSMap<AString, IAosHandle*>& GetHandles();
+    IAosHandle* GetHandle(IN const AString& strSrvId) const override;
+    IAosHandle* GetHandle(IN IMS_UINT32 nServiceType) override;
+    IMSMap<AString, IAosHandle*>& GetHandles() override;
 
-    virtual IAosApplication* GetApp() const;
-    virtual IAosConnection* GetConnection() const;
-    virtual IAosRegistration* GetRegistration() const;
-    virtual IAosNetTracker* GetNetTracker() const;
-    virtual IAosBlock* GetBlock() const;
-    virtual IAosSubscriber* GetSubscriber() const;
-    virtual IAosPcscf* GetPcscf() const;
-    virtual AosStaticProfile* GetStaticProfile() const;
+    IAosApplication* GetApp() const override;
+    IAosConnection* GetConnection() const override;
+    IAosRegistration* GetRegistration() const override;
+    IAosNetTracker* GetNetTracker() const override;
+    IAosBlock* GetBlock() const override;
+    IAosSubscriber* GetSubscriber() const override;
+    IAosPcscf* GetPcscf() const override;
+    AosStaticProfile* GetStaticProfile() const override;
 
 private:
-    virtual void SetSlotId(IN IMS_SINT32 nSlotId);
+    void SetSlotId(IN IMS_SINT32 nSlotId) override;
 
-    virtual void AddHandle(IN const AString& strSrvId, IN IAosHandle* piHandle);
+    void AddHandle(IN const AString& strSrvId, IN IAosHandle* piHandle) override;
 
-    virtual void SetApp(IN IAosApplication* piApp);
-    virtual void SetConnection(IN IAosConnection* piConnection);
-    virtual void SetRegistration(IN IAosRegistration* piRegistration);
-    virtual void SetNetTracker(IN IAosNetTracker* piNetTracker);
-    virtual void SetBlock(IN IAosBlock* piBlock);
-    virtual void SetSubscriber(IN IAosSubscriber* piSubscriber);
-    virtual void SetPcscf(IN IAosPcscf* piPcscf);
+    void SetApp(IN IAosApplication* piApp) override;
+    void SetConnection(IN IAosConnection* piConnection) override;
+    void SetRegistration(IN IAosRegistration* piRegistration) override;
+    void SetNetTracker(IN IAosNetTracker* piNetTracker) override;
+    void SetBlock(IN IAosBlock* piBlock) override;
+    void SetSubscriber(IN IAosSubscriber* piSubscriber) override;
+    void SetPcscf(IN IAosPcscf* piPcscf) override;
 
 private:
     IMS_SINT32 m_nSlotId;

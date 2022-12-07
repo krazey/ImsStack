@@ -124,17 +124,17 @@ protected:
     virtual void ClearTimers();
 
     // IAosConnectionListener
-    virtual void AosConnection_StateChanged(IN IMS_UINT32 nDataState);
-    virtual void AosConnection_IpChanged();
-    virtual void AosConnection_IpcanCatChanged();
-    virtual void AosConnection_PcscfChanged();
-    virtual void AosConnection_ConnectionFailed();
+    void AosConnection_StateChanged(IN IMS_UINT32 nDataState) override;
+    void AosConnection_IpChanged() override;
+    void AosConnection_IpcanCatChanged() override;
+    void AosConnection_PcscfChanged() override;
+    void AosConnection_ConnectionFailed() override;
 
     // IAosPcscfListener
-    virtual void Pcscf_NotifyResult(IN IMS_BOOL bResult);
+    void Pcscf_NotifyResult(IN IMS_BOOL bResult) override;
 
     // ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     virtual void CleanUp();
 

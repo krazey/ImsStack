@@ -110,19 +110,19 @@ protected:
     virtual void ProcessNotifyState_InvalidBody();
 
     // IRegSubscriptionListener
-    virtual void RegSubscription_NotifyReceived(
-            IN IMS_SINT32 nSubState, IN IMS_SINT32 nReasonParam, IN IMS_BOOL bHasBody);
-    virtual void RegSubscription_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
-    virtual void RegSubscription_Started();
-    virtual void RegSubscription_StartFailed(IN IMS_SINT32 nReason);
-    virtual void RegSubscription_Updated();
-    virtual void RegSubscription_UpdateFailed(IN IMS_SINT32 nReason);
-    virtual void RegSubscription_Removed();
-    virtual void RegSubscription_Terminated(IN IMS_SINT32 nReason);
+    void RegSubscription_NotifyReceived(
+            IN IMS_SINT32 nSubState, IN IMS_SINT32 nReasonParam, IN IMS_BOOL bHasBody) override;
+    void RegSubscription_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
+    void RegSubscription_Started() override;
+    void RegSubscription_StartFailed(IN IMS_SINT32 nReason) override;
+    void RegSubscription_Updated() override;
+    void RegSubscription_UpdateFailed(IN IMS_SINT32 nReason) override;
+    void RegSubscription_Removed() override;
+    void RegSubscription_Terminated(IN IMS_SINT32 nReason) override;
 
 public:
     // ITimerListener Interface
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* RegSubReasonToString(IN IMS_SINT32 nReason);
