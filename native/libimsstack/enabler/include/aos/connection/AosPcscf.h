@@ -20,7 +20,6 @@
 #include "IpAddress.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosPcscf.h"
-#include "IConfigUpdateListener.h"
 #include "IEventListener.h"
 #include "provider/AosStaticProfile.h"
 #include "provider/AosUtil.h"
@@ -233,11 +232,6 @@ protected:
     virtual void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
     virtual void StopTimer(IN IMS_UINT32 nType);
     virtual void ClearTimers();
-
-    // IConfigUpdateListener
-    virtual void ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCPI,
-            IN const AString& strConfName = AString::ConstNull(),
-            IN const AString& strExtraParam = AString::ConstNull());
 
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;

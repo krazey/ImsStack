@@ -69,7 +69,7 @@ protected:
     void ProcessReconfigTimerExpired() override;
 
     virtual IMS_BOOL IsEmergencyBlocked();
-    virtual IMS_BOOL IsWIFIConnected();
+    virtual IMS_BOOL IsWifiConnected();
     virtual IMS_BOOL IsWlanEmergencyBlocked();
     virtual IMS_BOOL CheckAppTerminatedTimerAndProcessCleanAll();
     virtual void ProcessECallStarted();

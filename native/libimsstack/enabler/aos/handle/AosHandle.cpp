@@ -542,8 +542,7 @@ PROTECTED VIRTUAL void AosHandle::CleanUp()
 
     if (m_piInfo != IMS_NULL)
     {
-        delete DYNAMIC_CAST(AosInfo*, m_piInfo);
-        m_piInfo = IMS_NULL;
+        delete m_piInfo;
     }
 
     IAosService* piAosService = AosProvider::GetInstance()->GetService(m_nSlotId);

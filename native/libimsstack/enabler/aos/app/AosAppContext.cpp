@@ -55,7 +55,7 @@ PUBLIC VIRTUAL AosAppContext::~AosAppContext()
         if (piHandle != IMS_NULL)
         {
             piHandle->CleanUp();
-            delete DYNAMIC_CAST(AosHandle*, piHandle);
+            delete piHandle;
         }
     }
 
@@ -64,35 +64,30 @@ PUBLIC VIRTUAL AosAppContext::~AosAppContext()
     if (m_piApp != IMS_NULL)
     {
         m_piApp->CleanUp();
-        delete DYNAMIC_CAST(AosApplication*, m_piApp);
-        m_piApp = IMS_NULL;
+        delete m_piApp;
     }
 
     if (m_piPcscf != IMS_NULL)
     {
         m_piPcscf->CleanUp();
-        delete DYNAMIC_CAST(AosPcscf*, m_piPcscf);
-        m_piPcscf = IMS_NULL;
+        delete m_piPcscf;
     }
 
     if (m_piSubscriber != IMS_NULL)
     {
         m_piSubscriber->CleanUp();
-        delete DYNAMIC_CAST(AosSubscriber*, m_piSubscriber);
-        m_piSubscriber = IMS_NULL;
+        delete m_piSubscriber;
     }
 
     if (m_piRegistration != IMS_NULL)
     {
         m_piRegistration->CleanUp();
-        delete DYNAMIC_CAST(AosRegistration*, m_piRegistration);
-        m_piRegistration = IMS_NULL;
+        delete m_piRegistration;
     }
 
     if (m_piBlock != IMS_NULL)
     {
-        delete DYNAMIC_CAST(AosBlock*, m_piBlock);
-        m_piBlock = IMS_NULL;
+        delete m_piBlock;
     }
 }
 

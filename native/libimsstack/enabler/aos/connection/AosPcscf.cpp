@@ -888,16 +888,6 @@ PROTECTED VIRTUAL void AosPcscf::ClearRetryHostList()
     m_objRetryHostList.Clear();
 }
 
-PROTECTED VIRTUAL void AosPcscf::ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
-        IN const AString& strConfName /* = AString::ConstNull() */,
-        IN const AString& strExtraParam /* = AString::ConstNull() */)
-{
-    (void)strConfName;
-    (void)strExtraParam;
-
-    A_IMS_TRACE_I(APPPROFILE, "ConfigUpdate_NotifyUpdated :: (%d)", nCpi, 0, 0);
-}
-
 PROTECTED
 void AosPcscf::PrintPcscfs()
 {
