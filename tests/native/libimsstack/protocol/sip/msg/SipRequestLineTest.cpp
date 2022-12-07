@@ -58,7 +58,6 @@ TEST_F(SipRequestLineTest, CopyConstructor)
     SipRequestLine* pCopyRequestLine = new SipRequestLine(*pRequestLine);
     ASSERT_TRUE(pCopyRequestLine != nullptr);
 
-    pSipAddrSpec->SipDelete();
     pRequestLine->SipDelete();
 
     pSipAddrSpec = pCopyRequestLine->GetReqUri();
