@@ -18,12 +18,22 @@ package com.android.imsstack.imsservice.sipcontroller;
 
 import android.util.Log;
 
-public class SipTransportBaseRegistrationHandler implements ISipTransportBaseRegistrationListener{
+import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
+import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
+import com.android.imsstack.imsservice.sipcontroller.remote.ISipTransportRemote;
+import com.android.imsstack.imsservice.sipcontroller.sipdelegate.ActiveSipDelegateManager;
+
+/**
+ * The{@link ISipTransportBaseRegistrationListener} interface implementation is to update
+ * the ims registration with new values for all sip delegates
+ */
+public class SipTransportBaseRegistrationHandler implements ISipTransportBaseRegistrationListener {
     private final int mSlotId;
 
     public SipTransportBaseRegistrationHandler(int slotId) {
         mSlotId = slotId;
     }
+
     /**
      * Called when feature tag registration is required and also when feature tag configuration
      * is changed.
@@ -31,14 +41,41 @@ public class SipTransportBaseRegistrationHandler implements ISipTransportBaseReg
     @Override
     public void triggerSipTransportDelegateRegistration() {
         Log.i(ImsSipTransport.LOG_TAG, "triggerSipTransportNetworkRegistration");
-        //TODO call the native updateRegistration with the list of feature tags supported by
-        // SipTransport
+        ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(mSlotId);
+        ActiveSipDelegateManager activeDelegateManager;
+        ISipTransportRemote remoteTransport;
+        if (serviceRecord != null) {
+            activeDelegateManager = serviceRecord.getSipTransport().getActiveSipDelegateManager();
+            remoteTransport = serviceRecord.getSipTransport().getISipTransportRemote();
+            if (remoteTransport != null) {
+                remoteTransport.updateSipDelegateRegistration(
+                        activeDelegateManager.getAllSipDelegatSupportedFeatureTags());
+            } else {
+                Log.e(ImsSipTransport.LOG_TAG, "remoteTransport is null");
+            }
+        } else {
+            Log.e(ImsSipTransport.LOG_TAG, "serviceRecord is null");
+        }
     }
 
+    /**
+     * This method will request de-registration for all sip delegates belongs to this sip transport
+     */
     @Override
     public void triggerSipTransportDelegateDeregistration() {
-        Log.i(ImsSipTransport.LOG_TAG, "triggerSipTransportNetworkDeregistration");
-        //TODO Get all the sip delegates from the sip delegate manager and then  change the status
-        // to de-registering.
+        Log.i(ImsSipTransport.LOG_TAG, "triggerSipTransportDelegateDeregistration");
+        ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(mSlotId);
+        ISipTransportRemote remoteTransport;
+        if (serviceRecord != null && serviceRecord.getSipTransport().getActiveDialogList() != null
+                && serviceRecord.getSipTransport().getActiveDialogList().isEmpty()) {
+            remoteTransport = serviceRecord.getSipTransport().getISipTransportRemote();
+            if (remoteTransport != null) {
+                remoteTransport.triggerSipDelegateDeRegistration();
+            } else {
+                Log.e(ImsSipTransport.LOG_TAG, "remoteTransport is null");
+            }
+        } else {
+            Log.e(ImsSipTransport.LOG_TAG, "active dialogs may be present");
+        }
     }
 }

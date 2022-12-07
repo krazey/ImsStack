@@ -38,8 +38,10 @@ import java.util.Set;
 public class SipTransportRemoteListener implements ISipTransportRemoteMessageListener,
         ISipTransportRemoteConfigListener, ISipTransportRemoteRegistrationListener {
     public static final String LOG_TAG = "SipTransportRemoteListener";
+
     /**
      * Sends a new incoming SIP message to the message application
+     *
      * @param message received message from network
      * @param subId subscription Id.
      */
@@ -56,7 +58,7 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
             SipDelegateImpl sipDelegateToBeNotified =
                     activeDelegateManager.getSipDelegateForCallId(message.getCallIdParameter());
 
-            if( sipDelegateToBeNotified == null ) {
+            if (sipDelegateToBeNotified == null) {
                 Log.i(LOG_TAG, "Not found sip delegate for callid: OutOfDialogMsg handling");
                 //Case 2: Try to get the sip delegate which can handle this feature tag
                 Set<String> featureTag = SipMessageParsingUtils.
@@ -65,7 +67,7 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
                 sipDelegateToBeNotified =
                         activeDelegateManager.getSipDelegateForSupportedFeatureTag(featureTag);
             }
-            if( sipDelegateToBeNotified != null ) {
+            if (sipDelegateToBeNotified != null) {
                 Log.i(LOG_TAG, "Found the sip delegate to notify received message"
                         + sipDelegateToBeNotified);
                 //Notify the sip delegate that message is received.
@@ -86,9 +88,11 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
                     + subId);
         }
     }
+
     /**
      * Notifies the remote application that a previous request to send a SIP
      * message using {@link android.telephony.ims.stub.SipDelegate#sendMessage} has succeeded.
+     *
      * @param viaTransactionId The transaction ID found in the via header field of
      * the previously sent {@link SipMessage}
      * @param subId subscription Id.
@@ -103,11 +107,11 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
             //Try to get sip delegate for ongoing session for this callid
             SipDelegateImpl sipDelegateToBeNotified = activeDelegateManager.
                     getSipDelegateForTransactionId(viaTransactionId);
-            if(sipDelegateToBeNotified != null) {
+            if (sipDelegateToBeNotified != null) {
                 Log.i(LOG_TAG, "Found the sip delegate to notify received message"
                         + sipDelegateToBeNotified);
                 //Notify the sip delegate that message is received.
-                 sipDelegateToBeNotified.onMessageSent(viaTransactionId);
+                sipDelegateToBeNotified.onMessageSent(viaTransactionId);
             } else {
                 Log.e(LOG_TAG, " Not Found the sip delegate to notify send msg status");
             }
@@ -116,9 +120,11 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
                     + subId);
         }
     }
+
     /**
      * Notifies the remote application that a previous request to send a SIP
      * message using {@link android.telephony.ims.stub.SipDelegate#sendMessage} has failed.
+     *
      * @param viaTransactionId The Transaction ID found in the via header field of
      * the previously sent {@link SipMessage}.
      * @param sipReason The reason for the sip server connection failure.
@@ -134,7 +140,7 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
             //Try to get sip delegate for ongoing session for this callid
             SipDelegateImpl sipDelegateToBeNotified = activeDelegateManager.
                     getSipDelegateForTransactionId(viaTransactionId);
-            if( sipDelegateToBeNotified !=null ) {
+            if (sipDelegateToBeNotified != null) {
                 Log.i(LOG_TAG, "Found the sip delegate to notify received message"
                         + sipDelegateToBeNotified);
                 //Notify the sip delegate that message is received.
@@ -147,8 +153,10 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
                     + subId);
         }
     }
+
     /**
      * Update the ims registration with new values
+     *
      * @param registrationState the current network IMS registration state for all
      * feature tags associated with this SipDelegate.
      * @param subId subscription Id.
@@ -162,7 +170,7 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
         ActiveSipDelegateManager activeDelegateManager;
         if (serviceRecord != null) {
             serviceRecord.getSipTransport().
-                    updatedSipTransportFeatureTagsStates(registrationState);
+                    updateSipTransportFeatureTagsStates(registrationState);
             activeDelegateManager = serviceRecord.getSipTransport().getActiveSipDelegateManager();
             for (SipDelegateImpl sipDelegate : activeDelegateManager.getActiveSipDelegateList()) {
                 sipDelegate.updateFeatureTagRegistrationChangedEvent(registrationState);
@@ -172,8 +180,10 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
                     + subId);
         }
     }
+
     /**
      * Shared the updated configuration values
+     *
      * @param configuration updated sip delegate Registration Configuration
      * @param subId subscription Id.
      */
