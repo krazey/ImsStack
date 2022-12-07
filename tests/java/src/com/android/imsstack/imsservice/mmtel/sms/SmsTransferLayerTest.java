@@ -118,6 +118,12 @@ public class SmsTransferLayerTest {
     }
 
     @Test
+    public void test_sendMemoryAvailabilityNotification() {
+        mSmsTransferLayer.sendMemoryAvailabilityNotification(mToken, mSmsc);
+        verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_SMMA), eq(mSmsc), eq(mSmsc),
+                eq(null), eq(STATUS_RESULT_NA));
+    }
+    @Test
     public void test_sendMoTPdu() {
         assertEquals(SmsUtils.RESULT_SUCCESS, mSmsTransferLayer.sendMoTPdu(mToken,
                 mSmsFormat, mMessageRef, mSmsc, mPdu));

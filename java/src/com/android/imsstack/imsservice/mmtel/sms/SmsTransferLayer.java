@@ -98,11 +98,14 @@ public class SmsTransferLayer {
         byte[] mTpdu;
         String mSmsc;
         String mDestinationAddress;
-        TpduParam(int token, byte[] pdu, String scAddress, String destinationAddr) {
+        int mRpMessageType;
+        TpduParam(int token, byte[] pdu, String scAddress, String destinationAddr,
+                    int rpMessageType) {
             mToken = token;
             mTpdu = pdu;
             mSmsc = scAddress;
             mDestinationAddress = destinationAddr;
+            mRpMessageType = rpMessageType;
         }
     }
 
@@ -199,7 +202,7 @@ public class SmsTransferLayer {
             if (DBG) {
                 log("TpAddress = " + ImsLog.hiddenString(address));
             }
-            TpduParam tpduParameters = new TpduParam(token, pdu, smsc, address);
+            TpduParam tpduParameters = new TpduParam(token, pdu, smsc, address, SmsUtils.RP_DATA);
             UsatInterface usat = mCallContext.getUsatInterface();
             mUsatBasedSms = new UsatBasedSms();
             if (usat != null && usat.isServiceAvailable(Usat.SERVICE_MO_SMS_CONTROL)) {
@@ -221,6 +224,27 @@ public class SmsTransferLayer {
             return enqueueAndSendMessageToRL(tpduParameters);
         } catch (RuntimeException e) {
             loge("sendMoTpdu Failed: " + e.getMessage());
+            return SmsUtils.SMSTL_RESULT_EXCEPTION;
+        }
+    }
+
+    /**
+     * Notifies RelayLayer to Send RP-SMMA to network
+     * @param token sent from framework to track callback for each RP-SMMA sent to network
+     * @param smsc SMS service centre address to send to MtsController
+     *
+     * @return result indicates if sending of RP-SMMA notification to native is success
+     */
+    public int sendMemoryAvailabilityNotification(int token, String smsc) {
+        if (DBG) {
+            log("sendMemoryAvailabilityNotification : token = " + token + " smsc = " + smsc);
+        }
+        try {
+            //In case of RP-SMMA, the destination address is set to smsc address
+            TpduParam tpduParameters = new TpduParam(token, null, smsc, smsc, SmsUtils.RP_SMMA);
+            return enqueueAndSendMessageToRL(tpduParameters);
+        } catch (RuntimeException e) {
+            loge("sendMemoryAvailabilityNotification :: Failed: " + e.getMessage());
             return SmsUtils.SMSTL_RESULT_EXCEPTION;
         }
     }
@@ -479,7 +503,7 @@ public class SmsTransferLayer {
                 }
                 mSendSmsQueue.add(tpduParameters.mToken);
                 mTokenMessageMap.put(tpduParameters.mToken, tpduParameters);
-                return mSmsRL.sendRPMessage(tpduParameters.mToken, SmsUtils.RP_DATA,
+                return mSmsRL.sendRPMessage(tpduParameters.mToken, tpduParameters.mRpMessageType,
                         tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
                         tpduParameters.mTpdu, 0);
             } else {
@@ -522,7 +546,7 @@ public class SmsTransferLayer {
                                     + " tpdu = " + ImsLog.hiddenString(IccUtils
                                         .bytesToHexString(tpduParameters.mTpdu)));
                     }
-                    mSmsRL.sendRPMessage(tpduParameters.mToken, SmsUtils.RP_DATA,
+                    mSmsRL.sendRPMessage(tpduParameters.mToken, tpduParameters.mRpMessageType,
                                          tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
                                          tpduParameters.mTpdu, 0);
                     break;

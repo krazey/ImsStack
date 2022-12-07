@@ -251,7 +251,9 @@ public class SmsRLStateMachine {
                 byte[] encodedPdu = null;
                 byte[] tpdu = moRPData.getUserData();
                 encodedPdu = moRPData.getRpduByteArray();
-                smsRLStateMachine.mTpMr = tpdu[SmsUtils.TPDU_MR_INDEX] & 0xff;
+                if (tpdu != null) {
+                    smsRLStateMachine.mTpMr = tpdu[SmsUtils.TPDU_MR_INDEX] & 0xff;
+                }
                 if (encodedPdu == null) {
                     loge("Encoding Failed");
                     return SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED;

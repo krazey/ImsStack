@@ -281,7 +281,8 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     public void testGetSmsImplementation() {
         ImsSmsImplBase smsImplBase = null;
         SmsTransferLayer smsTransFerLayer = Mockito.mock(SmsTransferLayer.class);
-        ImsSmsImpl smsImpl = new ImsSmsImpl(mMockCallContext, smsTransFerLayer);
+        String smsc = "+91987654321";
+        ImsSmsImpl smsImpl = new ImsSmsImpl(mMockCallContext, smsTransFerLayer, smsc);
         smsImplBase = mMmTelFeature.getSmsImplementation();
         assertNull(smsImplBase);
 

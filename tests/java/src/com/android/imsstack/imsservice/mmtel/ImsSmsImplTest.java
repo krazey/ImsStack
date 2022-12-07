@@ -18,6 +18,7 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -53,12 +54,12 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     @Mock private SmsTransferLayer mMockSmsTransferLayer;
     @Mock private ImsCallContext mMockImsCallContext;
     @Mock private IImsSmsListener mListener;
-
     private int mToken = 1;
     private int mMessageRef = 10;
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
     private byte[] mPdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
     private int mFormat = SmsUtils.FORMAT_INT_3GPP;
+    private String mSmsc = "+919876543210";
 
     @Before
     public void setUp() throws Exception {
@@ -68,7 +69,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
         when(mMockImsCallContext.getExecutor()).thenReturn(mExecutor);
         doReturn(Looper.getMainLooper()).when(mMockImsCallContext).getCallLooper();
 
-        mImsSmsImpl = new ImsSmsImpl(mMockImsCallContext, mMockSmsTransferLayer);
+        mImsSmsImpl = new ImsSmsImpl(mMockImsCallContext, mMockSmsTransferLayer, mSmsc);
         mImsSmsImpl.registerSmsListener(mListener);
     }
 
@@ -116,6 +117,12 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, RESULT_NO_NETWORK_ERROR);
+    }
+
+    @Test
+    public void test_onMemoryAvailable() {
+        mImsSmsImpl.onMemoryAvailable(mToken);
+        verify(mMockSmsTransferLayer).sendMemoryAvailabilityNotification(eq(mToken), eq(mSmsc));
     }
 
     @Test

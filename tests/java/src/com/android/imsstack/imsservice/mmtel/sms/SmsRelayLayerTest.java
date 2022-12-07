@@ -17,6 +17,8 @@
 package com.android.imsstack.imsservice.mmtel.sms;
 
 import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLState
+                                                        .IDLE;
+import static com.android.imsstack.imsservice.mmtel.sms.SmsRLStateMachine.SmsRLState
                                                         .WAIT_FOR_RPACK_FROM_NW;
 
 import static org.junit.Assert.assertEquals;
@@ -140,6 +142,34 @@ public class SmsRelayLayerTest {
         verify(mListener).notifyRLReportIndication(eq(mToken), eq(tpMR),
                     eq(ImsSmsImplBase.SEND_STATUS_OK), eq(SmsManager.RESULT_ERROR_NONE),
                     eq(sSuccessCause));
+    }
+
+    @Test
+    public void test_VerifyRPSMMA()
+            throws NoSuchFieldException, IllegalAccessException {
+        when(mMtsController.sendMessage(anyInt(), any(), anyString(), anyString(),
+                anyInt())).thenReturn(true);
+        when(mImsCallContext.getSubId()).thenReturn(-1);
+        mSmsRelayLayer.sendRPMessage(mToken, SmsUtils.RP_SMMA, mSmsc, null, null,
+                                     mStatusResultNA);
+        Field f = SmsRelayLayer.class.getDeclaredField("mRPMR");
+        f.setAccessible(true);
+        AtomicInteger rpMR = (AtomicInteger) f.get(mSmsRelayLayer);
+        int rpDataMR = rpMR.get();
+        SmsRPdu pdu = new SmsRPdu(rpDataMR, SmsUtils.RP_SMMA, null, 0, null);
+        byte[] expectedMoRpData = pdu.getRpduByteArray();
+        verify(mMtsController, timeout(1000).times(1)).sendMessage(eq(mSmsFormat),
+                                        eq(expectedMoRpData), eq(mSmsc),
+                                        eq(mSmsc), eq(rpDataMR));
+        assertEquals(WAIT_FOR_RPACK_FROM_NW, mSmsRelayLayer.mSmsRLStateMachine.getState());
+        byte[] mtRpAck = new byte[2];
+        mtRpAck[0] = SmsRPdu.MT_RP_ACK_MTI;
+        mtRpAck[1] = (byte) (rpDataMR & 0xff);
+        mProxyListener.notifyIncomingMessage(mSmsFormat, mtRpAck);
+        verify(mListener).notifyRLReportIndication(eq(mToken), eq(0),
+                    eq(ImsSmsImplBase.SEND_STATUS_OK), eq(SmsManager.RESULT_ERROR_NONE),
+                    eq(sSuccessCause));
+        assertEquals(IDLE, mSmsRelayLayer.mSmsRLStateMachine.getState());
     }
 
     @Test

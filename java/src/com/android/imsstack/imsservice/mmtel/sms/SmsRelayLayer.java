@@ -150,6 +150,7 @@ public class SmsRelayLayer {
                 rpCause = mDeliverCause.get(statusResult);
             }
             int result = SmsUtils.SMSRL_RESULT_INVALID_STATE;
+
             /* In Case of RP-Ack, Target address is already fetched when RP-Data is received
              * and  saved with corresponding StateMachine object
              */
@@ -177,7 +178,11 @@ public class SmsRelayLayer {
                     /* smsc address is passed in encoded format. Extracting the address
                      * string in decoded format and assigning it to TargetAddress
                      */
-                    targetAddress = decodeSmsc(smsc);
+                    if (rpType == SmsUtils.RP_SMMA) {
+                        targetAddress = smsc;
+                    } else {
+                        targetAddress = decodeSmsc(smsc);
+                    }
                     if (DBG) log("targetAddress set to Smsc:" + ImsLog.hiddenString(targetAddress));
                 }
                 /* As per b/232048441, if PSI & Smsc is null,

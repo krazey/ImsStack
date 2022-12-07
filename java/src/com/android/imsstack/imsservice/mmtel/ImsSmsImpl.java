@@ -32,6 +32,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     private static final String TAG = "[GII-ImsSmsImpl]";
     private final ImsCallContext mCallContext;
     private SmsTransferLayer mSmsTL = null;
+    private String mScAddress = null;
     private final SmsTLListenerProxy mSmsTLListener = new SmsTLListenerProxy();
     private static boolean sReady = false;
     private final Object mLock = new Object();
@@ -45,10 +46,19 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     }
 
     @VisibleForTesting
-    public ImsSmsImpl(ImsCallContext callContext, SmsTransferLayer smsTransferLayer) {
+    public ImsSmsImpl(ImsCallContext callContext, SmsTransferLayer smsTransferLayer,
+                                String scAddress) {
         mCallContext = callContext;
-        mSmsTL = smsTransferLayer;
-        init();
+        mScAddress = scAddress;
+        if (smsTransferLayer == null) {
+            mSmsTL = new SmsTransferLayer(mCallContext);
+        } else {
+            mSmsTL = smsTransferLayer;
+        }
+
+        if (mSmsTL != null) {
+            mSmsTL.setListener(mSmsTLListener);
+        }
     }
 
     /**
@@ -76,6 +86,27 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
         mSmsTL.setListener(null);
         mSmsTL.clear();
         mSmsTL = null;
+    }
+
+    @Override
+    public void onMemoryAvailable(int token) {
+        //send SMMA
+        log("SMMA token = " + token);
+        int result;
+        if (!sReady) {
+            throw new RuntimeException("Sms Not Ready!");
+        }
+        try {
+            if (mScAddress == null) {
+                mScAddress = SmsManager.getSmsManagerForContextAndSubscriptionId(null,
+                                mCallContext.getSubId()).getSmscAddress();
+            }
+            log("SMMA smsc = " + mScAddress);
+            result = mSmsTL.sendMemoryAvailabilityNotification(token, mScAddress);
+        } catch (RuntimeException e) {
+            loge("onMemoryAvailable :: Can not send smma: " + e.getMessage());
+        }
+
     }
 
     @Override
