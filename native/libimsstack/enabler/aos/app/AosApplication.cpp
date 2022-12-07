@@ -1075,11 +1075,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessPcscfRecovery(IN IMSMSG& objMsg)
     if (nNextAt >= 0 && nCount > 1)
     {
         AStringArray objUpdatePcscfs;
-        IMS_SINT32 nCurrAt = 0;
 
         for (IMS_SINT32 nAt = 0; nAt < nCount; ++nAt)
         {
-            nCurrAt = nNextAt + nAt;
+            IMS_SINT32 nCurrAt = nNextAt + nAt;
 
             if ((nCurrAt) > (nCount - 1))
             {
