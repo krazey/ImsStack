@@ -995,17 +995,18 @@ TEST_F(AosApplicationTest, StateMachine)
     EXPECT_TRUE(m_pTestAosApplication->StateUpdating_Registration(objMessageReg));
 
     // TEST_F : StateDisconnecting_Condition
-    EXPECT_TRUE(m_pTestAosApplication->StateDisconnecting_Condition(objMessageReg));
+    ImsMessage objMessageCondition(MSG_CONDITION, 0, 0);
+    EXPECT_TRUE(m_pTestAosApplication->StateDisconnecting_Condition(objMessageCondition));
 
     // TEST_F : StateDisconnecting_Connection - ProcessConnectionUpdated_StateDisconnecting
     objMessageCnx.nWparam = CONNECTION_UPDATED;
     objMessageCnx.nLparam = 0;
-    EXPECT_TRUE(m_pTestAosApplication->StateDisconnecting_Connection(objMessageReg));
+    EXPECT_TRUE(m_pTestAosApplication->StateDisconnecting_Connection(objMessageCnx));
 
     // TEST_F : StateDisconnecting_Registration
-    objMessageCnx.nWparam = IAosRegistration::RESULT_TRYING;
-    objMessageCnx.nLparam = 0;
-    EXPECT_TRUE(m_pTestAosApplication->StateDisconnecting_Connection(objMessageReg));
+    objMessageReg.nWparam = IAosRegistration::RESULT_TRYING;
+    objMessageReg.nLparam = 0;
+    EXPECT_TRUE(m_pTestAosApplication->StateDisconnecting_Registration(objMessageReg));
 }
 
 TEST_F(AosApplicationTest, Process)

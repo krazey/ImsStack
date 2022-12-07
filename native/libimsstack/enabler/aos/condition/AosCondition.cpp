@@ -193,7 +193,7 @@ PUBLIC VIRTUAL IMS_BOOL AosCondition::IsReasonBlocked(IN BLOCK_REASON eReason) c
 
 PUBLIC VIRTUAL IMS_BOOL AosCondition::IsReady()
 {
-    IMS_BOOL bReturn = IMS_FALSE;
+    IMS_BOOL bReturn;
 
     if (m_eServiceType == SERVICE_CELLULAR)
     {

@@ -987,9 +987,7 @@ void AosHandle::ProcessBlock(
 PROTECTED
 IMS_BOOL AosHandle::ProcessCheckBlock(IN IMS_BOOL bRunStateMachine /* = IMS_TRUE */)
 {
-    IMS_BOOL bCurrBlocked = IMS_FALSE;
-
-    bCurrBlocked = IsHandleBlocked();
+    IMS_BOOL bCurrBlocked = IsHandleBlocked();
 
     A_IMS_TRACE_D(APPPROFILE, "ProcessCheckBlock :: old(%s) -> current(%s) , blocks(%x)",
             _TRACE_B_(m_bBlocked), _TRACE_B_(bCurrBlocked), m_nBlocks);
