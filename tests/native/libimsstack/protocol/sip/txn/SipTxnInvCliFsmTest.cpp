@@ -125,7 +125,8 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_IDLE_ST][SipTxn::INV_CLI_SEND_INV_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -141,9 +142,8 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
     EXPECT_EQ(SIP_FALSE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_IDLE_ST][SipTxn::INV_CLI_SEND_INV_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
-
-    delete pTxn;
     delete pTxnKey;
+    pTxn->SipDelete();
 
     SipRequestLine* pReqLine = pSipMsg->GetReqLine();
     ASSERT_TRUE(pReqLine != nullptr);
@@ -158,7 +158,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_IdleState)
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_IDLE_ST][SipTxn::INV_CLI_SEND_INV_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pSipTranspParam;
     delete pTxnFsmData;
@@ -207,7 +207,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -266,7 +266,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     delete pSipTranspParam;
     delete pSipUserData;
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
 }
 
 TEST_F(Sip_txn_InvCliFsmTest, InvCli_ProceedingState)
@@ -395,7 +395,7 @@ RSeq: 2\r\n\
                                          pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
@@ -413,7 +413,7 @@ RSeq: 2\r\n\
                     pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipUserData;
     delete pSipTranspParam;
@@ -444,7 +444,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CompletedState)
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_COMPLETED_ST][SipTxn::INV_CLI_TRANSP_ERROR_EVT](
                     pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
 }
 
