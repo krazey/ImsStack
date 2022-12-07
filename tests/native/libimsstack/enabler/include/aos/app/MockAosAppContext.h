@@ -24,7 +24,10 @@
 
 class MockAosAppContext : public AosAppContext {
 public:
-    MockAosAppContext(IN AosStaticProfile * pProfile) : AosAppContext(pProfile) { }
+    explicit MockAosAppContext(IN AosStaticProfile* pProfile) :
+            AosAppContext(pProfile)
+    {
+    }
     ~MockAosAppContext() { }
 
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));

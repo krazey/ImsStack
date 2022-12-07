@@ -25,8 +25,9 @@
 class AosFeatureTag
 {
 public:
-    AosFeatureTag(IN const AString& strName, IN const AString& strValue = AString::ConstNull(),
-            IN IMS_UINT32 nType = 0, IN IMS_UINT32 nOption = OPTION_HEADER_PARAMETER);
+    explicit AosFeatureTag(IN const AString& strName,
+            IN const AString& strValue = AString::ConstNull(), IN IMS_UINT32 nType = 0,
+            IN IMS_UINT32 nOption = OPTION_HEADER_PARAMETER);
     virtual ~AosFeatureTag();
 
     void SetFeatureTag(

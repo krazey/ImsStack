@@ -30,7 +30,7 @@ class AosUtil;
 class AosConnector : public IAosConnectionListener, public IAosPcscfListener, public ITimerListener
 {
 public:
-    AosConnector(IN IAosAppContext* piAppContext);
+    explicit AosConnector(IN IAosAppContext* piAppContext);
     virtual ~AosConnector();
 
     virtual IMS_BOOL Start();

@@ -35,7 +35,7 @@ class AosSubscriberManager :
         public AosServicePhoneListener
 {
 public:
-    AosSubscriberManager(IN IMS_SINT32 nSlotId);
+    explicit AosSubscriberManager(IN IMS_SINT32 nSlotId);
     virtual ~AosSubscriberManager();
 
 public:

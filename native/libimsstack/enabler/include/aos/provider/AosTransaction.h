@@ -77,7 +77,7 @@ class AosTransaction :
         public IImsRadioTrafficPriorityListener
 {
 public:
-    AosTransaction(IN IMS_SINT32 nSlotId);
+    explicit AosTransaction(IN IMS_SINT32 nSlotId);
     virtual ~AosTransaction();
 
     void SetListener(IN IMS_UINT32 nType, IN IAosTransactionListener* piListener) override;

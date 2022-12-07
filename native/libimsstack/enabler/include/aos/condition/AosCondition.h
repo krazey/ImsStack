@@ -46,7 +46,7 @@ class AosCondition :
         public AosServiceSettingListener
 {
 public:
-    AosCondition(IN IAosAppContext* piAppContext);
+    explicit AosCondition(IN IAosAppContext* piAppContext);
     virtual ~AosCondition();
 
     virtual void Start();

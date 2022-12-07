@@ -29,7 +29,7 @@ class IAosServiceAvailableListener;
 class AosServiceAvailable
 {
 protected:
-    AosServiceAvailable(AString strName);
+    explicit AosServiceAvailable(AString strName);
     virtual ~AosServiceAvailable();
 
 public:

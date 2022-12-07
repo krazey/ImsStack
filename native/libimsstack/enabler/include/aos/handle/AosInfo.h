@@ -24,7 +24,7 @@ class IAosAppContext;
 class AosInfo : public IImsAosInfo
 {
 public:
-    AosInfo(IN IAosAppContext* piContext);
+    explicit AosInfo(IN IAosAppContext* piContext);
     virtual ~AosInfo();
 
 private:

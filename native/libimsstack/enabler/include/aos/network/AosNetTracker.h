@@ -37,7 +37,7 @@ class AosNetTracker :
         public ITimerListener
 {
 public:
-    AosNetTracker(IN IAosAppContext* piAppContext);
+    explicit AosNetTracker(IN IAosAppContext* piAppContext);
     virtual ~AosNetTracker();
 
 public:

@@ -25,7 +25,7 @@
 class AosRetryRepository : public IAosRetryRepository
 {
 public:
-    AosRetryRepository(IN IMS_SINT32 nSlotId);
+    explicit AosRetryRepository(IN IMS_SINT32 nSlotId);
     virtual ~AosRetryRepository();
 
     enum

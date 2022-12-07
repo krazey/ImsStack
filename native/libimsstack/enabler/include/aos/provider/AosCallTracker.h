@@ -31,7 +31,7 @@ class AosCallTracker :
         public IMtcCallStateListener
 {
 public:
-    AosCallTracker(IN IMS_SINT32 nSlotId);
+    explicit AosCallTracker(IN IMS_SINT32 nSlotId);
     virtual ~AosCallTracker();
 
     IMS_BOOL SetMtcReady() const override;

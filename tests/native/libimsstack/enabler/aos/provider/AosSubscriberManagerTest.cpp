@@ -43,7 +43,7 @@ const IMS_UINT32 TIMER_PHONE_RESTART_RECOVERY = 102;
 class TestAosSubscriberManager : public AosSubscriberManager
 {
 public:
-    inline TestAosSubscriberManager(IN IMS_SINT32 nSlotId) :
+    inline explicit TestAosSubscriberManager(IN IMS_SINT32 nSlotId) :
             AosSubscriberManager(nSlotId)
     {
     }

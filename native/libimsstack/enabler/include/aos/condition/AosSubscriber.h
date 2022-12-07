@@ -25,7 +25,7 @@ class IAosSubscriberManager;
 class AosSubscriber : public IAosSubscriber, public IAosSubscriberManagerListener
 {
 public:
-    AosSubscriber(IN IAosAppContext* piAppContext);
+    explicit AosSubscriber(IN IAosAppContext* piAppContext);
     virtual ~AosSubscriber();
 
     // IAosSubscriber

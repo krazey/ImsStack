@@ -27,7 +27,7 @@ class IAosAppContext;
 class AosConnection : public IAosConnection, public INetworkConnectionListener
 {
 public:
-    AosConnection(IN IAosAppContext* piAppContext);
+    explicit AosConnection(IN IAosAppContext* piAppContext);
     virtual ~AosConnection();
 
     virtual IMS_BOOL Activate();

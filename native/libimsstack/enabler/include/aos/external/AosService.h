@@ -26,7 +26,7 @@ class IJniAosServiceThread;
 class AosService : public IAosService
 {
 public:
-    AosService(IN IMS_SINT32 nSlotId);
+    explicit AosService(IN IMS_SINT32 nSlotId);
     virtual ~AosService();
 
     IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) override;

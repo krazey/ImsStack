@@ -21,7 +21,7 @@
 class AosAppContext : public IAosAppContext
 {
 public:
-    AosAppContext(IN AosStaticProfile* pProfile);
+    explicit AosAppContext(IN AosStaticProfile* pProfile);
     virtual ~AosAppContext();
 
 private:

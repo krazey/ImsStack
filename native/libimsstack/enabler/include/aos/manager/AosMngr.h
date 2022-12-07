@@ -29,7 +29,7 @@ class IAosAppContext;
 class AosMngr
 {
 public:
-    AosMngr(IN IMS_SINT32 nSlotId);
+    explicit AosMngr(IN IMS_SINT32 nSlotId);
     virtual ~AosMngr();
 
 private:

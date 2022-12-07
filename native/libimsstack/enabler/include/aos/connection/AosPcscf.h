@@ -152,7 +152,7 @@ private:
 class AosPcscf : public IAosPcscf, public ITimerListener
 {
 public:
-    AosPcscf(IN IAosAppContext* piAppContext);
+    explicit AosPcscf(IN IAosAppContext* piAppContext);
     virtual ~AosPcscf();
 
     virtual void Init();

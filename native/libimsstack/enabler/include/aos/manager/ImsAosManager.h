@@ -29,7 +29,7 @@ class IImsAos;
 class ImsAosManager : public ImsApp
 {
 public:
-    ImsAosManager(IN const AString& strAppName);
+    explicit ImsAosManager(IN const AString& strAppName);
     virtual ~ImsAosManager();
 
     /// Implement child class
