@@ -1356,7 +1356,7 @@ public final class LocationAgent implements ILocationAgent {
     }
 
     private class AddressResolver {
-        private List<Location> mLocations = new ArrayList<Location>();
+        private final List<Location> mLocations = new ArrayList<Location>();
         private MessageExecutor mExecutor
                 = new MessageExecutor(AddressResolver.class.getSimpleName());
         private Runner mRunner = new Runner();

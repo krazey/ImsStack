@@ -21,7 +21,7 @@ import com.android.imsstack.util.MSimUtils;
 
 public final class LocationAgentManager implements ILocationAgentManager {
     private final Context mContext;
-    private LocationAgent[] mAgents = new LocationAgent[MSimUtils.getSupportedSimCount()];
+    private final LocationAgent[] mAgents = new LocationAgent[MSimUtils.getSupportedSimCount()];
 
     public LocationAgentManager(Context context) {
         mContext = context;

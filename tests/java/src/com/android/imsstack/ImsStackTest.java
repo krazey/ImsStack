@@ -16,13 +16,11 @@
 
 package com.android.imsstack;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.nullable;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -31,36 +29,26 @@ import static org.mockito.Mockito.spy;
 
 import android.app.ActivityManager;
 import android.app.IActivityManager;
-import android.app.KeyguardManager;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkCapabilities;
-import android.net.vcn.VcnManager;
-import android.net.vcn.VcnNetworkPolicyResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
 import android.os.RegistrantList;
-import android.os.ServiceManager;
 import android.os.StrictMode;
-import android.os.UserManager;
 import android.provider.BlockedNumberContract;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Telephony;
-import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CellIdentity;
 import android.telephony.CellLocation;
@@ -69,21 +57,13 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.telephony.emergency.EmergencyNumber;
-import android.telephony.ims.ImsCallProfile;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.testing.TestableLooper;
 import android.util.Log;
 import android.util.Singleton;
 
-import com.android.ims.ImsCall;
-import com.android.ims.ImsEcbm;
-import com.android.ims.ImsManager;
-
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -143,7 +123,7 @@ public abstract class ImsStackTest {
     protected ContextFixture mContextFixture;
     protected Context mContext;
     private final ContentProvider mContentProvider = spy(new ContextFixture.FakeContentProvider());
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     private boolean mReady;
     protected NetworkRegistrationInfo mNetworkRegistrationInfo =
             new NetworkRegistrationInfo.Builder()
@@ -391,7 +371,6 @@ public abstract class ImsStackTest {
         mCarrierConfigManager = null;
         mContextFixture = null;
         mContext = null;
-        mLock = null;
         mTestableLoopers.clear();
         mTestableLoopers = null;
         mTestableLooper = null;

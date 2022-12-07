@@ -45,10 +45,10 @@ public class CommonStarter {
 
     private boolean mJNIReady = false;
     private boolean mCommonAgentReady = false;
-    private int[] mState = new int[MSimUtils.getSupportedSimCount()];
-    private Set<ICommonPackageListener> mListeners
+    private final int[] mState = new int[MSimUtils.getSupportedSimCount()];
+    private final Set<ICommonPackageListener> mListeners
             = new HashSet<ICommonPackageListener>();
-    private Set<IVoltePackageListener> mVolteListeners
+    private final Set<IVoltePackageListener> mVolteListeners
             = new HashSet<IVoltePackageListener>();
 
     private CommonStarter() {
