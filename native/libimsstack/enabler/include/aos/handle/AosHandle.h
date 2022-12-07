@@ -176,8 +176,6 @@ protected:
     void SetReason(IN IMS_UINT32 nReason);
     void ClearSuspendedReason();
 
-    IMS_BOOL CheckAppNotificationAndSetAppState();
-
     IMS_UINT32 GetAppState();
     IMS_UINT32 GetImsAosReason(IN IMS_UINT32 nAosReason);
     IMS_UINT32 GetImsAosReasonForSuspend(IN IMS_UINT32 nAosReason);

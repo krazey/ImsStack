@@ -291,11 +291,6 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
         return IMS_FALSE;
     }
 
-    if (!CheckAppNotificationAndSetAppState())
-    {
-        return IMS_FALSE;
-    }
-
     // notify the state to Enabler
     switch (GetState())
     {
@@ -590,28 +585,6 @@ void AosHandle::ClearSuspendedReason()
 {
     A_IMS_TRACE_D(APPPROFILE, "ClearSuspendedReason", 0, 0, 0);
     m_nSuspendedReason = AosReason::SUSPEND_NONE;
-}
-
-PROTECTED
-IMS_BOOL AosHandle::CheckAppNotificationAndSetAppState()
-{
-    return IMS_TRUE;
-    /* TODO_CONFIG
-    if (!AosUtil::GetInstance()->IsFeatureOn(GetServiceType(),
-            m_piAppContext->GetConfig()->GetCheckingAppNotificationSupportedServices()))
-    {
-        return IMS_TRUE;
-    }
-
-    IMS_UINT32 nReportState = GetAppState();
-    if (m_nAppState == nReportState)
-    {
-        return (nReportState == APP_STATE_CONNECTED) ? IMS_TRUE : IMS_FALSE;
-    }
-
-    m_nAppState = nReportState;
-    return IMS_TRUE;
-    */
 }
 
 PROTECTED
@@ -1074,11 +1047,9 @@ PROTECTED
 void AosHandle::BackupBlocks(
         IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
 {
-    IMS_UINT32 nBlock = BLOCK_NONE;
-
     for (IMS_UINT32 i = 0; i < objHoldingBlocksPolicy.GetSize(); i++)
     {
-        nBlock = objHoldingBlocksPolicy.GetAt(i);
+        IMS_UINT32 nBlock = objHoldingBlocksPolicy.GetAt(i);
         if (IsHandleBlocked(nBlock))
         {
             A_IMS_TRACE_D(APPPROFILE, "BackupBlocks :: Reset block[%x] and set to HoldingBlocks",
@@ -1093,11 +1064,9 @@ PROTECTED
 void AosHandle::RestoreBlocks(
         IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
 {
-    IMS_UINT32 nBlock = BLOCK_NONE;
-
     for (IMS_UINT32 i = 0; i < objHoldingBlocksPolicy.GetSize(); i++)
     {
-        nBlock = objHoldingBlocksPolicy.GetAt(i);
+        IMS_UINT32 nBlock = objHoldingBlocksPolicy.GetAt(i);
         if (IsHandleBlocked(nHoldingBlocks, nBlock))
         {
             A_IMS_TRACE_D(APPPROFILE, "RestoreBlocks :: Set block[%x] and reset from HoldingBlocks",
