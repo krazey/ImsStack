@@ -849,7 +849,7 @@ public class SystemInterface implements JniSystemListener {
         private ThreadMessageExecutor mExecutor =
                 new ThreadMessageExecutor(SystemInterface.class.getSimpleName());
 
-        private Object mLockObj = new Object();
+        private final Object mLock = new Object();
         private Set<Integer> mRegisteredEvents = new HashSet<Integer>();
 
         private int mSlotId = 0;
@@ -885,49 +885,49 @@ public class SystemInterface implements JniSystemListener {
 
         @Override
         public void setISystemAPICallInfo(ISystemAPICallInfo api) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mISystemAPICallInfo = api;
             }
         }
 
         @Override
         public void setISystemAPINetwork(ISystemAPINetwork api) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mISystemAPINetwork = api;
             }
         }
 
         @Override
         public void setISystemAPISendEvent(ISystemAPISendEvent api) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mISystemAPISendEvent = api;
             }
         }
 
         @Override
         public void setISystemAPITelephonyState(ISystemAPITelephonyState api) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mISystemAPITelephonyState = api;
             }
         }
 
         @Override
         public void setISystemAPITelephonySubscriber(ISystemAPITelephonySubscriber api) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mISystemAPITelephonySubscriber = api;
             }
         }
 
         @Override
         public void setISystemAPIWifiCalling(ISystemAPIWifiCalling api) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mISystemAPIWifiCalling = api;
             }
         }
 
         @Override
         public void setISystemAPILocation(ISystemAPILocation api) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mISystemAPILocation = api;
             }
         }
@@ -1405,19 +1405,19 @@ public class SystemInterface implements JniSystemListener {
 
         // Private/Protected methods ---------------------------------
         public boolean isEventRegistered(final int event) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 return (mRegisteredEvents.contains(event));
             }
         }
 
         public void registerEvent(final int event) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mRegisteredEvents.add(event);
             }
         }
 
         public void unregisterEvent(final int event) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 mRegisteredEvents.remove(event);
             }
         }
@@ -1430,7 +1430,7 @@ public class SystemInterface implements JniSystemListener {
 
             Parcel result = null;
 
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 switch (method) {
                     //mISystemAPICallInfo
                     case SystemConstants.IS_EMERGENCY_NUMBER: //FALL-THROUGH
@@ -1529,7 +1529,7 @@ public class SystemInterface implements JniSystemListener {
         }
 
         public Parcel handleSystemAPISendEvent(int event, int wParam, int lParam) {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 if (mISystemAPISendEvent == null) {
                     return null;
                 }
@@ -2062,7 +2062,7 @@ public class SystemInterface implements JniSystemListener {
         }
 
         private ISystemAPINetwork getSystemAPINetwork() {
-            synchronized (mLockObj) {
+            synchronized (mLock) {
                 return mISystemAPINetwork;
             }
         }

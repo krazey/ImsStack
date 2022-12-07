@@ -324,7 +324,7 @@ public final class LocationApi {
     }
 
     private class ListenerPool {
-        private Set<LocationApi.Listener> mListeners = new ArraySet<LocationApi.Listener>();
+        private final Set<LocationApi.Listener> mListeners = new ArraySet<LocationApi.Listener>();
 
         ListenerPool() {
         }

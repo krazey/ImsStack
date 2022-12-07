@@ -45,9 +45,9 @@ public class JniIms {
     }
 
     private static Callback sCallback = null;
-    private Hashtable<Long, JniImsListener> mListeners =
+    private final Hashtable<Long, JniImsListener> mListeners =
             new Hashtable<Long, JniImsListener>();
-    private Hashtable<Long, JniSystemListener> mSystemListeners =
+    private final Hashtable<Long, JniSystemListener> mSystemListeners =
             new Hashtable<Long, JniSystemListener>();
 
     /** Native APIs. */

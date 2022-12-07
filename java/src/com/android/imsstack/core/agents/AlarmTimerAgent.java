@@ -59,17 +59,17 @@ public class AlarmTimerAgent implements IAlarmTimer, ISystemAPIAlarm {
     private AlarmTimerReceiver mAlarmTimerReceiver;
     private Handler mAlarmTimerHandler;
 
-    private Hashtable<Long, Registrant> mTimerExpiredListeners =
+    private final Hashtable<Long, Registrant> mTimerExpiredListeners =
             new Hashtable<Long, Registrant>();
 
     // Pool for timers which is greater than 30 seconds; it's only for native timers
-    private ArrayList<Long> mLongTimers = new ArrayList<Long>();
+    private final ArrayList<Long> mLongTimers = new ArrayList<Long>();
     // Timer management for cancelling : requestCode of PendingIntent / timer id
-    private MapIntLong mActiveTimers = new MapIntLong();
+    private final MapIntLong mActiveTimers = new MapIntLong();
     // Tracked timer id to generate a unique id
     private int mTimerIdForUniqueness = 1;
     // IMS_ALARM_TIMER {
-    private ArrayList<ImsAlarm> mImsAlarms = new ArrayList<ImsAlarm>();
+    private final ArrayList<ImsAlarm> mImsAlarms = new ArrayList<ImsAlarm>();
     private ImsWakeLock mWakeLock;
     // IMS_ALARM_TIMER }
 

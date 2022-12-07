@@ -19,8 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class SystemNotifier {
-    private Object mLockObj = new Object();
-    private Set<Integer> mRegisteredEvents = new HashSet<Integer>();
+    private final Set<Integer> mRegisteredEvents = new HashSet<Integer>();
 
     public SystemNotifier() {
     }
@@ -232,8 +231,8 @@ public abstract class SystemNotifier {
      * @return true if the specified event is registered. Otherwise, false
      */
     public boolean isEventRegistered(final int event) {
-        synchronized (mLockObj) {
-            return (mRegisteredEvents.contains(event));
+        synchronized (mRegisteredEvents) {
+            return mRegisteredEvents.contains(event);
         }
     }
 
@@ -243,7 +242,7 @@ public abstract class SystemNotifier {
      * @param event the event to be registered
      */
     public void registerEvent(final int event) {
-        synchronized (mLockObj) {
+        synchronized (mRegisteredEvents) {
             mRegisteredEvents.add(event);
         }
     }
@@ -254,7 +253,7 @@ public abstract class SystemNotifier {
      * @param event the event to be unregistered
      */
     public void unregisterEvent(final int event) {
-        synchronized (mLockObj) {
+        synchronized (mRegisteredEvents) {
             mRegisteredEvents.remove(event);
         }
     }
