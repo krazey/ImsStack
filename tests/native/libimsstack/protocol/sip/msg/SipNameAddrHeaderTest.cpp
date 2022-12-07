@@ -108,7 +108,6 @@ TEST_F(SipNameAddrHeaderTest, EncodeHdr)
     SipAddrSpec* pAddressSpec = new SipAddrSpec();
     pAddressSpec->SetAbsUri("www.absolute-uri.com/abcd");
     pNameAddress->SetAddrSpec(pAddressSpec);
-    pAddressSpec->SipDelete();
     pNameAddress->SipDelete();
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -191,7 +190,7 @@ TEST_F(SipNameAddrHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE,
             pHeader->DecodeHdr(
                     const_cast<char*>("DisplayName <www.absolute-uri.com/abcd>;tag=tag-value"),
-                    62));
+                    53));
     pNameAddress = pHeader->GetNameAddr();
     EXPECT_STREQ("DisplayName", pNameAddress->GetDisplayName());
     pAddressSpec = pNameAddress->GetAddrSpec();
