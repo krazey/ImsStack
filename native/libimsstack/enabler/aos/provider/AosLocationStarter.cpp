@@ -130,9 +130,7 @@ PUBLIC VIRTUAL IMS_BOOL AosLocationStarter::SetPolicy(
 
 PUBLIC VIRTUAL IMS_BOOL AosLocationStarter::IsPolicyEnabled(IN IMS_UINT32 nPolicy)
 {
-    IMS_BOOL bResult = IMS_FALSE;
-
-    bResult = ((GetFeatures() & nPolicy) == nPolicy);
+    IMS_BOOL bResult = ((GetFeatures() & nPolicy) == nPolicy);
     A_IMS_TRACE_I(AOSTAG, "Is policy (%0x) enabled [%s]", GetFeatures(), _TRACE_B_(bResult), 0);
 
     return bResult;

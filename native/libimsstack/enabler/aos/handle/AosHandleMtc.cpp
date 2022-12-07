@@ -520,7 +520,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(
 PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
 {
     IMS_BOOL bIsVoiceUnavailable = IMS_FALSE;
-    IMS_BOOL bIsVideoUnavailable = IMS_FALSE;
     IMS_UINT32 nOldUnavailableFeature = m_objFeatureTagList.GetUnavailableFeatures();
 
     if (IsSupportedNetworkTypeForCellular(m_nNetworkType))
@@ -539,7 +538,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ReevaluateUnavailableFeature()
         return;
     }
 
-    bIsVideoUnavailable =
+    IMS_BOOL bIsVideoUnavailable =
             bIsVoiceUnavailable && !AosHandle::IsHandleBlocked(GetVideoBlockReasonForIpcan());
 
     A_IMS_TRACE_D(APPPROFILE,
