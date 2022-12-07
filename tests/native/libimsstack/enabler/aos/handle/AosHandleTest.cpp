@@ -4445,11 +4445,7 @@ TEST_F(AosHandleTest, ProcessImsResumed_Test6)
 
     EXPECT_FALSE(pTestAosHandleEmergencyMtc->ProcessImsResumed());
 
-    if (pTestAosHandleEmergencyMtc != nullptr)
-    {
-        delete pTestAosHandleEmergencyMtc;
-        pTestAosHandleEmergencyMtc = nullptr;
-    }
+    delete pTestAosHandleEmergencyMtc;
 
     AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }
