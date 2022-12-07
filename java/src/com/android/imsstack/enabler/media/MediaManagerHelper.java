@@ -59,8 +59,13 @@ public class MediaManagerHelper {
 
         mContext = context;
         mMediaObserver = mediaObserver;
-        sImsMediaManager = imsMediaManager;
-        sExecutor = executor;
+        if (sImsMediaManager == null) {
+            sImsMediaManager = imsMediaManager;
+            sExecutor = executor;
+            if (sMediaHandlerThread.getState() == Thread.State.NEW) {
+                sMediaHandlerThread.start();
+            }
+        }
     }
 
     private void createImsMediaManagerInstance(){
@@ -106,7 +111,8 @@ public class MediaManagerHelper {
     /**
      * clears the resources
      */
-    private void close() {
+    @VisibleForTesting
+    void close() {
         sImsMediaManager = null;
         sExecutor = null;
     }

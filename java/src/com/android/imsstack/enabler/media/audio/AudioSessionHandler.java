@@ -82,14 +82,14 @@ public class AudioSessionHandler extends MediaState {
     @VisibleForTesting
     public AudioSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             @NonNull AudioSessionCallbackHandler audioCallbackHandler,
-            @NonNull ImsAudioSession audioSession) {
+            @NonNull ImsAudioSession audioSession, Looper looper) {
         super(ImsMediaSession.SESSION_TYPE_AUDIO);
         mContext = context;
         mMediaManager = mediaManager;
         mAudioSessionCallbackHandler = audioCallbackHandler;
         mAudioSession = audioSession;
         mAudioSessionCallback = new AudioSessionCallbackProxy();
-        mAudioMessageHandler = new AudioMessageHandler(Looper.getMainLooper());
+        mAudioMessageHandler = new AudioMessageHandler(looper);
         ImsLog.d("AudioSessionHandler created");
     }
 

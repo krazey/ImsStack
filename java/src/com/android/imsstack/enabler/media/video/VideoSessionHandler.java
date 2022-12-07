@@ -84,7 +84,7 @@ public class VideoSessionHandler extends MediaState {
     public VideoSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             IMtcMediaVideoCallProvider mtcMediaVideoCallProvider,
             @NonNull VideoSessionCallbackHandler videoCallbackHandler,
-            @NonNull ImsVideoSession videoSession) {
+            @NonNull ImsVideoSession videoSession, Looper looper) {
         super(ImsMediaSession.SESSION_TYPE_VIDEO);
         mContext = context;
         mMediaManager = mediaManager;
@@ -92,7 +92,7 @@ public class VideoSessionHandler extends MediaState {
         mVideoSessionCallbackHandler = videoCallbackHandler;
         mVideoSession = videoSession;
         mVideoSessionCallback = new VideoSessionCallbackProxy();
-        mVideoMessageHandler = new VideoMessageHandler(Looper.getMainLooper());
+        mVideoMessageHandler = new VideoMessageHandler(looper);
         ImsLog.d("VideoSessionHandler created");
     }
 
