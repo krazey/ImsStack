@@ -23,22 +23,20 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.TestableLooper;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.SimUtils;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -56,7 +54,6 @@ public class UsatAgentTest {
     private static final int WAIT_TIMER_MILLIS = 2000;
     private static final byte[] USIM_SERVICE_TABLE =
             SimUtils.hexStringToBytes("000000FF0000000000000000FF");
-    private static final int WAIT_TIME_FOR_LISTENER = 40; // milli-seconds
     private static final String SEND_ENVELOPE_OK = "9000";
     private static final String SEND_ENVELOPE_ERROR = "9300";
     /** MO SMS control */
@@ -68,28 +65,25 @@ public class UsatAgentTest {
     /** Call control */
     private static final String DIALED_STRING = "1234567890";
 
-    private static ContextFixture sContext = null;
-
     @Mock SimInterface mSimInterface;
     @Mock Usat.Listener mListener;
+    private ContextFixture mContextFixture;
+    private TestableLooper mTestableLooper;
     private TelephonyManager mTelephonyManager;
     private UsatAgent mUsatAgent;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        AppContext.init(sContext.getTestDouble());
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
         SubscriptionManager sm =
-                sContext.getTestDouble().getSystemService(SubscriptionManager.class);
+                mContextFixture.getTestDouble().getSystemService(SubscriptionManager.class);
         when(sm.getSubscriptionIds(anyInt())).thenReturn(SUB_ID);
 
-        mTelephonyManager = sContext.getTestDouble().getSystemService(TelephonyManager.class);
+        mTelephonyManager =
+                mContextFixture.getTestDouble().getSystemService(TelephonyManager.class);
         when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
         when(mTelephonyManager.getActiveModemCount()).thenReturn(MAX_SIM_SLOT);
         when(mTelephonyManager.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
@@ -97,23 +91,24 @@ public class UsatAgentTest {
         when(mSimInterface.getSlotId()).thenReturn(SLOT0);
 
         mUsatAgent = new UsatAgent(mSimInterface);
+        mTestableLooper = new TestableLooper(mUsatAgent.getLooper());
     }
 
     @After
     public void tearDown() throws Exception {
+        if (mTestableLooper != null) {
+            mTestableLooper.destroy();
+            mTestableLooper = null;
+        }
+
         if (mUsatAgent != null) {
             mUsatAgent.removeCallbacksAndMessages(null);
         }
         mUsatAgent = null;
         mListener = null;
         mSimInterface = null;
-
         AppContext.deinit();
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        sContext = null;
+        mContextFixture = null;
     }
 
     @Test
@@ -225,9 +220,9 @@ public class UsatAgentTest {
                 ArgumentCaptor.forClass(Usat.CommandResponse.class);
 
         mUsatAgent.sendCommand(cmd);
+        processAllMessages();
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onCommandResponse(cmdResponseCaptor.capture());
+        verify(mListener).onCommandResponse(cmdResponseCaptor.capture());
 
         Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
         assertEquals(Usat.RESULT_ALLOWED, cmdResponse.getResult());
@@ -246,9 +241,9 @@ public class UsatAgentTest {
                 ArgumentCaptor.forClass(Usat.CommandResponse.class);
 
         mUsatAgent.sendCommand(cmd);
+        processAllMessages();
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onCommandResponse(cmdResponseCaptor.capture());
+        verify(mListener).onCommandResponse(cmdResponseCaptor.capture());
 
         Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
         assertEquals(Usat.RESULT_NOT_ALLOWED, cmdResponse.getResult());
@@ -266,9 +261,9 @@ public class UsatAgentTest {
                 ArgumentCaptor.forClass(Usat.CommandResponse.class);
 
         mUsatAgent.sendCommand(cmd);
+        processAllMessages();
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onCommandResponse(cmdResponseCaptor.capture());
+        verify(mListener).onCommandResponse(cmdResponseCaptor.capture());
 
         Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
         assertEquals(Usat.RESULT_DATA_DOWNLOAD_OK, cmdResponse.getResult());
@@ -286,9 +281,9 @@ public class UsatAgentTest {
                 ArgumentCaptor.forClass(Usat.CommandResponse.class);
 
         mUsatAgent.sendCommand(cmd);
+        processAllMessages();
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onCommandResponse(cmdResponseCaptor.capture());
+        verify(mListener).onCommandResponse(cmdResponseCaptor.capture());
 
         Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
         assertEquals(Usat.RESULT_DATA_DOWNLOAD_ERROR, cmdResponse.getResult());
@@ -306,9 +301,9 @@ public class UsatAgentTest {
                 ArgumentCaptor.forClass(Usat.CommandResponse.class);
 
         mUsatAgent.sendCommand(cmd);
+        processAllMessages();
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onCommandResponse(cmdResponseCaptor.capture());
+        verify(mListener).onCommandResponse(cmdResponseCaptor.capture());
 
         Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
         assertEquals(Usat.RESULT_ALLOWED, cmdResponse.getResult());
@@ -326,12 +321,18 @@ public class UsatAgentTest {
                 ArgumentCaptor.forClass(Usat.CommandResponse.class);
 
         mUsatAgent.sendCommand(cmd);
+        processAllMessages();
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onCommandResponse(cmdResponseCaptor.capture());
+        verify(mListener).onCommandResponse(cmdResponseCaptor.capture());
 
         Usat.CommandResponse cmdResponse = cmdResponseCaptor.getValue();
         assertEquals(Usat.RESULT_NOT_ALLOWED, cmdResponse.getResult());
         assertEquals(cmd, cmdResponse.getCommand());
+    }
+
+    private void processAllMessages() {
+        while (!mTestableLooper.getLooper().getQueue().isIdle()) {
+            mTestableLooper.processAllMessages();
+        }
     }
 }
