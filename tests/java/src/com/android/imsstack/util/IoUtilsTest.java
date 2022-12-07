@@ -16,7 +16,6 @@
 package com.android.imsstack.util;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -59,11 +58,7 @@ public class IoUtilsTest {
     public void closeQuietly() throws Exception {
         FileOutputStream fos = null;
 
-        try {
-            IoUtils.closeQuietly(fos);
-        } catch (Exception unexpected) {
-            fail("Unexpected exception thrown.");
-        }
+        IoUtils.closeQuietly(fos);
 
         try {
             fos = mContext.openFileOutput(TEST_FILE, Context.MODE_APPEND);

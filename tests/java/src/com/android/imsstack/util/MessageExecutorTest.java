@@ -17,7 +17,6 @@ package com.android.imsstack.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -35,7 +34,7 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class MessageExecutorTest {
-    private static final int CALLBACK_WAIT_TIME = 40;
+    private static final int CALLBACK_WAIT_TIME = 100;
 
     @Mock Runnable mCallback;
     @Mock Runnable mExceptionCallback;
@@ -51,7 +50,7 @@ public class MessageExecutorTest {
 
     @Test
     @SmallTest
-    public void constructor() throws Exception {
+    public void constructor() {
         MessageExecutor executor = new MessageExecutor(MessageExecutorTest.class.getSimpleName());
         assertNotEquals(Looper.getMainLooper(), executor.getLooper());
         assertEquals(MessageExecutorTest.class.getSimpleName(),
@@ -68,11 +67,8 @@ public class MessageExecutorTest {
         verify(mCallback, timeout(CALLBACK_WAIT_TIME)).run();
 
         doThrow(new RuntimeException("MessageExecutorTest!!!")).when(mExceptionCallback).run();
+        executor.execute(mExceptionCallback);
 
-        try {
-            executor.execute(mExceptionCallback);
-        } catch (Exception unexpected) {
-            fail("Exception unexpected.");
-        }
+        // Expected: Any exception should not be thrown when calling execute(...).
     }
 }

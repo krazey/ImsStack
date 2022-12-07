@@ -17,8 +17,7 @@ package com.android.imsstack.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -77,71 +76,58 @@ public class AppContextTest {
 
     @Test
     @SmallTest
-    public void init() throws Exception {
-        AppContext appContext = null;
-
-        try {
-            appContext = AppContext.getInstance();
-        } catch (IllegalStateException unexpected) {
-            fail("Exception unexpected.");
-        }
+    public void init() throws IllegalStateException {
+        AppContext appContext = AppContext.getInstance();
 
         assertNotNull(appContext);
     }
 
     @Test
     @SmallTest
-    public void deinit() throws Exception {
+    public void deinit() {
         AppContext.deinit();
 
-        AppContext appContext = null;
-
-        try {
-            appContext = AppContext.getInstance();
-            fail("Exception expected.");
-        } catch (IllegalStateException expected) {
-            // Expected.
-        }
-
-        assertNull(appContext);
+        assertThrows(IllegalStateException.class, () -> {
+            AppContext.getInstance();
+        });
     }
 
     @Test
     @SmallTest
-    public void getTelephonyManager() throws Exception {
+    public void getTelephonyManager() {
         TelephonyManager tm = AppContext.getTelephonyManager();
         assertEquals(tm, mTelephonyManager);
     }
 
     @Test
     @SmallTest
-    public void getTelephonyManager_subscription() throws Exception {
+    public void getTelephonyManager_subscription() {
         TelephonyManager tm = AppContext.getTelephonyManager(SUB_ID);
         assertEquals(tm, mTelephonyManager);
     }
 
     @Test
     @SmallTest
-    public void runTask() throws Exception {
+    public void runTask() {
         AppContext.runTask(mRunnable, 0);
         verify(mRunnable, timeout(RUN_TASK_WAIT_TIMEOUT)).run();
     }
 
     @Test
-    public void runTask_delay() throws Exception {
+    public void runTask_delay() {
         AppContext.runTask(mRunnable, RUN_TASK_DELAY);
         verify(mRunnable, timeout(RUN_TASK_DELAY + RUN_TASK_WAIT_TIMEOUT)).run();
     }
 
     @Test
     @SmallTest
-    public void getMainExecutor() throws Exception {
+    public void getMainExecutor() throws IllegalStateException {
         assertNotNull(AppContext.getInstance().getMainExecutor());
     }
 
     @Test
     @SmallTest
-    public void getMainHandler() throws Exception {
+    public void getMainHandler() throws IllegalStateException {
         assertNotNull(AppContext.getInstance().getMainHandler());
     }
 

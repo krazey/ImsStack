@@ -17,7 +17,6 @@ package com.android.imsstack.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -34,7 +33,7 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class ThreadMessageExecutorTest {
-    private static final int CALLBACK_WAIT_TIME = 40;
+    private static final int CALLBACK_WAIT_TIME = 100;
 
     @Mock Runnable mCallback;
     @Mock Runnable mExceptionCallback;
@@ -50,7 +49,7 @@ public class ThreadMessageExecutorTest {
 
     @Test
     @SmallTest
-    public void execute_threadNotStarted() throws Exception {
+    public void execute_threadNotStarted() {
         ThreadMessageExecutor executor = new ThreadMessageExecutor(
                 ThreadMessageExecutorTest.class.getSimpleName() + ":NotStarted");
 
@@ -74,11 +73,8 @@ public class ThreadMessageExecutorTest {
 
         doThrow(new RuntimeException("ThreadMessageExecutorTest!!!"))
                 .when(mExceptionCallback).run();
+        executor.execute(mExceptionCallback);
 
-        try {
-            executor.execute(mExceptionCallback);
-        } catch (Exception unexpected) {
-            fail("Exception unexpected.");
-        }
+        // Expected: Any exception should not be thrown when calling execute(...).
     }
 }
