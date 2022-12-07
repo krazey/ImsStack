@@ -83,7 +83,15 @@ public final class AgentFactory {
         return sInstance;
     }
 
-    public <T> T getAgent(Class<T> clazz, int slotId) {
+    /**
+     * Returns the specific agent corresponding to the given class for the specified slot.
+     *
+     * @param clazz The requested class name
+     * @param slotId The slot-id
+     * @return A {@link IAgent} object corresponding to the given class.
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends IAgent> T getAgent(Class<T> clazz, int slotId) {
         if (slotId < 0 || slotId >= mAgentsForSlot.size()) {
             return null;
         }
