@@ -21,7 +21,7 @@
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-class Application
+class ApplicationLog
 {
 public:
     // State
@@ -103,7 +103,7 @@ public:
     };
 };
 
-class Registration
+class RegistrationLog
 {
 public:
     enum
@@ -182,58 +182,58 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppMessageToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Application::MSG_CONDITION:
+        case ApplicationLog::MSG_CONDITION:
             return "MSG_CONDITION";
 
-        case Application::MSG_CONNECTION:
+        case ApplicationLog::MSG_CONNECTION:
             return "MSG_CONNECTION";
 
-        case Application::MSG_REGISTRATION:
+        case ApplicationLog::MSG_REGISTRATION:
             return "MSG_REGISTRATION";
 
-        case Application::MSG_INIT:
+        case ApplicationLog::MSG_INIT:
             return "MSG_INIT";
 
-        case Application::MSG_REG_START:
+        case ApplicationLog::MSG_REG_START:
             return "MSG_REG_START";
 
-        case Application::MSG_REG_UPDATE:
+        case ApplicationLog::MSG_REG_UPDATE:
             return "MSG_REG_UPDATE";
 
-        case Application::MSG_REG_STOP:
+        case ApplicationLog::MSG_REG_STOP:
             return "MSG_REG_STOP";
 
-        case Application::MSG_REG_RECONFIG:
+        case ApplicationLog::MSG_REG_RECONFIG:
             return "MSG_REG_RECONFIG";
 
-        case Application::MSG_REG_RECOVER:
+        case ApplicationLog::MSG_REG_RECOVER:
             return "MSG_REG_RECOVER";
 
-        case Application::MSG_IPCAN_CHANGED:
+        case ApplicationLog::MSG_IPCAN_CHANGED:
             return "MSG_IPCAN_CHANGED";
 
-        case Application::MSG_PUB_TERMINATED:
+        case ApplicationLog::MSG_PUB_TERMINATED:
             return "MSG_PUB_TERMINATED";
 
-        case Application::MSG_DESTROY:
+        case ApplicationLog::MSG_DESTROY:
             return "MSG_DESTROY";
 
-        case Application::MSG_SERVICE_CONTROL:
+        case ApplicationLog::MSG_SERVICE_CONTROL:
             return "MSG_SERVICE_CONTROL";
 
-        case Application::MSG_REG_EXCHANGE:
+        case ApplicationLog::MSG_REG_EXCHANGE:
             return "MSG_REG_EXCHANGE";
 
-        case Application::MSG_AC_CONFIGURED:
+        case ApplicationLog::MSG_AC_CONFIGURED:
             return "MSG_AC_CONFIGURED";
 
-        case Application::MSG_PCSCF_RECOVER:
+        case ApplicationLog::MSG_PCSCF_RECOVER:
             return "MSG_PCSCF_RECOVER";
 
-        case Application::MSG_SCSCF_RESTORATION:
+        case ApplicationLog::MSG_SCSCF_RESTORATION:
             return "MSG_SCSCF_RESTORATION";
 
-        case Application::MSG_OTHERS:
+        case ApplicationLog::MSG_OTHERS:
             return "MSG_OTHERS";
 
         default:
@@ -245,25 +245,25 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppPendingToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Application::PENDING_REG_RECOVERY_HELD:
+        case ApplicationLog::PENDING_REG_RECOVERY_HELD:
             return "PENDING_REG_RECOVERY_HELD";
 
-        case Application::PENDING_REG_STOP_HELD:
+        case ApplicationLog::PENDING_REG_STOP_HELD:
             return "PENDING_REG_STOP_HELD";
 
-        case Application::PENDING_APP_DESTROY_HELD:
+        case ApplicationLog::PENDING_APP_DESTROY_HELD:
             return "PENDING_APP_DESTROY_HELD";
 
-        case Application::PENDING_REG_RECONFIG_HELD:
+        case ApplicationLog::PENDING_REG_RECONFIG_HELD:
             return "PENDING_REG_RECONFIG_HELD";
 
-        case Application::PENDING_REG_AFTER_CSFB_COMPLETE:
+        case ApplicationLog::PENDING_REG_AFTER_CSFB_COMPLETE:
             return "PENDING_REG_AFTER_CSFB_COMPLETE";
 
-        case Application::PENDING_IPCAN_HELD:
+        case ApplicationLog::PENDING_IPCAN_HELD:
             return "PENDING_IPCAN_HELD";
 
-        case Application::PENDING_REG_UPDATE_HELD:
+        case ApplicationLog::PENDING_REG_UPDATE_HELD:
             return "PENDING_REG_UPDATE_HELD";
 
         default:
@@ -323,22 +323,22 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppStateToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Application::STATE_NOTREADY:
+        case ApplicationLog::STATE_NOTREADY:
             return "STATE_NOTREADY";
 
-        case Application::STATE_READY:
+        case ApplicationLog::STATE_READY:
             return "STATE_READY";
 
-        case Application::STATE_CONNECTING:
+        case ApplicationLog::STATE_CONNECTING:
             return "STATE_CONNECTING";
 
-        case Application::STATE_CONNECTED:
+        case ApplicationLog::STATE_CONNECTED:
             return "STATE_CONNECTED";
 
-        case Application::STATE_UPDATING:
+        case ApplicationLog::STATE_UPDATING:
             return "STATE_UPDATING";
 
-        case Application::STATE_DISCONNECTING:
+        case ApplicationLog::STATE_DISCONNECTING:
             return "STATE_DISCONNECTING";
 
         default:
@@ -350,31 +350,31 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Application::TIMER_RECONFIG_GUARD:
+        case ApplicationLog::TIMER_RECONFIG_GUARD:
             return "TIMER_RECONFIG_GUARD";
 
-        case Application::TIMER_MSG_CONITION:
+        case ApplicationLog::TIMER_MSG_CONITION:
             return "TIMER_MSG_CONITION";
 
-        case Application::TIMER_REG_STOP:
+        case ApplicationLog::TIMER_REG_STOP:
             return "TIMER_REG_STOP";
 
-        case Application::TIMER_REG_BLOCKED:
+        case ApplicationLog::TIMER_REG_BLOCKED:
             return "TIMER_REG_BLOCKED";
 
-        case Application::TIMER_APP_ACTIVATED:
+        case ApplicationLog::TIMER_APP_ACTIVATED:
             return "TIMER_APP_ACTIVATED";
 
-        case Application::TIMER_APP_CONNECTED:
+        case ApplicationLog::TIMER_APP_CONNECTED:
             return "TIMER_APP_CONNECTED";
 
-        case Application::TIMER_APP_TERMINATED:
+        case ApplicationLog::TIMER_APP_TERMINATED:
             return "TIMER_APP_TERMINATED";
 
-        case Application::TIMER_PDN_BLOCKED:
+        case ApplicationLog::TIMER_PDN_BLOCKED:
             return "TIMER_PDN_BLOCKED";
 
-        case Application::TIMER_IMS_ESTABLISHMENT:
+        case ApplicationLog::TIMER_IMS_ESTABLISHMENT:
             return "TIMER_IMS_ESTABLISHMENT";
 
         default:
@@ -386,37 +386,37 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Registration::MSG_REG_START:
+        case RegistrationLog::MSG_REG_START:
             return "MSG_REG_START";
 
-        case Registration::MSG_REG_REINITIATE:
+        case RegistrationLog::MSG_REG_REINITIATE:
             return "MSG_REG_REINITIATE";
 
-        case Registration::MSG_REG_UPDATE:
+        case RegistrationLog::MSG_REG_UPDATE:
             return "MSG_REG_UPDATE";
 
-        case Registration::MSG_REG_RECONFIG:
+        case RegistrationLog::MSG_REG_RECONFIG:
             return "MSG_REG_RECONFIG";
 
-        case Registration::MSG_REG_REQUIRED_WITH_WAIT_TIME:
+        case RegistrationLog::MSG_REG_REQUIRED_WITH_WAIT_TIME:
             return "MSG_REG_REQUIRED_WITH_WAIT_TIME";
 
-        case Registration::MSG_REG_REQUIRED_WITH_NEXT_PCSCF:
+        case RegistrationLog::MSG_REG_REQUIRED_WITH_NEXT_PCSCF:
             return "MSG_REG_REQUIRED_WITH_NEXT_PCSCF";
 
-        case Registration::MSG_REG_REINITIATE_WITH_REG_STATE:
+        case RegistrationLog::MSG_REG_REINITIATE_WITH_REG_STATE:
             return "MSG_REG_REINITIATE_WITH_REG_STATE";
 
-        case Registration::MSG_REG_TERMINATED_BY_NOTIFY:
+        case RegistrationLog::MSG_REG_TERMINATED_BY_NOTIFY:
             return "MSG_REG_TERMINATED_BY_NOTIFY";
 
-        case Registration::MSG_SUB_REINITIATE:
+        case RegistrationLog::MSG_SUB_REINITIATE:
             return "MSG_SUB_REINITIATE";
 
-        case Registration::MSG_SUB_TERMINATED:
+        case RegistrationLog::MSG_SUB_TERMINATED:
             return "MSG_SUB_TERMINATED";
 
-        case Registration::MSG_REG_EVENT_REGISTERED:
+        case RegistrationLog::MSG_REG_EVENT_REGISTERED:
             return "MSG_REG_EVENT_REGISTERED";
 
         default:
@@ -428,13 +428,13 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegModeToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Registration::MODE_NORMAL:
+        case RegistrationLog::MODE_NORMAL:
             return "MODE_NORMAL";
 
-        case Registration::MODE_LIMITED:
+        case RegistrationLog::MODE_LIMITED:
             return "MODE_LIMITED";
 
-        case Registration::MODE_FAKE:
+        case RegistrationLog::MODE_FAKE:
             return "MODE_FAKE";
 
         default:
@@ -446,25 +446,25 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Registration::PENDING_NONE:
+        case RegistrationLog::PENDING_NONE:
             return "PENDING_NONE";
 
-        case Registration::PENDING_TRANSACTION:
+        case RegistrationLog::PENDING_TRANSACTION:
             return "PENDING_TRANSACTION";
 
-        case Registration::PENDING_UPDATE:
+        case RegistrationLog::PENDING_UPDATE:
             return "PENDING_UPDATE";
 
-        case Registration::PENDING_RECONFIG:
+        case RegistrationLog::PENDING_RECONFIG:
             return "PENDING_RECONFIG";
 
-        case Registration::PENDING_UPDATE_HELD_BY_CALL:
+        case RegistrationLog::PENDING_UPDATE_HELD_BY_CALL:
             return "PENDING_UPDATE_HELD_BY_CALL";
 
-        case Registration::PENDING_SUBSCRIPTION:
+        case RegistrationLog::PENDING_SUBSCRIPTION:
             return "PENDING_SUBSCRIPTION";
 
-        case Registration::PENDING_TERMINATED:
+        case RegistrationLog::PENDING_TERMINATED:
             return "PENDING_TERMINATED";
 
         default:
@@ -515,25 +515,25 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegStateToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Registration::STATE_OFFLINE:
+        case RegistrationLog::STATE_OFFLINE:
             return "STATE_OFFLINE";
 
-        case Registration::STATE_REGISTERING:
+        case RegistrationLog::STATE_REGISTERING:
             return "STATE_REGISTERING";
 
-        case Registration::STATE_REGSTOP:
+        case RegistrationLog::STATE_REGSTOP:
             return "STATE_REGSTOP";
 
-        case Registration::STATE_REGISTERED:
+        case RegistrationLog::STATE_REGISTERED:
             return "STATE_REGISTERED";
 
-        case Registration::STATE_REFRESHING:
+        case RegistrationLog::STATE_REFRESHING:
             return "STATE_REFRESHING";
 
-        case Registration::STATE_REFRESHSTOP:
+        case RegistrationLog::STATE_REFRESHSTOP:
             return "STATE_REFRESHSTOP";
 
-        case Registration::STATE_DEREGISTERING:
+        case RegistrationLog::STATE_DEREGISTERING:
             return "STATE_DEREGISTERING";
 
         default:
@@ -545,25 +545,25 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case Registration::TIMER_OFFLINE_RECOVER:
+        case RegistrationLog::TIMER_OFFLINE_RECOVER:
             return "TIMER_OFFLINE_RECOVER";
 
-        case Registration::TIMER_STOP_RETRY:
+        case RegistrationLog::TIMER_STOP_RETRY:
             return "TIMER_STOP_RETRY";
 
-        case Registration::TIMER_REFRESH:
+        case RegistrationLog::TIMER_REFRESH:
             return "TIMER_REFRESH";
 
-        case Registration::TIMER_EXPIRED:
+        case RegistrationLog::TIMER_EXPIRED:
             return "TIMER_EXPIRED";
 
-        case Registration::TIMER_MODE:
+        case RegistrationLog::TIMER_MODE:
             return "TIMER_MODE";
 
-        case Registration::TIMER_TRANSACTION:
+        case RegistrationLog::TIMER_TRANSACTION:
             return "TIMER_TRANSACTION";
 
-        case Registration::TIMER_INTERNAL_ERROR:
+        case RegistrationLog::TIMER_INTERNAL_ERROR:
             return "TIMER_INTERNAL_ERROR";
 
         default:
