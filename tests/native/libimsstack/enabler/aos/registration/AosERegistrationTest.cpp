@@ -484,6 +484,11 @@ TEST_F(AosERegistrationTest, Start)
             .WillRepeatedly(
                     Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
 
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRoamingPreferredEmcReg())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(
+                    CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED));
+
     m_pTestAosERegistration->SetMockIRegistration(
             static_cast<IRegistration*>(&m_objMockIRegistration));
 

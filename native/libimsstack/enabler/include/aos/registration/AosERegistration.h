@@ -135,6 +135,8 @@ protected:
 
     void SetReinitiationRequested(IN IMS_BOOL bRequest);
 
+    IMS_UINT32 GetPreferredRegScheme();
+
 private:
     IMS_BOOL m_bReinitiationRequested;
 

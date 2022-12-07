@@ -35,7 +35,6 @@ public:
             bRegRetryWithIpVerFallback(IMS_FALSE),
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
             bRequiredCdmalessFeatureTag(IMS_FALSE),
-            bRequiredEmcRegInRoaming(IMS_FALSE),
             bRequiredInitRegAfterImsCallEndOnRegHeld(IMS_FALSE),
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
@@ -69,6 +68,8 @@ public:
             nRegRetryTimerFPolicy(CarrierConfig::Assets::TIMER_F_POLICY_NONE),
             nRegTimerForEmcCallMillis(0),
             nReregRetry305Policy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT),
+            nRoamingPreferredEmcReg(
+                    CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED),
             nSipMessageThresholdForTransportChange(200),
             objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
             objRegErrCodeForPcscfDiscovery(IMSVector<IMS_SINT32>()),
@@ -101,7 +102,6 @@ public:
     IMS_BOOL bRegRetryWithIpVerFallback;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
     IMS_BOOL bRequiredCdmalessFeatureTag;
-    IMS_BOOL bRequiredEmcRegInRoaming;
     IMS_BOOL bRequiredInitRegAfterImsCallEndOnRegHeld;
     IMS_BOOL bRequiredVolteBlockByAirplaneMode;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
@@ -133,6 +133,7 @@ public:
     IMS_SINT32 nRegRetryTimerFPolicy;
     IMS_SINT32 nRegTimerForEmcCallMillis;
     IMS_SINT32 nReregRetry305Policy;
+    IMS_SINT32 nRoamingPreferredEmcReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;

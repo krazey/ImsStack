@@ -175,11 +175,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsAvailableWithoutVoiceCapa
     return m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredEmcRegInRoaming() const
-{
-    return m_objAsset.bRequiredEmcRegInRoaming;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockByAirplaneMode() const
 {
     return m_objAsset.bRequiredVolteBlockByAirplaneMode;
@@ -471,6 +466,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegActualWaitTimePolicy() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegOutOfServicePolicy() const
 {
     return m_objAsset.nRegOutOfServicePolicy;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRoamingPreferredEmcReg() const
+{
+    return m_objAsset.nRoamingPreferredEmcReg;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportChange() const
@@ -1161,8 +1161,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL);
     m_objAsset.bRequiredCdmalessFeatureTag =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
-    m_objAsset.bRequiredEmcRegInRoaming =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL);
     m_objAsset.bRequiredInitRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
     m_objAsset.bRequiredVolteBlockByAirplaneMode =
@@ -1225,6 +1223,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT);
     m_objAsset.nReregRetry305Policy =
             piCc->GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT);
+    m_objAsset.nRoamingPreferredEmcReg =
+            piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
 

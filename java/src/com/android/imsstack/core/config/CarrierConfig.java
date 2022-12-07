@@ -463,8 +463,6 @@ public class CarrierConfig {
                 "remove_old_sa_on_establishing_sa_bool";
         public static final String KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL =
                 "required_cdmaless_feature_tag_bool";
-        public static final String KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL =
-                "required_emc_reg_in_roaming_bool";
         public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
                 "required_init_reg_after_ims_call_end_on_reg_held_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL =
@@ -527,6 +525,8 @@ public class CarrierConfig {
                 "reg_timer_for_emc_call_millis_int";
         public static final String KEY_REREG_RETRY_305_POLICY_INT =
                 "rereg_retry_305_policy_int";
+        public static final String KEY_ROAMING_PREFERRED_EMC_REG_INT =
+                "roaming_preferred_emc_reg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
                 "sip_message_threshold_for_transport_change_int";
 

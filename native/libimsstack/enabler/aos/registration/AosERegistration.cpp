@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceEvent.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
 
@@ -71,7 +72,7 @@ PUBLIC VIRTUAL void AosERegistration::Start()
     A_IMS_TRACE_I(
             REGID, "Start :: state(%s)", AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
 
-    IMS_UINT32 nScheme = GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration();
+    IMS_UINT32 nScheme = GetPreferredRegScheme();
 
     if (IsFakeModeCondition() ||
             (nScheme == CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP))
@@ -739,4 +740,21 @@ PROTECTED VIRTUAL void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bR
     A_IMS_TRACE_I(REGID, "SetReinitiationRequested :: (%s)", (bRequest) ? "ON" : "OFF", 0, 0);
 
     m_bReinitiationRequested = bRequest;
+}
+
+PROTECTED VIRTUAL IMS_UINT32 AosERegistration::GetPreferredRegScheme()
+{
+    IMS_UINT32 nRoamingScheme = GET_N_CONFIG(m_nSlotId)->GetRoamingPreferredEmcReg();
+
+    if (nRoamingScheme != CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED)
+    {
+        if (PhoneInfoService::GetPhoneInfoService()
+                        ->GetNetworkWatcher(m_nSlotId)
+                        ->GetRoamingState())
+        {
+            return nRoamingScheme;
+        }
+    }
+
+    return GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration();
 }
