@@ -156,10 +156,7 @@ IMS_BOOL AosFeatureTagList::RemoveFeatureTag(
 
         if (pFeatureTag->Equals(strName, strValue))
         {
-            if (pFeatureTag != IMS_NULL)
-            {
-                delete pFeatureTag;
-            }
+            delete pFeatureTag;
 
             m_objFeatureTagList.RemoveAt(i);
 

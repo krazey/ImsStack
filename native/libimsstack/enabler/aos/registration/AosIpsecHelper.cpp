@@ -572,11 +572,6 @@ void AosIpsecHelper::CloseUnsecureTCPSocket()
         return;
     }
 
-    if (m_piContext == IMS_NULL)
-    {
-        return;
-    }
-
     AString objPcscf;
     IMS_UINT32 nPort;
 
