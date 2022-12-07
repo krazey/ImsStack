@@ -103,7 +103,7 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        setNetworkType();
+        initConnections();
         SscXmlGov.getInstance(mSlotId).init();
 
         mSscServiceThread = new HandlerThread("SscServiceImplThread");
@@ -135,6 +135,7 @@ public class SscServiceImpl implements IUtInterface {
     public void close() {
         ImsLog.d(mSlotId, "");
 
+        clearConnections();
         SscConfig.clear(mSlotId);
         SscXmlGov.getInstance(mSlotId).clear();
         SscServiceStateAgent.getInstance().deInit(mSlotId);
@@ -152,12 +153,20 @@ public class SscServiceImpl implements IUtInterface {
         mSscRequestQueue.clear();
     }
 
-    private void setNetworkType() {
+    private void initConnections() {
         ISscNetConnectionGov netConnGov = SscNetConnectionGov.getInstance();
         netConnGov.init(mSlotId, EApnType.XCAP);
 
         ISscHttpConnectionGov httpConnectionGov = SscHttpConnectionGov.getInstance();
         httpConnectionGov.open(mSlotId, EApnType.XCAP);
+    }
+
+    private void clearConnections() {
+        ISscNetConnectionGov netConnGov = SscNetConnectionGov.getInstance();
+        netConnGov.cleanup(mSlotId);
+
+        ISscHttpConnectionGov httpConnectionGov = SscHttpConnectionGov.getInstance();
+        httpConnectionGov.close(mSlotId);
     }
 
     private void handleInvalidRequest(int tId, int requestType) {
