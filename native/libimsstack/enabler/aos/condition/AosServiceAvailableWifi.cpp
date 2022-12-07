@@ -338,7 +338,7 @@ void AosServiceAvailableWifi::ClearBadNetworkState()
 }
 
 PRIVATE
-IMS_BOOL AosServiceAvailableWifi::RequestNetPing()
+IMS_SINT32 AosServiceAvailableWifi::RequestNetPing()
 {
     IMS_SINT32 nResult = INetworkPing::PING_STATUS_OK;
 

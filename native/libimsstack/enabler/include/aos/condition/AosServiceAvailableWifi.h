@@ -62,7 +62,7 @@ private:
     void ProcessBadConnectionReported();
     void ClearBadNetworkState();
 
-    IMS_BOOL RequestNetPing();
+    IMS_SINT32 RequestNetPing();
     static const IMS_CHAR* PingResultToString(IN IMS_SINT32 nResult);
 
 private:
