@@ -428,7 +428,7 @@ public final class ImsStateStore {
     public static class CallState {
         private int mState = STATE_INACTIVE;
         private int mConnectedCallOnWifi = STATE_INACTIVE;
-        private ArraySet<Listener> mListeners = new ArraySet<>();
+        private final ArraySet<Listener> mListeners = new ArraySet<>();
 
         CallState() {
         }
