@@ -139,7 +139,7 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
                 {
                     pInvSerTxn->StopTxnTimer();
                 }
-                if (SipTxnUtil::DeleteTxnKey(pINVTxnKey, SIP_TRUE) == SIP_FALSE)
+                if (SipTxnUtil::DeleteTxnKey(pNewTxnKey, SIP_TRUE) == SIP_FALSE)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                             "NonInvSerFsm_IdleStRecvNonInvReqEvt:Deleting Txn Key from list Failed "
