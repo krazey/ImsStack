@@ -36,6 +36,8 @@ enum class AosPcscfOrder;
 class IAosService : public INativeEnabler
 {
 public:
+    virtual ~IAosService(){};
+
     virtual IMS_BOOL AddListener(IN IAosRegistrationControlListener* piListener) = 0;
     virtual IMS_BOOL RemoveListener(IN IAosRegistrationControlListener* piListener) = 0;
 

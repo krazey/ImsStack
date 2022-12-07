@@ -162,7 +162,7 @@ void AosBuildDirector::DestructAos()
         IAosAppContext* piContext = m_objAppContext.GetValueAt(i);
         if (piContext != IMS_NULL)
         {
-            delete DYNAMIC_CAST(AosAppContext*, piContext);
+            delete piContext;
         }
     }
 
@@ -171,7 +171,7 @@ void AosBuildDirector::DestructAos()
         IAosNetTracker* piTracker = m_objNetTracker.GetValueAt(i);
         if (piTracker != IMS_NULL)
         {
-            delete DYNAMIC_CAST(AosNetTracker*, piTracker);
+            delete piTracker;
         }
     }
 
@@ -180,7 +180,7 @@ void AosBuildDirector::DestructAos()
         IAosConnection* piConnection = m_objConnection.GetValueAt(i);
         if (piConnection != IMS_NULL)
         {
-            delete DYNAMIC_CAST(AosConnection*, piConnection);
+            delete piConnection;
         }
     }
 }
@@ -192,28 +192,28 @@ void AosBuildDirector::DestructProvider()
     if (piTransaction != IMS_NULL)
     {
         AosProvider::GetInstance()->SetTransaction(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosTransaction*, piTransaction);
+        delete piTransaction;
     }
 
     IAosRetryRepository* piRetryRep = AosProvider::GetInstance()->GetRetryRepository(m_nSlotId);
     if (piRetryRep != IMS_NULL)
     {
         AosProvider::GetInstance()->SetRetryRepository(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosRetryRepository*, piRetryRep);
+        delete piRetryRep;
     }
 
     IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
     if (piRsm != IMS_NULL)
     {
         AosProvider::GetInstance()->SetRegStateManager(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosRegStateManager*, piRsm);
+        delete piRsm;
     }
 
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
     {
         AosProvider::GetInstance()->SetCallTracker(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosCallTracker*, piCallTracker);
+        delete piCallTracker;
     }
 
     IAosSubscriberManager* piSubscriberManager =
@@ -221,20 +221,20 @@ void AosBuildDirector::DestructProvider()
     if (piSubscriberManager != IMS_NULL)
     {
         AosProvider::GetInstance()->SetSubscriberManager(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosSubscriberManager*, piSubscriberManager);
+        delete piSubscriberManager;
     }
 
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (piService != IMS_NULL)
     {
         AosProvider::GetInstance()->SetService(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosService*, piService);
+        delete piService;
     }
 
     IAosNConfiguration* piNc = AosProvider::GetInstance()->GetNConfiguration(m_nSlotId);
     if (piNc != IMS_NULL)
     {
         AosProvider::GetInstance()->SetNConfiguration(IMS_NULL, m_nSlotId);
-        delete DYNAMIC_CAST(AosNConfiguration*, piNc);
+        delete piNc;
     }
 }

@@ -138,12 +138,6 @@ protected:
 
         return IMS_FALSE;
     }
-
-    void ConfigUpdate_NotifyUpdate(
-            IN IMS_SINT32 nCpi, IN const AString& strConfName, IN const AString& strExtraParam)
-    {
-        pAosPcscf->ConfigUpdate_NotifyUpdate(nCpi, strConfName, strExtraParam);
-    }
 };
 
 TEST_F(AosPcscfTest, Configure_GetFromPco)
@@ -552,10 +546,4 @@ TEST_F(AosPcscfTest, SetListener)
 
     pAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
     NotifyResult();
-}
-
-TEST_F(AosPcscfTest, ConfigUpdate_NotifyUpdate)
-{
-    // Currently, there is no logic that requires tests.
-    ConfigUpdate_NotifyUpdate(0, AString::ConstNull(), AString::ConstNull());
 }

@@ -355,7 +355,7 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsEmergencyBlocked()
     return m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED);
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsWIFIConnected()
+PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsWifiConnected()
 {
     IWifiWatcher* piWifi = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
 

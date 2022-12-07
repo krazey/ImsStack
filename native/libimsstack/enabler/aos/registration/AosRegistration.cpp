@@ -5522,10 +5522,11 @@ PRIVATE
 IMS_BOOL AosRegistration::IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt)
 {
     IMS_SINT32 nExpireTime = GetRegExpires();
-    IMS_SINT32 nRemainTime = 0;
 
     if (nExpireTime > 0 && nAwt > 0)
     {
+        IMS_SINT32 nRemainTime;
+
         if (nExpireTime > 1200)
         {
             nRemainTime = 600 - nAwt;
