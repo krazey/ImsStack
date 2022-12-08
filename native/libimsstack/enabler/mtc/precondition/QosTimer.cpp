@@ -62,23 +62,7 @@ PUBLIC VIRTUAL void QosTimer::Timer_TimerExpired(IN ITimer* piExpiredTimer)
         }
 
         QosTimerType eTimerType = m_objTimers.GetKeyAt(index);
-
-        if (eTimerType == QosTimerType::WAIT_AVAILABLE)
-        {
-            m_pQosTimerListener->OnWaitTimerExpired(this);
-        }
-        else if (eTimerType == QosTimerType::GUARD_INACTIVE)
-        {
-            m_pQosTimerListener->OnGuardInactiveTimerExpired(this);
-        }
-        else if (eTimerType == QosTimerType::FORCE_AVAILABLE)
-        {
-            m_pQosTimerListener->OnForceAvailableTimerExpired(this);
-        }
-        else if (eTimerType == QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER)
-        {
-            m_pQosTimerListener->OnWaitTimerAfterHandOverExpired(this);
-        }
+        m_pQosTimerListener->OnTimerExpired(this, eTimerType);
 
         m_objTimers.Remove(eTimerType);
         piTimer->KillTimer();
@@ -124,7 +108,6 @@ void QosTimer::StopQosTimer(IN QosTimerType eType)
 
     if (!piTimer)
     {
-        IMS_TRACE_D("StopQosTimer : Type[%s] no active timer", PS_QosTimerType(eType), 0, 0);
         return;
     }
 

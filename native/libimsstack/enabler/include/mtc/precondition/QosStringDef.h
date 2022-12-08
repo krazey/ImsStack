@@ -60,14 +60,12 @@ public:
     {
         switch (eCheckType)
         {
-            case QosCheckType::ALL_STATUS:
-                return "all";
             case QosCheckType::LOCAL_STATUS:
                 return "local";
             case QosCheckType::REMOTE_STATUS:
                 return "remote";
-            default:
-                return "invalid";
+            default:  // QosCheckType::ALL_STATUS
+                return "all";
         }
     }
 
@@ -117,10 +115,8 @@ public:
                 return "maintain";
             case QosLossPolicy::MODIFY:
                 return "modify";
-            case QosLossPolicy::RELEASE:
+            default:  // QosLossPolicy::RELEASE:
                 return "release";
-            default:
-                return "invalid";
         }
     }
 
@@ -132,10 +128,8 @@ public:
                 return "idle";
             case QosStatus::AVAILABLE:
                 return "available";
-            case QosStatus::LOST:
+            default:  // QosStatus::LOST:
                 return "lost";
-            default:
-                return "invalid";
         }
     }
 
@@ -149,8 +143,8 @@ public:
                 return "guard inactive";
             case QosTimerType::FORCE_AVAILABLE:
                 return "force available";
-            default:
-                return "invalid";
+            default:  // QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER:
+                return "wait available after handover";
         }
     }
 };

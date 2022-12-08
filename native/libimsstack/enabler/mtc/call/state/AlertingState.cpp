@@ -188,6 +188,9 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
 
     RunMedia(piSession, piMessage);
     SendStarted();
+
+    m_objContext.GetPreconditionManager().CheckLocalResourceAvailableOnCallEstablished(piSession);
+
     return CallStateName::ESTABLISHED;
 }
 

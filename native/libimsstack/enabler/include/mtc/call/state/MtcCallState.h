@@ -192,9 +192,8 @@ protected:
     void SendIncomingUpdate(IN CallType eCallType);
 
     // TODO: bCheckSdp to be TRUE for all cases??
-    void UpdatePreconditionCapability(
+    void UpdateSupportingPrecondition(
             IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp = IMS_TRUE);
-    void SetLocalQosAvailableForWifiCalling(IN ISession* piSession);
 
     IMS_BOOL IsRprSupported() const;
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;

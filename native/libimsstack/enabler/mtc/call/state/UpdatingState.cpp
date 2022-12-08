@@ -299,7 +299,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN const CallReasonInf
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::QosReserveFailed(
-        IN ISession* /* piSession */, IN QosLossPolicy eNextAction)
+        IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
     IMS_TRACE_I("QosReserveFailed", 0, 0, 0);
     if (eNextAction == QosLossPolicy::RELEASE)
@@ -313,7 +313,11 @@ PUBLIC VIRTUAL CallStateName UpdatingState::QosReserveFailed(
 
     if (eNextAction == QosLossPolicy::MODIFY)
     {
-        // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [=](IMtcCallState* pState)
+                {
+                    return pState->QosReserveFailed(piSession, eNextAction);
+                });
     }
 
     return GetStateName();
@@ -373,7 +377,7 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
 
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
-    m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(piSession);
+    m_objContext.GetPreconditionManager().UpdateQosAttributesFromRemoteSdp(piSession);
 
     return IMS_SUCCESS;
 }
@@ -426,6 +430,7 @@ CallStateName UpdatingState::HandleModificationSucceeded()
 
     NotifyHoldResumeState();
 
+    IMS_BOOL bModified = m_objContext.GetUpdatingInfo().IsModified();
     CallStateName eCallStateName;
 
     if (m_objContext.GetUpdatingInfo().IsModifier())
@@ -439,8 +444,14 @@ CallStateName UpdatingState::HandleModificationSucceeded()
 
     if (eCallStateName == CallStateName::ESTABLISHED)
     {
-        m_objContext.GetMediaManager().Run(
-                &m_objContext.GetSession()->GetISession(), IMS_NULL, IMS_FALSE);
+        ISession* piSession = &m_objContext.GetSession()->GetISession();
+        m_objContext.GetMediaManager().Run(piSession, IMS_NULL, IMS_FALSE);
+
+        if (bModified)
+        {
+            m_objContext.GetPreconditionManager().CheckLocalResourceAvailableOnCallEstablished(
+                    piSession, bModified);
+        }
     }
 
     return eCallStateName;

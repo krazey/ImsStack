@@ -29,37 +29,48 @@
 #include "precondition/QosStatusTable.h"
 #include "precondition/QosTimer.h"
 
-class QosData
+class QosInfo
 {
 public:
-    inline QosData() :
+    inline explicit QosInfo(IN IQosTimerListener* pListener) :
             eAudioStatus(QosStatus::IDLE),
             eVideoStatus(QosStatus::IDLE),
-            eTextStatus(QosStatus::IDLE)
+            eTextStatus(QosStatus::IDLE),
+            objTimer(QosTimer(pListener)),
+            objStatusTable(QosStatusTable()),
+            bSupportPrecondition(IMS_FALSE)
     {
     }
-
-    inline virtual ~QosData() {}
+    inline virtual ~QosInfo() {}
+    QosInfo(IN const QosInfo&) = delete;
+    QosInfo& operator=(IN const QosInfo&) = delete;
 
 public:
     inline QosStatus GetAudioStatus() const { return eAudioStatus; }
     inline QosStatus GetVideoStatus() const { return eVideoStatus; }
     inline QosStatus GetTextStatus() const { return eTextStatus; }
+    inline QosTimer& GetTimer() { return objTimer; }
+    inline QosStatusTable& GetStatusTable() { return objStatusTable; }
+    inline IMS_BOOL IsPreconditionSupported() const { return bSupportPrecondition; }
 
     inline void SetAudioStatus(IN QosStatus eStatus) { eAudioStatus = eStatus; }
     inline void SetVideoStatus(IN QosStatus eStatus) { eVideoStatus = eStatus; }
     inline void SetTextStatus(IN QosStatus eStatus) { eTextStatus = eStatus; }
-
-private:
-    QosData& operator=(IN const QosData& objRHS);
+    inline void SetSupportingPrecondition(IN IMS_BOOL bSupported)
+    {
+        bSupportPrecondition = bSupported;
+    }
 
 private:
     QosStatus eAudioStatus;
     QosStatus eVideoStatus;
     QosStatus eTextStatus;
+    QosTimer objTimer;
+    QosStatusTable objStatusTable;
+    IMS_BOOL bSupportPrecondition;
 };
 
-class MtcPreconditionManager :
+class MtcPreconditionManager final :
         public IMtcPreconditionManager,
         public IMediaQosEventListener,
         public IQosTimerListener
@@ -67,90 +78,75 @@ class MtcPreconditionManager :
 public:
     explicit MtcPreconditionManager(IN IMtcCallContext& objContext);
     virtual ~MtcPreconditionManager();
-
-private:
-    MtcPreconditionManager(IN const MtcPreconditionManager& objRHS);
-    MtcPreconditionManager& operator=(IN const MtcPreconditionManager& objRHS);
+    MtcPreconditionManager(IN const MtcPreconditionManager& objRHS) = delete;
+    MtcPreconditionManager& operator=(IN const MtcPreconditionManager& objRHS) = delete;
 
 public:
     virtual void CreateQos(IN ISession* piSession) override;
     virtual void DestroyQos(IN ISession* piSession) override;
     virtual void SetListener(IN IMtcPreconditionListener* pListener) override;
-    virtual IMS_BOOL IsResourceReserved(IN ISession* piSession, IN QosCheckType eType) override;
-
     virtual void StartQosTimer(
             IN ISession* piSession, IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) override;
-    virtual void StopQosTimer(
-            IN ISession* piSession, IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) override;
-    virtual void StopAllQosTimer(IN ISession* piSession) override;
-
-    virtual void UpdatePreconditionCapability(
-            IN ISession* piSession, IN IMS_BOOL bCapability) override;
-    virtual IMS_BOOL HasPreconditionCapability(IN ISession* piSession) override;
-    virtual IMS_BOOL IsPreconditionSupportedInLocal() override;
-    virtual void UpdateQosAttributesFromSdp(IN ISession* piSession) override;
-    virtual void FormPreconditionSdp(IN ISession* piSession, IN IMS_BOOL bFailure) override;
-    virtual void RemovePreconditionSdp(IN ISession* piSession) override;
-    virtual IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession) override;
+    virtual IMS_BOOL IsPreconditionSupportedInLocal() const override;
+    virtual void UpdateSupportingPrecondition(
+            IN ISession* piSession, IN IMS_BOOL bRemoteSupported) override;
+    virtual IMS_BOOL IsPreconditionSupported(IN ISession* piSession) const override;
+    virtual IMS_BOOL IsResourceReserved(IN ISession* piSession, IN QosCheckType eType,
+            IN IMS_BOOL bAtLeastOneReserved = IMS_FALSE) const override;
+    virtual IMS_BOOL IsDedicatedBearerAllocated(
+            IN ISession* piSession, IN IMS_UINT32 eMediaType) const override;
+    virtual void UpdateQosAttributesFromRemoteSdp(IN ISession* piSession) override;
     virtual void SetRemoteResourceAvailable(IN ISession* piSession) override;
+    virtual void FormPreconditionSdp(IN ISession* piSession, IN IMS_BOOL bFailure) override;
     virtual void HandleQosOnIpcanChanged() override;
+    virtual void CheckLocalResourceAvailableOnCallEstablished(
+            IN ISession* piSession, IN IMS_BOOL bCallModified = IMS_FALSE) override;
 
 public:
     virtual void OnQosStatusChanged(
             IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) override;
-
-    virtual void OnWaitTimerExpired(IN QosTimer* pTimer) override;
-    virtual void OnGuardInactiveTimerExpired(IN QosTimer* pTimer) override;
-    virtual void OnForceAvailableTimerExpired(IN QosTimer* pTimer) override;
-    virtual void OnWaitTimerAfterHandOverExpired(IN QosTimer* pTimer) override;
+    virtual void OnTimerExpired(IN QosTimer* pTimer, IN QosTimerType eType) override;
 
 private:
-    void CreateQosTimer(IN ISession* piSession);
-    void RemoveQosTimer(IN ISession* piSession);
-
-    void CreateStatusTable(IN ISession* piSession);
-    void RemoveStatusTable(IN ISession* piSession);
-
-    void CreateQosData(IN ISession* piSession);
-    void RemoveQosData(IN ISession* piSession);
-
     void DestroyAll();
-
-    QosData* GetQosData(IN ISession* piSession);
-    QosTimer* GetQosTimer(IN ISession* piSession);
-    QosStatusTable* GetQosStatusTable(IN ISession* piSession);
-
+    QosInfo* GetQosInfo(IN ISession* piSession) const;
+    void SetQosStatus(IN ISession* piSession, QosStatus eStatus, IN IMS_UINT32 eMediaType) const;
+    QosStatus GetQosStatus(IN ISession* piSession, IN IMS_UINT32 eMediaType) const;
+    QosTimer* GetQosTimer(IN ISession* piSession) const;
+    QosStatusTable* GetQosStatusTable(IN ISession* piSession) const;
+    void StopQosTimer(IN ISession* piSession, IN QosTimerType eType) const;
+    void StopAllQosTimer(IN ISession* piSession);
+    void OnForceAvailableTimerExpired(IN QosTimer* pTimer);
     void HandleReservationFailureByTimerExpiration(IN const QosTimer* pTimer);
-    QosLossPolicy GetActionForQosLoss(IN ISession* piSession);
     void InitializeStatusForLostQos(IN ISession* piSession);
-    void UpdateStatusRecords(IN ISession* piSession);
-
-    void HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrStatus, IN QosStatus eNewStatus);
+    void CreateStatusRecordsWithActiveMediaTypes(IN ISession* piSession);
+    void CreateStatusRecords(IN ISession* piSession, IN IMS_UINT32 eMediaType);
+    void HandleQosTimer(
+            IN ISession* piSession, IN QosStatus eCurrentStatus, IN QosStatus eNewStatus);
     void NotifyQosStatusToListener(
             IN ISession* piSession, IN IMS_BOOL bReserved, IN IMS_UINT32 eMediaTypes);
-
-    IMS_BOOL IsStatusAvailable(IN QosStatus eStatus);
-    IMediaDescriptor* GetMediaDescriptor(IN IMedia* piMedia);
-    const SdpMedia* GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote);
-
-    IMS_SINT32 GetSdpMediaType(IN IMS_UINT32 eMediaType) const;
-    IMS_UINT32 GetMediaTypesFromCallType() const;
-    IMS_BOOL IsDefaultBearerUsed(IN IMS_UINT32 eMediaType) const;
-    void InitializeCapability(IN ISession* piSession);
-    QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType);
-    QosStatus GetQosStatus(IN ISession* piSession, IN IMS_UINT32 eMediaType);
-    void SetQosStatus(IN ISession* piSession, QosStatus eStatus, IN IMS_UINT32 eMediaType);
-
-    IMS_BOOL IsNeedToUpdateQosStatus(IN QosStatus eCurrStatus, IN QosStatus eNewStatus);
-    IMS_BOOL IsPreconditionSupportedInLocal(IN IMS_UINT32 eMediaType);
-    IMS_BOOL IsConfirmedDialog(IN const ISession* piSession);
     void SetOnWlan(IN IMS_BOOL bOnWlan);
+    static IMS_BOOL IsStatusAvailable(IN QosStatus eStatus);
+    static IMS_BOOL IsNeedToUpdateQosStatus(IN QosStatus eCurrentStatus, IN QosStatus eNewStatus);
+    IMS_BOOL IsDefaultBearerUsed(IN IMS_UINT32 eMediaType) const;
+    IMS_BOOL IsRemoteResourceReserved(IN ISession* piSession) const;
+    IMS_BOOL IsLocalResourceReserved(IN ISession* piSession, IN IMS_BOOL bAtLeastOneReserved) const;
+    IMS_BOOL IsLocalResourceReservedByMediaType(
+            IN ISession* piSession, IN IMS_UINT32 eMediaType) const;
+    IMS_BOOL IsPreconditionSupportedInLocal(IN IMS_UINT32 eMediaType) const;
+    static IMS_BOOL IsConfirmedDialog(IN const ISession* piSession);
+    IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession);
+    IMS_UINT32 GetMediaTypesFromCallType() const;
+    IMS_SINT32 GetQosTime(IN QosTimerType eType) const;
+    static IMS_SINT32 GetSdpMediaType(IN IMS_UINT32 eMediaType);
+    ISession* GetISessionWithTimer(IN const QosTimer* pTimer) const;
+    static IMediaDescriptor* GetMediaDescriptor(IN IMedia* piMedia);
+    const SdpMedia* GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote);
+    QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType) const;
+    QosLossPolicy GetActionForQosLoss(IN ISession* piSession);
 
 private:
-    ImsMap<ISession*, QosData*> m_objQosDatas;
-    ImsMap<ISession*, QosTimer*> m_objQosTimers;
-    ImsMap<ISession*, QosStatusTable*> m_objStatusTables;
-    ImsMap<ISession*, IMS_BOOL> m_objCapabilities;
+    ImsMap<ISession*, QosInfo*> m_objQosInfos;
     IMtcPreconditionListener* m_pListener;
     IMtcCallContext& m_objContext;
     IMS_BOOL m_bOnWlan;

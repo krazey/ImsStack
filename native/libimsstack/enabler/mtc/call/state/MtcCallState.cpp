@@ -608,7 +608,7 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
         return CODE_MEDIA_NOT_ACCEPTABLE;
     }
 
-    m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(piSession);
+    m_objContext.GetPreconditionManager().UpdateQosAttributesFromRemoteSdp(piSession);
 
     IMS_TRACE_D("OnSdpReceived - Nego Done", 0, 0, 0);
     return CODE_NONE;
@@ -677,7 +677,7 @@ void MtcCallState::SendIncomingUpdate(IN CallType eCallType)
 }
 
 PROTECTED
-void MtcCallState::UpdatePreconditionCapability(
+void MtcCallState::UpdateSupportingPrecondition(
         IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp /* = IMS_TRUE*/)
 {
     if (bCheckeSdp && !MessageUtil::HasSdp(piMessage))
@@ -697,26 +697,11 @@ void MtcCallState::UpdatePreconditionCapability(
         bRemoteCapability = IMS_TRUE;
     }
 
-    IMS_TRACE_D("UpdatePreconditionCapability : Precondition Capability on remote UE[%s]",
+    IMS_TRACE_D("UpdateSupportingPrecondition : Precondition Capability on remote UE[%s]",
             _TRACE_B_(bRemoteCapability), 0, 0);
 
-    m_objContext.GetPreconditionManager().UpdatePreconditionCapability(
+    m_objContext.GetPreconditionManager().UpdateSupportingPrecondition(
             piSession, bRemoteCapability);
-}
-
-PROTECTED
-void MtcCallState::SetLocalQosAvailableForWifiCalling(IN ISession* piSession)
-{
-    IMS_TRACE_D("SetLocalQosAvailableForWifiCalling", 0, 0, 0);
-
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-
-    if (!m_objContext.GetService().IsWlanIpCanType())
-    {
-        return;
-    }
-
-    objPreconditionManager.SetLocalResourceAvailable(piSession);
 }
 
 PROTECTED

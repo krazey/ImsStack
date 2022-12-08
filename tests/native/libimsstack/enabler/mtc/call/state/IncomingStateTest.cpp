@@ -126,11 +126,12 @@ protected:
     void SetPreconditionReservationStatus(IN IMS_BOOL bReserved)
     {
         ON_CALL(objPreconditionManager,
-                IsResourceReserved(&objISession, QosCheckType::LOCAL_STATUS))
+                IsResourceReserved(&objISession, QosCheckType::LOCAL_STATUS, IMS_FALSE))
                 .WillByDefault(Return(IMS_FALSE));
-        ON_CALL(objPreconditionManager, HasPreconditionCapability(&objISession))
+        ON_CALL(objPreconditionManager, IsPreconditionSupported(&objISession))
                 .WillByDefault(Return(IMS_TRUE));
-        ON_CALL(objPreconditionManager, IsResourceReserved(&objISession, QosCheckType::ALL_STATUS))
+        ON_CALL(objPreconditionManager,
+                IsResourceReserved(&objISession, QosCheckType::ALL_STATUS, IMS_FALSE))
                 .WillByDefault(Return(bReserved));
     }
 };
@@ -301,7 +302,7 @@ TEST_F(IncomingStateTest, SessionPRAckReceivedInvokesRejectIncomingIfOfferAnswer
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
             .WillByDefault(Return(NegotiationResult::NO_ERROR));
-    ON_CALL(objPreconditionManager, UpdateQosAttributesFromSdp(&objISession))
+    ON_CALL(objPreconditionManager, UpdateQosAttributesFromRemoteSdp(&objISession))
             .WillByDefault(Return());
 
     const SipMethod objMethod = SipMethod::PRACK;

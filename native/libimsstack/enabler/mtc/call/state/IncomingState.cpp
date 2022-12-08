@@ -78,16 +78,9 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (m_objContext.GetMediaManager().GetNegotiationState(piSession) ==
-            NegotiationState::STATE_NEGOTIATED)
-    {
-        if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
-        {
-            m_objContext.GetPreconditionManager().StartQosTimer(piSession);
-        }
-    }
+    objPreconditionManager.StartQosTimer(piSession);
 
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+    QosCheckType eCheckType = (objPreconditionManager.IsPreconditionSupported(piSession))
             ? QosCheckType::ALL_STATUS
             : QosCheckType::LOCAL_STATUS;
     if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
@@ -134,12 +127,9 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
-    {
-        objPreconditionManager.StartQosTimer(piSession);
-    }
+    objPreconditionManager.StartQosTimer(piSession);
 
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+    QosCheckType eCheckType = (objPreconditionManager.IsPreconditionSupported(piSession))
             ? QosCheckType::ALL_STATUS
             : QosCheckType::LOCAL_STATUS;
     if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
@@ -172,16 +162,10 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
-    SetLocalQosAvailableForWifiCalling(piSession);
-
-    // TODO: CheckReadyToAlert()? common?
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
-    {
-        objPreconditionManager.StartQosTimer(piSession);
-    }
+    objPreconditionManager.StartQosTimer(piSession);
 
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+    QosCheckType eCheckType = (objPreconditionManager.IsPreconditionSupported(piSession))
             ? QosCheckType::ALL_STATUS
             : QosCheckType::LOCAL_STATUS;
     if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
@@ -244,7 +228,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
     IMS_TRACE_D("QosReserved : Media[%d] is reserved.", eMediaType, 0, 0);
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+    QosCheckType eCheckType = (objPreconditionManager.IsPreconditionSupported(piSession))
             ? QosCheckType::ALL_STATUS
             : QosCheckType::LOCAL_STATUS;
     if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
