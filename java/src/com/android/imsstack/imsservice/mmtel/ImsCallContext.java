@@ -90,13 +90,13 @@ public class ImsCallContext implements ICallContext {
     @VisibleForTesting
     public ImsCallContext(Context context, Executor executor, ImsApp app,
             WfcSettingTracker wfcsettingtracker, MtcServiceStateTracker stateTracker,
-            MtcApp mMtcapp) {
+            MtcApp mtcApp) {
         mContext = context;
         mExecutor = executor;
         mApp = app;
         mWfcSettingTracker = wfcsettingtracker;
         mServiceStateTracker = stateTracker;
-        mMtcApp = mMtcapp;
+        mMtcApp = mtcApp;
         mMtcApp.setServiceStateListener(mServiceStateTracker);
     }
 
