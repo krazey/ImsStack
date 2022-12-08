@@ -111,6 +111,11 @@ public class TestConfigMenu extends PreferenceActivity {
         ImsLog.d(mSlotId, "TestModeMenu: onResume");
     }
 
+    @Override
+    protected boolean isValidFragment(String fragmentName) {
+        return fragmentName != null;
+    }
+
     private void initPreferences() {
         mImsDisabled = (CheckBoxPreference) findPreference(KEY_TEST_IMS_DISABLED);
 

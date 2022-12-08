@@ -173,6 +173,11 @@ public class CarrierConfigMenu extends PreferenceActivity {
         initTestConfig();
     }
 
+    @Override
+    protected boolean isValidFragment(String fragmentName) {
+        return fragmentName != null;
+    }
+
     private void initTestConfig() {
         if (mTestConfig != null) {
             return;
