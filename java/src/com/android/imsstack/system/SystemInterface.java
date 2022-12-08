@@ -1053,7 +1053,7 @@ public class SystemInterface implements JniSystemListener {
         /**
          * Notifies the network type which the device is attached.
          *
-         * @param voice networkType defined in DcNetWatcher
+         * @param networkType The network type defined in DcNetWatcher
          *          {@link RAT_NONET} (0)
          *          {@link RAT_EHRPD} (1)
          *          {@link RAT_4G} (2)
