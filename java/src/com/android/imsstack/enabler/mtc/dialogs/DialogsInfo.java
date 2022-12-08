@@ -275,4 +275,4 @@ public class DialogsInfo implements Parcelable {
         }
     };
 
-};
+}

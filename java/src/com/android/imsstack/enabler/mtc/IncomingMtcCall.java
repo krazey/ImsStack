@@ -154,4 +154,4 @@ public class IncomingMtcCall implements Parcelable {
             return new IncomingMtcCall[size];
         }
     };
-};
+}

@@ -28,4 +28,4 @@ public class IUDialogs {
     // Event : IMS to UI
     public static final int NOTIFY_DIALOG_INFO      = (EVENT_I2U + 1);
 
-};
+}

@@ -21,7 +21,7 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.util.ImsLog;
 
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 
 public class MtcCallUtils {
     /** Indication for media control */
@@ -33,7 +33,7 @@ public class MtcCallUtils {
     public static final int MEDIA_CVO_DISABLED = 0;
     public static final int MEDIA_CVO_ENABLED = 1;
 
-    private static final Hashtable<Integer, Integer> sUserStatusCodeToSIPStatusCode;
+    private static final LinkedHashMap<Integer, Integer> sUserStatusCodeToSIPStatusCode;
 
     public static void addUser(UsersInfo usersInfo, long callId, String target) {
         if (usersInfo != null) {
@@ -585,7 +585,7 @@ public class MtcCallUtils {
     }
 
     static {
-        sUserStatusCodeToSIPStatusCode = new Hashtable<Integer, Integer>();
+        sUserStatusCodeToSIPStatusCode = new LinkedHashMap<Integer, Integer>();
         sUserStatusCodeToSIPStatusCode.put(UsersInfo.USER_STATUS_REJECT, 603);
         sUserStatusCodeToSIPStatusCode.put(UsersInfo.USER_STATUS_BUSY, 486);
         // 400 ?
