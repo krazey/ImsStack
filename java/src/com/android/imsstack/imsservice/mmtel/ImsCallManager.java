@@ -47,9 +47,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ImsCallManager {
     private static final int MAX_CALL_ID = Integer.MAX_VALUE;
-    protected ConcurrentHashMap<String, ImsCallSessionImpl> mSessions
+    protected final ConcurrentHashMap<String, ImsCallSessionImpl> mSessions
             = new ConcurrentHashMap<String, ImsCallSessionImpl>(8, 0.9f, 1);
-    protected ConcurrentHashMap<String, ImsCallSessionImpl> mPendingSessions
+    protected final ConcurrentHashMap<String, ImsCallSessionImpl> mPendingSessions
             = new ConcurrentHashMap<String, ImsCallSessionImpl>(4, 0.9f, 1);
     private final Object mLock = new Object();
     private final ICallContext mCallContext;
