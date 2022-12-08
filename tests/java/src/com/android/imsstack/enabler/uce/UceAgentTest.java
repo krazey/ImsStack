@@ -32,9 +32,10 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Parcel;
 import android.telecom.PhoneAccount;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 
-import androidx.test.filters.SmallTest;
-
+import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.enabler.uce.impl.UceAgent;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceFeatureTags;
@@ -53,7 +54,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -65,8 +65,9 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(JUnit4.class)
-public class UceAgentTest {
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
+public class UceAgentTest extends ImsStackTest {
     private static final int MAX_WAIT_TIME = 1000;
     private static final int SLOT_ID = 0;
     private static final int testKey = 100;
@@ -114,16 +115,17 @@ public class UceAgentTest {
     }
 
     @After
-    public void cleanUp(){
+    public void tearDown() throws Exception {
         mUceJni = null;
         if (mAgent != null) {
             mAgent.interrupt();
             mAgent = null;
         }
+
+        super.tearDown();
     }
 
     @Test
-    @SmallTest
     public void test_setListener() throws Exception {
         mAgent = createUceAgent();
         mAgent.setImsRegistered(true);
@@ -134,7 +136,6 @@ public class UceAgentTest {
     }
 
     @Test
-    @SmallTest
     public void test_publishCapabilities() throws Exception {
         String pidfXml = "pidfXmlForTest";
         mAgent = createUceAgent();
@@ -151,7 +152,6 @@ public class UceAgentTest {
     }
 
     @Test
-    @SmallTest
     public void test_subscribeCapabilities() throws Exception {
         Uri contact1 = Uri.fromParts(PhoneAccount.SCHEME_TEL, "123456789", null);
         Collection<Uri> uris = new ArrayList<>(1);
@@ -171,7 +171,6 @@ public class UceAgentTest {
     }
 
     @Test
-    @SmallTest
     public void test_registered() throws Exception {
         mAgent = createUceAgent();
         mAgent.setListener(listener);
@@ -181,19 +180,17 @@ public class UceAgentTest {
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
 
-        mAgent.setPublishController(publishController);
-        mAgent.setSubscribeController(subscribeController);
-
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_IMS_AGENT_CONNECTED_IND);
         parcel.writeInt(UceConstant.RADIO_TECHNOLOGY_TYPE_LTE);
         parcel.writeLong(0);
         parcel.setDataPosition(0);
 
-        mUceJni.mUceJniListener.onServiceStatusMessage(parcel);
-
         Handler handler = mAgent.getHandler();
-        waitForHandlerActionDelayed(handler, 1000, 0);
+        mAgent.setPublishController(publishController);
+        mAgent.setSubscribeController(subscribeController);
+        mUceJni.mUceJniListener.onServiceStatusMessage(parcel);
+        waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(publishController, timeout(MAX_WAIT_TIME)).setImsRegistrationStatus(eq(true));
         verify(publishController, timeout(MAX_WAIT_TIME)).setUseExpiredEtag(anyBoolean());
@@ -208,7 +205,6 @@ public class UceAgentTest {
     }
 
     @Test
-    @SmallTest
     public void test_deRegistered() throws Exception {
         mAgent = createUceAgent();
         mAgent.setListener(listener);
@@ -225,10 +221,9 @@ public class UceAgentTest {
         parcel.writeInt(UceMessage.UCE_IMS_AGENT_DISCONNECTED_IND);
         parcel.setDataPosition(0);
 
-        mUceJni.mUceJniListener.onServiceStatusMessage(parcel);
-
         Handler handler = mAgent.getHandler();
-        waitForHandlerActionDelayed(handler, 1000, 0);
+        mUceJni.mUceJniListener.onServiceStatusMessage(parcel);
+        waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(publishController, timeout(MAX_WAIT_TIME)).setImsRegistrationStatus(eq(false));
         verify(subscribeController, timeout(MAX_WAIT_TIME)).setImsRegistrationStatus(eq(false));
@@ -237,7 +232,6 @@ public class UceAgentTest {
     }
 
     @Test
-    @SmallTest
     public void test_getCapabilityUpdateTriggerType() throws Exception {
         mAgent = createUceAgent();
 
@@ -264,7 +258,6 @@ public class UceAgentTest {
     }
 
     @Test
-    @SmallTest
     public void test_connectivityChangedFromImsDeregistered() throws Exception {
         mAgent = createUceAgent();
         mAgent.setListener(listener);
@@ -274,23 +267,20 @@ public class UceAgentTest {
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
 
-        mAgent.setImsRegistered(false);
-
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_NETWORK_CHANGED);
         parcel.writeInt(UceConstant.RADIO_TECHNOLOGY_TYPE_LTE); // network type
         parcel.setDataPosition(0);
 
-        mUceJni.mUceJniListener.onNetworkStatusMessage(parcel);
-
         Handler handler = mAgent.getHandler();
-        waitForHandlerActionDelayed(handler, 1000, 0);
+        mAgent.setImsRegistered(false);
+        mUceJni.mUceJniListener.onNetworkStatusMessage(parcel);
+        waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verifyNoMoreInteractions(listener);
     }
 
     @Test
-    @SmallTest
     public void test_connectivityNotChanged() throws Exception {
         mAgent = createUceAgent();
         mAgent.setListener(listener);
@@ -300,50 +290,47 @@ public class UceAgentTest {
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
 
-        mAgent.setImsRegistered(true);
-
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_NETWORK_CHANGED);
         parcel.writeInt(UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN); // network type
         parcel.setDataPosition(0);
 
+        Handler handler = mAgent.getHandler();
+        mAgent.setImsRegistered(true);
         mUceJni.mUceJniListener.onNetworkStatusMessage(parcel);
 
-        Handler handler = mAgent.getHandler();
-        waitForHandlerActionDelayed(handler, 1000, 0);
+        waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verifyNoMoreInteractions(listener);
     }
 
     @Test
-    @SmallTest
     public void test_connectivityChanged() throws Exception {
         mAgent = createUceAgent();
         mAgent.setListener(listener);
         mAgent.start();
 
-        CountDownLatch lock = new CountDownLatch(1);
+        CountDownLatch lock = new CountDownLatch(7);
         mUceJni.setCountDownLatch(lock);
         lock.await(10, TimeUnit.SECONDS);
-
-        mAgent.setImsRegistered(true);
+        Handler handler = mAgent.getHandler();
+        waitForHandlerActionDelayed(handler, 100, 150);
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(UceMessage.UCE_NETWORK_CHANGED);
         parcel.writeInt(UceConstant.RADIO_TECHNOLOGY_TYPE_LTE); // network type
         parcel.setDataPosition(0);
 
+        mAgent.setImsRegistered(true);
         mUceJni.mUceJniListener.onNetworkStatusMessage(parcel);
 
-        Handler handler = mAgent.getHandler();
-        waitForHandlerActionDelayed(handler, 1000, 0);
+        waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 50);
 
         verify(listener).onRequestPublishCapabilities(eq(
                 UceApiConstant.CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED));
     }
 
     @Test
-    @SmallTest
     public void test_publishUpdated() throws Exception {
         long capability = 10;
         int responseCode = 200;
@@ -374,9 +361,9 @@ public class UceAgentTest {
         parcel.writeInt(needToRetry); // needToRetry
         parcel.setDataPosition(0);
 
+        Handler handler = mAgent.getHandler();
         mUceJni.mUceJniListener.onPublishStatusMessage(parcel);
 
-        Handler handler = mAgent.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(publishController, timeout(MAX_WAIT_TIME)).setCapability(eq(capability));
@@ -401,7 +388,6 @@ public class UceAgentTest {
     }
 
     @Test
-    @SmallTest
     public void test_unpublished() throws Exception {
         mAgent = createUceAgent();
         mAgent.setListener(listener);
@@ -418,9 +404,9 @@ public class UceAgentTest {
         parcel.writeInt(UceMessage.UCE_UNPUBLISHED_IND);
         parcel.setDataPosition(0);
 
+        Handler handler = mAgent.getHandler();
         mUceJni.mUceJniListener.onPublishStatusMessage(parcel);
 
-        Handler handler = mAgent.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         verify(publishController, timeout(MAX_WAIT_TIME)).deletePendingRequest();
@@ -430,7 +416,6 @@ public class UceAgentTest {
     }
 
     @Test
-    @SmallTest
     public void test_receivedOptions() throws Exception {
         mAgent = createUceAgent();
         mAgent.setListener(listener);
@@ -450,9 +435,9 @@ public class UceAgentTest {
         parcel.writeLong(UceFeatureTags.Tags.FEATURE_TAG_PRESENCE.getCapa());
         parcel.setDataPosition(0);
 
+        Handler handler = mAgent.getHandler();
         mUceJni.mUceJniListener.onReceivedRemoteOptionsMessage(parcel);
 
-        Handler handler = mAgent.getHandler();
         waitForHandlerActionDelayed(handler, MAX_WAIT_TIME, 0);
 
         doAnswer(new Answer<Void>() {

@@ -468,10 +468,10 @@ public class UceAgent extends Thread implements IUceJNIListener {
     }
 
     private void imsRegistered(int registrationTech, long connectedServices) {
-        mUcePublishRequestController.setImsRegistrationStatus(mImsRegistered);
+        mUcePublishRequestController.setImsRegistrationStatus(true);
         mUcePublishRequestController.setUseExpiredEtag(mUceConfiguration.isUseExpiredEtag());
 
-        mUceSubscribeRequestController.setImsRegistrationStatus(mImsRegistered);
+        mUceSubscribeRequestController.setImsRegistrationStatus(true);
         if ((registrationTech == mRegistrationTech) && (mConnectedServices == connectedServices)) {
             return;
         }
@@ -491,8 +491,8 @@ public class UceAgent extends Thread implements IUceJNIListener {
     private void imsDeregistered() {
         mRegistrationTech = UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN;
         mConnectedServices = 0;
-        mUcePublishRequestController.setImsRegistrationStatus(mImsRegistered);
-        mUceSubscribeRequestController.setImsRegistrationStatus(mImsRegistered);
+        mUcePublishRequestController.setImsRegistrationStatus(false);
+        mUceSubscribeRequestController.setImsRegistrationStatus(false);
     }
 
     private void imsRegistrationStatusCheck() {
@@ -525,7 +525,6 @@ public class UceAgent extends Thread implements IUceJNIListener {
             return;
         }
         */
-
         ImsLog.i(mSlotId, "Registration Status : " + mImsRegistered);
 
         if (mImsRegistered) {
