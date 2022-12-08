@@ -183,7 +183,7 @@ public final class LocationAgent implements ILocationAgent {
     private final TriggerEventListener mSMDListener = new TriggerEventListener() {
         @Override
         public void onTrigger(TriggerEvent event) {
-            ImsLog.d(mSlotId, "event=" + event);
+            ImsLog.d(mSlotId, "onTrigger");
 
             if (!mIsSmdRequested) {
                 ImsLog.d(mSlotId, "Ignore, because SMD is not requested");
