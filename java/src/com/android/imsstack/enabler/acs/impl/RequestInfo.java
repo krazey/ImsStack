@@ -46,11 +46,11 @@ public class RequestInfo {
     private String mRcsState = "0";
     private String mOtp;
     private String mToken;
+
     // 0 : OS does not allow user to select SMS application
     // 1 :  RCS messaging client is selected as the default SMS application
     // 2 :  RCS messaging client is not selected as the default SMS application
     private String mDefaultSmsApp = "1";
-
     private String mDefaultVvmApp;
 
     /**
@@ -69,22 +69,22 @@ public class RequestInfo {
     public String generateUserAgent() {
         // this scheme is only available for TMUS
         // for ATT mTerminalName + "/" + mTerminalVersion
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder builder = new StringBuilder();
 
-        buffer.append(PREFIX);
-        buffer.append(" " + mBuilder.mTerminalVendor);
-        buffer.append("/" + mBuilder.mTerminalModel);
-        buffer.append("-" + mBuilder.mTerminalSwVersion);
-        buffer.append(" " + mBuilder.mClientVendor);
-        buffer.append("/" + mBuilder.mClientVersion);
+        builder.append(PREFIX);
+        builder.append(" " + mBuilder.mTerminalVendor);
+        builder.append("/" + mBuilder.mTerminalModel);
+        builder.append("-" + mBuilder.mTerminalSwVersion);
+        builder.append(" " + mBuilder.mClientVendor);
+        builder.append("/" + mBuilder.mClientVersion);
 
         if (!TextUtils.isEmpty(mGBAProductToken)) {
-            buffer.append(";" + mGBAProductToken);
+            builder.append(";" + mGBAProductToken);
         }
 
-        ImsLog.i("[" + mBuilder.mSlotId + "] userAgent :" + buffer.toString());
+        ImsLog.i("[" + mBuilder.mSlotId + "] userAgent :" + builder.toString());
 
-        return buffer.toString();
+        return builder.toString();
     }
 
     /**
@@ -217,52 +217,52 @@ public class RequestInfo {
     }
 
     private String encodeParameters() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder builder = new StringBuilder();
         try {
-            buffer.append(nullCheckACParamValue(String.format("?vers=%s",
+            builder.append(nullCheckACParamValue(String.format("?vers=%s",
                     URLEncoder.encode(mBuilder.mAcVersion, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&IMSI=%s",
+            builder.append(nullCheckACParamValue(String.format("&IMSI=%s",
                     URLEncoder.encode(mBuilder.mImsi, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&rcs_version=%s",
+            builder.append(nullCheckACParamValue(String.format("&rcs_version=%s",
                     URLEncoder.encode(mBuilder.mRcsVersion, DEFAULT_CHAT_SET))));
 
             // ATT & TMO does not require
-            buffer.append(nullCheckACParamValue(String.format("&rcs_profile=%s",
+            builder.append(nullCheckACParamValue(String.format("&rcs_profile=%s",
                     URLEncoder.encode(mBuilder.mRcsProfile, DEFAULT_CHAT_SET))));
 
             // ATT does not require
-            buffer.append(nullCheckACParamValue(String.format("&client_vendor=%s",
+            builder.append(nullCheckACParamValue(String.format("&client_vendor=%s",
                     URLEncoder.encode(mBuilder.mClientVendor, DEFAULT_CHAT_SET))));
 
             // ATT does not require
-            buffer.append(nullCheckACParamValue(String.format("&client_version=%s",
+            builder.append(nullCheckACParamValue(String.format("&client_version=%s",
                     URLEncoder.encode(mBuilder.mClientVersion, DEFAULT_CHAT_SET))));
 
-            buffer.append(nullCheckACParamValue(String.format("&terminal_vendor=%s",
+            builder.append(nullCheckACParamValue(String.format("&terminal_vendor=%s",
                     URLEncoder.encode(mBuilder.mTerminalVendor, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&terminal_model=%s",
+            builder.append(nullCheckACParamValue(String.format("&terminal_model=%s",
                     URLEncoder.encode(mBuilder.mTerminalModel, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&terminal_sw_version=%s",
+            builder.append(nullCheckACParamValue(String.format("&terminal_sw_version=%s",
                     URLEncoder.encode(mBuilder.mTerminalSwVersion, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&IMEI=%s",
+            builder.append(nullCheckACParamValue(String.format("&IMEI=%s",
                     URLEncoder.encode(mBuilder.mImei, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&default_sms_app=%s",
+            builder.append(nullCheckACParamValue(String.format("&default_sms_app=%s",
                     URLEncoder.encode(mDefaultSmsApp, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&rcs_state=%s",
+            builder.append(nullCheckACParamValue(String.format("&rcs_state=%s",
                     URLEncoder.encode(mRcsState, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&provisioning_version=%s",
+            builder.append(nullCheckACParamValue(String.format("&provisioning_version=%s",
                     URLEncoder.encode(mBuilder.mProvisioningVersion, DEFAULT_CHAT_SET))));
-            buffer.append(nullCheckACParamValue(String.format("&SMS_port=%s",
+            builder.append(nullCheckACParamValue(String.format("&SMS_port=%s",
                     URLEncoder.encode(mBuilder.mSmsPort, DEFAULT_CHAT_SET))));
 
             // TMO requires
             if (!TextUtils.isEmpty(mDefaultVvmApp)) {
-                buffer.append(nullCheckACParamValue(String.format("&default_vvm_app=%s",
+                builder.append(nullCheckACParamValue(String.format("&default_vvm_app=%s",
                         URLEncoder.encode(mDefaultVvmApp, DEFAULT_CHAT_SET))));
             }
 
-            buffer.append(encodeOtp());
-            buffer.append(encodeToken());
+            builder.append(encodeOtp());
+            builder.append(encodeToken());
 
             // TODO : need to check friendly_device_name for VZW
 
@@ -271,7 +271,7 @@ public class RequestInfo {
             return "";
         }
 
-        return buffer.toString();
+        return builder.toString();
     }
 
     private String nullCheckACParamValue(String parameter) {
