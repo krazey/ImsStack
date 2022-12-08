@@ -95,6 +95,7 @@ public class GeocoderProxy {
     /**
      * @param waitTime waiting time to decode the location
      */
+    @SuppressWarnings("WaitNotInLoop")
     public void findAddressFromLocation(long waitTime) {
         synchronized (mLock) {
             mHandler.post(mGeocodeExecutor);
