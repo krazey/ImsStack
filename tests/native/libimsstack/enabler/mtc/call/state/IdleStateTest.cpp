@@ -720,7 +720,7 @@ TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceivedIfRprNotSupported
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
 
-    ON_CALL(objPreconditionManager, IsResourceReserved(_, _)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPreconditionManager, IsResourceReserved(_, _, _)).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objPreconditionManager, StartQosTimer(&objSession, _));
 
     const AString strNoRprTag("no100rel");
