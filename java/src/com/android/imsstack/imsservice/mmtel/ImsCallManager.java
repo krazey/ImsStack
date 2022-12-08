@@ -623,7 +623,7 @@ public class ImsCallManager {
             }
 
             for (Map.Entry<String, ImsCallSessionImpl> entry : mSessions.entrySet()) {
-                onCallDestroy((ImsCallSessionImpl) entry.getValue());
+                onCallDestroy(entry.getValue());
             }
         }
     }
