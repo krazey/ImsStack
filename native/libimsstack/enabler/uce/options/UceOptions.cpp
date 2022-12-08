@@ -96,9 +96,9 @@ IMS_BOOL UceOptions::SendOptionsRequest(IN AString strRemoteURI, IN IMS_UINT32 o
 
     SetContactHeader(ownCapabilities, piSIPMessage);
 
-    if (m_piCapabilities->QueryCapabilitiesEx() == IMS_FAILURE)
+    if (m_piCapabilities->QueryCapabilities(ICapabilities::FLAG_ADD_CONTACT_HEADER) == IMS_FAILURE)
     {
-        IMS_TRACE_I("SendOptionsRequest:QueryCapabilitiesEx is failed", 0, 0, 0);
+        IMS_TRACE_I("SendOptionsRequest:QueryCapabilities is failed", 0, 0, 0);
         SendOptionsCommandError(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
         OptionsTerminated();
         return IMS_FALSE;
@@ -133,9 +133,9 @@ IMS_BOOL UceOptions::SendOptionsResponse(
         }
         SetContactHeader(ownCapabilities, piSIPMessage);
 
-        if (m_piCapabilities->AcceptEx() == IMS_FAILURE)
+        if (m_piCapabilities->Accept(nResponse) == IMS_FAILURE)
         {
-            IMS_TRACE_I("SendOptionsResponse:AcceptEx is failed", 0, 0, 0);
+            IMS_TRACE_I("SendOptionsResponse:Accept is failed", 0, 0, 0);
             return IMS_FALSE;
         }
     }
