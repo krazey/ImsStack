@@ -47,7 +47,6 @@ private:
     void UpdateUserStateByCallTerminated(IN IMS_UINTP nCallKey);
     void RecoverOnCreating();
     void RecoverOnReferring();
-    void RecoverOnSubscribing();
     IMS_BOOL RecoverOnConferenceCallFailed();
     void ClearIndividualCallOnMergeFailed();
 };

@@ -283,19 +283,19 @@ IMS_SLONG DialogInfo::GetIndexOfKeyHasSameId(IN const AString& strDialogId)
 }
 
 PRIVATE
-AString DialogInfo::GetDialogId(Dialog* pDialog) const
+AString DialogInfo::GetDialogId(Dialog* pDialog)
 {
     return pDialog->m_strId;
 }
 
 PRIVATE
-AString DialogInfo::GetDialogRemoteAddress(Dialog* pDialog) const
+AString DialogInfo::GetDialogRemoteAddress(Dialog* pDialog)
 {
     return pDialog->m_objRemote.m_objIdentity.m_strUri;
 }
 
 PRIVATE
-AString DialogInfo::GetDialogLocalAddress(Dialog* pDialog) const
+AString DialogInfo::GetDialogLocalAddress(Dialog* pDialog)
 {
     return pDialog->m_objLocal.m_objIdentity.m_strUri;
 }
@@ -325,13 +325,13 @@ IMS_BOOL DialogInfo::IsPullableDialog(Dialog* pDialog) const
 }
 
 PRIVATE
-IMS_UINT32 DialogInfo::GetDialogCallState(Dialog* pDialog) const
+IMS_UINT32 DialogInfo::GetDialogCallState(Dialog* pDialog)
 {
     return pDialog->m_objState.m_nState;
 }
 
 PRIVATE
-IMS_UINT32 DialogInfo::GetDialogCallType(Dialog* pDialog) const
+IMS_UINT32 DialogInfo::GetDialogCallType(Dialog* pDialog)
 {
     if (pDialog->m_objExtraInfo.m_objMediaInfo.eAudioQuality == AUDIO_QUALITY_AMR_WB)
     {
@@ -349,7 +349,7 @@ IMS_UINT32 DialogInfo::GetDialogCallType(Dialog* pDialog) const
 }
 
 PRIVATE
-IMS_BOOL DialogInfo::IsHeldDialog(Dialog* pDialog) const
+IMS_BOOL DialogInfo::IsHeldDialog(Dialog* pDialog)
 {
     AString strPval = pDialog->m_objLocal.m_objTarget.m_objParamMap.GetValue(
             AString(TARGET_PARAM_SIP_RENDERING));

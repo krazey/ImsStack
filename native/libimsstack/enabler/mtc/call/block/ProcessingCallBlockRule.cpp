@@ -61,7 +61,7 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsCallSetupProcessing(IN const IMSList<IMtcCall*>& lstCalls) const
+IMS_BOOL ProcessingCallBlockRule::IsCallSetupProcessing(IN const IMSList<IMtcCall*>& lstCalls)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
@@ -77,7 +77,7 @@ IMS_BOOL ProcessingCallBlockRule::IsCallSetupProcessing(IN const IMSList<IMtcCal
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsCallUpdating(IN const IMSList<IMtcCall*>& lstCalls) const
+IMS_BOOL ProcessingCallBlockRule::IsCallUpdating(IN const IMSList<IMtcCall*>& lstCalls)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
@@ -92,7 +92,7 @@ IMS_BOOL ProcessingCallBlockRule::IsCallUpdating(IN const IMSList<IMtcCall*>& ls
 }
 
 PRIVATE
-IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls) const
+IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {

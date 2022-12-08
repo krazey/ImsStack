@@ -280,7 +280,7 @@ public:
 private:
     static IMutex* s_pKeyCreationLock;
 
-    CallKey CreateCallKey();
+    static CallKey CreateCallKey();
     void OnInternalFailure();
     void OnAttached();
 

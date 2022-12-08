@@ -854,7 +854,7 @@ IMS_SINT32 MtcConfigurationManager::GetCallRejectCodeForNotAcceptableCallType() 
 
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
-        IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue) const
+        IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)
 {
     for (IMS_UINT32 i = 0; i < lstList.GetSize(); i++)
     {
@@ -868,7 +868,7 @@ IMS_BOOL MtcConfigurationManager::ContainsValue(
 
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
-        IN const IMSVector<AString>& lstList, IN const AString& strValue) const
+        IN const IMSVector<AString>& lstList, IN const AString& strValue)
 {
     for (IMS_UINT32 i = 0; i < lstList.GetSize(); i++)
     {

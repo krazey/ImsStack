@@ -88,7 +88,7 @@ public:
             IN IMS_SINT32 nValue, IN IMS_BOOL bValue) override;
 
 private:
-    void SetCallDetails(IN_OUT android::Parcel& objParcel, IN const JniCallInfo& objCallInfo,
+    static void SetCallDetails(IN_OUT android::Parcel& objParcel, IN const JniCallInfo& objCallInfo,
             IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices);
 };

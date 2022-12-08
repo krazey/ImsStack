@@ -270,7 +270,7 @@ PRIVATE void MtcRadioChecker::DeInit()
 }
 
 PRIVATE TrafficType MtcRadioChecker::ConvertCallTypeToTrafficType(
-        IN CallType eCallType, IN IMS_BOOL bEmergency) const
+        IN CallType eCallType, IN IMS_BOOL bEmergency)
 {
     if (bEmergency)
     {

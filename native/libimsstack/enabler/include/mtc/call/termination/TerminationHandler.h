@@ -34,8 +34,8 @@ public:
     CallReasonInfo Handle(IN const ISession& objSession) const;
 
 private:
-    CallReasonInfo GetCallReasonInfoFromSessionTerminationReason(
-            IN IMS_SINT32 nTerminationReason) const;
+    static CallReasonInfo GetCallReasonInfoFromSessionTerminationReason(
+            IN IMS_SINT32 nTerminationReason);
 
     IMtcCallContext& m_objContext;
 };

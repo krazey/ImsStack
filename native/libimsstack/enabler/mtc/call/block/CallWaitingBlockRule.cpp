@@ -53,7 +53,7 @@ PUBLIC VIRTUAL CallWaitingBlockRule::Result CallWaitingBlockRule::Check(
 }
 
 PRIVATE
-IMS_BOOL CallWaitingBlockRule::IsActiveCallExists(IN const IMSList<IMtcCall*> lstCalls) const
+IMS_BOOL CallWaitingBlockRule::IsActiveCallExists(IN const IMSList<IMtcCall*> lstCalls)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {

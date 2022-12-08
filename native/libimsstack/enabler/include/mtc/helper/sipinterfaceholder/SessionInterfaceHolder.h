@@ -74,7 +74,7 @@ public:
     inline virtual IMS_UINT32 GetSessionCount() const { return m_objISessions.GetSize(); }
 
 private:
-    IMS_BOOL IsReadyToDestroy(IN ISession* piSession);
+    static IMS_BOOL IsReadyToDestroy(IN ISession* piSession);
 
     void ClearISessions();
 

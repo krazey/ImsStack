@@ -50,7 +50,7 @@ CallReasonInfo TerminationHandler::Handle(IN const ISession& objSession) const
 
 PRIVATE
 CallReasonInfo TerminationHandler::GetCallReasonInfoFromSessionTerminationReason(
-        IN IMS_SINT32 nTerminationReason) const
+        IN IMS_SINT32 nTerminationReason)
 {
     switch (nTerminationReason)
     {

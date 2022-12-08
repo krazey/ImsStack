@@ -400,8 +400,8 @@ IMS_BOOL AlertingState::IsUpdateBySrvcc(IN ISession* piSession) const
         return IMS_FALSE;
     }
 
-    AString strReason;
-    MessageUtil::GetHeader(piUpdateMessage, ISipHeader::UNKNOWN, strReason, SipHeaderName::REASON);
+    AString strReason = m_objContext.GetMessageUtils().GetHeader(
+            piUpdateMessage, ISipHeader::UNKNOWN, SipHeaderName::REASON);
     if (strReason.Equals(MessageUtil::STR_REASON_HANDOVER_CANCELLED) ||
             strReason.Equals(MessageUtil::STR_REASON_FAILURE_TO_TRANSITION))
     {

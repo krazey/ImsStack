@@ -113,7 +113,7 @@ void MtcLocationObject::SetLocationToMessage(
 }
 
 PRIVATE
-AString MtcLocationObject::CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const
+AString MtcLocationObject::CreateCid(IN const ISubscriberConfig& objSubscriberConfig)
 {
     AString strCid;
     MessageUtil::GenerateContentId(objSubscriberConfig.GetHomeDomainName(), strCid);
@@ -159,7 +159,7 @@ IMS_SINT32 MtcLocationObject::GetInformationLevel() const
 }
 
 PRIVATE
-AString MtcLocationObject::GetGeolocationHeader(IN const AString& strCid) const
+AString MtcLocationObject::GetGeolocationHeader(IN const AString& strCid)
 {
     AString strGeolocationHeader;
     strGeolocationHeader.Sprintf("<cid:%s>", strCid.GetStr());
@@ -167,7 +167,7 @@ AString MtcLocationObject::GetGeolocationHeader(IN const AString& strCid) const
 }
 
 PRIVATE
-AString MtcLocationObject::GetContentLengthHeader(IN const ByteArray& objContent) const
+AString MtcLocationObject::GetContentLengthHeader(IN const ByteArray& objContent)
 {
     AString strContentLength;
     strContentLength.SetNumber(objContent.GetLength());
@@ -175,7 +175,7 @@ AString MtcLocationObject::GetContentLengthHeader(IN const ByteArray& objContent
 }
 
 PRIVATE
-AString MtcLocationObject::GetContentIdHeader(IN const AString& strCid) const
+AString MtcLocationObject::GetContentIdHeader(IN const AString& strCid)
 {
     AString strContentIdHeader;
     strContentIdHeader.Sprintf("<%s>", strCid.GetStr());
@@ -183,7 +183,7 @@ AString MtcLocationObject::GetContentIdHeader(IN const AString& strCid) const
 }
 
 PRIVATE
-AString MtcLocationObject::GetContentDispositionHeader() const
+AString MtcLocationObject::GetContentDispositionHeader()
 {
     AString strHeader;
     strHeader.Sprintf("%s;%s", CONTENT_DISPOSITION_RENDER, CONTENT_DISPOSITION_HANDLING_OPTIONAL);

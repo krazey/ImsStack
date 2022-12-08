@@ -108,7 +108,7 @@ public:
 
 private:
     void DeInit();
-    TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
+    static TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency);
     IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi) const;
     void AddCallKeyIfNeeded(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
             IN CallKey nCallKeyIn) const;

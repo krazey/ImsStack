@@ -41,16 +41,16 @@ public:
     IMS_BOOL UpdateIncomingServices(IN IMessage* piMessage);
     IMS_BOOL UpdateCallerId(IN IMessage* piMessage);
     IMS_BOOL UpdateCnap(IN IMessage* piMessage);
-    IMS_BOOL UpdateCnapEx(IN IMessage* piMessage);
+    static IMS_BOOL UpdateCnapEx(IN IMessage* piMessage);
     IMS_BOOL UpdateMmc(IN IMessage* piMessage);
-    IMS_BOOL UpdateGtt(IN IMessage* piMessage);
+    static IMS_BOOL UpdateGtt(IN IMessage* piMessage);
     IMS_BOOL UpdateCdivCause(IN IMessage* piMessage);
     IMS_BOOL UpdateCdivHistory(IN IMessage* piMessage);
     IMS_BOOL UpdateCw(IN IMessage* piMessage);
-    IMS_BOOL UpdateVm(IN IMessage* piMessage);
-    IMS_BOOL UpdateAnswerHold(IN IMessage* piMessage);
+    static IMS_BOOL UpdateVm(IN IMessage* piMessage);
+    static IMS_BOOL UpdateAnswerHold(IN IMessage* piMessage);
     IMS_BOOL UpdateMcid(IN IMessage* piMessage);
-    IMS_BOOL UpdateDualNumber(IN IMessage* piMessage);
+    static IMS_BOOL UpdateDualNumber(IN IMessage* piMessage);
     IMS_BOOL UpdateCallingNumVerification(IN IMessage* piMessage);
     void Delete(IN SuppType eType);
     void DeleteServices();
@@ -61,11 +61,11 @@ public:
     void Add(IN SuppType eSuppType, IN IMS_BOOL bValue);
 
 private:
-    ISipHeader* GetHistoryInfoHeader(IN IMessage* piMessage);
-    IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
-    IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
-    IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
-    IMS_SINT32 GetCallingNumVerificationResult(IN const AString& strValue);
+    static ISipHeader* GetHistoryInfoHeader(IN IMessage* piMessage);
+    static IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
+    static IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
+    static IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
+    static IMS_SINT32 GetCallingNumVerificationResult(IN const AString& strValue);
     IMS_SINT32 GetCnvHeaderType(IN IMessage* piMessage);
     OipType GetOipTypeByHeader(
             IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack);

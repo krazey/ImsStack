@@ -132,7 +132,7 @@ private:
     void FinalizeMediaInfo(IN IMS_UINTP nNegoId);
     void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
     void SetNetworkToneRTPTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration);  // TBD
-    void SendAudioInfoToJava(IN const ISession* piSession);
+    static void SendAudioInfoToJava(IN const ISession* piSession);
     void AdjustDirectionForAutoOffer(IN IMS_BOOL bHeldByMe);
     void AdjustDirectionForAutoAnswerIfHeldByMe(IN_OUT IMS_SINT32& eDirection);
 
@@ -140,9 +140,9 @@ private:
     IMS_UINTP GetMediaNegoId(IN ISession* piSession);
     IMS_UINT32 GetDurationWaitingNetworkTone(IN ISession* piSession, IN IMessage* piMessage);
 
-    void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
-    void HandleReceivingNetworkToneStarted();
-    void HandleReceivingNetworkToneFailed();
+    static void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
+    static void HandleReceivingNetworkToneStarted();
+    static void HandleReceivingNetworkToneFailed();
     void RequestToRegisterQosCallback(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eContents);
 
 protected:

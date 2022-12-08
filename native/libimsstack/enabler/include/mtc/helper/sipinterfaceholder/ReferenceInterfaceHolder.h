@@ -58,7 +58,7 @@ public:
     inline virtual IMS_UINT32 GetReferenceCount() const { return m_objIReferences.GetSize(); }
 
 private:
-    IMS_BOOL IsReadyToDestroy(IN IReference* piReference);
+    static IMS_BOOL IsReadyToDestroy(IN IReference* piReference);
 
     void ClearIReferences();
 

@@ -481,7 +481,7 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer)
 }
 
 PRIVATE
-AString MtcSession::GenerateSessionId() const
+AString MtcSession::GenerateSessionId()
 {
     // Pseudo-random 128-bit system secret key
     AString strSessionId;

@@ -97,7 +97,7 @@ public:
 private:
     void Init();
     void SetStatus(IN ServiceStatus eStatus);
-    AString GetServiceName(IN ServiceType eType) const;
+    static AString GetServiceName(IN ServiceType eType);
     void AttachCoreServiceInterface();
     void AttachAosInterface();
     IJniMtcServiceThread* GetJniThread();

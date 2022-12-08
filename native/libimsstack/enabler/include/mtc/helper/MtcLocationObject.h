@@ -38,14 +38,14 @@ public:
             IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting = IMS_FALSE);
 
 private:
-    AString CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const;
+    static AString CreateCid(IN const ISubscriberConfig& objSubscriberConfig);
     ByteArray CreateLocationBody() const;
 
     IMS_SINT32 GetInformationLevel() const;
-    AString GetGeolocationHeader(IN const AString& strCid) const;
-    AString GetContentLengthHeader(IN const ByteArray& objContent) const;
-    AString GetContentIdHeader(IN const AString& strCid) const;
-    AString GetContentDispositionHeader() const;
+    static AString GetGeolocationHeader(IN const AString& strCid);
+    static AString GetContentLengthHeader(IN const ByteArray& objContent);
+    static AString GetContentIdHeader(IN const AString& strCid);
+    static AString GetContentDispositionHeader();
 
     IMtcCallContext& m_objContext;
 };

@@ -137,11 +137,11 @@ public:
     IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode) override;
 
 private:
-    ISipMessage* GetSipMessage(IN const IMessage* piMessage);
+    static ISipMessage* GetSipMessage(IN const IMessage* piMessage);
     IMS_RESULT GetAddresses(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             OUT ImsList<SipAddress>& lstAddresses,
             IN const AString& strHeaderName = AString::ConstNull());
-    void GetParameterValueFromUnknownHeaderBody(
+    static void GetParameterValueFromUnknownHeaderBody(
             IN const AString& strBody, IN const AString& strParameterName, OUT AString& strValue);
     IMS_RESULT GetUrnValue(IN const IMessage* piMessage, IN const AString& strId,
             IN IMS_SINT32 eHeaderType, OUT AString& strValue,

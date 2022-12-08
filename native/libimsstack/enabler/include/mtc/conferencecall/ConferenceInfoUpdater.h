@@ -43,8 +43,8 @@ public:
     virtual IMS_UINT32 Update(
             IN ConferenceParticipantList* pParticipantList, IN const AString& strEventPackage);
 
-    const IMS_CHAR* ConvertPolicyToString(IN MatchingPolicy ePolicy) const;
-    const IMS_CHAR* ConvertStatusToString(IN IMS_SINT32 nStatus) const;
+    static const IMS_CHAR* ConvertPolicyToString(IN MatchingPolicy ePolicy);
+    static const IMS_CHAR* ConvertStatusToString(IN IMS_SINT32 nStatus);
 
 protected:
     IMS_RESULT ParseConferenceInfo(IN const AString& strEventPackage);
@@ -63,15 +63,15 @@ protected:
     IMS_SINT32 FindParticipantByReferToUri(IN const ConferenceInfo::User* pUser);
     IMS_SINT32 FindParticipantByUserEntity(IN const ConferenceInfo::User* pUser);
 
-    IMS_UINT32 GetMatchingScore(IN const AString& strUriA, IN const AString& strUriB) const;
-    IMS_UINT32 GetMatchingCount(IN const AString& strUriA, IN const AString& strUriB) const;
+    static IMS_UINT32 GetMatchingScore(IN const AString& strUriA, IN const AString& strUriB);
+    static IMS_UINT32 GetMatchingCount(IN const AString& strUriA, IN const AString& strUriB);
 
     void Clear();
 
     IMS_BOOL IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
             IN IMS_BOOL bAllowPrefix = IMS_TRUE) const;
     IMS_BOOL IsLocalUri(IN const AString& strUserEntity) const;
-    IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity) const;
+    static IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity);
     IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB) const;
     IMS_BOOL IsInvalidStatusUpdate(
             IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const;
@@ -80,10 +80,10 @@ protected:
     void RemoveFromNotMatchedUserList(IN ConferenceInfo::User* pUser);
     IMS_BOOL IsInitialNotifyWithoutUsers() const;
 
-    IMS_BOOL IsConnectedStatusCategory(IN IMS_UINT32 nStatus) const;
+    static IMS_BOOL IsConnectedStatusCategory(IN IMS_UINT32 nStatus);
 
 private:
-    void ModifyParticipantInfoByConfig(IN ConfUser* pConfUser);
+    static void ModifyParticipantInfoByConfig(IN ConfUser* pConfUser);
 
 public:
     enum

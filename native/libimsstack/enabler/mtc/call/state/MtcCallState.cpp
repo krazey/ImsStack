@@ -780,7 +780,7 @@ IMS_BOOL MtcCallState::IsInvalidOfferAnswer(
 }
 
 PROTECTED
-IMS_BOOL MtcCallState::IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const
+IMS_BOOL MtcCallState::IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage)
 {
     if (piSession->IsSdpNegotiationAllowedForNonRpr())
     {
@@ -1062,7 +1062,7 @@ void MtcCallState::StartEpsFallbackWatchdogIfNeeded(IN IMessage& objMessage) con
 }
 
 PROTECTED
-IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason) const
+IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason)
 {
     switch (nAosReason)
     {

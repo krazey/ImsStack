@@ -47,7 +47,7 @@ public:
 
 private:
     IMS_RESULT SendRefer(IN const AString& strReferToUri, IN IMtcCall* piTransferTargetCall);
-    AString GetReferToUri(IN IMtcCall* piTransferTargetCall) const;
+    static AString GetReferToUri(IN IMtcCall* piTransferTargetCall);
     AString GetReferToUri(IN const AString& strTransferTarget) const;
     void SetReplaces(IN IMtcCall* piTransferTargetCall);
     void SetReferredByHeader();

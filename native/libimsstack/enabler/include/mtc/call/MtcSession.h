@@ -92,7 +92,7 @@ private:
     void CheckCallTypeWithRegisteredFeature();
     ResultSetSdp SetSdpToSend(IN IMS_BOOL bAllowReOffer);
 
-    AString GenerateSessionId() const;
+    static AString GenerateSessionId();
     IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature);
     IMS_BOOL IsCallWaiting() const;
     IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
