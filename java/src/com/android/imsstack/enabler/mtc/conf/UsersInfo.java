@@ -258,15 +258,10 @@ public class UsersInfo implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<UsersInfo> CREATOR
-            = new Parcelable.Creator<UsersInfo>() {
+    public static final Parcelable.Creator<UsersInfo> CREATOR =
+            new Parcelable.Creator<UsersInfo>() {
         public UsersInfo createFromParcel(Parcel source) {
-            try {
-                return new UsersInfo(source);
-            } catch (Exception e) {
-                ImsLog.e("createFromParcel() :: Exception occurred when creating UsersInfo from parcel", e);
-            }
-            return null;
+            return new UsersInfo(source);
         }
 
         public UsersInfo[] newArray(int size) {

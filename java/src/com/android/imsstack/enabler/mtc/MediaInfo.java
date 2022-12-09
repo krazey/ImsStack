@@ -161,15 +161,10 @@ public class MediaInfo implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<MediaInfo> CREATOR
-            = new Parcelable.Creator<MediaInfo>() {
+    public static final Parcelable.Creator<MediaInfo> CREATOR =
+            new Parcelable.Creator<MediaInfo>() {
         public MediaInfo createFromParcel(Parcel source) {
-            try {
-                return new MediaInfo(source);
-            } catch (Exception e) {
-                ImsLog.e("Exception occurred when creating MediaInfo from parcel", e);
-            }
-            return null;
+            return new MediaInfo(source);
         }
 
         public MediaInfo[] newArray(int size) {

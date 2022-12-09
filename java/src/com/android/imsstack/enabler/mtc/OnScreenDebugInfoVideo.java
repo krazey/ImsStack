@@ -97,15 +97,10 @@ public class OnScreenDebugInfoVideo implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<OnScreenDebugInfoVideo> CREATOR
-            = new Parcelable.Creator<OnScreenDebugInfoVideo>() {
+    public static final Parcelable.Creator<OnScreenDebugInfoVideo> CREATOR =
+            new Parcelable.Creator<OnScreenDebugInfoVideo>() {
         public OnScreenDebugInfoVideo createFromParcel(Parcel source) {
-            try {
-                return new OnScreenDebugInfoVideo(source);
-            } catch (Exception e) {
-                ImsLog.e("Exception occurred when creating OnScreenDebugInfoVideo from parcel");
-            }
-            return null;
+            return new OnScreenDebugInfoVideo(source);
         }
 
         public OnScreenDebugInfoVideo[] newArray(int size) {

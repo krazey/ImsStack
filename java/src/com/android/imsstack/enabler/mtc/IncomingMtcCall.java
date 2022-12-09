@@ -138,16 +138,10 @@ public class IncomingMtcCall implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<IncomingMtcCall> CREATOR
-            = new Parcelable.Creator<IncomingMtcCall>() {
+    public static final Parcelable.Creator<IncomingMtcCall> CREATOR =
+            new Parcelable.Creator<IncomingMtcCall>() {
         public IncomingMtcCall createFromParcel(Parcel source) {
-            try {
-                return new IncomingMtcCall(source);
-            } catch (Exception e) {
-                ImsLog.e("createFromParcel() :: Exception occurred when creating IncomingMtcCall"
-                        + " from parcel", e);
-            }
-            return null;
+            return new IncomingMtcCall(source);
         }
 
         public IncomingMtcCall[] newArray(int size) {

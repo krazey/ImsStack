@@ -259,15 +259,10 @@ public class DialogsInfo implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<DialogsInfo> CREATOR
-            = new Parcelable.Creator<DialogsInfo>() {
+    public static final Parcelable.Creator<DialogsInfo> CREATOR =
+            new Parcelable.Creator<DialogsInfo>() {
         public DialogsInfo createFromParcel(Parcel source) {
-            try {
-                return new DialogsInfo(source);
-            } catch (Exception e) {
-                ImsLog.e("createFromParcel() :: Exception occurred when creating DialogsInfo from parcel", e);
-            }
-            return null;
+            return new DialogsInfo(source);
         }
 
         public DialogsInfo[] newArray(int size) {

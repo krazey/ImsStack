@@ -316,16 +316,10 @@ public class SuppInfo implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<SuppInfo> CREATOR
-            = new Parcelable.Creator<SuppInfo>() {
+    public static final Parcelable.Creator<SuppInfo> CREATOR =
+            new Parcelable.Creator<SuppInfo>() {
         public SuppInfo createFromParcel(Parcel source) {
-            try {
-                return new SuppInfo(source);
-            } catch (Exception e) {
-                ImsLog.e("createFromParcel() :: Exception occurred " +
-                        "when creating SuppInfo from parcel", e);
-            }
-            return null;
+            return new SuppInfo(source);
         }
 
         public SuppInfo[] newArray(int size) {

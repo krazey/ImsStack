@@ -232,12 +232,7 @@ public class CallReasonInfo implements Parcelable {
     public static final Parcelable.Creator<CallReasonInfo> CREATOR =
             new Parcelable.Creator<CallReasonInfo>() {
         public CallReasonInfo createFromParcel(Parcel source) {
-            try {
-                return new CallReasonInfo(source);
-            } catch (Exception e) {
-                ImsLog.e("Exception occurred when creating CallReasonInfo from parcel", e);
-            }
-            return null;
+            return new CallReasonInfo(source);
         }
 
         public CallReasonInfo[] newArray(int size) {

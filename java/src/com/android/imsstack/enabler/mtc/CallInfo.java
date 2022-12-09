@@ -165,15 +165,10 @@ public class CallInfo implements Parcelable
         return 0;
     }
 
-    public static final Parcelable.Creator<CallInfo> CREATOR
-            = new Parcelable.Creator<CallInfo>() {
+    public static final Parcelable.Creator<CallInfo> CREATOR =
+            new Parcelable.Creator<CallInfo>() {
         public CallInfo createFromParcel(Parcel source) {
-            try {
-                return new CallInfo(source);
-            } catch (Exception e) {
-                ImsLog.e("Exception occurred when creating CallInfo from parcel", e);
-            }
-            return null;
+            return new CallInfo(source);
         }
 
         public CallInfo[] newArray(int size) {
