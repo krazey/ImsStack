@@ -75,7 +75,7 @@ public class JNIUpCallEvtManager {
         public void procEvt( int nEvent, int nWParam, int nLParam );
     }
 
-    private class JNIUpCallEvt implements IJNIUpCallEvt, ISystemAPISendEvent {
+    private static class JNIUpCallEvt implements IJNIUpCallEvt, ISystemAPISendEvent {
         private Hashtable<Integer, EventProc> mapEventProc = new Hashtable <Integer, EventProc>();
 
         private RegistrantList mNativeBootCompleteRegistrants = new RegistrantList();

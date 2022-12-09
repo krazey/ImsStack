@@ -137,7 +137,7 @@ public abstract class ImsStackTest {
 
     private final LinkedList<InstanceKey> mInstanceKeys = new LinkedList<>();
 
-    private class InstanceKey {
+    private static class InstanceKey {
         public final Class mClass;
         public final String mInstName;
         public final Object mObj;

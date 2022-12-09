@@ -65,14 +65,14 @@ public class FQDNThread extends Thread {
         mApnType = apnType;
     }
 
-    private class Result {
+    private static class Result {
         public int m_nPriority = 0;
         public int m_nWeight = 0;
         public int m_nPort = 0;
         public String m_strTarget;
     };
 
-    private class Result_NAPTR {
+    private static class Result_NAPTR {
         // ImsStack-Build_DNS
         //public Name m_FQDN = null;
         public int nOrder = 10;

@@ -323,7 +323,7 @@ public final class LocationApi {
         ImsLog.i("[LocationApi] " + s);
     }
 
-    private class ListenerPool {
+    private static class ListenerPool {
         private final Set<LocationApi.Listener> mListeners = new ArraySet<LocationApi.Listener>();
 
         ListenerPool() {

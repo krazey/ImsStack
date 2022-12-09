@@ -422,7 +422,7 @@ public class ImsStackApp extends Application {
         return simState;
     }
 
-    private final class SlotState {
+    private static final class SlotState {
         private final int mSlotId;
         private boolean mServiceStarted;
         // This holds a flag briefly while processing the carrier configuration changed event.

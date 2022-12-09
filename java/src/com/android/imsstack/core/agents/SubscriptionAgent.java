@@ -646,7 +646,7 @@ public final class SubscriptionAgent implements ISubscription {
         return (slotId == SimState.SIM1) || (slotId == SimState.SIM2);
     }
 
-    private final class SimState {
+    private static final class SimState {
         public static final int SIM1 = 0;
         public static final int SIM2 = 1;
 

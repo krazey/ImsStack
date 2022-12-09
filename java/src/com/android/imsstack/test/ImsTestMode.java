@@ -98,7 +98,7 @@ public final class ImsTestMode {
         return tm;
     }
 
-    private class TestMode implements IImsTestMode {
+    private static class TestMode implements IImsTestMode {
         private int mSlotId = 0;
         private int mTestmodes = CONFIG_NONE;
         private int mExtraTestmask = 0;

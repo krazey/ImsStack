@@ -78,7 +78,7 @@ public final class ImsTestHelper {
         ImsLog.d("cleanup()");
     }
 
-    private class ImsTestHelperReceiver extends BroadcastReceiver {
+    private static class ImsTestHelperReceiver extends BroadcastReceiver {
         IntentFilter mIntentFilter = new IntentFilter();
 
         public ImsTestHelperReceiver() {

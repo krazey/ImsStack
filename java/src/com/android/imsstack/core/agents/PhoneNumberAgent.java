@@ -74,7 +74,7 @@ public class PhoneNumberAgent implements IVoLteAgent {
     private PhoneNumberAgent() {
     }
 
-    public class PhoneNumber {
+    private static class PhoneNumber {
         private final int mSlotId;
 
         private int mTryingCounter = 0;

@@ -540,7 +540,7 @@ public class AlarmTimerAgent implements IAlarmTimer, ISystemAPIAlarm {
     }
 
     // IMS_ALARM_TIMER {
-    private class AlarmTimerHandler extends Handler {
+    private static class AlarmTimerHandler extends Handler {
 
         public AlarmTimerHandler(String name) {
             super(createLooper(name));
