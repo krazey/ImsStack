@@ -24,7 +24,8 @@ import com.android.internal.util.ArrayUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -162,8 +163,8 @@ public class HttpResponse {
      *
      * @return the cookie header's value or empty list
      */
-    public List<String> getCookies() {
-        List<String> cookies = new LinkedList<String>();
+    public ArrayDeque getCookies() {
+        ArrayDeque cookies = new ArrayDeque<String>();
         if (mHttpURLConnection == null) {
             ImsLog.e(mSlotId, "HttpURLConnection");
             return cookies;
@@ -189,15 +190,13 @@ public class HttpResponse {
      *
      * @param cookies the cookie header value
      */
-    public void setCookies(List<String> cookies) {
+    public void setCookies(ArrayDeque cookies) {
         if (cookies != null && cookies.size() > 0) {
-
             StringBuilder sb = new StringBuilder();
-            sb.append(cookies.get(0));
-            for (int i = 1; i < cookies.size(); i++) {
-                if (!TextUtils.isEmpty(cookies.get(i))) {
-                    sb.append(";" + cookies.get(i));
-                }
+
+            Iterator iterator = cookies.iterator();
+            while (iterator.hasNext()) {
+                sb.append(";" + iterator.next());
             }
 
             if (!TextUtils.isEmpty(sb)) {
