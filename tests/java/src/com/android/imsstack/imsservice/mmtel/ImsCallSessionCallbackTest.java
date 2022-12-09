@@ -295,7 +295,7 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         int targetAccessTech = 0;
         mImsCallSessionCallback.invokeHandover(mSession, srcAccessTech, targetAccessTech);
         processAllMessages();
-        verify(mMockListener).callSessionHandover(anyInt(), anyInt(), any(ImsReasonInfo.class));
+        verify(mMockListener).onHandover(anyInt(), anyInt(), any(ImsReasonInfo.class));
     }
 
     @Test
@@ -305,8 +305,7 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeHandoverFailed(mSession, srcAccessTech, targetAccessTech,
                 mReasonInfo);
         processAllMessages();
-        verify(mMockListener).callSessionHandoverFailed(srcAccessTech, targetAccessTech,
-                mReasonInfo);
+        verify(mMockListener).onHandoverFailed(srcAccessTech, targetAccessTech, mReasonInfo);
     }
 
     @Test

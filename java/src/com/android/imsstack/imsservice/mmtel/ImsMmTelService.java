@@ -437,8 +437,6 @@ public class ImsMmTelService extends MmTelFeature
             }
 
             // EXTRA_IS_UNKNOWN_CALL
-
-            extras.putString(ImsManager.EXTRA_CALL_ID, incomingSession.getCallId());
             extras.putLong(ImsManager.EXTRA_PHONE_ID, mIContext.getPhoneId());
 
             // If any exception is thrown by this method call,

@@ -654,7 +654,7 @@ public class ImsCallSessionCallback {
                     ImsReasonInfo reasonInfo = new ImsReasonInfo(ImsReasonInfo.CODE_UNSPECIFIED,
                             ImsReasonInfo.CODE_UNSPECIFIED, null);
 
-                    mListener.callSessionHandover(
+                    mListener.onHandover(
                             srcAccessTech, targetAccessTech, reasonInfo);
                 } catch (Throwable t) {
                     log(t, "invokeHandover");
@@ -677,7 +677,7 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
-                    mListener.callSessionHandoverFailed(
+                    mListener.onHandoverFailed(
                             srcAccessTech, targetAccessTech, reasonInfo);
                 } catch (Throwable t) {
                     log(t, "invokeHandoverFailed");

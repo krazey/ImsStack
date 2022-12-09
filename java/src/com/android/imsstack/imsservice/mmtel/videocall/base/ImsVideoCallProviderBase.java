@@ -16,29 +16,16 @@
 
 package com.android.imsstack.imsservice.mmtel.videocall.base;
 
-import android.app.ActivityManager;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
 import android.net.Uri;
-import android.telecom.InCallService;
-import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsVideoCallProvider;
-import android.text.TextUtils;
 import android.view.Surface;
 
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
-import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         implements IVideoCallSession.EventListener {
@@ -68,10 +55,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
      */
     protected final static int DISPLAY_SIZE_NORMAL = 0;
     protected final static int DISPLAY_SIZE_FULL = 1;
-
-    // Package names for a dialer
-    private static final String DEFAULT_DIALER = "com.android.contacts";
-    private static final String SKT_T_PHONE = "com.skt.prod.dialer";
 
     private final IVideoCallSession mCallSession;
     private MtcMediaSessionListenerProxy mListenerProxy = new MtcMediaSessionListenerProxy();
@@ -379,67 +362,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         }
 
         return orientation;
-    }
-
-    protected static String getDefaultDialerPackage() {
-        TelecomManager tm = AppContext.getInstance().getSystemService(
-                TelecomManager.class);
-        return (tm != null) ? tm.getDefaultDialerPackage() : null;
-    }
-
-    protected static boolean is3rdPartyDialerSetAsDefaultDialerForVideoCall() {
-        if (ImsConstants.USE_GOOGLE_NATIVE_APPS) {
-            // It's always 3rd party dialer in JUMP.
-            return true;
-        }
-
-        String packageName = getDefaultDialerPackage();
-
-        if (TextUtils.isEmpty(packageName)
-                || DEFAULT_DIALER.equals(packageName)) {
-            return false;
-        }
-
-        PackageManager pm = AppContext.getInstance().getPackageManager();
-
-        if (pm == null) {
-            return true;
-        }
-
-        List<ServiceInfo> infos = new ArrayList<>();
-        Intent serviceIntent = new Intent(InCallService.SERVICE_INTERFACE);
-
-        serviceIntent.setPackage(packageName);
-
-        for (ResolveInfo entry : pm.queryIntentServicesAsUser(
-                serviceIntent,
-                PackageManager.GET_META_DATA,
-                ActivityManager.getCurrentUser())) {
-            if (entry.serviceInfo != null) {
-                infos.add(entry.serviceInfo);
-            }
-        }
-
-        if (infos.isEmpty()) {
-            // Dialer only package (w/o InCallUI)
-            log("3rd party dialer : No InCallService - " + packageName);
-            return false;
-        }
-
-        boolean is3rdPartyCallUI = false;
-
-        for (ServiceInfo serviceInfo : infos) {
-            if (serviceInfo.metaData != null
-                    && serviceInfo.metaData.getBoolean(
-                            TelecomManager.METADATA_IN_CALL_SERVICE_UI, false)) {
-                // Package to display Call UI
-                log("3rd party dialer : packageName="
-                        + serviceInfo.packageName + ", name=" + serviceInfo.name);
-                is3rdPartyCallUI = true;
-            }
-        }
-
-        return is3rdPartyCallUI;
     }
 
     protected static void log(String s) {
