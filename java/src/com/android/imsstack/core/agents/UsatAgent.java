@@ -1085,7 +1085,7 @@ public class UsatAgent extends Handler implements UsatInterface {
      * The buffer is a BER-TLV data object.
      *
      * @param buf The buffer to be parsed
-     * @param tlvObjects The list of TlvObject
+     * @param dataObjects The list of TlvObject
      * @return true if the encoded data is valid, false otherwise.
      */
     private static boolean extractDataObjectFromBuffer(byte[] buf, List<DataObject> dataObjects) {
