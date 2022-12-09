@@ -164,6 +164,7 @@ public abstract class ImsStackTest {
         }
     }
 
+    @SuppressWarnings("WaitNotInLoop")
     protected void waitUntilReady() {
         synchronized (mLock) {
             if (!mReady) {
