@@ -51,6 +51,11 @@ public class ImsConfigMenu extends PreferenceActivity {
         }
     }
 
+    @Override
+    protected boolean isValidFragment(String fragmentName) {
+        return fragmentName != null;
+    }
+
     private void initConfigMenu() {
         ImsLog.i(mSlotId, "initConfigMenu");
 
