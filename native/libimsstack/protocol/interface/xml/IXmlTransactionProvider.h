@@ -26,6 +26,9 @@
  */
 class IXmlTransactionProvider
 {
+protected:
+    virtual ~IXmlTransactionProvider() = default;
+
 public:
     /**
      * @brief Creates a transaction to parse an XML document.

@@ -26,6 +26,9 @@ class INode;
  */
 class INodeList
 {
+protected:
+    virtual ~INodeList() = default;
+
 public:
     /**
      * @brief Returns the number of nodes in the list.

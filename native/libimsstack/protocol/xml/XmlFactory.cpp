@@ -17,12 +17,6 @@
 #include "XmlStreamWriter.h"
 #include "XmlTransactionProvider.h"
 
-PROTECTED
-XmlFactory::XmlFactory() {}
-
-PUBLIC
-XmlFactory::~XmlFactory() {}
-
 PUBLIC
 IXmlStreamWriter* XmlFactory::CreateStreamWriter()
 {

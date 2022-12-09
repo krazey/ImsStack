@@ -20,6 +20,9 @@
 
 class IXmlStreamWriter
 {
+protected:
+    virtual ~IXmlStreamWriter() = default;
+
 public:
     /**
      * @brief Closes this writer and free any resources associated with the writer.

@@ -28,7 +28,8 @@
  */
 class IComment : public ICharacterData, public INode
 {
-public:
+protected:
+    virtual ~IComment() = default;
 };
 
 #endif

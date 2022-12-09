@@ -24,10 +24,8 @@ class IXmlTransactionProvider;
 class XmlFactory
 {
 protected:
-    XmlFactory();
-
-public:
-    ~XmlFactory();
+    XmlFactory() = default;
+    ~XmlFactory() = default;
 
 public:
     /**

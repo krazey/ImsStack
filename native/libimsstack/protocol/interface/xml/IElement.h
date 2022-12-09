@@ -28,6 +28,9 @@ class INodeList;
  */
 class IElement : public INode
 {
+protected:
+    virtual ~IElement() = default;
+
 public:
     /**
      * @brief Retrieves an attribute value by name.
