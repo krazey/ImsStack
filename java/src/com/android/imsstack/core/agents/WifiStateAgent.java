@@ -34,8 +34,8 @@ import com.android.imsstack.system.ISystemAPIWifi;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
 
-import java.util.Hashtable;
 import java.util.Locale;
+import java.util.Map;
 
 public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
     // Constants--------------------------------------------------
@@ -45,9 +45,28 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
     private static final int EVENT_RSSI_CHANGED_ACTION = 1003;
     private static final int EVENT_TURN_ON_OFF = 1004;
 
-    // Variables--------------------------------------------------
-    private static final Hashtable<NetworkInfo.State, Integer> sStateTable;
-    private static final Hashtable<NetworkInfo.DetailedState, Integer> sDetailedStateTable;
+    // NOTICE: This needs to be synchronize with native constant values.
+    private static final Map<NetworkInfo.State, Integer> STATE_MAP = Map.of(
+            NetworkInfo.State.CONNECTING, 0,
+            NetworkInfo.State.CONNECTED, 1,
+            NetworkInfo.State.SUSPENDED, 2,
+            NetworkInfo.State.DISCONNECTING, 3,
+            NetworkInfo.State.DISCONNECTED, 4,
+            NetworkInfo.State.UNKNOWN, 5);
+    private static final Map<NetworkInfo.DetailedState, Integer> DETAILED_STATE_MAP = Map.ofEntries(
+            Map.entry(NetworkInfo.DetailedState.IDLE, 0),
+            Map.entry(NetworkInfo.DetailedState.SCANNING, 1),
+            Map.entry(NetworkInfo.DetailedState.CONNECTING, 2),
+            Map.entry(NetworkInfo.DetailedState.AUTHENTICATING, 3),
+            Map.entry(NetworkInfo.DetailedState.OBTAINING_IPADDR, 4),
+            Map.entry(NetworkInfo.DetailedState.CONNECTED, 5),
+            Map.entry(NetworkInfo.DetailedState.SUSPENDED, 6),
+            Map.entry(NetworkInfo.DetailedState.DISCONNECTING, 7),
+            Map.entry(NetworkInfo.DetailedState.DISCONNECTED, 8),
+            Map.entry(NetworkInfo.DetailedState.FAILED, 9),
+            Map.entry(NetworkInfo.DetailedState.BLOCKED, 10),
+            Map.entry(NetworkInfo.DetailedState.VERIFYING_POOR_LINK, 11),
+            Map.entry(NetworkInfo.DetailedState.CAPTIVE_PORTAL_CHECK, 12));
 
     private static IWifiState sWifiStateAgent;
     private Context mContext;
@@ -330,12 +349,12 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
     }
 
     private int getNetworkInfoState(NetworkInfo.State state) {
-        Integer niState = sStateTable.get(state);
+        Integer niState = STATE_MAP.get(state);
         return (niState != null) ? niState.intValue() : (-1);
     }
 
     private int getNetworkInfoDetailedState(NetworkInfo.DetailedState state) {
-        Integer niDetailedState = sDetailedStateTable.get(state);
+        Integer niDetailedState = DETAILED_STATE_MAP.get(state);
         return (niDetailedState != null) ? niDetailedState.intValue() : (-1);
     }
 
@@ -535,31 +554,5 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
                     break;
             }
         }
-    }
-
-    static {
-        // NOTICE: This needs to be synchronize with native constant values.
-        sStateTable = new Hashtable<NetworkInfo.State, Integer>();
-        sStateTable.put(NetworkInfo.State.CONNECTING, 0);
-        sStateTable.put(NetworkInfo.State.CONNECTED, 1);
-        sStateTable.put(NetworkInfo.State.SUSPENDED, 2);
-        sStateTable.put(NetworkInfo.State.DISCONNECTING, 3);
-        sStateTable.put(NetworkInfo.State.DISCONNECTED, 4);
-        sStateTable.put(NetworkInfo.State.UNKNOWN, 5);
-
-        sDetailedStateTable = new Hashtable<NetworkInfo.DetailedState, Integer>();
-        sDetailedStateTable.put(NetworkInfo.DetailedState.IDLE, 0);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.SCANNING, 1);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.CONNECTING, 2);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.AUTHENTICATING, 3);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.OBTAINING_IPADDR, 4);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.CONNECTED, 5);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.SUSPENDED, 6);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.DISCONNECTING, 7);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.DISCONNECTED, 8);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.FAILED, 9);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.BLOCKED, 10);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.VERIFYING_POOR_LINK, 11);
-        sDetailedStateTable.put(NetworkInfo.DetailedState.CAPTIVE_PORTAL_CHECK, 12);
     }
 }

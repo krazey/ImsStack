@@ -28,6 +28,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Registrant;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 
 import com.android.imsstack.system.ISystemAPIAlarm;
 import com.android.imsstack.system.SystemInterface;
@@ -35,7 +36,6 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MapIntLong;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 public class AlarmTimerAgent implements IAlarmTimer, ISystemAPIAlarm {
 
@@ -59,8 +59,7 @@ public class AlarmTimerAgent implements IAlarmTimer, ISystemAPIAlarm {
     private AlarmTimerReceiver mAlarmTimerReceiver;
     private Handler mAlarmTimerHandler;
 
-    private final Hashtable<Long, Registrant> mTimerExpiredListeners =
-            new Hashtable<Long, Registrant>();
+    private final ArrayMap<Long, Registrant> mTimerExpiredListeners = new ArrayMap<>();
 
     // Pool for timers which is greater than 30 seconds; it's only for native timers
     private final ArrayList<Long> mLongTimers = new ArrayList<Long>();
@@ -141,12 +140,9 @@ public class AlarmTimerAgent implements IAlarmTimer, ISystemAPIAlarm {
         synchronized (this) {
             int allocatedTid = (-1);
             int tid = mTimerIdForUniqueness;
-            Registrant r = null;
 
             while (true) {
-                r = mTimerExpiredListeners.get(Long.valueOf((long)tid));
-
-                if (r == null) {
+                if (!isActiveTimer(Long.valueOf((long) tid))) {
                     allocatedTid = tid;
                     break;
                 }
@@ -326,6 +322,11 @@ public class AlarmTimerAgent implements IAlarmTimer, ISystemAPIAlarm {
         return 1;
     }
 
+    private boolean isActiveTimer(Long tid) {
+        synchronized (mTimerExpiredListeners) {
+            return mTimerExpiredListeners.containsKey(tid);
+        }
+    }
 
     // Private/Protected methods ---------------------------------
     private AlarmManager getAlarmMngr() {

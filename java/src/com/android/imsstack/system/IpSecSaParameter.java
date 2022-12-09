@@ -113,7 +113,7 @@ public class IpSecSaParameter implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         sb.append("[ id=");
         sb.append(mId);
@@ -196,7 +196,7 @@ public class IpSecSaParameter implements Parcelable {
             return "(null)";
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < data.length; i++) {
             sb.append(String.format("%02x ", data[i] & 0xff));

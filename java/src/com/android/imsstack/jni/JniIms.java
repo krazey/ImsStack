@@ -16,11 +16,11 @@
 package com.android.imsstack.jni;
 
 import android.os.Parcel;
+import android.util.ArrayMap;
 
 import com.android.imsstack.util.Log;
 
 import java.io.FileDescriptor;
-import java.util.Hashtable;
 
 /**
  * This class provides the interfaces to send/receive the data from native to Java,
@@ -45,10 +45,8 @@ public class JniIms {
     }
 
     private static Callback sCallback = null;
-    private final Hashtable<Long, JniImsListener> mListeners =
-            new Hashtable<Long, JniImsListener>();
-    private final Hashtable<Long, JniSystemListener> mSystemListeners =
-            new Hashtable<Long, JniSystemListener>();
+    private final ArrayMap<Long, JniImsListener> mListeners = new ArrayMap<>();
+    private final ArrayMap<Long, JniSystemListener> mSystemListeners = new ArrayMap<>();
 
     /** Native APIs. */
     /** Initializes the native resources. */

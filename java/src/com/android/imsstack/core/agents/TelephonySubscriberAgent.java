@@ -19,6 +19,7 @@ import android.content.Context;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPITelephonySubscriber;
@@ -27,7 +28,6 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
-import java.util.Hashtable;
 import java.util.Locale;
 
 public class TelephonySubscriberAgent implements ITelephonySubscriber,
@@ -48,7 +48,7 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
     private static final int ECC_PRIORITY_NETWORK = 1;
 
     // <MCC, Country-ISO>
-    private Hashtable<String, String> mCountryIsoTable = new Hashtable<String, String>();
+    private final ArrayMap<String, String> mCountryIsoTable = new ArrayMap<>();
 
     // Variables--------------------------------------------------
     private int mModemEccPriority = ECC_PRIORITY_NETWORK;

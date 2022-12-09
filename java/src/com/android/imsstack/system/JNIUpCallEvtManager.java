@@ -18,15 +18,12 @@ package com.android.imsstack.system;
 import android.os.Handler;
 import android.os.Registrant;
 import android.os.RegistrantList;
+import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IBatteryState;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
-
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
 
 public class JNIUpCallEvtManager {
     // Constants--------------------------------------------------
@@ -34,8 +31,8 @@ public class JNIUpCallEvtManager {
     // Variables--------------------------------------------------
     private static JNIUpCallEvtManager sJNIUpCallEvtManager = new JNIUpCallEvtManager();
 
-    private Map<Integer, IJNIUpCallEvt> mJniUpCallEvts =
-            new HashMap<Integer, IJNIUpCallEvt>(MSimUtils.getSupportedSimCount());
+    private final SparseArray<IJNIUpCallEvt> mJniUpCallEvts =
+            new SparseArray<>(MSimUtils.getSupportedSimCount());
 
     // Public methods --------------------------------------------
     public static JNIUpCallEvtManager getInstance() {
@@ -56,7 +53,7 @@ public class JNIUpCallEvtManager {
     }
 
     public synchronized void stop(int slotId) {
-        JNIUpCallEvt jniEvt = (JNIUpCallEvt)mJniUpCallEvts.get(slotId);
+        JNIUpCallEvt jniEvt = (JNIUpCallEvt) mJniUpCallEvts.get(slotId);
 
         if (jniEvt == null) {
             return;
@@ -76,11 +73,9 @@ public class JNIUpCallEvtManager {
     }
 
     private static class JNIUpCallEvt implements IJNIUpCallEvt, ISystemAPISendEvent {
-        private Hashtable<Integer, EventProc> mapEventProc = new Hashtable <Integer, EventProc>();
-
-        private RegistrantList mNativeBootCompleteRegistrants = new RegistrantList();
-
-        private int mSlotId = 0;
+        private final SparseArray<EventProc> mEventProcs = new SparseArray<>();
+        private final RegistrantList mNativeBootCompleteRegistrants = new RegistrantList();
+        private final int mSlotId;
 
         public JNIUpCallEvt(int slotId) {
             mSlotId = slotId;
@@ -106,7 +101,7 @@ public class JNIUpCallEvtManager {
             }
 
             system.setISystemAPISendEvent(null);
-            mapEventProc.clear();
+            mEventProcs.clear();
         }
 
         @Override
@@ -128,7 +123,7 @@ public class JNIUpCallEvtManager {
         public int processEvent4Sys(int nEvent, int nWParam, int nLParam ) {
             ImsLog.i(mSlotId, "Event (" + nEvent + "), WP (" + nWParam + "), LP (" + nLParam + ")");
 
-            EventProc EventProcess = mapEventProc.get(nEvent);
+            EventProc EventProcess = mEventProcs.get(nEvent);
 
             if (EventProcess == null) {
                 ImsLog.w("event is not supported");
@@ -144,12 +139,12 @@ public class JNIUpCallEvtManager {
         // Interface implementation methods --------------------------
         // Private/Protected methods ---------------------------------
         private void initEvtProcMap() {
-            mapEventProc.put(ImsEventDef.IMS_EVENT_NATIVE_BOOT_COMPLETED,
+            mEventProcs.put(ImsEventDef.IMS_EVENT_NATIVE_BOOT_COMPLETED,
                     new HandleIMSEventNativeBootCompleted()); // 0x00000012
             // handle as default without slod id
-            //mapEventProc.put(ImsEventDef.IMS_EVENT_WAKE_LOCK, new handle_IMS_EVENT_WAKE_LOCK());
+            //mEventProcs.put(ImsEventDef.IMS_EVENT_WAKE_LOCK, new handle_IMS_EVENT_WAKE_LOCK());
             // handle as default without slod id
-            //mapEventProc.put(ImsEventDef.IMS_EVENT_WIFI_SERVICE,
+            //mEventProcs.put(ImsEventDef.IMS_EVENT_WIFI_SERVICE,
             //        new handle_IMS_EVENT_WIFI_SERVICE()); // 0x10000000
         }
 

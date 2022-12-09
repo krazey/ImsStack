@@ -16,6 +16,8 @@
 package com.android.imsstack.system;
 
 import android.os.Parcel;
+import android.util.ArraySet;
+import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ICallSetting;
@@ -32,11 +34,6 @@ import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.ThreadMessageExecutor;
 
 import java.io.FileDescriptor;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This class provides the system interfaces to communicate with native and Java layer.
@@ -45,13 +42,12 @@ public class SystemInterface implements JniSystemListener {
     // Constants--------------------------------------------------
     // Variables--------------------------------------------------
     private static SystemInterface sSystemInterface = new SystemInterface();
-    private static final Hashtable<Integer, String> sMethodToString =
-        new Hashtable<Integer, String>();
+    private static final SparseArray<String> sMethodToString = new SparseArray<>();
 
     private long mNativeObject = 0;
 
-    private Map<Integer, ISystem> mSystems =
-            new HashMap<Integer, ISystem>(MSimUtils.getSupportedSimCount());
+    private final SparseArray<ISystem> mSystems =
+            new SparseArray<>(MSimUtils.getSupportedSimCount());
 
     private ThreadMessageExecutor mDefaultExecutor =
             new ThreadMessageExecutor(SystemInterface.class.getSimpleName() + "_DEFAULT");
@@ -850,9 +846,8 @@ public class SystemInterface implements JniSystemListener {
                 new ThreadMessageExecutor(SystemInterface.class.getSimpleName());
 
         private final Object mLock = new Object();
-        private Set<Integer> mRegisteredEvents = new HashSet<Integer>();
-
-        private int mSlotId = 0;
+        private final ArraySet<Integer> mRegisteredEvents = new ArraySet<>();
+        private final int mSlotId;
         private SystemCallInterface mSystemCall = null;
         private SystemRadioInterface mSystemRadio = null;
 
