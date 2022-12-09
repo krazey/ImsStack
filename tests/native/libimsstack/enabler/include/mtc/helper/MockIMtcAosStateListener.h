@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_I_MTC_AOS_STATE_LISTENER_
-#define MOCK_I_MTC_AOS_STATE_LISTENER_
+#ifndef MOCK_I_MTC_AOS_STATE_LISTENER_H_
+#define MOCK_I_MTC_AOS_STATE_LISTENER_H_
 
 #include "ImsTypeDef.h"
 #include "helper/IMtcAosStateListener.h"

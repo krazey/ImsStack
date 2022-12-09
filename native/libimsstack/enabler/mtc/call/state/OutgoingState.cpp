@@ -52,7 +52,7 @@
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "precondition/SdpPreconditionHelper.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -162,7 +162,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserveFailed(
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStarted", 0, 0, 0);
-    IMessage* piMessage = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
+    IMessage* piMessage =
+            m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_START);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
     m_objContext.GetTimer().StopAll();
@@ -214,7 +215,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
         return GetStateName();
     }
 
-    IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
+    IMessage* piResponse =
+            m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_START);
     CallReasonInfo objReason = StartErrorHandler(m_objContext).Handle(piResponse);
 
     if (objReason.nCode == CODE_INTERNAL_REDIAL)
@@ -239,8 +241,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionTerminated(IN ISession* piSes
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
-    IMessage* piMessage =
-            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
+    IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+            piSession, IMessage::SESSION_EARLY_UPDATE);
 
     m_objContext.GetSession(piSession)->HandleResponse(
             ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
@@ -266,8 +268,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
-    IMessage* piResponse =
-            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
+    IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
+            piSession, IMessage::SESSION_EARLY_UPDATE);
     CallReasonInfo objReason = EarlyUpdateErrorHandler().Handle(piResponse);
 
     HandleCancel(piSession, objReason);
@@ -376,7 +378,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
         return GetStateName();
     }
 
-    IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START);
+    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
+            piSession, IMessage::SESSION_START);
 
     if (nStatusCode == SipStatusCode::SC_183)
     {
@@ -411,7 +414,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDeliveryFailed(IN ISessi
         return GetStateName();
     }
 
-    IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_PRACK);
+    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
+            piSession, IMessage::SESSION_PRACK);
     IMS_TRACE_D("SessionPRAckDeliveryFailed statusCode[%d]", nStatusCode, 0, 0);
 
     CallReasonInfo objReason = CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_PRACK);
@@ -429,8 +433,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_D("SessionProvisionalResponseReceived", 0, 0, 0);
-    IMS_SINT32 nStatusCode =
-            MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START, nIndex);
+    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
+            piSession, IMessage::SESSION_START, nIndex);
     StopTimer(TIMER_MO_100_WAIT);
     if (SipStatusCode::IsProvisional(nStatusCode))
     {
@@ -445,8 +449,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         m_objContext.GetUdpKeepAliveSender().Start();
     }
 
-    IMessage* piMessage =
-            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
+    IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+            piSession, IMessage::SESSION_START, nIndex);
     m_objContext.GetSession(piSession)->HandleResponse(
             ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
@@ -503,15 +507,16 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
     StopTimer(TIMER_MO_100_WAIT);
     StopTimer(TIMER_MO_18X_WAIT);
 
-    IMessage* piMessage =
-            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
+    IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+            piSession, IMessage::SESSION_START, nIndex);
     IMtcSession* pSession = m_objContext.GetSession(piSession);
 
     pSession->HandleResponse(ResponseType::PROVISIONAL_RESPONSE, *piMessage);
 
     if (m_objContext.GetConfigurationProxy().Is(
                 Feature::STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY) &&
-            piMessage->GetStatusCode() == SipStatusCode::SC_183 && MessageUtil::HasSdp(piMessage))
+            piMessage->GetStatusCode() == SipStatusCode::SC_183 &&
+            m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
         StopTimer(TIMER_MO_NOANSWER);
     }
@@ -533,8 +538,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
 
-    IMS_SINT32 nStatusCode =
-            MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START, nIndex);
+    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
+            piSession, IMessage::SESSION_START, nIndex);
     // TODO: move to SessionAlerting
     if (nStatusCode == SipStatusCode::SC_180)
     {
@@ -791,15 +796,15 @@ void OutgoingState::HandleCountrySpecificServiceUrn(IN IMessage* piMessage)
     // it should be used to the subsequent emergency call.
 
     if ((piMessage->GetStatusCode() == SipStatusCode::SC_380) &&
-            MessageUtil::IsHeaderPresent(piMessage, ISipHeader::CONTACT_NORMAL))
+            m_objContext.GetMessageUtils().IsHeaderPresent(piMessage, ISipHeader::CONTACT_NORMAL))
     {
-        AString strServiceUrn;
-        MessageUtil::GetHeader(piMessage, ISipHeader::CONTACT_NORMAL, strServiceUrn);
+        AString strServiceUrn =
+                m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
 
         if (strServiceUrn.StartsWith("urn:service:sos.country-specific"))
         {
-            AString strNumber;
-            MessageUtil::GetUserPart(piMessage, ISipHeader::TO, strNumber);
+            AString strNumber =
+                    m_objContext.GetMessageUtils().GetUserPart(piMessage, ISipHeader::TO);
             m_objContext.GetDialingPlan().OnCountrySpecificServiceUrnReceived(
                     strNumber, strServiceUrn);
         }

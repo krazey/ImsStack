@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_SRVCC_STATE_MANAGER_H_
-#define MOCK_SRVCC_STATE_MANAGER_H_
+#ifndef MOCK_UDP_KEEP_ALIVE_SENDER_H_
+#define MOCK_UDP_KEEP_ALIVE_SENDER_H_
 
 #include "ImsTypeDef.h"
-#include "helper/SrvccStateManager.h"
+#include "helper/UdpKeepAliveSender.h"
 #include <gmock/gmock.h>
 
-class MockSrvccStateManager : public SrvccStateManager
+class IMtcCallContext;
+class ITimer;
+
+class MockUdpKeepAliveSender : public UdpKeepAliveSender
 {
 public:
-    explicit MockSrvccStateManager() :
-            SrvccStateManager()
+    explicit MockUdpKeepAliveSender(IN IMtcCallContext& objContext) :
+            UdpKeepAliveSender(objContext)
     {
     }
-    ~MockSrvccStateManager() {}
-    MOCK_METHOD(void, AddListener, (IN ISrvccStateListener*), (override));
-    MOCK_METHOD(void, RemoveListener, (IN ISrvccStateListener*), (override));
-    MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState), (override));
-    MOCK_METHOD(SrvccState, GetState, (), (override));
+    ~MockUdpKeepAliveSender() {}
+    MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer*), (override));
+    MOCK_METHOD(void, Start, (), (override));
+    MOCK_METHOD(void, Stop, (), (override));
 };
 
 #endif

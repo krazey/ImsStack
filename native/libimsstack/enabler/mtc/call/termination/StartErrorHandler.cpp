@@ -29,7 +29,7 @@
 #include "core/IMessageBodyPart.h"
 #include "helper/IMtcAosConnector.h"
 #include "sipcore/ISipMessage.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -162,8 +162,8 @@ CallReasonInfo StartErrorHandler::Handle3xxResponse(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleRedirection(IN const IMessage& objMessage) const
 {
-    AString strContact;
-    MessageUtil::GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, strContact);
+    AString strContact =
+            m_objContext.GetMessageUtils().GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL);
     if (strContact.GetLength() > 0)
     {
         // TODO: silent redial with the Contact header to be implemented
@@ -182,8 +182,8 @@ CallReasonInfo StartErrorHandler::HandleRedirection(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 eSosType =
-            MessageUtil::GetSosTypeFromServiceUrn(&objMessage, ISipHeader::CONTACT_NORMAL);
+    IMS_SINT32 eSosType = m_objContext.GetMessageUtils().GetSosTypeFromServiceUrn(
+            &objMessage, ISipHeader::CONTACT_NORMAL);
     if (eSosType != EXTRA_CODE_EMERGENCYSERVICE_INVALID &&
             IsNonUeDetectableEmergencyCall(objMessage))
     {
@@ -332,7 +332,7 @@ CallReasonInfo StartErrorHandler::Handle407Response()
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle488Response(IN const IMessage& objMessage) const
 {
-    if (MessageUtil::HasSdp(&objMessage))
+    if (m_objContext.GetMessageUtils().HasSdp(&objMessage))
     {
         // TODO: silent redial with the SDP to be implemented
         // temporary solution. to be verified.
@@ -380,7 +380,7 @@ CallReasonInfo StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle500Response(IN const IMessage& objMessage) const
 {
-    if (!MessageUtil::IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC))
+    if (!m_objContext.GetMessageUtils().IsHeaderPresent(&objMessage, ISipHeader::RETRY_AFTER_SEC))
     {
         if (IsIpcanResourceUnavailable(objMessage))
         {
@@ -395,8 +395,8 @@ CallReasonInfo StartErrorHandler::Handle500Response(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nRetryAfter =
-            MessageUtil::GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY);
+    IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
+            &objMessage, ISipHeader::RETRY_AFTER_ANY);
     if (nRetryAfter > 0)
     {
         // TODO: Set block and CSFB for nRetryAfter duration
@@ -414,10 +414,11 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessage) const
 {
-    if (MessageUtil::ContainsAddressInPaid(&objMessage, GetPathHeader()) ||
-            MessageUtil::ContainsAddressInPaid(&objMessage, GetServiceRouteHeader()))
+    if (m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader()) ||
+            m_objContext.GetMessageUtils().ContainsAddressInPaid(
+                    &objMessage, GetServiceRouteHeader()))
     {
-        if (MessageUtil::IsInitialRegistrationRequired(&objMessage))
+        if (m_objContext.GetMessageUtils().IsInitialRegistrationRequired(&objMessage))
         {
             const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
                     Feature::REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE);
@@ -492,7 +493,7 @@ CallReasonInfo StartErrorHandler::Handle6xxResponse(IN const IMessage& objMessag
 PRIVATE
 IMS_SINT32 StartErrorHandler::GetDefaultExtraCode(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nExtraCode = MessageUtil::GetCauseFromReasonHeader(&objMessage);
+    IMS_SINT32 nExtraCode = m_objContext.GetMessageUtils().GetCauseFromReasonHeader(&objMessage);
     if (nExtraCode == -1)
     {
         nExtraCode = objMessage.GetStatusCode();
@@ -560,17 +561,17 @@ IMS_BOOL StartErrorHandler::IsNonUeDetectableEmergencyCall(IN const IMessage& ob
         return IMS_TRUE;
     }
 
-    return MessageUtil::ContainsAddressInPaid(&objMessage, GetPathHeader());
+    return m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader());
 }
 
 PRIVATE
 IMS_BOOL StartErrorHandler::IsIpcanResourceUnavailable(IN const IMessage& objMessage) const
 {
-    IMS_SINT32 nCause = MessageUtil::GetCauseFromReasonHeader(&objMessage, "FAILURE_CAUSE");
+    IMS_SINT32 nCause =
+            m_objContext.GetMessageUtils().GetCauseFromReasonHeader(&objMessage, "FAILURE_CAUSE");
 
-    AString strFeParameter;
-    MessageUtil::GetParameterValue(
-            &objMessage, "fe", ISipHeader::UNKNOWN, strFeParameter, "Response-Source");
+    AString strFeParameter = m_objContext.GetMessageUtils().GetParameterValue(
+            &objMessage, "fe", ISipHeader::UNKNOWN, "Response-Source");
 
     return nCause == 1 && strFeParameter.Contains("urn:3gpp:fe:p-cscf.orig");
 }
@@ -579,7 +580,8 @@ PRIVATE
 IMS_BOOL StartErrorHandler::HasEmergencyServiceTypeInBody(IN const IMessage& objMessage) const
 {
     Ims3gpp objIms3gpp;
-    if (MessageUtil::GetIms3gppFromBody(&objMessage, objIms3gpp) == IMS_FAILURE)
+    m_objContext.GetMessageUtils().GetIms3gppFromBody(&objMessage, objIms3gpp);
+    if (objIms3gpp.GetType() == Ims3gpp::TYPE_UNKNOWN)
     {
         return IMS_FALSE;
     }

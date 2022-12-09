@@ -43,7 +43,7 @@ UdpKeepAliveSender::UdpKeepAliveSender(IN IMtcCallContext& objContext) :
 PUBLIC VIRTUAL UdpKeepAliveSender::~UdpKeepAliveSender()
 {
     IMS_TRACE_D("~UdpKeepAliveSender[%d]", m_objContext.GetCallKey(), 0, 0);
-    Stop();
+    StopTimer();
 
     m_pKeepAliveHelper->Destroy();
 }
@@ -91,13 +91,7 @@ PUBLIC
 void UdpKeepAliveSender::Stop()
 {
     IMS_TRACE_D("Stop", 0, 0, 0);
-    if (m_piTimer == IMS_NULL)
-    {
-        return;
-    }
-    m_piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(m_piTimer);
-    m_piTimer = IMS_NULL;
+    StopTimer();
 }
 
 PRIVATE
@@ -123,4 +117,17 @@ void UdpKeepAliveSender::SendDummyPacket()
 
     // no exception handling.
     m_pKeepAliveHelper->SendPacket(objPacket);
+}
+
+PRIVATE
+void UdpKeepAliveSender::StopTimer()
+{
+    IMS_TRACE_D("StopTimer", 0, 0, 0);
+    if (m_piTimer == IMS_NULL)
+    {
+        return;
+    }
+    m_piTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piTimer);
+    m_piTimer = IMS_NULL;
 }
