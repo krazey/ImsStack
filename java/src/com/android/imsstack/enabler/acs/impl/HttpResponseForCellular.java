@@ -22,7 +22,7 @@ import android.os.Message;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.util.ArrayUtils;
 
-import java.util.List;
+import java.util.ArrayDeque;
 
 /**
  * This class handles the http response for Cellular ACS flow.
@@ -32,7 +32,7 @@ public class HttpResponseForCellular {
     private final Handler mHandler;
     private final int mSlotId;
 
-    private List<String> mCookieList = null;
+    private ArrayDeque mCookieList = null;
 
     /**
      * Creator to handle http response
@@ -85,12 +85,12 @@ public class HttpResponseForCellular {
      *
      * @return cookie list or null
      */
-    public List<String> getCookies() {
+    public ArrayDeque getCookies() {
         return mCookieList;
     }
 
     private boolean checkCookies(HttpResponse httpResponse) {
-        List<String> cookies = httpResponse.getCookies();
+        ArrayDeque cookies = httpResponse.getCookies();
         if (ArrayUtils.isEmpty(cookies)) {
             ImsLog.d(mSlotId, "no cookie");
             return false;

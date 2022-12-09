@@ -38,9 +38,9 @@ import org.mockito.MockitoAnnotations;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 public class HttpResponseTest {
@@ -102,9 +102,9 @@ public class HttpResponseTest {
     @Test
     @SmallTest
     public void testGetCookies() throws Exception {
-        List<String> cookies = new LinkedList<String>();
+        ArrayDeque cookies = new ArrayDeque<String>();
         cookies.add("");
-        Map<String, List<String>> headerMap = new HashMap<>();
+        Map<String, ArrayDeque> headerMap = new HashMap<>();
         headerMap.put("Set-Cookie", cookies);
         doReturn(headerMap).when(mHttpURLConnection).getHeaderFields();
         assertEquals(new LinkedList<String>(), mHttpResponse.getCookies());
@@ -120,7 +120,7 @@ public class HttpResponseTest {
     @Test
     @SmallTest
     public void testSetCookies() throws Exception {
-        List<String> cookies = new LinkedList<String>();
+        ArrayDeque cookies = new ArrayDeque<String>();
         cookies.add("abcd");
         mHttpResponse.setCookies(cookies);
         verify(mHttpURLConnection, times(1))
