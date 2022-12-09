@@ -368,7 +368,7 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
             return;
         }
 
-        int newRssi = (int)intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
+        int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
         newRssi = newRssi * (-1);
 
         ImsLog.i("RSSI_CHANGED_ACTION : [" + newRssi + "]");

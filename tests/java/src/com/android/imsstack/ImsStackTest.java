@@ -154,7 +154,7 @@ public abstract class ImsStackTest {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == null || obj.getClass() != getClass()) {
+            if (!(obj instanceof InstanceKey)) {
                 return false;
             }
 

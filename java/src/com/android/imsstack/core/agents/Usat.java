@@ -155,7 +155,7 @@ public interface Usat {
 
         @Override
         public boolean equals(Object o) {
-            if (o == null) {
+            if (!(o instanceof Command)) {
                 return false;
             }
 

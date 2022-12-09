@@ -107,14 +107,14 @@ public class SystemInterface implements JniSystemListener {
 
     public synchronized void start(int slotId) {
         ImsLog.d(slotId, "");
-        System system = new System(slotId);
+        ImsSystem system = new ImsSystem(slotId);
         system.init();
         mSystems.put(slotId, system);
     }
 
     public synchronized void stop(int slotId) {
         ImsLog.d(slotId, "");
-        System system = (System)mSystems.get(slotId);
+        ImsSystem system = (ImsSystem) mSystems.get(slotId);
 
         if (system == null) {
             return;
@@ -387,11 +387,11 @@ public class SystemInterface implements JniSystemListener {
             }
         }
 
-        System system = null;
+        ImsSystem system;
         if (isActiveSlotIdRequired(method)) {
             system = getActiveSystem();
         } else {
-            system = (System)getSystem(slotId);
+            system = (ImsSystem) getSystem(slotId);
         }
 
         if (system == null) {
@@ -445,11 +445,11 @@ public class SystemInterface implements JniSystemListener {
     }
 
 
-    private synchronized System getActiveSystem() {
+    private synchronized ImsSystem getActiveSystem() {
         int activeSimCount = MSimUtils.getActiveSimCount();
 
         for (int i = 0; i < activeSimCount; i++) {
-            System system = (System)getSystem(i);
+            ImsSystem system = (ImsSystem) getSystem(i);
             if (system != null) {
                 return system;
             }
@@ -837,7 +837,7 @@ public class SystemInterface implements JniSystemListener {
         parcelOut = null;
     }
 
-    private class System implements ISystem {
+    private class ImsSystem implements ISystem {
         private ISystemAPICallInfo mISystemAPICallInfo;
         private ISystemAPINetwork mISystemAPINetwork;
         private ISystemAPISendEvent mISystemAPISendEvent;
@@ -856,7 +856,7 @@ public class SystemInterface implements JniSystemListener {
         private SystemCallInterface mSystemCall = null;
         private SystemRadioInterface mSystemRadio = null;
 
-        public System(int slotId) {
+        ImsSystem(int slotId) {
             mSlotId = slotId;
         }
 
