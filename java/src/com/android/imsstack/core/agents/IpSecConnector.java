@@ -51,7 +51,7 @@ public class IpSecConnector {
     }
 
     public boolean applySa(Context context, int spi, int intFd, FileDescriptor socketFd) {
-        ImsLog.d("[IpSec] applySa - spi=" + spi + ", intFd=" + intFd + ", socketFd=" + socketFd);
+        ImsLog.d("[IpSec] applySa - spi=" + spi + ", intFd=" + intFd);
 
         Transform transform = mTransforms.get(spi);
 
@@ -97,7 +97,7 @@ public class IpSecConnector {
     }
 
     public void removeSa(Context context, int spi, int intFd, FileDescriptor socketFd) {
-        ImsLog.d("[IpSec] removeSa - spi=" + spi + ", intFd=" + intFd + ", socketFd=" + socketFd);
+        ImsLog.d("[IpSec] removeSa - spi=" + spi + ", intFd=" + intFd);
 
         Transform transform = mTransforms.get(spi);
 
