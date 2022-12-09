@@ -141,7 +141,6 @@ protected:
     {
         ImsList<IMtcExtension*> objExtensions;
         MockIMtcExtension* pExtension = new MockIMtcExtension();
-        // const AString strSupportedOptionTag("supportedExtension");
         ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
         ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
         objExtensions.Append(pExtension);
