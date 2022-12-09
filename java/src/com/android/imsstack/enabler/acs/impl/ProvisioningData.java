@@ -47,9 +47,12 @@ import java.util.zip.GZIPOutputStream;
 public class ProvisioningData {
     private static final String LOCAL_FILE_NAME_PREFIX = "rcs_provisioning_";
     private static final String LOCAL_FILE_NAME_POSTFIX = ".xml";
-    private static final String TAG_PROVISIONINGDOC = "wap-provisioningdoc";
+
+    private static final String TAG_PROVISIONING_DOC = "wap-provisioningdoc";
     private static final String TAG_CHARACTERISTIC = "characteristic";
+
     private static final String ELEM_PARM = "parm";
+
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_NAME = "name";
@@ -109,7 +112,7 @@ public class ProvisioningData {
      * @param subId subscriber ID
      * @param data provisioning xml data
      */
-    public ProvisioningData(Context context, int subId, byte[] data) {
+    public ProvisioningData(Context context, int subId, @NonNull byte[] data) {
         mContext = context;
         mSubId = subId;
         mFileName = LOCAL_FILE_NAME_PREFIX + subId + LOCAL_FILE_NAME_POSTFIX;
@@ -139,7 +142,7 @@ public class ProvisioningData {
 
     /**
      * Check XML parsing is completed
-     * @return  true if xml parsing is completed, otherwise is false
+     * @return  true if xml parsing is completed and succeed, otherwise is false
      */
     public boolean isComplete() {
         return mIsComplete;
@@ -236,7 +239,6 @@ public class ProvisioningData {
         return value;
     }
 
-
     /**
      * compress the gzip format data
      * @param data byte array has data to compress
@@ -246,6 +248,7 @@ public class ProvisioningData {
         if (data == null || data.length == 0) {
             return data;
         }
+
         byte[] out = null;
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -299,7 +302,7 @@ public class ProvisioningData {
      * @param data data will be stored in file
      * @return true if the operation is success, otherwise return false
      */
-    public boolean createXmlFileFromBytes(byte[] data) {
+    public boolean createXmlFileFromBytes(@NonNull byte[] data) {
         try {
             String fileName = LOCAL_FILE_NAME_PREFIX + mSubId + LOCAL_FILE_NAME_POSTFIX;
             File file = new File(mContext.getFilesDir(), fileName);
@@ -380,7 +383,7 @@ public class ProvisioningData {
 
     private void readProvisioningDoc(XmlPullParser parser, Characteristic root)
             throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, TAG_PROVISIONINGDOC);
+        parser.require(XmlPullParser.START_TAG, null, TAG_PROVISIONING_DOC);
         int count = parser.getAttributeCount();
         if (count > 0) {
             for (int i = 0; i < count; i++) {
@@ -482,7 +485,7 @@ public class ProvisioningData {
         String line = "";
         try {
             out.write("<?xml version=\"1.0\"?>".getBytes());
-            line = "<" + TAG_PROVISIONINGDOC + " version=\"" + root.mType + "\">";
+            line = "<" + TAG_PROVISIONING_DOC + " version=\"" + root.mType + "\">";
             out.write(line.getBytes());
 
             for (Characteristic child : root.mChilds) {
