@@ -26,6 +26,9 @@ class INetworkWatcher;
 
 class INetworkWatcherListener
 {
+protected:
+    virtual ~INetworkWatcherListener() = default;
+
 public:
     virtual void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetworkWatcher) = 0;
 };
@@ -74,6 +77,9 @@ typedef enum
 
 class INetworkWatcher
 {
+protected:
+    virtual ~INetworkWatcher() = default;
+
 public:
     // Same as OsNetworkConstants.h
     enum

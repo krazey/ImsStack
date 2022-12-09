@@ -22,6 +22,9 @@ class IConfigurable;
 
 class ISipConfigV
 {
+protected:
+    virtual ~ISipConfigV() = default;
+
 public:
     /**
      * @brief Returns the configurable interface from the sip (service-specific) configuration.

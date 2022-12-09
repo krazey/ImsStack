@@ -21,6 +21,9 @@
 
 class IIpcan
 {
+protected:
+    virtual ~IIpcan() = default;
+
 public:
     /**
      * @brief Returns the access network information for SIP signalling.

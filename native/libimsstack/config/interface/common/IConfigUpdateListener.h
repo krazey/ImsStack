@@ -20,6 +20,9 @@
 
 class IConfigUpdateListener
 {
+protected:
+    virtual ~IConfigUpdateListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the specified configuration parameter item is updated.

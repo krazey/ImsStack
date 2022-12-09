@@ -24,6 +24,9 @@ class IIpSecPolicyListener;
 
 class IIpSecPolicy
 {
+protected:
+    virtual ~IIpSecPolicy() = default;
+
 public:
     /**
      * @brief Returns an Identifier of this IIPSecPolicy.

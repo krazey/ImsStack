@@ -34,12 +34,18 @@ class IPowerInfo;
 
 class IPowerInfoListener
 {
+protected:
+    virtual ~IPowerInfoListener() = default;
+
 public:
     virtual void PowerInfo_NotifyPowerLevel(IN IPowerInfo* piPowerInfo) = 0;
 };
 
 class IPowerInfo
 {
+protected:
+    virtual ~IPowerInfo() = default;
+
 public:
     virtual POWERLEVEL_ENTYPE GetPowerLevel() = 0;
 

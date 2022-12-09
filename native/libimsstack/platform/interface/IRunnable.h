@@ -20,6 +20,9 @@
 
 class IRunnable
 {
+protected:
+    virtual ~IRunnable() = default;
+
 public:
     virtual IMS_BOOL Runnable_Run(IN ImsMessage& objMsg) = 0;
 };

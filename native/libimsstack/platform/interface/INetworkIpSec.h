@@ -24,6 +24,9 @@ class IIpSecPolicy;
 
 class INetworkIpSec
 {
+protected:
+    virtual ~INetworkIpSec() = default;
+
 public:
     /**
      * @brief Creates IpSec policy.

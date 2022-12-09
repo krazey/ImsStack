@@ -20,6 +20,9 @@
 
 class IIpSecSa
 {
+protected:
+    virtual ~IIpSecSa() = default;
+
 public:
     virtual void SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
             IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort, IN IMS_UINT32 nSecurityProtocol,

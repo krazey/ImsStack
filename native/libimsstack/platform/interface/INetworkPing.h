@@ -22,6 +22,9 @@ class INetworkPingListener;
 
 class INetworkPing
 {
+protected:
+    virtual ~INetworkPing() = default;
+
 public:
     /**
      * @brief Destroys INetworkPing object.

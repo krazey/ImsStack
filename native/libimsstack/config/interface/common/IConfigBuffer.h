@@ -20,6 +20,9 @@
 
 class IConfigBuffer
 {
+protected:
+    virtual ~IConfigBuffer() = default;
+
 public:
     /**
      * @brief Destroys the configuration buffer.

@@ -33,6 +33,9 @@ class AccessNetworkInfo;
 // Let's share the network connection using the profile name such as ...
 class INetworkConnection
 {
+protected:
+    virtual ~INetworkConnection() = default;
+
 public:
     enum STATE_ENTYPE
     {
@@ -104,6 +107,9 @@ public:
 
 class INetworkConnectionListener
 {
+protected:
+    virtual ~INetworkConnectionListener() = default;
+
 public:
     virtual void NetworkConnection_OnConnected(IN INetworkConnection* piConnection) = 0;
     virtual void NetworkConnection_OnDisconnected(

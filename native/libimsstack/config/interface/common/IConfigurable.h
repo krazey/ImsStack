@@ -22,6 +22,9 @@ class IConfigUpdateListener;
 
 class IConfigurable
 {
+protected:
+    virtual ~IConfigurable() = default;
+
 public:
     /**
      * @brief Adds a new configuration update listener.

@@ -25,6 +25,9 @@
  */
 class IImsPrivateProperty
 {
+protected:
+    virtual ~IImsPrivateProperty() = default;
+
 public:
     /**
      * @brief Gets an ephemeral IMS private property.

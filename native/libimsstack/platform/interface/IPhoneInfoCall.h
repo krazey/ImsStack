@@ -20,6 +20,9 @@
 
 class ICallInfo
 {
+protected:
+    virtual ~ICallInfo() = default;
+
 public:
     /// TTY mode
     enum

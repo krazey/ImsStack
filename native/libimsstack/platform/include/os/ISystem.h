@@ -26,6 +26,9 @@ class AccessNetworkInfo;
 
 class ISystem
 {
+protected:
+    virtual ~ISystem() = default;
+
 public:
     virtual void Destroy() = 0;
     // Add & remove the listener to receive the system events

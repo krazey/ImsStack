@@ -20,6 +20,9 @@
 
 class IDigestAkaListener
 {
+protected:
+    virtual ~IDigestAkaListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the authentication is successfully done with the RES,

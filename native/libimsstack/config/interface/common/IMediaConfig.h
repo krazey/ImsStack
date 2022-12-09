@@ -20,6 +20,9 @@
 
 class IMediaConfig
 {
+protected:
+    virtual ~IMediaConfig() = default;
+
 public:
     virtual const AStringArray& GetMediaCapabilities(IN IMS_SINT32 nMediaType) const = 0;
     virtual const AStringArray& GetMediaProfile(

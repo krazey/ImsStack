@@ -39,6 +39,9 @@ enum FILE_SEEK_ENTYPE
 
 class IFile
 {
+protected:
+    virtual ~IFile() = default;
+
 public:
     /**
      * @brief Creates or opens a file.
@@ -105,6 +108,9 @@ public:
 
 class IFileUtil
 {
+protected:
+    virtual ~IFileUtil() = default;
+
 public:
     /**
      * @brief Changes the file mode to share the file to another user / module.

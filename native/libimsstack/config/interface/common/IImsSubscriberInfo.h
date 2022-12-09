@@ -21,6 +21,9 @@
 
 class IImsSubscriberInfo
 {
+protected:
+    virtual ~IImsSubscriberInfo() = default;
+
 public:
     /**
      * @brief Returns the credential of an IMS subscriber.

@@ -22,6 +22,9 @@ class RetryTimer;
 
 class IRetryTimerListener
 {
+protected:
+    virtual ~IRetryTimerListener() = default;
+
 public:
     /**
      * @brief Notify to the user that the interim retry timer is expired.

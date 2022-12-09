@@ -18,6 +18,9 @@
 
 class IAsyncConfig
 {
+protected:
+    virtual ~IAsyncConfig() = default;
+
 public:
     /**
      * @brief Dispatches the asynchronous message for the configuration.

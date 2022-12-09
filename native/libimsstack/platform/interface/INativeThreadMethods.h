@@ -20,6 +20,9 @@
 
 class INativeThreadMethods
 {
+protected:
+    virtual ~INativeThreadMethods() = default;
+
 public:
     /**
      * @brief Attaches the native thread.

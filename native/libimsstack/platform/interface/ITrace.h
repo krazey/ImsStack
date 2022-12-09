@@ -22,6 +22,9 @@
 
 class ITrace
 {
+protected:
+    virtual ~ITrace() = default;
+
 public:
     virtual void Out(IN const IMS_CHAR* pszFormat, ...) = 0;
 

@@ -25,6 +25,9 @@ class IWifiWatcher;
 
 class IWifiWatcherListener
 {
+protected:
+    virtual ~IWifiWatcherListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the Wi-Fi connection state is changed.
@@ -36,6 +39,9 @@ public:
 
 class IWifiWatcher
 {
+protected:
+    virtual ~IWifiWatcher() = default;
+
 public:
     /// State of Wi-Fi connection
     enum

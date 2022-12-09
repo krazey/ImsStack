@@ -20,6 +20,9 @@
 
 class ISystemProperty
 {
+protected:
+    virtual ~ISystemProperty() = default;
+
 public:
     /**
      * @brief Gets the system property.

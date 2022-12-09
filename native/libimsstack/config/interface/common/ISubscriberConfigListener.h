@@ -22,6 +22,9 @@
  */
 class ISubscriberConfigListener
 {
+protected:
+    virtual ~ISubscriberConfigListener() = default;
+
 public:
     virtual void SubscriberConfig_InitCompleted() = 0;
     virtual void SubscriberConfig_RefreshCompleted() = 0;

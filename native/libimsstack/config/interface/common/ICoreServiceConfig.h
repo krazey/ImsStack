@@ -20,6 +20,9 @@
 
 class ICoreServiceConfig
 {
+protected:
+    virtual ~ICoreServiceConfig() = default;
+
 public:
     virtual const AString& GetServiceId() const = 0;
     virtual IMS_BOOL IsIariSupported() const = 0;

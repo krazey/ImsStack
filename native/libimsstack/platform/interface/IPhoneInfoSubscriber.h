@@ -29,6 +29,9 @@ enum PREFERENCE_VALUE_ENTYPE
 
 class ISubscriberInfo
 {
+protected:
+    virtual ~ISubscriberInfo() = default;
+
 public:
     // CDMA: MDN, WCDMA: MSISDN(?)
     virtual IMS_BOOL GetPhoneNumber(OUT AString& strPhoneNumber) const = 0;

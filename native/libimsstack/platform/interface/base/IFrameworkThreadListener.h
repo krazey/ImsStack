@@ -18,6 +18,9 @@
 
 class IFrameworkThreadListener
 {
+protected:
+    virtual ~IFrameworkThreadListener() = default;
+
 public:
     /**
      * @brief Notifies the application for a start event of IMS Framework thread.

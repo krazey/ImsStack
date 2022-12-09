@@ -22,6 +22,9 @@ class ISocketListener;
 
 class ISocket
 {
+protected:
+    virtual ~ISocket() = default;
+
 public:
     /// Return types of socket operation
     enum SOCKET_RESULT
@@ -163,6 +166,9 @@ public:
 
 class ISocketListener
 {
+protected:
+    virtual ~ISocketListener() = default;
+
 public:
     virtual void Socket_OnDataReceived(IN ISocket* piSocket) = 0;
 

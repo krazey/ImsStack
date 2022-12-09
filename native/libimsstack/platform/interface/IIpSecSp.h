@@ -20,6 +20,9 @@
 
 class IIpSecSp
 {
+protected:
+    virtual ~IIpSecSp() = default;
+
 public:
     virtual void SetTransportInfo(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
             IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort, IN IMS_UINT32 nTransportProtocol,

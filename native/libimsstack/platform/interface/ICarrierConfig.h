@@ -23,6 +23,9 @@
 
 class ICarrierConfig
 {
+protected:
+    virtual ~ICarrierConfig() = default;
+
 public:
     /**
      * @brief Returns the boolean value for a specified key.

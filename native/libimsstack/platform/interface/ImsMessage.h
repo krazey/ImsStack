@@ -29,6 +29,9 @@ public:
     // The applications can use this interface, but it should not be overused.
     class IMessageCallback
     {
+    protected:
+        virtual ~IMessageCallback() = default;
+
     public:
         virtual void MessageCallback_OnMessage(IN ImsMessage& objMsg) = 0;
     };

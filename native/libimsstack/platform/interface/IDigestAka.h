@@ -22,6 +22,9 @@ class IDigestAkaListener;
 
 class IDigestAka
 {
+protected:
+    virtual ~IDigestAka() = default;
+
 public:
     /**
      * @brief Destroys the Digest AKA.

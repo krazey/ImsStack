@@ -20,6 +20,9 @@
 
 class IEnablerLoader
 {
+protected:
+    virtual ~IEnablerLoader() = default;
+
 public:
     /**
      * @brief Starts the enablers for the specified slot-id.

@@ -21,6 +21,9 @@
 // This interface will be used between System and JniSystem
 class SystemCallback
 {
+protected:
+    virtual ~SystemCallback() = default;
+
 public:
     virtual IMS_SINT32 SendDataToJava(
             IN const android::Parcel& in, IN_OUT android::Parcel& out, int fileDescriptor = -1) = 0;

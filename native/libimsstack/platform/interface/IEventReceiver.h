@@ -20,6 +20,9 @@
 
 class IEventReceiver
 {
+protected:
+    virtual ~IEventReceiver() = default;
+
 public:
     /**
      * @brief Unregisters the specified event from the event receiver.

@@ -46,6 +46,9 @@ struct ImsGmTime
 
 class ISystemTime
 {
+protected:
+    virtual ~ISystemTime() = default;
+
 public:
     virtual ImsDate GetDate() const = 0;
     virtual void GetDate(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth, OUT IMS_SINT32& nDay,
