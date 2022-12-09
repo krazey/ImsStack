@@ -18,6 +18,9 @@
 
 class ICancellableMethod
 {
+protected:
+    virtual ~ICancellableMethod() = default;
+
 public:
     virtual IMS_BOOL Cancellable_Compare(IN ISipServerConnection* piSscCancel) const = 0;
     virtual IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection* piSscCancel) = 0;

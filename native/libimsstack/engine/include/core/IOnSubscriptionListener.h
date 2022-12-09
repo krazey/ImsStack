@@ -29,6 +29,9 @@ class Subscription;
  */
 class IOnSubscriptionListener
 {
+protected:
+    virtual ~IOnSubscriptionListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the forked NOTIFY request received.

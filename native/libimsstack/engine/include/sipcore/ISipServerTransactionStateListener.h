@@ -27,6 +27,9 @@ class SipDialogState;
  */
 class ISipServerTransactionStateListener
 {
+protected:
+    virtual ~ISipServerTransactionStateListener() = default;
+
 public:
     virtual void ServerTransactionState_ForkedRequestReceived(
             IN SipServerTransactionState* pStState, IN SipDialogEx* pOrigDialogEx) = 0;

@@ -24,6 +24,9 @@
  */
 class IServiceFilterCriteria
 {
+protected:
+    virtual ~IServiceFilterCriteria() = default;
+
 public:
     /**
      * @brief Adds the trigger point to the service filter criteria.

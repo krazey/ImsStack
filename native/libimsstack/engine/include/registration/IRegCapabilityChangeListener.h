@@ -20,6 +20,9 @@
 
 class IRegCapabilityChangeListener
 {
+protected:
+    virtual ~IRegCapabilityChangeListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the registration binding is updated by adding a service.

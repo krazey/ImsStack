@@ -28,6 +28,9 @@ class ISipMessageTrackerListener;
  */
 class ISipMessageTracker
 {
+protected:
+    virtual ~ISipMessageTracker() = default;
+
 public:
     /**
      * @brief Adds the filters to monitor the SIP messages.

@@ -23,6 +23,9 @@ class SipAddress;
 
 class IRegBindingListener
 {
+protected:
+    virtual ~IRegBindingListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the registration binding (AOR - Contact) is

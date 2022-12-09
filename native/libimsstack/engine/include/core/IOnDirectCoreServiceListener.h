@@ -29,6 +29,9 @@ class ISipConnectionFactory;
  */
 class IOnDirectCoreServiceListener
 {
+protected:
+    virtual ~IOnDirectCoreServiceListener() = default;
+
 public:
     /**
      * @brief Notifies the application when the SIP server transaction is created and received.

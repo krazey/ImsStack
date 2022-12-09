@@ -30,6 +30,9 @@ class ISipMessageBodyPart;
  */
 class IRegParameter
 {
+protected:
+    virtual ~IRegParameter() = default;
+
 public:
     /**
      * Adds the extra headers to be set during the registration in active.

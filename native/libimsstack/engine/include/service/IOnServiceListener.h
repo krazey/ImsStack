@@ -22,6 +22,9 @@ class Service;
 
 class IOnServiceListener
 {
+protected:
+    virtual ~IOnServiceListener() = default;
+
 public:
     virtual void OnService_RegistrationStarted(
             IN Service* pService, IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nReason) = 0;

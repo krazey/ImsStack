@@ -27,6 +27,9 @@ class SipParameter;
  */
 class ISipHeader : public ISipObject
 {
+protected:
+    virtual ~ISipHeader() = default;
+
 public:
     /**
      * @brief Clones a SIP header.

@@ -23,6 +23,9 @@
  */
 class ISipGenericChallenge
 {
+protected:
+    virtual ~ISipGenericChallenge() = default;
+
 public:
     /**
      * @brief Clones a SIP generic challenge.

@@ -26,6 +26,9 @@
  */
 class IRegInfoContact
 {
+protected:
+    virtual ~IRegInfoContact() = default;
+
 public:
     /**
      * @brief Returns the 'cseq' information of contact.

@@ -27,6 +27,9 @@ class ISipKeepAliveHelperListener;
  */
 class ISipKeepAliveHelper : public ISipObject
 {
+protected:
+    virtual ~ISipKeepAliveHelper() = default;
+
 public:
     /**
      * @brief Sends the keep-alive packet to the specified destination.

@@ -22,6 +22,9 @@ class VirtualSession;
 
 class IOnSessionExListener
 {
+protected:
+    virtual ~IOnSessionExListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the UPDATE was successfully delivered

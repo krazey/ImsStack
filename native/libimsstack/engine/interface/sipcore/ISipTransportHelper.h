@@ -26,6 +26,9 @@ class ISipLocalDnsQueryListener;
  */
 class ISipTransportHelper
 {
+protected:
+    virtual ~ISipTransportHelper() = default;
+
 public:
     /**
      * @brief Applies SIP server sockets and new IpSec SA information.

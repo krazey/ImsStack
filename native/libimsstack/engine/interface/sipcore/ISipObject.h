@@ -21,6 +21,9 @@
  */
 class ISipObject
 {
+protected:
+    virtual ~ISipObject() = default;
+
 public:
     /**
      * @brief Destroys the all the resources for SIP object.

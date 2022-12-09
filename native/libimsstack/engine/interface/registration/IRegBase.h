@@ -25,6 +25,9 @@ class IMessageMediator;
  */
 class IRegBase
 {
+protected:
+    virtual ~IRegBase() = default;
+
 public:
     /**
      * @brief Returns the next outgoing SIP request message.

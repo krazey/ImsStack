@@ -26,6 +26,9 @@ class Capabilities;
  */
 class IOnCapabilitiesListener
 {
+protected:
+    virtual ~IOnCapabilitiesListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the capability query response from the remote endpoint

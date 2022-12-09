@@ -25,6 +25,9 @@ class ISipConnectionNotifier;
  */
 class ISipServerConnectionListener
 {
+protected:
+    virtual ~ISipServerConnectionListener() = default;
+
 public:
     /**
      * @brief This method will notify the listener that a new request is received.

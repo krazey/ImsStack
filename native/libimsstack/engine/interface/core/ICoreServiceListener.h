@@ -34,6 +34,9 @@ class ISession;
  */
 class ICoreServiceListener
 {
+protected:
+    virtual ~ICoreServiceListener() = default;
+
 public:
     /**
      * @brief Notifies the application when a page message is received from a remote endpoint.

@@ -27,6 +27,9 @@ class SipSocket;
  */
 class ISipDatagramSocketListener
 {
+protected:
+    virtual ~ISipDatagramSocketListener() = default;
+
 public:
     virtual void DatagramSocket_DataReceived(IN SipSocket* pSocket, IN const ByteArray& objBuffer,
             IN const IPAddress& objIp, IN IMS_SINT32 nPort) = 0;

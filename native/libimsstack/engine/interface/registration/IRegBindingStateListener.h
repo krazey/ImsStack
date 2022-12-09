@@ -22,6 +22,9 @@
  */
 class IRegBindingStateListener
 {
+protected:
+    virtual ~IRegBindingStateListener() = default;
+
 public:
     /**
      * @brief Notifies the application when the registration binding is updated.

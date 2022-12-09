@@ -25,6 +25,9 @@ class ISipIpSecStateListener;
  */
 class ISipIpSecState
 {
+protected:
+    virtual ~ISipIpSecState() = default;
+
 public:
     /**
      * @brief Clears the existing IpSec security association.

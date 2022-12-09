@@ -25,6 +25,9 @@
  */
 class ISipRtConfigHelper
 {
+protected:
+    virtual ~ISipRtConfigHelper() = default;
+
 public:
     /**
      * @brief Disables SIP run-time feature.

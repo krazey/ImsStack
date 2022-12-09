@@ -30,6 +30,9 @@ class ICapabilitiesListener;
  */
 class ICapabilities : public IServiceMethod
 {
+protected:
+    virtual ~ICapabilities() = default;
+
 public:
     /**
      * @brief Returns an array of strings representing valid user identities

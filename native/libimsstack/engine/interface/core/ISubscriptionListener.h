@@ -29,6 +29,9 @@ class ISubscription;
  */
 class ISubscriptionListener
 {
+protected:
+    virtual ~ISubscriptionListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the event notification

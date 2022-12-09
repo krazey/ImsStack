@@ -35,6 +35,9 @@ class SipProfile;
  */
 class ISipConnectionNotifier : public IConnection
 {
+protected:
+    virtual ~ISipConnectionNotifier() = default;
+
 public:
     /**
      * @brief Accepts and opens a new ISipServerConnection in this listening port.

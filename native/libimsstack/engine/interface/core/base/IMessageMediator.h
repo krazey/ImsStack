@@ -27,6 +27,9 @@
  */
 class IMessageMediator
 {
+protected:
+    virtual ~IMessageMediator() = default;
+
 public:
     /// Category of the message to be sent
     enum

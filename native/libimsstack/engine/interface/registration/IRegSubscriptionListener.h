@@ -23,6 +23,9 @@
  */
 class IRegSubscriptionListener
 {
+protected:
+    virtual ~IRegSubscriptionListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the event notification received.

@@ -33,6 +33,9 @@ class SipAddress;
  */
 class ISipConnectionFactory : public IMethod
 {
+protected:
+    virtual ~ISipConnectionFactory() = default;
+
 public:
     /**
      * @brief Creates a new SIP client connection (for new standalone tranction).

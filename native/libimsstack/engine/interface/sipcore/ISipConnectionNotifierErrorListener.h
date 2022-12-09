@@ -28,6 +28,9 @@ class ISipConnectionNotifier;
  */
 class ISipConnectionNotifierErrorListener
 {
+protected:
+    virtual ~ISipConnectionNotifierErrorListener() = default;
+
 public:
     /**
      * @brief Called when any error occurrs in the SipConnectionNotifier.

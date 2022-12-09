@@ -28,6 +28,9 @@ class IPublication;
  */
 class IPublicationListener
 {
+protected:
+    virtual ~IPublicationListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the publication request was successfully delivered.

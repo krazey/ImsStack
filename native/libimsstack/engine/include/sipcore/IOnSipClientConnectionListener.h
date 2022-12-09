@@ -25,6 +25,9 @@ class SipClientConnection;
  */
 class IOnSipClientConnectionListener
 {
+protected:
+    virtual ~IOnSipClientConnectionListener() = default;
+
 public:
     /**
      * This method gives the SipClientConnection instance, which has received a new SIP response.

@@ -23,6 +23,9 @@
  */
 class ISipIpSecStateListener
 {
+protected:
+    virtual ~ISipIpSecStateListener() = default;
+
 public:
     /**
      * @brief Notifies the application that IpSec security association's state is changed.

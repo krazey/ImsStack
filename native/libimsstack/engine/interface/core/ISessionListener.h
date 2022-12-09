@@ -28,6 +28,9 @@ class ISipServerConnection;
  */
 class ISessionListener
 {
+protected:
+    virtual ~ISessionListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the remote part's terminal is alerting the user

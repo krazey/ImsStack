@@ -28,6 +28,9 @@ class IServiceMethod;
  */
 class INotificationListener
 {
+protected:
+    virtual ~INotificationListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the notification was successfully delivered.

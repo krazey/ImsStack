@@ -33,6 +33,9 @@ class SessionEx;
  */
 class IOnCoreServiceListener
 {
+protected:
+    virtual ~IOnCoreServiceListener() = default;
+
 public:
     /**
      * @brief Notifies the application when a page message is received from a remote endpoint.

@@ -28,6 +28,9 @@ class ISipServerConnection;
  */
 class ISipConnectionFactoryListener
 {
+protected:
+    virtual ~ISipConnectionFactoryListener() = default;
+
 public:
     /**
      * @brief Notifies the application that a new incoming request inside of SIP dialog

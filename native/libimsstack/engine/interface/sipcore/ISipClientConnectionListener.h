@@ -25,6 +25,9 @@ class ISipClientConnection;
  */
 class ISipClientConnectionListener
 {
+protected:
+    virtual ~ISipClientConnectionListener() = default;
+
 public:
     /**
      * @brief This method gives the ISipClientConnection instance, which has received

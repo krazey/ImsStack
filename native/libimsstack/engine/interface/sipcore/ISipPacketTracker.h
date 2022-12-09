@@ -25,6 +25,9 @@ class ISipPacketTrackerListener;
  */
 class ISipPacketTracker
 {
+protected:
+    virtual ~ISipPacketTracker() = default;
+
 public:
     /**
      * @brief Sets the listener to monitor SIP packets.

@@ -29,6 +29,9 @@
  */
 class ISipErrorListener
 {
+protected:
+    virtual ~ISipErrorListener() = default;
+
 public:
     /**
      * @brief Called when an asynchronous send operation fails or any error occurrs.

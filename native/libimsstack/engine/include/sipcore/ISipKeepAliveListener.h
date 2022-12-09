@@ -21,6 +21,9 @@
  */
 class ISipKeepAliveListener
 {
+protected:
+    virtual ~ISipKeepAliveListener() = default;
+
 public:
     virtual void KeepAlive_PongReceived() = 0;
 };

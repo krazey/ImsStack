@@ -18,6 +18,9 @@
 
 class IRegInfoListener
 {
+protected:
+    virtual ~IRegInfoListener() = default;
+
 public:
     virtual void RegInfo_Updated(IN IMS_BOOL bStale = IMS_FALSE) = 0;
     virtual void RegInfo_UpdateFailed() = 0;

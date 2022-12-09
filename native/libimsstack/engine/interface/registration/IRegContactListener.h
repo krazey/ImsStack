@@ -23,6 +23,9 @@
  */
 class IRegContactListener
 {
+protected:
+    virtual ~IRegContactListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the specified service is added to this contact.

@@ -20,6 +20,9 @@
 
 class ISipTransportMessageListener
 {
+protected:
+    virtual ~ISipTransportMessageListener() = default;
+
 public:
     virtual void TransportMessage_PacketReceived(IN IMS_SINT32 nSlotId,
             IN const ByteArray& objBuffer, IN const SipTransportAddress& objNearEnd,

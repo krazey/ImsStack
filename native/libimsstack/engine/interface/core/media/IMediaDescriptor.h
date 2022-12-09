@@ -48,6 +48,9 @@
  */
 class IMediaDescriptor
 {
+protected:
+    virtual ~IMediaDescriptor() = default;
+
 public:
     /**
      * @brief Adds an attribute (a=) to the IMedia.

@@ -23,6 +23,9 @@
  */
 class ISipTransactionStateListener
 {
+protected:
+    virtual ~ISipTransactionStateListener() = default;
+
 public:
     virtual void TransactionState_TimerExpired() = 0;
 };

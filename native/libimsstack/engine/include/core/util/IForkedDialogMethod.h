@@ -18,6 +18,9 @@
 
 class IForkedDialogMethod
 {
+protected:
+    virtual ~IForkedDialogMethod() = default;
+
 public:
     virtual IMS_BOOL ForkedDialog_Compare(IN ISipDialog* piOrigDialog) const = 0;
     virtual IMS_BOOL ForkedDialog_NotifyRequest(IN ISipServerConnection* piSsc) = 0;

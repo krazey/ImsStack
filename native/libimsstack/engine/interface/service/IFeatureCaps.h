@@ -25,6 +25,9 @@
  */
 class IFeatureCaps
 {
+protected:
+    virtual ~IFeatureCaps() = default;
+
 public:
     /**
      * @brief Adds an additional feature parameter for a Contact header.

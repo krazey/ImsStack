@@ -37,6 +37,9 @@ class SipProfile;
  */
 class ISipConnection : public IConnection
 {
+protected:
+    virtual ~ISipConnection() = default;
+
 public:
     /**
      * @brief Adds a header to the SIP message.

@@ -22,6 +22,9 @@ class ISipMessage;
 
 class IReferredMessageListener
 {
+protected:
+    virtual ~IReferredMessageListener() = default;
+
 public:
     /**
      * @brief Notifies the SIP response message to the remote endpoint with the substate, "active".

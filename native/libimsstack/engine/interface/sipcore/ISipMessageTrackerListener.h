@@ -26,6 +26,9 @@
  */
 class ISipMessageTrackerListener
 {
+protected:
+    virtual ~ISipMessageTrackerListener() = default;
+
 public:
     /**
      * @brief Notifies the application that SIP message is received from the network.

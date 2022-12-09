@@ -25,6 +25,9 @@ class IMessageMediator;
  */
 class IMethod
 {
+protected:
+    virtual ~IMethod() = default;
+
 public:
     /**
      * @brief Destroys IMethod interface.

@@ -25,6 +25,9 @@ class SipClientTransactionState;
  */
 class ISipClientTransactionStateListener
 {
+protected:
+    virtual ~ISipClientTransactionStateListener() = default;
+
 public:
     virtual void ClientTransactionState_ForkedResponseReceived(
             IN SipClientTransactionState* pCtState) = 0;

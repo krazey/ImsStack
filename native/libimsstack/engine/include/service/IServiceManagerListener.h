@@ -22,6 +22,9 @@ class Service;
 
 class IServiceManagerListener
 {
+protected:
+    virtual ~IServiceManagerListener() = default;
+
 public:
     virtual void ServiceClosed(IN Service* pService) = 0;
 };

@@ -28,6 +28,9 @@
  */
 class IMessageBodyPart
 {
+protected:
+    virtual ~IMessageBodyPart() = default;
+
 public:
     /**
      * @brief Gets the content of this IMessageBodyPart.

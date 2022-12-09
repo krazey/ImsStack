@@ -25,6 +25,9 @@ class SipConnectionNotifier;
  */
 class IOnSipServerConnectionListener
 {
+protected:
+    virtual ~IOnSipServerConnectionListener() = default;
+
 public:
     /**
      * This method will notify the listener that a new request is received. This method gives the

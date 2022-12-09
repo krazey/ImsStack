@@ -27,6 +27,9 @@
  */
 class ISipServerConnection : public ISipConnection
 {
+protected:
+    virtual ~ISipServerConnection() = default;
+
 public:
     /**
      * @brief Initializes ISipServerConnection with a specific SIP response

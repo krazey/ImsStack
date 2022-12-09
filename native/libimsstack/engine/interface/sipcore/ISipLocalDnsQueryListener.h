@@ -24,6 +24,9 @@
  */
 class ISipLocalDnsQueryListener
 {
+protected:
+    virtual ~ISipLocalDnsQueryListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the host name should be resolved

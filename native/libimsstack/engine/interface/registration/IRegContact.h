@@ -28,6 +28,9 @@ class IRegContactListener;
  */
 class IRegContact
 {
+protected:
+    virtual ~IRegContact() = default;
+
 public:
     /**
      * @brief Adds the header parameter for this contact.

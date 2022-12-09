@@ -24,6 +24,9 @@
  */
 class IRegUserIdentityNotifier
 {
+protected:
+    virtual ~IRegUserIdentityNotifier() = default;
+
 public:
     /**
      * @brief Notifies the application when the network provisioned user identities are received

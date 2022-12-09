@@ -23,6 +23,9 @@ class ISipClientConnection;
  */
 class IRefreshListener
 {
+protected:
+    virtual ~IRefreshListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the refresh operation is completed.

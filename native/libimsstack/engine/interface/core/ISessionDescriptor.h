@@ -49,6 +49,9 @@
  */
 class ISessionDescriptor
 {
+protected:
+    virtual ~ISessionDescriptor() = default;
+
 public:
     /**
      * @brief Adds an attribute (a=) to the ISession.

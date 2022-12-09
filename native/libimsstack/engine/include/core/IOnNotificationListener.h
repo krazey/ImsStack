@@ -28,6 +28,9 @@ class ServiceMethod;
  */
 class IOnNotificationListener
 {
+protected:
+    virtual ~IOnNotificationListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the notification was successfully delivered.

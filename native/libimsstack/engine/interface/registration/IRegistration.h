@@ -33,6 +33,9 @@ class SipProfile;
  */
 class IRegistration : public IRegBase
 {
+protected:
+    virtual ~IRegistration() = default;
+
 public:
     /**
      * @brief Creates a registration binding information with the specified service.

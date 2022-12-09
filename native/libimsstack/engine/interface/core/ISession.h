@@ -48,6 +48,9 @@ class Replaces;
  */
 class ISession : public IServiceMethod
 {
+protected:
+    virtual ~ISession() = default;
+
 public:
     /**
      * @brief This method can be used to accept a session invitation or a session update

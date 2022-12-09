@@ -23,6 +23,9 @@
  */
 class ISipTokenGenerator
 {
+protected:
+    virtual ~ISipTokenGenerator() = default;
+
 public:
     /**
      * @brief Gets the boundary token for the multipart MIME body parts.

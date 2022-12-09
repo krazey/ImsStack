@@ -29,6 +29,9 @@ class IReference;
  */
 class IReferenceListener
 {
+protected:
+    virtual ~IReferenceListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the reference was successfully delivered.

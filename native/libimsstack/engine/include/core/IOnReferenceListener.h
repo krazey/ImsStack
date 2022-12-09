@@ -28,6 +28,9 @@ class Reference;
  */
 class IOnReferenceListener
 {
+protected:
+    virtual ~IOnReferenceListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the reference was successfully delivered.

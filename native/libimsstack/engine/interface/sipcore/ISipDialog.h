@@ -32,6 +32,9 @@ class ISipHeader;
  */
 class ISipDialog : public ISipObject
 {
+protected:
+    virtual ~ISipDialog() = default;
+
 public:
     /**
      * @brief Clones this SIP dialog.

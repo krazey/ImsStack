@@ -22,6 +22,9 @@
  */
 class ISipKeepAliveHelperListener
 {
+protected:
+    virtual ~ISipKeepAliveHelperListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the response of SIP keep-alive packet (PING)

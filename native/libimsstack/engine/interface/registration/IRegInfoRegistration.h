@@ -24,6 +24,9 @@
  */
 class IRegInfoRegistration
 {
+protected:
+    virtual ~IRegInfoRegistration() = default;
+
 public:
     /**
      * @brief Returns the AOR of this registration element.

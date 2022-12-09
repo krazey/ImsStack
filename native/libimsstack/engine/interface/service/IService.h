@@ -36,6 +36,9 @@ class SipProfile;
  */
 class IService : public IConnection
 {
+protected:
+    virtual ~IService() = default;
+
 public:
     /**
      * @brief Returns the application id string that this Service was created with.

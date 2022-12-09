@@ -28,6 +28,9 @@ class SipProfile;
 
 class IRegBinding
 {
+protected:
+    virtual ~IRegBinding() = default;
+
 public:
     /**
      * @brief Returns the network authorized public user identities.

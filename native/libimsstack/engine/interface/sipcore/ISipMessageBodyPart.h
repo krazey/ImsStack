@@ -26,6 +26,9 @@
  */
 class ISipMessageBodyPart : public ISipObject
 {
+protected:
+    virtual ~ISipMessageBodyPart() = default;
+
 public:
     /**
      * @brief Clones the SIP message body part.

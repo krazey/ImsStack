@@ -25,6 +25,9 @@ class RegStateTracker;
 
 class IRegistrationEx : public IRegistration, public ISipConnectionNotifierErrorListener
 {
+protected:
+    virtual ~IRegistrationEx() = default;
+
 public:
     /**
      * @brief Adds the observer to get the registration state transition.

@@ -26,6 +26,9 @@ class Media;
  */
 class IOnMediaListener
 {
+protected:
+    virtual ~IOnMediaListener() = default;
+
 public:
     /**
      * @brief The method is called when the fictitious media is created.

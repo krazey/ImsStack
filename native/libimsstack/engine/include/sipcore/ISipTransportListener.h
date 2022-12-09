@@ -20,6 +20,9 @@
 
 class ISipTransportListener
 {
+protected:
+    virtual ~ISipTransportListener() = default;
+
 public:
     virtual void Transport_NotifyPendingMessageSent() = 0;
     virtual void Transport_NotifyError(IN IMS_SINT32 nCode, IN const AString& strMessage) = 0;

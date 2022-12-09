@@ -20,6 +20,9 @@
 
 class IRetransmissionHelperListener
 {
+protected:
+    virtual ~IRetransmissionHelperListener() = default;
+
 public:
     virtual IMS_RESULT RetransmissionHelper_NotifyStatus(IN IMS_SINT32 nStatus) = 0;
 };

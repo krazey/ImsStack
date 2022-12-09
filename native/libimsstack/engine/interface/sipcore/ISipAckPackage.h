@@ -23,6 +23,9 @@
  */
 class ISipAckPackage : public ISipObject
 {
+protected:
+    virtual ~ISipAckPackage() = default;
+
 public:
     /**
      * @brief Removes the stray ACK object.

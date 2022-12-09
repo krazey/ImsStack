@@ -22,6 +22,9 @@ class SdpSessionParameter;
 
 class ISessionState
 {
+protected:
+    virtual ~ISessionState() = default;
+
 public:
     virtual const AString& GetConnectionAddress() const = 0;
     virtual IMS_SINT32 GetSessionState() const = 0;

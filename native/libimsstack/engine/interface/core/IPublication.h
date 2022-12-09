@@ -30,6 +30,9 @@ class IRefreshListener;
  */
 class IPublication : public IServiceMethod
 {
+protected:
+    virtual ~IPublication() = default;
+
 public:
     /**
      * @brief Returns the event package corresponding to this IPublication.

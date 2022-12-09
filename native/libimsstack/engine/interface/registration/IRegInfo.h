@@ -23,6 +23,9 @@
  */
 class IRegInfo
 {
+protected:
+    virtual ~IRegInfo() = default;
+
 public:
     /**
      * @brief Returns the registration element information of reginfo.

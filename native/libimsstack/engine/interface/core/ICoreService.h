@@ -36,6 +36,9 @@ class ISubscription;
  */
 class ICoreService : public IService
 {
+protected:
+    virtual ~ICoreService() = default;
+
 public:
     /**
      * @brief Creates a ICapabilities with strFrom as sender, addressed to strTo.

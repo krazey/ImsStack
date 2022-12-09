@@ -29,6 +29,9 @@
  */
 class IOnSipErrorListener
 {
+protected:
+    virtual ~IOnSipErrorListener() = default;
+
 public:
     /**
      * Called when an asynchronous send operation fails or any error occurrs.

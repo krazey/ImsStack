@@ -24,6 +24,9 @@
  */
 class IReasonInfo
 {
+protected:
+    virtual ~IReasonInfo() = default;
+
 public:
     /**
      * @brief Returns the IMS reason phrase.

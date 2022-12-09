@@ -23,6 +23,9 @@ class Reference;
 
 class IOnSessionListener
 {
+protected:
+    virtual ~IOnSessionListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the remote part's terminal is alerting the user

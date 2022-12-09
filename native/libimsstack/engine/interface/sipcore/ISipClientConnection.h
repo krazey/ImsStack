@@ -35,6 +35,9 @@ class ISipGenericChallenge;
  */
 class ISipClientConnection : public ISipConnection
 {
+protected:
+    virtual ~ISipClientConnection() = default;
+
 public:
     /**
      * @brief Convenience method to initialize ISipClientConnection with SIP request method, ACK.

@@ -36,6 +36,9 @@ class IReferenceListener;
  */
 class IReference : public IServiceMethod
 {
+protected:
+    virtual ~IReference() = default;
+
 public:
     /**
      * @brief Accepts an incoming reference request.

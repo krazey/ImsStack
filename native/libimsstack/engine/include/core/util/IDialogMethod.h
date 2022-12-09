@@ -18,6 +18,9 @@
 
 class IDialogMethod
 {
+protected:
+    virtual ~IDialogMethod() = default;
+
 public:
     virtual IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSsc) const = 0;
     virtual IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSsc) = 0;

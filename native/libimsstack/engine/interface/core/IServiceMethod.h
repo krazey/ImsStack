@@ -33,6 +33,9 @@ class IMessage;
  */
 class IServiceMethod : public IMethod
 {
+protected:
+    virtual ~IServiceMethod() = default;
+
 public:
     /**
      * @brief This method returns a handle to the next outgoing request Message

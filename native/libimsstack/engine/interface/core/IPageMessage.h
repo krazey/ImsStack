@@ -31,6 +31,9 @@ class IPageMessageListener;
  */
 class IPageMessage : public IServiceMethod
 {
+protected:
+    virtual ~IPageMessage() = default;
+
 public:
     /**
      * @brief Returns the content from this IPageMessage.

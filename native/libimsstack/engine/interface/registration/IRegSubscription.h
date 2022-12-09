@@ -26,6 +26,9 @@ class IRegSubscriptionListener;
  */
 class IRegSubscription : public IRegBase
 {
+protected:
+    virtual ~IRegSubscription() = default;
+
 public:
     /**
      * @brief Destroys the subscription for 'reg' event package.

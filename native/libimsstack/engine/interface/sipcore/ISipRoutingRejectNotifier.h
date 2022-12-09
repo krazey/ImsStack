@@ -28,6 +28,9 @@ class ISipRoutingRejectListener;
  */
 class ISipRoutingRejectNotifier
 {
+protected:
+    virtual ~ISipRoutingRejectNotifier() = default;
+
 public:
     /**
      * @brief Adds a listener to monitor the incoming SIP request to be just rejected by engine.

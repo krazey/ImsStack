@@ -28,6 +28,9 @@ class IPageMessage;
  */
 class IPageMessageListener
 {
+protected:
+    virtual ~IPageMessageListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the page message was successfully delivered.

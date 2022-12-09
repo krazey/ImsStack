@@ -29,6 +29,9 @@ class ISipServerConnection;
  */
 class ISipRoutingRejectListener
 {
+protected:
+    virtual ~ISipRoutingRejectListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the incoming SIP request will be rejected

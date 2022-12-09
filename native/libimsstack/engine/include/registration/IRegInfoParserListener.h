@@ -21,6 +21,9 @@ class RegInfoParser;
 
 class IRegInfoParserListener
 {
+protected:
+    virtual ~IRegInfoParserListener() = default;
+
 public:
     virtual void RegInfoParser_ParsingCompleted(
             IN RegInfoParser* pParser, IN IDocument* piDocument) = 0;

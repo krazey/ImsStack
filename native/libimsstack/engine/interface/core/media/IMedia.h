@@ -48,6 +48,9 @@ class IMediaListener;
  */
 class IMedia
 {
+protected:
+    virtual ~IMedia() = default;
+
 public:
     /**
      * @brief Returns the current direction of this IMedia.

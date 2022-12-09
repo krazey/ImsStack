@@ -25,6 +25,9 @@ class IRegistration;
  */
 class IRegistrationListener
 {
+protected:
+    virtual ~IRegistrationListener() = default;
+
 public:
     /**
      * @brief Notifies the application when the registration is challenged by S-CSCF.

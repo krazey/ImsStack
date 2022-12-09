@@ -28,6 +28,9 @@ class Publication;
  */
 class IOnPublicationListener
 {
+protected:
+    virtual ~IOnPublicationListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the publication request was successfully delivered.

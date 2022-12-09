@@ -29,6 +29,9 @@
  */
 class IConnection
 {
+protected:
+    virtual ~IConnection() = default;
+
 public:
     /**
      * @brief Destroys IConnection interface.

@@ -20,6 +20,9 @@
 
 class ISipClientTransmissionListener
 {
+protected:
+    virtual ~ISipClientTransmissionListener() = default;
+
 public:
     virtual void ClientTransmission_NotifyError(
             IN IMS_SINT32 nCode, IN const AString& strMessage) = 0;

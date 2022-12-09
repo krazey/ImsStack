@@ -28,6 +28,9 @@ class SipConnectionNotifier;
  */
 class IOnSipConnectionNotifierErrorListener
 {
+protected:
+    virtual ~IOnSipConnectionNotifierErrorListener() = default;
+
 public:
     /**
      * Called when any error occurrs in the SipConnectionNotifier.

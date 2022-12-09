@@ -20,6 +20,9 @@ class SipSocket;
 
 class ISipSocketListener
 {
+protected:
+    virtual ~ISipSocketListener() = default;
+
 public:
     virtual void Socket_NotifyError(IN SipSocket* pSocket, IN IMS_SINT32 nErrorCode) = 0;
     virtual void Socket_SendEnabled(IN SipSocket* pSocket) = 0;

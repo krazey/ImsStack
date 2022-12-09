@@ -20,6 +20,9 @@ class SipSocket;
 
 class ISipStreamSocketListener
 {
+protected:
+    virtual ~ISipStreamSocketListener() = default;
+
 public:
     virtual void StreamSocket_ConnectionReceived(IN SipSocket* pSocket) = 0;
     virtual void StreamSocket_DataReceived(IN SipSocket* pSocket, IN_OUT ByteArray& objBuffer) = 0;

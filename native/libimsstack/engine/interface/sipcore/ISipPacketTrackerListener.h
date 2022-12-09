@@ -28,6 +28,9 @@ class ISipMessage;
  */
 class ISipPacketTrackerListener
 {
+protected:
+    virtual ~ISipPacketTrackerListener() = default;
+
 public:
     /**
      * @brief Notifies the application that SIP packet is sent to the network.

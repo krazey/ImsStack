@@ -20,6 +20,9 @@ class ISipClientConnection;
 
 class IRefreshable
 {
+protected:
+    virtual ~IRefreshable() = default;
+
 public:
     virtual void Refreshable_RefreshCompleted(
             IN ISipClientConnection* piScc, IN IMS_SINT32 nCode = 0) = 0;

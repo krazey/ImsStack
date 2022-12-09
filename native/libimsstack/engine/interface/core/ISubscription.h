@@ -37,6 +37,9 @@ class ISubscriptionListener;
  */
 class ISubscription : public IServiceMethod
 {
+protected:
+    virtual ~ISubscription() = default;
+
 public:
     /**
      * @brief Returns the event package corresponding to this ISubscription.

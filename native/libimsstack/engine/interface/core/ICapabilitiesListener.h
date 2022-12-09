@@ -28,6 +28,9 @@ class ICapabilities;
  */
 class ICapabilitiesListener
 {
+protected:
+    virtual ~ICapabilitiesListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the capability query response

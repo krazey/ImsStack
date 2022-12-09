@@ -24,6 +24,9 @@
  */
 class ISessionParameter
 {
+protected:
+    virtual ~ISessionParameter() = default;
+
 public:
     /**
      * @brief This method returns a session-level session description object.

@@ -21,6 +21,9 @@
 
 class ISdpOaState
 {
+protected:
+    virtual ~ISdpOaState() = default;
+
 public:
     virtual void AbortProposal() = 0;
     virtual IMS_SINT32 CreateProposalView() = 0;

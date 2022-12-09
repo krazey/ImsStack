@@ -27,6 +27,9 @@
  */
 class ISipMessage : public ISipObject
 {
+protected:
+    virtual ~ISipMessage() = default;
+
 public:
     /**
      * @brief Clones the SIP message.

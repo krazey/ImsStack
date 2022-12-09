@@ -29,6 +29,9 @@ class ISipMessage;
  */
 class IMessage
 {
+protected:
+    virtual ~IMessage() = default;
+
 public:
     /**
      * @brief Adds a header value, either on a new header or appending a new value
