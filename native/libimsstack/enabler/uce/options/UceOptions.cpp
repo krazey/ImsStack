@@ -274,7 +274,7 @@ IMS_UINT32 UceOptions::GetCapability(IMSList<AString> objContactList)
     return capabilities;
 }
 
-void UceOptions::SetIARIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strIARITag)
+void UceOptions::SetIARIFeatureTag(IN IMS_UINT32 capabilities, OUT AString& strIARITag)
 {
     if ((capabilities & FEATURE_TAG_DP) > 0)
     {
@@ -342,7 +342,7 @@ void UceOptions::SetIARIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strIA
     }
 }
 
-void UceOptions::SetICSIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strICSITag)
+void UceOptions::SetICSIFeatureTag(IN IMS_UINT32 capabilities, OUT AString& strICSITag)
 {
     if ((capabilities & FEATURE_TAG_IPCALL_VOICE) > 0 ||
             (capabilities & FEATURE_TAG_IPCALL_VIDEO) > 0)
@@ -391,7 +391,7 @@ void UceOptions::SetICSIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strIC
     }
 }
 
-void UceOptions::SetNoTypeFeatureTag(IN IMS_UINT32 capabilities, IN AString& strTag)
+void UceOptions::SetNoTypeFeatureTag(IN IMS_UINT32 capabilities, OUT AString& strTag)
 {
     if ((capabilities & FEATURE_TAG_IPCALL_VIDEO) > 0)
     {
@@ -492,7 +492,7 @@ PROTECTED VIRTUAL void UceOptions::CapabilityQueryDeliveryFailed(IN ICapabilitie
 }
 
 PRIVATE
-void UceOptions::SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIPMessage)
+void UceOptions::SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIPMessage) const
 {
     IService* piService = m_piCoreService;
     AString strMyContact = AString::ConstEmpty();

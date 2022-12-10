@@ -41,9 +41,9 @@ public:
     }
     virtual ~TestUceOptions() {}
 
-    IMS_UINT32 GetKey() { return m_nKey; }
+    IMS_UINT32 GetKey() const { return m_nKey; }
 
-    IMS_BOOL GetSendingRequest() { return m_bIsSendingRequest; }
+    IMS_BOOL GetSendingRequest() const { return m_bIsSendingRequest; }
 
     void SetSendingRequest(IMS_BOOL value) { m_bIsSendingRequest = value; }
 };

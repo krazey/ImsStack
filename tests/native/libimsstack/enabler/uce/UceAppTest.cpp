@@ -50,7 +50,7 @@ public:
     virtual ~TestUceApp() {}
     IMS_BOOL SendMessage(IMSMSG objUIMsg) { return OnMessage(objUIMsg); }
     void SetAoSState(IMS_SINT32 state) { m_eAoSStatus = state; }
-    IMS_SINT32 GetAoSState() { return m_eAoSStatus; }
+    IMS_SINT32 GetAoSState() const { return m_eAoSStatus; }
     IMS_BOOL IsTimerNull()
     {
         if (GetTimer() == IMS_NULL)

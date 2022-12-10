@@ -33,7 +33,7 @@ class ISession;
 class UceService : public ImsService, public ICoreServiceListener
 {
 public:
-    UceService(IN const AString& strAppName, IN const IMS_SINT32 nSlotId);
+    explicit UceService(IN const AString& strAppName, IN const IMS_SINT32 nSlotId);
     virtual ~UceService();
     /* ------------------------------------------------------------------------------------------
         Method
@@ -48,17 +48,17 @@ protected:
     virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
     virtual void CoreService_PageMessageReceived(
-            IN ICoreService* piService, IN IPageMessage* piMessage);
+            IN ICoreService* piService, IN IPageMessage* piMessage) override;
     virtual void CoreService_ReferenceReceived(
-            IN ICoreService* piService, IN IReference* piReference);
+            IN ICoreService* piService, IN IReference* piReference) override;
     virtual void CoreService_ServiceClosed(
-            IN ICoreService* piService, IN IReasonInfo* piReasonInfo);
+            IN ICoreService* piService, IN IReasonInfo* piReasonInfo) override;
     virtual void CoreService_SessionInvitationReceived(
-            IN ICoreService* piService, IN ISession* piSession);
+            IN ICoreService* piService, IN ISession* piSession) override;
     virtual void CoreService_UnsolicitedNotifyReceived(
-            IN ICoreService* piService, IN IMessage* piNotify);
+            IN ICoreService* piService, IN IMessage* piNotify) override;
     virtual void CoreService_CapabilityQueryReceived(
-            IN ICoreService* piService, IN ICapabilities* piCapabilities);
+            IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
     void EnableManager();
     void DisableManager();
 

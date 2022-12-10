@@ -20,11 +20,9 @@
 class UceNonCapabilityUser
 {
 public:
-    UceNonCapabilityUser(AString& strId, AString& strReason)
-    {
-        m_strId = strId;
-        m_strReason = strReason;
-    }
+    explicit UceNonCapabilityUser(AString& strId, AString& strReason) :
+            m_strId(strId),
+            m_strReason(strReason){};
     virtual ~UceNonCapabilityUser(){};
 
     AString& GetId() { return m_strId; }

@@ -1268,10 +1268,11 @@ IPublishResponseData* UcePublishManager::GetPublishResponseData(ISipMessage* piM
 {
     IPublishResponseData* pPublishResponseData = IMS_NULL;
 
-    IMS_SINT32 nReasonCause = -1;
-    AString strReasonText = "";
     if (piMessage != IMS_NULL)
     {
+        IMS_SINT32 nReasonCause = -1;
+        AString strReasonText = "";
+
         pPublishResponseData = new IPublishResponseData();
 
         IMS_TRACE_D("GetPublishResponseData:StatusCode[%d], reason[%s]", piMessage->GetStatusCode(),
@@ -2070,7 +2071,7 @@ void UcePublishManager::HandleExponentialRetryTimer()
 
 void UcePublishManager::HandleRetryTimer()
 {
-    IMS_TRACE_I("HandleRetryTimer:Current State[%d], m_nRetryCount[%d]", StateToString(m_eState),
+    IMS_TRACE_I("HandleRetryTimer:Current State[%s], m_nRetryCount[%d]", StateToString(m_eState),
             m_nRetryCount, 0);
     if (GetState() == PUBLISHING)
     {
@@ -2092,7 +2093,7 @@ void UcePublishManager::HandleRetryTimer()
 
 void UcePublishManager::HandleRetryAfterTimer()
 {
-    IMS_TRACE_I("HandleRetryAfterTimer:Current State[%d]", StateToString(m_eState), 0, 0);
+    IMS_TRACE_I("HandleRetryAfterTimer:Current State[%s]", StateToString(m_eState), 0, 0);
     if (GetState() == PUBLISHING)
     {
         if (RetryPublish(INITIAL) == IMS_TRUE)
@@ -2155,12 +2156,7 @@ void UcePublishManager::ClearPendingPublishRequest()
     }
 }
 
-IMS_UINT32 UcePublishManager::GetKey()
-{
-    return m_nKey;
-}
-
-IMS_UINT32 UcePublishManager::GetState()
+IMS_UINT32 UcePublishManager::GetState() const
 {
     return m_eState;
 }

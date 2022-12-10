@@ -19,8 +19,6 @@
 PUBLIC
 UceNamespace::UceNamespace() {}
 
-PUBLIC GLOBAL const IMS_CHAR UceNamespace::UCE_APP_NAME_PREFIX[] = "UceApp";
-
 PUBLIC GLOBAL const IMS_CHAR UceNamespace::PRESENCE[] = "presence";
 
 PUBLIC GLOBAL const IMS_CHAR UceNamespace::PUBMNGR_NAME[] = "UCEPubMngr";

@@ -22,7 +22,8 @@
 class UceNotifyMessageBody
 {
 public:
-    UceNotifyMessageBody() { m_strContentType = AString::ConstNull(); }
+    explicit UceNotifyMessageBody() :
+            m_strContentType(AString::ConstNull()){};
     virtual ~UceNotifyMessageBody()
     {
         for (IMS_UINT32 i = 0; i < m_objNotifyBodyPartDatas.GetSize(); ++i)
@@ -31,19 +32,21 @@ public:
             if (pData != IMS_NULL)
             {
                 delete pData;
-                pData = IMS_NULL;
             }
         }
         m_objNotifyBodyPartDatas.Clear();
     }
 
-    void SetContentType(IN AString& strContentType) { m_strContentType = strContentType; }
+    void SetContentType(IN const AString& strContentType) { m_strContentType = strContentType; }
     void SetNotifyBodyPartData(IN UceNotifyBodyPartData* pData)
     {
         m_objNotifyBodyPartDatas.Append(pData);
     }
     AString& GetContentType() { return m_strContentType; }
-    IMSList<UceNotifyBodyPartData*> GetNotifyBodyPartDatas() { return m_objNotifyBodyPartDatas; }
+    IMSList<UceNotifyBodyPartData*> GetNotifyBodyPartDatas() const
+    {
+        return m_objNotifyBodyPartDatas;
+    }
 
 private:
     AString m_strContentType;

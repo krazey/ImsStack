@@ -143,7 +143,6 @@ PUBLIC VIRTUAL IMS_RESULT UceXmlDocumentHelperThread::XmlTransaction_NotifyParsi
         if (piDocument == IMS_NULL)
         {
             m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
-            piXMLTransaction = IMS_NULL;
             return eResult;
         }
         AString strRootName(AString::ConstNull());
@@ -151,7 +150,6 @@ PUBLIC VIRTUAL IMS_RESULT UceXmlDocumentHelperThread::XmlTransaction_NotifyParsi
         if (piRootElement == IMS_NULL)
         {
             m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
-            piXMLTransaction = IMS_NULL;
             piDocument->DestroyDocument();
             return eResult;
         }
@@ -160,7 +158,6 @@ PUBLIC VIRTUAL IMS_RESULT UceXmlDocumentHelperThread::XmlTransaction_NotifyParsi
         {
             IMS_TRACE_E(0, "[ERROR]strRootName is empty.", 0, 0, 0);
             m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
-            piXMLTransaction = IMS_NULL;
             piDocument->DestroyDocument();
             return eResult;
         }
@@ -170,7 +167,6 @@ PUBLIC VIRTUAL IMS_RESULT UceXmlDocumentHelperThread::XmlTransaction_NotifyParsi
             if (ParseRLMIList(piDocument) != IMS_SUCCESS)
             {
                 m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
-                piXMLTransaction = IMS_NULL;
                 piDocument->DestroyDocument();
                 return eResult;
             }
@@ -179,7 +175,6 @@ PUBLIC VIRTUAL IMS_RESULT UceXmlDocumentHelperThread::XmlTransaction_NotifyParsi
         }
     }
     m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
-    piXMLTransaction = IMS_NULL;
     SendParseCompletedMsg(eXMLInfoType);
     return eResult;
 }
@@ -210,40 +205,6 @@ PUBLIC VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Initialize()
     m_objMessageMap.Add(MSG_THREAD_PARSERED_XML_RLMI,
             reinterpret_cast<msgHandler>(&UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler));
     return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL void UceXmlDocumentHelperThread::Uninitialize()
-{
-    //---------------------------------------------------------------------------------------------
-    IMS_TRACE_D("Uninitialize", 0, 0, 0);
-    while (!m_objTransactionQueue.IsEmpty())
-    {
-        IXmlTransaction* piXMLTransaction = m_objTransactionQueue.GetFront();
-        m_objTransactionQueue.Pop();
-
-        if (piXMLTransaction != IMS_NULL)
-        {
-            m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
-        }
-    }
-    m_objTransactionQueue.Clear();
-
-    if (m_pXMLTransactionProvider != IMS_NULL)
-    {
-        XmlFactory::GetInstance()->DestroyTransactionProvider(m_pXMLTransactionProvider);
-        m_pXMLTransactionProvider = IMS_NULL;
-    }
-    m_objRlmiCidList.Clear();
-    m_objPidfXmls.Clear();
-    m_objNonCapabilities.Clear();
-    m_objBodyParts.Clear();
-    m_objMessageMap.Clear();
-
-    if (m_pUceNotifyMessageBody != IMS_NULL)
-    {
-        delete m_pUceNotifyMessageBody;
-        m_pUceNotifyMessageBody = IMS_NULL;
-    }
 }
 
 PROTECTED VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::OnStart(IN IMSMSG& objMSG)
@@ -285,6 +246,40 @@ PRIVATE VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Runnable_Run(IN IMSMSG& obj
     }
     msgHandler func = m_objMessageMap.GetValueAt(nIndexOfFunc);
     return (this->*(func))(objMSG);
+}
+
+VIRTUAL void UceXmlDocumentHelperThread::Uninitialize()
+{
+    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_D("Uninitialize", 0, 0, 0);
+    while (!m_objTransactionQueue.IsEmpty())
+    {
+        IXmlTransaction* piXMLTransaction = m_objTransactionQueue.GetFront();
+        m_objTransactionQueue.Pop();
+
+        if (piXMLTransaction != IMS_NULL)
+        {
+            m_pXMLTransactionProvider->DestroyTransaction(piXMLTransaction);
+        }
+    }
+    m_objTransactionQueue.Clear();
+
+    if (m_pXMLTransactionProvider != IMS_NULL)
+    {
+        XmlFactory::GetInstance()->DestroyTransactionProvider(m_pXMLTransactionProvider);
+        m_pXMLTransactionProvider = IMS_NULL;
+    }
+    m_objRlmiCidList.Clear();
+    m_objPidfXmls.Clear();
+    m_objNonCapabilities.Clear();
+    m_objBodyParts.Clear();
+    m_objMessageMap.Clear();
+
+    if (m_pUceNotifyMessageBody != IMS_NULL)
+    {
+        delete m_pUceNotifyMessageBody;
+        m_pUceNotifyMessageBody = IMS_NULL;
+    }
 }
 
 IMS_RESULT UceXmlDocumentHelperThread::XMLDataTokenization(IN const ByteArray& objBytes)
@@ -403,7 +398,6 @@ IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& ob
             {
                 XMLDataTokenization(objContent);
                 m_objBodyParts.RemoveAt(i);
-                bMatchingTheResult = IMS_TRUE;
                 return IMS_TRUE;
             }
         }
@@ -415,7 +409,6 @@ IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& ob
             {
                 XMLDataTokenization(objContent);
                 m_objBodyParts.RemoveAt(i);
-                bMatchingTheResult = IMS_TRUE;
                 return IMS_TRUE;
             }
         }
@@ -452,7 +445,7 @@ IMS_BOOL UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler(IMSMSG& objMsg)
             if (strConID.Contains(m_objRlmiCidList.GetAt(i)) == IMS_TRUE)
             {
                 IMS_TRACE_D("ParsedRlmiXmlMessageHandler:find content id.index[%d]", j, 0, 0);
-                ByteArray& objContent = piBodyPart->GetBodyContent();
+                const ByteArray& objContent = piBodyPart->GetBodyContent();
                 m_objPidfXmls.Append(objContent.ToString());
                 m_objBodyParts.RemoveAt(j);
                 m_objRlmiCidList.RemoveAt(i);

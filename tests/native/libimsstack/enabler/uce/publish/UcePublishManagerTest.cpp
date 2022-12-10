@@ -65,13 +65,13 @@ public:
     }
     virtual ~TestUcePublishManager() {}
 
-    IMS_UINT32 GetState() { return m_eState; }
+    IMS_UINT32 GetState() const { return m_eState; }
 
-    IMS_UINT32 GetKey() { return m_nKey; }
+    IMS_UINT32 GetKey() const { return m_nKey; }
 
     void SetReceivedUnPublishRequest(IMS_BOOL value) { m_bReceivedUnPublishRequest = value; }
 
-    IMS_BOOL GetReceivedUnPublishRequest() { return m_bReceivedUnPublishRequest; }
+    IMS_BOOL GetReceivedUnPublishRequest() const { return m_bReceivedUnPublishRequest; }
 
     IPublicationData* GetPublicationData() { return m_pPendingPublicationData; }
 

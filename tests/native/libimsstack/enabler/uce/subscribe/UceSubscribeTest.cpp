@@ -51,15 +51,15 @@ public:
     }
     virtual ~TestUceSubscribe() {}
 
-    IMS_UINT32 GetKey() { return m_nKey; }
+    IMS_UINT32 GetKey() const { return m_nKey; }
 
     void SetKey(IMS_UINT32 key) { m_nKey = key; }
 
-    AString GetRemoteUser() { return m_strRemoteUser; }
+    AString GetRemoteUser() const { return m_strRemoteUser; }
 
-    IMSList<AString> GetRemoteUsers() { return m_objRemoteUsers; }
+    IMSList<AString> GetRemoteUsers() const { return m_objRemoteUsers; }
 
-    IMS_UINT32 GetState() { return m_eState; }
+    IMS_UINT32 GetState() const { return m_eState; }
 
     void setState(IMS_UINT32 state) { SetState(state); }
 };

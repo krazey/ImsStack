@@ -27,7 +27,7 @@ class ICapabilities;
 class UceOptions : public ICapabilitiesListener
 {
 public:
-    UceOptions(IN const AString& strManagerName, IN ICoreService* piCoreService,
+    explicit UceOptions(IN const AString& strManagerName, IN ICoreService* piCoreService,
             IN ICapabilities* piCapabilities, IN IMS_UINT32 nKey, IN IMS_BOOL isSendingRequest,
             IN IMS_SINT32 nSimSlot = 0);
     virtual ~UceOptions();
@@ -37,18 +37,18 @@ public:
     IMS_BOOL SendOptionsResponse(
             IN IMS_UINT32 nResponse, IN AString reason, IN IMS_UINT32 ownCapabilities);
     void AoSDisconnected();
-    IMS_UINT32 GetCapability(IMSList<AString> objContactList);
-    void SetIARIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strIARITag);
-    void SetICSIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strICSITag);
-    void SetNoTypeFeatureTag(IN IMS_UINT32 capabilities, IN AString& strTag);
+    static IMS_UINT32 GetCapability(IMSList<AString> objContactList);
+    static void SetIARIFeatureTag(IN IMS_UINT32 capabilities, OUT AString& strIARITag);
+    static void SetICSIFeatureTag(IN IMS_UINT32 capabilities, OUT AString& strICSITag);
+    static void SetNoTypeFeatureTag(IN IMS_UINT32 capabilities, OUT AString& strTag);
 
 protected:
     // ICapabilitiesListener
-    virtual void CapabilityQueryDelivered(IN ICapabilities* piCapabilities);
-    virtual void CapabilityQueryDeliveryFailed(IN ICapabilities* piCapabilities);
+    virtual void CapabilityQueryDelivered(IN ICapabilities* piCapabilities) override;
+    virtual void CapabilityQueryDeliveryFailed(IN ICapabilities* piCapabilities) override;
 
 private:
-    void SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIPMessage);
+    void SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIPMessage) const;
     void SendOptionsResponseInd(
             IN IMS_SINT32 nResponseCode, IN AString reason, IN IMS_UINT32 capabilities);
     void SendOptionsCommandError(IN IMS_UINT32 code);

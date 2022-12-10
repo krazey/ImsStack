@@ -31,8 +31,8 @@ __IMS_TRACE_TAG_USER_DECL__("UCE");
 
 PUBLIC
 UceOptionsManager::UceOptionsManager(
-        IN const AString& _strName, IN ICoreService* piCoreService, IN IMS_SINT32 simSlotId) :
-        ImsActivityEx(_strName),
+        IN const AString& strName, IN ICoreService* piCoreService, IN IMS_SINT32 simSlotId) :
+        ImsActivityEx(strName),
         m_nSimSlot(simSlotId),
         m_piCoreService(piCoreService),
         m_bAoSConnected(IMS_FALSE),
@@ -111,9 +111,9 @@ IMS_BOOL UceOptionsManager::SendOptionsResponse(IN IMS_UINT32 nKey, IN IMS_UINT3
 }
 
 IMS_BOOL UceOptionsManager::ReceivedOptions(
-        IN ICoreService* piCoreService, IN ICapabilities* piCapabilities)
+        IN const ICoreService* piCoreService, IN ICapabilities* piCapabilities)
 {
-    if (piCoreService == IMS_NULL || piCapabilities || m_piCoreService != piCoreService)
+    if (piCoreService == IMS_NULL || piCapabilities == IMS_NULL || m_piCoreService != piCoreService)
     {
         IMS_TRACE_I("ReceivedOptions:piCoreService or piCapabilities is null", 0, 0, 0);
         return IMS_FALSE;

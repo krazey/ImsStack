@@ -19,10 +19,11 @@
 class UceNotifyBodyPartData
 {
 public:
-    UceNotifyBodyPartData(AString& strContentType, AString& strContentId, ByteArray& objBody)
+    explicit UceNotifyBodyPartData(
+            AString& strContentType, AString& strContentId, const ByteArray& objBody) :
+            m_strContentType(strContentType),
+            m_strContentId(strContentId)
     {
-        m_strContentType = strContentType;
-        m_strContentId = strContentId;
         m_pBodyContent.Append(objBody);
     }
     virtual ~UceNotifyBodyPartData() {}

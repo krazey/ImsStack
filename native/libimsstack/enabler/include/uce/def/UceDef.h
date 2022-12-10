@@ -31,7 +31,6 @@ class UceNamespace
 {
 public:
     UceNamespace();
-    static const IMS_CHAR UCE_APP_NAME_PREFIX[];
     static const IMS_CHAR PRESENCE[];
 
     // uce service namespace

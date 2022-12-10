@@ -40,6 +40,7 @@ public:
     {
         m_nKey = 0;
         m_nExtended = 1;
+        m_nCapability = 0;
     }
     inline virtual ~IPublicationData() {}
 
@@ -92,7 +93,7 @@ class UcePublishManager :
     ---------------------------------------------------------------------------------------------
   */
 public:
-    UcePublishManager(IN ICoreService* _piCoreService, IN const AString& strAppName,
+    explicit UcePublishManager(IN ICoreService* _piCoreService, IN const AString& strAppName,
             IN IMS_SINT32 nSimSlot = 0);
     virtual ~UcePublishManager();
 
@@ -110,7 +111,7 @@ public:
   */
 public:
     virtual IMS_RESULT MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
+            IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) override;
     IMS_BOOL SendPublishRequest(IN IMS_UINT32 key, IN AString pidfXml, IN AString eTag,
             IN IMS_UINT32 capability, IN IMS_UINT32 extended);
     IMS_BOOL AosConnected(IMS_UINT32 conectedService);  // AoS-connected
@@ -121,19 +122,19 @@ public:
     void SetState(IMS_UINT32 _eState);
 
 protected:
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer) override;
     // IPublicationListener - start
-    virtual void PublicationDelivered(IN IPublication* piPublication);
-    virtual void PublicationDeliveryFailed(IN IPublication* piPublication);
-    virtual void PublicationTerminated(IN IPublication* piPublication);
-    virtual void PublicationRefreshStarted(IN IPublication* piPublication);
-    virtual void PublicationRefreshCompleted(IN IPublication* piPublication);
+    virtual void PublicationDelivered(IN IPublication* piPublication) override;
+    virtual void PublicationDeliveryFailed(IN IPublication* piPublication) override;
+    virtual void PublicationTerminated(IN IPublication* piPublication) override;
+    virtual void PublicationRefreshStarted(IN IPublication* piPublication) override;
+    virtual void PublicationRefreshCompleted(IN IPublication* piPublication) override;
     // IPublicationListener - end
 
     // IRefreshListener - start
-    virtual void Refresh_NotifyCompleted(IN ISipClientConnection* piScc);
-    virtual void Refresh_NotifyTerminated();
-    virtual void Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
+    virtual void Refresh_NotifyCompleted(IN ISipClientConnection* piScc) override;
+    virtual void Refresh_NotifyTerminated() override;
+    virtual void Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
     // IRefreshListener - end
 
     // IDLE
@@ -170,7 +171,7 @@ protected:
 
 private:
     void LoadConfigValue();
-    IPublishResponseData* GetPublishResponseData(ISipMessage* piMessage);
+    static IPublishResponseData* GetPublishResponseData(ISipMessage* piMessage);
     ISipMessage* GetISIPMessage(IMS_BOOL bRequireResponseMessage = IMS_FALSE);
     void SendPublishCommandErrorInd(IMS_UINT32 nKey, IMS_UINT32 nCommandError);
     void SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResponseCode, AString strReason,
@@ -208,9 +209,8 @@ private:
 
     void SendPendingPublishRequest();
     void ClearPendingPublishRequest();
-    IMS_UINT32 GetKey();
-    IMS_UINT32 GetState();
-    const IMS_CHAR* StateToString(IMS_UINT32 _eState);
+    IMS_UINT32 GetState() const;
+    static const IMS_CHAR* StateToString(IMS_UINT32 _eState);
     /* ------------------------------------------------------------------------------------------
         Variables
     ---------------------------------------------------------------------------------------------
