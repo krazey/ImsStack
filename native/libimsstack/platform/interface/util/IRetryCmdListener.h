@@ -22,6 +22,9 @@ class RetryCmd;
 
 class IRetryCmdListener
 {
+protected:
+    virtual ~IRetryCmdListener() = default;
+
 public:
     /**
      * @brief Notify to the user that the retry command is executed succefully.

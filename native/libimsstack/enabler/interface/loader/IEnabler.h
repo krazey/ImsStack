@@ -20,6 +20,9 @@
 
 class IEnabler
 {
+protected:
+    virtual ~IEnabler() = default;
+
 public:
     /**
      * @brief Starts an enabler.

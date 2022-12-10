@@ -19,6 +19,9 @@
 // This interface will be used between OsXxx and System
 class ISystemListener
 {
+protected:
+    virtual ~ISystemListener() = default;
+
 public:
     virtual void System_NotifyEvent(
             IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) = 0;

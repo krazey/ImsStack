@@ -21,6 +21,9 @@
 
 class IIsimListener
 {
+protected:
+    virtual ~IIsimListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the specified field value is retrieved.

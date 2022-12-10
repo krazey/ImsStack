@@ -20,6 +20,9 @@
 
 class IEventSender
 {
+protected:
+    virtual ~IEventSender() = default;
+
 public:
     /**
      * @brief Sends the specified event to the upper(Java) layer.

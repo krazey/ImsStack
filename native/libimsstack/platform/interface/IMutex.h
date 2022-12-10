@@ -20,6 +20,9 @@
 
 class IMutex
 {
+protected:
+    virtual ~IMutex() = default;
+
 public:
     virtual void Lock() = 0;
     virtual void Unlock() = 0;

@@ -23,6 +23,9 @@ class RetryTaskHelper;
 
 class IRetryTaskHelperListener
 {
+protected:
+    virtual ~IRetryTaskHelperListener() = default;
+
 public:
     /**
      * @brief Notify to the user that the retry task is executed succefully or error occurred.

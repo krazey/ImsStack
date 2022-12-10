@@ -20,6 +20,9 @@
 
 class IDeviceInfo
 {
+protected:
+    virtual ~IDeviceInfo() = default;
+
 public:
     // CDMA : MEID, WCDMA : IMEI
     virtual IMS_BOOL GetDeviceId(IN IMS_SINT32 nSlotId, OUT AString& strId) const = 0;

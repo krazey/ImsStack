@@ -22,6 +22,9 @@ class IIpSecPolicy;
 
 class IIpSecPolicyListener
 {
+protected:
+    virtual ~IIpSecPolicyListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the liftime of security association is expired.

@@ -20,6 +20,9 @@
 
 class ISubscriberInfoListener
 {
+protected:
+    virtual ~ISubscriberInfoListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the subscriber info. (IMPU) has been updated.

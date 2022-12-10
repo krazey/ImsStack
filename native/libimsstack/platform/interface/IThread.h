@@ -23,6 +23,9 @@
 
 class IThread
 {
+protected:
+    virtual ~IThread() = default;
+
 public:
     virtual IMS_BOOL Activate() = 0;
 

@@ -20,6 +20,9 @@
 
 class IEventReceiverListener
 {
+protected:
+    virtual ~IEventReceiverListener() = default;
+
 public:
     /**
      * @brief Notifies the application for the event which is received on the event receiver.

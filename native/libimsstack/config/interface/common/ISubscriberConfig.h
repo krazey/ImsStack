@@ -28,6 +28,9 @@ class ServerAddress;
 
 class ISubscriberConfig : public IAsyncConfig
 {
+protected:
+    virtual ~ISubscriberConfig() = default;
+
 public:
     /**
      * @brief Returns the primary P-CSCF address when the P-CSCF discovery method is

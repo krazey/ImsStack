@@ -22,6 +22,9 @@ class INetworkPing;
 
 class INetworkPingListener
 {
+protected:
+    virtual ~INetworkPingListener() = default;
+
 public:
     /**
      * @brief Notify the application that the specified data connection is alive or not.

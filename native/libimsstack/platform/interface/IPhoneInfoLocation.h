@@ -20,6 +20,9 @@
 
 class ILocationProperties
 {
+protected:
+    virtual ~ILocationProperties() = default;
+
 public:
     virtual const AString& GetLatitude() const = 0;
     virtual const AString& GetLongitude() const = 0;
@@ -38,6 +41,9 @@ public:
 
 class ILocationInfo
 {
+protected:
+    virtual ~ILocationInfo() = default;
+
 public:
     virtual IMS_BOOL StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec) = 0;
     virtual void StopLocationInfo() = 0;

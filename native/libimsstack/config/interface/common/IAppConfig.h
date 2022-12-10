@@ -21,6 +21,9 @@
 
 class IAppConfig
 {
+protected:
+    virtual ~IAppConfig() = default;
+
 public:
     /**
      * @brief Returns the application id that this configuration was created with.

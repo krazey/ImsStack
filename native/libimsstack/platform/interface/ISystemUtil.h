@@ -20,6 +20,9 @@
 
 class ISystemUtil
 {
+protected:
+    virtual ~ISystemUtil() = default;
+
 public:
     /**
      * @brief Gets Digest result using SHA1 algorithm.

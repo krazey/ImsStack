@@ -22,6 +22,9 @@ class ITimerListener;
 
 class ITimer
 {
+protected:
+    virtual ~ITimer() = default;
+
 public:
     /**
      * @brief Checks if the specified timer is equal to the current object.
@@ -52,6 +55,9 @@ public:
 
 class ITimerListener
 {
+protected:
+    virtual ~ITimerListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the specified timer is expired.

@@ -22,6 +22,9 @@ class IDigestAka;
 
 class IUsim
 {
+protected:
+    virtual ~IUsim() = default;
+
 public:
     /**
      * @brief Creates the Digest AKA.

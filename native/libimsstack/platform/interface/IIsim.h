@@ -23,6 +23,9 @@ class IIsimListener;
 
 class IIsim
 {
+protected:
+    virtual ~IIsim() = default;
+
 public:
     /**
      * @brief Clears all the records which are obtained during the initialization

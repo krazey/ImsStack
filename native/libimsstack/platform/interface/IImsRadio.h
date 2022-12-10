@@ -39,6 +39,9 @@ struct SsacInfo
 
 class IImsRadioConnectionListener
 {
+protected:
+    virtual ~IImsRadioConnectionListener() = default;
+
 public:
     /**
      * @brief Notifies the reason of the connection setup corresponding with the IMS traffic type
@@ -60,6 +63,9 @@ public:
 
 class IImsRadioSsacListener
 {
+protected:
+    virtual ~IImsRadioSsacListener() = default;
+
 public:
     /**
      * @brief Notifies that SSAC is changed.
@@ -72,6 +78,9 @@ public:
 
 class IImsRadioTrafficPriorityListener
 {
+protected:
+    virtual ~IImsRadioTrafficPriorityListener() = default;
+
 public:
     /**
      * @brief Notifies that IMS traffic priority is changed for DSDS. If IMS traffic is pending
@@ -83,6 +92,9 @@ public:
 
 class IImsRadio
 {
+protected:
+    virtual ~IImsRadio() = default;
+
 public:
     /**
      * @brief Indicates whether Ims traffic is available or not after checking the traffic priority

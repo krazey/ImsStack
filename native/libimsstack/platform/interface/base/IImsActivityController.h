@@ -20,6 +20,9 @@
 
 class IImsActivityController
 {
+protected:
+    virtual ~IImsActivityController() = default;
+
 public:
     virtual IMS_BOOL Control(
             IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam, OUT IMS_UINTP* pnOutParam) = 0;

@@ -20,6 +20,9 @@
 
 class ICarrierConfigListener
 {
+protected:
+    virtual ~ICarrierConfigListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the carrier configuration is changed.

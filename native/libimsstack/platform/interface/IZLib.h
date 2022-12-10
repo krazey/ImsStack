@@ -20,6 +20,9 @@
 
 class IZLib
 {
+protected:
+    virtual ~IZLib() = default;
+
 public:
     /**
      * @brief Compresses the specified raw data with a default options.

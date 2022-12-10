@@ -18,6 +18,9 @@
 
 class IThreadImpListener
 {
+protected:
+    virtual ~IThreadImpListener() = default;
+
 public:
     virtual void RunImp() = 0;
 };

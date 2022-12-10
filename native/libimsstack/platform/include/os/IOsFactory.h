@@ -49,6 +49,9 @@ class SslCertificate;
 
 class IOsFactory
 {
+protected:
+    virtual ~IOsFactory() = default;
+
 public:
     virtual void Destroy() = 0;
     // Platform: common
