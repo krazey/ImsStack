@@ -63,7 +63,7 @@ public class UceOptionsRequestControllerTest {
 
     private final TestUceJni mUceJni = new TestUceJni();
 
-    private class TestUceJni extends UceJNI {
+    private static class TestUceJni extends UceJNI {
         public IUceJNIListener mUceJniListener;
         public TestUceJni() {
             super();

@@ -2,8 +2,8 @@ package com.android.imsstack.enabler.uce.interf;
 
 import android.content.Context;
 
-import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.enabler.uce.impl.UceImpl;
+import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ public class UceManager {
                 return mUceApi;
             }
             if (mSimSlotListMap.get(nSimSlot) == null) {
-                mUceApi = new UceImpl(context, nSimSlot);
+                mUceApi = new UceImpl(nSimSlot);
                 mSimSlotListMap.put(nSimSlot, mUceApi);
                 ImsLog.i("create UceImpl for simSlot : " + nSimSlot);
                 return mUceApi;

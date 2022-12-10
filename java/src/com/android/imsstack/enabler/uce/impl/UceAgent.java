@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.uce.impl;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,7 +32,6 @@ import com.android.imsstack.enabler.uce.impl.define.UceOptionsReceivedData;
 import com.android.imsstack.enabler.uce.impl.define.UceResponseData;
 import com.android.imsstack.enabler.uce.impl.jni.IUceJNIListener;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
-import com.android.imsstack.enabler.uce.impl.options.UceOptionsRequestController;
 import com.android.imsstack.enabler.uce.impl.options.UceOptionsResponseCallback;
 import com.android.imsstack.enabler.uce.impl.publish.UcePublishRequestController;
 import com.android.imsstack.enabler.uce.impl.subscribe.UceSubscribeRequestController;
@@ -55,7 +53,6 @@ interface UceAgentMessageHandler {
 }
 
 public class UceAgent extends Thread implements IUceJNIListener {
-    private final Context mContext;
     private final int mSlotId;
 
     private final HashMap<Integer, UceAgentMessageHandler> mMessageHandler =
@@ -68,7 +65,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
     private UceEventListener mUceEventListener;
     private UcePublishRequestController mUcePublishRequestController;
     private UceSubscribeRequestController mUceSubscribeRequestController;
-    private UceOptionsRequestController mUceOptionsRequestController;
+    //private UceOptionsRequestController mUceOptionsRequestController;
     private UceConfiguration mUceConfiguration;
 
     private int mRegistrationTech = UceConstant.RADIO_TECHNOLOGY_TYPE_UNKNOWN;
@@ -78,15 +75,14 @@ public class UceAgent extends Thread implements IUceJNIListener {
     private UceJNI mUceJNI;
     private IPreference mPf;
 
-    public UceAgent(Context context, String name, int nSimSlot) {
-        this(context, name, nSimSlot, UceJNI.getInstance());
+    public UceAgent(String name, int nSimSlot) {
+        this(name, nSimSlot, UceJNI.getInstance());
     }
 
     @VisibleForTesting
-    public UceAgent(Context context, String name, int nSimSlot, UceJNI jni) {
+    public UceAgent(String name, int nSimSlot, UceJNI jni) {
         super(name);
         mSlotId = nSimSlot;
-        mContext = context;
         mUceEventListener = null;
         mUceJNI = jni;
         mUceJNI.init(mSlotId);
@@ -96,7 +92,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
         ImsLog.i(mSlotId, "run()");
         Looper.prepare();
         mLoop = Looper.myLooper();
-        mUceAgentHandler = new UceAgentHandler();
+        mUceAgentHandler = new UceAgentHandler(mLoop);
         initialize();
         Looper.loop();
         deInitialize();
@@ -152,12 +148,12 @@ public class UceAgent extends Thread implements IUceJNIListener {
      * The user capabilities of one or multiple contacts have been requested by the framework.
      * <p>
      * The implementer must follow up this call with an
-     * {@link SubscribeResponse#onCommandError} call to indicate this operation has failed.
+     * {@link SubscribeResponse#onCommandError(int)} call to indicate this operation has failed.
      * The response from the network to the SUBSCRIBE request must be sent back to the framework
      * using {@link SubscribeResponse#onNetworkResponse(int, String)}.
      * As NOTIFY requests come in from the network, the requested contact’s capabilities should be
      * sent back to the framework using
-     * {@link SubscribeResponse#onNotifyCapabilitiesUpdate(List<String>}) and
+     * {@link SubscribeResponse#onNotifyCapabilitiesUpdate(List<String>)} and
      * {@link SubscribeResponse#onResourceTerminated(List<Pair<Uri, String>>)}
      * should be called with the presence information for the contacts specified.
      * <p>
@@ -278,7 +274,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
         ImsLog.d(mSlotId, "initialize");
         mUcePublishRequestController = new UcePublishRequestController(mSlotId, mLoop);
         mUceSubscribeRequestController = new UceSubscribeRequestController(mSlotId, mLoop);
-        mUceOptionsRequestController = new UceOptionsRequestController(mSlotId, mLoop);
+        //mUceOptionsRequestController = new UceOptionsRequestController(mSlotId, mLoop);
 
         mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_CONNECTED_IND);
         mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_DISCONNECTED_IND);
@@ -309,9 +305,8 @@ public class UceAgent extends Thread implements IUceJNIListener {
     }
 
     class UceAgentHandler extends Handler {
-
-        public UceAgentHandler() {
-            super();
+        UceAgentHandler(Looper looper) {
+            super(looper);
             /* speicial Message handler */
             // associated with Always on Service
             mMessageHandler.put(UceMessage.UCE_MSG_IMS_AGENT_CONNECTED, mUceAgentMsgHandler);

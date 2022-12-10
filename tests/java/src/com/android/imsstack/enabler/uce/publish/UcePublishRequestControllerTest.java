@@ -63,7 +63,7 @@ public class UcePublishRequestControllerTest {
 
     private final TestUceJni mUceJni = new TestUceJni();
 
-    private class TestUceJni extends UceJNI {
+    private static class TestUceJni extends UceJNI {
         public IUceJNIListener mUceJniListener;
         public TestUceJni() {
             super();
@@ -322,7 +322,6 @@ public class UcePublishRequestControllerTest {
     @Test
     @SmallTest
     public void test_getFileTransferAndCallComposerCapability() throws Exception {
-        String pidfXml = getFileTransferAndCallComposerPidfxml();
         long capability = UceServiceIds.SERVICE_ID_FILE_TRANSFER;
         capability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_THUMBNAIL;
         capability |= UceServiceIds.SERVICE_ID_FILE_TRANSFER_HTTP;

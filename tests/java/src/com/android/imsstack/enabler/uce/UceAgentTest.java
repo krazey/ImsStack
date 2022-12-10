@@ -27,7 +27,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Parcel;
@@ -72,7 +71,6 @@ public class UceAgentTest extends ImsStackTest {
     private static final int SLOT_ID = 0;
     private static final int testKey = 100;
     private static final String number = "123456";
-    @Mock Context mContext;
     @Mock UceEventListener listener;
     @Mock PublishResponse publihsCb;
     @Mock SubscribeResponse subscribeCb;
@@ -83,7 +81,7 @@ public class UceAgentTest extends ImsStackTest {
 
     private TestUceJni mUceJni;
 
-    private class TestUceJni extends UceJNI {
+    private static class TestUceJni extends UceJNI {
         public IUceJNIListener mUceJniListener;
         private CountDownLatch mLatch;
         public TestUceJni() {
@@ -459,7 +457,7 @@ public class UceAgentTest extends ImsStackTest {
     }
 
     private UceAgent createUceAgent() {
-        return new UceAgent(mContext, "UceTest", SLOT_ID, mUceJni);
+        return new UceAgent("UceTest", SLOT_ID, mUceJni);
     }
 
     private void waitForHandlerActionDelayed(Handler h, long timeoutMillis, long delayMs) {

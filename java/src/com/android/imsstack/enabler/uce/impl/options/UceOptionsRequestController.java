@@ -209,9 +209,8 @@ public class UceOptionsRequestController implements IUceJNIListener {
             ImsLog.e(mSlotId, "ClassCastException:" + e.toString());
         } catch (NullPointerException e) {
             ImsLog.e(mSlotId, "NullPointerException:" + e.toString());
-        } finally {
-            return request;
         }
+        return request;
     }
 
     private void removeOptionsRequest(int key) {
@@ -224,8 +223,6 @@ public class UceOptionsRequestController implements IUceJNIListener {
             ImsLog.e(mSlotId, "NullPointerException:" + e.toString());
         } catch (UnsupportedOperationException e) {
             ImsLog.e(mSlotId, "UnsupportedOperationException:" + e.toString());
-        } finally {
-            return;
         }
     }
 

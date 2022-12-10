@@ -34,7 +34,7 @@ public interface PublishResponse {
    * @param reasonHeaderText The “text” parameter of the “reason” header
    * included in the SIP message.
    */
-    void onNetworkResponse(int sipCode, String reason, int reasonHeaderCause,
+    void onNetworkResponse(int sipCode, String reasonPhrase, int reasonHeaderCause,
         String reasonHeaderText);
 
   /**

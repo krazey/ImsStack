@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.uce.impl;
 
-import android.content.Context;
 import android.net.Uri;
 
 import com.android.imsstack.enabler.uce.interf.IUceApi;
@@ -33,9 +32,9 @@ public class UceImpl implements IUceApi{
 
     private UceAgent mUceAgent = null;
 
-    public UceImpl(Context context, int nSimSlot){
+    public UceImpl(int nSimSlot) {
         ImsLog.d(nSimSlot, "Create UceImpl");
-        mUceAgent = new UceAgent(context, "UceAgentThread" + nSimSlot, nSimSlot);
+        mUceAgent = new UceAgent("UceAgentThread" + nSimSlot, nSimSlot);
         if (mUceAgent.isAlive() == false) {
             ImsLog.d(nSimSlot, "UceAgent Thread isn't alive");
             mUceAgent.start();
