@@ -20,6 +20,9 @@
 
 class IXmlTransactionListener
 {
+protected:
+    virtual ~IXmlTransactionListener() = default;
+
 public:
     /**
      * @brief Notifies the application that parsing XML document is completed.

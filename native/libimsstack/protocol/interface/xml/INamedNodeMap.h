@@ -25,6 +25,9 @@
  */
 class INamedNodeMap
 {
+protected:
+    virtual ~INamedNodeMap() = default;
+
 public:
     /**
      * @brief Returns the number of nodes in this map.

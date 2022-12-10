@@ -27,6 +27,9 @@ class IElement;
  */
 class IAttr : public INode
 {
+protected:
+    virtual ~IAttr() = default;
+
 public:
     /**
      * @brief Returns the name of this attribute.

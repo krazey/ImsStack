@@ -31,6 +31,9 @@
  */
 class ICharacterData : public INode
 {
+protected:
+    virtual ~ICharacterData() = default;
+
 public:
     /**
      * @brief Appends the string to the end of the character data of the node.

@@ -33,6 +33,9 @@ class INodeList;
  */
 class INode
 {
+protected:
+    virtual ~INode() = default;
+
 public:
     /**
      * @brief Adds a new child node to the end of the list of children of this node.

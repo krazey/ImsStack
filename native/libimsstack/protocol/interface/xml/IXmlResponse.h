@@ -22,6 +22,9 @@ class IDocument;
 
 class IXmlResponse
 {
+protected:
+    virtual ~IXmlResponse() = default;
+
 public:
     /**
      * @brief Returns a parsed XML document.

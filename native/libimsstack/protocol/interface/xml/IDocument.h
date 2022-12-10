@@ -32,6 +32,9 @@ class IText;
  */
 class IDocument : public INode
 {
+protected:
+    virtual ~IDocument() = default;
+
 public:
     /**
      * @brief Attempts to adopt a node from another document to this document.

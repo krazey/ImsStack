@@ -24,6 +24,9 @@ class IXmlTransactionListener;
 
 class IXmlTransaction
 {
+protected:
+    virtual ~IXmlTransaction() = default;
+
 public:
     /**
      * @brief Returns an XML request for this transaction.

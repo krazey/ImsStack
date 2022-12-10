@@ -20,6 +20,9 @@
 
 class IXmlStateListener
 {
+protected:
+    virtual ~IXmlStateListener() = default;
+
 public:
     /**
      * @brief Notifies the application that the state of XML transaction provider is changed.

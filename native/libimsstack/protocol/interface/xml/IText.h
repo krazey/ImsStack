@@ -26,6 +26,9 @@
  */
 class IText : public ICharacterData
 {
+protected:
+    virtual ~IText() = default;
+
 public:
     /**
      * @brief Breaks this node into two nodes at the specified offset,

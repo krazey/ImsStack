@@ -20,6 +20,9 @@
 
 class IXmlRequest
 {
+protected:
+    virtual ~IXmlRequest() = default;
+
 public:
     /**
      * @brief Sets a raw XML string.
