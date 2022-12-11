@@ -266,10 +266,9 @@ public:
     {
         return GetUtils().AddValueIfNotExists(piMessage, strValue, eHeaderType, strHeaderName);
     }
-    inline static IMS_RESULT GenerateContentId(IN const AString& strHost, OUT AString& strContentId,
-            IN IMS_BOOL bAngleQuote = IMS_FALSE)
+    inline static IMS_RESULT GenerateContentId(IN const AString& strHost, OUT AString& strContentId)
     {
-        strContentId = GetUtils().GenerateContentId(strHost, bAngleQuote);
+        strContentId = GetUtils().GenerateContentId(strHost);
         return strContentId.GetLength() <= 0 ? IMS_FAILURE : IMS_SUCCESS;
     }
     inline static IMS_RESULT SetResourceListByConfUser(IN_OUT IMessage* piMessage,

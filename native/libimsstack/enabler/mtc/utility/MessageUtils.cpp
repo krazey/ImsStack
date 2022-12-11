@@ -34,7 +34,6 @@
 #include "TextParser.h"
 #include "conferencecall/ConferenceDef.h"
 #include "media/IMedia.h"
-#include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
 
@@ -806,8 +805,7 @@ PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
             continue;
         }
 
-        ByteArray objContent;
-        objContent = piBodyPart->GetContent();
+        ByteArray objContent = piBodyPart->GetContent();
         // TODO: remove or check necessity
         objContent.Append(TextParser::CHAR_CR);
         objContent.Append(TextParser::CHAR_LF);
@@ -894,6 +892,21 @@ PUBLIC IMS_BOOL MessageUtils::IsInitialRegistrationRequired(IN const IMessage* p
     return IMS_FALSE;
 }
 
+PUBLIC IMS_BOOL MessageUtils::IsInitialEmergencyRegistrationRequired(IN const IMessage* piMessage)
+{
+    Ims3gpp objIms3gpp;
+    GetIms3gppFromBody(piMessage, objIms3gpp);
+    if (objIms3gpp.GetAlternativeService().GetType() ==
+                    Ims3gpp::AlternativeService::TYPE_EMERGENCY &&
+            objIms3gpp.GetAlternativeService().GetAction() ==
+                    Ims3gpp::AlternativeService::ACTION_EMERGENCY_REGISTRATION)
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
 // TODO: remove either ContainsValue or HasValue
 PUBLIC IMS_BOOL MessageUtils::ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
@@ -959,13 +972,7 @@ PUBLIC IMS_BOOL MessageUtils::ContainsTag(IN const AString& strHeader, IN const 
         return IMS_TRUE;
     }
 
-    // TODO, MTC BUILD
-    // AString strDecodedHeader = UCEscape::Decode((IMS_CHAR *)strHeader.GetStr());
-    AString strDecodedHeader;
-    if (strDecodedHeader.Contains(strTag))
-    {
-        return IMS_TRUE;
-    }
+    // TODO, Decode if escaped string.
 
     return IMS_FALSE;
 }
@@ -1035,17 +1042,11 @@ PUBLIC IMS_RESULT MessageUtils::AddValueIfNotExists(IN IMessage* piMessage,
     return piSipMessage->AddHeader(eHeaderType, strValue, strHeaderName);
 }
 
-PUBLIC AString MessageUtils::GenerateContentId(
-        IN const AString& strHost, IN IMS_BOOL bAngleQuote /*= IMS_FALSE*/)
+PUBLIC AString MessageUtils::GenerateContentId(IN const AString& strHost)
 {
     AString strContentId;
     IMS_UINT32 nRandom = IMS_SYS_GetSRandom0();
     IMS_UINT32 nMicroSeconds = IMS_SYS_GetTimeInMicroSeconds();
-
-    if (bAngleQuote)
-    {
-        strContentId.Append(TextParser::CHAR_LAQUOT);
-    }
 
     if (strHost.GetLength() < 1)
     {
@@ -1054,11 +1055,6 @@ PUBLIC AString MessageUtils::GenerateContentId(
     else
     {
         strContentId.Sprintf("%05x%05x@%s", nMicroSeconds, nRandom, strHost.GetStr());
-    }
-
-    if (bAngleQuote)
-    {
-        strContentId.Append(TextParser::CHAR_RAQUOT);
     }
 
     return strContentId;
@@ -1103,10 +1099,8 @@ PUBLIC IMS_RESULT MessageUtils::SetResourceListByConfUser(IN_OUT IMessage* piMes
                 case COPYCONTROLTYPE_CC:
                     objXml += "\"cc\"";
                     break;
-                case COPYCONTROLTYPE_BCC:
+                default:  // COPYCONTROLTYPE_BCC:
                     objXml += "\"bcc\"";
-                    break;
-                default:
                     break;
             }
 

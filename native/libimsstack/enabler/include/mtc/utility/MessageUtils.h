@@ -103,6 +103,7 @@ public:
     IMS_BOOL HasSdp(IN const IMessage* piMessage) override;
     IMS_BOOL IsFocusConf(IN const IMessage* piMessage) override;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage* piMessage) override;
+    IMS_BOOL IsInitialEmergencyRegistrationRequired(IN const IMessage* piMessage) override;
     IMS_BOOL ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
@@ -120,8 +121,7 @@ public:
     IMS_RESULT AddValueIfNotExists(IN IMessage* piMessage, IN const AString& strValue,
             IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull()) override;
-    AString GenerateContentId(
-            IN const AString& strHost, IN IMS_BOOL bAngleQuote = IMS_FALSE) override;
+    AString GenerateContentId(IN const AString& strHost) override;
     IMS_RESULT SetResourceListByConfUser(IN_OUT IMessage* piMessage, IN const AString& strContentId,
             IN ImsList<ConfUser*>& lstConfUser, IN IMS_BOOL bMultiPart,
             IN IMS_BOOL bCopyControl = IMS_TRUE) override;

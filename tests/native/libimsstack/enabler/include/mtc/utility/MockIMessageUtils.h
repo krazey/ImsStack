@@ -89,6 +89,7 @@ public:
     MOCK_METHOD(IMS_BOOL, HasSdp, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsFocusConf, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsInitialRegistrationRequired, (IN const IMessage*), (override));
+    MOCK_METHOD(IMS_BOOL, IsInitialEmergencyRegistrationRequired, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, ContainsValue,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_BOOL, HasValue,
@@ -102,8 +103,7 @@ public:
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
     MOCK_METHOD(IMS_RESULT, AddValueIfNotExists,
             (IN IMessage*, IN const AString&, IN IMS_SINT32, IN const AString&), (override));
-    MOCK_METHOD(
-            AString, GenerateContentId, (IN const AString&, IN IMS_BOOL bAngleQuote), (override));
+    MOCK_METHOD(AString, GenerateContentId, (IN const AString&), (override));
     MOCK_METHOD(IMS_RESULT, SetResourceListByConfUser,
             (IN_OUT IMessage*, IN const AString&, IN ImsList<ConfUser*>&, IN IMS_BOOL, IN IMS_BOOL),
             (override));
