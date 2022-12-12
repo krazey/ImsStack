@@ -24,6 +24,8 @@
 class IAosSubscriptionListener
 {
 public:
+    virtual ~IAosSubscriptionListener(){};
+
     /**
      * @brief Notifies the application that the state is changed.
      *
