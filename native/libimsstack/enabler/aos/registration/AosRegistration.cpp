@@ -1076,7 +1076,7 @@ PROTECTED VIRTUAL void AosRegistration::CleanUp()
 {
     A_IMS_TRACE_D(REGID, "CleanUp", 0, 0, 0);
 
-    Destroy();
+    DestroyEx();
 
     StopTimer(TIMER_OFFLINE_RECOVER);
 
