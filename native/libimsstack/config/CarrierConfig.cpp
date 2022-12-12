@@ -708,8 +708,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[
         "remove_old_sa_on_establishing_sa_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL[] =
         "required_cdmaless_feature_tag_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL[] =
-        "required_emc_reg_in_roaming_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL[] =
         "required_init_reg_after_ims_call_end_on_reg_held_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL[] =
@@ -769,6 +767,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT[] =
         "reg_timer_for_emc_call_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT[] =
         "rereg_retry_305_policy_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT[] =
+        "roaming_preferred_emc_reg_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT[] =
         "sip_message_threshold_for_transport_change_int";
 

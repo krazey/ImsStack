@@ -42,7 +42,6 @@ public:
     MOCK_METHOD(IMS_BOOL, IsTtySupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVopsIgnoredForVolteEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsAvailableWithoutVoiceCapability, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsRequiredEmcRegInRoaming, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredWfcBlockByAirplaneMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReregRetryWithChangedCountryOnWifi, (), (const, override));
@@ -101,6 +100,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRegistrationPrivateHeader, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegActualWaitTimePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegOutOfServicePolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRoamingPreferredEmcReg, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSipMessageThresholdForTransportChange, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetrySip305CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetReregRetrySip305CodePolicy, (), (const, override));

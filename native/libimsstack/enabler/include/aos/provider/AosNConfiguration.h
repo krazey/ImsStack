@@ -57,7 +57,6 @@ public:
     IMS_BOOL IsTtySupported() const override;
     IMS_BOOL IsVopsIgnoredForVolteEnabled() const override;
     IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const override;
-    IMS_BOOL IsRequiredEmcRegInRoaming() const override;
     IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const override;
     IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const override;
     IMS_BOOL IsReregRetryWithChangedCountryOnWifi() const override;
@@ -113,6 +112,7 @@ public:
     IMS_SINT32 GetRegistrationPrivateHeader() const override;
     IMS_SINT32 GetRegActualWaitTimePolicy() const override;
     IMS_SINT32 GetRegOutOfServicePolicy() const override;
+    IMS_SINT32 GetRoamingPreferredEmcReg() const override;
     IMS_SINT32 GetSipMessageThresholdForTransportChange() const override;
     IMS_SINT32 GetRegRetrySip305CodePolicy() const override;
     IMS_SINT32 GetReregRetrySip305CodePolicy() const override;

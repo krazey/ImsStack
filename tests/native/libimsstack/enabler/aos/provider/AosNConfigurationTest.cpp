@@ -428,9 +428,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_EMC_REG_IN_ROAMING_BOOL, IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
                                KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL,
                     IMS_FALSE))
@@ -532,6 +529,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             .WillOnce(Return(0));
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REREG_RETRY_305_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT));
+    EXPECT_CALL(
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT, -1))
+            .WillOnce(Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
             .WillOnce(Return(200));
@@ -656,7 +656,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(pAosNConfiguration->IsRegRetryWithIpVerFallback());
     EXPECT_FALSE(pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
     EXPECT_TRUE(pAosNConfiguration->IsRegRequiredAfterImsCallEndOnRegHeld());
-    EXPECT_FALSE(pAosNConfiguration->IsRequiredEmcRegInRoaming());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredWfcBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsReregRetryWithChangedCountryOnWifi());
@@ -696,6 +695,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(0, pAosNConfiguration->GetRegTimerForEmcCall());
     EXPECT_EQ(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT,
             pAosNConfiguration->GetReregRetrySip305CodePolicy());
+    EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL,
+            pAosNConfiguration->GetRoamingPreferredEmcReg());
     EXPECT_EQ(200, pAosNConfiguration->GetSipMessageThresholdForTransportChange());
 
     IMSVector<IMS_SINT32> objWaitTime = pAosNConfiguration->GetEmergencyPcscfRetryWaitTime();

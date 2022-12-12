@@ -143,16 +143,6 @@ public:
     virtual IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const = 0;
 
     /**
-     * @brief Check if emergency registration is required in roaming
-     *
-     * @return IMS_TRUE if required, IMS_FALSE if not required.
-     * @note If 'true' is returned,
-     *       emergency registration should be performed in the roaming network
-     *       regardless of whether emergency registration is used in the home network.
-     */
-    virtual IMS_BOOL IsRequiredEmcRegInRoaming() const = 0;
-
-    /**
      * @brief Check if VoLTE service block by Airplane mode is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.
@@ -655,6 +645,25 @@ public:
      * @return IMS_SINT32 Return the out of service policy
      */
     virtual IMS_SINT32 GetRegOutOfServicePolicy() const = 0;
+
+    /**
+     * @brief Check what registration rule is required in making an emergency call in roaming.
+     *
+     *       Specify the preferred policy for emergency registration in roaming.
+     *       Return value is to follow used configuration in GetPreferredEmergencyRegistration().
+     *       (Additionally, PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED config is added
+     *        for this function.)
+     *        Possible values are,
+     *        CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED
+     *        CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP
+     *        CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL
+     *        CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK
+     * @note  If 'PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED' is returned,
+     *        the UE in roaming follows the same rule as the home.
+     *
+     * @return IMS_SINT32 Return the emerrgency registration policy in roaming
+     */
+    virtual IMS_SINT32 GetRoamingPreferredEmcReg() const = 0;
 
     /**
      * @brief Get the SIP message threshold size caused by the transport change
