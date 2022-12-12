@@ -109,8 +109,6 @@ protected:
 
     void Init() { m_pAosHandleMts->Init(); }
 
-    void CleanUp() { m_pAosHandleMts->CleanUp(); }
-
     void SetBlocked(IN IMS_BOOL bBlocked) { m_pAosHandleMts->m_bBlocked = bBlocked; }
 
     IMS_BOOL IsBlocked() { return m_pAosHandleMts->AosHandle::IsBlocked(); }
@@ -207,7 +205,7 @@ TEST_F(AosHandleMtsTest, InitializeSupportedRats_Test)
                     NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE | NW_REPORT_RADIO_NR));
 }
 
-TEST_F(AosHandleMtsTest, Init_CleanUp_Test)
+TEST_F(AosHandleMtsTest, Init_Test)
 {
     IMSVector<IMS_SINT32> objTestRats;
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
@@ -236,11 +234,6 @@ TEST_F(AosHandleMtsTest, Init_CleanUp_Test)
     EXPECT_EQ(GetSupportedRats(), (NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_NR));
     EXPECT_FALSE(IsBlocked());
     EXPECT_TRUE(m_pAosHandleMts->GetFeatureTagList().HasFeature(ImsAosFeature::SMSIP));
-    EXPECT_TRUE(GetAosInfo() != nullptr);
-
-    CleanUp();
-
-    EXPECT_TRUE(GetAosInfo() == nullptr);
 }
 
 TEST_F(AosHandleMtsTest, InitializeServiceBlock_Test)

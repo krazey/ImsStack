@@ -105,13 +105,6 @@ PROTECTED VIRTUAL void AosHandleMts::Init()
     AosHandle::Init();
 }
 
-PROTECTED VIRTUAL void AosHandleMts::CleanUp()
-{
-    A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
-
-    AosHandle::CleanUp();
-}
-
 /* jryou::TODO
 PROTECTED VIRTUAL
 void AosHandleMts::EnableAoS()
