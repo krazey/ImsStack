@@ -222,17 +222,14 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
 
     InitMediaSession();
-
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    objPreconditionManager.CreateQos(piSession);
-    UpdateSupportingPrecondition(piSession, piMessage, IMS_FALSE);
+    m_objContext.GetPreconditionManager().CreateQos(piSession);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
-    objPreconditionManager.StartQosTimer(piSession);
+    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     if (IsRprSupported() &&
             !m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE))

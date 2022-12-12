@@ -78,14 +78,12 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    objPreconditionManager.StartQosTimer(piSession);
-
-    QosCheckType eCheckType = (objPreconditionManager.IsPreconditionSupported(piSession))
-            ? QosCheckType::ALL_STATUS
-            : QosCheckType::LOCAL_STATUS;
-    if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
+    if (objPreconditionManager.IsPreconditionRequiredToAlertUser())
     {
-        return GetStateName();
+        if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
+        {
+            return GetStateName();
+        }
     }
 
     SendIncomingCallReceived();
@@ -127,14 +125,12 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    objPreconditionManager.StartQosTimer(piSession);
-
-    QosCheckType eCheckType = (objPreconditionManager.IsPreconditionSupported(piSession))
-            ? QosCheckType::ALL_STATUS
-            : QosCheckType::LOCAL_STATUS;
-    if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
+    if (objPreconditionManager.IsPreconditionRequiredToAlertUser())
     {
-        return GetStateName();
+        if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
+        {
+            return GetStateName();
+        }
     }
 
     SendIncomingCallReceived();
@@ -163,14 +159,12 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    objPreconditionManager.StartQosTimer(piSession);
-
-    QosCheckType eCheckType = (objPreconditionManager.IsPreconditionSupported(piSession))
-            ? QosCheckType::ALL_STATUS
-            : QosCheckType::LOCAL_STATUS;
-    if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
+    if (objPreconditionManager.IsPreconditionRequiredToAlertUser())
     {
-        return GetStateName();
+        if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
+        {
+            return GetStateName();
+        }
     }
 
     SendIncomingCallReceived();
@@ -212,26 +206,19 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
         IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
-    if (!m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
-                MtcExtensionSet::OPTION_TAG_RPR))
-    {
-        return GetStateName();
-    }
-
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
-    if (piMessage == IMS_NULL)
-    {
-        IMS_TRACE_D("QosReserved : UE doesn't receive PRACK.", 0, 0, 0);
-        return GetStateName();
-    }
-
     IMS_TRACE_D("QosReserved : Media[%d] is reserved.", eMediaType, 0, 0);
+    if (piSession->GetPreviousRequest(IMessage::SESSION_PRACK) == IMS_NULL)
+    {
+        return GetStateName();
+    }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    QosCheckType eCheckType = (objPreconditionManager.IsPreconditionSupported(piSession))
-            ? QosCheckType::ALL_STATUS
-            : QosCheckType::LOCAL_STATUS;
-    if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
+    if (!objPreconditionManager.IsPreconditionRequiredToAlertUser())
+    {
+        return GetStateName();
+    }
+
+    if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
     {
         return GetStateName();
     }

@@ -24,13 +24,6 @@ enum class QosLossPolicy
     RELEASE = 2,
 };
 
-enum class QosCheckType
-{
-    ALL_STATUS = 0,
-    LOCAL_STATUS = 1,
-    REMOTE_STATUS = 2,
-};
-
 enum class QosStatus
 {
     IDLE = 0,
@@ -40,10 +33,11 @@ enum class QosStatus
 
 enum class QosTimerType
 {
-    WAIT_AVAILABLE = 0,
-    GUARD_INACTIVE = 1,
-    FORCE_AVAILABLE = 2,
+    WAIT_AUDIO_AVAILABLE = 0,
+    GUARD_AVAILABLE = 1,
+    GUARD_AFTER_LOST = 2,
     WAIT_AVAILABLE_AFTER_HANDOVER = 3,
+    FORCE_AVAILABLE = 4,
 };
 
 #endif

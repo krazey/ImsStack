@@ -122,18 +122,6 @@ protected:
         pParticipantInfo = new ParticipantInfo(objCallContext);
         ON_CALL(objCallContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
     }
-
-    void SetPreconditionReservationStatus(IN IMS_BOOL bReserved)
-    {
-        ON_CALL(objPreconditionManager,
-                IsResourceReserved(&objISession, QosCheckType::LOCAL_STATUS, IMS_FALSE))
-                .WillByDefault(Return(IMS_FALSE));
-        ON_CALL(objPreconditionManager, IsPreconditionSupported(&objISession))
-                .WillByDefault(Return(IMS_TRUE));
-        ON_CALL(objPreconditionManager,
-                IsResourceReserved(&objISession, QosCheckType::ALL_STATUS, IMS_FALSE))
-                .WillByDefault(Return(bReserved));
-    }
 };
 
 TEST_F(IncomingStateTest, TerminateInvokesTerminate)
@@ -163,10 +151,16 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdatedInvokesIncomingCallReceived)
 
     const SipMethod objMethod(SipMethod::INVITE);
     MakeIsPreviewOfAnswerReturnsTrue(objMethod);
-    SetPreconditionReservationStatus(IMS_FALSE);
+    ON_CALL(objPreconditionManager, IsPreconditionRequiredToAlertUser())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
     EXPECT_EQ(CallStateName::INCOMING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
 
-    SetPreconditionReservationStatus(IMS_TRUE);
+    ON_CALL(objPreconditionManager, IsPreconditionRequiredToAlertUser())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_TRUE));
     SetParamsForIncomingCallReceived();
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
     EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionEarlyMediaUpdated(&objISession));
@@ -188,7 +182,10 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUp
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
 
-    SetPreconditionReservationStatus(IMS_FALSE);
+    ON_CALL(objPreconditionManager, IsPreconditionRequiredToAlertUser())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(
             CallStateName::INCOMING, pIncomingState->SessionEarlyMediaUpdateReceived(&objISession));
@@ -203,7 +200,10 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedSendsIncomingCallReceiv
             .Times(1)
             .WillOnce(Return(IMS_SUCCESS));
 
-    SetPreconditionReservationStatus(IMS_TRUE);
+    ON_CALL(objPreconditionManager, IsPreconditionRequiredToAlertUser())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_TRUE));
 
     SetParamsForIncomingCallReceived();
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
@@ -278,7 +278,10 @@ TEST_F(IncomingStateTest, SessionPRAckReceivedInvokesRespondToPrackAndSendsIncom
     ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
-    SetPreconditionReservationStatus(IMS_TRUE);
+    ON_CALL(objPreconditionManager, IsPreconditionRequiredToAlertUser())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToAlertUser(&objISession))
+            .WillByDefault(Return(IMS_TRUE));
     SetParamsForIncomingCallReceived();
 
     EXPECT_EQ(CallStateName::ALERTING, pIncomingState->SessionPRAckReceived(&objISession));
@@ -302,7 +305,7 @@ TEST_F(IncomingStateTest, SessionPRAckReceivedInvokesRejectIncomingIfOfferAnswer
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
             .WillByDefault(Return(NegotiationResult::NO_ERROR));
-    ON_CALL(objPreconditionManager, UpdateQosAttributesFromRemoteSdp(&objISession))
+    ON_CALL(objPreconditionManager, OnSdpReceived(&objISession, &objIMessage))
             .WillByDefault(Return());
 
     const SipMethod objMethod = SipMethod::PRACK;

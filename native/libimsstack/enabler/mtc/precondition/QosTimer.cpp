@@ -62,15 +62,13 @@ PUBLIC VIRTUAL void QosTimer::Timer_TimerExpired(IN ITimer* piExpiredTimer)
         }
 
         QosTimerType eTimerType = m_objTimers.GetKeyAt(index);
-        m_pQosTimerListener->OnTimerExpired(this, eTimerType);
-
         m_objTimers.Remove(eTimerType);
         piTimer->KillTimer();
         TimerService::GetTimerService()->DestroyTimer(piTimer);
-
         IMS_TRACE_D("Timer_TimerExpired : Type[%s] removed. Timers size[%d]",
                 PS_QosTimerType(eTimerType), m_objTimers.GetSize(), 0);
 
+        m_pQosTimerListener->OnTimerExpired(this, eTimerType);
         return;
     }
 

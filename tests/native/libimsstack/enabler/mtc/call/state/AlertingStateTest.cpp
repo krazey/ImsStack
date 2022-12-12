@@ -263,7 +263,7 @@ TEST_F(AlertingStateTest, SessionStartedTerminatesCallIfOfferAnswerFails)
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
             .WillByDefault(Return(NegotiationResult::NO_ERROR));
-    ON_CALL(objPreconditionManager, UpdateQosAttributesFromRemoteSdp(&objISession))
+    ON_CALL(objPreconditionManager, OnSdpReceived(&objISession, &objIMessage))
             .WillByDefault(Return());
 
     SipMethod objMethod = SipMethod::ACK;
@@ -381,7 +381,7 @@ TEST_F(AlertingStateTest, SessionPRAckReceivedInvokesRejectIncomingIfOfferAnswer
             .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
     ON_CALL(objMediaManager, NegotiateSdp(&objISession))
             .WillByDefault(Return(NegotiationResult::NO_ERROR));
-    ON_CALL(objPreconditionManager, UpdateQosAttributesFromRemoteSdp(&objISession))
+    ON_CALL(objPreconditionManager, OnSdpReceived(&objISession, &objIMessage))
             .WillByDefault(Return());
 
     SipMethod objMethod = SipMethod::PRACK;
