@@ -128,57 +128,6 @@ public class IUMtcCall {
     public static final int VOLTE_CALL_STATE_ALERTING = 4;
     public static final int VOLTE_CALL_STATE_OFFHOOK = 5;
 
-    public class SpecialCode
-    {
-        public static final int SPCODE_NONE                            = 0;
-        public static final int SPCODE_USSD                         = 1;
-        public static final int SPCODE_PCFALL_REGI                     = 2;
-        public static final int SPCODE_PCFALL_ACTIVE                = 3;
-        public static final int SPCODE_PCFALL_DEACTIVE                = 4;
-        public static final int SPCODE_PCFALL_EARASE                = 5;
-        public static final int SPCODE_PCFALL_CHECK                    = 6;
-        public static final int SPCODE_PCFONLY_REGI                    = 7;
-        public static final int SPCODE_PCFONLY_ACTIVE                = 8;
-        public static final int SPCODE_PCFONLY_DEACTIVE                = 9;
-        public static final int SPCODE_PCFONLY_EARASE                = 10;
-        public static final int SPCODE_PCFONLY_CHECK                = 11;
-        public static final int SPCODE_CF_DELAY_REGI                = 12;
-        public static final int SPCODE_CF_DELAY_ACTIVE                = 13;
-        public static final int SPCODE_CF_DELAY_DEACTIVE             = 14;
-        public static final int SPCODE_CF_DELAY_EARASE                 = 15;
-        public static final int SPCODE_CF_DELAY_CHECK                 = 16;
-        public static final int SPCODE_CLIP_ACTIVE                    = 17;
-        public static final int SPCODE_CLIP_DEACTIVE                = 18;
-        public static final int SPCODE_CLIP_CHECK                    = 19;
-        public static final int SPCODE_CLIR_ACTIVE                    = 20;
-        public static final int SPCODE_CLIR_DEACTIVE                 = 21;
-        public static final int SPCODE_CLIR_CHECK                    = 22;
-        public static final int SPCODE_CW_ACTIVE                    = 23;
-        public static final int SPCODE_CW_DEACTIVE                    = 24;
-        public static final int SPCODE_CW_CHECK                        = 25;
-        public static final int SPCODE_CFU_REGI                     = 26;
-        public static final int SPCODE_CFU_ACTIVE                     = 27;
-        public static final int SPCODE_CFU_DEACTIVE                    = 28;
-        public static final int SPCODE_CFU_EARASE                    = 29;
-        public static final int SPCODE_CFU_CHECK                    = 30;
-        public static final int SPCODE_CFNRY_REGI                     = 31;
-        public static final int SPCODE_CFNRY_ACTIVE                    = 32;
-        public static final int SPCODE_CFNRY_DEACTIVE                = 33;
-        public static final int SPCODE_CFNRY_EARASE                    = 34;
-        public static final int SPCODE_CFNRY_CHECK                    = 35;
-        public static final int SPCODE_CFNRC_REGI                     = 36;
-        public static final int SPCODE_CFNRC_ACTIVE                    = 37;
-        public static final int SPCODE_CFNRC_DEACTIVE                = 38;
-        public static final int SPCODE_CFNRC_EARASE                    = 39;
-        public static final int SPCODE_CFNRC_CHECK                    = 40;
-        public static final int SPCODE_CFB_REGI                        = 41;
-        public static final int SPCODE_CFB_ACTIVE                     = 42;
-        public static final int SPCODE_CFB_DEACTIVE                    = 43;
-        public static final int SPCODE_CFB_EARASE                    = 44;
-        public static final int SPCODE_CFB_CHECK                    = 45;
-        public static final int SPCODE_IMEI_CHECK                    = 46;
-    };
-
     // Action
     public static final String ACTION_REMOTE_MEDIA =
             "com.android.imsstack.action.REMOTE_MEDIA";
