@@ -65,12 +65,12 @@ class UceSubscribe :
     ---------------------------------------------------------------------------------------------
   */
 public:
-    UceSubscribe(IN ICoreService* piCoreService, IN const AString& strAppName,
+    explicit UceSubscribe(IN ICoreService* piCoreService, IN const AString& strAppName,
             IN const AString& strManagerName, IN IMS_UINT32 conectedService,
             IN IMS_SINT32 nSimSlot = 0);
     virtual ~UceSubscribe();
     virtual IMS_RESULT MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
+            IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) override;
 
     IMS_BOOL QuerySingleCapability(IN AString strUser, IN IMS_UINT32 key);
     IMS_BOOL QueryMultiCapability(IN IMSList<AString> objUsers, IN IMS_UINT32 key);
@@ -79,16 +79,17 @@ public:
         Methods
     -------------------------------------------------------------------------------------------*/
 protected:
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
     // IWatcherListener - start
     virtual void SubscriptionForkedNotify(
-            IN ISubscription* piSubscription, IN ISubscription* piForkedSubscription);
-    virtual void SubscriptionNotify(IN ISubscription* piSubscription, IN IMessage* piNotify);
-    virtual void SubscriptionStarted(IN ISubscription* piSubscription);
-    virtual void SubscriptionStartFailed(IN ISubscription* piSubscription);
-    virtual void SubscriptionTerminated(IN ISubscription* piSubscription);
+            IN ISubscription* piSubscription, IN ISubscription* piForkedSubscription) override;
+    virtual void SubscriptionNotify(
+            IN ISubscription* piSubscription, IN IMessage* piNotify) override;
+    virtual void SubscriptionStarted(IN ISubscription* piSubscription) override;
+    virtual void SubscriptionStartFailed(IN ISubscription* piSubscription) override;
+    virtual void SubscriptionTerminated(IN ISubscription* piSubscription) override;
     // IWatcherListener - end
 
     virtual IMS_BOOL StateON_SingleSubscribeRequested(IN IMSMSG& objMsg);
@@ -114,16 +115,16 @@ private:
     void DestroySubscription();
     void SubscribeTerminated();
 
-    const IMS_CHAR* StateToString(IMS_UINT32 _eState);
+    static const IMS_CHAR* StateToString(IMS_UINT32 _eState);
 
     void SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString strReason,
-            IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText);
+            IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText) const;
     void SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError);
     void SendPresenceNotifyInd(IMSList<AString> pidfXmls);
     void SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUser*>* pList);
     void SendSubscribeTerminatedInd();
 
-    IMS_BOOL SetHeaderForSingleSubscription(IN_OUT ISipMessage* piSIPMessage);
+    IMS_BOOL SetHeaderForSingleSubscription(IN_OUT ISipMessage* piSIPMessage) const;
     AString GetListSubscribeUri();
     IMS_BOOL SetHeaderForListSubscription(
             IN_OUT ISipMessage* piSIPMessage, IN const AString& strListSubscriptionRequestUri);
@@ -133,7 +134,7 @@ private:
     IMS_BOOL SendSingleSubscribe();
     IMS_BOOL SendListSubscribe();
 
-    ISubscribeResponseData* GetSubscribeResponseData(ISipMessage* piMessage);
+    static ISubscribeResponseData* GetSubscribeResponseData(ISipMessage* piMessage);
 
     IMS_BOOL HandleRetryAfterHeader(ISipMessage* piSIPMessage);
     IMS_BOOL Handle403FailureResponse(ISipMessage* piSIPMessage);

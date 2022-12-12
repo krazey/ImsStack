@@ -19,7 +19,7 @@
 class UceAssetItems
 {
 public:
-    UceAssetItems() :
+    explicit UceAssetItems() :
             m_nExpireValuePublish(0),
             m_nExtendedExpireValuePublish(0),
             m_nPublishRefreshRatio(80),

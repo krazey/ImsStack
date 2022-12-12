@@ -13,30 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef UCE_FACTORY_H_
+#define UCE_FACTORY_H_
 
-#ifndef _IMS_UCE_SERVICE_H_
-#define _IMS_UCE_SERVICE_H_
+#include "ImsMap.h"
+#include "AString.h"
 
-#include "BaseService.h"
+class UceApp;
+/**
+ * @brief This is the factory class for Uce.
+ */
 
-class JniUceServiceThread;
-
-using namespace android;
-
-class JniUceService : public BaseService
+class UceFactory
 {
 public:
-    JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
-    virtual ~JniUceService();
+    UceFactory();
+    virtual ~UceFactory();
 
-    virtual int SendData(const Parcel& pParcel) override;
+    static void Start(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    static void Stop(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    static UceApp* GetUceApp(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
-private:
-    void HandleMessage(int nMsg, const Parcel& pParcel) override;
+protected:
+    static UceFactory* m_gpUceFactory;
 
-private:
-    JniUceServiceThread* m_pJniUceServiceThread;
-    AString m_strTarget;
+    /// <slot-id, ImsAosManager>
+    static IMSMap<IMS_SINT32, UceApp*> m_objManagers;
 };
 
-#endif  //_IMS_PEOPLE_SERVICE_H_
+#endif  // UCE_FACTORY_H_

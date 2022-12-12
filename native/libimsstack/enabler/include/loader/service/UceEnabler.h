@@ -33,9 +33,6 @@ public:
     // IEnabler class
     void Start() override;
     void Stop() override;
-
-private:
-    ImsApp* m_pApp;
 };
 
 #endif

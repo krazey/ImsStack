@@ -40,24 +40,25 @@ class UceXmlDocumentHelperThread :
     typedef IMS_BOOL (UceXmlDocumentHelperThread::*msgHandler)(IMSMSG& objMsg);
 
 public:
-    UceXmlDocumentHelperThread(IN const AString& strQueryName_, IN IMS_SINT32 nSimSlot = 0);
+    explicit UceXmlDocumentHelperThread(IN const AString& strQueryName, IN IMS_SINT32 nSimSlot = 0);
     virtual ~UceXmlDocumentHelperThread();
-    IMS_BOOL Start(IN const AString& strName, IN IMS_UINT32 _nIndex = 10);
+    IMS_BOOL Start(IN const AString& strName, IN IMS_UINT32 nIndex = 10);
     void Terminate();
     void SendMsg(IN IMS_UINT32 nMSG, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam);
-    virtual IMS_RESULT XmlTransaction_NotifyParsingCompleted(IN IXmlTransaction* piXMLTransaction);
-    virtual void XmlState_NotifyStateChanged();
+    virtual IMS_RESULT XmlTransaction_NotifyParsingCompleted(
+            IN IXmlTransaction* piXMLTransaction) override;
+    virtual void XmlState_NotifyStateChanged() override;
 
 protected:
     virtual IMS_BOOL Initialize();
-    virtual void Uninitialize();
     virtual IMS_BOOL OnStart(IN IMSMSG& objMSG);
     virtual IMS_BOOL OnTerminate(IN IMSMSG& objMSG);
     virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
     IThread* GetThread() const;
 
 private:
-    virtual IMS_BOOL Runnable_Run(IN IMSMSG& objMSG);
+    void Uninitialize();
+    virtual IMS_BOOL Runnable_Run(IN IMSMSG& objMSG) override;
     IMS_RESULT XMLDataTokenization(IN const ByteArray& objBytes);
     IMS_BOOL StartMessageHandler(IMSMSG& objMsg);
     IMS_BOOL TerminateMessageHandler(IMSMSG& objMsg);

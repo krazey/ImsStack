@@ -33,7 +33,7 @@ public:
 
 protected:
     virtual IMS_BOOL Initialize();
-    virtual void Uninitialize();
+    virtual void Uninitialize() override;
 
     virtual IMS_BOOL OnStart(IN IMSMSG& objMSG);
     virtual IMS_BOOL OnTerminate(IN IMSMSG& objMSG);

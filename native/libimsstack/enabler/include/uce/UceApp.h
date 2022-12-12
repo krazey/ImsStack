@@ -38,30 +38,28 @@ class UceApp :
     ---------------------------------------------------------------------------------------------
   */
 public:
-    UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName);
-    UceApp(IN const IMS_SINT32 nSlotId);
+    explicit UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName);
+    explicit UceApp(IN const IMS_SINT32 nSlotId);
     virtual ~UceApp();
     /* ------------------------------------------------------------------------------------------
         Methods
     ---------------------------------------------------------------------------------------------
-  */
-public:
-    static ImsApp* GetInstance(IN const IMS_SINT32 nSlotId);
+   */
 
 protected:
     virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);
     virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
     virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
-    virtual IImsActivityController* GetController();
+    virtual IImsActivityController* GetController() override;
     virtual IMS_BOOL Control(
-            IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam, OUT IMS_UINTP* pnOutParam);
-    void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo);
+            IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam, OUT IMS_UINTP* pnOutParam) override;
+    virtual void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo) override;
     void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
     void StopTimer(IN IMS_UINT32 nType);
     void ClearTimer();
 
     // ITimerListener Interface
-    void Timer_TimerExpired(IN ITimer* piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     virtual void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
     virtual void ImsAos_Connecting() override;
@@ -83,8 +81,6 @@ private:
     void NotifyRATChanged(void);
     void EnableAllAoSApps();
     void SelectActiveAoSApp();
-    static const IMS_CHAR* GetPrefixForMultiApp();
-    static AString GetUceAppName(IN IMS_SINT32 nSlotId);
     void SetPublishStatusToAos(IN IMS_BOOL bIsPublishStarted);
     void SendRegistrationRecoveryRequestToAos(IN IMS_UINT32 nAosControlType);
     void ImsRegistrationCheck(void);
@@ -126,5 +122,7 @@ private:
     IMS_SINT32 m_RegisteredNetwork;
     IMS_SINT32 m_eCurrentNetwork;
     UceService* m_pUceService;
+
+    static UceApp* m_gpUceApp;
 };
 #endif /* _UCE_APP_H_ */

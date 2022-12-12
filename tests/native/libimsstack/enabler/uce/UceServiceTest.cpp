@@ -56,7 +56,7 @@ public:
     void EnableManagers() { EnableManager(); }
     void DisableManagers() { DisableManager(); }
     IMS_BOOL SendMessage(IMSMSG objUIMsg) { return OnMessage(objUIMsg); }
-    IMS_BOOL IsNull(IMS_UINT32 manager)
+    IMS_BOOL IsNull(IMS_UINT32 manager) const
     {
         switch (manager)
         {

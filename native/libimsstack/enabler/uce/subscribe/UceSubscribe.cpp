@@ -1024,7 +1024,7 @@ const IMS_CHAR* UceSubscribe::StateToString(IMS_UINT32 _eState)
 }
 
 void UceSubscribe::SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString strReason,
-        IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText)
+        IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText) const
 {
     IUceSubResponseIndPrm* pParam = new IUceSubResponseIndPrm();
 
@@ -1123,7 +1123,7 @@ void UceSubscribe::SendSubscribeTerminatedInd()
     m_nKey = 0;
 }
 
-IMS_BOOL UceSubscribe::SetHeaderForSingleSubscription(IN_OUT ISipMessage* piSIPMessage)
+IMS_BOOL UceSubscribe::SetHeaderForSingleSubscription(IN_OUT ISipMessage* piSIPMessage) const
 {
     IMS_TRACE_D("SetHeaderForSingleSubscription", 0, 0, 0);
     if (piSIPMessage == IMS_NULL)
@@ -1308,10 +1308,10 @@ ISubscribeResponseData* UceSubscribe::GetSubscribeResponseData(ISipMessage* piMe
 {
     ISubscribeResponseData* pSubscribeResponseData = IMS_NULL;
 
-    IMS_SINT32 nReasonCause = -1;
-    AString strReasonText = "";
     if (piMessage != IMS_NULL)
     {
+        IMS_SINT32 nReasonCause = -1;
+        AString strReasonText = "";
         pSubscribeResponseData = new ISubscribeResponseData();
 
         IMS_TRACE_D("GetSubscribeResponseData:StatusCode[%d], reason[%s]",
@@ -1514,7 +1514,7 @@ void UceSubscribe::StartWaitingNotifyMessageTimer(IMS_UINT32 nDuration)
 {
     StopWaitingNotifyMessageTimer();
     m_pWaitNotifyMsgTimer = TimerService::GetTimerService()->CreateTimer();
-    if (m_pWaitNotifyMsgTimer == IMS_NULL || nDuration <= 0)
+    if (m_pWaitNotifyMsgTimer == IMS_NULL || nDuration == 0)
     {
         IMS_TRACE_I("StartWaitingNotifyMessageTimer:CreateTimer failed", 0, 0, 0);
         return;
@@ -1558,7 +1558,7 @@ void UceSubscribe::HandleWaitingNotifyMessageTimer()
 
 IMS_BOOL UceSubscribe::StartRetryAfterTimer(IMS_UINT32 nDuration)
 {
-    if (nDuration <= 0)
+    if (nDuration == 0)
     {
         IMS_TRACE_I("StartRetryAfterTimer:invalid duration[%d]", nDuration, 0, 0);
         return IMS_FALSE;

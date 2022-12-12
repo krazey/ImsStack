@@ -35,6 +35,7 @@
 #include "def/UceDef.h"
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
+PRIVATE GLOBAL UceApp* UceApp::m_gpUceApp = IMS_NULL;
 /* -------------------------------------------------------------------------------------------------
     Constructor, Destructor
 -------------------------------------------------------------------------------------------------
@@ -106,12 +107,6 @@ PUBLIC VIRTUAL UceApp::~UceApp()
     Methods
 -------------------------------------------------------------------------------------------------
 */
-PUBLIC
-ImsApp* UceApp::GetInstance(IN const IMS_SINT32 nSlotId)
-{
-    return new UceApp(nSlotId, GetUceAppName(nSlotId));
-}
-
 PROTECTED VIRTUAL IMS_BOOL UceApp::OnPreprocess(IN IMSMSG& objMSG)
 {
     (void)objMSG;
@@ -193,10 +188,9 @@ void UceApp::NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo)
         return;
     }
 
-    IMS_SINT32 nNetworkType = eUCE_RAT_INVALID;
     if (m_RegisteredNetwork != eUCE_RAT_WIFI)
     {
-        nNetworkType = ConvertNetworkType(m_piNetWatcherInfo->GetNetworkType());
+        IMS_SINT32 nNetworkType = ConvertNetworkType(m_piNetWatcherInfo->GetNetworkType());
         if (m_eCurrentNetwork != nNetworkType)
         {
             IMS_TRACE_I("NotifyNetWatcherStatus:NetworkType is changed [%d] -> [%d]",
@@ -209,8 +203,6 @@ void UceApp::NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo)
 
 void UceApp::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
-    IMS_UINTP nTimerID = 0;
-
     if (nType == TIMER_NETWORK_CHANGED)
     {
         if (m_piDeBounceTimer != IMS_NULL)
@@ -218,7 +210,7 @@ void UceApp::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
             StopTimer(TIMER_NETWORK_CHANGED);
         }
         m_piDeBounceTimer = TimerService::GetTimerService()->CreateTimer();
-        nTimerID = m_piDeBounceTimer->SetTimer(nDuration, this);
+        IMS_UINTP nTimerID = m_piDeBounceTimer->SetTimer(nDuration, this);
         IMS_TRACE_I("StartTimer:Type[%d], Duration[%d], Timer ID[%d] ", nType, nDuration, nTimerID);
         return;
     }
@@ -601,26 +593,6 @@ void UceApp::SelectActiveAoSApp()
         IMS_TRACE_I("SelectActiveAoSApp:AoS is changed [%p]>>[%p]", m_piImsAos, piActiveImsAos, 0);
         m_piImsAos = piActiveImsAos;
     }
-}
-
-PRIVATE
-const IMS_CHAR* UceApp::GetPrefixForMultiApp()
-{
-    return UceNamespace::UCE_APP_NAME_PREFIX;
-}
-
-PRIVATE
-AString UceApp::GetUceAppName(IN IMS_SINT32 nSlotId)
-{
-    if ((nSlotId <= IMS_SLOT_ANY) || (nSlotId >= IMS_SLOT_MAX))
-    {
-        nSlotId = IMS_SLOT_0;
-    }
-
-    // AString strName;
-    // strName.Sprintf("%s%02d", GetPrefixForMultiApp(), nSlotId);
-    AString strName(GetPrefixForMultiApp());
-    return strName;
 }
 
 PRIVATE

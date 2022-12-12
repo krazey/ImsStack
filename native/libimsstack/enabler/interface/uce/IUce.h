@@ -76,7 +76,11 @@ public:
 class IUceListSubCmdPrm
 {  // UCE_SEND_LIST_SUBSCRIBE_CMD
 public:
-    inline IUceListSubCmdPrm() { m_nKey = 0; }
+    inline IUceListSubCmdPrm()
+    {
+        m_nKey = 0;
+        m_nSize = 0;
+    }
     inline virtual ~IUceListSubCmdPrm() {}
 
 public:

@@ -25,7 +25,7 @@ class UceAssetItems;
 class UceConfig : public ICarrierConfigListener
 {
 public:
-    UceConfig();
+    explicit UceConfig();
     virtual ~UceConfig();
 
     static UceConfig* GetInstance();

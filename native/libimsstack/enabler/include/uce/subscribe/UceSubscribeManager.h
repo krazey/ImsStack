@@ -29,7 +29,7 @@ class UceSubscribeManager : public ImsActivityEx
     ---------------------------------------------------------------------------------------------
   */
 public:
-    UceSubscribeManager(IN const AString& strName, ICoreService* _piCoreService,
+    explicit UceSubscribeManager(IN const AString& strName, ICoreService* _piCoreService,
             IN const AString& strAppName, IN IMS_SINT32 nSimSlot);
     virtual ~UceSubscribeManager();
     /* ------------------------------------------------------------------------------------------

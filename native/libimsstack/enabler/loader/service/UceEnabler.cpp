@@ -16,15 +16,14 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-#include "UceApp.h"
+#include "UceFactory.h"
 #include "service/UceEnabler.h"
 
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
 PUBLIC
 UceEnabler::UceEnabler(IN IMS_SINT32 nSlotId) :
-        Enabler(nSlotId),
-        m_pApp(IMS_NULL)
+        Enabler(nSlotId)
 {
 }
 
@@ -37,16 +36,12 @@ PUBLIC VIRTUAL
 void UceEnabler::Start()
 {
     IMS_TRACE_D("Start", 0, 0, 0);
-    m_pApp = UceApp::GetInstance(GetSlotId());
+    UceFactory::Start(GetSlotId());
 }
 
 PUBLIC VIRTUAL
 void UceEnabler::Stop()
 {
     IMS_TRACE_D("Stop", 0, 0, 0);
-    if (m_pApp != IMS_NULL)
-    {
-        delete m_pApp;
-        m_pApp = IMS_NULL;
-    }
+    UceFactory::Stop(GetSlotId());
 }

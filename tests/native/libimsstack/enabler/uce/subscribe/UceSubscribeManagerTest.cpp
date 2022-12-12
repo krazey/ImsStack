@@ -42,7 +42,7 @@ public:
     }
     virtual ~TestUceSubscribeManager() {}
 
-    IMS_UINT32 GetListCount() { return m_objUceSubscribeList.GetSize(); }
+    IMS_UINT32 GetListCount() const { return m_objUceSubscribeList.GetSize(); }
 
     void AddUceSubscribe(UceSubscribe* pUceSubscribe)
     {
