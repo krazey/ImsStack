@@ -794,6 +794,7 @@ void OutgoingState::HandleCountrySpecificServiceUrn(IN IMessage* piMessage)
 {
     // If there is an alternative service URN in the Contact header of the 380 response,
     // it should be used to the subsequent emergency call.
+    IMS_TRACE_D("HandleCountrySpecificServiceUrn", 0, 0, 0);
 
     if ((piMessage->GetStatusCode() == SipStatusCode::SC_380) &&
             m_objContext.GetMessageUtils().IsHeaderPresent(piMessage, ISipHeader::CONTACT_NORMAL))
@@ -840,7 +841,7 @@ PRIVATE
 void OutgoingState::OnStartFailed(IN ISession* piSession, IN const CallReasonInfo& objReason)
 {
     // TODO : need to modify this after emergency domain selection policy is decided.
-    if (objReason.nCode == CODE_LOCAL_CALL_CS_RETRY_REQUIRED /*FAIL_REASON_SESSION_RETRY_R_RAT*/ &&
+    if (objReason.nCode == CODE_SIP_ALTERNATE_EMERGENCY_CALL &&
             objReason.nExtraCode == EXTRA_CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
     {
         HandleCountrySpecificServiceUrn(piSession->GetPreviousResponse(IMessage::SESSION_START));
