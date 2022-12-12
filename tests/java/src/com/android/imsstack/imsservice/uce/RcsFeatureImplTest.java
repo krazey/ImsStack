@@ -42,6 +42,10 @@ import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.android.imsstack.enabler.IContext;
+import com.android.imsstack.enabler.uce.impl.RcsCapOptionsResponseCallBack;
+import com.android.imsstack.enabler.uce.impl.RcsCapPublishResponseCallBack;
+import com.android.imsstack.enabler.uce.impl.RcsCapSubscribeResponseCallBack;
+import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.Log;
@@ -61,7 +65,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 @RunWith(JUnit4.class)
 public class RcsFeatureImplTest {
-    private RcsFeatureImpl mFeature;
+    private TestRcsFeatureImpl mFeature;
     private RcsFeature mRcsFeature;
     public static final int STATE_READY = 2;
     private int mSlotId = 1;
@@ -75,6 +79,11 @@ public class RcsFeatureImplTest {
     @Mock private CapabilityExchangeEventListener mCapabilityExchangeEventListener;
     @Mock protected CarrierConfigManager mMockCarrierConfigManager;
     @Mock protected SubscriptionManager mMockSubscriptionManager;
+    @Mock private RcsCapPublishResponseCallBack mRcsCapPublishResponseCallBack;
+    @Mock private RcsCapSubscribeResponseCallBack mRcsCapSubscribeResponseCallBack;
+    @Mock private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
+    @Mock private IUceApi mUceApi;
+
 
     @Mock
     private IBinder mTestBinder;
@@ -106,8 +115,9 @@ public class RcsFeatureImplTest {
         mMockContext = Mockito.spy(ApplicationProvider.getApplicationContext());
 
         mIContext = new ImsContext(mContextMock, executor, mSlotId);
+        AppContext.init(mMockContext);
         mRcsFeature = new RcsFeature(executor);
-        mFeature = new RcsFeatureImpl(mIContext);
+        mFeature = new TestRcsFeatureImpl(mIContext);
         mRcsFeature.initialize(mMockContext, mSlotId);
         mFeature.initialize(mMockContext, mSlotId);
         mFeature.setFeatureState(STATE_READY);
@@ -122,9 +132,8 @@ public class RcsFeatureImplTest {
 
     @Test
     public void createCapabilityExchangeImplTest() {
-        RcsCapabilityExchangeImplBase  rcsCapabilityExchangeImplBase =
-                mFeature.createCapabilityExchangeImpl(mCapabilityExchangeEventListener);
-        Assert.assertNotNull(rcsCapabilityExchangeImplBase);
+        Assert.assertNotNull(
+                mFeature.createCapabilityExchangeImpl(mCapabilityExchangeEventListener));
     }
 
     @Test
@@ -164,7 +173,6 @@ public class RcsFeatureImplTest {
 
         Mockito.when(mMockSubscriptionManager.getSubscriptionIds(anyInt()))
                 .thenReturn(new int[]{1});
-        AppContext.init(mMockContext);
         Mockito.doReturn(1).when(Mockito.mock(IContext.class)).getSubId();
 
         PersistableBundle bundle = new PersistableBundle();
@@ -202,8 +210,8 @@ public class RcsFeatureImplTest {
     }
 
     @After
-    public void tearDown()  {
-
+    public void tearDown() {
+        AppContext.deinit();
     }
 
     @After
@@ -214,5 +222,19 @@ public class RcsFeatureImplTest {
         mCapabilityExchangeEventListener = null;
         mMockCarrierConfigManager = null;
         mMockSubscriptionManager = null;
+    }
+
+    class TestRcsFeatureImpl extends RcsFeatureImpl {
+        TestRcsFeatureImpl(IContext iContext) {
+            super(iContext);
+        }
+
+        @Override
+        public RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(
+                CapabilityExchangeEventListener listener) {
+            return new RcsCapExchangeImpl(mCapabilityExchangeEventListener, mSlotId,
+                    mContext, mUceApi, mRcsCapSubscribeResponseCallBack,
+                    mRcsCapOptionsResponseCallBack, mRcsCapPublishResponseCallBack);
+        }
     }
 }
