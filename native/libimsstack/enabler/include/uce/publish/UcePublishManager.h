@@ -32,6 +32,7 @@
 class ICoreService;
 class IPublication;
 class ISipMessage;
+class IUceJniThread;
 
 class IPublicationData  // internal Param
 {
@@ -211,6 +212,7 @@ private:
     void ClearPendingPublishRequest();
     IMS_UINT32 GetState() const;
     static const IMS_CHAR* StateToString(IMS_UINT32 _eState);
+    IUceJniThread* GetJniThread();
     /* ------------------------------------------------------------------------------------------
         Variables
     ---------------------------------------------------------------------------------------------

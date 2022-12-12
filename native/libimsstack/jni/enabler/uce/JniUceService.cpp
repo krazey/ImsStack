@@ -24,42 +24,45 @@
 #include "IUce.h"
 #include "JniUceService.h"
 #include "JniUceServiceThread.h"
+#include "JniEnablerConnector.h"
 #include "ServiceMemory.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
+#include "IUceJni.h"
 
 __IMS_TRACE_TAG_USER_DECL__("IMS_UCE");
-
-static const AString STR_UCE_LISTENER_THREAD_NAME("JniUceServiceThread");
 
 JniUceService::JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot) :
         BaseService(nSimSlot)
 {
     IMS_TRACE_D("UCE_M : JniUceService = %" PFLS_u, sizeof(JniUceService), 0, 0);
     //---------------------------------------------------------------------------------------------
-    m_strTarget = EnablerUtils::GetEnablerThreadName(nSimSlot);
-    AString strName;
-    strName.Sprintf("UceApp%02d", nSimSlot);
-    m_strTarget.Append(".");
-    m_strTarget.Append(strName);
-    IMS_TRACE_D("JniUceService [%s]", m_strTarget.GetStr(), 0, 0);
 
     if (pfnSendDataToJava == NULL)
     {
         IMS_TRACE_E(0, "JniUceService:pfnSendDataToJava is null", 0, 0, 0);
+        return;
     }
-    ImsProcess::GetInstance()->LoadAppThread(
-            STR_UCE_LISTENER_THREAD_NAME, JniUceServiceThread::GetInstance, nSimSlot);
-    m_pJniUceServiceThread = DYNAMIC_CAST(JniUceServiceThread*,
-            ImsProcess::GetInstance()->GetApplicationThread(STR_UCE_LISTENER_THREAD_NAME));
-    if (m_pJniUceServiceThread != NULL)
+    AString strThreadName;
+    strThreadName.Sprintf("JniUceServiceThread%d", GetSlotId());
+
+    auto fnEntry = []() -> BaseThread*
     {
-        m_pJniUceServiceThread->SetCallback(reinterpret_cast<IMS_UINTP>(this), pfnSendDataToJava);
-    }
-    else
+        return new JniUceServiceThread();
+    };
+
+    ImsProcess::GetInstance()->LoadThread(strThreadName, fnEntry, GetSlotId());
+    m_pJniUceServiceThread =
+            DYNAMIC_CAST(JniUceServiceThread*, ImsProcess::GetInstance()->GetThread(strThreadName));
+
+    if (m_pJniUceServiceThread == IMS_NULL)
     {
-        IMS_TRACE_I("can't create listener thread", 0, 0, 0);
+        IMS_TRACE_E(0, "JniUceService : can't create listener thread", 0, 0, 0);
+        return;
     }
+
+    m_pJniUceServiceThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pfnSendDataToJava);
+    JniEnablerConnector::GetInstance().SetJniEnabler(GetSlotId(), EnablerType::UCE, this);
 }
 
 JniUceService::~JniUceService()
@@ -67,11 +70,18 @@ JniUceService::~JniUceService()
     IMS_TRACE_D("UCE_F : JniUceService = %" PFLS_u, sizeof(JniUceService), 0, 0);
     IMS_TRACE_I("~JniUceService :", 0, 0, 0);
     //---------------------------------------------------------------------------------------------
-    if (m_pJniUceServiceThread != NULL)
+    JniEnablerConnector::GetInstance().SetJniEnabler(GetSlotId(), EnablerType::UCE, IMS_NULL);
+
+    if (m_pJniUceServiceThread != IMS_NULL)
     {
-        ImsProcess::GetInstance()->UnloadAppThread(STR_UCE_LISTENER_THREAD_NAME);
-        m_pJniUceServiceThread = NULL;
+        ImsProcess::GetInstance()->UnloadAppThread(m_pJniUceServiceThread->GetName());
+        m_pJniUceServiceThread = IMS_NULL;
     }
+}
+
+PUBLIC VIRTUAL IJniEnablerThread* JniUceService::GetJniThread() const
+{
+    return DYNAMIC_CAST(IJniEnablerThread*, m_pJniUceServiceThread);
 }
 
 int JniUceService::SendData(const Parcel& pParcel)
@@ -79,116 +89,165 @@ int JniUceService::SendData(const Parcel& pParcel)
     int nMsg = pParcel.readInt32();
 
     IMS_TRACE_I("SendData : msg = %d", nMsg, 0, 0);
-    HandleMessage(nMsg, pParcel);
+
+    if (IsThreadSwitchingRequired(nMsg))
+    {
+        SendDataUsingEnablerThread(pParcel);
+    }
+    else
+    {
+        HandleMessage(nMsg, pParcel);
+    }
 
     return 1;
 }
 
 PRIVATE
+IUceJni* JniUceService::GetNativeService()
+{
+    return DYNAMIC_CAST(IUceJni*,
+            JniEnablerConnector::GetInstance().GetNativeEnabler(GetSlotId(), EnablerType::UCE));
+}
+
+PRIVATE
 void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
 {
-    IMS_TRACE_I("msg = %d", nMsg, 0, 0);
     //---------------------------------------------------------------------------------------------
+    IUceJni* piUceJni = GetNativeService();
+    if (piUceJni == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "HandleMessage:GetNativeService is null", 0, 0, 0);
+        return;
+    }
+
     switch (nMsg)
     {
         case IUUceService::UCE_SEND_PUBLISH_CMD:
         {
-            IUcePubCmdPrm* pCmdParam = new IUcePubCmdPrm();
-
-            pCmdParam->m_nKey = pParcel.readInt32();
-
-            String16 str16PidfXml = pParcel.readString16();
-            String8 str8PidfXml(str16PidfXml);
-            pCmdParam->m_strPidfXml = str8PidfXml.string();
-
-            pCmdParam->m_nExtended = pParcel.readInt32();
-            pCmdParam->m_nCapability = pParcel.readInt32();
-
-            if (pParcel.readInt32() == 1)
-            {
-                String16 str16ETag = pParcel.readString16();
-                String8 str8ETag(str16ETag);
-                pCmdParam->m_strEtag = str8ETag.string();
-            }
-
-            IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MessageService::PostMessage(m_strTarget, objMSG);
+            SendPublishCmd(piUceJni, pParcel);
         }
         break;
         case IUUceService::UCE_SEND_SINGLE_SUBSCRIBE_CMD:
         {
-            IUceSingleSubCmdPrm* pCmdParam = new IUceSingleSubCmdPrm();
-
-            pCmdParam->m_nKey = pParcel.readInt32();
-            pCmdParam->m_nSize = pParcel.readInt32();
-
-            String16 str16User = pParcel.readString16();
-            String8 str8User(str16User);
-            pCmdParam->m_strUser = str8User.string();
-
-            IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MessageService::PostMessage(m_strTarget, objMSG);
+            SendSingleSubscribeCmd(piUceJni, pParcel);
         }
         break;
         case IUUceService::UCE_SEND_LIST_SUBSCRIBE_CMD:
         {
-            IUceListSubCmdPrm* pCmdParam = new IUceListSubCmdPrm();
-
-            pCmdParam->m_nKey = pParcel.readInt32();
-            pCmdParam->m_nSize = pParcel.readInt32();
-            for (IMS_SINT32 i = 0; i < pCmdParam->m_nSize; i++)
-            {
-                String16 str16User = pParcel.readString16();
-                String8 str8User(str16User);
-                AString szUser = str8User.string();
-                pCmdParam->userList.Append(szUser);
-            }
-            IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MessageService::PostMessage(m_strTarget, objMSG);
+            SendListSubscribeCmd(piUceJni, pParcel);
         }
         break;
         case IUUceService::UCE_SEND_OPTIONS_CMD:
         {
-            IUceOptionsCmdPrm* pCmdParam = new IUceOptionsCmdPrm();
-
-            pCmdParam->m_nKey = pParcel.readInt32();
-
-            String16 str16RemoteUri = pParcel.readString16();
-            String8 str8RemoteUri(str16RemoteUri);
-            pCmdParam->m_strRemoteUri = str8RemoteUri.string();
-
-            pCmdParam->m_nMyCaps = pParcel.readInt32();
-
-            IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MessageService::PostMessage(m_strTarget, objMSG);
+            SendOptionsCmd(piUceJni, pParcel);
         }
         break;
         case IUUceService::UCE_SEND_OPTIONS_RESP_CMD:
         {
-            IUceOptionsRespCmdPrm* pCmdParam = new IUceOptionsRespCmdPrm();
-
-            pCmdParam->m_nKey = pParcel.readInt32();
-            pCmdParam->m_nResponseCode = pParcel.readInt32();
-
-            String16 str16Reason = pParcel.readString16();
-            String8 str8Reason(str16Reason);
-
-            pCmdParam->m_strReason = str8Reason.string();
-
-            pCmdParam->m_nMyCaps = pParcel.readInt32();
-
-            IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MessageService::PostMessage(m_strTarget, objMSG);
+            SendOptionsRespCmd(piUceJni, pParcel);
         }
         break;
         case IUUceService::UCE_GET_IMS_REGISTRATION_CMD:
         {
-            IMSMSG objMSG(nMsg, 0, 0);
-            MessageService::PostMessage(m_strTarget, objMSG);
+            ImsRegistrationCheck(piUceJni);
         }
         break;
         default:
             IMS_TRACE_E(0, "unknown message : %d", nMsg, 0, 0);
             break;
     }
+}
+
+void JniUceService::SendPublishCmd(IUceJni* pJniUce, const Parcel& pParcel)
+{
+    IMS_TRACE_D("SendPublishCmd", 0, 0, 0);
+
+    IMS_UINT32 key = pParcel.readInt32();
+
+    String16 str16PidfXml = pParcel.readString16();
+    String8 str8PidfXml(str16PidfXml);
+    AString pidfXml = str8PidfXml.string();
+
+    IMS_UINT32 extended = pParcel.readInt32();
+    IMS_UINT32 capability = pParcel.readInt32();
+
+    AString eTag = AString::ConstEmpty();
+    if (pParcel.readInt32() == 1)
+    {
+        String16 str16ETag = pParcel.readString16();
+        String8 str8ETag(str16ETag);
+        eTag = str8ETag.string();
+    }
+
+    pJniUce->SendPublishCmd(key, extended, capability, pidfXml, eTag);
+}
+
+void JniUceService::SendSingleSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel)
+{
+    IMS_TRACE_D("SendSingleSubscribeCmd", 0, 0, 0);
+
+    IMS_UINT32 key = pParcel.readInt32();
+    pParcel.readInt32();
+
+    String16 str16User = pParcel.readString16();
+    String8 str8User(str16User);
+    AString user = str8User.string();
+
+    pJniUce->SendSingleSubscribeCmd(key, user);
+}
+
+void JniUceService::SendListSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel)
+{
+    IMS_TRACE_D("SendListSubscribeCmd", 0, 0, 0);
+
+    IMS_UINT32 key = pParcel.readInt32();
+    IMS_UINT32 size = pParcel.readInt32();
+    IMSList<AString> userList;
+
+    for (IMS_SINT32 i = 0; i < size; i++)
+    {
+        String16 str16User = pParcel.readString16();
+        String8 str8User(str16User);
+        AString szUser = str8User.string();
+        userList.Append(szUser);
+    }
+
+    pJniUce->SendListSubscribeCmd(key, userList);
+}
+
+void JniUceService::SendOptionsCmd(IUceJni* pJniUce, const Parcel& pParcel)
+{
+    IMS_TRACE_D("SendOptionsCmd", 0, 0, 0);
+    IMS_UINT32 key = pParcel.readInt32();
+
+    String16 str16RemoteUri = pParcel.readString16();
+    String8 str8RemoteUri(str16RemoteUri);
+    AString remoteUri = str8RemoteUri.string();
+
+    IMS_UINT32 myCaps = pParcel.readInt32();
+
+    pJniUce->SendOptionsCmd(key, myCaps, remoteUri);
+}
+
+void JniUceService::SendOptionsRespCmd(IUceJni* pJniUce, const Parcel& pParcel)
+{
+    IMS_TRACE_D("SendOptionsRespCmd", 0, 0, 0);
+
+    IMS_UINT32 key = pParcel.readInt32();
+    IMS_SINT32 responseCode = pParcel.readInt32();
+
+    String16 str16Reason = pParcel.readString16();
+    String8 str8Reason(str16Reason);
+
+    AString reason = str8Reason.string();
+
+    IMS_UINT32 myCaps = pParcel.readInt32();
+
+    pJniUce->SendOptionsRespCmd(key, responseCode, reason, myCaps);
+}
+
+void JniUceService::ImsRegistrationCheck(IUceJni* pJniUce)
+{
+    IMS_TRACE_D("ImsRegistrationCheck", 0, 0, 0);
+    pJniUce->ImsRegistrationCheck();
 }

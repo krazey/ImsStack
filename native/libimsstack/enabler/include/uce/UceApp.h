@@ -21,9 +21,11 @@
 #include "ITimer.h"
 #include "aos/IImsAosListener.h"
 #include "aos/IImsAosMonitor.h"
+#include "IUceJni.h"
 
 class IImsAos;
 class UceService;
+class IUceJniThread;
 
 class UceApp :
         public ImsApp,
@@ -31,7 +33,8 @@ class UceApp :
         public IImsAosListener,
         public IImsAosMonitor,
         public INetworkWatcherListener,
-        public ITimerListener
+        public ITimerListener,
+        public IUceJni
 {
     /* ------------------------------------------------------------------------------------------
         Constructor, Destructor, Operator Overloading
@@ -73,6 +76,18 @@ protected:
 
     ITimer* GetTimer();
 
+    inline void NotifyJniEnablerSet() override {}
+
+    // JNI -> Native
+    virtual void SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
+            AString pidfXml, AString eTag) override;
+    virtual void SendSingleSubscribeCmd(IMS_UINT32 key, AString user) override;
+    virtual void SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList) override;
+    virtual void SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri) override;
+    virtual void SendOptionsRespCmd(
+            IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps) override;
+    virtual void ImsRegistrationCheck() override;
+
 private:
     void EnableUceService(void);
     void DisableUceService(void);
@@ -83,7 +98,7 @@ private:
     void SelectActiveAoSApp();
     void SetPublishStatusToAos(IN IMS_BOOL bIsPublishStarted);
     void SendRegistrationRecoveryRequestToAos(IN IMS_UINT32 nAosControlType);
-    void ImsRegistrationCheck(void);
+    IUceJniThread* GetJniThread();
     /* ------------------------------------------------------------------------------------------
         Variables
     ---------------------------------------------------------------------------------------------
@@ -122,7 +137,5 @@ private:
     IMS_SINT32 m_RegisteredNetwork;
     IMS_SINT32 m_eCurrentNetwork;
     UceService* m_pUceService;
-
-    static UceApp* m_gpUceApp;
 };
 #endif /* _UCE_APP_H_ */

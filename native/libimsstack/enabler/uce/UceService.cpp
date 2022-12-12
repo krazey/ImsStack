@@ -50,6 +50,7 @@ UceService::UceService(IN const AString& strAppName, IN const IMS_SINT32 nSlotId
         m_strAppName(strAppName)
 {
     IMS_TRACE_I("UCE_M : UceService = %" PFLS_u, sizeof(UceService), 0, 0);
+
     EnableCoreService();
     EnableManager();
 }
@@ -137,39 +138,62 @@ void UceService::AosDisConnecting()
     }
 }
 
-PROTECTED VIRTUAL IMS_BOOL UceService::OnMessage(IN IMSMSG& objMSG)
+IMS_BOOL UceService::SendPublishCmd(
+        IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability, AString pidfXml, AString eTag)
 {
-    IMS_TRACE_I("OnMessage:nMSG [%d]", objMSG.nMSG, 0, 0);
-
-    switch (objMSG.nMSG)
+    if (m_pUcePublishManager == IMS_NULL)
     {
-        case IUUceService::UCE_SEND_PUBLISH_CMD:
-        {
-            return SendPublishRequest(reinterpret_cast<IUcePubCmdPrm*>(objMSG.nLparam));
-        }
-        break;
-        case IUUceService::UCE_SEND_SINGLE_SUBSCRIBE_CMD:
-        {
-            return QuerySingleCapability(reinterpret_cast<IUceSingleSubCmdPrm*>(objMSG.nLparam));
-        }
-        case IUUceService::UCE_SEND_LIST_SUBSCRIBE_CMD:
-        {
-            return QueryMultiCapability(reinterpret_cast<IUceListSubCmdPrm*>(objMSG.nLparam));
-        }
-        break;
-        case IUUceService::UCE_SEND_OPTIONS_CMD:
-        {
-            return SendOptionsRequest(reinterpret_cast<IUceOptionsCmdPrm*>(objMSG.nLparam));
-        }
-        break;
-        case IUUceService::UCE_SEND_OPTIONS_RESP_CMD:
-        {
-            return SendOptionsResponse(reinterpret_cast<IUceOptionsRespCmdPrm*>(objMSG.nLparam));
-        }
-        break;
-        default:
-            break;
+        IMS_TRACE_E(0, "SendPublishCmd:m_pUcePublishManager is null", 0, 0, 0);
+        return IMS_FALSE;
     }
+
+    m_pUcePublishManager->SendPublishRequest(key, pidfXml, eTag, capability, extended);
+    return IMS_TRUE;
+}
+
+IMS_BOOL UceService::SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri)
+{
+    if (m_pUceOptionsManager == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendOptionsCmd:m_pUceOptionsManager is null", 0, 0, 0);
+        return IMS_FALSE;
+    }
+    m_pUceOptionsManager->SendOptionsRequest(key, remoteUri, myCaps);
+    return IMS_TRUE;
+}
+
+IMS_BOOL UceService::SendOptionsRespCmd(
+        IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps)
+{
+    if (m_pUceOptionsManager == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendOptionsRespCmd:m_pUceOptionsManager is null", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    m_pUceOptionsManager->SendOptionsResponse(key, responseCode, reason, myCaps);
+    return IMS_TRUE;
+}
+
+IMS_BOOL UceService::SendSingleSubscribeCmd(IMS_UINT32 key, AString user)
+{
+    if (m_pUceSubscribeManager == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendSingleSubscribeCmd:m_pUceSubscribeManager is null", 0, 0, 0);
+        return IMS_FALSE;
+    }
+    m_pUceSubscribeManager->QuerySingleCapability(user, key);
+    return IMS_TRUE;
+}
+
+IMS_BOOL UceService::SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList)
+{
+    if (m_pUceSubscribeManager == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendListSubscribeCmd:m_pUceSubscribeManager is null", 0, 0, 0);
+        return IMS_FALSE;
+    }
+    m_pUceSubscribeManager->QueryMultiCapability(userList, key);
     return IMS_TRUE;
 }
 
@@ -338,36 +362,6 @@ void UceService::DisableCoreService()
     }
 }
 
-IMS_BOOL UceService::SendOptionsRequest(IN IUceOptionsCmdPrm* pParam)
-{
-    if (pParam == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-    if (m_pUceOptionsManager != IMS_NULL)
-    {
-        m_pUceOptionsManager->SendOptionsRequest(
-                pParam->m_nKey, pParam->m_strRemoteUri, pParam->m_nMyCaps);
-    }
-    delete pParam;
-    return IMS_TRUE;
-}
-
-IMS_BOOL UceService::SendOptionsResponse(IUceOptionsRespCmdPrm* pParam)
-{
-    if (pParam == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-    if (m_pUceOptionsManager != IMS_NULL)
-    {
-        m_pUceOptionsManager->SendOptionsResponse(
-                pParam->m_nKey, pParam->m_nResponseCode, pParam->m_strReason, pParam->m_nMyCaps);
-    }
-    delete pParam;
-    return IMS_TRUE;
-}
-
 IMS_BOOL UceService::OptionsReceived(
         IN ICoreService* piCoreService, IN ICapabilities* piCapabilities)
 {
@@ -375,48 +369,5 @@ IMS_BOOL UceService::OptionsReceived(
     {
         m_pUceOptionsManager->ReceivedOptions(piCoreService, piCapabilities);
     }
-    return IMS_TRUE;
-}
-
-IMS_BOOL UceService::SendPublishRequest(IN IUcePubCmdPrm* pParam)
-{
-    if (pParam == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-    if (m_pUcePublishManager != IMS_NULL)
-    {
-        m_pUcePublishManager->SendPublishRequest(pParam->m_nKey, pParam->m_strPidfXml,
-                pParam->m_strEtag, pParam->m_nCapability, pParam->m_nExtended);
-    }
-    delete pParam;
-    return IMS_TRUE;
-}
-
-IMS_BOOL UceService::QuerySingleCapability(IN IUceSingleSubCmdPrm* pParam)
-{
-    if (pParam == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-    if (m_pUceSubscribeManager != IMS_NULL)
-    {
-        m_pUceSubscribeManager->QuerySingleCapability(pParam->m_strUser, pParam->m_nKey);
-    }
-    delete pParam;
-    return IMS_TRUE;
-}
-
-IMS_BOOL UceService::QueryMultiCapability(IN IUceListSubCmdPrm* pParam)
-{
-    if (pParam == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-    if (m_pUceSubscribeManager != IMS_NULL)
-    {
-        m_pUceSubscribeManager->QueryMultiCapability(pParam->userList, pParam->m_nKey);
-    }
-    delete pParam;
     return IMS_TRUE;
 }

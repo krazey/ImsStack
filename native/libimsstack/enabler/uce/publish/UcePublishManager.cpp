@@ -22,7 +22,6 @@
 #include "ISipClientConnection.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
-#include "IUce.h"
 #include "ImsAosParameter.h"
 #include "ServiceMessage.h"
 #include "ServiceTimer.h"
@@ -33,6 +32,8 @@
 #include "TextParser.h"
 #include "config/UceConfig.h"
 #include "def/UceDef.h"
+#include "IUceJniThread.h"
+#include "JniEnablerConnector.h"
 
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 /* -------------------------------------------------------------------------------------------------
@@ -1324,21 +1325,14 @@ ISipMessage* UcePublishManager::GetISIPMessage(IMS_BOOL bRequireResponseMessage)
 void UcePublishManager::SendPublishCommandErrorInd(IMS_UINT32 nKey, IMS_UINT32 nCommandError)
 {
     IMS_TRACE_I("SendPublishCommandErrorInd:key[%d], error[%d]", nKey, nCommandError, 0);
-    IUcePubCmdErrorIndPrm* pParam = new IUcePubCmdErrorIndPrm();
-    if (pParam != IMS_NULL)
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
     {
-        pParam->m_nKey = nKey;
-        pParam->m_nCommandError = nCommandError;
-
-        IMSMSG objUIMsg(
-                IUUceService::UCE_PUBLISH_CMD_ERROR_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-        MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+        IMS_TRACE_E(0, "SendPublishCommandErrorInd:piJniThread is null", 0, 0, 0);
+        m_nKey = 0;
+        return;
     }
-    else
-    {
-        IMS_TRACE_E(
-                0, "SendPublishCommandErrorInd:Command Error Param creation is failed", 0, 0, 0);
-    }
+    piJniThread->PublishErrorInd(nKey, nCommandError);
     m_nKey = 0;
 }
 
@@ -1350,68 +1344,48 @@ void UcePublishManager::SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResp
     IMS_TRACE_I("SendPublishResponseInd:reason[%s], Cause[%d], Text[%s]", strReason.GetStr(),
             nReasonHeaderCause, strReasonHeaderText.GetStr());
     m_bUnpublishSent = IMS_FALSE;
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendPublishResponseInd:piJniThread is null", 0, 0, 0);
+        m_nKey = 0;
+        return;
+    }
+
     if (nKey == 0)
     {
-        IUcePubUpdatedIndPrm* pParam = new IUcePubUpdatedIndPrm();
-        if (pParam != IMS_NULL)
+        if (nResponseCode != SipStatusCode::SC_200)
         {
-            if (nResponseCode != SipStatusCode::SC_200)
-            {
-                m_nCapability = 0;
-            }
-            pParam->m_nCapability = m_nCapability;
-            pParam->m_nResponseCode = nResponseCode;
-            pParam->m_strReason = strReason;
-            pParam->m_nReasonHeaderCause = nReasonHeaderCause;
-            pParam->m_strReasonHeaderText = strReasonHeaderText;
-            pParam->m_strEtag = eTag;
-
-            IMSMSG objUIMsg(
-                    IUUceService::UCE_PUBLISH_UPDATED_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-            MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+            m_nCapability = 0;
         }
-        else
-        {
-            IMS_TRACE_E(0, "SendPublishResponseInd:UpdatedInd Param creation is failed", 0, 0, 0);
-        }
+        piJniThread->PublishUpdatedInd(m_nCapability, nResponseCode, strReason, nReasonHeaderCause,
+                strReasonHeaderText, eTag, 0);
     }
     else
     {
-        IUcePubResponseIndPrm* pParam = new IUcePubResponseIndPrm();
-        if (pParam != IMS_NULL)
+        if (nResponseCode != SipStatusCode::SC_200)
         {
-            pParam->m_nKey = nKey;
-            if (nResponseCode != SipStatusCode::SC_200)
-            {
-                m_nCapability = 0;
-            }
-            pParam->m_nCapability = m_nCapability;
-            pParam->m_nResponseCode = nResponseCode;
-            pParam->m_strReason = strReason;
-            pParam->m_nReasonHeaderCause = nReasonHeaderCause;
-            pParam->m_strReasonHeaderText = strReasonHeaderText;
-            pParam->m_strEtag = eTag;
-            pParam->m_nNeedToRetry = bNeedToRetry ? 1 : 0;
-
-            IMSMSG objUIMsg(
-                    IUUceService::UCE_PUBLISH_RESPONSE_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-            MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+            m_nCapability = 0;
         }
-        else
-        {
-            IMS_TRACE_E(0, "SendPublishResponseInd:ResponseInd Param creation is failed", 0, 0, 0);
-        }
+        IMS_UINT32 needToRetry = bNeedToRetry ? 1 : 0;
+        piJniThread->PublishResponseInd(nKey, nResponseCode, m_nCapability, strReason,
+                nReasonHeaderCause, strReasonHeaderText, eTag, needToRetry);
     }
     m_nKey = 0;
 }
 void UcePublishManager::SendUnpublishedInd()
 {
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendUnpublishedInd:piJniThread is null", 0, 0, 0);
+        return;
+    }
     if (m_bUnpublishSent == IMS_FALSE)
     {
         m_bUnpublishSent = IMS_TRUE;
         IMS_TRACE_I("SendUnpublishedInd", 0, 0, 0);
-        IMSMSG objUIMsg(IUUceService::UCE_UNPUBLISHED_IND, 0, 0);
-        MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+        piJniThread->UnPublishedInd();
     }
 }
 
@@ -2178,4 +2152,17 @@ const IMS_CHAR* UcePublishManager::StateToString(IMS_UINT32 _eState)
         return szState[sizeof(szState) / sizeof(char*) - 1];
     }
     return szState[_eState];
+}
+
+PRIVATE
+IUceJniThread* UcePublishManager::GetJniThread()
+{
+    IJniEnabler* piJniEnabler =
+            JniEnablerConnector::GetInstance().GetJniEnabler(m_nSimSlot, EnablerType::UCE);
+    if (piJniEnabler == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    return reinterpret_cast<IUceJniThread*>(piJniEnabler->GetJniThread());
 }

@@ -64,6 +64,40 @@ public:
     void clearTimer() { ClearTimer(); }
     void aosDisConnecting() { ImsAos_Disconnecting(0); }
     void aosDisConnected() { ImsAos_Disconnected(0); }
+    void SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability, AString pidfXml,
+            AString eTag) override
+    {
+        (void)key;
+        (void)extended;
+        (void)capability;
+        (void)pidfXml;
+        (void)eTag;
+    }
+    void SendSingleSubscribeCmd(IMS_UINT32 key, AString user) override
+    {
+        (void)key;
+        (void)user;
+    }
+    void SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList) override
+    {
+        (void)key;
+        (void)userList;
+    }
+    void SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri) override
+    {
+        (void)key;
+        (void)myCaps;
+        (void)remoteUri;
+    }
+    void SendOptionsRespCmd(
+            IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps) override
+    {
+        (void)key;
+        (void)responseCode;
+        (void)reason;
+        (void)myCaps;
+    }
+    void ImsRegistrationCheck() override {}
 };
 
 class UceAppTest : public ::testing::Test
@@ -90,21 +124,21 @@ protected:
 TEST_F(UceAppTest, stopTimer)
 {
     IMS_TRACE_D("stopTimer", 0, 0, 0);
-    EXPECT_EQ(pUceApp->IsTimerNull(), IMS_TRUE);
+    EXPECT_TRUE(pUceApp->IsTimerNull());
     pUceApp->startTimer();
-    EXPECT_EQ(pUceApp->IsTimerNull(), IMS_FALSE);
+    EXPECT_TRUE(pUceApp->IsTimerNull());
     pUceApp->stopTimer();
-    EXPECT_EQ(pUceApp->IsTimerNull(), IMS_TRUE);
+    EXPECT_TRUE(pUceApp->IsTimerNull());
 }
 
 TEST_F(UceAppTest, clearTimer)
 {
     IMS_TRACE_D("clearTimer", 0, 0, 0);
-    EXPECT_EQ(pUceApp->IsTimerNull(), IMS_TRUE);
+    EXPECT_TRUE(pUceApp->IsTimerNull());
     pUceApp->startTimer();
-    EXPECT_EQ(pUceApp->IsTimerNull(), IMS_FALSE);
+    EXPECT_TRUE(pUceApp->IsTimerNull());
     pUceApp->clearTimer();
-    EXPECT_EQ(pUceApp->IsTimerNull(), IMS_TRUE);
+    EXPECT_TRUE(pUceApp->IsTimerNull());
 }
 
 TEST_F(UceAppTest, Aos_Disconnecting)

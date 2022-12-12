@@ -44,9 +44,20 @@ public:
     void AoSDisconnected();
     void AosDisConnecting();
 
-protected:
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
+    // related to publish
+    IMS_BOOL SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
+            AString pidfXml, AString eTag);
 
+    // related to subscribe
+    IMS_BOOL SendSingleSubscribeCmd(IMS_UINT32 key, AString user);
+    IMS_BOOL SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList);
+
+    // related to options
+    IMS_BOOL SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri);
+    IMS_BOOL SendOptionsRespCmd(
+            IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps);
+
+protected:
     virtual void CoreService_PageMessageReceived(
             IN ICoreService* piService, IN IPageMessage* piMessage) override;
     virtual void CoreService_ReferenceReceived(
@@ -65,15 +76,9 @@ protected:
 private:
     void EnableCoreService();
     void DisableCoreService();
-    // related to options
-    IMS_BOOL SendOptionsRequest(IN IUceOptionsCmdPrm* pParam);
-    IMS_BOOL SendOptionsResponse(IN IUceOptionsRespCmdPrm* pParam);
+    // received options request
     IMS_BOOL OptionsReceived(IN ICoreService* piCoreService, IN ICapabilities* piCapabilities);
-    // related to publish
-    IMS_BOOL SendPublishRequest(IN IUcePubCmdPrm* pParam);
-    // related to subscribe
-    IMS_BOOL QuerySingleCapability(IN IUceSingleSubCmdPrm* pParam);
-    IMS_BOOL QueryMultiCapability(IN IUceListSubCmdPrm* pParam);
+
     /* ------------------------------------------------------------------------------------------
         VARIABLE
     ---------------------------------------------------------------------------------------------

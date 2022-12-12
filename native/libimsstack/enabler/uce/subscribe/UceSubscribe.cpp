@@ -36,6 +36,8 @@
 #include "subscribe/UceNotifyMessageBody.h"
 #include "subscribe/UceRlmiComposer.h"
 #include "subscribe/UceXmlDocumentHelperThread.h"
+#include "IUceJniThread.h"
+#include "JniEnablerConnector.h"
 
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
@@ -927,6 +929,18 @@ void UceSubscribe::SetState(IMS_UINT32 _eState)
 }
 
 PRIVATE
+IUceJniThread* UceSubscribe::GetJniThread()
+{
+    IJniEnabler* piJniEnabler =
+            JniEnablerConnector::GetInstance().GetJniEnabler(m_nSimSlot, EnablerType::UCE);
+    if (piJniEnabler == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    return reinterpret_cast<IUceJniThread*>(piJniEnabler->GetJniThread());
+}
+
 void UceSubscribe::LoadConfigValue()
 {
     IMS_TRACE_I("LoadConfigValue : read config", 0, 0, 0);
@@ -1024,19 +1038,16 @@ const IMS_CHAR* UceSubscribe::StateToString(IMS_UINT32 _eState)
 }
 
 void UceSubscribe::SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString strReason,
-        IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText) const
+        IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText)
 {
-    IUceSubResponseIndPrm* pParam = new IUceSubResponseIndPrm();
-
-    pParam->m_nKey = m_nKey;
-    pParam->m_nResponseCode = nResponseCode;
-    pParam->m_strReason = strReason;
-    pParam->m_nReasonHeaderCause = nReasonHeaderCause;
-    pParam->m_strReasonHeaderText = strReasonHeaderText;
-
-    IMSMSG objUIMsg(
-            IUUceService::UCE_SUBSCRIBE_RESPONSE_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendSubscribeResponseInd:piJniThread is null", 0, 0, 0);
+        return;
+    }
+    piJniThread->SubscribeResponseInd(
+            m_nKey, nResponseCode, strReason, nReasonHeaderCause, strReasonHeaderText);
 }
 
 void UceSubscribe::SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError)
@@ -1045,15 +1056,17 @@ void UceSubscribe::SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError)
     {
         return;
     }
+
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendSubscribeCommandErrorInd:piJniThread is null", 0, 0, 0);
+        m_nKey = 0;
+        return;
+    }
     IMS_TRACE_I("SendSubscribeCommandErrorInd:key[%d], error[%d]", m_nKey, nCommandError, 0);
-    IUceSubCmdErrorIndPrm* pParam = new IUceSubCmdErrorIndPrm();
 
-    pParam->m_nKey = m_nKey;
-    pParam->m_nCommandError = nCommandError;
-
-    IMSMSG objUIMsg(
-            IUUceService::UCE_SUBSCRIBE_CMD_ERROR_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    piJniThread->SubscribeErrorInd(m_nKey, nCommandError);
     m_nKey = 0;
 }
 
@@ -1063,15 +1076,14 @@ void UceSubscribe::SendPresenceNotifyInd(IMSList<AString> pidfXmls)
     {
         return;
     }
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendPresenceNotifyInd:piJniThread is null", 0, 0, 0);
+        return;
+    }
     IMS_TRACE_I("SendPresenceNotifyInd:key[%d]", m_nKey, 0, 0);
-    IUcePreNotifyIndPrm* pParam = new IUcePreNotifyIndPrm();
-
-    pParam->m_nKey = m_nKey;
-    pParam->m_nCount = pidfXmls.GetSize();
-    pParam->m_lstPidfXmls = pidfXmls;
-
-    IMSMSG objUIMsg(IUUceService::UCE_PRESENCE_NOTIFY_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    piJniThread->NotifyInd(m_nKey, pidfXmls.GetSize(), pidfXmls);
 }
 
 void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUser*>* pList)
@@ -1080,10 +1092,15 @@ void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUs
     {
         return;
     }
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendSubscribeResourceTerminatedInd:piJniThread is null", 0, 0, 0);
+        return;
+    }
     IMS_TRACE_I("SendSubscribeResourceTerminatedInd:key[%d],size[%d]", m_nKey, pList->GetSize(), 0);
-    IUceSubResourceTerminatedIndPrm* pParam = new IUceSubResourceTerminatedIndPrm();
     IMS_UINT32 nCount = 0;
-    pParam->m_nKey = m_nKey;
+    IMSList<IUceTerminatedReason*> terminateContacts;
     for (IMS_UINT32 i = 0; i < pList->GetSize(); i++)
     {
         UceNonCapabilityUser* user = pList->GetAt(i);
@@ -1094,14 +1111,11 @@ void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUs
             reason->m_strReason = user->GetReason();
             delete user;
             nCount++;
-            pParam->m_lstTerminateContacts.Append(reason);
+            terminateContacts.Append(reason);
         }
     }
-    pParam->m_nCount = nCount;
     pList->Clear();
-    IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND, 0,
-            reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    piJniThread->SubscribeResourceTerminatedInd(m_nKey, nCount, terminateContacts);
 }
 
 void UceSubscribe::SendSubscribeTerminatedInd()
@@ -1110,16 +1124,15 @@ void UceSubscribe::SendSubscribeTerminatedInd()
     {
         return;
     }
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendSubscribeTerminatedInd:piJniThread is null", 0, 0, 0);
+        m_nKey = 0;
+        return;
+    }
     IMS_TRACE_I("SendSubscribeTerminatedInd:key[%d]", m_nKey, 0, 0);
-    IUceSubTerminatedIndPrm* pParam = new IUceSubTerminatedIndPrm();
-
-    pParam->m_nKey = m_nKey;
-    pParam->m_strReason = AString::ConstEmpty();
-    pParam->m_nRetryAfterMillsecond = 0;
-
-    IMSMSG objUIMsg(
-            IUUceService::UCE_SUBSCRIBE_TERMINATED_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    piJniThread->SubscribeTerminatedInd(m_nKey, AString::ConstEmpty(), 0);
     m_nKey = 0;
 }
 

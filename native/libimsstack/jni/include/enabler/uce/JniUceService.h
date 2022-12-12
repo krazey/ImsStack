@@ -20,19 +20,29 @@
 #include "BaseService.h"
 
 class JniUceServiceThread;
+class IJniEnablerThread;
+class IUceJni;
 
 using namespace android;
 
 class JniUceService : public BaseService
 {
 public:
-    JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
+    explicit JniUceService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
     virtual ~JniUceService();
 
+    IJniEnablerThread* GetJniThread() const override;
     virtual int SendData(const Parcel& pParcel) override;
 
 private:
+    IUceJni* GetNativeService();
     void HandleMessage(int nMsg, const Parcel& pParcel) override;
+    static void SendPublishCmd(IUceJni* pJniUce, const Parcel& pParcel);
+    static void SendSingleSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel);
+    static void SendListSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel);
+    static void SendOptionsCmd(IUceJni* pJniUce, const Parcel& pParcel);
+    static void SendOptionsRespCmd(IUceJni* pJniUce, const Parcel& pParcel);
+    static void ImsRegistrationCheck(IUceJni* pJniUce);
 
 private:
     JniUceServiceThread* m_pJniUceServiceThread;

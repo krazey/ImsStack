@@ -36,8 +36,8 @@ class TestUceSubscribeManager : public UceSubscribeManager
 {
 public:
     TestUceSubscribeManager() :
-            UceSubscribeManager(AString("UceSubscribeManager"), IMS_NULL,
-                    AString("JniUceServiceThread"), SUBSCRIBE_MNGR_SIM_SLOT)
+            UceSubscribeManager(AString("UceSubscribeManager"), IMS_NULL, AString("UceApp"),
+                    SUBSCRIBE_MNGR_SIM_SLOT)
     {
     }
     virtual ~TestUceSubscribeManager() {}

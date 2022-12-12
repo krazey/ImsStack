@@ -22,6 +22,7 @@
 class UceOptions;
 class ICoreService;
 class ICapabilities;
+class IUceJniThread;
 
 class UceOptionsManager : public ImsActivityEx
 {
@@ -45,9 +46,9 @@ protected:
 
 private:
     IMS_UINT32 getReceivedKey();
-    static void SendOptionsReceivedInd(
-            IN IMS_UINT32 nKey, IN AString from, IN IMS_UINT32 capabilities);
-    static void SendOptionsCommandError(IN IMS_UINT32 nKey, IN IMS_UINT32 code);
+    void SendOptionsReceivedInd(IN IMS_UINT32 nKey, IN AString from, IN IMS_UINT32 capabilities);
+    void SendOptionsCommandError(IN IMS_UINT32 nKey, IN IMS_UINT32 code);
+    IUceJniThread* GetJniThread();
 
 private:
     IMS_SINT32 m_nSimSlot;

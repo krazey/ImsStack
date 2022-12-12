@@ -55,7 +55,6 @@ public:
     }
     void EnableManagers() { EnableManager(); }
     void DisableManagers() { DisableManager(); }
-    IMS_BOOL SendMessage(IMSMSG objUIMsg) { return OnMessage(objUIMsg); }
     IMS_BOOL IsNull(IMS_UINT32 manager) const
     {
         switch (manager)
@@ -116,68 +115,95 @@ TEST_F(UceServiceTest, EnableManager)
 {
     IMS_TRACE_D("EnableManager", 0, 0, 0);
     pUceService->ResetManager();
-    EXPECT_EQ(pUceService->IsNull(TestUceService::SUBSCRIBE), IMS_TRUE);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::PUBLISH), IMS_TRUE);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::OPTIONS), IMS_TRUE);
+    EXPECT_TRUE(pUceService->IsNull(TestUceService::SUBSCRIBE));
+    EXPECT_TRUE(pUceService->IsNull(TestUceService::PUBLISH));
+    EXPECT_TRUE(pUceService->IsNull(TestUceService::OPTIONS));
     pUceService->EnableManagers();
-    EXPECT_EQ(pUceService->IsNull(TestUceService::SUBSCRIBE), IMS_FALSE);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::PUBLISH), IMS_FALSE);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::OPTIONS), IMS_FALSE);
+    EXPECT_FALSE(pUceService->IsNull(TestUceService::SUBSCRIBE));
+    EXPECT_FALSE(pUceService->IsNull(TestUceService::PUBLISH));
+    EXPECT_FALSE(pUceService->IsNull(TestUceService::OPTIONS));
 }
 
 TEST_F(UceServiceTest, DisableManager)
 {
     IMS_TRACE_D("DisableManager", 0, 0, 0);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::SUBSCRIBE), IMS_FALSE);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::PUBLISH), IMS_FALSE);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::OPTIONS), IMS_FALSE);
+    EXPECT_FALSE(pUceService->IsNull(TestUceService::SUBSCRIBE));
+    EXPECT_FALSE(pUceService->IsNull(TestUceService::PUBLISH));
+    EXPECT_FALSE(pUceService->IsNull(TestUceService::OPTIONS));
     pUceService->DisableManagers();
-    EXPECT_EQ(pUceService->IsNull(TestUceService::SUBSCRIBE), IMS_TRUE);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::PUBLISH), IMS_TRUE);
-    EXPECT_EQ(pUceService->IsNull(TestUceService::OPTIONS), IMS_TRUE);
+    EXPECT_TRUE(pUceService->IsNull(TestUceService::SUBSCRIBE));
+    EXPECT_TRUE(pUceService->IsNull(TestUceService::PUBLISH));
+    EXPECT_TRUE(pUceService->IsNull(TestUceService::OPTIONS));
 }
 
-TEST_F(UceServiceTest, onMessage)
+TEST_F(UceServiceTest, SendPublishCmd)
 {
-    IMS_TRACE_D("onMessage", 0, 0, 0);
+    IMS_UINT32 key = 1;
+    IMS_UINT32 extended = 1;
+    IMS_UINT32 capability = 1;
+    AString pidfXml = AString::ConstEmpty();
+    AString eTag = AString::ConstEmpty();
 
-    IMSMSG objSendPubMsg(IUUceService::UCE_SEND_PUBLISH_CMD, 0, IMS_NULL);
-    EXPECT_EQ(pUceService->SendMessage(objSendPubMsg), IMS_FALSE);
+    IMS_TRACE_D("SendPublishCmd", 0, 0, 0);
+    pUceService->DisableManagers();
+    EXPECT_FALSE(pUceService->SendPublishCmd(key, extended, capability, pidfXml, eTag));
 
-    IUcePubCmdPrm* pPubParam = new IUcePubCmdPrm();
-    IMSMSG objSendPubWithParamMsg(
-            IUUceService::UCE_SEND_PUBLISH_CMD, 0, reinterpret_cast<IMS_UINTP>(pPubParam));
-    EXPECT_EQ(pUceService->SendMessage(objSendPubWithParamMsg), IMS_TRUE);
+    pUceService->EnableManagers();
+    EXPECT_TRUE(pUceService->SendPublishCmd(key, extended, capability, pidfXml, eTag));
+}
 
-    IMSMSG objSingleSubMsg(IUUceService::UCE_SEND_SINGLE_SUBSCRIBE_CMD, 0, IMS_NULL);
-    EXPECT_EQ(pUceService->SendMessage(objSingleSubMsg), IMS_FALSE);
+TEST_F(UceServiceTest, SendOptionsCmd)
+{
+    IMS_UINT32 key = 1;
+    IMS_UINT32 myCaps = 1;
+    AString remoteUri = AString::ConstEmpty();
 
-    IUceSingleSubCmdPrm* pSingleSubParam = new IUceSingleSubCmdPrm();
-    IMSMSG objSingleSubWithParamMsg(IUUceService::UCE_SEND_SINGLE_SUBSCRIBE_CMD, 0,
-            reinterpret_cast<IMS_UINTP>(pSingleSubParam));
-    EXPECT_EQ(pUceService->SendMessage(objSingleSubWithParamMsg), IMS_TRUE);
+    IMS_TRACE_D("SendOptionsCmd", 0, 0, 0);
+    pUceService->DisableManagers();
+    EXPECT_FALSE(pUceService->SendOptionsCmd(key, myCaps, remoteUri));
 
-    IMSMSG objListSubMsg(IUUceService::UCE_SEND_LIST_SUBSCRIBE_CMD, 0, IMS_NULL);
-    EXPECT_EQ(pUceService->SendMessage(objListSubMsg), IMS_FALSE);
+    pUceService->EnableManagers();
+    EXPECT_TRUE(pUceService->SendOptionsCmd(key, myCaps, remoteUri));
+}
 
-    IUceListSubCmdPrm* pListSubParam = new IUceListSubCmdPrm();
-    IMSMSG objListSubWithParamMsg(IUUceService::UCE_SEND_LIST_SUBSCRIBE_CMD, 0,
-            reinterpret_cast<IMS_UINTP>(pListSubParam));
-    EXPECT_EQ(pUceService->SendMessage(objListSubWithParamMsg), IMS_TRUE);
+TEST_F(UceServiceTest, SendOptionsRespCmd)
+{
+    IMS_UINT32 key = 1;
+    IMS_SINT32 responseCode = 200;
+    AString reason = AString::ConstEmpty();
+    IMS_UINT32 myCaps = 1;
 
-    IMSMSG objOptionsMsg(IUUceService::UCE_SEND_OPTIONS_CMD, 0, IMS_NULL);
-    EXPECT_EQ(pUceService->SendMessage(objOptionsMsg), IMS_FALSE);
+    IMS_TRACE_D("SendOptionsRespCmd", 0, 0, 0);
+    pUceService->DisableManagers();
+    EXPECT_FALSE(pUceService->SendOptionsRespCmd(key, responseCode, reason, myCaps));
 
-    IUceOptionsCmdPrm* pOptionsParam = new IUceOptionsCmdPrm();
-    IMSMSG objOptionsWithParamMsg(
-            IUUceService::UCE_SEND_OPTIONS_CMD, 0, reinterpret_cast<IMS_UINTP>(pOptionsParam));
-    EXPECT_EQ(pUceService->SendMessage(objOptionsWithParamMsg), IMS_TRUE);
+    pUceService->EnableManagers();
+    EXPECT_TRUE(pUceService->SendOptionsRespCmd(key, responseCode, reason, myCaps));
+}
 
-    IMSMSG objOptionsResMsg(IUUceService::UCE_SEND_OPTIONS_RESP_CMD, 0, IMS_NULL);
-    EXPECT_EQ(pUceService->SendMessage(objOptionsResMsg), IMS_FALSE);
+TEST_F(UceServiceTest, SendSingleSubscribeCmd)
+{
+    IMS_UINT32 key = 1;
+    AString user = AString::ConstEmpty();
 
-    IUceOptionsRespCmdPrm* pOptionsResParam = new IUceOptionsRespCmdPrm();
-    IMSMSG objOptionsResWithParamMsg(IUUceService::UCE_SEND_OPTIONS_RESP_CMD, 0,
-            reinterpret_cast<IMS_UINTP>(pOptionsResParam));
-    EXPECT_EQ(pUceService->SendMessage(objOptionsResWithParamMsg), IMS_TRUE);
+    IMS_TRACE_D("SendSingleSubscribeCmd", 0, 0, 0);
+
+    pUceService->DisableManagers();
+    EXPECT_FALSE(pUceService->SendSingleSubscribeCmd(key, user));
+
+    pUceService->EnableManagers();
+    EXPECT_TRUE(pUceService->SendSingleSubscribeCmd(key, user));
+}
+
+TEST_F(UceServiceTest, SendListSubscribeCmd)
+{
+    IMS_UINT32 key = 1;
+    IMSList<AString> userList;
+
+    IMS_TRACE_D("SendListSubscribeCmd", 0, 0, 0);
+    pUceService->DisableManagers();
+    EXPECT_FALSE(pUceService->SendListSubscribeCmd(key, userList));
+
+    pUceService->EnableManagers();
+    EXPECT_TRUE(pUceService->SendListSubscribeCmd(key, userList));
 }

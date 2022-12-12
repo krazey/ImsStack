@@ -22,10 +22,11 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "IUUceService.h"
-#include "IUce.h"
 #include "ServiceMessage.h"
 #include "Sip.h"
 #include "options/UceOptions.h"
+#include "IUceJniThread.h"
+#include "JniEnablerConnector.h"
 
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
@@ -197,24 +198,35 @@ void UceOptionsManager::SendOptionsReceivedInd(
         IN IMS_UINT32 nKey, IN AString from, IN IMS_UINT32 capabilities)
 {
     IMS_TRACE_I("SendOptionsReceivedInd:key[%d], From[%s]", nKey, from.GetStr(), 0);
-    IUceOptionsReceivedIndPrm* pParam = new IUceOptionsReceivedIndPrm();
-
-    pParam->m_nKey = nKey;
-    pParam->m_strRemote = from;
-    pParam->m_nRemoteCaps = capabilities;
-
-    IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_RECEIVED_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendOptionsReceivedInd:piJniThread is null", 0, 0, 0);
+        return;
+    }
+    piJniThread->OptionsReceivedInd(nKey, from, capabilities);
 }
 
 void UceOptionsManager::SendOptionsCommandError(IN IMS_UINT32 nKey, IN IMS_UINT32 code)
 {
     IMS_TRACE_I("SendOptionsCommandError:key[%d], error[%d]", nKey, code, 0);
-    IUceOptionsCmdErrorIndPrm* pParam = new IUceOptionsCmdErrorIndPrm();
-    pParam->m_nKey = nKey;
-    pParam->m_nCommandError = code;
+    IUceJniThread* piJniThread = GetJniThread();
+    if (piJniThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendOptionsCommandError:piJniThread is null", 0, 0, 0);
+        return;
+    }
+    piJniThread->OptionsErrorInd(nKey, code);
+}
 
-    IMSMSG objUIMsg(
-            IUUceService::UCE_OPTIONS_CMD_ERROR_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+IUceJniThread* UceOptionsManager::GetJniThread()
+{
+    IJniEnabler* piJniEnabler =
+            JniEnablerConnector::GetInstance().GetJniEnabler(m_nSimSlot, EnablerType::UCE);
+    if (piJniEnabler == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    return reinterpret_cast<IUceJniThread*>(piJniEnabler->GetJniThread());
 }

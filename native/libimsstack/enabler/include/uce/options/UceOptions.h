@@ -23,6 +23,7 @@
 class ICoreService;
 class ISipMessage;
 class ICapabilities;
+class IUceJniThread;
 
 class UceOptions : public ICapabilitiesListener
 {
@@ -54,6 +55,7 @@ private:
     void SendOptionsCommandError(IN IMS_UINT32 code);
     void OptionsTerminated();
     void DestroyCapabilities();
+    IUceJniThread* GetJniThread();
 
 public:
     enum

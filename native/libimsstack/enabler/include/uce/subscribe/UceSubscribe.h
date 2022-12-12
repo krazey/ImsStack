@@ -30,6 +30,7 @@ class ISipMessage;
 class UceXmlDocumentHelperThread;
 class UceRlmiComposer;
 class UceNonCapabilityUser;
+class IUceJniThread;
 
 class ISubscribeResponseData  // internal Param
 {
@@ -108,6 +109,7 @@ protected:
     void SetState(IMS_UINT32 _eState);
 
 private:
+    IUceJniThread* GetJniThread();
     void LoadConfigValue();
     void CreateXMLDocumentHelperThread();
     void DestroyXMLDocumentHelperThread();
@@ -118,7 +120,7 @@ private:
     static const IMS_CHAR* StateToString(IMS_UINT32 _eState);
 
     void SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString strReason,
-            IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText) const;
+            IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText);
     void SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError);
     void SendPresenceNotifyInd(IMSList<AString> pidfXmls);
     void SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUser*>* pList);
@@ -147,6 +149,7 @@ private:
     IMS_BOOL StartRetryAfterTimer(IMS_UINT32 nDuration);
     void StopRetryAfterTimer();
     void HandleRetryAfterTimer();
+
     /* ------------------------------------------------------------------------------------------
         Variable
     ---------------------------------------------------------------------------------------------
