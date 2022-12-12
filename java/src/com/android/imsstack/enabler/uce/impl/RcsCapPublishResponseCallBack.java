@@ -37,11 +37,13 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
     /**
      * set callback PublishResponseCallback of publish request
      * to send the response from the network back to the framework.
+     *
      * @param publishCallback The callback of publish request
      */
     public void setCallBack(PublishResponseCallback publishCallback) {
         mPublishResponseCallBack = publishCallback;
     }
+
     /**
      * Provide the framework with a subsequent network response update to
      * {@link IUceApi#publishCapabilities(String, PublishResponse)}.
@@ -53,8 +55,7 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
      * token specified.
      * @param reason The optional reason response from the network. If there is a reason header
      * included in the response, that should take precedence over the reason provided in the
-     * status line. If the network provided no reason with the sip code, the string should be
-     * empty.
+     * status line. If the network provided no reason with the sip code, the string should be empty.
      */
     @Override
     public void onNetworkResponse(int sipCode, String reason) {
@@ -67,7 +68,7 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
                 mPublishResponseCallBack.onNetworkResponse(sipCode, reason);
                 Log.d(LOG_TAG, "onNetworkResponse PublishResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onNetworkResponse Exception:" + e.toString());
             }
         });
     }
@@ -99,7 +100,7 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
                         reasonHeaderText);
                 Log.d(LOG_TAG, "onNetworkResponse PublishResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onNetworkResponse Exception:" + e.toString());
             }
         });
     }
@@ -131,7 +132,7 @@ public class RcsCapPublishResponseCallBack implements PublishResponse {
                 mPublishResponseCallBack.onCommandError(code);
                 Log.d(LOG_TAG, "onCommandError PublishResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onCommandError Exception:" + e.toString());
             }
         });
     }

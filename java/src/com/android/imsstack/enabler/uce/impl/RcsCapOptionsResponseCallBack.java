@@ -39,11 +39,13 @@ public class RcsCapOptionsResponseCallBack implements OptionsResponse {
     /**
      * set the callback OptionsResponseCallback of options requests
      * to send the response from the network back to the framework.
+     *
      * @param optionsCallback Tha callback of Options callback
      */
     public void setCallBack(OptionsResponseCallback optionsCallback) {
         mOptionsResponseCallBack = optionsCallback;
     }
+
     /**
      * Notify the framework that the command associated with this callback has failed.
      *
@@ -71,7 +73,7 @@ public class RcsCapOptionsResponseCallBack implements OptionsResponse {
                 mOptionsResponseCallBack.onCommandError(code);
                 Log.d(LOG_TAG, "onCommandError OptionsResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onCommandError Exception:" + e.toString());
             }
         });
     }
@@ -97,7 +99,7 @@ public class RcsCapOptionsResponseCallBack implements OptionsResponse {
                 mOptionsResponseCallBack.onNetworkResponse(sipCode, reason, theirCaps);
                 Log.d(LOG_TAG, "onNetworkResponse OptionsResponse sent to framework");
             } catch (ImsException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "onNetworkResponse Exception:" + e.toString());
             }
         });
     }

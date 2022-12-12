@@ -88,7 +88,7 @@ public class RcsFeatureImplTest {
     @Mock
     private IBinder mTestBinder;
 
-    public class CapabilityCallback extends IImsCapabilityCallback.Stub {
+    private static class CapabilityCallback extends IImsCapabilityCallback.Stub {
 
         @Override
         public void onQueryCapabilityConfiguration(int capability, int radioTech, boolean enabled)
