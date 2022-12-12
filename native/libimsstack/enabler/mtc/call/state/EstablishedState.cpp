@@ -42,7 +42,7 @@
 #include "sipcore/SipStatusCode.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -184,14 +184,14 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     m_objContext.GetUpdatingInfo().GetNegotiatedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
     m_objContext.GetUpdatingInfo().SetTargetCallType(
-            MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE));
+            m_objContext.GetMessageUtils().GetCallType(piMessage, piSession, IMS_TRUE));
 
     // TODO, conference
 
     IMS_RESULT eResult = IMS_SUCCESS;
     CallStateName eStateName = CallStateName::UPDATING;
 
-    if (MessageUtil::HasSdp(piMessage))
+    if (m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
         auto pBlockChecker = std::make_unique<MtcBlockChecker>(GetCallUpdateBlockRules(), nullptr);
         IMtcBlockChecker::Result objResult = pBlockChecker->Check();

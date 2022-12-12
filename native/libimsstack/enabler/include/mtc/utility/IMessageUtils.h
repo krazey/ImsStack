@@ -376,6 +376,14 @@ public:
     virtual IMS_BOOL IsInitialRegistrationRequired(IN const IMessage* piMessage) = 0;
 
     /**
+     * @brief Checks
+     *
+     * @param piMessage
+     * @return
+     */
+    virtual IMS_BOOL IsInitialEmergencyRegistrationRequired(IN const IMessage* piMessage) = 0;
+
+    /**
      * @brief Containss
      *
      * @param piMessage
@@ -457,11 +465,9 @@ public:
      * @brief Generates
      *
      * @param strHost
-     * @param bAngleQuote
      * @return
      */
-    virtual AString GenerateContentId(
-            IN const AString& strHost, IN IMS_BOOL bAngleQuote = IMS_FALSE) = 0;
+    virtual AString GenerateContentId(IN const AString& strHost) = 0;
 
     /**
      * @brief Sets
