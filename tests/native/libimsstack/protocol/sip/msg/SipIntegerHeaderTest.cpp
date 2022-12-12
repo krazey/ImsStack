@@ -144,7 +144,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pExpiresHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pExpiresHeader->SetValueInt(60000));
     EXPECT_EQ(SIP_TRUE, pExpiresHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pExpiresHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("60000", &(aBuffer[0]));
     EXPECT_STREQ("60000", objBuffer.GetCharString());
     pExpiresHeader->SipDelete();
@@ -158,7 +158,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pMinExpiresHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pMinExpiresHeader->SetValueInt(1200));
     EXPECT_EQ(SIP_TRUE, pMinExpiresHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pMinExpiresHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("1200", &(aBuffer[0]));
     EXPECT_STREQ("1200", objBuffer.GetCharString());
     pMinExpiresHeader->SipDelete();
@@ -172,7 +172,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pMaxForwardsHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->SetValueInt(8));
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pMaxForwardsHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("8", &(aBuffer[0]));
     EXPECT_STREQ("8", objBuffer.GetCharString());
     pMaxForwardsHeader->SipDelete();
@@ -186,7 +186,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pMinSeHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pMinSeHeader->SetValueInt(360));
     EXPECT_EQ(SIP_TRUE, pMinSeHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pMinSeHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("360", &(aBuffer[0]));
     EXPECT_STREQ("360", objBuffer.GetCharString());
 
@@ -203,7 +203,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     }
     pParameters->AddParam("generic-param", "generic-value");
     EXPECT_EQ(SIP_TRUE, pMinSeHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_TRUE));
+    EXPECT_EQ(SIP_TRUE, pMinSeHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("360;generic-param=generic-value", &(aBuffer[0]));
     EXPECT_STREQ("360;generic-param=generic-value", objBuffer.GetCharString());
     pMinSeHeader->SipDelete();
@@ -217,7 +217,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pSessionExpiresHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->SetValueInt(2400));
     EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("2400", &(aBuffer[0]));
     EXPECT_STREQ("2400", objBuffer.GetCharString());
 
@@ -234,7 +234,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     }
     pParameters->AddParam("refresher", "uac");
     EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_TRUE));
+    EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->Encode(objBuffer, SIP_TRUE));
     EXPECT_STREQ("2400;refresher=uac", &(aBuffer[0]));
     EXPECT_STREQ("2400;refresher=uac", objBuffer.GetCharString());
     pSessionExpiresHeader->SipDelete();
@@ -248,7 +248,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pFlowTimerHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pFlowTimerHeader->SetValueInt(20));
     EXPECT_EQ(SIP_TRUE, pFlowTimerHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pFlowTimerHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("20", &(aBuffer[0]));
     EXPECT_STREQ("20", objBuffer.GetCharString());
     pFlowTimerHeader->SipDelete();
@@ -262,7 +262,7 @@ TEST_F(SipIntegerHeaderTest, EncodeAndEncodeHdr)
     ASSERT_TRUE(pMaxBreadthHeader != nullptr);
     EXPECT_EQ(SIP_TRUE, pMaxBreadthHeader->SetValueInt(120));
     EXPECT_EQ(SIP_TRUE, pMaxBreadthHeader->EncodeHdr(&pBuff));
-    EXPECT_EQ(SIP_TRUE, pContentLengthHeader->Encode(objBuffer, SIP_FALSE));
+    EXPECT_EQ(SIP_TRUE, pMaxBreadthHeader->Encode(objBuffer, SIP_FALSE));
     EXPECT_STREQ("120", &(aBuffer[0]));
     EXPECT_STREQ("120", objBuffer.GetCharString());
     pMaxBreadthHeader->SipDelete();
@@ -354,9 +354,9 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr)
     EXPECT_EQ(SIP_TRUE, pSessionExpiresHeader->DecodeHdr(const_cast<char*>("3600"), 4));
     EXPECT_EQ(3600, pSessionExpiresHeader->GetValueInt());
     pSessionExpiresHeader->SipDelete();
-    pMinSeHeader = reinterpret_cast<SipIntegerHeader*>(
-            SipHeaders::CreateCoreHdrObj(SipHeaderBase::MIN_SE));
-    ASSERT_TRUE(pMinSeHeader != nullptr);
+    pSessionExpiresHeader = reinterpret_cast<SipIntegerHeader*>(
+            SipHeaders::CreateCoreHdrObj(SipHeaderBase::SESSION_EXPIRES));
+    ASSERT_TRUE(pSessionExpiresHeader != nullptr);
     EXPECT_EQ(SIP_TRUE,
             pSessionExpiresHeader->DecodeHdr(const_cast<char*>("1600;refresher=uas"), 18));
     pParameters = pSessionExpiresHeader->GetParameters();
