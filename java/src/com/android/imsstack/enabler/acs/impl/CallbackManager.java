@@ -16,6 +16,9 @@
 
 package com.android.imsstack.enabler.acs.impl;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -58,7 +61,7 @@ public class CallbackManager {
      * @param callback callback instance to be registered
      * @return true if registering is success, otherwise is false
      */
-    public boolean registerCallback(IAcServiceImplCallback callback) {
+    public boolean registerCallback(@NonNull IAcServiceImplCallback callback) {
         synchronized (mLock) {
             if (!mCallbackList.contains(callback)) {
                 mCallbackList.add(callback);
@@ -74,7 +77,7 @@ public class CallbackManager {
      * unregister callback object. if there is no registered callback
      * @param callback callback instance to be unregistered
      */
-    public void unregisterCallback(IAcServiceImplCallback callback) {
+    public void unregisterCallback(@NonNull IAcServiceImplCallback callback) {
         synchronized (mLock) {
             if (mCallbackList.contains(callback)) {
                 mCallbackList.remove(callback);
@@ -90,7 +93,7 @@ public class CallbackManager {
      * @param data has provisioning.xml
      * @param isDeProvision indicates Provisioning or De-Provisioning
      */
-    public void notifyOnReceivedProvisioning(byte[] data, boolean isDeProvision) {
+    public void notifyOnReceivedProvisioning(@NonNull byte[] data, boolean isDeProvision) {
         ImsLog.i("[" + mSlotId + "] " + "notify onReceivedProvisioning " + isDeProvision);
 
         synchronized (mLock) {
@@ -106,7 +109,7 @@ public class CallbackManager {
      * notify receiving pre-provisioning data
      * @param data has pre-provisioning.xml
      */
-    public void notifyOnReceivedPreProvisioning(byte[] data) {
+    public void notifyOnReceivedPreProvisioning(@NonNull byte[] data) {
         ImsLog.i("[" + mSlotId + "] " + "notify onReceivedPreProvisioning");
 
         synchronized (mLock) {
@@ -123,7 +126,7 @@ public class CallbackManager {
      * @param errorCode integer type error code, 2xx/4xx/5xx
      * @param errorString string representing error code
      */
-    public void notifyOnReceivedError(int errorCode, String errorString) {
+    public void notifyOnReceivedError(int errorCode, @Nullable String errorString) {
         ImsLog.i("[" + mSlotId + "] " + "notify onReceivedError error code : "
                 + errorCode + " error string : " + errorString);
 

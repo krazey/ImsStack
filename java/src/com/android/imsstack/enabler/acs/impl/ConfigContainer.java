@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.acs.impl;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.text.TextUtils;
@@ -31,23 +33,28 @@ import java.io.FileOutputStream;
 /**
  * This class handles the provisioning config data based on subId
  * To handle all of related data for each subId with one xml file, this class will be worked static.
- *    client info : message client including rcs enabled or disabled
- *    provisioning validation : provisioning data expire time
+ *    client information : message app information
+ *    provisioning validation : version, validity time and token of provisioning data
  *    last updated time each provisioning data : condition which provisioning data will be removed
  *    etc.
  */
 public class ConfigContainer {
     private static final String LOCAL_FILE_NAME_PREFIX = "rcs_provisioning_config_";
     private static final String LOCAL_FILE_NAME_POSTFIX = ".xml";
+
+    // provisioning validation
     private static final String LOCAL_KEY_AC_VERSION = "version";
     private static final String LOCAL_KEY_AC_VALIDITY = "validity";
     private static final String LOCAL_KEY_AC_TOKEN = "token";
 
+    // client information
     private static final String LOCAL_KEY_RCS_VERSION = "key_rcs_version";
     private static final String LOCAL_KEY_RCS_PROFILE = "key_rcs_profile";
     private static final String LOCAL_KEY_CLIENT_VENDOR = "key_rcs_client_vendor";
     private static final String LOCAL_KEY_CLIENT_VERSION = "key_rcs_client_version";
     private static final String LOCAL_KEY_RCS_ENABLED_BY_USER = "key_rcs_enabled_by_user";
+
+    // last updated time each provisioning data
     private static final String LOCAL_KEY_VALIDATION_TIME = "key_validation_time";
     private static final String LOCAL_KEY_LAST_UPDATE_TIME = "key_last_updated_time";
 
@@ -84,15 +91,15 @@ public class ConfigContainer {
      * @return validity value which is stored or 0L
      */
     public long getAcValidity() {
-        return mConfig.getLong(LOCAL_KEY_AC_VALIDITY);
+        return mConfig.getLong(LOCAL_KEY_AC_VALIDITY, 0L);
     }
 
     /**
      * get token value in provisioning data
      * @return token value which is stored or null
      */
-    public String getAcToken() {
-        return mConfig.getString(LOCAL_KEY_AC_TOKEN);
+    public @Nullable String getAcToken() {
+        return mConfig.getString(LOCAL_KEY_AC_TOKEN, null);
     }
 
     /**
@@ -116,7 +123,7 @@ public class ConfigContainer {
      * update new token value
      * @param newToken token
      */
-    public void updateAcToken(String newToken) {
+    public void updateAcToken(@NonNull String newToken) {
         ImsLog.i(mSlotId, "old token : " + getAcToken() + " new token : " + newToken);
 
         mConfig.putString(LOCAL_KEY_AC_TOKEN, newToken);
@@ -131,7 +138,7 @@ public class ConfigContainer {
         mConfig.putInt(LOCAL_KEY_AC_VERSION, 0);
         mConfig.putLong(LOCAL_KEY_AC_VALIDITY, 0L);
         mConfig.putString(LOCAL_KEY_AC_TOKEN, null);
-        mConfig.putLong(LOCAL_KEY_LAST_UPDATE_TIME, 0L);
+        mConfig.putLong(LOCAL_KEY_LAST_UPDATE_TIME, getCurrentTimeMillis());
 
         saveDataToFile();
     }
@@ -140,7 +147,7 @@ public class ConfigContainer {
      * update AcServiceClientInfo
      * @param clientInfo container has client information
      */
-    public void updateClientInfo(AcServiceClientInfo clientInfo) {
+    public void updateClientInfo(@NonNull AcServiceClientInfo clientInfo) {
         mConfig.putString(LOCAL_KEY_RCS_VERSION, clientInfo.getRcsVersion());
         mConfig.putString(LOCAL_KEY_RCS_PROFILE, clientInfo.getRcsProfile());
         mConfig.putString(LOCAL_KEY_CLIENT_VENDOR, clientInfo.getClientVendor());
@@ -154,14 +161,14 @@ public class ConfigContainer {
      * get AcServiceClientInfo
      * @return container has client information corresponding to subId
      */
-    public AcServiceClientInfo getClientInfo() {
+    public @Nullable AcServiceClientInfo getClientInfo() {
         String rcsVersion = mConfig.getString(LOCAL_KEY_RCS_VERSION);
         String rcsProfile = mConfig.getString(LOCAL_KEY_RCS_PROFILE);
         String clientVendor = mConfig.getString(LOCAL_KEY_CLIENT_VENDOR);
         String clientVersion = mConfig.getString(LOCAL_KEY_CLIENT_VERSION);
 
-        if (TextUtils.isEmpty(rcsVersion) || TextUtils.isEmpty(rcsProfile)
-                || TextUtils.isEmpty(clientVendor) || TextUtils.isEmpty(clientVersion)) {
+        if (TextUtils.isEmpty(rcsVersion) && TextUtils.isEmpty(rcsProfile)
+                && TextUtils.isEmpty(clientVendor) && TextUtils.isEmpty(clientVersion)) {
             ImsLog.i(mSlotId, "not exist AcServiceClientInfo");
             return null;
         }

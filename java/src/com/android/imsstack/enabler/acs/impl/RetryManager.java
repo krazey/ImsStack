@@ -28,7 +28,7 @@ import com.android.internal.annotations.VisibleForTesting;
  * This class manages the timer for config retry. When provisioning request fails, this class set
  * timer. If the request failure is repeated the timer value increased exponentially.
  */
-public class ReconfigManager {
+public class RetryManager {
     private final IAlarmTimer mIAlarmTimer;
     private final int mSlotId;
 
@@ -44,8 +44,7 @@ public class ReconfigManager {
     private Handler mHandler;
 
     @VisibleForTesting
-    public ReconfigManager(int slotId, Handler handler,
-            IAlarmTimer iAlarmTimer) {
+    public RetryManager(int slotId, Handler handler, IAlarmTimer iAlarmTimer) {
         mSlotId = slotId;
         mHandler = handler;
         mIAlarmTimer = iAlarmTimer;
@@ -56,7 +55,7 @@ public class ReconfigManager {
      * @param slotId SIM slot ID or Phone ID
      * @param handler Handler object
      */
-    public ReconfigManager(int slotId, Handler handler) {
+    public RetryManager(int slotId, Handler handler) {
         this(slotId, handler,
                 (IAlarmTimer) AgentFactory.getAgent(AgentFactory.ALARM_TIMER, slotId));
     }
