@@ -65,29 +65,34 @@ PUBLIC VIRTUAL AosAppContext::~AosAppContext()
     {
         m_piApp->CleanUp();
         delete m_piApp;
+        m_piApp = IMS_NULL;
     }
 
     if (m_piPcscf != IMS_NULL)
     {
         m_piPcscf->CleanUp();
         delete m_piPcscf;
+        m_piPcscf = IMS_NULL;
     }
 
     if (m_piSubscriber != IMS_NULL)
     {
         m_piSubscriber->CleanUp();
         delete m_piSubscriber;
+        m_piSubscriber = IMS_NULL;
     }
 
     if (m_piRegistration != IMS_NULL)
     {
         m_piRegistration->CleanUp();
         delete m_piRegistration;
+        m_piRegistration = IMS_NULL;
     }
 
     if (m_piBlock != IMS_NULL)
     {
         delete m_piBlock;
+        m_piBlock = IMS_NULL;
     }
 }
 
