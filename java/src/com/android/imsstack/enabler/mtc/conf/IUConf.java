@@ -45,12 +45,4 @@ public class IUConf {
     // Result Type
     public static final int RESULT_FAILURE                = 0;
     public static final int RESULT_SUCCESS                = 1;
-
-    public class Failure_Reason {
-
-        public static final int FAILURE_REASON_UNKNOWN      = 0;
-
-    }; /* REJECT_REASON_ */
-
-
 }

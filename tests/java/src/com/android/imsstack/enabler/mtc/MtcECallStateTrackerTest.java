@@ -63,7 +63,7 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
 
     private MtcECallStateTracker mTestMtcECallStateTracker;
 
-    private class TestMtcECallStateTracker extends MtcECallStateTracker {
+    private static class TestMtcECallStateTracker extends MtcECallStateTracker {
         TestMtcECallStateTracker(IBaseContext context, ICallStateTracker csTracker) {
             super(context, csTracker);
         }

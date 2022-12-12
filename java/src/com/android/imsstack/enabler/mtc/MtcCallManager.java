@@ -669,7 +669,7 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
         ImsLog.i("[GII-MTC] " + s);
     }
 
-    private class CallNode {
+    private static class CallNode {
         private Call mCall;
         private int mCallState = CallTracker.CALL_STATE_IDLE;
 
