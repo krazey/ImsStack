@@ -325,7 +325,6 @@ TEST_F(SipHeadersTest, GetHdrObj_Index)
     EXPECT_TRUE(nullptr == pHdrs->GetHdrObj(SipHeaderBase::TYPE_END));
     EXPECT_TRUE(nullptr == pHdrs->GetHdrObj(SipHeaderBase::TYPE_INVALID));
 
-    pMaxForwardsHdr->SipDelete();
     delete pHdrs;
 }
 
@@ -355,11 +354,9 @@ TEST_F(SipHeadersTest, GetNewHdrObj)
 
     SipHeaderBase* pUserAgentHdr = pHdrs->GetNewHdrObj(SipHeaderBase::USER_AGENT);
     ASSERT_TRUE(pUserAgentHdr != nullptr);
-    pUserAgentHdr->SipDelete();
 
     SipHeaderBase* pViaHdr = pHdrs->GetNewHdrObj(SipHeaderBase::VIA);
     ASSERT_TRUE(pViaHdr != nullptr);
-    pViaHdr->SipDelete();
 
     delete pHdrs;
 }
