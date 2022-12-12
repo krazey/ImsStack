@@ -892,13 +892,18 @@ public class AudioSessionHandler extends MediaState {
     private Pair<DatagramSocket, DatagramSocket> getRtpSocketFromList(
             String remoteIpAddress, int remotePortNumber)  {
         synchronized (mRtpSocketList) {
-            for (Pair<DatagramSocket, DatagramSocket> rtpSocket : mRtpSocketList) {
-                InetSocketAddress remoteAddress =
+            if (remoteIpAddress != null) {
+                for (Pair<DatagramSocket, DatagramSocket> rtpSocket : mRtpSocketList) {
+                    InetSocketAddress remoteSocketAddress =
                         (InetSocketAddress) (rtpSocket.first).getRemoteSocketAddress();
-                if (remoteIpAddress != null
-                        && remoteIpAddress.equals(remoteAddress.getAddress().getHostAddress())
-                        && remotePortNumber == remoteAddress.getPort()) {
-                    return rtpSocket;
+                    if (remoteSocketAddress != null) {
+                        InetAddress remoteInetAddress = remoteSocketAddress.getAddress();
+                        if (remoteInetAddress != null
+                                && remoteIpAddress.equals(remoteInetAddress.getHostAddress())
+                                && remotePortNumber == remoteSocketAddress.getPort()) {
+                            return rtpSocket;
+                        }
+                    }
                 }
             }
         }
