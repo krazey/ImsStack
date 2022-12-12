@@ -204,6 +204,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
             }
         };
 
+        @SuppressWarnings("unchecked")
         private UceSubscribeMessageHandler mNotifyMsgHandler = new UceSubscribeMessageHandler() {
             @Override
             public void onHandle(Message objMessage) {
@@ -213,7 +214,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                     ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
-                List<String> pidfXmls = (List)objMessage.obj;
+                List<String> pidfXmls = (List<String>) objMessage.obj;
                 request.informCapabilitiesUpdate(pidfXmls);
             }
         };
@@ -251,6 +252,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
             }
         };
 
+        @SuppressWarnings("unchecked")
         private UceSubscribeMessageHandler mResourceTerminatedMsgHandler =
             new UceSubscribeMessageHandler() {
             @Override
@@ -261,7 +263,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
                     ImsLog.e(mSlotId, "Do not find request for Key=" + requestKey);
                     return;
                 }
-                ArrayList<UceResourceInfo> list = (ArrayList)objMessage.obj;
+                ArrayList<UceResourceInfo> list = (ArrayList<UceResourceInfo>) objMessage.obj;
                 request.informResourceTerminate(list);
             }
         };
@@ -284,9 +286,8 @@ public class UceSubscribeRequestController implements IUceJNIListener {
             ImsLog.e(mSlotId, "ClassCastException:" + e.toString());
         } catch (NullPointerException e) {
             ImsLog.e(mSlotId, "NullPointerException:" + e.toString());
-        } finally {
-            return request;
         }
+        return request;
     }
 
     private void removeSubscribeRequest(int key) {
@@ -299,8 +300,6 @@ public class UceSubscribeRequestController implements IUceJNIListener {
             ImsLog.e(mSlotId, "NullPointerException:" + e.toString());
         } catch (UnsupportedOperationException e) {
             ImsLog.e(mSlotId, "UnsupportedOperationException:" + e.toString());
-        } finally {
-            return;
         }
     }
 

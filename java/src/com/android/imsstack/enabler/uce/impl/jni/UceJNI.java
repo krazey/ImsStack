@@ -98,10 +98,10 @@ public class UceJNI {
         parcel = null;
     }
 
-    private class UceJNIImsListener implements JniImsListener{
-        private HashMap<Integer, ArrayList<IUceJNIListener>> mListenersMap =
+    private static class UceJNIImsListener implements JniImsListener {
+        private final HashMap<Integer, ArrayList<IUceJNIListener>> mListenersMap =
             new HashMap<Integer, ArrayList<IUceJNIListener>>();
-        private Map<Integer, UceJNIMessageHandlerFunc> mMessageHandler =
+        private final Map<Integer, UceJNIMessageHandlerFunc> mMessageHandler =
             new HashMap<Integer, UceJNIMessageHandlerFunc>();
 
         public UceJNIImsListener() {

@@ -3,7 +3,6 @@ package com.android.imsstack.enabler.uce.interf;
 import android.net.Uri;
 
 import java.util.Set;
-import java.util.Collection;
 /**
  * The interface that is used by the framework to listen to events from the vendor RCS stack
  * regarding capabilities exchange using presence server and OPTIONS.
@@ -32,7 +31,7 @@ public interface UceEventListener {
 
   /**
    * Trigger the framework to provide a capability update using
-   * {@link IUceApi##publishCapabilities}.
+   * {@link IUceApi#publishCapabilities}.
    *      CAPABILITY_UPDATE_TRIGGER_UNKNOWN = 0 (The reason for the request is unknown)
    *      CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 1 (When the Entity Tag (ETag) is  expiring)
    *      CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED = 2

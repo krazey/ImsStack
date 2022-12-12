@@ -484,7 +484,6 @@ public class UcePublishRequestController implements IUceJNIListener {
                 String reasonHeaderText = data.getReasonHeaderText();
                 String etag = data.getEtag();
                 long capability = data.getCapability();
-                int needToRetry = data.getNeedToRetry();
                 request.informNetworkResponse(responseCode, reason, reasonHeaderCause,
                         reasonHeaderText, etag);
                 controller.deleteActiveRequest();

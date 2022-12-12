@@ -148,8 +148,6 @@ public class UceOptionsRequestTest {
         mRequest = createUceOptionsRequest();
         mRequest.informCommandError(commandError);
 
-        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-
         verify(optionsCb, times(1)).onCommandError(eq(commandError));
     }
 
