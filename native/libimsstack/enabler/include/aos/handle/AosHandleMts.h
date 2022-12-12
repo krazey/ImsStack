@@ -33,7 +33,6 @@ protected:
     void InitializeSupportedRats();
 
     void Init() override;
-    void CleanUp() override;
 
     void InitializeServiceBlock() override;
     void InitializeServiceFeature() override;

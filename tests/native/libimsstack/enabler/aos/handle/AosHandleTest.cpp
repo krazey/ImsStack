@@ -1423,8 +1423,6 @@ TEST_F(AosHandleTest, Init_CleanUp)
     EXPECT_FALSE(IsBlockForWifi(AosHandle::BLOCK_3G));
 
     CleanUp();
-
-    EXPECT_TRUE(GetAosInfo() == nullptr);
 }
 
 TEST_F(AosHandleTest, SetHandleState_Test)
