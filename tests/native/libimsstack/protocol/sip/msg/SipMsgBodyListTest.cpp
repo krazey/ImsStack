@@ -169,7 +169,6 @@ Test body 2\r\n\
     EXPECT_EQ(SIP_FALSE,
             pList->DecodeMIMEBody(pMsg, pMsg + nLen, const_cast<char*>("mismatch-boundary")));
 
-    pMessageBody->SipDelete();
     pList->SipDelete();
 
     /* No CRLF present, fail */
@@ -183,7 +182,6 @@ Test body 2\r\n\
     EXPECT_EQ(SIP_FALSE,
             pList->DecodeMIMEBody(pMsg, pMsg + nLen, const_cast<char*>("unique-boundary")));
 
-    pMessageBody->SipDelete();
     pList->SipDelete();
 }
 
