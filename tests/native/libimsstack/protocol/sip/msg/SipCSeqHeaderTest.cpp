@@ -73,7 +73,7 @@ TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr)
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("0 INVITE"), 8));
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("1 \r\n INVITE"), 13));
+    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("1 \r\n INVITE"), 11));
     EXPECT_STREQ("INVITE", pHeader->GetMethod());
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr(const_cast<char*>("1 INVITE"), 8));
