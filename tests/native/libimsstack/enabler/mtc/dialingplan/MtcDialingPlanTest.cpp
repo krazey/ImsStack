@@ -84,11 +84,6 @@ TEST_F(MtcDialingPlanTest, GetToUriNormal)
     // TODO
 }
 
-TEST_F(MtcDialingPlanTest, GetToUriEmergency)
-{
-    // TODO
-}
-
 TEST_F(MtcDialingPlanTest, GetToUriReturnsConferenceUriFromConfig)
 {
     objCallInfo.bConference = IMS_TRUE;
@@ -218,7 +213,5 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDialNumberWithPhone)
     EXPECT_STREQ(strExpectedUri.GetStr(),
             pDialingPlan->GetToUri(strNumber, objCallInfo, Scheme::SIP).GetStr());
 }
-
-// TODO: emergency type will be added after ESCV from C/F is merged
 
 }  // namespace android

@@ -140,30 +140,11 @@ TEST_F(ParticipantInfoTest, GetRemoteNumberReturnsNullInitially)
     EXPECT_TRUE(pParticipantInfo->GetRemoteNumber().IsNull());
 }
 
-TEST_F(ParticipantInfoTest, GetRemoteUriReturnsFromDialingPlanForConference)
-{
-    const AString strToUri("some_uri");
-
-    CallInfo objCallInfo;
-    objCallInfo.bConference = IMS_TRUE;
-    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
-
-    MockIMtcDialingPlan objDialingPlan;
-    ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
-
-    EXPECT_CALL(objDialingPlan, GetToUri(_, Ref(objCallInfo), _))
-            .Times(1)
-            .WillOnce(Return(strToUri));
-
-    EXPECT_EQ(strToUri, pParticipantInfo->GetRemoteUri());
-}
-
 TEST_F(ParticipantInfoTest, GetRemoteUriReturnsFromSupplementaryService)
 {
     const AString strUri("some_uri");
 
     CallInfo objCallInfo;
-    objCallInfo.bConference = IMS_FALSE;
     ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
@@ -179,7 +160,6 @@ TEST_F(ParticipantInfoTest, GetRemoteUriReturnsFromSupplementaryService)
 TEST_F(ParticipantInfoTest, GetRemoteUriReturnsInitialRemoteUri)
 {
     CallInfo objCallInfo;
-    objCallInfo.bConference = IMS_FALSE;
     ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
@@ -251,7 +231,6 @@ TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteNumber)
     ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
     CallInfo objCallInfo;
-    objCallInfo.bConference = IMS_FALSE;
     ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
@@ -275,7 +254,6 @@ TEST_F(ParticipantInfoTest, UpdateFromRemoteNumberUpdatesRemoteUri)
     ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
 
     CallInfo objCallInfo;
-    objCallInfo.bConference = IMS_FALSE;
     ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
 
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());

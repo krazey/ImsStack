@@ -18,6 +18,7 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MtcContextRepository.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -33,6 +34,7 @@
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "ect/EctReference.h"
 #include "ect/MockIEctReferenceListener.h"
+#include "helper/MtcSupplementaryService.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
 #include "helper/sipinterfaceholder/MockIMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/MockReferenceInterfaceHolder.h"
@@ -84,6 +86,7 @@ public:
     MockISipMessage objMockSipMessage;
     EctReference* pEctReference;
     MessageUtils objMessageUtils;
+    MtcSupplementaryService* pSupplementaryService;
 
 protected:
     virtual void SetUp() override
@@ -111,6 +114,10 @@ protected:
                 .WillByDefault(Return(pMockReferenceInterfaceHolder));
         ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
                 .WillByDefault(Return(&objMockReference));
+
+        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        ON_CALL(objMockTargetContext, GetSupplementaryService)
+                .WillByDefault(ReturnRef(*pSupplementaryService));
 
         pParticipantInfo = IMS_NULL;
         SetUpCalls();
@@ -161,6 +168,7 @@ protected:
 
         ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP)).WillByDefault(Return(strUri));
         ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::UNKNOWN)).WillByDefault(Return(strUri));
+        pParticipantInfo->UpdateFromRemoteNumber("123");
     }
 
     void SetUpForSuccessfulReferenceOperation(IN const AString& strSessionId)

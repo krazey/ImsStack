@@ -19,7 +19,6 @@
 
 #include "AString.h"
 #include "ImsIdentity.h"
-#include "dialingplan/EmergencyNumberList.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "dialingplan/NormalDialingPlan.h"
 #include <memory>

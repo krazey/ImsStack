@@ -23,6 +23,7 @@
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
+#include "helper/MtcSupplementaryService.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -66,7 +67,8 @@ protected:
 TEST_F(UriFormatterTest, GetReferToForInvite)
 {
     // TODO: test for PAID should be added
-    objCallInfo.bConference = IMS_TRUE;  // to get Remote Uri from ParticipantInfo easily
+    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(objParticipantInfo));
@@ -75,6 +77,8 @@ TEST_F(UriFormatterTest, GetReferToForInvite)
 
     ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::SIP)).WillByDefault(Return(ANY_SIP_URI));
     ON_CALL(objDialingPlan, GetToUri(_, _, Scheme::UNKNOWN)).WillByDefault(Return(ANY_SIP_URI));
+
+    objParticipantInfo.UpdateFromRemoteNumber(ANY_NUMBER);
 
     AString strUri;
     UriFormatter::GetReferToForInvite(strUri, objContext, IMS_FALSE);

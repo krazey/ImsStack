@@ -29,7 +29,6 @@
 #include "call/IMtcCall.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "dialingplan/EmergencyDialingPlan.h"
 #include "dialingplan/ImsIdentityProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "util/TextParser.h"
@@ -77,21 +76,21 @@ AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo&
         m_pTemporaryServiceUrn = nullptr;
     }
 
-    if (objCallInfo.bUssi)
+    if (objCallInfo.bEmergency)
     {
-        return NormalDialingPlan::GetTranslatedUriForDialString(
-                m_objContext, strUri, *m_pIdentityProxy);
+        IMS_TRACE_D("GetToUri Emergency URN will be obtained using SuppType::TARGET_URI", 0, 0, 0);
+        return strUri;
     }
 
     if (objCallInfo.bConference)
     {
-        // TODO: creating confrence factory uri also needs to be moved
         return GetConferenceFactoryUri();
     }
 
-    if (objCallInfo.bEmergency)
+    if (objCallInfo.bUssi)
     {
-        return EmergencyDialingPlan::GetTranslatedUri(m_objContext, strUri);
+        return NormalDialingPlan::GetTranslatedUriForDialString(
+                m_objContext, strUri, *m_pIdentityProxy);
     }
 
     return NormalDialingPlan::GetTranslatedUri(m_objContext, strUri, eScheme, *m_pIdentityProxy);

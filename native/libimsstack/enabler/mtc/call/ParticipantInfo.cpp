@@ -80,23 +80,6 @@ AString ParticipantInfo::GetRemoteNumber() const
 PUBLIC
 AString ParticipantInfo::GetRemoteUri() const
 {
-    /*
-    TODO: E911 redial I/F will be changed
-    AStringBuffer objServiceUrn;
-    UCRedial::GetInstance()->GetServiceURNForRedial(
-            m_objContext.GetSlotId(), strNumber, objServiceUrn);
-    UCRedial::GetInstance()->ClearServiceURNForRedial(m_objContext.GetSlotId());
-    if (objServiceUrn.GetLength() > 0 && m_objContext.GetCallInfo().bEmergency)
-    {
-        return objServiceUrn.GetString();
-    }
-    */
-
-    if (m_objContext.GetCallInfo().bConference)
-    {
-        return m_objContext.GetDialingPlan().GetToUri("", m_objContext.GetCallInfo());
-    }
-
     const SuppService* pSuppService =
             m_objContext.GetSupplementaryService().Get(SuppType::TARGET_URI);
     if (pSuppService != IMS_NULL)
@@ -140,6 +123,7 @@ void ParticipantInfo::UpdateFromRemoteNumber(IN const AString& strRemoteNumber)
     m_strRemoteNumber = strRemoteNumber;
     m_strRemoteUri =
             m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext.GetCallInfo());
+    IMS_TRACE_D("UpdateFromRemoteNumber : URI[%s]", m_strRemoteUri.GetStr(), 0, 0);
 }
 
 PUBLIC void ParticipantInfo::HandleRequest(IN RequestType eType, IN const IMessage& objRequest)
