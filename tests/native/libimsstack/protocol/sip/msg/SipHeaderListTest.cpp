@@ -119,7 +119,7 @@ TEST_F(SipHeaderListTest, DecodeAndEncodeHdr)
     AStringBuffer objBuffer(256);
     EXPECT_EQ(SIP_TRUE, pHeaderList->Encode(objBuffer, SIP_TRUE));
 
-    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr(const_cast<char*>("INVITE,ACK,UPDATE,REFER"), 26));
+    EXPECT_EQ(SIP_TRUE, pHeaderList->DecodeHdr(const_cast<char*>("INVITE,ACK,UPDATE,REFER"), 23));
 
     EXPECT_EQ(4, pHeaderList->GetSize());
 
