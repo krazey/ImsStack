@@ -26,7 +26,8 @@ public interface IRegistrationNotifier {
      * Notify the application that the device is connected to the IMS network.
      *
      * @param networkType the radio access technology.
-     * @param featureTags Type of Set<String>.
+     * @param featureTags set of strings containing the MMTEL feature tags associated with the IMS
+     * registration.
      */
     public void notifyRegistered(int networkType, @NonNull Set<String> featureTags);
 
@@ -34,7 +35,8 @@ public interface IRegistrationNotifier {
      * Notify the application that the device is trying to connect to the IMS network.
      *
      * @param networkType the radio access technology.
-     * @param featureTags Type of Set<String>.
+     * @param featureTags set of strings containing the MMTEL feature tags associated with the IMS
+     * registration.
      */
     public void notifyRegistering(int networkType, @NonNull Set<String> featureTags);
 
