@@ -48,8 +48,8 @@ PUBLIC
 MtsDialingPlan::~MtsDialingPlan() {}
 
 PUBLIC
-AString MtsDialingPlan::Translate(IN const AString& strTargetAddress,
-        IN IMS_BOOL bAquot /* = IMS_TRUE */, IN IMS_BOOL bUssi /* = IMS_FALSE*/)
+AString MtsDialingPlan::Translate(
+        IN const AString& strTargetAddress, IN IMS_BOOL bAquot /* = IMS_TRUE */)
 {
     if (strTargetAddress.GetLength() == 0)
     {
@@ -94,29 +94,11 @@ AString MtsDialingPlan::Translate(IN const AString& strTargetAddress,
 
     if (nScheme != URI_SCHEME_TEL)
     {
-        if (bUssi)
-        {
-            if (!FormUssiNonTelUri(strTargetAddress, objUri, m_strScheme))
-            {
-                return AString::ConstNull();
-            }
-        }
-        else
-        {
-            if (!FormNonTelUri(strTargetAddress, bAquot, objUri))
-            {
-                return AString::ConstNull();
-            }
-        }
+        FormNonTelUri(strTargetAddress, bAquot, objUri);
     }
     else
     {
-        IMS_BOOL bOK = FormTelUri(strTargetAddress, objUri);
-
-        if (!bOK)
-        {
-            return AString::ConstNull();
-        }
+        FormTelUri(strTargetAddress, objUri);
 
         // Adds the URI scheme
         objUri.Prepend(':');
@@ -154,25 +136,12 @@ AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo
 }
 
 PRIVATE
-IMS_BOOL MtsDialingPlan::FormNonTelUri(IN const AString& strTargetAddress, IN IMS_BOOL bAquot,
-        OUT AStringBuffer& objUri, IN const AString& strScheme /* = AString::ConstNull() */)
+IMS_BOOL MtsDialingPlan::FormNonTelUri(
+        IN const AString& strTargetAddress, IN IMS_BOOL bAquot, OUT AStringBuffer& objUri)
 {
-    if (strScheme.GetLength() != 0)
-    {
-        objUri.Append(strScheme);
-    }
-    else
-    {
-        if (GetScheme().EqualsIgnoreCase("tel"))
-        {
-            objUri.Append("sip");
-        }
-        else
-        {
-            objUri.Append(GetScheme());
-        }
-    }
+    IMS_TRACE_I("FormNonTelUri", 0, 0, 0);
 
+    objUri.Append(GetScheme());
     objUri.Append(':');
     objUri.Append(strTargetAddress);
 
@@ -238,6 +207,8 @@ IMS_BOOL MtsDialingPlan::FormNonTelUri(IN const AString& strTargetAddress, IN IM
 PRIVATE
 IMS_BOOL MtsDialingPlan::FormTelUri(IN const AString& strTargetAddress, OUT AStringBuffer& objUri)
 {
+    IMS_TRACE_I("FormTelUri", 0, 0, 0);
+
     if (strTargetAddress.StartsWith('+'))
     {
         objUri.Append(strTargetAddress);
@@ -247,49 +218,6 @@ IMS_BOOL MtsDialingPlan::FormTelUri(IN const AString& strTargetAddress, OUT AStr
     objUri.Append(strTargetAddress);
     objUri.Append(";phone-context=");
     objUri.Append(ImsIdentity::GetPhoneContext(GetDialingPolicy(), m_nSlotId));
-
-    return IMS_TRUE;
-}
-
-PRIVATE
-IMS_BOOL MtsDialingPlan::FormUssiNonTelUri(IN const AString& strTargetAddress,
-        OUT AStringBuffer& objUri, IN const AString& strScheme /* = AString::ConstNull() */)
-{
-    IMS_TRACE_I("FormUssiNonTelUri", 0, 0, 0);
-
-    if (strScheme.GetLength() != 0)
-    {
-        objUri.Append(strScheme);
-    }
-    else
-    {
-        if (GetScheme().EqualsIgnoreCase("tel"))
-        {
-            objUri.Append("sip");
-        }
-        else
-        {
-            objUri.Append(GetScheme());
-        }
-    }
-
-    objUri.Append(':');
-    objUri.Append(strTargetAddress);
-
-    if (strTargetAddress.Contains('#'))
-    {
-        objUri.Replace('#', "%23");
-    }
-
-    objUri.Append(";phone-context=");
-
-    objUri.Append(ImsIdentity::GetHomeDomainName(m_nSlotId));
-    objUri.Append('@');
-    objUri.Append(ImsIdentity::GetHomeDomainName(m_nSlotId));
-
-    objUri.Append(";user=dialstring");
-    objUri.Prepend('<');
-    objUri.Append('>');
 
     return IMS_TRUE;
 }

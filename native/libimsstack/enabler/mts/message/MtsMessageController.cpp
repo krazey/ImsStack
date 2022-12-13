@@ -82,27 +82,10 @@ void MtsMessageController::PageMessageDelivered(IN IPageMessage* piPageMessage)
         return;
     }
 
-    ImsList<IMessage*> objResponses =
-            piPageMessage->GetPreviousResponses(IMessage::PAGEMESSAGE_SEND);
-    if (0 == objResponses.GetSize())
+    IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
+    if (piMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "No received responses in the page message", 0, 0, 0);
-
-        /*
-         * even though it's internal operation fails,
-         * it is sure that a successful response is received.
-         */
-        ReportTransmissionResult(
-                SipStatusCode::SC_200, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
-        CleanMtsMessage(piMtsMessage);
-        return;
-    }
-
-    IMessage* piMessage = objResponses.GetAt(objResponses.GetSize() - 1);
-    if (IMS_NULL == piMessage)
-    {
-        IMS_TRACE_E(0, "No received responses at the last index (%d) in the page message",
-                objResponses.GetSize() - 1, 0, 0);
         ReportTransmissionResult(
                 SipStatusCode::SC_200, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
         CleanMtsMessage(piMtsMessage);
@@ -138,24 +121,12 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
         return;
     }
 
-    ImsList<IMessage*> objResponses =
-            piPageMessage->GetPreviousResponses(IMessage::PAGEMESSAGE_SEND);
-    if (objResponses.GetSize() == 0)
-    {
-        IMS_TRACE_E(0, "IMS Internal Error!! No received responses in the page message!!", 0, 0, 0);
-        IMS_SINT32 nResult = m_piMtsErrorHandler->Handle();
-        ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
-        CleanMtsMessage(piMtsMessage);
-        return;
-    }
-
-    IMessage* piMessage = objResponses.GetAt(objResponses.GetSize() - 1);
+    IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
     if (piMessage == IMS_NULL)
     {
-        IMS_TRACE_E(0, "No received responses at the last index (%d) in the page message!!",
-                objResponses.GetSize() - 1, 0, 0);
-        IMS_SINT32 nResult = m_piMtsErrorHandler->Handle();
-        ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
+        IMS_TRACE_E(0, "No received responses in the page message", 0, 0, 0);
+        ReportTransmissionResult(
+                SipStatusCode::SC_200, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
         CleanMtsMessage(piMtsMessage);
         return;
     }
@@ -662,11 +633,7 @@ PRIVATE IMS_UINT32 MtsMessageController::ReportMtSms(
     strData.Attach(reinterpret_cast<const IMS_CHAR*>(pbySmsData), nSmsLength);
     ByteArray objData = strData.ToBase64();
 
-    m_piMtsService->ReportMtSms(eSmsFormat, objData);
-
-    // TODO: Call back is being considered
-
-    return MT_SUCCESS;
+    return m_piMtsService->ReportMtSms(eSmsFormat, objData);
 }
 
 PRIVATE
@@ -869,17 +836,6 @@ PRIVATE void MtsMessageController::ReportTransmissionResult(
     }
 
     ReportMoStatus(nResultCode, eSmsFormat, 0, nSeqId);
-}
-
-PRIVATE void MtsMessageController::ReportTransmissionFailureWithRetryTime(
-        IN SmsFormatType eSmsFormat, IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId /*= -1*/)
-{
-    IMS_UINT32 nResultCode = MO_ERROR_RETRY;
-    IMS_TRACE_I("ReportTransmissionFailureWithRetryTime : nResultCode[%d], eSmsFormat[%s], "
-                "nRetryTime[%d]",
-            nResultCode, PS_SmsFormatType(eSmsFormat), nRetryTime);
-
-    ReportMoStatus(nResultCode, eSmsFormat, nRetryTime, nSeqId);
 }
 
 PRIVATE

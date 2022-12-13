@@ -34,7 +34,7 @@ public:
     virtual IMtsServiceState* GetIMtsServiceState() = 0;
     virtual void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId) = 0;
-    virtual void ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData) = 0;
+    virtual IMS_UINT32 ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData) = 0;
     virtual void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) = 0;
     virtual void SetListener(IN IMtsServiceListener* piMtsServiceListener) = 0;
 

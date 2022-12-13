@@ -147,7 +147,7 @@ void MtsService::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsForm
 }
 
 PUBLIC
-void MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData)
+IMS_UINT32 MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData)
 {
     IMS_TRACE_I("ReportMtSms", 0, 0, 0);
 
@@ -156,6 +156,9 @@ void MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& ob
     {
         piJniThread->ReportMtSms(eSmsFormat, objData, m_nSlotId);
     }
+
+    // TODO: Call back is being considered
+    return MT_SUCCESS;
 }
 
 PUBLIC
