@@ -1129,14 +1129,8 @@ PRIVATE GLOBAL const IMS_CHAR* AosNetTracker::RadioTypeToString(IN IMS_UINT32 nS
         case (0x00010000 << 8):
             return "NW_REPORT_RADIO_WLAN";
 
-        case (0x00010000 << 9):
-            return "NW_REPORT_RADIO_CDMA1X";
-
         case (0x00010000 << 10):
             return "NW_REPORT_RADIO_EVDODO";
-
-        case (0x00010000 << 11):
-            return "NW_REPORT_RADIO_EVDORA";
 
         case (0x00010000 << 12):
             return "NW_REPORT_RADIO_EHRPD";
