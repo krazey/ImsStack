@@ -19,7 +19,6 @@
 
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
-#include "utility/MtsTimer.h"
 
 class MtsDynamicLoader final
 {
@@ -31,7 +30,6 @@ public:
 
     inline MtsSipFormUtils* GetMtsSipFormUtils() { return m_pMtsSipFormUtils; }
     inline MtsSmUtils* GetMtsSmUtils() { return m_pMtsSmUtils; }
-    inline MtsTimer* GetMtsTimer() { return m_pMtsTimer; }
 
 private:
     void DestroyAll();
@@ -40,7 +38,6 @@ private:
     IMS_SINT32 m_nSlotId;
     MtsSipFormUtils* m_pMtsSipFormUtils;
     MtsSmUtils* m_pMtsSmUtils;
-    MtsTimer* m_pMtsTimer;
 };
 
 #endif

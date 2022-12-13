@@ -42,12 +42,12 @@ __IMS_TRACE_TAG_COM_MTS__;
 PUBLIC
 MtsMessageController::MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
         IN MtsDynamicLoader* pMtsDynamicLoader) :
+        m_objMsgList(ImsList<IMtsMessage*>()),
         m_bProcessingMsg(IMS_FALSE),
         m_nCallStateMsg(CALL_STATE_IDLE),
         m_nCallTypeMsg(CALL_TYPE_CS),
         m_nSlotId(nSlotId),
         m_strLastRcvIpsmgwAddr(AString::ConstNull()),
-        m_objMsgList(ImsList<IMtsMessage*>()),
         m_objRpAckedMsgList(ImsList<IMtsMessage*>()),
         m_piMtsService(piMtsService),
         m_piMtsErrorHandler(IMS_NULL),
@@ -316,37 +316,6 @@ PRIVATE void MtsMessageController::Remove(IN IMtsMessage* piMtsMessage)
             _TRACE_B_(bHasDeliverMsg), 0);
 }
 
-PRIVATE IMtsMessage* MtsMessageController::Search(IN const AString& strDestination)
-{
-    if (strDestination.GetLength() == 0)
-    {
-        return IMS_NULL;
-    }
-
-    IMS_TRACE_I("Search : messageCount[%d], size[%d]", m_objMsgList.GetSize(),
-            strDestination.GetLength(), 0);
-
-    for (IMS_UINT32 i = 0; i < m_objMsgList.GetSize(); i++)
-    {
-        IMtsMessage* piTmpMtsMessage = m_objMsgList.GetAt(i);
-
-        if (IsReceivedMessage(piTmpMtsMessage))
-        {
-            continue;
-        }
-
-        IMS_TRACE_D("Search : searched destination[%s]", piTmpMtsMessage->GetDestination().GetStr(),
-                0, 0);
-
-        if (piTmpMtsMessage->GetDestination().Equals(strDestination))
-        {
-            return piTmpMtsMessage;
-        }
-    }
-
-    return IMS_NULL;
-}
-
 PRIVATE IMtsMessage* MtsMessageController::Search(IN IPageMessage* piPageMessage)
 {
     if (piPageMessage == IMS_NULL)
@@ -551,7 +520,7 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
     if (piMtsServiceState->IsTemporaryServiceBlocked())
     {
         IMS_TRACE_E(0, "Mts service is temporarily blocked", 0, 0, 0);
-        ReportTransmissionResult(MO_ERROR_RETRY, eSmsFormat);
+        ReportTransmissionResult(MO_ERROR_RETRY, eSmsFormat, nSeqId);
         return;
     }
 
@@ -806,14 +775,6 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, OUT ByteArray& objSms)
 {
     AString strTempSmsgw = AString::ConstNull();
-
-    if (piPageMessage == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "piPageMessage_ is null", 0, 0, 0);
-
-        delete piMtsMessage;
-        return IMS_FALSE;
-    }
 
     IMessage* piMessage = piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
 
@@ -1127,40 +1088,6 @@ AString MtsMessageController::GetPreviousCallId(IN const ByteArray& objSms)
 }
 
 PRIVATE
-IMS_SINT32 MtsMessageController::GetRetryAfterValue(IN IMessage* piMessage)
-{
-    ImsList<AString> objHeaderList = piMessage->GetHeaders(SipHeaderName::RETRY_AFTER);
-
-    if (objHeaderList.IsEmpty())
-    {
-        IMS_TRACE_E(0, "Error Response Message has not Retry-After Header", 0, 0, 0);
-        return -1;
-    }
-
-    AString strHeader = objHeaderList.GetAt(objHeaderList.GetSize() - 1);
-
-    if (strHeader.GetLength() == 0)
-    {
-        return -1;
-    }
-
-    ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::RETRY_AFTER_SEC, strHeader);
-
-    if (piHeader == IMS_NULL)
-    {
-        return -1;
-    }
-
-    IMS_SINT32 nValue = piHeader->GetValueInt();
-
-    piHeader->Destroy();
-
-    IMS_TRACE_I("GetRetryAfterValue : Retry-After value[%d]", nValue, 0, 0);
-
-    return nValue;
-}
-
-PRIVATE
 IMS_BOOL MtsMessageController::GetSmsgwFromReceivedMessage(
         IN const IPageMessage* piPageMessage, OUT AString& strSmsgw)
 {
@@ -1234,37 +1161,6 @@ void MtsMessageController::GetUriFromHeaders(
     strUri = objSIPAddress.ToString();
 
     IMS_TRACE_I("GetUriFromHeaders : strUri[%s]", strUri.GetStr(), 0, 0);
-}
-
-PRIVATE
-void MtsMessageController::GetUserPartFromUris(
-        IN const AString& strUri, OUT AString& strUserPart) const
-{
-    SipAddress objSIPAddress;
-
-    if (!objSIPAddress.Create(strUri))
-    {
-        IMS_TRACE_E(0, "Creating SipAddress failed, strUri = %s ", strUri.GetStr(), 0, 0);
-        return;
-    }
-
-    const SipAddress::UserInfoPart* pUserInfoPart = objSIPAddress.GetUserInfoPart();
-
-    if (pUserInfoPart != IMS_NULL)
-    {
-        strUserPart = pUserInfoPart->GetUser();
-    }
-    else
-    {
-        if (objSIPAddress.IsSchemeSip() || objSIPAddress.IsSchemeSips())
-        {
-            strUserPart = objSIPAddress.GetUser();
-        }
-        else if (objSIPAddress.IsSchemeTel())
-        {
-            strUserPart = objSIPAddress.GetHost();
-        }
-    }
 }
 
 PRIVATE IMS_BOOL MtsMessageController::IsDeliverMessage(IN IPageMessage* piPageMessage)
@@ -1401,23 +1297,4 @@ PRIVATE void MtsMessageController::UpdateRPAckMap(IN IPageMessage* pIPageMessage
             return;
         }
     }
-}
-
-PRIVATE void MtsMessageController::SetCallStateType(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
-{
-    IMS_TRACE_I("SetCallStateType : nType[%d], nState[%d]", nType, nState, 0);
-    m_nCallTypeMsg = nType;
-    m_nCallStateMsg = nState;
-}
-
-PRIVATE IMS_BOOL MtsMessageController::IsEmergencyCalling()
-{
-    if ((m_nCallTypeMsg == CALL_TYPE_EMERGENCY) && (m_nCallStateMsg != CALL_STATE_IDLE))
-    {
-        IMS_TRACE_I("IsEmergencyCalling : Now is Under E911-Call", 0, 0, 0);
-        return IMS_TRUE;
-    }
-
-    IMS_TRACE_I("IsEmergencyCalling : Now is NOT Under E911-Call", 0, 0, 0);
-    return IMS_FALSE;
 }

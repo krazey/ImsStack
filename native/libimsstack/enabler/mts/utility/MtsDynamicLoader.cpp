@@ -23,8 +23,7 @@ PUBLIC
 MtsDynamicLoader::MtsDynamicLoader(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_pMtsSipFormUtils(IMS_NULL),
-        m_pMtsSmUtils(IMS_NULL),
-        m_pMtsTimer(IMS_NULL)
+        m_pMtsSmUtils(IMS_NULL)
 {
     IMS_TRACE_D("+MtsDynamicLoader [slot_%d]", m_nSlotId, 0, 0);
     Initialize();
@@ -43,7 +42,6 @@ void MtsDynamicLoader::Initialize()
 
     m_pMtsSipFormUtils = new MtsSipFormUtils(m_nSlotId);
     m_pMtsSmUtils = new MtsSmUtils();
-    m_pMtsTimer = new MtsTimer();
 }
 
 PRIVATE
@@ -61,11 +59,5 @@ void MtsDynamicLoader::DestroyAll()
     {
         delete m_pMtsSmUtils;
         m_pMtsSmUtils = IMS_NULL;
-    }
-
-    if (m_pMtsTimer != IMS_NULL)
-    {
-        delete m_pMtsTimer;
-        m_pMtsTimer = IMS_NULL;
     }
 }

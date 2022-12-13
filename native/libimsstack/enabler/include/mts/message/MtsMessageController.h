@@ -30,7 +30,7 @@ class IPageMessage;
 class MtsDynamicLoader;
 class IMtsErrorHandler;
 
-class MtsMessageController final :
+class MtsMessageController :
         public ImsActivityEx,
         public IPageMessageListener,
         public IMtsServiceListener,
@@ -62,7 +62,6 @@ private:
     void DestroyMtsMessage();
     void Add(IN IMtsMessage* piMtsMessage);
     void Remove(IN IMtsMessage* piMtsMessage);
-    IMtsMessage* Search(IN const AString& strDestination);
     IMtsMessage* Search(IN IPageMessage* piPageMessage);
     IMtsMessage* Search(IN const AString& strDestination, IN IMS_SINT32 nMti);
     IMtsMessage* Search(IN IMS_SINT32 nMessageReference,
@@ -99,11 +98,9 @@ private:
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
 
     AString GetPreviousCallId(IN const ByteArray& objSms);
-    IMS_SINT32 GetRetryAfterValue(IN IMessage* piMessage);
     IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
     void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri) const;
-    void GetUserPartFromUris(IN const AString& strUri, OUT AString& strUserPart) const;
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
     IMS_BOOL IsReceivedMessage(IN IMtsMessage* piMtsMessage);
     void SetMessageInfo(IN IPageMessage* piPageMessage, IN const ByteArray& objSms,
@@ -111,9 +108,8 @@ private:
             IN MtsTransactionType eMessageType, OUT IMtsMessage* piMtsMessage);
     void UpdateRPAckMap(IN IPageMessage* piPageMessage);
 
-    // TODO: Need to check if these methods are deprecated for SCBM/ECBM feature
-    void SetCallStateType(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
-    IMS_BOOL IsEmergencyCalling();
+protected:
+    ImsList<IMtsMessage*> m_objMsgList;
 
 private:
     IMS_BOOL m_bProcessingMsg;
@@ -121,7 +117,6 @@ private:
     IMS_UINT32 m_nCallTypeMsg;
     IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
-    ImsList<IMtsMessage*> m_objMsgList;
     ImsList<IMtsMessage*> m_objRpAckedMsgList;
     IMtsService* m_piMtsService;
     IMtsErrorHandler* m_piMtsErrorHandler;
