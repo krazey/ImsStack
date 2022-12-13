@@ -35,7 +35,6 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -67,11 +66,11 @@ public class VideoCallUtils {
     /**
      * Table for video quality and video dimensions.
      */
-    private static final Hashtable<Integer, VideoDimension> sVideoDimensions;
+    private static final LinkedHashMap<Integer, VideoDimension> sVideoDimensions;
     /**
      * Table for orientation-reversed video quality.
      */
-    private static final Hashtable<Integer, Integer> sOrientationReversedVideoQualities;
+    private static final LinkedHashMap<Integer, Integer> sOrientationReversedVideoQualities;
 
     /**
      * DEBUGGING PURPOSE
@@ -357,7 +356,7 @@ public class VideoCallUtils {
         /**
          * Video dimensions
          */
-        sVideoDimensions = new Hashtable<Integer, VideoDimension>();
+        sVideoDimensions = new LinkedHashMap<Integer, VideoDimension>();
         sVideoDimensions.put(MediaInfo.VIDEO_QUALITY_QCIF, new VideoDimension(176, 144));
         sVideoDimensions.put(MediaInfo.VIDEO_QUALITY_QVGA_LS, new VideoDimension(320, 240));
         sVideoDimensions.put(MediaInfo.VIDEO_QUALITY_QVGA_PR, new VideoDimension(240, 320));
@@ -376,7 +375,7 @@ public class VideoCallUtils {
         /**
          * Orientation-reversed video quailities
          */
-        sOrientationReversedVideoQualities = new Hashtable<Integer, Integer>();
+        sOrientationReversedVideoQualities = new LinkedHashMap<Integer, Integer>();
         sOrientationReversedVideoQualities.put(
                 MediaInfo.VIDEO_QUALITY_QCIF, MediaInfo.VIDEO_QUALITY_QCIF_PR);
         sOrientationReversedVideoQualities.put(

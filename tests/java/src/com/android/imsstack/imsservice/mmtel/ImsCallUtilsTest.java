@@ -46,7 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 
 public class ImsCallUtilsTest {
 
@@ -238,7 +238,8 @@ public class ImsCallUtilsTest {
     @Test
     public void testGetExtraCodeFromMtc() {
 
-        Hashtable<Integer, Integer> sMtcReasonToImsReason = new Hashtable<Integer, Integer>();
+        LinkedHashMap<Integer, Integer> sMtcReasonToImsReason = new LinkedHashMap<Integer,
+              Integer>();
         int reason = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
         int extraCode = 0;
 
