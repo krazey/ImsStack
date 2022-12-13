@@ -752,8 +752,8 @@ public class CarrierConfig {
                 "one_way_video_call_by_remote_end_supported_bool";
         public static final String KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL =
                 "notify_conf_state_when_anonymous_user_bool";
-        public static final String KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_TYPE_INT =
-                "geolocation_policy_for_location_based_call";
+        public static final String KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT =
+                "geolocation_policy_for_location_based_call_int";
         public static final String KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY =
                 "location_based_number_list_int_array";
 
