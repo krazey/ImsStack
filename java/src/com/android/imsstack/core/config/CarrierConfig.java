@@ -357,8 +357,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_reject_reason_phrase_no_answer_by_user_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING =
                 KEY_PREFIX + "call_reject_reason_phrase_vowifi_off_string";
-        public static final String KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT =
-                KEY_PREFIX + "call_reject_reason_phrase_user_reject";
+        public static final String KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING =
+                KEY_PREFIX + "call_reject_reason_phrase_user_reject_string";
         // Media
         public static final String KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY =
                 KEY_PREFIX + "audio_jitter_buffer_size_int_array";

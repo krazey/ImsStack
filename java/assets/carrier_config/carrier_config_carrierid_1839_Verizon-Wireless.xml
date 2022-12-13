@@ -218,7 +218,7 @@
     <string name="imsvoice.call_terminate_reason_header_internal_error_string">USER;text=&quot;Internal Error Code:%d&quot;</string>
 
     <!-- MTC reject phrase -->
-    <string name="imsvoice.call_reject_reason_phrase_user_reject">Call Rejected By User</string>
+    <string name="imsvoice.call_reject_reason_phrase_user_reject_string">Call Rejected By User</string>
     <!-- TODO: need to check requirement - On active 1X call -->
     <string name="imsvoice.call_reject_reason_phrase_on_cscall_string">On active 1X call</string>
     <string name="imsvoice.call_reject_reason_phrase_on_connecting_call_string">Establishing Another Call</string>
