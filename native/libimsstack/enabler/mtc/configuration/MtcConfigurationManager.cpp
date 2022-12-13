@@ -415,9 +415,9 @@ IMS_BOOL MtcConfigurationManager::IsSupportEarlySession() const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsAllowTextWithVideo() const
+IMS_SINT32 MtcConfigurationManager::GetPolicyForTextWithVideo() const
 {
-    return m_objCarrierConfig.bAllowTextWithVideo;
+    return m_objCarrierConfig.nPolicyForTextWithVideo;
 }
 
 PUBLIC

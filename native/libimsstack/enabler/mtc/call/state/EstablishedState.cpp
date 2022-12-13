@@ -624,8 +624,8 @@ IMSList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
 {
     // No pending rules
     IMSList<IMtcBlockRule*> lstRules;
-    lstRules.Append(new CallTypeBlockRule(
-            m_objContext, m_objContext.GetUpdatingInfo().GetTargetCallType()));
+
+    lstRules.Append(new CallTypeBlockRule(m_objContext));
     lstRules.Append(new SrvccBlockRule(m_objContext.GetService().GetSrvccState()));
     return lstRules;
 }

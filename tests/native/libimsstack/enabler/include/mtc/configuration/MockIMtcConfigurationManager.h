@@ -91,7 +91,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetConvertUserResponseTimer, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPolicyOnVideoQosDeactivation, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportEarlySession, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsAllowTextWithVideo, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPolicyForTextWithVideo, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetMinimumBatteryLevelForLimitVideoCall, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTextOnDefaultBearerSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTextQosPreconditionSupported, (), (const, override));

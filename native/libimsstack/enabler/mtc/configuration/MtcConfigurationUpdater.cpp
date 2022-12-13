@@ -201,8 +201,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetInt(CarrierConfig::ImsVt::KEY_POLICY_ON_VIDEO_QOS_DEACTIVATION_INT);
     objItems.bSupportEarlySession =
             piCc->GetBoolean(CarrierConfig::ImsVt::KEY_SUPPORT_EARLY_SESSION_BOOL);
-    objItems.bAllowTextWithVideo =
-            piCc->GetBoolean(CarrierConfig::ImsVt::KEY_ALLOW_TEXT_WITH_VIDEO_BOOL);
+    objItems.nPolicyForTextWithVideo =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT);
     objItems.nMinimumBatteryLevelForLimitVideoCall =
             piCc->GetInt(CarrierConfig::ImsVt::KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT);
 

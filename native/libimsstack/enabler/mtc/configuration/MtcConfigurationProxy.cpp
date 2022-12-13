@@ -89,8 +89,6 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsVideoQosPreconditionSupported();
         case Feature::SUPPORT_EARLY_SESSION:
             return m_pManager->IsSupportEarlySession();
-        case Feature::ALLOW_TEXT_WITH_VIDEO:
-            return m_pManager->IsAllowTextWithVideo();
         case Feature::TEXT_ON_DEFAULT_BEARER_SUPPORTED:
             return m_pManager->IsTextOnDefaultBearerSupported();
         case Feature::TEXT_QOS_PRECONDITION_SUPPORTED:
@@ -267,6 +265,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_pManager->GetRegistrationRestorationModeOn504ForInvite();
         case Feature::POLICY_ON_AUDIO_QOS_DEACTIVATION:
             return m_pManager->GetPolicyOnAudioQosDeactivation();
+        case Feature::POLICY_FOR_TEXT_WITH_VIDEO:
+            return m_pManager->GetPolicyForTextWithVideo();
         case Feature::POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR:
             return m_pManager->GetPolicyForMediaTypeRestrictionOnCellular();
         case Feature::POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_IN_ROAMING:

@@ -616,8 +616,8 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_POLICY_ON_VIDEO_QOS_DEACTIVATION_INT[] 
         KEY_IMS_VT_PREFIX "policy_on_video_qos_deactivation_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_SUPPORT_EARLY_SESSION_BOOL[] =
         KEY_IMS_VT_PREFIX "support_early_session_bool";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_ALLOW_TEXT_WITH_VIDEO_BOOL[] =
-        KEY_IMS_VT_PREFIX "allow_text_with_video_bool";
+const IMS_CHAR CarrierConfig::ImsVt::KEY_POLICY_FOR_TEXT_WITH_VIDEO_INT[] =
+        KEY_IMS_VT_PREFIX "policy_for_text_with_video_int";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[] =
         KEY_IMS_VT_PREFIX "minimum_battery_level_for_limit_video_call_int";
 // Media

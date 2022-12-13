@@ -98,7 +98,7 @@ public:
     IMS_SINT32 GetConvertUserResponseTimer() const override;
     IMS_SINT32 GetPolicyOnVideoQosDeactivation() const override;
     IMS_BOOL IsSupportEarlySession() const override;
-    IMS_BOOL IsAllowTextWithVideo() const override;
+    IMS_SINT32 GetPolicyForTextWithVideo() const override;
     IMS_SINT32 GetMinimumBatteryLevelForLimitVideoCall() const override;
 
     IMS_BOOL IsTextOnDefaultBearerSupported() const override;
