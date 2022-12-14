@@ -34,22 +34,6 @@ public:
     void SetEImsRegState(IN IMS_UINT32 nState) override;
     void SetRegState(IN IMS_UINT32 nServiceType, IN IMS_UINT32 nState) override;
 
-    void SetDetailState(IN IMS_SINT32 nState) override;
-    IMS_SINT32 GetDetailState() override;
-    void SetReason(IN IMS_UINT32 nReason) override;
-    void EnforceUpdateRegistration() override;
-    void UpdateRegistration() override;
-
-    void ClearRegServices() override;
-    IMS_UINT32 GetRegServices() const override;
-    void UpdateRegServices(IN IMS_BOOL bUpdateCurrState = IMS_FALSE) override;
-
-    // registration response
-    void SetRegRespCode(IN IMS_SINT32 nRespCode) override;
-
-    // limited service mode for normal registration
-    IMS_BOOL IsLimitedMode() const override;
-
 protected:
     IMS_SINT32 ConvertServiceType(IMS_UINT32 nServiceType);
     void AddRegService(IN IMS_UINT32 nType);
@@ -62,12 +46,6 @@ protected:
     IMS_UINT32 m_nRegState;
     IMS_UINT32 m_nERegState;
     IMS_UINT32 m_nRegServices;
-    IMS_UINT32 m_nReportedRegServices;
-    IMS_SINT32 m_nRegDetailState;
-    IMS_SINT32 m_nReportedRegDetailState;
-    IMS_UINT32 m_nRegReason;
-    IMS_SINT32 m_nRegRespCode;
-    IMS_BOOL m_bLimitedMode;
 
     AString m_strTag;
 

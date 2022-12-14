@@ -177,21 +177,6 @@ IMSList<IAosHandle*> AosMngr::GetAllAosHandles(IN const AString& strAppId)
     return objHandles;
 }
 
-PUBLIC
-IAosAppContext* AosMngr::GetAosAppContext(IN const AString& strProfileId)
-{
-    IAosAppContext* piAppContext = m_objAppContext.GetValue(strProfileId);
-
-    if (piAppContext == IMS_NULL)
-    {
-        IMS_TRACE_D("[SLOT%d] GetAosAppContext :: PID[%s] no app context", m_nSlotId,
-                strProfileId.GetStr(), 0);
-        return IMS_NULL;
-    }
-
-    return piAppContext;
-}
-
 PRIVATE
 void AosMngr::CreateStaticConfig()
 {

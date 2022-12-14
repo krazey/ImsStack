@@ -185,8 +185,6 @@ protected:
 
     void SetTerminated(IN IMS_BOOL bTerminated) { pAosSubscription->SetTerminated(bTerminated); }
 
-    IMS_BOOL IsSubtrying() { return pAosSubscription->IsSubTrying(); }
-
     void StartTimer(IN IMS_UINT32 nDuration) { pAosSubscription->StartTimer(nDuration); }
 
     ITimer* GetTimer() { return pAosSubscription->m_piRetryTimer; }
@@ -247,18 +245,6 @@ TEST_F(AosSubscriptionTest, Initialize)
     pAosSubscription->Initialize();
 }
 
-TEST_F(AosSubscriptionTest, IsSubtrying)
-{
-    SetState(AosSubscription::STATE_SUBSCRIBING);
-    EXPECT_TRUE(IsSubtrying());
-
-    SetState(AosSubscription::STATE_SUBSCRIBING);
-    EXPECT_TRUE(IsSubtrying());
-
-    SetState(AosSubscription::STATE_OFFLINE);
-    EXPECT_FALSE(IsSubtrying());
-}
-
 TEST_F(AosSubscriptionTest, Stop)
 {
     EXPECT_CALL(objMockAosConfig, IsUnSubscription())
@@ -272,18 +258,6 @@ TEST_F(AosSubscriptionTest, Stop)
 
     pAosSubscription->Stop();
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_UNSUBSCRIBING);
-}
-
-TEST_F(AosSubscriptionTest, CheckState)
-{
-    SetState(AosSubscription::STATE_UNSUBSCRIBING);
-    EXPECT_FALSE(pAosSubscription->IsSubHolded());
-
-    SetState(AosSubscription::STATE_SUBSTOP);
-    EXPECT_TRUE(pAosSubscription->IsSubHolded());
-
-    SetState(AosSubscription::STATE_SUBREFRESHSTOP);
-    EXPECT_TRUE(pAosSubscription->IsSubHolded());
 }
 
 TEST_F(AosSubscriptionTest, AosSubscriptionStart)

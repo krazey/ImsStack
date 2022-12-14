@@ -116,118 +116,6 @@ TEST_F(AosUtilTest, GetMinExpiresValue)
     EXPECT_EQ(600, pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
 }
 
-TEST_F(AosUtilTest, GetKeepAliveValue)
-{
-    EXPECT_EQ(-1, pAosUtil->GetKeepAliveValue(IMS_NULL));
-
-    MockISipMessage objMockSipMsg;
-    AString strHeader = "";
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_EQ(-1, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
-
-    strHeader.Append("SIP/2.0/UDP 10.168.219.102");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_EQ(-1, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
-
-    strHeader.Append(";keep=30");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_EQ(30000, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
-}
-
-TEST_F(AosUtilTest, GetProxyFromContact)
-{
-    AString strUseProxy;
-    IMS_UINT32 nUseProxyPort;
-    EXPECT_FALSE(pAosUtil->GetProxyFromContact(IMS_NULL, strUseProxy, nUseProxyPort));
-
-    MockISipMessage objMockSipMsg;
-    AString strHeader = "";
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_FALSE(pAosUtil->GetProxyFromContact(
-            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
-
-    strHeader.Append("*");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_FALSE(pAosUtil->GetProxyFromContact(
-            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
-
-    strHeader = "";
-    strHeader.Append("1234");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_TRUE(pAosUtil->GetProxyFromContact(
-            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
-
-    strHeader = "";
-    strHeader.Append("sip:1234@ims.google.com:4500");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_TRUE(pAosUtil->GetProxyFromContact(
-            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
-
-    strHeader = "";
-    strHeader.Append("sip:1234@ims.google.com:65535");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_TRUE(pAosUtil->GetProxyFromContact(
-            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
-
-    strHeader = "";
-    strHeader.Append("sip:1234@ims.google.com:8080");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_TRUE(pAosUtil->GetProxyFromContact(
-            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
-}
-
-TEST_F(AosUtilTest, GetWarningHeader)
-{
-    AString strReult = AString::ConstEmpty();
-    EXPECT_EQ(strReult, pAosUtil->GetWarningHeader(IMS_NULL));
-
-    MockISipMessage objMockSipMsg;
-    AString strHeader = "";
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::WARNING, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_EQ(strReult, pAosUtil->GetWarningHeader(static_cast<ISipMessage*>(&objMockSipMsg)));
-
-    strHeader.Append("301 isi.edu "
-                     "incompatible network address type 'E.164'"
-                     " ");
-    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::WARNING, 0, AString::ConstNull()))
-            .WillOnce(Return(strHeader));
-    EXPECT_EQ(strHeader, pAosUtil->GetWarningHeader(static_cast<ISipMessage*>(&objMockSipMsg)));
-}
-
-TEST_F(AosUtilTest, IsReasonPhraseExist)
-{
-    AString strReason = "";
-    EXPECT_FALSE(pAosUtil->IsReasonPhraseExist(IMS_NULL, strReason));
-
-    MockISipMessage objMockSipMsg;
-    AString strHeader = "";
-    EXPECT_CALL(objMockSipMsg, GetReasonPhrase()).WillOnce(ReturnRef(strHeader));
-    EXPECT_FALSE(
-            pAosUtil->IsReasonPhraseExist(static_cast<ISipMessage*>(&objMockSipMsg), strReason));
-
-    strHeader.Append("Q.850; cause=17; text="
-                     "unallocated (unassigned) number"
-                     " ");
-    EXPECT_CALL(objMockSipMsg, GetReasonPhrase()).WillOnce(ReturnRef(strHeader));
-    EXPECT_FALSE(
-            pAosUtil->IsReasonPhraseExist(static_cast<ISipMessage*>(&objMockSipMsg), strReason));
-
-    strReason.Append("cause=17");
-    EXPECT_CALL(objMockSipMsg, GetReasonPhrase()).WillOnce(ReturnRef(strHeader));
-    EXPECT_TRUE(
-            pAosUtil->IsReasonPhraseExist(static_cast<ISipMessage*>(&objMockSipMsg), strReason));
-}
-
 TEST_F(AosUtilTest, IsInitialRegistrationRequired)
 {
     EXPECT_FALSE(pAosUtil->IsInitialRegistrationRequired(IMS_NULL));
@@ -329,10 +217,8 @@ TEST_F(AosUtilTest, CheckFeature)
 
     pAosUtil->RemoveFeature(FEATURE_IPSEC, nFeatures);
     EXPECT_FALSE(pAosUtil->IsFeatureOn(FEATURE_IPSEC, nFeatures));
-    EXPECT_FALSE(pAosUtil->IsFeatureCleared(nFeatures));
 
     pAosUtil->ClearFeature(nFeatures);
-    EXPECT_TRUE(pAosUtil->IsFeatureCleared(nFeatures));
 }
 
 TEST_F(AosUtilTest, SetRetryTimeDuration)
@@ -384,20 +270,13 @@ TEST_F(AosUtilTest, CompareList)
     rightArray.AddElement("tel:+1234@ims.google.com");
 
     EXPECT_TRUE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_FALSE));
-    EXPECT_TRUE(pAosUtil->IsListEquivalent(leftArray, rightArray, IMS_FALSE));
-    EXPECT_FALSE(pAosUtil->IsListAllDifferent(leftArray, rightArray, IMS_FALSE));
 
     leftArray.AddElement("+1234@ims.google.com");
     EXPECT_FALSE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_FALSE));
-    EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArray, rightArray, IMS_FALSE));
 
     EXPECT_TRUE(pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_FALSE));
-    EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArrayOutOfOrder, rightArray, IMS_FALSE));
-    EXPECT_FALSE(pAosUtil->IsListAllDifferent(leftArrayOutOfOrder, rightArray, IMS_FALSE));
 
     EXPECT_FALSE(pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_FALSE));
-    EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArrayAllDiff, rightArray, IMS_FALSE));
-    EXPECT_TRUE(pAosUtil->IsListAllDifferent(leftArrayAllDiff, rightArray, IMS_FALSE));
 
     EXPECT_TRUE(pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_FALSE));
     EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_FALSE));
@@ -429,16 +308,10 @@ TEST_F(AosUtilTest, CompareListIPv4)
     rightArray.AddElement("10.168.219.106");
 
     EXPECT_TRUE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_TRUE));
-    EXPECT_TRUE(pAosUtil->IsListEquivalent(leftArray, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListAllDifferent(leftArray, rightArray, IMS_TRUE));
 
     EXPECT_TRUE(pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArrayOutOfOrder, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListAllDifferent(leftArrayOutOfOrder, rightArray, IMS_TRUE));
 
     EXPECT_FALSE(pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArrayAllDiff, rightArray, IMS_TRUE));
-    EXPECT_TRUE(pAosUtil->IsListAllDifferent(leftArrayAllDiff, rightArray, IMS_TRUE));
 
     EXPECT_TRUE(pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_TRUE));
     EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
@@ -470,16 +343,10 @@ TEST_F(AosUtilTest, CompareListIPv6)
     rightArray.AddElement("fc01:abab:cdcd:6fee::1");
 
     EXPECT_TRUE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_TRUE));
-    EXPECT_TRUE(pAosUtil->IsListEquivalent(leftArray, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListAllDifferent(leftArray, rightArray, IMS_TRUE));
 
     EXPECT_TRUE(pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArrayOutOfOrder, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListAllDifferent(leftArrayOutOfOrder, rightArray, IMS_TRUE));
 
     EXPECT_FALSE(pAosUtil->IsListEqual(leftArrayAllDiff, rightArray, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArrayAllDiff, rightArray, IMS_TRUE));
-    EXPECT_TRUE(pAosUtil->IsListAllDifferent(leftArrayAllDiff, rightArray, IMS_TRUE));
 
     EXPECT_TRUE(pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_TRUE));
     EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
@@ -495,7 +362,6 @@ TEST_F(AosUtilTest, ManageIntList)
     combineReasons.Clear();
 
     pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
-    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_OUT_OF_SERVICE, reasons);
     pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
     pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
 
@@ -505,64 +371,17 @@ TEST_F(AosUtilTest, ManageIntList)
     EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
     EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
 
-    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
-    pAosUtil->RemoveElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
     pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
     pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
     EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
-    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
 
     pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
     EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
     EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
 
-    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
-    EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
-
-    pAosUtil->RemoveElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
     pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, reasons);
-    EXPECT_FALSE(pAosUtil->IsElementExistInList(reasons, compareReasons));
     EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
     EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
-
-    pAosUtil->CombineLists(reasons, compareReasons, combineReasons);
-    EXPECT_TRUE(pAosUtil->IsElementExistInList(reasons, combineReasons));
-
-    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, combineReasons);
-    EXPECT_TRUE(pAosUtil->IsElementExistInList(reasons, combineReasons));
-
-    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_VOPS_OFF, combineReasons);
-    pAosUtil->RemoveElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, combineReasons);
-    EXPECT_FALSE(pAosUtil->IsElementExistInList(reasons, combineReasons));
-}
-
-TEST_F(AosUtilTest, GetUserInfoFromSipAddress)
-{
-    AString strSipAddress = AString::ConstNull();
-    AString strUserInfo = AString::ConstNull();
-    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
-    EXPECT_EQ(AString::ConstNull(), strUserInfo);
-
-    strSipAddress.Append("10.168.219.102");
-    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
-    EXPECT_EQ(AString::ConstNull(), strUserInfo);
-
-    strSipAddress = "";
-    strSipAddress.Append("sip:1234@ims.google.com");
-    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
-    AString strResult = "1234";
-    EXPECT_EQ(strResult, strUserInfo);
-
-    strSipAddress = "";
-    strSipAddress.Append("sips:1234@ims.google.com");
-    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
-    EXPECT_EQ(strResult, strUserInfo);
-
-    strSipAddress = "";
-    strSipAddress.Append("tel:+1234@ims.google.com");
-    pAosUtil->GetUserInfoFromSipAddress(strSipAddress, strUserInfo);
-    strResult = "+1234@ims.google.com";
-    EXPECT_EQ(strResult, strUserInfo);
 }
 
 TEST_F(AosUtilTest, checkNetworkType)

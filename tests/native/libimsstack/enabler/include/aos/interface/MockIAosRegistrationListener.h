@@ -25,7 +25,6 @@ class MockIAosRegistrationListener : public IAosRegistrationListener
 public:
     MOCK_METHOD(void, Registration_StateChanged, (IN IMS_UINT32 nResult, IN IMS_UINT32 nReason),
             (override));
-    MOCK_METHOD(void, Registration_PreNotify, (IN IMS_UINT32 nPreReason), (override));
 };
 
 #endif  // MOCK_I_AOS_REGISTRATION_LISTENER_H_

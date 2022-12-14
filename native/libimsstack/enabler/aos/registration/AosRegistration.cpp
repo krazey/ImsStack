@@ -771,20 +771,6 @@ IMS_BOOL AosRegistration::IsNetworkBindingSupported(IN IAosHandle* /* piHandle *
 }
 
 PROTECTED
-IMS_BOOL AosRegistration::IsNetworkFeatureBindingSupported(IN IAosHandle* /* piHandle */)
-{
-    /* TODO_CONFIG : implement with different solution
-    if (m_pUtil->IsFeatureOn(piHandle->GetServiceType(),
-            m_piContext->GetConfig()->GetNetworkRegFeatureBindingSupportedServices()))
-    {
-        return IMS_TRUE;
-    }
-    */
-
-    return IMS_FALSE;
-}
-
-PROTECTED
 IMS_BOOL AosRegistration::IsCallStateRequired() const
 {
     return (m_eRegType == AosRegistrationType::EMERGENCY ||
@@ -1219,14 +1205,6 @@ PROTECTED VIRTUAL void AosRegistration::ReportStateChanged(
     if (m_piListener != IMS_NULL)
     {
         m_piListener->Registration_StateChanged(nResult, nReason);
-    }
-}
-
-PROTECTED VIRTUAL void AosRegistration::PreNotify(IN IMS_UINT32 nReason)
-{
-    if (m_piListener != IMS_NULL)
-    {
-        m_piListener->Registration_PreNotify(nReason);
     }
 }
 
@@ -2345,16 +2323,6 @@ PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetActualWaitTime()
             m_nRetryBaseTime, m_nRetryMaxTime, m_nConsecutiveFailure);
 }
 
-PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetUpperBoundTime()
-{
-    A_IMS_TRACE_I(REGID,
-            "GetUpperBoundTime :: max-time(%d), base-time(%d), consecutive-failures (%d)",
-            m_nRetryMaxTime, m_nRetryBaseTime, m_nConsecutiveFailure);
-
-    return m_pUtil->CalculateUpperBoundTime(
-            m_nRetryBaseTime, m_nRetryMaxTime, m_nConsecutiveFailure);
-}
-
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetFirstPcscf(
         IN IMS_BOOL bUpdateParameter /* = IMS_TRUE */)
 {
@@ -2457,11 +2425,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::TryNextPcscf(
 
     SetState(STATE_REGSTOP);
     return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsNextPcscf()
-{
-    return m_piContext->GetPcscf()->HasNextPcscf();
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsRetryStopped()
@@ -3562,8 +3525,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessStartFailed_305()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_403() {}
-
 PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_420()
 {
     IMS_BOOL bIsExtensionUnsupported =
@@ -3698,8 +3659,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUpdateFailed_305()
 
     return IMS_FALSE;
 }
-
-PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_403() {}
 
 PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_423()
 {
@@ -5019,36 +4978,7 @@ PROTECTED VIRTUAL void AosRegistration::DestroyIpsecHelper()
 
 PROTECTED VIRTUAL void AosRegistration::KeepAlive_DetectedFlowFailed() {}
 
-PROTECTED VIRTUAL void AosRegistration::StartKeepAlive()
-{
-    // will be removed
-    /*
-    if (!m_piContext->GetConfig()->IsKeepAlive())
-    {
-        return;
-    }
-
-    IMS_SINT32 nKeepAliveTime = m_pUtil->GetKeepAliveValue(m_piRegistration->GetPreviousResponse());
-
-    if (nKeepAliveTime > 0)
-    {
-        if(m_pKeepAlive == IMS_NULL)
-        {
-            m_pKeepAlive = AosProvider::GetInstance()->CreateKeepAlive();
-        }
-
-        IPAddress objPcscf(m_strPcscf);
-        m_pKeepAlive->SetTransport(m_objIpa, m_pUtil->GetLocalPort(m_nSlotId),
-                objPcscf, m_nPcscfPort, Sip::TRANSPORT_TCP);
-        m_pKeepAlive->Start(nKeepAliveTime);
-        m_pKeepAlive->SetListener(this);
-    }
-    else
-    {
-        A_IMS_TRACE_I(REGID, "No Keep Alive Parameter ", 0, 0, 0);
-    }
-    */
-}
+PROTECTED VIRTUAL void AosRegistration::StartKeepAlive() {}
 
 PROTECTED VIRTUAL void AosRegistration::StopKeepAlive()
 {

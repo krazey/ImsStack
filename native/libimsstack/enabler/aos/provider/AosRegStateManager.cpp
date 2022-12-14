@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceTrace.h"
-#include "ServiceEvent.h"
 #include "IUIMS.h"
-#include "ImsEventDef.h"
-#include "SipStatusCode.h"
 #include "ImsAosParameter.h"
 #include "provider/AosRegStateManager.h"
 
@@ -30,13 +27,7 @@ AosRegStateManager::AosRegStateManager() :
         m_nSlotId(IMS_SLOT_0),
         m_nRegState(IMS_REG_OFF),
         m_nERegState(IMS_REG_OFF),
-        m_nRegServices(ImsAosService::NONE),
-        m_nReportedRegServices(IMS_REGISTRATION_SERVICE_NONE),
-        m_nRegDetailState(IMS_REGISTRATION_INVALID),
-        m_nReportedRegDetailState(IMS_REGISTRATION_INVALID),
-        m_nRegReason(0),
-        m_nRegRespCode(SipStatusCode::SC_INVALID),
-        m_bLimitedMode(IMS_FALSE)
+        m_nRegServices(ImsAosService::NONE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosRegStateManager = %" PFLS_u "/%" PFLS_x,
             sizeof(AosRegStateManager), this, 0);
@@ -60,14 +51,10 @@ PUBLIC VIRTUAL void AosRegStateManager::SetSlotId(IN IMS_SINT32 nSlotId)
     m_strTag.Sprintf("%d", m_nSlotId);
 }
 
-PUBLIC VIRTUAL void AosRegStateManager::SetImsRegState(IN IMS_UINT32 nState, IN IMS_BOOL bLimited)
+PUBLIC VIRTUAL void AosRegStateManager::SetImsRegState(
+        IN IMS_UINT32 nState, IN IMS_BOOL /*bLimited*/)
 {
     m_nRegState = nState;
-
-    if (nState == IMS_REG_ON)
-    {
-        m_bLimitedMode = bLimited;
-    }
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosRegStateManager::GetImsRegState()
@@ -108,100 +95,6 @@ PUBLIC VIRTUAL void AosRegStateManager::SetRegState(
     }
 }
 
-PUBLIC VIRTUAL void AosRegStateManager::SetDetailState(IN IMS_SINT32 nState)
-{
-    m_nRegDetailState = nState;
-}
-
-PUBLIC VIRTUAL IMS_SINT32 AosRegStateManager::GetDetailState()
-{
-    return m_nRegDetailState;
-}
-
-PUBLIC VIRTUAL void AosRegStateManager::SetReason(IN IMS_UINT32 nReason)
-{
-    m_nRegReason = nReason;
-}
-
-PUBLIC VIRTUAL void AosRegStateManager::EnforceUpdateRegistration()
-{
-    // RIL_INTEGRATION
-    m_nReportedRegServices = GetConvertedRegServices();
-    m_nReportedRegDetailState = (m_nRegDetailState == IMS_REGISTRATION_STOP)
-            ? IMS_REGISTRATION_OFFLINE
-            : m_nRegDetailState;
-
-    m_nRegReason = 0;
-}
-
-PUBLIC VIRTUAL void AosRegStateManager::UpdateRegistration()
-{
-    // RIL_INTEGRATION
-    IMS_UINT32 nService = GetConvertedRegServices();
-    IMS_SINT32 nUpdatedRegDetailState = m_nRegDetailState;
-    IMS_BOOL bIsReportRequired = IMS_FALSE;
-
-    if (nService != m_nReportedRegServices)
-    {
-        bIsReportRequired = IMS_TRUE;
-        m_nReportedRegServices = nService;
-    }
-
-    if (nUpdatedRegDetailState == IMS_REGISTRATION_STOP)
-    {
-        nUpdatedRegDetailState = IMS_REGISTRATION_OFFLINE;
-    }
-
-    if (nUpdatedRegDetailState != m_nReportedRegDetailState)
-    {
-        bIsReportRequired = IMS_TRUE;
-        m_nReportedRegDetailState = nUpdatedRegDetailState;
-    }
-
-    if (bIsReportRequired)
-    {
-        IMS_UINT32 nReason = m_nRegReason;
-        m_nRegReason = 0;
-        if (nReason == IMS_REGISTRATION_REASON_BLOCK_NOTIFICATION)
-        {
-            return;
-        }
-    }
-}
-
-PUBLIC VIRTUAL void AosRegStateManager::ClearRegServices()
-{
-    m_nRegServices = ImsAosService::NONE;
-}
-
-PUBLIC VIRTUAL IMS_UINT32 AosRegStateManager::GetRegServices() const
-{
-    return m_nRegServices;
-}
-
-PUBLIC VIRTUAL void AosRegStateManager::UpdateRegServices(
-        IN IMS_BOOL bUpdateCurrState /* = IMS_FALSE */)
-{
-    if (bUpdateCurrState)
-    {
-        EnforceUpdateRegistration();
-    }
-    else
-    {
-        UpdateRegistration();
-    }
-}
-
-PUBLIC VIRTUAL void AosRegStateManager::SetRegRespCode(IN IMS_SINT32 nRespCode)
-{
-    m_nRegRespCode = nRespCode;
-}
-
-PUBLIC VIRTUAL IMS_BOOL AosRegStateManager::IsLimitedMode() const
-{
-    return m_bLimitedMode;
-}
-
 PROTECTED
 IMS_SINT32 AosRegStateManager::ConvertServiceType(IMS_UINT32 nServiceType)
 {
@@ -239,7 +132,7 @@ IMS_BOOL AosRegStateManager::IsRegService(IN IMS_UINT32 nType) const
 PROTECTED
 IMS_UINT32 AosRegStateManager::GetConvertedRegServices()
 {
-    IMS_UINT32 nServices = IMS_REGISTRATION_SERVICE_NONE;
+    IMS_UINT32 nServices = ImsAosService::NONE;
 
     if (IsRegService(ImsAosService::MTC))
     {

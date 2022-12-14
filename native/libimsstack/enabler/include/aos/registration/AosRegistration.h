@@ -129,7 +129,6 @@ protected:
     IMS_BOOL IsRegTypeEqual(IN AosRegistrationType eType) const;
     IMS_BOOL IsRegTrying() const;
     IMS_BOOL IsNetworkBindingSupported(IN IAosHandle* piHandle);
-    IMS_BOOL IsNetworkFeatureBindingSupported(IN IAosHandle* piHandle);
     IMS_BOOL IsCallStateRequired() const;
     IMS_BOOL IsRadioWaiting() const;
 
@@ -165,7 +164,6 @@ protected:
 
     /// Notify
     virtual void ReportStateChanged(IN IMS_UINT32 nResult, IN IMS_UINT32 nReason = 0);
-    virtual void PreNotify(IN IMS_UINT32 nReason);
     virtual void ReportTryingState();
 
     /// Registration
@@ -216,13 +214,11 @@ protected:
 
     /// Recovery
     virtual IMS_UINT32 GetActualWaitTime();
-    virtual IMS_UINT32 GetUpperBoundTime();
     virtual IMS_BOOL SetFirstPcscf(IN IMS_BOOL bUpdateParameter = IMS_TRUE);
     virtual IMS_BOOL SetNextPcscf(IN IMS_BOOL bUpdateParameter = IMS_TRUE);
     virtual IMS_BOOL TryNextPcscf();
     virtual IMS_BOOL TryNextPcscf(
             IN IMS_BOOL bFlowRecoveryOnAllFail, IN IMS_BOOL bHonorRetryAfter = IMS_FALSE);
-    virtual IMS_BOOL IsNextPcscf();
     virtual IMS_BOOL IsRetryStopped();
 
     /// Clear
@@ -275,14 +271,12 @@ protected:
             IN IMS_SINT32 nStatusCode, IN IMS_UINT32 nRetryAfter);
 
     virtual IMS_BOOL ProcessStartFailed_305();
-    virtual void ProcessStartFailed_403();
     virtual void ProcessStartFailed_420();
     virtual void ProcessStartFailed_421();
     virtual void ProcessStartFailed_423();
     virtual void ProcessStartFailed_503();
 
     virtual IMS_BOOL ProcessUpdateFailed_305();
-    virtual void ProcessUpdateFailed_403();
     virtual void ProcessUpdateFailed_423();
 
     virtual void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode);

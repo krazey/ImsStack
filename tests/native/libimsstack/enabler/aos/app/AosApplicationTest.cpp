@@ -400,8 +400,6 @@ protected:
         AosProvider::GetInstance()->SetRegStateManager(
                 static_cast<IAosRegStateManager*>(&m_objMockIAosRegStateManager), SLOT_ID);
         EXPECT_CALL(m_objMockIAosRegStateManager, SetImsRegState(_, _)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegStateManager, UpdateRegServices(_)).Times(AnyNumber());
-        EXPECT_CALL(m_objMockIAosRegStateManager, UpdateRegistration()).Times(AnyNumber());
 
         m_pTestAosApplication =
                 new TestAosApplication(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
@@ -1122,9 +1120,6 @@ TEST_F(AosApplicationTest, Callback)
 
     // TEST_F : Registration_StateChanged
     m_pTestAosApplication->Registration_StateChanged(0, 0);
-
-    // TEST_F : Registration_PreNotify
-    m_pTestAosApplication->Registration_PreNotify(0);
 
     // TEST_F : CallTracker_StateChanged
     m_pTestAosApplication->CallTracker_StateChanged(

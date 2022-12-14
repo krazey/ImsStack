@@ -181,25 +181,10 @@ PUBLIC VIRTUAL IMS_UINT32 AosSubscription::GetState()
     return m_nState;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubHolded()
-{
-    IMS_BOOL bResult =
-            (m_nState == STATE_SUBSTOP || m_nState == STATE_SUBREFRESHSTOP) ? IMS_TRUE : IMS_FALSE;
-
-    A_IMS_TRACE_I(AOSTAG, "IsSubHolded :: (%s)", _TRACE_B_(bResult), 0, 0);
-    return bResult;
-}
-
 PROTECTED
 void AosSubscription::ClearThrottlingCount()
 {
     m_nThrottlingCount = 0;
-}
-
-PROTECTED
-IMS_BOOL AosSubscription::IsSubTrying() const
-{
-    return (m_nState == STATE_SUBSCRIBING || m_nState == STATE_SUBREFRESHING);
 }
 
 PROTECTED

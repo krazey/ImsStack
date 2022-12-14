@@ -41,8 +41,6 @@ public:
     IMSList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId, IN const AString& strSrvId);
     IMSList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId);
 
-    IAosAppContext* GetAosAppContext(IN const AString& strProfileId);
-
 private:
     void CreateStaticConfig();
     void CreateAos();
