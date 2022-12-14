@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 
@@ -84,7 +85,7 @@ public class BatteryStateAgent implements IBatteryState, ISystemAPIBattery {
         mContext = context;
         SystemInterface.getInstance().setISystemAPIBattery(this);
 
-        mBatteryStateHandler = new BatteryStateHandler();
+        mBatteryStateHandler = new BatteryStateHandler(Looper.myLooper());
         mBatteryChangedReceiver = new BatteryChangedReceiver();
         mBatteryStateReceiver = new BatteryStateReceiver();
 
@@ -373,6 +374,10 @@ public class BatteryStateAgent implements IBatteryState, ISystemAPIBattery {
     }
 
     private final class BatteryStateHandler extends Handler {
+        BatteryStateHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (msg == null) {

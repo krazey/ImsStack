@@ -73,7 +73,8 @@ public class DeviceAgent implements IDevice, ISystemAPIDevice {
         String path;
 
         try {
-            PackageInfo packageInfo = pm.getPackageInfo(evalPackageName, 0);
+            PackageInfo packageInfo =
+                    pm.getPackageInfo(evalPackageName, PackageManager.PackageInfoFlags.of(0));
             path = packageInfo.applicationInfo.dataDir;
         } catch (NameNotFoundException e) {
             ImsLog.d("Package not found; name=" + evalPackageName);

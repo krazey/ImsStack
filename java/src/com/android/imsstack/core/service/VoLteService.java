@@ -17,6 +17,7 @@ package com.android.imsstack.core.service;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.telephony.CarrierConfigManager;
 
@@ -531,6 +532,7 @@ public class VoLteService implements IVoLteService {
         private final WeakReference<VoLteService> mService;
 
         IMSBootupHandler(VoLteService service) {
+            super(Looper.myLooper());
             mService = new WeakReference<VoLteService>(service);
         }
 

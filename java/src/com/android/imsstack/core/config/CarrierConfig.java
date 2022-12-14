@@ -16,6 +16,7 @@
 
 package com.android.imsstack.core.config;
 
+import android.annotation.NonNull;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.PersistableBundle;
@@ -25,6 +26,8 @@ import android.text.TextUtils;
 
 import com.android.imsstack.util.AppContext;
 
+import java.util.Arrays;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 public class CarrierConfig {
@@ -48,6 +51,7 @@ public class CarrierConfig {
             CarrierConfigManager.ImsWfc.KEY_PREFIX
         };
 
+    @SuppressWarnings("deprecation")
     public static final String IMS_COMMON_KEYS[] =
         {
             CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
@@ -975,7 +979,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the string value for a specified key.
+     * Returns the string value for a specified key.
      *
      * @param key The config key
      * @return A string value if present. Otherwise, returns null.
@@ -985,7 +989,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the string value for a specified key.
+     * Returns the string value for a specified key.
      *
      * @param key The config key
      * @param defaultValue The default value if not present
@@ -1038,7 +1042,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the long value for a specified key.
+     * Returns the long value for a specified key.
      *
      * @param key The config key
      * @return A long value if present. Otherwise, returns a negative value.
@@ -1048,7 +1052,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the long value for a specified key.
+     * Returns the long value for a specified key.
      *
      * @param key The config key
      * @param defaultValue The default value if not present
@@ -1059,7 +1063,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the boolean-array value for a specified key.
+     * Returns the boolean-array value for a specified key.
      *
      * @param key The config key
      * @return An boolean-array value if present. Otherwise, returns an empty array.
@@ -1069,7 +1073,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the integer-array value for a specified key.
+     * Returns the integer-array value for a specified key.
      *
      * @param key The config key
      * @return An integer-array value if present. Otherwise, returns an empty array.
@@ -1079,7 +1083,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the long-array value for a specified key.
+     * Returns the long-array value for a specified key.
      *
      * @param key The config key
      * @return A long-array value if present. Otherwise, returns an empty array.
@@ -1089,7 +1093,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the string-array value for a specified key.
+     * Returns the string-array value for a specified key.
      *
      * @param key The config key
      * @return A string-array value if present. Otherwise, returns an empty array.
@@ -1099,7 +1103,7 @@ public class CarrierConfig {
     }
 
     /**
-     * @brief Returns the PersistableBundle value for a specified key.
+     * Returns the PersistableBundle value for a specified key.
      *
      * @param key The config key
      * @return A PersistableBundle object if present. Otherwise, returns null.
@@ -1114,6 +1118,66 @@ public class CarrierConfig {
 
     public void writeToParcel(Parcel p) {
         mConfig.writeToParcel(p, 0);
+    }
+
+    /**
+     * Returns a flag indicating whether the VoLTE provisioning is required or not.
+     *
+     * @return {@code true} if VoLTE provisioning is required, {@code false} otherwise.
+     */
+    @SuppressWarnings("deprecation")
+    public boolean isVoLteProvisioningRequired() {
+        return getBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL);
+    }
+
+    /**
+     * Returns the value from the carrier-config that matches with the given key.
+     *
+     * @param config The {@link PersistableBundle} containing the carrier configuration
+     * @param key The key string to find the value
+     * @return A string representation of the value for the given key.
+     */
+    public static String getValue(@NonNull PersistableBundle config, @NonNull String key) {
+        if (key.endsWith("_bool") || key.endsWith("_boolean")) {
+            return String.valueOf(config.getBoolean(key));
+        } else if (key.endsWith("_int")) {
+            return String.valueOf(config.getInt(key));
+        } else if (key.endsWith("_long")) {
+            return String.valueOf(config.getLong(key));
+        } else if (key.endsWith("_string")) {
+            return config.getString(key);
+        } else if (key.endsWith("_double")) {
+            return String.valueOf(config.getDouble(key));
+        } else if (key.endsWith("_bool_array")) {
+            return Arrays.toString(config.getBooleanArray(key));
+        } else if (key.endsWith("_int_array")) {
+            return Arrays.toString(config.getIntArray(key));
+        } else if (key.endsWith("_long_array")) {
+            return Arrays.toString(config.getLongArray(key));
+        } else if (key.endsWith("_string_array")) {
+            return Arrays.toString(config.getStringArray(key));
+        } else if (key.endsWith("_double_array")) {
+            return Arrays.toString(config.getDoubleArray(key));
+        } else if (key.endsWith("_bundle") || TextUtils.isDigitsOnly(key)) {
+            // isDigitsOnly: codec payload number
+            PersistableBundle b = config.getPersistableBundle(key);
+            if (b != null) {
+                Set<String> keys = b.keySet();
+                StringBuilder sb = new StringBuilder();
+                sb.append("{ ");
+                for (String k : keys) {
+                    sb.append(k).append("=").append(getValue(b, k)).append(",");
+                }
+                if (sb.length() > 2) {
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+                sb.append(" }");
+                return sb.toString();
+            }
+            return "(null)";
+        }
+
+        return "UnknownKeyType";
     }
 
     private void refineSpecialKeys(int slotId) {

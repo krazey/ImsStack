@@ -196,13 +196,11 @@ public class ConfigAgent implements ConfigInterface {
 
         ImsLog.d(mSlotId, "updateCarrierConfig: " + config.toString());
 
-        // After debugging, let's remove this because it uses a deprecated API. {
         java.util.Set<String> keys = config.keySet();
 
         for (String key : keys) {
-            ImsLog.d(mSlotId, "carrier-config: " + key + "=" + config.get(key));
+            ImsLog.d(mSlotId, key + "=" + CarrierConfig.getValue(config, key));
         }
-        // }
 
         overrideTestConfigs(config);
 

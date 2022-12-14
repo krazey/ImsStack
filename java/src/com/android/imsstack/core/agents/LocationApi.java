@@ -15,20 +15,18 @@
  */
 package com.android.imsstack.core.agents;
 
-import android.content.ContentResolver;
-import android.location.Criteria;
+import android.annotation.NonNull;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationRequest;
-import android.os.Looper;
 import android.util.ArraySet;
 
-import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * This class provides utilities classes/methods for Location information retrieval.
@@ -133,24 +131,6 @@ public final class LocationApi {
     }
 
     /**
-     * Returns the current location mode.
-     *
-     * @return location mode
-     */
-    public int getLocationMode(ContentResolver cr) {
-        return SettingsUtils.getLocationMode(cr);
-    }
-
-    /**
-     * Sets the location mode.
-     *
-     * @param mode location mode to be set
-     */
-    public boolean setLocationMode(ContentResolver cr, int mode) {
-        return SettingsUtils.putLocationMode(cr, mode);
-    }
-
-    /**
      * Returns the current enabled/disabled status of the given provider.
      *
      * @param provider the name of the provider
@@ -176,65 +156,23 @@ public final class LocationApi {
     }
 
     /**
-     * Register for location updates using the named provider.
+     * Register for location updates from the specified provider, using a {@link LocationRequest},
+     * and a callback on the specified {@link Executor}.
      *
      * @param provider the name of the provider with which to register
-     * @param listener a {@link LocationListener} whose
-     * {@link LocationListener#onLocationChanged} method will be called for each location update
+     * @param request the location request containing location parameters
+     * @param listener a {@link LocationListener} whose {@link LocationListener#onLocationChanged}
+     *                 method will be called for each location update
+     * @param executor the executor handling listener callbacks
      */
-    public boolean requestLocationUpdates(String provider, LocationApi.Listener listener) {
+    public boolean requestLocationUpdates(@NonNull String provider,
+            @NonNull LocationRequest request, @NonNull LocationApi.Listener listener,
+            @NonNull Executor executor) {
         if (listener == null) {
             return false;
         }
 
-        if (!LocationManagerApi.requestLocationUpdates(provider, listener)) {
-            return false;
-        }
-
-        if (mListenerPool != null) {
-            mListenerPool.add(listener);
-        }
-
-        return true;
-    }
-
-    /**
-     * Register for a single location update using a Criteria and a callback.
-     *
-     * @param criteria criteria contains parameters for the location manager to choose the
-     * appropriate provider and parameters to compute the location
-     * @param listener a {@link LocationListener} whose
-     * {@link LocationListener#onLocationChanged} method will be called for each location update
-     * @param looper a Looper object whose message queue will be used to
-     * implement the callback mechanism, or null to make callbacks on the calling thread
-     */
-    public boolean requestLocationUpdates(Criteria criteria, LocationApi.Listener listener,
-            Looper looper) {
-        if (listener == null) {
-            return false;
-        }
-
-        if (!LocationManagerApi.requestLocationUpdates(criteria, listener, looper)) {
-            return false;
-        }
-
-        if (mListenerPool != null) {
-            mListenerPool.add(listener);
-        }
-
-        return true;
-    }
-
-    /**
-     * Register for a single location update using a LocationRequest and a callback.
-     */
-    public boolean requestLocationUpdates(LocationRequest request, LocationApi.Listener listener,
-            Looper looper) {
-        if (listener == null) {
-            return false;
-        }
-
-        if (!LocationManagerApi.requestLocationUpdates(request, listener, looper)) {
+        if (!LocationManagerApi.requestLocationUpdates(provider, request, listener, executor)) {
             return false;
         }
 
@@ -424,62 +362,20 @@ public final class LocationApi {
             return null;
         }
 
-        public static boolean requestLocationUpdates(
-                String provider, LocationListener listener) {
-            if (listener == null) {
-                return false;
-            }
-
-            LocationManager lm = getLocationManager();
-
-            if (lm == null) {
-                return false;
-            }
-
-            try {
-                logi("LM :: requestLocationUpdates - " + provider);
-                lm.requestLocationUpdates(provider, 0, 0F, listener);
-                return true;
-            } catch (SecurityException e) {
-                loge("Location update request is failed; ignore - " + e);
-            } catch (IllegalArgumentException e) {
-                loge("Provider does not exist; " + e.getMessage());
-            } catch (Exception e) {
-                loge(e.toString());
-            }
-
-            return false;
-        }
-
-        public static boolean requestLocationUpdates(
-                Criteria criteria, LocationListener listener, Looper looper) {
-            if (listener == null) {
-                return false;
-            }
-
-            LocationManager lm = getLocationManager();
-
-            if (lm == null) {
-                return false;
-            }
-
-            try {
-                logi("LM :: requestLocationUpdates - " + criteria);
-                lm.requestLocationUpdates(0, 0F, criteria, listener, looper);
-                return true;
-            } catch (SecurityException e) {
-                loge("Location update request is failed; ignore - " + e);
-            } catch (IllegalArgumentException e) {
-                loge("Provider does not exist; " + e.getMessage());
-            } catch (Exception e) {
-                loge(e.toString());
-            }
-
-            return false;
-        }
-
-        public static boolean requestLocationUpdates(
-                LocationRequest request, LocationListener listener, Looper looper) {
+        /**
+         * Register for location updates from the specified provider, using a
+         * {@link LocationRequest}, and a callback on the specified {@link Executor}.
+         *
+         * @param provider the name of the provider with which to register
+         * @param request the location request containing location parameters
+         * @param listener a {@link LocationListener} whose
+         *                 {@link LocationListener#onLocationChanged} method will be called
+         *                 for each location update
+         * @param executor the executor handling listener callbacks
+         */
+        public static boolean requestLocationUpdates(@NonNull String provider,
+                @NonNull LocationRequest request, @NonNull LocationListener listener,
+                @NonNull Executor executor) {
             if (listener == null) {
                 return false;
             }
@@ -492,7 +388,7 @@ public final class LocationApi {
 
             try {
                 logi("LM :: requestLocationUpdates - " + request);
-                lm.requestLocationUpdates(request, listener, looper);
+                lm.requestLocationUpdates(provider, request, executor, listener);
                 return true;
             } catch (SecurityException e) {
                 loge("Location update request is failed; ignore - " + e);

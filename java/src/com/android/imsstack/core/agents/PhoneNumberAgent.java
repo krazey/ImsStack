@@ -16,6 +16,7 @@
 package com.android.imsstack.core.agents;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import com.android.imsstack.enabler.aos.AosFactory;
@@ -80,7 +81,7 @@ public class PhoneNumberAgent implements IVoLteAgent {
         private int mTryingCounter = 0;
         private int mRetryMaxCount = 10;
         private int mRetryIntervalSec = 5;
-        private PhoneNumberHandler mPhoneNumberHandler = new PhoneNumberHandler();
+        private PhoneNumberHandler mPhoneNumberHandler = new PhoneNumberHandler(Looper.myLooper());
 
         public PhoneNumber(int slotID) {
             ImsLog.d(slotID, "");
@@ -184,6 +185,10 @@ public class PhoneNumberAgent implements IVoLteAgent {
         }
 
         private final class PhoneNumberHandler extends Handler {
+            PhoneNumberHandler(Looper looper) {
+                super(looper);
+            }
+
             public void handleMessage(Message msg) {
                 if (msg == null) {
                     return;

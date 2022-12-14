@@ -60,7 +60,7 @@ public final class PhoneStateAgent implements IPhoneState,
 
     public PhoneStateAgent(int slotId) {
         mSlotId = slotId;
-        mHandler = new PhoneStateHandler();
+        mHandler = new PhoneStateHandler(Looper.myLooper());
     }
 
     @Override
@@ -410,6 +410,10 @@ public final class PhoneStateAgent implements IPhoneState,
 
     private final class PhoneStateHandler extends Handler implements Executor {
         private List<String> mPcscf = null;
+
+        PhoneStateHandler(Looper looper) {
+            super(looper);
+        }
 
         @Override
         public void execute(Runnable command) {

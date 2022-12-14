@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.util;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
@@ -24,12 +25,16 @@ import android.os.Handler;
 import com.android.imsstack.util.ImsLog;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class GeocoderProxy {
     public static final String UNKNOWN_COUNTRY = "ZZ";
     private static final int MAX_RESULTS = 1;
+    private static final long GEOCODER_TIMEOUT_MS = 30000; // 30s
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -81,9 +86,11 @@ public class GeocoderProxy {
     public static List<Address> getAddressesFromLocation(Context context,
             double latitude, double longitude, int maxResults) {
         try {
-            Geocoder gc = new Geocoder(context, Locale.US);
-            return gc.getFromLocation(latitude, longitude, maxResults);
-        } catch (IOException e) {
+            final SynchronousGeocoder syncGeocoder = new SynchronousGeocoder();
+            final Geocoder gc = new Geocoder(context, Locale.US);
+            gc.getFromLocation(latitude, longitude, maxResults, syncGeocoder);
+            return syncGeocoder.getResults();
+        } catch (IllegalArgumentException | IOException e) {
             ImsLog.w("GeocoderProxy :: " + e.getMessage());
         } catch (Exception e) {
             ImsLog.e("GeocoderProxy :: " + e.getMessage());
@@ -151,6 +158,43 @@ public class GeocoderProxy {
             synchronized (mLock) {
                 mAddresses = addresses;
                 mLock.notifyAll();
+            }
+        }
+    }
+
+    private static class SynchronousGeocoder implements Geocoder.GeocodeListener {
+        private final CountDownLatch mLatch = new CountDownLatch(1);
+        private String mError = null;
+        private List<Address> mResults = Collections.emptyList();
+
+        SynchronousGeocoder() {
+        }
+
+        @Override
+        public void onGeocode(@NonNull List<Address> addresses) {
+            mResults = addresses;
+            mLatch.countDown();
+        }
+
+        @Override
+        public void onError(String errorMessage) {
+            mError = errorMessage;
+            mLatch.countDown();
+        }
+
+        public List<Address> getResults() throws IOException {
+            try {
+                if (!mLatch.await(GEOCODER_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                    mError = "Service not available";
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            if (mError != null) {
+                throw new IOException(mError);
+            } else {
+                return mResults;
             }
         }
     }

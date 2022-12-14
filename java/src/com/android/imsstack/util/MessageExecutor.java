@@ -26,10 +26,6 @@ import java.util.concurrent.Executor;
  * Executes the tasks in the other thread rather than the calling thread.
  */
 public class MessageExecutor extends Handler implements Executor {
-    public MessageExecutor() {
-        super();
-    }
-
     public MessageExecutor(String name) {
         this(createLooper(name));
     }

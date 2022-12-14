@@ -17,6 +17,7 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
@@ -45,7 +46,7 @@ public class SharedStateAgent implements ISharedState {
     public void init(Context context) {
         ImsLog.d(mSlotId, "");
 
-        mSharedStateHandler = new Handler() {
+        mSharedStateHandler = new Handler(Looper.myLooper()) {
            public void handleMessage(Message msg) {
                 ImsLog.i(mSlotId, "SharedStateAgentHandler :: what=" + msg.what);
 

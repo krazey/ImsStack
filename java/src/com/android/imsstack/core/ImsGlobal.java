@@ -20,7 +20,6 @@ import android.content.ContextWrapper;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.telephony.CarrierConfigManager;
 
 import com.android.ims.ImsManager;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -71,8 +70,7 @@ public class ImsGlobal extends ContextWrapper {
         ConfigInterface config = AgentFactory.getInstance().getAgent(
                 ConfigInterface.class, slotId);
         CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
-        return cc != null && cc.getBoolean(
-                CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL);
+        return cc != null && cc.isVoLteProvisioningRequired();
     }
 
     public static boolean isVtProvisioningRequired(Context context, int slotId) {

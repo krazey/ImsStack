@@ -408,6 +408,10 @@ public class CallSettingService implements ICallSettingService {
         return false;
     }
 
+    protected Handler getHandler() {
+        return AppContext.getInstance().getMainHandler();
+    }
+
     private void registerMobileDataSettingObserver() {
         ImsLog.d(getSlotId(), "");
 
@@ -415,7 +419,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mMobileDataSettingObserver = new ContentObserver(new Handler()) {
+        mMobileDataSettingObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -436,7 +440,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mVideoCallSettingObserver = new ContentObserver(new Handler()) {
+        mVideoCallSettingObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -458,7 +462,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mVideoCallRoamingSettingObserver = new ContentObserver(new Handler()) {
+        mVideoCallRoamingSettingObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -481,7 +485,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mVoLTESettingObserver = new ContentObserver(new Handler()) {
+        mVoLTESettingObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -503,7 +507,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mVoLTERoamingObserver = new ContentObserver(new Handler()) {
+        mVoLTERoamingObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -535,7 +539,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mVoWIFISettingObserver = new ContentObserver(new Handler()) {
+        mVoWIFISettingObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -557,7 +561,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mVoWIFIPreferenceObserver = new ContentObserver(new Handler()) {
+        mVoWIFIPreferenceObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -594,7 +598,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mVoWIFIRoamingSetObserver = new ContentObserver(new Handler()) {
+        mVoWIFIRoamingSetObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -630,7 +634,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mDataRoamingSettingObserver = new ContentObserver(new Handler()) {
+        mDataRoamingSettingObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -652,7 +656,7 @@ public class CallSettingService implements ICallSettingService {
             return;
         }
 
-        mRttModeSettingObserver = new ContentObserver(new Handler()) {
+        mRttModeSettingObserver = new ContentObserver(getHandler()) {
             @Override
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
@@ -788,8 +792,18 @@ public class CallSettingService implements ICallSettingService {
             return false;
         }
 
-        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(getSlotId()));
-        String mdn = (tm != null) ? tm.getLine1Number() : null;
+        SubscriptionManager sm =
+                AppContext.getInstance().getSystemService(SubscriptionManager.class);
+        String mdn = null;
+
+        try {
+            if (sm != null) {
+                mdn = sm.getPhoneNumber(MSimUtils.getSubId(getSlotId()),
+                        SubscriptionManager.PHONE_NUMBER_SOURCE_UICC);
+            }
+        } catch (Exception e) {
+            ImsLog.w(getSlotId(), "getPhoneNumber: " + e.toString());
+        }
 
         if (TextUtils.isEmpty(mdn)) {
             ImsLog.d(getSlotId(), "Telephony MDN is invalid");
