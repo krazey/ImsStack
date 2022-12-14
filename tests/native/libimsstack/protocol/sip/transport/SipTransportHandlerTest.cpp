@@ -55,6 +55,8 @@ public:
 protected:
     virtual void SetUp() override
     {
+        SIPHdrAccess::Init();
+
         pTranspInfo = SIP_NULL;
         pMessage = SIP_NULL;
         pTxnKey = SIP_NULL;
