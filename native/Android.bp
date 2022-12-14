@@ -20,17 +20,12 @@ package {
 cc_defaults {
     name: "imsstack_native_defaults",
     cflags: [
-        "-finline",
         "-Wall",
-        "-Wno-psabi",
-        "-Wno-non-virtual-dtor",
+        "-Wno-error=non-virtual-dtor",
         "-Wno-error=deprecated-declarations",
         "-D_REENTRANT",
         "-D__LINUX__",
         "-D_DEBUG",
-        "-DIMS_ZLIB",
-        "-D__IMS_ANDROID_VER__=0x0B00",
-        "-D__IMS_VER__=0x0620",
     ],
     product_variables: {
         debuggable: {
