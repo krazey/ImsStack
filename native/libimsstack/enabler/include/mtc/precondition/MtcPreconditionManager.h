@@ -111,13 +111,13 @@ private:
     QosStatus GetQosStatus(IN ISession* piSession, IN IMS_UINT32 eMediaType) const;
     QosTimer* GetQosTimer(IN ISession* piSession) const;
     QosStatusTable* GetQosStatusTable(IN ISession* piSession) const;
-    void StartQosTimer(IN ISession* piSession, IN QosTimerType eType);
+    void StartQosTimer(IN ISession* piSession, IN QosTimerType eType) const;
     void StopQosTimer(IN ISession* piSession, IN QosTimerType eType) const;
-    void StopAllQosTimer(IN ISession* piSession);
+    void StopAllQosTimer(IN ISession* piSession) const;
     void OnForceAvailableTimerExpired(IN QosTimer* pTimer);
     void OnGuardAvailableTimerExpired(IN QosTimer* pTimer);
     void HandleReservationFailureByTimerExpiration(IN const QosTimer* pTimer);
-    void InitializeStatusForLostQos(IN ISession* piSession);
+    void InitializeStatusForLostQos(IN ISession* piSession) const;
     void CreateStatusRecordsWithActiveMediaTypes(IN ISession* piSession);
     void CreateStatusRecords(IN ISession* piSession, IN IMS_UINT32 eMediaType);
     void HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrentStatus,
@@ -126,7 +126,7 @@ private:
             IN ISession* piSession, IN IMS_BOOL bReserved, IN IMS_UINT32 eMediaTypes);
     void SetOnWlan(IN IMS_BOOL bOnWlan);
     void SetRemoteResourceAvailable(IN ISession* piSession);
-    void UpdateSupportingPrecondition(IN ISession* piSession, IN IMS_BOOL bRemoteSupported);
+    void UpdateSupportingPrecondition(IN ISession* piSession, IN IMS_BOOL bRemoteSupported) const;
     void UpdateQosAttributesFromRemoteSdp(IN ISession* piSession);
     static IMS_BOOL IsStatusAvailable(IN QosStatus eStatus);
     static IMS_BOOL IsNeedToUpdateQosStatus(IN QosStatus eCurrentStatus, IN QosStatus eNewStatus);
@@ -140,15 +140,15 @@ private:
     static IMS_BOOL IsConfirmedDialog(IN const ISession* piSession);
     IMS_BOOL IsNeedToStartWaitAudioAvailableTimer(
             IN ISession* piSession, IN IMessage* piMessage) const;
-    IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession);
+    IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession) const;
     IMS_UINT32 GetMediaTypesFromCallType() const;
     IMS_SINT32 GetQosTime(IN QosTimerType eType) const;
     static IMS_SINT32 GetSdpMediaType(IN IMS_UINT32 eMediaType);
     ISession* GetISessionWithTimer(IN const QosTimer* pTimer) const;
     static IMediaDescriptor* GetMediaDescriptor(IN IMedia* piMedia);
-    const SdpMedia* GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote);
+    static const SdpMedia* GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote);
     QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType) const;
-    QosLossPolicy GetActionForQosLoss(IN ISession* piSession);
+    QosLossPolicy GetActionForQosLoss(IN ISession* piSession) const;
 
 private:
     ImsMap<ISession*, QosInfo*> m_objQosInfos;

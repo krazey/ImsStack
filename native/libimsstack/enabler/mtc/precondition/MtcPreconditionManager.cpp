@@ -505,7 +505,7 @@ QosStatusTable* MtcPreconditionManager::GetQosStatusTable(IN ISession* piSession
 }
 
 PRIVATE
-void MtcPreconditionManager::StartQosTimer(IN ISession* piSession, IN QosTimerType eType)
+void MtcPreconditionManager::StartQosTimer(IN ISession* piSession, IN QosTimerType eType) const
 {
     if (!IsPreconditionSupportedInLocal())
     {
@@ -544,7 +544,7 @@ void MtcPreconditionManager::StopQosTimer(IN ISession* piSession, IN QosTimerTyp
 }
 
 PRIVATE
-void MtcPreconditionManager::StopAllQosTimer(IN ISession* piSession)
+void MtcPreconditionManager::StopAllQosTimer(IN ISession* piSession) const
 {
     IMS_TRACE_D("StopAllQosTimer", 0, 0, 0);
     std::vector<QosTimerType> objTimerTypes{QosTimerType::WAIT_AUDIO_AVAILABLE,
@@ -617,7 +617,7 @@ void MtcPreconditionManager::HandleReservationFailureByTimerExpiration(IN const 
 }
 
 PRIVATE
-void MtcPreconditionManager::InitializeStatusForLostQos(IN ISession* piSession)
+void MtcPreconditionManager::InitializeStatusForLostQos(IN ISession* piSession) const
 {
     IMS_UINT32 eMediaTypesBySdp = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
 
@@ -795,7 +795,7 @@ void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession)
 
 PRIVATE
 void MtcPreconditionManager::UpdateSupportingPrecondition(
-        IN ISession* piSession, IN IMS_BOOL bRemoteSupported)
+        IN ISession* piSession, IN IMS_BOOL bRemoteSupported) const
 {
     QosInfo* pInfo = GetQosInfo(piSession);
     if (pInfo == IMS_NULL)
@@ -1042,7 +1042,7 @@ IMS_BOOL MtcPreconditionManager::IsNeedToStartWaitAudioAvailableTimer(
 }
 
 PRIVATE
-IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession)
+IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession) const
 {
     IMS_TRACE_D("SetLocalResourceAvailable", 0, 0, 0);
 
@@ -1249,7 +1249,7 @@ QosLossPolicy MtcPreconditionManager::GetQosLossPolicy(IN IMS_UINT32 eMediaType)
 }
 
 PRIVATE
-QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession)
+QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession) const
 {
     QosLossPolicy eAction = QosLossPolicy::MAINTAIN;
     if (piSession == IMS_NULL)
