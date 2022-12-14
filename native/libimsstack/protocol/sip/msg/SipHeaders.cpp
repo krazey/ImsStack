@@ -22,6 +22,12 @@
 
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
+const SIP_INT16 arrSipHeadersType[SipHeaderBase::TYPE_END + 1] = {1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0,
+        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+        0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1,
+        0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,
+        1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0};
+
 SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, SipHeaderBase*) = {
         SipHeaderBase::GetNewObj,                        // Allow
         SipAllowEventsHeader::GetNewObj,                 // AllowEvent

@@ -34,6 +34,8 @@ public:
 protected:
     virtual void SetUp() override
     {
+        SIPHdrAccess::Init();
+
         pMessage = new SipMessage();
         ASSERT_TRUE(pMessage != nullptr);
     }

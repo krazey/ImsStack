@@ -251,25 +251,6 @@ SIP_CHAR* SipFindBodyEnd(
 
 SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName);
 
-const SIP_INT16 arrSipHeadersType[SipHeaderBase::TYPE_END + 1] = {1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1,
-        0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1,
-        1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0};
-
-struct HdrNameType
-{
-    SIP_INT32 HdrType;
-    SIP_CHAR HdrName[SIP_MAX_HDR_LEN];
-};
-
-struct HdrLenRecord
-{
-    SIP_INT16 Hdrlen;
-    SIP_INT16 NoOfEntries;
-    HdrNameType objHeaders[SIP_MAX_HDR_LEN];
-};
-
 class SIPHdrAccess
 {
 private:

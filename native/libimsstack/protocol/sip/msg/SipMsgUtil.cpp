@@ -159,6 +159,21 @@ const SIP_INT16 gaszSipHdrCompactEnum[20] = {SipHeaderBase::ACCEPT_CONTACT,
         SipHeaderBase::ALLOW_EVENTS, SipHeaderBase::VIA, SipHeaderBase::SESSION_EXPIRES,
         SipHeaderBase::IDENTITY};
 
+struct HdrNameType
+{
+    SIP_INT32 HdrType;
+    SIP_CHAR HdrName[SIP_MAX_HDR_LEN];
+};
+
+struct HdrLenRecord
+{
+    SIP_INT16 Hdrlen;
+    SIP_INT16 NoOfEntries;
+    HdrNameType objHeaders[SIP_MAX_HDR_LEN];
+};
+
+static HdrLenRecord* s_pHdrLenRecord = SIP_NULL;
+
 SIP_BOOL SetCharVar(const SIP_CHAR* pszSource, SIP_CHAR*& pszDestination)
 {
     if (pszSource == SIP_NULL)
@@ -338,30 +353,33 @@ SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName)
     /* go for unknown header check*/
 }
 
-static HdrLenRecord s_objHdrLenRecord[SIP_MAX_HDR_LEN] = {
-        {0, 0, {{0, {0}}}}
-};
-
 void SIPHdrAccess::Init()
 {
-    memset(s_objHdrLenRecord, 0, sizeof(s_objHdrLenRecord));
+    if (s_pHdrLenRecord != SIP_NULL)
+    {
+        return;
+    }
+
+    s_pHdrLenRecord = new HdrLenRecord[SIP_MAX_HDR_LEN];
+    memset(s_pHdrLenRecord, 0, sizeof(HdrLenRecord) * SIP_MAX_HDR_LEN);
+
     for (SIP_INT32 nHdrLenIndex = SIP_ZERO; nHdrLenIndex < SIP_MAX_HDR_LEN; nHdrLenIndex++)
     {
         SIP_INT32 nNoOfHdr = SIP_ZERO;
-        s_objHdrLenRecord[nHdrLenIndex].NoOfEntries = SIP_ZERO;
-        s_objHdrLenRecord[nHdrLenIndex].Hdrlen = nHdrLenIndex;
+        s_pHdrLenRecord[nHdrLenIndex].NoOfEntries = SIP_ZERO;
+        s_pHdrLenRecord[nHdrLenIndex].Hdrlen = nHdrLenIndex;
 
         for (SIP_INT32 nHdrIndex = SIP_ZERO; nHdrIndex < SipHeaderBase::TYPE_END; nHdrIndex++)
         {
             if (SipPf_Strlen(gaszSipHdr[nHdrIndex]) == nHdrLenIndex)
             {
-                s_objHdrLenRecord[nHdrLenIndex].NoOfEntries++;
-                s_objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrType = nHdrIndex;
+                s_pHdrLenRecord[nHdrLenIndex].NoOfEntries++;
+                s_pHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrType = nHdrIndex;
 
-                SipPf_Memset(s_objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName, 0,
+                SipPf_Memset(s_pHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName, 0,
                         SIP_MAX_HDR_LEN);
 
-                SipPf_Strncpy(s_objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName,
+                SipPf_Strncpy(s_pHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName,
                         gaszSipHdr[nHdrIndex], SipPf_Strlen(gaszSipHdr[nHdrIndex]));
                 nNoOfHdr++;
             }
@@ -418,12 +436,17 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
         return SipHeaderBase::UNKNOWN;
     }
 
-    for (SIP_INT32 nNoOfHdr = SIP_ZERO; nNoOfHdr < s_objHdrLenRecord[nlen].NoOfEntries; nNoOfHdr++)
+    if (s_pHdrLenRecord == SIP_NULL)
     {
-        if (SipPf_Stricmp(s_objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrName, pszRcvdHdrName) ==
+        return SipHeaderBase::UNKNOWN;
+    }
+
+    for (SIP_INT32 nNoOfHdr = SIP_ZERO; nNoOfHdr < s_pHdrLenRecord[nlen].NoOfEntries; nNoOfHdr++)
+    {
+        if (SipPf_Stricmp(s_pHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrName, pszRcvdHdrName) ==
                 SIP_ZERO)
         {
-            return s_objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrType;
+            return s_pHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrType;
         }
     }
     return SipHeaderBase::UNKNOWN;
