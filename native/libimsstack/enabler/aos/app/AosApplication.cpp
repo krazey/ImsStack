@@ -1462,12 +1462,6 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegTrying_StateConnecting(IN IMS_U
         return;
     }
 
-    IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
-    if (piRsm != IMS_NULL)
-    {
-        piRsm->UpdateRegistration();
-    }
-
     ProcessImsEstablishmentStart();
 }
 
@@ -1774,23 +1768,6 @@ PROTECTED VIRTUAL void AosApplication::ProcessNetworkEvent(
     if (nType == IMS_EVENT_VOICE_SERVICE_STATE)
     {
         m_nVoiceServiceState = nState;
-    }
-
-    if (m_nVoiceServiceState == IMS_VOICE_SERVICE_EMERGENCY_ONLY)
-    {
-        if (m_nLteAttachState == IMS_LTE_INFO_EPS_ONLY_ATTACHED ||
-                m_nLteAttachState == IMS_LTE_INFO_NORMAL_ATTACHED)
-        {
-            if (m_piContext->GetConnection()->IsEpdgEnabled() && IsOn())
-            {
-                IAosRegStateManager* piRsm =
-                        AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
-                if (piRsm != IMS_NULL)
-                {
-                    piRsm->UpdateRegServices(IMS_TRUE);
-                }
-            }
-        }
     }
 }
 
@@ -2155,15 +2132,6 @@ PROTECTED VIRTUAL void AosApplication::Report_StateChanged(
     if (m_nReportState != APP_DISCONNECTING)
     {
         UpdateRegState();
-
-        if (IsRegTypeNormal() && !IsOn())
-        {
-            IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
-            if (piRsm != IMS_NULL)
-            {
-                piRsm->UpdateRegServices();
-            }
-        }
     }
 }
 
@@ -2415,10 +2383,9 @@ PROTECTED VIRTUAL void AosApplication::UpdateRegState()
 }
 
 PROTECTED VIRTUAL IMS_UINT32 AosApplication::UpdateConnectedServices(
-        IN IMS_BOOL bEnforceUpdateRegService)
+        IN IMS_BOOL /*bEnforceUpdateRegService*/)
 {
     IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
-    IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
     IMS_UINT32 nReportServices = ImsAosService::NONE;
     IMS_BOOL bWlanIpcan = m_piContext->GetConnection()->IsEpdgEnabled();
     IMS_UINT32 nAt = 0;
@@ -2452,11 +2419,6 @@ PROTECTED VIRTUAL IMS_UINT32 AosApplication::UpdateConnectedServices(
             piMonitor->ImsAosMonitor_Connected(nReportServices,
                     (bWlanIpcan) ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE);
         }
-    }
-
-    if (IsRegTypeNormal() && piRsm != IMS_NULL)
-    {
-        piRsm->UpdateRegServices(bEnforceUpdateRegService);
     }
 
     return nReportServices;
@@ -2575,11 +2537,6 @@ PROTECTED VIRTUAL void AosApplication::Registration_StateChanged(
             APPID, "Registration_StateChanged :: result(%d) , reason(%d)", nResult, nReason, 0);
 
     PostMessage(MSG_REGISTRATION, nResult, nReason);
-}
-
-PROTECTED VIRTUAL void AosApplication::Registration_PreNotify(IN IMS_UINT32 nPreReason)
-{
-    (void)nPreReason;
 }
 
 PROTECTED VIRTUAL void AosApplication::CallTracker_StateChanged(

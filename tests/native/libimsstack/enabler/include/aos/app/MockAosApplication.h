@@ -172,7 +172,6 @@ public:
     MOCK_METHOD(void, Connector_Updated, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, Registration_StateChanged, (IN IMS_UINT32 nResult, IN IMS_UINT32 nReason),
             (override));
-    MOCK_METHOD(void, Registration_PreNotify, (IN IMS_UINT32 nPreReason), (override));
     MOCK_METHOD(
             void, CallTracker_StateChanged, (IN IMS_UINT32 nType, IN CallState eState), (override));
     MOCK_METHOD(void, NetTracker_StatusChanged, (), (override));

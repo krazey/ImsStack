@@ -41,12 +41,7 @@ public:
     IMS_UINT32 GetRetryAfterValue(IN const IRegistration* piRegistration);
     IMS_SINT32 GetRetryAfterValue(IN const ISipMessage* piSipMsg);
     IMS_SINT32 GetMinExpiresValue(IN const ISipMessage* piSipMsg);
-    IMS_SINT32 GetKeepAliveValue(IN const ISipMessage* piSipMsg);
-    IMS_BOOL GetProxyFromContact(IN const ISipMessage* piSipMsg, OUT AString& strUseProxy,
-            OUT IMS_UINT32& nUseProxyPort);
-    AString GetWarningHeader(IN const ISipMessage* piSipMsg);
 
-    IMS_BOOL IsReasonPhraseExist(IN const ISipMessage* piSipMsg, IN AString strReason);
     IMS_BOOL IsInitialRegistrationRequired(IN ISipMessage* piSipMsg);
     // Check whether some extension is unsupported (included in "Unsupported" header)
     IMS_BOOL IsParameterIncluded(IN const ISipMessage* piSipMsg, IN IMS_SINT32 nHeaderType,
@@ -62,7 +57,6 @@ public:
     void AddFeature(IN IMS_UINT32 nAdd, IN_OUT IMS_UINT32& nFeatures);
     void RemoveFeature(IN IMS_UINT32 nRemove, IN_OUT IMS_UINT32& nFeatures);
     IMS_BOOL IsFeatureOn(IN IMS_UINT32 nFeature, IN IMS_UINT32 nFeatures);
-    IMS_BOOL IsFeatureCleared(IN IMS_UINT32 nFeatures);
     void ClearFeature(IN_OUT IMS_UINT32& nFeatures);
 
     // Timer
@@ -72,15 +66,8 @@ public:
 
     // List
     void AddElementToList(IN IMS_UINT32 nElement, IN IMSList<IMS_UINT32>& objTarget);
-    void RemoveElementToList(IN IMS_UINT32 nElement, IN IMSList<IMS_UINT32>& objTarget);
-    void CombineLists(IN const IMSList<IMS_UINT32>& objList1,
-            IN const IMSList<IMS_UINT32>& objList2, IN IMSList<IMS_UINT32>& objTarget);
 
     IMS_BOOL IsListEqual(IN const AStringArray& objLeft, IN const AStringArray& objRight,
-            IN IMS_BOOL bIsIpAddress = IMS_FALSE);
-    IMS_BOOL IsListEquivalent(IN const AStringArray& objLeft, IN const AStringArray& objRight,
-            IN IMS_BOOL bIsIpAddress = IMS_FALSE);
-    IMS_BOOL IsListAllDifferent(IN const AStringArray& objLeft, IN const AStringArray& objRight,
             IN IMS_BOOL bIsIpAddress = IMS_FALSE);
     IMS_BOOL IsStrExistInList(IN const AString& strValue, IN const AStringArray& objList,
             IN IMS_BOOL bIsIpAddress = IMS_FALSE);
@@ -95,8 +82,6 @@ public:
             IN IMS_UINT32 nBaseTime, IN IMS_UINT32 nMaxTime, IN IMS_UINT32 nConsecutiveFailCount);
     IMS_UINT32 WaitTimeForFlowRecovery(
             IN IMS_UINT32 nBaseTime, IN IMS_UINT32 nMaxTime, IN IMS_UINT32 nConsecutiveFailCount);
-    void GetMsisdn(OUT AString& objMsisdn, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void GetUserInfoFromSipAddress(IN const AString& strSipAddress, OUT AString& strUserInfo);
 
     void SetSocketOption(
             IN IMS_UINT32 nOption, IN IMS_UINT32 nValue, IN IMS_SINT32 nSlotId = IMS_SLOT_0);

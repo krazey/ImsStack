@@ -246,7 +246,6 @@ protected:
 
     // IAosRegistrationListener
     void Registration_StateChanged(IN IMS_UINT32 nResult, IN IMS_UINT32 nReason = 0) override;
-    void Registration_PreNotify(IN IMS_UINT32 nPreReason) override;
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;

@@ -29,16 +29,6 @@ public:
     MOCK_METHOD(IMS_SINT32, GetImsRegState, (), (override));
     MOCK_METHOD(void, SetEImsRegState, (IN IMS_UINT32 nState), (override));
     MOCK_METHOD(void, SetRegState, (IN IMS_UINT32 nServiceType, IN IMS_UINT32 nState), (override));
-    MOCK_METHOD(void, SetDetailState, (IN IMS_SINT32 nState), (override));
-    MOCK_METHOD(IMS_SINT32, GetDetailState, (), (override));
-    MOCK_METHOD(void, SetReason, (IN IMS_UINT32 nReason), (override));
-    MOCK_METHOD(void, EnforceUpdateRegistration, (), (override));
-    MOCK_METHOD(void, UpdateRegistration, (), (override));
-    MOCK_METHOD(void, ClearRegServices, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetRegServices, (), (const, override));
-    MOCK_METHOD(void, UpdateRegServices, (IN IMS_BOOL bUpdateCurrState), (override));
-    MOCK_METHOD(void, SetRegRespCode, (IN IMS_SINT32 nRespCode), (override));
-    MOCK_METHOD(IMS_BOOL, IsLimitedMode, (), (const, override));
 };
 
 #endif  // MOCK_I_AOS_REG_STATE_MANAGER_H_

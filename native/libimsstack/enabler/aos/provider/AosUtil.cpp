@@ -155,141 +155,6 @@ IMS_SINT32 AosUtil::GetMinExpiresValue(IN const ISipMessage* piSipMsg)
 }
 
 PUBLIC
-IMS_SINT32 AosUtil::GetKeepAliveValue(IN const ISipMessage* piSipMsg)
-{
-    IMS_SINT32 nKeepValue = -1;
-
-    if (piSipMsg == IMS_NULL)
-    {
-        return nKeepValue;
-    }
-
-    AString strViaHeader = piSipMsg->GetHeader(ISipHeader::VIA);
-
-    if (strViaHeader.GetLength() == 0)
-    {
-        return nKeepValue;
-    }
-
-    ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::VIA, strViaHeader);
-    if (piHeader == IMS_NULL)
-    {
-        return nKeepValue;
-    }
-
-    const SipParameter* pKeep = piHeader->GetParameter("keep");
-    if (pKeep == IMS_NULL)
-    {
-        piHeader->Destroy();
-        return nKeepValue;
-    }
-
-    const AString& strKeep = pKeep->GetValue();
-    IMS_BOOL bOk = IMS_FALSE;
-
-    nKeepValue = strKeep.ToInt32(&bOk) * 1000;
-    if (bOk == IMS_FALSE)
-    {
-        nKeepValue = -1;
-    }
-
-    IMS_TRACE_I("GetKeepAliveValue :: keep time (%d)", nKeepValue, 0, 0);
-
-    piHeader->Destroy();
-
-    return nKeepValue;
-}
-
-PUBLIC
-IMS_BOOL AosUtil::GetProxyFromContact(
-        IN const ISipMessage* piSipMsg, OUT AString& strUseProxy, OUT IMS_UINT32& nUseProxyPort)
-{
-    if (piSipMsg == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    AString strHeader = piSipMsg->GetHeader(ISipHeader::CONTACT_NORMAL);
-    if (strHeader.GetLength() == 0)
-    {
-        return IMS_FALSE;
-    }
-
-    ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::CONTACT_NORMAL, strHeader);
-    if (piHeader == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    const SipAddress* pSip = piHeader->GetSipAddress();
-    if (pSip == IMS_NULL)
-    {
-        piHeader->Destroy();
-        return IMS_FALSE;
-    }
-
-    AString strProxy = pSip->GetHost().GetStr();
-    IMS_UINT32 nProxyPort = pSip->GetPort();
-
-    if (strProxy.GetLength() == 0)
-    {
-        piHeader->Destroy();
-        return IMS_FALSE;
-    }
-
-    strUseProxy = strProxy;
-
-    if ((nProxyPort == 0) || (nProxyPort == Sip::PORT_UNSPECIFIED))
-    {
-        nProxyPort = Sip::PORT_5060;
-    }
-
-    nUseProxyPort = nProxyPort;
-
-    IMS_TRACE_D("Host (%s) , Port (%d)", strUseProxy.GetStr(), nUseProxyPort, 0);
-
-    piHeader->Destroy();
-
-    return IMS_TRUE;
-}
-
-PUBLIC
-AString AosUtil::GetWarningHeader(IN const ISipMessage* piSipMsg)
-{
-    if (piSipMsg == IMS_NULL)
-    {
-        return AString::ConstEmpty();
-    }
-
-    AString strValue = piSipMsg->GetHeader(ISipHeader::WARNING);
-    IMS_TRACE_D("Warning (%s)", strValue.GetStr(), 0, 0);
-    return strValue;
-}
-
-PUBLIC
-IMS_BOOL AosUtil::IsReasonPhraseExist(IN const ISipMessage* piSipMsg, IN AString strReason)
-{
-    if (piSipMsg == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    AString strPhrase = piSipMsg->GetReasonPhrase();
-
-    if (strPhrase.GetLength() > 0)
-    {
-        IMS_TRACE_I("IsReasonPhraseExist :: reason phrase (%s)", strPhrase.GetStr(), 0, 0);
-
-        if (strPhrase.MakeUpper().Contains(strReason.MakeUpper()))
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC
 IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
 {
     IMS_BOOL bInitialRegistration = IMS_FALSE;
@@ -423,12 +288,6 @@ IMS_BOOL AosUtil::IsFeatureOn(IN IMS_UINT32 nFeature, IN IMS_UINT32 nFeatures)
 }
 
 PUBLIC
-IMS_BOOL AosUtil::IsFeatureCleared(IN IMS_UINT32 nFeatures)
-{
-    return (nFeatures == 0);
-}
-
-PUBLIC
 void AosUtil::ClearFeature(IN_OUT IMS_UINT32& nFeatures)
 {
     nFeatures = 0;
@@ -478,35 +337,6 @@ void AosUtil::AddElementToList(IN IMS_UINT32 nElement, IN IMSList<IMS_UINT32>& o
 }
 
 PUBLIC
-void AosUtil::RemoveElementToList(IN IMS_UINT32 nElement, IN IMSList<IMS_UINT32>& objTarget)
-{
-    for (IMS_UINT32 nAt = 0; nAt < objTarget.GetSize(); nAt++)
-    {
-        IMS_UINT32 nCurrElement = objTarget.GetAt(nAt);
-        if (nElement == nCurrElement)
-        {
-            objTarget.RemoveAt(nAt);
-            return;
-        }
-    }
-}
-
-PUBLIC
-void AosUtil::CombineLists(IN const IMSList<IMS_UINT32>& objList1,
-        IN const IMSList<IMS_UINT32>& objList2, IN IMSList<IMS_UINT32>& objTarget)
-{
-    for (IMS_UINT32 i = 0; i < objList1.GetSize(); i++)
-    {
-        AddElementToList(objList1.GetAt(i), objTarget);
-    }
-
-    for (IMS_UINT32 j = 0; j < objList2.GetSize(); j++)
-    {
-        AddElementToList(objList2.GetAt(j), objTarget);
-    }
-}
-
-PUBLIC
 IMS_BOOL AosUtil::IsListEqual(IN const AStringArray& objLeft, IN const AStringArray& objRight,
         IN IMS_BOOL bIsIpAddress /* = IMS_FALSE */)
 {
@@ -548,76 +378,6 @@ IMS_BOOL AosUtil::IsListEqual(IN const AStringArray& objLeft, IN const AStringAr
         if (!bEqual)
         {
             return IMS_FALSE;
-        }
-    }
-
-    return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL AosUtil::IsListEquivalent(IN const AStringArray& objLeft, IN const AStringArray& objRight,
-        IN IMS_BOOL bIsIpAddress /* = IMS_FALSE */)
-{
-    if (objLeft.GetCount() != objRight.GetCount())
-    {
-        return IMS_FALSE;
-    }
-
-    for (IMS_SINT32 nAt = 0; nAt < objLeft.GetCount(); ++nAt)
-    {
-        const AString& strL = objLeft.GetElementAt(nAt);
-        const AString& strR = objRight.GetElementAt(nAt);
-
-        if (bIsIpAddress == IMS_TRUE)
-        {
-            IPAddress objIpAddrL(strL);
-            IPAddress objIpAddrR(strR);
-
-            if (!objIpAddrL.Equals(objIpAddrR))
-            {
-                return IMS_FALSE;
-            }
-        }
-        else
-        {
-            if (!strL.Equals(strR))
-            {
-                return IMS_FALSE;
-            }
-        }
-    }
-
-    return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL AosUtil::IsListAllDifferent(IN const AStringArray& objLeft,
-        IN const AStringArray& objRight, IN IMS_BOOL bIsIpAddress /* = IMS_FALSE */)
-{
-    for (IMS_SINT32 nAt = 0; nAt < objLeft.GetCount(); ++nAt)
-    {
-        const AString& strL = objLeft.GetElementAt(nAt);
-        for (IMS_SINT32 nRightAt = 0; nRightAt < objRight.GetCount(); ++nRightAt)
-        {
-            const AString& strR = objRight.GetElementAt(nRightAt);
-
-            if (bIsIpAddress == IMS_TRUE)
-            {
-                IPAddress objIpAddrL(strL);
-                IPAddress objIpAddrR(strR);
-
-                if (objIpAddrL.Equals(objIpAddrR))
-                {
-                    return IMS_FALSE;
-                }
-            }
-            else
-            {
-                if (strL.Equals(strR))
-                {
-                    return IMS_FALSE;
-                }
-            }
         }
     }
 
@@ -770,57 +530,6 @@ IMS_UINT32 AosUtil::WaitTimeForFlowRecovery(
             nWaitTime, nBaseTime, nUpperBoundWaitTime);
 
     return nWaitTime;
-}
-
-PUBLIC
-void AosUtil::GetMsisdn(OUT AString& objMsisdn, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
-{
-    if (PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId)->GetPhoneNumber(
-                objMsisdn) == IMS_FALSE)
-    {
-        IMS_TRACE_I("Failed to get MSISDN", 0, 0, 0);
-        objMsisdn = AString::ConstNull();
-        return;
-    }
-
-    if (objMsisdn.GetLength() <= 0)
-    {
-        IMS_TRACE_I("Failed to get MSISDN", 0, 0, 0);
-        objMsisdn = AString::ConstNull();
-        return;
-    }
-
-    IMS_TRACE_D("MSISDN: %s", objMsisdn.GetStr(), 0, 0);
-}
-
-PUBLIC
-void AosUtil::GetUserInfoFromSipAddress(IN const AString& strSipAddress, OUT AString& strUserInfo)
-{
-    strUserInfo = AString::ConstNull();
-
-    if (strSipAddress.IsEmpty())
-    {
-        return;
-    }
-
-    SipAddress objSipAddress;
-
-    if (objSipAddress.Create(strSipAddress) == IMS_FALSE)
-    {
-        IMS_TRACE_I("Failed to parse P-Associated-URI", 0, 0, 0);
-        return;
-    }
-
-    if (objSipAddress.IsSchemeSip() || objSipAddress.IsSchemeSips())
-    {
-        strUserInfo = objSipAddress.GetUser();
-    }
-    else if (objSipAddress.IsSchemeTel())
-    {
-        strUserInfo = objSipAddress.GetHost();
-    }
-
-    IMS_TRACE_D("User Info: %s", strUserInfo.GetStr(), 0, 0);
 }
 
 PUBLIC

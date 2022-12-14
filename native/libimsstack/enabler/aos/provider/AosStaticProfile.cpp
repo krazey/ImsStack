@@ -77,12 +77,6 @@ void AosStaticProfile::SetProflieType(IN Type eType)
 }
 
 PUBLIC
-void AosStaticProfile::SetRegistrationFlowId(IN IMS_UINT32 nFlowId)
-{
-    m_nRegistrationFlowId = nFlowId;
-}
-
-PUBLIC
 void AosStaticProfile::AddService(IN AString strAppId, IN AString strServiceId)
 {
     AosServiceProfile* pProfile = new AosServiceProfile(strAppId, strServiceId);

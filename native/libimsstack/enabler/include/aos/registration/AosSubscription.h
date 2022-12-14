@@ -47,12 +47,10 @@ public:
     virtual void SetRetryTimer(IN IMS_BOOL bCheckRetryAfter);
 
     virtual IMS_UINT32 GetState();
-    virtual IMS_BOOL IsSubHolded();
 
 protected:
     void ClearThrottlingCount();
 
-    IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
 
     void ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand = 0);
