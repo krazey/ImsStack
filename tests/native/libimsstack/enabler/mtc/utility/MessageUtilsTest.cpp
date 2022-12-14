@@ -702,7 +702,7 @@ TEST_F(MessageUtilsTest, GetIms3gppFromBody)
             .WillByDefault(Return(strContextType));
 
     AString strIms3gppType("unknown type");
-    AString strIms3gppReason("unknown type");
+    AString strIms3gppReason("unknown reason");
     AString strIms3gppAction("unknown action");
     ByteArray objContent(GetIms3gppXml(strIms3gppType, strIms3gppReason, strIms3gppAction));
     ON_CALL(objISipMessageBodyPart, GetContent).WillByDefault(ReturnRef(objContent));
@@ -716,6 +716,46 @@ TEST_F(MessageUtilsTest, GetIms3gppFromBody)
     EXPECT_EQ(objIms3gpp.GetAlternativeService().GetAction(),
             Ims3gpp::AlternativeService::ACTION_UNKNOWN);
     EXPECT_EQ(objIms3gpp.GetAlternativeService().GetUnknownAction(), strIms3gppAction);
+}
+
+TEST_F(MessageUtilsTest, GetIms3gpp)
+{
+    MockISipMessageBodyPart objISipMessageBodyPartOtherContent1;
+    MockISipMessageBodyPart objISipMessageBodyPartOtherContent2;
+    MockISipMessageBodyPart objISipMessageBodyPart;
+    ImsList<ISipMessageBodyPart*> objBodyParts;
+    objBodyParts.Append(IMS_NULL);
+    objBodyParts.Append(&objISipMessageBodyPartOtherContent1);
+    objBodyParts.Append(&objISipMessageBodyPartOtherContent2);
+    objBodyParts.Append(&objISipMessageBodyPart);
+    ON_CALL(*piSipMessage, GetBodyParts).WillByDefault(Return(objBodyParts));
+
+    // invalid type case
+    AString strOtherContextType1("other_application/3gpp-ims+xml");
+    ON_CALL(objISipMessageBodyPartOtherContent1, GetHeader(ISipMessageBodyPart::CONTENT_TYPE, _))
+            .WillByDefault(Return(strOtherContextType1));
+
+    // invalid sub type case
+    AString strOtherContextType2("application/other+xml");
+    ON_CALL(objISipMessageBodyPartOtherContent2, GetHeader(ISipMessageBodyPart::CONTENT_TYPE, _))
+            .WillByDefault(Return(strOtherContextType2));
+
+    AString strContextType("application/3gpp-ims+xml");
+    ON_CALL(objISipMessageBodyPart, GetHeader(ISipMessageBodyPart::CONTENT_TYPE, _))
+            .WillByDefault(Return(strContextType));
+
+    AString strIms3gppType("unknown type");
+    AString strIms3gppReason("unknown reason");
+    AString strIms3gppAction("unknown action");
+    ByteArray objContent(GetIms3gppXml(strIms3gppType, strIms3gppReason, strIms3gppAction));
+    ON_CALL(objISipMessageBodyPart, GetContent).WillByDefault(ReturnRef(objContent));
+
+    Ims3gppData objIms3gppData;
+    objIms3gppData = objMessageUtils.GetIms3gppData(piMessage);
+    EXPECT_EQ(objIms3gppData.eType, Ims3gpp::TYPE_ALTERNATIVE_SERVICE);
+    EXPECT_EQ(objIms3gppData.eAlternativeServiceType, Ims3gpp::AlternativeService::TYPE_UNKNOWN);
+    EXPECT_EQ(
+            objIms3gppData.eAlternativeServiceAction, Ims3gpp::AlternativeService::ACTION_UNKNOWN);
 }
 
 TEST_F(MessageUtilsTest, IsInitialRegistrationRequired)

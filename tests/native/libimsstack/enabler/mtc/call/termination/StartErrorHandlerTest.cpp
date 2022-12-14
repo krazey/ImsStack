@@ -16,6 +16,7 @@
 
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
+#include "Ims3gpp.h"
 #include "ImsAosParameter.h"
 #include "MockIMtcService.h"
 #include "MtcContextRepository.h"
@@ -270,11 +271,15 @@ TEST_F(StartErrorHandlerTest, Handle380Response)
     ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(EXTRA_CODE_EMERGENCYSERVICE_INVALID));
 
-    // TODO: MockIms3gpp is required. HasEmergencyServiceTypeInBody always returns false
-    Ims3gpp objIms3gpp;
-    ON_CALL(objMessageUtils, GetIms3gppFromBody(&objMessage, _))
-            .WillByDefault(ReturnRef(objIms3gpp));
+    // Ims3gppData no AlternativeService TYPE_EMERGENCY
+    Ims3gppData objIms3gppData;
+    ON_CALL(objMessageUtils, GetIms3gppData(&objMessage)).WillByDefault(Return(objIms3gppData));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
 
+    // Ims3gppData no AlternativeService TYPE_RESTORATION
+    objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
+    objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_RESTORATION;
+    ON_CALL(objMessageUtils, GetIms3gppData(&objMessage)).WillByDefault(Return(objIms3gppData));
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
 
     SetCsfbConfig(SipStatusCode::SC_380);
@@ -287,6 +292,53 @@ TEST_F(StartErrorHandlerTest, Handle380ResponseForEmergencyCall)
     SetMessageCode(SipStatusCode::SC_380);
     objCallInfo.bEmergency = IMS_TRUE;
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
+}
+
+TEST_F(StartErrorHandlerTest, Handle380ResponseWithUeUnDetectableEmergencyCall)
+{
+    SetMessageCode(SipStatusCode::SC_380);
+
+    IMS_SINT32 nCategoryInContact = EXTRA_CODE_EMERGENCYSERVICE_POLICE;
+    // by configuration
+    ON_CALL(objMessageUtils, GetSosTypeFromServiceUrn(&objMessage, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(nCategoryInContact));
+    ON_CALL(*pConfigurationManager,
+            IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall)
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_POLICE));
+
+    // no Non UE Detectable ECC but contains AlternativeService TYPE_EMERGENCY
+    ON_CALL(*pConfigurationManager,
+            IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall)
+            .WillByDefault(Return(IMS_FALSE));
+
+    Ims3gppData objIms3gppData;
+    objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
+    objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_EMERGENCY;
+    ON_CALL(objMessageUtils, GetIms3gppData(&objMessage)).WillByDefault(Return(objIms3gppData));
+
+    // Non UE Detectable : No path feature tag (empty tag)
+    ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString()));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_ALTERNATE_EMERGENCY_CALL, nCategoryInContact));
+
+    // Non UE Detectable : No path feature tag (other tag)
+    ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString("any")));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_ALTERNATE_EMERGENCY_CALL, nCategoryInContact));
+
+    // no Non UE Detectable : path feature tag exists but Path header value is different
+    ON_CALL(objAosConnector, GetSupportedHeaderValue).WillByDefault(Return(AString("path")));
+    AString strAnyPath("sip:anyPath");
+    ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strAnyPath)));
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(&objMessage, strAnyPath))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_GENERIC));
+
+    // Non UE Detectable
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(&objMessage, strAnyPath))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_ALTERNATE_EMERGENCY_CALL, nCategoryInContact));
 }
 
 TEST_F(StartErrorHandlerTest, Handle4xxResponses)
@@ -495,8 +547,64 @@ TEST_F(StartErrorHandlerTest, Handle503ResponseForEmergencyCall)
 
 TEST_F(StartErrorHandlerTest, Handle504Response)
 {
-    // TODO: more tests
     SetMessageCode(SipStatusCode::SC_504);
+
+    AString strPathHeader("sip:anyPath");
+    ON_CALL(objAosConnector, GetPathHeaderValue).WillByDefault(Return(AString(strPathHeader)));
+    AString strServiceRoute("sip:anyServiceRoute");
+    ON_CALL(objAosConnector, GetServiceRouteHeaderValue)
+            .WillByDefault(Return(AString(strServiceRoute)));
+
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(&objMessage, strPathHeader))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(&objMessage, strServiceRoute))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+
+    ON_CALL(objMessageUtils, ContainsAddressInPaid(&objMessage, strServiceRoute))
+            .WillByDefault(Return(IMS_TRUE));
+
+    Ims3gppData objIms3gppData;
+    ON_CALL(objMessageUtils, GetIms3gppData(&objMessage)).WillByDefault(Return(objIms3gppData));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+
+    objIms3gppData.eType = Ims3gpp::TYPE_ALTERNATIVE_SERVICE;
+    ON_CALL(objMessageUtils, GetIms3gppData(&objMessage)).WillByDefault(Return(objIms3gppData));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+
+    objIms3gppData.eAlternativeServiceType = Ims3gpp::AlternativeService::TYPE_RESTORATION;
+    ON_CALL(objMessageUtils, GetIms3gppData(&objMessage)).WillByDefault(Return(objIms3gppData));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+
+    SetCsfbConfig(SipStatusCode::SC_504);
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    objIms3gppData.eAlternativeServiceAction =
+            Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION;
+    ON_CALL(objMessageUtils, GetIms3gppData(&objMessage)).WillByDefault(Return(objIms3gppData));
+
+    ON_CALL(*pConfigurationManager, GetRegistrationRestorationModeOn504ForInvite)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE));
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+
+    ON_CALL(*pConfigurationManager, GetRegistrationRestorationModeOn504ForInvite)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::
+                            REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::PCSCF_NEXT)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+
+    ON_CALL(*pConfigurationManager, GetRegistrationRestorationModeOn504ForInvite)
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+
+    ON_CALL(*pConfigurationManager, GetRegistrationRestorationModeOn504ForInvite)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::
+                            REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 
