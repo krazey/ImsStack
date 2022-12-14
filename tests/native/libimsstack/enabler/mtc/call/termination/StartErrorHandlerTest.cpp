@@ -121,21 +121,19 @@ protected:
     }
 };
 
-TEST_F(StartErrorHandlerTest, HandleReturnsCsfbByTransactionTimeoutOfEcc)
+TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByTransactionTimeoutOfEcc)
 {
     objCallInfo.bEmergency = IMS_TRUE;
     SetMessageCode(SipStatusCode::SC_INVALID);
 
-    EXPECT_TRUE(
-            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
 
-TEST_F(StartErrorHandlerTest, HandleReturnsCsfbByNullIMessageOfEcc)
+TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByNullIMessageOfEcc)
 {
     objCallInfo.bEmergency = IMS_TRUE;
     CallReasonInfo objResult = pHandler->Handle(IMS_NULL);
-    EXPECT_TRUE(objResult ==
-            CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
+    EXPECT_TRUE(objResult == CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
@@ -284,6 +282,13 @@ TEST_F(StartErrorHandlerTest, Handle380Response)
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
+TEST_F(StartErrorHandlerTest, Handle380ResponseForEmergencyCall)
+{
+    SetMessageCode(SipStatusCode::SC_380);
+    objCallInfo.bEmergency = IMS_TRUE;
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
+}
+
 TEST_F(StartErrorHandlerTest, Handle4xxResponses)
 {
     SetMessageCode(SipStatusCode::SC_400);
@@ -403,6 +408,13 @@ TEST_F(StartErrorHandlerTest, Handle403Response)
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
+TEST_F(StartErrorHandlerTest, Handle403ResponseForEmergencyCall)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    objCallInfo.bEmergency = IMS_TRUE;
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
+}
+
 TEST_F(StartErrorHandlerTest, Handle404Response)
 {
     SetMessageCode(SipStatusCode::SC_404);
@@ -417,10 +429,6 @@ TEST_F(StartErrorHandlerTest, Handle407Response)
 {
     SetMessageCode(SipStatusCode::SC_407);
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_PROXY_AUTHENTICATION_REQUIRED, SipStatusCode::SC_407));
-
-    objCallInfo.bEmergency = IMS_TRUE;
-    EXPECT_TRUE(
-            CheckHandleResult(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY));
 }
 
 TEST_F(StartErrorHandlerTest, Handle488Response)
@@ -478,10 +486,24 @@ TEST_F(StartErrorHandlerTest, Handle503Response)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
 }
 
+TEST_F(StartErrorHandlerTest, Handle503ResponseForEmergencyCall)
+{
+    SetMessageCode(SipStatusCode::SC_503);
+    objCallInfo.bEmergency = IMS_TRUE;
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
+}
+
 TEST_F(StartErrorHandlerTest, Handle504Response)
 {
     // TODO: more tests
     SetMessageCode(SipStatusCode::SC_504);
+    EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
+}
+
+TEST_F(StartErrorHandlerTest, Handle504ResponseForEmergencyCall)
+{
+    SetMessageCode(SipStatusCode::SC_504);
+    objCallInfo.bEmergency = IMS_TRUE;
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504));
 }
 

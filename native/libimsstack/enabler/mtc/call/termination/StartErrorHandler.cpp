@@ -47,9 +47,11 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 {
     if (m_objContext.GetCallInfo().bEmergency)
     {
-        // TODO: emergency retry must be managed separately
-        // check if CODE_SIP_ALTERNATE_EMERGENCY_CALL is valid for emergency call retry case
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+        // According to Domain Selection and legacy Call Framework behavior,
+        // IMS Stack should use same failure reason as normal call.
+        // Emergency Call is redialed for all reasons except
+        // CODE_USER_TERMINATED, CODE_USER_TERMINATED_BY_REMOTE, and CODE_SIP_USER_REJECTED
+        IMS_TRACE_D("Handle : Emergency Call Failure.", 0, 0, 0);
     }
 
     if (IsTransactionTimeout(piMessage))
@@ -71,6 +73,11 @@ CallReasonInfo StartErrorHandler::Handle(IN const IMessage* piMessage) const
 PRIVATE
 CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
 {
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+    }
+
     Feature eFeature = m_objContext.GetService().IsWlanIpCanType()
             ? Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL
             : Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL;
@@ -182,6 +189,11 @@ CallReasonInfo StartErrorHandler::HandleRedirection(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessage) const
 {
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return CallReasonInfo(CODE_SIP_REDIRECTED, GetDefaultExtraCode(objMessage));
+    }
+
     IMS_SINT32 eSosType = m_objContext.GetMessageUtils().GetSosTypeFromServiceUrn(
             &objMessage, ISipHeader::CONTACT_NORMAL);
     if (eSosType != EXTRA_CODE_EMERGENCYSERVICE_INVALID &&
@@ -192,10 +204,8 @@ CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessag
 
     if (HasEmergencyServiceTypeInBody(objMessage))
     {
-        // TODO: check
-        // Set to EXTRA_CODE_CALL_RETRY_NORMAL even though it's emergency service.
-        // Call app will retry according to the UX scenario.
-        return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_EMERGENCY);
+        return CallReasonInfo(
+                CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
     }
 
     if (IsRetry1xRequiredForNormalCall(objMessage))
@@ -280,6 +290,11 @@ CallReasonInfo StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle403Response() const
 {
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return CallReasonInfo(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403);
+    }
+
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
             Feature::POLICY_FOR_403_RESPONSE_FOR_INVITE);
     switch (nPolicy)
@@ -395,6 +410,11 @@ CallReasonInfo StartErrorHandler::Handle500Response(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessage) const
 {
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503);
+    }
+
     IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
             &objMessage, ISipHeader::RETRY_AFTER_ANY);
     if (nRetryAfter > 0)
@@ -414,6 +434,11 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessage) const
 {
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return CallReasonInfo(CODE_SIP_SERVER_TIMEOUT, SipStatusCode::SC_504);
+    }
+
     if (m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader()) ||
             m_objContext.GetMessageUtils().ContainsAddressInPaid(
                     &objMessage, GetServiceRouteHeader()))
@@ -515,6 +540,11 @@ IMS_BOOL StartErrorHandler::IsTransactionTimeout(IN const IMessage* piMessage)
 PRIVATE
 IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const
 {
+    if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return IMS_FALSE;
+    }
+
     return m_objContext.GetConfigurationProxy().Is(
             Feature::REJECT_CODE_FOR_CSFB, objMessage.GetStatusCode());
 }
@@ -543,11 +573,13 @@ IMS_BOOL StartErrorHandler::IsConditionCheckRequiredBeforeRetry1x(IN const IMess
 PRIVATE
 IMS_BOOL StartErrorHandler::IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const
 {
+    // clang-format off
     if (m_objContext.GetConfigurationProxy().Is(Feature::
-                        EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
+            EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
     {
         return IMS_TRUE;
     }
+    // clang-format on
 
     if (!HasEmergencyServiceTypeInBody(objMessage))
     {
