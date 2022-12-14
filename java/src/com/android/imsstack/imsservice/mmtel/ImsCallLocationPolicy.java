@@ -139,7 +139,7 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
 
     private static int getGeolocationPolicy(int slotId) {
         return getConfigInterface(slotId).getCarrierConfig().getInt(
-                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_TYPE_INT);
+                CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT);
     }
 
     private boolean isLocationRequiredForECallOnly() {
