@@ -18,6 +18,7 @@ package com.android.imsstack.core.agents.internal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.BarringInfo;
 import android.telephony.CellInfo;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
@@ -157,6 +158,19 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
 
         Message.obtain(mHandler, ImsPhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE,
                 dataConnectionState).sendToTarget();
+    }
+
+    /**
+     * Posts barringInfo message to handler.
+     */
+    public void notifyBarringInfo(BarringInfo barringInfo) {
+        if (mHandler == null) {
+            onBarringInfoChanged(barringInfo);
+            return;
+        }
+
+        Message.obtain(mHandler, ImsPhoneStateListener.LISTEN_BARRING_INFO,
+                barringInfo).sendToTarget();
     }
 
     protected boolean isEventSet(int event) {
@@ -318,6 +332,25 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
         }
     }
 
+    /**
+     * Invokes when barring information is changed.
+     */
+    protected void onBarringInfoChanged(BarringInfo barringInfo) {
+        if (!isEventSet(ImsPhoneStateListener.LISTEN_BARRING_INFO)) {
+            return;
+        }
+
+        ImsPhoneStateListener listener;
+
+        synchronized (mLock) {
+            listener = mListener;
+        }
+
+        if (listener != null) {
+            listener.onBarringInfoChanged(barringInfo);
+        }
+    }
+
     private final class PhoneStateHandler extends Handler {
         public PhoneStateHandler(Looper looper) {
             super(looper);
@@ -327,40 +360,44 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
         @SuppressWarnings("unchecked")
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case ImsPhoneStateListener.LISTEN_SERVICE_STATE: {
-                onServiceStateChanged((ServiceState)msg.obj);
-                break;
-            }
-            case ImsPhoneStateListener.LISTEN_CALL_STATE: {
-                onCallStateChanged(msg.arg1, (String)msg.obj);
-                break;
-            }
-            case ImsPhoneStateListener.LISTEN_PRECISE_CALL_STATE: {
-                onPreciseCallStateChanged((PreciseCallState)msg.obj);
-                break;
-            }
-            case ImsPhoneStateListener.LISTEN_SRVCC_STATE: {
-                onSrvccStateChanged(msg.arg1);
-                break;
-            }
-            case ImsPhoneStateListener.LISTEN_CELL_INFO: {
-                onCellInfoChanged((List<CellInfo>)msg.obj);
-                break;
-            }
-            case ImsPhoneStateListener.LISTEN_SIGNAL_STRENGTHS: {
-                onSignalStrengthsChanged((SignalStrength)msg.obj);
-                break;
-            }
-            case ImsPhoneStateListener.LISTEN_PCSCF_ADDRESS_INFO: {
-                onPcscfUpdated((List<String>)msg.obj);
-                break;
-            }
-            case ImsPhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE: {
-                onPreciseDataConnectionStateChanged((PreciseDataConnectionState)msg.obj);
-                break;
-            }
-            default:
-                break;
+                case ImsPhoneStateListener.LISTEN_SERVICE_STATE: {
+                    onServiceStateChanged((ServiceState) msg.obj);
+                    break;
+                }
+                case ImsPhoneStateListener.LISTEN_CALL_STATE: {
+                    onCallStateChanged(msg.arg1, (String) msg.obj);
+                    break;
+                }
+                case ImsPhoneStateListener.LISTEN_PRECISE_CALL_STATE: {
+                    onPreciseCallStateChanged((PreciseCallState) msg.obj);
+                    break;
+                }
+                case ImsPhoneStateListener.LISTEN_SRVCC_STATE: {
+                    onSrvccStateChanged(msg.arg1);
+                    break;
+                }
+                case ImsPhoneStateListener.LISTEN_CELL_INFO: {
+                    onCellInfoChanged((List<CellInfo>) msg.obj);
+                    break;
+                }
+                case ImsPhoneStateListener.LISTEN_SIGNAL_STRENGTHS: {
+                    onSignalStrengthsChanged((SignalStrength) msg.obj);
+                    break;
+                }
+                case ImsPhoneStateListener.LISTEN_PCSCF_ADDRESS_INFO: {
+                    onPcscfUpdated((List<String>) msg.obj);
+                    break;
+                }
+                case ImsPhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE: {
+                    onPreciseDataConnectionStateChanged((PreciseDataConnectionState) msg.obj);
+                    break;
+                }
+                case ImsPhoneStateListener.LISTEN_BARRING_INFO: {
+                    onBarringInfoChanged((BarringInfo) msg.obj);
+                    break;
+                }
+                default:
+                    break;
             }
         }
     }

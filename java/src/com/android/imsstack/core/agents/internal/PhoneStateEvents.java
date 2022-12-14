@@ -31,8 +31,10 @@ public final class PhoneStateEvents {
     public static final int LISTEN_PRECISE_CALL_STATE = 0x00000800;
     public static final int LISTEN_SRVCC_STATE_CHANGED = 0x00004000;
     public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 0x00001000;
+    public static final int LISTEN_BARRING_INFO = 0x00002000;
 
-    public static final int DEFAULT_EVENTS = (LISTEN_SERVICE_STATE | LISTEN_CALL_STATE);
+    public static final int DEFAULT_EVENTS = (LISTEN_SERVICE_STATE | LISTEN_CALL_STATE
+            | LISTEN_BARRING_INFO);
 
     // IMS extended events
     public static final int LISTEN_PCSCF_ADDRESS_INFO = 0x00000001;
@@ -163,6 +165,10 @@ public final class PhoneStateEvents {
             pslEvents |= LISTEN_PRECISE_DATA_CONNECTION_STATE;
         }
 
+        if (isSet(events, ImsPhoneStateListener.LISTEN_BARRING_INFO)) {
+            pslEvents |= LISTEN_BARRING_INFO;
+        }
+
         return pslEvents;
     }
 
@@ -242,6 +248,7 @@ public final class PhoneStateEvents {
         sPSEvents.add(LISTEN_CELL_INFO);
         sPSEvents.add(LISTEN_SIGNAL_STRENGTHS);
         sPSEvents.add(LISTEN_PRECISE_DATA_CONNECTION_STATE);
+        sPSEvents.add(LISTEN_BARRING_INFO);
 
         // IMS extended events
         sImsEvents = new ArrayList<Integer>(MAX_IMS_EVENTS);

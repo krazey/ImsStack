@@ -16,11 +16,13 @@
 
 package com.android.imsstack.core.agents;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.BarringInfo;
 import android.telephony.CellInfo;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PreciseCallState;
@@ -214,6 +216,12 @@ public final class PhoneStateAgent implements IPhoneState,
     private void notifyPreciseDataConnectionState(PreciseDataConnectionState dataConnectionState) {
         for (PhoneStateNotifier n : mPhoneStateNotifiers) {
             n.notifyPreciseDataConnectionState(dataConnectionState);
+        }
+    }
+
+    private void notifyBarringInfo(BarringInfo barringInfo) {
+        for (PhoneStateNotifier n : mPhoneStateNotifiers) {
+            n.notifyBarringInfo(barringInfo);
         }
     }
 
@@ -472,6 +480,7 @@ public final class PhoneStateAgent implements IPhoneState,
         private SignalStrengthsListener mSignalStrengthsListener = null;
         private SrvccStateListener mSrvccStateListener = null;
         private PreciseDataConnectionStateListener mPreciseDataConnectionStateListener = null;
+        private BarringInfoListener mBarringInfoListener = null;
 
         PhoneStateListener() {
             mSubId = MSimUtils.INVALID_SUB_ID;
@@ -493,6 +502,7 @@ public final class PhoneStateAgent implements IPhoneState,
             mSignalStrengthsListener = null;
             mSrvccStateListener = null;
             mPreciseDataConnectionStateListener = null;
+            mBarringInfoListener = null;
         }
 
         /**
@@ -588,6 +598,14 @@ public final class PhoneStateAgent implements IPhoneState,
             notifyPreciseDataConnectionState(dataConnectionState);
         }
 
+        public void onBarringInfoChanged(BarringInfo barringInfo) {
+            if (isDisposed()) {
+                return;
+            }
+
+            notifyBarringInfo(barringInfo);
+        }
+
         public int getSubId() {
             return mSubId;
         }
@@ -677,6 +695,15 @@ public final class PhoneStateAgent implements IPhoneState,
                 }
                 tm.registerTelephonyCallback(mHandler, mPreciseDataConnectionStateListener);
             }
+
+            if (isEventSet(events, PhoneStateEvents.LISTEN_BARRING_INFO)) {
+                if (mBarringInfoListener == null) {
+                    mBarringInfoListener = new BarringInfoListener();
+                } else {
+                    tm.unregisterTelephonyCallback(mBarringInfoListener);
+                }
+                tm.registerTelephonyCallback(mHandler, mBarringInfoListener);
+            }
         }
 
         public void removeListener() {
@@ -712,6 +739,10 @@ public final class PhoneStateAgent implements IPhoneState,
 
             if (mPreciseDataConnectionStateListener != null) {
                 tm.unregisterTelephonyCallback(mPreciseDataConnectionStateListener);
+            }
+
+            if (mBarringInfoListener != null) {
+                tm.unregisterTelephonyCallback(mBarringInfoListener);
             }
         }
 
@@ -769,6 +800,14 @@ public final class PhoneStateAgent implements IPhoneState,
             public void onPreciseDataConnectionStateChanged(
                     PreciseDataConnectionState dataConnectionState) {
                 PhoneStateListener.this.onPreciseDataConnectionStateChanged(dataConnectionState);
+            }
+        }
+
+        private final class BarringInfoListener extends TelephonyCallback implements
+                TelephonyCallback.BarringInfoListener {
+            @Override
+            public void onBarringInfoChanged(@NonNull BarringInfo barringInfo) {
+                PhoneStateListener.this.onBarringInfoChanged(barringInfo);
             }
         }
 
