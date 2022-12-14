@@ -24,7 +24,7 @@ class SipHeadersTest : public ::testing::Test
 {
 public:
 protected:
-    virtual void SetUp() override {}
+    virtual void SetUp() override { SIPHdrAccess::Init(); }
 
     virtual void TearDown() override {}
 };
