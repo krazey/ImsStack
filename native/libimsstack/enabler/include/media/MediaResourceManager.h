@@ -18,10 +18,10 @@
 #define _IMS_MEDIA_RESOURCE_MNGR_H_
 
 #include "MediaDef.h"
-#include "config/MediaConfiguration.h"
-#include "config/AudioConfiguration.h"
 #include "IMediaNetworkConnectionListener.h"
-#include "MediaNetworkConnectionWatcher.h"
+
+class MediaConfiguration;
+class MediaNetworkConnectionWatcher;
 
 class MediaResourceManager : public IMediaNetworkConnectionListener
 {

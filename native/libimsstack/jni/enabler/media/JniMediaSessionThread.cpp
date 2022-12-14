@@ -21,6 +21,7 @@
 #include "JniMediaSessionThread.h"
 #include "JniMtcUtils.h"
 #include "ServiceTrace.h"
+#include "IMMedia.h"
 
 using namespace android;
 using namespace android::telephony::imsmedia;

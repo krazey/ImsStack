@@ -17,8 +17,9 @@
 #ifndef _MEDIA_NEGO_UTIL_H_
 #define _MEDIA_NEGO_UTIL_H_
 
-#include "MediaNego.h"
 #include "MediaDef.h"
+
+class MediaNego;
 
 class MediaNegoUtil
 {

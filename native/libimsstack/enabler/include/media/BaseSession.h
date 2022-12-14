@@ -18,11 +18,12 @@
 #define _IMS_BASE_SESSION_H_
 
 #include "ImsList.h"
-#include "IMediaSessionListener.h"
-#include "MediaEnvironment.h"
-
+#include "MediaDef.h"
 #include <RtpConfig.h>
 using namespace android::telephony::imsmedia;
+
+class IMediaSessionListener;
+class MediaEnvironment;
 
 class BaseSession
 {

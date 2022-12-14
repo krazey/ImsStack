@@ -18,6 +18,7 @@
 #include "ICoreService.h"
 #include "ISipHeader.h"
 #include "MediaManager.h"
+#include "MediaSession.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"

@@ -16,6 +16,7 @@
 
 #include "ServiceTrace.h"
 #include "BaseSession.h"
+#include "MediaEnvironment.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.BS");
 

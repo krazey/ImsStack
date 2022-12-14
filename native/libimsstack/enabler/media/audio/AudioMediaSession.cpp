@@ -23,8 +23,10 @@
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
 #include "IMMedia.h"
-#include "audio/AudioMediaSession.h"
+#include "IMediaSessionListener.h"
 #include "MediaManager.h"
+#include "audio/AudioMediaSession.h"
+#include "audio/AudioProfileUtil.h"
 
 #include <AudioConfig.h>
 using namespace android::telephony::imsmedia;

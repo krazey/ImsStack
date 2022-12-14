@@ -17,12 +17,12 @@
 #include "ServiceTrace.h"
 #include "ServiceSystemTime.h"
 
+#include "MediaManager.h"
+#include "MediaResourceManager.h"
 #include "config/CodecAvcConfig.h"
 #include "config/CodecHevcConfig.h"
 #include "config/VideoConfiguration.h"
-#include "video/VideoDef.h"
 #include "video/VideoProfileUtil.h"
-#include "MediaManager.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.PC");
 

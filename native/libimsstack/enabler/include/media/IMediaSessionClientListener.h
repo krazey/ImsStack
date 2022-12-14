@@ -24,6 +24,7 @@
 class IMediaSessionClientListener
 {
 public:
+    virtual ~IMediaSessionClientListener(){};
     /**
      * @brief Sends notification to the client
      *

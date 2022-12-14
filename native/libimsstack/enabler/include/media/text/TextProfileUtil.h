@@ -18,8 +18,9 @@
 #define _TEXT_PROFILE_UTIL_H_
 
 #include "MediaEnvironment.h"
-#include "text/TextProfile.h"
+#include "MediaResourceManager.h"
 #include "config/TextConfiguration.h"
+#include "text/TextProfile.h"
 
 class TextProfileUtil
 {

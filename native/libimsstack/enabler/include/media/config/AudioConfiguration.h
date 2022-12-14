@@ -20,8 +20,6 @@
 #include "AString.h"
 #include "config/MediaConfiguration.h"
 
-class ICarrierConfig;
-
 class AudioConfiguration : public MediaConfiguration
 {
 public:

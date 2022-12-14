@@ -24,7 +24,6 @@
 #include "video/VideoDef.h"
 #include "MediaEnvironment.h"
 #include "config/VideoConfiguration.h"
-#include "video/VideoProfile.h"
 #include "video/VideoProfileUtil.h"
 
 class VideoNego : ImsSlot

@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-#include "MediaNetworkConnectionWatcher.h"
 #include "ServiceTrace.h"
 #include "ServiceNetwork.h"
+
+#include "IMediaNetworkConnectionListener.h"
+#include "MediaNetworkConnectionWatcher.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.CW");
 

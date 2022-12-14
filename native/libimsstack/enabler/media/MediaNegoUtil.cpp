@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "MediaNego.h"
 #include "MediaNegoUtil.h"
 
 PUBLIC

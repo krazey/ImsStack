@@ -22,7 +22,7 @@
 class IMediaNetworkConnectionListener
 {
 public:
-    ~IMediaNetworkConnectionListener() {}
+    virtual ~IMediaNetworkConnectionListener() {}
 
     /**
      * @brief Called when the network connection changed

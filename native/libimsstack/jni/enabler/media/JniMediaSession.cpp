@@ -25,7 +25,6 @@
 
 #include <AudioConfig.h>
 #include <TextConfig.h>
-#include <TextConfig.h>
 
 using namespace android::telephony::imsmedia;
 

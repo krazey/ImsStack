@@ -17,8 +17,9 @@
 #ifndef _MEDIA_NETWORK_CONNECTION_WATCHER_H_
 #define _MEDIA_NETWORK_CONNECTION_WATCHER_H_
 
-#include "IMediaNetworkConnectionListener.h"
 #include "INetworkConnection.h"
+
+class IMediaNetworkConnectionListener;
 
 class MediaNetworkConnectionWatcher : public INetworkConnectionListener
 {

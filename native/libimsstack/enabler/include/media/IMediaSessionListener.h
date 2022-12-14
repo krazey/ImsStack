@@ -24,6 +24,11 @@ class IMediaSessionListener
 {
 public:
     /**
+     * @brief Destructor of IMediaSessionListener
+     */
+    virtual ~IMediaSessionListener(){};
+
+    /**
      * @brief Send request message to java
      *
      * @param eEvent The event defined in IMMedia.h
