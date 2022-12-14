@@ -2380,14 +2380,24 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
         }
 
         // if the case using different interval in live and hold, set here.
-        if (pNegotiatedProfile->eDirection == MEDIA_DIRECTION_SEND_RECEIVE &&
-                m_pConfig->GetRtcpLiveInterval() > 0)
+        pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
+        pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
+
+        if (pNegotiatedProfile->nBandwidthRs == 0 && pNegotiatedProfile->nBandwidthRr == 0)
         {
-            pNegotiatedProfile->nRtcpInterval = m_pConfig->GetRtcpLiveInterval();
+            pNegotiatedProfile->nRtcpInterval = 0;
+            IMS_TRACE_D(
+                    "MakeNegotiatedProfile() - negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
         }
         else
         {
             pNegotiatedProfile->nRtcpInterval = m_pConfig->GetRtcpInterval();
+
+            if (pNegotiatedProfile->eDirection == MEDIA_DIRECTION_SEND_RECEIVE &&
+                    m_pConfig->GetRtcpLiveInterval() > 0)
+            {
+                pNegotiatedProfile->nRtcpInterval = m_pConfig->GetRtcpLiveInterval();
+            }
         }
 
         // Setting bandwidth AS/RS/RR

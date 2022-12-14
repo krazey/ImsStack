@@ -1333,9 +1333,20 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
         }
     }
 
-    if (pNegotiatedProfile->nBandwidthRs != 0 || pNegotiatedProfile->nBandwidthRr != 0)
+    pNegotiatedProfile->nBandwidthRs = pPeerProfile->nBandwidthRs;
+    pNegotiatedProfile->nBandwidthRr = pPeerProfile->nBandwidthRr;
+
+    IMS_TRACE_D("MakeNegotiatedProfile() nego rs[%d] rr[%d]", pNegotiatedProfile->nBandwidthRs,
+            pNegotiatedProfile->nBandwidthRr, 0);
+
+    if (pNegotiatedProfile->nBandwidthRs == 0 && pNegotiatedProfile->nBandwidthRr == 0)
     {
-        pNegotiatedProfile->nRtcpInterval = pLocalProfile->nRtcpInterval;
+        pNegotiatedProfile->nRtcpInterval = 0;
+        IMS_TRACE_D("MakeNegotiatedProfile() - negotiated rs and rr are 0, disable rtcp", 0, 0, 0);
+    }
+    else
+    {
+        pNegotiatedProfile->nRtcpInterval = m_pConfig->GetRtcpInterval();
     }
 
     IMS_TRACE_D("MakeNegotiatedProfile() - negotiated payload size[%d], port[%d], direction[%d], ",
