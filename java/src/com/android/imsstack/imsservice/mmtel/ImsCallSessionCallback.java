@@ -161,6 +161,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    logi("invokeHeld :: " + profile);
+
                     mListener.callSessionHeld(profile);
                 } catch (Throwable t) {
                     log(t, "invokeHeld");
@@ -201,6 +203,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("invokeHoldReceived :: " + profile);
+
                     mListener.callSessionHoldReceived(profile);
                 } catch (Throwable t) {
                     log(t, "invokeHoldReceived");
@@ -219,6 +223,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeResumed :: " + profile);
 
                     mListener.callSessionResumed(profile);
                 } catch (Throwable t) {
@@ -259,6 +265,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeResumeReceived :: " + profile);
 
                     mListener.callSessionResumeReceived(profile);
                 } catch (Throwable t) {
@@ -351,6 +359,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("callSessionUpdated :: " + profile);
+
                     mListener.callSessionUpdated(profile);
                 } catch (Throwable t) {
                     log(t, "invokeUpdated");
@@ -391,6 +401,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("invokeUpdateReceived :: " + profile);
+
                     mListener.callSessionUpdateReceived(profile);
                 } catch (Throwable t) {
                     log(t, "invokeUpdateReceived");
@@ -409,6 +421,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeConferenceExtended :: " + session);
 
                     mListener.callSessionConferenceExtended(confSession, profile);
                 } catch (Throwable t) {
@@ -454,6 +468,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("invokeConferenceExtendReceived :: " + session);
+
                     mListener.callSessionConferenceExtendReceived(confSession, profile);
                 } catch (Throwable t) {
                     log(t, "invokeConferenceExtendReceived");
@@ -475,6 +491,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeInviteParticipantsRequestDelivered :: " + session);
 
                     mListener.callSessionInviteParticipantsRequestDelivered();
                 } catch (Throwable t) {
@@ -514,6 +532,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeRemoveParticipantsRequestDelivered :: " + session);
 
                     mListener.callSessionRemoveParticipantsRequestDelivered();
                 } catch (Throwable t) {
@@ -555,6 +575,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("invokeConferenceStateUpdated :: " + confState);
+
                     mListener.callSessionConferenceStateUpdated(confState);
                 } catch (Throwable t) {
                     log(t, "invokeConferenceStateUpdated");
@@ -573,6 +595,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeUssdMessageReceived :: " + ussdMessage);
 
                     mListener.callSessionUssdMessageReceived(mode, ussdMessage);
                 } catch (Throwable t) {
@@ -593,6 +617,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("invokeMultipartyStateChanged :: " + isMultiparty);
+
                     mListener.callSessionMultipartyStateChanged(isMultiparty);
                 } catch (Throwable t) {
                     log(t, "invokeMultipartyStateChanged");
@@ -610,6 +636,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeCallSessionTransferred :: " + session);
 
                     mListener.callSessionTransferred();
                 } catch (Throwable t) {
@@ -629,6 +657,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeCallSessionTransferFailed :: " + reasonInfo);
 
                     mListener.callSessionTransferFailed(reasonInfo);
                 } catch (Throwable t) {
@@ -782,6 +812,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("invokeRttModifyRequestReceived :: " + callProfile);
+
                     mListener.callSessionRttModifyRequestReceived(callProfile);
                 } catch (Throwable t) {
                     log(t, "invokeRttModifyRequestReceived");
@@ -800,6 +832,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeRttModifyResponseReceived :: " + status);
 
                     mListener.callSessionRttModifyResponseReceived(status);
                 } catch (Throwable t) {
@@ -820,6 +854,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("invokeRttMessageReceived :: " + data);
+
                     mListener.callSessionRttMessageReceived(data);
                 } catch (Throwable t) {
                     log(t, "invokeRttMessageReceived");
@@ -839,6 +875,8 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    log("invokeRttAudioIndicatorChanged :: " + profile);
+
                     mListener.callSessionRttAudioIndicatorChanged(profile);
                 } catch (Throwable t) {
                     log(t, "invokeRttAudioIndicatorChanged");
@@ -856,6 +894,8 @@ public class ImsCallSessionCallback {
                     if (mListener == null) {
                         return;
                     }
+
+                    log("invokeDtmfReceived :: " + dtmf);
 
                     mListener.callSessionDtmfReceived(dtmf);
                 } catch (Throwable t) {
