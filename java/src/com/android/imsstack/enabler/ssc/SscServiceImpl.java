@@ -247,7 +247,7 @@ public class SscServiceImpl implements IUtInterface {
                 return;
         }
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -302,7 +302,7 @@ public class SscServiceImpl implements IUtInterface {
                 return;
         }
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -317,7 +317,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.CW,
                 SscConstant.EVENT_SSC_QUERY_CW, tId, -1));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -332,7 +332,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.OIR,
                 SscConstant.EVENT_SSC_QUERY_OIR, tId, -1));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -347,7 +347,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.OIP,
                 SscConstant.EVENT_SSC_QUERY_OIP, tId, -1));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -362,7 +362,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.TIR,
                 SscConstant.EVENT_SSC_QUERY_TIR, tId, -1));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -377,7 +377,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.TIP,
                 SscConstant.EVENT_SSC_QUERY_TIP, tId, -1));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -439,7 +439,7 @@ public class SscServiceImpl implements IUtInterface {
                 return;
         }
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -529,7 +529,7 @@ public class SscServiceImpl implements IUtInterface {
                 return;
         }
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -544,7 +544,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new CwServiceData(mSlotId, ESsType.CW,
                 SscConstant.EVENT_SSC_UPDATE_CW, tId, (enable ? 1 : 0)));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -559,7 +559,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new OirServiceData(mSlotId, ESsType.OIR,
                 SscConstant.EVENT_SSC_UPDATE_OIR, tId, clirMode, 0, 0));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -574,7 +574,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new OipServiceData(mSlotId, ESsType.OIP,
                 SscConstant.EVENT_SSC_UPDATE_OIP, tId, (enable ? 1 : 0)));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -589,7 +589,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new TirServiceData(mSlotId, ESsType.TIR,
                 SscConstant.EVENT_SSC_UPDATE_TIR, tId, presentation, 0));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     @Override
@@ -604,7 +604,7 @@ public class SscServiceImpl implements IUtInterface {
         requestData.offerSscData(new TipServiceData(mSlotId, ESsType.TIP,
                 SscConstant.EVENT_SSC_UPDATE_TIP, tId, (enable ? 1 : 0)));
 
-        postRequestMessage(requestData);
+        addRequestToQueue(requestData);
     }
 
     private void startTransaction(SscData data) {
@@ -651,8 +651,9 @@ public class SscServiceImpl implements IUtInterface {
         }
     }
 
-    private void postRequestMessage(SscRequestData requestData) {
+    private void addRequestToQueue(SscRequestData requestData) {
         mSscRequestQueue.offerLast(requestData);
+
         if (mSscRequestQueue.size() > 1) {
             ImsLog.d(mSlotId, "Queueing...");
             return;
@@ -672,12 +673,13 @@ public class SscServiceImpl implements IUtInterface {
     /**
      * This method adjusts event number of SscData to comply with following requirement according to
      * KEY_UT_INSERT_NEW_RULE_BOOL.
-     * For versions earlier than IR.92 v9.0, the UE must insert a new <rule> element with a rule
-     * ID different from any existing rule ID in the XML document.
-     * For IR.92 v10 and later, the UE must consider that the supplementary service is
-     * not provisioned for the user and must not insert a new <rule> element with a rule ID
+     * For versions earlier than IR.92 v9.0, the UE must insert a new rule element with a rule ID
      * different from any existing rule ID in the XML document.
-     * @param sscData event number is updated to process insert operation
+     * For IR.92 v10 and later, the UE must consider that the supplementary service is not
+     * provisioned for the user and must not insert a new rule element with a rule ID different from
+     * any existing rule ID in the XML document.
+     *
+     * @param sscData event number of sscData will be updated to process insert operation
      */
     private void adjustEvent(SscData sscData) {
         if (!SscConfig.insertNewRule(sscData.getSlotId())) {
@@ -727,7 +729,7 @@ public class SscServiceImpl implements IUtInterface {
             ImsLog.d(mSlotId, "Message : " + msg.what);
             switch(msg.what) {
                 case EVENT_UT_TRANSACTION_STARTED: {
-                    SscData requestData = (SscData)msg.obj;
+                    SscData requestData = (SscData) msg.obj;
                     if (requestData != null) {
                          // before starting transaction, set flag as false.
                          //SscDnsQuery.getInstance().setNAFFailed(false);

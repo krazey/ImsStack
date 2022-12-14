@@ -36,6 +36,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
 
@@ -52,7 +53,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -65,7 +65,7 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class SscServiceImplTest {
     private final static int SLOT_0 = 0;
@@ -77,13 +77,13 @@ public class SscServiceImplTest {
     private Handler mCallbackHandler;
     private TestableLooper mLooper;
 
-    @Mock private Context mockContext;
+    @Mock private Context mMockContext;
 
-    @Mock private CarrierConfig mockCarrierConfig;
-    @Mock private ConfigAgent mockConfigAgent;
-    @Mock private SscServiceState mockSscServiceState;
-    @Mock private SscTransactionFactory mockSscTransactionFactory;
-    @Mock private SscTransaction mockSscTransaction;
+    @Mock private CarrierConfig mMockCarrierConfig;
+    @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private SscServiceState mMockSscServiceState;
+    @Mock private SscTransactionFactory mMockSscTransactionFactory;
+    @Mock private SscTransaction mMockSscTransaction;
     @Mock private IUtListener mMockUtListener;
     @Mock private IUtServiceStateListener mMockUtServiceStateListener;
 
@@ -119,31 +119,32 @@ public class SscServiceImplTest {
         mUpdateCount = 1;
         mSscServiceImpl = new SscServiceImpl(SLOT_0);
 
-        // mockConfigAgent should be set before starting SscServiceImpl
-        SscConfig.setConfigAgent(SLOT_0, mockConfigAgent);
-        when(mockConfigAgent.getCarrierConfig()).thenReturn(mockCarrierConfig);
-        when(mockCarrierConfig.getBoolean(
+        // mMockConfigAgent should be set before starting SscServiceImpl
+        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL))).thenReturn(true);
 
-        mSscServiceImpl.start(mockContext);
+        mSscServiceImpl.start(mMockContext);
         mSscServiceImpl.setListener(mMockUtListener);
-        mSscServiceImpl.setSscTransactionFactory(mockSscTransactionFactory);
+        mSscServiceImpl.setSscTransactionFactory(mMockSscTransactionFactory);
 
         HandlerThread serviceThreadHandler = mSscServiceImpl.getServiceHandlerThread();
         mLooper = new TestableLooper(serviceThreadHandler.getLooper());
 
         mCallbackHandler = mSscServiceImpl.getCallBackHandler();
-        when(mockSscTransactionFactory.getSscTransaction(eq(SLOT_0), any()))
-                .thenReturn(mockSscTransaction);
+        when(mMockSscTransactionFactory.getSscTransaction(eq(SLOT_0), any()))
+                .thenReturn(mMockSscTransaction);
 
         SscServiceStateAgent.getInstance()
-                .setSscServiceState(SLOT_0, mockSscServiceState, serviceThreadHandler.getLooper());
-        when(mockSscServiceState.isUtAvailable()).thenReturn(true);
+                .setSscServiceState(SLOT_0, mMockSscServiceState, serviceThreadHandler.getLooper());
+        when(mMockSscServiceState.isUtAvailable()).thenReturn(true);
     }
 
     @After
     public void tearDown() {
         mSscServiceImpl.close();
+        mLooper.destroy();
     }
 
     @Test
@@ -156,19 +157,19 @@ public class SscServiceImplTest {
 
     @Test
     public void testBasicOperation_utNotAvailable() {
-        when(mockSscServiceState.isUtAvailable()).thenReturn(false);
+        when(mMockSscServiceState.isUtAvailable()).thenReturn(false);
         int tId = 1;
 
         mSscServiceImpl.queryCallForward(tId, SscConstant.CONDITION_CFU, "");
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
     public void testBasicOperation_informErrorPhrase() {
-        when(mockCarrierConfig.getBoolean(
+        when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(true);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
@@ -186,13 +187,13 @@ public class SscServiceImplTest {
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_UT_NETWORK_ERROR);
         assertEquals(reasonInfo.getExtraMessage(), mErrorPhrase);
 
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
     public void testBasicOperation_ignoreErrorPhrase() {
-        when(mockCarrierConfig.getBoolean(
+        when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(false);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
@@ -209,13 +210,13 @@ public class SscServiceImplTest {
         assertNotNull(reasonInfo);
         assertNull(reasonInfo.getExtraMessage());
 
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
     public void testBasicOperation_errorReasonCsfb() {
-        when(mockCarrierConfig.getBoolean(
+        when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL)))
                 .thenReturn(true);
         mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
@@ -232,8 +233,8 @@ public class SscServiceImplTest {
         assertEquals(reasonInfo.getCode(), ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED);
         assertNotEquals(reasonInfo.getExtraMessage(), mErrorPhrase);
 
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -257,8 +258,8 @@ public class SscServiceImplTest {
         int xmlStatus = mIsCbRuleActivated ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(cbInfos[0].mStatus, xmlStatus);
 
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -282,8 +283,8 @@ public class SscServiceImplTest {
         int xmlStatus = mIsCbRuleActivated ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(cbInfos[0].mStatus, xmlStatus);
 
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -296,8 +297,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -312,8 +313,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -326,7 +327,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -343,7 +344,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -373,13 +374,13 @@ public class SscServiceImplTest {
             assertTrue(mForwardNumber.contains(cfInfos[0].mNumber));
         }
 
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
     public void testQueryCallForward_multipleRequest() {
-        when(mockCarrierConfig.getBoolean(
+        when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL)))
                 .thenReturn(true);
 
@@ -389,7 +390,7 @@ public class SscServiceImplTest {
             tId++;
             mSscServiceImpl.queryCallForward(tId, c, "");
 
-            if (SscXmlGov.getInstance(SLOT_0).isXmlDataPresent() == false) {
+            if (!SscXmlGov.getInstance(SLOT_0).isXmlDataPresent()) {
                 processEntireXmlDocQueryAsSuccess();
             }
 
@@ -398,11 +399,11 @@ public class SscServiceImplTest {
 
             mLooper.processAllMessages();
             verify(mMockUtListener).utConfigurationCallForwardQueried(eq(tId), any());
-            verify(mockSscTransaction, atLeast(responseCount)).close();
+            verify(mMockSscTransaction, atLeast(responseCount)).close();
             responseCount++;
         }
 
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -414,8 +415,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -429,13 +430,13 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
     public void testQueryCallForward_queryCfaAndCfacNotSupported() {
-        when(mockCarrierConfig.getBoolean(
+        when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_QUERY_CF_ALL_AND_CF_ALL_CONDITIONAL_SUPPORT_BOOL)))
                 .thenReturn(false);
 
@@ -445,7 +446,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -457,7 +458,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -481,7 +482,7 @@ public class SscServiceImplTest {
         int xmlStatus = mIsCwEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(cwInfos[0].mStatus, xmlStatus);
 
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -494,7 +495,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -516,7 +517,7 @@ public class SscServiceImplTest {
                 ? SscConstant.OIR_SUPPRESSION : SscConstant.OIR_INVOCATION;
         assertEquals(ssInfo.getClirOutgoingState(), outGoingState);
 
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -529,7 +530,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -550,7 +551,7 @@ public class SscServiceImplTest {
         int xmlStatus = mIsOipEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(ssInfo.mStatus, xmlStatus);
 
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -563,7 +564,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -586,7 +587,7 @@ public class SscServiceImplTest {
                 ? SscConstant.TIR_NOT_PROVISIONED : SscConstant.TIR_PROVISIONED;
         assertEquals(ssInfo.getProvisionStatus(), provisionedStatus);
 
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -599,7 +600,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -620,7 +621,7 @@ public class SscServiceImplTest {
         int xmlStatus = mIsTipEnabled ? SscConstant.STATUS_ENABLE : SscConstant.STATUS_DISABLE;
         assertEquals(ssInfo.mStatus, xmlStatus);
 
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -633,7 +634,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationQueryFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -648,15 +649,15 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
     public void testUpdateCallBarringWithPassword_insertNewRule() {
         mIsIcbRulesExist = false;
 
-        when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
         int tId = 1;
 
@@ -668,8 +669,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -682,8 +683,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -698,8 +699,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -712,7 +713,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -729,7 +730,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -746,7 +747,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -766,15 +767,15 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
-    public void testUpdateCallForward_insertNewRuleSet() {
+    public void testUpdateCallForward_insertRuleSet() {
         mIsCfRuleSetExist = false;
 
-        when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
         int tId = 1;
 
@@ -786,16 +787,16 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
-    public void testUpdateCallForward_insertNewRule() {
+    public void testUpdateCallForward_insertRule() {
         mIsCfRuleSetExist = true;
         mIsCfbRuleExist = false;
 
-        when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
         int tId = 1;
 
@@ -807,15 +808,15 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
-    public void testUpdateCallForward_notInsertNewRuleForCfnrTimer() {
+    public void testUpdateCallForward_notInsertRuleForCfnrTimer() {
         mIsCfRuleSetExist = false;
 
-        when(mockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
+        when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
         int tId = 1;
 
@@ -829,15 +830,15 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
     public void testUpdateCallForward_CfnrcAndCfnl() {
         mIsCfnlRuleExist = true;
 
-        when(mockCarrierConfig.getBoolean(
+        when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(true);
         int tId = 1;
 
@@ -851,8 +852,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -870,8 +871,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -888,8 +889,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -902,7 +903,7 @@ public class SscServiceImplTest {
                 SscConstant.CONDITION_CFA, null, 0, 20);
 
         for (int c = SscConstant.CONDITION_CFNRC; c >= SscConstant.CONDITION_CFU; c--) {
-            if (SscXmlGov.getInstance(SLOT_0).isXmlDataPresent() == false) {
+            if (!SscXmlGov.getInstance(SLOT_0).isXmlDataPresent()) {
                 processEntireXmlDocQueryAsSuccess();
             }
 
@@ -912,8 +913,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -926,8 +927,8 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -942,13 +943,13 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
-        verifyNoMoreInteractions(mockSscTransaction);
+        verify(mMockSscTransaction).close();
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
     public void testUpdateCallForward_erasureNotSupported() {
-        when(mockCarrierConfig.getBoolean(
+        when(mMockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_SUPPORT_CF_ACTION_ERASURE_BOOL))).thenReturn(false);
 
         int tId = 1;
@@ -958,7 +959,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
     }
 
     @Test
@@ -971,7 +972,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -988,7 +989,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -1005,7 +1006,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), captorReasonInfo.capture());
-        verifyNoMoreInteractions(mockSscTransaction);
+        verifyNoMoreInteractions(mMockSscTransaction);
 
         ImsReasonInfo reasonInfo = captorReasonInfo.getValue();
         assertNotNull(reasonInfo);
@@ -1022,7 +1023,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1035,7 +1036,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1048,7 +1049,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1061,7 +1062,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1074,7 +1075,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1087,7 +1088,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1100,7 +1101,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1113,7 +1114,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1126,7 +1127,7 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdated(eq(tId));
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     @Test
@@ -1139,12 +1140,12 @@ public class SscServiceImplTest {
 
         mLooper.processAllMessages();
         verify(mMockUtListener).utConfigurationUpdateFailed(eq(tId), any());
-        verify(mockSscTransaction).close();
+        verify(mMockSscTransaction).close();
     }
 
     private void processEntireXmlDocQueryAsSuccess() {
         mLooper.processAllMessages();
-        verify(mockSscTransaction, atLeast(mQueryCount))
+        verify(mMockSscTransaction, atLeast(mQueryCount))
                 .startGetTransaction(captorQueryData.capture());
         mQueryCount++;
 
@@ -1152,21 +1153,21 @@ public class SscServiceImplTest {
         assertEquals(capturedData.getSsType(), ESsType.NONE);
         assertEquals(capturedData.getEventNumber(), SscConstant.EVENT_SSC_QUERY_DOCUMENT);
 
-        capturedData.setResponseCode(200);
+        capturedData.setResponseCode(SscConstant.HTTP_OK);
         Document doc = createEntireXmldoc();
         SscXmlGov.getInstance(SLOT_0).parseXmlStream(capturedData, doc);
 
         Message msg = Message.obtain();
         msg.what = SscConstant.EVENT_SSC_QUERY_DOCUMENT;
         msg.obj =  new SscRequestResult(SLOT_0, capturedData.getTransactionId(),
-                SscConstant.REQUEST_SUCCESS, 200, -1);
+                SscConstant.REQUEST_SUCCESS, SscConstant.HTTP_OK, -1);
 
         mCallbackHandler.sendMessage(msg);
     }
 
     private void processEntireXmlDocQueryAsFailure() {
         mLooper.processAllMessages();
-        verify(mockSscTransaction, atLeast(mQueryCount))
+        verify(mMockSscTransaction, atLeast(mQueryCount))
                 .startGetTransaction(captorQueryData.capture());
         mQueryCount++;
 
@@ -1193,7 +1194,7 @@ public class SscServiceImplTest {
     private void processGetTransactionAsSuccess(ESsType validSsType, int validEventNum,
             int validCondition) {
         mLooper.processAllMessages();
-        verify(mockSscTransaction, atLeast(mQueryCount))
+        verify(mMockSscTransaction, atLeast(mQueryCount))
                 .startGetTransaction(captorQueryData.capture());
         mQueryCount++;
 
@@ -1220,7 +1221,7 @@ public class SscServiceImplTest {
     private void processGetTransactionAsFailure(ESsType validSsType, int validEventNum,
             int validCondition) {
         mLooper.processAllMessages();
-        verify(mockSscTransaction, atLeast(mQueryCount))
+        verify(mMockSscTransaction, atLeast(mQueryCount))
                 .startGetTransaction(captorQueryData.capture());
         mQueryCount++;
 
@@ -1244,8 +1245,7 @@ public class SscServiceImplTest {
     private void processPutTransactionAsSuccess(ESsType validSsType, int validEventNum,
             int validCondition) {
         mLooper.processAllMessages();
-
-        verify(mockSscTransaction, atLeast(mUpdateCount))
+        verify(mMockSscTransaction, atLeast(mUpdateCount))
                 .startPutTransaction(captorUpdateData.capture());
         mUpdateCount++;
 
@@ -1269,7 +1269,7 @@ public class SscServiceImplTest {
     private void processPutTransactionAsFailure(ESsType validSsType, int validEventNum,
             int validCondition) {
         mLooper.processAllMessages();
-        verify(mockSscTransaction, atLeast(mUpdateCount))
+        verify(mMockSscTransaction, atLeast(mUpdateCount))
                 .startPutTransaction(captorUpdateData.capture());
         mUpdateCount++;
 
