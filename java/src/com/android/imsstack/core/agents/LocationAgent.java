@@ -46,7 +46,6 @@ import com.android.imsstack.util.SystemUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -197,8 +196,7 @@ public final class LocationAgent implements ILocationAgent {
             mIsLocationUpdatedAfterMotionDetected = false;
 
             // Cache current time
-            Date date = new Date();
-            mCachedTimeMotionDetected = date.getTime();
+            mCachedTimeMotionDetected = System.currentTimeMillis();
         }
     };
 
@@ -374,8 +372,7 @@ public final class LocationAgent implements ILocationAgent {
 
         if (mIsSmdRequested) {
             // If motion is not detect yet, update current time to cache time
-            Date date = new Date();
-            mCachedTimeMotionDetected = date.getTime();
+            mCachedTimeMotionDetected = System.currentTimeMillis();
         }
 
         Location location = getBestLocation();
