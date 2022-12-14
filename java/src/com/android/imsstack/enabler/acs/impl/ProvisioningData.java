@@ -152,7 +152,6 @@ public class ProvisioningData {
      * Update element ant attribute. Before call this function, caller should check version value.
      * Only version is same with exist, this function is available.
      * @param newProvisioningData xml parser has updated data
-     * @return true if the operation is success, otherwise return false
      */
     public void updateData(@NonNull ProvisioningData newProvisioningData) {
         updateAttribute(newProvisioningData.mRoot);

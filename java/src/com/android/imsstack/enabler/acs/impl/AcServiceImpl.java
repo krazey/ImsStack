@@ -70,7 +70,7 @@ public class AcServiceImpl {
         int handleMessage(Message msg);
     }
 
-    private class TxzResponse {
+    private static class TxzResponse {
         private final int mResponseCode;
         private final String mResponseString;
         private final byte[] mProvisioningData;

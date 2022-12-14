@@ -57,7 +57,7 @@ public class ConfigContainerTest {
     private TestConfigContainer mConfigContainer;
 
 
-    private class TestConfigContainer extends ConfigContainer {
+    private static class TestConfigContainer extends ConfigContainer {
         private long mCurrentTime;
 
         TestConfigContainer(Context context, int slotId, int subId) {
