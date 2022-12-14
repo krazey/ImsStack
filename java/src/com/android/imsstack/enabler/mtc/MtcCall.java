@@ -1374,46 +1374,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
-    private void setOrClearHoldState(MediaInfo mediaInfo) {
-        logi("HoldState :: isOnHold=" + isOnHold() + ", isOnHeld=" + isOnHeld());
-
-        int callType = getCallType();
-
-        if (!MtcCallUtils.hasVideo(callType)) {
-            if (MtcCallUtils.isHoldMediaOnVoiceCall(mediaInfo)) {
-                setOnHold(true);
-            } else if (isOnHold()) {
-                setOnHold(false);
-            }
-
-            if (MtcCallUtils.isHoldMediaOnVoiceCallByRemoteEnd(mediaInfo)) {
-                setOnHeld(true);
-            } else if (isOnHeld()) {
-                setOnHeld(false);
-            }
-        } else {
-            boolean isVideoDirectionInactiveOnVideoCallHold
-                    = CallFeature.isVideoDirectionInactiveOnVideoCallHold(
-                        mContext.getSlotId());
-
-            if (MtcCallUtils.isHoldMediaOnVideoCall(mediaInfo,
-                    isVideoDirectionInactiveOnVideoCallHold)) {
-                setOnHold(true);
-            } else if (isOnHold() && MtcCallUtils.isUnholdMediaOnVideoCall(mediaInfo,
-                    isVideoDirectionInactiveOnVideoCallHold)) {
-                setOnHold(false);
-            }
-
-            if (MtcCallUtils.isHoldMediaOnVideoCallByRemoteEnd(mediaInfo,
-                    isVideoDirectionInactiveOnVideoCallHold)) {
-                setOnHeld(true);
-            } else if (isOnHeld()
-                    && MtcCallUtils.isUnholdMediaOnVideoCallByRemoteEnd(mediaInfo)) {
-                setOnHeld(false);
-            }
-        }
-    }
-
     private void setVideoHoldState(MediaInfo mediaInfo) {
         if (!MtcCallUtils.hasVideo(getCallType())) {
             return;
@@ -2101,12 +2061,6 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             checkAndSetCallType(MtcCallInfo.getCallType(callInfo));
 
-            // Assume that hold/held state will be cleared from this event.
-            // Because hold/held state is basically set to "true" by onHeld or onHeldBy.
-            //
-            // This code is disabled by changing MTC enabler's logic.
-            // MTC enabler always sends ResumedBy event first before this event.
-            // setOrClearHoldState(mediaInfo);
             logi("HoldState :: isOnHold=" + isOnHold() + ", isOnHeld=" + isOnHeld());
 
             mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_UPDATED, null);

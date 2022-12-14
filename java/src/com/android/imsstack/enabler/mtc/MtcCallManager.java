@@ -253,7 +253,7 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
         postAndRunTask(new Runnable() {
             @Override
             public void run() {
-                int callState = updateCallState();
+                updateCallState();
                 updateTelephonyCallState();
             }
         });

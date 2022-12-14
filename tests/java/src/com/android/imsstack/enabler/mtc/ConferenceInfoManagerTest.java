@@ -30,7 +30,6 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ConferenceInfoManagerTest {
     private String mCcid = "mCcid";
-    private int mSlotId = 0;
 
     private ConferenceInfoManager mTestConferenceInfoManager;
 

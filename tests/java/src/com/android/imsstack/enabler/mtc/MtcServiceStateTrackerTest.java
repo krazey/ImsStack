@@ -177,20 +177,17 @@ public class MtcServiceStateTrackerTest extends ImsStackTest {
 
         assertTrue(mTestMtcServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY));
 
-        MtcStateUtils.updateRegState(
-                mMockContext.getContext(), mMockContext.getSlotId(), IUMtcService.SERVICE_UC);
+        MtcStateUtils.updateRegState(null, mSlotId, IUMtcService.SERVICE_UC);
 
         assertTrue(mTestMtcServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VOIP));
         assertTrue(mTestMtcServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_UC));
         assertFalse(mTestMtcServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VT));
 
-        MtcStateUtils.updateRegState(
-                mMockContext.getContext(), mMockContext.getSlotId(), IUMtcService.SERVICE_VT);
+        MtcStateUtils.updateRegState(null, mSlotId, IUMtcService.SERVICE_VT);
 
         assertTrue(mTestMtcServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VT));
 
-        MtcStateUtils.updateRegState(
-                mMockContext.getContext(), mMockContext.getSlotId(), IUMtcService.SERVICE_VOIP);
+        MtcStateUtils.updateRegState(null, mSlotId, IUMtcService.SERVICE_VOIP);
 
         assertFalse(mTestMtcServiceStateTracker.isServiceRegistered(IUMtcService.SERVICE_VT));
     }
@@ -233,7 +230,7 @@ public class MtcServiceStateTrackerTest extends ImsStackTest {
 
     @Test
     public void testRegisterForServiceStateChanged() {
-        MtcStateUtils.updateRegState(null, mMockContext.getSlotId(), IUMtcService.SERVICE_VOIP);
+        MtcStateUtils.updateRegState(null, mSlotId, IUMtcService.SERVICE_VOIP);
         mTestMtcServiceStateTracker.registerForServiceStateChanged(
                 mServiceStateHandler, EVENT_SERVICE_STATE_CHANGED, null);
         processAllMessages();
@@ -243,7 +240,7 @@ public class MtcServiceStateTrackerTest extends ImsStackTest {
 
         mMsgWhat = 0;
         mServiceType = 0;
-        MtcStateUtils.updateRegState(null, mMockContext.getSlotId(), IUMtcService.SERVICE_UC);
+        MtcStateUtils.updateRegState(null, mSlotId, IUMtcService.SERVICE_UC);
         mTestMtcServiceStateTracker.registerForServiceStateChanged(
                 mServiceStateHandler, EVENT_SERVICE_STATE_CHANGED, null);
         processAllMessages();
@@ -253,7 +250,7 @@ public class MtcServiceStateTrackerTest extends ImsStackTest {
 
         mMsgWhat = 0;
         mServiceType = 0;
-        MtcStateUtils.updateRegState(null, mMockContext.getSlotId(), IUMtcService.SERVICE_VT);
+        MtcStateUtils.updateRegState(null, mSlotId, IUMtcService.SERVICE_VT);
         mTestMtcServiceStateTracker.registerForServiceStateChanged(
                 mServiceStateHandler, EVENT_SERVICE_STATE_CHANGED, null);
         processAllMessages();
@@ -263,7 +260,7 @@ public class MtcServiceStateTrackerTest extends ImsStackTest {
 
         mMsgWhat = 0;
         mServiceType = 0;
-        MtcStateUtils.updateRegState(null, mMockContext.getSlotId(), IUMtcService.SERVICE_NONE);
+        MtcStateUtils.updateRegState(null, mSlotId, IUMtcService.SERVICE_NONE);
         mTestMtcServiceStateTracker.registerForServiceStateChanged(
                 mServiceStateHandler, EVENT_SERVICE_STATE_CHANGED, null);
         processAllMessages();

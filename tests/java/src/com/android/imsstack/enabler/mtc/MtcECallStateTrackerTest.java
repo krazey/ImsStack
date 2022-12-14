@@ -55,7 +55,6 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
     @Mock private IServiceStateTracker mMockIServiceStateTracker;
     @Mock private EcbmListener mMockEcbmListener;
     @Mock private ISystem mMockISystem;
-    @Mock private CallStateListener mMockCallStateListener;
     @Mock private MtcCall mMockMtcCall;
     @Captor private ArgumentCaptor<MtcECallStateTracker.ECallStateHandler> mECallStateHandlerCaptor;
     @Captor private ArgumentCaptor<MtcECallStateTracker.MtcECallStateListener>

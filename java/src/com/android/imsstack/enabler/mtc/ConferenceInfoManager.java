@@ -90,10 +90,6 @@ public final class ConferenceInfoManager {
 
             log("destroyAllConferenceInfos :: size=" + mConferenceInfos.size());
 
-            for (int i = 0; i < mConferenceInfos.size(); ++i) {
-                ConferenceInfo ci = mConferenceInfos.get(i);
-            }
-
             mConferenceInfos.clear();
         }
     }

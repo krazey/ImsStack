@@ -433,7 +433,7 @@ public class MtcApp implements Closeable {
         private void onMessageForCallApp(int msg, Parcel parcel) {
             if (msg == IUMtcService.PRE_INCOMING_CALL) {
                 long nativeCallKey = parcel.readLong();
-                String logTag = parcel.readString();
+                parcel.readString();
 
                 MtcCall call = createCall(0);
 

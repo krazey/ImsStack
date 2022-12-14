@@ -154,22 +154,22 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
     }
 
     @VisibleForTesting
-    protected void setServiceState(int serviceState) {
+    void setServiceState(int serviceState) {
         mServiceState = serviceState;
     }
 
     @VisibleForTesting
-    protected void setEmergencyServiceState(int emergencyServiceState) {
+    void setEmergencyServiceState(int emergencyServiceState) {
         mEmergencyServiceState = emergencyServiceState;
     }
 
     @VisibleForTesting
-    protected void setEmergencyServiceReason(int emergencyServiceReason) {
+    void setEmergencyServiceReason(int emergencyServiceReason) {
         mEmergencyServiceReason = emergencyServiceReason;
     }
 
     @VisibleForTesting
-    protected boolean isServiceState(int serviceState) {
+    boolean isServiceState(int serviceState) {
         if (mServiceState == serviceState) {
             return true;
         }
@@ -177,7 +177,7 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
     }
 
     @VisibleForTesting
-    protected boolean isEmergencyServiceState(int emergencyServiceState) {
+    boolean isEmergencyServiceState(int emergencyServiceState) {
         if (mEmergencyServiceState == emergencyServiceState) {
             return true;
         }
