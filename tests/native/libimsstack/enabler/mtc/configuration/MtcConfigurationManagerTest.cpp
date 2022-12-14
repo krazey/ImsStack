@@ -613,7 +613,7 @@ TEST_F(MtcConfigurationManagerTest, GetCallRejectReasonPhraseReturnsValueInCarri
             GetString(CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING, _))
             .WillByDefault(Return(strReasonEmpty));
     ON_CALL(*piMockCarrierConfig,
-            GetString(CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT, _))
+            GetString(CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT_STRING, _))
             .WillByDefault(Return(strReasonEmpty));
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
