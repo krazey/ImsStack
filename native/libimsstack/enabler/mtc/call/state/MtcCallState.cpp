@@ -608,7 +608,7 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
         return CODE_MEDIA_NOT_ACCEPTABLE;
     }
 
-    m_objContext.GetPreconditionManager().UpdateQosAttributesFromRemoteSdp(piSession);
+    m_objContext.GetPreconditionManager().OnSdpReceived(piSession, piMessage);
 
     IMS_TRACE_D("OnSdpReceived - Nego Done", 0, 0, 0);
     return CODE_NONE;
@@ -674,34 +674,6 @@ void MtcCallState::SendIncomingUpdate(IN CallType eCallType)
 
     m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
             m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
-}
-
-PROTECTED
-void MtcCallState::UpdateSupportingPrecondition(
-        IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp /* = IMS_TRUE*/)
-{
-    if (bCheckeSdp && !MessageUtil::HasSdp(piMessage))
-    {
-        return;
-    }
-
-    IMS_BOOL bRemoteCapability = IMS_FALSE;
-    IMS_BOOL bHasSupportedHeader =
-            MessageUtil::HasValue(piMessage, MessageUtil::STR_PRECONDITION, ISipHeader::SUPPORTED);
-    IMS_BOOL bHasRequireHeader =
-            MessageUtil::HasValue(piMessage, MessageUtil::STR_PRECONDITION, ISipHeader::REQUIRE);
-
-    if ((!bCheckeSdp || SdpPreconditionHelper::IsPreconditionIncludedInSdp(piSession)) &&
-            (bHasSupportedHeader || bHasRequireHeader))
-    {
-        bRemoteCapability = IMS_TRUE;
-    }
-
-    IMS_TRACE_D("UpdateSupportingPrecondition : Precondition Capability on remote UE[%s]",
-            _TRACE_B_(bRemoteCapability), 0, 0);
-
-    m_objContext.GetPreconditionManager().UpdateSupportingPrecondition(
-            piSession, bRemoteCapability);
 }
 
 PROTECTED

@@ -98,31 +98,20 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
 {
     IMS_TRACE_D("QosReserved : MediaType[%d]", eMediaType, 0, 0);
 
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (!objPreconditionManager.IsPreconditionSupported(piSession))
-    {
-        IMS_TRACE_D("QosReserved Precondition mechanism is not supported", 0, 0, 0);
-        return GetStateName();
-    }
-
-    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS, IMS_TRUE))
-    {
-        IMS_TRACE_D("QosReserved : Resource isn't reserved.", 0, 0, 0);
-        return GetStateName();
-    }
-
     IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
     if (piMessage == IMS_NULL || piMessage->GetStatusCode() != SipStatusCode::SC_200)
     {
-        IMS_TRACE_D("QosReserved : There's no PRACK or response to PRACK.", 0, 0, 0);
         return GetStateName();
     }
 
-    if (piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) != IMS_NULL &&
-            SdpPreconditionHelper::IsLocalResourceReservedInSdp(
-                    piSession, IMessage::SESSION_EARLY_UPDATE))
+    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    if (!objPreconditionManager.IsEarlyUpdateRequired(piSession))
     {
-        IMS_TRACE_D("QosReserved : UE already send early UPDATE with activated QoS.", 0, 0, 0);
+        return GetStateName();
+    }
+
+    if (!objPreconditionManager.IsAvailableToSendEarlyUpdate(piSession))
+    {
         return GetStateName();
     }
 
@@ -187,8 +176,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
         return CallStateName::TERMINATING;
     }
 
-    UpdateSupportingPrecondition(piSession, piMessage);
-    m_objContext.GetPreconditionManager().SetRemoteResourceAvailable(piSession);
+    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     if (pSession->SendAck() == IMS_FAILURE)
     {
@@ -202,7 +190,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
     RunMedia(piSession, piMessage);
     OnStarted(piSession);
-    m_objContext.GetPreconditionManager().CheckLocalResourceAvailableOnCallEstablished(piSession);
+    m_objContext.GetPreconditionManager().OnCallEstablished(piSession);
+
     return CallStateName::ESTABLISHED;
 }
 
@@ -304,7 +293,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
         return GetStateName();
     }
 
-    UpdateSupportingPrecondition(piSession, piMessage);  // TODO: not in AlertingState?
+    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     if (pSession->RespondToEarlyUpdate(SipStatusCode::SC_200) == IMS_FAILURE)
     {
@@ -355,25 +344,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
     pSession->HandleResponse(ResponseType::PRACK_RESPONSE, *piMessage);
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-
-    if (!objPreconditionManager.IsPreconditionSupported(piSession))
+    if (!objPreconditionManager.IsEarlyUpdateRequired(piSession))
     {
         return GetStateName();
     }
 
-    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS, IMS_TRUE))
-    {
-        return GetStateName();
-    }
-
-    if (piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) &&
-            SdpPreconditionHelper::IsLocalResourceReservedInSdp(
-                    piSession, IMessage::SESSION_EARLY_UPDATE))
-    {
-        return GetStateName();
-    }
-
-    if (SdpPreconditionHelper::IsLocalResourceReservedInSdp(piSession, IMessage::SESSION_START))
+    if (!objPreconditionManager.IsAvailableToSendEarlyUpdate(piSession))
     {
         return GetStateName();
     }
@@ -489,10 +465,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         return CallStateName::TERMINATING;
     }
 
-    if (nStatusCode == SipStatusCode::SC_180 /* && local precondition support? */)
-    {
-        m_objContext.GetPreconditionManager().SetRemoteResourceAvailable(piSession);
-    }
+    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     RunMedia(piSession, piMessage);
     // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
@@ -562,13 +535,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         return CallStateName::TERMINATING;
     }
 
-    UpdateSupportingPrecondition(piSession, piMessage);
-
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    if (nStatusCode == SipStatusCode::SC_180)
-    {
-        objPreconditionManager.SetRemoteResourceAvailable(piSession);
-    }
+    m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     if (pSession->SendPrack() == IMS_FAILURE)
     {
@@ -582,8 +549,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
             return CallStateName::TERMINATING;
         }
     }
-
-    objPreconditionManager.StartQosTimer(piSession);
 
     StartEpsFallbackWatchdogIfNeeded(*piMessage);
     RunMedia(piSession, piMessage);

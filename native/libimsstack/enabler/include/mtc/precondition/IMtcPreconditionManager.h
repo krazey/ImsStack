@@ -52,45 +52,11 @@ public:
     virtual void SetListener(IN IMtcPreconditionListener* pListener) = 0;
 
     /**
-     * @brief Start the timer related to QoS.
-     * @param piSession ISession instance to find QoS timer for the specific session.
-     * @param eType The type of QoS timer to start.
-     */
-    virtual void StartQosTimer(
-            IN ISession* piSession, IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) = 0;
-
-    /**
      * @brief Checks
      *
      * @return
      */
     virtual IMS_BOOL IsPreconditionSupportedInLocal() const = 0;
-
-    /**
-     * @brief Update the capability for precondition through the value of Supported and Required
-     *        header field from the received SIP message from the specific session.
-     * @param piSession ISession instance to manage the capability for the specific session.
-     * @param bRemoteSupported Flag to IMS_TRUE if there is precondition value from Supported or
-     *                    Required header field.
-     */
-    virtual void UpdateSupportingPrecondition(
-            IN ISession* piSession, IN IMS_BOOL bRemoteSupported) = 0;
-
-    /**
-     * @brief To check if there are capability to use precondition or not.
-     * @return If there is capability, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
-     */
-    virtual IMS_BOOL IsPreconditionSupported(IN ISession* piSession) const = 0;
-
-    /**
-     * @brief Get QoS status according to the specific ISession and check type - local, remote,
-     *        or all.
-     * @param piSession ISession instance to find QosStatus for the specific session.
-     * @param eType The type to check for the QosStatus in the side of local, remote, or all
-     * @return returns QosStatus in the given ISession.
-     */
-    virtual IMS_BOOL IsResourceReserved(IN ISession* piSession, IN QosCheckType eType,
-            IN IMS_BOOL bAtLeastOneReserved = IMS_FALSE) const = 0;
 
     /**
      * @brief Checks
@@ -103,20 +69,35 @@ public:
             IN ISession* piSession, IN IMS_UINT32 eMediaType) const = 0;
 
     /**
-     * @brief This method is to update precondition attributes from the QosData and the received
-     *        SDP. Also if there is additional media line in the SDP, it creates QosStatusRecord
-     *        for that. And it removes QosStatusRecord of unused media.
-     * @param piSession ISession instance to find the QosData and QosStatusTable.
+     * @brief Checks
+     *
+     * @return IMS_BOOL
      */
-    virtual void UpdateQosAttributesFromRemoteSdp(IN ISession* piSession) = 0;
+    virtual IMS_BOOL IsPreconditionRequiredToAlertUser() const = 0;
 
     /**
-     * @brief Enable the current status of the remote side. It should be called when the UE
-     *        receives 180 Ringing or 200 OK response to INVITE SIP request without received
-     *        precondition information in the past.
-     * @param piSession ISession instance to find the QosStatusTable.
+     * @brief Checks
+     *
+     * @param piSession
+     * @return IMS_BOOL
      */
-    virtual void SetRemoteResourceAvailable(IN ISession* piSession) = 0;
+    virtual IMS_BOOL IsAvailableToAlertUser(IN ISession* piSession) const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param piSession
+     * @return IMS_BOOL
+     */
+    virtual IMS_BOOL IsEarlyUpdateRequired(IN ISession* piSession) const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param piSession
+     * @return IMS_BOOL
+     */
+    virtual IMS_BOOL IsAvailableToSendEarlyUpdate(IN ISession* piSession) const = 0;
 
     /**
      * @brief To form the precondition attributes of SDP.
@@ -133,13 +114,34 @@ public:
     virtual void HandleQosOnIpcanChanged() = 0;
 
     /**
+     * @brief Updates
+     *
+     * @param piSession
+     * @param piMessage
+     */
+    virtual void OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage) = 0;
+
+    /**
+     * @brief Updates
+     *
+     * @param piSession
+     * @param piMessage
+     */
+    virtual void OnMessageReceived(IN ISession* piSession, IN IMessage* piMessage) = 0;
+
+    /**
      * @brief Checks
      *
      * @param piSession
-     * @param bCallModified
      */
-    virtual void CheckLocalResourceAvailableOnCallEstablished(
-            IN ISession* piSession, IN IMS_BOOL bCallModified = IMS_FALSE) = 0;
+    virtual void OnCallEstablished(IN ISession* piSession) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @param piSession
+     */
+    virtual void OnCallModified(IN ISession* piSession) = 0;
 };
 
 #endif

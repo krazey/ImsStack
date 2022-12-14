@@ -32,23 +32,22 @@ public:
     MOCK_METHOD(void, CreateQos, (IN ISession* piSession), (override));
     MOCK_METHOD(void, DestroyQos, (IN ISession* piSession), (override));
     MOCK_METHOD(void, SetListener, (IN IMtcPreconditionListener* pListener), (override));
-    MOCK_METHOD(void, StartQosTimer, (IN ISession* piSession, IN QosTimerType eType), (override));
     MOCK_METHOD(IMS_BOOL, IsPreconditionSupportedInLocal, (), (const, override));
-    MOCK_METHOD(void, UpdateSupportingPrecondition,
-            (IN ISession* piSession, IN IMS_BOOL bRemoteSupported), (override));
-    MOCK_METHOD(IMS_BOOL, IsPreconditionSupported, (IN ISession* piSession), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsResourceReserved,
-            (IN ISession* piSession, IN QosCheckType eType, IN IMS_BOOL bAtLeastOneReserved),
-            (const, override));
     MOCK_METHOD(IMS_BOOL, IsDedicatedBearerAllocated,
             (IN ISession* piSession, IN IMS_UINT32 eMediaType), (const, override));
-    MOCK_METHOD(void, UpdateQosAttributesFromRemoteSdp, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SetRemoteResourceAvailable, (IN ISession* piSession), (override));
+    MOCK_METHOD(IMS_BOOL, IsPreconditionRequiredToAlertUser, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsAvailableToAlertUser, (IN ISession* piSession), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEarlyUpdateRequired, (IN ISession* piSession), (const, override));
+    MOCK_METHOD(
+            IMS_BOOL, IsAvailableToSendEarlyUpdate, (IN ISession* piSession), (const, override));
     MOCK_METHOD(
             void, FormPreconditionSdp, (IN ISession* piSession, IN IMS_BOOL bFailure), (override));
     MOCK_METHOD(void, HandleQosOnIpcanChanged, (), (override));
-    MOCK_METHOD(void, CheckLocalResourceAvailableOnCallEstablished,
-            (IN ISession* piSession, IN IMS_BOOL bCallModified), (override));
+    MOCK_METHOD(void, OnSdpReceived, (IN ISession* piSession, IN IMessage* piMessage), (override));
+    MOCK_METHOD(
+            void, OnMessageReceived, (IN ISession* piSession, IN IMessage* piMessage), (override));
+    MOCK_METHOD(void, OnCallEstablished, (IN ISession* piSession), (override));
+    MOCK_METHOD(void, OnCallModified, (IN ISession* piSession), (override));
 };
 
 #endif

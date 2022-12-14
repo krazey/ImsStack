@@ -377,7 +377,7 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
 
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
-    m_objContext.GetPreconditionManager().UpdateQosAttributesFromRemoteSdp(piSession);
+    m_objContext.GetPreconditionManager().OnSdpReceived(piSession, piMessage);
 
     return IMS_SUCCESS;
 }
@@ -449,8 +449,7 @@ CallStateName UpdatingState::HandleModificationSucceeded()
 
         if (bModified)
         {
-            m_objContext.GetPreconditionManager().CheckLocalResourceAvailableOnCallEstablished(
-                    piSession, bModified);
+            m_objContext.GetPreconditionManager().OnCallModified(piSession);
         }
     }
 

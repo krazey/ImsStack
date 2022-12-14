@@ -56,19 +56,6 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* PS_QosCheckType(IN QosCheckType eCheckType)
-    {
-        switch (eCheckType)
-        {
-            case QosCheckType::LOCAL_STATUS:
-                return "local";
-            case QosCheckType::REMOTE_STATUS:
-                return "remote";
-            default:  // QosCheckType::ALL_STATUS
-                return "all";
-        }
-    }
-
     inline static const IMS_CHAR* PS_QosDir(IN IMS_SINT32 eDirTag)
     {
         switch (eDirTag)
@@ -137,14 +124,16 @@ public:
     {
         switch (eTimerType)
         {
-            case QosTimerType::WAIT_AVAILABLE:
-                return "wait available";
-            case QosTimerType::GUARD_INACTIVE:
-                return "guard inactive";
-            case QosTimerType::FORCE_AVAILABLE:
-                return "force available";
-            default:  // QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER:
+            case QosTimerType::WAIT_AUDIO_AVAILABLE:
+                return "wait audio available";
+            case QosTimerType::GUARD_AVAILABLE:
+                return "guard available";
+            case QosTimerType::GUARD_AFTER_LOST:
+                return "guard after lost";
+            case QosTimerType::WAIT_AVAILABLE_AFTER_HANDOVER:
                 return "wait available after handover";
+            default:  // QosTimerType::FORCE_AVAILABLE:
+                return "force available";
         }
     }
 };
@@ -155,10 +144,6 @@ public:
 
 #ifndef PS_QosAttribute
 #define PS_QosAttribute(A) QosStringDef::PS_QosAttribute(A)
-#endif
-
-#ifndef PS_QosCheckType
-#define PS_QosCheckType(A) QosStringDef::PS_QosCheckType(A)
 #endif
 
 #ifndef PS_QosDir

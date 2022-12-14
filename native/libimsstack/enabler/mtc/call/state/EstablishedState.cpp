@@ -507,8 +507,8 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 
     m_objContext.GetUpdatingInfo().GetAlertingInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();
-
-    m_objContext.GetPreconditionManager().UpdateQosAttributesFromRemoteSdp(&objSession);
+    m_objContext.GetPreconditionManager().OnSdpReceived(
+            &objSession, objSession.GetPreviousRequest(IMessage::SESSION_UPDATE));
 
     eStateName = CallStateName::UPDATING;
 

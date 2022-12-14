@@ -191,10 +191,6 @@ protected:
     void SendStarted();
     void SendIncomingUpdate(IN CallType eCallType);
 
-    // TODO: bCheckSdp to be TRUE for all cases??
-    void UpdateSupportingPrecondition(
-            IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp = IMS_TRUE);
-
     IMS_BOOL IsRprSupported() const;
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
