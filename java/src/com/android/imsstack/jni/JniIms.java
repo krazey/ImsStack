@@ -65,7 +65,7 @@ public class JniIms {
     private static native int nativeSendCommand(int cmd, int slotId, byte[] data);
 
     /* package */ JniIms() {
-        sCallback = new Callback();
+        initCallback();
     }
 
     /**
@@ -208,6 +208,10 @@ public class JniIms {
         }
 
         return OK;
+    }
+
+    private void initCallback() {
+        sCallback = new Callback();
     }
 
     /** Handles the data from native. */

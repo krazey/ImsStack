@@ -103,7 +103,7 @@ import java.util.Set;
  * Controls a test {@link Context} as would be provided by the Android framework to an
  * {@code Activity}, {@code Service} or other system-instantiated component.
  *
- * Contains Fake<Component> classes like FakeContext for components that require complex and
+ * Contains Fake&lt;Component&gt; classes like FakeContext for components that require complex and
  * reusable stubbing. Others can be mocked using Mockito functions in tests or constructor/public
  * methods of this class.
  */
@@ -745,6 +745,7 @@ public class ContextFixture implements TestFixture<Context> {
             doReturn(mPackageInfo).when(mPackageManager).getPackageInfo(nullable(String.class),
                     anyInt());
         } catch (NameNotFoundException e) {
+            Log.d(TAG, "NameNotFoundException: " + e);
         }
 
         doAnswer((Answer<Boolean>)

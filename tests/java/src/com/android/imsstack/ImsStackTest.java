@@ -169,6 +169,7 @@ public abstract class ImsStackTest {
                 try {
                     mLock.wait(MAX_INIT_WAIT_MS);
                 } catch (InterruptedException ie) {
+                    Log.d(TAG, "InterruptedException: " + ie);
                 }
 
                 if (!mReady) {
