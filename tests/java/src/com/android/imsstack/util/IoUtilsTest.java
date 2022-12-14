@@ -15,13 +15,8 @@
  */
 package com.android.imsstack.util;
 
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import org.junit.After;
@@ -36,36 +31,23 @@ import java.io.FileOutputStream;
 
 @RunWith(JUnit4.class)
 public class IoUtilsTest {
-    private static final String TEST_FILE = "test.txt";
-
-    @Mock Context mContext;
     @Mock FileOutputStream mFileOutputStream;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-
-        when(mContext.openFileOutput(anyString(), anyInt())).thenReturn(mFileOutputStream);
     }
 
     @After
     public void tearDown() throws Exception {
-        mContext = null;
+        mFileOutputStream = null;
     }
 
     @Test
     @SmallTest
     public void closeQuietly() throws Exception {
-        FileOutputStream fos = null;
-
-        IoUtils.closeQuietly(fos);
-
-        try {
-            fos = mContext.openFileOutput(TEST_FILE, Context.MODE_APPEND);
-            assertNotNull(fos);
-        } finally {
-            IoUtils.closeQuietly(fos);
-        }
+        IoUtils.closeQuietly(null);
+        IoUtils.closeQuietly(mFileOutputStream);
 
         verify(mFileOutputStream).close();
     }
