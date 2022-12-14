@@ -197,7 +197,7 @@
     <int name="imsuce.anonymous_fetch_method_int" value="2"/>
     <boolean name="imsuce.encode_publish_body_bool" value="false"/>
     <boolean name="imsuce.encode_subscribe_body_bool" value="false"/>
-    <boolean name="imsuce.support_options" value="false"/>
+    <boolean name="imsuce.support_options_bool" value="false"/>
     <boolean name="imsuce.use_sip_uri_for_presence_subscribe_bool" value="false"/>
     <boolean name="imsuce.use_expired_etag_bool" value="false"/>
     <boolean name="imsuce.use_contact_header_in_publish_bool" value="false"/>
