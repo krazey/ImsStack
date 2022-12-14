@@ -56,7 +56,7 @@ public class ThreadMessageExecutor extends Thread implements Executor {
         log(getName() + " is started; tid=" + Process.myTid());
 
         synchronized (this) {
-            mHandler = new MyHandler();
+            mHandler = new MyHandler(Looper.myLooper());
         }
 
         Looper.loop();
@@ -85,6 +85,10 @@ public class ThreadMessageExecutor extends Thread implements Executor {
     }
 
     private class MyHandler extends Handler {
+        MyHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (msg.obj instanceof Runnable) {

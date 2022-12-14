@@ -17,9 +17,7 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.content.Context;
 import android.location.Location;
-import android.location.LocationProvider;
 import android.location.LocationRequest;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -142,27 +140,29 @@ public class ImsLocationHelper {
     public void startLocationUpdates(long waitingTime) {
         mLocationUpdateStarted = true;
 
-        final LocationRequest requestGps = LocationRequest.create();
-        requestGps.setProvider(LocationApi.GPS_PROVIDER);
-        requestGps.setQuality(LocationRequest.POWER_HIGH);
-        requestGps.setInterval(500);
+        final LocationRequest requestGps = new LocationRequest.Builder(500)
+                .setMinUpdateIntervalMillis(500)
+                .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
+                .build();
 
         if (!mLocationApi.requestLocationUpdates(
+                LocationApi.GPS_PROVIDER,
                 requestGps,
                 mLocationListeners[0],
-                mHandler.getLooper())) {
+                mHandler::post)) {
             log("Location(gps) update request is failed");
         }
 
-        final LocationRequest requestNetwork = LocationRequest.create();
-        requestNetwork.setProvider(LocationApi.NETWORK_PROVIDER);
-        requestNetwork.setQuality(LocationRequest.ACCURACY_FINE);
-        requestNetwork.setInterval(500);
+        final LocationRequest requestNetwork = new LocationRequest.Builder(500)
+                .setMinUpdateIntervalMillis(500)
+                .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
+                .build();
 
         if (!mLocationApi.requestLocationUpdates(
+                LocationApi.NETWORK_PROVIDER,
                 requestNetwork,
                 mLocationListeners[1],
-                mHandler.getLooper()))
+                mHandler::post))
         {
             log("Location(network) update request is failed");
         }
@@ -366,23 +366,6 @@ public class ImsLocationHelper {
             mUpdateDone = true;
 
             checkAndNotifyLocationUpdatesCompleted();
-        }
-
-        @Override
-        public void onStatusChanged(
-                String provider, int status, Bundle extras) {
-            switch (status) {
-                case LocationProvider.OUT_OF_SERVICE:
-                case LocationProvider.TEMPORARILY_UNAVAILABLE: {
-                    log("onStatusChanged :: status=" + status);
-                    mValid = false;
-                    mUpdateDone = true;
-                    checkAndNotifyLocationUpdatesCompleted();
-                    break;
-                }
-                default:
-                    break;
-            }
         }
 
         @Override

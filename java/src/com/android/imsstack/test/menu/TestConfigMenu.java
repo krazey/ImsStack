@@ -32,6 +32,7 @@ import com.android.imsstack.util.LogUtils;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SystemUtils;
 
+@SuppressWarnings("deprecation")
 public class TestConfigMenu extends PreferenceActivity {
     // Main tree
     private static final String KEY_TEST_IMS_DISABLED = "test_ims_disabled";
@@ -70,7 +71,6 @@ public class TestConfigMenu extends PreferenceActivity {
     private ListPreference mRestartImsStack;
     private ListPreference mClearTestConfig;
 
-    @SuppressWarnings("deprecation")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         ImsLog.d("");

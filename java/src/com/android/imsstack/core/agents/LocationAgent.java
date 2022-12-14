@@ -23,8 +23,6 @@ import android.hardware.TriggerEventListener;
 import android.location.Address;
 import android.location.Location;
 import android.location.LocationRequest;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -169,10 +167,6 @@ public final class LocationAgent implements ILocationAgent {
                 notifyEventOnLocationFixedForInstantRequest();
             }
         }
-
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
-        public void onProviderEnabled(String provider) {}
-        public void onProviderDisabled(String provider) {}
 
         public void onServiceDisconnected() {
             ImsLog.d(mSlotId, "onServiceDisconnected");
@@ -488,26 +482,33 @@ public final class LocationAgent implements ILocationAgent {
         int searchTime = 0;
 
         if (isFusedProviderEnabled && mPolicy.hasPolicy(LocationPolicy.POLICY_USE_FLP)) {
-            LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setInterval(0);
-            locationRequest.setFastestInterval(0);
-            locationRequest.setProvider(LocationApi.FUSED_PROVIDER);
-            locationRequest.setQuality(LocationRequest.ACCURACY_FINE);
-            locationRequest.setLocationSettingsIgnored(true);
-
-            mLocationApi.requestLocationUpdates(locationRequest, mLocationListener, null);
+            final LocationRequest request = new LocationRequest.Builder(0)
+                    .setMinUpdateIntervalMillis(0)
+                    .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
+                    .setLocationSettingsIgnored(true)
+                    .build();
+            mLocationApi.requestLocationUpdates(LocationApi.FUSED_PROVIDER,
+                    request, mLocationListener, mLocationInfoHandler::post);
 
             searchTime = mPolicy.getSearchDurationForFlp();
         } else {
             if (isGpsProviderEnabled) {
-                mLocationApi.requestLocationUpdates(
-                        LocationApi.GPS_PROVIDER, mLocationListener);
+                final LocationRequest request = new LocationRequest.Builder(0)
+                        .setMinUpdateIntervalMillis(0)
+                        .setQuality(LocationRequest.QUALITY_HIGH_ACCURACY)
+                        .build();
+                mLocationApi.requestLocationUpdates(LocationApi.GPS_PROVIDER,
+                        request, mLocationListener, mLocationInfoHandler::post);
                 mGpsLocationRequested = true;
             }
 
             if (isNetworkProviderEnabled) {
-                mLocationApi.requestLocationUpdates(
-                        LocationApi.NETWORK_PROVIDER, mLocationListener);
+                final LocationRequest request = new LocationRequest.Builder(0)
+                        .setMinUpdateIntervalMillis(0)
+                        .setQuality(LocationRequest.QUALITY_BALANCED_POWER_ACCURACY)
+                        .build();
+                mLocationApi.requestLocationUpdates(LocationApi.NETWORK_PROVIDER,
+                        request, mLocationListener, mLocationInfoHandler::post);
             }
 
             searchTime = Math.max(
@@ -591,21 +592,15 @@ public final class LocationAgent implements ILocationAgent {
         } else if (LocationApi.isLocationFromNetwork(location)) {
             method = "Cell";
 
-            ConnectivityManager cm = mContext.getSystemService(
-                    ConnectivityManager.class);
+            IWifiState wifiState = (IWifiState) AgentFactory.getAgent(AgentFactory.WIFI_STATE);
 
-            /* ImsStack-Build_ConnectivityManager#TYPE_ */
-            NetworkInfo wifiInfo = null;/*(cm != null) ?
-                    cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI) : null;*/
-
-            if (wifiInfo != null) {
+            if (wifiState != null) {
                 IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
                         DcFactory.NETWORK_WATCHER, mSlotId);
 
                 if ((dcnw != null)
                         && (dcnw.getDataServiceState() != ServiceState.STATE_IN_SERVICE)
-                        && wifiInfo.isAvailable()
-                        && (wifiInfo.getDetailedState() == NetworkInfo.DetailedState.CONNECTED)) {
+                        && wifiState.isWifiConnected()) {
                     method = "802.11";
                 }
             }
@@ -689,7 +684,7 @@ public final class LocationAgent implements ILocationAgent {
             locationInfo[9] = address.getLocality();
             locationInfo[10] = address.getPostalCode();
 
-            if (!location.isFromMockProvider()) {
+            if (!location.isMock()) {
                 setLastKnownCountryCode(address.getCountryCode());
             }
         }
@@ -1141,7 +1136,7 @@ public final class LocationAgent implements ILocationAgent {
     private void updateGpsLocation(Location location) {
         synchronized (mLock) {
             if (!mPolicy.hasPolicy(LocationPolicy.POLICY_ALLOW_MOCK_LOCATION_UPDATE)) {
-                if ((location != null) && location.isFromMockProvider()) {
+                if ((location != null) && location.isMock()) {
                     return;
                 }
             }
@@ -1161,7 +1156,7 @@ public final class LocationAgent implements ILocationAgent {
     private void updateNetworkLocation(Location location) {
         synchronized (mLock) {
             if (!mPolicy.hasPolicy(LocationPolicy.POLICY_ALLOW_MOCK_LOCATION_UPDATE)) {
-                if ((location != null) && location.isFromMockProvider()) {
+                if ((location != null) && location.isMock()) {
                     return;
                 }
             }
@@ -1181,7 +1176,7 @@ public final class LocationAgent implements ILocationAgent {
     private void updateFusedLocation(Location location) {
         synchronized (mLock) {
             if (!mPolicy.hasPolicy(LocationPolicy.POLICY_ALLOW_MOCK_LOCATION_UPDATE)) {
-                if ((location != null) && location.isFromMockProvider()) {
+                if ((location != null) && location.isMock()) {
                     return;
                 }
             }
@@ -1203,7 +1198,7 @@ public final class LocationAgent implements ILocationAgent {
             return;
         }
 
-        if (location.isFromMockProvider()) {
+        if (location.isMock()) {
             // Do not update MOCK location.
             return;
         }
@@ -1394,7 +1389,7 @@ public final class LocationAgent implements ILocationAgent {
                 ImsLog.d(mSlotId, LocationAgent.displayLocationDetails(location, address, null));
             }
 
-            if (!location.isFromMockProvider()) {
+            if (!location.isMock()) {
                 setLastKnownCountryCode(address.getCountryCode());
 
                 if (mPolicy.hasPolicy(LocationPolicy.POLICY_USE_CACHED_ADDRESS)) {

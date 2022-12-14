@@ -17,6 +17,7 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 
@@ -46,7 +47,7 @@ public class WakeLockAgent implements IWakeLock {
 
     @Override
     public void init(Context context) {
-        mHandler = new WakeLockHandler();
+        mHandler = new WakeLockHandler(Looper.myLooper());
         SystemInterface.getInstance().setWakeLock(mSystemAPI);
     }
 
@@ -146,6 +147,10 @@ public class WakeLockAgent implements IWakeLock {
     }
 
     private class WakeLockHandler extends Handler {
+        WakeLockHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {

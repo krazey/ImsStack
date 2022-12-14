@@ -33,11 +33,11 @@ import com.android.imsstack.util.MSimUtils;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("deprecation")
 public class ImsConfigMenu extends PreferenceActivity {
     private int mSlotId = -1;
     private ArrayList<String> mSimList;
 
-    @SuppressWarnings("deprecation")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         ImsLog.d("");

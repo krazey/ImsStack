@@ -16,6 +16,7 @@
 
 package com.android.imsstack.core.agents;
 
+import android.annotation.NonNull;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -29,6 +30,9 @@ import android.telephony.data.NrQosSessionAttributes;
 import android.util.Pair;
 import android.util.SparseArray;
 
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.EApnType;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
@@ -36,6 +40,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -338,9 +343,9 @@ public class QosAgent {
             return null;
         }
 
-        Network[] networks = cm.getAllNetworks();
+        List<Network> networks = getAllNetworks(mSlotId);
 
-        if (networks == null) {
+        if (networks.isEmpty()) {
             ImsLog.w(mSlotId, "No networks");
             return null;
         }
@@ -419,5 +424,26 @@ public class QosAgent {
         }
 
         return null;
+    }
+
+    private static @NonNull List<Network> getAllNetworks(int slotId) {
+        List<Network> allNetworks = new ArrayList<>();
+        IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, slotId);
+
+        if (dcApn == null) {
+            return allNetworks;
+        }
+
+        Network network = dcApn.getNetworkByCapability(EApnType.IMS.getType());
+        if (network != null) {
+            allNetworks.add(network);
+        }
+
+        network = dcApn.getNetworkByCapability(EApnType.EMERGENCY.getType());
+        if (network != null) {
+            allNetworks.add(network);
+        }
+
+        return allNetworks;
     }
 }

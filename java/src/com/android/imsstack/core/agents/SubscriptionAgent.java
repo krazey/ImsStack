@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
@@ -64,7 +65,7 @@ public final class SubscriptionAgent implements ISubscription {
 
     private static SubscriptionAgent sSubsAgent = new SubscriptionAgent();
     private Context mContext;
-    private final SubscriptionHandler mHandler = new SubscriptionHandler();
+    private final SubscriptionHandler mHandler = new SubscriptionHandler(Looper.myLooper());
     private final SubscriptionReceiver mReceiver = new SubscriptionReceiver();
     private final SimState mSimState = new SimState();
     private final Set<SubscriptionListener> mSubscriptionListeners
@@ -713,6 +714,10 @@ public final class SubscriptionAgent implements ISubscription {
     }
 
     private final class SubscriptionHandler extends Handler {
+        SubscriptionHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             ImsLog.i(mSlotId, "SubscriptionHandler :: msg=" + msg.what);

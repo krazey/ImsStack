@@ -22,8 +22,8 @@ import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.ims.ImsMmTelManager;
 
-import com.android.ims.ImsConfig;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -40,20 +40,10 @@ public final class SettingsUtils {
     /** Redefines the Wi-Fi calling mode. */
     public static class WfcMode {
         public static final int NONE = (-1);
-        public static final int WIFI_ONLY =
-                ImsConfig.WfcModeFeatureValueConstants.WIFI_ONLY;
-        public static final int CELLULAR_PREFERRED =
-                ImsConfig.WfcModeFeatureValueConstants.CELLULAR_PREFERRED;
-        public static final int WIFI_PREFERRED =
-                ImsConfig.WfcModeFeatureValueConstants.WIFI_PREFERRED;
-        public static final int IMS_PREFERRED =
-                3; // ImsConfig.WfcModeFeatureValueConstants.IMS_PREFERRED;
-    }
-
-    /** Returns the current setting of location mode. */
-    public static int getLocationMode(ContentResolver cr) {
-        return Settings.Secure.getInt(cr, Settings.Secure.LOCATION_MODE,
-                Settings.Secure.LOCATION_MODE_OFF);
+        public static final int WIFI_ONLY = ImsMmTelManager.WIFI_MODE_WIFI_ONLY;
+        public static final int CELLULAR_PREFERRED = ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED;
+        public static final int WIFI_PREFERRED = ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+        public static final int IMS_PREFERRED = 3;
     }
 
     /** Returns the TTY mode. */
@@ -107,11 +97,6 @@ public final class SettingsUtils {
     /** Checks whether the mobile data setting is enabled or not. */
     public static boolean isMobileDataEnabled(ContentResolver cr) {
         return Settings.Global.getInt(cr, Settings.Global.MOBILE_DATA, 0) == 1;
-    }
-
-    /** Sets the given location mode. */
-    public static boolean putLocationMode(ContentResolver cr, int mode) {
-        return Settings.Secure.putInt(cr, Settings.Secure.LOCATION_MODE, mode);
     }
 
     /** Returns a default Wi-Fi calling enabled. */

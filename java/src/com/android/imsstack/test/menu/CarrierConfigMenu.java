@@ -21,7 +21,6 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsManager;
 import android.telephony.ims.ProvisioningManager;
 import android.util.ArraySet;
@@ -51,6 +50,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Set;
 
+@SuppressWarnings("deprecation")
 public class CarrierConfigMenu extends PreferenceActivity {
     private static final String PUBLIC_CARRIER_CONFIG_FILE =
             "carrier_config/aosp_carrier_config.xml";
@@ -120,7 +120,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private ListPreference mVoLteProvisioning;
     private boolean mConfigChanged = false;
 
-    @SuppressWarnings("deprecation")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         ImsLog.d("");
@@ -312,8 +311,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
                         ConfigInterface.class, mSlotId);
                 CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
 
-                if (cc != null && cc.getBoolean(
-                        CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL)) {
+                if (cc != null && cc.isVoLteProvisioningRequired()) {
                     ImsLog.d(mSlotId, "VoLte-Provisioning-Required: subId="
                             + subId + ", status=" + provisioningStatus);
 

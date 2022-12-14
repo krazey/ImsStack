@@ -26,19 +26,24 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
 
 import com.android.imsstack.system.ISystemAPIWifi;
 import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * A class for tracking the state of Wi-Fi connection.
+ */
+@SuppressWarnings("deprecation")
 public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
-    // Constants--------------------------------------------------
     // Internal Event
     private static final int EVENT_NETWORK_STATE_CHAGED_ACTION = 1001;
     private static final int EVENT_WIFI_STATE_CHANGED_ACTION = 1002;
@@ -69,10 +74,9 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
             Map.entry(NetworkInfo.DetailedState.CAPTIVE_PORTAL_CHECK, 12));
 
     private static IWifiState sWifiStateAgent;
-    private Context mContext;
 
-    private WifiStateReceiverListener mReceiverListener;
-    private Handler mWifiStateHandler;
+    private WifiStateReceiver mWifiStateReceiver;
+    private WifiStateHandler mWifiStateHandler;
 
     private RegistrantList mWifiStateRegistrants = new RegistrantList();
 
@@ -82,10 +86,8 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
     private boolean mWifiSupported = false;
     private boolean mIsWifiConnected = false;
 
-    // Static loading materials ----------------------------------
-    // Public methods --------------------------------------------
     public WifiStateAgent() {
-   }
+    }
 
     public static IWifiState getInstance() {
         if (sWifiStateAgent == null) {
@@ -95,23 +97,16 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
         return sWifiStateAgent;
     }
 
-    // Interface implementation methods --------------------------
     @Override
     public void init(Context context) {
-        if (context == null) {
-            return;
-        }
-
-        mContext = context;
-
         SystemInterface.getInstance().setISystemAPIWifi(this);
 
         if (isWifiConnectionRequired()) {
-            mReceiverListener = new WifiStateReceiverListener();
-            mContext.registerReceiver(mReceiverListener,
-                    mReceiverListener.getFilter(), Context.RECEIVER_EXPORTED);
+            mWifiStateReceiver = new WifiStateReceiver();
+            AppContext.getInstance().registerReceiver(mWifiStateReceiver,
+                    mWifiStateReceiver.getFilter(), Context.RECEIVER_EXPORTED);
 
-            mWifiStateHandler = new WifiStateHandler();
+            mWifiStateHandler = new WifiStateHandler(Looper.myLooper());
         }
     }
 
@@ -125,9 +120,9 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
                 mWifiStateHandler = null;
             }
 
-            if (mReceiverListener != null && mContext != null) {
-                mContext.unregisterReceiver(mReceiverListener);
-                mReceiverListener = null;
+            if (mWifiStateReceiver != null) {
+                AppContext.getInstance().unregisterReceiver(mWifiStateReceiver);
+                mWifiStateReceiver = null;
             }
         }
 
@@ -223,14 +218,7 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
 
     @Override
     public int getWifiIfaceId4Sys() {
-        WifiManager wm = getWifiManager();
-
-        if (wm == null ) {
-            ImsLog.w("WifiManager is null");
-            return -1;
-        }
-
-        Network network = wm.getCurrentNetwork();
+        Network network = getCurrentNetwork();
 
         if (network == null) {
             ImsLog.w("Network is null");
@@ -242,13 +230,15 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
 
     @Override
     public int getWifiMtu4Sys() {
-        LinkProperties lp = getLinkProperties();
-
-        if (lp != null) {
-            return lp.getMtu();
+        Network network = getCurrentNetwork();
+        if (network == null) {
+            return 0;
         }
 
-        return 0;
+        ConnectivityManager cm =
+                AppContext.getInstance().getSystemService(ConnectivityManager.class);
+        LinkProperties lp = (cm != null) ? cm.getLinkProperties(network) : null;
+        return (lp != null) ? lp.getMtu() : 0;
     }
 
     @Override
@@ -260,30 +250,13 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
         }
     }
 
-    // Private/Protected methods ---------------------------------
-    private LinkProperties getLinkProperties() {
-        if (mContext == null) {
-            return null;
-        }
-
-        ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return null;
-        }
-
-        /* ImsStack-Build_ConnectivityManager#TYPE_
-        return cm.getLinkProperties(ConnectivityManager.TYPE_WIFI);
-        */
-        return null;
+    private Network getCurrentNetwork() {
+        WifiManager wm = getWifiManager();
+        return (wm != null) ? wm.getCurrentNetwork() : null;
     }
 
     private WifiManager getWifiManager() {
-        if (mContext == null) {
-            return null;
-        }
-
-        return mContext.getSystemService(WifiManager.class);
+        return AppContext.getInstance().getSystemService(WifiManager.class);
     }
 
     private WifiInfo getWifiInfo() {
@@ -442,11 +415,8 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
     }
 
     private void updateWifiState() {
-        if (mContext == null) {
-            return;
-        }
-
-        ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
+        ConnectivityManager cm =
+                AppContext.getInstance().getSystemService(ConnectivityManager.class);
 
         if (cm == null) {
             return;
@@ -471,11 +441,10 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
         }
     }
 
-    // -----------------------------------------------------------
-    private class WifiStateReceiverListener extends BroadcastReceiver {
+    private class WifiStateReceiver extends BroadcastReceiver {
         IntentFilter mIntentFilter = new IntentFilter();
 
-        public WifiStateReceiverListener() {
+        WifiStateReceiver() {
             mIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
             mIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
             mIntentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -529,6 +498,10 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
     }
     // -----------------------------------------------------------
     private class WifiStateHandler extends Handler {
+        WifiStateHandler(Looper looper) {
+            super(looper);
+        }
+
         public void handleMessage(Message msg) {
             if (msg == null) {
                 return;
