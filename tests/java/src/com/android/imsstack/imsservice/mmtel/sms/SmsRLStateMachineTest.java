@@ -123,13 +123,15 @@ public class SmsRLStateMachineTest {
 
     @Test
     public void onRpDatafromTL_timerTR2() {
+        mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
         Assert.assertNotNull(mHandler);
         Assert.assertNotNull(mSmsRLStateMachine.mTR2TimerHandler);
-        mSmsRLStateMachine.setState(WAIT_TO_SEND_RPACK_TO_NW);
         mHandler.post(()->mSmsRLStateMachine.mTR2TimerHandler.run());
+        verify(mListener, Mockito.timeout(100).times(0)).notifyRLReportIndication(mToken,
+                mSmsRLStateMachine.mTpMr, ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
         SmsRLStateMachine.SmsRLState state = mSmsRLStateMachine.getState();
         assertEquals(IDLE, state);
-        //TODO: Send an RP-Error back to network need to be implemented
     }
 
     @Test
@@ -139,8 +141,8 @@ public class SmsRLStateMachineTest {
         Assert.assertNotNull(mSmsRLStateMachine.mTR1TimerHandler);
 
         mHandler.post(()->mSmsRLStateMachine.mTR1TimerHandler.run());
-        verify(mListener, times(1)).notifyRLReportIndication(mToken,
-                0, ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+        verify(mListener, Mockito.timeout(100).times(1)).notifyRLReportIndication(mToken,
+                mSmsRLStateMachine.mTpMr, ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
                 SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
         assertEquals(IDLE, mSmsRLStateMachine.getState());
     }
