@@ -118,9 +118,9 @@ public class ImsCamera {
         try {
             return cm.getCameraCharacteristics(cameraId);
         } catch (CameraAccessException e) {
-            e.printStackTrace();
+            loge("getCameraCharacteristics: " + e);
         } catch (Exception e) {
-            e.printStackTrace();
+            loge("getCameraCharacteristics: " + e);
         }
 
         return null;

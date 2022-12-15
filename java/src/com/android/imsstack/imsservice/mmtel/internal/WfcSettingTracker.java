@@ -20,8 +20,8 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.telephony.SubscriptionManager;
+import android.telephony.ims.ImsMmTelManager;
 
-import com.android.ims.ImsConfig;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.enabler.IBaseContext;
@@ -30,14 +30,9 @@ import com.android.imsstack.util.ImsLog;
 public class WfcSettingTracker {
     /** 0 : Wi-Fi only, 1 : Cellular preferred, 2 : Wi-Fi preferred */
     public static final int MODE_NONE = (-1);
-    public static final int MODE_WIFI_ONLY
-            = ImsConfig.WfcModeFeatureValueConstants.WIFI_ONLY;
-    public static final int MODE_CELLULAR_PREFERRED
-            = ImsConfig.WfcModeFeatureValueConstants.CELLULAR_PREFERRED;
-    public static final int MODE_WIFI_PREFERRED
-            = ImsConfig.WfcModeFeatureValueConstants.WIFI_PREFERRED;
-    public static final int MODE_IMS_PREFERRED
-            = 3; // ImsConfig.WfcModeFeatureValueConstants.IMS_PREFERRED;
+    public static final int MODE_WIFI_ONLY = ImsMmTelManager.WIFI_MODE_WIFI_ONLY;
+    public static final int MODE_CELLULAR_PREFERRED = ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED;
+    public static final int MODE_WIFI_PREFERRED = ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
 
     private final IBaseContext mContext;
     private SettingObserver mSettingObserver;
@@ -104,8 +99,7 @@ public class WfcSettingTracker {
             return mWfcSettingOn
                     && ((mWfcMode == MODE_WIFI_ONLY)
                         || (mWfcMode == MODE_WIFI_PREFERRED)
-                        || (mWfcMode == MODE_CELLULAR_PREFERRED)
-                        || (mWfcMode == MODE_IMS_PREFERRED));
+                        || (mWfcMode == MODE_CELLULAR_PREFERRED));
         }
 
         return isWfcEnabled();
