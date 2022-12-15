@@ -63,9 +63,12 @@ public class HttpTransaction {
 
     /** @hide */
     @IntDef(prefix = {"REQUEST_"}, value = {
+            REQUEST_HTTP,
             REQUEST_HTTPS,
             REQUEST_NON_CELLULAR,
             REQUEST_GBA,
+            REQUEST_EAP_AKA,
+            REQUEST_AUTHENTICATION,
             REQUEST_DONE,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -79,14 +82,18 @@ public class HttpTransaction {
     public static final int REQUEST_HTTP = 2;
     // send HTTPS request
     public static final int REQUEST_HTTPS = 3;
-    // send non-cellular HTTP request using OTP ACS Auth
+    // send non-cellular HTTP request using OTP authentication
     public static final int REQUEST_NON_CELLULAR = 4;
     // send GBA request.
     public static final int REQUEST_GBA = 5;
+    // send EAP_AKA request.
+    public static final int REQUEST_EAP_AKA = 6;
+    // send HTTPS request using authentication
+    public static final int REQUEST_AUTHENTICATION = 7;
     // ACS is done.
-    public static final int REQUEST_DONE = 6;
+    public static final int REQUEST_DONE = 8;
     // maximum msg
-    public static final int MSG_MAX = 7;
+    public static final int MSG_MAX = 9;
 
     /**
      * Callback interface for receiving result from the AC HTTP request.
@@ -137,7 +144,10 @@ public class HttpTransaction {
                     put(REQUEST_START, mMsgFuncRequestStart);
                     put(REQUEST_HTTP, mMsgFuncRequestHttp);
                     put(REQUEST_HTTPS, mMsgFuncRequestHttps);
-                    put(REQUEST_GBA, mMsgFuncRequestGba);
+                    put(REQUEST_NON_CELLULAR, mMsgFuncRequestNonCellular);
+                    put(REQUEST_GBA, mMsgFuncRequestAuthentication);
+                    put(REQUEST_EAP_AKA, mMsgFuncRequestAuthentication);
+                    put(REQUEST_AUTHENTICATION, mMsgFuncRequestAuthentication);
                     put(REQUEST_DONE, mMsgFuncRequestDone);
                 }
             };
@@ -152,10 +162,10 @@ public class HttpTransaction {
         }
     };
 
-    private final MessageFunction mMsgFuncRequestGba = new MessageFunction() {
+    private final MessageFunction mMsgFuncRequestAuthentication = new MessageFunction() {
         @Override
         public int handleMessage(Message msg) {
-            // TODO: update for GBA
+            // TODO: update for GBA and EAP_AKA
             mUrl = mRequestInfo.getHttpsUrl();
 
             // TODO : change apn type
@@ -167,10 +177,16 @@ public class HttpTransaction {
 
             setConnectionProperties();
             setAuthorizationHeader();
-//            HttpResponse httpResponse = new HttpResponse(mSlotId, mHttpURLConnection);
+            HttpResponse httpResponse = new HttpResponse(mSlotId, mHttpURLConnection);
             if (!connect()) {
                 ImsLog.e(mSlotId, "HTTP connection is failed");
+                httpResponse.setResponseCode(RESULT_TYPE_HTTP_UNREACHABLE);
             }
+
+            // handle response
+            HttpResponseForAuthentication httpResponseForAuthentication =
+                    new HttpResponseForAuthentication(mHandler, mSlotId);
+            httpResponseForAuthentication.handle(httpResponse);
             return 0;
         }
     };
@@ -190,6 +206,7 @@ public class HttpTransaction {
             HttpResponse httpResponse = new HttpResponse(mSlotId, mHttpURLConnection);
             if (!connect()) {
                 ImsLog.e(mSlotId, "HTTP connection is failed");
+                httpResponse.setResponseCode(RESULT_TYPE_HTTP_UNREACHABLE);
             }
 
             // handle response
@@ -216,12 +233,41 @@ public class HttpTransaction {
             HttpResponse httpResponse = new HttpResponse(mSlotId, mHttpURLConnection);
             if (!connect()) {
                 ImsLog.e(mSlotId, "HTTP connection is failed");
+                httpResponse.setResponseCode(RESULT_TYPE_HTTP_UNREACHABLE);
             }
 
             // handle response
             HttpResponseForCellular httpResponseForCellular = new HttpResponseForCellular(mHandler,
                     mSlotId);
             httpResponseForCellular.handle(httpResponse);
+
+            return 0;
+        }
+    };
+
+    private final MessageFunction mMsgFuncRequestNonCellular = new MessageFunction() {
+        @Override
+        public int handleMessage(Message msg) {
+            mUrl = mRequestInfo.getHttpsUrl();
+            // TODO : change apn type
+            String ACSApnType = "mobile_internet";
+            if (!getURLConnection(ACSApnType) || mHttpURLConnection == null) {
+                ImsLog.e(mSlotId, "open UrlConnection is failed");
+                return 0;
+            }
+
+            // TODO : consider TLS?
+            setConnectionProperties();
+            HttpResponse httpResponse = new HttpResponse(mSlotId, mHttpURLConnection);
+            if (!connect()) {
+                ImsLog.e(mSlotId, "HTTP connection is failed");
+                httpResponse.setResponseCode(RESULT_TYPE_HTTP_UNREACHABLE);
+            }
+
+            // handle response
+            HttpResponseForNonCellular httpResponseNonCellular = new HttpResponseForNonCellular(
+                    mHandler, mSlotId);
+            httpResponseNonCellular.handle(httpResponse);
 
             return 0;
         }
@@ -346,7 +392,7 @@ public class HttpTransaction {
 
     private int getEApnType(String acsApnType) {
         IWifiState ws = (IWifiState) AgentFactory.getAgent(AgentFactory.WIFI_STATE, mSlotId);
-        boolean wifiConnected = (ws != null && (!ws.isWifiConnected()) ? true : false);
+        boolean wifiConnected = (ws != null && (!ws.isWifiConnected()));
 
         int netType = -1;
         if (TextUtils.isEmpty(acsApnType)) {

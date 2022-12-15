@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.acs.impl;
 
+import android.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.android.imsstack.util.ImsLog;
@@ -36,62 +37,6 @@ public class HttpResponse {
      * Defines the response to be processed for ACS operation
      */
 
-//    public enum HttpResponseType {
-//        CODE_UNDEFINED(0, "UnDefined"),
-//        CODE_INTERNAL_ERROR(1, "Internal Error"),
-//        CODE_UNREACHABLE_ERROR(2, "Unreachable Error"),
-//        CODE_200_OK(200, "OK"),
-//        CODE_401_UNAUTHORIZED(401, "Unauthorized"),
-//        CODE_403_FORBIDDEN(403, "Forbidden"),
-//        CODE_409_CONFLICT(403, "Conflict"),
-//        CODE_500_INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
-//        CODE_503_RETRY_AFTER(503, "Retry after"),
-//        CODE_511_NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required");
-//
-//        private int mResponseCode;
-//        private String mReasonPhrase;
-//
-//        HttpResponseType(int responseCode, String reasonPhrase) {
-//            mResponseCode = responseCode;
-//            mReasonPhrase = reasonPhrase;
-//        }
-//
-//        /**
-//         * Change the defined response code to handle the Http response code for ACS
-//         *
-//         * @param slotId SIM slot ID
-//         * @param responseCode the HTTP response code
-//         * @return the defined HTTP response code
-//         */
-//        public static HttpResponseType getEnum(int slotId, int responseCode) {
-//            for (HttpResponseType response : HttpResponseType.values()) {
-//                if (response.getResponseCode() == responseCode) {
-//                    return response;
-//                }
-//            }
-//            ImsLog.d(slotId, "UnDefined " + responseCode);
-//            return CODE_UNDEFINED;
-//        }
-//
-//        /**
-//         * Gets the response code from an HTTP response message.
-//         *
-//         * @return the HTTP response code
-//         */
-//        public int getResponseCode() {
-//            return mResponseCode;
-//        }
-//
-//        /**
-//         * Gets the reason phrase from an HTTP response message.
-//         *
-//         * @return the HTTP reason phrase
-//         */
-//        public String getReasonPhrase() {
-//            return mReasonPhrase;
-//        }
-//    }
-
     private final int mSlotId;
     private final HttpURLConnection mHttpURLConnection;
 
@@ -110,18 +55,22 @@ public class HttpResponse {
     }
 
     /**
+     * Sets the response code instead of receiving an HTTP response
+     *
+     * @param responseCode HTTP response code
+     */
+    public void setResponseCode(int responseCode) {
+        mResponse = responseCode;
+    }
+
+    /**
      * Gets the response code from an HTTP response message.
      *
      * @return the HTTP response code
      */
     public int getResponseCode() {
-//        // need to check
-//        if (mResponse != HttpResponseType.CODE_UNDEFINED.getResponseCode()) {
-//            return mResponse;
-//        }
-
         mResponse = HttpTransaction.RESULT_TYPE_INTERNAL_ERROR;
-        //HttpResponseType.CODE_INTERNAL_ERROR.getResponseCode();
+
         if (mHttpURLConnection != null) {
             try {
                 mResponse = mHttpURLConnection.getResponseCode();
@@ -131,7 +80,6 @@ public class HttpResponse {
         }
 
         ImsLog.i(mSlotId, "Response " + mResponse);
-
         return mResponse;
     }
 
@@ -195,6 +143,7 @@ public class HttpResponse {
             StringBuilder sb = new StringBuilder();
 
             Iterator iterator = cookies.iterator();
+            sb.append(iterator.next());
             while (iterator.hasNext()) {
                 sb.append(";" + iterator.next());
             }
@@ -203,7 +152,7 @@ public class HttpResponse {
                 mHttpURLConnection.setRequestProperty("Cookie", sb.toString());
             }
 
-            ImsLog.d(mSlotId, "Cookie: " + sb.toString());
+            ImsLog.d(mSlotId, "Cookie: " + sb);
         } else {
             ImsLog.d(mSlotId, "no Cookies");
         }
@@ -234,7 +183,20 @@ public class HttpResponse {
         return retryAfter;
     }
 
-    private String getHeader(String headerName) {
+    /**
+     * Set the header using HTTP message
+     * @param headerName header name in HTTP message
+     * @param value using value in HTTP message
+     */
+    public void setHeader(@NonNull String headerName, @NonNull String value) {
+        if (mHttpURLConnection == null) {
+            ImsLog.d(mSlotId, "mHttpURLConnection is null");
+            return;
+        }
+        mHttpURLConnection.setRequestProperty(headerName, value);
+    }
+
+    private String getHeader(@NonNull String headerName) {
         if (mHttpURLConnection == null) {
             ImsLog.d(mSlotId, "mHttpURLConnection is null");
             return null;
