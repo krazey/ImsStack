@@ -25,6 +25,7 @@ import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -56,6 +57,7 @@ public class QosAgentTest {
     }
 
     @Test
+    @Ignore("b/260951368")
     public void testCreateQosConnectionWithoutRemoteInfo() {
         final String strLocalAddr = "111.11.11.11";
         final int localPort = 1111;
@@ -71,6 +73,7 @@ public class QosAgentTest {
     }
 
     @Test
+    @Ignore("b/260951368")
     public void testCreateQosConnectionWithRemoteInfo() {
         final String strLocalAddr = "111.11.11.11";
         final int localPort = 1111;
@@ -93,6 +96,7 @@ public class QosAgentTest {
     }
 
     @Test
+    @Ignore("b/260951368")
     public void testUpdateQosConnection() throws IOException {
         final String strLocalAddr = "111.11.11.11";
         final int localPort = 1111;
@@ -111,6 +115,7 @@ public class QosAgentTest {
     }
 
     @Test
+    @Ignore("b/260951368")
     public void testDestroyQosConnection() throws IOException {
         final String strLocalAddr = "111.11.11.11";
         final int tpLocalPort = 1111;
