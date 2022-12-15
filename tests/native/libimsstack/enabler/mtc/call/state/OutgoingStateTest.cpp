@@ -621,8 +621,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedReturnsTerminatingIfSilentRedialFail
     ON_CALL(objRedialHelper, Redial).WillByDefault(Return(IMS_FAILURE));
 
     EXPECT_CALL(objNotifier,
-            SendStartFailed(
-                    CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT)));
+            SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE)));
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStartFailed(&objSession));
 }
 
