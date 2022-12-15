@@ -16,15 +16,12 @@
 
 package com.android.imsstack.imsservice.uce;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.content.Context;
-import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.telephony.CarrierConfigManager;
@@ -49,7 +46,6 @@ import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.Log;
-import com.android.internal.telephony.util.RemoteCallbackListExt;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -66,7 +62,6 @@ import java.util.concurrent.Executors;
 @RunWith(JUnit4.class)
 public class RcsFeatureImplTest {
     private TestRcsFeatureImpl mFeature;
-    private RcsFeature mRcsFeature;
     public static final int STATE_READY = 2;
     private int mSlotId = 1;
     private int mTestSubId = 1;
@@ -84,12 +79,9 @@ public class RcsFeatureImplTest {
     @Mock private RcsCapOptionsResponseCallBack mRcsCapOptionsResponseCallBack;
     @Mock private IUceApi mUceApi;
 
-
-    @Mock
-    private IBinder mTestBinder;
-
     private static class CapabilityCallback extends IImsCapabilityCallback.Stub {
-
+        boolean mIsOnCapabilitiesStatusChanged = false;
+        boolean mIsOnChangeCapabilityConfigurationError = false;
         @Override
         public void onQueryCapabilityConfiguration(int capability, int radioTech, boolean enabled)
                 throws RemoteException {
@@ -100,11 +92,13 @@ public class RcsFeatureImplTest {
         public void onChangeCapabilityConfigurationError(int capability, int radioTech, int reason)
                 throws RemoteException {
             Log.i("RcsFeature", "onChangeCapabilityConfigurationError ..for verifying ");
+            mIsOnChangeCapabilityConfigurationError = true;
         }
 
         @Override
         public void onCapabilitiesStatusChanged(int config) throws RemoteException {
             Log.i("RcsFeature", "onCapabilitiesStatusChanged ..for verifying ");
+            mIsOnCapabilitiesStatusChanged = true;
         }
     }
 
@@ -116,12 +110,9 @@ public class RcsFeatureImplTest {
 
         mIContext = new ImsContext(mContextMock, executor, mSlotId);
         AppContext.init(mMockContext);
-        mRcsFeature = new RcsFeature(executor);
         mFeature = new TestRcsFeatureImpl(mIContext);
-        mRcsFeature.initialize(mMockContext, mSlotId);
         mFeature.initialize(mMockContext, mSlotId);
         mFeature.setFeatureState(STATE_READY);
-        mTestBinder = Mockito.mock(IBinder.class);
     }
 
     @Test
@@ -190,23 +181,12 @@ public class RcsFeatureImplTest {
         capabilities.addCapabilities(RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE);
         bundle.putBoolean(Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, true);
 
-        CapabilityCallback capabilityCallback = Mockito.spy(new CapabilityCallback());
-        RemoteCallbackListExt ext = Mockito.mock(RemoteCallbackListExt.class);
-        Mockito.doReturn(true).when(ext).register(capabilityCallback);
-        Mockito.doReturn(mTestBinder).when(capabilityCallback).asBinder();
+        CapabilityCallback capabilityCallback = new CapabilityCallback();
         mFeature.addCapabilityCallback(capabilityCallback);
-
-        //API changeEnabledCapabilities call
+        //verify API changeEnabledCapabilities call
         mFeature.changeEnabledCapabilities(request, null);
-        Mockito.verify(capabilityCallback).onCapabilitiesStatusChanged(
-                RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE);
-
-        IllegalArgumentException thrown =
-                Assert.assertThrows(
-                        IllegalArgumentException.class,
-                        () -> mRcsFeature.notifyCapabilitiesStatusChanged(null));
-        assertThat(thrown).hasMessageThat().contains("RcsImsCapabilities must be non-null");
-
+        Assert.assertTrue(capabilityCallback.mIsOnCapabilitiesStatusChanged);
+        Assert.assertFalse(capabilityCallback.mIsOnChangeCapabilityConfigurationError);
     }
 
     @After
@@ -217,7 +197,6 @@ public class RcsFeatureImplTest {
     @After
     public void cleanUp() {
         mFeature = null;
-        mRcsFeature = null;
         mContextMock = null;
         mCapabilityExchangeEventListener = null;
         mMockCarrierConfigManager = null;
