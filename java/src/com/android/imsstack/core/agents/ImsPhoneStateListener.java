@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.core.agents;
 
+import android.telephony.BarringInfo;
 import android.telephony.CellInfo;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
@@ -38,6 +39,7 @@ public class ImsPhoneStateListener {
     public static final int LISTEN_SIGNAL_STRENGTHS = 0x00000020;
     public static final int LISTEN_PCSCF_ADDRESS_INFO = 0x00000040;
     public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 0x00000080;
+    public static final int LISTEN_BARRING_INFO = 0x00000100;
 
     /**
      * Invokes when service state is changed.
@@ -94,6 +96,13 @@ public class ImsPhoneStateListener {
     public void onPreciseDataConnectionStateChanged(
             PreciseDataConnectionState dataConnectionState)  {
         // no-op
+    }
+
+    /**
+     * Invokes when barring information is changed.
+     */
+    public void onBarringInfoChanged(BarringInfo barringInfo) {
+        // no op
     }
 
     protected static boolean isApnTypeIms(String apnSettingType) {

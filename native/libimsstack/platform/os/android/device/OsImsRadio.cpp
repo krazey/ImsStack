@@ -376,6 +376,17 @@ PROTECTED VIRTUAL void OsImsRadio::System_NotifyEvent(
             osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
+        case OsImsRadioParam::EVENT_SSAC_STATE_CHANGED:
+        {
+            SsacInfoParam* pParam = new SsacInfoParam();
+            pParam->m_nBarringFactorForVoice = pParcel->readInt32();
+            pParam->m_nBarringTimeSecForVoice = pParcel->readInt32();
+            pParam->m_nBarringFactorForVideo = pParcel->readInt32();
+            pParam->m_nBarringTimeSecForVideo = pParcel->readInt32();
+
+            osImsRadio_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
+            break;
+        }
         default:
         {
             // no-op
@@ -426,6 +437,12 @@ PRIVATE void OsImsRadio::NotifySsacInfoChanged(IN IMS_SINT32 nFactorForVoice,
         IN IMS_SINT32 nTimeSecForVoice, IN IMS_SINT32 nFactorForVideo,
         IN IMS_SINT32 nTimeSecForVideo)
 {
+    AString strSsacForLog;
+    strSsacForLog.Sprintf("slotId=%d, voice=%d,%d , video=%d,%d", GetSlotId(), nFactorForVoice,
+            nTimeSecForVoice, nFactorForVideo, nTimeSecForVideo);
+
+    IMS_TRACE_D("OsImsRadio :: NotifySsacInfoChanged -  %s", strSsacForLog.GetStr(), 0, 0);
+
     m_objSsacInfo.nBarringFactorForVoice = nFactorForVoice;
     m_objSsacInfo.nBarringTimeSecForVoice = nTimeSecForVoice;
     m_objSsacInfo.nBarringFactorForVideo = nFactorForVideo;

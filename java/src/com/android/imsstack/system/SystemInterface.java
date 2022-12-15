@@ -1393,6 +1393,32 @@ public class SystemInterface implements JniSystemListener {
             });
         }
 
+        @Override
+        public void notifySsacInfo(int event, int voiceFactor, int voiceTimeSec, int videoFactor,
+                int videoTimeSec) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_RADIO_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(voiceFactor);
+                    parcel.writeInt(voiceTimeSec);
+                    parcel.writeInt(videoFactor);
+                    parcel.writeInt(videoTimeSec);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
         // Private/Protected methods ---------------------------------
         public boolean isEventRegistered(final int event) {
             synchronized (mLock) {

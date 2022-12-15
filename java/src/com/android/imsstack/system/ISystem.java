@@ -213,4 +213,19 @@ public interface ISystem {
      * @param id The identification for IMS traffic.
      */
     void notifyRadioConnectionSetupPrepared(int event, int id);
+
+    /**
+     * Notifies the SSAC information.
+     *
+     * @param event The current event.
+     * @param voiceFactor  The conditional barring factor as a percentage 0-100, which is the
+     *                     probability of a random device being barred for the voice type.
+     * @param voiceTimeSec The conditional barring time seconds, which is the interval between
+     *                     successive evaluations for conditional barring based on the voice
+     *                     barring factor.
+     * @param videoFactor  The conditional barring factor for the video type.
+     * @param videoTimeSec The conditional barring time seconds for the video type.
+     */
+    void notifySsacInfo(int event, int voiceFactor, int voiceTimeSec, int videoFactor,
+            int videoTimeSec);
 }
