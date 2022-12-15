@@ -20,11 +20,14 @@
 #include "ServiceEvent.h"
 #include "IEventListener.h"
 #include "ImsActivityEx.h"
-#include "MediaMsgHandler.h"
-#include "MediaSession.h"
-#include "MediaResourceManager.h"
+#include "ImsMap.h"
 #include "IMediaManager.h"
-#include "IMediaNetworkConnectionListener.h"
+#include "IMMedia.h"
+#include "MediaDef.h"
+
+class MediaMsgHandler;
+class MediaSession;
+class MediaResourceManager;
 
 class MediaManager : public ImsActivityEx, public IMediaManager
 {

@@ -18,12 +18,13 @@
 #define _MEDIA_SESSION_H_
 
 #include "IMediaSession.h"
-#include "IMediaSessionClientListener.h"
-#include "MediaNego.h"
 #include "audio/AudioController.h"
 #include "video/VideoController.h"
 #include "text/TextController.h"
 #include <mutex>
+
+class IMediaSessionClientListener;
+class MediaNego;
 
 class MediaSession : public IMediaSessionListener, public IMediaSession
 {

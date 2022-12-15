@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-#include "MediaResourceManager.h"
 #include "ServiceTrace.h"
 #include "ServiceSystemTime.h"
 #include "ServiceNetworkPolicy.h"
-#include "MediaManager.h"
+
 #include "IMMedia.h"
+#include "MediaManager.h"
+#include "MediaNetworkConnectionWatcher.h"
+#include "MediaResourceManager.h"
+#include "config/MediaConfiguration.h"
 
 #define MEDIA_RESOURCEMNGR_IP_ADDR_LEN 46
 

@@ -19,8 +19,6 @@
 
 #include "config/MediaConfiguration.h"
 
-class ICarrierConfig;
-
 /*!
  * @class   VideoConfiguration
  * @brief   Video Configuration class

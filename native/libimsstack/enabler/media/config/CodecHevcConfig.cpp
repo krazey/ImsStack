@@ -22,10 +22,10 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 PUBLIC
 CodecHevcConfig::CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
         CodecConfig(nType_, nPayloadTypeNum_),
-        m_nResolutionWidth(DEFAULT_RESOLUTION_WIDTH),
-        m_nResolutionHeight(DEFAULT_RESOLUTION_HEIGHT),
-        m_nFramerate(DEFAULT_FRAMERATE),
-        m_nBitrate(DEFAULT_BITRATE),
+        m_nResolutionWidth(DEFAULT_HEVC_RESOLUTION_WIDTH),
+        m_nResolutionHeight(DEFAULT_HEVC_RESOLUTION_HEIGHT),
+        m_nFramerate(DEFAULT_HEVC_FRAMERATE),
+        m_nBitrate(DEFAULT_HEVC_BITRATE),
         m_nPacketizationMode(DEFAULT_PACKETIZATION_MODE),
         m_bIncludeSpropParameterSets(DEFAULT_INCLUDE_SPROP),
         m_nHevcProfile(DEFAULT_HEVC_PROFILE),

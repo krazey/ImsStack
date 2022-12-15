@@ -19,8 +19,6 @@
 
 #include "MediaDef.h"
 #include "MediaSessionConfigFactory.h"
-#include "AudioConfiguration.h"
-#include "TextConfiguration.h"
 
 class MediaConfigUtil
 {

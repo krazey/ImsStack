@@ -19,15 +19,13 @@
 
 #include "ImsMessage.h"
 #include "AString.h"
-#include "IMediaSessionClientListener.h"
 #include "ISession.h"
 #include "IMSTypeDef.h"
-#include "MediaEnvironment.h"
 #include "MediaDef.h"
 #include "MediaNego.h"
-#include "audio/AudioDef.h"
-#include "video/VideoDef.h"
-#include "text/TextDef.h"
+
+class IMediaSessionClientListener;
+class MediaEnvironment;
 
 class IMediaSession
 {
@@ -46,6 +44,11 @@ public:
         SEND_FAST_VIDEO_UPDATE,
         SET_DRA_REPORT_OPTION,  // TODO : remove
     };
+
+    /**
+     * @brief Destructor of IMediaSession
+     */
+    virtual ~IMediaSession(){};
 
     /**
      * @brief Set the mtc session listener

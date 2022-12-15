@@ -23,9 +23,13 @@
 #include "ServiceEvent.h"
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
-#include "text/TextMediaSession.h"
-#include "MediaManager.h"
+
+#include "IMediaSessionListener.h"
 #include "IMMedia.h"
+#include "MediaManager.h"
+#include "text/TextMediaSession.h"
+#include "text/TextProfileUtil.h"
+
 #include <TextConfig.h>
 using namespace android::telephony::imsmedia;
 

@@ -28,6 +28,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "MediaManager.h"
+#include "MediaResourceManager.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.PC");
 

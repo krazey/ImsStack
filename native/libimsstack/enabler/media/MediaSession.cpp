@@ -15,17 +15,21 @@
  */
 
 #include "Configuration.h"
-#include "config/MediaSessionConfigFactory.h"
-#include "config/MediaConfigUtil.h"
 #include "EnablerUtils.h"
 #include "ICoreService.h"
 #include "ISessionDescriptor.h"
-#include "MediaDef.h"
-#include "MediaManager.h"
-#include "MediaNegoUtil.h"
-#include "MediaSession.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
+
+#include "IMediaSessionClientListener.h"
+#include "MediaDef.h"
+#include "MediaManager.h"
+#include "MediaNego.h"
+#include "MediaNegoUtil.h"
+#include "MediaResourceManager.h"
+#include "MediaSession.h"
+#include "config/MediaSessionConfigFactory.h"
+#include "config/MediaConfigUtil.h"
 
 __IMS_TRACE_TAG_USER_DECL__("MED.SS");
 

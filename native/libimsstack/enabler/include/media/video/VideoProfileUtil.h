@@ -19,9 +19,10 @@
 
 #include "MediaEnvironment.h"
 #include "video/VideoProfile.h"
-#include "config/VideoConfiguration.h"
 
 #define VIDEO_MAX_CONFIG_LEN 256
+
+class VideoConfiguration;
 
 class VideoProfileUtil
 {
@@ -49,4 +50,4 @@ public:
             IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
             OUT VideoProfile* pNegotiatedProfile);
 };
-#endif /* end of _VIDEO_PROFILE_CONFIGURER_INTERFACE_H_ */
+#endif /* end of _VIDEO_PROFILE_UTIL_H_ */

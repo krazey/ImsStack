@@ -22,9 +22,13 @@
 #include "ServiceEvent.h"
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
-#include "video/VideoMediaSession.h"
-#include "MediaManager.h"
+
+#include "IMediaSessionListener.h"
 #include "IMMedia.h"
+#include "MediaManager.h"
+#include "MediaResourceManager.h"
+#include "video/VideoMediaSession.h"
+#include "video/VideoProfileUtil.h"
 
 #include <VideoConfig.h>
 using namespace android::telephony::imsmedia;

@@ -19,13 +19,14 @@
 
 #include "BaseService.h"
 #include "IMSTypeDef.h"
-#include "JniMediaSessionThread.h"
-#include "IMediaManager.h"
 #include "IJniEnabler.h"
+#include "IMediaManager.h"
+#include "IMMedia.h"
 
 using namespace android;
 
 class IJniEnablerThread;
+class JniMediaSessionThread;
 
 class JniMediaSession : public BaseService
 {
