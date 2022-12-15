@@ -81,7 +81,7 @@ public class VoLteFactory {
         }
 
         if (!sVoLteServices.containsKey(slotID)) {
-            IVoLteService voLteService = serviceFactory(slotID);
+            IVoLteService voLteService = serviceFactory();
             sVoLteServices.put(slotID, voLteService);
             voLteService.start(slotID);
         } else {
@@ -206,7 +206,7 @@ public class VoLteFactory {
      * If New BootupGov class for target operator is added in service package,
      * add branching statement to make target operator's service object in factory.
      */
-    private IVoLteService serviceFactory(int slotID) {
+    private IVoLteService serviceFactory() {
         ImsLog.i("");
 
         return new VoLteService(mContext);

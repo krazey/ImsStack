@@ -51,7 +51,6 @@ public class UsatAgentTest {
     private static final int MAX_SIM_SLOT = 1;
     private static final int SLOT0 = 0;
     private static final int[] SUB_ID = { 1 };
-    private static final int WAIT_TIMER_MILLIS = 2000;
     private static final byte[] USIM_SERVICE_TABLE =
             SimUtils.hexStringToBytes("000000FF0000000000000000FF");
     private static final String SEND_ENVELOPE_OK = "9000";

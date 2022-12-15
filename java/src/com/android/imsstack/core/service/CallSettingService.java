@@ -47,9 +47,6 @@ import com.android.imsstack.util.MSimUtils;
 
 /** this class is the interface for the call setting */
 public class CallSettingService implements ICallSettingService {
-    // constants
-    private static final int DISABLED = 0;
-    private static final int ENABLED = 1;
     private ContentObserver mVoLTESettingObserver = null;
     private ContentObserver mVoWIFISettingObserver = null;
     private ContentObserver mMobileDataSettingObserver = null;
@@ -80,7 +77,6 @@ public class CallSettingService implements ICallSettingService {
     private boolean mMobileDataEnabled = false;
     private boolean mDataRoamingEnabled = false;
     private int mVoWIFIPreference = -1; // 0: wifi only /1: cellular pref. /2: wifi pref.
-    private int mNetworkMode = -1;
     private int mRttMode = -1;
     public CallSettingService() {
     }
@@ -742,7 +738,6 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private int getRttMode() {
-        ContentResolver cr = getContext().getContentResolver();
         int option = -1;
 
         if (option == 0) {
@@ -766,10 +761,6 @@ public class CallSettingService implements ICallSettingService {
 
     private boolean isNetworkMode3GOnly(int mode) {
         return (mode < TelephonyManager.NETWORK_MODE_LTE_CDMA_EVDO) ? true : false;
-    }
-
-    private boolean isNetworkModeSupportsCDMA(int nNetworkMode) {
-        return false;
     }
 
     private boolean isVoLTEEnabled() {

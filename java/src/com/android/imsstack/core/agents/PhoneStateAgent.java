@@ -49,7 +49,6 @@ import java.util.concurrent.RejectedExecutionException;
 public final class PhoneStateAgent implements IPhoneState,
         PhoneStateNotifier.EventObserver {
     private final Object mLock = new Object();
-    private Context mContext;
     private final Set<PhoneStateNotifier> mPhoneStateNotifiers =
             new CopyOnWriteArraySet<PhoneStateNotifier>();
     private final PhoneStateEvents mEvents = new PhoneStateEvents();
@@ -65,8 +64,6 @@ public final class PhoneStateAgent implements IPhoneState,
 
     @Override
     public void init(Context context) {
-        mContext = context;
-
         mPhoneStateListener = createPhoneStateListener(MSimUtils.getSubId(mSlotId));
 
         setActivePhoneStateListener();

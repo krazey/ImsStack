@@ -47,9 +47,9 @@ public class UsatAgent extends Handler implements UsatInterface {
     private static final int DEVICE_IDENTITY_TERMINAL = 0x82; // ME
     private static final int DEVICE_IDENTITY_NETWORK = 0x83;
     /** IMS URI: 0x31 or 0xB1 */
-    private static final int TAG_IMS_URI = 0x31;
+    // private static final int TAG_IMS_URI = 0x31;
     /** URI truncated: 0x73 or 0xF3 */
-    private static final int TAG_URI_TRUNCATED = 0x73;
+    // private static final int TAG_URI_TRUNCATED = 0x73;
 
     /** Call control by USIM */
     private static final int TAG_CALL_CONTROL = 0xD4;
@@ -64,10 +64,11 @@ public class UsatAgent extends Handler implements UsatInterface {
     private static final int TAG_USSD_STRING_1 = 0x8A;
     /** Location information: 0x13 or 0x93 */
     private static final int TAG_LOCATION_INFORMATION = 0x13;
-    /** Media type: 0x7E or 0xFE */
+    /**
+     * Media type: 0x7E or 0xFE
+     * Voice: 0x01, Video: 0x02
+     */
     private static final int TAG_MEDIA_TYPE = 0x7E;
-    private static final int MEDIA_TYPE_VOICE = 0x01;
-    private static final int MEDIA_TYPE_VIDEO = 0x02;
 
     /** MO SMS control by USIM */
     private static final int TAG_MO_SMS_CONTROL = 0xD5;

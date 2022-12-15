@@ -185,7 +185,7 @@ public class ImsStackApp extends Application {
         slotState.setSimState(simState);
 
         if (simState == Sim.STATE_LOADED) {
-            if (!isCarrierConfigLoaded(slotId, subId)) {
+            if (!isCarrierConfigLoaded(subId)) {
                 Log.d(TAG, "SimState: wait for CarrierConfigChanged");
                 return;
             }
@@ -259,19 +259,18 @@ public class ImsStackApp extends Application {
         displayCarrierConfigs(slotId, subId);
 
         if (rebroadcastOnUnlock) {
-            processCarrierConfigState(slotId, subId, carrierId, specificCarrierId);
+            processCarrierConfigState(slotId, subId);
         } else {
             SlotState slotState = getSlotState(slotId);
             slotState.setCarrierConfigChanged(true);
-            processCarrierConfigState(slotId, subId, carrierId, specificCarrierId);
+            processCarrierConfigState(slotId, subId);
             slotState.setCarrierConfigChanged(false);
         }
 
         processCarrierConfigStateForOtherSlots(slotId);
     }
 
-    private void processCarrierConfigState(
-            int slotId, int subId, int carrierId, int specificCarrierId) {
+    private void processCarrierConfigState(int slotId, int subId) {
         SlotState slotState = getSlotState(slotId);
         processSimState(slotId, subId, slotState.getSimState());
     }
@@ -283,13 +282,7 @@ public class ImsStackApp extends Application {
                     int subId = MSimUtils.getSubId(i);
 
                     displayCarrierConfigs(i, subId);
-
-                    TelephonyManager tm = AppContext.getTelephonyManager(subId);
-
-                    if (tm != null) {
-                        processCarrierConfigState(i, subId,
-                                tm.getSimCarrierId(), tm.getSimSpecificCarrierId());
-                    }
+                    processCarrierConfigState(i, subId);
                 }
             }
         }
@@ -373,7 +366,7 @@ public class ImsStackApp extends Application {
                 + ", vtEnabled=" + deviceVtEnabled + ", wfcEnabled=" + deviceWfcEnabled);
     }
 
-    private boolean isCarrierConfigLoaded(int slotId, int subId) {
+    private boolean isCarrierConfigLoaded(int subId) {
         CarrierConfigManager ccm = getSystemService(CarrierConfigManager.class);
         PersistableBundle b = (ccm != null) ? ccm.getConfigForSubId(subId) : null;
         return CarrierConfigManager.isConfigForIdentifiedCarrier(b);

@@ -69,10 +69,6 @@ public class VoLteService implements IVoLteService {
     protected IMSBootupHandler mBootHandler = new IMSBootupHandler(this);
     private ConcurrentHashMap<Integer, IService> mServics =
             new ConcurrentHashMap<Integer, IService>();
-
-    private boolean mVOPSState = false;
-    private int mCount = 0;
-
     private SubscriptionListenerProxy mSubscriptionListener = null;
 
     /**
@@ -482,8 +478,6 @@ public class VoLteService implements IVoLteService {
     --------------------------------------------------------------------------------------------- */
     private void setImsBootCompleted() {
         ImsLog.i("");
-
-        SystemInterface si = SystemInterface.getInstance();
         ISystem system = SystemInterface.getInstance().getSystem(mSlotID);
         if (system == null) {
             return;
@@ -513,7 +507,6 @@ public class VoLteService implements IVoLteService {
     }
 
     private void notifyVopsState(boolean bIsVops) {
-        SystemInterface si = SystemInterface.getInstance();
         ISystem system = SystemInterface.getInstance().getSystem(mSlotID);
         if (system == null) {
             return;

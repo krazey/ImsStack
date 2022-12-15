@@ -27,23 +27,22 @@ import com.android.imsstack.util.MSimUtils;
 
 import java.util.Locale;
 
+/**
+ * A class to provide an interface to read/write the preferences of ImsStack.
+ */
 public class PreferenceAgent implements IPreference, ISystemAPIPreference {
-    // Constants--------------------------------------------------
     private static final String IMS_PREFERENCES = "ims_preferences";
 
+    // IPhoneInfoSubscriber#PREFERENCE_VALUE_ENTYPE
     private static final int TYPE_STRING = 0;
     private static final int TYPE_BOOL = 1;
     private static final int TYPE_INT = 2;
     private static final int TYPE_LONG = 3;
     private static final int TYPE_FLOAT = 4;
-    private static final int TYPE_MAX = 5;
 
-    // Variables--------------------------------------------------
     private static IPreference mPreferenceAgent;
     private Context mContext;
 
-    // Static loading materials ----------------------------------
-    // Public methods --------------------------------------------
     public PreferenceAgent() {
     }
 
@@ -55,7 +54,6 @@ public class PreferenceAgent implements IPreference, ISystemAPIPreference {
         return mPreferenceAgent;
     }
 
-    // Interface implementation methods --------------------------
     @Override
     public void init(Context context) {
         mContext = context;
@@ -309,17 +307,20 @@ public class PreferenceAgent implements IPreference, ISystemAPIPreference {
         objEditor.apply();
     }
 
-    // Private/Protected methods ---------------------------------
-    // -----------------------------------------------------------
     private static String getFileName(String fileName, int slotId) {
         return String.format(Locale.US, "%s_%d", fileName, slotId);
     }
 
     private static boolean isValidValueType(int valueType) {
-        if (valueType < TYPE_STRING || valueType >= TYPE_MAX) {
-            return false;
+        switch (valueType) {
+            case TYPE_STRING: // fall-through
+            case TYPE_BOOL: // fall-through
+            case TYPE_INT: // fall-through
+            case TYPE_LONG: // fall-through
+            case TYPE_FLOAT:
+                return true;
+            default:
+                return false;
         }
-
-        return true;
     }
 }

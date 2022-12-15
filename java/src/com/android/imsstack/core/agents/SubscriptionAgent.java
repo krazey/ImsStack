@@ -409,8 +409,6 @@ public final class SubscriptionAgent implements ISubscription {
 
         setSubId(subId);
         setPhoneId(phoneId);
-
-        int oldSlotId = getSlotId();
         setSlotId(slotId);
     }
 

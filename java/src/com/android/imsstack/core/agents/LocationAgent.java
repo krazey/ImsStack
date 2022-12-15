@@ -55,9 +55,6 @@ public final class LocationAgent implements ILocationAgent {
     private static final int EVENT_UPDATE_INTERVAL_TIMER_EXPIRED = 1002;
     private static final int EVENT_SEARCH_DURATION_EXPIRED = 1003;
 
-    /** Country code */
-    private static final String COUNTRY_CODE = "CC";
-
     enum ETimerType {
         TIMER_ASYNC_START,
         TIMER_LOCATION_UPDATE_INTERVAL,

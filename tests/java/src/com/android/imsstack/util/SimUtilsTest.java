@@ -18,8 +18,8 @@ package com.android.imsstack.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -87,12 +87,9 @@ public class SimUtilsTest {
         assertEquals(14, SimUtils.hexCharToInt('E'));
         assertEquals(15, SimUtils.hexCharToInt('F'));
 
-        try {
-            int value = SimUtils.hexCharToInt('G');
-            fail("Exception expected.");
-        } catch (RuntimeException expected) {
-            // Expected.
-        }
+        assertThrows(RuntimeException.class, () -> {
+            SimUtils.hexCharToInt('G');
+        });
     }
 
     @Test

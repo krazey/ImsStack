@@ -956,15 +956,6 @@ public class CarrierConfig {
         public static final int IPV6_PREFERRED = 1;
     }
 
-    private static final int TYPE_BOOLEAN = 0;
-    private static final int TYPE_INT = 1;
-    private static final int TYPE_LONG = 2;
-    private static final int TYPE_STRING = 3;
-    private static final int TYPE_BOOLEAN_ARRAY = 4;
-    private static final int TYPE_INT_ARRAY = 5;
-    private static final int TYPE_LONG_ARRAY = 6;
-    private static final int TYPE_STRING_ARRAY = 7;
-
     private final PersistableBundle mConfig = new PersistableBundle();
 
     public CarrierConfig() {
