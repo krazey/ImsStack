@@ -37,8 +37,6 @@ MediaSessionConfig::MediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_T
         m_bSdpReofferFullCapability(IMS_TRUE)
 {
     IMS_TRACE_D("+MediaSessionConfig() - nSlotId(%d), serviceType(%d)", nSlotId, serviceType, 0);
-
-    MediaSessionConfigFactory::GetInstance()->AddMediaSessionConfig(nSlotId, this);
 }
 
 PUBLIC VIRTUAL MediaSessionConfig::~MediaSessionConfig()
@@ -70,11 +68,18 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
     m_bSdpReofferFullCapability =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_SDP_REOFFER_FULL_CAPABILITY_BOOL);
 
-    CreateAudioConfiguration(piCc);
-    CreateVideoConfiguration(piCc);
-    CreateTextConfiguration(piCc);
-
-    MediaSessionConfigFactory::GetInstance()->AddMediaSessionConfig(nSlotId, this);
+    if (m_pAudioConfig == IMS_NULL)
+    {
+        CreateAudioConfiguration(piCc);
+    }
+    if (m_pVideoConfig == IMS_NULL)
+    {
+        CreateVideoConfiguration(piCc);
+    }
+    if (m_pTextConfig == IMS_NULL)
+    {
+        CreateTextConfiguration(piCc);
+    }
 
     ToDebugString();
 

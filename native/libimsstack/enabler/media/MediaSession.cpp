@@ -928,8 +928,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
 PROTECTED
 IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
 {
-    AString strMediaRef = "gims.com.media";
-    IMS_TRACE_D("CreateMediaConfig() media_ref=%s", strMediaRef.GetStr(), 0, 0);
+    IMS_TRACE_D("CreateMediaConfig()", 0, 0, 0);
     MediaSessionConfigFactory::GetInstance()->CreateMediaSessionConfig(m_nSlotId, eServiceType);
     MediaSessionConfig* pMediaSessionConfig =
             MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(
