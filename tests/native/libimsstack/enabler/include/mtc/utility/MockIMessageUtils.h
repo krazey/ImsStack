@@ -85,6 +85,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetSupportedFeatures, (IN IMessage*), (override));
     MOCK_METHOD(IMS_SINT32, GetRequireFeatures, (IN IMessage*), (override));
     MOCK_METHOD(Ims3gpp&, GetIms3gppFromBody, (IN const IMessage*, OUT Ims3gpp&), (override));
+    MOCK_METHOD(Ims3gppData, GetIms3gppData, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_SINT32, GetStatusCodeInNotify, (IN IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, HasSdp, (IN const IMessage*), (override));
     MOCK_METHOD(IMS_BOOL, IsFocusConf, (IN const IMessage*), (override));

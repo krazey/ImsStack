@@ -18,15 +18,16 @@
 #define INTERFACE_MESSAGE_UTILS_H_
 
 #include "AString.h"
+#include "Ims3gpp.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 
 class IMessage;
-class Ims3gpp;
 class ISession;
 struct ConfUser;
+struct Ims3gppData;
 struct ReasonHeaderValue;
 
 class IMessageUtils
@@ -336,12 +337,21 @@ public:
 
     /**
      * @brief Gets
+     *        This api is deprecated.
      *
      * @param piMessage
      * @param objIms3gpp
      * @return
      */
     virtual Ims3gpp& GetIms3gppFromBody(IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piMessage
+     * @return
+     */
+    virtual Ims3gppData GetIms3gppData(IN const IMessage* piMessage) = 0;
 
     /**
      * @brief Gets
@@ -369,6 +379,7 @@ public:
 
     /**
      * @brief Checks
+     *        This api is deprecated.
      *
      * @param piMessage
      * @return
@@ -377,6 +388,7 @@ public:
 
     /**
      * @brief Checks
+     *        This api is deprecated.
      *
      * @param piMessage
      * @return
@@ -564,9 +576,50 @@ public:
             strText(objRhs.strText)
     {
     }
+    ReasonHeaderValue& operator=(IN const ReasonHeaderValue& objRhs)
+    {
+        if (this != &objRhs)
+        {
+            nCause = objRhs.nCause;
+            strText = objRhs.strText;
+        }
+        return *this;
+    }
 
     IMS_SINT32 nCause;
     AString strText;
+};
+
+struct Ims3gppData
+{
+public:
+    inline Ims3gppData() :
+            eType(Ims3gpp::TYPE_UNKNOWN),
+            eAlternativeServiceType(Ims3gpp::AlternativeService::TYPE_UNKNOWN),
+            eAlternativeServiceAction(Ims3gpp::AlternativeService::ACTION_UNKNOWN)
+    {
+    }
+    inline ~Ims3gppData() {}
+    inline Ims3gppData(IN const Ims3gppData& objRhs) :
+            eType(objRhs.eType),
+            eAlternativeServiceType(objRhs.eAlternativeServiceType),
+            eAlternativeServiceAction(objRhs.eAlternativeServiceAction)
+    {
+    }
+    Ims3gppData& operator=(IN const Ims3gppData& objRhs)
+    {
+        if (this != &objRhs)
+        {
+            eType = objRhs.eType;
+            eAlternativeServiceType = objRhs.eAlternativeServiceType;
+            eAlternativeServiceAction = objRhs.eAlternativeServiceAction;
+        }
+        return *this;
+    }
+
+    IMS_SINT32 eType;
+    IMS_SINT32 eAlternativeServiceType;
+    IMS_SINT32 eAlternativeServiceAction;
 };
 
 #endif

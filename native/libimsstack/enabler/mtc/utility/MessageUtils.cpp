@@ -782,6 +782,49 @@ PUBLIC Ims3gpp& MessageUtils::GetIms3gppFromBody(
     return objIms3gpp;
 }
 
+PUBLIC Ims3gppData MessageUtils::GetIms3gppData(IN const IMessage* piMessage)
+{
+    Ims3gppData objIms3gppData;
+    ISipMessage* piSipMessage = GetSipMessage(piMessage);
+    if (piSipMessage == IMS_NULL)
+    {
+        return objIms3gppData;
+    }
+
+    ImsList<ISipMessageBodyPart*> lstBodyParts = piSipMessage->GetBodyParts();
+    for (IMS_UINT32 i = 0; i < lstBodyParts.GetSize(); i++)
+    {
+        ISipMessageBodyPart* piBodyPart = lstBodyParts.GetAt(i);
+        if (piBodyPart == IMS_NULL)
+        {
+            continue;
+        }
+
+        AString strContentType = piBodyPart->GetHeader(ISipMessageBodyPart::CONTENT_TYPE);
+
+        AString strType;
+        AString strSubType;
+        TextParser::ParseMediaType(strContentType, strType, strSubType);
+
+        if (!strType.EqualsIgnoreCase(MessageUtil::STR_CONTENT_TYPE_APPLICATION) ||
+                !strSubType.EqualsIgnoreCase(MessageUtil::STR_CONTENT_TYPE_3GPP_IMS_XML))
+        {
+            continue;
+        }
+
+        Ims3gpp objIms3gpp;
+        if (objIms3gpp.Parse(piBodyPart->GetContent().ToString()))
+        {
+            objIms3gppData.eType = objIms3gpp.GetType();
+            objIms3gppData.eAlternativeServiceType = objIms3gpp.GetAlternativeService().GetType();
+            objIms3gppData.eAlternativeServiceAction =
+                    objIms3gpp.GetAlternativeService().GetAction();
+        }
+    }
+
+    return objIms3gppData;
+}
+
 PUBLIC IMS_SINT32 MessageUtils::GetStatusCodeInNotify(IN IMessage* piMessage)
 {
     if (!ContainsValue(piMessage, MessageUtil::STR_CONTENT_TYPE_SIP_FRAG, ISipHeader::CONTENT_TYPE))

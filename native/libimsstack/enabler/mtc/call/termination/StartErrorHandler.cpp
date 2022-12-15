@@ -202,7 +202,7 @@ CallReasonInfo StartErrorHandler::Handle380Response(IN const IMessage& objMessag
         return CallReasonInfo(CODE_SIP_ALTERNATE_EMERGENCY_CALL, eSosType);
     }
 
-    if (HasEmergencyServiceTypeInBody(objMessage))
+    if (IsAlternativeEmergencyService(objMessage))
     {
         return CallReasonInfo(
                 CODE_SIP_ALTERNATE_EMERGENCY_CALL, EXTRA_CODE_EMERGENCYSERVICE_GENERIC);
@@ -443,7 +443,7 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
             m_objContext.GetMessageUtils().ContainsAddressInPaid(
                     &objMessage, GetServiceRouteHeader()))
     {
-        if (m_objContext.GetMessageUtils().IsInitialRegistrationRequired(&objMessage))
+        if (IsInitialRegistrationRequired(objMessage))
         {
             const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
                     Feature::REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE);
@@ -580,19 +580,16 @@ IMS_BOOL StartErrorHandler::IsNonUeDetectableEmergencyCall(IN const IMessage& ob
         return IMS_TRUE;
     }
     // clang-format on
-
-    if (!HasEmergencyServiceTypeInBody(objMessage))
+    if (!IsAlternativeEmergencyService(objMessage))
     {
         return IMS_FALSE;
     }
-
     // Loose checking for some carriers don't use Path header during registration
     AString strSupported = GetSupported();
     if (strSupported.GetLength() <= 0 || !strSupported.Contains("path"))
     {
         return IMS_TRUE;
     }
-
     return m_objContext.GetMessageUtils().ContainsAddressInPaid(&objMessage, GetPathHeader());
 }
 
@@ -609,17 +606,30 @@ IMS_BOOL StartErrorHandler::IsIpcanResourceUnavailable(IN const IMessage& objMes
 }
 
 PRIVATE
-IMS_BOOL StartErrorHandler::HasEmergencyServiceTypeInBody(IN const IMessage& objMessage) const
+IMS_BOOL StartErrorHandler::IsAlternativeEmergencyService(IN const IMessage& objMessage) const
 {
-    Ims3gpp objIms3gpp;
-    m_objContext.GetMessageUtils().GetIms3gppFromBody(&objMessage, objIms3gpp);
-    if (objIms3gpp.GetType() == Ims3gpp::TYPE_UNKNOWN)
+    Ims3gppData objIms3gppData = m_objContext.GetMessageUtils().GetIms3gppData(&objMessage);
+    if (objIms3gppData.eType != Ims3gpp::TYPE_ALTERNATIVE_SERVICE)
     {
         return IMS_FALSE;
     }
 
-    return objIms3gpp.GetAlternativeService().GetType() ==
-            Ims3gpp::AlternativeService::TYPE_EMERGENCY;
+    return objIms3gppData.eAlternativeServiceType == Ims3gpp::AlternativeService::TYPE_EMERGENCY;
+}
+
+PRIVATE
+IMS_BOOL StartErrorHandler::IsInitialRegistrationRequired(IN const IMessage& objMessage) const
+{
+    Ims3gppData objIms3gppData = m_objContext.GetMessageUtils().GetIms3gppData(&objMessage);
+    if (objIms3gppData.eType != Ims3gpp::TYPE_ALTERNATIVE_SERVICE)
+    {
+        return IMS_FALSE;
+    }
+
+    return objIms3gppData.eAlternativeServiceType ==
+            Ims3gpp::AlternativeService::TYPE_RESTORATION &&
+            objIms3gppData.eAlternativeServiceAction ==
+            Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION;
 }
 
 PRIVATE

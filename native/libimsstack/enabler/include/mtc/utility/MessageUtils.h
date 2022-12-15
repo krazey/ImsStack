@@ -99,6 +99,7 @@ public:
     IMS_SINT32 GetSupportedFeatures(IN IMessage* piMessage) override;
     IMS_SINT32 GetRequireFeatures(IN IMessage* piMessage) override;
     Ims3gpp& GetIms3gppFromBody(IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp) override;
+    Ims3gppData GetIms3gppData(IN const IMessage* piMessage) override;
     IMS_SINT32 GetStatusCodeInNotify(IN IMessage* piMessage) override;
     IMS_BOOL HasSdp(IN const IMessage* piMessage) override;
     IMS_BOOL IsFocusConf(IN const IMessage* piMessage) override;

@@ -73,7 +73,8 @@ private:
     static IMS_BOOL IsConditionCheckRequiredBeforeRetry1x(IN const IMessage& objMessage);
     IMS_BOOL IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const;
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
-    IMS_BOOL HasEmergencyServiceTypeInBody(IN const IMessage& objMessage) const;
+    IMS_BOOL IsAlternativeEmergencyService(IN const IMessage& objMessage) const;
+    IMS_BOOL IsInitialRegistrationRequired(IN const IMessage& objMessage) const;
 
     void ControlAos(IMS_UINT32 nCommand) const;
     AString GetPathHeader() const;
