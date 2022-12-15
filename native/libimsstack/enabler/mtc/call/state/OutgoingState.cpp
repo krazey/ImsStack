@@ -747,7 +747,25 @@ CallStateName OutgoingState::HandleSilentRedial(
 
     if (nResult == IMS_FAILURE)
     {
-        OnStartFailed(piSession, objReason);
+        CallReasonInfo objReasonToUi(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+        IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
+                piSession, IMessage::SESSION_START);
+        if (piResponse != IMS_NULL)
+        {
+            IMS_SINT32 nLastResponseCode = piResponse->GetStatusCode();
+            if (nLastResponseCode == SipStatusCode::SC_488)
+            {
+                objReasonToUi.nCode = CODE_SIP_NOT_ACCEPTABLE;
+                objReasonToUi.nExtraCode = nLastResponseCode;
+            }
+            else if (nLastResponseCode >= SipStatusCode::SC_300 &&
+                    nLastResponseCode < SipStatusCode::SC_400)
+            {
+                objReasonToUi.nCode = CODE_SIP_REDIRECTED;
+                objReasonToUi.nExtraCode = nLastResponseCode;
+            }
+        }
+        OnStartFailed(piSession, objReasonToUi);
         return CallStateName::TERMINATING;
     }
 
