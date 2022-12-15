@@ -32,8 +32,6 @@ import java.util.Locale;
 
 public class TelephonySubscriberAgent implements ITelephonySubscriber,
         ISystemAPITelephonySubscriber {
-
-    // Constants--------------------------------------------------
     private static final String MNC_KT = "08";
     private static final String MNC_LGU = "06";
     private static final String MNC_SKT = "05";
@@ -44,19 +42,11 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
     private static final String MNC_TMO = "260";
     private static final String MNC_MPCS = "660";
 
-    private static final int ECC_PRIORITY_UICC = 0;
     private static final int ECC_PRIORITY_NETWORK = 1;
 
     // <MCC, Country-ISO>
     private final ArrayMap<String, String> mCountryIsoTable = new ArrayMap<>();
-
-    // Variables--------------------------------------------------
-    private int mModemEccPriority = ECC_PRIORITY_NETWORK;
-
     private final int mSlotId;
-
-    // Static loading materials ----------------------------------
-    // Public methods --------------------------------------------
 
     public TelephonySubscriberAgent(int slotId) {
         mSlotId = slotId;
@@ -327,7 +317,7 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
 
     @Override
     public int getEmergencyPriorityFromModem4Sys() {
-        return mModemEccPriority;
+        return ECC_PRIORITY_NETWORK;
     }
 
     @Override
@@ -336,7 +326,6 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
         return (sim != null) ? sim.isGbaAvailable() : false;
     }
 
-    // Private/Protected methods ---------------------------------
     private TelephonyManager getTelephonyManagerOnSimConfig() {
         if (MSimUtils.isMultiSimEnabled()) {
             return getTelephonyManager(MSimUtils.getSubId(mSlotId));

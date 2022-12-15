@@ -34,8 +34,6 @@ public class IndentingPrintWriter extends PrintWriter {
     private StringBuilder mIndentBuilder = new StringBuilder();
     /** Cache of current {@link #mIndentBuilder} value */
     private char[] mCurrentIndent;
-    /** Length of current line being built, excluding any indent */
-    private int mCurrentLength;
 
     /**
      * Flag indicating if we're currently sitting on an empty line, and that
@@ -91,7 +89,6 @@ public class IndentingPrintWriter extends PrintWriter {
 
     @Override
     public void write(char[] buf, int offset, int count) {
-        final int indentLength = mIndentBuilder.length();
         final int bufferEnd = offset + count;
         int lineStart = offset;
         int lineEnd = offset;
@@ -99,13 +96,11 @@ public class IndentingPrintWriter extends PrintWriter {
         // March through incoming buffer looking for newlines
         while (lineEnd < bufferEnd) {
             char ch = buf[lineEnd++];
-            mCurrentLength++;
             if (ch == '\n') {
                 maybeWriteIndent();
                 super.write(buf, lineStart, lineEnd - lineStart);
                 lineStart = lineEnd;
                 mEmptyLine = true;
-                mCurrentLength = 0;
             }
         }
 

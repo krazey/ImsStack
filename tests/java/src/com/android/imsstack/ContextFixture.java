@@ -112,7 +112,6 @@ public class ContextFixture implements TestFixture<Context> {
     public static final String PERMISSION_ENABLE_ALL = "android.permission.STUB_PERMISSION";
 
     public static class FakeContentProvider extends MockContentProvider {
-        private String[] mColumns = {"name", "value"};
         private HashMap<String, String> mKeyValuePairs = new HashMap<String, String>();
         private int mNumKeyValuePairs = 0;
         private HashMap<String, String> mFlags = new HashMap<>();
@@ -831,7 +830,8 @@ public class ContextFixture implements TestFixture<Context> {
         mMockBindingFailureForPackage.add(packageName);
     }
 
-    private List<ResolveInfo> doQueryIntentServices(Intent intent, int flags) {
+    private List<ResolveInfo> doQueryIntentServices(Intent intent,
+            @SuppressWarnings("UnusedVariable") int flags) {
         List<ResolveInfo> result = new ArrayList<ResolveInfo>();
         for (ComponentName componentName : mComponentNamesByAction.get(intent.getAction())) {
             ResolveInfo resolveInfo = new ResolveInfo();

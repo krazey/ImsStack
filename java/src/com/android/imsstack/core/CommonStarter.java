@@ -182,8 +182,6 @@ public class CommonStarter {
 
         AosFactory.getInstance().stop(slotId);
 
-        Context context = AppContext.getInstance();
-
         DcFactory.cleanUpDc(slotId);
 
         AgentFactory.cleanUpAgents(slotId);

@@ -39,9 +39,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private static final String KEY_TEST_DEBUG_ENABLED = "test_debug_enabled";
     private static final String KEY_TEST_TESTMODE_ENABLED = "test_testmode_enabled";
     private static final String KEY_TEST_WIFI_TEST_ENABLED = "test_wifi_test_enabled";
-    private static final String KEY_TEST_SUBSCRIBER = "test_subscriber";
     private static final String KEY_TEST_PCSCF_ADDRESS = "test_pcscf_address";
-    private static final String KEY_TEST_USER_AGENT = "test_user_agent";
     private static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
     private static final String KEY_TEST_RESTART_IMSSTACK = "test_restart_imsstack";
     private static final String KEY_TEST_CLEAR_CONFIG = "test_clear_config";

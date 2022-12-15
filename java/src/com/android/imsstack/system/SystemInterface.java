@@ -266,38 +266,33 @@ public class SystemInterface implements JniSystemListener {
         Parcel result = null;
 
         switch (method) {
-        case SystemConstants.SET_ALARM: //FALL-THROUGH
-        case SystemConstants.KILL_ALARM:
-            result = handleSystemAPIAlarm(method, parcel);
-            break;
-
-        case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
-        case SystemConstants.SET_PREFERENCE:
-            result = handleSystemAPIPreference(method, parcel);
-            break;
-
-        case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
-        case SystemConstants.GET_WIFI_DETAILED_STATE: //FALL-THROUGH
-        case SystemConstants.GET_WIFI_BSS_ID: //FALL-THROUGH
-        case SystemConstants.GET_WIFI_SSID:
-            result = handleSystemAPIWifi(method, parcel);
-            break;
-
-        case SystemConstants.GET_BATTERY_LEVEL:
-            result = handleSystemAPIBattery(method, parcel);
-            break;
-
-        case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
-        case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
-            result = handleSystemAPIDevice(method, parcel);
-            break;
-        case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
-        case SystemConstants.SET_PRIVATE_PROPERTY:
-            result = handleSystemAPIConfiguration(method, parcel);
-            break;
-
-        default:
-            break;
+            case SystemConstants.SET_ALARM: //FALL-THROUGH
+            case SystemConstants.KILL_ALARM:
+                result = handleSystemAPIAlarm(method, parcel);
+                break;
+            case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
+            case SystemConstants.SET_PREFERENCE:
+                result = handleSystemAPIPreference(method, parcel);
+                break;
+            case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_DETAILED_STATE: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_BSS_ID: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_SSID:
+                result = handleSystemAPIWifi(method, parcel);
+                break;
+            case SystemConstants.GET_BATTERY_LEVEL:
+                result = handleSystemAPIBattery(method);
+                break;
+            case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
+            case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
+                result = handleSystemAPIDevice(method);
+                break;
+            case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
+            case SystemConstants.SET_PRIVATE_PROPERTY:
+                result = handleSystemAPIConfiguration(method, parcel);
+                break;
+            default:
+                break;
         }
 
         if (result == null) {
@@ -477,7 +472,7 @@ public class SystemInterface implements JniSystemListener {
         return result;
     }
 
-    private Parcel handleSystemAPIBattery(int method, Parcel parcel) {
+    private Parcel handleSystemAPIBattery(int method) {
         if (mISystemAPIBattery == null) {
             return null;
         }
@@ -496,7 +491,7 @@ public class SystemInterface implements JniSystemListener {
         return result;
     }
 
-    private Parcel handleSystemAPIDevice(int method, Parcel parcel) {
+    private Parcel handleSystemAPIDevice(int method) {
         if (mISystemAPIDevice == null) {
             return null;
         }
@@ -1472,7 +1467,7 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_NETWORK_TYPE: //FALL-THROUGH
                     case SystemConstants.GET_VOICE_NETWORK_TYPE: //FALL-THROUGH
                     case SystemConstants.GET_CALL_STATE:
-                        result = handleSystemAPITelephonyState(method, parcel);
+                        result = handleSystemAPITelephonyState(method);
                         break;
                     //mISystemAPITelephonySubscriber
                     case SystemConstants.GET_DEVICE_ID: //FALL-THROUGH
@@ -1487,14 +1482,14 @@ public class SystemInterface implements JniSystemListener {
                     case SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM: //FALL-THROUGH
                     case SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM: //FALL-THROUGH
                     case SystemConstants.GET_UICC_GBA_SUPPORT:
-                        result = handleSystemAPITelephonySubscriber(method, parcel);
+                        result = handleSystemAPITelephonySubscriber(method);
                         break;
                     //mISystemAPIWifiCalling
                     case SystemConstants.IS_WFC_ENABLED: //FALL-THROUGH
                     case SystemConstants.GET_WFC_PREFERENCES: //FALL-THROUGH
                     case SystemConstants.IS_WFC_PROVISIONED: //FALL-THROUGH
                     case SystemConstants.GET_WFC_ADDRESS_ID:
-                        result = handleSystemAPIWifiCalling(method, parcel);
+                        result = handleSystemAPIWifiCalling(method);
                         break;
                     //mISystemAPILocation
                     case SystemConstants.START_LOCATION_INFO: //FALL-THROUGH
@@ -1515,7 +1510,7 @@ public class SystemInterface implements JniSystemListener {
                         result = handleSystemApiIpSec(method, parcel, fd);
                         break;
                     default:
-                        result = handleSystemCall(method, parcel);
+                        result = handleSystemCall(method);
                         break;
                 }
             }
@@ -1836,7 +1831,7 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemAPITelephonyState(int method, Parcel parcel) {
+        private Parcel handleSystemAPITelephonyState(int method) {
             if (mISystemAPITelephonyState == null) {
                 return null;
             }
@@ -1860,7 +1855,7 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemAPITelephonySubscriber(int method, Parcel parcel) {
+        private Parcel handleSystemAPITelephonySubscriber(int method) {
             if (mISystemAPITelephonySubscriber == null) {
                 return null;
             }
@@ -1913,7 +1908,7 @@ public class SystemInterface implements JniSystemListener {
             return result;
         }
 
-        private Parcel handleSystemAPIWifiCalling(int method, Parcel parcel) {
+        private Parcel handleSystemAPIWifiCalling(int method) {
             if (mISystemAPIWifiCalling == null) {
                 return null;
             }
@@ -2062,7 +2057,7 @@ public class SystemInterface implements JniSystemListener {
             }
         }
 
-        private Parcel handleSystemCall(int method, Parcel parcel) {
+        private Parcel handleSystemCall(int method) {
             if (mSystemCall == null) {
                 return null;
             }
