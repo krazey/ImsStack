@@ -24,9 +24,12 @@ static const IMS_SINT32 CODEC_AMR_WB = ImsCodec::AUDIO_AMR_WB;
 static const IMS_CHAR* RETURN_AMR_STRING = "AMR";
 static const IMS_CHAR* RETURN_AMR_WB_STRING = "AMR-WB";
 
-class ImsCodecTest : public ::testing::Test {};
+class ImsCodecTest : public ::testing::Test
+{
+};
 
-TEST_F(ImsCodecTest, GetConfigDefault) {
-    EXPECT_EQ(ImsCodec::CodecToString(CODEC_AMR), RETURN_AMR_STRING);
-    EXPECT_EQ(ImsCodec::CodecToString(CODEC_AMR_WB), RETURN_AMR_WB_STRING);
+TEST_F(ImsCodecTest, GetConfigDefault)
+{
+    EXPECT_STREQ(ImsCodec::CodecToString(CODEC_AMR), RETURN_AMR_STRING);
+    EXPECT_STREQ(ImsCodec::CodecToString(CODEC_AMR_WB), RETURN_AMR_WB_STRING);
 }
