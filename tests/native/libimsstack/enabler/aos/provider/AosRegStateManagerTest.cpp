@@ -44,6 +44,17 @@ protected:
     }
 
     IMS_UINT32 GetEImsRegState() { return pAosRegStateManager->m_nERegState; }
+
+    IMS_UINT32 GetRegServices() { return pAosRegStateManager->m_nRegServices; }
+
+    void SetRegServices(IN IMS_UINT32 nRegServices)
+    {
+        pAosRegStateManager->m_nRegServices = nRegServices;
+    }
+
+    void AddRegService(IN IMS_UINT32 nType) { pAosRegStateManager->AddRegService(nType); }
+
+    IMS_BOOL IsRegService(IN IMS_UINT32 nType) { return pAosRegStateManager->IsRegService(nType); }
 };
 
 TEST_F(AosRegStateManagerTest, SlotId)
@@ -71,4 +82,30 @@ TEST_F(AosRegStateManagerTest, ImsERegState)
 
     pAosRegStateManager->SetEImsRegState(IMS_REG_ON);
     EXPECT_EQ(IMS_REG_ON, GetEImsRegState());
+}
+
+TEST_F(AosRegStateManagerTest, RegServices)
+{
+    IMS_UINT32 nOrigRegServices = GetRegServices();
+
+    pAosRegStateManager->SetRegState(ImsAosService::EMERGENCY_MTC, IMS_REG_ON);
+
+    EXPECT_FALSE(IsRegService(ImsAosService::MTS));
+
+    AddRegService(ImsAosService::MTS);
+    EXPECT_TRUE(IsRegService(ImsAosService::MTS));
+
+    pAosRegStateManager->SetRegState(ImsAosService::MTC, IMS_REG_OFF);
+    pAosRegStateManager->SetRegState(ImsAosService::MTS, IMS_REG_OFF);
+    EXPECT_FALSE(IsRegService(ImsAosService::MTC));
+    EXPECT_FALSE(IsRegService(ImsAosService::MTS));
+
+    AddRegService(ImsAosService::MTS);
+
+    pAosRegStateManager->SetRegState(ImsAosService::MTC, IMS_REG_ON);
+    pAosRegStateManager->SetRegState(ImsAosService::MTS, IMS_REG_ON);
+    EXPECT_TRUE(IsRegService(ImsAosService::MTC));
+    EXPECT_TRUE(IsRegService(ImsAosService::MTS));
+
+    SetRegServices(nOrigRegServices);
 }

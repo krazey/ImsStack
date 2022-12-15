@@ -39,7 +39,6 @@ protected:
     void AddRegService(IN IMS_UINT32 nType);
     void RemoveRegService(IN IMS_UINT32 nType);
     IMS_BOOL IsRegService(IN IMS_UINT32 nType) const;
-    IMS_UINT32 GetConvertedRegServices();
 
 protected:
     IMS_SINT32 m_nSlotId;

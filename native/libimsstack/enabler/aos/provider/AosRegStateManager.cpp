@@ -18,10 +18,6 @@
 #include "ImsAosParameter.h"
 #include "provider/AosRegStateManager.h"
 
-__IMS_TRACE_TAG_USER_DECL__("AOS");
-
-#define AOSTAG m_strTag.GetStr()
-
 PUBLIC
 AosRegStateManager::AosRegStateManager() :
         m_nSlotId(IMS_SLOT_0),
@@ -127,24 +123,4 @@ PROTECTED
 IMS_BOOL AosRegStateManager::IsRegService(IN IMS_UINT32 nType) const
 {
     return (m_nRegServices & nType);
-}
-
-PROTECTED
-IMS_UINT32 AosRegStateManager::GetConvertedRegServices()
-{
-    IMS_UINT32 nServices = ImsAosService::NONE;
-
-    if (IsRegService(ImsAosService::MTC))
-    {
-        nServices |= ImsAosService::MTC;
-    }
-
-    if (IsRegService(ImsAosService::MTS))
-    {
-        nServices |= ImsAosService::MTS;
-    }
-
-    A_IMS_TRACE_I(AOSTAG, "GetConvertedRegServices:: services (%d)", nServices, 0, 0);
-
-    return nServices;
 }
