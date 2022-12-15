@@ -45,6 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayDeque;
+import java.util.Iterator;
 
 public class HttpResponseForCellularTest {
     private static final int SLOT_ID = 0;
@@ -209,9 +210,11 @@ public class HttpResponseForCellularTest {
         // exist cookie header & received 511
         doReturn(511).when(mHttpResponse).getResponseCode();
         mHttpResponseForCellular.handle(mHttpResponse);
-        ArrayDeque cookies = getCookies();
-        assertEquals(cookies.getFirst(), mHttpResponseForCellular.getCookies().getFirst());
-        assertEquals(cookies, mHttpResponseForCellular.getCookies());
+        Iterator expectedCookies = getCookies().iterator();
+        Iterator actualCookies = mHttpResponseForCellular.getCookies().iterator();
+        while (expectedCookies.hasNext() && actualCookies.hasNext()) {
+            assertEquals(expectedCookies.next(), actualCookies.next());
+        }
 
         // msg what: REQUEST_NON_CELLULAR
         ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);

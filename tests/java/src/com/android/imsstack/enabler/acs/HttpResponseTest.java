@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.acs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -39,9 +40,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 public class HttpResponseTest {
     private static final int SLOT_ID = 0;
@@ -102,17 +105,19 @@ public class HttpResponseTest {
     @Test
     @SmallTest
     public void testGetCookies() throws Exception {
-        ArrayDeque cookies = new ArrayDeque<String>();
+        List<String> cookies = new ArrayList<>();
         cookies.add("");
-        Map<String, ArrayDeque> headerMap = new HashMap<>();
+        Map<String, List<String>> headerMap = new HashMap<>();
         headerMap.put("Set-Cookie", cookies);
         doReturn(headerMap).when(mHttpURLConnection).getHeaderFields();
-        assertEquals(new LinkedList<String>(), mHttpResponse.getCookies());
+        assertThrows(NoSuchElementException.class, () -> {
+            mHttpResponse.getCookies().getFirst();
+        });
 
         cookies.clear();
         cookies.add("abcd");
         headerMap.put("Set-Cookie", cookies);
-        assertEquals(cookies, mHttpResponse.getCookies());
+        assertEquals("abcd", mHttpResponse.getCookies().getFirst());
         verify(mHttpURLConnection, times(2))
                 .getHeaderFields();
     }
@@ -124,7 +129,7 @@ public class HttpResponseTest {
         cookies.add("abcd");
         mHttpResponse.setCookies(cookies);
         verify(mHttpURLConnection, times(1))
-                .setRequestProperty(eq("Cookie"), eq("abcd"));
+                .setRequestProperty(eq("Cookie"), eq(";abcd"));
     }
 
     @Test
