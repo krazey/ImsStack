@@ -13,39 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceTrace.h"
 
 #include "MtsFactory.h"
+#include "ServiceTrace.h"
 #include "service/MtsEnabler.h"
 
-__IMS_TRACE_TAG_USER_DECL__("SMS");
+__IMS_TRACE_TAG_USER_DECL__("Mts");
 
 PUBLIC
 MtsEnabler::MtsEnabler(IN IMS_SINT32 nSlotId) :
         Enabler(nSlotId)
 {
     IMS_TRACE_D("+MtsEnabler", 0, 0, 0);
-    MtsFactory::GetInstance();
 }
 
 PUBLIC
-MtsEnabler::~MtsEnabler()
-{
-    MtsFactory::GetInstance()->Destroy(GetSlotId());
-}
+MtsEnabler::~MtsEnabler() {}
 
 PUBLIC
 void MtsEnabler::Start()
 {
-    IMS_TRACE_D("MtsEnabler Start", 0, 0, 0);
-
-    MtsFactory::GetInstance()->StartMts(GetSlotId());
+    IMS_TRACE_D("Start", 0, 0, 0);
+    MtsFactory::GetInstance()->Start(GetSlotId());
 }
 
 PUBLIC
 void MtsEnabler::Stop()
 {
     IMS_TRACE_D("Stop", 0, 0, 0);
-
-    MtsFactory::GetInstance()->StopMts(GetSlotId());
+    MtsFactory::GetInstance()->Stop(GetSlotId());
 }

@@ -17,10 +17,11 @@
 #ifndef MTS_FACTORY_H_
 #define MTS_FACTORY_H_
 
+#include "IMutex.h"
 #include "ImsMap.h"
+#include "ImsTypeDef.h"
 
 class IMtsApp;
-class MtsApp;
 
 class MtsFactory final
 {
@@ -30,19 +31,12 @@ public:
 
     static MtsFactory* GetInstance();
 
-    void Destroy(IN IMS_SINT32 nSlotId);
-    void StartMts(IN IMS_SINT32 nSlotId);
-    void StopMts(IN IMS_SINT32 nSlotId);
-
-    IMS_BOOL DestroyMtsApp(IN IMS_SINT32 nSlotId);
-    MtsApp* GetMtsApp(IN IMS_SINT32 nSlotId);
-    IMS_UINT32 GetMtsAppListSize();
+    void Start(IN IMS_SINT32 nSlotId);
+    void Stop(IN IMS_SINT32 nSlotId);
 
 private:
-    IMtsApp* CreateMtsApp(IN IMS_SINT32 nSlotId);
-
-private:
-    ImsMap<IMS_SINT32, IMtsApp*> m_objMtsApp;
+    IMutex* m_piLock;
+    ImsMap<IMS_SINT32, IMtsApp*> m_objMtsApps;
 };
 
-#endif
+#endif  // MTS_FACTORY_H_

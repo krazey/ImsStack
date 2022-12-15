@@ -17,6 +17,7 @@
 #define MTS_ENABLER_H_
 
 #include "Enabler.h"
+#include "ImsTypeDef.h"
 
 class MtsEnabler final :
         public Enabler
@@ -28,8 +29,7 @@ public:
     MtsEnabler(IN const MtsEnabler&) = delete;
     MtsEnabler& operator=(IN const MtsEnabler&) = delete;
 
-public:
-    // IEnabler class
+    // IEnabler interface implementation
     void Start() override;
     void Stop() override;
 };

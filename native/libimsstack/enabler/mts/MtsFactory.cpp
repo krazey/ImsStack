@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-#include "ServiceTrace.h"
-
-#include "MtsApp.h"
 #include "IMtsApp.h"
+#include "MtsApp.h"
 #include "MtsFactory.h"
+#include "ServiceMutex.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
-MtsFactory::MtsFactory()
+MtsFactory::MtsFactory() :
+        m_objMtsApps(ImsMap<IMS_SINT32, IMtsApp*>())
 {
-    IMS_TRACE_D("MtsFactory", 0, 0, 0);
-    m_objMtsApp = ImsMap<IMS_SINT32, IMtsApp*>();
+    IMS_TRACE_D("+MtsFactory", 0, 0, 0);
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
 PUBLIC
@@ -34,19 +35,14 @@ MtsFactory::~MtsFactory()
 {
     IMS_TRACE_D("~MtsFactory", 0, 0, 0);
 
-    IMS_UINT32 nMtsAppSize = m_objMtsApp.GetSize();
-    for (IMS_UINT32 index = 0; index < nMtsAppSize; index++)
-    {
-        IMtsApp* pApp = m_objMtsApp.GetValueAt(index);
-        if (pApp == IMS_NULL)
-        {
-            continue;
-        }
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 
-        delete DYNAMIC_CAST(MtsApp*, pApp);
-        pApp = IMS_NULL;
+    for (IMS_UINT32 index = 0; index < m_objMtsApps.GetSize(); index++)
+    {
+        IMtsApp* pApp = m_objMtsApps.GetValueAt(index);
+        delete pApp;
     }
-    m_objMtsApp.Clear();
+    m_objMtsApps.Clear();
 }
 
 PUBLIC GLOBAL MtsFactory* MtsFactory::GetInstance()
@@ -62,90 +58,40 @@ PUBLIC GLOBAL MtsFactory* MtsFactory::GetInstance()
 }
 
 PUBLIC
-void MtsFactory::Destroy(IN IMS_SINT32 nSlotId)
+void MtsFactory::Start(IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("Destroy[%d]", nSlotId, 0, 0);
+    IMS_TRACE_D("Start[slot_%d]", nSlotId, 0, 0);
 
-    DestroyMtsApp(nSlotId);
-}
+    LockGuard objLock(m_piLock);
 
-PUBLIC
-void MtsFactory::StartMts(IN IMS_SINT32 nSlotId)
-{
-    IMS_TRACE_D("StartMts[%d]", nSlotId, 0, 0);
-
-    IMtsApp* MtsApp = CreateMtsApp(nSlotId);
-    if (MtsApp == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "StartMts : Fail to create MtsApp", 0, 0, 0);
-        return;
-    }
-    MtsApp->Start();
-}
-
-PUBLIC
-void MtsFactory::StopMts(IN IMS_SINT32 nSlotId)
-{
-    IMS_TRACE_D("StopMts[%d]", nSlotId, 0, 0);
-
-    DestroyMtsApp(nSlotId);
-}
-
-PUBLIC
-IMS_BOOL MtsFactory::DestroyMtsApp(IN IMS_SINT32 nSlotId)
-{
-    IMS_TRACE_D("DestroyMtsApp[%d]", nSlotId, 0, 0);
-
-    IMS_SLONG nIndex = m_objMtsApp.GetIndexOfKey(nSlotId);
-    if (nIndex < 0)
-    {
-        IMS_TRACE_D("DestroyMtsApp : Not Found", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    IMtsApp* piMtsApp = m_objMtsApp.GetValueAt(nIndex);
-    piMtsApp->Stop();
-    MtsApp* pMtsApp = DYNAMIC_CAST(MtsApp*, piMtsApp);
-
-    delete pMtsApp;
-
-    m_objMtsApp.RemoveAt(nIndex);
-    return IMS_TRUE;
-}
-
-PUBLIC
-MtsApp* MtsFactory::GetMtsApp(IN IMS_SINT32 nSlotId)
-{
-    IMS_TRACE_D("GetMtsApp[%d]", nSlotId, 0, 0);
-
-    IMS_SLONG nIndex = m_objMtsApp.GetIndexOfKey(nSlotId);
-
+    IMS_SLONG nIndex = m_objMtsApps.GetIndexOfKey(nSlotId);
     if (nIndex >= 0)
     {
-        IMtsApp* pApp = m_objMtsApp.GetValueAt(nIndex);
-        return DYNAMIC_CAST(MtsApp*, pApp);
+        IMS_TRACE_E(0, "Start : an App in the slot is already running", 0, 0, 0);
+        return;
     }
 
-    return IMS_NULL;
+    IMtsApp* piMtsApp = new MtsApp(nSlotId);
+    m_objMtsApps.Add(nSlotId, piMtsApp);
+    piMtsApp->Start();
 }
 
 PUBLIC
-IMS_UINT32 MtsFactory::GetMtsAppListSize()
+void MtsFactory::Stop(IN IMS_SINT32 nSlotId)
 {
-    IMS_UINT32 nSize = m_objMtsApp.GetSize();
+    IMS_TRACE_D("Stop[slot_%d]", nSlotId, 0, 0);
 
-    IMS_TRACE_D("GetMtsAppListSize: %d", nSize, 0, 0);
+    LockGuard objLock(m_piLock);
 
-    return nSize;
-}
+    IMS_SLONG nIndex = m_objMtsApps.GetIndexOfKey(nSlotId);
+    if (nIndex < 0)
+    {
+        IMS_TRACE_E(0, "Stop : no App in the slot", 0, 0, 0);
+        return;
+    }
 
-PRIVATE
-IMtsApp* MtsFactory::CreateMtsApp(IN IMS_SINT32 nSlotId)
-{
-    IMS_TRACE_D("CreateMtsApp[%d]", nSlotId, 0, 0);
-
-    IMtsApp* piMtsApp = new MtsApp(nSlotId);
-    m_objMtsApp.Add(nSlotId, piMtsApp);
-
-    return piMtsApp;
+    IMtsApp* piMtsApp = m_objMtsApps.GetValueAt(nIndex);
+    piMtsApp->Stop();
+    delete piMtsApp;
+    m_objMtsApps.RemoveAt(nIndex);
 }
