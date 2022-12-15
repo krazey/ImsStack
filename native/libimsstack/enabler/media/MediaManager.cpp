@@ -255,10 +255,14 @@ void MediaManager::DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS
     {
         IMS_TRACE_D("DeleteMediaSessionNode() - Index[%d]", nIndex, 0, 0);
 
-        if (pSessionNode->pMediaSession)
+        if (pSessionNode->pMediaSession != IMS_NULL)
         {
             delete pSessionNode->pMediaSession;
-            pSessionNode->pMediaSession = IMS_NULL;
+        }
+
+        if (pSessionNode->pMessageHandler != IMS_NULL)
+        {
+            delete pSessionNode->pMessageHandler;
         }
 
         delete pSessionNode;
