@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.telephony.CallQuality;
 import android.view.Surface;
@@ -165,7 +164,6 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     private static Surface mDisplaySurface = null;
 
     private final Object mLock = new Object();
-    private Context mContext;
     private Call mCall;
     private MtcMediaSession.AudioListener mAudioListener = null;
     private MtcMediaSession.VideoListener mVideoListener = null;
@@ -176,7 +174,6 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
     private final MediaSession mMediaSession;
 
     public MtcMediaSession(IBaseContext context, Call call) {
-        mContext = context.getContext();
         mCall = call;
         mMediaSession = MediaFactory.createMediaSession(context, this);
     }
@@ -188,6 +185,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
         synchronized (mLock) {
             mCall = null;
+            mMediaSession = null;
             mAudioListener = null;
             mVideoListener = null;
             mTextListener = null;
@@ -244,7 +242,7 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
 
     /**
      * Sends dtmf to media session
-     * @param code
+     * @param code a character of dtmf code
      */
     public void sendDtmf(char code) {
         log("sendDtmf :: code=" + code);
@@ -456,20 +454,9 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         listener.onMediaMessage(parcel);
     }
 
-    private boolean isCallSessionTerminated() {
-        if (!isMediaSessionValid()) {
-            return true;
-        }
-
-        synchronized (mLock) {
-            return (mCall.isTerminated()
-                    || (mCall.getCallState() == CallTracker.CALL_STATE_IDLE));
-        }
-    }
-
     private boolean isMediaSessionValid() {
         synchronized (mLock) {
-            return mCall != null;
+            return (mCall != null) && (mMediaSession != null);
         }
     }
 
