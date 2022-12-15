@@ -39,7 +39,6 @@ import org.w3c.dom.Document;
 
 public class SscTransaction {
     public static final int EVENT_SEND_HTTP_REQUEST = 1001;
-    public static final int EVENT_SRV_RETRY_REQUIRED = 1002;
 
     private final int mSlotId;
     private final SscXmlGov mXmlGov;
@@ -150,23 +149,6 @@ public class SscTransaction {
         close();
     }
 
-    /* TODO: check when implementing NAPTR/SRV
-    protected boolean isSrvRetryRequired(int responseCode) {
-        if (SscConfig.isSrvRecordsRequired(mSlotId) == false) {
-            return false;
-        }
-        if (responseCode == SscConstant.HTTP_PRECONDITION_FAILURE) {
-            return false;
-        }
-        if (responseCode < 200 || responseCode >= 500 ||
-                responseCode == ISscHttpConnection.HTTP_REQUEST_FAILED) {
-            SscDnsQuery.getInstance().setNAFFailed(true);
-            return true;
-        }
-        return false;
-    }
-     */
-
     private abstract class HttpTransaction {
         protected abstract int getRequestType();
         protected abstract String getRequestUri(String xui);
@@ -249,19 +231,6 @@ public class SscTransaction {
                             xui, body);
                 }
             }
-
-            /* TODO: TODO: check when implementing NAPTR/SRV
-            if (isSrvRetryRequired(responseCode)) {
-                ImsLog.d(mSlotId, "SRV Retry Needed");
-                if (mTransactionHandler != null) {
-                    mTransactionHandler.sendEmptyMessage(EVENT_SRV_RETRY_REQUIRED);
-                } else {
-                    ImsLog.e(mSlotId, "mTransactionHandler is null");
-                    sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-                }
-                return;
-            }
-            */
 
             if (responseCode < ISscHttpConnection.HTTP_REQUEST_FAILED_MAX) {
                 if (responseCode == ISscHttpConnection.HTTP_REQUEST_FAILED_BY_DNS) {
@@ -546,16 +515,6 @@ public class SscTransaction {
                     ImsLog.d("Connection Failed");
                     sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                     break;
-                /* TODO: check when implementing NAPTR/SRV
-                case EVENT_SRV_RETRY_REQUIRED:
-                    if (getSscServiceStateAgent().getAllSrvAddrTried(mSlotId) == true) {
-                        sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-                    } else {
-                        SscAuthAgent.getInstance(mSlotId).setIsCredentialInfoUpdated(false);
-                        mTransaction.startTransaction();
-                    }
-                    break;
-                */
                 default:
                     // do nothing
                     break;

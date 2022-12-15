@@ -152,10 +152,6 @@ public final class SscConfig {
     }
 
     // Asset
-    static boolean isSrvRecordsRequired(int slotId) {
-        return getBoolean(slotId, CarrierConfig.Assets.KEY_XCAP_ROOT_URI_REQUIRES_SRV_QUERY_BOOL);
-    }
-
     static int[] getSmCauseTempBlock(int slotId) {
         return getIntArray(slotId, CarrierConfig.Assets.KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY);
     }

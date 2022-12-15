@@ -731,8 +731,6 @@ public class SscServiceImpl implements IUtInterface {
                 case EVENT_UT_TRANSACTION_STARTED: {
                     SscData requestData = (SscData) msg.obj;
                     if (requestData != null) {
-                         // before starting transaction, set flag as false.
-                         //SscDnsQuery.getInstance().setNAFFailed(false);
                          startTransaction(requestData);
                     }
                     break;
