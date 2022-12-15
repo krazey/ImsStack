@@ -34,9 +34,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.imsstack.util.MessageExecutor;
@@ -53,6 +57,9 @@ import java.io.ByteArrayOutputStream;
 
 public class SmsRLStateMachineTest {
 
+    private static final int SLOT_ID = 0;
+    private CarrierConfig mMockCarrierConfig;
+    private ConfigInterface mMockConfigInterface;
     @Mock
     SmsRelayLayer.Listener mListener;
     @Mock
@@ -76,6 +83,10 @@ public class SmsRLStateMachineTest {
 
     @Before
     public void setUp() {
+        mMockCarrierConfig = Mockito.mock(CarrierConfig.class);
+        mMockConfigInterface = Mockito.mock(ConfigInterface.class);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
         mContext = Mockito.mock(ImsCallContext.class);
         mMtsController = Mockito.mock(MtsController.class);
         mListener = Mockito.mock(SmsRelayLayer.Listener.class);
@@ -83,13 +94,56 @@ public class SmsRLStateMachineTest {
         mCurrentState = IDLE;
         mHandler = new MessageExecutor("testMachine");
         Mockito.when(mContext.getCallHandler()).thenReturn(mHandler);
-        mSmsRLStateMachine = new SmsRLStateMachine(mCurrentState, mToken, mMessageType,
-                mMtsController, mContext, mListener, mPsiSmsc, mDestinationAddress, mHandler);
+        when(mMockCarrierConfig.getInt(
+                CarrierConfigManager.ImsSms.KEY_SMS_TR1_TIMER_MILLIS_INT))
+                .thenReturn(SmsUtils.TIMER_TR1M);
+        when(mMockCarrierConfig.getInt(
+                CarrierConfigManager.ImsSms.KEY_SMS_TR2_TIMER_MILLIS_INT))
+                .thenReturn(SmsUtils.TIMER_TR2);
+        mSmsRLStateMachine = new SmsRLStateMachine(mToken, mMessageType,
+                mMtsController, mContext, mListener, mPsiSmsc, mDestinationAddress);
+    }
+
+    @Test
+    public void getConfigTimer_test() {
+        when(mMockCarrierConfig.getInt(
+                CarrierConfigManager.ImsSms.KEY_SMS_TR1_TIMER_MILLIS_INT))
+                .thenReturn(SmsUtils.TIMER_TR1M);
+        assertEquals(SmsUtils.TIMER_TR1M, mSmsRLStateMachine.getTimerTR1());
+        when(mMockCarrierConfig.getInt(
+                CarrierConfigManager.ImsSms.KEY_SMS_TR2_TIMER_MILLIS_INT))
+                .thenReturn(SmsUtils.TIMER_TR2);
+        assertEquals(SmsUtils.TIMER_TR2, mSmsRLStateMachine.getTimerTR2());
+    }
+
+    @Test
+    public void getSendStatus_test() {
+        int[] retryCauseArray = {41, 29};
+        int[] fallbackArray = {1, 8, 10};
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSms.KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY))
+                .thenReturn(retryCauseArray);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSms.KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY))
+                .thenReturn(fallbackArray);
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_RETRY, mSmsRLStateMachine.getSendStatus(41));
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR_FALLBACK,
+                     mSmsRLStateMachine.getSendStatus(8));
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
+                     mSmsRLStateMachine.getSendStatus(11));
+        //Test when both Arrays are empty, the status should be fetched from SmsRPErrorCause
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSms.KEY_SMS_RP_CAUSE_VALUES_TO_RETRY_OVER_IMS_INT_ARRAY))
+                .thenReturn(null);
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSms.KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY))
+                .thenReturn(null);
+        assertEquals(ImsSmsImplBase.SEND_STATUS_ERROR,
+                     mSmsRLStateMachine.getSendStatus(8));
     }
 
     @Test
     public void onRPDataFromNetworkWithOutTimerExpiry_AllState() {
-
         // set State to IDLE
         mSmsRLStateMachine.setState(IDLE);
         SmsRPdu mtRpdata = new SmsRPdu(mMtRpData);
@@ -184,6 +238,10 @@ public class SmsRLStateMachineTest {
 
     @Test
     public void onRPErrorFromNetwork_allStateTest() {
+        int[] fallbackCauseArray = {111, 41};
+        when(mMockCarrierConfig.getIntArray(
+                CarrierConfigManager.ImsSms.KEY_SMS_RP_CAUSE_VALUES_TO_FALLBACK_INT_ARRAY))
+                .thenReturn(fallbackCauseArray);
         SmsRPdu mtRpError = new SmsRPdu(mMtRpError);
         int causeCode = mtRpError.getRPCause();
         mSmsRLStateMachine.setState(IDLE);
@@ -205,7 +263,7 @@ public class SmsRLStateMachineTest {
         mSmsRLStateMachine.setState(WAIT_FOR_RPACK_FROM_NW);
         mSmsRLStateMachine.onRPErrorFromNetwork(mtRpError);
         verify(mListener, times(1)).notifyRLReportIndication(mSmsRLStateMachine.mToken, 0,
-                                SmsRPErrorCause.getSendSmsStatusByRPCauseCode(causeCode),
+                                mSmsRLStateMachine.getSendStatus(causeCode),
                                 SmsRPErrorCause.getSendSmsStatusReasonByRPCauseCode(causeCode),
                                 causeCode);
         assertEquals(IDLE, mSmsRLStateMachine.getState());
