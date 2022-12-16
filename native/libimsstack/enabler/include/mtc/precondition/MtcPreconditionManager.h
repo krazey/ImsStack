@@ -121,11 +121,11 @@ private:
     void CreateStatusRecordsWithActiveMediaTypes(IN ISession* piSession);
     void CreateStatusRecords(IN ISession* piSession, IN IMS_UINT32 eMediaType);
     void HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrentStatus,
-            IN QosStatus eNewStatus, IN IMS_UINT32 eMediaType);
+            IN QosStatus eNewStatus, IN IMS_UINT32 eMediaType) const;
     void NotifyQosStatusToListener(
             IN ISession* piSession, IN IMS_BOOL bReserved, IN IMS_UINT32 eMediaTypes);
     void SetOnWlan(IN IMS_BOOL bOnWlan);
-    void SetRemoteResourceAvailable(IN ISession* piSession);
+    void SetRemoteResourceAvailable(IN ISession* piSession) const;
     void UpdateSupportingPrecondition(IN ISession* piSession, IN IMS_BOOL bRemoteSupported) const;
     void UpdateQosAttributesFromRemoteSdp(IN ISession* piSession);
     static IMS_BOOL IsStatusAvailable(IN QosStatus eStatus);

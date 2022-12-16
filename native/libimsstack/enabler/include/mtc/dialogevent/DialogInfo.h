@@ -54,7 +54,7 @@ private:
     static AString GetDialogId(Dialog* pDialog);
     static AString GetDialogRemoteAddress(Dialog* pDialog);
     static AString GetDialogLocalAddress(Dialog* pDialog);
-    IMS_BOOL IsPullableDialog(Dialog* pDialog) const;
+    static IMS_BOOL IsPullableDialog(Dialog* pDialog);
     static IMS_UINT32 GetDialogCallState(Dialog* pDialog);
     static IMS_UINT32 GetDialogCallType(Dialog* pDialog);
     static IMS_BOOL IsHeldDialog(Dialog* pDialog);

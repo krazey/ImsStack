@@ -650,13 +650,6 @@ AString StartErrorHandler::GetPathHeader() const
 }
 
 PRIVATE
-AString StartErrorHandler::GetLastPathHeader() const
-{
-    IMtcAosConnector* pAosConnector = GetAosConnector();
-    return pAosConnector ? pAosConnector->GetLastPathHeaderValue() : AString::ConstNull();
-}
-
-PRIVATE
 AString StartErrorHandler::GetServiceRouteHeader() const
 {
     IMtcAosConnector* pAosConnector = GetAosConnector();

@@ -104,7 +104,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
         return GetStateName();
     }
 
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     if (!objPreconditionManager.IsEarlyUpdateRequired(piSession))
     {
         return GetStateName();
@@ -259,7 +259,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
     IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
-    CallReasonInfo objReason = EarlyUpdateErrorHandler().Handle(piResponse);
+    CallReasonInfo objReason = EarlyUpdateErrorHandler::Handle(piResponse);
 
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
@@ -343,7 +343,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
     IMtcSession* pSession = m_objContext.GetSession(piSession);
     pSession->HandleResponse(ResponseType::PRACK_RESPONSE, *piMessage);
 
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     if (!objPreconditionManager.IsEarlyUpdateRequired(piSession))
     {
         return GetStateName();

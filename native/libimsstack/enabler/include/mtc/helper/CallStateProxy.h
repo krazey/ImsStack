@@ -79,7 +79,7 @@ private:
     IMtcCall::State CalculateTotalCallState();
 
     void NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails,
-            IN IMS_BOOL bTotalCallStateUpdated);
+            IN IMS_BOOL bTotalCallStateUpdated) const;
     static void NotifyCallState(
             IN ImsList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails);
     void NotifyTotalCallState(IN ImsList<IMtcCallStateListener*> objListeners) const;

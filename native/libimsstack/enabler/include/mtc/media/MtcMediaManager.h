@@ -129,12 +129,10 @@ public:
 private:
     void DestroyMediaSession();
     void SetState(IN MediaState eState);
-    void FinalizeMediaInfo(IN IMS_UINTP nNegoId);
     void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
     void SetNetworkToneRTPTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration);  // TBD
-    static void SendAudioInfoToJava(IN const ISession* piSession);
     void AdjustDirectionForAutoOffer(IN IMS_BOOL bHeldByMe);
-    void AdjustDirectionForAutoAnswerIfHeldByMe(IN_OUT IMS_SINT32& eDirection);
+    static void AdjustDirectionForAutoAnswerIfHeldByMe(IN_OUT IMS_SINT32& eDirection);
 
     IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN IMessage* piMessage);
     IMS_UINTP GetMediaNegoId(IN ISession* piSession);

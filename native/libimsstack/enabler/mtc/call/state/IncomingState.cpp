@@ -77,7 +77,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     if (objPreconditionManager.IsPreconditionRequiredToAlertUser())
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
@@ -124,7 +124,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     if (objPreconditionManager.IsPreconditionRequiredToAlertUser())
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
@@ -158,7 +158,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     }
 
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     if (objPreconditionManager.IsPreconditionRequiredToAlertUser())
     {
         if (!objPreconditionManager.IsAvailableToAlertUser(piSession))
@@ -212,7 +212,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
         return GetStateName();
     }
 
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    const IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     if (!objPreconditionManager.IsPreconditionRequiredToAlertUser())
     {
         return GetStateName();

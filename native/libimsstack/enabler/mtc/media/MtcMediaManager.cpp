@@ -714,41 +714,6 @@ void MtcMediaManager::SetState(IN MediaState eState)
 }
 
 PRIVATE
-void MtcMediaManager::FinalizeMediaInfo(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_D("FinalizeMediaInfo", 0, 0, 0);
-    // it is called by FinalizeSDP()
-    MEDIA_CONTENT_TYPE eContentType = m_piMediaSession->GetNegotiatedMediaType(nNegoId);
-
-    if (eContentType & MEDIA_TYPE_AUDIO)
-    {
-        MEDIA_DIRECTION eDir = m_piMediaSession->GetNegotiatedDirection(nNegoId, MEDIA_TYPE_AUDIO);
-        IMS_SINT32 eQuality = m_piMediaSession->GetNegotiatedQuality(nNegoId, MEDIA_TYPE_AUDIO);
-
-        UpdateMediaDirection(MEDIATYPE_AUDIO, eDir);
-        UpdateMediaQuality(MEDIATYPE_AUDIO, eQuality);
-    }
-
-    if (eContentType & MEDIA_TYPE_VIDEO)
-    {
-        MEDIA_DIRECTION eDir = m_piMediaSession->GetNegotiatedDirection(nNegoId, MEDIA_TYPE_VIDEO);
-        IMS_SINT32 eQuality = m_piMediaSession->GetNegotiatedQuality(nNegoId, MEDIA_TYPE_VIDEO);
-
-        UpdateMediaDirection(MEDIATYPE_VIDEO, eDir);
-        UpdateMediaQuality(MEDIATYPE_VIDEO, eQuality);
-    }
-
-    if (eContentType & MEDIA_TYPE_TEXT)
-    {
-        MEDIA_DIRECTION eDir = m_piMediaSession->GetNegotiatedDirection(nNegoId, MEDIA_TYPE_TEXT);
-        IMS_SINT32 eQuality = m_piMediaSession->GetNegotiatedQuality(nNegoId, MEDIA_TYPE_TEXT);
-
-        UpdateMediaDirection(MEDIATYPE_TEXT, eDir);
-        UpdateMediaQuality(MEDIATYPE_TEXT, eQuality);
-    }
-}
-
-PRIVATE
 void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage)
 {
     IMS_TRACE_D("UpdateLocalTone", 0, 0, 0);
@@ -808,13 +773,6 @@ void MtcMediaManager::SetNetworkToneRTPTimer(IN IMS_UINT32 eMediaTypes, IN IMS_U
     IMS_TRACE_D("SetNetworkToneRTPTimer : MediaType[%d] Duration[%d]", eMediaTypes, nDuration, 0);
 
     m_piMediaSession->SetNetworkToneRtpTimer(0 /* nNegoId */, eContents, nDuration);
-}
-
-PRIVATE
-void MtcMediaManager::SendAudioInfoToJava(IN const ISession* piSession)
-{
-    UNUSED_PARAM(piSession);
-    // IMS_EVENT_CALL_MEIDA_INFO, SlotId, MediaSession::GetNegotiatedQuality(), CodecBitrate()
 }
 
 PRIVATE

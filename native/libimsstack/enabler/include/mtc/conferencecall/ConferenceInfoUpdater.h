@@ -68,11 +68,11 @@ protected:
 
     void Clear();
 
-    IMS_BOOL IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
-            IN IMS_BOOL bAllowPrefix = IMS_TRUE) const;
+    static IMS_BOOL IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
+            IN IMS_BOOL bAllowPrefix = IMS_TRUE);
     IMS_BOOL IsLocalUri(IN const AString& strUserEntity) const;
     static IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity);
-    IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB) const;
+    static IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB);
     IMS_BOOL IsInvalidStatusUpdate(
             IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const;
     IMSList<ConferenceInfo::User*> GetSameUserEntities(IN const ConferenceInfo::User* pUser) const;

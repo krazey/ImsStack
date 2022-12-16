@@ -22,13 +22,7 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-EarlyUpdateErrorHandler::EarlyUpdateErrorHandler() {}
-
-PUBLIC
-EarlyUpdateErrorHandler::~EarlyUpdateErrorHandler() {}
-
-PUBLIC
-CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage) const
+CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage)
 {
     if (IsTransactionTimeout(piMessage))
     {

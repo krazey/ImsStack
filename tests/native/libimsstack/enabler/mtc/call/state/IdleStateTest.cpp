@@ -465,7 +465,6 @@ TEST_F(IdleStateTest, StartConferenceSetsMoTimesAndTransitsOutgoingState)
     AString strTarget("some_target");
     ImsList<ConfUser*> lstUsers;
 
-    CallReasonInfo objReasonInfo(CODE_REJECT_INTERNAL_ERROR);
     ON_CALL(*pBlockChecker, Check)
             .WillByDefault(
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));

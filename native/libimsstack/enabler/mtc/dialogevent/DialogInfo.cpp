@@ -301,7 +301,7 @@ AString DialogInfo::GetDialogLocalAddress(Dialog* pDialog)
 }
 
 PRIVATE
-IMS_BOOL DialogInfo::IsPullableDialog(Dialog* pDialog) const
+IMS_BOOL DialogInfo::IsPullableDialog(Dialog* pDialog)
 {
     if (GetDialogCallState(pDialog) == Dialog::State::STATE_CONFIRMED &&
             pDialog->m_objExtraInfo.m_strExclusive.EqualsIgnoreCase("false") &&

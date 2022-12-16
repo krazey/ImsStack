@@ -78,7 +78,6 @@ private:
 
     void ControlAos(IMS_UINT32 nCommand) const;
     AString GetPathHeader() const;
-    AString GetLastPathHeader() const;
     AString GetServiceRouteHeader() const;
     AString GetSupported() const;
     IMtcAosConnector* GetAosConnector() const;

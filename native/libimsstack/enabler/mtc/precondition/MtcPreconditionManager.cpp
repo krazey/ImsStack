@@ -702,7 +702,7 @@ void MtcPreconditionManager::CreateStatusRecords(IN ISession* piSession, IN IMS_
 
 PRIVATE
 void MtcPreconditionManager::HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrentStatus,
-        IN QosStatus eNewStatus, IN IMS_UINT32 eMediaType)
+        IN QosStatus eNewStatus, IN IMS_UINT32 eMediaType) const
 {
     IMS_TRACE_D(
             "HandleQosTimer [%s]->[%s]", PS_QosStatus(eCurrentStatus), PS_QosStatus(eNewStatus), 0);
@@ -763,7 +763,7 @@ void MtcPreconditionManager::SetOnWlan(IN IMS_BOOL bOnWlan)
 }
 
 PRIVATE
-void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession)
+void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession) const
 {
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     if (pStatusTable == IMS_NULL)

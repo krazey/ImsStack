@@ -127,7 +127,7 @@ private:
     void CreateConferenceDescription(IN const INode& objNode);
     void CreateUsers(IN const INode& objNode);
 
-    void CreateEndPointEntity(IN const IElement& objElement, IN User& objUser);
+    static void CreateEndPointEntity(IN const IElement& objElement, IN User& objUser);
 
     static const ImsList<IElement*>& GetSubElements(IN const IElement& objElement,
             IN const IMS_CHAR* pszSubElementName, OUT ImsList<IElement*>& objSubElements);

@@ -671,7 +671,7 @@ void ConferenceInfoUpdater::Clear()
 
 PROTECTED
 IMS_BOOL ConferenceInfoUpdater::IsSameUri(IN const AString& strUriA, IN const AString& strUriB,
-        IN IMS_BOOL bAllowPrefix /* = IMS_TRUE*/) const
+        IN IMS_BOOL bAllowPrefix /* = IMS_TRUE*/)
 {
     IMS_SINT32 nLengthA = strUriA.GetLength();
     IMS_SINT32 nLengthB = strUriB.GetLength();
@@ -726,7 +726,7 @@ IMS_BOOL ConferenceInfoUpdater::IsAnonymousUri(IN const AString& strUserEntity)
 
 PROTECTED
 IMS_BOOL ConferenceInfoUpdater::IsSamePrivacyUri(
-        IN const AString& strUriA, IN const AString& strUriB) const
+        IN const AString& strUriA, IN const AString& strUriB)
 {
     if (IsAnonymousUri(strUriA) && IsAnonymousUri(strUriB))
     {

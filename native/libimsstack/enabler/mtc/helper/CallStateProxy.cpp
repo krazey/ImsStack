@@ -184,8 +184,8 @@ IMtcCall::State CallStateProxy::CalculateTotalCallState()
 }
 
 PRIVATE
-void CallStateProxy::NotifyToListeners(
-        IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails, IN IMS_BOOL bTotalCallStateUpdated)
+void CallStateProxy::NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails,
+        IN IMS_BOOL bTotalCallStateUpdated) const
 {
     IMS_TRACE_D("NotifyToListeners sync[%s]", _TRACE_B_(bSynchronous), 0, 0);
     ImsList<IMtcCallStateListener*> pListener =
