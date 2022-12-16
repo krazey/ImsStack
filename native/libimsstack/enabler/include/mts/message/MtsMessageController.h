@@ -83,8 +83,6 @@ private:
             IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, OUT ByteArray& objSms);
     void ReportTransmissionResult(
             IN IMS_SINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
-    void ReportTransmissionFailureWithRetryTime(
-            IN SmsFormatType eSmsFormat, IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId = -1);
     IMS_BOOL RespondReceivedMessage(IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage,
             IN IMS_UINT32 nMtResult, IN IMS_BOOL bAdded);
     void Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessage);

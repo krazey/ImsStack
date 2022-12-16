@@ -20,6 +20,7 @@
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "IuMtsService.h"
+#include "MockIMtsServiceListener.h"
 #include "MtsService.h"
 #include "MtsServiceState.h"
 #include "MtsDef.h"
@@ -28,7 +29,6 @@
 #include "TestPhoneInfoService.h"
 #include "core/MockIReference.h"
 #include "core/IPageMessage.h"
-#include "../include/mts/MockIMtsServiceListener.h"
 #include "../../interface/aos/MockIImsAos.h"
 #include "../../interface/aos/MockIImsAosInfo.h"
 

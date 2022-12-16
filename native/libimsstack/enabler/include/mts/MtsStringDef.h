@@ -44,27 +44,6 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* PS_CallState(IN const IMS_UINT32 nState)
-    {
-        switch (nState)
-        {
-            case CALL_STATE_IDLE:
-                return "CALL_STATE_IDLE";
-            case CALL_STATE_TERMINATING:
-                return "CALL_STATE_TERMINATING";
-            case CALL_STATE_RINGBACK:
-                return "CALL_STATE_RINGBACK";
-            case CALL_STATE_RINGING:
-                return "CALL_STATE_RINGING";
-            case CALL_STATE_ALERTING:
-                return "CALL_STATE_ALERTING";
-            case CALL_STATE_OFFHOOK:
-                return "CALL_STATE_OFFHOOK";
-            default:
-                return "__INVALID__";
-        }
-    }
-
     inline static const IMS_CHAR* PS_Ipcan(IN const IMS_UINT32 nIpcan)
     {
         switch (nIpcan)
@@ -243,10 +222,6 @@ public:
 
 #ifndef PS_AccessNetworkType
 #define PS_AccessNetworkType(A) MtsStringDef::PS_AccessNetworkType(A)
-#endif
-
-#ifndef PS_CallState
-#define PS_CallState(A) MtsStringDef::PS_CallState(A)
 #endif
 
 #ifndef PS_Ipcan

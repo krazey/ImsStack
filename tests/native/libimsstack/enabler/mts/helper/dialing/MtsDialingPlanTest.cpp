@@ -83,6 +83,53 @@ TEST_F(MtsDialingPlanTest, Translate)
     EXPECT_STREQ(strResult.GetStr(), strTargetAddress.GetStr());
 }
 
+TEST_F(MtsDialingPlanTest, TranslateFormNonTelUriWithSomeMoreParameters)
+{
+    AString strTargetAddress = "#31#2345678901";
+    AString strResult;
+
+    pMtsDialingPlan->SetScheme(SIP_URI_SCHEME);
+    strResult = pMtsDialingPlan->Translate(strTargetAddress, IMS_TRUE);
+    EXPECT_TRUE(strResult.Contains(SIP_URI_SCHEME));
+    EXPECT_TRUE(strResult.Contains(";phone-context="));
+    EXPECT_TRUE(strResult.Contains(";user="));
+}
+
+TEST_F(MtsDialingPlanTest, TranslateFormNonTelUriWithSpecificTargetAddress)
+{
+    AString strTargetAddress = "+";
+    AString strResult;
+
+    pMtsDialingPlan->SetScheme(SIP_URI_SCHEME);
+
+    strResult = pMtsDialingPlan->Translate(strTargetAddress, IMS_TRUE);
+    EXPECT_TRUE(strResult.Contains(SIP_URI_SCHEME + ":+"));
+}
+
+TEST_F(MtsDialingPlanTest, TranslateFormNonTelUriWithUnexpectedTargetAddress)
+{
+    AString strTargetAddress = "+12345678901_";
+    AString strResult;
+
+    pMtsDialingPlan->SetScheme(SIP_URI_SCHEME);
+    strResult = pMtsDialingPlan->Translate(strTargetAddress, IMS_TRUE);
+    EXPECT_TRUE(strResult.Contains(SIP_URI_SCHEME + ":+12345678901_"));
+    EXPECT_FALSE(strResult.Contains(";phone-context="));
+    EXPECT_FALSE(strResult.Contains(";user="));
+}
+
+TEST_F(MtsDialingPlanTest, TranslateFormNonTelUriWithGlobalNumberFormat)
+{
+    AString strTargetAddress = "+12345678901";
+    AString strResult;
+
+    pMtsDialingPlan->SetScheme(SIP_URI_SCHEME);
+    strResult = pMtsDialingPlan->Translate(strTargetAddress, IMS_TRUE);
+    EXPECT_TRUE(strResult.Contains(SIP_URI_SCHEME + ":+12345678901"));
+    EXPECT_FALSE(strResult.Contains(";phone-context="));
+    EXPECT_TRUE(strResult.Contains(";user="));
+}
+
 TEST_F(MtsDialingPlanTest, GetterSetterNetworkProfile)
 {
     AString strNetworkProfile = "Sms over IP";

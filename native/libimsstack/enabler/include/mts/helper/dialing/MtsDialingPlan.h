@@ -27,8 +27,7 @@ public:
             IN IMS_SINT32 nSlotId, IN const AString& strScheme, IN IMS_SINT32 nDialingPolicy);
     ~MtsDialingPlan();
 
-    AString Translate(IN const AString& strTargetAddress, IN IMS_BOOL bAquot = IMS_TRUE,
-            IN IMS_BOOL bUssi = IMS_FALSE);
+    AString Translate(IN const AString& strTargetAddress, IN IMS_BOOL bAquot = IMS_TRUE);
 
     inline IMS_SINT32 GetDialingPolicy() const { return m_nDialingPolicy; }
     inline void SetDialingPolicy(IN IMS_SINT32 nPolicy) { m_nDialingPolicy = nPolicy; }
@@ -43,11 +42,9 @@ public:
 private:
     // For geo-local number format
     AccessNetworkInfo* GetAccessNetworkInfo(IN_OUT AccessNetworkInfo& objAni);
-    IMS_BOOL FormNonTelUri(IN const AString& strTargetAddress, IN IMS_BOOL bAquot,
-            OUT AStringBuffer& objUri, IN const AString& strScheme = AString::ConstNull());
+    IMS_BOOL FormNonTelUri(
+            IN const AString& strTargetAddress, IN IMS_BOOL bAquot, OUT AStringBuffer& objUri);
     IMS_BOOL FormTelUri(IN const AString& strTargetAddress, OUT AStringBuffer& objUri);
-    IMS_BOOL FormUssiNonTelUri(IN const AString& strTargetAddress, OUT AStringBuffer& objUri,
-            IN const AString& strScheme = AString::ConstNull());
 
     IMS_SINT32 TranslateScheme() const;
 

@@ -22,8 +22,8 @@
 
 __IMS_TRACE_TAG_COM_MTS__;
 
-MtsTraffic::MtsTraffic(IN IMS_UINT32 nDirection, IN IMS_UINT32 nTrafficType,
-        IN IMtsTrafficListener& objListener) :
+MtsTraffic::MtsTraffic(
+        IN IMS_UINT32 nDirection, IN IMS_UINT32 nTrafficType, IN IMtsTrafficListener& objListener) :
         m_nDirection(nDirection),
         m_nTrafficType(nTrafficType),
         m_objMtsTrafficListener(objListener),
@@ -31,8 +31,7 @@ MtsTraffic::MtsTraffic(IN IMS_UINT32 nDirection, IN IMS_UINT32 nTrafficType,
 {
 }
 
-PUBLIC
-MtsTraffic::~MtsTraffic()
+PUBLIC VIRTUAL MtsTraffic::~MtsTraffic()
 {
     if (m_piRadioGuardTimer != IMS_NULL)
     {

@@ -55,6 +55,15 @@ TEST_F(MtsSipFormUtilsTest, FormDestination)
     EXPECT_STREQ(strLastIpSmgw.GetStr(), strResultAddress.GetStr());
 }
 
+TEST_F(MtsSipFormUtilsTest, FormDestinationWithNoTargetAddress)
+{
+    AString strResultAddress;
+    AString strNoTargetAddress;
+
+    EXPECT_FALSE(pMtsSipFormUtils->FormDestination(
+            strNoTargetAddress, IMS_FALSE, strLastIpSmgw, strResultAddress));
+}
+
 TEST_F(MtsSipFormUtilsTest, FormContentTypeEnumToStr)
 {
     EXPECT_STREQ(pMtsSipFormUtils->FormContentTypeEnumToStr(SmsFormatType::SMSFORMAT_3GPP).GetStr(),
@@ -62,6 +71,9 @@ TEST_F(MtsSipFormUtilsTest, FormContentTypeEnumToStr)
     EXPECT_STREQ(
             pMtsSipFormUtils->FormContentTypeEnumToStr(SmsFormatType::SMSFORMAT_3GPP2).GetStr(),
             str3gpp2Format.GetStr());
+    EXPECT_STREQ(
+            pMtsSipFormUtils->FormContentTypeEnumToStr(SmsFormatType::SMSFORMAT_INVALID).GetStr(),
+            "");
 }
 
 TEST_F(MtsSipFormUtilsTest, FormContentTypeStrToEnum)
