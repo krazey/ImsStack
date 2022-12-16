@@ -176,5 +176,5 @@ IMS_BOOL TextController::UpdateQualityThreshold(IN TextNego* pNego)
         bEnableRtcp = IMS_FALSE;
     }
 
-    return m_pSession->UpdateMediaQualityThreshold(IMS_FALSE, bEnableRtcp);
+    return m_pSession->UpdateMediaQualityThreshold(IMS_TRUE, bEnableRtcp);
 }

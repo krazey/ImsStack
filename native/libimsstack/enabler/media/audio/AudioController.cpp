@@ -378,7 +378,7 @@ IMS_BOOL AudioController::UpdateQualityThreshold(IN IMS_UINTP nNegoId, IN AudioN
         }
 
         return pAudioSession->UpdateMediaQualityThreshold(
-                MEDIA_DIRECTION_IS_AUDIO_HOLD(pAudioSession->GetDirection()), bEnableRtcp);
+                !MEDIA_DIRECTION_IS_AUDIO_HOLD(pAudioSession->GetDirection()), bEnableRtcp);
     }
 
     return IMS_FALSE;

@@ -186,7 +186,7 @@ IMS_BOOL VideoController::UpdateQualityThreshold(IN VideoNego* pNego)
     }
 
     return m_pSession->UpdateMediaQualityThreshold(
-            MEDIA_DIRECTION_IS_VIDEO_HOLD(m_pSession->GetDirection()), bEnableRtcp);
+            MEDIA_DIRECTION_INVOLVED_RECV(m_pSession->GetDirection()), bEnableRtcp);
 }
 
 PUBLIC

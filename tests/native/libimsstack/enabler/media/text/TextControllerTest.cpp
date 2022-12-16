@@ -116,3 +116,11 @@ TEST_F(TextControllerTest, testModifySession)
     EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateSession(), IMS_TRUE);
 }
+
+TEST_F(TextControllerTest, testUpdateQualityThreshold)
+{
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, m_pConfig), IMS_TRUE);
+
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(nullptr), IMS_FALSE);
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(m_pTextNego), IMS_TRUE);
+}

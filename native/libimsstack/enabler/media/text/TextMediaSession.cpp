@@ -194,19 +194,10 @@ void TextMediaSession::UpdateAccessNetwork(IMS_UINT32 nAccessNetwork)
 }
 
 PUBLIC
-IMS_BOOL TextMediaSession::UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold, IN IMS_BOOL bEnableRtcp)
+IMS_BOOL TextMediaSession::UpdateMediaQualityThreshold(
+        IN IMS_BOOL bActiveSession, IN IMS_BOOL bEnableRtcp)
 {
-    if (bIsHold == IMS_TRUE)
-    {
-        m_objMediaQualityThreshold.setRtpInactivityTimerMillis(0);
-        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-                m_pConfig->GetRtcpInactivityTimerMillis());
-        m_objMediaQualityThreshold.setRtpPacketLossDurationMillis(0);
-        m_objMediaQualityThreshold.setRtpPacketLossRate(0);
-        m_objMediaQualityThreshold.setJitterDurationMillis(0);
-        m_objMediaQualityThreshold.setRtpJitterMillis(0);
-    }
-    else
+    if (bActiveSession)
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
                 m_pConfig->GetRtpInactivityTimerMillis());
@@ -226,9 +217,20 @@ IMS_BOOL TextMediaSession::UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold, IN I
         m_objMediaQualityThreshold.setJitterDurationMillis(15000);
         m_objMediaQualityThreshold.setRtpJitterMillis(100);
     }
+    else
+    {
+        m_objMediaQualityThreshold.setRtpInactivityTimerMillis(0);
+        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
+                m_pConfig->GetRtcpInactivityTimerMillis());
+        m_objMediaQualityThreshold.setRtpPacketLossDurationMillis(0);
+        m_objMediaQualityThreshold.setRtpPacketLossRate(0);
+        m_objMediaQualityThreshold.setJitterDurationMillis(0);
+        m_objMediaQualityThreshold.setRtpJitterMillis(0);
+    }
 
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - IsHold[%d], RtpInactivity[%d], RtcpInactivity[%d]",
-            bIsHold, m_objMediaQualityThreshold.getRtpInactivityTimerMillis(),
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - bActiveSession[%d], RtpInactivity[%d], "
+                "RtcpInactivity[%d]",
+            bActiveSession, m_objMediaQualityThreshold.getRtpInactivityTimerMillis(),
             m_objMediaQualityThreshold.getRtcpInactivityTimerMillis());
     IMS_TRACE_D("UpdateMediaQualityThreshold() - PacketLossDurationMillis[%d], PacketLossRate[%d]",
             m_objMediaQualityThreshold.getRtpPacketLossDurationMillis(),
