@@ -51,8 +51,8 @@ public class RcsCapOptionsRequestCallBackTest {
     public void setUp() {
         mRemoteOptionsCallback = Mockito.mock(RemoteOptionsCallback.class);
         mMessageExecutor = new MessageExecutor("requestExecutor");
-        mRcsCapOptionsRequestCallback = new RcsCapOptionsRequestCallback(
-                mRemoteOptionsCallback, mMessageExecutor);
+        mRcsCapOptionsRequestCallback = new RcsCapOptionsRequestCallback(mMessageExecutor);
+        mRcsCapOptionsRequestCallback.setCallBack(mRemoteOptionsCallback);
     }
 
     @Test

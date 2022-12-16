@@ -25,6 +25,7 @@ import com.android.imsstack.enabler.uce.interf.RemoteOptionsCallback;
 import com.android.imsstack.enabler.uce.interf.UceEventListener;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MessageExecutor;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Set;
 
@@ -34,11 +35,25 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
     private MessageExecutor mMessageExecutor;
     private MessageExecutor mRequestExecutor;
 
+    private RcsCapOptionsRequestCallback mRcsOptionsRequestCallback;
+
     public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
             MessageExecutor messageExecutor, MessageExecutor requestExecutor) {
         mEventListener = listener;
         mMessageExecutor = messageExecutor;
         mRequestExecutor = requestExecutor;
+        mRcsOptionsRequestCallback =
+                new RcsCapOptionsRequestCallback(mRequestExecutor);
+    }
+
+    @VisibleForTesting
+    public RcsCapEventListenerCallBack(CapabilityExchangeEventListener listener,
+            MessageExecutor messageExecutor, MessageExecutor requestExecutor,
+            RcsCapOptionsRequestCallback rcsOptionsRequestCallback) {
+        mEventListener = listener;
+        mMessageExecutor = messageExecutor;
+        mRequestExecutor = requestExecutor;
+        mRcsOptionsRequestCallback = rcsOptionsRequestCallback;
     }
 
     /**
@@ -154,13 +169,11 @@ public class RcsCapEventListenerCallBack implements UceEventListener {
             Log.d(LOG_TAG, "mEventListener is null");
             return;
         }
-        RcsCapOptionsRequestCallback rcsOptionsRequestCallback =
-                new RcsCapOptionsRequestCallback(remoteOptionsCallback, mRequestExecutor);
-
+        mRcsOptionsRequestCallback.setCallBack(remoteOptionsCallback);
         postAndRunTask(() -> {
             try {
                 mEventListener.onRemoteCapabilityRequest(
-                        contactUri, remoteCapabilities, rcsOptionsRequestCallback);
+                        contactUri, remoteCapabilities, mRcsOptionsRequestCallback);
                 Log.d(LOG_TAG, "onRemoteCapabilityRequest is sent to framework");
             } catch (ImsException e) {
                 Log.e(LOG_TAG, "onRemoteCapabilityRequest Exception = " + e.getMessage());

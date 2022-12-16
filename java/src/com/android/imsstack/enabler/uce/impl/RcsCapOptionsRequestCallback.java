@@ -17,22 +17,29 @@
 package com.android.imsstack.enabler.uce.impl;
 
 import android.telephony.ims.RcsContactUceCapability;
+import android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback;
 import android.util.Log;
 
 import com.android.imsstack.enabler.uce.interf.RemoteOptionsCallback;
 import com.android.imsstack.util.MessageExecutor;
-import android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback;
 
 public class RcsCapOptionsRequestCallback implements OptionsRequestCallback {
 
-    private RemoteOptionsCallback mRemoteOptionsCallback;
+    private RemoteOptionsCallback mRemoteOptionsCallback = null;
     private static final String LOG_TAG = "RcsCapOptionsRequestCallback";
     private MessageExecutor mMessageExecutor;
 
-    public  RcsCapOptionsRequestCallback (RemoteOptionsCallback remoteOptionsCallback,
-            MessageExecutor executor) {
-        mRemoteOptionsCallback = remoteOptionsCallback;
+    public RcsCapOptionsRequestCallback(MessageExecutor executor) {
         mMessageExecutor = executor;
+    }
+
+    /**
+     * set callback of option request to send the response from
+     * the network back to the framework.
+     * @param remoteOptionsCallback The callback of option request
+     */
+    public void setCallBack(RemoteOptionsCallback remoteOptionsCallback) {
+        mRemoteOptionsCallback = remoteOptionsCallback;
     }
 
     /**
