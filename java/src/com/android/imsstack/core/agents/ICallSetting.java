@@ -109,7 +109,4 @@ public interface ICallSetting {
 
     /** Unregister rtt mode setting */
     void unregisterForRttModeSettingChanged(Handler h);
-
-    /** REMOVE */
-    boolean isNetworkMode3GOnly();
 }

@@ -130,7 +130,6 @@ public final class PhoneStateAgent implements IPhoneState,
         boolean isChanged = mPhoneStateNotifiers.add((PhoneStateNotifier) notifier);
 
         if (isChanged && (notifier != null) && (notifier.getEvents() != 0)) {
-            updateImsEvents(notifier, notifier.getEvents(), notifier.getEvents());
             updatePhoneStateEvents(notifier, notifier.getEvents(), notifier.getEvents());
         }
     }
@@ -143,7 +142,6 @@ public final class PhoneStateAgent implements IPhoneState,
         boolean isChanged = mPhoneStateNotifiers.remove((PhoneStateNotifier) notifier);
 
         if (isChanged && (notifier != null) && (notifier.getEvents() != 0)) {
-            updateImsEvents(notifier, 0, 0);
             updatePhoneStateEvents(notifier, 0, 0);
         }
     }
@@ -164,7 +162,6 @@ public final class PhoneStateAgent implements IPhoneState,
             return;
         }
 
-        updateImsEvents(notifier, events, newEvents);
         updatePhoneStateEvents(notifier, events, newEvents);
     }
 
@@ -204,12 +201,6 @@ public final class PhoneStateAgent implements IPhoneState,
         }
     }
 
-    private void notifyPcscfUpdated(List<String> pcscf) {
-        for (PhoneStateNotifier n : mPhoneStateNotifiers) {
-            n.notifyPcscfUpdated(pcscf);
-        }
-    }
-
     private void notifyPreciseDataConnectionState(PreciseDataConnectionState dataConnectionState) {
         for (PhoneStateNotifier n : mPhoneStateNotifiers) {
             n.notifyPreciseDataConnectionState(dataConnectionState);
@@ -245,29 +236,6 @@ public final class PhoneStateAgent implements IPhoneState,
                 PhoneStateNotifier psn = (PhoneStateNotifier) notifier;
                 psn.notifyCallState(callState.getState(), callState.getIncomingNumber());
             }
-        }
-    }
-
-    private void notifyCurrentStateIfPresentForImsEvent(
-            IPhoneStateNotifier notifier, int events) {
-        if (notifier == null) {
-            return;
-        }
-
-        if (isEventSet(events, PhoneStateEvents.LISTEN_PCSCF_ADDRESS_INFO)) {
-            List<String> pcscf = mHandler.getPcscf();
-
-            if (pcscf != null) {
-                PhoneStateNotifier psn = (PhoneStateNotifier) notifier;
-                psn.notifyPcscfUpdated(pcscf);
-            }
-        }
-    }
-
-    private void listenForImsEventChanged() {
-        synchronized (mLock) {
-            ImsLog.i(mSlotId, "listenForImsEventChanged :: subId="
-                    + ((mPhoneStateListener != null) ? mPhoneStateListener.getSubId() : -1));
         }
     }
 
@@ -328,32 +296,8 @@ public final class PhoneStateAgent implements IPhoneState,
         listenForSubscriptionChanged(subId);
     }
 
-    private void setServiceStateAfterSimLoad(int subId) {
-        TelephonyManager tm = getTelephonyManager(subId);
-
-        if (tm == null) {
-            return;
-        }
-
-        ServiceState serviceState = tm.getServiceState();
-        if (serviceState != null) {
-            mPhoneStateListener.setServiceState(serviceState);
-        }
-    }
-
     private void setActivePhoneStateListener() {
         mPhoneStateListener.setListener(mEvents.getEvents());
-    }
-
-    private void updateImsEvents(IPhoneStateNotifier notifier,
-            int events, int newEvents) {
-        int imsEvents = PhoneStateEvents.getImsEventsFromImsPhoneState(events);
-
-        if (mEvents.updateImsEvents(imsEvents, notifier)) {
-            listenForImsEventChanged();
-        } else if (newEvents > 0) {
-            notifyCurrentStateIfPresentForImsEvent(notifier, newEvents);
-        }
     }
 
     private void updatePhoneStateEvents(IPhoneStateNotifier notifier,
@@ -414,8 +358,6 @@ public final class PhoneStateAgent implements IPhoneState,
     }
 
     private final class PhoneStateHandler extends Handler implements Executor {
-        private List<String> mPcscf = null;
-
         PhoneStateHandler(Looper looper) {
             super(looper);
         }
@@ -436,18 +378,6 @@ public final class PhoneStateAgent implements IPhoneState,
                     // no-op
                     break;
             }
-        }
-
-        public List<String> getPcscf() {
-            return mPcscf;
-        }
-
-        private void onPcscfUpdated(List<String> pcscf) {
-            ImsLog.i(mSlotId, "onPcscfUpdated :: ");
-            notifyPcscfUpdated(pcscf);
-
-            // Store the most recent pcscf
-            mPcscf = pcscf;
         }
     }
 
@@ -617,10 +547,6 @@ public final class PhoneStateAgent implements IPhoneState,
 
         public int getCellularDataRAT() {
             return mCellularDataRAT;
-        }
-
-        public void setServiceState(ServiceState serviceState) {
-            mServiceState = serviceState;
         }
 
         public void setListener(int events) {

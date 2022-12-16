@@ -85,10 +85,6 @@ public class QosAgent {
             }
         }
 
-        public DatagramSocket getDatagramSocket() {
-            return mSocket;
-        }
-
         @Override
         public void onError(final QosCallbackException exception) {
             ImsLog.d(mSlotId, "onError: " + exception.toString());
@@ -365,24 +361,6 @@ public class QosAgent {
             }
         }
         return null;
-    }
-
-    private Network getNetwork() {
-
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return null;
-        }
-
-        Network activeNetwork = cm.getActiveNetwork();
-
-        if (activeNetwork == null) {
-            ImsLog.w(mSlotId, "No networks");
-            return null;
-        }
-        return activeNetwork;
     }
 
     private void registerQosCallback(Network network, DatagramSocket socket, QosCallback callback) {

@@ -51,13 +51,6 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
     private static final int EVENT_TURN_ON_OFF = 1004;
 
     // NOTICE: This needs to be synchronize with native constant values.
-    private static final Map<NetworkInfo.State, Integer> STATE_MAP = Map.of(
-            NetworkInfo.State.CONNECTING, 0,
-            NetworkInfo.State.CONNECTED, 1,
-            NetworkInfo.State.SUSPENDED, 2,
-            NetworkInfo.State.DISCONNECTING, 3,
-            NetworkInfo.State.DISCONNECTED, 4,
-            NetworkInfo.State.UNKNOWN, 5);
     private static final Map<NetworkInfo.DetailedState, Integer> DETAILED_STATE_MAP = Map.ofEntries(
             Map.entry(NetworkInfo.DetailedState.IDLE, 0),
             Map.entry(NetworkInfo.DetailedState.SCANNING, 1),
@@ -321,11 +314,6 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
         }
     }
 
-    private int getNetworkInfoState(NetworkInfo.State state) {
-        Integer niState = STATE_MAP.get(state);
-        return (niState != null) ? niState.intValue() : (-1);
-    }
-
     private int getNetworkInfoDetailedState(NetworkInfo.DetailedState state) {
         Integer niDetailedState = DETAILED_STATE_MAP.get(state);
         return (niDetailedState != null) ? niDetailedState.intValue() : (-1);
@@ -412,33 +400,6 @@ public class WifiStateAgent implements IWifiState, ISystemAPIWifi {
         }
 
         ImsLog.i("DetailedState = " + detailedState + " , mIsWifiConnected = " + mIsWifiConnected);
-    }
-
-    private void updateWifiState() {
-        ConnectivityManager cm =
-                AppContext.getInstance().getSystemService(ConnectivityManager.class);
-
-        if (cm == null) {
-            return;
-        }
-
-        /* ImsStack-Build_ConnectivityManager#TYPE_ */
-        final NetworkInfo networkInfo = null; // cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-        if (networkInfo == null) {
-            return;
-        }
-
-        ImsLog.i("wifi state = " + networkInfo.getState() + " detailed state = "
-            + networkInfo.getDetailedState());
-
-        setWifiConnectedState(networkInfo);
-
-        mWifiDetailedStatus = getNetworkInfoDetailedState(networkInfo.getDetailedState());
-
-        if (mWifiSupported == true) {
-            SystemInterface.getInstance().notifyWifiDetailedStateChanged(mWifiDetailedStatus);
-        }
     }
 
     private class WifiStateReceiver extends BroadcastReceiver {

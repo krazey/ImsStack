@@ -427,10 +427,6 @@ public class ImsStackApp extends Application {
             mSlotId = slotId;
         }
 
-        public int getSlotId() {
-            return mSlotId;
-        }
-
         public boolean isServiceStarted() {
             return mServiceStarted;
         }
@@ -449,10 +445,6 @@ public class ImsStackApp extends Application {
 
         public @Sim.State int getSimState() {
             return mSimState;
-        }
-
-        public @Sim.State int getOldSimState() {
-            return mOldSimState;
         }
 
         public void setSimState(@Sim.State int state) {

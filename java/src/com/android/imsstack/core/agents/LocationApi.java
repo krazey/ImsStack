@@ -39,11 +39,9 @@ public final class LocationApi {
             LocationManager.PROVIDERS_CHANGED_ACTION;
 
     public static final int FLAG_NONE = 0x00000000;
-    // The location information will be obtained by IMS Service (Location Service).
-    public static final int FLAG_USE_IMS_LOCATION = 0x00000001;
     // If current user is the same user which IMS process runs,
     // then it will obtain the location information from LocationManager directly.
-    public static final int FLAG_SELECT_LOCATION_SCHEME_BY_CURRENT_USER = 0x00000002;
+    public static final int FLAG_SELECT_LOCATION_SCHEME_BY_CURRENT_USER = 0x00000001;
 
     /** Wrapper interface for LocationListener */
     public interface Listener extends LocationListener {
@@ -225,12 +223,6 @@ public final class LocationApi {
      */
     public static boolean isLocationFromFlp(Location location) {
         return (location != null) && location.getProvider().equals(FUSED_PROVIDER);
-    }
-
-    private boolean isImsLocationEnabled() {
-        synchronized (mLock) {
-            return (mFlag & FLAG_USE_IMS_LOCATION) != 0;
-        }
     }
 
     private boolean isLocationApiReady() {

@@ -1421,7 +1421,8 @@ public class CarrierConfig {
         }
     }
 
-    private void refineBundlesForImsVt() {
+    // TODO_MEDIA temp block waiting for bundle
+    /*private void refineBundlesForImsVt() {
         // Check the following keys:
         // KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
         // KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE
@@ -1446,7 +1447,7 @@ public class CarrierConfig {
         setBundle(mConfig,
                 CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE,
                 H264_PAYLOAD_DESCRIPTION_BUNDLE_KEYS);
-    }
+    }*/
 
     private void refineBundlesForAssets() {
         // Check the following keys:

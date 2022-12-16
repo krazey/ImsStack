@@ -186,14 +186,6 @@ public final class ImsTestMode {
             mTestmodes |= enabledTestmodes;
         }
 
-        private void disableTestmode(int disabledTestmodes) {
-            mTestmodes &= (~disabledTestmodes);
-        }
-
-        private void setExtraTestmask(int testmask) {
-            mExtraTestmask = testmask;
-        }
-
         private boolean isConfigEnabled(int config) {
             return (mTestmodes & config) == config;
         }

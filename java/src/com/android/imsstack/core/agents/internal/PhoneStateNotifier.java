@@ -140,16 +140,6 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
                 state, 0).sendToTarget();
     }
 
-    public void notifyPcscfUpdated(List<String> pcscf) {
-        if (mHandler == null) {
-            onPcscfUpdated(pcscf);
-            return;
-        }
-
-        Message.obtain(mHandler, ImsPhoneStateListener.LISTEN_PCSCF_ADDRESS_INFO,
-                pcscf).sendToTarget();
-    }
-
     public void notifyPreciseDataConnectionState(PreciseDataConnectionState dataConnectionState) {
         if (mHandler == null) {
             onPreciseDataConnectionStateChanged(dataConnectionState);
@@ -294,25 +284,6 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
     }
 
     /**
-     * Invokes when P-CSCF addresses are changed.
-     */
-    protected void onPcscfUpdated(List<String> pcscf) {
-        if (!isEventSet(ImsPhoneStateListener.LISTEN_PCSCF_ADDRESS_INFO)) {
-            return;
-        }
-
-        ImsPhoneStateListener listener;
-
-        synchronized (mLock) {
-            listener = mListener;
-        }
-
-        if (listener != null) {
-            listener.onPcscfUpdated(pcscf);
-        }
-    }
-
-    /**
      * Invokes when precise data connection state is changed.
      */
     protected void onPreciseDataConnectionStateChanged(
@@ -382,10 +353,6 @@ public class PhoneStateNotifier implements IPhoneStateNotifier {
                 }
                 case ImsPhoneStateListener.LISTEN_SIGNAL_STRENGTHS: {
                     onSignalStrengthsChanged((SignalStrength) msg.obj);
-                    break;
-                }
-                case ImsPhoneStateListener.LISTEN_PCSCF_ADDRESS_INFO: {
-                    onPcscfUpdated((List<String>) msg.obj);
                     break;
                 }
                 case ImsPhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE: {

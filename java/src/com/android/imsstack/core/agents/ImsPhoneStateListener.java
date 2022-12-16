@@ -37,9 +37,8 @@ public class ImsPhoneStateListener {
     public static final int LISTEN_SRVCC_STATE = 0x00000008;
     public static final int LISTEN_CELL_INFO = 0x00000010;
     public static final int LISTEN_SIGNAL_STRENGTHS = 0x00000020;
-    public static final int LISTEN_PCSCF_ADDRESS_INFO = 0x00000040;
-    public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 0x00000080;
-    public static final int LISTEN_BARRING_INFO = 0x00000100;
+    public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 0x00000040;
+    public static final int LISTEN_BARRING_INFO = 0x00000080;
 
     /**
      * Invokes when service state is changed.
@@ -80,13 +79,6 @@ public class ImsPhoneStateListener {
      * Invokes when signal strengths is changed.
      */
     public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-        // no-op
-    }
-
-    /**
-     * Invokes when pdn handover info is changed.
-     */
-    public void onPcscfUpdated(List<String> pcscf) {
         // no-op
     }
 

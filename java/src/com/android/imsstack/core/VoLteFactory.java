@@ -178,17 +178,6 @@ public class VoLteFactory {
         sAgents.clear();
     }
 
-    private void startAgents(int slotID) {
-        ImsLog.d("slotID[" + slotID + "]");
-
-        for (int agentKey = AGENT_DEFAULT; agentKey < AGENT_MAX; agentKey++) {
-            IVoLteAgent volteAgent = sAgents.get(agentKey);
-            if (volteAgent != null) {
-                volteAgent.start(slotID);
-            }
-        }
-    }
-
     private void stopAgents(int slotID) {
         ImsLog.d("slotID[" + slotID + "]");
 

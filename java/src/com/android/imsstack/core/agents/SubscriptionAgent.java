@@ -694,14 +694,6 @@ public final class SubscriptionAgent implements ISubscription {
             return isIccStateLoadedOrAbsent(getState(slotId));
         }
 
-        public void removeState(int slotId) {
-            if (!isValidSlotId(slotId)) {
-                return;
-            }
-
-            mState.remove(Integer.valueOf(slotId));
-        }
-
         public void setState(int slotId, String state) {
             if (!isValidSlotId(slotId)) {
                 return;

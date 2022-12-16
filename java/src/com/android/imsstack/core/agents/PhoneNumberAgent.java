@@ -97,10 +97,6 @@ public class PhoneNumberAgent implements IVoLteAgent {
             }
         }
 
-        private void clearRetryCount() {
-            mTryingCounter = 0;
-        }
-
         // return : milli-seconds
         private int getRetryInterval() {
             return mRetryIntervalSec * 1000;
@@ -174,14 +170,6 @@ public class PhoneNumberAgent implements IVoLteAgent {
 
         private void retryForPhoneNumberReadyEvent() {
             retryForPhoneNumber(true, EVENT_PHONE_NUMBER_READY_RETRY, 1, getRetryInterval());
-        }
-
-        private void setRetryMaxCount(int count) {
-            mRetryMaxCount = count;
-        }
-
-        private void setRetryInterval(int seconds) {
-            mRetryIntervalSec = seconds;
         }
 
         private final class PhoneNumberHandler extends Handler {

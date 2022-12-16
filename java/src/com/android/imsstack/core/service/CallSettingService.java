@@ -19,14 +19,11 @@ package com.android.imsstack.core.service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
@@ -399,11 +396,6 @@ public class CallSettingService implements ICallSettingService {
         }
     }
 
-    @Override
-    public boolean isNetworkMode3GOnly() {
-        return false;
-    }
-
     protected Handler getHandler() {
         return AppContext.getInstance().getMainHandler();
     }
@@ -710,33 +702,6 @@ public class CallSettingService implements ICallSettingService {
         return SettingsUtils.getWFCImsMode(getContext(), getSlotId());
     }
 
-    private String getVoWIFIAddressID() {
-        String value = null;
-        Cursor c = null;
-
-        try {
-            c = getContext().getContentResolver().query(VoWIFI.CONTENT_URI_AID,
-                new String[] {"value"},
-                "name = ?", new String[]{ VoWIFI.KEY_ADDRESSID }, null);
-
-            if ((c != null) && c.moveToNext()) {
-                String buffer = c.getString(0);
-                if (!TextUtils.isEmpty(buffer)) {
-                    value = buffer;
-                }
-            }
-        } catch (Exception e) {
-            ImsLog.e(getSlotId(), e.toString());
-        } finally {
-            if (c != null) {
-                c.close();
-                c = null;
-            }
-        }
-
-        return value;
-    }
-
     private int getRttMode() {
         int option = -1;
 
@@ -757,10 +722,6 @@ public class CallSettingService implements ICallSettingService {
 
     private boolean isMobileDataEnabled() {
         return SettingsUtils.isMobileDataEnabled(getContext().getContentResolver());
-    }
-
-    private boolean isNetworkMode3GOnly(int mode) {
-        return (mode < TelephonyManager.NETWORK_MODE_LTE_CDMA_EVDO) ? true : false;
     }
 
     private boolean isVoLTEEnabled() {
@@ -1138,43 +1099,11 @@ public class CallSettingService implements ICallSettingService {
         return false;
     }
 
-    private boolean contains(String[] stringArray, String value) {
-        if (TextUtils.isEmpty(value)) {
-            return false;
-        }
-
-        for (String item : stringArray) {
-            if (value.contains(item)) {
-                ImsLog.d(ImsLog.hiddenString(value) + "is contained");
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isKTRoamingUISpec_v1_3_6_applied() {
-        return false;
-    }
-
     private Context getContext() {
         return (mVoLteService != null) ? mVoLteService.getContext() : ImsGlobal.getInstance();
     }
 
     private int getSlotId() {
         return (mVoLteService != null) ? mVoLteService.getSlotID() : (-1);
-    }
-
-    /** this class is the vowifi related data */
-    public static final class VoWIFI {
-        public static final  Uri CONTENT_URI_AID = Uri.parse(
-                "content://com.xxx.wfcprovider/wfcconfig_att");
-        public static final  String KEY_ADDRESSID = "AID";
-
-        public static final int MODE_WIFI_ONLY = 0;
-        public static final int MODE_CELL_PREF = 1;
-        public static final int MODE_WIFI_PREF = 2;
-
-        public static final int MODE_ROAMING_CELL_PREF = 0;
-        public static final int MODE_ROAMING_WIFI_PREF = 1;
     }
 }
