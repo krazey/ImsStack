@@ -1075,7 +1075,7 @@ public class UsatAgent extends Handler implements UsatInterface {
     private static int sizeOfLengthField(byte firstByteOfLength) {
         if (firstByteOfLength <= 0x7F) {
             return 1;
-        } else if (firstByteOfLength == 0x81) {
+        } else if (firstByteOfLength == (byte) 0x81) {
             return 2;
         }
         return 0;
