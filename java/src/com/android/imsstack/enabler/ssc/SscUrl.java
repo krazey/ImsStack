@@ -177,44 +177,6 @@ public class SscUrl {
         return uri;
     }
 
-    /* TODO: NAPTR/SRV query will be refactored
-    private String queryNaptrSrv(int slotId, String fqdn) {
-
-        ImsLog.d("");
-        String urlAddr = null;
-        SscDnsQuery.IQueryObject queryObject = SscDnsQuery.getInstance().makeDnsQuery(slotId, fqdn);
-        if (queryObject == null) {
-            return null;
-        }
-
-        String urlPort = Integer.toString(queryObject.getPort());
-        String ipAddress = queryObject.getIP();
-        if (SscConfig.MMTel.isTLS(slotId)) {
-            sHttpString = "https://";
-        } else {
-            sHttpString = "http://";
-        }
-
-        if (ipAddress != null) {
-            // for IPv6
-            if (ipAddress.contains(":") && !ipAddress.contains("[") && !ipAddress.contains("]")) {
-                ipAddress = "[" + ipAddress + "]";
-            }
-        }
-
-        if (!TextUtils.isEmpty(urlPort)) {
-            urlAddr = sHttpString + ipAddress + ":" + urlPort;
-        } else {
-            urlAddr = sHttpString + ipAddress;
-        }
-
-        ImsLog.d("urlAddr : " + urlAddr);
-        return urlAddr;
-
-        return null;
-    }
-    */
-
     private String getXcapRootUri(int slotId) {
         String uriAddr = SscConfig.getUtServerFqdn(slotId);
         if (TextUtils.isEmpty(uriAddr)) {
@@ -224,20 +186,6 @@ public class SscUrl {
                 return null;
             }
         }
-
-        /* TODO: will be used after implementation NAPTR/SRV query
-        if (SscConfig.isSrvRecordsRequired(slotId)) {
-            uriAddr = queryNaptrSrv(slotId, uriAddr);
-        } else {
-            int uriPort = SscConfig.getUtServerPort(slotId);
-            if (uriPort <= 0) {
-                uriPort = SscConfig.isTls(slotId) ? 443 : 80;
-            }
-
-            String uriHttp = SscConfig.isTls(slotId) ? URI_HTTPS : URI_HTTP;
-            uriAddr = uriHttp + uriAddr + ":" + Integer.toString(uriPort);
-        }
-        */
 
         int uriPort = SscConfig.getUtServerPort(slotId);
         if (uriPort <= 0) {

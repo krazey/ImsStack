@@ -32,7 +32,6 @@
     <int name="imsss.ut_as_server_port_int" value="7077"/>
 
     <!-- Ut/Xcap -->
-    <!--<boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="true"/>-->
     <!--<string  name="imsss.ut_as_server_fqdn_string"
                 value="xcap.ims.mncXXX.mccYYY.pub.3gppnetwork.org"/> -->
     <!-- Ut/Xcap Assets -->

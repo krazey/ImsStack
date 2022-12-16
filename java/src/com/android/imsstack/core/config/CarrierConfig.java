@@ -911,8 +911,6 @@ public class CarrierConfig {
                 "sms_use_dialed_number_for_request_uri_bool";
 
         // Ut/Xcap
-        public static final String KEY_XCAP_ROOT_URI_REQUIRES_SRV_QUERY_BOOL =
-                "xcap_root_uri_requires_srv_query_bool";
         public static final String KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY =
                 "ut_sm_cause_temporary_block_int_array";
         public static final String KEY_UT_HTTP_TEMPORARY_ERROR_CODE_INT_ARRAY =
