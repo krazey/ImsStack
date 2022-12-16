@@ -96,7 +96,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_IdleState)
                                     [SipTxn::NON_INV_CLI_SEND_NON_INV_REQ_EVT](
                                             pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->SipDelete();
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -113,7 +113,8 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_IdleState)
                                     [SipTxn::NON_INV_CLI_SEND_NON_INV_REQ_EVT](
                                             pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -141,7 +142,8 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_IdleState)
                                     [SipTxn::NON_INV_CLI_SEND_NON_INV_REQ_EVT](
                                             pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pSipTranspParam;
     delete pTxnFsmData;
@@ -211,7 +213,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_TryingState)
     delete pSipTranspParam;
     delete pSipUserData;
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
 }
 
 TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
@@ -244,7 +246,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
                                             pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipTranspParam;
 
@@ -260,7 +262,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
                                             pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
@@ -272,7 +274,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
                                             pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
@@ -287,7 +289,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
                                             pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipTranspParam;
 
@@ -316,7 +318,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
                                             pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
@@ -329,7 +331,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
                                             pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipUserData;
     delete pSipTranspParam;
@@ -361,8 +363,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_CompletedState)
             gpfSipNonInvClientTxnFsm[SipTxn::NON_INV_CLI_COMPLETED_ST]
                                     [SipTxn::NON_INV_CLI_TIMER_K_TIME_OUT_EVT](
                                             pTxn, pTxnFsmData, &nError));
-
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
 }
 

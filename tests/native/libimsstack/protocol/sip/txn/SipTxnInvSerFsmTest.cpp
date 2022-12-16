@@ -113,7 +113,8 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_IdleState)
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_IDLE_ST][SipTxn::INV_SER_RECV_INV_REQ_EVT](
                     pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pTxnKey;
 
@@ -131,7 +132,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_IdleState)
                     pTxn, pTxnFsmData, &nError));
 
     delete pSipTranspParam;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -191,7 +192,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -260,7 +261,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
     delete pSipTranspParam;
     delete pSipUserData;
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
 }
 
 TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
@@ -300,7 +301,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -326,7 +327,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
@@ -355,7 +356,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_CompletedState)
                               [SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT](pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipUserData;
     delete pSipTranspParam;
@@ -376,7 +377,7 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ConfirmedState)
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_CONFIRMED_ST][SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT](
                     pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
 }
 

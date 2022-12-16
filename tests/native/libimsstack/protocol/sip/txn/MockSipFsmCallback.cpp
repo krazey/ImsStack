@@ -16,8 +16,9 @@
 
 #include "SipUtil.h"
 #include "txn/SipTxn.h"
+#include "include/MockSipTransaction.h"
 
-SipVector<SipTxn*> objFsmTxnList;
+SipVector<MockSipTransaction*> objFsmTxnList;
 SIP_BOOL MockFsm_FetchTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
 {
@@ -29,7 +30,9 @@ SIP_BOOL MockFsm_FetchTransaction(
         }
         if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
         {
-            objFsmTxnList.Add((SipTxn*)*ppvTxn);
+            MockSipTransaction* pMockTxn = new MockSipTransaction((SipTxnKey*)pvTxnKey,
+                    (SipTxn*)*ppvTxn);
+            objFsmTxnList.Add(pMockTxn);
         }
         return SIP_TRUE;
     }
@@ -39,7 +42,8 @@ SIP_BOOL MockFsm_FetchTransaction(
 
         for (SIP_UINT32 i = 0; i < nSize; i++)
         {
-            SipTxn* pTxn = objFsmTxnList.GetAt(i);
+            MockSipTransaction* pMockTxn = objFsmTxnList.GetAt(i);
+            SipTxn* pTxn = pMockTxn->GetTxn();
 
             if (pTxn != SIP_NULL)
             {
@@ -100,18 +104,30 @@ SIP_BOOL MockFsm_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID**)
     return SIP_TRUE;
 }
 
-SIP_BOOL MockFsm_ReleaseTransaction(SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID**, SIP_VOID**)
+SIP_BOOL MockFsm_ReleaseTransaction(SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID** ppvOutTxnKey,
+        SIP_VOID** ppvTxn)
 {
     SIP_UINT32 nSize = objFsmTxnList.GetSize();
 
     for (SIP_UINT32 i = 0; i < nSize; i++)
     {
-        SipTxn* pTxn = objFsmTxnList.GetAt(i);
+        MockSipTransaction* pMockTxn = objFsmTxnList.GetAt(i);
+        SipTxn* pTxn = pMockTxn->GetTxn();
 
         if (pTxn != SIP_NULL)
         {
             if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
             {
+                if (ppvOutTxnKey != IMS_NULL)
+                {
+                    (*ppvOutTxnKey) = pMockTxn->GetKey();
+                }
+
+                if (ppvTxn != IMS_NULL)
+                {
+                    (*ppvTxn) = pTxn;
+                }
+                delete pMockTxn;
                 objFsmTxnList.RemoveAt(i);
                 return SIP_TRUE;
             }

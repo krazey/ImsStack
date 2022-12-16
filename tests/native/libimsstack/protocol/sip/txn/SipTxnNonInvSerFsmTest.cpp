@@ -97,7 +97,8 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_IdleState)
                                  [SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT](
                                          pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pTxnKey;
 
@@ -110,7 +111,8 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_IdleState)
                                  [SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT](
                                          pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pSipTranspParam;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -131,8 +133,7 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_IdleState)
             gpfSipNonInvSerTxnFsm[SipTxn::NON_INV_SER_IDLE_ST]
                                  [SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT](
                                          pTxn, pTxnFsmData, &nError));
-
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pTxnKey;
 
@@ -162,7 +163,7 @@ RSeq: 2\r\n\
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST]
                               [SipTxn::INV_SER_SEND_NON_100_PROV_RESP_EVT](
                                       pTxn, pTxnFsmData, &nError));
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTempSipMsg;
     delete pTxnKey;
     delete pTxnFsmData;
@@ -191,10 +192,11 @@ RAck: 562 1 INVITE\r\n\
                                  [SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT](
                                          pTxn, pTxnFsmData, &nError));
 
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pTempSipMsg;
     delete pTxnFsmData;
     delete pTxnKey;
-    delete pTxn;
 
     pTempSipMsg = new SipMessage();
     pTempSipMsg->SetMessageType(SipMessage::RESP_TYPE);
@@ -223,7 +225,8 @@ RAck: 2 1 INVITE\r\n\
 
     /* Calling Search txn key with null */
     SipTxnUtil::SearchTxnKey(SIP_NULL, SIP_FALSE);
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pSipTranspParam;
     delete pTxnFsmData;
@@ -270,7 +273,7 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_TryingState)
                                          pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipTranspParam;
 
@@ -294,7 +297,7 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_TryingState)
     delete pSipTranspParam;
     delete pSipUserData;
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
 }
 
 TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_ProceedingState)
@@ -334,7 +337,7 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_ProceedingState)
                                          pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipTranspParam;
 
@@ -355,7 +358,7 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_ProceedingState)
                                          pTxn, pTxnFsmData, &nError));
 
     delete pTxnKey;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
     delete pSipUserData;
     delete pSipTranspParam;
@@ -383,7 +386,7 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_CompletedState)
                                  [SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT](
                                          pTxn, pTxnFsmData, &nError));
 
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnFsmData;
 }
 

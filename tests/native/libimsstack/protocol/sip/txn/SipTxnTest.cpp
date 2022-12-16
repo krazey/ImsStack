@@ -23,8 +23,9 @@
 #include "SipStackCallback.h"
 #include "txn/SipTimeoutData.h"
 #include "SipVector.h"
+#include "include/MockSipTransaction.h"
 
-SipVector<SipTxn*> objTxnList;
+SipVector<MockSipTransaction*> objTxnList;
 static int* pnTimerId = SIP_NULL;
 
 SIP_BOOL MockTxn_FetchTransaction(
@@ -34,11 +35,10 @@ SIP_BOOL MockTxn_FetchTransaction(
     {
         if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
         {
-            objTxnList.Add((SipTxn*)*ppvTxn);
-            ((SipTxn*)*ppvTxn)->Decrement();
+            MockSipTransaction* pMockTxn = new MockSipTransaction((SipTxnKey*)pvTxnKey,
+                    (SipTxn*)*ppvTxn);
+            objTxnList.Add(pMockTxn);
         }
-
-        (static_cast<SipTxnKey*>(pvTxnKey))->SipDelete();
         return SIP_TRUE;
     }
 
@@ -46,7 +46,8 @@ SIP_BOOL MockTxn_FetchTransaction(
 
     for (SIP_UINT32 i = 0; i < nSize; i++)
     {
-        SipTxn* pTxn = objTxnList.GetAt(i);
+        MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
+        SipTxn* pTxn = pMockTxn->GetTxn();
 
         if (pTxn != SIP_NULL)
         {
@@ -70,18 +71,29 @@ SIP_BOOL MockTxn_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID** 
     return SIP_TRUE;
 }
 
-SIP_BOOL MockTxn_ReleaseTransaction(SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID**, SIP_VOID**)
+SIP_BOOL MockTxn_ReleaseTransaction(SIP_VOID* pvTxnKey, SIP_INT32, SIP_VOID** ppvOutTxnKey,
+        SIP_VOID** ppvTxn)
 {
     SIP_UINT32 nSize = objTxnList.GetSize();
 
     for (SIP_UINT32 i = 0; i < nSize; i++)
     {
-        SipTxn* pTxn = objTxnList.GetAt(i);
+        MockSipTransaction* pMockTxn = objTxnList.GetAt(i);
+        SipTxn* pTxn = pMockTxn->GetTxn();
 
         if (pTxn != SIP_NULL)
         {
             if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
             {
+                if (ppvOutTxnKey != IMS_NULL)
+                {
+                    (*ppvOutTxnKey) = pMockTxn->GetKey();
+                }
+                if (ppvTxn != IMS_NULL)
+                {
+                    (*ppvTxn) = pTxn;
+                }
+                delete pMockTxn;
                 objTxnList.RemoveAt(i);
                 return SIP_TRUE;
             }
@@ -201,7 +213,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
 
     delete pSipTranspParam;
     delete pTxnFsmData;
-    delete pTxn;
+    pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -221,7 +233,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     EXPECT_EQ(SipTxn::NON_INV_CLI_TERMINATED_ST, pTxn->GetTxnState());
 
     delete pSipTranspParam;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -277,7 +289,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
 
     delete pSipTranspParam;
     delete pTxnFsmData;
-    delete pTxn;
+    pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
@@ -297,7 +309,8 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     EXPECT_EQ(SIP_FALSE, pTxn->InvokeFsm(SipTxn::INV_CLI_INVALID_EVT, pTxnFsmData, &nError));
 
     delete pSipTranspParam;
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -380,7 +393,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     EXPECT_EQ(SipTxn::INV_SER_TERMINATED_ST, pTxn->GetTxnState());
 
     delete pSipTranspParam;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -437,7 +450,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     CbkTxnTimeout(pTimeoutData, &nTimerId);
 
     delete pSipTranspParam;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
     delete pTxnKey;
@@ -453,7 +466,7 @@ TEST_F(SipTxnTest, StartTxnTimer)
     ASSERT_TRUE(pTxn->GetTimerId() != nullptr);
     EXPECT_EQ(SIP_TRUE, pTxn->StopTxnTimer());
 
-    delete pTxn;
+    pTxn->SipDelete();
 }
 
 TEST_F(SipTxnTest, PrepareACK)
@@ -493,7 +506,7 @@ CSeq: 1 INVITE\r\n\
     EXPECT_EQ(SIP_TRUE, pTxn->PrepareACK(pRespSipMsg, SIP_TRUE, &pOutMsg));
 
     delete pInSipMsg;
-    delete pTxn;
+    pTxn->SipDelete();
     delete pRespSipMsg;
 }
 
@@ -511,7 +524,7 @@ TEST_F(SipTxnTest, SetUserData)
     EXPECT_EQ(SIP_FALSE, pSipUserData->GetDeleteFlag());
     EXPECT_EQ(SIP_TRUE, pTxn->SetUserData(pSipUserData));
 
-    delete pTxn;
+    pTxn->SipDelete();
 }
 
 TEST_F(SipTxnTest, IsTxnTerminated)
@@ -522,26 +535,26 @@ TEST_F(SipTxnTest, IsTxnTerminated)
     pTxn->SetTxnState(SipTxn::NON_INV_CLI_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
-    delete pTxn;
+    pTxn->SipDelete();
     pTxn = new SipTxn(SipTxn::INV_CLI_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
-    delete pTxn;
+    pTxn->SipDelete();
     pTxn = new SipTxn(SipTxn::INV_SER_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
-    delete pTxn;
+    pTxn->SipDelete();
     pTxn = new SipTxn(SipTxn::NON_INV_SER_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TERMINATED_ST);
     EXPECT_EQ(SIP_TRUE, pTxn->IsTxnTerminated());
 
-    delete pTxn;
+    pTxn->SipDelete();
     pTxn = new SipTxn(SipTxn::INVALID_TXN, SIP_NULL, pSipMsg, SIP_NULL, &nError);
     EXPECT_EQ(SIP_FALSE, pTxn->IsTxnTerminated());
 
-    delete pTxn;
+    pTxn->SipDelete();
 }
 
 TEST_F(SipTxnTest, InvalidTxn)
@@ -567,7 +580,7 @@ TEST_F(SipTxnTest, InvalidTxn)
     CbkTxnTimeout(SIP_NULL, SIP_NULL);
 
     SipTxn_RemoveFromTxnPool(SIP_NULL);
-    delete pTxn;
+    pTxn->SipDelete();
     delete pTxnKey;
     delete pInSipMsg;
 }
@@ -608,7 +621,8 @@ TEST_F(SipTxnTest, AbortTxn)
     EXPECT_EQ(SIP_FALSE, pTxn->AbortTxn());
 
     delete pSipTranspParam;
-    delete pTxn;
+    pTxn->RemoveFromTxnPool();
+    pTxn->SipDelete();
     delete pSipUserData;
     delete pTxnFsmData;
     delete pTxnKey;
