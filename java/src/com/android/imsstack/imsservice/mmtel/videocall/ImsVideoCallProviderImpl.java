@@ -99,7 +99,7 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
                 && (callSession.getSessionModificationType()
                         == IVideoCallSession.MODIFICATION_CALL_TYPE);
         boolean isAudioOnly = (videoProfile != null)
-                && videoProfile.isAudioOnly(videoProfile.getVideoState());
+                && VideoProfile.isAudioOnly(videoProfile.getVideoState());
 
         if (isDynamicVideoQualitySupportedOnSessionModification()) {
             // Notify video resolution first before passing video upgrade request
@@ -159,7 +159,7 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
                     && (status == Connection.VideoProvider.SESSION_MODIFY_REQUEST_SUCCESS)
                     && (mSessionModificationType == IVideoCallSession.MODIFICATION_CALL_TYPE)
                     && (responseProfile != null)
-                    && !responseProfile.isAudioOnly(responseProfile.getVideoState())) {
+                    && !VideoProfile.isAudioOnly(responseProfile.getVideoState())) {
                 notifyPeerDimensionsChanged(callSession.getStreamMediaProfile());
             }
         }
@@ -183,7 +183,7 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
             mSessionModificationType = callSession.getSessionModificationType();
 
             if (mSessionModificationType == IVideoCallSession.MODIFICATION_CALL_TYPE
-                    && !toProfile.isAudioOnly(toProfile.getVideoState())) {
+                    && !VideoProfile.isAudioOnly(toProfile.getVideoState())) {
                 logi("Prepare preview for video call upgrade request (TX)");
                 synchronized (mLock) {
                     setCallState(CALL_STATE_VIDEO_UPGRADE_REQUESTED);
