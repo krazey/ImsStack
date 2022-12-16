@@ -189,14 +189,13 @@ public class ImsLocationHelper {
     }
 
     private boolean startWaitingTimer(long interval) {
-        int timerId = 0;
         IAlarmTimer alarmTimer = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER);
 
         if (alarmTimer == null) {
             return false;
         }
 
-        timerId = alarmTimer.getTimerId();
+        int timerId = alarmTimer.getTimerId();
 
         if (timerId <= 0) {
             return false;
