@@ -71,6 +71,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
 
         mImsSmsImpl = new ImsSmsImpl(mMockImsCallContext, mMockSmsTransferLayer, mSmsc);
         mImsSmsImpl.registerSmsListener(mListener);
+        mImsSmsImpl.onReady();
     }
 
     @After
