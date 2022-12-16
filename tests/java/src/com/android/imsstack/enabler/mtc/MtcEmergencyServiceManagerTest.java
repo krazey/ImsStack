@@ -45,6 +45,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class MtcEmergencyServiceManagerTest extends ImsStackTest {
+    private static final int EC_ROUTING = 0;
     private int mCommand;
     private final int mInvalid = -1;
     private long mNativeObject;
@@ -96,7 +97,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     @Test
     public void testOpenEmergencyService() {
         mTestMtcEmergencyServiceManager.setNativeObject(1);
-        mTestMtcEmergencyServiceManager.openEmergencyService();
+        mTestMtcEmergencyServiceManager.openEmergencyService(EC_ROUTING);
         processAllMessages();
 
         assertEquals(1, mNativeObject);

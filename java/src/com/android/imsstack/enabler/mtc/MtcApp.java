@@ -162,6 +162,11 @@ public class MtcApp implements Closeable {
     }
 
     public MtcCall createCall(int callAttributes) {
+        int defaultEmergencyRouting = 0;
+        return createCall(callAttributes, defaultEmergencyRouting);
+    }
+
+    public MtcCall createCall(int callAttributes, int emergencyRouting) {
         if (getJNIService() == 0) {
             bindJNIService();
 
@@ -181,7 +186,7 @@ public class MtcApp implements Closeable {
 
         if (isEmergencyCall(callAttributes)) {
             mEmergencyServiceManager.setCall(call);
-            mEmergencyServiceManager.openEmergencyService();
+            mEmergencyServiceManager.openEmergencyService(emergencyRouting);
         }
 
         return call;
