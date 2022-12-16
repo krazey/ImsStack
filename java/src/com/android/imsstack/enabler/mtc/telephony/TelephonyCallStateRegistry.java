@@ -141,10 +141,6 @@ public final class TelephonyCallStateRegistry {
         logi("notifyCallStateForRIL :: state=" + state);
     }
 
-    private static void loge(String s) {
-        ImsLog.e("[GII-TEL] " + s);
-    }
-
     private static void logi(String s) {
         ImsLog.i("[GII-TEL] " + s);
     }

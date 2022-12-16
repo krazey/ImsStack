@@ -484,10 +484,6 @@ public class Call implements Closeable {
         return "MO_" + id;
     }
 
-    private void log(String s) {
-        ImsLog.d("[GII-CALL][" + mLogTag + "] " + s);
-    }
-
     private void logi(String s) {
         ImsLog.i("[GII-CALL][" + mLogTag + "] " + s);
     }

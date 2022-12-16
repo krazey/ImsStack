@@ -41,7 +41,7 @@ public class IncomingRejectedMtcCall extends IncomingMtcCall implements Parcelab
         int callType = source.readInt();
 
         OIPType = source.readInt();
-        int cnap = source.readInt(); // same as OIPType
+        source.readInt(); // same as OIPType
         calleePartyNum = "";
         callerPartyNum = source.readString();
 
