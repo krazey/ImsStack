@@ -45,8 +45,11 @@ void MediaSessionConfigFactory::CreateMediaSessionConfig(
         m_mapListMediaSessionConfig.Add(nSlotId, pListMediaSessionConfig);
     }
 
-    MediaSessionConfig* objMediaSessionConfig = new MediaSessionConfig(nSlotId, eServiceType);
-    pListMediaSessionConfig->Append(objMediaSessionConfig);
+    if (FindMediaSessionConfig(nSlotId, eServiceType) == IMS_NULL)
+    {
+        MediaSessionConfig* objMediaSessionConfig = new MediaSessionConfig(nSlotId, eServiceType);
+        pListMediaSessionConfig->Append(objMediaSessionConfig);
+    }
 
     IMS_TRACE_D("CreateMediaSessionConfig - nSlotId[%d], listSize[%d], svc[%d]", nSlotId,
             pListMediaSessionConfig->GetSize(), (IMS_SINT32)eServiceType);
