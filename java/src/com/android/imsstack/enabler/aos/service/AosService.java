@@ -75,6 +75,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     @VisibleForTesting
     protected int mRegisteredNetworkType = NetworkType.NONE;
 
+    private int mRegTriedNetworkType = NetworkType.NONE;
+
     public void init(int slotId) {
         mSlotId = slotId;
 
@@ -451,6 +453,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void onRegistered(int networkType, int featureTagBits,
             Set<String> featureTags) {
         mRegisteredNetworkType = networkType;
+        mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyRegistered(networkType, featureTagBits, featureTags);
         }
@@ -458,6 +461,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     private void onRegistering(int networkType, int featureTagBits,
             Set<String> featureTags) {
+        mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyRegistering(networkType, featureTagBits, featureTags);
         }
@@ -466,8 +470,9 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void onDeregistered(int reason) {
         mRegisteredNetworkType = NetworkType.NONE;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
-            l.notifyDeregistered(reason);
+            l.notifyDeregistered(mRegTriedNetworkType, reason);
         }
+        mRegTriedNetworkType = NetworkType.NONE;
     }
 
     private void onTechnologyChangeFailed(int networkType, int causeCode) {

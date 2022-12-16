@@ -554,7 +554,9 @@ public class ImsRegistrationTracker {
         }
 
         @Override
-        public void notifyDeregistered(int reason) {
+        public void notifyDeregistered(int networkType, int reason) {
+            logi("ImsRegistrationTracker notifyDeregistered - network=" + networkType
+                    + ", reason =" + reason);
             mRegImpl.notifyDeregistered(reason);
             boolean networkTypeChanged = updateNetworkType(
                     IAosRegistrationListener.NetworkType.NONE);

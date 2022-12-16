@@ -208,7 +208,7 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testnotifyDeRegistered() {
-        mAosRegListener.notifyDeregistered(
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
                 IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
@@ -231,8 +231,8 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testnotifyDeRegistered_WithError() {
-        mAosRegListener.notifyDeregistered(IAosRegistrationListener.ReasonCode
-                .CODE_REGISTRATION_ERROR_BY_MISSING_911_ADDRESS);
+        mAosRegListener.notifyDeregistered(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.ReasonCode.CODE_REGISTRATION_ERROR_BY_MISSING_911_ADDRESS);
         assertEquals(false, mRegTracker.isRegistered());
         assertEquals(IAosRegistrationListener.FeatureTagMask.NONE,
                 mRegTracker.getRegisteredFeatures());
