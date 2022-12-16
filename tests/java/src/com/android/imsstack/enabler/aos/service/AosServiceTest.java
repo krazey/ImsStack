@@ -701,7 +701,8 @@ public class AosServiceTest extends ImsStackTest {
         processAllMessages();
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
-        verify(mMockAosRegistrationListener).notifyDeregistered(ReasonCode.CODE_REGISTRATION_ERROR);
+        verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.NONE,
+                ReasonCode.CODE_REGISTRATION_ERROR);
     }
 
     @Test
