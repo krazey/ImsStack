@@ -47,6 +47,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class ImsCallUtilsTest {
 
@@ -57,6 +58,7 @@ public class ImsCallUtilsTest {
     private static final String SOS_SERVICE_URN_MARINE = "urn:service:sos.marine";
     private static final String SOS_SERVICE_URN_MOUNTAIN = "urn:service:sos.mountain";
     public static final String EXTRA_CONFERENCE_USER_ID = "conference_user_id";
+    private static final String SOS_SERVICE_URN_GENERIC = "urn:service:sos";
     public static final String ANONYMOUS = "anonymous";
 
     private ICallContext mContext;
@@ -545,5 +547,25 @@ public class ImsCallUtilsTest {
         callProfile.setEmergencyCallRouting(EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL);
         assertEquals(EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL,
                 ImsCallUtils.getEmergencyRoutingFromCallProfile(callProfile));
+    }
+
+    @Test
+    public void testSetSosUrnFromCallReasonInfo() {
+        List emergencyUrn;
+        int emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE;
+        ImsCallProfile callProfile = new ImsCallProfile();
+        ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_POLICE,
+                callProfile);
+        assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE,
+                callProfile.getEmergencyServiceCategories());
+        emergencyUrn = callProfile.getEmergencyUrns();
+        assertEquals(SOS_SERVICE_URN_POLICE, emergencyUrn.get(0));
+
+        ImsCallUtils.setSosUrnFromCallReasonInfo(CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_INVALID,
+                callProfile);
+        assertEquals(EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED,
+                callProfile.getEmergencyServiceCategories());
+        emergencyUrn = callProfile.getEmergencyUrns();
+        assertEquals(SOS_SERVICE_URN_GENERIC, emergencyUrn.get(0));
     }
 }
