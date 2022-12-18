@@ -51,6 +51,7 @@
 #include "precondition/QosDef.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
+#include "sipcore/MockISipMessageBodyPart.h"
 #include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
@@ -82,6 +83,7 @@ public:
     MockIInterfaceHolderListener objInterfaceHolderListener;
     MockIMtcSipInterfaceFactory objSipInterfaceFactory;
     MockSessionInterfaceHolder* pSessionInterfaceHolder;
+    MockIMtcExtension objExtension;
     SipMethod objAckMethod;
     SipMethod objInviteMethod;
     MtcSupplementaryService* pSupplementaryService;
@@ -189,10 +191,9 @@ protected:
     MtcExtensionSet* GetTestExtensionSet(IN const AString& strOptionTag)
     {
         ImsList<IMtcExtension*> objExtensions;
-        MockIMtcExtension* pExtension = new MockIMtcExtension();
-        ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
-        ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
-        objExtensions.Append(pExtension);
+        ON_CALL(objExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
+        ON_CALL(objExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
+        objExtensions.Append(&objExtension);
         return new MtcExtensionSet(objExtensions);
     }
 };
@@ -247,12 +248,39 @@ TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfPolicyIsNotWaitForResponse)
     pOutgoingState->Terminate(objReason);
 }
 
+TEST_F(OutgoingStateTest, HandleB1TimerIsNotHandledIfPolicyIsNotWaitForResponseInWifi)
+{
+    EXPECT_CALL(objAosConnector, Control).Times(0);
+
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
+            .WillByDefault(Return(CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB));
+
+    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
+    const CallReasonInfo objReason(CODE_USER_TERMINATED);
+    pOutgoingState->Terminate(objReason);
+}
+
 TEST_F(OutgoingStateTest, HandleB1TimerIsHandled)
 {
     EXPECT_CALL(objAosConnector, Control).Times(1);
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVolteCall)
+            .WillByDefault(Return(
+                    CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
+
+    pOutgoingState->OnTimerExpired(MtcCallState::TIMER_MO_100_WAIT);
+    const CallReasonInfo objReason(CODE_USER_TERMINATED);
+    pOutgoingState->Terminate(objReason);
+}
+
+TEST_F(OutgoingStateTest, HandleB1TimerIsHandledInWifi)
+{
+    EXPECT_CALL(objAosConnector, Control).Times(1);
+
+    ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(*pConfigurationManager, GetPolicyForTcallTimerExpiryOfVowifiCall)
             .WillByDefault(Return(
                     CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_WAIT_FOR_RESPONSE));
 
@@ -340,11 +368,6 @@ TEST_F(OutgoingStateTest, SendUpdateBySrvccDoesNothingIfSessionIsNull)
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_FAILURE)).Times(0);
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnSrvccStateUpdated(SrvccState::FAILED));
-}
-
-TEST_F(OutgoingStateTest, HandleSilentRedialInvokesRedial)
-{
-    // TODO: test StartFailed by With SilentRedial
 }
 
 TEST_F(OutgoingStateTest, HandleAosConnectedDoesNothingIfNoWatchdogTimer)
@@ -608,7 +631,7 @@ TEST_F(OutgoingStateTest, SessionStartFailedInvokesRedialByCallReason)
     EXPECT_EQ(CallStateName::IDLE, pOutgoingState->SessionStartFailed(&objSession));
 }
 
-TEST_F(OutgoingStateTest, SessionStartFailedReturnsTerminatingIfSilentRedialFails)
+TEST_F(OutgoingStateTest, SessionStartFailedSetsNetworkResponseTimoutReasonIfSilentRedialFails)
 {
     ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
 
@@ -618,10 +641,53 @@ TEST_F(OutgoingStateTest, SessionStartFailedReturnsTerminatingIfSilentRedialFail
     SetUpStartErrorHandler(objMessage, SipStatusCode::SC_INVALID, IMS_FALSE,
             CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL, IMS_FALSE,
             IMS_FALSE);
+
     ON_CALL(objRedialHelper, Redial).WillByDefault(Return(IMS_FAILURE));
 
     EXPECT_CALL(objNotifier,
             SendStartFailed(CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE)));
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStartFailed(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionStartFailedSetsSipNotAcceptableReasonIfSilentRedialFails)
+{
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_488, IMS_FALSE, 0, IMS_FALSE, IMS_FALSE);
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    MockISipMessage objSipMessage;
+    ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+    MockISipMessageBodyPart objSipMessageBodyPart;
+    ON_CALL(objSipMessage, GetSdpBodyPart).WillByDefault(Return(&objSipMessageBodyPart));
+    ByteArray objContent("anyContent");
+    ON_CALL(objSipMessageBodyPart, GetContent).WillByDefault(ReturnRef(objContent));
+
+    ON_CALL(objRedialHelper, Redial).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(objNotifier,
+            SendStartFailed(CallReasonInfo(CODE_SIP_NOT_ACCEPTABLE, SipStatusCode::SC_488)));
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStartFailed(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionStartFailedSetsSipRedirectedReasonIfSilentRedialFails)
+{
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+    SetUpStartErrorHandler(objMessage, SipStatusCode::SC_301, IMS_FALSE, 0, IMS_FALSE, IMS_FALSE);
+    AString strContactToRedirect("sip:contactToRedirect");
+    ON_CALL(objMessageUtils, GetHeaderValue(&objMessage, ISipHeader::CONTACT_NORMAL, _))
+            .WillByDefault(Return(strContactToRedirect));
+
+    ON_CALL(objRedialHelper, Redial).WillByDefault(Return(IMS_FAILURE));
+
+    EXPECT_CALL(objNotifier,
+            SendStartFailed(CallReasonInfo(CODE_SIP_REDIRECTED, SipStatusCode::SC_301)));
     EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionStartFailed(&objSession));
 }
 
@@ -933,7 +999,10 @@ TEST_F(OutgoingStateTest, SessionPRAckDeliveredReturnsOutgoingIfNotAvailableToSe
             .WillByDefault(Return(&objMessage));
 
     ON_CALL(objPreconditionManager, IsEarlyUpdateRequired(&objSession))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
             .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMessageUtils, GetResponseStatusCode(_, _, _)).Times(0);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionPRAckDelivered(&objSession));
 }
 

@@ -26,7 +26,6 @@
 #include "call/ISilentRedialHelper.h"
 
 class IMtcCallContext;
-class ParticipantInfo;
 
 class SilentRedialHelper :
         public ISilentRedialHelper,
