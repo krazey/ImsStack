@@ -51,11 +51,6 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
 {
     DomDocumentBuilderFactory* pBuilderFactory = DomDocumentBuilderFactory::GetInstance();
     DocumentBuilder* pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
-    if (pDocumentBuilder == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "DocumentBuilder is null", 0, 0, 0);
-        return IMS_FALSE;
-    }
 
     IDocument* piDocument = pDocumentBuilder->Parse(strUssiBody);
     if (piDocument == IMS_NULL)
@@ -99,10 +94,6 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
     for (IMS_SINT32 i = 0; i < piNodeListEvents->GetLength(); i++)
     {
         INode* piNodeEvent = piNodeListEvents->Item(i);
-        if (piNodeEvent == IMS_NULL)
-        {
-            continue;
-        }
 
         AString strName = piNodeEvent->GetLocalName();
         if (strName.EqualsIgnoreCase(UssiConstants::ELEMENT_LANGUAGE))
@@ -148,12 +139,6 @@ IMS_BOOL UssiData::Parse(IN const AString& strUssiBody)
 PRIVATE
 void UssiData::CreateAnyExtension(IN INode* piNode)
 {
-    if (piNode == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "CreateAnyExtension : piNode is NULL", 0, 0, 0);
-        return;
-    }
-
     INode* piElement = piNode->GetFirstChild();
     AString strName;
 

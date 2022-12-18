@@ -79,8 +79,8 @@ public:
     MOCK_METHOD(void, SendUpdatedBy,
             (IN CallInfo*, IN const MediaInfo&, (IN const ImsMap<SuppType, SuppService*>&)),
             (override));
-    MOCK_METHOD(void, SendNotifyInfo, (IN IMS_UINT32, IN const AString, IN IMS_SINT32, IN IMS_BOOL),
-            (override));
+    MOCK_METHOD(void, SendNotifyInfo,
+            (IN IMS_UINT32, IN const AString&, IN IMS_SINT32, IN IMS_BOOL), (override));
     MOCK_METHOD(void, SendExpanded,
             (IN CallInfo*, IN const MediaInfo&, (IN const ImsMap<SuppType, SuppService*>&)),
             (override));

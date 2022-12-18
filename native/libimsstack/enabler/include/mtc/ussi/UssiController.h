@@ -23,6 +23,7 @@
 #include "ussi/UssiEventNotifier.h"
 
 class IMessage;
+class IMessageUtils;
 class ISipClientConnection;
 class ISipMessage;
 class ISipServerConnection;
@@ -30,18 +31,16 @@ class ISipServerConnection;
 class UssiController
 {
 public:
-    explicit UssiController(IN IMtcCallContext& objContext);
+    explicit UssiController(IN IMtcCallContext& objContext, IN UssiDataParser* pParser);
     virtual ~UssiController();
+    UssiController(IN const UssiController&) = delete;
+    UssiController& operator=(IN const UssiController&) = delete;
 
-private:
-    UssiController(IN const UssiController& objRHS);
-    UssiController& operator=(IN const UssiController& objRHS);
-
-public:
-    static IMS_BOOL IsNetworkInitiatedUssi(IN IMessage* piMessage);
+    static IMS_BOOL IsNetworkInitiatedUssi(
+            IN IMessageUtils& objMessageUtils, IN IMessage* piMessage);
 
     virtual IMS_BOOL HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage);
-    static IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
+    IMS_BOOL IsByeForUssi(IN IMessage* piMessage);
     virtual IMS_BOOL IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection);
     virtual IMS_BOOL HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection);
     virtual UssiResult ParseUssiBodyAndCheckResult(
@@ -58,17 +57,18 @@ public:
 
 private:
     IMS_RESULT FormHeadersForStartUssi(IN IMessage* piMessage);
-    IMS_RESULT FormStartUssiBody(IN ISipMessage* piSipMessage, IN const AString& strTarget);
+    static IMS_RESULT FormStartUssiBody(IN ISipMessage* piSipMessage, IN const AString& strTarget);
 
     IMS_RESULT SetRecvInfoHeader(IN IMessage* piMessage);
     IMS_RESULT SetAcceptHeader(IN IMessage* piMessage);
 
-    IMS_RESULT FormHeadersForInfo(IN ISipClientConnection* piSipClientConnection);
+    static IMS_RESULT FormHeadersForInfo(IN ISipClientConnection* piSipClientConnection);
     IMS_RESULT FormBodyForInfo(
             IN ISipMessage* piSipMessage, IN const AString& strUssdString, IN UssiError eErrorCode);
 
-    UssiData* GetParsedUssiData(IN ISipMessage* piSipMessage);
-    void NotifyUssiEvent(IN AString strUssdString, IN UssiModeType eType, IN UssiError eErrorCode);
+    UssiData* GetParsedUssiData(IN ISipMessage* piSipMessage) const;
+    void NotifyUssiEvent(
+            IN const AString& strUssdString, IN UssiModeType eType, IN UssiError eErrorCode);
 
     void SetUssiModeTypeForNetworkInitiated(IN UssiModeType eType);
     void SetLastResult(IN UssiResult objResult);
@@ -77,6 +77,7 @@ private:
 
 private:
     IMtcCallContext& m_objContext;
+    std::unique_ptr<UssiDataParser> m_pDataParser;
     UssiEventNotifier m_objEventNotifier;
     UssiModeType m_eUssiModeType;
     UssiResult m_objLastResult;

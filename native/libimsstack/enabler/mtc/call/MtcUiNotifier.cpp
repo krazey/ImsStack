@@ -304,9 +304,8 @@ void MtcUiNotifier::SendUpdatedBy(IN CallInfo* /* pCallInfo */, IN const MediaIn
 }
 
 PUBLIC
-void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType,
-        IN AString strValue /*= AString::ConstNull() */, IN IMS_SINT32 nValue /*= -1 */,
-        IN IMS_BOOL bValue /*= IMS_FALSE */)
+void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType, IN const AString& strValue,
+        IN IMS_SINT32 nValue /*= -1 */, IN IMS_BOOL bValue /*= IMS_FALSE */)
 {
     IMS_TRACE_I("SendNotifyInfo : Type[%d]", eType, 0, 0);
     IMS_TRACE_D("SendNotifyInfo : [%s][%d][%s]", strValue.GetStr(), nValue, _TRACE_B_(bValue));

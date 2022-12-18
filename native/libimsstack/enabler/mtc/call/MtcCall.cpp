@@ -39,6 +39,8 @@
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "sipcore/SipMethod.h"
+#include "ussi/UssiController.h"
+#include "ussi/UssiData.h"
 #include <functional>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -107,10 +109,10 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(IN ISession* piSession)
         return;
     }
 
-    if (UssiController::IsNetworkInitiatedUssi(
+    if (UssiController::IsNetworkInitiatedUssi(m_objContext.GetMessageUtils(),
                 piSession->GetPreviousRequest(IMessage::SESSION_START)))
     {
-        m_pUssiController = new UssiController(*this);
+        m_pUssiController = new UssiController(*this, new UssiDataParser());
         m_objStateMachine.RunStateOperation(
                 [&](IMtcCallState* pState)
                 {
@@ -144,7 +146,7 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
 
     if (IsUssi())
     {
-        m_pUssiController = new UssiController(*this);
+        m_pUssiController = new UssiController(*this, new UssiDataParser());
     }
 
     m_objStateMachine.RunStateOperation(

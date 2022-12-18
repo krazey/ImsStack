@@ -204,7 +204,7 @@ public:
      * @param -1
      * @param bValue
      */
-    virtual void SendNotifyInfo(IN IMS_UINT32 eType, IN AString strValue = AString::ConstNull(),
+    virtual void SendNotifyInfo(IN IMS_UINT32 eType, IN const AString& strValue,
             IN IMS_SINT32 nValue = -1, IN IMS_BOOL bValue = IMS_FALSE) = 0;
 
     /**

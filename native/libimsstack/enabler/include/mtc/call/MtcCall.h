@@ -45,7 +45,6 @@
 #include "media/IMediaReportEventListener.h"
 #include "media/MtcMediaManager.h"
 #include "precondition/MtcPreconditionManager.h"
-#include "ussi/UssiController.h"
 #include <functional>
 #include <memory>
 

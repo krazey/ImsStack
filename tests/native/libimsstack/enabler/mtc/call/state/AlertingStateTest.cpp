@@ -42,6 +42,7 @@
 #include "sipcore/SipStatusCode.h"
 #include "ussi/UssiConstants.h"
 #include "ussi/UssiController.h"
+#include "ussi/UssiData.h"
 #include "utility/MessageUtil.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
@@ -121,7 +122,8 @@ protected:
 
     void SetUpForUssi()
     {
-        pUssiController = new UssiController(objCallContext);
+        // TODO: use MockUssiController
+        pUssiController = new UssiController(objCallContext, new UssiDataParser());
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
         ON_CALL(objISession, GetNextRequest()).WillByDefault(Return(&objIMessage));
 

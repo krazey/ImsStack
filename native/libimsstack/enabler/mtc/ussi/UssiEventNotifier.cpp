@@ -35,16 +35,16 @@ PUBLIC VIRTUAL UssiEventNotifier::~UssiEventNotifier()
 }
 
 PUBLIC
-void UssiEventNotifier::NotifyUssiError(IN AString strUssdString)
+void UssiEventNotifier::NotifyUssiError(IN const AString& strUssdString)
 {
-    IMS_TRACE_D("NotifyUssiError", 0, 0, 0);
+    IMS_TRACE_D("NotifyUssiError String[%s]", strUssdString.GetStr(), 0, 0);
     m_objContext.GetUiNotifier().SendNotifyInfo(
             INFO_TYPE_USSI, strUssdString, (IMS_SINT32)UssiModeType::ERROR);
 }
 
 PUBLIC
-void UssiEventNotifier::NotifyUssiResult(IN AString strUssdString, IN UssiModeType eType)
+void UssiEventNotifier::NotifyUssiResult(IN const AString& strUssdString, IN UssiModeType eType)
 {
-    IMS_TRACE_D("NotifyUssiResult", 0, 0, 0);
+    IMS_TRACE_D("NotifyUssiResult String[%s] Type[%d]", strUssdString.GetStr(), eType, 0);
     m_objContext.GetUiNotifier().SendNotifyInfo(INFO_TYPE_USSI, strUssdString, (IMS_SINT32)eType);
 }

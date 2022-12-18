@@ -77,8 +77,8 @@ public:
     void SendUpdateFailed(IN const CallReasonInfo& objReason) override;
     void SendUpdatedBy(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
-    void SendNotifyInfo(IN IMS_UINT32 eType, IN AString strValue = AString::ConstNull(),
-            IN IMS_SINT32 nValue = -1, IN IMS_BOOL bValue = IMS_FALSE) override;
+    void SendNotifyInfo(IN IMS_UINT32 eType, IN const AString& strValue, IN IMS_SINT32 nValue = -1,
+            IN IMS_BOOL bValue = IMS_FALSE) override;
     void SendExpanded(IN CallInfo* pCallInfo, IN const MediaInfo& objMediaInfo,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void SendExpandFailed(IN const CallReasonInfo& objReason) override;

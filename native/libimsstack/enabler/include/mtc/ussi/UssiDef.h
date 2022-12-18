@@ -62,6 +62,11 @@ public:
         return *this;
     }
 
+    IMS_BOOL operator==(const UssiResult& objRhs) const
+    {
+        return eAction == objRhs.eAction && eErrorCode == objRhs.eErrorCode;
+    }
+
     UssiNextAction eAction;
     UssiError eErrorCode;
 };
