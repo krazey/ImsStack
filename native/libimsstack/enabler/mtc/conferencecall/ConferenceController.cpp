@@ -585,7 +585,7 @@ PROTECTED VIRTUAL IConferenceReference* ConferenceController::CreateReference(
 PROTECTED
 void ConferenceController::ClearOngoingReferences()
 {
-    IMS_UINT32 nSize = m_objIConfReferences.GetSize();
+    IMS_SINT32 nSize = static_cast<IMS_SINT32>(m_objIConfReferences.GetSize());
     IMS_TRACE_I("ClearOngoingReferences reference size=[%d]", nSize, 0, 0);
 
     for (IMS_SINT32 i = nSize - 1; i >= 0; i--)
