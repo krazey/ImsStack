@@ -753,7 +753,8 @@ PROTECTED VIRTUAL void AosSubscription::ProcessStartFailed_StatusCode(IN IMS_SIN
     }
 
     SetState(STATE_SUBSTOP);
-    SetRetryTimer(IMS_TRUE);
+
+    SetRetryTimer((nStatusCode != 0) ? IMS_TRUE : IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosSubscription::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
@@ -779,7 +780,7 @@ PROTECTED VIRTUAL void AosSubscription::ProcessUpdateFailed_StatusCode(IN IMS_SI
     }
 
     SetState(STATE_SUBREFRESHSTOP);
-    SetRetryTimer(IMS_TRUE);
+    SetRetryTimer((nStatusCode != 0) ? IMS_TRUE : IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosSubscription::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
@@ -840,8 +841,14 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetNextThrottlingTime(
     IMSVector<IMS_SINT32>& objRetryRandomIntervals =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRandomRetryIntervals();
 
-    nThrotllingTime = (objInterval.GetAt(nTimeIndex - 1) * 1000) +
-            (IMS_SYS_GetRandom(objRetryRandomIntervals.GetAt(nTimeIndex - 1)) * 1000);
+    nThrotllingTime = (objInterval.GetAt(nTimeIndex - 1) * 1000);
+
+    if (objRetryRandomIntervals.GetAt(nTimeIndex - 1) > 0)
+    {
+        nThrotllingTime +=
+                (IMS_SYS_GetRandom(objRetryRandomIntervals.GetAt(nTimeIndex - 1) + 1) * 1000);
+    }
+
     A_IMS_TRACE_I(AOSTAG, "GetNextThrottlingTime :: throttling count (%d) , time (%d)",
             m_nThrottlingCount, nThrotllingTime, 0);
 

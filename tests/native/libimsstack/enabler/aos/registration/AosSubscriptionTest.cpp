@@ -1079,14 +1079,6 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStarted)
 
 TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdated)
 {
-    EXPECT_CALL(objMockAosConfig, IsRegRetryIntervalsUsedForSub())
-            .Times(1)
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryBaseTime()).Times(1).WillOnce(Return(30));
-    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryMaxTime()).Times(1).WillOnce(Return(1800));
-
-    pAosSubscription->SetRetryTimer(IMS_FALSE);
-
     EXPECT_CALL(objMockIAosSubscriptionListener,
             Subscription_StateChanged(
                     AosSubscription::STATE_SUBSCRIBED, AosSubscription::REASON_SUB_ESTABLISHED))
@@ -1096,19 +1088,18 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdated)
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_SUBSCRIBED);
 }
 
-TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed)
+TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_Others)
 {
     EXPECT_CALL(objMockAosConfig, IsRegRetryIntervalsUsedForSub())
             .Times(AnyNumber())
             .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
+            .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objMockAosConfig, GetRegistrationRetryBaseTime())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(30));
+            .WillRepeatedly(Return(30000));
     EXPECT_CALL(objMockAosConfig, GetRegistrationRetryMaxTime())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(1800));
+            .WillRepeatedly(Return(1800000));
 
     // SetRetryTimer - GetNextThrottlingTime(objRetryIntervals)
     IMSVector<IMS_SINT32> objRetryIntervals;
@@ -1139,50 +1130,71 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed)
     NotifyListenerEvent(
             AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_INTERNAL_ERROR, 0);
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
+}
 
+TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_StatusCode)
+{
     // ProcessStartFailed_StatusCode - pAosSubscription->SetRetryTimer(IMS_FALSE);
+    // IsRetryActionDueToRetrycounter - FALSE
     EXPECT_CALL(objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .Times(3)
             .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(objMockAosConfig, GetExtraRegErrMaxCount()).Times(3).WillRepeatedly(Return(0));
 
+    // IsSubscriptionTerminated - FALSE
     EXPECT_CALL(objMockAosConfig, GetRetryCountSubErrorSubTerminated())
             .Times(3)
             .WillRepeatedly(Return(0));
 
+    // IsInitialRegistrationRequired - FALSE
     EXPECT_CALL(objMockAosConfig, GetRetryCountSubErrorRegRequired())
             .Times(3)
             .WillRepeatedly(Return(0));
 
+    // IsInitialRegistrationWithNextPcscfRequired - FALSE
     IMSVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
     objErrRegRequiredWithNextPcscf.Clear();
     EXPECT_CALL(objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
-            .Times(AnyNumber())
+            .Times(3)
             .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
 
+    // IsInitialRegistrationRequiredInWifi - FALSE
     MockIAosConnection objMockIAosConnection;
+    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled()).Times(3).WillRepeatedly(Return(IMS_FALSE));
+
     EXPECT_CALL(*pMockAosAppContext, GetConnection())
             .Times(3)
             .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
 
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled()).Times(3).WillRepeatedly(Return(IMS_FALSE));
+    SetThrottlingCount(0);
+    EXPECT_CALL(objMockAosConfig, IsRegRetryIntervalsUsedForSub())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryBaseTime())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(30000));
+    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryMaxTime())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(1800000));
 
     NotifyListenerEvent(
             AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_TRANSACTION_TIMEOUT, 0);
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 
     MockISipMessage objMockSipMsg;
-    EXPECT_CALL(objMockIRegSubscription, GetPreviousResponse())
-            .WillOnce(Return(static_cast<ISipMessage*>(&objMockSipMsg)))
-            .WillOnce(Return(static_cast<ISipMessage*>(&objMockSipMsg)))
-            .WillOnce(ReturnNull())
-            .WillOnce(ReturnNull());
+    EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(481));
 
     AString strHeader = "";
     strHeader.Append("60");
     EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
             .WillOnce(Return(strHeader));
+
+    EXPECT_CALL(objMockIRegSubscription, GetPreviousResponse())
+            .WillOnce(Return(static_cast<ISipMessage*>(&objMockSipMsg)))
+            .WillOnce(Return(static_cast<ISipMessage*>(&objMockSipMsg)))
+            .WillOnce(ReturnNull())
+            .WillOnce(ReturnNull());
 
     NotifyListenerEvent(
             AMSG_REG_SUBSCRIPTION_START_FAILED, IRegSubscription::REASON_STATUS_CODE, 0);
@@ -1193,58 +1205,78 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed)
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
 }
 
-TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed)
+TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed_others)
 {
     EXPECT_CALL(objMockAosConfig, IsRegRetryIntervalsUsedForSub())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
-    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryBaseTime())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(30));
-    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryMaxTime())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(1800));
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryBaseTime()).Times(1).WillOnce(Return(30000));
+    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryMaxTime()).Times(1).WillOnce(Return(1800000));
 
     // pAosSubscription->SetRetryTimer(IMS_FALSE);
     NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_UPDATE_FAILED,
             IRegSubscription::REASON_REFRESH_INTERNAL_ERROR, 0);
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHSTOP);
+}
 
+TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed_StatusCode)
+{
+    // IsRetryActionDueToRetrycounter - FALSE
     EXPECT_CALL(objMockAosConfig, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
             .Times(2)
             .WillRepeatedly(Return(IMS_FALSE));
 
     EXPECT_CALL(objMockAosConfig, GetExtraRegErrMaxCount()).Times(2).WillRepeatedly(Return(0));
 
+    // IsSubscriptionTerminated - FALSE
     EXPECT_CALL(objMockAosConfig, GetRetryCountSubErrorSubTerminated())
             .Times(2)
             .WillRepeatedly(Return(0));
 
+    // IsInitialRegistrationRequired - FALSE
     EXPECT_CALL(objMockAosConfig, GetRetryCountSubErrorRegRequired())
             .Times(2)
             .WillRepeatedly(Return(0));
 
+    // IsInitialRegistrationWithNextPcscfRequired - FALSE
     IMSVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
     objErrRegRequiredWithNextPcscf.Clear();
     EXPECT_CALL(objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
 
+    // IsInitialRegistrationRequiredInWifi - FALSE
     MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(*pMockAosAppContext, GetConnection())
-            .Times(2)
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-
     EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
             .Times(2)
             .WillOnce(Return(IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
 
+    EXPECT_CALL(*pMockAosAppContext, GetConnection())
+            .Times(2)
+            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
+
+    // IsResubscriptionStopped - FALSE
     IMSVector<IMS_SINT32> objErrResubStopped;
     objErrResubStopped.Clear();
     EXPECT_CALL(objMockAosConfig, GetSubErrorStoppingResub())
             .Times(2)
             .WillRepeatedly(ReturnRef(objErrResubStopped));
+
+    EXPECT_CALL(objMockAosConfig, IsRegRetryIntervalsUsedForSub())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryBaseTime())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(30000));
+    EXPECT_CALL(objMockAosConfig, GetRegistrationRetryMaxTime())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(1800000));
+
+    MockISipMessage objMockSipMsg;
+    EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(404));
+
+    EXPECT_CALL(objMockIRegSubscription, GetPreviousResponse()).WillRepeatedly(ReturnNull());
 
     NotifyListenerEvent(
             AMSG_REG_SUBSCRIPTION_UPDATE_FAILED, IRegSubscription::REASON_TRANSACTION_TIMEOUT, 0);
