@@ -25,27 +25,25 @@ public class SscConstant {
     public static final int EVENT_SSC_BASE = 13200;
 
     // Event param for callback
-    public static final int EVENT_SSC_TRANSACT = EVENT_SSC_BASE + 1;
+    public static final int EVENT_SSC_QUERY_DOCUMENT = EVENT_SSC_BASE + 1;
+    public static final int EVENT_SSC_QUERY_CB = EVENT_SSC_BASE + 2;
+    public static final int EVENT_SSC_QUERY_CF = EVENT_SSC_BASE + 3;
+    public static final int EVENT_SSC_QUERY_CW = EVENT_SSC_BASE + 4;
+    public static final int EVENT_SSC_QUERY_OIR = EVENT_SSC_BASE + 5;
+    public static final int EVENT_SSC_QUERY_OIP = EVENT_SSC_BASE + 6;
+    public static final int EVENT_SSC_QUERY_TIR = EVENT_SSC_BASE + 7;
+    public static final int EVENT_SSC_QUERY_TIP = EVENT_SSC_BASE + 8;
 
-    public static final int EVENT_SSC_QUERY_DOCUMENT = EVENT_SSC_BASE + 2;
-    public static final int EVENT_SSC_QUERY_CB = EVENT_SSC_BASE + 3;
-    public static final int EVENT_SSC_QUERY_CF = EVENT_SSC_BASE + 4;
-    public static final int EVENT_SSC_QUERY_CW = EVENT_SSC_BASE + 5;
-    public static final int EVENT_SSC_QUERY_OIR = EVENT_SSC_BASE + 6;
-    public static final int EVENT_SSC_QUERY_OIP = EVENT_SSC_BASE + 7;
-    public static final int EVENT_SSC_QUERY_TIR = EVENT_SSC_BASE + 8;
-    public static final int EVENT_SSC_QUERY_TIP = EVENT_SSC_BASE + 9;
+    public static final int EVENT_SSC_UPDATE_CB = EVENT_SSC_BASE + 11;
+    public static final int EVENT_SSC_UPDATE_CF = EVENT_SSC_BASE + 12;
+    public static final int EVENT_SSC_UPDATE_CW = EVENT_SSC_BASE + 13;
+    public static final int EVENT_SSC_UPDATE_OIR = EVENT_SSC_BASE + 14;
+    public static final int EVENT_SSC_UPDATE_OIP = EVENT_SSC_BASE + 15;
+    public static final int EVENT_SSC_UPDATE_TIR = EVENT_SSC_BASE + 16;
+    public static final int EVENT_SSC_UPDATE_TIP = EVENT_SSC_BASE + 17;
 
-    public static final int EVENT_SSC_UPDATE_CB = EVENT_SSC_BASE + 10;
-    public static final int EVENT_SSC_UPDATE_CF = EVENT_SSC_BASE + 11;
-    public static final int EVENT_SSC_UPDATE_CW = EVENT_SSC_BASE + 12;
-    public static final int EVENT_SSC_UPDATE_OIR = EVENT_SSC_BASE + 13;
-    public static final int EVENT_SSC_UPDATE_OIP = EVENT_SSC_BASE + 14;
-    public static final int EVENT_SSC_UPDATE_TIR = EVENT_SSC_BASE + 15;
-    public static final int EVENT_SSC_UPDATE_TIP = EVENT_SSC_BASE + 16;
-
-    public static final int EVENT_SSC_INSERT_CB = EVENT_SSC_BASE + 17;
-    public static final int EVENT_SSC_INSERT_CF = EVENT_SSC_BASE + 18;
+    public static final int EVENT_SSC_INSERT_CB = EVENT_SSC_BASE + 21;
+    public static final int EVENT_SSC_INSERT_CF = EVENT_SSC_BASE + 22;
 
     // NoReplyTimer value range according to 3GPP 24.604 4.9.2
     public static final int CFNR_TIMER_MIN = 5;
@@ -112,23 +110,22 @@ public class SscConstant {
 
     // HTTP Response Code
     public static final int HTTP_OK = 200;
-    public static final int HTTP_NOT_MODIFIED = 304;
     public static final int HTTP_UNAUTHORIZED = 401;
     public static final int HTTP_FORBIDDEN = 403;
     public static final int HTTP_CONFLICT = 409;
     public static final int HTTP_PRECONDITION_FAILURE = 412;
 
     // Temp. Ssc Block List
-    public static final int BLOCK_REASON_GBA_FAILURE                        = 0x00000001;
-    public static final int BLOCK_REASON_DNS_QUERY_FAILURE                  = 0x00000002;
-    public static final int BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT          = 0x00000004;
-    public static final int BLOCK_REASON_PDN_CONNECTION_TIMEOUT            = 0x00000008;
-    public static final int BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP        = 0x00000010;
-    public static final int BLOCK_REASON_BY_RESPONSE_CODE_TEMP              = 0x00000020;
+    public static final int BLOCK_REASON_GBA_FAILURE = 0x00000001;
+    public static final int BLOCK_REASON_DNS_QUERY_FAILURE = 0x00000002;
+    public static final int BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT = 0x00000004;
+    public static final int BLOCK_REASON_PDN_CONNECTION_TIMEOUT = 0x00000008;
+    public static final int BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP = 0x00000010;
+    public static final int BLOCK_REASON_BY_RESPONSE_CODE_TEMP = 0x00000020;
 
     // Perm. Ssc Block List
-    public static final int BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM        = 0x00010000;
-    public static final int BLOCK_REASON_BY_RESPONSE_CODE_PERM              = 0x00020000;
+    public static final int BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM = 0x00010000;
+    public static final int BLOCK_REASON_BY_RESPONSE_CODE_PERM = 0x00020000;
 
     public static final int BLOCK_REASON_NONE = 0;
 

@@ -289,14 +289,6 @@ public class SscHttpConnection implements ISscHttpConnection {
         mConnection.setRequestProperty("X-3GPP-Intended-Identity", "\"" + xui + "\"");
 
         String host = connectionUrl.getHost();
-        /* TODO_JS : Need test in production network w/o port number in host header
-        if (SscConfig.isSetPortInHostHeader(mSlotId)) {
-            if (connectionUrl.getPort() >= 0) {
-                host += ":" + String.valueOf(connectionUrl.getPort());
-            }
-        }
-         */
-
         mConnection.setRequestProperty("Host", host);
 
         String userAgent = SscUtils.getInstance().getSscUserAgent(mSlotId);

@@ -26,7 +26,6 @@ import java.net.Socket;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -35,35 +34,33 @@ import javax.net.ssl.X509TrustManager;
 public class SscHttpsConnection extends SscHttpConnection {
     private final SscSslSocketFactory mSscSocketFactory;
 
-    public SscHttpsConnection(int slotId, EApnType apntype) {
-        super(slotId, apntype);
+    public SscHttpsConnection(int slotId, EApnType apnType) {
+        super(slotId, apnType);
+
         mSscSocketFactory = new SscSslSocketFactory();
     }
 
     @Override
     protected void setSocketFactory() {
-        ((HttpsURLConnection)mConnection).setSSLSocketFactory(mSscSocketFactory);
+        ((HttpsURLConnection) mConnection).setSSLSocketFactory(mSscSocketFactory);
     }
 
     @Override
     protected void setHostnameVerifier() {
-        ((HttpsURLConnection)mConnection).setHostnameVerifier((DO_NOT_VERIFY));
+        ((HttpsURLConnection) mConnection).setHostnameVerifier((DO_NOT_VERIFY));
     }
 
     @Override
     protected String getCipherSuiteFromConn() {
-        String cipherSuite = ((HttpsURLConnection)mConnection).getCipherSuite();
+        String cipherSuite = ((HttpsURLConnection) mConnection).getCipherSuite();
         ImsLog.d("cipherSuite = " + cipherSuite);
+
         return cipherSuite;
     }
 
-    private static final HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    };
+    private static final HostnameVerifier DO_NOT_VERIFY = (hostname, session) -> true;
 
-    public final class SscSslSocketFactory extends SSLSocketFactory {
+    private static final class SscSslSocketFactory extends SSLSocketFactory {
         private SSLSocketFactory mSocketFactory = null;
 
         private SscSslSocketFactory() {
@@ -81,36 +78,43 @@ public class SscHttpsConnection extends SscHttpConnection {
         }
 
         @Override
-        public Socket createSocket (String host, int port) throws IOException {
-            SSLSocket sslSocket = (SSLSocket)mSocketFactory.createSocket(host, port);
-            return configureScoket(sslSocket);
+        public Socket createSocket(String host, int port) throws IOException {
+            SSLSocket sslSocket = (SSLSocket) mSocketFactory.createSocket(host, port);
+
+            return configureSocket(sslSocket);
         }
 
         @Override
-        public Socket createSocket (InetAddress host, int port) throws IOException {
-            SSLSocket sslSocket = (SSLSocket)mSocketFactory.createSocket(host, port);
-            return configureScoket(sslSocket);
+        public Socket createSocket(InetAddress host, int port) throws IOException {
+            SSLSocket sslSocket = (SSLSocket) mSocketFactory.createSocket(host, port);
+
+            return configureSocket(sslSocket);
         }
 
         @Override
-        public Socket createSocket (InetAddress address, int port, InetAddress localAddress
-                                        , int localPort) throws IOException {
-            SSLSocket sslSocket = (SSLSocket)mSocketFactory.createSocket(address, port, localAddress, localPort);
-            return configureScoket(sslSocket);
+        public Socket createSocket(InetAddress address, int port, InetAddress localAddress,
+                int localPort) throws IOException {
+            SSLSocket sslSocket =
+                    (SSLSocket) mSocketFactory.createSocket(address, port, localAddress, localPort);
+
+            return configureSocket(sslSocket);
         }
 
         @Override
-        public Socket createSocket (String host, int port, InetAddress localHost
-                                        , int localPort) throws IOException {
-            SSLSocket sslSocket = (SSLSocket)mSocketFactory.createSocket(host, port, localHost, localPort);
-            return configureScoket(sslSocket);
+        public Socket createSocket(String host, int port, InetAddress localHost, int localPort)
+                throws IOException {
+            SSLSocket sslSocket =
+                    (SSLSocket) mSocketFactory.createSocket(host, port, localHost, localPort);
+
+            return configureSocket(sslSocket);
         }
 
         @Override
-        public Socket createSocket (Socket s, String host, int port
-                                        , boolean autoClose) throws IOException {
-            SSLSocket sslSocket = (SSLSocket)mSocketFactory.createSocket(s, host, port, autoClose);
-            return configureScoket(sslSocket);
+        public Socket createSocket(Socket s, String host, int port, boolean autoClose)
+                throws IOException {
+            SSLSocket sslSocket = (SSLSocket) mSocketFactory.createSocket(s, host, port, autoClose);
+
+            return configureSocket(sslSocket);
         }
 
         private void init() {
@@ -121,35 +125,29 @@ public class SscHttpsConnection extends SscHttpConnection {
                     }
 
                     public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
-                            String authType) throws java.security.cert.CertificateException
-                    {
+                            String authType) throws java.security.cert.CertificateException {
                     }
 
                     public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
-                            String authType) throws java.security.cert.CertificateException
-                    {
+                            String authType) throws java.security.cert.CertificateException {
                     }
                 }
             };
 
             try {
                 SSLContext sc = SSLContext.getInstance("TLS");
-                if (SscConfig.isTrustAllHosts(mSlotId)) {
-                    sc.init(null, null, null); //--> if u dnt want to set any certificate
-                } else {
-                    sc.init(null, trustAllCerts, new java.security.SecureRandom());
-                }
+                sc.init(null, trustAllCerts, new java.security.SecureRandom());
 
                 mSocketFactory = sc.getSocketFactory();
             } catch (Exception e) {
                 ImsLog.e(e.toString());
-                e.printStackTrace();
             }
         }
 
-        private Socket configureScoket(SSLSocket sslSocket) throws IOException {
+        private Socket configureSocket(SSLSocket sslSocket) throws IOException {
             final String[] protocols = { "TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3" };
             sslSocket.setEnabledProtocols(protocols);
+
             return sslSocket;
         }
     }

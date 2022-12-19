@@ -193,7 +193,7 @@ public class SscUrl {
         }
 
         String uriHttp = SscConfig.isTls(slotId) ? URI_HTTPS : URI_HTTP;
-        uriAddr = uriHttp + uriAddr + ":" + Integer.toString(uriPort);
+        uriAddr = uriHttp + uriAddr + ":" + uriPort;
 
         ImsLog.d("uriAddr : " + uriAddr);
         return uriAddr;

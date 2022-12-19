@@ -219,13 +219,6 @@ public final class SscConfig {
         return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL);
     }
 
-    /* TODO: This isn't used now.
-    public static boolean isHostHeaderRequiresPortNumber(int slotId) {
-        return getBoolean(slotId,
-                CarrierConfig.Assets.KEY_UT_HOST_HEADER_REQUIRES_PORT_NUMBER_BOOL);
-    }
-    */
-
     static int getXcapApnInactivityTimer(int slotId) {
         return getInt(slotId, CarrierConfig.Assets.KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT) * 1000;
     }
@@ -273,6 +266,7 @@ public final class SscConfig {
             if (value == 0) {
                 return true;
             }
+
             return value == smCause;
         });
     }
@@ -289,6 +283,7 @@ public final class SscConfig {
                     return true;
                 }
             }
+
             return value == responseCode;
         });
     }
@@ -305,6 +300,7 @@ public final class SscConfig {
                     return true;
                 }
             }
+
             return value == responseCode;
         });
     }
@@ -316,21 +312,10 @@ public final class SscConfig {
     }
 
     // Temporary APIs
-    static boolean isTrustAllHosts(int slotId) {
-        // TODO: Is this function really needed?
-        return false;
-    }
-
     static String getTargetAddrScheme(int slotId) {
         // TODO: Is this function really needed?
         return "tel";
     }
-
-    /* TODO: If there is an error, this method will be used.
-    public static boolean isSetPortInHostHeader(int slotId) {
-        return ImsGlobal.isOperator(slotId, "TLS") ? false : true;
-    }
-     */
 
     static boolean isPdnConnCheckedByDataState(int slotId) {
         // TODO:

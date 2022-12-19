@@ -934,8 +934,6 @@ public class CarrierConfig {
                 "ut_target_address_country_code_replace_to_zero_string";
         public static final String KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING =
                 "ut_target_address_zero_replace_to_country_code_string";
-        public static final String KEY_UT_HOST_HEADER_REQUIRES_PORT_NUMBER_BOOL =
-                "ut_host_header_requires_port_number_bool";
         public static final String KEY_UT_XCAP_APN_INACTIVITY_TIMER_SEC_INT =
                 "ut_xcap_apn_inactivity_timer_sec_int";
         public static final String KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL =
