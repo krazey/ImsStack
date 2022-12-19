@@ -15,10 +15,13 @@
  */
 
 #include <gtest/gtest.h>
+#include "Configuration.h"
 #include "IImsRadio.h"
 #include "IIpcan.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
+#include "ImsServiceConfig.h"
+#include "ImsServiceConfigTypeDef.h"
 #include "IuMtsService.h"
 #include "MockIMtsServiceListener.h"
 #include "MtsService.h"
@@ -63,6 +66,12 @@ protected:
                 PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &objImsRadioService);
+        /*
+         * To make Connector::Open() return valid IConnector even though
+         * MtsApp is not created during the test.
+         */
+        Configuration::GetInstance()->SetAppConfig(
+                ImsServiceConfig::GetAppName(ImsAppId::MTS), SLOT_ID);
 
         pMtsService = new MtsService(SLOT_ID);
         pMtsService->SetIImsAos(&objMockIImsAos);
