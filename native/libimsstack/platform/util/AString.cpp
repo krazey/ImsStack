@@ -1221,7 +1221,8 @@ IMS_SINT32 AString::GetIndexOf(IN const AString& objStr, IN IMS_SINT32 nOffset /
 
         if (OL_MINUS_1 < sizeof(IMS_UINT32) * 8 /*number of char bits*/)
         {
-            nHashHayStack -= (IMS_UINT32)(*pHayStack) << OL_MINUS_1;
+            __builtin_sub_overflow(nHashHayStack, static_cast<IMS_UINT32>(*pHayStack) << OL_MINUS_1,
+                    &nHashHayStack);
         }
 
         nHashHayStack <<= 1;
