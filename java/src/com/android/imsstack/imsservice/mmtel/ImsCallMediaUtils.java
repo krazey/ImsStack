@@ -78,8 +78,7 @@ public class ImsCallMediaUtils {
         switch (callType) {
             case ImsCallProfile.CALL_TYPE_VOICE: // FALL-THROUGH
             case ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO:
-                return createMediaInfoForVoiceCallOnCallAccept(profile, callType, audioCapabilities,
-                        videoCapabilities);
+                return createMediaInfoForVoiceCallOnCallAccept(profile, audioCapabilities);
 
             case ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE: // FALL-THROUGH
             case ImsCallProfile.CALL_TYPE_VT: // FALL-THROUGH
@@ -527,8 +526,8 @@ public class ImsCallMediaUtils {
                 MediaInfo.DIRECTION_INVALID, MediaInfo.GTTMODE_INVALID);
     }
 
-    private static MediaInfo createMediaInfoForVoiceCallOnCallAccept(
-            ImsCallProfile profile, int callType, int audioCapabilities, int videoCapabilities) {
+    private static MediaInfo createMediaInfoForVoiceCallOnCallAccept(ImsCallProfile profile,
+            int audioCapabilities) {
         int audioQuality = getNegotiatedAudioQuality(profile, audioCapabilities);
         int audioDirection = getNegotiatedDirection(profile, true);
 

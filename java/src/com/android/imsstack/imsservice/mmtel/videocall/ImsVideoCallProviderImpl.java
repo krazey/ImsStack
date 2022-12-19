@@ -36,7 +36,6 @@ import com.android.imsstack.imsservice.mmtel.videocall.base.VideoCallUtils;
 /** IMS extended interface implementation */
 public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
     // milli-seconds
-    private static final int WAIT_TIME_FOR_UI_CLEARING = 4000;
     private static final int WAIT_TIME_FOR_UI_NOTIFICATION = 400;
     private final Object mLock = new Object();
     private String mCameraId = null;

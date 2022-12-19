@@ -32,7 +32,6 @@ import org.mockito.Mockito;
 
 @RunWith(JUnit4.class)
 public class ImsGarbageCallsTest {
-    private static final String LOG_TAG = "ImsGarbageCallsTest";
     ImsGarbageCalls mImsGarbageCalls;
     private String mCallId;
     private int mSlotId;

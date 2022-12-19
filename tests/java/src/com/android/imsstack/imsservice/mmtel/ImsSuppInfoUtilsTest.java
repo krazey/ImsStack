@@ -41,8 +41,6 @@ public class ImsSuppInfoUtilsTest {
     private static final int SLOT_ID = 0;
 
     private int mInfo = 1;
-    private int mCode = 1;
-    private ImsSuppInfoUtils mImsSuppInfoUtils;
     private SuppInfo mSuppInfo;
     private ImsCallProfile mCallProfile;
     private ICallContext mMockContext;
@@ -51,7 +49,6 @@ public class ImsSuppInfoUtilsTest {
 
     @Before
     public void setUp() throws Exception {
-        mImsSuppInfoUtils = new ImsSuppInfoUtils();
         mCallProfile = new ImsCallProfile();
         mSuppInfo = new SuppInfo();
         mMockContext = Mockito.mock(ICallContext.class);
@@ -64,7 +61,6 @@ public class ImsSuppInfoUtilsTest {
     @After
     public void tearDown() throws Exception {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
-        mImsSuppInfoUtils = null;
         mCallProfile = null;
         mSuppInfo = null;
     }

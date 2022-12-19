@@ -46,7 +46,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public class ImsCallUtilsTest {
@@ -84,13 +83,12 @@ public class ImsCallUtilsTest {
         int audioDirection = ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
         int videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_QCIF;
         int videoDirection =  ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
-        ImsCallProfile profile = null, clone = null;
 
-        profile = ImsCallUtils.createCallProfile(
+        ImsCallProfile profile = ImsCallUtils.createCallProfile(
                 serviceType, callType, audioQuality, audioDirection, videoQuality, videoDirection);
         assertNotNull(profile);
 
-        clone = ImsCallUtils.cloneCallProfile(profile);
+        ImsCallProfile clone = ImsCallUtils.cloneCallProfile(profile);
         assertNotNull(clone);
     }
 
@@ -144,9 +142,8 @@ public class ImsCallUtilsTest {
         int audioDirection = ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
         int videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_QCIF;
         int videoDirection =  ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE;
-        ImsCallProfile profile = null, clone = null;
 
-        profile = ImsCallUtils.createCallProfile(
+        ImsCallProfile profile = ImsCallUtils.createCallProfile(
                 serviceType, callType, audioQuality, audioDirection, videoQuality, videoDirection);
         assertNotNull(profile);
 
@@ -196,8 +193,7 @@ public class ImsCallUtilsTest {
 
     @Test
     public void testGetCalltypeFromProfile() {
-        int ret = 0;
-        ret = ImsCallUtils.getCallTypeFromProfile(ImsCallProfile.CALL_TYPE_VOICE, true);
+        int ret = ImsCallUtils.getCallTypeFromProfile(ImsCallProfile.CALL_TYPE_VOICE, true);
         assertEquals(IUMtcCall.CALLTYPE_RTT, ret);
 
         ret = ImsCallUtils.getCallTypeFromProfile(ImsCallProfile.CALL_TYPE_VOICE, false);
@@ -239,18 +235,11 @@ public class ImsCallUtilsTest {
 
     @Test
     public void testGetExtraCodeFromMtc() {
-
-        LinkedHashMap<Integer, Integer> sMtcReasonToImsReason = new LinkedHashMap<Integer,
-              Integer>();
         int reason = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-        int extraCode = 0;
 
-        int resultCode = ImsReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-        int result;
-
-        extraCode = -1;
-        result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
-        resultCode = ImsReasonInfo.CODE_UNSPECIFIED;
+        int extraCode = -1;
+        int result = ImsCallUtils.getExtraCodeFromMtc(reason, extraCode);
+        int resultCode = ImsReasonInfo.CODE_UNSPECIFIED;
         assertEquals(resultCode, result);
 
         reason = ImsReasonInfo.CODE_LOCAL_CALL_TERMINATED;
@@ -262,10 +251,9 @@ public class ImsCallUtilsTest {
     public void testGetProfileCallTypeFromCallInfo() {
         int result;
         boolean videoCapable = true;
-        int callType = 1;
         int profileCallType = ImsCallProfile.CALL_TYPE_VOICE;
 
-        callType = IUMtcCall.CALLTYPE_VOIP;
+        int callType = IUMtcCall.CALLTYPE_VOIP;
         result = ImsCallUtils.getProfileCallTypeFromCallInfo(videoCapable, callType);
         assertEquals(result, profileCallType);
 
@@ -463,7 +451,6 @@ public class ImsCallUtilsTest {
         ImsCallProfile profile = new ImsCallProfile();
         profile.mCallType = ImsCallProfile.CALL_TYPE_VOICE;
         SuppInfo suppInfo = new SuppInfo();
-        SuppInfo.SuppService ss = suppInfo.getService(SuppInfo.TYPE_TIP);
 
         SuppInfo suppInfo2 = new SuppInfo(suppInfo);
         CallInfo ci = new CallInfo();

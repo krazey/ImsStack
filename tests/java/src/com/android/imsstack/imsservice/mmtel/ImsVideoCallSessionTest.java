@@ -53,7 +53,6 @@ import org.mockito.MockitoAnnotations;
 public class ImsVideoCallSessionTest {
     private static final int UPDATE_STATE_IDLE = 0;
     private static final int UPDATE_STATE_SENT = 1;
-    private static final int UPDATE_STATE_RECEIVED = 2;
     private static final int UPDATE_STATE_FINALIZING = 3;
     private static final int SLOT_ID = 0;
     private ImsVideoCallSession mVideoSession;

@@ -84,7 +84,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private static final boolean FEATURE_CHANGE_CONFERENCE_PARTICIPANT_STATE_ON_DROP = false;
     private static final String MEDIA_GTT_MODE = "media_gtt_mode";
     private static final String PREFIX_MMI_PARTICIPANT_DROP = "callId:";
-    private static final String EXTRA_USAT_OI = "usat_oi";
     /**
      * Extra key to identify that the session modification is handled by ImsCallSessionImpl.
      * Value: boolean type
@@ -490,7 +489,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             // For example,
             //    - "recvonly" by remote end: "sendonly"
             //    - "sendonly" by remote end: "recvonly"
-            int slotId = mCallContext.getSlotId();
 
             if (state == ImsCallSessionImplBase.State.RENEGOTIATING) {
                 mediaInfo = ImsCallMediaUtils.createMediaInfoForCallAccept(
@@ -546,7 +544,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             } else if ((state == ImsCallSessionImplBase.State.TERMINATED)
                     && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
                 notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED,
-                        ImsReasonInfo.CODE_UNSPECIFIED,
                         ImsCallUtils.REASON_CALL_DISCONNECTED_BY_USER);
             }
             return;
@@ -587,7 +584,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         mIsEctConfirmationRequired = isConfirmationRequired;
         mCallTransferTarget = number;
 
-        int slotId = mCallContext.getSlotId();
         mTransferRequestedSession = this;
 
         if (mCall.isOnHold()) {
@@ -626,7 +622,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         mIsEctConfirmationRequired = true;
         mTransferRequestedSession = transferRequestedSession;
-        int slotId = mCallContext.getSlotId();
 
         //If required we can pass transfer target ID or Session to native
         //Currently we can pass "null" to keep native implemation as it is for Consultative transfer
@@ -667,7 +662,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     notifyCallStartFailedWithDelay(reasonInfo, 100);
                 } else {
                     notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED,
-                            ImsReasonInfo.CODE_UNSPECIFIED,
                             ImsCallUtils.REASON_CALL_DISCONNECTED_BY_USER);
                 }
             }
@@ -710,8 +704,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if ((state == ImsCallSessionImplBase.State.TERMINATED)
                     && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
-                notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED,
-                        ImsReasonInfo.CODE_UNSPECIFIED, "");
+                notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED, "");
             }
 
             return;
@@ -774,8 +767,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if ((state == ImsCallSessionImplBase.State.TERMINATED)
                     && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
-                notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED,
-                        ImsReasonInfo.CODE_UNSPECIFIED, "");
+                notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED, "");
             }
 
             return;
@@ -790,7 +782,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         if (ImsCallUtils.isVideoCall(mCallProfile.getCallType())) {
-            int slotId = mCallContext.getSlotId();
 
             if (mCall.isOnHeld()) {
                 if (isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE)) {
@@ -848,16 +839,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                             + ", state=" + ImsCallSessionImplBase.State.toString(state));
 
                     notifyCallSessionMergeFailed(
-                            CallReasonInfo.CODE_UNSPECIFIED,
-                            ImsReasonInfo.CODE_UNSPECIFIED, "",
+                            CallReasonInfo.CODE_UNSPECIFIED, "",
                             ImsReasonInfo.CODE_LOCAL_ILLEGAL_STATE);
                     return;
                 }
 
                 if (!ImsConferenceHelper.getInstance().merge(mCallContext)) {
                     notifyCallSessionMergeFailed(
-                            CallReasonInfo.CODE_UNSPECIFIED,
-                            ImsReasonInfo.CODE_UNSPECIFIED, "", 0);
+                            CallReasonInfo.CODE_UNSPECIFIED, "", 0);
                 }
             }
         });
@@ -1224,7 +1213,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         notifyCallTerminated(
                 CallReasonInfo.CODE_LOCAL_NOT_REGISTERED,
-                ImsReasonInfo.CODE_UNSPECIFIED,
                 ImsCallUtils.REASON_IMS_NOT_REGISTERED);
     }
 
@@ -1703,7 +1691,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void notifyCallSessionMergeFailed(int reason,
-            int extraCode, String message, int preferredCode) {
+            String message, int preferredCode) {
         if (!mCallback.hasListener()) {
             return;
         }
@@ -1792,7 +1780,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private void notifyCallTerminated(int reason, int extraCode, String message) {
+    private void notifyCallTerminated(int reason, String message) {
         ImsReasonInfo reasonInfo = ImsCallUtils.createReasonInfo(
                 getTerminationReason(reason),
                 ImsReasonInfo.CODE_UNSPECIFIED, message,
@@ -2026,8 +2014,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         if (!isRttOn) {
             rttDirection = MediaInfo.DIRECTION_INVALID;
         } else {
-            int slotId = mCallContext.getSlotId();
-
             if (mCallDetails.is(CallDetails.ON_HOLDING)) {
                 if (isCallFeatureSupported(CF_TEXT_HOLD_WITH_INACTIVE) || mCall.isOnHeld()) {
                     rttDirection = MediaInfo.DIRECTION_INACTIVE;
@@ -2932,7 +2918,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mRemoteCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_OIR,
                             ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED);
 
-                    String[] callExtraKeys = new String[] { ImsCallProfile.EXTRA_OI };
                     mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
                 }
             }
@@ -3371,7 +3356,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             ImsCallUtils.refineCallReasonInfoForCode(mCallContext, mCallProfile, callReasonInfo);
 
-            if (checkAndSetImmediateCallEndReason(call, callReasonInfo)) {
+            if (checkAndSetImmediateCallEndReason(callReasonInfo)) {
                 setState(ImsCallSessionImplBase.State.TERMINATED);
                 return;
             }
@@ -3469,7 +3454,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 log("Ignore the duplicated terminated event");
             } else {
                 notifyCallTerminated(callReasonInfo.mCode,
-                        callReasonInfo.mExtraCode,
                         callReasonInfo.mExtraMessage);
             }
 
@@ -4177,7 +4161,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             ImsStreamMediaProfile tMediaprofile = mLocalCallProfile.getMediaProfile();
 
-            int audioQuality = tMediaprofile.getAudioQuality();
             int videoQuality = tMediaprofile.getVideoQuality();
 
             ImsCallProfile profile = ImsCallUtils.createCallProfileFromIncomingCallInfo(
@@ -4186,7 +4169,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             // For Google native behavior
             // Set local call profile as local capability for audio quality
-            audioQuality = mCallContext.getMediaCapabilities(
+            int audioQuality = mCallContext.getMediaCapabilities(
                     mCallProfile.getCallType(), ICallContext.MEDIA_AUDIO);
 
             if (ImsCallUtils.isVideoCall(mCallProfile.getCallType())) {
@@ -4493,7 +4476,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            log("onRttChanged :: isRttOn=" + isRttOn);
+            log("onRttChanged :: isRttOn=" + isRttOn + "oldRttOn=" + oldRttOn);
 
             if (mCallDetails.is(CallDetails.RTT_TURNING_ON)) {
                 mCallDetails.clear(CallDetails.RTT_TURNING_ON);
@@ -4528,16 +4511,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                 setState(ImsCallSessionImplBase.State.TERMINATED);
 
-                int slotId = mCallContext.getSlotId();
-
                 if (!isConferenceTransitionInProgress()) {
                     // TODO: _CONFERENCE_CALL_CONNECTION_ID_
                     ConferenceInfoHelper.setListenerForConferenceUser(
                             mCall.getCallConnectionId() + "", mCall.getConferenceUserId(),
                             null);
 
-                    notifyCallTerminated(callReasonInfo.mCode, callReasonInfo.mExtraCode,
-                            callReasonInfo.mExtraMessage);
+                    notifyCallTerminated(callReasonInfo.mCode, callReasonInfo.mExtraMessage);
                     closeMtcCall(mCall);
                 } else {
                     // After receiving the result of call merge,
@@ -4604,8 +4584,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 ConferenceInfoHelper.removeConferenceUser(
                         mCall.getCallId(), mCall.getConferenceUserId());
 
-                notifyCallSessionMergeFailed(callReasonInfo.mCode, callReasonInfo.mExtraCode,
-                        callReasonInfo.mExtraMessage, 0);
+                notifyCallSessionMergeFailed(callReasonInfo.mCode, callReasonInfo.mExtraMessage,
+                        0);
 
                 // CASE: initial merge failure
                 if (transientConfSession != null) {
@@ -4643,8 +4623,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return false;
         }
 
-        private boolean checkAndSetImmediateCallEndReason(
-                final MtcCall call, CallReasonInfo callReasonInfo) {
+        private boolean checkAndSetImmediateCallEndReason(CallReasonInfo callReasonInfo) {
             int state = getState();
 
             synchronized (mLock) {
@@ -4961,8 +4940,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             if (notifyMergeFailed) {
-                notifyCallSessionMergeFailed(callReasonInfo.mCode, callReasonInfo.mExtraCode,
-                        callReasonInfo.mExtraMessage, 0);
+                notifyCallSessionMergeFailed(callReasonInfo.mCode, callReasonInfo.mExtraMessage,
+                        0);
             }
 
             // FIXME: is it required?
@@ -4983,7 +4962,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         || (reason == ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE))
                     && !mCallDetails.is(CallDetails.CALL_END_FINISHED)) {
                 notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE,
-                        ImsReasonInfo.CODE_UNSPECIFIED,
                         ImsCallUtils.REASON_CALL_DISCONNECTED_BY_MERGE_FAILED);
             }
         }
@@ -5060,9 +5038,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 mCallDetails.clear(CallDetails.SESSION_TERMINATED_ON_CONFERENCE);
 
                 notifyCallTerminated(
-                        CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE,
-                        ImsReasonInfo.CODE_UNSPECIFIED,
-                        "");
+                        CallReasonInfo.CODE_USER_TERMINATED_BY_REMOTE, "");
             } else {
                 setState(ImsCallSessionImplBase.State.ESTABLISHED);
 
@@ -5324,6 +5300,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
+            log("updateConferenceState :: call=" + call);
+
             int userCount = usersInfo.Users.size();
 
             if (userCount == 0) {
@@ -5369,3 +5347,4 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 }
+

@@ -30,7 +30,6 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class ImsSuppServiceUtilsTest {
-    private static final String LOG_TAG = "[ImsSuppServiceUtilsTest]";
     private ImsSuppServiceUtils mImsSuppServiceUtils;
     private ImsSuppServiceUtils.MO mMoSuppUtils;
     private ImsSuppServiceUtils.MT mMtSuppUtils;

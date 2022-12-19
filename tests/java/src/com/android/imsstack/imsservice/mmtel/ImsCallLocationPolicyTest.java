@@ -43,8 +43,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ImsCallLocationPolicyTest extends ImsStackTest {
     /* Indicates that geolocation information is required to make a call */
     private static final int FLAG_LOCATION_REQUIRED = 0x00000001;
-    /* Indicates that positioning information (latitude/longitude) is required */
-    private static final int FLAG_POSITION_INFO_REQUIRED = 0x00000002;
     /* Indicates that geolocation information is required for emergency call only */
     private static final int FLAG_EMERGENCY_CALL_ONLY = 0x00000004;
     /* Indicates that geolocation information is required for Wi-Fi call only */
@@ -135,9 +133,6 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
 
     @Test
     public void testIsLocationRequired() {
-        int[] intArray = {};
-        int[] emptyArray = new int[0];
-
         assertFalse(mImsCallLocationPolicy.isLocationRequired("150", null));
 
         /*verify isLocationRequiredFromCallInfo()
@@ -181,7 +176,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         assertTrue(mImsCallLocationPolicy.isLocationRequired("910", callProfile));
 
         //verify mNumberSet.contains -> true , it will return form isWifiCall() true
-        intArray = new int[]{-1, 150, 155};
+        int[] intArray = new int[]{-1, 150, 155};
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfig.Assets.KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY))
                 .thenReturn(intArray);

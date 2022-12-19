@@ -61,9 +61,7 @@ public class ImsCallManagerTest {
     private IMmTelCallListener mMockIMmTelCallListener;
     private TestImsCallManager mImsCallManager;
     private MtcApp mMockMtcApp;
-    private ImsCallProfile mProfile;
     private MtcCall mMockMtcCall;
-    private CallTracker mMockCallTracker;
     private ImsCallSessionImpl mMockImsCallSession;
     private TestImsCallManager mImsCallManagernull;
     private ImsCallContext mMockCallContext;
@@ -87,7 +85,6 @@ public class ImsCallManagerTest {
         mMockMtcCall = Mockito.mock(MtcCall.class);
         mMockImsCallSession = Mockito.mock(ImsCallSessionImpl.class);
         mMockIMmTelCallListener = Mockito.mock(IMmTelCallListener.class);
-        mMockCallTracker = Mockito.mock(CallTracker.class);
 
         ArgumentCaptor<ImsCallManager.MtcAppCallListenerProxy> mListenerArg =
                 ArgumentCaptor.forClass(ImsCallManager.MtcAppCallListenerProxy.class);
@@ -97,14 +94,11 @@ public class ImsCallManagerTest {
         verify(mMockMtcApp).setCallListener(mListenerArg.capture());
         mMtcAppCallListenerProxy = mListenerArg.getValue();
         mImsCallManagernull = new TestImsCallManager(mMockCallContext, mMockMtcApp, null);
-        mProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
-                ImsCallProfile.CALL_TYPE_VOICE);
     }
 
     @After
     public void tearDown() {
         mImsCallManager = null;
-        mProfile = null;
         mImsCallTracker = null;
         mImsCallManagernull = null;
     }

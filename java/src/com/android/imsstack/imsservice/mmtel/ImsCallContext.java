@@ -313,7 +313,7 @@ public class ImsCallContext implements ICallContext {
         if (mediaType == MEDIA_AUDIO) {
             return getAudioCapabilities(callType);
         } else if (mediaType == MEDIA_VIDEO) {
-            return getVideoCapabilities(callType);
+            return getVideoCapabilities();
         }
 
         return 0;
@@ -387,7 +387,7 @@ public class ImsCallContext implements ICallContext {
         return ImsStreamMediaProfile.AUDIO_QUALITY_AMR;
     }
 
-    private int getVideoCapabilities(int callType) {
+    private int getVideoCapabilities() {
         if (hasAccessBearerCapabilitiesForHDCall()) {
             return getVideoHDQuality();
         }

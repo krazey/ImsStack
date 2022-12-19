@@ -48,9 +48,8 @@ public class ImsCallMediaUtilsTest {
         VideoProfile videoProfile = new VideoProfile(VideoProfile.STATE_TX_ENABLED,
                 VideoProfile.QUALITY_HIGH);
         VideoProfile clonedVideoProfile = ImsCallMediaUtils.cloneVideoProfile(videoProfile);
-        assertEquals(videoProfile.getVideoState(), VideoProfile.STATE_TX_ENABLED);
-        assertEquals(videoProfile.getQuality(), VideoProfile.QUALITY_HIGH);
-
+        assertEquals(videoProfile.getVideoState(), clonedVideoProfile.getVideoState());
+        assertEquals(videoProfile.getQuality(), clonedVideoProfile.getQuality());
     }
 
     @Test

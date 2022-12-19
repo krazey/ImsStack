@@ -116,8 +116,6 @@ public class MergeProxy extends ConferenceProxy {
         mBackgroundCall.setListener(mListenerProxy);
         MtcCall.setListener(mBackgroundCall, mConferenceListenerProxy);
 
-        int slotId = getCallContext().getSlotId();
-
         if (isInitialConferenceExtension() && holdRequired) {
             // hold -> merge
             setState(STATE_HOLDING);

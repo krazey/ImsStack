@@ -59,7 +59,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
     private final IVideoCallSession mCallSession;
     private MtcMediaSessionListenerProxy mListenerProxy = new MtcMediaSessionListenerProxy();
     private VideoDimension mVideoDimension = null;
-    private boolean mPauseImageSet = false;
     private int mCallState = CALL_STATE_IDLE;
     protected MtcMediaSession mMediaSession = null;
 

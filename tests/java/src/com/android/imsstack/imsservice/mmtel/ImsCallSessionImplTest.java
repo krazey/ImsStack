@@ -76,7 +76,6 @@ public class ImsCallSessionImplTest {
     private ImsCallSessionImpl mImsCallSession;
     private ImsCallSessionListener mMockImsCallSessionListener;
     private ImsCallSessionCallback mMockImsCallSessionCallback;
-    private Handler mHandler;
     private String mCallId;
     private MediaInfo mMockMediaInfo;
     private ImsCallApp mMockImsCallApp;
@@ -505,15 +504,18 @@ public class ImsCallSessionImplTest {
     }
 
     @Test
-    public void testRemoveParticipants() {
+    public void testRemoveParticipantsForError() {
+        String[] participants = {"callId:2"};
+        when(mMockMtcCall.getCallExtraBoolean(Call.EXTRA_CONFERENCE_EVENT, false))
+            .thenReturn(true);
+        mImsCallSession.removeParticipants(participants);
+        verify(mMockImsCallSessionCallback, never()).invokeRemoveParticipantsRequestFailed(
+                any(ImsCallSessionImplBase.class),  any(ImsReasonInfo.class));
+
         String[] participant = {};
         mImsCallSession.removeParticipants(participant);
         verify(mMockImsCallSessionCallback, times(1)).invokeRemoveParticipantsRequestFailed(
                 any(ImsCallSessionImplBase.class),  any(ImsReasonInfo.class));
-
-        String[] participants = {"callId: 2"};
-        when(mMockMtcCall.getCallExtraBoolean(Call.EXTRA_CONFERENCE_EVENT, false))
-                .thenReturn(true);
     }
 
     @Test

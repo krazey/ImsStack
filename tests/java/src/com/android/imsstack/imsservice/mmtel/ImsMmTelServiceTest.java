@@ -236,9 +236,9 @@ public class ImsMmTelServiceTest extends ImsStackTest {
 
     @Test
     public void testGetUt() {
-        ImsUtImplBase utImplBase = null;
+        ImsUtImplBase utImplBase = mMmTelFeature.getUt();
         ImsUtImpl utImpl = new ImsUtImpl(mMockCallContext);
-        assertNull(mMmTelFeature.getUt());
+        assertNull(utImplBase);
 
         mMmTelFeature = createMmTelService(null);
         mMmTelFeature.start();
@@ -252,9 +252,9 @@ public class ImsMmTelServiceTest extends ImsStackTest {
 
     @Test
     public void testGetEcbm() {
-        ImsEcbmImplBase ecbmImplBase = null;
+        ImsEcbmImplBase ecbmImplBase = mMmTelFeature.getEcbm();
         ImsEcbmImpl ecbmImpl = new ImsEcbmImpl(mMockCallContext);
-        assertNull(mMmTelFeature.getEcbm());
+        assertNull(ecbmImplBase);
 
         mMmTelFeature = createMmTelService(null);
         mMmTelFeature.start();
@@ -279,11 +279,10 @@ public class ImsMmTelServiceTest extends ImsStackTest {
 
     @Test
     public void testGetSmsImplementation() {
-        ImsSmsImplBase smsImplBase = null;
+        ImsSmsImplBase smsImplBase = mMmTelFeature.getSmsImplementation();
         SmsTransferLayer smsTransFerLayer = Mockito.mock(SmsTransferLayer.class);
         String smsc = "+91987654321";
         ImsSmsImpl smsImpl = new ImsSmsImpl(mMockCallContext, smsTransFerLayer, smsc);
-        smsImplBase = mMmTelFeature.getSmsImplementation();
         assertNull(smsImplBase);
 
         mMmTelFeature = createMmTelService(null);
@@ -376,9 +375,9 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         TestImsMmTelService imsMmTelFeature = new TestImsMmTelService();
 
         if (sr != null) {
-            ConcurrentHashMap<Integer, ImsServiceRecord> serviceRecords = null;
+            ConcurrentHashMap<Integer, ImsServiceRecord> serviceRecords =
+                    mServiceManager.getServiceRecordMap();
             ImsServiceManager.setDefault(mServiceManager);
-            serviceRecords = mServiceManager.getServiceRecordMap();
             serviceRecords.put(0, sr);
         } else {
             ImsServiceManager.setDefault(null);
