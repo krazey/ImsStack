@@ -43,36 +43,48 @@
 
 // FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
 // Rotation is separate from addition to prevent recomputation.
-#define FF(a, b, c, d, x, s, ac)                                       \
-    do                                                                 \
-    {                                                                  \
-        (a) += F((b), (c), (d)) + (x) + (static_cast<IMS_UINT32>(ac)); \
-        (a) = ROTATE_LEFT((a), (s));                                   \
-        (a) += (b);                                                    \
+#define FF(a, b, c, d, x, s, ac)                                    \
+    do                                                              \
+    {                                                               \
+        IMS_UINT32 n;                                               \
+        __builtin_add_overflow(F((b), (c), (d)), (x), &n);          \
+        __builtin_add_overflow(n, static_cast<IMS_UINT32>(ac), &n); \
+        __builtin_add_overflow((a), n, &n);                         \
+        (a) = ROTATE_LEFT(n, (s));                                  \
+        __builtin_add_overflow((a), (b), &(a));                     \
     } while (0)
 
-#define GG(a, b, c, d, x, s, ac)                                       \
-    do                                                                 \
-    {                                                                  \
-        (a) += G((b), (c), (d)) + (x) + (static_cast<IMS_UINT32>(ac)); \
-        (a) = ROTATE_LEFT((a), (s));                                   \
-        (a) += (b);                                                    \
+#define GG(a, b, c, d, x, s, ac)                                    \
+    do                                                              \
+    {                                                               \
+        IMS_UINT32 n;                                               \
+        __builtin_add_overflow(G((b), (c), (d)), (x), &n);          \
+        __builtin_add_overflow(n, static_cast<IMS_UINT32>(ac), &n); \
+        __builtin_add_overflow((a), n, &n);                         \
+        (a) = ROTATE_LEFT(n, (s));                                  \
+        __builtin_add_overflow((a), (b), &(a));                     \
     } while (0)
 
-#define HH(a, b, c, d, x, s, ac)                                       \
-    do                                                                 \
-    {                                                                  \
-        (a) += H((b), (c), (d)) + (x) + (static_cast<IMS_UINT32>(ac)); \
-        (a) = ROTATE_LEFT((a), (s));                                   \
-        (a) += (b);                                                    \
+#define HH(a, b, c, d, x, s, ac)                                    \
+    do                                                              \
+    {                                                               \
+        IMS_UINT32 n;                                               \
+        __builtin_add_overflow(H((b), (c), (d)), (x), &n);          \
+        __builtin_add_overflow(n, static_cast<IMS_UINT32>(ac), &n); \
+        __builtin_add_overflow((a), n, &n);                         \
+        (a) = ROTATE_LEFT(n, (s));                                  \
+        __builtin_add_overflow((a), (b), &(a));                     \
     } while (0)
 
-#define II(a, b, c, d, x, s, ac)                                       \
-    do                                                                 \
-    {                                                                  \
-        (a) += I((b), (c), (d)) + (x) + (static_cast<IMS_UINT32>(ac)); \
-        (a) = ROTATE_LEFT((a), (s));                                   \
-        (a) += (b);                                                    \
+#define II(a, b, c, d, x, s, ac)                                    \
+    do                                                              \
+    {                                                               \
+        IMS_UINT32 n;                                               \
+        __builtin_add_overflow(I((b), (c), (d)), (x), &n);          \
+        __builtin_add_overflow(n, static_cast<IMS_UINT32>(ac), &n); \
+        __builtin_add_overflow((a), n, &n);                         \
+        (a) = ROTATE_LEFT(n, (s));                                  \
+        __builtin_add_overflow((a), (b), &(a));                     \
     } while (0)
 
 // clang-format off
@@ -298,10 +310,10 @@ LOCAL void imsMd5_Transform(IN IMS_UINT32 anState[4], OUT IMS_UCHAR aucBlock[64]
     II(c, d, a, b, x[2], S43, 0x2ad7d2bb);  /* 63 */
     II(b, c, d, a, x[9], S44, 0xeb86d391);  /* 64 */
 
-    anState[0] += a;
-    anState[1] += b;
-    anState[2] += c;
-    anState[3] += d;
+    __builtin_add_overflow(anState[0], a, &anState[0]);
+    __builtin_add_overflow(anState[1], b, &anState[1]);
+    __builtin_add_overflow(anState[2], c, &anState[2]);
+    __builtin_add_overflow(anState[3], d, &anState[3]);
 
     // Zeroize sensitive information
     imsMd5_SetMemory(reinterpret_cast<IMS_UCHAR*>(x), 0, sizeof(x));
