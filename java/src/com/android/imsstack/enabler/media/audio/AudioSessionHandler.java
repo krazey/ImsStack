@@ -143,6 +143,7 @@ public class AudioSessionHandler extends MediaState {
     }
 
     /** Audio session message Handler */
+    @SuppressWarnings({"unchecked", "WaitNotInLoop"})
     class AudioMessageHandler extends Handler {
 
         AudioMessageHandler(Looper looper) {
@@ -528,7 +529,7 @@ public class AudioSessionHandler extends MediaState {
             case MediaConstants.REQUEST_HEADER_EXTENSION:
             {
                 int rtpExtensionsListSize = parcel.readInt();
-                ArrayList rtpExtensions = new ArrayList<RtpHeaderExtension>();
+                ArrayList<RtpHeaderExtension> rtpExtensions = new ArrayList<RtpHeaderExtension>();
                 if (rtpExtensionsListSize!=0) {
                     for (int i = 0; i < rtpExtensionsListSize; ++i) {
                         rtpExtensions.add(RtpHeaderExtension.CREATOR.createFromParcel(parcel));
