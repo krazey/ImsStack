@@ -33,15 +33,19 @@
 #define ROTATE_LEFT(x, n) ((((x) << (n)) & 0xFFFFFFFF) | ((x) >> (32 - (n))))
 
 // Calculate A,B,C,D,E
-#define FF(a, b, c, d, e, bcd, w, k, temp)                                               \
-    {                                                                                    \
-        (temp) = ROTATE_LEFT((a), 5) + (bcd) + (e) + (w) + (static_cast<IMS_UINT32>(k)); \
-        (e) = (d);                                                                       \
-        (d) = (c);                                                                       \
-        (c) = ROTATE_LEFT((b), 30);                                                      \
-        (b) = (a);                                                                       \
-        (a) = (temp)&0xFFFFFFFF;                                                         \
-    }
+#define FF(a, b, c, d, e, bcd, w, k, temp)                                   \
+    do                                                                       \
+    {                                                                        \
+        __builtin_add_overflow(ROTATE_LEFT((a), 5), (bcd), &(temp));         \
+        __builtin_add_overflow((temp), (e), &(temp));                        \
+        __builtin_add_overflow((temp), (w), &(temp));                        \
+        __builtin_add_overflow((temp), static_cast<IMS_UINT32>(k), &(temp)); \
+        (e) = (d);                                                           \
+        (d) = (c);                                                           \
+        (c) = ROTATE_LEFT((b), 30);                                          \
+        (b) = (a);                                                           \
+        (a) = (temp)&0xFFFFFFFF;                                             \
+    } while (0)
 
 // clang-format off
 LOCAL const IMS_UCHAR SHA1_PADDING[64] = {
@@ -232,9 +236,9 @@ LOCAL void imsSha1_Transform(IN_OUT IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBl
         FF(A, B, C, D, E, F60(B, C, D), W[t], K60, TEMP);
     }
 
-    anH[0] = (anH[0] + A) & 0xFFFFFFFF;
-    anH[1] = (anH[1] + B) & 0xFFFFFFFF;
-    anH[2] = (anH[2] + C) & 0xFFFFFFFF;
-    anH[3] = (anH[3] + D) & 0xFFFFFFFF;
-    anH[4] = (anH[4] + E) & 0xFFFFFFFF;
+    __builtin_add_overflow(anH[0], A, &anH[0]);
+    __builtin_add_overflow(anH[1], B, &anH[1]);
+    __builtin_add_overflow(anH[2], C, &anH[2]);
+    __builtin_add_overflow(anH[3], D, &anH[3]);
+    __builtin_add_overflow(anH[4], E, &anH[4]);
 }
