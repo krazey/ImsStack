@@ -19,7 +19,6 @@
 #include "IText.h"
 #include "XmlApiTree.h"
 
-class IElement;
 class INode;
 class Text;
 
