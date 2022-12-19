@@ -20,10 +20,10 @@
 class UceNonCapabilityUser
 {
 public:
-    explicit UceNonCapabilityUser(AString& strId, AString& strReason) :
+    explicit UceNonCapabilityUser(AString strId, AString strReason) :
             m_strId(strId),
             m_strReason(strReason){};
-    virtual ~UceNonCapabilityUser(){};
+    virtual ~UceNonCapabilityUser() {}
 
     AString& GetId() { return m_strId; }
     AString& GetReason() { return m_strReason; }
@@ -33,4 +33,42 @@ private:
     AString m_strReason;
 };
 
+class UceNonCapabilityUsers
+{
+public:
+    explicit UceNonCapabilityUsers(){};
+    virtual ~UceNonCapabilityUsers()
+    {
+        for (IMS_UINT32 i = 0; i < m_lstUceNonCapabilityUsers.GetSize(); i++)
+        {
+            if (m_lstUceNonCapabilityUsers.GetAt(i) != null)
+                delete m_lstUceNonCapabilityUsers.GetAt(i);
+        }
+    }
+    void SetNonCapabilityUser(UceNonCapabilityUser* user)
+    {
+        m_lstUceNonCapabilityUsers.Append(user);
+    }
+
+    IMSList<UceNonCapabilityUser*> GetNonCapabilityUser() const
+    {
+        return m_lstUceNonCapabilityUsers;
+    }
+
+private:
+    IMSList<UceNonCapabilityUser*> m_lstUceNonCapabilityUsers;
+};
+
+class UcePidfXmls
+{
+public:
+    explicit UcePidfXmls(){};
+    virtual ~UcePidfXmls() {}
+    void SetPidfXml(AString pidfXml) { m_lstPidfXmls.Append(pidfXml); }
+
+    IMSList<AString> GetPidfXmls() const { return m_lstPidfXmls; }
+
+private:
+    IMSList<AString> m_lstPidfXmls;
+};
 #endif /* UCE_NON_CAPABILITY_USER_H_ */

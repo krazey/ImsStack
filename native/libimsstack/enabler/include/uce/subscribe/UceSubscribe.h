@@ -29,7 +29,7 @@ class ITimer;
 class ISipMessage;
 class UceXmlDocumentHelperThread;
 class UceRlmiComposer;
-class UceNonCapabilityUser;
+class UceNonCapabilityUsers;
 class IUceJniThread;
 
 class ISubscribeResponseData  // internal Param
@@ -123,7 +123,7 @@ private:
             IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText);
     void SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError);
     void SendPresenceNotifyInd(IMSList<AString> pidfXmls);
-    void SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUser*>* pList);
+    void SendSubscribeResourceTerminatedInd(UceNonCapabilityUsers* nonCapUsers);
     void SendSubscribeTerminatedInd();
 
     IMS_BOOL SetHeaderForSingleSubscription(IN_OUT ISipMessage* piSIPMessage) const;

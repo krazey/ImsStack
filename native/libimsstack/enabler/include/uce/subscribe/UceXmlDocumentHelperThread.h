@@ -29,7 +29,8 @@ class IXmlTransactionProvider;
 class IXmlTransaction;
 class IDocument;
 class UceNotifyMessageBody;
-class UceNonCapabilityUser;
+class UceNonCapabilityUsers;
+class UcePidfXmls;
 class UceNotifyBodyPartData;
 
 class UceXmlDocumentHelperThread :
@@ -76,8 +77,8 @@ private:
     IXmlTransactionProvider* m_pXMLTransactionProvider;
     ImsQueue<IXmlTransaction*> m_objTransactionQueue;
     IMSList<AString> m_objRlmiCidList;
-    IMSList<AString> m_objPidfXmls;
-    IMSList<UceNonCapabilityUser*> m_objNonCapabilities;
+    UcePidfXmls* m_pPidfXmls;
+    UceNonCapabilityUsers* m_pNonCapabilities;
     UceNotifyMessageBody* m_pUceNotifyMessageBody;
     IMSList<UceNotifyBodyPartData*> m_objBodyParts;
 

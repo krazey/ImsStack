@@ -448,22 +448,19 @@ IMS_BOOL UceSubscribe::OnMessage(IN IMSMSG& objMsg)
     }
 
     m_nThreadRunningCompleted--;
-    IMSList<UceNonCapabilityUser*>* pNonCapabilities =
-            (IMSList<UceNonCapabilityUser*>*)objMsg.nWparam;
+    UceNonCapabilityUsers* pNonCapabilities =
+            reinterpret_cast<UceNonCapabilityUsers*>(objMsg.nWparam);
 
-    IMSList<AString> objPidfXmls = *(IMSList<AString>*)objMsg.nLparam;
+    UcePidfXmls* pPidfXmls = reinterpret_cast<UcePidfXmls*>(objMsg.nLparam);
+
+    if (pPidfXmls != IMS_NULL)
+    {
+        SendPresenceNotifyInd(pPidfXmls->GetPidfXmls());
+    }
 
     if (pNonCapabilities != IMS_NULL)
     {
-        if (pNonCapabilities->GetSize() != 0)
-        {
-            SendSubscribeResourceTerminatedInd(pNonCapabilities);
-        }
-    }
-
-    if (objPidfXmls.GetSize() != 0)
-    {
-        SendPresenceNotifyInd(objPidfXmls);
+        SendSubscribeResourceTerminatedInd(pNonCapabilities);
     }
 
     if (m_bSubscriptionTerminated == IMS_TRUE && m_nThreadRunningCompleted == 0)
@@ -1086,7 +1083,7 @@ void UceSubscribe::SendPresenceNotifyInd(IMSList<AString> pidfXmls)
     piJniThread->NotifyInd(m_nKey, pidfXmls.GetSize(), pidfXmls);
 }
 
-void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUser*>* pList)
+void UceSubscribe::SendSubscribeResourceTerminatedInd(UceNonCapabilityUsers* nonCapUsers)
 {
     if (m_nKey == 0)
     {
@@ -1098,12 +1095,18 @@ void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUs
         IMS_TRACE_E(0, "SendSubscribeResourceTerminatedInd:piJniThread is null", 0, 0, 0);
         return;
     }
-    IMS_TRACE_I("SendSubscribeResourceTerminatedInd:key[%d],size[%d]", m_nKey, pList->GetSize(), 0);
+    if (nonCapUsers == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "SendSubscribeResourceTerminatedInd:nonCapUsers is null", 0, 0, 0);
+        return;
+    }
+    IMSList<UceNonCapabilityUser*> pList = nonCapUsers->GetNonCapabilityUser();
+    IMS_TRACE_I("SendSubscribeResourceTerminatedInd:key[%d],size[%d]", m_nKey, pList.GetSize(), 0);
     IMS_UINT32 nCount = 0;
     IMSList<IUceTerminatedReason*> terminateContacts;
-    for (IMS_UINT32 i = 0; i < pList->GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < pList.GetSize(); i++)
     {
-        UceNonCapabilityUser* user = pList->GetAt(i);
+        UceNonCapabilityUser* user = pList.GetAt(i);
         if (user != IMS_NULL)
         {
             IUceTerminatedReason* reason = new IUceTerminatedReason();
@@ -1114,7 +1117,7 @@ void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUs
             terminateContacts.Append(reason);
         }
     }
-    pList->Clear();
+    pList.Clear();
     piJniThread->SubscribeResourceTerminatedInd(m_nKey, nCount, terminateContacts);
 }
 

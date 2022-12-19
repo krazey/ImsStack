@@ -204,6 +204,8 @@ PUBLIC VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Initialize()
                     &UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler));
     m_objMessageMap.Add(MSG_THREAD_PARSERED_XML_RLMI,
             reinterpret_cast<msgHandler>(&UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler));
+    m_pNonCapabilities = new UceNonCapabilityUsers();
+    m_pPidfXmls = new UcePidfXmls();
     return IMS_FALSE;
 }
 
@@ -270,8 +272,14 @@ VIRTUAL void UceXmlDocumentHelperThread::Uninitialize()
         m_pXMLTransactionProvider = IMS_NULL;
     }
     m_objRlmiCidList.Clear();
-    m_objPidfXmls.Clear();
-    m_objNonCapabilities.Clear();
+    if (m_pNonCapabilities != IMS_NULL)
+    {
+        delete m_pNonCapabilities;
+    }
+    if (m_pPidfXmls != IMS_NULL)
+    {
+        delete m_pPidfXmls;
+    }
     m_objBodyParts.Clear();
     m_objMessageMap.Clear();
 
@@ -326,7 +334,9 @@ IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& ob
     {
         IMS_TRACE_I("ReceivedRlmiNotifyMessageHandler:UceNotifyMessageBody is null", 0, 0, 0);
         IMS_MSG_CreateNPostActivityMessageByName(m_strQueryName,
-                IUUceService::UCE_XML_PARSE_COMPLETED_IND, &m_objNonCapabilities, &m_objPidfXmls);
+                IUUceService::UCE_XML_PARSE_COMPLETED_IND,
+                reinterpret_cast<IMS_UINTP>(m_pNonCapabilities),
+                reinterpret_cast<IMS_UINTP>(m_pPidfXmls));
         return IMS_TRUE;
     }
     /*
@@ -417,7 +427,9 @@ IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& ob
     {
         IMS_TRACE_I("ReceivedRlmiNotifyMessageHandler:Don`t match Any content type or id", 0, 0, 0);
         IMS_MSG_CreateNPostActivityMessageByName(m_strQueryName,
-                IUUceService::UCE_XML_PARSE_COMPLETED_IND, &m_objNonCapabilities, &m_objPidfXmls);
+                IUUceService::UCE_XML_PARSE_COMPLETED_IND,
+                reinterpret_cast<IMS_UINTP>(m_pNonCapabilities),
+                reinterpret_cast<IMS_UINTP>(m_pPidfXmls));
     }
     return IMS_TRUE;
 }
@@ -446,7 +458,7 @@ IMS_BOOL UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler(IMSMSG& objMsg)
             {
                 IMS_TRACE_D("ParsedRlmiXmlMessageHandler:find content id.index[%d]", j, 0, 0);
                 const ByteArray& objContent = piBodyPart->GetBodyContent();
-                m_objPidfXmls.Append(objContent.ToString());
+                m_pPidfXmls->SetPidfXml(objContent.ToString());
                 m_objBodyParts.RemoveAt(j);
                 m_objRlmiCidList.RemoveAt(i);
                 IMS_TRACE_D("ParsedRlmiXmlMessageHandler:current remain bodyPart`s size[%d]",
@@ -457,8 +469,9 @@ IMS_BOOL UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler(IMSMSG& objMsg)
     }
     IMS_TRACE_I("ParsedRlmiXmlMessageHandler:RLMI parsing completed", 0, 0, 0);
     IMS_MSG_CreateNPostActivityMessageByName(m_strQueryName,
-            IUUceService::UCE_XML_PARSE_COMPLETED_IND, &m_objNonCapabilities, &m_objPidfXmls);
-    m_objNonCapabilities.Clear();
+            IUUceService::UCE_XML_PARSE_COMPLETED_IND,
+            reinterpret_cast<IMS_UINTP>(m_pNonCapabilities),
+            reinterpret_cast<IMS_UINTP>(m_pPidfXmls));
     return IMS_TRUE;
 }
 
@@ -565,7 +578,7 @@ IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN IDocument* piDocument)
                     {
                         UceNonCapabilityUser* pNonCapabilityUser =
                                 new UceNonCapabilityUser(strURI, strReason);
-                        m_objNonCapabilities.Append(pNonCapabilityUser);
+                        m_pNonCapabilities->SetNonCapabilityUser(pNonCapabilityUser);
                     }
                 }
             }
