@@ -349,8 +349,8 @@ CallReasonInfo StartErrorHandler::Handle488Response(IN const IMessage& objMessag
 {
     if (m_objContext.GetMessageUtils().HasSdp(&objMessage))
     {
-        // TODO: silent redial with the SDP to be implemented
-        // temporary solution. to be verified.
+        // TODO: silent redial with the SDP to be implemented.
+        // Temporary solution. to be verified.
         AString strSdp = objMessage.GetMessage()->GetSdpBodyPart()->GetContent().ToString();
         return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strSdp);
     }
@@ -635,7 +635,7 @@ IMS_BOOL StartErrorHandler::IsInitialRegistrationRequired(IN const IMessage& obj
 PRIVATE
 void StartErrorHandler::ControlAos(IMS_UINT32 nCommand) const
 {
-    IMtcAosConnector* pAosConnector = GetAosConnector();
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     if (pAosConnector)
     {
         pAosConnector->Control(nCommand);
@@ -645,31 +645,20 @@ void StartErrorHandler::ControlAos(IMS_UINT32 nCommand) const
 PRIVATE
 AString StartErrorHandler::GetPathHeader() const
 {
-    IMtcAosConnector* pAosConnector = GetAosConnector();
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     return pAosConnector ? pAosConnector->GetPathHeaderValue() : AString::ConstNull();
 }
 
 PRIVATE
 AString StartErrorHandler::GetServiceRouteHeader() const
 {
-    IMtcAosConnector* pAosConnector = GetAosConnector();
+    IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
     return pAosConnector ? pAosConnector->GetServiceRouteHeaderValue() : AString::ConstNull();
 }
 
 PRIVATE
 AString StartErrorHandler::GetSupported() const
 {
-    IMtcAosConnector* pAosConnector = GetAosConnector();
-    return pAosConnector ? pAosConnector->GetSupportedHeaderValue() : AString::ConstNull();
-}
-
-PRIVATE
-IMtcAosConnector* StartErrorHandler::GetAosConnector() const
-{
     IMtcAosConnector* pAosConnector = m_objContext.GetService().GetAosConnector();
-    if (pAosConnector == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "GetAosConnector : AosConnector is null", 0, 0, 0);
-    }
-    return pAosConnector;
+    return pAosConnector ? pAosConnector->GetSupportedHeaderValue() : AString::ConstNull();
 }
