@@ -114,8 +114,8 @@ public class ImsRegistrationTracker {
     }
 
     public void dispose() {
-        // FIXME: use proper reason
-        mRegImpl.notifyDeregistered(0);
+        mRegTracker.notifyDeregistered(mRegTracker.getNetworkType(),
+                IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED);
         mRegImpl.setRegistrationTracker(null);
         mRegTracker.clear();
         mCapabilities.clear();
@@ -557,7 +557,8 @@ public class ImsRegistrationTracker {
         public void notifyDeregistered(int networkType, int reason) {
             logi("ImsRegistrationTracker notifyDeregistered - network=" + networkType
                     + ", reason =" + reason);
-            mRegImpl.notifyDeregistered(reason);
+            int radioTech = convertToTelephonyNetworkType(networkType);
+            mRegImpl.notifyDeregistered(radioTech, reason);
             boolean networkTypeChanged = updateNetworkType(
                     IAosRegistrationListener.NetworkType.NONE);
             boolean featureChanged = updateFeatures(FeatureTagMask.NONE);

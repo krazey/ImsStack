@@ -29,7 +29,7 @@ public interface IRegistrationNotifier {
      * @param featureTags set of strings containing the MMTEL feature tags associated with the IMS
      * registration.
      */
-    public void notifyRegistered(int networkType, @NonNull Set<String> featureTags);
+    void notifyRegistered(int networkType, @NonNull Set<String> featureTags);
 
     /**
      * Notify the application that the device is trying to connect to the IMS network.
@@ -38,14 +38,15 @@ public interface IRegistrationNotifier {
      * @param featureTags set of strings containing the MMTEL feature tags associated with the IMS
      * registration.
      */
-    public void notifyRegistering(int networkType, @NonNull Set<String> featureTags);
+    void notifyRegistering(int networkType, @NonNull Set<String> featureTags);
 
     /**
      * Notify the application that the device is disconnected from the IMS network.
      *
+     * @param networkType the radio access technology.
      * @param reason the disconnected reason.
      */
-    public void notifyDeregistered(int reason);
+    void notifyDeregistered(int networkType, int reason);
 
     /**
      * Notify the framework that the handover from the current radio technology
@@ -54,7 +55,7 @@ public interface IRegistrationNotifier {
      * @param networkType the current network type (before handover)
      * @param reason the handover failure reason.
      */
-    public void notifyTechnologyChangeFailed(int networkType, int reason);
+    void notifyTechnologyChangeFailed(int networkType, int reason);
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter
@@ -62,5 +63,5 @@ public interface IRegistrationNotifier {
      *
      * @param uris the network provisioned public user identities.
      */
-    public void notifyAssociatedUriChanged(Uri[] uris);
+    void notifyAssociatedUriChanged(Uri[] uris);
 }
