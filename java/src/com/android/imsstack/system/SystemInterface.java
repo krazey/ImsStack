@@ -805,19 +805,19 @@ public class SystemInterface implements JniSystemListener {
                 "TRIGGER_EPS_FALLBACK");
     }
 
-    private void sendData2Native(long nCmd, Parcel parcel) {
-        byte[] baDataRet;
-        byte[] baData = parcel.marshall();
+    private void sendData2Native(long cmd, Parcel parcel) {
+        byte[] result;
+        byte[] data = parcel.marshall();
 
         try {
-            baDataRet = JniImsProxy.sendDataForSystem(mNativeObject, baData);
+            result = JniImsProxy.sendDataForSystem(mNativeObject, data);
         } catch (RuntimeException e) {
-            ImsLog.e(e.getStackTrace().toString() + " cmd : " + nCmd);
+            ImsLog.e("sendDataForSystem: " + e.toString() + "; cmd=" + cmd);
             return;
         }
 
         Parcel parcelOut = Parcel.obtain();
-        parcelOut.unmarshall(baDataRet, 0, baDataRet.length);
+        parcelOut.unmarshall(result, 0, result.length);
         parcelOut.setDataPosition(0);
 
         // if need the return data, use parcelOut at here
