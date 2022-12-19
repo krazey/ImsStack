@@ -178,7 +178,7 @@ PRIVATE
 void ConferenceEventNotifier::CheckDisconnectedConfUsersInfo(
         IN ConferenceParticipantList& objParticipantList, IN_OUT ImsList<ConfUser*>& /*objUsers*/)
 {
-    for (IMS_SINT32 i = (objParticipantList.GetSize() - 1); i >= 0; i--)
+    for (IMS_SINT32 i = static_cast<IMS_SINT32>(objParticipantList.GetSize()) - 1; i >= 0; i--)
     {
         ConferenceParticipantList::ConferenceParticipant* pParticipant =
                 objParticipantList.GetAt(i);

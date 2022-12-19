@@ -37,7 +37,9 @@ SubscriptionInterfaceHolder::~SubscriptionInterfaceHolder()
 
     ClearISubscriptions();
 
-    for (IMS_SINT32 i = m_objSubscriptionTerminatedGuardTimers.GetSize() - 1; i >= 0; i--)
+    for (IMS_SINT32 i =
+                    static_cast<IMS_SINT32>(m_objSubscriptionTerminatedGuardTimers.GetSize()) - 1;
+            i >= 0; i--)
     {
         StopTimer(m_objSubscriptionTerminatedGuardTimers.GetKeyAt(i));
     }

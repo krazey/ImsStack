@@ -36,7 +36,8 @@ SessionInterfaceHolder::~SessionInterfaceHolder()
 
     ClearISessions();
 
-    for (IMS_SINT32 i = m_objTerminatedGuardTimers.GetSize() - 1; i >= 0; i--)
+    for (IMS_SINT32 i = static_cast<IMS_SINT32>(m_objTerminatedGuardTimers.GetSize()) - 1; i >= 0;
+            i--)
     {
         StopTimer(m_objTerminatedGuardTimers.GetKeyAt(i));
     }

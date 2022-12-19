@@ -36,7 +36,8 @@ ReferenceInterfaceHolder::~ReferenceInterfaceHolder()
 
     ClearIReferences();
 
-    for (IMS_SINT32 i = m_objReferenceTerminatedGuardTimers.GetSize() - 1; i >= 0; i--)
+    for (IMS_SINT32 i = static_cast<IMS_SINT32>(m_objReferenceTerminatedGuardTimers.GetSize()) - 1;
+            i >= 0; i--)
     {
         StopTimer(m_objReferenceTerminatedGuardTimers.GetKeyAt(i));
     }
