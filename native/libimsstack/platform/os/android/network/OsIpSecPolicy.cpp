@@ -16,7 +16,6 @@
 #include "IIpSecPolicyListener.h"
 #include "IIpSecSa.h"
 #include "IIpSecSp.h"
-#include "ITimer.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"

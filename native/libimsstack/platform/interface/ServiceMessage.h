@@ -18,7 +18,6 @@
 
 #include "AString.h"
 #include "ImsMessage.h"
-#include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
 class IThread;

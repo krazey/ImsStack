@@ -22,7 +22,6 @@
 #include "IpAddress.h"
 
 class INetworkConnectionListener;
-class AccessNetworkInfo;
 
 // Default network id - system default id
 #define IMS_NET_IFACE_DEFAULT_ID 0

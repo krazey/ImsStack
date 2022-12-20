@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "AStringBuffer.h"
 #include "ImsMd5.h"
 #include "ImsSha1.h"
 #include "ImsUuid.h"

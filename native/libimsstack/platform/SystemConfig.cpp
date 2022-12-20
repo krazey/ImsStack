@@ -16,8 +16,6 @@
 #include "DeviceConfig.h"
 #include "SystemConfig.h"
 
-PRIVATE GLOBAL IMS_SINT32 SystemConfig::s_nGlobalConfigs = CONFIG_MULTI_IMS;
-
 PUBLIC GLOBAL IMS_SINT32 SystemConfig::GetActiveSimCount()
 {
     return DeviceConfig::GetActiveSimCount();
@@ -30,8 +28,8 @@ PUBLIC GLOBAL IMS_SINT32 SystemConfig::GetSupportedSimCount()
 
 PUBLIC GLOBAL IMS_BOOL SystemConfig::IsMultiImsEnabled()
 {
-    // As a default, single IMS is required on dual SIM environment.
-    return (s_nGlobalConfigs & CONFIG_MULTI_IMS) != 0;
+    // Device supports the multi-SIM as a default.
+    return IMS_TRUE;
 }
 
 PUBLIC GLOBAL IMS_BOOL SystemConfig::IsMultiSimEnabled()

@@ -95,19 +95,8 @@ static int SendDataToJava(long nNativeObject, const android::Parcel& objParcel)
 int SendDataToJavaForSystem(
         long nNativeObject, const android::Parcel& parcelIn, android::Parcel& parcelOut, int fd)
 {
-#define MAX_LOG_DISPLAY_COUNT 5
-
-    static IMS_SINT32 nLogDisplayCount = 0;
     JNIEnv* env;
     jlong jNativeObject = nNativeObject;
-
-    ++nLogDisplayCount;
-
-    if (nLogDisplayCount >= MAX_LOG_DISPLAY_COUNT)
-    {
-        IMS_TRACE_D("SendDataToJavaForSystem: object=%" PFLS_x, nNativeObject, 0, 0);
-        nLogDisplayCount = 0;
-    }
 
     if ((s_classJniIms == NULL) || (s_methodSendDataToJavaForSystem == NULL))
     {
@@ -415,19 +404,7 @@ static jint JniIms_nativeSendData(
 jbyteArray JniIms_nativeSendDataForSystem(
         JNIEnv* env, jobject /*object*/, jlong jNativeObject, jbyteArray jData)
 {
-#define MAX_LOG_DISPLAY_COUNT 5
-
-    static int nLogDisplayCount = 0;
     long nNativeObject = INT64_TO_SINTP(jNativeObject);
-
-    nLogDisplayCount++;
-
-    if (nLogDisplayCount >= MAX_LOG_DISPLAY_COUNT)
-    {
-        IMS_TRACE_I("JniIms_nativeSendDataForSystem: object=%" PFLS_x, nNativeObject, 0, 0);
-        nLogDisplayCount = 0;
-    }
-
     android::Parcel parcelOut;
     BaseService* pService = reinterpret_cast<BaseService*>(nNativeObject);
 

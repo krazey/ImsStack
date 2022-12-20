@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include "ImsMessageDef.h"
-#include "OsTimer.h"
 #include "OsTimerService.h"
 #include "PlatformContext.h"
 #include "ServiceMessage.h"

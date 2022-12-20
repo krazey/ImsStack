@@ -20,7 +20,6 @@
 #include "IMtcService.h"
 #include "INetworkWatcher.h"
 #include "ImsList.h"
-#include "ImsTypeCast.h"
 #include "ImsTypeDef.h"
 #include "ServiceImsRadio.h"
 #include "ServicePhoneInfo.h"
@@ -513,7 +512,7 @@ PRIVATE IMS_BOOL MtcRadioChecker::StartSsacTimer(IN CallType eCallType)
     }
 
     IMS_UINT32 nRandom = IMS_SYS_GetRandom(100);
-    if (nRandom <= STATIC_CAST(IMS_UINT32, nBarringFactor))
+    if (nRandom <= static_cast<IMS_UINT32>(nBarringFactor))
     {
         return IMS_FALSE;
     }

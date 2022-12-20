@@ -19,8 +19,6 @@
 #include "ISystemListener.h"
 #include "IWifiWatcher.h"
 
-class System;
-
 class OsWifiWatcher : public IWifiWatcher, public ISystemListener
 {
 public:

@@ -19,8 +19,8 @@
 #include "ISystemListener.h"
 #include "ImsList.h"
 #include "OsMutex.h"
+#include "OsTimer.h"
 
-class OsTimer;
 class OsTimerWrapper;
 
 class OsTimerService : public ISystemListener

@@ -21,8 +21,6 @@
 #include "ImsMap.h"
 #include "PlatformService.h"
 
-class OsFactory;
-
 class PlatformContext
 {
 public:

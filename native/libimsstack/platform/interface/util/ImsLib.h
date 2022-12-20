@@ -25,16 +25,16 @@
 #else
 #define IMS_LONG_MAX  (0x7FFFFFFFL)
 #define IMS_LONG_MIN  (-IMS_LONG_MAX - 1L)
-#define IMS_ULONG_MAX (0xFFFFFFFFL)
+#define IMS_ULONG_MAX (0xFFFFFFFFUL)
 #endif
 
 #define IMS_INT_MAX    (0x7FFFFFFF)
 #define IMS_INT_MIN    (-IMS_INT_MAX - 1)
-#define IMS_UINT_MAX   (0xFFFFFFFF)
+#define IMS_UINT_MAX   (0xFFFFFFFFU)
 
 #define IMS_SHORT_MAX  (0x7FFF)
 #define IMS_SHORT_MIN  (-IMS_SHORT_MAX - 1)
-#define IMS_USHORT_MAX (0xFFFF)
+#define IMS_USHORT_MAX (0xFFFFU)
 
 template <typename T>
 inline const T& IMS_MIN(IN const T& a, IN const T& b)

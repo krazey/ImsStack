@@ -24,11 +24,9 @@
 #include "private/ConfigBase.h"
 #include "private/ImsSubscriberInfo.h"
 
-class IImsPrivateProperty;
 class IIsim;
 
 class AsyncConfigHelper;
-class ICarrierConfig;
 class ISubscriberInfoListener;
 
 class SubscriberConfig :

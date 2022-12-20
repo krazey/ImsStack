@@ -16,8 +16,6 @@
 #ifndef INTERFACE_USIM_H_
 #define INTERFACE_USIM_H_
 
-#include "ImsTypeDef.h"
-
 class IDigestAka;
 
 class IUsim

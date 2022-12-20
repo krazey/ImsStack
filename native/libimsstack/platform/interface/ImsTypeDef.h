@@ -301,9 +301,14 @@ typedef unsigned int IMS_UINTP;
 
 #endif
 
-// To fix a type casting problem according to the device platform.
-//    For external interfaces, defines a header file not to include the below header file.
-#include "ImsTypeCast.h"
+#ifdef IMS_RTTI_ENABLED
+#define DYNAMIC_CAST(TYPE, VALUE)     (dynamic_cast<TYPE>(VALUE))
+#define REINTERPRET_CAST(TYPE, VALUE) (reinterpret_cast<TYPE>(VALUE))
+#else
+// C-style type casting
+#define DYNAMIC_CAST(TYPE, VALUE)     ((TYPE)(VALUE))
+#define REINTERPRET_CAST(TYPE, VALUE) (reinterpret_cast<TYPE>(VALUE))
+#endif  // IMS_RTTI_ENABLED
 
 // IMS ASSERT (ServiceTrace.cpp implements this function)
 extern void TraceService_Assert(IN const IMS_CHAR*, IN const IMS_CHAR*, IN IMS_UINT16);
