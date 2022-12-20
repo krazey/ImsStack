@@ -615,6 +615,13 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
+    public void testtriggerDeRegistration() {
+        ImsRegistrationImpl regImpl = mRegTracker.getRegistration();
+        assertNotNull(regImpl);
+        regImpl.triggerDeregistration(ImsRegistrationImpl.REASON_SIM_REMOVED);
+    }
+
+    @Test
     public void testOnCommonPackageReady() {
         ICommonPackageListener listener = mRegTracker.getICommonPackageListener();
         assertNotNull(listener);

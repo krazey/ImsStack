@@ -349,6 +349,14 @@ public class ImsRegistrationTracker {
                 CarrierConfig.Assets
                 .KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL);
     }
+    /**
+     * Call aos to send deregistration
+     *
+     */
+    public void onDeregistrationTriggered(int reason) {
+        logi("DeregistrationTriggered :: request from framework" + reason);
+        mRegTracker.controlRegistration(reason);
+    }
 
     private int convertToAosNetworkType(int radioTech) {
         switch (radioTech) {
@@ -515,6 +523,11 @@ public class ImsRegistrationTracker {
             if (mAosReg != null) {
                 mAosReg.changeCapabilities(capabilities);
             }
+        }
+
+        public void controlRegistration(int reason) {
+            mAosReg.controlRegistration(IAosRegistration.RequestType.STOP,
+                    IAosRegistration.Pcscf.CURRENT, reason);
         }
 
         @Override
