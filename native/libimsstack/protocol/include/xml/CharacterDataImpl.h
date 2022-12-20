@@ -18,8 +18,6 @@
 
 #include "ICharacterData.h"
 
-class IElement;
-
 class CharacterDataImpl : public ICharacterData
 {
 public:
