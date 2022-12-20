@@ -47,12 +47,12 @@ IMS_SINT32 MtsErrorHandler::Handle(IN const IMessage* piMessage)
     IMS_SINT32 nResult = MO_ERROR_RETRY;
     IMS_SINT32 nStatusCode =
             (piMessage != IMS_NULL) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
-    ImsVector<IMS_SINT32> objPermanentErrorCodes = m_piCarrierConfig->GetIntArray(
-            CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY);
+    ImsVector<IMS_SINT32> objGenericErrorCodes = m_piCarrierConfig->GetIntArray(
+            CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY);
 
-    for (IMS_UINT32 i = 0; i < objPermanentErrorCodes.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objGenericErrorCodes.GetSize(); i++)
     {
-        if (objPermanentErrorCodes.GetAt(i) == nStatusCode)
+        if (objGenericErrorCodes.GetAt(i) == nStatusCode)
         {
             nResult = MO_ERROR_GENERIC;
             break;
