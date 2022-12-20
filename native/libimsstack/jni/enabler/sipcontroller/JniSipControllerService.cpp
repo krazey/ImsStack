@@ -28,46 +28,55 @@
 
 __IMS_TRACE_TAG_USER_DECL__("IMS_SNC");
 
-JniSipControllerService::JniSipControllerService(Jni_SendDataToJava pfnSendDataToJava,
-        IMS_SINTP _nSessionId, IN IMS_UINT32 nSimSlot /*= 0*/) :
+JniSipControllerService::JniSipControllerService(
+        Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot /*= 0*/) :
         BaseService(nSimSlot),
         m_strTarget(AString::ConstNull()),
         m_strThreadName(AString::ConstNull()),
-        m_nSessionId(_nSessionId)
+        m_nSessionId(-1)
 {
-    IMS_TRACE_D("JniSipControllerService = %" PFLS_u, sizeof(JniSipControllerService), 0, 0);
-
+    IMS_TRACE_MEM("SNC_MEM", "JniSipControllerService = %" PFLS_u "/%" PFLS_x,
+            sizeof(JniSipControllerService), this, 0);
     m_strTarget = EnablerUtils::GetEnablerThreadName(nSimSlot);
     m_strTarget.Append(".RcsMessageService");
     IMS_TRACE_D("JniSipControllerService [%s]", m_strTarget.GetStr(), 0, 0);
+    m_nSessionId = reinterpret_cast<IMS_SINTP>(this);
 
-    if (pfnSendDataToJava != NULL)
+    if (pfnSendDataToJava == NULL)
     {
-        m_strThreadName.Sprintf("JniSipControllerServiceThread_%d", m_nSessionId /*m_nSlotId*/);
-        LoadThread(m_strThreadName);
-
-        if (m_pJniSipControllerServiceThread != NULL)
-        {
-            m_pJniSipControllerServiceThread->SetCallback(
-                    reinterpret_cast<IMS_UINTP>(this), pfnSendDataToJava);
-
-            IUSncOpenCmdParam* pParam = new IUSncOpenCmdParam();
-            pParam->nSessionID = m_nSessionId;
-            IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
-            IMSMSG objMSG(IUSncService::OPENMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
-            MessageService::PostMessage(m_strTarget, objMSG);
-        }
-        else
-        {
-            IMS_TRACE_I("can't create listener thread", 0, 0, 0);
-        }
+        return;
     }
+    m_strThreadName.Sprintf("JniSipControllerServiceThread_%d", GetSlotId());
+    auto fnEntry = []() -> BaseThread*
+    {
+        return new JniSipControllerServiceThread();
+    };
+
+    ImsProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry, GetSlotId());
+    m_pJniSipControllerServiceThread = reinterpret_cast<JniSipControllerServiceThread*>(
+            ImsProcess::GetInstance()->GetThread(m_strThreadName));
+
+    if (m_pJniSipControllerServiceThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniSipControllerService : can't create listener thread", 0, 0, 0);
+        return;
+    }
+
+    m_pJniSipControllerServiceThread->SetCallback(
+            reinterpret_cast<IMS_UINTP>(this), pfnSendDataToJava);
+
+    IUSncOpenCmdParam* pParam = new IUSncOpenCmdParam();
+    pParam->nSessionID = m_nSessionId;
+    IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
+    IMSMSG objMSG(IUSncService::OPENMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+    MessageService::PostMessage(m_strTarget, objMSG);
 }
 
 JniSipControllerService::~JniSipControllerService()
 {
-    IMS_TRACE_D("JniSipControllerService = %" PFLS_u, sizeof(JniSipControllerService), 0, 0);
     IMS_TRACE_I("~JniSipControllerService :", 0, 0, 0);
+    IMS_TRACE_MEM("SNC_MEM", "JniSipControllerService = %" PFLS_u "/%" PFLS_x,
+            sizeof(JniSipControllerService), this, 0);
 
     if (m_pJniSipControllerServiceThread != NULL)
     {
@@ -78,25 +87,6 @@ JniSipControllerService::~JniSipControllerService()
     pParam->nSessionID = m_nSessionId;
     IMSMSG objMSG(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     MessageService::PostMessage(m_strTarget, objMSG);
-}
-
-PRIVATE
-void JniSipControllerService::LoadThread(IN const AString& strThreadName)
-{
-    if (strThreadName.GetLength() <= 0)
-    {
-        IMS_TRACE_E(0, "LoadThread() : strThreadName is empty", 0, 0, 0);
-        return;
-    }
-
-    if (!ImsProcess::GetInstance()->LoadAppThread(
-                strThreadName, JniSipControllerServiceThread::GetInstance, GetSlotId()))
-    {
-        IMS_TRACE_E(0, "LoadThread() : failed to load a thread(%s)", strThreadName.GetStr(), 0, 0);
-        return;
-    }
-    m_pJniSipControllerServiceThread = DYNAMIC_CAST(JniSipControllerServiceThread*,
-            ImsProcess::GetInstance()->GetApplicationThread(strThreadName));
 }
 
 int JniSipControllerService::SendData(const Parcel& pParcel)

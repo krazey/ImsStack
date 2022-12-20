@@ -22,7 +22,7 @@
 
 class JniSipControllerServiceThread : public ImsAppThread
 {
-private:
+public:
     JniSipControllerServiceThread();
 
 public:
