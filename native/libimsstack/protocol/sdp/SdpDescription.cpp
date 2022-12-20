@@ -16,7 +16,6 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-#include "Sdp.h"
 #include "SdpDescription.h"
 
 __IMS_TRACE_TAG_SDP__;

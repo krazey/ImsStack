@@ -19,7 +19,7 @@
 #include "Credential.h"
 
 #include "ISipGenericChallenge.h"
-#include "SipStackHeaders.h"
+#include "msg/SipMessage.h"
 
 class SipAuHelperPrivate;
 

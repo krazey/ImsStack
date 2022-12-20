@@ -16,10 +16,12 @@
 #ifndef SIP_ACK_PACKAGE_H_
 #define SIP_ACK_PACKAGE_H_
 
+#include "AString.h"
 #include "ImsList.h"
 
 #include "ISipAckPackage.h"
-#include "SipStackHeaders.h"
+#include "msg/SipMessage.h"
+#include "txn/SipTxnKey.h"
 
 class SipAck;
 class SipAckPackagePrivate;

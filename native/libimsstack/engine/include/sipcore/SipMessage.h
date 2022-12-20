@@ -17,8 +17,9 @@
 #define SIP_MESSAGE_H_
 
 #include "ISipMessage.h"
-#include "SipHeader.h"
 #include "SipMessageBodyPart.h"
+#include "SipStatusCode.h"
+#include "msg/SipMessage.h"
 
 namespace sipcore
 {

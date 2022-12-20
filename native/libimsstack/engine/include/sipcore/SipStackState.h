@@ -19,6 +19,8 @@
 #include "ImsList.h"
 #include "ImsMap.h"
 
+#include "txn/SipTxnKey.h"
+
 class IMutex;
 class SipProfile;
 class SipStackTransaction;

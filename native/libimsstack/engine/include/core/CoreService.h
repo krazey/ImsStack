@@ -24,6 +24,7 @@ class IOnDirectCoreServiceListener;
 class ISipConnectionFactory;
 class Publication;
 class Subscription;
+class SessionEx;
 
 class CoreService : public Service
 {

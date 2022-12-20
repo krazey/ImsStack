@@ -21,7 +21,6 @@
 
 #include "SipAddress.h"
 
-class CallerCapability;
 class IRegBindingListener;
 class IRegInfo;
 class SipProfile;

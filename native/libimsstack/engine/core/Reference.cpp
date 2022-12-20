@@ -36,7 +36,6 @@
 #include "SipDebug.h"
 #include "SipFeatures.h"
 #include "SipHeaderName.h"
-#include "SipStatusCode.h"
 #include "base/Ims.h"
 #include "util/DialogMethodManager.h"
 

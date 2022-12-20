@@ -19,9 +19,7 @@
 
 #include "Feature.h"
 #include "ImsIdentity.h"
-#include "private/AppConfig.h"
 #include "private/ConfigurationManager.h"
-#include "private/CoreServiceConfig.h"
 #include "private/SipConfig.h"
 #include "private/SubscriberConfig.h"
 

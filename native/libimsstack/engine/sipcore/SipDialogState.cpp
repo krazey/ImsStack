@@ -22,6 +22,7 @@
 #include "SipHeaderName.h"
 #include "SipMessage.h"
 #include "SipPrivate.h"
+#include "SipStack.h"
 
 #define __IMS_SIP_DIALOG_COMPONENT_BY_REFERENCE__
 

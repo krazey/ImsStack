@@ -22,13 +22,13 @@
 #include "ISipClientTransmissionListener.h"
 #include "Sip.h"
 #include "SipClientTransactionState.h"
-#include "SipClientTransmissionProxy.h"
 #include "SipConnection.h"
 
 class IOnSipClientConnectionListener;
 class ISipAckPackage;
 class ISipGenericChallenge;
 class SipAuHelper;
+class SipClientTransmissionProxy;
 class SipConnectionNotifier;
 
 class SipClientConnection :

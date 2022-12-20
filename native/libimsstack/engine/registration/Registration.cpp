@@ -43,7 +43,6 @@
 #include "RegInfo.h"
 #include "RegInfoManager.h"
 #include "RegObserver.h"
-#include "RegParameter.h"
 #include "RegRefreshHelper.h"
 #include "RegSubscription.h"
 #include "Registration.h"

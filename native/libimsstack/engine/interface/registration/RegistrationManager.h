@@ -18,7 +18,6 @@
 
 #include "IRegistration.h"
 
-class IRegistrationListener;
 class RegistrationManagerPrivate;
 
 /**

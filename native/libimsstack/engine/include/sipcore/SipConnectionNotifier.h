@@ -21,6 +21,7 @@
 #include "ISipSocketListener.h"
 #include "Sip.h"
 #include "SipProfile.h"
+#include "SipServerTransactionState.h"
 #include "SipTransportAddress.h"
 
 class IOnSipConnectionNotifierErrorListener;
@@ -28,7 +29,6 @@ class IOnSipServerConnectionListener;
 class ISipDialog;
 class ISipServerConnection;
 class SipParameter;
-class SipServerTransactionState;
 class SipSocket;
 class SipSocketAddress;
 class SipTransportHelper;

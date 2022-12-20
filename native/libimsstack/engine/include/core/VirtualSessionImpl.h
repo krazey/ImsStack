@@ -17,7 +17,6 @@
 #define VIRTUAL_SESSION_IMPL_H_
 
 #include "ISession.h"
-#include "Session.h"
 #include "VirtualSession.h"
 
 class IMedia;

@@ -24,7 +24,7 @@
 #include "SipManager.h"
 #include "SipMessageHandler.h"
 #include "SipPrivate.h"
-#include "SipStackHeaders.h"
+#include "SipStack.h"
 #include "SipStackState.h"
 #include "SipTransportHelper.h"
 #include "SipUtils.h"

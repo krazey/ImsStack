@@ -16,6 +16,7 @@
 #include "SipHeader.h"
 #include "SipHeaderName.h"
 #include "SipMessage.h"
+#include "SipParameter.h"
 #include "SipParsingHelper.h"
 #include "SipPrivate.h"
 

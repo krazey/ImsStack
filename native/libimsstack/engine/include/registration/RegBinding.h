@@ -19,6 +19,7 @@
 #include "IRegBinding.h"
 #include "RegObserver.h"
 
+class CallerCapability;
 class IRegContact;
 class IRegistrationEx;
 class ISipConnectionNotifier;

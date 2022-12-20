@@ -18,8 +18,6 @@
 
 #include "media/Media.h"
 
-class StreamMediaImpl;
-
 class StreamMedia : public Media
 {
 public:

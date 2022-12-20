@@ -19,6 +19,7 @@
 #include "SipAck.h"
 #include "SipAckPackage.h"
 #include "SipDebug.h"
+#include "SipStack.h"
 
 __IMS_TRACE_TAG_SIP__;
 

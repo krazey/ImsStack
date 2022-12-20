@@ -22,7 +22,7 @@
 #include "SipIpSecState.h"
 #include "SipMessageTracker.h"
 #include "SipPrivate.h"
-#include "SipStackHeaders.h"
+#include "SipStack.h"
 
 __IMS_TRACE_TAG_SIP__;
 

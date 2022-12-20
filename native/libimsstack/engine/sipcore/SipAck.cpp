@@ -18,7 +18,7 @@
 #include "ImsStrLib.h"
 
 #include "SipAck.h"
-#include "SipStackHeaders.h"
+#include "SipStack.h"
 
 PUBLIC
 SipAck::SipAck(IN SipClientTransactionState* pCtState, IN IMS_SINT32 nAliveInterval) :

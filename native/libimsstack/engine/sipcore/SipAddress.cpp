@@ -26,7 +26,7 @@
 #include "SipDebug.h"
 #include "SipHeader.h"
 #include "SipPrivate.h"
-#include "SipStackHeaders.h"
+#include "SipStack.h"
 #include "SipUtils.h"
 
 __IMS_TRACE_TAG_SIP__;

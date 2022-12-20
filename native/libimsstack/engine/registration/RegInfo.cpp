@@ -23,6 +23,7 @@
 #include "IRegInfoListener.h"
 #include "RegInfo.h"
 #include "RegInfoConst.h"
+#include "RegInfoRegistration.h"
 
 __IMS_TRACE_TAG_REG__;
 

@@ -17,7 +17,8 @@
 #include "ServiceTrace.h"
 
 #include "SipClientTransactionState.h"
-#include "SipStackHeaders.h"
+#include "SipStack.h"
+#include "SipStackCallback.h"
 #include "SipStackState.h"
 #include "SipStackTxnLayer.h"
 #include "SipTransactionTimer.h"

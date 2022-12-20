@@ -18,8 +18,6 @@
 
 #include "SipServerTransactionState.h"
 
-class SipDialogState;
-
 /**
  * @brief This class defines a listener interface for an incoming SIP requests.
  *

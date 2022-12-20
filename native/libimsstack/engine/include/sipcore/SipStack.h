@@ -31,10 +31,10 @@
 #include "txn/SipTxnKey.h"
 
 class ISipConfigV;
+class ISipHeader;
 class SipProfile;
 class SipTimeoutData;
 class SipTimerValues;
-class SipTxnContextData;
 
 namespace SipStack
 {
@@ -374,6 +374,11 @@ GLOBAL void DisplayUnknownHeaders(IN ::SipMessage* pMessage);
 GLOBAL const IMS_CHAR* GetLogString(IN const IMS_CHAR* pszInput, IN_OUT IMS_CHAR* pszOutput,
         IN IMS_SINT32 nOutSize /* > 3, excluding null char*/,
         IN const IMS_CHAR cDelimiter = 0 /*no delimiter*/);
+
+GLOBAL IMS_BOOL DecodeHeaderComponent(
+        IN const SipAddrSpec* pAddrSpec, OUT ImsList<ISipHeader*>& objHeaders);
+GLOBAL IMS_BOOL DecodeHeaderComponent(
+        IN const AString& strHeaders, OUT ImsList<ISipHeader*>& objHeaders);
 }  // namespace SipStack
 
 #endif

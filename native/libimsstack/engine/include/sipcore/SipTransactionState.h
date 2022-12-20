@@ -23,8 +23,10 @@
 #include "SipDialogEx.h"
 #include "SipProfile.h"
 #include "SipTimerValues.h"
+#include "SipTxnContext.h"
+#include "msg/SipMessage.h"
+#include "txn/SipTxnKey.h"
 
-class INetworkConnection;
 class ISipTransactionStateListener;
 class ISipTransportListener;
 class SipTransport;
