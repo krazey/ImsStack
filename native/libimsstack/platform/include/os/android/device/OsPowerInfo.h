@@ -21,7 +21,6 @@
 #include "ISystemListener.h"
 
 class OsPowerInfoPrivate;
-class System;
 
 class OsPowerInfo : public IPowerInfo, public ISystemListener
 {

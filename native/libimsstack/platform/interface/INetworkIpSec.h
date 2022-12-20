@@ -19,7 +19,6 @@
 #include "ISocket.h"
 #include "SocketAddress.h"
 
-class ISocket;
 class IIpSecPolicy;
 
 class INetworkIpSec

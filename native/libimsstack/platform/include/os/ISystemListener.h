@@ -16,6 +16,8 @@
 #ifndef INTERFACE_SYSTEM_LISTENER_H_
 #define INTERFACE_SYSTEM_LISTENER_H_
 
+#include "ImsTypeDef.h"
+
 // This interface will be used between OsXxx and System
 class ISystemListener
 {

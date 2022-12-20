@@ -16,8 +16,8 @@
 #ifndef INTERFACE_OS_FACTORY_H_
 #define INTERFACE_OS_FACTORY_H_
 
+#include "AString.h"
 #include "ImsFdSet.h"
-#include "ImsSocket.h"
 
 class ICallInfo;
 class IDeviceInfo;
@@ -41,6 +41,7 @@ class ImsIsim;
 class ImsMutex;
 class ImsNetworkConnection;
 class ImsRadio;
+class ImsSocket;
 class ImsThread;
 class ImsTimer;
 class ImsTrace;

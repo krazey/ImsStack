@@ -17,7 +17,6 @@
 #include "ServiceMemory.h"
 #include "ServiceMessage.h"
 #include "ServiceThread.h"
-#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 

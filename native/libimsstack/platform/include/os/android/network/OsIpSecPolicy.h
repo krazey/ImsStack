@@ -24,7 +24,6 @@ class IIpSecSp;
 class IIpSecSa;
 class OsIpSecSp;
 class OsIpSecSa;
-class IIPSecPolicyListener;
 
 class OsIpSecPolicy : public IIpSecPolicy, public ITimerListener
 {

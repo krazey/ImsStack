@@ -28,15 +28,6 @@ public:
     static IMS_SINT32 GetSupportedSimCount();
     static IMS_BOOL IsMultiImsEnabled();
     static IMS_BOOL IsMultiSimEnabled();
-
-private:
-    /// Global configurations
-    enum
-    {
-        CONFIG_MULTI_IMS = 1 << 0,
-    };
-
-    static IMS_SINT32 s_nGlobalConfigs;
 };
 
 #endif

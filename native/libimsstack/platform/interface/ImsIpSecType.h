@@ -16,8 +16,6 @@
 #ifndef IMS_IPSEC_TYPE_H_
 #define IMS_IPSEC_TYPE_H_
 
-#include "ImsTypeDef.h"
-
 class IpSecType
 {
 public:

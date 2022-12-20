@@ -16,7 +16,6 @@
 #ifndef IMS_STATE_MACHINE_H_
 #define IMS_STATE_MACHINE_H_
 
-#include "ImsActivity.h"
 #include "ImsStateMap.h"
 #include "ImsStateObject.h"
 

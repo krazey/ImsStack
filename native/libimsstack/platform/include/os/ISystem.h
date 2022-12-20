@@ -22,8 +22,6 @@
 #include "ImsParcel.h"
 #include "IpSecSaParameter.h"
 
-class AccessNetworkInfo;
-
 class ISystem
 {
 protected:

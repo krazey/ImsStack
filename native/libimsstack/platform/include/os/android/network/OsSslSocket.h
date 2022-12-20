@@ -19,7 +19,6 @@
 #include "ITimer.h"
 #include "OsSocket.h"
 
-class SslCertificate;
 class OsSsl;
 
 class OsSslSocket : public OsSocket, public ITimerListener
