@@ -54,7 +54,7 @@ PUBLIC GLOBAL BaseService* CoreInterfaceFactory::GetInterface(IN IMS_SINT32 nInt
             break;
 
         case IUIMS::APP_SIP_DELEGATE:
-            pService = new JniSipControllerService(pfnSendDataToJava, -1, nSlotId);
+            pService = new JniSipControllerService(pfnSendDataToJava, nSlotId);
             break;
 
         case IUIMS::MTS_EMERGENCY_SERVICE:

@@ -76,17 +76,15 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
             ImsLog.i("slotId is invalid");
             return;
         }
-
         mSlotId = slotId;
         mSubId = MSimUtils.getSubId(slotId);
-        // to avoid crash
-        //initService(slotId);
+        initService(slotId);
         mSipMsgMap = new HashMap<>();
     }
 
     /**
-     * @param slotId This id is intended to manage Sip Messages for multi-SIMs
-     * @return To deliver the object for each sim to the sipController
+     * @param slotId SIM slot id for instance of SipControllerAgent
+     * @return Instance of SipControllerAgent associated with SIM slot ID.
      */
     public static SipControllerAgent getInstance(int slotId) {
         synchronized (sAgentArray) {
@@ -102,9 +100,9 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     /**
-     * @param slotId This id is intended to manage Sip Messages for multi-SIMs
+     * @param slotId SIM slot id for instance of SipControllerAgent
      * @param subId The ID of the Subscription associated with slot ID.
-     * @return To deliver the object for each sim to the sipController
+     * @return Instance of SipControllerAgent associated with SIM slot ID.
      */
     @VisibleForTesting
     public static SipControllerAgent getInstance(int slotId, int subId) {
@@ -134,7 +132,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
         if (nativeObj != 0) {
             JniImsProxy.setListener(nativeObj, this);
         } else {
-            ImsLog.e("nativeObj is 0");
+            ImsLog.e(mSlotId, "nativeObj is 0");
         }
     }
 
@@ -180,11 +178,11 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     private Boolean validateNotifyMessageReceived(String viaTransactionId) {
         if (viaTransactionId == null) {
-            ImsLog.e("viaTransactionId == null");
+            ImsLog.e(mSlotId, "viaTransactionId == null");
             return false;
         }
         if (!mSipMsgMap.containsKey(viaTransactionId)) {
-            ImsLog.e("Message is not contain in Map" + viaTransactionId);
+            ImsLog.e(mSlotId, "Message is not contain in Map" + viaTransactionId);
             return false;
         }
         return true;
@@ -200,6 +198,10 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
             SipMessage message = mSipMsgMap.get(viaTransactionId);
             mSipMsgMap.remove(viaTransactionId);
 
+            if (message == null) {
+                ImsLog.e(mSlotId, "SipMessage Does not exist in mSipMsgMap");
+                return;
+            }
             // ToDo
             // need to make the response error message param
             sendMessageToJNI(parcel);
@@ -226,7 +228,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
             MESSAGE_FAILURE_REASON_INTERNAL_DELEGATE_STATE_TRANSITION
         };
         if (IntStream.of(Reasons).noneMatch(x -> x == reason)) {
-            ImsLog.e("Message failure reason: " + reason);
+            ImsLog.e(mSlotId, "Message failure reason: " + reason);
             return false;
         }
         return true;
@@ -236,7 +238,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     public void setSipTransportListener(SipTransportRemoteListener listener) {
         mListener = listener;
         if (listener != null && mNativeObj == 0) {
-            ImsLog.i("NativeObj of JniImsProxy is Null");
+            ImsLog.i(mSlotId, "NativeObj of JniImsProxy is Null");
         }
     }
 
@@ -276,7 +278,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     public void onMessage(Parcel parcel) {
         int msg = parcel.readInt();
         if (mListener == null) {
-            ImsLog.e("NO listener!!!");
+            ImsLog.e(mSlotId, "NO listener!!!");
             return;
         }
 
@@ -303,11 +305,11 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
                     break;
                 }
                 default:
-                    ImsLog.e("NOT HANDLED!!! [" + msg + "]");
+                    ImsLog.e(mSlotId, "NOT HANDLED!!! [" + msg + "]");
                     break;
             }
         } catch (Exception e) {
-            ImsLog.e("Exception: " + e);
+            ImsLog.e(mSlotId, "Exception: " + e);
         }
     }
 
@@ -328,7 +330,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
         String transactionId = parcel.readString();
         SipMessage message = mSipMsgMap.remove(transactionId);
         if (message == null) {
-            ImsLog.e("SipMessage Does not exist in mSipMsgMap");
+            ImsLog.e(mSlotId, "SipMessage Does not exist in mSipMsgMap");
             return;
         }
 
@@ -341,7 +343,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
         SipMessage message = mSipMsgMap.remove(transactionId);
         if (message == null) {
-            ImsLog.e("SipMessage Does not exist in mSipMsgMap");
+            ImsLog.e(mSlotId, "SipMessage Does not exist in mSipMsgMap");
             return;
         }
 
