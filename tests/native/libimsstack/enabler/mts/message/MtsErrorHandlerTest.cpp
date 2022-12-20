@@ -80,7 +80,7 @@ TEST_F(MtsErrorHandlerTest, Handle403Error)
     objArray.Push(SipStatusCode::SC_408);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_403_RESPONSE_INT,
@@ -109,7 +109,7 @@ TEST_F(MtsErrorHandlerTest, Handle404Error)
     objArray.Push(SipStatusCode::SC_408);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_404_RESPONSE_INT,
@@ -138,7 +138,7 @@ TEST_F(MtsErrorHandlerTest, Handle406Error)
     objArray.Push(SipStatusCode::SC_408);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_406_RESPONSE_INT,
@@ -167,7 +167,7 @@ TEST_F(MtsErrorHandlerTest, Handle408Error)
     objArray.Push(SipStatusCode::SC_408);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_408_RESPONSE_INT,
@@ -194,7 +194,7 @@ TEST_F(MtsErrorHandlerTest, Handle500Error)
     objArray.Push(SipStatusCode::SC_504);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_500_RESPONSE_INT,
@@ -221,7 +221,7 @@ TEST_F(MtsErrorHandlerTest, Handle503Error)
     objArray.Push(SipStatusCode::SC_504);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT,
@@ -250,7 +250,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
     objArray.Push(SipStatusCode::SC_504);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT,
@@ -279,7 +279,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
     objArray.Push(SipStatusCode::SC_504);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT,
@@ -306,7 +306,7 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
     objArray.Push(SipStatusCode::SC_504);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_504_RESPONSE_INT,
@@ -330,7 +330,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpired)
     objArray.Push(SipStatusCode::SC_INVALID);
 
     ON_CALL(*piMockCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::KEY_SMS_PERMANENT_ERROR_CODES_INT_ARRAY))
+            GetIntArray(CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY))
             .WillByDefault(Return(objArray));
     ON_CALL(*piMockCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT,
