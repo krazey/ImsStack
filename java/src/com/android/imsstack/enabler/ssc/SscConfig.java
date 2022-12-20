@@ -116,6 +116,11 @@ public final class SscConfig {
         return getInt(slotId, CarrierConfigManager.KEY_GBA_MODE_INT);
     }
 
+    static boolean isImsRegistrationRequired(int slotId) {
+        return getBoolean(slotId,
+                CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL);
+    }
+
     static int[] getServerBasedServices(int slotId) {
         return getIntArray(slotId,
                 CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY);

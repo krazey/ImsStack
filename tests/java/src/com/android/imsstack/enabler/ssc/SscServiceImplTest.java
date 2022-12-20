@@ -136,8 +136,7 @@ public class SscServiceImplTest {
         when(mMockSscTransactionFactory.getSscTransaction(eq(SLOT_0), any()))
                 .thenReturn(mMockSscTransaction);
 
-        SscServiceStateAgent.getInstance()
-                .setSscServiceState(SLOT_0, mMockSscServiceState, serviceThreadHandler.getLooper());
+        SscServiceStateAgent.getInstance().setSscServiceState(SLOT_0, mMockSscServiceState);
         when(mMockSscServiceState.isUtAvailable()).thenReturn(true);
     }
 

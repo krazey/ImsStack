@@ -26,31 +26,40 @@ import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
+import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.aos.IAosRegistration;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 public class SscServiceState {
-    private static final int EVENT_INITIALIZATION_DONE = 1000;
+    private static final int EVENT_UT_CAPABITILY_CHANGED = 1000;
     @VisibleForTesting
-    public static final int EVENT_UT_BLOCK_TIMER_EXPIRED = 1001;
+    protected static final int EVENT_UT_BLOCK_TIMER_EXPIRED = 1001;
     @VisibleForTesting
-    public static final int EVENT_AIRPLANE_MODE_CHANGED = 1002;
+    protected static final int EVENT_AIRPLANE_MODE_CHANGED = 1002;
 
-    private int mSlotId = -1;
+    private final int mSlotId;
+    @VisibleForTesting
+    final SscServiceStateHandler mHandler;
+    @VisibleForTesting
+    final SscRegiStateListener mRegiStateListener;
+
     private int mUtBlockTimerId = -1;
     private int mUtBlockReason = SscConstant.BLOCK_REASON_NONE;
 
     private boolean mAllSRVAddrTried = false;
 
-    @VisibleForTesting
-    public Handler mHandler = null;
-
-    protected void init(int slotId, Looper looper) {
-        ImsLog.d("");
+    SscServiceState(int slotId, Looper looper) {
         mSlotId = slotId;
         mHandler = new SscServiceStateHandler(looper);
+        mRegiStateListener = new SscRegiStateListener();
+    }
+
+    protected void init() {
+        ImsLog.d(mSlotId, "");
 
         IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
@@ -59,13 +68,20 @@ public class SscServiceState {
 
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
         if (sim != null) {
-            sim.addListener((SscServiceStateHandler) mHandler);
+            sim.addListener(mHandler);
         }
 
-        mHandler.sendEmptyMessage(EVENT_INITIALIZATION_DONE);
+        IAosRegistration aosService = AosFactory.getInstance().getAosRegistration(mSlotId);
+        if (aosService != null) {
+            aosService.addListener(mRegiStateListener);
+        }
+
+        handleUtFeatureCapabilityChanged();
     }
 
     protected void deInit() {
+        ImsLog.d(mSlotId, "");
+
         resetAllUtStatus();
 
         IDcNetWatcher dnw = (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
@@ -75,24 +91,36 @@ public class SscServiceState {
         }
 
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
-
         if (sim != null) {
-            sim.removeListener((SscServiceStateHandler) mHandler);
+            sim.removeListener(mHandler);
+        }
+
+        IAosRegistration aosService = AosFactory.getInstance().getAosRegistration(mSlotId);
+        if (aosService != null) {
+            aosService.removeListener(mRegiStateListener);
         }
     }
 
     protected boolean isUtAvailable() {
         if (!SscConfig.isUtSupported(mSlotId)) {
-            ImsLog.i("Ut not supported");
+            ImsLog.i(mSlotId, "Ut not supported");
             return false;
+        }
+
+        if (SscConfig.isImsRegistrationRequired(mSlotId)) {
+            if (!mRegiStateListener.getImsRegistrationState()) {
+                ImsLog.w(mSlotId, "Ims not registered");
+                return false;
+            }
         }
 
         if (mUtBlockReason != SscConstant.BLOCK_REASON_NONE) {
-            ImsLog.w("mUtBlockReason = " + getBlockedReasonString(mUtBlockReason));
+            ImsLog.w(mSlotId, "mUtBlockReason = " + getBlockedReasonString(mUtBlockReason));
             return false;
         }
 
-        ImsLog.i("Ut is available now");
+        ImsLog.i(mSlotId, "Ut is available now");
+
         return true;
     }
 
@@ -183,7 +211,7 @@ public class SscServiceState {
         authAgent.setETag("");
 
         stopUtBlockTimer(true);
-        updateUtServiceFeature();
+        notifyUtFeatureCapabilityChanged();
     }
 
     private void setUtBlock(int blockReason) {
@@ -192,7 +220,7 @@ public class SscServiceState {
             return;
         }
 
-        ImsLog.d("SetReason : " + getBlockedReasonString(blockReason));
+        ImsLog.d(mSlotId, "SetReason : " + getBlockedReasonString(blockReason));
 
         if (!SscConfig.isCsfbSupported(mSlotId)) {
             if (blockReason != SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM
@@ -213,7 +241,7 @@ public class SscServiceState {
                 if (blockTimeMilliSeconds > 0) {
                     startUtBlockTimer(blockTimeMilliSeconds);
                     mUtBlockReason |= blockReason;
-                    updateUtServiceFeature();
+                    notifyUtFeatureCapabilityChanged();
                 }
                 break;
             case SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP : // fall-through
@@ -222,17 +250,17 @@ public class SscServiceState {
                 if (blockTimeMilliSeconds > 0) {
                     startUtBlockTimer(blockTimeMilliSeconds);
                     mUtBlockReason |= blockReason;
-                    updateUtServiceFeature();
+                    notifyUtFeatureCapabilityChanged();
                 }
                 break;
             case SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM : // fall-through
             case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM :
                 // don't start timer
                 mUtBlockReason |= blockReason;
-                updateUtServiceFeature();
+                notifyUtFeatureCapabilityChanged();
                 break;
             default :
-                ImsLog.e("wrong block reason");
+                ImsLog.e(mSlotId, "wrong block reason");
                 break;
         }
     }
@@ -243,9 +271,9 @@ public class SscServiceState {
             return;
         }
 
-        ImsLog.d("ResetReason : " + getBlockedReasonString(blockReason));
+        ImsLog.d(mSlotId, "ResetReason : " + getBlockedReasonString(blockReason));
         mUtBlockReason &= ~blockReason;
-        updateUtServiceFeature();
+        notifyUtFeatureCapabilityChanged();
     }
 
     private boolean isUtBlocked(int blockReason) {
@@ -255,7 +283,7 @@ public class SscServiceState {
     private void startUtBlockTimer(long duration) {
         IAlarmTimer alarmTimer = getTimerAgent();
         if (alarmTimer == null) {
-            ImsLog.e("alarmTimer is null");
+            ImsLog.e(mSlotId, "alarmTimer is null");
             return;
         }
 
@@ -265,7 +293,7 @@ public class SscServiceState {
 
         mUtBlockTimerId = alarmTimer.getTimerId();
         if (mUtBlockTimerId <= 0) {
-            ImsLog.e("Retry timer id is invalid");
+            ImsLog.e(mSlotId, "Retry timer id is invalid");
             return;
         }
 
@@ -274,11 +302,11 @@ public class SscServiceState {
 
         if (!alarmTimer.startTimer(mUtBlockTimerId, duration)) {
             stopUtBlockTimer(false);
-            ImsLog.e(" Starting a validity timer failed");
+            ImsLog.e(mSlotId, "Starting a validity timer failed");
             return;
         }
 
-        ImsLog.i(EVENT_UT_BLOCK_TIMER_EXPIRED + " timer is started :: "
+        ImsLog.i(mSlotId, EVENT_UT_BLOCK_TIMER_EXPIRED + " timer is started :: "
                 + "tid[" + mUtBlockTimerId + "], duration[" + duration + "]");
     }
 
@@ -289,7 +317,7 @@ public class SscServiceState {
 
         IAlarmTimer alarmTimer = getTimerAgent();
         if (alarmTimer == null) {
-            ImsLog.e("alarmTimer is null");
+            ImsLog.e(mSlotId, "alarmTimer is null");
             return;
         }
 
@@ -311,7 +339,15 @@ public class SscServiceState {
         return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
     }
 
-    private void updateUtServiceFeature() {
+    private void handleUtFeatureCapabilityChanged() {
+        if (mHandler.hasMessages(EVENT_UT_CAPABITILY_CHANGED)) {
+            mHandler.removeMessages(EVENT_UT_CAPABITILY_CHANGED);
+        }
+
+        mHandler.sendEmptyMessageDelayed(EVENT_UT_CAPABITILY_CHANGED, 1000); // 1s
+    }
+
+    private void notifyUtFeatureCapabilityChanged() {
         IUtInterface utInterface = UtFactory.getInstance().getUtInterface(mSlotId);
         if (utInterface != null) {
             utInterface.onServiceStateChanged();
@@ -340,10 +376,11 @@ public class SscServiceState {
                 return;
             }
 
-            ImsLog.d("Message : " + msg.what);
+            ImsLog.d(mSlotId, "Message : " + msg.what);
+
             switch(msg.what) {
-                case EVENT_INITIALIZATION_DONE:
-                    updateUtServiceFeature();
+                case EVENT_UT_CAPABITILY_CHANGED:
+                    notifyUtFeatureCapabilityChanged();
                     break;
                 case EVENT_UT_BLOCK_TIMER_EXPIRED:
                     int allTempBlockReasons = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
@@ -355,9 +392,9 @@ public class SscServiceState {
                     resetUtBlock(allTempBlockReasons);
                     break;
                 case EVENT_AIRPLANE_MODE_CHANGED:
-                    IDcNetWatcher dcnw = getDcNetWatcher();
-                    if (dcnw != null) {
-                        if (dcnw.isAirplaneMode()) {
+                    IDcNetWatcher dnw = getDcNetWatcher();
+                    if (dnw != null) {
+                        if (dnw.isAirplaneMode()) {
                             resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
                             resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
                             resetUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
@@ -365,11 +402,63 @@ public class SscServiceState {
                     }
                     break;
                 default:
-                    ImsLog.e("Invalid Message");
+                    ImsLog.e(mSlotId, "Invalid Message");
                     break;
             }
 
-            ImsLog.d("mUtBlockReason = " + mUtBlockReason);
+            ImsLog.d(mSlotId, "mUtBlockReason = " + mUtBlockReason);
+        }
+    }
+
+    @VisibleForTesting
+    final class SscRegiStateListener implements IAosRegistrationListener {
+        @VisibleForTesting
+        boolean mImsRegistrationState = false;
+
+        @Override
+        public void notifyRegistered(int networkType, int featureTagBits,
+                java.util.Set<String> featureTags) {
+            ImsLog.d(mSlotId, "Registered : network = " + networkType);
+
+            if (!mImsRegistrationState) {
+                mImsRegistrationState = true;
+                handleUtFeatureCapabilityChanged();
+            }
+        }
+
+        @Override
+        public void notifyRegistering(int networkType, int featureTagBits,
+                java.util.Set<String> featureTags) {
+            // do nothing
+        }
+
+        @Override
+        public void notifyDeregistered(int networkType, int reason) {
+            ImsLog.d(mSlotId, "Deregistered : reason = " + reason);
+
+            if (mImsRegistrationState) {
+                mImsRegistrationState = false;
+                handleUtFeatureCapabilityChanged();
+            }
+        }
+
+        @Override
+        public void notifyTechnologyChangeFailed(int networkType, int causeCode) {
+            // do nothing
+        }
+
+        @Override
+        public void notifyAssociatedUriChanged(android.net.Uri[] uris) {
+            // do nothing
+        }
+
+        @Override
+        public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason) {
+            // do nothing
+        }
+
+        public boolean getImsRegistrationState() {
+            return mImsRegistrationState;
         }
     }
 

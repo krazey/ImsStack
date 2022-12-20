@@ -31,7 +31,7 @@ public class AosFactory {
     private static AosFactory sFactory = null;
 
     @VisibleForTesting
-    protected Map<Integer, AosService> mAosServices =
+    public Map<Integer, AosService> mAosServices =
             new HashMap<Integer, AosService>(MSimUtils.getSupportedSimCount());
     @VisibleForTesting
     protected Map<Integer, AosSettingService> mAosSettingServices =

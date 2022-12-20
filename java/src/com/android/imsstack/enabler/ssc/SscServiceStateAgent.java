@@ -32,7 +32,7 @@ public class SscServiceStateAgent {
     }
 
     protected void init(int slotId, Looper looper) {
-        setSscServiceState(slotId, new SscServiceState(), looper);
+        setSscServiceState(slotId, new SscServiceState(slotId, looper));
     }
 
     protected void deInit(int slotId) {
@@ -54,9 +54,9 @@ public class SscServiceStateAgent {
     }
 
     @VisibleForTesting
-    public void setSscServiceState(int slotId, SscServiceState sscServiceState, Looper looper) {
+    public void setSscServiceState(int slotId, SscServiceState sscServiceState) {
         deInit(slotId);
-        sscServiceState.init(slotId, looper);
+        sscServiceState.init();
         mSscServiceState.put(slotId, sscServiceState);
     }
 

@@ -375,8 +375,7 @@ public class SscNetConnectionTest {
         int timerIdForRequestTimeout = 2;
         mSscNetConnection.mTimerIdTable.put(SscNetConnection.EVENT_PDN_REQUEST_TIMEOUT,
                 timerIdForRequestTimeout);
-        SscServiceStateAgent.getInstance()
-                .setSscServiceState(SLOT_0, mMockSscServiceState, android.os.Looper.myLooper());
+        SscServiceStateAgent.getInstance().setSscServiceState(SLOT_0, mMockSscServiceState);
 
         IDcNetWatcher.NotiObj notiObj = new IDcNetWatcher.NotiObj(EApnType.XCAP,
                 EDataState.DATA_STATE_CONNECT_FAILED, smCause);
