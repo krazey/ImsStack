@@ -452,6 +452,15 @@ public class MtcCall extends Call implements ConferenceTracker {
 
     @Override
     public void close() {
+        if (mHandler.hasMessages(MSG_CLOSE)) {
+            return;
+        }
+
+        if (mHandler.hasMessages(MSG_SEND_REQUEST)) {
+            closeInternal(MtcCall.this);
+            return;
+        }
+
         long nativeCallId = 0L;
         String callId = null;
 
