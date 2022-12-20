@@ -29,16 +29,15 @@ public class IUMtcCall {
     public static final int REJECT              = (EVENT_U2I + 5);
     public static final int HOLD                = (EVENT_U2I + 6);
     public static final int RESUME              = (EVENT_U2I + 7);
-    public static final int SEND_DTMF           = (EVENT_U2I + 8);
-    public static final int TERMINATE           = (EVENT_U2I + 9);
-    public static final int UPDATE              = (EVENT_U2I + 10);
-    public static final int ACCEPT_UPDATE       = (EVENT_U2I + 11);
-    public static final int REJECT_UPDATE       = (EVENT_U2I + 12);
-    public static final int CANCEL_UPDATE       = (EVENT_U2I + 13);
-    public static final int ACCEPT_RESUME       = (EVENT_U2I + 14);
-    public static final int REJECT_RESUME       = (EVENT_U2I + 15);
+    public static final int TERMINATE           = (EVENT_U2I + 8);
+    public static final int UPDATE              = (EVENT_U2I + 9);
+    public static final int ACCEPT_UPDATE       = (EVENT_U2I + 10);
+    public static final int REJECT_UPDATE       = (EVENT_U2I + 11);
+    public static final int CANCEL_UPDATE       = (EVENT_U2I + 12);
+    public static final int ACCEPT_RESUME       = (EVENT_U2I + 13);
+    public static final int REJECT_RESUME       = (EVENT_U2I + 14);
     // Google_IMS_IF :: USSD {
-    public static final int SEND_USSD           = (EVENT_U2I + 16);
+    public static final int SEND_USSD           = (EVENT_U2I + 15);
     // Google_IMS_IF :: USSD }
     public static final int REQUEST_ECT         = (EVENT_U2I + 61);
     public static final int REQUEST_CALL_PUSH   = (EVENT_U2I + 62);

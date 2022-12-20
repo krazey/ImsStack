@@ -68,7 +68,6 @@ public:
     inline void RejectUpdate(IN const CallReasonInfo&) override {}
     inline void CancelUpdate(IN const CallReasonInfo&) override {}
     inline void Terminate(IN const CallReasonInfo&) override {}
-    inline void SendDtmf(IN const AString&, IN IMS_SINT32) override {}
     inline void SendUssd(IN const AString&) override {}
 
     inline CallKey GetKey() const override { return CALL_KEY_INVALID; }

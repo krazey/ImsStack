@@ -75,7 +75,6 @@ public:
     CallStateName RejectUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName CancelUpdate(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
-    CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
 
     CallStateName HandleIncomingUssi(IN ISession* piSession) override;
     CallStateName OnUssiAttached() override;

@@ -141,12 +141,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::Terminate(IN const CallReasonInfo& /*
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::SendDtmf(
-        IN const AString& /* strSignal */, IN IMS_SINT32 /* nDuration */)
-{
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
         IN const AString&, IN MediaInfo& /* pMediaInfo */,
         IN const ImsMap<SuppType, SuppService*>& /* lstSuppServices */,

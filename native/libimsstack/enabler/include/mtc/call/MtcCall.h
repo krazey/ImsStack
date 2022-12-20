@@ -117,7 +117,6 @@ public:
     void RejectUpdate(IN const CallReasonInfo& objReason) override;
     void CancelUpdate(IN const CallReasonInfo& objReason) override;
     void Terminate(IN const CallReasonInfo& objReason) override;
-    void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
     void SendUssd(IN const AString& strUssd) override;
 
     inline CallKey GetKey() const override { return m_nKey; }

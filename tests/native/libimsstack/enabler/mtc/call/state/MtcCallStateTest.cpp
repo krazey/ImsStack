@@ -181,11 +181,6 @@ TEST_F(MtcCallStateTest, TerminateDoesNothing)
     EXPECT_EQ(INITIAL_CALL_STATE, pState->Terminate(*pReason));
 }
 
-TEST_F(MtcCallStateTest, SendDtmfDoesNothing)
-{
-    EXPECT_EQ(INITIAL_CALL_STATE, pState->SendDtmf("anySignal", 1));
-}
-
 TEST_F(MtcCallStateTest, HandleIncomingUssiDoesNothing)
 {
     EXPECT_EQ(INITIAL_CALL_STATE, pState->HandleIncomingUssi(&objISession));

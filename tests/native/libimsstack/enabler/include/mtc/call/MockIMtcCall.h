@@ -68,7 +68,6 @@ public:
     MOCK_METHOD(void, RejectUpdate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, CancelUpdate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, Terminate, (IN const CallReasonInfo& objReason), (override));
-    MOCK_METHOD(void, SendDtmf, (IN const AString& strSignal, IN IMS_SINT32 nDuration), (override));
     MOCK_METHOD(void, SendUssd, (IN const AString& strUssd), (override));
     MOCK_METHOD(CallKey, GetKey, (), (const, override));
     MOCK_METHOD(CallType, GetCallType, (), (const, override));

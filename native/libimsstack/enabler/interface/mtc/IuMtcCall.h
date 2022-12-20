@@ -44,16 +44,15 @@ public:
     static const IMS_SINT32 REJECT = (EVENT_U2I + 5);
     static const IMS_SINT32 HOLD = (EVENT_U2I + 6);
     static const IMS_SINT32 RESUME = (EVENT_U2I + 7);
-    static const IMS_SINT32 SEND_DTMF = (EVENT_U2I + 8);
-    static const IMS_SINT32 TERMINATE = (EVENT_U2I + 9);
-    static const IMS_SINT32 UPDATE = (EVENT_U2I + 10);
-    static const IMS_SINT32 ACCEPT_UPDATE = (EVENT_U2I + 11);
-    static const IMS_SINT32 REJECT_UPDATE = (EVENT_U2I + 12);
-    static const IMS_SINT32 CANCEL_UPDATE = (EVENT_U2I + 13);
-    static const IMS_SINT32 ACCEPT_RESUME = (EVENT_U2I + 14);
-    static const IMS_SINT32 REJECT_RESUME = (EVENT_U2I + 15);
+    static const IMS_SINT32 TERMINATE = (EVENT_U2I + 8);
+    static const IMS_SINT32 UPDATE = (EVENT_U2I + 9);
+    static const IMS_SINT32 ACCEPT_UPDATE = (EVENT_U2I + 10);
+    static const IMS_SINT32 REJECT_UPDATE = (EVENT_U2I + 11);
+    static const IMS_SINT32 CANCEL_UPDATE = (EVENT_U2I + 12);
+    static const IMS_SINT32 ACCEPT_RESUME = (EVENT_U2I + 13);
+    static const IMS_SINT32 REJECT_RESUME = (EVENT_U2I + 14);
 
-    static const IMS_SINT32 SEND_USSD = (EVENT_U2I + 16);
+    static const IMS_SINT32 SEND_USSD = (EVENT_U2I + 15);
 
     static const IMS_SINT32 CONF_EXPAND = (EVENT_CONF_U2I + 1);
     static const IMS_SINT32 CONF_MERGE = (EVENT_CONF_U2I + 2);

@@ -72,8 +72,6 @@ public:
     MOCK_METHOD(CallStateName, RejectUpdate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(CallStateName, CancelUpdate, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(CallStateName, Terminate, (IN const CallReasonInfo& objReason), (override));
-    MOCK_METHOD(CallStateName, SendDtmf, (IN const AString& strSignal, IN IMS_SINT32 nDuration),
-            (override));
     MOCK_METHOD(CallStateName, HandleIncomingUssi, (IN ISession* piSession), (override));
     MOCK_METHOD(CallStateName, OnUssiAttached, (), (override));
     MOCK_METHOD(CallStateName, AcceptUssi, (IN CallType eCallType, IN MediaInfo& objMediaInfo),
