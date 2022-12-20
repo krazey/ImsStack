@@ -15,6 +15,7 @@
  */
 #include "ServiceMemory.h"
 
+#include "Sip.h"
 #include "SipPrivate.h"
 
 PUBLIC GLOBAL const IMS_CHAR Sip::CONNECTION_SCHEME_SIP[] = "sip";

@@ -29,7 +29,6 @@
 #include "SipDebug.h"
 #include "SipFeatures.h"
 #include "SipParameter.h"
-#include "util/CallerCapability.h"
 
 __IMS_TRACE_TAG_REG__;
 

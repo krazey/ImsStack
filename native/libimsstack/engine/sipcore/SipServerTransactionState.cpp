@@ -32,6 +32,7 @@
 #include "SipPrivate.h"
 #include "SipServerTransactionState.h"
 #include "SipServerTransport.h"
+#include "SipStack.h"
 #include "SipStackState.h"
 #include "SipTimerValuesHelper.h"
 #include "SipTxnContextData.h"

@@ -21,6 +21,7 @@
 #include "ISubscriptionState.h"
 #include "Sip.h"
 #include "SipDebug.h"
+#include "SipHeaderProperty.h"
 #include "SipParameter.h"
 #include "SubState.h"
 

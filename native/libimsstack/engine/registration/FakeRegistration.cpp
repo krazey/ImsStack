@@ -23,7 +23,6 @@
 #include "RegBindingProxy.h"
 #include "RegFlow.h"
 #include "RegObserver.h"
-#include "RegParameter.h"
 #include "Sip.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"

@@ -29,7 +29,7 @@
 #include "SipHeaderName.h"
 #include "SipMessageTracker.h"
 #include "SipPrivate.h"
-#include "SipStackHeaders.h"
+#include "SipStack.h"
 #include "SipStackState.h"
 #include "SipTxnContextData.h"
 #include "SipUtils.h"

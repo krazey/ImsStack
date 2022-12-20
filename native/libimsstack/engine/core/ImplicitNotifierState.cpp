@@ -19,6 +19,7 @@
 #include "ISipHeader.h"
 #include "ImplicitNotifierState.h"
 #include "Sip.h"
+#include "SipHeaderProperty.h"
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 

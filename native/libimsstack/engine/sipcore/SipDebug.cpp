@@ -20,7 +20,7 @@
 #include "SystemConfig.h"
 
 #include "SipDebug.h"
-#include "SipStackHeaders.h"
+#include "SipStack.h"
 
 PRIVATE GLOBAL IMS_CHAR SipDebug::acIpAddr[SipDebug::MAX_LOG_IP + 1] = {
         '\0',

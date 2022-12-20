@@ -19,8 +19,8 @@
 #include "ImsList.h"
 #include "RcObject.h"
 
-#include "SipStackHeaders.h"
 #include "SipStatusCode.h"
+#include "msg/SipMessage.h"
 
 class SipClientTransactionState;
 

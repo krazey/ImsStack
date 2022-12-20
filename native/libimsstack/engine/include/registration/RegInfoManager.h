@@ -24,7 +24,6 @@
 
 class IDocument;
 class IMutex;
-class IRegInfoListener;
 class RegInfo;
 class RegInfoParser;
 

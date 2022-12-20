@@ -19,7 +19,6 @@
 
 #include "Sdp.h"
 #include "SdpSessionDescription.h"
-#include "SdpTimeDescription.h"
 #include "SdpTimezone.h"
 #include "SdpUri.h"
 

@@ -15,7 +15,7 @@
  */
 #include "ServiceMemory.h"
 
-#include "SipStackHeaders.h"
+#include "SipStack.h"
 #include "SipStackTransaction.h"
 
 PUBLIC

@@ -24,7 +24,6 @@
 #include "private/SipConfigV.h"
 
 #include "Connection.h"
-// CONTACT_FEATURE_CAPS
 #include "FeatureCaps.h"
 #include "IRegBindingListener.h"
 #include "Sip.h"
@@ -39,7 +38,6 @@ class IRegBinding;
 class IRegInfo;
 class IServiceManagerListener;
 class ISipClientConnection;
-class ISipConnectionNotifier;
 class ISipDialog;
 class ISipMessage;
 class ISipServerConnection;
@@ -49,7 +47,6 @@ class PageMessage;
 class PreferenceHeader;
 class Reference;
 class Session;
-class SessionEx;
 
 /**
  * @brief Service is the base class for IMS services.

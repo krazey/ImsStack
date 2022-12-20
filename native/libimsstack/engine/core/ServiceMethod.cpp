@@ -20,7 +20,6 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
-#include "Service.h"
 #include "ServiceMethod.h"
 #include "SipConfigProxy.h"
 #include "SipParameter.h"

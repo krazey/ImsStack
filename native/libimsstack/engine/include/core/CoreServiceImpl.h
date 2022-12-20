@@ -21,9 +21,6 @@
 #include "IOnCoreServiceListener.h"
 #include "IOnDirectCoreServiceListener.h"
 
-class ISipConnectionNotifier;
-class ISipServerConnection;
-
 class CoreServiceImpl :
         public ICoreService,
         public IOnCoreServiceListener,

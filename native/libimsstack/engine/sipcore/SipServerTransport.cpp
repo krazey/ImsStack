@@ -20,6 +20,7 @@
 #include "SipDebug.h"
 #include "SipPrivate.h"
 #include "SipServerTransport.h"
+#include "SipStack.h"
 
 __IMS_TRACE_TAG_SIP__;
 

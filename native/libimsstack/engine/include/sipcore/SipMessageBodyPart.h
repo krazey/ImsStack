@@ -17,8 +17,8 @@
 #define SIP_MESSAGE_BODY_PART_H_
 
 #include "ISipMessageBodyPart.h"
-#include "SipStackHeaders.h"
 #include "SipUnknownHeaders.h"
+#include "msg/SipMsgBody.h"
 
 class SipMessageBodyPart : public ISipMessageBodyPart
 {

@@ -20,7 +20,6 @@
 
 class AppConfig;
 class CoreServiceConfig;
-class Feature;
 class FeatureSet;
 class ISipConfigV;
 class PreferenceHeader;

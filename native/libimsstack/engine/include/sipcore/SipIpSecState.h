@@ -18,9 +18,10 @@
 
 #include "EngineActivity.h"
 #include "ISipIpSecState.h"
-#include "SipStackHeaders.h"
 #include "SipTransportAddress.h"
 #include "SipTxnKey.h"
+#include "msg/SipMessage.h"
+#include "txn/SipTxnKey.h"
 
 class SipIpSecState : public EngineActivity, public ISipIpSecState
 {

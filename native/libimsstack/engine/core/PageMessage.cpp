@@ -27,7 +27,6 @@
 #include "Service.h"
 #include "SipConfigProxy.h"
 #include "SipHeaderName.h"
-#include "SipStatusCode.h"
 #include "base/Ims.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

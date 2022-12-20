@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Credential.h"
 #include "ServiceMemory.h"
 
 #include "IOnSipClientConnectionListener.h"
 #include "SipAckPackage.h"
 #include "SipAuHelper.h"
 #include "SipClientConnection.h"
+#include "SipClientTransmissionProxy.h"
 #include "SipConfigProxy.h"
 #include "SipConnectionNotifier.h"
 #include "SipDebug.h"
@@ -27,6 +27,7 @@
 #include "SipMethod.h"
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
+#include "SipStack.h"
 #include "SipUnknownHeaders.h"
 
 __IMS_TRACE_TAG_SIP__;

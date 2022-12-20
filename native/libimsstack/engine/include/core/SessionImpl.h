@@ -26,10 +26,8 @@
 class ICapabilities;
 class IMedia;
 class IReference;
-class ISessionDescriptor;
 class ISubscription;
 class MediaImpl;
-class VirtualSession;
 
 class SessionImpl : public ISession, public IOnSessionListener, public IOnSessionExListener
 {

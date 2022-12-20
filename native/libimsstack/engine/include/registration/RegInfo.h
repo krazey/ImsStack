@@ -19,11 +19,11 @@
 #include "ImsList.h"
 
 #include "IRegInfo.h"
-#include "RegInfoRegistration.h"
 
 class IDocument;
 class INode;
 class IRegInfoListener;
+class RegInfoRegistration;
 
 class RegInfo : public IRegInfo
 {

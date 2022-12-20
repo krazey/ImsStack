@@ -45,7 +45,6 @@
 #include "SipMethod.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
-#include "SipStatusCode.h"
 #include "SipTimerValuesHelper.h"
 #include "Subscription.h"
 #include "base/IRefreshListener.h"
@@ -56,7 +55,6 @@
 #include "util/DialogMethodManager.h"
 #include "util/OperatorFeatureResolver.h"
 #include "util/UserAgentHeader.h"
-#include "util/MethodManager.h"
 
 #define __IMS_SEND_ACK_IN_TERMINATING_STATE__
 

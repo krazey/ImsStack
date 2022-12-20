@@ -31,6 +31,7 @@
 #include "SipRoutingRejectNotifier.h"
 #include "SipRtConfigUtils.h"
 #include "SipServerTransactionState.h"
+#include "SipStack.h"
 #include "SipTransport.h"
 #include "SipWakeLock.h"
 

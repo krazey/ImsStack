@@ -23,6 +23,7 @@
 #include "SipPacketTracker.h"
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
+#include "SipStack.h"
 #include "SipStackState.h"
 #include "SipTransactionState.h"
 #include "SipTransport.h"

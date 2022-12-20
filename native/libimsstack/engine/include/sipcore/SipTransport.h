@@ -21,8 +21,9 @@
 #include "ISipSocketListener.h"
 #include "SipPrivate.h"
 #include "SipSocket.h"
-#include "SipStackHeaders.h"
 #include "SipTransportAddress.h"
+#include "msg/SipAddrSpec.h"
+#include "msg/SipMessage.h"
 
 class ISipTransportListener;
 class SipProfile;

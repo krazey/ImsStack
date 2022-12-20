@@ -17,8 +17,9 @@
 #define SUB_STATE_H_
 
 #include "ISipMessage.h"
-#include "SipHeaderProperty.h"
 #include "util/EventPackage.h"
+
+struct SipHeaderProperty;
 
 /**
  * @brief This class defines a state & behavior for a subscription state.

@@ -38,7 +38,6 @@ class ISipGenericChallenge;
 class RegFlow;
 class RegInfo;
 class RegRefreshHelper;
-class RegSubscription;
 class SubscriberConfig;
 
 class Registration :

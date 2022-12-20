@@ -17,6 +17,7 @@
 
 #include "SipDialogInviteUsage.h"
 #include "SipPrivate.h"
+#include "SipStack.h"
 
 __IMS_TRACE_TAG_SIP__;
 

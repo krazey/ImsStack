@@ -25,7 +25,6 @@
 #include "util/IRefreshable.h"
 
 class IRegSubscriptionListener;
-class IRegistration;
 class ISipConnectionNotifier;
 class SipTimerValues;
 class SubState;

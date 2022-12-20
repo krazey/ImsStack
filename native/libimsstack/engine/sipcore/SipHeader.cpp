@@ -21,6 +21,7 @@
 #include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipPrivate.h"
+#include "SipStack.h"
 
 // clang-format off
 // Constant Header Names

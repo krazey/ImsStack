@@ -23,12 +23,12 @@
 #include "IRegParameter.h"
 #include "RegStateTracker.h"
 #include "SipAddress.h"
+#include "SipSecurityHeader.h"
 
 class ISipMessage;
 class ISipClientConnection;
 class ExtraHeaders;
 class ImsSubscriberInfo;
-class SipSecurityHeader;
 
 class RegParameter final : public ImsSlot, public IRegParameter
 {

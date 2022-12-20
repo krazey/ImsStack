@@ -19,14 +19,15 @@
 #include "CallState.h"
 #include "IRetryTaskHelperListener.h"
 #include "ISessionState.h"
-#include "ServiceMethod.h"
 #include "RetryCmd.h"
 #include "RetryTaskHelper.h"
+#include "ServiceMethod.h"
 #include "SipStatusCode.h"
 #include "VirtualSession.h"
 #include "util/ICancellableMethod.h"
 #include "util/IDialogMethod.h"
 #include "util/IRefreshable.h"
+#include "util/MethodManager.h"
 
 class Capabilities;
 class IOnSessionListener;
@@ -34,7 +35,6 @@ class IRefreshListener;
 class ISessionParameter;
 class ISipAckPackage;
 class Media;
-class MethodManager;
 class Reference;
 class Replaces;
 class SdpOaState;

@@ -28,6 +28,7 @@
 #include "SipMessageBuffer.h"
 #include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
+#include "SipStack.h"
 #include "SipTransportHelper.h"
 #include "SipUtils.h"
 

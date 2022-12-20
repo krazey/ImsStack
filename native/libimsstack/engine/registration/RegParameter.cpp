@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "Credential.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
@@ -29,7 +28,6 @@
 #include "SipDebug.h"
 #include "SipHeaderName.h"
 #include "SipParsingHelper.h"
-#include "SipSecurityHeader.h"
 #include "SipStatusCode.h"
 #include "base/SubscriberTracker.h"
 #include "util/UserAgentHeader.h"
