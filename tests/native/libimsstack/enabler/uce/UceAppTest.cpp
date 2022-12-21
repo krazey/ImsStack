@@ -126,7 +126,7 @@ TEST_F(UceAppTest, stopTimer)
     IMS_TRACE_D("stopTimer", 0, 0, 0);
     EXPECT_TRUE(pUceApp->IsTimerNull());
     pUceApp->startTimer();
-    EXPECT_TRUE(pUceApp->IsTimerNull());
+    EXPECT_FALSE(pUceApp->IsTimerNull());
     pUceApp->stopTimer();
     EXPECT_TRUE(pUceApp->IsTimerNull());
 }
@@ -136,7 +136,7 @@ TEST_F(UceAppTest, clearTimer)
     IMS_TRACE_D("clearTimer", 0, 0, 0);
     EXPECT_TRUE(pUceApp->IsTimerNull());
     pUceApp->startTimer();
-    EXPECT_TRUE(pUceApp->IsTimerNull());
+    EXPECT_FALSE(pUceApp->IsTimerNull());
     pUceApp->clearTimer();
     EXPECT_TRUE(pUceApp->IsTimerNull());
 }
