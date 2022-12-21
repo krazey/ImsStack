@@ -32,8 +32,8 @@ public:
     UssiEventNotifier& operator=(IN const UssiEventNotifier&) = delete;
 
 public:
-    void NotifyUssiError(IN AString strUssdString);
-    void NotifyUssiResult(IN AString strUssdString, IN UssiModeType eType);
+    void NotifyUssiError(IN const AString& strUssdString);
+    void NotifyUssiResult(IN const AString& strUssdString, IN UssiModeType eType);
 
 private:
     IMtcCallContext& m_objContext;

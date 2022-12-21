@@ -121,7 +121,7 @@ protected:
         ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimerWrapper));
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        pUssiController = new MockUssiController(objCallContext);
+        pUssiController = new MockUssiController(objCallContext, IMS_NULL);
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
 

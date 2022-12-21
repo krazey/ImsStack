@@ -29,6 +29,10 @@ PUBLIC GLOBAL void UssiDataCreator::GetXmlBody(IN const AString& strUssdString,
         OUT AStringBuffer& objXml, IN UssiModeType eUssiModeType /*= UssiModeType::NONE*/,
         IN UssiError eErrorCode /*= UssiError::CODE_NONE*/)
 {
+    if (strUssdString.GetLength() <= 0)
+    {
+        return;
+    }
     objXml.Append(UssiConstants::XML_PROCESSING_INSTRUCTION);
     objXml.Append(TextParser::CHAR_LF);
 
@@ -43,7 +47,7 @@ PUBLIC GLOBAL void UssiDataCreator::GetXmlBody(IN const AString& strUssdString,
     objXml.Append(CreateAttribute(UssiConstants::ELEMENT_USSD_STRING, strUssdString));
 
     // error-code
-    AString strErrorCode = AString::ConstEmpty();
+    AString strErrorCode;
     GetErrorCode(eErrorCode, strErrorCode);
 
     if (strErrorCode.GetLength() > 0)
@@ -90,12 +94,6 @@ PUBLIC GLOBAL void UssiDataCreator::GetXmlBody(IN const AString& strUssdString,
 PRIVATE GLOBAL const AString UssiDataCreator::CreateStartElement(
         IN const AString& strStartElementName)
 {
-    if (strStartElementName.GetLength() <= 0)
-    {
-        IMS_TRACE_D("CreateStartElement : Empty", 0, 0, 0);
-        return AString::ConstEmpty();
-    }
-
     AString strStartElement;
 
     strStartElement.Append(TextParser::CHAR_LAQUOT);
@@ -111,12 +109,6 @@ PRIVATE GLOBAL const AString UssiDataCreator::CreateStartElement(
 PRIVATE GLOBAL const AString UssiDataCreator::CreateAttribute(
         IN const AString& strAttributeName, IN const AString& strValue)
 {
-    if (strAttributeName.GetLength() <= 0 || strValue.GetLength() <= 0)
-    {
-        IMS_TRACE_D("CreateAttribute : Empty", 0, 0, 0);
-        return AString::ConstEmpty();
-    }
-
     AString strAttribute;
 
     strAttribute.Append(TextParser::CHAR_LAQUOT);
@@ -136,12 +128,6 @@ PRIVATE GLOBAL const AString UssiDataCreator::CreateAttribute(
 
 PRIVATE GLOBAL const AString UssiDataCreator::CreateEndElement(IN const AString& strEndElementName)
 {
-    if (strEndElementName.GetLength() <= 0)
-    {
-        IMS_TRACE_D("CreateEndElement : Empty", 0, 0, 0);
-        return AString::ConstEmpty();
-    }
-
     AString strEndElement;
 
     strEndElement.Append(TextParser::CHAR_LAQUOT);
@@ -158,11 +144,6 @@ PRIVATE GLOBAL const AString UssiDataCreator::CreateEndElement(IN const AString&
 PRIVATE GLOBAL void UssiDataCreator::GetErrorCode(
         IN UssiError eErrorCode, OUT AString& strErrorCode)
 {
-    if (eErrorCode == UssiError::CODE_NONE)
-    {
-        return;
-    }
-
     switch (eErrorCode)
     {
         case UssiError::CODE_1:
@@ -177,7 +158,7 @@ PRIVATE GLOBAL void UssiDataCreator::GetErrorCode(
         case UssiError::CODE_4:
             strErrorCode = "4";
             break;
-        default:
+        default:  // UssiError::CODE_NONE
             break;
     }
 }

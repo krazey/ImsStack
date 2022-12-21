@@ -20,14 +20,15 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCallContext.h"
 #include "ussi/UssiController.h"
+#include "ussi/UssiData.h"
 #include "ussi/UssiDef.h"
 #include <gmock/gmock.h>
 
 class MockUssiController : public UssiController
 {
 public:
-    explicit MockUssiController(IN IMtcCallContext& objContext) :
-            UssiController(objContext)
+    explicit MockUssiController(IN IMtcCallContext& objContext, IN UssiDataParser* pParser) :
+            UssiController(objContext, pParser)
     {
     }
     ~MockUssiController() {}

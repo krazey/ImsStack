@@ -33,15 +33,13 @@ public:
                 m_nAlertingPattern(-1)
         {
         }
-        inline ~AnyExtension() {}
-
-    private:
-        AnyExtension(IN const AnyExtension& objRHS);
-        AnyExtension& operator=(IN const AnyExtension& objRHS);
+        inline virtual ~AnyExtension() {}
+        AnyExtension(IN const AnyExtension&) = delete;
+        AnyExtension& operator=(IN const AnyExtension&) = delete;
 
     public:
-        inline UssiModeType GetUssiModeType() const { return m_eUssiModeType; }
-        inline IMS_SINT32 GetAlertingPattern() const { return m_nAlertingPattern; }
+        inline virtual UssiModeType GetUssiModeType() const { return m_eUssiModeType; }
+        inline virtual IMS_SINT32 GetAlertingPattern() const { return m_nAlertingPattern; }
 
     private:
         friend class UssiData;
@@ -53,29 +51,44 @@ public:
 
 public:
     UssiData();
-    ~UssiData();
+    virtual ~UssiData();
+    UssiData(IN const UssiData&) = delete;
+    UssiData& operator=(IN const UssiData&) = delete;
 
-    inline const AString& GetLanguage() const { return m_strLanguage; }
-    inline const AString& GetUssdString() const { return m_strUssdString; }
-    inline UssiError GetErrorCode() const { return m_eErrorCode; }
-
-private:
-    UssiData(IN const UssiData& objRHS);
-    UssiData& operator=(IN const UssiData& objRHS);
-
-public:
-    const AnyExtension& GetAnyExtension() const;
-    IMS_BOOL Parse(IN const AString& strUssiBody);
+    inline virtual const AString& GetLanguage() const { return m_strLanguage; }
+    inline virtual const AString& GetUssdString() const { return m_strUssdString; }
+    inline virtual UssiError GetErrorCode() const { return m_eErrorCode; }
+    virtual const AnyExtension& GetAnyExtension() const;
+    virtual IMS_BOOL Parse(IN const AString& strUssiBody);
 
 private:
     void CreateAnyExtension(IN INode* piNode);
 
-private:
     AnyExtension objAnyExtension;
-
     AString m_strLanguage;
     AString m_strUssdString;
     UssiError m_eErrorCode;
+};
+
+class UssiDataParser
+{
+public:
+    inline UssiDataParser() {}
+    inline virtual ~UssiDataParser() {}
+    UssiDataParser(IN const UssiDataParser&) = delete;
+    UssiDataParser& operator=(IN const UssiDataParser&) = delete;
+
+    inline virtual UssiData* Parse(IN const AString& strUssiBody)
+    {
+        UssiData* pData = new UssiData();
+        if (!pData->Parse(strUssiBody))
+        {
+            delete pData;
+            return IMS_NULL;
+        }
+
+        return pData;
+    }
 };
 
 #endif

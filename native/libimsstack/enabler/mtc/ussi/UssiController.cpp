@@ -28,15 +28,17 @@
 #include "call/IMtcSession.h"
 #include "ussi/UssiConstants.h"
 #include "ussi/UssiController.h"
+#include "ussi/UssiData.h"
 #include "ussi/UssiDataCreator.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-UssiController::UssiController(IN IMtcCallContext& objContext) :
+UssiController::UssiController(IN IMtcCallContext& objContext, IN UssiDataParser* pParser) :
         m_objContext(objContext),
+        m_pDataParser(pParser),
         m_objEventNotifier(UssiEventNotifier(objContext)),
         m_eUssiModeType(UssiModeType::NONE),
         m_objLastResult(UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE))
@@ -49,17 +51,18 @@ PUBLIC VIRTUAL UssiController::~UssiController()
     IMS_TRACE_I("~UssiController", 0, 0, 0);
 }
 
-PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(IN IMessage* piMessage)
+PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(
+        IN IMessageUtils& objMessageUtils, IN IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_TRUE;
 
-    if (!MessageUtil::ContainsValue(piMessage, UssiConstants::HEADER_USSD_PACKAGE,
+    if (!objMessageUtils.ContainsValue(piMessage, UssiConstants::HEADER_USSD_PACKAGE,
                 ISipHeader::UNKNOWN, UssiConstants::HEADER_RECVINFO))
     {
         bResult = IMS_FALSE;
     }
 
-    if (!MessageUtil::ContainsValue(
+    if (!objMessageUtils.ContainsValue(
                 piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::ACCEPT))
     {
         bResult = IMS_FALSE;
@@ -72,19 +75,17 @@ PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(IN IMessage* piMes
 PUBLIC
 IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage)
 {
-    IMS_BOOL bResult = IMS_TRUE;
-    if (!piMessage)
+    IMS_BOOL bResult = IMS_FALSE;
+    IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
+    if (piMessage)
     {
-        bResult = IMS_FALSE;
-    }
-    else
-    {
+        IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
         std::unique_ptr<UssiData> pParsedData =
                 std::unique_ptr<UssiData>(GetParsedUssiData(piMessage->GetMessage()));
 
-        if (!pParsedData || pParsedData->GetAnyExtension().GetUssiModeType() == UssiModeType::NONE)
+        if (pParsedData && pParsedData->GetAnyExtension().GetUssiModeType() != UssiModeType::NONE)
         {
-            bResult = IMS_FALSE;
+            bResult = IMS_TRUE;
         }
     }
 
@@ -96,7 +97,7 @@ PUBLIC
 IMS_BOOL UssiController::IsByeForUssi(IN IMessage* piMessage)
 {
     IMS_BOOL bResult = IMS_FALSE;
-    if (MessageUtil::ContainsValue(
+    if (m_objContext.GetMessageUtils().ContainsValue(
                 piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::CONTENT_TYPE))
     {
         bResult = IMS_TRUE;
@@ -109,27 +110,20 @@ IMS_BOOL UssiController::IsByeForUssi(IN IMessage* piMessage)
 PUBLIC
 IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection)
 {
-    IMS_BOOL bResult = IMS_TRUE;
+    IMS_BOOL bResult = IMS_FALSE;
 
-    if (!piSipServerConnection)
-    {
-        bResult = IMS_FALSE;
-    }
-    else
+    if (piSipServerConnection)
     {
         ISipMessage* piSipMessage = piSipServerConnection->GetMessage();
-        if (!piSipMessage)
+        if (piSipMessage)
         {
-            bResult = IMS_FALSE;
-        }
-        else
-        {
-            IMSList<AString> lstHeaders =
+            ImsList<AString> lstHeaders =
                     piSipMessage->GetHeaders(ISipHeader::UNKNOWN, SipHeaderName::INFO_PACKAGE);
             for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
             {
                 if (lstHeaders.GetAt(i).Contains(UssiConstants::HEADER_USSD_PACKAGE))
                 {
+                    bResult = IMS_TRUE;
                     break;
                 }
             }
@@ -143,23 +137,18 @@ IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServer
 PUBLIC
 IMS_BOOL UssiController::HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection)
 {
-    IMS_BOOL bResult = IMS_TRUE;
-    if (!piSipServerConnection)
-    {
-        bResult = IMS_FALSE;
-    }
-    else
+    IMS_BOOL bResult = IMS_FALSE;
+    if (piSipServerConnection)
     {
         std::unique_ptr<UssiData> pParsedData =
                 std::unique_ptr<UssiData>(GetParsedUssiData(piSipServerConnection->GetMessage()));
-        if (!pParsedData)
+        if (pParsedData)
         {
-            bResult = IMS_FALSE;
+            bResult = IMS_TRUE;
         }
     }
 
     IMS_TRACE_D("HasXmlBodyInInfo : %s", _TRACE_B_(bResult), 0, 0);
-
     return bResult;
 }
 
@@ -251,12 +240,7 @@ IMS_RESULT UssiController::FormAcceptUssi()
         return IMS_FAILURE;
     }
 
-    if (SetAcceptHeader(piMessage) == IMS_FAILURE)
-    {
-        return IMS_FAILURE;
-    }
-
-    return IMS_SUCCESS;
+    return SetAcceptHeader(piMessage);
 }
 
 PUBLIC
@@ -307,8 +291,8 @@ IMS_RESULT UssiController::FormHeadersForStartUssi(IN IMessage* piMessage)
         return IMS_FAILURE;
     }
 
-    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_MULTIPART_MIXED,
-                ISipHeader::CONTENT_TYPE) == IMS_FAILURE)
+    if (m_objContext.GetMessageUtils().AddValueIfNotExists(piMessage,
+                UssiConstants::HEADER_MULTIPART_MIXED, ISipHeader::CONTENT_TYPE) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -337,9 +321,9 @@ IMS_RESULT UssiController::FormStartUssiBody(
     piBodyPart->SetHeader(
             ISipMessageBodyPart::CONTENT_DISPOSITION, UssiConstants::HEADER_RENDER_HANDLING);
 
-    AStringBuffer objXML(UssiConstants::XML_BUFFER_SIZE);
-    UssiDataCreator::GetXmlBody(strTarget, objXML, UssiModeType::NONE);
-    piBodyPart->SetContent(objXML.GetString());
+    AStringBuffer objXml(UssiConstants::XML_BUFFER_SIZE);
+    UssiDataCreator::GetXmlBody(strTarget, objXml, UssiModeType::NONE);
+    piBodyPart->SetContent(objXml.GetString());
 
     return IMS_SUCCESS;
 }
@@ -348,33 +332,34 @@ PRIVATE
 IMS_RESULT UssiController::SetRecvInfoHeader(IN IMessage* piMessage)
 {
     IMS_TRACE_D("SetRecvInfoHeader", 0, 0, 0);
-    return MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_USSD_PACKAGE,
-            ISipHeader::UNKNOWN, SipHeaderName::RECV_INFO);
+    return m_objContext.GetMessageUtils().AddValueIfNotExists(piMessage,
+            UssiConstants::HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN, SipHeaderName::RECV_INFO);
 }
 
 PRIVATE
 IMS_RESULT UssiController::SetAcceptHeader(IN IMessage* piMessage)
 {
     IMS_TRACE_D("SetAcceptHeader", 0, 0, 0);
-    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_SDP,
+    IMessageUtils& objMessageUtils = m_objContext.GetMessageUtils();
+    if (objMessageUtils.AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_SDP,
                 ISipHeader::ACCEPT) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
-    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_IMSXML,
+    if (objMessageUtils.AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_IMSXML,
                 ISipHeader::ACCEPT) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
-    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_USSDXML,
+    if (objMessageUtils.AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_USSDXML,
                 ISipHeader::ACCEPT) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
-    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_MULTIPART_MIXED,
+    if (objMessageUtils.AddValueIfNotExists(piMessage, UssiConstants::HEADER_MULTIPART_MIXED,
                 ISipHeader::ACCEPT) == IMS_FAILURE)
     {
         return IMS_FAILURE;
@@ -429,15 +414,15 @@ IMS_RESULT UssiController::FormBodyForInfo(
         return IMS_FAILURE;
     }
 
-    AStringBuffer objXML(UssiConstants::XML_BUFFER_SIZE);
-    UssiDataCreator::GetXmlBody(strUssdString, objXML, m_eUssiModeType, eErrorCode);
-    piBodyPart->SetContent(objXML.GetString());
+    AStringBuffer objXml(UssiConstants::XML_BUFFER_SIZE);
+    UssiDataCreator::GetXmlBody(strUssdString, objXml, m_eUssiModeType, eErrorCode);
+    piBodyPart->SetContent(objXml.GetString());
 
     return IMS_SUCCESS;
 }
 
 PRIVATE
-UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage)
+UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage) const
 {
     IMS_TRACE_D("GetParsedUssiData", 0, 0, 0);
     if (!piSipMessage)
@@ -445,7 +430,7 @@ UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage)
         return IMS_NULL;
     }
 
-    IMSList<ISipMessageBodyPart*> objBodyParts = piSipMessage->GetBodyParts();
+    ImsList<ISipMessageBodyPart*> objBodyParts = piSipMessage->GetBodyParts();
     if (objBodyParts.IsEmpty())
     {
         return IMS_NULL;
@@ -464,19 +449,12 @@ UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage)
         }
     }
 
-    UssiData* pUssiData = new UssiData();
-    if (!pUssiData->Parse(strUssiBody))
-    {
-        delete pUssiData;
-        return IMS_NULL;
-    }
-
-    return pUssiData;
+    return m_pDataParser->Parse(strUssiBody);
 }
 
 PRIVATE
 void UssiController::NotifyUssiEvent(
-        IN AString strUssdString, IN UssiModeType eType, IN UssiError eErrorCode)
+        IN const AString& strUssdString, IN UssiModeType eType, IN UssiError eErrorCode)
 {
     IMS_TRACE_D("NotifyUssiEvent", 0, 0, 0);
 
