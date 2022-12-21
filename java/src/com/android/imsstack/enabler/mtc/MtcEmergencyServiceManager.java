@@ -78,11 +78,12 @@ public class MtcEmergencyServiceManager {
         mCall = call;
     }
 
-    public void openEmergencyService() {
+    public void openEmergencyService(int emergencyRouting) {
         log("openEmergencyService");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
+        parcel.writeInt(emergencyRouting);
         sendRequest(parcel);
     }
 

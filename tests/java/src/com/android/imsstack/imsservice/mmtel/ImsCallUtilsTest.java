@@ -535,4 +535,15 @@ public class ImsCallUtilsTest {
         assertEquals(ImsCallProfile.CALL_TYPE_VT, profile.getCallType());
     }
 
+    @Test
+    public void testGetEmergencyRoutingFromCallProfile() {
+        ImsCallProfile callProfile = new ImsCallProfile();
+        callProfile.setEmergencyCallRouting(EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
+        assertEquals(EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN,
+                ImsCallUtils.getEmergencyRoutingFromCallProfile(callProfile));
+
+        callProfile.setEmergencyCallRouting(EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL);
+        assertEquals(EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL,
+                ImsCallUtils.getEmergencyRoutingFromCallProfile(callProfile));
+    }
 }

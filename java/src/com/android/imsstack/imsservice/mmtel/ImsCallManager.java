@@ -130,12 +130,14 @@ public class ImsCallManager {
         boolean emergency = false;
         boolean offline = false;
         boolean ussi = false;
+        int emergencyRouting = 0;
 
         int sessionAttributes = MtcCall.FLAG_MO;
 
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             sessionAttributes |= MtcCall.FLAG_EMERGENCY;
             emergency = true;
+            emergencyRouting = ImsCallUtils.getEmergencyRoutingFromCallProfile(profile);
 
             // ECBM
             checkAndExitEcbm();
@@ -157,7 +159,7 @@ public class ImsCallManager {
             sessionAttributes |= MtcCall.FLAG_RTT;
         }
 
-        MtcCall call = mMtcApp.createCall(sessionAttributes);
+        MtcCall call = mMtcApp.createCall(sessionAttributes, emergencyRouting);
         String callId = createCallId();
 
         if (call == null) {

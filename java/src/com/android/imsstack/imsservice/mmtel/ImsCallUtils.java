@@ -353,6 +353,10 @@ public class ImsCallUtils {
         return si;
     }
 
+    public static int getEmergencyRoutingFromCallProfile(final ImsCallProfile profile) {
+        return profile.getEmergencyCallRouting();
+    }
+
     public static String getCallExtraFromOemExtras(ImsCallProfile profile,
             String key, String defaultValue) {
         Bundle oemExtras = profile.getCallExtras().getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
