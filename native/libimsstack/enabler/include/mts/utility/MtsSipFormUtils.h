@@ -27,13 +27,15 @@ class MtsSipFormUtils final
 public:
     explicit MtsSipFormUtils(IN IMS_SINT32 nSlotId);
     ~MtsSipFormUtils();
+    MtsSipFormUtils(IN const MtsSipFormUtils&) = delete;
+    MtsSipFormUtils& operator=(IN const MtsSipFormUtils&) = delete;
 
     IMS_BOOL FormDestination(IN const AString& strTargetAddress, IN const IMS_BOOL bIsAckorError,
             IN const AString& strLastIpSmgw, OUT AString& strDest);
     static AString FormContentTypeEnumToStr(IN SmsFormatType nType);
     static SmsFormatType FormContentTypeStrToEnum(IN const AString& strContentType);
     static IMS_BOOL IsTelUrlParam(IN const AString& strParam);
-    IMS_BOOL IsNumberFormat(IN const AString& strDial) const;
+    static IMS_BOOL IsNumberFormat(IN const AString& strDial);
     static IMS_BOOL IsIpAddress(IN const AString& strIp);
     static IMS_SINT32 CheckScheme(IN const AString& strTargetAddress);
 

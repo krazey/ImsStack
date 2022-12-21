@@ -39,7 +39,9 @@ class MtsMessageController :
 public:
     MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
             IN MtsDynamicLoader* pMtsDynamicLoader);
-    ~MtsMessageController();
+    virtual ~MtsMessageController();
+    MtsMessageController(IN const MtsMessageController&) = delete;
+    MtsMessageController& operator=(IN const MtsMessageController&) = delete;
 
     // IPageMessageListener
     void PageMessageDelivered(IN IPageMessage* piPageMessage) override;
@@ -61,8 +63,8 @@ private:
 
     void DestroyMtsMessage();
     void Add(IN IMtsMessage* piMtsMessage);
-    void Remove(IN IMtsMessage* piMtsMessage);
-    IMtsMessage* Search(IN IPageMessage* piPageMessage);
+    void Remove(IN const IMtsMessage* piMtsMessage);
+    IMtsMessage* Search(IN const IPageMessage* piPageMessage);
     IMtsMessage* Search(IN const AString& strDestination, IN IMS_SINT32 nMti);
     IMtsMessage* Search(IN IMS_SINT32 nMessageReference,
             IN MtsTransactionType eMessageType = MtsTransactionType::MESSAGE_TYPE_RECEIVE);
@@ -96,11 +98,11 @@ private:
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
 
     AString GetPreviousCallId(IN const ByteArray& objSms);
-    IMS_BOOL GetSmsgwFromReceivedMessage(
+    static IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
-    void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri) const;
+    static void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri);
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
-    IMS_BOOL IsReceivedMessage(IN IMtsMessage* piMtsMessage);
+    static IMS_BOOL IsReceivedMessage(IN IMtsMessage* piMtsMessage);
     void SetMessageInfo(IN IPageMessage* piPageMessage, IN const ByteArray& objSms,
             IN SmsFormatType eSmsFormat, IN const AString& strDestination,
             IN MtsTransactionType eMessageType, OUT IMtsMessage* piMtsMessage);

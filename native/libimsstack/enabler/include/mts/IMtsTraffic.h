@@ -22,11 +22,6 @@ class IMtsTraffic : public IImsRadioConnectionListener
 public:
     virtual ~IMtsTraffic() {}
 
-    // IImsRadioConnectionListener
-    virtual void ImsRadio_OnConnectionFailed(IN IMS_UINT32 nFailureReason,
-            IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis) = 0;
-    virtual void ImsRadio_OnConnectionSetupPrepared() = 0;
-
     // MtsService
     virtual IMS_UINT32 GetDirection() = 0;
     virtual IMS_UINT32 GetTrafficType() = 0;

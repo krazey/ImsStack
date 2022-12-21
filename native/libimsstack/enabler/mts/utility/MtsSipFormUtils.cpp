@@ -165,7 +165,7 @@ PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsTelUrlParam(IN const AString& strPara
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsNumberFormat(IN const AString& strDial) const
+PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsNumberFormat(IN const AString& strDial)
 {
     /*
      * global-number-digits := "+" *phonedigit DIGIT *phonedigit

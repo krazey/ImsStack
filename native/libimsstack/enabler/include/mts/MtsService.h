@@ -39,17 +39,24 @@ class MtsService final :
         public ImsService
 {
 public:
-    MtsService(IN IMS_SINT32 nSlotId);
-    virtual ~MtsService();
+    explicit MtsService(IN IMS_SINT32 nSlotId);
+    ~MtsService();
+    MtsService(IN const MtsService&) = delete;
+    MtsService& operator=(IN const MtsService&) = delete;
 
     // ICoreServiceListener
-    void CoreService_PageMessageReceived(IN ICoreService* piService, IN IPageMessage* piMessage);
-    void CoreService_ReferenceReceived(IN ICoreService* piService, IN IReference* piReference);
-    void CoreService_ServiceClosed(IN ICoreService* piService, IN IReasonInfo* piReasonInfo);
-    void CoreService_SessionInvitationReceived(IN ICoreService* piService, IN ISession* piSession);
-    void CoreService_UnsolicitedNotifyReceived(IN ICoreService* piService, IN IMessage* piNotify);
+    void CoreService_PageMessageReceived(
+            IN ICoreService* piService, IN IPageMessage* piMessage) override;
+    void CoreService_ReferenceReceived(
+            IN ICoreService* piService, IN IReference* piReference) override;
+    void CoreService_ServiceClosed(
+            IN ICoreService* piService, IN IReasonInfo* piReasonInfo) override;
+    void CoreService_SessionInvitationReceived(
+            IN ICoreService* piService, IN ISession* piSession) override;
+    void CoreService_UnsolicitedNotifyReceived(
+            IN ICoreService* piService, IN IMessage* piNotify) override;
     void CoreService_CapabilityQueryReceived(
-            IN ICoreService* piService, IN ICapabilities* piCapabilities);
+            IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 
     // IImsAosListener
     void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;

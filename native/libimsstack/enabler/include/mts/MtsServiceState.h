@@ -22,7 +22,7 @@
 class MtsServiceState final : public IMtsServiceState
 {
 public:
-    MtsServiceState(IN IMS_SINT32 nSlotId);
+    explicit MtsServiceState(IN IMS_SINT32 nSlotId);
     ~MtsServiceState();
 
     inline IMS_UINT32 GetConnectedServices() const { return m_nConnectedServices; }
