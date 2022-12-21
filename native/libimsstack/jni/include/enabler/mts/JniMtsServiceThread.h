@@ -33,7 +33,7 @@ public:
             IN IMS_SINT32 nSlotId) override;
 
 private:
-    IMS_UINT32 ConvertSmsFormatToInt(IN SmsFormatType eSmsFormat);
+    static IMS_UINT32 ConvertSmsFormatToInt(IN SmsFormatType eSmsFormat);
 };
 
 #endif

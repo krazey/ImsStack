@@ -26,7 +26,7 @@ class MtsTraffic final : public IMtsTraffic, public ITimerListener
 public:
     MtsTraffic(IN IMS_UINT32 nDirection, IN IMS_UINT32 nTrafficType,
             IN IMtsTrafficListener& objListener);
-    virtual ~MtsTraffic();
+    ~MtsTraffic();
 
     // IImsRadioConnectionListener
     void ImsRadio_OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,

@@ -24,11 +24,11 @@ class IMtsService;
 class MtsDynamicLoader;
 class MtsMessageController;
 
-class MtsApp : public IMtsApp, public ImsApp
+class MtsApp final : public IMtsApp, public ImsApp
 {
 public:
-    MtsApp(IN IMS_SINT32 nSlotId);
-    virtual ~MtsApp();
+    explicit MtsApp(IN IMS_SINT32 nSlotId);
+    ~MtsApp();
 
     // IMtsApp
     virtual void Start() override;

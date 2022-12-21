@@ -22,8 +22,8 @@
 class MtsMessage final : public IMtsMessage
 {
 public:
-    MtsMessage(IN IMS_SINT32 nSlotId);
-    virtual ~MtsMessage();
+    explicit MtsMessage(IN IMS_SINT32 nSlotId);
+    ~MtsMessage();
 
     // IMtsMessage
     inline AString& GetDestination() override { return m_strDestination; }

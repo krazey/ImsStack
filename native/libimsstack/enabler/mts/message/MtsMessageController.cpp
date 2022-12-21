@@ -275,7 +275,7 @@ PRIVATE void MtsMessageController::Add(IN IMtsMessage* piMtsMessage)
     IMS_TRACE_I("Add : messageCount(after)[%d]", m_objMsgList.GetSize(), 0, 0);
 }
 
-PRIVATE void MtsMessageController::Remove(IN IMtsMessage* piMtsMessage)
+PRIVATE void MtsMessageController::Remove(IN const IMtsMessage* piMtsMessage)
 {
     IMS_BOOL bHasDeliverMsg = IMS_FALSE;
 
@@ -316,7 +316,7 @@ PRIVATE void MtsMessageController::Remove(IN IMtsMessage* piMtsMessage)
             _TRACE_B_(bHasDeliverMsg), 0);
 }
 
-PRIVATE IMtsMessage* MtsMessageController::Search(IN IPageMessage* piPageMessage)
+PRIVATE IMtsMessage* MtsMessageController::Search(IN const IPageMessage* piPageMessage)
 {
     if (piPageMessage == IMS_NULL)
     {
@@ -596,8 +596,8 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
 
     piMtsMessage = new MtsMessage(m_nSlotId);
     piMtsMessage->SetSeqId(nSeqId);
-    IMessage* pIMessage = piPageMessage->GetNextRequest();
-    if (ConstructSendMessage(pIMessage, objData, eSmsFormat, bEmergency) == IMS_FALSE)
+    IMessage* piMessage = piPageMessage->GetNextRequest();
+    if (ConstructSendMessage(piMessage, objData, eSmsFormat, bEmergency) == IMS_FALSE)
     {
         ReportTransmissionResult(MO_ERROR_GENERIC, eSmsFormat, nSeqId);
         delete piMtsMessage;
@@ -1147,8 +1147,7 @@ IMS_BOOL MtsMessageController::GetSmsgwFromReceivedMessage(
 }
 
 PRIVATE
-void MtsMessageController::GetUriFromHeaders(
-        IN const AString& strFromHdr, OUT AString& strUri) const
+void MtsMessageController::GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri)
 {
     SipAddress objSIPAddress;
 
@@ -1247,7 +1246,7 @@ void MtsMessageController::SetMessageInfo(IN IPageMessage* piPageMessage,
     }
 }
 
-PRIVATE void MtsMessageController::UpdateRPAckMap(IN IPageMessage* pIPageMessage)
+PRIVATE void MtsMessageController::UpdateRPAckMap(IN IPageMessage* piPageMessage)
 {
     if (m_objMsgList.GetSize() == 0)
     {
@@ -1255,13 +1254,13 @@ PRIVATE void MtsMessageController::UpdateRPAckMap(IN IPageMessage* pIPageMessage
     }
 
     // received page message
-    IMessage* pICurrentMessage = pIPageMessage != IMS_NULL
-            ? pIPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND)
+    IMessage* piCurrentMessage = piPageMessage != IMS_NULL
+            ? piPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND)
             : IMS_NULL;
-    ISipMessage* pICurrentSIPMessage =
-            pICurrentMessage != IMS_NULL ? pICurrentMessage->GetMessage() : IMS_NULL;
-    AString strInReplyTo = pICurrentSIPMessage != IMS_NULL
-            ? pICurrentSIPMessage->GetHeader(ISipHeader::UNKNOWN, 0, SipHeaderName::IN_REPLY_TO)
+    ISipMessage* piCurrentSIPMessage =
+            piCurrentMessage != IMS_NULL ? piCurrentMessage->GetMessage() : IMS_NULL;
+    AString strInReplyTo = piCurrentSIPMessage != IMS_NULL
+            ? piCurrentSIPMessage->GetHeader(ISipHeader::UNKNOWN, 0, SipHeaderName::IN_REPLY_TO)
             : AString::ConstEmpty();
 
     if (strInReplyTo.GetLength() <= 0)
@@ -1278,12 +1277,12 @@ PRIVATE void MtsMessageController::UpdateRPAckMap(IN IPageMessage* pIPageMessage
 
         // sent page message
         IPageMessage* piTargetPageMessage = m_objMsgList.GetAt(i)->GetPageMessage();
-        IMessage* pITargetMessage =
+        IMessage* piTargetMessage =
                 piTargetPageMessage->GetPreviousRequest(IMessage::PAGEMESSAGE_SEND);
-        ISipMessage* pITargetSIPMessage =
-                pITargetMessage != IMS_NULL ? pITargetMessage->GetMessage() : IMS_NULL;
-        AString strCallId = pITargetSIPMessage != IMS_NULL
-                ? pITargetSIPMessage->GetHeader(ISipHeader::CALL_ID)
+        ISipMessage* piTargetSIPMessage =
+                piTargetMessage != IMS_NULL ? piTargetMessage->GetMessage() : IMS_NULL;
+        AString strCallId = piTargetSIPMessage != IMS_NULL
+                ? piTargetSIPMessage->GetHeader(ISipHeader::CALL_ID)
                 : AString::ConstEmpty();
 
         if (strCallId.GetLength() <= 0)
