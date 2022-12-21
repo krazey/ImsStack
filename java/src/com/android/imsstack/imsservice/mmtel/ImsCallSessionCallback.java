@@ -923,7 +923,7 @@ public class ImsCallSessionCallback {
 
                     mListener.callQualityChanged(callQuality);
                 } catch (Throwable t) {
-                    log(t, "invokeCallQualityChanged: " + t.getMessage());
+                    log(t, "invokeCallQualityChanged");
                 }
             }
         });
@@ -951,7 +951,7 @@ public class ImsCallSessionCallback {
         if (t instanceof DeadObjectException) {
             mListener = null;
         } else if (mListener != null) {
-            ImsLog.e("[GII-IMPL] " + message + t, t);
+            ImsLog.e("[GII-IMPL] " + message + t.getMessage(), t);
         }
     }
 

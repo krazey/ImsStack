@@ -19,6 +19,7 @@ package com.android.imsstack.imsservice.mmtel;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.android.ims.internal.IImsEcbmListener;
@@ -68,7 +69,14 @@ public class ImsEcbmImplTest {
     @Test
     public void test_exitEmergencyCallbackMode() {
         mImsEcbmImpl.exitEmergencyCallbackMode();
-        verify(mMockIECallStateTracker, Mockito.times(1)).exitEmergencyCallbackMode(false);
+        verify(mMockIECallStateTracker).exitEmergencyCallbackMode(false);
+    }
+
+    @Test
+    public void test_exitEmergencyCallbackModeForNullTracker() {
+        doReturn(null).when(mMockCallContext).getECallStateTracker();
+        mImsEcbmImpl.exitEmergencyCallbackMode();
+        verify(mMockIECallStateTracker, never()).exitEmergencyCallbackMode(false);
     }
 
     @Test
@@ -88,7 +96,14 @@ public class ImsEcbmImplTest {
     @Test
     public void test_exitEmergencyCallbackModeByESMS() {
         mImsEcbmImpl.exitEmergencyCallbackModeByESMS(true);
-        verify(mMockIECallStateTracker, Mockito.times(1)).exitEmergencyCallbackMode(true);
+        verify(mMockIECallStateTracker).exitEmergencyCallbackMode(true);
+    }
+
+    @Test
+    public void test_exitEmergencyCallbackModeByESMSForNulltracker() {
+        doReturn(null).when(mMockCallContext).getECallStateTracker();
+        mImsEcbmImpl.exitEmergencyCallbackModeByESMS(true);
+        verify(mMockIECallStateTracker, never()).exitEmergencyCallbackMode(true);
     }
 
     @Test

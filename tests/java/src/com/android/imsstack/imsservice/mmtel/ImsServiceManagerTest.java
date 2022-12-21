@@ -247,11 +247,12 @@ public class ImsServiceManagerTest extends ImsStackTest {
 
     @Test
     public void testIsValidPhoneId() {
-        mServiceManager.setMultiImsEnabled(false);
-        assertFalse(mServiceManager.isValidPhoneId(INVALID_PHONE_ID));
-
         assertTrue(mServiceManager.isValidPhoneId(DEFAULT_PHONE_ID));
         assertFalse(mServiceManager.isValidPhoneId(INVALID_PHONE_ID));
+
+        mServiceManager.setMultiImsEnabled(false);
+        assertFalse(mServiceManager.isValidPhoneId(INVALID_PHONE_ID));
+        assertTrue(mServiceManager.isValidPhoneId(DEFAULT_PHONE_ID));
     }
 
     @Test

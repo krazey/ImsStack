@@ -75,7 +75,7 @@ public class ImsConferenceHelperTest {
     public void test_onConferenceProxyDisposed() {
         ConferenceProxy mConfProxy = Mockito.mock(ConferenceProxy.class);
         mConfHelper.onConferenceProxyDisposed(mConfProxy);
-        verify(mConfProxy, Mockito.times(1)).dispose();
+        verify(mConfProxy).dispose();
     }
 
     @Test
@@ -104,7 +104,7 @@ public class ImsConferenceHelperTest {
         when(mMtcApp.createCall(18)).thenReturn(mMtcCall);
 
         assertEquals(true, mConfHelper.extendToConference(mICallContext, mParticipants));
-        verify(mFgImsCallSession, Mockito.times(1)).setConferenceProxy(any(ConferenceProxy.class));
+        verify(mFgImsCallSession).setConferenceProxy(any(ConferenceProxy.class));
 
         mMtcCall = null;
         when(mMtcApp.createCall(18)).thenReturn(mMtcCall);
@@ -133,8 +133,12 @@ public class ImsConferenceHelperTest {
         when(mMtcApp.createCall(18)).thenReturn(mMtcCall);
 
         assertEquals(true, mConfHelper.merge(mICallContext));
-        verify(mBgImsCallSession, Mockito.times(1)).setConferenceProxy(any(ConferenceProxy.class));
-        verify(mFgImsCallSession, Mockito.times(1)).setConferenceProxy(any(ConferenceProxy.class));
+        verify(mBgImsCallSession).setConferenceProxy(any(ConferenceProxy.class));
+        verify(mFgImsCallSession).setConferenceProxy(any(ConferenceProxy.class));
+
+        mBgMtcCall = null;
+        when(mBgImsCallSession.getMtcCall()).thenReturn(mBgMtcCall);
+        assertEquals(false, mConfHelper.merge(mICallContext));
 
         mMtcCall = null;
         when(mMtcApp.createCall(18)).thenReturn(mMtcCall);
@@ -144,16 +148,12 @@ public class ImsConferenceHelperTest {
         when(mFgImsCallSession.getMtcCall()).thenReturn(mFgMtcCall);
         assertEquals(false, mConfHelper.merge(mICallContext));
 
-        mBgMtcCall = null;
-        when(mBgImsCallSession.getMtcCall()).thenReturn(mBgMtcCall);
+        mBgImsCallSession = null;
+        when(mImsCallManager.getHoldSession()).thenReturn(mBgImsCallSession);
         assertEquals(false, mConfHelper.merge(mICallContext));
 
         mFgImsCallSession = null;
         when(mImsCallManager.getActiveSession()).thenReturn(mFgImsCallSession);
-        assertEquals(false, mConfHelper.merge(mICallContext));
-
-        mBgImsCallSession = null;
-        when(mImsCallManager.getHoldSession()).thenReturn(mBgImsCallSession);
         assertEquals(false, mConfHelper.merge(mICallContext));
     }
 
