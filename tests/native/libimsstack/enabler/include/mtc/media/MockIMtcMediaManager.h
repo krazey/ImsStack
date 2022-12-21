@@ -40,10 +40,7 @@ public:
     MOCK_METHOD(void, SetMediaInfo, (IN const MediaInfo& objInfo), (override));
     MOCK_METHOD(
             void, UpdateMediaDirection, (IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir), (override));
-    MOCK_METHOD(void, UpdateMediaQuality, (IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality),
-            (override));
     MOCK_METHOD(const MediaInfo&, GetMediaInfo, (), (const, override));
-    MOCK_METHOD(void, GetOldMediaInfo, (OUT MediaInfo& objInfo), (override));
     MOCK_METHOD(void, RestoreMediaInfo, (), (override));
     MOCK_METHOD(void, CreateMediaSession, (), (override));
     MOCK_METHOD(void, CreateMediaProfile,
@@ -64,24 +61,16 @@ public:
             (override));
     MOCK_METHOD(void, Terminate, (), (override));
     MOCK_METHOD(void, SetRtpPort,
-            (IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort), (override));
-    MOCK_METHOD(void, RequestVideoDataUsage, (), (override));
-    MOCK_METHOD(void, SetEnforcedDirection, (IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir),
-            (override));
-    MOCK_METHOD(IMS_BOOL, GetCvoResult, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, SendFastVideoUpdate, (), (override));
+            (IN ISession * piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort), (override));
     MOCK_METHOD(void, SetConferenceCall, (IN IMS_BOOL bConference), (override));
-    MOCK_METHOD(void, SetConfirmedSession, (IN ISession* piSession), (override));
-    MOCK_METHOD(void, UpdateStatsReportOption, (IN IMS_UINT32 eAction), (override));
+    MOCK_METHOD(void, SetConfirmedSession, (IN ISession * piSession), (override));
     MOCK_METHOD(NegotiationState, GetNegotiationState, (IN ISession* piSession), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedDirection,
             (IN ISession* piSession, IN IMS_UINT32 eMediaType), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedQuality,
             (IN ISession* piSession, IN IMS_UINT32 eMediaType), (override));
-    MOCK_METHOD(CallType, GetNegotiatedCallType, (IN ISession* piSession), (override));
-    MOCK_METHOD(IMS_BOOL, IsAudioQualityHd, (), (override));
-    MOCK_METHOD(PemType, GetPemType, (IN ISession* piSession), (override));
-    MOCK_METHOD(IMS_BOOL, IsAudioMediaActivated, (), (override));
+    MOCK_METHOD(CallType, GetNegotiatedCallType, (IN ISession * piSession), (override));
+    MOCK_METHOD(PemType, GetPemType, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsAudioInactive, (), (override));
     MOCK_METHOD(void, AdjustDirectionForAutoAccept, (IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe),
             (override));

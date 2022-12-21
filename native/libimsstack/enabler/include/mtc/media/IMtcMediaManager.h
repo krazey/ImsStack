@@ -65,25 +65,10 @@ public:
     virtual void UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) = 0;
 
     /**
-     * @brief Updates
-     *
-     * @param eMediaType
-     * @param eQuality
-     */
-    virtual void UpdateMediaQuality(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality) = 0;
-
-    /**
      * @brief Gets
      *
      */
     virtual const MediaInfo& GetMediaInfo() const = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @param objInfo
-     */
-    virtual void GetOldMediaInfo(OUT MediaInfo& objInfo) = 0;
 
     /**
      * @brief Restores
@@ -200,38 +185,8 @@ public:
     virtual void SetRtpPort(
             IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort) = 0;
 
-    /**
-     * @brief Request video data usage when the call is terminated.
-     */
-    virtual void RequestVideoDataUsage() = 0;
-
-    /**
-     * @brief Sets
-     *
-     * @param ISession*
-     * @param IMS_UINT32
-     * @param IMS_SINT32
-     */
-    virtual void SetEnforcedDirection(
-            /* IN ISession* piSession, */ IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir) = 0;
-    virtual IMS_BOOL GetCvoResult(IN ISession* piSession) = 0;
-
-    /**
-     * @brief Sends
-     *
-     * @param piSession
-     */
-    virtual void SendFastVideoUpdate(/* IN ISession* piSession */) = 0;
     virtual void SetConferenceCall(/* IN ISession* piSession, */ IN IMS_BOOL bConference) = 0;
     virtual void SetConfirmedSession(IN ISession* piSession) = 0;
-
-    /**
-     * @brief Updates
-     *
-     * @param piSession
-     * @param eAction
-     */
-    virtual void UpdateStatsReportOption(/* IN ISession* piSession, */ IN IMS_UINT32 eAction) = 0;
 
     /**
      * @brief Get NegotiationState via MediaSession.
@@ -261,9 +216,6 @@ public:
      */
     virtual CallType GetNegotiatedCallType(IN ISession* piSession) = 0;
 
-    /* Provide information of MtcMediaManager */
-    virtual IMS_BOOL IsAudioQualityHd() = 0;
-
     /**
      * @brief Gets
      *
@@ -271,13 +223,6 @@ public:
      * @return
      */
     virtual PemType GetPemType(IN ISession* piSession) = 0;
-
-    /**
-     * @brief Checks
-     *
-     * @return
-     */
-    virtual IMS_BOOL IsAudioMediaActivated() = 0;
 
     /**
      * @brief Checks

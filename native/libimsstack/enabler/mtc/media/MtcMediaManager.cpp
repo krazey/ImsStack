@@ -195,41 +195,10 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaDirection(
     }
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaQuality(
-        IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality)
-{
-    if (eMediaType == MEDIATYPE_AUDIO)
-    {
-        m_pOldMediaInfo->eAudioQuality = m_pMediaInfo->eAudioQuality;
-        m_pMediaInfo->eAudioQuality = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : audio [%d]->[%d]", m_pOldMediaInfo->eAudioQuality,
-                m_pMediaInfo->eAudioQuality, 0);
-    }
-    else if (eMediaType == MEDIATYPE_VIDEO)
-    {
-        m_pOldMediaInfo->eVideoQuality = m_pMediaInfo->eVideoQuality;
-        m_pMediaInfo->eVideoQuality = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : video [%d]->[%d]", m_pOldMediaInfo->eVideoQuality,
-                m_pMediaInfo->eVideoQuality, 0);
-    }
-    else if (eMediaType == MEDIATYPE_TEXT)
-    {
-        m_pOldMediaInfo->eGttMode = m_pMediaInfo->eGttMode;
-        m_pMediaInfo->eGttMode = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : text [%d]->[%d]", m_pOldMediaInfo->eGttMode,
-                m_pMediaInfo->eGttMode, 0);
-    }
-}
-
 PUBLIC VIRTUAL const MediaInfo& MtcMediaManager::GetMediaInfo() const
 {
     IMS_TRACE_D("GetMediaInfo", 0, 0, 0);
     return *m_pMediaInfo;
-}
-
-PUBLIC VIRTUAL void MtcMediaManager::GetOldMediaInfo(OUT MediaInfo& objInfo)
-{
-    objInfo = *m_pOldMediaInfo;
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::RestoreMediaInfo()
@@ -526,43 +495,6 @@ PUBLIC VIRTUAL void MtcMediaManager::SetRtpPort(
             GetMediaNegoId(piSession), IMediaSession::OptionType::SET_RTP_PORT, eContents, nPort);
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::RequestVideoDataUsage()
-{
-    IMS_TRACE_D("RequestVideoDataUsage", 0, 0, 0);
-    m_piMediaSession->SendMessage(IMMedia::REQUEST_VIDEO_DATA_USAGE, 0);
-}
-
-PUBLIC VIRTUAL void MtcMediaManager::SetEnforcedDirection(
-        IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir)
-{
-    IMS_TRACE_D("SetEnforcedDirection : MediaType[%d] Dir[%d]", eMediaTypes, eDir, 0);
-
-    // check if negoId is necessary or not by the Media side.
-    MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaTypes);
-    m_piMediaSession->SetOptions(
-            IMS_NULL, IMediaSession::OptionType::SET_DIRECTION, eContents, eDir);
-}
-
-PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::GetCvoResult(IN ISession* piSession)
-{
-    IMS_BOOL bResult = IMS_FALSE;
-    UNUSED_PARAM(piSession);
-    // bResult = m_piMediaSession->GetNegotiatedCVOResult(GetMediaNegoId(piSession));
-
-    IMS_TRACE_D("GetCvoResult : %d", bResult, 0, 0);
-
-    return bResult;
-}
-
-PUBLIC VIRTUAL void MtcMediaManager::SendFastVideoUpdate()
-{
-    IMS_TRACE_D("SendFastVideoUpdate", 0, 0, 0);
-
-    // check the params for SetOptions() - video phase
-    // check if negoId is necessary or not by the Media side.
-    m_piMediaSession->SetOptions(IMS_NULL, IMediaSession::OptionType::SEND_FAST_VIDEO_UPDATE, 0, 0);
-}
-
 PUBLIC VIRTUAL void MtcMediaManager::SetConferenceCall(IN IMS_BOOL bConference)
 {
     IMS_TRACE_D("SetConferenceCall : %d", bConference, 0, 0);
@@ -580,15 +512,6 @@ PUBLIC VIRTUAL void MtcMediaManager::SetConfirmedSession(IN ISession* piSession)
             IMediaSession::OptionType::SET_CONFIRMED_SESSION, IMS_TRUE, 0);
 
     m_pProfileManager->SetConfirmed(piSession, IMS_TRUE);
-}
-
-PUBLIC VIRTUAL void MtcMediaManager::UpdateStatsReportOption(IN IMS_UINT32 eAction)
-{
-    IMS_TRACE_D("UpdateStatsReportOption : %d", eAction, 0, 0);
-
-    // param is not defined for this option.
-    m_piMediaSession->SetOptions(
-            IMS_NULL, IMediaSession::OptionType::SET_DRA_REPORT_OPTION, eAction, 0);
 }
 
 PUBLIC VIRTUAL NegotiationState MtcMediaManager::GetNegotiationState(IN ISession* piSession)
@@ -639,32 +562,9 @@ PUBLIC VIRTUAL CallType MtcMediaManager::GetNegotiatedCallType(IN ISession* piSe
     return MtcMediaUtil::GetCallTypeFromMediaContents(eContents);
 }
 
-PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioQualityHd()
-{
-    switch (m_pMediaInfo->eAudioQuality)
-    {
-        case AUDIO_QUALITY_AMR_WB:
-        case AUDIO_QUALITY_EVS:
-        case AUDIO_QUALITY_EVS_NB:
-        case AUDIO_QUALITY_EVS_WB:
-        case AUDIO_QUALITY_EVS_SWB:
-        case AUDIO_QUALITY_EVS_FB:
-            return IMS_TRUE;
-        default:
-            break;
-    }
-
-    return IMS_FALSE;
-}
-
 PUBLIC VIRTUAL PemType MtcMediaManager::GetPemType(IN ISession* piSession)
 {
     return m_pProfileManager->GetPemType(piSession);
-}
-
-PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioMediaActivated()
-{
-    return (m_pMediaInfo->eAudioDirection != DIRECTION_INACTIVE) ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioInactive()

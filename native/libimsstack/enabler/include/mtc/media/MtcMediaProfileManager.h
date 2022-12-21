@@ -86,21 +86,15 @@ public:
     virtual PemType GetPemType(IN ISession* piSession);
     virtual IMS_BOOL IsActive(IN ISession* piSession);
     virtual IMS_BOOL IsConfirmed(IN ISession* piSession);
-    virtual IMS_BOOL IsForked(IN ISession* piSession);
-    virtual IMS_BOOL IsOriginalProfile(IN ISession* piSession);
 
     virtual void SetPemType(IN ISession* piSession, IN PemType ePemType);
     virtual void SetActive(IN ISession* piSession, IN IMS_BOOL bActive);
     virtual void SetConfirmed(IN ISession* piSession, IN IMS_BOOL bConfirmed);
-    virtual void SetForked(IN ISession* piSession, IN IMS_BOOL bForked);
-    virtual void SetAsOriginalProfile(IN ISession* piSession, IN IMS_BOOL bOriginalProfile);
 
     virtual IMS_BOOL IsPemSendInOtherEarlySession(IN ISession* piSession);
-    virtual IMS_BOOL IsConfirmedDialogState();
     virtual void UpdateProfileForMediaActivation(IN ISession* piActiveSession);
 
     virtual ISession* GetSessionWithNegoId(IN IMS_UINTP nNegoId);
-    virtual ISession* GetActiveSession();
 
 private:
     IMS_BOOL IsMediaProfilePresent(IN const ISession* piSession);
