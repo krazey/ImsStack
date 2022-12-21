@@ -295,7 +295,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
     pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
-    pTxn = new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
+    pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, pSipTxnTimerContext, &nError);
 
     /* Calling Inv cli fsm with send invite event in UDP timer B will start */
     EXPECT_EQ(SIP_TRUE, pTxn->InvokeFsm(SipTxn::INV_CLI_SEND_INV_REQ_EVT, pTxnFsmData, &nError));
