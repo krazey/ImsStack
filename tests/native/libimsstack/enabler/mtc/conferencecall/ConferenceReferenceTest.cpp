@@ -39,7 +39,7 @@
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/MockISipMessage.h"
 #include "sipcore/SipStatusCode.h"
-#include "utility/MessageUtils.h"
+#include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -78,7 +78,7 @@ public:
     MockIMtcPreconditionManager objMockPreconditionManager;
     CallInfo objCallInfo;
     ConfUser objUser;
-    MessageUtils objMessageUtils;
+    MockIMessageUtils objMessageUtils;
 
     MockISession objMockConfSession;
     MockIMtcSession objMockConfMtcSession;
@@ -191,6 +191,8 @@ protected:
 
         ON_CALL(objMockCallContext, GetConfigurationProxy())
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        ON_CALL(objMockCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
     }
 };
 
@@ -235,12 +237,8 @@ TEST_F(ConferenceReferenceTest, OnReferenceDeliveryFailed)
 TEST_F(ConferenceReferenceTest, OnReferenceNotifyWithStateActive)
 {
     MockIMessage objMockMessage;
-    MockISipMessage objMockISipMessage;
-    ON_CALL(objMockMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
-
-    ImsList<AString> objSubStates;
-    objSubStates.Append("active");
-    ON_CALL(objMockISipMessage, GetHeaders(_, _)).WillByDefault(Return(objSubStates));
+    ON_CALL(objMessageUtils, GetHeaderValue(&objMockMessage, ISipHeader::SUBSCRIPTION_STATE, _))
+            .WillByDefault(Return("active"));
 
     EXPECT_CALL(objMockListener, OnReferenceUpdated(_, _, ReferSubscriptionState::ACTIVE)).Times(1);
 
@@ -250,12 +248,8 @@ TEST_F(ConferenceReferenceTest, OnReferenceNotifyWithStateActive)
 TEST_F(ConferenceReferenceTest, OnReferenceNotifyWithStateTerminated)
 {
     MockIMessage objMockMessage;
-    MockISipMessage objMockISipMessage;
-    ON_CALL(objMockMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
-
-    ImsList<AString> objSubStates;
-    objSubStates.Append("terminated");
-    ON_CALL(objMockISipMessage, GetHeaders(_, _)).WillByDefault(Return(objSubStates));
+    ON_CALL(objMessageUtils, GetHeaderValue(&objMockMessage, ISipHeader::SUBSCRIPTION_STATE, _))
+            .WillByDefault(Return("terminated"));
 
     EXPECT_CALL(objMockListener, OnReferenceUpdated(_, _, ReferSubscriptionState::TERMINATED))
             .Times(1);
@@ -280,11 +274,11 @@ TEST_F(ConferenceReferenceTest, SendInviteWithSingleUser)
     ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
             .WillByDefault(Return(&objMockReference));
 
-    AString strSessionId = "12345";
-    ON_CALL(objMockJoiningSession, GetSessionId()).WillByDefault(ReturnRef(strSessionId));
+    ON_CALL(objMessageUtils, GetSessionId(&objMockJoiningSession)).WillByDefault(Return("12345"));
 
     // TODO: let UriFormatter returns test uri
     AString strReferToUri = "sip:testuri@ims.google.com";
+    ON_CALL(objMessageUtils, GetRemoteUri(_, _)).WillByDefault(Return(strReferToUri));
     IMS_RESULT nResult = pConferenceReference->SendInvite(strReferToUri, *pMockConnectionIdManager);
     EXPECT_EQ(nResult, IMS_SUCCESS);
     EXPECT_EQ(pConferenceReference->GetType(), REFERENCE_TYPE_INVITE);

@@ -32,7 +32,7 @@
 #include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -390,8 +390,8 @@ void MtcMediaManager::FinalizeSdp(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IMessage* piMessage)
 {
-    ImsList<AString> lstHeaders;
-    MessageUtil::GetHeaders(piMessage, ISipHeader::P_EARLY_MEDIA, lstHeaders);
+    ImsList<AString> lstHeaders =
+            m_objContext.GetMessageUtils().GetHeaders(piMessage, ISipHeader::P_EARLY_MEDIA);
 
     PemType ePemType = PemType::NONE;
 
@@ -624,7 +624,7 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMes
      * communication progress information also when the most recently received P-Early-Media header
      * fields of all early dialogs contain "inactive" or "recvonly".
      */
-    if (!MessageUtil::IsResponseExist(piSession, SipStatusCode::SC_180))
+    if (!m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_180))
     {
         bUseLocalTone = IMS_FALSE;
     }

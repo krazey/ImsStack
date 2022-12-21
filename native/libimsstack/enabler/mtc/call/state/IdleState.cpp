@@ -51,7 +51,7 @@
 #include "media/MtcMediaUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "ussi/UssiController.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -172,7 +172,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
     }
 
     if (m_objContext.GetConfigurationProxy().Is(Feature::REJECT_OFFERLESS_INVITE) &&
-            !MessageUtil::HasSdp(piMessage))
+            !m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
@@ -260,7 +260,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncomingUssi(IN ISession* piSessio
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
 
     if (m_objContext.GetConfigurationProxy().Is(Feature::REJECT_OFFERLESS_INVITE) &&
-            !MessageUtil::HasSdp(piMessage))
+            !m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }

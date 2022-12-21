@@ -29,7 +29,7 @@
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -113,11 +113,10 @@ void MtcLocationObject::SetLocationToMessage(
 }
 
 PRIVATE
-AString MtcLocationObject::CreateCid(IN const ISubscriberConfig& objSubscriberConfig)
+AString MtcLocationObject::CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const
 {
-    AString strCid;
-    MessageUtil::GenerateContentId(objSubscriberConfig.GetHomeDomainName(), strCid);
-    return strCid;
+    return m_objContext.GetMessageUtils().GenerateContentId(
+            objSubscriberConfig.GetHomeDomainName());
 }
 
 PRIVATE

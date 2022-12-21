@@ -32,7 +32,7 @@
 #include "conferencecall/ConferenceFactory.h"
 #include "conferencecall/ConferenceReference.h"
 #include "helper/ICallStateProxy.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -1078,7 +1078,8 @@ void ConferenceController::GetFocusAddress(OUT AString& strAddress) const
         piMessage = objSession.GetPreviousRequest(IMessage::SESSION_START);
     }
 
-    MessageUtil::GetUri(piMessage, IMS_TRUE, ISipHeader::CONTACT_NORMAL, strAddress);
+    strAddress =
+            m_objContext.GetMessageUtils().GetUri(piMessage, IMS_TRUE, ISipHeader::CONTACT_NORMAL);
 }
 
 PROTECTED

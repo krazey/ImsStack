@@ -29,7 +29,7 @@
 #include "dialingplan/IMtcDialingPlan.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -133,8 +133,8 @@ PUBLIC void ParticipantInfo::HandleRequest(IN RequestType eType, IN const IMessa
         return;
     }
 
-    MessageUtil::GetRemoteUri(
-            &m_objContext.GetSession()->GetISession(), PeerType::MT, m_strRemoteUri);
+    m_strRemoteUri = m_objContext.GetMessageUtils().GetRemoteUri(
+            &m_objContext.GetSession()->GetISession(), PeerType::MT);
     m_strRemoteNumber = GetRemoteNumberFromMessage(objRequest);
 
     IMS_TRACE_D("HandleRequest : Remote URI[%s] Number[%s]", m_strRemoteUri.GetStr(),
@@ -153,12 +153,13 @@ PRIVATE AString ParticipantInfo::GetRemoteNumberFromMessage(IN const IMessage& o
     if (!m_objContext.GetConfigurationProxy().Is(Feature::OIP_SOURCE_FROM_HEADER))
     {
         // Examine PAID first
-        MessageUtil::GetUserPart(&objMessage, ISipHeader::P_ASSERTED_IDENTITY, strNumber);
+        strNumber = m_objContext.GetMessageUtils().GetUserPart(
+                &objMessage, ISipHeader::P_ASSERTED_IDENTITY);
     }
 
     if (strNumber.GetLength() <= 0)
     {
-        MessageUtil::GetUserPart(&objMessage, ISipHeader::FROM, strNumber);
+        strNumber = m_objContext.GetMessageUtils().GetUserPart(&objMessage, ISipHeader::FROM);
     }
 
     return strNumber;

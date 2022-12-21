@@ -48,7 +48,7 @@
 #include "precondition/SdpPreconditionHelper.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -574,7 +574,7 @@ void MtcCallState::InitMediaSession()
 PROTECTED
 IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage)
 {
-    if (MessageUtil::HasSdp(piMessage) == IMS_FALSE)
+    if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
         IMS_TRACE_D("OnSdpReceived - No SDP received.", 0, 0, 0);
         if (IsAnswerMandatory(piSession, piMessage))
@@ -611,7 +611,8 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
 PROTECTED
 void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
 {
-    IMS_BOOL bEarly = !MessageUtil::IsResponseExist(piSession, SipStatusCode::SC_200);
+    IMS_BOOL bEarly =
+            !m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_200);
     m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly);
 }
 
