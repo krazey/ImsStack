@@ -28,6 +28,7 @@
 #include "precondition/QosDef.h"
 #include "precondition/QosStatusTable.h"
 #include "precondition/QosTimer.h"
+#include "precondition/SdpPreconditionHelper.h"
 
 class QosInfo
 {
@@ -46,17 +47,17 @@ public:
     QosInfo& operator=(IN const QosInfo&) = delete;
 
 public:
-    inline QosStatus GetAudioStatus() const { return eAudioStatus; }
-    inline QosStatus GetVideoStatus() const { return eVideoStatus; }
-    inline QosStatus GetTextStatus() const { return eTextStatus; }
-    inline QosTimer& GetTimer() { return objTimer; }
-    inline QosStatusTable& GetStatusTable() { return objStatusTable; }
-    inline IMS_BOOL IsPreconditionSupported() const { return bSupportPrecondition; }
+    inline virtual QosStatus GetAudioStatus() const { return eAudioStatus; }
+    inline virtual QosStatus GetVideoStatus() const { return eVideoStatus; }
+    inline virtual QosStatus GetTextStatus() const { return eTextStatus; }
+    inline virtual QosTimer& GetTimer() { return objTimer; }
+    inline virtual QosStatusTable& GetStatusTable() { return objStatusTable; }
+    inline virtual IMS_BOOL IsPreconditionSupported() const { return bSupportPrecondition; }
 
-    inline void SetAudioStatus(IN QosStatus eStatus) { eAudioStatus = eStatus; }
-    inline void SetVideoStatus(IN QosStatus eStatus) { eVideoStatus = eStatus; }
-    inline void SetTextStatus(IN QosStatus eStatus) { eTextStatus = eStatus; }
-    inline void SetSupportingPrecondition(IN IMS_BOOL bSupported)
+    inline virtual void SetAudioStatus(IN QosStatus eStatus) { eAudioStatus = eStatus; }
+    inline virtual void SetVideoStatus(IN QosStatus eStatus) { eVideoStatus = eStatus; }
+    inline virtual void SetTextStatus(IN QosStatus eStatus) { eTextStatus = eStatus; }
+    inline virtual void SetSupportingPrecondition(IN IMS_BOOL bSupported)
     {
         bSupportPrecondition = bSupported;
     }
@@ -70,7 +71,7 @@ private:
     IMS_BOOL bSupportPrecondition;
 };
 
-class MtcPreconditionManager final :
+class MtcPreconditionManager :
         public IMtcPreconditionManager,
         public IMediaQosEventListener,
         public IQosTimerListener
@@ -104,9 +105,11 @@ public:
             IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) override;
     virtual void OnTimerExpired(IN QosTimer* pTimer, IN QosTimerType eType) override;
 
+protected:
+    virtual QosInfo* GetQosInfo(IN ISession* piSession) const;
+
 private:
-    void DestroyAll();
-    QosInfo* GetQosInfo(IN ISession* piSession) const;
+    void DestroyAllQosInfo();
     void SetQosStatus(IN ISession* piSession, QosStatus eStatus, IN IMS_UINT32 eMediaType) const;
     QosStatus GetQosStatus(IN ISession* piSession, IN IMS_UINT32 eMediaType) const;
     QosTimer* GetQosTimer(IN ISession* piSession) const;
@@ -150,10 +153,11 @@ private:
     QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType) const;
     QosLossPolicy GetActionForQosLoss(IN ISession* piSession) const;
 
-private:
+protected:
     ImsMap<ISession*, QosInfo*> m_objQosInfos;
     IMtcPreconditionListener* m_pListener;
     IMtcCallContext& m_objContext;
+    SdpPreconditionHelper* m_pSdpPreconditionHelper;
     IMS_BOOL m_bOnWlan;
 };
 

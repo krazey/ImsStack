@@ -18,6 +18,7 @@
 #include "ISessionParameter.h"
 #include "ISipMessage.h"
 #include "ISipMessageBodyPart.h"
+#include "ImsList.h"
 #include "MtcDef.h"
 #include "SdpParser.h"
 #include "ServiceTrace.h"
@@ -31,7 +32,10 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC GLOBAL void SdpPreconditionHelper::FormPreconditionSdp(
+PUBLIC SdpPreconditionHelper::SdpPreconditionHelper() {}
+PUBLIC VIRTUAL SdpPreconditionHelper::~SdpPreconditionHelper() {}
+
+PUBLIC VIRTUAL void SdpPreconditionHelper::FormPreconditionSdp(
         IN ISession* piSession, IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf)
 {
     if (piSession == IMS_NULL || pStatusTable == IMS_NULL)
@@ -83,7 +87,7 @@ PUBLIC GLOBAL void SdpPreconditionHelper::FormPreconditionSdp(
     }
 }
 
-PUBLIC GLOBAL void SdpPreconditionHelper::RemovePreconditionSdp(IN ISession* piSession)
+PUBLIC VIRTUAL void SdpPreconditionHelper::RemovePreconditionSdp(IN ISession* piSession)
 {
     if (piSession == IMS_NULL)
     {
@@ -115,7 +119,7 @@ PUBLIC GLOBAL void SdpPreconditionHelper::RemovePreconditionSdp(IN ISession* piS
     }
 }
 
-PUBLIC GLOBAL void SdpPreconditionHelper::FormFailurePreconditionSdp(IN ISession* piSession)
+PUBLIC VIRTUAL void SdpPreconditionHelper::FormFailurePreconditionSdp(IN ISession* piSession)
 {
     if (piSession == IMS_NULL)
     {
@@ -157,7 +161,36 @@ PUBLIC GLOBAL void SdpPreconditionHelper::FormFailurePreconditionSdp(IN ISession
     }
 }
 
-PUBLIC GLOBAL IMS_UINT32 SdpPreconditionHelper::GetMediaTypesBySdp(IN ISession* piSession)
+PUBLIC VIRTUAL IMS_UINT32 SdpPreconditionHelper::GetMediaType(
+        IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState)
+{
+    IMS_UINT32 eMediaType = MEDIATYPE_NONE;
+
+    if (pSdpMedia == IMS_NULL || pSdpMedia->GetPort() == 0)
+    {
+        return eMediaType;
+    }
+
+    if (pSdpMedia->GetType() == SdpMedia::TYPE_AUDIO)
+    {
+        eMediaType = MEDIATYPE_AUDIO;
+    }
+    else if (nMediaState != IMedia::STATE_DELETED)
+    {
+        if (pSdpMedia->GetType() == SdpMedia::TYPE_VIDEO)
+        {
+            eMediaType = MEDIATYPE_VIDEO;
+        }
+        else if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT)
+        {
+            eMediaType = MEDIATYPE_TEXT;
+        }
+    }
+
+    return eMediaType;
+}
+
+PUBLIC VIRTUAL IMS_UINT32 SdpPreconditionHelper::GetMediaTypesBySdp(IN ISession* piSession)
 {
     IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
 
@@ -213,7 +246,7 @@ PUBLIC GLOBAL IMS_UINT32 SdpPreconditionHelper::GetMediaTypesBySdp(IN ISession* 
     return eMediaTypes;
 }
 
-PUBLIC GLOBAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN ISession* piSession)
+PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN ISession* piSession)
 {
     IMS_BOOL bResult = IMS_FALSE;
 
@@ -251,7 +284,7 @@ PUBLIC GLOBAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN ISe
     return bResult;
 }
 
-PUBLIC GLOBAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
+PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
         IN ISession* piSession, IN IMS_SINT32 nServiceMethod)
 {
     if (piSession == IMS_NULL)
@@ -320,7 +353,8 @@ PUBLIC GLOBAL IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(
     return bResult;
 }
 
-PRIVATE GLOBAL void SdpPreconditionHelper::FormCurrentAttribute(
+PRIVATE
+void SdpPreconditionHelper::FormCurrentAttribute(
         IN IMediaDescriptor* piMediaDescriptor, IN QosStatusTable* pStatusTable)
 {
     if (piMediaDescriptor == IMS_NULL || pStatusTable == IMS_NULL)
@@ -355,7 +389,8 @@ PRIVATE GLOBAL void SdpPreconditionHelper::FormCurrentAttribute(
     piMediaDescriptor->SetPrecondition(SdpAttribute::CURR, &objCurrent);
 }
 
-PRIVATE GLOBAL void SdpPreconditionHelper::FormDesiredAttribute(
+PRIVATE
+void SdpPreconditionHelper::FormDesiredAttribute(
         IN IMediaDescriptor* piMediaDescriptor, IN QosStatusTable* pStatusTable)
 {
     if (piMediaDescriptor == IMS_NULL || pStatusTable == IMS_NULL)
@@ -382,10 +417,9 @@ PRIVATE GLOBAL void SdpPreconditionHelper::FormDesiredAttribute(
     }
 }
 
-// check
-PRIVATE GLOBAL void SdpPreconditionHelper::AddDesiredStatus(
-        OUT SdpSegmentedPrecondition* objDesired, IN QosStatusTable* pStatusTable,
-        IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType)
+PRIVATE
+void SdpPreconditionHelper::AddDesiredStatus(OUT SdpSegmentedPrecondition* objDesired,
+        IN QosStatusTable* pStatusTable, IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType)
 {
     if (pStatusTable == IMS_NULL || objDesired == IMS_NULL)
     {
@@ -415,9 +449,9 @@ PRIVATE GLOBAL void SdpPreconditionHelper::AddDesiredStatus(
     }
 }
 
-PRIVATE GLOBAL void SdpPreconditionHelper::FormConfirmAttribute(
-        IN IMediaDescriptor* piMediaDescriptor, IN QosStatusTable* pStatusTable,
-        IN IMS_BOOL bUseConf)
+PRIVATE
+void SdpPreconditionHelper::FormConfirmAttribute(IN IMediaDescriptor* piMediaDescriptor,
+        IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf)
 {
     if (!bUseConf || piMediaDescriptor == IMS_NULL || pStatusTable == IMS_NULL)
     {
@@ -456,36 +490,8 @@ PRIVATE GLOBAL void SdpPreconditionHelper::FormConfirmAttribute(
     piMediaDescriptor->SetPrecondition(SdpAttribute::CONF, &objConf);
 }
 
-PUBLIC GLOBAL IMS_UINT32 SdpPreconditionHelper::GetMediaType(
-        IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState)
-{
-    IMS_UINT32 eMediaType = MEDIATYPE_NONE;
-
-    if (pSdpMedia == IMS_NULL || pSdpMedia->GetPort() == 0)
-    {
-        return eMediaType;
-    }
-
-    if (pSdpMedia->GetType() == SdpMedia::TYPE_AUDIO)
-    {
-        eMediaType = MEDIATYPE_AUDIO;
-    }
-    else if (nMediaState != IMedia::STATE_DELETED)
-    {
-        if (pSdpMedia->GetType() == SdpMedia::TYPE_VIDEO)
-        {
-            eMediaType = MEDIATYPE_VIDEO;
-        }
-        else if (pSdpMedia->GetType() == SdpMedia::TYPE_TEXT)
-        {
-            eMediaType = MEDIATYPE_TEXT;
-        }
-    }
-
-    return eMediaType;
-}
-
-PRIVATE GLOBAL IMediaDescriptor* SdpPreconditionHelper::GetMediaDescriptor(IN IMedia* piMedia)
+PRIVATE
+IMediaDescriptor* SdpPreconditionHelper::GetMediaDescriptor(IN IMedia* piMedia)
 {
     if (piMedia == IMS_NULL)
     {
@@ -502,7 +508,8 @@ PRIVATE GLOBAL IMediaDescriptor* SdpPreconditionHelper::GetMediaDescriptor(IN IM
     }
 }
 
-PRIVATE GLOBAL IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
+PRIVATE
+IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(
         IN ISipMessage* piSipMessage, IN IMS_SINT32 eSdpMediaType)
 {
     if (piSipMessage == IMS_NULL)

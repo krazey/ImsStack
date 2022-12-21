@@ -19,24 +19,28 @@
 
 #include "ISession.h"
 #include "ISipMessage.h"
+#include "ImsTypeDef.h"
 #include "media/IMediaDescriptor.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
+#include "precondition/SdpPreconditionHelper.h"
 #include "precondition/QosStatusTable.h"
 
 class SdpPreconditionHelper
 {
 public:
-    static void FormPreconditionSdp(
+    SdpPreconditionHelper();
+    virtual ~SdpPreconditionHelper();
+    SdpPreconditionHelper(IN const SdpPreconditionHelper&) = delete;
+    SdpPreconditionHelper& operator=(IN const SdpPreconditionHelper) = delete;
+
+    virtual void FormPreconditionSdp(
             IN ISession* piSession, IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf);
-    static void RemovePreconditionSdp(IN ISession* piSession);
-    static void FormFailurePreconditionSdp(IN ISession* piSession);
-
-    static IMS_UINT32 GetMediaType(IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState);
-
-    /* Parsing SDP Utility */
-    static IMS_UINT32 GetMediaTypesBySdp(IN ISession* piSession);
-    static IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession);
-    static IMS_BOOL IsLocalResourceReservedInSdp(
+    virtual void RemovePreconditionSdp(IN ISession* piSession);
+    virtual void FormFailurePreconditionSdp(IN ISession* piSession);
+    virtual IMS_UINT32 GetMediaType(IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState);
+    virtual IMS_UINT32 GetMediaTypesBySdp(IN ISession* piSession);
+    virtual IMS_BOOL IsPreconditionIncludedInSdp(IN ISession* piSession);
+    virtual IMS_BOOL IsLocalResourceReservedInSdp(
             IN ISession* piSession, IN IMS_SINT32 nServiceMethod);
 
 private:
@@ -49,7 +53,6 @@ private:
             IN IMS_SINT32 eStatusType);
     static void FormConfirmAttribute(IN IMediaDescriptor* piMediaDescriptor,
             IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf);
-
     static IMediaDescriptor* GetMediaDescriptor(IN IMedia* piMedia);
     static IMS_BOOL HasReservedResourceInSdp(
             IN ISipMessage* piSipMessage, IN IMS_SINT32 eSdpMediaType);
