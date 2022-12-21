@@ -39,6 +39,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
+#include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -335,8 +336,8 @@ IFeatureCaps* MessageFormatter::GetIFeatureCaps()
 PRIVATE
 void MessageFormatter::SetPPreferredServiceHeader()
 {
-    MessageUtil::SetHeader(m_piNextMessage, Const3GPP::ICSI_MMTEL, ISipHeader::UNKNOWN,
-            SipHeaderName::P_PREFERRED_SERVICE);
+    m_objContext.GetMessageUtils().SetHeader(m_piNextMessage, Const3GPP::ICSI_MMTEL,
+            ISipHeader::UNKNOWN, SipHeaderName::P_PREFERRED_SERVICE);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -359,7 +360,8 @@ void MessageFormatter::SetAcceptContactHeader(IN CallType eCallType)
         strAcceptContact.Append(MessageUtil::STR_VIDEO);
     }
 
-    MessageUtil::SetHeader(m_piNextMessage, strAcceptContact, ISipHeader::ACCEPT_CONTACT);
+    m_objContext.GetMessageUtils().SetHeader(
+            m_piNextMessage, strAcceptContact, ISipHeader::ACCEPT_CONTACT);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -367,9 +369,9 @@ void MessageFormatter::SetAcceptContactHeader(IN CallType eCallType)
 PRIVATE
 void MessageFormatter::SetAcceptHeader()
 {
-    MessageUtil::AddValueIfNotExists(
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
             m_piNextMessage, MessageUtil::STR_ACCEPT_TYPE_APPLICATION_SDP, ISipHeader::ACCEPT);
-    MessageUtil::AddValueIfNotExists(m_piNextMessage,
+    m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
             MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_IMS_XML, ISipHeader::ACCEPT);
 }
 
@@ -402,22 +404,22 @@ void MessageFormatter::AddSrvccFeature()
         return;
     }
 
-    if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_A,
-                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
+                MessageUtil::STR_SRVCC_FEATURE_A, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_A, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
     }
 
-    if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_B,
-                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
+                MessageUtil::STR_SRVCC_FEATURE_B, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_B, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
     }
 
-    if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_M,
-                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
+                MessageUtil::STR_SRVCC_FEATURE_M, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_M, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
@@ -435,20 +437,20 @@ void MessageFormatter::SetSrvccContactParameter()
         return;
     }
 
-    if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_A,
-                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
+                MessageUtil::STR_SRVCC_FEATURE_A, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_A, 0);
     }
 
-    if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_B,
-                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
+                MessageUtil::STR_SRVCC_FEATURE_B, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_B, 0);
     }
 
-    if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_M,
-                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+    if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
+                MessageUtil::STR_SRVCC_FEATURE_M, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_M, 0);
     }
@@ -498,20 +500,24 @@ void MessageFormatter::SetCallerIdHeader()
         if (objConfig.GetInt(Feature::SESSION_PRIVACY_TYPE) ==
                 CarrierConfig::ImsVoice::SESSION_PRIVACY_TYPE_HEADER)
         {
-            MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_HEADER, ISipHeader::PRIVACY);
+            m_objContext.GetMessageUtils().SetHeader(
+                    m_piNextMessage, MessageUtil::STR_HEADER, ISipHeader::PRIVACY);
         }
         else
         {
-            MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
+            m_objContext.GetMessageUtils().SetHeader(
+                    m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
         }
 
         SipAddress objSIPAddress(ImsIdentity::GetAnonymousUserId());
         objSIPAddress.SetDisplayName(MessageUtil::STR_ANONYMOUS);
-        MessageUtil::SetHeader(m_piNextMessage, objSIPAddress.ToString(), ISipHeader::FROM);
+        m_objContext.GetMessageUtils().SetHeader(
+                m_piNextMessage, objSIPAddress.ToString(), ISipHeader::FROM);
     }
     else if (pSuppService->nValue == CALLERID_IDENTITY)
     {
-        MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
+        m_objContext.GetMessageUtils().SetHeader(
+                m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
     }
 }
 
@@ -535,7 +541,7 @@ void MessageFormatter::SetCallerIdHeader()
 //             (m_eFormType == FormType::ACCEPT))
 //     {
 //         IMessage* piPreviousMessage = m_objSession.GetPreviousRequest(IMessage::SESSION_START);
-//         if (MessageUtil::HasValue(piPreviousMessage, Sip::STR_FROM_CHANGE,
+//         if (m_objContext.GetMessageUtils().HasValue(piPreviousMessage, Sip::STR_FROM_CHANGE,
 //                 ISipHeader::SUPPORTED))
 //         {
 //             bAddTagToSupported = IMS_TRUE;
@@ -544,7 +550,7 @@ void MessageFormatter::SetCallerIdHeader()
 
 //     if (bAddTagToSupported)
 //     {
-//         MessageUtil::AddValueIfNotExists(
+//         m_objContext.GetMessageUtils().AddValueIfNotExists(
 //                 m_piNextMessage, Sip::STR_FROM_CHANGE, ISipHeader::SUPPORTED);
 //     }
 
@@ -562,11 +568,13 @@ void MessageFormatter::SetCallerIdHeader()
 //     IMS_SINT32 eTipType = TIP_TYPE_IDENTITY;  // TODO, from user settings
 //     if (eTipType == TIP_TYPE_RESTRICTED)
 //     {
-//         MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
+//         m_objContext.GetMessageUtils().SetHeader(m_piNextMessage, MessageUtil::STR_ID,
+//         ISipHeader::PRIVACY);
 //     }
 //     else if (eTipType == TIP_TYPE_IDENTITY)
 //     {
-//         MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_NONE, ISipHeader::PRIVACY);
+//         m_objContext.GetMessageUtils().SetHeader(m_piNextMessage, MessageUtil::STR_NONE,
+//         ISipHeader::PRIVACY);
 //     }
 // }
 
@@ -580,7 +588,7 @@ void MessageFormatter::SetPEarlyMediaHeader()
         return;
     }
 
-    MessageUtil::AddValueIfNotExists(
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
             m_piNextMessage, MessageUtil::STR_SUPPORTED, ISipHeader::P_EARLY_MEDIA);
 }
 
@@ -594,8 +602,9 @@ void MessageFormatter::SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo)
         return;
     }
 
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_ALERT_URN_CALL_WAITING,
-            ISipHeader::UNKNOWN, SipHeaderName::ALERT_INFO);
+    m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
+            MessageUtil::STR_ALERT_URN_CALL_WAITING, ISipHeader::UNKNOWN,
+            SipHeaderName::ALERT_INFO);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -608,7 +617,7 @@ void MessageFormatter::SetReasonHeader(IN const AString& strReason)
         return;
     }
 
-    MessageUtil::AddValueIfNotExists(
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
             m_piNextMessage, strReason, ISipHeader::UNKNOWN, SipHeaderName::REASON);
 }
 
@@ -625,8 +634,9 @@ void MessageFormatter::SetCarrierSpecificHeaders()
                 m_eFormType == FormType::UPDATE || m_eFormType == FormType::ACCEPT_UPDATE)
         {
             IMS_TRACE_D("SetCarrierSpecificHeaders : avchange", 0, 0, 0);
-            MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_AVCHANGE,
-                    ISipHeader::UNKNOWN, MessageUtil::STR_P_TTA_VOLTE_INFO);
+            m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
+                    MessageUtil::STR_AVCHANGE, ISipHeader::UNKNOWN,
+                    MessageUtil::STR_P_TTA_VOLTE_INFO);
         }
     }
 }
