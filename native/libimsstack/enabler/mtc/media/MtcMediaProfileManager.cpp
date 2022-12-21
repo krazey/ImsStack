@@ -187,32 +187,6 @@ IMS_BOOL MtcMediaProfileManager::IsConfirmed(IN ISession* piSession)
 }
 
 PUBLIC
-IMS_BOOL MtcMediaProfileManager::IsForked(IN ISession* piSession)
-{
-    MediaProfile* pProfile = GetMediaProfile(piSession);
-
-    if (!pProfile)
-    {
-        return IMS_FALSE;
-    }
-
-    return pProfile->bForked;
-}
-
-PUBLIC
-IMS_BOOL MtcMediaProfileManager::IsOriginalProfile(IN ISession* piSession)
-{
-    MediaProfile* pProfile = GetMediaProfile(piSession);
-
-    if (!pProfile)
-    {
-        return IMS_FALSE;
-    }
-
-    return pProfile->bOriginalProfile;
-}
-
-PUBLIC
 void MtcMediaProfileManager::SetPemType(IN ISession* piSession, IN PemType ePemType)
 {
     MediaProfile* pProfile = GetMediaProfile(piSession);
@@ -252,33 +226,6 @@ void MtcMediaProfileManager::SetConfirmed(IN ISession* piSession, IN IMS_BOOL bC
 }
 
 PUBLIC
-void MtcMediaProfileManager::SetForked(IN ISession* piSession, IN IMS_BOOL bForked)
-{
-    MediaProfile* pProfile = GetMediaProfile(piSession);
-
-    if (!pProfile)
-    {
-        return;
-    }
-
-    pProfile->bConfirmed = bForked;
-}
-
-PUBLIC
-void MtcMediaProfileManager::SetAsOriginalProfile(
-        IN ISession* piSession, IN IMS_BOOL bOriginalProfile)
-{
-    MediaProfile* pProfile = GetMediaProfile(piSession);
-
-    if (!pProfile)
-    {
-        return;
-    }
-
-    pProfile->bOriginalProfile = bOriginalProfile;
-}
-
-PUBLIC
 IMS_BOOL MtcMediaProfileManager::IsPemSendInOtherEarlySession(IN ISession* piSession)
 {
     IMS_BOOL bResult = IMS_FALSE;
@@ -308,31 +255,6 @@ IMS_BOOL MtcMediaProfileManager::IsPemSendInOtherEarlySession(IN ISession* piSes
     }
 
     IMS_TRACE_D("IsPemSendInOtherEarlySession : %d", bResult, 0, 0);
-    return bResult;
-}
-
-PUBLIC
-IMS_BOOL MtcMediaProfileManager::IsConfirmedDialogState()
-{
-    IMS_BOOL bResult = IMS_FALSE;
-
-    for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
-    {
-        MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(index);
-        if (!pProfile)
-        {
-            continue;
-        }
-
-        if (pProfile->bConfirmed)
-        {
-            bResult = IMS_TRUE;
-            break;
-        }
-    }
-
-    IMS_TRACE_D("IsConfirmedDialogState : %d", bResult, 0, 0);
-
     return bResult;
 }
 
@@ -368,23 +290,6 @@ ISession* MtcMediaProfileManager::GetSessionWithNegoId(IN IMS_UINTP nNegoId)
     }
 
     IMS_TRACE_D("GetSessionWithNegoId : ISession is null.", 0, 0, 0);
-    return IMS_NULL;
-}
-
-PUBLIC
-ISession* MtcMediaProfileManager::GetActiveSession()
-{
-    for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
-    {
-        ISession* piSession = m_objMediaProfiles.GetKeyAt(index);
-
-        if (IsActive(piSession))
-        {
-            return piSession;
-        }
-    }
-
-    IMS_TRACE_D("GetActiveSession : There is no active session.", 0, 0, 0);
     return IMS_NULL;
 }
 

@@ -56,10 +56,8 @@ public:
     /* Media Info */
     virtual void SetMediaInfo(IN const MediaInfo& objInfo) override;
     virtual void UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir) override;
-    virtual void UpdateMediaQuality(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality) override;
     // using enum values defined in MtcDef.h
     virtual const MediaInfo& GetMediaInfo() const override;
-    virtual void GetOldMediaInfo(OUT MediaInfo& objInfo) override;
     virtual void RestoreMediaInfo() override;
 
     /* MediaSession */
@@ -102,13 +100,8 @@ public:
 
     virtual void SetRtpPort(
             IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort) override;
-    virtual void RequestVideoDataUsage() override;
-    virtual void SetEnforcedDirection(IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir) override;
-    virtual IMS_BOOL GetCvoResult(IN ISession* piSession) override;
-    virtual void SendFastVideoUpdate() override;
     virtual void SetConferenceCall(IN IMS_BOOL bConference) override;
     virtual void SetConfirmedSession(IN ISession* piSession) override;
-    virtual void UpdateStatsReportOption(IN IMS_UINT32 eAction) override;
 
     virtual NegotiationState GetNegotiationState(IN ISession* piSession) override;
     virtual IMS_SINT32 GetNegotiatedDirection(
@@ -117,10 +110,7 @@ public:
             IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
     virtual CallType GetNegotiatedCallType(IN ISession* piSession) override;
 
-    /* Provide information of MtcMediaManager */
-    virtual IMS_BOOL IsAudioQualityHd() override;
     virtual PemType GetPemType(IN ISession* piSession) override;  // remove..?
-    virtual IMS_BOOL IsAudioMediaActivated() override;
 
     virtual IMS_BOOL IsAudioInactive() override;
     virtual void AdjustDirectionForAutoAccept(
