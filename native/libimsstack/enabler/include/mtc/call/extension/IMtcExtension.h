@@ -36,28 +36,28 @@ public:
      *
      * @return Copy of this instance.
      */
-    virtual IMtcExtension* Clone() const;
+    virtual IMtcExtension* Clone() const = 0;
 
     /**
      * Returns whether the extension is available on the remote.
      *
      * @return True if available on the remote.
      */
-    virtual IMS_BOOL IsAvailableOnRemote() const;
+    virtual IMS_BOOL IsAvailableOnRemote() const = 0;
 
     /**
      * Returns whether the extension is required on the remote.
      *
      * @return True if required on the remote.
      */
-    virtual IMS_BOOL IsRequiredOnRemote() const;
+    virtual IMS_BOOL IsRequiredOnRemote() const = 0;
 
     /**
      * Returns the extension's option tag
      *
      * @return Option tag string.
      */
-    virtual const AString& GetOptionTag() const;
+    virtual const AString& GetOptionTag() const = 0;
 };
 
 #endif

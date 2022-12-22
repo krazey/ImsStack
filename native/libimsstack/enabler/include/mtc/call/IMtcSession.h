@@ -134,9 +134,6 @@ public:
      */
     virtual IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) = 0;
 
-    void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
-    void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
-
     /**
      * @brief Sets
      *
