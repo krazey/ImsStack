@@ -452,29 +452,105 @@ public class SscUtilsTest {
     @Test
     public void convertToImsRadioNetworkType() {
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_IWLAN));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_IWLAN));
 
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_UMTS));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_UMTS));
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSDPA));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSDPA));
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSUPA));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSUPA));
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSPA));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSPA));
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSPAP));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_HSPAP));
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UTRAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_TD_SCDMA));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_TD_SCDMA));
 
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_EUTRAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_LTE));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_LTE));
 
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_NGRAN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_NR));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_NR));
 
         assertEquals(ImsRadioInterface.ACCESS_NETWORK_TYPE_UNKNOWN,
-                mSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_UNKNOWN));
+                SscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_UNKNOWN));
+    }
+
+    @Test
+    public void getSupplementaryServiceTypeForCarrierConfig() {
+        assertEquals(SscConfig.SERVICE_TYPE_OIP,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.OIP,
+                        SscConstant.CONDITION_INVALID));
+        assertEquals(SscConfig.SERVICE_TYPE_OIR,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.OIR,
+                        SscConstant.CONDITION_INVALID));
+
+        assertEquals(SscConfig.SERVICE_TYPE_TIP,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.TIP,
+                        SscConstant.CONDITION_INVALID));
+        assertEquals(SscConfig.SERVICE_TYPE_TIR,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.TIR,
+                        SscConstant.CONDITION_INVALID));
+
+        assertEquals(SscConfig.SERVICE_TYPE_CFU,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CF,
+                        SscConstant.CONDITION_CFU));
+        assertEquals(SscConfig.SERVICE_TYPE_CFB,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CF,
+                        SscConstant.CONDITION_CFB));
+        assertEquals(SscConfig.SERVICE_TYPE_CFNRY,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CF,
+                        SscConstant.CONDITION_CFNR));
+        assertEquals(SscConfig.SERVICE_TYPE_CFNRC,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CF,
+                        SscConstant.CONDITION_CFNRC));
+        assertEquals(SscConfig.SERVICE_TYPE_CFA,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CF,
+                        SscConstant.CONDITION_CFA));
+        assertEquals(SscConfig.SERVICE_TYPE_CFAC,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CF,
+                        SscConstant.CONDITION_CFAC));
+        assertEquals(SscConfig.SERVICE_TYPE_CFNL,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CF,
+                        SscConstant.CONDITION_CFNL));
+        assertEquals(SscConfig.SERVICE_TYPE_INVALID,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CF,
+                        SscConstant.CONDITION_INVALID));
+
+        assertEquals(SscConfig.SERVICE_TYPE_BAOC,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.OCB,
+                        SscConstant.CONDITION_BAOC));
+        assertEquals(SscConfig.SERVICE_TYPE_BOIC,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.OCB,
+                        SscConstant.CONDITION_BOIC));
+        assertEquals(SscConfig.SERVICE_TYPE_BOIC_EXHC,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.OCB,
+                        SscConstant.CONDITION_BOIC_EXHC));
+        assertEquals(SscConfig.SERVICE_TYPE_INVALID,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.OCB,
+                        SscConstant.CONDITION_INVALID));
+
+        assertEquals(SscConfig.SERVICE_TYPE_BAIC,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.ICB,
+                        SscConstant.CONDITION_BAIC));
+        assertEquals(SscConfig.SERVICE_TYPE_BIC_ROAM,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.ICB,
+                        SscConstant.CONDITION_BIC_WR));
+        assertEquals(SscConfig.SERVICE_TYPE_ACR,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.ICB,
+                        SscConstant.CONDITION_ACR));
+        assertEquals(SscConfig.SERVICE_TYPE_INVALID,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.ICB,
+                        SscConstant.CONDITION_INVALID));
+
+        assertEquals(SscConfig.SERVICE_TYPE_CW,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.CW,
+                        SscConstant.CONDITION_INVALID));
+
+        assertEquals(SscConfig.SERVICE_TYPE_INVALID,
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.NONE,
+                        SscConstant.CONDITION_INVALID));
     }
 
     private class FakeSscUtils extends SscUtils {

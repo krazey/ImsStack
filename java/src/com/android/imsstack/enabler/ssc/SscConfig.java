@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import android.annotation.IntDef;
 import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -25,6 +26,8 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -41,6 +44,68 @@ public final class SscConfig {
     public static final int GBA_ME = CarrierConfigManager.GBA_ME; // 1
     public static final int GBA_U = CarrierConfigManager.GBA_U; // 2
     public static final int GBA_DIGEST = CarrierConfigManager.GBA_DIGEST; // 3
+
+    public static final int SERVICE_TYPE_INVALID = -1;
+    public static final int SERVICE_TYPE_CW =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CW; // 0
+    public static final int SERVICE_TYPE_CFA =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_ALL; // 1
+    public static final int SERVICE_TYPE_CFU =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFU; // 2
+    public static final int SERVICE_TYPE_CFAC =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_ALL_CONDITONAL_FORWARDING; // 3
+    public static final int SERVICE_TYPE_CFB =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFB; // 4
+    public static final int SERVICE_TYPE_CFNRY =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFNRY; // 5
+    public static final int SERVICE_TYPE_CFNRC =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFNRC; // 6
+    public static final int SERVICE_TYPE_CFNL =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFNL; // 7
+    public static final int SERVICE_TYPE_OIP =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIP; // 8
+    public static final int SERVICE_TYPE_TIP =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIP; // 9
+    public static final int SERVICE_TYPE_OIR =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_OIR; // 10
+    public static final int SERVICE_TYPE_TIR =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_IDENTIFICATION_TIR; // 11
+    public static final int SERVICE_TYPE_BAOC =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CB_BAOC; // 14
+    public static final int SERVICE_TYPE_BOIC =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CB_BOIC; // 15
+    public static final int SERVICE_TYPE_BOIC_EXHC =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CB_BOIC_EXHC; // 16
+    public static final int SERVICE_TYPE_BAIC =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CB_BAIC; // 18
+    public static final int SERVICE_TYPE_BIC_ROAM =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CB_BIC_ROAM; // 19
+    public static final int SERVICE_TYPE_ACR =
+            CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CB_ACR; // 20
+
+    @IntDef(prefix = {"SERVICE_TYPE_"}, value = {
+            SERVICE_TYPE_INVALID,
+            SERVICE_TYPE_CW,
+            SERVICE_TYPE_CFA,
+            SERVICE_TYPE_CFU,
+            SERVICE_TYPE_CFAC,
+            SERVICE_TYPE_CFB,
+            SERVICE_TYPE_CFNRY,
+            SERVICE_TYPE_CFNRC,
+            SERVICE_TYPE_CFNL,
+            SERVICE_TYPE_OIP,
+            SERVICE_TYPE_TIP,
+            SERVICE_TYPE_OIR,
+            SERVICE_TYPE_TIR,
+            SERVICE_TYPE_BAOC,
+            SERVICE_TYPE_BOIC,
+            SERVICE_TYPE_BOIC_EXHC,
+            SERVICE_TYPE_BAIC,
+            SERVICE_TYPE_BIC_ROAM,
+            SERVICE_TYPE_ACR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CarrierConfigServiceType {}
 
     private static HashMap<Integer, ConfigAgent> mConfigAgent = new HashMap<>();
 
@@ -233,14 +298,13 @@ public final class SscConfig {
     }
 
     // Specific APIs
-    static boolean isCfnlOverUtSupported(int slotId) {
+    static boolean isServerBasedService(int slotId, @CarrierConfigServiceType int serviceType) {
         int[] serverBasedServices = getServerBasedServices(slotId);
         if (serverBasedServices == null) {
             return false;
         }
 
-        return Arrays.stream(serverBasedServices).anyMatch(value ->
-                value == CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFNL);
+        return Arrays.stream(serverBasedServices).anyMatch(value -> value == serviceType);
     }
 
     static boolean isTls(int slotId) {

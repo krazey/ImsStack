@@ -19,7 +19,7 @@ package com.android.imsstack.enabler.ssc;
 public class SscServiceClassUtil {
     // See 27.007 +CCFC or +CLCK
     public static final int SERVICE_CLASS_NONE          = 0; // no user input
-    public static final int SERVICE_CLASS_VOICE         = (1 << 0);
+    public static final int SERVICE_CLASS_VOICE         = 1;
     public static final int SERVICE_CLASS_DATA          = (1 << 1);
     public static final int SERVICE_CLASS_FAX           = (1 << 2);
     public static final int SERVICE_CLASS_SMS           = (1 << 3);
@@ -35,24 +35,29 @@ public class SscServiceClassUtil {
     public static final int SERVICE_CLASS_VIDEO = SERVICE_CLASS_DATA_SYNC + SERVICE_CLASS_PACKET;
     public static final int SERVICE_CLASS_CALL = SERVICE_CLASS_VOICE + SERVICE_CLASS_VIDEO;
 
-    protected static boolean isValid(int serviceClass) {
-        if (hasVoice(serviceClass) || hasVideo(serviceClass)
-                || serviceClass == SERVICE_CLASS_NONE) {
-            return true;
-        }
-
-        return false;
+    /**
+     * Check if the service class is related to call service. If the service class is
+     * SERVICE_CLASS_NONE or the service class contains SERVICE_CLASS_VOICE or SERVICE_CLASS_VIDEO,
+     * then it returns true. Otherwise, it returns false.
+     */
+    public static boolean isValid(int serviceClass) {
+        return hasVoice(serviceClass) || hasVideo(serviceClass)
+                || serviceClass == SERVICE_CLASS_NONE;
     }
 
-    protected static boolean hasVoice(int serviceClass) {
+    /**
+     * Removing all service classes except for call related service classes, such as
+     * SERVICE_CLASS_VOICE and SERVICE_CLASS_VIDEO.
+     */
+    public static int removeInvalidServiceClass(int serviceClass) {
+        return serviceClass & SERVICE_CLASS_CALL;
+    }
+
+    static boolean hasVoice(int serviceClass) {
         return (serviceClass & SERVICE_CLASS_VOICE) == SERVICE_CLASS_VOICE;
     }
 
-    protected static boolean hasVideo(int serviceClass) {
+    static boolean hasVideo(int serviceClass) {
         return (serviceClass & SERVICE_CLASS_VIDEO) == SERVICE_CLASS_VIDEO;
-    }
-
-    protected static int removeInvalidServiceClass(int serviceClass) {
-        return serviceClass & SERVICE_CLASS_CALL;
     }
 }
