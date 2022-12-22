@@ -238,7 +238,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateFailed(
         IN ISession* /* piSession */)
 {
     /*
-    IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(
+    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     TODO: failure handler
     */

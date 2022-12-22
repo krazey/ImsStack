@@ -31,7 +31,7 @@
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -223,7 +223,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
 
     StopTimer();
 
-    IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
+    IMessage* piResponse =
+            m_objContext.GetMessageUtils().GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
     CallReasonInfo objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
 
     if (objReason.nCode == CODE_USER_TERMINATED_BY_REMOTE)
@@ -358,14 +359,15 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
     IMessage* piMessage = IMS_NULL;
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {
-        piMessage = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
+        piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+                piSession, IMessage::SESSION_UPDATE);
     }
     else
     {
         piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
     }
 
-    if (MessageUtil::HasSdp(piMessage) == IMS_FALSE)
+    if (m_objContext.GetMessageUtils().HasSdp(piMessage) == IMS_FALSE)
     {
         return IMS_SUCCESS;
     }

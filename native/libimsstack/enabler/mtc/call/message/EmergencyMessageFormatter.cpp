@@ -27,7 +27,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/message/EmergencyMessageFormatter.h"
 #include "helper/IMtcAosConnector.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -77,7 +77,8 @@ PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallTyp
 PRIVATE
 void EmergencyMessageFormatter::SetPPreferredIdentityHeader()
 {
-    if (MessageUtil::IsHeaderPresent(m_piNextMessage, ISipHeader::P_PREFERRED_IDENTITY))
+    if (m_objContext.GetMessageUtils().IsHeaderPresent(
+                m_piNextMessage, ISipHeader::P_PREFERRED_IDENTITY))
     {
         return;
     }
@@ -114,7 +115,8 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByUserId()
             continue;
         }
 
-        MessageUtil::SetHeader(m_piNextMessage, strAddress, ISipHeader::P_PREFERRED_IDENTITY);
+        m_objContext.GetMessageUtils().SetHeader(
+                m_piNextMessage, strAddress, ISipHeader::P_PREFERRED_IDENTITY);
         return;
     }
 }
@@ -169,7 +171,8 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
     strPort.Sprintf("%d", nPort);
     strValue.Append(strPort);
 
-    MessageUtil::SetHeader(m_piNextMessage, strValue, ISipHeader::P_PREFERRED_IDENTITY);
+    m_objContext.GetMessageUtils().SetHeader(
+            m_piNextMessage, strValue, ISipHeader::P_PREFERRED_IDENTITY);
 }
 
 /* -------------------------------------------------------------------------------------------------

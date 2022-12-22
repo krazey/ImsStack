@@ -30,7 +30,7 @@
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -68,8 +68,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSes
 PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
-    IMessage* piMessage =
-            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
+    IMessage* piMessage = m_objContext.GetMessageUtils().GetPreviousResponse(
+            piSession, IMessage::SESSION_EARLY_UPDATE);
     m_objContext.GetSession()->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
@@ -95,7 +95,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
     /*
-    IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(
+    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     TODO: failure handler
     */

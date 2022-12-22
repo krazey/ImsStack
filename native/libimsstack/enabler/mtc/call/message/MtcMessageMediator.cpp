@@ -25,6 +25,7 @@
 #include "call/IMtcSession.h"
 #include "call/message/MtcMessageMediator.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -95,7 +96,7 @@ CallType MtcMessageMediator::GetCallTypeOfCurrentMessage()
 {
     // VZ_REQ_5GNRSAVOICEVIDEO_4105999311948863
     // The device shall treat a "downgraded video call" as a video call, ...
-    CallType eCallType = MessageUtil::GetCallTypeFromSdp(
+    CallType eCallType = m_objContext.GetMessageUtils().GetCallTypeFromSdp(
             &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE, IMS_FALSE);
     if (eCallType != CallType::UNKNOWN)
     {

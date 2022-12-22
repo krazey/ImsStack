@@ -38,7 +38,7 @@ public:
             IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting = IMS_FALSE);
 
 private:
-    static AString CreateCid(IN const ISubscriberConfig& objSubscriberConfig);
+    AString CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const;
     ByteArray CreateLocationBody() const;
 
     IMS_SINT32 GetInformationLevel() const;

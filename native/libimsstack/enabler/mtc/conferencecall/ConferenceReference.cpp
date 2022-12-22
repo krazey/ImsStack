@@ -41,7 +41,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -130,9 +130,9 @@ PUBLIC VIRTUAL void ConferenceReference::ReferenceNotify(
 {
     (void)piReference;
 
-    AString strSubState;
-    MessageUtil::GetHeaderValue(piNotify, ISipHeader::SUBSCRIPTION_STATE, strSubState);
-    IMS_SINT32 nStatusCode = MessageUtil::GetStatusCodeInNotify(piNotify);
+    AString strSubState =
+            m_objContext.GetMessageUtils().GetHeaderValue(piNotify, ISipHeader::SUBSCRIPTION_STATE);
+    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetStatusCodeInNotify(piNotify);
     IMS_TRACE_I(
             "ReferenceNotify : state[%s] status-code[%d]", strSubState.GetStr(), nStatusCode, 0);
 
@@ -298,7 +298,7 @@ IMS_RESULT ConferenceReference::SendInviteForMultipleUser(OUT AString& strReferT
     AString strContentDisposition = "recipient-list";
     piReferMessage->AddHeader(SipHeaderName::CONTENT_DISPOSITION, strContentDisposition);
 
-    MessageUtil::SetResourceListByConfUser(
+    m_objContext.GetMessageUtils().SetResourceListByConfUser(
             piReferMessage, strReferToUri, m_objConfUsers, IMS_FALSE, IMS_TRUE);
 
     // 4. Set Referred-By header
@@ -337,9 +337,8 @@ void ConferenceReference::SetReplaces(IN IMtcCall* pi1To1Call)
     {
         return;
     }
-    AString strSessionId;
-    MessageUtil::GetSessionId(
-            &(pi1To1Call->GetCallContext().GetSession()->GetISession()), strSessionId);
+    AString strSessionId = m_objContext.GetMessageUtils().GetSessionId(
+            &(pi1To1Call->GetCallContext().GetSession()->GetISession()));
     m_piReference->SetReplaces(strSessionId);
 }
 

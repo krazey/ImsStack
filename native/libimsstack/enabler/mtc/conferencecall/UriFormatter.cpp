@@ -41,8 +41,8 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(OUT AString& strUri,
         IMtcSession* pMtcSession = objContext.GetSession();
         if (pMtcSession != IMS_NULL)
         {
-            MessageUtil::GetRemoteUri(
-                    &pMtcSession->GetISession(), objContext.GetCallInfo().ePeerType, strUri);
+            strUri = objContext.GetMessageUtils().GetRemoteUri(
+                    &pMtcSession->GetISession(), objContext.GetCallInfo().ePeerType);
         }
     }
     else
