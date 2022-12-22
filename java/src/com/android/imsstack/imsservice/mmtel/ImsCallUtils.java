@@ -40,6 +40,7 @@ import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.ImsConstants;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -404,6 +405,49 @@ public class ImsCallUtils {
         }
     }
 
+    public static void setSosUrnFromCallReasonInfo(int category, ImsCallProfile profile) {
+        String sosUrn = null;
+        int emergencyServiceCategory = 0;
+
+        switch (category)  {
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_POLICE: {
+                sosUrn = SOS_SERVICE_URN_POLICE;
+                emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_POLICE;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_AMBULANCE: {
+                sosUrn = SOS_SERVICE_URN_AMBULANCE;
+                emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_AMBULANCE;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_FIRE: {
+                sosUrn = SOS_SERVICE_URN_FIRE;
+                emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MARINE: {
+                sosUrn = SOS_SERVICE_URN_MARINE;
+                emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD;
+                break;
+            }
+            case CallReasonInfo.EXTRA_CODE_EMERGENCYSERVICE_MOUNTAIN: {
+                sosUrn = SOS_SERVICE_URN_MOUNTAIN;
+                emergencyServiceCategory =
+                        EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE;
+                break;
+            }
+            default: {
+                sosUrn = SOS_SERVICE_URN_GENERIC;
+                emergencyServiceCategory = EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED;
+            }
+        }
+
+        List emergencyUrn = new LinkedList<String>();
+        emergencyUrn.add(sosUrn);
+        profile.setEmergencyUrns(emergencyUrn);
+        profile.setEmergencyServiceCategories(emergencyServiceCategory);
+    }
+
     public static String getStringFromUserStatus(int status) {
         // "progressing" / "connect-fail" will be handled by the application
         // comparing to the previous status,
@@ -571,6 +615,10 @@ public class ImsCallUtils {
         }
 
         return false;
+    }
+
+    public static boolean isAlternateEmergencyCall(CallReasonInfo info) {
+        return (info.mCode == ImsReasonInfo.CODE_SIP_ALTERNATE_EMERGENCY_CALL);
     }
 
     public static boolean isHoldMediaOnVideoCall(ICallContext context,

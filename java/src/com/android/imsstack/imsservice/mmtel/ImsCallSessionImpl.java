@@ -3376,6 +3376,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
+            if (ImsCallUtils.isAlternateEmergencyCall(callReasonInfo)) {
+                ImsCallUtils.setSosUrnFromCallReasonInfo(callReasonInfo.mExtraCode, mCallProfile);
+                mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+                mCallDetails.clear(CallDetails.MO_PROGRESSING);
+            }
+
             setState(ImsCallSessionImplBase.State.TERMINATED);
 
             final ImsReasonInfo reasonInfo = ImsCallUtils.createReasonInfo(
