@@ -36,6 +36,17 @@ SipDialogState::PendingRemoteTarget::PendingRemoteTarget() :
 }
 
 PUBLIC
+SipDialogState::PendingRemoteTarget::PendingRemoteTarget(IN const PendingRemoteTarget& other) :
+        strKey(other.strKey),
+        pSipHdr(IMS_NULL)
+{
+    if (other.pSipHdr != IMS_NULL)
+    {
+        pSipHdr = SipStack::CloneHeader(other.pSipHdr);
+    }
+}
+
+PUBLIC
 SipDialogState::PendingRemoteTarget::PendingRemoteTarget(
         IN const AString& strKey_, IN SipHeaderBase* pSipHdr_) :
         strKey(strKey_),
@@ -82,9 +93,62 @@ SipDialogState::SipDialogState(IN IMS_BOOL bIsCaller /*= IMS_TRUE*/) :
 
 PUBLIC
 SipDialogState::SipDialogState(IN const SipDialogState& other) :
-        RcObject(other)
+        RcObject(other),
+        m_bIsCaller(other.m_bIsCaller),
+        m_pLocalUri(IMS_NULL),
+        m_pRemoteUri(IMS_NULL),
+        m_bSecure(other.m_bSecure),
+        m_pLocalTargetUri(IMS_NULL),
+        m_pRemoteTargetUri(IMS_NULL),
+        m_objPendingRemoteTargets(IMSList<PendingRemoteTarget*>()),
+        m_nLocalCSeq(other.m_nLocalCSeq),
+        m_nRemoteCSeq(other.m_nRemoteCSeq),
+        m_nRemoteCSeqForInvite(other.m_nRemoteCSeqForInvite),
+        m_nState(other.m_nState),
+        m_bPreloadedSet(other.m_bPreloadedSet),
+        m_pSharedState(IMS_NULL),
+        m_pLocalContactHeader(IMS_NULL),
+        m_strSessionId(other.m_strSessionId),
+        m_nFromChangeOption(other.m_nFromChangeOption)
 {
-    // NOTE: If reference count is not used, you MUST implement this copy constructor
+    // NOTE: Actually, this class is used as a reference count object so if the class usage is
+    // changed, then we need to handle how to copy the SipDialogSharedState object.
+
+    if (other.m_pLocalUri != IMS_NULL)
+    {
+        m_pLocalUri = SipStack::CloneHeader(other.m_pLocalUri);
+    }
+
+    if (other.m_pRemoteUri != IMS_NULL)
+    {
+        m_pRemoteUri = SipStack::CloneHeader(other.m_pRemoteUri);
+    }
+
+    // Local & Remote Contact information
+    if (other.m_pLocalTargetUri != IMS_NULL)
+    {
+        m_pLocalTargetUri = SipStack::CloneHeader(other.m_pLocalTargetUri);
+    }
+
+    if (other.m_pRemoteTargetUri != IMS_NULL)
+    {
+        m_pRemoteTargetUri = SipStack::CloneHeader(other.m_pRemoteTargetUri);
+    }
+
+    if (other.m_pLocalContactHeader != IMS_NULL)
+    {
+        m_pLocalContactHeader = static_cast<SipHeader*>(other.m_pLocalContactHeader->Clone());
+    }
+
+    for (IMS_UINT32 i = 0; i < other.m_objPendingRemoteTargets.GetSize(); ++i)
+    {
+        const PendingRemoteTarget* pRemoteTarget = other.m_objPendingRemoteTargets.GetAt(i);
+
+        if (pRemoteTarget != IMS_NULL)
+        {
+            m_objPendingRemoteTargets.Append(new PendingRemoteTarget(*pRemoteTarget));
+        }
+    }
 }
 
 PUBLIC VIRTUAL SipDialogState::~SipDialogState()

@@ -41,10 +41,10 @@ public:
     {
     public:
         PendingRemoteTarget();
+        PendingRemoteTarget(IN const PendingRemoteTarget& other);
         PendingRemoteTarget(IN const AString& strKey_, IN SipHeaderBase* pSipHdr_);
         ~PendingRemoteTarget();
 
-        PendingRemoteTarget(IN const PendingRemoteTarget&) = delete;
         PendingRemoteTarget& operator=(IN const PendingRemoteTarget&) = delete;
 
     public:

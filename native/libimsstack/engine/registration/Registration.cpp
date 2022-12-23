@@ -70,6 +70,7 @@ Registration::Registration() :
         m_pRegFlow(IMS_NULL),
         m_pRegParam(IMS_NULL),
         m_objContacts(IMSList<RegContact*>()),
+        m_pStateTracker(new RegStateTracker()),
         m_piListener(IMS_NULL),
         m_piBindingStateListener(IMS_NULL),
         m_piUserIdNotifier(IMS_NULL),
@@ -87,7 +88,6 @@ Registration::Registration() :
         m_bActiveBindingsRestorationEnabled(IMS_FALSE),
         m_nRefCountForScnErrorListener(0)
 {
-    m_pStateTracker = new RegStateTracker();
 }
 
 PUBLIC VIRTUAL Registration::~Registration()

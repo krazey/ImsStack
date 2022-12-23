@@ -285,6 +285,7 @@ SipAddress& SipAddress::operator=(IN const SipAddress& other)
         m_strUserInfo = other.m_strUserInfo;
         m_strHostInfo = other.m_strHostInfo;
         m_nPort = other.m_nPort;
+        m_pUserInfoPart = IMS_NULL;
 
         IMS_UINT32 i;
 

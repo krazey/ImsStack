@@ -40,14 +40,13 @@ FakeRegistration::FakeRegistration() :
         m_pRegFlow(IMS_NULL),
         m_pRegParam(IMS_NULL),
         m_objContacts(IMSList<RegContact*>()),
-        m_pStateTracker(IMS_NULL),
+        m_pStateTracker(new RegStateTracker()),
         m_piListener(IMS_NULL),
         m_piUserIdNotifier(IMS_NULL),
         m_objObservers(IMSList<RegObserver*>()),
         m_bIsWithinTrustDomain(IMS_TRUE),
         m_nRefCountForScnErrorListener(0)
 {
-    m_pStateTracker = new RegStateTracker();
 }
 
 PUBLIC VIRTUAL FakeRegistration::~FakeRegistration()
