@@ -53,7 +53,7 @@ public:
     void SetImplicitRouteHeader(IN const AString& strRouteHeader);
     inline void SetListener(IN ISipClientTransactionStateListener* piListener)
     {
-        m_piListener = piListener;
+        m_piCtsListener = piListener;
     }
     IMS_BOOL UpdateRouteDetails(IN const SipMethod& objMethod);
     IMS_SINT32 HandleResponse(IN ::SipMessage* pSipMsg);
@@ -91,7 +91,7 @@ private:
 
     IMS_SINT32 m_nRoutingType;
     SipAddrSpec* m_pImplicitRoute;
-    ISipClientTransactionStateListener* m_piListener;
+    ISipClientTransactionStateListener* m_piCtsListener;
     // FORKED_RESPONSE
     RcPtr<SipForkedTransactionManager> m_pForkedTxnMngr;
     // FORKED_RESPONSE_TO_SUPPORT_EARLY_DIALOG_TERMINATION

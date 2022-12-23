@@ -41,7 +41,7 @@ SipClientTransactionState::SipClientTransactionState(IN IMS_SINT32 nSlotId) :
         SipTransactionState(),
         m_nRoutingType(TARGET_LR),
         m_pImplicitRoute(IMS_NULL),
-        m_piListener(IMS_NULL)
+        m_piCtsListener(IMS_NULL)
 {
     m_nType = TYPE_CLIENT;
     m_pTransport = new SipClientTransport(nSlotId);
@@ -819,9 +819,9 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pSipMsg)
     }
 
     // Notify the response to SipClientConnection
-    if (m_piListener != IMS_NULL)
+    if (m_piCtsListener != IMS_NULL)
     {
-        m_piListener->ClientTransactionState_ResponseReceived(pSipMsg);
+        m_piCtsListener->ClientTransactionState_ResponseReceived(pSipMsg);
     }
     else
     {
@@ -1173,7 +1173,7 @@ PRIVATE VIRTUAL SipTransactionState* SipClientTransactionState::Clone()
 PRIVATE
 IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN const SipMessageInfo& objMsgInfo)
 {
-    if (m_piListener == IMS_NULL)
+    if (m_piCtsListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "No listener (%s)",
                 SipDebug::GetCharA1(m_pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0,
@@ -1278,7 +1278,7 @@ IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN const SipMessageInfo
         }
     }
 
-    m_piListener->ClientTransactionState_ForkedResponseReceived(pForkedCtState.Get());
+    m_piCtsListener->ClientTransactionState_ForkedResponseReceived(pForkedCtState.Get());
 
     return IMS_TRUE;
 }
