@@ -310,12 +310,10 @@ IMS_BOOL DialogInfo::IsPullableDialog(Dialog* pDialog)
                             DIRECTION_SEND_RECEIVE))
     {
         if (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_NONE ||
-                pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_NOTUSED)
-        {
-            return IMS_TRUE;
-        }
-        else if (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_QVGA_PR &&
-                pDialog->m_objExtraInfo.m_objMediaInfo.eVideoDirection == DIRECTION_SEND_RECEIVE)
+                pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_NOTUSED ||
+                (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_QVGA_PR &&
+                        pDialog->m_objExtraInfo.m_objMediaInfo.eVideoDirection ==
+                                DIRECTION_SEND_RECEIVE))
         {
             return IMS_TRUE;
         }

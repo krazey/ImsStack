@@ -265,10 +265,9 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SendUssd(IN const AString& strUss
 }
 
 PUBLIC VIRTUAL CallStateName EstablishedState::UssiInfoReceived(
-        IN ISession* piSession, IN ISipServerConnection* piSipServerConnection)
+        IN ISession* /*piSession*/, IN ISipServerConnection* piSipServerConnection)
 {
     IMS_TRACE_D("UssiInfoReceived", 0, 0, 0);
-    UNUSED_PARAM(piSession);
     IMS_SINT32 nMethod = piSipServerConnection->GetMethod().ToInt();
 
     if (nMethod != SipMethod::INFO)
@@ -363,11 +362,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingMediaDataFailed(
     }
 
     CallType eCallType = m_objContext.GetSession()->GetCallType();
-    if (eMediaType == MEDIATYPE_VIDEO && eCallType == CallType::VT)
-    {
-        return Downgrade(CallType::VOIP);
-    }
-    else if (eMediaType == MEDIATYPE_TEXT && eCallType == CallType::RTT)
+    if ((eMediaType == MEDIATYPE_VIDEO && eCallType == CallType::VT) ||
+            (eMediaType == MEDIATYPE_TEXT && eCallType == CallType::RTT))
     {
         return Downgrade(CallType::VOIP);
     }

@@ -39,7 +39,7 @@ LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_FAILED[] = "TN-Validation-Failed"
 
 PUBLIC
 MtcSupplementaryService::MtcSupplementaryService(IN MtcConfigurationProxy& objConfigurationProxy,
-        IN IMSMap<SuppType, SuppService*> objSuppServices) :
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices) :
         m_objSuppService(objSuppServices),
         m_objConfigurationProxy(objConfigurationProxy)
 {
@@ -55,7 +55,7 @@ MtcSupplementaryService::~MtcSupplementaryService()
 
 PUBLIC
 void MtcSupplementaryService::UpdateOutgoingServices(
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_UINT32 nInServiceSize = objSuppServices.GetSize();
     IMS_TRACE_I("MtcSupplementaryService : ServiceNum[%d] InServiceNum[%d]",
@@ -378,13 +378,13 @@ const SuppService* MtcSupplementaryService::Get(IN SuppType eType)
 }
 
 PUBLIC
-const IMSMap<SuppType, SuppService*>& MtcSupplementaryService::GetServices() const
+const ImsMap<SuppType, SuppService*>& MtcSupplementaryService::GetServices() const
 {
     return m_objSuppService;
 }
 
 PUBLIC
-void MtcSupplementaryService::Add(IN SuppType eSuppType, IN AString strValue)
+void MtcSupplementaryService::Add(IN SuppType eSuppType, IN const AString& strValue)
 {
     if (IsExist(eSuppType) == IMS_TRUE)
     {
@@ -434,7 +434,7 @@ void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
 PRIVATE
 ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN IMessage* piMessage)
 {
-    IMSList<AString> lstHistoryInfos;
+    ImsList<AString> lstHistoryInfos;
     MessageUtil::GetHeaders(piMessage, ISipHeader::HISTORY_INFO, lstHistoryInfos);
     if (lstHistoryInfos.IsEmpty())
     {
@@ -580,7 +580,7 @@ OipType MtcSupplementaryService::GetOipTypeByHeader(
         IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack)
 {
     OipType eOipType = OipType::INVALID;
-    IMSList<AString> objHeaders;
+    ImsList<AString> objHeaders;
     IMS_SINT32 nDeterminationPolicyHeader =
             bFromHeader ? ISipHeader::FROM : ISipHeader::P_ASSERTED_IDENTITY;
     MessageUtil::GetHeaders(piMessage, nDeterminationPolicyHeader, objHeaders);

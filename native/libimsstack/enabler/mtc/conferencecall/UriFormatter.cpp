@@ -113,7 +113,7 @@ PUBLIC GLOBAL AString& UriFormatter::GetReferToForBye(
         return strUri;
     }
 
-    strUri = pConfUser->strUserEntity;
+    strUri = strUserEntity;
 
     // sip Uri from 'user entity' && no 'anonymous' case only.
     if (strUri.GetLength() > 0 && !strUri.Contains(STR_USER_PHONE))

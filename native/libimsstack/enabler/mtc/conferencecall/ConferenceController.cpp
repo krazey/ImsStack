@@ -207,7 +207,7 @@ PUBLIC VIRTUAL void ConferenceController::OnReferenceStartFailed(IN IConferenceR
 }
 
 PUBLIC VIRTUAL void ConferenceController::OnReferenceUpdated(IN IConferenceReference* piConfRef,
-        IN SipStatusCode nSipFragCode, IN ReferSubscriptionState eState)
+        IN IMS_SINT32 nSipFragCode, IN ReferSubscriptionState eState)
 {
     // TODO: separate functions. : HandleSuccessSipFrag / HandleFailureSipFrag
     // ExpandController to override them.
@@ -221,17 +221,17 @@ PUBLIC VIRTUAL void ConferenceController::OnReferenceUpdated(IN IConferenceRefer
         ConfUser* pTempUser = m_objParticipantList.GetConfUser(piConfRef);
         UpdateUserStatusByReferResult(pTempUser, piConfRef, nSipFragCode);
 
-        if (SipStatusCode::IsFinalSuccess(nSipFragCode.ToInt()))
+        if (SipStatusCode::IsFinalSuccess(nSipFragCode))
         {
             StopFinalSipfragWaitTimer();
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE, pTempUser);
         }
-        else if (SipStatusCode::IsFinalFailure(nSipFragCode.ToInt()))
+        else if (SipStatusCode::IsFinalFailure(nSipFragCode))
         {
             StopFinalSipfragWaitTimer();
             Recover();
         }
-        else if (SipStatusCode::Is1XX(nSipFragCode.ToInt()))
+        else if (SipStatusCode::Is1XX(nSipFragCode))
         {
             CheckNStartFinalSipfragWaitTimer(CONDITION_SIPFRAG_100_RECEIVED);
         }
@@ -628,8 +628,7 @@ void ConferenceController::RemoveReference(IN IConferenceReference* piReference)
 }
 
 PROTECTED VIRTUAL void ConferenceController::UpdateUserStatusByReferResult(IN ConfUser* pUser,
-        IN IConferenceReference* piConfRef,
-        IN SipStatusCode nStatusCode /* = SipStatusCode::SC_200*/)
+        IN IConferenceReference* piConfRef, IN IMS_SINT32 nStatusCode /* = SipStatusCode::SC_200*/)
 {
     IMS_TRACE_D("UpdateUserStatusByReferResult", 0, 0, 0);
 
@@ -657,7 +656,7 @@ PROTECTED VIRTUAL void ConferenceController::UpdateUserStatusByReferResult(IN Co
         }
     }
 
-    pUser->eStatusCode = nStatusCode.ToInt();
+    pUser->eStatusCode = nStatusCode;
 }
 
 PROTECTED
@@ -815,9 +814,6 @@ PROTECTED VIRTUAL void ConferenceController::NotifyCmdResult()
         case STATE_DROPPING:
             m_objNotifier.NotifyDropped(CallReasonInfo(CODE_NONE), m_objParticipantList);
             break;
-        case STATE_IDLE:
-            break;
-
         default:
             break;
     }

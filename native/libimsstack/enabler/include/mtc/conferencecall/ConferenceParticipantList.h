@@ -61,7 +61,7 @@ public:
         }
         inline IConferenceReference* GetReference() { return m_pIReference; }
 
-        inline void SetReferInviteUri(IN AString strReferInviteUri)
+        inline void SetReferInviteUri(IN const AString& strReferInviteUri)
         {
             m_strReferInviteUri = strReferInviteUri;
         }
@@ -138,7 +138,8 @@ public:
     virtual IConferenceReference* GetReference(IN const ConfUser* pConfUser) const;
     virtual void ResetReference(IN IConferenceReference* piConfReference);
 
-    virtual void SetReferInviteUri(IN AString strReferInviteUri, IN const ConfUser* pConfUser);
+    virtual void SetReferInviteUri(
+            IN const AString& strReferInviteUri, IN const ConfUser* pConfUser);
     virtual AString GetReferInviteUri(IN const ConfUser* pConfUser);
 
     virtual IMS_SINT32 FindParticipant(IN IMS_UINT32 nConnectionId);

@@ -20,11 +20,6 @@
 #include "AString.h"
 #include "ImsTypeDef.h"
 
-// TODO, MTC BUILD
-#ifndef UNUSED_PARAM
-#define UNUSED_PARAM(A) (A == 0)
-#endif
-
 enum class UpdateType
 {
     NORMAL,

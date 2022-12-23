@@ -35,7 +35,7 @@ public:
 
     IMS_BOOL HasPendingOperation() const;
     virtual void PushPendingOperation(
-            IN std::function<IMtcCall::State(IMtcCallState*)> objPendingOperation);
+            IN const std::function<IMtcCall::State(IMtcCallState*)>& objPendingOperation);
     std::function<IMtcCall::State(IMtcCallState*)> PopPendingOperation();
 
 private:

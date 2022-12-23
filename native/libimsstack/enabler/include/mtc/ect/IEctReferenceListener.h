@@ -17,8 +17,6 @@
 #ifndef INTERFACE_ECT_REFERENCE_LISTENER_H_
 #define INTERFACE_ECT_REFERENCE_LISTENER_H_
 
-#include "SipStatusCode.h"
-
 class IEctReferenceListener
 {
 public:
@@ -41,7 +39,7 @@ public:
      *
      * @param nSipFragCode
      */
-    virtual void OnReferenceUpdated(IN SipStatusCode nSipFragCode) = 0;
+    virtual void OnReferenceUpdated(IN IMS_SINT32 nSipFragCode) = 0;
 };
 
 #endif

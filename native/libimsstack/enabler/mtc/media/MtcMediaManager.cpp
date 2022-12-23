@@ -135,7 +135,7 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyFailures(IN IMS_UINT32 e
     IMS_TRACE_D("MediaSession_NotifyFailures : Report[%d] Error[%d] Media[%d]", eReportType, eError,
             eMediaType);
 
-    if (eError == RtpError::NO_RESOURCES || eError != RtpError::NO_ERROR)
+    if (eError != RtpError::NO_ERROR)
     {
         m_pMediaReportListener->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
     }

@@ -18,12 +18,13 @@
 #include "ServiceTrace.h"
 #include "helper/OperationAsyncRunner.h"
 #include <functional>
+#include <utility>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 OperationAsyncRunner::OperationAsyncRunner(IN std::function<void()> objOperation) :
-        m_objOperation(objOperation)
+        m_objOperation(std::move(objOperation))
 {
     IMS_TRACE_D("+OperationAsyncRunner", 0, 0, 0);
     PostMessage(0, 0, 0);

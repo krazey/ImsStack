@@ -49,7 +49,7 @@ public:
             IConferenceReference*, GetReference, (IN const ConfUser* pConfUser), (const, override));
     MOCK_METHOD(void, ResetReference, (IN IConferenceReference* piConfReference), (override));
     MOCK_METHOD(void, SetReferInviteUri,
-            (IN AString strReferInviteUri, IN const ConfUser* pConfUser), (override));
+            (IN const AString& strReferInviteUri, IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(AString, GetReferInviteUri, (IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(IMS_SINT32, FindParticipant, (IN IMS_UINT32 nConnectionId), (override));
     MOCK_METHOD(void, ReOrder,

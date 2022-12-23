@@ -37,22 +37,22 @@ public:
     ~MockConferenceEventNotifier() {}
     MOCK_METHOD(
             void, NotifyMerged, (IN ConferenceParticipantList& objParticipantList), (override));
-    MOCK_METHOD(void, NotifyMergeFailed, (IN CallReasonInfo objReason), (override));
+    MOCK_METHOD(void, NotifyMergeFailed, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, NotifyGroupCallStarted, (), (override));
-    MOCK_METHOD(void, NotifyGroupCallFailed, (IN CallReasonInfo objReason), (override));
+    MOCK_METHOD(void, NotifyGroupCallFailed, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, NotifyExpanded, (), (override));
-    MOCK_METHOD(void, NotifyExpandFailed, (IN CallReasonInfo objReason), (override));
+    MOCK_METHOD(void, NotifyExpandFailed, (IN const CallReasonInfo& objReason), (override));
     MOCK_METHOD(void, NotifyDropped,
-            (IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList),
+            (IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList),
             (override));
     MOCK_METHOD(void, NotifyDropFailed,
-            (IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList),
+            (IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList),
             (override));
     MOCK_METHOD(void, NotifyJoined,
-            (IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList),
+            (IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList),
             (override));
     MOCK_METHOD(void, NotifyJoinFailed,
-            (IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList),
+            (IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList),
             (override));
     MOCK_METHOD(void, NotifyConferenceInfo, (IN ConferenceParticipantList& objParticipantList),
             (override));

@@ -75,7 +75,7 @@ void ConferenceOperationQueue::CreateNPut(
 
 PUBLIC
 void ConferenceOperationQueue::CreateNPutWithUsers(IN IMS_UINT32 nType,
-        IN ImsList<ConfUser*> objUsers, IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
+        IN const ImsList<ConfUser*>& objUsers, IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetConfUsers(objUsers);

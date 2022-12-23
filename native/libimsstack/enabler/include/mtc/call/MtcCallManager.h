@@ -47,23 +47,23 @@ public:
 
     IMtcCall* GetCallByCallKey(IN CallKey nCallKey) override;
 
-    IMSList<IMtcCall*> GetCalls() override;
-    IMSList<IMtcCall*> GetCallsExcluding(IN CallKey nExcludingCallKey) override;
-    IMSList<IMtcCall*> GetCallsByType(IN CallType eCallType) override;
-    IMSList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) override;
-    IMSList<IMtcCall*> GetCallsInConference() override;
-    IMSList<IMtcCall*> GetCallsByState(IN State eState) override;
+    ImsList<IMtcCall*> GetCalls() override;
+    ImsList<IMtcCall*> GetCallsExcluding(IN CallKey nExcludingCallKey) override;
+    ImsList<IMtcCall*> GetCallsByType(IN CallType eCallType) override;
+    ImsList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) override;
+    ImsList<IMtcCall*> GetCallsInConference() override;
+    ImsList<IMtcCall*> GetCallsByState(IN State eState) override;
 
     void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
             IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     void OnTotalCallStateChanged(IN State eState) override;
 
 private:
-    IMS_SINT32 GetFirstIndexByFilter(IN std::function<IMS_BOOL(MtcCall*)> objFilter);
-    IMSList<IMtcCall*> GetCallsByFilter(IN std::function<IMS_BOOL(MtcCall*)> objFilter);
+    IMS_SINT32 GetFirstIndexByFilter(IN const std::function<IMS_BOOL(MtcCall*)>& objFilter);
+    ImsList<IMtcCall*> GetCallsByFilter(IN const std::function<IMS_BOOL(MtcCall*)>& objFilter);
 
     IMtcContext& m_objContext;
-    IMSList<MtcCall*> m_lstCalls;
+    ImsList<MtcCall*> m_lstCalls;
 };
 
 #endif

@@ -22,7 +22,6 @@
 #include "ImsTypeDef.h"
 #include "call/IMtcCallManager.h"
 #include "ect/IEctReferenceListener.h"
-#include "sipcore/SipStatusCode.h"
 #include <memory>
 
 class IMtcContext;
@@ -43,7 +42,7 @@ public:
     // IEctReferenceListener implementation
     void OnReferenceStarted() override;
     void OnReferenceStartFailed() override;
-    void OnReferenceUpdated(IN SipStatusCode nSipFragCode) override;
+    void OnReferenceUpdated(IN IMS_SINT32 nSipFragCode) override;
 
     // ITimerListener implementation
     void Timer_TimerExpired(IN ITimer* piTimer) override;

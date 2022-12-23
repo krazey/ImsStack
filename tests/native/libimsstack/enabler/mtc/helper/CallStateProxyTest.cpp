@@ -36,7 +36,6 @@ LOCAL IMS_UINT32 ANY_REASON = 0;
 
 using ::testing::_;
 using ::testing::Return;
-using ::testing::ReturnRef;
 
 namespace android
 {

@@ -39,7 +39,7 @@ public:
     // void Updated(IN IMS_UINTP nParam) override;
     void OnReferenceStarted(IN IConferenceReference* piConfRef) override;
     void OnReferenceStartFailed(IN IConferenceReference* piConfRef) override;
-    void OnReferenceUpdated(IN IConferenceReference* piConfRef, IN SipStatusCode nSipFragCode,
+    void OnReferenceUpdated(IN IConferenceReference* piConfRef, IN IMS_SINT32 nSipFragCode,
             IN ReferSubscriptionState eState) override;
 
 protected:
@@ -50,7 +50,7 @@ protected:
 
     void OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey) override;
     void UpdateUserStatusByReferResult(IN ConfUser* pUser, IN IConferenceReference* piConfRef,
-            IN SipStatusCode nStatusCode = SipStatusCode::SC_200) override;
+            IN IMS_SINT32 nStatusCode = SipStatusCode::SC_200) override;
 
     void NotifyCmdResult() override;
 

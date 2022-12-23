@@ -23,7 +23,6 @@
 #include "call/IMtcCall.h"
 #include "ect/EctController.h"
 #include "ect/EctFactory.h"
-#include "sipcore/SipStatusCode.h"
 #include <gmock/gmock.h>
 
 class MockEctController : public EctController
@@ -38,7 +37,7 @@ public:
 
     MOCK_METHOD(void, OnReferenceStarted, (), (override));
     MOCK_METHOD(void, OnReferenceStartFailed, (), (override));
-    MOCK_METHOD(void, OnReferenceUpdated, (IN SipStatusCode), (override));
+    MOCK_METHOD(void, OnReferenceUpdated, (IN IMS_SINT32), (override));
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer*), (override));
     MOCK_METHOD(void, Transfer, (IN const AString&), (override));
     MOCK_METHOD(void, Transfer, (), (override));

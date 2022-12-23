@@ -77,7 +77,7 @@ public:
         }
 
         // setters
-        inline void SetConfUsers(IN ImsList<ConfUser*> objConfUsers)
+        inline void SetConfUsers(IN const ImsList<ConfUser*>& objConfUsers)
         {
             m_objConfUsers = objConfUsers;
         }
@@ -129,7 +129,7 @@ public:
     void AddDelay(IN IMS_UINT32 nDelayMillisec);
 
     virtual void CreateNPut(IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    virtual void CreateNPutWithUsers(IN IMS_UINT32 nType, IN ImsList<ConfUser*> objUsers,
+    virtual void CreateNPutWithUsers(IN IMS_UINT32 nType, IN const ImsList<ConfUser*>& objUsers,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
     virtual void CreateNPutWithUser(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);

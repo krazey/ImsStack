@@ -93,9 +93,6 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             ControlAos(ImsAosControl::PCSCF_NEXT);
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
-            nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-            nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-            break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
             nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;  // TODO : check requirement
             nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
@@ -383,9 +380,7 @@ CallReasonInfo StartErrorHandler::Handle5xxResponse(IN const IMessage& objMessag
             return Handle504Response(objMessage);
         case SipStatusCode::SC_505:
         case SipStatusCode::SC_513:
-            return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
-        case SipStatusCode::SC_580:
-            // remote precondition failure case
+        case SipStatusCode::SC_580:  // remote precondition failure case
             return CallReasonInfo(CODE_SIP_SERVER_ERROR, GetDefaultExtraCode(objMessage));
     }
 

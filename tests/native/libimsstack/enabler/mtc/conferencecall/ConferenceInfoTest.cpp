@@ -279,7 +279,7 @@ TEST_F(ConferenceInfoTest, ConvertStatusForAllCases)
     };
     // clang-format on
     IMS_UINT32 nIndex = 0;
-    for (AString strStatus : objStatusStrings)
+    for (const AString& strStatus : objStatusStrings)
     {
         ConferenceInfo objInfo;  // to avoid stacking User list
         strUser1Ep1Status = strStatus;

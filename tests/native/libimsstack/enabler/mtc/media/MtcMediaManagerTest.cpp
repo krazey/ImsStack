@@ -25,7 +25,6 @@
 
 using ::testing::_;
 using ::testing::Return;
-using ::testing::ReturnRef;
 
 LOCAL CallKey DEFAULT_CALL_KEY = 1;
 LOCAL IMS_UINTP NEGO_ID = 100;

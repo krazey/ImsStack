@@ -28,6 +28,7 @@
 #include "ect/EctFactory.h"
 #include "ect/EctReference.h"
 #include "ect/IEctControllerListener.h"
+#include "sipcore/SipStatusCode.h"
 #include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -63,14 +64,14 @@ PUBLIC VIRTUAL void EctController::OnReferenceStartFailed()
     OnFailed();
 }
 
-PUBLIC VIRTUAL void EctController::OnReferenceUpdated(IN SipStatusCode nSipFragCode)
+PUBLIC VIRTUAL void EctController::OnReferenceUpdated(IN IMS_SINT32 nSipFragCode)
 {
     IMS_TRACE_D("OnReferenceUpdated", 0, 0, 0);
-    if (SipStatusCode::IsFinalSuccess(nSipFragCode.ToInt()))
+    if (SipStatusCode::IsFinalSuccess(nSipFragCode))
     {
         OnCompleted();
     }
-    else if (SipStatusCode::IsFinalFailure(nSipFragCode.ToInt()))
+    else if (SipStatusCode::IsFinalFailure(nSipFragCode))
     {
         OnFailed();
     }

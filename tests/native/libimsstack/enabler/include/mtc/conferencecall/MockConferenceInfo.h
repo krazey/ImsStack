@@ -41,8 +41,8 @@ private:
 class MockEndPoint : public ConferenceInfo::User::EndPoint
 {
 public:
-    explicit MockEndPoint(IN AString strEntity, IN IMS_UINT32 nState, IN AString strDisplayText,
-            IN IMS_UINT32 nStatus) :
+    explicit MockEndPoint(IN const AString& strEntity, IN IMS_UINT32 nState,
+            IN const AString& strDisplayText, IN IMS_UINT32 nStatus) :
             m_strEntity(strEntity),
             m_nState(nState),
             m_strDisplayText(strDisplayText),
@@ -65,8 +65,8 @@ private:
 class MockUser : public ConferenceInfo::User
 {
 public:
-    explicit MockUser(IN AString strEntity, IN IMS_UINT32 nState, IN AString strDisplayText,
-            IN ImsList<EndPoint*> objEndPoints) :
+    explicit MockUser(IN const AString& strEntity, IN IMS_UINT32 nState,
+            IN const AString& strDisplayText, IN const ImsList<EndPoint*>& objEndPoints) :
             m_strEntity(strEntity),
             m_nState(nState),
             m_strDisplayText(strDisplayText),
