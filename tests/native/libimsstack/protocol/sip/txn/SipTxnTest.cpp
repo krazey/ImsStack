@@ -31,12 +31,17 @@ static int* pnTimerId = SIP_NULL;
 SIP_BOOL MockTxn_FetchTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
 {
+    if (pvTxnKey == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
+    SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
     if (nOption == TXN_OPT_CREATE)
     {
         if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
         {
-            MockSipTransaction* pMockTxn = new MockSipTransaction((SipTxnKey*)pvTxnKey,
-                    (SipTxn*)*ppvTxn);
+            MockSipTransaction* pMockTxn =
+                    new MockSipTransaction(pTxnKey, reinterpret_cast<SipTxn*>(*ppvTxn));
             objTxnList.Add(pMockTxn);
         }
         return SIP_TRUE;
@@ -51,7 +56,7 @@ SIP_BOOL MockTxn_FetchTransaction(
 
         if (pTxn != SIP_NULL)
         {
-            if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
+            if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
             {
                 *ppvTxn = pTxn;
                 return SIP_TRUE;

@@ -23,16 +23,21 @@ SipVector<MockSipTransaction*> objFsmTxnList;
 SIP_BOOL MockFsm_FetchTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
 {
+    if (pvTxnKey == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
+    SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
     if (nOption == TXN_OPT_CREATE)
     {
-        if (strcmp((static_cast<SipTxnKey*>(pvTxnKey))->GetMethod(), "BYE") == 0)
+        if (strcmp(pTxnKey->GetMethod(), "BYE") == 0)
         {
             return SIP_FALSE;
         }
         if ((ppvTxn != SIP_NULL) && (*ppvTxn != SIP_NULL))
         {
-            MockSipTransaction* pMockTxn = new MockSipTransaction((SipTxnKey*)pvTxnKey,
-                    (SipTxn*)*ppvTxn);
+            MockSipTransaction* pMockTxn =
+                    new MockSipTransaction(pTxnKey, reinterpret_cast<SipTxn*>(*ppvTxn));
             objFsmTxnList.Add(pMockTxn);
         }
         return SIP_TRUE;
@@ -48,8 +53,7 @@ SIP_BOOL MockFsm_FetchTransaction(
 
             if (pTxn != SIP_NULL)
             {
-                if ((static_cast<SipTxnKey*>(pvTxnKey))->CompareKeys(pTxn->GetTxnKey()) ==
-                        SIP_MATCHES)
+                if (pTxnKey->CompareKeys(pTxn->GetTxnKey()) == SIP_MATCHES)
                 {
                     if (ppvTxn != SIP_NULL)
                     {
@@ -60,13 +64,13 @@ SIP_BOOL MockFsm_FetchTransaction(
             }
         }
 
-        SIP_INT32 eMsgType = (static_cast<SipTxnKey*>(pvTxnKey))->GetMsgType();
+        SIP_INT32 eMsgType = pTxnKey->GetMsgType();
 
         switch (eMsgType)
         {
             case SipMessage::REQ_TYPE:
             {
-                if (strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "CANCEL") == 0)
+                if (strcmp(pTxnKey->GetMethod(), "CANCEL") == 0)
                 {
                     return SIP_TRUE;
                 }
@@ -74,12 +78,12 @@ SIP_BOOL MockFsm_FetchTransaction(
             }
             case SipMessage::RESP_TYPE:
             {
-                if (strcmp(((static_cast<SipTxnKey*>(pvTxnKey)))->GetMethod(), "INVITE") == 0)
+                if (strcmp(pTxnKey->GetMethod(), "INVITE") == 0)
                 {
                     SIP_UINT16 nError;
                     SipMessage* pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
-                            pTempSipMsg, SIP_NULL, &nError);
+                    *ppvTxn = new SipTxn(
+                            SipTxn::INV_SER_TXN, pTxnKey, pTempSipMsg, SIP_NULL, &nError);
                     delete pTempSipMsg;
                     return SIP_TRUE;
                 }
