@@ -821,11 +821,9 @@ void MediaSession::ClearMediaNego()
 PROTECTED
 QosRequestParam* MediaSession::FindQosParam(QosRequestParam* srcParam)
 {
-    QosRequestParam* param = IMS_NULL;
-
     for (IMS_SINT32 nIndex = 0; nIndex < m_objListQosParams.GetSize(); nIndex++)
     {
-        param = m_objListQosParams.GetAt(nIndex);
+        QosRequestParam* param = m_objListQosParams.GetAt(nIndex);
 
         if (param != NULL && *param == *srcParam)
         {
