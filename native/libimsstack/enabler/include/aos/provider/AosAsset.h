@@ -31,12 +31,14 @@ public:
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregOn3gNetwork(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
+            bPlmnBlockWithTimeoutOnVoiceCallUnavailable(IMS_FALSE),
             bRegContactValidation(IMS_FALSE),
             bRegRetryWithIpVerFallback(IMS_FALSE),
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
             bRequiredCdmalessFeatureTag(IMS_FALSE),
             bRequiredInitRegAfterImsCallEndOnRegHeld(IMS_FALSE),
             bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
+            bRequiredVolteBlockBySsac(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
             bReregWithChangedCountryOnWifi(IMS_FALSE),
             bSipOverIpsecEnabledInRoaming(IMS_TRUE),
@@ -71,6 +73,7 @@ public:
             nRoamingPreferredEmcReg(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED),
             nSipMessageThresholdForTransportChange(200),
+            nVolteHysTimeSec(0),
             objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
             objRegErrCodeForPcscfDiscovery(IMSVector<IMS_SINT32>()),
             objRegPermanentErrMaxCnt(IMSVector<IMS_SINT32>()),
@@ -98,12 +101,14 @@ public:
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregOn3gNetwork;
     IMS_BOOL bNoInitRegOnPcscfChange;
+    IMS_BOOL bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
     IMS_BOOL bRegContactValidation;
     IMS_BOOL bRegRetryWithIpVerFallback;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
     IMS_BOOL bRequiredCdmalessFeatureTag;
     IMS_BOOL bRequiredInitRegAfterImsCallEndOnRegHeld;
     IMS_BOOL bRequiredVolteBlockByAirplaneMode;
+    IMS_BOOL bRequiredVolteBlockBySsac;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
     IMS_BOOL bReregWithChangedCountryOnWifi;
     IMS_BOOL bSipOverIpsecEnabledInRoaming;
@@ -135,6 +140,7 @@ public:
     IMS_SINT32 nReregRetry305Policy;
     IMS_SINT32 nRoamingPreferredEmcReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
+    IMS_SINT32 nVolteHysTimeSec;
     IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     IMSVector<IMS_SINT32> objRegPermanentErrMaxCnt;

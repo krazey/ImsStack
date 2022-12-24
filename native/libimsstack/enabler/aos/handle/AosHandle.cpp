@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
@@ -100,7 +101,9 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_nHoldingBlocksForWifi(BLOCK_NONE),
         m_nHoldingVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
         m_nVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
+        m_nRoamingState(IMS_ROAMING_STATE_OFF),
         m_bVopsIgnoredForVolteEnabled(IMS_TRUE),
+        m_bCombinedAttach(IMS_FALSE),
         m_bEpdgEnabled(IMS_FALSE),
         m_bDataConnected(IMS_FALSE),
         m_bNetSrvIn(IMS_FALSE),
@@ -772,6 +775,12 @@ IMS_BOOL AosHandle::IsEmergencyService()
 }
 
 PROTECTED
+IMS_BOOL AosHandle::IsRoaming() const
+{
+    return (m_nRoamingState == IMS_ROAMING_STATE_ON);
+}
+
+PROTECTED
 IMS_UINT32 AosHandle::GetNetworkType() const
 {
     return m_piAppContext->GetNetTracker()->GetNetworkType();
@@ -787,21 +796,6 @@ PROTECTED
 IMS_UINT32 AosHandle::GetMobileChangingNetworkType() const
 {
     return m_piAppContext->GetNetTracker()->GetMobileChangingNetworkType();
-}
-
-PROTECTED
-IMS_UINT32 AosHandle::GetBlock(IN IMS_UINT32 nEvent)
-{
-    switch (nEvent)
-    {
-        case IMS_EVENT_IMS_VOICE_OVER_PS_STATE:
-            return BLOCK_VOPS;
-
-        default:
-            break;
-    }
-
-    return BLOCK_NONE;
 }
 
 PROTECTED
@@ -1233,6 +1227,11 @@ PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(
         IN IMS_UINT32 /*nState*/, IN IMS_BOOL /*bUpdateState = IMS_TRUE*/)
 {
     // Implemented in child
+}
+
+PROTECTED VIRTUAL void AosHandle::ProcessPsRoamingStateChanged(IN IMS_UINT32 nState)
+{
+    m_nRoamingState = nState;
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
@@ -1737,9 +1736,9 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
 
         case IMS_EVENT_ROAMING_STATE:
             // jryou: This will be added later
-
             // ProcessCsRoamingStateChanged(nLParam);
-            // ProcessLteRoamingStateChanged(nWParam);
+
+            ProcessPsRoamingStateChanged(nWParam);
             break;
 
         default:

@@ -416,6 +416,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetBoolean(CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::
+                               KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -435,6 +440,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL,
                     IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(
@@ -535,6 +543,8 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig,
             GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT, -1))
             .WillOnce(Return(200));
+    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT, -1))
+            .WillOnce(Return(60));
 
     IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     objEmergencyPcscfRetryWaitTimeSec.Clear();
@@ -652,11 +662,13 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_TRUE(pAosNConfiguration->IsVopsIgnoredForVolteEnabled());
     EXPECT_FALSE(pAosNConfiguration->IsDeregOn3gNetwork());
     EXPECT_FALSE(pAosNConfiguration->IsNoInitRegOnPcscfChange());
+    EXPECT_FALSE(pAosNConfiguration->IsPlmnBlockWithTimeoutOnVoiceCallUnavailable());
     EXPECT_FALSE(pAosNConfiguration->IsContactUriValidationChecked());
     EXPECT_FALSE(pAosNConfiguration->IsRegRetryWithIpVerFallback());
     EXPECT_FALSE(pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
     EXPECT_TRUE(pAosNConfiguration->IsRegRequiredAfterImsCallEndOnRegHeld());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockByAirplaneMode());
+    EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockBySsac());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredWfcBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsReregRetryWithChangedCountryOnWifi());
     EXPECT_TRUE(pAosNConfiguration->IsSipOverIpsecInRoamingEnabled());
@@ -698,6 +710,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL,
             pAosNConfiguration->GetRoamingPreferredEmcReg());
     EXPECT_EQ(200, pAosNConfiguration->GetSipMessageThresholdForTransportChange());
+    EXPECT_EQ(60, pAosNConfiguration->GetVolteHysTime());
 
     IMSVector<IMS_SINT32> objWaitTime = pAosNConfiguration->GetEmergencyPcscfRetryWaitTime();
     EXPECT_EQ(2, objWaitTime.GetSize());

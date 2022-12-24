@@ -302,8 +302,6 @@ protected:
         return m_pAosHandle->GetMobileChangingNetworkType();
     }
 
-    IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent) { return m_pAosHandle->GetBlock(nEvent); }
-
     IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock) { return m_pAosHandle->GetAosFeature(nBlock); }
 
     void SetRegFeatureTagRequired(IN IMS_BOOL bRequired)
@@ -496,6 +494,11 @@ protected:
         m_pAosHandle->ProcessVopsStateChanged(nState);
     }
 
+    void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState)
+    {
+        m_pAosHandle->ProcessPsRoamingStateChanged(nState);
+    }
+
     IMS_BOOL IsSupportedNetworkType(IN IMS_UINT32 nType) const
     {
         return m_pAosHandle->IsSupportedNetworkType(nType);
@@ -541,6 +544,10 @@ protected:
     IMS_BOOL Is3G(IN IMS_UINT32 nNetworkType) { return m_pAosHandle->Is3G(nNetworkType); }
 
     IMS_BOOL IsEmergencyService() { return m_pAosHandle->IsEmergencyService(); }
+
+    IMS_BOOL IsRoaming() { return m_pAosHandle->IsRoaming(); }
+
+    void SetRoamingState(IN IMS_UINT32 nState) { m_pAosHandle->m_nRoamingState = nState; }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -1803,6 +1810,15 @@ TEST_F(AosHandleTest, IsEmergencyService_Test)
     AosProvider::GetInstance()->SetNConfiguration(piAosNConfiguration);
 }
 
+TEST_F(AosHandleTest, IsRoaming_Test)
+{
+    SetRoamingState(IMS_ROAMING_STATE_OFF);
+    EXPECT_EQ(IsRoaming(), IMS_ROAMING_STATE_OFF);
+
+    SetRoamingState(IMS_ROAMING_STATE_ON);
+    EXPECT_EQ(IsRoaming(), IMS_ROAMING_STATE_ON);
+}
+
 TEST_F(AosHandleTest, GetNetworkType_Test)
 {
     EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType()).Times(1);
@@ -1819,15 +1835,6 @@ TEST_F(AosHandleTest, GetMobileChangingNetworkType_Test)
 {
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType()).Times(1);
     GetMobileChangingNetworkType();
-}
-
-TEST_F(AosHandleTest, GetBlock_Test)
-{
-    EXPECT_EQ(GetBlock(IMS_EVENT_IMS_VOICE_OVER_PS_STATE), AosHandle::BLOCK_VOPS);
-
-    EXPECT_EQ(GetBlock(IMS_EVENT_ROAMING_STATE), AosHandle::BLOCK_NONE);
-    EXPECT_EQ(GetBlock(IMS_EVENT_VOLTE_SETTING), AosHandle::BLOCK_NONE);
-    EXPECT_EQ(GetBlock(IMS_EVENT_WFC_SETTING_CHANGED), AosHandle::BLOCK_NONE);
 }
 
 TEST_F(AosHandleTest, GetAosFeature_Test)
@@ -4633,6 +4640,15 @@ TEST_F(AosHandleTest, ProcessNetworkChanged_Test)
 TEST_F(AosHandleTest, ProcessVopsStateChanged_Test)
 {
     ProcessVopsStateChanged(0);
+}
+
+TEST_F(AosHandleTest, ProcessPsRoamingStateChanged_Test)
+{
+    ProcessPsRoamingStateChanged(IMS_ROAMING_STATE_OFF);
+    EXPECT_FALSE(IsRoaming());
+
+    ProcessPsRoamingStateChanged(IMS_ROAMING_STATE_ON);
+    EXPECT_TRUE(IsRoaming());
 }
 
 TEST_F(AosHandleTest, IsSupportedNetworkType_Test)

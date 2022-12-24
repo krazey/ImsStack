@@ -16,9 +16,18 @@
 #ifndef AOS_HANDLE_MTC_H_
 #define AOS_HANDLE_MTC_H_
 
+#include "IImsRadio.h"
+#include "ITimer.h"
+
 #include "handle/AosHandle.h"
 
-class AosHandleMtc : public AosHandle
+#include "interface/IAosServicePhoneListener.h"
+
+class AosHandleMtc :
+        public AosHandle,
+        public AosServicePhoneListener,
+        public IImsRadioSsacListener,
+        public ITimerListener
 {
 public:
     AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
@@ -63,11 +72,40 @@ private:
     void UpdateGGsmaRcsTelephonyFeatureTag();
     IMS_UINT32 GetVoiceBlockReasonForIpcan();
     IMS_UINT32 GetVideoBlockReasonForIpcan();
-    IMS_BOOL IsCsFeatureTagRequired();
+
+    IMS_BOOL IsCsFeatureTagRequired() const;
     IMS_BOOL IsInvalidMobileNetwork() const;
+    IMS_BOOL IsPlmnBlockCondition() const;
+
+    IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
+    IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);
+
+    void ProcessVolteHysTimerExpired();
+
+    // Timer
+    IMS_BOOL StartVolteHysTimer(IN IMS_UINT32 nDuration);
+    void StopVolteHysTimer();
+    IMS_BOOL IsVolteHysTimerRunning() const;
 
     // IAosNConfigurationListener
     void NConfiguration_NotifyConfigChanged() override;
+
+    // IImsRadioSsacListener
+    void ImsRadio_OnSsacChanged(IN const SsacInfo& objSsacInfo) override;
+
+    // IAosServicePhoneListener
+    void ServicePhone_PlmnChanged() override;
+
+    // ITimerListener
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
+
+protected:
+    IImsRadio* m_piImsRadio;
+
+private:
+    ITimer* m_piVolteHysTimer;
+    IMS_BOOL m_bSsacBarred;
+    IMS_BOOL m_bSsacHeld;
 
 private:
     friend class AosHandleMtcTest;

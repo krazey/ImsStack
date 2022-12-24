@@ -16,13 +16,13 @@
 #ifndef AOS_HANDLE_H_
 #define AOS_HANDLE_H_
 
-#include "interface/IAosHandle.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "ImsStateMachine.h"
 #include "IEventListener.h"
 #include "IWifiWatcher.h"
 #include "interface/IAosCallTrackerListener.h"
+#include "interface/IAosHandle.h"
 #include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosNetTrackerListener.h"
 #include "interface/IAosRegistrationControlListener.h"
@@ -161,11 +161,12 @@ public:
 
         // Network
         BLOCK_VOPS = 0x20,
-        BLOCK_NETWORK = 0x40,
-        BLOCK_3G = 0x80,
+        BLOCK_SSAC = 0x40,
+        BLOCK_NETWORK = 0x80,
+        BLOCK_3G = 0x100,
 
         // DM
-        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x100
+        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x400
     };
 
 protected:
@@ -190,11 +191,11 @@ protected:
     IMS_BOOL IsWifiConnected();
     IMS_BOOL IsDataConnected();
     IMS_BOOL IsEmergencyService();
+    IMS_BOOL IsRoaming() const;
 
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;
     IMS_UINT32 GetMobileChangingNetworkType() const;
-    IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent);
     IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock);
 
     void AddBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
@@ -232,6 +233,7 @@ protected:
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
+    virtual void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState);
 
     // State Machine
     virtual IMS_BOOL StateDisconnected(IN IMSMSG& objMSG);
@@ -313,7 +315,9 @@ protected:
     IMS_UINT32 m_nHoldingBlocksForWifi;
     IMS_UINT32 m_nHoldingVopsState;
     IMS_UINT32 m_nVopsState;
+    IMS_UINT32 m_nRoamingState;
     IMS_BOOL m_bVopsIgnoredForVolteEnabled;
+    IMS_BOOL m_bCombinedAttach;
 
     IMSMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
     IMSList<IMS_UINT32> m_objServiceFeatures;

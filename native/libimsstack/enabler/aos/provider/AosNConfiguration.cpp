@@ -180,6 +180,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockByAirplaneMode() 
     return m_objAsset.bRequiredVolteBlockByAirplaneMode;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockBySsac() const
+{
+    return m_objAsset.bRequiredVolteBlockBySsac;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredWfcBlockByAirplaneMode() const
 {
     return m_objAsset.bRequiredWfcBlockByAirplaneMode;
@@ -373,6 +378,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVerstatForRegistrationSupported() c
     return m_objAsset.bSupportVerstatForReg;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const
+{
+    return m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -476,6 +486,11 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRoamingPreferredEmcReg() const
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetSipMessageThresholdForTransportChange() const
 {
     return m_objAsset.nSipMessageThresholdForTransportChange;
+}
+
+PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetVolteHysTime() const
+{
+    return m_objAsset.nVolteHysTimeSec;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRegRetrySip305CodePolicy() const
@@ -1153,6 +1168,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL);
     m_objAsset.bNoInitRegOnPcscfChange =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL);
+    m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL);
     m_objAsset.bRegContactValidation =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REG_CONTACT_VALIDATION_BOOL);
     m_objAsset.bRegRetryWithIpVerFallback =
@@ -1165,6 +1182,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
     m_objAsset.bRequiredVolteBlockByAirplaneMode =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL);
+    m_objAsset.bRequiredVolteBlockBySsac =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL);
     m_objAsset.bRequiredWfcBlockByAirplaneMode =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL);
     m_objAsset.bReregWithChangedCountryOnWifi =
@@ -1227,6 +1246,7 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_ROAMING_PREFERRED_EMC_REG_INT);
     m_objAsset.nSipMessageThresholdForTransportChange =
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
+    m_objAsset.nVolteHysTimeSec = piCc->GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT);
 
     m_objAsset.objEmergencyPcscfRetryWaitTimeSec = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY);

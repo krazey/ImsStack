@@ -150,6 +150,13 @@ public:
     virtual IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const = 0;
 
     /**
+     * @brief Check if VoLTE service block by SSAC is required.
+     *
+     * @return IMS_TRUE if required, IMS_FALSE if not required.
+     */
+    virtual IMS_BOOL IsRequiredVolteBlockBySsac() const = 0;
+
+    /**
      * @brief Check if WFC service block by Airplane mode is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.
@@ -424,6 +431,13 @@ public:
     virtual IMS_BOOL IsVerstatForRegistrationSupported() const = 0;
 
     /**
+     * @brief Flag specifying if service fallback is required when voice call is unavailable.
+     *
+     * @return IMS_TRUE if required, else IMS_FALSE
+     */
+    virtual IMS_BOOL IsPlmnBlockWithTimeoutOnVoiceCallUnavailable() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
@@ -675,6 +689,13 @@ public:
      * @return IMS_SINT32 Return the threshold size of SIP message
      */
     virtual IMS_SINT32 GetSipMessageThresholdForTransportChange() const = 0;
+
+    /**
+     * @brief Get the VoLTE Hysteresis time.
+     *
+     * @return IMS_SINT32 Returns VoLTE Hysteresis time.
+     */
+    virtual IMS_SINT32 GetVolteHysTime() const = 0;
 
     /**
      * @brief Indicate the SIP 305 response policy for registration

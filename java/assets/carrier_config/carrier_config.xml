@@ -259,12 +259,14 @@
     <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
     <boolean name="ims_dereg_on_3g_network_bool" value="false"/>
     <boolean name="no_init_reg_on_pcscf_change_bool" value="false"/>
+    <boolean name="plmn_block_with_timeout_on_voice_call_unavailable_bool" value="false"/>
     <boolean name="reg_contact_validation_bool" value="false"/>
     <boolean name="reg_retry_with_ip_ver_fallback_bool" value="false"/>
     <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
     <boolean name="required_cdmaless_feature_tag_bool" value="false"/>
     <boolean name="required_init_reg_after_ims_call_end_on_reg_held_bool" value="false"/>
     <boolean name="required_volte_block_by_airplane_mode_bool" value="false"/>
+    <boolean name="required_volte_block_by_ssac_bool" value="false"/>
     <boolean name="required_wfc_block_by_airplane_mode_bool" value="false"/>
     <boolean name="rereg_with_changed_country_on_wifi_bool" value="false"/>
     <boolean name="sip_over_ipsec_enabled_in_roaming_bool" value="true"/>
@@ -298,6 +300,7 @@
     <int name="rereg_retry_305_policy_int" value="1"/>
     <int name="roaming_preferred_emc_reg_int" value="-1"/>
     <int name="sip_message_threshold_for_transport_change_int" value="200"/>
+    <int name="volte_hys_time_sec_int" value="0"/>
 
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="0">
     </int-array>

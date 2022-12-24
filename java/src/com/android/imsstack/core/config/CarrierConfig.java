@@ -459,6 +459,8 @@ public class CarrierConfig {
                 "ims_dereg_on_3g_network_bool";
         public static final String KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL =
                 "no_init_reg_on_pcscf_change_bool";
+        public static final String KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL =
+                "plmn_block_with_timeout_on_voice_call_unavailable_bool";
         public static final String KEY_REG_CONTACT_VALIDATION_BOOL =
                 "reg_contact_validation_bool";
         public static final String KEY_REG_RETRY_IP_VER_FALLBACK_BOOL =
@@ -471,6 +473,8 @@ public class CarrierConfig {
                 "required_init_reg_after_ims_call_end_on_reg_held_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL =
                 "required_volte_block_by_airplane_mode_bool";
+        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL =
+                "required_volte_block_by_ssac_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =
                 "required_wfc_block_by_airplane_mode_bool";
         public static final String KEY_REREG_WITH_CHANGED_COUNTRY_ON_WIFI_BOOL =
@@ -533,6 +537,7 @@ public class CarrierConfig {
                 "roaming_preferred_emc_reg_int";
         public static final String KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT =
                 "sip_message_threshold_for_transport_change_int";
+        public static final String KEY_VOLTE_HYS_TIME_INT = "volte_hys_time_sec_int";
 
         public static final String KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY =
                 "emergency_pcscf_retry_wait_time_sec_int_array";
