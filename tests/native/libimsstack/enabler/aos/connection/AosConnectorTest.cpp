@@ -86,9 +86,9 @@ protected:
     virtual void TearDown() override
     {
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
-        m_pAosConnector->CleanUp();
         if (m_pAosConnector)
         {
+            m_pAosConnector->CleanUp();
             delete m_pAosConnector;
         }
     }
