@@ -150,8 +150,12 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager* MtcApp::GetEmergencyServiceManager()
 
 PUBLIC VIRTUAL OperationAsyncRunner* MtcApp::GetAsyncRunner(IN std::function<void()> objOperation)
 {
+    if (objOperation == nullptr)
+    {
+        return IMS_NULL;
+    }
     // object is deleted by itself
-    return new OperationAsyncRunner(objOperation);
+    return new OperationAsyncRunner(m_nSlotId, objOperation);
 }
 
 PROTECTED VIRTUAL void MtcApp::InitConfiguration()

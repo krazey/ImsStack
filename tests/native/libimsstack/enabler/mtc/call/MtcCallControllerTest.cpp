@@ -384,15 +384,12 @@ TEST_F(MtcCallControllerTest, ResumeCallsTargetCall)
     pCallController->Resume(nCallKey, objMediaInfo);
 }
 
-TEST_F(MtcCallControllerTest, TerminateCallsTargetCall)
+TEST_F(MtcCallControllerTest, TerminateCallsAsyncRunner)
 {
     CallReasonInfo objReason(CODE_LOCAL_SERVICE_UNAVAILABLE);
     CallKey nCallKey = 1;
 
-    MockIMtcCall objCall;
-    EXPECT_CALL(objCall, Terminate(objReason)).Times(1);
-
-    ON_CALL(objCallManager, GetCallByCallKey(nCallKey)).WillByDefault(Return(&objCall));
+    EXPECT_CALL(objContext, GetAsyncRunner).Times(1);
 
     pCallController->Terminate(nCallKey, objReason);
 }

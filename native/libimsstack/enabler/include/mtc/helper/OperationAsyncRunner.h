@@ -17,16 +17,14 @@
 #ifndef OPERATION_ASYNC_RUNNER_H_
 #define OPERATION_ASYNC_RUNNER_H_
 
-#include "ImsActivityEx.h"
+#include "ImsMessage.h"
 #include "ImsTypeDef.h"
 #include <functional>
 
-class ImsMessage;
-
-class OperationAsyncRunner : public ImsActivityEx
+class OperationAsyncRunner : public ImsMessage::IMessageCallback
 {
 public:
-    explicit OperationAsyncRunner(IN std::function<void()> objOperation);
+    OperationAsyncRunner(IN IMS_SINT32 nSlotId, IN std::function<void()> objOperation);
 
 private:
     ~OperationAsyncRunner();
@@ -35,9 +33,10 @@ public:
     OperationAsyncRunner(IN const OperationAsyncRunner&) = delete;
     OperationAsyncRunner& operator=(IN const OperationAsyncRunner&) = delete;
 
-    IMS_BOOL OnMessage(IN ImsMessage& objMsg) override;
+    void MessageCallback_OnMessage(IN ImsMessage& objMsg) override;
 
 private:
+    IMS_SINT32 m_nSlotId;
     std::function<void()> m_objOperation;
 };
 
