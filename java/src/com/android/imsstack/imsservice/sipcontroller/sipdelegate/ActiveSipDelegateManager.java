@@ -191,7 +191,7 @@ public class ActiveSipDelegateManager {
      * @return the delegate object mapping with callid
      */
     public SipDelegateImpl getSipDelegateForCallId(String callId) {
-        Log.i(LOG_TAG, "getSipDelegateForCallId for callid:" + callId);
+        Log.i(LOG_TAG, "getSipDelegateForCallId for callId:" + callId);
         return mCallIdMappingSipDelegate.get(callId);
     }
 

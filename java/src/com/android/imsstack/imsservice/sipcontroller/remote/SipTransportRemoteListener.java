@@ -47,7 +47,7 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
      */
     @Override
     public void onMessageReceived(@NonNull SipMessage message, int subId) {
-        Log.i(LOG_TAG, "onMessageReceived: " + subId);
+        Log.i(LOG_TAG, "onMessageReceived: subId " + subId);
         //How to know for which sip delegate this message belongs.
         //Case 1: Use the call id for ongoing active dialog session.
         ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(subId);
@@ -66,10 +66,20 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
                 Log.i(LOG_TAG, "Check feature tag:" + featureTag);
                 sipDelegateToBeNotified =
                         activeDelegateManager.getSipDelegateForSupportedFeatureTag(featureTag);
+                if (sipDelegateToBeNotified != null && SipMessageParsingUtils.isSipRequest(
+                        message.getStartLine())) {
+                    //Keep track of this sip delegate and call id mapping.
+                    activeDelegateManager.addActiveSipDelegate(message.getCallIdParameter(),
+                            sipDelegateToBeNotified);
+                }
             }
             if (sipDelegateToBeNotified != null) {
                 Log.i(LOG_TAG, "Found the sip delegate to notify received message"
                         + sipDelegateToBeNotified);
+                String viaTransactionId = message.getViaBranchParameter();
+                sipDelegateToBeNotified.getViaTransactionIds().add(viaTransactionId);
+                sipDelegateToBeNotified.getViaTransactionIdsAndCallId().put(
+                        viaTransactionId, message.getCallIdParameter());
                 //Notify the sip delegate that message is received.
                 sipDelegateToBeNotified.onMessageReceived(message);
             } else {
