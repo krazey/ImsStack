@@ -15,6 +15,7 @@
  */
 
 #include "ICarrierConfig.h"
+#include "ImsVector.h"
 #include "ServiceConfig.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
@@ -25,8 +26,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcConfigurationManager::MtcConfigurationManager() :
-        m_objCarrierConfig(CarrierConfigItems()),
-        m_objAsset(AssetItems())
+        m_objCarrierConfig(CarrierConfigItems())
 {
 }
 
@@ -52,7 +52,7 @@ PUBLIC
 void MtcConfigurationManager::UpdateFullConfig(ICarrierConfig* piCc)
 {
     IMS_TRACE_I("UpdateFullConfig", 0, 0, 0);
-    MtcConfigurationUpdater::Update(piCc, m_objCarrierConfig, m_objAsset);
+    MtcConfigurationUpdater::Update(piCc, m_objCarrierConfig);
 }
 
 PUBLIC VIRTUAL void MtcConfigurationManager::CarrierConfig_NotifyConfigChanged(
@@ -519,271 +519,273 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyForEmergencyUrnEscvMapping() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCheckConferenceEventPackageVersion() const
 {
-    return m_objAsset.bCheckConferenceEventPackageVersion;
+    return m_objCarrierConfig.bCheckConferenceEventPackageVersion;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsConferenceReferToUriSourcePaid() const
 {
-    return m_objAsset.bConferenceReferToUriSourcePaid;
+    return m_objCarrierConfig.bConferenceReferToUriSourcePaid;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetConferenceDropReferToUriSourceType() const
 {
-    return m_objAsset.nConferenceDropReferToUriSourceType;
+    return m_objCarrierConfig.nConferenceDropReferToUriSourceType;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsEnableFakeQosCallFlowOnWifi() const
 {
-    return m_objAsset.bEnableFakeQosCallFlowOnWifi;
+    return m_objCarrierConfig.bEnableFakeQosCallFlowOnWifi;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetMediaTypeForOfferlessReinvite() const
 {
-    return m_objAsset.nMediaTypeForOfferlessReinvite;
+    return m_objCarrierConfig.nMediaTypeForOfferlessReinvite;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSupportVideoCallUpgradeRegardlessOfFeatureTags() const
 {
-    return m_objAsset.bSupportVideoCallUpgradeRegardlessOfFeatureTags;
+    return m_objCarrierConfig.bSupportVideoCallUpgradeRegardlessOfFeatureTags;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetOipTypeForUnavailable() const
 {
-    return m_objAsset.nOipTypeForUnavailable;
+    return m_objCarrierConfig.nOipTypeForUnavailable;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsEnableOipHeaderPolicyFallBack() const
 {
-    return m_objAsset.bEnableOipHeaderPolicyFallBack;
+    return m_objCarrierConfig.bEnableOipHeaderPolicyFallBack;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetEmergencyRttGuardTimer() const
 {
-    return m_objAsset.nEmergencyRttGuardTimer;
+    return m_objCarrierConfig.nEmergencyRttGuardTimer;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf() const
 {
-    return m_objAsset.bRetryEmergencyCallOverEmergencyPdnWithNextPcscf;
+    return m_objCarrierConfig.bRetryEmergencyCallOverEmergencyPdnWithNextPcscf;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetPreAlertingTimer() const
 {
-    return m_objAsset.nPreAlertingTimer;
+    return m_objCarrierConfig.nPreAlertingTimer;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetPolicyForTcallTimerExpiryOfVolteCall() const
 {
-    return m_objAsset.nPolicyForTcallTimerExpiryOfVolteCall;
+    return m_objCarrierConfig.nPolicyForTcallTimerExpiryOfVolteCall;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetPolicyForTcallTimerExpiryOfVolteEmergencyCall() const
 {
-    return m_objAsset.nPolicyForTcallTimerExpiryOfVolteEmergencyCall;
+    return m_objCarrierConfig.nPolicyForTcallTimerExpiryOfVolteEmergencyCall;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetPolicyForTcallTimerExpiryOfVowifiCall() const
 {
-    return m_objAsset.nPolicyForTcallTimerExpiryOfVowifiCall;
+    return m_objCarrierConfig.nPolicyForTcallTimerExpiryOfVowifiCall;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCarrierSpecificSipHeader(IN const AString& strHeader) const
 {
-    return ContainsValue(m_objAsset.objCarrierSpecificSipHeaders, strHeader);
+    return ContainsValue(m_objCarrierConfig.objCarrierSpecificSipHeaders, strHeader);
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCheckAvchangeFeatureForCallConvertingCapability() const
 {
-    return m_objAsset.bCheckAvchangeFeatureForCallConvertingCapability;
+    return m_objCarrierConfig.bCheckAvchangeFeatureForCallConvertingCapability;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSupportRegistrationRecoveryForFailureOfSessionRefresh() const
 {
-    return m_objAsset.bSupportRegistrationRecoveryForFailureOfSessionRefresh;
+    return m_objCarrierConfig.bSupportRegistrationRecoveryForFailureOfSessionRefresh;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCallMaintainingOnRegistrationSuspended(
         IN IMS_SINT32 nSuspendType) const
 {
-    return ContainsValue(m_objAsset.objCallMaintainingOnRegistrationSuspendeds, nSuspendType);
+    return ContainsValue(
+            m_objCarrierConfig.objCallMaintainingOnRegistrationSuspendeds, nSuspendType);
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRequiringEmergencyCallWhenVideoEmergencyCallFailed(
         IN IMS_SINT32 nCode) const
 {
-    return ContainsValue(m_objAsset.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds, nCode);
+    return ContainsValue(
+            m_objCarrierConfig.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds, nCode);
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsUseMcidSupplementaryService() const
 {
-    return m_objAsset.bUseMcidSupplementaryService;
+    return m_objCarrierConfig.bUseMcidSupplementaryService;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsUseMmcSupplementaryService() const
 {
-    return m_objAsset.bUseMmcSupplementaryService;
+    return m_objCarrierConfig.bUseMmcSupplementaryService;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsUseLtePreferredStatusForServiceCapability() const
 {
-    return m_objAsset.bUseLtePreferredStatusForServiceCapability;
+    return m_objCarrierConfig.bUseLtePreferredStatusForServiceCapability;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsAllowIncomingHoldRequestDuringConferenceCall() const
 {
-    return m_objAsset.bAllowIncomingHoldRequestDuringConferenceCall;
+    return m_objCarrierConfig.bAllowIncomingHoldRequestDuringConferenceCall;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsIgnore180After183Response() const
 {
-    return m_objAsset.bIgnore180After183Response;
+    return m_objCarrierConfig.bIgnore180After183Response;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsAddReplaceHeaderForConference() const
 {
-    return m_objAsset.bAddReplaceHeaderForConference;
+    return m_objCarrierConfig.bAddReplaceHeaderForConference;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsVilteToVolteRetryFailureResponseCode(IN IMS_SINT32 nCode) const
 {
-    return ContainsValue(m_objAsset.objVilteToVolteRetryFailureResponseCodes, nCode);
+    return ContainsValue(m_objCarrierConfig.objVilteToVolteRetryFailureResponseCodes, nCode);
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsUseEmergencyNumberTranslationInRoamingStatus() const
 {
-    return m_objAsset.bUseEmergencyNumberTranslationInRoamingStatus;
+    return m_objCarrierConfig.bUseEmergencyNumberTranslationInRoamingStatus;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsIgnorePrackDeliveryFailure() const
 {
-    return m_objAsset.bIgnorePrackDeliveryFailure;
+    return m_objCarrierConfig.bIgnorePrackDeliveryFailure;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSupportVideoCallOnlyInVopsOffStatus() const
 {
-    return m_objAsset.bSupportVideoCallOnlyInVopsOffStatus;
+    return m_objCarrierConfig.bSupportVideoCallOnlyInVopsOffStatus;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsBlockWifiEmergencyCallIfNotProvisioned() const
 {
-    return m_objAsset.bBlockWifiEmergencyCallIfNotProvisioned;
+    return m_objCarrierConfig.bBlockWifiEmergencyCallIfNotProvisioned;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRegistrationDisconnectReasonToTerminateOngoingCall(
         IN IMS_SINT32 nReason) const
 {
-    if (ContainsValue(m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls,
+    if (ContainsValue(m_objCarrierConfig.objRegistrationDisconnectReasonToTerminateOngoingCalls,
                 TERMINATE_BY_ANY_AOS_REASON))
     {
         return IMS_TRUE;
     }
 
     return ContainsValue(
-            m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls, nReason);
+            m_objCarrierConfig.objRegistrationDisconnectReasonToTerminateOngoingCalls, nReason);
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetWifiEmergency18xTimer() const
 {
-    return m_objAsset.nWifiEmergency18xTimer;
+    return m_objCarrierConfig.nWifiEmergency18xTimer;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSupportCanidInfo() const
 {
-    return m_objAsset.bSupportCanidInfo;
+    return m_objCarrierConfig.bSupportCanidInfo;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsUseCarrierSpecificContactHeaderForOptionsResponse() const
 {
-    return m_objAsset.bUseCarrierSpecificContactHeaderForOptionsResponse;
+    return m_objCarrierConfig.bUseCarrierSpecificContactHeaderForOptionsResponse;
 }
 
 PUBLIC
 IMS_BOOL
 MtcConfigurationManager::IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration() const
 {
-    return m_objAsset.bUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration;
+    return m_objCarrierConfig.bUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsEnableRegistrationRecoveryWhenCallRejectedByServerError() const
 {
-    return m_objAsset.bEnableRegistrationRecoveryWhenCallRejectedByServerError;
+    return m_objCarrierConfig.bEnableRegistrationRecoveryWhenCallRejectedByServerError;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsEnableRegistrationRecoveryWhenCallRetryUnavailable() const
 {
-    return m_objAsset.bEnableRegistrationRecoveryWhenCallRetryUnavailable;
+    return m_objCarrierConfig.bEnableRegistrationRecoveryWhenCallRetryUnavailable;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRejectVowifiVoiceCallWhenVowifiSettingOff() const
 {
-    return m_objAsset.bRejectVowifiVoiceCallWhenVowifiSettingOff;
+    return m_objCarrierConfig.bRejectVowifiVoiceCallWhenVowifiSettingOff;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCheckServerOutageReasonForVxlteCall() const
 {
-    return m_objAsset.bCheckServerOutageReasonForVxlteCall;
+    return m_objCarrierConfig.bCheckServerOutageReasonForVxlteCall;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType()
         const
 {
-    return m_objAsset.bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType;
+    return m_objCarrierConfig.bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetMaximumWaitTimerForGeolocationPidfInfo() const
 {
-    return m_objAsset.nMaximumWaitTimerForGeolocationPidfInfo;
+    return m_objCarrierConfig.nMaximumWaitTimerForGeolocationPidfInfo;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsMaintainMultipleEarlySessionsByForking() const
 {
-    return m_objAsset.bMaintainMultipleEarlySessionsByForking;
+    return m_objCarrierConfig.bMaintainMultipleEarlySessionsByForking;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsStopRingbackTimerBy183WithSdpBody() const
 {
-    return m_objAsset.bStopRingbackTimerBy183WithSdpBody;
+    return m_objCarrierConfig.bStopRingbackTimerBy183WithSdpBody;
 }
 
 PUBLIC
@@ -792,19 +794,19 @@ IMS_SINT32 MtcConfigurationManager::GetInformationLevelOfGeolocationPidf(
 {
     if (bEmergency && !bWifi)
     {
-        return m_objAsset.objInformationLevelOfGeolocationPidfs.GetAt(0);
+        return m_objCarrierConfig.objInformationLevelOfGeolocationPidfs.GetAt(0);
     }
     else if (bEmergency && bWifi)
     {
-        return m_objAsset.objInformationLevelOfGeolocationPidfs.GetAt(1);
+        return m_objCarrierConfig.objInformationLevelOfGeolocationPidfs.GetAt(1);
     }
     else if (!bEmergency && !bWifi)
     {
-        return m_objAsset.objInformationLevelOfGeolocationPidfs.GetAt(2);
+        return m_objCarrierConfig.objInformationLevelOfGeolocationPidfs.GetAt(2);
     }
     else  // if (!bEmergency && bWifi)
     {
-        return m_objAsset.objInformationLevelOfGeolocationPidfs.GetAt(3);
+        return m_objCarrierConfig.objInformationLevelOfGeolocationPidfs.GetAt(3);
     }
 }
 
@@ -813,48 +815,48 @@ IMS_BOOL MtcConfigurationManager::IsMessageTypeSupportGeolocationPidf(
         IN MessageTypeForGeolocationPidf eType) const
 {
     IMS_UINT32 nType = static_cast<IMS_UINT32>(eType);
-    return ContainsValue(m_objAsset.objMessageTypesSupportGeolocationPidf, nType);
+    return ContainsValue(m_objCarrierConfig.objMessageTypesSupportGeolocationPidf, nType);
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsInitializePemWhenNoHeader() const
 {
-    return m_objAsset.bInitializePemWhenNoHeader;
+    return m_objCarrierConfig.bInitializePemWhenNoHeader;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetPolicyForLocalRingbackToneWith180Response() const
 {
-    return m_objAsset.nPolicyForLocalRingbackToneWith180Response;
+    return m_objCarrierConfig.nPolicyForLocalRingbackToneWith180Response;
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSend180ForInitialInvite() const
 {
-    return m_objAsset.bSend180ForInitialInvite;
+    return m_objCarrierConfig.bSend180ForInitialInvite;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetEpsFallbackWatchdogTime() const
 {
-    return m_objAsset.nEpsFallbackWatchDogTime;
+    return m_objCarrierConfig.nEpsFallbackWatchDogTime;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetSendUdpKeepAliveIntervalTime() const
 {
-    return m_objAsset.nSendUdpKeepAliveIntervalTime;
+    return m_objCarrierConfig.nSendUdpKeepAliveIntervalTime;
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetCallRejectCodeForNotAcceptableCallType() const
 {
-    return m_objAsset.nCallRejectCodeForNotAcceptableCallType;
+    return m_objCarrierConfig.nCallRejectCodeForNotAcceptableCallType;
 }
 
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
-        IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)
+        IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)
 {
     for (IMS_UINT32 i = 0; i < lstList.GetSize(); i++)
     {
@@ -868,7 +870,7 @@ IMS_BOOL MtcConfigurationManager::ContainsValue(
 
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
-        IN const IMSVector<AString>& lstList, IN const AString& strValue)
+        IN const ImsVector<AString>& lstList, IN const AString& strValue)
 {
     for (IMS_UINT32 i = 0; i < lstList.GetSize(); i++)
     {

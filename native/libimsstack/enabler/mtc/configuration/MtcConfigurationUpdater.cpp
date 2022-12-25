@@ -20,23 +20,21 @@
 #include "ImsList.h"
 #include "ImsMap.h"
 #include "ServiceTrace.h"
-#include "configuration/AssetItems.h"
 #include "configuration/CarrierConfigItems.h"
 #include "configuration/MtcConfigurationUpdater.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC GLOBAL void MtcConfigurationUpdater::Update(IN ICarrierConfig* piCc,
-        IN CarrierConfigItems& objCarrierConfigItems, IN AssetItems& objAssetItems)
+PUBLIC GLOBAL void MtcConfigurationUpdater::Update(
+        IN ICarrierConfig* piCc, IN CarrierConfigItems& objCarrierConfigItems)
 {
     IMS_TRACE_I("Update", 0, 0, 0);
-    ClearArrays(objCarrierConfigItems, objAssetItems);
+    ClearArrays(objCarrierConfigItems);
     UpdateByCarrierConfig(piCc, objCarrierConfigItems);
-    UpdateByAsset(piCc, objAssetItems);
 }
 
 PRIVATE GLOBAL void MtcConfigurationUpdater::ClearArrays(
-        IN CarrierConfigItems& objCarrierConfigItems, IN AssetItems& /*objAssetItems*/)
+        IN CarrierConfigItems& objCarrierConfigItems)
 {
     objCarrierConfigItems.objCallRejectReasonPhrases.Clear();
     objCarrierConfigItems.objCallTerminateReasonHeaders.Clear();
@@ -239,12 +237,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EMERGENCY_18X_TIMER_MILLIS_INT);
     objItems.nPolicyForEmergencyUrnEscvMapping = piCc->GetInt(
             CarrierConfig::ImsEmergency::KEY_POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING_INT);
-}
-
-PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
-        IN ICarrierConfig* piCc, IN AssetItems& objItems)
-{
-    IMS_TRACE_I("UpdateByAsset", 0, 0, 0);
 
     objItems.bCheckConferenceEventPackageVersion = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL);

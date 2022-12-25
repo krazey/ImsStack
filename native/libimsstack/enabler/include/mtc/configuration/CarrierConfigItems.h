@@ -25,176 +25,279 @@ struct CarrierConfigItems
 {
 public:
     CarrierConfigItems() :
-            nRequestUriType(0),
-            objSupportGeolocationPidfInSipInvite(IMSVector<IMS_SINT32>()),
-            bSupportSipSessionIdHeader(IMS_FALSE),
-            bIncludeCallerIdServiceCodesInSipInvite(IMS_FALSE),
-            bMultiendpointSupported(IMS_FALSE),
-            bSessionTimerSupported(IMS_TRUE),
-            nSessionPrivacyType(0),
-            bPrackSupportedFor18x(IMS_TRUE),
-            nConferenceSubscribeType(1),
-            bVoiceQosPreconditionSupported(IMS_TRUE),
-            bVoiceOnDefaultBearerSupported(IMS_FALSE),
-            nDedicatedBearerWaitTimer(8000),
-            objSrvccTypes(IMSVector<IMS_SINT32>()),
-            nRingingTimer(90000),
-            nRingbackTimer(90000),
             strConferenceFactoryUri(AString::ConstEmpty()),
-            bOipSourceFromHeader(IMS_FALSE),
-            nMoCallRequestTimeout(5000),
-            objAudioInactivityCallEndReasons(IMSVector<IMS_SINT32>()),
+            objCallRejectReasonPhrases(ImsVector<AString>()),
+            objCallTerminateReasonHeaders(ImsVector<AString>()),
+            objCarrierSpecificSipHeaders(ImsVector<AString>()),
+            objPidfShortCodes(ImsVector<AString>()),
+            objAudioInactivityCallEndReasons(ImsVector<IMS_SINT32>()),
+            objCallMaintainingOnRegistrationSuspendeds(ImsVector<IMS_SINT32>()),
+            objInformationLevelOfGeolocationPidfs(ImsVector<IMS_SINT32>()),
+            objMessageTypesSupportGeolocationPidf(ImsVector<IMS_SINT32>()),
+            objRegistrationDisconnectReasonToTerminateOngoingCalls(ImsVector<IMS_SINT32>()),
+            objRejectCodeForCsfbs(ImsVector<IMS_SINT32>()),
+            objRequiringEmergencyCallWhenVideoEmergencyCallFaileds(ImsVector<IMS_SINT32>()),
+            objShortCallCodes(ImsVector<IMS_SINT32>()),
+            objSrvccTypes(ImsVector<IMS_SINT32>()),
+            objSupportGeolocationPidfInSipInvite(ImsVector<IMS_SINT32>()),
+            objVilteToVolteRetryFailureResponseCodes(ImsVector<IMS_SINT32>()),
             n18xTimer(32000),
-            bSupportConferenceReferSubscribe(IMS_TRUE),
-            bEnableConferenceSubscribeByParticipant(IMS_FALSE),
-            nConferenceSipFlowOrder(1),
-            nConferenceInvitingReferType(1),
-            nPolicyQosPreconditionMechanismWhileCallModification(1),
-            nIncomingCallRejectCodeForUserDecline(486),
-            nIncomingCallRejectCodeForNoAnswer(486),
-            nPrackUpdateResponseWaitTimer(3000),
-            nSessionRefreshTriggerInterval(0),
-            nRegistrationRestorationModeOn504ForInvite(1),
-            nPolicyOnAudioQosDeactivation(0),
-            bEnableSendReinviteOnRatChange(IMS_FALSE),
-            nPolicyForMediaTypeRestrictionOnCellular(0),
-            nPolicyForMediaTypeRestrictionOnCellularInRoaming(0),
-            nPolicyOfLocalNumbers(2),
-            bDefaultEpsBearerContextUsageRestrictionOnCellular(IMS_TRUE),
-            nSilentRedialInterval(0),
-            nCallTypeAfterAudioAndVideoCallMerged(1),
-            objShortCallCodes(IMSVector<IMS_SINT32>()),
-            bValidateVerstatFeatureInRegistrationToCheckNetworkCapability(IMS_FALSE),
-            bAllowMultipleCallIncludingVideoCall(IMS_TRUE),
-            objRejectCodeForCsfbs(IMSVector<IMS_SINT32>()),
-            nSilentRedialMaxRetryCount(0),
-            nPolicyFor403ResponseForInvite(1),
-            nPolicyForCheckingQosWhileCallUpgrading(0),
-            bRejectOfferlessInvite(IMS_FALSE),
             nCallMaxCount(3),
-            objCallTerminateReasonHeaders(IMSVector<AString>()),
-            objCallRejectReasonPhrases(IMSVector<AString>()),
-            bVideoOnDefaultBearerSupported(IMS_FALSE),
-            bVideoQosPreconditionSupported(IMS_TRUE),
+            nCallRejectCodeForNotAcceptableCallType(488),
+            nCallTypeAfterAudioAndVideoCallMerged(1),
+            nConferenceDropReferToUriSourceType(0),
+            nConferenceInvitingReferType(1),
+            nConferenceSipFlowOrder(1),
+            nConferenceSubscribeType(1),
             nConvertRemoteResponseTimer(20000),
             nConvertUserResponseTimer(20000),
-            nPolicyOnVideoQosDeactivation(2),
-            bSupportEarlySession(IMS_FALSE),
-            nPolicyForTextWithVideo(0),
+            nCountryCode(0),
+            nDedicatedBearerWaitTimer(8000),
+            nEmergency18xTimer(20000),
+            nEmergencyRingbackTimer(10000),
+            nEmergencyRttGuardTimer(0),
+            nEmergencyTCallTimer(10000),
+            nEpsFallbackWatchDogTime(-1),
+            nIncomingCallRejectCodeForNoAnswer(486),
+            nIncomingCallRejectCodeForUserDecline(486),
+            nMaximumWaitTimerForGeolocationPidfInfo(0),
+            nMediaTypeForOfferlessReinvite(0),
             nMinimumBatteryLevelForLimitVideoCall(0),
+            nMoCallRequestTimeout(5000),
+            nOipTypeForUnavailable(1),
+            nPolicyFor403ResponseForInvite(1),
+            nPolicyForCheckingQosWhileCallUpgrading(0),
+            nPolicyForEmergencyUrnEscvMapping(0),
+            nPolicyForLocalRingbackToneWith180Response(0),
+            nPolicyForMediaTypeRestrictionOnCellular(0),
+            nPolicyForMediaTypeRestrictionOnCellularInRoaming(0),
+            nPolicyForTcallTimerExpiryOfVolteCall(2),
+            nPolicyForTcallTimerExpiryOfVolteEmergencyCall(2),
+            nPolicyForTcallTimerExpiryOfVowifiCall(0),
+            nPolicyForTextWithVideo(0),
+            nPolicyOfLocalNumbers(2),
+            nPolicyOnAudioQosDeactivation(0),
+            nPolicyOnTextQosDeactivation(2),
+            nPolicyOnVideoQosDeactivation(2),
+            nPolicyQosPreconditionMechanismWhileCallModification(1),
+            nPrackUpdateResponseWaitTimer(3000),
+            nPreAlertingTimer(0),
+            nRegistrationRestorationModeOn504ForInvite(1),
+            nRequestUriType(0),
+            nRingbackTimer(90000),
+            nRingingTimer(90000),
+            nSendUdpKeepAliveIntervalTime(-1),
+            nSessionPrivacyType(0),
+            nSessionRefreshTriggerInterval(0),
+            nSilentRedialInterval(0),
+            nSilentRedialMaxRetryCount(0),
+            nWifiEmergency18xTimer(0),
+            bAddReplaceHeaderForConference(IMS_FALSE),
+            bAllowIncomingHoldRequestDuringConferenceCall(IMS_FALSE),
+            bAllowMultipleCallIncludingVideoCall(IMS_TRUE),
+            bBlockWifiEmergencyCallIfNotProvisioned(IMS_FALSE),
+            bCheckAvchangeFeatureForCallConvertingCapability(IMS_FALSE),
+            bCheckConferenceEventPackageVersion(IMS_TRUE),
+            bCheckServerOutageReasonForVxlteCall(IMS_FALSE),
+            bConferenceReferToUriSourcePaid(IMS_TRUE),
+            bDefaultEpsBearerContextUsageRestrictionOnCellular(IMS_TRUE),
+            bEmergencyCallOverEmergencyPdn(IMS_FALSE),  // wifi
+            bEmergencyCallOverEmergencyPdnOnCellular(IMS_TRUE),
+            bEmergencyQosPreconditionSupported(IMS_TRUE),
+            bEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall(IMS_FALSE),
+            bEnableConferenceSubscribeByParticipant(IMS_FALSE),
+            bEnableFakeQosCallFlowOnWifi(IMS_FALSE),
+            bEnableOipHeaderPolicyFallBack(IMS_FALSE),
+            bEnableRegistrationRecoveryWhenCallRejectedByServerError(IMS_FALSE),
+            bEnableRegistrationRecoveryWhenCallRetryUnavailable(IMS_FALSE),
+            bEnableSendReinviteOnRatChange(IMS_FALSE),
+            bIgnore180After183Response(IMS_FALSE),
+            bIgnorePrackDeliveryFailure(IMS_FALSE),
+            bIncludeCallerIdServiceCodesInSipInvite(IMS_FALSE),
+            bInitializePemWhenNoHeader(IMS_FALSE),
+            bMaintainMultipleEarlySessionsByForking(IMS_TRUE),
+            bMultiendpointSupported(IMS_FALSE),
+            bOipSourceFromHeader(IMS_FALSE),
+            bPrackSupportedFor18x(IMS_TRUE),
+            bRejectOfferlessInvite(IMS_FALSE),
+            bRejectVowifiVoiceCallWhenVowifiSettingOff(IMS_FALSE),
+            bRetryEmergencyCallOverEmergencyPdnWithNextPcscf(IMS_FALSE),
+            bRetryEmergencyOnImsPdnBool(IMS_FALSE),
+            bSend180ForInitialInvite(IMS_FALSE),
+            bSessionTimerSupported(IMS_TRUE),
+            bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType(IMS_FALSE),
+            bStopRingbackTimerBy183WithSdpBody(IMS_FALSE),
+            bSupportCanidInfo(IMS_FALSE),
+            bSupportConferenceReferSubscribe(IMS_TRUE),
+            bSupportEarlySession(IMS_FALSE),
+            bSupportRegistrationRecoveryForFailureOfSessionRefresh(IMS_FALSE),
+            bSupportSipSessionIdHeader(IMS_FALSE),
+            bSupportVideoCallOnlyInVopsOffStatus(IMS_FALSE),
+            bSupportVideoCallUpgradeRegardlessOfFeatureTags(IMS_FALSE),
             bTextOnDefaultBearerSupported(IMS_FALSE),
             bTextQosPreconditionSupported(IMS_TRUE),
-            nPolicyOnTextQosDeactivation(2),
-            objPidfShortCodes(IMSVector<AString>()),
-            bEmergencyCallOverEmergencyPdn(IMS_FALSE),  // wifi
-            nCountryCode(0),
-            bRetryEmergencyOnImsPdnBool(IMS_FALSE),
-            bEmergencyQosPreconditionSupported(IMS_TRUE),
-            bEmergencyCallOverEmergencyPdnOnCellular(IMS_TRUE),
-            bEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall(IMS_FALSE),
-            nEmergencyTCallTimer(10000),
-            nEmergencyRingbackTimer(10000),
-            nEmergency18xTimer(20000),
-            nPolicyForEmergencyUrnEscvMapping(0)
+            bUseCarrierSpecificContactHeaderForOptionsResponse(IMS_FALSE),
+            bUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration(IMS_FALSE),
+            bUseEmergencyNumberTranslationInRoamingStatus(IMS_FALSE),
+            bUseLtePreferredStatusForServiceCapability(IMS_FALSE),
+            bUseMcidSupplementaryService(IMS_FALSE),
+            bUseMmcSupplementaryService(IMS_FALSE),
+            bValidateVerstatFeatureInRegistrationToCheckNetworkCapability(IMS_FALSE),
+            bVideoOnDefaultBearerSupported(IMS_FALSE),
+            bVideoQosPreconditionSupported(IMS_TRUE),
+            bVoiceOnDefaultBearerSupported(IMS_FALSE),
+            bVoiceQosPreconditionSupported(IMS_TRUE)
     {
     }
     ~CarrierConfigItems()
     {
-        objSrvccTypes.Clear();
-        objAudioInactivityCallEndReasons.Clear();
-        objShortCallCodes.Clear();
-        objRejectCodeForCsfbs.Clear();
-        objCallTerminateReasonHeaders.Clear();
         objCallRejectReasonPhrases.Clear();
+        objCallTerminateReasonHeaders.Clear();
+        objCarrierSpecificSipHeaders.Clear();
         objPidfShortCodes.Clear();
+        objAudioInactivityCallEndReasons.Clear();
+        objCallMaintainingOnRegistrationSuspendeds.Clear();
+        objInformationLevelOfGeolocationPidfs.Clear();
+        objMessageTypesSupportGeolocationPidf.Clear();
+        objRegistrationDisconnectReasonToTerminateOngoingCalls.Clear();
+        objRejectCodeForCsfbs.Clear();
+        objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.Clear();
+        objShortCallCodes.Clear();
+        objSrvccTypes.Clear();
+        objSupportGeolocationPidfInSipInvite.Clear();
+        objVilteToVolteRetryFailureResponseCodes.Clear();
     }
 
-    CarrierConfigItems(IN const CarrierConfigItems&) = delete;             // not planed
-    CarrierConfigItems& operator=(IN const CarrierConfigItems&) = delete;  // not planed
+    CarrierConfigItems(IN const CarrierConfigItems&) = delete;
+    CarrierConfigItems& operator=(IN const CarrierConfigItems&) = delete;
 
 public:
-    // ims configurations
-    IMS_SINT32 nRequestUriType;
-    IMSVector<IMS_SINT32> objSupportGeolocationPidfInSipInvite;
-    IMS_BOOL bSupportSipSessionIdHeader;
-
-    // audio configurations
-    IMS_BOOL bIncludeCallerIdServiceCodesInSipInvite;
-    IMS_BOOL bMultiendpointSupported;
-    IMS_BOOL bSessionTimerSupported;
-    IMS_SINT32 nSessionPrivacyType;
-    IMS_BOOL bPrackSupportedFor18x;
-    IMS_SINT32 nConferenceSubscribeType;
-    IMS_BOOL bVoiceQosPreconditionSupported;
-    IMS_BOOL bVoiceOnDefaultBearerSupported;
-    IMS_SINT32 nDedicatedBearerWaitTimer;
-    IMSVector<IMS_SINT32> objSrvccTypes;
-    IMS_SINT32 nRingingTimer;
-    IMS_SINT32 nRingbackTimer;
     AString strConferenceFactoryUri;
-    IMS_BOOL bOipSourceFromHeader;
-    IMS_SINT32 nMoCallRequestTimeout;
-    IMSVector<IMS_SINT32> objAudioInactivityCallEndReasons;
-    IMS_SINT32 n18xTimer;
-    IMS_BOOL bSupportConferenceReferSubscribe;
-    IMS_BOOL bEnableConferenceSubscribeByParticipant;
-    IMS_SINT32 nConferenceSipFlowOrder;
-    IMS_SINT32 nConferenceInvitingReferType;
-    IMS_SINT32 nPolicyQosPreconditionMechanismWhileCallModification;
-    IMS_SINT32 nIncomingCallRejectCodeForUserDecline;
-    IMS_SINT32 nIncomingCallRejectCodeForNoAnswer;
-    IMS_SINT32 nPrackUpdateResponseWaitTimer;
-    IMS_SINT32 nSessionRefreshTriggerInterval;
-    IMS_SINT32 nRegistrationRestorationModeOn504ForInvite;
-    IMS_SINT32 nPolicyOnAudioQosDeactivation;
-    IMS_BOOL bEnableSendReinviteOnRatChange;
-    IMS_SINT32 nPolicyForMediaTypeRestrictionOnCellular;
-    IMS_SINT32 nPolicyForMediaTypeRestrictionOnCellularInRoaming;
-    IMS_SINT32 nPolicyOfLocalNumbers;
-    IMS_BOOL bDefaultEpsBearerContextUsageRestrictionOnCellular;
-    IMS_SINT32 nSilentRedialInterval;
-    IMS_SINT32 nCallTypeAfterAudioAndVideoCallMerged;
-    IMSVector<IMS_SINT32> objShortCallCodes;
-    IMS_BOOL bValidateVerstatFeatureInRegistrationToCheckNetworkCapability;
-    IMS_BOOL bAllowMultipleCallIncludingVideoCall;
-    IMSVector<IMS_SINT32> objRejectCodeForCsfbs;
-    IMS_SINT32 nSilentRedialMaxRetryCount;
-    IMS_SINT32 nPolicyFor403ResponseForInvite;
-    IMS_SINT32 nPolicyForCheckingQosWhileCallUpgrading;
-    IMS_BOOL bRejectOfferlessInvite;
-    IMS_SINT32 nCallMaxCount;
-    IMSVector<AString> objCallTerminateReasonHeaders;
-    IMSVector<AString> objCallRejectReasonPhrases;
 
-    // vt configurations
-    IMS_BOOL bVideoOnDefaultBearerSupported;
-    IMS_BOOL bVideoQosPreconditionSupported;
+    ImsVector<AString> objCallRejectReasonPhrases;
+    ImsVector<AString> objCallTerminateReasonHeaders;
+    ImsVector<AString> objCarrierSpecificSipHeaders;
+    ImsVector<AString> objPidfShortCodes;
+
+    ImsVector<IMS_SINT32> objAudioInactivityCallEndReasons;
+    ImsVector<IMS_SINT32> objCallMaintainingOnRegistrationSuspendeds;  // name?
+    ImsVector<IMS_SINT32> objInformationLevelOfGeolocationPidfs;
+    ImsVector<IMS_SINT32> objMessageTypesSupportGeolocationPidf;
+    ImsVector<IMS_SINT32> objRegistrationDisconnectReasonToTerminateOngoingCalls;
+    ImsVector<IMS_SINT32> objRejectCodeForCsfbs;
+    ImsVector<IMS_SINT32> objRequiringEmergencyCallWhenVideoEmergencyCallFaileds;  // name?
+    ImsVector<IMS_SINT32> objShortCallCodes;
+    ImsVector<IMS_SINT32> objSrvccTypes;
+    ImsVector<IMS_SINT32> objSupportGeolocationPidfInSipInvite;
+    ImsVector<IMS_SINT32> objVilteToVolteRetryFailureResponseCodes;
+
+    IMS_SINT32 n18xTimer;
+    IMS_SINT32 nCallMaxCount;
+    IMS_SINT32 nCallRejectCodeForNotAcceptableCallType;
+    IMS_SINT32 nCallTypeAfterAudioAndVideoCallMerged;
+    IMS_SINT32 nConferenceDropReferToUriSourceType;
+    IMS_SINT32 nConferenceInvitingReferType;
+    IMS_SINT32 nConferenceSipFlowOrder;
+    IMS_SINT32 nConferenceSubscribeType;
     IMS_SINT32 nConvertRemoteResponseTimer;
     IMS_SINT32 nConvertUserResponseTimer;
-    IMS_SINT32 nPolicyOnVideoQosDeactivation;
-    IMS_BOOL bSupportEarlySession;
-    IMS_SINT32 nPolicyForTextWithVideo;
+    IMS_SINT32 nCountryCode;
+    IMS_SINT32 nDedicatedBearerWaitTimer;
+    IMS_SINT32 nEmergency18xTimer;
+    IMS_SINT32 nEmergencyRingbackTimer;
+    IMS_SINT32 nEmergencyRttGuardTimer;
+    IMS_SINT32 nEmergencyTCallTimer;
+    IMS_SINT32 nEpsFallbackWatchDogTime;
+    IMS_SINT32 nIncomingCallRejectCodeForNoAnswer;
+    IMS_SINT32 nIncomingCallRejectCodeForUserDecline;
+    IMS_SINT32 nMaximumWaitTimerForGeolocationPidfInfo;
+    IMS_SINT32 nMediaTypeForOfferlessReinvite;
     IMS_SINT32 nMinimumBatteryLevelForLimitVideoCall;
+    IMS_SINT32 nMoCallRequestTimeout;
+    IMS_SINT32 nOipTypeForUnavailable;
+    IMS_SINT32 nPolicyFor403ResponseForInvite;
+    IMS_SINT32 nPolicyForCheckingQosWhileCallUpgrading;
+    IMS_SINT32 nPolicyForEmergencyUrnEscvMapping;
+    IMS_SINT32 nPolicyForLocalRingbackToneWith180Response;
+    IMS_SINT32 nPolicyForMediaTypeRestrictionOnCellular;
+    IMS_SINT32 nPolicyForMediaTypeRestrictionOnCellularInRoaming;
+    IMS_SINT32 nPolicyForTcallTimerExpiryOfVolteCall;
+    IMS_SINT32 nPolicyForTcallTimerExpiryOfVolteEmergencyCall;
+    IMS_SINT32 nPolicyForTcallTimerExpiryOfVowifiCall;
+    IMS_SINT32 nPolicyForTextWithVideo;
+    IMS_SINT32 nPolicyOfLocalNumbers;
+    IMS_SINT32 nPolicyOnAudioQosDeactivation;
+    IMS_SINT32 nPolicyOnTextQosDeactivation;
+    IMS_SINT32 nPolicyOnVideoQosDeactivation;
+    IMS_SINT32 nPolicyQosPreconditionMechanismWhileCallModification;
+    IMS_SINT32 nPrackUpdateResponseWaitTimer;
+    IMS_SINT32 nPreAlertingTimer;
+    IMS_SINT32 nRegistrationRestorationModeOn504ForInvite;
+    IMS_SINT32 nRequestUriType;
+    IMS_SINT32 nRingbackTimer;
+    IMS_SINT32 nRingingTimer;
+    IMS_SINT32 nSendUdpKeepAliveIntervalTime;
+    IMS_SINT32 nSessionPrivacyType;
+    IMS_SINT32 nSessionRefreshTriggerInterval;
+    IMS_SINT32 nSilentRedialInterval;
+    IMS_SINT32 nSilentRedialMaxRetryCount;
+    IMS_SINT32 nWifiEmergency18xTimer;
 
-    // rtt configurations
+    IMS_BOOL bAddReplaceHeaderForConference;
+    IMS_BOOL bAllowIncomingHoldRequestDuringConferenceCall;
+    IMS_BOOL bAllowMultipleCallIncludingVideoCall;
+    IMS_BOOL bBlockWifiEmergencyCallIfNotProvisioned;
+    IMS_BOOL bCheckAvchangeFeatureForCallConvertingCapability;
+    IMS_BOOL bCheckConferenceEventPackageVersion;
+    IMS_BOOL bCheckServerOutageReasonForVxlteCall;
+    IMS_BOOL bConferenceReferToUriSourcePaid;
+    IMS_BOOL bDefaultEpsBearerContextUsageRestrictionOnCellular;
+    IMS_BOOL bEmergencyCallOverEmergencyPdn;
+    IMS_BOOL bEmergencyCallOverEmergencyPdnOnCellular;
+    IMS_BOOL bEmergencyQosPreconditionSupported;
+    IMS_BOOL bEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall;
+    IMS_BOOL bEnableConferenceSubscribeByParticipant;
+    IMS_BOOL bEnableFakeQosCallFlowOnWifi;
+    IMS_BOOL bEnableOipHeaderPolicyFallBack;
+    IMS_BOOL bEnableRegistrationRecoveryWhenCallRejectedByServerError;
+    IMS_BOOL bEnableRegistrationRecoveryWhenCallRetryUnavailable;
+    IMS_BOOL bEnableSendReinviteOnRatChange;
+    IMS_BOOL bIgnore180After183Response;
+    IMS_BOOL bIgnorePrackDeliveryFailure;
+    IMS_BOOL bIncludeCallerIdServiceCodesInSipInvite;
+    IMS_BOOL bInitializePemWhenNoHeader;
+    IMS_BOOL bMaintainMultipleEarlySessionsByForking;
+    IMS_BOOL bMultiendpointSupported;
+    IMS_BOOL bOipSourceFromHeader;
+    IMS_BOOL bPrackSupportedFor18x;
+    IMS_BOOL bRejectOfferlessInvite;
+    IMS_BOOL bRejectVowifiVoiceCallWhenVowifiSettingOff;
+    IMS_BOOL bRetryEmergencyCallOverEmergencyPdnWithNextPcscf;
+    IMS_BOOL bRetryEmergencyOnImsPdnBool;
+    IMS_BOOL bSend180ForInitialInvite;
+    IMS_BOOL bSessionTimerSupported;
+    IMS_BOOL bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType;
+    IMS_BOOL bStopRingbackTimerBy183WithSdpBody;
+    IMS_BOOL bSupportCanidInfo;
+    IMS_BOOL bSupportConferenceReferSubscribe;
+    IMS_BOOL bSupportEarlySession;
+    IMS_BOOL bSupportRegistrationRecoveryForFailureOfSessionRefresh;
+    IMS_BOOL bSupportSipSessionIdHeader;
+    IMS_BOOL bSupportVideoCallOnlyInVopsOffStatus;
+    IMS_BOOL bSupportVideoCallUpgradeRegardlessOfFeatureTags;
     IMS_BOOL bTextOnDefaultBearerSupported;
     IMS_BOOL bTextQosPreconditionSupported;
-    IMS_SINT32 nPolicyOnTextQosDeactivation;
-
-    // wfc configurations
-    IMSVector<AString> objPidfShortCodes;
-    IMS_BOOL bEmergencyCallOverEmergencyPdn;
-    IMS_SINT32 nCountryCode;
-
-    // emergency configurations
-    IMS_BOOL bRetryEmergencyOnImsPdnBool;
-    IMS_BOOL bEmergencyQosPreconditionSupported;
-    IMS_BOOL bEmergencyCallOverEmergencyPdnOnCellular;
-    IMS_BOOL bEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall;
-    IMS_SINT32 nEmergencyTCallTimer;
-    IMS_SINT32 nEmergencyRingbackTimer;
-    IMS_SINT32 nEmergency18xTimer;
-    IMS_SINT32 nPolicyForEmergencyUrnEscvMapping;
+    IMS_BOOL bUseCarrierSpecificContactHeaderForOptionsResponse;
+    IMS_BOOL bUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration;
+    IMS_BOOL bUseEmergencyNumberTranslationInRoamingStatus;
+    IMS_BOOL bUseLtePreferredStatusForServiceCapability;
+    IMS_BOOL bUseMcidSupplementaryService;
+    IMS_BOOL bUseMmcSupplementaryService;
+    IMS_BOOL bValidateVerstatFeatureInRegistrationToCheckNetworkCapability;
+    IMS_BOOL bVideoOnDefaultBearerSupported;
+    IMS_BOOL bVideoQosPreconditionSupported;
+    IMS_BOOL bVoiceOnDefaultBearerSupported;
+    IMS_BOOL bVoiceQosPreconditionSupported;
 };
 
 #endif

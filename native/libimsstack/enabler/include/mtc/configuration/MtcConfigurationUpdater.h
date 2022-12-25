@@ -22,19 +22,15 @@
 
 class ICarrierConfig;
 struct CarrierConfigItems;
-struct AssetItems;
 
 class MtcConfigurationUpdater final
 {
 public:
-    static void Update(IN ICarrierConfig* piCc, IN CarrierConfigItems& objCarrierConfigItems,
-            IN AssetItems& objAssetItems);
+    static void Update(IN ICarrierConfig* piCc, IN CarrierConfigItems& objCarrierConfigItems);
 
 private:
-    static void ClearArrays(
-            IN CarrierConfigItems& objCarrierConfigItems, IN AssetItems& objAssetItems);
+    static void ClearArrays(IN CarrierConfigItems& objCarrierConfigItems);
     static void UpdateByCarrierConfig(IN ICarrierConfig* piCc, IN CarrierConfigItems& objItems);
-    static void UpdateByAsset(IN ICarrierConfig* piCc, IN AssetItems& objItems);
 };
 
 #endif

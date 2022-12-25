@@ -20,7 +20,7 @@
 #include "AString.h"
 #include "ICarrierConfigListener.h"
 #include "ImsTypeDef.h"
-#include "configuration/AssetItems.h"
+#include "ImsVector.h"
 #include "configuration/CarrierConfigItems.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/IMtcConfigurationManager.h"
@@ -176,11 +176,10 @@ public:
     IMS_SINT32 GetCallRejectCodeForNotAcceptableCallType() const override;
 
 private:
-    static IMS_BOOL ContainsValue(IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue);
-    static IMS_BOOL ContainsValue(IN const IMSVector<AString>& lstList, IN const AString& strValue);
+    static IMS_BOOL ContainsValue(IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue);
+    static IMS_BOOL ContainsValue(IN const ImsVector<AString>& lstList, IN const AString& strValue);
 
     CarrierConfigItems m_objCarrierConfig;
-    AssetItems m_objAsset;
 
     LOCAL const IMS_UINT32 TERMINATE_BY_ANY_AOS_REASON = 999;
 };
