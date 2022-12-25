@@ -29,5 +29,6 @@ It allows additional grants on top of privapp-permissions-platform.xml.
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="com.android.telephony.permission.USE_IMSMEDIA"/>
     </privapp-permissions>
 </permissions>
