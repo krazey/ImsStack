@@ -232,9 +232,11 @@ private:
     static SdpPrecondition* CreatePrecondition(
             IN const IMSList<SdpAttribute>& objAttributes, OUT IMSList<SdpAttribute>& objQosAttrs);
 
+#if defined(__SDP_CORRECT_FMTP_FOR_DUPLICATE_PAYLOAD_TYPES__)
     // 4 workaround solution for multiple fmtp
     static void CorrectFmtps(
-            IN IMSList<IMS_SINT32>& objPayloadTypes4Fmtp, IN_OUT IMSList<SdpAttribute>& objFmtps);
+            IN ImsList<IMS_SINT32>& objPayloadTypes4Fmtp, IN_OUT ImsList<SdpAttribute>& objFmtps);
+#endif
 
 private:
     // Attribute flags

@@ -1370,9 +1370,11 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
             }
         }
 
+#if defined(__SDP_CORRECT_FMTP_FOR_DUPLICATE_PAYLOAD_TYPES__)
         // 4 workaround solution for the multiple fmtp attributes -
         //  if it is required for test purpose, please enable below line.
-        // CorrectFMTPs(objPTs4FMTP, objFMTPs);
+        CorrectFmtps(objPts4Fmtp, objFmtps);
+#endif
 
         // Check the payload type and collect the attribute according to the payload type
         for (IMS_UINT32 j = 0; j < objPts.GetSize(); ++j)
@@ -1865,10 +1867,11 @@ PRIVATE GLOBAL SdpPrecondition* SdpMediaParameter::CreatePrecondition(
     return pPrecondition;
 }
 
+#if defined(__SDP_CORRECT_FMTP_FOR_DUPLICATE_PAYLOAD_TYPES__)
 PUBLIC GLOBAL void SdpMediaParameter::CorrectFmtps(
-        IN IMSList<IMS_SINT32>& objPayloadTypes4Fmtp, IN_OUT IMSList<SdpAttribute>& objFmtps)
+        IN ImsList<IMS_SINT32>& objPayloadTypes4Fmtp, IN_OUT ImsList<SdpAttribute>& objFmtps)
 {
-    IMSMap<IMS_SINT32, IMSList<IMS_SINT32>> objDuplicatedFmtps;
+    ImsMap<IMS_SINT32, ImsList<IMS_SINT32>> objDuplicatedFmtps;
     IMS_BOOL bHasDuplicatedFmtp = IMS_FALSE;
 
     for (IMS_UINT32 i = 0; i < objPayloadTypes4Fmtp.GetSize(); ++i)
@@ -1878,14 +1881,14 @@ PUBLIC GLOBAL void SdpMediaParameter::CorrectFmtps(
 
         if (nIndex < 0)
         {
-            IMSList<IMS_SINT32> objIndices;
+            ImsList<IMS_SINT32> objIndices;
             objIndices.Append(i);
 
             objDuplicatedFmtps.SetValue(nPayloadType, objIndices);
         }
         else
         {
-            IMSList<IMS_SINT32>& objIndices = objDuplicatedFmtps.GetValueAt(nIndex);
+            ImsList<IMS_SINT32>& objIndices = objDuplicatedFmtps.GetValueAt(nIndex);
             objIndices.Append(i);
 
             bHasDuplicatedFmtp = IMS_TRUE;
@@ -1901,7 +1904,7 @@ PUBLIC GLOBAL void SdpMediaParameter::CorrectFmtps(
 
     for (IMS_UINT32 i = 0; i < objDuplicatedFmtps.GetSize(); ++i)
     {
-        const IMSList<IMS_SINT32>& objIndices = objDuplicatedFmtps.GetValueAt(i);
+        const ImsList<IMS_SINT32>& objIndices = objDuplicatedFmtps.GetValueAt(i);
 
         if (objIndices.GetSize() <= 1)
         {
@@ -1927,3 +1930,4 @@ PUBLIC GLOBAL void SdpMediaParameter::CorrectFmtps(
         objAnchorAttr.SetValue(SdpAttribute::FMTP, strOtherFmtp);
     }
 }
+#endif
