@@ -27,6 +27,10 @@ private:
     ~SdpProfile();
 
 public:
+    SdpProfile(IN const SdpProfile&) = delete;
+    SdpProfile& operator=(IN const SdpProfile&) = delete;
+
+public:
     void InitFeatures(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nNewFeatures);
     IMS_SINT32 GetFeatures(IN IMS_SINT32 nSlotId) const;
 
