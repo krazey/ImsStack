@@ -34,9 +34,11 @@ public:
     IJniEnablerThread* GetJniThread() const override;
     virtual int SendData(const Parcel& pParcel) override;
 
+protected:
+    void HandleMessage(int nMsg, const Parcel& pParcel) override;
+
 private:
     IUceJni* GetNativeService();
-    void HandleMessage(int nMsg, const Parcel& pParcel) override;
     static void SendPublishCmd(IUceJni* pJniUce, const Parcel& pParcel);
     static void SendSingleSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel);
     static void SendListSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel);
