@@ -41,7 +41,7 @@ public:
     }
 
     inline void NotifyNativeEnablerSet() override {}
-    inline IJniEnablerThread* GetJniThread() const { return IMS_NULL; }
+    inline IJniEnablerThread* GetJniThread() const override { return IMS_NULL; }
     inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }
 
 protected:

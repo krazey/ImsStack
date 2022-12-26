@@ -1861,9 +1861,7 @@ void System::NotifyCallCategory(
     IMS_SINT32 nEvent = IMS_SYSTEM_INVALID;
     IMS_UINTP nWParam = 0;
     IMS_UINTP nLParam = 0;
-    IMS_CHAR szNumber[20 + 1] = {
-            0,
-    };
+    AString strNumber;
 
     if (nCmd == SystemConstants::NOTIFY_VOICE_CALL_STATE_CHANGED)
     {
@@ -1873,8 +1871,8 @@ void System::NotifyCallCategory(
         String16 str16Number = in.readString16();
         String8 str8Number(str16Number);
 
-        IMS_StrCpy(szNumber, 20 + 1, str8Number.string());
-        nLParam = reinterpret_cast<IMS_UINTP>(szNumber);
+        strNumber = str8Number.string();
+        nLParam = reinterpret_cast<IMS_UINTP>(strNumber.GetStr());
     }
     else
     {

@@ -23,7 +23,7 @@
 class MockIThread : public IThread
 {
 public:
-    inline MockIThread(IN IMS_SINT32 nSlotId = IMS_SLOT_0) :
+    inline explicit MockIThread(IN IMS_SINT32 nSlotId = IMS_SLOT_0) :
             m_nSlotId(nSlotId),
             m_strName(AString::ConstNull())
     {
