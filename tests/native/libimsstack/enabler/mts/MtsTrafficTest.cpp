@@ -30,6 +30,7 @@ class MtsTrafficTest : public ::testing::Test
 {
 public:
     inline MtsTrafficTest() :
+            pMtsTraffic(IMS_NULL),
             pTimerService(new TestTimerService()),
             objTimer(pTimerService->GetMockTimer())
     {
@@ -41,10 +42,11 @@ public:
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
     }
 
+    MtsTraffic* pMtsTraffic;
     TestTimerService* pTimerService;
+
     MockIMtsTrafficListener objMockMtsTrafficListener;
     MockITimer& objTimer;
-    MtsTraffic* pMtsTraffic;
 
 protected:
     virtual void SetUp() override
