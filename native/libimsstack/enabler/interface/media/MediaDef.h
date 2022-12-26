@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_DEF_H_
-#define _MEDIA_DEF_H_
+#ifndef MEDIA_DEF_H_
+#define MEDIA_DEF_H_
 
 #include <IpAddress.h>
 

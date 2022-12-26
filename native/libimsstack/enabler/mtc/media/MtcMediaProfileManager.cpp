@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "IMediaSession.h"
+#include "ISession.h"
 #include "ServiceTrace.h"
 #include "media/MtcMediaProfileManager.h"
 
@@ -21,7 +23,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcMediaProfileManager::MtcMediaProfileManager() :
-        m_objMediaProfiles(IMSMap<ISession*, MediaProfile*>())
+        m_objMediaProfiles(ImsMap<const ISession*, MediaProfile*>())
 {
     IMS_TRACE_D("+MtcMediaProfileManager", 0, 0, 0);
 }
@@ -42,11 +44,16 @@ PUBLIC VIRTUAL MtcMediaProfileManager::~MtcMediaProfileManager()
 }
 
 PUBLIC
-void MtcMediaProfileManager::CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,
+void MtcMediaProfileManager::CreateMediaProfile(IN const ISession* piSession, IN IMS_BOOL bForked,
         IN IMS_BOOL bOriginalProfile, IN MEDIA_CONTENT_TYPE eMediaContents,
         IN IMediaSession* piMediaSession)
 {
     IMS_TRACE_D("CreateMediaProfile", 0, 0, 0);
+
+    if (!piSession)
+    {
+        return;
+    }
 
     if (IsMediaProfilePresent(piSession))
     {
@@ -55,16 +62,11 @@ void MtcMediaProfileManager::CreateMediaProfile(IN ISession* piSession, IN IMS_B
 
     IMS_UINTP nParamId = 0;
 
-    if (bForked == IMS_TRUE)  // forked session
+    if (bOriginalProfile && bForked)  // not virtual session && forked session
     {
         for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
         {
             MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(index);
-
-            if (!pProfile)
-            {
-                continue;
-            }
 
             if (pProfile->bForked == IMS_FALSE)
             {
@@ -86,11 +88,6 @@ void MtcMediaProfileManager::CreateMediaProfile(IN ISession* piSession, IN IMS_B
         }
     }
 
-    if (bOriginalProfile == IMS_FALSE)  // virtual early session
-    {
-        nParamId = 0;
-    }
-
     MediaProfile* pProfile = new MediaProfile();
     pProfile->nNegoId = piMediaSession->CreateProfile(nParamId, eMediaContents);
     pProfile->bForked = bForked;
@@ -101,7 +98,7 @@ void MtcMediaProfileManager::CreateMediaProfile(IN ISession* piSession, IN IMS_B
 
 PUBLIC
 void MtcMediaProfileManager::DestroyMediaProfile(
-        IN ISession* piSession, IN IMediaSession* piMediaSession)
+        IN const ISession* piSession, IN IMediaSession* piMediaSession)
 {
     IMS_TRACE_D("DestroyMediaProfile", 0, 0, 0);
 
@@ -125,19 +122,17 @@ void MtcMediaProfileManager::DestroyMediaProfile(
 PUBLIC
 void MtcMediaProfileManager::DestroyAllMediaProfiles(IN IMediaSession* piMediaSession)
 {
-    IMS_TRACE_D("DestroyAllMediaProfiles", 0, 0, 0);
-
-    for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
+    for (IMS_UINT32 i = m_objMediaProfiles.GetSize(); i > 0; i--)
     {
-        ISession* piSession = m_objMediaProfiles.GetKeyAt(index);
+        const ISession* piSession = m_objMediaProfiles.GetKeyAt(i - 1);
         DestroyMediaProfile(piSession, piMediaSession);
     }
 }
 
 PUBLIC
-IMS_UINTP MtcMediaProfileManager::GetNegoId(IN ISession* piSession)
+IMS_UINTP MtcMediaProfileManager::GetNegoId(IN const ISession* piSession) const
 {
-    MediaProfile* pProfile = GetMediaProfile(piSession);
+    const MediaProfile* pProfile = GetMediaProfile(piSession);
 
     if (!pProfile)
     {
@@ -148,9 +143,9 @@ IMS_UINTP MtcMediaProfileManager::GetNegoId(IN ISession* piSession)
 }
 
 PUBLIC
-PemType MtcMediaProfileManager::GetPemType(IN ISession* piSession)
+PemType MtcMediaProfileManager::GetPemType(IN const ISession* piSession) const
 {
-    MediaProfile* pProfile = GetMediaProfile(piSession);
+    const MediaProfile* pProfile = GetMediaProfile(piSession);
 
     if (!pProfile)
     {
@@ -161,9 +156,9 @@ PemType MtcMediaProfileManager::GetPemType(IN ISession* piSession)
 }
 
 PUBLIC
-IMS_BOOL MtcMediaProfileManager::IsActive(IN ISession* piSession)
+IMS_BOOL MtcMediaProfileManager::IsActive(IN const ISession* piSession) const
 {
-    MediaProfile* pProfile = GetMediaProfile(piSession);
+    const MediaProfile* pProfile = GetMediaProfile(piSession);
 
     if (!pProfile)
     {
@@ -174,9 +169,9 @@ IMS_BOOL MtcMediaProfileManager::IsActive(IN ISession* piSession)
 }
 
 PUBLIC
-IMS_BOOL MtcMediaProfileManager::IsConfirmed(IN ISession* piSession)
+IMS_BOOL MtcMediaProfileManager::IsConfirmed(IN const ISession* piSession) const
 {
-    MediaProfile* pProfile = GetMediaProfile(piSession);
+    const MediaProfile* pProfile = GetMediaProfile(piSession);
 
     if (!pProfile)
     {
@@ -187,7 +182,7 @@ IMS_BOOL MtcMediaProfileManager::IsConfirmed(IN ISession* piSession)
 }
 
 PUBLIC
-void MtcMediaProfileManager::SetPemType(IN ISession* piSession, IN PemType ePemType)
+void MtcMediaProfileManager::SetPemType(IN const ISession* piSession, IN PemType ePemType)
 {
     MediaProfile* pProfile = GetMediaProfile(piSession);
 
@@ -200,7 +195,7 @@ void MtcMediaProfileManager::SetPemType(IN ISession* piSession, IN PemType ePemT
 }
 
 PUBLIC
-void MtcMediaProfileManager::SetActive(IN ISession* piSession, IN IMS_BOOL bActive)
+void MtcMediaProfileManager::SetActive(IN const ISession* piSession, IN IMS_BOOL bActive)
 {
     MediaProfile* pProfile = GetMediaProfile(piSession);
 
@@ -213,7 +208,7 @@ void MtcMediaProfileManager::SetActive(IN ISession* piSession, IN IMS_BOOL bActi
 }
 
 PUBLIC
-void MtcMediaProfileManager::SetConfirmed(IN ISession* piSession, IN IMS_BOOL bConfirmed)
+void MtcMediaProfileManager::SetConfirmed(IN const ISession* piSession, IN IMS_BOOL bConfirmed)
 {
     MediaProfile* pProfile = GetMediaProfile(piSession);
 
@@ -226,13 +221,13 @@ void MtcMediaProfileManager::SetConfirmed(IN ISession* piSession, IN IMS_BOOL bC
 }
 
 PUBLIC
-IMS_BOOL MtcMediaProfileManager::IsPemSendInOtherEarlySession(IN ISession* piSession)
+IMS_BOOL MtcMediaProfileManager::IsPemSendInOtherEarlySession(IN const ISession* piSession) const
 {
     IMS_BOOL bResult = IMS_FALSE;
 
     for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
     {
-        ISession* piTargetSession = m_objMediaProfiles.GetKeyAt(index);
+        const ISession* piTargetSession = m_objMediaProfiles.GetKeyAt(index);
 
         if (piTargetSession == piSession)
         {
@@ -246,8 +241,8 @@ IMS_BOOL MtcMediaProfileManager::IsPemSendInOtherEarlySession(IN ISession* piSes
 
         PemType ePemType = GetPemType(piTargetSession);
 
-        if (IsActive(piTargetSession) &&
-                ((ePemType == PemType::SENDRECV) || (ePemType == PemType::SENDONLY)))
+        if ((ePemType == PemType::SENDRECV || ePemType == PemType::SENDONLY) &&
+                IsActive(piTargetSession))
         {
             bResult = IMS_TRUE;
             break;
@@ -259,14 +254,14 @@ IMS_BOOL MtcMediaProfileManager::IsPemSendInOtherEarlySession(IN ISession* piSes
 }
 
 PUBLIC
-void MtcMediaProfileManager::UpdateProfileForMediaActivation(IN ISession* piActiveSession)
+void MtcMediaProfileManager::UpdateProfileForMediaActivation(IN const ISession* piActiveSession)
 {
     IMS_TRACE_D("UpdateProfileForMediaActivation", 0, 0, 0);
     SetActive(piActiveSession, IMS_TRUE);
 
     for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
     {
-        ISession* piSession = m_objMediaProfiles.GetKeyAt(index);
+        const ISession* piSession = m_objMediaProfiles.GetKeyAt(index);
         if (piSession == piActiveSession)
         {
             continue;
@@ -281,11 +276,11 @@ ISession* MtcMediaProfileManager::GetSessionWithNegoId(IN IMS_UINTP nNegoId)
 {
     for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
     {
-        ISession* piSession = m_objMediaProfiles.GetKeyAt(index);
+        const ISession* piSession = m_objMediaProfiles.GetKeyAt(index);
 
         if (nNegoId == GetNegoId(piSession))
         {
-            return piSession;
+            return const_cast<ISession*>(piSession);
         }
     }
 
@@ -294,7 +289,7 @@ ISession* MtcMediaProfileManager::GetSessionWithNegoId(IN IMS_UINTP nNegoId)
 }
 
 PRIVATE
-IMS_BOOL MtcMediaProfileManager::IsMediaProfilePresent(IN const ISession* piSession)
+IMS_BOOL MtcMediaProfileManager::IsMediaProfilePresent(IN const ISession* piSession) const
 {
     for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
     {
@@ -309,7 +304,8 @@ IMS_BOOL MtcMediaProfileManager::IsMediaProfilePresent(IN const ISession* piSess
 }
 
 PRIVATE
-MediaProfile* MtcMediaProfileManager::GetMediaProfile(IN ISession* piSession)
+MediaProfile* MtcMediaProfileManager::GetMediaProfile(IN const ISession* piSession) const
 {
-    return m_objMediaProfiles.GetValue(piSession);
+    IMS_SLONG nIndex = m_objMediaProfiles.GetIndexOfKey(piSession);
+    return nIndex >= 0 ? m_objMediaProfiles.GetValueAt(nIndex) : IMS_NULL;
 }

@@ -30,21 +30,24 @@ class MockMtcMediaProfileManager : public MtcMediaProfileManager
 public:
     ~MockMtcMediaProfileManager() {}
     MOCK_METHOD(void, CreateMediaProfile,
-            (IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile,
+            (IN const ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile,
                     IN MEDIA_CONTENT_TYPE eMediaContents, IN IMediaSession* piMediaSession),
             (override));
     MOCK_METHOD(void, DestroyMediaProfile,
-            (IN ISession* piSession, IN IMediaSession* piMediaSession), (override));
+            (IN const ISession* piSession, IN IMediaSession* piMediaSession), (override));
     MOCK_METHOD(void, DestroyAllMediaProfiles, (IN IMediaSession* piMediaSession), (override));
-    MOCK_METHOD(IMS_UINTP, GetNegoId, (IN ISession* piSession), (override));
-    MOCK_METHOD(PemType, GetPemType, (IN ISession* piSession), (override));
-    MOCK_METHOD(IMS_BOOL, IsActive, (IN ISession* piSession), (override));
-    MOCK_METHOD(IMS_BOOL, IsConfirmed, (IN ISession * piSession), (override));
-    MOCK_METHOD(void, SetPemType, (IN ISession* piSession, IN PemType ePemType), (override));
-    MOCK_METHOD(void, SetActive, (IN ISession* piSession, IN IMS_BOOL bActive), (override));
-    MOCK_METHOD(void, SetConfirmed, (IN ISession * piSession, IN IMS_BOOL bConfirmed), (override));
-    MOCK_METHOD(IMS_BOOL, IsPemSendInOtherEarlySession, (IN ISession * piSession), (override));
-    MOCK_METHOD(void, UpdateProfileForMediaActivation, (IN ISession* piActiveSession), (override));
+    MOCK_METHOD(IMS_UINTP, GetNegoId, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(PemType, GetPemType, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsActive, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsConfirmed, (IN const ISession* piSession), (const, override));
+    MOCK_METHOD(void, SetPemType, (IN const ISession* piSession, IN PemType ePemType), (override));
+    MOCK_METHOD(void, SetActive, (IN const ISession* piSession, IN IMS_BOOL bActive), (override));
+    MOCK_METHOD(
+            void, SetConfirmed, (IN const ISession* piSession, IN IMS_BOOL bConfirmed), (override));
+    MOCK_METHOD(IMS_BOOL, IsPemSendInOtherEarlySession, (IN const ISession* piSession),
+            (const, override));
+    MOCK_METHOD(void, UpdateProfileForMediaActivation, (IN const ISession* piActiveSession),
+            (override));
     MOCK_METHOD(ISession*, GetSessionWithNegoId, (IN IMS_UINTP nNegoId), (override));
 };
 
