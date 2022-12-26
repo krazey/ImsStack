@@ -17,11 +17,13 @@
 #ifndef MTC_MEDIA_PROFILE_MANAGER_H_
 #define MTC_MEDIA_PROFILE_MANAGER_H_
 
-#include "IMediaSession.h"
-#include "ISession.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
+#include "MediaDef.h"
 #include "MtcDef.h"
+
+class IMediaSession;
+class ISession;
 
 class MediaProfile
 {
@@ -35,27 +37,11 @@ public:
             bOriginalProfile(IMS_TRUE)
     {
     }
-
-    inline MediaProfile(IN const MediaProfile& objRHS)
-    {
-        nNegoId = objRHS.nNegoId;
-        ePemType = objRHS.ePemType;
-        bActive = objRHS.bActive;
-        bConfirmed = objRHS.bConfirmed;
-        bForked = objRHS.bForked;
-        bOriginalProfile = objRHS.bOriginalProfile;
-    }
-
-    inline virtual ~MediaProfile()
-    {
-        if (nNegoId != IMS_NULL)
-        {
-            nNegoId = IMS_NULL;
-        }
-    }
+    inline virtual ~MediaProfile() {}
+    MediaProfile(IN const MediaProfile&) = delete;
+    MediaProfile& operator=(IN const MediaProfile&) = delete;
 
 private:
-    MediaProfile& operator=(IN const MediaProfile& objRHS);
     friend class MtcMediaProfileManager;
 
 private:
@@ -76,32 +62,33 @@ public:
     MtcMediaProfileManager& operator=(IN const MtcMediaProfileManager&) = delete;
 
 public:
-    virtual void CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,
+    virtual void CreateMediaProfile(IN const ISession* piSession, IN IMS_BOOL bForked,
             IN IMS_BOOL bOriginalProfile, IN MEDIA_CONTENT_TYPE eMediaContents,
             IN IMediaSession* piMediaSession);
-    virtual void DestroyMediaProfile(IN ISession* piSession, IN IMediaSession* piMediaSession);
+    virtual void DestroyMediaProfile(
+            IN const ISession* piSession, IN IMediaSession* piMediaSession);
     virtual void DestroyAllMediaProfiles(IN IMediaSession* piMediaSession);
 
-    virtual IMS_UINTP GetNegoId(IN ISession* piSession);
-    virtual PemType GetPemType(IN ISession* piSession);
-    virtual IMS_BOOL IsActive(IN ISession* piSession);
-    virtual IMS_BOOL IsConfirmed(IN ISession* piSession);
+    virtual IMS_UINTP GetNegoId(IN const ISession* piSession) const;
+    virtual PemType GetPemType(IN const ISession* piSession) const;
+    virtual IMS_BOOL IsActive(IN const ISession* piSession) const;
+    virtual IMS_BOOL IsConfirmed(IN const ISession* piSession) const;
 
-    virtual void SetPemType(IN ISession* piSession, IN PemType ePemType);
-    virtual void SetActive(IN ISession* piSession, IN IMS_BOOL bActive);
-    virtual void SetConfirmed(IN ISession* piSession, IN IMS_BOOL bConfirmed);
+    virtual void SetPemType(IN const ISession* piSession, IN PemType ePemType);
+    virtual void SetActive(IN const ISession* piSession, IN IMS_BOOL bActive);
+    virtual void SetConfirmed(IN const ISession* piSession, IN IMS_BOOL bConfirmed);
 
-    virtual IMS_BOOL IsPemSendInOtherEarlySession(IN ISession* piSession);
-    virtual void UpdateProfileForMediaActivation(IN ISession* piActiveSession);
+    virtual IMS_BOOL IsPemSendInOtherEarlySession(IN const ISession* piSession) const;
+    virtual void UpdateProfileForMediaActivation(IN const ISession* piActiveSession);
 
     virtual ISession* GetSessionWithNegoId(IN IMS_UINTP nNegoId);
 
 private:
-    IMS_BOOL IsMediaProfilePresent(IN const ISession* piSession);
-    MediaProfile* GetMediaProfile(IN ISession* piSession);
+    IMS_BOOL IsMediaProfilePresent(IN const ISession* piSession) const;
+    MediaProfile* GetMediaProfile(IN const ISession* piSession) const;
 
 private:
-    ImsMap<ISession*, MediaProfile*> m_objMediaProfiles;
+    ImsMap<const ISession*, MediaProfile*> m_objMediaProfiles;
 };
 
 #endif
