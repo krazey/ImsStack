@@ -398,15 +398,18 @@ public class MergeProxy extends ConferenceProxy {
         });
     }
 
-    private boolean isBackgroundCallRecoveryRequired() {
+    @VisibleForTesting
+    protected boolean isBackgroundCallRecoveryRequired() {
         return (mCallRecoveryRequired & FLAG_RECOVER_BACKGROUND_CALL) != 0;
     }
 
-    private boolean isForegroundCallRecoveryRequired() {
+    @VisibleForTesting
+    protected boolean isForegroundCallRecoveryRequired() {
         return (mCallRecoveryRequired & FLAG_RECOVER_FOREGROUND_CALL) != 0;
     }
 
-    private void setBackgroundCallRecovery(boolean flag) {
+    @VisibleForTesting
+    protected void setBackgroundCallRecovery(boolean flag) {
         log("BackgroundCallRecoveryRequired=" + flag);
 
         if (flag) {
@@ -416,7 +419,8 @@ public class MergeProxy extends ConferenceProxy {
         }
     }
 
-    private void setForegroundCallRecovery(boolean flag) {
+    @VisibleForTesting
+    protected void setForegroundCallRecovery(boolean flag) {
         log("BackgroundCallRecoveryRequired=" + flag);
 
         if (flag) {
