@@ -300,6 +300,8 @@ PUBLIC
 IMS_BYTE& Ipv6Address::operator[](IN IMS_SINT32 i)
 {
     IMS_ASSERT((i >= 0) && (i < MAX_SIZE));
+    // cppcheck-suppress arrayIndexOutOfBoundsCond
+    // cppcheck-suppress negativeIndex
     return aIp6[i];
 }
 
@@ -307,6 +309,8 @@ PUBLIC
 IMS_BYTE Ipv6Address::operator[](IN IMS_SINT32 i) const
 {
     IMS_ASSERT((i >= 0) && (i < MAX_SIZE));
+    // cppcheck-suppress arrayIndexOutOfBoundsCond
+    // cppcheck-suppress negativeIndex
     return aIp6[i];
 }
 

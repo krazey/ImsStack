@@ -325,6 +325,7 @@ case SystemConstants::NOTIFY_DATA_CONNECTION_STATE_CHANGED:
 PUBLIC
 void System::NotifyData(IN const android::Parcel& in, OUT android::Parcel& out)
 {
+    // cppcheck-suppress duplicateAssignExpression
     IMS_SINT32 nSlotId = in.readInt32();
     IMS_SINT32 nCmd = in.readInt32();
     AString strLog;

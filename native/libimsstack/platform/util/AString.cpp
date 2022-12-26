@@ -382,6 +382,8 @@ AString astring_ULLToA(IN IMS_UINT64 nULL, IN IMS_SINT32 nBase)
 
         while (nULL != 0)
         {
+            // The "nBase" is always not zero.
+            // cppcheck-suppress zerodivcond
             n1Cipher = nULL % nBase;
 
             --pULL;
@@ -395,6 +397,8 @@ AString astring_ULLToA(IN IMS_UINT64 nULL, IN IMS_SINT32 nBase)
                 *pULL = n1Cipher - 10 + 'a';
             }
 
+            // The "nBase" is always not zero.
+            // cppcheck-suppress zerodivcond
             nULL /= nBase;
         }
     }
@@ -667,6 +671,9 @@ AString::CharRef::CharRef(IN AString& objStr, IN IMS_SINT32 nIndex) :
 }
 
 PUBLIC
+// This assignment operator is not used to change the "m_nIndex",
+// but to change the character itself.
+// cppcheck-suppress operatorEqVarError
 AString::CharRef& AString::CharRef::operator=(IN const CharRef& other)
 {
     if (this != &other)
@@ -2067,6 +2074,7 @@ AString AString::TrimLeft() const
 
     IMS_SINT32 nLen = nEnd - nStart + 1;
 
+    // cppcheck-suppress knownConditionTrueFalse
     if (nLen <= 0)
     {
         return AString(&SHARED_EMPTY);

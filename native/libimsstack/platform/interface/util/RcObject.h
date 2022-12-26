@@ -44,6 +44,7 @@ template <class T>
 class RcPtr
 {
 public:
+    // cppcheck-suppress noExplicitConstructor
     RcPtr(T* pRealPtr = IMS_NULL);
     RcPtr(IN const RcPtr& other);
     ~RcPtr();

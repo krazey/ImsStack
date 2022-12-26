@@ -59,6 +59,9 @@ ByteArray::ByteRef::ByteRef(IN ByteArray& objBa, IN IMS_SINT32 nIndex) :
 }
 
 PUBLIC
+// This assignment operator is not used to change the "m_nIndex",
+// but to change the character itself.
+// cppcheck-suppress operatorEqVarError
 ByteArray::ByteRef& ByteArray::ByteRef::operator=(IN const ByteRef& other)
 {
     if (this != &other)

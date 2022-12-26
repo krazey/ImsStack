@@ -72,6 +72,7 @@ public:
 
 public:
     AString();
+    // cppcheck-suppress noExplicitConstructor
     AString(IN const IMS_CHAR* pszValue);
     AString(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nSize);
     AString(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount);

@@ -193,6 +193,7 @@ PUBLIC GLOBAL AString ImsProperty::KeyToString(IN IMS_SINT32 nKey)
 {
     if ((nKey > PKEY_CUSTOM) && (nKey < PKEY_MAX))
     {
+        // cppcheck-suppress arrayIndexOutOfBoundsCond
         return AString(PKEY_STRING[nKey]);
     }
 
