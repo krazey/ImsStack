@@ -30,6 +30,7 @@
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceManager.h"
 #include "ect/IEctManager.h"
+#include "helper/OperationAsyncRunner.h"
 #include "ussi/UssiConstants.h"
 #include "utility/MessageUtil.h"
 
@@ -197,7 +198,11 @@ void MtcCallController::RejectResume(IN CallKey nCallKey, IN const CallReasonInf
 PUBLIC
 void MtcCallController::Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->Terminate(objReason);
+    m_objContext.GetAsyncRunner(
+            [&, objReason]()
+            {
+                m_objCallManager.GetCallByCallKey(nCallKey)->Terminate(objReason);
+            });
 }
 
 PUBLIC

@@ -67,6 +67,7 @@ class ISession;
 class MessageSender;
 class MessageUtils;
 class MtcConfigurationProxy;
+class OperationAsyncRunner;
 class UdpKeepAliveSender;
 class UssiController;
 struct CallReasonInfo;

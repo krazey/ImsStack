@@ -205,14 +205,20 @@ TEST_F(MtcAppTest, GetConferenceManagerAfterConstructor)
 
 TEST_F(MtcAppTest, GetAsyncRunnerAfterConstructor)
 {
+    // null case
+    ASSERT_EQ(nullptr, pMtcApp->GetAsyncRunner(nullptr));
+
+    // non-null case
     OperationAsyncRunner* pRunner = pMtcApp->GetAsyncRunner(
             [&]()
             {
                 // do nothing
             });
     ASSERT_NE(pRunner, nullptr);
-    ImsMessage objMessage(0, 0, 0);
-    pRunner->OnMessage(objMessage);  // to delete pRunner
+
+    // Here, BaseThread is null so OperationAsyncRunner is deleted immediately
+    // so pRunner is Dangling pointer.
+    // Let's test the normal case within OperationAsyncRunner with some SetUps
 }
 
 TEST_F(MtcAppTest, GetMessageUtilsAfterConstructor)

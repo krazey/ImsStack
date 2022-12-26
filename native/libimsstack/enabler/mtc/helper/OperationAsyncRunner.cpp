@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#include "EnablerUtils.h"
 #include "ImsMessage.h"
+#include "ImsProcess.h"
 #include "ServiceTrace.h"
 #include "helper/OperationAsyncRunner.h"
 #include <functional>
@@ -23,21 +25,39 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-OperationAsyncRunner::OperationAsyncRunner(IN std::function<void()> objOperation) :
+OperationAsyncRunner::OperationAsyncRunner(
+        IN IMS_SINT32 nSlotId, IN std::function<void()> objOperation) :
+        m_nSlotId(nSlotId),
         m_objOperation(std::move(objOperation))
 {
     IMS_TRACE_D("+OperationAsyncRunner", 0, 0, 0);
-    PostMessage(0, 0, 0);
+
+    ImsMessage objMsg(0, 0, 0, this);
+    BaseThread* pThread =
+            ImsProcess::GetInstance()->GetThread(EnablerUtils::GetEnablerThreadName(m_nSlotId));
+    if (pThread != IMS_NULL)
+    {
+        IThread* piThread = pThread->GetThread();
+        if (piThread != IMS_NULL)
+        {
+            piThread->PostMessageI(objMsg);
+            return;
+        }
+    }
+
+    IMS_TRACE_E(0, "Thread is null", 0, 0, 0);
+    delete this;
 }
 
-PUBLIC VIRTUAL OperationAsyncRunner::~OperationAsyncRunner()
+PRIVATE
+OperationAsyncRunner::~OperationAsyncRunner()
 {
     IMS_TRACE_D("~OperationAsyncRunner", 0, 0, 0);
 
     m_objOperation = {};
 }
 
-PUBLIC VIRTUAL IMS_BOOL OperationAsyncRunner::OnMessage(IN ImsMessage& /*objMsg*/)
+PUBLIC VIRTUAL void OperationAsyncRunner::MessageCallback_OnMessage(IN ImsMessage& /*objMsg*/)
 {
     if (m_objOperation)
     {
@@ -45,5 +65,4 @@ PUBLIC VIRTUAL IMS_BOOL OperationAsyncRunner::OnMessage(IN ImsMessage& /*objMsg*
     }
 
     delete this;
-    return IMS_TRUE;
 }

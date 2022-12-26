@@ -34,7 +34,6 @@
 #include "helper/ICallStateProxy.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
-#include "helper/OperationAsyncRunner.h"
 #include "helper/UdpKeepAliveSender.h"
 #include "helper/sipinterfaceholder/IMtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"

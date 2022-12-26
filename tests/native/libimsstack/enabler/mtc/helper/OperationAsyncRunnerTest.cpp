@@ -14,24 +14,72 @@
  * limitations under the License.
  */
 
+#include "EnablerUtils.h"
+#include "ImsMessage.h"
+#include "ImsProcess.h"
+#include "MockIThread.h"
+#include "PlatformContext.h"
+#include "TestThreadService.h"
+#include "base/BaseThread.h"
 #include "helper/OperationAsyncRunner.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
+
 namespace android
 {
+LOCAL const IMS_SINT32 SLOT_ID = 0;
+
+class TestBaseThread : public BaseThread
+{
+public:
+    inline TestBaseThread() :
+            BaseThread()
+    {
+    }
+    inline ~TestBaseThread() {}
+};
 
 class OperationAsyncRunnerTest : public ::testing::Test
 {
-protected:
-    virtual void SetUp() override {}
+public:
+    inline OperationAsyncRunnerTest() :
+            pThreadService(new TestThreadService())
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, pThreadService);
+    }
+    inline ~OperationAsyncRunnerTest()
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
+        delete pThreadService;
+    }
 
-    virtual void TearDown() override {}
+protected:
+    TestThreadService* pThreadService;
+
+    virtual void SetUp() override
+    {
+        auto fnEntry = []() -> BaseThread*
+        {
+            return new TestBaseThread();
+        };
+
+        ImsProcess::GetInstance()->LoadThread(
+                EnablerUtils::GetEnablerThreadName(SLOT_ID), fnEntry, SLOT_ID);
+    }
+
+    virtual void TearDown() override
+    {
+        ImsProcess::GetInstance()->UnloadThread(EnablerUtils::GetEnablerThreadName(SLOT_ID));
+    }
 };
 
 TEST_F(OperationAsyncRunnerTest, OperationIsNotRunSynchronously)
 {
+    EXPECT_CALL(pThreadService->GetMockThread(), PostMessageI(_));
+
     IMS_BOOL bUpdated = IMS_FALSE;
-    OperationAsyncRunner* pRunner = new OperationAsyncRunner(
+    OperationAsyncRunner* pRunner = new OperationAsyncRunner(SLOT_ID,
             [&]()
             {
                 bUpdated = IMS_TRUE;
@@ -40,7 +88,7 @@ TEST_F(OperationAsyncRunnerTest, OperationIsNotRunSynchronously)
     EXPECT_FALSE(bUpdated);
 
     ImsMessage objMessage(0, 0, 0);
-    pRunner->OnMessage(objMessage);
+    pRunner->MessageCallback_OnMessage(objMessage);
     EXPECT_TRUE(bUpdated);
 }
 
