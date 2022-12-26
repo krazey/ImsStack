@@ -29,18 +29,27 @@
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "helper/MtcSupplementaryService.h"
+#include "service/MockIFeatureCaps.h"
 #include "sipcore/MockISipMessage.h"
+#include "sipcore/SipHeaderName.h"
 #include "utility/MessageUtil.h"
 #include "utility/MessageUtils.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
+using ::testing::_;
+using ::testing::AnyOf;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
 namespace android
 {
+
+LOCAL const AString SRVCC_FEATURE_A(MessageUtil::STR_SRVCC_FEATURE_A);
+LOCAL const AString SRVCC_FEATURE_B(MessageUtil::STR_SRVCC_FEATURE_B);
+LOCAL const AString SRVCC_FEATURE_M(MessageUtil::STR_SRVCC_FEATURE_M);
 
 class MessageFormatterTest : public ::testing::Test
 {
@@ -387,29 +396,86 @@ TEST_F(MessageFormatterTest, SetAcceptContactHeader)
     pFormatter->FormStartMessage(CallType::VT);
 }
 
-TEST_F(MessageFormatterTest, AddSrvccFeature)
+TEST_F(MessageFormatterTest, AddSrvccFeatureByStartMessage)
 {
+    // ICoreService is null case. Nothing to check.
     ON_CALL(objService, GetICoreService).WillByDefault(Return(nullptr));
     pFormatter->FormStartMessage(CallType::VOIP);
 
+    // IFeatureCaps is null case. Nothing to check.
     MockICoreService objCoreService;
     ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
-    FeatureCaps* pFeatureCaps = new FeatureCaps();
-    ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(pFeatureCaps));
+    ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(nullptr));
     pFormatter->FormStartMessage(CallType::VOIP);
 
+    // Normal case
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(SRVCC_FEATURE_A, AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_REQUEST));
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(SRVCC_FEATURE_B, AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_REQUEST));
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(SRVCC_FEATURE_M, AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_REQUEST));
+    pFormatter->FormStartMessage(CallType::VOIP);
+}
+
+TEST_F(MessageFormatterTest, AddNoSrvccFeatureByPrAnswerMessage)
+{
+    // TODO: change all Tests in this file to use MockIMessageUtils.
+    MockIMessageUtils objMockMessageUtils;
+    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
+
+    MockICoreService objCoreService;
+    ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+
+    // Previous Message is null case
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(nullptr));
+    EXPECT_CALL(objFeatureCaps, AddFeature(_, _, _, _)).Times(0);
     pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
 
+    // No FeatureCaps in INVITE case
     ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
-    ImsList<AString> lstHeaders;
-    lstHeaders.Append(MessageUtil::STR_SRVCC_FEATURE_A);
-    lstHeaders.Append(MessageUtil::STR_SRVCC_FEATURE_B);
-    lstHeaders.Append(MessageUtil::STR_SRVCC_FEATURE_M);
-    ON_CALL(objSipMessage, GetHeaders).WillByDefault(Return(lstHeaders));
+    const AString strFeatureCaps(SipHeaderName::FEATURE_CAPS);
+    ON_CALL(objMockMessageUtils,
+            ContainsValue(&objMessage, AnyOf(SRVCC_FEATURE_A, SRVCC_FEATURE_B, SRVCC_FEATURE_M),
+                    ISipHeader::UNKNOWN, strFeatureCaps))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objFeatureCaps, AddFeature(_, _, _, _)).Times(0);
     pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
+}
 
-    delete pFeatureCaps;
+TEST_F(MessageFormatterTest, AddSrvccFeatureByPrAnswerMessage)
+{
+    MockIMessageUtils objMockMessageUtils;
+    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
+    MockICoreService objCoreService;
+    ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
+    MockIFeatureCaps objFeatureCaps;
+    ON_CALL(objCoreService, GetFeatureCaps).WillByDefault(Return(&objFeatureCaps));
+    ON_CALL(objSession, GetPreviousRequest).WillByDefault(Return(&objMessage));
+
+    const AString strFeatureCaps(SipHeaderName::FEATURE_CAPS);
+    ON_CALL(objMockMessageUtils,
+            ContainsValue(&objMessage, AnyOf(SRVCC_FEATURE_A, SRVCC_FEATURE_B, SRVCC_FEATURE_M),
+                    ISipHeader::UNKNOWN, strFeatureCaps))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(SRVCC_FEATURE_A, AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_RESPONSE));
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(SRVCC_FEATURE_B, AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_RESPONSE));
+    EXPECT_CALL(objFeatureCaps,
+            AddFeature(SRVCC_FEATURE_M, AString::ConstEmpty(), SipMethod::INVITE,
+                    ISipMessage::TYPE_RESPONSE));
+    pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
 }
 
 TEST_F(MessageFormatterTest, SetSrvccContactParameter)

@@ -394,7 +394,6 @@ void MessageFormatter::AddSrvccFeature()
                 SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_M, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
-
         return;
     }
 
@@ -408,21 +407,21 @@ void MessageFormatter::AddSrvccFeature()
                 MessageUtil::STR_SRVCC_FEATURE_A, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_A, AString::ConstEmpty(),
-                SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
+                SipMethod::INVITE, ISipMessage::TYPE_RESPONSE);
     }
 
     if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
                 MessageUtil::STR_SRVCC_FEATURE_B, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_B, AString::ConstEmpty(),
-                SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
+                SipMethod::INVITE, ISipMessage::TYPE_RESPONSE);
     }
 
     if (m_objContext.GetMessageUtils().ContainsValue(piPreviousMessage,
                 MessageUtil::STR_SRVCC_FEATURE_M, ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_M, AString::ConstEmpty(),
-                SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
+                SipMethod::INVITE, ISipMessage::TYPE_RESPONSE);
     }
 }
 
