@@ -245,5 +245,7 @@ public class ConferenceInfoHelperTest {
         ConferenceInfoHelper.updateConferenceUsersOnRemoval(mCcid1);
         assertEquals(ConferenceInfo.User.STATUS_DISCONNECTED,
                 conferenceInfo.getUser(mPeerCallConnectionIdStr, mPeerConfUserId).getStatus());
+
+        ConferenceInfoHelper.destroyAllConferenceInfos();
     }
 }

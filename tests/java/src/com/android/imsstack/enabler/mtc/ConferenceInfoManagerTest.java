@@ -40,6 +40,7 @@ public class ConferenceInfoManagerTest {
 
     @After
     public void tearDown() throws Exception {
+        mTestConferenceInfoManager.destroyAllConferenceInfos();
     }
 
     @Test
