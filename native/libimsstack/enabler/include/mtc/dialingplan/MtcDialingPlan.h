@@ -60,7 +60,7 @@ private:
     struct TemporaryServiceUrn final
     {
     public:
-        TemporaryServiceUrn(IN AString strNumber_, IN AString strUrn_) :
+        TemporaryServiceUrn(IN const AString& strNumber_, IN const AString& strUrn_) :
                 strNumber(strNumber_),
                 strUrn(strUrn_)
         {

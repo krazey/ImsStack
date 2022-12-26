@@ -193,7 +193,8 @@ enum
 struct CallReasonInfo
 {
 public:
-    CallReasonInfo(IN IMS_SINT32 _nCode, IN IMS_SINT32 _nExtraCode, IN AString _strExtraMessage) :
+    CallReasonInfo(
+            IN IMS_SINT32 _nCode, IN IMS_SINT32 _nExtraCode, IN const AString& _strExtraMessage) :
             nCode(_nCode),
             nExtraCode(_nExtraCode),
             strExtraMessage(_strExtraMessage)
@@ -269,6 +270,6 @@ public:
     AString strExtraMessage;
 };
 
-#define _TRACE_CR_(I) (I.ToString().GetStr())
+#define _TRACE_CR_(I) ((I).ToString().GetStr())
 
 #endif

@@ -23,7 +23,6 @@
 #include <gtest/gtest.h>
 #include <functional>
 
-using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 

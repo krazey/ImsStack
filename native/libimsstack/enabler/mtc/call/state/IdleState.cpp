@@ -339,7 +339,7 @@ CallStateName IdleState::ContinueStart()
 }
 
 PRIVATE
-CallStateName IdleState::ContinueConference(IN IMSList<ConfUser*> lstUsers)
+CallStateName IdleState::ContinueConference(IN const ImsList<ConfUser*>& lstUsers)
 {
     IMS_TRACE_D("ContinueConference", 0, 0, 0);
     if (m_objContext.CreateSession() == IMS_NULL)
@@ -348,7 +348,7 @@ CallStateName IdleState::ContinueConference(IN IMSList<ConfUser*> lstUsers)
         return CallStateName::TERMINATING;
     }
 
-    IMSList<AString> lstUris = GetEntryUrisFromConferenceUsers(lstUsers);
+    ImsList<AString> lstUris = GetEntryUrisFromConferenceUsers(lstUsers);
     SetResourceListForConference(*GetISession()->GetNextRequest(), lstUris);
 
     InitMediaSession();
@@ -413,11 +413,11 @@ CallStateName IdleState::ContinueStartUssi()
 }
 
 PRIVATE
-IMSList<AString> IdleState::GetEntryUrisFromConferenceUsers(IN const IMSList<ConfUser*>& lstUsers)
+ImsList<AString> IdleState::GetEntryUrisFromConferenceUsers(IN const ImsList<ConfUser*>& lstUsers)
 {
     // TODO: Pass param as entry URIs for MtcCall I/F.
     // So this method will be moved to outside of MtcCall
-    IMSList<AString> lstEntryUris;
+    ImsList<AString> lstEntryUris;
     for (IMS_SIZE_T index = 0; index < lstUsers.GetSize(); index++)
     {
         // TODO: Implement GetEntryUri (operatior specific?)
@@ -428,7 +428,7 @@ IMSList<AString> IdleState::GetEntryUrisFromConferenceUsers(IN const IMSList<Con
 
 PRIVATE
 void IdleState::SetResourceListForConference(
-        IN_OUT IMessage& objMessage, IN const IMSList<AString>& lstEntryUris)
+        IN_OUT IMessage& objMessage, IN const ImsList<AString>& lstEntryUris)
 {
     if (lstEntryUris.GetSize() == 0)
     {
@@ -439,9 +439,9 @@ void IdleState::SetResourceListForConference(
 }
 
 PRIVATE
-IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
+ImsList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
 
     lstRules.Append(new VopsBlockRule(m_objContext));
     lstRules.Append(new NetworkBlockRule(m_objContext,
@@ -456,9 +456,9 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
 }
 
 PRIVATE
-IMSList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
+ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
 
     // IMS call won't be initiated if
     // - VoPS is 0 or can be ignored

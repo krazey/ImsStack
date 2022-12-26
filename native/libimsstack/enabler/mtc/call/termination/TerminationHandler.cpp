@@ -55,26 +55,18 @@ CallReasonInfo TerminationHandler::GetCallReasonInfoFromSessionTerminationReason
     switch (nTerminationReason)
     {
         case ISession::TERMINATION_REASON_INVALID:
-            return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nTerminationReason);
-
         case ISession::TERMINATION_REASON_UNKNOWN:
+        case ISession::TERMINATION_REASON_REMOTE_ACTION:
             return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nTerminationReason);
 
         case ISession::TERMINATION_REASON_USER_ACTION:
             return CallReasonInfo(CODE_USER_TERMINATED, nTerminationReason);
 
-        case ISession::TERMINATION_REASON_REMOTE_ACTION:
-            return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nTerminationReason);
-
         case ISession::TERMINATION_REASON_REFRESH_408:
-            return CallReasonInfo(CODE_SIP_REQUEST_TIMEOUT, nTerminationReason);
-
         case ISession::TERMINATION_REASON_REFRESH_481:
             return CallReasonInfo(CODE_SIP_REQUEST_TIMEOUT, nTerminationReason);
 
         case ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT:
-            return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
-
         case ISession::TERMINATION_REASON_REFRESH_TIMEOUT:
             return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_UPDATE);
 

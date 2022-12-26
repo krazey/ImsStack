@@ -228,7 +228,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
-        IN ISession* piSession, IN QosLossPolicy eNextAction)
+        IN ISession* /*piSession*/, IN QosLossPolicy eNextAction)
 {
     IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
     if (eNextAction == QosLossPolicy::RELEASE)
@@ -239,7 +239,6 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
     if (eNextAction == QosLossPolicy::MODIFY)
     {
         // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
-        UNUSED_PARAM(piSession);
     }
 
     return GetStateName();

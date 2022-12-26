@@ -49,7 +49,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         IN CallType eCallType, IN IMessageSender* pMessageSender) :
         m_objContext(objContext),
         m_objSession(objSession),
-        m_pMessageSender(std::move(pMessageSender)),
+        m_pMessageSender(pMessageSender),
         m_objExtensionSet(GetSupportedExtensions()),
         m_eCallType(eCallType),
         m_bVideoCapable(IMS_FALSE),

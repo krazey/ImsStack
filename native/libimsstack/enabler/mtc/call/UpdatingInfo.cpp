@@ -72,12 +72,9 @@ IMS_BOOL UpdatingInfo::IsHeldBy() const
 
     if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_SEND_RECEIVE)
     {
-        if (eNewAudioDirection == DIRECTION_RECEIVE)
-        {
-            return IMS_TRUE;
-        }
-        else if (eNewAudioDirection == DIRECTION_INACTIVE &&
-                m_objModifyingInfo.eAudioDirection != DIRECTION_INACTIVE)
+        if (eNewAudioDirection == DIRECTION_RECEIVE ||
+                (eNewAudioDirection == DIRECTION_INACTIVE &&
+                        m_objModifyingInfo.eAudioDirection != DIRECTION_INACTIVE))
         {
             return IMS_TRUE;
         }
@@ -127,12 +124,9 @@ IMS_BOOL UpdatingInfo::IsResumedBy() const
     }
     else if (m_objNegotiatedInfo.eAudioDirection == DIRECTION_INACTIVE)
     {
-        if (eNewAudioDirection == DIRECTION_SEND)
-        {
-            return IMS_TRUE;
-        }
-        else if (eNewAudioDirection == DIRECTION_SEND_RECEIVE &&
-                m_objModifyingInfo.eAudioDirection != DIRECTION_SEND_RECEIVE)
+        if (eNewAudioDirection == DIRECTION_SEND ||
+                (eNewAudioDirection == DIRECTION_SEND_RECEIVE &&
+                        m_objModifyingInfo.eAudioDirection != DIRECTION_SEND_RECEIVE))
         {
             return IMS_TRUE;
         }

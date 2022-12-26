@@ -37,23 +37,23 @@ public:
 
 public:
     virtual void NotifyMerged(IN ConferenceParticipantList& objParticipantList);
-    virtual void NotifyMergeFailed(IN CallReasonInfo objReason);
+    virtual void NotifyMergeFailed(IN const CallReasonInfo& objReason);
 
     virtual void NotifyGroupCallStarted();
-    virtual void NotifyGroupCallFailed(IN CallReasonInfo objReason);
+    virtual void NotifyGroupCallFailed(IN const CallReasonInfo& objReason);
 
     virtual void NotifyExpanded();
-    virtual void NotifyExpandFailed(IN CallReasonInfo objReason);
+    virtual void NotifyExpandFailed(IN const CallReasonInfo& objReason);
 
     virtual void NotifyDropped(
-            IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList);
+            IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList);
     virtual void NotifyDropFailed(
-            IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList);
+            IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList);
 
     virtual void NotifyJoined(
-            IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList);
+            IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList);
     virtual void NotifyJoinFailed(
-            IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList);
+            IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList);
 
     virtual void NotifyConferenceInfo(IN ConferenceParticipantList& objParticipantList);
     virtual void NotifyUsersInfo(IN ConferenceParticipantList& objParticipantList);

@@ -654,37 +654,20 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
                     Feature::INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE);
             break;
         case CODE_USER_NOANSWER:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
         case CODE_LOW_BATTERY:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
         case CODE_REJECT_ONGOING_CALL_WAITING_DISABLED:
             eStatusCode = SipStatusCode::SC_486;
             break;
         case CODE_LOCAL_SERVICE_UNAVAILABLE:
-            eStatusCode = SipStatusCode::SC_480;
-            break;
         case CODE_REJECT_VT_TTY_NOT_ALLOWED:
             eStatusCode = SipStatusCode::SC_480;
             break;
-
         case CODE_REJECT_ONGOING_CS_CALL:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
         case CODE_REJECT_ONGOING_E911_CALL:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
         case CODE_REJECT_CALL_ON_OTHER_SUB:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
         case CODE_REJECT_ONGOING_CALL_SETUP:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
         case CODE_REJECT_MAX_CALL_LIMIT_REACHED:
         case CODE_LOCAL_CALL_EXCEEDED:
-            eStatusCode = SipStatusCode::SC_486;
-            break;
         case CODE_LOCAL_CALL_BUSY:
             eStatusCode = SipStatusCode::SC_486;
             break;
@@ -743,8 +726,6 @@ IMS_SINT32 MessageFormatter::GetRejectStatusCode(IN const CallReasonInfo& objRea
             eStatusCode = SipStatusCode::SC_500;
             break;
         case CODE_BLACKLISTED_CALL_ID:
-            eStatusCode = SipStatusCode::SC_603;
-            break;
         case CODE_USER_REJECTED_SESSION_MODIFICATION:
             eStatusCode = SipStatusCode::SC_603;
             break;

@@ -378,7 +378,6 @@ TEST_F(ConferenceControllerTest, OnByeReferenceStartFailed)
 
 TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFrag200)
 {
-    const SipStatusCode SIPFRAG = SipStatusCode::SC_200;
     MockIConferenceReference objReference;
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
     ConfUser objUser;
@@ -387,38 +386,39 @@ TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFrag200)
     EXPECT_CALL(*pMockQueue, CompleteCurrentOperation(CONTROL_OPERATION_REFER_INVITE, &objUser))
             .Times(1);
 
-    pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
+    pController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_200, ReferSubscriptionState::ACTIVE);
 
     EXPECT_EQ(objUser.eStatus, STATUS_CONNECTED);
-    EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
+    EXPECT_EQ(objUser.eStatusCode, SipStatusCode::SC_200);
 }
 
 TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFrag100)
 {
-    const SipStatusCode SIPFRAG = SipStatusCode::SC_100;
     MockIConferenceReference objReference;
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
     ConfUser objUser;
     ON_CALL(*pMockParticipantList, GetConfUser(&objReference)).WillByDefault(Return(&objUser));
 
-    pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
+    pController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_100, ReferSubscriptionState::ACTIVE);
 
     EXPECT_EQ(objUser.eStatus, STATUS_DIALING_OUT);
-    EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
+    EXPECT_EQ(objUser.eStatusCode, SipStatusCode::SC_100);
 }
 
 TEST_F(ConferenceControllerTest, OnInviteReferenceUpdatedSipFragError)
 {
-    const SipStatusCode SIPFRAG = SipStatusCode::SC_486;
     MockIConferenceReference objReference;
     ON_CALL(objReference, GetType).WillByDefault(Return(REFERENCE_TYPE_INVITE));
     ConfUser objUser;
     ON_CALL(*pMockParticipantList, GetConfUser(&objReference)).WillByDefault(Return(&objUser));
 
-    pController->OnReferenceUpdated(&objReference, SIPFRAG, ReferSubscriptionState::ACTIVE);
+    pController->OnReferenceUpdated(
+            &objReference, SipStatusCode::SC_486, ReferSubscriptionState::ACTIVE);
 
     EXPECT_EQ(objUser.eStatus, STATUS_IDLE);
-    EXPECT_EQ(objUser.eStatusCode, SIPFRAG);
+    EXPECT_EQ(objUser.eStatusCode, SipStatusCode::SC_486);
 }
 
 TEST_F(ConferenceControllerTest, OnOperationReadyWhenNextIsCreateConferenceCall)

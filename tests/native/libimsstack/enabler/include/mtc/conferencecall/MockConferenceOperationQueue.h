@@ -37,7 +37,8 @@ public:
     MOCK_METHOD(
             void, CreateNPut, (IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation), (override));
     MOCK_METHOD(void, CreateNPutWithUsers,
-            (IN IMS_UINT32 nType, IN IMSList<ConfUser*> objUsers, IN IMS_BOOL bStandAloneOperation),
+            (IN IMS_UINT32 nType, IN const ImsList<ConfUser*>& objUsers,
+                    IN IMS_BOOL bStandAloneOperation),
             (override));
     MOCK_METHOD(void, CreateNPutWithUser,
             (IN IMS_UINT32 nType, IN ConfUser* pConfUser, IN IMS_BOOL bStandAloneOperation),
@@ -59,7 +60,7 @@ public:
     MOCK_METHOD(ConferenceOperationQueue::ConferenceOperation*, GetCurrentOperation, (),
             (const, override));
     MOCK_METHOD(IMS_UINT32, GetTypeOfCurrentOperation, (), (const, override));
-    MOCK_METHOD(const IMSList<ConfUser*>&, GetUsersOfCurrentOperation, (), (const, override));
+    MOCK_METHOD(const ImsList<ConfUser*>&, GetUsersOfCurrentOperation, (), (const, override));
     MOCK_METHOD(IMS_BOOL, HasPendingOperation, (), (const, override));
     MOCK_METHOD(void, Remove, (IN ConferenceOperation* pOperation), ());
     MOCK_METHOD(void, Clear, (), ());

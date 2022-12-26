@@ -18,7 +18,6 @@
 #define MOCK_I_ECT_REFERENCE_LISTENER_H_
 
 #include "ect/IEctReferenceListener.h"
-#include "sipcore/SipStatusCode.h"
 #include <gmock/gmock.h>
 
 class MockIEctReferenceListener : public IEctReferenceListener
@@ -28,7 +27,7 @@ public:
 
     MOCK_METHOD(void, OnReferenceStarted, (), (override));
     MOCK_METHOD(void, OnReferenceStartFailed, (), (override));
-    MOCK_METHOD(void, OnReferenceUpdated, (IN SipStatusCode), (override));
+    MOCK_METHOD(void, OnReferenceUpdated, (IN IMS_SINT32), (override));
 };
 
 #endif

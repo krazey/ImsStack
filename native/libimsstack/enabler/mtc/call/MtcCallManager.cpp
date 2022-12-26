@@ -31,7 +31,7 @@ NullCall* const MtcCallManager::s_pNullCall = new NullCall();
 PUBLIC
 MtcCallManager::MtcCallManager(IN IMtcContext& objContext) :
         m_objContext(objContext),
-        m_lstCalls(IMSList<MtcCall*>())
+        m_lstCalls(ImsList<MtcCall*>())
 {
 }
 
@@ -108,7 +108,7 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::GetCallByCallKey(IN CallKey nCallKey)
     }
 }
 
-PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCalls()
+PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCalls()
 {
     return GetCallsByFilter(
             [](MtcCall* /* pCall */)
@@ -117,7 +117,7 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCalls()
             });
 }
 
-PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsExcluding(IN CallKey nExcludingCallKey)
+PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsExcluding(IN CallKey nExcludingCallKey)
 {
     return GetCallsByFilter(
             [nExcludingCallKey](MtcCall* pCall)
@@ -126,7 +126,7 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsExcluding(IN CallKey n
             });
 }
 
-PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCallType)
+PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCallType)
 {
     return GetCallsByFilter(
             [eCallType](MtcCall* pCall)
@@ -135,7 +135,7 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCa
             });
 }
 
-PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByServiceType(IN ServiceType eServiceType)
+PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByServiceType(IN ServiceType eServiceType)
 {
     return GetCallsByFilter(
             [eServiceType](MtcCall* pCall)
@@ -144,7 +144,7 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByServiceType(IN Servi
             });
 }
 
-PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsInConference()
+PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsInConference()
 {
     return GetCallsByFilter(
             [](MtcCall* pCall)
@@ -153,7 +153,7 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsInConference()
             });
 }
 
-PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByState(IN State eState)
+PUBLIC VIRTUAL ImsList<IMtcCall*> MtcCallManager::GetCallsByState(IN State eState)
 {
     return GetCallsByFilter(
             [eState](MtcCall* pCall)
@@ -177,7 +177,8 @@ PUBLIC VIRTUAL void MtcCallManager::OnCallStateChanged(IN CallKey nCallKey, IN S
 PUBLIC VIRTUAL void MtcCallManager::OnTotalCallStateChanged(IN State /* eState */) {}
 
 PRIVATE
-IMS_SINT32 MtcCallManager::GetFirstIndexByFilter(IN std::function<IMS_BOOL(MtcCall*)> objFilter)
+IMS_SINT32 MtcCallManager::GetFirstIndexByFilter(
+        IN const std::function<IMS_BOOL(MtcCall*)>& objFilter)
 {
     // Call index mustn't be outside of IMS_SINT32 range.
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstCalls.GetSize(); nIndex++)
@@ -194,9 +195,10 @@ IMS_SINT32 MtcCallManager::GetFirstIndexByFilter(IN std::function<IMS_BOOL(MtcCa
 }
 
 PRIVATE
-IMSList<IMtcCall*> MtcCallManager::GetCallsByFilter(IN std::function<IMS_BOOL(MtcCall*)> objFilter)
+ImsList<IMtcCall*> MtcCallManager::GetCallsByFilter(
+        IN const std::function<IMS_BOOL(MtcCall*)>& objFilter)
 {
-    IMSList<IMtcCall*> lstResult;
+    ImsList<IMtcCall*> lstResult;
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_lstCalls.GetSize(); nIndex++)
     {

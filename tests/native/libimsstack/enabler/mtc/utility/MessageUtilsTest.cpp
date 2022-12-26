@@ -115,7 +115,8 @@ public:
                 .WillByDefault(Return(objMessages));
     }
 
-    const AString GetIms3gppXml(IN AString strType, IN AString strReason, IN AString strAction)
+    const AString GetIms3gppXml(
+            IN const AString& strType, IN const AString& strReason, IN const AString& strAction)
     {
         AString strIms3gpp(IMS_3GPP_XML);
         strIms3gpp = strIms3gpp.Replace("_TYPE_", strType);

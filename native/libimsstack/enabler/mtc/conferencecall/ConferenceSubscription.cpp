@@ -138,8 +138,6 @@ PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStartFailed(
                 return;
             }
             break;
-        case SipStatusCode::SC_INVALID:
-            break;
         default:
             // TODO: Other responses
             break;
@@ -372,7 +370,6 @@ void ConferenceSubscription::HandleUpdateResult(IN IMS_UINT32 nResult)
             break;
         case ConferenceInfoUpdater::RESULT_MALFORMED_XML:
             // stop subscription
-            break;
         case ConferenceInfoUpdater::RESULT_NOTHING_UPDATED:
             // re-send Subscription or ignore as it's an initial notify
             break;
@@ -383,11 +380,8 @@ void ConferenceSubscription::HandleUpdateResult(IN IMS_UINT32 nResult)
         case ConferenceInfoUpdater::RESULT_INFO_DELETED:
             // terminate conference call?
             // or stop Subscription?
-            break;
         case ConferenceInfoUpdater::RESULT_AMBIGUOUS:
             // re-sned Subscription
-            break;
-
         default:
             break;
     }

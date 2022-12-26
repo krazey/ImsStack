@@ -206,7 +206,7 @@ void ConferenceParticipantList::ResetReference(IN IConferenceReference* piConfRe
 
 PUBLIC
 void ConferenceParticipantList::SetReferInviteUri(
-        IN AString strReferInviteUri, IN const ConfUser* pConfUser)
+        IN const AString& strReferInviteUri, IN const ConfUser* pConfUser)
 {
     ConferenceParticipant* pTemp = m_objParticipants.GetAt(FindParticipant(pConfUser));
     if (pTemp != IMS_NULL)

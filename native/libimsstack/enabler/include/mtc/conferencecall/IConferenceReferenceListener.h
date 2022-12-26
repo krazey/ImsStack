@@ -46,8 +46,8 @@ public:
      * @param nSipFragCode
      * @param eState
      */
-    virtual void OnReferenceUpdated(IN IConferenceReference* piConfRef,
-            IN SipStatusCode nSipFragCode, IN ReferSubscriptionState eState) = 0;
+    virtual void OnReferenceUpdated(IN IConferenceReference* piConfRef, IN IMS_SINT32 nSipFragCode,
+            IN ReferSubscriptionState eState) = 0;
 };
 
 #endif

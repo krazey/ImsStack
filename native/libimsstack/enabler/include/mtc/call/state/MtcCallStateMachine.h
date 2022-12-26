@@ -44,7 +44,7 @@ public:
      * @param objOperation Function to run. The current state instance is passed to the parameter.
      *                     It should returns the next state name.
      */
-    void RunStateOperation(IN std::function<IMtcCall::State(IMtcCallState*)> objOperation);
+    void RunStateOperation(IN const std::function<IMtcCall::State(IMtcCallState*)>& objOperation);
 
     /**
      * Returns the current state name.

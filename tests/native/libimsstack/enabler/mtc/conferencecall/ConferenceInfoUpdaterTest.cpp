@@ -109,7 +109,8 @@ protected:
     }
 
     void AddUserToInfo(IN const AString& strEntity, IN IMS_UINT32 nStatus,
-            IN IMS_UINT32 nState = ANY_STATE, IN AString strDisplayText = AString::ConstNull())
+            IN IMS_UINT32 nState = ANY_STATE,
+            IN const AString& strDisplayText = AString::ConstNull())
     {
         // assumption1 : User and Endpoint use same entity value
         // assumption2 : one User entity has only one Endpoint entity

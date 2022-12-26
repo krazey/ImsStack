@@ -58,7 +58,7 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyMergeFailed(IN CallReasonInfo objReason)
+void ConferenceEventNotifier::NotifyMergeFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("NotifyMergeFailed", 0, 0, 0);
 
@@ -74,7 +74,7 @@ void ConferenceEventNotifier::NotifyGroupCallStarted()
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyGroupCallFailed(IN CallReasonInfo /*objReason*/)
+void ConferenceEventNotifier::NotifyGroupCallFailed(IN const CallReasonInfo& /*objReason*/)
 {
     IMS_TRACE_I("NotifyGroupCallFailed", 0, 0, 0);
 }
@@ -88,14 +88,14 @@ void ConferenceEventNotifier::NotifyExpanded()
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyExpandFailed(IN CallReasonInfo /*objReason*/)
+void ConferenceEventNotifier::NotifyExpandFailed(IN const CallReasonInfo& /*objReason*/)
 {
     IMS_TRACE_I("NotifyExpandFailed", 0, 0, 0);
 }
 
 PUBLIC
 void ConferenceEventNotifier::NotifyDropped(
-        IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList)
+        IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyDropped", 0, 0, 0);
 
@@ -106,7 +106,7 @@ void ConferenceEventNotifier::NotifyDropped(
 
 PUBLIC
 void ConferenceEventNotifier::NotifyDropFailed(
-        IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList)
+        IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyDropFailed", 0, 0, 0);
 
@@ -117,7 +117,7 @@ void ConferenceEventNotifier::NotifyDropFailed(
 
 PUBLIC
 void ConferenceEventNotifier::NotifyJoined(
-        IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList)
+        IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyJoined", 0, 0, 0);
 
@@ -128,7 +128,7 @@ void ConferenceEventNotifier::NotifyJoined(
 
 PUBLIC
 void ConferenceEventNotifier::NotifyJoinFailed(
-        IN CallReasonInfo objReason, IN ConferenceParticipantList& objParticipantList)
+        IN const CallReasonInfo& objReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyJoinFailed", 0, 0, 0);
 

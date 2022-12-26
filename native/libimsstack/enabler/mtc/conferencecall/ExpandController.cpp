@@ -126,7 +126,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceStartFailed(IN IConferenceRefer
 }
 
 PUBLIC VIRTUAL void ExpandController::OnReferenceUpdated(IN IConferenceReference* piConfRef,
-        IN SipStatusCode nSipFragCode, IN ReferSubscriptionState eState)
+        IN IMS_SINT32 nSipFragCode, IN ReferSubscriptionState eState)
 {
     IMS_TRACE_D("OnReferenceUpdated : R-NOTIFY is received.", 0, 0, 0);
 
@@ -138,7 +138,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceUpdated(IN IConferenceReference
     ConfUser* pTempUser = m_objParticipantList.GetConfUser(piConfRef);
     UpdateUserStatusByReferResult(pTempUser, piConfRef, nSipFragCode);
 
-    if (SipStatusCode::IsFinalSuccess(nSipFragCode.ToInt()))
+    if (SipStatusCode::IsFinalSuccess(nSipFragCode))
     {
         StopFinalSipfragWaitTimer();
 
@@ -156,7 +156,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceUpdated(IN IConferenceReference
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE, pTempUser);
         }
     }
-    else if (SipStatusCode::IsFinalFailure(nSipFragCode.ToInt()))
+    else if (SipStatusCode::IsFinalFailure(nSipFragCode))
     {
         StopFinalSipfragWaitTimer();
 
@@ -170,7 +170,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceUpdated(IN IConferenceReference
             NotifyUsersInfo();
         }
     }
-    else if (SipStatusCode::Is1XX(nSipFragCode.ToInt()) && (GetState() == STATE_EXPANDING))
+    else if (SipStatusCode::Is1XX(nSipFragCode) && (GetState() == STATE_EXPANDING))
     {
         CheckNStartFinalSipfragWaitTimer(CONDITION_SIPFRAG_100_RECEIVED);
     }
@@ -283,14 +283,13 @@ PROTECTED VIRTUAL void ExpandController::Recover()
 }
 
 PROTECTED VIRTUAL void ExpandController::UpdateUserStatusByReferResult(IN ConfUser* pUser,
-        IN IConferenceReference* piConfRef,
-        IN SipStatusCode nStatusCode /* = SipStatusCode::SC_200*/)
+        IN IConferenceReference* piConfRef, IN IMS_SINT32 nStatusCode /* = SipStatusCode::SC_200*/)
 {
     if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired() &&
             (GetState() == STATE_JOINING) && (piConfRef->GetType() == REFERENCE_TYPE_INVITE) &&
-            SipStatusCode::IsFinalFailure(nStatusCode.ToInt()))
+            SipStatusCode::IsFinalFailure(nStatusCode))
     {
-        switch (nStatusCode.ToInt())
+        switch (nStatusCode)
         {
             case SipStatusCode::SC_400:
             case SipStatusCode::SC_503:
@@ -330,7 +329,7 @@ PROTECTED VIRTUAL void ExpandController::UpdateUserStatusByReferResult(IN ConfUs
                 break;
         }
 
-        pUser->eStatusCode = nStatusCode.ToInt();
+        pUser->eStatusCode = nStatusCode;
     }
     else
     {

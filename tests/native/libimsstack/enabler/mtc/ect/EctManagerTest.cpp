@@ -22,7 +22,6 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-using ::testing::_;
 using ::testing::Return;
 
 namespace android

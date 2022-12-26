@@ -373,9 +373,8 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnAttached()
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::ClientConnection_NotifyResponse(
-        IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc)
+        IN ISipClientConnection* piScc, IN ISipClientConnection* /*piForkedScc*/)
 {
-    UNUSED_PARAM(piForkedScc);
     if (piScc->Receive() != IMS_SUCCESS)
     {
         return GetStateName();
@@ -782,7 +781,7 @@ IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessa
         return IMS_FALSE;
     }
 
-    SipMethod eMethod = piMessage->GetMethod();
+    const SipMethod& eMethod = piMessage->GetMethod();
     if (eMethod.Equals(SipMethod::INVITE))
     {
         if (piMessage->GetMessage()->GetType() == ISipMessage::TYPE_RESPONSE)
@@ -1043,13 +1042,11 @@ IMS_SINT32 MtcCallState::GetCallReasonByAosReason(IN IMS_UINT32 nAosReason)
         case ImsAosReason::NO_RAT_COVERAGE:
             return CODE_LOCAL_NETWORK_NO_LTE_COVERAGE;
         case ImsAosReason::SERVICE_POLICY:
-            return CODE_LOCAL_SERVICE_UNAVAILABLE;
         case ImsAosReason::SERVICE_BLOCKED:
             return CODE_LOCAL_SERVICE_UNAVAILABLE;
         case ImsAosReason::DATA_DISCONNECTED:
             return CODE_LOCAL_NETWORK_NO_SERVICE;
         case ImsAosReason::REG_TERMINATED:
-            return CODE_LOCAL_NOT_REGISTERED;
         case ImsAosReason::REG_NEW_REQUIRED:
             return CODE_LOCAL_NOT_REGISTERED;
         case ImsAosReason::SUSPEND_OUT_OF_SERVICE:

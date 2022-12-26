@@ -28,8 +28,8 @@ public:
     explicit MockMtcPendingOperationHolder() {}
     ~MockMtcPendingOperationHolder() {}
 
-    MOCK_METHOD(void, PushPendingOperation, (IN std::function<IMtcCall::State(IMtcCallState*)>),
-            (override));
+    MOCK_METHOD(void, PushPendingOperation,
+            (IN const std::function<IMtcCall::State(IMtcCallState*)>&), (override));
 };
 
 #endif

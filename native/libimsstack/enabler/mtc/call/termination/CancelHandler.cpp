@@ -62,12 +62,10 @@ CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
     {
         return CallReasonInfo(CODE_ANSWERED_ELSEWHERE);
     }
-    else if (nCause == SipStatusCode::SC_600 && strNormalizedText.Contains(REASON_TEXT_CALL_BUSY))
-    {
-        return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
-    }
-    else if (nCause == SipStatusCode::SC_603 &&
-            strNormalizedText.Contains(REASON_TEXT_CALL_DECLINED))
+    else if ((nCause == SipStatusCode::SC_600 &&
+                     strNormalizedText.Contains(REASON_TEXT_CALL_BUSY)) ||
+            (nCause == SipStatusCode::SC_603 &&
+                    strNormalizedText.Contains(REASON_TEXT_CALL_DECLINED)))
     {
         return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
     }

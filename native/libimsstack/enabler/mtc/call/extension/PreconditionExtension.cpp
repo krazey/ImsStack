@@ -55,10 +55,8 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatRequest(
     switch (eType)
     {
         case RequestType::START:
-            break;
-
         case RequestType::UPDATE:
-            // TODO, B_PRECONDITION_SUPPORTED_IN_REINVITE
+            // TODO: In UPDATE, precondition supportability check
             break;
 
         case RequestType::EARLY_UPDATE:

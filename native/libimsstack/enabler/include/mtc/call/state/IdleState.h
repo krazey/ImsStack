@@ -62,7 +62,7 @@ public:
 
 private:
     CallStateName ContinueStart();
-    CallStateName ContinueConference(IN ImsList<ConfUser*> lstUsers);
+    CallStateName ContinueConference(IN const ImsList<ConfUser*>& lstUsers);
     CallStateName ContinueHandleIncoming();
     CallStateName ContinueStartUssi();
 

@@ -56,7 +56,7 @@ protected:
 
     virtual void TearDown() override {}
 
-    void SetUpReasonHeader(IN IMS_SINT32 nCause, IN AString strText)
+    void SetUpReasonHeader(IN IMS_SINT32 nCause, IN const AString& strText)
     {
         ReasonHeaderValue objValue;
         objValue.nCause = nCause;

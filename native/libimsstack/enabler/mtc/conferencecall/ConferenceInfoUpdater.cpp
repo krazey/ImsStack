@@ -24,6 +24,8 @@
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceParticipantList.h"
 #include "conferencecall/ConferenceUtils.h"
+#include "algorithm"
+#include <vector>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -209,19 +211,16 @@ IMS_RESULT ConferenceInfoUpdater::UpdateParticipantList()
 
     SetParticipantsMatchingStarted();
 
-    if (FindAndUpdate(MatchingPolicy::ORDER_LEG_ID))
-    {
-    }
-    else if (FindAndUpdate(MatchingPolicy::USERENTITY))
-    {
-    }
-    else if (FindAndUpdate(MatchingPolicy::REFER_TO_URI))
-    {
-    }
-    else if (FindAndUpdate(MatchingPolicy::ORDER))
-    {
-    }
-    else
+    std::vector<MatchingPolicy> objPolicies{MatchingPolicy::ORDER_LEG_ID,
+            MatchingPolicy::USERENTITY, MatchingPolicy::REFER_TO_URI, MatchingPolicy::ORDER};
+
+    IMS_BOOL bFound = std::any_of(objPolicies.begin(), objPolicies.end(),
+            [&](MatchingPolicy ePolicy)
+            {
+                return FindAndUpdate(ePolicy);
+            });
+
+    if (!bFound)
     {
         // TODO: reaching here means there is a user-entity which is invalidstatusupdate
         // return IMS_FAILURE;

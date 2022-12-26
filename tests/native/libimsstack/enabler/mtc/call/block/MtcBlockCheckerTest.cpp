@@ -19,10 +19,10 @@
 #include "call/block/MtcBlockChecker.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <utility>
 
 using ::testing::_;
 using ::testing::Return;
-using ::testing::ReturnRef;
 using Result = IMtcBlockChecker::Result;
 
 const CallReasonInfo objDefaultReason(CODE_NONE);
@@ -32,7 +32,7 @@ MockIMtcBlockRule* CreateMockIMtcBlockRule(Result objResult)
 {
     MockIMtcBlockRule* pRule = new MockIMtcBlockRule();
 
-    ON_CALL(*pRule, Check).WillByDefault(Return(objResult));
+    ON_CALL(*pRule, Check).WillByDefault(Return(std::move(objResult)));
 
     return pRule;
 }

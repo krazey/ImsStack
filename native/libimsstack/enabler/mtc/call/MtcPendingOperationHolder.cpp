@@ -44,7 +44,7 @@ PUBLIC IMS_BOOL MtcPendingOperationHolder::HasPendingOperation() const
 }
 
 PUBLIC void MtcPendingOperationHolder::PushPendingOperation(
-        IN std::function<IMtcCall::State(IMtcCallState*)> objPendingOperation)
+        IN const std::function<IMtcCall::State(IMtcCallState*)>& objPendingOperation)
 {
     m_objPendingOperations.Append(objPendingOperation);
     IMS_TRACE_D("PushPendingOperation :: added", 0, 0, 0);

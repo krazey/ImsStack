@@ -32,7 +32,6 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
-using ::testing::Eq;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;

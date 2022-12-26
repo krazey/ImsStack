@@ -102,22 +102,20 @@ TEST_F(EctControllerTest, OnReferenceStartFailedNotifiesFailure)
 
 TEST_F(EctControllerTest, OnReferenceUpdatedSuccessNotifiesSuccess)
 {
-    SipStatusCode eAnyFianlSuccess = SipStatusCode::SC_202;
     EXPECT_CALL(objListener, OnEctCompleted);
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_SUCCESS, CallReasonInfo(CODE_USER_TERMINATED)));
     EXPECT_CALL(objTransfereeCall,
             Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT)));
 
-    pController->OnReferenceUpdated(eAnyFianlSuccess);
+    pController->OnReferenceUpdated(SipStatusCode::SC_202);
 }
 
 TEST_F(EctControllerTest, OnReferenceUpdatedFailureNotifiesFailure)
 {
-    SipStatusCode eAnyFianlFailure = SipStatusCode::SC_415;
     EXPECT_CALL(objListener, OnEctCompleted);
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)));
 
-    pController->OnReferenceUpdated(eAnyFianlFailure);
+    pController->OnReferenceUpdated(SipStatusCode::SC_415);
 }
 
 TEST_F(EctControllerTest, TimerExpiredDoesNothingBeforeStartTimer)

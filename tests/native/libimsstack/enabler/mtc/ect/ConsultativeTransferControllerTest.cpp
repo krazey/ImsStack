@@ -172,7 +172,6 @@ TEST_F(ConsultativeTransferControllerTest, SuccessfulTransferStartsTimer)
 TEST_F(ConsultativeTransferControllerTest, OnReferenceUpdatedSuccessNotifiesSuccess)
 {
     SetUpCallsForSuccessfulCase();
-    SipStatusCode eAnyFianlSuccess = SipStatusCode::SC_202;
     ON_CALL(*GetMockReference(), SendInvite(TRANSFER_TARGET_KEY))
             .WillByDefault(Return(IMS_SUCCESS));
 
@@ -186,13 +185,12 @@ TEST_F(ConsultativeTransferControllerTest, OnReferenceUpdatedSuccessNotifiesSucc
             Terminate(CallReasonInfo(CODE_USER_TERMINATED, EXTRA_USER_TERMINATED_ECT)));
     EXPECT_CALL(objTimer, KillTimer).Times(1);
 
-    pController->OnReferenceUpdated(eAnyFianlSuccess);
+    pController->OnReferenceUpdated(SipStatusCode::SC_202);
 }
 
 TEST_F(ConsultativeTransferControllerTest, OnReferenceUpdatedFailureNotifiesFailure)
 {
     SetUpCallsForSuccessfulCase();
-    SipStatusCode eAnyFianlFailure = SipStatusCode::SC_415;
     ON_CALL(*GetMockReference(), SendInvite(TRANSFER_TARGET_KEY))
             .WillByDefault(Return(IMS_SUCCESS));
 
@@ -202,7 +200,7 @@ TEST_F(ConsultativeTransferControllerTest, OnReferenceUpdatedFailureNotifiesFail
     EXPECT_CALL(objNotifier, SendEctCompleted(IMS_FAILURE, CallReasonInfo(CODE_USER_TERMINATED)));
     EXPECT_CALL(objTimer, KillTimer).Times(1);
 
-    pController->OnReferenceUpdated(eAnyFianlFailure);
+    pController->OnReferenceUpdated(SipStatusCode::SC_415);
 }
 
 }  // namespace android

@@ -19,7 +19,6 @@
 
 #include "conferencecall/IConferenceReference.h"
 #include "conferencecall/IConferenceReferenceListener.h"
-#include "sipcore/SipStatusCode.h"
 #include <gmock/gmock.h>
 
 class MockIConferenceReferenceListener : public IConferenceReferenceListener
@@ -28,7 +27,7 @@ public:
     MOCK_METHOD(void, OnReferenceStarted, (IN IConferenceReference* piConfRef), (override));
     MOCK_METHOD(void, OnReferenceStartFailed, (IN IConferenceReference* pConfRef), (override));
     MOCK_METHOD(void, OnReferenceUpdated,
-            (IN IConferenceReference* piConfRef, IN SipStatusCode nSipFragCode,
+            (IN IConferenceReference * piConfRef, IN IMS_SINT32 nSipFragCode,
                     IN ReferSubscriptionState eState),
             (override));
 };

@@ -30,12 +30,13 @@ class MtcSupplementaryService final
 {
 public:
     explicit MtcSupplementaryService(IN MtcConfigurationProxy& objConfigurationProxy,
-            IN IMSMap<SuppType, SuppService*> objSuppServices = IMSMap<SuppType, SuppService*>());
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices =
+                    ImsMap<SuppType, SuppService*>());
     ~MtcSupplementaryService();
     MtcSupplementaryService(const MtcSupplementaryService&) = delete;
     MtcSupplementaryService& operator=(const MtcSupplementaryService&) = delete;
 
-    void UpdateOutgoingServices(IN const IMSMap<SuppType, SuppService*>& objSuppServices);
+    void UpdateOutgoingServices(IN const ImsMap<SuppType, SuppService*>& objSuppServices);
     void UpdateTip(IN IMessage* piMessage);
 
     IMS_BOOL UpdateIncomingServices(IN IMessage* piMessage);
@@ -55,8 +56,8 @@ public:
     void Delete(IN SuppType eType);
     void DeleteServices();
     const SuppService* Get(IN SuppType eType);
-    const IMSMap<SuppType, SuppService*>& GetServices() const;
-    void Add(IN SuppType eSuppType, IN AString strValue);
+    const ImsMap<SuppType, SuppService*>& GetServices() const;
+    void Add(IN SuppType eSuppType, IN const AString& strValue);
     void Add(IN SuppType eSuppType, IN IMS_SINT32 nValue);
     void Add(IN SuppType eSuppType, IN IMS_BOOL bValue);
 
@@ -74,7 +75,7 @@ private:
     IMS_BOOL IsExist(IN SuppType suppType);
 
 private:
-    IMSMap<SuppType, SuppService*> m_objSuppService;
+    ImsMap<SuppType, SuppService*> m_objSuppService;
     MtcConfigurationProxy& m_objConfigurationProxy;
 };
 #endif

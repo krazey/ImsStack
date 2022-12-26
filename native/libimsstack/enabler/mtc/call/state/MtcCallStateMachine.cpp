@@ -42,7 +42,7 @@ MtcCallStateMachine::~MtcCallStateMachine()
 
 PUBLIC
 void MtcCallStateMachine::RunStateOperation(
-        IN std::function<IMtcCall::State(IMtcCallState*)> objOperation)
+        IN const std::function<IMtcCall::State(IMtcCallState*)>& objOperation)
 {
     IMtcCall::State eNextState = objOperation(m_pCurrentState.get());
     TransitToState(eNextState);
