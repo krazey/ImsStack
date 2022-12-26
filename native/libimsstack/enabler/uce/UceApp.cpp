@@ -448,8 +448,8 @@ ITimer* UceApp::GetTimer()
     return m_piDeBounceTimer;
 }
 
-void UceApp::SendPublishCmd(
-        IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability, AString pidfXml, AString eTag)
+void UceApp::SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
+        const AString& pidfXml, const AString& eTag)
 {
     IMS_TRACE_D("SendPublishCmd", 0, 0, 0);
     if (m_pUceService == IMS_NULL)
@@ -460,7 +460,7 @@ void UceApp::SendPublishCmd(
     m_pUceService->SendPublishCmd(key, extended, capability, pidfXml, eTag);
 }
 
-void UceApp::SendSingleSubscribeCmd(IMS_UINT32 key, AString user)
+void UceApp::SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user)
 {
     IMS_TRACE_D("SendSingleSubscribeCmd", 0, 0, 0);
     if (m_pUceService == IMS_NULL)
@@ -471,7 +471,7 @@ void UceApp::SendSingleSubscribeCmd(IMS_UINT32 key, AString user)
     m_pUceService->SendSingleSubscribeCmd(key, user);
 }
 
-void UceApp::SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList)
+void UceApp::SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList)
 {
     IMS_TRACE_D("SendListSubscribeCmd", 0, 0, 0);
     if (m_pUceService == IMS_NULL)
@@ -482,7 +482,7 @@ void UceApp::SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList)
     m_pUceService->SendListSubscribeCmd(key, userList);
 }
 
-void UceApp::SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri)
+void UceApp::SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri)
 {
     IMS_TRACE_D("SendOptionsCmd", 0, 0, 0);
     if (m_pUceService == IMS_NULL)
@@ -494,7 +494,7 @@ void UceApp::SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri
 }
 
 void UceApp::SendOptionsRespCmd(
-        IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps)
+        IMS_UINT32 key, IMS_SINT32 responseCode, const AString& reason, IMS_UINT32 myCaps)
 {
     IMS_TRACE_D("SendOptionsRespCmd", 0, 0, 0);
     if (m_pUceService == IMS_NULL)

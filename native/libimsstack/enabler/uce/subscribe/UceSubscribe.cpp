@@ -392,7 +392,7 @@ IMS_RESULT UceSubscribe::MessageMediator_AdjustMessage(
     return IMS_SUCCESS;
 }
 
-IMS_BOOL UceSubscribe::QuerySingleCapability(IN AString strUser, IN IMS_UINT32 key)
+IMS_BOOL UceSubscribe::QuerySingleCapability(IN const AString& strUser, IN IMS_UINT32 key)
 {
     IMS_TRACE_I("QuerySingleCapability - Trigger single capability discovery", 0, 0, 0);
     m_nKey = key;
@@ -402,7 +402,7 @@ IMS_BOOL UceSubscribe::QuerySingleCapability(IN AString strUser, IN IMS_UINT32 k
     return IMS_TRUE;
 }
 
-IMS_BOOL UceSubscribe::QueryMultiCapability(IN IMSList<AString> objUsers, IN IMS_UINT32 key)
+IMS_BOOL UceSubscribe::QueryMultiCapability(IN const IMSList<AString>& objUsers, IN IMS_UINT32 key)
 {
     IMS_TRACE_I("QueryMultiCapability - Trigger multi capability discovery", 0, 0, 0);
     m_nKey = key;
@@ -1034,8 +1034,8 @@ const IMS_CHAR* UceSubscribe::StateToString(IMS_UINT32 _eState)
     return szState[_eState];
 }
 
-void UceSubscribe::SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString strReason,
-        IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText)
+void UceSubscribe::SendSubscribeResponseInd(IMS_SINT32 nResponseCode, const AString& strReason,
+        IMS_SINT32 nReasonHeaderCause, const AString& strReasonHeaderText)
 {
     IUceJniThread* piJniThread = GetJniThread();
     if (piJniThread == IMS_NULL)
@@ -1067,7 +1067,7 @@ void UceSubscribe::SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError)
     m_nKey = 0;
 }
 
-void UceSubscribe::SendPresenceNotifyInd(IMSList<AString> pidfXmls)
+void UceSubscribe::SendPresenceNotifyInd(const IMSList<AString>& pidfXmls)
 {
     if (m_nKey == 0)
     {

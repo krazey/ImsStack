@@ -25,9 +25,6 @@
 
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
-using ::testing::AnyNumber;
-using ::testing::Return;
-
 IMS_SINT32 APP_SIM_SLOT = 20;
 
 class TestUceApp : public UceApp
@@ -64,8 +61,8 @@ public:
     void clearTimer() { ClearTimer(); }
     void aosDisConnecting() { ImsAos_Disconnecting(0); }
     void aosDisConnected() { ImsAos_Disconnected(0); }
-    void SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability, AString pidfXml,
-            AString eTag) override
+    void SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
+            const AString& pidfXml, const AString& eTag) override
     {
         (void)key;
         (void)extended;
@@ -73,24 +70,24 @@ public:
         (void)pidfXml;
         (void)eTag;
     }
-    void SendSingleSubscribeCmd(IMS_UINT32 key, AString user) override
+    void SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user) override
     {
         (void)key;
         (void)user;
     }
-    void SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList) override
+    void SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList) override
     {
         (void)key;
         (void)userList;
     }
-    void SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri) override
+    void SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri) override
     {
         (void)key;
         (void)myCaps;
         (void)remoteUri;
     }
-    void SendOptionsRespCmd(
-            IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps) override
+    void SendOptionsRespCmd(IMS_UINT32 key, IMS_SINT32 responseCode, const AString& reason,
+            IMS_UINT32 myCaps) override
     {
         (void)key;
         (void)responseCode;

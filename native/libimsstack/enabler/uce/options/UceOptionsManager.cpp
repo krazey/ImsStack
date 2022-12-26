@@ -72,7 +72,7 @@ PUBLIC VIRTUAL UceOptionsManager::~UceOptionsManager()
 
 PUBLIC
 IMS_BOOL UceOptionsManager::SendOptionsRequest(
-        IN IMS_UINT32 nKey, IN AString strRemoteURI, IN IMS_UINT32 ownCapabilities)
+        IN IMS_UINT32 nKey, IN const AString& strRemoteURI, IN IMS_UINT32 ownCapabilities)
 {
     if (m_bAoSConnected == IMS_FALSE)
     {
@@ -90,7 +90,7 @@ IMS_BOOL UceOptionsManager::SendOptionsRequest(
 }
 
 IMS_BOOL UceOptionsManager::SendOptionsResponse(IN IMS_UINT32 nKey, IN IMS_UINT32 nResponse,
-        IN AString reason, IN IMS_UINT32 ownCapabilities)
+        IN const AString& reason, IN IMS_UINT32 ownCapabilities)
 {
     UceOptions* pOptions = IMS_NULL;
     IMS_SLONG nIndex = m_objReceivedUceOptionsMap.GetIndexOfKey(nKey);

@@ -32,9 +32,9 @@ public:
     virtual ~UceOptionsManager();
 
     IMS_BOOL SendOptionsRequest(
-            IN IMS_UINT32 nKey, IN AString strRemoteURI, IN IMS_UINT32 ownCapabilities);
-    IMS_BOOL SendOptionsResponse(IN IMS_UINT32 nKey, IN IMS_UINT32 nResponse, IN AString reason,
-            IN IMS_UINT32 ownCapabilities);
+            IN IMS_UINT32 nKey, IN const AString& strRemoteURI, IN IMS_UINT32 ownCapabilities);
+    IMS_BOOL SendOptionsResponse(IN IMS_UINT32 nKey, IN IMS_UINT32 nResponse,
+            IN const AString& reason, IN IMS_UINT32 ownCapabilities);
     IMS_BOOL ReceivedOptions(
             IN const ICoreService* piCoreService, IN ICapabilities* piCapabilities);
 

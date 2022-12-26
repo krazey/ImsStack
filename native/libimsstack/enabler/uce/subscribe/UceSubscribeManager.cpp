@@ -54,7 +54,7 @@ PUBLIC VIRTUAL UceSubscribeManager::~UceSubscribeManager()
 -------------------------------------------------------------------------------------------------
 */
 PUBLIC
-IMS_BOOL UceSubscribeManager::QuerySingleCapability(IN AString strUser, IN IMS_UINT32 key)
+IMS_BOOL UceSubscribeManager::QuerySingleCapability(IN const AString& strUser, IN IMS_UINT32 key)
 {
     UceSubscribe* pUceSubscribe = new UceSubscribe(
             m_piCoreService, m_strAppName, GetName(), m_nConnectedServices, m_nSimSlot);
@@ -68,7 +68,8 @@ IMS_BOOL UceSubscribeManager::QuerySingleCapability(IN AString strUser, IN IMS_U
     return IMS_TRUE;
 }
 
-IMS_BOOL UceSubscribeManager::QueryMultiCapability(IN IMSList<AString> objUsers, IN IMS_UINT32 key)
+IMS_BOOL UceSubscribeManager::QueryMultiCapability(
+        IN const IMSList<AString>& objUsers, IN IMS_UINT32 key)
 {
     UceSubscribe* pUceSubscribe = new UceSubscribe(
             m_piCoreService, m_strAppName, GetName(), m_nConnectedServices, m_nSimSlot);

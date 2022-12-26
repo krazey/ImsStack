@@ -113,8 +113,8 @@ public:
 public:
     virtual IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) override;
-    IMS_BOOL SendPublishRequest(IN IMS_UINT32 key, IN AString pidfXml, IN AString eTag,
-            IN IMS_UINT32 capability, IN IMS_UINT32 extended);
+    IMS_BOOL SendPublishRequest(IN IMS_UINT32 key, IN const AString& pidfXml,
+            IN const AString& eTag, IN IMS_UINT32 capability, IN IMS_UINT32 extended);
     IMS_BOOL AosConnected(IMS_UINT32 conectedService);  // AoS-connected
     IMS_BOOL AosDisConnected();                         // AoS-disconnected
     IMS_BOOL AosDisConnecting();                        // AoS-disconnecting
@@ -176,7 +176,7 @@ private:
     ISipMessage* GetISIPMessage(IMS_BOOL bRequireResponseMessage = IMS_FALSE);
     void SendPublishCommandErrorInd(IMS_UINT32 nKey, IMS_UINT32 nCommandError);
     void SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResponseCode, AString strReason,
-            IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText, AString eTag,
+            IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText, const AString& eTag,
             IMS_BOOL bNeedToRetry = IMS_FALSE);
     void SendUnpublishedInd();
     IMS_BOOL CreatePublication();
@@ -206,7 +206,8 @@ private:
     void HandleRetryTimer();
     void HandleRetryAfterTimer();
 
-    IMS_BOOL RetryPublish(IMS_BOOL bRefresh, AString strMinExpiryValue = AString::ConstEmpty());
+    IMS_BOOL RetryPublish(
+            IMS_BOOL bRefresh, const AString& strMinExpiryValue = AString::ConstEmpty());
 
     void SendPendingPublishRequest();
     void ClearPendingPublishRequest();

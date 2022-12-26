@@ -21,7 +21,7 @@
 #include "ImsMessageDef.h"
 
 #define UI2UCEAPP IMS_MSG_BASE_UCE  // 3000
-#define UCEAPP2UI IMS_MSG_BASE_UCE + 50
+#define UCEAPP2UI (IMS_MSG_BASE_UCE + 50)
 
 class IUUceService
 {

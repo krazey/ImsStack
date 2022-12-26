@@ -138,8 +138,8 @@ void UceService::AosDisConnecting()
     }
 }
 
-IMS_BOOL UceService::SendPublishCmd(
-        IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability, AString pidfXml, AString eTag)
+IMS_BOOL UceService::SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
+        const AString& pidfXml, const AString& eTag)
 {
     if (m_pUcePublishManager == IMS_NULL)
     {
@@ -151,7 +151,7 @@ IMS_BOOL UceService::SendPublishCmd(
     return IMS_TRUE;
 }
 
-IMS_BOOL UceService::SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri)
+IMS_BOOL UceService::SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri)
 {
     if (m_pUceOptionsManager == IMS_NULL)
     {
@@ -163,7 +163,7 @@ IMS_BOOL UceService::SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString r
 }
 
 IMS_BOOL UceService::SendOptionsRespCmd(
-        IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps)
+        IMS_UINT32 key, IMS_SINT32 responseCode, const AString& reason, IMS_UINT32 myCaps)
 {
     if (m_pUceOptionsManager == IMS_NULL)
     {
@@ -175,7 +175,7 @@ IMS_BOOL UceService::SendOptionsRespCmd(
     return IMS_TRUE;
 }
 
-IMS_BOOL UceService::SendSingleSubscribeCmd(IMS_UINT32 key, AString user)
+IMS_BOOL UceService::SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user)
 {
     if (m_pUceSubscribeManager == IMS_NULL)
     {
@@ -186,7 +186,7 @@ IMS_BOOL UceService::SendSingleSubscribeCmd(IMS_UINT32 key, AString user)
     return IMS_TRUE;
 }
 
-IMS_BOOL UceService::SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList)
+IMS_BOOL UceService::SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList)
 {
     if (m_pUceSubscribeManager == IMS_NULL)
     {

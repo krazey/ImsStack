@@ -36,7 +36,7 @@ public:
 public:
     IMS_BOOL SendOptionsRequest(IN AString strRemoteURI, IN IMS_UINT32 ownCapabilities);
     IMS_BOOL SendOptionsResponse(
-            IN IMS_UINT32 nResponse, IN AString reason, IN IMS_UINT32 ownCapabilities);
+            IN IMS_UINT32 nResponse, IN const AString& reason, IN IMS_UINT32 ownCapabilities);
     void AoSDisconnected();
     static IMS_UINT32 GetCapability(IMSList<AString> objContactList);
     static void SetIARIFeatureTag(IN IMS_UINT32 capabilities, OUT AString& strIARITag);

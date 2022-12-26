@@ -26,9 +26,6 @@
 
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
-using ::testing::AnyNumber;
-using ::testing::Return;
-
 IMS_SINT32 SUBSCRIBE_MNGR_SIM_SLOT = 20;
 IMS_UINT32 SUBSCRIBE_KEY = 20;
 

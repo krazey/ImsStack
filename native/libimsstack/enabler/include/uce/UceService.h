@@ -46,16 +46,16 @@ public:
 
     // related to publish
     IMS_BOOL SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
-            AString pidfXml, AString eTag);
+            const AString& pidfXml, const AString& eTag);
 
     // related to subscribe
-    IMS_BOOL SendSingleSubscribeCmd(IMS_UINT32 key, AString user);
-    IMS_BOOL SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList);
+    IMS_BOOL SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user);
+    IMS_BOOL SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList);
 
     // related to options
-    IMS_BOOL SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri);
+    IMS_BOOL SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri);
     IMS_BOOL SendOptionsRespCmd(
-            IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps);
+            IMS_UINT32 key, IMS_SINT32 responseCode, const AString& reason, IMS_UINT32 myCaps);
 
 protected:
     virtual void CoreService_PageMessageReceived(

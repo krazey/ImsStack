@@ -109,7 +109,7 @@ IMS_BOOL UceOptions::SendOptionsRequest(IN AString strRemoteURI, IN IMS_UINT32 o
 }
 
 IMS_BOOL UceOptions::SendOptionsResponse(
-        IN IMS_UINT32 nResponse, IN AString reason, IN IMS_UINT32 ownCapabilities)
+        IN IMS_UINT32 nResponse, IN const AString& reason, IN IMS_UINT32 ownCapabilities)
 {
     (void)reason;
     if (m_piCapabilities == IMS_NULL)

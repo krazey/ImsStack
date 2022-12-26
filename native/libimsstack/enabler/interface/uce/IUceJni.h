@@ -39,7 +39,7 @@ public:
      * @param eTag is a value of the SIP IF Match header when sending the publish requeset.
      */
     virtual void SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
-            AString pidfXml, AString eTag) = 0;
+            const AString& pidfXml, const AString& eTag) = 0;
 
     /**
      * Receives single subscribe request from the Framework.
@@ -47,7 +47,7 @@ public:
      * @param key is a value that can identify the request.
      * @param user The target of capability query.
      */
-    virtual void SendSingleSubscribeCmd(IMS_UINT32 key, AString user) = 0;
+    virtual void SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user) = 0;
 
     /**
      * Receives list subscribe request from the Framework.
@@ -55,7 +55,7 @@ public:
      * @param key is a value that can identify the request.
      * @param user The target of capability query.
      */
-    virtual void SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList) = 0;
+    virtual void SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList) = 0;
 
     /**
      * Receives options request from the Framework.
@@ -64,7 +64,7 @@ public:
      * @param myCaps is my capability.
      * @param remoteUri The target of capability query.
      */
-    virtual void SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri) = 0;
+    virtual void SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri) = 0;
 
     /**
      * Receives a response for the received options from the Framework.
@@ -75,7 +75,7 @@ public:
      * @param myCaps is my capability.
      */
     virtual void SendOptionsRespCmd(
-            IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps) = 0;
+            IMS_UINT32 key, IMS_SINT32 responseCode, const AString& reason, IMS_UINT32 myCaps) = 0;
 
     /**
      * Receives a request to get th current ims registration status.

@@ -73,8 +73,8 @@ public:
     virtual IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) override;
 
-    IMS_BOOL QuerySingleCapability(IN AString strUser, IN IMS_UINT32 key);
-    IMS_BOOL QueryMultiCapability(IN IMSList<AString> objUsers, IN IMS_UINT32 key);
+    IMS_BOOL QuerySingleCapability(IN const AString& strUser, IN IMS_UINT32 key);
+    IMS_BOOL QueryMultiCapability(IN const IMSList<AString>& objUsers, IN IMS_UINT32 key);
     IMS_BOOL AosDisConnected();  // AoS-disconnected
     /* ------------------------------------------------------------------------------------------
         Methods
@@ -119,10 +119,10 @@ private:
 
     static const IMS_CHAR* StateToString(IMS_UINT32 _eState);
 
-    void SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString strReason,
-            IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText);
+    void SendSubscribeResponseInd(IMS_SINT32 nResponseCode, const AString& strReason,
+            IMS_SINT32 nReasonHeaderCause, const AString& strReasonHeaderText);
     void SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError);
-    void SendPresenceNotifyInd(IMSList<AString> pidfXmls);
+    void SendPresenceNotifyInd(const IMSList<AString>& pidfXmls);
     void SendSubscribeResourceTerminatedInd(UceNonCapabilityUsers* nonCapUsers);
     void SendSubscribeTerminatedInd();
 

@@ -25,9 +25,6 @@
 
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
-using ::testing::AnyNumber;
-using ::testing::Return;
-
 IMS_SINT32 SERVICE_SIM_SLOT = 20;
 
 class TestUceService : public UceService

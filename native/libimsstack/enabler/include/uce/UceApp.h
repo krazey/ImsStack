@@ -80,12 +80,13 @@ protected:
 
     // JNI -> Native
     virtual void SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
-            AString pidfXml, AString eTag) override;
-    virtual void SendSingleSubscribeCmd(IMS_UINT32 key, AString user) override;
-    virtual void SendListSubscribeCmd(IMS_UINT32 key, IMSList<AString> userList) override;
-    virtual void SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, AString remoteUri) override;
-    virtual void SendOptionsRespCmd(
-            IMS_UINT32 key, IMS_SINT32 responseCode, AString reason, IMS_UINT32 myCaps) override;
+            const AString& pidfXml, const AString& eTag) override;
+    virtual void SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user) override;
+    virtual void SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList) override;
+    virtual void SendOptionsCmd(
+            IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri) override;
+    virtual void SendOptionsRespCmd(IMS_UINT32 key, IMS_SINT32 responseCode, const AString& reason,
+            IMS_UINT32 myCaps) override;
     virtual void ImsRegistrationCheck() override;
 
 private:

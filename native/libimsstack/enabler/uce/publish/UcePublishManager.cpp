@@ -423,8 +423,8 @@ IMS_RESULT UcePublishManager::MessageMediator_AdjustMessage(
     return IMS_SUCCESS;
 }
 
-IMS_BOOL UcePublishManager::SendPublishRequest(IN IMS_UINT32 key, IN AString pidfXml,
-        IN AString eTag, IN IMS_UINT32 capability, IN IMS_UINT32 extended)
+IMS_BOOL UcePublishManager::SendPublishRequest(IN IMS_UINT32 key, IN const AString& pidfXml,
+        IN const AString& eTag, IN IMS_UINT32 capability, IN IMS_UINT32 extended)
 {
     IMS_TRACE_D(
             "SendPublishRequest:key [%d], extended[%d], capability[%d]", key, extended, capability);
@@ -1242,10 +1242,7 @@ IMS_BOOL UcePublishManager::StateALL_Terminated(IN IMSMSG& objMsg)
             StopTimer(TIMER_ALL);
             break;
         case REFRESHING:
-            SendPublishResponseInd(m_nKey, SipStatusCode::SC_504, "Server Time-out", 0, "", "");
-            StopTimer(TIMER_ALL);
-            break;
-        case TERMINATING:
+        case TERMINATING:  // FALL-THROUGH
             SendPublishResponseInd(m_nKey, SipStatusCode::SC_504, "Server Time-out", 0, "", "");
             StopTimer(TIMER_ALL);
             break;
@@ -1337,8 +1334,8 @@ void UcePublishManager::SendPublishCommandErrorInd(IMS_UINT32 nKey, IMS_UINT32 n
 }
 
 void UcePublishManager::SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResponseCode,
-        AString strReason, IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText, AString eTag,
-        IMS_BOOL bNeedToRetry)
+        AString strReason, IMS_SINT32 nReasonHeaderCause, AString strReasonHeaderText,
+        const AString& eTag, IMS_BOOL bNeedToRetry)
 {
     IMS_TRACE_I("SendPublishResponseInd:key[%d], responseCode[%d]", nKey, nResponseCode, 0);
     IMS_TRACE_I("SendPublishResponseInd:reason[%s], Cause[%d], Text[%s]", strReason.GetStr(),
@@ -2086,7 +2083,7 @@ void UcePublishManager::HandleRetryAfterTimer()
     SendPendingPublishRequest();
 }
 
-IMS_BOOL UcePublishManager::RetryPublish(IMS_BOOL bRefresh, AString strMinExpiryValue)
+IMS_BOOL UcePublishManager::RetryPublish(IMS_BOOL bRefresh, const AString& strMinExpiryValue)
 {
     if (CreatePublication() == IMS_FALSE)
     {

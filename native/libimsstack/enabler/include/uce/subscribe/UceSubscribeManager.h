@@ -37,8 +37,8 @@ public:
     ---------------------------------------------------------------------------------------------
   */
 public:
-    IMS_BOOL QuerySingleCapability(IN AString strUser, IN IMS_UINT32 key);
-    IMS_BOOL QueryMultiCapability(IN IMSList<AString> objUsers, IN IMS_UINT32 key);
+    IMS_BOOL QuerySingleCapability(IN const AString& strUser, IN IMS_UINT32 key);
+    IMS_BOOL QueryMultiCapability(IN const IMSList<AString>& objUsers, IN IMS_UINT32 key);
     IMS_BOOL AosConnected(IMS_UINT32 conectedService);
     IMS_BOOL AosDisConnected();
     void ClosedService();  // core service closed

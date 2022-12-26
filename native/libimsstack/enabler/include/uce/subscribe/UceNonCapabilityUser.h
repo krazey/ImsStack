@@ -20,7 +20,7 @@
 class UceNonCapabilityUser
 {
 public:
-    explicit UceNonCapabilityUser(AString strId, AString strReason) :
+    explicit UceNonCapabilityUser(const AString& strId, const AString& strReason) :
             m_strId(strId),
             m_strReason(strReason){};
     virtual ~UceNonCapabilityUser() {}
@@ -64,7 +64,7 @@ class UcePidfXmls
 public:
     explicit UcePidfXmls(){};
     virtual ~UcePidfXmls() {}
-    void SetPidfXml(AString pidfXml) { m_lstPidfXmls.Append(pidfXml); }
+    void SetPidfXml(const AString& pidfXml) { m_lstPidfXmls.Append(pidfXml); }
 
     IMSList<AString> GetPidfXmls() const { return m_lstPidfXmls; }
 

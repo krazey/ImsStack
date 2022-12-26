@@ -365,11 +365,8 @@ IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& ob
         if (pParameter != IMS_NULL)
         {
             strStart = pParameter->GetValue();
-            if (strStart.StartsWith('\"') == IMS_TRUE && strStart.EndsWith('\"') == IMS_TRUE)
-            {
-                strStart = strStart.GetSubStr(1, strStart.GetLength() - 2);
-            }
-            else if (strStart.StartsWith('<') == IMS_TRUE && strStart.EndsWith('>') == IMS_TRUE)
+            if ((strStart.StartsWith('\"') == IMS_TRUE && strStart.EndsWith('\"') == IMS_TRUE) ||
+                    (strStart.StartsWith('<') == IMS_TRUE && strStart.EndsWith('>') == IMS_TRUE))
             {
                 strStart = strStart.GetSubStr(1, strStart.GetLength() - 2);
             }
@@ -392,13 +389,10 @@ IMS_BOOL UceXmlDocumentHelperThread::ReceivedRlmiNotifyMessageHandler(IMSMSG& ob
         if (bFoundStartParameter == IMS_TRUE)
         {
             AString strContentId = piBodyPart->GetContentId();
-            if (strContentId.StartsWith('\"') == IMS_TRUE &&
-                    strContentId.EndsWith('\"') == IMS_TRUE)
-            {
-                strContentId = strContentId.GetSubStr(1, strContentId.GetLength() - 2);
-            }
-            else if (strContentId.StartsWith('<') == IMS_TRUE &&
-                    strContentId.EndsWith('>') == IMS_TRUE)
+            if ((strContentId.StartsWith('\"') == IMS_TRUE &&
+                        strContentId.EndsWith('\"') == IMS_TRUE) ||
+                    (strContentId.StartsWith('<') == IMS_TRUE &&
+                            strContentId.EndsWith('>') == IMS_TRUE))
             {
                 strContentId = strContentId.GetSubStr(1, strContentId.GetLength() - 2);
             }
@@ -445,11 +439,8 @@ IMS_BOOL UceXmlDocumentHelperThread::ParsedRlmiXmlMessageHandler(IMSMSG& objMsg)
         {
             UceNotifyBodyPartData* piBodyPart = m_objBodyParts.GetAt(j);
             AString strConID = piBodyPart->GetContentId();
-            if (strConID.StartsWith('\"') == IMS_TRUE && strConID.EndsWith('\"') == IMS_TRUE)
-            {
-                strConID = strConID.GetSubStr(1, strConID.GetLength() - 2);
-            }
-            else if (strConID.StartsWith('<') == IMS_TRUE && strConID.EndsWith('>') == IMS_TRUE)
+            if ((strConID.StartsWith('\"') == IMS_TRUE && strConID.EndsWith('\"') == IMS_TRUE) ||
+                    (strConID.StartsWith('<') == IMS_TRUE && strConID.EndsWith('>') == IMS_TRUE))
             {
                 strConID = strConID.GetSubStr(1, strConID.GetLength() - 2);
             }
@@ -552,11 +543,10 @@ IMS_RESULT UceXmlDocumentHelperThread::ParseRLMIList(IN IDocument* piDocument)
                     }
                     else
                     {
-                        if (temp.StartsWith('\"') == IMS_TRUE && temp.EndsWith('\"') == IMS_TRUE)
-                        {
-                            temp = temp.GetSubStr(1, temp.GetLength() - 2);
-                        }
-                        else if (temp.StartsWith('<') == IMS_TRUE && temp.EndsWith('>') == IMS_TRUE)
+                        if ((temp.StartsWith('\"') == IMS_TRUE &&
+                                    temp.EndsWith('\"') == IMS_TRUE) ||
+                                (temp.StartsWith('<') == IMS_TRUE &&
+                                        temp.EndsWith('>') == IMS_TRUE))
                         {
                             temp = temp.GetSubStr(1, temp.GetLength() - 2);
                         }
