@@ -165,7 +165,7 @@ IMS_BOOL SipManager::AttachConnectionNotifier(IN SipConnectionNotifier* pScn)
 }
 
 PUBLIC
-void SipManager::DetachConnectionNotifier(IN SipConnectionNotifier* pScn)
+void SipManager::DetachConnectionNotifier(IN const SipConnectionNotifier* pScn)
 {
     if (m_nState != STATE_ACTIVE)
     {

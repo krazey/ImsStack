@@ -30,7 +30,7 @@ class SipClientTransactionState;
 class SipAckPackage : public ISipAckPackage
 {
 private:
-    SipAckPackage(IN const AString& strCallId);
+    explicit SipAckPackage(IN const AString& strCallId);
 
 public:
     virtual ~SipAckPackage();

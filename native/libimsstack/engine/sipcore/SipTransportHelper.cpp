@@ -882,10 +882,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_KeepAliveExpired(IN SipSoc
     if (pSocket->RemoveListener(IMS_NULL) == 0)
     {
         LookupSocket(*pSocket, IMS_TRUE);
-
         delete pSocket;
-        pSocket = IMS_NULL;
-
         IMS_TRACE_D("TransportHelper :: Destroy (Keep-Alive Expired) - Sockets (%d)",
                 m_objSockets.GetSize(), 0, 0);
     }
@@ -912,10 +909,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_PassiveClosed(IN SipSocket
         if (pSocket == pTmpSocket)
         {
             m_objSockets.RemoveAt(i);
-
             delete pSocket;
-            pSocket = IMS_NULL;
-
             IMS_TRACE_D("TransportHelper :: Destroy (Passive Closed) - Sockets (%d)",
                     m_objSockets.GetSize(), 0, 0);
             return;
@@ -930,7 +924,7 @@ IMS_BOOL SipTransportHelper::AttachSocket(IN SipSocket* pSocket)
 }
 
 PRIVATE
-IMS_BOOL SipTransportHelper::IsSocketPresent(IN SipSocket* pSocket) const
+IMS_BOOL SipTransportHelper::IsSocketPresent(IN const SipSocket* pSocket) const
 {
     if (pSocket != IMS_NULL)
     {

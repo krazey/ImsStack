@@ -261,21 +261,6 @@ IMS_BOOL PreferenceHeader::Attach(
 }
 
 PRIVATE
-void PreferenceHeader::Detach(IN const AString& strTag)
-{
-    for (IMS_UINT32 i = 0; i < m_objPreferenceFeatures.GetSize(); ++i)
-    {
-        const FeatureSet* pFeatureSet = m_objPreferenceFeatures.GetAt(i);
-
-        if (pFeatureSet->GetTag().EqualsIgnoreCase(strTag))
-        {
-            m_objPreferenceFeatures.RemoveAt(i);
-            return;
-        }
-    }
-}
-
-PRIVATE
 FeatureSet* PreferenceHeader::Lookup(IN const AString& strTag) const
 {
     for (IMS_UINT32 i = 0; i < m_objPreferenceFeatures.GetSize(); ++i)

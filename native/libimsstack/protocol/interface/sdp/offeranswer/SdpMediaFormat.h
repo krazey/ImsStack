@@ -23,7 +23,7 @@ class SdpMediaFormatParameter;
 class SdpMediaFormat
 {
 public:
-    SdpMediaFormat(IN IMS_SINT32 nType = TYPE_OTHER);
+    explicit SdpMediaFormat(IN IMS_SINT32 nType = TYPE_OTHER);
     SdpMediaFormat(IN const SdpMediaFormat& other);
     virtual ~SdpMediaFormat();
 

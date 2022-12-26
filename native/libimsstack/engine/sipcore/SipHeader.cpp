@@ -241,7 +241,7 @@ PUBLIC VIRTUAL IMS_BOOL SipHeader::Equals(IN const ISipHeader* piHeader) const
         return IMS_FALSE;
     }
 
-    if ((m_nType == ISipHeader::UNKNOWN) && (pHeader->m_nType == ISipHeader::UNKNOWN))
+    if (m_nType == ISipHeader::UNKNOWN)
     {
         const IMS_CHAR* pszHdrName = SipStack::GetHeaderName(m_nType, m_strName);
         const IMS_CHAR* pszOtherHdrName =

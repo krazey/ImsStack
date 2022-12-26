@@ -163,11 +163,6 @@ inline IMS_SINT32 AddrSpec_GetPort(IN const SipAddrSpec* pAddrSpec)
     return pAddrSpec->GetSipUriAsRef()->GetPort();
 }
 
-inline IMS_BOOL IsAckTransmissionRequiredForNon2XX()
-{
-    return IMS_FALSE;
-}
-
 GLOBAL IMS_BOOL AppendHeader(IN SipHeaderBase* pHeader, IN_OUT ::SipMessage*& pMessage);
 GLOBAL IMS_BOOL AppendMessageBody(IN SipMsgBody* pMsgBody, IN_OUT ::SipMessage*& pMessage);
 GLOBAL IMS_BOOL PrependHeader(IN SipHeaderBase* pHeader, IN_OUT ::SipMessage*& pMessage);

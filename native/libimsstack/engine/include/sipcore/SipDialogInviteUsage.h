@@ -32,7 +32,7 @@
 class SipDialogInviteUsage : public SipDialogUsage
 {
 public:
-    inline SipDialogInviteUsage(IN SipDialogBase* pDialog) :
+    inline explicit SipDialogInviteUsage(IN SipDialogBase* pDialog) :
             SipDialogUsage(SipDialogUsage::TYPE_INVITE, pDialog)
     {
     }

@@ -37,7 +37,7 @@ public:
             IN IMS_BOOL bCheckForked = IMS_FALSE, OUT IMS_BOOL* pbIsForked = IMS_NULL);
 
     IMS_BOOL AttachConnectionNotifier(IN SipConnectionNotifier* pScn);
-    void DetachConnectionNotifier(IN SipConnectionNotifier* pScn);
+    void DetachConnectionNotifier(IN const SipConnectionNotifier* pScn);
     SipConnectionNotifier* LookupConnectionNotifier(IN const SipTransportAddress& objTAddr,
             IN const AString& strFilter = AString::ConstNull());
 

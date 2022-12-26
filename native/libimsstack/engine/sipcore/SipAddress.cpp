@@ -1196,15 +1196,13 @@ IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
 
     // Check if any uri-parameter components are appearing in both URIs.
     // user/ttl/method/maddr[/transport]
-    IMS_BOOL bParamPresent = IMS_FALSE;
-    IMS_BOOL bOtherParamPresent = IMS_FALSE;
     AString strParamName;
 
     for (IMS_UINT32 i = 0; i < MAX_SPECIAL_PARAMETER; ++i)
     {
         strParamName.Attach(SPECIAL_PARAMETER[i].pszName, SPECIAL_PARAMETER[i].nSize);
-        bParamPresent = IsParameterPresent(strParamName);
-        bOtherParamPresent = objAddress.IsParameterPresent(strParamName);
+        IMS_BOOL bParamPresent = IsParameterPresent(strParamName);
+        IMS_BOOL bOtherParamPresent = objAddress.IsParameterPresent(strParamName);
 
         if (bParamPresent != bOtherParamPresent)
         {

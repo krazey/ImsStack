@@ -46,7 +46,7 @@ public:
     inline IMS_BOOL IsEmpty() const { return m_objTxnStates.IsEmpty(); }
     inline IMS_BOOL IsTransactionCompleted() const { return SipStatusCode::IsFinal(m_nStatusCode); }
     SipClientTransactionState* Lookup(IN ::SipMessage* pSipMsg) const;
-    void Remove(IN SipClientTransactionState* pCtState);
+    void Remove(IN const SipClientTransactionState* pCtState);
     inline void SetTransactionCompleted(IN IMS_SINT32 nStatusCode) { m_nStatusCode = nStatusCode; }
 
 private:

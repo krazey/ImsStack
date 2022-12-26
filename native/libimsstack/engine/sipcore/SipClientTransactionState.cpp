@@ -1107,12 +1107,7 @@ IMS_BOOL SipClientTransactionState::CorrectRouteHeader(IN_OUT ::SipMessage*& pSi
 PRIVATE
 void SipClientTransactionState::CheckNSendAck()
 {
-    if (!SipStack::IsAckTransmissionRequiredForNon2XX())
-    {
-        // SIP stack takes care of the failure response for INVITE and sends ACK
-        return;
-    }
-
+#if defined(__SIP_ACK_TRANSMISSION_REQUIRED_FOR_NON_2XX__)
     // Check if non-2xx response to INVITE, then the client transaction needs to send ACK request.
     IMS_SINT32 nStatusCode = SipStack::GetStatusCode(m_pSipMsg);
 
@@ -1150,6 +1145,7 @@ void SipClientTransactionState::CheckNSendAck()
 
         SipStack::FreeMessage(pAckSipMsg);
     }
+#endif
 }
 
 PRIVATE VIRTUAL SipTransactionState* SipClientTransactionState::Clone()

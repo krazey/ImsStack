@@ -35,7 +35,7 @@
 class SipDialogUsage
 {
 public:
-    inline SipDialogUsage(IN SipDialogBase* pDialogBase) :
+    inline explicit SipDialogUsage(IN SipDialogBase* pDialogBase) :
             m_nType(TYPE_EPHEMERAL),
             m_pDialogBase(pDialogBase)
     {

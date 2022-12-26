@@ -33,7 +33,7 @@ public:
     {
     }
 
-    inline void RefreshCompleted(ISipClientConnection* piScc, IMS_SINT32 nCode /*= 0*/)
+    inline void RefreshCompleted(ISipClientConnection* piScc, IMS_SINT32 nCode /*= 0*/) override
     {
         SessionRefreshHelper::RefreshCompleted(piScc, nCode);
     }

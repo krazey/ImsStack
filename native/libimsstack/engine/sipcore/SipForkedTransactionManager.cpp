@@ -132,7 +132,7 @@ SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* 
 }
 
 PUBLIC
-void SipForkedTransactionManager::Remove(IN SipClientTransactionState* pCtState)
+void SipForkedTransactionManager::Remove(IN const SipClientTransactionState* pCtState)
 {
     for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {

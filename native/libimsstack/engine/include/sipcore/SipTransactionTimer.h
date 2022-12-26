@@ -36,7 +36,7 @@ public:
 
 private:
     // ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
 private:
     ITimer* m_piTimer;

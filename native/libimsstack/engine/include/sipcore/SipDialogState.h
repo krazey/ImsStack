@@ -118,7 +118,6 @@ private:
     {
         return ((m_nFromChangeOption & FROM_CHANGE_CAPABLE) == FROM_CHANGE_CAPABLE);
     }
-    inline void ClearFromChangeOption(IN IMS_SINT32 nOption) { m_nFromChangeOption &= (~nOption); }
     void SetFromChangeOption(IN IMS_SINT32 nOption);
     void UpdateFromChangeOption(IN const SipMessageInfo& objMsgInfo);
 

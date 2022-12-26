@@ -35,7 +35,7 @@
 class SipDialogSubscribeUsage : public SipDialogUsage
 {
 public:
-    SipDialogSubscribeUsage(IN SipDialogBase* pDialog);
+    explicit SipDialogSubscribeUsage(IN SipDialogBase* pDialog);
     SipDialogSubscribeUsage(IN const SipDialogSubscribeUsage& other);
     inline virtual ~SipDialogSubscribeUsage() {}
 

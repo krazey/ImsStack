@@ -44,7 +44,6 @@ public:
 
 private:
     IMS_BOOL Attach(IN const AString& strTag, IN const AString& strValue = AString::ConstNull());
-    void Detach(IN const AString& strTag);
     FeatureSet* Lookup(IN const AString& strTag) const;
 
     void ExtractProperties(IN const AString& strFeatureSet);

@@ -43,50 +43,53 @@ public:
     virtual ~SipNetworkUtil() {}
 
     SIP_BOOL SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
-            IN SipTransportParameter* /*pTransportParam*/, ISipUserData* pUserData)
-    {
-        if (pUserData == SIP_NULL)
-        {
-            IMS_TRACE_E(0, "User data is missing", 0, 0, 0);
-            return SIP_FALSE;
-        }
-
-        SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(pUserData->GetUserData());
-
-        if (pTxnContext == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "pstTxnContext is NULL", 0, 0, 0);
-            return SIP_FALSE;
-        }
-
-        SipTxnContextData* pTxnContextData =
-                static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
-
-        if (pTxnContextData == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "User data does not contains SipTxnContextData", 0, 0, 0);
-            return SIP_FALSE;
-        }
-
-        SipTransactionState* pTxnState = pTxnContextData->GetTxnState();
-
-        if (pTxnState == SIP_NULL)
-        {
-            IMS_TRACE_E(0, "SipTxnContextData does not contain TxnState", 0, 0, 0);
-            return SIP_FALSE;
-        }
-
-        if (!pTxnState->SendToNetwork(
-                    reinterpret_cast<const IMS_BYTE*>(pTransportBuffer->GetSipBuffer()),
-                    static_cast<IMS_SINT32>(pTransportBuffer->GetSipBufferLen())))
-        {
-            IMS_TRACE_E(0, "SendToNetwork failed", 0, 0, 0);
-            return SIP_FALSE;
-        }
-
-        return SIP_TRUE;
-    }
+            IN SipTransportParameter* pTransportParam, ISipUserData* pUserData) override;
 };
+
+SIP_BOOL SipNetworkUtil::SendToNetwork(IN SipTransportBuffer* pTransportBuffer,
+        IN SipTransportParameter* /*pTransportParam*/, ISipUserData* pUserData)
+{
+    if (pUserData == SIP_NULL)
+    {
+        IMS_TRACE_E(0, "User data is missing", 0, 0, 0);
+        return SIP_FALSE;
+    }
+
+    SipTxnContext* pTxnContext = static_cast<SipTxnContext*>(pUserData->GetUserData());
+
+    if (pTxnContext == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "pstTxnContext is NULL", 0, 0, 0);
+        return SIP_FALSE;
+    }
+
+    SipTxnContextData* pTxnContextData =
+            static_cast<SipTxnContextData*>(pTxnContext->pTxnContextData);
+
+    if (pTxnContextData == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "User data does not contains SipTxnContextData", 0, 0, 0);
+        return SIP_FALSE;
+    }
+
+    SipTransactionState* pTxnState = pTxnContextData->GetTxnState();
+
+    if (pTxnState == SIP_NULL)
+    {
+        IMS_TRACE_E(0, "SipTxnContextData does not contain TxnState", 0, 0, 0);
+        return SIP_FALSE;
+    }
+
+    if (!pTxnState->SendToNetwork(
+                reinterpret_cast<const IMS_BYTE*>(pTransportBuffer->GetSipBuffer()),
+                static_cast<IMS_SINT32>(pTransportBuffer->GetSipBufferLen())))
+    {
+        IMS_TRACE_E(0, "SendToNetwork failed", 0, 0, 0);
+        return SIP_FALSE;
+    }
+
+    return SIP_TRUE;
+}
 
 class SipTxnListenerProxy : public ISipTxnListener
 {
@@ -94,36 +97,38 @@ public:
     SipTxnListenerProxy() {}
     virtual ~SipTxnListenerProxy() {}
 
-    SIP_BOOL TxnTimeout(ISipUserData* pUserData, IMS_SINT32 eTimerType)
-    {
-        IMS_TRACE_I("TxnTimeout", 0, 0, 0);
-        Sip_Cbk_OnTimerExpired(pUserData, eTimerType);
-        return SIP_TRUE;
-    }
+    SIP_BOOL TxnTimeout(ISipUserData* pUserData, IMS_SINT32 eTimerType) override;
+    SIP_BOOL TxnTerminated(ISipUserData* pUserData) override;
+};
 
-    SIP_BOOL TxnTerminated(ISipUserData* pUserData)
-    {
-        IMS_TRACE_I("TxnTerminated", 0, 0, 0);
+SIP_BOOL SipTxnListenerProxy::TxnTimeout(ISipUserData* pUserData, IMS_SINT32 eTimerType)
+{
+    IMS_TRACE_I("TxnTimeout", 0, 0, 0);
+    Sip_Cbk_OnTimerExpired(pUserData, eTimerType);
+    return SIP_TRUE;
+}
 
-        if (pUserData != SIP_NULL)
+SIP_BOOL SipTxnListenerProxy::TxnTerminated(ISipUserData* pUserData)
+{
+    IMS_TRACE_I("TxnTerminated", 0, 0, 0);
+
+    if (pUserData != SIP_NULL)
+    {
+        if (pUserData->GetDeleteFlag() == SIP_TRUE)
         {
-            if (pUserData->GetDeleteFlag() == SIP_TRUE)
-            {
-                SipTxnContext* pTxnContext =
-                        reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
+            SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
 
-                if (pTxnContext != SIP_NULL)
-                {
-                    IMS_TRACE_D("Destroy::SipTxnContext", 0, 0, 0);
-                    SipStack::DestroyTxnContext(pTxnContext);
-                    pUserData->SetUserData(SIP_NULL);
-                }
+            if (pTxnContext != SIP_NULL)
+            {
+                IMS_TRACE_D("Destroy::SipTxnContext", 0, 0, 0);
+                SipStack::DestroyTxnContext(pTxnContext);
+                pUserData->SetUserData(SIP_NULL);
             }
         }
-
-        return SIP_TRUE;
     }
-};
+
+    return SIP_TRUE;
+}
 
 namespace SipStack
 {
@@ -1190,8 +1195,7 @@ GLOBAL IMSList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 
     if (pParams != IMS_NULL)
     {
-        SipParameterList& objParameterList = pParams->GetParameterList();
-
+        const SipParameterList& objParameterList = pParams->GetParameterList();
         IMS_UINT32 nParamCount = objParameterList.GetCount();
 
         for (IMS_UINT32 i = 0; i < nParamCount; ++i)

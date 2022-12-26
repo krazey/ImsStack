@@ -99,7 +99,7 @@ private:
     void StreamSocket_PassiveClosed(IN SipSocket* pSocket) override;
 
     IMS_BOOL AttachSocket(IN SipSocket* pSocket);
-    IMS_BOOL IsSocketPresent(IN SipSocket* pSocket) const;
+    IMS_BOOL IsSocketPresent(IN const SipSocket* pSocket) const;
     SipSocket* LookupSocket(
             IN const SipSocketAddress& objSockAddr, IN IMS_BOOL bDetach = IMS_FALSE);
     SipSocket* LookupSocket(IN const SipSocket& objSocket, IN IMS_BOOL bDetach = IMS_FALSE);
