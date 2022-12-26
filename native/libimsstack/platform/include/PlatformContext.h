@@ -50,6 +50,10 @@ private:
     ~PlatformContext();
 
 public:
+    PlatformContext(IN const PlatformContext&) = delete;
+    PlatformContext& operator=(IN const PlatformContext&) = delete;
+
+public:
     /**
      * @brief Returns the platform service that matches with the given service type.
      *
