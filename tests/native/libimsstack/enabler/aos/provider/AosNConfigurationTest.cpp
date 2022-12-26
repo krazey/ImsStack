@@ -583,13 +583,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY))
             .WillOnce(Return(objReregErrForCallEnd));
 
-    IMSVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
-    objReregErrCodeForImsPdnReactivation.Clear();
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(
-                    CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY))
-            .WillOnce(Return(objReregErrCodeForImsPdnReactivation));
-
     IMSVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
     objReregErrCodeForInitRegWithAvailablePcscf.Clear();
     EXPECT_CALL(objCarrierConfig,
@@ -603,6 +596,14 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::
                             KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY))
             .WillOnce(Return(objReregErrForPdnReactivationAfterCallEnd));
+
+    IMSVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
+    objReregErrCodeForImsPdnReactivation.Clear();
+    objReregErrCodeForImsPdnReactivation.Add(408);
+    EXPECT_CALL(objCarrierConfig,
+            GetIntArray(
+                    CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY))
+            .WillOnce(Return(objReregErrCodeForImsPdnReactivation));
 
     IMSVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
     objReregRetryErrCodeForInitRegWithSamePcscf.Clear();
@@ -736,6 +737,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetReregErrCodeForPdnReactivationAfterCallEnd();
     EXPECT_EQ(0, objErrCode.GetSize());
+    objErrCode.Clear();
+    objErrCode = pAosNConfiguration->GetReregErrCodeForImsPdnReactivation();
+    EXPECT_EQ(1, objErrCode.GetSize());
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetReregErrCodeForInitRegWithAvailablePcscf();
     EXPECT_EQ(0, objErrCode.GetSize());

@@ -356,10 +356,8 @@ TEST_F(AosUtilTest, ManageIntList)
 {
     IMSList<IMS_UINT32> reasons;
     IMSList<IMS_UINT32> compareReasons;
-    IMSList<IMS_UINT32> combineReasons;
     reasons.Clear();
     compareReasons.Clear();
-    combineReasons.Clear();
 
     pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
     pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
@@ -371,17 +369,20 @@ TEST_F(AosUtilTest, ManageIntList)
     EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
     EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
 
+    reasons.Clear();
     pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
     pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
     EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
+    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
 
     pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
     EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
     EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
 
+    reasons.Clear();
+    pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
     pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, reasons);
-    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
-    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
+    EXPECT_FALSE(pAosUtil->IsElementExistInList(compareReasons, reasons));
 }
 
 TEST_F(AosUtilTest, checkNetworkType)
