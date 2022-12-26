@@ -744,7 +744,7 @@ PROTECTED VIRTUAL void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bR
 
 PROTECTED VIRTUAL IMS_UINT32 AosERegistration::GetPreferredRegScheme()
 {
-    IMS_UINT32 nRoamingScheme = GET_N_CONFIG(m_nSlotId)->GetRoamingPreferredEmcReg();
+    IMS_SINT32 nRoamingScheme = GET_N_CONFIG(m_nSlotId)->GetRoamingPreferredEmcReg();
 
     if (nRoamingScheme != CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED)
     {

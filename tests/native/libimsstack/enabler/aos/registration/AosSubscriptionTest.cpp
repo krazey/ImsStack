@@ -176,7 +176,7 @@ protected:
         pAosSubscription->m_nThrottlingCount = nThrottlingCount;
     }
 
-    void SetObjContactAddress(IN SipAddress objContactAddress)
+    void SetObjContactAddress(IN const SipAddress& objContactAddress)
     {
         pAosSubscription->m_objContactAddress = objContactAddress;
     }

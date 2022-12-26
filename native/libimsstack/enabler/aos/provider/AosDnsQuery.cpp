@@ -115,7 +115,6 @@ PRIVATE VIRTUAL void AosDnsQueryPrivate::RunImp()
 {
     IMS_BOOL bLoop = IMS_TRUE;
     IMS_SINT32 nWaitResult;
-    IMS_UINT32 nEventCache;
 
     if (m_pQueryer != IMS_NULL)
     {
@@ -147,7 +146,7 @@ PRIVATE VIRTUAL void AosDnsQueryPrivate::RunImp()
         m_objMutex4Signal.Unlock();
 
         m_objMutex4Event.Lock();
-        nEventCache = m_nEvent;
+        IMS_UINT32 nEventCache = m_nEvent;
         m_objMutex4Event.Unlock();
 
         IMS_TRACE_D("AosDnsQueryPrivate :: wait_result (%d) , event (%d) before processing",
