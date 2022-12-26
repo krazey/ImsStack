@@ -32,6 +32,8 @@ RcObject::RcObject(IN const RcObject& /*other*/) :
 PUBLIC VIRTUAL RcObject::~RcObject() {}
 
 PUBLIC
+// The member variables will be controlled by the RcPtr object.
+// cppcheck-suppress operatorEqVarError
 RcObject& RcObject::operator=(IN const RcObject& /*other*/)
 {
     return (*this);

@@ -269,6 +269,7 @@ PUBLIC GLOBAL const IMS_CHAR* Feature::GetFeatureTag(IN IMS_SINT32 nBaseTag)
 {
     if ((nBaseTag >= BASE_AUDIO) && (nBaseTag < BASE_MAX))
     {
+        // cppcheck-suppress arrayIndexOutOfBoundsCond
         return BASE_TAG[nBaseTag];
     }
 

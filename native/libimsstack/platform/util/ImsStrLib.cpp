@@ -194,6 +194,8 @@ GLOBAL IMS_SINT32 IMS_StrCmp(IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* pszS
         return 1;
     }
 
+    // Both pointers are not null.
+    // cppcheck-suppress nullPointerRedundantCheck
     while (*pszStrA && *pszStrB)
     {
         if (*pszStrA != *pszStrB)
@@ -258,6 +260,8 @@ GLOBAL IMS_SINT32 IMS_StrICmp(IN const IMS_CHAR* pszStrA, IN const IMS_CHAR* psz
         return 1;
     }
 
+    // Both pointers are not null.
+    // cppcheck-suppress nullPointerRedundantCheck
     while (*pszStrA && *pszStrB)
     {
         IMS_CHAR ch1 = IMS_TOLOWER(*pszStrA);

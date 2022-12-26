@@ -145,6 +145,7 @@ PUBLIC GLOBAL AString CapProperty::MessageTypeToString(IN IMS_SINT32 nMessageTyp
 {
     if ((nMessageType > MESSAGE_TYPE_INVALID) && (nMessageType < MESSAGE_TYPE_MAX))
     {
+        // cppcheck-suppress arrayIndexOutOfBoundsCond
         return AString(MESSAGE_TYPE_STRING[nMessageType]);
     }
 
@@ -155,6 +156,7 @@ PUBLIC GLOBAL AString CapProperty::SectorIdToString(IN IMS_SINT32 nSectorId)
 {
     if ((nSectorId > SECTOR_INVALID) && (nSectorId < SECTOR_MAX))
     {
+        // cppcheck-suppress arrayIndexOutOfBoundsCond
         return AString(SECTOR_STRING[nSectorId]);
     }
 

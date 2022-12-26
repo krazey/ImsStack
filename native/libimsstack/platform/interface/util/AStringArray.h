@@ -22,6 +22,7 @@ class AStringArray
 {
 public:
     AStringArray();
+    // cppcheck-suppress noExplicitConstructor
     AStringArray(IN const ImsList<AString>& objElements);
     AStringArray(IN const AStringArray& other);
     ~AStringArray();
