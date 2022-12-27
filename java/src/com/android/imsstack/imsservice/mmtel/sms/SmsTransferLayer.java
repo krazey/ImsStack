@@ -93,7 +93,7 @@ public class SmsTransferLayer {
      * This class contains parameters related to each SMS sent and is required for
      * maintaining the Message details in queue when there are simultaneous SMS requests
      */
-    private class TpduParam {
+    private static class TpduParam {
         int mToken;
         byte[] mTpdu;
         String mSmsc;
@@ -647,7 +647,6 @@ public class SmsTransferLayer {
             int result = SmsUtils.SMSTL_RESULT_FAILURE;
             try {
                 SmsTransferLayer.Listener listener = mListener;
-                int newToken = token;
                 byte[] cdmaPdu = null;
                 if (listener == null) {
                     loge("Listener is null");

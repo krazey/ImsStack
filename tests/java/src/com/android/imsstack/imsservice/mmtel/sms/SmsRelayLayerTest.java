@@ -81,17 +81,7 @@ public class SmsRelayLayerTest {
     //TPDU sent to framework(Smsc Address + mTpdu)
     private byte[] mFrameworkPdu = HexDump.hexStringToByteArray("07919130079229F02111"
                                                             + "0A81785634121000000666B2996C2603");
-    private byte[] mMoRpData = HexDump.hexStringToByteArray("0001000791913007"
-                                                            + "9229F01221110A81785634121000"
-                                                            + "000666B2996C2603");
     private byte[] mMoRpAck = HexDump.hexStringToByteArray("0201");
-    private byte[] mMoRpError = HexDump.hexStringToByteArray("0401016f");
-    private byte[] mMtRpAck = HexDump.hexStringToByteArray("0301");
-    private byte[] mMtRpError = HexDump.hexStringToByteArray("0501016f");
-    private byte[] mMoRpSmma = HexDump.hexStringToByteArray("0601");
-    private byte[] mMtRpAckFailCase = HexDump.hexStringToByteArray("0302");
-    private byte[] mDeliverPdu = HexDump.hexStringToByteArray("20110A81785634121000000666"
-                                                                + "B2996C2603");
 
     @Before
     public void setUp() throws Exception {

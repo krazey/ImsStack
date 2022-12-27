@@ -27,13 +27,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.os.HandlerThread;
 import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.core.agents.Usat;
 import com.android.imsstack.core.agents.UsatInterface;
-import com.android.imsstack.enabler.mts.MtsController;
 import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.internal.util.HexDump;
 
@@ -59,13 +57,11 @@ public class SmsTransferLayerTest {
     @Mock SmsRelayLayer mSmsRL;
     @Mock private UsatInterface mMockUsatInterface;
     @Mock private Usat.MoSmsControlCommandResponse mMockUsatCmdRes;
-    @Mock MtsController.Listener mMockMtsControllerListener = new MtsController.Listener();
     @Mock private Usat.MoSmsControlCommand mMoSmsCCmd;
     @Captor ArgumentCaptor<String> mRpAddrCaptor;
     @Captor ArgumentCaptor<String> mTpAddrCaptor;
     @Captor ArgumentCaptor<Usat.Listener> mUsatListenerCaptor;
 
-    private static final long MAX_WAIT_TIME_MS = 10000;
     private TestSmsTransferLayer mSmsTransferLayer;
     private SmsTransferLayer.SmsRLListenerProxy mProxyListener;
     private int mToken = 1;
@@ -86,9 +82,6 @@ public class SmsTransferLayerTest {
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
     private int mRpMessageType = SmsUtils.RP_DATA;
     private int mReason = SmsManager.RESULT_ERROR_NONE;
-    private HandlerThread mHt;
-    private boolean mReady = false;
-    private Object mLock = new Object();
 
     @Before
     public void setUp() throws Exception {
@@ -106,15 +99,6 @@ public class SmsTransferLayerTest {
     @After
     public void tearDown() throws Exception {
         mSmsTransferLayer = null;
-    }
-
-    private SmsRelayLayer.Listener setupListener() {
-        ArgumentCaptor<SmsRelayLayer.Listener> callbackArg =
-                ArgumentCaptor.forClass(SmsRelayLayer.Listener.class);
-        verify(mSmsRL).setListener(callbackArg.capture());
-        SmsRelayLayer.Listener listener = callbackArg.getValue();
-        assertNotNull(listener);
-        return listener;
     }
 
     @Test
@@ -282,7 +266,7 @@ public class SmsTransferLayerTest {
                 eq(mDestinationAddress), eq(mTpdu), eq(STATUS_RESULT_NA));
     }
 
-    private class TestSmsTransferLayer extends SmsTransferLayer {
+    private static class TestSmsTransferLayer extends SmsTransferLayer {
         TestSmsTransferLayer(ImsCallContext callContext, SmsRelayLayer smsRL) {
             super(callContext, smsRL);
         }

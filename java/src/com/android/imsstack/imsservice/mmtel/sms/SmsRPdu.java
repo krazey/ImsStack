@@ -347,19 +347,17 @@ public final class SmsRPdu {
         }
 
         byte[] getUserDataForRpData() {
-            byte[] ud = null;
             int udlen = getByte();
             if (udlen > MAX_TPDU_LENGTH) {
                 loge("TPDU Length exceeds Max Length");
                 return null;
             }
-            ud = Arrays.copyOfRange(mPdu, mCur, mCur + udlen);
+            byte[] ud = Arrays.copyOfRange(mPdu, mCur, mCur + udlen);
             mCur += ud.length;
             return ud;
         }
 
         byte[] getUserDataForRpAckOrRpError() {
-            byte[] ud = null;
             //For RP-Ack and RPError the RP-UserData starts with Identifier 0x41(49)
             int udIdentifier = getByte();
             if (udIdentifier != RP_UD_IEI) {
@@ -371,7 +369,7 @@ public final class SmsRPdu {
                 loge("getUserDataForRpAckOrRpError :: TPDU Length exceeds Max Length");
                 return null;
             }
-            ud = Arrays.copyOfRange(mPdu, mCur, mCur + udlen);
+            byte[] ud = Arrays.copyOfRange(mPdu, mCur, mCur + udlen);
             mCur += ud.length;
             return ud;
         }
