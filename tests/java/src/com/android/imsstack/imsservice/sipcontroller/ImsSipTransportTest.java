@@ -15,12 +15,26 @@
  */
 package com.android.imsstack.imsservice.sipcontroller;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
 import android.content.Context;
 import android.telephony.ims.DelegateMessageCallback;
 import android.telephony.ims.DelegateRequest;
 import android.telephony.ims.DelegateStateCallback;
 import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.stub.SipDelegate;
+
+import com.android.imsstack.enabler.sipcontroller.impl.SipControllerAgent;
+import com.android.imsstack.imsservice.mmtel.ImsRegistrationImpl;
+import com.android.imsstack.util.AppContext;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,20 +43,6 @@ import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-
-import com.android.imsstack.imsservice.mmtel.ImsRegistrationImpl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -54,15 +54,21 @@ public class ImsSipTransportTest {
     Context mContextMock;
     ImsSipTransport mImsSipTransport;
     //Valid slot
-    int mSlotId = 0;
+    private final int mSlotId = 0;
+
     @Before
-    public void setUp(){
+    public void setUp() {
+        mContextMock = Mockito.mock(Context.class);
+        AppContext.init(mContextMock);
         Executor e = Executors.newSingleThreadExecutor();
-        mImsSipTransport = new ImsSipTransport(mSlotId,mContextMock,e,e,new ImsRegistrationImpl());
+        SipControllerAgent agent = Mockito.mock(SipControllerAgent.class);
+        mImsSipTransport = new ImsSipTransport(mSlotId, mContextMock, e, e,
+                new ImsRegistrationImpl(), agent);
     }
     @After
-    public void cleanUp(){
+    public void tearDown() {
         mImsSipTransport = null;
+        AppContext.deinit();
     }
     @Test
     public void createSipDelegate_invalidSubId() {
