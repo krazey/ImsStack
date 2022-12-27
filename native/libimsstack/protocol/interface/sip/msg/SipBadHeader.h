@@ -39,10 +39,10 @@ public:
     }
 
     /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     /*set methods*/
     SIP_BOOL SetHeaderName(const SIP_CHAR* pszHdrName);
@@ -50,6 +50,6 @@ public:
     /*Get methods*/
     inline const SIP_CHAR* GetHeaderName() const { return m_pszHdrName; }
 
-    inline SIP_BOOL IsValidHeader() const { return SIP_TRUE; }
+    inline SIP_BOOL IsValidHeader() const override { return SIP_TRUE; }
 };
 #endif  //__SIP_BAD_HEADER_H__

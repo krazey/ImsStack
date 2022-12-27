@@ -42,6 +42,29 @@ SipMessageBuffer::SipMessageBuffer() :
     }
 }
 
+PUBLIC
+SipMessageBuffer::SipMessageBuffer(const SipMessageBuffer& other) :
+        RcObject(other),
+        m_ppBuffer(IMS_NULL)
+{
+    IMS_MEM_Memcpy(m_baBuffer, other.m_baBuffer, MAX_MSG_SIZE);
+
+    if (SystemConfig::IsMultiImsEnabled())
+    {
+        IMS_SINT32 nSimCount = SystemConfig::GetSupportedSimCount();
+
+        m_ppBuffer = new IMS_BYTE*[nSimCount];
+
+        m_ppBuffer[0] = &(m_baBuffer[0]);
+
+        for (IMS_SINT32 i = 1; i < nSimCount; ++i)
+        {
+            m_ppBuffer[i] = new IMS_BYTE[MAX_MSG_SIZE];
+            IMS_MEM_Memcpy(m_ppBuffer[i], other.m_ppBuffer[i], MAX_MSG_SIZE);
+        }
+    }
+}
+
 PUBLIC VIRTUAL SipMessageBuffer::~SipMessageBuffer()
 {
     if (m_ppBuffer != IMS_NULL)

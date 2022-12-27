@@ -160,7 +160,7 @@ private:
     SipParameters* m_pParameters;
 
 public:
-    SipHeaderBase(SIP_INT32 eHdrType);
+    explicit SipHeaderBase(SIP_INT32 eHdrType);
     SipHeaderBase(const SipHeaderBase& objHeader);
     virtual ~SipHeaderBase();
     SIP_VOID InitParameters(SipParameters* pParameters);
@@ -182,11 +182,12 @@ public:
     virtual SIP_BOOL IsValidHeader() const;
     virtual SIP_BOOL SetValue(const SIP_CHAR* pszValue);
     virtual const SIP_CHAR* GetValue() const;
+    static SIP_BOOL IsHeaderTypeValid(SIP_INT32 eHdrType);
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
 protected:
-    static SIP_BOOL FindComment(SIP_CHAR* pszStart, SIP_CHAR* pszEnd, SIP_CHAR*& pszCommentStart,
-            SIP_CHAR*& pszCommentEnd);
+    static SIP_BOOL FindComment(SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
+            SIP_CHAR*& pszCommentStart, SIP_CHAR*& pszCommentEnd);
 };
 
 class SipNameAddrHeader : public SipHeaderBase
@@ -195,7 +196,7 @@ protected:
     SipNameAddr* m_pNameAddr;
 
 public:
-    SipNameAddrHeader(SIP_INT32 eHdrType);
+    explicit SipNameAddrHeader(SIP_INT32 eHdrType);
     SipNameAddrHeader(const SipNameAddrHeader& objSipNameAddrHeader);
     virtual ~SipNameAddrHeader();
 
@@ -203,10 +204,10 @@ public:
     SipNameAddr* GetNameAddr();
     SIP_CHAR* GetTag();
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
-    virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
+    virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
-    inline SIP_BOOL IsValidHeader() const
+    inline SIP_BOOL IsValidHeader() const override
     {
         return (m_pNameAddr == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }

@@ -35,7 +35,7 @@ public:
     ~SipTestNetworkUtil() {}
 
 public:
-    SIP_BOOL SendToNetwork(SipTransportBuffer*, SipTransportParameter*, ISipUserData*)
+    SIP_BOOL SendToNetwork(SipTransportBuffer*, SipTransportParameter*, ISipUserData*) override
     {
         return (bSendStatus == SIP_TRUE) ? SIP_TRUE : SIP_FALSE;
     }
@@ -47,9 +47,9 @@ public:
     SipTestTxnListener() {}
     virtual ~SipTestTxnListener() {}
 
-    SIP_BOOL TxnTimeout(ISipUserData*, IMS_SINT32) { return SIP_TRUE; }
+    SIP_BOOL TxnTimeout(ISipUserData*, IMS_SINT32) override { return SIP_TRUE; }
 
-    SIP_BOOL TxnTerminated(ISipUserData*) { return SIP_TRUE; }
+    SIP_BOOL TxnTerminated(ISipUserData*) override { return SIP_TRUE; }
 };
 
 SIP_BOOL SipTestNetworkUtil::bSendStatus = SIP_TRUE;

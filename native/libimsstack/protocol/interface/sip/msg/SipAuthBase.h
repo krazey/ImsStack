@@ -26,7 +26,7 @@ protected:
 
 public:
     /*constructor*/
-    SipAuthBase(SIP_INT32 eHdrType);
+    explicit SipAuthBase(SIP_INT32 eHdrType);
     SipAuthBase(const SipAuthBase& objHeader);
 
     /*destructor*/
@@ -35,10 +35,10 @@ public:
     /*virtual methods*/
     /*Function for encoding of headers*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_BOOL SetParams(const SIP_CHAR* pszName, const SIP_CHAR* pszVal, SIP_BOOL bIsFeatureParam);
 
@@ -46,7 +46,7 @@ public:
 
     SIP_CHAR* GetAuthValue(const SIP_CHAR* pszName);
 
-    SIP_BOOL IsValidHeader() const;
+    SIP_BOOL IsValidHeader() const override;
 
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 };

@@ -27,7 +27,7 @@ public:
 
 public:
     SIP_BOOL SendToNetwork(SipTransportBuffer* pTransportBuffer,
-            SipTransportParameter* pTransportParam, ISipUserData* pUserData);
+            SipTransportParameter* pTransportParam, ISipUserData* pUserData) override;
 };
 
 #endif  // __ISIP_DEFNETWORKUTIL_H__

@@ -302,8 +302,6 @@ static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
         return SIP_FALSE;
     }
 
-    SIP_UINT32 nDuration = SIP_ZERO;
-
     SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
     SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
@@ -324,7 +322,6 @@ static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
         if (nDurationExpired >= nMaxDuration)
         {
             pTxn->SetTxnState(SipTxn::INV_SER_TERMINATED_ST);
-            nDuration = SIP_ZERO;
             return SIP_TRUE;
         }
         else
@@ -332,27 +329,27 @@ static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
             SIP_UINT32 nCurrentDuration = pTxn->GetCurrentDuration();
 
             /* Double of timeout value for RPR */
-            nDuration = nCurrentDuration << 1;
+            SIP_UINT32 nDuration = nCurrentDuration << 1;
 
             // Update the timer duration.
             if ((nDurationExpired + nDuration) >= nMaxDuration)
             {
                 nDuration = nMaxDuration - nDurationExpired;
             }
-        }
 
-        if (nDuration > SIP_ZERO)
-        {
-            if (pTxn->StartTxnTimer(SipTxn::TIMERG, nDuration, pnError) == SIP_FALSE)
+            if (nDuration > SIP_ZERO)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                        "InvSerFsm_ProceedingStTimerG_H_TimeoutEvt: Start Timer Failed", SIP_ZERO,
-                        SIP_ZERO);
-                return SIP_FALSE;
+                if (pTxn->StartTxnTimer(SipTxn::TIMERG, nDuration, pnError) == SIP_FALSE)
+                {
+                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
+                            "InvSerFsm_ProceedingStTimerG_H_TimeoutEvt: Start Timer Failed",
+                            SIP_ZERO, SIP_ZERO);
+                    return SIP_FALSE;
+                }
+                pTxn->IncrTxnCount();
+                pTxn->IncrDurationExpired(nDuration);
+                pTxn->SetCurrentDuration(nDuration);
             }
-            pTxn->IncrTxnCount();
-            pTxn->IncrDurationExpired(nDuration);
-            pTxn->SetCurrentDuration(nDuration);
         }
     }
 

@@ -36,7 +36,7 @@ public:
     {
     }
 
-    inline ISipUserData(SIP_VOID* pvUserData) :
+    inline explicit ISipUserData(SIP_VOID* pvUserData) :
             m_nMsgOptions(SipConfiguration::MSG_OPT_ENCODE_NONE),
             m_bDeleteFlag(SIP_FALSE),
             m_pvUserData(pvUserData)

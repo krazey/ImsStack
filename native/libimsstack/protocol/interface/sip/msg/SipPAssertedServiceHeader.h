@@ -31,6 +31,6 @@ public:
 
     /*virtual methods*/
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 };
 #endif  //__SIP_P_ASSERTED_SERVICE_HEADER_H__

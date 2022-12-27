@@ -23,18 +23,15 @@
 #define SIP_TRACE_MAX_SIZE 2000
 
 #ifdef SIP_DEBUG_ENABLE
-#define SIP_DEBUG_WARNING(a, b, c, d) \
-    SIP_DEBUG_LOG(CAT_D, (SIP_CHAR*)__FILE__, __LINE__, (SIP_CHAR*)b, c, d)
-#define SIP_DEBUG_EXTRLBUG(a, b, c, d) \
-    SIP_DEBUG_LOG(CAT_D, (SIP_CHAR*)__FILE__, __LINE__, (SIP_CHAR*)b, c, d)
-#define SIP_DEBUG_STACKBUG(a, b, c, d) \
-    SIP_DEBUG_LOG(CAT_D, (SIP_CHAR*)__FILE__, __LINE__, (SIP_CHAR*)b, c, d)
+#define SIP_DEBUG_WARNING(a, b, c, d)  SIP_DEBUG_LOG(CAT_D, __FILE__, __LINE__, b, c, d)
+#define SIP_DEBUG_EXTRLBUG(a, b, c, d) SIP_DEBUG_LOG(CAT_D, __FILE__, __LINE__, b, c, d)
+#define SIP_DEBUG_STACKBUG(a, b, c, d) SIP_DEBUG_LOG(CAT_D, __FILE__, __LINE__, b, c, d)
 // Added New INFO log capturing macro function
-#define SIP_TRACE_I(a, b, c) SIP_DEBUG_LOG(CAT_I, (SIP_CHAR*)__FILE__, __LINE__, a, b, c)
+#define SIP_TRACE_I(a, b, c)           SIP_DEBUG_LOG(CAT_I, __FILE__, __LINE__, a, b, c)
 // Added New ERROR log capturing macro function
-#define SIP_TRACE_E(a, b, c) SIP_DEBUG_LOG(CAT_E, (SIP_CHAR*)__FILE__, __LINE__, a, b, c)
+#define SIP_TRACE_E(a, b, c)           SIP_DEBUG_LOG(CAT_E, __FILE__, __LINE__, a, b, c)
 // Added New DEBUG og capturing macro function
-#define SIP_TRACE_D(a, b, c) SIP_DEBUG_LOG(CAT_D, (SIP_CHAR*)__FILE__, __LINE__, a, b, c)
+#define SIP_TRACE_D(a, b, c)           SIP_DEBUG_LOG(CAT_D, __FILE__, __LINE__, a, b, c)
 #else
 #define SIP_DEBUG_WARNING(a, b, c, d)
 #define SIP_DEBUG_EXTRLBUG(a, b, c, d)
@@ -75,7 +72,7 @@ typedef enum _SipEn_DebugTypes
     ESIPDEBUG_INVALID = SIP_INVALID
 } SipEn_DebugTypes;
 
-void SIP_DEBUG_LOG(
-        SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine, SIP_CHAR* pszFormat, ...);
+void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
+        const SIP_CHAR* pszFormat, ...);
 
 #endif  //__SIP_DEBUG_H__

@@ -203,7 +203,7 @@ SipHeaders::~SipHeaders()
 
 SipHeaderBase* SipHeaders::GetHdrObj(SIP_INT32 eHdrType, SIP_UINT16 eIndex)
 {
-    if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
+    if (SipHeaderBase::IsHeaderTypeValid(eHdrType) == SIP_FALSE)
     {
         return SIP_NULL;
     }
@@ -246,7 +246,7 @@ SIP_VOID SipHeaders::OverWriteHdrObj(IN SipHeaders* pSrcHdrs, IN SIP_BOOL bIgnor
 
 SipHeaderBase* SipHeaders::GetHdrObj(SIP_INT32 eHdrType)
 {
-    if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
+    if (SipHeaderBase::IsHeaderTypeValid(eHdrType) == SIP_FALSE)
     {
         return SIP_NULL;
     }
@@ -261,7 +261,7 @@ SipHeaderBase* SipHeaders::GetHdrObj(SIP_INT32 eHdrType)
 SipHeaderBase* SipHeaders::GetNewHdrObj(SIP_INT32 eHdrType)
 {
     eHdrType = CheckAndGetHdrEnumType(eHdrType);
-    if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
+    if (SipHeaderBase::IsHeaderTypeValid(eHdrType) == SIP_FALSE)
     {
         return SIP_NULL;
     }
@@ -280,7 +280,7 @@ SipHeaderBase* SipHeaders::GetNewHdrObj(SIP_INT32 eHdrType)
 
 SIP_BOOL SipHeaders::RemoveHdr(SIP_INT32 eHdrType)
 {
-    if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
+    if (SipHeaderBase::IsHeaderTypeValid(eHdrType) == SIP_FALSE)
     {
         return SIP_FALSE;
     }

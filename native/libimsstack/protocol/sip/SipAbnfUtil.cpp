@@ -240,7 +240,7 @@ SIP_CHAR* SipCreateString(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
     return pString;
 }
 
-SIP_BOOL SipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
+SIP_BOOL SipFindCrlf(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
 {
     SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
     while (pNext1Pt <= pEndPt)
@@ -305,10 +305,11 @@ SIP_BOOL SipFindTerminatingCRLF(
 
 SIP_CHAR* SkipConsecutiveCRLFs(SIP_CHAR* pStartPt)
 {
-    while ((pStartPt != SIP_NULL && (pStartPt + 1) != SIP_NULL) &&
-            (IS_CRLF(*pStartPt, *(pStartPt + 1))))
+    SIP_CHAR* pNext = (pStartPt != SIP_NULL) ? (pStartPt + 1) : SIP_NULL;
+    while ((pNext != SIP_NULL) && (IS_CRLF(*pStartPt, *pNext)))
     {
         pStartPt = pStartPt + SIP_TWO;
+        pNext = (pStartPt != SIP_NULL) ? (pStartPt + 1) : SIP_NULL;
     }
     return pStartPt;
 }

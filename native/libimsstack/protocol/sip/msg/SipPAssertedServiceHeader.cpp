@@ -80,7 +80,7 @@ SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDe
         nTopLevelIDLen = pEndPt - pTempCurr + 1;
     }
 
-    if ((nTopLevelIDLen > MAXLETDIG) || (nTopLevelIDLen <= 0))
+    if (nTopLevelIDLen > MAXLETDIG)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipPAssertedServiceHeader::DecodeHdr:invalid subService id", SIP_ZERO, SIP_ZERO);

@@ -22,6 +22,7 @@ class SipMessageBuffer : public RcObject
 {
 public:
     SipMessageBuffer();
+    SipMessageBuffer(const SipMessageBuffer& other);
     virtual ~SipMessageBuffer();
 
 private:

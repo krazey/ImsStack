@@ -49,9 +49,9 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     /*set methods*/
     SIP_BOOL SetProtocolName(const SIP_CHAR* pszProtocolNm);
@@ -78,7 +78,7 @@ public:
     const SIP_CHAR* GetBranch() const;
 
     SIP_BOOL SetBranchParam(const SIP_CHAR* pszBranch);
-    SIP_BOOL IsValidHeader() const;
+    SIP_BOOL IsValidHeader() const override;
 };
 
 #endif  //__SIP_VIA_HEADER_H__

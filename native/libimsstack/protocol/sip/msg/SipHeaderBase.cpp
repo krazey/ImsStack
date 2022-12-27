@@ -188,8 +188,8 @@ SipParameters* SipHeaderBase::GetParameters() const
     return m_pParameters;
 }
 
-SIP_BOOL SipHeaderBase::FindComment(
-        SIP_CHAR* pszStart, SIP_CHAR* pszEnd, SIP_CHAR*& pszCommentStart, SIP_CHAR*& pszCommentEnd)
+SIP_BOOL SipHeaderBase::FindComment(SIP_CHAR* pszStart, const SIP_CHAR* pszEnd,
+        SIP_CHAR*& pszCommentStart, SIP_CHAR*& pszCommentEnd)
 {
     SIP_CHAR* pszCurrent = pszStart;
     SIP_INT32 nCount = 0;
@@ -267,7 +267,7 @@ SIP_BOOL SipHeaderBase::EncodeHeaderParameters(
         return SIP_TRUE;
     }
 
-    SipParameterList& objParameterList = m_pParameters->GetParameterList();
+    const SipParameterList& objParameterList = m_pParameters->GetParameterList();
 
     if (bParams == SIP_TRUE)
     {
@@ -284,7 +284,7 @@ SIP_BOOL SipHeaderBase::EncodeParameters(AStringBuffer& objBuffer) const
         return SIP_TRUE;
     }
 
-    SipParameterList& objParameterList = m_pParameters->GetParameterList();
+    const SipParameterList& objParameterList = m_pParameters->GetParameterList();
     return objParameterList.Encode(objBuffer, SIP_SEMI);
 }
 
@@ -384,6 +384,11 @@ SIP_BOOL SipHeaderBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
     delete[] pszValue;
     return SIP_TRUE;
+}
+
+SIP_BOOL SipHeaderBase::IsHeaderTypeValid(SIP_INT32 eHdrType)
+{
+    return ((eHdrType > TYPE_INVALID) && eHdrType < SipHeaderBase::TYPE_END) ? SIP_TRUE : SIP_FALSE;
 }
 
 SipHeaderBase* SipHeaderBase::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)

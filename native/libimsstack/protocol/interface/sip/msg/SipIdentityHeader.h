@@ -33,10 +33,10 @@ public:
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SIP_BOOL SetSignedIdentityDigest(const SIP_CHAR* pszSignedIdentiDigest);
     SIP_BOOL SetInfo(const SIP_CHAR* pszInfo);
@@ -44,7 +44,7 @@ public:
     inline const SIP_CHAR* GetSignedIdentityDigest() const { return m_pSignedIdentityDigest; }
     inline const SIP_CHAR* GetInfo() const { return m_pInfo; }
 
-    inline SIP_BOOL IsValidHeader() const
+    inline SIP_BOOL IsValidHeader() const override
     {
         return ((m_pSignedIdentityDigest == SIP_NULL) || (m_pInfo == SIP_NULL)) ? SIP_FALSE
                                                                                 : SIP_TRUE;

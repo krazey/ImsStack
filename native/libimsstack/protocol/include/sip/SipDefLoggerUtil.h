@@ -29,7 +29,7 @@ public:
 
 public:
     void DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile, SIP_UINT16 nLine,
-            const SIP_CHAR* pszFormat, ...);
+            const SIP_CHAR* pszFormat, ...) override;
 };
 
 #endif

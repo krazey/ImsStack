@@ -25,7 +25,7 @@ private:
     SipVector<SipHeaderBase*> m_headerList;
 
 public:
-    SipHeaderList(SIP_INT32 eHdrType);
+    explicit SipHeaderList(SIP_INT32 eHdrType);
     SipHeaderList(const SipHeaderList& objHeaderList);
     ~SipHeaderList();
     static SipHeaderBase* GetNewListObj(SIP_INT32 eHdr, SipHeaderBase* pHeader);
@@ -33,13 +33,13 @@ public:
     {
         return SIP_TRUE;
     }
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions) override;
 
     SipHeaderBase* GetObj(SIP_UINT32 nIndex);
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     SipHeaderBase* GetListObj(SipHeaderBase* pHeader = SIP_NULL);
     SIP_BOOL AddHeader(SipHeaderBase* pHeader);

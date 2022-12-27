@@ -25,14 +25,14 @@ public:
     SipTransactionListener() {}
     virtual ~SipTransactionListener() {}
 
-    virtual SIP_BOOL TxnTimeout(ISipUserData* pUserData, int eTimerType)
+    virtual SIP_BOOL TxnTimeout(ISipUserData* pUserData, int eTimerType) override
     {
         (void)pUserData;
         (void)eTimerType;
         return SIP_TRUE;
     }
 
-    virtual SIP_BOOL TxnTerminated(ISipUserData* pUserData)
+    virtual SIP_BOOL TxnTerminated(ISipUserData* pUserData) override
     {
         (void)pUserData;
         return SIP_TRUE;

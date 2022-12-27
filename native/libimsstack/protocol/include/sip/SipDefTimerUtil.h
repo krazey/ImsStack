@@ -29,11 +29,11 @@ public:
 
 public:
     SIP_BOOL StartTimer(SIP_VOID** ppvTimerId, SIP_UINT32 nDuration, SIP_UINT16 nResetFlag,
-            SipTimerCallback pfnTimerCallback, SIP_VOID* pvData);
+            SipTimerCallback pfnTimerCallback, SIP_VOID* pvData) override;
 
-    SIP_VOID* StopTimer(SIP_VOID* pvTimerId);
+    SIP_VOID* StopTimer(SIP_VOID* pvTimerId) override;
 
-    SIP_VOID* StopTimerEx(SIP_VOID* pvTimerId);
+    SIP_VOID* StopTimerEx(SIP_VOID* pvTimerId) override;
 };
 
 #endif  //__SIP_DEFTIMERUTIL_H__

@@ -60,7 +60,7 @@ public:
     /*destructor*/
     ~SipUri();
 
-    virtual SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const;
+    SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const override;
 
     SIP_BOOL DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 

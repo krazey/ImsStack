@@ -195,7 +195,7 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
         return SIP_NULL;
     }
 
-    SipVector<SIP_CHAR*>& valueList = pNmVl->m_valueList;
+    const SipVector<SIP_CHAR*>& valueList = pNmVl->m_valueList;
     if (valueList.IsEmpty() == SIP_TRUE)
     {
         return SIP_NULL;

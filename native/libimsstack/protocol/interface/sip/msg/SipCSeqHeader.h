@@ -35,10 +35,10 @@ public:
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     /*set methods*/
     SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);
@@ -50,6 +50,6 @@ public:
 
     inline SIP_UINT32 GetCSeq() const { return m_nSeq; }
 
-    SIP_BOOL IsValidHeader() const;
+    SIP_BOOL IsValidHeader() const override;
 };
 #endif  //__SIP_CSEQ_HEADER_H__

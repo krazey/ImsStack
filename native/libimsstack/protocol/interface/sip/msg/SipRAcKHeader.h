@@ -39,9 +39,9 @@ public:
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     /*set methods*/
     SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);
@@ -53,7 +53,7 @@ public:
     inline SIP_UINT32 GetResponseNum() const { return m_nResponseNum; }
 
     inline SIP_UINT32 GetCSeqNum() const { return m_nCSeqNum; }
-    inline SIP_BOOL IsValidHeader() const
+    inline SIP_BOOL IsValidHeader() const override
     {
         return (m_pszMethod == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }

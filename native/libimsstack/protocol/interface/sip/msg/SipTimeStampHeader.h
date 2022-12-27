@@ -41,10 +41,10 @@ public:
     /*virtual methods*/
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     /*Function for encoding of headers*/
-    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE) override;
 
     /*Function for decoding of headers*/
-    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
 
     /*Sets */
     SIP_BOOL SetTimeVal(const SIP_CHAR* pszTimeVal);
@@ -57,7 +57,7 @@ public:
 
     /*Gets */
     inline const SIP_CHAR* GetDelay() const { return m_pszDelay; }
-    inline SIP_BOOL IsValidHeader() const
+    inline SIP_BOOL IsValidHeader() const override
     {
         return (m_pszTimeVal == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
     }

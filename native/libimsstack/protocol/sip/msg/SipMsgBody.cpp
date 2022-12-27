@@ -505,7 +505,7 @@ SIP_BOOL SipMsgBody::EncodeBody(SIP_CHAR** ppCurrPos)
                                                       : EncodeMIMEMsgBody(ppCurrPos);
 }
 
-SIP_BOOL SipMsgBody::DecodeSingleMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
+SIP_BOOL SipMsgBody::DecodeSingleMsgBody(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 {
     SIP_UINT32 nSize = pEndPt - pStartPt;
     SIP_CHAR* pData = new SIP_CHAR[nSize + SIP_ONE];

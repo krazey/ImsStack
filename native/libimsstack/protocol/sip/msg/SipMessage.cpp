@@ -601,7 +601,6 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
     else
     { /*If present validate and update*/
         SIP_INT32 nCurLen = 0;
-        SIP_CHAR szLen[SIP_CONTLEN_LEN] = {0};
         const SIP_CHAR* pCurLen = pUnknown->GetHeaderValue();
 
         if (pCurLen != SIP_NULL)
@@ -611,6 +610,7 @@ SIP_BOOL SipMessage::EncodeMsgBodyAndUpdateContentHdrs(
 
         if (nMsgLen != nCurLen)
         { /*Mismatch in content length & actual body size*/
+            SIP_CHAR szLen[SIP_CONTLEN_LEN] = {0};
             SipPf_Sprintf(szLen, "%u", nMsgLen);
             pUnknown->SetHeaderValue(szLen);
         }

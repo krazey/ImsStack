@@ -18,8 +18,8 @@
 #include "SipDebug.h"
 #include "SipUtil.h"
 
-void SIP_DEBUG_LOG(SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine,
-    SIP_CHAR* pszFormat,...)
+void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
+        const SIP_CHAR* pszFormat, ...)
 {
     SipUtil* pUtil = SipUtil_GetInstance();
 

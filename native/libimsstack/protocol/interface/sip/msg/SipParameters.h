@@ -32,7 +32,7 @@ public:
     SIP_CHAR m_Sep;
 
     SipNameValue();
-    SipNameValue(SIP_INT32 eHdrType);
+    explicit SipNameValue(SIP_INT32 eHdrType);
     SipNameValue(const SipNameValue& objNmVl);
     virtual ~SipNameValue();
 
@@ -53,7 +53,7 @@ private:
 
 public:
     SipParameterList();
-    SipParameterList(SIP_INT32 eHdrType);
+    explicit SipParameterList(SIP_INT32 eHdrType);
     SipParameterList(const SipParameterList& objPrmList);
     ~SipParameterList();
 

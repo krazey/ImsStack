@@ -213,7 +213,7 @@ SIP_BOOL SipFindPreDelimiter(
 
 SIP_CHAR* SipCreateString(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
-SIP_BOOL SipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
+SIP_BOOL SipFindCrlf(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
 
 SIP_BOOL SipFindTerminatingCRLF(SIP_CHAR* pStartPoint, const SIP_CHAR* pEndPoint,
         SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd);

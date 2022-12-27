@@ -115,7 +115,7 @@ private:
 public:
     /*Constructor*/
     SipMsgBody();
-    SipMsgBody(SIP_INT32 eBodyType);
+    explicit SipMsgBody(SIP_INT32 eBodyType);
 
     SipMsgBody(const SipMsgBody& objMsgBody);
     /*Destructor*/
@@ -129,7 +129,7 @@ public:
     SIP_BOOL EncodeBody(SIP_CHAR** ppCurrPos);
 
     /*Function for decoding*/
-    SIP_BOOL DecodeSingleMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+    SIP_BOOL DecodeSingleMsgBody(SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
     SIP_BOOL DecodeMIMEMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 

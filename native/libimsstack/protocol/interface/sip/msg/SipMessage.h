@@ -117,7 +117,7 @@ private:
 public:
     SipMessage();
     ~SipMessage();
-    SipMessage(SIP_INT32 eSipMsgType);
+    explicit SipMessage(SIP_INT32 eSipMsgType);
     SipMessage(const SipMessage& objSipMsg);
     SIP_BOOL EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
             SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions);

@@ -55,6 +55,5 @@ void SipContextUtils::Sip_DestroyTxnContext(IN SipTxnContext* pContext)
     if (pContext != SIP_NULL)
     {
         delete pContext;
-        pContext = SIP_NULL;
     }
 }

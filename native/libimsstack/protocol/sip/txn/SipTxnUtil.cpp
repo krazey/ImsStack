@@ -36,7 +36,7 @@ SipTxnKey* SipTxnUtil::SearchTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckRSeq)
 
     SIP_UINT32 nSize = s_txnKeyList.GetSize();
 
-    if (nSize <= SIP_ZERO)
+    if (nSize == SIP_ZERO)
     {
         return SIP_NULL;
     }
@@ -125,7 +125,7 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
     }
 
     SIP_UINT32 nSize = s_txnKeyList.GetSize();
-    if (nSize <= SIP_ZERO)
+    if (nSize == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODTXN, "SipTxnUtil::DeleteTxnKey: List Size Zero", SIP_ZERO, SIP_ZERO);
