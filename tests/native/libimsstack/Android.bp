@@ -59,11 +59,13 @@ cc_test {
         "enabler/include/aos",
         "enabler/include/mtc",
         "enabler/include/mts",
+        "enabler/include/uce",
         "enabler/include/media",
         "enabler/interface",
         "enabler/interface/aos",
         "enabler/interface/mtc",
         "enabler/interface/mts",
+        "enabler/interface/uce",
     ],
     header_libs: [
         "libimsstack_config_headers",

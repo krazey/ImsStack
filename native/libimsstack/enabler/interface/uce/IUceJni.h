@@ -18,6 +18,8 @@
 
 #include "INativeEnabler.h"
 
+class AString;
+
 class IUceJni : public INativeEnabler
 {
 public:

@@ -109,8 +109,7 @@ IUceJni* JniUceService::GetNativeService()
             JniEnablerConnector::GetInstance().GetNativeEnabler(GetSlotId(), EnablerType::UCE));
 }
 
-PRIVATE
-void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
+PROTECTED VIRTUAL void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
 {
     //---------------------------------------------------------------------------------------------
     IUceJni* piUceJni = GetNativeService();
@@ -158,6 +157,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
     }
 }
 
+PRIVATE
 void JniUceService::SendPublishCmd(IUceJni* pJniUce, const Parcel& pParcel)
 {
     IMS_TRACE_D("SendPublishCmd", 0, 0, 0);
