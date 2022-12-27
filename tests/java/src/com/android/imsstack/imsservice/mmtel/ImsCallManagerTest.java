@@ -298,7 +298,7 @@ public class ImsCallManagerTest {
     public void getTakeSessionTest() {
         // verify false case condition
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
-        mImsCallManager.getSession().put(mMockImsCallSession.getCallId(), mMockImsCallSession);
+        mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
         boolean takeSession = mImsCallManager.takeSession(mMockImsCallSession);
         Assert.assertFalse(takeSession);
 
@@ -306,9 +306,8 @@ public class ImsCallManagerTest {
         when(mMockMtcCall.isOnHold()).thenReturn(false);
         when(mMockMtcCall.isInCall()).thenReturn(true);
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
-        mImsCallManager.getSession().put(mMockImsCallSession.getCallId(), mMockImsCallSession);
-        mImsCallManager.getPendingSession().put(mMockImsCallSession.getCallId(),
-                mMockImsCallSession);
+        mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
+        mImsCallManager.getPendingSession().put(CALL_ID, mMockImsCallSession);
         Assert.assertEquals(mMockImsCallSession, mImsCallManager.getPendingSession().get(CALL_ID));
         Assert.assertFalse(mImsCallManager.getPendingSession().isEmpty());
         takeSession = mImsCallManager.takeSession(mMockImsCallSession);
@@ -319,13 +318,13 @@ public class ImsCallManagerTest {
         Assert.assertTrue(mImsCallManager.getPendingSession().isEmpty());
 
         // verify removePendingSession with different sessions
-        mImsCallManager.getPendingSession().remove(mMockImsCallSession);
+        mImsCallManager.getPendingSession().remove(CALL_ID);
         ImsCallSessionImpl sessionObj = mImsCallManagernull.createSession(new ImsCallProfile());
         mImsCallManager.getPendingSession().put(CALL_ID, sessionObj);
         Assert.assertNotEquals(mMockImsCallSession, mImsCallManager.getPendingSession());
         when(mMockMtcCall.isOnHold()).thenReturn(false);
         when(mMockMtcCall.isInCall()).thenReturn(true);
-        mImsCallManager.getSession().put(mMockImsCallSession.getCallId(), mMockImsCallSession);
+        mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
         Assert.assertFalse(mImsCallManager.getPendingSession().isEmpty());
         Assert.assertEquals(1, mImsCallManager.getPendingSession().size());
         Assert.assertNotNull(mImsCallManager.getPendingSession().get(CALL_ID));
