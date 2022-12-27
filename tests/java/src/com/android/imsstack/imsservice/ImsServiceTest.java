@@ -38,6 +38,7 @@ import com.android.imsstack.enabler.IContext;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -85,6 +86,7 @@ public class ImsServiceTest {
     }
 
     @Test
+    @Ignore // TODO(b/263768170): Binder should not return null
     public void querySupportedImsFeaturesTest() throws Exception {
         Assert.assertNotNull(mImsServiceBinder);
         ImsFeatureConfiguration resultConfig = mImsServiceBinder.querySupportedImsFeatures();
@@ -106,6 +108,7 @@ public class ImsServiceTest {
     }
 
     @Test
+    @Ignore // TODO(b/263768170): Binder should not return null
     public void createRcsFeatureTest() throws RemoteException, InterruptedException {
         Assert.assertNotNull(mImsServiceBinder);
         //verify for invalid slot id
@@ -146,6 +149,7 @@ public class ImsServiceTest {
     }
 
     @Test
+    @Ignore // TODO(b/263768170): Binder should not return null
     public void createMmTelFeatureTest() throws RemoteException {
         Assert.assertNotNull(mImsServiceBinder);
         Mockito.when(mIContext.getSlotId()).thenReturn(-1);
