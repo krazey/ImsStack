@@ -21,6 +21,7 @@
 #include <binder/Parcel.h>
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
 
 namespace android
@@ -82,7 +83,7 @@ TEST_F(JniUceServiceTest, SendPublishCmd)
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockIUceJni, SendPublishCmd).Times(1);
+    EXPECT_CALL(objMockIUceJni, SendPublishCmd(_, _, _, _, _)).Times(1);
     pJniService->SendData(objParcel);
 }
 
@@ -94,7 +95,7 @@ TEST_F(JniUceServiceTest, SendSingleSubscribeCmd)
     objParcel.writeString16(android::String16(AString("user").GetStr()));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockIUceJni, SendSingleSubscribeCmd).Times(1);
+    EXPECT_CALL(objMockIUceJni, SendSingleSubscribeCmd(_, _)).Times(1);
 
     pJniService->SendData(objParcel);
 }
@@ -107,7 +108,7 @@ TEST_F(JniUceServiceTest, SendListSubscribeCmd)
     objParcel.writeString16(android::String16(AString("user").GetStr()));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockIUceJni, SendListSubscribeCmd).Times(1);
+    EXPECT_CALL(objMockIUceJni, SendListSubscribeCmd(_, _)).Times(1);
 
     pJniService->SendData(objParcel);
 }
@@ -119,7 +120,7 @@ TEST_F(JniUceServiceTest, SendOptionsCmd)
     objParcel.writeString16(android::String16(AString("user").GetStr()));
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockIUceJni, SendOptionsCmd).Times(1);
+    EXPECT_CALL(objMockIUceJni, SendOptionsCmd(_, _, _)).Times(1);
 
     pJniService->SendData(objParcel);
 }
@@ -133,7 +134,7 @@ TEST_F(JniUceServiceTest, SendOptionsRespCmd)
     objParcel.writeInt32(0);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockIUceJni, SendOptionsRespCmd).Times(1);
+    EXPECT_CALL(objMockIUceJni, SendOptionsRespCmd(_, _, _, _)).Times(1);
 
     pJniService->SendData(objParcel);
 }
@@ -143,7 +144,7 @@ TEST_F(JniUceServiceTest, ImsRegistrationCheck)
     objParcel.writeInt32(IUUceService::UCE_GET_IMS_REGISTRATION_CMD);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockIUceJni, ImsRegistrationCheck).Times(1);
+    EXPECT_CALL(objMockIUceJni, ImsRegistrationCheck()).Times(1);
 
     pJniService->SendData(objParcel);
 }

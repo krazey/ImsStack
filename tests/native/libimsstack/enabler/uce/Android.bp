@@ -24,9 +24,6 @@ cc_test {
     srcs: [
         "**/*.cpp",
     ],
-    include_dirs: [
-        "packages/modules/ImsStack/tests/native/libimsstack/enabler/include/uce",
-    ],
     cflags: [
         "-Wno-unused-parameter",
     ],
