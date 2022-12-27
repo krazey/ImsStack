@@ -174,8 +174,7 @@ TEST_F(AudioControllerTest, testUpdateQualityThreshold)
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId, m_pConfig), IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
 
-    EXPECT_EQ(m_pController->UpdateQualityThreshold(IMS_NULL, m_pAudioNego), IMS_FALSE);
     EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, nullptr), IMS_FALSE);
-
+    EXPECT_EQ(m_pController->UpdateQualityThreshold(IMS_NULL, m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, m_pAudioNego), IMS_TRUE);
 }
