@@ -52,6 +52,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -641,6 +642,8 @@ public class ImsRegistrationTrackerTest {
                 mRegTracker.getMessageHandler());
     }
 
+    @Test
+    @Ignore("b/263774010")
     public void testConfigListener() {
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(true);
 
