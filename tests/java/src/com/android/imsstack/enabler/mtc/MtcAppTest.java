@@ -29,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.emergency.EmergencyNumber;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -50,7 +51,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class MtcAppTest extends ImsStackTest {
-    private static final int EMERGENCY_ROUTING = 0;
     @Mock private IBaseContext mBaseContext;
     @Mock private IMtcCallManager mCM;
     @Mock private MtcEmergencyServiceManager mEmergencyServiceManager;
@@ -226,6 +226,16 @@ public class MtcAppTest extends ImsStackTest {
     }
 
     @Test
+    public void testOpenEmergencyService() {
+        mTestMtcApp.openEmergencyService(
+                mMtcCall, EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
+
+        verify(mEmergencyServiceManager, times(1)).setCall(any(MtcCall.class));
+        verify(mEmergencyServiceManager, times(1)).openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
+    }
+
+    @Test
     public void testCreateCall() {
         mTestMtcApp.setNativeObj(1);
 
@@ -236,22 +246,13 @@ public class MtcAppTest extends ImsStackTest {
 
         verify(mCM, times(1)).attachCall(any(MtcCall.class));
 
-        verify(mEmergencyServiceManager, times(0)).setCall(any(MtcCall.class));
-        verify(mEmergencyServiceManager, times(0)).openEmergencyService(EMERGENCY_ROUTING);
-
         doReturn(false).when(mMtcCall).isMO();
         mTestMtcApp.createCall(0);
 
         verify(mCM, times(1)).attachPreIncomingCall(any(MtcCall.class));
 
-        verify(mEmergencyServiceManager, times(0)).setCall(any(MtcCall.class));
-        verify(mEmergencyServiceManager, times(0)).openEmergencyService(EMERGENCY_ROUTING);
-
         int sessionAttributes = MtcCall.FLAG_EMERGENCY;
         mTestMtcApp.createCall(sessionAttributes);
-
-        verify(mEmergencyServiceManager, times(1)).setCall(any(MtcCall.class));
-        verify(mEmergencyServiceManager, times(1)).openEmergencyService(EMERGENCY_ROUTING);
     }
 
     @Test
