@@ -49,7 +49,6 @@ public:
     MockIMtcConfigurationManager* pConfigManager;
     MockMtcConfigurationProxy* pConfigProxy;
     MockIJniMtcServiceThread objJniThread;
-    MockMtcEmergencyServiceManager* pEmergencyServiceManager;
 
 protected:
     virtual void SetUp() override
@@ -58,13 +57,11 @@ protected:
 
         pConfigManager = new MockIMtcConfigurationManager();
         pConfigProxy = new MockMtcConfigurationProxy(pConfigManager);
-        pEmergencyServiceManager = new MockMtcEmergencyServiceManager(objContext);
         pEventHandler = new MtcAosEventHandler(objMtcService, *pConfigProxy);
     }
 
     virtual void TearDown() override
     {
-        delete pEmergencyServiceManager;
         delete pConfigProxy;
         delete pEventHandler;
     }
@@ -75,15 +72,15 @@ TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesJni)
     IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO + ImsAosFeature::TEXT;
     EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures - ImsAosFeature::TEXT, 0));
     EXPECT_CALL(*pConfigProxy, OnRegistrationRefreshed).Times(3);
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE, pEmergencyServiceManager);
+    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
 
     nFeatures = ImsAosFeature::MMTEL;
     EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures, 0));
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE, pEmergencyServiceManager);
+    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
 
     nFeatures = ImsAosFeature::VIDEO;
     EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures, 0));
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE, pEmergencyServiceManager);
+    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemoveListener)
@@ -103,7 +100,7 @@ TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemo
             OnAosStateChanged(
                     IsEqualMtcService(&objMtcService), MtcAosState::CONNECTED, ImsAosReason::NONE))
             .Times(1);
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE, pEmergencyServiceManager);
+    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
 
     pEventHandler->RemoveListener(&objListener1);
     pEventHandler->RemoveListener(&objListener2);
@@ -111,7 +108,7 @@ TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemo
 
     EXPECT_CALL(objListener1, OnAosStateChanged(_, _, _)).Times(0);
     EXPECT_CALL(objListener2, OnAosStateChanged(_, _, _)).Times(0);
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE, pEmergencyServiceManager);
+    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnConnectedWithDifferentIpcanNotifiesListener)
@@ -120,26 +117,12 @@ TEST_F(MtcAosEventHandlerTest, OnConnectedWithDifferentIpcanNotifiesListener)
     pEventHandler->AddListener(&objListener);
 
     IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO;
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE, pEmergencyServiceManager);
+    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
 
     EXPECT_CALL(
             objListener, OnIpcanChanged(IsEqualMtcService(&objMtcService), IIpcan::CATEGORY_WLAN))
             .Times(1);
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_WLAN, pEmergencyServiceManager);
-}
-
-TEST_F(MtcAosEventHandlerTest,
-        OnConnectedAndDisconnectedByEmergencyServiceCallsEmergencyServiceManager)
-{
-    ON_CALL(objMtcService, IsEmergency).WillByDefault(Return(IMS_TRUE));
-    IMS_UINT32 nFeatures = ImsAosFeature::MMTEL;
-    EXPECT_CALL(objJniThread, OnServiceChanged(_, _)).Times(0);
-
-    EXPECT_CALL(*pEmergencyServiceManager, HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE));
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE, pEmergencyServiceManager);
-
-    EXPECT_CALL(*pEmergencyServiceManager, HandleServiceStatus(ServiceStatus::SERVICE_IDLE));
-    pEventHandler->OnDisconnected(1, pEmergencyServiceManager);
+    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_WLAN);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnDisconnectedNotifiesJni)
@@ -153,7 +136,7 @@ TEST_F(MtcAosEventHandlerTest, OnDisconnectedNotifiesJni)
             OnAosStateChanged(
                     IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTED, nAnyReason));
 
-    pEventHandler->OnDisconnected(nAnyReason, pEmergencyServiceManager);
+    pEventHandler->OnDisconnected(nAnyReason);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnDisconnectingNotifiesListenerOnly)

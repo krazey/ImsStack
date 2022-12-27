@@ -50,7 +50,7 @@ protected:
     {
         ON_CALL(objContext, GetCallManager).WillByDefault(ReturnRef(objCallManager));
         ON_CALL(objContext, GetConferenceManager).WillByDefault(ReturnRef(objConferenceManager));
-        ON_CALL(objContext, GetEctManager).WillByDefault(Return(&objEctManager));
+        ON_CALL(objContext, GetEctManager).WillByDefault(ReturnRef(objEctManager));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
 
         pCallController = new MtcCallController(objContext);

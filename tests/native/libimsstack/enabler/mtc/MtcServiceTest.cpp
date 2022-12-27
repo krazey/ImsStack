@@ -122,9 +122,10 @@ protected:
 
         ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(SLOT_ID));
 
+        ON_CALL(objMockContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
         pMockEmergencyManager = new MockMtcEmergencyServiceManager(objMockContext);
         ON_CALL(objMockContext, GetEmergencyServiceManager)
-                .WillByDefault(Return(pMockEmergencyManager));
+                .WillByDefault(ReturnRef(*pMockEmergencyManager));
 
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
         ON_CALL(objMockContext, GetCallController).WillByDefault(ReturnRef(objMockCallController));
@@ -245,8 +246,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
 {
     IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
     IMS_UINT32 nIpcan = IIpcan::CATEGORY_MOBILE;
-    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature, nIpcan, pMockEmergencyManager))
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature, nIpcan)).Times(1);
 
     pNormalMtcService->ImsAos_Connected(nFeature, nIpcan);
     EXPECT_EQ(pNormalMtcService->IsActive(), IMS_TRUE);
@@ -266,7 +266,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosDisconnected)
 {
     ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(nullptr));
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, pMockEmergencyManager)).Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason)).Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
     pNormalMtcService->ImsAos_Disconnected(nReason);

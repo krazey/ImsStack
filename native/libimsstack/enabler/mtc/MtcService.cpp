@@ -178,7 +178,7 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled
 
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService()
 {
-    m_objContext.GetEmergencyServiceManager()->OpenEmergencyService();
+    m_objContext.GetEmergencyServiceManager().OpenEmergencyService();
 }
 
 PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
@@ -225,7 +225,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
 {
     IMS_TRACE_I("ImsAos_Connected", 0, 0, 0);
     SetStatus(ServiceStatus::SERVICE_ACTIVE);
-    m_pAosEventHandler->OnConnected(nFeatures, nIpcan, m_objContext.GetEmergencyServiceManager());
+    m_pAosEventHandler->OnConnected(nFeatures, nIpcan);
     SetAosReady(IMS_TRUE);
 }
 
@@ -239,7 +239,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
     SetStatus(ServiceStatus::SERVICE_IDLE);
-    m_pAosEventHandler->OnDisconnected(nReason, m_objContext.GetEmergencyServiceManager());
+    m_pAosEventHandler->OnDisconnected(nReason);
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Suspended(IN IMS_UINT32 nReason)

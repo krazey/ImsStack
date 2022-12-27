@@ -32,6 +32,7 @@
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "utility/MessageUtils.h"
 #include <functional>
+#include <memory>
 
 class EctManager;
 class ICallStateProxy;
@@ -79,8 +80,8 @@ public:
         return m_objSipInterfaceFactory;
     }
     inline IConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
-    IEctManager* GetEctManager() override;
-    MtcEmergencyServiceManager* GetEmergencyServiceManager() override;
+    IEctManager& GetEctManager() override;
+    MtcEmergencyServiceManager& GetEmergencyServiceManager() override;
     OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override;
     inline IMessageUtils& GetMessageUtils() override { return m_objMessageUtils; };
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
@@ -102,8 +103,8 @@ protected:
     MtcImsEventReceiver m_objImsEventReceiver;
     MtcSipInterfaceFactory m_objSipInterfaceFactory;
     ConferenceManager m_objConferenceManager;
-    EctManager* m_pEctManager;
-    MtcEmergencyServiceManager* m_pEmergencyServiceManager;
+    std::unique_ptr<EctManager> m_pEctManager;
+    std::unique_ptr<MtcEmergencyServiceManager> m_pEmergencyServiceManager;
     MessageUtils m_objMessageUtils;
     MtcRadioChecker m_objMtcRadioChecker;
 

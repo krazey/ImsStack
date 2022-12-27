@@ -74,8 +74,7 @@ void MtcAosEventHandler::RemoveListener(IN IMtcAosStateListener* piListener)
 }
 
 PUBLIC
-void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
-        IN MtcEmergencyServiceManager* pEmergencyServiceManager)
+void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
     IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nIpcan, 0);
@@ -85,13 +84,7 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
     IMS_UINT32 nVideoConnected =
             (nFeatures & ImsAosFeature::VIDEO) ? ImsAosFeature::VIDEO : ImsAosFeature::NONE;
 
-    IMS_BOOL bEmergency = m_objService.IsEmergency();
-
-    if (bEmergency)
-    {
-        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE);
-    }
-    else
+    if (!m_objService.IsEmergency())
     {
         IJniMtcServiceThread* pThread = m_objService.GetJniServiceThread();
         if (pThread)
@@ -120,17 +113,12 @@ void MtcAosEventHandler::OnDisconnecting(IN IMS_UINT32 nReason)
 }
 
 PUBLIC
-void MtcAosEventHandler::OnDisconnected(
-        IN IMS_UINT32 nReason, IN MtcEmergencyServiceManager* pEmergencyServiceManager)
+void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason)
 {
     IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nReason, 0);
 
-    if (m_objService.IsEmergency())
-    {
-        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_IDLE);
-    }
-    else
+    if (!m_objService.IsEmergency())
     {
         IJniMtcServiceThread* pThread = m_objService.GetJniServiceThread();
         if (pThread)

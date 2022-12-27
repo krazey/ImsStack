@@ -29,11 +29,21 @@ MtcEmergencyServiceManager::MtcEmergencyServiceManager(IN IMtcContext& objContex
         m_eState(IuMtcService::EmergencyServiceState::IDLE)
 {
     IMS_TRACE_I("+MtcEmergencyServiceManager", 0, 0, 0);
+    IMtcService* pEmergencyService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
+    if (pEmergencyService)
+    {
+        pEmergencyService->AddAosStateListener(this);
+    }
 }
 
 PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
 {
     IMS_TRACE_I("~MtcEmergencyServiceManager", 0, 0, 0);
+    IMtcService* pEmergencyService = m_objContext.GetServiceByType(ServiceType::EMERGENCY);
+    if (pEmergencyService)
+    {
+        pEmergencyService->RemoveAosStateListener(this);
+    }
 }
 
 PUBLIC
@@ -63,20 +73,19 @@ void MtcEmergencyServiceManager::OpenEmergencyService()
         NotifyEmergencyServiceChanged(-1);
     }
 }
-
-PUBLIC
-void MtcEmergencyServiceManager::HandleServiceStatus(IN ServiceStatus eStatus)
+PUBLIC VIRTUAL void MtcEmergencyServiceManager::OnAosStateChanged(
+        IN IMtcService& /*objMtcService*/, IN MtcAosState eState, IN IMS_UINT32 /*eAosReason*/)
 {
-    IMS_TRACE_D("HandleServiceStatus :: %d", eStatus, 0, 0);
+    IMS_TRACE_D("OnAosStateChanged :: %d", eState, 0, 0);
 
     IMS_BOOL bStateChanged = IMS_FALSE;
 
-    switch (eStatus)
+    switch (eState)
     {
-        case ServiceStatus::SERVICE_IDLE:
+        case MtcAosState::DISCONNECTED:
             HandleServiceIdle(bStateChanged);
             break;
-        case ServiceStatus::SERVICE_ACTIVE:
+        case MtcAosState::CONNECTED:
             HandleServiceActive(bStateChanged);
             break;
         default:

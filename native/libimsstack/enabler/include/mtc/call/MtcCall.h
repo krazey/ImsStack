@@ -67,6 +67,7 @@ class ISession;
 class MessageSender;
 class MessageUtils;
 class MtcConfigurationProxy;
+class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
 class UdpKeepAliveSender;
 class UssiController;
@@ -206,8 +207,8 @@ public:
     {
         return m_objContext.GetConferenceManager();
     }
-    inline IEctManager* GetEctManager() override { return m_objContext.GetEctManager(); }
-    inline MtcEmergencyServiceManager* GetEmergencyServiceManager() override
+    inline IEctManager& GetEctManager() override { return m_objContext.GetEctManager(); }
+    inline MtcEmergencyServiceManager& GetEmergencyServiceManager() override
     {
         return m_objContext.GetEmergencyServiceManager();
     }

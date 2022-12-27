@@ -17,11 +17,13 @@
 #ifndef MTC_EMERGENCY_SERVICE_MANAGER_H_
 #define MTC_EMERGENCY_SERVICE_MANAGER_H_
 
+#include "ImsTypeDef.h"
 #include "IuMtcService.h"
+#include "helper/IMtcAosStateListener.h"
 
 class IMtcContext;
 
-class MtcEmergencyServiceManager
+class MtcEmergencyServiceManager : public IMtcAosStateListener
 {
 public:
     explicit MtcEmergencyServiceManager(IN IMtcContext& objContext);
@@ -30,7 +32,10 @@ public:
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
     virtual void OpenEmergencyService();
-    virtual void HandleServiceStatus(IN ServiceStatus eStatus);
+
+    void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
+            IN IMS_UINT32 eAosReason) override;
+    inline void OnIpcanChanged(IN IMtcService&, IN IMS_UINT32) override {}
 
 private:
     void HandleServiceIdle(OUT IMS_BOOL& bStateChanged);

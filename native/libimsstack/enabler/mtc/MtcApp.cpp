@@ -58,8 +58,8 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objImsEventReceiver(MtcImsEventReceiver(nSlotId)),
         m_objSipInterfaceFactory(MtcSipInterfaceFactory()),
         m_objConferenceManager(ConferenceManager(*this)),
-        m_pEctManager(IMS_NULL),
-        m_pEmergencyServiceManager(IMS_NULL),
+        m_pEctManager(nullptr),
+        m_pEmergencyServiceManager(nullptr),
         m_objMessageUtils(MessageUtils()),
         m_objMtcRadioChecker(*this, m_objCallController),
         m_bWifiTestMode(IMS_FALSE)
@@ -93,7 +93,6 @@ PUBLIC VIRTUAL void MtcApp::Stop()
 {
     IMS_TRACE_I("Stop", 0, 0, 0);
     DestroyServices();
-    delete m_pEctManager;
 }
 
 PUBLIC VIRTUAL IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType)
@@ -128,24 +127,24 @@ PUBLIC VIRTUAL IMtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eService
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL IEctManager* MtcApp::GetEctManager()
+PUBLIC VIRTUAL IEctManager& MtcApp::GetEctManager()
 {
-    if (m_pEctManager == IMS_NULL)
+    if (m_pEctManager == nullptr)
     {
-        m_pEctManager = new EctManager(*this);
+        m_pEctManager = std::make_unique<EctManager>(*this);
     }
 
-    return m_pEctManager;
+    return *m_pEctManager.get();
 }
 
-PUBLIC VIRTUAL MtcEmergencyServiceManager* MtcApp::GetEmergencyServiceManager()
+PUBLIC VIRTUAL MtcEmergencyServiceManager& MtcApp::GetEmergencyServiceManager()
 {
-    if (m_pEmergencyServiceManager == IMS_NULL)
+    if (m_pEmergencyServiceManager == nullptr)
     {
-        m_pEmergencyServiceManager = new MtcEmergencyServiceManager(*this);
+        m_pEmergencyServiceManager = std::make_unique<MtcEmergencyServiceManager>(*this);
     }
 
-    return m_pEmergencyServiceManager;
+    return *m_pEmergencyServiceManager.get();
 }
 
 PUBLIC VIRTUAL OperationAsyncRunner* MtcApp::GetAsyncRunner(IN std::function<void()> objOperation)

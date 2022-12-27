@@ -17,10 +17,13 @@
 #ifndef MOCK_MTC_EMERGENCY_SERVICE_MANAGER_
 #define MOCK_MTC_EMERGENCY_SERVICE_MANAGER_
 
-#include "IMtcService.h"
 #include "ImsTypeDef.h"
 #include "MtcEmergencyServiceManager.h"
+#include "helper/IMtcAosStateListener.h"
 #include <gmock/gmock.h>
+
+class IMtcContext;
+class IMtcService;
 
 class MockMtcEmergencyServiceManager : public MtcEmergencyServiceManager
 {
@@ -31,7 +34,9 @@ public:
     }
 
     MOCK_METHOD(void, OpenEmergencyService, (), (override));
-    MOCK_METHOD(void, HandleServiceStatus, (IN ServiceStatus), (override));
+    MOCK_METHOD(
+            void, OnAosStateChanged, (IN IMtcService&, IN MtcAosState, IN IMS_UINT32), (override));
+    MOCK_METHOD(void, OnIpcanChanged, (IN IMtcService&, IN IMS_UINT32), (override));
 };
 
 #endif

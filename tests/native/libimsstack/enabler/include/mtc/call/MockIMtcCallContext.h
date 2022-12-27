@@ -96,8 +96,8 @@ public:
     MOCK_METHOD(IMtcAosConnector*, GetAosConnector, (IN ServiceType eServiceType), (override));
     MOCK_METHOD(IMtcSipInterfaceFactory&, GetSipInterfaceFactory, (), (override));
     MOCK_METHOD(IConferenceManager&, GetConferenceManager, (), (override));
-    MOCK_METHOD(IEctManager*, GetEctManager, (), (override));
-    MOCK_METHOD(MtcEmergencyServiceManager*, GetEmergencyServiceManager, (), (override));
+    MOCK_METHOD(IEctManager&, GetEctManager, (), (override));
+    MOCK_METHOD(MtcEmergencyServiceManager&, GetEmergencyServiceManager, (), (override));
     MOCK_METHOD(OperationAsyncRunner*, GetAsyncRunner, (IN std::function<void()>), (override));
     MOCK_METHOD(IMessageUtils&, GetMessageUtils, (), (override));
     MOCK_METHOD(IMS_BOOL, IsWifiTestMode, (), (override));

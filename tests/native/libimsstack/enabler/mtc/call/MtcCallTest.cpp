@@ -19,6 +19,7 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
+#include "MockMtcEmergencyServiceManager.h"
 #include "MtcContextRepository.h"
 #include "MtcDef.h"
 #include "call/EpsFallbackTrigger.h"
@@ -39,6 +40,7 @@
 #include "core/MockIReference.h"
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
+#include "ect/MockIEctManager.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockICallStateProxy.h"
@@ -1135,7 +1137,8 @@ TEST_F(MtcCallTest, GetEctManagerCallsMtcContext)
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    EXPECT_CALL(objContext, GetEctManager).Times(1);
+    MockIEctManager objEctManager;
+    EXPECT_CALL(objContext, GetEctManager).Times(1).WillOnce(ReturnRef(objEctManager));
 
     objCall.GetEctManager();
 }
@@ -1145,7 +1148,8 @@ TEST_F(MtcCallTest, GetEmergencyServiceManagerCallsMtcContext)
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    EXPECT_CALL(objContext, GetEmergencyServiceManager).Times(1);
+    MockMtcEmergencyServiceManager objEsm(objContext);
+    EXPECT_CALL(objContext, GetEmergencyServiceManager).Times(1).WillOnce(ReturnRef(objEsm));
 
     objCall.GetEmergencyServiceManager();
 }

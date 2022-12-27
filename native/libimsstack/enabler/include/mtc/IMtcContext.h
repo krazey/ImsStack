@@ -132,14 +132,14 @@ public:
      *
      * @return
      */
-    virtual IEctManager* GetEctManager() = 0;
+    virtual IEctManager& GetEctManager() = 0;
 
     /**
      * @brief Gets
      *
      * @return
      */
-    virtual MtcEmergencyServiceManager* GetEmergencyServiceManager() = 0;
+    virtual MtcEmergencyServiceManager& GetEmergencyServiceManager() = 0;
 
     /**
      * @brief Gets

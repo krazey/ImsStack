@@ -289,7 +289,7 @@ void MtcCallController::RemoveFromConference(IN CallKey nCallKey, IN IMSList<Con
 PUBLIC
 void MtcCallController::Transfer(IN CallKey nCallKey, IN const AString& strTarget)
 {
-    m_objContext.GetEctManager()->Transfer(nCallKey, strTarget);
+    m_objContext.GetEctManager().Transfer(nCallKey, strTarget);
 }
 
 PUBLIC

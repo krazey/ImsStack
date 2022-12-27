@@ -39,11 +39,9 @@ public:
     virtual void AddListener(IN IMtcAosStateListener* piListener);
     virtual void RemoveListener(IN IMtcAosStateListener* piListener);
 
-    virtual void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
-            IN MtcEmergencyServiceManager* pEmergencyServiceManager);
+    virtual void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan);
     virtual void OnDisconnecting(IN IMS_UINT32 nReason);
-    virtual void OnDisconnected(
-            IN IMS_UINT32 nReason, IN MtcEmergencyServiceManager* pEmergencyServiceManager);
+    virtual void OnDisconnected(IN IMS_UINT32 nReason);
     virtual void OnSuspended(IN IMS_UINT32 nReason);
     virtual void OnResumed();
 

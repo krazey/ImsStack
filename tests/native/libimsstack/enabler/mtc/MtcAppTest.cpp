@@ -137,15 +137,16 @@ TEST_F(MtcAppTest, StartTwiceWithoutStopNoDuplicatedServiceCreation)
 
 TEST_F(MtcAppTest, CreateEctManagerOnlyOnceWhenFirstGetterIsCalled)
 {
-    IEctManager* pFirstManager = pMtcApp->GetEctManager();
-    IEctManager* pSecondManager = pMtcApp->GetEctManager();
+    IEctManager* pFirstManager = &pMtcApp->GetEctManager();
+    IEctManager* pSecondManager = &pMtcApp->GetEctManager();
     EXPECT_EQ(pFirstManager, pSecondManager);
 }
 
 TEST_F(MtcAppTest, CreateEmergencyManagerOnlyOnceWhenFirstGetterIsCalled)
 {
-    MtcEmergencyServiceManager* pFirstManager = pMtcApp->GetEmergencyServiceManager();
-    MtcEmergencyServiceManager* pSecondManager = pMtcApp->GetEmergencyServiceManager();
+    pMtcApp->Start();  // to have MtcService
+    MtcEmergencyServiceManager* pFirstManager = &pMtcApp->GetEmergencyServiceManager();
+    MtcEmergencyServiceManager* pSecondManager = &pMtcApp->GetEmergencyServiceManager();
     EXPECT_EQ(pFirstManager, pSecondManager);
 }
 
