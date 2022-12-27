@@ -75,7 +75,6 @@ void MtcAosEventHandler::RemoveListener(IN IMtcAosStateListener* piListener)
 
 PUBLIC
 void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
-        IN IJniMtcServiceThread* pServiceThread,
         IN MtcEmergencyServiceManager* pEmergencyServiceManager)
 {
     IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
@@ -90,14 +89,14 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
 
     if (bEmergency)
     {
-        pEmergencyServiceManager->HandleServiceStatus(
-                ServiceStatus::SERVICE_ACTIVE, pServiceThread);
+        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_ACTIVE);
     }
     else
     {
-        if (pServiceThread)
+        IJniMtcServiceThread* pThread = m_objService.GetJniServiceThread();
+        if (pThread)
         {
-            pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
+            pThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
         }
         // TODO: this must be called when registration is refreshed?
         m_objConfiguration.OnRegistrationRefreshed();
@@ -121,22 +120,22 @@ void MtcAosEventHandler::OnDisconnecting(IN IMS_UINT32 nReason)
 }
 
 PUBLIC
-void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
-        IN IJniMtcServiceThread* pServiceThread,
-        IN MtcEmergencyServiceManager* pEmergencyServiceManager)
+void MtcAosEventHandler::OnDisconnected(
+        IN IMS_UINT32 nReason, IN MtcEmergencyServiceManager* pEmergencyServiceManager)
 {
     IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nReason, 0);
 
     if (m_objService.IsEmergency())
     {
-        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_IDLE, pServiceThread);
+        pEmergencyServiceManager->HandleServiceStatus(ServiceStatus::SERVICE_IDLE);
     }
     else
     {
-        if (pServiceThread)
+        IJniMtcServiceThread* pThread = m_objService.GetJniServiceThread();
+        if (pThread)
         {
-            pServiceThread->OnServiceChanged(IuMtcService::SERVICE_NONE, 0);
+            pThread->OnServiceChanged(IuMtcService::SERVICE_NONE, 0);
         }
     }
 

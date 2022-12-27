@@ -23,6 +23,7 @@
 
 class AString;
 class ICoreService;
+class IJniMtcServiceThread;
 class IMtcAosConnector;
 class IMtcAosStateListener;
 class ISrvccStateListener;
@@ -47,6 +48,7 @@ public:
     MOCK_METHOD(ServiceStatus, GetStatus, (), (const, override));
     MOCK_METHOD(ICoreService*, GetICoreService, (), (const, override));
     MOCK_METHOD(IMtcAosConnector*, GetAosConnector, (), (const, override));
+    MOCK_METHOD(IJniMtcServiceThread*, GetJniServiceThread, (), (const, override));
     MOCK_METHOD(SrvccState, GetSrvccState, (), (const, override));
     MOCK_METHOD(void, UpdateSrvccState, (IN SrvccState eState), (override));
     MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL bEnabled), (override));

@@ -22,7 +22,6 @@
 #include "ImsTypeDef.h"
 #include "helper/IMtcAosStateListener.h"
 
-class IJniMtcServiceThread;
 class IMessage;
 class IMtcService;
 class MtcConfigurationProxy;
@@ -41,11 +40,10 @@ public:
     virtual void RemoveListener(IN IMtcAosStateListener* piListener);
 
     virtual void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
-            IN IJniMtcServiceThread* pServiceThread,
             IN MtcEmergencyServiceManager* pEmergencyServiceManager);
     virtual void OnDisconnecting(IN IMS_UINT32 nReason);
-    virtual void OnDisconnected(IN IMS_UINT32 nReason, IN IJniMtcServiceThread* pServiceThread,
-            IN MtcEmergencyServiceManager* pEmergencyServiceManager);
+    virtual void OnDisconnected(
+            IN IMS_UINT32 nReason, IN MtcEmergencyServiceManager* pEmergencyServiceManager);
     virtual void OnSuspended(IN IMS_UINT32 nReason);
     virtual void OnResumed();
 

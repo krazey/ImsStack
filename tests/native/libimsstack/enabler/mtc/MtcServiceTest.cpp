@@ -245,8 +245,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsTrueAfterAosConnected)
 {
     IMS_UINT32 nFeature = ImsAosFeature::MMTEL;
     IMS_UINT32 nIpcan = IIpcan::CATEGORY_MOBILE;
-    EXPECT_CALL(*pMockAosEventHandler,
-            OnConnected(nFeature, nIpcan, &objMockServiceThread, pMockEmergencyManager))
+    EXPECT_CALL(*pMockAosEventHandler, OnConnected(nFeature, nIpcan, pMockEmergencyManager))
             .Times(1);
 
     pNormalMtcService->ImsAos_Connected(nFeature, nIpcan);
@@ -267,8 +266,7 @@ TEST_F(MtcServiceTest, IsActiveReturnsFalseAfterAosDisconnected)
 {
     ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(nullptr));
     IMS_UINT32 nReason = ImsAosReason::NONE;
-    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, IMS_NULL, pMockEmergencyManager))
-            .Times(1);
+    EXPECT_CALL(*pMockAosEventHandler, OnDisconnected(nReason, pMockEmergencyManager)).Times(1);
 
     pNormalMtcService->ImsAos_Connected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
     pNormalMtcService->ImsAos_Disconnected(nReason);
@@ -377,6 +375,11 @@ TEST_F(MtcServiceTest, GetAosConnectorReturnsNull)
     EXPECT_EQ(pNormalMtcService->GetAosConnector(), pMockAosConnector);
 }
 
+TEST_F(MtcServiceTest, GetJniServiceThreadReturnsThread)
+{
+    EXPECT_EQ(pNormalMtcService->GetJniServiceThread(), &objMockServiceThread);
+}
+
 TEST_F(MtcServiceTest, GetSrvccStateReturnsValueFromSrvccStateManager)
 {
     ON_CALL(*pMockSrvccStateManager, GetState).WillByDefault(Return(SrvccState::STARTED));
@@ -414,7 +417,7 @@ TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
 
 TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
 {
-    EXPECT_CALL(*pMockEmergencyManager, OpenEmergencyService(_)).Times(1);
+    EXPECT_CALL(*pMockEmergencyManager, OpenEmergencyService()).Times(1);
     pNormalMtcService->OpenEmergencyService();
 }
 

@@ -39,17 +39,7 @@ MtcUiNotifier::~MtcUiNotifier() {}
 PUBLIC
 void MtcUiNotifier::SendPreIncomingCallReceived(IN CallKey nKey)
 {
-    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
-            m_objContext.GetSlotId(), EnablerType::MTC_SERVICE);
-    if (piJniEnabler == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "JniMtcService is null", 0, 0, 0);
-        return;
-    }
-
-    IJniMtcServiceThread* piServiceThread =
-            reinterpret_cast<IJniMtcServiceThread*>(piJniEnabler->GetJniThread());
-
+    IJniMtcServiceThread* piServiceThread = m_objContext.GetService().GetJniServiceThread();
     if (piServiceThread == IMS_NULL)
     {
         IMS_TRACE_E(0, "JniMtcServiceThread is null", 0, 0, 0);

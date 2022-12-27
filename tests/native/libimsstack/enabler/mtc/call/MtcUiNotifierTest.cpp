@@ -20,6 +20,7 @@
 #include "ImsMap.h"
 #include "JniCallInfo.h"
 #include "JniEnablerConnector.h"
+#include "MockIMtcService.h"
 #include "MockIJniEnabler.h"
 #include "MockIJniMtcCallThread.h"
 #include "MockIJniMtcServiceThread.h"
@@ -88,12 +89,17 @@ protected:
 
 TEST_F(MtcUiNotifierTest, SendPreIncomingCallReceived)
 {
+    MockIMtcService objService;
+    ON_CALL(objMockContext, GetService).WillByDefault(ReturnRef(objService));
+
     MockIJniMtcServiceThread objMockServiceThread;
-    pConnector->SetJniEnabler(SLOT_ID, EnablerType::MTC_SERVICE, &objMockJniEnabler);
-    ON_CALL(objMockJniEnabler, GetJniThread).WillByDefault(Return(&objMockServiceThread));
 
+    ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(nullptr));
+    EXPECT_CALL(objMockServiceThread, OnPreIncomingCallReceived(CALL_KEY)).Times(0);  // no meaning
+    pNotifier->SendPreIncomingCallReceived(CALL_KEY);
+
+    ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(&objMockServiceThread));
     EXPECT_CALL(objMockServiceThread, OnPreIncomingCallReceived(CALL_KEY)).Times(1);
-
     pNotifier->SendPreIncomingCallReceived(CALL_KEY);
 }
 

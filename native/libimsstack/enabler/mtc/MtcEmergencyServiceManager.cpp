@@ -37,7 +37,7 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
 }
 
 PUBLIC
-void MtcEmergencyServiceManager::OpenEmergencyService(IN IJniMtcServiceThread* pThread)
+void MtcEmergencyServiceManager::OpenEmergencyService()
 {
     IMS_TRACE_D("OpenEmergencyService", 0, 0, 0);
 
@@ -46,7 +46,7 @@ void MtcEmergencyServiceManager::OpenEmergencyService(IN IJniMtcServiceThread* p
             m_eState == IuMtcService::EmergencyServiceState::IN_CALL)
     {
         SetState(IuMtcService::EmergencyServiceState::OPENED, bStateChanged);
-        NotifyEmergencyServiceChanged(-1, pThread);
+        NotifyEmergencyServiceChanged(-1);
         return;
     }
 
@@ -60,13 +60,12 @@ void MtcEmergencyServiceManager::OpenEmergencyService(IN IJniMtcServiceThread* p
     SetState(IuMtcService::EmergencyServiceState::OPENING, bStateChanged);
     if (bStateChanged)
     {
-        NotifyEmergencyServiceChanged(-1, pThread);
+        NotifyEmergencyServiceChanged(-1);
     }
 }
 
 PUBLIC
-void MtcEmergencyServiceManager::HandleServiceStatus(
-        IN ServiceStatus eStatus, IN IJniMtcServiceThread* pThread)
+void MtcEmergencyServiceManager::HandleServiceStatus(IN ServiceStatus eStatus)
 {
     IMS_TRACE_D("HandleServiceStatus :: %d", eStatus, 0, 0);
 
@@ -86,7 +85,7 @@ void MtcEmergencyServiceManager::HandleServiceStatus(
 
     if (bStateChanged)
     {
-        NotifyEmergencyServiceChanged(-1, pThread);
+        NotifyEmergencyServiceChanged(-1);
     }
 }
 
@@ -127,10 +126,11 @@ void MtcEmergencyServiceManager::SetState(
 }
 
 PRIVATE
-void MtcEmergencyServiceManager::NotifyEmergencyServiceChanged(
-        IN IMS_SINT32 eReason, IN IJniMtcServiceThread* pThread)
+void MtcEmergencyServiceManager::NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason)
 {
     IMS_TRACE_D("NotifyEmergencyServiceChanged :: state=%d, reason=%d", m_eState, eReason, 0);
+    IJniMtcServiceThread* pThread =
+            m_objContext.GetServiceByType(ServiceType::NORMAL)->GetJniServiceThread();
     if (pThread == IMS_NULL)
     {
         IMS_TRACE_E(0, "IJniMtcServiceThread is null", 0, 0, 0);

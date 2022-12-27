@@ -61,6 +61,7 @@ public:
     inline ServiceStatus GetStatus() const override { return m_eStatus; }
     inline ICoreService* GetICoreService() const override { return m_piCoreService; }
     inline IMtcAosConnector* GetAosConnector() const override { return m_pAosConnector; }
+    IJniMtcServiceThread* GetJniServiceThread() const override;
     inline SrvccState GetSrvccState() const override { return m_pSrvccStateManager->GetState(); }
 
     void UpdateSrvccState(IN SrvccState eState) override;
@@ -100,7 +101,6 @@ private:
     static AString GetServiceName(IN ServiceType eType);
     void AttachCoreServiceInterface();
     void AttachAosInterface();
-    IJniMtcServiceThread* GetJniThread();
     void SetServiceFilterCriteria() const;
     void SetAosReady(IN IMS_BOOL);
 

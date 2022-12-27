@@ -22,6 +22,7 @@
 
 class AString;
 class ICoreService;
+class IJniMtcServiceThread;
 class IMtcAosConnector;
 class IMtcAosStateListener;
 class ISrvccStateListener;
@@ -118,6 +119,13 @@ public:
      * @return
      */
     virtual IMtcAosConnector* GetAosConnector() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual IJniMtcServiceThread* GetJniServiceThread() const = 0;
 
     /**
      * @brief Gets

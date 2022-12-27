@@ -19,7 +19,6 @@
 
 #include "IuMtcService.h"
 
-class IJniMtcServiceThread;
 class IMtcContext;
 
 class MtcEmergencyServiceManager
@@ -30,14 +29,14 @@ public:
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    virtual void OpenEmergencyService(IN IJniMtcServiceThread* pThread);
-    virtual void HandleServiceStatus(IN ServiceStatus eStatus, IN IJniMtcServiceThread* pThread);
+    virtual void OpenEmergencyService();
+    virtual void HandleServiceStatus(IN ServiceStatus eStatus);
 
 private:
     void HandleServiceIdle(OUT IMS_BOOL& bStateChanged);
     void HandleServiceActive(OUT IMS_BOOL& bStateChanged);
     void SetState(IN IuMtcService::EmergencyServiceState eState, OUT IMS_BOOL& bChanged);
-    void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason, IN IJniMtcServiceThread* pThread);
+    void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason);
 
     IMtcContext& m_objContext;
 

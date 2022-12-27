@@ -136,6 +136,19 @@ PUBLIC VIRTUAL IMS_BOOL MtcService::IsWlanIpCanType() const
     return m_pAosConnector->GetIpcanType() == IIpcan::CATEGORY_WLAN;
 }
 
+PUBLIC VIRTUAL IJniMtcServiceThread* MtcService::GetJniServiceThread() const
+{
+    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
+            m_objContext.GetSlotId(), EnablerType::MTC_SERVICE);
+    if (piJniEnabler == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniMtcServiceThread is null", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    return reinterpret_cast<IJniMtcServiceThread*>(piJniEnabler->GetJniThread());
+}
+
 PUBLIC VIRTUAL void MtcService::UpdateSrvccState(IN SrvccState eState)
 {
     IMS_TRACE_I("UpdateSrvccState", 0, 0, 0);
@@ -165,7 +178,7 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled
 
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService()
 {
-    m_objContext.GetEmergencyServiceManager()->OpenEmergencyService(GetJniThread());
+    m_objContext.GetEmergencyServiceManager()->OpenEmergencyService();
 }
 
 PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
@@ -212,8 +225,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
 {
     IMS_TRACE_I("ImsAos_Connected", 0, 0, 0);
     SetStatus(ServiceStatus::SERVICE_ACTIVE);
-    m_pAosEventHandler->OnConnected(
-            nFeatures, nIpcan, GetJniThread(), m_objContext.GetEmergencyServiceManager());
+    m_pAosEventHandler->OnConnected(nFeatures, nIpcan, m_objContext.GetEmergencyServiceManager());
     SetAosReady(IMS_TRUE);
 }
 
@@ -227,8 +239,7 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 PUBLIC VIRTUAL void MtcService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
     SetStatus(ServiceStatus::SERVICE_IDLE);
-    m_pAosEventHandler->OnDisconnected(
-            nReason, GetJniThread(), m_objContext.GetEmergencyServiceManager());
+    m_pAosEventHandler->OnDisconnected(nReason, m_objContext.GetEmergencyServiceManager());
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Suspended(IN IMS_UINT32 nReason)
@@ -336,20 +347,6 @@ void MtcService::AttachAosInterface()
     }
     piImsAos->SetListener(this);
     m_pAosConnector = new MtcAosConnector(*piImsAos, *(piImsAos->GetAosInfo()));
-}
-
-PRIVATE
-IJniMtcServiceThread* MtcService::GetJniThread()
-{
-    IJniEnabler* piJniEnabler = JniEnablerConnector::GetInstance().GetJniEnabler(
-            m_objContext.GetSlotId(), EnablerType::MTC_SERVICE);
-    if (piJniEnabler == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "JniMtcServiceThread is null", 0, 0, 0);
-        return IMS_NULL;
-    }
-
-    return reinterpret_cast<IJniMtcServiceThread*>(piJniEnabler->GetJniThread());
 }
 
 PRIVATE
