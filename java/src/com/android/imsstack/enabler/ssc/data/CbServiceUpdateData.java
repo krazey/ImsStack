@@ -18,6 +18,8 @@ package com.android.imsstack.enabler.ssc.data;
 
 import com.android.imsstack.enabler.ssc.ESsType;
 
+import java.util.Arrays;
+
 public class CbServiceUpdateData extends SscServiceData  {
     private String[] mBarrList = null;
     private String mPassword = null;
@@ -39,6 +41,7 @@ public class CbServiceUpdateData extends SscServiceData  {
     }
 
     public String toString() {
-        return super.toString() + ", mCondition : " + mCondition + ", Barr List : " + mBarrList;
+        return super.toString() + ", Condition : " + mCondition
+                + ", Barring List : " + Arrays.toString(mBarrList);
     }
 }
