@@ -199,7 +199,7 @@ PUBLIC
 void MtcCallController::Terminate(IN CallKey nCallKey, IN const CallReasonInfo& objReason)
 {
     m_objContext.GetAsyncRunner(
-            [&, objReason]()
+            [&, nCallKey, objReason]()
             {
                 m_objCallManager.GetCallByCallKey(nCallKey)->Terminate(objReason);
             });
