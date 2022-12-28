@@ -17,117 +17,146 @@
 package com.android.imsstack.core.agents;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.net.ConnectivityManager;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.Network;
 import android.util.Pair;
 
 import com.android.imsstack.ContextFixture;
+import com.android.imsstack.core.agents.dcm.DcFactory;
+import com.android.imsstack.core.agents.dcmif.EApnType;
+import com.android.imsstack.core.agents.dcmif.IDc;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 
 @RunWith(JUnit4.class)
 public class QosAgentTest {
     private static final int SLOT0 = 0;
-
-    private ContextFixture mContextFixture;
+    private ConnectivityManager mConnectivityManager;
+    private ContextFixture mContext;
+    private LinkProperties mLinkProperties;
     private QosAgent mQosAgent;
+
+    @Mock private Network mMockNetwork;
+    @Mock private IDcApn mMockDcApn;
+    @Mock private DatagramSocket mMockRtpSocket;
+    @Mock private DatagramSocket mMockRtcpSocket;
+
+    private static final String LOCAL_RTP_ADDRESS = "127.0.0.1";
+    private static final String LOCAL_LINK_ADDRESS = "127.0.0.1/24";
+    private static final int LOCAL_RTP_PORT = 50010;
+    private static final String REMOTE_RTP_ADDRESS = "127.0.0.10";
+    private static final int REMOTE_RTP_PORT = 1240;
 
     @Before
     public void setUp() throws Exception {
-        mContextFixture = new ContextFixture();
-        AppContext.init(mContextFixture.getTestDouble());
+        MockitoAnnotations.initMocks(this);
 
+        mContext = new ContextFixture();
         mQosAgent = new QosAgent(SLOT0);
+        AppContext.init(mContext.getTestDouble());
+
+        mConnectivityManager = mContext.getTestDouble().getSystemService(ConnectivityManager.class);
+        mLinkProperties = new LinkProperties();
+        mLinkProperties.addLinkAddress(new LinkAddress(LOCAL_LINK_ADDRESS));
+        when(mConnectivityManager.getLinkProperties(eq(mMockNetwork))).thenReturn(mLinkProperties);
+
+        HashMap<Integer, IDc> dcObjects = new HashMap<>();
+        dcObjects.put(DcFactory.APN, mMockDcApn);
+        DcFactory.setObjects(SLOT0, dcObjects);
+        when(mMockDcApn.getNetworkByCapability(anyInt())).thenReturn(mMockNetwork);
     }
 
     @After
     public void tearDown() throws Exception {
         AppContext.deinit();
-        mContextFixture = null;
+        mContext = null;
+        mQosAgent = null;
+        mMockNetwork = null;
+        mMockDcApn = null;
+        DcFactory.setObjects(SLOT0, null);
     }
 
     @Test
-    @Ignore("b/260951368")
-    public void testCreateQosConnectionWithoutRemoteInfo() {
-        final String strLocalAddr = "111.11.11.11";
-        final int localPort = 1111;
+    public void testCreateQosConnectionWithoutRemoteInfo() throws Exception {
+        InetAddress localAddr = InetAddress.getByName(LOCAL_RTP_ADDRESS);
 
-        InetAddress localAddress = InetAddress.parseNumericAddress(strLocalAddr);
-        final Pair<DatagramSocket, DatagramSocket> retSocket =
-                mQosAgent.createQosConnection(strLocalAddr, localPort);
+        Pair<DatagramSocket, DatagramSocket> retSocket =
+                mQosAgent.createQosConnection(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
 
+        verify(mConnectivityManager).getLinkProperties(eq(mMockNetwork));
+        verify(mMockDcApn).getNetworkByCapability(eq(EApnType.IMS.getType()));
+
+        assertNotNull(retSocket);
         assertEquals(new InetSocketAddress(
-                localAddress, localPort), retSocket.first.getLocalSocketAddress());
-        assertEquals(new InetSocketAddress(
-                localAddress, localPort + 1), retSocket.second.getLocalSocketAddress());
+                localAddr, LOCAL_RTP_PORT), retSocket.first.getLocalSocketAddress());
+
+        mQosAgent.destroyQosConnection(retSocket.first, retSocket.second);
     }
 
     @Test
-    @Ignore("b/260951368")
-    public void testCreateQosConnectionWithRemoteInfo() {
-        final String strLocalAddr = "111.11.11.11";
-        final int localPort = 1111;
-        final String strRemoteAddr = "122.22.22.22";
-        final int remotePort = 2222;
+    public void testCreateQosConnectionWithRemoteInfo() throws Exception {
+        InetAddress localAddr = InetAddress.getByName(LOCAL_RTP_ADDRESS);
 
-        InetAddress localAddress = InetAddress.parseNumericAddress(strLocalAddr);
-        InetAddress remoteAddress = InetAddress.parseNumericAddress(strRemoteAddr);
-        final Pair<DatagramSocket, DatagramSocket> retSocket =
-                mQosAgent.createQosConnection(strLocalAddr, localPort, strRemoteAddr, remotePort);
+        Pair<DatagramSocket, DatagramSocket> retSocket =
+                mQosAgent.createQosConnection(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT, REMOTE_RTP_ADDRESS,
+                REMOTE_RTP_PORT);
 
+        verify(mConnectivityManager).getLinkProperties(eq(mMockNetwork));
+        verify(mMockDcApn).getNetworkByCapability(eq(EApnType.IMS.getType()));
+
+        assertNotNull(retSocket);
         assertEquals(new InetSocketAddress(
-                localAddress, localPort), retSocket.first.getLocalSocketAddress());
+                localAddr, LOCAL_RTP_PORT), retSocket.first.getLocalSocketAddress());
         assertEquals(new InetSocketAddress(
-                remoteAddress, remotePort), retSocket.first.getRemoteSocketAddress());
-        assertEquals(new InetSocketAddress(
-                localAddress, localPort + 1), retSocket.second.getLocalSocketAddress());
-        assertEquals(new InetSocketAddress(
-                remoteAddress, remotePort + 1), retSocket.second.getRemoteSocketAddress());
+                localAddr, LOCAL_RTP_PORT + 1), retSocket.second.getLocalSocketAddress());
+
+        mQosAgent.destroyQosConnection(retSocket.first, retSocket.second);
     }
 
     @Test
-    @Ignore("b/260951368")
-    public void testUpdateQosConnection() throws IOException {
-        final String strLocalAddr = "111.11.11.11";
-        final int localPort = 1111;
-        final String strRemoteAddr = "122.22.22.22";
-        final int remotePort = 2222;
+    public void testUpdateQosConnection() throws Exception {
+        Pair<DatagramSocket, DatagramSocket> retSocket =
+                mQosAgent.createQosConnection(LOCAL_RTP_ADDRESS, LOCAL_RTP_PORT);
 
-        InetAddress localAddress = InetAddress.parseNumericAddress(strLocalAddr);
-        InetAddress remoteAddress = InetAddress.parseNumericAddress(strRemoteAddr);
-        DatagramSocket rtpSocket = new DatagramSocket(localPort, localAddress);
-        DatagramSocket rtcpSocket = new DatagramSocket(remotePort, remoteAddress);
+        boolean retResult =
+                mQosAgent.updateQosConnection(retSocket.first, retSocket.second, REMOTE_RTP_ADDRESS,
+                REMOTE_RTP_PORT);
 
-        final boolean mRetResult =
-                mQosAgent.updateQosConnection(rtpSocket, rtcpSocket, strRemoteAddr, remotePort);
+        assertTrue(retResult);
+        verify(mConnectivityManager, times(2)).getLinkProperties(eq(mMockNetwork));
+        verify(mMockDcApn, times(2)).getNetworkByCapability(eq(EApnType.IMS.getType()));
 
-        assertEquals(true, mRetResult);
+        mQosAgent.destroyQosConnection(retSocket.first, retSocket.second);
     }
 
     @Test
-    @Ignore("b/260951368")
-    public void testDestroyQosConnection() throws IOException {
-        final String strLocalAddr = "111.11.11.11";
-        final int tpLocalPort = 1111;
+    public void testDestroyQosConnection() throws Exception {
+        mQosAgent.destroyQosConnection(mMockRtpSocket, mMockRtcpSocket);
 
-        InetAddress localAddress = InetAddress.parseNumericAddress(strLocalAddr);
-
-        DatagramSocket rtpSocket = new DatagramSocket(tpLocalPort, localAddress);
-        DatagramSocket rtcpSocket = new DatagramSocket(tpLocalPort + 1, localAddress);
-
-        mQosAgent.destroyQosConnection(rtpSocket, rtcpSocket);
-
-        assertEquals("", rtpSocket);
-        assertEquals("", rtcpSocket);
+        verify(mMockRtpSocket, times(1)).close();
+        verify(mMockRtcpSocket, times(1)).close();
     }
 }
