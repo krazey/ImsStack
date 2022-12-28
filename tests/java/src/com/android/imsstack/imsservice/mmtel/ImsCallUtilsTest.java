@@ -30,7 +30,6 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 
-import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
@@ -286,15 +285,6 @@ public class ImsCallUtilsTest {
     public void testIsGoogleNativeCompliant() {
         boolean ret = ImsCallUtils.isGoogleNativeCompliant(mContext);
         assertEquals(ret, ImsConstants.USE_GOOGLE_NATIVE_APPS);
-    }
-
-    @Test
-    public void testIsCallOnNativeAppsAndCountryKR() {
-        ICallContext context = Mockito.mock(ICallContext.class);
-        boolean testvalue = ImsConstants.USE_GOOGLE_NATIVE_APPS && ImsGlobal.isCountry(
-                context.getSlotId(), "KR");
-        boolean ret = ImsCallUtils.isCallOnNativeAppsAndCountryKR(context);
-        assertEquals(ret, testvalue);
     }
 
     @Test

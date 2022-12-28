@@ -33,8 +33,6 @@ import android.telephony.ims.stub.ImsFeatureConfiguration;
 
 import androidx.test.core.app.ApplicationProvider;
 
-import com.android.imsstack.enabler.IContext;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -42,8 +40,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.TimeUnit;
@@ -53,8 +49,11 @@ public class ImsServiceTest {
     IImsServiceController mImsServiceBinder;
     private TestImsService mImsService;
     private Context mContext;
-    @Mock
-    IContext mIContext;
+    private static final int INVALID_SLOT = -1;
+    private static final int SLOT0 = 0;
+    private static final int SLOT1 = 1;
+    private static final int SUB_ID = 1;
+
     private static final String IMS_PACKAGE_NAME = "com.android.imsstack";
     private static final String CLASS_NAME = "com.android.imsstack.imsservice.ImsService";
 
@@ -72,8 +71,6 @@ public class ImsServiceTest {
     public void setUp() throws InterruptedException {
         MockitoAnnotations.initMocks(this);
         mContext = spy(ApplicationProvider.getApplicationContext());
-        Mockito.when(mIContext.getSlotId()).thenReturn(0);
-        Mockito.when(mIContext.getSubId()).thenReturn(1);
 
         Intent intent = new Intent(ImsService.SERVICE_INTERFACE);
         intent.setClassName(IMS_PACKAGE_NAME, CLASS_NAME);
@@ -112,21 +109,17 @@ public class ImsServiceTest {
     public void createRcsFeatureTest() throws RemoteException, InterruptedException {
         Assert.assertNotNull(mImsServiceBinder);
         //verify for invalid slot id
-        Mockito.when(mIContext.getSlotId()).thenReturn(-1);
-        IImsRcsFeature result = mImsServiceBinder.createRcsFeature(
-                mIContext.getSlotId(), mIContext.getSubId());
+        IImsRcsFeature result = mImsServiceBinder.createRcsFeature(INVALID_SLOT, SUB_ID);
         Assert.assertNull(result);
 
-        Mockito.when(mIContext.getSlotId()).thenReturn(0);
-        result = mImsServiceBinder.createRcsFeature(mIContext.getSlotId(),
-                mIContext.getSubId());
+        result = mImsServiceBinder.createRcsFeature(SLOT0, SUB_ID);
         Assert.assertNotNull(result);
     }
 
     @Test
     public void createRcsFeatureWithoutBinderTest() {
         ImsServiceController.create(mContext);
-        RcsFeature rcs = mImsService.createRcsFeature(mIContext.getSlotId());
+        RcsFeature rcs = mImsService.createRcsFeature(SLOT0);
         Assert.assertNotNull(rcs);
     }
 
@@ -152,29 +145,25 @@ public class ImsServiceTest {
     @Ignore // TODO(b/263768170): Binder should not return null
     public void createMmTelFeatureTest() throws RemoteException {
         Assert.assertNotNull(mImsServiceBinder);
-        Mockito.when(mIContext.getSlotId()).thenReturn(-1);
         IImsMmTelFeature iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(
-                mIContext.getSlotId(), mIContext.getSubId());
+                INVALID_SLOT, SUB_ID);
         Assert.assertNull(iImsMMTelFeature);
 
-        Mockito.when(mIContext.getSlotId()).thenReturn(0);
-        iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(
-                mIContext.getSlotId(), mIContext.getSubId());
+        iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(SLOT0, SUB_ID);
         Assert.assertNotNull(iImsMMTelFeature);
     }
 
     @Test
     public void createMmTelFeatureWithOutBinderTest() throws RemoteException {
         ImsServiceController.create(mContext);
-        MmTelFeature iImsMMTelFeature = mImsService.createMmTelFeature(mIContext.getSlotId());
+        MmTelFeature iImsMMTelFeature = mImsService.createMmTelFeature(SLOT0);
         Assert.assertNotNull(iImsMMTelFeature);
     }
 
     @After
-    public void cleanUp() {
+    public void tearDown() {
         mImsServiceBinder = null;
         mContext = null;
         mConnection = null;
-        mIContext = null;
     }
 }
