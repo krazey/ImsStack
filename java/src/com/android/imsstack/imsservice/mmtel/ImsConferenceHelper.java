@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public final class ImsConferenceHelper implements ConferenceProxy.DisposalCallback {
     private static ImsConferenceHelper sConferenceHelper = new ImsConferenceHelper();
 
-    private ArrayList<ConferenceProxy> mConferenceProxys
+    private final ArrayList<ConferenceProxy> mConferenceProxys
             = new ArrayList<ConferenceProxy>();
     private ImsCallSessionImplBase mTransientConferenceSession = null;
     // To recover background session when foreground session is terminated
