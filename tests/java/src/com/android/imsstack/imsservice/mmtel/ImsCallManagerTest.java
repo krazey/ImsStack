@@ -127,11 +127,9 @@ public class ImsCallManagerTest {
 
         ImsCallSessionImpl pendingCallSession = Mockito.mock(ImsCallSessionImpl.class);
         when(pendingCallSession.getCallId()).thenReturn(PENDING_CALL_ID);
-        pendingCallSession.setState(ImsCallSession.State.IDLE);
-        mImsCallManager.getPendingSession().put(pendingCallSession.getCallId(), pendingCallSession);
+        mImsCallManager.getPendingSession().put(PENDING_CALL_ID, pendingCallSession);
         mImsCallManager.closeAllSessions();
         verify(pendingCallSession, times(2)).getState();
-        Assert.assertEquals(ImsCallSession.State.IDLE, pendingCallSession.getState());
         verify(pendingCallSession).close();
 
         // verify terminateAllSessions
@@ -139,9 +137,8 @@ public class ImsCallManagerTest {
         Assert.assertTrue(mImsCallManager.getSession().isEmpty());
 
         reset(mMockImsCallSession);
-        mMockImsCallSession.setState(ImsCallSession.State.TERMINATED);
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
-        mImsCallManager.getSession().put(mMockImsCallSession.getCallId(), mMockImsCallSession);
+        mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
         mImsCallManager.closeAllSessions();
         verify(mMockImsCallSession).notifyCallTerminatedByServiceUnavailable();
         verify(mMockImsCallSession).close();
@@ -151,9 +148,7 @@ public class ImsCallManagerTest {
         mImsCallManager.closeAllSessions();
         Assert.assertTrue(mImsCallManager.getPendingSession().isEmpty());
         when(pendingCallSession.getCallId()).thenReturn(CALL_ID);
-        mImsCallManager.getPendingSession().put(mMockImsCallSession.getCallId(),
-                pendingCallSession);
-        pendingCallSession.setState(ImsCallSession.State.TERMINATED);
+        mImsCallManager.getPendingSession().put(CALL_ID, pendingCallSession);
         mImsCallManager.closeAllSessions();
         Assert.assertEquals(0, mImsCallManager.getPendingSession().size());
         Assert.assertEquals(0, mImsCallManager.getSession().size());
@@ -195,8 +190,6 @@ public class ImsCallManagerTest {
         ImsCallSessionImpl result = mImsCallManager.createSession(profile);
         verify(mockIECallStateTracker).exitEmergencyCallbackMode(anyBoolean());
         verify(mMockCallContext).getECallStateTracker();
-        Assert.assertNotNull(mMockCallContext.getECallStateTracker());
-        Assert.assertTrue(mMockCallContext.getECallStateTracker().isEcbmEntered());
         verify(mMockMtcApp).createCall((MtcCall.FLAG_EMERGENCY | MtcCall.FLAG_MO));
         verify(mMockMtcCall).isEmergencyCall();
         verify(mMockMtcApp).openEmergencyService(
@@ -347,7 +340,6 @@ public class ImsCallManagerTest {
         Assert.assertTrue(mImsCallManager.getSession().isEmpty());
         Assert.assertNull(session);
 
-        mMockImsCallSession.setState(ImsCallSession.State.INITIATED);
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
         when(mMockImsCallSession.getProperty(MtcCall.EXTRA_CONFERENCE)).thenReturn("true");
         mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
@@ -374,7 +366,7 @@ public class ImsCallManagerTest {
         when(mMockMtcCall.isOnHold()).thenReturn(false);
         when(mMockMtcCall.isInCall()).thenReturn(false);
         when(mMockImsCallSession.getMtcCall()).thenReturn(mMockMtcCall);
-        mImsCallManager.getSession().put(mMockImsCallSession.getCallId(), mMockImsCallSession);
+        mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
         implSession = mImsCallManager.getConnectingSession();
         Assert.assertEquals(mMockImsCallSession, implSession);
         verify(mMockImsCallSession).getMtcCall();
@@ -390,8 +382,7 @@ public class ImsCallManagerTest {
         Assert.assertNull(implSession);
 
         when(mMockImsCallSession.getMtcCall()).thenReturn(mMockMtcCall);
-        mImsCallManager.getPendingSession().put(mMockImsCallSession.getCallId(),
-                mMockImsCallSession);
+        mImsCallManager.getPendingSession().put(CALL_ID, mMockImsCallSession);
         implSession = mImsCallManager.getConnectingSession();
         Assert.assertNotNull(implSession);
         Assert.assertEquals(mMockImsCallSession, implSession);
@@ -409,7 +400,7 @@ public class ImsCallManagerTest {
         when(mMockMtcCall.isInCall()).thenReturn(true);
         when(mMockMtcCall.getCallId()).thenReturn(CALL_ID);
         when(mMockImsCallSession.getMtcCall()).thenReturn(mMockMtcCall);
-        mImsCallManager.getSession().put(mMockImsCallSession.getCallId(), mMockImsCallSession);
+        mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
         implSession = mImsCallManager.getActiveSession();
         Assert.assertNotNull(implSession);
         Assert.assertEquals(mMockImsCallSession, implSession);
@@ -425,7 +416,7 @@ public class ImsCallManagerTest {
         Assert.assertNull(result);
 
         when(mMockImsCallSession.getCallId()).thenReturn(CALL_ID);
-        mImsCallManager.getSession().put(mMockImsCallSession.getCallId(), mMockImsCallSession);
+        mImsCallManager.getSession().put(CALL_ID, mMockImsCallSession);
         when(mMockMtcCall.isOnHold()).thenReturn(true);
         when(mMockMtcCall.getCallId()).thenReturn(CALL_ID);
         when(mMockImsCallSession.getMtcCall()).thenReturn(mMockMtcCall);
@@ -537,10 +528,11 @@ public class ImsCallManagerTest {
         Assert.assertEquals(1, mImsCallManager.getSession().size());
         verify(mMockCallContext).getSrvccStateTracker();
 
+        String callId = "20";
         // Verify onCallIncomingReceived
         ImsCallSessionImpl mPendingSession = Mockito.mock(ImsCallSessionImpl.class);
-        when(mPendingSession.getCallId()).thenReturn("20");
-        mImsCallManager.getPendingSession().put(mPendingSession.getCallId(), mPendingSession);
+        when(mPendingSession.getCallId()).thenReturn(callId);
+        mImsCallManager.getPendingSession().put(callId, mPendingSession);
         mImsCallTracker.updateCallState(mPendingSession,
                 CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
         verify(mMockIMmTelCallListener).onIncomingCallReceived(eq(mPendingSession));
@@ -549,8 +541,8 @@ public class ImsCallManagerTest {
         // Verify onCallIncomingReceived ->rejectAndDestroyCall when mMmTelCallListener null
         reset(mMockIMmTelCallListener);
         ImsCallManager.ImsCallTracker mctNull = mImsCallManagernull.new ImsCallTracker();
-        mImsCallManagernull.getPendingSession().put(mPendingSession.getCallId(), mPendingSession);
-        mImsCallManagernull.getSession().put(mPendingSession.getCallId(), mPendingSession);
+        mImsCallManagernull.getPendingSession().put(callId, mPendingSession);
+        mImsCallManagernull.getSession().put(callId, mPendingSession);
         mctNull.updateCallState(mPendingSession,
                 CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
         verify(mMockIMmTelCallListener, never()).onIncomingCallReceived(
@@ -561,10 +553,10 @@ public class ImsCallManagerTest {
 
         // Verify onCallDestroy with pending session
         Assert.assertTrue(
-                mImsCallManager.getPendingSession().containsKey(mPendingSession.getCallId()));
+                mImsCallManager.getPendingSession().containsKey(callId));
         mImsCallTracker.updateCallState(mPendingSession, CallTracker.CALL_EVENT_DESTROY, null);
         Assert.assertFalse(
-                mImsCallManager.getPendingSession().containsKey(mPendingSession.getCallId()));
+                mImsCallManager.getPendingSession().containsKey(callId));
 
         // Verify onCallDestroy with session
         Assert.assertEquals(1, mImsCallManager.getSession().size());
@@ -587,7 +579,6 @@ public class ImsCallManagerTest {
     public void onPreIncomingCallReceivedTest() {
         mMtcAppCallListenerProxy.onPreIncomingCallReceived(null, -1);
         verify(mMockMtcApp).getPendingCall(-1);
-        Assert.assertNull(mMockMtcApp.getPendingCall(-1));
         Assert.assertEquals(0, mImsCallManager.getPendingSession().size());
 
         when(mMockMtcCall.getNativeCallId()).thenReturn(4L);
@@ -595,11 +586,9 @@ public class ImsCallManagerTest {
         when(mMockMtcApp.getPendingCall(4L)).thenReturn(call);
         when(mMockImsCallSession.getCallId()).thenReturn("4");
         mImsCallManager.getSession().put("4", mMockImsCallSession);
-        mMtcAppCallListenerProxy.onPreIncomingCallReceived(mMockMtcApp,
-                mMockMtcCall.getNativeCallId());
-        verify(mMockMtcApp).getPendingCall(mMockMtcCall.getNativeCallId());
-        Assert.assertNotNull(
-                mImsCallManager.getPendingSession().get(mMockImsCallSession.getCallId()));
+        mMtcAppCallListenerProxy.onPreIncomingCallReceived(mMockMtcApp, 4L);
+        verify(mMockMtcApp).getPendingCall(4L);
+        Assert.assertNotNull(mImsCallManager.getPendingSession().get("4"));
 
         // Verify function onPreIncomingCallReceived->onCallPreIncomingReceived()
         reset(mMockMtcApp);
@@ -612,8 +601,7 @@ public class ImsCallManagerTest {
         verify(mMockMtcApp, times(1)).setCallListener(mListenerArgNull.capture());
         mMtcAppCallListenerProxyNull = mListenerArgNull.getValue();
         mImsCallManagernull.getSession().put(CALL_ID, mMockImsCallSession);
-        mMtcAppCallListenerProxyNull.onPreIncomingCallReceived(mMockMtcApp,
-                mMockMtcCall.getNativeCallId());
+        mMtcAppCallListenerProxyNull.onPreIncomingCallReceived(mMockMtcApp, 12L);
         verify(mMockImsCallSession, timeout(100)).close();
         verify(mMockImsCallSession, timeout(100)).reject(
                 eq(ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE));
