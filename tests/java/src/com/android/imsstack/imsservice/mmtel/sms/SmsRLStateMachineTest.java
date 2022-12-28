@@ -61,26 +61,18 @@ public class SmsRLStateMachineTest {
     MtsController mMtsController;
     private Handler mHandler = null;
     int mMessageType = 2;
-    private byte[] mMoRpAck = HexDump.hexStringToByteArray("0201");
-    private byte[] mMoRpError = HexDump.hexStringToByteArray("0401016f");
     private byte[] mMtRpAck = HexDump.hexStringToByteArray("0301");
     private byte[] mMtRpError = HexDump.hexStringToByteArray("0501016f");
     private String mDestinationAddress = "0987654321";
     private String mPsiSmsc = "+19037029920";
     private String mSmsc = "07912160130300F4";
-    private String mDecodedSmsc = "+12063130004";
     SmsRLStateMachine mSmsRLStateMachine;
     private SmsRLStateMachine.SmsRLState mCurrentState;
     private byte[] mMtRpData = HexDump.hexStringToByteArray("010107919130079229"
                                                         + "F0001221110A81785634121000000666"
                                                         + "B2996C2603");
     private int mToken = 1;
-    private int mRpType = SmsUtils.RP_DATA;
     private byte[] mTpdu = HexDump.hexStringToByteArray("21110A81785634121000000666B2996C2603");
-    private byte[] mMoRpData = HexDump.hexStringToByteArray("0001000791913007"
-                                                            + "9229F01221110A81785634121000"
-                                                            + "000666B2996C2603");
-
 
     @Before
     public void setUp() {
@@ -309,7 +301,7 @@ public class SmsRLStateMachineTest {
         SmsRPdu moRpAck = new SmsRPdu(1, SmsUtils.RP_ACK, mSmsc, 0, null);
 
         byte[] encodedPdu = moRpAck.getRpduByteArray();
-        int result = mSmsRLStateMachine.onRPAckFromTL(moRpAck);
+        mSmsRLStateMachine.onRPAckFromTL(moRpAck);
         verify(mMtsController).sendMessage(SmsUtils.FORMAT_INT_3GPP, encodedPdu, mPsiSmsc,
                 mDestinationAddress, moRpAck.getMessageRef());
     }

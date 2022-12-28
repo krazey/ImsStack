@@ -248,9 +248,8 @@ public class SmsRLStateMachine {
             @Override
             public int onRPDataFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu moRPData) {
                 logi("IDLE State: onRPDataFromTL");
-                byte[] encodedPdu = null;
                 byte[] tpdu = moRPData.getUserData();
-                encodedPdu = moRPData.getRpduByteArray();
+                byte[] encodedPdu = moRPData.getRpduByteArray();
                 if (tpdu != null) {
                     smsRLStateMachine.mTpMr = tpdu[SmsUtils.TPDU_MR_INDEX] & 0xff;
                 }
@@ -440,9 +439,8 @@ public class SmsRLStateMachine {
             }
             @Override
             public int onRPErrorFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu mtRPError) {
-                byte[] encodedPdu = null;
                 log("WAIT_TO_SEND_RPACK TO NW : onRPErrorFromTL");
-                encodedPdu = mtRPError.getRpduByteArray();
+                byte[] encodedPdu = mtRPError.getRpduByteArray();
                 if (encodedPdu == null) {
                     log("onRPErrorFromTL: Encoding Failed");
                     return SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED;

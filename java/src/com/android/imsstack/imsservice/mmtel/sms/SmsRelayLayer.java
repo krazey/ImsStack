@@ -38,7 +38,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SmsRelayLayer {
     private static final String TAG = "[GII-SmsRL] ";
     private final ImsCallContext mCallContext;
-    private SmsTransferLayer mSmsTL = null;
     private MtsController mMtsController = null;
     SmsRLStateMachine mSmsRLStateMachine = null;
     private final MtsControllerListenerProxy mMtsControllerListener =
@@ -142,7 +141,6 @@ public class SmsRelayLayer {
                         + " tpdu = " + ImsLog.hiddenString(IccUtils.bytesToHexString(tpdu))
                         + " statusResult = " + statusResult);
             }
-            byte[] encodedPdu = null;
             TelephonyManager tm = null;
             String targetAddress = null;
             int rpCause = GENERIC_ERROR_CAUSE_VALUE;
@@ -362,7 +360,6 @@ public class SmsRelayLayer {
                     }
                     return MtsController.MT_SUCCESS;
                 }
-                byte[] tpdu = null;
                 SmsRPdu mtData = new SmsRPdu(pduData);
                 if (DBG) {
                     log("Rpdu fields new: message type ="
@@ -373,11 +370,10 @@ public class SmsRelayLayer {
                                     + ImsLog.hiddenString(mtData.getOrigAddr()));
                 }
                 int messageRef = mtData.getMessageRef();
-                TelephonyManager tm = null;
                 String targetAddress = null;
                 //fetch PSI Value
                 int subId = mCallContext.getSubId();
-                tm = AppContext.getTelephonyManager(subId);
+                TelephonyManager tm = AppContext.getTelephonyManager(subId);
                 if (tm != null) {
                     targetAddress = tm.getSmscIdentity(TelephonyManager.APPTYPE_ISIM);
                     if (DBG) log("PSI in ISIM " + ImsLog.hiddenString(targetAddress));
@@ -412,8 +408,7 @@ public class SmsRelayLayer {
                                         + ImsLog.hiddenString(IccUtils
                                         .bytesToHexString(encodedPdu)));
                             }
-                            boolean res = false;
-                            res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
+                            boolean res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
                                                     encodedPdu, targetAddress,
                                                     mtData.getOrigAddr(), mtData.getMessageRef());
 
@@ -465,8 +460,7 @@ public class SmsRelayLayer {
                         log("Sending Encoded RP-Error: "
                                     + ImsLog.hiddenString(IccUtils.bytesToHexString(encodedPdu)));
                     }
-                    boolean res = false;
-                    res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
+                    boolean res =  mMtsController.sendMessage(SmsUtils.FORMAT_INT_3GPP,
                                                     encodedPdu,
                                                     targetAddress,
                                                     mtData.getOrigAddr(),

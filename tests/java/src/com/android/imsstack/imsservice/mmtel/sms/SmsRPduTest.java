@@ -29,7 +29,6 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class SmsRPduTest {
-    private static final String LOG_TAG = "SmsRPduTest";
     private SmsRPdu mMoRpData;
     private SmsRPdu mMoRpAck;
     private SmsRPdu mMoRpError;
@@ -44,7 +43,6 @@ public class SmsRPduTest {
     private SmsRPdu mSmsRPduMtRpErrorWithDiagnostics;
 
     private int mMessageRef = 0x01;
-    private int mMessageType; // = SmsUtils.RP_DATA;
     private String mDestinationAddress = "07919130079229F0";
     private String mOrigAddr = null;
     private int mCause = 0;
