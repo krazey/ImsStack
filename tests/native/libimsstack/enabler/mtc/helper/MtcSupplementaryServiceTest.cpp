@@ -101,6 +101,14 @@ TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
     EXPECT_EQ(objOutSuppService.GetValue(SuppType::CNAP)->strValue, strTest);
     EXPECT_EQ(objOutSuppService.GetValue(SuppType::CALLER_ID)->nValue, 1);
     EXPECT_TRUE(objOutSuppService.GetValue(SuppType::CW)->bValue);
+
+    SuppService* pTestSupp4 = new SuppService();
+    pTestSupp3->bValue = IMS_FALSE;
+    IMSMap<SuppType, SuppService*> objInSuppService2;
+    objInSuppService2.Add(SuppType::CW, pTestSupp4);
+    pMtcSupplementaryService->UpdateOutgoingServices(objInSuppService2);
+
+    EXPECT_FALSE(objOutSuppService.GetValue(SuppType::CW)->bValue);
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateTip)
@@ -327,6 +335,67 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
     pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
             static_cast<IMS_SINT32>(CdivCause::BUSY));
+
+    objHeaders.Append(AString("<sip:last_diverting_target;cause=302>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
+            static_cast<IMS_SINT32>(CdivCause::UNCONDITION));
+
+    objHeaders.Append(AString("<sip:last_diverting_target;cause=404>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
+            static_cast<IMS_SINT32>(CdivCause::NOT_LOGGED_IN));
+
+    objHeaders.Append(AString("<sip:last_diverting_target;cause=408>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
+            static_cast<IMS_SINT32>(CdivCause::NO_REPLY));
+
+    objHeaders.Append(AString("<sip:last_diverting_target;cause=480>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
+            static_cast<IMS_SINT32>(CdivCause::DEFLECTION));
+
+    objHeaders.Append(AString("<sip:last_diverting_target;cause=487>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
+            static_cast<IMS_SINT32>(CdivCause::DEFLECTION_ALERTING));
+
+    objHeaders.Append(AString("<sip:last_diverting_target;cause=503>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
+            static_cast<IMS_SINT32>(CdivCause::NOT_REACHABLE));
+
+    objHeaders.Append(AString("<sip:last_diverting_target;cause=999>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivCause(static_cast<IMessage*>(&objMockIMessage));
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_CAUSE)->nValue,
+            static_cast<IMS_SINT32>(CdivCause::NONE));
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCdivHistory)
@@ -342,6 +411,32 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivHistory)
 
     pMtcSupplementaryService->UpdateCdivHistory(static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_HISTORY)->strValue, AString("office"));
+
+    objHeaders.Append(AString("<sips:bob@ims.com;transport=tcp>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivHistory(static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_HISTORY)->strValue, AString("bob"));
+
+    objHeaders.Append(AString("<tel:+358-9-123-45678>;index=1.1.1;mp=1.1"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivHistory(static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_HISTORY)->strValue,
+            AString("+358-9-123-45678"));
+
+    objHeaders.Append(AString("358-9-123-45678"));
+    EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::HISTORY_INFO, AString::ConstNull()))
+            .Times(1)
+            .WillOnce(Return(objHeaders));
+    pMtcSupplementaryService->UpdateCdivHistory(static_cast<IMessage*>(&objMockIMessage));
+
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CDIV_HISTORY)->strValue,
+            AString("+358-9-123-45678"));
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCw)
@@ -352,7 +447,10 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCw)
             .WillOnce(Return(IMS_TRUE));
 
     pMtcSupplementaryService->UpdateCw(static_cast<IMessage*>(&objMockIMessage));
-    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CW)->bValue, IMS_TRUE);
+    EXPECT_TRUE(pMtcSupplementaryService->Get(SuppType::CW)->bValue);
+
+    pMtcSupplementaryService->Add(SuppType::CW, IMS_FALSE);
+    EXPECT_FALSE(pMtcSupplementaryService->Get(SuppType::CW)->bValue);
 }
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumVerification)
