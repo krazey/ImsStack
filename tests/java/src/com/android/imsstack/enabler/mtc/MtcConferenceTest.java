@@ -24,7 +24,7 @@ import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions​;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.os.Looper;
 import android.os.Parcel;
@@ -113,12 +113,12 @@ public class MtcConferenceTest extends ImsStackTest {
         processAllMessages();
 
         assertEquals(mInvalidCommand, mCommand);
-        verifyNoMoreInteractions​(mMockMtcCall);
+        verifyNoMoreInteractions(mMockMtcCall);
 
         sendMessage(IUConf.EXPANDED);
 
-        verifyNoMoreInteractions​(mMockMtcCall);
-        verifyNoMoreInteractions​(mMockConferenceListener);
+        verifyNoMoreInteractions(mMockMtcCall);
+        verifyNoMoreInteractions(mMockConferenceListener);
     }
 
     @Test
