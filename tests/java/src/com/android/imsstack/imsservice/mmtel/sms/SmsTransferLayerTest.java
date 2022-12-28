@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -128,9 +129,8 @@ public class SmsTransferLayerTest {
         assertEquals(SmsUtils.RESULT_SUCCESS, mSmsTransferLayer.sendMoTPdu(mToken,
                 mSmsFormat, mMessageRef, mSmsc, mPdu));
         mSmsTransferLayer.sendMoTPdu(mToken, SmsUtils.RP_ACK, mMessageRef, mSmsc, mPdu);
-        mSmsRL.sendRPMessage(mToken, SmsUtils.RP_ACK, mSmsc, null, mPdu, 1);
-        verify(mSmsRL).sendRPMessage(eq(mToken), eq(SmsUtils.RP_ACK), eq(mSmsc), eq(null),
-                eq(mPdu), eq(1));
+        verify(mSmsRL).sendRPMessage(anyInt(), anyInt(), anyString(), anyString(),
+                anyObject(), anyInt());
     }
 
     @Test
@@ -307,12 +307,6 @@ public class SmsTransferLayerTest {
     }
 
     @Test
-    public void test_notifyRLDataIndication() {
-        mListener.notifySmsReceived(mToken, mSmsFormat, mRpMessageType, mPdu);
-        verify(mListener).notifySmsReceived(mToken, mSmsFormat, mRpMessageType, mPdu);
-    }
-
-    @Test
     public void test_notifyRLDataIndication_3GPP2() {
         String pduString = "0000021002020702A848D159E24006010008"
                          + "2300031010D0011410A48CBB366F418F465C"
@@ -344,8 +338,9 @@ public class SmsTransferLayerTest {
 
     @Test
     public void test_notifyRLReportIndication() {
-        mListener.notifySmsResult(mToken, 1, mResult, mReason, 0);
-        verify(mListener, Mockito.times(1)).notifySmsResult(mToken, 1, mResult, mReason, 0);
+        mProxyListener  = mSmsTransferLayer.getListener();
+        mProxyListener.notifyRLReportIndication(mToken, 1, mResult, mReason, 0);
+        verify(mListener).notifySmsResult(mToken, 1, mResult, mReason, 0);
     }
 
     @Test
