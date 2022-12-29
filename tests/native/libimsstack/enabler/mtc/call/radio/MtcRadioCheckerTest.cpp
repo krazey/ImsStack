@@ -38,8 +38,10 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::WithArgs;
 
 LOCAL const IMS_SINT32 SLOT_ID = 0;
 LOCAL const CallKey CALL_KEY1 = 123;
@@ -59,6 +61,7 @@ public:
             m_objImsRadioService(),
             m_objTimerService(),
             m_objSsacInfo(),
+            m_piImsRadioConnectionListener(IMS_NULL),
             m_pMtcRadioChecker(IMS_NULL)
     {
     }
@@ -75,7 +78,14 @@ public:
     TestTimerService m_objTimerService;
     TestSystemTimeService m_objTestSystemTimeService;
     SsacInfo m_objSsacInfo;
+    IImsRadioConnectionListener* m_piImsRadioConnectionListener;
     MtcRadioChecker* m_pMtcRadioChecker;
+
+    void CaptureIImsRadioConnectionListener(
+            IN IImsRadioConnectionListener* piImsRadioConnectionListener)
+    {
+        m_piImsRadioConnectionListener = piImsRadioConnectionListener;
+    }
 
 protected:
     virtual void SetUp() override
@@ -215,6 +225,7 @@ TEST_F(MtcRadioCheckerTest, MakeSsacTimerNullWhenTimerExpired)
 
     EXPECT_CALL(m_objTimerService.GetMockTimer(), KillTimer()).Times(2);
 
+    m_pMtcRadioChecker->Timer_TimerExpired(IMS_NULL);  // do nothing, for coverage.
     m_pMtcRadioChecker->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
@@ -463,13 +474,33 @@ TEST_F(MtcRadioCheckerTest, OnCallStateChanged)
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
             IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
 
+    // no keys, just delete `MtcTrafficInfo`.
+    m_pMtcRadioChecker->OnCallStateChanged(
+            CALL_KEY1, IMtcCall::State::TERMINATING, CallType::VT, IMS_FALSE, 0);
+
+    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
+            IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
+
+    m_pMtcRadioChecker->OnCallStateChanged(
+            CALL_KEY1, IMtcCall::State::OUTGOING, CallType::UNKNOWN, IMS_FALSE, 0);
+
+    // do nothing with a same key.
     m_pMtcRadioChecker->OnCallStateChanged(
             CALL_KEY1, IMtcCall::State::OUTGOING, CallType::VOIP, IMS_FALSE, 0);
+
+    m_pMtcRadioChecker->OnCallStateChanged(
+            CALL_KEY2, IMtcCall::State::INCOMING, CallType::VOIP, IMS_FALSE, 0);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
 
     m_pMtcRadioChecker->OnCallStateChanged(
             CALL_KEY1, IMtcCall::State::TERMINATING, CallType::VT, IMS_FALSE, 0);
+
+    m_pMtcRadioChecker->OnCallStateChanged(
+            CALL_KEY2, IMtcCall::State::ESTABLISHED, CallType::VOIP, IMS_FALSE, 0);
+
+    m_pMtcRadioChecker->OnCallStateChanged(
+            CALL_KEY2, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_FALSE, 0);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
 
@@ -575,6 +606,62 @@ TEST_F(MtcRadioCheckerTest, OnConnectionSetupPrepared)
 
     m_pMtcRadioChecker->OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MT);
+}
+
+TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionFailedNotifies)
+{
+    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VIDEO,
+            IImsRadio::DIRECTION_MO, IMS_FALSE, IMtcCall::CALL_KEY_INVALID);
+    m_pMtcRadioChecker->SetTrafficCheckerListener(&m_objIMtcRadioCheckerListener);
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
+                    IImsRadio::DIRECTION_MO, _))
+            .Times(1)
+            .WillOnce(WithArgs<3>(
+                    Invoke(this, &MtcRadioCheckerTest::CaptureIImsRadioConnectionListener)));
+
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE));
+
+    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
+
+    m_piImsRadioConnectionListener->ImsRadio_OnConnectionFailed(
+            IImsRadio::REASON_ACCESS_DENIED, 0, 0);
+
+    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(1);
+
+    m_piImsRadioConnectionListener->ImsRadio_OnConnectionFailed(
+            IImsRadio::REASON_NAS_FAILURE, 0, 0);
+}
+
+TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionSetupPreparedNotifies)
+{
+    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VIDEO,
+            IImsRadio::DIRECTION_MO, IMS_FALSE, IMtcCall::CALL_KEY_INVALID);
+    m_pMtcRadioChecker->SetTrafficCheckerListener(&m_objIMtcRadioCheckerListener);
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
+                    IImsRadio::DIRECTION_MO, _))
+            .Times(1)
+            .WillOnce(WithArgs<3>(
+                    Invoke(this, &MtcRadioCheckerTest::CaptureIImsRadioConnectionListener)));
+
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE));
+
+    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(1);
+
+    m_piImsRadioConnectionListener->ImsRadio_OnConnectionSetupPrepared();
 }
 
 }  // namespace android
