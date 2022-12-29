@@ -252,6 +252,7 @@ protected:
     virtual void ProcessRegRequiredWithNextPcscf();
     virtual void ProcessRegRequiredWithAvailableNextPcscf(
             IN IMS_BOOL bSetCurrentPcscfInvalid, IN IMS_UINT32 nReconnectTime = 0);
+    virtual IMS_BOOL ProcessRegRequiredWithIpVersionChange();
     virtual void ProcessSubReinitiate();
     virtual IMS_BOOL ProcessForbiddenFailed(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode);
@@ -286,6 +287,7 @@ protected:
     virtual void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason);
 
     virtual void ProcessStandardPcscfSelection(IN IMS_UINT32 nRetryAfter = 0);
+    virtual IMS_BOOL ProcessIpVersionChange();
 
     virtual void RecordImpu();
 

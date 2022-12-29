@@ -535,7 +535,7 @@ IMS_BOOL IpAddress::Parse(IN const AString& strAddress)
         }
     }
 
-    // All IPv6 addresses contain a '.'
+    // All IPv4 addresses contain a '.'
     if (strIp.Contains('.'))
     {
         IMS_UINT32 nIp4 = 0;

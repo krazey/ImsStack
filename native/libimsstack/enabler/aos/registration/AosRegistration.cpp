@@ -3072,6 +3072,26 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf
     }
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessRegRequiredWithIpVersionChange()
+{
+    if (ProcessIpVersionChange())
+    {
+        IMS_UINT32 nRetryTime = m_pUtil->GetRetryAfterValue(m_piRegistration);
+        if (nRetryTime == 0)
+        {
+            nRetryTime = GetActualWaitTime();
+        }
+
+        DestroyEx();
+        StartTimer(TIMER_OFFLINE_RECOVER, nRetryTime * 1000);
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
 PROTECTED VIRTUAL void AosRegistration::ProcessSubReinitiate()
 {
     DestroySubscription();
@@ -3795,6 +3815,17 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
         }
     }
 
+    if (GET_N_CONFIG(m_nSlotId)->IsRegRetryWithIpVerFallback() &&
+            nStatusCode >= SipStatusCode::SC_500 && nStatusCode < SipStatusCode::SC_600)
+    {
+        if (m_piContext->GetPcscf()->HasNextPcscf() || !ProcessRegRequiredWithIpVersionChange())
+        {
+            ProcessDefaultFlowRecovery_Start(nStatusCode);
+        }
+
+        return;
+    }
+
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetrySip503CodePolicy() ==
                     CarrierConfig::Assets::SIP_503_CODE_POLICY_3GPP &&
             nStatusCode == SipStatusCode::SC_503)
@@ -4121,6 +4152,30 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStandardPcscfSelection(
     {
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
     }
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessIpVersionChange()
+{
+    IpAddress objPcscf(m_strPcscf);
+    IMS_SINT32 nTargetIpVersion = objPcscf.IsIpv4Address() ? IpAddress::IPV6 : IpAddress::IPV4;
+
+    IAosConnection* piConnection = m_piContext->GetConnection();
+    IpAddress objIpa = piConnection->GetLocalAddress(nTargetIpVersion);
+    if (objIpa.GetVersion() != nTargetIpVersion)
+    {
+        return IMS_FALSE;
+    }
+
+    const AStringArray& objNewPcscfs = piConnection->GetPcscfAddress(nTargetIpVersion);
+    if (objNewPcscfs.GetCount() <= 0)
+    {
+        return IMS_FALSE;
+    }
+
+    m_piContext->GetPcscf()->UpdatePcscfs(objNewPcscfs);
+    m_piContext->GetPcscf()->SetFirstPcscfIndex();
+
+    return IMS_TRUE;
 }
 
 PROTECTED VIRTUAL void AosRegistration::RecordImpu()
