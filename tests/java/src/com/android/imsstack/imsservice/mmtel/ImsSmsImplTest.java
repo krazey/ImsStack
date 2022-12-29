@@ -84,7 +84,7 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     @Test
     public void test_sendSms_Success() throws RemoteException {
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
-        verify(mMockSmsTransferLayer).sendMoTPdu(mToken, mMessageRef, mFormat, "1111", mPdu);
+        verify(mMockSmsTransferLayer).sendMoTPdu(mToken, mFormat, mMessageRef, "1111", mPdu);
     }
 
     @Test
@@ -101,19 +101,19 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
         verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_INVALID_SMS_FORMAT, RESULT_NO_NETWORK_ERROR);
 
-        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mMessageRef, mFormat,
+        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
                 "1111", mPdu)).thenReturn(SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener, times(2)).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_INVALID_SMSC_ADDRESS, RESULT_NO_NETWORK_ERROR);
 
-        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mMessageRef, mFormat,
+        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
                 "1111", mPdu)).thenReturn(SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,
                 SmsManager.RESULT_ENCODING_ERROR, RESULT_NO_NETWORK_ERROR);
 
-        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mMessageRef, mFormat,
+        when(mMockSmsTransferLayer.sendMoTPdu(mToken, mFormat, mMessageRef,
                 "1111", mPdu)).thenReturn(SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED);
         mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
         verify(mListener).onSendSmsResult(mToken, mMessageRef, SEND_STATUS_ERROR,

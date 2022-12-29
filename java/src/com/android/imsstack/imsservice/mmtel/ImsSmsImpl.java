@@ -34,7 +34,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     private SmsTransferLayer mSmsTL = null;
     private String mScAddress = null;
     private final SmsTLListenerProxy mSmsTLListener = new SmsTLListenerProxy();
-    private static boolean sReady = false;
+    private boolean mReady = false;
     private final Object mLock = new Object();
 
     public ImsSmsImpl(ImsCallContext callContext) {
@@ -82,7 +82,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
      * clears the objects created by this class.
      */
     public void clear() {
-        sReady = false;
+        mReady = false;
         mSmsTL.setListener(null);
         mSmsTL.clear();
         mSmsTL = null;
@@ -93,7 +93,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
         //send SMMA
         log("SMMA token = " + token);
         int result;
-        if (!sReady) {
+        if (!mReady) {
             throw new RuntimeException("Sms Not Ready!");
         }
         try {
@@ -116,7 +116,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                                 + " isRetry = " + isRetry);
         int smsFormat = SmsUtils.FORMAT_INT_INVALID;
         int result;
-        if (!sReady) {
+        if (!mReady) {
             throw new RuntimeException("Sms Not Ready!");
         }
         try {
@@ -157,7 +157,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                         RESULT_NO_NETWORK_ERROR);
                 return;
             }
-            result = mSmsTL.sendMoTPdu(token, messageRef, smsFormat, smsc, pdu);
+            result = mSmsTL.sendMoTPdu(token, smsFormat, messageRef, smsc, pdu);
             if (result == SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS) {
                 loge("Can not send sms - Invalid smsc");
                 onSendSmsResultError(
@@ -193,7 +193,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     public void acknowledgeSms(int token, int messageRef, int result) {
         log("acknowledgeSms: token = " + token + " messageRef = " + messageRef
                 + " result = " + result);
-        if (!sReady) {
+        if (!mReady) {
             throw new RuntimeException("Sms Not Ready!");
         }
         try {
@@ -211,7 +211,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     public void acknowledgeSmsReport(int token, int messageRef, int result) {
         log("acknowledgeSmsReport: token = " + token + " messageRef = " + messageRef
                 + " result = " + result);
-        if (!sReady) {
+        if (!mReady) {
             throw new RuntimeException("Sms Not Ready!");
         }
         try {
@@ -228,7 +228,8 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     @Override
     public void onReady() {
         synchronized (mLock) {
-            sReady = true;
+            mReady = true;
+            log("Sms Ready");
         }
     }
 

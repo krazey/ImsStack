@@ -4039,6 +4039,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             // FIXME: Check the race condition
             int slotId = mCallContext.getSlotId();
+            log("onCallUpdateReceived :: slotId" + slotId);
 
             // VIDEO_CALL_HOLD
             if (ImsCallUtils.isVideoCall(mCallProfile.getCallType())) {

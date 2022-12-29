@@ -110,6 +110,7 @@ public class ImsVideoCallSessionTest {
         callProfile = new ImsCallProfile();
         doReturn(callProfile).when(mImsCallSession).getCallProfile();
         assertNotNull(mVideoSession.getStreamMediaProfile());
+        assertEquals(callProfile.getMediaProfile(), mVideoSession.getStreamMediaProfile());
     }
 
     @Test

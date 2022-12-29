@@ -347,7 +347,7 @@ public class SmsRelayLayer {
                 Listener listener = mListener;
                 if (listener == null) {
                     loge("Listener is null");
-                    return mMtsController.MT_FAILURE;
+                    return MtsController.MT_FAILURE;
                 }
                 if (smsFormat == SmsUtils.FORMAT_INT_3GPP2) {
                     token = mToken.incrementAndGet();
