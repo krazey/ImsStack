@@ -20,6 +20,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.telephony.emergency.EmergencyNumber;
+import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
@@ -78,12 +80,17 @@ public class MtcEmergencyServiceManager {
         mCall = call;
     }
 
-    public void openEmergencyService(int emergencyRouting) {
+    /**
+     * Notifies the Native to do registration for emergency call.
+     *
+     * @param emergencyRouting The routing information for emergency call.
+     */
+    public void openEmergencyService(@EmergencyCallRouting int emergencyRouting) {
         log("openEmergencyService");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
-        parcel.writeInt(emergencyRouting);
+        parcel.writeInt(convertEmergencyRouting(emergencyRouting));
         sendRequest(parcel);
     }
 
@@ -139,6 +146,17 @@ public class MtcEmergencyServiceManager {
 
     private void onEsInCall() {
         log("onEsInCall");
+    }
+
+    private int convertEmergencyRouting(@EmergencyCallRouting int emergencyRoutingIn) {
+        switch (emergencyRoutingIn) {
+            case EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN:
+                return IUMtcService.EMERGENCY_CALL_ROUTING_UNKNOWN;
+            case EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL:
+                return IUMtcService.EMERGENCY_CALL_ROUTING_NORMAL;
+            default: // EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY
+                return IUMtcService.EMERGENCY_CALL_ROUTING_EMERGENCY;
+        }
     }
 
     private void sendRequest(Parcel parcel) {

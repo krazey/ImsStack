@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 
 import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.ISharedState;
@@ -161,12 +162,24 @@ public class MtcApp implements Closeable {
         return mCM;
     }
 
-    public MtcCall createCall(int callAttributes) {
-        int defaultEmergencyRouting = 0;
-        return createCall(callAttributes, defaultEmergencyRouting);
+    /**
+     * Notifies {@link MtcEmergencyServiceManager} to do registration for emergency call.
+     *
+     * @param call The target emergency call.
+     * @param emergencyRouting The emergency call routing value.
+     */
+    public void openEmergencyService(MtcCall call, @EmergencyCallRouting int emergencyRouting) {
+        mEmergencyServiceManager.setCall(call);
+        mEmergencyServiceManager.openEmergencyService(emergencyRouting);
     }
 
-    public MtcCall createCall(int callAttributes, int emergencyRouting) {
+    /**
+     * Creates {@link MtcCall} according to received information.
+     *
+     * @param callAttributes The information used when creates {@link MtcCall}.
+     * @return The created {@link MtcCall}.
+     */
+    public MtcCall createCall(int callAttributes) {
         if (getJNIService() == 0) {
             bindJNIService();
 
@@ -182,11 +195,6 @@ public class MtcApp implements Closeable {
             mCM.attachCall(call);
         } else {
             mCM.attachPreIncomingCall(call);
-        }
-
-        if (isEmergencyCall(callAttributes)) {
-            mEmergencyServiceManager.setCall(call);
-            mEmergencyServiceManager.openEmergencyService(emergencyRouting);
         }
 
         return call;
@@ -391,10 +399,6 @@ public class MtcApp implements Closeable {
         }
 
         Message.obtain(mHandler, MSG_SEND_NOTIFICATION, parcel).sendToTarget();
-    }
-
-    private boolean isEmergencyCall(int callAttributes) {
-        return ((callAttributes & MtcCall.FLAG_EMERGENCY) != 0);
     }
 
     private static void log(String s) {

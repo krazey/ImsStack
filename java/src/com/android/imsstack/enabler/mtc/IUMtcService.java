@@ -71,4 +71,10 @@ public class IUMtcService {
     public static final int ES_UNAVAILABLE_REASON_NONE    = 0;
     public static final int ES_UNAVAILABLE_REASON_NO_CSFB = 1;
     public static final int ES_UNAVAILABLE_REASON_SSAC    = 2;
+
+    // Emergency Routing Category
+    public static final int EMERGENCY_CALL_ROUTING_UNKNOWN = 0;
+    public static final int EMERGENCY_CALL_ROUTING_EMERGENCY = 1;
+    public static final int EMERGENCY_CALL_ROUTING_NORMAL = 2;
+
 }

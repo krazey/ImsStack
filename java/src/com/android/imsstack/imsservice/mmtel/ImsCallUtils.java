@@ -18,6 +18,7 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.os.Bundle;
 import android.telephony.emergency.EmergencyNumber;
+import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsConferenceState;
@@ -354,7 +355,14 @@ public class ImsCallUtils {
         return si;
     }
 
-    public static int getEmergencyRoutingFromCallProfile(final ImsCallProfile profile) {
+    /**
+     * Gets the emergency call routing value from {@link ImsCallProfile}.
+     *
+     * @param profile The {@link ImsCallProfile} which has an emergency call routing value.
+     * @return The emergency call routing value.
+     */
+    public static @EmergencyCallRouting int getEmergencyRoutingFromCallProfile(
+            final ImsCallProfile profile) {
         return profile.getEmergencyCallRouting();
     }
 
