@@ -923,7 +923,7 @@ public class ImsCallSessionCallback {
 
                     mListener.callQualityChanged(callQuality);
                 } catch (Throwable t) {
-                    log(t, "invokeCallQualityChanged");
+                    log(t, "invokeCallQualityChanged: " + t.getMessage());
                 }
             }
         });
