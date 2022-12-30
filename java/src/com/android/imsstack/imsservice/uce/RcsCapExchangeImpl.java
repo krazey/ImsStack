@@ -92,8 +92,8 @@ public class RcsCapExchangeImpl extends RcsCapabilityExchangeImplBase {
      * using {@link SubscribeResponseCallback#onNetworkResponse(int, String)}.
      * As NOTIFY requests come in from the network, the requested contact’s capabilities should be
      * sent back to the framework using
-     * {@link SubscribeResponseCallback#onNotifyCapabilitiesUpdate(List<String>}) and
-     * {@link SubscribeResponseCallback#onResourceTerminated(List<Pair< Uri , String>>)}
+     * {@link SubscribeResponseCallback#onNotifyCapabilitiesUpdate{@code (List<String>)}} and
+     * {@link SubscribeResponseCallback#onResourceTerminated{@code(List<Pair< Uri ,String>>)}}
      * should be called with the presence information for the contacts specified.
      * <p>
      * Once the subscription is terminated,
