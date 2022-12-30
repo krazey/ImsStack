@@ -24,9 +24,9 @@ import android.util.Log;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +43,7 @@ public class ActiveSipDelegateManager {
     /**
      * This hods list of all {@link SipDelegateImpl}'s created for applications.
      */
-    private final List<SipDelegateImpl> mActiveSipDelegateList = new LinkedList<>();
+    private final ArrayList<SipDelegateImpl> mActiveSipDelegateList = new ArrayList<>();
 
     /**
      * Create the sip delegate manager for specific slot.
@@ -64,7 +64,8 @@ public class ActiveSipDelegateManager {
     /**
      * This holds the call id and mapping sip delegate.
      */
-    private final Hashtable<String, SipDelegateImpl> mCallIdMappingSipDelegate = new Hashtable<>();
+    private final LinkedHashMap<String, SipDelegateImpl> mCallIdMappingSipDelegate =
+            new LinkedHashMap<>();
 
     /**
      * Add all active sip delegate created
