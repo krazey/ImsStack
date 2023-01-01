@@ -18,6 +18,7 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import com.android.ims.internal.IImsEcbmListener;
@@ -88,6 +89,24 @@ public class ImsEcbmImplTest {
     public void test_exitEmergencyCallbackModeByESMS() {
         mImsEcbmImpl.exitEmergencyCallbackModeByESMS(true);
         verify(mMockIECallStateTracker, Mockito.times(1)).exitEmergencyCallbackMode(true);
+    }
+
+    @Test
+    public void test_onEcbmEntered_Exception() throws Exception {
+        EcbmListener proxyListener = setupListener();
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+        doThrow(mockRuntimeException).when(mMockListener).enteredECBM();
+        proxyListener.onEcbmEntered();
+        verify(mockRuntimeException).getMessage();
+    }
+
+    @Test
+    public void test_onEcbmExited_Exception() throws Exception {
+        EcbmListener proxyListener = setupListener();
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+        doThrow(mockRuntimeException).when(mMockListener).exitedECBM();
+        proxyListener.onEcbmExited();
+        verify(mockRuntimeException).getMessage();
     }
 
     @After

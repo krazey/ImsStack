@@ -89,7 +89,7 @@ public final class ImsEcbmImpl extends ImsEcbmImplBase {
             try {
                 enteredEcbm();
             } catch (Throwable t) {
-                loge(t, "enteredEcbm");
+                loge(t, "enteredEcbm: " + t.getMessage());
             }
         }
 
@@ -103,7 +103,7 @@ public final class ImsEcbmImpl extends ImsEcbmImplBase {
             try {
                 exitedEcbm();
             } catch (Throwable t) {
-                loge(t, "exitedEcbm");
+                loge(t, "exitedEcbm: " + t.getMessage());
             }
         }
     }

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -114,40 +115,36 @@ public class MergeProxyTest extends ImsStackTest {
 
     @Test
     public void testMtcCallListenerCallbacks() {
-        CallInfo callInfo = Mockito.mock(CallInfo.class);
-        MediaInfo mediaInfo = Mockito.mock(MediaInfo.class);
-        SuppInfo suppInfo = Mockito.mock(SuppInfo.class);
-
         mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
 
         /* callbacks */
-        mMtcCallListenerProxy.onCallHoldReceived(mMockFgCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallHoldReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo);
         processAllMessages();
-        verify(mMockMtcCallListenerProxy).onCallHoldReceived(mMockFgCall, callInfo, mediaInfo,
-                suppInfo);
+        verify(mMockMtcCallListenerProxy).onCallHoldReceived(mMockFgCall, mMockCallInfo,
+                mMockMediaInfo, mMockSuppInfo);
 
-        mMtcCallListenerProxy.onCallResumeReceived(mMockFgCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallResumeReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo);
         processAllMessages();
-        verify(mMockMtcCallListenerProxy).onCallResumeReceived(mMockFgCall, callInfo, mediaInfo,
-                suppInfo);
+        verify(mMockMtcCallListenerProxy).onCallResumeReceived(mMockFgCall, mMockCallInfo,
+                mMockMediaInfo, mMockSuppInfo);
 
-        mMtcCallListenerProxy.onCallAutoUpdated(mMockFgCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallAutoUpdated(mMockFgCall, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo);
         processAllMessages();
-        verify(mMockMtcCallListenerProxy).onCallAutoUpdated(mMockFgCall, callInfo, mediaInfo,
-                suppInfo);
+        verify(mMockMtcCallListenerProxy).onCallAutoUpdated(mMockFgCall, mMockCallInfo,
+                mMockMediaInfo, mMockSuppInfo);
 
-        mMtcCallListenerProxy.onCallUpdateReceived(mMockFgCall, callInfo, mediaInfo, suppInfo);
+        mMtcCallListenerProxy.onCallUpdateReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo);
         processAllMessages();
-        verify(mMockMtcCallListenerProxy).onCallUpdateReceived(mMockFgCall, callInfo, mediaInfo,
-                suppInfo);
+        verify(mMockMtcCallListenerProxy).onCallUpdateReceived(mMockFgCall, mMockCallInfo,
+                mMockMediaInfo, mMockSuppInfo);
 
         mMtcCallListenerProxy.onCallInfoUpdated(mMockFgCall, 0, "", 0, false);
         processAllMessages();
         verify(mMockMtcCallListenerProxy).onCallInfoUpdated(mMockFgCall, 0, "", 0, false);
-
-        callInfo = null;
-        mediaInfo = null;
-        suppInfo = null;
     }
 
     @Test
@@ -422,6 +419,119 @@ public class MergeProxyTest extends ImsStackTest {
         assertFalse(mMergeProxy.isBackgroundCallRecoveryRequired());
         processAllMessages();
         verify(mMockMtcConferencelistenerProxy).onCallMergeFailed(mMockMtcConference, mFailInfo);
+    }
+
+    @Test
+    public void testNotifySessionHoldReceivedException() {
+        mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+
+        doThrow(mockRuntimeException).when(mMockMtcCallListenerProxy)
+            .onCallHoldReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo, mMockSuppInfo);
+        mMtcCallListenerProxy.onCallHoldReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo);
+        verify(mMockConfProxy).loge("notifySessionHoldReceived", mockRuntimeException);
+    }
+
+    @Test
+    public void testNotifySessionResumeReceivedException() {
+        mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+
+        doThrow(mockRuntimeException).when(mMockMtcCallListenerProxy)
+            .onCallResumeReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo, mMockSuppInfo);
+        mMtcCallListenerProxy.onCallResumeReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo);
+        verify(mMockConfProxy).loge("notifySessionResumeReceived", mockRuntimeException);
+    }
+
+    @Test
+    public void testNotifySessionAutoUpdatedException() {
+        mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+
+        doThrow(mockRuntimeException).when(mMockMtcCallListenerProxy)
+            .onCallAutoUpdated(mMockFgCall, mMockCallInfo, mMockMediaInfo, mMockSuppInfo);
+        mMtcCallListenerProxy.onCallAutoUpdated(mMockFgCall, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo);
+        verify(mMockConfProxy).loge("notifySessionAutoUpdated", mockRuntimeException);
+    }
+
+    @Test
+    public void testNotifySessionUpdateReceivedException() {
+        mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+
+        doThrow(mockRuntimeException).when(mMockMtcCallListenerProxy)
+            .onCallUpdateReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo, mMockSuppInfo);
+        mMtcCallListenerProxy.onCallUpdateReceived(mMockFgCall, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo);
+        verify(mMockConfProxy).loge("notifySessionUpdateReceived", mockRuntimeException);
+    }
+
+    @Test
+    public void testNotifySessionInfoUpdatedException() {
+        mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+
+        doThrow(mockRuntimeException).when(mMockMtcCallListenerProxy)
+            .onCallInfoUpdated(mMockFgCall, 0, "", 0, false);
+        mMtcCallListenerProxy.onCallInfoUpdated(mMockFgCall, 0, "", 0, false);
+        verify(mMockConfProxy).loge("notifySessionInfoUpdated", mockRuntimeException);
+    }
+
+    @Test
+    public void testNotifySessionMergedException() {
+        mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+
+        when(mMockMtcConference.isSameCall(mMockMtcConference)).thenReturn(true);
+        when(mMockConfProxy.getConferenceCall()).thenReturn(mMockMtcCall);
+        MtcConference mtcConferenceFg = Mockito.mock(MtcConference.class);
+        when(mMockMtcCall.getConferenceInterface()).thenReturn(mMockMtcConference);
+        when(mMockFgCall.getConferenceInterface()).thenReturn(mtcConferenceFg);
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+
+        doThrow(mockRuntimeException).when(mMockMtcConferencelistenerProxy)
+                .onCallMerged(mtcConferenceFg, mMockCallInfo, mMockMediaInfo, mMockSuppInfo,
+                    mMockUsersInfo);
+        mMtcConferencelistenerProxy.onCallMerged(mMockMtcConference, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo, mMockUsersInfo);
+        verify(mMockConfProxy).loge("notifySessionMerged", mockRuntimeException);
+    }
+
+    @Test
+    public void testNotifySessionMergeFailedException() {
+        mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+        when(mMockMtcConference.isSameCall(mMockMtcConference)).thenReturn(true);
+        when(mMockConfProxy.getConferenceCall()).thenReturn(mMockMtcCall);
+        MtcConference mtcConferenceFg = Mockito.mock(MtcConference.class);
+        when(mMockMtcCall.getConferenceInterface()).thenReturn(mMockMtcConference);
+        when(mMockFgCall.getConferenceInterface()).thenReturn(mtcConferenceFg);
+
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+        doThrow(mockRuntimeException).when(mMockMtcConferencelistenerProxy)
+            .onCallMergeFailed(mtcConferenceFg, mFailInfo);
+        mMtcConferencelistenerProxy.onCallMergeFailed(mMockMtcConference, mFailInfo);
+        verify(mMockConfProxy).loge("notifySessionMergeFailed", mockRuntimeException);
+    }
+
+    @Test
+    public void testNotifySessionMergeStartedException() {
+        mMergeProxy.addListener(mMockMtcCallListenerProxy, mMockMtcConferencelistenerProxy);
+
+        when(mMockMtcConference.isSameCall(mMockMtcConference)).thenReturn(true);
+        when(mMockConfProxy.getConferenceCall()).thenReturn(mMockMtcCall);
+        MtcConference mtcConferenceFg = Mockito.mock(MtcConference.class);
+        when(mMockMtcCall.getConferenceInterface()).thenReturn(mMockMtcConference);
+        when(mMockFgCall.getConferenceInterface()).thenReturn(mtcConferenceFg);
+
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+        doThrow(mockRuntimeException).when(mMockMtcConferencelistenerProxy)
+                .onCallMergeStarted(mtcConferenceFg, mMockMtcConference, mMockCallInfo,
+                    mMockMediaInfo, mMockSuppInfo);
+        mMtcConferencelistenerProxy.onCallMerged(mMockMtcConference, mMockCallInfo, mMockMediaInfo,
+                mMockSuppInfo, mMockUsersInfo);
+        verify(mMockConfProxy).loge("notifySessionMergeStarted", mockRuntimeException);
     }
 
     private class TestMergeProxy extends MergeProxy {
