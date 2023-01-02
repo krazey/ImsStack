@@ -228,8 +228,5 @@ public final class MtcServiceStateTracker extends MtcApp.ServiceStateListener
             MtcStateUtils.updateRegState(mContext.getContext(),
                     mContext.getSlotId(), mServiceState);
         }
-
-        MtcStateUtils.notifyRegState(mContext.getContext(),
-                mContext.getSlotId(), mServiceState, MtcStateUtils.SERVICE_UC);
     }
 }

@@ -521,10 +521,7 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     }
 
     private void updateCallStateInternal(int voiceCallState, int videoCallState) {
-        boolean voiceCallStateChanged = updateCallStateForVoLte(voiceCallState);
-        boolean videoCallStateChanged = updateCallStateForVt(videoCallState);
-
-        if (voiceCallStateChanged || videoCallStateChanged) {
+        if (updateCallStateForVoLte(voiceCallState) || updateCallStateForVt(videoCallState)) {
             Context context = mContext.getContext();
             int slotId = mContext.getSlotId();
 
@@ -533,16 +530,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
                 MtcStateUtils.updateCallState(context, slotId, MtcStateUtils.STATE_ACTIVE);
             } else {
                 MtcStateUtils.updateCallState(context, slotId, MtcStateUtils.STATE_INACTIVE);
-            }
-
-            if (voiceCallStateChanged) {
-                MtcStateUtils.notifyCallState(context, slotId,
-                        mCallStateVoLte, MtcStateUtils.SERVICE_VOIP);
-            }
-
-            if (videoCallStateChanged) {
-                MtcStateUtils.notifyCallState(context, slotId,
-                        mCallStateVt, MtcStateUtils.SERVICE_VT);
             }
         }
     }

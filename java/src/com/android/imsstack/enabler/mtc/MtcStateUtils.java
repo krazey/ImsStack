@@ -16,7 +16,6 @@
 package com.android.imsstack.enabler.mtc;
 
 import android.content.Context;
-import android.content.Intent;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -37,8 +36,6 @@ public class MtcStateUtils {
     public static final String SERVICE_VT = "VT";
     public static final String SERVICE_UC = "UC";
 
-    public static final String ACTION_CALL_STATE = "com.android.imsstack.action.CALL_STATE";
-    public static final String ACTION_REG_STATE = "com.android.imsstack.action.REG_STATE";
     public static final String EXTRA_SUB_ID = "subId";
     public static final String EXTRA_STATE = "state";
     public static final String EXTRA_SVC_TYPE = "svcType";
@@ -65,10 +62,6 @@ public class MtcStateUtils {
         int phoneId = getPhoneId(slotId);
 
         ImsStateStore.init(phoneId);
-
-        notifyRegState(context, slotId, IUMtcService.SERVICE_NONE, SERVICE_UC);
-        notifyCallState(context, slotId, STATE_INACTIVE, SERVICE_VT);
-        notifyCallState(context, slotId, STATE_INACTIVE, SERVICE_VOIP);
 
         boolean isVoLteEnabled = ImsGlobal.isVoLteEnabled(context, slotId);
         boolean isWfcEnabled = ImsGlobal.isWfcEnabled(context, slotId);
@@ -160,50 +153,6 @@ public class MtcStateUtils {
 
     public static boolean isWfcProvisioned(Context context, int phoneId) {
         return ImsStateStore.getMmTelState(phoneId).isWfcProvisioned();
-    }
-
-    public static void notifyCallState(Context context, int slotId, int state, String svcType) {
-        if (context == null) {
-            return;
-        }
-
-        int subId = getSubId(slotId);
-
-        log("notifyCallState :: slotId=" + slotId + ", subId=" + subId
-                + ", state=" + state + ", svcType=" + svcType);
-
-        Intent intent = new Intent(ACTION_CALL_STATE);
-
-        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-        intent.putExtra(EXTRA_SUB_ID, subId);
-        intent.putExtra(EXTRA_STATE, state);
-        intent.putExtra(EXTRA_SVC_TYPE, svcType);
-
-        context.sendBroadcast(intent);
-    }
-
-    public static void notifyRegState(Context context, int slotId, int state, String svcType) {
-        if (context == null) {
-            return;
-        }
-
-        int subId = getSubId(slotId);
-
-        log("notifyRegState :: slotId=" + slotId + ", subId=" + subId
-                + ", state=" + state + ", svcType=" + svcType);
-
-        Intent intent = new Intent(ACTION_REG_STATE);
-
-        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-        intent.putExtra(EXTRA_SUB_ID, subId);
-        intent.putExtra(EXTRA_STATE, state);
-        intent.putExtra(EXTRA_SVC_TYPE, svcType);
-
-        context.sendBroadcast(intent);
     }
 
     public static void updateCallState(Context context, int slotId, int state) {
