@@ -38,12 +38,9 @@ public:
     // IMtsServiceState
     IMS_BOOL IsMoServiceBlocked() const override;
     IMS_BOOL IsMtServiceBlocked() const override;
-    IMS_BOOL IsTemporaryServiceBlocked() const override;
 
     IMS_SINT32 GetServiceState() override;
     IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService) override;
-    void NotifySpecificMessage(
-            IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam) override;
     void OnImsConnected() override;
     void OnImsDisconnected(IN IMS_UINT32 nReason) override;
     void OnImsDisconnecting(IN IMS_UINT32 nReason) override;
@@ -57,8 +54,6 @@ private:
     void Init();
     void DeInit();
     void SetImsSuspendState(IN IMS_BOOL bState);
-    void SetMtsServiceState(IN IMS_SINT32 nServiceState);
-    void SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked);
 
     IMS_SINT32 m_nMtsServiceState;
     // Check Condition for SMS SERVICE MODE
@@ -67,7 +62,6 @@ private:
     IMS_BOOL m_bImsSuspend;      // if IMSAoSApp_IMSSuspended true. block mo service
     // if sms_over_ip_network Ind is false. block mo service
     IMS_BOOL m_bSmsOverIpConf;
-    IMS_BOOL m_bTemporaryBlocked;
     IMS_UINT32 m_nConnectedServices;
     IMS_SINT32 m_nSlotId;
 };

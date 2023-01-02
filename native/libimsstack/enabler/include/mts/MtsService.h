@@ -91,10 +91,6 @@ public:
     void Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
     void Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
 
-    // TODO: need to check if it is deprecated or not
-    void IMSAoSApp_NotifySpecificMessage(
-            IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
-
     // Test-Purpose
     inline void SetIImsAos(IN IImsAos* piImsAos) { m_piImsAos = piImsAos; }
     inline void SetIImsEmergencyAos(IN IImsAos* piImsEmergencyAos)
