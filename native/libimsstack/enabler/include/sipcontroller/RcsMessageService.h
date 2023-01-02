@@ -37,7 +37,7 @@ public:
 private:
     void EnableCoreService();
     void DisableCoreService();
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
+    IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
     IMS_BOOL CloseSession(IN IMS_UINTP nSessionId);
     void HandleErrorCase(IN IMSMSG& objMSG);
     void PostNotification(IN IMS_SINT32 nMSG, IN IMS_UINTP npParam);
@@ -50,10 +50,10 @@ public:
     IMS_BOOL HandleCloseSessionMSG(IN IMSMSG& objMSG);
     IMS_BOOL HandleNotifyReceiveErrorMSG(IN IMSMSG& objMSG);
 
-    virtual IMS_SINT32 DirectCoreService_TransactionReceived(
-            IN ICoreService* piService, IN ISipConnectionFactory* piScf);
-    virtual void ConnectionFactory_NotifyRequest(
-            IN ISipConnectionFactory* piScFactory, IN ISipServerConnection* piSsc);
+    IMS_SINT32 DirectCoreService_TransactionReceived(
+            IN ICoreService* piService, IN ISipConnectionFactory* piScf) override;
+    void ConnectionFactory_NotifyRequest(
+            IN ISipConnectionFactory* piScFactory, IN ISipServerConnection* piSsc) override;
 
 private:
     IMS_SINT32 m_nSlotId;

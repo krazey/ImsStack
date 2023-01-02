@@ -32,11 +32,11 @@ public:
     int SetCallback(IN IMS_UINTP nNativeObj, IN Jni_SendDataToJava pfnSendDataToJava);
 
 private:
-    virtual IMS_BOOL Initialize();
-    virtual void Uninitialize();
-    virtual IMS_BOOL OnStart(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnTerminate(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
+    IMS_BOOL Initialize() override;
+    void Uninitialize() override;
+    IMS_BOOL OnStart(IN IMSMSG& objMSG) override;
+    IMS_BOOL OnTerminate(IN IMSMSG& objMSG) override;
+    IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
     void HandleMsg(IN IMSMSG& objMSG);
     inline void WriteStringToParcel(IN CONST IMS_CHAR* pszValue, OUT android::Parcel& parcel);
 

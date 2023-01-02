@@ -40,7 +40,7 @@ public:
     };
 
 public:
-    RcsMessageTracker(IN ISipConnectionFactory* _piscf, IN IMS_SINT32 nSimSlot = 0);
+    explicit RcsMessageTracker(IN ISipConnectionFactory* _piscf, IN IMS_SINT32 nSimSlot = 0);
     virtual ~RcsMessageTracker();
 
     void SetSessionId(IN IMS_UINTP _nSessionId);
@@ -64,8 +64,8 @@ private:
     IMS_RESULT NotifyReceiveError(IN IUSncNotifyErrorCmdParam* pParam);
 
 public:
-    virtual void ClientConnection_NotifyResponse(
-            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc = IMS_NULL);
+    void ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
+            IN ISipClientConnection* piForkedScc = IMS_NULL) override;
 
 private:
     ISipConnectionFactory* m_piscf;

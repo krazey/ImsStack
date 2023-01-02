@@ -78,7 +78,11 @@ public:
 class IUSncSessionData
 {
 public:
-    inline IUSncSessionData() {}
+    inline IUSncSessionData()
+    {
+        nSessionID = 0;
+        szThread[0] = '\0';
+    }
     inline ~IUSncSessionData(){};
 
 public:
