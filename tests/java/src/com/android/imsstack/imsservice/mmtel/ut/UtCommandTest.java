@@ -108,6 +108,25 @@ public class UtCommandTest {
     }
 
     @Test
+    public void startTransaction_invalidServiceClass() {
+        int transactionId = 1;
+        int condition = SscConstant.CONDITION_BAOC;
+        int invalidServiceClass = SscServiceClassUtil.SERVICE_CLASS_FAX;
+        when(mMockUsatInterface.isServiceAvailable(Usat.SERVICE_CALL_CONTROL)).thenReturn(false);
+
+        UtCommand utCmd = new UtCommand.Builder(mMockBaseContext, transactionId, UtCommand.CMD_CB,
+                SscConstant.ACTION_INTERROGATION, mMockUtListener)
+                .setCondition(condition).setServiceClass(invalidServiceClass).build();
+        utCmd.startTransaction();
+
+        verify(mMockUtListener).utConfigurationQueryFailed(eq(transactionId),
+                mReasonInfoCaptor.capture());
+        ImsReasonInfo reasonInfo = mReasonInfoCaptor.getValue();
+        assertNotNull(reasonInfo);
+        assertEquals(ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED, reasonInfo.getCode());
+    }
+
+    @Test
     public void startTransaction_queryCallBarring() {
         int condition = SscConstant.CONDITION_BAIC;
 

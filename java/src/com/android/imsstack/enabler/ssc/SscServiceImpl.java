@@ -210,16 +210,21 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCallBarringForServiceClass(int tId, int condition, int serviceClass) {
-        // Check valid service class or not
-        boolean isValid = SscServiceClassUtil.isValid(serviceClass);
-        if (!isValid) {
-            ImsLog.e(mSlotId, "Invalid serviceclass " + serviceClass);
+        final ESsType ssType;
+
+        if (condition == SscConstant.CONDITION_BAOC || condition == SscConstant.CONDITION_BOIC
+                || condition == SscConstant.CONDITION_BOIC_EXHC) {
+            ssType = ESsType.OCB;
+        } else {
+            // SscConstant.CONDITION_BAIC, SscConstant.CONDITION_BIC_WR, SscConstant.CONDITION_ACR
+            ssType = ESsType.ICB;
+        }
+
+        if (!isServerBasedService(ssType, condition)) {
+            ImsLog.e(mSlotId, "Invalid service request, condition : " + condition);
             handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
             return;
         }
-
-        // remove service classes except voice and video
-        serviceClass = SscServiceClassUtil.removeInvalidServiceClass(serviceClass);
 
         SscRequestData requestData = new SscRequestData(tId);
 
@@ -228,24 +233,8 @@ public class SscServiceImpl implements IUtInterface {
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
-        switch(condition) {
-            case SscConstant.CONDITION_BAOC:
-            case SscConstant.CONDITION_BOIC:
-            case SscConstant.CONDITION_BOIC_EXHC:
-                requestData.offerSscData(new CbServiceQueryData(mSlotId, ESsType.OCB,
-                        SscConstant.EVENT_SSC_QUERY_CB, tId, condition, serviceClass));
-                break;
-            case SscConstant.CONDITION_BAIC:
-            case SscConstant.CONDITION_BIC_WR:
-            case SscConstant.CONDITION_ACR:
-                requestData.offerSscData(new CbServiceQueryData(mSlotId, ESsType.ICB,
-                        SscConstant.EVENT_SSC_QUERY_CB, tId, condition, serviceClass));
-                break;
-            default:
-                ImsLog.e(mSlotId, "Invalid CB condition : " + condition);
-                handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
-                return;
-        }
+        requestData.offerSscData(new CbServiceQueryData(mSlotId, ssType,
+                SscConstant.EVENT_SSC_QUERY_CB, tId, condition, serviceClass));
 
         addRequestToQueue(requestData);
     }
@@ -259,6 +248,12 @@ public class SscServiceImpl implements IUtInterface {
     //@Override
     private void queryCallForwardForServiceClass(int tId, int condition, String number,
             int serviceClass) {
+        if (!isServerBasedService(ESsType.CF, condition)) {
+            ImsLog.e(mSlotId, "Invalid service request, condition : " + condition);
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            return;
+        }
+
         if (condition == SscConstant.CONDITION_CFA || condition == SscConstant.CONDITION_CFAC) {
             if (!SscConfig.isCfQueryAllAndCfAllConditionalSupported(mSlotId)) {
                 ImsLog.d(mSlotId, "isCfQueryAllAndCfAllConditionalSupported is false");
@@ -267,17 +262,6 @@ public class SscServiceImpl implements IUtInterface {
             }
         }
 
-        // Check valid service class or not
-        boolean isValid = SscServiceClassUtil.isValid(serviceClass);
-        if (!isValid) {
-            ImsLog.e(mSlotId, "Invalid serviceClass " + serviceClass);
-            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
-            return;
-        }
-
-        // remove service classes except voice and video
-        serviceClass = SscServiceClassUtil.removeInvalidServiceClass(serviceClass);
-
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -285,28 +269,20 @@ public class SscServiceImpl implements IUtInterface {
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
-        switch (condition) {
-            case SscConstant.CONDITION_CFU:
-            case SscConstant.CONDITION_CFB:
-            case SscConstant.CONDITION_CFNR:
-            case SscConstant.CONDITION_CFNRC:
-            case SscConstant.CONDITION_CFA:
-            case SscConstant.CONDITION_CFAC:
-            case SscConstant.CONDITION_CFNL:
-                requestData.offerSscData(new CfServiceQueryData(mSlotId, ESsType.CF,
-                        SscConstant.EVENT_SSC_QUERY_CF, tId, condition, number, serviceClass));
-                break;
-            default :
-                ImsLog.e(mSlotId, "Invalid CF condition : " + condition);
-                handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
-                return;
-        }
+        requestData.offerSscData(new CfServiceQueryData(mSlotId, ESsType.CF,
+                SscConstant.EVENT_SSC_QUERY_CF, tId, condition, number, serviceClass));
 
         addRequestToQueue(requestData);
     }
 
     @Override
     public void queryCallWaiting(int tId) {
+        if (!isServerBasedService(ESsType.CW, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -322,6 +298,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCLIR(int tId) {
+        if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -337,6 +319,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCLIP(int tId) {
+        if (!isServerBasedService(ESsType.OIP, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -352,6 +340,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCOLR(int tId) {
+        if (!isServerBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -367,6 +361,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void queryCOLP(int tId) {
+        if (!isServerBasedService(ESsType.TIP, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_QUERY);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -395,22 +395,27 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void updateCallBarringWithPassword(int tId, int condition, int action,
             String[] barringList, int serviceClass, String password) {
+        final ESsType ssType;
+
+        if (condition == SscConstant.CONDITION_BAOC || condition == SscConstant.CONDITION_BOIC
+                || condition == SscConstant.CONDITION_BOIC_EXHC) {
+            ssType = ESsType.OCB;
+        } else {
+            // SscConstant.CONDITION_BAIC, SscConstant.CONDITION_BIC_WR, SscConstant.CONDITION_ACR
+            ssType = ESsType.ICB;
+        }
+
+        if (!isServerBasedService(ssType, condition)) {
+            ImsLog.e(mSlotId, "Invalid service request, condition : " + condition);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
+        }
+
         if (action != SscConstant.STATUS_ENABLE && action != SscConstant.STATUS_DISABLE) {
             ImsLog.e(mSlotId, "Invalid action : " + action);
             handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
             return;
         }
-
-        // Check valid service class or not
-        boolean isValid = SscServiceClassUtil.isValid(serviceClass);
-        if (!isValid) {
-            ImsLog.e(mSlotId, "Invalid serviceClass: " + serviceClass);
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
-            return;
-        }
-
-        // remove service classes except voice and video
-        serviceClass = SscServiceClassUtil.removeInvalidServiceClass(serviceClass);
 
         SscRequestData requestData = new SscRequestData(tId);
 
@@ -419,25 +424,9 @@ public class SscServiceImpl implements IUtInterface {
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
-        switch (condition) {
-            case SscConstant.CONDITION_BAOC :
-            case SscConstant.CONDITION_BOIC :
-            case SscConstant.CONDITION_BOIC_EXHC :
-                requestData.offerSscData(new CbServiceUpdateData(mSlotId, ESsType.OCB,
-                        SscConstant.EVENT_SSC_UPDATE_CB,  tId, action, condition, barringList,
-                        serviceClass, password));
-                break;
-            case SscConstant.CONDITION_BAIC :
-            case SscConstant.CONDITION_BIC_WR :
-                requestData.offerSscData(new CbServiceUpdateData(mSlotId, ESsType.ICB,
-                        SscConstant.EVENT_SSC_UPDATE_CB, tId, action, condition, barringList,
-                        serviceClass, password));
-                break;
-            default:
-                ImsLog.e(mSlotId, "Invalid  condition : " + condition);
-                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
-                return;
-        }
+        requestData.offerSscData(new CbServiceUpdateData(mSlotId, ssType,
+                SscConstant.EVENT_SSC_UPDATE_CB,  tId, action, condition, barringList,
+                serviceClass, password));
 
         addRequestToQueue(requestData);
     }
@@ -445,6 +434,12 @@ public class SscServiceImpl implements IUtInterface {
     @Override
     public void updateCallForward(int tId, int action, int condition, String number,
             int serviceClass, int timeSeconds) {
+        if (!isServerBasedService(ESsType.CF, condition)) {
+            ImsLog.e(mSlotId, "Invalid service request, condition : " + condition);
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
+        }
+
         if (action == SscConstant.ACTION_ERASURE) {
             if (!SscConfig.isCfActionErasureSupported(mSlotId)) {
                 ImsLog.e(mSlotId, "isCfActionErasureSupported is false");
@@ -482,17 +477,6 @@ public class SscServiceImpl implements IUtInterface {
             }
         }
 
-        // Check valid service class or not
-        boolean isValid = SscServiceClassUtil.isValid(serviceClass);
-        if (!isValid) {
-            ImsLog.e(mSlotId, "Invalid serviceClass " + serviceClass);
-            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
-            return;
-        }
-
-        // remove service classes except voice and video
-        serviceClass = SscServiceClassUtil.removeInvalidServiceClass(serviceClass);
-
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -500,33 +484,25 @@ public class SscServiceImpl implements IUtInterface {
                     SscConstant.EVENT_SSC_QUERY_DOCUMENT, tId, 0));
         }
 
-        switch (condition) {
-            case SscConstant.CONDITION_CFU:
-            case SscConstant.CONDITION_CFB:
-            case SscConstant.CONDITION_CFNR:
-            case SscConstant.CONDITION_CFNRC:
-            case SscConstant.CONDITION_CFNL:
+        if (condition == SscConstant.CONDITION_CFU || condition == SscConstant.CONDITION_CFB
+                || condition == SscConstant.CONDITION_CFNR
+                || condition == SscConstant.CONDITION_CFNRC
+                || condition == SscConstant.CONDITION_CFNL) {
+            requestData.offerSscData(new CfServiceUpdateData(mSlotId, ESsType.CF,
+                    SscConstant.EVENT_SSC_UPDATE_CF, tId, action, condition, number,
+                    timeSeconds, serviceClass));
+        } else { // SscConstant.CONDITION_CFA, SscConstant.CONDITION_CFAC
+            for (int i = SscConstant.CONDITION_CFNRC; i > SscConstant.CONDITION_CFU; i--) {
+                requestData.offerSscData(new CfServiceUpdateData(
+                        mSlotId, ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF, tId, action, i,
+                        number, timeSeconds, serviceClass));
+            }
+
+            if (condition == SscConstant.CONDITION_CFA) {
                 requestData.offerSscData(new CfServiceUpdateData(mSlotId, ESsType.CF,
-                        SscConstant.EVENT_SSC_UPDATE_CF, tId, action, condition, number,
-                        timeSeconds, serviceClass));
-                break;
-            case SscConstant.CONDITION_CFA:
-            case SscConstant.CONDITION_CFAC:
-                for (int i = SscConstant.CONDITION_CFNRC; i > SscConstant.CONDITION_CFU; i--) {
-                    requestData.offerSscData(new CfServiceUpdateData(
-                            mSlotId, ESsType.CF, SscConstant.EVENT_SSC_UPDATE_CF, tId, action, i,
-                            number, timeSeconds, serviceClass));
-                }
-                if (condition == SscConstant.CONDITION_CFA) {
-                    requestData.offerSscData(new CfServiceUpdateData(mSlotId, ESsType.CF,
-                            SscConstant.EVENT_SSC_UPDATE_CF, tId, action,
-                            SscConstant.CONDITION_CFU, number, timeSeconds, serviceClass));
-                }
-                break;
-            default:
-                ImsLog.e(mSlotId, "Invalid Condition : " + condition);
-                handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
-                return;
+                        SscConstant.EVENT_SSC_UPDATE_CF, tId, action,
+                        SscConstant.CONDITION_CFU, number, timeSeconds, serviceClass));
+            }
         }
 
         addRequestToQueue(requestData);
@@ -534,6 +510,11 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCallWaiting(int tId, boolean enable, int serviceClass) {
+        if (!isServerBasedService(ESsType.CW, SscConstant.CONDITION_INVALID)) {
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -549,6 +530,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCLIR(int tId, int clirMode) {
+        if (!isServerBasedService(ESsType.OIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -564,6 +551,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCLIP(int tId, boolean enable) {
+        if (!isServerBasedService(ESsType.OIP, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -579,6 +572,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCOLR(int tId, int presentation) {
+        if (!isServerBasedService(ESsType.TIR, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -594,6 +593,12 @@ public class SscServiceImpl implements IUtInterface {
 
     @Override
     public void updateCOLP(int tId, boolean enable) {
+        if (!isServerBasedService(ESsType.TIP, SscConstant.CONDITION_INVALID)) {
+            ImsLog.e(mSlotId, "Invalid service request");
+            handleInvalidRequest(tId, REQUEST_TYPE_UPDATE);
+            return;
+        }
+
         SscRequestData requestData = new SscRequestData(tId);
 
         if (!SscXmlGov.getInstance(mSlotId).isXmlDataPresent()) {
@@ -712,6 +717,16 @@ public class SscServiceImpl implements IUtInterface {
             ImsLog.w(mSlotId, "Need to insert new rule ID for CF");
             sscData.setEventNumber(SscConstant.EVENT_SSC_INSERT_CF);
         }
+    }
+
+    private boolean isServerBasedService(ESsType ssType, int condition) {
+        int carrierConfigServiceType =
+                SscUtils.getSupplementaryServiceTypeForCarrierConfig(ssType, condition);
+        if (carrierConfigServiceType == SscConfig.SERVICE_TYPE_INVALID) {
+            return false;
+        }
+
+        return SscConfig.isServerBasedService(mSlotId, carrierConfigServiceType);
     }
 
     private final class SscRequestHandler extends Handler {

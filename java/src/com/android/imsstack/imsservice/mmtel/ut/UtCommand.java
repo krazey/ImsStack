@@ -117,6 +117,15 @@ public final class UtCommand {
             return;
         }
 
+        if (!SscServiceClassUtil.isValid(mServiceClass)) {
+            log("invalid service class : " + mServiceClass);
+            sendFailResponse(ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED, null);
+            return;
+        }
+
+        // remove service classes except voice and video
+        mServiceClass = SscServiceClassUtil.removeInvalidServiceClass(mServiceClass);
+
         if (mAction == SscConstant.ACTION_INTERROGATION) {
             switch (mCommand) {
                 case CMD_CB:
@@ -388,6 +397,6 @@ public final class UtCommand {
     }
 
     private void log(String s) {
-        ImsLog.d("[GII-IMPL] " + s);
+        ImsLog.d(mContext.getSlotId(), "[GII-IMPL] " + s);
     }
 }

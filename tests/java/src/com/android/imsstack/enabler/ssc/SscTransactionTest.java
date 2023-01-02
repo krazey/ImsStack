@@ -252,10 +252,6 @@ public class SscTransactionTest {
     public void startTransaction_pdnIpcanChanged() {
         when(mMockSscConnection.getNetworkType())
                 .thenReturn(TelephonyManager.NETWORK_TYPE_LTE, TelephonyManager.NETWORK_TYPE_IWLAN);
-        when(mMockSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_LTE))
-                .thenReturn(ImsRadioInterface.ACCESS_NETWORK_TYPE_EUTRAN);
-        when(mMockSscUtils.convertToImsRadioNetworkType(TelephonyManager.NETWORK_TYPE_IWLAN))
-                .thenReturn(ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN);
         doNothing().when(mMockImsRadioInterface)
                 .startImsTraffic(anyInt(), anyInt(), anyInt(), any());
 

@@ -25,6 +25,7 @@ import com.android.imsstack.core.agents.ITelephonySubscriber;
 import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
+import com.android.imsstack.enabler.ssc.SscConfig.CarrierConfigServiceType;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -244,7 +245,7 @@ public class SscUtils {
      * @param networkType See {@link TelephonyManager#NETWORK_TYPE_XXX}
      * @return Matched network type of {@link ImsRadioInterface.AccessNetworkType}
      */
-    protected int convertToImsRadioNetworkType(@NetworkType int networkType) {
+    protected static int convertToImsRadioNetworkType(@NetworkType int networkType) {
         switch (networkType) {
             case TelephonyManager.NETWORK_TYPE_IWLAN:
                 return ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN;
@@ -261,6 +262,59 @@ public class SscUtils {
                 return ImsRadioInterface.ACCESS_NETWORK_TYPE_NGRAN;
             default:
                 return ImsRadioInterface.ACCESS_NETWORK_TYPE_UNKNOWN;
+        }
+    }
+
+    protected static @CarrierConfigServiceType int getSupplementaryServiceTypeForCarrierConfig(
+            ESsType ssType, int condition) {
+        switch (ssType) {
+            case OIP:
+                return SscConfig.SERVICE_TYPE_OIP;
+            case OIR:
+                return SscConfig.SERVICE_TYPE_OIR;
+            case TIP:
+                return SscConfig.SERVICE_TYPE_TIP;
+            case TIR:
+                return SscConfig.SERVICE_TYPE_TIR;
+            case CF:
+                if (condition == SscConstant.CONDITION_CFU) {
+                    return SscConfig.SERVICE_TYPE_CFU;
+                } else if (condition == SscConstant.CONDITION_CFB) {
+                    return SscConfig.SERVICE_TYPE_CFB;
+                } else if (condition == SscConstant.CONDITION_CFNR) {
+                    return SscConfig.SERVICE_TYPE_CFNRY;
+                } else if (condition == SscConstant.CONDITION_CFNRC) {
+                    return SscConfig.SERVICE_TYPE_CFNRC;
+                } else if (condition == SscConstant.CONDITION_CFA) {
+                    return SscConfig.SERVICE_TYPE_CFA;
+                } else if (condition == SscConstant.CONDITION_CFAC) {
+                    return SscConfig.SERVICE_TYPE_CFAC;
+                } else if (condition == SscConstant.CONDITION_CFNL) {
+                    return SscConfig.SERVICE_TYPE_CFNL;
+                }
+
+                return SscConfig.SERVICE_TYPE_INVALID;
+            case OCB: // FALL-THROUGH
+            case ICB:
+                if (condition == SscConstant.CONDITION_BAOC) {
+                    return SscConfig.SERVICE_TYPE_BAOC;
+                } else if (condition == SscConstant.CONDITION_BOIC) {
+                    return SscConfig.SERVICE_TYPE_BOIC;
+                } else if (condition == SscConstant.CONDITION_BOIC_EXHC) {
+                    return SscConfig.SERVICE_TYPE_BOIC_EXHC;
+                } else if (condition == SscConstant.CONDITION_BAIC) {
+                    return SscConfig.SERVICE_TYPE_BAIC;
+                } else if (condition == SscConstant.CONDITION_BIC_WR) {
+                    return SscConfig.SERVICE_TYPE_BIC_ROAM;
+                } else if (condition == SscConstant.CONDITION_ACR) {
+                    return SscConfig.SERVICE_TYPE_ACR;
+                }
+
+                return SscConfig.SERVICE_TYPE_INVALID;
+            case CW:
+                return SscConfig.SERVICE_TYPE_CW;
+            default:
+                return SscConfig.SERVICE_TYPE_INVALID;
         }
     }
 
