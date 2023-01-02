@@ -56,7 +56,7 @@ public:
      * @param nCommand Request to AosRegistration
      * @param nRetryAfter Time to wait before the above request is proceed
      */
-    virtual void Subscription_Request(IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0);
+    virtual void Subscription_Request(IN IMS_SINT32 nCommand, IN IMS_SINT32 nRetryAfter = 0) = 0;
 };
 
 #endif  // INTERFACE_AOS_SUBSCRIPTION_LISTENER_H_

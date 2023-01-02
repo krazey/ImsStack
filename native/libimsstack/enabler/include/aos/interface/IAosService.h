@@ -78,7 +78,7 @@ public:
      * AosService(Java) -> IAosServicePhoneListener(Native)
      *
      */
-    virtual void NotifyAosStart();
+    virtual void NotifyAosStart() = 0;
     virtual void NotifyIpcanHandoverFailure(
             IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode) = 0;
     virtual void NotifyIsimState(IN IMS_UINT32 nState) = 0;
@@ -197,7 +197,7 @@ public:
      *
      * @return Returns capabilities of type IMSMap<IMS_UINT32, IMS_UINT32>&.
      */
-    virtual IMSMap<IMS_UINT32, IMS_UINT32>& GetCapabilities();
+    virtual IMSMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() = 0;
 
     /**
      * Gets the capabilities for the network.
@@ -205,7 +205,7 @@ public:
      * @param eNetworkType The radio access technology.
      * @see class AosNetworkType
      */
-    virtual IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType);
+    virtual IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) = 0;
 
     /**
      * Request the capabilities for the network.
@@ -217,7 +217,7 @@ public:
      * @see class AosCapability
      */
     virtual IMS_BOOL IsSupportCapabilitiesForNetwork(
-            AosNetworkType eNetworkType, AosCapability eCapability);
+            AosNetworkType eNetworkType, AosCapability eCapability) = 0;
 };
 
 /**
