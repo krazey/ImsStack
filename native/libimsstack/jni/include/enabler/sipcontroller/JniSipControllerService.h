@@ -27,13 +27,14 @@ using namespace android;
 class JniSipControllerService : public BaseService
 {
 public:
-    JniSipControllerService(Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
+    explicit JniSipControllerService(
+            Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot = 0);
     virtual ~JniSipControllerService();
 
-    virtual int SendData(const Parcel& pParcel);
+    int SendData(const Parcel& pParcel) override;
 
 private:
-    void HandleMessage(int nMsg, const Parcel& pParcel);
+    void HandleMsg(int nMsg, const Parcel& pParcel);
     IUSncSendMessageParam* makeSendMessageParamFromParcel(const android::Parcel& objParcel);
     void ConvertString(IN const android::String16& strSource, OUT AString& strDest);
 

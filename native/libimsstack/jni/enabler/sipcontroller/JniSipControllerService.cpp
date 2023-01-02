@@ -31,13 +31,12 @@ __IMS_TRACE_TAG_USER_DECL__("IMS_SNC");
 JniSipControllerService::JniSipControllerService(
         Jni_SendDataToJava pfnSendDataToJava, IN IMS_UINT32 nSimSlot /*= 0*/) :
         BaseService(nSimSlot),
-        m_strTarget(AString::ConstNull()),
+        m_strTarget(EnablerUtils::GetEnablerThreadName(nSimSlot)),
         m_strThreadName(AString::ConstNull()),
         m_nSessionId(-1)
 {
     IMS_TRACE_MEM("SNC_MEM", "JniSipControllerService = %" PFLS_u "/%" PFLS_x,
             sizeof(JniSipControllerService), this, 0);
-    m_strTarget = EnablerUtils::GetEnablerThreadName(nSimSlot);
     m_strTarget.Append(".RcsMessageService");
     IMS_TRACE_D("JniSipControllerService [%s]", m_strTarget.GetStr(), 0, 0);
     m_nSessionId = reinterpret_cast<IMS_SINTP>(this);
@@ -94,12 +93,12 @@ int JniSipControllerService::SendData(const Parcel& pParcel)
     int nMsg = pParcel.readInt32();
 
     IMS_TRACE_I("SendData : msg = %d", nMsg, 0, 0);
-    HandleMessage(nMsg, pParcel);
+    HandleMsg(nMsg, pParcel);
     return 1;
 }
 
 PRIVATE
-void JniSipControllerService::HandleMessage(int nMsg, const Parcel& pParcel)
+void JniSipControllerService::HandleMsg(int nMsg, const Parcel& pParcel)
 {
     AString strDest = AString::ConstEmpty();
     IMS_TRACE_I("msg = %d", nMsg, 0, 0);
