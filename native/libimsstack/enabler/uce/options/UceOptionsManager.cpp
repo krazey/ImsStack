@@ -18,6 +18,7 @@
 
 #include "ICapabilities.h"
 #include "ICoreService.h"
+#include "IJniEnabler.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"

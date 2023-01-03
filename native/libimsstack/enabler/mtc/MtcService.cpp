@@ -22,6 +22,7 @@
 #include "ICoreService.h"
 #include "IImsAos.h"
 #include "IIpcan.h"
+#include "IJniEnabler.h"
 #include "IJniMtcServiceThread.h"
 #include "IMtcCallController.h"
 #include "IMtcContext.h"

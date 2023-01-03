@@ -16,6 +16,7 @@
 #include "ServiceTrace.h"
 #include "JniEnablerConnector.h"
 #include "IJniAosServiceThread.h"
+#include "IJniEnabler.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"

@@ -23,6 +23,7 @@
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "IIpcan.h"
+#include "IJniEnabler.h"
 #include "IUUceService.h"
 #include "ImsAos.h"
 #include "ImsAosParameter.h"
