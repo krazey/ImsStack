@@ -41,6 +41,7 @@ public:
     MtcCallManager& operator=(IN const MtcCallManager&) = delete;
 
     void Init();
+    void DeInit();
 
     IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
     void RemoveCall(IN CallKey nCallKey) override;

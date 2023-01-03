@@ -64,6 +64,13 @@ TEST_F(MtcCallManagerTest, InitRegistersThisToCallStateProxy)
     pCallManager->Init();
 }
 
+TEST_F(MtcCallManagerTest, DeInitUnregistersThisFromCallStateProxy)
+{
+    EXPECT_CALL(objCallStateProxy, RemoveListener(pCallManager)).Times(1);
+
+    pCallManager->DeInit();
+}
+
 TEST_F(MtcCallManagerTest, CreateCallReturnsNewCall)
 {
     CallInfo objCallInfo;
