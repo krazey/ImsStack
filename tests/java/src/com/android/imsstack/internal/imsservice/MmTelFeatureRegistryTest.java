@@ -21,14 +21,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +39,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class MmTelFeatureRegistryTest {
     private static final int SLOT0 = 0;
-    private static final int WAIT_TIME_FOR_LISTENER = 100; // milli-seconds
 
     @Mock Context mContext;
     @Mock MmTelFeatureRegistry.Listener mListener;
@@ -51,7 +48,6 @@ public class MmTelFeatureRegistryTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        AppContext.init(mContext);
         mMmTelFeatureRegistry = ImsServiceRegistry.getInstance(SLOT0).getMmTelFeatureRegistry();
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(false);
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_NONE);
@@ -59,7 +55,6 @@ public class MmTelFeatureRegistryTest {
 
     @After
     public void tearDown() throws Exception {
-        AppContext.deinit();
     }
 
     @Test
@@ -108,10 +103,8 @@ public class MmTelFeatureRegistryTest {
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(false);
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_COMPLETED);
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(2))
-                .onTerminalBasedCallWaitingStatusChanged();
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(2))
-                .onSrvccStateChanged(anyInt());
+        verify(mListener, times(2)).onTerminalBasedCallWaitingStatusChanged();
+        verify(mListener, times(2)).onSrvccStateChanged(anyInt());
 
         mMmTelFeatureRegistry.removeListener(mListener);
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
@@ -135,14 +128,11 @@ public class MmTelFeatureRegistryTest {
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_FAILED);
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(3))
+        verify(mListener, times(3))
                 .onSrvccStateChanged(eq(MmTelFeatureRegistry.SRVCC_STATE_STARTED));
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onSrvccStateChanged(eq(MmTelFeatureRegistry.SRVCC_STATE_COMPLETED));
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onSrvccStateChanged(eq(MmTelFeatureRegistry.SRVCC_STATE_CANCELED));
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(1))
-                .onSrvccStateChanged(eq(MmTelFeatureRegistry.SRVCC_STATE_FAILED));
+        verify(mListener).onSrvccStateChanged(eq(MmTelFeatureRegistry.SRVCC_STATE_COMPLETED));
+        verify(mListener).onSrvccStateChanged(eq(MmTelFeatureRegistry.SRVCC_STATE_CANCELED));
+        verify(mListener).onSrvccStateChanged(eq(MmTelFeatureRegistry.SRVCC_STATE_FAILED));
 
         mMmTelFeatureRegistry.removeListener(mListener);
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
