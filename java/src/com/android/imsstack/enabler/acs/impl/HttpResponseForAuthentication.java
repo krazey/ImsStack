@@ -21,10 +21,10 @@ import android.os.Handler;
 import com.android.imsstack.util.ImsLog;
 
 /**
- * This class handles the http response for Cellular ACS flow.
+ * This class handles the http response for ACS flow with authentication
  * Send the ACS result via message to HttpTransaction.
  */
-public class HttpResponseForCellular extends HttpResponseHandler{
+public class HttpResponseForAuthentication extends HttpResponseHandler{
     private final int mSlotId;
 
     /**
@@ -33,7 +33,7 @@ public class HttpResponseForCellular extends HttpResponseHandler{
      * @param handler Handler of HttpTransaction
      * @param slotId SIM slot ID
      */
-    public HttpResponseForCellular(Handler handler, int slotId) {
+    public HttpResponseForAuthentication(Handler handler, int slotId) {
         super(handler, slotId);
         mSlotId = slotId;
     }
@@ -75,11 +75,6 @@ public class HttpResponseForCellular extends HttpResponseHandler{
 
     private void handle401Response(HttpResponse httpResponse) {
         ImsLog.d(mSlotId, "Http " + httpResponse.toString());
-        // TODO : handle 401 case
-        // 0. this device didn't support authentication ?
-        // 1. consider WWW-Authenticate header , -> GBA or EAP-AKA
-        // HttpResponse.getHeader("WWW-Authenticate");
-        // 2. carrier config wzw : EAP-AKA ...
-        sendNextProgressMsg(HttpTransaction.REQUEST_AUTHENTICATION, 0, 0, null, 0);
     }
+
 }

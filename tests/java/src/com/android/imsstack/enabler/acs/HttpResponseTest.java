@@ -129,7 +129,7 @@ public class HttpResponseTest {
         cookies.add("abcd");
         mHttpResponse.setCookies(cookies);
         verify(mHttpURLConnection, times(1))
-                .setRequestProperty(eq("Cookie"), eq(";abcd"));
+                .setRequestProperty(eq("Cookie"), eq("abcd"));
     }
 
     @Test

@@ -47,7 +47,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayDeque;
 import java.util.Iterator;
 
-public class HttpResponseForCellularTest {
+public class HttpResponseHandlerTest {
     private static final int SLOT_ID = 0;
     private static final String AC_DATA_PARTIAL = "<?xml version=\"1.0\"?>"
             + "<wap-provisioningdoc version=\"1.1\">"
