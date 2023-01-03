@@ -42,14 +42,18 @@ PUBLIC VIRTUAL MtcCallManager::~MtcCallManager()
         delete m_lstCalls.GetAt(nIndex);
     }
     m_lstCalls.Clear();
-
-    m_objContext.GetCallStateProxy().RemoveListener(this);
 }
 
 PUBLIC
 void MtcCallManager::Init()
 {
     m_objContext.GetCallStateProxy().AddListener(this);
+}
+
+PUBLIC
+void MtcCallManager::DeInit()
+{
+    m_objContext.GetCallStateProxy().RemoveListener(this);
 }
 
 PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(

@@ -93,6 +93,7 @@ PUBLIC VIRTUAL void MtcApp::Stop()
 {
     IMS_TRACE_I("Stop", 0, 0, 0);
     DestroyServices();
+    m_objCallManager.DeInit();
 }
 
 PUBLIC VIRTUAL IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType)
