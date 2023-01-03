@@ -23,6 +23,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.ssc.SscConstant.AccessNetworkTypes;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -186,18 +187,9 @@ public final class SscConfig {
                 CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL);
     }
 
-    static int[] getServerBasedServices(int slotId) {
-        return getIntArray(slotId,
-                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY);
-    }
-
     static boolean isCsfbSupported(int slotId) {
         return getBoolean(slotId,
                 CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL);
-    }
-
-    static String getUtServerFqdn(int slotId) {
-        return getString(slotId, CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING);
     }
 
     static int getUtServerPort(int slotId) {
@@ -206,6 +198,20 @@ public final class SscConfig {
 
     static int getUtTransportType(int slotId) {
         return getInt(slotId, CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT);
+    }
+
+    static int[] getServerBasedServices(int slotId) {
+        return getIntArray(slotId,
+                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY);
+    }
+
+    static int[] getSupportedRats(int slotId) {
+        return getIntArray(slotId,
+                CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY);
+    }
+
+    static String getUtServerFqdn(int slotId) {
+        return getString(slotId, CarrierConfigManager.ImsSs.KEY_UT_AS_SERVER_FQDN_STRING);
     }
 
     // CarrierConfig
@@ -303,6 +309,16 @@ public final class SscConfig {
     }
 
     // Specific APIs
+    static boolean isGbaSupported(int slotId) {
+        int gbaType = SscConfig.getGbaMode(slotId);
+
+        return (gbaType == GBA_ME) || (gbaType == GBA_U);
+    }
+
+    static boolean isTls(int slotId) {
+        return getUtTransportType(slotId) == CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TLS;
+    }
+
     static boolean isServerBasedService(int slotId, @CarrierConfigServiceType int serviceType) {
         int[] serverBasedServices = getServerBasedServices(slotId);
         if (serverBasedServices == null) {
@@ -312,8 +328,13 @@ public final class SscConfig {
         return Arrays.stream(serverBasedServices).anyMatch(value -> value == serviceType);
     }
 
-    static boolean isTls(int slotId) {
-        return getUtTransportType(slotId) == CarrierConfigManager.Ims.PREFERRED_TRANSPORT_TLS;
+    static boolean isSupportedNetwork(int slotId, @AccessNetworkTypes int networkType) {
+        int[] serverBasedServices = getSupportedRats(slotId);
+        if (serverBasedServices == null) {
+            return false;
+        }
+
+        return Arrays.stream(serverBasedServices).anyMatch(value -> value == networkType);
     }
 
     static boolean isPermanentBlockSmCause(int slotId, int smCause) {
@@ -372,12 +393,6 @@ public final class SscConfig {
 
             return value == responseCode;
         });
-    }
-
-    static boolean isGbaSupported(int slotId) {
-        int gbaType = SscConfig.getGbaMode(slotId);
-
-        return (gbaType == GBA_ME) || (gbaType == GBA_U);
     }
 
     // Temporary APIs
