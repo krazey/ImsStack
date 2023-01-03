@@ -27,9 +27,11 @@ import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.mtc.IUMtcService;
+import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcJniProxy;
+import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.imsservice.mmtel.ImsCallApp;
 import com.android.imsstack.imsservice.mmtel.ImsCallSessionImpl;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
@@ -51,6 +53,8 @@ public final class ImsTestHelper {
     private static final String INTENT_SRVCC_TEST = "com.android.imsstack.action.INTENT_SRVCC_TEST";
     private static final String INTENT_MTC_TEST = "com.android.imsstack.action.INTENT_MTC_TEST";
     private static final String INTENT_QOS_TEST = "com.android.imsstack.action.INTENT_QOS_TEST";
+
+    private static MtcCall sTempCall = null;
 
     private Context mContext;
     private ImsTestHelperReceiver mReceiver;
@@ -110,7 +114,7 @@ public final class ImsTestHelper {
                 sendSrvccEvent(intent.getIntExtra("type", -1));
             } else if (action.equals(INTENT_MTC_TEST)) {
                 sendMtcTestCommand(intent.getIntExtra("command", -1),
-                        intent.getIntExtra("wparam", -1), intent.getIntExtra("lparam", -1));
+                        intent.getIntExtra("slotid", 0), intent.getIntArrayExtra("extras"));
             } else if (action.equals(INTENT_QOS_TEST)) {
                 sendQosChanged(intent.getIntExtra("call", -1),
                         intent.getIntExtra("media", -1), intent.getStringExtra("ipaddress"),
@@ -206,12 +210,13 @@ public final class ImsTestHelper {
         // MTC TEST COMMAND (Native MTC only)
         // extra parameter : test command, WParam, LParam
         // ex)  adb shell am broadcast -a com.android.imsstack.action.INTENT_MTC_TEST
-        // .    --ei command 0 --ei wparam 0 --ei lparam 0
-        private void sendMtcTestCommand(int command, int wParam, int lParam) {
+        // .    --ei command 0 --ei slotid 0 --eia extras 0,0,1...
+        // no exception check for the array as it's only for test
+        private void sendMtcTestCommand(int command, int slotId, int[] extras) {
             ImsLog.d("sendMtcTestCommand :: command=" + command);
 
             ImsServiceManager sm = ImsServiceManager.getDefault();
-            ImsCallApp callApp = sm.getCallApp(0);
+            ImsCallApp callApp = sm.getCallApp(slotId);
             if (callApp == null) {
                 return;
             }
@@ -221,11 +226,56 @@ public final class ImsTestHelper {
                 return;
             }
 
+            if (command == 100) {
+                // 0 : callAttributes
+                // 1 : emergencyRouting type
+                ImsLog.d("sendMtcTestCommand :: open emergency service");
+                sTempCall = mtcApp.createCall(extras[0]);
+                mtcApp.openEmergencyService(sTempCall, extras[1]);
+                return;
+            } else if (command == 101) {
+                // 0 : callAttributes
+                // 1 : serviceType, 2 : emergency, 3 : offline, 4 : ussi
+                ImsLog.d("sendMtcTestCommand :: open call");
+                sTempCall = mtcApp.createCall(extras[0]);
+                sTempCall.open(extras[1], extras[2] != 0, extras[3] != 0, extras[4] != 0);
+                return;
+            } else if (command == 102) {
+                // 0 : callType
+                // 1 : callee, 2 : actualCallee, 3 ~ 5 : audio/video/text direction
+                ImsLog.d("sendMtcTestCommand :: start call");
+                if (sTempCall == null) {
+                    return;
+                }
+                MediaInfo mediaInfo = new MediaInfo();
+                mediaInfo.ADir = extras[3];
+                mediaInfo.VDir = extras[4];
+                mediaInfo.TDir = extras[5];
+                SuppInfo suppInfo = new SuppInfo();
+                sTempCall.start(extras[0], extras[1] + "", extras[2] + "", mediaInfo, suppInfo);
+                return;
+            } else if (command == 103) {
+                // 0 : reason
+                ImsLog.d("sendMtcTestCommand :: terminate call");
+                if (sTempCall == null) {
+                    return;
+                }
+                sTempCall.terminate(extras[0], true);
+                return;
+            } else if (command == 104) {
+                ImsLog.d("sendMtcTestCommand :: close call");
+                if (sTempCall == null) {
+                    return;
+                }
+                sTempCall.close();
+                return;
+            }
+
             Parcel parcel = Parcel.obtain();
             parcel.writeInt(IUMtcService.TEST_COMMAND);
             parcel.writeInt(command);
-            parcel.writeInt(wParam);
-            parcel.writeInt(lParam);
+            parcel.writeInt(extras[0]);
+            parcel.writeInt(extras[1]);
 
             MtcJniProxy.getInstance().sendDataToNative(mtcApp.getJNIService(), parcel);
         }
