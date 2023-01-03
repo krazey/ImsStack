@@ -15,12 +15,16 @@
  */
 package com.android.imsstack.core.agents;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.BarringInfo;
 import android.telephony.BarringInfo.BarringServiceInfo;
+import android.telephony.ims.feature.ConnectionFailureInfo;
+import android.telephony.ims.feature.ImsTrafficSessionCallback;
 import android.telephony.ims.feature.MmTelFeature;
 
 import com.android.imsstack.core.agents.dcm.DcFactory;
@@ -32,9 +36,11 @@ import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.system.SystemRadioInterface;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsPrivateProperties;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -44,14 +50,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     private final int mSlotId;
+    private boolean mImsHalTestEnabled = false;
     private AtomicInteger mIdGenerator = new AtomicInteger(ID_MIN);
     private ImsRadioHandler mHandler;
     private ImsRadioPhoneStateListener mPhoneStateListener;
     private SsacInfo mSsacInfo;
     private Map<Integer, ConnectionListener> mConnectionListeners =
                 new HashMap<Integer, ConnectionListener>();
+    private Map<Integer, TrafficCallback> mTrafficCallbacks =
+                new HashMap<Integer, TrafficCallback>();
 
-    //private static final int EVENT_CONNECTION_FAILED = 1;
+    private static final int EVENT_CONNECTION_FAILED = 1;
     private static final int EVENT_CONNECTION_SETUP_PREPARED = 2;
     private static final int EVENT_SSAC_STATE_CHANGED = 3;
 
@@ -90,6 +99,9 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         if (juce != null) {
             juce.registerForNativeBootComplete(mHandler, EVENT_NATIVE_BOOT_COMPLETED, null);
         }
+
+        mImsHalTestEnabled = (ImsPrivateProperties.Persistent.getInt(
+                    ImsPrivateProperties.Persistent.KEY_IMS_HAL_TEST, 0, mSlotId) == 1);
     }
 
     @Override
@@ -109,6 +121,9 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         mSsacInfo = null;
         mPhoneStateListener.dispose();
         mHandler.removeCallbacksAndMessages(null);
+
+        mConnectionListeners.clear();
+        mTrafficCallbacks.clear();
     }
 
     @Override
@@ -131,29 +146,37 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         if (id < 0) {
             id = getId();
             mConnectionListeners.put(id, listener);
+
+            TrafficCallback tcb = new TrafficCallback(id);
+            mTrafficCallbacks.put(id, tcb);
+
+            invokeStartImsTrafficSession(convertTrafficType(trafficType),
+                    convertAccessNetworkType(accessNetworkType),
+                    convertTrafficDirection(direction), mHandler::post, tcb);
+
+        } else {
+            TrafficCallback tcb = mTrafficCallbacks.get(id);
+
+            if (tcb != null) {
+                invokeModifyImsTrafficSession(convertAccessNetworkType(accessNetworkType), tcb,
+                        mHandler::post);
+            }
         }
 
         ImsLog.d(mSlotId, "startImsTraffic - type=" + trafficType + ", network type="
                 + accessNetworkType + ", id=" + id + ", size=" + mConnectionListeners.size());
-
-        final int key = id;
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                ConnectionListener listener = mConnectionListeners.get(key);
-
-                if (listener != null) {
-                    listener.onConnectionSetupPrepared();
-                }
-            }
-        });
     }
 
     @Override
     public void stopImsTraffic(ConnectionListener listener) {
         for (Integer i : mConnectionListeners.keySet()) {
             if (mConnectionListeners.get(i) == listener) {
+                TrafficCallback tcb = mTrafficCallbacks.get(i);
+
+                if (tcb != null) {
+                    invokeStopImsTrafficSession(tcb);
+                    mTrafficCallbacks.remove(i);
+                }
                 mConnectionListeners.remove(i);
                 break;
             }
@@ -175,16 +198,24 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         ImsLog.d(mSlotId, "startImsTraffic - id=" + id + ", type=" + trafficType
                 + ", network type=" + accessNetworkType + ", dir=" + direction);
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+        for (Integer i : mTrafficCallbacks.keySet()) {
+            if (i == id) {
+                TrafficCallback tcb = mTrafficCallbacks.get(i);
 
-                if (system != null) {
-                    system.notifyRadioConnectionSetupPrepared(EVENT_CONNECTION_SETUP_PREPARED, id);
+                if (tcb != null) {
+                    invokeModifyImsTrafficSession(convertAccessNetworkType(accessNetworkType),
+                            tcb, mHandler::post);
                 }
+                return SystemRadioInterface.RESULT_OK;
             }
-        });
+        }
+
+        TrafficCallback tcb = new TrafficCallback(id);
+        mTrafficCallbacks.put(id, tcb);
+
+        invokeStartImsTrafficSession(convertTrafficType(trafficType),
+                convertAccessNetworkType(accessNetworkType),
+                convertTrafficDirection(direction), mHandler::post, tcb);
 
         return SystemRadioInterface.RESULT_OK;
     }
@@ -192,6 +223,13 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     @Override
     public void stopImsTraffic(int id) {
         ImsLog.d(mSlotId, "stopImsTraffic - id=" + id);
+
+        TrafficCallback tcb = mTrafficCallbacks.get(id);
+
+        if (tcb != null) {
+            invokeStopImsTrafficSession(tcb);
+            mTrafficCallbacks.remove(id);
+        }
     }
 
     @Override
@@ -202,8 +240,13 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         MmTelFeature mtf = isr.getMmTelFeature();
 
         if (mtf != null) {
-            mtf.triggerEpsFallback(reason);
-            return SystemRadioInterface.RESULT_OK;
+            try {
+                mtf.triggerEpsFallback(reason);
+                return SystemRadioInterface.RESULT_OK;
+            } catch (IllegalStateException e) {
+                ImsLog.e("triggerEpsFallback: " + e.toString());
+                return SystemRadioInterface.RESULT_ERROR;
+            }
         }
 
         return SystemRadioInterface.RESULT_ERROR;
@@ -211,6 +254,50 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
 
     private static IDcNetWatcher getDcNetWatcher(int slotId) {
         return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, slotId);
+    }
+
+    private static int convertAccessNetworkType(int type) {
+        switch (type) {
+            case ACCESS_NETWORK_TYPE_UTRAN:
+                return AccessNetworkConstants.AccessNetworkType.UTRAN;
+            case ACCESS_NETWORK_TYPE_EUTRAN:
+                return AccessNetworkConstants.AccessNetworkType.EUTRAN;
+            case ACCESS_NETWORK_TYPE_NGRAN:
+                return AccessNetworkConstants.AccessNetworkType.NGRAN;
+            case ACCESS_NETWORK_TYPE_IWLAN:
+                return AccessNetworkConstants.AccessNetworkType.IWLAN;
+            default:
+                return AccessNetworkConstants.AccessNetworkType.UNKNOWN;
+        }
+    }
+
+    private static int convertTrafficDirection(int direction) {
+        if (direction == DIRECTION_MO) {
+            return MmTelFeature.IMS_TRAFFIC_DIRECTION_OUTGOING;
+        }
+
+        return MmTelFeature.IMS_TRAFFIC_DIRECTION_INCOMING;
+    }
+
+    private static int convertTrafficType(int type) {
+        switch (type) {
+            case TRAFFIC_TYPE_EMERGENCY:
+                return MmTelFeature.IMS_TRAFFIC_TYPE_EMERGENCY;
+            case TRAFFIC_TYPE_EMERGENCY_SMS:
+                return MmTelFeature.IMS_TRAFFIC_TYPE_EMERGENCY_SMS;
+            case TRAFFIC_TYPE_VOICE:
+                return MmTelFeature.IMS_TRAFFIC_TYPE_VOICE;
+            case TRAFFIC_TYPE_VIDEO:
+                return MmTelFeature.IMS_TRAFFIC_TYPE_VIDEO;
+            case TRAFFIC_TYPE_SMS:
+                return MmTelFeature.IMS_TRAFFIC_TYPE_SMS;
+            case TRAFFIC_TYPE_REGISTRATION:
+                return MmTelFeature.IMS_TRAFFIC_TYPE_REGISTRATION;
+            case TRAFFIC_TYPE_UT_XCAP:
+                return MmTelFeature.IMS_TRAFFIC_TYPE_UT_XCAP;
+            default:
+                return MmTelFeature.IMS_TRAFFIC_TYPE_NONE;
+        }
     }
 
     private int getId() {
@@ -268,6 +355,106 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
 
         if (dcnw != null && !dcnw.is4G()) {
             notifySsacInfo(new SsacInfo());
+        }
+    }
+
+    private void handleTrafficCallbackOnError(
+            int id, int reason, int causeCode, int waitTimeMillis) {
+        ImsLog.d(mSlotId, "handleTrafficCallbackOnError - id=" + id + ", reason=" + reason
+                + " , cause=" + causeCode + " , timeM=" + waitTimeMillis);
+
+        if (id >= ID_MIN) {
+            ConnectionListener listener = mConnectionListeners.get(id);
+
+            if (listener != null) {
+                listener.onConnectionFailed(reason, causeCode, waitTimeMillis);
+            }
+        } else {
+            ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+
+            if (system != null) {
+                system.notifyRadioConnectionFailed(EVENT_CONNECTION_FAILED, id, reason, causeCode,
+                        waitTimeMillis);
+            }
+        }
+    }
+
+    private void handleTrafficCallbackOnReady(int id) {
+        ImsLog.d(mSlotId, "handleTrafficCallbackOnReady - id=" + id);
+
+        if (id >= ID_MIN) {
+            ConnectionListener listener = mConnectionListeners.get(id);
+
+            if (listener != null) {
+                listener.onConnectionSetupPrepared();
+            }
+        } else {
+            ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+
+            if (system != null) {
+                system.notifyRadioConnectionSetupPrepared(EVENT_CONNECTION_SETUP_PREPARED, id);
+            }
+        }
+    }
+
+    private void invokeModifyImsTrafficSession(int accessNetworkType,
+            @NonNull ImsTrafficSessionCallback callback, @NonNull Executor executor) {
+        if (!mImsHalTestEnabled) {
+            executor.execute(() -> callback.onReady());
+            return;
+        }
+
+        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
+        MmTelFeature mtf = isr.getMmTelFeature();
+
+        if (mtf != null) {
+            try {
+                mtf.modifyImsTrafficSession(accessNetworkType, callback);
+            } catch (IllegalStateException e) {
+                ImsLog.e("modifyImsTrafficSession: " + e.toString());
+                return;
+            }
+        }
+    }
+
+    private void invokeStartImsTrafficSession(int trafficType, int accessNetworkType,
+            int direction, @NonNull Executor executor,
+            @NonNull ImsTrafficSessionCallback callback) {
+
+        if (!mImsHalTestEnabled) {
+            executor.execute(() -> callback.onReady());
+            return;
+        }
+
+        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
+        MmTelFeature mtf = isr.getMmTelFeature();
+
+        if (mtf != null) {
+            try {
+                mtf.startImsTrafficSession(trafficType, accessNetworkType, direction, executor,
+                        callback);
+            } catch (IllegalStateException e) {
+                ImsLog.e("startImsTrafficSession: " + e.toString());
+                return;
+            }
+        }
+    }
+
+    private void invokeStopImsTrafficSession(@NonNull ImsTrafficSessionCallback callback) {
+        if (!mImsHalTestEnabled) {
+            return;
+        }
+
+        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
+        MmTelFeature mtf = isr.getMmTelFeature();
+
+        if (mtf != null) {
+            try {
+                mtf.stopImsTrafficSession(callback);
+            } catch (IllegalStateException e) {
+                ImsLog.e("stopImsTrafficSession: " + e.toString());
+                return;
+            }
         }
     }
 
@@ -401,6 +588,25 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
                 default:
                     break;
             }
+        }
+    }
+
+    private final class TrafficCallback implements ImsTrafficSessionCallback {
+        private final int mId;
+
+        TrafficCallback(int id) {
+            mId = id;
+        }
+
+        @Override
+        public void onReady() {
+            handleTrafficCallbackOnReady(mId);
+        }
+
+        @Override
+        public void onError(@NonNull ConnectionFailureInfo info) {
+            handleTrafficCallbackOnError(mId, info.getReason(), info.getCauseCode(),
+                    info.getWaitTimeMillis());
         }
     }
 }
