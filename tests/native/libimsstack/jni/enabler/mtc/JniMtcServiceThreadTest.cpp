@@ -60,9 +60,9 @@ public:
     }
     inline virtual ~JniMtcServiceThreadTest()
     {
+        delete pJniServiceThread;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         delete pThreadService;
-        delete pJniServiceThread;
     }
 
 public:

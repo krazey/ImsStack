@@ -64,9 +64,9 @@ public:
 
     inline virtual ~CallStateProxyTest()
     {
+        delete pProxy;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         delete pThreadService;
-        delete pProxy;
     }
 
     void SetTotalCallStateBySingleCallState(IN IMtcCall::State eSingleCallState)

@@ -57,9 +57,9 @@ public:
 
     inline virtual ~ObjectAsyncDestroyerTest()
     {
+        delete pDestroyer;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         delete pThreadService;
-        delete pDestroyer;
     }
 
 protected:
