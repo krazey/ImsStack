@@ -24,7 +24,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-LOCAL IMS_SINT32 DEFAULT_SLOT_ID = 0;
+const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 const AString LOCAL_IP = "127.0.0.1";
 const IMS_UINT32 LOCAL_PORT = 20000;
 
