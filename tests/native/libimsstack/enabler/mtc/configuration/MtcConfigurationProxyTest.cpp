@@ -470,16 +470,17 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE));
 }
 
-TEST_F(MtcConfigurationProxyTest, GetIntWith2BoolArgReturnsFromConfigManager)
+TEST_F(MtcConfigurationProxyTest, GetIntWith3BoolArgReturnsFromConfigManager)
 {
     const IMS_SINT32 nValue = 1;
     const IMS_BOOL bArg1 = IMS_FALSE;
     const IMS_BOOL bArg2 = IMS_TRUE;
+    const IMS_BOOL bArg3 = IMS_TRUE;
 
-    EXPECT_CALL(*pConfigManager, GetInformationLevelOfGeolocationPidf(bArg1, bArg2))
+    EXPECT_CALL(*pConfigManager, GetInformationLevelOfGeolocationPidf(bArg1, bArg2, bArg3))
             .WillOnce(Return(nValue));
-    EXPECT_EQ(
-            nValue, pConfig->GetInt(Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, bArg1, bArg2));
+    EXPECT_EQ(nValue,
+            pConfig->GetInt(Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, bArg1, bArg2, bArg3));
 }
 
 TEST_F(MtcConfigurationProxyTest, GetStrWithIntArgReturnsFromConfigManager)
@@ -509,7 +510,8 @@ TEST_F(MtcConfigurationProxyTest, ReturnsDefaultValueForInvalidFeature)
     EXPECT_EQ(bDefaultValue, pConfig->Is(Feature::CONFERENCE_FACTORY_URI, ""));
     EXPECT_EQ(bDefaultValue, pConfig->Is(Feature::CONFERENCE_FACTORY_URI, 0));
     EXPECT_EQ(nDefaultValue, pConfig->GetInt(Feature::SUPPORT_EARLY_SESSION));
-    EXPECT_EQ(nDefaultValue, pConfig->GetInt(Feature::SUPPORT_EARLY_SESSION, IMS_FALSE, IMS_FALSE));
+    EXPECT_EQ(nDefaultValue,
+            pConfig->GetInt(Feature::SUPPORT_EARLY_SESSION, IMS_FALSE, IMS_FALSE, IMS_FALSE));
     EXPECT_EQ(strDefaultValue, pConfig->GetStr(Feature::SUPPORT_EARLY_SESSION, 0));
 }
 

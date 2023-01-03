@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "ICarrierConfig.h"
 #include "ImsVector.h"
 #include "ServiceConfig.h"
@@ -790,7 +791,7 @@ IMS_BOOL MtcConfigurationManager::IsStopRingbackTimerBy183WithSdpBody() const
 
 PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetInformationLevelOfGeolocationPidf(
-        IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const
+        IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi, IN IMS_BOOL bShortCode) const
 {
     if (bEmergency && !bWifi)
     {
@@ -806,6 +807,10 @@ IMS_SINT32 MtcConfigurationManager::GetInformationLevelOfGeolocationPidf(
     }
     else  // if (!bEmergency && bWifi)
     {
+        if (bShortCode)
+        {
+            return CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE;
+        }
         return m_objCarrierConfig.objInformationLevelOfGeolocationPidfs.GetAt(3);
     }
 }

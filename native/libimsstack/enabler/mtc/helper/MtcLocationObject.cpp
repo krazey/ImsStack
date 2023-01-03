@@ -25,6 +25,7 @@
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "call/IMtcCallContext.h"
+#include "call/ParticipantInfo.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcLocationObject.h"
@@ -141,9 +142,13 @@ ByteArray MtcLocationObject::CreateLocationBody() const
     {
         pPidfCreator->CreateWithPosition(AString::ConstNull(), objContent);
     }
-    else  // GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY
+    else if (nInformationLevel == CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY)
     {
         pPidfCreator->CreateWithoutPosition(AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent);
+    }
+    else  // GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE
+    {
+        pPidfCreator->CreateWithoutPosition(AString::ConstNull(), IMS_FALSE, IMS_TRUE, objContent);
     }
 
     return objContent;
@@ -154,7 +159,9 @@ IMS_SINT32 MtcLocationObject::GetInformationLevel() const
 {
     return m_objContext.GetConfigurationProxy().GetInt(
             Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, m_objContext.GetCallInfo().bEmergency,
-            m_objContext.GetService().IsWlanIpCanType());
+            m_objContext.GetService().IsWlanIpCanType(),
+            m_objContext.GetConfigurationProxy().Is(
+                    Feature::PIDF_SHORT_CODE, m_objContext.GetParticipantInfo().GetRemoteNumber()));
 }
 
 PRIVATE

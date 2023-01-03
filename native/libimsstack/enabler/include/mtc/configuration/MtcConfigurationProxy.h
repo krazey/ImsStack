@@ -40,7 +40,8 @@ public:
     IMS_BOOL Is(IN Feature eFeature, IN const AString& strAdditionalInfo) const;
     IMS_BOOL Is(IN Feature eFeature, IN IMS_SINT32 nAdditionalInfo) const;
     IMS_SINT32 GetInt(IN Feature eFeature) const;
-    IMS_SINT32 GetInt(IN Feature eFeature, IN IMS_BOOL bWParam, IN IMS_BOOL bLParam) const;
+    IMS_SINT32 GetInt(IN Feature eFeature, IN IMS_BOOL bParam1, IN IMS_BOOL bParam2,
+            IN IMS_BOOL bParam3) const;
     const AString GetStr(IN Feature eFeature, IN IMS_SINT32 nAdditionalInfo) const;
 
     virtual void PutConfigCache(IN Feature eFeature, IN IMS_SINT32 nValue);

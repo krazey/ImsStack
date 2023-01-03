@@ -926,7 +926,7 @@ public:
      * @return
      */
     virtual IMS_SINT32 GetInformationLevelOfGeolocationPidf(
-            IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const = 0;
+            IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi, IN IMS_BOOL bShortCode) const = 0;
 
     /**
      * @brief Checks
