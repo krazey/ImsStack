@@ -66,6 +66,7 @@ protected:
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(0));
 
         pDialingPlan = new TestMtcDialingPlan(objContext, objSubscriberInfo);
         pIdentityProxy = new MockImsIdentityProxy();
@@ -153,6 +154,19 @@ TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultConferenceUriIfMncIs3Digit)
     strUri = strUri.Replace("[MCC]", strMcc3).Replace("[MNC]", strMnc3);
 
     EXPECT_EQ(strUri, pDialingPlan->GetToUri("", objCallInfo));
+}
+
+TEST_F(MtcDialingPlanTest, GetToUriReturnsConferenceFactoryUriWithConvertingHomaDomainName)
+{
+    objCallInfo.bConference = IMS_TRUE;
+    AString strUri("sip:anyUserPart@[DOMAIN]");
+    ON_CALL(*pConfigurationManager, GetConferenceFactoryUri).WillByDefault(Return(strUri));
+    AString strDomainName("any_domain_name");
+    EXPECT_CALL(*pIdentityProxy, GetHomeDomainName(_)).WillOnce(Return(strDomainName));
+
+    strUri = strUri.Replace("[DOMAIN]", strDomainName);
+
+    EXPECT_STREQ(strUri.GetStr(), pDialingPlan->GetToUri("", objCallInfo).GetStr());
 }
 
 TEST_F(MtcDialingPlanTest, GetToUriReturnsDefaultUriInSipUriScheme)

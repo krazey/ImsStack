@@ -132,16 +132,25 @@ AString MtcDialingPlan::GetConferenceFactoryUri() const
     {
         strUri = "sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org";
     }
-    else if (IsUriForm(strUri) == IMS_FALSE)
-    {
-        strUri = strUri.Prepend("sip:");
-    }
 
     if (strUri.Contains("[MNC") || strUri.Contains("[MCC"))
     {
+        IMS_TRACE_D("GetConferenceFactoryUri MNC/MCC converting", 0, 0, 0);
         strUri = strUri.Replace("[MCC]", GetMcc())
                          .Replace("[MNC]", GetMnc(3))
                          .Replace("[MNC2]", GetMnc(2));
+    }
+
+    if (strUri.Contains("[DOMAIN"))
+    {
+        IMS_TRACE_D("GetConferenceFactoryUri DOMAIN converting", 0, 0, 0);
+        strUri = strUri.Replace(
+                "[DOMAIN]", m_pIdentityProxy->GetHomeDomainName(m_objContext.GetSlotId()));
+    }
+
+    if (IsUriForm(strUri) == IMS_FALSE)
+    {
+        strUri = strUri.Prepend("sip:");
     }
 
     IMS_TRACE_I("GetConferenceFactoryUri [%s]", strUri.GetStr(), 0, 0);
