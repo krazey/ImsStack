@@ -21,9 +21,9 @@
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
-#include "conferencecall/ConferenceDef.h"
 
 struct CallReasonInfo;
+struct ConfUser;
 struct JniCallInfo;
 
 class IJniMtcCallThread : public IJniEnablerThread

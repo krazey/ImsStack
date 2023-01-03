@@ -31,7 +31,6 @@ class SuppService;
 enum class CallType;
 enum class KeyType;
 enum class SuppType;
-struct CallInfo;
 struct CallReasonInfo;
 struct ConfUser;
 struct MediaInfo;
