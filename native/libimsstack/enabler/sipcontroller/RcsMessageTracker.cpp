@@ -158,7 +158,7 @@ IMS_BOOL RcsMessageTracker::StateINITIATED_SendMessage(IN IMSMSG& objMSG)
             IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD:
         */
         // Internal Tracker Obj is Null.
-        pFailureParam->nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
+        pFailureParam->m_nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
         // ToDo
         // pFailureParam->szTId = ;
         IMS_SINT32 nMsg = objMSG.GetName();
@@ -211,11 +211,11 @@ IMS_RESULT RcsMessageTracker::SendMessage(IN IUSncSendMessageParam* pParam)
         return IMS_FAILURE;
     }
 
-    if (pParam->nType == ISipMessage::TYPE_REQUEST)
+    if (pParam->m_nType == ISipMessage::TYPE_REQUEST)
     {
         SendRequest(pParam);
     }
-    else if (pParam->nType == ISipMessage::TYPE_RESPONSE)
+    else if (pParam->m_nType == ISipMessage::TYPE_RESPONSE)
     {
         CreateResponse();
     }
@@ -245,10 +245,10 @@ IMS_RESULT RcsMessageTracker::SendRequest(IN IUSncSendMessageParam* pParam)
     if (result != IMS_SUCCESS)
     {
         IUSncSendFailureIndParam* pFailureParam = new IUSncSendFailureIndParam();
-        pFailureParam->nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
+        pFailureParam->m_nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
 
         // ToDo
-        IMS_StrCpy(pFailureParam->szTId, IMS_SOLUTION_MSG_SOURCE_LEN, "viaTransactionId");
+        pFailureParam->m_strTId = "viaTransactionId";
         IMSMSG objMSG(MESSAGE_SENDFAILED, 0, reinterpret_cast<IMS_UINTP>(pFailureParam));
 
         HandleMessage(objMSG);
@@ -258,7 +258,7 @@ IMS_RESULT RcsMessageTracker::SendRequest(IN IUSncSendMessageParam* pParam)
     IUSncSentMessageIndParam* pSentParam = new IUSncSentMessageIndParam();
 
     // ToDo
-    IMS_StrCpy(pSentParam->szTId, IMS_SOLUTION_MSG_SOURCE_LEN, "viaTransactionId");
+    pSentParam->m_strTId = "viaTransactionId";
     IMSMSG objMSG(MESSAGE_SENT, 0, reinterpret_cast<IMS_UINTP>(pSentParam));
 
     HandleMessage(objMSG);

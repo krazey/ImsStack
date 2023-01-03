@@ -162,7 +162,7 @@ void RcsMessageService::HandleErrorCase(IN IMSMSG& objMSG)
     IUSncSendFailureIndParam* pParam = REINTERPRET_CAST(IUSncSendFailureIndParam*, objMSG.nLparam);
 
     // Internal Tracker Obj is Null.
-    pParam->nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
+    pParam->m_nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
     PostNotification(nMsg, reinterpret_cast<IMS_UINTP>(pParam));
 }
 
@@ -302,15 +302,15 @@ void RcsMessageService::convertMessage(ISipMessage* message)
     IUSncMessageParam* pOutParam = new IUSncMessageParam();
     // StartLine
     AString startLine = message->ToByteArray(ISipMessage::OPT_START_LINE).ToString();
-    pOutParam->pszStartLine = startLine.GetStr();
+    pOutParam->m_strStartLine = startLine;
 
     // HeaderSection
     AString headerSection = message->ToByteArray(ISipMessage::OPT_HEADER_PART).ToString();
-    pOutParam->pszHeaderSection = headerSection.GetStr();
+    pOutParam->m_strHeaderSection = headerSection;
 
     // BodyContent
     AString objContent = message->ToByteArray(ISipMessage::OPT_BODY_PART).ToString();
-    pOutParam->pszContent = objContent.GetStr();
+    pOutParam->m_strContent = objContent;
 }
 
 IMS_BOOL RcsMessageService::HandleOpenMSG(IN IMSMSG& objMSG)
@@ -322,8 +322,8 @@ IMS_BOOL RcsMessageService::HandleOpenMSG(IN IMSMSG& objMSG)
         return IMS_FALSE;
     }
 
-    IMS_UINTP nSessionId = pParam->nSessionID;
-    AString strListenerThread(pParam->szThread);
+    IMS_UINTP nSessionId = pParam->m_nSessionID;
+    AString strListenerThread(pParam->m_strThread);
     if (strListenerThread.GetLength() > 0)
     {
         RcsMessageTracker* pRcsMessageTracker = objRcsMessages.Get(nSessionId);
@@ -361,11 +361,11 @@ IMS_BOOL RcsMessageService::HandleSessionMSG(IN IMSMSG& objMSG)
         return IMS_FALSE;
     }
 
-    RcsMessageTracker* pRcsMessageTracker = objRcsMessages.Get(pParam->nSessionID);
+    RcsMessageTracker* pRcsMessageTracker = objRcsMessages.Get(pParam->m_nSessionID);
 
     if (pRcsMessageTracker == IMS_NULL)
     {
-        IMS_TRACE_E(0, "HandleSessionMSG : NO Tracker! [%" PFLS_u "]", pParam->nSessionID, 0, 0);
+        IMS_TRACE_E(0, "HandleSessionMSG : NO Tracker! [%" PFLS_u "]", pParam->m_nSessionID, 0, 0);
 
         HandleErrorCase(objMSG);
         return IMS_FALSE;
@@ -373,7 +373,7 @@ IMS_BOOL RcsMessageService::HandleSessionMSG(IN IMSMSG& objMSG)
 
     if (pRcsMessageTracker->HandleMessage(objMSG) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "HandleSessionMSG : NOT HANDLED! [%" PFLS_u "]", pParam->nSessionID, 0, 0);
+        IMS_TRACE_E(0, "HandleSessionMSG : NOT HANDLED! [%" PFLS_u "]", pParam->m_nSessionID, 0, 0);
 
         delete pParam;
         return IMS_FALSE;
@@ -389,7 +389,7 @@ IMS_BOOL RcsMessageService::HandleCloseSessionMSG(IN IMSMSG& objMSG)
 
     if (pParam != IMS_NULL)
     {
-        CloseSession(pParam->nSessionID);
+        CloseSession(pParam->m_nSessionID);
 
         delete pParam;
     }
@@ -409,11 +409,11 @@ IMS_BOOL RcsMessageService::HandleNotifyReceiveErrorMSG(IN IMSMSG& objMSG)
         return IMS_FALSE;
     }
 
-    RcsMessageTracker* pRcsMessageTracker = objRcsMessages.Get(pParam->nSessionID);
+    RcsMessageTracker* pRcsMessageTracker = objRcsMessages.Get(pParam->m_nSessionID);
 
     if (pRcsMessageTracker == IMS_NULL)
     {
-        IMS_TRACE_E(0, "HandleSessionMSG : NO Tracker! [%" PFLS_u "]", pParam->nSessionID, 0, 0);
+        IMS_TRACE_E(0, "HandleSessionMSG : NO Tracker! [%" PFLS_u "]", pParam->m_nSessionID, 0, 0);
 
         HandleErrorCase(objMSG);
         return IMS_FALSE;
@@ -421,7 +421,7 @@ IMS_BOOL RcsMessageService::HandleNotifyReceiveErrorMSG(IN IMSMSG& objMSG)
 
     if (pRcsMessageTracker->HandleMessage(objMSG) == IMS_FALSE)
     {
-        IMS_TRACE_E(0, "HandleSessionMSG : NOT HANDLED! [%" PFLS_u "]", pParam->nSessionID, 0, 0);
+        IMS_TRACE_E(0, "HandleSessionMSG : NOT HANDLED! [%" PFLS_u "]", pParam->m_nSessionID, 0, 0);
 
         delete pParam;
         return IMS_FALSE;

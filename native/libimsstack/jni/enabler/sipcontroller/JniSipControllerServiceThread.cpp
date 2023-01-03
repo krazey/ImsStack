@@ -100,24 +100,24 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
         {
             IUSncMessageParam* pParam = reinterpret_cast<IUSncMessageParam*>(objMSG.nLparam);
 
-            WriteStringToParcel(pParam->pszStartLine, parcel);
-            WriteStringToParcel(pParam->pszHeaderSection, parcel);
-            parcel.writeInt32(pParam->nContentLength);
-            WriteStringToParcel(pParam->pszContent, parcel);
+            WriteStringToParcel(pParam->m_strStartLine, parcel);
+            WriteStringToParcel(pParam->m_strHeaderSection, parcel);
+            parcel.writeInt32(pParam->m_nContentLength);
+            WriteStringToParcel(pParam->m_strContent, parcel);
         }
         break;
         case IUSncService::MESSAGESENT_IND:
         {
             IUSncSentMessageIndParam* pParam =
                     reinterpret_cast<IUSncSentMessageIndParam*>(objMSG.nLparam);
-            parcel.writeString16(android::String16(pParam->szTId));
+            parcel.writeString16(android::String16(pParam->m_strTId.GetStr()));
         }
         break;
         case IUSncService::SENDMESSAGEFAILURE_IND:
         {
             IUSncSendFailureIndParam* pParam =
                     reinterpret_cast<IUSncSendFailureIndParam*>(objMSG.nLparam);
-            parcel.writeString16(android::String16(pParam->szTId));
+            parcel.writeString16(android::String16(pParam->m_strTId.GetStr()));
         }
         break;
         case IUSncControl::ONREGISTRATIONUPDATED_IND:
@@ -150,12 +150,12 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
 
 PRIVATE
 inline void JniSipControllerServiceThread::WriteStringToParcel(
-        IN CONST IMS_CHAR* pszValue, OUT android::Parcel& parcel)
+        IN AString strValue, OUT android::Parcel& parcel)
 {
-    if (pszValue == IMS_NULL)
+    if (strValue == IMS_NULL)
     {
         parcel.writeString16(android::String16(""));
         return;
     }
-    parcel.writeString16(android::String16(pszValue));
+    parcel.writeString16(android::String16(strValue.GetStr()));
 }

@@ -38,7 +38,7 @@ private:
     IMS_BOOL OnTerminate(IN IMSMSG& objMSG) override;
     IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
     void HandleMsg(IN IMSMSG& objMSG);
-    inline void WriteStringToParcel(IN CONST IMS_CHAR* pszValue, OUT android::Parcel& parcel);
+    inline void WriteStringToParcel(IN AString pszValue, OUT android::Parcel& parcel);
 
 private:
     IMS_UINTP m_nNativeObj;

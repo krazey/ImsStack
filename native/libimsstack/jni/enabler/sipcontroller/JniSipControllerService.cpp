@@ -65,8 +65,8 @@ JniSipControllerService::JniSipControllerService(
             reinterpret_cast<IMS_UINTP>(this), pfnSendDataToJava);
 
     IUSncOpenCmdParam* pParam = new IUSncOpenCmdParam();
-    pParam->nSessionID = m_nSessionId;
-    IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
+    pParam->m_nSessionID = m_nSessionId;
+    pParam->m_strThread = m_strThreadName;
     IMSMSG objMSG(IUSncService::OPENMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     MessageService::PostMessage(m_strTarget, objMSG);
 }
@@ -83,7 +83,7 @@ JniSipControllerService::~JniSipControllerService()
         m_pJniSipControllerServiceThread = NULL;
     }
     IUSncCloseSessionCmdParam* pParam = new IUSncCloseSessionCmdParam();
-    pParam->nSessionID = m_nSessionId;
+    pParam->m_nSessionID = m_nSessionId;
     IMSMSG objMSG(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     MessageService::PostMessage(m_strTarget, objMSG);
 }
@@ -108,8 +108,8 @@ void JniSipControllerService::HandleMsg(int nMsg, const Parcel& pParcel)
         case IUSncService::SENDMESSAGE_CMD:
         {
             IUSncSendMessageParam* pParam = makeSendMessageParamFromParcel(pParcel);
-            pParam->nSessionID = m_nSessionId;
-            IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
+            pParam->m_nSessionID = m_nSessionId;
+            pParam->m_strThread = m_strThreadName;
             IMSMSG objMSG(IUSncService::SENDMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
         }
@@ -117,10 +117,10 @@ void JniSipControllerService::HandleMsg(int nMsg, const Parcel& pParcel)
         case IUSncService::CLOSESESSION_CMD:
         {
             IUSncCloseSessionCmdParam* pParam = new IUSncCloseSessionCmdParam();
-            pParam->nSessionID = m_nSessionId;
-            IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
+            pParam->m_nSessionID = m_nSessionId;
+            pParam->m_strThread = m_strThreadName;
             ConvertString(pParcel.readString16(), strDest);
-            IMS_StrCpy(pParam->szCallId, IMS_SOLUTION_URI_LEN, strDest.GetStr());
+            pParam->m_strCallId = strDest;
             IMSMSG objMSG(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
         }
@@ -128,10 +128,10 @@ void JniSipControllerService::HandleMsg(int nMsg, const Parcel& pParcel)
         case IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD:
         {
             IUSncNotifyErrorCmdParam* pParam = new IUSncNotifyErrorCmdParam();
-            pParam->nSessionID = m_nSessionId;
-            IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, m_strThreadName.GetStr());
+            pParam->m_nSessionID = m_nSessionId;
+            pParam->m_strThread = m_strThreadName;
             ConvertString(pParcel.readString16(), strDest);
-            IMS_StrCpy(pParam->szTId, IMS_SOLUTION_URI_LEN, strDest.GetStr());
+            pParam->m_strTId = strDest;
             IMSMSG objMSG(IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD, 0,
                     reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
@@ -165,38 +165,26 @@ IUSncSendMessageParam* JniSipControllerService::makeSendMessageParamFromParcel(
     IUSncSendMessageParam* pParam = new IUSncSendMessageParam();
 
     ConvertString(objParcel.readString16(), strDest);
-    pParam->pszStartLine =
-            static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
-    IMS_StrCpy(pParam->pszStartLine, strDest.GetLength(), strDest.GetStr());
+    pParam->m_strStartLine = strDest;
 
     ConvertString(objParcel.readString16(), strDest);
-    pParam->pszHeaderSection =
-            static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
-    IMS_StrCpy(pParam->pszHeaderSection, strDest.GetLength(), strDest.GetStr());
+    pParam->m_strHeaderSection = strDest;
 
-    pParam->nContentLength = objParcel.readInt32();
+    pParam->m_nContentLength = objParcel.readInt32();
 
     ConvertString(objParcel.readString16(), strDest);
-    pParam->pszContent =
-            static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
-    IMS_StrCpy(pParam->pszContent, strDest.GetLength(), strDest.GetStr());
+    pParam->m_strContent = strDest;
 
     ConvertString(objParcel.readString16(), strDest);
-    pParam->pszMethod =
-            static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
-    IMS_StrCpy(pParam->pszMethod, strDest.GetLength(), strDest.GetStr());
+    pParam->m_strMethod = strDest;
 
     ConvertString(objParcel.readString16(), strDest);
-    pParam->pszFromParameter =
-            static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
-    IMS_StrCpy(pParam->pszFromParameter, strDest.GetLength(), strDest.GetStr());
+    pParam->m_strFromParameter = strDest;
 
     ConvertString(objParcel.readString16(), strDest);
-    pParam->pszToParameter =
-            static_cast<IMS_CHAR*>(IMS_MEM_Malloc(sizeof(IMS_CHAR) * (strDest.GetLength() + 1)));
-    IMS_StrCpy(pParam->pszToParameter, strDest.GetLength(), strDest.GetStr());
+    pParam->m_strToParameter = strDest;
 
-    pParam->nType = objParcel.readInt32();
+    pParam->m_nType = objParcel.readInt32();
     return pParam;
 }
 

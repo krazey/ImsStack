@@ -26,7 +26,7 @@
 
 __IMS_TRACE_TAG_USER_DECL__("IMS_SNC");
 
-IMS_SINT32 SLOT_ID = 0;
+const IMS_SINT32 SLOT_ID = 0;
 
 class RcsMessageServiceTest : public ::testing::Test
 {

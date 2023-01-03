@@ -20,7 +20,6 @@
 #include "ISipClientConnectionListener.h"
 #include "ISipConnectionFactory.h"
 #include "IURcsMessageService.h"
-class ICoreService;
 
 class RcsMessageTracker : public ImsStateMachine, public ISipClientConnectionListener
 {

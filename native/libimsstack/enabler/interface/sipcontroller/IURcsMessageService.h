@@ -78,16 +78,12 @@ public:
 class IUSncSessionData
 {
 public:
-    inline IUSncSessionData()
-    {
-        nSessionID = 0;
-        szThread[0] = '\0';
-    }
+    inline IUSncSessionData() { m_nSessionID = 0; }
     inline ~IUSncSessionData(){};
 
 public:
-    IMS_UINTP nSessionID;
-    IMS_CHAR szThread[IMS_SOLUTION_MSG_SOURCE_LEN + 1];
+    IMS_UINTP m_nSessionID;
+    AString m_strThread;
 };
 
 class IUSncSendMessageParam : public IUSncSessionData
@@ -97,54 +93,24 @@ public:
     {
         IMS_TRACE_MEM("SNC_MSG", "IM_M : IUSncSendMessageParam = %" PFLS_u,
                 sizeof(IUSncSendMessageParam), 0, 0);
-        pszStartLine = IMS_NULL;
-        pszHeaderSection = IMS_NULL;
-        nContentLength = 0;
-        pszContent = IMS_NULL;
-        pszMethod = IMS_NULL;
-        pszFromParameter = IMS_NULL;
-        pszToParameter = IMS_NULL;
-        nType = 0;
+        m_nContentLength = 0;
+        m_nType = 0;
     }
     inline ~IUSncSendMessageParam()
     {
         IMS_TRACE_MEM("SNC_MSG", "IM_F : IUSncSendMessageParam = %" PFLS_u,
                 sizeof(IUSncSendMessageParam), 0, 0);
-        if (pszStartLine != IMS_NULL)
-        {
-            IMS_MEM_Free(pszStartLine);
-        }
-        if (pszHeaderSection != IMS_NULL)
-        {
-            IMS_MEM_Free(pszHeaderSection);
-        }
-        if (pszContent != IMS_NULL)
-        {
-            IMS_MEM_Free(pszContent);
-        }
-        if (pszMethod != IMS_NULL)
-        {
-            IMS_MEM_Free(pszMethod);
-        }
-        if (pszFromParameter != IMS_NULL)
-        {
-            IMS_MEM_Free(pszFromParameter);
-        }
-        if (pszToParameter != IMS_NULL)
-        {
-            IMS_MEM_Free(pszToParameter);
-        }
     }
 
 public:
-    IMS_CHAR* pszStartLine;
-    IMS_CHAR* pszHeaderSection;
-    IMS_SINT32 nContentLength;
-    IMS_CHAR* pszContent;
-    IMS_CHAR* pszMethod;
-    IMS_CHAR* pszFromParameter;
-    IMS_CHAR* pszToParameter;
-    IMS_SINT32 nType;
+    AString m_strStartLine;
+    AString m_strHeaderSection;
+    IMS_SINT32 m_nContentLength;
+    AString m_strContent;
+    AString m_strMethod;
+    AString m_strFromParameter;
+    AString m_strToParameter;
+    IMS_SINT32 m_nType;
 };
 
 class IUSncMessageParam : public IUSncSessionData
@@ -154,34 +120,19 @@ public:
     {
         IMS_TRACE_MEM(
                 "SNC_MSG", "IM_M : IUSncMessageParam = %" PFLS_u, sizeof(IUSncMessageParam), 0, 0);
-        pszStartLine = IMS_NULL;
-        pszHeaderSection = IMS_NULL;
-        nContentLength = 0;
-        pszContent = IMS_NULL;
+        m_nContentLength = 0;
     }
     inline ~IUSncMessageParam()
     {
         IMS_TRACE_MEM(
                 "SNC_MSG", "IM_F : IUSncMessageParam = %" PFLS_u, sizeof(IUSncMessageParam), 0, 0);
-        if (pszStartLine != IMS_NULL)
-        {
-            IMS_MEM_Free(pszStartLine);
-        }
-        if (pszHeaderSection != IMS_NULL)
-        {
-            IMS_MEM_Free(pszHeaderSection);
-        }
-        if (pszContent != IMS_NULL)
-        {
-            IMS_MEM_Free(pszContent);
-        }
     }
 
 public:
-    IMS_CHAR* pszStartLine;
-    IMS_CHAR* pszHeaderSection;
-    IMS_SINT32 nContentLength;
-    IMS_CHAR* pszContent;
+    AString m_strStartLine;
+    AString m_strHeaderSection;
+    IMS_SINT32 m_nContentLength;
+    AString m_strContent;
 };
 
 class IUSncOpenCmdParam : public IUSncSessionData
@@ -221,7 +172,6 @@ public:
     {
         IMS_TRACE_MEM("SNC_MSG", "IM_M : IUSncCloseSessionCmdParam = %" PFLS_u,
                 sizeof(IUSncCloseSessionCmdParam), 0, 0);
-        szCallId[0] = '\0';
     }
     inline ~IUSncCloseSessionCmdParam()
     {
@@ -230,7 +180,7 @@ public:
     }
 
 public:
-    IMS_CHAR szCallId[IMS_SOLUTION_URI_LEN + 1];
+    AString m_strCallId;
 };
 
 class IUSncSendCmdParam : public IUSncSessionData
@@ -255,7 +205,6 @@ public:
     {
         IMS_TRACE_MEM("SNC_MSG", "IM_M : IUSncNotifyErrorCmdParam = %" PFLS_u,
                 sizeof(IUSncNotifyErrorCmdParam), 0, 0);
-        szTId[0] = '\0';
     }
     inline ~IUSncNotifyErrorCmdParam()
     {
@@ -264,7 +213,7 @@ public:
     }
 
 public:
-    IMS_CHAR szTId[IMS_SOLUTION_URI_LEN + 1];
+    AString m_strTId;
 };
 
 class IUSncSentMessageIndParam : public IUSncSessionData
@@ -274,7 +223,6 @@ public:
     {
         IMS_TRACE_MEM("SNC_MSG", "IM_M : IUSncSentMessageIndParam = %" PFLS_u,
                 sizeof(IUSncSentMessageIndParam), 0, 0);
-        szTId[0] = '\0';
     }
     inline ~IUSncSentMessageIndParam()
     {
@@ -283,7 +231,7 @@ public:
     }
 
 public:
-    IMS_CHAR szTId[IMS_SOLUTION_URI_LEN + 1];
+    AString m_strTId;
 };
 
 class IUSncSendFailureIndParam : public IUSncSessionData
@@ -293,8 +241,7 @@ public:
     {
         IMS_TRACE_MEM("SNC_MSG", "IM_M : IUSncSendFailureIndParam = %" PFLS_u,
                 sizeof(IUSncSendFailureIndParam), 0, 0);
-        nReason = 0;
-        szTId[0] = '\0';
+        m_nReason = 0;
     }
     inline ~IUSncSendFailureIndParam()
     {
@@ -303,7 +250,7 @@ public:
     }
 
 public:
-    IMS_SINT32 nReason;
-    IMS_CHAR szTId[IMS_SOLUTION_URI_LEN + 1];
+    IMS_SINT32 m_nReason;
+    AString m_strTId;
 };
 #endif  //_IUSncService_H_
