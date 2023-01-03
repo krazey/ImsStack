@@ -9,6 +9,16 @@
         }
     ],
 
+    // For postsubmit test group.
+    "postsubmit": [
+        {
+            "name": "ImsStackJavaTests"
+        },
+        {
+            "name": "ImsStackNativeTests"
+        }
+    ],
+
     // For ImsStack test group.
     "ImsStack-alltests": [
         {
