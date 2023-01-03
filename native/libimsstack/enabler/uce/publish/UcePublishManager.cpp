@@ -17,6 +17,7 @@
 
 #include "AoSAppRequestType.h"
 #include "ICoreService.h"
+#include "IJniEnabler.h"
 #include "IMessage.h"
 #include "IPublication.h"
 #include "ISipClientConnection.h"

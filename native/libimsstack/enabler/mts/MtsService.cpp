@@ -18,6 +18,7 @@
 #include "ICoreService.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
+#include "IJniEnabler.h"
 #include "IJniMtsServiceThread.h"
 #include "IMtsServiceListener.h"
 #include "IServiceFilterCriteria.h"

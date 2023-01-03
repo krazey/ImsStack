@@ -21,8 +21,6 @@
 
 #include "INativeEnabler.h"
 
-class IJniEnablerThread;
-
 class MockINativeEnabler : public INativeEnabler
 {
 public:
