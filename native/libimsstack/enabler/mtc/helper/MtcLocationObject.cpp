@@ -22,6 +22,7 @@
 #include "IMessageBodyPart.h"
 #include "ISipMessage.h"
 #include "ISubscriberConfig.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "call/IMtcCallContext.h"
@@ -79,11 +80,12 @@ PUBLIC GLOBAL IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired(IN IMtcCallC
     IMS_SINT32 nType = GetGeolocationPidfAllowedType(
             objContext.GetCallInfo().bEmergency, objContext.GetService().IsWlanIpCanType());
 
-    return objContext.GetConfigurationProxy().Is(
-            Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType);
+    const SuppService* pSuppService =
+            objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION);
 
-    // TODO: need to mix this with a condition above.
-    // return objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION)->bValue;
+    return objContext.GetConfigurationProxy().Is(
+                   Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType) &&
+            (pSuppService == IMS_NULL || pSuppService->bValue);
 }
 
 PUBLIC
