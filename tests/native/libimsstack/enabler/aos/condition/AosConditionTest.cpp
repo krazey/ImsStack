@@ -20,6 +20,7 @@
 #include "ImsEventDef.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
+#include "interface/IAosConditionListener.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosSubscriber.h"
 #include "condition/AosBlock.h"
@@ -38,8 +39,6 @@
 #include "interface/MockIAosNetTracker.h"
 #include "interface/MockIAosRegistration.h"
 #include "interface/MockIAosSubscriber.h"
-
-class IAosConditionListener;
 
 using ::testing::_;
 using ::testing::AnyNumber;

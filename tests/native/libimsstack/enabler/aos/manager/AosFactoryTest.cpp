@@ -17,9 +17,8 @@
 #include <gmock/gmock.h>
 
 #include "ImsTypeDef.h"
+#include "IMutex.h"
 #include "manager/AosFactory.h"
-
-class IMutex;
 
 class TestAosFactory : public AosFactory
 {

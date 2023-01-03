@@ -37,12 +37,6 @@
 #include "app/AosApplication.h"
 
 class IAosAppContext;
-class IAosRegistration;
-class IAosCallTracker;
-class IAosNetTracker;
-class AosCondition;
-class AosConnector;
-class AosUtil;
 
 class MockAosApplication : public AosApplication
 {

@@ -22,11 +22,10 @@
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
+#include "interface/IAosConditionListener.h"
 #include "condition/AosBlock.h"
 #include "condition/AosECondition.h"
 #include "provider/AosStaticProfile.h"
-
-class IAosConditionListener;
 
 using ::testing::_;
 using ::testing::AnyNumber;
