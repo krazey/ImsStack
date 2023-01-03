@@ -19,7 +19,6 @@ package com.android.imsstack.internal.imsservice;
 import android.telephony.ims.feature.MmTelFeature;
 import android.util.SparseArray;
 
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Objects;
@@ -109,12 +108,17 @@ public class ImsServiceRegistry {
      * @param feature A MmTelFeature to be set.
      */
     public void setMmTelFeature(MmTelFeature feature) {
+        boolean notifyChange = false;
+
         synchronized (mLock) {
             if (!Objects.equals(mMmTelFeature, feature)) {
                 mMmTelFeature = feature;
-
-                notifyMmTelFeatureChanged();
+                notifyChange = true;
             }
+        }
+
+        if (notifyChange) {
+            notifyMmTelFeatureChanged();
         }
     }
 
@@ -135,13 +139,18 @@ public class ImsServiceRegistry {
      * @param enabled The IMS status to be turned on or off.
      */
     public void setImsEnabled(boolean enabled) {
+        boolean notifyChange = false;
+
         synchronized (mLock) {
             if (mImsEnabled != enabled) {
                 ImsLog.i(mSlotId, "setImsEnabled: " + mImsEnabled + " >> " + enabled);
                 mImsEnabled = enabled;
-
-                notifyImsOnOffChanged();
+                notifyChange = true;
             }
+        }
+
+        if (notifyChange) {
+            notifyImsOnOffChanged();
         }
     }
 
@@ -173,18 +182,14 @@ public class ImsServiceRegistry {
     }
 
     private void notifyMmTelFeatureChanged() {
-        AppContext.runTask(() -> {
-            for (Listener l : mListeners) {
-                l.onMmTelFeatureChanged();
-            }
-        }, 0);
+        for (Listener l : mListeners) {
+            l.onMmTelFeatureChanged();
+        }
     }
 
     private void notifyImsOnOffChanged() {
-        AppContext.runTask(() -> {
-            for (Listener l : mListeners) {
-                l.onImsOnOffChanged();
-            }
-        }, 0);
+        for (Listener l : mListeners) {
+            l.onImsOnOffChanged();
+        }
     }
 }

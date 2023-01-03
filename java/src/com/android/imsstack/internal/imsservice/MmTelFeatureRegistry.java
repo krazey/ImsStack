@@ -16,7 +16,6 @@
 
 package com.android.imsstack.internal.imsservice;
 
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
@@ -84,15 +83,19 @@ public class MmTelFeatureRegistry {
      * @param enabled The flag specifying that the service is capable.
      */
     public void setTerminalBasedCallWaitingStatus(boolean enabled) {
+        boolean notifyChange = false;
+
         synchronized (mLock) {
             if (mTerminalBasedCallWaitingEnabled != enabled) {
                 ImsLog.i(mSlotId, "setTerminalBasedCallWaitingStatus: "
                         + mTerminalBasedCallWaitingEnabled + " >> " + enabled);
-
                 mTerminalBasedCallWaitingEnabled = enabled;
-
-                notifyTerminalBasedCallWaitingStatusChanged();
+                notifyChange = true;
             }
+        }
+
+        if (notifyChange) {
+            notifyTerminalBasedCallWaitingStatusChanged();
         }
     }
 
@@ -119,19 +122,23 @@ public class MmTelFeatureRegistry {
      * @param srvccState The SRVCC state to be set.
      */
     public void setSrvccState(int srvccState) {
+        boolean notifyChange = false;
+
         synchronized (mLock) {
             if (mSrvccState != srvccState) {
                 ImsLog.i(mSlotId, "setSrvccState: " + srvccStateToString(mSrvccState)
                         + " >> " + srvccStateToString(srvccState));
-
                 if (srvccState == SRVCC_STATE_STARTED) {
                     mSrvccState = srvccState;
                 } else {
                     mSrvccState = SRVCC_STATE_NONE;
                 }
-
-                notifySrvccStateChanged(srvccState);
+                notifyChange = true;
             }
+        }
+
+        if (notifyChange) {
+            notifySrvccStateChanged(srvccState);
         }
     }
 
@@ -154,19 +161,15 @@ public class MmTelFeatureRegistry {
     }
 
     private void notifySrvccStateChanged(int srvccState) {
-        AppContext.runTask(() -> {
-            for (Listener l : mListeners) {
-                l.onSrvccStateChanged(srvccState);
-            }
-        }, 0);
+        for (Listener l : mListeners) {
+            l.onSrvccStateChanged(srvccState);
+        }
     }
 
     private void notifyTerminalBasedCallWaitingStatusChanged() {
-        AppContext.runTask(() -> {
-            for (Listener l : mListeners) {
-                l.onTerminalBasedCallWaitingStatusChanged();
-            }
-        }, 0);
+        for (Listener l : mListeners) {
+            l.onTerminalBasedCallWaitingStatusChanged();
+        }
     }
 
     private static String srvccStateToString(int srvccState) {

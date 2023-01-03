@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -29,10 +29,7 @@ import android.content.Context;
 import android.telephony.ims.feature.MmTelFeature;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.util.AppContext;
-
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +40,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class ImsServiceRegistryTest {
     private static final int SLOT0 = 0;
-    private static final int WAIT_TIME_FOR_LISTENER = 40; // milli-seconds
 
     @Mock Context mContext;
     @Mock MmTelFeature mMmTelFeature;
@@ -54,7 +50,6 @@ public class ImsServiceRegistryTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        AppContext.init(mContext);
         mServiceRegistry = ImsServiceRegistry.getInstance(SLOT0);
         mServiceRegistry.setImsEnabled(false);
         mServiceRegistry.setMmTelFeature(null);
@@ -62,11 +57,6 @@ public class ImsServiceRegistryTest {
 
     @After
     public void tearDown() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
-        AppContext.deinit();
     }
 
     @Test
@@ -107,8 +97,8 @@ public class ImsServiceRegistryTest {
         mServiceRegistry.setMmTelFeature(null);
         mServiceRegistry.setImsEnabled(false);
 
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(2)).onMmTelFeatureChanged();
-        verify(mListener, timeout(WAIT_TIME_FOR_LISTENER).times(2)).onImsOnOffChanged();
+        verify(mListener, times(2)).onMmTelFeatureChanged();
+        verify(mListener, times(2)).onImsOnOffChanged();
 
         mServiceRegistry.removeListener(mListener);
         mServiceRegistry.setMmTelFeature(mMmTelFeature);
