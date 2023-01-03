@@ -1857,13 +1857,6 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegAuthenticationFailed()
 
     CleanAll(AosReason::IMS_DISABLED);
     Report_StateChanged(IMS_FALSE);
-
-    if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType() ==
-            CarrierConfig::Assets::ERROR_TYPE_CRITICAL)
-    {
-        A_IMS_TRACE_I(APPID, "ProcessRegAuthenticationFailed :: PLMN is blocked", 0, 0, 0);
-        NotifyDeregistered(AosReasonCode::PLMN_BLOCK);
-    }
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegTerminated()

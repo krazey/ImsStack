@@ -3021,6 +3021,12 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessForbiddenFailed(IN IMS_SINT32
 
     if (m_nForbiddenCount >= nMaxCount)
     {
+        if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType() ==
+                CarrierConfig::Assets::ERROR_TYPE_CRITICAL)
+        {
+            m_eImsReasonCode = AosReasonCode::PLMN_BLOCK;
+        }
+
         Destroy();
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_FORBIDDEN);
     }
@@ -5257,6 +5263,12 @@ void AosRegistration::ProcessImsiBasedSubscriber()
     }
     else
     {
+        if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType() ==
+                CarrierConfig::Assets::ERROR_TYPE_CRITICAL)
+        {
+            m_eImsReasonCode = AosReasonCode::PLMN_BLOCK;
+        }
+
         Destroy();
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_FORBIDDEN);
     }
