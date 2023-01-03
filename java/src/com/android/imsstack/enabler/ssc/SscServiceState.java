@@ -50,8 +50,6 @@ public class SscServiceState {
     private int mUtBlockTimerId = -1;
     private int mUtBlockReason = SscConstant.BLOCK_REASON_NONE;
 
-    private boolean mAllSRVAddrTried = false;
-
     SscServiceState(int slotId, Looper looper) {
         mSlotId = slotId;
         mHandler = new SscServiceStateHandler(looper);
@@ -172,10 +170,6 @@ public class SscServiceState {
         }
     }
 
-    protected void setAllSrvAddrTried(boolean input) {
-        mAllSRVAddrTried = input;
-    }
-
     protected boolean getPdnConnectionFailed() {
         return isUtBlocked(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
                 | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
@@ -191,10 +185,6 @@ public class SscServiceState {
 
     protected boolean getPdnConnectionTimeout() {
         return isUtBlocked(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT);
-    }
-
-    protected boolean getAllSrvAddrTried() {
-        return mAllSRVAddrTried;
     }
 
     protected boolean getSocketConnectionExpired() {
