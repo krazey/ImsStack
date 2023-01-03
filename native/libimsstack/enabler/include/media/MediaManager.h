@@ -25,6 +25,7 @@
 #include "IMMedia.h"
 #include "MediaDef.h"
 
+class IMediaSession;
 class MediaMsgHandler;
 class MediaSession;
 class MediaResourceManager;
@@ -68,16 +69,16 @@ public:
      * @param nService service type, normal or emergency
      * @param callKey The key to identify the call session, each MediaSession has a unique key to
      * match with the call session
-     * @return MediaSession* created MediaSession instance
+     * @return IMediaSession* created IMediaSession instance
      */
-    MediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP callKey);
+    IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP callKey);
 
     /**
      * @brief Destroys the MediaSession instance
      *
      * @param pSession The instance to destroy
      */
-    void DestroySession(IN MediaSession* pSession);
+    void DestroySession(IN IMediaSession* piSession);
 
     /**
      * @brief Gets MediaSession instance
