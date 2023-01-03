@@ -134,16 +134,6 @@ public class SscServiceStateAgent {
         serviceState.setSocketConnectionExpired(input);
     }
 
-    protected void setAllSrvAddrTried(int slotId, boolean input) {
-        SscServiceState serviceState = getSscServiceState(slotId);
-        if (serviceState == null) {
-            ImsLog.i("setAllSrvAddrTried()");
-            return;
-        }
-
-        serviceState.setAllSrvAddrTried(input);
-    }
-
     protected boolean getDnsQueryFailed(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
@@ -182,16 +172,6 @@ public class SscServiceStateAgent {
         }
 
         return serviceState.getSocketConnectionExpired();
-    }
-
-    protected boolean getAllSrvAddrTried(int slotId) {
-        SscServiceState serviceState = getSscServiceState(slotId);
-        if (serviceState == null) {
-            ImsLog.i("getAllSrvAddrTried()");
-            return false;
-        }
-
-        return serviceState.getAllSrvAddrTried();
     }
 
     protected boolean getPdnConnectionFailed(int slotId) {

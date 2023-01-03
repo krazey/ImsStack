@@ -125,14 +125,6 @@ public class SscServiceStateAgentTest {
     }
 
     @Test
-    public void testSetAllSrvAddrTried() {
-        final boolean input = false;
-        mSscServiceStateAgent.setAllSrvAddrTried(SLOT_0, input);
-
-        verify(mockSscServiceState).setAllSrvAddrTried(eq(input));
-    }
-
-    @Test
     public void testGetDnsQueryFailed() {
         mSscServiceStateAgent.getDnsQueryFailed(SLOT_0);
 
@@ -158,13 +150,6 @@ public class SscServiceStateAgentTest {
         mSscServiceStateAgent.getSocketConnectionExpired(SLOT_0);
 
         verify(mockSscServiceState).getSocketConnectionExpired();
-    }
-
-    @Test
-    public void testGetAllSrvAddrTried() {
-        mSscServiceStateAgent.getAllSrvAddrTried(SLOT_0);
-
-        verify(mockSscServiceState).getAllSrvAddrTried();
     }
 
     @Test
