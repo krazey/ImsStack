@@ -379,6 +379,15 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             UpdateDetailState(GetState());
             break;
 
+        case CMD_INCREASE_FAILURE_COUNT_FOR_PDN_REACTIVATED:
+            if (GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPolicy() ==
+                            CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED &&
+                    m_bEps5GsOnly)
+            {
+                m_nConsecutiveFailureForPdnReactivated++;
+            }
+            break;
+
         default:
             break;
     }

@@ -1111,6 +1111,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessPcscfRecovery(IN IMSMSG& objMsg)
 
     m_nRecoverReason = 0;
     m_piRegistration->Destroy();
+    m_piRegistration->RequestCmd(IAosRegistration::CMD_INCREASE_FAILURE_COUNT_FOR_PDN_REACTIVATED);
     PostMessage(MSG_REG_RECOVER, nReason, 0);
 }
 
