@@ -78,7 +78,7 @@ public:
      *
      * @param pSession The instance to destroy
      */
-    void DestroySession(IN IMediaSession* piSession);
+    void DestroySession(IN const IMediaSession* piSession);
 
     /**
      * @brief Gets MediaSession instance

@@ -264,7 +264,7 @@ private:
             IN VideoProfile::CapaNego* pDestCapaNego,
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
     IMS_BOOL CheckAvpfFromProfile(IN VideoProfile* pProfile);
-    IMS_BOOL GetAvpfFromAttributes_EX(IN const IMediaDescriptor* pMediaDescriptor,
+    IMS_BOOL GetAvpfFromAttributes_EX(
             IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
     OaModel* GetNegotiatedOaModel();
 

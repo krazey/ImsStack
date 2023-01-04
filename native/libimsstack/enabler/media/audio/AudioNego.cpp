@@ -2391,7 +2391,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
         if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") ||
                 pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
         {
-            AUDIO_CODEC nCurrCodec = AUDIO_CODEC_NONE;
+            AUDIO_CODEC nCurrCodec;
 
             AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pNegotiatedPayload->pFmtp;
             if (pNegotiatedPayload->objRtpMap.nSamplingRate == 8000)
@@ -4065,9 +4065,6 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
         return IMS_FALSE;
     }
 
-    IMS_SINT32 nTcapInitNum = 0;
-    AString strTcap = "";
-
     IMSList<AString> lstTcapAttr = pDescriptor->GetAttributes(SdpAttribute::TCAP);
     IMSList<AString> lstAcapAttr = pDescriptor->GetAttributes(SdpAttribute::ACAP);
     IMSList<AString> lstAcfgAttr = pDescriptor->GetAttributes(SdpAttribute::ACFG);
@@ -4097,6 +4094,7 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
         }
 
         IMSList<AString> lstSplitSpace = strTcapline.Split(' ');
+        IMS_SINT32 nTcapInitNum = 0;
 
         // save Tcap String to CapaNego Obj
         for (IMS_UINT32 j = 0; j < lstSplitSpace.GetSize(); j++)
@@ -4108,11 +4106,11 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
             }
             else
             {
+                AString strTcap = "";
                 // mapped - key : 'number' value:'Tcap'
                 strTcap.Sprintf("%s", lstSplitSpace.GetAt(j).GetStr());
                 pObjCapaNego->mapTransportCapa.Add(nTcapInitNum, strTcap);
                 nTcapInitNum++;
-                strTcap = "";
             }
         }
     }
