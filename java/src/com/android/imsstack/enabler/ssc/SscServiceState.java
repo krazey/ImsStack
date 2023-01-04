@@ -43,11 +43,13 @@ public class SscServiceState {
 
     // external events
     @VisibleForTesting
-    protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2000;
+    protected static final int EVENT_WIFI_STATE_CHANGED = 2000;
     @VisibleForTesting
-    protected static final int EVENT_DATA_RAT_CHANGED = 2001;
+    protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
     @VisibleForTesting
-    protected static final int EVENT_WIFI_STATE_CHANGED = 2002;
+    protected static final int EVENT_DATA_RAT_CHANGED = 2002;
+    @VisibleForTesting
+    protected static final int EVENT_DATA_ROAMING_STATE_CHANGED = 2003;
 
     private final int mSlotId;
     @VisibleForTesting
@@ -82,6 +84,7 @@ public class SscServiceState {
         if (dnw != null) {
             dnw.registerForAirplaneModeChanged(mHandler, EVENT_AIRPLANE_MODE_CHANGED, null);
             dnw.registerForRatChanged(mHandler, EVENT_DATA_RAT_CHANGED, null);
+            dnw.registerForRoamingStateChanged(mHandler, EVENT_DATA_ROAMING_STATE_CHANGED, null);
         }
 
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
@@ -109,8 +112,9 @@ public class SscServiceState {
 
         IDcNetWatcher dnw = getDcNetWatcher();
         if (dnw != null) {
-            dnw.unregisterForRatChanged(mHandler);
             dnw.unregisterForAirplaneModeChanged(mHandler);
+            dnw.unregisterForRatChanged(mHandler);
+            dnw.unregisterForRoamingStateChanged(mHandler);
         }
 
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
@@ -125,6 +129,7 @@ public class SscServiceState {
     }
 
     protected boolean isUtAvailable() {
+        ImsLog.i(mSlotId, "isUtAvailable : " + mUtAvailability);
         return mUtAvailability;
     }
 
@@ -252,6 +257,13 @@ public class SscServiceState {
         if (dnw == null) {
             ImsLog.w(mSlotId, "DcNetWatcher is null");
             return false;
+        }
+
+        if (dnw.isRoaming()) {
+            if (!SscConfig.isUtSupportedWhenRoaming(mSlotId)) {
+                ImsLog.w(mSlotId, "Ut not supported when roaming");
+                return false;
+            }
         }
 
         int dataRat = dnw.getNetworkType();
@@ -440,16 +452,15 @@ public class SscServiceState {
                 case EVENT_AIRPLANE_MODE_CHANGED:
                     handleAirplaneModeChanged();
                     break;
+                case EVENT_WIFI_STATE_CHANGED: // FALL-THROUGH
                 case EVENT_DATA_RAT_CHANGED: // FALL-THROUGH
-                case EVENT_WIFI_STATE_CHANGED:
+                case EVENT_DATA_ROAMING_STATE_CHANGED:
                     handleUtFeatureCapabilityChanged();
                     break;
                 default:
                     ImsLog.e(mSlotId, "Invalid Message");
                     break;
             }
-
-            ImsLog.d(mSlotId, "mUtBlockReason = " + mUtBlockReason);
         }
 
         private void handleBlockTimerExpired() {
