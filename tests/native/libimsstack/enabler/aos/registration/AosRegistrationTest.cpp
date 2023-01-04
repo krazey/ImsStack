@@ -89,6 +89,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
     FRIEND_TEST(AosRegistrationTest, BlockChanged);
     FRIEND_TEST(AosRegistrationTest, RetryCount);
+    FRIEND_TEST(AosRegistrationTest, RefreshTimerExpired);
 
 protected:
     inline IRegistration* GetRegistration() override { return m_piMockRegistration; }
@@ -108,6 +109,11 @@ public:
     inline void SetIRegContact(IN IRegContact* piRegContact) { m_piRegContact = piRegContact; }
 
     inline void SetRegType(IN AosRegistrationType eRegType) { m_eRegType = eRegType; }
+
+    inline void SetTransactionStarted(IN IMS_BOOL bIsTransactionStarted)
+    {
+        m_bIsTransactionStarted = bIsTransactionStarted;
+    }
 
     inline IAosRegistrationListener* GetListener() { return m_piListener; }
 
@@ -790,4 +796,78 @@ TEST_F(AosRegistrationTest, RetryCount)
 
     m_pTestAosRegistration->ClearRetryCount(IMS_TRUE);
     EXPECT_TRUE(m_pTestAosRegistration->IsRetryCountClear());
+}
+
+TEST_F(AosRegistrationTest, RefreshTimerExpired)
+{
+    // m_piRegistration == IMS_NULL
+    IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
+    m_pTestAosRegistration->SetIRegistration(IMS_NULL);
+    m_pTestAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
+    EXPECT_FALSE(bDoImplicitRefresh);
+
+    // GetState() == STATE_OFFLINE return;
+    EXPECT_CALL(m_objMockIRegistration, GetState()).Times(0);
+
+    m_pTestAosRegistration->SetIRegistration(static_cast<IRegistration*>(&m_objMockIRegistration));
+    m_pTestAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    bDoImplicitRefresh = IMS_TRUE;
+    m_pTestAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
+    EXPECT_FALSE(bDoImplicitRefresh);
+
+    // GetRegOutOfServicePolicy
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegOutOfServicePolicy())
+            .Times(AnyNumber())
+            .WillOnce(
+                    Return(static_cast<IMS_SINT32>(CarrierConfig::Assets::REG_OOS_POLICY_DESTROY)))
+            .WillRepeatedly(
+                    Return(static_cast<IMS_SINT32>(CarrierConfig::Assets::REG_OOS_POLICY_DEFAULT)));
+
+    EXPECT_CALL(m_objMockAosINetTracker, IsSuspended()).Times(1).WillOnce(Return(IMS_TRUE));
+
+    // Destroy() - SetContactAddressConfiguration()
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, IsContactUriValidationChecked())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegRetryCountResetPolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_SUBSCRIPTION));
+
+    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(1);
+    EXPECT_CALL(m_objMockIRegistration, SetListener(IMS_NULL)).Times(1);
+
+    bDoImplicitRefresh = IMS_TRUE;
+    m_pTestAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pTestAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
+    EXPECT_FALSE(bDoImplicitRefresh);
+    EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+
+    // !IsTransactionStarted , AddFeature return;
+    bDoImplicitRefresh = IMS_TRUE;
+    m_pTestAosRegistration->SetIRegistration(static_cast<IRegistration*>(&m_objMockIRegistration));
+    m_pTestAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pTestAosRegistration->SetTransactionStarted(IMS_FALSE);
+
+    m_pTestAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
+    EXPECT_FALSE(bDoImplicitRefresh);
+    EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_REFRESHSTOP);
+
+    // IsTransactionStarted , SetState  STATE_REFRESHING;
+    m_pTestAosRegistration->SetTransactionStarted(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
+            .Times(AnyNumber());
+
+    bDoImplicitRefresh = IMS_TRUE;
+    m_pTestAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pTestAosRegistration->SetFakeReg(IMS_TRUE);
+
+    m_pTestAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
+    EXPECT_TRUE(bDoImplicitRefresh);
+    EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_REFRESHING);
 }
