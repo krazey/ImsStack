@@ -392,9 +392,7 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
         if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
         {
             // VZW Reqs. - VZ_REQ_VOWIFI_6230394
-            bBlocked = bBlocked &&
-                    (AosHandle::IsHandleBlocked(BLOCK_VIWIFI_CAPABILITY) ||
-                            !IsInvalidMobileNetwork());
+            bBlocked = bBlocked && AosHandle::IsHandleBlocked(BLOCK_VIWIFI_CAPABILITY);
         }
 
         return bBlocked;

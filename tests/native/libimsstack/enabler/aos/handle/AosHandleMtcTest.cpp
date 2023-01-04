@@ -1474,8 +1474,8 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test2)
 TEST_F(AosHandleMtcTest, IsHandleBlocked_Test3)
 {
     // Test3: Epdg enabled, BLOCK_VOWIFI_CAPABILITY
-    //        ViWiFi without Voice supported, valid network
-    // Expectation: return true
+    //        ViWiFi without Voice supported
+    // Expectation: return false
 
     SetEpdgEnabled(IMS_TRUE);
     AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
@@ -1483,41 +1483,13 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test3)
     EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileChangingNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
-    EXPECT_TRUE(IsHandleBlocked());
-}
-
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test4)
-{
-    // Test4: Epdg enabled, BLOCK_VOWIFI_CAPABILITY
-    //        ViWiFi without Voice supported, invalid network
-    // Expectation: return true
-
-    SetEpdgEnabled(IMS_TRUE);
-    AddBlock(AosHandle::BLOCK_VOWIFI_CAPABILITY);
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsVideoOverWifiSupportedWithoutVoice())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_GSM));
 
     EXPECT_FALSE(IsHandleBlocked());
 }
 
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test4)
 {
-    // Test5: Epdg not enabled
+    // Test4: Epdg not enabled
     // Expectation: return true if BLOCK_VOPS or BLOCK_VOLTE_CAPABILITY or BLOCK_NETWORK or BLOCK_3G
     //              or BLOCK_SSAC
     //              else return false
@@ -1545,9 +1517,9 @@ TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
     EXPECT_FALSE(IsHandleBlocked());
 }
 
-TEST_F(AosHandleMtcTest, IsHandleBlocked_Test6)
+TEST_F(AosHandleMtcTest, IsHandleBlocked_Test5)
 {
-    // Test6: Epdg enabled, BLOCK_VOWIFI_CAPABILITY
+    // Test5: Epdg enabled, BLOCK_VOWIFI_CAPABILITY
     //        ViWiFi without Voice supported, Changing to invalid network
     // Expectation: return true
 
