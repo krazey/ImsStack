@@ -17,12 +17,12 @@
 #include "ImsVector.h"
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
+#include "IAosService.h"
 #include "ImsEventDef.h"
 
 #include "../../interface/mtc/MtcConnector.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosCallTrackerListener.h"
-#include "interface/IAosService.h"
 #include "provider/AosUtil.h"
 #include "provider/AosCallTracker.h"
 #include "provider/AosProvider.h"

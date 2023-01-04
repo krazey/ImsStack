@@ -20,10 +20,10 @@
 #include <gmock/gmock.h>
 
 #include "AString.h"
+#include "IAosService.h"
 #include "ImsMap.h"
 #include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
-#include "interface/IAosService.h"
 
 class MockIAosService : public IAosService
 {

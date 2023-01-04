@@ -16,7 +16,7 @@
 #ifndef AOS_SERVICE_H_
 #define AOS_SERVICE_H_
 
-#include "interface/IAosService.h"
+#include "IAosService.h"
 
 class IAosRegistrationControlListener;
 class IAosServiceSettingListener;

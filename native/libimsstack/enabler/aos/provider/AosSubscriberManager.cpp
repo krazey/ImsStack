@@ -17,6 +17,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTimer.h"
 #include "Configuration.h"
+#include "IAosService.h"
 #include "IConfigurable.h"
 #include "ISubscriberConfig.h"
 #include "SipAddress.h"
@@ -31,7 +32,6 @@
 #include "interface/IAosRegistration.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosRegStateManager.h"
-#include "interface/IAosService.h"
 #include "interface/IAosSubscriber.h"
 #include "interface/IAosSubscriberListener.h"
 

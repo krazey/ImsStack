@@ -32,6 +32,8 @@
 
 #include "../../../enabler/interface/aos/ImsAosParameter.h"
 
+#include "../../interface/aos/MockIAosService.h"
+
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosConnection.h"
 #include "interface/MockIAosBlock.h"
@@ -40,7 +42,6 @@
 #include "interface/MockIAosNetTracker.h"
 #include "interface/MockIAosPcscf.h"
 #include "interface/MockIAosRegistrationListener.h"
-#include "interface/MockIAosService.h"
 #include "interface/MockIAosSubscriber.h"
 
 #include "interface/AosInternalMsgDef.h"

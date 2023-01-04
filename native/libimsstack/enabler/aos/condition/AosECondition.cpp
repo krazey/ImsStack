@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 #include "ServiceTrace.h"
+#include "IAosService.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosConditionListener.h"
 #include "interface/IAosNetTracker.h"
-#include "interface/IAosService.h"
 #include "interface/IAosSubscriber.h"
 #include "provider/AosProvider.h"
 #include "condition/AosBlock.h"

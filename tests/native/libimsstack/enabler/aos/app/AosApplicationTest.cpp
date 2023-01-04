@@ -27,6 +27,8 @@
 #include "../../../config/interface/CarrierConfig.h"
 #include "../../../config/interface/ImsServiceConfig.h"
 
+#include "../../interface/aos/MockIAosService.h"
+
 #include "app/MockAosAppContext.h"
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosBlock.h"
@@ -39,7 +41,6 @@
 #include "interface/MockIAosPcscf.h"
 #include "interface/MockIAosRegistration.h"
 #include "interface/MockIAosRegStateManager.h"
-#include "interface/MockIAosService.h"
 
 #include "AosReason.h"
 #include "ImsAosParameter.h"

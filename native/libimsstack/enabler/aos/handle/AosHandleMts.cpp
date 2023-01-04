@@ -15,11 +15,11 @@
  */
 #include "ServiceTrace.h"
 #include "CarrierConfig.h"
+#include "IAosService.h"
 #include "INetworkWatcher.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosNConfiguration.h"
-#include "interface/IAosService.h"
 #include "provider/AosProvider.h"
 #include "handle/AosHandleMts.h"
 

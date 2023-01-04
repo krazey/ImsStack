@@ -44,8 +44,8 @@
 #include "interface/MockIAosNConfiguration.h"
 #include "interface/MockIAosNetTracker.h"
 #include "interface/MockIAosRegistration.h"
-#include "interface/MockIAosService.h"
 
+#include "../../interface/aos/MockIAosService.h"
 #include "../../interface/aos/MockIImsAosListener.h"
 #include "../../../platform/interface/MockIImsRadio.h"
 #include "../../../platform/interface/TestImsRadioService.h"

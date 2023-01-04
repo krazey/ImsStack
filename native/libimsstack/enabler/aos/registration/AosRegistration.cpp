@@ -48,6 +48,7 @@
 #include "GeolocationHelper.h"
 
 #include "AoSAppRequestType.h"
+#include "IAosService.h"
 #include "ImsAosParameter.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
@@ -60,7 +61,6 @@
 #include "interface/IAosPcscf.h"
 #include "interface/IAosRegistrationListener.h"
 #include "interface/IAosRegStateManager.h"
-#include "interface/IAosService.h"
 #include "interface/IAosSubscriber.h"
 #include "handle/AosFeatureTag.h"
 #include "provider/AosLog.h"

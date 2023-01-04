@@ -15,6 +15,7 @@
  */
 
 #include "CarrierConfig.h"
+#include "IAosService.h"
 #include "INetworkWatcher.h"
 #include "ServiceEvent.h"
 #include "ServiceImsRadio.h"
@@ -30,7 +31,6 @@
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
-#include "interface/IAosService.h"
 
 #include "provider/AosProvider.h"
 #include "provider/AosString.h"

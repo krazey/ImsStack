@@ -18,11 +18,11 @@
 
 #include "AString.h"
 #include "ImsMap.h"
-#include "interface/IAosServicePhoneListener.h"
-#include "interface/IAosServiceSettingListener.h"
 #include "INativeEnabler.h"
 
 class IAosRegistrationControlListener;
+class IAosServicePhoneListener;
+class IAosServiceSettingListener;
 
 enum class AosReasonCode;
 enum class AosNetworkType;

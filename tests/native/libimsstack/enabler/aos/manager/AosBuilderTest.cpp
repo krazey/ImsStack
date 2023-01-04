@@ -17,8 +17,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "../../interface/aos/MockIAosService.h"
+
 #include "app/MockAosAppContext.h"
-#include "interface/MockIAosService.h"
 
 #include "ImsServiceConfig.h"
 #include "app/AosApplication.h"

@@ -16,13 +16,13 @@
 #include "ServiceTrace.h"
 #include "ServiceMutex.h"
 #include "SystemConfig.h"
+#include "IAosService.h"
 
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosLocationStarter.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosRegStateManager.h"
 #include "interface/IAosRetryRepository.h"
-#include "interface/IAosService.h"
 #include "interface/IAosSubscriberManager.h"
 #include "interface/IAosTransaction.h"
 

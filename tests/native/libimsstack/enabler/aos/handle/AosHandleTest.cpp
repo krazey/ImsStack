@@ -42,10 +42,11 @@
 #include "interface/MockIAosNetTracker.h"
 #include "interface/MockIAosRegistration.h"
 #include "interface/MockIAosRegStateManager.h"
-#include "interface/MockIAosService.h"
+
 #include "../../interface/aos/MockIImsAosInfo.h"
 #include "../../interface/aos/MockIImsAosListener.h"
 #include "../../interface/aos/MockIImsAosMonitor.h"
+#include "../../interface/aos/MockIAosService.h"
 #include "../../../platform/interface/MockIWifiWatcher.h"
 
 using ::testing::_;

@@ -16,6 +16,7 @@
 #ifndef AOS_HANDLE_H_
 #define AOS_HANDLE_H_
 
+#include "IAosService.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "ImsStateMachine.h"
@@ -27,7 +28,6 @@
 #include "interface/IAosNetTrackerListener.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosServiceSettingListener.h"
-#include "interface/IAosService.h"
 
 #include "handle/AosFeatureTag.h"
 

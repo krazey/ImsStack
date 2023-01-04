@@ -17,13 +17,13 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "IAosService.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosLocationStarter.h"
 #include "interface/IAosRegStateManager.h"
 #include "interface/IAosRetryRepository.h"
-#include "interface/IAosService.h"
 #include "interface/IAosSubscriberManager.h"
 #include "provider/AosDnsQuery.h"
 #include "provider/AosKeepAlive.h"
@@ -34,8 +34,9 @@
 #include "interface/MockIAosLocationStarter.h"
 #include "interface/MockIAosRegStateManager.h"
 #include "interface/MockIAosRetryRepository.h"
-#include "interface/MockIAosService.h"
 #include "interface/MockIAosSubscriberManager.h"
+
+#include "../../interface/aos/MockIAosService.h"
 
 using ::testing::TypedEq;
 

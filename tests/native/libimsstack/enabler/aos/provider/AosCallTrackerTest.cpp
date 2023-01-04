@@ -18,13 +18,14 @@
 #include <gmock/gmock.h>
 
 #include "ImsEventDef.h"
-#include "interface/IAosService.h"
 #include "provider/AosCallTracker.h"
 #include "provider/AosProvider.h"
+#include "../../interface/aos/IAosService.h"
 #include "../../interface/mtc/IMtcCallStateListener.h"
 
 #include "interface/MockIAosCallTrackerListener.h"
-#include "interface/MockIAosService.h"
+
+#include "../../interface/aos/MockIAosService.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;

@@ -17,6 +17,7 @@
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
+#include "IAosService.h"
 #include "ImsMessage.h"
 #include "INetworkWatcher.h"
 
@@ -35,7 +36,6 @@
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosRegistration.h"
 #include "interface/IAosRegStateManager.h"
-#include "interface/IAosService.h"
 
 #include "provider/AosLog.h"
 #include "provider/AosProvider.h"
