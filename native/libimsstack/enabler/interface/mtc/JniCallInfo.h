@@ -19,7 +19,6 @@
 
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
-#include "MtcDef.h"
 #include "call/IMtcCall.h"
 
 struct JniCallInfo

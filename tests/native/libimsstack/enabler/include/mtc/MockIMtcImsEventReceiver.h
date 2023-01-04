@@ -21,8 +21,6 @@
 #include "ImsTypeDef.h"
 #include <gmock/gmock.h>
 
-class IMtcImsEventListener;
-
 class MockIMtcImsEventReceiver : public IMtcImsEventReceiver
 {
 public:
