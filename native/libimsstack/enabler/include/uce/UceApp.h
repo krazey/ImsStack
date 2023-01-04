@@ -42,7 +42,7 @@ class UceApp :
   */
 public:
     explicit UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName);
-    explicit UceApp(IN const IMS_SINT32 nSlotId);
+    explicit UceApp(IN const IMS_SINT32 nSlotId, IN IImsAos* piImsAos);
     virtual ~UceApp();
     /* ------------------------------------------------------------------------------------------
         Methods
@@ -124,6 +124,7 @@ protected:
 private:
     enum
     {
+        AOS_CONNECTING,
         AOS_CONNECTED,
         AOS_DISCONNECTING,
         AOS_DISCONNECTED,

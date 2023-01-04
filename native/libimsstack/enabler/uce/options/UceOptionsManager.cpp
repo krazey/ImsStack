@@ -22,7 +22,7 @@
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
-#include "IUUceService.h"
+#include "IUce.h"
 #include "ServiceMessage.h"
 #include "Sip.h"
 #include "options/UceOptions.h"
@@ -35,9 +35,9 @@ PUBLIC
 UceOptionsManager::UceOptionsManager(
         IN const AString& strName, IN ICoreService* piCoreService, IN IMS_SINT32 simSlotId) :
         ImsActivityEx(strName),
+        m_bAoSConnected(IMS_FALSE),
         m_nSimSlot(simSlotId),
         m_piCoreService(piCoreService),
-        m_bAoSConnected(IMS_FALSE),
         m_nReceivedOptionKey(0)
 {
     m_nSimSlot = simSlotId;
@@ -148,7 +148,7 @@ void UceOptionsManager::AoSDisconnected()
     m_bAoSConnected = IMS_FALSE;
 }
 
-void UceOptionsManager::ClosedService()
+IMS_BOOL UceOptionsManager::ClosedService()
 {
     IMS_TRACE_D("ClosedService", 0, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objSentUceOptionsMap.GetSize(); i++)
@@ -159,6 +159,7 @@ void UceOptionsManager::ClosedService()
             pUceOptions->AoSDisconnected();
         }
     }
+    return IMS_TRUE;
 }
 
 PROTECTED VIRTUAL IMS_BOOL UceOptionsManager::OnMessage(IN IMSMSG& objMsg)

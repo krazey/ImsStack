@@ -51,36 +51,21 @@ public:
     virtual void XmlState_NotifyStateChanged() override;
 
 protected:
-    virtual IMS_BOOL Initialize();
-    virtual IMS_BOOL OnStart(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnTerminate(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
     IThread* GetThread() const;
 
 private:
+    IMS_BOOL Initialize();
     void Uninitialize();
+    IMS_BOOL OnStart(IN const IMSMSG& objMSG);
+    IMS_BOOL OnTerminate(IN const IMSMSG& objMSG);
     virtual IMS_BOOL Runnable_Run(IN IMSMSG& objMSG) override;
     IMS_RESULT XMLDataTokenization(IN const ByteArray& objBytes);
-    IMS_BOOL StartMessageHandler(IMSMSG& objMsg);
-    IMS_BOOL TerminateMessageHandler(IMSMSG& objMsg);
+    IMS_BOOL StartMessageHandler(const IMSMSG& objMsg);
+    IMS_BOOL TerminateMessageHandler(const IMSMSG& objMsg);
     IMS_BOOL ReceivedRlmiNotifyMessageHandler(IMSMSG& objMsg);
     IMS_BOOL ParsedRlmiXmlMessageHandler(IMSMSG& objMsg);
     void SendParseCompletedMsg(IMS_SINT32 eXMLInfoType);
     IMS_RESULT ParseRLMIList(IN IDocument* piDocument);
-
-private:
-    IMS_SINT32 m_nSimSlot;
-    IMS_UINT32 m_nIndex;
-    AString m_strQueryName;
-    AString m_strThreadName;
-    IThread* m_piThread;
-    IXmlTransactionProvider* m_pXMLTransactionProvider;
-    ImsQueue<IXmlTransaction*> m_objTransactionQueue;
-    IMSList<AString> m_objRlmiCidList;
-    UcePidfXmls* m_pPidfXmls;
-    UceNonCapabilityUsers* m_pNonCapabilities;
-    UceNotifyMessageBody* m_pUceNotifyMessageBody;
-    IMSList<UceNotifyBodyPartData*> m_objBodyParts;
 
 public:
     typedef enum _XMLINFO
@@ -89,6 +74,22 @@ public:
         XMLINFO_RLMI_LIST,
     } XMLInfo;
     IMSMap<IMS_SINT32, msgHandler> m_objMessageMap;
+
+protected:
+    IThread* m_piThread;
+
+private:
+    IMS_SINT32 m_nSimSlot;
+    IMS_UINT32 m_nIndex;
+    AString m_strQueryName;
+    AString m_strThreadName;
+    IXmlTransactionProvider* m_pXMLTransactionProvider;
+    ImsQueue<IXmlTransaction*> m_objTransactionQueue;
+    IMSList<AString> m_objRlmiCidList;
+    UcePidfXmls* m_pPidfXmls;
+    UceNonCapabilityUsers* m_pNonCapabilities;
+    UceNotifyMessageBody* m_pUceNotifyMessageBody;
+    IMSList<UceNotifyBodyPartData*> m_objBodyParts;
 };
 
 #endif  // _UCE_XML_DOCUMENT_HELPER_THREAD_H_

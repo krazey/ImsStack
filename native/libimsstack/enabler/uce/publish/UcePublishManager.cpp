@@ -31,6 +31,7 @@
 #include "SipParsingHelper.h"
 #include "SipStatusCode.h"
 #include "TextParser.h"
+#include "IUce.h"
 #include "config/UceConfig.h"
 #include "def/UceDef.h"
 #include "IUceJniThread.h"
@@ -114,15 +115,15 @@ UcePublishManager::UcePublishManager(
         m_nKey(0),
         m_bReceivedUnPublishRequest(IMS_FALSE),
         m_pPendingPublicationData(IMS_NULL),
+        m_nConnectedServices(0),
+        m_piPublication(IMS_NULL),
         m_strPidfXml(AString::ConstNull()),
         m_strEtag(AString::ConstNull()),
         m_nCapability(0),
         m_nSimSlot(nSimSlot),
         m_piCoreService(_piCoreService),
-        m_piPublication(IMS_NULL),
         m_strAppName(strAppName),
         m_objExponentialRetryTimeSec(IMSVector<IMS_SINT32>()),
-        m_nConnectedServices(0),
         m_bAoSConnected(IMS_FALSE),
         m_nExtended(1),
         m_bEnablePIDFCompression(IMS_FALSE),
@@ -622,12 +623,9 @@ IMS_BOOL UcePublishManager::StateIDLE_PublishRequested(IN IMSMSG& objMsg)
         IMS_TRACE_I("StateIDLE_PublishRequested - pPublicationData is null", 0, 0, 0);
         return IMS_FALSE;
     }
-    else
-    {
-        SendPublishCommandErrorInd(
-                pPublicationData->m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
-        delete pPublicationData;
-    }
+    SendPublishCommandErrorInd(
+            pPublicationData->m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+    delete pPublicationData;
     return IMS_TRUE;
 }
 
@@ -794,10 +792,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Published(IN IMSMSG& objMsg)
         SetState(TERMINATING);
         return IMS_TRUE;
     }
-    else
-    {
-        SetState(PUBLISHED);
-    }
+    SetState(PUBLISHED);
     return IMS_TRUE;
 }
 
@@ -983,17 +978,15 @@ IMS_BOOL UcePublishManager::StateREFRESHING_PublishRequested(IN IMSMSG& objMsg)
     {
         SendPublishCommandErrorInd(
                 pPublicationData->m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+        return IMS_TRUE;
     }
-    else
-    {
-        m_pPendingPublicationData = new IPublicationData();
-        m_pPendingPublicationData->m_nKey = pPublicationData->m_nKey;
-        m_pPendingPublicationData->m_nCapability = pPublicationData->m_nCapability;
-        m_pPendingPublicationData->m_strEtag = pPublicationData->m_strEtag;
-        m_pPendingPublicationData->m_strPidfXml = pPublicationData->m_strPidfXml;
-        m_pPendingPublicationData->m_nExtended = pPublicationData->m_nExtended;
-        delete pPublicationData;
-    }
+    m_pPendingPublicationData = new IPublicationData();
+    m_pPendingPublicationData->m_nKey = pPublicationData->m_nKey;
+    m_pPendingPublicationData->m_nCapability = pPublicationData->m_nCapability;
+    m_pPendingPublicationData->m_strEtag = pPublicationData->m_strEtag;
+    m_pPendingPublicationData->m_strPidfXml = pPublicationData->m_strPidfXml;
+    m_pPendingPublicationData->m_nExtended = pPublicationData->m_nExtended;
+    delete pPublicationData;
     return IMS_TRUE;
 }
 
@@ -1050,17 +1043,14 @@ IMS_BOOL UcePublishManager::StateREFRESHING_Refreshed(IN IMSMSG& objMsg)
         SetState(TERMINATING);
         return IMS_TRUE;
     }
+    if (m_pPendingPublicationData != IMS_NULL)
+    {
+        SetState(ON);
+        SendPendingPublishRequest();
+    }
     else
     {
-        if (m_pPendingPublicationData != IMS_NULL)
-        {
-            SetState(ON);
-            SendPendingPublishRequest();
-        }
-        else
-        {
-            SetState(PUBLISHED);
-        }
+        SetState(PUBLISHED);
     }
     return IMS_TRUE;
 }
@@ -1110,20 +1100,15 @@ IMS_BOOL UcePublishManager::StateREFRESHING_RefreshFailed(IN IMSMSG& objMsg)
         SetState(TERMINATING);
         return IMS_TRUE;
     }
-    else
+
+    if (HandleFailResponse(nResponseCode) == IMS_TRUE)
     {
-        if (HandleFailResponse(nResponseCode) == IMS_TRUE)
-        {
-            SetState(PUBLISHING);
-            return IMS_TRUE;
-        }
-        else
-        {
-            if (m_pPendingPublicationData != IMS_NULL)
-            {
-                SendPendingPublishRequest();
-            }
-        }
+        SetState(PUBLISHING);
+        return IMS_TRUE;
+    }
+    if (m_pPendingPublicationData != IMS_NULL)
+    {
+        SendPendingPublishRequest();
     }
     return IMS_TRUE;
 }
@@ -1195,12 +1180,9 @@ IMS_BOOL UcePublishManager::StateTERMINATING_PublishRequested(IN IMSMSG& objMsg)
         IMS_TRACE_I("StateTERMINATING_PublishRequested - pPublicationData is null", 0, 0, 0);
         return IMS_FALSE;
     }
-    else
-    {
-        SendPublishCommandErrorInd(
-                pPublicationData->m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
-        delete pPublicationData;
-    }
+    SendPublishCommandErrorInd(
+            pPublicationData->m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+    delete pPublicationData;
     return IMS_TRUE;
 }
 
@@ -1555,16 +1537,13 @@ IMS_BOOL UcePublishManager::SetPidfXmlBody(ISipMessage* piMessage)
     ISipMessageBodyPart* piBodyPart = piMessage->CreateBodyPart();
     piMessage->AddHeader(ISipHeader::CONTENT_TYPE, "application/pidf+xml");
 
-    if (m_strPidfXml != IMS_NULL && !m_strPidfXml.IsEmpty())
-    {
-        const IMS_BYTE* pszXML = reinterpret_cast<const IMS_BYTE*>(m_strPidfXml.GetStr());
-        objContent.Attach(pszXML, m_strPidfXml.GetLength());
-    }
-    else
+    if (m_strPidfXml == IMS_NULL || m_strPidfXml.IsEmpty())
     {
         IMS_TRACE_E(0, "[ERROR]SetPidfXmlBody:m_strPidfXml is null or empty", 0, 0, 0);
         return IMS_FALSE;
     }
+    const IMS_BYTE* pszXML = reinterpret_cast<const IMS_BYTE*>(m_strPidfXml.GetStr());
+    objContent.Attach(pszXML, m_strPidfXml.GetLength());
 
     // TMO TRD 2020 4Q - GID-MTRREQ-480586
     if (m_bEnablePIDFCompression == IMS_TRUE)

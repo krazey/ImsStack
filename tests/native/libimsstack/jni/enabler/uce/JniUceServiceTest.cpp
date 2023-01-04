@@ -17,7 +17,7 @@
 #include "JniEnablerConnector.h"
 #include "JniUceService.h"
 #include "MockIUceJni.h"
-#include "IUUceService.h"
+#include "IUce.h"
 #include <binder/Parcel.h>
 #include <gtest/gtest.h>
 
@@ -26,8 +26,6 @@ using ::testing::Return;
 
 namespace android
 {
-
-LOCAL IMS_SINT32 SLOT_ID = 0;
 
 class TestJniUceService : public JniUceService
 {
@@ -55,16 +53,14 @@ protected:
     virtual void SetUp() override
     {
         ON_CALL(objMockIUceJni, NotifyJniEnablerSet).WillByDefault(Return());
-        JniEnablerConnector::GetInstance().SetNativeEnabler(
-                SLOT_ID, EnablerType::UCE, &objMockIUceJni);
-
-        pJniService = new TestJniUceService(reinterpret_cast<Jni_SendDataToJava>(0x01), SLOT_ID);
+        JniEnablerConnector::GetInstance().SetNativeEnabler(0, EnablerType::UCE, &objMockIUceJni);
+        pJniService = new TestJniUceService(reinterpret_cast<Jni_SendDataToJava>(0x01), 0);
     }
 
     virtual void TearDown() override
     {
         delete pJniService;
-        JniEnablerConnector::GetInstance().SetNativeEnabler(SLOT_ID, EnablerType::UCE, IMS_NULL);
+        JniEnablerConnector::GetInstance().SetNativeEnabler(0, EnablerType::UCE, IMS_NULL);
     }
 };
 

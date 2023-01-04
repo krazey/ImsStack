@@ -17,15 +17,18 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "UceService.h"
-#include "IUUceService.h"
+#include "IUce.h"
+#include "MockICoreService.h"
+#include "MockIFeatureCaps.h"
 
 #include "ServiceMessage.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+using ::testing::_;
+using ::testing::Return;
 
-IMS_SINT32 SERVICE_SIM_SLOT = 20;
+__IMS_TRACE_TAG_USER_DECL__("UCE");
 
 class TestUceService : public UceService
 {
@@ -38,8 +41,8 @@ public:
     };
 
 public:
-    TestUceService() :
-            UceService(AString("UceApp"), SERVICE_SIM_SLOT)
+    inline explicit TestUceService(ICoreService* piCoreService) :
+            UceService(piCoreService)
     {
     }
     virtual ~TestUceService() {}
@@ -91,11 +94,13 @@ class UceServiceTest : public ::testing::Test
 {
 public:
     TestUceService* pUceService;
+    MockICoreService objMockICoreService;
+    MockIFeatureCaps objMockIFeatureCaps;
 
 protected:
     virtual void SetUp() override
     {
-        pUceService = new TestUceService();
+        pUceService = new TestUceService(&objMockICoreService);
         ASSERT_TRUE(pUceService != nullptr);
     }
 
@@ -131,6 +136,15 @@ TEST_F(UceServiceTest, DisableManager)
     EXPECT_TRUE(pUceService->IsNull(TestUceService::SUBSCRIBE));
     EXPECT_TRUE(pUceService->IsNull(TestUceService::PUBLISH));
     EXPECT_TRUE(pUceService->IsNull(TestUceService::OPTIONS));
+}
+
+TEST_F(UceServiceTest, AoSConnected)
+{
+    IMS_TRACE_D("AoSConnected", 0, 0, 0);
+    ON_CALL(objMockICoreService, GetFeatureCaps()).WillByDefault(Return(&objMockIFeatureCaps));
+
+    EXPECT_CALL(objMockIFeatureCaps, RemoveFeature(_, _)).Times(1);
+    pUceService->AoSConnected(0);
 }
 
 TEST_F(UceServiceTest, SendPublishCmd)

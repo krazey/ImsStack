@@ -40,7 +40,8 @@ public:
 
     void AoSConnected();
     void AoSDisconnected();
-    void ClosedService();  // core service closed
+    IMS_BOOL ClosedService();  // core service closed
+
 protected:
     virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
 
@@ -50,11 +51,13 @@ private:
     void SendOptionsCommandError(IN IMS_UINT32 nKey, IN IMS_UINT32 code);
     IUceJniThread* GetJniThread();
 
+protected:
+    IMS_BOOL m_bAoSConnected;
+    IMSMap<IMS_UINT32, UceOptions*> m_objSentUceOptionsMap;
+
 private:
     IMS_SINT32 m_nSimSlot;
     ICoreService* m_piCoreService;
-    IMS_BOOL m_bAoSConnected;
-    IMSMap<IMS_UINT32, UceOptions*> m_objSentUceOptionsMap;
     IMSMap<IMS_UINT32, UceOptions*> m_objReceivedUceOptionsMap;
     IMS_UINT32 m_nReceivedOptionKey;
 };
