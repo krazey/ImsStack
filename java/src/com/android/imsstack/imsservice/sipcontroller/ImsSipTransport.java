@@ -53,7 +53,6 @@ public class ImsSipTransport extends SipTransportImplBase {
 
     //Below instance variables for each sip transport object which is created for each slot
     private final int mSlotId;
-    private final Context mContext;
     //New message executor for framework callback interfaces
     private Executor mCallBackExecutor;
     //Ims base registration implementation
@@ -101,7 +100,6 @@ public class ImsSipTransport extends SipTransportImplBase {
         super(sipTransportRequestExecutor);
         mCallBackExecutor = callBackExecutor;
         mSlotId = slotId;
-        mContext = context;
         mImsRegistrationBaseImpl = registration;
         mISipTransportRemote = sipControllerAgent;
         initializeSipTransport();
@@ -201,6 +199,7 @@ public class ImsSipTransport extends SipTransportImplBase {
 
     /**
      * Update the latest configuration value.
+     * @param sipTransportConfig contains IMS Registration Configuration
      */
     public void updateSipTransportConfig(SipDelegateConfiguration sipTransportConfig) {
         mSipTransportConfig = sipTransportConfig;
