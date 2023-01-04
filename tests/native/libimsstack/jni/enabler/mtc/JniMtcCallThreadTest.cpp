@@ -57,9 +57,9 @@ public:
     {
         objSuppServices.Clear();
 
+        delete pJniCallThread;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         delete pThreadService;
-        delete pJniCallThread;
     }
 
 public:
