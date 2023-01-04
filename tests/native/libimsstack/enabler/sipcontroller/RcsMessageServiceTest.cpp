@@ -42,7 +42,7 @@ protected:
         ASSERT_TRUE(pRcsService != nullptr);
 
         IUSncOpenCmdParam* pParam = new IUSncOpenCmdParam();
-        IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, sThread.GetStr());
+        pParam->m_strThread = sThread;
 
         IMSMSG objOpenCmdMsg(IUSncService::OPENMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
         ASSERT_TRUE(pRcsService->HandleOpenMSG(objOpenCmdMsg) == IMS_TRUE);
@@ -63,7 +63,7 @@ TEST_F(RcsMessageServiceTest, HandleSessionMSG)
     IMS_TRACE_D("HandleSessionMSG", 0, 0, 0);
 
     IUSncSendMessageParam* pParam = new IUSncSendMessageParam();
-    IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, sThread.GetStr());
+    pParam->m_strThread = sThread;
 
     IMSMSG objSessionCmdMsg(IUSncService::SENDMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     // to avoid test
@@ -75,7 +75,7 @@ TEST_F(RcsMessageServiceTest, HandleNotifyReceiveErrorMSG)
     IMS_TRACE_D("HandleNotifyReceiveErrorMSG", 0, 0, 0);
 
     IUSncNotifyErrorCmdParam* pParam = new IUSncNotifyErrorCmdParam();
-    IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, sThread.GetStr());
+    pParam->m_strThread = sThread;
 
     IMSMSG objNotifyCmdMsg(
             IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
@@ -88,7 +88,7 @@ TEST_F(RcsMessageServiceTest, HandleCloseSessionMSG)
     IMS_TRACE_D("HandleCloseSessionMSG", 0, 0, 0);
 
     IUSncCloseSessionCmdParam* pParam = new IUSncCloseSessionCmdParam();
-    IMS_StrCpy(pParam->szThread, IMS_SOLUTION_MSG_SOURCE_LEN, sThread.GetStr());
+    pParam->m_strThread = sThread;
 
     IMSMSG objCloseCmdMsg(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     // to avoid test
