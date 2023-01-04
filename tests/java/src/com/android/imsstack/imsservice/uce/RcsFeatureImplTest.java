@@ -25,12 +25,10 @@ import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.telephony.CarrierConfigManager;
-import android.telephony.CarrierConfigManager.Ims;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.ImsRcsManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.CapabilityChangeRequest;
-import android.telephony.ims.feature.RcsFeature;
 import android.telephony.ims.feature.RcsFeature.RcsImsCapabilities;
 import android.telephony.ims.stub.CapabilityExchangeEventListener;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
@@ -175,12 +173,6 @@ public class RcsFeatureImplTest {
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
         request.addCapabilitiesToEnableForTech(RcsImsCapabilities.CAPABILITY_TYPE_OPTIONS_UCE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
-
-        RcsImsCapabilities  capabilities = Mockito.mock(RcsFeature.RcsImsCapabilities.class);
-        //add Presence Capability
-        capabilities.addCapabilities(RcsImsCapabilities.CAPABILITY_TYPE_PRESENCE_UCE);
-        bundle.putBoolean(Ims.KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, true);
-
         CapabilityCallback capabilityCallback = new CapabilityCallback();
         mFeature.addCapabilityCallback(capabilityCallback);
         //verify API changeEnabledCapabilities call
