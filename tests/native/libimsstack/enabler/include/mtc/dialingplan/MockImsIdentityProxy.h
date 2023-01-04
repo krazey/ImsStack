@@ -41,6 +41,7 @@ public:
     MOCK_METHOD(const AString, GetPhoneContext,
             (IN IMS_SINT32, IN IMS_SINT32, IN AccessNetworkInfo*, IN const AString&),
             (const, override));
+    MOCK_METHOD(const AString, GetHomeDomainName, (IN IMS_SINT32), (const, override));
 };
 
 #endif

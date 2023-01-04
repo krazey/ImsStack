@@ -57,6 +57,11 @@ public:
     {
         return ImsIdentity::GetPhoneContext(nDialingPolicy, nSlotId, pAni, strSubscriberId);
     }
+
+    inline virtual const AString GetHomeDomainName(IN IMS_SINT32 nSlotId) const
+    {
+        return ImsIdentity::GetHomeDomainName(nSlotId);
+    }
 };
 
 #endif
