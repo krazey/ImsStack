@@ -59,7 +59,7 @@ public:
 
     // TODO: temp inline. move to cpp
     inline void NotifyJniEnablerSet() override {}
-    virtual void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
+    void SendMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam) override;
 
     /**
      * @brief Creates a MediaSession instacne with the service type and assign the jni thread

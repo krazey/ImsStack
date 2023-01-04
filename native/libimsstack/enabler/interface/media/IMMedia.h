@@ -228,7 +228,7 @@ enum
 class ImsMediaMsgParamBase
 {
 public:
-    ImsMediaMsgParamBase(const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_INVALID) :
+    explicit ImsMediaMsgParamBase(const MEDIA_CONTENT_TYPE eType = MEDIA_TYPE_INVALID) :
             m_eMediaType(eType){};
     virtual ~ImsMediaMsgParamBase() {}
 
@@ -239,7 +239,7 @@ public:
 class ImsMediaMsgSetMediaQualityParam : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaMsgSetMediaQualityParam(const MEDIA_CONTENT_TYPE eType) :
+    explicit ImsMediaMsgSetMediaQualityParam(const MEDIA_CONTENT_TYPE eType) :
             ImsMediaMsgParamBase(eType),
             m_objMediaQualityThreshold(MediaQualityThreshold()){};
 
@@ -250,7 +250,7 @@ public:
 class ImsMediaMsgConfigParam : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaMsgConfigParam(const MEDIA_CONTENT_TYPE eType) :
+    explicit ImsMediaMsgConfigParam(const MEDIA_CONTENT_TYPE eType) :
             ImsMediaMsgParamBase(eType),
             m_pConfig(IMS_NULL){};
     virtual ~ImsMediaMsgConfigParam()
@@ -275,7 +275,7 @@ public:
 class ImsMediaMsgOpenConfigParam : public ImsMediaMsgConfigParam
 {
 public:
-    ImsMediaMsgOpenConfigParam(const MEDIA_CONTENT_TYPE type) :
+    explicit ImsMediaMsgOpenConfigParam(const MEDIA_CONTENT_TYPE type) :
             ImsMediaMsgConfigParam(type),
             m_objLocalAddress(IPAddress::IPv6NONE),
             m_nLocalPort(0){};
@@ -302,7 +302,7 @@ public:
 class ImsMediaResponseParamBase : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaResponseParamBase(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
+    explicit ImsMediaResponseParamBase(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO) :
             ImsMediaMsgParamBase(type),
             m_eResult(RtpError::NO_ERROR){};
     virtual ~ImsMediaResponseParamBase() {}
@@ -314,7 +314,7 @@ public:
 class ImsMediaResponseConfigParam : public ImsMediaResponseParamBase
 {
 public:
-    ImsMediaResponseConfigParam(RtpConfig* config = IMS_NULL) :
+    explicit ImsMediaResponseConfigParam(RtpConfig* config = IMS_NULL) :
             ImsMediaResponseParamBase(),
             m_pConfig(config){};
     virtual ~ImsMediaResponseConfigParam()
@@ -339,7 +339,7 @@ public:
 class ImsMediaMsgQosParam : public ImsMediaResponseParamBase
 {
 public:
-    ImsMediaMsgQosParam(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO,
+    explicit ImsMediaMsgQosParam(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO,
             const IPAddress& address = IPAddress(IPAddress::IPv6NONE), const IMS_SINT32 port = 0) :
             ImsMediaResponseParamBase(type),
             m_objIpAddress(address),
@@ -397,7 +397,7 @@ public:
 class ImsMediaVideoParam : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaVideoParam(IMS_SINT32 value = -1) :
+    explicit ImsMediaVideoParam(IMS_SINT32 value = -1) :
             ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO),
             nValue(value){};
 
@@ -408,7 +408,7 @@ public:
 class ImsMediaVideoResolutionParam : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaVideoResolutionParam(IMS_SINT32 value1 = -1, IMS_SINT32 value2 = -1) :
+    explicit ImsMediaVideoResolutionParam(IMS_SINT32 value1 = -1, IMS_SINT32 value2 = -1) :
             ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO),
             nWidth(value1),
             nHeight(value2){};

@@ -83,7 +83,7 @@ public:
     };
 
 public:
-    VideoNego(IN const IMS_SINT32 nSlotID = IMS_SLOT_0);
+    explicit VideoNego(IN const IMS_SINT32 nSlotID = IMS_SLOT_0);
     VideoNego(IN const VideoNego& obj);
     VideoNego& operator=(IN const VideoNego& obj);
     virtual ~VideoNego();
@@ -95,7 +95,7 @@ public:
      * @param pConfig The configuration to create audio profile
      */
     virtual void CreateProfiles(IN MediaEnvironment* pEnvironment, IN VideoConfiguration* pConfig);
-    virtual void DestroyProfiles();
+    void DestroyProfiles();
     /**
      * @brief Form the SDP with the current profile based on the state
      *
@@ -238,7 +238,7 @@ private:
     VideoProfile::Payload* FindPayloadInProfile(
             IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
     IMS_SINT32 FindPayloadIndexFromProfile(
-            IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
+            IN VideoProfile* pProfile, IN const VideoProfile::Payload* pPayload);
     MEDIA_DIRECTION UpdateDirectionToMine(
             IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
     IMS_BOOL GetAvpfFromAttributes(IN SdpMediaFormat* pMediaFormat,
@@ -264,7 +264,7 @@ private:
             IN VideoProfile::CapaNego* pDestCapaNego,
             OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
     IMS_BOOL CheckAvpfFromProfile(IN VideoProfile* pProfile);
-    IMS_BOOL GetAvpfFromAttributes_EX(IN IMediaDescriptor* pMediaDescriptor,
+    IMS_BOOL GetAvpfFromAttributes_EX(IN const IMediaDescriptor* pMediaDescriptor,
             IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
     OaModel* GetNegotiatedOaModel();
 

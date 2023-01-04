@@ -79,7 +79,7 @@ public:
      *
      * @param pMediaSessionConfig set mediasession config
      */
-    void DestroySessionConfig(IN MediaSessionConfig* pMediaSessionConfig);
+    void DestroySessionConfig(IN const MediaSessionConfig* pMediaSessionConfig);
     /**
      * @brief Get the instance of the mediasession config
      *

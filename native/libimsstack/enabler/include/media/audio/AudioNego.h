@@ -92,7 +92,7 @@ public:
     };
 
 public:
-    AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
+    explicit AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
     AudioNego(IN const AudioNego& objAudioNego);
     AudioNego& operator=(IN const AudioNego& obj);
     virtual ~AudioNego();

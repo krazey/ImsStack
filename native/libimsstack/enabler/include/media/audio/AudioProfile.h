@@ -362,7 +362,7 @@ public:
         TelephoneEventFmtp() :
                 strEvents("0-15"){};
 
-        TelephoneEventFmtp(IN AString events) :
+        explicit TelephoneEventFmtp(IN AString events) :
                 strEvents(events){};
 
         TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp)

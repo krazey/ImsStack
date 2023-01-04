@@ -23,7 +23,7 @@
 class MockMediaConfiguration : public MediaConfiguration
 {
 public:
-    MockMediaConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
+    explicit MockMediaConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
             MediaConfiguration(eSessionType)
     {
     }

@@ -41,7 +41,7 @@ public:
         STATE_PAUSED,
     };
 
-    AudioMediaSession(IN IMS_SINT32 nSlodId = 0);
+    explicit AudioMediaSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~AudioMediaSession();
 
     /**

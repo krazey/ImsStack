@@ -93,7 +93,8 @@ PUBLIC VIRTUAL void VideoNego::CreateProfiles(
     }
 }
 
-PUBLIC VIRTUAL void VideoNego::DestroyProfiles()
+PUBLIC
+void VideoNego::DestroyProfiles()
 {
     while (m_objBaseProfile.lstPayload.GetSize() > 0)
     {
@@ -1778,14 +1779,14 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
                     {
                         if (pLocalFmtp->nLevel != pPeerFmtp->nLevel)
                         {
-                            // if find matching level fmtp, skip unmatched level payload
-                            VideoProfile::Payload* pPotentialPayload = IMS_NULL;
                             IMS_BOOL bFoundPayload = IMS_FALSE;
 
                             for (IMS_UINT32 nIndex = nLocalIndex;
                                     nIndex < pLocalProfile->lstPayload.GetSize(); nIndex++)
                             {
-                                pPotentialPayload = pLocalProfile->lstPayload.GetAt(nIndex);
+                                // if find matching level fmtp, skip unmatched level payload
+                                VideoProfile::Payload* pPotentialPayload =
+                                        pLocalProfile->lstPayload.GetAt(nIndex);
 
                                 if (pPotentialPayload->objRtpMap.strPayloadType.Equals("H264"))
                                 {
@@ -2849,7 +2850,7 @@ VideoProfile::Payload* VideoNego::FindPayloadInProfile(
 
 PRIVATE
 IMS_SINT32 VideoNego::FindPayloadIndexFromProfile(
-        IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload)
+        IN VideoProfile* pProfile, IN const VideoProfile::Payload* pPayload)
 {
     if (pProfile == IMS_NULL || pPayload == IMS_NULL)
     {
@@ -3509,7 +3510,7 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes(IN SdpMediaFormat* pMediaForma
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes_EX(IN IMediaDescriptor* pMediaDescriptor,
+PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes_EX(IN const IMediaDescriptor* pMediaDescriptor,
         IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr)
 {
     if (pMediaDescriptor == IMS_NULL || pRtcpFbAttr == IMS_NULL || pCapaNego == IMS_NULL)

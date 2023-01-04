@@ -68,7 +68,7 @@ public:
      *
      * @param _nSessionType mediasession type
      */
-    VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType = MEDIA_TYPE_AUDIOVIDEO);
+    explicit VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType = MEDIA_TYPE_AUDIOVIDEO);
     /**
      * @brief Destroy the video configuration
      *

@@ -468,7 +468,7 @@ PUBLIC VIRTUAL MEDIA_CONTENT_TYPE MediaSession::GetNegotiatedMediaType(IN IMS_UI
 
     if (pMediaNego->GetNegotiatedAudioQuality() != AUDIO_CODEC_NOT_USED)
     {
-        eMedia = (MEDIA_CONTENT_TYPE)(eMedia | MEDIA_TYPE_AUDIO);
+        eMedia = MEDIA_TYPE_AUDIO;
     }
 
     if (pMediaNego->GetNegotiatedVideoQuality() != VIDEO_RESOLUTION_NOT_USED)
@@ -819,7 +819,7 @@ void MediaSession::ClearMediaNego()
 }
 
 PROTECTED
-QosRequestParam* MediaSession::FindQosParam(QosRequestParam* srcParam)
+QosRequestParam* MediaSession::FindQosParam(const QosRequestParam* srcParam)
 {
     for (IMS_SINT32 nIndex = 0; nIndex < m_objListQosParams.GetSize(); nIndex++)
     {

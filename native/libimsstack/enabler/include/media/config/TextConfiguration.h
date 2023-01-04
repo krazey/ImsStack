@@ -27,7 +27,7 @@ public:
      *
      * @param _eSessionType mediasession type (as: text)
      */
-    TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_TEXT);
+    explicit TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_TEXT);
     /**
      * @brief Destroy the text configuration
      *
@@ -40,7 +40,7 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
     /**
      * @brief Update codec using the configuration
      *
@@ -48,7 +48,7 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
+    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
     /**
      * @brief Get the T140 payload type number
      *
@@ -82,8 +82,8 @@ public:
     static const IMS_BOOL DEFAULT_EMPTY_REDUNDANT = IMS_TRUE;
 
 protected:
-    virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
-    virtual void ToDebugString() const;
+    IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc) override;
+    void ToDebugString() const override;
 
 private:
     IMS_SINT32 m_nT140PayloadType;

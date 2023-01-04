@@ -36,7 +36,7 @@ public:
      *
      * @param _eSessionType Set media ssession_type (ex: audio, video etc)
      */
-    MediaConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_AUDIO);
+    explicit MediaConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_AUDIO);
     /**
      * @brief Destroy the media configuration
      *

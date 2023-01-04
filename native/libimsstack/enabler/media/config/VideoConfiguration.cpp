@@ -162,6 +162,9 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         nCodecCnt = MakeEachCodecs(piCc, ImsCodec::VIDEO_AVC, nCodecCnt, objAvcPayloadType);
     }
 
+    // to avoid static analysis issue (not used variable and variable scope)
+    IMS_TRACE_D("nCodecCnt(%d)", nCodecCnt, 0, 0);
+
     /** TODO: need to add after creating HEVC in CarrierConfig */
     /* if (objHevcPayloadType.GetSize() > 0)
     {

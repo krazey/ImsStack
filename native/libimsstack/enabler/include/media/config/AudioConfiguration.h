@@ -28,7 +28,7 @@ public:
      *
      * @param eSessionType the Media type
      */
-    AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
+    explicit AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
     /**
      * @brief Destroy the Audio Configuration
      *
@@ -41,7 +41,7 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
     /**
      * @brief Update the carrier configuration items
      *
@@ -49,7 +49,7 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
+    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
     /**
      * @brief Get whether EVS codec is supported
      *
@@ -222,8 +222,8 @@ public:
     static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = 0;
 
 protected:
-    virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
-    virtual void ToDebugString() const;
+    IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc) override;
+    void ToDebugString() const override;
 
 private:
     IMS_BOOL m_bEvsSupported;

@@ -72,8 +72,8 @@ class IUMediaSetSurfaceCmdParam :
         public IUEventParam
 {
 public:
-    inline IUMediaSetSurfaceCmdParam(IN CONST IUMediaSetSurfaceCmdParam* pParam = NULL) :
-            IUEventParam((IUEventParam*)pParam),
+    inline explicit IUMediaSetSurfaceCmdParam(IN const IUMediaSetSurfaceCmdParam* pParam = NULL) :
+            IUEventParam(pParam),
             nSessionID(0),
             nSurfaceType(0),
             nSurfaceTx(0),
@@ -100,9 +100,9 @@ class IUMediaPreviewCameraCmdParam :
 public:
     IMS_UINT32 nCamera;
 public:
-    IUMediaPreviewCameraCmdParam(IN CONST IUMediaPreviewCameraCmdParam* pParam = NULL) :
-        IUMediaSetSurfaceCmdParam((IUMediaSetSurfaceCmdParam*)pParam),
-    nCamera(0)
+    explicit IUMediaPreviewCameraCmdParam(IN const IUMediaPreviewCameraCmdParam* pParam = NULL) :
+            IUMediaSetSurfaceCmdParam(pParam),
+            nCamera(0)
     {
         if (pParam == NULL)
         {
@@ -423,7 +423,7 @@ public:
         DRA_MEDIA_MODE_TRX  = 2
     };
 
-    inline IMediaDRAMsgParam(IN CONST IMediaDRAMsgParam* pParam = NULL) :
+    inline explicit IMediaDRAMsgParam(IN CONST IMediaDRAMsgParam* pParam = NULL) :
             eMediaType(DRA_MEDIA_TYPE_AUDIO),
             eModeType(DRA_MEDIA_MODE_RX),
             nLossRate(0),

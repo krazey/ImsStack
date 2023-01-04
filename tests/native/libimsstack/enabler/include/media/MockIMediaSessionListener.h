@@ -28,8 +28,8 @@ public:
     FakeIMediaSessionListener() {}
     virtual ~FakeIMediaSessionListener() {}
 
-    virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
-            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam)
+    IMS_BOOL MediaSession_SendMsgToMediaManager(
+            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) override
     {
         if (pParam == NULL)
         {
@@ -73,6 +73,9 @@ public:
 class MockIMediaSessionListener : public IMediaSessionListener
 {
 public:
+    MockIMediaSessionListener() {}
+    virtual ~MockIMediaSessionListener() {}
+
     MOCK_METHOD(IMS_BOOL, MediaSession_SendMsgToMediaManager,
             (IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam), (override));
 

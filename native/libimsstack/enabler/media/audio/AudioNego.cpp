@@ -2416,10 +2416,6 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                     pNegotiatedProfile->objIpAddr.IsIPv6Address(), pEvsFmtp->nEvsModeSwitch,
                     nModeSet);
         }
-        else
-        {
-            nCurrCodec = AUDIO_CODEC_NONE;
-        }
 
         // Setting direction
         pNegotiatedProfile->eDirection = UpdateDirectionToMine(
@@ -3958,7 +3954,6 @@ void AudioNego::RearrangeModeSetByAs(
 
     IMS_SINT32 nLargestModeSet =
             AudioProfileUtil::GetLargestModesetInFmtp(pPayload->objRtpMap.strPayloadType, pPayload);
-    IMS_SINT32 nAsFromModeset = 0;
 
     if (eCodec == AUDIO_CODEC_EVS)
     {
@@ -3972,7 +3967,7 @@ void AudioNego::RearrangeModeSetByAs(
             return;
         }
 
-        nAsFromModeset = AudioProfileUtil::ConvertToBandwidthAS(
+        IMS_SINT32 nAsFromModeset = AudioProfileUtil::ConvertToBandwidthAS(
                 eCodec, pNegotiatedFmtp->nOctetAlign, bIpV6, nLargestModeSet);
 
         if (nAs < nAsFromModeset)
@@ -3985,7 +3980,6 @@ void AudioNego::RearrangeModeSetByAs(
                     eCodec, pNegotiatedFmtp->nOctetAlign, bIpV6, nAs);
 
             IMS_UINT32 nPossibleModeSetList = 0;
-            IMS_UINT32 nNegotiatedModeSetList = 0;
 
             for (IMS_SINT32 i = 0; i <= nPossibleModeSet; i++)
             {
@@ -3998,7 +3992,8 @@ void AudioNego::RearrangeModeSetByAs(
             }
             else
             {
-                nNegotiatedModeSetList = pNegotiatedFmtp->nModeSetList & nPossibleModeSetList;
+                IMS_UINT32 nNegotiatedModeSetList =
+                        pNegotiatedFmtp->nModeSetList & nPossibleModeSetList;
                 if (nNegotiatedModeSetList != 0)
                 {
                     pNegotiatedFmtp->nModeSetList = nNegotiatedModeSetList;

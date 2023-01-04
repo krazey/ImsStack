@@ -28,7 +28,7 @@ class MediaEnvironment;
 class BaseSession
 {
 public:
-    BaseSession(IN IMS_SINT32 nSlodId = 0);
+    explicit BaseSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~BaseSession();
 
     /**

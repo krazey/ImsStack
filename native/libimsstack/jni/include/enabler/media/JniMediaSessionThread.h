@@ -26,20 +26,20 @@ class JniMediaSessionThread final : public BaseServiceThread, public IJniMediaSe
 public:
     JniMediaSessionThread();
     virtual ~JniMediaSessionThread();
-    virtual IMS_BOOL OnOpenSession(IN ImsMediaMsgOpenConfigParam* pParam);
-    virtual IMS_BOOL OnModifySession(IN ImsMediaMsgConfigParam* pParam);
-    virtual IMS_BOOL OnCloseSession(IN ImsMediaMsgParamBase* pParam);
-    virtual IMS_BOOL OnAddConfig(IN ImsMediaMsgConfigParam* pParam);
-    virtual IMS_BOOL OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam);
-    virtual IMS_BOOL OnConfirmConfig(IN ImsMediaMsgConfigParam* pParam);
-    virtual IMS_BOOL OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam);
-    virtual IMS_BOOL OnSetMediaQualityThreshold(IN ImsMediaMsgSetMediaQualityParam* pParam);
-    virtual IMS_BOOL OnRequestQos(IN ImsMediaMsgQosParam* pParam);
-    virtual void OnSetPreviewSurface();
-    virtual void OnSetDisplaySurface();
+    IMS_BOOL OnOpenSession(IN ImsMediaMsgOpenConfigParam* pParam) override;
+    IMS_BOOL OnModifySession(IN ImsMediaMsgConfigParam* pParam) override;
+    IMS_BOOL OnCloseSession(IN ImsMediaMsgParamBase* pParam) override;
+    IMS_BOOL OnAddConfig(IN ImsMediaMsgConfigParam* pParam) override;
+    IMS_BOOL OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam) override;
+    IMS_BOOL OnConfirmConfig(IN ImsMediaMsgConfigParam* pParam) override;
+    IMS_BOOL OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam) override;
+    IMS_BOOL OnSetMediaQualityThreshold(IN ImsMediaMsgSetMediaQualityParam* pParam) override;
+    IMS_BOOL OnRequestQos(IN ImsMediaMsgQosParam* pParam) override;
+    void OnSetPreviewSurface() override;
+    void OnSetDisplaySurface() override;
 
 protected:
-    virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const;
+    IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const override;
 
 private:
     SessionType ConvertToSessionType(IN MEDIA_CONTENT_TYPE eMediaType);

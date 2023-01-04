@@ -36,7 +36,7 @@ public:
         PDN_EMERGENCY,
     };  // PDN Type
 
-    MediaResourceManager(IN IMS_SINT32 nSlotId = 0);
+    explicit MediaResourceManager(IN IMS_SINT32 nSlotId = 0);
     virtual ~MediaResourceManager();
 
     /**

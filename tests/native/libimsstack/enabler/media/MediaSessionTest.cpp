@@ -39,8 +39,8 @@ public:
     }
     virtual ~FakeMediaSession() {}
 
-    virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
-            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam)
+    IMS_BOOL MediaSession_SendMsgToMediaManager(
+            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) override
     {
         if (pParam == NULL)
         {

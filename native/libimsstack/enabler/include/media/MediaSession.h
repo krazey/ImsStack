@@ -36,8 +36,8 @@ public:
      * @param nCallKey The identification of the call session
      * @param nSlotId The UICC slot id
      */
-    MediaSession(IN MEDIA_SERVICE_TYPE nService = MEDIA_SERVICE_DEFAULT, IN IMS_SINTP nCallKey = 0,
-            IN IMS_UINT32 nSlotId = 0);
+    explicit MediaSession(IN MEDIA_SERVICE_TYPE nService = MEDIA_SERVICE_DEFAULT,
+            IN IMS_SINTP nCallKey = 0, IN IMS_UINT32 nSlotId = 0);
     virtual ~MediaSession();
 
     /**
@@ -61,35 +61,35 @@ public:
      */
     IMS_SINTP GetCallKey() { return m_nCallKey; };
 
-    virtual void SetMtcListener(IN IMediaSessionClientListener* pISessionListener);
-    virtual IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment);
-    virtual IMS_UINTP CreateProfile(
-            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO);
-    virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID);
-    virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
-            IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 nAudioDirection,
-            IN IMS_SINT32 nVideoDirection, IN IMS_SINT32 nTextDirection = -1,
-            IN IMS_BOOL bEnforceReofferMode = IMS_FALSE);
-    virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
+    void SetMtcListener(IN IMediaSessionClientListener* pISessionListener) override;
+    IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment) override;
+    IMS_UINTP CreateProfile(
+            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
+    IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID) override;
+    IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType,
+            IN IMS_SINT32 nAudioDirection, IN IMS_SINT32 nVideoDirection,
+            IN IMS_SINT32 nTextDirection = -1,
+            IN IMS_BOOL bEnforceReofferMode = IMS_FALSE) override;
+    IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
             OUT IMS_SINT32* nAudioDirection, OUT IMS_SINT32* nVideoDirection,
-            OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason);
-    virtual IMS_BOOL RequestQos(
-            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO);
-    virtual void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession);
-    virtual IMS_BOOL Run(IN IMS_UINTP nNegoID);
-    virtual IMS_BOOL Terminate();
-    virtual NEGO_STATE GetNegoState(IN IMS_UINTP nNegoID);
-    virtual MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId);
-    virtual IMS_SINT32 GetNegotiatedQuality(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
-    virtual IMS_SINT32 GetNegotiatedCodecBitrate(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
-    virtual MEDIA_DIRECTION GetNegotiatedDirection(
-            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
-    virtual void SetOptions(
-            IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1, IN IMS_SINT32 param2);
-    virtual void SetNetworkToneRtpTimer(
-            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer);
-    virtual IMS_BOOL NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus);
-    virtual IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam);
+            OUT IMS_SINT32* nTextDirection, OUT MediaNego::MediaNegoResult& errorReason) override;
+    IMS_BOOL RequestQos(
+            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO) override;
+    void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession) override;
+    IMS_BOOL Run(IN IMS_UINTP nNegoID) override;
+    IMS_BOOL Terminate() override;
+    NEGO_STATE GetNegoState(IN IMS_UINTP nNegoID) override;
+    MEDIA_CONTENT_TYPE GetNegotiatedMediaType(IN IMS_UINTP nNegoId) override;
+    IMS_SINT32 GetNegotiatedQuality(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) override;
+    IMS_SINT32 GetNegotiatedCodecBitrate(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) override;
+    MEDIA_DIRECTION GetNegotiatedDirection(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType) override;
+    void SetOptions(IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1,
+            IN IMS_SINT32 param2) override;
+    void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType,
+            IN IMS_UINT32 nRtpTimer) override;
+    IMS_BOOL NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus) override;
+    IMS_BOOL SendMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam) override;
 
 protected:
     // for MediaNego
@@ -98,12 +98,12 @@ protected:
     void ConfirmMediaNego(IN IMS_UINTP nNegoId);
     IMS_BOOL DeleteMediaNego(IN IMS_UINTP nNegoId);
     void ClearMediaNego();
-    QosRequestParam* FindQosParam(QosRequestParam* param);
+    QosRequestParam* FindQosParam(const QosRequestParam* param);
     QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
     void ClearQosParam();
     // IMediaSessionListener
-    virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
-            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param);
+    IMS_BOOL MediaSession_SendMsgToMediaManager(
+            IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param) override;
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
     IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
     void SetMediaQuality(IN AudioMediaSession* pAudioSession);

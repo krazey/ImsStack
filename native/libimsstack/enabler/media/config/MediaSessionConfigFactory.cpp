@@ -161,7 +161,8 @@ MediaSessionConfig* MediaSessionConfigFactory::FindMediaSessionConfig(
 }
 
 PUBLIC
-void MediaSessionConfigFactory::DestroySessionConfig(IN MediaSessionConfig* pMediaSessionConfig)
+void MediaSessionConfigFactory::DestroySessionConfig(
+        IN const MediaSessionConfig* pMediaSessionConfig)
 {
     for (IMS_UINT32 nIdxSlot = 0; nIdxSlot <= IMS_SLOT_1; nIdxSlot++)
     {

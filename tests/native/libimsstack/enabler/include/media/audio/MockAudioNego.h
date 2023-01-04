@@ -25,7 +25,7 @@
 class MockAudioNego : public AudioNego
 {
 public:
-    MockAudioNego(IMS_SINT32 nSlotId) :
+    explicit MockAudioNego(IMS_SINT32 nSlotId) :
             AudioNego(nSlotId){};
     MOCK_METHOD(void, CreateProfiles,
             (IN MediaEnvironment * pEnvironment, IN AudioConfiguration* pConfig), (override));

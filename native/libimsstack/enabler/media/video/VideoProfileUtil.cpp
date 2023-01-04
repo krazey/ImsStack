@@ -369,11 +369,10 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
     IMS_TRACE_D("CreateProfile - AS[%d], RR[%d], RS[%d]", pVideoProfile->nBandwidthAs,
             pVideoProfile->nBandwidthRr, pVideoProfile->nBandwidthRs);
 
-    IMS_SINT32 nTCap = 0;
-    IMS_SINT32 nAcap = 0;
-
     if (pConfig->IsVideoAvpfEnabled() == IMS_TRUE)
     {
+        IMS_SINT32 nTCap = 0;
+        IMS_SINT32 nAcap = 0;
         AString strTemp = "";
         pVideoProfile->bSupportAvpf = IMS_TRUE;
 

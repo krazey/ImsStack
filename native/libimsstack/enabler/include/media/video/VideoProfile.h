@@ -80,7 +80,7 @@ public:
         IMS_BOOL bShow_PacketizationMode;
 
     public:
-        HevcFmtp(IN const HevcFmtp* pFmtp = IMS_NULL) :
+        explicit HevcFmtp(IN const HevcFmtp* pFmtp = IMS_NULL) :
                 eResolution(VIDEO_RESOLUTION_INVALID),
                 nBitrate(0),
                 nFrameRate(30),
@@ -153,7 +153,7 @@ public:
         IMS_BOOL bShow_SpropParam;
 
     public:
-        AvcFmtp(IN AvcFmtp* pFmtp = IMS_NULL) :
+        explicit AvcFmtp(IN AvcFmtp* pFmtp = IMS_NULL) :
                 eResolution(VIDEO_RESOLUTION_INVALID),
                 nBitrate(0),
                 nFrameRate(15),

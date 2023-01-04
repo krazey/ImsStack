@@ -146,6 +146,9 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
         nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_T140, nCodecCnt, m_nT140PayloadType, 0);
     }
 
+    // to avoid static analysis issue (not used variable and variable scope)
+    IMS_TRACE_D("nCodecCnt(%d)", nCodecCnt, 0, 0);
+
     return IMS_TRUE;
 }
 

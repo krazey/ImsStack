@@ -86,7 +86,7 @@ public:
     };
 
 public:
-    TextNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
+    explicit TextNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
     TextNego(IN const TextNego& objTextNego);
     TextNego& operator=(IN const TextNego& obj);
     virtual ~TextNego();

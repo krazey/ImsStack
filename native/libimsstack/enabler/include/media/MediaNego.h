@@ -44,7 +44,7 @@ public:
         ERROR_NO_TEXT,
     };
 
-    MediaNego(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    explicit MediaNego(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     ~MediaNego();
 
     /**

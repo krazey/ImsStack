@@ -139,7 +139,7 @@ public:
             this->objRtpMap.nSamplingRate = samplingRate;
         }
 
-        void SetRtpMap(IN RtpMap& objMap)
+        void SetRtpMap(IN const RtpMap& objMap)
         {
             this->objRtpMap.nPayloadNum = objMap.nPayloadNum;
             this->objRtpMap.strPayloadType = objMap.strPayloadType;

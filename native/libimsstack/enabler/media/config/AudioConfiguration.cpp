@@ -258,6 +258,9 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
                 piCc, ImsCodec::AUDIO_TELEPHONE_EVENT, nCodecCnt, objDtmfnbPayloadType);
     }
 
+    // to avoid static analysis issue (not used variable and variable scope)
+    IMS_TRACE_D("nCodecCnt(%d)", nCodecCnt, 0, 0);
+
     return IMS_TRUE;
 }
 

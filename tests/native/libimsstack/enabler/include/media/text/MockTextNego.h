@@ -25,7 +25,7 @@
 class MockTextNego : public TextNego
 {
 public:
-    MockTextNego(IMS_SINT32 nSlotId) :
+    explicit MockTextNego(IMS_SINT32 nSlotId) :
             TextNego(nSlotId){};
     MOCK_METHOD(void, CreateProfiles,
             (IN MediaEnvironment * pEnvironment, IN TextConfiguration* pConfig), (override));
