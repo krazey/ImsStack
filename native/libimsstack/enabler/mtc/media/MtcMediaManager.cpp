@@ -18,7 +18,6 @@
 #include "ICoreService.h"
 #include "ISipHeader.h"
 #include "MediaManager.h"
-#include "MediaSession.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
@@ -623,7 +622,7 @@ void MtcMediaManager::DestroyMediaSession()
     }
 
     IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
-    pMediaManager->DestroySession(static_cast<MediaSession*>(m_piMediaSession));
+    pMediaManager->DestroySession(m_piMediaSession);
 }
 
 PRIVATE

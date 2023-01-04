@@ -19,6 +19,7 @@
 #include "ServiceTrace.h"
 
 #include "IMMedia.h"
+#include "IMediaSession.h"
 #include "MediaManager.h"
 #include "MediaSession.h"
 #include "MediaMsgHandler.h"
@@ -122,7 +123,7 @@ MediaMsgHandler* MediaManager::GetHandler(IN IMS_SINTP nCallKey)
 }
 
 PUBLIC
-MediaSession* MediaManager::CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey)
+IMediaSession* MediaManager::CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey)
 {
     IMS_TRACE_D("CreateSession() - CallKey[%d], nService[%d]", nCallKey, nService, 0);
 
@@ -143,20 +144,20 @@ MediaSession* MediaManager::CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS
 }
 
 PUBLIC
-void MediaManager::DestroySession(IN MediaSession* pSession)
+void MediaManager::DestroySession(IN IMediaSession* piSession)
 {
-    if (pSession == IMS_NULL)
+    if (piSession == IMS_NULL)
     {
         return;
     }
 
-    IMS_TRACE_I("DestroySession callkey[%d]", pSession->GetCallKey(), 0, 0);
+    IMS_TRACE_I("DestroySession", 0, 0, 0);
 
     for (IMS_UINT32 i = 0; i < m_lstSessionNode.GetSize(); i++)
     {
         MediaSessionNode* pSessionNode = m_lstSessionNode.GetAt(i);
 
-        if (pSessionNode->pMediaSession == pSession)
+        if (pSessionNode->pMediaSession == piSession)
         {
             DeleteMediaSessionNode(pSessionNode, i);
             return;
