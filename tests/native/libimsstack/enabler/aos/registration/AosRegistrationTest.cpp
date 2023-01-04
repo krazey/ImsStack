@@ -658,8 +658,6 @@ TEST_F(AosRegistrationTest, RequestCmd)
 
     m_pTestAosRegistration->RequestCmd(IAosRegistration::CMD_CLEAR_SERVER_SOCKET_ERROR_COUNT);
 
-    m_pTestAosRegistration->RequestCmd(IAosRegistration::CMD_REPORT_REG_STATE);
-
     m_pTestAosRegistration->SetIRegContact(IMS_NULL);
 
     m_pTestAosRegistration->SetRegType(AosRegistrationType::NORMAL);
