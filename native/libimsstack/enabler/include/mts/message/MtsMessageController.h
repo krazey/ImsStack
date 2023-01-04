@@ -90,7 +90,7 @@ private:
     void Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessage);
 
     void CleanMtsMessage(IN IMtsMessage* piMtsMessage);
-    void CleanOperatorMtsMessage(IN IMS_SINT32 nMrOfRp);
+    void CleanMtsMessageWithRpMr(IN IMS_SINT32 nMrOfRp);
     void TerminateAllMessages();
     void TerminateMessage(IN IMtsMessage* piMtsMessage);
 

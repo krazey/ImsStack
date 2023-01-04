@@ -101,7 +101,7 @@ void MtsMessageController::PageMessageDelivered(IN IPageMessage* piPageMessage)
     {
         IMS_TRACE_I("PageMessageDelivered : Response recv for ACK( Del Report / Error )", 0, 0, 0);
         m_bProcessingMsg = IMS_FALSE;
-        CleanOperatorMtsMessage(piMtsMessage->GetMessageReference());
+        CleanMtsMessageWithRpMr(piMtsMessage->GetMessageReference());
     }
 
     // remove this MtsMessage, so that MtsService send any following sms messages.
@@ -121,26 +121,23 @@ void MtsMessageController::PageMessageDeliveryFailed(IN IPageMessage* piPageMess
         return;
     }
 
+    // report failure send results.
     IMessage* piMessage = piPageMessage->GetPreviousResponse(IMessage::PAGEMESSAGE_SEND);
+    IMS_SINT32 nResult = m_piMtsErrorHandler->Handle(piMessage);
+    ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
+
     if (piMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "No received responses in the page message", 0, 0, 0);
-        ReportTransmissionResult(
-                SipStatusCode::SC_200, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
         CleanMtsMessage(piMtsMessage);
         return;
     }
-
-    // report failure send results.
-    IMS_SINT32 nResult = m_piMtsErrorHandler->Handle(piMessage);
-    ReportTransmissionResult(nResult, piMtsMessage->GetSmsFormat(), piMtsMessage->GetSeqId());
 
     IMS_SINT32 nMti = piMtsMessage->GetMti();
     if (nMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)
     {
         m_bProcessingMsg = IMS_FALSE;
-        // Remove DELIVER-MESSAGE;
-        CleanOperatorMtsMessage(piMtsMessage->GetMessageReference());
+        CleanMtsMessageWithRpMr(piMtsMessage->GetMessageReference());
     }
 
     // remove this MtsMessage, so that MtsService send any following sms messages.
@@ -933,12 +930,10 @@ void MtsMessageController::CleanMtsMessage(IMtsMessage* piMtsMessage)
     delete piMtsMessage;
 }
 
-// TODO: This method should be considered to re-naming
 PRIVATE
-void MtsMessageController::CleanOperatorMtsMessage(IMS_SINT32 nMrOfRp)
+void MtsMessageController::CleanMtsMessageWithRpMr(IMS_SINT32 nMrOfRp)
 {
-    IMS_TRACE_D("CleanOperatorMtsMessage : nMrOfRp[%d]", nMrOfRp, 0, 0);
-    // Remove DELIVER-MESSAGE;
+    IMS_TRACE_D("CleanMtsMessageWithRpMr : nMrOfRp[%d]", nMrOfRp, 0, 0);
     IMtsMessage* piMtsMessage = Search(nMrOfRp);
 
     if (piMtsMessage != IMS_NULL)
