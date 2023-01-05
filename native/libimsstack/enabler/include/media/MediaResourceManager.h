@@ -78,8 +78,8 @@ public:
     /** Get the mtu size */
     IMS_SINT32 GetMtu();
     /* IMediaNetworkConnectionListener Interface Impl */
-    virtual void OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType);
-    virtual void OnMediaMtuChanged(IN const IMS_UINT32 nMtu);
+    void OnNetworkConnectionChanged(IN const IMS_UINT32 nRatType) override;
+    void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) override;
 
 private:
     IMS_SINT32 m_nSlotId;

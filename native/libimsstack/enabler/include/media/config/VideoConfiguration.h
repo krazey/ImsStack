@@ -81,7 +81,7 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    IMS_BOOL Create(IN ICarrierConfig* piCc) override;
     /**
      * @brief Update codec using the configuration
      *
@@ -89,7 +89,7 @@ public:
      * @return IMS_BOOL Return true if the create function is executed without error
      * Return false if the create function is failed
      */
-    virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
+    IMS_BOOL Update(IN ICarrierConfig* piCc) override;
     /**
      * @brief Get the video dscp value
      *
@@ -191,12 +191,12 @@ protected:
      * @return true Return the create function is executed without error
      * @return false Return the create function is failed
      */
-    virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
+    IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc) override;
     /**
      * @brief Print debugstring
      *
      */
-    virtual void ToDebugString() const;
+    void ToDebugString() const override;
 
 private:
     IMS_SINT32 m_nVideoDscp;
