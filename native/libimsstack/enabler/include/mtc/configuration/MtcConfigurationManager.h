@@ -165,7 +165,7 @@ public:
     IMS_BOOL IsMaintainMultipleEarlySessionsByForking() const override;
     IMS_BOOL IsStopRingbackTimerBy183WithSdpBody() const override;
     IMS_SINT32 GetInformationLevelOfGeolocationPidf(
-            IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi) const override;
+            IN IMS_BOOL bEmergency, IN IMS_BOOL bWifi, IN IMS_BOOL bShortCode) const override;
     IMS_BOOL IsMessageTypeSupportGeolocationPidf(
             IN MessageTypeForGeolocationPidf eType) const override;
     IMS_BOOL IsInitializePemWhenNoHeader() const override;

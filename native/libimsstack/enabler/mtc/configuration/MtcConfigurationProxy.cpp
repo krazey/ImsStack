@@ -333,21 +333,21 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_pManager->GetCallRejectCodeForNotAcceptableCallType();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
-            return IMS_FALSE;
+            return 0;
     }
 }
 
 PUBLIC
 IMS_SINT32 MtcConfigurationProxy::GetInt(
-        IN Feature eFeature, IN IMS_BOOL bWParam, IN IMS_BOOL bLParam) const
+        IN Feature eFeature, IN IMS_BOOL bParam1, IN IMS_BOOL bParam2, IN IMS_BOOL bParam3) const
 {
     switch (eFeature)
     {
         case Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF:
-            return m_pManager->GetInformationLevelOfGeolocationPidf(bWParam, bLParam);
+            return m_pManager->GetInformationLevelOfGeolocationPidf(bParam1, bParam2, bParam3);
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
-            return IMS_FALSE;
+            return 0;
     }
 }
 

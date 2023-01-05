@@ -22,6 +22,7 @@
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcLocationObject.h"
+#include "helper/MtcSupplementaryService.h"
 #include <gtest/gtest.h>
 
 using ::testing::Return;
@@ -35,6 +36,7 @@ public:
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
+    MtcSupplementaryService* pSupplementaryService;
 
 protected:
     virtual void SetUp() override
@@ -45,9 +47,22 @@ protected:
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        ON_CALL(objContext, GetSupplementaryService)
+                .WillByDefault(ReturnRef(*pSupplementaryService));
     }
 
-    virtual void TearDown() override { delete pConfigurationProxy; }
+    virtual void TearDown() override
+    {
+        delete pConfigurationProxy;
+        delete pSupplementaryService;
+    }
+
+    void AddGeoLocationValue(IN IMS_BOOL bGeoLocation)
+    {
+        pSupplementaryService->Add(SuppType::GEOLOCATION, bGeoLocation);
+    }
 };
 
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfAosConnectorIsNull)
@@ -59,18 +74,24 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsFalseIfAosConnecto
 
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiNormal)
 {
-    const IMS_BOOL bConfig = IMS_TRUE;
-
     ON_CALL(*pConfigurationManager,
             IsSupportGeolocationPidfInSipInvite(
                     CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
-            .WillByDefault(Return(bConfig));
+            .WillByDefault(Return(IMS_TRUE));
 
     objCallInfo.bEmergency = IMS_FALSE;
 
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
 
-    EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+    EXPECT_EQ(IMS_TRUE, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    AddGeoLocationValue(IMS_TRUE);
+
+    EXPECT_EQ(IMS_TRUE, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+
+    AddGeoLocationValue(IMS_FALSE);
+
+    EXPECT_EQ(IMS_FALSE, MtcLocationObject::IsGeolocationInfoRequired(objContext));
 }
 
 TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForWifiEmergency)

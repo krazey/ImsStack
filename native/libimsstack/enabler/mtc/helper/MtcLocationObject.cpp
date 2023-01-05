@@ -22,9 +22,11 @@
 #include "IMessageBodyPart.h"
 #include "ISipMessage.h"
 #include "ISubscriberConfig.h"
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
 #include "call/IMtcCallContext.h"
+#include "call/ParticipantInfo.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcLocationObject.h"
@@ -78,11 +80,12 @@ PUBLIC GLOBAL IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired(IN IMtcCallC
     IMS_SINT32 nType = GetGeolocationPidfAllowedType(
             objContext.GetCallInfo().bEmergency, objContext.GetService().IsWlanIpCanType());
 
-    return objContext.GetConfigurationProxy().Is(
-            Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType);
+    const SuppService* pSuppService =
+            objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION);
 
-    // TODO: need to mix this with a condition above.
-    // return objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION)->bValue;
+    return objContext.GetConfigurationProxy().Is(
+                   Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType) &&
+            (pSuppService == IMS_NULL || pSuppService->bValue);
 }
 
 PUBLIC
@@ -141,9 +144,13 @@ ByteArray MtcLocationObject::CreateLocationBody() const
     {
         pPidfCreator->CreateWithPosition(AString::ConstNull(), objContent);
     }
-    else  // GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY
+    else if (nInformationLevel == CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY)
     {
         pPidfCreator->CreateWithoutPosition(AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent);
+    }
+    else  // GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE
+    {
+        pPidfCreator->CreateWithoutPosition(AString::ConstNull(), IMS_FALSE, IMS_TRUE, objContent);
     }
 
     return objContent;
@@ -154,7 +161,9 @@ IMS_SINT32 MtcLocationObject::GetInformationLevel() const
 {
     return m_objContext.GetConfigurationProxy().GetInt(
             Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF, m_objContext.GetCallInfo().bEmergency,
-            m_objContext.GetService().IsWlanIpCanType());
+            m_objContext.GetService().IsWlanIpCanType(),
+            m_objContext.GetConfigurationProxy().Is(
+                    Feature::PIDF_SHORT_CODE, m_objContext.GetParticipantInfo().GetRemoteNumber()));
 }
 
 PRIVATE

@@ -1211,13 +1211,15 @@ TEST_F(MtcConfigurationManagerTest, GetInformationLevelOfGeolocationPidfReturnsV
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
 
-    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_TRUE, IMS_FALSE),
+    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_TRUE, IMS_FALSE, IMS_TRUE),
             CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG);
-    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_TRUE, IMS_TRUE),
+    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_TRUE, IMS_TRUE, IMS_TRUE),
             CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC);
-    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_FALSE, IMS_FALSE),
+    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_FALSE, IMS_FALSE, IMS_TRUE),
             CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY);
-    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_FALSE, IMS_TRUE),
+    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_FALSE, IMS_TRUE, IMS_TRUE),
+            CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE);
+    EXPECT_EQ(pManager->GetInformationLevelOfGeolocationPidf(IMS_FALSE, IMS_TRUE, IMS_FALSE),
             CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY);
 }
 
