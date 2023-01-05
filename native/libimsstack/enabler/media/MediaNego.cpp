@@ -284,12 +284,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
                         // if port 0, replace with another descriptor
                         if (GetNegoState() == STATE_OFFER_RECEIVED && pSDPMedia->GetPort() == 0)
                         {
-                            pDescriptorForAudio = pDescriptor;
-                            // if port 0, replace with another descriptor
-                            if (GetNegoState() == STATE_OFFER_RECEIVED && pSDPMedia->GetPort() == 0)
-                            {
-                                continue;
-                            }
+                            continue;
                         }
 
                         bAudioMLineSetted = IMS_TRUE;
@@ -928,25 +923,4 @@ void MediaNego::SetMediaDescriptorAsNotSupported(
 
     pDescriptor->SetMediaDescription(
             pSDPMedia->GetType(), 0, pSDPMedia->GetTransportProtocol(), pSDPMedia->GetFormats());
-}
-
-PRIVATE
-IMS_BOOL MediaNego::CheckOneWayVideoCall()
-{
-    IMS_TRACE_I("CheckOneWayVideoCall() Oneway video call check", 0, 0, 0);
-
-    MEDIA_DIRECTION nAudioDirection = GetNegotiatedAudioDirection();
-    MEDIA_DIRECTION nVideoDirection = GetNegotiatedVideoDirection();
-
-    // check one-way video call case..
-    if ((nAudioDirection == MEDIA_DIRECTION_SEND_RECEIVE) &&
-            ((nVideoDirection == MEDIA_DIRECTION_RECEIVE) ||
-                    (nVideoDirection == MEDIA_DIRECTION_SEND)))
-    {
-        IMS_TRACE_I(
-                "CheckOneWayVideoCall() Oneway video call - VideoDir[%d]", nVideoDirection, 0, 0);
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
 }

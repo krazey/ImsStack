@@ -216,7 +216,6 @@ private:
             IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType);
     void SetSessionType(IN ISession* pSession);
     void SetMediaDescriptorAsNotSupported(IN IMediaDescriptor* pDescriptor, IN SdpMedia* pSDPMedia);
-    IMS_BOOL CheckOneWayVideoCall(void);
 
 protected:
     NEGO_STATE m_eNegoState;
