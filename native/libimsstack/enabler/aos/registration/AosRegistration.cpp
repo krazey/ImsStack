@@ -4158,6 +4158,16 @@ PROTECTED VIRTUAL void AosRegistration::Registration_RefreshTimerExpired(
         return;
     }
 
+    if (GET_N_CONFIG(m_nSlotId)->GetRegOutOfServicePolicy() ==
+            CarrierConfig::Assets::REG_OOS_POLICY_DESTROY)
+    {
+        if (m_piContext->GetNetTracker()->IsSuspended())
+        {
+            ProcessUnpredictableFailure();
+            return;
+        }
+    }
+
     CheckRadioReadyAndSetTxnPending();
 
     if (!IsTransactionStarted())

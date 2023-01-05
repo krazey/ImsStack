@@ -38,6 +38,7 @@
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
 
     <!-- Aos -->
+    <int name="reg_out_of_service_policy_int" value="1"/>
     <int name="reg_retry_default_policy_int" value="1"/>
     <int name="roaming_preferred_emc_reg_int" value="2"/>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
