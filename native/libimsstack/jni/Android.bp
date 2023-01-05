@@ -1,0 +1,106 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// JniConnector
+cc_library_headers {
+    name: "libimsstack_jni_mtc_headers",
+    export_include_dirs: [
+        "include",
+        "include/enabler/mtc",
+    ],
+}
+
+cc_library_headers {
+    name: "libimsstack_jni_mts_headers",
+    export_include_dirs: [
+        "include",
+        "include/enabler/mts",
+    ],
+}
+
+cc_library_headers {
+    name: "libimsstack_jni_media_headers",
+    export_include_dirs: [
+        "include",
+        "include/enabler/media",
+    ],
+}
+
+cc_library_headers {
+    name: "libimsstack_jni_aos_headers",
+    export_include_dirs: [
+        "include",
+        "include/enabler/aos",
+    ],
+}
+
+cc_library_headers {
+    name: "libimsstack_jni_sipcontroller_headers",
+    export_include_dirs: [
+        "include",
+        "include/enabler/sipcontroller",
+    ],
+}
+
+cc_library_static {
+    name:"libimsstack-jni",
+    defaults: [
+        "imsstack_native_defaults",
+    ],
+    srcs: [
+        "**/*.cpp",
+    ],
+    include_dirs: [
+        "system/libbase/include",
+    ],
+    header_libs: [
+        "libimsmedia_config_headers",
+        "libimsstack_config_headers",
+        "libimsstack_enabler_headers",
+        "libimsstack_main_headers",
+        "libimsstack_platform_headers",
+        "libimsstack_platform_os_android_system-intf_headers",
+    ] + [
+        "libimsstack_enabler_mts_headers",
+    ],
+    local_include_dirs: [
+        "include",
+        "include/enabler",
+        "include/enabler/aos",
+        "include/enabler/media",
+        "include/enabler/mtc",
+        "include/enabler/mts",
+        "include/enabler/sipcontroller",
+        "include/enabler/uce",
+        "include/system",
+    ],
+    // For unit-test
+    export_include_dirs: [
+        "include",
+        "include/enabler",
+        "include/enabler/aos",
+        "include/enabler/mtc",
+        "include/enabler/mts",
+        "include/enabler/sipcontroller",
+        "include/enabler/uce",
+        "include/system",
+    ],
+    shared_libs: [
+        "libnativehelper",
+    ],
+}

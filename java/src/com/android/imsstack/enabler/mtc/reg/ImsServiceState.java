@@ -1,0 +1,61 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.imsstack.enabler.mtc.reg;
+
+public class ImsServiceState {
+    // IUIMS::APP_XXX
+    public int mApp = (-1);
+    // IUMtcService.SERVICE_XXX
+    public int mServiceType = 0;
+    // Additional information for each service types
+    // As of now, it's only for SERVICE_EMERGENCY
+    public int mExtraState = (-1);
+    // Reason code if the service is not available
+    public int mReason = 0;
+
+    public ImsServiceState() {
+    }
+
+    public ImsServiceState(int app, int serviceType) {
+        mApp = app;
+        mServiceType = serviceType;
+    }
+
+    public ImsServiceState(int app, int serviceType, int extraState, int reason) {
+        this(app, serviceType);
+
+        mExtraState = extraState;
+        mReason = reason;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("[ ImsServiceState: app=");
+        sb.append(mApp);
+        sb.append(", serviceType=");
+        sb.append(mServiceType);
+        sb.append(", extraState=");
+        sb.append(mExtraState);
+        sb.append(", reason=");
+        sb.append(mReason);
+        sb.append(" ]");
+
+        return sb.toString();
+    }
+}

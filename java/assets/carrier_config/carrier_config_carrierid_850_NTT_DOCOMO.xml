@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<carrier_config>
+    <!-- Carrier configurations -->
+    <!-- Ims General -->
+    <boolean name="ims.allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool" value="true"/>
+    <boolean name="request_uri_validation_required_in_mid_dialog_bool" value="false"/>
+
+    <!-- Aos -->
+    <int name="ims.sip_preferred_transport_int" value="2"/>
+    <int-array name="ims.ims_identity_priority_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+    <int name="ims.isim_index_for_impu_int" value="0"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
+    <int-array name="ims.ipsec_authentication_algorithms_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+    <int-array name="ims.ipsec_encryption_algorithms_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+
+    <!-- Assets: non-carrier configurations -->
+    <!-- Ims General -->
+    <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+    <int name="sip_timer_100_trying_millis_int" value="0"/>
+
+    <!-- Aos -->
+    <int name="contact_user_info_policy_for_non_reg_message_int" value="2"/>
+    <int name="reg_actual_wait_time_policy_int" value="2"/>
+    <int name="reg_retry_default_policy_int" value="1"/>
+    <int-array name="reg_err_code_for_pcscf_discovery_int_array" num="2">
+        <item value="0"/>
+        <item value="504"/>
+    </int-array>
+    <int-array name="rereg_err_code_for_ims_pdn_reactivation_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+    <int-array name="rereg_err_code_for_init_reg_with_available_pcscf_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+
+    <!-- MTC -->
+    <int name="ims.request_uri_type_int" value="1"/>
+    <boolean name="imsvoice.session_timer_supported_bool" value="false"/>
+    <int name="imsvoice.session_privacy_type_int" value="2"/>
+    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
+    <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="true"/>
+    <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="0"/>
+    <int-array name="imsvoice.srvcc_type_int_array" num="4">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="2"/>
+        <item value="3"/>
+    </int-array>
+    <int name="imsvoice.ringing_timer_millis_int" value="180000"/>
+    <int name="imsvoice.ringback_timer_millis_int" value="180000"/>
+    <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
+    <int name="imsvoice.mo_call_request_timeout_millis_int" value="-1"/>
+    <int name="imsvoice.18x_timer_millis_int" value="-1"/>
+    <int name="imsvoice.incoming_call_reject_code_for_user_decline_int" value="403"/>
+    <int name="imsvoice.incoming_call_reject_code_for_no_answer_int" value="486"/>
+    <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="1"/>
+    <int name="imsvoice.policy_on_audio_qos_deactivation_int" value="1"/>
+    <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="false"/>
+    <int-array name="imsvoice.reject_code_for_csfb_int_array" num="37">
+        <item value="300"/>
+        <item value="301"/>
+        <item value="302"/>
+        <item value="305"/>
+        <item value="400"/>
+        <item value="401"/>
+        <item value="402"/>
+        <item value="405"/>
+        <item value="406"/>
+        <item value="407"/>
+        <item value="408"/>
+        <item value="410"/>
+        <item value="413"/>
+        <item value="414"/>
+        <item value="415"/>
+        <item value="416"/>
+        <item value="420"/>
+        <item value="421"/>
+        <item value="423"/>
+        <item value="481"/>
+        <item value="482"/>
+        <item value="483"/>
+        <item value="484"/>
+        <item value="485"/>
+        <item value="488"/>
+        <item value="491"/>
+        <item value="493"/>
+        <item value="494"/>
+        <item value="500"/>
+        <item value="501"/>
+        <item value="502"/>
+        <item value="503"/>
+        <item value="505"/>
+        <item value="513"/>
+        <item value="580"/>
+        <item value="604"/>
+        <item value="606"/>
+    </int-array>
+    <int name="imsvoice.policy_for_403_response_for_invite_int" value="0"/>
+    <boolean name="imsvt.video_qos_precondition_supported_bool" value="true"/>
+    <int name="imsvt.convert_remote_response_timer_millis_int" value="30000"/>
+    <int name="imsvt.convert_user_response_timer_millis_int" value="40000"/>
+    <int name="imsvt.policy_on_video_qos_deactivation_int" value="2"/>
+    <int-array name="registration_disconnect_reason_to_terminate_ongoing_call_int_array" num="1">
+        <item value="999"/> <!-- All cases -->
+    </int-array>
+
+    <!-- Mts -->
+    <int-array name="sms_generic_error_codes_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+    <int name="sms_policy_for_expiry_timer_f_int" value="8"/>
+    <int name="sms_policy_for_504_response_int" value="8"/>
+
+    <!-- Media -->
+    <boolean name="audio_evs_support_bool" value="true"/>
+    <int name="audio_maxred_int" value="0"/>
+    <boolean name="audio_bw_nego_option_bool" value="true"/>
+    <int-array name="asset_evs_payload_type_int_array" num="1">
+        <item value="127"/>
+    </int-array>
+    <int-array name="asset_amrwb_payload_type_int_array" num="2">
+        <item value="97"/>
+        <item value="98"/>
+    </int-array>
+    <int-array name="asset_amrnb_payload_type_int_array" num="2">
+        <item value="100"/>
+        <item value="101"/>
+    </int-array>
+    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
+        <item value="99"/>
+    </int-array>
+    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
+        <item value="102"/>
+    </int-array>
+    <int-array name="asset_amr_amrwb_codec_attribute_modeset_int_array" num="0">
+    </int-array>
+    <int-array name="asset_amr_amrnb_codec_attribute_modeset_int_array" num="0">
+    </int-array>
+    <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+    <int-array name="asset_amrnb_codec_attribute_payload_format_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="0"/>
+        <item value="4"/>
+    </int-array>
+    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="asset_evs_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="asset_evs_codec_attribute_dtx_recv_bool" value="false"/>
+    <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
+    <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
+    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
+
+</carrier_config>

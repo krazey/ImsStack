@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="test_config_editor"
+    android:title="TestConfig Editor">
+    <CheckBoxPreference android:title="IMS Disabled"
+        android:key="test_ims_disabled"
+        android:summaryOn="IMS off" android:summaryOff="IMS on"
+        android:enabled="true" android:defaultValue="false">
+    </CheckBoxPreference>
+    <CheckBoxPreference android:title="Debug Enabled"
+        android:key="test_debug_enabled"
+        android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
+        android:enabled="true" android:defaultValue="false">
+    </CheckBoxPreference>
+    <CheckBoxPreference android:title="Testmode Enabled"
+        android:key="test_testmode_enabled"
+        android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
+        android:enabled="true" android:defaultValue="false">
+    </CheckBoxPreference>
+    <CheckBoxPreference android:title="Wi-Fi Test Enabled"
+        android:key="test_wifi_test_enabled"
+        android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
+        android:enabled="true" android:defaultValue="false">
+    </CheckBoxPreference>
+    <CheckBoxPreference android:title="IMS HAL Test Enabled"
+        android:key="test_ims_hal_enabled"
+        android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
+        android:enabled="true" android:defaultValue="false">
+    </CheckBoxPreference>
+    <PreferenceScreen android:title="Subscriber"
+        android:key="screen_subscriber">
+        <EditTextPreference android:title="Home Domain Name"
+            android:key="subscriber_home_domain_name"
+            android:dialogMessage="">
+        </EditTextPreference>
+        <EditTextPreference android:title="IMPI"
+            android:key="subscriber_impi"
+            android:dialogMessage="">
+        </EditTextPreference>
+        <EditTextPreference android:title="IMPU"
+            android:key="subscriber_impu"
+            android:dialogMessage="">
+        </EditTextPreference>
+    </PreferenceScreen>
+    <EditTextPreference android:title="P-CSCF Address"
+        android:key="test_pcscf_address"
+        android:dialogMessage="">
+    </EditTextPreference>
+    <PreferenceScreen android:title="User-Agent"
+        android:key="screen_user_agent">
+        <CheckBoxPreference android:title="Use predefined UA String"
+            android:key="user_agent_use_predefined_ua_string"
+            android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
+            android:enabled="true" android:defaultValue="false">
+        </CheckBoxPreference>
+        <EditTextPreference android:title="UA String"
+            android:key="user_agent_ua_string"
+            android:dialogMessage="">
+        </EditTextPreference>
+    </PreferenceScreen>
+    <EditTextPreference android:title="Log Options"
+        android:key="test_log_options"
+        android:dialogMessage="">
+    </EditTextPreference>
+    <ListPreference android:title="Restart ImsStack"
+        android:entryValues="@array/two_state_value"
+        android:entries="@array/two_state_entry"
+        android:key="test_restart_imsstack" android:defaultValue="-1" android:enabled="true"
+        android:selectable="true">
+    </ListPreference>
+    <ListPreference android:title="Clear Config"
+        android:entryValues="@array/two_state_value"
+        android:entries="@array/two_state_entry"
+        android:key="test_clear_config" android:defaultValue="-1" android:enabled="true"
+        android:selectable="true">
+    </ListPreference>
+</PreferenceScreen>

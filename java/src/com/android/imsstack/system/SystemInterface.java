@@ -1,0 +1,2117 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.imsstack.system;
+
+import android.os.Parcel;
+import android.util.ArraySet;
+import android.util.SparseArray;
+
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ICallSetting;
+import com.android.imsstack.core.agents.dcmif.EApnType;
+import com.android.imsstack.core.agents.dcmif.IApn;
+import com.android.imsstack.core.agents.dcmif.IDcUtils;
+import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.jni.JniImsProxy;
+import com.android.imsstack.jni.JniSystemListener;
+import com.android.imsstack.system.SystemConstants;
+import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsPrivateProperties;
+import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.util.ThreadMessageExecutor;
+
+import java.io.FileDescriptor;
+
+/**
+ * This class provides the system interfaces to communicate with native and Java layer.
+ */
+public class SystemInterface implements JniSystemListener {
+    // Constants--------------------------------------------------
+    // Variables--------------------------------------------------
+    private static SystemInterface sSystemInterface = new SystemInterface();
+    private static final SparseArray<String> sMethodToString = new SparseArray<>();
+
+    private long mNativeObject = 0;
+
+    private final SparseArray<ISystem> mSystems =
+            new SparseArray<>(MSimUtils.getSupportedSimCount());
+
+    private ThreadMessageExecutor mDefaultExecutor =
+            new ThreadMessageExecutor(SystemInterface.class.getSimpleName() + "_DEFAULT");
+
+    private ISystemAPIAlarm mISystemAPIAlarm;
+    private ISystemAPIBattery mISystemAPIBattery;
+    private ISystemAPIDevice mISystemAPIDevice;
+    private ISystemAPIPreference mISystemAPIPreference;
+    private ISystemAPIWifi mISystemAPIWifi;
+    private ISystemAPIWakeLock mWakeLock;
+
+    // Static loading materials ----------------------------------
+    // Public methods --------------------------------------------
+    public static SystemInterface getInstance() {
+        return sSystemInterface;
+    }
+
+    public SystemInterface() {
+        ImsLog.d("");
+    }
+
+    public void init() {
+        if (mNativeObject == 0) {
+            sSystemInterface = this;
+
+            mNativeObject = JniImsProxy.getInterface(
+                    SystemConstants.SYSTEM_INTERFACE, MSimUtils.DEFAULT_SLOT_ID);
+
+            JniImsProxy.setSystemListener(mNativeObject, this);
+            mDefaultExecutor.start();
+
+            if (ImsLog.DBG) {
+                initForDebugLog();
+            }
+        }
+        else {
+            ImsLog.w("aready registered listener or parameter is null");
+        }
+    }
+
+    public void cleanup() {
+        if (mNativeObject != 0) {
+            mDefaultExecutor = null;
+            JniImsProxy.removeSystemListener(mNativeObject);
+            JniImsProxy.releaseInterface(mNativeObject);
+            mNativeObject = 0;
+        }
+    }
+
+    public synchronized ISystem getSystem(int slotId) {
+        return mSystems.get(slotId);
+    }
+
+    public synchronized void start(int slotId) {
+        ImsLog.d(slotId, "");
+        ImsSystem system = new ImsSystem(slotId);
+        system.init();
+        mSystems.put(slotId, system);
+    }
+
+    public synchronized void stop(int slotId) {
+        ImsLog.d(slotId, "");
+        ImsSystem system = (ImsSystem) mSystems.get(slotId);
+
+        if (system == null) {
+            return;
+        }
+
+        system.cleanup();
+        mSystems.remove(slotId);
+    }
+
+    public void setISystemAPIAlarm(ISystemAPIAlarm api) {
+        mISystemAPIAlarm = api;
+    }
+
+    public void setISystemAPIBattery(ISystemAPIBattery api) {
+        mISystemAPIBattery = api;
+    }
+
+    public void setISystemAPIDevice(ISystemAPIDevice api) {
+        mISystemAPIDevice = api;
+    }
+
+    public void setISystemAPIPreference(ISystemAPIPreference api) {
+        mISystemAPIPreference = api;
+    }
+
+    public void setISystemAPIWifi(ISystemAPIWifi api) {
+        mISystemAPIWifi = api;
+    }
+
+    public void setWakeLock(ISystemAPIWakeLock wakeLock) {
+        mWakeLock = wakeLock;
+    }
+
+    /**
+     * Notifies the expiration of the alarm timer.
+     *
+     * @param id the timer id which is provisioned to start an alarm timer
+     */
+    public void notifyAlarmExpired(final long id) {
+        mDefaultExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Parcel parcel = Parcel.obtain();
+
+                if (parcel == null) {
+                    ImsLog.d("Parcel is null");
+                    return;
+                }
+
+                parcel.writeInt(MSimUtils.DEFAULT_SLOT_ID);
+                parcel.writeInt(SystemConstants.NOTIFY_ALARM_EXPIRED);
+                parcel.writeLong(id);
+
+                sendData2Native(mNativeObject, parcel);
+            }
+        });
+    }
+
+    /**
+     * Notifies the changes of the battery level.
+     *
+     * @param level the battery level (integer between 1 and 100)
+     */
+    public void notifyBatteryLevelChanged(final int level) {
+        mDefaultExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Parcel parcel = Parcel.obtain();
+
+                if (parcel == null) {
+                    ImsLog.d("Parcel is null");
+                    return;
+                }
+
+                parcel.writeInt(MSimUtils.DEFAULT_SLOT_ID);
+                parcel.writeInt(SystemConstants.NOTIFY_BATTERY_LEVEL_CHANGED);
+                parcel.writeInt(level);
+
+                sendData2Native(mNativeObject, parcel);
+            }
+        });
+    }
+
+    /**
+     * Notifies the state of the WiFi module.
+     *
+     * @param state the state of the WiFi module
+     *          {@link WifiManager.WIFI_STATE_DISABLING} (0)
+     *          {@link WifiManager.WIFI_STATE_DISABLED} (1)
+     *          {@link WifiManager.WIFI_STATE_ENABLING} (2)
+     *          {@link WifiManager.WIFI_STATE_ENABLED} (3)
+     *          {@link WifiManager.WIFI_STATE_UNKNOWN} (4)
+     */
+    public void notifyWifiStateChanged(final int state) {
+        mDefaultExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Parcel parcel = Parcel.obtain();
+
+                if (parcel == null) {
+                    ImsLog.d("Parcel is null");
+                    return;
+                }
+
+                parcel.writeInt(MSimUtils.DEFAULT_SLOT_ID);
+                parcel.writeInt(SystemConstants.NOTIFY_WIFI_STATE_CHANGED);
+                parcel.writeInt(state);
+
+                sendData2Native(mNativeObject, parcel);
+            }
+        });
+    }
+
+    /**
+     * Notifies the state of the WiFi data connection.
+     *
+     * @param state the state of the WiFi data connection (NetworkInfo.DetailedState enum)
+     *          {@link NetworkInfo.DetailedState.IDLE} (0)
+     *          {@link NetworkInfo.DetailedState.SCANNING} (1)
+     *          {@link NetworkInfo.DetailedState.CONNECTING} (2)
+     *          {@link NetworkInfo.DetailedState.AUTHENTICATING} (3)
+     *          {@link NetworkInfo.DetailedState.OBTAINING_IPADDR} (4)
+     *          {@link NetworkInfo.DetailedState.CONNECTED} (5)
+     *          {@link NetworkInfo.DetailedState.SUSPENDED} (6)
+     *          {@link NetworkInfo.DetailedState.DISCONNECTING} (7)
+     *          {@link NetworkInfo.DetailedState.DISCONNECTED} (8)
+     *          {@link NetworkInfo.DetailedState.FAILED} (9)
+     *          {@link NetworkInfo.DetailedState.BLOCKED} (10)
+     *          {@link NetworkInfo.DetailedState.VERIFYING_POOR_LINK} (11)
+     *          {@link NetworkInfo.DetailedState.CAPTIVE_PORTAL_CHECK} (12)
+     */
+    public void notifyWifiDetailedStateChanged(final int state) {
+        mDefaultExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Parcel parcel = Parcel.obtain();
+
+                if (parcel == null) {
+                    ImsLog.d("Parcel is null");
+                    return;
+                }
+
+                parcel.writeInt(MSimUtils.DEFAULT_SLOT_ID);
+                parcel.writeInt(SystemConstants.NOTIFY_WIFI_DETAILED_STATE_CHANGED);
+                parcel.writeInt(state);
+
+                sendData2Native(mNativeObject, parcel);
+            }
+        });
+    }
+
+    private byte[] onDefaultMessage(int method, Parcel parcel) {
+        Parcel result = null;
+
+        switch (method) {
+            case SystemConstants.SET_ALARM: //FALL-THROUGH
+            case SystemConstants.KILL_ALARM:
+                result = handleSystemAPIAlarm(method, parcel);
+                break;
+            case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
+            case SystemConstants.SET_PREFERENCE:
+                result = handleSystemAPIPreference(method, parcel);
+                break;
+            case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_DETAILED_STATE: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_BSS_ID: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_SSID:
+                result = handleSystemAPIWifi(method, parcel);
+                break;
+            case SystemConstants.GET_BATTERY_LEVEL:
+                result = handleSystemAPIBattery(method);
+                break;
+            case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
+            case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
+                result = handleSystemAPIDevice(method);
+                break;
+            case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
+            case SystemConstants.SET_PRIVATE_PROPERTY:
+                result = handleSystemAPIConfiguration(method, parcel);
+                break;
+            default:
+                break;
+        }
+
+        if (result == null) {
+            if (ImsLog.DBG) {
+                ImsLog.d("method = " + sMethodToString.get(method) + " is not handled");
+            } else {
+                ImsLog.i("method = " + method + " is not handled");
+            }
+            return new byte[] {(byte)0};
+        }
+
+        byte[] buffer = result.marshall();
+        result.recycle();
+        result = null;
+
+        return buffer;
+    }
+
+    private byte[] onDefaultMessageForEvent(int event, int wParam, int lParam) {
+        int returnValue = 1;
+
+        switch (event) {
+            case ImsEventDef.IMS_EVENT_WAKE_LOCK:
+                if (mWakeLock != null) {
+                    mWakeLock.acquire(lParam);
+                }
+                break;
+
+            case ImsEventDef.IMS_EVENT_WIFI_SERVICE:
+                if (mISystemAPIWifi != null) {
+                    mISystemAPIWifi.turnOnOff((wParam == ImsEventDef.IMS_WIFI_ON) ? true : false);
+                }
+                break;
+
+            default:
+                returnValue = 0;
+                break;
+        }
+
+        Parcel result = Parcel.obtain();
+        result.writeInt(returnValue);
+
+        byte[] buffer = result.marshall();
+        result.recycle();
+        result = null;
+
+        return buffer;
+    }
+
+    @Override
+    public byte[] onMessage(Parcel parcel, FileDescriptor fd) {
+        try {
+            return handleMessage(parcel, fd);
+        } catch (Throwable t) {
+            ImsLog.i("onMessage :: exception=" + t.toString());
+            t.printStackTrace();
+            return new byte[] {(byte)0};
+        }
+    }
+
+    private byte[] handleMessage(Parcel parcel, FileDescriptor fd) {
+        int slotId = parcel.readInt();
+        int method = parcel.readInt();
+        int event = 0;
+        int wParam = 0;
+        int lParam = 0;
+
+        if (ImsLog.DBG) {
+            ImsLog.d(slotId, "method = " + sMethodToString.get(method));
+        }
+
+        if (isSendEvent(method)) {
+            event = parcel.readInt();
+            wParam = parcel.readInt();
+            lParam = parcel.readInt();
+        }
+
+        if (isDefaultRequired(method, event)) {
+            if (isSendEvent(method)) {
+                return onDefaultMessageForEvent(event, wParam, lParam);
+            } else {
+                return onDefaultMessage(method, parcel);
+            }
+        }
+
+        ImsSystem system;
+        if (isActiveSlotIdRequired(method)) {
+            system = getActiveSystem();
+        } else {
+            system = (ImsSystem) getSystem(slotId);
+        }
+
+        if (system == null) {
+            return new byte[] {(byte)0};
+        }
+
+        Parcel result = null;
+
+        switch (method) {
+        //mISystemAPISendEvent
+        case SystemConstants.SEND_EVENT:
+            result = system.handleSystemAPISendEvent(event, wParam, lParam);
+            break;
+            // setEvent
+        case SystemConstants.SET_EVENT: {
+            int setEvent = parcel.readInt();
+            ImsLog.d(slotId, "set event = " + Integer.toString(setEvent, 16));
+            system.registerEvent(setEvent);
+            result = Parcel.obtain();
+            result.writeInt(1);
+            break;
+        }
+            // resetEvent
+        case SystemConstants.RESET_EVENT: {
+            int resetEvent = parcel.readInt();
+            ImsLog.d(slotId, "reset event = " + Integer.toString(resetEvent, 16));
+            system.unregisterEvent(resetEvent);
+            result = Parcel.obtain();
+            result.writeInt(1);
+            break;
+        }
+        default:
+            result = system.handleSystemAPI(method, parcel, fd);
+            break;
+        }
+
+        if (result == null) {
+            if (ImsLog.DBG) {
+                ImsLog.d(slotId, "method = " + sMethodToString.get(method) + " is not handled");
+            } else {
+                ImsLog.i(slotId, "method = " + method + " is not handled");
+            }
+            return new byte[] {(byte)0};
+        }
+
+        byte[] buffer = result.marshall();
+        result.recycle();
+        result = null;
+
+        return buffer;
+    }
+
+
+    private synchronized ImsSystem getActiveSystem() {
+        int activeSimCount = MSimUtils.getActiveSimCount();
+
+        for (int i = 0; i < activeSimCount; i++) {
+            ImsSystem system = (ImsSystem) getSystem(i);
+            if (system != null) {
+                return system;
+            }
+        }
+
+        return null;
+    }
+
+    private Parcel handleSystemAPIAlarm(int method, Parcel parcel) {
+        if (mISystemAPIAlarm == null) {
+            return null;
+        }
+
+        Parcel result = Parcel.obtain();
+
+        switch (method) {
+        case SystemConstants.SET_ALARM:
+            result.writeInt(mISystemAPIAlarm.startAlarm4Sys(parcel.readInt(),
+                parcel.readLong()));
+            break;
+        case SystemConstants.KILL_ALARM:
+            result.writeInt(mISystemAPIAlarm.killAlarm4Sys(parcel.readLong()));
+            break;
+        default:
+            result.recycle();
+            return null;
+        }
+
+        return result;
+    }
+
+    private Parcel handleSystemAPIBattery(int method) {
+        if (mISystemAPIBattery == null) {
+            return null;
+        }
+
+        Parcel result = Parcel.obtain();
+
+        switch (method) {
+        case SystemConstants.GET_BATTERY_LEVEL:
+            result.writeInt(mISystemAPIBattery.getBatteryLevel4Sys());
+            break;
+        default:
+            result.recycle();
+            return null;
+        }
+
+        return result;
+    }
+
+    private Parcel handleSystemAPIDevice(int method) {
+        if (mISystemAPIDevice == null) {
+            return null;
+        }
+
+        Parcel result = Parcel.obtain();
+
+        switch (method) {
+        case SystemConstants.GET_DEVICE_NAME:
+            result.writeString(mISystemAPIDevice.getDeviceName4Sys());
+            break;
+        case SystemConstants.GET_EXTERNAL_STORAGE_PATH:
+            result.writeString(mISystemAPIDevice.getExternalStoragePath4Sys());
+            break;
+        default:
+            result.recycle();
+            return null;
+        }
+
+        return result;
+    }
+
+    public Parcel handleSystemAPIConfiguration(int method, Parcel parcel) {
+        Parcel result = Parcel.obtain();
+
+        switch (method) {
+        case SystemConstants.GET_PRIVATE_PROPERTY: {
+            int persistent = parcel.readInt();
+            String key = parcel.readString();
+            int slotId = parcel.readInt();
+
+            if (persistent == 1) {
+                result.writeString(ImsPrivateProperties.Persistent.get(key, "", slotId));
+            } else {
+                result.writeString(ImsPrivateProperties.Ephemeral.get(key, "", slotId));
+            }
+            break;
+        }
+        case SystemConstants.SET_PRIVATE_PROPERTY: {
+            int persistent = parcel.readInt();
+            String key = parcel.readString();
+            String value = parcel.readString();
+            int slotId = parcel.readInt();
+
+            if (persistent == 1) {
+                ImsPrivateProperties.Persistent.set(key, value, slotId);
+            } else {
+                ImsPrivateProperties.Ephemeral.set(key, value, slotId);
+            }
+            result.writeInt(1);
+            break;
+        }
+        default:
+            result.recycle();
+            return null;
+        }
+
+        return result;
+    }
+
+    private Parcel handleSystemAPIPreference(int method, Parcel parcel) {
+        if (mISystemAPIPreference == null) {
+            return null;
+        }
+
+        Parcel result = Parcel.obtain();
+        switch (method) {
+        case SystemConstants.GET_PREFERENCE:
+            result.writeString(mISystemAPIPreference.getPreference4Sys(parcel.readString(),
+                    parcel.readString(), parcel.readInt(), parcel.readInt()));
+            break;
+        case SystemConstants.SET_PREFERENCE:
+            result.writeInt(mISystemAPIPreference.setPreference4Sys(parcel.readString(),
+                    parcel.readString(), parcel.readInt(), parcel.readString(), parcel.readInt()));
+            break;
+        default:
+            result.recycle();
+            return null;
+        }
+
+        return result;
+    }
+
+    public Parcel handleSystemAPIWifi(int method, Parcel parcel) {
+        if (mISystemAPIWifi == null) {
+            return null;
+        }
+
+        Parcel result = Parcel.obtain();
+        switch (method) {
+        case SystemConstants.GET_WIFI_STATE:
+            result.writeInt(mISystemAPIWifi.getWifiState4Sys());
+            break;
+        case SystemConstants.GET_WIFI_DETAILED_STATE:
+            result.writeInt(mISystemAPIWifi.getWifiDetailedState4Sys());
+            break;
+        case SystemConstants.GET_WIFI_BSS_ID:
+            result.writeString(mISystemAPIWifi.getWifiBssId4Sys());
+            break;
+        case SystemConstants.GET_WIFI_SSID:
+            result.writeString(mISystemAPIWifi.getWifiSsId4Sys());
+            break;
+        default:
+            result.recycle();
+            return null;
+        }
+
+        return result;
+    }
+
+    private boolean isActiveSlotIdRequired(int method) {
+        switch (method) {
+        case SystemConstants.GET_DIGEST_SHA1:
+            return true;
+        default:
+            break;
+        }
+
+        return false;
+    }
+
+    private boolean isSendEvent(int method) {
+        return (method == SystemConstants.SEND_EVENT);
+    }
+
+    private boolean isDefaultRequired(int method, int event) {
+        if (method == SystemConstants.SEND_EVENT) {
+            if (event == ImsEventDef.IMS_EVENT_WAKE_LOCK
+                || event == ImsEventDef.IMS_EVENT_WIFI_SERVICE) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        switch (method) {
+        case SystemConstants.SET_ALARM: //FALL-THROUGH
+        case SystemConstants.KILL_ALARM: //FALL-THROUGH
+        case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
+        case SystemConstants.SET_PREFERENCE: //FALL-THROUGH
+        case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
+        case SystemConstants.GET_WIFI_DETAILED_STATE: //FALL-THROUGH
+        case SystemConstants.GET_WIFI_BSS_ID: //FALL-THROUGH
+        case SystemConstants.GET_WIFI_SSID: //FALL-THROUGH
+        case SystemConstants.GET_BATTERY_LEVEL: //FALL-THROUGH
+        case SystemConstants.GET_EXTERNAL_STORAGE_PATH: //FALL-THROUGH
+        case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
+        case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
+        case SystemConstants.SET_PRIVATE_PROPERTY:
+            return true;
+        default:
+            break;
+        }
+
+        return false;
+    }
+
+    private void initForDebugLog() {
+        sMethodToString.put(SystemConstants.SET_ALARM,
+                "SET_ALARM");
+        sMethodToString.put(SystemConstants.KILL_ALARM,
+                "KILL_ALARM");
+        sMethodToString.put(SystemConstants.GET_BATTERY_LEVEL,
+                "GET_BATTERY_LEVEL");
+        sMethodToString.put(SystemConstants.IS_EMERGENCY_NUMBER,
+                "IS_EMERGENCY_NUMBER");
+        sMethodToString.put(SystemConstants.GET_TTY_MODE,
+                "GET_TTY_MODE");
+        sMethodToString.put(SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED,
+                "IS_IMS_VOICE_CALL_SUPPORTED");
+        sMethodToString.put(SystemConstants.ACTIVATE_DATA_CONNECTION,
+                "ACTIVATE_DATA_CONNECTION");
+        sMethodToString.put(SystemConstants.DEACTIVATE_DATA_CONNECTION,
+                "DEACTIVATE_DATA_CONNECTION");
+        sMethodToString.put(SystemConstants.GET_ACCESS_NETWORK_INFO,
+                "GET_ACCESS_NETWORK_INFO");
+        sMethodToString.put(SystemConstants.GET_APN_NAME,
+                "GET_APN_NAME");
+        sMethodToString.put(SystemConstants.GET_DATA_CONNECTION_STATE,
+                "GET_DATA_CONNECTION_STATE");
+        sMethodToString.put(SystemConstants.GET_HOST_BY_NAME,
+                "GET_HOST_BY_NAME");
+        sMethodToString.put(SystemConstants.GET_IFACE_ID,
+                "GET_IFACE_ID");
+        sMethodToString.put(SystemConstants.GET_IFACE_NAME,
+                "GET_IFACE_NAME");
+        sMethodToString.put(SystemConstants.GET_IPCAN_CATEGORY,
+                "GET_IPCAN_CATEGORY");
+        sMethodToString.put(SystemConstants.GET_LAST_ACCESS_NETWORK_INFO,
+                "GET_LAST_ACCESS_NETWORK_INFO");
+        sMethodToString.put(SystemConstants.GET_LOCAL_ADDRESS,
+                "GET_LOCAL_ADDRESS");
+        sMethodToString.put(SystemConstants.GET_PCSCF_ADDRESSES,
+                "GET_PCSCF_ADDRESSES");
+        sMethodToString.put(SystemConstants.GET_ROAMING_STATE,
+                "GET_ROAMING_STATE");
+        sMethodToString.put(SystemConstants.GET_SERVICE_STATE,
+                "GET_SERVICE_STATE");
+        sMethodToString.put(SystemConstants.IS_LTE_EMERGENCY_ONLY,
+                "IS_LTE_EMERGENCY_ONLY");
+        sMethodToString.put(SystemConstants.IS_MOBILE_DATA_ENABLED,
+                "IS_MOBILE_DATA_ENABLED");
+        sMethodToString.put(SystemConstants.GET_MOCN_PLMN_INFO,
+                "GET_MOCN_PLMN_INFO");
+        sMethodToString.put(SystemConstants.GET_VOICE_SERVICE_STATE,
+                "GET_VOICE_SERVICE_STATE");
+        sMethodToString.put(SystemConstants.GET_MTU,
+                "GET_MTU");
+        sMethodToString.put(SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED,
+                "IS_EMERGENCY_ATTACH_SUPPORTED");
+        sMethodToString.put(SystemConstants.BIND_SOCKET,
+                "BIND_SOCKET");
+        sMethodToString.put(SystemConstants.GET_PREFERENCE,
+                "GET_PREFERENCE");
+        sMethodToString.put(SystemConstants.SET_PREFERENCE,
+                "SET_PREFERENCE");
+        sMethodToString.put(SystemConstants.GET_PRIVATE_PROPERTY,
+                "GET_PRIVATE_PROPERTY");
+        sMethodToString.put(SystemConstants.SET_PRIVATE_PROPERTY,
+                "SET_PRIVATE_PROPERTY");
+        sMethodToString.put(SystemConstants.GET_CARRIER_CONFIG,
+                "GET_CARRIER_CONFIG");
+        sMethodToString.put(SystemConstants.GET_DIGEST_SHA1,
+                "GET_DIGEST_SHA1");
+        sMethodToString.put(SystemConstants.SEND_EVENT,
+                "SEND_EVENT");
+        sMethodToString.put(SystemConstants.GET_ISIM_STATE,
+                "GET_ISIM_STATE");
+        sMethodToString.put(SystemConstants.READ_ISIM_FILE_ATTR,
+                "READ_ISIM_FILE_ATTR");
+        sMethodToString.put(SystemConstants.READ_ISIM_RECORD,
+                "READ_ISIM_RECORD");
+        sMethodToString.put(SystemConstants.REQUEST_ISIM_AUTH,
+                "REQUEST_ISIM_AUTH");
+        sMethodToString.put(SystemConstants.REQUEST_USIM_AUTH,
+                "REQUEST_USIM_AUTH");
+        sMethodToString.put(SystemConstants.GET_NETWORK_TYPE,
+                "GET_NETWORK_TYPE");
+        sMethodToString.put(SystemConstants.GET_VOICE_NETWORK_TYPE,
+                "GET_VOICE_NETWORK_TYPE");
+        sMethodToString.put(SystemConstants.GET_CALL_STATE,
+                "GET_CALL_STATE");
+        sMethodToString.put(SystemConstants.GET_DEVICE_ID,
+                "GET_DEVICE_ID");
+        sMethodToString.put(SystemConstants.GET_DEVICE_NAME,
+                "GET_DEVICE_NAME");
+        sMethodToString.put(SystemConstants.GET_DEVICE_SOFTWARE_VERSION,
+                "GET_DEVICE_SOFTWARE_VERSION");
+        sMethodToString.put(SystemConstants.GET_EXTERNAL_STORAGE_PATH,
+                "GET_EXTERNAL_STORAGE_PATH");
+        sMethodToString.put(SystemConstants.GET_PHONE_NUMBER,
+                "GET_PHONE_NUMBER");
+        sMethodToString.put(SystemConstants.GET_SUBSCRIBER_ID,
+                "GET_SUBSCRIBER_ID");
+        sMethodToString.put(SystemConstants.GET_MCC,
+                "GET_MCC");
+        sMethodToString.put(SystemConstants.GET_MNC,
+                "GET_MNC");
+        sMethodToString.put(SystemConstants.GET_OPERATOR,
+                "GET_OPERATOR");
+        sMethodToString.put(SystemConstants.GET_COUNTRY,
+                "GET_COUNTRY");
+        sMethodToString.put(SystemConstants.GET_NETWORK_COUNTRY,
+                "GET_NETWORK_COUNTRY");
+        sMethodToString.put(SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM,
+                "GET_EMERGENCY_NUM_LIST_FROM_SIM");
+        sMethodToString.put(SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM,
+                "GET_EMERGENCY_PRIORITY_FROM_MODEM");
+        sMethodToString.put(SystemConstants.GET_UICC_GBA_SUPPORT,
+                "GET_UICC_GBA_SUPPORT");
+        sMethodToString.put(SystemConstants.GET_WIFI_STATE,
+                "GET_WIFI_STATE");
+        sMethodToString.put(SystemConstants.GET_WIFI_DETAILED_STATE,
+                "GET_WIFI_DETAILED_STATE");
+        sMethodToString.put(SystemConstants.GET_WIFI_BSS_ID,
+                "GET_WIFI_BSS_ID");
+        sMethodToString.put(SystemConstants.GET_WIFI_SSID,
+                "GET_WIFI_SSID");
+        sMethodToString.put(SystemConstants.IS_WFC_ENABLED,
+                "IS_WFC_ENABLED");
+        sMethodToString.put(SystemConstants.GET_WFC_PREFERENCES,
+                "GET_WFC_PREFERENCES");
+        sMethodToString.put(SystemConstants.IS_WFC_PROVISIONED,
+                "IS_WFC_PROVISIONED");
+        sMethodToString.put(SystemConstants.GET_WFC_ADDRESS_ID,
+                "GET_WFC_ADDRESS_ID");
+        sMethodToString.put(SystemConstants.START_LOCATION_INFO,
+                "START_LOCATION_INFO");
+        sMethodToString.put(SystemConstants.STOP_LOCATION_INFO,
+                "STOP_LOCATION_INFO");
+        sMethodToString.put(SystemConstants.GET_LOCATION_INFO,
+                "GET_LOCATION_INFO");
+        sMethodToString.put(SystemConstants.SET_EVENT,
+                "SET_EVENT");
+        sMethodToString.put(SystemConstants.RESET_EVENT,
+                "RESET_EVENT");
+        sMethodToString.put(SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT,
+                "GET_CALL_STATE_IN_OTHER_SLOT");
+        sMethodToString.put(SystemConstants.ADD_IPSEC_SA_PARAMETER,
+                "ADD_IPSEC_SA_PARAMETER");
+        sMethodToString.put(SystemConstants.REMOVE_IPSEC_SA_PARAMETER,
+                "REMOVE_IPSEC_SA_PARAMETER");
+        sMethodToString.put(SystemConstants.APPLY_IPSEC_SA,
+                "APPLY_IPSEC_SA");
+        sMethodToString.put(SystemConstants.REMOVE_IPSEC_SA,
+                "REMOVE_IPSEC_SA");
+        sMethodToString.put(SystemConstants.START_IMS_TRAFFIC,
+                "START_IMS_TRAFFIC");
+        sMethodToString.put(SystemConstants.STOP_IMS_TRAFFIC,
+                "STOP_IMS_TRAFFIC");
+        sMethodToString.put(SystemConstants.TRIGGER_EPS_FALLBACK,
+                "TRIGGER_EPS_FALLBACK");
+    }
+
+    private void sendData2Native(long cmd, Parcel parcel) {
+        byte[] result;
+        byte[] data = parcel.marshall();
+
+        try {
+            result = JniImsProxy.sendDataForSystem(mNativeObject, data);
+        } catch (RuntimeException e) {
+            ImsLog.e("sendDataForSystem: " + e.toString() + "; cmd=" + cmd);
+            return;
+        }
+
+        Parcel parcelOut = Parcel.obtain();
+        parcelOut.unmarshall(result, 0, result.length);
+        parcelOut.setDataPosition(0);
+
+        // if need the return data, use parcelOut at here
+        // start
+        // end
+
+        parcelOut.recycle();
+        parcelOut = null;
+    }
+
+    private class ImsSystem implements ISystem {
+        private ISystemAPICallInfo mISystemAPICallInfo;
+        private ISystemAPINetwork mISystemAPINetwork;
+        private ISystemAPISendEvent mISystemAPISendEvent;
+        private ISystemAPITelephonyState mISystemAPITelephonyState;
+        private ISystemAPITelephonySubscriber mISystemAPITelephonySubscriber;
+        private ISystemAPIWifiCalling mISystemAPIWifiCalling;
+        private ISystemAPILocation mISystemAPILocation;
+
+        private ThreadMessageExecutor mExecutor =
+                new ThreadMessageExecutor(SystemInterface.class.getSimpleName());
+
+        private final Object mLock = new Object();
+        private final ArraySet<Integer> mRegisteredEvents = new ArraySet<>();
+        private final int mSlotId;
+        private SystemCallInterface mSystemCall = null;
+        private SystemRadioInterface mSystemRadio = null;
+
+        ImsSystem(int slotId) {
+            mSlotId = slotId;
+        }
+
+        public void init() {
+            mExecutor.start();
+        }
+
+        public void cleanup() {
+            mExecutor = null;
+        }
+
+        @Override
+        public int getSlotId() {
+            return mSlotId;
+        }
+
+        @Override
+        public void setSystemCallInterface(SystemCallInterface systemCall) {
+            mSystemCall = systemCall;
+        }
+
+        @Override
+        public void setSystemRadioInterface(SystemRadioInterface systemRadio) {
+            mSystemRadio = systemRadio;
+        }
+
+        @Override
+        public void setISystemAPICallInfo(ISystemAPICallInfo api) {
+            synchronized (mLock) {
+                mISystemAPICallInfo = api;
+            }
+        }
+
+        @Override
+        public void setISystemAPINetwork(ISystemAPINetwork api) {
+            synchronized (mLock) {
+                mISystemAPINetwork = api;
+            }
+        }
+
+        @Override
+        public void setISystemAPISendEvent(ISystemAPISendEvent api) {
+            synchronized (mLock) {
+                mISystemAPISendEvent = api;
+            }
+        }
+
+        @Override
+        public void setISystemAPITelephonyState(ISystemAPITelephonyState api) {
+            synchronized (mLock) {
+                mISystemAPITelephonyState = api;
+            }
+        }
+
+        @Override
+        public void setISystemAPITelephonySubscriber(ISystemAPITelephonySubscriber api) {
+            synchronized (mLock) {
+                mISystemAPITelephonySubscriber = api;
+            }
+        }
+
+        @Override
+        public void setISystemAPIWifiCalling(ISystemAPIWifiCalling api) {
+            synchronized (mLock) {
+                mISystemAPIWifiCalling = api;
+            }
+        }
+
+        @Override
+        public void setISystemAPILocation(ISystemAPILocation api) {
+            synchronized (mLock) {
+                mISystemAPILocation = api;
+            }
+        }
+
+        // Interface implementation methods --------------------------
+        /**
+         * Notifies the changes of airplane mode in the phone settings.
+         *
+         * @param airplaneMode the current airplane mode status
+         *          0: Airplane mode OFF, 1: Airplane mode ON
+         */
+        @Override
+        public void notifyAirplaneModeChanged(final int airplaneMode) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    // Write the event name
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_AIRPLANE_MODE_CHANGED);
+                    parcel.writeInt(airplaneMode);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the failure result to connect a data connection of the specified APN type.
+         *
+         * @param apnType the APN type (1: ims, 2: internet, 3: xcap, 9: emergency, 21: wifi)
+         */
+        @Override
+        public void notifyDataConnectionFailed(final int apnType) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_DATA_CONNECTION_FAILED);
+                    parcel.writeInt(apnType);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the IPCAN category of the attached data connection.
+         *
+         * @param apnType the APN type (1: ims, 2: internet, 3: xcap, 9: emergency,
+         *            21: wifi)
+         * @param ipcanCategory the IPCAN category (0: MOBILE, 1: WLAN); Refer to IIPCAN.h
+         */
+        @Override
+        public void notifyDataConnectionIpcanChanged(final int apnType,
+                final int ipcanCategory) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_DATA_CONNECTION_IPCAN_CHANGED);
+                    parcel.writeInt(apnType);
+                    parcel.writeInt(ipcanCategory);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the state of the specified data connection.
+         *
+         * @param apnType the APN type (1: ims, 2: internet, 3: xcap, 9: emergency, 21: wifi)
+         * @param state the data state (TelephonyManager.DATA_*)
+         *          {@link TelephonyManager.DATA_UNKNOWN} (-1)
+         *          {@link TelephonyManager.DATA_DISCONNECTED} (0)
+         *          {@link TelephonyManager.DATA_CONNECTING} (1)
+         *          {@link TelephonyManager.DATA_CONNECTED} (2)
+         *          {@link TelephonyManager.DATA_SUSPENDED} (3)
+         */
+        @Override
+        public void notifyDataConnectionStateChanged(final int apnType, final int state) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_DATA_CONNECTION_STATE_CHANGED);
+                    parcel.writeInt(apnType);
+                    parcel.writeInt(state);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the network type which the device is attached.
+         *
+         * @param networkType The network type defined in DcNetWatcher
+         *          {@link RAT_NONET} (0)
+         *          {@link RAT_EHRPD} (1)
+         *          {@link RAT_4G} (2)
+         *          {@link RAT_3G} (3)
+         *          {@link RAT_1XRTT} (4)
+         *          {@link RAT_2G} (5)
+         */
+        @Override
+        public void notifyNetworkTypeChanged(final int networkType) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_NETWORK_TYPE_CHANGED);
+                    parcel.writeInt(networkType);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the voice network type which the device is attached.
+         *
+         * @param networkType defined in DcNetWatcher
+         *          {@link RAT_NONET} (0)
+         *          {@link RAT_EHRPD} (1)
+         *          {@link RAT_4G} (2)
+         *          {@link RAT_3G} (3)
+         *          {@link RAT_1XRTT} (4)
+         *          {@link RAT_2G} (5)
+         */
+        @Override
+        public void notifyVoiceNetworkTypeChanged(final int networkType) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_VOICE_NETWORK_TYPE_CHANGED);
+                    parcel.writeInt(networkType);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the service state related to the attached network.
+         *
+         * @param serviceState the service state (ServiceState.STATE_*)
+         *          {@link ServiceState.STATE_IN_SERVICE} (0)
+         *          {@link ServiceState.STATE_OUT_OF_SERVICE} (1)
+         *          {@link ServiceState.STATE_EMERGENCY_ONLY} (2)
+         *          {@link ServiceState.STATE_POWER_OFF} (3)
+         */
+        @Override
+        public void notifyServiceStateChanged(final int serviceState) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_SERVICE_STATE_CHANGED);
+                    parcel.writeInt(serviceState);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the voice call (CS / IMS) state.
+         *
+         * @param state the call state (TelephonyManager.CALL_STATE_*)
+         *          {@link TelephonyManager.CALL_STATE_IDLE} (0)
+         *          {@link TelephonyManager.CALL_STATE_RINGING} (1)
+         *          {@link TelephonyManager.CALL_STATE_OFFHOOK} (2)
+         */
+        @Override
+        public void notifyVoiceCallStateChanged(final int state) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_VOICE_CALL_STATE_CHANGED);
+                    parcel.writeInt(state);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the changes of the IMS configuration.
+         *
+         * @param configs the configuration items to be updated
+         */
+        @Override
+        public void notifyConfigurationChanged(final int configs) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_CONFIGURATION_CHANGED);
+                    parcel.writeInt(configs);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        /**
+         * Notifies the events which are registered by the native modules.
+         *
+         * @param event the current event
+         * @param param1 the parameter related to the current event
+         * @param param2 the additional parameter related to the current event
+         */
+        @Override
+        public void notifyEvent(final int event, final int param1, final int param2) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isEventRegistered(event)) {
+                        ImsLog.w("Event (" + Integer.toString(event, 16) + ") is not registered");
+                        return;
+                    }
+
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(param1);
+                    parcel.writeInt(param2);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+         public void notifyIsimState(int event, String state) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeString(state);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+        public void notifyIsimFileAttributesResponse(int event,
+                int fileId, int size, String[] values) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(fileId);
+                    parcel.writeInt(size);
+                    for (int i = 0;  i < size; i++)
+                    {
+                        parcel.writeString(values[i]);
+                    }
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+        public void notifyIsimRecordResponse(int event,
+                int fileId, int index, String value) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(fileId);
+                    parcel.writeInt(index);
+                    parcel.writeString(value);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+        public void notifyIsimAuthenticationResponse(int event, String response, long owner) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeString(response);
+                    parcel.writeLong(owner);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+        public void notifyUsimAuthenticationResponse(int event, String response, long owner) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_USIM_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeString(response);
+                    parcel.writeLong(owner);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+        public void notifyRadioConnectionFailed(int event, int id, int failureReason, int causeCode,
+                int waitTimeMillis) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_RADIO_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(id);
+                    parcel.writeInt(failureReason);
+                    parcel.writeInt(causeCode);
+                    parcel.writeInt(waitTimeMillis);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+        public void notifyRadioConnectionSetupPrepared(int event, int id) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_RADIO_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(id);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        @Override
+        public void notifySsacInfo(int event, int voiceFactor, int voiceTimeSec, int videoFactor,
+                int videoTimeSec) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Parcel parcel = Parcel.obtain();
+
+                    if (parcel == null) {
+                        ImsLog.d("Parcel is null");
+                        return;
+                    }
+
+                    parcel.writeInt(mSlotId);
+                    parcel.writeInt(SystemConstants.NOTIFY_RADIO_EVENT);
+                    parcel.writeInt(event);
+                    parcel.writeInt(voiceFactor);
+                    parcel.writeInt(voiceTimeSec);
+                    parcel.writeInt(videoFactor);
+                    parcel.writeInt(videoTimeSec);
+
+                    sendData2Native(mNativeObject, parcel);
+                }
+            });
+        }
+
+        // Private/Protected methods ---------------------------------
+        public boolean isEventRegistered(final int event) {
+            synchronized (mLock) {
+                return (mRegisteredEvents.contains(event));
+            }
+        }
+
+        public void registerEvent(final int event) {
+            synchronized (mLock) {
+                mRegisteredEvents.add(event);
+            }
+        }
+
+        public void unregisterEvent(final int event) {
+            synchronized (mLock) {
+                mRegisteredEvents.remove(event);
+            }
+        }
+
+        public Parcel handleSystemAPI(int method, Parcel parcel, FileDescriptor fd) {
+            if (method == SystemConstants.GET_HOST_BY_NAME) {
+                final ISystemAPINetwork network = getSystemAPINetwork();
+                return handleSystemAPINetwork(network, method, parcel);
+            }
+
+            Parcel result = null;
+
+            synchronized (mLock) {
+                switch (method) {
+                    //mISystemAPICallInfo
+                    case SystemConstants.IS_EMERGENCY_NUMBER: //FALL-THROUGH
+                    case SystemConstants.GET_TTY_MODE: //FALL-THROUGH
+                    case SystemConstants.GET_RTT_MODE: //FALL-THROUGH
+                    case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
+                        result = handleSystemAPICallInfo(method, parcel);
+                        break;
+                    //mISystemAPINetwork 1 ~ 10
+                    case SystemConstants.ACTIVATE_DATA_CONNECTION: //FALL-THROUGH
+                    case SystemConstants.DEACTIVATE_DATA_CONNECTION: //FALL-THROUGH
+                    case SystemConstants.GET_ACCESS_NETWORK_INFO: //FALL-THROUGH
+                    case SystemConstants.GET_APN_NAME: //FALL-THROUGH
+                    case SystemConstants.GET_DATA_CONNECTION_STATE: //FALL-THROUGH
+                    case SystemConstants.GET_HOST_BY_NAME: //FALL-THROUGH
+                    case SystemConstants.GET_IFACE_ID: //FALL-THROUGH
+                    case SystemConstants.GET_IFACE_NAME: //FALL-THROUGH
+                    case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO: //FALL-THROUGH
+                    case SystemConstants.GET_LOCAL_ADDRESS:
+                        result = handleSystemAPINetwork1(method, parcel);
+                        break;
+                    //mISystemAPINetwork 11 ~ 20
+                    case SystemConstants.GET_IPCAN_CATEGORY: //FALL-THROUGH
+                    case SystemConstants.GET_PCSCF_ADDRESSES: //FALL-THROUGH
+                    case SystemConstants.GET_ROAMING_STATE: //FALL-THROUGH
+                    case SystemConstants.GET_SERVICE_STATE: //FALL-THROUGH
+                    case SystemConstants.IS_LTE_EMERGENCY_ONLY: //FALL-THROUGH
+                    case SystemConstants.IS_MOBILE_DATA_ENABLED://FALL-THROUGH
+                    case SystemConstants.GET_MOCN_PLMN_INFO: //FALL-THROUGH
+                    case SystemConstants.GET_VOICE_SERVICE_STATE: //FALL-THROUGH
+                    case SystemConstants.GET_MTU: //FALL-THROUGH
+                    case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED: // FALL-THROUGH
+                    case SystemConstants.BIND_SOCKET:
+                        result = handleSystemAPINetwork2(method, parcel, fd);
+                        break;
+                    case SystemConstants.GET_ISIM_STATE: //FALL-THROUGH
+                    case SystemConstants.READ_ISIM_FILE_ATTR: //FALL-THROUGH
+                    case SystemConstants.READ_ISIM_RECORD: //FALL-THROUGH
+                    case SystemConstants.REQUEST_ISIM_AUTH: //FALL-THROUGH
+                    case SystemConstants.REQUEST_USIM_AUTH:
+                        result = handleSystemCallForSim(method, parcel);
+                        break;
+                    //mISystemAPITelephonyState
+                    case SystemConstants.GET_NETWORK_TYPE: //FALL-THROUGH
+                    case SystemConstants.GET_VOICE_NETWORK_TYPE: //FALL-THROUGH
+                    case SystemConstants.GET_CALL_STATE:
+                        result = handleSystemAPITelephonyState(method);
+                        break;
+                    //mISystemAPITelephonySubscriber
+                    case SystemConstants.GET_DEVICE_ID: //FALL-THROUGH
+                    case SystemConstants.GET_DEVICE_SOFTWARE_VERSION: //FALL-THROUGH
+                    case SystemConstants.GET_PHONE_NUMBER: //FALL-THROUGH
+                    case SystemConstants.GET_SUBSCRIBER_ID: //FALL-THROUGH
+                    case SystemConstants.GET_MCC: //FALL-THROUGH
+                    case SystemConstants.GET_MNC: //FALL-THROUGH
+                    case SystemConstants.GET_OPERATOR: //FALL-THROUGH
+                    case SystemConstants.GET_COUNTRY: //FALL-THROUGH
+                    case SystemConstants.GET_NETWORK_COUNTRY: //FALL-THROUGH
+                    case SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM: //FALL-THROUGH
+                    case SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM: //FALL-THROUGH
+                    case SystemConstants.GET_UICC_GBA_SUPPORT:
+                        result = handleSystemAPITelephonySubscriber(method);
+                        break;
+                    //mISystemAPIWifiCalling
+                    case SystemConstants.IS_WFC_ENABLED: //FALL-THROUGH
+                    case SystemConstants.GET_WFC_PREFERENCES: //FALL-THROUGH
+                    case SystemConstants.IS_WFC_PROVISIONED: //FALL-THROUGH
+                    case SystemConstants.GET_WFC_ADDRESS_ID:
+                        result = handleSystemAPIWifiCalling(method);
+                        break;
+                    //mISystemAPILocation
+                    case SystemConstants.START_LOCATION_INFO: //FALL-THROUGH
+                    case SystemConstants.STOP_LOCATION_INFO: //FALL-THROUGH
+                    case SystemConstants.GET_LOCATION_INFO: //FALL-THROUGH
+                    case SystemConstants.MAKE_INSTATNT_LOCATION_INFO:
+                        result = handleSystemAPILocation(method, parcel);
+                        break;
+                    case SystemConstants.START_IMS_TRAFFIC: //FALL-THROUGH
+                    case SystemConstants.STOP_IMS_TRAFFIC: //FALL-THROUGH
+                    case SystemConstants.TRIGGER_EPS_FALLBACK:
+                        result = handleSystemApiRadio(method, parcel);
+                        break;
+                    case SystemConstants.ADD_IPSEC_SA_PARAMETER: // FALL-THROUGH
+                    case SystemConstants.REMOVE_IPSEC_SA_PARAMETER: // FALL-THROUGH
+                    case SystemConstants.APPLY_IPSEC_SA: // FALL-THROUGH
+                    case SystemConstants.REMOVE_IPSEC_SA:
+                        result = handleSystemApiIpSec(method, parcel, fd);
+                        break;
+                    default:
+                        result = handleSystemCall(method);
+                        break;
+                }
+            }
+
+            return result;
+        }
+
+        public Parcel handleSystemAPISendEvent(int event, int wParam, int lParam) {
+            synchronized (mLock) {
+                if (mISystemAPISendEvent == null) {
+                    return null;
+                }
+
+                Parcel result = Parcel.obtain();
+                result.writeInt(mISystemAPISendEvent.processEvent4Sys(event, wParam, lParam));
+
+                return result;
+            }
+        }
+
+        private Parcel handleSystemAPICallInfo(int method, Parcel parcel) {
+            if (mISystemAPICallInfo == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+
+            switch (method) {
+            case SystemConstants.IS_EMERGENCY_NUMBER:
+                result.writeInt(mISystemAPICallInfo.isEmergencyNumber(
+                    parcel.readString()));
+                break;
+            case SystemConstants.GET_TTY_MODE:
+                result.writeInt(mISystemAPICallInfo.getTTYMode());
+                break;
+            case SystemConstants.GET_RTT_MODE:
+                int nRTTmode = 0;
+                ICallSetting cso = (ICallSetting)AgentFactory.getAgent(AgentFactory.CALL_SETTING, mSlotId);
+                if (cso != null) {
+                    nRTTmode = cso.getRTTMode();
+                }
+                result.writeInt(nRTTmode);
+                break;
+            case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
+                result.writeInt(mISystemAPICallInfo.getCallStateInOtherSlot());
+                break;
+            default:
+                result.recycle();
+                return null;
+            }
+
+            return result;
+
+        }
+
+        private Parcel handleSystemAPINetwork(ISystemAPINetwork network,
+                int method, Parcel parcel) {
+            if (network == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+            switch (method) {
+            case SystemConstants.GET_HOST_BY_NAME:
+                String[] ipAddrs = network.getHostByName4Sys(
+                            parcel.readInt(), parcel.readInt(), parcel.readString());
+
+                if (ipAddrs == null) {
+                    result.writeInt(0);
+                    break;
+                }
+
+                result.writeInt(ipAddrs.length);
+
+                for (int i = 0; i < ipAddrs.length; ++i) {
+                    result.writeString(ipAddrs[i]);
+                }
+                break;
+            default:
+                result.recycle();
+                return null;
+            }
+
+            return result;
+        }
+
+        private Parcel handleSystemAPINetwork1(int method, Parcel parcel) {
+            if (mISystemAPINetwork == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+            switch (method) {
+                case SystemConstants.ACTIVATE_DATA_CONNECTION:
+                    result.writeInt(mISystemAPINetwork.activateDataConnection4Sys(
+                            parcel.readInt()));
+                    break;
+                case SystemConstants.DEACTIVATE_DATA_CONNECTION:
+                    result.writeInt(mISystemAPINetwork.deactivateDataConnection4Sys(
+                            parcel.readInt()));
+                    break;
+                case SystemConstants.GET_ACCESS_NETWORK_INFO:
+                    int defaultNetworkType = parcel.readInt();
+                    IDcUtils.AccessNetworkInfo ani =
+                            mISystemAPINetwork.getAccessNetworkInfo4Sys(defaultNetworkType);
+
+                    if (ani == null) {
+                        result.writeInt(defaultNetworkType);
+                        result.writeInt(0);
+                        break;
+                    }
+
+                    result.writeInt(ani.mNetworkType);
+
+                    if (ani.mAni == null) {
+                        result.writeInt(0);
+                    } else {
+                        result.writeInt(ani.mAni.length);
+
+                        for (int i = 0; i < ani.mAni.length; ++i) {
+                            result.writeString(ani.mAni[i]);
+                        }
+                    }
+                    break;
+                case SystemConstants.GET_APN_NAME:
+                    result.writeString(mISystemAPINetwork.getApnName4Sys(parcel.readInt()));
+                    break;
+                case SystemConstants.GET_DATA_CONNECTION_STATE:
+                    result.writeInt(
+                            mISystemAPINetwork.getDataConnectionState4Sys(parcel.readInt()));
+                    break;
+                case SystemConstants.GET_HOST_BY_NAME:
+                    String[] ipAddrs = mISystemAPINetwork.getHostByName4Sys(
+                            parcel.readInt(), parcel.readInt(), parcel.readString());
+
+                    if (ipAddrs == null) {
+                        result.writeInt(0);
+                        break;
+                    }
+
+                    result.writeInt(ipAddrs.length);
+
+                    for (int i = 0; i < ipAddrs.length; ++i) {
+                        result.writeString(ipAddrs[i]);
+                    }
+                    break;
+                case SystemConstants.GET_IFACE_ID: {
+                    int apnType = parcel.readInt();
+
+                    if (apnType == EApnType.WIFI.getType()) {
+                        if (mISystemAPIWifi != null) {
+                            result.writeInt(mISystemAPIWifi.getWifiIfaceId4Sys());
+                        } else {
+                            // Invalid interface id
+                            result.writeInt(-1);
+                        }
+                    } else {
+                        result.writeInt(mISystemAPINetwork.getIfaceId4Sys(apnType));
+                    }
+                    break;
+                }
+                case SystemConstants.GET_IFACE_NAME:
+                    result.writeString(mISystemAPINetwork.getIfaceName4Sys(parcel.readInt()));
+                    break;
+                case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO:
+                    String[] lastANInfo = mISystemAPINetwork.getLastAccessNetworkInfo4Sys(
+                            parcel.readInt());
+
+                    if (lastANInfo == null) {
+                        result.writeInt(0);
+                        break;
+                    }
+
+                    result.writeInt(lastANInfo.length);
+
+                    for (int i = 0; i < lastANInfo.length; ++i) {
+                        result.writeString(lastANInfo[i]);
+                    }
+                    break;
+                case SystemConstants.GET_LOCAL_ADDRESS:
+                    result.writeString(mISystemAPINetwork.getLocalAddress4Sys(parcel.readInt(),
+                            parcel.readInt()));
+                    break;
+                default:
+                    result.recycle();
+                    return null;
+            }
+
+            return result;
+        }
+
+        private Parcel handleSystemAPINetwork2(int method, Parcel parcel, FileDescriptor fd) {
+            if (mISystemAPINetwork == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+            switch (method) {
+            case SystemConstants.GET_IPCAN_CATEGORY: {
+                int apnType = parcel.readInt();
+
+                if (apnType == EApnType.WIFI.getType()) {
+                    result.writeInt(IApn.IPCAN_CATEGORY_WLAN);
+                } else {
+                    result.writeInt(mISystemAPINetwork.getIpcanCategory4Sys(apnType));
+                }
+                break;
+            }
+            case SystemConstants.GET_PCSCF_ADDRESSES:
+                String[] pcscfs = mISystemAPINetwork.getPcscfAddresses4Sys(parcel.readInt(),
+                    parcel.readInt());
+
+                if (pcscfs == null) {
+                    result.writeInt(0);
+                    break;
+                }
+
+                result.writeInt(pcscfs.length);
+
+                for (int i = 0; i < pcscfs.length; ++i) {
+                    result.writeString(pcscfs[i]);
+                }
+                break;
+            case SystemConstants.GET_ROAMING_STATE:
+                result.writeInt(mISystemAPINetwork.getRoamingState4Sys());
+                break;
+            case SystemConstants.GET_SERVICE_STATE:
+                result.writeInt(mISystemAPINetwork.getServiceState4Sys());
+                break;
+            case SystemConstants.IS_LTE_EMERGENCY_ONLY:
+                result.writeInt(mISystemAPINetwork.isLteEmergencyOnly4Sys());
+                break;
+            case SystemConstants.IS_MOBILE_DATA_ENABLED:
+                result.writeInt(mISystemAPINetwork.isMobileDataEnabled() ? 1 : 0);
+                break;
+            case SystemConstants.GET_MOCN_PLMN_INFO:
+                result.writeInt(mISystemAPINetwork.getMocnPlmnInfo4Sys());
+                break;
+            case SystemConstants.GET_VOICE_SERVICE_STATE:
+                result.writeInt(mISystemAPINetwork.getVoiceServiceState4Sys());
+                break;
+            case SystemConstants.GET_VOICE_ROAMING_TYPE:
+                result.writeInt(mISystemAPINetwork.getVoiceRoamingType4Sys());
+                break;
+            case SystemConstants.GET_DATA_ROAMING_TYPE:
+                result.writeInt(mISystemAPINetwork.getDataRoamingType4Sys());
+                break;
+            case SystemConstants.GET_MTU: {
+                int apnType = parcel.readInt();
+
+                if (apnType == EApnType.WIFI.getType()) {
+                    if (mISystemAPIWifi != null) {
+                        result.writeInt(mISystemAPIWifi.getWifiMtu4Sys());
+                    } else {
+                        // Use a default MTU size (1500)
+                        result.writeInt(0);
+                    }
+                } else {
+                    result.writeInt(mISystemAPINetwork.getMtu4Sys(apnType));
+                }
+                break;
+            }
+            case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED:
+                result.writeInt(mISystemAPINetwork.isEmergencyAttachSupported4Sys());
+                break;
+            case SystemConstants.BIND_SOCKET: {
+                int apnType = parcel.readInt();
+                result.writeInt(mISystemAPINetwork.bindSocket(apnType, fd));
+                break;
+            }
+            default:
+                result.recycle();
+                return null;
+            }
+
+            return result;
+        }
+
+        private Parcel handleSystemCallForSim(int method, Parcel parcel) {
+            if (mSystemCall == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+
+            switch (method) {
+                case SystemConstants.GET_ISIM_STATE:
+                    result.writeString(mSystemCall.getIsimState());
+                    break;
+                case SystemConstants.READ_ISIM_FILE_ATTR: {
+                    int fileId = parcel.readInt();
+                    result.writeInt(mSystemCall.readIsimFileAttributes(fileId));
+                    break;
+                }
+                case SystemConstants.READ_ISIM_RECORD: {
+                    int fileId = parcel.readInt();
+                    int index = parcel.readInt();
+                    result.writeInt(mSystemCall.readIsimRecord(fileId, index));
+                    break;
+                }
+                case SystemConstants.REQUEST_ISIM_AUTH: {
+                    String nonce = parcel.readString();
+                    long owner = parcel.readLong();
+                    result.writeInt(mSystemCall.requestIsimAuthentication(nonce, owner));
+                    break;
+                }
+                case SystemConstants.REQUEST_USIM_AUTH: {
+                    String nonce = parcel.readString();
+                    long owner = parcel.readLong();
+                    result.writeInt(mSystemCall.requestUsimAuthentication(nonce, owner));
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
+            }
+
+            return result;
+        }
+
+        private Parcel handleSystemAPITelephonyState(int method) {
+            if (mISystemAPITelephonyState == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+            switch (method) {
+            case SystemConstants.GET_NETWORK_TYPE:
+                result.writeInt(mISystemAPITelephonyState.getNetworkType4Sys());
+                break;
+            case SystemConstants.GET_VOICE_NETWORK_TYPE:
+                result.writeInt(mISystemAPITelephonyState.getVoiceNetworkType4Sys());
+                break;
+            case SystemConstants.GET_CALL_STATE:
+                result.writeInt(mISystemAPITelephonyState.getCallState4Sys());
+                break;
+            default:
+                result.recycle();
+                return null;
+            }
+
+            return result;
+        }
+
+        private Parcel handleSystemAPITelephonySubscriber(int method) {
+            if (mISystemAPITelephonySubscriber == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+            switch (method) {
+            case SystemConstants.GET_DEVICE_ID:
+                result.writeString(mISystemAPITelephonySubscriber.getDeviceId4Sys());
+                break;
+            case SystemConstants.GET_DEVICE_SOFTWARE_VERSION:
+                result.writeString(mISystemAPITelephonySubscriber.getDeviceSoftwareVersion4Sys());
+                break;
+            case SystemConstants.GET_PHONE_NUMBER:
+                result.writeString(
+                    mISystemAPITelephonySubscriber.getPhoneNUmberExcludingNationalPrefix4Sys());
+                break;
+            case SystemConstants.GET_SUBSCRIBER_ID:
+                result.writeString(mISystemAPITelephonySubscriber.getSubscriberId4Sys());
+                break;
+            case SystemConstants.GET_MCC:
+                result.writeString(mISystemAPITelephonySubscriber.getMcc4Sys(true));
+                break;
+            case SystemConstants.GET_MNC:
+                result.writeString(mISystemAPITelephonySubscriber.getMnc4Sys(true));
+                break;
+            case SystemConstants.GET_OPERATOR:
+                result.writeString(mISystemAPITelephonySubscriber.getOperator4Sys());
+                break;
+            case SystemConstants.GET_COUNTRY:
+                result.writeString(mISystemAPITelephonySubscriber.getCountry4Sys());
+                break;
+            case SystemConstants.GET_NETWORK_COUNTRY:
+                result.writeString(mISystemAPITelephonySubscriber.getNetworkCountry4Sys());
+                break;
+            case SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM:
+                result.writeString(
+                    mISystemAPITelephonySubscriber.getEmergencyNumberListFromSIM4Sys());
+                break;
+            case SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM:
+                result.writeInt(mISystemAPITelephonySubscriber.getEmergencyPriorityFromModem4Sys());
+                break;
+            case SystemConstants.GET_UICC_GBA_SUPPORT:
+                result.writeInt(mISystemAPITelephonySubscriber.isUiccGbaSupported4Sys() ? 1 : 0);
+                break;
+            default:
+                result.recycle();
+                return null;
+            }
+
+            return result;
+        }
+
+        private Parcel handleSystemAPIWifiCalling(int method) {
+            if (mISystemAPIWifiCalling == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+            switch (method) {
+            case SystemConstants.IS_WFC_ENABLED:
+                result.writeInt(mISystemAPIWifiCalling.isWifiCallingEnabled4Sys());
+                break;
+            case SystemConstants.GET_WFC_PREFERENCES:
+                result.writeInt(mISystemAPIWifiCalling.getWifiCallingPreferences4Sys());
+                break;
+            case SystemConstants.IS_WFC_PROVISIONED:
+                result.writeInt(mISystemAPIWifiCalling.isWifiCallingProvisioned4Sys());
+                break;
+            case SystemConstants.GET_WFC_ADDRESS_ID:
+                result.writeString(mISystemAPIWifiCalling.getWifiCallingAddressID4Sys());
+                break;
+            default:
+                result.recycle();
+                return null;
+            }
+
+            return result;
+        }
+
+        private Parcel handleSystemAPILocation(int method, Parcel parcel) {
+            if (mISystemAPILocation == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+            switch (method) {
+            case SystemConstants.START_LOCATION_INFO:
+                result.writeInt(mISystemAPILocation.startLocationInfo4Sys(parcel.readInt()));
+                break;
+            case SystemConstants.STOP_LOCATION_INFO:
+                mISystemAPILocation.stopLocationInfo4Sys();
+                result.writeInt(1);
+                break;
+            case SystemConstants.GET_LOCATION_INFO:
+                int nType = parcel.readInt();
+                String[] locationParam = mISystemAPILocation.getLocationInformation4Sys(nType);
+
+                if (locationParam == null) {
+                    result.writeInt(0);
+                    break;
+                }
+
+                result.writeInt(locationParam.length);
+
+                for (int i = 0; i < locationParam.length; ++i) {
+                    result.writeString(locationParam[i]);
+                }
+                break;
+            case SystemConstants.MAKE_INSTATNT_LOCATION_INFO:
+                result.writeInt(mISystemAPILocation.makeInstantLocationUpdates4Sys());
+                break;
+            default:
+                result.recycle();
+                return null;
+            }
+
+            return result;
+        }
+
+        private Parcel handleSystemApiRadio(int method, Parcel parcel) {
+            if (mSystemRadio == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+
+            switch (method) {
+                case SystemConstants.START_IMS_TRAFFIC: {
+                    int id = parcel.readInt();
+                    int trafficType = parcel.readInt();
+                    int accessNetworkType = parcel.readInt();
+                    int direction = parcel.readInt();
+
+                    result.writeInt(mSystemRadio.startImsTraffic(id, trafficType,
+                            accessNetworkType, direction));
+                    break;
+                }
+                case SystemConstants.STOP_IMS_TRAFFIC: {
+                    int id = parcel.readInt();
+
+                    mSystemRadio.stopImsTraffic(id);
+                    break;
+                }
+                case SystemConstants.TRIGGER_EPS_FALLBACK: {
+                    int reason = parcel.readInt();
+
+                    result.writeInt(mSystemRadio.triggerEpsFallback(reason));
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
+            }
+
+            return result;
+        }
+
+        // IpSec
+        private Parcel handleSystemApiIpSec(int method, Parcel parcel, FileDescriptor fd) {
+            if (mSystemCall == null) {
+                return null;
+            }
+
+            Parcel result = Parcel.obtain();
+            switch (method) {
+                case SystemConstants.ADD_IPSEC_SA_PARAMETER: {
+                    IpSecSaParameter param = IpSecSaParameter.CREATOR.createFromParcel(parcel);
+                    result.writeInt(mSystemCall.addIpSecSaParameter(param));
+                    break;
+                }
+                case SystemConstants.REMOVE_IPSEC_SA_PARAMETER:
+                    mSystemCall.removeIpSecSaParameter(parcel.readInt());
+                    break;
+                case SystemConstants.APPLY_IPSEC_SA: {
+                    int ipsecId = parcel.readInt();
+                    int spi = parcel.readInt();
+                    int intFd = parcel.readInt();
+                    result.writeInt(mSystemCall.applyIpSecSa(ipsecId, spi, intFd, fd));
+                    break;
+                }
+                case SystemConstants.REMOVE_IPSEC_SA: {
+                    int ipsecId = parcel.readInt();
+                    int spi = parcel.readInt();
+                    int intFd = parcel.readInt();
+                    mSystemCall.removeIpSecSa(ipsecId, spi, intFd, fd);
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
+            }
+
+            return result;
+        }
+
+        private ISystemAPINetwork getSystemAPINetwork() {
+            synchronized (mLock) {
+                return mISystemAPINetwork;
+            }
+        }
+
+        private Parcel handleSystemCall(int method) {
+            if (mSystemCall == null) {
+                return null;
+            }
+
+            Parcel result = null;
+
+            switch (method) {
+                case SystemConstants.GET_CARRIER_CONFIG: {
+                    CarrierConfig cc = mSystemCall.getCarrierConfig();
+
+                    if (cc != null) {
+                        result = Parcel.obtain();
+                        result.writeInt(1);
+                        cc.writeToParcel(result);
+                    }
+                    break;
+                }
+                case SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED: {
+                    result = Parcel.obtain();
+                    result.writeInt(mSystemCall.isImsVoiceCallSupported() ? 1 : 0);
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+
+            return result;
+        }
+    }
+}

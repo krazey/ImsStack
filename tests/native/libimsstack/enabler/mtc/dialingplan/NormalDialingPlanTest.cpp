@@ -1,0 +1,187 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "CarrierConfig.h"
+#include "MockIMtcContext.h"
+#include "MockIMtcService.h"
+#include "ServiceNetworkPolicy.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "dialingplan/MockImsIdentityProxy.h"
+#include "dialingplan/NormalDialingPlan.h"
+#include "helper/MockIMtcAosConnector.h"
+#include <gtest/gtest.h>
+
+using LocalnumberPolicy = NormalDialingPlan::LocalNumberPolicy;
+using NumberFormat = NormalDialingPlan::NumberFormat;
+using Scheme = NormalDialingPlan::Scheme;
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
+namespace android
+{
+
+LOCAL IMS_UINT32 ANY_COUNTRY_CODE = 1;
+LOCAL IMS_SINT32 SLOT_ID = 0;
+
+class NormalDialingPlanTest : public ::testing::Test
+{
+public:
+    NormalDialingPlanTest() :
+            objContext(),
+            pConfigurationManager(new MockIMtcConfigurationManager()),
+            pConfigurationProxy(new MtcConfigurationProxy(pConfigurationManager)),
+            objIdentityProxy(),
+            strNumber(AString::ConstNull()),
+            eScheme(Scheme::UNKNOWN)
+    {
+    }
+
+    ~NormalDialingPlanTest() { delete pConfigurationProxy; }
+
+protected:
+    MockIMtcContext objContext;
+    MockIMtcConfigurationManager* pConfigurationManager;
+    MtcConfigurationProxy* pConfigurationProxy;
+    MockImsIdentityProxy objIdentityProxy;
+    AString strNumber;
+    Scheme eScheme;
+
+    virtual void SetUp() override
+    {
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
+        ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        ON_CALL(*pConfigurationManager, GetCountryCode).WillByDefault(Return(ANY_COUNTRY_CODE));
+        ON_CALL(*pConfigurationManager, GetRequestUriType)
+                .WillByDefault(Return(CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL));
+        ON_CALL(*pConfigurationManager, GetPolicyOfLocalNumbers)
+                .WillByDefault(Return(0));  // LocalNumberPolicy::HOME
+    }
+
+    virtual void TearDown() override {}
+
+    IMS_CHAR* GetTranslatedUri()
+    {
+        return NormalDialingPlan::GetTranslatedUri(objContext, strNumber, eScheme, objIdentityProxy)
+                .GetStr();
+    }
+};
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriForDialStringReturnsUriWithDialString)
+{
+    strNumber = "123";
+    AString strExpectedUri(
+            "sip:" + strNumber + ";phone-context=ims.google.com@ims.google.com;user=dialstring");
+    ON_CALL(objIdentityProxy, CreateSipUserIdWithDialString(strNumber, _, _))
+            .WillByDefault(Return(strExpectedUri));
+    strNumber = NormalDialingPlan::GetTranslatedUriForDialString(
+            objContext, strNumber, objIdentityProxy);
+    EXPECT_STREQ(strNumber.GetStr(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsEmptyIfNumberIsEmpty)
+{
+    AString strExpectedUri;
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsOriginalStringIfNameAddressFormat)
+{
+    strNumber = "<123>";
+    AString strExpectedUri(strNumber);
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsOriginalStringWithAquotIfAddressSpec)
+{
+    strNumber = "sip:123;phone-context=ims.mnc001.mcc001.3gppnetwork.org";
+    AString strExpectedUri("<" + strNumber + ">");
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsTelUriByConfigurationOrRequestType)
+{
+    AString strAnyPhoneContext("anyPhoneContext");
+
+    // local number
+    strNumber = "12345";
+    AString strExpectedUri("<tel:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">");
+    eScheme = Scheme::UNKNOWN;
+
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+
+    // global number
+    strNumber = "+12345";
+    strExpectedUri = "tel:" + strNumber;
+    eScheme = Scheme::TEL;
+
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+TEST_F(NormalDialingPlanTest, GetTranslatedUriReturnsSipUriByConfigurationOrRequestType)
+{
+    MockIMtcService objService;
+    MockIMtcAosConnector objAosConnector;
+    ON_CALL(objContext, GetServiceByType(ServiceType::NORMAL)).WillByDefault(Return(&objService));
+    ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
+    ON_CALL(objAosConnector, GetConnectionType).WillByDefault(Return(NetworkPolicy::APN_IMS));
+    ON_CALL(*pConfigurationManager, GetRequestUriType)
+            .WillByDefault(Return(CarrierConfig::Ims::REQUEST_URI_FORMAT_SIP));
+
+    AString strAnyPhoneContext("anyPhoneContext");
+    ON_CALL(objIdentityProxy,
+            GetPhoneContext(ImsIdentity::DIALING_POLICY_HOME_LOCAL, SLOT_ID, _, _))
+            .WillByDefault(Return(strAnyPhoneContext));
+
+    // non-number cases
+    strNumber = "+123:456";
+    eScheme = Scheme::SIP;
+    AString strExpectedUri(
+            "sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ";user=phone");
+    ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
+            .WillByDefault(Return(strExpectedUri));
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+
+    strNumber = "123:456";
+    strExpectedUri = "sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ";user=phone";
+    ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
+            .WillByDefault(Return(strExpectedUri));
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+
+    // global number
+    strNumber = "+123-456";
+    AString strAnyHomeDomainName("anyDomain");
+    strExpectedUri = "sip:" + strNumber + "@" + strAnyHomeDomainName + ";user=phone";
+    ON_CALL(objIdentityProxy, CreateSipUserId(strNumber, SLOT_ID, _, _))
+            .WillByDefault(Return(strExpectedUri));
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+
+    // local number
+    strNumber = "12345";
+    strExpectedUri = "<sip:" + strNumber + ";phone-context=" + strAnyPhoneContext + ">";
+    eScheme = Scheme::UNKNOWN;
+    ON_CALL(objIdentityProxy, CreateSipUserIdWithPhone(strNumber, SLOT_ID, strAnyPhoneContext))
+            .WillByDefault(Return(strExpectedUri));
+    EXPECT_STREQ(GetTranslatedUri(), strExpectedUri.GetStr());
+}
+
+}  // namespace android

@@ -1,0 +1,695 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include <gtest/gtest.h>
+
+#include "SipStackManager.h"
+#include "ISipNetworkUtil.h"
+#include "ISipTxnListener.h"
+#include "ISipTimerUtil.h"
+#include "transport/SipTransportHandler.h"
+#include "SipStackCallback.h"
+#include "SipTxnContext.h"
+#include "SipUtil.h"
+#include "SipStackError.h"
+
+SipTxn* pTxn = SIP_NULL;
+
+class SipTestNetworkUtil : public ISipNetworkUtil
+{
+public:
+    static SIP_BOOL bSendStatus;
+    SipTestNetworkUtil() {}
+    ~SipTestNetworkUtil() {}
+
+public:
+    SIP_BOOL SendToNetwork(SipTransportBuffer*, SipTransportParameter*, ISipUserData*) override
+    {
+        return (bSendStatus == SIP_TRUE) ? SIP_TRUE : SIP_FALSE;
+    }
+};
+
+class SipTestTxnListener : public ISipTxnListener
+{
+public:
+    SipTestTxnListener() {}
+    virtual ~SipTestTxnListener() {}
+
+    SIP_BOOL TxnTimeout(ISipUserData*, IMS_SINT32) override { return SIP_TRUE; }
+
+    SIP_BOOL TxnTerminated(ISipUserData*) override { return SIP_TRUE; }
+};
+
+SIP_BOOL SipTestNetworkUtil::bSendStatus = SIP_TRUE;
+
+namespace android
+{
+SIP_BOOL FetchTransactionStub(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID** ppvTxn)
+{
+    if (pTxn == SIP_NULL)
+    {
+        if (*ppvTxn != SIP_NULL)
+        {
+            pTxn = static_cast<SipTxn*>(*ppvTxn);
+            return SIP_TRUE;
+        }
+        return SIP_FALSE;
+    }
+
+    *ppvTxn = static_cast<SIP_VOID*>(pTxn);
+
+    return SIP_TRUE;
+}
+
+SIP_BOOL StartTimerStub(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID**)
+{
+    return SIP_TRUE;
+}
+
+SIP_BOOL ReleaseTransactionStub(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID** ppvTxn)
+{
+    *ppvTxn = static_cast<SIP_VOID*>(pTxn);
+    pTxn = SIP_NULL;
+    return SIP_TRUE;
+}
+
+SIP_VOID* CreateAckRequestStub(SIP_VOID*, ISipUserData*)
+{
+    return SIP_NULL;
+}
+
+SIP_VOID PreprocessMessageStub(SIP_VOID*, ISipUserData*) {}
+
+SIP_VOID PostprocessMessageStub(IN SIP_VOID*, IN SIP_CHAR*, IN SIP_UINT32, IN ISipUserData*) {}
+
+SIP_VOID DisplayTxnKeyStub(IN SIP_VOID*) {}
+
+SIP_BOOL StopTimerStub(IN SIP_VOID*, OUT SIP_VOID**)
+{
+    return SIP_TRUE;
+}
+
+SIP_VOID OnTimerExpiredStub(IN ISipUserData*, IN SIP_INT32) {}
+
+class SipStackManagerTest : public ::testing::Test
+{
+public:
+    SipTxnKey* pTxnKey;
+
+protected:
+    virtual void SetUp() override { pTxnKey = SIP_NULL; }
+
+    virtual void TearDown() override {}
+};
+
+TEST_F(SipStackManagerTest, SendRecvMessage)
+{
+    SipStackManager* pSipStackManager = SipStackManager::GetInstance();
+    ASSERT_TRUE(pSipStackManager != nullptr);
+
+    pSipStackManager->GetSipUtil()->RegisterNetwork(new SipTestNetworkUtil());
+    pSipStackManager->GetSipUtil()->RegisterTxnListener(new SipTestTxnListener());
+
+    // clang-format off
+    SipStackCallbacks stCallbacks = {
+            &FetchTransactionStub,
+            &ReleaseTransactionStub,
+            &StartTimerStub,
+            &StopTimerStub,
+            &OnTimerExpiredStub,
+            &CreateAckRequestStub,
+            &PreprocessMessageStub,
+            &PostprocessMessageStub,
+            &DisplayTxnKeyStub,
+        };
+    // clang-format on
+    SipStackCallback_SetCallbacks(stCallbacks);
+
+    SipTransportParameter objTransportParam;
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+    objTransportParam.SetHostAddress("192.168.1.2");
+    objTransportParam.SetPort(5060);
+    objTransportParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
+
+    ISipUserData objUserData(SIP_NULL);
+
+    /* Invite client transaction check - Start */
+    char* pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    unsigned int nLength = strlen(pReqMsg);
+
+    SipMessage* pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+
+    unsigned short nError = 0;
+    SipTxnKey* pTxnKey = SIP_NULL;
+
+    /* Passing invalig arguments, fail */
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->SendMsg(nullptr, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    &pTxnKey, &nError));
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->SendMsg(
+                    pMessage, nullptr, &objUserData, pReqMsg, nLength, &pTxnKey, &nError));
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    nullptr, &nError));
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    &pTxnKey, nullptr));
+
+    /* Pass valid arguments, success */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::INV_CLI_TXN, pTxn->GetTxnType());
+
+    pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
+
+    /* Resend message, fail */
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    &pTxnKey, &nError));
+
+    EXPECT_EQ(ETXN_ALREADYTRANSACTIONINPROCESSERROR, nError);
+
+    pMessage->SipDelete();
+
+    char* pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:user@host>;tag=dcba\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pRespMsg);
+    int eTxnStatus = SipTxn::STATUS_INVALID;
+
+    SipMessage* pRespSipMessage = new SipMessage();
+    ASSERT_TRUE(pRespSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+
+    /* Passing invalig arguments, fail */
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->OnRecvMessage(
+                    nullptr, nullptr, &objUserData, nullptr, nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->OnRecvMessage(
+                    pRespSipMessage, nullptr, &objUserData, nullptr, nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->OnRecvMessage(
+                    pRespSipMessage, &objTransportParam, &objUserData, nullptr, nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, nullptr, nullptr));
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, nullptr));
+
+    /* Pass valid arguments, success */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, &nError));
+
+    /* In case of retransmitted 2xx for INVITE, return as stray message */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_2XX_STRAY_RESP, eTxnStatus);
+
+    pRespSipMessage->SipDelete();
+    /* Invite client check for send receive - End */
+
+    char* pAckMsg = const_cast<char*>("ACK sip:userAck@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP host;branch=test-brAck\r\n\
+From: <sip:userAck@host>;tag=Ackabcd\r\n\
+To: <sip:user@host>;tag=Ackdcba\r\n\
+Call-ID: callidAck\r\n\
+CSeq: 1 ACK\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pAckMsg);
+
+    SipMessage* pAckSipMessage = new SipMessage();
+    ASSERT_TRUE(pAckSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pAckSipMessage->DecCompleteMsg(pAckMsg, nLength));
+
+    /* No matching Invite transaction for ACK, retransmission message */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(pAckSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_RETRANSMISSION, eTxnStatus);
+
+    pAckSipMessage->SipDelete();
+
+    /* Invite client with fail response receive, response with failure ACK - Start */
+    pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pReqMsg);
+
+    pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+
+    nError = 0;
+    pTxnKey = SIP_NULL;
+
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::INV_CLI_TXN, pTxn->GetTxnType());
+
+    pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
+
+    pMessage->SipDelete();
+
+    pRespMsg = const_cast<char*>("SIP/2.0 486 Busy Here\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:user@host>;tag=dcba\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pRespMsg);
+    eTxnStatus = SipTxn::STATUS_INVALID;
+
+    pRespSipMessage = new SipMessage();
+    ASSERT_TRUE(pRespSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::STATUS_VALID_MESSAGE, eTxnStatus);
+
+    pRespSipMessage->SipDelete();
+
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+    /* Invite client with fail response receive, response with failure ACK - End */
+
+    /* Invite server check for send receive - Start */
+    pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pReqMsg);
+
+    pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+
+    /* Pass valid arguments, success */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(
+                    pMessage, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::INV_SER_TXN, pTxn->GetTxnType());
+
+    pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
+
+    pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:user@host>;tag=dcba\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pRespMsg);
+    eTxnStatus = SipTxn::STATUS_INVALID;
+
+    pRespSipMessage = new SipMessage();
+    ASSERT_TRUE(pRespSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+
+    /* Pass valid arguments, success */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->SendMsg(pRespSipMessage, &objTransportParam, &objUserData, pRespMsg,
+                    nLength, &pTxnKey, &nError));
+
+    pRespSipMessage->SipDelete();
+
+    /* Received retransmitted INVITE in completed state - retransmission message, success */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(
+                    pMessage, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_RETRANSMISSION, eTxnStatus);
+    pMessage->SipDelete();
+    /* Invite server check for send receive - End */
+
+    pAckMsg = const_cast<char*>("ACK sip:userAck@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP host;branch=test-brAck\r\n\
+From: <sip:userAck@host>;tag=Ackabcd\r\n\
+To: <sip:user@host>;tag=Ackdcba\r\n\
+Call-ID: callidAck\r\n\
+CSeq: 1 ACK\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pAckMsg);
+
+    pAckSipMessage = new SipMessage();
+    ASSERT_TRUE(pAckSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pAckSipMessage->DecCompleteMsg(pAckMsg, nLength));
+
+    EXPECT_TRUE(pTxn != nullptr);
+
+    /* ACK for Invite transaction, valid message */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(pAckSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, &nError));
+    EXPECT_EQ(SipTxn::STATUS_VALID_MESSAGE, eTxnStatus);
+
+    pAckSipMessage->SipDelete();
+
+    pSipStackManager->TerminateTxn(pTxnKey);
+
+    pTxnKey->SipDelete();
+
+    /* Send to network fail */
+    SipTestNetworkUtil::bSendStatus = SIP_FALSE;
+
+    pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pReqMsg);
+
+    pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+
+    nError = 0;
+    pTxnKey = SIP_NULL;
+
+    /* Pass valid arguments - Send to network fail, fail */
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    &pTxnKey, &nError));
+    pMessage->SipDelete();
+
+    pTxn->SipDelete();
+    pTxn = SIP_NULL;
+
+    SipTestNetworkUtil::bSendStatus = SIP_TRUE;
+
+    /* Non-Invite server with TCP, check for send receive - Start */
+    pReqMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 REGISTER\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pReqMsg);
+
+    pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(
+                    pMessage, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::NON_INV_SER_TXN, pTxn->GetTxnType());
+
+    pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
+
+    pMessage->SipDelete();
+
+    pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:user@host>;tag=dcba\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 REGISTER\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pRespMsg);
+
+    pRespSipMessage = new SipMessage();
+    ASSERT_TRUE(pRespSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+
+    /* Pass valid arguments, success */
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->SendMsg(pRespSipMessage, &objTransportParam, &objUserData, pRespMsg,
+                    nLength, &pTxnKey, &nError));
+
+    pRespSipMessage->SipDelete();
+
+    /* Non-Invite server with TCP, check for send receive - End */
+
+    /* Non-Invite response message received where no transaction present, stray message */
+    pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:user@host>;tag=dcba\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 REGISTER\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pRespMsg);
+    eTxnStatus = SipTxn::STATUS_INVALID;
+
+    pRespSipMessage = new SipMessage();
+    ASSERT_TRUE(pRespSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::STATUS_STRAY_RESP, eTxnStatus);
+
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+
+    pRespSipMessage->SipDelete();
+
+    /* Invalid message type - OnReceiveTransp fail while checking mandatory params */
+    SipMessage* pInvalidMsg = new SipMessage(SipMessage::TYPE_INVALID);
+    ASSERT_TRUE(pInvalidMsg != nullptr);
+
+    EXPECT_EQ(SIP_FALSE,
+            pSipStackManager->OnRecvMessage(
+                    pInvalidMsg, &objTransportParam, &objUserData, &eTxnStatus, &pTxnKey, &nError));
+
+    pInvalidMsg->SipDelete();
+
+    /* Non-Invite Client with receive 1xx in completed state, ignore response, success - Start*/
+    pReqMsg = const_cast<char*>("REGISTER sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 REGISTER\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pReqMsg);
+
+    pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+
+    nError = 0;
+    pTxnKey = SIP_NULL;
+
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::NON_INV_CLI_TXN, pTxn->GetTxnType());
+
+    pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
+
+    pMessage->SipDelete();
+
+    pRespMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:user@host>;tag=dcba\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 REGISTER\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pRespMsg);
+    eTxnStatus = SipTxn::STATUS_INVALID;
+
+    pRespSipMessage = new SipMessage();
+    ASSERT_TRUE(pRespSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::STATUS_VALID_MESSAGE, eTxnStatus);
+
+    pRespSipMessage->SipDelete();
+
+    pRespMsg = const_cast<char*>("SIP/2.0 100 Trying\r\n\
+Via: SIP/2.0/UDP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:user@host>;tag=dcba\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 REGISTER\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    nLength = strlen(pRespMsg);
+    eTxnStatus = SipTxn::STATUS_INVALID;
+
+    pRespSipMessage = new SipMessage();
+    ASSERT_TRUE(pRespSipMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRespSipMessage->DecCompleteMsg(pRespMsg, nLength));
+
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
+                    &eTxnStatus, &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::STATUS_IGNORE_RESP, eTxnStatus);
+
+    pSipStackManager->TerminateTxn(pTxnKey);
+
+    if (pTxn != SIP_NULL)
+    {
+        pTxn->SipDelete();
+        pTxn = SIP_NULL;
+    }
+    /* Non-Invite Client with receive 1xx in completed state, ignore response, success - End*/
+
+    pSipStackManager->Destruct();
+}
+
+TEST_F(SipStackManagerTest, OnRecvTanspError)
+{
+    SipStackManager* pSipStackManager = SipStackManager::GetInstance();
+    ASSERT_TRUE(pSipStackManager != nullptr);
+
+    unsigned short nError = 0;
+    SipTxnKey* pTxnKey = SIP_NULL;
+
+    EXPECT_EQ(SIP_FALSE, pSipStackManager->OnRecvTanspError(0, pTxnKey, &nError));
+
+    pSipStackManager->GetSipUtil()->RegisterNetwork(new SipTestNetworkUtil());
+    pSipStackManager->GetSipUtil()->RegisterTxnListener(new SipTestTxnListener());
+
+    // clang-format off
+    SipStackCallbacks stCallbacks = {
+            &FetchTransactionStub,
+            &ReleaseTransactionStub,
+            &StartTimerStub,
+            &StopTimerStub,
+            &OnTimerExpiredStub,
+            &CreateAckRequestStub,
+            &PreprocessMessageStub,
+            &PostprocessMessageStub,
+            &DisplayTxnKeyStub,
+        };
+    // clang-format on
+    SipStackCallback_SetCallbacks(stCallbacks);
+
+    SipTransportParameter objTransportParam;
+    objTransportParam.SetTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    objTransportParam.SetHostAddress("192.168.1.2");
+    objTransportParam.SetPort(5060);
+    objTransportParam.SetTanspIpType(SipTransportInfo::NETWORK_IPV4);
+
+    ISipUserData objUserData(SIP_NULL);
+
+    /* Invite client transaction check - Start */
+    char* pReqMsg = const_cast<char*>("INVITE sip:user@host SIP/2.0\r\n\
+Via: SIP/2.0/TCP host;branch=test-br\r\n\
+From: <sip:user@host>;tag=abcd\r\n\
+To: <sip:userA@host>\r\n\
+Call-ID: callid\r\n\
+CSeq: 3 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n");
+
+    unsigned int nLength = strlen(pReqMsg);
+
+    SipMessage* pMessage = new SipMessage();
+    ASSERT_TRUE(pMessage != nullptr);
+    EXPECT_EQ(SIP_TRUE, pMessage->DecCompleteMsg(pReqMsg, nLength));
+
+    EXPECT_EQ(SIP_TRUE,
+            pSipStackManager->SendMsg(pMessage, &objTransportParam, &objUserData, pReqMsg, nLength,
+                    &pTxnKey, &nError));
+
+    EXPECT_EQ(SipTxn::INV_CLI_TXN, pTxn->GetTxnType());
+
+    EXPECT_EQ(SIP_TRUE, pSipStackManager->OnRecvTanspError(0, pTxnKey, &nError));
+
+    pMessage->SipDelete();
+
+    pSipStackManager->TerminateTxn(pTxnKey);
+
+    pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
+
+    pSipStackManager->Destruct();
+}
+
+}  // namespace android

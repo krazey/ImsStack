@@ -1,0 +1,89 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ServiceMemory.h"
+
+#include "SipFactory.h"
+#include "SipFactoryProxy.h"
+#include "SipFeatures.h"
+#include "SipIpSecState.h"
+#include "SipKeepAliveHelper.h"
+#include "SipMessageTracker.h"
+#include "SipPacketTracker.h"
+#include "SipRoutingRejectNotifier.h"
+#include "SipRtConfigHelper.h"
+#include "SipTransportHelper.h"
+#include "SipUtils.h"
+
+PUBLIC GLOBAL ISipKeepAliveHelper* SipFactory::CreateKeepAliveHelper(IN IMS_SINT32 nSlotId)
+{
+    return new SipKeepAliveHelper(nSlotId);
+}
+
+PUBLIC GLOBAL void SipFactory::GenerateCallId(IN const AString& strHost, OUT AString& strCallId)
+{
+    strCallId = SipUtils::GenerateCallId(strHost);
+}
+
+/**
+ * HEADER_REQ_SESSION-ID
+ */
+PUBLIC GLOBAL void SipFactory::GenerateSessionId(
+        IN IMS_SINT32 nSlotId, IN const AString& strCallId, OUT AString& strSessionId)
+{
+    if (SipFeatures::IsHeaderSessionIdRequired(nSlotId))
+    {
+        strSessionId = SipUtils::GenerateSessionId(nSlotId, strCallId);
+        return;
+    }
+
+    strSessionId = AString::ConstNull();
+}
+
+PUBLIC GLOBAL ISipIpSecState* SipFactory::GetIpSecState(IN IMS_SINT32 nSlotId)
+{
+    return SipFactoryProxy::GetInstance()->GetIpSecState(nSlotId);
+}
+
+PUBLIC GLOBAL ISipMessageTracker* SipFactory::GetMessageTracker(IN IMS_SINT32 nSlotId)
+{
+    return SipFactoryProxy::GetInstance()->GetMessageTracker(nSlotId);
+}
+
+PUBLIC GLOBAL ISipRoutingRejectNotifier* SipFactory::GetRoutingRejectNotifier(IN IMS_SINT32 nSlotId)
+{
+    return SipFactoryProxy::GetInstance()->GetRoutingRejectNotifier(nSlotId);
+}
+
+PUBLIC GLOBAL ISipRtConfigHelper* SipFactory::GetRtConfigHelper(IN IMS_SINT32 nSlotId)
+{
+    return SipFactoryProxy::GetInstance()->GetRtConfigHelper(nSlotId);
+}
+
+PUBLIC GLOBAL ISipTransportHelper* SipFactory::GetTransportHelper(IN IMS_SINT32 nSlotId)
+{
+    return SipFactoryProxy::GetInstance()->GetTransportHelper(nSlotId);
+}
+
+PUBLIC GLOBAL ISipPacketTracker* SipFactory::GetPacketTracker(IN IMS_SINT32 nSlotId)
+{
+    return SipFactoryProxy::GetInstance()->GetPacketTracker(nSlotId);
+}
+
+PUBLIC GLOBAL void SipFactory::SetTokenGenerator(
+        IN IMS_SINT32 nSlotId, IN ISipTokenGenerator* piTokenGenerator)
+{
+    SipFactoryProxy::GetInstance()->SetTokenGenerator(nSlotId, piTokenGenerator);
+}

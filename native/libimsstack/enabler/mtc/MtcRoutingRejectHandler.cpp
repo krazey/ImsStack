@@ -1,0 +1,122 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "IMtcContext.h"
+#include "INetworkWatcher.h"
+#include "ISipMessage.h"
+#include "ISipServerConnection.h"
+#include "ImsEventDef.h"
+#include "MtcImsEventReceiver.h"
+#include "MtcRoutingRejectHandler.h"
+#include "ServiceTrace.h"
+#include "SipMethod.h"
+
+__IMS_TRACE_TAG_COM_MTC__;
+
+LOCAL const IMS_CHAR REASON_PHRASE_VZW_ON_EHRPD[] = "On eHRPD";
+LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOWIFI_OFF[] = "VoWiFi OFF";
+LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOLTE_OFF[] = "VoLTE setting OFF";
+LOCAL const IMS_CHAR REASON_PHRASE_VZW_VOPS_OFF[] = "VOPS OFF";
+
+PUBLIC MtcRoutingRejectHandler::MtcRoutingRejectHandler(
+        IN IMtcContext& objContext, IN INetworkWatcher& objNetworkWatcher) :
+        m_objContext(objContext),
+        m_objNetworkWatcher(objNetworkWatcher)
+{
+    IMS_TRACE_I("+MtcRoutingRejectHandler", 0, 0, 0);
+}
+
+PUBLIC MtcRoutingRejectHandler::~MtcRoutingRejectHandler()
+{
+    IMS_TRACE_I("~MtcRoutingRejectHandler", 0, 0, 0);
+}
+
+PUBLIC IMS_BOOL MtcRoutingRejectHandler::RoutingReject_NotifyRequest(
+        IN ISipMessage* pSipMessage, IN_OUT SipStatusCode& objStatusCode)
+{
+    if (pSipMessage->GetMethod().Equals(SipMethod::INVITE))
+    {
+        objStatusCode = GetRoutingRejectCodeForInvite(objStatusCode);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC IMS_BOOL MtcRoutingRejectHandler::RoutingReject_NotifyRequest(
+        IN ISipServerConnection* pSipServerConnection, IN_OUT SipStatusCode& objStatusCode)
+{
+    if (pSipServerConnection->GetMethod().Equals(SipMethod::INVITE))
+    {
+        objStatusCode = GetRoutingRejectCodeForInvite(objStatusCode);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+SipStatusCode MtcRoutingRejectHandler::GetRoutingRejectCodeForInvite(
+        IN const SipStatusCode& objDefaultStatusCode) const
+{
+    // Covers VZ_REQ_RCSVOLTE_37606 and VZ_REQ_VOWIFI_6230932.
+
+    /*
+    TODO: if (IMS_OMADM_VLT off)
+    {
+        return SipStatusCode(SipStatusCode::SC_488, "Subscriber not provisioned for VoLTE");
+    }
+    */
+
+    NETRADIO_ENTYPE eRat = m_objNetworkWatcher.GetNetRadioTechType();
+    IMS_TRACE_D("GetRoutingRejectCodeForInvite : RAT[%d]", eRat, 0, 0);
+    switch (eRat)
+    {
+        case NW_REPORT_RADIO_EHRPD:
+            return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_ON_EHRPD);
+
+        case NW_REPORT_RADIO_WLAN:
+            if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_WFC_SETTING_CHANGED) !=
+                    IMS_WFC_ON)
+            {
+                return SipStatusCode(SipStatusCode::SC_486, REASON_PHRASE_VZW_VOWIFI_OFF);
+            }
+            break;
+
+        case NW_REPORT_RADIO_LTE:
+            /*
+            TODO: if (SSAC)
+            {
+                return SipStatusCode(SipStatusCode::SC_488, "SSAC ON");
+            }
+            */
+            if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_VOLTE_SETTING) ==
+                    IMS_VOLTE_SETTING_OFF)
+            {
+                return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_VOLTE_OFF);
+            }
+            if (m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE) !=
+                    IMS_VOICE_OVER_PS_SUPPORTED)
+            {
+                return SipStatusCode(SipStatusCode::SC_488, REASON_PHRASE_VZW_VOPS_OFF);
+            }
+            break;
+
+        default:
+            break;
+    }
+    return objDefaultStatusCode;
+}

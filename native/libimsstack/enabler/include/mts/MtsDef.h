@@ -1,0 +1,147 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef MTS_DEF_H_
+#define MTS_DEF_H_
+
+#include "ByteArray.h"
+#include "ImsTypeDef.h"
+
+enum class SmsFormatType;
+
+class SmsSendRequestInfo
+{
+public:
+    SmsSendRequestInfo(IN SmsFormatType eInitSmsFormat, IN const AString& strInitAddress,
+            IN const ByteArray& objInitSmsData, IN IMS_SINT32 nInitSeqId,
+            IN IMS_BOOL bInitEmergency) :
+            eSmsFormat(eInitSmsFormat),
+            strAddress(strInitAddress),
+            objSmsData(objInitSmsData),
+            nSeqId(nInitSeqId),
+            bEmergency(bInitEmergency)
+    {
+    }
+
+    SmsFormatType eSmsFormat;
+    AString strAddress;
+    ByteArray objSmsData;
+    IMS_SINT32 nSeqId;
+    IMS_BOOL bEmergency;
+};
+
+enum class MtsTimerType
+{
+    TIMER_UNKNOWN = 0,
+    TIMER_SMS_CALLBACK_MODE = 1,
+    TIMER_RETRY_AFTER = 2,
+};
+
+enum class MtsTransactionType
+{
+    MESSAGE_TYPE_SEND = 1,
+    MESSAGE_TYPE_RECEIVE = 2,
+    MESSAGE_TYPE_INVALID = 3,
+};
+
+enum class SmsFormatType
+{
+    SMSFORMAT_INVALID = 0,
+    SMSFORMAT_3GPP = 1,
+    SMSFORMAT_3GPP2 = 2,
+};
+
+enum
+{
+    SMS_MTI_NONE = -1
+};
+
+enum
+{
+    MTS_REG_RECOVERY_POLICY_NONE = -1
+};
+
+// RP Data Unit type in 3GPP SMS
+enum
+{
+    SMS_3GPP_MTI_RP_DATA_FROM_MS = 0,
+    SMS_3GPP_MTI_RP_DATA_FROM_N = 1,
+    SMS_3GPP_MTI_RP_ACK_FROM_MS = 2,
+    SMS_3GPP_MTI_RP_ACK_FROM_N = 3,
+    SMS_3GPP_MTI_RP_ERROR_FROM_MS = 4,
+    SMS_3GPP_MTI_RP_ERROR_FROM_N = 5,
+    SMS_3GPP_MTI_RP_SMMA = 6
+};
+
+// Bearer Data Unit type in 3GPP2 SMS
+enum
+{
+    SMS_3GPP2_MTI_POINT_TO_POINT = 0,
+    SMS_3GPP2_MTI_BROADCAST = 1,
+    SMS_3GPP2_MTI_ACKNOWLEDGE = 2
+};
+
+enum
+{
+    URI_SCHEME_UNKNOWN = -1,
+    URI_SCHEME_TEL,
+    URI_SCHEME_SIP,
+    URI_SCHEME_SIPS
+};
+
+enum
+{
+    MTS_RADIO_GUARD_TIME = 1000
+};
+
+// Call type
+enum
+{
+    CALL_TYPE_CS = 0,
+    CALL_TYPE_NORMAL,
+    CALL_TYPE_EMERGENCY
+};
+
+// Call state
+enum
+{
+    CALL_STATE_UNKNOWN = -1,
+    CALL_STATE_IDLE = 0,
+    CALL_STATE_TERMINATING = 1,
+    CALL_STATE_RINGBACK = 2,
+    CALL_STATE_RINGING = 3,
+    CALL_STATE_ALERTING = 4,
+    CALL_STATE_OFFHOOK = 5
+};
+
+enum
+{
+    SESSION_TYPE_NONE = 0x00000000,
+    SESSION_TYPE_VOIP = 0x00000001,
+    SESSION_TYPE_VS = 0x00000002,
+    SESSION_TYPE_VT = 0x00000004
+};
+
+// State of Service
+enum
+{
+    STATE_INIT = 0,
+    STATE_READY,
+    STATE_LIMITED,
+    STATE_NOTREADY
+};
+
+#endif

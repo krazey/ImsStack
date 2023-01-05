@@ -1,0 +1,98 @@
+// Copyright (C) 2022 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+filegroup {
+    name: "imsstack_java_srcs",
+    srcs: [
+        "src/**/*.java",
+    ],
+    path: "src",
+}
+
+filegroup {
+    name: "imsstack_aidl_srcs",
+    srcs: [
+        "src/**/*.aidl",
+    ],
+    path: "src",
+}
+
+android_app {
+    name: "ImsStack",
+    privileged: true,
+    certificate: "platform",
+    platform_apis: true,
+    system_ext_specific: true,
+
+    srcs: [
+        ":imsstack_java_srcs",
+        ":imsstack_aidl_srcs",
+    ],
+
+    aidl: {
+        include_dirs: [
+            "frameworks/native/aidl/gui",
+        ],
+    },
+    resource_dirs: [
+        "res"
+    ],
+    asset_dirs: [
+        "assets",
+    ],
+    javacflags: [
+        "-Xlint",
+    ],
+    aaptflags: [
+        "--auto-add-overlay",
+    ],
+    static_libs:[
+        // TODO: move this to libs after API review
+        "ImsMediaFramework",
+    ],
+    libs: [
+        "ims-common",
+        "telephony-common",
+    ],
+    required: [
+        "libimsstack",
+        "privapp_permissions_com.android.imsstack",
+        "allowlist_com.android.imsstack",
+    ],
+    optimize: {
+        proguard_flags_files: [
+            "proguard.flags",
+        ],
+    },
+}
+
+prebuilt_etc {
+    name: "privapp_permissions_com.android.imsstack",
+    system_ext_specific: true,
+    sub_dir: "permissions",
+    src: "privapp-permissions_com.android.imsstack.xml",
+    filename: "com.android.imsstack.xml",
+}
+
+prebuilt_etc {
+    name: "allowlist_com.android.imsstack",
+    system_ext_specific: true,
+    sub_dir: "sysconfig",
+    src: "allowlist_com.android.imsstack.xml",
+    filename_from_src: true,
+}

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<carrier_config>
+
+    <!-- MEDIA -->
+
+    <!-- EVS Payload -->
+    <int-array name="asset_evs_payload_type_int_array" num="1">
+        <item value="125"/>
+    </int-array>
+
+     <!-- EVS configuration -->
+    <int name="asset_evs_codec_attribute_channels_int" value="1"/>
+    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="0"/>
+        <item value="6"/>
+    </int-array>
+    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
+    <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
+    <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
+
+    <!-- AMR-WB, AMR-NB Payload -->
+    <int-array name="asset_amrwb_payload_type_int_array" num="1">
+        <item value="115"/>
+    </int-array>
+
+    <int-array name="asset_amrnb_payload_type_int_array" num="1">
+        <item value="97"/>
+    </int-array>
+
+    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
+        <item value="103"/>
+    </int-array>
+
+    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
+        <item value="105"/>
+    </int-array>
+
+    <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+
+    <int-array name="asset_amrnb_codec_attribute_payload_format_int_array" num="1">
+        <item value="0"/>
+    </int-array>
+
+    <int-array name="asset_amr_amrwb_codec_attribute_modeset_int_array" num="0">
+    </int-array>
+
+    <int-array name="asset_amr_amrnb_codec_attribute_modeset_int_array" num="0">
+    </int-array>
+
+    <int name="video_cvo_value_int" value="4"/>
+    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
+    <boolean name="video_avpf_enable_bool" value="true"/>
+    <int name="imsvt.video_avpf_feature_int" value="30"/>
+    <int name="imsvt.video_codec_attribute_packetization_mode_int" value="0"/>
+    <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+        <item value="240"/>
+        <item value="320"/>
+    </int-array>
+    <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
+    <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
+    <int-array name="imsvt.h264_payload_type_int_array" num="1">
+        <item value="119"/>
+    </int-array>
+
+    <!-- Media common configuration -->
+    <int name="audio_maxred_int" value="220"/>
+    <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
+    <int name="audio_ptime_millis_int" value="20"/>
+    <int name="audio_maxptime_millis_int" value="240"/>
+    <boolean name="audio_evs_support_bool" value="true"/>
+    <boolean name="sdp_reoffer_full_capability_bool" value="true"/>
+    <boolean name="media_session_level_bandwidth_bool" value="true"/>
+
+    <!-- Ut/Xcap Config -->
+    <string name="imsss.xcap_auid_prefix_string">/xcap.test.3gpp.com</string>
+
+    <!-- Ut/Xcap Assets -->
+    <boolean name="ut_oir_tir_always_temporary_mode_bool" value="false"/>
+
+    <!-- MTC -->
+    <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
+    <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
+</carrier_config>

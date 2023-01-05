@@ -1,0 +1,41 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef UCE_NOTIFY_BODY_PART_DATA_H_
+#define UCE_NOTIFY_BODY_PART_DATA_H_
+
+class UceNotifyBodyPartData
+{
+public:
+    explicit UceNotifyBodyPartData(
+            AString& strContentType, AString& strContentId, const ByteArray& objBody) :
+            m_strContentType(strContentType),
+            m_strContentId(strContentId)
+    {
+        m_pBodyContent.Append(objBody);
+    }
+    virtual ~UceNotifyBodyPartData() {}
+
+    AString& GetContentType() { return m_strContentType; }
+    AString& GetContentId() { return m_strContentId; }
+    ByteArray& GetBodyContent() { return m_pBodyContent; }
+
+private:
+    AString m_strContentType;
+    AString m_strContentId;
+    ByteArray m_pBodyContent;
+};
+
+#endif /* UCE_NOTIFY_BODY_PART_DATA_H_ */

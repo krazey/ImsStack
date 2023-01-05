@@ -1,0 +1,14 @@
+# ProGuard Troubleshooting : Do NOT apply shrinking to below class
+# refer URL : http://proguard.sourceforge.net/index.html#/manual/usage.html#keep
+
+-keepclasseswithmembers class * {
+   native <methods>;
+}
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keep public class com.android.imsstack.jni.JniIms{
+    *;
+}

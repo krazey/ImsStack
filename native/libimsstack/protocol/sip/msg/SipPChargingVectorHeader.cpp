@@ -1,0 +1,142 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "msg/SipPChargingVectorHeader.h"
+#include "SipDebug.h"
+#include "platform/SipString.h"
+#include "msg/SipMsgUtil.h"
+
+SipPChargingVectorHeader::SipPChargingVectorHeader() :
+        SipHeaderBase(SipHeaderBase::P_CHARGING_VECTOR),
+        m_pChargingVectorList(SIP_NULL)
+{
+}
+
+SipPChargingVectorHeader::SipPChargingVectorHeader(const SipPChargingVectorHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pChargingVectorList(SIP_NULL)
+{
+    if (objHeader.m_pChargingVectorList != SIP_NULL)
+    {
+        m_pChargingVectorList = new SipNameValue(*(objHeader.m_pChargingVectorList));
+    }
+}
+
+SipPChargingVectorHeader::~SipPChargingVectorHeader()
+{
+    if (m_pChargingVectorList != SIP_NULL)
+    {
+        m_pChargingVectorList->SipDelete();
+    }
+}
+
+SIP_BOOL SipPChargingVectorHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pChargingVectorList == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Missing body", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    if (m_pChargingVectorList->Encode(objBuffer) == SIP_FALSE)
+    {
+        return SIP_FALSE;
+    }
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
+SIP_BOOL SipPChargingVectorHeader::EncodeHdr(
+        SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+{
+    if (m_pChargingVectorList == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                "SipPChargingVectorHeader::EncodeHdr:m_pChargingVectorList missing", SIP_ZERO,
+                SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    if (m_pChargingVectorList->Encode(ppCurrPos) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                "SipPChargingVectorHeader::EncodeHdr: Name Value Encoding failed", SIP_ZERO,
+                SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    return EncodeHeaderParameters(ppCurrPos, bParams);
+}
+
+SIP_BOOL SipPChargingVectorHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
+{
+    if (nDecLen == SIP_ZERO)
+    {
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "SipPChargingVectorHeader::DecodeHdr", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
+    /*Header value is the first node of SipParameterList
+      and the other Node will contain SIP parameter*/
+    if (SipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    {
+        if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
+                    "SipPChargingVectorHeader::DecodeHdr: Hdr Prm Decoding Failed", SIP_ZERO,
+                    SIP_ZERO);
+            return SIP_FALSE;
+        }
+        pEndPt = pTempPre;
+    }
+
+    /*Decode the Header Value*/
+    m_pChargingVectorList = new SipNameValue();
+    if (m_pChargingVectorList == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
+                "SipAuthInfoHeader::DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    if (m_pChargingVectorList->Decode(pStartPt, pEndPt) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
+                "SipAuthInfoHeader::DecodeHdr: Name Value Decoding Successful", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+    // charge vector should be icid-value
+    if (SipPf_Stricmp("icid-value", m_pChargingVectorList->m_pszName) != SIP_ZERO)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
+                "SipAuthInfoHeader::DecodeHdr: Name Value Decoding Successful", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    return SIP_TRUE;
+}
+
+SipHeaderBase* SipPChargingVectorHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
+{
+    if (pHeader != SIP_NULL)
+    {
+        return new SipPChargingVectorHeader(*reinterpret_cast<SipPChargingVectorHeader*>(pHeader));
+    }
+    return new SipPChargingVectorHeader();
+}

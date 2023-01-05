@@ -1,0 +1,262 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "CallReasonInfo.h"
+#include "ImsTypeDef.h"
+#include "MtcContextRepository.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
+#include "call/MockIMtcUiNotifier.h"
+#include "call/MockMtcPendingOperationHolder.h"
+#include "call/UpdatingInfo.h"
+#include "call/state/EstablishedState.h"
+#include "call/state/MtcCallState.h"
+#include "configuration/MockIMtcConfigurationManager.h"
+#include "configuration/MtcConfigurationProxy.h"
+#include "core/MockIMessage.h"
+#include "core/MockISession.h"
+#include "helper/ISrvccStateListener.h"
+#include "helper/MockMtcTimerWrapper.h"
+#include "media/MockIMtcMediaManager.h"
+#include "precondition/MockIMtcPreconditionManager.h"
+#include "sipcore/ISipClientConnection.h"
+#include "sipcore/SipMethod.h"
+#include "utility/MockIMessageUtils.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+using ::testing::_;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
+namespace android
+{
+
+class EstablishedStateTest : public ::testing::Test
+{
+public:
+    EstablishedState* pEstablishedState;
+    MockIMtcCallContext objMockCallContext;
+    MockIMtcMediaManager objMockMediaManager;
+    MockIMtcSession objMockMtcSession;
+    MockIMtcUiNotifier objUiNotifier;
+    MockISession objMockISession;
+    MockIMtcConfigurationManager* pMockConfigurationManager;
+    MockIMtcPreconditionManager objMockPreconditionManager;
+    MockMtcTimerWrapper objTimerWrapper;
+    MockIMessage objMessage;
+    MockIMessageUtils objMessageUtils;
+    MtcConfigurationProxy* pConfigurationProxy;
+    UpdatingInfo* pUpdatingInfo;
+    MediaInfo objMediaInfo;
+
+protected:
+    virtual void SetUp() override
+    {
+        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objMockCallContext);
+
+        ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
+        ON_CALL(objMockMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
+        ON_CALL(objMockMtcSession, GetISession).WillByDefault(ReturnRef(objMockISession));
+        ON_CALL(objMockISession, GetPreviousRequest(_)).WillByDefault(Return(&objMessage));
+
+        ON_CALL(objMockCallContext, GetUiNotifier).WillByDefault(ReturnRef(objUiNotifier));
+
+        pMockConfigurationManager = new MockIMtcConfigurationManager();
+        pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
+        ON_CALL(objMockCallContext, GetConfigurationProxy)
+                .WillByDefault(ReturnRef(*pConfigurationProxy));
+
+        pUpdatingInfo = new UpdatingInfo(objMockCallContext);
+        ON_CALL(objMockCallContext, GetUpdatingInfo).WillByDefault(ReturnRef(*pUpdatingInfo));
+        ON_CALL(objMockCallContext, GetPreconditionManager)
+                .WillByDefault(ReturnRef(objMockPreconditionManager));
+        ON_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::VOIP, IMS_TRUE))
+                .WillByDefault(Return(IMS_SUCCESS));
+
+        ON_CALL(objMockCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+
+        ON_CALL(objMockPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
+
+        ON_CALL(objMockCallContext, GetTimer).WillByDefault(ReturnRef(objTimerWrapper));
+
+        pEstablishedState = new EstablishedState(objMockCallContext);
+    }
+
+    virtual void TearDown() override
+    {
+        delete pConfigurationProxy;
+        delete pUpdatingInfo;
+        delete pEstablishedState;
+    }
+};
+
+TEST_F(EstablishedStateTest, OnEnterRunsPendingOperationSynchronously)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMockCallContext, RunPendingOperationIfPossible());
+    pEstablishedState->OnEnter();
+}
+
+TEST_F(EstablishedStateTest, OnEnterRunsPendingOperationAsynchronouslyIfOnRefreshing)
+{
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objMockCallContext, GetAsyncRunner(_));
+    pEstablishedState->OnEnter();
+}
+
+TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
+{
+    CallInfo objCallInfo;
+    ON_CALL(objMockCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    EXPECT_CALL(objMockMediaManager, IsAudioInactive)
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_CALL(objMockMtcSession, Terminate(_, _)).Times(2);
+
+    CallReasonInfo objReason(CODE_USER_TERMINATED);
+    pEstablishedState->Terminate(objReason);
+    pEstablishedState->Terminate(objReason);
+}
+
+TEST_F(EstablishedStateTest, RefreshNotifyCompletedRunsPendingOperationAsynchronously)
+{
+    EXPECT_CALL(objMockCallContext, GetAsyncRunner(_));
+
+    ISipClientConnection* piFakeConnection = reinterpret_cast<ISipClientConnection*>(0x1);
+    pEstablishedState->Refresh_NotifyCompleted(piFakeConnection);
+}
+
+TEST_F(EstablishedStateTest, OnReceivingMediaDataFailedWithVideoInvokesDowngrade)
+{
+    EXPECT_CALL(objMockMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE))
+            .Times(2)
+            .WillOnce(Return(IMS_SUCCESS))
+            .WillOnce(Return(IMS_FAILURE));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _)).Times(2);
+
+    ON_CALL(objMockMtcSession, GetCallType).WillByDefault(Return(CallType::VT));
+    pEstablishedState->OnReceivingMediaDataFailed(MEDIATYPE_VIDEO, MEDIA_PROTOCOL_RTP);
+
+    ON_CALL(objMockMtcSession, GetCallType).WillByDefault(Return(CallType::RTT));
+    pEstablishedState->OnReceivingMediaDataFailed(MEDIATYPE_TEXT, MEDIA_PROTOCOL_RTP);
+}
+
+TEST_F(EstablishedStateTest, OnMediaFailed)
+{
+    EXPECT_CALL(objMockMtcSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_MEDIA_INIT_FAILED)))
+            .Times(1);
+
+    pEstablishedState->OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED));
+}
+
+TEST_F(EstablishedStateTest, OnIpcanChangedNotHandledIfConfigurationIsOff)
+{
+    ON_CALL(*pMockConfigurationManager, IsEnableSendReinviteOnRatChange)
+            .WillByDefault(Return(IMS_FALSE));
+
+    MockMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
+
+    IMS_UINT32 eIpcan = 1;
+    pEstablishedState->OnIpcanChanged(eIpcan);
+}
+
+TEST_F(EstablishedStateTest, OnIpcanChangedDoesNotPushPendingOperationIfNoSessionRefreshing)
+{
+    ON_CALL(*pMockConfigurationManager, IsEnableSendReinviteOnRatChange)
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_FALSE));
+
+    MockMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
+    EXPECT_CALL(objMockMtcSession, Update(_, _, _));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _));
+
+    IMS_UINT32 eIpcan = 1;
+    pEstablishedState->OnIpcanChanged(eIpcan);
+}
+
+TEST_F(EstablishedStateTest, OnIpcanChangedPushesPendingOperation)
+{
+    ON_CALL(*pMockConfigurationManager, IsEnableSendReinviteOnRatChange)
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMockISession, IsSessionRefreshInProgress).WillByDefault(Return(IMS_TRUE));
+
+    MockMtcPendingOperationHolder objPendingOperationHolder;
+    ON_CALL(objMockCallContext, GetPendingOperationHolder)
+            .WillByDefault(ReturnRef(objPendingOperationHolder));
+
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_));
+
+    IMS_UINT32 eIpcan = 1;
+    pEstablishedState->OnIpcanChanged(eIpcan);
+}
+
+TEST_F(EstablishedStateTest, SendUpdateBySrvccByCanceled)
+{
+    EXPECT_CALL(objMockMtcSession,
+            Update(UpdateType::SRVCC_RECOVERED_CANCEL, IMS_FALSE, SipMethod::UPDATE))
+            .Times(1);
+
+    EXPECT_EQ(
+            CallStateName::UPDATING, pEstablishedState->OnSrvccStateUpdated(SrvccState::CANCELED));
+}
+
+TEST_F(EstablishedStateTest, SendUpdateBySrvccByFailed)
+{
+    EXPECT_CALL(objMockMtcSession,
+            Update(UpdateType::SRVCC_RECOVERED_FAILURE, IMS_FALSE, SipMethod::UPDATE))
+            .Times(1);
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->OnSrvccStateUpdated(SrvccState::FAILED));
+}
+
+TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
+{
+    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    SipMethod objSipMethod(SipMethod::INVITE);
+    ON_CALL(objMessage, GetMethod()).WillByDefault(ReturnRef(objSipMethod));
+    ON_CALL(objMockCallContext, IsHeldByMe).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::VOIP, IMS_TRUE))
+            .Times(1)
+            .WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_CALL(objMockPreconditionManager, FormPreconditionSdp(_, IMS_FALSE)).Times(1);
+
+    EXPECT_CALL(objMockMtcSession, AcceptUpdate()).Times(1).WillOnce(Return(IMS_SUCCESS));
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
+}  // namespace android

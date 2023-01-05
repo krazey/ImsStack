@@ -1,0 +1,174 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef __SIP_ADDR_SPEC_H__
+#define __SIP_ADDR_SPEC_H__
+
+#include "AStringBuffer.h"
+
+#include "SipDatatypes.h"
+#include "SipRefBase.h"
+#include "msg/SipParameters.h"
+#include "msg/IParameterComponent.h"
+
+class SipUri : public SipRefBase, public IParameterComponent
+{
+public:
+    /*Enumeration for URI Scheme*/
+    enum
+    {
+        SCHEME_INVALID = SIP_INVALID,
+        SCHEME_SIP,
+        SCHEME_SIPS,
+        SCHEME_ABS
+    };
+
+private:
+    /*User Info contains username and pwd*/
+    SIP_CHAR* m_pszUser;
+    SIP_CHAR* m_pszPassword;
+    /*Host Port contains host(can be domain name or IP) and port*/
+    SIP_CHAR* m_pszHost;
+    SIP_UINT16 m_nPort;
+    SIP_INT32 m_eHostType;
+    SipParameterList* m_pUriParamList;
+    // for storing each header in
+    // "?"   header   *( "&"   header )
+    // each node consists of a SipNameValue obj for one header
+    SipParameterList* m_pUriHdrParamList;
+
+    SIP_BOOL DecUserInfo(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+
+    SIP_BOOL DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+
+public:
+    /*constructor*/
+    SipUri();
+    SipUri(const SipUri& objSipUri);
+    /*destructor*/
+    ~SipUri();
+
+    SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const override;
+
+    SIP_BOOL DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+
+    /*Set Methods*/
+    SIP_BOOL SetUser(const SIP_CHAR* pszUser);
+
+    SIP_BOOL SetPassword(const SIP_CHAR* pszPass);
+
+    /*Get methods*/
+    inline const SIP_CHAR* GetUser() const { return m_pszUser; }
+
+    inline const SIP_CHAR* GetPassword() const { return m_pszPassword; }
+
+    inline const SIP_CHAR* GetHost() const { return m_pszHost; }
+
+    inline SIP_UINT16 GetPort() const { return m_nPort; }
+
+    SipParameterList* GetUriParamList();
+
+    inline SIP_UINT32 GetUriParamCount() const
+    {
+        return (m_pUriParamList != SIP_NULL) ? m_pUriParamList->GetCount() : SIP_ZERO;
+    }
+    SipParameterList* GetHdrParamList();
+
+    inline SIP_UINT32 GetHdrParamCount() const
+    {
+        return (m_pUriHdrParamList != SIP_NULL) ? m_pUriHdrParamList->GetCount() : SIP_ZERO;
+    }
+
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
+    SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
+    SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
+
+    SIP_BOOL RemoveHdrParam(const SIP_CHAR* pszName);
+};
+
+class SipAddrSpec : public SipRefBase
+{
+public:
+    /*Enumeration for host type*/
+    enum
+    {
+        HOST_NAME,
+        HOST_IPV4,
+        HOST_IPV6,
+        HOST_INVALID = SIP_INVALID
+    };
+
+private:
+    SIP_INT32 m_eUriType;
+
+protected:
+    SipUri* m_pSipUri;
+    SIP_CHAR* m_pszAbsUri;
+
+public:
+    SipAddrSpec();
+
+    SipAddrSpec(const SipAddrSpec& objAddressSpec);
+    ~SipAddrSpec();
+
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
+
+    /*Function for encoding*/
+    SIP_BOOL EncodeAddrSpec(SIP_CHAR** ppCurrPos) const;
+
+    /*Function for decoding*/
+    SIP_BOOL DecodeAddrSpec(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+    /*function for getting the header type*/
+    inline SIP_INT32 GetUriScheme() const { return m_eUriType; }
+
+    SipUri* GetSipUri();
+
+    SIP_BOOL SetAbsUri(const SIP_CHAR* pszSipUri);
+
+    inline const SIP_CHAR* GetAbsUri() const { return m_pszAbsUri; }
+
+    /*get methods*/
+
+    /* Get methods as reference */
+    inline const SipUri* GetSipUriAsRef() const { return m_pSipUri; }
+};
+
+class SipNameAddr : public SipRefBase
+{
+public:
+    SIP_CHAR* m_pszDispName;
+    SipAddrSpec* m_pAddrSpec;
+
+public:
+    SipNameAddr();
+    SipNameAddr(const SipNameAddr& objNameAddr);
+    virtual ~SipNameAddr();
+
+    SIP_BOOL SetAddrSpec(SipAddrSpec* pSipAddrSpec);
+
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
+    SIP_BOOL EncodeNameAddr(SIP_CHAR** ppCurrPos);
+
+    /*Function for decoding*/
+    SIP_BOOL DecodeNameAddr(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
+
+    SipAddrSpec* GetAddrSpec();
+
+    SIP_BOOL SetDisplayName(const SIP_CHAR* pszDisplayName);
+
+    inline const SIP_CHAR* GetDisplayName() const { return m_pszDispName; }
+};
+
+#endif  //__SIP_ADDR_SPEC_H__

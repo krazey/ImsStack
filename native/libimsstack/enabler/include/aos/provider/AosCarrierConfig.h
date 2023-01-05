@@ -1,0 +1,159 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef AOS_CARRIER_CONFIG_H_
+#define AOS_CARRIER_CONFIG_H_
+
+#include "IMSTypeDef.h"
+#include "AString.h"
+#include "ImsVector.h"
+#include "CarrierConfig.h"
+
+struct AosCarrierConfig
+{
+public:
+    AosCarrierConfig() :
+            bSupportEmergencySmsOverIms(IMS_FALSE),
+            bCarrierVolteAvailable(IMS_FALSE),
+            bCarrierVtAvailable(IMS_FALSE),
+            bCarrierWfcImsAvailable(IMS_FALSE),
+            bRttSupported(IMS_FALSE),
+            bCarrierCrossSimImsAvailable(IMS_FALSE),
+            bCarrierVolteTtySupported(IMS_FALSE),
+            objCarrierNrAvailabilities(IMSVector<IMS_SINT32>()),
+            nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED),
+            objPcscfDiscoveryMethod(IMSVector<IMS_SINT32>()),
+            bImsSingleRegistrationRequired(IMS_FALSE),
+            nSipServerPortNumber(5060),
+            bKeepPdnUpInNoVops(IMS_FALSE),
+            nSipPreferredTransport(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP),
+            nIpv4SipMtuSizeCellular(1500),
+            nIpv6SipMtuSizeCellular(1500),
+            objImsPdnEnabledInNoVopsSupport(IMSVector<IMS_SINT32>()),
+            bSipOverIpsecEnabled(IMS_FALSE)  // default - IMS_TRUE
+            ,
+            objIpsecAuthenticationAlgorithms(IMSVector<IMS_SINT32>()),
+            objIpsecEncryptionAlgorithms(IMSVector<IMS_SINT32>()),
+            nRegistrationExpiryTimerSec(600000),
+            nRegistrationRetryBaseTimerMillis(30000),
+            nRegistrationRetryMaxTimerMillis(1800000),
+            bRegistrationEventPackageSupported(IMS_TRUE),
+            nRegistrationSubscribeExpiryTimerSec(600000),
+            objSupportedRats(IMSVector<IMS_SINT32>()),
+            bCarrierVolteRoamingAvailable(IMS_TRUE),
+            bSmsOverImsSupported(IMS_TRUE),
+            objSmsOverImsSupportedRats(IMSVector<IMS_SINT32>()),
+            bEmergencyCallbackModeSupported(IMS_FALSE),
+            objEmergencyOverImsSupportedRats(IMSVector<IMS_SINT32>()),
+            nEmergencyRegistrationTimerMillis(10000),
+            nRefreshGeolocationTimeoutMillis(5000),
+            bRegistrationEventForCatRequired(IMS_FALSE),
+            bUnsubscribeRegistrationEventPackage(IMS_FALSE),
+            nIsimIndexForImpu(1),
+            nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
+            nRegistrationPreferredAccesstypeFeatureTag(
+                    CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
+            objGeolocationPidfInSipRegisterSupport(IMSVector<IMS_SINT32>()),
+            objImsIdentityPriority(IMSVector<IMS_SINT32>()),
+            objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>()),
+            objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>()),
+            bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
+            nPreferredEmergencyRegistration(
+                    CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
+            bSupportLimitedAdminSmsMode(IMS_FALSE),
+            nRegistrationPrivateHeader(0)
+    {
+        // temp setting
+        objSupportedRats.Push(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
+        objSupportedRats.Push(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
+    }
+
+    AosCarrierConfig(IN const AosCarrierConfig&) = delete;
+    AosCarrierConfig& operator=(IN const AosCarrierConfig&) = delete;
+
+public:
+    /* aosp_carrier_config */
+    /// no prefix
+    IMS_BOOL bSupportEmergencySmsOverIms;
+    IMS_BOOL bCarrierVolteAvailable;
+    IMS_BOOL bCarrierVtAvailable;
+    IMS_BOOL bCarrierWfcImsAvailable;
+    IMS_BOOL bRttSupported;
+    IMS_BOOL bCarrierCrossSimImsAvailable;
+    IMS_BOOL bCarrierVolteTtySupported;
+    IMSVector<IMS_SINT32> objCarrierNrAvailabilities;
+    IMS_SINT32 nCarrierUssdMethod;
+
+    /// ims.
+    IMSVector<IMS_SINT32> objPcscfDiscoveryMethod;
+    IMS_BOOL bImsSingleRegistrationRequired;
+    IMS_SINT32 nSipServerPortNumber;
+    IMS_BOOL bKeepPdnUpInNoVops;
+    IMS_SINT32 nSipPreferredTransport;
+    IMS_SINT32 nIpv4SipMtuSizeCellular;
+    IMS_SINT32 nIpv6SipMtuSizeCellular;
+    IMSVector<IMS_SINT32> objImsPdnEnabledInNoVopsSupport;
+    IMS_BOOL bSipOverIpsecEnabled;
+    IMSVector<IMS_SINT32> objIpsecAuthenticationAlgorithms;
+    IMSVector<IMS_SINT32> objIpsecEncryptionAlgorithms;
+    IMS_SINT32 nRegistrationExpiryTimerSec;
+    IMS_SINT32 nRegistrationRetryBaseTimerMillis;
+    IMS_SINT32 nRegistrationRetryMaxTimerMillis;
+    IMS_BOOL bRegistrationEventPackageSupported;
+    IMS_SINT32 nRegistrationSubscribeExpiryTimerSec;
+    IMSVector<IMS_SINT32> objSupportedRats;
+
+    /// imsvoice.
+    IMS_BOOL bCarrierVolteRoamingAvailable;
+
+    /// imssms.
+    IMS_BOOL bSmsOverImsSupported;
+    IMSVector<IMS_SINT32> objSmsOverImsSupportedRats;
+
+    /// imsrtt.
+
+    /// imsemergency.
+    IMS_BOOL bEmergencyCallbackModeSupported;
+    IMSVector<IMS_SINT32> objEmergencyOverImsSupportedRats;
+    IMS_SINT32 nEmergencyRegistrationTimerMillis;
+    IMS_SINT32 nRefreshGeolocationTimeoutMillis;
+
+    /// imsvt.
+
+    /// imswfc.
+
+    /* carrier_config */
+    /// ims
+    IMS_BOOL bRegistrationEventForCatRequired;
+    IMS_BOOL bUnsubscribeRegistrationEventPackage;
+    IMS_SINT32 nIsimIndexForImpu;
+    IMS_SINT32 nPreferredImsDscp;
+    IMS_SINT32 nRegistrationPreferredAccesstypeFeatureTag;
+    IMSVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
+    IMSVector<IMS_SINT32> objImsIdentityPriority;
+    IMSVector<IMS_SINT32> objRegistrationPermanentErrorCode;
+    IMSVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
+
+    /// imsemergency.
+    IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;
+    IMS_SINT32 nPreferredEmergencyRegistration;
+
+    /// imssms.
+    IMS_BOOL bSupportLimitedAdminSmsMode;
+
+    /// imswfc.
+    IMS_SINT32 nRegistrationPrivateHeader;
+};
+#endif  // AOS_CARRIER_CONFIG_H_

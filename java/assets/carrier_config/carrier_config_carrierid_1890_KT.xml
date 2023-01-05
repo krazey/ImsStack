@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<carrier_config>
+    <!-- Carrier configurations -->
+    <!-- Ims General -->
+    <boolean name="ims.allow_algorithm_parameter_in_sip_authorization_header_bool" value="true"/>
+    <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
+    <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+    <string name="ims.ims_user_agent_string">TTA-VoLTE/2.0 MI10 Lite/MIUI12 Device_Type/Android_Phone KT</string>
+    <int-array name="ims.ipsec_authentication_algorithms_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+    <int-array name="ims.ipsec_encryption_algorithms_int_array" num="1">
+        <item value="2"/>
+    </int-array>
+
+    <!-- Aos -->
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
+
+    <!-- Assets: non-carrier configurations -->
+    <!-- Ims General -->
+    <boolean name="support_sdp_precondition_bool" value="false"/>
+    <boolean name="sdp_negotiation_required_for_non_rpr_bool" value="true"/>
+    <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+
+    <!-- Aos -->
+    <int name="reg_out_of_service_policy_int" value="1"/>
+    <int name="reg_retry_default_policy_int" value="1"/>
+    <int name="roaming_preferred_emc_reg_int" value="2"/>
+    <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
+    <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="1"/>
+    <int-array name="sub_err_code_for_terminated_int_array" num="1">
+        <item value="489"/>
+    </int-array>
+
+    <!-- Media -->
+    <int-array name="audio_rtp_port_range_int_array" num="2">
+        <item value="49152"/>
+        <item value="65535"/>
+    </int-array>
+    <boolean name="audio_evs_support_bool" value="true"/>
+
+    <!-- TODO Media - to testcases-->
+    <int-array name="asset_evs_payload_type_int_array" num="1">
+        <item value="110"/>
+    </int-array>
+    <int-array name="asset_amrwb_payload_type_int_array" num="2">
+        <item value="98"/>
+        <item value="97"/>
+    </int-array>
+    <int-array name="asset_amrnb_payload_type_int_array" num="2">
+        <item value="101"/>
+        <item value="100"/>
+    </int-array>
+    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
+        <item value="99"/>
+    </int-array>
+    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
+        <item value="102"/>
+    </int-array>
+    <int-array name="asset_amr_amrwb_codec_attribute_modeset_int_array" num="0">
+    </int-array>
+    <int-array name="asset_amr_amrnb_codec_attribute_modeset_int_array" num="0">
+    </int-array>
+    <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+    <int-array name="asset_amrnb_codec_attribute_payload_format_int_array" num="2">
+        <item value="0"/>
+        <item value="1"/>
+    </int-array>
+    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
+    <boolean name="audio_show_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="asset_evs_codec_attribute_dtx_bool" value="false"/>
+    <boolean name="asset_evs_codec_attribute_dtx_recv_bool" value="false"/>
+    <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
+    <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
+    <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
+    <boolean name="audio_show_codec_attribute_amrwbio_modeset_bool" value="false"/>
+    <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
+    <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
+
+    <int name="imsvoice.audio_as_bandwidth_kbps_int" value="49"/>
+    <int name="imsvoice.audio_rs_bandwidth_bps_int" value="0"/>
+    <int name="imsvoice.audio_rr_bandwidth_bps_int" value="2500"/>
+    <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
+    <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+    <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
+    <!-- <int name="imsvoice.evs_codec_attribute_hf_only_int" value="0"/> -->
+    <!-- <int name="imsvoice.evs_codec_attribute_mode_switch_int" value="0"/> -->
+    <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
+    <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
+    <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
+    <!-- <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="1"/> -->
+    <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <int-array name="video_rtp_port_range_int_array" num="2">
+        <item value="49154"/>
+        <item value="65535"/>
+    </int-array>
+    <string-array name="imsvoice.audio_candidate_attribute_string_array" num="1">
+        <item value="1, UDP, 1119400811, 10.3.210.77, 49152, typ, host"/>
+    </string-array>
+</carrier_config>

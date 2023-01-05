@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="carrier_config_editor"
+    android:title="CarrierConfig Editor">
+    <PreferenceScreen android:title="CarrierConfig - Public"
+        android:key="screen_carrier_config">
+        <PreferenceCategory android:title="CarrierConfig: boolean"
+            android:key="category_config_boolean">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="config_boolean_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="config_boolean_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig: int"
+            android:key="category_config_int">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="config_int_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="config_int_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig: string"
+            android:key="category_config_string">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="config_string_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="config_string_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig: int-array"
+            android:key="category_config_int_array">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="config_int_array_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="config_int_array_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig: string-array"
+            android:key="category_config_string_array">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="config_string_array_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="config_string_array_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+    </PreferenceScreen>
+    <PreferenceScreen android:title="CarrierConfig - Assets"
+        android:key="screen_carrier_config_assets">
+        <PreferenceCategory android:title="CarrierConfig(assets): boolean"
+            android:key="category_assets_config_boolean">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="assets_config_boolean_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="assets_config_boolean_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig(assets): int"
+            android:key="category_assets_config_int">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="assets_config_int_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="assets_config_int_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig(assets): string"
+            android:key="category_assets_config_string">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="assets_config_string_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="assets_config_string_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig(assets): int-array"
+            android:key="category_assets_config_int_array">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="assets_config_int_array_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="assets_config_int_array_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig(assets): string-array"
+            android:key="category_assets_config_string_array">
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="assets_config_string_array_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="assets_config_string_array_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+    </PreferenceScreen>
+    <ListPreference android:title="Clear Test Config"
+        android:entryValues="@array/two_state_value" android:entries="@array/two_state_entry"
+        android:key="clear_test_config" android:defaultValue="no" android:enabled="true"
+        android:selectable="true">
+    </ListPreference>
+    <ListPreference android:title="Test Carrier Id"
+        android:entryValues="@array/carrier_config_carrier_id_value"
+        android:entries="@array/carrier_config_carrier_id_entry"
+        android:key="test_carrier_id" android:defaultValue="0" android:enabled="true"
+        android:selectable="true">
+    </ListPreference>
+    <ListPreference android:title="VoLte Provisioning"
+        android:entryValues="@array/volte_provisioning_value"
+        android:entries="@array/volte_provisioning_entry"
+        android:key="volte_provisioning" android:defaultValue="-1" android:enabled="true"
+        android:selectable="true">
+    </ListPreference>
+</PreferenceScreen>

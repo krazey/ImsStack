@@ -1,0 +1,169 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.imsstack.imsservice;
+
+import static org.mockito.Mockito.spy;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.telephony.ims.aidl.IImsMmTelFeature;
+import android.telephony.ims.aidl.IImsRcsFeature;
+import android.telephony.ims.aidl.IImsServiceController;
+import android.telephony.ims.feature.MmTelFeature;
+import android.telephony.ims.feature.RcsFeature;
+import android.telephony.ims.stub.ImsFeatureConfiguration;
+
+import androidx.test.core.app.ApplicationProvider;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.TimeUnit;
+
+@RunWith(JUnit4.class)
+public class ImsServiceTest {
+    IImsServiceController mImsServiceBinder;
+    private TestImsService mImsService;
+    private Context mContext;
+    private static final int INVALID_SLOT = -1;
+    private static final int SLOT0 = 0;
+    private static final int SLOT1 = 1;
+    private static final int SUB_ID = 1;
+
+    private static final String IMS_PACKAGE_NAME = "com.android.imsstack";
+    private static final String CLASS_NAME = "com.android.imsstack.imsservice.ImsService";
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mImsServiceBinder = IImsServiceController.Stub.asInterface(service);
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            mImsServiceBinder = null;
+        }
+    };
+
+    @Before
+    public void setUp() throws InterruptedException {
+        MockitoAnnotations.initMocks(this);
+        mContext = spy(ApplicationProvider.getApplicationContext());
+
+        Intent intent = new Intent(ImsService.SERVICE_INTERFACE);
+        intent.setClassName(IMS_PACKAGE_NAME, CLASS_NAME);
+        mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        mImsService = new TestImsService(mContext);
+        mImsService.setImsControllerReady(true);
+        //added delay for service binding
+        TimeUnit.MILLISECONDS.sleep(10);
+    }
+
+    @Test
+    @Ignore // TODO(b/263768170): Binder should not return null
+    public void querySupportedImsFeaturesTest() throws Exception {
+        Assert.assertNotNull(mImsServiceBinder);
+        ImsFeatureConfiguration resultConfig = mImsServiceBinder.querySupportedImsFeatures();
+        Assert.assertNotNull(resultConfig);
+    }
+
+    @Test
+    public void querySupportedImsFeaturesWithoutBinderTest() {
+        //set ImsController ready state false
+        mImsService.setImsControllerReady(false);
+        ImsFeatureConfiguration result = mImsService.querySupportedImsFeatures();
+        Assert.assertEquals(0, result.getServiceFeatures().size());
+
+        ImsServiceController.create(mContext);
+        mImsService.setImsControllerReady(true);
+        ImsFeatureConfiguration resultConfig = mImsService.querySupportedImsFeatures();
+        Assert.assertTrue(ImsServiceController.isReady());
+        Assert.assertNotNull(resultConfig);
+    }
+
+    @Test
+    @Ignore // TODO(b/263768170): Binder should not return null
+    public void createRcsFeatureTest() throws RemoteException, InterruptedException {
+        Assert.assertNotNull(mImsServiceBinder);
+        //verify for invalid slot id
+        IImsRcsFeature result = mImsServiceBinder.createRcsFeature(INVALID_SLOT, SUB_ID);
+        Assert.assertNull(result);
+
+        result = mImsServiceBinder.createRcsFeature(SLOT0, SUB_ID);
+        Assert.assertNotNull(result);
+    }
+
+    @Test
+    public void createRcsFeatureWithoutBinderTest() {
+        ImsServiceController.create(mContext);
+        RcsFeature rcs = mImsService.createRcsFeature(SLOT0);
+        Assert.assertNotNull(rcs);
+    }
+
+    private static class TestImsService extends ImsService {
+        Context mContext;
+        boolean mReady;
+        TestImsService(Context context) {
+            mContext = context;
+        }
+        public Context getAppContext() {
+            return mContext;
+        }
+        private void setImsControllerReady(boolean ready) {
+            mReady = ready;
+        }
+
+        public boolean isImsControllerReady() {
+            return mReady;
+        }
+    }
+
+    @Test
+    @Ignore // TODO(b/263768170): Binder should not return null
+    public void createMmTelFeatureTest() throws RemoteException {
+        Assert.assertNotNull(mImsServiceBinder);
+        IImsMmTelFeature iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(
+                INVALID_SLOT, SUB_ID);
+        Assert.assertNull(iImsMMTelFeature);
+
+        iImsMMTelFeature = mImsServiceBinder.createMmTelFeature(SLOT0, SUB_ID);
+        Assert.assertNotNull(iImsMMTelFeature);
+    }
+
+    @Test
+    public void createMmTelFeatureWithOutBinderTest() throws RemoteException {
+        ImsServiceController.create(mContext);
+        MmTelFeature iImsMMTelFeature = mImsService.createMmTelFeature(SLOT0);
+        Assert.assertNotNull(iImsMMTelFeature);
+    }
+
+    @After
+    public void tearDown() {
+        mImsServiceBinder = null;
+        mContext = null;
+        mConnection = null;
+    }
+}
