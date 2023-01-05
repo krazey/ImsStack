@@ -32,7 +32,6 @@ MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
         m_bAosRegModAdmin(IMS_FALSE),
         m_bImsSuspend(IMS_FALSE),
         m_bSmsOverIpConf(IMS_FALSE),
-        m_bTemporaryBlocked(IMS_FALSE),
         m_nConnectedServices(ImsAosService::NONE),
         m_nSlotId(nSlotId)
 {
@@ -52,8 +51,6 @@ MtsServiceState::~MtsServiceState()
 PUBLIC
 void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
 {
-    IMS_UINT32 nType = IImsAosInfo::REG_MODE_UNKNOWN;
-
     IMS_TRACE_I("SetImsRegConnected : m_bImsConnected[%s]/bConnected[%s]",
             _TRACE_B_(m_bImsConnected), _TRACE_B_(bConnected), 0);
 
@@ -75,7 +72,7 @@ void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
             return;
         }
 
-        nType = piImsAos->GetAosInfo()->GetRegistrationMode();
+        IMS_UINT32 nType = piImsAos->GetAosInfo()->GetRegistrationMode();
 
         if (IImsAosInfo::REG_MODE_ADMIN == nType)
         {
@@ -165,17 +162,6 @@ void MtsServiceState::OnImsResumed()
 }
 
 PUBLIC
-void MtsServiceState::NotifySpecificMessage(
-        IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam)
-{
-    (void)nMsg;
-    (void)nWparam;
-    (void)nLparam;
-
-    IMS_TRACE_I("NotifySpecificMessage", 0, 0, 0);
-}
-
-PUBLIC
 IMS_SINT32 MtsServiceState::GetServiceState()
 {
     IMS_SINT32 nState = STATE_NOTREADY;
@@ -221,12 +207,6 @@ PUBLIC
 IMS_BOOL MtsServiceState::IsMtServiceBlocked() const
 {
     return (m_nMtsServiceState == STATE_NOTREADY);
-}
-
-PUBLIC
-IMS_BOOL MtsServiceState::IsTemporaryServiceBlocked() const
-{
-    return m_bTemporaryBlocked;
 }
 
 PRIVATE
@@ -279,19 +259,4 @@ void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
     IMS_TRACE_I("SetImsSuspendState : IMS Suspend State is [%s]", _TRACE_B_(m_bImsSuspend), 0, 0);
 
     UpdateServiceState();
-}
-
-PRIVATE
-void MtsServiceState::SetMtsServiceState(IN IMS_SINT32 nServiceState)
-{
-    m_nMtsServiceState = nServiceState;
-}
-
-PRIVATE
-void MtsServiceState::SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked)
-{
-    m_bTemporaryBlocked = bBlocked;
-
-    IMS_TRACE_I("SetTemporaryServiceBlocked : Service Blocked State is [%s]",
-            _TRACE_B_(m_bTemporaryBlocked), 0, 0);
 }

@@ -335,13 +335,6 @@ void MtsService::ImsAos_Resumed()
 }
 
 PUBLIC
-void MtsService::IMSAoSApp_NotifySpecificMessage(
-        IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam)
-{
-    m_piMtsServiceState->NotifySpecificMessage(nMsg, nWparam, nLparam);
-}
-
-PUBLIC
 void MtsService::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 /*nIpcan*/)
 {
     IMS_TRACE_I("ImsAosMonitor_Connected : nServices[%08x] ", nServices, 0, 0);

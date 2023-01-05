@@ -27,13 +27,10 @@ public:
     // MtsMessageController
     virtual IMS_BOOL IsMoServiceBlocked() const = 0;
     virtual IMS_BOOL IsMtServiceBlocked() const = 0;
-    virtual IMS_BOOL IsTemporaryServiceBlocked() const = 0;
 
     // MtsService
     virtual IMS_SINT32 GetServiceState() = 0;
     virtual IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService) = 0;
-    virtual void NotifySpecificMessage(
-            IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam) = 0;
     virtual void OnImsConnected() = 0;
     virtual void OnImsDisconnected(IN IMS_UINT32 nReason) = 0;
     virtual void OnImsDisconnecting(IN IMS_UINT32 nReason) = 0;

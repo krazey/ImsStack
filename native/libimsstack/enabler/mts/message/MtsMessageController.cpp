@@ -485,13 +485,6 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
         return;
     }
 
-    if (piMtsServiceState->IsTemporaryServiceBlocked())
-    {
-        IMS_TRACE_E(0, "Mts service is temporarily blocked", 0, 0, 0);
-        ReportTransmissionResult(MO_ERROR_RETRY, eSmsFormat, nSeqId);
-        return;
-    }
-
     if (pMtsICoreService == IMS_NULL)
     {
         IMS_TRACE_E(0, "Fail to get MtsICoreService instance ", 0, 0, 0);
@@ -677,11 +670,10 @@ IMS_BOOL MtsMessageController::FormDestinationByMti(IN SmsFormatType eSmsFormat,
 {
     IMS_BOOL bIsAckOrError = IMS_FALSE;
     AString strLastIpSmgw;
-    IMS_SINT32 nGsmMti = SMS_MTI_NONE;
 
     if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
     {
-        nGsmMti = m_pMtsDynamicLoader->GetMtsSmUtils()->GetMti(
+        IMS_SINT32 nGsmMti = m_pMtsDynamicLoader->GetMtsSmUtils()->GetMti(
                 SmsFormatType::SMSFORMAT_3GPP, objData);
         bIsAckOrError =
                 (nGsmMti == SMS_3GPP_MTI_RP_ACK_FROM_MS || nGsmMti == SMS_3GPP_MTI_RP_ERROR_FROM_MS)

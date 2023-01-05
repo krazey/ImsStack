@@ -28,7 +28,6 @@ public:
     // MtsMessageController
     MOCK_METHOD(IMS_BOOL, IsMoServiceBlocked, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsMtServiceBlocked, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsTemporaryServiceBlocked, (), (const, override));
 
     // MtsService
     MOCK_METHOD(void, SetSmsOverIpState, (IN IMS_BOOL bState), (override));
@@ -38,8 +37,6 @@ public:
     MOCK_METHOD(void, OnImsDisconnecting, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, OnImsSuspended, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, OnImsResumed, (), (override));
-    MOCK_METHOD(void, NotifySpecificMessage,
-            (IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam), (override));
 
     MOCK_METHOD(IMS_SINT32, GetServiceState, (), (override));
     MOCK_METHOD(IMS_BOOL, IsServiceConnected, (IN IMS_UINT32 nService), (override));
