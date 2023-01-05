@@ -15,13 +15,12 @@
  */
 
 #include <gtest/gtest.h>
+#include "IImsRadio.h"
 #include "MockIMtsTrafficListener.h"
 #include "MockITimer.h"
 #include "MtsTraffic.h"
 #include "PlatformContext.h"
 #include "TestTimerService.h"
-
-class IImsRadio;
 
 namespace android
 {
