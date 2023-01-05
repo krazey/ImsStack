@@ -157,6 +157,23 @@ TEST_F(MtcEmergencyServiceManagerTest, OnAosDisconnectedRetriesOnImsPdnIfReasonI
     pEsm->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED);
 }
 
+TEST_F(MtcEmergencyServiceManagerTest, OnAosDisconnectedSetsIdleStateIfRetryOnImsPdn)
+{
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_TRUE));
+
+    pEsm->SetState(EmergencyServiceState::OPENING);
+
+    ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
+    ON_CALL(*pMockServiceThread,
+            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::OPENED), -1,
+                    static_cast<IMS_SINT32>(ServiceType::NORMAL)))
+            .WillByDefault(Return());
+
+    pEsm->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED);
+
+    EXPECT_EQ(pEsm->GetState(), EmergencyServiceState::IDLE);
+}
+
 TEST_F(MtcEmergencyServiceManagerTest, OnAosConnectedSetsOpenedStateIfOpening)
 {
     pEsm->SetState(EmergencyServiceState::OPENING);

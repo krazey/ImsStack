@@ -92,6 +92,7 @@ PUBLIC VIRTUAL void MtcEmergencyServiceManager::OnAosStateChanged(
         case MtcAosState::DISCONNECTED:
             if (IsRetryOverImsPdnRequired(eAosReason))
             {
+                SetState(EmergencyServiceState::IDLE, bStateChanged);
                 return HandleEmergencyCallOverImsPdn();
             }
             HandleServiceIdle(bStateChanged);
