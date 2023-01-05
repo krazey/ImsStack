@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.telephony.Annotation.NetworkType;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
@@ -26,6 +25,7 @@ import com.android.imsstack.core.agents.ImsRadioInterface;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.enabler.ssc.SscConfig.CarrierConfigServiceType;
+import com.android.imsstack.enabler.ssc.SscConstant.AccessNetworkTypes;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -242,10 +242,12 @@ public class SscUtils {
      * Converts network type from TelephonyManager#NETWORK_TYPE_XXX to
      * ImsRadioInterface#ACCESS_NETWORK_TYPE_XXX
      *
-     * @param networkType See {@link TelephonyManager#NETWORK_TYPE_XXX}
+     * @param networkType One of network type defined in {@link TelephonyManager}. See
+     * {@link TelephonyManager#NETWORK_TYPE_IWLAN}, {@link TelephonyManager#NETWORK_TYPE_LTE}, and
+     * others.
      * @return Matched network type of {@link ImsRadioInterface.AccessNetworkType}
      */
-    protected static int convertToImsRadioNetworkType(@NetworkType int networkType) {
+    protected static int convertToImsRadioNetworkType(int networkType) {
         switch (networkType) {
             case TelephonyManager.NETWORK_TYPE_IWLAN:
                 return ImsRadioInterface.ACCESS_NETWORK_TYPE_IWLAN;
@@ -262,6 +264,39 @@ public class SscUtils {
                 return ImsRadioInterface.ACCESS_NETWORK_TYPE_NGRAN;
             default:
                 return ImsRadioInterface.ACCESS_NETWORK_TYPE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Converts network type from TelephonyManager#NETWORK_TYPE_XXX to
+     * AccessNetworkConstants.AccessNetworkType
+     *
+     * @param networkType One of network type defined in {@link TelephonyManager}. See
+     * {@link TelephonyManager#NETWORK_TYPE_IWLAN}, {@link TelephonyManager#NETWORK_TYPE_LTE}, and
+     * others.
+     * @return Matched network type of {@link SscConstant.AccessNetworkTypes}
+     */
+    protected static @AccessNetworkTypes int convertToAccessNetworkType(int networkType) {
+        switch (networkType) {
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return SscConstant.NETWORK_TYPE_IWLAN;
+            case TelephonyManager.NETWORK_TYPE_GPRS: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_GSM: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+                return SscConstant.NETWORK_TYPE_GERAN;
+            case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSUPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSPA: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_HSPAP: // FALL-THROUGH
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return SscConstant.NETWORK_TYPE_UTRAN;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return SscConstant.NETWORK_TYPE_EUTRAN;
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return SscConstant.NETWORK_TYPE_NGRAN;
+            default:
+                return SscConstant.NETWORK_TYPE_UNKNOWN;
         }
     }
 

@@ -478,6 +478,41 @@ public class SscUtilsTest {
     }
 
     @Test
+    public void convertToAccessNetworkType() {
+        assertEquals(SscConstant.NETWORK_TYPE_IWLAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_IWLAN));
+
+        assertEquals(SscConstant.NETWORK_TYPE_GERAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_GPRS));
+        assertEquals(SscConstant.NETWORK_TYPE_GERAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_GSM));
+        assertEquals(SscConstant.NETWORK_TYPE_GERAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_EDGE));
+
+        assertEquals(SscConstant.NETWORK_TYPE_UTRAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_UMTS));
+        assertEquals(SscConstant.NETWORK_TYPE_UTRAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_HSDPA));
+        assertEquals(SscConstant.NETWORK_TYPE_UTRAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_HSUPA));
+        assertEquals(SscConstant.NETWORK_TYPE_UTRAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_HSPA));
+        assertEquals(SscConstant.NETWORK_TYPE_UTRAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_HSPAP));
+        assertEquals(SscConstant.NETWORK_TYPE_UTRAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_TD_SCDMA));
+
+        assertEquals(SscConstant.NETWORK_TYPE_EUTRAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_LTE));
+
+        assertEquals(SscConstant.NETWORK_TYPE_NGRAN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_NR));
+
+        assertEquals(SscConstant.NETWORK_TYPE_UNKNOWN,
+                SscUtils.convertToAccessNetworkType(TelephonyManager.NETWORK_TYPE_UNKNOWN));
+    }
+
+    @Test
     public void getSupplementaryServiceTypeForCarrierConfig() {
         assertEquals(SscConfig.SERVICE_TYPE_OIP,
                 SscUtils.getSupplementaryServiceTypeForCarrierConfig(ESsType.OIP,

@@ -16,10 +16,15 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import android.annotation.IntDef;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsSsInfo;
 import android.telephony.ims.stub.ImsUtImplBase;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class SscConstant {
     public static final int EVENT_SSC_BASE = 13200;
@@ -132,4 +137,24 @@ public class SscConstant {
     // Telephony SIM Application type
     public static final int APPTYPE_USIM = TelephonyManager.APPTYPE_USIM; // 2
     public static final int APPTYPE_ISIM = TelephonyManager.APPTYPE_ISIM; // 5
+
+    // AccessNetworkTypes match the radio technologies listed in
+    // {@link CarrierConfigManager.ImsSs#KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY}.
+    public static final int NETWORK_TYPE_UNKNOWN = AccessNetworkType.UNKNOWN; // 0
+    public static final int NETWORK_TYPE_GERAN = AccessNetworkType.GERAN; // 1
+    public static final int NETWORK_TYPE_UTRAN = AccessNetworkType.UTRAN; // 2
+    public static final int NETWORK_TYPE_EUTRAN = AccessNetworkType.EUTRAN; // 3
+    public static final int NETWORK_TYPE_IWLAN = AccessNetworkType.IWLAN; // 5
+    public static final int NETWORK_TYPE_NGRAN = AccessNetworkType.NGRAN; // 6
+
+    @IntDef(prefix = {"NETWORK_TYPE_"}, value = {
+            NETWORK_TYPE_UNKNOWN,
+            NETWORK_TYPE_GERAN,
+            NETWORK_TYPE_UTRAN,
+            NETWORK_TYPE_EUTRAN,
+            NETWORK_TYPE_IWLAN,
+            NETWORK_TYPE_NGRAN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AccessNetworkTypes {}
 }
