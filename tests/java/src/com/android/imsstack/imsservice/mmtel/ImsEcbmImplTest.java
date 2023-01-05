@@ -20,8 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import android.util.Log;
-
 import com.android.ims.internal.IImsEcbmListener;
 import com.android.imsstack.enabler.mtc.EcbmListener;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
@@ -35,25 +33,26 @@ import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class ImsEcbmImplTest {
-    private static final String LOG_TAG = "ImsEcbmImplTest";
     private ImsEcbmImpl mImsEcbmImpl;
 
+    //Mocked Classes
     @Mock private ICallContext mMockCallContext;
     @Mock private IECallStateTracker mMockIECallStateTracker;
     @Mock private IImsEcbmListener mMockListener;
 
     @Before
     public void setUp() throws Exception {
-        Log.d(LOG_TAG, " Unit Test");
-        mMockCallContext = Mockito.mock(ICallContext.class);
-        mMockIECallStateTracker = Mockito.mock(IECallStateTracker.class);
+        MockitoAnnotations.initMocks(this);
+
         mImsEcbmImpl = new ImsEcbmImpl(mMockCallContext);
-        mMockListener = Mockito.mock(IImsEcbmListener.class);
+
         doReturn(mMockIECallStateTracker).when(mMockCallContext).getECallStateTracker();
         mImsEcbmImpl.init();
+        mImsEcbmImpl.getImsEcbm().setListener(mMockListener);
     }
 
     private EcbmListener setupListener() {
@@ -75,8 +74,6 @@ public class ImsEcbmImplTest {
     public void test_onEcbmEntered() throws Exception {
         EcbmListener proxyListener = setupListener();
         proxyListener.onEcbmEntered();
-        mImsEcbmImpl.enteredEcbm();
-        mMockListener.enteredECBM();
         verify(mMockListener).enteredECBM();
     }
 
@@ -84,7 +81,6 @@ public class ImsEcbmImplTest {
     public void test_onEcbmExited() throws Exception {
         EcbmListener proxyListener = setupListener();
         proxyListener.onEcbmExited();
-        mMockListener.exitedECBM();
         verify(mMockListener).exitedECBM();
     }
 
@@ -98,7 +94,5 @@ public class ImsEcbmImplTest {
     public void tearDown() throws Exception {
         mImsEcbmImpl.dispose();
         mImsEcbmImpl = null;
-        mMockCallContext = null;
-        mMockIECallStateTracker = null;
     }
 }
