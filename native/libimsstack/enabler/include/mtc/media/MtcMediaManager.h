@@ -122,18 +122,19 @@ private:
     void DestroyMediaSession();
     void SetState(IN MediaState eState);
     void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
-    void SetNetworkToneRTPTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration);  // TBD
+    void UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bAudioBlocked);
+    void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration);
     void AdjustDirectionForAutoOffer(IN IMS_BOOL bHeldByMe);
     static void AdjustDirectionForAutoAnswerIfHeldByMe(IN_OUT IMS_SINT32& eDirection);
 
     IMS_BOOL IsNecessaryToRunMedia(IN ISession* piSession, IN IMessage* piMessage);
     IMS_UINTP GetMediaNegoId(IN ISession* piSession);
-    IMS_UINT32 GetDurationWaitingNetworkTone(IN ISession* piSession, IN IMessage* piMessage);
+    IMS_UINT32 GetWaitingNetworkToneDuration(IN ISession* piSession, IN IMessage* piMessage);
 
     static void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
-    static void HandleReceivingNetworkToneStarted();
-    static void HandleReceivingNetworkToneFailed();
+    void HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived);
     void RequestToRegisterQosCallback(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eContents);
+    IMS_BOOL IsDynamicRbtRequired(IN ISession* piSession);
 
 protected:
     IMediaReportEventListener* m_pMediaReportListener;

@@ -575,14 +575,14 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataStarted(
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneStarted()
 {
     IMS_TRACE_I("OnReceivingNetworkToneStarted", 0, 0, 0);
-    // TODO: send progressing with updated media info.
+    SendProgressing();
     return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneFailed()
 {
     IMS_TRACE_I("OnReceivingNetworkToneFailed", 0, 0, 0);
-    // TODO: send progressing with updated media info.
+    SendProgressing();
     return GetStateName();
 }
 

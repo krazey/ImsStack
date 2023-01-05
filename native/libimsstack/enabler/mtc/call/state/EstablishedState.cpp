@@ -385,6 +385,26 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnVideoLowestBitRate()
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingNetworkToneStarted()
+{
+    IMS_TRACE_I("OnReceivingNetworkToneStarted", 0, 0, 0);
+    m_objContext.GetUiNotifier().SendHeldBy(&(m_objContext.GetCallInfo()),
+            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetSupplementaryService().GetServices());
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::OnReceivingNetworkToneFailed()
+{
+    IMS_TRACE_I("OnReceivingNetworkToneFailed", 0, 0, 0);
+    m_objContext.GetUiNotifier().SendHeldBy(&(m_objContext.GetCallInfo()),
+            m_objContext.GetMediaManager().GetMediaInfo(),
+            m_objContext.GetSupplementaryService().GetServices());
+
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName EstablishedState::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);

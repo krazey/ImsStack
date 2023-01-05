@@ -82,6 +82,7 @@ public:
     virtual void UpdateProfileForMediaActivation(IN const ISession* piActiveSession);
 
     virtual ISession* GetSessionWithNegoId(IN IMS_UINTP nNegoId);
+    virtual ISession* GetActiveSession() const;
 
 private:
     IMS_BOOL IsMediaProfilePresent(IN const ISession* piSession) const;

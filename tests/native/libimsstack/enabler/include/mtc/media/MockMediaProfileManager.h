@@ -49,6 +49,7 @@ public:
     MOCK_METHOD(void, UpdateProfileForMediaActivation, (IN const ISession* piActiveSession),
             (override));
     MOCK_METHOD(ISession*, GetSessionWithNegoId, (IN IMS_UINTP nNegoId), (override));
+    MOCK_METHOD(ISession*, GetActiveSession, (), (const, override));
 };
 
 #endif

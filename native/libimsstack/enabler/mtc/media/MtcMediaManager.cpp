@@ -112,14 +112,11 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
         case REPORT_VIDEO_LOWEST_BIT_RATE:
             m_pMediaReportListener->OnVideoLowestBitRate();
             break;
-        case REPORT_CHECK_RADIO_CONNECTION:
-            // TODO: need to ping check?
-            break;
         case REPORT_NW_TONE_RTP_RECEIVE_STARTED:
-            HandleReceivingNetworkToneStarted();
+            HandleReceivingNetworkTone(IMS_TRUE);
             break;
         case REPORT_NW_TONE_RTP_RECEIVE_FAILED:
-            HandleReceivingNetworkToneFailed();
+            HandleReceivingNetworkTone(IMS_FALSE);
             break;
         case REPORT_MEDIA_DETACH:
             m_pMediaReportListener->OnMediaFailed(CallReasonInfo(CODE_MEDIA_UNSPECIFIED));
@@ -451,9 +448,6 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
         FinalizeSdp(piSession);
     }
 
-    IMS_UINT32 nTimeWaitingNetworkTone = GetDurationWaitingNetworkTone(piSession, piMessage);
-    IMS_TRACE_D("Run : duration for waiting network tone[%d]", nTimeWaitingNetworkTone, 0, 0);
-
     if (!IsNecessaryToRunMedia(piSession, piMessage))
     {
         return;
@@ -461,13 +455,20 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
 
     IMS_TRACE_D("Run : EarlyDialog[%s]", _TRACE_B_(bEarly), 0, 0);
 
-    if (!m_piMediaSession->Run(GetMediaNegoId(piSession)))
+    IMS_UINTP nNegoId = GetMediaNegoId(piSession);
+    IMS_UINT32 nNetworkToneRtpTime = GetWaitingNetworkToneDuration(piSession, piMessage);
+    SetNetworkToneRtpTimer(nNegoId, nNetworkToneRtpTime);
+    if (!bEarly && nNetworkToneRtpTime == TIME_NO_WAIT_NW_TONE_RTP)
+    {
+        m_objContext.GetSupplementaryService().Delete(SuppType::ENFORCE_LT);
+    }
+
+    if (!m_piMediaSession->Run(nNegoId))
     {
         return;
     }
 
     SetState(MediaState::STARTING);
-    SetNetworkToneRTPTimer(MEDIATYPE_AUDIO, nTimeWaitingNetworkTone);
     m_pProfileManager->UpdateProfileForMediaActivation(piSession);
 }
 
@@ -690,13 +691,23 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMes
 }
 
 PRIVATE
-void MtcMediaManager::SetNetworkToneRTPTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration)
+void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bNetworkToneReceived)
 {
-    MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaTypes);
+    if (!IsDynamicRbtRequired(piSession))
+    {
+        return;
+    }
 
-    IMS_TRACE_D("SetNetworkToneRTPTimer : MediaType[%d] Duration[%d]", eMediaTypes, nDuration, 0);
+    SetLocalTone(!bNetworkToneReceived);
+    IMS_TRACE_D("UpdateLocalTone : use local ringback tone [%s]", _TRACE_B_(!bNetworkToneReceived),
+            0, 0);
+}
 
-    m_piMediaSession->SetNetworkToneRtpTimer(0 /* nNegoId */, eContents, nDuration);
+PRIVATE
+void MtcMediaManager::SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration)
+{
+    IMS_TRACE_D("SetNetworkToneRtpTimer : NegoId[%" PFLS_x "] Duration[%d]", nNegoId, nDuration, 0);
+    m_piMediaSession->SetNetworkToneRtpTimer(nNegoId, MEDIA_TYPE_AUDIO, nDuration);
 }
 
 PRIVATE
@@ -779,7 +790,7 @@ IMS_UINTP MtcMediaManager::GetMediaNegoId(IN ISession* piSession)
 }
 
 PRIVATE
-IMS_UINT32 MtcMediaManager::GetDurationWaitingNetworkTone(
+IMS_UINT32 MtcMediaManager::GetWaitingNetworkToneDuration(
         IN ISession* piSession, IN IMessage* piMessage)
 {
     if (m_pProfileManager->IsConfirmed(piSession))
@@ -792,12 +803,7 @@ IMS_UINT32 MtcMediaManager::GetDurationWaitingNetworkTone(
         return TIME_WAIT_NW_TONE_RTP;
     }
 
-    if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
-    {
-        return TIME_NO_WAIT_NW_TONE_RTP;
-    }
-
-    if (IsLocalTone())
+    if (!IsDynamicRbtRequired(piSession))
     {
         return TIME_NO_WAIT_NW_TONE_RTP;
     }
@@ -810,11 +816,6 @@ IMS_UINT32 MtcMediaManager::GetDurationWaitingNetworkTone(
 
     PemType ePemType = GetPemType(piSession);
     if (ePemType == PemType::SENDONLY || ePemType == PemType::SENDRECV)
-    {
-        return TIME_NO_WAIT_NW_TONE_RTP;
-    }
-
-    if (m_pProfileManager->IsPemSendInOtherEarlySession(piSession))
     {
         return TIME_NO_WAIT_NW_TONE_RTP;
     }
@@ -832,17 +833,46 @@ void MtcMediaManager::HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType)
 }
 
 PRIVATE
-void MtcMediaManager::HandleReceivingNetworkToneStarted()
+void MtcMediaManager::HandleReceivingNetworkTone(IN IMS_BOOL bNetworkToneReceived)
 {
-    IMS_TRACE_D("HandleReceivingNetworkToneStarted", 0, 0, 0);
-    // TODO: set network tone, set dynamic network tone timer.
-}
+    IMS_TRACE_D("HandleReceivingNetworkTone", 0, 0, 0);
+    ISession* piSession = m_pProfileManager->GetActiveSession();
+    if (piSession == IMS_NULL)
+    {
+        return;
+    }
 
-PRIVATE
-void MtcMediaManager::HandleReceivingNetworkToneFailed()
-{
-    IMS_TRACE_D("HandleReceivingNetworkToneFailed", 0, 0, 0);
-    // TODO: set local tone (check 180 response) or enforced local tone
+    IMS_BOOL bConfirmed = m_pProfileManager->IsConfirmed(piSession);
+    if (bConfirmed && m_pMediaInfo->eAudioDirection != DIRECTION_RECEIVE)
+    {
+        return;
+    }
+
+    if (!bConfirmed)
+    {
+        UpdateLocalTone(piSession, bNetworkToneReceived);
+    }
+    else
+    {
+        MtcSupplementaryService& objSuppService = m_objContext.GetSupplementaryService();
+        if (bNetworkToneReceived)
+        {
+            objSuppService.Delete(SuppType::ENFORCE_LT);
+        }
+        else
+        {
+            objSuppService.Add(SuppType::ENFORCE_LT, IMS_TRUE);
+        }
+    }
+
+    if (bNetworkToneReceived)
+    {
+        m_pMediaReportListener->OnReceivingNetworkToneStarted();
+    }
+    else
+    {
+        m_pMediaReportListener->OnReceivingNetworkToneFailed();
+    }
 }
 
 PRIVATE
@@ -865,4 +895,22 @@ void MtcMediaManager::RequestToRegisterQosCallback(
     {
         m_piMediaSession->RequestQos(nNegoId, MEDIA_TYPE_TEXT);
     }
+}
+
+PRIVATE
+IMS_BOOL MtcMediaManager::IsDynamicRbtRequired(IN ISession* piSession)
+{
+    if (!m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_180))
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_SINT32 nLocalRbtPolicy = m_objContext.GetConfigurationProxy().GetInt(
+            Feature::POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE);
+    if (nLocalRbtPolicy != USE_DYNAMIC_NW_TONE_TIMER)
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
 }

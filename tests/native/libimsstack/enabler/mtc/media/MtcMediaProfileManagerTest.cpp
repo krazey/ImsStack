@@ -317,4 +317,26 @@ TEST_F(MtcMediaProfileManagerTest, GetSessionWithNegoIdReturnsMatchingSession)
     EXPECT_EQ(objProfileManager.GetSessionWithNegoId(nNegoId3), &objSession3);
 }
 
+TEST_F(MtcMediaProfileManagerTest, GetActiveSession)
+{
+    EXPECT_EQ(nullptr, objProfileManager.GetActiveSession());
+
+    ON_CALL(objMediaSession1, CreateProfile(0, MEDIA_TYPE_AUDIO)).WillByDefault(Return(1));
+    objProfileManager.CreateMediaProfile(
+            &objSession1, IMS_FALSE, IMS_FALSE, MEDIA_TYPE_AUDIO, &objMediaSession1);
+
+    ON_CALL(objMediaSession2, CreateProfile(0, MEDIA_TYPE_AUDIO)).WillByDefault(Return(2));
+    objProfileManager.CreateMediaProfile(
+            &objSession2, IMS_FALSE, IMS_FALSE, MEDIA_TYPE_AUDIO, &objMediaSession2);
+
+    ON_CALL(objMediaSession3, CreateProfile(0, MEDIA_TYPE_AUDIO)).WillByDefault(Return(3));
+    objProfileManager.CreateMediaProfile(
+            &objSession3, IMS_FALSE, IMS_FALSE, MEDIA_TYPE_AUDIO, &objMediaSession3);
+
+    objProfileManager.SetActive(&objSession1, IMS_FALSE);
+    objProfileManager.SetActive(&objSession2, IMS_FALSE);
+    objProfileManager.SetActive(&objSession3, IMS_TRUE);
+    EXPECT_EQ(&objSession3, objProfileManager.GetActiveSession());
+}
+
 }  // namespace android
