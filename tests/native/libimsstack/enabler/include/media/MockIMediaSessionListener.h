@@ -73,7 +73,7 @@ public:
 class MockIMediaSessionListener : public IMediaSessionListener
 {
 public:
-    MockIMediaSessionListener() {}
+    MockIMediaSessionListener() { m_pFake = IMS_NULL; }
     virtual ~MockIMediaSessionListener() {}
 
     MOCK_METHOD(IMS_BOOL, MediaSession_SendMsgToMediaManager,

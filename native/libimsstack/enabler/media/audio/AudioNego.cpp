@@ -2385,13 +2385,14 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
     {
         // Setting bandwidth AS/RS/RR
         IMS_SINT32 nAsValueOfNegoticatedCodec = 0;
-        AUDIO_CODEC nCurrCodec = AUDIO_CODEC_NONE;
         IMS_SINT32 nModeSet;
 
         // find largest AS value..
         if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") ||
                 pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
         {
+            AUDIO_CODEC nCurrCodec = AUDIO_CODEC_NONE;
+
             AudioProfile::AmrFmtp* pAmrFmtp = (AudioProfile::AmrFmtp*)pNegotiatedPayload->pFmtp;
             if (pNegotiatedPayload->objRtpMap.nSamplingRate == 8000)
             {
@@ -2410,7 +2411,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
         else if (pNegotiatedPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
         {
             AudioProfile::EvsFmtp* pEvsFmtp = (AudioProfile::EvsFmtp*)pNegotiatedPayload->pFmtp;
-            nCurrCodec = AUDIO_CODEC_EVS;
+            AUDIO_CODEC nCurrCodec = AUDIO_CODEC_EVS;
             nModeSet = AudioProfileUtil::GetLargestModesetInFmtp("EVS", pNegotiatedPayload);
             nAsValueOfNegoticatedCodec = AudioProfileUtil::ConvertToBandwidthAS(nCurrCodec,
                     pNegotiatedProfile->objIpAddr.IsIPv6Address(), pEvsFmtp->nEvsModeSwitch,
@@ -4064,9 +4065,8 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
         return IMS_FALSE;
     }
 
-    IMS_SINT32 nTcapInitNum = 0, nAcapNum = 0;
+    IMS_SINT32 nTcapInitNum = 0;
     AString strTcap = "";
-    AString strAcap = "";
 
     IMSList<AString> lstTcapAttr = pDescriptor->GetAttributes(SdpAttribute::TCAP);
     IMSList<AString> lstAcapAttr = pDescriptor->GetAttributes(SdpAttribute::ACAP);
@@ -4120,8 +4120,9 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
     // Get attribute capability(ACAP) list -"'number' SP 'Acap'" pair
     for (IMS_UINT32 i = 0; i < lstAcapAttr.GetSize(); i++)
     {
-        strAcap = "";
-        nAcapNum = 0;
+        IMS_SINT32 nAcapNum = 0;
+        AString strAcap = "";
+
         AString strAcapline = lstAcapAttr.GetAt(i);
         if (strAcapline.GetLength() == 0)
         {

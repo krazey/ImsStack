@@ -3562,9 +3562,8 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
         return IMS_FALSE;
 
     IMS_UINT32 i = 0, j = 0;
-    IMS_SINT32 nTcapInitNum = 0, nAcapNum = 0;
+    IMS_SINT32 nTcapInitNum = 0;
     AString strTcap = "";
-    AString strAcap = "";
 
     IMSList<AString> lstTCAPAttr = pDescriptor->GetAttributes(SdpAttribute::TCAP);
     IMSList<AString> lstACAPAttr = pDescriptor->GetAttributes(SdpAttribute::ACAP);
@@ -3616,8 +3615,8 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
     // Get attribute capability(ACAP) list - "'number' SP 'Acap'" pair
     for (i = 0; i < lstACAPAttr.GetSize(); i++)
     {
-        strAcap = "";
-        nAcapNum = 0;
+        AString strAcap = "";
+        IMS_SINT32 nAcapNum = 0;
         AString strACAPline = lstACAPAttr.GetAt(i);
         if (strACAPline.GetLength() == 0)
             continue;
