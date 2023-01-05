@@ -91,7 +91,6 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_pIpsecHelper(IMS_NULL),
         m_bIsIpsecSupported(IMS_FALSE),
         m_bIsIpsecInit(IMS_FALSE),
-        m_pKeepAlive(IMS_NULL),
         m_pUtil(IMS_NULL),
         m_nFeature(FEATURE_NONE),
         m_nState(STATE_OFFLINE),
@@ -304,15 +303,8 @@ PUBLIC VIRTUAL void AosRegistration::Reconfig()
 PUBLIC VIRTUAL void AosRegistration::Destroy()
 {
     SetContactAddressConfiguration(IMS_FALSE);
-
     ClearRegParameters();
-
     DestroyRegistration();
-
-    DestroySocket();
-
-    StopKeepAlive();
-
     SetState(STATE_OFFLINE);
 }
 
@@ -369,10 +361,6 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
 
         case CMD_CLEAR_SERVER_SOCKET_ERROR_COUNT:
             ClearErrorCount();
-            break;
-
-        case CMD_REPORT_REG_STATE:
-            ReportRegState();
             break;
 
         case CMD_UNAVAILABLE_FEATURE_TAG:
@@ -586,7 +574,6 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
 
     if (m_eRegType == AosRegistrationType::NORMAL)
     {
-        UpdateReason();
         UpdateDetailState(m_nState);
 
         IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
@@ -1100,15 +1087,8 @@ PROTECTED VIRTUAL void AosRegistration::CleanUp()
 PROTECTED VIRTUAL void AosRegistration::DestroyEx()
 {
     SetContactAddressConfiguration(IMS_FALSE);
-
     ClearRegParameters(IMS_FALSE);
-
     DestroyRegistration();
-
-    DestroySocket();
-
-    StopKeepAlive();
-
     SetState(STATE_OFFLINE);
 }
 
@@ -1272,8 +1252,6 @@ void AosRegistration::PrepareRegistration()
             SetIsIpsecSupported(IMS_FALSE);
         }
     }
-
-    DestroySocket();
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
@@ -1332,8 +1310,6 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
     {
         return IMS_FALSE;
     }
-
-    SetDefaultTransport();
 
     SetStaticIpQos();
 
@@ -2164,8 +2140,6 @@ PROTECTED VIRTUAL void AosRegistration::SetTcpCriterionLength()
     m_piRegistration->SetSipProfile(m_pSipProfile.Get());
 }
 
-PROTECTED VIRTUAL void AosRegistration::SetDefaultTransport() {}
-
 PROTECTED VIRTUAL void AosRegistration::SetStaticIpQos()
 {
     IMS_SINT32 nPreferredImsDscp = GET_N_CONFIG(m_nSlotId)->GetPreferredImsDscp();
@@ -2512,10 +2486,6 @@ PROTECTED VIRTUAL void AosRegistration::ClearNetworkBindingFeatures()
 {
     m_nNetworkBindingFeatures = 0;
 }
-
-PROTECTED VIRTUAL void AosRegistration::DestroySocket() {}
-
-PROTECTED VIRTUAL void AosRegistration::ReportRegState() {}
 
 PROTECTED VIRTUAL void AosRegistration::CheckPending()
 {
@@ -4265,8 +4235,6 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
     CheckPending();
 
     RecordImpu();
-
-    StartKeepAlive();
 }
 
 PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 nReason)
@@ -4348,7 +4316,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
         if (m_pUtil->IsFeatureOn(PENDING_SUBSCRIPTION, m_nTxnPending))
         {
             m_pUtil->RemoveFeature(PENDING_SUBSCRIPTION, m_nTxnPending);
-            StartSubscription();
+            StartSubscription(IMS_FALSE);
         }
     }
 
@@ -4363,9 +4331,6 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
     CheckPending();
 
     RecordImpu();
-
-    StopKeepAlive();
-    StartKeepAlive();
 }
 
 PROTECTED VIRTUAL void AosRegistration::Registration_UpdateFailed(IN IMS_SINT32 nReason)
@@ -4401,8 +4366,6 @@ PROTECTED VIRTUAL void AosRegistration::Registration_UpdateFailed(IN IMS_SINT32 
     }
 
     CheckPending();
-
-    StopKeepAlive();
 }
 
 PROTECTED VIRTUAL void AosRegistration::Registration_Removed()
@@ -4774,7 +4737,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateSubscription()
     m_pSubscription->Initialize();
     m_pSubscription->SetListener(this);
 
-    StartSubscription();
+    StartSubscription(IMS_FALSE);
 
     return IMS_TRUE;
 }
@@ -4801,7 +4764,8 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::DestroySubscription()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartSubscription()
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartSubscription(
+        IN IMS_BOOL bIsRadioCheckRequired /* = IMS_TRUE */)
 {
     if (!m_pUtil->IsFeatureOn(FEATURE_SUBSCRIPTION, m_nFeature))
     {
@@ -4815,7 +4779,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartSubscription()
 
     A_IMS_TRACE_I(REGID, "StartSubscription", 0, 0, 0);
 
-    m_pSubscription->Start();
+    m_pSubscription->Start(bIsRadioCheckRequired);
 
     return IMS_TRUE;
 }
@@ -4874,8 +4838,6 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegEventRegistered()
         ClearRetryCount(IMS_TRUE);
     }
 }
-
-PROTECTED VIRTUAL void AosRegistration::UpdateReason() {}
 
 PROTECTED VIRTUAL void AosRegistration::Subscription_StateChanged(
         IN IMS_SINT32 nState, IN IMS_SINT32 nReason /*= 0 */)
@@ -4989,30 +4951,6 @@ PROTECTED VIRTUAL void AosRegistration::DestroyIpsecHelper()
         delete m_pIpsecHelper;
         m_pIpsecHelper = IMS_NULL;
     }
-}
-
-PROTECTED VIRTUAL void AosRegistration::KeepAlive_DetectedFlowFailed() {}
-
-PROTECTED VIRTUAL void AosRegistration::StartKeepAlive() {}
-
-PROTECTED VIRTUAL void AosRegistration::StopKeepAlive()
-{
-    // will be removed
-    /*
-    if (!m_piContext->GetConfig()->IsKeepAlive())
-    {
-        return;
-    }
-
-    A_IMS_TRACE_I(REGID, "StopKeepAlive", 0, 0, 0);
-
-    if (m_pKeepAlive != IMS_NULL)
-    {
-        m_pKeepAlive->Stop();
-        delete m_pKeepAlive;
-        m_pKeepAlive = IMS_NULL;
-    }
-    */
 }
 
 PROTECTED VIRTUAL void AosRegistration::Block_Changed(

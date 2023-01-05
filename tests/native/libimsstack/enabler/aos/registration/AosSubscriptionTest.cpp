@@ -20,9 +20,11 @@
 #include "app/MockAosAppContext.h"
 #include "interface/MockIAosConnection.h"
 #include "interface/MockIAosNConfiguration.h"
+#include "interface/MockIAosNetTracker.h"
 #include "interface/MockIAosRegistration.h"
 #include "interface/MockIAosRetryRepository.h"
 #include "interface/MockIAosSubscriptionListener.h"
+#include "interface/MockIAosTransaction.h"
 #include "../../interface/aos/MockIAosService.h"
 #include "../../../engine/interface/registration/MockIRegInfo.h"
 #include "../../../engine/interface/registration/MockIRegInfoContact.h"
@@ -57,6 +59,7 @@ public:
 
     AosStaticProfile* pAosStaticProfile;
     MockAosAppContext* pMockAosAppContext;
+    MockIAosNetTracker m_objMockAosINetTracker;
     MockIRegSubscription objMockIRegSubscription;
     AString* pAor;
     SipAddress* pContactAddress;
@@ -72,6 +75,9 @@ public:
 
     IAosRetryRepository* pOriginAosRetryRepository;
     MockIAosRetryRepository objMockAosRetryRepository;
+
+    IAosTransaction* pOriginAosTransaction;
+    MockIAosTransaction objMockIAosTransaction;
 
     enum
     {
@@ -99,6 +105,13 @@ protected:
 
         EXPECT_CALL(*pMockAosAppContext, GetSlotId()).WillRepeatedly(Return(SLOT_ID));
 
+        EXPECT_CALL(*pMockAosAppContext, GetNetTracker())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockAosINetTracker));
+        EXPECT_CALL(m_objMockAosINetTracker, GetNetworkType())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
+
         pAosSubscription = new AosSubscription(static_cast<IAosAppContext*>(pMockAosAppContext),
                 static_cast<IRegSubscription*>(&objMockIRegSubscription), *pAor, *pContactAddress);
         ASSERT_TRUE(pAosSubscription != nullptr);
@@ -106,6 +119,9 @@ protected:
         pAosSubscription->SetListener(&objMockIAosSubscriptionListener);
         EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_StateChanged(_, _))
                 .WillRepeatedly(Return());
+
+        EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
+                .WillRepeatedly(Return(IMS_TRUE));
 
         // save origin pointer
         pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
@@ -119,6 +135,20 @@ protected:
         pOriginAosRetryRepository = AosProvider::GetInstance()->GetRetryRepository(SLOT_ID);
         AosProvider::GetInstance()->SetRetryRepository(
                 static_cast<IAosRetryRepository*>(&objMockAosRetryRepository), SLOT_ID);
+
+        pOriginAosTransaction = AosProvider::GetInstance()->GetTransaction(SLOT_ID);
+        AosProvider::GetInstance()->SetTransaction(
+                static_cast<IAosTransaction*>(&objMockIAosTransaction), SLOT_ID);
+
+        EXPECT_CALL(objMockIAosTransaction, SetListener(_, _)).Times(AnyNumber());
+        EXPECT_CALL(objMockIAosTransaction, RemoveListener(_, _)).Times(AnyNumber());
+        EXPECT_CALL(objMockIAosTransaction, IsTransactionAllowed(_))
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_TRUE));
+        EXPECT_CALL(objMockIAosTransaction, StartTraffic(_, _))
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_TRUE));
+        EXPECT_CALL(objMockIAosTransaction, StopTraffic(_)).Times(AnyNumber());
     }
 
     virtual void TearDown() override
@@ -126,6 +156,7 @@ protected:
         AosProvider::GetInstance()->SetNConfiguration(pOriginAosNConfiguration, SLOT_ID);
         AosProvider::GetInstance()->SetService(pOriginAosService, SLOT_ID);
         AosProvider::GetInstance()->SetRetryRepository(pOriginAosRetryRepository, SLOT_ID);
+        AosProvider::GetInstance()->SetTransaction(pOriginAosTransaction, SLOT_ID);
 
         if (pAor)
         {
@@ -263,20 +294,20 @@ TEST_F(AosSubscriptionTest, Stop)
 TEST_F(AosSubscriptionTest, AosSubscriptionStart)
 {
     SetState(AosSubscription::STATE_UNSUBSCRIBING);
-    EXPECT_FALSE(pAosSubscription->Start());
+    EXPECT_FALSE(pAosSubscription->Start(IMS_FALSE));
 
     SetState(AosSubscription::STATE_OFFLINE);
 
     SetpiRegSubscription(IMS_NULL);
-    EXPECT_FALSE(pAosSubscription->Start());
+    EXPECT_FALSE(pAosSubscription->Start(IMS_FALSE));
 
     SetState(AosSubscription::STATE_SUBSCRIBED);
     SetpiRegSubscription(static_cast<IRegSubscription*>(&objMockIRegSubscription));
     EXPECT_CALL(objMockIRegSubscription, Subscribe())
             .WillOnce(Return(IMS_FAILURE))
             .WillRepeatedly(Return(IMS_SUCCESS));
-    EXPECT_FALSE(pAosSubscription->Start());
-    EXPECT_TRUE(pAosSubscription->Start());
+    EXPECT_FALSE(pAosSubscription->Start(IMS_FALSE));
+    EXPECT_TRUE(pAosSubscription->Start(IMS_FALSE));
 }
 
 TEST_F(AosSubscriptionTest, IsRetryActionDueToRetrycounter)
@@ -1055,12 +1086,13 @@ TEST_F(AosSubscriptionTest, RegSubscription_RefreshTimerExpired)
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
 
     EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_FALSE));
+            .WillRepeatedly(Return(IMS_TRUE));
     RefreshTimerExpiredListener(bDoImplicitRefresh);
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHING);
     EXPECT_EQ(bDoImplicitRefresh, IMS_TRUE);
 
+    EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
+            .WillRepeatedly(Return(IMS_FALSE));
     RefreshTimerExpiredListener(bDoImplicitRefresh);
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
     EXPECT_EQ(bDoImplicitRefresh, IMS_FALSE);
@@ -1309,6 +1341,9 @@ TEST_F(AosSubscriptionTest, ProcessTimerExpired)
 
     // Timer_TimerExpired (piTimer != m_piRetryTimer) to do
 
+    EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
+            .WillRepeatedly(Return(IMS_FALSE));
+
     // ProcessTimerExpired() - return;
     SetState(AosSubscription::STATE_OFFLINE);
     StartTimer(30);
@@ -1318,11 +1353,6 @@ TEST_F(AosSubscriptionTest, ProcessTimerExpired)
     // ProcessTimerExpired() - Subscription_CanBeTransmitted() == IMS_FALSE
     SetState(AosSubscription::STATE_SUBSTOP);
 
-    EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE))
-            .WillRepeatedly(Return(IMS_TRUE));
-
     StartTimer(30);
     Timer_TimerExpired(GetTimer());
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_SUBSTOP);
@@ -1331,6 +1361,9 @@ TEST_F(AosSubscriptionTest, ProcessTimerExpired)
     StartTimer(30);
     Timer_TimerExpired(GetTimer());
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_SUBREFRESHSTOP);
+
+    EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_CanBeTransmitted())
+            .WillRepeatedly(Return(IMS_TRUE));
 
     // ProcessTimerExpired() - Subscription_CanBeTransmitted() == IMS_TRUE
     // SendSubscribe() == IMS_FALSE m_piRegSubscription == IMS_NULL

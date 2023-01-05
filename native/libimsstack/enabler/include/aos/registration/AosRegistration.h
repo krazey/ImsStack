@@ -34,7 +34,6 @@
 #include "interface/IAosSubscriptionListener.h"
 #include "interface/IAosTransaction.h"
 
-#include "provider/AosKeepAlive.h"
 #include "provider/AosUtil.h"
 
 class IRegContact;
@@ -64,7 +63,6 @@ class AosRegistration :
         public IAosNConfigurationListener,
         public IAosNetTrackerListener,
         public ITimerListener,
-        public IAosKeepAliveListener,
         public IMessageMediator,
         public IAosTransactionListener
 {
@@ -205,7 +203,6 @@ protected:
     virtual void SetFailureState();
     virtual void SetRetryState();
     virtual void SetTcpCriterionLength();
-    virtual void SetDefaultTransport();
     virtual void SetStaticIpQos();
     virtual void SetDynamicIpQos();
     virtual void SetActiveBindingsRestorationUsage();
@@ -229,9 +226,6 @@ protected:
     virtual void ClearAuthChallengedCount();
     virtual void ClearErrorCount();
     virtual void ClearNetworkBindingFeatures();
-    virtual void DestroySocket();
-
-    virtual void ReportRegState();
 
     virtual void CheckPending();
     virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();
@@ -324,7 +318,7 @@ protected:
     // Subscription
     virtual IMS_BOOL CreateSubscription();
     virtual IMS_BOOL DestroySubscription();
-    virtual IMS_BOOL StartSubscription();
+    virtual IMS_BOOL StartSubscription(IN IMS_BOOL bIsRadioCheckRequired = IMS_TRUE);
     virtual IMS_BOOL StopSubscription();
 
     virtual AosSubscription* GetSubscription(IN IRegSubscription* piRegSubscription);
@@ -334,7 +328,6 @@ protected:
     virtual void ProcessSubscription_Terminated(IN IMS_SINT32 nTerminateType = 0);
 
     virtual void ProcessRegEventRegistered();
-    virtual void UpdateReason();
 
     /// IAosSubscriptionListener
     void Subscription_StateChanged(IN IMS_SINT32 nState, IN IMS_SINT32 nReason = 0) override;
@@ -345,13 +338,6 @@ protected:
     /// Ipsec Helper
     virtual void CreateIpsecHelper();
     virtual void DestroyIpsecHelper();
-
-    /// KeepAlive
-    virtual void StartKeepAlive();
-    virtual void StopKeepAlive();
-
-    /// IAosKeepAliveListener
-    void KeepAlive_DetectedFlowFailed() override;
 
     /// IAosBlockListener
     void Block_Changed(IN IMS_UINT32 nType = 0, IN IMS_UINT32 nParam = 0) override;
@@ -470,9 +456,6 @@ protected:
     AosIpsecHelper* m_pIpsecHelper;
     IMS_BOOL m_bIsIpsecSupported;
     IMS_BOOL m_bIsIpsecInit;
-
-    /// keepalive
-    AosKeepAlive* m_pKeepAlive;
 
     /// object
     AosUtil* m_pUtil;

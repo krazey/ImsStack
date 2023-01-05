@@ -21,6 +21,8 @@
 #include "ITimer.h"
 #include "IRegSubscriptionListener.h"
 
+#include "interface/IAosTransaction.h"
+
 class IAosSubscriptionListener;
 class IRegSubscription;
 class IRegInfoContact;
@@ -29,7 +31,10 @@ class IAosAppContext;
 /**
  * @brief This class provides a IMS subscription for reg event package.
  */
-class AosSubscription : public IRegSubscriptionListener, public ITimerListener
+class AosSubscription :
+        public IRegSubscriptionListener,
+        public ITimerListener,
+        public IAosTransactionListener
 {
 public:
     AosSubscription(IN IAosAppContext* piContext, IN IRegSubscription* piRegSubscription,
@@ -39,7 +44,7 @@ public:
 
     virtual void Initialize();
 
-    virtual IMS_BOOL Start();
+    virtual IMS_BOOL Start(IN IMS_BOOL bIsRadioCheckRequired);
     virtual void Stop();
     virtual void Destroy();
 
@@ -51,6 +56,7 @@ public:
 protected:
     void ClearThrottlingCount();
 
+    IMS_BOOL IsSubTrying() const;
     IMS_BOOL IsTerminated() const;
 
     void ReportState(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand = 0);
@@ -61,6 +67,10 @@ protected:
 
     void StartTimer(IN IMS_UINT32 nDuration);
     void StopTimer();
+
+    IMS_BOOL CheckRadioReadyAndSetRadioWaiting();
+    IMS_BOOL IsRadioWaiting() const;
+    void SetRadioWaiting(IN IMS_BOOL bWaiting);
 
     // Print Log
     void PrintRegInfo(IN IMSList<IRegInfoContact*>& objRegInfo);
@@ -117,6 +127,12 @@ protected:
     void RegSubscription_UpdateFailed(IN IMS_SINT32 nReason) override;
     void RegSubscription_Removed() override;
     void RegSubscription_Terminated(IN IMS_SINT32 nReason) override;
+
+    /// IAosTransactionListener
+    void Transaction_OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
+            IN IMS_UINT32 nWaitTimeMillis) override;
+    void Transaction_OnConnectionSetupPrepared() override;
+    void Transaction_OnTrafficPriorityChanged() override;
 
 public:
     // ITimerListener Interface
@@ -195,10 +211,12 @@ private:
     IMS_SINT32 m_nState;
     IMS_BOOL m_bIsTerminated;
     IMS_BOOL m_bIsErrChecked;
+    IMS_BOOL m_bIsRadioWaiting;
 
     IMS_UINT32 m_nRetryCountSubTerminated;
     IMS_UINT32 m_nRetryCountRegRequired;
 
+    static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;
     static const IMS_UINT32 REFRESH_POLICY_CRITERIA_INTERVAL_FOR_RETRY = 1200;
     static const IMS_UINT32 REFRESH_POLICY_RATIO_VALUE_BELOW_THE_CRITERIA = 50;
     static const IMS_UINT32 REFRESH_POLICY_INTERVAL_VALUE_ABOVE_THE_CRITERIA = 600;

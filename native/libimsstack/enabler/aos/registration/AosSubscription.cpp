@@ -21,15 +21,17 @@
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
 #include "CarrierConfig.h"
-#include "IAosService.h"
+#include "IImsRadio.h"
 #include "IRegInfoContact.h"
 #include "IRegSubscription.h"
 #include "IRegistration.h"
 #include "SipStatusCode.h"
 #include "ISipHeader.h"
+#include "IAosService.h"
 #include "interface/IAosSubscriptionListener.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosNConfiguration.h"
+#include "interface/IAosNetTracker.h"
 #include "interface/IAosConnection.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
@@ -57,6 +59,7 @@ AosSubscription::AosSubscription(IN IAosAppContext* piContext,
         m_nState(STATE_OFFLINE),
         m_bIsTerminated(IMS_FALSE),
         m_bIsErrChecked(IMS_FALSE),
+        m_bIsRadioWaiting(IMS_FALSE),
         m_nRetryCountSubTerminated(0),
         m_nRetryCountRegRequired(0)
 {
@@ -88,15 +91,34 @@ PUBLIC VIRTUAL void AosSubscription::Initialize()
 
     SetRefreshPolicy();
     m_piRegSubscription->SetListener(this);
+
+    IAosTransaction* piTransaction =
+            AosProvider::GetInstance()->GetTransaction(m_piContext->GetSlotId());
+    if (piTransaction != IMS_NULL)
+    {
+        piTransaction->SetListener(IAosTransaction::TYPE_SUB, this);
+    }
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosSubscription::Start()
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::Start(IN IMS_BOOL bIsRadioCheckRequired)
 {
     A_IMS_TRACE_I(AOSTAG, "Start :: state(%s)", StateToString(m_nState), 0, 0);
 
     IMS_SINT32 nNextState = STATE_SUBSCRIBING;
 
     StopTimer();
+
+    if (!m_piListener->Subscription_CanBeTransmitted())
+    {
+        A_IMS_TRACE_D(AOSTAG, "sending trx is not possible", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (bIsRadioCheckRequired && !CheckRadioReadyAndSetRadioWaiting())
+    {
+        A_IMS_TRACE_I(AOSTAG, "Start :: txn is pending due to radio", 0, 0, 0);
+        return IMS_FALSE;
+    }
 
     switch (m_nState)
     {
@@ -140,6 +162,15 @@ PUBLIC VIRTUAL void AosSubscription::Stop()
 PUBLIC VIRTUAL void AosSubscription::Destroy()
 {
     A_IMS_TRACE_I(AOSTAG, "Destroy :: state(%s)", StateToString(m_nState), 0, 0);
+
+    IAosTransaction* piTransaction =
+            AosProvider::GetInstance()->GetTransaction(m_piContext->GetSlotId());
+
+    if (piTransaction != IMS_NULL)
+    {
+        piTransaction->RemoveListener(IAosTransaction::TYPE_SUB, this);
+    }
+
     delete this;
 }
 
@@ -185,6 +216,12 @@ PROTECTED
 void AosSubscription::ClearThrottlingCount()
 {
     m_nThrottlingCount = 0;
+}
+
+PROTECTED
+IMS_BOOL AosSubscription::IsSubTrying() const
+{
+    return (m_nState == STATE_SUBSCRIBING || m_nState == STATE_SUBREFRESHING);
 }
 
 PROTECTED
@@ -289,10 +326,23 @@ void AosSubscription::ReportNotifyEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nRet
 PROTECTED
 void AosSubscription::SetState(IN IMS_UINT32 nState)
 {
-    A_IMS_TRACE_I(AOSTAG, "SetState :: (%s) to (%s)", StateToString(this->m_nState),
-            StateToString(nState), 0);
+    if (m_nState == nState)
+    {
+        return;
+    }
 
-    this->m_nState = nState;
+    A_IMS_TRACE_I(
+            AOSTAG, "SetState :: (%s) to (%s)", StateToString(m_nState), StateToString(nState), 0);
+
+    m_nState = nState;
+
+    IAosTransaction* piTransaction =
+            AosProvider::GetInstance()->GetTransaction(m_piContext->GetSlotId());
+
+    if (piTransaction != IMS_NULL && !IsSubTrying())
+    {
+        piTransaction->StopTraffic(IAosTransaction::TYPE_SUB);
+    }
 }
 
 PROTECTED
@@ -323,6 +373,48 @@ void AosSubscription::StopTimer()
     }
 
     AosUtil::GetInstance()->StopTimer(m_piRetryTimer, "SUB_RETRY_TIMER");
+}
+
+PROTECTED
+IMS_BOOL AosSubscription::CheckRadioReadyAndSetRadioWaiting()
+{
+    IAosTransaction* m_piTransaction =
+            AosProvider::GetInstance()->GetTransaction(m_piContext->GetSlotId());
+
+    if (m_piTransaction == IMS_NULL)
+    {
+        return IMS_TRUE;
+    }
+
+    if (!m_piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_SUB))
+    {
+        // TODO: implement to control priority
+        A_IMS_TRACE_I(AOSTAG, "CheckRadioReadyAndSetRadioWaiting :: trx is not allowed", 0, 0, 0);
+        return IMS_FALSE;
+    }
+    else
+    {
+        if (m_piTransaction->StartTraffic(
+                    IAosTransaction::TYPE_SUB, m_piContext->GetNetTracker()->GetNetworkType()))
+        {
+            return IMS_TRUE;
+        }
+
+        SetRadioWaiting(IMS_TRUE);
+        return IMS_FALSE;
+    }
+}
+
+PROTECTED
+IMS_BOOL AosSubscription::IsRadioWaiting() const
+{
+    return m_bIsRadioWaiting;
+}
+
+PROTECTED
+void AosSubscription::SetRadioWaiting(IN IMS_BOOL bWaiting)
+{
+    m_bIsRadioWaiting = bWaiting;
 }
 
 PROTECTED
@@ -859,28 +951,14 @@ PROTECTED VIRTUAL void AosSubscription::ProcessTimerExpired()
 {
     A_IMS_TRACE_I(AOSTAG, "ProcessTimerExpired :: state(%s)", StateToString(m_nState), 0, 0);
 
-    if ((m_nState != STATE_SUBSTOP) && (m_nState != STATE_SUBREFRESHSTOP))
+    if ((m_nState != STATE_OFFLINE) && (m_nState != STATE_SUBSTOP) &&
+            (m_nState != STATE_SUBREFRESHSTOP))
     {
         A_IMS_TRACE_I(AOSTAG, "sub state is invalid", 0, 0, 0);
         return;
     }
 
-    if (m_piListener->Subscription_CanBeTransmitted())
-    {
-        A_IMS_TRACE_I(AOSTAG, "timer is expired, do subscription", 0, 0, 0);
-
-        if (!SendSubscribe())
-        {
-            return;
-        }
-
-        SetState((m_nState == STATE_SUBSTOP) ? STATE_SUBSCRIBING : STATE_SUBREFRESHING);
-    }
-    else
-    {
-        A_IMS_TRACE_I(AOSTAG, "do subscription when transmission is possilbe", 0, 0, 0);
-        SetState((m_nState == STATE_SUBSTOP) ? STATE_SUBSTOP : STATE_SUBREFRESHSTOP);
-    }
+    Start(IMS_TRUE);
 }
 
 PROTECTED VIRTUAL void AosSubscription::SetRefreshPolicy()
@@ -1069,16 +1147,24 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_RefreshTimerExpired(
 {
     A_IMS_TRACE_I(AOSTAG, "RegSubscription_RefreshTimerExpired", 0, 0, 0);
 
+    bDoImplicitRefresh = IMS_FALSE;
+
     if (m_piListener->Subscription_CanBeTransmitted())
     {
-        // refresh subscription from engine
-        bDoImplicitRefresh = IMS_TRUE;
-        SetState(STATE_SUBREFRESHING);
+        if (CheckRadioReadyAndSetRadioWaiting())
+        {
+            // refresh subscription from engine
+            bDoImplicitRefresh = IMS_TRUE;
+            SetState(STATE_SUBREFRESHING);
+        }
+        else
+        {
+            SetState(STATE_SUBREFRESHSTOP);
+        }
     }
     else
     {
         // after expiring subscription, do initial subscription
-        bDoImplicitRefresh = IMS_FALSE;
         SetState(STATE_OFFLINE);
     }
 }
@@ -1166,6 +1252,49 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_Terminated(IN IMS_SINT32
     SetState(STATE_OFFLINE);
     ReportState(REASON_SUB_TERMINATED, COMMAND_SUB_REQUIRED);
 }
+
+PROTECTED VIRTUAL void AosSubscription::Transaction_OnConnectionFailed(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 nWaitTimeMillis)
+{
+    A_IMS_TRACE_I(AOSTAG, "Transaction_OnConnectionFailed :: reason(%d), nWaitTimeMillis(%d)",
+            nFailureReason, nWaitTimeMillis, 0);
+
+    if (!IsRadioWaiting())
+    {
+        return;
+    }
+
+    if (nFailureReason == IImsRadio::REASON_ACCESS_DENIED)
+    {
+        StartTimer(RETRY_DEFAULT_WAIT_TIME * 1000);
+    }
+    else
+    {
+        if (nWaitTimeMillis > 0)
+        {
+            StartTimer(nWaitTimeMillis * 1000);
+        }
+        else
+        {
+            Transaction_OnConnectionSetupPrepared();
+            return;
+        }
+    }
+
+    SetRadioWaiting(IMS_FALSE);
+}
+
+PROTECTED VIRTUAL void AosSubscription::Transaction_OnConnectionSetupPrepared()
+{
+    if (IsRadioWaiting())
+    {
+        A_IMS_TRACE_D(AOSTAG, "Transaction_OnConnectionSetupPrepared", 0, 0, 0);
+        SetRadioWaiting(IMS_FALSE);
+        Start(IMS_FALSE);
+    }
+}
+
+PROTECTED VIRTUAL void AosSubscription::Transaction_OnTrafficPriorityChanged() {}
 
 PUBLIC VIRTUAL void AosSubscription::Timer_TimerExpired(IN ITimer* piTimer)
 {
