@@ -19,12 +19,16 @@ package com.android.imsstack.enabler.ssc;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.TelephonyCallback;
+import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IAlarmTimer;
+import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.IWifiState;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.aos.AosFactory;
@@ -32,7 +36,9 @@ import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 public class SscServiceState {
@@ -52,12 +58,17 @@ public class SscServiceState {
     protected static final int EVENT_DATA_ROAMING_STATE_CHANGED = 2003;
 
     private final int mSlotId;
+    private int mSubId;
     @VisibleForTesting
     final SscServiceStateHandler mHandler;
     @VisibleForTesting
     final SscSimStateListener mSimStateListener;
     @VisibleForTesting
     final SscRegiStateListener mRegiStateListener;
+    @VisibleForTesting
+    final SscSubscriptionListener mSubscriptionListener;
+    @VisibleForTesting
+    final SscMobileDataStateListener mMobileDataStateListener;
 
     @VisibleForTesting
     boolean mUtAvailability = false;
@@ -67,9 +78,12 @@ public class SscServiceState {
 
     SscServiceState(int slotId, Looper looper) {
         mSlotId = slotId;
+        mSubId = MSimUtils.getSubId(mSlotId);
         mHandler = new SscServiceStateHandler(looper);
         mSimStateListener = new SscSimStateListener();
         mRegiStateListener = new SscRegiStateListener();
+        mSubscriptionListener = new SscSubscriptionListener();
+        mMobileDataStateListener = new SscMobileDataStateListener();
     }
 
     protected void init() {
@@ -87,15 +101,22 @@ public class SscServiceState {
             dnw.registerForRoamingStateChanged(mHandler, EVENT_DATA_ROAMING_STATE_CHANGED, null);
         }
 
-        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        SimInterface sim = getSimInterface();
         if (sim != null) {
             sim.addListener(mSimStateListener);
         }
 
-        IAosRegistration aosService = AosFactory.getInstance().getAosRegistration(mSlotId);
+        IAosRegistration aosService = getAosRegistration();
         if (aosService != null) {
             aosService.addListener(mRegiStateListener);
         }
+
+        ISubscription subscription = getSubscription();
+        if (subscription != null) {
+            subscription.addListener(mSubscriptionListener);
+        }
+
+        registerTelephonyCallback(mSubId);
 
         handleUtFeatureCapabilityChanged();
     }
@@ -117,15 +138,22 @@ public class SscServiceState {
             dnw.unregisterForRoamingStateChanged(mHandler);
         }
 
-        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        SimInterface sim = getSimInterface();
         if (sim != null) {
             sim.removeListener(mSimStateListener);
         }
 
-        IAosRegistration aosService = AosFactory.getInstance().getAosRegistration(mSlotId);
+        IAosRegistration aosService = getAosRegistration();
         if (aosService != null) {
             aosService.removeListener(mRegiStateListener);
         }
+
+        ISubscription subscription = getSubscription();
+        if (subscription != null) {
+            subscription.removeListener(mSubscriptionListener);
+        }
+
+        unregisterTelephonyCallback(mSubId);
     }
 
     protected boolean isUtAvailable() {
@@ -225,6 +253,13 @@ public class SscServiceState {
         if (!isValidNetwork()) {
             ImsLog.w(mSlotId, "invalid network");
             return false;
+        }
+
+        if (!SscConfig.isUtSupportedWhenPsDataOff(mSlotId)) {
+            if (!mMobileDataStateListener.getUserMobileDataState()) {
+                ImsLog.w(mSlotId, "PS Data off");
+                return false;
+            }
         }
 
         if (SscConfig.isImsRegistrationRequired(mSlotId)) {
@@ -388,19 +423,77 @@ public class SscServiceState {
         mUtBlockTimerId = (-1);
     }
 
-    @VisibleForTesting
-    protected IAlarmTimer getTimerAgent() {
+    private IAlarmTimer getTimerAgent() {
         return (IAlarmTimer) AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
     }
 
-    @VisibleForTesting
-    protected IWifiState getWifiStateAgent() {
+    private IWifiState getWifiStateAgent() {
         return (IWifiState) AgentFactory.getAgent(AgentFactory.WIFI_STATE, mSlotId);
     }
 
-    @VisibleForTesting
-    protected IDcNetWatcher getDcNetWatcher() {
+    private SimInterface getSimInterface() {
+        return AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+    }
+
+    private IAosRegistration getAosRegistration() {
+        return AosFactory.getInstance().getAosRegistration(mSlotId);
+    }
+
+    private ISubscription getSubscription() {
+        return (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+    }
+
+    private IDcNetWatcher getDcNetWatcher() {
         return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
+    }
+
+    @VisibleForTesting
+    protected int getSlotId(int subId) {
+        return MSimUtils.getSlotId(subId);
+    }
+
+    private void registerTelephonyCallback(int subId) {
+        if (subId != MSimUtils.INVALID_SUB_ID) {
+            TelephonyManager tm = AppContext.getTelephonyManager(subId);
+            if (tm != null) {
+                tm.registerTelephonyCallback(AppContext.getInstance().getMainExecutor(),
+                        mMobileDataStateListener);
+            }
+        }
+    }
+
+    private void unregisterTelephonyCallback(int subId) {
+        if (subId != MSimUtils.INVALID_SUB_ID) {
+            TelephonyManager tm = AppContext.getTelephonyManager(subId);
+            if (tm != null) {
+                tm.unregisterTelephonyCallback(mMobileDataStateListener);
+            }
+        }
+    }
+
+    private synchronized void updateSubscription(int subId) {
+        ImsLog.d(mSlotId, "");
+
+        int slotId = getSlotId(subId);
+        if (mSlotId != slotId) {
+            ISubscription isub = getSubscription();
+            if (isub == null) {
+                return;
+            }
+
+            subId = isub.getSubId(mSlotId);
+        }
+
+        if (mSubId == subId || (subId == MSimUtils.INVALID_SUB_ID)) {
+            return;
+        }
+
+        ImsLog.i(mSlotId, "updateSubscription :: subId=" + subId);
+
+        unregisterTelephonyCallback(mSubId);
+
+        mSubId = subId;
+        registerTelephonyCallback(mSubId);
     }
 
     /**
@@ -494,7 +587,7 @@ public class SscServiceState {
         public void onSimCardStateChanged() {
             ImsLog.d(mSlotId, "onSimCardStateChanged");
 
-            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+            SimInterface sim = getSimInterface();
             if (sim != null) {
                 if (sim.getSimCardState() == Sim.STATE_ABSENT) {
                     resetAllUtStatus();
@@ -552,6 +645,51 @@ public class SscServiceState {
 
         public boolean getImsRegistrationState() {
             return mImsRegistrationState;
+        }
+    }
+
+    @VisibleForTesting
+    final class SscSubscriptionListener extends SubscriptionListener {
+
+        @Override
+        public void onSimLoadCompleted(int slotId) {
+            if (mSlotId == slotId) {
+                updateSubscription(MSimUtils.getSubId(mSlotId));
+            }
+        }
+
+        @Override
+        public void onDefaultSubscriptionChanged(int subId) {
+            updateSubscription(subId);
+        }
+
+        @Override
+        public void onDefaultDataSubscriptionChanged(int subId) {
+            updateSubscription(subId);
+        }
+    }
+
+    @VisibleForTesting
+    final class SscMobileDataStateListener extends TelephonyCallback implements
+            TelephonyCallback.UserMobileDataStateListener {
+
+        @VisibleForTesting
+        boolean mMobileDataState = false;
+
+        @Override
+        public void onUserMobileDataStateChanged(boolean enabled) {
+            ImsLog.d(mSlotId, "Mobile Data switch = " + enabled);
+
+            if (mMobileDataState == enabled) {
+                return;
+            }
+
+            mMobileDataState = enabled;
+            handleUtFeatureCapabilityChanged();
+        }
+
+        public boolean getUserMobileDataState() {
+            return mMobileDataState;
         }
     }
 

@@ -192,6 +192,11 @@ public final class SscConfig {
                 CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL);
     }
 
+    static boolean isUtSupportedWhenPsDataOff(int slotId) {
+        return getBoolean(slotId,
+                CarrierConfigManager.ImsSs.KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL);
+    }
+
     static boolean isUtSupportedWhenRoaming(int slotId) {
         return getBoolean(slotId, CarrierConfigManager.ImsSs.KEY_UT_SUPPORTED_WHEN_ROAMING_BOOL);
     }

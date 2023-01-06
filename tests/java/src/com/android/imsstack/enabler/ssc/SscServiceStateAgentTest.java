@@ -23,6 +23,9 @@ import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
 
+import com.android.imsstack.ContextFixture;
+import com.android.imsstack.util.AppContext;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +45,8 @@ public class SscServiceStateAgentTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        AppContext.init(new ContextFixture().getTestDouble());
+
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
@@ -55,6 +60,8 @@ public class SscServiceStateAgentTest {
     @After
     public void tearDown() {
         mSscServiceStateAgent.deInit(SLOT_0);
+
+        AppContext.deinit();
     }
 
     @Test

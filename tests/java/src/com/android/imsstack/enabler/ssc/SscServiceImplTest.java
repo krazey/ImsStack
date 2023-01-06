@@ -40,6 +40,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
 
+import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
@@ -48,6 +49,7 @@ import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
+import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,8 +78,6 @@ public class SscServiceImplTest {
     private int mUpdateCount; // increase after every startPutTransaction case
     private Handler mCallbackHandler;
     private TestableLooper mLooper;
-
-    @Mock private Context mMockContext;
 
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
@@ -135,6 +135,9 @@ public class SscServiceImplTest {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        Context context = new ContextFixture().getTestDouble();
+        AppContext.init(context);
+
         mQueryCount = 1;
         mUpdateCount = 1;
         mSscServiceImpl = new SscServiceImpl(SLOT_0);
@@ -148,7 +151,7 @@ public class SscServiceImplTest {
                 CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
                 .thenReturn(mServerBasedServices);
 
-        mSscServiceImpl.start(mMockContext);
+        mSscServiceImpl.start(context);
         mSscServiceImpl.setListener(mMockUtListener);
         mSscServiceImpl.setSscTransactionFactory(mMockSscTransactionFactory);
 
@@ -167,6 +170,8 @@ public class SscServiceImplTest {
     public void tearDown() {
         mSscServiceImpl.close();
         mLooper.destroy();
+
+        AppContext.deinit();
     }
 
     @Test
