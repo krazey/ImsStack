@@ -225,8 +225,12 @@ PUBLIC VIRTUAL IMS_UINT32 ConferenceReference::GetType() const
 
 PUBLIC VIRTUAL IMS_UINT32 ConferenceReference::GetResponseCode() const
 {
-    IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
+    if (m_piReference == IMS_NULL)
+    {
+        return SipStatusCode::SC_INVALID;
+    }
 
+    IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
     if (piReferMessage == IMS_NULL)
     {
         return SipStatusCode::SC_INVALID;

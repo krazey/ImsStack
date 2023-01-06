@@ -343,8 +343,8 @@ void MergeController::ClearIndividualCallOnMergeFailed()
             if (SipStatusCode::IsFinalFailure(nResponseCode) ||
                     nResponseCode == SipStatusCode::SC_INVALID)
             {
-                // refer is rejected. so, call can be maintained
-                IMS_TRACE_I("ClearIndividualCallOnMergeFailed : refer is rejected.", 0, 0, 0);
+                // refer was rejected or no refer was sent so, call can be maintained
+                IMS_TRACE_I("ClearIndividualCallOnMergeFailed : refer failed.", 0, 0, 0);
                 continue;
             }
 
