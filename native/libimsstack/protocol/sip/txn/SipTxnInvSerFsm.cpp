@@ -392,7 +392,6 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
     SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
 
     SIP_UINT16 nNextState;
-    SIP_UINT32 nDurationTI = 0;
 
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     /* For Unreliable Transport */
@@ -400,12 +399,19 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
     {
         /* Start Timer I */
         const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-        nDurationTI = objSipTxnTimers.GetTimerValue(SipTxn::TIMERI);
+        SIP_UINT32 nDurationTI = objSipTxnTimers.GetTimerValue(SipTxn::TIMERI);
 
         nNextState = SipTxn::INV_SER_CONFIRMED_ST;
 
         pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
         pFsmData->m_pOutUserData = pTxn->GetUserData();
+
+        if (pTxn->StartTxnTimer(SipTxn::TIMERI, nDurationTI, pnError) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
+                    "InvSerFsm_CompletedStRecvAckReqEvt:Start Timer Failed \n", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
     }
     else /* For Relaible Transport */
     {
@@ -416,15 +422,6 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
     }
 
     pTxn->SetTxnState(nNextState);
-
-    SIP_BOOL bStatus = pTxn->StartTxnTimer(SipTxn::TIMERI, nDurationTI, pnError);
-    if (bStatus == SIP_FALSE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "InvSerFsm_CompletedStRecvAckReqEvt:Start Timer Failed \n", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
     return SIP_TRUE;
 }
 
