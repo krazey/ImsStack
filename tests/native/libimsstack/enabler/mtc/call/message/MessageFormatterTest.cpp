@@ -36,6 +36,7 @@
 #include "utility/MessageUtils.h"
 #include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
+#include <vector>
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
@@ -391,6 +392,23 @@ TEST_F(MessageFormatterTest, FormTerminateMessageFailureCase)
     EXPECT_EQ(nResult, IMS_FAILURE);
 }
 
+TEST_F(MessageFormatterTest, FormTerminateMessageAddCarrierSpecificHeaderByConfig)
+{
+    const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
+            .WillByDefault(Return(IMS_TRUE));
+
+    const AString strByeCauseNormal("normal");
+    MockIMessageUtils objMockMessageUtils;
+    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
+    EXPECT_CALL(objMockMessageUtils,
+            AddValueIfNotExists(
+                    &objMessage, strByeCauseNormal, ISipHeader::UNKNOWN, strCarrierSpecificHeader));
+
+    const CallReasonInfo objReasonInfo(CODE_USER_TERMINATED);
+    pFormatter->FormTerminateMessage(objReasonInfo);
+}
+
 TEST_F(MessageFormatterTest, SetAcceptContactHeader)
 {
     pFormatter->FormStartMessage(CallType::VT);
@@ -651,6 +669,130 @@ TEST_F(MessageFormatterTest, SetTerminateReason)
 
     objReasonInfo.nCode = CODE_LOCAL_ENDED_BY_CONFERENCE_MERGE;
     pFormatter->FormTerminateMessage(objReasonInfo);
+}
+
+TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderDoesNotSetReasonHeadersByNoConfiguration)
+{
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(_)).WillByDefault(Return(IMS_FALSE));
+
+    MockISipMessage objMessage;
+    EXPECT_CALL(objMessage, AddHeader(_, _, _)).Times(0);
+
+    // to cover null case
+    pFormatter->ReasonHeaderSetter_SetHeader(IMS_NULL, 0);
+
+    //clang-format off
+    std::vector<IMS_SINT32> objReasons{ISession::TERMINATION_REASON_INVALID,
+            ISession::TERMINATION_REASON_UNKNOWN, ISession::TERMINATION_REASON_USER_ACTION,
+            ISession::TERMINATION_REASON_REMOTE_ACTION, ISession::TERMINATION_REASON_REFRESH_408,
+            ISession::TERMINATION_REASON_REFRESH_481,
+            ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT,
+            ISession::TERMINATION_REASON_REFRESH_TIMEOUT,
+            ISession::TERMINATION_REASON_SERVICE_CLOSED, ISession::TERMINATION_REASON_MAX};
+    //clang-format on
+
+    for (IMS_SINT32 eTerminationReason : objReasons)
+    {
+        pFormatter->ReasonHeaderSetter_SetHeader(&objMessage, eTerminationReason);
+    }
+}
+
+TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByVzwConfiguration)
+{
+    const AString strReasonHeaderName(SipHeaderName::REASON);
+    const AString strCarrierSpecificHeader(MessageUtil::STR_REASON_USER_SESSIONEXPIRED);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
+            .WillByDefault(Return(IMS_TRUE));
+
+    const AString strReasonHeaderValue("USER;text=\"Session Expired\"");
+    MockISipMessage objMessage;
+    EXPECT_CALL(
+            objMessage, AddHeader(ISipHeader::UNKNOWN, strReasonHeaderValue, strReasonHeaderName))
+            .Times(2);
+    pFormatter->ReasonHeaderSetter_SetHeader(
+            &objMessage, ISession::TERMINATION_REASON_REFRESH_TIMEOUT);
+    pFormatter->ReasonHeaderSetter_SetHeader(
+            &objMessage, ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT);
+
+    EXPECT_CALL(objMessage, AddHeader(_, _, _)).Times(0);
+    //clang-format off
+    std::vector<IMS_SINT32> objReasons{ISession::TERMINATION_REASON_INVALID,
+            ISession::TERMINATION_REASON_UNKNOWN, ISession::TERMINATION_REASON_USER_ACTION,
+            ISession::TERMINATION_REASON_REMOTE_ACTION, ISession::TERMINATION_REASON_REFRESH_408,
+            ISession::TERMINATION_REASON_REFRESH_481, ISession::TERMINATION_REASON_SERVICE_CLOSED,
+            ISession::TERMINATION_REASON_MAX};
+    //clang-format on
+
+    for (IMS_SINT32 eTerminationReason : objReasons)
+    {
+        pFormatter->ReasonHeaderSetter_SetHeader(&objMessage, eTerminationReason);
+    }
+}
+
+TEST_F(MessageFormatterTest, ReasonHeaderSetterSetHeaderSetsReasonHeadersByKrConfiguration)
+{
+    const AString strReasonHeaderName(SipHeaderName::REASON);
+    const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
+            .WillByDefault(Return(IMS_TRUE));
+
+    const AString strReasonHeaderSip("SIP; cause=103; text=\"Session-Expire\"; fc=9602");
+    const AString strReasonHeaderUser("USER; cause=101;text=\"USER triggered\"; fc=9501");
+    const AString strReasonHeaderEtc("ETC; cause=104; text=\"Unknown\"; fc=9999");
+    const AString strByeCauseNormal("normal");
+    const AString strByeCauseNoUpd("no_upd");
+    MockISipMessage objMessage;
+    EXPECT_CALL(objMessage, AddHeader(ISipHeader::UNKNOWN, strReasonHeaderSip, strReasonHeaderName))
+            .Times(2);
+    EXPECT_CALL(
+            objMessage, AddHeader(ISipHeader::UNKNOWN, strReasonHeaderUser, strReasonHeaderName))
+            .Times(1);
+    EXPECT_CALL(objMessage, AddHeader(ISipHeader::UNKNOWN, strReasonHeaderEtc, strReasonHeaderName))
+            .Times(7);
+    EXPECT_CALL(
+            objMessage, AddHeader(ISipHeader::UNKNOWN, strByeCauseNormal, strCarrierSpecificHeader))
+            .Times(8);
+    EXPECT_CALL(
+            objMessage, AddHeader(ISipHeader::UNKNOWN, strByeCauseNoUpd, strCarrierSpecificHeader))
+            .Times(2);
+
+    //clang-format off
+    std::vector<IMS_SINT32> objReasons{ISession::TERMINATION_REASON_INVALID,
+            ISession::TERMINATION_REASON_UNKNOWN, ISession::TERMINATION_REASON_USER_ACTION,
+            ISession::TERMINATION_REASON_REMOTE_ACTION, ISession::TERMINATION_REASON_REFRESH_408,
+            ISession::TERMINATION_REASON_REFRESH_481,
+            ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT,
+            ISession::TERMINATION_REASON_REFRESH_TIMEOUT,
+            ISession::TERMINATION_REASON_SERVICE_CLOSED, ISession::TERMINATION_REASON_MAX};
+    //clang-format on
+
+    for (IMS_SINT32 eTerminationReason : objReasons)
+    {
+        pFormatter->ReasonHeaderSetter_SetHeader(&objMessage, eTerminationReason);
+    }
+}
+
+TEST_F(MessageFormatterTest, ReasonHeaderSetterSetPrivateHeaderSetsPrivateHeaderByKrConfiguration)
+{
+    const AString strCarrierSpecificHeader(MessageUtil::STR_P_SKT_BYE_CAUSE);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strCarrierSpecificHeader))
+            .WillByDefault(Return(IMS_TRUE));
+
+    const AString strPSktByeCause(MessageUtil::STR_P_SKT_BYE_CAUSE);
+    MockISipMessage objOldMessage;
+    MockISipMessage objNewMessage;
+
+    ON_CALL(objOldMessage, GetHeader(ISipHeader::UNKNOWN, 0, strPSktByeCause))
+            .WillByDefault(Return(AString::ConstEmpty()));
+    EXPECT_CALL(objNewMessage, SetHeader(_, _, _)).Times(0);
+    pFormatter->ReasonHeaderSetter_SetPrivateHeader(&objOldMessage, &objNewMessage);
+
+    const AString strAnyCause("anyCause");
+    ON_CALL(objOldMessage, GetHeader(ISipHeader::UNKNOWN, 0, strPSktByeCause))
+            .WillByDefault(Return(strAnyCause));
+    EXPECT_CALL(objNewMessage, SetHeader(ISipHeader::UNKNOWN, strAnyCause, strPSktByeCause));
+
+    pFormatter->ReasonHeaderSetter_SetPrivateHeader(&objOldMessage, &objNewMessage);
 }
 
 }  // namespace android

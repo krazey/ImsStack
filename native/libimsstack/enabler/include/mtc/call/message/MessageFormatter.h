@@ -17,19 +17,22 @@
 #ifndef MTC_MESSAGE_FORMATTER_H_
 #define MTC_MESSAGE_FORMATTER_H_
 
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "configuration/ConfigDef.h"
+#include "core/IReasonHeaderSetter.h"
 
+class AString;
 class ICoreService;
 class IFeatureCaps;
 class IMessage;
 class IMtcCallContext;
 class ISession;
-class AString;
+class ISipMessage;
 struct CallReasonInfo;
 
-class MessageFormatter
+class MessageFormatter : public IReasonHeaderSetter
 {
 public:
     MessageFormatter(IN IMtcCallContext& objContext, IN ISession& objSession);
@@ -57,6 +60,11 @@ private:
     };
 
 public:
+    void ReasonHeaderSetter_SetHeader(
+            IN ISipMessage* piSipMsg, IN IMS_SINT32 nTerminationReason) override;
+    void ReasonHeaderSetter_SetPrivateHeader(
+            IN ISipMessage* piOldSipMsg, IN ISipMessage* piNewSipMsg) override;
+
     virtual IMS_RESULT FormStartMessage(IN CallType eCallType);
     virtual IMS_RESULT FormProvisionalResponseMessage(IN IMS_BOOL bIncludeAlertInfo);
     virtual IMS_RESULT FormPrackMessage();
@@ -84,7 +92,6 @@ private:
     void SetAcceptHeader();
     void AddSrvccFeature();
     void SetSrvccContactParameter();
-    // void SetKeepAliveProfile();
     void SetCallerIdHeader();
     // void SetTipHeader();
     void SetPEarlyMediaHeader();

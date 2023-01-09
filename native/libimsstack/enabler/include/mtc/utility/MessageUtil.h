@@ -363,8 +363,12 @@ public:
     static const IMS_CHAR STR_URN[];
     static const IMS_CHAR STR_VIDEO[];
     static const IMS_CHAR STR_TEXT[];
+
+    // carrier specific
+    static const IMS_CHAR STR_P_SKT_BYE_CAUSE[];
     static const IMS_CHAR STR_P_TTA_VOLTE_INFO[];
     static const IMS_CHAR STR_AVCHANGE[];
+    static const IMS_CHAR STR_REASON_USER_SESSIONEXPIRED[];
 
 private:
     static const IMS_SINT32 INVALID_INDEX;
