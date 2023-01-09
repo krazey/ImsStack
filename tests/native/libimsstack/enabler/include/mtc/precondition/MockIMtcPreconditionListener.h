@@ -14,34 +14,23 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MTC_PRECONDITION_LISTENER_H_
-#define INTERFACE_MTC_PRECONDITION_LISTENER_H_
+#ifndef MOCK_I_MTC_PRECONDITION_LISTENER_H_
+#define MOCK_I_MTC_PRECONDITION_LISTENER_H_
 
-#include "ISession.h"
 #include "ImsTypeDef.h"
+#include "precondition/IMtcPreconditionListener.h"
+#include <gmock/gmock.h>
 
+class ISession;
 enum class QosLossPolicy;
 
-class IMtcPreconditionListener
+class MockIMtcPreconditionListener : public IMtcPreconditionListener
 {
 public:
-    virtual ~IMtcPreconditionListener(){};
-
-    /**
-     * @brief Notifies
-     *
-     * @param piSession
-     * @param eMediaType
-     */
-    virtual void QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
-
-    /**
-     * @brief Notifies
-     *
-     * @param piSession
-     * @param eNextAction
-     */
-    virtual void QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) = 0;
+    ~MockIMtcPreconditionListener() {}
+    MOCK_METHOD(void, QosReserved, (IN ISession * piSession, IN IMS_UINT32 eMediaType), (override));
+    MOCK_METHOD(void, QosReserveFailed, (IN ISession * piSession, IN QosLossPolicy eNextAction),
+            (override));
 };
 
 #endif

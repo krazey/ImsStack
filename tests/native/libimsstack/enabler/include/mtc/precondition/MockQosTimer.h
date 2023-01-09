@@ -14,36 +14,31 @@
  * limitations under the License.
  */
 
-#ifndef QOS_TIMER_H_
-#define QOS_TIMER_H_
+#ifndef MOCK_QOS_TIMER_H_
+#define MOCK_QOS_TIMER_H_
 
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "ServiceTimer.h"
 #include "precondition/IQosTimerListener.h"
-#include "precondition/QosDef.h"
+#include "precondition/QosTimer.h"
+#include <gmock/gmock.h>
 
-class QosTimer : public ITimerListener
+enum class QosTimerType;
+
+class MockQosTimer : public QosTimer
 {
 public:
-    explicit QosTimer(IN IQosTimerListener* pListener);
-    virtual ~QosTimer();
+    explicit MockQosTimer(IN IQosTimerListener* pListener) :
+            QosTimer(pListener)
+    {
+    }
+    ~MockQosTimer() {}
 
-private:
-    QosTimer(IN const QosTimer& objRHS);
-    QosTimer& operator=(IN const QosTimer& objRHS);
-
-public:
-    virtual void Timer_TimerExpired(IN ITimer* piExpiredTimer) override;
-    virtual void StartQosTimer(IN QosTimerType eType, IN IMS_SINT32 nDuration);
-    virtual void StopQosTimer(IN QosTimerType eType);
-    virtual IMS_BOOL IsQosTimerActivated(IN QosTimerType eType);
-
-private:
-    ITimer* GetTimer(IN QosTimerType eType);
-
-protected:
-    ImsMap<QosTimerType, ITimer*> m_objTimers;
-    IQosTimerListener* m_pQosTimerListener;
+    MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer * piExpiredTimer), (override));
+    MOCK_METHOD(void, StartQosTimer, (IN QosTimerType eType, IN IMS_SINT32 nDuration), (override));
+    MOCK_METHOD(void, StopQosTimer, (IN QosTimerType eType), (override));
+    MOCK_METHOD(IMS_BOOL, IsQosTimerActivated, (IN QosTimerType eType), (override));
 };
+
 #endif

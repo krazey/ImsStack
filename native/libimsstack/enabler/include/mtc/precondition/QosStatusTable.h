@@ -113,31 +113,29 @@ class QosStatusTable
 {
 public:
     QosStatusTable();
-    ~QosStatusTable();
+    virtual ~QosStatusTable();
 
 private:
     QosStatusTable(IN const QosStatusTable& objRHS);
     QosStatusTable& operator=(IN const QosStatusTable& objRHS);
 
 public:
-    void UpdateStatusTableWithRemoteSdp(IN IMedia* piMedia);
-
-    void UpdateLocalCurrentStatus(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQoSEnabled);
-    void EnableRemoteCurrentStatus(IN IMS_SINT32 eSdpMediaType);
-    IMS_BOOL IsCurrentStatusEnabled(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType);
-
-    IMS_SINT32 GetDirectionTag(
+    virtual void UpdateStatusTableWithRemoteSdp(IN IMedia* piMedia);
+    virtual void UpdateLocalCurrentStatus(
+            IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQoSEnabled);
+    virtual void EnableRemoteCurrentStatus(IN IMS_SINT32 eSdpMediaType);
+    virtual IMS_BOOL IsCurrentStatusEnabled(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType);
+    virtual IMS_SINT32 GetDirectionTag(
             IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType, IN IMS_SINT32 eStatusType);
-    IMS_SINT32 GetStrengthTag(
+    virtual IMS_SINT32 GetStrengthTag(
             IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
-    void SetDirectionTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
+    virtual void SetDirectionTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
             IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
-    void SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType,
+    virtual void SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType,
             IN IMS_SINT32 eDirTag, IN IMS_SINT32 eStrengthTag);
-
-    void CreateStatusRecords(IN IMS_SINT32 eSdpMediaType);
-    IMS_BOOL IsStatusRecordsListEmpty(IN IMS_SINT32 eSdpMediaType);
-    void RemoveUnusedStatusRecords(IN IMS_UINT32 eMediaTypes);
+    virtual void CreateStatusRecords(IN IMS_SINT32 eSdpMediaType);
+    virtual IMS_BOOL IsStatusRecordsListEmpty(IN IMS_SINT32 eSdpMediaType);
+    virtual void RemoveUnusedStatusRecords(IN IMS_UINT32 eMediaTypes);
 
 private:
     void AddStatusRecord(IN IMS_SINT32 eSdpMediaType);
