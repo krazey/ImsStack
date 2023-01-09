@@ -111,7 +111,7 @@ public class MtcEmergencyServiceManager {
             case IUMtcService.ES_UNAVAILABLE:
                 onEsUnavailable();
                 break;
-            case IUMtcService.ES_IN_CALL:
+            case IUMtcService.ES_IN_CALL: // TODO: remove
                 onEsInCall();
                 break;
             default:
@@ -137,6 +137,7 @@ public class MtcEmergencyServiceManager {
 
         mCall.createNativeCallObject();
         mCall.open(serviceType, true, false, false);
+        mCall = null;
     }
 
     private void onEsUnavailable() {
