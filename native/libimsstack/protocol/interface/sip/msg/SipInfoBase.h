@@ -35,5 +35,7 @@ public:
 
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen) override;
+
+    static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 };
 #endif  //__SIP_INFO_BASE_H__

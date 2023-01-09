@@ -125,3 +125,12 @@ SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     return SIP_TRUE;
 }
+
+SipHeaderBase* SipInfoBase::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
+{
+    if (pHeader != SIP_NULL)
+    {
+        return new SipInfoBase(*static_cast<SipInfoBase*>(pHeader));
+    }
+    return new SipInfoBase(eHeaderType);
+}
