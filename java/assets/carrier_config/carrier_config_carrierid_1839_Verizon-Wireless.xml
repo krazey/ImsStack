@@ -257,6 +257,7 @@
 
     <!-- Mts -->
     <boolean name="sms_use_dialed_number_for_request_uri_bool" value="true"/>
+    <boolean name="sms_allow_imsi_based_sip_uri_bool" value="true"/>
     <int name="sms_policy_for_503_response_int" value="5"/>
 
     <!-- Uce -->

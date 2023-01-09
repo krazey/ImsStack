@@ -19,27 +19,17 @@
 
 #include "IMtsServiceState.h"
 
+class IImsAos;
+
 class MtsServiceState final : public IMtsServiceState
 {
 public:
     explicit MtsServiceState(IN IMS_SINT32 nSlotId);
     ~MtsServiceState();
 
-    inline IMS_UINT32 GetConnectedServices() const { return m_nConnectedServices; }
-    inline IMS_BOOL GetImsRegState() const { return m_bImsConnected; }
-    inline IMS_BOOL GetImsRegMod() const { return m_bAosRegModAdmin; }
-    inline IMS_BOOL GetImsSuspendState() const { return m_bImsSuspend; }
-    inline IMS_SINT32 GetMtsServiceState() const { return m_nMtsServiceState; }
-    inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }
-    inline IMS_BOOL GetSmsOverIpState() const { return m_bSmsOverIpConf; }
-
-    void UpdateServiceState();
-
     // IMtsServiceState
-    IMS_BOOL IsMoServiceBlocked() const override;
-    IMS_BOOL IsMtServiceBlocked() const override;
-
-    IMS_SINT32 GetServiceState() override;
+    void Init(IN IImsAos* piImsAos) override;
+    IMS_SINT32 GetServiceState() const override;
     IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService) override;
     void OnImsConnected() override;
     void OnImsDisconnected(IN IMS_UINT32 nReason) override;
@@ -48,13 +38,16 @@ public:
     void OnImsResumed() override;
     void SetConnectedServices(IN IMS_UINT32 nServices) override;
     void SetImsRegConnected(IN IMS_BOOL bConnected) override;
-    void SetSmsOverIpState(IN IMS_BOOL bState) override;
+
+    IMS_BOOL IsMoServiceBlocked() const override;
+    IMS_BOOL IsMtServiceBlocked() const override;
 
 private:
-    void Init();
-    void DeInit();
     void SetImsSuspendState(IN IMS_BOOL bState);
+    void SetSmsOverIpState(IN IMS_BOOL bState);
+    void UpdateServiceState();
 
+    IImsAos* m_piImsAos;
     IMS_SINT32 m_nMtsServiceState;
     // Check Condition for SMS SERVICE MODE
     IMS_BOOL m_bImsConnected;    // if Connected true enable sms mo/mt service.
@@ -62,6 +55,7 @@ private:
     IMS_BOOL m_bImsSuspend;      // if IMSAoSApp_IMSSuspended true. block mo service
     // if sms_over_ip_network Ind is false. block mo service
     IMS_BOOL m_bSmsOverIpConf;
+    IMS_BOOL m_bAllowImsiBasedSipUri;
     IMS_UINT32 m_nConnectedServices;
     IMS_SINT32 m_nSlotId;
 };

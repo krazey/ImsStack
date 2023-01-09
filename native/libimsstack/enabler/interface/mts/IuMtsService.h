@@ -22,8 +22,8 @@
 #include "ImsMessageDef.h"
 #include "IUBaseParam.h"
 
-#define JAVA2MTSENABLER         IMS_MSG_BASE_SERVICE
-#define MTSENABLER2JAVA         IMS_MSG_BASE_SERVICE + 50
+#define JAVA2MTSENABLER         (IMS_MSG_BASE_SERVICE + 0)
+#define MTSENABLER2JAVA         (IMS_MSG_BASE_SERVICE + 50)
 
 class IuMtsService
 {
