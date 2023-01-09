@@ -42,6 +42,7 @@ MediaSession::MediaSession(
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
+        m_bSessionConfirmed(IMS_FALSE),
         m_nRtpTimer(0)
 {
     IMS_TRACE_D(
@@ -398,10 +399,13 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::Run(IN IMS_UINTP nNegoId)
         m_objVideoController.UpdateSession();
     }
 
-    m_objTextController.UpdateRtpConfig(pMediaNego->GetTextNego());
-    m_objTextController.UpdateAccessNetwork(nAccessNetwork);
-    m_objTextController.UpdateQualityThreshold(pMediaNego->GetTextNego());
-    m_objTextController.UpdateSession();
+    if (m_bSessionConfirmed)
+    {
+        m_objTextController.UpdateRtpConfig(pMediaNego->GetTextNego());
+        m_objTextController.UpdateAccessNetwork(nAccessNetwork);
+        m_objTextController.UpdateQualityThreshold(pMediaNego->GetTextNego());
+        m_objTextController.UpdateSession();
+    }
 
     return IMS_TRUE;
 }
@@ -661,6 +665,7 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
             break;
         case SET_CONFIRMED_SESSION:
             m_objAudioController.SetConfirmSession(param1);
+            m_bSessionConfirmed = (param1 > 0);
             break;
         case SET_DIRECTION:
         case SET_CONFERENCE_ENABLE:

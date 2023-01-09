@@ -127,6 +127,7 @@ protected:
     AudioController m_objAudioController;
     VideoController m_objVideoController;
     TextController m_objTextController;
+    IMS_BOOL m_bSessionConfirmed;
     IMS_UINT32 m_nRtpTimer;
     std::mutex m_objMutex;
 };
