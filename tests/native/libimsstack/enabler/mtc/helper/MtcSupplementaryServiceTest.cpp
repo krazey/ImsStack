@@ -88,14 +88,15 @@ TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
     SuppService* pTestSupp3 = new SuppService();
     pTestSupp3->bValue = IMS_TRUE;
 
-    IMSMap<SuppType, SuppService*> objInSuppService;
+    ImsMap<SuppType, SuppService*> objInSuppService;
     objInSuppService.Add(SuppType::CNAP, pTestSupp1);
     objInSuppService.Add(SuppType::CALLER_ID, pTestSupp2);
     objInSuppService.Add(SuppType::CW, pTestSupp3);
 
     pMtcSupplementaryService->UpdateOutgoingServices(objInSuppService);
 
-    IMSMap<SuppType, SuppService*> objOutSuppService = pMtcSupplementaryService->GetServices();
+    const ImsMap<SuppType, SuppService*>& objOutSuppService =
+            pMtcSupplementaryService->GetServices();
 
     EXPECT_EQ(objOutSuppService.GetSize(), 3);
     EXPECT_EQ(objOutSuppService.GetValue(SuppType::CNAP)->strValue, strTest);
@@ -103,8 +104,8 @@ TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
     EXPECT_TRUE(objOutSuppService.GetValue(SuppType::CW)->bValue);
 
     SuppService* pTestSupp4 = new SuppService();
-    pTestSupp3->bValue = IMS_FALSE;
-    IMSMap<SuppType, SuppService*> objInSuppService2;
+    pTestSupp4->bValue = IMS_FALSE;
+    ImsMap<SuppType, SuppService*> objInSuppService2;
     objInSuppService2.Add(SuppType::CW, pTestSupp4);
     pMtcSupplementaryService->UpdateOutgoingServices(objInSuppService2);
 
