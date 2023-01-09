@@ -19,7 +19,6 @@
 #include "SipDebug.h"
 #include "SipStackError.h"
 
-#include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnFsmData.h"
@@ -260,10 +259,6 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
 static SIP_BOOL NonInvCliFsm_TryingStTimer_E_F_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
-
-    (void)pTimeoutData;
-
     /* handling of timeout and state transition occure inside the function */
     SIP_BOOL bStatus = NonInvClient_TimeoutHandling(pTxn, pvData, pnError);
 
@@ -332,9 +327,6 @@ static SIP_BOOL NonInvCliFsm_TryingStTranspErrorEvt(
 static SIP_BOOL NonInvCliFsm_ProceedingStTimer_E_F_TimeoutEvt(
         SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
-    (void)pTimeoutData;
-
     /* handling of timeout and state transition occure inside the function */
     SIP_BOOL bStatus = NonInvClient_TimeoutHandling(pTxn, pvData, pnError);
 
@@ -403,12 +395,8 @@ static SIP_BOOL NonInvCliFsm_ProceedingStTranspErrorEvt(
 }
 
 static SIP_BOOL NonInvCliFsm_CompletedStTimer_K_TimeoutEvt(
-        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+        SipTxn* pTxn, SIP_VOID* /*pvData*/, SIP_UINT16* /*pnError*/)
 {
-    (void)pnError;
-    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
-    (void)pTimeoutData;
-
     /* State Transition */
     pTxn->SetTxnState(SipTxn::NON_INV_CLI_TERMINATED_ST);
     return SIP_TRUE;

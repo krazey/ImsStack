@@ -17,7 +17,6 @@
 #include "SipDebug.h"
 #include "SipStackError.h"
 
-#include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnFsmData.h"
@@ -177,12 +176,8 @@ static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SI
 }
 
 static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(
-        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+        SipTxn* pTxn, SIP_VOID* /*pvData*/, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
-
-    (void)pTimeoutData;
-
     SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
@@ -513,13 +508,8 @@ static SIP_BOOL InvCliFsm_ProceedingStTranspErrorEvt(
 }
 
 static SIP_BOOL InvCliFsm_CompletedStTimerD_TimeoutEvt(
-        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+        SipTxn* pTxn, SIP_VOID* /*pvData*/, SIP_UINT16* /*pnError*/)
 {
-    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
-
-    (void)pnError;
-    (void)pTimeoutData;
-
     /* Transition to Terminated State */
     pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
 
