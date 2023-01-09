@@ -140,7 +140,6 @@ protected:
         AosProvider::GetInstance()->SetTransaction(
                 static_cast<IAosTransaction*>(&objMockIAosTransaction), SLOT_ID);
 
-        EXPECT_CALL(objMockIAosTransaction, SetListener(_, _)).Times(AnyNumber());
         EXPECT_CALL(objMockIAosTransaction, RemoveListener(_, _)).Times(AnyNumber());
         EXPECT_CALL(objMockIAosTransaction, IsTransactionAllowed(_))
                 .Times(AnyNumber())
@@ -168,6 +167,12 @@ protected:
             delete pContactAddress;
         }
 
+        if (pAosSubscription)
+        {
+            pAosSubscription->SetListener(IMS_NULL);
+            pAosSubscription->Destroy();
+        }
+
         if (pMockAosAppContext)
         {
             delete pMockAosAppContext;
@@ -176,12 +181,6 @@ protected:
         if (pAosStaticProfile)
         {
             delete pAosStaticProfile;
-        }
-
-        if (pAosSubscription)
-        {
-            pAosSubscription->SetListener(IMS_NULL);
-            pAosSubscription->Destroy();
         }
     }
 
@@ -272,6 +271,7 @@ TEST_F(AosSubscriptionTest, Initialize)
 {
     EXPECT_CALL(objMockIRegSubscription, SetRefreshPolicy(0, 1200, 50, 600)).Times(1);
     EXPECT_CALL(objMockIRegSubscription, SetListener(pAosSubscription)).Times(1);
+    EXPECT_CALL(objMockIAosTransaction, SetListener(_, _)).Times(1);
 
     pAosSubscription->Initialize();
 }
