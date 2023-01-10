@@ -35,6 +35,7 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IoUtils;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -172,8 +173,6 @@ public class QosAgent {
         ImsLog.d(mSlotId, "createQosConnection without remoteaddress");
 
         if (network == null) {
-            ImsLog.e(mSlotId, "Network not found");
-
             return null;
         }
 
@@ -265,20 +264,8 @@ public class QosAgent {
     * Request to close rtpsocket/rtcpsocket
     */
     public void destroyQosConnection(DatagramSocket rtpSocket, DatagramSocket rtcpSocket) {
-
-        if (!closeDatagramSocket(rtpSocket, rtcpSocket)) {
-            ImsLog.e(mSlotId, "destroyQosConnection is failed");
-        }
-    }
-
-    private boolean closeDatagramSocket(DatagramSocket rtpSocket, DatagramSocket rtcpSocket) {
-
         if (rtcpSocket != null) {
-            try {
-                rtcpSocket.close();
-            } catch (Exception e) {
-                ImsLog.e(mSlotId, "rtcpcloseDatagramSocket: " + e.toString());
-            }
+            IoUtils.closeQuietly(rtcpSocket);
         }
 
         if (rtpSocket != null) {
@@ -288,21 +275,14 @@ public class QosAgent {
             if (socket != null) {
                 unregisterQosCallback(socket);
                 mSockets.remove(remotePort);
-                ImsLog.d("QosSocket closed");
-
-                try {
-                    rtpSocket.close();
-                    socket.close();
-                } catch (Exception e) {
-                    ImsLog.e(mSlotId, "rtp closeDatagramSocket: " + e.toString());
-                }
-                return true;
+                ImsLog.d(mSlotId, "QosSocket closed");
+                socket.close();
             } else {
-                ImsLog.d(mSlotId, "QosSocket for remotePort=" + remotePort + ", not found");
+                ImsLog.d(mSlotId, "socket is not connected");
             }
-        }
 
-        return false;
+            IoUtils.closeQuietly(rtpSocket);
+        }
     }
 
     private DatagramSocket createDatagramSocket(Network network, InetAddress ipAddr, int port) {
