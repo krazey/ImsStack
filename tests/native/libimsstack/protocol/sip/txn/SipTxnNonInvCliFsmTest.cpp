@@ -168,7 +168,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_TryingState)
     pTxn->UpdateTranspInfo(pTranspInfo);
 
     SipTimeoutData* pTimeoutData =
-            new SipTimeoutData(SipTxn::NON_INV_CLI_TXN, SipTxn::TIMERE, pTxnKey);
+            new SipTimeoutData(SipTxn::NON_INV_CLI_TXN, SipTxn::TIMER_E, pTxnKey);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipNonInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
@@ -236,7 +236,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
     pTxn->UpdateTranspInfo(pTranspInfo);
 
     SipTimeoutData* pTimeoutData =
-            new SipTimeoutData(SipTxn::NON_INV_CLI_TXN, SipTxn::TIMERE, pTxnKey);
+            new SipTimeoutData(SipTxn::NON_INV_CLI_TXN, SipTxn::TIMER_E, pTxnKey);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipNonInvClientTxnFsm[SipTxn::NON_INV_CLI_PROCEEDING_ST]
@@ -263,7 +263,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_ProceedingState)
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::NON_INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
-    pTimeoutData = new SipTimeoutData(SipTxn::NON_INV_CLI_TXN, SipTxn::TIMERF, pTxnKey);
+    pTimeoutData = new SipTimeoutData(SipTxn::NON_INV_CLI_TXN, SipTxn::TIMER_F, pTxnKey);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipNonInvClientTxnFsm[SipTxn::NON_INV_CLI_PROCEEDING_ST]
@@ -366,7 +366,7 @@ TEST_F(Sip_txn_NonInvCliFsmTest, NonInvCli_CompletedState)
                                             pTxn, pTxnFsmData, &nError));
 
     SipTimeoutData* pTimeoutData =
-            new SipTimeoutData(SipTxn::NON_INV_CLI_TXN, SipTxn::TIMERK, SIP_NULL);
+            new SipTimeoutData(SipTxn::NON_INV_CLI_TXN, SipTxn::TIMER_K, SIP_NULL);
     EXPECT_EQ(SIP_TRUE,
             gpfSipNonInvClientTxnFsm[SipTxn::NON_INV_CLI_COMPLETED_ST]
                                     [SipTxn::NON_INV_CLI_TIMER_K_TIME_OUT_EVT](

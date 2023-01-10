@@ -34,6 +34,7 @@ SipUri::SipUri() :
 }
 
 SipUri::SipUri(const SipUri& objSipUri) :
+        IParameterComponent(objSipUri),
         m_pszUser(SipPf_Strdup(objSipUri.m_pszUser)),
         m_pszPassword(SipPf_Strdup(objSipUri.m_pszPassword)),
         m_pszHost(SipPf_Strdup(objSipUri.m_pszHost)),
@@ -82,51 +83,18 @@ SipUri::~SipUri()
 
 SIP_BOOL SipUri::IsValidComponent(const SIP_CHAR* pszComponent) const
 {
-    if (SipPf_Stricmp(pszComponent, SIP_USER) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_PASSWORD) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_HOST) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_PORT) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_USER_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_METHOD) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_MADDR_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_TTL_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_TRNSPORT_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_LR_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_OTHER_PRM) == 0)
-    {
-        return SIP_TRUE;
-    }
-    else if (SipPf_Stricmp(pszComponent, SIP_HEADERS) == 0)
+    if ((SipPf_Stricmp(pszComponent, SIP_USER) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_PASSWORD) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_HOST) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_PORT) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_USER_PRM) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_METHOD) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_MADDR_PRM) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_TTL_PRM) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_TRNSPORT_PRM) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_LR_PRM) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_OTHER_PRM) == 0) ||
+            (SipPf_Stricmp(pszComponent, SIP_HEADERS) == 0))
     {
         return SIP_TRUE;
     }

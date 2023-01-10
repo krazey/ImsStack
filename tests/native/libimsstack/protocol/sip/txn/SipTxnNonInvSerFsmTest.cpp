@@ -382,7 +382,7 @@ TEST_F(Sip_txn_NonInvSerFsmTest, NonInvSer_CompletedState)
                                          pTxn, pTxnFsmData, &nError));
 
     SipTimeoutData* pTimeoutData =
-            new SipTimeoutData(SipTxn::NON_INV_SER_TXN, SipTxn::TIMERJ, SIP_NULL);
+            new SipTimeoutData(SipTxn::NON_INV_SER_TXN, SipTxn::TIMER_J, SIP_NULL);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipNonInvSerTxnFsm[SipTxn::NON_INV_SER_COMPLETED_ST]

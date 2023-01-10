@@ -168,8 +168,8 @@ LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IM
     // when SIP transaction timer is expired.
     pUserData->SetUserData(IMS_NULL);
 
-    if ((nTimerType == SipTxn::TIMERD) || (nTimerType == SipTxn::TIMERI) ||
-            (nTimerType == SipTxn::TIMERJ) || (nTimerType == SipTxn::TIMERK))
+    if ((nTimerType == SipTxn::TIMER_D) || (nTimerType == SipTxn::TIMER_I) ||
+            (nTimerType == SipTxn::TIMER_J) || (nTimerType == SipTxn::TIMER_K))
     {
         // CSM moving from "Completed" to "Terminated".
         // This is a normal case and ignore these cases.

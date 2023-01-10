@@ -23,7 +23,7 @@
 #include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnUtil.h"
 
-#define MIN(a, b)                (a < b) ? a : b
+#define MIN(a, b)                ((a) < (b)) ? (a) : (b)
 
 /* RFC 3261: Sec 17.2.1
    The server transaction MUST generate a 100
@@ -173,12 +173,12 @@ static SIP_BOOL InvSerFsm_ProceedingStSendNon100ProvRespEvt(
         }
 
         const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-        SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
-        SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMERH);
+        SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
+        SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_H);
 
         /*RFC 3262 mentions to start retransmission timer irrespective of transport being used*/
         /*Start retransmission timer*/
-        if (pTxn->StartTxnTimer(SipTxn::TIMERG, nDurationT1, pnError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMER_G, nDurationT1, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "InvSerFsm_ProceedingStSendNon100ProvRespEvt: Start Timer Failed", SIP_ZERO,
@@ -207,8 +207,8 @@ static SIP_BOOL InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt(
     pTxn->InitRetransmissionInfo();
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
-    SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMERH);
+    SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
+    SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_H);
 
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
@@ -217,7 +217,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt(
     /* For Unreliable Transport : Start Timer G*/
     if (eTranspProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
-        if (pTxn->StartTxnTimer(SipTxn::TIMERG, nDurationT1, pnError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMER_G, nDurationT1, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt: Start Timer Failed", SIP_ZERO,
@@ -227,7 +227,7 @@ static SIP_BOOL InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt(
     }
     else /*Reliable transport*/
     {
-        if (pTxn->StartTxnTimer(SipTxn::TIMERH, nDurationTH, pnError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMER_H, nDurationTH, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "InvSerFsm_ProceedingStSend3xx6xxFailureRespEvt:Start Timer Failed", SIP_ZERO,
@@ -260,10 +260,10 @@ static SIP_BOOL InvSerFsm_ProceedingStSend2xxSuccessRespEvt(
     pTxn->InitRetransmissionInfo();
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMERH);
+    SIP_UINT32 nDurationTH = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_H);
 
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
-    if (pTxn->StartTxnTimer(SipTxn::TIMERH, nDurationTH, pnError) != SIP_FALSE)
+    if (pTxn->StartTxnTimer(SipTxn::TIMER_H, nDurationTH, pnError) != SIP_FALSE)
     {
         pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
         pTxn->SetMaxDuration(nDurationTH);
@@ -304,7 +304,7 @@ static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
 
     SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
+    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
 
     if (nDurationExpired == 0)
     {
@@ -315,7 +315,7 @@ static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
 
     SIP_UINT32 nMaxDuration = pTxn->GetMaxDuration();
 
-    if (pTimeoutData->GetTimerType() == SipTxn::TIMERG)
+    if (pTimeoutData->GetTimerType() == SipTxn::TIMER_G)
     {
         /* Check Max Retransmission Limit or Total expired
            time has crossed the Max duration limit or not */
@@ -339,7 +339,7 @@ static SIP_BOOL InvSerFsm_ProceedingStTimerG_H_TimeoutEvt(
 
             if (nDuration > SIP_ZERO)
             {
-                if (pTxn->StartTxnTimer(SipTxn::TIMERG, nDuration, pnError) == SIP_FALSE)
+                if (pTxn->StartTxnTimer(SipTxn::TIMER_G, nDuration, pnError) == SIP_FALSE)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                             "InvSerFsm_ProceedingStTimerG_H_TimeoutEvt: Start Timer Failed",
@@ -399,14 +399,14 @@ static SIP_BOOL InvSerFsm_CompletedStRecvAckReqEvt(
     {
         /* Start Timer I */
         const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-        SIP_UINT32 nDurationTI = objSipTxnTimers.GetTimerValue(SipTxn::TIMERI);
+        SIP_UINT32 nDurationTI = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_I);
 
         nNextState = SipTxn::INV_SER_CONFIRMED_ST;
 
         pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
         pFsmData->m_pOutUserData = pTxn->GetUserData();
 
-        if (pTxn->StartTxnTimer(SipTxn::TIMERI, nDurationTI, pnError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMER_I, nDurationTI, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "InvSerFsm_CompletedStRecvAckReqEvt:Start Timer Failed \n", SIP_ZERO, SIP_ZERO);
@@ -432,7 +432,7 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
 
     SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
+    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
 
     if (nDurationExpired == 0)
     {
@@ -460,7 +460,7 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
         {
             SIP_UINT32 nCurrentDuration = pTxn->GetCurrentDuration();
             SIP_UINT32 nNextDuration = nCurrentDuration << 1;
-            SIP_UINT32 nDurationT2 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER2);
+            SIP_UINT32 nDurationT2 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T2);
 
             /* MIN(2*T1, T2) seconds*/
             nDuration = MIN(nNextDuration, nDurationT2);
@@ -480,7 +480,7 @@ static SIP_BOOL InvSerFsm_CompletedStTimerG_H_TimeoutEvt(
 
     if (nDuration > SIP_ZERO)
     {
-        SIP_BOOL bStatus = pTxn->StartTxnTimer(SipTxn::TIMERG, nDuration, pnError);
+        SIP_BOOL bStatus = pTxn->StartTxnTimer(SipTxn::TIMER_G, nDuration, pnError);
         if (bStatus == SIP_FALSE)
         {
             return SIP_FALSE;

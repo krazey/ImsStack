@@ -182,7 +182,8 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
-    SipTimeoutData* pTimeoutData = new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMERA, pTxnKey);
+    SipTimeoutData* pTimeoutData =
+            new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMER_A, pTxnKey);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
@@ -224,7 +225,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
-    pTimeoutData = new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMERB, pTxnKey);
+    pTimeoutData = new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMER_B, pTxnKey);
     /* Calling with TCP transport info */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
@@ -427,7 +428,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CompletedState)
     SIP_UINT16 nError = 0;
     SipTxn* pTxn = new SipTxn();
     SipTimeoutData* pTimeoutData =
-            new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMERD, SIP_NULL);
+            new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMER_D, SIP_NULL);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_COMPLETED_ST]

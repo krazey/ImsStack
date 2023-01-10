@@ -24,7 +24,7 @@
 #include "txn/SipTxnFsmData.h"
 #include "txn/SipTxnUtil.h"
 
-#define MIN(a, b) (a < b) ? a : b
+#define MIN(a, b) ((a) < (b)) ? (a) : (b)
 
 static SIP_BOOL NonInvCliFsm_NullFxn(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
@@ -42,7 +42,7 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
     (void)pvData;
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
+    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
 
     SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
     if (nDurationExpired == 0)
@@ -76,7 +76,7 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
                seconds.
             */
             SIP_UINT16 nCurTxnState = pTxn->GetTxnState();
-            SIP_UINT32 nDurationT2 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER2);
+            SIP_UINT32 nDurationT2 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T2);
             if (nCurTxnState == SipTxn::NON_INV_CLI_TRYING_ST)
             {
                 SIP_UINT32 nCurrentDuration = pTxn->GetCurrentDuration();
@@ -106,7 +106,7 @@ static SIP_BOOL NonInvClient_TimeoutHandling(SipTxn* pTxn, SIP_VOID* pvData, SIP
     /* Start Timer E with updated Duration */
     if (nDuration > SIP_ZERO)
     {
-        SIP_BOOL bTimerStatus = pTxn->StartTxnTimer(SipTxn::TIMERE, nDuration, pnError);
+        SIP_BOOL bTimerStatus = pTxn->StartTxnTimer(SipTxn::TIMER_E, nDuration, pnError);
         if (bTimerStatus == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
@@ -133,8 +133,8 @@ static SIP_BOOL NonInvCli_Recv2xx6xxResp(
     {
         /* Start Timer K */
         const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-        SIP_UINT32 nDurationTK = objSipTxnTimers.GetTimerValue(SipTxn::TIMERK);
-        SIP_BOOL bStatus = pTxn->StartTxnTimer(SipTxn::TIMERK, nDurationTK, pnError);
+        SIP_UINT32 nDurationTK = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_K);
+        SIP_BOOL bStatus = pTxn->StartTxnTimer(SipTxn::TIMER_K, nDurationTK, pnError);
         if (bStatus == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
@@ -191,8 +191,8 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
        2. Transaction Timer : for TCP
      */
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
-    SIP_UINT32 nDurationTF = objSipTxnTimers.GetTimerValue(SipTxn::TIMERF);
+    SIP_UINT32 nDurationT1 = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_T1);
+    SIP_UINT32 nDurationTF = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_F);
     SipTxnFsmData* pFsmData = static_cast<SipTxnFsmData*>(pvData);
     SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
     SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
@@ -200,7 +200,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
     /* For Unreliable Transport : Start Timer E*/
     if (eTranspProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
-        bStatus = pTxn->StartTxnTimer(SipTxn::TIMERE, nDurationT1, pnError);
+        bStatus = pTxn->StartTxnTimer(SipTxn::TIMER_E, nDurationT1, pnError);
         if (bStatus == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
@@ -212,7 +212,7 @@ static SIP_BOOL NonInvCliFsm_IdleStSendNonInvReqEvt(
     }
     else /* For Reliable Transport : Start Timer F*/
     {
-        bStatus = pTxn->StartTxnTimer(SipTxn::TIMERF, nDurationTF, pnError);
+        bStatus = pTxn->StartTxnTimer(SipTxn::TIMER_F, nDurationTF, pnError);
         if (bStatus == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,

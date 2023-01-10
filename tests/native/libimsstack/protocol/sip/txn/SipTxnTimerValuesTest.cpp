@@ -35,19 +35,19 @@ TEST_F(SipTxnTimerValuesTest, SetGetAndUpdate)
     SipTxnTimerValues* pTxnTimers = new SipTxnTimerValues();
     ASSERT_TRUE(pTxnTimers != nullptr);
 
-    pTxnTimers->SetTimerValue(SipTxn::TIMER1, 1);
-    pTxnTimers->SetTimerValue(SipTxn::TIMER2, 2);
-    pTxnTimers->SetTimerValue(SipTxn::TIMER4, 3);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERA, 4);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERB, 5);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERD, 6);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERE, 7);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERF, 8);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERG, 9);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERH, 10);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERI, 11);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERJ, 12);
-    pTxnTimers->SetTimerValue(SipTxn::TIMERK, 13);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_T1, 1);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_T2, 2);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_T4, 3);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_A, 4);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_B, 5);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_D, 6);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_E, 7);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_F, 8);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_G, 9);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_H, 10);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_I, 11);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_J, 12);
+    pTxnTimers->SetTimerValue(SipTxn::TIMER_K, 13);
 
     pTxnTimers->SetTimerValue(SipTxn::TIMER_TYPE_INVALID, 14);
 
@@ -69,19 +69,19 @@ TEST_F(SipTxnTimerValuesTest, SetGetAndUpdate)
 
     delete pTxnTimers;
 
-    EXPECT_EQ(1, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER1));
-    EXPECT_EQ(2, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER2));
-    EXPECT_EQ(3, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER4));
-    EXPECT_EQ(4, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERA));
-    EXPECT_EQ(5, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERB));
-    EXPECT_EQ(6, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERD));
-    EXPECT_EQ(7, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERE));
-    EXPECT_EQ(8, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERF));
-    EXPECT_EQ(9, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERG));
-    EXPECT_EQ(10, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERH));
-    EXPECT_EQ(11, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERI));
-    EXPECT_EQ(12, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERJ));
-    EXPECT_EQ(13, pCopyTxnTimers->GetTimerValue(SipTxn::TIMERK));
+    EXPECT_EQ(1, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_T1));
+    EXPECT_EQ(2, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_T2));
+    EXPECT_EQ(3, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_T4));
+    EXPECT_EQ(4, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_A));
+    EXPECT_EQ(5, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_B));
+    EXPECT_EQ(6, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_D));
+    EXPECT_EQ(7, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_E));
+    EXPECT_EQ(8, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_F));
+    EXPECT_EQ(9, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_G));
+    EXPECT_EQ(10, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_H));
+    EXPECT_EQ(11, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_I));
+    EXPECT_EQ(12, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_J));
+    EXPECT_EQ(13, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_K));
 
     EXPECT_EQ(0, pCopyTxnTimers->GetTimerValue(SipTxn::TIMER_TYPE_INVALID));
 

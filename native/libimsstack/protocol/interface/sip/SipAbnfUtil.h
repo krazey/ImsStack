@@ -165,30 +165,29 @@
     (pch2) = SIP_NULL
 
 #define IS_QdText(ch) \
-    ((ch == 0x21) || ((ch >= 0x23) && (ch <= 0x5B)) || ((ch >= 0x5D) && (ch <= 0x7E)))
+    (((ch) == 0x21) || (((ch) >= 0x23) && ((ch) <= 0x5B)) || (((ch) >= 0x5D) && ((ch) <= 0x7E)))
 
-#define IS_QdTextNoAbkt(ch)                                            \
-    ((ch == 0x21) || ((ch >= 0x23) && (ch <= 0x3B)) || (ch == 0x3D) || \
-            ((ch >= 0x3F) && (ch <= 0x5B)) || ((ch >= 0x5D) && (ch <= 0x7E)))
+#define IS_QdTextNoAbkt(ch)                                                    \
+    (((ch) == 0x21) || (((ch) >= 0x23) && ((ch) <= 0x3B)) || ((ch) == 0x3D) || \
+            (((ch) >= 0x3F) && ((ch) <= 0x5B)) || (((ch) >= 0x5D) && ((ch) <= 0x7E)))
 
-#define IS_QUOTED_PAIR(ch)                                            \
-    (((((SIP_CHAR)ch) >= 0x00) && (((SIP_CHAR)ch) <= 0x09)) ||        \
-            ((((SIP_CHAR)ch) >= 0x0B) && (((SIP_CHAR)ch) <= 0x0C)) || \
-            ((((SIP_CHAR)ch) >= 0x0E) && (((SIP_CHAR)ch) <= 0x7F)))
+#define IS_QUOTED_PAIR(ch)                                                       \
+    ((((ch) >= 0x00) && ((ch) <= 0x09)) || (((ch) >= 0x0B) && ((ch) <= 0x0C)) || \
+            (((ch) >= 0x0E) && ((ch) <= 0x7F)))
 
 /*  %80 - BF*/
-#define IS_UTF8_CONT(ch) ((ch >= 0x80) && (ch <= 0xBF))
+#define IS_UTF8_CONT(ch) (((ch) >= 0x80) && ((ch) <= 0xBF))
 /*
    ctext = %x21-27 / %x2A-5B / %x5D-7E / UTF8-NONASCII/ LWS
 //Check UTF8-NONASCII using validateUTF8-NONASCII()
  */
 
-#define IS_QVAL(ch)      ((ch == 0x30) || (ch == 0x31))
+#define IS_QVAL(ch)      (((ch) == 0x30) || ((ch) == 0x31))
 #define IS_CTEXT(ch)                                                             \
     ((((ch) >= 0x21) && ((ch) <= 0x27)) || (((ch) >= 0x2A) && ((ch) <= 0x5B)) || \
             (((ch) >= 0x5D) && ((ch) <= 0x7E)))
 
-// #define IS_LHEX(ch) (((ch >= 48) && (ch<= 57)) ||(((ch >= 61) && (ch<= 66))) )
+// #define IS_LHEX(ch) ((((ch) >= 48) && ((ch) <= 57)) ||((((ch) >= 61) && ((ch) <= 66))) )
 
 SIP_BOOL HasSpace(const SIP_CHAR* pszValue);
 

@@ -39,14 +39,14 @@ static SIP_BOOL NonInvSer_Send2xx6xxResp(
     SipTransportParameter* pTransparam = pFsmData->m_pTranspParam;
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
-    SIP_UINT32 nDurationTJ = objSipTxnTimers.GetTimerValue(SipTxn::TIMERJ);
+    SIP_UINT32 nDurationTJ = objSipTxnTimers.GetTimerValue(SipTxn::TIMER_J);
 
     SIP_INT32 eTranspMsgSentProtocol = pTransparam->GetTranspProtocol();
 
     /* For Unreliable Transport : Start Timer J*/
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
-        if (pTxn->StartTxnTimer(SipTxn::TIMERJ, nDurationTJ, pnError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMER_J, nDurationTJ, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "NonInvSer_Send2xx6xxResp: StartTxnTimer:Failed \n",
                     SIP_ZERO, SIP_ZERO);

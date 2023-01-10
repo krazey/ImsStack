@@ -29,6 +29,11 @@ SipVector<SipTxn*> objTxnList;
 SIP_BOOL Mock_FetchTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
 {
+    if ((pvTxnKey == SIP_NULL) || (ppvTxn == SIP_NULL))
+    {
+        return SIP_FALSE;
+    }
+
     if (nOption == TXN_OPT_CREATE)
     {
         if (strcmp((static_cast<SipTxnKey*>(pvTxnKey))->GetMethod(), "BYE") == 0)

@@ -17,7 +17,7 @@
 #define _SIP_DATATYPES_H_
 
 #define SIP_NULL             (0)
-#define SIP_INVALID          -1
+#define SIP_INVALID          (-1)
 #define SIP_EQUALS           0
 #define SIP_MATCHES          0
 #define SIP_NOT_MATCH        1

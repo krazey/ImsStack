@@ -457,21 +457,9 @@ SipMsgBody* SipMessage::GetMsgBody(SIP_UINT32 nPos)
 SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
         SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions)
 {
-    if ((m_pReqLine == SIP_NULL) && (m_pStatusLine == SIP_NULL))
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Start Line Missing", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    if ((m_eSipMsgType != SipMessage::REQ_TYPE) && (m_eSipMsgType != SipMessage::RESP_TYPE))
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Invalid sip message type", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
     SIP_CHAR* pCurrPos = *ppSipMsgBuffer;
 
-    if (m_eSipMsgType == SipMessage::REQ_TYPE)
+    if ((m_eSipMsgType == SipMessage::REQ_TYPE) && (m_pReqLine != SIP_NULL))
     {
         if (m_pReqLine->EncodeRequestLine(&pCurrPos) == SIP_FALSE)
         {
@@ -480,7 +468,7 @@ SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
             return SIP_FALSE;
         }
     }
-    else
+    else if ((m_eSipMsgType == SipMessage::RESP_TYPE) && (m_pStatusLine != SIP_NULL))
     {
         if (m_pStatusLine->EncodeStatusLine(&pCurrPos) == SIP_FALSE)
         {
@@ -488,6 +476,12 @@ SIP_BOOL SipMessage::EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
                     ESIPTRACE_MODENCODER, "Encoding status line Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
+    }
+    else
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Start Line Missing or invalid message type",
+                SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
     }
 
     // Put CRLF at the end of Start Line
