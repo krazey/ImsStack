@@ -30,7 +30,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -39,7 +38,6 @@ import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.AlarmTimerAgent;
 import com.android.imsstack.core.agents.ConfigAgent;
-import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.IWifiState;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
@@ -68,25 +66,21 @@ import java.util.HashMap;
 public class SscServiceStateTest {
     private static final int MAX_SIM_SLOT = 1;
     private static final int SLOT_0 = 0;
-    private static final int SLOT_1 = 1;
     private static final int SUB_ID_0 = 1;
     private static final int SUB_ID_1 = 2;
-    private static final int[] SUB_IDS = { SUB_ID_0 };
 
-    private FakeSscServiceState mSscServiceState;
+    private SscServiceState mSscServiceState;
 
     private final int mTimerId = 1;
     private final int mBlockTimer = 1;
     private TestableLooper mLooper;
 
-    private SubscriptionManager mMockSubscriptionManager;
     private TelephonyManager mMockTelephonyManager;
     @Mock private AlarmTimerAgent mMockAlarmTimer;
     @Mock private AosService mMockAosService;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
     @Mock private DcNetWatcher mMockDcNetWatcher;
-    @Mock private ISubscription mMockSubscription;
     @Mock private IUtInterface mMockUtInterface;
     @Mock private IWifiState mMockWifiState;
     @Mock private SimInterface mMockSimInterface;
@@ -122,6 +116,7 @@ public class SscServiceStateTest {
         when(mMockWifiState.isWifiConnected()).thenReturn(false);
         when(mMockDcNetWatcher.isRoaming()).thenReturn(false);
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
+        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_0);
 
         Context context = new ContextFixture().getTestDouble();
         AppContext.init(context);
@@ -131,12 +126,8 @@ public class SscServiceStateTest {
                 .thenReturn(mMockTelephonyManager);
         when(mMockTelephonyManager.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
 
-        mMockSubscriptionManager = context.getSystemService(SubscriptionManager.class);
-        when(mMockSubscriptionManager.getSubscriptionIds(SLOT_0)).thenReturn(SUB_IDS);
-
         AgentFactory.setDefaultAgent(AgentFactory.ALARM_TIMER, mMockAlarmTimer);
         AgentFactory.setDefaultAgent(AgentFactory.WIFI_STATE, mMockWifiState);
-        AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, mMockSubscription);
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
         AosFactory.getInstance().mAosServices.put(SLOT_0, mMockAosService);
 
@@ -152,7 +143,7 @@ public class SscServiceStateTest {
         Looper looper = handlerThread.getLooper();
         mLooper = new TestableLooper(looper);
 
-        mSscServiceState = new FakeSscServiceState(SLOT_0, looper);
+        mSscServiceState = new SscServiceState(SLOT_0, looper);
         mSscServiceState.init();
 
         processDelayedMessage();
@@ -569,19 +560,17 @@ public class SscServiceStateTest {
 
     @Test
     public void testSscSimStateListener_onSimCardStateChangedWhenSimLoaded() {
-        ISscAuthAgent authAgent = SscAuthAgent.getInstance(SLOT_0);
-        authAgent.setIsCredentialInfoUpdated(true);
-        authAgent.setETag("etag");
-        mSscServiceState.mUtBlockReason = SscConstant.BLOCK_REASON_GBA_FAILURE;
-        mSscServiceState.mUtAvailability = false;
+        TelephonyManager tmForSubId1 = org.mockito.Mockito.mock(TelephonyManager.class);
         when(mMockSimInterface.getSimCardState()).thenReturn(Sim.STATE_LOADED);
+        when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_1);
+        when(mMockTelephonyManager.createForSubscriptionId(SUB_ID_1)).thenReturn(tmForSubId1);
 
         ((Sim.Listener) mSscServiceState.mSimStateListener).onSimCardStateChanged();
 
-        assertEquals(SscConstant.BLOCK_REASON_GBA_FAILURE, mSscServiceState.mUtBlockReason);
-        assertEquals(true, authAgent.isCredentialInfoUpdated());
-        assertEquals("etag", authAgent.getETag());
-        verifyNoMoreInteractions(mMockUtInterface);
+        verify(mMockTelephonyManager).unregisterTelephonyCallback(
+                mSscServiceState.mMobileDataStateListener);
+        verify(tmForSubId1).registerTelephonyCallback(AppContext.getInstance().getMainExecutor(),
+                mSscServiceState.mMobileDataStateListener);
     }
 
     @Test
@@ -691,54 +680,6 @@ public class SscServiceStateTest {
     }
 
     @Test
-    public void testSubscriptionListener_onSimLoadCompleted() {
-        mSscServiceState.mSubscriptionListener.onSimLoadCompleted(SLOT_0);
-
-        verify(mMockTelephonyManager, times(0))
-                .unregisterTelephonyCallback(mSscServiceState.mMobileDataStateListener);
-    }
-
-    @Test
-    public void testSubscriptionListener_onDefaultSubscriptionChanged() {
-        when(mMockSubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
-        when(mMockTelephonyManager.createForSubscriptionId(SUB_ID_1))
-                .thenReturn(mMockTelephonyManager);
-        verify(mMockTelephonyManager, times(1)).registerTelephonyCallback(
-                AppContext.getInstance().getMainExecutor(),
-                mSscServiceState.mMobileDataStateListener);
-
-        mSscServiceState.mSubscriptionListener.onDefaultSubscriptionChanged(SUB_ID_1);
-
-        verify(mMockSubscriptionManager).getSubscriptionIds(SLOT_0);
-        verify(mMockTelephonyManager)
-                .unregisterTelephonyCallback(mSscServiceState.mMobileDataStateListener);
-        verify(mMockTelephonyManager).createForSubscriptionId(SUB_ID_1);
-        verify(mMockTelephonyManager, times(2)).registerTelephonyCallback(
-                AppContext.getInstance().getMainExecutor(),
-                mSscServiceState.mMobileDataStateListener);
-    }
-
-    @Test
-    public void testSubscriptionListener_onDefaultDataSubscriptionChanged() {
-        when(mMockSubscription.getSubId(SLOT_0)).thenReturn(SUB_ID_1);
-        when(mMockTelephonyManager.createForSubscriptionId(SUB_ID_1))
-                .thenReturn(mMockTelephonyManager);
-        verify(mMockTelephonyManager, times(1)).registerTelephonyCallback(
-                AppContext.getInstance().getMainExecutor(),
-                mSscServiceState.mMobileDataStateListener);
-
-        mSscServiceState.mSubscriptionListener.onDefaultDataSubscriptionChanged(SUB_ID_1);
-
-        verify(mMockSubscriptionManager).getSubscriptionIds(SLOT_0);
-        verify(mMockTelephonyManager)
-                .unregisterTelephonyCallback(mSscServiceState.mMobileDataStateListener);
-        verify(mMockTelephonyManager).createForSubscriptionId(SUB_ID_1);
-        verify(mMockTelephonyManager, times(2)).registerTelephonyCallback(
-                AppContext.getInstance().getMainExecutor(),
-                mSscServiceState.mMobileDataStateListener);
-    }
-
-    @Test
     public void testMobileDataStateListener_onUserMobileDataStateChangedToOffFromOn() {
         mSscServiceState.mUtAvailability = true;
         mSscServiceState.mMobileDataStateListener.mMobileDataState = true;
@@ -776,23 +717,5 @@ public class SscServiceStateTest {
     private void processDelayedMessage() {
         mLooper.moveTimeForward(1000);
         mLooper.processAllMessages();
-    }
-
-    private static class FakeSscServiceState extends SscServiceState {
-        FakeSscServiceState(int slotId, Looper looper) {
-            super(slotId, looper);
-        }
-
-        @Override
-        protected int getSlotId(int subId) {
-            super.getSlotId(subId);
-
-            if (subId == SUB_ID_0) {
-                return SLOT_0;
-            } else {
-                return SLOT_1;
-            }
-        }
-
     }
 }

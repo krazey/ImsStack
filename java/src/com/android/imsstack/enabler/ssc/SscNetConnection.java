@@ -378,19 +378,18 @@ public class SscNetConnection implements ISscNetConnection {
 
             EApnType apnType = res.eApnType;
             if (mApnType == null || mApnType != apnType) {
-                ImsLog.e("apnType(" + mApnType + ") is not matched : [" + apnType + "]");
                 return;
             }
 
             ImsLog.i("apnType[" + apnType + "], state[" + res.eDataState + "]");
-            EDataState eDataState = res.eDataState;
-            if (eDataState == EDataState.DATA_STATE_CONNECTED) {
+
+            if (res.eDataState == EDataState.DATA_STATE_CONNECTED) {
                 stopTimer(EVENT_PDN_REQUEST_TIMEOUT);
                 startTimer(EVENT_PDN_CONNECTION_EXPIRED, mConnectionInactivityTimer);
                 if (mSscTransactionHandler != null) {
                     mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_CONNECTED);
                 }
-            } else if (eDataState == EDataState.DATA_STATE_DISCONNECTED) {
+            } else if (res.eDataState == EDataState.DATA_STATE_DISCONNECTED) {
                 startTimer(EVENT_PDN_CONNECTION_EXPIRED, DISCONNECTION_DELAY);
                 if (mSscTransactionHandler != null) {
                     mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_DISCONNECTED);
@@ -410,9 +409,9 @@ public class SscNetConnection implements ISscNetConnection {
             }
 
             if (mApnType == EApnType.XCAP && res.eApnType == EApnType.XCAP) {
-                int smCause = res.mSmCause;
-                SscServiceStateAgent.getInstance().setPdnConnectionFailed(mSlotId, smCause);
-                ImsLog.d("smCause : " + smCause);
+                ImsLog.d("smCause : " + res.mSmCause);
+
+                SscServiceStateAgent.getInstance().setPdnConnectionFailed(mSlotId, res.mSmCause);
 
                 if (mSscTransactionHandler != null) {
                     mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_CONNECTION_FAILED);
