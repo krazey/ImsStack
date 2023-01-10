@@ -173,7 +173,6 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     ISipUserData* pSipUserData = new ISipUserData(SIP_NULL);
     SipTransportParameter* pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_UDP);
-    SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, &nError);
     SipTxn* pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     SipTransportInfo* pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
@@ -183,10 +182,13 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
+    SipTimeoutData* pTimeoutData = new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMERA, pTxnKey);
+
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
                                  [SipTxn::INV_CLI_TIMERA_B_TIME_OUT_EVT](
-                                         pTxn, pTxnFsmData, &nError));
+                                         pTxn, pTimeoutData, &nError));
+
     pTxn->SetMaxDuration(8000);
     pTxn->SetTxnState(SipTxn::INV_CLI_CALLING_ST);
     /* Increase max duration to continue retransmission timer A
@@ -194,7 +196,7 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     EXPECT_EQ(SIP_FALSE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
                                  [SipTxn::INV_CLI_TIMERA_B_TIME_OUT_EVT](
-                                         pTxn, pTxnFsmData, &nError));
+                                         pTxn, pTimeoutData, &nError));
 
     pTxn->SetMaxDuration(4000);
     pTxn->SetTxnState(SipTxn::INV_CLI_CALLING_ST);
@@ -203,17 +205,16 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
                                  [SipTxn::INV_CLI_TIMERA_B_TIME_OUT_EVT](
-                                         pTxn, pTxnFsmData, &nError));
+                                         pTxn, pTimeoutData, &nError));
 
+    delete pTimeoutData;
     delete pSipTranspParam;
-    delete pTxnFsmData;
     delete pTxnKey;
     pTxn->SipDelete();
 
     pSipTranspParam = new SipTransportParameter(
             const_cast<char*>("192.168.35.156"), 5060, SipTransportInfo::PROTOCOL_TCP);
 
-    pTxnFsmData = new SipTxnFsmData(pSipMsg, pSipTranspParam, pSipUserData);
     pTxnKey = new SipTxnKey(pSipMsg, &nError);
     pTxn = new SipTxn(SipTxn::INV_CLI_TXN, pTxnKey, pSipMsg, SIP_NULL, &nError);
     pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
@@ -223,15 +224,15 @@ TEST_F(Sip_txn_InvCliFsmTest, InvCli_CallingState)
     pTranspInfo->SetMsgSentTranspParam(pSipSendTranspParam);
     pTxn->UpdateTranspInfo(pTranspInfo);
 
+    pTimeoutData = new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMERB, pTxnKey);
     /* Calling with TCP transport info */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST]
                                  [SipTxn::INV_CLI_TIMERA_B_TIME_OUT_EVT](
-                                         pTxn, pTxnFsmData, &nError));
+                                         pTxn, pTimeoutData, &nError));
+    delete pTimeoutData;
 
-    delete pTxnFsmData;
-
-    pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
+    SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pRespSipMsg, pSipTranspParam, pSipUserData);
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_CALLING_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));
@@ -424,14 +425,17 @@ RSeq: 2\r\n\
 TEST_F(Sip_txn_InvCliFsmTest, InvCli_CompletedState)
 {
     SIP_UINT16 nError = 0;
-
-    SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, SIP_NULL, SIP_NULL);
     SipTxn* pTxn = new SipTxn();
+    SipTimeoutData* pTimeoutData =
+            new SipTimeoutData(SipTxn::INV_CLI_TXN, SipTxn::TIMERD, SIP_NULL);
 
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_COMPLETED_ST]
-                                 [SipTxn::INV_CLI_TIMERD_TIME_OUT_EVT](pTxn, pTxnFsmData, &nError));
+                                 [SipTxn::INV_CLI_TIMERD_TIME_OUT_EVT](
+                                         pTxn, pTimeoutData, &nError));
+    delete pTimeoutData;
 
+    SipTxnFsmData* pTxnFsmData = new SipTxnFsmData(pSipMsg, SIP_NULL, SIP_NULL);
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvClientTxnFsm[SipTxn::INV_CLI_COMPLETED_ST][SipTxn::INV_CLI_RECV_1XX_RESP_EVT](
                     pTxn, pTxnFsmData, &nError));

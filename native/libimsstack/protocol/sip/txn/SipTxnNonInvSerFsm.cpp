@@ -17,7 +17,6 @@
 #include "SipDebug.h"
 #include "SipStackError.h"
 
-#include "txn/SipTimeoutData.h"
 #include "txn/SipTxn.h"
 #include "txn/SipTxnKey.h"
 #include "txn/SipTxnFsmData.h"
@@ -336,13 +335,8 @@ static SIP_BOOL NonInvSerFsm_CompletedStTranspErrorEvt(
 }
 
 static SIP_BOOL NonInvSerFsm_CompletedStTimer_J_TimeoutEvt(
-        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
+        SipTxn* pTxn, SIP_VOID* /*pvData*/, SIP_UINT16* /*pnError*/)
 {
-    SipTimeoutData* pTimeoutData = static_cast<SipTimeoutData*>(pvData);
-
-    (void)pnError;
-    (void)pTimeoutData;
-
     /* State Transition */
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TERMINATED_ST);
     return SIP_TRUE;
