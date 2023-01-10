@@ -24,10 +24,12 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsSuppServiceNotification;
+import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 
 import com.android.imsstack.util.ImsLog;
 
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 public class ImsCallSessionCallback {
@@ -929,6 +931,29 @@ public class ImsCallSessionCallback {
         });
     }
 
+    /**
+     * Called to report incoming RTP header extension data.
+     *
+     * @param extensions The header extension data eceived.
+     */
+    public void invokeRtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
+        postAndRunTask(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (mListener == null) {
+                        return;
+                    }
+
+                    log("invokeRtpHeaderExtensionsReceived :: " + extensions);
+
+                    mListener.callSessionRtpHeaderExtensionsReceived(extensions);
+                } catch (Throwable t) {
+                    log(t, "invokeRtpHeaderExtensionsReceived");
+                }
+            }
+        });
+    }
 
     private void closeSession(ImsCallSessionImplBase session, Throwable t) {
         Throwable cause = t.getCause();

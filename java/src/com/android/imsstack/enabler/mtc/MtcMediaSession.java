@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
 import android.telephony.CallQuality;
+import android.telephony.ims.RtpHeaderExtension;
 import android.view.Surface;
 
 import com.android.imsstack.enabler.IBaseContext;
@@ -25,6 +26,9 @@ import com.android.imsstack.enabler.media.IMediaListener;
 import com.android.imsstack.enabler.media.MediaFactory;
 import com.android.imsstack.enabler.media.MediaSession;
 import com.android.imsstack.util.ImsLog;
+
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * class to handle calls to or from ImsMedia, ImsService, videoprovider
@@ -54,6 +58,13 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
          * Called when the audio call quality changed message received
          */
         public void onCallQualityChanged(CallQuality callQuality) {
+            // no-op
+        }
+
+        /**
+         * Called when the RTP header extension data received
+         */
+        public void onRtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
             // no-op
         }
     }
@@ -344,6 +355,17 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         }
     }
 
+    /**
+     * Notifies when the remote party has sent RTP header extension data
+     * @param extensions the RTP header extension data
+     */
+    public void rtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
+        log("rtpHeaderExtensionsReceived");
+        if (mAudioListener != null) {
+            mAudioListener.onRtpHeaderExtensionsReceived(extensions);
+        }
+    }
+
     // TODO MEDIA : RTT audio indicator to be implemented
 
     /**
@@ -477,6 +499,28 @@ public class MtcMediaSession implements IMtcMediaVideoCallProvider, IMtcMediaInt
         parcel.writeInt(IUMtcMedia.SEND_RTT_CMD);
         parcel.writeInt(IUMtcMedia.SESSION_TYPE_RTT);
         parcel.writeString(rttMessage);
+        parcel.setDataPosition(0);
+
+        onMessage(parcel);
+    }
+
+    /**
+     * Sends the Rtp header extensions to Media session
+     *
+     * @param rtpHeaderExtensions The header extensions to be included in the next RTP header.
+     */
+    public void sendRtpHeaderExtensions(Set<RtpHeaderExtension> rtpHeaderExtensions) {
+        log("sendRtpHeaderExtensions");
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcMedia.SEND_HEADER_EXTENSION);
+        parcel.writeInt(IUMtcMedia.SESSION_TYPE_AUDIO);
+        parcel.writeInt(rtpHeaderExtensions.size());
+
+        Iterator<RtpHeaderExtension> extensions = rtpHeaderExtensions.iterator();
+        while (extensions.hasNext()) {
+            RtpHeaderExtension rtpExt = extensions.next();
+            rtpExt.writeToParcel(parcel, 1);
+        }
         parcel.setDataPosition(0);
 
         onMessage(parcel);

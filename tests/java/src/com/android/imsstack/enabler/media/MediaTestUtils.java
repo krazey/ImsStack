@@ -35,7 +35,9 @@ import android.telephony.imsmedia.VideoConfig;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MediaTestUtils {
 
@@ -188,6 +190,14 @@ public class MediaTestUtils {
         byte[] testBytes = new byte[MAX_BYTES];
         testBytes[0] = BYTE_DATA;
         ArrayList extensions = new ArrayList<RtpHeaderExtension>();
+        extensions.add(new RtpHeaderExtension(LOCAL_IDENTIFIER, testBytes));
+        return extensions;
+    }
+
+    public static Set<RtpHeaderExtension> createRtpExtensionsSet() {
+        byte[] testBytes = new byte[MAX_BYTES];
+        testBytes[0] = BYTE_DATA;
+        Set<RtpHeaderExtension> extensions = new HashSet<RtpHeaderExtension>();
         extensions.add(new RtpHeaderExtension(LOCAL_IDENTIFIER, testBytes));
         return extensions;
     }

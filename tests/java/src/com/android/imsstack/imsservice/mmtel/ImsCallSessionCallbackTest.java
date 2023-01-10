@@ -22,6 +22,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.os.DeadSystemException;
@@ -33,11 +34,13 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsSuppServiceNotification;
+import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.enabler.media.MediaTestUtils;
 import com.android.imsstack.imsservice.mmtel.ImsCallSessionCallback;
 import com.android.imsstack.util.MessageExecutor;
 
@@ -47,6 +50,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+
+import java.util.Set;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -1027,6 +1032,33 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeCallQualityChanged(callQuality);
         processAllMessages();
         verify(mockRuntimeException).getMessage();
+    }
+
+    @Test
+    public void testInvokeRtpHeaderExtensionsReceived() {
+        Set<RtpHeaderExtension> extensions = MediaTestUtils.createRtpExtensionsSet();
+        mImsCallSessionCallback.invokeRtpHeaderExtensionsReceived(extensions);
+        processAllMessages();
+        verify(mMockListener, times(1)).callSessionRtpHeaderExtensionsReceived(extensions);
+    }
+
+    @Test
+    public void testInvokeRtpHeaderExtensionsReceivedForNullListener() {
+        Set<RtpHeaderExtension> extensions = MediaTestUtils.createRtpExtensionsSet();
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeRtpHeaderExtensionsReceived(extensions);
+        verify(mMockListener, never()).callSessionRtpHeaderExtensionsReceived(extensions);
+    }
+
+    @Test
+    public void testInvokeRtpHeaderExtensionsReceivedException() {
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+        Set<RtpHeaderExtension> extensions = MediaTestUtils.createRtpExtensionsSet();
+        doThrow(mockRuntimeException).when(mMockListener)
+                .callSessionRtpHeaderExtensionsReceived(extensions);
+        mImsCallSessionCallback.invokeRtpHeaderExtensionsReceived(extensions);
+        processAllMessages();
+        verify(mockRuntimeException, times(1)).getMessage();
     }
 
     @Test

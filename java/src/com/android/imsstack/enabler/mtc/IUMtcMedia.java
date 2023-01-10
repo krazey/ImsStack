@@ -30,6 +30,7 @@ public class IUMtcMedia {
     public static final int IMS_MSG_MAX_MEDIA             = IMS_MEDIA_MSG_IND + 100;
 
     /** Audio related command starting index */
+    public static final int IMS_MSG_BASE_MEDIA_AUDIO_CMD = IMS_MEDIA_MSG_CMD;
     public static final int IMS_MSG_BASE_MEDIA_AUDIO_IND = IMS_MEDIA_MSG_IND;
     /** Video related command starting index */
     public static final int IMS_MSG_BASE_MEDIA_VIDEO_IND = IMS_MEDIA_MSG_IND + 50;
@@ -37,6 +38,7 @@ public class IUMtcMedia {
     public static final int IMS_MSG_BASE_MEDIA_TEXT_CMD = IMS_MEDIA_MSG_CMD + 80;
     public static final int IMS_MSG_BASE_MEDIA_TEXT_IND = IMS_MEDIA_MSG_IND + 80;
 
+    public static final int SEND_HEADER_EXTENSION        = (IMS_MSG_BASE_MEDIA_AUDIO_CMD + 9);
     /** Send dtmf digit value to native */
     public static final int SEND_DTMF = (IMS_MSG_BASE_MEDIA_AUDIO_IND + 19);
     /** Set surface buffer to native */

@@ -163,24 +163,10 @@ public class AudioSessionCallbackHandlerTest {
     public void testHeaderExtensionReceived() {
 
         List<RtpHeaderExtension> rtpExtensions = MediaTestUtils.createRtpExtensions();
-        Parcel testParcel = Parcel.obtain();
-
-        testParcel.writeInt(MediaConstants.NOTIFY_HEADER_EXTENSION);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        testParcel.writeInt(rtpExtensions.size());
-
-        if (!rtpExtensions.isEmpty()) {
-            for (int i = 0; i < rtpExtensions.size(); ++i) {
-                rtpExtensions.get(i).writeToParcel(testParcel,
-                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            }
-        }
-
         mAudioSessionCallbackHandler.headerExtensionReceived(rtpExtensions);
 
-        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
-        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
+        verify(mMockMtcMediaSession).rtpHeaderExtensionsReceived(
+                eq(MediaTestUtils.createRtpExtensionsSet()));
     }
 
     @Test

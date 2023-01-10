@@ -29,6 +29,7 @@ import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This handles callbacks received from {@link ImsMediaManager} and passes it to
@@ -143,18 +144,8 @@ public class AudioSessionCallbackHandler {
     public void headerExtensionReceived(List<RtpHeaderExtension> rtpExtensions) {
         ImsLog.v("headerExtensionReceived");
 
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(MediaConstants.NOTIFY_HEADER_EXTENSION);
-        parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        parcel.writeInt(rtpExtensions.size());
-        if (!rtpExtensions.isEmpty()) {
-            for (int i = 0; i < rtpExtensions.size(); ++i) {
-                rtpExtensions.get(i).writeToParcel(parcel,
-                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            }
-        }
-
-        getMtcMediaInterface().sendRequest(parcel);
+        getMtcMediaInterface().rtpHeaderExtensionsReceived(
+                rtpExtensions.stream().collect(Collectors.toSet()));
     }
 
     /**

@@ -38,9 +38,11 @@ import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
+import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.util.Log;
 
+import com.android.imsstack.enabler.media.MediaTestUtils;
 import com.android.imsstack.enabler.mtc.Call;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
@@ -65,6 +67,7 @@ import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RunWith(JUnit4.class)
 public class ImsCallSessionImplTest {
@@ -687,6 +690,22 @@ public class ImsCallSessionImplTest {
         mImsCallSession.setState(ImsCallSessionImplBase.State.INVALID);
         assertEquals(PreciseCallState.PRECISE_CALL_STATE_NOT_VALID,
                 mImsCallSession.getPreciseState());
+    }
+
+    @Test
+    public void testSendRtpHeaderExtensions() {
+        Set<RtpHeaderExtension> extensions = MediaTestUtils.createRtpExtensionsSet();
+        mImsCallSession.sendRtpHeaderExtensions(extensions);
+        verify(mMockMtcCall, times(1)).sendRtpHeaderExtensions(eq(extensions));
+    }
+
+    @Test
+    public void testOnCallRtpHeaderExtensionsReceived() {
+        Set<RtpHeaderExtension> extensions = MediaTestUtils.createRtpExtensionsSet();
+        mImsCallSession.getMtcCallListenerProxy().onCallRtpHeaderExtensionsReceived(
+                mMockMtcCall, extensions);
+        verify(mMockImsCallSessionCallback, times(1)).invokeRtpHeaderExtensionsReceived(
+                eq(extensions));
     }
 
     private void verifyWaitOrNotifyCallTerminated() {

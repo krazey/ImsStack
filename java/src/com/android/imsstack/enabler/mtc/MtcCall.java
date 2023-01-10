@@ -21,6 +21,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.telephony.CallQuality;
+import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.text.TextUtils;
 
@@ -32,6 +33,8 @@ import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsArgs;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Set;
 
 public class MtcCall extends Call implements ConferenceTracker {
     /**
@@ -256,6 +259,15 @@ public class MtcCall extends Call implements ConferenceTracker {
         public void onCallQualityChanged(MtcCall call, CallQuality quality) {
             // no-op
         }
+
+        /**
+         * Called when the RTP header extension data is received
+         * @param extensions the RTP header extension data
+         */
+        public void onCallRtpHeaderExtensionsReceived(MtcCall call,
+                Set<RtpHeaderExtension> extensions) {
+            // no-op
+        }
     }
 
     /**
@@ -275,6 +287,11 @@ public class MtcCall extends Call implements ConferenceTracker {
         @Override
         public void onCallQualityChanged(CallQuality callQuality) {
             Message.obtain(mHandler, MSG_AUDIO_QUALITY_CHANGED, callQuality).sendToTarget();
+        }
+
+        @Override
+        public void onRtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions) {
+            Message.obtain(mHandler, MSG_AUDIO_RTP_EXTENSION_RECEIVED, extensions).sendToTarget();
         }
     }
 
@@ -347,6 +364,7 @@ public class MtcCall extends Call implements ConferenceTracker {
     private static final int MSG_AUDIO_SESSION_OPENED = 401;
     private static final int MSG_AUDIO_SESSION_CLOSED = 402;
     private static final int MSG_AUDIO_QUALITY_CHANGED = 403;
+    private static final int MSG_AUDIO_RTP_EXTENSION_RECEIVED = 404;
 
     private final MessageHandler mHandler;
     private final JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
@@ -443,9 +461,15 @@ public class MtcCall extends Call implements ConferenceTracker {
         mHandler = new MessageHandler(looper);
         mConference = mtcConference;
         mMediaSession = mtcMediaSession;
+        mAudioListener = new AudioSessionListener();
         mMtcJniProxy = mtcJniProxy;
         mCallInfo = new MtcCallInfo(callInfo);
         mMediaInfo = mediaInfo;
+    }
+
+    @VisibleForTesting
+    MtcMediaSession.AudioListener getAudioListener() {
+        return mAudioListener;
     }
 
     @Override
@@ -1150,6 +1174,17 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
+    /**
+     * Requests that {@code rtpHeaderExtensions} are sent as a header extension with the next
+     * RTP packet sent by the ImsMedia.
+     * @param rtpHeaderExtensions The header extensions to be included in the next RTP header.
+     */
+    public void sendRtpHeaderExtensions(Set<RtpHeaderExtension> rtpHeaderExtensions) {
+        if (mMediaSession != null) {
+            mMediaSession.sendRtpHeaderExtensions(rtpHeaderExtensions);
+        }
+    }
+
     public void sendUssd(String ussdMessage) {
         log("sendUssd :: ussdMessage=" + ussdMessage);
 
@@ -1584,6 +1619,7 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
         }
 
+        @SuppressWarnings("unchecked")
         private void handleMessageForListener(Message msg) {
             Listener listener = mListener;
 
@@ -1628,6 +1664,11 @@ public class MtcCall extends Call implements ConferenceTracker {
                 }
                 case MSG_AUDIO_QUALITY_CHANGED: {
                     listener.onCallQualityChanged(MtcCall.this, (CallQuality) msg.obj);
+                    break;
+                }
+                case MSG_AUDIO_RTP_EXTENSION_RECEIVED: {
+                    listener.onCallRtpHeaderExtensionsReceived(
+                            MtcCall.this, (Set<RtpHeaderExtension>) msg.obj);
                     break;
                 }
                 default:

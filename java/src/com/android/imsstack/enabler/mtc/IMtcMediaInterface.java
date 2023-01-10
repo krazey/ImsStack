@@ -18,8 +18,11 @@ package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
 import android.telephony.CallQuality;
+import android.telephony.ims.RtpHeaderExtension;
 
 import com.android.imsstack.enabler.media.IMediaListener;
+
+import java.util.Set;
 
 /**
  * Interface to interact with MtcMediaSession
@@ -56,4 +59,10 @@ public interface IMtcMediaInterface {
      * @param callQuality Defined in android.telephony.CallQuality
      */
     void callQualityChanged(CallQuality callQuality);
+
+    /**
+     * Notifies when the remote party has sent RTP header extension data
+     * @param extensions the RTP header extension data
+     */
+    void rtpHeaderExtensionsReceived(Set<RtpHeaderExtension> extensions);
 }

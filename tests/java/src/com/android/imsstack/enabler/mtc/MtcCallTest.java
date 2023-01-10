@@ -33,11 +33,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.ims.RtpHeaderExtension;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.media.MediaTestUtils;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsArgs;
@@ -50,6 +52,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Set;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -598,6 +602,14 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     @Test
+    public void testSendRtpHeaderExtensions() {
+        Set<RtpHeaderExtension> extensions = MediaTestUtils.createRtpExtensionsSet();
+        mTestMtcCall.sendRtpHeaderExtensions(extensions);
+
+        verify(mMtcMediaSession, times(1)).sendRtpHeaderExtensions(eq(extensions));
+    }
+
+    @Test
     public void testGetMediaSession() {
         assertEquals(mMtcMediaSession, mTestMtcCall.getMediaSession());
     }
@@ -828,5 +840,16 @@ public class MtcCallTest extends ImsStackTest {
     @Test
     public void testGetCallId() {
         assertNotNull(mTestMtcCall.getCallId());
+    }
+
+    @Test
+    public void testRtpHeaderExtensionsReceived() {
+        mTestMtcCall.setListener(mListener);
+        Set<RtpHeaderExtension> extensions = MediaTestUtils.createRtpExtensionsSet();
+        mTestMtcCall.getAudioListener().onRtpHeaderExtensionsReceived(extensions);
+        processAllMessages();
+
+        verify(mListener, times(1)).onCallRtpHeaderExtensionsReceived(
+                eq(mTestMtcCall), eq(extensions));
     }
 }

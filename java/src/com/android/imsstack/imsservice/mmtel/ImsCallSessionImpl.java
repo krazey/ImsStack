@@ -33,6 +33,7 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsVideoCallProvider;
+import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.text.TextUtils;
 
@@ -77,7 +78,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 
 public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private static final boolean DBG = ImsLog.isDebuggable();
@@ -179,6 +180,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         setApnStateListener();
         updateCallExtraForRatType(mCallProfile, true);
+    }
+
+    @VisibleForTesting
+    MtcCall.Listener getMtcCallListenerProxy() {
+        return mListenerProxy;
     }
 
     @Override
@@ -1116,6 +1122,16 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         mCall.sendRttMessage(rttMessage);
+    }
+
+    @Override
+    public void sendRtpHeaderExtensions(@NonNull Set<RtpHeaderExtension> rtpHeaderExtensions) {
+        if (mCall == null) {
+            loge("sendRtpHeaderExtensions :: session is null");
+            return;
+        }
+
+        mCall.sendRtpHeaderExtensions(rtpHeaderExtensions);
     }
 
     // @Override
@@ -4413,6 +4429,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             logi("onCallQualityChanged");
             mCallback.invokeCallQualityChanged(callQuality);
+        }
+
+        @Override
+        public void onCallRtpHeaderExtensionsReceived(MtcCall call,
+                Set<RtpHeaderExtension> extensions) {
+            if (!call.equals(mCall)) {
+                return;
+            }
+
+            logi("onCallRtpHeaderExtensionsReceived");
+            mCallback.invokeRtpHeaderExtensionsReceived(extensions);
         }
 
         private void onVideoCallHoldReceived(final MtcCall call,
