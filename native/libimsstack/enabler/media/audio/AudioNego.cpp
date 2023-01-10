@@ -53,8 +53,11 @@ AudioNego::AudioNego(IN const AudioNego& objAudioNego) :
 PUBLIC
 AudioNego& AudioNego::operator=(IN const AudioNego& obj)
 {
-    copy(&obj);
-    return *this;
+    if (this != &obj)
+    {
+        copy(&obj);
+    }
+    return (*this);
 }
 
 PUBLIC VIRTUAL AudioNego::~AudioNego()
@@ -892,20 +895,27 @@ IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
                 {
                     pNewOaModel->pLocalProfile = new AudioProfile(m_objBaseProfile);
                 }
-                else
+                else if (pPrevOaModel->pNegotiatedProfile != IMS_NULL)
                 {
                     pNewOaModel->pLocalProfile =
                             new AudioProfile(*pPrevOaModel->pNegotiatedProfile);
                 }
             }
         }
+    }
 
-        // set default AS value when localProfile AS value is 0 in ReOffer case
-        if (pNewOaModel->pLocalProfile->nBandwidthAs <= 0)
-        {
-            IMS_TRACE_I("FormReoffer() - use default AS value", 0, 0, 0);
-            pNewOaModel->pLocalProfile->nBandwidthAs = m_objBaseProfile.nBandwidthAs;
-        }
+    if (pNewOaModel->pLocalProfile == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "create LocalProfile has failed", 0, 0, 0);
+        delete pNewOaModel;
+        return IMS_FALSE;
+    }
+
+    // set default AS value when localProfile AS value is 0 in ReOffer case
+    if (pNewOaModel->pLocalProfile->nBandwidthAs <= 0)
+    {
+        IMS_TRACE_I("FormReoffer() - use default AS value", 0, 0, 0);
+        pNewOaModel->pLocalProfile->nBandwidthAs = m_objBaseProfile.nBandwidthAs;
     }
 
     // Modify a direction by Enabler
@@ -2498,7 +2508,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 }
 
 PRIVATE
-IMS_BOOL AudioNego::GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::EvsFmtp* pFmtp)
+IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfile::EvsFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -3010,7 +3020,7 @@ IMS_BOOL AudioNego::FindEvsInProfile(IN AudioProfile* pLocalProfile,
 }
 
 PRIVATE
-IMS_BOOL AudioNego::GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrFmtp* pFmtp)
+IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfile::AmrFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -3724,7 +3734,7 @@ IMS_BOOL AudioNego::FindTelephoneEventInProfile(
     return IMS_FALSE;
 }
 
-PRIVATE IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN AString strCodecName,
+PRIVATE IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN const AString& strCodecName,
         IN AudioProfile* pLocalProfile, IN AudioProfile::Payload* pDstPayload,
         IN IMS_BOOL bIsOfferReceived)
 {
@@ -4037,17 +4047,13 @@ MEDIA_DIRECTION AudioNego::UpdateDirectionToMine(
     if (bIsMtCase == IMS_FALSE)
     {
         // direction check strictly
-        if (eSrcDir == MEDIA_DIRECTION_SEND &&
-                (ePeerDir == MEDIA_DIRECTION_SEND || ePeerDir == MEDIA_DIRECTION_SEND_RECEIVE))
-        {
-            return MEDIA_DIRECTION_INVALID;
-        }
-        else if (eSrcDir == MEDIA_DIRECTION_RECEIVE &&
-                (ePeerDir == MEDIA_DIRECTION_RECEIVE || ePeerDir == MEDIA_DIRECTION_SEND_RECEIVE))
-        {
-            return MEDIA_DIRECTION_INVALID;
-        }
-        else if (eSrcDir == MEDIA_DIRECTION_INACTIVE && (ePeerDir != MEDIA_DIRECTION_INACTIVE))
+        if ((eSrcDir == MEDIA_DIRECTION_SEND &&
+                    (ePeerDir == MEDIA_DIRECTION_SEND ||
+                            ePeerDir == MEDIA_DIRECTION_SEND_RECEIVE)) ||
+                (eSrcDir == MEDIA_DIRECTION_RECEIVE &&
+                        (ePeerDir == MEDIA_DIRECTION_RECEIVE ||
+                                ePeerDir == MEDIA_DIRECTION_SEND_RECEIVE)) ||
+                (eSrcDir == MEDIA_DIRECTION_INACTIVE && (ePeerDir != MEDIA_DIRECTION_INACTIVE)))
         {
             return MEDIA_DIRECTION_INVALID;
         }
@@ -4374,11 +4380,8 @@ AudioNego::OaModel* AudioNego::GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed)
         OaModel* pLatestOaModel = m_lstOaModel.GetAt(nTempOaModelCount - 1);
         if (pLatestOaModel != IMS_NULL)
         {
-            if (pLatestOaModel->IsAllProfileExist() == IMS_TRUE && bCheckConfirmed == IMS_FALSE)
-            {
-                return pLatestOaModel;
-            }
-            else if (pLatestOaModel->bConfirmedSession == IMS_TRUE && bCheckConfirmed == IMS_TRUE)
+            if ((pLatestOaModel->IsAllProfileExist() == IMS_TRUE && bCheckConfirmed == IMS_FALSE) ||
+                    (pLatestOaModel->bConfirmedSession == IMS_TRUE && bCheckConfirmed == IMS_TRUE))
             {
                 return pLatestOaModel;
             }

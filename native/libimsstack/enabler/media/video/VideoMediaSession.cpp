@@ -402,7 +402,7 @@ IMS_BOOL VideoMediaSession::UpdateMediaQualityThreshold(
 }
 
 PUBLIC
-void VideoMediaSession::UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort)
+void VideoMediaSession::UpdateLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     if (!objLocalAddr.ToString().IsNULL())
     {

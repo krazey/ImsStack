@@ -24,8 +24,6 @@
 #include "MockICarrierConfig.h"
 #include "config/CodecHevcConfig.h"
 
-using ::testing::Return;
-
 static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const IMS_SINT32 DEFAULT_TYPE = ImsCodec::VIDEO_HEVC;
 static const IMS_SINT32 DEFAULT_PAYLOAD_NUM = 3;

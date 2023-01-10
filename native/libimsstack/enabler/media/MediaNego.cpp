@@ -600,9 +600,7 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
     // Change the negotiation state
     switch (m_eNegoState)
     {
-        case STATE_IDLE:
-            m_eNegoState = STATE_OFFER_RECEIVED;
-            break;
+        case STATE_IDLE:  // FALL-THROUGH
         case STATE_NEGOTIATED:
             m_eNegoState = STATE_OFFER_RECEIVED;
             break;

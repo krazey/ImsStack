@@ -41,21 +41,22 @@ public:
                 nSamplingRate(0),
                 nChannel(0){};
 
-        RtpMap(IN const RtpMap& obj)
-        {
-            this->nPayloadNum = obj.nPayloadNum;
-            this->strPayloadType = obj.strPayloadType;
-            this->nSamplingRate = obj.nSamplingRate;
-            this->nChannel = obj.nChannel;
-        }
+        RtpMap(IN const RtpMap& obj) :
+                nPayloadNum(obj.nPayloadNum),
+                strPayloadType(obj.strPayloadType),
+                nSamplingRate(obj.nSamplingRate),
+                nChannel(obj.nChannel){};
 
         RtpMap& operator=(IN const RtpMap& obj)
         {
-            this->nPayloadNum = obj.nPayloadNum;
-            this->strPayloadType = obj.strPayloadType;
-            this->nSamplingRate = obj.nSamplingRate;
-            this->nChannel = obj.nChannel;
-            return *this;
+            if (this != &obj)
+            {
+                nPayloadNum = obj.nPayloadNum;
+                strPayloadType = obj.strPayloadType;
+                nSamplingRate = obj.nSamplingRate;
+                nChannel = obj.nChannel;
+            }
+            return (*this);
         }
     };
 
@@ -98,26 +99,26 @@ public:
                 return;
             }
 
-            this->eResolution = pFmtp->eResolution;
-            this->nBitrate = pFmtp->nBitrate;
-            this->nFrameRate = pFmtp->nFrameRate;
-            this->nAs = pFmtp->nAs;
-            this->nProfile = pFmtp->nProfile;
-            this->nLevel = pFmtp->nLevel;
-            this->strVps = pFmtp->strVps;
-            this->strSps = pFmtp->strSps;
-            this->strPps = pFmtp->strPps;
-            this->strSpropParam = pFmtp->strSpropParam;
-            this->nPacketizationMode = pFmtp->nPacketizationMode;
-            this->bShow_Profile = pFmtp->bShow_Profile;
-            this->bShow_Level = pFmtp->bShow_Level;
-            this->bShow_SpropParam = pFmtp->bShow_SpropParam;
-            this->bShow_PacketizationMode = pFmtp->bShow_PacketizationMode;
+            eResolution = pFmtp->eResolution;
+            nBitrate = pFmtp->nBitrate;
+            nFrameRate = pFmtp->nFrameRate;
+            nAs = pFmtp->nAs;
+            nProfile = pFmtp->nProfile;
+            nLevel = pFmtp->nLevel;
+            strVps = pFmtp->strVps;
+            strSps = pFmtp->strSps;
+            strPps = pFmtp->strPps;
+            strSpropParam = pFmtp->strSpropParam;
+            nPacketizationMode = pFmtp->nPacketizationMode;
+            bShow_Profile = pFmtp->bShow_Profile;
+            bShow_Level = pFmtp->bShow_Level;
+            bShow_SpropParam = pFmtp->bShow_SpropParam;
+            bShow_PacketizationMode = pFmtp->bShow_PacketizationMode;
         };
 
         HevcFmtp(IN const VIDEO_RESOLUTION resol, IN const VIDEO_PROFILE_HEVC profile,
                 IN const IMS_UINT32 level, IN const IMS_UINT32 packetization,
-                IN const AString sprop) :
+                IN const AString& sprop) :
                 eResolution(resol),
                 nBitrate(0),
                 nFrameRate(30),
@@ -170,25 +171,25 @@ public:
                 return;
             }
 
-            this->eResolution = pFmtp->eResolution;
-            this->nBitrate = pFmtp->nBitrate;
-            this->nFrameRate = pFmtp->nFrameRate;
-            this->nAs = pFmtp->nAs;
-            this->nProfile = pFmtp->nProfile;
-            this->nLevel = pFmtp->nLevel;
+            eResolution = pFmtp->eResolution;
+            nBitrate = pFmtp->nBitrate;
+            nFrameRate = pFmtp->nFrameRate;
+            nAs = pFmtp->nAs;
+            nProfile = pFmtp->nProfile;
+            nLevel = pFmtp->nLevel;
 
-            this->strProfileLevelId = pFmtp->strProfileLevelId;
-            this->nPacketizationMode = pFmtp->nPacketizationMode;
-            this->strSpropParam = pFmtp->strSpropParam;
+            strProfileLevelId = pFmtp->strProfileLevelId;
+            nPacketizationMode = pFmtp->nPacketizationMode;
+            strSpropParam = pFmtp->strSpropParam;
 
-            this->bShow_ProfileLevelId = pFmtp->bShow_ProfileLevelId;
-            this->bShow_PacketizationMode = pFmtp->bShow_PacketizationMode;
-            this->bShow_SpropParam = pFmtp->bShow_SpropParam;
+            bShow_ProfileLevelId = pFmtp->bShow_ProfileLevelId;
+            bShow_PacketizationMode = pFmtp->bShow_PacketizationMode;
+            bShow_SpropParam = pFmtp->bShow_SpropParam;
         };
 
         AvcFmtp(IN const VIDEO_RESOLUTION resol, IN const VIDEO_PROFILE_AVC profile,
-                IN const IMS_UINT32 level, IN const AString profileLevelID,
-                IN const IMS_UINT32 packetization, IN const AString sprop) :
+                IN const IMS_UINT32& level, IN const AString& profileLevelID,
+                IN const IMS_UINT32& packetization, IN const AString& sprop) :
                 eResolution(resol),
                 nBitrate(0),
                 nFrameRate(15),
@@ -227,14 +228,17 @@ public:
 
         RtcpFbAttributes& operator=(IN const RtcpFbAttributes& obj)
         {
-            this->bTrrSupported = obj.bTrrSupported;
-            this->nTrrInt = obj.nTrrInt;
-            this->bNackSupported = obj.bNackSupported;
-            this->bTmmbrSupported = obj.bTmmbrSupported;
-            this->nTmmbrSmaxPr = obj.nTmmbrSmaxPr;
-            this->bPliSupported = obj.bPliSupported;
-            this->bFirSupported = obj.bFirSupported;
-            return *this;
+            if (this != &obj)
+            {
+                bTrrSupported = obj.bTrrSupported;
+                nTrrInt = obj.nTrrInt;
+                bNackSupported = obj.bNackSupported;
+                bTmmbrSupported = obj.bTmmbrSupported;
+                nTmmbrSmaxPr = obj.nTmmbrSmaxPr;
+                bPliSupported = obj.bPliSupported;
+                bFirSupported = obj.bFirSupported;
+            }
+            return (*this);
         }
     };
 
@@ -255,12 +259,15 @@ public:
 
         CapaNego& operator=(IN const CapaNego& obj)
         {
-            this->mapTransportCapa = obj.mapTransportCapa;
-            this->mapAttributeCapa = obj.mapAttributeCapa;
-            this->lstPotentialConfig = obj.lstPotentialConfig;
-            this->strNegotiatedAcfg = obj.strNegotiatedAcfg;
-            this->bIsAttCapaInPcfg = obj.bIsAttCapaInPcfg;
-            return *this;
+            if (this != &obj)
+            {
+                mapTransportCapa = obj.mapTransportCapa;
+                mapAttributeCapa = obj.mapAttributeCapa;
+                lstPotentialConfig = obj.lstPotentialConfig;
+                strNegotiatedAcfg = obj.strNegotiatedAcfg;
+                bIsAttCapaInPcfg = obj.bIsAttCapaInPcfg;
+            }
+            return (*this);
         }
     };
 
@@ -284,7 +291,7 @@ public:
 
         Payload(IN const Payload& obj)
         {
-            this->objRtpMap = obj.objRtpMap;
+            objRtpMap = obj.objRtpMap;
 
             if (objRtpMap.strPayloadType.Equals("H264"))
             {
@@ -297,10 +304,10 @@ public:
                         reinterpret_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
             }
 
-            this->bIncludeImageAttr = obj.bIncludeImageAttr;
-            this->bIncludeFrameSize = obj.bIncludeFrameSize;
-            this->strImageAttr = obj.strImageAttr;
-            this->objRtcpFbAttr = obj.objRtcpFbAttr;
+            bIncludeImageAttr = obj.bIncludeImageAttr;
+            bIncludeFrameSize = obj.bIncludeFrameSize;
+            strImageAttr = obj.strImageAttr;
+            objRtcpFbAttr = obj.objRtcpFbAttr;
         }
 
         virtual ~Payload() { deleteFmtp(); }
@@ -309,7 +316,7 @@ public:
         {
             if (this != &obj)
             {
-                this->objRtpMap = obj.objRtpMap;
+                objRtpMap = obj.objRtpMap;
                 deleteFmtp();
 
                 if (objRtpMap.strPayloadType.Equals("H264"))
@@ -323,16 +330,16 @@ public:
                             reinterpret_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
                 }
 
-                this->bIncludeImageAttr = obj.bIncludeImageAttr;
-                this->bIncludeFrameSize = obj.bIncludeFrameSize;
-                this->strImageAttr = obj.strImageAttr;
-                this->objRtcpFbAttr = obj.objRtcpFbAttr;
+                bIncludeImageAttr = obj.bIncludeImageAttr;
+                bIncludeFrameSize = obj.bIncludeFrameSize;
+                strImageAttr = obj.strImageAttr;
+                objRtcpFbAttr = obj.objRtcpFbAttr;
             }
 
-            return *this;
+            return (*this);
         }
 
-        void SetRtpMap(IN const IMS_UINT32 payloadNum, IN const AString payloadType,
+        void SetRtpMap(IN const IMS_UINT32& payloadNum, IN const AString& payloadType,
                 const IN IMS_UINT32 samplingRate, IN const IMS_SINT32 nChannel)
         {
             objRtpMap.nPayloadNum = payloadNum;
@@ -351,11 +358,11 @@ public:
 
             if (objRtpMap.strPayloadType.Equals("H264"))
             {
-                delete reinterpret_cast<VideoProfile::AvcFmtp*>(this->pFmtp);
+                delete reinterpret_cast<VideoProfile::AvcFmtp*>(pFmtp);
             }
             else if (objRtpMap.strPayloadType.Equals("H265"))
             {
-                delete reinterpret_cast<VideoProfile::HevcFmtp*>(this->pFmtp);
+                delete reinterpret_cast<VideoProfile::HevcFmtp*>(pFmtp);
             }
         }
     };
@@ -402,9 +409,12 @@ public:
 
     VideoProfile& operator=(IN const VideoProfile& obj)
     {
-        copy(&obj);
+        if (this != &obj)
+        {
+            copy(&obj);
+        }
         nNegotiatedPayloadIndex = -1;
-        return *this;
+        return (*this);
     }
 
     virtual ~VideoProfile() { deletePayloads(); };
@@ -417,14 +427,14 @@ private:
             return;
         }
 
-        this->objIpAddress = pProfile->objIpAddress;
-        this->nDataPort = pProfile->nDataPort;
-        this->nControlPort = pProfile->nControlPort;
-        this->strTransportType = pProfile->strTransportType;
-        this->nRtcpInterval = pProfile->nRtcpInterval;
-        this->nBandwidthAs = pProfile->nBandwidthAs;
-        this->nBandwidthRs = pProfile->nBandwidthRs;
-        this->nBandwidthRr = pProfile->nBandwidthRr;
+        objIpAddress = pProfile->objIpAddress;
+        nDataPort = pProfile->nDataPort;
+        nControlPort = pProfile->nControlPort;
+        strTransportType = pProfile->strTransportType;
+        nRtcpInterval = pProfile->nRtcpInterval;
+        nBandwidthAs = pProfile->nBandwidthAs;
+        nBandwidthRs = pProfile->nBandwidthRs;
+        nBandwidthRr = pProfile->nBandwidthRr;
 
         deletePayloads();
 
@@ -432,15 +442,15 @@ private:
         {
             VideoProfile::Payload* pNewPayload =
                     new VideoProfile::Payload(*pProfile->lstPayload.GetAt(i));
-            this->lstPayload.Append(pNewPayload);
+            lstPayload.Append(pNewPayload);
         }
 
-        this->eDirection = pProfile->eDirection;
-        this->nFrameRate = pProfile->nFrameRate;
-        this->bSupportAvpf = pProfile->bSupportAvpf;
-        this->nCvoId = pProfile->nCvoId;
-        this->bSupportCapaNegoForAvpf = pProfile->bSupportCapaNegoForAvpf;
-        this->objCapaNego = pProfile->objCapaNego;
+        eDirection = pProfile->eDirection;
+        nFrameRate = pProfile->nFrameRate;
+        bSupportAvpf = pProfile->bSupportAvpf;
+        nCvoId = pProfile->nCvoId;
+        bSupportCapaNegoForAvpf = pProfile->bSupportCapaNegoForAvpf;
+        objCapaNego = pProfile->objCapaNego;
     }
 
     void deletePayloads()

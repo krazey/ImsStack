@@ -889,7 +889,6 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
             continue;
         }
 
-        nCurrAs = 0;
         if ((pAudioPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") == IMS_TRUE) ||
                 (pAudioPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") == IMS_TRUE))
         {
@@ -1010,7 +1009,7 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileUtil::UpdateAudioProfileBandwidth(
 }
 
 PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
-        IN AString strCodec, IN AudioProfile::Payload* pPayload)
+        IN const AString& strCodec, IN AudioProfile::Payload* pPayload)
 {
     const IMS_SINT32 NO_MODESET = -1;
     const IMS_SINT32 AMR_MAX_MODESET = 7;
@@ -1115,7 +1114,7 @@ PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetLargestModesetInFmtp(
 }
 
 PUBLIC GLOBAL IMS_SINT32 AudioProfileUtil::GetModesetList(
-        IN AString strCodec, IN AudioProfile::Payload* pPayload)
+        IN const AString& strCodec, IN AudioProfile::Payload* pPayload)
 {
     const IMS_SINT32 NO_MODESET = 0;
     const IMS_SINT32 EVS_PRIMARY_MODE_MAX_MODESET = 11;

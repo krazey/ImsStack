@@ -233,8 +233,8 @@ private:
             IN VideoProfile::Payload* pPeerPayload, OUT VideoProfile::Payload* pNegoPayload);
     IMS_BOOL MakeNegotiatedProfile(IN VideoProfile* pLocalProfile, IN VideoProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT VideoProfile* pNegotiatedProfile);
-    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::AvcFmtp* pFmtp);
-    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::HevcFmtp* pFmtp);
+    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfile::AvcFmtp* pFmtp);
+    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfile::HevcFmtp* pFmtp);
     VideoProfile::Payload* FindPayloadInProfile(
             IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
     IMS_SINT32 FindPayloadIndexFromProfile(
@@ -245,9 +245,10 @@ private:
             IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
     IMS_BOOL GetCorrectImageIndex(IN IMS_SINT32 nPayloadTypeNum, IN IMSList<AString> objAttributes,
             OUT IMS_UINT32* nIndex);
-    VIDEO_RESOLUTION GetResolutionFromSdp(IN VIDEO_CODEC codecType, IN AString strImageAttrFromSdp,
-            IN AString strFrameSizeFromSdp, IN AString strSpropParam, IN IMS_SINT32 nQcif = -1);
-    IMS_BOOL GetWidthHeightFromSdp_ImageAttr(IN AString strImageAttrFromSdp,
+    VIDEO_RESOLUTION GetResolutionFromSdp(IN VIDEO_CODEC codecType,
+            IN const AString& strImageAttrFromSdp, IN const AString& strFrameSizeFromSdp,
+            IN const AString& strSpropParam, IN IMS_SINT32 nQcif = -1);
+    IMS_BOOL GetWidthHeightFromSdp_ImageAttr(IN const AString& strImageAttrFromSdp,
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
     IMS_BOOL GetWidthHeightFromSdp_SpropParam(IN VIDEO_CODEC codecType, IN IMS_CHAR* szSprop,
             OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);

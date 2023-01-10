@@ -22,8 +22,6 @@
 #include "ServiceConfig.h"
 #include "config/MediaSessionConfig.h"
 
-using ::testing::Return;
-
 static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const MEDIA_SERVICE_TYPE DEFAULT_SERVICE_TYPE = MEDIA_SERVICE_DEFAULT;
 static const MEDIA_SERVICE_TYPE EMERGENCY_SERVICE_TYPE = MEDIA_SERVICE_EMERGENCY;

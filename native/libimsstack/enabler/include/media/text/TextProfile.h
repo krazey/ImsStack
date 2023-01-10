@@ -36,19 +36,23 @@ public:
                 nSamplingRate(0)
         {
         }
-        RtpMap(IN const RtpMap& obj)
+
+        RtpMap(IN const RtpMap& obj) :
+                nPayloadNum(obj.nPayloadNum),
+                strPayloadType(obj.strPayloadType),
+                nSamplingRate(obj.nSamplingRate)
         {
-            this->nPayloadNum = obj.nPayloadNum;
-            this->strPayloadType = obj.strPayloadType;
-            this->nSamplingRate = obj.nSamplingRate;
         }
 
         RtpMap& operator=(IN const RtpMap& obj)
         {
-            this->nPayloadNum = obj.nPayloadNum;
-            this->strPayloadType = obj.strPayloadType;
-            this->nSamplingRate = obj.nSamplingRate;
-            return *this;
+            if (this != &obj)
+            {
+                nPayloadNum = obj.nPayloadNum;
+                strPayloadType = obj.strPayloadType;
+                nSamplingRate = obj.nSamplingRate;
+            }
+            return (*this);
         }
     };
 
@@ -63,24 +67,23 @@ public:
         RedFmtp() :
                 nRedLevel(-1),
                 nRedPayload(-1){};
-        RedFmtp(IN IMS_SINT32 nRed, IN IMS_SINT32 nRedPT)
-        {
-            nRedLevel = nRed;
-            nRedPayload = nRedPT;
-        };
-        RedFmtp(IN const RedFmtp& obj)
-        {
-            this->nRedLevel = -1;
-            this->nRedPayload = -1;
-            this->nRedLevel = obj.nRedLevel;
-            this->nRedPayload = obj.nRedPayload;
-        }
+
+        RedFmtp(IN IMS_SINT32 nRed, IN IMS_SINT32 nRedPT) :
+                nRedLevel(nRed),
+                nRedPayload(nRedPT){};
+
+        RedFmtp(IN const RedFmtp& obj) :
+                nRedLevel(obj.nRedLevel),
+                nRedPayload(obj.nRedPayload){};
 
         RedFmtp& operator=(IN const RedFmtp& obj)
         {
-            this->nRedLevel = obj.nRedLevel;
-            this->nRedPayload = obj.nRedPayload;
-            return *this;
+            if (this != &obj)
+            {
+                nRedLevel = obj.nRedLevel;
+                nRedPayload = obj.nRedPayload;
+            }
+            return (*this);
         }
     };
 
@@ -96,7 +99,7 @@ public:
                 pFmtp(IMS_NULL){};
         Payload(IN const Payload& obj)
         {
-            this->objRtpMap = obj.objRtpMap;
+            objRtpMap = obj.objRtpMap;
 
             if (objRtpMap.strPayloadType.Equals("red"))
             {
@@ -109,9 +112,9 @@ public:
         {
             if (objRtpMap.strPayloadType.Equals("red"))
             {
-                if (this->pFmtp != IMS_NULL)
+                if (pFmtp != IMS_NULL)
                 {
-                    delete reinterpret_cast<TextProfile::RedFmtp*>(this->pFmtp);
+                    delete reinterpret_cast<TextProfile::RedFmtp*>(pFmtp);
                 }
             }
         }
@@ -120,7 +123,7 @@ public:
         {
             if (this != &obj)
             {
-                this->objRtpMap = obj.objRtpMap;
+                objRtpMap = obj.objRtpMap;
 
                 if (objRtpMap.strPayloadType.Equals("red"))
                 {
@@ -129,21 +132,22 @@ public:
                 }
             }
 
-            return *this;
+            return (*this);
         }
 
-        void SetRtpMap(IN IMS_UINT32 payloadNum, IN AString payloadType, IN IMS_UINT32 samplingRate)
+        void SetRtpMap(IN const IMS_UINT32 payloadNum, IN const AString& payloadType,
+                IN const IMS_UINT32 samplingRate)
         {
-            this->objRtpMap.nPayloadNum = payloadNum;
-            this->objRtpMap.strPayloadType = payloadType;
-            this->objRtpMap.nSamplingRate = samplingRate;
+            objRtpMap.nPayloadNum = payloadNum;
+            objRtpMap.strPayloadType = payloadType;
+            objRtpMap.nSamplingRate = samplingRate;
         }
 
         void SetRtpMap(IN const RtpMap& objMap)
         {
-            this->objRtpMap.nPayloadNum = objMap.nPayloadNum;
-            this->objRtpMap.strPayloadType = objMap.strPayloadType;
-            this->objRtpMap.nSamplingRate = objMap.nSamplingRate;
+            objRtpMap.nPayloadNum = objMap.nPayloadNum;
+            objRtpMap.strPayloadType = objMap.strPayloadType;
+            objRtpMap.nSamplingRate = objMap.nSamplingRate;
         }
     };
 
@@ -195,20 +199,21 @@ public:
 
     TextProfile& operator=(IN const TextProfile& obj)
     {
-        copy(&obj);
-        return *this;
+        if (this != &obj)
+        {
+            copy(&obj);
+        }
+        return (*this);
     }
 
     bool operator==(IN const TextProfile& obj) const
     {
-        return (this->objIpAddress == obj.objIpAddress && this->nDataPort == obj.nDataPort &&
-                this->nControlPort == obj.nControlPort &&
-                this->strTransportType == obj.strTransportType &&
-                this->nRtcpInterval == obj.nRtcpInterval &&
-                this->nBandwidthAs == obj.nBandwidthAs && this->nBandwidthRs == obj.nBandwidthRs &&
-                this->nBandwidthRr == obj.nBandwidthRr && this->eDirection == obj.eDirection &&
-                this->bISOfferCase == obj.bISOfferCase && this->bIsHold == obj.bIsHold &&
-                this->bKeepRedLevel == obj.bKeepRedLevel);
+        return (objIpAddress == obj.objIpAddress && nDataPort == obj.nDataPort &&
+                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
+                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
+                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
+                eDirection == obj.eDirection && bISOfferCase == obj.bISOfferCase &&
+                bIsHold == obj.bIsHold && bKeepRedLevel == obj.bKeepRedLevel);
     }
 
 private:
@@ -219,14 +224,14 @@ private:
             return;
         }
 
-        this->objIpAddress = pProfile->objIpAddress;
-        this->nDataPort = pProfile->nDataPort;
-        this->nControlPort = pProfile->nControlPort;
-        this->strTransportType = pProfile->strTransportType;
-        this->nRtcpInterval = pProfile->nRtcpInterval;
-        this->nBandwidthAs = pProfile->nBandwidthAs;
-        this->nBandwidthRs = pProfile->nBandwidthRs;
-        this->nBandwidthRr = pProfile->nBandwidthRr;
+        objIpAddress = pProfile->objIpAddress;
+        nDataPort = pProfile->nDataPort;
+        nControlPort = pProfile->nControlPort;
+        strTransportType = pProfile->strTransportType;
+        nRtcpInterval = pProfile->nRtcpInterval;
+        nBandwidthAs = pProfile->nBandwidthAs;
+        nBandwidthRs = pProfile->nBandwidthRs;
+        nBandwidthRr = pProfile->nBandwidthRr;
 
         while (lstPayload.GetSize() > 0)
         {
@@ -244,13 +249,13 @@ private:
         {
             TextProfile::Payload* pNewPayload =
                     new TextProfile::Payload(*pProfile->lstPayload.GetAt(i));
-            this->lstPayload.Append(pNewPayload);
+            lstPayload.Append(pNewPayload);
         }
 
-        this->eDirection = pProfile->eDirection;
-        this->bISOfferCase = pProfile->bISOfferCase;
-        this->bIsHold = pProfile->bIsHold;
-        this->bKeepRedLevel = pProfile->bKeepRedLevel;
+        eDirection = pProfile->eDirection;
+        bISOfferCase = pProfile->bISOfferCase;
+        bIsHold = pProfile->bIsHold;
+        bKeepRedLevel = pProfile->bKeepRedLevel;
     }
 };
 

@@ -40,21 +40,24 @@ public:
         {
         }
 
-        RtpMap(IN const RtpMap& obj)
+        RtpMap(IN const RtpMap& obj) :
+                nPayloadNum(obj.nPayloadNum),
+                strPayloadType(obj.strPayloadType),
+                nSamplingRate(obj.nSamplingRate),
+                nChannel(obj.nChannel)
         {
-            this->nPayloadNum = obj.nPayloadNum;
-            this->strPayloadType = obj.strPayloadType;
-            this->nSamplingRate = obj.nSamplingRate;
-            this->nChannel = obj.nChannel;
         }
 
         RtpMap& operator=(IN const RtpMap& obj)
         {
-            this->nPayloadNum = obj.nPayloadNum;
-            this->strPayloadType = obj.strPayloadType;
-            this->nSamplingRate = obj.nSamplingRate;
-            this->nChannel = obj.nChannel;
-            return *this;
+            if (this != &obj)
+            {
+                nPayloadNum = obj.nPayloadNum;
+                strPayloadType = obj.strPayloadType;
+                nSamplingRate = obj.nSamplingRate;
+                nChannel = obj.nChannel;
+            }
+            return (*this);
         }
     };
 
@@ -121,31 +124,29 @@ public:
                 bShowModeSet(IMS_FALSE)
         {
         }
-        AmrFmtp(IN const AmrFmtp& objFmtp)
+
+        AmrFmtp(IN const AmrFmtp& objFmtp) :
+                nModeSetList(objFmtp.nModeSetList),
+                nDefaultRtpModeSet(objFmtp.nDefaultRtpModeSet),
+                bSCREnable(objFmtp.bSCREnable),
+                nOctetAlign(objFmtp.nOctetAlign),
+                nModeChangeCapability(objFmtp.nModeChangeCapability),
+                nModeChangePeriod(objFmtp.nModeChangePeriod),
+                nModeChangeNeighbor(objFmtp.nModeChangeNeighbor),
+                nMaxRed(objFmtp.nMaxRed),
+                nPtime(objFmtp.nPtime),
+                nMaxPtime(objFmtp.nMaxPtime),
+                bShow_OctetAlign(objFmtp.bShow_OctetAlign),
+                bShowModeChangeCapability(objFmtp.bShowModeChangeCapability),
+                bShowModeChangePeriod(objFmtp.bShowModeChangePeriod),
+                bShowModeChangeNeighbor(objFmtp.bShowModeChangeNeighbor),
+                bShow_RobustSorting(objFmtp.bShow_RobustSorting),
+                bShowMaxRed(objFmtp.bShowMaxRed),
+                bShowPtime(objFmtp.bShowPtime),
+                bShowMaxPtime(objFmtp.bShowMaxPtime),
+                bShowModeSet(objFmtp.bShowModeSet)
         {
-            this->nModeSetList = objFmtp.nModeSetList;
-            this->nDefaultRtpModeSet = objFmtp.nDefaultRtpModeSet;
-            this->bSCREnable = objFmtp.bSCREnable;
-            this->nOctetAlign = objFmtp.nOctetAlign;
-            this->nModeChangeCapability = objFmtp.nModeChangeCapability;
-            this->nModeChangePeriod = objFmtp.nModeChangePeriod;
-            this->nModeChangeNeighbor = objFmtp.nModeChangeNeighbor;
-
-            this->nMaxRed = objFmtp.nMaxRed;
-            this->nPtime = objFmtp.nPtime;
-            this->nMaxPtime = objFmtp.nMaxPtime;
-
-            this->bShow_OctetAlign = objFmtp.bShow_OctetAlign;
-            this->bShowModeChangeCapability = objFmtp.bShowModeChangeCapability;
-            this->bShowModeChangePeriod = objFmtp.bShowModeChangePeriod;
-            this->bShowModeChangeNeighbor = objFmtp.bShowModeChangeNeighbor;
-            this->bShow_RobustSorting = objFmtp.bShow_RobustSorting;
-
-            this->bShowMaxRed = objFmtp.bShowMaxRed;
-            this->bShowPtime = objFmtp.bShowPtime;
-            this->bShowMaxPtime = objFmtp.bShowMaxPtime;
-            this->bShowModeSet = objFmtp.bShowModeSet;
-        };
+        }
 
         AmrFmtp(IN const IMS_UINT32 modeSet, IN const IMS_SINT32 octetAlign,
                 IN const IMS_SINT32 modeChangeCapability) :
@@ -159,32 +160,15 @@ public:
                 nMaxRed(DEFAULT_MAXRED),
                 nPtime(DEFAULT_PTIME),
                 nMaxPtime(DEFAULT_MAXPTIME),
+                bShow_OctetAlign(octetAlign > 0),
+                bShowModeChangeCapability(modeChangeCapability > 0),
                 bShowModeChangePeriod(IMS_FALSE),
                 bShowModeChangeNeighbor(IMS_FALSE),
                 bShow_RobustSorting(IMS_FALSE),
                 bShowMaxRed(IMS_FALSE),
                 bShowPtime(IMS_FALSE),
                 bShowMaxPtime(IMS_FALSE),
-                bShowModeSet(IMS_FALSE)
-        {
-            if (octetAlign > 0)
-            {
-                bShow_OctetAlign = IMS_TRUE;
-            }
-            else
-            {
-                bShow_OctetAlign = IMS_FALSE;
-            }
-
-            if (modeChangeCapability > 0)
-            {
-                bShowModeChangeCapability = IMS_TRUE;
-            }
-            else
-            {
-                bShowModeChangeCapability = IMS_FALSE;
-            }
-        };
+                bShowModeSet(IMS_FALSE){};
     };
 
 public:
@@ -311,44 +295,44 @@ public:
         {
         }
 
-        EvsFmtp(IN const EvsFmtp& objFmtp)
+        EvsFmtp(IN const EvsFmtp& objFmtp) :
+                nPtime(objFmtp.nPtime),
+                nMaxPtime(objFmtp.nMaxPtime),
+                nDtx(objFmtp.nDtx),
+                nDtx_Recv(objFmtp.nDtx_Recv),
+                nHfOnly(objFmtp.nHfOnly),
+                nEvsModeSwitch(objFmtp.nEvsModeSwitch),
+                nMaxRed(objFmtp.nMaxRed),
+                nBrList(objFmtp.nBrList),
+                nBrSend(objFmtp.nBrSend),
+                nBrRecv(objFmtp.nBrRecv),
+                nBwList(objFmtp.nBwList),
+                nBwSend(objFmtp.nBwSend),
+                nBwRecv(objFmtp.nBwRecv),
+                nCmr(objFmtp.nCmr),
+                nChAwRecv(objFmtp.nChAwRecv),
+                nReceivedChAwRecv(objFmtp.nReceivedChAwRecv),
+                nModeSetList(objFmtp.nModeSetList),
+                nDefaultRtpModeSet(objFmtp.nDefaultRtpModeSet),
+                nModeChangeCapability(objFmtp.nModeChangeCapability),
+                nModeChangePeriod(objFmtp.nModeChangePeriod),
+                nModeChangeNeighbor(objFmtp.nModeChangeNeighbor),
+                bShowPtime(objFmtp.bShowPtime),
+                bShowMaxPtime(objFmtp.bShowMaxPtime),
+                bShowDtx(objFmtp.bShowDtx),
+                bShowHfOnly(objFmtp.bShowHfOnly),
+                bShowEvsModeSwitch(objFmtp.bShowEvsModeSwitch),
+                bShowMaxRed(objFmtp.bShowMaxRed),
+                bShowCmr(objFmtp.bShowCmr),
+                bShowChannelAwMode(objFmtp.bShowChannelAwMode),
+                bShowModeChangeCapability(objFmtp.bShowModeChangeCapability),
+                bShowModeChangePeriod(objFmtp.bShowModeChangePeriod),
+                bShowModeChangeNeighbor(objFmtp.bShowModeChangeNeighbor),
+                bShowBrList(objFmtp.bShowBrList),
+                bShowBwList(objFmtp.bShowBwList),
+                bSendCmr(objFmtp.bSendCmr),
+                bShowModeSetList(objFmtp.bShowModeSetList)
         {
-            this->nPtime = objFmtp.nPtime;
-            this->nMaxPtime = objFmtp.nMaxPtime;
-            this->nDtx = objFmtp.nDtx;
-            this->nDtx_Recv = objFmtp.nDtx_Recv;
-            this->nHfOnly = objFmtp.nHfOnly;
-            this->nEvsModeSwitch = objFmtp.nEvsModeSwitch;
-            this->nMaxRed = objFmtp.nMaxRed;
-            this->nBrList = objFmtp.nBrList;
-            this->nBrSend = objFmtp.nBrSend;
-            this->nBrRecv = objFmtp.nBrRecv;
-            this->nBwList = objFmtp.nBwList;
-            this->nBwSend = objFmtp.nBwSend;
-            this->nBwRecv = objFmtp.nBwRecv;
-            this->nCmr = objFmtp.nCmr;
-            this->nChAwRecv = objFmtp.nChAwRecv;
-            this->nReceivedChAwRecv = objFmtp.nReceivedChAwRecv;
-            this->nModeSetList = objFmtp.nModeSetList;
-            this->nDefaultRtpModeSet = objFmtp.nDefaultRtpModeSet;
-            this->nModeChangeCapability = objFmtp.nModeChangeCapability;
-            this->nModeChangePeriod = objFmtp.nModeChangePeriod;
-            this->nModeChangeNeighbor = objFmtp.nModeChangeNeighbor;
-            this->bShowPtime = objFmtp.bShowPtime;
-            this->bShowMaxPtime = objFmtp.bShowMaxPtime;
-            this->bShowDtx = objFmtp.bShowDtx;
-            this->bShowHfOnly = objFmtp.bShowHfOnly;
-            this->bShowEvsModeSwitch = objFmtp.bShowEvsModeSwitch;
-            this->bShowMaxRed = objFmtp.bShowMaxRed;
-            this->bShowCmr = objFmtp.bShowCmr;
-            this->bShowChannelAwMode = objFmtp.bShowChannelAwMode;
-            this->bShowModeChangeCapability = objFmtp.bShowModeChangeCapability;
-            this->bShowModeChangePeriod = objFmtp.bShowModeChangePeriod;
-            this->bShowModeChangeNeighbor = objFmtp.bShowModeChangeNeighbor;
-            this->bShowBrList = objFmtp.bShowBrList;
-            this->bShowBwList = objFmtp.bShowBwList;
-            this->bSendCmr = objFmtp.bSendCmr;
-            this->bShowModeSetList = objFmtp.bShowModeSetList;
         }
     };
 
@@ -362,24 +346,23 @@ public:
         TelephoneEventFmtp() :
                 strEvents("0-15"){};
 
-        explicit TelephoneEventFmtp(IN AString events) :
+        explicit TelephoneEventFmtp(IN const AString& events) :
                 strEvents(events){};
 
-        TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp)
-        {
-            this->strEvents = objFmtp.strEvents;
-        };
+        TelephoneEventFmtp(IN const TelephoneEventFmtp& objFmtp) :
+                strEvents(objFmtp.strEvents){};
 
         TelephoneEventFmtp& operator=(IN const TelephoneEventFmtp& obj)
         {
-            this->strEvents = obj.strEvents;
-            return *this;
+            if (this != &obj)
+            {
+                strEvents = obj.strEvents;
+            }
+
+            return (*this);
         }
 
-        bool operator==(IN const TelephoneEventFmtp& obj)
-        {
-            return (this->strEvents == obj.strEvents);
-        }
+        bool operator==(IN const TelephoneEventFmtp& obj) { return (strEvents == obj.strEvents); }
     };
 
 public:
@@ -394,7 +377,7 @@ public:
                 pFmtp(IMS_NULL){};
         Payload(IN const Payload& obj)
         {
-            this->objRtpMap = obj.objRtpMap;
+            objRtpMap = obj.objRtpMap;
 
             if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
                     objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
@@ -437,7 +420,7 @@ public:
         }
 
     public:
-        void SetRtpMap(IN const IMS_UINT32 nPayloadNum, IN const AString strPayloadType,
+        void SetRtpMap(IN const IMS_UINT32 nPayloadNum, IN const AString& strPayloadType,
                 IN const IMS_UINT32 nSamplingRate, IN const IMS_SINT32 nChannel)
         {
             objRtpMap.nPayloadNum = nPayloadNum;
@@ -470,13 +453,13 @@ public:
                 strNegotiatedAcfg(""),
                 bIsAttCapaInPcfg(IMS_FALSE){};
 
-        CapaNego(const CapaNego& obj)
+        CapaNego(const CapaNego& obj) :
+                mapTransportCapa(obj.mapTransportCapa),
+                mapAttributeCapa(obj.mapAttributeCapa),
+                lstPotentialConfig(obj.lstPotentialConfig),
+                strNegotiatedAcfg(obj.strNegotiatedAcfg),
+                bIsAttCapaInPcfg(obj.bIsAttCapaInPcfg)
         {
-            this->mapTransportCapa = obj.mapTransportCapa;
-            this->mapAttributeCapa = obj.mapAttributeCapa;
-            this->lstPotentialConfig = obj.lstPotentialConfig;
-            this->strNegotiatedAcfg = obj.strNegotiatedAcfg;
-            this->bIsAttCapaInPcfg = obj.bIsAttCapaInPcfg;
         }
     };
 
@@ -498,11 +481,14 @@ public:
 
         RTCPXRAttributes& operator=(const RTCPXRAttributes& p)
         {
-            bSupportStatisticMetrics = p.bSupportStatisticMetrics;
-            bSupportVoipMetrics = p.bSupportVoipMetrics;
-            bSupportPacketLossRle = p.bSupportPacketLossRle;
-            bSupportPacketDuplicatedRle = p.bSupportPacketDuplicatedRle;
-            return *this;
+            if (this != &p)
+            {
+                bSupportStatisticMetrics = p.bSupportStatisticMetrics;
+                bSupportVoipMetrics = p.bSupportVoipMetrics;
+                bSupportPacketLossRle = p.bSupportPacketLossRle;
+                bSupportPacketDuplicatedRle = p.bSupportPacketDuplicatedRle;
+            }
+            return (*this);
         }
 
         bool operator==(IN const RTCPXRAttributes& obj) const
@@ -581,21 +567,21 @@ public:
 
     AudioProfile& operator=(IN const AudioProfile& obj)
     {
-        copy(&obj);
-        return *this;
+        if (this != &obj)
+        {
+            copy(&obj);
+        }
+        return (*this);
     }
 
     bool operator==(IN const AudioProfile& obj) const
     {
-        return (this->objIpAddr == obj.objIpAddr && this->nDataPort == obj.nDataPort &&
-                this->nControlPort == obj.nControlPort &&
-                this->strTransportType == obj.strTransportType &&
-                this->nRtcpInterval == obj.nRtcpInterval &&
-                this->nBandwidthAs == obj.nBandwidthAs && this->nBandwidthRs == obj.nBandwidthRs &&
-                this->nBandwidthRr == obj.nBandwidthRr &&
-                this->bSupportRtcpXr == obj.bSupportRtcpXr &&
-                this->objRtcpXrAttr == obj.objRtcpXrAttr &&
-                this->bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup);
+        return (objIpAddr == obj.objIpAddr && nDataPort == obj.nDataPort &&
+                nControlPort == obj.nControlPort && strTransportType == obj.strTransportType &&
+                nRtcpInterval == obj.nRtcpInterval && nBandwidthAs == obj.nBandwidthAs &&
+                nBandwidthRs == obj.nBandwidthRs && nBandwidthRr == obj.nBandwidthRr &&
+                bSupportRtcpXr == obj.bSupportRtcpXr && objRtcpXrAttr == obj.objRtcpXrAttr &&
+                bRtcpDisableBeforeSetup == obj.bRtcpDisableBeforeSetup);
     }
 
     AudioProfile(IN const AudioProfile& obj) { copy(&obj); }
@@ -608,17 +594,17 @@ private:
             return;
         }
 
-        this->objIpAddr = pProfile->objIpAddr;
-        this->nDataPort = pProfile->nDataPort;
-        this->nControlPort = pProfile->nControlPort;
-        this->strTransportType = pProfile->strTransportType;
-        this->nRtcpInterval = pProfile->nRtcpInterval;
-        this->nBandwidthAs = pProfile->nBandwidthAs;
-        this->nBandwidthRs = pProfile->nBandwidthRs;
-        this->nBandwidthRr = pProfile->nBandwidthRr;
-        this->bSupportRtcpXr = pProfile->bSupportRtcpXr;
-        this->objRtcpXrAttr = pProfile->objRtcpXrAttr;
-        this->bRtcpDisableBeforeSetup = pProfile->bRtcpDisableBeforeSetup;
+        objIpAddr = pProfile->objIpAddr;
+        nDataPort = pProfile->nDataPort;
+        nControlPort = pProfile->nControlPort;
+        strTransportType = pProfile->strTransportType;
+        nRtcpInterval = pProfile->nRtcpInterval;
+        nBandwidthAs = pProfile->nBandwidthAs;
+        nBandwidthRs = pProfile->nBandwidthRs;
+        nBandwidthRr = pProfile->nBandwidthRr;
+        bSupportRtcpXr = pProfile->bSupportRtcpXr;
+        objRtcpXrAttr = pProfile->objRtcpXrAttr;
+        bRtcpDisableBeforeSetup = pProfile->bRtcpDisableBeforeSetup;
 
         while (lstPayload.GetSize() > 0)
         {
@@ -636,16 +622,16 @@ private:
         {
             AudioProfile::Payload* pNewPayload =
                     new AudioProfile::Payload(*pProfile->lstPayload.GetAt(i));
-            this->lstPayload.Append(pNewPayload);
+            lstPayload.Append(pNewPayload);
         }
 
-        this->eDirection = pProfile->eDirection;
-        this->nPtime = pProfile->nPtime;
-        this->nMaxPtime = pProfile->nMaxPtime;
-        this->objCandidateAttr = pProfile->objCandidateAttr;
-        this->bIsOfferCase = pProfile->bIsOfferCase;
-        this->objCapaNego = pProfile->objCapaNego;
-        this->nNegotiatedPayloadIndex = -1;
+        eDirection = pProfile->eDirection;
+        nPtime = pProfile->nPtime;
+        nMaxPtime = pProfile->nMaxPtime;
+        objCandidateAttr = pProfile->objCandidateAttr;
+        bIsOfferCase = pProfile->bIsOfferCase;
+        objCapaNego = pProfile->objCapaNego;
+        nNegotiatedPayloadIndex = -1;
     }
 };
 

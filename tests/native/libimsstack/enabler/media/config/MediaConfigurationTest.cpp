@@ -19,8 +19,6 @@
 
 #include "config/MediaConfiguration.h"
 
-using ::testing::Return;
-
 static const IMS_SINT32 DEFAULT_RTP_PORT = MediaConfiguration::DEFAULT_RTP_PORT;
 static const IMS_SINT32 DEFAULT_RTP_PORT_END = MediaConfiguration::DEFAULT_RTP_PORT_END;
 static const IMS_SINT32 DEFAULT_RTCP_PORT = MediaConfiguration::DEFAULT_RTCP_PORT;

@@ -243,11 +243,11 @@ private:
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
     IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pLocalProfile, IN AudioProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile);
-    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::EvsFmtp* pFmtp);
+    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfile::EvsFmtp* pFmtp);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
             OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
-    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrFmtp* pFmtp);
+    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfile::AmrFmtp* pFmtp);
     IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
             OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
@@ -264,8 +264,9 @@ private:
             OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
     IMS_BOOL FindTelephoneEventInProfile(
             IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
-    IMS_SINT32 FindPayloadIndexFromProfile(IN AString strCodecName, IN AudioProfile* pProfile,
-            IN AudioProfile::Payload* pPayload, IN IMS_BOOL isOfferReceivedCase);
+    IMS_SINT32 FindPayloadIndexFromProfile(IN const AString& strCodecName,
+            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
+            IN IMS_BOOL isOfferReceivedCase);
     void RearrangeModeSetByAs(
             OUT AudioProfile::Payload* pPayload, IMS_BOOL bIpV6, IN IMS_SINT32 nAs);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,

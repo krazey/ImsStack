@@ -48,8 +48,11 @@ TextNego::TextNego(IN const TextNego& objTextNego) :
 PUBLIC
 TextNego& TextNego::operator=(IN const TextNego& obj)
 {
-    copy(&obj);
-    return *this;
+    if (this != &obj)
+    {
+        copy(&obj);
+    }
+    return (*this);
 }
 
 PUBLIC VIRTUAL TextNego::~TextNego()
@@ -1355,7 +1358,8 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     return bRet;
 }
 
-PRIVATE IMS_BOOL TextNego::GetFmtpFromString(IN AString strFmtp, OUT TextProfile::RedFmtp* pFmtp)
+PRIVATE IMS_BOOL TextNego::GetFmtpFromString(
+        IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL || strFmtp.IsEmpty() == IMS_TRUE)
         return IMS_FALSE;

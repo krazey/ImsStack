@@ -443,7 +443,7 @@ IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
 }
 
 PUBLIC
-void AudioMediaSession::SetLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort)
+void AudioMediaSession::SetLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     m_objLocalAddress = objLocalAddr;
     m_nLocalPort = nPort;
