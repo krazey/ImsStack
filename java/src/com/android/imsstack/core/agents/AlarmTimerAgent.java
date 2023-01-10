@@ -210,7 +210,7 @@ public class AlarmTimerAgent implements IAlarmTimer, ISystemAPIAlarm {
                     mContext, requestCode, intent,
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-            am.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            am.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + duration, sender);
         }
         return true;
@@ -278,7 +278,7 @@ public class AlarmTimerAgent implements IAlarmTimer, ISystemAPIAlarm {
                     mContext, requestCode, intent,
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-            am.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            am.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     SystemClock.elapsedRealtime() + duration, sender);
         }
         return 1;
