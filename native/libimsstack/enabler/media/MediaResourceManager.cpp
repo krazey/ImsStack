@@ -63,7 +63,6 @@ PUBLIC IMS_UINT32 MediaResourceManager::AcquireRtpPort(
 {
     const IMS_UINT32 RTP_PORT_MAX = 0xffff;
     IMS_UINT32 nInitialPort = 0;
-    IMS_UINT32 nTempPort = 0;
     IMS_UINT32 nChosenPort = 0;
     IMS_BOOL bFoundSamePort = IMS_FALSE;
 
@@ -77,7 +76,7 @@ PUBLIC IMS_UINT32 MediaResourceManager::AcquireRtpPort(
     }
     else if (nRangeStart > nRangeEnd)
     {  // when Start Port is bigger than End Port, swapping them.
-        nTempPort = nRangeStart;
+        IMS_UINT32 nTempPort = nRangeStart;
         nRangeStart = nRangeEnd;
         nRangeEnd = nTempPort;
     }

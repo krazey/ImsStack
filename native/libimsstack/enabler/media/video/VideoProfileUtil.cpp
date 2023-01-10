@@ -427,7 +427,6 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
         if (nCapaNegoForAvpfOption > MediaConfiguration::CAPNEG_OFFER_NONE)
         {
             pVideoProfile->bSupportCapaNegoForAvpf = IMS_TRUE;
-            IMS_SINT32 i = 0;
             AString strPcfg = AString::ConstNull();
             AString strTmp = AString::ConstNull();
             if (nCapaNegoForAvpfOption == MediaConfiguration::CAPNEG_OFFER_WITHOUT_ACAP)
@@ -438,7 +437,7 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
             else if (nCapaNegoForAvpfOption == MediaConfiguration::CAPNEG_OFFER_WITH_ACAP)
             {
                 strPcfg.Sprintf("t=%d a=", nTCap);
-                for (i = 1; i <= nAcap; i++)
+                for (IMS_SINT32 i = 1; i <= nAcap; i++)
                 {
                     if (strTmp.GetLength() > 0)
                         strTmp.Append(",");
