@@ -15,6 +15,7 @@
  */
 #include "AString.h"
 #include "IUceJni.h"
+#include "IUce.h"
 #include "ImsProcess.h"
 #include "ImsTypeDef.h"
 #include "JniUceServiceThread.h"
@@ -153,9 +154,9 @@ public:
     }
     inline virtual ~JniUceServiceThreadTest()
     {
+        delete pJniServiceThread;
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
         delete pThreadService;
-        delete pJniServiceThread;
     }
 
 public:

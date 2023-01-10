@@ -17,21 +17,27 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "UceApp.h"
-#include "IUUceService.h"
+#include "IUce.h"
+#include "MockIJniEnabler.h"
+#include "MockIUceJniThread.h"
+#include "MockIImsAos.h"
+#include "JniEnablerConnector.h"
 
 #include "ServiceMessage.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 
-__IMS_TRACE_TAG_USER_DECL__("UCE");
+using ::testing::_;
+using ::testing::Return;
 
-IMS_SINT32 APP_SIM_SLOT = 20;
+__IMS_TRACE_TAG_USER_DECL__("UCE");
 
 class TestUceApp : public UceApp
 {
 public:
     enum
     {
+        AOS_CONNECTING,
         AOS_CONNECTED,
         AOS_DISCONNECTING,
         AOS_DISCONNECTED,
@@ -40,8 +46,8 @@ public:
     };
 
 public:
-    TestUceApp() :
-            UceApp(APP_SIM_SLOT)
+    inline explicit TestUceApp(IImsAos* piImsAos) :
+            UceApp(0, piImsAos)
     {
     }
     virtual ~TestUceApp() {}
@@ -59,8 +65,14 @@ public:
     void startTimer() { StartTimer(TIMER_NETWORK_CHANGED, 10000); }
     void stopTimer() { StopTimer(TIMER_NETWORK_CHANGED); }
     void clearTimer() { ClearTimer(); }
+    void aosConnecting() { ImsAos_Connecting(); }
     void aosDisConnecting() { ImsAos_Disconnecting(0); }
     void aosDisConnected() { ImsAos_Disconnected(0); }
+    void aosSuspend() { ImsAos_Suspended(0); }
+    void aosResume() { ImsAos_Resumed(); }
+    void aosMonitorConnected() { ImsAosMonitor_Connected(0, 0); }
+    void registrationCheck() { ImsRegistrationCheck(); }
+
     void SendPublishCmd(IMS_UINT32 key, IMS_UINT32 extended, IMS_UINT32 capability,
             const AString& pidfXml, const AString& eTag) override
     {
@@ -94,19 +106,23 @@ public:
         (void)reason;
         (void)myCaps;
     }
-    void ImsRegistrationCheck() override {}
 };
 
 class UceAppTest : public ::testing::Test
 {
 public:
     TestUceApp* pUceApp;
+    MockIJniEnabler objMockJniEnabler;
+    MockIUceJniThread objMockIUceJniThread;
+    MockIImsAos objMockIImsAos;
 
 protected:
     virtual void SetUp() override
     {
-        pUceApp = new TestUceApp();
+        pUceApp = new TestUceApp(&objMockIImsAos);
         ASSERT_TRUE(pUceApp != nullptr);
+        ON_CALL(objMockJniEnabler, GetJniThread()).WillByDefault(Return(&objMockIUceJniThread));
+        JniEnablerConnector::GetInstance().SetJniEnabler(0, EnablerType::UCE, &objMockJniEnabler);
     }
 
     virtual void TearDown() override
@@ -115,6 +131,7 @@ protected:
         {
             delete pUceApp;
         }
+        JniEnablerConnector::GetInstance().SetJniEnabler(0, EnablerType::UCE, IMS_NULL);
     }
 };
 
@@ -138,20 +155,77 @@ TEST_F(UceAppTest, clearTimer)
     EXPECT_TRUE(pUceApp->IsTimerNull());
 }
 
-TEST_F(UceAppTest, Aos_Disconnecting)
+TEST_F(UceAppTest, aosConnecting)
 {
-    IMS_TRACE_D("Aos_Disconnecting", 0, 0, 0);
+    IMS_TRACE_D("aosConnecting", 0, 0, 0);
+    EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_DISCONNECTED);
+    pUceApp->aosConnecting();
+    EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_CONNECTING);
+}
+
+TEST_F(UceAppTest, aosDisConnecting)
+{
+    IMS_TRACE_D("aosDisConnecting", 0, 0, 0);
     EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_DISCONNECTED);
     pUceApp->aosDisConnecting();
     EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_DISCONNECTING);
 }
 
-TEST_F(UceAppTest, Aos_Disconnected)
+TEST_F(UceAppTest, aosDisConnected)
 {
-    IMS_TRACE_D("Aos_Disconnecting", 0, 0, 0);
+    IMS_TRACE_D("aosDisConnected", 0, 0, 0);
     EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_DISCONNECTED);
     pUceApp->SetAoSState(TestUceApp::AOS_CONNECTED);
     EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_CONNECTED);
     pUceApp->aosDisConnected();
     EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_DISCONNECTED);
+}
+
+TEST_F(UceAppTest, NotifyImsDeregistered)
+{
+    IMS_TRACE_D("NotifyImsDeregistered", 0, 0, 0);
+    pUceApp->SetAoSState(TestUceApp::AOS_CONNECTED);
+
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsDeregistered()).Times(1);
+    pUceApp->aosDisConnected();
+}
+
+TEST_F(UceAppTest, aosSuspend)
+{
+    IMS_TRACE_D("aosSuspend", 0, 0, 0);
+    EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_DISCONNECTED);
+    pUceApp->aosSuspend();
+    EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_SUSPENDED);
+}
+
+TEST_F(UceAppTest, aosResume)
+{
+    IMS_TRACE_D("aosResume", 0, 0, 0);
+    EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_DISCONNECTED);
+    pUceApp->aosResume();
+    EXPECT_EQ(pUceApp->GetAoSState(), TestUceApp::AOS_RESUMED);
+}
+
+TEST_F(UceAppTest, aosMonitorConnected)
+{
+    IMS_TRACE_D("aosMonitorConnected", 0, 0, 0);
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsRegistered(_, _)).Times(1);
+    pUceApp->aosMonitorConnected();
+
+    pUceApp->SetAoSState(TestUceApp::AOS_CONNECTED);
+
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsRegiRefreshed(_)).Times(1);
+    pUceApp->aosMonitorConnected();
+}
+
+TEST_F(UceAppTest, registrationCheck)
+{
+    IMS_TRACE_D("registrationCheck", 0, 0, 0);
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsDeregistered()).Times(1);
+    pUceApp->registrationCheck();
+
+    pUceApp->SetAoSState(TestUceApp::AOS_CONNECTED);
+
+    EXPECT_CALL(objMockIUceJniThread, NotifyImsRegistered(_, _)).Times(1);
+    pUceApp->registrationCheck();
 }

@@ -24,7 +24,7 @@
 #include "IImsAosInfo.h"
 #include "IIpcan.h"
 #include "IJniEnabler.h"
-#include "IUUceService.h"
+#include "IUce.h"
 #include "ImsAos.h"
 #include "ImsAosParameter.h"
 #include "ImsServiceConfig.h"
@@ -76,12 +76,12 @@ UceApp::UceApp(IN const IMS_SINT32 nSlotId, IN const AString& strAppName) :
     PostMessage(AMSG_CREATE_SERVICE, 0, 0);
 }
 
-UceApp::UceApp(IN const IMS_SINT32 nSlotId) :
+UceApp::UceApp(IN const IMS_SINT32 nSlotId, IN IImsAos* piImsAos) :
         ImsApp("UceApp"),
         m_nSlotId(nSlotId),
         m_strAppName("UceApp"),
         m_eAoSStatus(AOS_DISCONNECTED),
-        m_piImsAos(IMS_NULL),
+        m_piImsAos(piImsAos),
         m_piNetWatcherInfo(IMS_NULL),
         m_piDeBounceTimer(IMS_NULL),
         m_RegisteredNetwork(eUCE_RAT_INVALID),
@@ -252,6 +252,7 @@ void UceApp::ImsAos_Connected(IN IMS_UINT32 /*nFeatures*/, IN IMS_UINT32 /*nIpca
 void UceApp::ImsAos_Connecting()
 {
     IMS_TRACE_I("ImsAos_Connecting()", 0, 0, 0);
+    m_eAoSStatus = AOS_CONNECTING;
 }
 
 void UceApp::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
@@ -296,11 +297,13 @@ void UceApp::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 void UceApp::ImsAos_Suspended(IN IMS_UINT32 nReason)
 {
     IMS_TRACE_I("ImsAos_Suspended : Reason[%d]", nReason, 0, 0);
+    m_eAoSStatus = AOS_SUSPENDED;
 }
 
 void UceApp::ImsAos_Resumed()
 {
     IMS_TRACE_I("ImsAos_Resumed ", 0, 0, 0);
+    m_eAoSStatus = AOS_RESUMED;
 }
 
 void UceApp::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan)

@@ -23,7 +23,7 @@ __IMS_TRACE_TAG_USER_DECL__("Uce");
 
 PRIVATE GLOBAL UceFactory* UceFactory::m_gpUceFactory = IMS_NULL;
 
-PRIVATE GLOBAL IMSMap<IMS_SINT32, UceApp*> UceFactory::m_objManagers =
+PRIVATE GLOBAL IMSMap<IMS_SINT32, UceApp*> UceFactory::m_objUceManagers =
         IMSMap<IMS_SINT32, UceApp*>();
 
 PUBLIC
@@ -52,7 +52,7 @@ PUBLIC GLOBAL void UceFactory::Start(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
     strName.Sprintf("UceApp%02d", nSlotId);
 
     UceApp* pUceApp = new UceApp(nSlotId, strName);
-    m_objManagers.Add(nSlotId, pUceApp);
+    m_objUceManagers.Add(nSlotId, pUceApp);
 }
 
 PUBLIC GLOBAL void UceFactory::Stop(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
@@ -68,18 +68,18 @@ PUBLIC GLOBAL void UceFactory::Stop(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
     if (pUceApp != IMS_NULL)
     {
         delete pUceApp;
-        m_objManagers.Remove(nSlotId);
+        m_objUceManagers.Remove(nSlotId);
     }
 }
 
 PUBLIC GLOBAL UceApp* UceFactory::GetUceApp(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
-    IMS_SLONG nIndex = m_objManagers.GetIndexOfKey(nSlotId);
+    IMS_SLONG nIndex = m_objUceManagers.GetIndexOfKey(nSlotId);
 
     if (nIndex < 0)
     {
         return IMS_NULL;
     }
 
-    return m_objManagers.GetValueAt(nIndex);
+    return m_objUceManagers.GetValueAt(nIndex);
 }

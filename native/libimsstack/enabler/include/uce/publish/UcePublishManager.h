@@ -258,6 +258,9 @@ protected:
     IMS_UINT32 m_nKey;
     IMS_BOOL m_bReceivedUnPublishRequest;
     IPublicationData* m_pPendingPublicationData;
+    // save registered service feature tags which included in contact header.
+    IMS_UINT32 m_nConnectedServices;
+    IPublication* m_piPublication;
 
 private:
     AString m_strPidfXml;
@@ -266,13 +269,10 @@ private:
     IMS_SINT32 m_nSimSlot;
 
     ICoreService* m_piCoreService;
-    IPublication* m_piPublication;
     AString m_strAppName;
 
     // variable that caches the configuration value.
     IMSVector<IMS_SINT32> m_objExponentialRetryTimeSec;
-    // saving registered service for add feature tags to contact header.
-    IMS_UINT32 m_nConnectedServices;
     IMS_BOOL m_bAoSConnected;
     IMS_UINT32 m_nExtended;  // service availability = timer of publish refresh
     // If TMUS supports the encoded body, the pidf xml must be gzipped. If a

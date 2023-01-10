@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include "subscribe/UceSubscribeManager.h"
 #include "subscribe/UceSubscribe.h"
-#include "IUUceService.h"
+#include "IUce.h"
 
 #include "ServiceMessage.h"
 #include "ServiceTimer.h"
@@ -26,15 +26,11 @@
 
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
-IMS_SINT32 SUBSCRIBE_MNGR_SIM_SLOT = 20;
-IMS_UINT32 SUBSCRIBE_KEY = 20;
-
 class TestUceSubscribeManager : public UceSubscribeManager
 {
 public:
     TestUceSubscribeManager() :
-            UceSubscribeManager(AString("UceSubscribeManager"), IMS_NULL, AString("UceApp"),
-                    SUBSCRIBE_MNGR_SIM_SLOT)
+            UceSubscribeManager(AString("UceSubscribeManager"), IMS_NULL, AString("UceApp"), 0)
     {
     }
     virtual ~TestUceSubscribeManager() {}
@@ -52,11 +48,15 @@ public:
                 reinterpret_cast<IMS_UINTP>(pUceSubscribe));
         return OnMessage(objUIMsg);
     }
+
+    IMS_UINT32 GetConnectedService() { return m_nConnectedServices; }
 };
 
 class UceSubscribeManagerTest : public ::testing::Test
 {
 public:
+    IMS_UINT32 SUBSCRIBE_KEY = 20;
+
     TestUceSubscribeManager* pUceSubscribeManager;
 
 protected:
@@ -108,4 +108,16 @@ TEST_F(UceSubscribeManagerTest, OnMessage)
     EXPECT_EQ(pUceSubscribeManager->GetListCount(), 1);
     EXPECT_EQ(pUceSubscribeManager->SendDeleteIndMessage(pUceSubscribe), IMS_TRUE);
     EXPECT_EQ(pUceSubscribeManager->GetListCount(), 0);
+}
+
+TEST_F(UceSubscribeManagerTest, AosConnected)
+{
+    IMS_TRACE_D("AosConnected", 0, 0, 0);
+
+    IMS_UINT32 conectedService = 10;
+
+    EXPECT_EQ(pUceSubscribeManager->GetConnectedService(), 0);
+
+    pUceSubscribeManager->AosConnected(conectedService);
+    EXPECT_EQ(pUceSubscribeManager->GetConnectedService(), conectedService);
 }

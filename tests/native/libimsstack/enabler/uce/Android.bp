@@ -27,5 +27,11 @@ cc_test {
     cflags: [
         "-Wno-unused-parameter",
     ],
+    include_dirs: [
+        "packages/modules/ImsStack/tests/native/libimsstack/enabler/interface",
+        "packages/modules/ImsStack/tests/native/libimsstack/enabler/interface/uce",
+        "packages/modules/ImsStack/tests/native/libimsstack/engine/interface/core",
+        "packages/modules/ImsStack/tests/native/libimsstack/engine/interface/service",
+    ],
     test_config: "ImsStackNativeEnablerUceTests.xml",
 }

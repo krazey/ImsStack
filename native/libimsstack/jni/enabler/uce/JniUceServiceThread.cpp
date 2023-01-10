@@ -16,7 +16,6 @@
 
 #include "JniUceServiceThread.h"
 
-#include "IUUceService.h"
 #include "IUce.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"

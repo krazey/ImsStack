@@ -20,7 +20,6 @@
 
 #include "EnablerUtils.h"
 #include "ImsProcess.h"
-#include "IUUceService.h"
 #include "IUce.h"
 #include "JniUceService.h"
 #include "JniUceServiceThread.h"

@@ -20,7 +20,7 @@
 
 #include "ICoreService.h"
 #include "IMessage.h"
-#include "IUUceService.h"
+#include "IUce.h"
 #include "ServiceTrace.h"
 #include "subscribe/UceSubscribe.h"
 

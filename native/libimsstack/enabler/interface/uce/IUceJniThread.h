@@ -18,7 +18,8 @@
 
 #include "ImsTypeDef.h"
 #include "IJniEnablerThread.h"
-#include "IUce.h"
+
+class IUceTerminatedReason;
 
 class IUceJniThread : public IJniEnablerThread
 {

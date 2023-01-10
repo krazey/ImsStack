@@ -20,7 +20,7 @@
 #include "IElement.h"
 #include "INodeList.h"
 #include "ISipHeader.h"
-#include "IUUceService.h"
+#include "IUce.h"
 #include "IXmlRequest.h"
 #include "IXmlResponse.h"
 #include "IXmlTransaction.h"
@@ -40,11 +40,11 @@ __IMS_TRACE_TAG_USER_DECL__("UCE");
 PUBLIC
 UceXmlDocumentHelperThread::UceXmlDocumentHelperThread(
         IN const AString& strQueryName, IN IMS_SINT32 nSimSlot) :
+        m_piThread(IMS_NULL),
         m_nSimSlot(nSimSlot),
         m_nIndex(10),
         m_strQueryName(strQueryName),
         m_strThreadName(AString::ConstNull()),
-        m_piThread(IMS_NULL),
         m_pUceNotifyMessageBody(IMS_NULL)
 {
     m_pXMLTransactionProvider = XmlFactory::GetInstance()->CreateTransactionProvider();
@@ -118,6 +118,11 @@ void UceXmlDocumentHelperThread::Terminate()
 void UceXmlDocumentHelperThread::SendMsg(
         IN IMS_UINT32 nMSG, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
+    if (m_piThread == IMS_NULL)
+    {
+        IMS_TRACE_D("SendMsg: m_piThread is null", 0, 0, 0);
+        return;
+    }
     m_piThread->PostMessageI(nMSG, nWparam, nLparam);
 }
 
@@ -190,7 +195,41 @@ void UceXmlDocumentHelperThread::XmlState_NotifyStateChanged()
     IMS_TRACE_D("NotifyXMLState:state [%d]", nXMLState, 0, 0);
 }
 
-PUBLIC VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Initialize()
+PROTECTED
+IThread* UceXmlDocumentHelperThread::GetThread() const
+{
+    //---------------------------------------------------------------------------------------------
+    return m_piThread;
+}
+
+IMS_BOOL UceXmlDocumentHelperThread::OnStart(IN const IMSMSG& objMSG)
+{
+    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I("OnStart:[%d]", objMSG.GetName(), 0, 0);
+    return IMS_TRUE;
+}
+
+IMS_BOOL UceXmlDocumentHelperThread::OnTerminate(IN const IMSMSG& objMSG)
+{
+    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I("OnTerminate:[%d]", objMSG.GetName(), 0, 0);
+    return IMS_TRUE;
+}
+
+PRIVATE VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Runnable_Run(IN IMSMSG& objMSG)
+{
+    IMS_TRACE_D("Runnable_Run:MessageName[%d]", objMSG.GetName(), 0, 0);
+    IMS_SLONG nIndexOfFunc = m_objMessageMap.GetIndexOfKey(objMSG.GetName());
+    if (nIndexOfFunc < 0)
+    {
+        IMS_TRACE_I("Runnable_Run:This message is not supported.", objMSG.GetName(), 0, 0);
+        return IMS_TRUE;
+    }
+    msgHandler func = m_objMessageMap.GetValueAt(nIndexOfFunc);
+    return (this->*(func))(objMSG);
+}
+
+PRIVATE IMS_BOOL UceXmlDocumentHelperThread::Initialize()
 {
     //---------------------------------------------------------------------------------------------
     IMS_TRACE_D("Initialize", 0, 0, 0);
@@ -207,47 +246,6 @@ PUBLIC VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Initialize()
     m_pNonCapabilities = new UceNonCapabilityUsers();
     m_pPidfXmls = new UcePidfXmls();
     return IMS_FALSE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::OnStart(IN IMSMSG& objMSG)
-{
-    //---------------------------------------------------------------------------------------------
-    IMS_TRACE_I("OnStart:[%d]", objMSG.GetName(), 0, 0);
-    return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::OnTerminate(IN IMSMSG& objMSG)
-{
-    //---------------------------------------------------------------------------------------------
-    IMS_TRACE_I("OnTerminate:[%d]", objMSG.GetName(), 0, 0);
-    return IMS_TRUE;
-}
-
-PROTECTED VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::OnMessage(IN IMSMSG& objMSG)
-{
-    //---------------------------------------------------------------------------------------------
-    IMS_TRACE_I("OnMessage:[%d]", objMSG.GetName(), 0, 0);
-    return IMS_TRUE;
-}
-
-PROTECTED
-IThread* UceXmlDocumentHelperThread::GetThread() const
-{
-    //---------------------------------------------------------------------------------------------
-    return m_piThread;
-}
-
-PRIVATE VIRTUAL IMS_BOOL UceXmlDocumentHelperThread::Runnable_Run(IN IMSMSG& objMSG)
-{
-    IMS_TRACE_D("Runnable_Run:MessageName[%d]", objMSG.GetName(), 0, 0);
-    IMS_SLONG nIndexOfFunc = m_objMessageMap.GetIndexOfKey(objMSG.GetName());
-    if (nIndexOfFunc < 0)
-    {
-        IMS_TRACE_I("Runnable_Run:This message is not supported.", objMSG.GetName(), 0, 0);
-        return IMS_TRUE;
-    }
-    msgHandler func = m_objMessageMap.GetValueAt(nIndexOfFunc);
-    return (this->*(func))(objMSG);
 }
 
 VIRTUAL void UceXmlDocumentHelperThread::Uninitialize()
@@ -312,7 +310,7 @@ IMS_RESULT UceXmlDocumentHelperThread::XMLDataTokenization(IN const ByteArray& o
     return IMS_FAILURE;
 }
 
-IMS_BOOL UceXmlDocumentHelperThread::StartMessageHandler(IMSMSG& objMsg)
+IMS_BOOL UceXmlDocumentHelperThread::StartMessageHandler(const IMSMSG& objMsg)
 {
     if (!Initialize())
     {
@@ -321,7 +319,7 @@ IMS_BOOL UceXmlDocumentHelperThread::StartMessageHandler(IMSMSG& objMsg)
     return OnStart(objMsg);
 }
 
-IMS_BOOL UceXmlDocumentHelperThread::TerminateMessageHandler(IMSMSG& objMsg)
+IMS_BOOL UceXmlDocumentHelperThread::TerminateMessageHandler(const IMSMSG& objMsg)
 {
     OnTerminate(objMsg);
     return IMS_TRUE;

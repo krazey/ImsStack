@@ -55,6 +55,20 @@ UceService::UceService(IN const AString& strAppName, IN const IMS_SINT32 nSlotId
     EnableManager();
 }
 
+PUBLIC
+UceService::UceService(IN ICoreService* piCoreService) :
+        ImsService(AString::ConstNull()),
+        m_pUceSubscribeManager(IMS_NULL),
+        m_pUcePublishManager(IMS_NULL),
+        m_pUceOptionsManager(IMS_NULL),
+        m_nSlotId(0),
+        m_piCoreService(piCoreService),
+        m_strAppName(AString("UceServiceTest"))
+{
+    IMS_TRACE_I("UCE_M : UceService = %" PFLS_u, sizeof(UceService), 0, 0);
+    EnableManager();
+}
+
 PUBLIC VIRTUAL UceService::~UceService()
 {
     IMS_TRACE_I("UCE_F : UceService = %" PFLS_u, sizeof(UceService), 0, 0);
