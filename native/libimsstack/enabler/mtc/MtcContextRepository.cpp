@@ -23,7 +23,7 @@ MtcContextRepository* MtcContextRepository::s_pThis = IMS_NULL;
 
 PUBLIC
 MtcContextRepository::MtcContextRepository() :
-        m_objContexts(IMSMap<IMS_SINT32, IMtcContext*>())
+        m_objContexts(ImsMap<IMS_SINT32, IMtcContext*>())
 {
 }
 

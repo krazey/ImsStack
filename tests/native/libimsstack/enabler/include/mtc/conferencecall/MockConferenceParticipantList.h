@@ -42,7 +42,7 @@ public:
             ConfUser*, GetConfUser, (IN IConferenceReference* piConfReference), (const, override));
     MOCK_METHOD(IMS_BOOL, IsConnectedUser,
             (IN const ConfUser* pConfUser, IN IMS_BOOL bIncludingConnecting), (const, override));
-    MOCK_METHOD(IMSList<ConfUser*>, GetConfUsers, (IN IMS_BOOL bCopy), (const, override));
+    MOCK_METHOD(ImsList<ConfUser*>, GetConfUsers, (IN IMS_BOOL bCopy), (const, override));
     MOCK_METHOD(void, SetReference,
             (IN IConferenceReference* piReference, IN const ConfUser* pConfUser), (override));
     MOCK_METHOD(

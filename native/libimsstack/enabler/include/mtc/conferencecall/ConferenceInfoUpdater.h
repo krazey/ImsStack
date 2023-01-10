@@ -17,6 +17,7 @@
 #ifndef CONFERENCE_INFO_UPDATER_H_
 #define CONFERENCE_INFO_UPDATER_H_
 
+#include "ImsList.h"
 #include "MtcDef.h"
 #include "conferencecall/ConferenceInfo.h"
 
@@ -75,7 +76,7 @@ protected:
     static IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB);
     IMS_BOOL IsInvalidStatusUpdate(
             IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const;
-    IMSList<ConferenceInfo::User*> GetSameUserEntities(IN const ConferenceInfo::User* pUser) const;
+    ImsList<ConferenceInfo::User*> GetSameUserEntities(IN const ConferenceInfo::User* pUser) const;
     void AddNotMatchedUserList(IN ConferenceInfo::User* pUser);
     void RemoveFromNotMatchedUserList(IN ConferenceInfo::User* pUser);
     IMS_BOOL IsInitialNotifyWithoutUsers() const;
@@ -102,7 +103,7 @@ private:
     ConferenceParticipantList* m_pParticipantList;
     IMS_UINT32 m_nInfoState;
     MatchingPolicy m_eCurrentMatchPolicy;
-    IMSList<ConferenceInfo::User*> m_objNotMatchedUsers;
+    ImsList<ConferenceInfo::User*> m_objNotMatchedUsers;
     IMS_BOOL m_bHostInfoInUsers;
 };
 

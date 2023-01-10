@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 #include "helper/ISrvccStateListener.h"
@@ -25,7 +24,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 PUBLIC
 SrvccStateManager::SrvccStateManager() :
         m_eState(SrvccState::IDLE),
-        m_objListeners(IMSList<ISrvccStateListener*>())
+        m_objListeners(ImsList<ISrvccStateListener*>())
 {
     IMS_TRACE_I("+SrvccStateManager", 0, 0, 0);
 }

@@ -70,7 +70,7 @@ public:
      *
      * @return
      */
-    virtual IMSList<IMtcCall*> GetCalls() = 0;
+    virtual ImsList<IMtcCall*> GetCalls() = 0;
 
     // Returns a list of all calls excluding a given one.
     // The list is sorted in the order in which the calls were created.
@@ -81,7 +81,7 @@ public:
      * @param nExcludingCallKey
      * @return
      */
-    virtual IMSList<IMtcCall*> GetCallsExcluding(IN CallKey nExcludingCallKey) = 0;
+    virtual ImsList<IMtcCall*> GetCallsExcluding(IN CallKey nExcludingCallKey) = 0;
 
     // Returns a list of calls matching the given session type.
     // The list is sorted in the order in which the calls were created.
@@ -92,7 +92,7 @@ public:
      * @param eCallType
      * @return
      */
-    virtual IMSList<IMtcCall*> GetCallsByType(IN CallType eCallType) = 0;
+    virtual ImsList<IMtcCall*> GetCallsByType(IN CallType eCallType) = 0;
 
     // Returns a list of calls matching the given service type.
     // The list is sorted in the order in which the calls were created.
@@ -103,7 +103,7 @@ public:
      * @param eServiceType
      * @return
      */
-    virtual IMSList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) = 0;
+    virtual ImsList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) = 0;
 
     // Returns a list of conference calls.
     // The list is sorted in the order in which the calls were created.
@@ -113,7 +113,7 @@ public:
      *
      * @return
      */
-    virtual IMSList<IMtcCall*> GetCallsInConference() = 0;
+    virtual ImsList<IMtcCall*> GetCallsInConference() = 0;
 
     // Returns a list of calls that in the specific state.
     // The list is sorted in the order in which the calls were created.
@@ -124,7 +124,7 @@ public:
      * @param eState
      * @return
      */
-    virtual IMSList<IMtcCall*> GetCallsByState(IN State eState) = 0;
+    virtual ImsList<IMtcCall*> GetCallsByState(IN State eState) = 0;
 };
 
 #endif

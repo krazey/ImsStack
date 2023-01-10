@@ -39,14 +39,14 @@ public:
      * @param pListener Listener to be notified the result if pending.
      */
     MtcBlockChecker(
-            IN const IMSList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener* pListener);
+            IN const ImsList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener* pListener);
 
     ~MtcBlockChecker();
 
     MtcBlockChecker(IN const MtcBlockChecker&) = delete;
     MtcBlockChecker& operator=(IN const MtcBlockChecker&) = delete;
 
-    static IMSList<IMtcBlockRule*> GetCallUpdateRules(IN IMtcCallContext& objContext);
+    static ImsList<IMtcBlockRule*> GetCallUpdateRules(IN IMtcCallContext& objContext);
 
     Result Check() override;
 
@@ -56,7 +56,7 @@ private:
     IMS_BOOL IsResultNotified() const;
 
     IMtcBlockCheckListener* m_pListener;
-    IMSList<IMtcBlockRule*> m_lstRules;
+    ImsList<IMtcBlockRule*> m_lstRules;
 
     IMS_SINT32 m_nPendingCount;
 };

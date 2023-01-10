@@ -49,7 +49,7 @@ ConferenceController::ConferenceController(IN CallKey nConfCallKey, IMtcContext&
                 GetConferenceCall()->GetCallContext(), objConnectionIdManager)),
         m_objOperationQueue(*objFactory.CreateOperationQueue()),
         m_pSubscription(IMS_NULL),
-        m_objIConfReferences(IMSList<IConferenceReference*>()),
+        m_objIConfReferences(ImsList<IConferenceReference*>()),
         m_piTimer(IMS_NULL),
         m_nConditionFinalSipfragTimer(CONDITION_NONE),
         m_nState(STATE_CREATED)
@@ -261,8 +261,8 @@ PUBLIC VIRTUAL void ConferenceController::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PUBLIC VIRTUAL void ConferenceController::ProcessCommand(IN IMS_UINT32 nCmd,
-        IN IMSList<ConfUser*>& objUsers, IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-        IN IMSMap<SuppType, SuppService*>& objSuppServices)
+        IN ImsList<ConfUser*>& objUsers, IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
+        IN ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_D("ProcessCommand : [%d]", nCmd, 0, 0);
 
@@ -279,7 +279,7 @@ PUBLIC VIRTUAL void ConferenceController::ProcessCommand(IN IMS_UINT32 nCmd,
 }
 
 PUBLIC VIRTUAL void ConferenceController::ProcessCommand(
-        IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers)
+        IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_D("ProcessCommand : [%d]", nCmd, 0, 0);
 
@@ -330,7 +330,7 @@ PUBLIC VIRTUAL IndividualCallState ConferenceController::GetCallStatusInConferen
 
     if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_REFER_INVITE)
     {
-        const IMSList<ConfUser*>& objUsers = m_objOperationQueue.GetCurrentOperation()->GetUsers();
+        const ImsList<ConfUser*>& objUsers = m_objOperationQueue.GetCurrentOperation()->GetUsers();
         for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
         {
             if (nKey == m_objConnectionIdManager.GetCallKey(objUsers.GetAt(i)->nConnectionId))
@@ -380,7 +380,7 @@ PUBLIC VIRTUAL void ConferenceController::OnOperationReady()
     DoNextOperation();
 }
 
-PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& objUsers)
+PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("ProcessJoin", 0, 0, 0);
 
@@ -407,7 +407,7 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& 
     }
     else if (nReferType == REFER_INVITE_MULTIPLE)  // send REFER with resource list
     {
-        IMSList<ConfUser*> objJoinList;
+        ImsList<ConfUser*> objJoinList;
         for (IMS_UINT32 i = nStartIndex; i < m_objParticipantList.GetSize(); i++)
         {
             objJoinList.Append(m_objParticipantList.GetConfUsers().GetAt(i));
@@ -423,7 +423,7 @@ PROTECTED VIRTUAL void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& 
     m_objOperationQueue.SetAddingOperationSetCompleted();
 }
 
-PROTECTED VIRTUAL void ConferenceController::ProcessDrop(IN IMSList<ConfUser*>& objUsers)
+PROTECTED VIRTUAL void ConferenceController::ProcessDrop(IN ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("ProcessDrop", 0, 0, 0);
 
@@ -466,7 +466,7 @@ void ConferenceController::ProcessSubscribeOnParticipant()
 
 PROTECTED
 IMS_UINT32 ConferenceController::AddUserToParticipantList(
-        IN IMSList<ConfUser*>& objConfUsers, IN IMS_BOOL bReOrder /* = IMS_FALSE*/)
+        IN ImsList<ConfUser*>& objConfUsers, IN IMS_BOOL bReOrder /* = IMS_FALSE*/)
 {
     IMS_UINT32 nStartIndex = m_objParticipantList.GetSize();
     IMS_UINT32 nAddingSize = objConfUsers.GetSize();
@@ -488,7 +488,7 @@ IMS_UINT32 ConferenceController::AddUserToParticipantList(
 }
 
 PROTECTED
-void ConferenceController::ClearListForConfUsers(IN IMSList<ConfUser*>& objUsers)
+void ConferenceController::ClearListForConfUsers(IN ImsList<ConfUser*>& objUsers)
 {
     for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
     {
@@ -566,7 +566,7 @@ PROTECTED VIRTUAL IConferenceReference* ConferenceController::CreateReference(IN
 }
 
 PROTECTED VIRTUAL IConferenceReference* ConferenceController::CreateReference(
-        IN IMSList<ConfUser*>& objUsers)
+        IN ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_D("CreateReference", 0, 0, 0);
 
@@ -715,7 +715,7 @@ PROTECTED VIRTUAL void ConferenceController::CheckUserEntityConnected(IN ConfUse
     }
 }
 
-PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN IMSList<ConfUser*> objUsers)
+PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN ImsList<ConfUser*> objUsers)
 {
     IMS_TRACE_D("InviteParticipants : [%d] users", objUsers.GetSize(), 0, 0);
 
@@ -768,7 +768,7 @@ PROTECTED VIRTUAL void ConferenceController::InviteParticipants(IN IMSList<ConfU
     m_objParticipantList.Login();
 }
 
-PROTECTED VIRTUAL void ConferenceController::RemoveParticipants(IN IMSList<ConfUser*> objUsers)
+PROTECTED VIRTUAL void ConferenceController::RemoveParticipants(IN ImsList<ConfUser*> objUsers)
 {
     IMS_TRACE_D("RemoveParticipants", 0, 0, 0);
 

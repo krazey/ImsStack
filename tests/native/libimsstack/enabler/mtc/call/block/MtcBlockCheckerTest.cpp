@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
 #include "call/block/MockIMtcBlockChecker.h"
 #include "call/block/MockIMtcBlockRule.h"
 #include "call/block/MtcBlockChecker.h"
@@ -39,7 +40,7 @@ MockIMtcBlockRule* CreateMockIMtcBlockRule(Result objResult)
 
 TEST(MtcBlockCheckerTest, CheckReturnsUnblockedForEmptyRule)
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
 
     MtcBlockChecker objChecker(lstRules, nullptr);
     Result objResult = objChecker.Check();
@@ -49,7 +50,7 @@ TEST(MtcBlockCheckerTest, CheckReturnsUnblockedForEmptyRule)
 
 TEST(MtcBlockCheckerTest, CheckReturnsUnblockedIfAllRulesUnblocked)
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::UNBLOCKED)));
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::UNBLOCKED)));
 
@@ -61,7 +62,7 @@ TEST(MtcBlockCheckerTest, CheckReturnsUnblockedIfAllRulesUnblocked)
 
 TEST(MtcBlockCheckerTest, CheckReturnsBlockedIfSomeRulesBlocked)
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::UNBLOCKED)));
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::BLOCKED, objReason)));
@@ -74,7 +75,7 @@ TEST(MtcBlockCheckerTest, CheckReturnsBlockedIfSomeRulesBlocked)
 
 TEST(MtcBlockCheckerTest, CheckReturnsPendingIfSomeRulesPending)
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::UNBLOCKED)));
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
@@ -86,7 +87,7 @@ TEST(MtcBlockCheckerTest, CheckReturnsPendingIfSomeRulesPending)
 
 TEST(MtcBlockCheckerTest, ListenerNotifiedWhenAllPendingRulesUnblocked)
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
@@ -103,7 +104,7 @@ TEST(MtcBlockCheckerTest, ListenerNotifiedWhenAllPendingRulesUnblocked)
 
 TEST(MtcBlockCheckerTest, ListenerNotNotifiedWhenSomePendingRulesUnblocked)
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
@@ -117,7 +118,7 @@ TEST(MtcBlockCheckerTest, ListenerNotNotifiedWhenSomePendingRulesUnblocked)
 
 TEST(MtcBlockCheckerTest, ListenerNotifiedWhenSomePendingRulesBlocked)
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 
@@ -131,7 +132,7 @@ TEST(MtcBlockCheckerTest, ListenerNotifiedWhenSomePendingRulesBlocked)
 
 TEST(MtcBlockCheckerTest, ListenerNotNotifiedAfterNotifiedOnce)
 {
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
     lstRules.Append(CreateMockIMtcBlockRule(Result(Result::Status::PENDING)));
 

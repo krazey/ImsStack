@@ -50,7 +50,7 @@ private:
 private:
     IMtcContext& m_objContext;
     ConferenceFactory m_objConferenceFactory;
-    IMSMap<CallKey, ConferenceController*> m_objControllers;
+    ImsMap<CallKey, ConferenceController*> m_objControllers;
     ObjectAsyncDestroyer<ConferenceController> m_objDestroyer;
     CallConnectionIdManager m_objCallConnectionIdManager;
 };

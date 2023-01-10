@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
@@ -43,7 +42,7 @@ PUBLIC VIRTUAL MergeController::~MergeController()
     IMS_TRACE_I("~MergeController", 0, 0, 0);
 }
 
-PROTECTED VIRTUAL void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objUsers)
+PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("ProcessMerge user size[%d]", objUsers.GetSize(), 0, 0);
 
@@ -201,7 +200,7 @@ PROTECTED VIRTUAL void MergeController::OnIndividualCallTerminated(IN IMS_UINTP 
 }
 
 PRIVATE
-void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers)
+void MergeController::ProcessMergeWithoutRefer(IN ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("ProcessMergeWithoutRefer", 0, 0, 0);
 

@@ -17,6 +17,7 @@
 #ifndef CONFERENCE_EVENT_NOTIFIER_H_
 #define CONFERENCE_EVENT_NOTIFIER_H_
 
+#include "ImsList.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 
@@ -62,7 +63,7 @@ public:
 
 private:
     void CheckDisconnectedConfUsersInfo(
-            IN ConferenceParticipantList& objParticipantList, IN_OUT IMSList<ConfUser*>& objUsers);
+            IN ConferenceParticipantList& objParticipantList, IN_OUT ImsList<ConfUser*>& objUsers);
 
 private:
     IMtcCallContext& m_objConfCallContext;

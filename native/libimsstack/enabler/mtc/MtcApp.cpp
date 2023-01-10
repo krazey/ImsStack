@@ -17,7 +17,6 @@
 #include "AString.h"
 #include "Configuration.h"
 #include "IMtcService.h"
-#include "ImsList.h"
 #include "ImsServiceConfig.h"
 #include "JniEnablerConnector.h"
 #include "JniMtcCall.h"
@@ -49,7 +48,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         ImsApp(MTC_APP_NAME),
         m_nSlotId(nSlotId),
         m_objConfigurationProxy(MtcConfigurationProxy(new MtcConfigurationManager())),
-        m_lstServices(IMSList<IMtcService*>()),
+        m_lstServices(ImsList<IMtcService*>()),
         m_objDialingPlan(MtcDialingPlan(
                 *this, *PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(nSlotId))),
         m_objCallManager(MtcCallManager(*this)),

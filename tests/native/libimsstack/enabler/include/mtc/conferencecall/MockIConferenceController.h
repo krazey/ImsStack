@@ -17,6 +17,8 @@
 #ifndef MOCK_I_CONFERENCE_CONTROLLER_H_
 #define MOCK_I_CONFERENCE_CONTROLLER_H_
 
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "MtcDef.h"
 #include "conferencecall/IConferenceController.h"
 #include <gmock/gmock.h>
@@ -29,11 +31,11 @@ public:
     virtual ~MockIConferenceController() {}
 
     MOCK_METHOD(void, ProcessCommand,
-            (IN IMS_UINT32 nCmd, (IN IMSList<ConfUser*>& objUsers), IN CallInfo& objCallInfo,
+            (IN IMS_UINT32 nCmd, (IN ImsList<ConfUser*> & objUsers), IN CallInfo& objCallInfo,
                     IN MediaInfo& objMediaInfo,
-                    (IN IMSMap<SuppType, SuppService*>& objSuppServices)),
+                    (IN ImsMap<SuppType, SuppService*> & objSuppServices)),
             (override));
-    MOCK_METHOD(void, ProcessCommand, (IN IMS_UINT32 nCmd, (IN IMSList<ConfUser*>& objUsers)),
+    MOCK_METHOD(void, ProcessCommand, (IN IMS_UINT32 nCmd, (IN ImsList<ConfUser*> & objUsers)),
             (override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(

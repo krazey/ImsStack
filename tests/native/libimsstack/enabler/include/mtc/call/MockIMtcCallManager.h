@@ -34,13 +34,13 @@ public:
             (override));
     MOCK_METHOD(void, RemoveCall, (IN CallKey nCallKey), (override));
     MOCK_METHOD(IMtcCall*, GetCallByCallKey, (IN CallKey nCallKey), (override));
-    MOCK_METHOD(IMSList<IMtcCall*>, GetCalls, (), (override));
-    MOCK_METHOD(IMSList<IMtcCall*>, GetCallsExcluding, (IN CallKey nExcludingCallKey), (override));
-    MOCK_METHOD(IMSList<IMtcCall*>, GetCallsByType, (IN CallType eCallType), (override));
+    MOCK_METHOD(ImsList<IMtcCall*>, GetCalls, (), (override));
+    MOCK_METHOD(ImsList<IMtcCall*>, GetCallsExcluding, (IN CallKey nExcludingCallKey), (override));
+    MOCK_METHOD(ImsList<IMtcCall*>, GetCallsByType, (IN CallType eCallType), (override));
     MOCK_METHOD(
-            IMSList<IMtcCall*>, GetCallsByServiceType, (IN ServiceType eServiceType), (override));
-    MOCK_METHOD(IMSList<IMtcCall*>, GetCallsInConference, (), (override));
-    MOCK_METHOD(IMSList<IMtcCall*>, GetCallsByState, (IN State eState), (override));
+            ImsList<IMtcCall*>, GetCallsByServiceType, (IN ServiceType eServiceType), (override));
+    MOCK_METHOD(ImsList<IMtcCall*>, GetCallsInConference, (), (override));
+    MOCK_METHOD(ImsList<IMtcCall*>, GetCallsByState, (IN State eState), (override));
 };
 
 #endif

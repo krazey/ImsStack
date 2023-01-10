@@ -17,6 +17,7 @@
 #ifndef MOCK_CONFERENCE_FACTORY_H_
 #define MOCK_CONFERENCE_FACTORY_H_
 
+#include "ImsList.h"
 #include "conferencecall/ConferenceFactory.h"
 #include <gmock/gmock.h>
 
@@ -51,7 +52,7 @@ public:
                     IN IConferenceReferenceListener& objListener),
             (override));
     MOCK_METHOD(IConferenceReference*, CreateReference,
-            (IN CallKey nConfCallKey, IN IMSList<ConfUser*>& objConfUsers,
+            (IN CallKey nConfCallKey, IN ImsList<ConfUser*>& objConfUsers,
                     IN IConferenceReferenceListener& objListener),
             (override));
     MOCK_METHOD(ConferenceParticipantList*, CreateParticipantList, (), (override));

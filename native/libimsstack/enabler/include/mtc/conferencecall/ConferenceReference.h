@@ -17,6 +17,7 @@
 #ifndef CONFERENCE_REFERENCE_H_
 #define CONFERENCE_REFERENCE_H_
 
+#include "ImsList.h"
 #include "AString.h"
 #include "IReferenceListener.h"
 #include "MtcDef.h"
@@ -34,7 +35,7 @@ public:
     explicit ConferenceReference(IN IMtcContext& objContext, IN CallKey nConfCallKey,
             IN ConfUser* pConfUser, IN IConferenceReferenceListener& objListener);
     explicit ConferenceReference(IN IMtcContext& objContext, IN CallKey nConfCallKey,
-            IN IMSList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener);
+            IN ImsList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener);
     virtual ~ConferenceReference();
     ConferenceReference(IN const ConferenceReference&) = delete;
     ConferenceReference& operator=(IN const ConferenceReference&) = delete;
@@ -76,7 +77,7 @@ private:
     IConferenceReferenceListener& m_objListener;
     IMS_UINT32 m_nType;
     ConfUser* m_pConfUser;
-    IMSList<ConfUser*> m_objConfUsers;
+    ImsList<ConfUser*> m_objConfUsers;
     IReference* m_piReference;
     IMS_BOOL m_bForceToTerminateInterface;
 };

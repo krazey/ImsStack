@@ -15,6 +15,7 @@
  */
 
 #include "IMtcService.h"
+#include "ImsList.h"
 #include "MockIMtcService.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -34,7 +35,7 @@ public:
     MockIMtcService objService;
     CallInfo objCallInfo;
     MockIMtcBlockRuleCheckListener objListener;
-    IMSList<IMtcCall*> lstOtherCalls;
+    ImsList<IMtcCall*> lstOtherCalls;
     CallWaitingBlockRule* pBlockRule;
 
 protected:

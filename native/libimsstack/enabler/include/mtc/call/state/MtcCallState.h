@@ -19,6 +19,7 @@
 
 #include "ISessionListener.h"
 #include "ImsList.h"
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "base/IMessageMediator.h"

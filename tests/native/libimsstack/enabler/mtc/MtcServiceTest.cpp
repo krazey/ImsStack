@@ -21,6 +21,7 @@
 #include "ImsAosParameter.h"
 #include "ImsServiceConfig.h"
 #include "ImsServiceConfigTypeDef.h"
+#include "ImsVector.h"
 #include "JniEnablerConnector.h"
 #include "MockICarrierConfig.h"
 #include "MockIJniEnabler.h"
@@ -391,9 +392,9 @@ TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
 {
     EXPECT_EQ(TbcwStatus::UNPROVISIONED, pNormalMtcService->GetTbcwStatus());
 
-    IMSVector<IMS_SINT32> objTbcw;
+    ImsVector<IMS_SINT32> objTbcw;
     objTbcw.Add(0);
-    IMSVector<IMS_SINT32> objNoTbcw;
+    ImsVector<IMS_SINT32> objNoTbcw;
 
     EXPECT_CALL(objConfigService.GetMockCarrierConfig(),
             GetIntArray(CarrierConfig::ImsSs::KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY))

@@ -23,7 +23,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcTimerWrapper::MtcTimerWrapper() :
-        m_lstTimers(IMSList<MtcTimer*>()),
+        m_lstTimers(ImsList<MtcTimer*>()),
         m_piListener(IMS_NULL)
 {
     IMS_TRACE_D("+MtcTimerWrapper", 0, 0, 0);

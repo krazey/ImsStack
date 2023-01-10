@@ -30,7 +30,7 @@ PUBLIC
 ConferenceManager::ConferenceManager(IN IMtcContext& objContext) :
         m_objContext(objContext),
         m_objConferenceFactory(ConferenceFactory(objContext)),
-        m_objControllers(IMSMap<CallKey, ConferenceController*>()),
+        m_objControllers(ImsMap<CallKey, ConferenceController*>()),
         m_objDestroyer(ObjectAsyncDestroyer<ConferenceController>()),
         m_objCallConnectionIdManager(CallConnectionIdManager(objContext))
 {

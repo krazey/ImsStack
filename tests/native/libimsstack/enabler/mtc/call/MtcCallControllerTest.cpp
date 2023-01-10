@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/ISilentRedialHelper.h"
@@ -25,9 +27,9 @@
 #include "conferencecall/MockIConferenceManager.h"
 #include "ect/MockIEctManager.h"
 #include "helper/MockICallStateProxy.h"
-#include <initializer_list>
-#include <gtest/gtest.h>
 #include <functional>
+#include <gtest/gtest.h>
+#include <initializer_list>
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -58,9 +60,9 @@ protected:
 
     virtual void TearDown() override { delete pCallController; }
 
-    IMSList<IMtcCall*> CreateCallList(std::initializer_list<IMtcCall*> lstCalls)
+    ImsList<IMtcCall*> CreateCallList(std::initializer_list<IMtcCall*> lstCalls)
     {
-        IMSList<IMtcCall*> lstOut;
+        ImsList<IMtcCall*> lstOut;
 
         for (IMtcCall* pCall : lstCalls)
         {
@@ -92,7 +94,7 @@ TEST_F(MtcCallControllerTest, TerminateCallsByNoneKeyTerminatesTargetCalls)
     EXPECT_CALL(objCall1, Terminate(objReason)).Times(1);
     EXPECT_CALL(objCall2, Terminate(objReason)).Times(1);
 
-    IMSList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
+    ImsList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
 
     Key nKey;
@@ -124,7 +126,7 @@ TEST_F(MtcCallControllerTest, TerminateCallsByCallTypeTerminatesTargetCalls)
     EXPECT_CALL(objCall1, Terminate(objReason)).Times(1);
     EXPECT_CALL(objCall2, Terminate(objReason)).Times(1);
 
-    IMSList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
+    ImsList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
     ON_CALL(objCallManager, GetCallsByType(eCallType)).WillByDefault(Return(lstCalls));
 
     Key nKey;
@@ -143,7 +145,7 @@ TEST_F(MtcCallControllerTest, TerminateCallsByServiceTypeTerminatesTargetCalls)
 
     ServiceType eServiceType = ServiceType::NORMAL;
 
-    IMSList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
+    ImsList<IMtcCall*> lstCalls = CreateCallList({&objCall1, &objCall2});
     ON_CALL(objCallManager, GetCallsByServiceType(eServiceType)).WillByDefault(Return(lstCalls));
 
     Key nKey;
@@ -159,7 +161,7 @@ TEST_F(MtcCallControllerTest, RemoveCallsByNoneKeyRemovesTargetCalls)
     CallKey nCallKey2 = 2;
     MockIMtcCall* pCall2 = CreateMockIMtcCall(nCallKey2);
 
-    IMSList<IMtcCall*> lstCalls = CreateCallList({pCall1, pCall2});
+    ImsList<IMtcCall*> lstCalls = CreateCallList({pCall1, pCall2});
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
     EXPECT_CALL(objCallManager, RemoveCall(pCall1->GetKey())).Times(1);
     EXPECT_CALL(objCallManager, RemoveCall(pCall2->GetKey())).Times(1);
@@ -196,7 +198,7 @@ TEST_F(MtcCallControllerTest, RemoveCallsByCallTypeRemovesTargetCalls)
 
     CallType eCallType = CallType::VOIP;
 
-    IMSList<IMtcCall*> lstCalls = CreateCallList({pCall1, pCall2});
+    ImsList<IMtcCall*> lstCalls = CreateCallList({pCall1, pCall2});
     ON_CALL(objCallManager, GetCallsByType(eCallType)).WillByDefault(Return(lstCalls));
     EXPECT_CALL(objCallManager, RemoveCall(pCall1->GetKey())).Times(1);
     EXPECT_CALL(objCallManager, RemoveCall(pCall2->GetKey())).Times(1);
@@ -219,7 +221,7 @@ TEST_F(MtcCallControllerTest, RemoveCallsByServiceTypeRemovesTargetCalls)
 
     ServiceType eServiceType = ServiceType::NORMAL;
 
-    IMSList<IMtcCall*> lstCalls = CreateCallList({pCall1, pCall2});
+    ImsList<IMtcCall*> lstCalls = CreateCallList({pCall1, pCall2});
     ON_CALL(objCallManager, GetCallsByServiceType(eServiceType)).WillByDefault(Return(lstCalls));
     EXPECT_CALL(objCallManager, RemoveCall(pCall1->GetKey())).Times(1);
     EXPECT_CALL(objCallManager, RemoveCall(pCall2->GetKey())).Times(1);
@@ -308,9 +310,9 @@ TEST_F(MtcCallControllerTest, StartCallsTargetCall)
     CallType eCallType = CallType::VOIP;
     AString strTarget = "target";
     MediaInfo objMediaInfo;
-    IMSMap<SuppType, SuppService*> objSuppServices;
+    ImsMap<SuppType, SuppService*> objSuppServices;
 
-    // TODO: Make a matcher for IMSMap<SuppType, SuppService*>
+    // TODO: Make a matcher for ImsMap<SuppType, SuppService*>
     MockIMtcCall objCall;
     EXPECT_CALL(objCall, Start(eCallType, strTarget, objMediaInfo, _)).Times(1);
 
@@ -464,9 +466,9 @@ TEST_F(MtcCallControllerTest, SendUssdCallsTargetCall)
 TEST_F(MtcCallControllerTest, MergeToConferenceCallsProcessesMerge)
 {
     CallKey nCallKey = 1;
-    IMSList<ConfUser*> objUsers;
+    ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for IMSList<ConfUser*>
+    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::MERGE, _)).Times(1);
 
@@ -488,16 +490,16 @@ TEST_F(MtcCallControllerTest, MergeToConferenceCreatesControllerIfNull)
             .Times(1)
             .WillRepeatedly(ReturnRef(objConferenceController));
 
-    IMSList<ConfUser*> objUsers;
+    ImsList<ConfUser*> objUsers;
     pCallController->MergeToConference(nCallKey, objUsers);
 }
 
 TEST_F(MtcCallControllerTest, AddToConferenceCallsProcessesAdd)
 {
     CallKey nCallKey = 1;
-    IMSList<ConfUser*> objUsers;
+    ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for IMSList<ConfUser*>
+    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::ADD, _)).Times(1);
 
@@ -515,16 +517,16 @@ TEST_F(MtcCallControllerTest, AddToConferenceDoNothingIfControllerNull)
     ON_CALL(objConferenceManager, GetController(nCallKey)).WillByDefault(Return(nullptr));
     EXPECT_CALL(objConferenceManager, CreateController(_, _)).Times(0);
 
-    IMSList<ConfUser*> objUsers;
+    ImsList<ConfUser*> objUsers;
     pCallController->AddToConference(nCallKey, objUsers);
 }
 
 TEST_F(MtcCallControllerTest, RemoveFromConferenceCallsProcessesRemove)
 {
     CallKey nCallKey = 1;
-    IMSList<ConfUser*> objUsers;
+    ImsList<ConfUser*> objUsers;
 
-    // TODO: Make a matcher for IMSList<ConfUser*>
+    // TODO: Make a matcher for ImsList<ConfUser*>
     MockIConferenceController objConferenceController;
     EXPECT_CALL(objConferenceController, ProcessCommand(IConferenceController::REMOVE, _)).Times(1);
 
@@ -542,7 +544,7 @@ TEST_F(MtcCallControllerTest, RemoveFromConferenceDoNothingIfControllerNull)
     ON_CALL(objConferenceManager, GetController(nCallKey)).WillByDefault(Return(nullptr));
     EXPECT_CALL(objConferenceManager, CreateController(_, _)).Times(0);
 
-    IMSList<ConfUser*> objUsers;
+    ImsList<ConfUser*> objUsers;
     pCallController->RemoveFromConference(nCallKey, objUsers);
 }
 

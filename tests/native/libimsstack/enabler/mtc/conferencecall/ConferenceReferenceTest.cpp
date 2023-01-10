@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MtcContextRepository.h"
@@ -173,7 +174,7 @@ protected:
         ON_CALL(objMockJoiningMtcSession, GetISession())
                 .WillByDefault(ReturnRef(objMockJoiningSession));
 
-        IMSList<AString> lstAddresses;
+        ImsList<AString> lstAddresses;
         lstAddresses.Append("sip:testUri@ims.google.com");
         ON_CALL(objMockJoiningSession, GetRemoteUserId).WillByDefault(Return(lstAddresses));
     }

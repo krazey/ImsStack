@@ -23,7 +23,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcBlockChecker::MtcBlockChecker(
-        IN const IMSList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener* pListener) :
+        IN const ImsList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener* pListener) :
         m_pListener(pListener),
         m_lstRules(lstRules),
         m_nPendingCount(0)

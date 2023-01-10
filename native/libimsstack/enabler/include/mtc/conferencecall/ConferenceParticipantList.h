@@ -132,7 +132,7 @@ public:
             IN const ConfUser* pConfUser, IN IMS_BOOL bIncludingConnecting = IMS_FALSE) const;
 
     // the order of this ConfUser is same with the order of REFER sent.
-    virtual IMSList<ConfUser*> GetConfUsers(IN IMS_BOOL bCopy = IMS_FALSE) const;
+    virtual ImsList<ConfUser*> GetConfUsers(IN IMS_BOOL bCopy = IMS_FALSE) const;
 
     virtual void SetReference(IN IConferenceReference* piReference, IN const ConfUser* pConfUser);
     virtual IConferenceReference* GetReference(IN const ConfUser* pConfUser) const;
@@ -167,7 +167,7 @@ private:
     friend class ConferenceInfoUpdater;
 
     // the order of this list is same as the order of sending REFER.
-    IMSList<ConferenceParticipant*> m_objParticipants;
+    ImsList<ConferenceParticipant*> m_objParticipants;
 
     // this is host uri in most cases. if participant subscribes, this is not a host.
     AString m_strLocalUri;

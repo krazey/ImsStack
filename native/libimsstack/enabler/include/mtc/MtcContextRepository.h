@@ -42,7 +42,7 @@ public:
 private:
     static MtcContextRepository* s_pThis;
     static const IMS_SINT32 INVALID_SLOT_ID = -1;
-    IMSMap<IMS_SINT32, IMtcContext*> m_objContexts;
+    ImsMap<IMS_SINT32, IMtcContext*> m_objContexts;
 };
 
 #endif

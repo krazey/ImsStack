@@ -17,6 +17,7 @@
 #ifndef CALL_WAITING_BLOCK_RULE_H_
 #define CALL_WAITING_BLOCK_RULE_H_
 
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/block/IMtcBlockRule.h"
 
@@ -35,7 +36,7 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    static IMS_BOOL IsActiveCallExists(IN const IMSList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsActiveCallExists(IN const ImsList<IMtcCall*>& lstCalls);
 
     IMtcCallContext& m_objContext;
     IMtcService& m_objService;

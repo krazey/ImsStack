@@ -24,7 +24,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcFactory::MtcFactory() :
-        m_objMtcApps(IMSMap<IMS_UINT32, IMtcApp*>())
+        m_objMtcApps(ImsMap<IMS_UINT32, IMtcApp*>())
 {
     IMS_TRACE_I("+MtcFactory", 0, 0, 0);
     m_piLock = MutexService::GetMutexService()->CreateMutex();

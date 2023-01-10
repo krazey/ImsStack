@@ -19,6 +19,8 @@
 
 #include "IMtcCallController.h"
 #include "IMtcService.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
@@ -56,7 +58,7 @@ public:
     void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) override;
     void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo& objMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+            IN const ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void HandleUserAlert(IN CallKey nCallKey) override;
     void Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo& objMediaInfo) override;
     void Reject(IN CallKey nCallKey, IN const CallReasonInfo& objReason) override;
@@ -74,14 +76,14 @@ public:
     void SendUssd(IN CallKey nCallKey, IN const AString& strUssd) override;
 
     /*
-    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers,
+    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN IMSMap<SuppType, SuppService*>& objSuppServices);
+            IN ImsMap<SuppType, SuppService*>& objSuppServices);
     */
 
-    void MergeToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) override;
-    void AddToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) override;
-    void RemoveFromConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers) override;
+    void MergeToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
+    void AddToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
+    void RemoveFromConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers) override;
 
     // TODO: Consider ECT, SRVCC
     void Transfer(IN CallKey nCallKey, IN const AString& strTarget) override;

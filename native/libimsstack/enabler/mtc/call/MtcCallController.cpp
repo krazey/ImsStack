@@ -19,7 +19,6 @@
 #include "IMtcService.h"
 #include "ISession.h"
 #include "ISipHeader.h"
-#include "ImsList.h"
 #include "IuMtcService.h"
 #include "MtcDef.h"
 #include "call/IMtcCallContext.h"
@@ -51,7 +50,7 @@ PUBLIC
 void MtcCallController::TerminateCalls(
         IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason)
 {
-    IMSList<IMtcCall*> lstCalls;
+    ImsList<IMtcCall*> lstCalls;
     switch (eKeyType)
     {
         case KeyType::NONE:
@@ -88,7 +87,7 @@ void MtcCallController::TerminateCalls(
 PUBLIC
 void MtcCallController::RemoveCalls(IN KeyType eKeyType, IN Key nKey)
 {
-    IMSList<IMtcCall*> lstCalls;
+    ImsList<IMtcCall*> lstCalls;
     switch (eKeyType)
     {
         case KeyType::NONE:
@@ -145,7 +144,7 @@ void MtcCallController::HandleIncoming(IN IMtcService* pService, IN ISession* pi
 PUBLIC
 void MtcCallController::Start(IN CallKey nCallKey, IN CallType eCallType,
         IN const AString& strTarget, IN MediaInfo& objMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+        IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->Start(
             eCallType, strTarget, objMediaInfo, objSuppServices);
@@ -240,7 +239,7 @@ void MtcCallController::SendUssd(IN CallKey nCallKey, IN const AString& strUssd)
 /*
 PUBLIC
 void MtcCallController::HandleConference(IN CallKey nCallKey, IN IMS_UINT32 nCmd,
-        IN IMSList<ConfUser*>& objUsers)
+        IN ImsList<ConfUser*>& objUsers)
 {
     ConferenceCallProxy::GetInstance()->ProcessCmd(
             m_objContext.GetSlotId(),
@@ -250,7 +249,7 @@ void MtcCallController::HandleConference(IN CallKey nCallKey, IN IMS_UINT32 nCmd
 */
 
 PUBLIC
-void MtcCallController::MergeToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers)
+void MtcCallController::MergeToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers)
 {
     IConferenceController* pController =
             m_objContext.GetConferenceManager().GetController(nCallKey);
@@ -263,7 +262,7 @@ void MtcCallController::MergeToConference(IN CallKey nCallKey, IN IMSList<ConfUs
 }
 
 PUBLIC
-void MtcCallController::AddToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers)
+void MtcCallController::AddToConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers)
 {
     IConferenceController* pController =
             m_objContext.GetConferenceManager().GetController(nCallKey);
@@ -275,7 +274,7 @@ void MtcCallController::AddToConference(IN CallKey nCallKey, IN IMSList<ConfUser
 }
 
 PUBLIC
-void MtcCallController::RemoveFromConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers)
+void MtcCallController::RemoveFromConference(IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers)
 {
     IConferenceController* pController =
             m_objContext.GetConferenceManager().GetController(nCallKey);

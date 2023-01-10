@@ -72,7 +72,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsAllParticipantUpdated, (), (const));
     MOCK_METHOD(IMS_BOOL, IsInvalidStatusUpdate, (
             IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo :: User* pUser), (const));
-    MOCK_METHOD(IMSList<ConferenceInfo :: User*>, GetSameUserEntities, (
+    MOCK_METHOD(ImsList<ConferenceInfo :: User*>, GetSameUserEntities, (
             IN const ConferenceInfo :: User* pUser), (const));
     MOCK_METHOD(void, AddNotMatchedUserList, (IN ConferenceInfo :: User* pUser), ());
     MOCK_METHOD(void, RemoveFromNotMatchedUserList, (IN ConferenceInfo :: User* pUser), ());

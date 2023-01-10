@@ -43,7 +43,7 @@ private:
 
 private:
     SrvccState m_eState;
-    IMSList<ISrvccStateListener*> m_objListeners;
+    ImsList<ISrvccStateListener*> m_objListeners;
 };
 
 #endif

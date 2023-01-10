@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
@@ -84,7 +85,7 @@ TEST_F(CallCountBlockRuleTest, CheckReturnsUnblockedIfNoCallExists)
 {
     objCallInfo.bConference = IMS_FALSE;
 
-    IMSList<IMtcCall*> lstCalls;
+    ImsList<IMtcCall*> lstCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
 
     ON_CALL(*pConfigurationManager, GetCallMaxCount).WillByDefault(Return(1));
@@ -98,7 +99,7 @@ TEST_F(CallCountBlockRuleTest, CheckReturnsUnblockedIfMaxTerminatingCallExists)
 {
     objCallInfo.bConference = IMS_FALSE;
 
-    IMSList<IMtcCall*> lstCalls;
+    ImsList<IMtcCall*> lstCalls;
     lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));         // Call to check
     lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::TERMINATING));  // Ongoing call
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));
@@ -114,7 +115,7 @@ TEST_F(CallCountBlockRuleTest, CheckReturnsBlockedIfMaxCallExists)
 {
     objCallInfo.bConference = IMS_FALSE;
 
-    IMSList<IMtcCall*> lstCalls;
+    ImsList<IMtcCall*> lstCalls;
     lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::IDLE));         // Call to check
     lstCalls.Append(CreateMockIMtcCall(IMtcCall::State::ESTABLISHED));  // Ongoing call
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(lstCalls));

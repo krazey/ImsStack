@@ -18,6 +18,8 @@
 #include "../../../engine/interface/sipcore/MockISipMessage.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "MockIMtcContext.h"
 #include "MtcContextRepository.h"
 #include "MtcDef.h"
@@ -114,9 +116,9 @@ TEST_F(MtcSupplementaryServiceTest, UpdateOutgoingServices)
 
 TEST_F(MtcSupplementaryServiceTest, UpdateTip)
 {
-    IMSList<AString> objPrivacyHeadersHaveId;
+    ImsList<AString> objPrivacyHeadersHaveId;
     objPrivacyHeadersHaveId.Append(AString("id"));
-    IMSList<AString> objPrivacyHeadersEmpty;
+    ImsList<AString> objPrivacyHeadersEmpty;
 
     EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::PRIVACY, AString::ConstNull()))
             .Times(AnyNumber())
@@ -131,7 +133,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateTip)
             .WillOnce(Return(IMS_FALSE))
             .WillRepeatedly(Return(IMS_TRUE));
 
-    IMSList<AString> objPaidHeaders;
+    ImsList<AString> objPaidHeaders;
     objPaidHeaders.Append(AString("\"testDisplay\" <sip:01030993879@fakeims.google.com>"));
     EXPECT_CALL(
             objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
@@ -152,9 +154,9 @@ TEST_F(MtcSupplementaryServiceTest, UpdateTip)
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCallerId)
 {
-    IMSList<AString> objPrivacyHeadersHaveId;
+    ImsList<AString> objPrivacyHeadersHaveId;
     objPrivacyHeadersHaveId.Append(AString("id"));
-    IMSList<AString> objPrivacyHeadersEmpty;
+    ImsList<AString> objPrivacyHeadersEmpty;
 
     EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::PRIVACY, AString::ConstNull()))
             .Times(AnyNumber())
@@ -163,7 +165,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallerId)
 
     pMtcSupplementaryService->UpdateCallerId(static_cast<IMessage*>(&objMockIMessage));
 
-    IMSMap<SuppType, SuppService*> objOutSuppService1 = pMtcSupplementaryService->GetServices();
+    ImsMap<SuppType, SuppService*> objOutSuppService1 = pMtcSupplementaryService->GetServices();
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLER_ID)->nValue,
             static_cast<IMS_SINT32>(OipType::RESTRICTED));
 
@@ -185,12 +187,12 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallerId)
             .WillOnce(Return(0))
             .WillOnce(Return(1));
 
-    IMSList<AString> objHeaders;
+    ImsList<AString> objHeaders;
     objHeaders.Append(AString("\"testDisplay\" <sip:01030993879@fakeims.google.com>"));
-    IMSList<AString> objHeadersEmpty;
-    IMSList<AString> objHeadersAnonymous;
+    ImsList<AString> objHeadersEmpty;
+    ImsList<AString> objHeadersAnonymous;
     objHeadersAnonymous.Append(AString("\"Anonymous\" <sip:Anonymous@fakeims.google.com>"));
-    IMSList<AString> objHeadersunavailable;
+    ImsList<AString> objHeadersunavailable;
     objHeadersunavailable.Append(AString("\"unavailable\" <sip:unavailable@fakeims.google.com>"));
 
     EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
@@ -291,9 +293,9 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCnap)
             .WillOnce(Return(IMS_TRUE))
             .WillOnce(Return(IMS_FALSE));
 
-    IMSList<AString> objHeaders;
+    ImsList<AString> objHeaders;
     objHeaders.Append(AString("\"testDisplay\" <sip:01030993879@fakeims.google.com>"));
-    IMSList<AString> objHeadersEmpty;
+    ImsList<AString> objHeadersEmpty;
 
     EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
             .Times(3)
@@ -323,7 +325,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCnap)
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
 {
-    IMSList<AString> objHeaders;
+    ImsList<AString> objHeaders;
     objHeaders.Append(AString("<sip:diverting_user1_address?Privacy=history>;index=1"));
     objHeaders.Append(
             AString("<sip:diverting_user2_address;cause=302?Privacy=none>;index=1.1;mp=1"));
@@ -401,7 +403,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCdivCause)
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCdivHistory)
 {
-    IMSList<AString> objHeaders;
+    ImsList<AString> objHeaders;
     objHeaders.Append(AString("<sip:bob@example.com>;index=1"));
     objHeaders.Append(AString("<sip:bob@192.0.2.4>;index=1.1;mp=1"));
     objHeaders.Append(AString("<sip:office@example.com;cause=486>;index=1.1.1;mp=1.1"));
@@ -467,15 +469,15 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumVerification)
             .Times(1)
             .WillOnce(Return(IMS_TRUE));
 
-    IMSList<AString> objHeadersPass;
+    ImsList<AString> objHeadersPass;
     AString strCnvPass = "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
     objHeadersPass.Append(AString(strCnvPass));
 
-    IMSList<AString> objHeadersFail;
+    ImsList<AString> objHeadersFail;
     AString strCnvFail = "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Failed>";
     objHeadersFail.Append(strCnvFail);
 
-    IMSList<AString> objHeadersNone;
+    ImsList<AString> objHeadersNone;
     objHeadersNone.Append(AString("<sip:01030993879@fakeims.google.com>"));
 
     EXPECT_CALL(

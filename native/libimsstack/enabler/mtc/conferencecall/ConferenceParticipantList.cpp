@@ -24,7 +24,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PRIVATE
 ConferenceParticipantList::ConferenceParticipantList() :
-        m_objParticipants(IMSList<ConferenceParticipant*>()),
+        m_objParticipants(ImsList<ConferenceParticipant*>()),
         m_strLocalUri(AString::ConstNull()),
         m_nVersion(-1),
         m_nMaxUserCount(0)
@@ -150,9 +150,9 @@ IMS_BOOL ConferenceParticipantList::IsConnectedUser(
 }
 
 PUBLIC
-IMSList<ConfUser*> ConferenceParticipantList::GetConfUsers(IN IMS_BOOL bCopy /* = IMS_FALSE*/) const
+ImsList<ConfUser*> ConferenceParticipantList::GetConfUsers(IN IMS_BOOL bCopy /* = IMS_FALSE*/) const
 {
-    IMSList<ConfUser*> objTempUsers;
+    ImsList<ConfUser*> objTempUsers;
     for (IMS_UINT32 i = 0; i < m_objParticipants.GetSize(); i++)
     {
         if (bCopy == IMS_TRUE)
@@ -244,9 +244,9 @@ PUBLIC
 void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager,
         IN const CallConnectionIdManager& objConnectionIdManager)
 {
-    IMSList<ConferenceParticipant*> objTemp;
+    ImsList<ConferenceParticipant*> objTemp;
 
-    IMSList<IMtcCall*> objCalls = objCallManager.GetCalls();
+    ImsList<IMtcCall*> objCalls = objCallManager.GetCalls();
     for (IMS_UINT32 nSessIndex = 0; nSessIndex < objCalls.GetSize(); nSessIndex++)
     {
         IMtcCall* piTempCall = objCalls.GetAt(nSessIndex);
@@ -298,7 +298,7 @@ IMS_UINT32 ConferenceParticipantList::GetConnectedParticipantSize(
         IN IMS_BOOL bIncludingConnecting /* = IMS_FALSE*/)
 {
     IMS_UINT32 nCount = 0;
-    IMSList<ConfUser*> objConfUsers = GetConfUsers();
+    ImsList<ConfUser*> objConfUsers = GetConfUsers();
     for (IMS_UINT32 i = 0; i < objConfUsers.GetSize(); i++)
     {
         if (IsConnectedUser(objConfUsers.GetAt(i), bIncludingConnecting))

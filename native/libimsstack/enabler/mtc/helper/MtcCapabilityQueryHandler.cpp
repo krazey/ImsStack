@@ -25,6 +25,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ImsAosParameter.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "SdpMediaDescription.h"
 #include "SdpSessionDescription.h"
@@ -209,8 +210,8 @@ PRIVATE GLOBAL AString MtcCapabilityQueryHandler::GetAdjustedCodecList(
     }
 
     //// Look up "rtpmap" attribute and parse all the attributes
-    IMSList<SdpAttribute> objRtpMaps = objMediaDesc.GetAttributes(SdpAttribute::RTPMAP);
-    IMSList<SdpAvCodec> objAVCodecs;
+    ImsList<SdpAttribute> objRtpMaps = objMediaDesc.GetAttributes(SdpAttribute::RTPMAP);
+    ImsList<SdpAvCodec> objAVCodecs;
 
     for (IMS_UINT32 i = 0; i < objRtpMaps.GetSize(); i++)
     {

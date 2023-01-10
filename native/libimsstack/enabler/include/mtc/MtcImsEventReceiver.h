@@ -47,7 +47,7 @@ public:
 private:
     struct EventEntry
     {
-        IMSList<IMtcImsEventListener*> lstListeners;
+        ImsList<IMtcImsEventListener*> lstListeners;
         IMS_UINT32 nWParam = UNKNOWN_VALUE;
         IMS_UINT32 nLParam = UNKNOWN_VALUE;
     };
@@ -59,7 +59,7 @@ private:
     EventEntry* GetEntry(IN ImsEvent nEvent);
 
     IMS_SINT32 m_nSlotId;
-    IMSMap<ImsEvent, EventEntry*> m_objEvents;
+    ImsMap<ImsEvent, EventEntry*> m_objEvents;
 };
 
 #endif

@@ -21,6 +21,7 @@
 #include "IMtcContext.h"
 #include "IMtcService.h"
 #include "ImsApp.h"
+#include "ImsList.h"
 #include "MtcImsEventReceiver.h"
 #include "call/MtcCallController.h"
 #include "call/MtcCallManager.h"

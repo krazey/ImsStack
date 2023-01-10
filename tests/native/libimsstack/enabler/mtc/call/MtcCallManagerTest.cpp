@@ -15,6 +15,7 @@
  */
 
 #include "IMtcService.h"
+#include "ImsList.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "call/IMtcCall.h"
@@ -148,7 +149,7 @@ TEST_F(MtcCallManagerTest, GetCallByCallKeyReturnsNullCallIfNoMatchingCall)
 
 TEST_F(MtcCallManagerTest, GetCallsReturnsEmptyCallListInitially)
 {
-    IMSList<IMtcCall*> lstCalls = pCallManager->GetCalls();
+    ImsList<IMtcCall*> lstCalls = pCallManager->GetCalls();
 
     EXPECT_EQ(0, lstCalls.GetSize());
 }
@@ -159,7 +160,7 @@ TEST_F(MtcCallManagerTest, GetCallsExcludingReturnsCallListOfMatchingCall)
     IMtcCall* pCall1 = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
     IMtcCall* pCall2 = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
-    IMSList<IMtcCall*> lstResult = pCallManager->GetCallsExcluding(pCall1->GetKey());
+    ImsList<IMtcCall*> lstResult = pCallManager->GetCallsExcluding(pCall1->GetKey());
     EXPECT_EQ(1, lstResult.GetSize());
     EXPECT_EQ(pCall2, lstResult.GetAt(0));
 }
@@ -174,7 +175,7 @@ TEST_F(MtcCallManagerTest, GetCallsByTypeReturnsCallListOfMatchingCall)
     objCallInfo2.eInitialCallType = CallType::VT;
     pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo2);
 
-    IMSList<IMtcCall*> lstResult = pCallManager->GetCallsByType(CallType::VOIP);
+    ImsList<IMtcCall*> lstResult = pCallManager->GetCallsByType(CallType::VOIP);
     EXPECT_EQ(1, lstResult.GetSize());
     EXPECT_EQ(pVoipCall, lstResult.GetAt(0));
 }
@@ -195,7 +196,7 @@ TEST_F(MtcCallManagerTest, GetCallsByServiceTypeReturnsCallListOfMatchingCall)
     IMtcCall* pNormalCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
     IMtcCall* pEmergencyCall = pCallManager->CreateCall(ServiceType::EMERGENCY, objCallInfo);
 
-    IMSList<IMtcCall*> lstResult = pCallManager->GetCallsByServiceType(ServiceType::NORMAL);
+    ImsList<IMtcCall*> lstResult = pCallManager->GetCallsByServiceType(ServiceType::NORMAL);
     EXPECT_EQ(1, lstResult.GetSize());
     EXPECT_EQ(pNormalCall, lstResult.GetAt(0));
 
@@ -214,7 +215,7 @@ TEST_F(MtcCallManagerTest, GetCallsInConferenceReturnsCallListOfMatchingCall)
     objCallInfo2.bConference = IMS_FALSE;
     pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo2);
 
-    IMSList<IMtcCall*> lstResult = pCallManager->GetCallsInConference();
+    ImsList<IMtcCall*> lstResult = pCallManager->GetCallsInConference();
     EXPECT_EQ(1, lstResult.GetSize());
     EXPECT_EQ(pConferenceCall, lstResult.GetAt(0));
 }
@@ -224,11 +225,11 @@ TEST_F(MtcCallManagerTest, GetCallsByStateReturnsCallListOfMatchingCall)
     CallInfo objCallInfo;
     IMtcCall* pIdleCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
-    IMSList<IMtcCall*> lstIdleCalls = pCallManager->GetCallsByState(IMtcCall::State::IDLE);
+    ImsList<IMtcCall*> lstIdleCalls = pCallManager->GetCallsByState(IMtcCall::State::IDLE);
     EXPECT_EQ(1, lstIdleCalls.GetSize());
     EXPECT_EQ(pIdleCall, lstIdleCalls.GetAt(0));
 
-    IMSList<IMtcCall*> lstTerminatingCalls =
+    ImsList<IMtcCall*> lstTerminatingCalls =
             pCallManager->GetCallsByState(IMtcCall::State::TERMINATING);
     EXPECT_EQ(0, lstTerminatingCalls.GetSize());
 }

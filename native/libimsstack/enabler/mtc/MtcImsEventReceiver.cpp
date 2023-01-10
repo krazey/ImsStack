@@ -27,7 +27,7 @@ const IMS_UINT32 IMtcImsEventReceiver::UNKNOWN_VALUE = -1;
 PUBLIC
 MtcImsEventReceiver::MtcImsEventReceiver(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_objEvents(IMSMap<ImsEvent, EventEntry*>())
+        m_objEvents(ImsMap<ImsEvent, EventEntry*>())
 {
     RegisterSupportedEvents();
 }

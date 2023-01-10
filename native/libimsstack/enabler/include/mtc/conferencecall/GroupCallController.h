@@ -18,6 +18,7 @@
 #define GROUP_CALL_CONTROLLER_H_
 
 #include "ImsList.h"
+#include "ImsMap.h"
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
@@ -41,9 +42,9 @@ public:
     void OnReferenceStartFailed(IN IConferenceReference* piConfRef) override;
 
 protected:
-    void ProcessGroupCall(IN IMSList<ConfUser*>& objUsers, IN CallInfo& objCallInfo,
+    void ProcessGroupCall(IN ImsList<ConfUser*>& objUsers, IN CallInfo& objCallInfo,
             IN MediaInfo& objMediaInfo,
-            IN IMSMap<SuppType, SuppService*>& objSuppServices) override;
+            IN ImsMap<SuppType, SuppService*>& objSuppServices) override;
     void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation* pOperation) override;
     void Recover() override;
 

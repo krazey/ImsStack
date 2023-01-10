@@ -590,7 +590,7 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
 PRIVATE
 IMS_BOOL EstablishedState::IsConferenceCallParticipant() const
 {
-    IMSList<IMtcCall*> objConfCalls = m_objContext.GetCallManager().GetCallsInConference();
+    ImsList<IMtcCall*> objConfCalls = m_objContext.GetCallManager().GetCallsInConference();
     if (objConfCalls.GetSize() == 0)
     {
         return IMS_FALSE;
@@ -616,10 +616,10 @@ IMS_BOOL EstablishedState::IsConferenceCallParticipant() const
 }
 
 PRIVATE
-IMSList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
+ImsList<IMtcBlockRule*> EstablishedState::GetCallUpdateBlockRules() const
 {
     // No pending rules
-    IMSList<IMtcBlockRule*> lstRules;
+    ImsList<IMtcBlockRule*> lstRules;
 
     lstRules.Append(new CallTypeBlockRule(m_objContext));
     lstRules.Append(new SrvccBlockRule(m_objContext.GetService().GetSrvccState()));

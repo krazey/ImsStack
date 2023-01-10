@@ -56,7 +56,7 @@ ConferenceReference::ConferenceReference(IN IMtcContext& objContext, IN CallKey 
         m_objListener(objListener),
         m_nType(REFERENCE_TYPE_INVALID),
         m_pConfUser(pConfUser),
-        m_objConfUsers(IMSList<ConfUser*>()),
+        m_objConfUsers(ImsList<ConfUser*>()),
         m_piReference(IMS_NULL),
         m_bForceToTerminateInterface(IMS_FALSE)
 {
@@ -65,13 +65,13 @@ ConferenceReference::ConferenceReference(IN IMtcContext& objContext, IN CallKey 
 
 PUBLIC
 ConferenceReference::ConferenceReference(IN IMtcContext& objContext, IN CallKey nConfCallKey,
-        IN IMSList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener) :
+        IN ImsList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener) :
         m_objContext(objContext),
         m_nConfCallKey(nConfCallKey),
         m_objListener(objListener),
         m_nType(REFERENCE_TYPE_INVALID),
         m_pConfUser(IMS_NULL),
-        m_objConfUsers(IMSList<ConfUser*>(objConfUsers)),
+        m_objConfUsers(ImsList<ConfUser*>(objConfUsers)),
         m_piReference(IMS_NULL),
         m_bForceToTerminateInterface(IMS_FALSE)
 {

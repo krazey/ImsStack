@@ -17,6 +17,7 @@
 #include "CarrierConfig.h"
 #include "ICarrierConfig.h"
 #include "ImsAosReason.h"
+#include "ImsVector.h"
 #include "MockICarrierConfig.h"
 #include "ServiceConfig.h"
 #include "configuration/ConfigDef.h"
@@ -63,7 +64,7 @@ protected:
         return piCc->GetString(pszKey);
     }
 
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
     {
         ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
         return piCc->GetIntArray(pszKey);
@@ -77,7 +78,7 @@ TEST_F(MtcConfigurationManagerTest, GetRequestUriTypeReturnsValueInCarrierConfig
 
 TEST_F(MtcConfigurationManagerTest, IsSupportGeolocationPidfInSipInviteReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI);
     objArray.Push(CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI);
 
@@ -162,7 +163,7 @@ TEST_F(MtcConfigurationManagerTest, GetDedicatedBearerWaitTimerReturnsValueInCar
 
 TEST_F(MtcConfigurationManagerTest, IsSrvccTypeReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(CarrierConfig::ImsVoice::BASIC_SRVCC_SUPPORT);
     objArray.Push(CarrierConfig::ImsVoice::MIDCALL_SRVCC_SUPPORT);
 
@@ -210,7 +211,7 @@ TEST_F(MtcConfigurationManagerTest, GetMoCallRequestTimeoutReturnsValueInCarrier
 
 TEST_F(MtcConfigurationManagerTest, IsAudioInactivityCallEndReasonReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(CarrierConfig::Ims::RTCP_INACTIVITY_ON_HOLD);
     objArray.Push(CarrierConfig::Ims::RTCP_INACTIVITY_ON_CONNECTED);
     objArray.Push(CarrierConfig::Ims::RTP_INACTIVITY_ON_CONNECTED);
@@ -361,7 +362,7 @@ TEST_F(MtcConfigurationManagerTest,
 
 TEST_F(MtcConfigurationManagerTest, IsShortCallCodeReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(123);
     objArray.Push(456);
 
@@ -394,7 +395,7 @@ TEST_F(MtcConfigurationManagerTest,
 
 TEST_F(MtcConfigurationManagerTest, IsRejectCodeForCsfbReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(380);
     objArray.Push(488);
 
@@ -712,7 +713,7 @@ TEST_F(MtcConfigurationManagerTest, IsPidfShortCodeReturnsValueInCarrierConfig)
     AString strCode3 = "789";
     AString strCode4 = "123456";
 
-    IMSVector<AString> objArray;
+    ImsVector<AString> objArray;
     objArray.Push(strCode1);
     objArray.Push(strCode2);
 
@@ -892,7 +893,7 @@ TEST_F(MtcConfigurationManagerTest, IsCarrierSpecificSipHeaderReturnsValueInCarr
     AString strHeader3 = "Test-Header3";
     AString strHeader4 = "Test-Header4";
 
-    IMSVector<AString> objArray;
+    ImsVector<AString> objArray;
     objArray.Push(strHeader1);
     objArray.Push(strHeader2);
 
@@ -928,7 +929,7 @@ TEST_F(MtcConfigurationManagerTest,
 TEST_F(MtcConfigurationManagerTest,
         IsCallMaintainingOnRegistrationSuspendedReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(ImsAosReason::SUSPEND_NO_RAT_COVERAGE);
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
@@ -949,7 +950,7 @@ TEST_F(MtcConfigurationManagerTest,
 TEST_F(MtcConfigurationManagerTest,
         IsRequiringEmergencyCallWhenVideoEmergencyCallFailedReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(488);
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
@@ -1009,7 +1010,7 @@ TEST_F(MtcConfigurationManagerTest, IsAddReplaceHeaderForConferenceReturnsValueI
 TEST_F(MtcConfigurationManagerTest,
         IsVilteToVolteRetryFailureResponseCodeReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(488);
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
@@ -1056,7 +1057,7 @@ TEST_F(MtcConfigurationManagerTest,
 TEST_F(MtcConfigurationManagerTest,
         IsRegistrationDisconnectReasonToTerminateOngoingCallReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(ImsAosReason::POWER_OFF);
     objArray.Push(ImsAosReason::OUT_OF_SERVICE);
 
@@ -1085,7 +1086,7 @@ TEST_F(MtcConfigurationManagerTest,
 TEST_F(MtcConfigurationManagerTest,
         IsRegistrationDisconnectReasonToTerminateOngoingCallReturnsTrueBy999)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(999);
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
@@ -1198,7 +1199,7 @@ TEST_F(MtcConfigurationManagerTest, IsStopRingbackTimerBy183WithSdpBodyReturnsVa
 
 TEST_F(MtcConfigurationManagerTest, GetInformationLevelOfGeolocationPidfReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG);
     objArray.Push(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_LAT_AND_LONG_AND_CIVIC);
     objArray.Push(CarrierConfig::ImsVoice::GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY);
@@ -1225,7 +1226,7 @@ TEST_F(MtcConfigurationManagerTest, GetInformationLevelOfGeolocationPidfReturnsV
 
 TEST_F(MtcConfigurationManagerTest, IsMessageTypeSupportGeolocationPidfReturnsValueInCarrierConfig)
 {
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::INVITE));
     objArray.Push(static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::FINAL_SUCCESS_RESPONSE));
 

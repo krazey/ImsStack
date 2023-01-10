@@ -17,6 +17,7 @@
 #ifndef EXPAND_CONTROLLER_H_
 #define EXPAND_CONTROLLER_H_
 
+#include "ImsList.h"
 #include "conferencecall/ConferenceController.h"
 
 class IMtcCallContext;
@@ -43,7 +44,7 @@ public:
             IN ReferSubscriptionState eState) override;
 
 protected:
-    void ProcessExpand(IN IMSList<ConfUser*>& objUsers) override;
+    void ProcessExpand(IN ImsList<ConfUser*>& objUsers) override;
     void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation* pOperation) override;
     IMS_BOOL IsStartFinalSipfragWaitTimer() const override;
     void Recover() override;

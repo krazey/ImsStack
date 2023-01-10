@@ -72,7 +72,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncoming(IN ISession* /* piSess
 
 PUBLIC VIRTUAL CallStateName MtcCallState::Start(IN CallType /* eCallType */,
         IN const AString& /* strTarget */, IN MediaInfo& /* pMediaInfo */,
-        IN const IMSMap<SuppType, SuppService*>& /* lstSuppServices */)
+        IN const ImsMap<SuppType, SuppService*>& /* lstSuppServices */)
 {
     return GetStateName();
 }

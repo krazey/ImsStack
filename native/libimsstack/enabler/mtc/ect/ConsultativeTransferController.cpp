@@ -16,6 +16,7 @@
 
 #include "CallReasonInfo.h"
 #include "IMtcContext.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
@@ -83,7 +84,7 @@ PROTECTED VIRTUAL void ConsultativeTransferController::OnCompleted()
 PRIVATE
 void ConsultativeTransferController::FindTransferTarget()
 {
-    IMSList<IMtcCall*> objCalls = m_objContext.GetCallManager().GetCalls();
+    ImsList<IMtcCall*> objCalls = m_objContext.GetCallManager().GetCalls();
     for (IMS_UINT32 i = 0; i < objCalls.GetSize(); i++)
     {
         CallKey nTempKey = objCalls.GetAt(i)->GetKey();

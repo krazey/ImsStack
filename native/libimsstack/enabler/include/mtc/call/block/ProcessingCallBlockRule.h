@@ -17,6 +17,7 @@
 #ifndef PROCESSING_CALL_BLOCK_RULE_H_
 #define PROCESSING_CALL_BLOCK_RULE_H_
 
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
@@ -34,9 +35,9 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    static IMS_BOOL IsCallSetupProcessing(IN const IMSList<IMtcCall*>& lstCalls);
-    static IMS_BOOL IsCallUpdating(IN const IMSList<IMtcCall*>& lstCalls);
-    static IMS_BOOL IsEmergencyCallExists(IN const IMSList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsCallSetupProcessing(IN const ImsList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsCallUpdating(IN const ImsList<IMtcCall*>& lstCalls);
+    static IMS_BOOL IsEmergencyCallExists(IN const ImsList<IMtcCall*>& lstCalls);
 
     IMtcCallContext& m_objContext;
 };

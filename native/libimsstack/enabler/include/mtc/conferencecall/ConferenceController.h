@@ -18,6 +18,8 @@
 #define CONFERENCE_CONTROLLER_H_
 
 #include "IMtcCallStateListener.h"
+#include "ImsList.h"
+#include "ImsMap.h"
 #include "ServiceTimer.h"
 #include "SipStatusCode.h"
 #include "call/IMtcUiNotifier.h"
@@ -82,10 +84,10 @@ public:
 
     // TODO: need to optimize.
     // IConferenceController interfaces implementation
-    void ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers,
+    void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-            IN IMSMap<SuppType, SuppService*>& objSuppServices) override;
-    void ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers) override;
+            IN ImsMap<SuppType, SuppService*>& objSuppServices) override;
+    void ProcessCommand(IN IMS_UINT32 nCmd, IN ImsList<ConfUser*>& objUsers) override;
     IMS_SINT32 GetState() const override;
     IndividualCallState GetCallStatusInConference(IN CallKey nKey) const override;
 
@@ -95,28 +97,28 @@ public:
 protected:
     // basic operation set
     inline virtual void ProcessGroupCall(
-            IN IMSList<ConfUser*>&, IN CallInfo&, IN MediaInfo&, IN IMSMap<SuppType, SuppService*>&)
+            IN ImsList<ConfUser*>&, IN CallInfo&, IN MediaInfo&, IN ImsMap<SuppType, SuppService*>&)
     {
     }
-    inline virtual void ProcessExpand(IN IMSList<ConfUser*>&) {}
-    inline virtual void ProcessMerge(IN IMSList<ConfUser*>&) {}
-    virtual void ProcessJoin(IN IMSList<ConfUser*>& objUsers);
-    virtual void ProcessDrop(IN IMSList<ConfUser*>& objUsers);
+    inline virtual void ProcessExpand(IN ImsList<ConfUser*>&) {}
+    inline virtual void ProcessMerge(IN ImsList<ConfUser*>&) {}
+    virtual void ProcessJoin(IN ImsList<ConfUser*>& objUsers);
+    virtual void ProcessDrop(IN ImsList<ConfUser*>& objUsers);
 
     void ProcessSubscribeOnParticipant();
 
     // ConfUser to Participant
     IMS_UINT32 AddUserToParticipantList(
-            IN IMSList<ConfUser*>& objConfUsers, IN IMS_BOOL bReOrder = IMS_FALSE);
+            IN ImsList<ConfUser*>& objConfUsers, IN IMS_BOOL bReOrder = IMS_FALSE);
 
-    static void ClearListForConfUsers(IN IMSList<ConfUser*>& objUsers);
+    static void ClearListForConfUsers(IN ImsList<ConfUser*>& objUsers);
 
     // real operations.
     virtual IMS_BOOL CreateSubscription();
     virtual void StartSubscription();
     virtual void StopSubscription();
     virtual IConferenceReference* CreateReference(IN ConfUser* pUser);
-    virtual IConferenceReference* CreateReference(IN IMSList<ConfUser*>& objUsers);
+    virtual IConferenceReference* CreateReference(IN ImsList<ConfUser*>& objUsers);
     void RemoveReference(IN IConferenceReference* piReference);
     void ClearOngoingReferences();
     virtual void UpdateUserStatusByReferResult(IN ConfUser* pUser,
@@ -128,8 +130,8 @@ protected:
     inline virtual void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation*) {}
     virtual void SubscribeConference(IN IMS_BOOL bUnsub = IMS_FALSE);
     virtual void CheckUserEntityConnected(IN ConfUser* pConfUser);
-    virtual void InviteParticipants(IN IMSList<ConfUser*> objUsers);
-    virtual void RemoveParticipants(IN IMSList<ConfUser*> objUsers);
+    virtual void InviteParticipants(IN ImsList<ConfUser*> objUsers);
+    virtual void RemoveParticipants(IN ImsList<ConfUser*> objUsers);
     virtual void NotifyCmdResult();
     virtual void TerminateIndividualCall(IN IMS_UINT32 nConnectionId);
     virtual void TerminateConference(IN IMS_SINT32 nTerminateReason);
@@ -207,7 +209,7 @@ protected:
     ConferenceEventNotifier& m_objNotifier;
     ConferenceOperationQueue& m_objOperationQueue;
     ConferenceSubscription* m_pSubscription;
-    IMSList<IConferenceReference*> m_objIConfReferences;
+    ImsList<IConferenceReference*> m_objIConfReferences;
     ITimer* m_piTimer;
 
     IMS_UINT32 m_nConditionFinalSipfragTimer;

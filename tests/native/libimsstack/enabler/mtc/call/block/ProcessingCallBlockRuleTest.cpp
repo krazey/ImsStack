@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/MockIMtcBlockRule.h"
@@ -34,7 +35,7 @@ public:
     CallInfo objEmergencyCallInfo;
 
     MockIMtcBlockRuleCheckListener objListener;
-    IMSList<IMtcCall*> lstOtherCalls;
+    ImsList<IMtcCall*> lstOtherCalls;
     ProcessingCallBlockRule* pBlockRule;
 
 protected:

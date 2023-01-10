@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ImsList.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
@@ -63,7 +64,7 @@ PUBLIC VIRTUAL CallCountBlockRule::Result CallCountBlockRule::Check(
 PRIVATE
 IMS_UINT32 CallCountBlockRule::GetActiveCallCount()
 {
-    const IMSList<IMtcCall*> lstCalls = m_objCallManager.GetCalls();
+    const ImsList<IMtcCall*> lstCalls = m_objCallManager.GetCalls();
     IMS_UINT32 nCount = 0;
 
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)

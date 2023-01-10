@@ -19,6 +19,7 @@
 
 #include "IMtcCallController.h"
 #include "IMtcService.h"
+#include "ImsList.h"
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include <gmock/gmock.h>
@@ -74,11 +75,11 @@ public:
     MOCK_METHOD(void, RejectUpdate, (IN CallKey nCallKey, IN const CallReasonInfo& objReason),
             (override));
     MOCK_METHOD(void, SendUssd, (IN CallKey nCallKey, IN const AString& strUssd), (override));
-    MOCK_METHOD(void, MergeToConference, (IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers),
+    MOCK_METHOD(void, MergeToConference, (IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers),
             (override));
-    MOCK_METHOD(void, AddToConference, (IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers),
+    MOCK_METHOD(void, AddToConference, (IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers),
             (override));
-    MOCK_METHOD(void, RemoveFromConference, (IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers),
+    MOCK_METHOD(void, RemoveFromConference, (IN CallKey nCallKey, IN ImsList<ConfUser*>& objUsers),
             (override));
     MOCK_METHOD(void, Transfer, (IN CallKey nCallKey, IN const AString& strTarget), (override));
     MOCK_METHOD(ISilentRedialHelper&, GetRedialHelper, (

@@ -36,14 +36,14 @@ public:
     MergeController& operator=(IN const MergeController&) = delete;
 
 protected:
-    void ProcessMerge(IN IMSList<ConfUser*>& objUsers) override;
+    void ProcessMerge(IN ImsList<ConfUser*>& objUsers) override;
     void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation* pOperation) override;
     IMS_BOOL IsStartFinalSipfragWaitTimer() const override;
     void Recover() override;
     void OnIndividualCallTerminated(IN IMS_UINTP nCallKey) override;
 
 private:
-    void ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers);
+    void ProcessMergeWithoutRefer(IN ImsList<ConfUser*>& objUsers);
     void UpdateUserStateByCallTerminated(IN IMS_UINTP nCallKey);
     void RecoverOnCreating();
     void RecoverOnReferring();

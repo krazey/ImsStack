@@ -187,7 +187,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceUpdated(IN IConferenceReference
 }
 
 PROTECTED
-void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
+void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("ProcessExpand", 0, 0, 0);
 
@@ -457,7 +457,7 @@ void ExpandController::RecoverOnReferring()
         return;
     }
 
-    IMSList<ConfUser*> objConfUsers = m_objOperationQueue.GetUsersOfCurrentOperation();
+    ImsList<ConfUser*> objConfUsers = m_objOperationQueue.GetUsersOfCurrentOperation();
 
     for (IMS_UINT32 nIndex = 0; nIndex < objConfUsers.GetSize(); nIndex++)
     {
