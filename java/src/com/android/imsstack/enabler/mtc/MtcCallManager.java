@@ -20,7 +20,6 @@ import android.content.Context;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
-import com.android.imsstack.enabler.mtc.telephony.TelephonyCallStateRegistry;
 import com.android.imsstack.imsservice.mmtel.ImsRegistrationTracker;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
@@ -43,7 +42,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     private MtcCallTracker mCT = new MtcCallTracker();
     // E-call tracker
     private MtcECallStateTracker mECallStateTracker = null;
-    private TelephonyCallStateRegistry mTelephonyCsRegistry = null;
     private int mCallStateVoLte = MtcStateUtils.STATE_INACTIVE;
     private int mCallStateVt = MtcStateUtils.STATE_INACTIVE;
 
@@ -69,9 +67,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
                 || MtcECallStateTracker.isEcbmSupportedForVowifi(mContext.getSlotId())) {
             mECallStateTracker = new MtcECallStateTracker(mContext, this);
         }
-
-        // Initialize the call state for telephony or modem
-        mTelephonyCsRegistry = new TelephonyCallStateRegistry(mContext, this);
     }
 
     @Override
@@ -81,11 +76,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
         if (mECallStateTracker != null) {
             mECallStateTracker.dispose();
             mECallStateTracker = null;
-        }
-
-        if (mTelephonyCsRegistry != null) {
-            mTelephonyCsRegistry.dispose();
-            mTelephonyCsRegistry = null;
         }
 
         mPendingCallNodes.clear();
@@ -240,15 +230,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
         return index;
     }
 
-    private void checkAndNotifyNonTelephonyCallState(Call call) {
-        // Special case for VZW
-        if ((mTelephonyCsRegistry != null)
-                && mTelephonyCsRegistry.isCallStateRequired()
-                && call.isTerminatedByCSRetry()) {
-            notifyNonTelephonyCallState(TelephonyCallStateRegistry.CALL_STATE_CS_RETRY, true);
-        }
-    }
-
     private void doCallStateChanged() {
         postAndRunTask(new Runnable() {
             @Override
@@ -322,29 +303,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
         }
 
         return activeCallCount;
-    }
-
-    /** @param callState TelephonyCallStateRegistry#CALL_STATE_XXX */
-    private void notifyNonTelephonyCallState(final int callState, boolean isAsync) {
-        if (isAsync) {
-            postAndRunTask(new Runnable() {
-                @Override
-                public void run() {
-                    notifyNonTelephonyCallState(callState, false);
-                }
-            });
-        } else {
-            if (mTelephonyCsRegistry != null) {
-                mTelephonyCsRegistry.updateNonTelephonyCallState(callState);
-            }
-        }
-    }
-
-    /** @param callState CallTracker#CALL_STATE_XXX */
-    private void notifyTelephonyCallState(int callState, String incomingNumber) {
-        if (mTelephonyCsRegistry != null) {
-            mTelephonyCsRegistry.updateCallState(callState, incomingNumber);
-        }
     }
 
     private synchronized void onCallCreate(Call call) {
@@ -421,7 +379,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
             log("onCallTerminated :: An active call is terminated; call=" +
                     Long.toHexString(call.getNativeCallId()));
             node.setCallState(CallTracker.CALL_STATE_IDLE);
-            checkAndNotifyNonTelephonyCallState(call);
             doCallStateChanged();
             mCallStateNotifier.onCallTerminated(call);
         }
@@ -595,10 +552,6 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
             // Adjust the call state for Android Framework
             callState = CallTracker.CALL_STATE_OFFHOOK;
         }
-
-        //4 need to check if the termination reason is SRVCC case
-
-        notifyTelephonyCallState(callState, incomingNumber);
     }
 
     private boolean isImsRegisteredOnWifi() {
