@@ -115,6 +115,7 @@ protected:
     {
         m_pAosInfo->NotifyEmergencySmsState(bIsInitialized);
     }
+    void NotifyEpsfbCallState(IN IMS_UINT32 nState) { m_pAosInfo->NotifyEpsfbCallState(nState); }
     IMS_BOOL IsForbiddenBlock() { return m_pAosInfo->IsForbiddenBlock(); }
 };
 
@@ -571,6 +572,21 @@ TEST_F(AosInfoTest, NotifyEmergencySmsState_Test)
 
     NotifyEmergencySmsState(IMS_TRUE);
     NotifyEmergencySmsState(IMS_FALSE);
+}
+
+TEST_F(AosInfoTest, NotifyEpsfbCallState_Test)
+{
+    // Expectation: Call AosApplication::NotifyEpsFallbackCallState()
+
+    MockIAosApplication objMockIAosApplication;
+
+    EXPECT_CALL(m_objMockIAosAppContext, GetApp())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(static_cast<IAosApplication*>(&objMockIAosApplication)));
+
+    EXPECT_CALL(objMockIAosApplication, NotifyEpsFallbackCallState(_)).Times(1);
+
+    NotifyEpsfbCallState(1);
 }
 
 TEST_F(AosInfoTest, IsForbiddenBlock_Test)
