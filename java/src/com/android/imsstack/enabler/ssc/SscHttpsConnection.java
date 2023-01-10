@@ -140,7 +140,7 @@ public class SscHttpsConnection extends SscHttpConnection {
 
                 mSocketFactory = sc.getSocketFactory();
             } catch (Exception e) {
-                ImsLog.e(e.toString());
+                ImsLog.e(e.toString(), e);
             }
         }
 
