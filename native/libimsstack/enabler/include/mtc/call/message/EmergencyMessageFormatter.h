@@ -18,8 +18,13 @@
 #define MTC_EMERGENCY_MESSAGE_FORMATTER_H_
 
 #include "IMtcService.h"
+#include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
 #include "call/message/MessageFormatter.h"
+
+class AString;
+class IMtcCallContext;
+class ISession;
 
 class EmergencyMessageFormatter : public MessageFormatter
 {

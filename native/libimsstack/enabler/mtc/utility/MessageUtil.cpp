@@ -73,7 +73,11 @@ const IMS_CHAR MessageUtil::STR_TIMER[] = "timer";
 const IMS_CHAR MessageUtil::STR_URN[] = "urn";
 const IMS_CHAR MessageUtil::STR_VIDEO[] = "video";
 const IMS_CHAR MessageUtil::STR_TEXT[] = "text";
+
+// carrier specific
+const IMS_CHAR MessageUtil::STR_P_SKT_BYE_CAUSE[] = "P-SKT-BYE-CAUSE";
 const IMS_CHAR MessageUtil::STR_P_TTA_VOLTE_INFO[] = "P-TTA-VoLTE-Info";
 const IMS_CHAR MessageUtil::STR_AVCHANGE[] = "avchange";
+const IMS_CHAR MessageUtil::STR_REASON_USER_SESSIONEXPIRED[] = "Reason.User.SessionExpired";
 
 const IMS_SINT32 MessageUtil::INVALID_INDEX = -1;

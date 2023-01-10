@@ -27,11 +27,6 @@
 #include "ImsIdentity.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"
-#include "Sip.h"
-#include "SipAddress.h"
-#include "SipHeaderName.h"
-#include "SipProfile.h"
-#include "SipStatusCode.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/message/MessageFormatter.h"
@@ -39,6 +34,11 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
+#include "sipcore/Sip.h"
+#include "sipcore/SipAddress.h"
+#include "sipcore/SipHeaderName.h"
+#include "sipcore/SipProfile.h"
+#include "sipcore/SipStatusCode.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
@@ -54,6 +54,7 @@ MessageFormatter::MessageFormatter(IN IMtcCallContext& objContext, IN ISession& 
         m_eFormType(FormType::NONE)
 {
     IMS_TRACE_I("+MessageFormatter", 0, 0, 0);
+    m_objSession.SetReasonHeaderSetter(this);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -61,6 +62,77 @@ MessageFormatter::MessageFormatter(IN IMtcCallContext& objContext, IN ISession& 
 PUBLIC VIRTUAL MessageFormatter::~MessageFormatter()
 {
     IMS_TRACE_I("~MessageFormatter", 0, 0, 0);
+    m_objSession.SetReasonHeaderSetter(IMS_NULL);
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetHeader(
+        IN ISipMessage* piSipMsg, IN IMS_SINT32 nTerminationReason)
+{
+    if (piSipMsg == IMS_NULL)
+    {
+        return;
+    }
+
+    MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    if (objConfig.Is(
+                Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_REASON_USER_SESSIONEXPIRED))
+    {
+        IMS_TRACE_D("ReasonHeaderSetter_SetHeader [%d]", nTerminationReason, 0, 0);
+        if ((nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TIMEOUT) ||
+                (nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
+        {
+            piSipMsg->AddHeader(
+                    ISipHeader::UNKNOWN, "USER;text=\"Session Expired\"", SipHeaderName::REASON);
+        }
+    }
+
+    if (objConfig.Is(Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_SKT_BYE_CAUSE))
+    {
+        IMS_TRACE_D("ReasonHeaderSetter_SetHeader [%d]", nTerminationReason, 0, 0);
+        if ((nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TIMEOUT) ||
+                (nTerminationReason == ISession::TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
+        {
+            piSipMsg->AddHeader(ISipHeader::UNKNOWN,
+                    "SIP; cause=103; text=\"Session-Expire\"; fc=9602", SipHeaderName::REASON);
+            piSipMsg->AddHeader(ISipHeader::UNKNOWN, "no_upd", MessageUtil::STR_P_SKT_BYE_CAUSE);
+        }
+        else
+        {
+            if (nTerminationReason == ISession::TERMINATION_REASON_USER_ACTION)
+            {
+                piSipMsg->AddHeader(ISipHeader::UNKNOWN,
+                        "USER; cause=101;text=\"USER triggered\"; fc=9501", SipHeaderName::REASON);
+            }
+            else
+            {
+                piSipMsg->AddHeader(ISipHeader::UNKNOWN,
+                        "ETC; cause=104; text=\"Unknown\"; fc=9999", SipHeaderName::REASON);
+            }
+
+            piSipMsg->AddHeader(ISipHeader::UNKNOWN, "normal", MessageUtil::STR_P_SKT_BYE_CAUSE);
+        }
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PUBLIC VIRTUAL void MessageFormatter::ReasonHeaderSetter_SetPrivateHeader(
+        IN ISipMessage* piOldSipMsg, IN ISipMessage* piNewSipMsg)
+{
+    MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
+    if (objConfig.Is(Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_SKT_BYE_CAUSE))
+    {
+        const AString strPSktByeCause(MessageUtil::STR_P_SKT_BYE_CAUSE);
+        AString strByeCause = piOldSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, strPSktByeCause);
+        IMS_TRACE_D("ReasonHeaderSetter_SetPrivateHeader [%s]", strByeCause.GetStr(), 0, 0);
+
+        if (strByeCause.GetLength() > 0)
+        {
+            piNewSipMsg->SetHeader(ISipHeader::UNKNOWN, strByeCause, strPSktByeCause);
+        }
+    }
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -76,7 +148,6 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage(IN CallType eCallTy
     SetAcceptHeader();
     SetPPreferredServiceHeader();
     AddSrvccFeature();
-    // SetKeepAliveProfile();
     SetCallerIdHeader();
     // SetTipHeader();
     SetPEarlyMediaHeader();
@@ -292,6 +363,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormTerminateMessage(IN const CallRe
     AString strReason;
     GetTerminateReason(objReason, strReason);
     SetReasonHeader(strReason);
+    SetCarrierSpecificHeaders();
 
     return IMS_SUCCESS;
 }
@@ -457,31 +529,6 @@ void MessageFormatter::SetSrvccContactParameter()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-// PRIVATE
-// void MessageFormatter::SetKeepAliveProfile()
-// {
-//     IMS_BOOL bKeepAlive = IMS_FALSE;  // TODO, SESSION_SP_KEEP_ALIVE
-
-//     if (!bKeepAlive)
-//     {
-//         return;
-//     }
-
-//     ICoreService* piCoreService = GetICoreService();
-//     if (piCoreService == IMS_NULL)
-//     {
-//         return;
-//     }
-
-//     IMS_UINT32 eSipFeatures = ISipConfig::SIP_FEATURE_CAPS_KEEP;
-//     RcPtr<SipProfile> pProfile = new SipProfile();
-
-//     pProfile->SetSipFeatures(eSipFeatures);
-//     piCoreService->SetSipProfile(pProfile.Get());
-// }
-
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
 PRIVATE
 void MessageFormatter::SetCallerIdHeader()
 {
@@ -636,6 +683,17 @@ void MessageFormatter::SetCarrierSpecificHeaders()
             m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
                     MessageUtil::STR_AVCHANGE, ISipHeader::UNKNOWN,
                     MessageUtil::STR_P_TTA_VOLTE_INFO);
+        }
+    }
+
+    if (objConfig.Is(Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_SKT_BYE_CAUSE))
+    {
+        if (m_eFormType == FormType::TERMINATE)
+        {
+            // TODO: add bye cause by the CallReasonInfo.
+            // TODO: update KT carrier's config for termination reason
+            m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage, "normal",
+                    ISipHeader::UNKNOWN, MessageUtil::STR_P_SKT_BYE_CAUSE);
         }
     }
 }
