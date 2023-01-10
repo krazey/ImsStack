@@ -324,7 +324,7 @@ IMS_BOOL TextMediaSession::SetMediaQuality()
 {
     IMS_TRACE_I("SetMediaQuality() - state[%d]", m_nState, 0, 0);
 
-    if (m_piMediaSessionListener != IMS_NULL && m_nState != STATE_IDLE)
+    if (m_piMediaSessionListener != IMS_NULL && m_nState >= STATE_IDLE)
     {
         ImsMediaMsgSetMediaQualityParam* pParam =
                 new ImsMediaMsgSetMediaQualityParam(MEDIA_TYPE_TEXT);
