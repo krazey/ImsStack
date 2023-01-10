@@ -31,6 +31,7 @@
 
 class Capabilities;
 class IOnSessionListener;
+class IReasonHeaderSetter;
 class IRefreshListener;
 class ISessionParameter;
 class ISipAckPackage;
@@ -131,6 +132,10 @@ public:
         return (m_nConfigValue & nValue) != 0;
     }
     IMS_BOOL IsSessionRefreshInProgress() const;
+    inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* piSetter)
+    {
+        m_piReasonHeaderSetter = piSetter;
+    }
 
 protected:
     // Activity class
@@ -228,6 +233,11 @@ protected:
     // CALLER_PREFERENCE_MANAGER
     void UpdateCallerPreference(
             IN const ISipMessage* piPrevSipMsg, IN IMS_SINT32 nStatusCode = SipStatusCode::SC_200);
+
+    void SetState(IN IMS_SINT32 nState);
+    // UAC behavior
+    IMS_RESULT SendRequestToByeInternal();
+
     static void RemoveRecordRouteHeaders(IN ISipMessage* piSipMsg);
 
     inline void AddSessionToCallControlHelperIfNotPresent()
@@ -275,7 +285,6 @@ private:
     IMS_RESULT SendRequestForRefresh(IN IMS_SINT32 nMethod = SipMethod::INVALID);
     IMS_RESULT SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT32 nServiceMethod);
     IMS_RESULT SendRequestToBye();
-    IMS_RESULT SendRequestToByeInternal();
     IMS_RESULT SendRequestToCancel();
     IMS_RESULT SendRequestToInvite(IN IMS_BOOL bSessionRefresh = IMS_FALSE);
     IMS_RESULT SendRequestToInviteOn422Received();
@@ -286,7 +295,6 @@ private:
             IN IMS_SINT32 nStatusCode);
 
     void SetReasonHeaderFromPreviousRequest(IN IMS_SINT32 nRequest);
-    void SetState(IN IMS_SINT32 nState);
     void Start2xxRetransmission();
     void Stop2xxRetransmission();
 
@@ -504,6 +512,8 @@ private:
     RcPtr<MethodManager> m_pForkedSessions;
     // EARLY_SESSION_MODEL
     RcPtr<VirtualSession> m_pVirtualEarlySession;
+    // Setter for Reason header
+    IReasonHeaderSetter* m_piReasonHeaderSetter;
 };
 
 #endif

@@ -16,10 +16,14 @@
 #include <gtest/gtest.h>
 
 #include "CoreService.h"
+#include "MockIReasonHeaderSetter.h"
 #include "MockISipClientConnection.h"
 #include "Session.h"
 #include "SessionRefreshHelper.h"
+#include "TestCoreBase.h"
+#include "TestCoreService.h"
 
+using ::testing::_;
 using ::testing::Return;
 
 namespace android
@@ -70,15 +74,22 @@ public:
         m_pTestRefreshHelper->SetRefreshConnection(piScc);
     }
 
+    inline void SetTerminationReasonForTest(IN IMS_SINT32 nReason)
+    {
+        SetTerminationReason(nReason);
+    }
+    inline void SetStateForTest(IN IMS_SINT32 nState) { SetState(nState); }
+    inline void SendRequestToByeInternalForTest() { SendRequestToByeInternal(); }
+
 public:
     TestSessionRefreshHelper* m_pTestRefreshHelper;
 };
 
-class SessionTest : public ::testing::Test
+class SessionTest : public TestCoreBase
 {
 public:
     inline SessionTest() :
-            m_pCoreService(new CoreService("test.app", "test.service")),
+            TestCoreBase(),
             m_pSession(IMS_NULL)
     {
     }
@@ -88,20 +99,15 @@ public:
         {
             delete m_pSession;
         }
-
-        if (m_pCoreService != IMS_NULL)
-        {
-            delete m_pCoreService;
-        }
     }
 
 protected:
     virtual void SetUp() override
     {
-        m_pSession = new TestSession(m_pCoreService);
+        TestCoreBase::SetUp();
 
-        SipAddress objUserId("sip:1234@test.ims.com");
-        m_pSession->InitMethod("sip:1234@test.ims.com", "sip:5678@test.ims.com", objUserId);
+        m_pSession = new TestSession(GetCoreService());
+        InitMethod(m_pSession);
     }
 
     virtual void TearDown() override
@@ -111,10 +117,11 @@ protected:
             delete m_pSession;
             m_pSession = IMS_NULL;
         }
+
+        TestCoreBase::TearDown();
     }
 
 protected:
-    CoreService* m_pCoreService;
     TestSession* m_pSession;
 };
 
@@ -157,6 +164,23 @@ TEST_F(SessionTest, IsSessionRefreshInProgress)
     EXPECT_FALSE(m_pSession->IsSessionRefreshInProgress());
 
     delete pScc;
+}
+
+TEST_F(SessionTest, SendRequestToByeInternal)
+{
+    SetUpClientConnection(IMS_TRUE);
+    ON_CALL(GetScc(), SetExtensionTokenForViaBranch(_)).WillByDefault(Return());
+    ON_CALL(GetSipMsg(), GetType()).WillByDefault(Return(ISipMessage::TYPE_REQUEST));
+
+    MockIReasonHeaderSetter objReasonHeaderSetter;
+    m_pSession->SetReasonHeaderSetter(&objReasonHeaderSetter);
+    m_pSession->SetStateForTest(Session::STATE_ESTABLISHED);
+    m_pSession->SetTerminationReasonForTest(Session::TERMINATION_REASON_REFRESH_TIMEOUT);
+    EXPECT_CALL(objReasonHeaderSetter,
+            ReasonHeaderSetter_SetHeader(_, Session::TERMINATION_REASON_REFRESH_TIMEOUT))
+            .WillOnce(Return());
+
+    m_pSession->SendRequestToByeInternalForTest();
 }
 
 }  // namespace android

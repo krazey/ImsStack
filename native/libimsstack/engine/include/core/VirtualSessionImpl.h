@@ -118,6 +118,7 @@ private:
     inline ISession* GetVirtualSession() const override { return IMS_NULL; }
     // }
     inline IMS_BOOL IsSessionRefreshInProgress() const override { return IMS_FALSE; }
+    inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* /*piSetter*/) {}
 
 private:
     ISession* m_piOwnerSession;

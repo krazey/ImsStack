@@ -122,6 +122,7 @@ public:
     MOCK_METHOD(ISession*, GetOwnerSession, (), (const, override));
     MOCK_METHOD(ISession*, GetVirtualSession, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSessionRefreshInProgress, (), (const, override));
+    MOCK_METHOD(void, SetReasonHeaderSetter, (IN IReasonHeaderSetter * piSetter), (override));
 };
 
 #endif

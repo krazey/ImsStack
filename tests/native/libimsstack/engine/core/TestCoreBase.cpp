@@ -62,17 +62,27 @@ TestCoreBase::~TestCoreBase()
     }
 }
 
-void TestCoreBase::SetUpClientConnection()
+void TestCoreBase::SetUpClientConnection(IN IMS_BOOL bMidDialog /*= IMS_FALSE*/)
 {
-    m_pCoreService->SetScc(&m_objScc);
+    if (bMidDialog)
+    {
+        m_pCoreService->SetSccForMidDialog(&m_objScc);
+    }
+    else
+    {
+        m_pCoreService->SetScc(&m_objScc);
+    }
     m_pCoreService->SetImsConnected(IMS_TRUE);
 
     ON_CALL(m_objScc, Close()).WillByDefault(Return());
     ON_CALL(m_objScc, SetErrorListener(_)).WillByDefault(Return());
     ON_CALL(m_objScc, SetListener(_)).WillByDefault(Return());
+    ON_CALL(m_objScc, GetDialog()).WillByDefault(Return(&m_objDialog));
     ON_CALL(m_objScc, GetMessage()).WillByDefault(Return(&m_objSipMsg));
     ON_CALL(m_objScc, GetMethod()).WillByDefault(ReturnRef(GetMethodForSipConnection()));
     ON_CALL(m_objScc, Send()).WillByDefault(Return(IMS_SUCCESS));
+
+    ON_CALL(m_objSipMsg, GetMethod()).WillByDefault(ReturnRef(GetMethodForSipConnection()));
 }
 
 void TestCoreBase::TearDownClientConnection()
@@ -89,6 +99,8 @@ void TestCoreBase::SetUpServerConnection()
     ON_CALL(m_objSsc, GetMethod()).WillByDefault(ReturnRef(GetMethodForSipConnection()));
     ON_CALL(m_objSsc, GetMessage()).WillByDefault(Return(&m_objSipMsg));
     ON_CALL(m_objSsc, Send()).WillByDefault(Return(IMS_SUCCESS));
+
+    ON_CALL(m_objSipMsg, GetMethod()).WillByDefault(ReturnRef(GetMethodForSipConnection()));
 }
 
 void TestCoreBase::TearDownServerConnection() {}

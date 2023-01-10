@@ -207,6 +207,10 @@ private:
     {
         return m_pSession->IsSessionRefreshInProgress();
     }
+    inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* piSetter)
+    {
+        return m_pSession->SetReasonHeaderSetter(piSetter);
+    }
 
     // IOnSessionListener interface
     void OnSession_Alerting(IN Session* pSession) override;

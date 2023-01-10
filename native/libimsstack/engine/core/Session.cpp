@@ -25,6 +25,7 @@
 #include "CallControlHelper.h"
 #include "Capabilities.h"
 #include "IOnSessionListener.h"
+#include "IReasonHeaderSetter.h"
 #include "ISipAckPackage.h"
 #include "ISipDialog.h"
 #include "ISipHeader.h"
@@ -89,7 +90,8 @@ Session::Session(IN Service* pService) :
         m_piSccBye(IMS_NULL),
         m_objPreviousCallerPreference(IMSList<AString>()),
         m_pForkedSessions(IMS_NULL),
-        m_pVirtualEarlySession(IMS_NULL)
+        m_pVirtualEarlySession(IMS_NULL),
+        m_piReasonHeaderSetter(IMS_NULL)
 {
 }
 
@@ -4978,6 +4980,59 @@ void Session::UpdateCallerPreference(
     }
 }
 
+PROTECTED
+void Session::SetState(IN IMS_SINT32 nState)
+{
+    IMS_TRACE_I("Session :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
+
+    m_nState = nState;
+}
+
+PROTECTED
+IMS_RESULT Session::SendRequestToByeInternal()
+{
+    SipMethod objMethod(SipMethod::BYE);
+    ISipClientConnection* piScc = CreateConnectionL(GetDialog(), objMethod);
+
+    if (piScc == IMS_NULL)
+    {
+        return IMS_FAILURE;
+    }
+
+    // Set the headers for the session termination
+    piScc->SetExtensionTokenForViaBranch(m_strTerminationReasonFromApp);
+
+    // Update a session refresh timer info.
+    m_pRefreshHelper->StopSessionTimer(piScc);
+
+    if (m_piReasonHeaderSetter != IMS_NULL)
+    {
+        m_piReasonHeaderSetter->ReasonHeaderSetter_SetHeader(
+                piScc->GetMessage(), m_nTerminationReason);
+    }
+
+    (void)AdjustMessage(piScc->GetMessage(), MESSAGE_CLASS_INTERNAL_BYE);
+
+    // Try to send a BYE request to the network
+    if (piScc->Send() != IMS_SUCCESS)
+    {
+        piScc->Close();
+        return IMS_FAILURE;
+    }
+
+    // Update the call state
+    UpdateCallStateOnMessageSent(piScc->GetMessage());
+
+    if (m_piSccBye != IMS_NULL)
+    {
+        m_piSccBye->Close();
+    }
+
+    m_piSccBye = piScc;
+
+    return IMS_SUCCESS;
+}
+
 // REMOVE_RECORD_ROUTE_HEADERS
 PROTECTED GLOBAL void Session::RemoveRecordRouteHeaders(IN ISipMessage* piSipMsg)
 {
@@ -6629,7 +6684,7 @@ IMS_RESULT Session::SendRequestToBye()
     ISipMessage* piSipMsg = piScc->GetMessage();
     SetSdpBodyPartFromRefusedView(piSipMsg);
 
-    // Try to send an BYE request to the network
+    // Try to send a BYE request to the network
     if (!SendNUpdateRequest(IMessage::SESSION_TERMINATE, piScc))
     {
         piScc->Close();
@@ -6638,88 +6693,6 @@ IMS_RESULT Session::SendRequestToBye()
 
     // Update the call state
     UpdateCallStateOnMessageSent(piScc->GetMessage());
-
-    return IMS_SUCCESS;
-}
-
-PRIVATE
-IMS_RESULT Session::SendRequestToByeInternal()
-{
-    SipMethod objMethod(SipMethod::BYE);
-    ISipClientConnection* piScc = CreateConnectionL(GetDialog(), objMethod);
-
-    if (piScc == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
-    // Set the headers for the session termination
-    piScc->SetExtensionTokenForViaBranch(m_strTerminationReasonFromApp);
-
-    // Update a session refresh timer info.
-    m_pRefreshHelper->StopSessionTimer(piScc);
-
-#if 0
-    // KR
-    {
-        if ((m_nTerminationReason == TERMINATION_REASON_REFRESH_TIMEOUT)
-            || (m_nTerminationReason == TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
-        {
-            piScc->AddHeader(SipHeaderName::REASON,
-                    "SIP; cause=103; text=\"Session-Expire\"; fc=9602");
-            piScc->AddHeader("P-SKT-BYE-CAUSE", "no_upd");
-        }
-        else
-        {
-            if ((m_nTerminationReason == TERMINATION_REASON_REFRESH_408)
-                || (m_nTerminationReason == TERMINATION_REASON_REFRESH_481)
-                || (m_nTerminationReason == TERMINATION_REASON_REMOTE_ACTION))
-            {
-                piScc->AddHeader(SipHeaderName::REASON,
-                        "ETC; cause=104; text=\"Unknown\"; fc=9999");
-            }
-            else if (m_nTerminationReason == TERMINATION_REASON_USER_ACTION)
-            {
-                piScc->AddHeader(SipHeaderName::REASON,
-                        "USER; cause=101;text=\"USER triggered\"; fc=9501");
-            }
-            else
-            {
-                piScc->AddHeader(SipHeaderName::REASON,
-                        "ETC; cause=104; text=\"Unknown\"; fc=9999");
-            }
-
-            piScc->AddHeader("P-SKT-BYE-CAUSE", "normal");
-        }
-    }
-    // VZW
-    {
-        if ((m_nTerminationReason == TERMINATION_REASON_REFRESH_TIMEOUT)
-                || (m_nTerminationReason == TERMINATION_REASON_REFRESH_TXN_TIMEOUT))
-        {
-            piScc->AddHeader(SipHeaderName::REASON, "USER;text=\"Session Expired\"");
-        }
-    }
-#endif
-
-    (void)AdjustMessage(piScc->GetMessage(), MESSAGE_CLASS_INTERNAL_BYE);
-
-    // Try to send an BYE request to the network
-    if (piScc->Send() != IMS_SUCCESS)
-    {
-        piScc->Close();
-        return IMS_FAILURE;
-    }
-
-    // Update the call state
-    UpdateCallStateOnMessageSent(piScc->GetMessage());
-
-    if (m_piSccBye != IMS_NULL)
-    {
-        m_piSccBye->Close();
-    }
-
-    m_piSccBye = piScc;
 
     return IMS_SUCCESS;
 }
@@ -7226,25 +7199,11 @@ void Session::SetReasonHeaderFromPreviousRequest(IN IMS_SINT32 nRequest)
             piNextSipMsg->SetHeader(ISipHeader::UNKNOWN, strReason, strReasonHeaderName);
         }
 
-        // KR requirements
+        if (m_piReasonHeaderSetter != IMS_NULL)
         {
-            const AString strPSktByeCause("P-SKT-BYE-CAUSE");
-            AString strByeCause = piPrevSipMsg->GetHeader(ISipHeader::UNKNOWN, 0, strPSktByeCause);
-
-            if (strByeCause.GetLength() > 0)
-            {
-                piNextSipMsg->SetHeader(ISipHeader::UNKNOWN, strByeCause, strPSktByeCause);
-            }
+            m_piReasonHeaderSetter->ReasonHeaderSetter_SetPrivateHeader(piPrevSipMsg, piNextSipMsg);
         }
     }
-}
-
-PRIVATE
-void Session::SetState(IN IMS_SINT32 nState)
-{
-    IMS_TRACE_I("Session :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
-
-    m_nState = nState;
 }
 
 PRIVATE

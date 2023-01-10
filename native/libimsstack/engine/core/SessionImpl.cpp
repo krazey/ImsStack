@@ -73,6 +73,7 @@ PRIVATE VIRTUAL void SessionImpl::Destroy()
         m_pSession->SetListener(IMS_NULL);
         m_pSession->SetExListener(IMS_NULL);
         m_pSession->SetRefreshListener(IMS_NULL);
+        m_pSession->SetReasonHeaderSetter(IMS_NULL);
         m_pSession->Destroy();
         m_pSession = IMS_NULL;
     }

@@ -20,6 +20,7 @@
 
 #include "ISipHeader.h"
 #include "ISipMessageBodyPart.h"
+#include "MockISipDialog.h"
 #include "MockISipMessage.h"
 #include "MockISipMessageBodyPart.h"
 #include "MockISipServerConnection.h"
@@ -37,7 +38,7 @@ public:
     virtual ~TestCoreBase();
 
 public:
-    virtual void SetUpClientConnection();
+    virtual void SetUpClientConnection(IN IMS_BOOL bMidDialog = IMS_FALSE);
     virtual void TearDownClientConnection();
     virtual void SetUpServerConnection();
     virtual void TearDownServerConnection();
@@ -46,6 +47,7 @@ public:
     void InitMethod(IN_OUT ServiceMethod* pMethod, IN IMS_BOOL bOriginated = IMS_TRUE);
     inline MockISipClientConnection& GetScc() { return m_objScc; }
     inline MockISipServerConnection& GetSsc() { return m_objSsc; }
+    inline MockISipDialog& GetDialog() { return m_objDialog; }
     inline MockISipMessage& GetSipMsg() { return m_objSipMsg; }
     inline MockISipMessageBodyPart& GetSipMsgBodyPart() { return m_objSipMsgBodyPart; }
     inline TestCoreService* GetCoreService() { return m_pCoreService; }
@@ -77,6 +79,7 @@ protected:
     TestCoreService* m_pCoreService;
     MockISipClientConnection m_objScc;
     MockISipServerConnection m_objSsc;
+    MockISipDialog m_objDialog;
     MockISipMessage m_objSipMsg;
     MockISipMessageBodyPart m_objSipMsgBodyPart;
 

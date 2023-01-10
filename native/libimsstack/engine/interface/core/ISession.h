@@ -21,6 +21,7 @@
 
 class ICapabilities;
 class IMedia;
+class IReasonHeaderSetter;
 class IReference;
 class IRefreshListener;
 class ISessionDescriptor;
@@ -663,6 +664,13 @@ public:
      * @return IMS_TRUE if the session refresh is in progress, IMS_FALSE otherwise.
      */
     virtual IMS_BOOL IsSessionRefreshInProgress() const = 0;
+
+    /**
+     * @brief Sets the setter interface for Reason header.
+     *
+     * @param piSetter The setter interface for Reason header
+     */
+    virtual void SetReasonHeaderSetter(IN IReasonHeaderSetter* piSetter) = 0;
 
 public:
     /// States of ISession
