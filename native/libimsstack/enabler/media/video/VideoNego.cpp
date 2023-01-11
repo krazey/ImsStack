@@ -56,7 +56,7 @@ VideoNego& VideoNego::operator=(IN const VideoNego& obj)
 PUBLIC VideoNego::~VideoNego()
 {
     IMS_TRACE_I("~VideoNego()", 0, 0, 0);
-    DestroyProfiles();
+    VideoNego::DestroyProfiles();
 
     while (m_listOaModel.GetSize() > 0)
     {
@@ -1497,8 +1497,7 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
                 if (GetAvpfFromAttributes(pSdpCodec, &pProfile->objCapaNego,
                             &pPayload->objRtcpFbAttr) == IMS_FALSE)
                 {
-                    GetAvpfFromAttributes_EX(
-                            pDescriptor, &pProfile->objCapaNego, &pPayload->objRtcpFbAttr);
+                    GetAvpfFromAttributes_EX(&pProfile->objCapaNego, &pPayload->objRtcpFbAttr);
                 }
             }
         }
@@ -1519,8 +1518,7 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
                 if (GetAvpfFromAttributes(pSdpCodec, &pProfile->objCapaNego,
                             &pPayload->objRtcpFbAttr) == IMS_FALSE)
                 {
-                    GetAvpfFromAttributes_EX(
-                            pDescriptor, &pProfile->objCapaNego, &pPayload->objRtcpFbAttr);
+                    GetAvpfFromAttributes_EX(&pProfile->objCapaNego, &pPayload->objRtcpFbAttr);
                 }
             }
         }
@@ -3510,10 +3508,10 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes(IN SdpMediaFormat* pMediaForma
     return IMS_TRUE;
 }
 
-PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes_EX(IN const IMediaDescriptor* pMediaDescriptor,
+PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes_EX(
         IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr)
 {
-    if (pMediaDescriptor == IMS_NULL || pRtcpFbAttr == IMS_NULL || pCapaNego == IMS_NULL)
+    if (pRtcpFbAttr == IMS_NULL || pCapaNego == IMS_NULL)
         return IMS_FALSE;
 
     // check attribute..
@@ -3561,10 +3559,6 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
     if (pDescriptor == IMS_NULL || pObjCapaNego == IMS_NULL)
         return IMS_FALSE;
 
-    IMS_UINT32 i = 0, j = 0;
-    IMS_SINT32 nTcapInitNum = 0;
-    AString strTcap = "";
-
     IMSList<AString> lstTCAPAttr = pDescriptor->GetAttributes(SdpAttribute::TCAP);
     IMSList<AString> lstACAPAttr = pDescriptor->GetAttributes(SdpAttribute::ACAP);
     IMSList<AString> lstACFGAttr = pDescriptor->GetAttributes(SdpAttribute::ACFG);
@@ -3585,16 +3579,17 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
             pObjCapaNego->mapAttributeCapa.GetSize());
 
     // Get transport capability(TCAP) list - "'number' SP 'Tcap'" pair
-    for (i = 0; i < lstTCAPAttr.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < lstTCAPAttr.GetSize(); i++)
     {
         AString strTCAPline = lstTCAPAttr.GetAt(i);
         if (strTCAPline.GetLength() == 0)
             continue;
 
         IMSList<AString> lstSplitSpace = strTCAPline.Split(' ');
+        IMS_SINT32 nTcapInitNum = 0;
 
         // save Tcap String to CapaNego Obj
-        for (j = 0; j < lstSplitSpace.GetSize(); j++)
+        for (IMS_UINT32 j = 0; j < lstSplitSpace.GetSize(); j++)
         {
             if (j == 0)
             {
@@ -3603,17 +3598,17 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
             }
             else
             {
+                AString strTcap = "";
                 // mapped - key : 'number' value:'Tcap'
                 strTcap.Sprintf("%s", lstSplitSpace.GetAt(j).GetStr());
                 pObjCapaNego->mapTransportCapa.Add(nTcapInitNum, strTcap);
                 nTcapInitNum++;
-                strTcap = "";
             }
         }
     }
 
     // Get attribute capability(ACAP) list - "'number' SP 'Acap'" pair
-    for (i = 0; i < lstACAPAttr.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < lstACAPAttr.GetSize(); i++)
     {
         AString strAcap = "";
         IMS_SINT32 nAcapNum = 0;
@@ -3624,7 +3619,7 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
         IMSList<AString> lstSplitSpace = strACAPline.Split(' ');
 
         // save Acap String to CapaNego Obj
-        for (j = 0; j < lstSplitSpace.GetSize(); j++)
+        for (IMS_UINT32 j = 0; j < lstSplitSpace.GetSize(); j++)
         {
             if (j == 0)
             {

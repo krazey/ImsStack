@@ -144,7 +144,7 @@ IMediaSession* MediaManager::CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IM
 }
 
 PUBLIC
-void MediaManager::DestroySession(IN IMediaSession* piSession)
+void MediaManager::DestroySession(IN const IMediaSession* piSession)
 {
     if (piSession == IMS_NULL)
     {
