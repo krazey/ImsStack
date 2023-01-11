@@ -23,7 +23,6 @@
 #include "call/IMtcSession.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/message/IMessageSender.h"
-#include <memory>
 
 class IMessage;
 class IConferenceManager;
@@ -101,7 +100,7 @@ private:
     IMtcCallContext& m_objContext;
     ISession& m_objSession;
 
-    std::unique_ptr<IMessageSender> m_pMessageSender;
+    IMessageSender* m_pMessageSender;
     MtcExtensionSet m_objExtensionSet;
 
     CallType m_eCallType;
