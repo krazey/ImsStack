@@ -39,9 +39,6 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
 
     public ImsSmsImpl(ImsCallContext callContext) {
         mCallContext = callContext;
-        if (mSmsTL == null) {
-            mSmsTL = new SmsTransferLayer(mCallContext);
-        }
         init();
     }
 
@@ -72,7 +69,9 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
      * Initialises the objects created by this Class
      */
     public void init() {
-        if (mSmsTL != null) {
+        if (mSmsTL == null) {
+            log("init");
+            mSmsTL = new SmsTransferLayer(mCallContext);
             mSmsTL.setListener(mSmsTLListener);
         }
         onReady();
@@ -83,9 +82,12 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
      */
     public void clear() {
         mReady = false;
-        mSmsTL.setListener(null);
-        mSmsTL.clear();
-        mSmsTL = null;
+        if (mSmsTL != null) {
+            log("clear");
+            mSmsTL.setListener(null);
+            mSmsTL.clear();
+            mSmsTL = null;
+        }
     }
 
     @Override

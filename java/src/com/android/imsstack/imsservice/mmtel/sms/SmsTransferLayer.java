@@ -162,7 +162,10 @@ public class SmsTransferLayer {
     public void clear() {
         mSmsRL = null;
         mSmsHandler = null;
-        mUsatBasedSms.dispose();
+        if (mUsatBasedSms != null) {
+            mUsatBasedSms.dispose();
+            mUsatBasedSms = null;
+        }
     }
 
     public void setListener(SmsTransferLayer.Listener listener) {
