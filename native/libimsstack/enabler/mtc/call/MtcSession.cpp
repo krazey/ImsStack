@@ -84,6 +84,8 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
     m_objContext.GetPreconditionManager().DestroyQos(&m_objSession);
     m_objSession.SetMessageMediator(IMS_NULL);
     m_objSession.SetRefreshListener(IMS_NULL);
+    delete m_pMessageSender;
+
     m_objContext.GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
 }
 
