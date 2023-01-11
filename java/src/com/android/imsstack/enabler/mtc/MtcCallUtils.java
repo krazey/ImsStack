@@ -16,8 +16,6 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.util.ImsLog;
 
@@ -211,21 +209,6 @@ public class MtcCallUtils {
     public static boolean isCallWaitingEnabled(SuppInfo si) {
         SuppInfo.SuppService ss = (si != null) ? si.getService(SuppInfo.TYPE_CW) : null;
         return (ss != null) && ss.boolValue;
-    }
-
-    public static boolean isEmergencyServiceStateForCSRetry(IBaseContext context,
-            int serviceState, int reason) {
-        if (serviceState == IUMtcService.ES_UNAVAILABLE) {
-            if (reason == IUMtcService.ES_UNAVAILABLE_REASON_SSAC) {
-                return false;
-            } else if (ImsGlobal.isOperator(context.getSlotId(), "KDDI")) {
-                return false;
-            } else if (reason == IUMtcService.ES_UNAVAILABLE_REASON_NO_CSFB) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public static boolean isGttEnabled(int gttMode) {

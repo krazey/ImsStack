@@ -2689,20 +2689,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if ((mCall != null) && (mListenerProxy != null)
                     && (getState() != ImsCallSessionImplBase.State.TERMINATED)) {
-                // ImsReasonInfo.CODE_LOCAL_SERVICE_UNAVAILABLE
                 int code = CallReasonInfo.CODE_REJECT_INTERNAL_ERROR;
                 int extraCode = 0;
 
-                if (MtcCallUtils.isEmergencyServiceStateForCSRetry(
-                        mCallContext, ss.mExtraState, ss.mReason)) {
-                    code = CallReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-                    extraCode = CallReasonInfo.EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-
-                    // TODO : need to modify this
-                    // after emergency domain selection policy is decided.
-                    /*if (ImsGlobal.isOperator(slotId, "VZW")) {
-                        code = IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRY_RAT;
-                    }*/
+                if (ss.mExtraState == IUMtcService.ES_UNAVAILABLE) {
+                    code = CallReasonInfo.CODE_LOCAL_NOT_REGISTERED;
                 }
 
                 mListenerProxy.onCallStartFailed(mCall, new CallReasonInfo(code, extraCode, ""));
