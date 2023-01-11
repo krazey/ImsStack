@@ -396,6 +396,10 @@ TEST_F(UpdatingInfoTest, ReturnHoldResumeStatusIfAlertingInactiveToSendReceive)
 
 TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfVideoDirectionIsChanging)
 {
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+
     MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
     MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
     MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
@@ -408,6 +412,31 @@ TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsTrueIfVideoDirectionIsChanging)
     objAlertingInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
 
     EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
+
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VIDEO_RTT));
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsNeedToAlert());
+}
+
+TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoDirectionIsChangingButCallTypeIsVoip)
+{
+    ON_CALL(objSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
+
+    MediaInfo& objNegotiatedInfo = pUpdatingInfo->GetNegotiatedInfo();
+    MediaInfo& objModifyingInfo = pUpdatingInfo->GetModifyingInfo();
+    MediaInfo& objAlertingInfo = pUpdatingInfo->GetAlertingInfo();
+
+    // Not (IsHeldBy() || IsResumedBy())
+    objNegotiatedInfo.eAudioDirection = DIRECTION_INACTIVE;
+    objModifyingInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+
+    objNegotiatedInfo.eVideoDirection = DIRECTION_SEND;
+    objAlertingInfo.eVideoDirection = DIRECTION_SEND_RECEIVE;
+
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsNeedToAlert());
 }
 
 TEST_F(UpdatingInfoTest, IsNeedToAlertReturnsFalseIfVideoDirectionIsNotChanging)

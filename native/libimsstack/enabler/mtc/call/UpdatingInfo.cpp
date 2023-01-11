@@ -150,7 +150,11 @@ IMS_BOOL UpdatingInfo::IsNeedToAlert() const
 
     if (m_objNegotiatedInfo.eVideoDirection != m_objAlertingInfo.eVideoDirection)
     {
-        return IMS_TRUE;
+        CallType eCurrentType = GetCurrentCallType();
+        if (eCurrentType == CallType::VT || eCurrentType == CallType::VIDEO_RTT)
+        {
+            return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
