@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_SESSION_CONFIG_FACTORY_H_
-#define _MEDIA_SESSION_CONFIG_FACTORY_H_
+#ifndef MEDIA_SESSION_CONFIG_FACTORY_H_
+#define MEDIA_SESSION_CONFIG_FACTORY_H_
 
 // == INCLUDES =========================================================
 
@@ -97,4 +97,4 @@ private:
     IMSMap<IMS_UINT32, IMSList<MediaSessionConfig*>*> m_mapListMediaSessionConfig;
 };
 
-#endif /* _MEDIA_SESSION_CONFIG_FACTORY_H_ */
+#endif

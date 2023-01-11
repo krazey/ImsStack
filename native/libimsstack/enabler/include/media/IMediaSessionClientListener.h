@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _INTERFACE_MEDIA_SESSION_CLIENT_LISTENER_H_
-#define _INTERFACE_MEDIA_SESSION_CLIENT_LISTENER_H_
+#ifndef INTERFACE_MEDIA_SESSION_CLIENT_LISTENER_H_
+#define INTERFACE_MEDIA_SESSION_CLIENT_LISTENER_H_
 
 #include "IUMedia.h"
 #include "IMMedia.h"
@@ -56,4 +56,5 @@ public:
     virtual void MediaSession_NotifyQos(IMS_UINTP nNegoId, IMS_BOOL bSuccess,
             MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;
 };
-#endif /* _INTERFACE_MEDIA_SESSION_LISTENER_H_ */
+
+#endif

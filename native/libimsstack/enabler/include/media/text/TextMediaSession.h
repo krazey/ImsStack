@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_TEXT_MEDIA_SESSION_H_
-#define _IMS_TEXT_MEDIA_SESSION_H_
+#ifndef TEXT_MEDIA_SESSION_H_
+#define TEXT_MEDIA_SESSION_H_
 
 #include <MediaQualityThreshold.h>
 #include "BaseSession.h"
@@ -133,4 +133,5 @@ private:
     IPAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
 };
-#endif /* End of _IMS_TEXT_MEDIA_SESSION_H_*/
+
+#endif

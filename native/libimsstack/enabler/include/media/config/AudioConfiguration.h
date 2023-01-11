@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _AUDIO_CONFIGURATION_H_
-#define _AUDIO_CONFIGURATION_H_
+#ifndef AUDIO_CONFIGURATION_H_
+#define AUDIO_CONFIGURATION_H_
 
 #include "AString.h"
 #include "config/MediaConfiguration.h"
@@ -247,4 +247,5 @@ private:
     IMS_SINT32 m_nModeChangeNeighbor;
     IMSVector<AString> m_objAudioCandidateAttribute;
 };
-#endif  // _AUDIO_CONFIGURATION_H_
+
+#endif

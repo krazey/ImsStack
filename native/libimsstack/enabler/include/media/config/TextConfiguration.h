@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _TEXT_CONFIGURATION_H_
-#define _TEXT_CONFIGURATION_H_
+#ifndef TEXT_CONFIGURATION_H_
+#define TEXT_CONFIGURATION_H_
 
 #include "config/MediaConfiguration.h"
 
@@ -91,4 +91,5 @@ private:
     IMS_SINT32 m_nTextDscp;
     IMS_BOOL m_bTextCodecEmptyRedundantEnabled;
 };
-#endif  // _TEXT_CONFIGURATION_H_
+
+#endif

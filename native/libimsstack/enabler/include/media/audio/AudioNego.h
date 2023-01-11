@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_AUDIO_NEGO_H_
-#define _IMS_AUDIO_NEGO_H_
+#ifndef AUDIO_NEGO_H_
+#define AUDIO_NEGO_H_
 
 #include "ImsSlot.h"
 #include "media/IMedia.h"
@@ -283,4 +283,4 @@ private:
     AudioConfiguration* m_pConfig;
 };
 
-#endif /* _IMS_AUDIO_NEGO_H_ */
+#endif

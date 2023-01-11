@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_VIDEO_NEGO_PROFILE_H_
-#define _IMS_VIDEO_NEGO_PROFILE_H_
+#ifndef VIDEO_PROFILE_H_
+#define VIDEO_PROFILE_H_
 
 #include "IMSTypeDef.h"
 #include "IpAddress.h"
@@ -458,4 +458,5 @@ private:
         }
     }
 };
-#endif /* End of _IMS_VIDEO_NEGO_PROFILE_H_*/
+
+#endif

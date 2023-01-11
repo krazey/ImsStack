@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_MEDIA_ENVIRONMENT_H_
-#define _IMS_MEDIA_ENVIRONMENT_H_
+#ifndef MEDIA_ENVIRONMENT_H_
+#define MEDIA_ENVIRONMENT_H_
 
 #include "IService.h"
 #include "IMSTypeDef.h"
@@ -48,4 +48,5 @@ public:
         }
     };
 };
-#endif /* _IMS_MEDIA_ENVIRONMENT_H_ */
+
+#endif

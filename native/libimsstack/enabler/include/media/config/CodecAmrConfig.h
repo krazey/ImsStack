@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_AMR_CONFIG_H_
-#define _CODEC_AMR_CONFIG_H_
+#ifndef CODEC_AMR_CONFIG_H_
+#define CODEC_AMR_CONFIG_H_
 
 #include "config/CodecConfig.h"
 
@@ -161,4 +161,5 @@ private:
     IMS_SINT32 m_nSamplingRate;
     IMS_BOOL m_bDtx;
 };
-#endif  // _CODEC_AMR_CONFIG_H_
+
+#endif

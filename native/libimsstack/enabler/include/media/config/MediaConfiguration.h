@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_CONFIGURATION_H_
-#define _MEDIA_CONFIGURATION_H_
+#ifndef MEDIA_CONFIGURATION_H_
+#define MEDIA_CONFIGURATION_H_
 
 #include "MediaDef.h"
 #include "CarrierConfig.h"
@@ -217,4 +217,5 @@ protected:
     // Provisioned codecs
     IMSList<CodecConfig*> objCodecConfigs;
 };
-#endif  // _MEDIA_CONFIGURATION_H_
+
+#endif

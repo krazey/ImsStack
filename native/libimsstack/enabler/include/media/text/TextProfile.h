@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_TEXT_PROFILE_H_
-#define _IMS_TEXT_PROFILE_H_
+#ifndef TEXT_PROFILE_H_
+#define TEXT_PROFILE_H_
 
 #include "IMSTypeDef.h"
 #include "IpAddress.h"

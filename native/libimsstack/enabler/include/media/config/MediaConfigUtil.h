@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_MEDIA_CONFIG_UTIL_H_
-#define _IMS_MEDIA_CONFIG_UTIL_H_
+#ifndef MEDIA_CONFIG_UTIL_H_
+#define MEDIA_CONFIG_UTIL_H_
 
 #include "MediaDef.h"
 #include "MediaSessionConfigFactory.h"

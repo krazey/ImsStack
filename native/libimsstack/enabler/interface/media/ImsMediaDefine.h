@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef IMS_MEDIA_DEFINE_H_
+#define IMS_MEDIA_DEFINE_H_
+
 enum ImsMediaResult
 {
     IMS_MEDIA_OK = 0,
@@ -134,3 +137,5 @@ enum StreamState
     STATE_RUN,
     STATE_PAUSED,
 };
+
+#endif

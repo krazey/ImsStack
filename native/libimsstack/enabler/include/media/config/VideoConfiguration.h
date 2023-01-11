@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _VIDEO_CONFIGURATION_H_
-#define _VIDEO_CONFIGURATION_H_
+#ifndef VIDEO_CONFIGURATION_H_
+#define VIDEO_CONFIGURATION_H_
 
 #include "config/MediaConfiguration.h"
 
@@ -213,4 +213,5 @@ private:
     IMS_SINT32 m_nChannel;
     IMS_SINT32 m_nVideoSamplingRate;
 };
-#endif  // _VIDEO_CONFIGURATION_H_
+
+#endif

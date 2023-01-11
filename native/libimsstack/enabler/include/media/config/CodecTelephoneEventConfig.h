@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_TELEPHONE_EVENT_CONFIG_H_
-#define _CODEC_TELEPHONE_EVENT_CONFIG_H_
+#ifndef CODEC_TELEPHONE_EVENT_CONFIG_H_
+#define CODEC_TELEPHONE_EVENT_CONFIG_H_
 
 #include "AString.h"
 #include "config/CodecConfig.h"
@@ -77,4 +77,5 @@ private:
     IMS_SINT32 m_nRedundancyCount;
     IMS_SINT32 m_nSamplingRate;
 };
-#endif  // _CODEC_TELEPHONE_EVENT_CONFIG_H_
+
+#endif

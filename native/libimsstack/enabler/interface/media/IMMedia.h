@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMMEDIA_H_
-#define _IMMEDIA_H_
+#ifndef INTERFACE_IMMEDIA_H_
+#define INTERFACE_IMMEDIA_H_
 
 #include <AudioConfig.h>
 #include <VideoConfig.h>

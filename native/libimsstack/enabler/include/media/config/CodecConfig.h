@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_CONFIG_H_
-#define _CODEC_CONFIG_H_
+#ifndef CODEC_CONFIG_H_
+#define CODEC_CONFIG_H_
 
 #include "CarrierConfig.h"
 #include "ICarrierConfig.h"
@@ -67,4 +67,5 @@ protected:
     IMS_SINT32 m_nCodec;
     IMS_SINT32 m_nPayloadType;
 };
-#endif  // _CODEC_CONFIG_H_
+
+#endif

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_T140_CONFIG_H_
-#define _CODEC_T140_CONFIG_H_
+#ifndef CODEC_T140_CONFIG_H_
+#define CODEC_T140_CONFIG_H_
 
 #include "config/CodecConfig.h"
 
@@ -69,4 +69,5 @@ private:
     IMS_SINT32 m_nRedLevel;
     IMS_SINT32 m_nTextSamplingRate;
 };
-#endif  // _CODEC_T140_CONFIG_H_
+
+#endif

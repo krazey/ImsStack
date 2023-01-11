@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _VIDEO_PROFILE_UTIL_H_
-#define _VIDEO_PROFILE_UTIL_H_
+#ifndef VIDEO_PROFILE_UTIL_H_
+#define VIDEO_PROFILE_UTIL_H_
 
 #include "MediaEnvironment.h"
 #include "video/VideoProfile.h"
@@ -50,4 +50,5 @@ public:
             IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
             OUT VideoProfile* pNegotiatedProfile);
 };
-#endif /* end of _VIDEO_PROFILE_UTIL_H_ */
+
+#endif

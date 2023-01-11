@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_AUDIO_MEDIA_SESSION_H_
-#define _IMS_AUDIO_MEDIA_SESSION_H_
+#ifndef AUDIO_MEDIA_SESSION_H_
+#define AUDIO_MEDIA_SESSION_H_
 
 #include <AudioConfig.h>
 #include <MediaQualityThreshold.h>
@@ -162,4 +162,4 @@ protected:
     IMSList<IMS_UINTP> m_listNegoId;
 };
 
-#endif /* End of _IMS_AUDIO_MEDIA_SESSION_H_*/
+#endif

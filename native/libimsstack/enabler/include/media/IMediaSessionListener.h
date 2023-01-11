@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _INTERFACE_MEDIA_SESSION_LISTENER_H_
-#define _INTERFACE_MEDIA_SESSION_LISTENER_H_
+#ifndef INTERFACE_MEDIA_SESSION_LISTENER_H_
+#define INTERFACE_MEDIA_SESSION_LISTENER_H_
 
 #include "MediaDef.h"
 #include "IMMedia.h"
@@ -38,4 +38,5 @@ public:
     virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) = 0;
 };
-#endif /* _INTERFACE_MEDIA_SESSION_LISTENER_H_ */
+
+#endif

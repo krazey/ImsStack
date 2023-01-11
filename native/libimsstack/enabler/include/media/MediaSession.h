@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_SESSION_H_
-#define _MEDIA_SESSION_H_
+#ifndef MEDIA_SESSION_H_
+#define MEDIA_SESSION_H_
 
 #include "IMediaSession.h"
 #include "audio/AudioController.h"
@@ -131,4 +131,5 @@ protected:
     IMS_UINT32 m_nRtpTimer;
     std::mutex m_objMutex;
 };
+
 #endif

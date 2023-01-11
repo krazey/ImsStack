@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_CONFIG_FACTORY_H_
-#define _CODEC_CONFIG_FACTORY_H_
+#ifndef CODEC_CONFIG_FACTORY_H_
+#define CODEC_CONFIG_FACTORY_H_
 
 #include "config/CodecAmrConfig.h"
 #include "config/CodecPcmConfig.h"
@@ -67,5 +67,5 @@ public:
     static CodecConfig* CreateTextPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
             IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
 };
+
 #endif
-// _CODEC_CONFIG_FACTORY_H_

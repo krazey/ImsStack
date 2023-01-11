@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IUMEDIA_H_
-#define _IUMEDIA_H_
+#ifndef INTERFACE_IUMEDIA_H_
+#define INTERFACE_IUMEDIA_H_
 
 #include "IMSTypeDef.h"
 #include "ImsMessageDef.h"
@@ -642,4 +642,4 @@ public :
     IMS_UINT32          nReserved3;              // reserved value
 };
 
-#endif                                              // _IUMEDIA_H_
+#endif
