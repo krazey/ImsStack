@@ -86,7 +86,7 @@ protected:
                 new AosNetTracker(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
         ASSERT_TRUE(m_pAosNetTracker != nullptr);
 
-        SetNConfig();
+        InitObject();
     }
 
     virtual void TearDown() override
@@ -99,7 +99,11 @@ protected:
 
     void Initialize() { m_pAosNetTracker->Init(); }
 
-    void SetNConfig() { m_pAosNetTracker->m_piAosNConfig = &m_objMockIAosNConfiguration; }
+    void InitObject()
+    {
+        m_pAosNetTracker->m_piAosNConfig = &m_objMockIAosNConfiguration;
+        m_pAosNetTracker->InitObject();
+    }
 
     void SetNetworkWatcher(IN INetworkWatcher* piNw)
     {
@@ -353,6 +357,18 @@ TEST_F(AosNetTrackerTest, IsServiceTimerRunning)
 
     StopTimer(AosNetTracker::TIMER_OUT_GUARD);
     EXPECT_FALSE(m_pAosNetTracker->IsServiceTimerRunning());
+}
+
+TEST_F(AosNetTrackerTest, IsImsVoiceCallSupported)
+{
+    EXPECT_CALL(m_objMockINetworkWatcher, IsImsVoiceCallSupported())
+            .Times(2)
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    EXPECT_TRUE(m_pAosNetTracker->IsImsVoiceCallSupported());
+    EXPECT_FALSE(m_pAosNetTracker->IsImsVoiceCallSupported());
 }
 
 TEST_F(AosNetTrackerTest, SetListener)
