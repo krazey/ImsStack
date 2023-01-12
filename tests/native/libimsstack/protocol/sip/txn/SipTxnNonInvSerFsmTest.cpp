@@ -27,6 +27,7 @@
 extern SIP_BOOL MockFsm_FetchTransaction(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID**);
 extern SIP_BOOL MockFsm_StartTimer(SIP_UINT32, SipTimerCallback, SIP_VOID*, SIP_VOID**);
 extern SIP_BOOL MockFsm_ReleaseTransaction(SIP_VOID*, SIP_INT32, SIP_VOID**, SIP_VOID**);
+extern SIP_VOID MockFsm_ResetTimerCount();
 
 namespace android
 {
@@ -66,6 +67,7 @@ CSeq: 1 REGISTER\r\n\
         };
 
         SipStackCallback_SetCallbacks(stTestCallbacks);
+        MockFsm_ResetTimerCount();
     }
 
     virtual void TearDown() override

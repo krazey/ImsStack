@@ -100,16 +100,7 @@ SIP_BOOL Mock_FetchTransaction(
                     return SIP_TRUE;
                 }
                 SipMessage* pTempSipMsg;
-                if (((static_cast<SipTxnKey*>(pvTxnKey)))->GetRespCode() == 480)
-                {
-                    pTempSipMsg = new SipMessage();
-                    *ppvTxn = new SipTxn(SipTxn::INV_SER_TXN, static_cast<SipTxnKey*>(pvTxnKey),
-                            pTempSipMsg, SIP_NULL, &nError);
-                    objTxnList.Add((SipTxn*)*ppvTxn);
-                    pTempSipMsg->SipDelete();
-                    return SIP_TRUE;
-                }
-                else if (bFromRecvTxn == SIP_TRUE)
+                if (bFromRecvTxn == SIP_TRUE)
                 {
                     pTempSipMsg = new SipMessage();
                     *ppvTxn = new SipTxn(SipTxn::INV_CLI_TXN, static_cast<SipTxnKey*>(pvTxnKey),
@@ -134,6 +125,10 @@ SIP_BOOL Mock_FetchTransaction(
                         {
                             if (ppvTxn != SIP_NULL)
                             {
+                                if (((static_cast<SipTxnKey*>(pvTxnKey)))->GetRespCode() == 480)
+                                {
+                                    pTxn->SetTxnState(SipTxn::INV_SER_IDLE_ST);
+                                }
                                 *ppvTxn = pTxn;
                                 return SIP_TRUE;
                             }
@@ -427,9 +422,13 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
     pStatusLine->SetStatusCode("480");
     pStatusLine->SipDelete();
 
+    SipTxnKey* pInvTxnKey = new SipTxnKey(pSipMsg, &nError);
+    EXPECT_EQ(
+            SIP_TRUE, pTxnHandler->OnRecvTxn(pSipMsg, pInvTxnKey, pSipUserData, pTxnInfo, &nError));
     EXPECT_EQ(SIP_FALSE,
             pTxnHandler->OnSendTxn(
                     pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
+    EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pInvTxnKey));
 
     SipCSeqHeader* pCSeq = static_cast<SipCSeqHeader*>(pRespSipMsg->GetHdrObj(SipHeaderBase::CSEQ));
 
@@ -447,6 +446,7 @@ TEST_F(SipTxnHandlerTest, OnSendTxn_ResponseMsg)
     EXPECT_EQ(SIP_TRUE,
             pTxnHandler->OnSendTxn(
                     pRespSipMsg, pSipTranspParam, pSipUserData, &pTxnKey, pTxnInfo, &nError));
+    EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
     delete pTxnInfo;
 }
 
@@ -973,8 +973,9 @@ TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
     EXPECT_EQ(SIP_TRUE,
             pTxnHandler->OnRecvTxn(pRespSipMsg, pTxnKey, pSipUserData, pTxnInfo, &nError));
     EXPECT_EQ(SIP_TRUE, pTxnHandler->UpdateTxnDetails(pTxnKey, pTranspInfo, &nError));
-    delete pTxnKey;
+    EXPECT_EQ(SIP_TRUE, pTxnHandler->TerminateTxn(pTxnKey));
 
+    pTranspInfo = new SipTransportInfo(pSipTranspParam, SIP_NULL);
     pStatusLine = pRespSipMsg->GetStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);
     pStatusLine->SetStatusCode("420");
@@ -984,6 +985,7 @@ TEST_F(SipTxnHandlerTest, UpdateTxnDetails)
     true but txn is not passed. Inorder to test if txn is null Update will be failed */
     pTxnKey = new SipTxnKey(pRespSipMsg, &nError);
     EXPECT_EQ(SIP_FALSE, pTxnHandler->UpdateTxnDetails(pTxnKey, pTranspInfo, &nError));
+
     delete pTxnKey;
     delete pTranspInfo;
     delete pTxnInfo;
