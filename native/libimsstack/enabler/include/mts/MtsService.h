@@ -19,7 +19,6 @@
 
 #include "ICoreServiceListener.h"
 #include "IImsAosListener.h"
-#include "IImsAosMonitor.h"
 #include "IMtsService.h"
 #include "ImsService.h"
 #include "IMtsTrafficListener.h"
@@ -33,7 +32,6 @@ class INetworkWatcher;
 class MtsService final :
         public ICoreServiceListener,
         public IImsAosListener,
-        public IImsAosMonitor,
         public IMtsService,
         public IMtsTrafficListener,
         public ImsService
@@ -65,10 +63,6 @@ public:
     void ImsAos_Disconnected(IN IMS_UINT32 nReason) override;
     void ImsAos_Suspended(IN IMS_UINT32 nReason) override;
     void ImsAos_Resumed() override;
-
-    // IImsAosMonitor
-    void ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan) override;
-    void ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
 
     // IMtsService
     ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;

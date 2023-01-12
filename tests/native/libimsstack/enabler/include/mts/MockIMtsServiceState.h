@@ -30,13 +30,11 @@ public:
     // MtsService
     MOCK_METHOD(void, Init, (IN IImsAos* piImsAos), (override));
     MOCK_METHOD(IMS_SINT32, GetServiceState, (), (const, override));
-    MOCK_METHOD(IMS_BOOL, IsServiceConnected, (IN IMS_UINT32 nService), (override));
     MOCK_METHOD(void, OnImsConnected, (), (override));
     MOCK_METHOD(void, OnImsDisconnected, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, OnImsDisconnecting, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, OnImsSuspended, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, OnImsResumed, (), (override));
-    MOCK_METHOD(void, SetConnectedServices, (IN IMS_UINT32 nServices), (override));
     MOCK_METHOD(void, SetImsRegConnected, (IN IMS_BOOL bConnected), (override));
 
     // MtsMessageController
