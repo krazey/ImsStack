@@ -23,6 +23,7 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IAlarmTimer;
 import com.android.imsstack.core.agents.IWifiState;
 import com.android.imsstack.core.agents.Sim;
@@ -62,6 +63,8 @@ public class SscServiceState {
     @VisibleForTesting
     final SscSimStateListener mSimStateListener;
     @VisibleForTesting
+    final SscCarrierConfigListener mCarrierConfigListener;
+    @VisibleForTesting
     final SscRegiStateListener mRegiStateListener;
     @VisibleForTesting
     final SscMobileDataStateListener mMobileDataStateListener;
@@ -76,6 +79,7 @@ public class SscServiceState {
         mSlotId = slotId;
         mHandler = new SscServiceStateHandler(looper);
         mSimStateListener = new SscSimStateListener();
+        mCarrierConfigListener = new SscCarrierConfigListener();
         mRegiStateListener = new SscRegiStateListener();
         mMobileDataStateListener = new SscMobileDataStateListener();
     }
@@ -99,6 +103,11 @@ public class SscServiceState {
         if (sim != null) {
             mSubId = sim.getSubId();
             sim.addListener(mSimStateListener);
+        }
+
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            config.addListener(mCarrierConfigListener);
         }
 
         IAosRegistration aosService = getAosRegistration();
@@ -131,6 +140,11 @@ public class SscServiceState {
         SimInterface sim = getSimInterface();
         if (sim != null) {
             sim.removeListener(mSimStateListener);
+        }
+
+        ConfigInterface config = getConfigInterface();
+        if (config != null) {
+            config.removeListener(mCarrierConfigListener);
         }
 
         IAosRegistration aosService = getAosRegistration();
@@ -420,6 +434,10 @@ public class SscServiceState {
         return AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
     }
 
+    private ConfigInterface getConfigInterface() {
+        return AgentFactory.getInstance().getAgent(ConfigInterface.class, mSlotId);
+    }
+
     private IAosRegistration getAosRegistration() {
         return AosFactory.getInstance().getAosRegistration(mSlotId);
     }
@@ -560,6 +578,15 @@ public class SscServiceState {
                     updateSubscription(sim.getSubId());
                 }
             }
+        }
+    }
+
+    private final class SscCarrierConfigListener implements ConfigInterface.Listener {
+
+        @Override
+        public void onCarrierConfigChanged(int slotId, int subId) {
+            ImsLog.d(mSlotId, "slotId : " + slotId + ", subId : " + subId);
+            handleUtFeatureCapabilityChanged();
         }
     }
 
