@@ -941,11 +941,15 @@ public class ApnTest {
         mApn.registerHandler(Apn.EVENT_NETWORK_AVAILABLE, mMockMsgProc);
         mApn.registerHandler(Apn.EVENT_NETWORK_CAPABILITIES_CHANGED, mMockMsgProc);
         NetworkCapabilities networkCapabilities = new NetworkCapabilities();
+        LinkProperties linkProperties = new LinkProperties();
+        when(mConnectivityManager.getLinkProperties(any(Network.class)))
+                .thenReturn(linkProperties);
         Apn.ImsNetworkCallback callback = new Apn.ImsNetworkCallback(AppContext.getInstance(),
                 mApn.mType.getType(), Apn.ImsNetworkCallback.EVENT_LOST, mApn);
 
         // check whether send EVENT_NETWORK_AVAILABLE and EVENT_NETWORK_CAPABILITIES_CHANGED
         callback.mIsPendingOnAvailable = true;
+        callback.cacheLinkProperties(mMockNetwork);
         callback.setEvents(Apn.ImsNetworkCallback.EVENT_ALL);
         callback.onCapabilitiesChanged(mMockNetwork, networkCapabilities);
         mTestableLooper.processAllMessages();
