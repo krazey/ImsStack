@@ -84,6 +84,7 @@ public class LogTest {
     @Test
     @SmallTest
     public void pii() throws Exception {
+        Log.setDebuggable();
         String refinedLogMessage;
 
         refinedLogMessage = Log.pii(null);
