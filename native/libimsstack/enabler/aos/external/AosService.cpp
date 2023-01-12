@@ -25,7 +25,7 @@
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define AOSTAG m_strTag.GetStr()
-#define TO_BOOLEAN(n) (n > 0)
+#define TO_BOOLEAN(n) ((n) > 0)
 
 PUBLIC
 AosService::AosService(IN IMS_SINT32 nSlotId) :

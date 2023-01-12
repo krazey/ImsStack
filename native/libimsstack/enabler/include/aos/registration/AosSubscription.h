@@ -109,7 +109,7 @@ protected:
     virtual void ProcessTimerExpired();
     virtual void SetRefreshPolicy();
 
-    virtual IRegInfoContact* GetRegInfoContact(IN const IMSList<IRegInfoContact*> objContact);
+    virtual IRegInfoContact* GetRegInfoContact(IN const IMSList<IRegInfoContact*>& objContact);
     virtual IMS_BOOL CompareUriAssociatedWithContact(IN const SipAddress& objUri);
 
     virtual IMS_SINT32 ConvertRegInfoEvent(IN IMS_SINT32 nEvent);

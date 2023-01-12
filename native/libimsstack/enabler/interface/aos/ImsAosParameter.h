@@ -134,7 +134,7 @@ public:
 class ImsAosFeatureTag
 {
 public:
-    ImsAosFeatureTag(IN AString strName, IN AString strValue) :
+    ImsAosFeatureTag(IN const AString& strName, IN const AString& strValue) :
             m_strName(strName),
             m_strValue(strValue)
     {

@@ -786,13 +786,13 @@ void AosNetTracker::ProcessVoiceNetworkChanged()
 PRIVATE
 IMS_BOOL AosNetTracker::IsRadioTechAvailable(IN IMS_UINT32 nPolicy, IN IMS_UINT32 nRadioTech)
 {
-    return ((nPolicy & 0xffff0000) & (nRadioTech & 0xffff0000));
+    return (nPolicy & nRadioTech & 0xffff0000);
 }
 
 PRIVATE
 IMS_BOOL AosNetTracker::IsServiceAvailable(IN IMS_UINT32 nPolicy, IN IMS_UINT32 nService)
 {
-    return ((nPolicy & 0x000000ff) & (nService & 0x000000ff));
+    return (nPolicy & nService & 0x000000ff);
 }
 
 PRIVATE

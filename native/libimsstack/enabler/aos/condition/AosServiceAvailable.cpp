@@ -29,7 +29,7 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define AOSTAG m_strTag.GetStr()
 
 PROTECTED
-AosServiceAvailable::AosServiceAvailable(AString strName) :
+AosServiceAvailable::AosServiceAvailable(const AString& strName) :
         m_piAppContext(IMS_NULL),
         m_nSlotId(IMS_SLOT_0),
         m_piBlock(IMS_NULL),

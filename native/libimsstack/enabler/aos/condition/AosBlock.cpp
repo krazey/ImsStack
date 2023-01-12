@@ -255,12 +255,11 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::IsReasonBlocked(IN BLOCK_REASON eReason,
         {
             return IMS_FALSE;
         }
-        else if (eServiceType == SERVICE_WIFI &&
-                m_objBlockWifi.GetSize() + m_objBlock.GetSize() != 1)
+        if (eServiceType == SERVICE_WIFI && m_objBlockWifi.GetSize() + m_objBlock.GetSize() != 1)
         {
             return IMS_FALSE;
         }
-        else if (eServiceType == SERVICE_WHOLE &&
+        if (eServiceType == SERVICE_WHOLE &&
                 m_objBlockCellular.GetSize() + m_objBlockWifi.GetSize() + m_objBlock.GetSize() != 1)
         {
             return IMS_FALSE;

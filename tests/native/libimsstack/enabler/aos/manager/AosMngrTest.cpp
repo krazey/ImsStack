@@ -18,11 +18,6 @@
 
 #include "manager/AosMngr.h"
 
-using ::testing::_;
-using ::testing::AnyNumber;
-using ::testing::Return;
-using ::testing::ReturnRef;
-
 class AosMngrTest : public ::testing::Test
 {
 public:

@@ -666,6 +666,25 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
     EXPECT_CALL(objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
             .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
 
+    // IsInitialRegistrationRequiredInWifi() - 1st: true, others: false
+    MockIAosConnection objMockIAosConnection;
+    EXPECT_CALL(*pMockAosAppContext, GetConnection())
+            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
+
+    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
+            .WillOnce(Return(IMS_TRUE))
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    IMSVector<IMS_SINT32> objErrRegRequiredInWifi;
+    objErrRegRequiredInWifi.Clear();
+    objErrRegRequiredInWifi.Add(403);
+    EXPECT_CALL(objMockAosConfig, GetVowifiSubErrorRegRequired())
+            .WillOnce(ReturnRef(objErrRegRequiredInWifi));
+
+    EXPECT_CALL(objMockIAosSubscriptionListener, Subscription_Request(_, _)).Times(AnyNumber());
+
+    EXPECT_TRUE(pAosSubscription->ProcessFailed_StatusCode(403, IMS_FALSE));
+
     // nStatusCode == SipStatusCode::SC_423 refresh: IMS_FALSE;
     MockISipMessage objMockSipMsg;
 
@@ -697,23 +716,6 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
 
     // nStatusCode == SipStatusCode::SC_423 nMinTime : 0;
     EXPECT_FALSE(pAosSubscription->ProcessFailed_StatusCode(423, IMS_FALSE));
-
-    // IsInitialRegistrationRequiredInWifi() - 1st: true, others: false
-    MockIAosConnection objMockIAosConnection;
-    EXPECT_CALL(*pMockAosAppContext, GetConnection())
-            .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
-
-    EXPECT_CALL(objMockIAosConnection, IsEpdgEnabled())
-            .WillOnce(Return(IMS_TRUE))
-            .WillRepeatedly(Return(IMS_FALSE));
-
-    IMSVector<IMS_SINT32> objErrRegRequiredInWifi;
-    objErrRegRequiredInWifi.Clear();
-    objErrRegRequiredInWifi.Add(403);
-    EXPECT_CALL(objMockAosConfig, GetVowifiSubErrorRegRequired())
-            .WillOnce(ReturnRef(objErrRegRequiredInWifi));
-
-    EXPECT_TRUE(pAosSubscription->ProcessFailed_StatusCode(403, IMS_FALSE));
 
     // nStatusCode == SipStatusCode::SC_504;
     IMSList<ISipMessageBodyPart*> objBodyParts;
@@ -1412,7 +1414,6 @@ TEST_F(AosSubscriptionTest, Print)
         nReason++;
     }
     pAosSubscription->RegSubReasonToString(nReason);
-    nReason = IRegSubscription::REASON_NONE;
 
     int nNotifyState = IRegInfoContact::STATE_CREATED;
     while (nNotifyState <= IRegInfoContact::STATE_TERMINATED)
@@ -1421,7 +1422,6 @@ TEST_F(AosSubscriptionTest, Print)
         nNotifyState++;
     }
     pAosSubscription->RegInfoStateToString(nNotifyState);
-    nNotifyState = IRegInfoContact::STATE_CREATED;
 
     int nEvent = IRegInfoContact::EVENT_REGISTERED;
     while (nEvent <= IRegInfoContact::EVENT_REJECTED)
@@ -1430,7 +1430,6 @@ TEST_F(AosSubscriptionTest, Print)
         nEvent++;
     }
     pAosSubscription->RegInfoEventToString(nEvent);
-    nEvent = IRegInfoContact::EVENT_REGISTERED;
 
     SetState(AosSubscription::STATE_OFFLINE);
     EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);

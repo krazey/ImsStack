@@ -694,21 +694,16 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
 {
     m_bIsErrChecked = IMS_FALSE;
 
-    if (IsRetryActionDueToRetrycounter(bIsRefreshed) == IMS_TRUE)
-    {
-        return IMS_TRUE;
-    }
-    else if ((!m_bIsErrChecked) && (IsSubscriptionTerminated(nStatusCode) == IMS_TRUE))
-    {
-        return IMS_TRUE;
-    }
-    else if ((!m_bIsErrChecked) &&
-            (IsInitialRegistrationRequired(nStatusCode, bIsRefreshed) == IMS_TRUE))
-    {
-        return IMS_TRUE;
-    }
-    else if ((!m_bIsErrChecked) &&
-            (IsInitialRegistrationWithNextPcscfRequired(nStatusCode, bIsRefreshed) == IMS_TRUE))
+    if ((IsRetryActionDueToRetrycounter(bIsRefreshed) == IMS_TRUE) ||
+            ((!m_bIsErrChecked) && (IsSubscriptionTerminated(nStatusCode) == IMS_TRUE)) ||
+            ((!m_bIsErrChecked) &&
+                    (IsInitialRegistrationRequired(nStatusCode, bIsRefreshed) == IMS_TRUE)) ||
+            ((!m_bIsErrChecked) &&
+                    (IsInitialRegistrationWithNextPcscfRequired(nStatusCode, bIsRefreshed) ==
+                            IMS_TRUE)) ||
+            ((!m_bIsErrChecked) &&
+                    (IsInitialRegistrationRequiredInWifi(nStatusCode, bIsRefreshed) == IMS_TRUE)))
+
     {
         return IMS_TRUE;
     }
@@ -718,11 +713,6 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::ProcessFailed_StatusCode(
         {
             return IMS_TRUE;
         }
-    }
-    else if ((!m_bIsErrChecked) &&
-            (IsInitialRegistrationRequiredInWifi(nStatusCode, bIsRefreshed) == IMS_TRUE))
-    {
-        return IMS_TRUE;
     }
     else if ((!m_bIsErrChecked) && (nStatusCode == SipStatusCode::SC_504))
     {
@@ -970,7 +960,7 @@ PROTECTED VIRTUAL void AosSubscription::SetRefreshPolicy()
 }
 
 PROTECTED VIRTUAL IRegInfoContact* AosSubscription::GetRegInfoContact(
-        IN const IMSList<IRegInfoContact*> objContact)
+        IN const IMSList<IRegInfoContact*>& objContact)
 {
     IRegInfoContact* piRegInfoContact = IMS_NULL;
 

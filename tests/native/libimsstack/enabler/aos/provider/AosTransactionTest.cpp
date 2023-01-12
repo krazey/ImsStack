@@ -27,8 +27,6 @@
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
-using ::testing::ReturnNull;
-using ::testing::ReturnRef;
 
 const IMS_SINT32 SLOT_ID = 0;
 

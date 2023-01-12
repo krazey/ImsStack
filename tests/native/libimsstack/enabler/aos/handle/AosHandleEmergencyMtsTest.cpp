@@ -25,7 +25,6 @@
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosNConfiguration.h"
 
-using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
