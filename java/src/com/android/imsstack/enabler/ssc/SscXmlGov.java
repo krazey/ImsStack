@@ -203,7 +203,7 @@ public class SscXmlGov {
             InputSource is = new InputSource(new StringReader(xml));
             doc = builder.parse(is);
         } catch (Exception e) {
-            ImsLog.e(e.toString());
+            ImsLog.e(mSlotId, e.toString(), e);
             return null;
         }
 
@@ -218,7 +218,7 @@ public class SscXmlGov {
             doc = docBuilder.newDocument();
             doc.setXmlStandalone(true);
         } catch (Exception e) {
-            ImsLog.e(e.toString());
+            ImsLog.e(mSlotId, e.toString(), e);
             return null;
         }
 

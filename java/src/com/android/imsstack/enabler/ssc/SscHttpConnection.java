@@ -184,7 +184,7 @@ public class SscHttpConnection implements ISscHttpConnection {
             ImsLog.e(mSlotId, e.toString());
             return HTTP_REQUEST_FAILED_BY_DNS;
         } catch (Exception e) {
-            ImsLog.e(mSlotId, e.toString());
+            ImsLog.e(mSlotId, e.toString(), e);
             return HTTP_REQUEST_FAILED_UNSPECIFIED;
         } finally {
             if (mConnection != null) {
@@ -318,7 +318,7 @@ public class SscHttpConnection implements ISscHttpConnection {
             DocumentBuilder builder = factory.newDocumentBuilder();
             document = builder.parse(in);
         } catch (Exception e) {
-            ImsLog.e(mSlotId, e.toString());
+            ImsLog.e(mSlotId, e.toString(), e);
             return null;
         } finally {
             try {
