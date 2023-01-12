@@ -98,11 +98,6 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        if (!SscConfig.isUtSupported(mSlotId)) {
-            ImsLog.w("XCAP/Ut is disabled");
-            return;
-        }
-
         initConnections();
         SscXmlGov.getInstance(mSlotId).init();
 

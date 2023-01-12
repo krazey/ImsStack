@@ -145,8 +145,6 @@ public class SscServiceImplTest {
         // mMockConfigAgent should be set before starting SscServiceImpl
         SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
         when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        when(mMockCarrierConfig.getBoolean(
-                CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(true);
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
                 .thenReturn(mServerBasedServices);

@@ -38,6 +38,7 @@ import com.android.imsstack.ContextFixture;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.AlarmTimerAgent;
 import com.android.imsstack.core.agents.ConfigAgent;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IWifiState;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
@@ -84,6 +85,7 @@ public class SscServiceStateTest {
     @Mock private IUtInterface mMockUtInterface;
     @Mock private IWifiState mMockWifiState;
     @Mock private SimInterface mMockSimInterface;
+    @Mock private ConfigInterface mMockConfigInterface;
 
     @Before
     public void setup() throws Exception {
@@ -129,6 +131,7 @@ public class SscServiceStateTest {
         AgentFactory.setDefaultAgent(AgentFactory.ALARM_TIMER, mMockAlarmTimer);
         AgentFactory.setDefaultAgent(AgentFactory.WIFI_STATE, mMockWifiState);
         AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, SLOT_0);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_0);
         AosFactory.getInstance().mAosServices.put(SLOT_0, mMockAosService);
 
         HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
@@ -159,6 +162,7 @@ public class SscServiceStateTest {
         AgentFactory.setDefaultAgent(AgentFactory.WIFI_STATE, null);
         AgentFactory.setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
         AgentFactory.getInstance().setAgent(SimInterface.class, null, SLOT_0);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_0);
         AosFactory.getInstance().mAosServices.remove(SLOT_0);
         DcFactory.setObjects(SLOT_0, null);
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT_0, null);
@@ -178,6 +182,7 @@ public class SscServiceStateTest {
         verify(mMockDcNetWatcher).registerForRoamingStateChanged(mSscServiceState.mHandler,
                 SscServiceState.EVENT_DATA_ROAMING_STATE_CHANGED, null);
         verify(mMockSimInterface).addListener(mSscServiceState.mSimStateListener);
+        verify(mMockConfigInterface).addListener(mSscServiceState.mCarrierConfigListener);
         verify(mMockAosService).addListener(mSscServiceState.mRegiStateListener);
         verify(mMockTelephonyManager).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
@@ -199,6 +204,7 @@ public class SscServiceStateTest {
         verify(mMockDcNetWatcher).unregisterForRatChanged(mSscServiceState.mHandler);
         verify(mMockDcNetWatcher).unregisterForRoamingStateChanged(mSscServiceState.mHandler);
         verify(mMockSimInterface).removeListener(mSscServiceState.mSimStateListener);
+        verify(mMockConfigInterface).removeListener(mSscServiceState.mCarrierConfigListener);
         verify(mMockAosService).removeListener(mSscServiceState.mRegiStateListener);
         verify(mMockTelephonyManager)
                 .unregisterTelephonyCallback(mSscServiceState.mMobileDataStateListener);
@@ -571,6 +577,20 @@ public class SscServiceStateTest {
                 mSscServiceState.mMobileDataStateListener);
         verify(tmForSubId1).registerTelephonyCallback(AppContext.getInstance().getMainExecutor(),
                 mSscServiceState.mMobileDataStateListener);
+    }
+
+    @Test
+    public void testSscCarrierConfigListener_onCarrierConfigChanged() {
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL)).thenReturn(false);
+        assertEquals(true, mSscServiceState.isUtAvailable());
+
+        ((ConfigInterface.Listener) mSscServiceState.mCarrierConfigListener)
+                .onCarrierConfigChanged(SLOT_0, SUB_ID_0);
+        processDelayedMessage();
+
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        assertEquals(false, mSscServiceState.isUtAvailable());
     }
 
     @Test
