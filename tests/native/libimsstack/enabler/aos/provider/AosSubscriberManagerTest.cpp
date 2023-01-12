@@ -167,6 +167,8 @@ public:
         m_objImsIdentityPriority = objImsIdentityPriority;
     }
 
+    void SetIsimIndex(IN IMS_UINT32 nIsimIndex) { m_nIsimIndexForImpu = nIsimIndex; }
+
     void SetIAosNConfiguration(IN IAosNConfiguration* piNConfig) { m_piNConfig = piNConfig; }
 };
 
@@ -403,7 +405,9 @@ TEST_F(AosSubscriberManagerTest, IsTimerRunning)
 
 TEST_F(AosSubscriberManagerTest, GetIsimAt_ConfigurationNull)
 {
-    EXPECT_EQ(m_pTestAosSubscriberManager->GetIsimAt(), 1);
+    IMS_UINT32 isimIndex = 1;
+    m_pTestAosSubscriberManager->SetIsimIndex(isimIndex);
+    EXPECT_EQ(m_pTestAosSubscriberManager->GetIsimAt(), isimIndex);
 }
 
 TEST_F(AosSubscriberManagerTest, ClearIsimRecovery)
