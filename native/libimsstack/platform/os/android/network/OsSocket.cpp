@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 #include <errno.h>
-#include <fcntl.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
@@ -24,7 +23,6 @@
 #include <linux/udp.h>
 #include <net/if.h>
 #include <netinet/tcp.h>
-#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
@@ -266,16 +264,16 @@ PUBLIC GLOBAL void OsSocket::CleanUp()
 PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
         IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType)
 {
-    IMS_SINT32 nSockType = SOCK_DGRAM;
+    IMS_SINT32 nSockType;
     IMS_SINT32 nAf = PF_INET;
 
     switch (enType)
     {
         case TYPE_STREAM:
-            nSockType = SOCK_STREAM;
+            nSockType = SOCK_STREAM | SOCK_CLOEXEC;
             break;
         case TYPE_DGRAM:
-            nSockType = SOCK_DGRAM;
+            nSockType = SOCK_DGRAM | SOCK_CLOEXEC;
             break;
         default:
             return IMS_FALSE;
@@ -380,7 +378,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Open(
     };
 
     IMS_SINT32 nAf;
-    IMS_SINT32 nSockType;
+    IMS_SINT32 nSockType = SOCK_CLOEXEC | SOCK_NONBLOCK;
     IMS_SINT32 nSelectEvent = (FD_READ | FD_CLOSE);
 
     if (m_hSocket != INVALID_SOCKET)
@@ -405,10 +403,10 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Open(
     switch (eType)
     {
         case TYPE_STREAM:
-            nSockType = SOCK_STREAM;
+            nSockType |= SOCK_STREAM;
             break;
         case TYPE_DGRAM:
-            nSockType = SOCK_DGRAM;
+            nSockType |= SOCK_DGRAM;
             break;
         default:
             return RESULT_ERROR;
@@ -435,16 +433,6 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Open(
 
     if (m_hSocket != INVALID_SOCKET)
     {
-        // set asynchronous socket
-        IMS_UINT32 flags = fcntl(m_hSocket, F_GETFL, 0);
-        flags |= O_NONBLOCK;
-
-        if (fcntl(m_hSocket, F_SETFL, flags) < 0)
-        {
-            IMS_TRACE_E(0, "Setting O_NONBLOCK option failed", 0, 0, 0);
-            return RESULT_ERROR;
-        }
-
         OsSocketService::GetInstance()->AttachHandle(m_hSocket, this);
 
         if (SelectEvent(nSelectEvent))
@@ -554,7 +542,7 @@ PROTECTED VIRTUAL ISocket* OsSocket::Accept()
         return IMS_NULL;
     }
 
-    SOCKET hAcceptSocket = accept(m_hSocket, IMS_NULL, IMS_NULL);
+    SOCKET hAcceptSocket = accept4(m_hSocket, IMS_NULL, IMS_NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);
 
     SelectEventEx(FD_ACCEPT);
 
@@ -591,22 +579,6 @@ PROTECTED VIRTUAL ISocket* OsSocket::Accept()
 
         // Inherits the same property from TCP server socket
         pSocketService->AttachHandle(hAcceptSocket, pNewSocket);
-
-        // set asynchronous socket
-        IMS_UINT32 flags = fcntl(pNewSocket->m_hSocket, F_GETFL, 0);
-        flags |= O_NONBLOCK;
-
-        if (fcntl(pNewSocket->m_hSocket, F_SETFL, flags) < 0)
-        {
-            IMSSOCKET_DEBUG(errno);
-
-            IMS_TRACE_E(0, "Setting O_NONBLOCK option failed", 0, 0, 0);
-
-            pNewSocket->Close();
-
-            delete pNewSocket;
-            return IMS_NULL;
-        }
 
         // Accepted socket has the same event as the listening socket has.
         // if (!pNewSocket->SelectEvent(m_nSocketEvent & (~FD_ACCEPT)))

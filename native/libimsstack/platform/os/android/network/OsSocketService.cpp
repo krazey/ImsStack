@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 #include <errno.h>
-#include <fcntl.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <net/if.h>
-#include <netinet/in.h>
-#include <sys/ioctl.h>
 
 #include "ImsFdSet.h"
 #include "ImsSocketState.h"
@@ -268,7 +262,7 @@ void SocketFdManager::CreateControlPipe()
 
     m_objLockCtrlEvent.Lock();
 
-    if (pipe(m_nCtrlPipe) < 0)
+    if (pipe2(m_nCtrlPipe, O_CLOEXEC | O_NONBLOCK) < 0)
     {
         IMS_TRACE_E(0, "[SocketCtrlEvent] Creating a control pipe failed (%d)", errno, 0, 0);
 
@@ -283,23 +277,7 @@ void SocketFdManager::CreateControlPipe()
     // PIPE - read end
     if (m_nCtrlPipe[0] != (-1))
     {
-        IMS_UINT32 nFlags = fcntl(m_nCtrlPipe[0], F_GETFL, 0);
-
-        nFlags |= O_NONBLOCK;
-
-        fcntl(m_nCtrlPipe[0], F_SETFL, nFlags);
-
         nReadFd = m_nCtrlPipe[0];
-    }
-
-    // PIPE - write end
-    if (m_nCtrlPipe[1] != (-1))
-    {
-        IMS_UINT32 nFlags = fcntl(m_nCtrlPipe[1], F_GETFL, 0);
-
-        nFlags |= O_NONBLOCK;
-
-        fcntl(m_nCtrlPipe[1], F_SETFL, nFlags);
     }
 
     m_objLockCtrlEvent.Unlock();

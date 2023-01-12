@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 #include <errno.h>
-#include <fcntl.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <net/if.h>
-#include <netinet/in.h>
 #ifdef __cplusplus
 extern "C"
 {
@@ -32,9 +27,6 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
