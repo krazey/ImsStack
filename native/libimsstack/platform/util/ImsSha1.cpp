@@ -17,7 +17,7 @@
 
 // Fxx are a basic SHA1 functions
 // 0 <= t <= 19
-#define F00(b, c, d)      (((b) & (c)) | ((~b) & (d)))
+#define F00(b, c, d)      (((b) & (c)) | ((~(b)) & (d)))
 #define K00               (0x5a827999)
 // 20 <= t <= 39
 #define F20(b, c, d)      ((b) ^ (c) ^ (d))

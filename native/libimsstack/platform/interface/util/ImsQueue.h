@@ -35,7 +35,10 @@ public:
 public:
     inline ImsQueue<T>& operator=(IN const ImsQueue<T>& other)
     {
-        ImsVector<T>::operator=(other);
+        if (this != &other)
+        {
+            ImsVector<T>::operator=(other);
+        }
         return (*this);
     }
 

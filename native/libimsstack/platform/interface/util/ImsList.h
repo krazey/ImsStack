@@ -37,7 +37,10 @@ public:
 public:
     inline ImsList<T>& operator=(IN const ImsList<T>& other)
     {
-        ImsVector<T>::operator=(other);
+        if (this != &other)
+        {
+            ImsVector<T>::operator=(other);
+        }
         return (*this);
     }
 

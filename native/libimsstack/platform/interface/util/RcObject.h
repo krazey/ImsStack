@@ -97,17 +97,20 @@ PUBLIC
 template <class T>
 inline RcPtr<T>& RcPtr<T>::operator=(IN const RcPtr<T>& other)
 {
-    if (m_pPointee != other.m_pPointee)
+    if (this != &other)
     {
-        T* pOldPointee = m_pPointee;
-
-        m_pPointee = other.m_pPointee;
-
-        Init();
-
-        if (pOldPointee)
+        if (m_pPointee != other.m_pPointee)
         {
-            pOldPointee->RemoveReference();
+            T* pOldPointee = m_pPointee;
+
+            m_pPointee = other.m_pPointee;
+
+            Init();
+
+            if (pOldPointee)
+            {
+                pOldPointee->RemoveReference();
+            }
         }
     }
 

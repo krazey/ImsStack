@@ -17,8 +17,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-using ::testing::Return;
-
 class ImsFeatureTest : public ::testing::Test {
 
 protected:

@@ -916,8 +916,8 @@ PUBLIC
 AString& AString::operator=(IN const IMS_CHAR c)
 {
     const IMS_CHAR acValue[2] = {c, '\0'};
-
-    return operator=(acValue);
+    operator=(acValue);
+    return (*this);
 }
 
 PUBLIC
