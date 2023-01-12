@@ -1034,6 +1034,7 @@ public:
         // Mts
         static const IMS_CHAR KEY_SMS_REQUEST_URI_TYPE_INT[];
         static const IMS_CHAR KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[];
+        static const IMS_CHAR KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[];
         static const IMS_CHAR KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[];
         static const IMS_CHAR KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT[];
         static const IMS_CHAR KEY_SMS_POLICY_FOR_403_RESPONSE_INT[];

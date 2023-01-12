@@ -27,100 +27,69 @@ __IMS_TRACE_TAG_COM_MTS__;
 
 PUBLIC
 MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
+        m_piImsAos(IMS_NULL),
         m_nMtsServiceState(STATE_INIT),
         m_bImsConnected(IMS_FALSE),
         m_bAosRegModAdmin(IMS_FALSE),
         m_bImsSuspend(IMS_FALSE),
         m_bSmsOverIpConf(IMS_FALSE),
+        m_bAllowImsiBasedSipUri(IMS_FALSE),
         m_nConnectedServices(ImsAosService::NONE),
         m_nSlotId(nSlotId)
 {
     IMS_TRACE_I("+MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
-
-    Init();
 }
 
 PUBLIC
 MtsServiceState::~MtsServiceState()
 {
     IMS_TRACE_I("~MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
-
-    DeInit();
 }
 
 PUBLIC
-void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
+void MtsServiceState::Init(IN IImsAos* piImsAos)
 {
-    IMS_TRACE_I("SetImsRegConnected : m_bImsConnected[%s]/bConnected[%s]",
-            _TRACE_B_(m_bImsConnected), _TRACE_B_(bConnected), 0);
+    IMS_TRACE_I("Init", 0, 0, 0);
 
-    if (m_bImsConnected == bConnected)
-    {
-        return;
-    }
+    m_piImsAos = piImsAos;
+    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+    IMS_BOOL bSmsOverIpNetwork =
+            piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
+    m_bAllowImsiBasedSipUri =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL);
 
-    m_bImsConnected = bConnected;
+    SetSmsOverIpState(bSmsOverIpNetwork);
+
+    IMS_TRACE_I("GetSmOverIpConfigInfo : SmsOverIpNetwork[%s], AllowImsiBasedSipUri[%s]",
+            _TRACE_B_(bSmsOverIpNetwork), _TRACE_B_(m_bAllowImsiBasedSipUri), 0);
+}
+
+PUBLIC
+IMS_SINT32 MtsServiceState::GetServiceState() const
+{
+    IMS_SINT32 nState = STATE_NOTREADY;
 
     if (m_bImsConnected)
     {
-        IImsAos* piImsAos =
-                ImsAos::GetImsAos(AString("ims.app.mts"), AString("ims.service.mts"), m_nSlotId);
-
-        if (piImsAos == IMS_NULL)
+        if (m_bImsSuspend || (!m_bSmsOverIpConf) || m_bAosRegModAdmin)
         {
-            IMS_TRACE_E(0, "Fail to get AoSApp", 0, 0, 0);
-            return;
-        }
-
-        IMS_UINT32 nType = piImsAos->GetAosInfo()->GetRegistrationMode();
-
-        if (IImsAosInfo::REG_MODE_ADMIN == nType)
-        {
-            m_bAosRegModAdmin = IMS_TRUE;
+            nState = STATE_LIMITED;
         }
         else
         {
-            m_bAosRegModAdmin = IMS_FALSE;
-
-            if (IImsAosInfo::REG_MODE_UNKNOWN == nType)
-            {
-                IMS_TRACE_I("IMS Reg Mod is UNKNOWN!!", 0, 0, 0);
-            }
+            nState = STATE_READY;
         }
     }
 
-    IMS_TRACE_I("SetImsRegConnected : IMS Reg State [%s], IMS Admin Reg [%s]",
-            _TRACE_B_(m_bImsConnected), _TRACE_B_(m_bAosRegModAdmin), 0);
+    IMS_TRACE_I("GetServiceState : nState(%d)", nState, 0, 0);
 
-    UpdateServiceState();
-}
-
-PUBLIC
-void MtsServiceState::SetSmsOverIpState(IN IMS_BOOL bState)
-{
-    if (m_bSmsOverIpConf == bState)
-    {
-        return;
-    }
-
-    m_bSmsOverIpConf = bState;
-
-    IMS_TRACE_I("SetSmsOverIpState : Sms Over IP Network State is [%s]",
-            _TRACE_B_(m_bSmsOverIpConf), 0, 0);
-
-    UpdateServiceState();
+    return nState;
 }
 
 PUBLIC
 IMS_BOOL MtsServiceState::IsServiceConnected(IN IMS_UINT32 nService)
 {
     return (m_nConnectedServices & nService) != 0;
-}
-
-PUBLIC
-void MtsServiceState::SetConnectedServices(IN IMS_UINT32 nServices)
-{
-    m_nConnectedServices = nServices;
 }
 
 PUBLIC
@@ -162,88 +131,61 @@ void MtsServiceState::OnImsResumed()
 }
 
 PUBLIC
-IMS_SINT32 MtsServiceState::GetServiceState()
+void MtsServiceState::SetConnectedServices(IN IMS_UINT32 nServices)
 {
-    IMS_SINT32 nState = STATE_NOTREADY;
-
-    if (m_bImsConnected)
-    {
-        if (m_bImsSuspend || (!m_bSmsOverIpConf) || m_bAosRegModAdmin)
-        {
-            nState = STATE_LIMITED;
-        }
-        else
-        {
-            nState = STATE_READY;
-        }
-    }
-
-    IMS_TRACE_I("GetServiceState : nState(%d)", nState, 0, 0);
-
-    return nState;
+    m_nConnectedServices = nServices;
 }
 
 PUBLIC
-void MtsServiceState::UpdateServiceState()
+void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
 {
-    IMS_SINT32 nTempState = GetServiceState();
+    IMS_TRACE_I("SetImsRegConnected : m_bImsConnected[%s]/bConnected[%s]",
+            _TRACE_B_(m_bImsConnected), _TRACE_B_(bConnected), 0);
 
-    IMS_TRACE_I("UpdateServiceState : nTempState(%d) m_nMtsServiceState(%d)", nTempState,
-            m_nMtsServiceState, 0);
-
-    if (nTempState != m_nMtsServiceState)
+    if (m_bImsConnected == bConnected)
     {
-        m_nMtsServiceState = nTempState;
+        return;
     }
+
+    m_bImsConnected = bConnected;
+
+    if (m_bImsConnected)
+    {
+        IMS_UINT32 nMode = m_piImsAos->GetAosInfo()->GetRegistrationMode();
+
+        if (IImsAosInfo::REG_MODE_ADMIN == nMode)
+        {
+            m_bAosRegModAdmin = IMS_TRUE;
+        }
+        else
+        {
+            m_bAosRegModAdmin = IMS_FALSE;
+        }
+    }
+
+    IMS_TRACE_I("SetImsRegConnected : IMS Reg State [%s], IMS Admin Reg [%s]",
+            _TRACE_B_(m_bImsConnected), _TRACE_B_(m_bAosRegModAdmin), 0);
+
+    UpdateServiceState();
 }
 
 PUBLIC
 IMS_BOOL MtsServiceState::IsMoServiceBlocked() const
 {
-    return (m_nMtsServiceState != STATE_READY);
+    if (m_bAllowImsiBasedSipUri)
+    {
+        return (m_bImsConnected == IMS_FALSE);
+    }
+    else
+    {
+        return (m_nMtsServiceState != STATE_READY);
+    }
 }
 
 PUBLIC
 IMS_BOOL MtsServiceState::IsMtServiceBlocked() const
 {
     return (m_nMtsServiceState == STATE_NOTREADY);
-}
-
-PRIVATE
-void MtsServiceState::Init()
-{
-    IMS_TRACE_I("Init", 0, 0, 0);
-
-    ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
-    IMS_BOOL bSmsOverIpNetwork =
-            piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL);
-
-    // TODO(Mts): Check whether Mts should consider KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
-    IMSVector<IMS_SINT32> objSupportedRats =
-            piCc->GetIntArray(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY);
-
-    IMS_TRACE_I("GetSmOverIpConfigInfo : bSmsOverIpNetwork[%d]", bSmsOverIpNetwork, 0, 0);
-
-    for (IMS_UINT32 i = 0; i < objSupportedRats.GetSize(); ++i)
-    {
-        IMS_SINT32 nValue = objSupportedRats.GetAt(i);
-        IMS_TRACE_I("GetSmOverIpConfigInfo : objSupportedRats[%d][%d]", i, nValue, 0);
-    }
-
-    if (bSmsOverIpNetwork)
-    {
-        SetSmsOverIpState(IMS_TRUE);
-    }
-    else
-    {
-        SetSmsOverIpState(IMS_FALSE);
-    }
-}
-
-PRIVATE
-void MtsServiceState::DeInit()
-{
-    IMS_TRACE_I("DeInit", 0, 0, 0);
 }
 
 PRIVATE
@@ -259,4 +201,34 @@ void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
     IMS_TRACE_I("SetImsSuspendState : IMS Suspend State is [%s]", _TRACE_B_(m_bImsSuspend), 0, 0);
 
     UpdateServiceState();
+}
+
+PRIVATE
+void MtsServiceState::SetSmsOverIpState(IN IMS_BOOL bState)
+{
+    if (m_bSmsOverIpConf == bState)
+    {
+        return;
+    }
+
+    m_bSmsOverIpConf = bState;
+
+    IMS_TRACE_I("SetSmsOverIpState : Sms Over IP Network State is [%s]",
+            _TRACE_B_(m_bSmsOverIpConf), 0, 0);
+
+    UpdateServiceState();
+}
+
+PRIVATE
+void MtsServiceState::UpdateServiceState()
+{
+    IMS_SINT32 nTempState = GetServiceState();
+
+    IMS_TRACE_I("UpdateServiceState : nTempState(%d) m_nMtsServiceState(%d)", nTempState,
+            m_nMtsServiceState, 0);
+
+    if (nTempState != m_nMtsServiceState)
+    {
+        m_nMtsServiceState = nTempState;
+    }
 }

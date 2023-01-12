@@ -914,6 +914,8 @@ public class CarrierConfig {
                 "sms_request_uri_type_int";
         public static final String KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL =
                 "sms_use_dialed_number_for_request_uri_bool";
+        public static final String KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL =
+                "sms_allow_imsi_based_sip_uri_bool";
 
         // Ut/Xcap
         public static final String KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY =

@@ -92,6 +92,7 @@ public:
     void Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection) override;
 
     // Test-Purpose
+    void InitMtsServiceState();
     inline void SetIImsAos(IN IImsAos* piImsAos) { m_piImsAos = piImsAos; }
     inline void SetIImsEmergencyAos(IN IImsAos* piImsEmergencyAos)
     {

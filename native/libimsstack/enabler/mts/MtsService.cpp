@@ -428,6 +428,12 @@ void MtsService::Traffic_GuardTimerExpired(IN IMS_UINT32 nType, IN IMS_UINT32 nD
     m_piImsRadio->StopImsTraffic(piMtsTraffic);
 }
 
+PUBLIC
+void MtsService::InitMtsServiceState()
+{
+    m_piMtsServiceState->Init(m_piImsAos);
+}
+
 PRIVATE
 void MtsService::AttachJni()
 {
@@ -687,9 +693,8 @@ void MtsService::Init()
     AttachJni();
     AttachAos();
     AttachCoreService();
-
+    InitMtsServiceState();
     m_piNetWatcherInfo = PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId);
-
     m_objMtsTraffics.Append(
             new MtsTraffic(IImsRadio::DIRECTION_MO, IImsRadio::TRAFFIC_TYPE_SMS, *this));
     m_objMtsTraffics.Append(

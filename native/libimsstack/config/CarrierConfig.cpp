@@ -1130,6 +1130,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SMS_REQUEST_URI_TYPE_INT[] =
         "sms_request_uri_type_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL[] =
         "sms_use_dialed_number_for_request_uri_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL[] =
+        "sms_allow_imsi_based_sip_uri_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_GENERIC_ERROR_CODES_INT_ARRAY[] =
         "sms_generic_error_codes_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_EXPIRY_TIMER_F_INT[] =
