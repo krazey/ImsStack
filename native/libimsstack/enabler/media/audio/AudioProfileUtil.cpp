@@ -134,7 +134,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
         pAudioProfile->bSupportRtcpXr = IMS_TRUE;
         if (pConfig->IsRtcpXrVoipEnabled() == IMS_TRUE)
         {
-            pAudioProfile->objRtcpXrAttr.bSupportVoipMatircs = IMS_TRUE;
+            pAudioProfile->objRtcpXrAttr.bSupportVoipMetrics = IMS_TRUE;
         }
         if (pConfig->IsRtcpXrStatisticsEnabled() == IMS_TRUE)
         {
@@ -150,7 +150,7 @@ AudioProfile* AudioProfileUtil::CreateProfile(
         }
 
         IMS_TRACE_D("CreateProfile() Add RTCP-XR. VoIP[%d], Stat[%d], PLR[%d]",
-                pAudioProfile->objRtcpXrAttr.bSupportVoipMatircs,
+                pAudioProfile->objRtcpXrAttr.bSupportVoipMetrics,
                 pAudioProfile->objRtcpXrAttr.bSupportStatisticMetrics,
                 pAudioProfile->objRtcpXrAttr.bSupportPacketLossRle);
         IMS_TRACE_D("CreateProfile() Add RTCP-XR. PDR[%d]",
