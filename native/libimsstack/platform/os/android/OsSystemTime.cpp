@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <limits>
+#include <random>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
@@ -154,21 +156,19 @@ PUBLIC VIRTUAL void OsSystemTime::GetGmTime(OUT IMS_SINT32& nYear, OUT IMS_SINT3
     }
 }
 
-PUBLIC VIRTUAL IMS_UINT32 OsSystemTime::GetRandom(
-        IN IMS_BOOL bSeed /*= IMS_TRUE*/, IN IMS_UINT32 nRange /*= 0*/) const
+PUBLIC VIRTUAL IMS_UINT32 OsSystemTime::GetRandom(IN IMS_UINT32 nRange /*= 0*/) const
 {
-    if (bSeed)
-    {
-        srand(time(NULL));
-    }
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<IMS_UINT32> dist(0, std::numeric_limits<IMS_SINT32>::max());
 
     if (nRange == 0)
     {
-        return static_cast<IMS_UINT32>(rand());
+        return dist(rng);
     }
     else
     {
-        return static_cast<IMS_UINT32>(rand() % nRange);
+        return dist(rng) % nRange;
     }
 }
 

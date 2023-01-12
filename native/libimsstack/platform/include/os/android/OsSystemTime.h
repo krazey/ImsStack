@@ -37,7 +37,7 @@ public:
     void GetGmTime(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth, OUT IMS_SINT32& nDay,
             OUT IMS_UINT32& nHour, OUT IMS_UINT32& nMinute, OUT IMS_UINT32& nSecond) const override;
 
-    IMS_UINT32 GetRandom(IN IMS_BOOL bSeed = IMS_TRUE, IN IMS_UINT32 nRange = 0) const override;
+    IMS_UINT32 GetRandom(IN IMS_UINT32 nRange = 0) const override;
     IMS_UINT32 GetTickCount() const override;
     IMS_UINT32 GetTimeInSeconds() const override;
     IMS_UINT32 GetTimeInMicroSeconds() const override;

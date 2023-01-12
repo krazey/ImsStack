@@ -45,17 +45,16 @@ private:
 #define IMS_SYS_GetLocalTime() \
     SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetLocalTime()
 
-#define IMS_SYS_GetRandom0() \
-    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_FALSE)
+#define IMS_SYS_GetRandom0() SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom()
 
 #define IMS_SYS_GetRandom(R) \
-    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_FALSE, R)
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(R)
 
 #define IMS_SYS_GetSRandom0() \
-    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_TRUE)
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom()
 
 #define IMS_SYS_GetSRandom(R) \
-    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_TRUE, R)
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(R)
 
 #define IMS_SYS_GetTickCount() \
     SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTickCount()
