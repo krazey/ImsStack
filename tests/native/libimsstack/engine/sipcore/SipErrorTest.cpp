@@ -22,8 +22,6 @@
 #include "SipManager.h"
 #include "SipPrivate.h"
 
-using ::testing::Return;
-
 namespace android
 {
 

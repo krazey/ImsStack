@@ -20,7 +20,6 @@
 
 using ::testing::_;
 using ::testing::Return;
-using ::testing::ReturnRef;
 
 namespace android
 {
