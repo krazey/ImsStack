@@ -2097,27 +2097,8 @@ PROTECTED VIRTUAL void OsSocket::NotifyClosed(IN IMS_SINT32 nErrorCode)
         return;
     }
 
-    switch (nErrorCode)
-    {
-        case 0:
-        {
-            OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
-            break;
-        }
-        case ENETDOWN:    // FALL-THROUGH
-        case ECONNRESET:  // FALL-THROUGH
-        case ECONNABORTED:
-        {
-            // closed by network
-            OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
-            break;
-        }
-        default:
-        {
-            OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
-            break;
-        }
-    }
+    // Closed by network: ENETDOWN, ECONNRESET, ECONNABORTED
+    OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
 }
 
 PROTECTED VIRTUAL void OsSocket::NotifyAcceptCompleted(IN IMS_SOCKET hSocket)

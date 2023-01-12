@@ -213,17 +213,17 @@ PUBLIC VIRTUAL IMS_BOOL OsSelectFdSet::IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT
 
     nEvent = (nEvent & EVENT_ALL);
 
-    if ((nEvent == EVENT_READ) && FD_ISSET(nFd, &(m_pFds->m_stReadFds)))
+    if (nEvent == EVENT_READ)
     {
-        return IMS_TRUE;
+        return FD_ISSET(nFd, &(m_pFds->m_stReadFds));
     }
-    else if ((nEvent == EVENT_WRITE) && FD_ISSET(nFd, &(m_pFds->m_stWriteFds)))
+    else if (nEvent == EVENT_WRITE)
     {
-        return IMS_TRUE;
+        return FD_ISSET(nFd, &(m_pFds->m_stWriteFds));
     }
-    else if ((nEvent == EVENT_EXCEPT) && FD_ISSET(nFd, &(m_pFds->m_stExceptFds)))
+    else if (nEvent == EVENT_EXCEPT)
     {
-        return IMS_TRUE;
+        return FD_ISSET(nFd, &(m_pFds->m_stExceptFds));
     }
 
     return IMS_FALSE;

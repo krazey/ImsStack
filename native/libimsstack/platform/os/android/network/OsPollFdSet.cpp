@@ -374,17 +374,17 @@ PUBLIC VIRTUAL IMS_BOOL OsPollFdSet::IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32
 
     nEvent = (nEvent & EVENT_ALL);
 
-    if ((nEvent == EVENT_READ) && PollFds::IsEventSet(pstFd, PollFds::EVENT_READ))
+    if (nEvent == EVENT_READ)
     {
-        return IMS_TRUE;
+        return PollFds::IsEventSet(pstFd, PollFds::EVENT_READ);
     }
-    else if ((nEvent == EVENT_WRITE) && PollFds::IsEventSet(pstFd, PollFds::EVENT_WRITE))
+    else if (nEvent == EVENT_WRITE)
     {
-        return IMS_TRUE;
+        return PollFds::IsEventSet(pstFd, PollFds::EVENT_WRITE);
     }
-    else if ((nEvent == EVENT_EXCEPT) && PollFds::IsEventSet(pstFd, PollFds::EVENT_EXCEPT))
+    else if (nEvent == EVENT_EXCEPT)
     {
-        return IMS_TRUE;
+        return PollFds::IsEventSet(pstFd, PollFds::EVENT_EXCEPT);
     }
 
     return IMS_FALSE;

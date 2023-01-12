@@ -376,15 +376,8 @@ PUBLIC GLOBAL AString TextParser::DoPercentEncodingEx(IN const AString& strData,
     {
         IMS_CHAR c = strData[i];
 
-        if (IMS_ISDIGIT(c))
-        {
-            objPeData.Append(c);
-        }
-        else if (IMS_ISALPHA(c))
-        {
-            objPeData.Append(c);
-        }
-        else if ((strPeExcludingChar.GetLength() > 0) && strPeExcludingChar.Contains(c))
+        if (IMS_ISDIGIT(c) || IMS_ISALPHA(c) ||
+                ((strPeExcludingChar.GetLength() > 0) && strPeExcludingChar.Contains(c)))
         {
             objPeData.Append(c);
         }

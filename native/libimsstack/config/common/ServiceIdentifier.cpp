@@ -184,11 +184,7 @@ PUBLIC GLOBAL IMS_BOOL ServiceIdentifier::CheckFeatureFlags(
         IMS_BOOL bValid = IMS_TRUE;
         const AString& strToken = objTokens.GetElementAt(i);
 
-        if (strToken.Equals(Feature::FLAG_EXPLICIT))
-        {
-            bValid = bAllowExplicitRequire;
-        }
-        else if (strToken.Equals(Feature::FLAG_REQUIRE))
+        if (strToken.Equals(Feature::FLAG_EXPLICIT) || strToken.Equals(Feature::FLAG_REQUIRE))
         {
             bValid = bAllowExplicitRequire;
         }
