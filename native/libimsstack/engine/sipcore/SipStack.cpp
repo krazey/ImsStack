@@ -970,7 +970,7 @@ GLOBAL IMS_BOOL EncodePartialMessage(
         return IMS_FALSE;
     }
 
-    if ((nOptions | OPT_ALL) == 0)
+    if ((nOptions & OPT_ALL) == 0)
     {
         SIPStackError(EERR_INVALIDPARAM);
         return IMS_FALSE;

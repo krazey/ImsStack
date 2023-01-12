@@ -21,12 +21,12 @@
 class SdpLine
 {
 public:
-    SdpLine();
-    SdpLine(IN const SdpLine& other);
+    SdpLine() = default;
+    SdpLine(IN const SdpLine& other) = default;
     virtual ~SdpLine() = 0;
 
 public:
-    SdpLine& operator=(IN const SdpLine& other);
+    SdpLine& operator=(IN const SdpLine& other) = default;
 
 public:
     /**

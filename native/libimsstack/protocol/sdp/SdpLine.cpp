@@ -19,19 +19,7 @@
 #include "Sdp.h"
 #include "SdpLine.h"
 
-PUBLIC
-SdpLine::SdpLine() {}
-
-PUBLIC
-SdpLine::SdpLine(IN const SdpLine& /*other*/) {}
-
 PUBLIC VIRTUAL SdpLine::~SdpLine() {}
-
-PUBLIC
-SdpLine& SdpLine::operator=(IN const SdpLine& /*other*/)
-{
-    return (*this);
-}
 
 PUBLIC VIRTUAL IMS_BOOL SdpLine::Decode(IN const AString& /*strValue*/)
 {

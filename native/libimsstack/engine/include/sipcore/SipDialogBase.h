@@ -40,7 +40,10 @@ public:
 public:
     inline SipDialogBase& operator=(IN const SipDialogBase& other)
     {
-        RcObject::operator=(other);
+        if (this != &other)
+        {
+            RcObject::operator=(other);
+        }
         return (*this);
     }
 

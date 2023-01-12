@@ -21,8 +21,6 @@
 #include "base/Ims.h"
 #include "base/ImsError.h"
 
-using ::testing::Return;
-
 namespace android
 {
 

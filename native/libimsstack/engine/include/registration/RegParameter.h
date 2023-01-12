@@ -52,9 +52,9 @@ public:
     }
 
     IMS_RESULT FormHeaders(
-            IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker> pStateTracker);
+            IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker>& pStateTracker);
     IMS_RESULT FormRouteHeaders(
-            IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker> pStateTracker);
+            IN_OUT ISipClientConnection*& piScc, IN const RcPtr<RegStateTracker>& pStateTracker);
     IMS_RESULT FormSecurityHeaders(IN_OUT ISipClientConnection*& piScc);
     inline Credential& GetCredential() { return m_objCredential; }
     inline IMS_SINT32 GetFlowControlOption() const { return m_nFlowControlOption; }

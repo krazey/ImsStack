@@ -33,7 +33,7 @@ public:
     }
     inline TestRepeatTime(const AString& strSdpFullLine, const AString& strSdpLine,
             IMS_UINT32 nInterval, IMS_UINT32 nActiveDuration, IMS_UINT32 nFirstOffset,
-            const ImsList<IMS_UINT32> objAdditionalOffsets) :
+            const ImsList<IMS_UINT32>& objAdditionalOffsets) :
             m_strSdpFullLine(strSdpFullLine),
             m_strSdpLine(strSdpLine),
             m_nInterval(nInterval),
