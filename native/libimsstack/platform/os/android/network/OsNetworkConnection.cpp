@@ -393,16 +393,7 @@ PRIVATE VIRTUAL INetworkConnection::STATE_ENTYPE OsNetworkConnection::GetState()
 PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsConnected(
         IN IMS_SINT32 nCategory /*= IIpcan::CATEGORY_ANY*/) const
 {
-    if (nCategory == IIpcan::CATEGORY_ANY)
-    {
-        return (m_nState == STATE_ACTIVE);
-    }
-    else if ((nCategory == IIpcan::CATEGORY_MOBILE) &&
-            (m_nIpcanCategory == IIpcan::CATEGORY_MOBILE))
-    {
-        return (m_nState == STATE_ACTIVE);
-    }
-    else if ((nCategory == IIpcan::CATEGORY_WLAN) && (m_nIpcanCategory == IIpcan::CATEGORY_WLAN))
+    if (nCategory == m_nIpcanCategory || nCategory == IIpcan::CATEGORY_ANY)
     {
         return (m_nState == STATE_ACTIVE);
     }

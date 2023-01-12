@@ -325,19 +325,15 @@ void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN OsIsimStateParam* pParam)
         case OsIsimStateParam::STATE_NOT_READY:
         {
             // Case 1) Abnormal ISIM state notification (system crash, ...)
-            if (nState == IIsim::STATE_READY)
+            // Case 2) Refresh is completed, but reading ISIM records fails
+            if (nState == IIsim::STATE_READY || nState == IIsim::STATE_REFRESHED)
             {
                 pIsim->SetState(IIsim::STATE_REFRESHING);
             }
-            // Case 1) ISIM state notification when reading the file attributes
+            // ISIM state notification when reading the file attributes
             else if (nState == IIsim::STATE_INIT)
             {
                 pIsim->SetState(IIsim::STATE_IDLE);
-            }
-            // Case: Refresh is completed, but reading ISIM records fails.
-            else if (nState == IIsim::STATE_REFRESHED)
-            {
-                pIsim->SetState(IIsim::STATE_REFRESHING);
             }
             break;
         }
@@ -357,17 +353,10 @@ void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN OsIsimStateParam* pParam)
         case OsIsimStateParam::STATE_REFRESH_STARTED:
         {
             // Case 1) Normal ISIM refresh state notification
-            if (nState == IIsim::STATE_READY)
-            {
-                pIsim->SetState(IIsim::STATE_REFRESHING);
-            }
-            // Refresh is completed, but reading ISIM records fails.
-            else if (nState == IIsim::STATE_REFRESHED)
-            {
-                pIsim->SetState(IIsim::STATE_REFRESHING);
-            }
-            // Refresh is started on INIT state (Normal SIM activation)
-            else if (nState == IIsim::STATE_INIT)
+            // Case 2) Refresh is completed, but reading ISIM records fails
+            // Case 3) Refresh is started on INIT state (Normal SIM activation)
+            if (nState == IIsim::STATE_READY || nState == IIsim::STATE_REFRESHED ||
+                    nState == IIsim::STATE_INIT)
             {
                 pIsim->SetState(IIsim::STATE_REFRESHING);
             }

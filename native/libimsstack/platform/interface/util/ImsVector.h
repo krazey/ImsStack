@@ -362,11 +362,7 @@ PUBLIC
 template <class T>
 inline void ImsVector<T>::Shrink()
 {
-    if (m_objVector.empty())
-    {
-        m_objVector.shrink_to_fit();
-    }
-    else if (m_objVector.size() <= (m_objVector.capacity() / 2))
+    if (m_objVector.empty() || (m_objVector.size() <= (m_objVector.capacity() / 2)))
     {
         m_objVector.shrink_to_fit();
     }

@@ -247,10 +247,6 @@ PRIVATE VIRTUAL void OsTrace::OutputString(
             {
                 (void)ALOG(LOG_INFO, IMS_LOG_TAG, "%s", pszOutString);
             }
-            else if (nCategory == ITrace::CAT_D)
-            {
-                (void)ALOG(LOG_DEBUG, IMS_LOG_TAG, "%s", pszOutString);
-            }
             else if (nCategory == ITrace::CAT_E)
             {
                 (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "%s", pszOutString);
