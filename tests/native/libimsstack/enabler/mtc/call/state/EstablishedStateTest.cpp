@@ -17,6 +17,7 @@
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
 #include "MtcContextRepository.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
@@ -31,6 +32,7 @@
 #include "core/MockISession.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockMtcTimerWrapper.h"
+#include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/ISipClientConnection.h"
@@ -257,6 +259,19 @@ TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
     EXPECT_CALL(objMockMtcSession, AcceptUpdate()).Times(1).WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
+TEST_F(EstablishedStateTest, OnReceivingNetworkToneStartedAndFailedInvokesSendHeldBy)
+{
+    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
+    ON_CALL(objMockCallContext, GetSupplementaryService)
+            .WillByDefault(ReturnRef(objSupplementaryService));
+    CallInfo objCallInfo;
+    ON_CALL(objMockCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
+
+    EXPECT_CALL(objUiNotifier, SendHeldBy(&objCallInfo, objMediaInfo, _)).Times(2);
+    EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneStarted());
+    EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneFailed());
 }
 
 }  // namespace android

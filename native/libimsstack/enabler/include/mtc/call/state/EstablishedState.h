@@ -56,6 +56,8 @@ public:
     CallStateName OnReceivingMediaDataFailed(
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnVideoLowestBitRate() override;
+    CallStateName OnReceivingNetworkToneStarted() override;
+    CallStateName OnReceivingNetworkToneFailed() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;

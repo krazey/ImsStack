@@ -409,15 +409,18 @@ TEST_F(OutgoingStateTest, OnReceivingMediaDataStartedStopsUdpKeepAliveSender)
     pOutgoingState->OnReceivingMediaDataStarted(0, 0);
 }
 
-TEST_F(OutgoingStateTest, OnReceivingNetworkToneStartedDoesNothing)
+TEST_F(OutgoingStateTest, OnReceivingNetworkToneStartedInvokesSendProgressing)
 {
-    // TODO: implement and add test
+    ON_CALL(objMediaManager, IsLocalTone()).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objNotifier, SendProgressing(_, objMediaInfo, _, _)).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnReceivingNetworkToneStarted());
 }
 
-TEST_F(OutgoingStateTest, OnReceivingNetworkToneFailedDoesNothing)
+TEST_F(OutgoingStateTest, OnReceivingNetworkToneFailedInvokesSendProgressingWithInactiveAudio)
 {
-    // TODO: implement and add test
+    ON_CALL(objMediaManager, IsLocalTone()).WillByDefault(Return(IMS_TRUE));
+    objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
+    EXPECT_CALL(objNotifier, SendProgressing(_, objMediaInfo, _, _)).Times(1);
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->OnReceivingNetworkToneFailed());
 }
 
