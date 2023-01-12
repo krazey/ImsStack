@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImsNew.h"
 #include "ImsMd5.h"
 
 #define S11               7
@@ -96,8 +97,6 @@ LOCAL const IMS_UCHAR MD5_PADDING[64] = {
 };
 // clang-format on
 
-LOCAL void imsMd5_CopyMemory(
-        OUT IMS_UCHAR* pucDest, IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen);
 LOCAL void imsMd5_Decode(IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
 LOCAL void imsMd5_Encode(
         IN const IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest);
@@ -142,7 +141,7 @@ GLOBAL void ImsMd5_Update(
     // Transforms as many times as possible.
     if (nSrcLen >= nPartLen)
     {
-        imsMd5_CopyMemory(&(pContext->aucBuffer[nIndex]), pucSrc, nPartLen);
+        IMS_MEM_Memcpy(&(pContext->aucBuffer[nIndex]), pucSrc, nPartLen);
         imsMd5_Transform(pContext->anState, pContext->aucBuffer);
 
         for (nProcIndex = nPartLen; nProcIndex + 63 < nSrcLen; nProcIndex += 64)
@@ -158,7 +157,7 @@ GLOBAL void ImsMd5_Update(
     }
 
     // Process the remaining input buffer
-    imsMd5_CopyMemory(&(pContext->aucBuffer[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
+    IMS_MEM_Memcpy(&(pContext->aucBuffer[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
 }
 
 GLOBAL void ImsMd5_Finalize(
@@ -185,15 +184,6 @@ GLOBAL void ImsMd5_Finalize(
 
     // Zeroize sensitive information
     imsMd5_SetMemory(reinterpret_cast<IMS_UCHAR*>(pContext), 0, sizeof(ImsMd5Context));
-}
-
-LOCAL void imsMd5_CopyMemory(
-        OUT IMS_UCHAR* pucDest, IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen)
-{
-    for (IMS_UINT32 i = 0; i < nSrcLen; i++)
-    {
-        pucDest[i] = pucSrc[i];
-    }
 }
 
 // Decodes the input (IMS_UCHAR) into output (IMS_UINT32). Assumes nSrcLen is a multiple of 4.

@@ -102,19 +102,22 @@ IMS_SINT32 astring_WideCharToChar(IN const IMS_WCHAR* pwszSrc, IN IMS_SINT32 nSr
 
     IMS_SINT32 nCountOfChar = 0;
 
-    for (IMS_SINT32 i = 0; i < nSrcLen; ++i)
+    if (pszDst != IMS_NULL && pwszSrc != IMS_NULL)
     {
-        if (i < nDstLen)
+        for (IMS_SINT32 i = 0; i < nSrcLen; ++i)
         {
-            // Truncate
-            // pszDst[i] = (IMS_CHAR)(pwszSrc[i]);
-            pszDst[i] = (pwszSrc[i] > 0xFF) ? '?' : (IMS_CHAR)pwszSrc[i];
+            if (i < nDstLen)
+            {
+                // Truncate
+                // pszDst[i] = (IMS_CHAR)(pwszSrc[i]);
+                pszDst[i] = (pwszSrc[i] > 0xFF) ? '?' : (IMS_CHAR)pwszSrc[i];
 
-            nCountOfChar++;
+                nCountOfChar++;
+            }
         }
-    }
 
-    pszDst[nDstLen - 1] = '\0';
+        pszDst[nDstLen - 1] = '\0';
+    }
 
     return nCountOfChar;
 }

@@ -262,7 +262,8 @@ void ImsHashMap::GetNext(IN_OUT ImsIterator& iterator, OUT void*& pvKey, OUT voi
 }
 
 // Get a hash key
-PROTECTED VIRTUAL IMS_UINTP ImsHashMap::GetHashKey(IN void* pvKey)
+PROTECTED
+IMS_UINTP ImsHashMap::GetHashKey(IN void* pvKey)
 {
     IMS_UINTP nTemp = reinterpret_cast<IMS_UINTP>(pvKey);
 
@@ -270,8 +271,8 @@ PROTECTED VIRTUAL IMS_UINTP ImsHashMap::GetHashKey(IN void* pvKey)
 }
 
 // Find an element using the key
-PROTECTED VIRTUAL ImsHashMap::Element* ImsHashMap::GetElementAt(
-        IN void* pvKey, OUT IMS_UINT32& nBucket)
+PROTECTED
+ImsHashMap::Element* ImsHashMap::GetElementAt(IN void* pvKey, OUT IMS_UINT32& nBucket)
 {
     IMS_UINTP nHashKey = GetHashKey(pvKey);
 

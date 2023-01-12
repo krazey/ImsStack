@@ -75,8 +75,8 @@ public:
     void GetNext(IN_OUT ImsIterator& iterator, OUT void*& pvKey, OUT void*& pvValue);
 
 protected:
-    virtual IMS_UINTP GetHashKey(IN void* pvKey);
-    virtual Element* GetElementAt(IN void* pvKey, OUT IMS_UINT32& nBucket);
+    IMS_UINTP GetHashKey(IN void* pvKey);
+    Element* GetElementAt(IN void* pvKey, OUT IMS_UINT32& nBucket);
 
 protected:
     IMS_UINT32 m_nHashTableSize;

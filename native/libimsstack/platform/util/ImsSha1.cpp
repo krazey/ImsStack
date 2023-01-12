@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ImsNew.h"
 #include "ImsSha1.h"
 
 // Fxx are a basic SHA1 functions
@@ -56,8 +57,6 @@ LOCAL const IMS_UCHAR SHA1_PADDING[64] = {
 };
 // clang-format on
 
-LOCAL void imsSha1_CopyMemory(
-        OUT IMS_UCHAR* pucDest, IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen);
 LOCAL void imsSha1_Decode(
         IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
 LOCAL void imsSha1_Encode(
@@ -105,7 +104,7 @@ GLOBAL void ImsSha1_Update(
     // Transforms as many times as possible.
     if (nSrcLen >= nPartLen)
     {
-        imsSha1_CopyMemory(&(pContext->aucMessageBlock[nIndex]), pucSrc, nPartLen);
+        IMS_MEM_Memcpy(&(pContext->aucMessageBlock[nIndex]), pucSrc, nPartLen);
         imsSha1_Transform(pContext->anH, pContext->aucMessageBlock);
 
         for (nProcIndex = nPartLen; nProcIndex + 63 < nSrcLen; nProcIndex += 64)
@@ -121,8 +120,7 @@ GLOBAL void ImsSha1_Update(
     }
 
     // Process the remaining input buffer
-    imsSha1_CopyMemory(
-            &(pContext->aucMessageBlock[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
+    IMS_MEM_Memcpy(&(pContext->aucMessageBlock[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
 }
 
 GLOBAL void ImsSha1_Finalize(
@@ -150,15 +148,6 @@ GLOBAL void ImsSha1_Finalize(
 
     // Zeroize sensitive information
     imsSha1_SetMemory(reinterpret_cast<IMS_UCHAR*>(pContext), 0, sizeof(ImsSha1Context));
-}
-
-LOCAL void imsSha1_CopyMemory(
-        OUT IMS_UCHAR* pucDest, IN const IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen)
-{
-    for (IMS_UINT32 i = 0; i < nSrcLen; i++)
-    {
-        pucDest[i] = pucSrc[i];
-    }
 }
 
 // Decodes the input (IMS_UCHAR) into output (IMS_UINT32). Assumes nSrcLen is a multiple of 4.

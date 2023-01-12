@@ -86,6 +86,7 @@ protected:
     virtual OsSocket* CreateSocket();
     virtual IMS_BOOL ShutDown(IN IMS_SINT32 nHow = SHUTDOWN_BOTH);
 
+    inline IMS_SINT32 GetOptionForShutdown() const { return m_nOptionForShutdown; }
     IMS_BOOL SelectEvent(IN IMS_SLONG nEvent = EVENT_FD_ALL);
     IMS_BOOL SelectEventEx(IN IMS_SLONG nEvent);
     IMS_BOOL DeselectEventEx(IN IMS_SLONG nEvent);

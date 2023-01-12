@@ -29,25 +29,22 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 LOCAL
-IMS_PVOID osPthread_Run(IN OsPthread* pThread)
+void osPthread_Run(IN OsPthread* pThread)
 {
     if (pThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Thread is null", 0, 0, 0);
-        return IMS_NULL;
+        return;
     }
 
-    IMS_PVOID pvThread = reinterpret_cast<IMS_PVOID>(pThread->Run());
-
+    pThread->Run();
     pthread_exit(NULL);
-
-    return pvThread;
 }
 
 LOCAL
-IMS_PVOID osPthread_ThreadProc(void* lpParam)
+IMS_PVOID osPthread_ThreadProc(void* param)
 {
-    return osPthread_Run(reinterpret_cast<OsPthread*>(lpParam));
+    osPthread_Run(reinterpret_cast<OsPthread*>(param));
+    return IMS_NULL;
 }
 
 class OsPthreadPrivate
@@ -176,6 +173,26 @@ PUBLIC VIRTUAL void OsPthread::Deactivate()
     {
         IMS_TRACE_D("Thread is not running", 0, 0, 0);
         return;
+    }
+
+    IMS_SINT32 nResult = pthread_join(m_pThreadP->m_nThreadId, IMS_NULL);
+
+    if (nResult == 0)
+    {
+        IMS_TRACE_D("pthread_join - %lu", m_pThreadP->m_nThreadId, 0, 0);
+    }
+    else if (nResult == EINVAL)
+    {
+        IMS_TRACE_E(0, "pthread_join - failed (does not refer to a joinable thread)", 0, 0, 0);
+    }
+    else if (nResult == ESRCH)
+    {
+        IMS_TRACE_E(0, "pthread_join - failed (can not found thread id (%x))",
+                m_pThreadP->m_nThreadId, 0, 0);
+    }
+    else
+    {
+        IMS_TRACE_E(0, "pthread_join - failed (%d)", nResult, 0, 0);
     }
 }
 

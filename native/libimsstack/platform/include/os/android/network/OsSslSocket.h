@@ -51,7 +51,7 @@ protected:
     void NotifyDataReceived(IN IMS_SINT32 nErrorCode) override;
 
     // OsSocket class
-    IMS_BOOL ShutDown(IN IMS_SINT32 nHow = SHUTDOWN_BOTH) override;
+    IMS_BOOL ShutDown(IN IMS_SINT32 nHow = SHUTDOWN_BOTH) override final;
 
     // ITimerListener class
     void Timer_TimerExpired(IN ITimer* piTimer) override;

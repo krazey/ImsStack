@@ -169,12 +169,20 @@ PUBLIC VIRTUAL OsSocket::~OsSocket()
 {
     IMS_TRACE_D("Destructor :: OsSocket (%d)", m_nInternalSocketId, 0, 0);
 
-    m_piOwnerThread = IMS_NULL;
-    m_piListener = IMS_NULL;
-
     if (m_hSocket != INVALID_SOCKET)
     {
-        Close();
+        IMS_TRACE_I("Socket :: Close(%d-%d)", m_hSocket, GetInternalSocketId(), 0);
+
+        if (GetSocketType() == TYPE_STREAM)
+        {
+            // Disable send()
+            OsSocket::ShutDown((m_nOptionForShutdown < 0) ? SHUTDOWN_BOTH : m_nOptionForShutdown);
+        }
+
+        OsSocketService::GetInstance()->KillSocket(m_hSocket);
+        close(m_hSocket);
+        UnbindSocketFromIpSecTransform(m_hSocket);
+        m_hSocket = INVALID_SOCKET;
     }
 }
 

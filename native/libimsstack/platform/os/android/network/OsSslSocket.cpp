@@ -539,11 +539,8 @@ PUBLIC VIRTUAL OsSslSocket::~OsSslSocket()
 {
     IMS_TRACE_D("Destructor :: OsSslSocket", 0, 0, 0);
 
-    if (m_piSslConnectRetryTimer != IMS_NULL)
-    {
-        m_piSslConnectRetryTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(m_piSslConnectRetryTimer);
-    }
+    IMS_SINT32 nOption = GetOptionForShutdown();
+    ShutDown((nOption < 0) ? SHUTDOWN_BOTH : nOption);
 
     if (m_pSsl != IMS_NULL)
     {

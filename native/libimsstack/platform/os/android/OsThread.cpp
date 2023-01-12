@@ -35,36 +35,34 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 LOCAL
-IMS_PVOID osThread_Run(IN OsThread* pThread)
+void osThread_Run(IN OsThread* pThread)
 {
     if (pThread == IMS_NULL)
     {
-        return IMS_NULL;
+        return;
     }
 
-    IMS_PVOID pvThread = IMS_NULL;
     INativeThreadMethods* piNativeThreadMethods = ThreadService::GetNativeThreadMethods();
 
     if (piNativeThreadMethods != IMS_NULL)
     {
         piNativeThreadMethods->AttachNativeThread(pThread->GetName().GetStr());
-        pvThread = reinterpret_cast<IMS_PVOID>(pThread->Run());
+        pThread->Run();
         piNativeThreadMethods->DetachNativeThread();
     }
     else
     {
-        pvThread = reinterpret_cast<IMS_PVOID>(pThread->Run());
+        pThread->Run();
     }
 
     pthread_exit(NULL);
-
-    return pvThread;
 }
 
 LOCAL
-IMS_PVOID osThread_ThreadProc(void* lpParam)
+IMS_PVOID osThread_ThreadProc(void* param)
 {
-    return osThread_Run(reinterpret_cast<OsThread*>(lpParam));
+    osThread_Run(reinterpret_cast<OsThread*>(param));
+    return IMS_NULL;
 }
 
 PUBLIC
@@ -366,12 +364,11 @@ PROTECTED VIRTUAL pthread_t OsThread::CreateThread()
 
 PROTECTED VIRTUAL void OsThread::JoinThread()
 {
-    IMS_PVOID pvReturnValue = IMS_NULL;
-    IMS_SINT32 nResult = pthread_join(m_nThreadId, &pvReturnValue);
+    IMS_SINT32 nResult = pthread_join(m_nThreadId, IMS_NULL);
 
     if (nResult == 0)
     {
-        IMS_TRACE_D("pthread_join - success", 0, 0, 0);
+        IMS_TRACE_D("pthread_join - %lu", m_nThreadId, 0, 0);
     }
     else if (nResult == EINVAL)
     {
