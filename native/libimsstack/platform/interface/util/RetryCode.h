@@ -21,12 +21,12 @@
 class RetryCode
 {
 public:
-    inline RetryCode() {}
-    inline RetryCode(IN const RetryCode&) {}
-    inline virtual ~RetryCode() {}
+    RetryCode() = default;
+    RetryCode(IN const RetryCode& other) = default;
+    virtual ~RetryCode() = default;
 
 public:
-    inline RetryCode& operator=(IN const RetryCode&) { return (*this); }
+    RetryCode& operator=(IN const RetryCode& other) = default;
 
 public:
     virtual IMS_BOOL IsIn(IN IMS_SINT32 nCode) const = 0;

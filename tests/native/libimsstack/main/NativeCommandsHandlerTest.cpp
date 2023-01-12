@@ -21,9 +21,6 @@
 #include "NativeCommands.h"
 #include "NativeCommandsHandler.h"
 
-using ::testing::Eq;
-using ::testing::Return;
-
 namespace android
 {
 
