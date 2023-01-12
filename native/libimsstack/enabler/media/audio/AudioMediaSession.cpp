@@ -177,7 +177,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(IN const IMS_UINT32 nAccessNetwork,
 
     // RTCP-XR
     IMS_UINT32 nRtcpXrBlocks = 0;
-    if (pNegoProfile->objRtcpXrAttr.bSupportVoipMatircs)
+    if (pNegoProfile->objRtcpXrAttr.bSupportVoipMetrics)
     {
         nRtcpXrBlocks += RtcpConfig::FLAG_RTCPXR_VOIP_METRICS_REPORT_BLOCK;
     }

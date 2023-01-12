@@ -485,21 +485,21 @@ public:
     {
     public:
         IMS_BOOL bSupportStatisticMetrics;
-        IMS_BOOL bSupportVoipMatircs;
+        IMS_BOOL bSupportVoipMetrics;
         IMS_BOOL bSupportPacketLossRle;
         IMS_BOOL bSupportPacketDuplicatedRle;
 
     public:
         RTCPXRAttributes() :
                 bSupportStatisticMetrics(IMS_FALSE),
-                bSupportVoipMatircs(IMS_FALSE),
+                bSupportVoipMetrics(IMS_FALSE),
                 bSupportPacketLossRle(IMS_FALSE),
                 bSupportPacketDuplicatedRle(IMS_FALSE){};
 
         RTCPXRAttributes& operator=(const RTCPXRAttributes& p)
         {
             bSupportStatisticMetrics = p.bSupportStatisticMetrics;
-            bSupportVoipMatircs = p.bSupportVoipMatircs;
+            bSupportVoipMetrics = p.bSupportVoipMetrics;
             bSupportPacketLossRle = p.bSupportPacketLossRle;
             bSupportPacketDuplicatedRle = p.bSupportPacketDuplicatedRle;
             return *this;
@@ -508,7 +508,7 @@ public:
         bool operator==(IN const RTCPXRAttributes& obj) const
         {
             return (bSupportStatisticMetrics == obj.bSupportStatisticMetrics &&
-                    bSupportVoipMatircs == obj.bSupportVoipMatircs &&
+                    bSupportVoipMetrics == obj.bSupportVoipMetrics &&
                     bSupportPacketLossRle == obj.bSupportPacketLossRle &&
                     bSupportPacketDuplicatedRle == obj.bSupportPacketDuplicatedRle);
         }

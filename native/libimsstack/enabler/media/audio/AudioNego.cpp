@@ -1777,7 +1777,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "stat-summary=loss,dup,jitt,HL");
         }
-        if (pProfile->objRtcpXrAttr.bSupportVoipMatircs)
+        if (pProfile->objRtcpXrAttr.bSupportVoipMetrics)
         {
             pDescriptor->AddAttribute(SdpAttribute::RTCP_XR, "voip-metrics");
         }
@@ -1957,7 +1957,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
         }
         if (xrAttr.Contains("voip-metrics"))
         {
-            pProfile->objRtcpXrAttr.bSupportVoipMatircs = IMS_TRUE;
+            pProfile->objRtcpXrAttr.bSupportVoipMetrics = IMS_TRUE;
         }
         if (xrAttr.Contains("pkt-loss-rle"))
         {
