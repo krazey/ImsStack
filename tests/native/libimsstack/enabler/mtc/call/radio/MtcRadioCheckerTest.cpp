@@ -161,7 +161,7 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWithStartingTimer)
     m_objSsacInfo.nBarringTimeSecForVoice = 10;
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_, _))
+    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(2)
             .WillOnce(Return(99))
             .WillOnce(Return(10));
@@ -177,7 +177,7 @@ TEST_F(MtcRadioCheckerTest, CheckSsacNotBlockedWhenRandomSmallerThanFactor)
     m_objSsacInfo.nBarringTimeSecForVoice = 10;
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_, _))
+    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(1)
             .WillOnce(Return(50));
     EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(0);
@@ -191,7 +191,7 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWhenTimerIsRunning)
     m_objSsacInfo.nBarringTimeSecForVoice = 10;
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_, _))
+    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(2)
             .WillOnce(Return(99))
             .WillOnce(Return(10));
@@ -201,7 +201,7 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWhenTimerIsRunning)
             m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(0);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_, _)).Times(0);
+    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_)).Times(0);
     EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(0);
 
     EXPECT_EQ(CheckResult::BLOCKED,
@@ -214,7 +214,7 @@ TEST_F(MtcRadioCheckerTest, MakeSsacTimerNullWhenTimerExpired)
     m_objSsacInfo.nBarringTimeSecForVideo = 10;
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_, _))
+    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(2)
             .WillOnce(Return(99))
             .WillOnce(Return(10));
@@ -229,7 +229,7 @@ TEST_F(MtcRadioCheckerTest, MakeSsacTimerNullWhenTimerExpired)
     m_pMtcRadioChecker->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_, _))
+    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(2)
             .WillOnce(Return(99))
             .WillOnce(Return(10));
