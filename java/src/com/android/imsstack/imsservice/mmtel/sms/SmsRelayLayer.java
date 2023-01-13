@@ -16,8 +16,9 @@
 
 package com.android.imsstack.imsservice.mmtel.sms;
 
+import android.net.Uri;
 import android.telephony.PhoneNumberUtils;
-import android.telephony.TelephonyManager;
+import android.telephony.SmsManager;
 import android.telephony.ims.stub.ImsSmsImplBase;
 
 import com.android.imsstack.enabler.mts.MtsController;
@@ -141,7 +142,6 @@ public class SmsRelayLayer {
                         + " tpdu = " + ImsLog.hiddenString(IccUtils.bytesToHexString(tpdu))
                         + " statusResult = " + statusResult);
             }
-            TelephonyManager tm = null;
             String targetAddress = null;
             int rpCause = GENERIC_ERROR_CAUSE_VALUE;
             if (mDeliverCause.containsKey(statusResult)) {
@@ -154,17 +154,8 @@ public class SmsRelayLayer {
              */
             if (rpType == SmsUtils.RP_DATA || rpType == SmsUtils.RP_SMMA) {
                 //fetch PSI Value
-                int subId = mCallContext.getSubId();
-                tm = AppContext.getTelephonyManager(subId);
-                if (tm != null) {
-                    //As per b/232048441 targetAddress must be set to PSI value,
-                    targetAddress = tm.getSmscIdentity(TelephonyManager.APPTYPE_ISIM);
-                    if (DBG) log("PSI in ISIM " + ImsLog.hiddenString(targetAddress));
-                    if (targetAddress == null || targetAddress.length() == 0) {
-                        targetAddress = tm.getSmscIdentity(TelephonyManager.APPTYPE_USIM);
-                        if (DBG) log("PSI in USIM" + ImsLog.hiddenString(targetAddress));
-                    }
-                }
+                targetAddress = getPSIValue();
+                if (DBG) log("PSI = " + ImsLog.hiddenString(targetAddress));
                 //return if smsc is null as it is a must to construct RP-Destination address
                 if (smsc == null || smsc.length() == 0) {
                     loge("Smsc is null");
@@ -263,6 +254,28 @@ public class SmsRelayLayer {
         int len = targetAddrBytes[0];
         return PhoneNumberUtils.calledPartyBCDToString(targetAddrBytes, 1,
                             len, PhoneNumberUtils.BCD_EXTENDED_TYPE_CALLED_PARTY);
+    }
+
+    /**
+     * Fetches PSI Value from SmsManager using SystemApi
+     * @return PSI Value
+     */
+    protected String getPSIValue() {
+        try {
+            synchronized (mLock) {
+                String psiValue = null;
+                SmsManager sm = AppContext.getInstance().getSystemService(SmsManager.class);
+                Uri psiUri = null;
+                if (sm != null) {
+                    psiUri = sm.getSmscIdentity();
+                    psiValue = psiUri.toString();
+                }
+                return psiValue;
+            }
+        } catch (RuntimeException e) {
+            loge("SendRPMessage Failed: " + e.getMessage());
+            return null;
+        }
     }
     /*
      * Increments and returns RP-MR Value
@@ -370,18 +383,7 @@ public class SmsRelayLayer {
                                     + ImsLog.hiddenString(mtData.getOrigAddr()));
                 }
                 int messageRef = mtData.getMessageRef();
-                String targetAddress = null;
-                //fetch PSI Value
-                int subId = mCallContext.getSubId();
-                TelephonyManager tm = AppContext.getTelephonyManager(subId);
-                if (tm != null) {
-                    targetAddress = tm.getSmscIdentity(TelephonyManager.APPTYPE_ISIM);
-                    if (DBG) log("PSI in ISIM " + ImsLog.hiddenString(targetAddress));
-                    if (targetAddress == null || targetAddress.length() == 0) {
-                        targetAddress = tm.getSmscIdentity(TelephonyManager.APPTYPE_USIM);
-                        if (DBG) log("PSI in USIM" + ImsLog.hiddenString(targetAddress));
-                    }
-                }
+                String targetAddress = getPSIValue();
                 if (targetAddress == null || targetAddress.length() == 0) {
                     targetAddress = mtData.getOrigAddr();
                     if (DBG) {
