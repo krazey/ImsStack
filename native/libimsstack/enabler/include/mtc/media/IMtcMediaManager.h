@@ -246,6 +246,13 @@ public:
      * @param eState
      */
     virtual void SetSrvccState(IN SrvccState eState) = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
+    virtual IMS_BOOL IsOnHold() = 0;
 };
 
 enum class MediaState

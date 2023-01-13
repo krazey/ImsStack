@@ -612,6 +612,12 @@ PUBLIC VIRTUAL void MtcMediaManager::SetSrvccState(IN SrvccState eState)
     m_piMediaSession->NotifySrvccStatus(eMediaSrvccStatus);
 }
 
+PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsOnHold()
+{
+    IMS_SINT32 nAudioDirection = m_pMediaInfo->eAudioDirection;
+    return (nAudioDirection != DIRECTION_INVALID && nAudioDirection != DIRECTION_SEND_RECEIVE);
+}
+
 PRIVATE
 void MtcMediaManager::DestroyMediaSession()
 {

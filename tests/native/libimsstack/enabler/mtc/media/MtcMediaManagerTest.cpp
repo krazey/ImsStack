@@ -824,3 +824,30 @@ TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerIfAudioAndVideoDirection
     EXPECT_EQ(pMediaManager->GetMediaInfo().eVideoDirection, DIRECTION_INACTIVE);
     EXPECT_EQ(pMediaManager->GetMediaInfo().eTextDirection, DIRECTION_INVALID);
 }
+
+TEST_F(MtcMediaManagerTest, IsOnHoldReturnsTrueIfAudioDirectionIsNotSendReceiveAndInvalid)
+{
+    MediaInfo objMediaInfo;
+    objMediaInfo.eAudioDirection = DIRECTION_INACTIVE;
+    pMediaManager->SetMediaInfo(objMediaInfo);
+    EXPECT_TRUE(pMediaManager->IsOnHold());
+
+    objMediaInfo.eAudioDirection = DIRECTION_RECEIVE;
+    pMediaManager->SetMediaInfo(objMediaInfo);
+    EXPECT_TRUE(pMediaManager->IsOnHold());
+
+    objMediaInfo.eAudioDirection = DIRECTION_SEND;
+    pMediaManager->SetMediaInfo(objMediaInfo);
+    EXPECT_TRUE(pMediaManager->IsOnHold());
+}
+
+TEST_F(MtcMediaManagerTest, IsOnHoldReturnsFalseIfAudioDirectionIsSendReceiveOrInvalid)
+{
+    MediaInfo objMediaInfo;
+    pMediaManager->SetMediaInfo(objMediaInfo);
+    EXPECT_FALSE(pMediaManager->IsOnHold());
+
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pMediaManager->SetMediaInfo(objMediaInfo);
+    EXPECT_FALSE(pMediaManager->IsOnHold());
+}

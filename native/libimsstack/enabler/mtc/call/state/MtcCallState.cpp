@@ -920,10 +920,8 @@ IMS_BOOL MtcCallState::IsCallEndNeededByAudioInactivity(
         return bNeedToEnd;
     }
 
-    const UpdatingInfo& objUpdatingInfo = m_objContext.GetUpdatingInfo();
     IMS_SINT32 nAdditionalInfo = -1;
-
-    if (objUpdatingInfo.IsHeld() || objUpdatingInfo.IsHeldBy())
+    if (m_objContext.GetMediaManager().IsOnHold())
     {
         if (eProtocolType == MEDIA_PROTOCOL_RTCP)
         {

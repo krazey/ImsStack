@@ -117,6 +117,7 @@ public:
     virtual void AdjustDirectionForAutoAccept(
             IN IMS_BOOL bSendOffer, IN IMS_BOOL bHeldByMe) override;
     void SetSrvccState(IN SrvccState eState) override;
+    IMS_BOOL IsOnHold() override;
 
 private:
     void DestroyMediaSession();
