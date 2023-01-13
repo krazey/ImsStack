@@ -123,11 +123,7 @@ void SipPortManager::SetNextPortC(IN IMS_SINT32 nPort) const
     if (m_nNextPortC != nPort)
     {
         // Round-robin
-        if (nPort == m_nPortCEnd)
-        {
-            nPort = (m_nPortCStart + 1);
-        }
-        else if (nPort == m_nPortCStart)
+        if (nPort == m_nPortCEnd || nPort == m_nPortCStart)
         {
             nPort = (m_nPortCStart + 1);
         }

@@ -153,8 +153,6 @@ PRIVATE VIRTUAL IMedia* SessionImpl::CreateMedia(IN const AString& strType,
         case ImsCore::MEDIA_TYPE_FRAMED:
             pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
             break;
-        case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:    // FALL-THROUGH
-        case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:  // FALL-THROUGH
         default:
             break;
     }
@@ -226,8 +224,6 @@ PRIVATE VIRTUAL IMSList<IMedia*> SessionImpl::GetMedia()
                 case ImsCore::MEDIA_TYPE_FRAMED:
                     pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
                     break;
-                case ImsCore::MEDIA_TYPE_BASIC_RELIABLE:    // FALL-THROUGH
-                case ImsCore::MEDIA_TYPE_BASIC_UNRELIABLE:  // FALL-THROUGH
                 default:
                     break;
             }

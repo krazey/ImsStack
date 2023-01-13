@@ -496,11 +496,8 @@ PUBLIC GLOBAL IMS_BOOL CallerPreference::CreateAcceptContactHeaders(IN const App
                 AddFeature(strType, objHeaders);
                 AddFeature(Feature::OTHER_APP_SUBTYPE, objTokens.GetAt(1), objHeaders);
             }
-            else if (strType.EqualsIgnoreCase(Feature::BASE_TAG[Feature::BASE_VIDEO]))
-            {
-                AddFeature(strType, objHeaders);
-            }
-            else if (strType.EqualsIgnoreCase(Feature::BASE_TAG[Feature::BASE_AUDIO]))
+            else if (strType.EqualsIgnoreCase(Feature::BASE_TAG[Feature::BASE_AUDIO]) ||
+                    strType.EqualsIgnoreCase(Feature::BASE_TAG[Feature::BASE_VIDEO]))
             {
                 AddFeature(strType, objHeaders);
             }

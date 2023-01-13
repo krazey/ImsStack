@@ -244,17 +244,8 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
     {
         IMS_SINT32 nDialogState = m_pDialogEx->GetState();
 
-        if (nDialogState == SipDState::STATE_INIT)
-        {
-            bImplicitRouteRequired = IMS_TRUE;
-        }
-        // IMPLICIT_ROUTING_FOR_MID_DIALOG
-        else if (m_pDialogEx->IsInviteUsage() && (nDialogState == SipDState::STATE_CONFIRMED))
-        {
-            bImplicitRouteRequired = IMS_TRUE;
-        }
         // For routing all mid-dialog requests to the first outbound proxy
-        else if ((nDialogState == SipDState::STATE_EARLY) ||
+        if ((nDialogState == SipDState::STATE_INIT) || (nDialogState == SipDState::STATE_EARLY) ||
                 (nDialogState == SipDState::STATE_CONFIRMED))
         {
             bImplicitRouteRequired = IMS_TRUE;
@@ -675,13 +666,10 @@ IMS_BOOL SipClientTransactionState::SendWithCredentials(
     if (!m_pDialogEx.IsNull())
     {
         if ((m_pDialogEx->GetState() == SipDState::STATE_EARLY) ||
-                (m_pDialogEx->GetState() == SipDState::STATE_CONFIRMED))
-        {
-            m_pDialogEx->GetDialogState()->UpdateLocalCSeq(m_nCSeqNumber);
-        }
-        // BYE_REQUEST_ON_DIALOG_TERMINATED
-        else if (objMethod.Equals(SipMethod::BYE) &&
-                (m_pDialogEx->GetState() == SipDState::STATE_TERMINATED))
+                (m_pDialogEx->GetState() == SipDState::STATE_CONFIRMED) ||
+                // BYE_REQUEST_ON_DIALOG_TERMINATED
+                (objMethod.Equals(SipMethod::BYE) &&
+                        m_pDialogEx->GetState() == SipDState::STATE_TERMINATED))
         {
             m_pDialogEx->GetDialogState()->UpdateLocalCSeq(m_nCSeqNumber);
         }

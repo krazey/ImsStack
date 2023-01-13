@@ -437,11 +437,8 @@ PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId
 
     const SipMethod& objMethod = piSipMsg->GetMethod();
 
-    if (objMethod.Equals(SipMethod::CANCEL))
-    {
-        return;
-    }
-    else if (objMethod.Equals(SipMethod::ACK) && !SipFeatures::IsPaniHeaderForAckRequired(nSlotId))
+    if (objMethod.Equals(SipMethod::CANCEL) ||
+            (objMethod.Equals(SipMethod::ACK) && !SipFeatures::IsPaniHeaderForAckRequired(nSlotId)))
     {
         return;
     }

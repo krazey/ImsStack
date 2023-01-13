@@ -39,12 +39,6 @@ PUBLIC GLOBAL Media* MediaFactory::CreateOutgoingMedia(IN const AString& strMTyp
     {
         pMedia = new FramedMedia(pService, piOaState);
     }
-    else if (strMType.Equals(ImsCore::MEDIA_BASIC_RELIABLE))
-    {
-    }
-    else if (strMType.Equals(ImsCore::MEDIA_BASIC_UNRELIABLE))
-    {
-    }
     else
     {
         IMS_TRACE_E(0, "Trying to create an unsupported media (%s)", strMType.GetStr(), 0, 0);
@@ -90,12 +84,6 @@ PUBLIC GLOBAL Media* MediaFactory::CreateIncomingMedia(IN IMS_SINT32 nTransportP
         case SdpMedia::TRANSPORT_TCP_TLS_MSRP:
             pszMType = ImsCore::MEDIA_FRAMED;
             pMedia = new FramedMedia(pService, piOaState);
-            break;
-        case SdpMedia::TRANSPORT_UDP:
-            pszMType = ImsCore::MEDIA_BASIC_UNRELIABLE;
-            break;
-        case SdpMedia::TRANSPORT_TCP:
-            pszMType = ImsCore::MEDIA_BASIC_RELIABLE;
             break;
         default:
             IMS_TRACE_E(0, "Trying to create an unsupported media (%d)", nTransportProtocol, 0, 0);

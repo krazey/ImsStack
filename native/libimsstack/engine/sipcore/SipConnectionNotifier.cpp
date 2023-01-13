@@ -587,14 +587,9 @@ IMS_BOOL SipConnectionNotifier::IsSameConnectionNotifier(
 {
     if (GetLocalAddress().Equals(objTAddr.GetIpAddress()))
     {
-        if (m_nPort == objTAddr.GetPort())
-        {
-            // Shall we check the transport protocol type ???
-            return IMS_TRUE;
-        }
         // RFC5626_FLOW_CONTROL
-        else if (IsClientInitiatedConnectionRequired() &&
-                (m_nPortFlowControl == objTAddr.GetPort()))
+        if ((m_nPort == objTAddr.GetPort()) ||
+                (IsClientInitiatedConnectionRequired() && m_nPortFlowControl == objTAddr.GetPort()))
         {
             return IMS_TRUE;
         }

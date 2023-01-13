@@ -225,20 +225,16 @@ IMS_SINT32 SipDialogUsage::GetActionForResponse(IN const SipMessageInfo& objMsgI
                 {
                     if (nStatusCode == SipStatusCode::SC_408)
                     {
-                        if (m_nType == TYPE_INVITE)
-                        {
-                            // It should be verified in the commercial networks...
-                            // return SipDState::ACTION_DESTROY_USAGE;
-                        }
-                        else if (m_nType == TYPE_SUBSCRIBE)
-                        {
-                            // If re-SUBSCRIBE is timed out (Timer F),
-                            // it does not terminate the dialog usage.
-                            // if (objMsgInfo.GetMethod().Equals(SipMethod::NOTIFY))
-                            //{
-                            //    return SipDState::ACTION_DESTROY_USAGE;
-                            //}
-                        }
+                        // Case1) TYPE_INVITE
+                        //      It should be verified in the commercial networks...
+                        //      return SipDState::ACTION_DESTROY_USAGE;
+                        // Case2) TYPE_SUBSCRIBE
+                        //      If re-SUBSCRIBE is timed out (Timer F),
+                        //      it does not terminate the dialog usage.
+                        //      if (objMsgInfo.GetMethod().Equals(SipMethod::NOTIFY))
+                        //      {
+                        //          return SipDState::ACTION_DESTROY_USAGE;
+                        //      }
                     }
                     break;
                 }

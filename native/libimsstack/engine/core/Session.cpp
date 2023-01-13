@@ -1689,9 +1689,6 @@ IMS_RESULT Session::Terminate()
         case STATE_REESTABLISHING:
             TerminateOnReEstablishing();
             break;
-        case STATE_TERMINATING:  // FALL-THROUGH
-        case STATE_TERMINATED:
-            break;
         default:
             break;
     }
@@ -2791,11 +2788,8 @@ PROTECTED VIRTUAL void Session::NotifySipError(
                         {
                             IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_CANCEL);
 
-                            if (piResponse == IMS_NULL)
-                            {
-                                nMethodForCancel = IMessage::SESSION_CANCEL;
-                            }
-                            else if (!SipStatusCode::IsFinal(piResponse->GetStatusCode()))
+                            if ((piResponse == IMS_NULL) ||
+                                    !SipStatusCode::IsFinal(piResponse->GetStatusCode()))
                             {
                                 nMethodForCancel = IMessage::SESSION_CANCEL;
                             }
@@ -5249,12 +5243,9 @@ IMS_RESULT Session::HandleRequestToAck(IN ISipServerConnection* piSsc)
         IMS_BOOL bInitialSession = IMS_TRUE;
         IMessage* piMessage = GetPreviousRequest(IMessage::SESSION_UPDATE);
 
-        if ((piMessage != IMS_NULL) && piMessage->GetMethod().Equals(SipMethod::INVITE) &&
-                (piMessage->GetState() == IMessage::STATE_RECEIVED))
-        {
-            bInitialSession = IMS_FALSE;
-        }
-        else if ((m_nCompletedListenerCalls & LISTENER_CALL_STARTED) != 0)
+        if ((piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::INVITE) &&
+                    piMessage->GetState() == IMessage::STATE_RECEIVED) ||
+                ((m_nCompletedListenerCalls & LISTENER_CALL_STARTED) != 0))
         {
             bInitialSession = IMS_FALSE;
         }
@@ -5575,13 +5566,11 @@ IMS_RESULT Session::HandleRequestToInviteWithinDialog(IN ISipServerConnection* p
 
     IMS_SINT32 nStatusCode = SipStatusCode::SC_INVALID;
 
-    if (nState == STATE_NEGOTIATING)
-    {
-        nStatusCode = SipStatusCode::SC_491;
-    }
     // Checks the message validity:
-    // If re-INVITE is sent, we needs to reject the message with 491 Request Pending response.
-    else if ((nState == STATE_RENEGOTIATING) || (m_pOaState->IsOfferProgress()))
+    // If INVITE/re-INVITE is sent,
+    // the device needs to reject the message with 491 Request Pending response.
+    if ((nState == STATE_NEGOTIATING) || (nState == STATE_RENEGOTIATING) ||
+            m_pOaState->IsOfferProgress())
     {
         nStatusCode = SipStatusCode::SC_491;
     }
@@ -5945,11 +5934,8 @@ IMS_RESULT Session::HandleResponseToCancel(IN ISipClientConnection* piScc)
             {
                 IMessage* piResponse = GetPreviousResponse(IMessage::SESSION_CANCEL);
 
-                if (piResponse == IMS_NULL)
-                {
-                    nMethodForCancel = IMessage::SESSION_CANCEL;
-                }
-                else if (!SipStatusCode::IsFinal(piResponse->GetStatusCode()))
+                if ((piResponse == IMS_NULL) ||
+                        !SipStatusCode::IsFinal(piResponse->GetStatusCode()))
                 {
                     nMethodForCancel = IMessage::SESSION_CANCEL;
                 }
@@ -6258,100 +6244,12 @@ IMS_RESULT Session::HandleResponseToInvite(IN ISipClientConnection* piScc)
                 PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
             }
             break;
-        case SipStatusCode::SC_486:  // Busy here, FALL-THROUGH
-        case SipStatusCode::SC_480:  // Temporarily unavailable
-            // 486 : INVITE is rejected by the other side
-            // 480 : INVITE is rejected by the proxy because the remote user is not registered
-            if (nState == STATE_NEGOTIATING)
-            {
-                SetState(STATE_TERMINATED);
-                CleanupMedia();
-
-                PostMessage(AMSG_SESSION_START_FAILED, 0, 0);
-            }
-            else if (nState == STATE_RENEGOTIATING)
-            {
-                UpdateMedia(Media::SESSION_UPDATE_FAILED);
-
-                SetState(STATE_ESTABLISHED);
-                // RACE_CONDITION : SESSION_UPDATE
-                SetSessionUpdateNotificationState(IMS_TRUE);
-                RestoreOfferAnswerState();
-                RestoreEx();
-
-                PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
-            }
-            // A cancelled INVITE
-            else if (nState == STATE_TERMINATING)
-            {
-                SetState(STATE_TERMINATED);
-                CleanupMedia();
-
-                PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
-            }
-            break;
-        case SipStatusCode::SC_487:  // Request terminated
-            // This is the response to our cancelled INVITE, in the terminating session.
-            if (nState == STATE_NEGOTIATING)
-            {
-                SetState(STATE_TERMINATED);
-                CleanupMedia();
-
-                PostMessage(AMSG_SESSION_START_FAILED, 0, 0);
-            }
-            else if (nState == STATE_RENEGOTIATING)
-            {
-                UpdateMedia(Media::SESSION_UPDATE_FAILED);
-
-                SetState(STATE_ESTABLISHED);
-                // RACE_CONDITION : SESSION_UPDATE
-                SetSessionUpdateNotificationState(IMS_TRUE);
-                RestoreOfferAnswerState();
-                RestoreEx();
-
-                PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
-            }
-            // A cancelled INVITE
-            else if (nState == STATE_TERMINATING)
-            {
-                SetState(STATE_TERMINATED);
-                CleanupMedia();
-
-                PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
-            }
-            break;
-        case SipStatusCode::SC_488:  // Not acceptable here
-            // INVITE is rejected because the media negotiation failed
-            if (nState == STATE_NEGOTIATING)
-            {
-                SetState(STATE_TERMINATED);
-                CleanupMedia();
-
-                PostMessage(AMSG_SESSION_START_FAILED, 0, 0);
-            }
-            else if (nState == STATE_RENEGOTIATING)
-            {
-                UpdateMedia(Media::SESSION_UPDATE_FAILED);
-
-                SetState(STATE_ESTABLISHED);
-                // RACE_CONDITION : SESSION_UPDATE
-                SetSessionUpdateNotificationState(IMS_TRUE);
-                RestoreOfferAnswerState();
-                RestoreEx();
-
-                PostMessage(AMSG_SESSION_UPDATE_FAILED, 0, 0);
-            }
-            // A cancelled INVITE
-            else if (nState == STATE_TERMINATING)
-            {
-                SetState(STATE_TERMINATED);
-                CleanupMedia();
-
-                PostMessage(AMSG_SESSION_TERMINATED, 0, 0);
-            }
-            break;
         default:
         {
+            // 480 : INVITE is rejected by the proxy because the remote user is not registered
+            // 486 : INVITE is rejected by the other side
+            // 487 : This is the response to our cancelled INVITE, in the terminating session
+            // 488 : INVITE is rejected because the media negotiation failed
             if (nState == STATE_NEGOTIATING)
             {
                 SetState(STATE_TERMINATED);
@@ -7141,20 +7039,6 @@ IMS_RESULT Session::SendResponseEx(
         IMS_TRACE_E(0, "Initializing a response failed - SipError (%d)", SipError::GetLastError(),
                 0, 0);
         return IMS_FAILURE;
-    }
-
-    // Update a new SIP response message
-    if (piSsc->GetMethod().Equals(SipMethod::INVITE))
-    {
-        switch (nStatusCode)
-        {
-            case SipStatusCode::SC_180:
-                break;
-            case SipStatusCode::SC_200:
-                break;
-            default:
-                break;
-        }
     }
 
     if (!SendNUpdateResponse(nServiceMethod, piSsc))

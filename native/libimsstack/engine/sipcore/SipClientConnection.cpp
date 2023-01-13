@@ -727,11 +727,8 @@ IMS_RESULT SipClientConnection::SetCredentials(IN const Credential& objCredentia
 
     IMS_BOOL bPasswordLogging = IMS_TRUE;
 
-    if (SipRtConfigUtils::IsMessageHiddenInLog(GetSlotId()))
-    {
-        bPasswordLogging = IMS_FALSE;
-    }
-    else if ((objCredential.GetType() == Credential::TYPE_AKAv1_MD5) ||
+    if (SipRtConfigUtils::IsMessageHiddenInLog(GetSlotId()) ||
+            (objCredential.GetType() == Credential::TYPE_AKAv1_MD5) ||
             (objCredential.GetType() == Credential::TYPE_AKAv2_MD5))
     {
         bPasswordLogging = IMS_FALSE;

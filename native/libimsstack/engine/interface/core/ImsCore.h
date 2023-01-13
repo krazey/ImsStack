@@ -37,18 +37,12 @@ public:
     static const IMS_CHAR MEDIA_STREAM[];
     /// "FramedMedia"
     static const IMS_CHAR MEDIA_FRAMED[];
-    /// "BasicReliableMedia"
-    static const IMS_CHAR MEDIA_BASIC_RELIABLE[];
-    /// "BasicUnreliableMedia"
-    static const IMS_CHAR MEDIA_BASIC_UNRELIABLE[];
 
     /// Types of media
     enum
     {
         MEDIA_TYPE_STREAM = 0,
-        MEDIA_TYPE_FRAMED,
-        MEDIA_TYPE_BASIC_RELIABLE,
-        MEDIA_TYPE_BASIC_UNRELIABLE
+        MEDIA_TYPE_FRAMED
     };
 };
 

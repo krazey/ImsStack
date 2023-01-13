@@ -334,18 +334,10 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNotifyResponse(IN const ISipMessage* piS
 {
     IMS_SINT32 nStatusCode = piSipMsg->GetStatusCode();
 
-    if (SipStatusCode::Is1XX(nStatusCode))
+    if (SipStatusCode::Is1XX(nStatusCode) || SipStatusCode::IsFinalSuccess(nStatusCode) ||
+            (nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         // Do nothing ...
-        return IMS_TRUE;
-    }
-    else if (SipStatusCode::IsFinalSuccess(nStatusCode))
-    {
-    }
-    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
-    {
-        // Do nothing ...
-        return IMS_TRUE;
     }
     else
     {

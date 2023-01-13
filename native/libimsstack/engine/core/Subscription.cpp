@@ -1059,14 +1059,8 @@ PROTECTED VIRTUAL void Subscription::Refreshable_RefreshCompleted(
 
         CheckDialogNCallListener();
     }
-    else if (nCode == SipStatusCode::SC_408)
+    else if ((nCode == SipStatusCode::SC_408) || (nCode == RefreshHelper::TRANSACTION_TIMEOUT))
     {
-        Refreshable_RefreshTerminated();
-    }
-    // The subscription refresh request is timed out.
-    else if (nCode == RefreshHelper::TRANSACTION_TIMEOUT)
-    {
-        // 4 TODO:: what to do ... ? In this moment, do nothing ...
         Refreshable_RefreshTerminated();
     }
 

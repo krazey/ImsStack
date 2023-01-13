@@ -211,15 +211,12 @@ SipDialogEx* SipDialog::GetOptimumDialog(IN const SipMethod& objMethod) const
     // Case 1)
     //    Condition - invite usage & method except for REFER/SUBSCRIBE
     //    Action - Use an invite usage as it is
-    if (m_pDialogEx->IsInviteUsage() && !objMethod.Equals(SipMethod::SUBSCRIBE) &&
-            !objMethod.Equals(SipMethod::REFER))
-    {
-        return m_pDialogEx.Get();
-    }
     // Case 2)
     //    Condition - subscribe usage & NOTIFY method
     //    Action - Use an subscribe usage as it is
-    else if (!(m_pDialogEx->IsInviteUsage()) && objMethod.Equals(SipMethod::NOTIFY))
+    if ((m_pDialogEx->IsInviteUsage() && !objMethod.Equals(SipMethod::SUBSCRIBE) &&
+                !objMethod.Equals(SipMethod::REFER)) ||
+            (!m_pDialogEx->IsInviteUsage() && objMethod.Equals(SipMethod::NOTIFY)))
     {
         return m_pDialogEx.Get();
     }

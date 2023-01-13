@@ -448,11 +448,7 @@ PROTECTED VIRTUAL void SipStreamSocket::Socket_OnDataReceived(IN ISocket* piSock
 
         IMS_TRACE_I("SipStreamSocket(%p) :: read-bytes=%d", piSocket, nReadBytes, 0);
 
-        if (nReadBytes == ISocket::RESULT_ERROR)
-        {
-            break;
-        }
-        else if (nReadBytes == ISocket::RESULT_WOULDBLOCK)
+        if (nReadBytes == ISocket::RESULT_ERROR || nReadBytes == ISocket::RESULT_WOULDBLOCK)
         {
             break;
         }

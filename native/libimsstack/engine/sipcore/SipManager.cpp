@@ -120,13 +120,6 @@ RcPtr<SipDialogState> SipManager::LookupDialogState(IN SipDialogState* pDState,
             {
                 case SipDialogState::MATCHED:
                     return pTempDState;
-
-                case SipDialogState::NOT_MATCHED:
-                    break;
-
-                case SipDialogState::MATCHED_DIFFERENT:
-                    break;
-
                 case SipDialogState::MATCHED_FORKED_SUBSCRIBE:
                     if (pbIsForked != IMS_NULL)
                     {
@@ -135,14 +128,12 @@ RcPtr<SipDialogState> SipManager::LookupDialogState(IN SipDialogState* pDState,
 
                     IMS_TRACE_I("___ FORKED NOTIFY RECEIVED ___", 0, 0, 0);
                     return pTempDState;
-
                 case SipDialogState::MATCHED_EARLY_NOTIFY:
                     IMS_TRACE_I("___ EARLY NOTIFY RECEIVED ___", 0, 0, 0);
                     return pTempDState;
-
-                case SipDialogState::MATCHED_OVERLAP_DIALING:
-                    break;
-
+                case SipDialogState::NOT_MATCHED:              // FALL-THROUGH
+                case SipDialogState::MATCHED_DIFFERENT:        // FALL-THROUGH
+                case SipDialogState::MATCHED_OVERLAP_DIALING:  // FALL-THROUGH
                 default:
                     break;
             }

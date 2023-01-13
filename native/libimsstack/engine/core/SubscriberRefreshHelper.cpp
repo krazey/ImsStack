@@ -166,11 +166,9 @@ PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(
                 }
             }
         }
-        else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
-        {
-        }
         else
         {
+            // 401/407: a special handling required if new code is written.
             // A failure final response to NOTIFY request results
             // in the removal of subscription from the Subscriber.
         }

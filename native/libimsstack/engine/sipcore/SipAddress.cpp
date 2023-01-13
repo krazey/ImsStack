@@ -1414,12 +1414,8 @@ IMS_BOOL SipAddress::CompareTransportParameters(IN const SipAddress& objAddress)
      */
     const AString& strValue = (strTransport.GetLength() == 0) ? strOtherTransport : strTransport;
 
-    if (IsSchemeSip() && strValue.EqualsIgnoreCase(Sip::STR_UDP))
-    {
-        // One default(missing) & one explicitly contain
-        return IMS_FALSE;
-    }
-    else if (IsSchemeSips() && strValue.EqualsIgnoreCase(Sip::STR_TCP))
+    if ((IsSchemeSip() && strValue.EqualsIgnoreCase(Sip::STR_UDP)) ||
+            (IsSchemeSips() && strValue.EqualsIgnoreCase(Sip::STR_TCP)))
     {
         // One default(missing) & one explicitly contain
         return IMS_FALSE;

@@ -1339,11 +1339,8 @@ PRIVATE VIRTUAL void Registration::ConnectionNotifierError_NotifyError(
     {
         PostMessage(AMSG_REGISTRATION_TERMINATED, REASON_CLIENT_SOCKET_ERROR, 0);
     }
-    else if (nCode == ISipConnectionNotifier::TRANSPORT_ERROR_TCP_SERVER)
-    {
-        PostMessage(AMSG_REGISTRATION_TERMINATED, REASON_SERVER_SOCKET_ERROR, 0);
-    }
-    else if (nCode == ISipConnectionNotifier::TRANSPORT_ERROR_UDP_SERVER)
+    else if (nCode == ISipConnectionNotifier::TRANSPORT_ERROR_TCP_SERVER ||
+            nCode == ISipConnectionNotifier::TRANSPORT_ERROR_UDP_SERVER)
     {
         PostMessage(AMSG_REGISTRATION_TERMINATED, REASON_SERVER_SOCKET_ERROR, 0);
     }
@@ -1716,11 +1713,7 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FA
                 {
                     bUpdateRefreshTimer = IMS_TRUE;
 
-                    if (nShortenedExpires == 0)
-                    {
-                        nShortenedExpires = nExpires;
-                    }
-                    else if (nShortenedExpires > nExpires)
+                    if (nShortenedExpires == 0 || nShortenedExpires > nExpires)
                     {
                         nShortenedExpires = nExpires;
                     }
@@ -1880,9 +1873,7 @@ void Registration::CallListener(
                 PostMessage(AMSG_REGISTRATION_REMOVED, 0, 0);
             }
             break;
-        case STATE_TERMINATED:
-            break;
-
+        case STATE_TERMINATED:  // FALL-THROUGH
         default:
             break;
     }
@@ -1994,11 +1985,8 @@ void Registration::CheckUaLocation(IN ISipMessage* piSipMsg)
     }
     else
     {
-        if (objSentBy.IsIPv6Address() && objReceived.IsIPv6Address())
-        {
-            m_bIsBehindNat = !objSentBy.Equals(objReceived);
-        }
-        else if (objSentBy.IsIPv4Address() && objReceived.IsIPv4Address())
+        if ((objSentBy.IsIPv6Address() && objReceived.IsIPv6Address()) ||
+                (objSentBy.IsIPv4Address() && objReceived.IsIPv4Address()))
         {
             m_bIsBehindNat = !objSentBy.Equals(objReceived);
         }

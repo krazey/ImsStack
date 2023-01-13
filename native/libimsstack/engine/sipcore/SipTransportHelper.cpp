@@ -535,19 +535,13 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyAllSockets(
 
                     pSocket->GetSockName(objIp, nPort);
 
-                    if (objLocalIp.Equals(objIp))
+                    if (!objLocalIp.Equals(objIp) && !objIp.IsNoneAddress())
                     {
-                        pSocket->NotifyForceClosed();
-                    }
-                    else if (objIp.IsNoneAddress())
-                    {
-                        pSocket->NotifyForceClosed();
+                        continue;
                     }
                 }
-                else
-                {
-                    pSocket->NotifyForceClosed();
-                }
+
+                pSocket->NotifyForceClosed();
             }
         }
 

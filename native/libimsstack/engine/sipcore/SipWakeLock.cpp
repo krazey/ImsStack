@@ -26,12 +26,7 @@ PUBLIC GLOBAL void SipWakeLock::Acquire(
         // 3 seconds
         IMS_EVENT_SendEventForSlotId(IMS_EVENT_WAKE_LOCK, 0, 3000, IMS_SLOT_0);
     }
-    else if (objMethod.Equals(SipMethod::UPDATE))
-    {
-        // 2 seconds
-        IMS_EVENT_SendEventForSlotId(IMS_EVENT_WAKE_LOCK, 0, 2000, IMS_SLOT_0);
-    }
-    else if (objMethod.Equals(SipMethod::BYE))
+    else if (objMethod.Equals(SipMethod::UPDATE) || objMethod.Equals(SipMethod::BYE))
     {
         // 2 seconds
         IMS_EVENT_SendEventForSlotId(IMS_EVENT_WAKE_LOCK, 0, 2000, IMS_SLOT_0);

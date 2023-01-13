@@ -1503,7 +1503,8 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
         case 'a':
         case 'A':
         {
-            if (strName.EqualsIgnoreCase(SipHeaderName::CF_ACCEPT_CONTACT))
+            if (strName.EqualsIgnoreCase(SipHeaderName::CF_ACCEPT_CONTACT) ||
+                    strName.EqualsIgnoreCase(SipHeaderName::ACCEPT_CONTACT))
             {
                 nType = SipHeaderBase::ACCEPT_CONTACT;
             }
@@ -1514,10 +1515,6 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
             else if (strName.EqualsIgnoreCase(SipHeaderName::ALLOW_EVENTS))
             {
                 nType = SipHeaderBase::ALLOW_EVENTS;
-            }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::ACCEPT_CONTACT))
-            {
-                nType = SipHeaderBase::ACCEPT_CONTACT;
             }
             else if (strName.EqualsIgnoreCase(SipHeaderName::ACCEPT))
             {
@@ -1567,7 +1564,8 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
         case 'c':
         case 'C':
         {
-            if (strName.EqualsIgnoreCase(SipHeaderName::CF_CONTENT_TYPE))
+            if (strName.EqualsIgnoreCase(SipHeaderName::CF_CONTENT_TYPE) ||
+                    strName.EqualsIgnoreCase(SipHeaderName::CONTENT_TYPE))
             {
                 nType = SipHeaderBase::CONTENT_TYPE;
             }
@@ -1578,10 +1576,6 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
             else if (strName.EqualsIgnoreCase(SipHeaderName::CONTACT))
             {
                 nType = SipHeaderBase::CONTACT;
-            }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::CONTENT_TYPE))
-            {
-                nType = SipHeaderBase::CONTENT_TYPE;
             }
             else if (strName.EqualsIgnoreCase(SipHeaderName::CONTENT_LENGTH))
             {
@@ -1650,11 +1644,8 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
         case 'f':
         case 'F':
         {
-            if (strName.EqualsIgnoreCase(SipHeaderName::CF_FROM))
-            {
-                nType = SipHeaderBase::FROM;
-            }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::FROM))
+            if (strName.EqualsIgnoreCase(SipHeaderName::CF_FROM) ||
+                    strName.EqualsIgnoreCase(SipHeaderName::FROM))
             {
                 nType = SipHeaderBase::FROM;
             }
@@ -1884,11 +1875,8 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
             {
                 nType = SipHeaderBase::REFERRED_BY;
             }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::CF_REFER_TO))
-            {
-                nType = SipHeaderBase::REFER_TO;
-            }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::REFER_TO))
+            else if (strName.EqualsIgnoreCase(SipHeaderName::CF_REFER_TO) ||
+                    strName.EqualsIgnoreCase(SipHeaderName::REFER_TO))
             {
                 nType = SipHeaderBase::REFER_TO;
             }
@@ -1950,7 +1938,8 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
         case 's':
         case 'S':
         {
-            if (strName.EqualsIgnoreCase(SipHeaderName::CF_SUBJECT))
+            if (strName.EqualsIgnoreCase(SipHeaderName::CF_SUBJECT) ||
+                    strName.EqualsIgnoreCase(SipHeaderName::SUBJECT))
             {
                 nType = SipHeaderBase::SUBJECT;
             }
@@ -1978,10 +1967,6 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
             {
                 nType = SipHeaderBase::SUBSCRIPTION_STATE;
             }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::SUBJECT))
-            {
-                nType = SipHeaderBase::SUBJECT;
-            }
             else if (strName.EqualsIgnoreCase(SipHeaderName::SECURITY_CLIENT))
             {
                 nType = SipHeaderBase::SECURITY_CLIENT;
@@ -2008,11 +1993,8 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
         case 't':
         case 'T':
         {
-            if (strName.EqualsIgnoreCase(SipHeaderName::CF_TO))
-            {
-                nType = SipHeaderBase::TO;
-            }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::TO))
+            if (strName.EqualsIgnoreCase(SipHeaderName::CF_TO) ||
+                    strName.EqualsIgnoreCase(SipHeaderName::TO))
             {
                 nType = SipHeaderBase::TO;
             }
@@ -2052,11 +2034,8 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN const AString& strName)
         case 'v':
         case 'V':
         {
-            if (strName.EqualsIgnoreCase(SipHeaderName::CF_VIA))
-            {
-                nType = SipHeaderBase::VIA;
-            }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::VIA))
+            if (strName.EqualsIgnoreCase(SipHeaderName::CF_VIA) ||
+                    strName.EqualsIgnoreCase(SipHeaderName::VIA))
             {
                 nType = SipHeaderBase::VIA;
             }
@@ -4613,15 +4592,7 @@ GLOBAL const IMS_CHAR* GetLogString(IN const IMS_CHAR* pszInput, IN_OUT IMS_CHAR
         return pszOutput;
     }
 
-    if (pszInput == IMS_NULL)
-    {
-        pszOutput[0] = 'z';
-        pszOutput[1] = 'z';
-        pszOutput[2] = 'z';
-        pszOutput[3] = '\0';
-        return pszOutput;
-    }
-    else if (pszInput[0] == '\0')
+    if ((pszInput == IMS_NULL) || (pszInput[0] == '\0'))
     {
         pszOutput[0] = 'z';
         pszOutput[1] = 'z';

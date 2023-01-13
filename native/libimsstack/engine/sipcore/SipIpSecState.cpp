@@ -500,13 +500,9 @@ void SipIpSecState::NotifyMessageReceivedInternal(IN const SipTransportAddress& 
         {
             if (!m_pOldSa->HasPendingTransaction())
             {
-                if (m_pOldSa->GetState() == STATE_TERMINATED_PENDING)
-                {
-                    m_pOldSa->SetState(STATE_TERMINATED);
-                    PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
-                }
-                else if ((m_pNewSa != IMS_NULL) && (m_pNewSa->GetState() == STATE_ACTIVE) &&
-                        (m_pOldSa->GetState() != STATE_TERMINATED))
+                if ((m_pOldSa->GetState() == STATE_TERMINATED_PENDING) ||
+                        ((m_pNewSa != IMS_NULL) && (m_pNewSa->GetState() == STATE_ACTIVE) &&
+                                (m_pOldSa->GetState() != STATE_TERMINATED)))
                 {
                     m_pOldSa->SetState(STATE_TERMINATED);
                     PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
@@ -618,13 +614,9 @@ void SipIpSecState::NotifyMessageSentInternal(IN const SipTransportAddress& objN
         {
             if (!m_pOldSa->HasPendingTransaction())
             {
-                if (m_pOldSa->GetState() == STATE_TERMINATED_PENDING)
-                {
-                    m_pOldSa->SetState(STATE_TERMINATED);
-                    PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
-                }
-                else if ((m_pNewSa != IMS_NULL) && (m_pNewSa->GetState() == STATE_ACTIVE) &&
-                        (m_pOldSa->GetState() != STATE_TERMINATED))
+                if ((m_pOldSa->GetState() == STATE_TERMINATED_PENDING) ||
+                        ((m_pNewSa != IMS_NULL) && (m_pNewSa->GetState() == STATE_ACTIVE) &&
+                                (m_pOldSa->GetState() != STATE_TERMINATED)))
                 {
                     m_pOldSa->SetState(STATE_TERMINATED);
                     PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);

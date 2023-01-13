@@ -991,11 +991,7 @@ PROTECTED VIRTUAL IMS_BOOL SessionEx::Dialog_NotifyRequest(IN ISipServerConnecti
 
         if (piSipMsg->GetSdpBodyPart() != IMS_NULL)
         {
-            if (IsEarlyUpdateNotificationInProgress())
-            {
-                bPendingUpdateRequired = IMS_TRUE;
-            }
-            else if (IsIncomingEarlyUpdateReceivedInShortTime())
+            if (IsEarlyUpdateNotificationInProgress() || IsIncomingEarlyUpdateReceivedInShortTime())
             {
                 bPendingUpdateRequired = IMS_TRUE;
             }

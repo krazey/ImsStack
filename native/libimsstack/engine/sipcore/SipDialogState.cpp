@@ -355,32 +355,28 @@ IMS_SINT32 SipDialogState::CompareTo(IN SipDialogState* pDState, IN ::SipMessage
         // Fix for CSR 1-1316815
         // The To-Tag leniency should be present for CANCEL request,
         // response for CANCEL, and failure responses for INVITE.
-        if (objMethod.Equals(SipMethod::CANCEL))
-            bToTagLenient = IMS_TRUE;
-
-        else if (!SipStack::IsRequestMessage(pSipMsg) && (objMethod.Equals(SipMethod::INVITE)) &&
-                (nStatusCode >= SipStatusCode::SC_300))
+        // If the forking flag is enabled and it's a 1xx/2xx response to SUBSCRIBE,
+        // then set the bToTagLenient flag.
+        // Also, reset the matching result since it is used only for detecting forked NOTIFYs.
+        if (objMethod.Equals(SipMethod::CANCEL) ||
+                (!SipStack::IsRequestMessage(pSipMsg) && objMethod.Equals(SipMethod::INVITE) &&
+                        SipStatusCode::IsFinalFailure(nStatusCode)) ||
+                (bCheckForked && !SipStack::IsRequestMessage(pSipMsg) &&
+                        objMethod.Equals(SipMethod::SUBSCRIBE) &&
+                        (nStatusCode >= SipStatusCode::SC_100) &&
+                        (nStatusCode < SipStatusCode::SC_300)))
         {
             bToTagLenient = IMS_TRUE;
         }
-        else if ((bCheckForked) && !SipStack::IsRequestMessage(pSipMsg) &&
-                (objMethod.Equals(SipMethod::INVITE)) && (nStatusCode >= SipStatusCode::SC_100) &&
+        else if (bCheckForked && !SipStack::IsRequestMessage(pSipMsg) &&
+                objMethod.Equals(SipMethod::INVITE) && (nStatusCode >= SipStatusCode::SC_100) &&
                 (nStatusCode < SipStatusCode::SC_300))
         {
             bToTagLenient = IMS_TRUE;
             nForkedMessage = FORKED_INVITE;
         }
-        // If the forking flag in enabled (i.e. Sdf_en_forkedSubscribe)
-        // and it's a 1xx/2xx response to SUBSCRIBE, then set the bToTagLenient flag.
-        // Also, reset the matching result since it is used only for detecting forked NOTIFYs.
-        else if ((bCheckForked) && !SipStack::IsRequestMessage(pSipMsg) &&
-                (objMethod.Equals(SipMethod::SUBSCRIBE)) &&
-                (nStatusCode >= SipStatusCode::SC_100) && (nStatusCode < SipStatusCode::SC_300))
-        {
-            bToTagLenient = IMS_TRUE;
-        }
-        else if ((bCheckForked) && SipStack::IsRequestMessage(pSipMsg) &&
-                (objMethod.Equals(SipMethod::NOTIFY)))
+        else if (bCheckForked && SipStack::IsRequestMessage(pSipMsg) &&
+                objMethod.Equals(SipMethod::NOTIFY))
         {
             nForkedMessage = FORKED_SUBSCRIBE;
         }
@@ -1176,15 +1172,11 @@ PUBLIC GLOBAL IMS_BOOL SipDialogState::IsContactMandatory(IN IMS_SINT32 nMsgType
 {
     if (nMsgType == sipcore::SipMessage::TYPE_REQUEST)
     {
+        // REGISTER, OPTIONS, and PUBLISH: added by imscore requirements.
         if (objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::SUBSCRIBE) ||
                 objMethod.Equals(SipMethod::NOTIFY) || objMethod.Equals(SipMethod::REFER) ||
-                objMethod.Equals(SipMethod::UPDATE))
-        {
-            return IMS_TRUE;
-        }
-        // REGISTER, OPTIONS, and PUBLISH is added by the JSR 281 requirements.
-        else if (objMethod.Equals(SipMethod::REGISTER) || objMethod.Equals(SipMethod::OPTIONS) ||
-                objMethod.Equals(SipMethod::PUBLISH))
+                objMethod.Equals(SipMethod::UPDATE) || objMethod.Equals(SipMethod::REGISTER) ||
+                objMethod.Equals(SipMethod::OPTIONS) || objMethod.Equals(SipMethod::PUBLISH))
         {
             return IMS_TRUE;
         }
@@ -1193,13 +1185,10 @@ PUBLIC GLOBAL IMS_BOOL SipDialogState::IsContactMandatory(IN IMS_SINT32 nMsgType
     {
         if ((nStatusCode >= SipStatusCode::SC_200) && (nStatusCode < SipStatusCode::SC_300))
         {
+            // OPTIONS & NOTIFY: added by imscore requirements.
             if (objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::SUBSCRIBE) ||
-                    objMethod.Equals(SipMethod::REFER) || objMethod.Equals(SipMethod::UPDATE))
-            {
-                return IMS_TRUE;
-            }
-            // OPTIONS & NOTIFY is added by the JSR 281 requirements.
-            else if (objMethod.Equals(SipMethod::OPTIONS) || objMethod.Equals(SipMethod::NOTIFY))
+                    objMethod.Equals(SipMethod::REFER) || objMethod.Equals(SipMethod::UPDATE) ||
+                    objMethod.Equals(SipMethod::OPTIONS) || objMethod.Equals(SipMethod::NOTIFY))
             {
                 return IMS_TRUE;
             }
@@ -1216,13 +1205,9 @@ PUBLIC GLOBAL IMS_BOOL SipDialogState::IsContactMandatory(IN IMS_SINT32 nMsgType
         {
             if (objMethod.Equals(SipMethod::INVITE))
             {
-                if (bContactInAll1xxRequired)
+                // 3GPP Profile: 18x / 19x
+                if (bContactInAll1xxRequired || (nStatusCode >= SipStatusCode::SC_180))
                 {
-                    return IMS_TRUE;
-                }
-                else if (nStatusCode >= SipStatusCode::SC_180)
-                {
-                    // 3GPP Profile: 18x / 19x
                     return IMS_TRUE;
                 }
             }

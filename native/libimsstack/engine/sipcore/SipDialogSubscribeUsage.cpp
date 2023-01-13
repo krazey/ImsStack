@@ -125,11 +125,8 @@ PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::CompareTo(
 {
     const SipMethod& objMethod = objMsgInfo.GetMethod();
 
-    if (objMethod.Equals(SipMethod::REFER) && (m_nMethod != METHOD_REFER))
-    {
-        return IMS_FALSE;
-    }
-    else if (objMethod.Equals(SipMethod::SUBSCRIBE) && (m_nMethod != METHOD_SUBSCRIBE))
+    if ((objMethod.Equals(SipMethod::REFER) && (m_nMethod != METHOD_REFER)) ||
+            (objMethod.Equals(SipMethod::SUBSCRIBE) && (m_nMethod != METHOD_SUBSCRIBE)))
     {
         return IMS_FALSE;
     }

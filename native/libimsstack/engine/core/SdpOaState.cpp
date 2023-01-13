@@ -1654,12 +1654,9 @@ IMS_SINT32 SdpOaState::HandleOffer(IN const SdpParser& objParser)
         // Check the peer status
         if (pOffer->GetMediaCount() == 0)
         {
-            if (m_nState == STATE_OFFER_RECEIVED)
-            {
-                nOptions &= ~(SdpOfferAnswer::F_MEDIA_PARAM);
-            }
-            else if ((m_nState == STATE_OFFER_CHANGE_RECEIVED) &&
-                    (m_pCurrentView->GetMediaCount() == 0))
+            if ((m_nState == STATE_OFFER_RECEIVED) ||
+                    (m_nState == STATE_OFFER_CHANGE_RECEIVED &&
+                            m_pCurrentView->GetMediaCount() == 0))
             {
                 nOptions &= ~(SdpOfferAnswer::F_MEDIA_PARAM);
             }

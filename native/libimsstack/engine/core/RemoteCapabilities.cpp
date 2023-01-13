@@ -217,46 +217,31 @@ PUBLIC
 IMS_BOOL RemoteCapabilities::IsCompatible(
         IN const AppConfig* pAppConfig, IN const AString& strServiceId) const
 {
-    IMS_BOOL bIsCompatible = IMS_TRUE;
-
     if (pAppConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
     // StreamAudio
-    if (pAppConfig->IsStreamMediaAudioSupported() && !IsAudioSupported())
-    {
-        bIsCompatible = IMS_FALSE;
-    }
     // StreamVideo
-    else if (pAppConfig->IsStreamMediaVideoSupported() && !IsVideoSupported())
-    {
-        bIsCompatible = IMS_FALSE;
-    }
     // FramedMedia
-    else if (pAppConfig->IsFramedMediaSupported() && !IsFramedMediaSupported())
-    {
-        bIsCompatible = IMS_FALSE;
-    }
     // BasicMedia
-    else if (pAppConfig->IsBasicMediaSupported() && !IsBasicMediaCompatible(pAppConfig))
-    {
-        bIsCompatible = IMS_FALSE;
-    }
     // Event packages
-    else if (!pAppConfig->GetSupportedEventPackages().IsEmpty() && !IsEventCompatible(pAppConfig))
-    {
-        bIsCompatible = IMS_FALSE;
-    }
     // CoreService capabilities
-    else if (!pAppConfig->GetCoreServiceConfigs().IsEmpty() &&
-            !IsCoreServiceCompatible(pAppConfig, strServiceId))
+    if ((pAppConfig->IsStreamMediaAudioSupported() && !IsAudioSupported()) ||
+            (pAppConfig->IsStreamMediaVideoSupported() && !IsVideoSupported()) ||
+            (pAppConfig->IsFramedMediaSupported() && !IsFramedMediaSupported()) ||
+            (pAppConfig->IsBasicMediaSupported() && !IsBasicMediaCompatible(pAppConfig)) ||
+            (!pAppConfig->GetSupportedEventPackages().IsEmpty() &&
+                    !IsEventCompatible(pAppConfig)) ||
+            (!pAppConfig->GetCoreServiceConfigs().IsEmpty() &&
+                    !IsCoreServiceCompatible(pAppConfig, strServiceId)))
+
     {
-        bIsCompatible = IMS_FALSE;
+        return IMS_FALSE;
     }
 
-    return bIsCompatible;
+    return IMS_TRUE;
 }
 
 /**
