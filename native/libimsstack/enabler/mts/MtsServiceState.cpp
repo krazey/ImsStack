@@ -19,7 +19,6 @@
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "ImsAos.h"
-#include "ImsAosParameter.h"
 #include "MtsStringDef.h"
 #include "MtsServiceState.h"
 
@@ -34,7 +33,6 @@ MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
         m_bImsSuspend(IMS_FALSE),
         m_bSmsOverIpConf(IMS_FALSE),
         m_bAllowImsiBasedSipUri(IMS_FALSE),
-        m_nConnectedServices(ImsAosService::NONE),
         m_nSlotId(nSlotId)
 {
     IMS_TRACE_I("+MtsServiceState [slot_%d]", m_nSlotId, 0, 0);
@@ -87,12 +85,6 @@ IMS_SINT32 MtsServiceState::GetServiceState() const
 }
 
 PUBLIC
-IMS_BOOL MtsServiceState::IsServiceConnected(IN IMS_UINT32 nService)
-{
-    return (m_nConnectedServices & nService) != 0;
-}
-
-PUBLIC
 void MtsServiceState::OnImsConnected()
 {
     IMS_TRACE_I("OnImsConnected", 0, 0, 0);
@@ -128,12 +120,6 @@ void MtsServiceState::OnImsResumed()
     IMS_TRACE_I("OnImsResumed", 0, 0, 0);
 
     SetImsSuspendState(IMS_FALSE);
-}
-
-PUBLIC
-void MtsServiceState::SetConnectedServices(IN IMS_UINT32 nServices)
-{
-    m_nConnectedServices = nServices;
 }
 
 PUBLIC

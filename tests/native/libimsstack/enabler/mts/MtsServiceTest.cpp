@@ -168,12 +168,6 @@ TEST_F(MtsServiceTest, CoreServiceCapabilityQueryReceivedDoesNothing)
     pMtsService->CoreService_CapabilityQueryReceived(piCoreService, piCapabilities);
 }
 
-TEST_F(MtsServiceTest, ImsAosMonitorConnected)
-{
-    pMtsService->ImsAosMonitor_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
-    EXPECT_TRUE(pMtsService->GetIMtsServiceState()->IsServiceConnected(ImsAosFeature::SMSIP));
-}
-
 TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosConnected)
 {
     pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);

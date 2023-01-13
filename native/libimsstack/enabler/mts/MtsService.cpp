@@ -335,23 +335,6 @@ void MtsService::ImsAos_Resumed()
 }
 
 PUBLIC
-void MtsService::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 /*nIpcan*/)
-{
-    IMS_TRACE_I("ImsAosMonitor_Connected : nServices[%08x] ", nServices, 0, 0);
-
-    m_piMtsServiceState->SetConnectedServices(nServices);
-}
-
-PUBLIC
-void MtsService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
-{
-    (void)nType;
-    (void)nState;
-
-    IMS_TRACE_I("IMSAoSAppMonitor_Notify : nType[%d], nInfo[%d]", nType, nState, 0);
-}
-
-PUBLIC
 void MtsService::RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType)
 {
     if (m_piImsAos != IMS_NULL)
@@ -450,7 +433,6 @@ void MtsService::AttachAos()
     if (m_piImsAos != IMS_NULL)
     {
         m_piImsAos->SetListener(this);
-        m_piImsAos->SetMonitor(this);
     }
     else
     {
@@ -464,7 +446,6 @@ void MtsService::AttachAos()
     if (m_piImsEmergencyAos != IMS_NULL)
     {
         m_piImsEmergencyAos->SetListener(this);
-        m_piImsEmergencyAos->SetMonitor(this);
     }
     else
     {
@@ -724,14 +705,12 @@ void MtsService::DeInit()
     if (m_piImsAos != IMS_NULL)
     {
         m_piImsAos->SetListener(IMS_NULL);
-        m_piImsAos->SetMonitor(IMS_NULL);
         m_piImsAos = IMS_NULL;
     }
 
     if (m_piImsEmergencyAos != IMS_NULL)
     {
         m_piImsEmergencyAos->SetListener(IMS_NULL);
-        m_piImsEmergencyAos->SetMonitor(IMS_NULL);
         m_piImsEmergencyAos = IMS_NULL;
     }
 

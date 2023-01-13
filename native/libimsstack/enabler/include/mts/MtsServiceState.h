@@ -30,13 +30,11 @@ public:
     // IMtsServiceState
     void Init(IN IImsAos* piImsAos) override;
     IMS_SINT32 GetServiceState() const override;
-    IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService) override;
     void OnImsConnected() override;
     void OnImsDisconnected(IN IMS_UINT32 nReason) override;
     void OnImsDisconnecting(IN IMS_UINT32 nReason) override;
     void OnImsSuspended(IN IMS_UINT32 nReason) override;
     void OnImsResumed() override;
-    void SetConnectedServices(IN IMS_UINT32 nServices) override;
     void SetImsRegConnected(IN IMS_BOOL bConnected) override;
 
     IMS_BOOL IsMoServiceBlocked() const override;
@@ -56,7 +54,6 @@ private:
     // if sms_over_ip_network Ind is false. block mo service
     IMS_BOOL m_bSmsOverIpConf;
     IMS_BOOL m_bAllowImsiBasedSipUri;
-    IMS_UINT32 m_nConnectedServices;
     IMS_SINT32 m_nSlotId;
 };
 
