@@ -20,7 +20,6 @@
 #include <video/MockVideoNego.h>
 #include <MockIMediaSessionListener.h>
 
-using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 

@@ -21,8 +21,6 @@
 #include <MediaNetworkConnectionWatcher.h>
 #include <MockIMediaSessionListener.h>
 
-using ::testing::_;
-using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
 

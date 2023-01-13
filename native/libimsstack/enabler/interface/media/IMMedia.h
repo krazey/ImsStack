@@ -26,7 +26,7 @@
 #include "MediaDef.h"
 
 #define IMMEDIA     IMS_MSG_BASE_STREAMEDMEDIA
-#define IMMEDIA_IND IMMEDIA + 100
+#define IMMEDIA_IND (IMMEDIA + 100)
 
 using namespace android::telephony::imsmedia;
 
@@ -353,16 +353,6 @@ public:
     {
         return (this->m_eMediaType == param.m_eMediaType &&
                 this->m_objIpAddress == param.m_objIpAddress && this->m_nPort == param.m_nPort);
-    }
-
-    ImsMediaMsgQosParam(const ImsMediaMsgQosParam& param)
-    {
-        this->m_eMediaType = param.m_eMediaType;
-        this->m_eResult = param.m_eResult;
-        this->m_objIpAddress = param.m_objIpAddress;
-        this->m_nPort = param.m_nPort;
-        this->m_bCallback = param.m_bCallback;
-        this->m_bResult = param.m_bResult;
     }
 
 public:

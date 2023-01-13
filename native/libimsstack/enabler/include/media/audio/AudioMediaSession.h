@@ -103,7 +103,7 @@ public:
      * @param objLocalAddr The local ip address
      * @param nPort The local port number
      */
-    void SetLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);
+    void SetLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort);
 
     /**
      * @brief Get the rtcp is enabled

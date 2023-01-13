@@ -44,8 +44,9 @@ public:
     static IMS_BOOL UpdateAudioProfileBandwidth(
             OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig);
     static IMS_SINT32 GetLargestModesetInFmtp(
-            IN AString strCodec, IN AudioProfile::Payload* pPayload);
-    static IMS_SINT32 GetModesetList(IN AString strCodec, IN AudioProfile::Payload* pPayload);
+            IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
+    static IMS_SINT32 GetModesetList(
+            IN const AString& strCodec, IN AudioProfile::Payload* pPayload);
 
     static const IMS_UINT32 EVS_BR_CNT = 12;
     static const IMS_UINT32 EVS_BW_CNT = 4;

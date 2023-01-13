@@ -48,11 +48,7 @@ public:
                 delete pParam;
                 break;
             case IMMedia::REQUEST_ADD_CONFIG:
-                delete static_cast<ImsMediaMsgConfigParam*>(pParam);
-                break;
             case IMMedia::REQUEST_DELETE_CONFIG:
-                delete static_cast<ImsMediaMsgConfigParam*>(pParam);
-                break;
             case IMMedia::REQUEST_CONFIRM_CONFIG:
                 delete static_cast<ImsMediaMsgConfigParam*>(pParam);
                 break;

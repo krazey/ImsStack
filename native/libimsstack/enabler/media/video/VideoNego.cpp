@@ -49,8 +49,11 @@ VideoNego::VideoNego(IN const VideoNego& obj) :
 PUBLIC
 VideoNego& VideoNego::operator=(IN const VideoNego& obj)
 {
-    Copy(&obj);
-    return *this;
+    if (this != &obj)
+    {
+        Copy(&obj);
+    }
+    return (*this);
 }
 
 PUBLIC VideoNego::~VideoNego()
@@ -710,12 +713,23 @@ PRIVATE IMS_BOOL VideoNego::FormReoffer(IN ISessionDescriptor* pSessionDescripto
                 }
                 else
                 {
-                    IMS_TRACE_D("VideoNego::FormReOffer() - Try to Negotiated Capability", 0, 0, 0);
-                    pNewOaModel->pLocalProfile =
-                            new VideoProfile(*pPrevOaModel->pNegotiatedProfile);
+                    if (pPrevOaModel->pNegotiatedProfile != IMS_NULL)
+                    {
+                        IMS_TRACE_D(
+                                "VideoNego::FormReOffer() - Try to Negotiated Capability", 0, 0, 0);
+                        pNewOaModel->pLocalProfile =
+                                new VideoProfile(*pPrevOaModel->pNegotiatedProfile);
+                    }
                 }
             }
         }
+    }
+
+    if (pNewOaModel->pLocalProfile == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "VideoNego::Create Local Profile failed", 0, 0, 0);
+        delete pNewOaModel;
+        return IMS_FALSE;
     }
 
     // Modify a RTP/RTCP port if video is not supported
@@ -2456,7 +2470,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedProfile(IN VideoProfile* pLocalProfile
 }
 
 PRIVATE
-IMS_BOOL VideoNego::GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::AvcFmtp* pFmtp)
+IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfile::AvcFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -2535,7 +2549,7 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::AvcF
 }
 
 PRIVATE
-IMS_BOOL VideoNego::GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::HevcFmtp* pFmtp)
+IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfile::HevcFmtp* pFmtp)
 {
     if (pFmtp == IMS_NULL)
     {
@@ -2900,17 +2914,13 @@ MEDIA_DIRECTION VideoNego::UpdateDirectionToMine(
     if (bIsMtCase == IMS_FALSE)
     {
         // direction check strictly
-        if (eSrcDir == MEDIA_DIRECTION_SEND &&
-                (ePeerDir == MEDIA_DIRECTION_SEND || ePeerDir == MEDIA_DIRECTION_SEND_RECEIVE))
-        {
-            return MEDIA_DIRECTION_INVALID;
-        }
-        else if (eSrcDir == MEDIA_DIRECTION_RECEIVE &&
-                (ePeerDir == MEDIA_DIRECTION_RECEIVE || ePeerDir == MEDIA_DIRECTION_SEND_RECEIVE))
-        {
-            return MEDIA_DIRECTION_INVALID;
-        }
-        else if (eSrcDir == MEDIA_DIRECTION_INACTIVE && (ePeerDir != MEDIA_DIRECTION_INACTIVE))
+        if ((eSrcDir == MEDIA_DIRECTION_SEND &&
+                    (ePeerDir == MEDIA_DIRECTION_SEND ||
+                            ePeerDir == MEDIA_DIRECTION_SEND_RECEIVE)) ||
+                (eSrcDir == MEDIA_DIRECTION_RECEIVE &&
+                        (ePeerDir == MEDIA_DIRECTION_RECEIVE ||
+                                ePeerDir == MEDIA_DIRECTION_SEND_RECEIVE)) ||
+                (eSrcDir == MEDIA_DIRECTION_INACTIVE && (ePeerDir != MEDIA_DIRECTION_INACTIVE)))
         {
             return MEDIA_DIRECTION_INVALID;
         }
@@ -2954,8 +2964,8 @@ PRIVATE IMS_BOOL VideoNego::GetCorrectImageIndex(
 }
 
 PRIVATE VIDEO_RESOLUTION VideoNego::GetResolutionFromSdp(IN VIDEO_CODEC codecType,
-        IN AString strImageAttrFromSdp, IN AString strFrameSizeFromSdp, IN AString strSpropParam,
-        IN IMS_SINT32 nQcif)
+        IN const AString& strImageAttrFromSdp, IN const AString& strFrameSizeFromSdp,
+        IN const AString& strSpropParam, IN IMS_SINT32 nQcif)
 {
     IMS_UINT32 nWidth, nHeight;
 
@@ -2996,8 +3006,8 @@ PRIVATE VIDEO_RESOLUTION VideoNego::GetResolutionFromSdp(IN VIDEO_CODEC codecTyp
     }
 }
 
-PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(
-        IN AString strImageAttrFromSdp, OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight)
+PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(IN const AString& strImageAttrFromSdp,
+        OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight)
 {
     IMS_UINT32 nImagePayloadNum = 0;  // Payload Number in Image Attr
     IMS_UINT32 nDirection = 1;        // Direction : send or recv
@@ -3120,6 +3130,7 @@ PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(
                     (*nImageHeight) =
                             strSendValue.GetAt(1).ToInt32();  // Image Height for Send Direction
                 }
+                /* TODO: need to add
                 else if (strSendValue.GetAt(0).Equals("sar") == IMS_TRUE)
                 {
                     // dImageOptSAR = (IMS_DOUBLE)strSendValue.GetAt(1).GetStr();  // Sample Aspect
@@ -3135,6 +3146,7 @@ PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(
                     // dImageOptQ = strSendValue.GetAt(1).ToDouble();    // Higher Preference for
                     // Send Direction
                 }
+                */
             }
         }
 
@@ -3233,24 +3245,23 @@ PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(
                     (*nImageHeight) =
                             strRecvValue.GetAt(1).ToInt32();  // Image Height for Recv Direction
                 }
+                /* TODO: Need to add
                 else if (strRecvValue.GetAt(0).Equals("sar") == IMS_TRUE)
                 {
-                    /** TODO: disable temporary */
                     // dImageOptSAR = strRecvValue.GetAt(1).ToDouble();  // Sample Aspect Ratio for
                     // Recv Direction
                 }
                 else if (strRecvValue.GetAt(0).Equals("par") == IMS_TRUE)
                 {
-                    /** TODO: disable temporary */
                     // dImageOptPAR = strRecvValue.GetAt(1).ToDouble();  // Picture Aspect Ratio for
                     // Recv Direction
                 }
                 else if (strRecvValue.GetAt(0).Equals("q") == IMS_TRUE)
                 {
-                    /** TODO: disable temporary */
                     // dImageOptQ = strRecvValue.GetAt(1).ToDouble();    // Higher Preference for
                     // Recv Direction
                 }
+                */
             }
         }
 

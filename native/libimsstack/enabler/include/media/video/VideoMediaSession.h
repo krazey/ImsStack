@@ -88,7 +88,7 @@ public:
      * @param objLocalAddr The local ip address
      * @param nPort The local port number
      */
-    void UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);
+    void UpdateLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort);
 
     /**
      * @brief Handles the message from the telecom

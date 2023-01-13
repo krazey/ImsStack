@@ -671,7 +671,6 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
         case SET_CONFERENCE_ENABLE:
         case SEND_FAST_VIDEO_UPDATE:
             /** TODO: add implementation*/
-            break;
         default:
             break;
     }
@@ -1004,7 +1003,6 @@ IMS_BOOL MediaSession::OnMessage(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
             break;
         case IMMedia::CHANGE_MTU:
             /** TODO: add implementation */
-            break;
         default:
             break;
     }

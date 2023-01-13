@@ -243,7 +243,7 @@ IMS_BOOL TextMediaSession::UpdateMediaQualityThreshold(
 }
 
 PUBLIC
-void TextMediaSession::UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort)
+void TextMediaSession::UpdateLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     if (!objLocalAddr.ToString().IsNULL())
     {

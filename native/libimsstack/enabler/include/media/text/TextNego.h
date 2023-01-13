@@ -228,7 +228,7 @@ private:
             IN IMediaDescriptor* pDescriptor, OUT TextProfile* pProfile);
     IMS_BOOL MakeNegotiatedProfile(IN TextProfile* pLocalProfile, IN TextProfile* pPeerProfile,
             IN IMS_BOOL bIsOfferReceived, OUT TextProfile* pNegotiatedProfile);
-    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT TextProfile::RedFmtp* pFmtp);
+    IMS_BOOL GetFmtpFromString(IN const AString& strFmtp, OUT TextProfile::RedFmtp* pFmtp);
     IMS_BOOL FindT140InProfile(IN TextProfile* pProfile, IN TextProfile::Payload* pPayload);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
