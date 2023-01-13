@@ -190,8 +190,7 @@ PUBLIC
 const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfig(
         IN IMS_SINT32 nType /*= IAosSubscriber::NORMAL*/) const
 {
-    return Configuration::GetInstance()->GetSubscriberConfig(
-            m_nSlotId, (nType == IAosSubscriber::FAKE) ? ID_FAKE : AString::ConstNull());
+    return GetSubscriberConfiguration(nType);
 }
 
 PROTECTED
@@ -206,12 +205,12 @@ void AosSubscriberManager::Init()
 
     if (m_piSubscriberConfig == IMS_NULL)
     {
-        m_piSubscriberConfig = GetSubscriberConfig();
+        m_piSubscriberConfig = GetSubscriberConfiguration();
     }
 
     if (m_piSubscriberConfigFake == IMS_NULL)
     {
-        m_piSubscriberConfigFake = GetSubscriberConfig(IAosSubscriber::FAKE);
+        m_piSubscriberConfigFake = GetSubscriberConfiguration(IAosSubscriber::FAKE);
     }
 
     if (m_piSubscriberConfig != IMS_NULL)
@@ -568,6 +567,14 @@ IMS_BOOL AosSubscriberManager::CheckIsimValues()
     }
 
     return IMS_TRUE;
+}
+
+PROTECTED
+const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfiguration(
+        IN IMS_SINT32 nType /*= IAosSubscriber::NORMAL*/) const
+{
+    return Configuration::GetInstance()->GetSubscriberConfig(
+            m_nSlotId, (nType == IAosSubscriber::FAKE) ? ID_FAKE : AString::ConstNull());
 }
 
 PROTECTED

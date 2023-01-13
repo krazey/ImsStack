@@ -96,6 +96,8 @@ protected:
 
     IMS_BOOL CheckIsimValues();
 
+    const ISubscriberConfig* GetSubscriberConfiguration(
+            IN IMS_SINT32 nType = IAosSubscriber::NORMAL) const;
     IMS_BOOL GetImpuFromIsim(OUT AStringArray& objImpus) const;
     IMS_BOOL GetTemporaryImpu(OUT AStringArray& objImpus, IN IMS_BOOL bDbWritable);
 
