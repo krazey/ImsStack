@@ -44,7 +44,8 @@ protected:
         IUSncOpenCmdParam* pParam = new IUSncOpenCmdParam();
         pParam->m_strThread = sThread;
 
-        IMSMSG objOpenCmdMsg(IUSncService::OPENMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+        IMSMSG objOpenCmdMsg(
+                IUSncService::OPEN_MESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
         ASSERT_TRUE(pRcsService->HandleOpenMSG(objOpenCmdMsg) == IMS_TRUE);
     }
 
@@ -65,7 +66,7 @@ TEST_F(RcsMessageServiceTest, HandleSessionMSG)
     IUSncSendMessageParam* pParam = new IUSncSendMessageParam();
     pParam->m_strThread = sThread;
 
-    IMSMSG objSessionCmdMsg(IUSncService::SENDMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+    IMSMSG objSessionCmdMsg(IUSncService::SEND_MESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     // to avoid test
     // EXPECT_EQ(pRcsService->HandleSessionMSG(objSessionCmdMsg), IMS_TRUE);
 }
@@ -78,7 +79,7 @@ TEST_F(RcsMessageServiceTest, HandleNotifyReceiveErrorMSG)
     pParam->m_strThread = sThread;
 
     IMSMSG objNotifyCmdMsg(
-            IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+            IUSncService::NOTIFY_MESSAGE_RECEIVE_ERROR_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     // to avoid test
     // EXPECT_EQ(pRcsService->HandleSessionMSG(objNotifyCmdMsg), IMS_TRUE);
 }
@@ -90,7 +91,7 @@ TEST_F(RcsMessageServiceTest, HandleCloseSessionMSG)
     IUSncCloseSessionCmdParam* pParam = new IUSncCloseSessionCmdParam();
     pParam->m_strThread = sThread;
 
-    IMSMSG objCloseCmdMsg(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+    IMSMSG objCloseCmdMsg(IUSncService::CLOSE_SESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     // to avoid test
     // EXPECT_EQ(pRcsService->HandleCloseSessionMSG(objCloseCmdMsg), IMS_TRUE);
 }

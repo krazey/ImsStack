@@ -23,6 +23,7 @@
 #include "service/MtcEnabler.h"
 #include "service/MtsEnabler.h"
 #include "service/UceEnabler.h"
+#include "service/SipControllerEnabler.h"
 
 PUBLIC
 EnablerFactory::EnablerFactory() :
@@ -142,4 +143,5 @@ void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId, OUT IMSList<IEnabler*
     pEnablers->Append(new MtcEnabler(nSlotId));
     pEnablers->Append(new MtsEnabler(nSlotId));
     pEnablers->Append(new UceEnabler(nSlotId));
+    pEnablers->Append(new SipControllerEnabler(nSlotId));
 }

@@ -96,7 +96,7 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
 
     switch (objMSG.nMSG)
     {
-        case IUSncService::MESSAGERECEIVED_IND:
+        case IUSncService::MESSAGE_RECEIVED_IND:
         {
             IUSncMessageParam* pParam = reinterpret_cast<IUSncMessageParam*>(objMSG.nLparam);
 
@@ -106,28 +106,28 @@ void JniSipControllerServiceThread::HandleMsg(IN IMSMSG& objMSG)
             WriteStringToParcel(pParam->m_strContent, parcel);
         }
         break;
-        case IUSncService::MESSAGESENT_IND:
+        case IUSncService::MESSAGE_SENT_IND:
         {
             IUSncSentMessageIndParam* pParam =
                     reinterpret_cast<IUSncSentMessageIndParam*>(objMSG.nLparam);
             parcel.writeString16(android::String16(pParam->m_strTId.GetStr()));
         }
         break;
-        case IUSncService::SENDMESSAGEFAILURE_IND:
+        case IUSncService::SEND_MESSAGE_FAILURE_IND:
         {
             IUSncSendFailureIndParam* pParam =
                     reinterpret_cast<IUSncSendFailureIndParam*>(objMSG.nLparam);
             parcel.writeString16(android::String16(pParam->m_strTId.GetStr()));
         }
         break;
-        case IUSncControl::ONREGISTRATIONUPDATED_IND:
+        case IUSncControl::ONREGISTRATION_UPDATED_IND:
         {
             // TODO : hakjunc
             IMS_TRACE_E(0, "HandleMsg : ONREGISTRATIONUPDATED_IND by hakjunc,  name %d\n",
                     objMSG.nMSG, 0, 0);
         }
         break;
-        case IUSncControl::ONCONFIGURATIONUPDATED_IND:
+        case IUSncControl::ONCONFIGURATION_UPDATED_IND:
         {
             // TODO : hakjunc
             IMS_TRACE_E(0, "HandleMsg : ONCONFIGURATIONUPDATED_IND by hakjunc, name %d\n",
