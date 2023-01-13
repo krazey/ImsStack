@@ -23,12 +23,15 @@
 #include "core/MockISession.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMediaReportEventListener.h"
+#include "media/MockIMediaQosEventListener.h"
 #include "media/MockMediaProfileManager.h"
 #include "media/MtcMediaManager.h"
+#include "sipcore/ISipHeader.h"
 #include "sipcore/SipStatusCode.h"
 #include "utility/MockIMessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <vector>
 
 using ::testing::_;
 using ::testing::Return;
@@ -283,6 +286,100 @@ TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithMediaDetachReport)
     pMediaManager->MediaSession_Notify(REPORT_MEDIA_DETACH);
 }
 
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyFailuresNotifiesListenerMediaInitFailed)
+{
+    IMS_UINT32 nAnyReportType = REPORT_SUCCESS;
+
+    //clang-format off
+    std::vector<RtpError> objErrors{RtpError::INVALID_PARAM, RtpError::NOT_READY,
+            RtpError::NO_MEMORY, RtpError::NO_RESOURCES, RtpError::PORT_UNAVAILABLE,
+            RtpError::REQUEST_NOT_SUPPORTED, RtpError::RESPONSE_WAIT_TIMEOUT};
+    //clang-format on
+
+    EXPECT_CALL(*pListener, OnMediaFailed(CallReasonInfo(CODE_MEDIA_INIT_FAILED))).Times(7);
+    for (RtpError eError : objErrors)
+    {
+        pMediaManager->MediaSession_NotifyFailures(nAnyReportType, eError);
+    }
+}
+
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyDoesNothingForNotUsedReportType)
+{
+    EXPECT_CALL(*pListener, OnMediaFailed(_)).Times(0);
+    pMediaManager->MediaSession_Notify(REPORT_NOTUSED);
+    pMediaManager->MediaSession_Notify(REPORT_INVALID);
+}
+
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyFailuresDoesNothingIfNoError)
+{
+    IMS_UINT32 nAnyReportType = REPORT_SUCCESS;
+    EXPECT_CALL(*pListener, OnMediaFailed(_)).Times(0);
+    pMediaManager->MediaSession_NotifyFailures(nAnyReportType, RtpError::NO_ERROR);
+}
+
+TEST_F(MtcMediaManagerTest, MediaSessionNotifyQosNotifiesListener)
+{
+    IMS_BOOL bAnyResult = IMS_TRUE;
+    MEDIA_CONTENT_TYPE eAnyMediaType = MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO;
+
+    MockIMediaQosEventListener objQosListener;
+    {
+        // qos listener is null
+        EXPECT_CALL(objQosListener, OnQosStatusChanged(_, _, _)).Times(0);
+        pMediaManager->MediaSession_NotifyQos(NEGO_ID, bAnyResult, eAnyMediaType);
+    }
+
+    {
+        // valid qos listener
+        pMediaManager->SetQosListener(&objQosListener);
+        EXPECT_CALL(*pMediaProfileManager, GetSessionWithNegoId(NEGO_ID))
+                .Times(2)
+                .WillRepeatedly(Return(&objISession));
+        EXPECT_CALL(objQosListener,
+                OnQosStatusChanged(&objISession, QosStatus::AVAILABLE, MEDIATYPE_AUDIO))
+                .Times(1);
+        pMediaManager->MediaSession_NotifyQos(NEGO_ID, IMS_TRUE, eAnyMediaType);
+
+        EXPECT_CALL(
+                objQosListener, OnQosStatusChanged(&objISession, QosStatus::LOST, MEDIATYPE_AUDIO))
+                .Times(1);
+        pMediaManager->MediaSession_NotifyQos(NEGO_ID, IMS_FALSE, eAnyMediaType);
+    }
+}
+
+TEST_F(MtcMediaManagerTest, UpdateAudioMediaDirectionUpdatesMediaInfo)
+{
+    std::vector<IMS_SINT32> objDirections{DIRECTION_INVALID, DIRECTION_INACTIVE, DIRECTION_RECEIVE,
+            DIRECTION_SEND, DIRECTION_SEND_RECEIVE};
+    for (IMS_SINT32 eDirection : objDirections)
+    {
+        pMediaManager->UpdateMediaDirection(MEDIATYPE_AUDIO, eDirection);
+        EXPECT_EQ(pMediaManager->GetMediaInfo().eAudioDirection, eDirection);
+    }
+}
+
+TEST_F(MtcMediaManagerTest, UpdateVideoMediaDirectionUpdatesMediaInfo)
+{
+    std::vector<IMS_SINT32> objDirections{DIRECTION_INVALID, DIRECTION_INACTIVE, DIRECTION_RECEIVE,
+            DIRECTION_SEND, DIRECTION_SEND_RECEIVE};
+    for (IMS_SINT32 eDirection : objDirections)
+    {
+        pMediaManager->UpdateMediaDirection(MEDIATYPE_VIDEO, eDirection);
+        EXPECT_EQ(pMediaManager->GetMediaInfo().eVideoDirection, eDirection);
+    }
+}
+
+TEST_F(MtcMediaManagerTest, UpdateTextMediaDirectionUpdatesMediaInfo)
+{
+    std::vector<IMS_SINT32> objDirections{DIRECTION_INVALID, DIRECTION_INACTIVE, DIRECTION_RECEIVE,
+            DIRECTION_SEND, DIRECTION_SEND_RECEIVE};
+    for (IMS_SINT32 eDirection : objDirections)
+    {
+        pMediaManager->UpdateMediaDirection(MEDIATYPE_TEXT, eDirection);
+        EXPECT_EQ(pMediaManager->GetMediaInfo().eTextDirection, eDirection);
+    }
+}
+
 TEST_F(MtcMediaManagerTest, FormSdpWhenNegotiationStateIsOfferSent)
 {
     ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
@@ -424,6 +521,62 @@ TEST_F(MtcMediaManagerTest, NegotiateSdpContainsText)
     EXPECT_CALL(*piMediaSession, RequestQos(NEGO_ID, MEDIA_TYPE_TEXT)).Times(1);
 
     pMediaManager->NegotiateSdp(&objISession);
+}
+
+TEST_F(MtcMediaManagerTest, UpdatePemTypeDoesNothingIfNoPemAndConfigDoesNotRequire)
+{
+    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::P_EARLY_MEDIA, _))
+            .WillByDefault(Return(AString::ConstEmpty()));
+    EXPECT_CALL(*pConfigurationManager, IsInitializePemWhenNoHeader()).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, PemType::NONE)).Times(0);
+    pMediaManager->UpdatePemType(&objISession, &objIMessage);
+}
+
+TEST_F(MtcMediaManagerTest, UpdatePemTypeUpdatesProfileManagerIfNoPemButConfigRequires)
+{
+    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::P_EARLY_MEDIA, _))
+            .WillByDefault(Return(AString::ConstEmpty()));
+    EXPECT_CALL(*pConfigurationManager, IsInitializePemWhenNoHeader()).WillOnce(Return(IMS_TRUE));
+
+    EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, PemType::NONE));
+    pMediaManager->UpdatePemType(&objISession, &objIMessage);
+}
+
+TEST_F(MtcMediaManagerTest, UpdatePemTypeUpdatesProfileManagerIfPemSendrecv)
+{
+    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::P_EARLY_MEDIA, _))
+            .WillByDefault(Return(AString("sendrecv")));
+
+    EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, PemType::SENDRECV));
+    pMediaManager->UpdatePemType(&objISession, &objIMessage);
+}
+
+TEST_F(MtcMediaManagerTest, UpdatePemTypeUpdatesProfileManagerIfPemSendonly)
+{
+    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::P_EARLY_MEDIA, _))
+            .WillByDefault(Return(AString("sendonly")));
+
+    EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, PemType::SENDONLY));
+    pMediaManager->UpdatePemType(&objISession, &objIMessage);
+}
+
+TEST_F(MtcMediaManagerTest, UpdatePemTypeUpdatesProfileManagerIfPemRecvonly)
+{
+    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::P_EARLY_MEDIA, _))
+            .WillByDefault(Return(AString("recvonly")));
+
+    EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, PemType::RECVONLY));
+    pMediaManager->UpdatePemType(&objISession, &objIMessage);
+}
+
+TEST_F(MtcMediaManagerTest, UpdatePemTypeUpdatesProfileManagerIfPemInactive)
+{
+    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::P_EARLY_MEDIA, _))
+            .WillByDefault(Return(AString("inactive")));
+
+    EXPECT_CALL(*pMediaProfileManager, SetPemType(&objISession, PemType::INACTIVE));
+    pMediaManager->UpdatePemType(&objISession, &objIMessage);
 }
 
 TEST_F(MtcMediaManagerTest, RunForMtCallInEarlyDialogState)
@@ -748,6 +901,117 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfLocalToneWith180ByForce)
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
     EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_FALSE(pMediaManager->IsLocalTone());
+}
+
+TEST_F(MtcMediaManagerTest, SetRtpPortInvokesMediaSessionSetOptions)
+{
+    IMS_UINT32 eMediaType = MEDIATYPE_AUDIO;
+    MEDIA_CONTENT_TYPE eContentType = MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO;
+    IMS_UINT32 nPort = 12345;
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+    EXPECT_CALL(*piMediaSession,
+            SetOptions(NEGO_ID, IMediaSession::OptionType::SET_RTP_PORT, eContentType, nPort));
+    pMediaManager->SetRtpPort(&objISession, eMediaType, nPort);
+}
+
+TEST_F(MtcMediaManagerTest, SetConferenceCallInvokesMediaSessionSetOptions)
+{
+    EXPECT_CALL(*piMediaSession,
+            SetOptions(IMS_NULL, IMediaSession::OptionType::SET_CONFERENCE_ENABLE, 0, 0))
+            .Times(2);
+    pMediaManager->SetConferenceCall(IMS_TRUE);
+    pMediaManager->SetConferenceCall(IMS_FALSE);
+}
+
+TEST_F(MtcMediaManagerTest, GetNegotiationStateReturnsIdleIfMediaSessionIsNull)
+{
+    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext);
+    EXPECT_EQ(pTestMediaManager->GetNegotiationState(&objISession), NegotiationState::STATE_IDLE);
+    delete pTestMediaManager;
+}
+
+TEST_F(MtcMediaManagerTest, GetNegotiationStateReturnsValueFromMediaSession)
+{
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+    //clang-format off
+    std::vector<NegotiationState> objNeoStates{
+            STATE_IDLE, STATE_OFFER_RECEIVED, STATE_OFFER_SENT, STATE_NEGOTIATED, STATE_NOTUSED};
+    //clang-format on
+
+    for (NegotiationState eState : objNeoStates)
+    {
+        EXPECT_CALL(*piMediaSession, GetNegoState(NEGO_ID)).WillOnce(Return(eState));
+        EXPECT_EQ(pMediaManager->GetNegotiationState(&objISession), eState);
+    }
+}
+
+TEST_F(MtcMediaManagerTest, GetNegotiatedDirectionReturnsInvalidIfMediaSessionIsNull)
+{
+    IMS_UINT32 eMediaType = MEDIATYPE_AUDIO;
+
+    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext);
+    EXPECT_EQ(pTestMediaManager->GetNegotiatedDirection(&objISession, eMediaType),
+            MEDIA_DIRECTION::MEDIA_DIRECTION_INVALID);
+    delete pTestMediaManager;
+}
+
+TEST_F(MtcMediaManagerTest, GetNegotiatedDirectionReturnsValueFromMediaSession)
+{
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+    IMS_UINT32 eMediaType = MEDIATYPE_AUDIO;
+    MEDIA_CONTENT_TYPE eContentType = MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO;
+
+    //clang-format off
+    std::vector<MEDIA_DIRECTION> objDirections{MEDIA_DIRECTION_INVALID, MEDIA_DIRECTION_INACTIVE,
+            MEDIA_DIRECTION_RECEIVE, MEDIA_DIRECTION_SEND, MEDIA_DIRECTION_SEND_RECEIVE};
+    //clang-format on
+
+    for (MEDIA_DIRECTION eDirection : objDirections)
+    {
+        EXPECT_CALL(*piMediaSession, GetNegotiatedDirection(NEGO_ID, eContentType))
+                .WillOnce(Return(eDirection));
+        EXPECT_EQ(pMediaManager->GetNegotiatedDirection(&objISession, eMediaType), eDirection);
+    }
+}
+
+TEST_F(MtcMediaManagerTest, GetNegotiatedCallTypeReturnsUnknownIfMediaSessionIsNull)
+{
+    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext);
+    EXPECT_EQ(pTestMediaManager->GetNegotiatedCallType(&objISession), CallType::UNKNOWN);
+    delete pTestMediaManager;
+}
+
+TEST_F(MtcMediaManagerTest, GetNegotiatedCallTypeReturnsValueBasedOnMediaTypeFromMediaSession)
+{
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+    MEDIA_CONTENT_TYPE eContentType = MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO;
+    ON_CALL(*piMediaSession, GetNegotiatedMediaType(NEGO_ID)).WillByDefault(Return(eContentType));
+    EXPECT_EQ(pMediaManager->GetNegotiatedCallType(&objISession), CallType::VOIP);
+}
+
+TEST_F(MtcMediaManagerTest, SetSrvccStateDoesNohtingIfMediaSessionIsNull)
+{
+    MtcMediaManager* pTestMediaManager = new MtcMediaManager(objContext);
+    pTestMediaManager->SetSrvccState(SrvccState::IDLE);
+    delete pTestMediaManager;
+}
+
+TEST_F(MtcMediaManagerTest, SetSrvccStateSetsStateToMediaSession)
+{
+    EXPECT_CALL(*piMediaSession, NotifySrvccStatus(MEDIA_SRVCC_STATUS::MEDIA_SRVCC_IDLE));
+    pMediaManager->SetSrvccState(SrvccState::IDLE);
+
+    EXPECT_CALL(*piMediaSession, NotifySrvccStatus(MEDIA_SRVCC_STATUS::MEDIA_SRVCC_STARTED));
+    pMediaManager->SetSrvccState(SrvccState::STARTED);
+
+    EXPECT_CALL(*piMediaSession, NotifySrvccStatus(MEDIA_SRVCC_STATUS::MEDIA_SRVCC_SUCCEED));
+    pMediaManager->SetSrvccState(SrvccState::SUCCEEDED);
+
+    EXPECT_CALL(*piMediaSession, NotifySrvccStatus(MEDIA_SRVCC_STATUS::MEDIA_SRVCC_FAILED));
+    pMediaManager->SetSrvccState(SrvccState::FAILED);
+
+    EXPECT_CALL(*piMediaSession, NotifySrvccStatus(MEDIA_SRVCC_STATUS::MEDIA_SRVCC_CANCELED));
+    pMediaManager->SetSrvccState(SrvccState::CANCELED);
 }
 
 TEST_F(MtcMediaManagerTest, AdjustDirectionForAutoAnswerForNormalCase)

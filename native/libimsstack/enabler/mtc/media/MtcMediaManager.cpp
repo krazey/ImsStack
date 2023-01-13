@@ -144,9 +144,12 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyQos(IN IMS_UINTP nNegoId
     IMS_TRACE_D("MediaSession_NotifyQos : NegoId[%" PFLS_x "] Result[%d] Media[%d]", nNegoId,
             bSuccess, eMediaType);
 
-    m_pQosListener->OnQosStatusChanged(m_pProfileManager->GetSessionWithNegoId(nNegoId),
-            (bSuccess) ? QosStatus::AVAILABLE : QosStatus::LOST,
-            MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType));
+    if (m_pQosListener != IMS_NULL)
+    {
+        m_pQosListener->OnQosStatusChanged(m_pProfileManager->GetSessionWithNegoId(nNegoId),
+                (bSuccess) ? QosStatus::AVAILABLE : QosStatus::LOST,
+                MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType));
+    }
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::SetMediaReportEventListener(
@@ -387,33 +390,27 @@ void MtcMediaManager::FinalizeSdp(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IMessage* piMessage)
 {
-    ImsList<AString> lstHeaders =
-            m_objContext.GetMessageUtils().GetHeaders(piMessage, ISipHeader::P_EARLY_MEDIA);
-
     PemType ePemType = PemType::NONE;
 
-    for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
+    AString strPemHeader =
+            m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::P_EARLY_MEDIA);
+    if (strPemHeader.Contains("sendrecv"))
     {
-        AString strPemHeader = lstHeaders.GetAt(i);
-
-        if (strPemHeader.Contains("sendrecv"))
-        {
-            ePemType = PemType::SENDRECV;
-        }
-        else if (strPemHeader.Contains("sendonly"))
-        {
-            ePemType = PemType::SENDONLY;
-        }
-        else if (strPemHeader.Contains("recvonly"))
-        {
-            ePemType = PemType::RECVONLY;
-        }
-        else if (strPemHeader.Contains("inactive"))
-        {
-            ePemType = PemType::INACTIVE;
-        }
-        // When UE receives P-Early-Media header with "gated", PemType will be keep the value.
+        ePemType = PemType::SENDRECV;
     }
+    else if (strPemHeader.Contains("sendonly"))
+    {
+        ePemType = PemType::SENDONLY;
+    }
+    else if (strPemHeader.Contains("recvonly"))
+    {
+        ePemType = PemType::RECVONLY;
+    }
+    else if (strPemHeader.Contains("inactive"))
+    {
+        ePemType = PemType::INACTIVE;
+    }
+    // When UE receives P-Early-Media header with "gated", PemType will be keep the value.
 
     if (ePemType != PemType::NONE ||
             m_objContext.GetConfigurationProxy().Is(Feature::INITIALIZE_PEM_WHEN_NO_HEADER))
@@ -532,6 +529,12 @@ PUBLIC VIRTUAL NegotiationState MtcMediaManager::GetNegotiationState(IN ISession
 PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedDirection(
         IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
+    if (!m_piMediaSession)
+    {
+        IMS_TRACE_D("GetNegotiatedDirection : Fail to get the negotiated direction.", 0, 0, 0);
+        return MEDIA_DIRECTION::MEDIA_DIRECTION_INVALID;
+    }
+
     MEDIA_CONTENT_TYPE eContent = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaType);
 
     MEDIA_DIRECTION eDir =
@@ -555,6 +558,12 @@ PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedQuality(
 
 PUBLIC VIRTUAL CallType MtcMediaManager::GetNegotiatedCallType(IN ISession* piSession)
 {
+    if (!m_piMediaSession)
+    {
+        IMS_TRACE_D("GetNegotiatedCallType : Fail to get the negotiated call type.", 0, 0, 0);
+        return CallType::UNKNOWN;
+    }
+
     MEDIA_CONTENT_TYPE eContents =
             m_piMediaSession->GetNegotiatedMediaType(GetMediaNegoId(piSession));
 
@@ -590,6 +599,12 @@ PUBLIC VIRTUAL void MtcMediaManager::AdjustDirectionForAutoAccept(
 
 PUBLIC VIRTUAL void MtcMediaManager::SetSrvccState(IN SrvccState eState)
 {
+    if (!m_piMediaSession)
+    {
+        IMS_TRACE_E(0, "SetSrvccState : No IMediaSession", 0, 0, 0);
+        return;
+    }
+
     MEDIA_SRVCC_STATUS eMediaSrvccStatus;
     switch (eState)
     {
@@ -605,7 +620,7 @@ PUBLIC VIRTUAL void MtcMediaManager::SetSrvccState(IN SrvccState eState)
         case SrvccState::FAILED:
             eMediaSrvccStatus = MEDIA_SRVCC_STATUS::MEDIA_SRVCC_FAILED;
             break;
-        default:  // SrvccState::CANCLED:
+        default:  // SrvccState::CANCELED:
             eMediaSrvccStatus = MEDIA_SRVCC_STATUS::MEDIA_SRVCC_CANCELED;
             break;
     }
