@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _INTERFACE_MEDIA_SESSION_H_
-#define _INTERFACE_MEDIA_SESSION_H_
+#ifndef INTERFACE_MEDIA_SESSION_H_
+#define INTERFACE_MEDIA_SESSION_H_
 
 #include "ImsMessage.h"
 #include "AString.h"

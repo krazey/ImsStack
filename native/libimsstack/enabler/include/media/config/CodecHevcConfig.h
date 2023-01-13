@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_HEVC_CONFIG_H_
-#define _CODEC_HEVC_CONFIG_H_
+#ifndef CODEC_HEVC_CONFIG_H_
+#define CODEC_HEVC_CONFIG_H_
 
 #include "config/CodecConfig.h"
 
@@ -135,4 +135,5 @@ private:
     AString m_strImageAttr;
     AString m_strFrameSize;
 };
-#endif  // _CODEC_HEVC_CONFIG_H_
+
+#endif

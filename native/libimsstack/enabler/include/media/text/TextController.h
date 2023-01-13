@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _TEXT_CONTROLLER_H_
-#define _TEXT_CONTROLLER_H_
+#ifndef TEXT_CONTROLLER_H_
+#define TEXT_CONTROLLER_H_
 
 #include "MediaDef.h"
 #include "IMediaSessionListener.h"

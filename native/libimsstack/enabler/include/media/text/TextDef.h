@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_TEXT_DEF_H_
-#define _IMS_TEXT_DEF_H_
+#ifndef TEXT_DEF_H_
+#define TEXT_DEF_H_
 
 typedef enum
 {

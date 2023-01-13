@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _AUDIO_PROFILE_UTIL_INTERFACE_H_
-#define _AUDIO_PROFILE_UTIL_INTERFACE_H_
+#ifndef AUDIO_PROFILE_UTIL_H_
+#define AUDIO_PROFILE_UTIL_H_
 
 #include "MediaEnvironment.h"
 #include "audio/AudioProfile.h"

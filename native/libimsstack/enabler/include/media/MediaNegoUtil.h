@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_NEGO_UTIL_H_
-#define _MEDIA_NEGO_UTIL_H_
+#ifndef MEDIA_NEGO_UTIL_H_
+#define MEDIA_NEGO_UTIL_H_
 
 #include "MediaDef.h"
 

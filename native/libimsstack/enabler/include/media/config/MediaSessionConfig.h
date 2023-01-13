@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_SESSION_CONFIG_H_
-#define _MEDIA_SESSION_CONFIG_H_
+#ifndef MEDIA_SESSION_CONFIG_H_
+#define MEDIA_SESSION_CONFIG_H_
 
 #include "MediaDef.h"
 #include "ImsList.h"
@@ -146,4 +146,5 @@ private:
     IMS_BOOL m_bSupportMultiConfigInEarlySession;
     IMS_BOOL m_bSdpReofferFullCapability;
 };
-#endif  // _MEDIA_SESSION_CONFIG_H_
+
+#endif

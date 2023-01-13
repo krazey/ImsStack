@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_MANAGER_H_
-#define _MEDIA_MANAGER_H_
+#ifndef MEDIA_MANAGER_H_
+#define MEDIA_MANAGER_H_
 
 #include "ServiceEvent.h"
 #include "IEventListener.h"
@@ -141,4 +141,5 @@ protected:
     IMSList<MediaSessionNode*> m_lstSessionNode;
     MediaResourceManager* m_pResourceMngr;
 };
-#endif /* _MEDIA_MANAGER_H_ */
+
+#endif

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _AUDIO_CONTROLLER_H_
-#define _AUDIO_CONTROLLER_H_
+#ifndef AUDIO_CONTROLLER_H_
+#define AUDIO_CONTROLLER_H_
 
 #include "MediaDef.h"
 #include "IMediaSessionListener.h"

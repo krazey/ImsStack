@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_MEDIA_RESOURCE_MNGR_H_
-#define _IMS_MEDIA_RESOURCE_MNGR_H_
+#ifndef MEDIA_RESOURCE_MANAGER_H_
+#define MEDIA_RESOURCE_MANAGER_H_
 
 #include "MediaDef.h"
 #include "IMediaNetworkConnectionListener.h"
@@ -91,4 +91,4 @@ private:
     MediaNetworkConnectionWatcher* m_pNetworkConnectionWatcher;
 };
 
-#endif /* _IMS_MEDIA_RESOURCE_MNGR_H_ */
+#endif

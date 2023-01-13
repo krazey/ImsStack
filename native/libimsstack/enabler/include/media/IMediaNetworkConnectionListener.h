@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _INTERFACE_MEDIA_NETWORK_CONNECTION_LISTENER_H_
-#define _INTERFACE_MEDIA_NETWORK_CONNECTION_LISTENER_H_
+#ifndef INTERFACE_MEDIA_NETWORK_CONNECTION_LISTENER_H_
+#define INTERFACE_MEDIA_NETWORK_CONNECTION_LISTENER_H_
 
 #include "ImsTypeDef.h"
 
@@ -38,4 +38,5 @@ public:
      */
     virtual void OnMediaMtuChanged(IN const IMS_UINT32 nMtu) = 0;
 };
+
 #endif

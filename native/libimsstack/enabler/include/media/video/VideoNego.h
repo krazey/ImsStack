@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_VIDEO_NEGO_H_
-#define _IMS_VIDEO_NEGO_H_
+#ifndef VIDEO_NEGO_H_
+#define VIDEO_NEGO_H_
 
 #include "ImsSlot.h"
 #include "media/IMedia.h"
@@ -287,4 +287,5 @@ private:
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bNegotiatedCvoResult;
 };
-#endif /* _IMS_VIDEO_NEGO_H_ */
+
+#endif

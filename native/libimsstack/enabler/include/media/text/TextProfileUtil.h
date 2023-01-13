@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _TEXT_PROFILE_UTIL_H_
-#define _TEXT_PROFILE_UTIL_H_
+#ifndef TEXT_PROFILE_UTIL_H_
+#define TEXT_PROFILE_UTIL_H_
 
 #include "MediaEnvironment.h"
 #include "MediaResourceManager.h"

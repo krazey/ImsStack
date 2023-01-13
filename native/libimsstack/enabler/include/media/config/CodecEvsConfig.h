@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_EVS_CONFIG_H_
-#define _CODEC_EVS_CONFIG_H_
+#ifndef CODEC_EVS_CONFIG_H_
+#define CODEC_EVS_CONFIG_H_
 
 #include "AString.h"
 #include "config/CodecConfig.h"
@@ -248,4 +248,5 @@ private:
     IMS_SINT32 m_nAmrWbIoModeSetList;  // AMR-WB IO parameter
     IMS_SINT32 m_nDefaultRtpModeSet;   // default mode-set for EVS AMR-WB IO mode
 };
-#endif  // _CODEC_EVS_CONFIG_H_
+
+#endif

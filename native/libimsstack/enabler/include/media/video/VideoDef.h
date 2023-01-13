@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_VIDEO_DEF_H_
-#define _IMS_VIDEO_DEF_H_
+#ifndef VIDEO_DEF_H_
+#define VIDEO_DEF_H_
 
 typedef enum
 {
@@ -66,4 +66,4 @@ typedef enum  // HEVC profile
     HEVC_PROFILE_NOT_USED
 } VIDEO_PROFILE_HEVC;
 
-#endif /* _IMS_VIDEO_DEF_H_ */
+#endif

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_NETWORK_CONNECTION_WATCHER_H_
-#define _MEDIA_NETWORK_CONNECTION_WATCHER_H_
+#ifndef MEDIA_NETWORK_CONNECTION_WATCHER_H_
+#define MEDIA_NETWORK_CONNECTION_WATCHER_H_
 
 #include "INetworkConnection.h"
 
@@ -86,4 +86,5 @@ private:
     IMS_SINT32 m_nMediaConnectionType;
     IMS_SINT32 m_nMtu;
 };
-#endif /* _MEDIA_NETWORK_CONNECTION_WATCHER_H_ */
+
+#endif

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MEDIA_MSG_HANDLER_H_
-#define _MEDIA_MSG_HANDLER_H_
+#ifndef MEDIA_MSG_HANDLER_H_
+#define MEDIA_MSG_HANDLER_H_
 
 #include "IMMedia.h"
 
@@ -47,4 +47,5 @@ private:
     AString m_strListenerThread;
     IMS_SINTP m_nCallKey;  // TODO: IMS_ULONG
 };
-#endif /* _MEDIA_MSG_HANDLER_H_ */
+
+#endif

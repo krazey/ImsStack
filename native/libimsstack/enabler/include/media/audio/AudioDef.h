@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_AUDIO_DEF_H_
-#define _IMS_AUDIO_DEF_H_
+#ifndef AUDIO_DEF_H_
+#define AUDIO_DEF_H_
 
 // == ENUM VALUES ==========================================================
 typedef enum
@@ -115,4 +115,4 @@ typedef enum
     AUDIO_CODEC_QUALITY_G711 = 5,
 } AUDIO_CODEC_QUALITY;
 
-#endif /* _IMS_AUDIO_DEF_H_ */
+#endif

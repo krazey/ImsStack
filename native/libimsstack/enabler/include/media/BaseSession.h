@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_BASE_SESSION_H_
-#define _IMS_BASE_SESSION_H_
+#ifndef BASE_SESSION_H_
+#define BASE_SESSION_H_
 
 #include "ImsList.h"
 #include "MediaDef.h"

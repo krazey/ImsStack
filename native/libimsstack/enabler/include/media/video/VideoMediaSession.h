@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_VIDEO_MEDIA_SESSION_H_
-#define _IMS_VIDEO_MEDIA_SESSION_H_
+#ifndef VIDEO_MEDIA_SESSION_H_
+#define VIDEO_MEDIA_SESSION_H_
 
 #include <MediaQualityThreshold.h>
 #include "BaseSession.h"
@@ -137,4 +137,4 @@ private:
     IMS_BOOL m_bDisplaySurfaceSet;
 };
 
-#endif /* End of _IMS_VIDEO_MEDIA_SESSION_H_*/
+#endif

@@ -213,4 +213,4 @@ public:
 #define MEDIA_DIRECTION_IS_TEXT_HOLD(eDir) \
     ((eDir == MEDIA_DIRECTION_SEND) || (eDir == MEDIA_DIRECTION_INACTIVE))
 
-#endif /* _MEDIA_DEF_H_ */
+#endif

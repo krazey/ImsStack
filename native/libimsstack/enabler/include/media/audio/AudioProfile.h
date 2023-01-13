@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_AUDIO_NEGO_PROFILE_H_
-#define _IMS_AUDIO_NEGO_PROFILE_H_
+#ifndef AUDIO_PROFILE_H_
+#define AUDIO_PROFILE_H_
 
 #include "IMSTypeDef.h"
 #include "IpAddress.h"
@@ -648,4 +648,5 @@ private:
         this->nNegotiatedPayloadIndex = -1;
     }
 };
-#endif /* End of _IMS_AUDIO_NEGO_PROFILE_H_*/
+
+#endif

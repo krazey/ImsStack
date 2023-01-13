@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_TEXT_NEGO_H_
-#define _IMS_TEXT_NEGO_H_
+#ifndef TEXT_NEGO_H_
+#define TEXT_NEGO_H_
 
 #include "ImsSlot.h"
 #include "media/IMedia.h"
@@ -239,4 +239,5 @@ private:
     MediaEnvironment* m_pEnvironment;
     TextConfiguration* m_pConfig;
 };
-#endif /* _IMS_TEXT_NEGO_H_ */
+
+#endif

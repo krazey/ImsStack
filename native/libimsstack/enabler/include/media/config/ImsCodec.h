@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_CODEC_H_
-#define _IMS_CODEC_H_
+#ifndef IMS_CODEC_H_
+#define IMS_CODEC_H_
 
 #include "AString.h"
 
@@ -80,4 +80,5 @@ public:
         TEXT_MAX = 299
     };
 };
-#endif  // _IMS_CODEC_H_
+
+#endif

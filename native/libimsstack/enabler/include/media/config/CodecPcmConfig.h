@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_PCM_CONFIG_H_
-#define _CODEC_PCM_CONFIG_H_
+#ifndef CODEC_PCM_CONFIG_H_
+#define CODEC_PCM_CONFIG_H_
 
 #include "config/CodecConfig.h"
 
@@ -49,4 +49,5 @@ public:
      */
     virtual void ToDebugString() const override;
 };
-#endif  // _CODEC_PCM_CONFIG_H_
+
+#endif

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MEDIA_CARRIER_CONFIG_BUNDLE_H
-#define MEDIA_CARRIER_CONFIG_BUNDLE_H
+#ifndef MEDIA_CARRIER_CONFIG_BUNDLE_H_
+#define MEDIA_CARRIER_CONFIG_BUNDLE_H_
 
 #include "IMSTypeDef.h"
 #include "AString.h"
@@ -199,4 +199,4 @@ public:
     AString strH264VideoCodecAttributeProfileLevelId;
 };
 
-#endif  // MEDIA_CARRIER_CONFIG_BUNDLE_H
+#endif
