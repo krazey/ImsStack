@@ -639,7 +639,7 @@ IMS_BOOL OsWifiConnection::CacheLocalAddress()
     struct ifreq* pIfreq;
     struct ifconf ifcfg;
 
-    IMS_SINT32 nSockFd = socket(AF_INET6, SOCK_DGRAM, 0);
+    IMS_SINT32 nSockFd = socket(AF_INET6, SOCK_DGRAM | SOCK_CLOEXEC, 0);
 
     memset(&ifcfg, 0, sizeof(ifcfg));
 
