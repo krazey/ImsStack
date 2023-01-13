@@ -69,7 +69,7 @@ protected:
         pAosServiceAvailable->m_piAppContext = piAppContext;
     }
 
-    void SetListeners(IN IMSList<IAosServiceAvailableListener*> objListeners)
+    void SetListeners(IN const IMSList<IAosServiceAvailableListener*>& objListeners)
     {
         pAosServiceAvailable->m_objListeners = objListeners;
     }

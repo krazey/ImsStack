@@ -44,7 +44,7 @@ public:
         return AosFactory::m_objManagers;
     }
 
-    inline static void SetManagers(IN IMSMap<IMS_SINT32, ImsAosManager*> objManagers)
+    inline static void SetManagers(IN const IMSMap<IMS_SINT32, ImsAosManager*>& objManagers)
     {
         AosFactory::m_objManagers = objManagers;
     }

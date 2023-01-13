@@ -27,7 +27,6 @@
 #include "interface/MockIAosNConfiguration.h"
 
 using ::testing::_;
-using ::testing::AnyNumber;
 using ::testing::Return;
 
 class AosServiceAvailableCellurTest : public ::testing::Test

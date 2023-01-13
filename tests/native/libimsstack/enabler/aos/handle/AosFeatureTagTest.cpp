@@ -19,11 +19,6 @@
 
 #include "handle/AosFeatureTag.h"
 
-using ::testing::_;
-using ::testing::AnyNumber;
-using ::testing::Return;
-using ::testing::ReturnRef;
-
 class AosFeatureTagTest : public ::testing::Test
 {
 public:

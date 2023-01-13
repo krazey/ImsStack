@@ -55,7 +55,6 @@ typedef enum
 
 typedef enum
 {
-    NW_REPORT_SRV_INVALID = -1,
     NW_REPORT_SRV_NOSRV = (0x00000001),
     NW_REPORT_SRV_LIMITED = (0x00000002),
     NW_REPORT_SRV_SRV = (0x00000004),
@@ -66,7 +65,6 @@ typedef enum
 
 typedef enum
 {
-    NW_REPORT_DOMAIN_INVALID = -1,
     NW_REPORT_DOMAIN_NOSRV = (0x00000100),
     NW_REPORT_DOMAIN_CS = (0x00000200),
     NW_REPORT_DOMAIN_PS = (0x00000400),

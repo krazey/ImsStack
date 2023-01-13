@@ -246,12 +246,9 @@ IMS_BOOL AosLocationStarter::HandleStartConditionChanged()
     // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_ON_WFC_AVAILABILITY))
     {
-        if (m_piBlock->IsCleared(SERVICE_WIFI))
-        {
-            bStart = IMS_TRUE;
-        }
-        else if (m_piBlock->IsReasonBlocked(
-                         BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, IMS_TRUE, SERVICE_WIFI))
+        if (m_piBlock->IsCleared(SERVICE_WIFI) ||
+                m_piBlock->IsReasonBlocked(
+                        BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, IMS_TRUE, SERVICE_WIFI))
         {
             bStart = IMS_TRUE;
         }

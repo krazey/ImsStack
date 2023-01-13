@@ -27,7 +27,6 @@
 
 using ::testing::_;
 using ::testing::AnyNumber;
-using ::testing::Assign;
 using ::testing::Return;
 using ::testing::ReturnRef;
 

@@ -77,7 +77,7 @@ void AosStaticProfile::SetProflieType(IN Type eType)
 }
 
 PUBLIC
-void AosStaticProfile::AddService(IN AString strAppId, IN AString strServiceId)
+void AosStaticProfile::AddService(IN const AString& strAppId, IN const AString& strServiceId)
 {
     AosServiceProfile* pProfile = new AosServiceProfile(strAppId, strServiceId);
     m_objServiceProfiles.Append(pProfile);

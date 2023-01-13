@@ -361,7 +361,7 @@ IMS_BOOL AosDnsQuery::DnsQueryPrivate_Ready()
 }
 
 PUBLIC
-IMS_BOOL AosDnsQuery::DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIps)
+IMS_BOOL AosDnsQuery::DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const IMSList<IPAddress>& objIps)
 {
     m_objIps = objIps;
     return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_DONE, (bResult) ? 1 : 0, 0);

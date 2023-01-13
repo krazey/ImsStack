@@ -27,7 +27,6 @@
 
 using ::testing::_;
 using ::testing::AnyNumber;
-using ::testing::Return;
 using ::testing::ReturnNull;
 
 static const IMS_UINT32 DEFAULT_SHORT_UPDATE_INTERVAL = 300;

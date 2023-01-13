@@ -245,9 +245,6 @@ PUBLIC VIRTUAL void AosHandle::ProcessFeatureTagChange()
                 m_piAppContext->GetApp()->Reconfig();
                 break;
 
-            case STATE_DISCONNECTING:  // FALL-THROUGH
-            case STATE_DISCONNECTED:
-                break;
             default:
                 break;
         }
@@ -297,9 +294,7 @@ PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
     // notify the state to Enabler
     switch (GetState())
     {
-        case STATE_DISCONNECTED:
-            m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
-            break;
+        case STATE_DISCONNECTED:  // FALL-THROUGH
         case STATE_CONNECTING:
             m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
             break;
@@ -1256,10 +1251,6 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
 
                 m_bNotify = IMS_TRUE;
             }
-            break;
-
-        case HANDLE_MSG_APP_STATUS:
-            // Don't care
             break;
 
         default:

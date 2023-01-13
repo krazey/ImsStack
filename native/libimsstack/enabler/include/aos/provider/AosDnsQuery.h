@@ -43,7 +43,7 @@ public:
     IMS_BOOL Destroy();
 
     IMS_BOOL DnsQueryPrivate_Ready();
-    IMS_BOOL DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIps);
+    IMS_BOOL DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const IMSList<IPAddress>& objIps);
     IMS_BOOL DnsQueryPrivate_Terminated();
 
 private:

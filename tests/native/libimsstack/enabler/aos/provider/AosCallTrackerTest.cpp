@@ -85,17 +85,17 @@ protected:
         m_pAosCallTracker->m_nNormalCallType = nNormalCallType;
     }
 
-    void SetNormalCalls(IN IMSMap<CallKey, CallState> objNormalCalls)
+    void SetNormalCalls(IN const IMSMap<CallKey, CallState>& objNormalCalls)
     {
         m_pAosCallTracker->m_objNormalCalls = objNormalCalls;
     }
 
-    void SetEmergenyCalls(IN IMSMap<CallKey, CallState> objEmergencyCalls)
+    void SetEmergenyCalls(IN const IMSMap<CallKey, CallState>& objEmergencyCalls)
     {
         m_pAosCallTracker->m_objEmergencyCalls = objEmergencyCalls;
     }
 
-    void SetNormalCallTypes(IN IMSMap<CallKey, CallType> objNormalCallTypes)
+    void SetNormalCallTypes(IN const IMSMap<CallKey, CallType>& objNormalCallTypes)
     {
         m_pAosCallTracker->m_objNormalCallTypes = objNormalCallTypes;
     }

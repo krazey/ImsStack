@@ -41,7 +41,7 @@ enum class AosRegistrationType
 class AosServiceProfile
 {
 public:
-    AosServiceProfile(IN AString strAppId, IN AString strServiceId) :
+    AosServiceProfile(IN const AString& strAppId, IN const AString& strServiceId) :
             m_strAppId(strAppId),
             m_ServiceId(strServiceId)
     {
@@ -72,7 +72,7 @@ public:
     };
 
     void SetProflieType(IN Type eType);
-    void AddService(IN AString strAppId, IN AString strServiceId);
+    void AddService(IN const AString& strAppId, IN const AString& strServiceId);
 
     AString& GetId();
     IMS_SINT32 GetConnectionType();
