@@ -80,6 +80,7 @@ protected:
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) final;
 
     void Init() final;
+    void CleanUp() final;
     IMS_BOOL CreateRegistration() final;
 
     void ProcessAuthenticationFailed() final;
@@ -114,6 +115,11 @@ protected:
 
     void Event_NotifyEvent(
             IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) final;
+
+    void Transaction_OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
+            IN IMS_UINT32 nWaitTimeMillis) final;
+    void Transaction_OnConnectionSetupPrepared() final;
+    void Transaction_OnTrafficPriorityChanged() final;
 
     IMS_UINT32 GetRetryTime();
 

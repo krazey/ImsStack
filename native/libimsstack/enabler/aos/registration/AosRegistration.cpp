@@ -197,6 +197,11 @@ PUBLIC VIRTUAL void AosRegistration::Start()
         return;
     }
 
+    if (IsRegTypeEqual(AosRegistrationType::EMERGENCY) && !IsFakeRegistration())
+    {
+        SetTraffic(IMS_TRUE);
+    }
+
     if (!CreateRegistration())
     {
         ProcessUnpredictableFailure();
@@ -575,12 +580,9 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
     if (m_eRegType == AosRegistrationType::NORMAL)
     {
         UpdateDetailState(m_nState);
-
-        IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
-
-        if (piTransaction != IMS_NULL && !IsRegTrying())
+        if (!IsRegTrying())
         {
-            piTransaction->StopTraffic(IAosTransaction::TYPE_REG);
+            SetTraffic(IMS_FALSE);
         }
     }
 }
@@ -648,6 +650,76 @@ void AosRegistration::SetRetryTime()
 
     A_IMS_TRACE_I(REGID, "m_nRetryBaseTime (%d) , m_nRetryMaxTime (%d)", m_nRetryBaseTime,
             m_nRetryMaxTime, 0);
+}
+
+PROTECTED
+IMS_BOOL AosRegistration::SetTraffic(IN IMS_BOOL bStarted)
+{
+    if (m_eRegType != AosRegistrationType::NORMAL && m_eRegType != AosRegistrationType::EMERGENCY)
+    {
+        return IMS_FALSE;
+    }
+
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+
+    if (piTransaction != IMS_NULL)
+    {
+        if (bStarted)
+        {
+            if (m_eRegType == AosRegistrationType::NORMAL)
+            {
+                return piTransaction->StartTraffic(
+                        IAosTransaction::TYPE_REG, m_piContext->GetNetTracker()->GetNetworkType());
+            }
+            else
+            {
+                piTransaction->StartEmergencyTraffic(
+                        m_piContext->GetNetTracker()->GetNetworkType());
+            }
+        }
+        else
+        {
+            if (m_eRegType == AosRegistrationType::NORMAL)
+            {
+                piTransaction->StopTraffic(IAosTransaction::TYPE_REG);
+            }
+            else
+            {
+                piTransaction->StopEmergencyTraffic();
+            }
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED
+void AosRegistration::SetTrafficListener(IN IMS_BOOL bSet)
+{
+    if (m_eRegType != AosRegistrationType::NORMAL && m_eRegType != AosRegistrationType::EMERGENCY)
+    {
+        return;
+    }
+
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+
+    if (piTransaction == IMS_NULL)
+    {
+        return;
+    }
+
+    IMS_UINT32 nType = (m_eRegType == AosRegistrationType::NORMAL)
+            ? IAosTransaction::TYPE_REG
+            : IAosTransaction::TYPE_EMERGENCY;
+
+    if (bSet)
+    {
+        piTransaction->SetListener(nType, this);
+    }
+    else
+    {
+        piTransaction->RemoveListener(nType, this);
+    }
 }
 
 PROTECTED
@@ -1025,14 +1097,7 @@ PROTECTED VIRTUAL void AosRegistration::Init()
         }
     }
 
-    if (m_eRegType == AosRegistrationType::NORMAL)
-    {
-        IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
-        if (piTransaction != IMS_NULL)
-        {
-            piTransaction->SetListener(IAosTransaction::TYPE_REG, this);
-        }
-    }
+    SetTrafficListener(IMS_TRUE);
 }
 
 PROTECTED VIRTUAL void AosRegistration::InitFeatures()
@@ -1062,14 +1127,7 @@ PROTECTED VIRTUAL void AosRegistration::CleanUp()
 
     StopTimer(TIMER_OFFLINE_RECOVER);
 
-    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
-    if (piTransaction != IMS_NULL)
-    {
-        if (m_eRegType == AosRegistrationType::NORMAL)
-        {
-            piTransaction->RemoveListener(IAosTransaction::TYPE_REG, this);
-        }
-    }
+    SetTrafficListener(IMS_FALSE);
 
     IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCt != IMS_NULL)
@@ -1334,6 +1392,7 @@ PROTECTED VIRTUAL void AosRegistration::DestroyRegistration()
     ClearNetworkBindingFeatures();
 
     SetRadioWaiting(IMS_FALSE);
+    SetTraffic(IMS_FALSE);
 
     DestroyIpsecHelper();
 
@@ -2513,14 +2572,14 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckRadioReadyAndSetTxnPending()
         return IMS_TRUE;
     }
 
-    IAosTransaction* m_piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
+    IAosTransaction* piTransaction = AosProvider::GetInstance()->GetTransaction(m_nSlotId);
 
-    if (m_piTransaction == IMS_NULL)
+    if (piTransaction == IMS_NULL)
     {
         return IMS_TRUE;
     }
 
-    if (!m_piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
+    if (!piTransaction->IsTransactionAllowed(IAosTransaction::TYPE_REG))
     {
         // TODO: implement to control priority
         A_IMS_TRACE_I(REGID, "CheckRadioReadyAndSetTxnPending :: trx is not allowed", 0, 0, 0);
@@ -2528,8 +2587,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckRadioReadyAndSetTxnPending()
     }
     else
     {
-        if (m_piTransaction->StartTraffic(
-                    IAosTransaction::TYPE_REG, m_piContext->GetNetTracker()->GetNetworkType()))
+        if (SetTraffic(IMS_TRUE))
         {
             return IMS_TRUE;
         }
@@ -2721,6 +2779,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRetryInRegStopped(
     {
         A_IMS_TRACE_I(REGID, "ProcessRetryInRegStopped :: txn is pending due to radio", 0, 0, 0);
         return;
+    }
+
+    if (IsRegTypeEqual(AosRegistrationType::EMERGENCY) && !IsFakeRegistration() && !IsImsCall())
+    {
+        SetTraffic(IMS_TRUE);
     }
 
     if (!SendRegister((m_nState == STATE_REGSTOP) ? IMS_TRUE : IMS_FALSE))
