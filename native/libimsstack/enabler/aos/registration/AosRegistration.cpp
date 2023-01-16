@@ -5038,8 +5038,8 @@ PROTECTED VIRTUAL void AosRegistration::NConfiguration_NotifyConfigChanged()
     }
 }
 
-PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(IN IMS_UINT32 nFailureReason,
-        IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 /* nWaitTimeMillis */)
+PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 nWaitTimeMillis)
 {
     if (nFailureReason == IImsRadio::REASON_ACCESS_DENIED)
     {
@@ -5050,6 +5050,19 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(IN IMS_UI
     }
     else
     {
+        if (nFailureReason == IImsRadio::REASON_RRC_REJECT)
+        {
+            if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() > 0 &&
+                    nWaitTimeMillis > (RETRY_DEFAULT_WAIT_TIME * 1000))
+            {
+                Destroy();
+
+                ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
+                StartTimer(TIMER_OFFLINE_RECOVER, nWaitTimeMillis * 1000);
+                return;
+            }
+        }
+
         Transaction_OnConnectionSetupPrepared();
     }
 }
