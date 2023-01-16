@@ -175,14 +175,6 @@ typedef unsigned short IMS_WCHAR;
 typedef unsigned char IMS_BYTE;
 #endif
 
-#ifndef IMS_SINT64
-typedef signed long IMS_SINT64;
-#endif
-
-#ifndef IMS_UINT64
-typedef unsigned long IMS_UINT64;
-#endif
-
 #ifndef IMS_FLOAT
 typedef float IMS_FLOAT;
 #endif
@@ -197,6 +189,14 @@ typedef IMS_SINT32 IMS_RESULT;
 
 // START :: definitions for 64-bit platform
 #ifdef __IMS_LP64__
+
+#ifndef IMS_SINT64
+typedef signed long IMS_SINT64;
+#endif
+
+#ifndef IMS_UINT64
+typedef unsigned long IMS_UINT64;
+#endif
 
 #ifndef IMS_SIZE_T
 typedef unsigned long IMS_SIZE_T;
@@ -223,6 +223,14 @@ typedef unsigned long IMS_UINTP;
 #define PFLS_X "lX"
 
 #else  // __IMS_LP64__
+
+#ifndef IMS_SINT64
+typedef signed long long IMS_SINT64;
+#endif
+
+#ifndef IMS_UINT64
+typedef unsigned long long IMS_UINT64;
+#endif
 
 #ifndef IMS_SIZE_T
 typedef unsigned int IMS_SIZE_T;
