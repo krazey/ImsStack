@@ -58,6 +58,9 @@ RcsMessageService::RcsMessageService(IN const AString& strName, IN const IMS_SIN
 PUBLIC
 VIRTUAL RcsMessageService::~RcsMessageService()
 {
+    IMS_TRACE_D(
+            "RcsMessageService_F : RcsMessageService = %" PFLS_u, sizeof(RcsMessageService), 0, 0);
+    IMS_TRACE_I("~RcsMessageService [%d]", m_nSlotId, 0, 0);
     DisableCoreService();
     objRcsMessages.Clear();
 }
@@ -110,19 +113,19 @@ VIRTUAL IMS_BOOL RcsMessageService::OnMessage(IN IMSMSG& objMSG)
     IMS_TRACE_I("\nOnMessage : Service Name = %s Msg = %d", GetName().GetStr(), objMSG.nMSG, 0);
     IMS_SINT32 nMSG = objMSG.GetName();
 
-    if (nMSG == IUSncService::OPENMESSAGE_CMD)
+    if (nMSG == IUSncService::OPEN_MESSAGE_CMD)
     {
         return HandleOpenMSG(objMSG);
     }
-    else if (nMSG == IUSncService::SENDMESSAGE_CMD)
+    else if (nMSG == IUSncService::SEND_MESSAGE_CMD)
     {
         return HandleSessionMSG(objMSG);
     }
-    else if (nMSG == IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD)
+    else if (nMSG == IUSncService::NOTIFY_MESSAGE_RECEIVE_ERROR_CMD)
     {
         return HandleNotifyReceiveErrorMSG(objMSG);
     }
-    else if (nMSG == IUSncService::CLOSESESSION_CMD)
+    else if (nMSG == IUSncService::CLOSE_SESSION_CMD)
     {
         HandleCloseSessionMSG(objMSG);
     }
@@ -203,22 +206,22 @@ IMS_BOOL RcsMessageService::RegisterIMServiceTag()
             strGeolocationTag.Append(IMConstants::TAG_GEOLOCATIONPUSH);
 
             AString strCPMSessionTag(strTagBase);
-            strCPMSessionTag.Append(IMConstants::TAG_CPM_SESSION);
+            strCPMSessionTag.Append(IMConstants::TAG_SESSION);
 
             AString strCPMMessageTag(strTagBase);
-            strCPMMessageTag.Append(IMConstants::TAG_CPM_MSG);
+            strCPMMessageTag.Append(IMConstants::TAG_STANDALONE_PAGER);
 
             AString strCPMDeferredMessageTag(strTagBase);
-            strCPMDeferredMessageTag.Append(IMConstants::TAG_CPM_DEFERRED);
+            strCPMDeferredMessageTag.Append(IMConstants::TAG_STANDALONE_DEFERRED);
 
             AString strCPMLargeMessageTag(strTagBase);
-            strCPMLargeMessageTag.Append(IMConstants::TAG_CPM_LARGE_MSG);
+            strCPMLargeMessageTag.Append(IMConstants::TAG_STANDALONE_LARGE);
 
             AString strCPMFileTransferTag(strTagBase);
-            strCPMFileTransferTag.Append(IMConstants::TAG_CPM_FILE_TRANSFER);
+            strCPMFileTransferTag.Append(IMConstants::TAG_FILE_TRANSFER);
 
             AString strCPMSystemMsgTag(strTagBase);
-            strCPMSystemMsgTag.Append(IMConstants::TAG_CPM_SYSTEM_MSG);
+            strCPMSystemMsgTag.Append(IMConstants::TAG_SYSTEM_MSG);
 
             // Sets the trigger point for INVITE
             objTP.RemoveAllHeaders();

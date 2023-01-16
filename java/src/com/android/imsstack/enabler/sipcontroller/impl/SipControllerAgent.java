@@ -56,7 +56,6 @@ import java.util.stream.IntStream;
  * Start SipNativeController service through JNI
  */
 public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
-
     private long mNativeObj = 0;
     private int mSlotId = MSimUtils.INVALID_SLOT_ID;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
@@ -154,7 +153,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     @Override
     public void sendMessage(@NonNull SipMessage message, long configVersion) {
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(SipControllerInternalMsgDef.SENDMESSAGE_CMD);
+        parcel.writeInt(SipControllerConstants.SEND_MESSAGE_CMD);
         convertSipMessageToParcel(message, parcel);
         String branch = SipMessageParsingUtils.getTransactionId(message.getHeaderSection());
         mSipMsgMap.put(branch, message);
@@ -164,7 +163,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     @Override
     public void closeOngoingSession(@NonNull String callId) {
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(SipControllerInternalMsgDef.CLOSESESSION_CMD);
+        parcel.writeInt(SipControllerConstants.CLOSE_SESSION_CMD);
         parcel.writeString(callId);
         sendMessageToJNI(parcel);
     }
@@ -193,7 +192,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
         if (validateNotifyMessageReceiveError(viaTransactionId, reason)) {
 
             Parcel parcel = Parcel.obtain();
-            parcel.writeInt(SipControllerInternalMsgDef.NOTIFYMESSAGERECEIVEERROR_CMD);
+            parcel.writeInt(SipControllerConstants.NOTIFY_MESSAGE_RECEIVE_ERROR_CMD);
             parcel.writeString(viaTransactionId);
             SipMessage message = mSipMsgMap.get(viaTransactionId);
             mSipMsgMap.remove(viaTransactionId);
@@ -244,18 +243,18 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     @Override
     public void updateSipDelegateRegistration(@NonNull Set<String> featureTags) {
-        //TODO
+        ImsLog.i(mSlotId, "updateSipDelegateRegistration");
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(SipControllerInternalMsgDef.UPDATESIPREGISTRATION_CMD);
+        parcel.writeInt(SipControllerConstants.UPDATE_DELEGATE_REGISTRATION_CMD);
         parcel.writeStringArray((String[]) featureTags.toArray());
         sendMessageToJNI(parcel);
     }
 
     @Override
     public void triggerSipDelegateDeRegistration() {
-        //TODO
+        ImsLog.i(mSlotId, "triggerSipDelegateDeRegistration");
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(SipControllerInternalMsgDef.TRIGGERSIPDEREGISTRATION_CMD);
+        parcel.writeInt(SipControllerConstants.TRIGGER_DELEGATEDE_REGISTRATION_CMD);
         sendMessageToJNI(parcel);
     }
 
@@ -284,23 +283,23 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
         try {
             switch (msg) {
-                case SipControllerInternalMsgDef.MESSAGERECEIVED_IND: {
+                case SipControllerConstants.MESSAGE_RECEIVED_IND: {
                     messageReceived(parcel);
                     break;
                 }
-                case SipControllerInternalMsgDef.MESSAGESENT_IND: {
+                case SipControllerConstants.MESSAGE_SENT_IND: {
                     messageSent(parcel);
                     break;
                 }
-                case SipControllerInternalMsgDef.SENDMESSAGEFAILURE_IND: {
+                case SipControllerConstants.SEND_MESSAGE_FAILURE_IND: {
                     messageSendFailure(parcel);
                     break;
                 }
-                case SipControllerInternalMsgDef.ONREGISTRATIONUPDATED_IND: {
+                case SipControllerConstants.ONREGISTRATION_UPDATED_IND: {
                     registrationUpdated(parcel);
                     break;
                 }
-                case SipControllerInternalMsgDef.ONCONFIGURATIONUPDATED_IND: {
+                case SipControllerConstants.ONCONFIGURATION_UPDATED_IND: {
                     configurationUpdated(parcel);
                     break;
                 }
@@ -314,6 +313,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     private void messageReceived(Parcel parcel) throws Exception {
+        ImsLog.i(mSlotId, "messageReceived");
         convertParcelToString(parcel);
         SipMessage message = new SipMessage(sStartLineString, sHeaderSectionString, sConBytes);
 
@@ -327,6 +327,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     private void messageSent(Parcel parcel) throws Exception {
+        ImsLog.i(mSlotId, "messageSent");
         String transactionId = parcel.readString();
         SipMessage message = mSipMsgMap.remove(transactionId);
         if (message == null) {
@@ -338,6 +339,7 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     private void messageSendFailure(Parcel parcel) throws Exception {
+        ImsLog.i(mSlotId, "messageSendFailure");
         int sipReason = parcel.readInt();
         String transactionId = parcel.readString();
 
@@ -351,12 +353,14 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
     }
 
     private void registrationUpdated(Parcel parcel) throws Exception {
+        ImsLog.i(mSlotId, "registrationUpdated");
         DelegateRegistrationState registrationState =
                 DelegateRegistrationState.CREATOR.createFromParcel(parcel);
         mListener.updateRegistration(registrationState, mSubId);
     }
 
     private void configurationUpdated(Parcel parcel) throws Exception {
+        ImsLog.i(mSlotId, "configurationUpdated");
         SipDelegateConfiguration configuration =
                 SipDelegateConfiguration.CREATOR.createFromParcel(parcel);
         mListener.updateConfiguration(configuration, mSubId);

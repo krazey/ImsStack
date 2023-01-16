@@ -67,7 +67,7 @@ JniSipControllerService::JniSipControllerService(
     IUSncOpenCmdParam* pParam = new IUSncOpenCmdParam();
     pParam->m_nSessionID = m_nSessionId;
     pParam->m_strThread = m_strThreadName;
-    IMSMSG objMSG(IUSncService::OPENMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+    IMSMSG objMSG(IUSncService::OPEN_MESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     MessageService::PostMessage(m_strTarget, objMSG);
 }
 
@@ -84,7 +84,7 @@ JniSipControllerService::~JniSipControllerService()
     }
     IUSncCloseSessionCmdParam* pParam = new IUSncCloseSessionCmdParam();
     pParam->m_nSessionID = m_nSessionId;
-    IMSMSG objMSG(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+    IMSMSG objMSG(IUSncService::CLOSE_SESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
     MessageService::PostMessage(m_strTarget, objMSG);
 }
 
@@ -105,46 +105,46 @@ void JniSipControllerService::HandleMsg(int nMsg, const Parcel& pParcel)
 
     switch (nMsg)
     {
-        case IUSncService::SENDMESSAGE_CMD:
+        case IUSncService::SEND_MESSAGE_CMD:
         {
             IUSncSendMessageParam* pParam = makeSendMessageParamFromParcel(pParcel);
             pParam->m_nSessionID = m_nSessionId;
             pParam->m_strThread = m_strThreadName;
-            IMSMSG objMSG(IUSncService::SENDMESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+            IMSMSG objMSG(IUSncService::SEND_MESSAGE_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
         }
         break;
-        case IUSncService::CLOSESESSION_CMD:
+        case IUSncService::CLOSE_SESSION_CMD:
         {
             IUSncCloseSessionCmdParam* pParam = new IUSncCloseSessionCmdParam();
             pParam->m_nSessionID = m_nSessionId;
             pParam->m_strThread = m_strThreadName;
             ConvertString(pParcel.readString16(), strDest);
             pParam->m_strCallId = strDest;
-            IMSMSG objMSG(IUSncService::CLOSESESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
+            IMSMSG objMSG(IUSncService::CLOSE_SESSION_CMD, 0, reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
         }
         break;
-        case IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD:
+        case IUSncService::NOTIFY_MESSAGE_RECEIVE_ERROR_CMD:
         {
             IUSncNotifyErrorCmdParam* pParam = new IUSncNotifyErrorCmdParam();
             pParam->m_nSessionID = m_nSessionId;
             pParam->m_strThread = m_strThreadName;
             ConvertString(pParcel.readString16(), strDest);
             pParam->m_strTId = strDest;
-            IMSMSG objMSG(IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD, 0,
+            IMSMSG objMSG(IUSncService::NOTIFY_MESSAGE_RECEIVE_ERROR_CMD, 0,
                     reinterpret_cast<IMS_UINTP>(pParam));
             MessageService::PostMessage(m_strTarget, objMSG);
         }
         break;
-        case IUSncControl::UPDATESIPREGISTRATION_CMD:
+        case IUSncControl::UPDATE_SIPREGISTRATION_CMD:
         {
             // TODO : hakjunc
             IMS_TRACE_E(
                     0, "HandleMsg : UPDATESIPREGISTRATION_CMD by hakjunc, name %d\n", nMsg, 0, 0);
         }
         break;
-        case IUSncControl::TRIGGERSIPDEREGISTRATION_CMD:
+        case IUSncControl::TRIGGER_SIPDEREGISTRATION_CMD:
         {
             // TODO : hakjunc
             IMS_TRACE_E(0, "HandleMsg : TRIGGERSIPDEREGISTRATION_CMD by hakjunc, name %d\n", nMsg,

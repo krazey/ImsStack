@@ -42,8 +42,8 @@ STATE_ENTRY(TERMINATED)
 END_STATE_MAP()
 
 BEGIN_STATE_MSG_MAP(RcsMessageTracker, INITIATED)
-STATE_MSG_ENTRY(IUSncService::SENDMESSAGE_CMD, &RcsMessageTracker::StateINITIATED_SendMessage)
-STATE_MSG_ENTRY(IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD,
+STATE_MSG_ENTRY(IUSncService::SEND_MESSAGE_CMD, &RcsMessageTracker::StateINITIATED_SendMessage)
+STATE_MSG_ENTRY(IUSncService::NOTIFY_MESSAGE_RECEIVE_ERROR_CMD,
         &RcsMessageTracker::StateINITIATED_NotifyReceiveError)
 END_STATE_MSG_MAP()
 
@@ -152,10 +152,10 @@ IMS_BOOL RcsMessageTracker::StateINITIATED_SendMessage(IN IMSMSG& objMSG)
                 REINTERPRET_CAST(IUSncSendFailureIndParam*, objMSG.nLparam);
         /*
         Error Cases
-            IUSncService::OPENMESSAGE_CMD:
-            IUSncService::SENDMESSAGE_CMD:
-            IUSncService::CLOSESESSION_CMD:
-            IUSncService::NOTIFYMESSAGERECEIVEERROR_CMD:
+            IUSncService::OPEN_MESSAGE_CMD:
+            IUSncService::SEND_MESSAGE_CMD:
+            IUSncService::CLOSE_SESSION_CMD:
+            IUSncService::NOTIFY_MESSAGE_RECEIVE_ERROR_CMD:
         */
         // Internal Tracker Obj is Null.
         pFailureParam->m_nReason = IURcsMessageFailureReason::MESSAGE_FAILURE_REASON_UNKNOWN;
@@ -186,7 +186,7 @@ IMS_BOOL RcsMessageTracker::StateSENDING_Sent(IN IMSMSG& objMSG)
 {
     IMS_TRACE_D("StateSENDING_Sent", 0, 0, 0);
     IUSncSentMessageIndParam* pParam = REINTERPRET_CAST(IUSncSentMessageIndParam*, objMSG.nLparam);
-    PostNotification(IUSncService::SENDMESSAGEFAILURE_IND, reinterpret_cast<IMS_UINTP>(pParam));
+    PostNotification(IUSncService::SEND_MESSAGE_FAILURE_IND, reinterpret_cast<IMS_UINTP>(pParam));
     return IMS_TRUE;
 }
 
@@ -195,7 +195,7 @@ IMS_BOOL RcsMessageTracker::StateSENDING_SendFailed(IN IMSMSG& objMSG)
 {
     IMS_TRACE_D("StateSENDING_SendFailed", 0, 0, 0);
     IUSncSendFailureIndParam* pParam = REINTERPRET_CAST(IUSncSendFailureIndParam*, objMSG.nLparam);
-    PostNotification(IUSncService::SENDMESSAGEFAILURE_IND, reinterpret_cast<IMS_UINTP>(pParam));
+    PostNotification(IUSncService::SEND_MESSAGE_FAILURE_IND, reinterpret_cast<IMS_UINTP>(pParam));
     return IMS_TRUE;
 }
 

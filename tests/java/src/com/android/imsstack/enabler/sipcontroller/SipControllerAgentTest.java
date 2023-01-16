@@ -27,7 +27,7 @@ import android.telephony.ims.SipMessage;
 import androidx.test.filters.SmallTest;
 
 import com.android.imsstack.enabler.sipcontroller.impl.SipControllerAgent;
-import com.android.imsstack.enabler.sipcontroller.impl.SipControllerInternalMsgDef;
+import com.android.imsstack.enabler.sipcontroller.impl.SipControllerConstants;
 import com.android.imsstack.imsservice.sipcontroller.remote.SipTransportRemoteListener;
 
 import org.junit.After;
@@ -76,7 +76,7 @@ public final class SipControllerAgentTest {
         assertTrue(mScAgent.mSipMsgMap.containsKey(TRANSACTION_ID));
 
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(SipControllerInternalMsgDef.MESSAGESENT_IND);
+        parcel.writeInt(SipControllerConstants.MESSAGE_SENT_IND);
         parcel.writeString(TRANSACTION_ID);
         parcel.setDataPosition(0);
 
@@ -92,7 +92,7 @@ public final class SipControllerAgentTest {
         assertTrue(mScAgent.mSipMsgMap.containsKey(TRANSACTION_ID));
 
         Parcel parcel = Parcel.obtain();
-        parcel.writeInt(SipControllerInternalMsgDef.SENDMESSAGEFAILURE_IND);
+        parcel.writeInt(SipControllerConstants.SEND_MESSAGE_FAILURE_IND);
         parcel.writeInt(MESSAGE_FAILURE_REASON_UNKNOWN);
         parcel.writeString(TRANSACTION_ID);
         parcel.setDataPosition(0);
@@ -109,7 +109,7 @@ public final class SipControllerAgentTest {
         Parcel parcel = Parcel.obtain();
         messageReceived(parcel);
 
-        if (parcel.readInt() == SipControllerInternalMsgDef.MESSAGERECEIVED_IND) {
+        if (parcel.readInt() == SipControllerConstants.MESSAGE_RECEIVED_IND) {
             SipMessage message = SipMessage.CREATOR.createFromParcel(parcel);
             verify(mListener).onMessageReceived(message, mSubId);
         }
@@ -125,7 +125,7 @@ public final class SipControllerAgentTest {
         Parcel parcel = Parcel.obtain();
         messageReceived(parcel);
 
-        if (parcel.readInt() == SipControllerInternalMsgDef.MESSAGERECEIVED_IND) {
+        if (parcel.readInt() == SipControllerConstants.MESSAGE_RECEIVED_IND) {
             SipMessage message = SipMessage.CREATOR.createFromParcel(parcel);
             verify(mListener).onMessageReceived(message, mSubId);
         }
@@ -150,7 +150,7 @@ public final class SipControllerAgentTest {
 
     public void messageReceived(Parcel parcel) {
 
-        parcel.writeInt(SipControllerInternalMsgDef.MESSAGERECEIVED_IND);
+        parcel.writeInt(SipControllerConstants.MESSAGE_RECEIVED_IND);
         parcel.writeString(STARTLINE);
         parcel.writeString(HEADERSECTION);
         parcel.writeInt(CONTENT.length);
