@@ -244,8 +244,8 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
             // Control messages MUST be notified to the application...
             break;
 
-        case IConfigurable::CP_I_TV_T1:  // FALL-THROUGH
-        case IConfigurable::CP_I_TV_T2:
+        case IConfigurable::CP_I_TIMER_T1:  // FALL-THROUGH
+        case IConfigurable::CP_I_TIMER_T2:
         {
             const ISipConfigV* piSipConfigV = GetSipConfigV();
 
@@ -255,7 +255,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
             }
             break;
         }
-        case IConfigurable::CP_I_TV_100_TRYING:
+        case IConfigurable::CP_I_TIMER_100_TRYING:
         {
             if (strValue.GetLength() > 0)
             {

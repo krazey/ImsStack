@@ -198,13 +198,13 @@ PROTECTED VIRTUAL void ConfigApp::UpdateItemForPst(IN IMS_UINT32 nItem, IN IMS_U
             UpdateSubscriberConfig(IConfigurable::CP_I_PCSCF_PORT_0);
             break;
         case ImsConfig::PST_I_TV_T1:
-            UpdateSipConifgV(IConfigurable::CP_I_TV_T1);
+            UpdateSipConifgV(IConfigurable::CP_I_TIMER_T1);
             break;
         case ImsConfig::PST_I_TV_T2:
-            UpdateSipConifgV(IConfigurable::CP_I_TV_T2);
+            UpdateSipConifgV(IConfigurable::CP_I_TIMER_T2);
             break;
         case ImsConfig::PST_I_TV_TF:
-            UpdateSipConifgV(IConfigurable::CP_I_TV_TF);
+            UpdateSipConifgV(IConfigurable::CP_I_TIMER_F);
             break;
         case ImsConfig::PST_I_SESSION_TIMER:
             UpdateSipConifgV(IConfigurable::CP_I_SESSION_EXPIRES);
@@ -227,13 +227,13 @@ PROTECTED VIRTUAL void ConfigApp::UpdateItemForSdm(IN IMS_UINT32 nItem, IN IMS_U
             UpdateSubscriberConfig(IConfigurable::CP_I_HOME_DOMAIN_NAME);
             break;
         case ImsConfig::SDM_I_TV_T1:
-            UpdateSipConifgV(IConfigurable::CP_I_TV_T1);
+            UpdateSipConifgV(IConfigurable::CP_I_TIMER_T1);
             break;
         case ImsConfig::SDM_I_TV_T2:
-            UpdateSipConifgV(IConfigurable::CP_I_TV_T2);
+            UpdateSipConifgV(IConfigurable::CP_I_TIMER_T2);
             break;
         case ImsConfig::SDM_I_TV_TF:
-            UpdateSipConifgV(IConfigurable::CP_I_TV_TF);
+            UpdateSipConifgV(IConfigurable::CP_I_TIMER_F);
             break;
         case ImsConfig::SDM_I_SIP_SESSION_TIMER:
             UpdateSipConifgV(IConfigurable::CP_I_SESSION_EXPIRES);

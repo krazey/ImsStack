@@ -263,7 +263,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             // Control messages MUST be notified to the application...
             break;
 
-        case IConfigurable::CP_I_TV_T1:
+        case IConfigurable::CP_I_TIMER_T1:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_T1_MILLIS_INT,
                         DEFAULT_TIMER_T1, strValue, m_nTimerValueT1))
@@ -274,7 +274,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_T1 :: %d", m_nTimerValueT1, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_T2:
+        case IConfigurable::CP_I_TIMER_T2:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_T2_MILLIS_INT,
                         DEFAULT_TIMER_T2, strValue, m_nTimerValueT2))
@@ -285,7 +285,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_T2 :: %d", m_nTimerValueT2, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_T4:
+        case IConfigurable::CP_I_TIMER_T4:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_T4_MILLIS_INT,
                         DEFAULT_TIMER_T4, strValue, m_nTimerValueT4))
@@ -296,7 +296,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_T4 :: %d", m_nTimerValueT4, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TA:
+        case IConfigurable::CP_I_TIMER_A:
         {
             if (!GetTimerValueForUpdate("", m_nTimerValueT1, strValue, m_nTimerValueA))
             {
@@ -306,7 +306,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_A :: %d", m_nTimerValueA, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TB:
+        case IConfigurable::CP_I_TIMER_B:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_B_MILLIS_INT,
                         m_nTimerValueT1 * 64, strValue, m_nTimerValueB))
@@ -317,7 +317,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_B :: %d", m_nTimerValueB, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TC:
+        case IConfigurable::CP_I_TIMER_C:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_C_MILLIS_INT,
                         DEFAULT_TIMER_C, strValue, m_nTimerValueC))
@@ -328,7 +328,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_C :: %d", m_nTimerValueC, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TD:
+        case IConfigurable::CP_I_TIMER_D:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_D_MILLIS_INT,
                         DEFAULT_TIMER_D, strValue, m_nTimerValueD))
@@ -339,7 +339,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_D :: %d", m_nTimerValueD, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TE:
+        case IConfigurable::CP_I_TIMER_E:
         {
             if (!GetTimerValueForUpdate("", m_nTimerValueT1, strValue, m_nTimerValueE))
             {
@@ -349,7 +349,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_E :: %d", m_nTimerValueE, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TF:
+        case IConfigurable::CP_I_TIMER_F:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_F_MILLIS_INT,
                         m_nTimerValueT1 * 64, strValue, m_nTimerValueF))
@@ -360,7 +360,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_F :: %d", m_nTimerValueF, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TG:
+        case IConfigurable::CP_I_TIMER_G:
         {
             if (!GetTimerValueForUpdate("", m_nTimerValueT1, strValue, m_nTimerValueG))
             {
@@ -370,7 +370,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_G :: %d", m_nTimerValueG, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TH:
+        case IConfigurable::CP_I_TIMER_H:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_H_MILLIS_INT,
                         m_nTimerValueT1 * 64, strValue, m_nTimerValueH))
@@ -381,7 +381,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_H :: %d", m_nTimerValueH, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TI:
+        case IConfigurable::CP_I_TIMER_I:
         {
             if (!GetTimerValueForUpdate("", m_nTimerValueT4, strValue, m_nTimerValueI))
             {
@@ -391,7 +391,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_I :: %d", m_nTimerValueI, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TJ:
+        case IConfigurable::CP_I_TIMER_J:
         {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_SIP_TIMER_J_MILLIS_INT,
                         m_nTimerValueT1 * 64, strValue, m_nTimerValueJ))
@@ -402,7 +402,7 @@ PROTECTED VIRTUAL IMS_BOOL SipConfigV::Update(
             IMS_TRACE_D("TIMER_J :: %d", m_nTimerValueJ, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TV_TK:
+        case IConfigurable::CP_I_TIMER_K:
         {
             if (!GetTimerValueForUpdate("", m_nTimerValueT4, strValue, m_nTimerValueK))
             {

@@ -101,7 +101,8 @@ void TransactionTimerUpdateHelper::UpdateTimer(IN IMS_BOOL bInviteTransaction, I
     }
 
     IMS_TRACE_D("UpdateTimer INVITE[%s] value[%d]", _TRACE_B_(bInviteTransaction), nValue, 0);
-    IMS_SINT32 nTimer = bInviteTransaction ? IConfigurable::CP_I_TV_TB : IConfigurable::CP_I_TV_TF;
+    IMS_SINT32 nTimer =
+            bInviteTransaction ? IConfigurable::CP_I_TIMER_B : IConfigurable::CP_I_TIMER_F;
     AString strValue;
     strValue.Sprintf("%d", nValue);
     if (!piConfigurable->Update(nTimer, strValue))
