@@ -89,6 +89,9 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
     FRIEND_TEST(AosRegistrationTest, BlockChanged);
     FRIEND_TEST(AosRegistrationTest, RetryCount);
+    FRIEND_TEST(AosRegistrationTest, StartFailed_TxnTimeout);
+    FRIEND_TEST(AosRegistrationTest, UpdateFailed_TxnTimeout);
+    FRIEND_TEST(AosRegistrationTest, StandardPcscfSelection);
     FRIEND_TEST(AosRegistrationTest, RefreshTimerExpired);
 
 protected:
@@ -794,6 +797,90 @@ TEST_F(AosRegistrationTest, RetryCount)
 
     m_pTestAosRegistration->ClearRetryCount(IMS_TRUE);
     EXPECT_TRUE(m_pTestAosRegistration->IsRetryCountClear());
+}
+
+TEST_F(AosRegistrationTest, StartFailed_TxnTimeout)
+{
+    // Covers GetRegErrCodeForPcscfDiscovery() == CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F
+    IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
+    objRegErrCodeForPcscfDiscovery.Clear();
+    objRegErrCodeForPcscfDiscovery.Add(0);
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objRegErrCodeForPcscfDiscovery));
+
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(AnyNumber());
+
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegRetryTimerFPolicy())
+            .Times(AnyNumber())
+            .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_SPEC))
+            .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_SPEC_WITH_AWT));
+
+    m_pTestAosRegistration->ProcessStartFailed_TxnTimeout();
+
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .Times(1)
+            .WillOnce(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pTestAosRegistration->ProcessStartFailed_TxnTimeout();
+}
+
+TEST_F(AosRegistrationTest, UpdateFailed_TxnTimeout)
+{
+    // Covers GetReregErrCodeForInitRegWithAvailablePcscf() ==
+    // CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+
+    IMSVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
+    objReregErrCodeForInitRegWithAvailablePcscf.Clear();
+    objReregErrCodeForInitRegWithAvailablePcscf.Add(0);
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetReregErrCodeForInitRegWithAvailablePcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objReregErrCodeForInitRegWithAvailablePcscf));
+
+    EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(AnyNumber());
+
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegRetryTimerFPolicy())
+            .Times(AnyNumber())
+            .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_SPEC))
+            .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_SPEC_WITH_AWT));
+
+    m_pTestAosRegistration->ProcessUpdateFailed_TxnTimeout();
+
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, GetRegActualWaitTimePolicy())
+            .Times(1)
+            .WillOnce(Return(CarrierConfig::Assets::AWT_POLICY_RFC_RULE));
+
+    EXPECT_CALL(m_objMockAosIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
+            .Times(1)
+            .WillOnce(Return(IMS_FALSE));
+
+    m_pTestAosRegistration->ProcessUpdateFailed_TxnTimeout();
+}
+
+TEST_F(AosRegistrationTest, StandardPcscfSelection)
+{
+    EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscf(_, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT))
+            .Times(AnyNumber());
+
+    m_pTestAosRegistration->ProcessStandardPcscfSelection();
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT))
+            .Times(AnyNumber());
+
+    m_pTestAosRegistration->ProcessStandardPcscfSelection(30);
 }
 
 TEST_F(AosRegistrationTest, RefreshTimerExpired)

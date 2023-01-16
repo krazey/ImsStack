@@ -43,6 +43,7 @@
     <int name="contact_user_info_policy_for_non_reg_message_int" value="2"/>
     <int name="reg_actual_wait_time_policy_int" value="2"/>
     <int name="reg_retry_default_policy_int" value="1"/>
+    <int name="reg_retry_timer_f_policy_int" value="1"/>
     <int-array name="reg_err_code_for_pcscf_discovery_int_array" num="2">
         <item value="0"/>
         <item value="504"/>

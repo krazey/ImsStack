@@ -1062,7 +1062,7 @@ public:
         {
             TIMER_F_POLICY_NONE = 0,
             TIMER_F_POLICY_SPEC = 1,
-            TIMER_F_POLICY_SPEC_WITH_MIN_TIMES_AND_AWT = 2
+            TIMER_F_POLICY_SPEC_WITH_AWT = 2
         };
 
         // Registration Retry Default Policy

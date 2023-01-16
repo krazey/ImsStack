@@ -247,7 +247,8 @@ protected:
     virtual void ProcessAuthenticationFailed();
     virtual void ProcessRegRequiredWithWaitTime(IN IMS_SINT32 nWaitTime);
     virtual void ProcessRegRequiredWithNextPcscf();
-    virtual void ProcessRegRequiredWithAvailableNextPcscf(IN IMS_BOOL bSetCurrentPcscfInvalid);
+    virtual void ProcessRegRequiredWithAvailableNextPcscf(
+            IN IMS_BOOL bSetCurrentPcscfInvalid, IN IMS_UINT32 nReconnectTime = 0);
     virtual void ProcessSubReinitiate();
     virtual IMS_BOOL ProcessForbiddenFailed(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode);
