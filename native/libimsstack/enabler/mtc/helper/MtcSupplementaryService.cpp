@@ -296,36 +296,13 @@ IMS_BOOL MtcSupplementaryService::UpdateDualNumber(IN IMessage* /*piMessage*/)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateCallingNumVerification(IN IMessage* piMessage)
 {
-    // TODO :: need to check stiil using scheme below
-    // PRIVATE
-    // IMS_BOOL IdleState::IsSupportCallingNumberVerification()
-    // {
-    //     /* TODO:
-    //     IMS_UINT32 nSupported = AoSSupportability::NOT_SUPPORTED;
-
-    //     if (m_objContext.GetService().GetIImsAosApp()->GetDetailedState(
-    //             AoSAppRequest::STATE_SUPPORT_CALLING_NUMBER_VERIFICATION, nSupported))
-    //     {
-    //         if (nSupported == AoSSupportability::SUPPORTED)
-    //         {
-    //             return IMS_TRUE;
-    //         }
-    //     }
-    //     */
-    //     return IMS_FALSE;
-    // }
-
-    IMS_SINT32 nHeaderType = GetCnvHeaderType(piMessage);
-
-    AString strValue;
-    if (MessageUtil::GetParameterValueFromUri(
-                piMessage, STR_VERSTAT, nHeaderType, strValue, AString::ConstNull()) == IMS_FAILURE)
+    AString strValue = GetCnvParameterValue(piMessage);
+    if (strValue.GetLength() <= 0)
     {
         return IMS_FALSE;
     }
 
     Add(SuppType::CALLING_NUM_VERIFICATION, GetCallingNumVerificationResult(strValue));
-
     return IMS_TRUE;
 }
 
@@ -562,17 +539,19 @@ IMS_SINT32 MtcSupplementaryService::GetCallingNumVerificationResult(IN const ASt
 }
 
 PRIVATE
-IMS_SINT32 MtcSupplementaryService::GetCnvHeaderType(IN IMessage* piMessage)
+AString MtcSupplementaryService::GetCnvParameterValue(IN IMessage* piMessage) const
 {
-    if (m_objConfigurationProxy.Is(Feature::OIP_SOURCE_FROM_HEADER) == IMS_FALSE &&
-            MessageUtil::IsHeaderPresent(piMessage, ISipHeader::P_ASSERTED_IDENTITY))
+    AString strValue;
+    MessageUtil::GetParameterValueFromUri(piMessage, STR_VERSTAT, ISipHeader::P_ASSERTED_IDENTITY,
+            strValue, AString::ConstNull());
+    if (strValue.GetLength() > 0)
     {
-        IMS_TRACE_D("GetCNVHeaderType - P_ASSERTED_IDENTITY", 0, 0, 0);
-        return ISipHeader::P_ASSERTED_IDENTITY;
+        return strValue;
     }
 
-    IMS_TRACE_D("GetCNVHeaderType - FROM", 0, 0, 0);
-    return ISipHeader::FROM;
+    MessageUtil::GetParameterValueFromUri(
+            piMessage, STR_VERSTAT, ISipHeader::FROM, strValue, AString::ConstNull());
+    return strValue;
 }
 
 PRIVATE

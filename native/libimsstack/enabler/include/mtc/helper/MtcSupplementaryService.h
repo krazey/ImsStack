@@ -67,7 +67,7 @@ private:
     static IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
     static IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
     static IMS_SINT32 GetCallingNumVerificationResult(IN const AString& strValue);
-    IMS_SINT32 GetCnvHeaderType(IN IMessage* piMessage);
+    AString GetCnvParameterValue(IN IMessage* piMessage) const;
     OipType GetOipTypeByHeader(
             IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack);
     void GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOOL bFromHeader, OUT AString& strCnap,

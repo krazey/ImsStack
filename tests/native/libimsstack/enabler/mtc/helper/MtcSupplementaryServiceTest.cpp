@@ -458,16 +458,7 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCw)
 
 TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumVerification)
 {
-    EXPECT_CALL(*pMockIMtcConfigurationManager, IsOipSourceFromHeader())
-            .Times(3)
-            .WillOnce(Return(IMS_FALSE))
-            .WillOnce(Return(IMS_TRUE))
-            .WillOnce(Return(IMS_TRUE));
-
-    EXPECT_CALL(objMockISipMessage,
-            IsHeaderPresent(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
-            .Times(1)
-            .WillOnce(Return(IMS_TRUE));
+    ImsList<AString> objNoHeaders;
 
     ImsList<AString> objHeadersPass;
     AString strCnvPass = "<sip:01030993879@fakeims.google.com;verstat=TN-Validation-Passed>";
@@ -480,15 +471,26 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumVerification)
     ImsList<AString> objHeadersNone;
     objHeadersNone.Append(AString("<sip:01030993879@fakeims.google.com>"));
 
+    ImsList<AString> objHeadersNoValidation;
+    objHeadersNoValidation.Append(
+            AString("<sip:01030993879@fakeims.google.com;verstat=No-TN-Validation>"));
+
     EXPECT_CALL(
             objMockISipMessage, GetHeaders(ISipHeader::P_ASSERTED_IDENTITY, AString::ConstNull()))
-            .Times(1)
-            .WillOnce(Return(objHeadersPass));
+            .Times(6)
+            .WillOnce(Return(objHeadersPass))
+            .WillOnce(Return(objNoHeaders))
+            .WillOnce(Return(objNoHeaders))
+            .WillOnce(Return(objHeadersNoValidation))
+            .WillOnce(Return(objHeadersNone))
+            .WillOnce(Return(objNoHeaders));
 
     EXPECT_CALL(objMockISipMessage, GetHeaders(ISipHeader::FROM, AString::ConstNull()))
-            .Times(2)
+            .Times(4)
             .WillOnce(Return(objHeadersFail))
-            .WillOnce(Return(objHeadersNone));
+            .WillOnce(Return(objHeadersNone))
+            .WillOnce(Return(objHeadersFail))
+            .WillOnce(Return(objHeadersPass));
 
     pMtcSupplementaryService->UpdateCallingNumVerification(
             static_cast<IMessage*>(&objMockIMessage));
@@ -506,6 +508,21 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumVerification)
             static_cast<IMessage*>(&objMockIMessage));
     EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION),
             static_cast<SuppService*>(IMS_NULL));
+    pMtcSupplementaryService->Delete(SuppType::CALLING_NUM_VERIFICATION);
+
+    pMtcSupplementaryService->UpdateCallingNumVerification(&objMockIMessage);
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_NONE);
+    pMtcSupplementaryService->Delete(SuppType::CALLING_NUM_VERIFICATION);
+
+    pMtcSupplementaryService->UpdateCallingNumVerification(&objMockIMessage);
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_NOT_VERIFIED);
+    pMtcSupplementaryService->Delete(SuppType::CALLING_NUM_VERIFICATION);
+
+    pMtcSupplementaryService->UpdateCallingNumVerification(&objMockIMessage);
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALLING_NUM_VERIFICATION)->nValue,
+            CALLING_NUM_VERSTAT_VERIFIED);
 }
 
 }  // namespace android
