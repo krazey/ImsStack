@@ -19,6 +19,7 @@ package com.android.imsstack.imsservice.mmtel;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.util.Log;
@@ -85,8 +86,17 @@ public class ConferenceExtensionProxyTest {
     @After
     public void tearDown() throws Exception {
         mConfExtProxy.setStateForTest(ConferenceProxy.STATE_IDLE);
+        mConfExtProxy.dispose();
         mConfExtProxy = null;
         mIscallBackCalled = false;
+    }
+
+    @Test
+    public void testAbort() {
+        MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
+        mConfExtProxy.setConferenceCallForTest(mockMtcCall);
+        mConfExtProxy.abort();
+        verify(mockMtcCall).close();
     }
 
     @Test
@@ -244,6 +254,10 @@ public class ConferenceExtensionProxyTest {
 
         public void setStateForTest(int state) {
             setState(state);
+        }
+
+        public void setConferenceCallForTest(MtcCall call) {
+            setConferenceCall(call);
         }
     }
 

@@ -138,6 +138,22 @@ public class ConferenceProxyTest {
     }
 
     @Test
+    public void testIsConferenceExtensionRequestor() {
+        MtcCall call = Mockito.mock(MtcCall.class);
+        assertFalse(mConfProxyWrapper.isConferenceExtensionRequestor(call));
+    }
+
+    @Test
+    public void testIsConferenceForCallMerge() {
+        assertFalse(mConfProxyWrapper.isConferenceForCallMerge());
+    }
+
+    @Test
+    public void testStartInternal() {
+        assertFalse(mConfProxyWrapper.startInternal(true));
+    }
+
+    @Test
     public void testListenerAddRemove() {
         MtcCall.Listener callListener = new MtcCall.Listener();
         MtcConference.Listener conferenceListener = new MtcConference.Listener();
