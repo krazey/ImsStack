@@ -2738,6 +2738,7 @@ AString AString::ToUtf8() const
 }
 
 PUBLIC
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 AString& AString::Sprintf(IN const IMS_CHAR* pszFormat, ...)
 {
     va_list ap;

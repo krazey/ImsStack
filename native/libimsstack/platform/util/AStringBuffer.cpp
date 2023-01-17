@@ -80,6 +80,7 @@ AStringBuffer& AStringBuffer::operator+=(IN const AStringBuffer& other)
 }
 
 PUBLIC
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 AStringBuffer& AStringBuffer::Sprintf(IN const IMS_CHAR* pszFormat, ...)
 {
     va_list ap;

@@ -92,6 +92,7 @@ PUBLIC VIRTUAL IMS_BOOL ImsTrace::IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS
 }
 
 PUBLIC
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 void ImsTrace::OutP(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
         IN const IMS_CHAR* pszFormat, ...)
 {
@@ -200,6 +201,7 @@ IMS_BOOL ImsTrace::IsOptionEnabled(IN IMS_SINT32 nCategory) const
     return IMS_FALSE;
 }
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 PRIVATE VIRTUAL void ImsTrace::Out(IN const IMS_CHAR* pszFormat, ...)
 {
     va_list args;
@@ -220,6 +222,7 @@ PRIVATE VIRTUAL void ImsTrace::Out(IN const IMS_CHAR* pszFormat, ...)
     va_end(args);
 }
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 PRIVATE VIRTUAL void ImsTrace::Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag,
         IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat, ...)
 {
@@ -241,6 +244,7 @@ PRIVATE VIRTUAL void ImsTrace::Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* p
     va_end(args);
 }
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 PRIVATE VIRTUAL void ImsTrace::OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszFunction,
         IN IMS_UINT16 nLine, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
         IN const IMS_CHAR* pszFormat, ...)

@@ -75,6 +75,7 @@ GLOBAL IMS_UINT32 IMS_StrCpy(
  * @param nBufSize The buffer size excluding null('\0') character
  * @return The number of characters written (>= 0) if operation was successful, -1 otherwise.
  */
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 GLOBAL IMS_SINT32 IMS_Sprintf(
         OUT IMS_CHAR* pszBuf, IN IMS_SIZE_T nBufSize, IN const IMS_CHAR* pszFormat, ...)
 {
