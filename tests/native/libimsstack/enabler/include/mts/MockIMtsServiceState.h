@@ -29,7 +29,7 @@ public:
 
     // MtsService
     MOCK_METHOD(void, Init, (IN IImsAos* piImsAos), (override));
-    MOCK_METHOD(IMS_SINT32, GetServiceState, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(void, OnImsConnected, (), (override));
     MOCK_METHOD(void, OnImsDisconnected, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, OnImsDisconnecting, (IN IMS_UINT32 nReason), (override));

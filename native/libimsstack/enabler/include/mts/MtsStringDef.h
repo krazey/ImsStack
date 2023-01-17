@@ -180,6 +180,23 @@ public:
         }
     }
 
+    inline static const IMS_CHAR* PS_ServiceState(IN IMS_SINT32 nState)
+    {
+        switch (nState)
+        {
+            case STATE_INIT:
+                return "STATE_INIT";
+            case STATE_READY:
+                return "STATE_READY";
+            case STATE_LIMITED:
+                return "STATE_LIMITED";
+            case STATE_NOTREADY:
+                return "STATE_NOTREADY";
+            default:
+                return "__INVALID__";
+        }
+    }
+
     inline static const IMS_CHAR* PS_SmsFormatType(IN SmsFormatType eSmsFormat)
     {
         switch (eSmsFormat)
@@ -246,6 +263,10 @@ public:
 
 #ifndef PS_ScbmState
 #define PS_ScbmState(A) MtsStringDef::PS_ScbmState(A)
+#endif
+
+#ifndef PS_ServiceState
+#define PS_ServiceState(A) MtsStringDef::PS_ServiceState(A)
 #endif
 
 #ifndef PS_SmsFormatType

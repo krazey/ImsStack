@@ -27,7 +27,7 @@ __IMS_TRACE_TAG_COM_MTS__;
 PUBLIC
 MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
         m_piImsAos(IMS_NULL),
-        m_nMtsServiceState(STATE_INIT),
+        m_nState(STATE_INIT),
         m_bImsConnected(IMS_FALSE),
         m_bAosRegModAdmin(IMS_FALSE),
         m_bImsSuspend(IMS_FALSE),
@@ -63,25 +63,11 @@ void MtsServiceState::Init(IN IImsAos* piImsAos)
 }
 
 PUBLIC
-IMS_SINT32 MtsServiceState::GetServiceState() const
+IMS_SINT32 MtsServiceState::GetState() const
 {
-    IMS_SINT32 nState = STATE_NOTREADY;
+    IMS_TRACE_I("GetState : State(%s)", PS_ServiceState(m_nState), 0, 0);
 
-    if (m_bImsConnected)
-    {
-        if (m_bImsSuspend || (!m_bSmsOverIpConf) || m_bAosRegModAdmin)
-        {
-            nState = STATE_LIMITED;
-        }
-        else
-        {
-            nState = STATE_READY;
-        }
-    }
-
-    IMS_TRACE_I("GetServiceState : nState(%d)", nState, 0, 0);
-
-    return nState;
+    return m_nState;
 }
 
 PUBLIC
@@ -152,7 +138,7 @@ void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
     IMS_TRACE_I("SetImsRegConnected : IMS Reg State [%s], IMS Admin Reg [%s]",
             _TRACE_B_(m_bImsConnected), _TRACE_B_(m_bAosRegModAdmin), 0);
 
-    UpdateServiceState();
+    Update();
 }
 
 PUBLIC
@@ -164,14 +150,14 @@ IMS_BOOL MtsServiceState::IsMoServiceBlocked() const
     }
     else
     {
-        return (m_nMtsServiceState != STATE_READY);
+        return (m_nState != STATE_READY);
     }
 }
 
 PUBLIC
 IMS_BOOL MtsServiceState::IsMtServiceBlocked() const
 {
-    return (m_nMtsServiceState == STATE_NOTREADY);
+    return (m_nState == STATE_NOTREADY);
 }
 
 PRIVATE
@@ -186,7 +172,7 @@ void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
 
     IMS_TRACE_I("SetImsSuspendState : IMS Suspend State is [%s]", _TRACE_B_(m_bImsSuspend), 0, 0);
 
-    UpdateServiceState();
+    Update();
 }
 
 PRIVATE
@@ -202,19 +188,31 @@ void MtsServiceState::SetSmsOverIpState(IN IMS_BOOL bState)
     IMS_TRACE_I("SetSmsOverIpState : Sms Over IP Network State is [%s]",
             _TRACE_B_(m_bSmsOverIpConf), 0, 0);
 
-    UpdateServiceState();
+    Update();
 }
 
 PRIVATE
-void MtsServiceState::UpdateServiceState()
+void MtsServiceState::Update()
 {
-    IMS_SINT32 nTempState = GetServiceState();
+    IMS_SINT32 nNewState = STATE_NOTREADY;
 
-    IMS_TRACE_I("UpdateServiceState : nTempState(%d) m_nMtsServiceState(%d)", nTempState,
-            m_nMtsServiceState, 0);
-
-    if (nTempState != m_nMtsServiceState)
+    if (m_bImsConnected)
     {
-        m_nMtsServiceState = nTempState;
+        if (m_bImsSuspend || (!m_bSmsOverIpConf) || m_bAosRegModAdmin)
+        {
+            nNewState = STATE_LIMITED;
+        }
+        else
+        {
+            nNewState = STATE_READY;
+        }
+    }
+
+    IMS_TRACE_I("Update : OldState(%s), NewState(%s)", PS_ServiceState(m_nState),
+            PS_ServiceState(nNewState), 0);
+
+    if (m_nState != nNewState)
+    {
+        m_nState = nNewState;
     }
 }
