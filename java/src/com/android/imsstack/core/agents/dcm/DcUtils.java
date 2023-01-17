@@ -26,12 +26,14 @@ import android.telephony.CellInfo;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
@@ -213,7 +215,7 @@ public class DcUtils implements IDcUtils {
         if (ci == null) {
             ani = getAccessNetworkInfoFromCache(TelephonyManager.NETWORK_TYPE_NR);
         } else {
-            ani = getAccessNetworkInfoFromCellIdentityNr(ci, getDuplexModeForNr(ci));
+            ani = getAccessNetworkInfoFromCellIdentityNr(ci, getDuplexModeForNr(ci, mSlotId));
 
             if (ani == null) {
                 ani = getAccessNetworkInfoFromCache(TelephonyManager.NETWORK_TYPE_NR);
@@ -259,7 +261,20 @@ public class DcUtils implements IDcUtils {
         return null;
     }
 
-    private static int getDuplexModeForNr(@NonNull CellIdentityNr ci) {
+    private static int getDuplexModeForNr(@NonNull CellIdentityNr ci, int slotId) {
+        String nrMode = ImsPrivateProperties.Persistent.get(
+                ImsPrivateProperties.Persistent.KEY_CONFIG_NR_DUPLEX_MODE, slotId);
+
+        if (!TextUtils.isEmpty(nrMode)) {
+            ImsLog.d(slotId, "predefined nr mode: " + nrMode);
+
+            if (nrMode.equals(MODE_TDD)) {
+                return ServiceState.DUPLEX_MODE_TDD;
+            } else if (nrMode.equals(MODE_FDD)) {
+                return ServiceState.DUPLEX_MODE_FDD;
+            }
+        }
+
         // TODO: Is the arfcn for downlink? Need to check if it could be uplink as well
         int arfcn = ci.getNrarfcn();
         if (arfcn == CellInfo.UNAVAILABLE) {

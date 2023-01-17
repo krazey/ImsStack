@@ -53,6 +53,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private static final String KEY_USER_AGENT_USE_PREDEFINED_UA_STRING =
             "user_agent_use_predefined_ua_string";
     private static final String KEY_USER_AGENT_UA_STRING = "user_agent_ua_string";
+    private static final String KEY_NR_DUPLEX_MODE = "nr_duplex_mode";
 
     private int mSlotId = 0;
 
@@ -67,6 +68,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private EditTextPreference mPcscfAddress;
     private CheckBoxPreference mUsePredefinedUaString;
     private EditTextPreference mUaString;
+    private EditTextPreference mNrDuplexMode;
     private EditTextPreference mLogOptions;
     private ListPreference mRestartImsStack;
     private ListPreference mClearTestConfig;
@@ -222,6 +224,16 @@ public class TestConfigMenu extends PreferenceActivity {
             mUaString.setOnPreferenceChangeListener(new EditTextItemChangeListener());
         }
 
+        mNrDuplexMode = (EditTextPreference) findPreference(KEY_NR_DUPLEX_MODE);
+
+        if (mNrDuplexMode != null) {
+            String nrMode = ImsPrivateProperties.Persistent.get(
+                    ImsPrivateProperties.Persistent.KEY_CONFIG_NR_DUPLEX_MODE, mSlotId);
+            mNrDuplexMode.setText(nrMode);
+            mNrDuplexMode.setSummary(nrMode);
+            mNrDuplexMode.setOnPreferenceChangeListener(new EditTextItemChangeListener());
+        }
+
         mLogOptions = (EditTextPreference) findPreference(KEY_TEST_LOG_OPTIONS);
 
         if (mLogOptions != null) {
@@ -317,6 +329,9 @@ public class TestConfigMenu extends PreferenceActivity {
                     break;
                 case KEY_USER_AGENT_UA_STRING:
                     key = ImsPrivateProperties.Persistent.KEY_CONFIG_UA_STRING;
+                    break;
+                case KEY_NR_DUPLEX_MODE:
+                    key = ImsPrivateProperties.Persistent.KEY_CONFIG_NR_DUPLEX_MODE;
                     break;
                 case KEY_TEST_LOG_OPTIONS:
                     if (value != null && !value.startsWith("0x")) {

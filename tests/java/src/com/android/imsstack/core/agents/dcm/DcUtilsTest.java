@@ -20,10 +20,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.SharedPreferences;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellIdentity;
@@ -46,6 +49,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
 
 import java.util.Collections;
 
@@ -53,6 +57,7 @@ import java.util.Collections;
 public class DcUtilsTest extends ImsStackTest {
     private static final int SLOT_ID = 0;
 
+    @Mock SharedPreferences mSp;
     DcUtils mDcUtils;
 
     @Before
@@ -103,6 +108,8 @@ public class DcUtilsTest extends ImsStackTest {
             ServiceState.DUPLEX_MODE_TDD
         };
 
+        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+
         for (int i = 0; i < testNetworkTypes.length; ++i) {
             NetworkRegistrationInfo nri = createNetworkRegistrationInfo(testNetworkTypes[i]);
 
@@ -149,6 +156,7 @@ public class DcUtilsTest extends ImsStackTest {
         NetworkRegistrationInfo nri = createNetworkRegistrationInfo(testNetworkType);
 
         when(mServiceState.getNetworkRegistrationInfo(anyInt(), anyInt())).thenReturn(nri);
+        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
 
         IDcUtils.AccessNetworkInfo ani = mDcUtils.getAccessNetworkInfo(testNetworkType);
 
@@ -352,6 +360,8 @@ public class DcUtilsTest extends ImsStackTest {
         mDcUtils.storeAccessNetworkInfoToCache(TelephonyManager.NETWORK_TYPE_NR,
                 new String[] {"310"});
 
+        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+
         String[] networks = mDcUtils.getAccessNetworkInfoForNr(nri);
 
         assertNotNull(networks);
@@ -361,6 +371,8 @@ public class DcUtilsTest extends ImsStackTest {
     @Test
     @SmallTest
     public void getAccessNetworkInfoForNr_nrAccessNetworkInfo() {
+        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
+
         NetworkRegistrationInfo nri = createNetworkRegistrationInfo(
                 TelephonyManager.NETWORK_TYPE_NR);
         CellIdentityNr ci = getCellIdentity(nri, CellIdentityNr.class);

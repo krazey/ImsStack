@@ -73,6 +73,10 @@
             android:dialogMessage="">
         </EditTextPreference>
     </PreferenceScreen>
+    <EditTextPreference android:title="NR Duplex Mode"
+        android:key="nr_duplex_mode"
+        android:dialogMessage="FDD or TDD">
+    </EditTextPreference>
     <EditTextPreference android:title="Log Options"
         android:key="test_log_options"
         android:dialogMessage="">

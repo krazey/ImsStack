@@ -252,11 +252,18 @@ public final class ImsPrivateProperties {
          * Value : boolean (true / false)
          */
         public static final String KEY_USE_PREDEFINED_UA_STRING = "use_predefined_ua_string";
+
         /**
          * Keeps the pre-defined User-Agent string.
          * Value : string
          */
         public static final String KEY_CONFIG_UA_STRING = "config_ua_string";
+
+        /**
+         * Keeps the pre-defined NR duplex mode.
+         * Value : string
+         */
+        public static final String KEY_CONFIG_NR_DUPLEX_MODE = "config_nr_duplex_mode";
 
         /**
          * Keeps the log options for the ImsStack's logging.
@@ -340,6 +347,7 @@ public final class ImsPrivateProperties {
                 KEY_TEST_DEBUG_ENABLED,
                 KEY_TEST_TESTMODE_ENABLED,
                 KEY_USE_PREDEFINED_UA_STRING,
+                KEY_CONFIG_NR_DUPLEX_MODE,
                 KEY_TEST_CARRIER_ID,
                 KEY_TEST_LOG_OPTIONS
             };
