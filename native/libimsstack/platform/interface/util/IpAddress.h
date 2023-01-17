@@ -36,6 +36,9 @@ public:
     const IMS_BYTE* GetAddress() const;
     ByteArray ToNetworkByteOrder() const;
 
+private:
+    static IMS_BOOL IsValidIndex(IN IMS_SINT32 nIndex);
+
 public:
     enum
     {

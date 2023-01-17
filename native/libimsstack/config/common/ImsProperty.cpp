@@ -47,7 +47,7 @@ ImsProperty::ImsProperty(IN IMS_SINT32 nKey, IN const AString& strKey /*= AStrin
         m_nKey(nKey),
         m_strKey(strKey)
 {
-    if ((m_nKey > PKEY_CUSTOM) && (m_nKey < PKEY_MAX))
+    if (IsValidKey(m_nKey))
     {
         m_strKey = PKEY_STRING[m_nKey];
     }
@@ -191,13 +191,7 @@ PUBLIC GLOBAL IMS_BOOL ImsProperty::CheckDuplicate(
 
 PUBLIC GLOBAL AString ImsProperty::KeyToString(IN IMS_SINT32 nKey)
 {
-    if ((nKey > PKEY_CUSTOM) && (nKey < PKEY_MAX))
-    {
-        // cppcheck-suppress arrayIndexOutOfBoundsCond
-        return AString(PKEY_STRING[nKey]);
-    }
-
-    return AString();
+    return IsValidKey(nKey) ? AString(PKEY_STRING[nKey]) : AString::ConstNull();
 }
 
 PUBLIC GLOBAL IMS_SINT32 ImsProperty::StringToKey(IN const AString& strKey)
@@ -304,4 +298,9 @@ PUBLIC GLOBAL AString ImsProperty::ToString(IN const AStringArray& objProperty)
     strProperty.Append('}');
 
     return strProperty;
+}
+
+PRIVATE GLOBAL IMS_BOOL ImsProperty::IsValidKey(IN IMS_SINT32 nKey)
+{
+    return (PKEY_CUSTOM < nKey) && (nKey < PKEY_MAX);
 }

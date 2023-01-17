@@ -39,9 +39,11 @@ public:
     static IMS_SINT32 StringToKey(IN const AString& strKey);
     static IMS_BOOL TrimAndCheckProperties(
             IN const ImsRegistry& objRegistry, OUT ImsRegistry& objNewRegistry);
-
     // DEBUG
     static AString ToString(IN const AStringArray& objProperty);
+
+private:
+    static IMS_BOOL IsValidKey(IN IMS_SINT32 nKey);
 
 public:
     /// Type of property key
