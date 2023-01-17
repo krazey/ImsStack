@@ -68,6 +68,9 @@ protected:
     const IMS_CHAR* TriggerToString(IN IMS_SINT32 nTrigger) const override;
 
 private:
+    static IMS_BOOL IsValidTrigger(IN IMS_SINT32 nTrigger);
+
+private:
     /// INVITE usage: TRIGGER events for dialog state transition
     enum
     {

@@ -207,7 +207,7 @@ private:
     {
         return m_pSession->IsSessionRefreshInProgress();
     }
-    inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* piSetter)
+    inline void SetReasonHeaderSetter(IN IReasonHeaderSetter* piSetter) override
     {
         return m_pSession->SetReasonHeaderSetter(piSetter);
     }

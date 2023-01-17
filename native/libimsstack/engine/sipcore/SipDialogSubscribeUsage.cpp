@@ -285,13 +285,7 @@ IMS_BOOL SipDialogSubscribeUsage::InitDialogUsage(IN const SipMethod& objMethod)
 PUBLIC GLOBAL IMS_SINT32 SipDialogSubscribeUsage::GetNextState(
         IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger)
 {
-    if ((nTrigger < TRIGGER_INIT) || (nTrigger >= TRIGGER_MAX))
-    {
-        return SipDState::STATE_MAX;
-    }
-
-    // cppcheck-suppress arrayIndexOutOfBoundsCond
-    return STATE_TABLE[nState][nTrigger];
+    return IsValidTrigger(nTrigger) ? STATE_TABLE[nState][nTrigger] : SipDState::STATE_MAX;
 }
 
 PROTECTED VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::GetActionNTrigger(
@@ -412,4 +406,9 @@ PROTECTED VIRTUAL const IMS_CHAR* SipDialogSubscribeUsage::TriggerToString(
         default:
             return SipDialogUsage::TriggerToString(nTrigger);
     }
+}
+
+PRIVATE GLOBAL IMS_BOOL SipDialogSubscribeUsage::IsValidTrigger(IN IMS_SINT32 nTrigger)
+{
+    return (TRIGGER_INIT <= nTrigger) && (nTrigger < TRIGGER_MAX);
 }
