@@ -23,10 +23,11 @@ SipVector<MockSipTransaction*> objFsmTxnList;
 SIP_BOOL MockFsm_FetchTransaction(
         SIP_VOID* pvTxnKey, SIP_INT32 nOption, SIP_VOID** /*ppvOutTxnKey*/, SIP_VOID** ppvTxn)
 {
-    if (pvTxnKey == SIP_NULL)
+    if ((pvTxnKey == SIP_NULL) || (ppvTxn == SIP_NULL))
     {
         return SIP_FALSE;
     }
+
     SipTxnKey* pTxnKey = static_cast<SipTxnKey*>(pvTxnKey);
     if (nOption == TXN_OPT_CREATE)
     {

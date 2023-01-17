@@ -4440,55 +4440,55 @@ GLOBAL void SetTimerValues(IN SipTimerValues* pTv, IN_OUT SipTxnContext*& pTxnCo
     if (pTv->IsSet(SipTimerValues::TIMER_T1))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_T1;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMER1, pTv->GetValue(SipTimerValues::TIMER_T1));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T1, pTv->GetValue(SipTimerValues::TIMER_T1));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_T2))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_T2;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMER2, pTv->GetValue(SipTimerValues::TIMER_T2));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_T2, pTv->GetValue(SipTimerValues::TIMER_T2));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_B))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_B;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMERB, pTv->GetValue(SipTimerValues::TIMER_B));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_B, pTv->GetValue(SipTimerValues::TIMER_B));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_D))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_D;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMERD, pTv->GetValue(SipTimerValues::TIMER_D));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_D, pTv->GetValue(SipTimerValues::TIMER_D));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_F))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_F;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMERF, pTv->GetValue(SipTimerValues::TIMER_F));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_F, pTv->GetValue(SipTimerValues::TIMER_F));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_H))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_H;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMERH, pTv->GetValue(SipTimerValues::TIMER_H));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_H, pTv->GetValue(SipTimerValues::TIMER_H));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_I))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_I;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMERI, pTv->GetValue(SipTimerValues::TIMER_I));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_I, pTv->GetValue(SipTimerValues::TIMER_I));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_J))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_J;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMERJ, pTv->GetValue(SipTimerValues::TIMER_J));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_J, pTv->GetValue(SipTimerValues::TIMER_J));
     }
 
     if (pTv->IsSet(SipTimerValues::TIMER_K))
     {
         nTxnTimerOptions |= SipTimerValues::TIMER_K;
-        pTxnTimerValues->SetTimerValue(SipTxn::TIMERK, pTv->GetValue(SipTimerValues::TIMER_K));
+        pTxnTimerValues->SetTimerValue(SipTxn::TIMER_K, pTv->GetValue(SipTimerValues::TIMER_K));
     }
 
     pTxnContext->pSipTimerContext->nTimerOptions = nTxnTimerOptions;

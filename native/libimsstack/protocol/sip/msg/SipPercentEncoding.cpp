@@ -271,11 +271,9 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_OtherParam(SIP_CHAR* pszString)
 
 SIP_CHAR* SipPercentEncoding::DoPerEnc_Param(SIP_CHAR* pszName, SIP_CHAR* pszValue)
 {
-    if (SipPf_Stricmp(pszName, SIP_USER_PRM) == 0)
-    {
-        return DoPerEnc_TokenParam(pszValue);
-    }
-    else if (SipPf_Stricmp(pszName, SIP_METHOD) == 0)
+    if ((SipPf_Stricmp(pszName, SIP_USER_PRM) == 0) || (SipPf_Stricmp(pszName, SIP_METHOD) == 0) ||
+            (SipPf_Stricmp(pszName, SIP_TRNSPORT_PRM) == 0) ||
+            (SipPf_Stricmp(pszName, SIP_LR_PRM) == 0))
     {
         return DoPerEnc_TokenParam(pszValue);
     }
@@ -286,14 +284,6 @@ SIP_CHAR* SipPercentEncoding::DoPerEnc_Param(SIP_CHAR* pszName, SIP_CHAR* pszVal
     else if (SipPf_Stricmp(pszName, SIP_TTL_PRM) == 0)
     {
         return DoPerEnc_TtlParam(pszValue);
-    }
-    else if (SipPf_Stricmp(pszName, SIP_TRNSPORT_PRM) == 0)
-    {
-        return DoPerEnc_TokenParam(pszValue);
-    }
-    else if (SipPf_Stricmp(pszName, SIP_LR_PRM) == 0)
-    {
-        return DoPerEnc_TokenParam(pszValue);
     }
     else if (SipPf_Stricmp(pszName, SIP_HEADERS) == 0)
     {

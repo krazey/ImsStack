@@ -55,67 +55,67 @@ SIP_VOID SipTxnTimerValues::SetTimerValue(SIP_UINT32 nTimerType, SIP_UINT32 nDur
 {
     switch (nTimerType)
     {
-        case SipTxn::TIMER1:
+        case SipTxn::TIMER_T1:
         {
             m_nT1Value = nDur;
         }
         break;
-        case SipTxn::TIMER2:
+        case SipTxn::TIMER_T2:
         {
             m_nT2Value = nDur;
         }
         break;
-        case SipTxn::TIMER4:
+        case SipTxn::TIMER_T4:
         {
             m_nT4Value = nDur;
         }
         break;
-        case SipTxn::TIMERA:
+        case SipTxn::TIMER_A:
         {
             m_nTimerA_Value = nDur;
         }
         break;
-        case SipTxn::TIMERB:
+        case SipTxn::TIMER_B:
         {
             m_nTimerB_Value = nDur;
         }
         break;
-        case SipTxn::TIMERD:
+        case SipTxn::TIMER_D:
         {
             m_nTimerD_Value = nDur;
         }
         break;
-        case SipTxn::TIMERE:
+        case SipTxn::TIMER_E:
         {
             m_nTimerE_Value = nDur;
         }
         break;
-        case SipTxn::TIMERF:
+        case SipTxn::TIMER_F:
         {
             m_nTimerF_Value = nDur;
         }
         break;
-        case SipTxn::TIMERG:
+        case SipTxn::TIMER_G:
         {
             m_nTimerG_Value = nDur;
         }
         break;
-        case SipTxn::TIMERH:
+        case SipTxn::TIMER_H:
         {
             m_nTimerH_Value = nDur;
         }
         break;
-        case SipTxn::TIMERI:
+        case SipTxn::TIMER_I:
         {
             m_nTimerI_Value = nDur;
         }
         break;
-        case SipTxn::TIMERJ:
+        case SipTxn::TIMER_J:
         {
             m_nTimerJ_Value = nDur;
         }
         break;
-        case SipTxn::TIMERK:
+        case SipTxn::TIMER_K:
         {
             m_nTimerK_Value = nDur;
         }
@@ -130,66 +130,66 @@ SIP_UINT32 SipTxnTimerValues::GetTimerValue(SIP_UINT32 nTimerType) const
 {
     switch (nTimerType)
     {
-        case SipTxn::TIMER1:
+        case SipTxn::TIMER_T1:
         {
             return m_nT1Value;
         }
         break;
-        case SipTxn::TIMER2:
+        case SipTxn::TIMER_T2:
         {
             return m_nT2Value;
         }
         break;
-        case SipTxn::TIMER4:
+        case SipTxn::TIMER_T4:
         {
             return m_nT4Value;
         }
         break;
-        case SipTxn::TIMERA:
+        case SipTxn::TIMER_A:
         {
             return m_nTimerA_Value;
         }
         break;
-        case SipTxn::TIMERB:
+        case SipTxn::TIMER_B:
         {
             return m_nTimerB_Value;
         }
-        case SipTxn::TIMERD:
+        case SipTxn::TIMER_D:
         {
             return m_nTimerD_Value;
         }
         break;
-        case SipTxn::TIMERE:
+        case SipTxn::TIMER_E:
         {
             return m_nTimerE_Value;
         }
         break;
-        case SipTxn::TIMERF:
+        case SipTxn::TIMER_F:
         {
             return m_nTimerF_Value;
         }
         break;
-        case SipTxn::TIMERG:
+        case SipTxn::TIMER_G:
         {
             return m_nTimerG_Value;
         }
         break;
-        case SipTxn::TIMERH:
+        case SipTxn::TIMER_H:
         {
             return m_nTimerH_Value;
         }
         break;
-        case SipTxn::TIMERI:
+        case SipTxn::TIMER_I:
         {
             return m_nTimerI_Value;
         }
         break;
-        case SipTxn::TIMERJ:
+        case SipTxn::TIMER_J:
         {
             return m_nTimerJ_Value;
         }
         break;
-        case SipTxn::TIMERK:
+        case SipTxn::TIMER_K:
         {
             return m_nTimerK_Value;
         }
@@ -221,67 +221,67 @@ SIP_BOOL SipTxnTimerValues::UpdateSipTimers(
 
     if (IsTimerSet(nTimerOptions, TV_T1) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMER1, ptrTxnSipTxnTimers->m_nT1Value);
+        SetTimerValue(SipTxn::TIMER_T1, ptrTxnSipTxnTimers->m_nT1Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_T2) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMER2, ptrTxnSipTxnTimers->m_nT2Value);
+        SetTimerValue(SipTxn::TIMER_T2, ptrTxnSipTxnTimers->m_nT2Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_T4) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMER4, ptrTxnSipTxnTimers->m_nT4Value);
+        SetTimerValue(SipTxn::TIMER_T4, ptrTxnSipTxnTimers->m_nT4Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_A) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERA, ptrTxnSipTxnTimers->m_nTimerA_Value);
+        SetTimerValue(SipTxn::TIMER_A, ptrTxnSipTxnTimers->m_nTimerA_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_B) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERB, ptrTxnSipTxnTimers->m_nTimerB_Value);
+        SetTimerValue(SipTxn::TIMER_B, ptrTxnSipTxnTimers->m_nTimerB_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_D) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERD, ptrTxnSipTxnTimers->m_nTimerD_Value);
+        SetTimerValue(SipTxn::TIMER_D, ptrTxnSipTxnTimers->m_nTimerD_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_E) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERE, ptrTxnSipTxnTimers->m_nTimerE_Value);
+        SetTimerValue(SipTxn::TIMER_E, ptrTxnSipTxnTimers->m_nTimerE_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_F) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERF, ptrTxnSipTxnTimers->m_nTimerF_Value);
+        SetTimerValue(SipTxn::TIMER_F, ptrTxnSipTxnTimers->m_nTimerF_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_G) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERG, ptrTxnSipTxnTimers->m_nTimerG_Value);
+        SetTimerValue(SipTxn::TIMER_G, ptrTxnSipTxnTimers->m_nTimerG_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_H) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERH, ptrTxnSipTxnTimers->m_nTimerH_Value);
+        SetTimerValue(SipTxn::TIMER_H, ptrTxnSipTxnTimers->m_nTimerH_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_I) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERI, ptrTxnSipTxnTimers->m_nTimerI_Value);
+        SetTimerValue(SipTxn::TIMER_I, ptrTxnSipTxnTimers->m_nTimerI_Value);
     }
 
     if (IsTimerSet(nTimerOptions, TV_TIMER_J) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERJ, ptrTxnSipTxnTimers->m_nTimerJ_Value);
+        SetTimerValue(SipTxn::TIMER_J, ptrTxnSipTxnTimers->m_nTimerJ_Value);
     }
 
-    if (IsTimerSet(nTimerOptions, SipTxn::TIMERK) == SIP_TRUE)
+    if (IsTimerSet(nTimerOptions, SipTxn::TIMER_K) == SIP_TRUE)
     {
-        SetTimerValue(SipTxn::TIMERK, ptrTxnSipTxnTimers->m_nTimerK_Value);
+        SetTimerValue(SipTxn::TIMER_K, ptrTxnSipTxnTimers->m_nTimerK_Value);
     }
 
     PrintSIPTxnTimerValues();

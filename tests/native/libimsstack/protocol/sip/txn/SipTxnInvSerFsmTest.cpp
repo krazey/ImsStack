@@ -239,7 +239,8 @@ TEST_F(Sip_txn_InvSerFsmTest, InvSer_ProceedingState)
 
     pTxn->SetMaxDuration(4000);
     pTxn->SetCurrentDuration(2000);
-    SipTimeoutData* pTimeoutData = new SipTimeoutData(SipTxn::INV_SER_TXN, SipTxn::TIMERG, pTxnKey);
+    SipTimeoutData* pTimeoutData =
+            new SipTimeoutData(SipTxn::INV_SER_TXN, SipTxn::TIMER_G, pTxnKey);
     /* Calling once timer to make startTimer for Timer G return success */
     EXPECT_EQ(SIP_TRUE,
             gpfSipInvSerTxnFsm[SipTxn::INV_SER_PROCEEDING_ST]

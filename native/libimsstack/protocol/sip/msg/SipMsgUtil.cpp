@@ -312,11 +312,8 @@ SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName)
     {
         case 'c':
         case 'C':
-            if (SipPf_Stricmp(pszHdrName, "c") == 0)
-            {
-                return SipHeaderBase::CONTENT_TYPE;
-            }
-            else if (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_TYPE]) == 0)
+            if ((SipPf_Stricmp(pszHdrName, "c") == 0) ||
+                    (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_TYPE]) == 0))
             {
                 return SipHeaderBase::CONTENT_TYPE;
             }
@@ -328,17 +325,15 @@ SIP_INT32 SipGetMimeHdrType(SIP_CHAR* pszHdrName)
             {
                 return SipHeaderBase::CONTENT_DISPOSITION;
             }
-            else if (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_ENCODING]) == 0)
+            else if ((SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_ENCODING]) ==
+                             0) ||
+                    (SipPf_Stricmp(pszHdrName, NAME_CONTENT_TRANSFER_ENCODING) == 0))
             {
                 return SipHeaderBase::CONTENT_ENCODING;
             }
             else if (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_LANGUAGE]) == 0)
             {
                 return SipHeaderBase::CONTENT_LANGUAGE;
-            }
-            else if (SipPf_Stricmp(pszHdrName, NAME_CONTENT_TRANSFER_ENCODING) == 0)
-            {
-                return SipHeaderBase::CONTENT_ENCODING;
             }
             break;
 

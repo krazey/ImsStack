@@ -193,7 +193,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     /* Invoking timeout callback for Timer E */
     SipTimeoutData* pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERE);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_E);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::NON_INV_CLI_TRYING_ST, pTxn->GetTxnState());
 
@@ -206,7 +206,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     /* Invoking timeout callback for Timer K */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERK);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_K);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::NON_INV_CLI_TERMINATED_ST, pTxn->GetTxnState());
 
@@ -233,7 +233,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvCliTxn)
     /* Invoking timeout callback for Timer F */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERF);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_F);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::NON_INV_CLI_TERMINATED_ST, pTxn->GetTxnState());
 
@@ -269,7 +269,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     /* Invoking timeout callback for Timer A */
     SipTimeoutData* pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERA);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_A);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::INV_CLI_CALLING_ST, pTxn->GetTxnState());
 
@@ -288,7 +288,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
     /* Invoking timeout callback for Timer D */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERD);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_D);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::INV_CLI_TERMINATED_ST, pTxn->GetTxnState());
 
@@ -308,7 +308,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvCliTxn)
 
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERB);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_B);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
 
     EXPECT_EQ(SIP_FALSE, pTxn->InvokeFsm(SipTxn::INV_CLI_INVALID_EVT, pTxnFsmData, &nError));
@@ -347,7 +347,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     /* Invoking timeout callback for Timer G */
     SipTimeoutData* pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERG);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_G);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::INV_SER_PROCEEDING_ST, pTxn->GetTxnState());
 
@@ -367,14 +367,14 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     /* Invoking timeout callback for Timer H */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERH);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_H);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
 
     /* Calling timeout with not matching TxnKey */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey());
-    pTimeoutData->SetTimerType(SipTxn::TIMERH);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_H);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::INV_SER_COMPLETED_ST, pTxn->GetTxnState());
 
@@ -393,7 +393,7 @@ TEST_F(SipTxnTest, InvokeFsm_InvSerTxn)
     /* Invoking timeout callback for Timer I */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERI);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_I);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::INV_SER_TERMINATED_ST, pTxn->GetTxnState());
 
@@ -439,7 +439,7 @@ TEST_F(SipTxnTest, InvokeFsm_NonInvSerTxn)
     /* Invoking timeout callback for Timer J */
     pTimeoutData = new SipTimeoutData();
     pTimeoutData->SetTxnKey(new SipTxnKey(pTxn->GetTxnKey(), &nError));
-    pTimeoutData->SetTimerType(SipTxn::TIMERJ);
+    pTimeoutData->SetTimerType(SipTxn::TIMER_J);
     CbkTxnTimeout(pTimeoutData, pTxn->GetTimerId());
     EXPECT_EQ(SipTxn::NON_INV_SER_TERMINATED_ST, pTxn->GetTxnState());
 
@@ -467,7 +467,7 @@ TEST_F(SipTxnTest, StartTxnTimer)
     SIP_UINT16 nError = 0;
     SipTxn* pTxn = new SipTxn();
 
-    EXPECT_EQ(SIP_TRUE, pTxn->StartTxnTimer(SipTxn::TIMERG, 500, &nError));
+    EXPECT_EQ(SIP_TRUE, pTxn->StartTxnTimer(SipTxn::TIMER_G, 500, &nError));
     ASSERT_TRUE(pTxn->GetTimerId() != nullptr);
     EXPECT_EQ(SIP_TRUE, pTxn->StopTxnTimer());
 

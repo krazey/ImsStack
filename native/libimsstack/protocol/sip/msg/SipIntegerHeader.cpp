@@ -97,15 +97,10 @@ SIP_BOOL SipIntegerHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         SIP_UINT32 nValue = SipPf_Atoi(pszValue);
         SIP_INT32 eHeaderType = GetHdrType();
-        if ((eHeaderType == SipHeaderBase::MAX_FORWARDS) && (nValue > MAX_MAXFD))
-        {
-            return SIP_FALSE;
-        }
-        else if ((eHeaderType == SipHeaderBase::EXPIRES_SEC) && (nValue > MAX_EXPIRES))
-        {
-            return SIP_FALSE;
-        }
-        else if ((eHeaderType == SipHeaderBase::GEOLOCATION_ERROR) && (nValue > MAX_ERROR_CODE))
+
+        if (((eHeaderType == SipHeaderBase::MAX_FORWARDS) && (nValue > MAX_MAXFD)) ||
+                ((eHeaderType == SipHeaderBase::EXPIRES_SEC) && (nValue > MAX_EXPIRES)) ||
+                ((eHeaderType == SipHeaderBase::GEOLOCATION_ERROR) && (nValue > MAX_ERROR_CODE)))
         {
             return SIP_FALSE;
         }

@@ -719,11 +719,11 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
     {
         case SipTxn::INV_CLI_TXN:
         {
-            if ((eTimerType == SipTxn::TIMERA) || (eTimerType == SipTxn::TIMERB))
+            if ((eTimerType == SipTxn::TIMER_A) || (eTimerType == SipTxn::TIMER_B))
             {
                 nEvent = SipTxn::INV_CLI_TIMERA_B_TIME_OUT_EVT;
             }
-            else if (eTimerType == SipTxn::TIMERD)
+            else if (eTimerType == SipTxn::TIMER_D)
             {
                 nEvent = SipTxn::INV_CLI_TIMERD_TIME_OUT_EVT;
             }
@@ -740,11 +740,11 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
         case SipTxn::NON_INV_CLI_TXN:
         {
-            if ((eTimerType == SipTxn::TIMERE) || (eTimerType == SipTxn::TIMERF))
+            if ((eTimerType == SipTxn::TIMER_E) || (eTimerType == SipTxn::TIMER_F))
             {
                 nEvent = SipTxn::NON_INV_CLI_TIMER_E_F_TIME_OUT_EVT;
             }
-            else if (eTimerType == SipTxn::TIMERK)
+            else if (eTimerType == SipTxn::TIMER_K)
             {
                 nEvent = SipTxn::NON_INV_CLI_TIMER_K_TIME_OUT_EVT;
             }
@@ -761,11 +761,11 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
 
         case SipTxn::INV_SER_TXN:
         {
-            if ((eTimerType == SipTxn::TIMERG) || (eTimerType == SipTxn::TIMERH))
+            if ((eTimerType == SipTxn::TIMER_G) || (eTimerType == SipTxn::TIMER_H))
             {
                 nEvent = SipTxn::INV_SER_TIMER_G_H_TIME_OUT_EVT;
             }
-            else if (eTimerType == SipTxn::TIMERI)
+            else if (eTimerType == SipTxn::TIMER_I)
             {
                 nEvent = SipTxn::INV_SER_TIMER_I_TIME_OUT_EVT;
             }
@@ -781,7 +781,7 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, const SIP_VOID* pvTimerId)
         break;
         case SipTxn::NON_INV_SER_TXN:
         {
-            if (eTimerType == SipTxn::TIMERJ)
+            if (eTimerType == SipTxn::TIMER_J)
             {
                 nEvent = SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT;
             }

@@ -329,6 +329,11 @@ SIP_BOOL SipMIMEHdrs::DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         }
         delete[] pszHdrValue;
 
+        if (m_pUnKnownHdrList == SIP_NULL)
+        {
+            m_pUnKnownHdrList = new SipHeaderList(SipHeaderBase::UNKNOWN);
+        }
+
         /*Add the header into the unknown list*/
         if (m_pUnKnownHdrList->AddHeader(pUnknown) == SIP_FALSE)
         {
