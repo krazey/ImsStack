@@ -47,11 +47,7 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
                                 String scAddress) {
         mCallContext = callContext;
         mScAddress = scAddress;
-        if (smsTransferLayer == null) {
-            mSmsTL = new SmsTransferLayer(mCallContext);
-        } else {
-            mSmsTL = smsTransferLayer;
-        }
+        mSmsTL = smsTransferLayer;
 
         if (mSmsTL != null) {
             mSmsTL.setListener(mSmsTLListener);

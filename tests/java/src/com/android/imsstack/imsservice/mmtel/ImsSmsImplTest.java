@@ -16,11 +16,14 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,9 +54,12 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     private ImsSmsImpl mImsSmsImpl;
     private MessageExecutor mExecutor;
 
+    //Mocked classes
     @Mock private SmsTransferLayer mMockSmsTransferLayer;
     @Mock private ImsCallContext mMockImsCallContext;
     @Mock private IImsSmsListener mListener;
+    @Mock private RuntimeException mMockRuntimeException;
+
     private int mToken = 1;
     private int mMessageRef = 10;
     private int mResult = ImsSmsImplBase.SEND_STATUS_OK;
@@ -76,9 +82,25 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
 
     @After
     public void tearDown() throws Exception {
-        mImsSmsImpl.dispose();
         mImsSmsImpl = null;
         mExecutor = null;
+    }
+
+    @Test
+    public void test_dispose() throws RemoteException {
+        mImsSmsImpl.dispose();
+        verify(mMockSmsTransferLayer).setListener(null);
+        verify(mMockSmsTransferLayer).clear();
+    }
+
+    @Test
+    public void test_sendSms_Exception() throws RemoteException {
+        mImsSmsImpl.clear();
+        Throwable exception = assertThrows(RuntimeException.class, () -> {
+            mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
+        }
+        );
+        assertEquals("Sms Not Ready!", exception.getMessage());
     }
 
     @Test
@@ -127,14 +149,62 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
     }
 
     @Test
-    public void test_acknowledgeSms() {
+    public void test_onMemoryAvailable_Exception() throws RemoteException {
+        mImsSmsImpl.clear();
+        Throwable exception = assertThrows(RuntimeException.class, () -> {
+            mImsSmsImpl.onMemoryAvailable(mToken);
+        }
+        );
+        assertEquals("Sms Not Ready!", exception.getMessage());
+    }
+
+    @Test
+    public void test_acknowledgeSms_Success() {
         mImsSmsImpl.acknowledgeSms(mToken, mMessageRef, mResult);
         verify(mMockSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_DELIVER, mMessageRef,
                 mResult);
     }
 
     @Test
-    public void test_acknowledgeSmsReport() {
+    public void test_acknowledgeSms_Exception() throws RemoteException {
+        mImsSmsImpl.clear();
+        Throwable exception = assertThrows(RuntimeException.class, () -> {
+            mImsSmsImpl.acknowledgeSms(mToken, mMessageRef, mResult);
+        }
+        );
+        assertEquals("Sms Not Ready!", exception.getMessage());
+    }
+
+    @Test
+    public void test_acknowledgeSms_Error() {
+        when(mMockSmsTransferLayer.sendReportTPdu(mToken, SmsUtils.TP_SMS_DELIVER, mMessageRef,
+                mResult)).thenReturn(SmsUtils.RESULT_FAILURE);
+        mImsSmsImpl.acknowledgeSms(mToken, mMessageRef, mResult);
+        verify(mMockSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_DELIVER, mMessageRef,
+                mResult);
+    }
+
+    @Test
+    public void test_acknowledgeSmsReport_Success() {
+        mImsSmsImpl.acknowledgeSmsReport(mToken, mMessageRef, mResult);
+        verify(mMockSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_STATUS_REPORT,
+                mMessageRef, mResult);
+    }
+
+    @Test
+    public void test_acknowledgeSmsReport_Exception() throws RemoteException {
+        mImsSmsImpl.clear();
+        Throwable exception = assertThrows(RuntimeException.class, () -> {
+            mImsSmsImpl.acknowledgeSmsReport(mToken, mMessageRef, mResult);
+        }
+        );
+        assertEquals("Sms Not Ready!", exception.getMessage());
+    }
+
+    @Test
+    public void test_acknowledgeSmsReport_Error() {
+        when(mMockSmsTransferLayer.sendReportTPdu(mToken, SmsUtils.TP_SMS_STATUS_REPORT,
+                mMessageRef, mResult)).thenReturn(SmsUtils.RESULT_FAILURE);
         mImsSmsImpl.acknowledgeSmsReport(mToken, mMessageRef, mResult);
         verify(mMockSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_STATUS_REPORT,
                 mMessageRef, mResult);
@@ -180,6 +250,58 @@ public class ImsSmsImplTest extends ImsSmsImplBase {
         listener.notifySmsReceived(mToken, mFormat, SmsUtils.TP_SMS_SUBMIT, mPdu);
         verify(mMockSmsTransferLayer).sendReportTPdu(mToken, SmsUtils.TP_SMS_SUBMIT, mMessageRef,
                 ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
+    }
 
+
+    @Test
+    public void test_acknowledgeSmsReport_RuntimeException() {
+        doThrow(mMockRuntimeException).when(mMockSmsTransferLayer).sendReportTPdu(mToken,
+                SmsUtils.TP_SMS_STATUS_REPORT, mMessageRef, mResult);
+        mImsSmsImpl.acknowledgeSmsReport(mToken, mMessageRef, mResult);
+        verify(mMockRuntimeException).getMessage();
+    }
+
+    @Test
+    public void test_acknowledgeSms_RuntimeException() {
+        doThrow(mMockRuntimeException).when(mMockSmsTransferLayer).sendReportTPdu(mToken,
+                SmsUtils.TP_SMS_DELIVER, mMessageRef, mResult);
+        mImsSmsImpl.acknowledgeSms(mToken, mMessageRef, mResult);
+        verify(mMockRuntimeException).getMessage();
+    }
+
+    @Test
+    public void test_onMemoryAvailable_RuntimeException() {
+        doThrow(mMockRuntimeException).when(mMockSmsTransferLayer)
+            .sendMemoryAvailabilityNotification(eq(mToken), eq(mSmsc));
+        mImsSmsImpl.onMemoryAvailable(mToken);
+        verify(mMockRuntimeException).getMessage();
+    }
+
+    @Test
+    public void test_sendSms_RuntimeException() {
+        doThrow(mMockRuntimeException).when(mMockSmsTransferLayer).sendMoTPdu(mToken, mFormat,
+                mMessageRef, "1111", mPdu);
+        mImsSmsImpl.sendSms(mToken, mMessageRef, SmsMessage.FORMAT_3GPP, "1111", true, mPdu);
+        verify(mMockRuntimeException).getMessage();
+    }
+
+    @Test
+    public void test_notifySmsResult_RuntimeException() throws RemoteException  {
+        SmsTransferLayer.Listener listener = setupListener();
+        doThrow(mMockRuntimeException).when(mListener).onSendSmsResult(mToken, mMessageRef,
+                mResult, SmsManager.RESULT_ERROR_NONE, ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
+        listener.notifySmsResult(mToken, mMessageRef, mResult, SmsManager.RESULT_ERROR_NONE,
+                ImsSmsImplBase.RESULT_NO_NETWORK_ERROR);
+        verify(mMockRuntimeException).getMessage();
+    }
+
+    @Test
+    public void test_notifySmsReceived_RuntimeException() {
+        SmsTransferLayer.Listener listener = setupListener();
+        doThrow(mMockRuntimeException).when(mMockSmsTransferLayer).sendReportTPdu(mToken,
+                SmsUtils.TP_SMS_SUBMIT, mMessageRef,
+                ImsSmsImplBase.DELIVER_STATUS_ERROR_REQUEST_NOT_SUPPORTED);
+        listener.notifySmsReceived(mToken, mFormat, SmsUtils.TP_SMS_SUBMIT, mPdu);
+        verify(mMockRuntimeException).getMessage();
     }
 }
