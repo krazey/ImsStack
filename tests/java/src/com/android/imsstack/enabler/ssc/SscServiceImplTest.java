@@ -173,6 +173,13 @@ public class SscServiceImplTest {
     }
 
     @Test
+    public void testChangeCapability() {
+        mSscServiceImpl.changeCapability(true);
+
+        verify(mMockSscServiceState).changeCapability(true);
+    }
+
+    @Test
     public void testServiceStateChanged() {
         mSscServiceImpl.setServiceStateListener(mMockUtServiceStateListener);
         mSscServiceImpl.onServiceStateChanged();

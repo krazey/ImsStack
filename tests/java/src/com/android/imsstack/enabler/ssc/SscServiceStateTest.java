@@ -239,6 +239,24 @@ public class SscServiceStateTest {
     }
 
     @Test
+    public void testChangeCapability_sameCapabilityAsBefore() {
+        mSscServiceState.changeCapability(true);
+        processDelayedMessage();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+        assertEquals(true, mSscServiceState.isUtAvailable());
+    }
+
+    @Test
+    public void testChangeCapability_changeCapabilityToFalse() {
+        mSscServiceState.changeCapability(false);
+        processDelayedMessage();
+
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        assertEquals(false, mSscServiceState.isUtAvailable());
+    }
+
+    @Test
     public void testSetErrorResponseCode_codeNoneBlock() {
         int[] emptyBlockErrorCodes = {};
         int errorCode = 403;

@@ -85,6 +85,13 @@ public class SscServiceStateAgentTest {
     }
 
     @Test
+    public void testChangeCapability() {
+        mSscServiceStateAgent.changeCapability(SLOT_0, false);
+
+        verify(mockSscServiceState).changeCapability(false);
+    }
+
+    @Test
     public void testSetErrorResponseCode() {
         mSscServiceStateAgent.setErrorResponseCode(SLOT_0, SscConstant.HTTP_CONFLICT);
 

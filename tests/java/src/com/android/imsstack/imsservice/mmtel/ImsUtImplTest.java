@@ -19,6 +19,7 @@ package com.android.imsstack.imsservice.mmtel;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -30,6 +31,9 @@ import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
 import android.telephony.ims.ImsUtListener;
+import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+import android.telephony.ims.feature.MmTelFeature.MmTelCapabilities;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.ssc.SscConstant;
@@ -48,6 +52,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
@@ -515,6 +520,51 @@ public class ImsUtImplTest  {
 
         verify(mMockUtInterface, never()).isUtAvailable();
         assertEquals(false, available);
+    }
+
+    @Test
+    public void changeCapabilities_enablingUt() {
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(MmTelCapabilities.CAPABILITY_TYPE_UT,
+                ImsRegistrationImplBase.REGISTRATION_TECH_LTE));
+        disabledCaps.add(new CapabilityPair(MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                ImsRegistrationImplBase.REGISTRATION_TECH_LTE));
+
+        mImsUtImpl = new ImsUtImpl(mMockBaseContext);
+        mImsUtImpl.changeCapabilities(enabledCaps, disabledCaps);
+
+        verify(mMockUtInterface).changeCapability(true);
+    }
+
+    @Test
+    public void changeCapabilities_disablingUt() {
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImplBase.REGISTRATION_TECH_LTE));
+        disabledCaps.add(new CapabilityPair(MmTelCapabilities.CAPABILITY_TYPE_UT,
+                ImsRegistrationImplBase.REGISTRATION_TECH_LTE));
+
+        mImsUtImpl = new ImsUtImpl(mMockBaseContext);
+        mImsUtImpl.changeCapabilities(enabledCaps, disabledCaps);
+
+        verify(mMockUtInterface).changeCapability(false);
+    }
+
+    @Test
+    public void changeCapabilities_utCapabilityNotIncluded() {
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImplBase.REGISTRATION_TECH_LTE));
+        disabledCaps.add(new CapabilityPair(MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
+                ImsRegistrationImplBase.REGISTRATION_TECH_LTE));
+
+        mImsUtImpl = new ImsUtImpl(mMockBaseContext);
+        mImsUtImpl.changeCapabilities(enabledCaps, disabledCaps);
+
+        verify(mMockUtInterface, never()).changeCapability(anyBoolean());
     }
 
     @Test

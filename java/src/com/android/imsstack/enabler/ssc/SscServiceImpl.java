@@ -89,6 +89,11 @@ public class SscServiceImpl implements IUtInterface {
     }
 
     @Override
+    public void changeCapability(boolean enable) {
+        SscServiceStateAgent.getInstance().changeCapability(mSlotId, enable);
+    }
+
+    @Override
     public void start(Context context) {
         ImsLog.d(mSlotId, "");
 

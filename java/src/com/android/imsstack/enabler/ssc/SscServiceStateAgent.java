@@ -74,6 +74,16 @@ public class SscServiceStateAgent {
         return serviceState.isUtAvailable();
     }
 
+    protected void changeCapability(int slotId, boolean enable) {
+        SscServiceState serviceState = getSscServiceState(slotId);
+        if (serviceState == null) {
+            ImsLog.i("changeCapability()");
+            return;
+        }
+
+        serviceState.changeCapability(enable);
+    }
+
     protected void setErrorResponseCode(int slotId, int responseCode) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {

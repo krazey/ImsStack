@@ -69,6 +69,7 @@ public class SscServiceState {
     @VisibleForTesting
     final SscMobileDataStateListener mMobileDataStateListener;
 
+    private boolean mIsUtFeatureEnabled = true;
     @VisibleForTesting
     boolean mUtAvailability = false;
     private int mUtBlockTimerId = -1;
@@ -160,6 +161,17 @@ public class SscServiceState {
         return mUtAvailability;
     }
 
+    protected void changeCapability(boolean enable) {
+        ImsLog.i(mSlotId, "changeCapability : " + enable);
+
+        if (mIsUtFeatureEnabled == enable) {
+            return;
+        }
+
+        mIsUtFeatureEnabled = enable;
+        handleUtFeatureCapabilityChanged();
+    }
+
     protected void setErrorResponseCode(int responseCode) {
         if (SscConfig.isPermanentErrorCode(mSlotId, responseCode)) {
             setUtBlockReason(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
@@ -246,6 +258,11 @@ public class SscServiceState {
     private boolean getCurrentUtAvailability() {
         if (!SscConfig.isUtSupported(mSlotId)) {
             ImsLog.i(mSlotId, "Ut not supported");
+            return false;
+        }
+
+        if (!mIsUtFeatureEnabled) {
+            ImsLog.w(mSlotId, "Ut feature disabled");
             return false;
         }
 

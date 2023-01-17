@@ -29,6 +29,11 @@ public interface IUtInterface {
     boolean isUtAvailable();
 
     /**
+     * Changes Ut capability
+     */
+    void changeCapability(boolean enable);
+
+    /**
      * Initialize Ut service
      */
     void start(Context context);

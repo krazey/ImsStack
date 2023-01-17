@@ -21,6 +21,8 @@ import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
 import android.telephony.ims.ImsUtListener;
+import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+import android.telephony.ims.feature.MmTelFeature.MmTelCapabilities;
 import android.telephony.ims.stub.ImsUtImplBase;
 import android.text.TextUtils;
 
@@ -34,6 +36,7 @@ import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
+import java.util.List;
 
 public final class ImsUtImpl extends ImsUtImplBase {
     private static final boolean DBG = ImsLog.isDebuggable();
@@ -428,6 +431,35 @@ public final class ImsUtImpl extends ImsUtImplBase {
 
     public boolean isUtAvailable() {
         return (mUt != null) && mUt.isUtAvailable();
+    }
+
+    /**
+     * Updating Ut feature capability when capabilities are changed. Currently, radio technologies
+     * are ignored because they're not updated properly.
+     * See also {@link com.android.ims.ImsManager#updateUtFeatureValue}.
+     *
+     * @param enabledCaps list of CapabilityPair of features which are enabled.
+     * @param disabledCaps list of CapabilityPair of features which are disabled.
+     */
+    public void changeCapabilities(List<CapabilityPair> enabledCaps,
+            List<CapabilityPair> disabledCaps) {
+        if (mUt == null) {
+            return;
+        }
+
+        for (CapabilityPair capabilityPair : enabledCaps) {
+            if (capabilityPair.getCapability() == MmTelCapabilities.CAPABILITY_TYPE_UT) {
+                mUt.changeCapability(true);
+                return;
+            }
+        }
+
+        for (CapabilityPair capabilityPair : disabledCaps) {
+            if (capabilityPair.getCapability() == MmTelCapabilities.CAPABILITY_TYPE_UT) {
+                mUt.changeCapability(false);
+                return;
+            }
+        }
     }
 
     private void postAndRunTask(Runnable task) {
