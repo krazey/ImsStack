@@ -167,6 +167,7 @@ void JniUceService::SendPublishCmd(IUceJni* pJniUce, const Parcel& pParcel)
     String8 str8PidfXml(str16PidfXml);
     AString pidfXml = str8PidfXml.string();
 
+    // cppcheck-suppress duplicateAssignExpression
     IMS_UINT32 extended = pParcel.readInt32();
     IMS_UINT32 capability = pParcel.readInt32();
 
@@ -199,6 +200,7 @@ void JniUceService::SendListSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel
 {
     IMS_TRACE_D("SendListSubscribeCmd", 0, 0, 0);
 
+    // cppcheck-suppress duplicateAssignExpression
     IMS_UINT32 key = pParcel.readInt32();
     IMS_UINT32 size = pParcel.readInt32();
     IMSList<AString> userList;
@@ -232,6 +234,7 @@ void JniUceService::SendOptionsRespCmd(IUceJni* pJniUce, const Parcel& pParcel)
 {
     IMS_TRACE_D("SendOptionsRespCmd", 0, 0, 0);
 
+    // cppcheck-suppress duplicateAssignExpression
     IMS_UINT32 key = pParcel.readInt32();
     IMS_SINT32 responseCode = pParcel.readInt32();
 

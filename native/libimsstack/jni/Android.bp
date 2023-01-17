@@ -57,6 +57,14 @@ cc_library_headers {
     ],
 }
 
+cc_library_headers {
+    name: "libimsstack_jni_uce_headers",
+    export_include_dirs: [
+        "include",
+        "include/enabler/uce",
+    ],
+}
+
 cc_library_static {
     name:"libimsstack-jni",
     defaults: [
