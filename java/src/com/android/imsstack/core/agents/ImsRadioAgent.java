@@ -363,6 +363,10 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         ImsLog.d(mSlotId, "handleTrafficCallbackOnError - id=" + id + ", reason=" + reason
                 + " , cause=" + causeCode + " , timeM=" + waitTimeMillis);
 
+        if (waitTimeMillis < 0) {
+            waitTimeMillis = 0;
+        }
+
         if (id >= ID_MIN) {
             ConnectionListener listener = mConnectionListeners.get(id);
 
