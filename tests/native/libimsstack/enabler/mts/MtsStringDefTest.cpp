@@ -121,6 +121,15 @@ TEST_F(MtsStringDefTest, PrintStringScbmState)
     EXPECT_STREQ(PS_ScbmState(NOTIFY_SCBM_INVALID), "__INVALID__");
 }
 
+TEST_F(MtsStringDefTest, PrintStringServiceState)
+{
+    EXPECT_STREQ(PS_ServiceState(STATE_INIT), "STATE_INIT");
+    EXPECT_STREQ(PS_ServiceState(STATE_READY), "STATE_READY");
+    EXPECT_STREQ(PS_ServiceState(STATE_LIMITED), "STATE_LIMITED");
+    EXPECT_STREQ(PS_ServiceState(STATE_NOTREADY), "STATE_NOTREADY");
+    EXPECT_STREQ(PS_ServiceState(-1), "__INVALID__");
+}
+
 TEST_F(MtsStringDefTest, PrintStringSmsFormatType)
 {
     EXPECT_STREQ(PS_SmsFormatType(SmsFormatType::SMSFORMAT_3GPP), "3GPP");

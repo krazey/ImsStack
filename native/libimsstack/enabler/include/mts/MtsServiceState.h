@@ -29,7 +29,7 @@ public:
 
     // IMtsServiceState
     void Init(IN IImsAos* piImsAos) override;
-    IMS_SINT32 GetServiceState() const override;
+    IMS_SINT32 GetState() const override;
     void OnImsConnected() override;
     void OnImsDisconnected(IN IMS_UINT32 nReason) override;
     void OnImsDisconnecting(IN IMS_UINT32 nReason) override;
@@ -43,10 +43,10 @@ public:
 private:
     void SetImsSuspendState(IN IMS_BOOL bState);
     void SetSmsOverIpState(IN IMS_BOOL bState);
-    void UpdateServiceState();
+    void Update();
 
     IImsAos* m_piImsAos;
-    IMS_SINT32 m_nMtsServiceState;
+    IMS_SINT32 m_nState;
     // Check Condition for SMS SERVICE MODE
     IMS_BOOL m_bImsConnected;    // if Connected true enable sms mo/mt service.
     IMS_BOOL m_bAosRegModAdmin;  // if Mod Admin true. block mo service.

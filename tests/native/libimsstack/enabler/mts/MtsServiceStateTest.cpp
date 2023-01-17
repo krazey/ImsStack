@@ -135,19 +135,19 @@ TEST_F(MtsServiceStateTest, CheckServiceStateByImsConnection)
     pMtsServiceState->Init(&objMockIImsAos);
 
     pMtsServiceState->OnImsConnected();
-    EXPECT_EQ(pMtsServiceState->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_READY);
 
     pMtsServiceState->OnImsSuspended(ImsAosReason::SUSPEND_OUT_OF_SERVICE);
-    EXPECT_EQ(pMtsServiceState->GetServiceState(), STATE_LIMITED);
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_LIMITED);
 
     pMtsServiceState->OnImsResumed();
-    EXPECT_EQ(pMtsServiceState->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_READY);
 
     pMtsServiceState->OnImsDisconnecting(ImsAosReason::REG_TERMINATED);
-    EXPECT_EQ(pMtsServiceState->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_READY);
 
     pMtsServiceState->OnImsDisconnected(ImsAosReason::REG_TERMINATED);
-    EXPECT_EQ(pMtsServiceState->GetServiceState(), STATE_NOTREADY);
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_NOTREADY);
 }
 
 TEST_F(MtsServiceStateTest, LimitedStateBySmsOverIpConfiguration)
@@ -166,7 +166,7 @@ TEST_F(MtsServiceStateTest, LimitedStateBySmsOverIpConfiguration)
     pMtsServiceState->Init(&objMockIImsAos);
 
     pMtsServiceState->OnImsConnected();
-    EXPECT_EQ(pMtsServiceState->GetServiceState(), STATE_LIMITED);
+    EXPECT_EQ(pMtsServiceState->GetState(), STATE_LIMITED);
 }
 
 }  // namespace android

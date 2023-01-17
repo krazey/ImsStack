@@ -168,16 +168,16 @@ TEST_F(MtsServiceTest, CoreServiceCapabilityQueryReceivedDoesNothing)
     pMtsService->CoreService_CapabilityQueryReceived(piCoreService, piCapabilities);
 }
 
-TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosConnected)
+TEST_F(MtsServiceTest, GetStateReturnsReadyAfterAosConnected)
 {
     pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
-    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_READY);
 }
 
-TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosConnecting)
+TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosConnecting)
 {
     pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
@@ -185,40 +185,40 @@ TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosConnecting)
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
     pMtsService->ImsAos_Connecting();
-    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_NOTREADY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_NOTREADY);
 }
 
-TEST_F(MtsServiceTest, GetServiceStateReturnsNotreadyAfterAosDisconnected)
+TEST_F(MtsServiceTest, GetStateReturnsNotreadyAfterAosDisconnected)
 {
     pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Disconnected(ImsAosReason::NONE);
-    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_NOTREADY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_NOTREADY);
 }
 
-TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosDisconnecting)
+TEST_F(MtsServiceTest, GetStateReturnsReadyAfterAosDisconnecting)
 {
     pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Disconnecting(ImsAosReason::NONE);
-    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_READY);
 }
 
-TEST_F(MtsServiceTest, GetServiceStateReturnsLimitedAfterAosSuspended)
+TEST_F(MtsServiceTest, GetStateReturnsLimitedAfterAosSuspended)
 {
     pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
 
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
-    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_LIMITED);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_LIMITED);
 }
 
-TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosResumed)
+TEST_F(MtsServiceTest, GetStateReturnsReadyAfterAosResumed)
 {
     pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_FALSE));
@@ -226,7 +226,7 @@ TEST_F(MtsServiceTest, GetServiceStateReturnsReadyAfterAosResumed)
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->ImsAos_Suspended(ImsAosReason::NONE);
     pMtsService->ImsAos_Resumed();
-    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetServiceState(), STATE_READY);
+    EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_READY);
 }
 
 TEST_F(MtsServiceTest, ForwardScbmNotification)

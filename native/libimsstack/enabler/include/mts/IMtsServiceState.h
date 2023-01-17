@@ -28,7 +28,7 @@ public:
 
     // MtsService
     virtual void Init(IN IImsAos* piImsAos) = 0;
-    virtual IMS_SINT32 GetServiceState() const = 0;
+    virtual IMS_SINT32 GetState() const = 0;
     virtual void OnImsConnected() = 0;
     virtual void OnImsDisconnected(IN IMS_UINT32 nReason) = 0;
     virtual void OnImsDisconnecting(IN IMS_UINT32 nReason) = 0;
