@@ -260,8 +260,9 @@ PUBLIC VIRTUAL void AosTransaction::StartEmergencyTraffic(IN IMS_UINT32 nRadioTy
             return;
         }
 
-        m_piImsRadio->StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY, IImsRadio::DIRECTION_MO,
-                GetAccessNetworkType(nRadioType), m_objTraffics.GetValueAt(nIndex));
+        m_piImsRadio->StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY,
+                GetAccessNetworkType(nRadioType), IImsRadio::DIRECTION_MO,
+                m_objTraffics.GetValueAt(nIndex));
     }
 }
 
@@ -284,13 +285,13 @@ PUBLIC VIRTUAL void AosTransaction::StopTraffic(IN IMS_UINT32 nType)
     }
 }
 
-PUBLIC VIRTUAL void AosTransaction::StopEmergencyTaffic(IN IMS_UINT32 nType)
+PUBLIC VIRTUAL void AosTransaction::StopEmergencyTraffic()
 {
     if (m_bIsEmergencyStartUpdated)
     {
         m_bIsEmergencyStartUpdated = IMS_FALSE;
 
-        IMS_SLONG nIndex = m_objTraffics.GetIndexOfKey(nType);
+        IMS_SLONG nIndex = m_objTraffics.GetIndexOfKey(TYPE_EMERGENCY);
 
         if (nIndex >= 0)
         {

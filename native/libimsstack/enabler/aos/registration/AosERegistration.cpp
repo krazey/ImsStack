@@ -18,6 +18,8 @@
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
 
+#include "IImsRadio.h"
+
 #include "CarrierConfig.h"
 #include "IRegistration.h"
 #include "SipStatusCode.h"
@@ -52,19 +54,6 @@ PUBLIC VIRTUAL AosERegistration::~AosERegistration()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosERegistration = %" PFLS_u "/%" PFLS_x, REGID,
             sizeof(AosERegistration), this);
-
-    IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
-    if (piCt != IMS_NULL)
-    {
-        piCt->RemoveListener(this);
-    }
-
-    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ECM_STATE, this, m_nSlotId);
-
-    if (pEModeInfo != IMS_NULL)
-    {
-        delete pEModeInfo;
-    }
 }
 
 PUBLIC VIRTUAL void AosERegistration::Start()
@@ -190,6 +179,32 @@ PROTECTED VIRTUAL void AosERegistration::Init()
     }
 
     InitFeatures();
+
+    SetTrafficListener(IMS_TRUE);
+}
+
+PROTECTED VIRTUAL void AosERegistration::CleanUp()
+{
+    A_IMS_TRACE_D(REGID, "CleanUp", 0, 0, 0);
+
+    DestroyEx();
+
+    StopTimer(TIMER_OFFLINE_RECOVER);
+
+    SetTrafficListener(IMS_FALSE);
+
+    IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+    if (piCt != IMS_NULL)
+    {
+        piCt->RemoveListener(this);
+    }
+
+    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ECM_STATE, this, m_nSlotId);
+
+    if (pEModeInfo != IMS_NULL)
+    {
+        delete pEModeInfo;
+    }
 }
 
 PROTECTED VIRTUAL IMS_BOOL AosERegistration::CreateRegistration()
@@ -239,6 +254,7 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
     }
 
     SetState(STATE_REGSTOP);
+    SetTraffic(IMS_FALSE);
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
 }
 
@@ -252,6 +268,7 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
     }
 
     SetState(STATE_REFRESHSTOP);
+    SetTraffic(IMS_FALSE);
 }
 
 PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
@@ -367,16 +384,18 @@ PROTECTED VIRTUAL void AosERegistration::UpdateTransactionStarted()
 {
     if (pEModeInfo == IMS_NULL || !GET_N_CONFIG(m_nSlotId)->IsEmergencyCallbackModeSupported())
     {
-        return;
-    }
-
-    if (pEModeInfo->IsEcbmCheckedForRefresh() && IsEcbmTimer())
-    {
-        m_bIsTransactionStarted = IsImsCall() || pEModeInfo->IsEcbm() || pEModeInfo->IsScbm();
+        m_bIsTransactionStarted = IsImsCall();
     }
     else
     {
-        m_bIsTransactionStarted = IsImsCall();
+        if (pEModeInfo->IsEcbmCheckedForRefresh() && IsEcbmTimer())
+        {
+            m_bIsTransactionStarted = IsImsCall() || pEModeInfo->IsEcbm() || pEModeInfo->IsScbm();
+        }
+        else
+        {
+            m_bIsTransactionStarted = IsImsCall();
+        }
     }
 
     A_IMS_TRACE_D(REGID, "UpdateTransactionStarted :: (%s)",
@@ -416,6 +435,7 @@ PROTECTED VIRTUAL void AosERegistration::Registration_RefreshTimerExpired(
 
     bDoImplicitRefresh = IMS_TRUE;
 
+    SetTraffic(IMS_TRUE);
     SetState(STATE_REFRESHING);
     ReportTryingState();
 }
@@ -425,12 +445,14 @@ PROTECTED VIRTUAL void AosERegistration::Registration_Started()
     StopTimer(TIMER_STOP_RETRY);
     StopTimer(TIMER_TRANSACTION);
     ProcessEMode();
+    SetTraffic(IMS_FALSE);
     AosRegistration::Registration_Started();
 }
 
 PROTECTED VIRTUAL void AosERegistration::Registration_Updated()
 {
     ProcessEMode();
+    SetTraffic(IMS_FALSE);
     AosRegistration::Registration_Updated();
 }
 
@@ -525,6 +547,25 @@ PROTECTED VIRTUAL void AosERegistration::Event_NotifyEvent(
         }
     }
 }
+
+PROTECTED VIRTUAL void AosERegistration::Transaction_OnConnectionFailed(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 /* nCauseCode */,
+        IN IMS_UINT32 /* nWaitTimeMillis */)
+{
+    if (IsRegistered())
+    {
+        return;
+    }
+
+    if (nFailureReason == IImsRadio::REASON_ACCESS_DENIED)
+    {
+        ProcessUnpredictableFailure();
+    }
+}
+
+PROTECTED VIRTUAL void AosERegistration::Transaction_OnConnectionSetupPrepared() {}
+
+PROTECTED VIRTUAL void AosERegistration::Transaction_OnTrafficPriorityChanged() {}
 
 PROTECTED IMS_UINT32 AosERegistration::GetRetryTime()
 {

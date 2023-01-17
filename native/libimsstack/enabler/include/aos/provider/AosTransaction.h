@@ -88,7 +88,7 @@ public:
     virtual IMS_BOOL StartTraffic(IN IMS_UINT32 nType, IN IMS_UINT32 nRadioType) override;
     virtual void StartEmergencyTraffic(IN IMS_UINT32 nRadioType) override;
     virtual void StopTraffic(IN IMS_UINT32 nType) override;
-    virtual void StopEmergencyTaffic(IN IMS_UINT32 nType) override;
+    virtual void StopEmergencyTraffic() override;
 
 protected:
     IMS_BOOL IsResponseWaiting(IN IMS_UINT32 nType) const;

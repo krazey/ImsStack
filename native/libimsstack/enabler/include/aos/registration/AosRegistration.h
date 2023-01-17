@@ -108,6 +108,8 @@ protected:
     void SetImsCall(IN IMS_BOOL bStarted);
     void SetRadioWaiting(IN IMS_BOOL bWaiting);
     void SetRetryTime();
+    IMS_BOOL SetTraffic(IN IMS_BOOL bStarted);
+    void SetTrafficListener(IN IMS_BOOL bSet);
 
     void ClearPending();
     void ClearCallingNumberVerification();
