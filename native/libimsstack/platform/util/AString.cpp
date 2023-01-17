@@ -3003,6 +3003,14 @@ AString& AString::Vsprintf(IN const IMS_CHAR* pszFormat, va_list ap)
                     case LM_t:
                         i = va_arg(ap, IMS_SINT32);
                         break;
+#if defined(__IMS_LP64__)
+                    case LM_j:  // FALL-THROUGH
+                    case LM_l:  // FALL-THROUGH
+                    case LM_z:  // FALL-THROUGH, size_t type
+                    case LM_ll:
+                        i = va_arg(ap, IMS_SINT64);
+                        break;
+#else
                     case LM_j:  // FALL-THROUGH
                     case LM_l:  // FALL-THROUGH
                     case LM_z:  // size_t type
@@ -3011,6 +3019,7 @@ AString& AString::Vsprintf(IN const IMS_CHAR* pszFormat, va_list ap)
                     case LM_ll:
                         i = va_arg(ap, IMS_SINT64);
                         break;
+#endif
                     default:
                         i = 0;
                         break;
@@ -3034,12 +3043,19 @@ AString& AString::Vsprintf(IN const IMS_CHAR* pszFormat, va_list ap)
                     case LM_h:
                         u = va_arg(ap, IMS_UINT32);
                         break;
+#if defined(__IMS_LP64__)
+                    case LM_l:  // FALL-THROUGH
+                    case LM_ll:
+                        u = va_arg(ap, IMS_UINT64);
+                        break;
+#else
                     case LM_l:
                         u = va_arg(ap, IMS_ULONG);
                         break;
                     case LM_ll:
                         u = va_arg(ap, IMS_UINT64);
                         break;
+#endif
                     default:
                         u = 0;
                         break;
