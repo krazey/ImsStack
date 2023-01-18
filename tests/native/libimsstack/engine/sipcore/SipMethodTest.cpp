@@ -54,6 +54,8 @@ TEST_F(SipMethodTest, Constructor)
     EXPECT_STREQ(strInviteMethod.GetStr(), objSm3.ToString().GetStr());
 
     SipMethod objSm4(nInviteMethod);
+    // This is a test to verify the copy constructor.
+    // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
     SipMethod objSm5(objSm4);
 
     EXPECT_EQ(objSm4.ToInt(), objSm5.ToInt());

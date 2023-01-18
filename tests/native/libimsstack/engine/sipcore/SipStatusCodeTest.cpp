@@ -46,6 +46,8 @@ TEST_F(SipStatusCodeTest, Constructor)
     EXPECT_STREQ("Session Progress", objSsc2.GetReasonPhrase().GetStr());
 
     SipStatusCode objSsc3(SipStatusCode::SC_400, "Bad Request");
+    // This is a test to verify the copy constructor.
+    // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
     SipStatusCode objSsc4(objSsc3);
 
     EXPECT_EQ(objSsc3.ToInt(), objSsc4.ToInt());
