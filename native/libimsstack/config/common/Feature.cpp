@@ -267,13 +267,7 @@ AString Feature::ToStringValueOnly() const
 
 PUBLIC GLOBAL const IMS_CHAR* Feature::GetFeatureTag(IN IMS_SINT32 nBaseTag)
 {
-    if ((nBaseTag >= BASE_AUDIO) && (nBaseTag < BASE_MAX))
-    {
-        // cppcheck-suppress arrayIndexOutOfBoundsCond
-        return BASE_TAG[nBaseTag];
-    }
-
-    return IMS_NULL;
+    return IsValidBaseTag(nBaseTag) ? BASE_TAG[nBaseTag] : IMS_NULL;
 }
 
 PUBLIC GLOBAL IMS_BOOL Feature::IsFeatureTag(IN const AString& strName)
@@ -405,7 +399,7 @@ void Feature::ExtractProperties(IN const AString& strFeature)
     }
 }
 
-PUBLIC GLOBAL AString Feature::DoPercentDecoding(IN const AString& strValue)
+PRIVATE GLOBAL AString Feature::DoPercentDecoding(IN const AString& strValue)
 {
     AString strNewValue;
     const IMS_SINT32 nLen = strValue.GetLength();
@@ -438,7 +432,7 @@ PUBLIC GLOBAL AString Feature::DoPercentDecoding(IN const AString& strValue)
     return strNewValue;
 }
 
-PUBLIC GLOBAL AString Feature::DoPercentEncoding(IN const AString& strValue)
+PRIVATE GLOBAL AString Feature::DoPercentEncoding(IN const AString& strValue)
 {
     // tag-value = ["!"] (token-nobang / boolean / numeric)
     // token-nobang = 1*(alphanum / "-" / "." / "%" / "*" / "_" / "+" / "`" / "'" / "~")
@@ -465,7 +459,7 @@ PUBLIC GLOBAL AString Feature::DoPercentEncoding(IN const AString& strValue)
     return strNewValue;
 }
 
-PUBLIC GLOBAL IMS_BOOL Feature::IsBaseTag(IN const AString& strName)
+PRIVATE GLOBAL IMS_BOOL Feature::IsBaseTag(IN const AString& strName)
 {
     AString strTemp = strName.MakeLower();
 
@@ -498,7 +492,12 @@ PUBLIC GLOBAL IMS_BOOL Feature::IsBaseTag(IN const AString& strName)
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL AString Feature::StripPrefixInSipTree(IN const AString& strName)
+PRIVATE GLOBAL IMS_BOOL Feature::IsValidBaseTag(IN IMS_SINT32 nBaseTag)
+{
+    return (BASE_AUDIO <= nBaseTag) && (nBaseTag < BASE_MAX);
+}
+
+PRIVATE GLOBAL AString Feature::StripPrefixInSipTree(IN const AString& strName)
 {
     IMS_SINT32 nStartIndex = strName.GetIndexOf(TextParser::CHAR_DOT);
 

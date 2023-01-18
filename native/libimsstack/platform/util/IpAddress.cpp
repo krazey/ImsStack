@@ -299,18 +299,14 @@ Ipv6Address& Ipv6Address::operator=(IN const Ipv6Address& other)
 PUBLIC
 IMS_BYTE& Ipv6Address::operator[](IN IMS_SINT32 i)
 {
-    IMS_ASSERT((i >= 0) && (i < MAX_SIZE));
-    // cppcheck-suppress arrayIndexOutOfBoundsCond
-    // cppcheck-suppress negativeIndex
+    IMS_ASSERT(IsValidIndex(i));
     return aIp6[i];
 }
 
 PUBLIC
 IMS_BYTE Ipv6Address::operator[](IN IMS_SINT32 i) const
 {
-    IMS_ASSERT((i >= 0) && (i < MAX_SIZE));
-    // cppcheck-suppress arrayIndexOutOfBoundsCond
-    // cppcheck-suppress negativeIndex
+    IMS_ASSERT(IsValidIndex(i));
     return aIp6[i];
 }
 
@@ -332,6 +328,11 @@ ByteArray Ipv6Address::ToNetworkByteOrder() const
     }
 
     return objIp6;
+}
+
+PRIVATE GLOBAL IMS_BOOL Ipv6Address::IsValidIndex(IN IMS_SINT32 nIndex)
+{
+    return (nIndex >= 0) && (nIndex < MAX_SIZE);
 }
 
 const IpAddress IpAddress::ANY = IpAddress(AString("0.0.0.0"));

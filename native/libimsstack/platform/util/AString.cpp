@@ -400,8 +400,6 @@ AString astring_ULLToA(IN IMS_UINT64 nULL, IN IMS_SINT32 nBase)
                 *pULL = n1Cipher - 10 + 'a';
             }
 
-            // The "nBase" is always not zero.
-            // cppcheck-suppress zerodivcond
             nULL /= nBase;
         }
     }

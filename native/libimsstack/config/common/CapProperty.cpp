@@ -143,24 +143,13 @@ PUBLIC GLOBAL AString CapProperty::CreateCapKey(IN IMS_SINT32 nSectorId, IN IMS_
 
 PUBLIC GLOBAL AString CapProperty::MessageTypeToString(IN IMS_SINT32 nMessageType)
 {
-    if ((nMessageType > MESSAGE_TYPE_INVALID) && (nMessageType < MESSAGE_TYPE_MAX))
-    {
-        // cppcheck-suppress arrayIndexOutOfBoundsCond
-        return AString(MESSAGE_TYPE_STRING[nMessageType]);
-    }
-
-    return AString();
+    return IsValidMessageType(nMessageType) ? AString(MESSAGE_TYPE_STRING[nMessageType])
+                                            : AString::ConstNull();
 }
 
 PUBLIC GLOBAL AString CapProperty::SectorIdToString(IN IMS_SINT32 nSectorId)
 {
-    if ((nSectorId > SECTOR_INVALID) && (nSectorId < SECTOR_MAX))
-    {
-        // cppcheck-suppress arrayIndexOutOfBoundsCond
-        return AString(SECTOR_STRING[nSectorId]);
-    }
-
-    return AString();
+    return IsValidSectorId(nSectorId) ? AString(SECTOR_STRING[nSectorId]) : AString::ConstNull();
 }
 
 PUBLIC GLOBAL IMS_SINT32 CapProperty::StringToMessageType(IN const AString& strMessageType)
@@ -187,4 +176,14 @@ PUBLIC GLOBAL IMS_SINT32 CapProperty::StringToSectorId(IN const AString& strSect
     }
 
     return SECTOR_INVALID;
+}
+
+PRIVATE GLOBAL IMS_BOOL CapProperty::IsValidMessageType(IN IMS_SINT32 nMessageType)
+{
+    return (MESSAGE_TYPE_INVALID < nMessageType) && (nMessageType < MESSAGE_TYPE_MAX);
+}
+
+PRIVATE GLOBAL IMS_BOOL CapProperty::IsValidSectorId(IN IMS_SINT32 nSectorId)
+{
+    return (SECTOR_INVALID < nSectorId) && (nSectorId < SECTOR_MAX);
 }

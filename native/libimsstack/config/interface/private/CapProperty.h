@@ -45,6 +45,10 @@ public:
     static IMS_SINT32 StringToMessageType(IN const AString& strMessageType);
     static IMS_SINT32 StringToSectorId(IN const AString& strSectorId);
 
+private:
+    static IMS_BOOL IsValidMessageType(IN IMS_SINT32 nMessageType);
+    static IMS_BOOL IsValidSectorId(IN IMS_SINT32 nSectorId);
+
 public:
     /// Sector Id
     enum

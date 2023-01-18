@@ -49,6 +49,7 @@ private:
     static AString DoPercentDecoding(IN const AString& strValue);
     static AString DoPercentEncoding(IN const AString& strValue);
     static IMS_BOOL IsBaseTag(IN const AString& strName);
+    static IMS_BOOL IsValidBaseTag(IN IMS_SINT32 nBaseTag);
     static AString StripPrefixInSipTree(IN const AString& strName);
 
 public:
