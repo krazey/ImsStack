@@ -189,14 +189,6 @@ public:
 
     enum
     {
-        /** BW nego with local value */
-        BW_OPTION_LOCAL_VALUE = 0,
-        /** BW nego with remote value */
-        BW_OPTION_REMOTE_VALUE = 1
-    };
-
-    enum
-    {
         /** [VOCODER_INTERFACE] DEFAULT_VOCODER_INTERFACE is CVD */
         DEFAULT_VOCODER_INTERFACE = 2
     };
@@ -205,7 +197,7 @@ public:
     static const IMS_SINT32 DEFAULT_PTIME = 20;
     static const IMS_SINT32 DEFAULT_MAX_PTIME = 240;
     static const IMS_SINT32 DEFAULT_MAX_RED = DEFAULT_MAX_PTIME - DEFAULT_PTIME;
-    static const IMS_BOOL DEFAULT_BW_NEGO_OPERION = BW_OPTION_LOCAL_VALUE;
+    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_SOURCE_VALUE;
     static const IMS_SINT32 DEFAULT_AUDIO_DSCP = 184;  // converted value from 46
     static const IMS_SINT32 DEFAULT_JITTER_MIN = 0;
     static const IMS_SINT32 DEFAULT_JITTER_MAX = 0;

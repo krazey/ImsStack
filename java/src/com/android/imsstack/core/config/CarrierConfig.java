@@ -815,6 +815,8 @@ public class CarrierConfig {
                 "video_iframe_interval_sec_int";
         public static final String KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT =
                 "video_send_periodic_sps_pps_int";
+        public static final String KEY_VIDEO_BW_NEGO_OPTION_BOOL =
+                "video_bw_nego_option_bool";
         public static final String KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY =
                 "text_rtp_port_range_int_array";
         public static final String KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL =

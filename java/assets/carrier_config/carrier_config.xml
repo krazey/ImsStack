@@ -509,6 +509,7 @@
     <boolean name="video_avpf_enable_bool" value="false"/>
     <int name="video_iframe_interval_sec_int" value="1"/>
     <int name="video_send_periodic_sps_pps_int" value="2"/>
+    <boolean name="video_bw_nego_option_bool" value="false"/>
     <int name="asset_t140_payload_type_int" value="111"/>
     <int name="asset_red_payload_type_int" value="112"/>
     <int-array name="text_rtp_port_range_int_array" num="2">

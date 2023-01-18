@@ -31,7 +31,7 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nAudioPtime(DEFAULT_PTIME),
         m_nAudioMaxPtime(DEFAULT_MAX_PTIME),
         m_nAudioMaxRed(DEFAULT_MAX_RED),
-        m_bAudioBwNegoOptionEnabled(DEFAULT_BW_NEGO_OPERION),
+        m_bAudioBwNegoOptionEnabled(DEFAULT_BW_NEGO_OPTION),
         m_nAudioRtpDscp(DEFAULT_AUDIO_DSCP),
         m_nJitterBufferMinSize(DEFAULT_JITTER_MIN),
         m_nJitterBufferMaxSize(DEFAULT_JITTER_MAX),
