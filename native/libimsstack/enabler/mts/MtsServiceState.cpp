@@ -208,11 +208,10 @@ void MtsServiceState::Update()
         }
     }
 
-    IMS_TRACE_I("Update : OldState(%s), NewState(%s)", PS_ServiceState(m_nState),
-            PS_ServiceState(nNewState), 0);
-
     if (m_nState != nNewState)
     {
+        IMS_TRACE_I("Update : OldState(%s), NewState(%s)", PS_ServiceState(m_nState),
+                PS_ServiceState(nNewState), 0);
         m_nState = nNewState;
     }
 }
