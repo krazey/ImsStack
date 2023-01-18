@@ -52,7 +52,7 @@ TEST(CallInfoTest, CallInfoEqualToOperator)
 {
     CallInfo objCallInfo;
     CallInfo* pCallInfo = &objCallInfo;
-    EXPECT_TRUE(&objCallInfo == pCallInfo);
+    EXPECT_TRUE(objCallInfo == *pCallInfo);
 
     CallInfo objCallInfoWithValues;
     objCallInfoWithValues.ePeerType = ANY_PEER_TYPE;
