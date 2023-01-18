@@ -81,6 +81,8 @@ TEST(MtcExtensionSetTest, ConstructorWithEmptyOptionTags)
 TEST(MtcExtensionSetTest, CopyConstructor)
 {
     MtcExtensionSet objExtensionSet = CreateExtensionSetSupportsRprOnly();
+    // This is a test to verify the copy constructor.
+    // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
     MtcExtensionSet objCopiedExtensionSet(objExtensionSet);
 
     EXPECT_EQ(objExtensionSet.IsAvailableOnLocal(MtcExtensionSet::OPTION_TAG_RPR),

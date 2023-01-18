@@ -55,6 +55,8 @@ TEST_F(SipTimerValuesTest, ConstructorNAssignmentOperator)
         ++i;
     }
 
+    // This is a test to verify the copy constructor.
+    // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
     SipTimerValues objStv2(objStv1);
 
     // No flags
@@ -66,12 +68,14 @@ TEST_F(SipTimerValuesTest, ConstructorNAssignmentOperator)
     }
 
     SipTimerValues objStv3 = SipTimerValues::CreateTimerValues(500, 4000);
-    SipTimerValues objStv4(objStv3);
+    SipTimerValues objStv4;
+    objStv4 = objStv3;
 
     // All flags
     i = 0;
     while (nTimerTypes[i] != SipTimerValues::TIMER_ALL)
     {
+        // cppcheck-suppress knownConditionTrueFalse
         EXPECT_EQ(objStv3.GetValue(nTimerTypes[i]), objStv4.GetValue(nTimerTypes[i]));
         ++i;
     }

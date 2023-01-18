@@ -48,6 +48,8 @@ TEST_F(SocketAddressTest, Constructor)
     EXPECT_EQ(5060, objSa2_1.GetPort());
     ASSERT_TRUE(objIpAddr1.Equals(objSa2_1.GetAddress()));
 
+    // This is a test to verify the copy constructor.
+    // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
     SocketAddress objSa3(objSa2_1);
 
     EXPECT_EQ(5060, objSa3.GetPort());
@@ -62,7 +64,8 @@ TEST_F(SocketAddressTest, OperatorAssignment)
     EXPECT_EQ(5060, objSa.GetPort());
     ASSERT_TRUE(objIpAddr.Equals(objSa.GetAddress()));
 
-    SocketAddress objSa1(objSa);
+    SocketAddress objSa1;
+    objSa1 = objSa;
 
     EXPECT_EQ(5060, objSa1.GetPort());
     ASSERT_TRUE(objIpAddr.Equals(objSa1.GetAddress()));

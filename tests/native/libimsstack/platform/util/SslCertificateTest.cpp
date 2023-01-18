@@ -51,6 +51,8 @@ TEST_F(SslCertificateTest, Constructor)
 
     AString strKeyFileAsn1("/data/certificate.asn1");
     SslCertificate objTempSslCert(strKeyFileAsn1, SslCertificate::FILETYPE_ASN1);
+    // This is a test to verify the copy constructor.
+    // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
     SslCertificate objSslCert2(objTempSslCert);
 
     EXPECT_EQ(SslCertificate::FILETYPE_ASN1, objSslCert2.GetKeyFileType());
