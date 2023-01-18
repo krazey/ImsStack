@@ -23,21 +23,30 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
+import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDc;
+import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.mtc.IMtcCallManager;
 import com.android.imsstack.enabler.mtc.MtcApp;
+import com.android.imsstack.enabler.mtc.MtcCall;
+import com.android.imsstack.enabler.mtc.MtcECallStateTracker;
 import com.android.imsstack.enabler.mtc.MtcServiceStateTracker;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ImsApp;
 import com.android.imsstack.imsservice.mmtel.internal.WfcSettingTracker;
+import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
@@ -54,11 +63,12 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
-public class ImsCallContextTest {
+public class ImsCallContextTest extends ImsStackTest {
     /* Indicates that geolocation information is required to make a call */
     private static final int FLAG_LOCATION_REQUIRED = 0x00000001;
     private int mSlotId = 0;
     private static final int SUBSCRIPTION = 1;
+    private static final int SHARED_STATE = 10;
 
     private ImsCallContext mImsCallContext;
     private MtcServiceStateTracker mStateTracker;
@@ -75,20 +85,26 @@ public class ImsCallContextTest {
     @Mock private WfcSettingTracker mWfcsettingtracker;
     @Mock private MtcApp mMtcapp;
     @Mock private IDcNetWatcher mMockDcNetWatcher;
+    @Mock private MtcCall mMockMtcCall;
+    @Mock private SystemInterface mMockSystemInterface;
+    @Mock private ISystem mMockSystem;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
         AppContext.init(mContext);
 
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, mSlotId);
-        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, mSlotId);
         AgentFactory.getInstance().setDefaultAgent(SUBSCRIPTION, mMockISubscription);
 
         HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
         dcs.put(DcFactory.NETWORK_WATCHER, mMockDcNetWatcher);
         DcFactory.setObjects(mSlotId, dcs);
+
+        when(mMockSystemInterface.getSystem(mSlotId)).thenReturn(mMockSystem);
+        replaceInstance(SystemInterface.class, "sSystemInterface", null, mMockSystemInterface);
 
         mStateTracker = new MtcServiceStateTracker(mIBaseContext);
         mImsApp = new ImsApp(mSlotId) {
@@ -97,18 +113,90 @@ public class ImsCallContextTest {
         };
         mImsCallContext = new ImsCallContext(mContext, mExecutor, mImsApp,
                 mWfcsettingtracker, mStateTracker, mMtcapp);
-
     }
 
     @After
     public void tearDown() throws Exception {
         AppContext.deinit();
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, mSlotId);
-        AgentFactory.getInstance().setAgent(SimInterface.class, null, mSlotId);
         AgentFactory.getInstance().setDefaultAgent(SUBSCRIPTION, null);
         DcFactory.setObjects(mSlotId, null);
         mStateTracker = null;
         mImsCallContext = null;
+        super.tearDown();
+    }
+
+    @Test
+    public void getDcApnTest() {
+        IDcApn mockIDcApn = Mockito.mock(IDcApn.class);
+        HashMap<Integer, IDc> dcs = new HashMap<Integer, IDc>(1);
+        dcs.put(DcFactory.APN, mockIDcApn);
+        DcFactory.setObjects(mSlotId, dcs);
+        Assert.assertNotNull(mImsCallContext.getDcApn());
+    }
+
+    @Test
+    public void getMtcAppTest() {
+        Assert.assertNotNull(mImsCallContext.getMtcApp());
+    }
+
+    @Test
+    public void getSystemTest() {
+        Assert.assertNotNull(mImsCallContext.getSystem());
+    }
+
+    @Test
+    public void getSharedStateTest() {
+        ISharedState mockISharedState = Mockito.mock(ISharedState.class);
+        Assert.assertNull(mImsCallContext.getSharedState());
+
+        AgentFactory.getInstance().setDefaultAgent(SHARED_STATE, mockISharedState);
+        Assert.assertNotNull(mImsCallContext.getSharedState());
+        AgentFactory.getInstance().setDefaultAgent(SHARED_STATE, null);
+    }
+
+    @Test
+    public void getDefaultHandlerTest() {
+        Assert.assertNotNull(mImsCallContext.getDefaultHandler());
+    }
+
+    @Test
+    public void getDefaultLooperTest() {
+        Assert.assertNotNull(mImsCallContext.getDefaultLooper());
+    }
+
+    @Test
+    public void getECallStateTrackerTest() {
+        IMtcCallManager mockIMtcCallManager = Mockito.mock(IMtcCallManager.class);
+        MtcECallStateTracker mockIECallStateTracker = Mockito.mock(MtcECallStateTracker.class);
+        when(mMtcapp.getCallManager()).thenReturn(mockIMtcCallManager);
+        when(mockIMtcCallManager.getECallStateTracker()).thenReturn(mockIECallStateTracker);
+        Assert.assertNotNull(mImsCallContext.getECallStateTracker());
+    }
+
+    @Test
+    public void getCallHandlerTest() {
+        ImsGlobal.create(mContext);
+        Assert.assertNotNull(mImsCallContext.getCallHandler());
+    }
+
+    @Test
+    public void getCallLooperTest() {
+        ImsGlobal.create(mContext);
+        Assert.assertNotNull(mImsCallContext.getCallLooper());
+    }
+
+    @Test
+    public void getMtcCallTest() {
+        IMtcCallManager iMtcCallManager = Mockito.mock(IMtcCallManager.class);
+        when(mMtcapp.getCallManager()).thenReturn(iMtcCallManager);
+        when(iMtcCallManager.getCall(123)).thenReturn(mMockMtcCall);
+        Assert.assertNotNull(mImsCallContext.getMtcCall(123));
+    }
+
+    @Test
+    public void isCommonPackageReadyTest() {
+        Assert.assertFalse(mImsCallContext.isCommonPackageReady());
     }
 
     @Test
@@ -208,9 +296,11 @@ public class ImsCallContextTest {
     public void getUsatInterfaceTest() {
         Assert.assertNull(mImsCallContext.getUsatInterface());
 
+        AgentFactory.getInstance().setAgent(SimInterface.class, mMockSimInterface, mSlotId);
         UsatInterface mUsatInterface = Mockito.mock(UsatInterface.class);
         when(mMockSimInterface.getUsatInterface()).thenReturn(mUsatInterface);
         Assert.assertNotNull(mImsCallContext.getUsatInterface());
+        AgentFactory.getInstance().setAgent(SimInterface.class, null, mSlotId);
     }
 
     @Test
@@ -241,6 +331,10 @@ public class ImsCallContextTest {
                     ICallContext.MEDIA_VIDEO));
         Assert.assertEquals(0, mImsCallContext.getMediaCapabilities(ImsCallProfile.CALL_TYPE_VOICE,
                 0));
+
+        Assert.assertEquals(ImsStreamMediaProfile.AUDIO_QUALITY_AMR,
+                mImsCallContext.getMediaCapabilities(ImsCallProfile.CALL_TYPE_VS,
+                    ICallContext.MEDIA_AUDIO));
 
         int[] intArray = {0, 1};
         when(mMockCarrierConfig.getIntArray(
