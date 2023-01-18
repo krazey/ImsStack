@@ -1278,6 +1278,8 @@ void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
     IMSVector<IMS_SINT32> objAuthAlgo =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY);
 
+    m_objCarrierConfig.objIpsecAuthenticationAlgorithms.Clear();
+
     for (int i = 0; i < objAuthAlgo.GetSize(); i++)
     {
         m_objCarrierConfig.objIpsecAuthenticationAlgorithms.Push(objAuthAlgo.GetAt(i));
@@ -1285,6 +1287,8 @@ void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
 
     IMSVector<IMS_SINT32> objEncryAlgo =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_IPSEC_ENCRYPTION_ALGORITHMS_INT_ARRAY);
+
+    m_objCarrierConfig.objIpsecEncryptionAlgorithms.Clear();
 
     for (int i = 0; i < objEncryAlgo.GetSize(); i++)
     {
