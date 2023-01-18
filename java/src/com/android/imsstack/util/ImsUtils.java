@@ -15,7 +15,6 @@
  */
 package com.android.imsstack.util;
 
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Process;
@@ -133,46 +132,12 @@ public final class ImsUtils {
     }
 
     public static boolean isEmergencyCallEnabledOnServiceRestricted() {
-        /*
-        if (isDeviceEncryptionModeEnabled()) {
-            // If device is in encryption mode, SIM is in LOADED state
-            // and IMS emergency call may be initiated.
-            // Finally, IMS emergency call can be made based on
-            // the emergency call configuration.
-            return true;
-        }
-        */
-
         // P-OS: VoLte service always runs, VoLte only enabled
         return true;
     }
 
     public static boolean isEmergencyCallEnabledOnNonVoLteSim() {
         return true;
-    }
-
-    public static boolean isDeviceEncryptionModeEnabled() {
-        DevicePolicyManager dpm = AppContext.getInstance().getSystemService(
-                DevicePolicyManager.class);
-        int status = (dpm != null) ? dpm.getStorageEncryptionStatus()
-                : DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
-
-        if (status == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
-                || status == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /** Full-Disk Encryption mode */
-    public static boolean isDeviceEncryptionModeEnabledAsFDE() {
-        DevicePolicyManager dpm = AppContext.getInstance().getSystemService(
-                DevicePolicyManager.class);
-        int status = (dpm != null) ? dpm.getStorageEncryptionStatus()
-                : DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
-
-        return (status == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE);
     }
 
     /** APIs for ImsManager - starts */
