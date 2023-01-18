@@ -527,11 +527,6 @@ public class ImsServiceManager {
                 logi("SimAbsentOrLocked: VoLTE is enabled for IMS e-call");
                 serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
                 serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE_EMERGENCY;
-            } else if (ImsConstants.USE_CARRIER_CONFIG
-                    && ImsUtils.isDeviceEncryptionModeEnabledAsFDE()) {
-                logi("EncryptionMode: VoLTE is enabled for IMS e-call");
-                serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
-                serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE_EMERGENCY;
             }
         }
 
