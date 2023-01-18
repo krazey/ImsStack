@@ -190,24 +190,17 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
             PostMessage(MSG_REG_UPDATE, 0, 1);
             break;
 
-        case ImsAosControl::REGISTER_STOP:
-            ProcessDisconnectingState();
-            PostMessage(MSG_REG_STOP, 0, 0);
-            break;
-
+        case ImsAosControl::REGISTER_STOP:  // FALL-THROUGH
         case ImsAosControl::REGISTER_STOP_BY_ROAMING:
+            // TODO : check the roaming operation for REGISTER_STOP_BY_ROAMING
             ProcessDisconnectingState();
             PostMessage(MSG_REG_STOP, 0, 0);
-            // TODO : check the roaming operation
             break;
 
-        case ImsAosControl::REGISTER_REINITIATE:
-            PostMessage(MSG_REG_RECOVER, 0, 0);
-            break;
-
+        case ImsAosControl::REGISTER_REINITIATE:  // FALL-THROUGH
         case ImsAosControl::REGISTER_REINITIATE_BY_CSFB:
+            // TODO : check csfb operation for REGISTER_REINITIATE_BY_CSFB
             PostMessage(MSG_REG_RECOVER, 0, 0);
-            // TODO : check csfb operation
             break;
 
         case ImsAosControl::PCSCF_NEXT:
@@ -223,14 +216,8 @@ PUBLIC VIRTUAL IMS_BOOL AosApplication::RequestCmd(
                     IAosRegistration::CMD_SET_IPSEC, IAosRegistration::REASON_SET_IPSEC_DISABLE);
             break;
 
-        case ImsAosControl::RETRY_COUNT_INCREASE:
-            // TODO
-            break;
-
-        case ImsAosControl::UPDATE_SIP_DELEGATE_REGISTRATION:
-            // TODO
-            break;
-
+        case ImsAosControl::RETRY_COUNT_INCREASE:              // FALL-THROUGH
+        case ImsAosControl::UPDATE_SIP_DELEGATE_REGISTRATION:  // FALL-THROUGH
         case ImsAosControl::TRIGGER_SIP_DELEGATE_DEREGISTRATION:
             // TODO
             break;
