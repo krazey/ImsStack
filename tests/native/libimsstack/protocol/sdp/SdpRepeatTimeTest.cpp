@@ -165,13 +165,9 @@ TEST_F(SdpRepeatTimeTest, OperatorAssignment)
 
     SdpRepeatTime objNewRepeatTime;
     objNewRepeatTime = objRepeatTime;
-    // cppcheck-suppress knownConditionTrueFalse
     EXPECT_EQ(objNewRepeatTime.GetRepeatInterval(), objRepeatTime.GetRepeatInterval());
-    // cppcheck-suppress knownConditionTrueFalse
     EXPECT_EQ(objNewRepeatTime.GetActiveDuration(), objRepeatTime.GetActiveDuration());
-    // cppcheck-suppress knownConditionTrueFalse
     EXPECT_EQ(objNewRepeatTime.GetFirstOffset(), objRepeatTime.GetFirstOffset());
-    // cppcheck-suppress knownConditionTrueFalse
     EXPECT_EQ(objNewRepeatTime.GetAdditionalOffsets().GetSize(),
             objRepeatTime.GetAdditionalOffsets().GetSize());
 

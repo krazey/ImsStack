@@ -65,6 +65,9 @@ protected:
     }
     const IMS_CHAR* TriggerToString(IN IMS_SINT32 nTrigger) const override;
 
+private:
+    static IMS_BOOL IsValidTrigger(IN IMS_SINT32 nTrigger);
+
 public:
     /// State of Subscription-State
     enum
