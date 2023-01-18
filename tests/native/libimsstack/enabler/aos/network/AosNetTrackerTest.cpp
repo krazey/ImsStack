@@ -220,11 +220,11 @@ TEST_F(AosNetTrackerTest, Init_ImsType)
     EXPECT_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled()).WillOnce(Return(IMS_TRUE));
 
     Initialize();
-    IMS_UINT32 nCnxPolicy = 0;
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
     EXPECT_EQ(GetAccessPolicy(),
-            nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE |
-                    NW_REPORT_RADIO_WCDMA | NW_REPORT_RADIO_HSPA | NW_REPORT_RADIO_LTE |
-                    NW_REPORT_RADIO_NR | NW_REPORT_RADIO_WLAN);
+            nCnxPolicy | NW_REPORT_RADIO_GSM | NW_REPORT_RADIO_EDGE | NW_REPORT_RADIO_WCDMA |
+                    NW_REPORT_RADIO_HSPA | NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_NR |
+                    NW_REPORT_RADIO_WLAN);
     EXPECT_EQ(GetFeature(), AosNetTracker::FEATURE_IN_GUARD | AosNetTracker::FEATURE_OUT_GUARD);
     EXPECT_NE(GetNetworkWatcher(), nullptr);
 }
@@ -270,8 +270,8 @@ TEST_F(AosNetTrackerTest, IsServiceIn)
 
     SetEpdgEnabled(IMS_TRUE);
     EXPECT_TRUE(m_pAosNetTracker->IsServiceIn(IAosNetTracker::TYPE_DEFAULT));
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_WLAN);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_WLAN);
 
     // WLAN isServiceIn
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WLAN, IMS_FALSE);
@@ -282,8 +282,8 @@ TEST_F(AosNetTrackerTest, IsServiceIn)
 
 TEST_F(AosNetTrackerTest, IsDataIn)
 {
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
 
     SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_NOSRV, IMS_FALSE);
     EXPECT_FALSE(m_pAosNetTracker->IsDataIn());
@@ -294,8 +294,8 @@ TEST_F(AosNetTrackerTest, IsDataIn)
 
 TEST_F(AosNetTrackerTest, IsNetworkIn)
 {
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
 
     SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_NOSRV, IMS_FALSE);
     EXPECT_FALSE(m_pAosNetTracker->IsNetworkIn());
@@ -327,16 +327,16 @@ TEST_F(AosNetTrackerTest, IsSuspended)
 
 TEST_F(AosNetTrackerTest, IsSessionContinuitySupported)
 {
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_NR);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_NR);
     EXPECT_FALSE(m_pAosNetTracker->IsSessionContinuitySupported());
 
-    nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_WLAN);
+    nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE | NW_REPORT_RADIO_WLAN);
     EXPECT_TRUE(m_pAosNetTracker->IsSessionContinuitySupported());
 
-    nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_NR | NW_REPORT_RADIO_WLAN);
+    nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_NR | NW_REPORT_RADIO_WLAN);
     EXPECT_TRUE(m_pAosNetTracker->IsSessionContinuitySupported());
 }
 
@@ -490,8 +490,8 @@ TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_FromOtherNetworkWatcher)
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _)).Times(0);
     EXPECT_CALL(objOtherMockINetworkWatcher, GetNetServiceType(_, _)).Times(0);
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
 
@@ -510,8 +510,8 @@ TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_WithSrvInGuardTime)
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_LTE));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -533,8 +533,8 @@ TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_WithoutGuardTime)
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_LTE));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -555,8 +555,8 @@ TEST_F(AosNetTrackerTest, NetworkWatcher_NotifyStatus_NoChanges)
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_NOSRV));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -580,8 +580,8 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_NoChanges)
             .Times(AnyNumber())
             .WillRepeatedly(Return(NW_REPORT_RADIO_NOSRV));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -611,8 +611,8 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_OutSrvToInSrv_WithSrvInGuardTime
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_NOSRV));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_LTE, IMS_FALSE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -636,8 +636,8 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_OutSrvToInSrv_WithRatGuardTime)
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_NOSRV));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_NOSRV, IMS_FALSE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -660,8 +660,8 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_InSrvToOutSrv_WithSrvOutGuardTim
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_NOSRV));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -685,8 +685,8 @@ TEST_F(AosNetTrackerTest, ProcessNetworkChanged_InSrvToOutSrv_WithRatGuardTime)
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_NOSRV));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_TRUE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -742,8 +742,8 @@ TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithRatGuardTime)
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_LTE));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_NOSRV, NW_REPORT_RADIO_NOSRV, IMS_FALSE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
@@ -765,8 +765,8 @@ TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithoutGuardTime)
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_LTE));
 
-    IMS_UINT32 nCnxPolicy = 0;
-    SetCnxPolicy(nCnxPolicy | NW_REPORT_SRV_SRV | NW_REPORT_RADIO_LTE);
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy | NW_REPORT_RADIO_LTE);
     SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_WCDMA, IMS_TRUE);
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     m_pAosNetTracker->SetListener(
