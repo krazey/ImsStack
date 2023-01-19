@@ -32,48 +32,48 @@ public:
             bRttSupported(IMS_FALSE),
             bCarrierCrossSimImsAvailable(IMS_FALSE),
             bCarrierVolteTtySupported(IMS_FALSE),
-            objCarrierNrAvailabilities(IMSVector<IMS_SINT32>()),
-            nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED),
-            objPcscfDiscoveryMethod(IMSVector<IMS_SINT32>()),
             bImsSingleRegistrationRequired(IMS_FALSE),
-            nSipServerPortNumber(5060),
             bKeepPdnUpInNoVops(IMS_FALSE),
+            bSipOverIpsecEnabled(IMS_FALSE)  // default - IMS_TRUE
+            ,
+            bRegistrationEventPackageSupported(IMS_TRUE),
+            bCarrierVolteRoamingAvailable(IMS_TRUE),
+            bSmsOverImsSupported(IMS_TRUE),
+            bEmergencyCallbackModeSupported(IMS_FALSE),
+            bRegistrationEventForCatRequired(IMS_FALSE),
+            bUnsubscribeRegistrationEventPackage(IMS_FALSE),
+            bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
+            bSupportLimitedAdminSmsMode(IMS_FALSE),
+            nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED),
+            nSipServerPortNumber(5060),
             nSipPreferredTransport(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP),
             nIpv4SipMtuSizeCellular(1500),
             nIpv6SipMtuSizeCellular(1500),
-            objImsPdnEnabledInNoVopsSupport(IMSVector<IMS_SINT32>()),
-            bSipOverIpsecEnabled(IMS_FALSE)  // default - IMS_TRUE
-            ,
-            objIpsecAuthenticationAlgorithms(IMSVector<IMS_SINT32>()),
-            objIpsecEncryptionAlgorithms(IMSVector<IMS_SINT32>()),
             nRegistrationExpiryTimerSec(600000),
             nRegistrationRetryBaseTimerMillis(30000),
             nRegistrationRetryMaxTimerMillis(1800000),
-            bRegistrationEventPackageSupported(IMS_TRUE),
             nRegistrationSubscribeExpiryTimerSec(600000),
-            objSupportedRats(IMSVector<IMS_SINT32>()),
-            bCarrierVolteRoamingAvailable(IMS_TRUE),
-            bSmsOverImsSupported(IMS_TRUE),
-            objSmsOverImsSupportedRats(IMSVector<IMS_SINT32>()),
-            bEmergencyCallbackModeSupported(IMS_FALSE),
-            objEmergencyOverImsSupportedRats(IMSVector<IMS_SINT32>()),
             nEmergencyRegistrationTimerMillis(10000),
             nRefreshGeolocationTimeoutMillis(5000),
-            bRegistrationEventForCatRequired(IMS_FALSE),
-            bUnsubscribeRegistrationEventPackage(IMS_FALSE),
             nIsimIndexForImpu(1),
             nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
             nRegistrationPreferredAccesstypeFeatureTag(
                     CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
+            nPreferredEmergencyRegistration(
+                    CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
+            nRegistrationPrivateHeader(0),
+            objCarrierNrAvailabilities(IMSVector<IMS_SINT32>()),
+            objPcscfDiscoveryMethod(IMSVector<IMS_SINT32>()),
+            objImsPdnEnabledInNoVopsSupport(IMSVector<IMS_SINT32>()),
+            objIpsecAuthenticationAlgorithms(IMSVector<IMS_SINT32>()),
+            objIpsecEncryptionAlgorithms(IMSVector<IMS_SINT32>()),
+            objSupportedRats(IMSVector<IMS_SINT32>()),
+            objSmsOverImsSupportedRats(IMSVector<IMS_SINT32>()),
+            objEmergencyOverImsSupportedRats(IMSVector<IMS_SINT32>()),
             objGeolocationPidfInSipRegisterSupport(IMSVector<IMS_SINT32>()),
             objImsIdentityPriority(IMSVector<IMS_SINT32>()),
             objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>()),
-            objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>()),
-            bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
-            nPreferredEmergencyRegistration(
-                    CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
-            bSupportLimitedAdminSmsMode(IMS_FALSE),
-            nRegistrationPrivateHeader(0)
+            objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>())
     {
         // temp setting
         objSupportedRats.Push(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
@@ -84,8 +84,7 @@ public:
     AosCarrierConfig& operator=(IN const AosCarrierConfig&) = delete;
 
 public:
-    /* aosp_carrier_config */
-    /// no prefix
+    /// aosp_carrier_config - no prefix
     IMS_BOOL bSupportEmergencySmsOverIms;
     IMS_BOOL bCarrierVolteAvailable;
     IMS_BOOL bCarrierVtAvailable;
@@ -93,67 +92,67 @@ public:
     IMS_BOOL bRttSupported;
     IMS_BOOL bCarrierCrossSimImsAvailable;
     IMS_BOOL bCarrierVolteTtySupported;
-    IMSVector<IMS_SINT32> objCarrierNrAvailabilities;
-    IMS_SINT32 nCarrierUssdMethod;
-
-    /// ims.
-    IMSVector<IMS_SINT32> objPcscfDiscoveryMethod;
+    /// aosp_carrier_config - ims.
     IMS_BOOL bImsSingleRegistrationRequired;
-    IMS_SINT32 nSipServerPortNumber;
     IMS_BOOL bKeepPdnUpInNoVops;
+    IMS_BOOL bSipOverIpsecEnabled;
+    IMS_BOOL bRegistrationEventPackageSupported;
+    /// aosp_carrier_config - imsvoice.
+    IMS_BOOL bCarrierVolteRoamingAvailable;
+    /// aosp_carrier_config - imssms.
+    IMS_BOOL bSmsOverImsSupported;
+    /// aosp_carrier_config - imsemergency.
+    IMS_BOOL bEmergencyCallbackModeSupported;
+
+    /// carrier_config - ims
+    IMS_BOOL bRegistrationEventForCatRequired;
+    IMS_BOOL bUnsubscribeRegistrationEventPackage;
+    /// carrier_config - imsemergency.
+    IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;
+    /// carrier_config - imssms.
+    IMS_BOOL bSupportLimitedAdminSmsMode;
+
+    /// aosp_carrier_config - no prefix
+    IMS_SINT32 nCarrierUssdMethod;
+    /// aosp_carrier_config - ims.
+    IMS_SINT32 nSipServerPortNumber;
     IMS_SINT32 nSipPreferredTransport;
     IMS_SINT32 nIpv4SipMtuSizeCellular;
     IMS_SINT32 nIpv6SipMtuSizeCellular;
-    IMSVector<IMS_SINT32> objImsPdnEnabledInNoVopsSupport;
-    IMS_BOOL bSipOverIpsecEnabled;
-    IMSVector<IMS_SINT32> objIpsecAuthenticationAlgorithms;
-    IMSVector<IMS_SINT32> objIpsecEncryptionAlgorithms;
     IMS_SINT32 nRegistrationExpiryTimerSec;
     IMS_SINT32 nRegistrationRetryBaseTimerMillis;
     IMS_SINT32 nRegistrationRetryMaxTimerMillis;
-    IMS_BOOL bRegistrationEventPackageSupported;
     IMS_SINT32 nRegistrationSubscribeExpiryTimerSec;
-    IMSVector<IMS_SINT32> objSupportedRats;
-
-    /// imsvoice.
-    IMS_BOOL bCarrierVolteRoamingAvailable;
-
-    /// imssms.
-    IMS_BOOL bSmsOverImsSupported;
-    IMSVector<IMS_SINT32> objSmsOverImsSupportedRats;
-
-    /// imsrtt.
-
-    /// imsemergency.
-    IMS_BOOL bEmergencyCallbackModeSupported;
-    IMSVector<IMS_SINT32> objEmergencyOverImsSupportedRats;
+    /// aosp_carrier_config - imsemergency.
     IMS_SINT32 nEmergencyRegistrationTimerMillis;
     IMS_SINT32 nRefreshGeolocationTimeoutMillis;
 
-    /// imsvt.
-
-    /// imswfc.
-
-    /* carrier_config */
-    /// ims
-    IMS_BOOL bRegistrationEventForCatRequired;
-    IMS_BOOL bUnsubscribeRegistrationEventPackage;
+    /// carrier_config - ims
     IMS_SINT32 nIsimIndexForImpu;
     IMS_SINT32 nPreferredImsDscp;
     IMS_SINT32 nRegistrationPreferredAccesstypeFeatureTag;
+    /// carrier_config - imsemergency.
+    IMS_SINT32 nPreferredEmergencyRegistration;
+    /// carrier_config - imswfc.
+    IMS_SINT32 nRegistrationPrivateHeader;
+
+    /// aosp_carrier_config - no prefix
+    IMSVector<IMS_SINT32> objCarrierNrAvailabilities;
+    /// aosp_carrier_config - ims.
+    IMSVector<IMS_SINT32> objPcscfDiscoveryMethod;
+    IMSVector<IMS_SINT32> objImsPdnEnabledInNoVopsSupport;
+    IMSVector<IMS_SINT32> objIpsecAuthenticationAlgorithms;
+    IMSVector<IMS_SINT32> objIpsecEncryptionAlgorithms;
+    IMSVector<IMS_SINT32> objSupportedRats;
+    /// aosp_carrier_config - imssms.
+    IMSVector<IMS_SINT32> objSmsOverImsSupportedRats;
+    /// aosp_carrier_config - imsemergency.
+    IMSVector<IMS_SINT32> objEmergencyOverImsSupportedRats;
+
+    /// carrier_config - ims
     IMSVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
     IMSVector<IMS_SINT32> objImsIdentityPriority;
     IMSVector<IMS_SINT32> objRegistrationPermanentErrorCode;
     IMSVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
-
-    /// imsemergency.
-    IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallEnd;
-    IMS_SINT32 nPreferredEmergencyRegistration;
-
-    /// imssms.
-    IMS_BOOL bSupportLimitedAdminSmsMode;
-
-    /// imswfc.
-    IMS_SINT32 nRegistrationPrivateHeader;
 };
 #endif  // AOS_CARRIER_CONFIG_H_
