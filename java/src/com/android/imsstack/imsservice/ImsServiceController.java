@@ -17,10 +17,6 @@
 package com.android.imsstack.imsservice;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.RcsFeature;
 
@@ -31,6 +27,7 @@ import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.imsservice.uce.RcsFeatureImpl;
 import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
+import com.android.imsstack.util.MessageExecutor;
 
 import java.util.concurrent.Executor;
 
@@ -174,17 +171,8 @@ public class ImsServiceController {
             });
     }
 
-    private static Looper createLooper(String name) {
-        HandlerThread thread = new HandlerThread(name);
-        thread.start();
-
-        Looper looper = thread.getLooper();
-
-        if (looper == null) {
-            return Looper.getMainLooper();
-        }
-
-        return looper;
+    public Executor getExecutor() {
+        return mExecutor;
     }
 
     private static void log(String s) {
@@ -206,41 +194,6 @@ public class ImsServiceController {
         }
         loge("getRcsFeature is null for slotId:" + slotId);
         return null;
-    }
-
-    /**
-     * Executes the tasks in the other thread rather than the calling thread.
-     */
-    private static class MessageExecutor extends Handler implements Executor {
-        public MessageExecutor(String name) {
-            super(createLooper(name));
-        }
-
-        @Override
-        public void execute(Runnable r) {
-            Message m = Message.obtain(this, 0 /* don't care */, r);
-            m.sendToTarget();
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.obj instanceof Runnable) {
-                executeInternal((Runnable)msg.obj);
-            } else {
-                log("[MessageExecutor] handleMessage :: "
-                    + "Not runnable object; ignore the msg=" + msg);
-            }
-        }
-
-        private void executeInternal(Runnable r) {
-            try {
-                r.run();
-            } catch (Throwable t) {
-                loge("[MessageExecutor] executeInternal :: run task=" + r);
-                t.printStackTrace();
-            } finally {
-            }
-        }
     }
 
     /** Dump this instance into a readable format for dumpsys usage. */

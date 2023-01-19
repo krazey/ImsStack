@@ -26,23 +26,24 @@ import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.agents.SubscriptionListener;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.FeatureTable;
+import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 
 public class ImsServiceManager {
     private static ImsServiceManager sServiceManager;
     private final Context mContext;
-    private final Executor mExecutor;
+    private final MessageExecutor mExecutor;
     protected final SubscriptionListenerProxy mSubscriptionListener;
     protected final CommonPackageListener mCommonPackageListener;
     // PhoneId -> ImsServiceRecord
@@ -58,7 +59,7 @@ public class ImsServiceManager {
     protected final int[] mServiceFeatures;
     private final int[] mVoLteServiceFeatures;
 
-    public ImsServiceManager(Context context, Executor executor) {
+    public ImsServiceManager(Context context, MessageExecutor executor) {
         mContext = context;
         mExecutor = executor;
         mDefaultPhoneId = getActivePhoneId();
@@ -120,9 +121,10 @@ public class ImsServiceManager {
         destroyAllServiceRecords();
     }
 
-    public ImsCallApp createCallApp(int phoneId,
+    public ImsCallApp createCallApp(ImsContext imsContext,
             IMmTelFeatureCapabilityListener featureCapabilityListener,
             IMmTelCallListener callListener) {
+        int phoneId = imsContext.getPhoneId();
         log("createCallApp :: phoneId=" + phoneId);
 
         ImsServiceRecord isr = getServiceRecordInternal(phoneId);
@@ -143,7 +145,8 @@ public class ImsServiceManager {
                 mVoLteServiceFeatures[phoneId] = getVoLteServiceFeatures(phoneId);
             }
 
-            callApp = createCallAppInternal(phoneId, isr, featureCapabilityListener, callListener);
+            callApp = createCallAppInternal(imsContext, isr, featureCapabilityListener,
+                    callListener);
             addCallApp(phoneId, callApp);
             setCallAppForServiceRecord(callApp.getPhoneId(), callApp);
 
@@ -184,11 +187,11 @@ public class ImsServiceManager {
     }
 
     @VisibleForTesting
-    protected ImsCallApp createCallAppInternal(int phoneId, ImsServiceRecord isr,
+    protected ImsCallApp createCallAppInternal(ImsContext imsContext, ImsServiceRecord isr,
             IMmTelFeatureCapabilityListener featureCapabilityListener,
             IMmTelCallListener callListener) {
-        return new ImsCallApp(phoneId, mContext, mExecutor, isr.getRegistrationTracker(),
-                featureCapabilityListener, callListener);
+        return new ImsCallApp(imsContext, isr.getRegistrationTracker(), featureCapabilityListener,
+                callListener);
     }
 
     @VisibleForTesting

@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Handler;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
@@ -52,7 +53,6 @@ import android.telephony.ims.stub.ImsUtImplBase;
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
@@ -80,7 +80,7 @@ import java.util.function.Consumer;
 
 @RunWith(JUnit4.class)
 public class ImsMmTelServiceTest extends ImsStackTest {
-    private IContext mMockImsContext;
+    private ImsContext mMockImsContext;
     private IBaseContext mMockBaseContext;
     private ImsCallContext mMockCallContext;
     private ImsServiceRegistry mMockServiceRegistry;
@@ -408,6 +408,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
 
     @Test
     public void testOnIncomingCallReceived() {
+        String callId = "1";
         final ImsCallSessionImpl callSesison;
         assertThrows(IllegalArgumentException.class,
                 () ->  mMmTelFeature.makeIncomingCall(null));
@@ -418,7 +419,9 @@ public class ImsMmTelServiceTest extends ImsStackTest {
                 () ->  mMmTelFeature.makeIncomingCall(callSesison));
 
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
+        when(mMockImsContext.getDefaultHandler()).thenReturn(new Handler(mExecutor.getLooper()));
         when(callSesison.getProperty(ImsCallProfile.EXTRA_USSD)).thenReturn(null);
+        when(callSesison.getCallId()).thenReturn(callId);
         mMmTelFeature.makeIncomingCall(callSesison);
         verify(mMockImsCallApp, times(1)).takeCallSession(callSesison);
         verify(callSesison, times(1)).alertUser();

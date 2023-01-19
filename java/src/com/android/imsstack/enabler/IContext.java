@@ -45,4 +45,9 @@ public interface IContext {
      * Returns the subscription id of this context.
      */
     public int getSubId();
+
+    /**
+     * Returns the looper associated with handler.
+     */
+    public Looper getLooper();
 }
