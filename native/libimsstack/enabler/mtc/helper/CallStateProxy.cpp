@@ -41,8 +41,6 @@ PUBLIC VIRTUAL CallStateProxy::~CallStateProxy() {}
 PUBLIC
 void CallStateProxy::AddListener(IN IMtcCallStateListener* pListener)
 {
-    IMS_TRACE_D("+AddListener", 0, 0, 0);
-
     if (pListener->IsSynchronousCallRequired())
     {
         for (IMS_UINT32 i = 0; i < m_objSynchronousListeners.GetSize(); i++)
@@ -53,6 +51,7 @@ void CallStateProxy::AddListener(IN IMtcCallStateListener* pListener)
             }
         }
         m_objSynchronousListeners.Append(pListener);
+        IMS_TRACE_D("+AddListener sync size=[%d]", m_objSynchronousListeners.GetSize(), 0, 0);
     }
     else
     {
@@ -64,6 +63,7 @@ void CallStateProxy::AddListener(IN IMtcCallStateListener* pListener)
             }
         }
         m_objAsynchronousListeners.Append(pListener);
+        IMS_TRACE_D("+AddListener async size=[%d]", m_objAsynchronousListeners.GetSize(), 0, 0);
     }
 }
 
@@ -77,6 +77,8 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
             if (pListener == m_objSynchronousListeners.GetAt(i))
             {
                 m_objSynchronousListeners.RemoveAt(i);
+                IMS_TRACE_D("+RemoveListener sync size=[%d]", m_objSynchronousListeners.GetSize(),
+                        0, 0);
                 return;
             }
         }
@@ -88,6 +90,8 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
             if (pListener == m_objAsynchronousListeners.GetAt(i))
             {
                 m_objAsynchronousListeners.RemoveAt(i);
+                IMS_TRACE_D("+RemoveListener async size=[%d]", m_objAsynchronousListeners.GetSize(),
+                        0, 0);
                 return;
             }
         }
@@ -111,6 +115,7 @@ void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eSt
     }
     if (m_objAsynchronousListeners.GetSize() > 0)
     {
+        // TODO: use OperationAsyncRunner?
         PostMessage(MESSAGE_ASYNC_NOTIFY, reinterpret_cast<IMS_UINTP>(pDetails),
                 static_cast<IMS_UINTP>(bTotalCallStateUpdated));
     }
@@ -188,13 +193,22 @@ void CallStateProxy::NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDet
         IN IMS_BOOL bTotalCallStateUpdated) const
 {
     IMS_TRACE_D("NotifyToListeners sync[%s]", _TRACE_B_(bSynchronous), 0, 0);
-    ImsList<IMtcCallStateListener*> pListener =
-            bSynchronous ? m_objSynchronousListeners : m_objAsynchronousListeners;
 
-    NotifyCallState(pListener, pDetails);
-    if (bTotalCallStateUpdated)
+    if (bSynchronous)
     {
-        NotifyTotalCallState(pListener);
+        NotifyCallState(m_objSynchronousListeners, pDetails);
+        if (bTotalCallStateUpdated)
+        {
+            NotifyTotalCallState(m_objSynchronousListeners);
+        }
+    }
+    else
+    {
+        NotifyCallState(m_objAsynchronousListeners, pDetails);
+        if (bTotalCallStateUpdated)
+        {
+            NotifyTotalCallState(m_objAsynchronousListeners);
+        }
     }
 }
 
