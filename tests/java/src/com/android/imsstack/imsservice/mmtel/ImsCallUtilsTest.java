@@ -40,6 +40,7 @@ import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.MediaInfo;
+import com.android.imsstack.enabler.mtc.MtcCallInfo;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -538,9 +539,36 @@ public class ImsCallUtilsTest {
         ImsCallProfile profile = new ImsCallProfile();
         profile.mCallType = ImsCallProfile.CALL_TYPE_VOICE;
         CallInfo ci = new CallInfo();
+        ImsCallUtils.updateCallProfileForEmergency(profile, ci);
+        assertFalse(profile.getCallExtraBoolean(ImsCallProfile.EXTRA_EMERGENCY_CALL));
+
         ci.serviceType = IUMtcCall.SERVICETYPE_EMERGENCY;
         ImsCallUtils.updateCallProfileForEmergency(profile, ci);
         assertTrue(profile.getCallExtraBoolean(ImsCallProfile.EXTRA_EMERGENCY_CALL));
+    }
+
+    @Test
+    public void testUpdateCallProfileFromCallInfo() {
+        ImsCallProfile profile = new ImsCallProfile();
+        CallInfo ci = new CallInfo();
+        ImsCallUtils.updateCallProfileFromCallInfo(mContext, profile, ci);
+
+        when(mMockCarrierConfig.getBoolean(CarrierConfigManager.KEY_RTT_SUPPORTED_BOOL, false))
+                .thenReturn(true);
+        assertFalse(profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE));
+        assertFalse(profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE));
+        assertEquals("false", profile.getCallExtra(ImsCallProfile.EXTRA_USSD));
+        assertFalse(profile.getCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL));
+
+        MtcCallInfo.setConference(ci, true);
+        MtcCallInfo.setVideoCapable(ci, true);
+        MtcCallInfo.setUssi(ci, true);
+        MtcCallInfo.setRttCapable(ci, true);
+        ImsCallUtils.updateCallProfileFromCallInfo(mContext, profile, ci);
+        assertTrue(profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE));
+        assertTrue(profile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE));
+        assertEquals("true", profile.getCallExtra(ImsCallProfile.EXTRA_USSD));
+        assertTrue(profile.getCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL));
     }
 
     @Test
