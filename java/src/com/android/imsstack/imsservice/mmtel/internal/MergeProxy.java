@@ -18,6 +18,7 @@ package com.android.imsstack.imsservice.mmtel.internal;
 
 import android.telephony.CallQuality;
 
+import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.MediaInfo;
@@ -122,17 +123,15 @@ public class MergeProxy extends ConferenceProxy {
             // hold -> merge
             setState(STATE_HOLDING);
             executeHold(mForegroundCall);
-        } else if (confCall.isOnHold()) {
+        } else if (confCall.isOnHold()
+                 && !CallFeature.isCallMergeableOnConferenceOnHold(getCallContext().getSlotId())) {
             // hold -> resume -> merge
             setState(STATE_SWAP_HOLDING);
             executeHold(mForegroundCall);
-        }
-        //Based on the test result for VZW we can keep the configuration or can be removable
-        //CallFeature.isCallMergeableOnConferenceOnHold(slotId)
-        /*else {
+        } else {
             setState(STATE_MERGE_WAITING);
             executeMerge();
-        }*/
+        }
 
         return true;
     }

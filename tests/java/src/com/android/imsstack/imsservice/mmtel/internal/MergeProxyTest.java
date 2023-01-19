@@ -33,6 +33,9 @@ import android.testing.TestableLooper;
 import android.util.Log;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallReasonInfo;
 import com.android.imsstack.enabler.mtc.MediaInfo;
@@ -79,6 +82,8 @@ public class MergeProxyTest extends ImsStackTest {
     @Mock private MtcConference.Listener mMockMtcConferencelistenerProxy;
     @Mock private SuppInfo mMockSuppInfo;
     @Mock private UsersInfo mMockUsersInfo;
+    @Mock private CarrierConfig mMockCarrierConfig;
+    @Mock private ConfigInterface mMockConfigInterface;
 
     public static final int STATE_IDLE = 0;
     public static final int STATE_HOLDING = 1;
@@ -145,6 +150,18 @@ public class MergeProxyTest extends ImsStackTest {
         mMtcCallListenerProxy.onCallInfoUpdated(mMockFgCall, 0, "", 0, false);
         processAllMessages();
         verify(mMockMtcCallListenerProxy).onCallInfoUpdated(mMockFgCall, 0, "", 0, false);
+
+        mMtcCallListenerProxy.onAudioSessionOpened(mMockFgCall);
+        processAllMessages();
+        verify(mMockMtcCallListenerProxy).onAudioSessionOpened(mMockFgCall);
+
+        mMtcCallListenerProxy.onCallQualityChanged(mMockFgCall, null);
+        processAllMessages();
+        verify(mMockMtcCallListenerProxy).onCallQualityChanged(mMockFgCall, null);
+
+        mMtcCallListenerProxy.onAudioSessionClosed(mMockFgCall);
+        processAllMessages();
+        verify(mMockMtcCallListenerProxy).onAudioSessionClosed(mMockFgCall);
     }
 
     @Test
@@ -222,6 +239,7 @@ public class MergeProxyTest extends ImsStackTest {
 
     @Test
     public void testStartInternal() {
+        int slotId = 0;
         mMergeProxy.setInitialConferenceExtensionForTest(true);
         assertTrue(mMergeProxy.startInternal(true));
         verify(mMockMtcCall).setListener(mMtcCallListenerProxy);
@@ -231,6 +249,11 @@ public class MergeProxyTest extends ImsStackTest {
         assertTrue(mIsHoldCalled);
         mIsHoldCalled = false;
 
+        mockCarrierConfig();
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
+                .thenReturn(false)
+                .thenReturn(true);
         clearInvocations(mMockFgCall);
         clearInvocations(mMockBgCall);
         mMergeProxy.setInitialConferenceExtensionForTest(false);
@@ -241,8 +264,24 @@ public class MergeProxyTest extends ImsStackTest {
         assertEquals(mMergeProxy.getState(), STATE_SWAP_HOLDING);
         assertTrue(mIsHoldCalled);
 
+        mIsHoldCalled = false;
+        assertTrue(mMergeProxy.startInternal(false));
+        verify(mMockFgCall, times(2)).setListener(mMtcCallListenerProxy);
+        verify(mMockBgCall, times(2)).setListener(mMtcCallListenerProxy);
+        assertEquals(mMergeProxy.getState(), STATE_MERGE_WAITING);
+        assertFalse(mIsHoldCalled);
+
         mMockMtcCall = null;
         assertFalse(mMergeProxy.startInternal(true));
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, slotId);
+    }
+
+    private void mockCarrierConfig() {
+        int slotId = 0;
+        mMockCarrierConfig = Mockito.mock(CarrierConfig.class);
+        mMockConfigInterface = Mockito.mock(ConfigInterface.class);
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, slotId);
     }
 
     @Test

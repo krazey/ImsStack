@@ -150,5 +150,12 @@ public class CallFeatureTest {
                 .thenReturn(false);
         assertTrue(CallFeature.isNotifyConfStateWhenAnonymousUser(SLOT_ID));
         assertFalse(CallFeature.isNotifyConfStateWhenAnonymousUser(SLOT_ID));
+
+        when(mMockCarrierConfig.getBoolean(
+                CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL))
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(CallFeature.isCallMergeableOnConferenceOnHold(SLOT_ID));
+        assertFalse(CallFeature.isCallMergeableOnConferenceOnHold(SLOT_ID));
     }
 }

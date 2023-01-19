@@ -210,6 +210,7 @@
     <boolean name="one_way_video_call_by_local_end_supported_bool" value="false"/>
     <boolean name="one_way_video_call_by_remote_end_supported_bool" value="false"/>
     <boolean name="notify_conf_state_when_anonymous_user_bool" value="true"/>
+    <boolean name="call_mergeable_on_conference_on_hold_bool" value="true"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>

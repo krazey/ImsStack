@@ -765,6 +765,8 @@ public class CarrierConfig {
                 "geolocation_policy_for_location_based_call_int";
         public static final String KEY_LOCATION_BASED_NUMBER_LIST_INT_ARRAY =
                 "location_based_number_list_int_array";
+        public static final String KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL =
+                "call_mergeable_on_conference_on_hold_bool";
 
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =

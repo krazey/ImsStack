@@ -117,6 +117,11 @@ public final class CallFeature {
                 .getBoolean(CarrierConfig.Assets.KEY_NOTIFY_CONF_STATE_WHEN_ANONYMOUS_USER_BOOL);
     }
 
+    public static boolean isCallMergeableOnConferenceOnHold(int slotId) {
+        return getConfigInterface(slotId).getCarrierConfig()
+                .getBoolean(CarrierConfig.Assets.KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL);
+    }
+
     /**
      * Returns the configuration interface.
      *
