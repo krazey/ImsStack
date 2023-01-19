@@ -76,12 +76,10 @@ TEST_F(SipUtilTest, UtilityTest)
     EXPECT_TRUE(pUtil->GetTxnListener() == nullptr);
 
     ISipNetworkUtil* pNetworkUtil = new SipDefNetworkUtil();
-    ASSERT_TRUE(pNetworkUtil != nullptr);
     pUtil->RegisterNetwork(pNetworkUtil);
     EXPECT_TRUE(pNetworkUtil == pUtil->GetNetwork());
 
     ISipTxnListener* pTxnListener = new SipTransactionListener();
-    ASSERT_TRUE(pTxnListener != nullptr);
     pUtil->RegisterTxnListener(pTxnListener);
     EXPECT_TRUE(pTxnListener == pUtil->GetTxnListener());
 

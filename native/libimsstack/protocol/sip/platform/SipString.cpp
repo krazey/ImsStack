@@ -17,6 +17,7 @@
 #include "platform/SipMemory.h"
 #include "ServiceSystemTime.h"
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 void SipPf_Snprintf(SIP_CHAR* pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR* pszFormat, ...)
 {
     va_list arg;
@@ -25,6 +26,7 @@ void SipPf_Snprintf(SIP_CHAR* pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR* p
     va_end(arg);
 }
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 void SipPf_Sprintf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, ...)
 {
     va_list arg;

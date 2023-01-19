@@ -22,6 +22,7 @@ SipDefLoggerUtil::SipDefLoggerUtil() {}
 
 SipDefLoggerUtil::~SipDefLoggerUtil() {}
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 void SipDefLoggerUtil::DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* /*pszFile*/,
         SIP_UINT16 /*nLine*/, const SIP_CHAR* pszFormat, ...)
 {

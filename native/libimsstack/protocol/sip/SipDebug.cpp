@@ -18,6 +18,7 @@
 #include "SipDebug.h"
 #include "SipUtil.h"
 
+// NOLINTNEXTLINE(cert-dcl50-cpp)
 void SIP_DEBUG_LOG(SIP_UINT32 nCategory, const SIP_CHAR* pszFilename, SIP_INT32 nLine,
         const SIP_CHAR* pszFormat, ...)
 {
