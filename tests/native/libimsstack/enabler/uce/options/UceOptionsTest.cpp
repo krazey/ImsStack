@@ -31,7 +31,6 @@
 #include "ServiceTrace.h"
 
 using ::testing::_;
-using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::ReturnRef;
@@ -54,11 +53,8 @@ public:
 
     void SetSendingRequest(IMS_BOOL value) { m_bIsSendingRequest = value; }
 
-    void capabilityQueryDelivered(ICapabilities* piCapabilities)
-    {
-        CapabilityQueryDelivered(piCapabilities);
-    }
-    void capabilityQueryDeliveryFailed(ICapabilities* piCapabilities)
+    void capaDeliverd(ICapabilities* piCapabilities) { CapabilityQueryDelivered(piCapabilities); }
+    void capaDeliveryFailed(ICapabilities* piCapabilities)
     {
         CapabilityQueryDeliveryFailed(piCapabilities);
     }
@@ -249,21 +245,21 @@ TEST_F(UceOptionsTest, SetNoTypeFeatureTag)
     EXPECT_STREQ(strTag.GetStr(), "video;+g.gsma.rcs.isbot");
 }
 
-TEST_F(UceOptionsTest, capabilityQueryDelivered)
+TEST_F(UceOptionsTest, capaDeliverd)
 {
-    IMS_TRACE_D("capabilityQueryDelivered", 0, 0, 0);
+    IMS_TRACE_D("capaDeliverd", 0, 0, 0);
 
     EXPECT_CALL(objMockIUceJniThread, OptionsErrorInd(_, _)).Times(1);
 
     ON_CALL(objMockICapabilities, GetPreviousResponse(IMessage::CAPABILITIES_QUERY))
             .WillByDefault(ReturnNull());
 
-    pUceOptions->capabilityQueryDelivered(&objMockICapabilities);
+    pUceOptions->capaDeliverd(&objMockICapabilities);
 }
 
-TEST_F(UceOptionsTest, capabilityQueryDeliveryFailed)
+TEST_F(UceOptionsTest, capaDeliveryFailed)
 {
-    IMS_TRACE_D("capabilityQueryDeliveryFailed", 0, 0, 0);
+    IMS_TRACE_D("capaDeliveryFailed", 0, 0, 0);
 
     EXPECT_CALL(objMockIUceJniThread, OptionsResponseInd(_, _, _, _)).Times(1);
 
@@ -278,5 +274,5 @@ TEST_F(UceOptionsTest, capabilityQueryDeliveryFailed)
         AString reason("not found");
         ON_CALL(objMockISipMessage, GetReasonPhrase).WillByDefault(ReturnRef(reason));
     */
-    pUceOptions->capabilityQueryDeliveryFailed(&objMockICapabilities);
+    pUceOptions->capaDeliveryFailed(&objMockICapabilities);
 }

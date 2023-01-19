@@ -52,7 +52,7 @@ public:
         m_objSentUceOptionsMap.Add(key, pOptions);
     }
     IMS_UINT32 getListCount() const { return m_objSentUceOptionsMap.GetSize(); }
-    IMS_BOOL onMessage(IMSMSG& objMsg) { return OnMessage(objMsg); }
+    IMS_BOOL sendMsg(IMSMSG& objMsg) { return OnMessage(objMsg); }
 };
 
 class UceOptionsManagerTest : public ::testing::Test
@@ -143,18 +143,18 @@ TEST_F(UceOptionsManagerTest, ClosedService)
     EXPECT_TRUE(pUceOptionsManager->ClosedService());
 }
 
-TEST_F(UceOptionsManagerTest, OnMessage)
+TEST_F(UceOptionsManagerTest, sendMsg)
 {
-    IMS_TRACE_D("OnMessage", 0, 0, 0);
+    IMS_TRACE_D("sendMsg", 0, 0, 0);
     IMS_UINT32 key = 3;
     IMSMSG objMsg(IUUceService::UCE_SUBSCRIBE_DELETED_IND, 0, key);
-    EXPECT_FALSE(pUceOptionsManager->onMessage(objMsg));
+    EXPECT_FALSE(pUceOptionsManager->sendMsg(objMsg));
 
     UceOptions* pOptions = new UceOptions("Options", IMS_NULL, IMS_NULL, 0, IMS_TRUE, 0);
     pUceOptionsManager->addOptions(key, pOptions);
 
     IMSMSG objSecondMsg(IUUceService::UCE_OPTIONS_DELETED_IND, 0, key);
     EXPECT_EQ(pUceOptionsManager->getListCount(), 1);
-    EXPECT_TRUE(pUceOptionsManager->onMessage(objSecondMsg));
+    EXPECT_TRUE(pUceOptionsManager->sendMsg(objSecondMsg));
     EXPECT_EQ(pUceOptionsManager->getListCount(), 0);
 }

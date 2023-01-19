@@ -74,7 +74,7 @@ public:
 
     void setState(IMS_UINT32 state) { SetState(state); }
 
-    IMS_BOOL onMessage(IN IMSMSG& objMsg) { return OnMessage(objMsg); }
+    IMS_BOOL sendMsg(IN IMSMSG& objMsg) { return OnMessage(objMsg); }
 
     void setISubscription(ISubscription* pSubscription) { m_piSubscription = pSubscription; }
 
@@ -186,12 +186,12 @@ TEST_F(UceSubscribeTest, QueryMultiCapability)
     delete pUceSubscribe;
 }
 
-TEST_F(UceSubscribeTest, onMessage)
+TEST_F(UceSubscribeTest, sendMsg)
 {
-    IMS_TRACE_D("onMessage", 0, 0, 0);
+    IMS_TRACE_D("sendMsg", 0, 0, 0);
     IMSMSG objMsg(TestUceSubscribe::SINGLE_REQUESTED, 0, IMS_NULL);
 
-    EXPECT_FALSE(pUceSubscribe->onMessage(objMsg));
+    EXPECT_FALSE(pUceSubscribe->sendMsg(objMsg));
 }
 
 TEST_F(UceSubscribeTest, onSingleSubscribeRequested)
