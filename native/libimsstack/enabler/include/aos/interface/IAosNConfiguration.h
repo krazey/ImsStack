@@ -782,6 +782,11 @@ public:
     /**
      * @brief Get the Reg Retry Timer F Policy object
      *
+     *        This is related to managing pcscf. In case the UE uses this config.
+     *        A value of KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY and
+     *        KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY must be set to 0
+     *        as well. (0: TimerF)
+     *
      * @return IMS_SINT32 Return retry policy
      */
     virtual IMS_SINT32 GetRegRetryTimerFPolicy() const = 0;

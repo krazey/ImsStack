@@ -2999,7 +2999,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithNextPcscf()
 }
 
 PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf(
-        IN IMS_BOOL bSetCurrentPcscfInvalid)
+        IN IMS_BOOL bSetCurrentPcscfInvalid, IN IMS_UINT32 nReconnectTime /* = 0 */)
 {
     IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
 
@@ -3032,7 +3032,15 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRegRequiredWithAvailableNextPcscf
     }
     else
     {
-        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+        if (nReconnectTime > 0)
+        {
+            m_nPdnReactivateWaitTime = nReconnectTime;
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+        }
+        else
+        {
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+        }
     }
 }
 
@@ -3804,7 +3812,17 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
                 CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
     {
         m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
-        ProcessStandardPcscfSelection();
+
+        if (GET_N_CONFIG(m_nSlotId)->GetRegRetryTimerFPolicy() ==
+                CarrierConfig::Assets::TIMER_F_POLICY_SPEC_WITH_AWT)
+        {
+            IncreaseConsecutiveFailCount();
+            ProcessStandardPcscfSelection(GetActualWaitTime());
+        }
+        else
+        {
+            ProcessStandardPcscfSelection();
+        }
         return;
     }
 
@@ -3973,7 +3991,17 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()
     if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregErrCodeForInitRegWithAvailablePcscf(),
                 CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
     {
-        ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
+        if (GET_N_CONFIG(m_nSlotId)->GetRegRetryTimerFPolicy() ==
+                CarrierConfig::Assets::TIMER_F_POLICY_SPEC_WITH_AWT)
+        {
+            IncreaseConsecutiveFailCount();
+            ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE, GetActualWaitTime());
+        }
+        else
+        {
+            ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
+        }
+
         return;
     }
 
