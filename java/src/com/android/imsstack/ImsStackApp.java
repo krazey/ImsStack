@@ -32,6 +32,7 @@ import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.carrier.CarrierInfo;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
+import com.android.imsstack.core.carrier.SimCarrierId;
 import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -186,12 +187,12 @@ public class ImsStackApp extends Application {
 
         if (simState == Sim.STATE_LOADED) {
             if (!isCarrierConfigLoaded(subId)) {
-                Log.d(TAG, "SimState: wait for CarrierConfigChanged");
+                Log.d(TAG, "SimState: wait for CarrierConfigChanged on LOADED in slot" + slotId);
                 return;
             }
         } else if (simState == Sim.STATE_ABSENT) {
             if (oldSimState == Sim.STATE_LOCKED || oldSimState == Sim.STATE_LOADED) {
-                Log.d(TAG, "SimState: wait for CarrierConfigChanged");
+                Log.d(TAG, "SimState: wait for CarrierConfigChanged on ABSENT in slot" + slotId);
                 return;
             }
 
@@ -221,12 +222,17 @@ public class ImsStackApp extends Application {
             }
         } else {
             if (slotState.isServiceStarted()) {
+                SimCarrierId carrierId = CarrierInfo.getInstance().getCarrierId(slotId);
+
+                if (simState == Sim.STATE_ABSENT && carrierId.isSimAbsent()) {
+                    Log.i(TAG, "SimState: Postpone service restart until SIM is reinserted.");
+                    return;
+                }
+
                 stopServices(slotId);
-                loadConfigAndStartServices(slotId);
-            } else {
-                loadConfigAndStartServices(slotId);
             }
 
+            loadConfigAndStartServices(slotId);
             slotState.setServiceStarted(true);
         }
     }
@@ -361,7 +367,8 @@ public class ImsStackApp extends Application {
                 com.android.internal.R.bool.config_device_wfc_ims_available);
 
         Log.i(TAG, "CarrierConfig(" + phoneId + ") - voLteEnabled=" + voLteEnabled
-                + ", vtEnabled=" + vtEnabled + ", wfcEnabled=" + wfcEnabled);
+                + ", vtEnabled=" + vtEnabled + ", wfcEnabled=" + wfcEnabled
+                + ", identifiedCarrier=" + CarrierConfigManager.isConfigForIdentifiedCarrier(b));
         Log.i(TAG, "Device(" + phoneId + ") - voLteEnabled=" + deviceVoLteEnabled
                 + ", vtEnabled=" + deviceVtEnabled + ", wfcEnabled=" + deviceWfcEnabled);
     }
