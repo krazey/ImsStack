@@ -84,7 +84,7 @@ protected:
         }
     }
 
-    void Initializ() { m_pAosPcscf->Init(); }
+    void Initialize() { m_pAosPcscf->Init(); }
 
     void CleanUp() { m_pAosPcscf->CleanUp(); }
 
@@ -327,7 +327,7 @@ TEST_F(AosPcscfTest, IsAsyncDnsDiscovery)
 
     SetRegType(AosRegistrationType::RCS);
     EXPECT_TRUE(m_pAosPcscf->IsAsyncDnsDiscovery());
-    Initializ();
+    Initialize();
     EXPECT_FALSE(m_pAosPcscf->IsAsyncDnsDiscovery());
 }
 
@@ -636,4 +636,70 @@ TEST_F(AosPcscfTest, SetListener)
 
     m_pAosPcscf->SetListener(static_cast<IAosPcscfListener*>(&objMockIAosPcscfListener));
     NotifyResult();
+}
+
+TEST_F(AosPcscfTest, Get_Reset_IncreaseCurrentPcscfTriedCount)
+{
+    MockIAosNConfiguration m_objMockIAosNConfiguration;
+    SetNConfig(&m_objMockIAosNConfiguration);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(2));
+
+    SetPcscfs();
+    SetCurrentPcscfIndex(0);
+
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 2);
+
+    m_pAosPcscf->ResetCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+
+    SetCurrentPcscfIndex(3);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+}
+
+TEST_F(AosPcscfTest, ResetAllPcscfTriedCount)
+{
+    MockIAosNConfiguration m_objMockIAosNConfiguration;
+    SetNConfig(&m_objMockIAosNConfiguration);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountPerPcscf())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(2));
+
+    SetPcscfs();
+
+    SetCurrentPcscfIndex(0);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+
+    SetCurrentPcscfIndex(1);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+
+    SetCurrentPcscfIndex(2);
+    m_pAosPcscf->IncreaseCurrentPcscfTriedCount();
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 1);
+
+    m_pAosPcscf->ResetAllPcscfTriedCount();
+
+    SetCurrentPcscfIndex(0);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+
+    SetCurrentPcscfIndex(1);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
+
+    SetCurrentPcscfIndex(2);
+    EXPECT_EQ(m_pAosPcscf->GetCurrentPcscfTriedCount(), 0);
 }

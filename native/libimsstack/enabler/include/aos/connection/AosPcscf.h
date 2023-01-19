@@ -36,6 +36,7 @@ public:
             m_nPort(nPort),
             m_bIsAvailable(IMS_TRUE),
             m_bIsTried(IMS_FALSE),
+            m_nTriedCount(0),
             m_piTimer(IMS_NULL)
     {
     }
@@ -44,6 +45,9 @@ public:
 
     inline const AString& GetAddress() { return m_strAddress; }
     inline IMS_SINT32 GetPort() { return m_nPort; }
+    inline IMS_UINT32 GetTriedCount() { return m_nTriedCount; }
+
+    inline void IncreaseTriedCount() { m_nTriedCount++; }
     inline IMS_BOOL IsAvailable() { return m_bIsAvailable; }
 
     inline IMS_BOOL IsEqual(IN const AString& strCurr)
@@ -54,6 +58,9 @@ public:
     }
 
     inline IMS_BOOL IsTried() { return m_bIsTried; }
+
+    inline void ResetTriedCount() { m_nTriedCount = 0; }
+
     inline void SetAddress(IN const AString& strAddress) { m_strAddress = strAddress; }
 
     inline void SetAvailable(IN IMS_BOOL bAvailable)
@@ -121,6 +128,7 @@ private:
     IMS_SINT32 m_nPort;
     IMS_BOOL m_bIsAvailable;
     IMS_BOOL m_bIsTried;
+    IMS_UINT32 m_nTriedCount;
     ITimer* m_piTimer;
 };
 
@@ -179,6 +187,11 @@ public:
     IMS_BOOL IsAllPcscfTried() override;
     void SetCurrentPcscfTried() override;
     void ResetAllPcscfTried() override;
+
+    IMS_UINT32 GetCurrentPcscfTriedCount() override;
+    void IncreaseCurrentPcscfTriedCount() override;
+    void ResetCurrentPcscfTriedCount() override;
+    void ResetAllPcscfTriedCount() override;
 
     IMS_BOOL GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort) override;
     IMS_UINT32 GetCurrentIndex() const override;
@@ -251,6 +264,7 @@ private:
     IMS_SINT32 GetPcscfPort();
     void ProcessReorder(IN const AString& strCurrentPcscf, IN const AStringArray& objNewPcscfs);
     void UpdatePcscfs(IN const AStringArray& objPcscfs, IN IMS_SINT32 nPort);
+    IMS_BOOL IsRegRetryCountPerPcscfConfigured();
 
 protected:
     IAosAppContext* m_piAppContext;

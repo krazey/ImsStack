@@ -626,13 +626,14 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_503_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT));
     EXPECT_CALL(
+            objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_CNT_PER_PCSCF_INT, -1))
+            .WillOnce(Return(0));
+    EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_CNT_RESET_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_DEFAULT_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC));
-    EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_MIN_CNT_INT, -1))
-            .WillOnce(Return(0));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_TIMER_F_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::TIMER_F_POLICY_NONE));
@@ -800,11 +801,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             pAosNConfiguration->GetRegRetrySip305CodePolicy());
     EXPECT_EQ(CarrierConfig::Assets::SIP_503_CODE_POLICY_DEFAULT,
             pAosNConfiguration->GetRegRetrySip503CodePolicy());
+    EXPECT_EQ(0, pAosNConfiguration->GetRegRetryCountPerPcscf());
     EXPECT_EQ(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION,
             pAosNConfiguration->GetRegRetryCountResetPolicy());
     EXPECT_EQ(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC,
             pAosNConfiguration->GetRegRetryDefaultPolicy());
-    EXPECT_EQ(0, pAosNConfiguration->GetRegRetryMinCount());
     EXPECT_EQ(CarrierConfig::Assets::TIMER_F_POLICY_NONE,
             pAosNConfiguration->GetRegRetryTimerFPolicy());
     EXPECT_EQ(0, pAosNConfiguration->GetRegistrationPcscfUpdatePolicy());

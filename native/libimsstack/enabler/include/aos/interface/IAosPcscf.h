@@ -51,6 +51,11 @@ public:
     virtual void SetCurrentPcscfTried() = 0;
     virtual void ResetAllPcscfTried() = 0;
 
+    virtual IMS_UINT32 GetCurrentPcscfTriedCount() = 0;
+    virtual void IncreaseCurrentPcscfTriedCount() = 0;
+    virtual void ResetCurrentPcscfTriedCount() = 0;
+    virtual void ResetAllPcscfTriedCount() = 0;
+
     virtual IMS_BOOL GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort) = 0;
     virtual IMS_UINT32 GetCurrentIndex() const = 0;
 

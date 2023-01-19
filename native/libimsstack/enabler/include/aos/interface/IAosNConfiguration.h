@@ -745,6 +745,16 @@ public:
     virtual IMS_SINT32 GetRegRetrySip503CodePolicy() const = 0;
 
     /**
+     * @brief Get the number of registration retry for each PCSCF
+     *
+     *        Indicate the number of retry for each PCSCF.
+     *        If the value is 0, it follows default scheme.
+     *
+     * @return IMS_SINT32 Return the number of retry
+     */
+    virtual IMS_SINT32 GetRegRetryCountPerPcscf() const = 0;
+
+    /**
      * @brief Indicate the policy for clearing the registration retry count
      *
      *        Possible values are,
@@ -768,16 +778,6 @@ public:
      * @return IMS_SINT32 Return the default policy for the registration retry
      */
     virtual IMS_SINT32 GetRegRetryDefaultPolicy() const = 0;
-
-    /**
-     * @brief Get minimum number of registration retries
-     *
-     *        Indicate the number of minimum retry if P-CSCF count is less than this number.
-     *        If the value is 0, it is not applicable.
-     *
-     * @return IMS_SINT32 Return retry minimum count
-     */
-    virtual IMS_SINT32 GetRegRetryMinCount() const = 0;
 
     /**
      * @brief Get the Reg Retry Timer F Policy object

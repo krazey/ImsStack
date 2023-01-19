@@ -45,6 +45,10 @@ public:
     MOCK_METHOD(IMS_BOOL, IsAllPcscfTried, (), (override));
     MOCK_METHOD(void, SetCurrentPcscfTried, (), (override));
     MOCK_METHOD(void, ResetAllPcscfTried, (), (override));
+    MOCK_METHOD(IMS_UINT32, GetCurrentPcscfTriedCount, (), (override));
+    MOCK_METHOD(void, IncreaseCurrentPcscfTriedCount, (), (override));
+    MOCK_METHOD(void, ResetCurrentPcscfTriedCount, (), (override));
+    MOCK_METHOD(void, ResetAllPcscfTriedCount, (), (override));
     MOCK_METHOD(
             IMS_BOOL, GetCurrentPcscf, (OUT AString & objPcscf, OUT IMS_UINT32& nPort), (override));
     MOCK_METHOD(IMS_UINT32, GetCurrentIndex, (), (const, override));

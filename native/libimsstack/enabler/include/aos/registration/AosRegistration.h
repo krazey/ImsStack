@@ -219,6 +219,7 @@ protected:
     virtual IMS_BOOL TryNextPcscf(
             IN IMS_BOOL bFlowRecoveryOnAllFail, IN IMS_BOOL bHonorRetryAfter = IMS_FALSE);
     virtual IMS_BOOL IsRetryStopped();
+    virtual IMS_BOOL IsRetryOnSamePcscfRequired() const;
 
     /// Clear
     virtual void ClearRegParameters(IN IMS_BOOL bClearPcscf = IMS_TRUE);

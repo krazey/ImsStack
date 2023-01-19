@@ -522,11 +522,11 @@ public class CarrierConfig {
                 "reg_pcscf_update_policy_int";
         public static final String KEY_REG_RETRY_305_POLICY_INT = "reg_retry_305_policy_int";
         public static final String KEY_REG_RETRY_503_POLICY_INT = "reg_retry_503_policy_int";
+        public static final String KEY_REG_RETRY_CNT_PER_PCSCF_INT = "reg_retry_cnt_per_pcscf_int";
         public static final String KEY_REG_RETRY_CNT_RESET_POLICY_INT =
                 "reg_retry_cnt_reset_policy_int";
         public static final String KEY_REG_RETRY_DEFAULT_POLICY_INT =
                 "reg_retry_default_policy_int";
-        public static final String KEY_REG_RETRY_MIN_CNT_INT = "reg_retry_min_cnt_int";
         public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =
                 "reg_retry_timer_f_policy_int";
         public static final String KEY_REG_TIMER_FOR_EMC_CALL_MILLIS_INT =

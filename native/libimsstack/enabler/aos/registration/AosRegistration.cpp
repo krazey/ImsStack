@@ -2390,6 +2390,12 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetFirstPcscf(
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetNextPcscf(
         IN IMS_BOOL bUpdateParameter /* = IMS_TRUE */)
 {
+    if (IsRetryOnSamePcscfRequired())
+    {
+        A_IMS_TRACE_I(REGID, "SetNextPcscf :: Use current pcscf", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
     AString strPcscf;
     IMS_UINT32 nPort;
 
@@ -2484,6 +2490,18 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsRetryStopped()
     return IMS_FALSE;
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::IsRetryOnSamePcscfRequired() const
+{
+    IMS_SINT32 nRegRetryCountPerPcscf = GET_N_CONFIG(m_nSlotId)->GetRegRetryCountPerPcscf();
+
+    if (nRegRetryCountPerPcscf > 0)
+    {
+        return (nRegRetryCountPerPcscf >= m_piContext->GetPcscf()->GetCurrentPcscfTriedCount());
+    }
+
+    return IMS_FALSE;
+}
+
 PROTECTED VIRTUAL void AosRegistration::ClearRegParameters(IN IMS_BOOL bClearPcscf /* = IMS_TRUE */)
 {
     ClearTimers();
@@ -2506,6 +2524,7 @@ PROTECTED VIRTUAL void AosRegistration::ClearPcscf()
     {
         piPcscf->SetFirstPcscfIndex();
         piPcscf->ResetAllPcscfTried();
+        piPcscf->ResetAllPcscfTriedCount();
     }
 }
 
@@ -3212,6 +3231,8 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
 {
     A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start", 0, 0, 0);
 
+    m_piContext->GetPcscf()->IncreaseCurrentPcscfTriedCount();
+
     IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy();
     IMS_UINT32 nRetryAfter = 0;
     IMS_UINT32 nAwt = 0;
@@ -3263,8 +3284,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_Start(
     }
     else
     {
-        m_piContext->GetPcscf()->SetCurrentPcscfInvalid(
-                IMS_TRUE, (nRetryAfter > 0) ? nRetryAfter : nAwt);
+        if (!IsRetryOnSamePcscfRequired())
+        {
+            m_piContext->GetPcscf()->SetCurrentPcscfInvalid(
+                    IMS_TRUE, (nRetryAfter > 0) ? nRetryAfter : nAwt);
+        }
+
         if (TryNextPcscf())
         {
             SetState(STATE_REGISTERING);
@@ -3386,6 +3411,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpec
         {
             nAwt = GetActualWaitTime();
         }
+
         m_piContext->GetPcscf()->SetCurrentPcscfTried();
         if (SetNextPcscf())
         {
@@ -4302,6 +4328,8 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
     {
         ClearRetryCount(IMS_TRUE);
     }
+
+    m_piContext->GetPcscf()->ResetCurrentPcscfTriedCount();
 
     if (IsIpsecSupported())
     {

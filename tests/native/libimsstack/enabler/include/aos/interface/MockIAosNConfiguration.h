@@ -107,9 +107,9 @@ public:
     MOCK_METHOD(IMS_SINT32, GetRegRetrySip305CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetReregRetrySip305CodePolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetrySip503CodePolicy, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetRegRetryCountPerPcscf, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryCountResetPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryDefaultPolicy, (), (const, override));
-    MOCK_METHOD(IMS_SINT32, GetRegRetryMinCount, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegRetryTimerFPolicy, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRegTimerForEmcCall, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetExtraRegErrFinalType, (), (const, override));

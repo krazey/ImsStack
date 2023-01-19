@@ -311,6 +311,71 @@ PUBLIC VIRTUAL void AosPcscf::ResetAllPcscfTried()
     }
 }
 
+PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetCurrentPcscfTriedCount()
+{
+    if (m_nCurrentPcscfIndex < m_objPcscfList.GetSize())
+    {
+        Pcscf* pPcscf = m_objPcscfList.GetAt(m_nCurrentPcscfIndex);
+        if (pPcscf != IMS_NULL)
+        {
+            return pPcscf->GetTriedCount();
+        }
+    }
+
+    return 0;
+}
+
+PUBLIC VIRTUAL void AosPcscf::IncreaseCurrentPcscfTriedCount()
+{
+    if (!IsRegRetryCountPerPcscfConfigured())
+    {
+        return;
+    }
+
+    if (m_nCurrentPcscfIndex < m_objPcscfList.GetSize())
+    {
+        Pcscf* pPcscf = m_objPcscfList.GetAt(m_nCurrentPcscfIndex);
+        if (pPcscf != IMS_NULL)
+        {
+            pPcscf->IncreaseTriedCount();
+        }
+    }
+}
+
+PUBLIC VIRTUAL void AosPcscf::ResetCurrentPcscfTriedCount()
+{
+    if (!IsRegRetryCountPerPcscfConfigured())
+    {
+        return;
+    }
+
+    if (m_nCurrentPcscfIndex < m_objPcscfList.GetSize())
+    {
+        Pcscf* pPcscf = m_objPcscfList.GetAt(m_nCurrentPcscfIndex);
+        if (pPcscf != IMS_NULL)
+        {
+            pPcscf->ResetTriedCount();
+        }
+    }
+}
+
+PUBLIC VIRTUAL void AosPcscf::ResetAllPcscfTriedCount()
+{
+    if (!IsRegRetryCountPerPcscfConfigured())
+    {
+        return;
+    }
+
+    for (IMS_UINT32 nAt = 0; nAt < m_objPcscfList.GetSize(); nAt++)
+    {
+        Pcscf* pPcscf = m_objPcscfList.GetAt(nAt);
+        if (pPcscf != IMS_NULL)
+        {
+            pPcscf->ResetTriedCount();
+        }
+    }
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 {
     if ((m_objPcscfList.GetSize() - 1) < m_nCurrentPcscfIndex)
@@ -914,76 +979,7 @@ void AosPcscf::PrintPcscfs()
     A_IMS_TRACE_D(APPPROFILE, "pcscf list :: (%s)", strLog.GetStr(), 0, 0);
 }
 
-PRIVATE
-IMS_SINT32 AosPcscf::GetPcscfPort()
-{
-    const ISubscriberConfig* piSubsConfig =
-            GetSubscriberConfig((IsFakeDiscoverySchemes()) ? IAosSubscriber::FAKE : -1);
-
-    if (piSubsConfig != IMS_NULL)
-    {
-        ServerAddress* pServerAddress = piSubsConfig->GetPcscfAddress();
-        if (pServerAddress != IMS_NULL)
-            return pServerAddress->GetPort();
-    }
-
-    return GetDefaultPcscfPort();
-}
-
-PRIVATE
-void AosPcscf::ProcessReorder(
-        IN const AString& strCurrentPcscf, IN const AStringArray& objNewPcscfs)
-{
-    A_IMS_TRACE_D(APPPROFILE, "ProcessReorder", 0, 0, 0);
-
-    AStringArray objUpdatePcscfs;
-    IPAddress objIpa(strCurrentPcscf);
-
-    IMS_SINT32 nCurrentIndex = 0;
-    for (int nAt = 0; nAt < objNewPcscfs.GetCount(); nAt++)
-    {
-        const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
-        IPAddress objIpaCurr(strCurr);
-
-        if (objIpaCurr.Equals(objIpa))
-        {
-            nCurrentIndex = nAt;
-            objUpdatePcscfs.AddElement(strCurrentPcscf);
-            break;
-        }
-    }
-
-    for (int nAt = nCurrentIndex + 1; nAt < objNewPcscfs.GetCount(); ++nAt)
-    {
-        const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
-        objUpdatePcscfs.AddElement(strCurr);
-    }
-
-    for (int nAt = 0; nAt < nCurrentIndex; ++nAt)
-    {
-        const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
-        objUpdatePcscfs.AddElement(strCurr);
-    }
-
-    UpdatePcscfs(objUpdatePcscfs, GetPcscfPort());
-}
-
-PRIVATE
-void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs, IN IMS_SINT32 nPort)
-{
-    ClearPcscfList();
-
-    for (int nAt = 0; nAt < objPcscfs.GetCount(); ++nAt)
-    {
-        IPAddress objIpa(objPcscfs.GetElementAt(nAt));
-        if (!IsSamePcscf(objIpa, nPort))
-        {
-            AddPcscf(objIpa.ToString(), nPort);
-        }
-    }
-}
-
-PRIVATE
+PROTECTED
 void AosPcscf::ProcessDnsRetryTimerExpired()
 {
     IMS_SINT32 nIpVersion = IPAddress::UNKNOWN;
@@ -1108,4 +1104,79 @@ PROTECTED GLOBAL const IMS_CHAR* AosPcscf::TimerToString(IN IMS_UINT32 nType)
         default:
             return "__INVALID__";
     }
+}
+
+PRIVATE
+IMS_SINT32 AosPcscf::GetPcscfPort()
+{
+    const ISubscriberConfig* piSubsConfig =
+            GetSubscriberConfig((IsFakeDiscoverySchemes()) ? IAosSubscriber::FAKE : -1);
+
+    if (piSubsConfig != IMS_NULL)
+    {
+        ServerAddress* pServerAddress = piSubsConfig->GetPcscfAddress();
+        if (pServerAddress != IMS_NULL)
+            return pServerAddress->GetPort();
+    }
+
+    return GetDefaultPcscfPort();
+}
+
+PRIVATE
+void AosPcscf::ProcessReorder(
+        IN const AString& strCurrentPcscf, IN const AStringArray& objNewPcscfs)
+{
+    A_IMS_TRACE_D(APPPROFILE, "ProcessReorder", 0, 0, 0);
+
+    AStringArray objUpdatePcscfs;
+    IPAddress objIpa(strCurrentPcscf);
+
+    IMS_SINT32 nCurrentIndex = 0;
+    for (int nAt = 0; nAt < objNewPcscfs.GetCount(); nAt++)
+    {
+        const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
+        IPAddress objIpaCurr(strCurr);
+
+        if (objIpaCurr.Equals(objIpa))
+        {
+            nCurrentIndex = nAt;
+            objUpdatePcscfs.AddElement(strCurrentPcscf);
+            break;
+        }
+    }
+
+    for (int nAt = nCurrentIndex + 1; nAt < objNewPcscfs.GetCount(); ++nAt)
+    {
+        const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
+        objUpdatePcscfs.AddElement(strCurr);
+    }
+
+    for (int nAt = 0; nAt < nCurrentIndex; ++nAt)
+    {
+        const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
+        objUpdatePcscfs.AddElement(strCurr);
+    }
+
+    UpdatePcscfs(objUpdatePcscfs, GetPcscfPort());
+}
+
+PRIVATE
+void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs, IN IMS_SINT32 nPort)
+{
+    ClearPcscfList();
+
+    for (int nAt = 0; nAt < objPcscfs.GetCount(); ++nAt)
+    {
+        IPAddress objIpa(objPcscfs.GetElementAt(nAt));
+        if (!IsSamePcscf(objIpa, nPort))
+        {
+            AddPcscf(objIpa.ToString(), nPort);
+        }
+    }
+}
+
+PRIVATE
+IMS_BOOL AosPcscf::IsRegRetryCountPerPcscfConfigured()
+{
+    return (m_piAosNConfig->GetRegRetryCountPerPcscf() > 0);
 }
