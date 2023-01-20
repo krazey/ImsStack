@@ -39,6 +39,7 @@ private:
     void EnableAoS();
     IJniSipControllerServiceThread* GetJniThread();
     IMSList<AString> GetFeatureTags(IN IMS_UINT32 nFeatures);
+    IMS_SINT32 GetReason(IN IMS_UINT32 nReason);
 
 protected:
     virtual void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;

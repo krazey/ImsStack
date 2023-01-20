@@ -20,6 +20,7 @@
 #include "IImsAos.h"
 #include "ImsAos.h"
 #include "ImsAosParameter.h"
+#include "ImsAosReason.h"
 #include "ImsServiceConfig.h"
 #include "IURcsMessageService.h"
 #include "config/IMConstants.h"
@@ -324,12 +325,12 @@ PROTECTED void RcsRegistrationService::ImsAos_Connecting()
 
 PROTECTED void RcsRegistrationService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 {
-    (void)nReason;
     IMS_TRACE_I("ImsAos_Connecting()", 0, 0, 0);
     IUSncFeatureTagsParam* pParam = new IUSncFeatureTagsParam();
 
     pParam->m_nFeatureCount = m_objCurrentFeatures.GetSize();
     pParam->m_nRegState = static_cast<IMS_SINT32>(RcsRegState::STATE_DEREGISTERING);
+    pParam->m_nReason = GetReason(nReason);
 
     for (IMS_UINT32 i = 0; i < pParam->m_nFeatureCount; i++)
     {
@@ -346,12 +347,12 @@ PROTECTED void RcsRegistrationService::ImsAos_Disconnecting(IN IMS_UINT32 nReaso
 
 PROTECTED void RcsRegistrationService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
-    (void)nReason;
     IMS_TRACE_I("ImsAos_Connecting()", 0, 0, 0);
     IUSncFeatureTagsParam* pParam = new IUSncFeatureTagsParam();
 
     pParam->m_nFeatureCount = m_objCurrentFeatures.GetSize();
     pParam->m_nRegState = static_cast<IMS_SINT32>(RcsRegState::STATE_DEREGISTERED);
+    pParam->m_nReason = GetReason(nReason);
 
     for (IMS_UINT32 i = 0; i < pParam->m_nFeatureCount; i++)
     {
@@ -375,4 +376,28 @@ PRIVATE void RcsRegistrationService::ImsAos_Suspended(IN IMS_UINT32 nReason)
 PRIVATE void RcsRegistrationService::ImsAos_Resumed()
 {
     IMS_TRACE_I("ImsAos_Resumed ", 0, 0, 0);
+}
+
+PRIVATE
+IMS_SINT32 RcsRegistrationService::GetReason(IN IMS_UINT32 nReason)
+{
+    switch (nReason)
+    {
+        case ImsAosReason::OUT_OF_SERVICE:
+        case ImsAosReason::POWER_OFF:
+        case ImsAosReason::NO_RAT_COVERAGE:
+        case ImsAosReason::SERVICE_POLICY:
+        case ImsAosReason::SERVICE_BLOCKED:
+        case ImsAosReason::SUSPEND_OUT_OF_SERVICE:
+        case ImsAosReason::SUSPEND_NO_RAT_COVERAGE:
+            return static_cast<IMS_SINT32>(RcsDeRegReason::REASON_NOT_PROVISIONED);
+        case ImsAosReason::DATA_DISCONNECTED:
+            return static_cast<IMS_SINT32>(RcsDeRegReason::REASON_DESTROY_PENDING);
+        case ImsAosReason::REG_TERMINATED:
+            return static_cast<IMS_SINT32>(RcsDeRegReason::REASON_NOT_REGISTERED);
+        case ImsAosReason::REG_NEW_REQUIRED:
+            return static_cast<IMS_SINT32>(RcsDeRegReason::REASON_PROVISIONING_CHANGE);
+        default:  // NOT_SPECIFIED
+            return static_cast<IMS_SINT32>(RcsDeRegReason::REASON_UNSPECIFIED);
+    }
 }

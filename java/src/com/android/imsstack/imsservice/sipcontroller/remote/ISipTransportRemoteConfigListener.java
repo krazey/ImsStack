@@ -28,5 +28,5 @@ public interface ISipTransportRemoteConfigListener {
      * @param config updated sip delegate configuration
      * @param slotId slotId for which configuration is updated
      */
-    void updateConfiguration(@NonNull SipDelegateConfiguration config, int slotId);
+    void onConfigurationUpdated(@NonNull SipDelegateConfiguration config, int slotId);
 }
