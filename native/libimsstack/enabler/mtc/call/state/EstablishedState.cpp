@@ -455,13 +455,8 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnIpcanChanged(IN IMS_UINT32 eIpc
         return GetStateName();
     }
 
-    const MediaInfo& objMediaInfo = m_objContext.GetMediaManager().GetMediaInfo();
-    if (HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(), objMediaInfo) ==
-            IMS_FAILURE)
-    {
-        // TODO
-    }
-
+    HandleUpdate(UpdateType::SESSION, m_objContext.GetSession()->GetCallType(),
+            m_objContext.GetMediaManager().GetMediaInfo());
     return CallStateName::UPDATING;
 }
 
@@ -473,7 +468,10 @@ PROTECTED VIRTUAL CallStateName EstablishedState::SendUpdateBySrvcc(IN UpdateTyp
         return GetStateName();
     }
 
-    piMtcSession->Update(eType, IMS_FALSE, SipMethod::UPDATE);
+    // TODO: check IsRefreshInProgress in MtcCallState#OnSrvccStateUpdated?
+    // Handling in UpdatingState is also needed.
+    HandleUpdate(eType, m_objContext.GetSession()->GetCallType(),
+            m_objContext.GetMediaManager().GetMediaInfo());
     return CallStateName::UPDATING;
 }
 
@@ -481,7 +479,7 @@ PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(
         IN UpdateType eUpdateType, IN CallType eCallType, IN const MediaInfo& objMediaInfo)
 {
-    IMS_TRACE_D("HandleUpdate", 0, 0, 0);
+    IMS_TRACE_D("HandleUpdate Type[%d]", eUpdateType, 0, 0);
     m_objContext.GetUpdatingInfo().SetModifier();
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();

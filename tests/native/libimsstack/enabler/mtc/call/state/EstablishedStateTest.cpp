@@ -224,7 +224,7 @@ TEST_F(EstablishedStateTest, OnIpcanChangedPushesPendingOperation)
 TEST_F(EstablishedStateTest, SendUpdateBySrvccByCanceled)
 {
     EXPECT_CALL(objMockMtcSession,
-            Update(UpdateType::SRVCC_RECOVERED_CANCEL, IMS_FALSE, SipMethod::UPDATE))
+            Update(UpdateType::SRVCC_RECOVERED_CANCEL, IMS_FALSE, SipMethod::INVITE))
             .Times(1);
 
     EXPECT_EQ(
@@ -234,7 +234,7 @@ TEST_F(EstablishedStateTest, SendUpdateBySrvccByCanceled)
 TEST_F(EstablishedStateTest, SendUpdateBySrvccByFailed)
 {
     EXPECT_CALL(objMockMtcSession,
-            Update(UpdateType::SRVCC_RECOVERED_FAILURE, IMS_FALSE, SipMethod::UPDATE))
+            Update(UpdateType::SRVCC_RECOVERED_FAILURE, IMS_FALSE, SipMethod::INVITE))
             .Times(1);
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->OnSrvccStateUpdated(SrvccState::FAILED));
