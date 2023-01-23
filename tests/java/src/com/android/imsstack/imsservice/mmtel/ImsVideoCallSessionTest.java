@@ -123,10 +123,10 @@ public class ImsVideoCallSessionTest {
         //To set call state and type for testing purpose
         mVideoSession.setStateAndType(UPDATE_STATE_SENT, IVideoCallSession.MODIFICATION_NONE);
         mVideoSession.setVideoCallProvider(mVideoCallProvider);
-        VideoProfile fromProfile = new VideoProfile(VideoProfile.QUALITY_HIGH,
-                VideoProfile.STATE_BIDIRECTIONAL);
-        VideoProfile toProfile = new VideoProfile(VideoProfile.QUALITY_HIGH,
-                VideoProfile.STATE_BIDIRECTIONAL);
+        VideoProfile fromProfile = new VideoProfile(VideoProfile.STATE_BIDIRECTIONAL,
+                VideoProfile.QUALITY_HIGH);
+        VideoProfile toProfile = new VideoProfile(VideoProfile.STATE_BIDIRECTIONAL,
+                VideoProfile.QUALITY_HIGH);
         mVideoSession.sendSessionModifyRequest(fromProfile, toProfile);
         verify(mVideoCallProvider).receiveSessionModifyResponse(anyInt(), eq(null),
                 eq(fromProfile));
@@ -141,8 +141,7 @@ public class ImsVideoCallSessionTest {
         ImsCallProfile callProfile = new ImsCallProfile();
         doReturn(callProfile).when(mImsCallSession).getCallProfile();
 
-        toProfile = new VideoProfile(VideoProfile.QUALITY_HIGH,
-                VideoProfile.STATE_RX_ENABLED);
+        toProfile = new VideoProfile(VideoProfile.STATE_RX_ENABLED, VideoProfile.QUALITY_HIGH);
         mVideoSession.sendSessionModifyRequest(fromProfile, toProfile);
         verify(mImsCallSession).update(anyInt(), any(ImsStreamMediaProfile.class));
         clearInvocations(mImsCallSession);
@@ -152,9 +151,7 @@ public class ImsVideoCallSessionTest {
         callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VT);
         doReturn(callProfile).when(mImsCallSession).getCallProfile();
-        toProfile = null;
-        toProfile = new VideoProfile(VideoProfile.QUALITY_HIGH,
-                VideoProfile.STATE_TX_ENABLED);
+        toProfile = new VideoProfile(VideoProfile.STATE_TX_ENABLED, VideoProfile.QUALITY_HIGH);
         mVideoSession.sendSessionModifyRequest(fromProfile, toProfile);
         verify(mImsCallSession).update(anyInt(), any(ImsStreamMediaProfile.class));
         mVideoSession.setStateAndType(UPDATE_STATE_IDLE, IVideoCallSession.MODIFICATION_NONE);
@@ -166,8 +163,8 @@ public class ImsVideoCallSessionTest {
         mVideoSession.setStateAndType(UPDATE_STATE_IDLE, IVideoCallSession.MODIFICATION_CALL_TYPE);
         mVideoSession.setVideoCallProvider(mVideoCallProvider);
 
-        VideoProfile videoProfile = new VideoProfile(VideoProfile.QUALITY_HIGH,
-                VideoProfile.STATE_BIDIRECTIONAL);
+        VideoProfile videoProfile = new VideoProfile(VideoProfile.STATE_BIDIRECTIONAL,
+                VideoProfile.QUALITY_HIGH);
         ImsCallProfile callProfile = null;
         doReturn(callProfile).when(mImsCallSession).getCallProfile();
         mVideoSession.sendSessionModifyResponse(videoProfile);
@@ -186,8 +183,7 @@ public class ImsVideoCallSessionTest {
         mVideoSession.setStateAndType(UPDATE_STATE_IDLE,
                 IVideoCallSession.MODIFICATION_VIDEO_PROFILE);
         videoProfile = null;
-        videoProfile = new VideoProfile(VideoProfile.QUALITY_HIGH,
-                VideoProfile.STATE_TX_ENABLED);
+        videoProfile = new VideoProfile(VideoProfile.STATE_TX_ENABLED, VideoProfile.QUALITY_HIGH);
         callProfile = null;
         callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
                 ImsCallProfile.CALL_TYPE_VOICE);
@@ -288,5 +284,30 @@ public class ImsVideoCallSessionTest {
         verify(mVideoCallProvider).receiveSessionModifyResponse(anyInt(), eq(null),
                 any(VideoProfile.class));
 
+    }
+
+    @Test
+    public void testSendSessionModifyRequest_isVideoCall() {
+        ImsCallProfile callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                ImsCallProfile.CALL_TYPE_VT);
+        doReturn(callProfile).when(mImsCallSession).getCallProfile();
+        VideoProfile fromProfile = new VideoProfile(VideoProfile.STATE_BIDIRECTIONAL,
+                VideoProfile.QUALITY_HIGH);
+        VideoProfile toProfile = new VideoProfile(VideoProfile.STATE_AUDIO_ONLY,
+                VideoProfile.QUALITY_HIGH);
+
+        mVideoSession.sendSessionModifyRequest(fromProfile, toProfile);
+        verify(mImsCallSession).update(anyInt(), any(ImsStreamMediaProfile.class));
+    }
+
+    @Test
+    public void testSendSessionModifyResponse_isVideoCall() {
+        ImsCallProfile callProfile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                ImsCallProfile.CALL_TYPE_VT);
+        doReturn(callProfile).when(mImsCallSession).getCallProfile();
+        VideoProfile fromProfile = new VideoProfile(VideoProfile.STATE_AUDIO_ONLY,
+                VideoProfile.QUALITY_HIGH);
+        mVideoSession.sendSessionModifyResponse(fromProfile);
+        verify(mImsCallSession).accept(anyInt(), any(ImsStreamMediaProfile.class));
     }
 }
