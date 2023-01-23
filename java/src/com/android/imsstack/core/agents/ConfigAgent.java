@@ -390,7 +390,8 @@ public class ConfigAgent implements ConfigInterface {
             dst.putLong(key, src.getLong(key));
         } else if (key.endsWith("_double")) {
             dst.putDouble(key, src.getDouble(key));
-        } else if (key.endsWith("_bool") || key.endsWith("_boolean")) {
+        } else if (key.endsWith("_bool") || key.endsWith("_boolean")
+                || key.equals("ignore_data_enabled_changed_for_video_calls")) {
             dst.putBoolean(key, src.getBoolean(key));
         } else if (key.endsWith("_int_array")) {
             dst.putIntArray(key, src.getIntArray(key));
@@ -583,7 +584,8 @@ public class ConfigAgent implements ConfigInterface {
                 mConfig.putDouble(key, value);
                 mTestConfig.putDouble(key, value);
                 mCarrierConfig.getConfig().putDouble(key, value);
-            } else if (key.endsWith("_bool") || key.endsWith("_boolean")) {
+            } else if (key.endsWith("_bool") || key.endsWith("_boolean")
+                    || key.equals("ignore_data_enabled_changed_for_video_calls")) {
                 boolean value = intent.getBooleanExtra(KEY_VALUE, false);
                 valueForLog = String.valueOf(value);
                 mConfig.putBoolean(key, value);
