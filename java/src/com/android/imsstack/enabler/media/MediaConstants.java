@@ -60,7 +60,7 @@ public class MediaConstants {
     public static final int NOTIFY_HEADER_EXTENSION       = (IMSMEDIA_RESPONSE + 12);
     public static final int NOTIFY_MEDIA_INACTIVITY       = (IMSMEDIA_RESPONSE + 13);
     public static final int NOTIFY_PACKET_LOSS            = (IMSMEDIA_RESPONSE + 14);
-    public static final int NOTIFY_JITTER                 = (IMSMEDIA_RESPONSE + 15);
+    public static final int NOTIFY_MEDIA_QUALITY_STATUS   = (IMSMEDIA_RESPONSE + 15);
     public static final int NOTIFY_CALL_QUALITY_CHANGE    = (IMSMEDIA_RESPONSE + 16);
     public static final int NOTIFY_MEDIA_DETACH           = (IMSMEDIA_RESPONSE + 17);
     public static final int NOTIFY_QOS_INFO               = (IMSMEDIA_RESPONSE + 18);

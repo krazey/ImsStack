@@ -23,6 +23,7 @@ import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.MediaQualityStatus;
 
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
@@ -157,52 +158,19 @@ public class AudioSessionCallbackHandler {
     }
 
     /**
-     * Handles notification when media inactivity observed as per thresholds set by
+     * Handles notification when media quality change observed as per thresholds set by
      * setMediaQualityThreshold()
      *
-     * @param packetType either RTP or RTCP
+     * @param qualityStatus The object of MediaQualityStatus with the rtp and the rtcp statistics.
      */
-    public void onNotifyMediaInactivity(int packetType) {
-        ImsLog.v("onNotifyMediaInactivity");
+    public void onNotifyMediaQualityStatus(MediaQualityStatus qualityStatus) {
+        ImsLog.v("onNotifyMediaQualityStatus");
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(MediaConstants.NOTIFY_MEDIA_INACTIVITY);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        parcel.writeInt(packetType);
-
-        getMtcMediaInterface().sendRequest(parcel);
-    }
-
-    /**
-     * Handles notification when RTP packet loss observed as per thresholds set by
-     * setMediaQualityThreshold()
-     *
-     * @param packetLossPercentage percentage of packet loss calculated over the duration
-     */
-    public void onNotifyPacketLoss(int packetLossPercentage) {
-        ImsLog.v("onNotifyPacketLoss");
-
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(MediaConstants.NOTIFY_PACKET_LOSS);
-        parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        parcel.writeInt(packetLossPercentage);
-
-        getMtcMediaInterface().sendRequest(parcel);
-    }
-
-    /**
-     * Handles notification when RTP jitter observed as per thresholds set by
-     * setMediaQualityThreshold()
-     *
-     * @param jitter jitter of the RTP packets in milliseconds calculated over the duration
-     */
-    public void onNotifyJitter(int jitter) {
-        ImsLog.v("onNotifyJitter");
-
-        Parcel parcel = Parcel.obtain();
-        parcel.writeInt(MediaConstants.NOTIFY_JITTER);
-        parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        parcel.writeInt(jitter);
+        parcel.writeInt(qualityStatus.getRtpInactivityTimeMillis());
+        parcel.writeInt(qualityStatus.getRtcpInactivityTimeMillis());
 
         getMtcMediaInterface().sendRequest(parcel);
     }

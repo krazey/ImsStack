@@ -26,6 +26,7 @@ import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AmrParams;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.EvsParams;
+import android.telephony.imsmedia.MediaQualityStatus;
 import android.telephony.imsmedia.MediaQualityThreshold;
 import android.telephony.imsmedia.RtcpConfig;
 import android.telephony.imsmedia.RtpConfig;
@@ -40,7 +41,6 @@ public class MediaTestUtils {
 
     //Media Quality Settings
     public static final int PACKET_LOSS_PERCENT = 30;
-    public static final int JITTER = 100;
 
     // AudioConfig
     public static final String REMOTE_RTP_ADDRESS = "2401:4900:4b88:94fd:2:2:666c:7803";
@@ -89,12 +89,19 @@ public class MediaTestUtils {
     private static final byte BYTE_DATA = 10;
 
     // MediaQualityThreshold
-    private static final int RTP_TIMEOUT = 20000;
+    private static final int[] RTP_TIMEOUT = { 10000, 20000 };
     private static final int RTCP_TIMEOUT = 20000;
-    private static final int PACKET_LOSS_PERIOD = 30000;
-    private static final int PACKET_LOSS_RATE = 30;
-    private static final int JITTER_PERIOD = 1000;
-    private static final int JITTER_THRESHOLD = 1000;
+    private static final int RTP_HYSTERESIS_TIME = 3000;
+    private static final int PACKET_LOSS_DURATION = 30000;
+    private static final int[] PACKET_LOSS_RATE = { 10, 30 };
+    private static final int[] JITTER_THRESHOLD = { 100, 200 };
+    private static final boolean NOTIFY_STATUS = false;
+
+    //Media Quality Status
+    private static final int RTP_INACTIVITY_TIME = 10000;
+    private static final int RTCP_INACTIVITY_TIME = 15000;
+    private static final int RTP_PACKET_LOSS_RATE = 15;
+    private static final int JITTER = 100;
 
     // VideoConfig
     private static final int VIDEO_FRAMERATE = 15;
@@ -204,11 +211,21 @@ public class MediaTestUtils {
         return new MediaQualityThreshold.Builder()
                 .setRtpInactivityTimerMillis(RTP_TIMEOUT)
                 .setRtcpInactivityTimerMillis(RTCP_TIMEOUT)
-                .setPacketLossPeriodMillis(PACKET_LOSS_PERIOD)
-                .setPacketLossThreshold(PACKET_LOSS_RATE)
-                .setJitterPeriodMillis(JITTER_PERIOD)
-                .setJitterThresholdMillis(JITTER_THRESHOLD)
+                .setRtpHysteresisTimeInMillis(RTP_HYSTERESIS_TIME)
+                .setRtpPacketLossDurationMillis(PACKET_LOSS_DURATION)
+                .setRtpPacketLossRate(PACKET_LOSS_RATE)
+                .setRtpJitterMillis(JITTER_THRESHOLD)
+                .setNotifyCurrentStatus(NOTIFY_STATUS)
                 .build();
+    }
+
+    static MediaQualityStatus createMediaQualityStatus() {
+        return new MediaQualityStatus.Builder()
+            .setRtpInactivityTimeMillis(RTP_INACTIVITY_TIME)
+            .setRtcpInactivityTimeMillis(RTCP_INACTIVITY_TIME)
+            .setRtpPacketLossRate(RTP_PACKET_LOSS_RATE)
+            .setRtpJitterMillis(JITTER)
+            .build();
     }
 
     static VideoConfig createVideoConfig() {

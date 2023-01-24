@@ -33,6 +33,7 @@ import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.AudioSessionCallback;
 import android.telephony.imsmedia.ImsAudioSession;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.MediaQualityStatus;
 import android.telephony.imsmedia.MediaQualityThreshold;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -451,31 +452,12 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
     }
 
     @Test
-    public void testMediaInactivityNotifications() {
-        // Receive RTP Inactivity Notification
-        mAudioSessionCallback.notifyMediaInactivity(RTP);
+    public void testMediaQualityStatusNotification() {
+        // Receive Media Quality Status Notification
+        MediaQualityStatus qualityStatus = MediaTestUtils.createMediaQualityStatus();
+        mAudioSessionCallback.notifyMediaQualityStatus(qualityStatus);
         processAllMessages();
-        verify(mMockAudioSessionCallbackHandler).onNotifyMediaInactivity(eq(RTP));
-
-        // Receive RTCP Inactivity Notification
-        mAudioSessionCallback.notifyMediaInactivity(RTCP);
-        processAllMessages();
-        verify(mMockAudioSessionCallbackHandler).onNotifyMediaInactivity(eq(RTCP));
-    }
-
-    @Test
-    public void testMediaQualityNotifications() {
-        // Receive Packet Loss Notification
-        mAudioSessionCallback.notifyPacketLoss(MediaTestUtils.PACKET_LOSS_PERCENT);
-        processAllMessages();
-        verify(mMockAudioSessionCallbackHandler).onNotifyPacketLoss(
-            eq(MediaTestUtils.PACKET_LOSS_PERCENT));
-
-        // Receive Packet Loss Notification
-        mAudioSessionCallback.notifyJitter(MediaTestUtils.JITTER);
-        processAllMessages();
-        verify(mMockAudioSessionCallbackHandler).onNotifyJitter(eq(MediaTestUtils.JITTER));
-
+        verify(mMockAudioSessionCallbackHandler).onNotifyMediaQualityStatus(eq(qualityStatus));
     }
 
     @Test

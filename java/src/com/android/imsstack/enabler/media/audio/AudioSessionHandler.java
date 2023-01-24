@@ -28,6 +28,7 @@ import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.AudioSessionCallback;
 import android.telephony.imsmedia.ImsAudioSession;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.MediaQualityStatus;
 import android.telephony.imsmedia.MediaQualityThreshold;
 import android.util.Pair;
 
@@ -278,21 +279,9 @@ public class AudioSessionHandler extends MediaState {
                 }
                     break;
 
-                case MediaConstants.NOTIFY_MEDIA_INACTIVITY:
+                case MediaConstants.NOTIFY_MEDIA_QUALITY_STATUS:
                 {
-                    handleMediaInactivityNotification(msg.arg1);
-                }
-                    break;
-
-                case MediaConstants.NOTIFY_PACKET_LOSS:
-                {
-                    handlePacketLossNotification(msg.arg1);
-                }
-                    break;
-
-                case MediaConstants.NOTIFY_JITTER:
-                {
-                    handleJitterNotification(msg.arg1);
+                    handleMediaQualityStatusNotification((MediaQualityStatus) msg.obj);
                 }
                     break;
 
@@ -393,27 +382,10 @@ public class AudioSessionHandler extends MediaState {
         }
 
         @Override
-        public void notifyMediaInactivity(final @ImsMediaSession.PacketType int packetType) {
-            ImsLog.d("packetType=" + packetType);
-
-            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_MEDIA_INACTIVITY,
-                    packetType, UNUSED).sendToTarget();
-        }
-
-        @Override
-        public void notifyPacketLoss(final int packetLossPercentage) {
-            ImsLog.d("packetLossPercentage=" + packetLossPercentage);
-
-            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_PACKET_LOSS,
-                    packetLossPercentage, UNUSED).sendToTarget();
-        }
-
-        @Override
-        public void notifyJitter(final int jitter) {
-            ImsLog.d("jitter=" + jitter);
-
-            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_JITTER, jitter, UNUSED)
-                    .sendToTarget();
+        public void notifyMediaQualityStatus(final MediaQualityStatus qualityStatus) {
+            ImsLog.d("notifyMediaQualityStatus: " + qualityStatus.toString());
+            Message.obtain(mAudioMessageHandler, MediaConstants.NOTIFY_MEDIA_QUALITY_STATUS,
+                qualityStatus).sendToTarget();
         }
 
         @Override
@@ -841,21 +813,9 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private void handleMediaInactivityNotification(final int packetType) {
+    private void handleMediaQualityStatusNotification(final MediaQualityStatus qualityStatus) {
         if (mAudioSessionCallbackHandler != null) {
-            mAudioSessionCallbackHandler.onNotifyMediaInactivity(packetType);
-        }
-    }
-
-    private void handlePacketLossNotification(final int packetLossPercentage) {
-        if (mAudioSessionCallbackHandler != null) {
-            mAudioSessionCallbackHandler.onNotifyPacketLoss(packetLossPercentage);
-        }
-    }
-
-    private void handleJitterNotification(final int jitter) {
-        if (mAudioSessionCallbackHandler != null) {
-            mAudioSessionCallbackHandler.onNotifyJitter(jitter);
+            mAudioSessionCallbackHandler.onNotifyMediaQualityStatus(qualityStatus);
         }
     }
 

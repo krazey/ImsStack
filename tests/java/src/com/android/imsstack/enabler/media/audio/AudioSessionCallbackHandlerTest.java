@@ -25,6 +25,7 @@ import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.telephony.imsmedia.MediaQualityStatus;
 
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 
@@ -183,47 +184,17 @@ public class AudioSessionCallbackHandlerTest {
     }
 
     @Test
-    public void testNotifyMediaInactivity() {
+    public void testNotifyMediaQualityStatus() {
 
+        MediaQualityStatus qualityStatus = MediaTestUtils.createMediaQualityStatus();
         Parcel testParcel = Parcel.obtain();
 
         testParcel.writeInt(MediaConstants.NOTIFY_MEDIA_INACTIVITY);
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        testParcel.writeInt(ImsMediaSession.PACKET_TYPE_RTP);
+        testParcel.writeInt(qualityStatus.getRtpInactivityTimeMillis());
+        testParcel.writeInt(qualityStatus.getRtcpInactivityTimeMillis());
 
-        mAudioSessionCallbackHandler.onNotifyMediaInactivity(ImsMediaSession.PACKET_TYPE_RTP);
-
-        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
-        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
-    }
-
-    @Test
-    public void testNotifyPacketLoss() {
-
-        Parcel testParcel = Parcel.obtain();
-
-        testParcel.writeInt(MediaConstants.NOTIFY_PACKET_LOSS);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        testParcel.writeInt(MediaTestUtils.PACKET_LOSS_PERCENT);
-
-        mAudioSessionCallbackHandler.onNotifyPacketLoss(MediaTestUtils.PACKET_LOSS_PERCENT);
-
-        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
-        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-        testParcel.recycle();
-    }
-
-    @Test
-    public void testNotifyJitter() {
-
-        Parcel testParcel = Parcel.obtain();
-
-        testParcel.writeInt(MediaConstants.NOTIFY_JITTER);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
-        testParcel.writeInt(MediaTestUtils.JITTER);
-
-        mAudioSessionCallbackHandler.onNotifyJitter(MediaTestUtils.JITTER);
+        mAudioSessionCallbackHandler.onNotifyMediaQualityStatus(qualityStatus);
 
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
