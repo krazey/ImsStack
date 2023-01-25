@@ -24,6 +24,7 @@
 #include "MtcEmergencyServiceManager.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include <gtest/gtest.h>
 #include <vector>
@@ -54,6 +55,7 @@ public:
             objContext(),
             objService(),
             objAosConnector(),
+            objCallStateProxy(),
             pMockServiceThread(new MockIJniMtcServiceThread()),
             pConfigurationManager(new MockIMtcConfigurationManager()),
             pConfigurationProxy(new MtcConfigurationProxy(pConfigurationManager)),
@@ -72,6 +74,7 @@ protected:
     MockIMtcContext objContext;
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;
+    MockICallStateProxy objCallStateProxy;
     MockIJniMtcServiceThread* pMockServiceThread;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
@@ -88,6 +91,8 @@ protected:
         // this must be done before MtcEmergencyServiceManager is created.
         ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(&objService));
         ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(pMockServiceThread));
+
+        ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
 
         pEsm = new TestEmergencyServiceManager(objContext);
     }
@@ -141,14 +146,29 @@ TEST_F(MtcEmergencyServiceManagerTest, OnAosDisconnectedSetsStateByCurrentState)
     EXPECT_EQ(pEsm->GetState(), EmergencyServiceState::IDLE);
 }
 
-TEST_F(MtcEmergencyServiceManagerTest, OnAosDisconnectedRetriesOnImsPdnIfReasonIsDisconnected)
+TEST_F(MtcEmergencyServiceManagerTest, OnAosDisconnectedDoesNotRetryOnImsPdnInIdleState)
 {
     ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(objService, GetStatus).Times(0);
     pEsm->SetState(EmergencyServiceState::IDLE);
+    EXPECT_CALL(*pMockServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
+
+    pEsm->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest,
+        OnAosDisconnectedRetriesOnImsPdnIfReasonIsDisconnectedInOpeningState)
+{
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_CALL(objService, GetStatus).Times(0);
+    pEsm->SetState(EmergencyServiceState::OPENING);
     pEsm->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, ImsAosReason::OUT_OF_SERVICE);
 
+    EXPECT_CALL(objCallStateProxy, AddListener(_));
+    EXPECT_CALL(objCallStateProxy, RemoveListener(_));
+    pEsm->SetState(EmergencyServiceState::OPENING);
     EXPECT_CALL(objService, GetStatus).WillOnce(Return(ServiceStatus::SERVICE_ACTIVE));
     EXPECT_CALL(*pMockServiceThread,
             OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::OPENED), -1,
@@ -169,9 +189,30 @@ TEST_F(MtcEmergencyServiceManagerTest, OnAosDisconnectedSetsIdleStateIfRetryOnIm
                     static_cast<IMS_SINT32>(ServiceType::NORMAL)))
             .WillByDefault(Return());
 
+    EXPECT_CALL(objCallStateProxy, AddListener(_));
+    EXPECT_CALL(objCallStateProxy, RemoveListener(_));
     pEsm->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED);
 
     EXPECT_EQ(pEsm->GetState(), EmergencyServiceState::IDLE);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, OnNormalRoutingClosedResetsRoutingHelper)
+{
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_TRUE));
+
+    pEsm->SetState(EmergencyServiceState::OPENING);
+
+    ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
+    ON_CALL(*pMockServiceThread,
+            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::OPENED), -1,
+                    static_cast<IMS_SINT32>(ServiceType::NORMAL)))
+            .WillByDefault(Return());
+
+    EXPECT_CALL(objCallStateProxy, AddListener(_));
+    pEsm->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED);
+    EXPECT_CALL(objCallStateProxy, RemoveListener(_));
+    pEsm->OnNormalRoutingClosed();
+    EXPECT_CALL(objCallStateProxy, RemoveListener(_)).Times(0);
 }
 
 TEST_F(MtcEmergencyServiceManagerTest, OnAosConnectedSetsOpenedStateIfOpening)
