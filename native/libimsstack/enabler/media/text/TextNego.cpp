@@ -26,8 +26,6 @@
 
 __IMS_TRACE_TAG_USER_DECL__("MED.TN");
 
-static const IMS_UINT32 MAX_TEXT_OAMODEL_SIZE = 6;
-
 PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
         m_listOaModel(IMSList<OaModel*>()),
@@ -156,7 +154,6 @@ PUBLIC VIRTUAL void TextNego::FinalizeSDP(
         IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
 {
     IMS_BOOL bFoundOaModel = IMS_FALSE;
-    IMS_UINT32 nOaModelSize = m_listOaModel.GetSize();
 
     // reset confirmed Session check variable
     for (IMS_UINT32 i = 0; i < m_listOaModel.GetSize(); i++)
@@ -189,10 +186,10 @@ PUBLIC VIRTUAL void TextNego::FinalizeSDP(
         }
     }
 
-    for (IMS_UINT32 i = 0; i < nOaModelSize; i++)
+    for (IMS_UINT32 i = 0; i < m_listOaModel.GetSize(); i++)
     {
         // get OaModel
-        OaModel* pTempOaModel = m_listOaModel.GetAt(nOaModelSize - 1 - i);
+        OaModel* pTempOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1 - i);
 
         // find matched SessionDescriptor key
         if (pTempOaModel != IMS_NULL)
@@ -211,38 +208,9 @@ PUBLIC VIRTUAL void TextNego::FinalizeSDP(
 
     // SessionDescriptor key mismatch case handling
     // not select OaModel
-    if (bFoundOaModel != IMS_TRUE && nOaModelSize > 0)
+    if (bFoundOaModel != IMS_TRUE && m_listOaModel.GetSize() > 0)
     {
         IMS_TRACE_D("FinalizeSDP() - not found comfirmed Session OaModel", 0, 0, 0);
-        return;
-    }
-
-    // Remove old OaModels excepts confirmed OaModel
-    for (IMS_UINT32 i = 0; i < nOaModelSize; i++)
-    {
-        if ((nOaModelSize - i - 1) < MAX_TEXT_OAMODEL_SIZE)
-        {
-            IMS_TRACE_D("FinalizeSDP() - nOaModelSize is under 6", 0, 0, 0);
-            break;
-        }
-
-        OaModel* pDeleteCheckOaModel = m_listOaModel.GetAt(0);
-
-        if (pDeleteCheckOaModel != IMS_NULL)
-        {
-            IMS_TRACE_D("FinalizeSDP() - remove old OaModel", 0, 0, 0);
-            if (pDeleteCheckOaModel->nSessionDescriptorKey ==
-                            reinterpret_cast<IMS_SINTP>(pSessionDescriptor) &&
-                    pDeleteCheckOaModel->bConfirmedSession == IMS_TRUE)
-            {
-                break;
-            }
-
-            IMS_TRACE_D("FinalizeSDP() - Delete the oldest[%" PFLS_x "] OaModel",
-                    pDeleteCheckOaModel, 0, 0);
-            delete pDeleteCheckOaModel;
-            m_listOaModel.RemoveAt(0);
-        }
     }
 }
 
