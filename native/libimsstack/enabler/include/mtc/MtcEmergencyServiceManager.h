@@ -19,14 +19,18 @@
 
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
+#include "helper/EmergencyNormalRoutingHelper.h"
 #include "helper/IMtcAosStateListener.h"
+#include <memory>
 
 class IMtcContext;
 
 using EmergencyCallRoutingPdn = IuMtcService::EmergencyCallRoutingPdn;
 using EmergencyServiceState = IuMtcService::EmergencyServiceState;
 
-class MtcEmergencyServiceManager : public IMtcAosStateListener
+class MtcEmergencyServiceManager :
+        public IMtcAosStateListener,
+        public IEmergencyNormalRoutingHelperListener
 {
 public:
     explicit MtcEmergencyServiceManager(IN IMtcContext& objContext);
@@ -40,15 +44,18 @@ public:
             IN IMS_UINT32 eAosReason) override;
     inline void OnIpcanChanged(IN IMtcService&, IN IMS_UINT32) override {}
 
+    void OnNormalRoutingClosed() override;
+
 private:
-    void HandleServiceIdle(OUT IMS_BOOL& bStateChanged);
-    void HandleServiceActive(OUT IMS_BOOL& bStateChanged);
+    void HandleServiceIdle(OUT IMS_BOOL& bNeedToNotify);
+    void HandleServiceActive(OUT IMS_BOOL& bNeedToNotify);
     void HandleEmergencyCallOverImsPdn();
     IMS_BOOL IsRetryOverImsPdnRequired(IN IMS_SINT32 eAosReason) const;
-    void SetState(IN EmergencyServiceState eState, OUT IMS_BOOL& bChanged);
+    void SetState(IN EmergencyServiceState eState);
     void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason);
 
     IMtcContext& m_objContext;
+    std::unique_ptr<EmergencyNormalRoutingHelper> m_pNormalRoutingHelper;
 
 protected:
     // open to unit test
