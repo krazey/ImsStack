@@ -28,6 +28,6 @@ public interface ISipTransportRemoteRegistrationListener {
      * @param updatedRegistrationValues after registration update
      * @param slotId for which registration is changed
      */
-    void updateRegistration(@NonNull DelegateRegistrationState updatedRegistrationValues,
+    void onRegistrationUpdated(@NonNull DelegateRegistrationState updatedRegistrationValues,
            int slotId);
 }

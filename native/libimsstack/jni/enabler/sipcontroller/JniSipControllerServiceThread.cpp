@@ -67,6 +67,7 @@ PUBLIC void JniSipControllerServiceThread::OnRegistrationUpdated(IN IMS_UINTP nP
     objParcel.writeInt32(IUSncControl::ONREGISTRATION_UPDATED_IND);
     objParcel.writeInt32(pParam->m_nFeatureCount);
     objParcel.writeInt32(pParam->m_nRegState);
+    objParcel.writeInt32(pParam->m_nReason);
     for (IMS_UINT32 i = 0; i < pParam->m_nFeatureCount; i++)
     {
         objParcel.writeString16(

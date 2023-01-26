@@ -52,6 +52,19 @@ enum class RcsRegState
     STATE_REGISTERED
 };
 
+enum class RcsDeRegReason
+{
+    REASON_UNKNOWN = 0,
+    REASON_NOT_PROVISIONED,
+    REASON_NOT_REGISTERED,
+    REASON_PDN_CHANGE,
+    REASON_PROVISIONING_CHANGE,
+    REASON_FEATURE_TAGS_CHANGING,
+    REASON_DESTROY_PENDING,
+    REASON_LOSING_PDN,
+    REASON_UNSPECIFIED
+};
+
 class IUSncService
 {
 public:
@@ -229,6 +242,8 @@ public:
         IMS_TRACE_MEM("SNC_MSG", "IM_M : IUSncFeatureTagsParam = %" PFLS_u,
                 sizeof(IUSncFeatureTagsParam), 0, 0);
         m_nFeatureCount = 0;
+        m_nRegState = 0;
+        m_nReason = 0;
     }
     inline ~IUSncFeatureTagsParam()
     {
@@ -240,6 +255,7 @@ public:
     AStringArray m_objFeatureTags;
     IMS_SINT32 m_nFeatureCount;
     IMS_SINT32 m_nRegState;
+    IMS_SINT32 m_nReason;
 };
 
 class IUSncTriggerDeregistrationParam : public IUSncSessionData

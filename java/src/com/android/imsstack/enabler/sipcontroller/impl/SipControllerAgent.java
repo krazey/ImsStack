@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.telephony.ims.DelegateRegistrationState;
 import android.telephony.ims.SipDelegateConfiguration;
 import android.telephony.ims.SipMessage;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.imsstack.enabler.IUIMS;
@@ -358,16 +359,58 @@ public class SipControllerAgent implements ISipTransportRemote, JniImsListener {
 
     private void registrationUpdated(Parcel parcel) throws Exception {
         ImsLog.i(mSlotId, "registrationUpdated");
-        DelegateRegistrationState registrationState =
-                DelegateRegistrationState.CREATOR.createFromParcel(parcel);
-        mListener.updateRegistration(registrationState, mSubId);
+        int featureSize = parcel.readInt();
+        int regState = parcel.readInt();
+        int reason = parcel.readInt();
+
+        ImsLog.i(mSlotId, "Size : " + featureSize + " State: " + regState);
+        Set<String> features = new ArraySet<String>();
+        DelegateRegistrationState.Builder registrationState =
+                new DelegateRegistrationState.Builder();
+        switch(regState) {
+            case SipControllerConstants.STATE_DEREGISTERING:
+            {
+                for (int i = 0; i < featureSize; i++) {
+                    registrationState.addDeregisteringFeatureTag(parcel.readString(), reason);
+                }
+                break;
+            }
+            case SipControllerConstants.STATE_DEREGISTERED:
+            {
+                for (int i = 0; i < featureSize; i++) {
+                    registrationState.addDeregisteredFeatureTag(parcel.readString(), reason);
+                }
+                break;
+            }
+            case SipControllerConstants.STATE_REGISTERING:
+            {
+                for (int i = 0; i < featureSize; i++) {
+                    features.add(parcel.readString());
+                }
+                registrationState.addRegisteringFeatureTags(features);
+                break;
+            }
+            case SipControllerConstants.STATE_REGISTERED:
+            {
+                for (int i = 0; i < featureSize; i++) {
+                    features.add(parcel.readString());
+                }
+                registrationState.addRegisteredFeatureTags(features);
+                break;
+            }
+            default:
+            {
+                ImsLog.e(mSlotId, "non defined Registration state");
+            }
+        }
+        mListener.onRegistrationUpdated(registrationState.build(), mSubId);
     }
 
     private void configurationUpdated(Parcel parcel) throws Exception {
         ImsLog.i(mSlotId, "configurationUpdated");
         SipDelegateConfiguration configuration =
                 SipDelegateConfiguration.CREATOR.createFromParcel(parcel);
-        mListener.updateConfiguration(configuration, mSubId);
+        mListener.onConfigurationUpdated(configuration, mSubId);
     }
 
     private static void convertSipMessageToParcel(SipMessage message, Parcel parcel) {

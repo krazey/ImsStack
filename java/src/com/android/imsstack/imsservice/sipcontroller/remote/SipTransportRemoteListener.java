@@ -162,7 +162,7 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
      * @param subId subscription Id.
      */
     @Override
-    public void updateRegistration(@NonNull DelegateRegistrationState registrationState,
+    public void onRegistrationUpdated(@NonNull DelegateRegistrationState registrationState,
             int subId) {
         Log.i(LOG_TAG, "updateImsRegistration: received from IMS stack for subId:" + subId);
         //Get all the active sip delegate and update then with the latest registration state.
@@ -188,7 +188,7 @@ public class SipTransportRemoteListener implements ISipTransportRemoteMessageLis
      * @param subId subscription Id.
      */
     @Override
-    public void updateConfiguration(@NonNull SipDelegateConfiguration configuration, int subId) {
+    public void onConfigurationUpdated(@NonNull SipDelegateConfiguration configuration, int subId) {
         Log.i(LOG_TAG, "updateImsConfigs: received from IMS stack for subId:" + subId);
         //Get all the active sip delegate and update then with the latest config value.
         ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(subId);
