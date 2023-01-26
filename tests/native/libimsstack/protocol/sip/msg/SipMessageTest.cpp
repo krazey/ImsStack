@@ -503,17 +503,17 @@ TEST_F(SipMessageTest, DecodeFragmentMsg)
 
     pDecodeMessage->SipDelete();
 
-    /* Only response line with 3 CRLFs, fail */
+    /* Only response line with 3 CRLFs, success */
     pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\r\n\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
-    /* response line with 2 CRLFs and a header, fail */
+    /* response line with 2 CRLFs and a header, success - ignores header */
     pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 \r\n\
 Call-ID: callid\r\n");
@@ -521,11 +521,11 @@ Call-ID: callid\r\n");
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
-    /* response line with 2 CRLFs and a message body, fail */
+    /* response line with 2 CRLFs and a message body, success - ignores message body */
     pMsg = const_cast<char*>("SIP/2.0 200 OK\r\n\
 \r\n\
 Hello!");
@@ -533,7 +533,7 @@ Hello!");
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
 
-    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+    EXPECT_EQ(SIP_TRUE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
 
     pDecodeMessage->SipDelete();
 
@@ -577,8 +577,38 @@ Hello!");
 
     pDecodeMessage->SipDelete();
 
-    /* message contains only CRLFs ans SPACEs, fail */
+    /* message contains only CRLFs and SPACEs, fail */
     pMsg = const_cast<char*>("\r\n    \r\n");
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
+    /* message contains only SPACE and 2CRLFs, fail */
+    pMsg = const_cast<char*>(" \r\n\r\n");
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
+    /* message contains only SPACE and 3CRLFs, fail */
+    pMsg = const_cast<char*>(" \r\n\r\n\r\n");
+
+    pDecodeMessage = new SipMessage();
+    ASSERT_TRUE(pDecodeMessage != nullptr);
+
+    EXPECT_EQ(SIP_FALSE, pDecodeMessage->DecodeFragmentMsg(pMsg, strlen(pMsg)));
+
+    pDecodeMessage->SipDelete();
+
+    /* message contains only 2CRLFs, fail */
+    pMsg = const_cast<char*>("\r\n\r\n");
 
     pDecodeMessage = new SipMessage();
     ASSERT_TRUE(pDecodeMessage != nullptr);
