@@ -66,7 +66,7 @@
     </int-array>
 
     <int name="video_cvo_value_int" value="4"/>
-    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
+    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="0"/>
     <boolean name="video_avpf_enable_bool" value="true"/>
     <int name="imsvt.video_avpf_feature_int" value="30"/>
     <int name="imsvt.video_codec_attribute_packetization_mode_int" value="0"/>
