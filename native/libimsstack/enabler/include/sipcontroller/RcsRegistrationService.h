@@ -17,7 +17,7 @@
 #define RCS_REGISTRATION_SERVICE_H_
 
 #include "ImsService.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IImsAosListener.h"
 #include "ImsMap.h"
 

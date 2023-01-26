@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_BUILDER_H_
 #define INTERFACE_AOS_BUILDER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 #include "provider/AosStaticProfile.h"
 

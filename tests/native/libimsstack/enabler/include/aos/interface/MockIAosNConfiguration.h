@@ -19,7 +19,7 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "interface/IAosNConfiguration.h"
 
 class MockIAosNConfiguration : public IAosNConfiguration

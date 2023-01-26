@@ -17,7 +17,7 @@
 #ifndef VIDEO_PROFILE_H_
 #define VIDEO_PROFILE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IpAddress.h"
 #include "ImsMap.h"
 #include "MediaDef.h"

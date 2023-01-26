@@ -16,7 +16,7 @@
 #ifndef IMS_AOS_MANAGER_H_
 #define IMS_AOS_MANAGER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ImsApp.h"
 #include "AString.h"
 

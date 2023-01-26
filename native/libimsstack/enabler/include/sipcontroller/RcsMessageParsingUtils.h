@@ -16,7 +16,7 @@
 #ifndef RCS_MESSAGE_PARSING_UTILS_H_
 #define RCS_MESSAGE_PARSING_UTILS_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class RcsMessageParsingUtils
 {

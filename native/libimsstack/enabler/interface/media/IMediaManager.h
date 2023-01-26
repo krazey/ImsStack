@@ -18,7 +18,7 @@
 #define INTERFACE_MEDIA_MANAGER_H_
 
 #include "ImsList.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "INativeEnabler.h"
 
 class IMediaManager : public INativeEnabler

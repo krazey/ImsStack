@@ -21,7 +21,7 @@
 #include <VideoConfig.h>
 #include <MediaQualityThreshold.h>
 #include "ImsMessageDef.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IpAddress.h"
 #include "MediaDef.h"
 

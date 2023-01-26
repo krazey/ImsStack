@@ -16,7 +16,7 @@
 #ifndef INTERFACE_IMS_AOS_LISTENER_H_
 #define INTERFACE_IMS_AOS_LISTENER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * @brief This class provides an listener interface for AoS.

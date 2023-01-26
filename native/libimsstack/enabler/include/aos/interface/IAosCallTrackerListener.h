@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_CALL_TRACKER_LISTENER_H_
 #define INTERFACE_AOS_CALL_TRACKER_LISTENER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 enum class CallState;
 

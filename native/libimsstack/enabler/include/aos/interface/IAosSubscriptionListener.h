@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_SUBSCRIPTION_LISTENER_H_
 #define INTERFACE_AOS_SUBSCRIPTION_LISTENER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * @brief This class provies a listener interface for registration.

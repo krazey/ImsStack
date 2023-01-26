@@ -17,7 +17,7 @@
 #ifndef _INTERFACE_AOS_HANDLE_H_
 #define _INTERFACE_AOS_HANDLE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "AString.h"
 
 class IImsAosMonitor;

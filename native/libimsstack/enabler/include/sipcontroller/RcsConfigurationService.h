@@ -17,7 +17,7 @@
 #define RCS_CONFIGURATION_SERVICE_H_
 
 #include "ImsService.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class RcsConfigurationService : public ImsService
 {

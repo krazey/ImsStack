@@ -17,7 +17,7 @@
 #define INTERFACE_AOS_REGISTRATION_CONTROL_LISTENER_H_
 
 #include "ImsMap.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "AString.h"
 
 enum class AosPcscfOrder;

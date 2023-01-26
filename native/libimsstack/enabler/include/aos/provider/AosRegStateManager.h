@@ -16,7 +16,7 @@
 #ifndef AOS_REG_STATE_MANAGER_H_
 #define AOS_REG_STATE_MANAGER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "interface/IAosRegStateManager.h"
 
 class AosRegStateManager : public IAosRegStateManager

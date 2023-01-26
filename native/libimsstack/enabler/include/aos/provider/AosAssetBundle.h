@@ -16,7 +16,7 @@
 #ifndef AOS_ASSET_BUNDLE_H_
 #define AOS_ASSET_BUNDLE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "AString.h"
 #include "ImsVector.h"
 #include "CarrierConfig.h"

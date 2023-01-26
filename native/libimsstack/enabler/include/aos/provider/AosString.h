@@ -16,7 +16,7 @@
 #ifndef AOS_STRING_H_
 #define AOS_STRING_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class AosString
 {

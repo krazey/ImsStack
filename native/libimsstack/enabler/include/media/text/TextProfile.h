@@ -17,7 +17,7 @@
 #ifndef TEXT_PROFILE_H_
 #define TEXT_PROFILE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IpAddress.h"
 
 class TextProfile

@@ -20,7 +20,7 @@
 #include "ImsMessage.h"
 #include "AString.h"
 #include "ISession.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "MediaDef.h"
 #include "MediaNego.h"
 

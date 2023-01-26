@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_APPLICATION_H_
 #define INTERFACE_AOS_APPLICATION_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * @brief This class provides the interface for Always On Service.

@@ -16,7 +16,7 @@
 #ifndef IM_CONSTANTS_H_
 #define IM_CONSTANTS_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IMConstants
 {

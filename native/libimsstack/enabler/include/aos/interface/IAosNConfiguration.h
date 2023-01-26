@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_NCONFIGURATION_H_
 #define INTERFACE_AOS_NCONFIGURATION_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 #define GET_N_CONFIG(SLOT) (AosProvider::GetInstance()->GetNConfiguration(SLOT))
 

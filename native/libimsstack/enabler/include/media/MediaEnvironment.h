@@ -18,7 +18,7 @@
 #define MEDIA_ENVIRONMENT_H_
 
 #include "IService.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "MediaDef.h"
 
 class MediaEnvironment

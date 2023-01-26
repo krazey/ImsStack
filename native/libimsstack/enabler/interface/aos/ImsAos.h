@@ -16,7 +16,7 @@
 #ifndef IMS_AOS_H_
 #define IMS_AOS_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ImsList.h"
 
 class IImsAos;

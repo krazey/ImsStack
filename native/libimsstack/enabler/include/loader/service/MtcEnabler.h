@@ -17,7 +17,7 @@
 #define MTC_ENABLER_H_
 
 #include "Enabler.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class MtcEnabler :
         public Enabler

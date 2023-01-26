@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_APP_CONTEXT_H_
 #define INTERFACE_AOS_APP_CONTEXT_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ImsMap.h"
 #include "AString.h"
 

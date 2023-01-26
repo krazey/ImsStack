@@ -18,7 +18,7 @@
 #define JNI_MEDIA_SESSION_H
 
 #include "BaseService.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IJniEnabler.h"
 #include "IMediaManager.h"
 #include "IMMedia.h"

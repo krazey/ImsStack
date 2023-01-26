@@ -21,7 +21,7 @@
 #include "IDirectCoreServiceListener.h"
 #include "ISipConnectionFactoryListener.h"
 #include "ImsService.h"
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ISipMessage.h"
 #include "RcsMessageRepository.h"
 

@@ -19,7 +19,7 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "interface/IAosConditionListener.h"
 
 class MockIAosConditionListener : public IAosConditionListener {

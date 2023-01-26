@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_PCSCF_H_
 #define INTERFACE_AOS_PCSCF_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ImsList.h"
 #include "IpAddress.h"
 #include "AStringArray.h"

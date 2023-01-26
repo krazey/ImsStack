@@ -19,7 +19,7 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ImsList.h"
 #include "IpAddress.h"
 #include "AStringArray.h"

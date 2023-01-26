@@ -16,7 +16,7 @@
 #ifndef INTERFACE_IMS_AOS_MONITOR_H_
 #define INTERFACE_IMS_AOS_MONITOR_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * @brief This class provides an monitor interface for AoS.

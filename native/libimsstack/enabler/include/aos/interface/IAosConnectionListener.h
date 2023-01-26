@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AoS_CONNECTION_LISTENER_H_
 #define INTERFACE_AoS_CONNECTION_LISTENER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IAosConnectionListener
 {

@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_SUBSCRIBER_H_
 #define INTERFACE_AOS_SUBSCRIBER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "AStringArray.h"
 
 class IAosSubscriberListener;

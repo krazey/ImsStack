@@ -19,7 +19,7 @@
 
 #include <gmock/gmock.h>
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "interface/IAosSubscriber.h"
 #include "interface/IAosSubscriberManagerListener.h"
 #include "interface/IAosSubscriberManager.h"

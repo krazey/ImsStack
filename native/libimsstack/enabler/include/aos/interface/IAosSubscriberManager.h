@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_SUBSCRIBER_MANAGERH_
 #define INTERFACE_AOS_SUBSCRIBER_MANAGERH_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "interface/IAosSubscriber.h"
 #include "interface/IAosSubscriberManagerListener.h"
 

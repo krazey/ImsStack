@@ -16,7 +16,7 @@
 #ifndef INTERFACE_AOS_BLOCK_H_
 #define INTERFACE_AOS_BLOCK_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IAosBlockListener;
 

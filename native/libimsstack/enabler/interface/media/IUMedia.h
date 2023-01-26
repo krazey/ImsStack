@@ -17,7 +17,7 @@
 #ifndef INTERFACE_IUMEDIA_H_
 #define INTERFACE_IUMEDIA_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "ImsMessageDef.h"
 #include "IUEventParam.h"
 #include "IUIMS.h"

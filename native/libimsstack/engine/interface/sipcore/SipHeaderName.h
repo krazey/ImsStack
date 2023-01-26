@@ -16,7 +16,7 @@
 #ifndef SIP_HEADER_NAME_H_
 #define SIP_HEADER_NAME_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * @brief This class defines SIP header names.
