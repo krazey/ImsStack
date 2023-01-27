@@ -3299,7 +3299,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             setState(ImsCallSessionImplBase.State.ESTABLISHED);
-            mCallDetails.set(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
 
             // FIXME : how to remove the existing values?
             ImsCallUtils.updateCallProfileForEmergency(mCallProfile, callInfo);
@@ -4376,6 +4375,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             logi("onAudioSessionOpened");
+            mCallDetails.set(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
         }
 
         @Override
@@ -4409,12 +4409,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             logi("onCallQualityChanged");
-            // Will not update this for early session.
-            int state = getState();
-            if (state >= ImsCallSessionImplBase.State.ESTABLISHED
-                    && state < ImsCallSessionImplBase.State.TERMINATED) {
                 mCallback.invokeCallQualityChanged(callQuality);
-            }
         }
 
         private void onVideoCallHoldReceived(final MtcCall call,
