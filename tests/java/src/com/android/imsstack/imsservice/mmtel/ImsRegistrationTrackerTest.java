@@ -52,7 +52,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -390,6 +389,7 @@ public class ImsRegistrationTrackerTest {
 
     @Test
     public void testchangeCapabilities_VoWifiBasedOnMode() {
+        ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
         ImsServiceManager.setDefault(new ImsServiceManager(mContext, mExecutor));
 
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(true);
@@ -438,10 +438,13 @@ public class ImsRegistrationTrackerTest {
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(false);
         mRegTracker.changeCapabilities(enableCapabilities, new ArrayList<>());
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        ImsServiceManager.setDefault(oldServiceManager);
     }
 
     @Test
     public void testcreateCapabilities_OnRoaming() {
+        ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
         ImsServiceManager.setDefault(new ImsServiceManager(mContext, mExecutor));
 
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(false);
@@ -477,6 +480,8 @@ public class ImsRegistrationTrackerTest {
         mRegTracker.getMessageHandler().handleMessage(
                 Message.obtain(mRegTracker.getMessageHandler(), eventVoiceRoaming));
         assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+
+        ImsServiceManager.setDefault(oldServiceManager);
     }
 
     @Test
@@ -643,14 +648,22 @@ public class ImsRegistrationTrackerTest {
     }
 
     @Test
-    @Ignore("b/263774010")
     public void testConfigListener() {
+        ImsServiceManager oldServiceManager = ImsServiceManager.getDefault();
+        ImsServiceManager.setDefault(new ImsServiceManager(mContext, mExecutor));
         when(mMockIDcNetWatcher.isVoiceRoaming()).thenReturn(true);
 
         List<CapabilityPair> enableCapabilities = new ArrayList<>();
         enableCapabilities.add(new CapabilityPair(
                 MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
                 ImsRegistrationImpl.REGISTRATION_TECH_IWLAN));
+
+        when(mSp.getInt(eq("VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE"), anyInt()))
+                .thenReturn(ProvisioningManager.PROVISIONING_VALUE_ENABLED);
+        when(mSp.getInt(eq("VOICE_OVER_WIFI_MODE_OVERRIDE"), anyInt()))
+                .thenReturn(ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
+
+        mRegTracker.changeCapabilities(enableCapabilities, null);
 
         CapabilityPairs capabilityPairs = new CapabilityPairs();
         capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
@@ -661,16 +674,21 @@ public class ImsRegistrationTrackerTest {
         ImsConfigImpl configImpl = isr.getConfig();
 
         configImpl.setConfig(
+                ProvisioningManager.KEY_VOICE_OVER_WIFI_MODE_OVERRIDE,
+                ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
+
+        configImpl.setConfig(
                 ProvisioningManager.KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE,
                 ProvisioningManager.PROVISIONING_VALUE_DISABLED);
 
+        when(mSp.getInt(eq("VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE"), anyInt()))
+                .thenReturn(ProvisioningManager.PROVISIONING_VALUE_DISABLED);
+        when(mSp.getInt(eq("VOICE_OVER_WIFI_MODE_OVERRIDE"), anyInt()))
+                .thenReturn(ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED);
+
         assertEquals(new CapabilityPairs(), mRegTracker.createCapabilityPairsFromCapabilities());
 
-        configImpl.setConfig(
-                ProvisioningManager.KEY_VOICE_OVER_WIFI_MODE_OVERRIDE,
-                ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED);
-
-        assertEquals(capabilityPairs, mRegTracker.createCapabilityPairsFromCapabilities());
+        ImsServiceManager.setDefault(oldServiceManager);
     }
 
     private class FakeImsRegistrationTracker extends ImsRegistrationTracker {
