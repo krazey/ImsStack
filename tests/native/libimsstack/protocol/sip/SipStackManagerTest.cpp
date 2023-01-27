@@ -185,6 +185,10 @@ Content-Length: 0\r\n\
 
     EXPECT_EQ(SipTxn::INV_CLI_TXN, pTxn->GetTxnType());
 
+    ASSERT_TRUE(pTxnKey != nullptr);
+
+    ASSERT_TRUE(pTxnKey->GetToTag() == nullptr);
+
     pTxnKey->SipDelete();
     pTxnKey = SIP_NULL;
 
@@ -234,6 +238,13 @@ Content-Length: 0\r\n\
     EXPECT_EQ(SIP_TRUE,
             pSipStackManager->OnRecvMessage(pRespSipMessage, &objTransportParam, &objUserData,
                     &eTxnStatus, &pTxnKey, &nError));
+
+    ASSERT_TRUE(pTxnKey != nullptr);
+
+    EXPECT_STREQ(pTxnKey->GetToTag(), "dcba");
+
+    pTxnKey->SipDelete();
+    pTxnKey = SIP_NULL;
 
     /* In case of retransmitted 2xx for INVITE, return as stray message */
     EXPECT_EQ(SIP_TRUE,

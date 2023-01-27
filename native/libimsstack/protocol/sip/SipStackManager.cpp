@@ -548,7 +548,15 @@ stack user must process this request and can decide whether to ignore or not
            Delete Txn entry from DB and delete the instance*/
         objTxnHandler.DeleteTxn(pTxnKey);
 
-        delete pTxnKey;
+        if (pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE)
+        {
+            /* return the key to update the to-tag */
+            *ppTxnKey = pTxnKey;
+        }
+        else
+        {
+            delete pTxnKey;
+        }
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTxn: Txn Terminated", SIP_ZERO, SIP_ZERO);
     }
