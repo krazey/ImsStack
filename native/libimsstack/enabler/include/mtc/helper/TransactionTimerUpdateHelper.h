@@ -41,6 +41,7 @@ private:
 
     IMS_SINT32 m_nSlotId;
     MtcConfigurationProxy& m_objConfiguration;
+    IMS_BOOL m_bEmergency;
     IMS_BOOL m_bWifi;
 };
 
