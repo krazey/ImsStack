@@ -183,7 +183,7 @@ protected:
 
     void NotifyStatusChanged() { m_pAosNetTracker->Notify(); }
 
-    void UpdateVoiceNetwork() { m_pAosNetTracker->UpdateVoiceNetwork(); }
+    void UpdateNetworkStatus() { m_pAosNetTracker->UpdateNetworkStatus(); }
 
     void NotifyConnectionStateChanged(IN IMS_UINT32 nState)
     {
@@ -431,11 +431,15 @@ TEST_F(AosNetTrackerTest, GetMobileVoiceServiceState)
 
 TEST_F(AosNetTrackerTest, GetMobileVoiceNetworkType)
 {
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
+            .WillOnce(Return(NW_REPORT_SRV_SRV));
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
+            .WillOnce(Return(NW_REPORT_RADIO_LTE));
     EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
             .WillOnce(Return(NW_REPORT_RADIO_LTE));
     SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
     EXPECT_EQ(m_pAosNetTracker->GetMobileVoiceNetworkType(), NW_REPORT_RADIO_NOSRV);
-    UpdateVoiceNetwork();
+    UpdateNetworkStatus();
     EXPECT_EQ(m_pAosNetTracker->GetMobileVoiceNetworkType(), NW_REPORT_RADIO_LTE);
 }
 
@@ -729,6 +733,35 @@ TEST_F(AosNetTrackerTest, WifiWatcher_NotifyStateChanged)
             static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
     m_pAosNetTracker->WifiWatcher_NotifyStateChanged(
             static_cast<IWifiWatcher*>(&m_objMockIWifiWatcher));
+}
+
+TEST_F(AosNetTrackerTest, NConfiguration_NotifyConfigChanged)
+{
+    // 1. Set Listener, 2. carrier configuration for supported RAT is changed
+    EXPECT_CALL(m_objMockIAosNetTrackerListener, NetTracker_StatusChanged()).Times(2);
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetServiceType(_, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_SRV_SRV));
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetRadioTechType(_, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+    EXPECT_CALL(m_objMockINetworkWatcher, GetNetVoiceRadioTechType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NW_REPORT_RADIO_NOSRV));
+    EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(NetworkPolicy::APN_IMS));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSmsOverImsSupported()).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsImsOverNrEnabled()).WillOnce(Return(IMS_FALSE));
+
+    IMS_UINT32 nCnxPolicy = NW_REPORT_SRV_SRV;
+    SetCnxPolicy(nCnxPolicy);
+    SetStatus(NW_REPORT_SRV_SRV, NW_REPORT_RADIO_LTE, IMS_FALSE);
+    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    m_pAosNetTracker->SetListener(
+            static_cast<IAosNetTrackerListener*>(&m_objMockIAosNetTrackerListener));
+
+    m_pAosNetTracker->NConfiguration_NotifyConfigChanged();
 }
 
 TEST_F(AosNetTrackerTest, Event_NotifyEvent_WithRatGuardTime)

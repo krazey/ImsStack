@@ -18,13 +18,6 @@
     <!-- Carrier configurations -->
     <!-- Aos -->
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
-    <int-array name="supported_roaming_rats_int_array" num="5">
-        <item value="1"/>
-        <item value="2"/>
-        <item value="3"/>
-        <item value="5"/>
-        <item value="6"/>
-    </int-array>
 
     <!-- Mtc Assets -->
     <int name="geolocation_policy_for_location_based_call_int" value="13"/>

@@ -100,6 +100,12 @@ PUBLIC VIRTUAL AosNetTracker::~AosNetTracker()
         m_piNetWatcherInfo = IMS_NULL;
     }
 
+    if (m_piAosNConfig != IMS_NULL)
+    {
+        m_piAosNConfig->RemoveListener(this);
+        m_piAosNConfig = IMS_NULL;
+    }
+
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
 }
 
@@ -338,21 +344,9 @@ PUBLIC VIRTUAL void AosNetTracker::NetworkWatcher_NotifyStatus(IN INetworkWatche
         return;
     }
 
-    IMS_BOOL bOldNetIN = m_bIsNetAvailable;
-    IMS_UINT32 nOldRadioType = m_nNetRadioType;
-    IMS_UINT32 nOldVoiceRadioType = m_nNetVoiceRadioType;
-
-    Update();
-    UpdateVoiceNetwork();
-
-    if ((m_bIsNetAvailable != bOldNetIN) || (nOldRadioType != m_nNetRadioType) ||
-            (nOldVoiceRadioType != m_nNetVoiceRadioType))
+    if (UpdateNetworkStatus())
     {
         Notify();
-    }
-    else
-    {
-        A_IMS_TRACE_D(CNXID, "NotifyNetWatcherStatus :: no changed", 0, 0, 0);
     }
 }
 
@@ -369,6 +363,17 @@ PUBLIC VIRTUAL void AosNetTracker::WifiWatcher_NotifyStateChanged(IN IWifiWatche
     if (IsWifiConnected() != bCurrConnected)
     {
         SetWifiConnected(bCurrConnected);
+        Notify();
+    }
+}
+
+PROTECTED VIRTUAL void AosNetTracker::NConfiguration_NotifyConfigChanged()
+{
+    A_IMS_TRACE_I(CNXID, "NConfiguration_NotifyConfigChanged :: changed", 0, 0, 0);
+
+    if (m_piAosNConfig != IMS_NULL)
+    {
+        InitConfig();
         Notify();
     }
 }
@@ -397,8 +402,7 @@ PUBLIC VIRTUAL void AosNetTracker::Event_NotifyEvent(
                 }
                 else
                 {
-                    Update();
-                    UpdateVoiceNetwork();
+                    UpdateNetworkStatus();
                     Notify();
                 }
             }
@@ -413,14 +417,21 @@ PUBLIC VIRTUAL void AosNetTracker::Event_NotifyEvent(
 PROTECTED
 void AosNetTracker::Init()
 {
-    InitConfig();
+    if (m_piAosNConfig != IMS_NULL)
+    {
+        InitConfig();
+        m_piAosNConfig->SetListener(this);
+    }
     InitObject();
-    Update();
+    UpdateNetworkStatus();
 }
 
 PRIVATE
 void AosNetTracker::InitConfig()
 {
+    m_nCnxPolicy = 0;
+    m_nCnxPolicyInRoaming = 0;
+
     if (IsCnxTypeEqual(NetworkPolicy::APN_IMS))
     {
         m_nCnxPolicy |= NW_REPORT_SRV_SRV;
@@ -568,27 +579,27 @@ void AosNetTracker::InitObject()
 }
 
 PRIVATE
-void AosNetTracker::Update()
+IMS_BOOL AosNetTracker::UpdateNetworkStatus()
 {
-    // update data service & radio state
-    IMS_SINT32 nOldService = m_nNetServiceType;
-    IMS_UINT32 nOldRadio = m_nNetRadioType;
-    IMS_BOOL bOldIN = m_bIsNetAvailable;
+    IMS_BOOL bOldNetAvailable = m_bIsNetAvailable;
+    IMS_UINT32 nOldRadioType = m_nNetRadioType;
+    IMS_UINT32 nOldVoiceRadioType = m_nNetVoiceRadioType;
 
     A_IMS_TRACE_I(CNXID, "Old Status :: service(%s), radio(%s), availability(%s)",
-            ServiceTypeToString(nOldService), RadioTypeToString(nOldRadio),
-            (bOldIN) ? "IN" : "OUT");
+            ServiceTypeToString(m_nNetServiceType), RadioTypeToString(m_nNetRadioType),
+            (m_bIsNetAvailable) ? "IN" : "OUT");
 
     GetStatus(m_nNetServiceType, m_nNetRadioType, m_bIsNetAvailable);
-}
 
-PRIVATE
-void AosNetTracker::UpdateVoiceNetwork()
-{
     if (m_piNetWatcherInfo != IMS_NULL)
     {
         m_nNetVoiceRadioType = m_piNetWatcherInfo->GetNetVoiceRadioTechType();
     }
+
+    IMS_BOOL bIsChanged = (bOldNetAvailable != m_bIsNetAvailable) ||
+            (nOldRadioType != m_nNetRadioType) || (nOldVoiceRadioType != m_nNetVoiceRadioType);
+
+    return bIsChanged;
 }
 
 PRIVATE

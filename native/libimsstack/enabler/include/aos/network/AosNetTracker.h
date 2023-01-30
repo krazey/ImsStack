@@ -20,8 +20,9 @@
 #include "ITimer.h"
 #include "INetworkWatcher.h"
 #include "IWifiWatcher.h"
-#include "interface/IAosNConfiguration.h"
 #include "interface/IAosConnectionListener.h"
+#include "interface/IAosNConfiguration.h"
+#include "interface/IAosNConfigurationListener.h"
 #include "interface/IAosNetTracker.h"
 
 class IAosAppContext;
@@ -33,6 +34,7 @@ class AosNetTracker :
         public IAosConnectionListener,
         public INetworkWatcherListener,
         public IWifiWatcherListener,
+        public IAosNConfigurationListener,
         public IEventListener,
         public ITimerListener
 {
@@ -70,6 +72,9 @@ public:
     // IWifiWatcherListener
     void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* piWifiWatcher) override;
 
+    // IAosNConfigurationListener
+    void NConfiguration_NotifyConfigChanged() override;
+
     // IEventListener
     void Event_NotifyEvent(
             IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
@@ -97,8 +102,7 @@ private:
     void InitRoamingCnxPolicy(IN IMSVector<IMS_SINT32>& objRoamingRats);
     void InitObject();
 
-    void Update();
-    void UpdateVoiceNetwork();
+    IMS_BOOL UpdateNetworkStatus();
     void Notify();
 
     void GetStatus(OUT IMS_SINT32& nService, OUT IMS_UINT32& nRadioTech, OUT IMS_BOOL& bIsIn);
