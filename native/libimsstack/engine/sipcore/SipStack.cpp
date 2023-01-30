@@ -4008,27 +4008,28 @@ GLOBAL void DisplayBadHeaders(IN ::SipMessage* pMessage)
     IMS_TRACE_I("___ SIP bad headers - S ___", 0, 0, 0);
 
     SipHeaderList* pBadHdrList = pMessage->GetBadHdrs();
-    IMS_SINT32 nCount = pBadHdrList->GetSize();
 
-    for (IMS_SINT32 i = 0; i < nCount; ++i)
+    if (pBadHdrList != IMS_NULL)
     {
-        SipBadHeader* pBadHeader = DYNAMIC_CAST(SipBadHeader*, pBadHdrList->GetObj(i));
+        IMS_SINT32 nCount = pBadHdrList->GetSize();
 
-        if (pBadHeader == IMS_NULL)
+        for (IMS_SINT32 i = 0; i < nCount; ++i)
         {
-            continue;
+            SipBadHeader* pBadHeader = DYNAMIC_CAST(SipBadHeader*, pBadHdrList->GetObj(i));
+
+            if (pBadHeader == IMS_NULL)
+            {
+                continue;
+            }
+
+            const IMS_CHAR* pszHdrName = pBadHeader->GetHeaderName();
+            const IMS_CHAR* pszHdrValue = pBadHeader->GetValue();
+
+            IMS_TRACE_I("    (%d) %s: %s", i, _TRACE_S_(pszHdrName), _TRACE_S_(pszHdrValue));
+
+            pBadHeader->SipDelete();
         }
-
-        const IMS_CHAR* pszHdrName = pBadHeader->GetHeaderName();
-        const IMS_CHAR* pszHdrValue = pBadHeader->GetValue();
-
-        IMS_TRACE_I("    (%d) %s: %s", i, _TRACE_S_(pszHdrName), _TRACE_S_(pszHdrValue));
-
-        pBadHeader->SipDelete();
     }
-    /*Memory leak fix: Delete Bad Header list after display, it's not freed for
-      Non-Mandatory SIP Headers.*/
-    pMessage->DeleteBadHdrList();
 
     IMS_TRACE_I("___ SIP bad headers - E ___", 0, 0, 0);
 #else
