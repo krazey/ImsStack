@@ -341,13 +341,13 @@ public class SscServiceStateTest {
         verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 1000);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
-        assertEquals(true, mSscServiceState.getDnsQueryFailed());
+        assertEquals(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE, mSscServiceState.mUtBlockReason);
 
         mSscServiceState.setDnsQueryFailed(false);
 
         verify(mMockUtInterface, times(3)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
-        assertEquals(false, mSscServiceState.getDnsQueryFailed());
+        assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
     }
 
     @Test
@@ -359,13 +359,13 @@ public class SscServiceStateTest {
         verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 1000);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
-        assertEquals(true, mSscServiceState.getGbaRequestFailed());
+        assertEquals(SscConstant.BLOCK_REASON_GBA_FAILURE, mSscServiceState.mUtBlockReason);
 
         mSscServiceState.setGbaRequestFailed(false);
 
         verify(mMockUtInterface, times(3)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
-        assertEquals(false, mSscServiceState.getGbaRequestFailed());
+        assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
     }
 
     @Test
@@ -377,13 +377,14 @@ public class SscServiceStateTest {
         verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 1000);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
-        assertEquals(true, mSscServiceState.getPdnConnectionTimeout());
+        assertEquals(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT,
+                mSscServiceState.mUtBlockReason);
 
         mSscServiceState.setPdnConnectionTimeout(false);
 
         verify(mMockUtInterface, times(3)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
-        assertEquals(false, mSscServiceState.getPdnConnectionTimeout());
+        assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
     }
 
     @Test
@@ -395,13 +396,14 @@ public class SscServiceStateTest {
         verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 1000);
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
-        assertEquals(true, mSscServiceState.getSocketConnectionExpired());
+        assertEquals(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT,
+                mSscServiceState.mUtBlockReason);
 
         mSscServiceState.setSocketConnectionExpired(false);
 
         verify(mMockUtInterface, times(3)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
-        assertEquals(false, mSscServiceState.getSocketConnectionExpired());
+        assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
     }
 
     @Test

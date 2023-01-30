@@ -46,7 +46,6 @@ public class SscServiceStateAgent {
     @VisibleForTesting
     protected SscServiceState getSscServiceState(int slotId) {
         if (!mSscServiceState.containsKey(slotId)) {
-            ImsLog.w("SscServiceState for#" + slotId + " is not set...");
             return null;
         }
 
@@ -67,7 +66,7 @@ public class SscServiceStateAgent {
     protected boolean isUtAvailable(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("isUtAvailable()");
+            ImsLog.e(slotId, "serviceState is null");
             return false;
         }
 
@@ -77,7 +76,7 @@ public class SscServiceStateAgent {
     protected void changeCapability(int slotId, boolean enable) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("changeCapability()");
+            ImsLog.e(slotId, "serviceState is null");
             return;
         }
 
@@ -87,7 +86,7 @@ public class SscServiceStateAgent {
     protected void setErrorResponseCode(int slotId, int responseCode) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("setErrorResponseCode()");
+            ImsLog.e(slotId, "serviceState is null");
             return;
         }
 
@@ -97,7 +96,7 @@ public class SscServiceStateAgent {
     protected void setPdnConnectionFailed(int slotId, int smCause) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("setPdnConnectionFailed()");
+            ImsLog.e(slotId, "serviceState is null");
             return;
         }
 
@@ -107,7 +106,7 @@ public class SscServiceStateAgent {
     protected void setDnsQueryFailed(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("setDnsQueryFailed()");
+            ImsLog.e(slotId, "serviceState is null");
             return;
         }
 
@@ -117,7 +116,7 @@ public class SscServiceStateAgent {
     protected void setGbaRequestFailed(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("setGbaRequestFailed()");
+            ImsLog.e(slotId, "serviceState is null");
             return;
         }
 
@@ -127,7 +126,7 @@ public class SscServiceStateAgent {
     protected void setPdnConnectionTimeout(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("setPdnConnectionTimeout()");
+            ImsLog.e(slotId, "serviceState is null");
             return;
         }
 
@@ -137,60 +136,10 @@ public class SscServiceStateAgent {
     protected void setSocketConnectionExpired(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("setSocketConnectionExpired()");
+            ImsLog.e(slotId, "serviceState is null");
             return;
         }
 
         serviceState.setSocketConnectionExpired(input);
-    }
-
-    protected boolean getDnsQueryFailed(int slotId) {
-        SscServiceState serviceState = getSscServiceState(slotId);
-        if (serviceState == null) {
-            ImsLog.i("getDnsQueryFailed()");
-            return true;
-        }
-
-        return serviceState.getDnsQueryFailed();
-    }
-
-    protected boolean getGbaRequestFailed(int slotId) {
-        SscServiceState serviceState = getSscServiceState(slotId);
-        if (serviceState == null) {
-            ImsLog.i("getGbaRequestFailed()");
-            return true;
-        }
-
-        return serviceState.getGbaRequestFailed();
-    }
-
-    protected boolean getPdnConnectionTimeout(int slotId) {
-        SscServiceState serviceState = getSscServiceState(slotId);
-        if (serviceState == null) {
-            ImsLog.i("getPdnConnectionTimeout()");
-            return true;
-        }
-
-        return serviceState.getPdnConnectionTimeout();
-    }
-
-    protected boolean getSocketConnectionExpired(int slotId) {
-        SscServiceState serviceState = getSscServiceState(slotId);
-        if (serviceState == null) {
-            ImsLog.i("getSocketConnectionExpired()");
-            return true;
-        }
-
-        return serviceState.getSocketConnectionExpired();
-    }
-
-    protected boolean getPdnConnectionFailed(int slotId) {
-        SscServiceState serviceState = getSscServiceState(slotId);
-        if (serviceState == null) {
-            ImsLog.i("getPdnConnectionFailed()");
-            return true;
-        }
-
-        return serviceState.getPdnConnectionFailed();
     }
 }

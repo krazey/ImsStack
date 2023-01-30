@@ -137,39 +137,4 @@ public class SscServiceStateAgentTest {
 
         verify(mockSscServiceState).setSocketConnectionExpired(eq(input));
     }
-
-    @Test
-    public void testGetDnsQueryFailed() {
-        mSscServiceStateAgent.getDnsQueryFailed(SLOT_0);
-
-        verify(mockSscServiceState).getDnsQueryFailed();
-    }
-
-    @Test
-    public void testGetGbaRequestFailed() {
-        mSscServiceStateAgent.getGbaRequestFailed(SLOT_0);
-
-        verify(mockSscServiceState).getGbaRequestFailed();
-    }
-
-    @Test
-    public void testGetPdnConnectionTimeout() {
-        mSscServiceStateAgent.getPdnConnectionTimeout(SLOT_0);
-
-        verify(mockSscServiceState).getPdnConnectionTimeout();
-    }
-
-    @Test
-    public void testGetSocketConnectionExpired() {
-        mSscServiceStateAgent.getSocketConnectionExpired(SLOT_0);
-
-        verify(mockSscServiceState).getSocketConnectionExpired();
-    }
-
-    @Test
-    public void testGetPdnConnectionFailed() {
-        mSscServiceStateAgent.getPdnConnectionFailed(SLOT_0);
-
-        verify(mockSscServiceState).getPdnConnectionFailed();
-    }
 }

@@ -220,27 +220,6 @@ public class SscServiceState {
         }
     }
 
-    protected boolean getPdnConnectionFailed() {
-        return isUtBlocked(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
-                | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
-    }
-
-    protected boolean getDnsQueryFailed() {
-        return isUtBlocked(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE);
-    }
-
-    protected boolean getGbaRequestFailed() {
-        return isUtBlocked(SscConstant.BLOCK_REASON_GBA_FAILURE);
-    }
-
-    protected boolean getPdnConnectionTimeout() {
-        return isUtBlocked(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT);
-    }
-
-    protected boolean getSocketConnectionExpired() {
-        return isUtBlocked(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT);
-    }
-
     protected void resetAllUtStatus() {
         ImsLog.d("");
 
@@ -341,34 +320,36 @@ public class SscServiceState {
             }
         }
 
-        long blockTimeMilliSeconds = 0;
         switch (blockReason) {
             case SscConstant.BLOCK_REASON_GBA_FAILURE : // fall-through
             case SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE : // fall-through
             case SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMEOUT : // fall-through
-            case SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT : // fall-through
-                blockTimeMilliSeconds = SscConfig.getTimerForTempBlockWithAnyReason(mSlotId);
+            case SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMEOUT : {
+                long blockTimeMilliSeconds = SscConfig.getTimerForTempBlockWithAnyReason(mSlotId);
                 if (blockTimeMilliSeconds > 0) {
                     startUtBlockTimer(blockTimeMilliSeconds);
                     mUtBlockReason |= blockReason;
                     notifyUtFeatureCapabilityChanged();
                 }
                 break;
+            }
             case SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP : // fall-through
-            case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP :
-                blockTimeMilliSeconds = SscConfig.getTimerForTempBlock(mSlotId);
+            case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP : {
+                long blockTimeMilliSeconds = SscConfig.getTimerForTempBlock(mSlotId);
                 if (blockTimeMilliSeconds > 0) {
                     startUtBlockTimer(blockTimeMilliSeconds);
                     mUtBlockReason |= blockReason;
                     notifyUtFeatureCapabilityChanged();
                 }
                 break;
+            }
             case SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM : // fall-through
-            case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM :
+            case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM : {
                 // don't start timer
                 mUtBlockReason |= blockReason;
                 notifyUtFeatureCapabilityChanged();
                 break;
+            }
             default :
                 ImsLog.e(mSlotId, "wrong block reason");
                 break;
@@ -384,10 +365,6 @@ public class SscServiceState {
         ImsLog.d(mSlotId, "ResetReason : " + getBlockedReasonString(blockReason));
         mUtBlockReason &= ~blockReason;
         notifyUtFeatureCapabilityChanged();
-    }
-
-    private boolean isUtBlocked(int blockReason) {
-        return (mUtBlockReason & blockReason) > 0;
     }
 
     private void startUtBlockTimer(long duration) {
