@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.os.DeadSystemException;
@@ -84,6 +85,8 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     @Test
     public void testHasListener() {
         assertEquals(true, mImsCallSessionCallback.hasListener());
+        mImsCallSessionCallback.setListener(null);
+        assertEquals(false, mImsCallSessionCallback.hasListener());
     }
 
     @Test
@@ -91,6 +94,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeInitiating(mSession, mProfile);
         processAllMessages();
         verify(mMockListener).callSessionInitiating(mProfile);
+    }
+
+    @Test
+    public void testInvokeInitiatingForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeInitiating(mSession, mProfile);
+        verify(mMockListener, never()).callSessionInitiating(mProfile);
     }
 
     @Test
@@ -110,6 +120,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeProgressingForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeProgressing(mSession, mMediaProfile);
+        verify(mMockListener, never()).callSessionProgressing(mMediaProfile);
+    }
+
+    @Test
     public void testInvokeProgressingException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionProgressing(mMediaProfile);
@@ -126,6 +143,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeStartedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeStarted(mSession, mProfile);
+        verify(mMockListener, never()).callSessionInitiated(mProfile);
+    }
+
+    @Test
     public void testInvokeStartedException() {
         doThrow(newDeadSystemRuntimeException()).when(mMockListener).callSessionInitiated(mProfile);
         mImsCallSessionCallback.invokeStarted(mSession, mProfile);
@@ -138,6 +162,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeStartFailed(mSession, mReasonInfo);
         processAllMessages();
         verify(mMockListener).callSessionInitiatingFailed(mReasonInfo);
+    }
+
+    @Test
+    public void testInvokeStartFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeStartFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionInitiatingFailed(mReasonInfo);
     }
 
     @Test
@@ -157,6 +188,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeTerminatedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeTerminated(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionTerminated(mReasonInfo);
+    }
+
+    @Test
     public void testInvokeTerminatedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionTerminated(mReasonInfo);
@@ -173,6 +211,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeHeldForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeHeld(mSession, mProfile);
+        verify(mMockListener, never()).callSessionHeld(mProfile);
+    }
+
+    @Test
     public void testInvokeHeldException() {
         doThrow(newDeadSystemRuntimeException()).when(mMockListener).callSessionHeld(mProfile);
         mImsCallSessionCallback.invokeHeld(mSession, mProfile);
@@ -185,6 +230,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeHoldFailed(mSession, mReasonInfo);
         processAllMessages();
         verify(mMockListener).callSessionHoldFailed(mReasonInfo);
+    }
+
+    @Test
+    public void testInvokeHoldFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeHoldFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionHoldFailed(mReasonInfo);
     }
 
     @Test
@@ -204,6 +256,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeHoldReceivedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeHoldReceived(mSession, mProfile);
+        verify(mMockListener, never()).callSessionHoldReceived(mProfile);
+    }
+
+    @Test
     public void testInvokeHoldReceivedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionHoldReceived(mProfile);
@@ -220,6 +279,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeResumedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeResumed(mSession, mProfile);
+        verify(mMockListener, never()).callSessionResumed(mProfile);
+    }
+
+    @Test
     public void testInvokeResumedException() {
         doThrow(newDeadSystemRuntimeException()).when(mMockListener).callSessionResumed(mProfile);
         mImsCallSessionCallback.invokeResumed(mSession, mProfile);
@@ -232,6 +298,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeResumeFailed(mSession, mReasonInfo);
         processAllMessages();
         verify(mMockListener).callSessionResumeFailed(mReasonInfo);
+    }
+
+    @Test
+    public void testInvokeResumeFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeResumeFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionResumeFailed(mReasonInfo);
     }
 
     @Test
@@ -251,6 +324,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeResumeReceivedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeResumeReceived(mSession, mProfile);
+        verify(mMockListener, never()).callSessionResumeReceived(mProfile);
+    }
+
+    @Test
     public void testInvokeResumeReceivedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionResumeReceived(mProfile);
@@ -264,6 +344,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeMergeStarted(mSession, mConfSession, mProfile);
         processAllMessages();
         verify(mMockListener).callSessionMergeStarted(mConfSession, mProfile);
+    }
+
+    @Test
+    public void testInvokeMergeStartedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeMergeStarted(mSession, mConfSession, mProfile);
+        verify(mMockListener, never()).callSessionMergeStarted(mConfSession, mProfile);
     }
 
     @Test
@@ -283,6 +370,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeMergeCompleteForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeMergeComplete(mSession, mNewSession);
+        verify(mMockListener, never()).callSessionMergeComplete(mNewSession);
+    }
+
+    @Test
     public void testInvokeMergeCompleteException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionMergeComplete(mNewSession);
@@ -296,6 +390,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeMergeFailed(mSession, mReasonInfo);
         processAllMessages();
         verify(mMockListener).callSessionMergeFailed(mReasonInfo);
+    }
+
+    @Test
+    public void testInvokeMergeFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeMergeFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionMergeFailed(mReasonInfo);
     }
 
     @Test
@@ -315,6 +416,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeUpdatedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeUpdated(mSession, mProfile);
+        verify(mMockListener, never()).callSessionUpdated(mProfile);
+    }
+
+    @Test
     public void testInvokeUpdatedException() {
         doThrow(newDeadSystemRuntimeException()).when(mMockListener).callSessionUpdated(mProfile);
         mImsCallSessionCallback.invokeUpdated(mSession, mProfile);
@@ -327,6 +435,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeUpdateFailed(mSession, mReasonInfo);
         processAllMessages();
         verify(mMockListener).callSessionUpdateFailed(mReasonInfo);
+    }
+
+    @Test
+    public void testInvokeUpdateFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeUpdateFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionUpdateFailed(mReasonInfo);
     }
 
     @Test
@@ -346,6 +461,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeUpdateReceivedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeUpdateReceived(mSession, mProfile);
+        verify(mMockListener, never()).callSessionUpdateReceived(mProfile);
+    }
+
+    @Test
     public void testInvokeUpdateReceivedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionUpdateReceived(mProfile);
@@ -359,6 +481,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeConferenceExtended(mSession, mConfSession, mProfile);
         processAllMessages();
         verify(mMockListener).callSessionConferenceExtended(mConfSession, mProfile);
+    }
+
+    @Test
+    public void testInvokeConferenceExtendedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeConferenceExtended(mSession, mConfSession, mProfile);
+        verify(mMockListener, never()).callSessionConferenceExtended(mConfSession, mProfile);
     }
 
     @Test
@@ -378,6 +507,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeConferenceExtendFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeConferenceExtendFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionConferenceExtendFailed(mReasonInfo);
+    }
+
+    @Test
     public void testInvokeConferenceExtendFailedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionConferenceExtendFailed(mReasonInfo);
@@ -391,6 +527,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeConferenceExtendReceived(mSession, mConfSession, mProfile);
         processAllMessages();
         verify(mMockListener).callSessionConferenceExtendReceived(mConfSession, mProfile);
+    }
+
+    @Test
+    public void testInvokeConferenceExtendReceivedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeConferenceExtendReceived(mSession, mConfSession, mProfile);
+        verify(mMockListener, never()).callSessionConferenceExtendReceived(mConfSession, mProfile);
     }
 
     @Test
@@ -410,6 +553,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeInviteParticipantsRequestDeliveredForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeInviteParticipantsRequestDelivered(mSession);
+        verify(mMockListener, never()).callSessionInviteParticipantsRequestDelivered();
+    }
+
+    @Test
     public void testInvokeInviteParticipantsRequestDeliveredException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionInviteParticipantsRequestDelivered();
@@ -423,6 +573,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeInviteParticipantsRequestFailed(mSession, mReasonInfo);
         processAllMessages();
         verify(mMockListener).callSessionInviteParticipantsRequestFailed(mReasonInfo);
+    }
+
+    @Test
+    public void testInvokeInviteParticipantsRequestFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeInviteParticipantsRequestFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionInviteParticipantsRequestFailed(mReasonInfo);
     }
 
     @Test
@@ -442,6 +599,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeRemoveParticipantsRequestDeliveredForNulllistener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeRemoveParticipantsRequestDelivered(mSession);
+        verify(mMockListener, never()).callSessionRemoveParticipantsRequestDelivered();
+    }
+
+    @Test
     public void testInvokeRemoveParticipantsRequestDeliveredException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionRemoveParticipantsRequestDelivered();
@@ -455,6 +619,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeRemoveParticipantsRequestFailed(mSession, mReasonInfo);
         processAllMessages();
         verify(mMockListener).callSessionRemoveParticipantsRequestFailed(mReasonInfo);
+    }
+
+    @Test
+    public void testInvokeRemoveParticipantsRequestFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeRemoveParticipantsRequestFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionRemoveParticipantsRequestFailed(mReasonInfo);
     }
 
     @Test
@@ -474,6 +645,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeConferenceStateUpdatedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeConferenceStateUpdated(mSession, mConfState);
+        verify(mMockListener, never()).callSessionConferenceStateUpdated(mConfState);
+    }
+
+    @Test
     public void testInvokeConferenceStateUpdatedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionConferenceStateUpdated(mConfState);
@@ -489,6 +667,15 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeUssdMessageReceived(mSession, mode, ussdMessage);
         processAllMessages();
         verify(mMockListener).callSessionUssdMessageReceived(mode, ussdMessage);
+    }
+
+    @Test
+    public void testInvokeUssdMessageReceivedForNullListener() {
+        int mode = 0;
+        String ussdMessage = "";
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeUssdMessageReceived(mSession, mode, ussdMessage);
+        verify(mMockListener, never()).callSessionUssdMessageReceived(mode, ussdMessage);
     }
 
     @Test
@@ -511,6 +698,14 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeMultipartyStateChangedForNullListener() {
+        boolean isMultiParty = false;
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeMultipartyStateChanged(mSession, isMultiParty);
+        verify(mMockListener, never()).callSessionMultipartyStateChanged(isMultiParty);
+    }
+
+    @Test
     public void testInvokeMultipartyStateChangedException() {
         boolean isMultiParty = false;
         doThrow(newDeadSystemRuntimeException())
@@ -525,6 +720,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeCallSessionTransferred(mSession);
         processAllMessages();
         verify(mMockListener).callSessionTransferred();
+    }
+
+    @Test
+    public void testInvokeCallSessionTransferredForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeCallSessionTransferred(mSession);
+        verify(mMockListener, never()).callSessionTransferred();
     }
 
     @Test
@@ -543,6 +745,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeCallSessionTransferFailedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeCallSessionTransferFailed(mSession, mReasonInfo);
+        verify(mMockListener, never()).callSessionTransferFailed(mReasonInfo);
+    }
+
+    @Test
     public void testInvokeCallSessionTransferFailedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionTransferFailed(mReasonInfo);
@@ -558,6 +767,15 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeHandover(mSession, srcAccessTech, targetAccessTech);
         processAllMessages();
         verify(mMockListener).onHandover(anyInt(), anyInt(), any(ImsReasonInfo.class));
+    }
+
+    @Test
+    public void testInvokeHandoverForNullListener() {
+        int srcAccessTech = 0;
+        int targetAccessTech = 0;
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeHandover(mSession, srcAccessTech, targetAccessTech);
+        verify(mMockListener, never()).onHandover(anyInt(), anyInt(), any(ImsReasonInfo.class));
     }
 
     @Test
@@ -582,6 +800,17 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeHandoverFailedForNullListener() {
+        int srcAccessTech = 0;
+        int targetAccessTech = 0;
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeHandoverFailed(mSession, srcAccessTech, targetAccessTech,
+                mReasonInfo);
+        verify(mMockListener, never()).onHandoverFailed(srcAccessTech, targetAccessTech,
+                mReasonInfo);
+    }
+
+    @Test
     public void testInvokeHandoverFailedException() {
         int srcAccessTech = 0;
         int targetAccessTech = 0;
@@ -599,6 +828,14 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeTtyModeReceived(mSession, mode);
         processAllMessages();
         verify(mMockListener).callSessionTtyModeReceived(mode);
+    }
+
+    @Test
+    public void testInvokeTtyModeReceivedForNullListener() {
+        int mode = 0;
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeTtyModeReceived(mSession, mode);
+        verify(mMockListener, never()).callSessionTtyModeReceived(mode);
     }
 
     @Test
@@ -627,6 +864,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeSuppServiceReceivedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeSuppServiceReceived(mSession, mIssn);
+        verify(mMockListener, never()).callSessionSuppServiceReceived(mIssn);
+    }
+
+    @Test
     public void testInvokeSuppServiceReceivedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionSuppServiceReceived(mIssn);
@@ -640,6 +884,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeRttModifyRequestReceived(mSession, mProfile);
         processAllMessages();
         verify(mMockListener).callSessionRttModifyRequestReceived(mProfile);
+    }
+
+    @Test
+    public void testInvokeRttModifyRequestReceivedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeRttModifyRequestReceived(mSession, mProfile);
+        verify(mMockListener, never()).callSessionRttModifyRequestReceived(mProfile);
     }
 
     @Test
@@ -657,6 +908,14 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeRttModifyResponseReceived(mSession, status);
         processAllMessages();
         verify(mMockListener).callSessionRttModifyResponseReceived(status);
+    }
+
+    @Test
+    public void testInvokeRttModifyResponseReceivedForNullListener() {
+        int status = 0;
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeRttModifyResponseReceived(mSession, status);
+        verify(mMockListener, never()).callSessionRttModifyResponseReceived(status);
     }
 
     @Test
@@ -678,6 +937,14 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeRttMessageReceivedForNullListener() {
+        String data = " ";
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeRttMessageReceived(mSession, data);
+        verify(mMockListener, never()).callSessionRttMessageReceived(data);
+    }
+
+    @Test
     public void testInvokeRttMessageReceivedException() {
         String data = " ";
         doThrow(newDeadSystemRuntimeException())
@@ -695,6 +962,13 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeRttAudioIndicatorChangedForNullListener() {
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeRttAudioIndicatorChanged(mSession, mMediaProfile);
+        verify(mMockListener, never()).callSessionRttAudioIndicatorChanged(mMediaProfile);
+    }
+
+    @Test
     public void testInvokeRttAudioIndicatorChangedException() {
         doThrow(newDeadSystemRuntimeException())
             .when(mMockListener).callSessionRttAudioIndicatorChanged(mMediaProfile);
@@ -709,6 +983,14 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
         mImsCallSessionCallback.invokeDtmfReceived(mSession, dtmf);
         processAllMessages();
         verify(mMockListener).callSessionDtmfReceived(dtmf);
+    }
+
+    @Test
+    public void testInvokeDtmfReceivedForNullListener() {
+        char dtmf = '\u0000';
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeDtmfReceived(mSession, dtmf);
+        verify(mMockListener, never()).callSessionDtmfReceived(dtmf);
     }
 
     @Test
@@ -730,11 +1012,30 @@ public class ImsCallSessionCallbackTest extends ImsStackTest {
     }
 
     @Test
+    public void testInvokeCallQualityChangedForNullListener() {
+        CallQuality callQuality = new CallQuality();
+        mImsCallSessionCallback.setListener(null);
+        mImsCallSessionCallback.invokeCallQualityChanged(callQuality);
+        verify(mMockListener, never()).callQualityChanged(callQuality);
+    }
+
+    @Test
     public void testInvokeCallQualityChangedException() {
         RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
         CallQuality callQuality = new CallQuality();
         doThrow(mockRuntimeException).when(mMockListener).callQualityChanged(callQuality);
         mImsCallSessionCallback.invokeCallQualityChanged(callQuality);
+        processAllMessages();
+        verify(mockRuntimeException).getMessage();
+    }
+
+    @Test
+    public void testCloseSessionException() {
+        RuntimeException mockRuntimeException = Mockito.mock(RuntimeException.class);
+        doThrow(newDeadSystemRuntimeException())
+            .when(mMockListener).callSessionInitiating(mProfile);
+        doThrow(mockRuntimeException).when(mSession).close();
+        mImsCallSessionCallback.invokeInitiating(mSession, mProfile);
         processAllMessages();
         verify(mockRuntimeException).getMessage();
     }

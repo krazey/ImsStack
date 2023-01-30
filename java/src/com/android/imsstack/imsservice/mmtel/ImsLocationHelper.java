@@ -326,7 +326,7 @@ public class ImsLocationHelper {
         }
     }
 
-    private class LocationListenerProxy implements LocationApi.Listener {
+    class LocationListenerProxy implements LocationApi.Listener {
         Location mLastLocation;
         boolean mValid = false;
         boolean mUpdateDone = false;
