@@ -85,6 +85,7 @@ private:
 
     IMS_BOOL m_bRemoteAlerted;
     IMS_BOOL m_bTimer100WaitExpired;
+    IMS_BOOL m_bWaitingRedialEmergency;
 };
 
 #endif

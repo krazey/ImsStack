@@ -136,6 +136,8 @@ public:
     CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNegoSdp, IN IMS_BOOL bPeerView,
             IN IMS_BOOL bCheckPort = IMS_TRUE) override;  // TODO: change name of bPeerView
     IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode) override;
+    IMS_UINT32 GetNumberOfPreviousResponses(
+            IN const ISession* piSession, IN IMS_SINT32 eServiceMethod) const override;
 
 private:
     static ISipMessage* GetSipMessage(IN const IMessage* piMessage);

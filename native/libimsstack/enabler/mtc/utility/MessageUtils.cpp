@@ -1333,6 +1333,18 @@ PUBLIC IMS_BOOL MessageUtils::IsResponseExist(IN ISession* piSession, IN IMS_SIN
     return bExist;
 }
 
+PUBLIC IMS_UINT32 MessageUtils::GetNumberOfPreviousResponses(
+        IN const ISession* piSession, IN IMS_SINT32 eServiceMethod) const
+{
+    if (piSession == IMS_NULL)
+    {
+        return 0;
+    }
+
+    ImsList<IMessage*> lstResponses = piSession->GetPreviousResponses(eServiceMethod);
+    return lstResponses.GetSize();
+}
+
 PRIVATE ISipMessage* MessageUtils::GetSipMessage(IN const IMessage* piMessage)
 {
     if (piMessage == IMS_NULL)

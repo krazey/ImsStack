@@ -60,6 +60,7 @@ private:
     void ReStart();
     void SetRedialDetail();
     void ReleaseCallResources();
+    void StopCallTimers();
     IMS_BOOL IsRedialAvailable() const;
     CallType GetCallType() const;
     const AString GetRemoteTarget() const;
@@ -72,6 +73,8 @@ private:
     IMS_UINT32 m_nCount;
     const AString m_strExtra;
     ITimer* m_piTimer;
+
+    LOCAL const IMS_UINT32 NO_LIMIT = 999;
 };
 
 #endif

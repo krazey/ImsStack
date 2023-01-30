@@ -30,6 +30,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockISession.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
 #include <gtest/gtest.h>
@@ -76,6 +77,7 @@ public:
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
     MediaInfo objMediaInfo;
+    MockMtcTimerWrapper objTimerWrapper;
 
 protected:
     virtual void SetUp() override
@@ -97,6 +99,7 @@ protected:
         pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
+        ON_CALL(objContext, GetTimer()).WillByDefault(ReturnRef(objTimerWrapper));
     }
 
     virtual void TearDown() override
@@ -135,6 +138,14 @@ TEST_F(SilentRedialHelperTest, CreateHelperWithSdpChangeType)
     const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_FOR_SDP_CHANGE);
+}
+
+TEST_F(SilentRedialHelperTest, CreateHelperWithRedialEmergencyType)
+{
+    const CallReasonInfo objReason(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
+    pRedialHelper = new SilentRedialHelper(objContext, objReason);
+    EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
 }
 
 TEST_F(SilentRedialHelperTest, IsSameRedialTypeReturnsComparisonResult)
@@ -195,8 +206,21 @@ TEST_F(SilentRedialHelperTest, RedialReleasesSessionResources)
 {
     EXPECT_CALL(objMediaManager, Terminate());
     EXPECT_CALL(objContext, RemoveSession(&objSession));
+    EXPECT_CALL(objTimerWrapper, StopAll());
 
     const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_REDIRECTION);
+    pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
+    EXPECT_EQ(IMS_SUCCESS, pRedialHelper->Redial());
+}
+
+TEST_F(SilentRedialHelperTest, RedialReleaseSessionResourceIfRedialEmergency)
+{
+    EXPECT_CALL(objMediaManager, Terminate());
+    EXPECT_CALL(objContext, RemoveSession(&objSession));
+    EXPECT_CALL(objTimerWrapper, Stop(_));
+
+    const CallReasonInfo objAnyReason(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
     EXPECT_EQ(IMS_SUCCESS, pRedialHelper->Redial());
 }
@@ -332,6 +356,26 @@ TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithDowngradeAudioSdpCh
             CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_FOR_SDP_CHANGE, strSdpBody);
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
     pRedialHelper->Redial();
+
+    ParticipantInfo objParticipantInfo(objContext);
+    ON_CALL(objContext, GetParticipantInfo)
+            .WillByDefault(ReturnRef(objParticipantInfo));  // empty remote target.
+
+    AString strEmptyNumber;
+    EXPECT_CALL(objMtcCall, Start(CallType::VOIP, strEmptyNumber, _, _));
+
+    pRedialHelper->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRedialEmergencyWithNextPcscf)
+{
+    const CallReasonInfo objAnyReason(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF);
+    pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
+    pRedialHelper->Redial();
+
+    CallInfo objCallInfo;
+    ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));  // initial type is VOIP
 
     ParticipantInfo objParticipantInfo(objContext);
     ON_CALL(objContext, GetParticipantInfo)

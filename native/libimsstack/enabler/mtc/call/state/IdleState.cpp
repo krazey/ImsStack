@@ -333,7 +333,12 @@ CallStateName IdleState::ContinueStart()
     }
 
     StartTimer(MtcCallState::TimerType::TIMER_MO_100_WAIT);
-    StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
+    if (!m_objContext.GetTimer().IsActive(TIMER_MO_18X_WAIT))
+    {
+        // The 18x wait timer may already be activated in some redial cases.
+        // In this case, don't restart the 18x wait timer.
+        StartTimer(MtcCallState::TimerType::TIMER_MO_18X_WAIT);
+    }
 
     return CallStateName::OUTGOING;
 }

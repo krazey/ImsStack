@@ -1394,4 +1394,13 @@ TEST_F(MessageUtilsTest, IsResponseExist)
     EXPECT_FALSE(objMessageUtils.IsResponseExist(piSession, nAnotherCode));
 }
 
+TEST_F(MessageUtilsTest, GetNumberOfPreviousResponses)
+{
+    EXPECT_EQ(0, objMessageUtils.GetNumberOfPreviousResponses(IMS_NULL, ANY_METHOD));
+
+    SetUpPreviousResponses();
+    EXPECT_EQ(objMessages.GetSize(),
+            objMessageUtils.GetNumberOfPreviousResponses(piSession, ANY_METHOD));
+}
+
 }  // namespace android

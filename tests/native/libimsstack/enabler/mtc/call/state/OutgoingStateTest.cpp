@@ -792,6 +792,29 @@ TEST_F(OutgoingStateTest,
     */
 }
 
+TEST_F(OutgoingStateTest, SessionStartFailedIfWaitingForSilentEmergencyRedial)
+{
+    objCallInfo.bEmergency = IMS_TRUE;
+    ON_CALL(objService, GetSrvccState()).WillByDefault(Return(SrvccState::IDLE));
+
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, -1))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_400));
+    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(objAosConnector, Control).Times(1);
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionStartFailed(&objSession));
+
+    EXPECT_CALL(objRedialHelper, Redial(_)).Times(1).WillOnce(Return(IMS_SUCCESS));
+    EXPECT_EQ(CallStateName::IDLE, pOutgoingState->OnAosStateChanged(MtcAosState::CONNECTED, 0));
+}
+
 TEST_F(OutgoingStateTest, SessionTerminatedNotifiesStartFailed)
 {
     ON_CALL(objSession, GetTerminationReason)

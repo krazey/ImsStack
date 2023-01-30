@@ -25,10 +25,12 @@
 #include "call/IMtcSession.h"
 #include "call/ParticipantInfo.h"
 #include "call/SilentRedialHelper.h"
+#include "call/state/MtcCallState.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -173,6 +175,10 @@ void SilentRedialHelper::SetRedialDetail()
             m_nInterval = 0;
             m_nMaxCount = 1;
             return;
+        case EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF:
+            m_nInterval = 0;
+            m_nMaxCount = NO_LIMIT;
+            return;
         default:
             return;
     }
@@ -188,6 +194,20 @@ void SilentRedialHelper::ReleaseCallResources()
     }
 
     m_objContext.GetMediaManager().Terminate();
+    StopCallTimers();
+}
+
+PRIVATE
+void SilentRedialHelper::StopCallTimers()
+{
+    MtcTimerWrapper& objTimerWrapper = m_objContext.GetTimer();
+    if (m_nType == EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF)
+    {
+        objTimerWrapper.Stop(MtcCallState::TimerType::TIMER_MO_100_WAIT);
+        return;
+    }
+
+    objTimerWrapper.StopAll();
 }
 
 PRIVATE

@@ -560,6 +560,16 @@ public:
      * @return
      */
     virtual IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode) = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @param piSession
+     * @param eServiceMethod
+     * @return
+     */
+    virtual IMS_UINT32 GetNumberOfPreviousResponses(
+            IN const ISession* piSession, IN IMS_SINT32 eServiceMethod) const = 0;
 };
 
 struct ReasonHeaderValue

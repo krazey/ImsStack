@@ -66,6 +66,8 @@ private:
 
     CallReasonInfo HandleRedialByNetworkContext() const;
 
+    CallReasonInfo HandleRedialEmergencyWithNextPcscf() const;
+
     IMS_SINT32 GetDefaultExtraCode(IN const IMessage& objMessage) const;
     static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
     IMS_BOOL IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const;
@@ -74,6 +76,7 @@ private:
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL IsAlternativeEmergencyService(IN const IMessage& objMessage) const;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage& objMessage) const;
+    IMS_BOOL IsRedialEmergencyWithNextPcscfRequired(IN const IMessage* piMessage) const;
 
     void ControlAos(IMS_UINT32 nCommand) const;
     AString GetPathHeader() const;

@@ -23,10 +23,12 @@
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
 #include "call/termination/StartErrorHandler.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockIMessage.h"
+#include "core/MockISession.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "internal/Ims3gpp.h"
 #include "sipcore/ISipHeader.h"
@@ -55,6 +57,8 @@ public:
     MtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
     MockIMessageUtils objMessageUtils;
+    MockIMtcSession objMtcSession;
+    MockISession objSession;
 
     StartErrorHandler* pHandler;
 
@@ -73,6 +77,8 @@ protected:
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
         ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+        ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
+        ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
 
         pHandler = new StartErrorHandler(objCallContext);
     }
@@ -127,12 +133,25 @@ TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByTransactionTimeout
     objCallInfo.bEmergency = IMS_TRUE;
     SetMessageCode(SipStatusCode::SC_INVALID);
 
+    EXPECT_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
+            .Times(2)
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objMtcService, IsEmergency()).Times(1).WillOnce(Return(IMS_FALSE));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
 
 TEST_F(StartErrorHandlerTest, HandleReturnsNetworkNoResponseByNullIMessageOfEcc)
 {
     objCallInfo.bEmergency = IMS_TRUE;
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
+            .WillByDefault(Return(2));
+
     CallReasonInfo objResult = pHandler->Handle(IMS_NULL);
     EXPECT_TRUE(objResult == CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
@@ -244,6 +263,21 @@ TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatusCodeIsIncludedInCsfbConfi
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 }
 
+TEST_F(StartErrorHandlerTest, HandleReturnsRedialEmergencyWithNextPcscf)
+{
+    SetMessageCode(SipStatusCode::SC_600);
+    objCallInfo.bEmergency = IMS_TRUE;
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
+            .WillByDefault(Return(1));
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF)).Times(1);
+    EXPECT_TRUE(
+            CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_EMERGENCY_WITH_NEXT_PCSCF));
+}
+
 TEST_F(StartErrorHandlerTest, HandleRedirectionBy3xxResponses)
 {
     const IMS_SINT32 ANY_REJECT_CODE = SipStatusCode::SC_300;
@@ -291,6 +325,10 @@ TEST_F(StartErrorHandlerTest, Handle380ResponseForEmergencyCall)
 {
     SetMessageCode(SipStatusCode::SC_380);
     objCallInfo.bEmergency = IMS_TRUE;
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
+
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_REDIRECTED, SipStatusCode::SC_380));
 }
 
@@ -464,6 +502,12 @@ TEST_F(StartErrorHandlerTest, Handle403ResponseForEmergencyCall)
 {
     SetMessageCode(SipStatusCode::SC_403);
     objCallInfo.bEmergency = IMS_TRUE;
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyCallOverEmergencyPdnWithNextPcscf())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcService, IsEmergency()).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, GetNumberOfPreviousResponses(&objSession, IMessage::SESSION_START))
+            .WillByDefault(Return(2));
+
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
 }
 
