@@ -197,6 +197,10 @@ public class ImsMmTelService extends MmTelFeature
         // Ut off -> SscServiceImpl
         mCapabilityCallback = c;
         mRegTracker.changeCapabilities(enabledCaps, disabledCaps);
+        ImsCallApp callApp = getCallApp();
+        if (callApp != null) {
+            callApp.getUtInterface().changeCapabilities(enabledCaps, disabledCaps);
+        }
         mLocalLog.log("changeEnabledCapabilities " + enabledCaps + ", " + disabledCaps);
     }
 
