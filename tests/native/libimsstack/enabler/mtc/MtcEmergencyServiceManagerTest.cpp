@@ -22,6 +22,8 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MtcEmergencyServiceManager.h"
+#include "PlatformContext.h"
+#include "TestPhoneInfoService.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MockICallStateProxy.h"
@@ -56,6 +58,7 @@ public:
             objService(),
             objAosConnector(),
             objCallStateProxy(),
+            objPhoneInfoService(),
             pMockServiceThread(new MockIJniMtcServiceThread()),
             pConfigurationManager(new MockIMtcConfigurationManager()),
             pConfigurationProxy(new MtcConfigurationProxy(pConfigurationManager)),
@@ -75,6 +78,7 @@ protected:
     MockIMtcService objService;
     MockIMtcAosConnector objAosConnector;
     MockICallStateProxy objCallStateProxy;
+    TestPhoneInfoService objPhoneInfoService;
     MockIJniMtcServiceThread* pMockServiceThread;
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
@@ -86,7 +90,13 @@ protected:
         ON_CALL(objContext, GetAosConnector(ServiceType::EMERGENCY))
                 .WillByDefault(Return(&objAosConnector));
 
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
+        ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetRoamingState())
+                .WillByDefault(Return(0));  // Default: not in roaming
+
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
+        ON_CALL(objContext, GetSlotId).WillByDefault(Return(IMS_SLOT_0));
 
         // this must be done before MtcEmergencyServiceManager is created.
         ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(&objService));
@@ -95,6 +105,11 @@ protected:
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
 
         pEsm = new TestEmergencyServiceManager(objContext);
+    }
+
+    virtual void TearDown() override
+    {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
     }
 };
 
@@ -194,6 +209,22 @@ TEST_F(MtcEmergencyServiceManagerTest, OnAosDisconnectedSetsIdleStateIfRetryOnIm
     pEsm->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED);
 
     EXPECT_EQ(pEsm->GetState(), EmergencyServiceState::IDLE);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, OnAosDisconnectedDoesNotRetryOnImsPdnIfRoaming)
+{
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetRoamingState())
+            .WillByDefault(Return(1));
+    ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_TRUE));
+
+    pEsm->SetState(EmergencyServiceState::OPENING);
+    EXPECT_CALL(*pMockServiceThread,
+            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::UNAVAILABLE),
+                    ImsAosReason::DATA_DISCONNECTED,
+                    static_cast<IMS_SINT32>(ServiceType::EMERGENCY)));
+
+    pEsm->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, ImsAosReason::DATA_DISCONNECTED);
+    EXPECT_EQ(pEsm->GetState(), EmergencyServiceState::UNAVAILABLE);
 }
 
 TEST_F(MtcEmergencyServiceManagerTest, OnNormalRoutingClosedResetsRoutingHelper)

@@ -16,9 +16,11 @@
 
 #include "IJniMtcServiceThread.h"
 #include "IMtcContext.h"
+#include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
 #include "MtcEmergencyServiceManager.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -166,7 +168,11 @@ IMS_BOOL MtcEmergencyServiceManager::IsRetryOverImsPdnRequired(IN IMS_SINT32 eAo
     if (m_eState == EmergencyServiceState::OPENING &&
             m_objContext.GetConfigurationProxy().Is(Feature::RETRY_EMERGENCY_ON_IMS_PDN_BOOL))
     {
-        return eAosReason == ImsAosReason::DATA_DISCONNECTED;
+        INetworkWatcher* pNetworkWatcher =
+                PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
+                        m_objContext.GetSlotId());
+        return eAosReason == ImsAosReason::DATA_DISCONNECTED &&
+                pNetworkWatcher->GetRoamingState() == 0;
     }
 
     return IMS_FALSE;
