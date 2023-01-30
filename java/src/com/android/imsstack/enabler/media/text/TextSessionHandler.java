@@ -117,7 +117,8 @@ public class TextSessionHandler extends MediaState {
     private boolean isWaitRequired(int requestType) {
         return (requestType != MediaConstants.REQUEST_OPEN_SESSION
                 && requestType != MediaConstants.RESPONSE_OPEN_SESSION
-                && requestType != MediaConstants.REQUEST_QOS);
+                && requestType != MediaConstants.REQUEST_QOS
+                && requestType != MediaConstants.NOTIFY_MEDIA_DETACH);
     }
 
     /** Text session message Handler */
@@ -195,6 +196,7 @@ public class TextSessionHandler extends MediaState {
                     break;
 
                 case MediaConstants.RESPONSE_SESSION_CLOSED:
+                case MediaConstants.NOTIFY_MEDIA_DETACH:
                 {
                     handleTextSessionClosed();
                 }
@@ -337,6 +339,7 @@ public class TextSessionHandler extends MediaState {
                 break;
 
             case MediaConstants.REQUEST_CLOSE_SESSION:
+            case MediaConstants.NOTIFY_MEDIA_DETACH:
             {
                 Message.obtain(mTextMessageHandler, requestType).sendToTarget();
             }
@@ -533,6 +536,7 @@ public class TextSessionHandler extends MediaState {
         setMediaState(MEDIA_STATE_IDLE);
         mTextSession = null;
         mTextSessionId = 0;
+        mTextMessageHandler.removeCallbacksAndMessages(null);
     }
 
     private void handleModifySessionResponse(final TextConfig textConfig, final int result) {

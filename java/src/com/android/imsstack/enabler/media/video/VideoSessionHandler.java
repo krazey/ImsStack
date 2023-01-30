@@ -129,7 +129,8 @@ public class VideoSessionHandler extends MediaState {
     private boolean isWaitRequired(int requestType) {
         return (requestType != MediaConstants.REQUEST_OPEN_SESSION
                 && requestType != MediaConstants.RESPONSE_OPEN_SESSION
-                && requestType != MediaConstants.REQUEST_QOS);
+                && requestType != MediaConstants.REQUEST_QOS
+                && requestType != MediaConstants.NOTIFY_MEDIA_DETACH);
     }
 
     /** Video session message Handler */
@@ -219,6 +220,7 @@ public class VideoSessionHandler extends MediaState {
                     break;
 
                 case MediaConstants.RESPONSE_SESSION_CLOSED:
+                case MediaConstants.NOTIFY_MEDIA_DETACH:
                 {
                     handleVideoSessionClosed();
                 }
@@ -257,12 +259,6 @@ public class VideoSessionHandler extends MediaState {
                 case MediaConstants.NOTIFY_VIDEO_DATA_USAGE:
                 {
                     handleVideoDataUsageNotification((long) msg.obj);
-                }
-                    break;
-
-                case MediaConstants.NOTIFY_MEDIA_DETACH:
-                {
-                    handleVideoDisconnection();
                 }
                     break;
 
@@ -540,17 +536,9 @@ public class VideoSessionHandler extends MediaState {
         }
     }
 
-    private void handleVideoDisconnection() {
-        if (mVideoSession != null) {
-            closeSockets();
-            mVideoSession = null;
-            setMediaState(MEDIA_STATE_IDLE);
-        }
-    }
-
     private void closeSockets() {
         if (mRtpSocket != null) {
-        mVideoQosAgent.destroyQosConnection(mRtpSocket.first, mRtpSocket.second);
+            mVideoQosAgent.destroyQosConnection(mRtpSocket.first, mRtpSocket.second);
         }
     }
 
@@ -642,6 +630,7 @@ public class VideoSessionHandler extends MediaState {
         setMediaState(MEDIA_STATE_IDLE);
         mVideoSession = null;
         mVideoSessionId = 0;
+        mVideoMessageHandler.removeCallbacksAndMessages(null);
     }
 
     private void handleVideoModifySessionResponse(final VideoConfig videoConfig, final int result) {

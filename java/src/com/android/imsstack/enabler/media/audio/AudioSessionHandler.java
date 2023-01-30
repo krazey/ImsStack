@@ -139,7 +139,8 @@ public class AudioSessionHandler extends MediaState {
     private boolean isWaitRequired(int requestType) {
         return (requestType != MediaConstants.REQUEST_OPEN_SESSION
                 && requestType != MediaConstants.RESPONSE_OPEN_SESSION
-                && requestType != MediaConstants.REQUEST_QOS);
+                && requestType != MediaConstants.REQUEST_QOS
+                && requestType != MediaConstants.NOTIFY_MEDIA_DETACH);
     }
 
     /** Audio session message Handler */
@@ -634,18 +635,6 @@ public class AudioSessionHandler extends MediaState {
         }
     }
 
-    private void handleAudioDisconnection() {
-        if (mAudioSession != null) {
-            if (mAudioSessionCallbackHandler != null) {
-                mAudioSessionCallbackHandler.nofityMediaDetach();
-                mAudioSessionCallbackHandler.closeSessionResponse();
-            }
-            closeSockets();
-            mAudioSession = null;
-            setMediaState(MEDIA_STATE_IDLE);
-        }
-    }
-
     private void closeSockets() {
         synchronized (mRtpSocketList) {
             for (Pair<DatagramSocket, DatagramSocket> rtpSocket : mRtpSocketList) {
@@ -805,15 +794,21 @@ public class AudioSessionHandler extends MediaState {
     }
 
     private void handleSessionClosed() {
-        if (mAudioSession != null) {
-            if (mAudioSessionCallbackHandler != null) {
-                mAudioSessionCallbackHandler.closeSessionResponse();
-            }
-            closeSockets();
-        }
         setMediaState(MEDIA_STATE_IDLE);
+        closeSockets();
         mAudioSession = null;
         mAudioSessionId = 0;
+        mAudioMessageHandler.removeCallbacksAndMessages(null);
+        if (mAudioSessionCallbackHandler != null) {
+            mAudioSessionCallbackHandler.closeSessionResponse();
+        }
+    }
+
+    private void handleAudioDisconnection() {
+        if (mAudioSessionCallbackHandler != null) {
+            mAudioSessionCallbackHandler.nofityMediaDetach();
+        }
+        handleSessionClosed();
     }
 
     private void handleModifySessionResponse(final AudioConfig audioConfig, final int result) {

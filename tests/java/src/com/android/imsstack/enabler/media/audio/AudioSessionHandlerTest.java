@@ -487,4 +487,23 @@ public class AudioSessionHandlerTest extends MediaSessionHandlerTest {
         verify(mMockAudioSessionCallbackHandler).callQualityChanged(eq(callQuality));
     }
 
+    @Test
+    public void testMediaDetach() {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.NOTIFY_MEDIA_DETACH);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.setDataPosition(0);
+        mAudioSessionHandler.setAudioQosAgent(mMockQosAgent);
+        mAudioSessionHandler.setRtpSocket(mRtpSocketPair);
+        mAudioSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+
+        verify(mMockAudioSessionCallbackHandler, times(1)).nofityMediaDetach();
+        verify(mMockAudioSessionCallbackHandler, times(1)).closeSessionResponse();
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mAudioSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
+        testParcel.recycle();
+    }
 }

@@ -298,4 +298,22 @@ public class VideoSessionHandlerTest extends MediaSessionHandlerTest {
         verify(mMockVideoSessionCallbackHandler)
                 .onNotifyVideoDataUsage(eq(MediaTestUtils.DATA_BYTES));
     }
+
+    @Test
+    public void testMediaDetach() {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.NOTIFY_MEDIA_DETACH);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
+        testParcel.setDataPosition(0);
+        mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
+        mVideoSessionHandler.setRtpSocket(mRtpSocketPair);
+        mVideoSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mVideoSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
+        testParcel.recycle();
+    }
 }

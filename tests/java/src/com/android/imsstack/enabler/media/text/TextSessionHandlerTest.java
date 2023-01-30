@@ -293,4 +293,21 @@ public class TextSessionHandlerTest extends MediaSessionHandlerTest {
         verify(mMockTextSessionCallbackHandler).onNotifyMediaInactivity(eq(RTCP));
     }
 
+    @Test
+    public void testMediaDetach() {
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.NOTIFY_MEDIA_DETACH);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_RTT);
+        testParcel.setDataPosition(0);
+        mTextSessionHandler.setTextQosAgent(mMockQosAgent);
+        mTextSessionHandler.setRtpSocket(mRtpSocketPair);
+        mTextSessionHandler.setMediaState(MediaState.MEDIA_STATE_LIVE);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+
+        verify(mMockQosAgent,
+                times(1)).destroyQosConnection(eq(mMockRtpSocket), eq(mMockRtpSocket));
+        assertEquals(mTextSessionHandler.getMediaState(), MediaState.MEDIA_STATE_IDLE);
+        testParcel.recycle();
+    }
 }

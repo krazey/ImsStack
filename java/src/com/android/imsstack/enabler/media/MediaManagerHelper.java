@@ -40,6 +40,7 @@ public class MediaManagerHelper {
 
     private final Context mContext;
     private static boolean sIsImsMediaManagerReady;
+    private static boolean sIsImsMediaServiceDisconnected;
     private static ImsMediaManager sImsMediaManager;
     private static Executor sExecutor;
     private IMediaConnectionObserver mMediaObserver;
@@ -75,6 +76,8 @@ public class MediaManagerHelper {
             sExecutor = Executors.newSingleThreadExecutor();
             sImsMediaManager = new ImsMediaManager(mContext, sExecutor,
                                     new ImsMediaManagerCallback());
+            sIsImsMediaManagerReady = false;
+            sIsImsMediaServiceDisconnected = false;
             if (sMediaHandlerThread.getState() == Thread.State.NEW) {
                 sMediaHandlerThread.start();
             }
@@ -113,8 +116,13 @@ public class MediaManagerHelper {
      */
     @VisibleForTesting
     void close() {
-        sImsMediaManager = null;
-        sExecutor = null;
+        if (sImsMediaManager != null) {
+            sImsMediaManager.release();
+            sImsMediaManager = null;
+            sExecutor = null;
+            sIsImsMediaManagerReady = false;
+            sIsImsMediaServiceDisconnected = false;
+        }
     }
 
     /**
@@ -177,16 +185,19 @@ public class MediaManagerHelper {
             if (mMediaObserver != null) {
                 mMediaObserver.onMediaConnected();
             }
+            if (sIsImsMediaServiceDisconnected) {
+                close();
+            }
         }
 
         @Override
         public void onDisconnected() {
             ImsLog.i("ImsMediaManager - disconnected");
             sIsImsMediaManagerReady = false;
+            sIsImsMediaServiceDisconnected = true;
             if (mMediaObserver != null) {
                 mMediaObserver.onMediaDisconnected();
             }
-            close();
         }
     }
 }
