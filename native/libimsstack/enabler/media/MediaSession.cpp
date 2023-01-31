@@ -42,8 +42,7 @@ MediaSession::MediaSession(
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
-        m_bSessionConfirmed(IMS_FALSE),
-        m_nRtpTimer(0)
+        m_bSessionConfirmed(IMS_FALSE)
 {
     IMS_TRACE_D(
             "+MediaSession() - ServiceType[%" PFLS_u "], CallKey[%d]", eServiceType, nCallKey, 0);
@@ -201,7 +200,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::FormSDP(IN IMS_UINTP nNegoId, OUT ISession
 
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "FormSDP() - Can't find nNegoId[%d]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FormSDP() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_FALSE;
     }
 
@@ -679,12 +678,13 @@ PUBLIC VIRTUAL void MediaSession::SetOptions(
 PUBLIC VIRTUAL void MediaSession::SetNetworkToneRtpTimer(
         IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer)
 {
-    (void)nNegoId;
-    (void)eMediaType; /** TODO do it later */
-    IMS_TRACE_I("SetNetworkToneRtpTimer() - CallKey[%d], eMediaType[%d], nRtpTimer[%d]", m_nCallKey,
-            eMediaType, nRtpTimer);
+    IMS_TRACE_I("SetNetworkToneRtpTimer() - nNegoId[%" PFLS_x "], eMediaType[%d], nRtpTimer[%d]",
+            nNegoId, eMediaType, nRtpTimer);
 
-    m_nRtpTimer = nRtpTimer;
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_AUDIO))
+    {
+        m_objAudioController.SetInactivityTimer(nNegoId, nRtpTimer);
+    }
 }
 
 PUBLIC VIRTUAL IMS_BOOL MediaSession::NotifySrvccStatus(IN MEDIA_SRVCC_STATUS nStatus)
@@ -716,7 +716,7 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SendMessage(IN IMS_SINT32 nMsg, IN IMS_UIN
 PROTECTED
 MediaNego* MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
 {
-    IMS_TRACE_I("CreateMediaNego() nNegoId[%d]", nNegoId, 0, 0);
+    IMS_TRACE_I("CreateMediaNego() nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
 
     // Create new MediaNego
     MediaNego* pMediaNego = new MediaNego(m_nSlotId);
@@ -755,7 +755,7 @@ MediaNego* MediaSession::FindMediaNego(IN IMS_UINTP nNegoId)
 
     if (nIndex < 0)
     {
-        IMS_TRACE_E(0, "FindMediaNego() - invalid nNegoId[%d]", nNegoId, 0, 0);
+        IMS_TRACE_E(0, "FindMediaNego() - invalid nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
         return IMS_NULL;
     }
 
@@ -1046,6 +1046,17 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                 IMS_TRACE_I("OnNotify() - eMediaType[%d]", pParam->m_eMediaType, 0, 0);
                 m_pClientListener->MediaSession_Notify(
                         REPORT_DATA_RECEIVE_STARTED, pParam->m_eMediaType);
+
+                if (MEDIA_IS_CONTAINED_THIS_TYPE(pParam->m_eMediaType, MEDIA_TYPE_AUDIO))
+                {
+                    if (m_objAudioController.GetInactivityTimer(IMS_NULL) != 0)
+                    {
+                        m_objAudioController.SetInactivityTimer(IMS_NULL, 0);
+                        m_pClientListener->MediaSession_Notify(
+                                REPORT_NW_TONE_RTP_RECEIVE_STARTED, pParam->m_eMediaType);
+                    }
+                }
+
                 delete pParam;
                 return IMS_TRUE;
             }
@@ -1058,12 +1069,22 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 
             if (pParam != IMS_NULL)
             {
-                IMS_TRACE_I("OnNotify() - eMediaProtocolType[%d], eMediaType[%d]",
+                IMS_TRACE_I("OnNotify() - m_eMediaType[%d], m_eMediaProtocolType[%d]",
                         pParam->m_eMediaType, pParam->m_eMediaProtocolType, 0);
                 m_pClientListener->MediaSession_Notify(REPORT_DATA_RECEIVE_FAILED,
                         pParam->m_eMediaType,
                         pParam->m_eMediaProtocolType == RTP ? MEDIA_PROTOCOL_RTP
                                                             : MEDIA_PROTOCOL_RTCP);
+
+                if (MEDIA_IS_CONTAINED_THIS_TYPE(pParam->m_eMediaType, MEDIA_TYPE_AUDIO))
+                {
+                    if (m_objAudioController.GetInactivityTimer(IMS_NULL) != 0)
+                    {
+                        m_objAudioController.SetInactivityTimer(IMS_NULL, 0);
+                        m_pClientListener->MediaSession_Notify(
+                                REPORT_NW_TONE_RTP_RECEIVE_FAILED, pParam->m_eMediaType);
+                    }
+                }
 
                 delete pParam;
                 return IMS_TRUE;
@@ -1160,4 +1181,14 @@ PRIVATE IpAddress MediaSession::GetAndroidIP()
     }
 
     return IpAddress();
+}
+
+PRIVATE void MediaSession::SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer)
+{
+    m_objAudioController.SetInactivityTimer(nNegoId, nTimer);
+}
+
+PRIVATE IMS_UINT32 MediaSession::GetInactivityTimer(IN IMS_UINTP nNegoId)
+{
+    return m_objAudioController.GetInactivityTimer(nNegoId);
 }

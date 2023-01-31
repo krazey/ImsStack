@@ -116,6 +116,15 @@ public:
     IMS_BOOL ModifySession(IN IMS_UINTP nNegoId);
 
     /**
+     * @brief Send SetMediaQuality message to java without any following session changing method
+     *
+     * @param nNegoId The identification of the target AudioMediaSession instance
+     * @return IMS_BOOL Returns IMS_TRUE when the send message successfully, IMS_FALSE when it is
+     * failed to send
+     */
+    IMS_BOOL SetMediaQuality(IN IMS_UINTP nNegoId);
+
+    /**
      * @brief Send deleteConfig message to java
      *
      * @param nNegoId The identification of the target AudioMediaSession instance
@@ -188,6 +197,22 @@ public:
      */
     IMS_BOOL UpdateMediaDirection(IN MEDIA_DIRECTION eDirection, IN IMS_BOOL bRestore = IMS_FALSE);
 
+    /**
+     * @brief Set Inactivity timer
+     *
+     * @param nNegoId The identification to get the audio profile from negotiated parameter
+     * @param nTimer Inactivity timer value
+     */
+    void SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer);
+
+    /**
+     * @brief Get Inactivity timer
+     *
+     * @param nNegoId The identification to get the audio profile from negotiated parameter
+     * @return IMS_UINT32 Inactivity timer value
+     */
+    IMS_UINT32 GetInactivityTimer(IN IMS_UINTP nNegoId);
+
 private:
     AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = IMS_NULL);
     void ClearSession();
@@ -197,6 +222,7 @@ private:
     IMS_UINT32 m_eUpdateCondition;
     IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
+    IMS_UINTP m_nCurrentActiveNegoId;
 };
 
 #endif

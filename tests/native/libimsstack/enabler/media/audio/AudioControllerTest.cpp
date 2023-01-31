@@ -176,3 +176,28 @@ TEST_F(AudioControllerTest, testUpdateQualityThreshold)
     EXPECT_EQ(m_pController->UpdateQualityThreshold(IMS_NULL, m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->UpdateQualityThreshold(negoId, m_pAudioNego), IMS_TRUE);
 }
+
+TEST_F(AudioControllerTest, testInactivityTimer)
+{
+    IMS_UINTP negoId1 = 1000;
+    IMS_UINTP negoId2 = 2000;
+    IMS_UINT32 inactivityTime1 = 1111;
+    IMS_UINT32 inactivityTime2 = 2222;
+    IMS_UINT32 inactivityTime3 = 3333;
+
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId1, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId2, m_pConfig), IMS_TRUE);
+    EXPECT_EQ(m_pController->GetAudioSessionSize(), 2);
+
+    m_pController->SetInactivityTimer(negoId1, inactivityTime1);
+    m_pController->SetInactivityTimer(negoId2, inactivityTime2);
+
+    EXPECT_EQ(m_pController->GetInactivityTimer(negoId1), inactivityTime1);
+    EXPECT_EQ(m_pController->GetInactivityTimer(negoId2), inactivityTime2);
+
+    m_pController->UpdateSession(negoId2, ACCESS_NETWORK, m_pAudioNego);
+
+    m_pController->SetInactivityTimer(IMS_NULL, inactivityTime3);
+    EXPECT_EQ(m_pController->GetInactivityTimer(negoId1), inactivityTime1);
+    EXPECT_EQ(m_pController->GetInactivityTimer(negoId2), inactivityTime3);
+}

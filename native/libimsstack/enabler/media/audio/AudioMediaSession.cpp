@@ -39,7 +39,8 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         m_pConfig(IMS_NULL),
         m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IpAddress::IPv6NONE),
-        m_nLocalPort(0)
+        m_nLocalPort(0),
+        m_nInactivityTimer(0)
 {
     IMS_TRACE_I("+AudioMediaSession() - state[%d]", m_nState, 0, 0);
 
@@ -637,4 +638,16 @@ IMS_BOOL AudioMediaSession::SetMediaQuality()
                 IMMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
     }
     return bResult;
+}
+
+PUBLIC
+void AudioMediaSession::SetInactivityTimer(IN IMS_UINT32 nTimer)
+{
+    m_nInactivityTimer = nTimer;
+}
+
+PUBLIC
+IMS_UINT32 AudioMediaSession::GetInactivityTimer()
+{
+    return m_nInactivityTimer;
 }

@@ -154,12 +154,27 @@ public:
      */
     IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode);
 
+    /**
+     * @brief Set Inactivity timer separately
+     *
+     * @param nTimer Inactivity timer value
+     */
+    void SetInactivityTimer(IN IMS_UINT32 nTimer);
+
+    /**
+     * @brief Get Inactivity timer
+     *
+     * @return IMS_UINT32 Inactivity timer value
+     */
+    IMS_UINT32 GetInactivityTimer();
+
 protected:
     AudioConfiguration* m_pConfig;
     MediaQualityThreshold m_objMediaQualityThreshold;
     IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
     IMSList<IMS_UINTP> m_listNegoId;
+    IMS_UINT32 m_nInactivityTimer;
 };
 
 #endif

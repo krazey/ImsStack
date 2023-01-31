@@ -23,9 +23,12 @@ __IMS_TRACE_TAG_USER_DECL__("MED.AC");
 
 PUBLIC
 AudioController::AudioController() :
+        m_listAudioSession(IMSList<AudioMediaSession*>()),
         m_nAudioSessionState(AudioMediaSession::STATE_NONE),
         m_eUpdateCondition(EARLY_SESSION),
-        m_nPort(0)
+        m_objLocalAddr(IpAddress::IPv6NONE),
+        m_nPort(0),
+        m_nCurrentActiveNegoId(IMS_NULL)
 {
     m_listAudioSession.Clear();
 }
@@ -99,6 +102,11 @@ PUBLIC
 IMS_BOOL AudioController::UpdateSession(
         IN IMS_UINTP nNegoId, IN IMS_UINT32 nAccessNetwork, IN AudioNego* pNego)
 {
+    IMS_TRACE_I("UpdateSession() - nNegoId[%" PFLS_x "], nAccessNetwork[%d]", nNegoId,
+            nAccessNetwork, 0);
+
+    m_nCurrentActiveNegoId = nNegoId;
+
     if (m_eUpdateCondition == READY_TO_CONFIRM && m_listAudioSession.GetSize() > 1)
     {
         UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
@@ -107,9 +115,12 @@ IMS_BOOL AudioController::UpdateSession(
     }
     else
     {
-        if (UpdateRtpConfig(nNegoId, nAccessNetwork, pNego) == IMS_TRUE)
+        IMS_BOOL bResult = UpdateRtpConfig(nNegoId, nAccessNetwork, pNego);
+        UpdateQualityThreshold(nNegoId, pNego);
+        SetMediaQuality(nNegoId);
+
+        if (bResult)
         {
-            UpdateQualityThreshold(nNegoId, pNego);
             return ModifySession(nNegoId);
         }
     }
@@ -248,8 +259,22 @@ IMS_BOOL AudioController::ModifySession(IN IMS_UINTP nNegoId)
 
     if (pAudioSession != NULL)
     {
-        pAudioSession->SetMediaQuality();
         return pAudioSession->Modify();
+    }
+
+    return IMS_FALSE;
+}
+
+PUBLIC
+IMS_BOOL AudioController::SetMediaQuality(IN IMS_UINTP nNegoId)
+{
+    IMS_TRACE_D("SetMediaQuality() - nNegoId[%" PFLS_x "], Size[%d]", nNegoId, 0, 0);
+
+    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+
+    if (pAudioSession != NULL)
+    {
+        return pAudioSession->SetMediaQuality();
     }
 
     return IMS_FALSE;
@@ -417,6 +442,42 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
     }
 
     return bRet;
+}
+
+PUBLIC void AudioController::SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer)
+{
+    IMS_TRACE_I("SetInactivityTimer() - nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]", nNegoId,
+            m_nCurrentActiveNegoId, 0);
+
+    if (nNegoId == IMS_NULL)
+    {
+        nNegoId = m_nCurrentActiveNegoId;
+    }
+
+    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    if (pAudioSession != IMS_NULL)
+    {
+        pAudioSession->SetInactivityTimer(nTimer);
+    }
+}
+
+PUBLIC IMS_UINT32 AudioController::GetInactivityTimer(IN IMS_UINTP nNegoId)
+{
+    IMS_TRACE_I("GetInactivityTimer() - nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]", nNegoId,
+            m_nCurrentActiveNegoId, 0);
+
+    if (nNegoId == IMS_NULL)
+    {
+        nNegoId = m_nCurrentActiveNegoId;
+    }
+
+    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    if (pAudioSession != IMS_NULL)
+    {
+        return pAudioSession->GetInactivityTimer();
+    }
+
+    return 0;
 }
 
 PRIVATE
