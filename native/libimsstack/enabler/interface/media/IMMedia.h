@@ -78,6 +78,23 @@ public:
         return "Unrecognized Msg";
     }
 
+    static const IMS_CHAR* PrintMediaType(IN MEDIA_CONTENT_TYPE eMediaType)
+    {
+        switch (eMediaType)
+        {
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_INVALID);
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIO);
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_VIDEO);
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOVIDEO);
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_TEXT);
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOTEXT);
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_VIDEOTEXT);
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_AUDIOVIDEOTEXT);
+            IMMEDIA_CASE_ENUM(MEDIA_TYPE_NOTUSED);
+        }
+        return "Unrecognized Type";
+    }
+
 public:
     static const IMS_SINT32 MEDIA_MESSAGE_IDX_START = IMMEDIA + 0;
 

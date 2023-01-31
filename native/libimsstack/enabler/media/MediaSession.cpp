@@ -919,8 +919,8 @@ void MediaSession::ClearQosParam()
 PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
         IN IMS_SINT32 nEvent, IN ImsMediaMsgParamBase* param)
 {
-    IMS_TRACE_D(
-            "MediaSession_SendMsgToMediaManager() : CallKey[%d] nEvent[%d]", m_nCallKey, nEvent, 0);
+    IMS_TRACE_D("MediaSession_SendMsgToMediaManager() : MediaType[%s], CallKey[%d] nEvent[%d]",
+            IMMedia::PrintMediaType(param->m_eMediaType), m_nCallKey, nEvent);
     MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlotId);
 
     if (pMediaManager != IMS_NULL)

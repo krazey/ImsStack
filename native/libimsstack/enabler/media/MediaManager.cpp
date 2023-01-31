@@ -220,8 +220,8 @@ PUBLIC
 IMS_BOOL MediaManager::handleRequestMsg(
         IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param)
 {
-    IMS_TRACE_I("handleRequestMsg() - MSG[%d, %s], CallKey[%d]", eEvent, IMMedia::PrintMsg(eEvent),
-            nCallKey);
+    IMS_TRACE_I("handleRequestMsg() - MediaType[%s], MSG[%s], CallKey[%d]",
+            IMMedia::PrintMediaType(param->m_eMediaType), IMMedia::PrintMsg(eEvent), nCallKey);
 
     MediaSessionNode* pNode = FindSessionNode(nCallKey);
 
