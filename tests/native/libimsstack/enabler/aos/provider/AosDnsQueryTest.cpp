@@ -95,7 +95,7 @@ TEST_F(AosDnsQueryTest, DnsQueryPrivate_Ready)
 
 TEST_F(AosDnsQueryTest, DnsQueryPrivate_Done)
 {
-    IMSList<IPAddress> Ips;
+    IMSList<IpAddress> Ips;
     EXPECT_TRUE(m_pAosDnsQuery->DnsQueryPrivate_Done(IMS_TRUE, Ips));
     EXPECT_TRUE(m_pAosDnsQuery->DnsQueryPrivate_Done(IMS_FALSE, Ips));
 }

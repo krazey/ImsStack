@@ -60,7 +60,7 @@ PRIVATE VIRTUAL void SipKeepAliveHelper::Destroy()
 
 PRIVATE VIRTUAL IMS_RESULT SipKeepAliveHelper::SendPacket(IN const ByteArray& objPacket)
 {
-    if (m_objFarEnd.GetIpAddress().Equals(IPAddress::NONE) || (m_objFarEnd.GetPort() <= 0))
+    if (m_objFarEnd.GetIpAddress().Equals(IpAddress::NONE) || (m_objFarEnd.GetPort() <= 0))
     {
         IMS_TRACE_E(0, "IP address & port number MUST be specified to send the keep-alive packet",
                 0, 0, 0);
@@ -118,13 +118,13 @@ PRIVATE VIRTUAL void SipKeepAliveHelper::SetListener(IN ISipKeepAliveHelperListe
 }
 
 PRIVATE VIRTUAL void SipKeepAliveHelper::SetTransportTupleD(
-        IN const IPAddress& objIp, IN IMS_SINT32 nPort)
+        IN const IpAddress& objIp, IN IMS_SINT32 nPort)
 {
     m_objFarEnd.SetIpAddress(objIp);
     m_objFarEnd.SetPort(nPort);
 }
 
-PRIVATE VIRTUAL void SipKeepAliveHelper::SetTransportTupleS(IN const IPAddress& objIp,
+PRIVATE VIRTUAL void SipKeepAliveHelper::SetTransportTupleS(IN const IpAddress& objIp,
         IN IMS_SINT32 nPort, IN IMS_SINT32 nProtocol /*= Sip::TRANSPORT_UDP*/)
 {
     m_objNearEnd.SetIpAddress(objIp);

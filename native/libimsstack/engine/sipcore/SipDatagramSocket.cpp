@@ -39,7 +39,7 @@ PUBLIC VIRTUAL SipDatagramSocket::~SipDatagramSocket()
 }
 
 PUBLIC VIRTUAL IMS_BOOL SipDatagramSocket::Create(
-        IN const IPAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
+        IN const IpAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
 {
     if (!SipSocket::Create(objIp, nPort, bSecure))
     {
@@ -73,7 +73,7 @@ PUBLIC VIRTUAL IMS_BOOL SipDatagramSocket::Create(
 
 PUBLIC VIRTUAL IMS_SINT32 SipDatagramSocket::Send(IN const IMS_BYTE* pBuffer,
         IN IMS_SINT32 nBuffLen, IN IMS_UINT32 nPort /*= 0*/,
-        IN const IPAddress& objIp /*= IPAddress::NONE*/)
+        IN const IpAddress& objIp /*= IpAddress::NONE*/)
 {
     if ((GetState() != STATE_CONNECTED) && (GetState() != STATE_CONNECTING))
     {
@@ -91,7 +91,7 @@ PROTECTED VIRTUAL void SipDatagramSocket::Socket_OnDataReceived(IN ISocket* piSo
     IMS_MEM_Memset(pRecvBuffer, 0x00, pMessageBuffer->GetLength());
 
     IMS_UINT32 nPort = 0;
-    IPAddress objIp;
+    IpAddress objIp;
     IMS_SINT32 nReadBytes =
             piSocket->ReceiveFrom(pRecvBuffer, pMessageBuffer->GetLength(), objIp, nPort);
 

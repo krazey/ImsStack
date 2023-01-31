@@ -28,7 +28,7 @@ class IAosPcscf
 public:
     virtual ~IAosPcscf(){};
 
-    virtual void Configure(IN IMS_UINT32 nIpVersion = IPAddress::UNKNOWN) = 0;
+    virtual void Configure(IN IMS_UINT32 nIpVersion = IpAddress::UNKNOWN) = 0;
     virtual IMS_BOOL IsConfigured() const = 0;
 
     virtual IMS_BOOL IsAsyncDnsDiscovery() const = 0;

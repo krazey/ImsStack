@@ -41,7 +41,7 @@ public:
     AudioProfile* m_pLocalProfile;
     AudioProfile* m_pPeerProfile;
     AudioProfile* m_pNegoProfile;
-    IPAddress m_objIpAddr;
+    IpAddress m_objIpAddr;
 
 protected:
     virtual void SetUp() override
@@ -64,7 +64,7 @@ protected:
         m_pPeerProfile = new AudioProfile(*m_pLocalProfile);
         m_pNegoProfile = new AudioProfile(*m_pLocalProfile);
 
-        m_objIpAddr = IPAddress(LOCAL_IP);
+        m_objIpAddr = IpAddress(LOCAL_IP);
         ON_CALL(*m_pAudioNego, GetLocalAddress()).WillByDefault(ReturnRef(m_objIpAddr));
         ON_CALL(*m_pAudioNego, GetLocalPort()).WillByDefault(Return(LOCAL_PORT));
         ON_CALL(*m_pAudioNego, GetNegotiatedLocalProfile()).WillByDefault(Return(m_pLocalProfile));
@@ -106,7 +106,7 @@ TEST_F(AudioControllerTest, testOpenSessionFail)
     EXPECT_EQ(m_pController->CreateSession(&m_objListener, negoId, m_pConfig), IMS_TRUE);
     EXPECT_EQ(m_pController->GetAudioSessionSize(), 1);
 
-    IPAddress objIpAddr(LOCAL_IP);
+    IpAddress objIpAddr(LOCAL_IP);
     EXPECT_EQ(m_pController->UpdateLocalAddress(m_pAudioNego), IMS_TRUE);
     EXPECT_EQ(m_pController->OpenSession(2000), IMS_FALSE);
 }

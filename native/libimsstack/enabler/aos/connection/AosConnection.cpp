@@ -173,7 +173,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetMtu()
     }
 }
 
-PUBLIC VIRTUAL const IPAddress& AosConnection::GetLocalAddress(IN IMS_SINT32 nIpVersion /* = 0 */)
+PUBLIC VIRTUAL const IpAddress& AosConnection::GetLocalAddress(IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetLocalAddress(nIpVersion);
 }
@@ -185,7 +185,7 @@ PUBLIC VIRTUAL const AStringArray& AosConnection::GetPcscfAddress(
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetHostByName(IN const AString& strHostName,
-        OUT IMSList<IPAddress>& objIps, IN IMS_SINT32 nIpVersion /* = 0 */)
+        OUT IMSList<IpAddress>& objIps, IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetHostByName(strHostName, objIps, nIpVersion);
 }

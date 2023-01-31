@@ -605,7 +605,7 @@ PRIVATE VIRTUAL void Registration::DestroyBinding(
     RegBindingProxy::DestroyBinding(GetSlotId(), strAppId, strServiceId);
 }
 
-PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN const IPAddress& objIpAddr,
+PRIVATE VIRTUAL IRegContact* Registration::CreateContact(IN const IpAddress& objIpAddr,
         IN IMS_SINT32 nPort, IN IMS_SINT32 nExpiresPolicy /*= POLICY_EXPIRES_CONFIG*/,
         IN IMS_UINT32 nExpiresValue /*= DEFAULT_EXPIRES*/)
 {
@@ -734,7 +734,7 @@ PRIVATE VIRTUAL void Registration::DestroyContact(IN IRegContact* piContact)
 }
 
 PRIVATE VIRTUAL void Registration::DestroyContact(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort)
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort)
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
@@ -769,7 +769,7 @@ PRIVATE VIRTUAL IMSList<IRegContact*> Registration::GetAllContacts() const
 }
 
 PRIVATE VIRTUAL IRegContact* Registration::GetContact(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) const
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
@@ -1139,7 +1139,7 @@ PRIVATE VIRTUAL void Registration::Restore()
 
     // NAT_REQ_UE_PUBLIC_IP
     m_bIsBehindNat = IMS_FALSE;
-    m_pStateTracker->SetPublicIpAddress(IPAddress::NONE);
+    m_pStateTracker->SetPublicIpAddress(IpAddress::NONE);
 
     if (NatHelper::IsNatResolverRequired())
     {
@@ -1967,12 +1967,12 @@ void Registration::CheckUaLocation(IN ISipMessage* piSipMsg)
     }
 
     // Compares the sent-by address & the address of 'received' parameter
-    IPAddress objSentBy(strHost);
-    IPAddress objReceived(pParameter->GetValue());
+    IpAddress objSentBy(strHost);
+    IpAddress objReceived(pParameter->GetValue());
     IMS_BOOL bIsPublicIpUpdateRequired = IMS_TRUE;
     IMS_BOOL bIsSentByPublicIp = IMS_FALSE;
 
-    if (!IPAddress::NONE.Equals(m_pStateTracker->GetPublicIpAddress()) &&
+    if (!IpAddress::NONE.Equals(m_pStateTracker->GetPublicIpAddress()) &&
             objSentBy.Equals(m_pStateTracker->GetPublicIpAddress()))
     {
         bIsSentByPublicIp = IMS_TRUE;
@@ -2009,14 +2009,14 @@ void Registration::CheckUaLocation(IN ISipMessage* piSipMsg)
         }
         else
         {
-            m_pStateTracker->SetPublicIpAddress(IPAddress::NONE);
+            m_pStateTracker->SetPublicIpAddress(IpAddress::NONE);
         }
 
         if (NatHelper::IsNatResolverRequired())
         {
             NatHelper::GetInstance()->SetPublicAddress(GetSlotId(),
                     m_pRegFlow->GetRegKey().GetFlowId(), objSentBy,
-                    (m_bIsBehindNat ? objReceived : IPAddress::NONE));
+                    (m_bIsBehindNat ? objReceived : IpAddress::NONE));
         }
     }
 }

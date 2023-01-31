@@ -56,7 +56,7 @@ public:
      * @param strHeader Formed header string
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL FormHeader(IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr,
+    static IMS_BOOL FormHeader(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr,
             IN const SipMethod& objMethod, IN const SipProfile* pSipProfile,
             OUT AString& strHeader);
 
@@ -68,7 +68,7 @@ public:
      * @param pSipProfile SIP profile for this header
      * @param piSipMsg SIP message object
      */
-    static void SetHeader(IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr,
+    static void SetHeader(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr,
             IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg);
 
 private:

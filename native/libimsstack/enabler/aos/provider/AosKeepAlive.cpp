@@ -106,8 +106,8 @@ void AosKeepAlive::Stop()
 }
 
 PUBLIC
-IMS_BOOL AosKeepAlive::SetTransport(IN const IPAddress& objSourceIpAddress,
-        IN IMS_SINT32 nSourcePort, IN const IPAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
+IMS_BOOL AosKeepAlive::SetTransport(IN const IpAddress& objSourceIpAddress,
+        IN IMS_SINT32 nSourcePort, IN const IpAddress& objDestIpAddress, IN IMS_SINT32 nDestPort,
         IN IMS_SINT32 nProtocol /* = AosKeepAlive::TRANSPORT_UDP */)
 {
     if (m_piKeepAliveHelper == IMS_NULL)

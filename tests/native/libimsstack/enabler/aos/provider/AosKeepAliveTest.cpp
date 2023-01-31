@@ -129,7 +129,7 @@ TEST_F(AosKeepAliveTest, Stop)
 TEST_F(AosKeepAliveTest, SetTransport_KeepAliveHelperIsNull)
 {
     EXPECT_FALSE(m_pAosKeepAlive->SetTransport(
-            IPAddress("127.0.0.1"), 1234, IPAddress("127.0.0.2"), 5678, 1));
+            IpAddress("127.0.0.1"), 1234, IpAddress("127.0.0.2"), 5678, 1));
 }
 
 TEST_F(AosKeepAliveTest, ProcessKeepAliveTimerExpired_IsPongChecked)

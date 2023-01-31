@@ -33,10 +33,12 @@ public:
     MOCK_METHOD(void, SetListener, (IN IAosConnectionListener* piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosConnectionListener* piListener), (override));
     MOCK_METHOD(IMS_SINT32, GetMtu, (), (override));
-    MOCK_METHOD(const IPAddress&, GetLocalAddress, (IN IMS_SINT32 nIpVersion), (override));
+    MOCK_METHOD(const IpAddress&, GetLocalAddress, (IN IMS_SINT32 nIpVersion), (override));
     MOCK_METHOD(const AStringArray&, GetPcscfAddress, (IN IMS_SINT32 nIpVersion), (override));
-    MOCK_METHOD(IMS_SINT32, GetHostByName, (IN const AString& strHostName,
-            OUT IMSList<IPAddress>& objIps, IN IMS_SINT32 nIpVersion), (override));
+    MOCK_METHOD(IMS_SINT32, GetHostByName,
+            (IN const AString& strHostName, OUT IMSList<IpAddress>& objIps,
+                    IN IMS_SINT32 nIpVersion),
+            (override));
     MOCK_METHOD(const AString&, GetIfaceName, (), (override));
     MOCK_METHOD(IMS_BOOL, IsEpdgEnabled, (), (override));
     MOCK_METHOD(IMS_SINT32, GetIpcanCategory, (), (override));

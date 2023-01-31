@@ -54,7 +54,7 @@ private:
     IMS_BOOL IsIpSecSaMatched(IN IMS_SINT32 nSlotId, IN const SipTransportAddress& objNearEnd,
             IN const SipTransportAddress& objFarEnd);
     IMS_BOOL IsIpSecSaMatchedForUs(
-            IN IMS_SINT32 nSlotId, IN const IPAddress& objIp, IN IMS_SINT32 nPort);
+            IN IMS_SINT32 nSlotId, IN const IpAddress& objIp, IN IMS_SINT32 nPort);
     IMS_BOOL IsSecuredMessage(IN IMS_SINT32 nSlotId, IN ::SipMessage* pSipMsg);
 
     IMS_BOOL CheckRegContactValidity(IN IMS_SINT32 nSlotId, IN ::SipMessage* pSipMsg);

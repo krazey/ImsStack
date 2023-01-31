@@ -40,8 +40,8 @@ public:
      * @param objHostIp Resolved host IP address
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL LocalDnsQuery_GetHostByName(IN const IPAddress& objLocalIp,
-            IN const AString& strHostname, OUT IPAddress& objHostIp) = 0;
+    virtual IMS_BOOL LocalDnsQuery_GetHostByName(IN const IpAddress& objLocalIp,
+            IN const AString& strHostname, OUT IpAddress& objHostIp) = 0;
 };
 
 #endif

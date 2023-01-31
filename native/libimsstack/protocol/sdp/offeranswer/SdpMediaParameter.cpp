@@ -701,7 +701,7 @@ void SdpMediaParameter::SetAttributeMid(IN const AString& strAttrMid)
 PUBLIC
 IMS_BOOL SdpMediaParameter::SetConnectionAddress(IN const AString& strAddress)
 {
-    IPAddress objIpAddr;
+    IpAddress objIpAddr;
 
     if (strAddress.GetLength() > 0)
     {

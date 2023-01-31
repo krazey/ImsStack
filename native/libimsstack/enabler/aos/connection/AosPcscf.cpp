@@ -83,7 +83,7 @@ PROTECTED VIRTUAL void AosPcscf::CleanUp()
     CleanAll();
 }
 
-PUBLIC VIRTUAL void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IPAddress::UNKNOWN */)
+PUBLIC VIRTUAL void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IpAddress::UNKNOWN */)
 {
     A_IMS_TRACE_I(APPPROFILE, "Configure :: nIpVersion(%d)", nIpVersion, 0, 0);
 
@@ -107,7 +107,7 @@ PUBLIC VIRTUAL void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IPAddress:
         if (!IsConfigured() && (m_piDnsQueryRetryTimer == IMS_NULL))
         {
             IMS_SINT32 nOtherIpType =
-                    (nIpType == IPAddress::IPV6) ? IPAddress::IPV4 : IPAddress::IPV6;
+                    (nIpType == IpAddress::IPV6) ? IpAddress::IPV4 : IpAddress::IPV6;
             if (IsLocalAddressValid(nOtherIpType))
             {
                 ClearDiscoveryContents();
@@ -198,7 +198,7 @@ PUBLIC VIRTUAL void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
 
     for (int nAt = 0; nAt < objPcscfs.GetCount(); ++nAt)
     {
-        IPAddress objIpa(objPcscfs.GetElementAt(nAt));
+        IpAddress objIpa(objPcscfs.GetElementAt(nAt));
 
         if ((objPorts.GetSize() != 0) && (objPorts.GetAt(static_cast<IMS_UINT32>(nAt)) != IMS_NULL))
         {
@@ -516,7 +516,7 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::CheckAndProcessChangeFromPco()
         return IMS_FALSE;
     }
 
-    IPAddress objCurrPcscf;
+    IpAddress objCurrPcscf;
     if (!objCurrPcscf.Parse(strCurrPcscf))
     {
         return IMS_FALSE;
@@ -581,7 +581,7 @@ IMS_BOOL AosPcscf::GetChangedPcscfs(OUT AStringArray& objPcscfs, IN IMS_SINT32 n
 
     if (objNewPcscfs.GetCount() > 0)
     {
-        IPAddress objIpa;
+        IpAddress objIpa;
 
         for (int nAt = 0; nAt < objNewPcscfs.GetCount(); nAt++)
         {
@@ -619,11 +619,11 @@ IMS_BOOL AosPcscf::GetChangedPcscfs(OUT AStringArray& objPcscfs, IN IMS_SINT32 n
 PROTECTED
 IMS_SINT32 AosPcscf::GetLocalIpVersion()
 {
-    const IPAddress& objIpa = m_piAppContext->GetConnection()->GetLocalAddress();
+    const IpAddress& objIpa = m_piAppContext->GetConnection()->GetLocalAddress();
     IMS_SINT32 nIpVersion = objIpa.GetVersion();
 
     A_IMS_TRACE_I(APPPROFILE, "GetLocalIpVersion :: IP version (%s)",
-            (nIpVersion == IPAddress::IPV4) ? "IPv4" : "IPv6", 0, 0);
+            (nIpVersion == IpAddress::IPV4) ? "IPv4" : "IPv6", 0, 0);
 
     return nIpVersion;
 }
@@ -631,25 +631,25 @@ IMS_SINT32 AosPcscf::GetLocalIpVersion()
 PROTECTED
 IMS_BOOL AosPcscf::IsLocalAddressValid(IN IMS_SINT32 nIpVersion)
 {
-    const IPAddress& objIpa = m_piAppContext->GetConnection()->GetLocalAddress(nIpVersion);
+    const IpAddress& objIpa = m_piAppContext->GetConnection()->GetLocalAddress(nIpVersion);
     return (!objIpa.IsAnyAddress());
 }
 
 PROTECTED
 IMS_BOOL AosPcscf::IsLocalAddressTypeValid(IN IMS_SINT32 nIpVersion) const
 {
-    return (nIpVersion == IPAddress::IPV4 || nIpVersion == IPAddress::IPV6);
+    return (nIpVersion == IpAddress::IPV4 || nIpVersion == IpAddress::IPV6);
 }
 
 PROTECTED
-IMS_BOOL AosPcscf::IsSamePcscf(IN const IPAddress& objPcscfAddress, IN IMS_SINT32 nPort)
+IMS_BOOL AosPcscf::IsSamePcscf(IN const IpAddress& objPcscfAddress, IN IMS_SINT32 nPort)
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objPcscfList.GetSize(); ++nAt)
     {
         Pcscf* pPcscf = m_objPcscfList.GetAt(nAt);
         if (pPcscf != IMS_NULL)
         {
-            IPAddress objIpa(pPcscf->GetAddress());
+            IpAddress objIpa(pPcscf->GetAddress());
 
             if (objIpa.Equals(objPcscfAddress) && (pPcscf->GetPort() == nPort))
             {
@@ -747,7 +747,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromPco(IN IMS_SINT32 nIpVersion)
 
     if (objCurrPcscfs.GetCount() > 0)
     {
-        IPAddress objIpa;
+        IpAddress objIpa;
 
         for (int nAt = 0; nAt < objCurrPcscfs.GetCount(); nAt++)
         {
@@ -821,7 +821,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
             nPort = GetDefaultPcscfPort();
         }
 
-        IPAddress objIpa;
+        IpAddress objIpa;
         objIpa.Parse(strHost);
 
         // check the IP address or not
@@ -854,7 +854,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
 PROTECTED VIRTUAL IMS_BOOL AosPcscf::ProcessDnsQuery(
         IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion)
 {
-    IMSList<IPAddress> objIpas;
+    IMSList<IpAddress> objIpas;
 
     A_IMS_TRACE_D(APPPROFILE, "DNS query :: host (%s)", strHost.GetStr(), 0, 0);
     if (m_piAppContext->GetConnection()->GetHostByName(strHost, objIpas, nIpVersion) == -1)
@@ -872,7 +872,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::ProcessDnsQuery(
 
     for (IMS_UINT32 i = 0; i < objIpas.GetSize(); ++i)
     {
-        const IPAddress& objCurrIpa = objIpas.GetAt(i);
+        const IpAddress& objCurrIpa = objIpas.GetAt(i);
 
         if (objCurrIpa.GetVersion() != nIpVersion)
         {
@@ -982,7 +982,7 @@ void AosPcscf::PrintPcscfs()
 PROTECTED
 void AosPcscf::ProcessDnsRetryTimerExpired()
 {
-    IMS_SINT32 nIpVersion = IPAddress::UNKNOWN;
+    IMS_SINT32 nIpVersion = IpAddress::UNKNOWN;
     m_bIsDnsQueryRetry = IMS_TRUE;
     A_IMS_TRACE_I(APPPROFILE, "ProcessDnsRetryTimerExpired", 0, 0, 0);
 
@@ -1012,7 +1012,7 @@ void AosPcscf::ProcessDnsRetryTimerExpired()
         if (!IsConfigured() && m_bOtherIpTypeRequired)
         {
             IMS_SINT32 nOtherIpType =
-                    (nIpVersion == IPAddress::IPV6) ? IPAddress::IPV4 : IPAddress::IPV6;
+                    (nIpVersion == IpAddress::IPV6) ? IpAddress::IPV4 : IpAddress::IPV6;
             if (IsLocalAddressValid(nOtherIpType))
             {
                 ClearDiscoveryContents();
@@ -1129,13 +1129,13 @@ void AosPcscf::ProcessReorder(
     A_IMS_TRACE_D(APPPROFILE, "ProcessReorder", 0, 0, 0);
 
     AStringArray objUpdatePcscfs;
-    IPAddress objIpa(strCurrentPcscf);
+    IpAddress objIpa(strCurrentPcscf);
 
     IMS_SINT32 nCurrentIndex = 0;
     for (int nAt = 0; nAt < objNewPcscfs.GetCount(); nAt++)
     {
         const AString& strCurr = objNewPcscfs.GetElementAt(nAt);
-        IPAddress objIpaCurr(strCurr);
+        IpAddress objIpaCurr(strCurr);
 
         if (objIpaCurr.Equals(objIpa))
         {
@@ -1167,7 +1167,7 @@ void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs, IN IMS_SINT32 nPor
 
     for (int nAt = 0; nAt < objPcscfs.GetCount(); ++nAt)
     {
-        IPAddress objIpa(objPcscfs.GetElementAt(nAt));
+        IpAddress objIpa(objPcscfs.GetElementAt(nAt));
         if (!IsSamePcscf(objIpa, nPort))
         {
             AddPcscf(objIpa.ToString(), nPort);

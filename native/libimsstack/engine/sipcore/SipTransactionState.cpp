@@ -325,7 +325,7 @@ void SipTransactionState::SetTransportListener(IN ISipTransportListener* piListe
 
 // RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
 PUBLIC
-void SipTransactionState::SetTransportTuple(IN const IPAddress& objIp, IN IMS_SINT32 nPortS,
+void SipTransactionState::SetTransportTuple(IN const IpAddress& objIp, IN IMS_SINT32 nPortS,
         IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc /*= Sip::PORT_UNSPECIFIED*/,
         IN IMS_SINT32 nTransportExt /*= Sip::TRANSPORT_EXT_ANY*/)
 {

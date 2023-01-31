@@ -525,7 +525,7 @@ IMS_BOOL SipMessageHandler::IsIpSecSaMatched(IN IMS_SINT32 nSlotId,
 
 PRIVATE
 IMS_BOOL SipMessageHandler::IsIpSecSaMatchedForUs(
-        IN IMS_SINT32 nSlotId, IN const IPAddress& objIp, IN IMS_SINT32 nPort)
+        IN IMS_SINT32 nSlotId, IN const IpAddress& objIp, IN IMS_SINT32 nPort)
 {
     SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
     const IMSList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
@@ -565,7 +565,7 @@ IMS_BOOL SipMessageHandler::IsSecuredMessage(IN IMS_SINT32 nSlotId, IN ::SipMess
     }
     else
     {
-        IPAddress objIp(strHost);
+        IpAddress objIp(strHost);
 
         if (IsIpSecSaMatchedForUs(nSlotId, objIp, nPort))
         {

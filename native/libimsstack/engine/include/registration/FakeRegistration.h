@@ -68,11 +68,11 @@ private:
     // IRegistration interface
     IMS_BOOL CreateBinding(IN const AString& strAppId, IN const AString& strServiceId) override;
     void DestroyBinding(IN const AString& strAppId, IN const AString& strServiceId) override;
-    IRegContact* CreateContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort,
+    IRegContact* CreateContact(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nExpiresPolicy = POLICY_EXPIRES_CONFIG,
             IN IMS_UINT32 nExpiresValue = DEFAULT_EXPIRES) override;
     void DestroyContact(IN IRegContact* piContact) override;
-    void DestroyContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) override;
+    void DestroyContact(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) override;
     inline const Credential* GetCredential() const override { return IMS_NULL; }
     inline const SipAddress& GetAor() const override { return m_pStateTracker->GetAor(); }
     inline const AStringArray& GetAssociatedUris() const override
@@ -84,13 +84,13 @@ private:
         return m_pStateTracker->GetAuthorizedAor();
     }
     IMSList<IRegContact*> GetAllContacts() const override;
-    IRegContact* GetContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) const override;
+    IRegContact* GetContact(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) const override;
     inline IRegContact* GetPreferredContact() const override
     {
         return const_cast<RegContact*>(m_pStateTracker->GetPreferredContact());
     }
     inline IRegParameter* GetParameter() const override { return m_pRegParam; }
-    inline const IPAddress& GetPublicIpAddress() const override { return IPAddress::NONE; }
+    inline const IpAddress& GetPublicIpAddress() const override { return IpAddress::NONE; }
     inline const AStringArray& GetServiceRoutes() const override
     {
         return m_pStateTracker->GetServiceRoutes();

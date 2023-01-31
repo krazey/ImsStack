@@ -28,7 +28,7 @@ class SipProfile;
 class RegContact final : public ImsSlot, public IRegContact
 {
 public:
-    RegContact(IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort,
+    RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
             IN IRegCapabilityChangeListener* piListener, IN IMS_SINT32 nRegId = (-1),
             IN const SipProfile* pProfile = IMS_NULL);
     virtual ~RegContact();
@@ -40,7 +40,7 @@ public:
     // IRegContact interface
     inline const SipAddress& GetContactAddress() const override { return m_objContactAddress; }
     IMS_UINT32 GetExpires() const override;
-    inline const IPAddress& GetIpAddress() const override { return m_objIpAddr; }
+    inline const IpAddress& GetIpAddress() const override { return m_objIpAddr; }
     inline IMS_SINT32 GetPort() const override { return m_objContactAddress.GetPort(); }
     inline const IMSList<SipParameter*>& GetHeaderParameters() const override
     {
@@ -73,7 +73,7 @@ public:
     void SetAor(IN const SipAddress& objAor);
     inline void SetExpires(IN IMS_UINT32 nExpires) { m_nInitialExpires = nExpires; }
     // IMS_IPSEC_UDP_ENC
-    inline void SetHostInfo(IN const IPAddress& objIpAddr)
+    inline void SetHostInfo(IN const IpAddress& objIpAddr)
     {
         m_objContactAddress.SetHost(objIpAddr.ToString());
     }
@@ -155,7 +155,7 @@ private:
     IMS_SINT32 m_nState;
     SipAddress* m_pAor;
     // URI for Contact header
-    IPAddress m_objIpAddr;
+    IpAddress m_objIpAddr;
     IMS_SINT32 m_nPolicyUserInfo;
     SipAddress m_objContactAddress;
 

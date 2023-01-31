@@ -69,7 +69,7 @@ public:
         m_piListener = piListener;
     }
     void SetTransportListener(IN ISipTransportListener* piListener);
-    void SetTransportTuple(IN const IPAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+    void SetTransportTuple(IN const IpAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY);
 

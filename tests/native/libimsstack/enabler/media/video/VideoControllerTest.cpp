@@ -39,7 +39,7 @@ public:
     VideoProfile* m_pLocalProfile;
     VideoProfile* m_pPeerProfile;
     VideoProfile* m_pNegoProfile;
-    IPAddress m_objIpAddress;
+    IpAddress m_objIpAddress;
 
 protected:
     virtual void SetUp() override
@@ -63,7 +63,7 @@ protected:
         m_pPeerProfile = new VideoProfile(*m_pLocalProfile);
         m_pNegoProfile = new VideoProfile(*m_pLocalProfile);
 
-        m_objIpAddress = IPAddress(LOCAL_IP);
+        m_objIpAddress = IpAddress(LOCAL_IP);
         ON_CALL(*m_pVideoNego, GetLocalAddress()).WillByDefault(ReturnRef(m_objIpAddress));
         ON_CALL(*m_pVideoNego, GetLocalPort()).WillByDefault(Return(LOCAL_PORT));
         ON_CALL(*m_pVideoNego, GetNegotiatedLocalProfile()).WillByDefault(Return(m_pLocalProfile));

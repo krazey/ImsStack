@@ -19,7 +19,7 @@
 #include "network/OsSocket.h"
 
 PUBLIC GLOBAL IMS_BOOL PlatformApi::CheckIpAndPortAvailability(
-        IN const IPAddress& objIp, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType)
+        IN const IpAddress& objIp, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType)
 {
     return OsSocket::CheckIpAndPortAvailability(objIp, nPort, enType);
 }

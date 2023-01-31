@@ -135,7 +135,7 @@ ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN IMS_CONNECTION 
 }
 
 PUBLIC
-ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN const IPAddress& objIpAddr)
+ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN const IpAddress& objIpAddr)
 {
     LockGuard objLock(m_piLock);
 

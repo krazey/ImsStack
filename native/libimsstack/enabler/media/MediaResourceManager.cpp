@@ -171,7 +171,7 @@ PUBLIC IMS_BOOL MediaResourceManager::ReleaseRtpPort(IN IMS_UINT32 nPort)
 }
 
 PUBLIC IMS_BOOL MediaResourceManager::UpdatePdn(
-        IN IMS_SINT32 nPdnType, IN const IPAddress& objIpAddress)
+        IN IMS_SINT32 nPdnType, IN const IpAddress& objIpAddress)
 {
     if (m_nPdnType == nPdnType)
     {

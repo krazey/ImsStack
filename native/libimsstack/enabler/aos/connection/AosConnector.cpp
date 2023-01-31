@@ -318,14 +318,14 @@ IMS_BOOL AosConnector::CheckIpChangedForEmergency()
     IMS_UINT32 nNa = 0;
     piRegistration->GetProperty(IAosRegistration::PROPERTY_LOCAL_ADDRESS, nNa, strIpa);
 
-    IPAddress objIpa(strIpa);
+    IpAddress objIpa(strIpa);
     if (objIpa.IsUnknownAddress())
     {
         return IMS_FALSE;
     }
 
-    const IPAddress& objCurrIpa = m_piConnection->GetLocalAddress(
-            (objIpa.IsIPv6Address()) ? IPAddress::IPV6 : IPAddress::IPV4);
+    const IpAddress& objCurrIpa = m_piConnection->GetLocalAddress(
+            (objIpa.IsIPv6Address()) ? IpAddress::IPV6 : IpAddress::IPV4);
 
     return objIpa.Equals(objCurrIpa);
 }
@@ -341,13 +341,13 @@ IMS_BOOL AosConnector::CheckIpaAndProcessReadyRecovery()
 
         if (objPcscfs.GetFirstElement().GetLength() > 0)
         {
-            IPAddress objPcscf;
+            IpAddress objPcscf;
 
             bIsReady = IMS_TRUE;
             if (objPcscf.Parse(objPcscfs.GetFirstElement()))
             {
-                const IPAddress& objIpa = m_piConnection->GetLocalAddress(
-                        (objPcscf.IsIPv6Address()) ? IPAddress::IPV6 : IPAddress::IPV4);
+                const IpAddress& objIpa = m_piConnection->GetLocalAddress(
+                        (objPcscf.IsIPv6Address()) ? IpAddress::IPV6 : IpAddress::IPV4);
 
                 if (objPcscf.IsNoneAddress() || objIpa.IsNoneAddress())
                 {
@@ -394,7 +394,7 @@ IMS_BOOL AosConnector::SelectIpVersion()
 
     // Check if local address and PCSCF address are in the same IP version.
 
-    const IPAddress& objLocalAddr = m_piConnection->GetLocalAddress();
+    const IpAddress& objLocalAddr = m_piConnection->GetLocalAddress();
 
     if (objLocalAddr.IsUnknownAddress())
     {
@@ -424,7 +424,7 @@ IMS_BOOL AosConnector::SelectIpVersion()
         return IMS_FALSE;
     }
 
-    IPAddress objPcscfAddress(strPcscf);
+    IpAddress objPcscfAddress(strPcscf);
 
     if (objPcscfAddress.IsUnknownAddress())
     {
@@ -438,8 +438,8 @@ IMS_BOOL AosConnector::SelectIpVersion()
     {
         A_IMS_TRACE_I(APPPROFILE, "change default ip version", 0, 0, 0);
 
-        const IPAddress& objIpa =
-                m_piConnection->GetLocalAddress((bPcscfIpv6) ? IPAddress::IPV6 : IPAddress::IPV4);
+        const IpAddress& objIpa =
+                m_piConnection->GetLocalAddress((bPcscfIpv6) ? IpAddress::IPV6 : IpAddress::IPV4);
 
         if (bPcscfIpv6 != objIpa.IsIPv6Address())
         {
@@ -642,7 +642,7 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nD
         if (IsIpv6DelayRequired())
         {
             // check the local IP Address version
-            IPAddress objIpAddress = m_piConnection->GetLocalAddress();
+            IpAddress objIpAddress = m_piConnection->GetLocalAddress();
             IMS_BOOL bLocalIpv4 = objIpAddress.IsIPv4Address();
 
             if (!IsDataConnected() && bLocalIpv4)

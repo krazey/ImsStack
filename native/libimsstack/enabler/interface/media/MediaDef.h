@@ -153,7 +153,7 @@ enum MEDIA_SRVCC_STATUS
 struct QosRequestParam
 {
 public:
-    QosRequestParam(const MEDIA_CONTENT_TYPE type, const IPAddress& address, const IMS_SINT32 port,
+    QosRequestParam(const MEDIA_CONTENT_TYPE type, const IpAddress& address, const IMS_SINT32 port,
             const IMS_BOOL callback = IMS_FALSE) :
             m_eMediaType(type),
             m_objIpAddress(address),
@@ -182,7 +182,7 @@ public:
 
 public:
     MEDIA_CONTENT_TYPE m_eMediaType;
-    IPAddress m_objIpAddress;
+    IpAddress m_objIpAddress;
     IMS_SINT32 m_nPort;
     IMS_BOOL m_bCallback;
     IMS_BOOL m_bResult;

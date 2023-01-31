@@ -75,7 +75,7 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
 }
 
 PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
-        IN const IPAddress& objIpAddr, IN const SipMethod& objMethod,
+        IN const IpAddress& objIpAddr, IN const SipMethod& objMethod,
         IN const SipProfile* pSipProfile, OUT AString& strHeader)
 {
     INetworkConnection* piConnection =
@@ -90,7 +90,7 @@ PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotI
 }
 
 PUBLIC GLOBAL void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId,
-        IN const IPAddress& objIpAddr, IN const SipProfile* pSipProfile,
+        IN const IpAddress& objIpAddr, IN const SipProfile* pSipProfile,
         IN_OUT ISipMessage*& piSipMsg)
 {
     if (piSipMsg == IMS_NULL)

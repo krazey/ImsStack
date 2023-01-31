@@ -27,10 +27,10 @@ public:
     virtual ~SipDatagramSocket();
 
 public:
-    IMS_BOOL Create(IN const IPAddress& objIp, IN IMS_UINT32 nPort = 0,
+    IMS_BOOL Create(IN const IpAddress& objIp, IN IMS_UINT32 nPort = 0,
             IN IMS_BOOL bSecure = IMS_FALSE) override;
     IMS_SINT32 Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen, IN IMS_UINT32 nPort = 0,
-            IN const IPAddress& objIp = IPAddress::NONE) override;
+            IN const IpAddress& objIp = IpAddress::NONE) override;
     inline void SetListener(IN ISipDatagramSocketListener* piListener)
     {
         m_piListener = piListener;

@@ -72,7 +72,7 @@ public:
      * @return An instance of data connection.
      */
     virtual INetworkConnection* FindConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
-    virtual INetworkConnection* FindConnection(IN const IPAddress& objIpAddr);
+    virtual INetworkConnection* FindConnection(IN const IpAddress& objIpAddr);
 
     virtual ISocket* CreateSocket(IN INetworkConnection* piConnection);
     virtual ISocket* CreateSocket(IN const IMS_CHAR* pszProfileName, IN IMS_SINT32 nSlotId);
@@ -85,7 +85,7 @@ public:
 
     // To check if the specified IP address & port number can be used to create a socket
     virtual IMS_BOOL CheckIpAndPortAvailability(
-            IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
+            IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
 
     virtual IIpcan* GetIpcan();
     virtual INetworkIpSec* GetIpSec(IN IMS_SINT32 nSlotId);
@@ -95,7 +95,7 @@ public:
     static NetworkService* GetNetworkService();
 
     // Gets slot-id from the specified network connection
-    static IMS_SINT32 GetSlotId(IN const IPAddress& objIpAddr);
+    static IMS_SINT32 GetSlotId(IN const IpAddress& objIpAddr);
     static IMS_SINT32 GetSlotId(IN INetworkConnection* piConnection);
 
 private:

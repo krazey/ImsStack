@@ -508,7 +508,7 @@ public:
         DEFAULT_MAXPTIME = 240,
     };
 
-    IPAddress objIpAddr;
+    IpAddress objIpAddr;
     IMS_UINT32 nDataPort;
     IMS_UINT32 nControlPort;
     AString strTransportType;
@@ -530,7 +530,7 @@ public:
 
 public:
     AudioProfile() :
-            objIpAddr(IPAddress::IPv6NONE),
+            objIpAddr(IpAddress::IPv6NONE),
             nDataPort(0),
             nControlPort(0),
             strTransportType("RTP/AVP"),

@@ -22,7 +22,7 @@ PUBLIC
 SipTransportAddress::SipTransportAddress() :
         m_nProtocol(PROTOCOL_UDP),
         m_nPort(Sip::PORT_UNSPECIFIED),
-        m_objIpAddr(IPAddress::NONE)
+        m_objIpAddr(IpAddress::NONE)
 {
 }
 

@@ -338,7 +338,7 @@ PRIVATE VIRTUAL void SipClientConnectionImpl::SetImplicitRouteHeader(
     m_pScc->SetImplicitRouteHeader(strRouteHeader);
 }
 
-PRIVATE VIRTUAL void SipClientConnectionImpl::SetTransportTuple(IN const IPAddress& objIp,
+PRIVATE VIRTUAL void SipClientConnectionImpl::SetTransportTuple(IN const IpAddress& objIp,
         IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
         IN IMS_SINT32 nPortFc /*= Sip::PORT_UNSPECIFIED*/,
         IN IMS_SINT32 nTransportExt /*= Sip::TRANSPORT_EXT_ANY*/)

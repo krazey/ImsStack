@@ -52,7 +52,7 @@ public:
      * @param objIpAddr Destination IP address
      * @param nPort Destination port number
      */
-    virtual void SetTransportTupleD(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) = 0;
+    virtual void SetTransportTupleD(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) = 0;
 
     /**
      * @brief Sets the source transport information to transmit the keep-alive packet.
@@ -63,7 +63,7 @@ public:
      *                  #Sip#TRANSPORT_UDP\n
      *                  #Sip#TRANSPORT_TCP
      */
-    virtual void SetTransportTupleS(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort,
+    virtual void SetTransportTupleS(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nProtocol = Sip::TRANSPORT_UDP) = 0;
 };
 

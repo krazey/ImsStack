@@ -365,16 +365,16 @@ PROTECTED VIRTUAL const SipAddress* RegBinding::GetContactAddressForOutgoingMess
     return pStateTracker->GetContactAddressForOutgoingMessage();
 }
 
-PROTECTED VIRTUAL const IPAddress& RegBinding::GetIpAddress() const
+PROTECTED VIRTUAL const IpAddress& RegBinding::GetIpAddress() const
 {
     if (m_piRegEx == IMS_NULL)
     {
-        return IPAddress::NONE;
+        return IpAddress::NONE;
     }
 
     if (m_piContact == IMS_NULL)
     {
-        return IPAddress::NONE;
+        return IpAddress::NONE;
     }
 
     return m_piContact->GetIpAddress();
@@ -674,7 +674,7 @@ void RegBinding::RestoreTransportResourceForClientInitiatedConnection()
     }
 
     const SipAddress& objRoute = piRegParam->GetTopmostRouteAddress();
-    IPAddress objPeerIpAddr(objRoute.GetHost());
+    IpAddress objPeerIpAddr(objRoute.GetHost());
 
     if (m_piScn->RestoreTransportResource(nTransportResource, objPeerIpAddr, objRoute.GetPort()) !=
             IMS_SUCCESS)
@@ -700,7 +700,7 @@ void RegBinding::RestoreTransportResourceForServerConnection()
         return;
     }
 
-    if (m_piScn->RestoreTransportResource(nTransportResource, IPAddress::NONE, 0) != IMS_SUCCESS)
+    if (m_piScn->RestoreTransportResource(nTransportResource, IpAddress::NONE, 0) != IMS_SUCCESS)
     {
         m_piRegEx->ConnectionNotifierError_NotifyError(m_piScn,
                 ISipConnectionNotifier::TRANSPORT_ERROR_UDP_SERVER,

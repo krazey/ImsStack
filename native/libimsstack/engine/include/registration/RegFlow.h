@@ -41,7 +41,7 @@ public:
     inline void Release() { m_nSubscriber = NO_SUBSCRIBER; }
     void Restore();
     inline void SetCSeqValue(IN IMS_SINT32 nValue) { m_nCSeqValue = nValue; }
-    void UpdateCallId(IN const IPAddress& objIpAddr);
+    void UpdateCallId(IN const IpAddress& objIpAddr);
 
 public:
     enum

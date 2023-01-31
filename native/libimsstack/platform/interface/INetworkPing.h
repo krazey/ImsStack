@@ -43,7 +43,7 @@ public:
      *         #PING_STATUS_PENDING\n
      *         #PING_STATUS_NOK
      */
-    virtual IMS_SINT32 Ping(IN const IPAddress& objSrcIp, IN const IPAddress& objDstIp,
+    virtual IMS_SINT32 Ping(IN const IpAddress& objSrcIp, IN const IpAddress& objDstIp,
             IN IMS_SINT32 nDstPort, IN IMS_SINT32 nWaitTime) = 0;
 
     /**

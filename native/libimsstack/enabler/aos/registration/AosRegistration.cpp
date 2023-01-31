@@ -1346,9 +1346,9 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CreateRegistration()
     IAosConnection* piConnection = m_piContext->GetConnection();
 
     // select local IP version based on PCSCF IP version
-    IPAddress objPcscf(m_strPcscf);
+    IpAddress objPcscf(m_strPcscf);
     m_objIpa = piConnection->GetLocalAddress(
-            (objPcscf.IsIPv6Address()) ? IPAddress::IPV6 : IPAddress::IPV4);
+            (objPcscf.IsIPv6Address()) ? IpAddress::IPV6 : IpAddress::IPV4);
 
     CreateContact();
 

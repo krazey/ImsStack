@@ -169,7 +169,7 @@ public:
     AosFeatureTagList m_objFeatureTagList;
     AosFeatureTagList m_objBindedFeatureTagList;
 
-    IPAddress m_objIpa;
+    IpAddress m_objIpa;
     SipAddress m_objSipAddress;
     AString m_strHeader;
     AStringArray m_objImpus;
@@ -441,7 +441,7 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(ReturnRef(m_objPcscfPorts));
 
-        IPAddress objLocalIpa(AString("192.168.0.1"));
+        IpAddress objLocalIpa(AString("192.168.0.1"));
         m_objIpa = objLocalIpa;
         EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
                 .Times(AnyNumber())

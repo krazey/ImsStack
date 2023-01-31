@@ -532,7 +532,7 @@ AString SipAddress::GetUri() const
         objUri.Append(TextParser::CHAR_AT);
     }
 
-    IPAddress objHost;
+    IpAddress objHost;
 
     if (objHost.Parse(m_strHostInfo))
     {
@@ -782,7 +782,7 @@ IMS_RESULT SipAddress::SetHost(IN const AString& strHost)
         return IMS_FAILURE;  // Throw exception
     }
 
-    IPAddress objHost;
+    IpAddress objHost;
 
     if (objHost.Parse(strHost))
     {
@@ -1003,7 +1003,7 @@ AString SipAddress::ToString() const
         objSipAddr.Append(TextParser::CHAR_AT);
     }
 
-    IPAddress objHost;
+    IpAddress objHost;
 
     if (objHost.Parse(m_strHostInfo))
     {
@@ -1521,7 +1521,7 @@ IMS_BOOL SipAddress::Decode(IN const AString& strAddress, IN IMS_BOOL bParsePara
 
             m_strHostInfo = SipStack::AddrSpec_GetHost(pAddrSpec);
 
-            IPAddress objHost;
+            IpAddress objHost;
 
             if (objHost.Parse(m_strHostInfo))
             {

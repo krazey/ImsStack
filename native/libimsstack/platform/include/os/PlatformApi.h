@@ -23,7 +23,7 @@ class PlatformApi
 public:
     // Checks if socket bind information is used or not.
     static IMS_BOOL CheckIpAndPortAvailability(
-            IN const IPAddress& objIp, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
+            IN const IpAddress& objIp, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
     // Sets IMS debug flag
     static void SetDebugOn(IN IMS_BOOL bDebugOn);
 

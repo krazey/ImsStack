@@ -32,10 +32,10 @@ public:
 public:
     IMS_BOOL Equals(IN const SipTransportAddress& other) const;
 
-    inline const IPAddress& GetIpAddress() const { return m_objIpAddr; }
+    inline const IpAddress& GetIpAddress() const { return m_objIpAddr; }
     inline IMS_SINT32 GetPort() const { return m_nPort; }
     inline IMS_SINT32 GetProtocol() const { return m_nProtocol; }
-    inline void SetIpAddress(IN const IPAddress& objIpAddr) { m_objIpAddr = objIpAddr; }
+    inline void SetIpAddress(IN const IpAddress& objIpAddr) { m_objIpAddr = objIpAddr; }
     inline void SetPort(IN IMS_UINT32 nPort) { m_nPort = nPort; }
     inline void SetProtocol(IN IMS_SINT32 nProtocol) { m_nProtocol = nProtocol; }
 
@@ -58,7 +58,7 @@ private:
     // Port; If -1, the default port number will be selected according to the transport protocol
     IMS_SINT32 m_nPort;
     // IP address (null-terminating dotted numeric IP address)
-    IPAddress m_objIpAddr;
+    IpAddress m_objIpAddr;
 };
 
 #endif

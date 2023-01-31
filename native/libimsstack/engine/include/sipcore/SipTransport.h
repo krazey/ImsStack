@@ -46,7 +46,7 @@ public:
     const SipTransportAddress& GetAddress(IN IMS_SINT32 nTaType = TA_NEAR) const;
     inline IMS_SINT32 GetPortC() const { return m_nNearEndPortC; }
     inline IMS_SINT32 GetPortFlowControl() const { return m_nPortFlowControl; }
-    const IPAddress& GetIpAddress(IN IMS_SINT32 nTaType = TA_NEAR);
+    const IpAddress& GetIpAddress(IN IMS_SINT32 nTaType = TA_NEAR);
     IMS_SINT32 GetPort(IN IMS_SINT32 nTaType = TA_NEAR) const;
     IMS_SINT32 GetProtocol(IN IMS_SINT32 nTaType = TA_NEAR) const;
     inline IMS_SINT32 GetTransportExt() const { return m_nTransportExt; }
@@ -72,7 +72,7 @@ public:
     {
         m_bExplicitTargetProtocol = bExplicitTargetProtocol;
     }
-    void SetIpAddress(IN const IPAddress& objIp, IN IMS_SINT32 nTaType = TA_NEAR);
+    void SetIpAddress(IN const IpAddress& objIp, IN IMS_SINT32 nTaType = TA_NEAR);
     inline void SetListener(IN ISipTransportListener* piListener) { m_piListener = piListener; }
     void SetPort(IN IMS_SINT32 nPort, IN IMS_SINT32 nTaType = TA_NEAR);
     void SetProtocol(IN IMS_SINT32 nProtocol, IN IMS_SINT32 nTaType = TA_NEAR);
@@ -80,7 +80,7 @@ public:
     {
         m_bTxnFlowControlRequired = bFlowControlRequired;
     }
-    void SetTransportTuple(IN const IPAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+    void SetTransportTuple(IN const IpAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY);
     void StoreResource();

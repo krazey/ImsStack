@@ -33,7 +33,7 @@ public:
 
 public:
     SipSocket* Accept() override;
-    IMS_BOOL Create(IN const IPAddress& objIp, IN IMS_UINT32 nPort = 0,
+    IMS_BOOL Create(IN const IpAddress& objIp, IN IMS_UINT32 nPort = 0,
             IN IMS_BOOL bSecure = IMS_FALSE) override;
     inline void SetListener(IN ISipStreamSocketListener* piListener) { m_piListener = piListener; }
 

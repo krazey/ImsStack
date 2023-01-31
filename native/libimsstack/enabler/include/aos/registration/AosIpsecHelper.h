@@ -44,7 +44,7 @@ public:
     virtual IMS_BOOL IsPcscfServerPortDifferent();
     virtual IMS_BOOL UpdatePreloadedRoute(IN const AString& strPcscf);
 
-    virtual IMS_BOOL MakeSas(IN const AString& strPcscf, IN const IPAddress& objIpa,
+    virtual IMS_BOOL MakeSas(IN const AString& strPcscf, IN const IpAddress& objIpa,
             IN const ByteArray& objIk, IN const ByteArray& objCk);
 
     virtual IMS_BOOL ProcessAuthChallenged(IN IMS_SINT32 nAlgorithm);

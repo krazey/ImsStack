@@ -87,8 +87,8 @@ public:
     MockISession* m_pIsession;
     MockICoreService m_objMockICoreService;
     MockIMediaSessionClientListener m_objClientListener;
-    IPAddress m_objLocalIpAddress;
-    IPAddress m_objRemoteIpAddress;
+    IpAddress m_objLocalIpAddress;
+    IpAddress m_objRemoteIpAddress;
 
     IMS_UINTP createAudioSession()
     {

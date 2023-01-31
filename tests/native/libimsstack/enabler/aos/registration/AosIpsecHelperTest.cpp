@@ -443,7 +443,7 @@ TEST_F(AosIpsecHelperTest, Create)
     SetRegParameter(static_cast<IRegParameter*>(&objMockIRegParameter));
 
     // SetUePortnSpi() - GetValidUePort()
-    IPAddress objIpAddr(IPADDR1);
+    IpAddress objIpAddr(IPADDR1);
     EXPECT_CALL(objMockIRegContact, GetIpAddress()).Times(3).WillRepeatedly(ReturnRef(objIpAddr));
 
     EXPECT_CALL(objMockIRegContact, SetPort(_)).Times(AnyNumber());
@@ -566,7 +566,7 @@ TEST_F(AosIpsecHelperTest, MakeSas)
     SetIpsec(NEW_IPSEC, pAosNewIpsec);
 
     AString strPcscf = IPADDR1;
-    IPAddress objIpa(IPADDR2);
+    IpAddress objIpa(IPADDR2);
 
     AString strIk = "";
     strIk.Append("integrity key");
@@ -727,7 +727,7 @@ TEST_F(AosIpsecHelperTest, ProcessRegStarted)
             .Times(1)
             .WillOnce(Return(&objMockIAosConnection));
 
-    IPAddress ipAddr(ADDRESS1);
+    IpAddress ipAddr(ADDRESS1);
     EXPECT_CALL(objMockIAosConnection, GetLocalAddress(_)).Times(1).WillOnce(ReturnRef(ipAddr));
 
     pAosIpsecHelper->ProcessRegStarted();

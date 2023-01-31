@@ -434,7 +434,7 @@ PUBLIC VIRTUAL AString SdpSessionDescription::Encode() const
 
 PUBLIC
 IMS_BOOL SdpSessionDescription::CreateMandatoryLines(
-        IN const AString& strUserId, IN const IPAddress& objLocalAddress)
+        IN const AString& strUserId, IN const IpAddress& objLocalAddress)
 {
     // Mandatory SDP lines: v, o, s, t
     AString strAddress = objLocalAddress.ToString();

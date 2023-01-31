@@ -29,7 +29,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC GLOBAL void UserAgentHeader::SetHeader(IN const AString& strName,
         IN const SipProfile* pProfile, IN const AString& /*strServiceId*/,
-        IN const IPAddress& /*objIpAddr*/, IN IMS_SINT32 nSlotId, IN_OUT ISipMessage*& piSipMsg)
+        IN const IpAddress& /*objIpAddr*/, IN IMS_SINT32 nSlotId, IN_OUT ISipMessage*& piSipMsg)
 {
     if (strName.GetLength() == 0)
     {

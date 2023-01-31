@@ -70,7 +70,7 @@ public:
      * @param nPDNType The pdn type to change
      * @param objIpAddress The local ip address
      */
-    virtual IMS_BOOL UpdatePdn(IN IMS_SINT32 nPDNType, IN const IPAddress& objIpAddress);
+    virtual IMS_BOOL UpdatePdn(IN IMS_SINT32 nPDNType, IN const IpAddress& objIpAddress);
 
     /** Get the current network type connected */
     IMS_SINT32 GetNetworkType();

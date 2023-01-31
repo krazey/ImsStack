@@ -44,23 +44,23 @@ public:
     MOCK_METHOD(void, DestroyBinding, (IN const AString& strAppId, IN const AString& strServiceId),
             (override));
     MOCK_METHOD(IRegContact*, CreateContact,
-            (IN const IPAddress& objIPA, IN IMS_SINT32 nPort, IN IMS_SINT32 nExpiresPolicy,
+            (IN const IpAddress& objIPA, IN IMS_SINT32 nPort, IN IMS_SINT32 nExpiresPolicy,
                     IN IMS_UINT32 nExpiresValue),
             (override));
     MOCK_METHOD(void, DestroyContact, (IN IRegContact * piContact), (override));
     MOCK_METHOD(
-            void, DestroyContact, (IN const IPAddress& objIPA, IN IMS_SINT32 nPort), (override));
+            void, DestroyContact, (IN const IpAddress& objIPA, IN IMS_SINT32 nPort), (override));
     MOCK_METHOD(IMS_BOOL, Equals, (IN const IRegistration* piReg), (const, override));
     MOCK_METHOD(const Credential*, GetCredential, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetAor, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetAssociatedUris, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetAuthorizedAor, (), (const, override));
     MOCK_METHOD(IMSList<IRegContact*>, GetAllContacts, (), (const, override));
-    MOCK_METHOD(IRegContact*, GetContact, (IN const IPAddress& objIPA, IN IMS_SINT32 nPort),
+    MOCK_METHOD(IRegContact*, GetContact, (IN const IpAddress& objIPA, IN IMS_SINT32 nPort),
             (const, override));
     MOCK_METHOD(IRegContact*, GetPreferredContact, (), (const, override));
     MOCK_METHOD(IRegParameter*, GetParameter, (), (const, override));
-    MOCK_METHOD(const IPAddress&, GetPublicIpAddress, (), (const, override));
+    MOCK_METHOD(const IpAddress&, GetPublicIpAddress, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetServiceRoutes, (), (const, override));
     MOCK_METHOD(SipProfile*, GetSipProfile, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));

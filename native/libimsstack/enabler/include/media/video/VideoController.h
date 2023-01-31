@@ -105,7 +105,7 @@ public:
 
 private:
     VideoMediaSession* m_pSession;
-    IPAddress m_objLocalAddr;
+    IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
 };
 

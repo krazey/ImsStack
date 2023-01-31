@@ -40,7 +40,7 @@ public:
     static IMS_BOOL StartUp();
     static void CleanUp();
     static IMS_BOOL CheckIpAndPortAvailability(
-            IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType);
+            IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType);
 
 protected:
     // ISocket class
@@ -52,19 +52,19 @@ protected:
     SOCKET_RESULT Close() override final;
     void SetListener(IN ISocketListener* piListener) override;
     ISocket* Accept() override;
-    SOCKET_RESULT Bind(IN const IPAddress& objSocketAddress, IN IMS_UINT32 nSocketPort) override;
-    SOCKET_RESULT Connect(IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort) override;
+    SOCKET_RESULT Bind(IN const IpAddress& objSocketAddress, IN IMS_UINT32 nSocketPort) override;
+    SOCKET_RESULT Connect(IN const IpAddress& objHostAddress, IN IMS_UINT32 nHostPort) override;
     SOCKET_RESULT Listen(IN IMS_SINT32 nBackLog = MAX_BACKLOG
             /*Maximum length of the queue of pending connections*/) override;
     IMS_SINT32 Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen) override;
     IMS_SINT32 Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen) override;
     IMS_SINT32 ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-            OUT IPAddress& objHostAddress, OUT IMS_UINT32& nHostPort) override;
+            OUT IpAddress& objHostAddress, OUT IMS_UINT32& nHostPort) override;
     IMS_SINT32 SendTo(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-            IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort) override;
-    SOCKET_RESULT GetPeerName(OUT IPAddress& objPeerAddress, OUT IMS_UINT32& nPeerPort) override;
+            IN const IpAddress& objHostAddress, IN IMS_UINT32 nHostPort) override;
+    SOCKET_RESULT GetPeerName(OUT IpAddress& objPeerAddress, OUT IMS_UINT32& nPeerPort) override;
     SOCKET_RESULT GetSockName(
-            OUT IPAddress& objSocketAddress, OUT IMS_UINT32& nSocketPort) override;
+            OUT IpAddress& objSocketAddress, OUT IMS_UINT32& nSocketPort) override;
     IMS_BOOL Equals(IN const ISocket* piSocket) override;
     IMS_SINT32 GetOption(IN IMS_SINT32 nOption) override;
     IMS_BOOL SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue) override;
@@ -119,7 +119,7 @@ private:
     IMS_SINT32 m_nOptionForShutdown;
 
     // PATCH_FOR_NON_SOCKET
-    IPAddress m_objSocketAddress;
+    IpAddress m_objSocketAddress;
     IMS_UINT32 m_nSocketPort;
 
     // FIX_TIMING_ISSUE

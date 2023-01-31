@@ -809,11 +809,11 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
         IN IMS_BOOL bCheckMediaCapability /*= IMS_TRUE*/,
         IN IMS_BOOL bRequest /*= IMS_FALSE*/) const
 {
-    IPAddress objLocalAddress = GetService()->GetIpAddress();
+    IpAddress objLocalAddress = GetService()->GetIpAddress();
 
-    if (objLocalAddress.Equals(IPAddress::NONE))
+    if (objLocalAddress.Equals(IpAddress::NONE))
     {
-        objLocalAddress = IPAddress::LOOPBACK;
+        objLocalAddress = IpAddress::LOOPBACK;
     }
 
     SdpSessionDescription objSessionDesc;

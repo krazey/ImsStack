@@ -27,9 +27,9 @@ class OsIpSecSpPrivate
 {
 public:
     inline OsIpSecSpPrivate() :
-            m_objSrcIp(IPAddress::IPv6NONE),
+            m_objSrcIp(IpAddress::IPv6NONE),
             m_nSrcPort(0),
-            m_objDstIp(IPAddress::IPv6NONE),
+            m_objDstIp(IpAddress::IPv6NONE),
             m_nDstPort(0),
             m_nTransportProtocol(IpSecType::TRANS_PROTOCOL_ANY),
             m_nAction(IpSecType::ACTION_APPLY),
@@ -39,16 +39,16 @@ public:
             m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP),
             m_nAuthAlgorithm(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96),
             m_nEncryptionAlgorithm(IpSecType::ENCRYPTION_ALGORITHM_NO),
-            m_objTunnelSrcIp(IPAddress::IPv6NONE),
-            m_objTunnelDstIp(IPAddress::IPv6NONE)
+            m_objTunnelSrcIp(IpAddress::IPv6NONE),
+            m_objTunnelDstIp(IpAddress::IPv6NONE)
     {
     }
     inline ~OsIpSecSpPrivate() {}
 
 public:
-    IPAddress m_objSrcIp;
+    IpAddress m_objSrcIp;
     IMS_UINT32 m_nSrcPort;
-    IPAddress m_objDstIp;
+    IpAddress m_objDstIp;
     IMS_UINT32 m_nDstPort;
     IMS_UINT32 m_nTransportProtocol;
     IMS_UINT32 m_nAction;
@@ -58,8 +58,8 @@ public:
     IMS_UINT32 m_nSecurityProtocol;
     IMS_UINT32 m_nAuthAlgorithm;
     IMS_UINT32 m_nEncryptionAlgorithm;
-    IPAddress m_objTunnelSrcIp;
-    IPAddress m_objTunnelDstIp;
+    IpAddress m_objTunnelSrcIp;
+    IpAddress m_objTunnelDstIp;
 };
 
 PUBLIC
@@ -77,8 +77,8 @@ PUBLIC VIRTUAL OsIpSecSp::~OsIpSecSp()
     }
 }
 
-PUBLIC VIRTUAL void OsIpSecSp::SetTransportInfo(IN const IPAddress& objSrcIp,
-        IN IMS_UINT32 nSrcPort, IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+PUBLIC VIRTUAL void OsIpSecSp::SetTransportInfo(IN const IpAddress& objSrcIp,
+        IN IMS_UINT32 nSrcPort, IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort,
         IN IMS_UINT32 nTransportProtocol, IN IMS_UINT32 nAction, IN IMS_UINT32 nDirection,
         IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode)
 {

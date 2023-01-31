@@ -1416,33 +1416,33 @@ PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionExAsLocal() 
     return &(pMediaParam->GetMedia());
 }
 
-PRIVATE VIRTUAL IPAddress MediaDescriptor::GetLocalAddress() const
+PRIVATE VIRTUAL IpAddress MediaDescriptor::GetLocalAddress() const
 {
     SdpMediaParameter* pMediaParam = m_piMediaState->GetMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
         IMS_TRACE_E(0, "No media parameter", 0, 0, 0);
-        return IPAddress::NONE;
+        return IpAddress::NONE;
     }
 
-    IPAddress objAddress;
+    IpAddress objAddress;
 
     // Frist, media-level connection address will be checked
     if (pMediaParam->IsConnectionPresent())
     {
         if (!objAddress.Parse(pMediaParam->GetConnectionAddress()))
         {
-            IMS_TRACE_E(0, "Parsing IPAddress failed", 0, 0, 0);
-            return IPAddress::NONE;
+            IMS_TRACE_E(0, "Parsing IpAddress failed", 0, 0, 0);
+            return IpAddress::NONE;
         }
     }
     else
     {
         if (!objAddress.Parse(m_piMediaState->GetConnectionAddress()))
         {
-            IMS_TRACE_E(0, "Parsing IPAddress failed", 0, 0, 0);
-            return IPAddress::NONE;
+            IMS_TRACE_E(0, "Parsing IpAddress failed", 0, 0, 0);
+            return IpAddress::NONE;
         }
     }
 
@@ -1462,14 +1462,14 @@ PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetLocalPort() const
     return pMediaParam->GetMedia().GetPort();
 }
 
-PRIVATE VIRTUAL IPAddress MediaDescriptor::GetRemoteAddress() const
+PRIVATE VIRTUAL IpAddress MediaDescriptor::GetRemoteAddress() const
 {
-    IPAddress objAddress;
+    IpAddress objAddress;
 
     if (!objAddress.Parse(GetRemoteAddressAsString()))
     {
         IMS_TRACE_D("Remote connection address may be FQDN or null", 0, 0, 0);
-        return IPAddress::NONE;
+        return IpAddress::NONE;
     }
 
     return objAddress;

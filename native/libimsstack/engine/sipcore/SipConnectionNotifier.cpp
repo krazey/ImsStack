@@ -281,7 +281,7 @@ AString SipConnectionNotifier::GetContactAddress() const
 
     strContact.Append(TextParser::CHAR_COLON);
 
-    const IPAddress& objAddress = GetLocalAddress();
+    const IpAddress& objAddress = GetLocalAddress();
     AString strPort;
     strPort.SetNumber(m_nPort);
 
@@ -386,7 +386,7 @@ IMS_BOOL SipConnectionNotifier::IsTransportResourceReserved(
 }
 
 PUBLIC
-IMS_RESULT SipConnectionNotifier::ReserveTransportResource(IN const IPAddress& objIp,
+IMS_RESULT SipConnectionNotifier::ReserveTransportResource(IN const IpAddress& objIp,
         IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl)
 {
     // Port (US) will not be updated in here; it will be set when SCN is created...
@@ -488,7 +488,7 @@ IMS_RESULT SipConnectionNotifier::ReserveTransportResource(IN const IPAddress& o
 
 PUBLIC
 IMS_RESULT SipConnectionNotifier::RestoreTransportResource(
-        IN IMS_SINT32 nType, IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort)
+        IN IMS_SINT32 nType, IN const IpAddress& objPeerIp, IN IMS_SINT32 nPeerPort)
 {
     IMS_RESULT nResult = IMS_SUCCESS;
 
@@ -863,7 +863,7 @@ IMS_BOOL SipConnectionNotifier::CreateClientInitiatedConnection(
 
     m_pSocketTcpClient->SetListener(this);
 
-    IPAddress objPeerIp;
+    IpAddress objPeerIp;
     IMS_UINT32 nPeerPort = 0;
 
     if (bPeerNameRequired)
@@ -1076,7 +1076,7 @@ SipTransportHelper* SipConnectionNotifier::GetTransportHelper() const
 
 PRIVATE
 IMS_RESULT SipConnectionNotifier::RestoreTransportResourceForClientInitiatedConnection(
-        IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort)
+        IN const IpAddress& objPeerIp, IN IMS_SINT32 nPeerPort)
 {
     IMS_BOOL bRestorationRequired = IMS_FALSE;
     IMS_SINT32 nClientPort = Sip::PORT_UNSPECIFIED;

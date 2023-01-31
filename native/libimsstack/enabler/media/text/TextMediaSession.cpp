@@ -39,7 +39,7 @@ PUBLIC TextMediaSession::TextMediaSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
         m_pConfig(IMS_NULL),
         m_objMediaQualityThreshold(MediaQualityThreshold()),
-        m_objLocalAddress(IPAddress::IPv6NONE),
+        m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0)
 {
     IMS_TRACE_I("+TextMediaSession()", 0, 0, 0);
@@ -243,7 +243,7 @@ IMS_BOOL TextMediaSession::UpdateMediaQualityThreshold(
 }
 
 PUBLIC
-void TextMediaSession::UpdateLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort)
+void TextMediaSession::UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     if (!objLocalAddr.ToString().IsNULL())
     {

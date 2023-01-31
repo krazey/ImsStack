@@ -40,12 +40,12 @@ public:
     MOCK_METHOD(
             IMS_BOOL, GetExtraInfo, (IN const AString& strType, OUT AString& strInfo), (override));
     MOCK_METHOD(IMS_SINT32, GetHostByName,
-            (IN const AString& strHostName, OUT IMSList<IPAddress>& objIpAddrs,
+            (IN const AString& strHostName, OUT IMSList<IpAddress>& objIpAddrs,
                     IN IMS_SINT32 nIpVersion),
             (override));
     MOCK_METHOD(IMS_SINT32, GetIfaceId, (), (const, override));
     MOCK_METHOD(const AString&, GetIfaceName, (), (const, override));
-    MOCK_METHOD(const IPAddress&, GetLocalAddress, (IN IMS_SINT32 nIpVersion), (const, override));
+    MOCK_METHOD(const IpAddress&, GetLocalAddress, (IN IMS_SINT32 nIpVersion), (const, override));
     MOCK_METHOD(const AStringArray&, GetPcscfAddress, (IN IMS_SINT32 nIpVersion), (override));
     MOCK_METHOD(STATE_ENTYPE, GetState, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsConnected, (IN IMS_SINT32 nCategory), (const, override));

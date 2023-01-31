@@ -39,7 +39,7 @@ PUBLIC VIRTUAL AString SdpLine::GetValue() const
 PROTECTED GLOBAL IMS_BOOL SdpLine::CheckValidityForAddress(
         IN const AString& strAddress, IN IMS_SINT32 nAddrType)
 {
-    IPAddress objIpAddr;
+    IpAddress objIpAddr;
 
     if (objIpAddr.Parse(strAddress))
     {

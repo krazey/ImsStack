@@ -152,7 +152,7 @@ public:
     };
 
 public:
-    IPAddress objIpAddress;
+    IpAddress objIpAddress;
     IMS_UINT32 nDataPort;
     IMS_UINT32 nControlPort;
     AString strTransportType;

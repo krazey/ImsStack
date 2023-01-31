@@ -74,7 +74,7 @@ PUBLIC VIRTUAL SipSocket* SipStreamSocketNotifier::Accept()
 }
 
 PUBLIC VIRTUAL IMS_BOOL SipStreamSocketNotifier::Create(
-        IN const IPAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
+        IN const IpAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
 {
     if (!SipSocket::Create(objIp, nPort, bSecure))
     {

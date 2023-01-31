@@ -336,7 +336,7 @@ TEST_F(AosConnectorTest, StateChanged_Active_Ipv6DelayRequired)
     EXPECT_CALL(m_objMockIAosConnection, GetIpcanCategory())
             .WillOnce(Return(IIpcan::CATEGORY_MOBILE));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     NotifyStateChanged(IAosConnection::STATE_ACTIVE);
     EXPECT_TRUE(IsDataConnected());
@@ -409,8 +409,8 @@ TEST_F(AosConnectorTest, StateChanged_Active_InvalidIpAddress)
     EXPECT_CALL(m_objMockIAosPcscf, IsConfigured()).WillOnce(Return(IMS_TRUE));
     m_objPcscfs.AddElement(AString("::1"));
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IPAddress::IPV6))
-            .WillOnce(ReturnRef(IPAddress::NONE));
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV6))
+            .WillOnce(ReturnRef(IpAddress::NONE));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
 
@@ -432,8 +432,8 @@ TEST_F(AosConnectorTest, StateChanged_Active)
     EXPECT_CALL(m_objMockIAosPcscf, IsConfigured()).WillOnce(Return(IMS_TRUE));
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IPAddress::IPV4))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
 
@@ -475,7 +475,7 @@ TEST_F(AosConnectorTest, IpChanged_Ready_NoPcscfAddress)
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Updated(_)).Times(0);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetState(AosConnector::STATE_READY);
@@ -491,7 +491,7 @@ TEST_F(AosConnectorTest, IpChanged_Ready_NullPcscfAddress)
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Updated(_)).Times(0);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetState(AosConnector::STATE_READY);
@@ -508,7 +508,7 @@ TEST_F(AosConnectorTest, IpChanged_Ready_EmptyPcscfAddress)
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Updated(_)).Times(0);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetState(AosConnector::STATE_READY);
@@ -525,7 +525,7 @@ TEST_F(AosConnectorTest, IpChanged_Ready_InvalidFormPcscfAddress)
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Updated(_)).Times(0);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetState(AosConnector::STATE_READY);
@@ -542,7 +542,7 @@ TEST_F(AosConnectorTest, IpChanged_Ready_NoMatchingIpVersion)
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Updated(_)).Times(0);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillRepeatedly(ReturnRef(IPAddress::LOOPBACK));
+            .WillRepeatedly(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetState(AosConnector::STATE_READY);
@@ -560,7 +560,7 @@ TEST_F(AosConnectorTest, IpChanged_Ready)
             .Times(0);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetState(AosConnector::STATE_READY);
@@ -573,7 +573,7 @@ TEST_F(AosConnectorTest, IpChanged_Idle_WaitMoreIPv6Address)
 {
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Activated()).Times(0);
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetDataConnected(IMS_TRUE);
@@ -590,7 +590,7 @@ TEST_F(AosConnectorTest, IpChanged_Idle_Pending)
 {
     EXPECT_CALL(m_objMockIAosConnectorListener, Connector_Activated()).Times(0);
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
-            .WillOnce(ReturnRef(IPAddress::IPv6LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::IPv6LOOPBACK));
     EXPECT_CALL(m_objMockIAosPcscf, IsAsyncDnsDiscovery()).WillOnce(Return(IMS_TRUE));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
@@ -625,8 +625,8 @@ TEST_F(AosConnectorTest, IpChanged_Idle_InvalidIpAddress)
             .WillOnce(Return(NetworkPolicy::APN_IMS));
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IPAddress::IPV4))
-            .WillOnce(ReturnRef(IPAddress::NONE));
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
+            .WillOnce(ReturnRef(IpAddress::NONE));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetDataConnected(IMS_TRUE);
@@ -645,8 +645,8 @@ TEST_F(AosConnectorTest, IpChanged_Idle)
             .WillOnce(Return(NetworkPolicy::APN_IMS));
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IPAddress::IPV4))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     SetDataConnected(IMS_TRUE);
@@ -847,8 +847,8 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_InvalidIpAddress)
             .WillOnce(Return(NetworkPolicy::APN_IMS));
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IPAddress::IPV4))
-            .WillOnce(ReturnRef(IPAddress::NONE));
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
+            .WillOnce(ReturnRef(IpAddress::NONE));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_FIVE_SEC);
@@ -869,8 +869,8 @@ TEST_F(AosConnectorTest, Ipv6TimerExpired_NotifyActivated)
             .WillOnce(Return(NetworkPolicy::APN_IMS));
     m_objPcscfs.AddElement(AString("1.1.1.1"));
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs()).WillOnce(ReturnRef(m_objPcscfs));
-    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IPAddress::IPV4))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+    EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(IpAddress::IPV4))
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
     StartTimer(AosConnector::TIMER_IPV6, TIMER_DURATION_FIVE_SEC);

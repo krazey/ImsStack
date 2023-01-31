@@ -43,7 +43,7 @@ public:
     IMS_BOOL Destroy();
 
     IMS_BOOL DnsQueryPrivate_Ready();
-    IMS_BOOL DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const IMSList<IPAddress>& objIps);
+    IMS_BOOL DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const IMSList<IpAddress>& objIps);
     IMS_BOOL DnsQueryPrivate_Terminated();
 
 private:
@@ -67,7 +67,7 @@ private:
     IAosDnsQueryListener* m_piListener;
     AString m_strDomainName;
     INetworkConnection* m_piConnection;
-    IMSList<IPAddress> m_objIps;
+    IMSList<IpAddress> m_objIps;
 
 private:
     // Use only for Unit test
@@ -81,7 +81,7 @@ public:
     virtual ~IAosDnsQueryListener(){};
 
     virtual void DnsQuery_Ready() = 0;
-    virtual void DnsQuery_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIps) = 0;
+    virtual void DnsQuery_Done(IN IMS_BOOL bResult, IN IMSList<IpAddress> objIps) = 0;
 };
 
 #endif  // AOS_DNS_QUERY_H_

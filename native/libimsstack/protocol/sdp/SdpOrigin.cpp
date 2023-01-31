@@ -229,7 +229,7 @@ void SdpOrigin::IncreaseSessionVersion()
 PUBLIC
 IMS_BOOL SdpOrigin::SetAddress(IN const AString& strAddress)
 {
-    IPAddress objAddress;
+    IpAddress objAddress;
 
     if (!objAddress.Parse(strAddress))
     {
@@ -272,7 +272,7 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
         return IMS_FALSE;
     }
 
-    IPAddress objAddress;
+    IpAddress objAddress;
 
     if (!objAddress.Parse(strAddress))
     {

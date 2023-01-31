@@ -286,7 +286,7 @@ PUBLIC IMS_BOOL TextNego::SetPort(IN IMS_UINT32 nPort)
 }
 
 PUBLIC
-const IPAddress& TextNego::GetNegotiatedRemoteAddress()
+const IpAddress& TextNego::GetNegotiatedRemoteAddress()
 {
     TextProfile* pProfile = GetNegotiatedPeerProfile();
 
@@ -295,7 +295,7 @@ const IPAddress& TextNego::GetNegotiatedRemoteAddress()
         return pProfile->objIpAddress;
     }
 
-    return IPAddress::NONE;
+    return IpAddress::NONE;
 }
 
 PUBLIC
@@ -1223,7 +1223,7 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     pNegotiatedProfile->nDataPort = pLocalProfile->nDataPort;
     pNegotiatedProfile->nControlPort = pLocalProfile->nControlPort;
 
-    IPAddress objLocalIPAddr = pLocalProfile->objIpAddress;
+    IpAddress objLocalIPAddr = pLocalProfile->objIpAddress;
 
     if (pNegotiatedProfile->nDataPort == 0 || pPeerProfile->nDataPort == 0)
     {

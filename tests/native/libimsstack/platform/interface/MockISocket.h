@@ -38,24 +38,24 @@ public:
     MOCK_METHOD(SOCKET_RESULT, Close, (), (override));
     MOCK_METHOD(ISocket*, Accept, (), (override));
     MOCK_METHOD(SOCKET_RESULT, Bind,
-            (IN const IPAddress& objSocketAddress, IN IMS_UINT32 nSocketPort), (override));
+            (IN const IpAddress& objSocketAddress, IN IMS_UINT32 nSocketPort), (override));
     MOCK_METHOD(SOCKET_RESULT, Connect,
-            (IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort), (override));
+            (IN const IpAddress& objHostAddress, IN IMS_UINT32 nHostPort), (override));
     MOCK_METHOD(SOCKET_RESULT, Listen, (IN IMS_SINT32 nBackLog), (override));
     MOCK_METHOD(IMS_SINT32, Receive, (OUT IMS_BYTE * pBuffer, IN IMS_SINT32 nBuffLen), (override));
     MOCK_METHOD(IMS_SINT32, Send, (IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen), (override));
     MOCK_METHOD(IMS_SINT32, ReceiveFrom,
-            (OUT IMS_BYTE * pBuffer, IN IMS_SINT32 nBuffLen, OUT IPAddress& objHostAddress,
+            (OUT IMS_BYTE * pBuffer, IN IMS_SINT32 nBuffLen, OUT IpAddress& objHostAddress,
                     OUT IMS_UINT32& nHostPort),
             (override));
     MOCK_METHOD(IMS_SINT32, SendTo,
-            (IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen, IN const IPAddress& objHostAddress,
+            (IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen, IN const IpAddress& objHostAddress,
                     IN IMS_UINT32 nHostPort),
             (override));
     MOCK_METHOD(SOCKET_RESULT, GetPeerName,
-            (OUT IPAddress & objPeerAddress, OUT IMS_UINT32& nPeerPort), (override));
+            (OUT IpAddress & objPeerAddress, OUT IMS_UINT32& nPeerPort), (override));
     MOCK_METHOD(SOCKET_RESULT, GetSockName,
-            (OUT IPAddress & objSocketAddress, OUT IMS_UINT32& nSocketPort), (override));
+            (OUT IpAddress & objSocketAddress, OUT IMS_UINT32& nSocketPort), (override));
     MOCK_METHOD(IMS_BOOL, Equals, (IN const ISocket* piSocket), (override));
     MOCK_METHOD(IMS_SINT32, GetOption, (IN IMS_SINT32 nOption), (override));
     MOCK_METHOD(

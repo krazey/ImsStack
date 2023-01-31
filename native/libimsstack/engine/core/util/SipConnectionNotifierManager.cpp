@@ -138,12 +138,12 @@ public:
     void Init(IN IMS_SINT32 nSlotId);
 
     ISipConnectionNotifier* CreateConnectionNotifier(IN const AString& strScheme,
-            IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+            IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFlowControl, IN const AString& strParams,
             IN const SipAddress& objUserId);
 
     ISipConnectionNotifier* GetConnectionNotifier(
-            IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort);
+            IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort);
 
     void AddConnectionNotifier(IN const AString& strKey, IN ISipConnectionNotifier* piScn);
     void ReleaseConnectionNotifier(IN ISipConnectionNotifier* piScn);
@@ -160,7 +160,7 @@ private:
     IMS_BOOL IsConnectionNotifierPresent(IN const ISipConnectionNotifier* piScn) const;
 
     static IMS_BOOL CheckMessageValidity(IN ISipMessage* piSipMsg, OUT AString& strReason);
-    static AString CreateConnectionNotifierKey(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort);
+    static AString CreateConnectionNotifierKey(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort);
     static void CreateExtraFeatures(IN Service* pService, OUT ImsList<FeatureSet*>& objFeatures);
     static void CreatePreferenceHeaders(
             IN const AStringArray& objAcceptContacts, OUT ImsList<PreferenceHeader*>& objHeaders);
@@ -252,7 +252,7 @@ void SipConnectionNotifierManagerPrivate::Init(IN IMS_SINT32 nSlotId)
 
 PUBLIC
 ISipConnectionNotifier* SipConnectionNotifierManagerPrivate::CreateConnectionNotifier(
-        IN const AString& strScheme, IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS,
+        IN const AString& strScheme, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS,
         IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl, IN const AString& strParams,
         IN const SipAddress& objUserId)
 {
@@ -302,7 +302,7 @@ ISipConnectionNotifier* SipConnectionNotifierManagerPrivate::CreateConnectionNot
 
 PUBLIC
 ISipConnectionNotifier* SipConnectionNotifierManagerPrivate::GetConnectionNotifier(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort)
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort)
 {
     AString strKey = CreateConnectionNotifierKey(objIpAddr, nPort);
     ISipConnectionNotifier* piScn = GetConnectionNotifier(strKey);
@@ -542,7 +542,7 @@ PRIVATE GLOBAL IMS_BOOL SipConnectionNotifierManagerPrivate::CheckMessageValidit
 }
 
 PRIVATE GLOBAL AString SipConnectionNotifierManagerPrivate::CreateConnectionNotifierKey(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort)
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort)
 {
     AString strKey;
 
@@ -1305,7 +1305,7 @@ PRIVATE GLOBAL void SipConnectionNotifierManagerPrivate::SetServerHeader(
         return;
     }
 
-    const IPAddress& objIpAddr = piScn->GetLocalAddress();
+    const IpAddress& objIpAddr = piScn->GetLocalAddress();
 
     if (SipConfigProxy::IsUserAgentSetByContext(nSlotId, pProfile))
     {
@@ -1336,7 +1336,7 @@ SipConnectionNotifierManager::~SipConnectionNotifierManager()
 
 PUBLIC
 ISipConnectionNotifier* SipConnectionNotifierManager::CreateConnectionNotifier(
-        IN const AString& strScheme, IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS,
+        IN const AString& strScheme, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS,
         IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl, IN const AString& strParams,
         IN const SipAddress& objUserId)
 {
@@ -1351,7 +1351,7 @@ ISipConnectionNotifier* SipConnectionNotifierManager::CreateConnectionNotifier(
 
 PUBLIC
 ISipConnectionNotifier* SipConnectionNotifierManager::GetConnectionNotifier(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort)
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort)
 {
     if (m_pScnMngrPrivate == IMS_NULL)
     {

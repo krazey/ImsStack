@@ -68,7 +68,7 @@ private:
         return m_pService->GetPathHeaders();
     }
     inline const IRegInfo* GetRegInfo() const override { return m_pService->GetRegInfo(); }
-    inline const IPAddress& GetIpAddress() const override { return m_pService->GetIpAddress(); }
+    inline const IpAddress& GetIpAddress() const override { return m_pService->GetIpAddress(); }
     inline SipProfile* GetSipProfile() const override { return m_pService->GetSipProfile(); }
     inline const AStringArray& GetUserIdentities() const override
     {

@@ -308,7 +308,7 @@ IMS_BOOL VideoNego::SetPort(IN IMS_UINT32 nPort)
 }
 
 PUBLIC
-const IPAddress& VideoNego::GetNegotiatedRemoteAddress()
+const IpAddress& VideoNego::GetNegotiatedRemoteAddress()
 {
     VideoProfile* pProfile = GetNegotiatedPeerProfile();
 
@@ -317,7 +317,7 @@ const IPAddress& VideoNego::GetNegotiatedRemoteAddress()
         return pProfile->objIpAddress;
     }
 
-    return IPAddress::NONE;
+    return IpAddress::NONE;
 }
 
 PUBLIC

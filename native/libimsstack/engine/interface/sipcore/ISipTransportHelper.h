@@ -44,7 +44,7 @@ public:
      * @param objLocalIp Specify local(bound) IP address to destroy a socket
      */
     virtual void DestroyAllSockets(
-            IN IMS_SINT32 nMethod = 0, IN const IPAddress& objLocalIp = IPAddress::NONE) = 0;
+            IN IMS_SINT32 nMethod = 0, IN const IpAddress& objLocalIp = IpAddress::NONE) = 0;
 
     /**
      * @brief Destroys the TCP client socket which matches with the specified
@@ -64,8 +64,8 @@ public:
      * @param objDstPort Destination port number
      * @param bIsConnectionByPeer Flag to indicate which endpoint the TCP connection is requested
      */
-    virtual void DestroyTcpSocket(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
-            IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+    virtual void DestroyTcpSocket(IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+            IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort,
             IN IMS_BOOL bIsConnectionByPeer = IMS_FALSE) = 0;
 
     /**
@@ -97,8 +97,8 @@ public:
      *                - (-1) : Inactivity timer by configuration
      *                - ( > 0) : Inactivity timer by this value
      */
-    virtual void SetKeepAlivePolicy(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
-            IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+    virtual void SetKeepAlivePolicy(IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+            IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort,
             IN IMS_SINT32 nPolicy = (-1) /* default */) = 0;
 
     /**

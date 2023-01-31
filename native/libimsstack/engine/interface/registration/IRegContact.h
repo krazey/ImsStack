@@ -73,7 +73,7 @@ public:
      *
      * @return IP address for this contact.
      */
-    virtual const IPAddress& GetIpAddress() const = 0;
+    virtual const IpAddress& GetIpAddress() const = 0;
 
     /**
      * @brief Returns the port number for this contact.

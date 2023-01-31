@@ -33,7 +33,7 @@ public:
             (override));
     MOCK_METHOD(const SipAddress&, GetContactAddress, (), (const, override));
     MOCK_METHOD(IMS_UINT32, GetExpires, (), (const, override));
-    MOCK_METHOD(const IPAddress&, GetIpAddress, (), (const, override));
+    MOCK_METHOD(const IpAddress&, GetIpAddress, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPort, (), (const, override));
     MOCK_METHOD(const IMSList<SipParameter*>&, GetHeaderParameters, (), (const, override));
     MOCK_METHOD(const SipParameter*, GetInstanceParameter, (), (const, override));

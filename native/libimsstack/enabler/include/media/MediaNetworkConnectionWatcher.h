@@ -57,7 +57,7 @@ public:
         NGRAN,
     };
 
-    explicit MediaNetworkConnectionWatcher(IN const IPAddress& objIpAddress);
+    explicit MediaNetworkConnectionWatcher(IN const IpAddress& objIpAddress);
     virtual ~MediaNetworkConnectionWatcher();
     virtual void SetListener(IN IMediaNetworkConnectionListener* piListener);
     /* INetworkConnectionListener Interface Impl */

@@ -356,8 +356,8 @@ IMS_BOOL AosUtil::IsListEqual(IN const AStringArray& objLeft, IN const AStringAr
 
             if (bIsIpAddress == IMS_TRUE)
             {
-                IPAddress objIpAddrL(strL);
-                IPAddress objIpAddrR(strR);
+                IpAddress objIpAddrL(strL);
+                IpAddress objIpAddrR(strR);
 
                 if (objIpAddrL.Equals(objIpAddrR))
                 {
@@ -394,8 +394,8 @@ IMS_BOOL AosUtil::IsStrExistInList(IN const AString& strValue, IN const AStringA
 
         if (bIsIpAddress == IMS_TRUE)
         {
-            IPAddress objIpAddrCurr(strCurr);
-            IPAddress objIpAddrValue(strValue);
+            IpAddress objIpAddrCurr(strCurr);
+            IpAddress objIpAddrValue(strValue);
 
             if (objIpAddrCurr.Equals(objIpAddrValue))
             {

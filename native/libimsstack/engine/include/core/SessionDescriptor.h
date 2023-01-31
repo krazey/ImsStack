@@ -64,8 +64,8 @@ private:
     IMS_RESULT SetConnectionAddress(IN const AString& strAddress) override;
     IMS_RESULT SetDirection(IN IMS_SINT32 nDirection) override;
     IMS_RESULT SetOriginAddress(IN const AString& strAddress) override;
-    IPAddress GetLocalAddress() const override;
-    IPAddress GetRemoteAddress() const override;
+    IpAddress GetLocalAddress() const override;
+    IpAddress GetRemoteAddress() const override;
     const AString& GetRemoteAddressAsString() const override;
 
 private:

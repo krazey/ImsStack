@@ -205,11 +205,11 @@ PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::UpdatePreloadedRoute(IN const AString& s
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::MakeSas(IN const AString& strPcscf,
-        IN const IPAddress& objIpa, IN const ByteArray& objIk, IN const ByteArray& objCk)
+        IN const IpAddress& objIpa, IN const ByteArray& objIk, IN const ByteArray& objCk)
 {
     A_IMS_TRACE_D(REGID, "MakeSas", 0, 0, 0);
 
-    IPAddress objPcscfIpa;
+    IpAddress objPcscfIpa;
     objPcscfIpa.Parse(strPcscf);
 
     // set Local & P-CSCF IPs
@@ -581,8 +581,8 @@ void AosIpsecHelper::CloseUnsecureTCPSocket()
         return;
     }
 
-    IPAddress objIpaPcscf(objPcscf);
-    IPAddress objIpaLocal = m_piContext->GetConnection()->GetLocalAddress(objIpaPcscf.GetVersion());
+    IpAddress objIpaPcscf(objPcscf);
+    IpAddress objIpaLocal = m_piContext->GetConnection()->GetLocalAddress(objIpaPcscf.GetVersion());
 
     SipFactory::GetTransportHelper(m_piContext->GetSlotId())
             ->DestroyTcpSocket(objIpaLocal, 0, objIpaPcscf, nPort);
@@ -596,9 +596,9 @@ void AosIpsecHelper::CloseSecureTCPSocket(IN AosIpsec* pIpsec)
         return;
     }
 
-    const IPAddress& objUeIpa = pIpsec->GetUeIpa();
+    const IpAddress& objUeIpa = pIpsec->GetUeIpa();
     IMS_UINT32 nUeCPort = pIpsec->GetUePort(AosIpsec::TYPE_CLIENT);
-    const IPAddress& objPcscfIpAddr = pIpsec->GetPcscfIpa();
+    const IpAddress& objPcscfIpAddr = pIpsec->GetPcscfIpa();
     IMS_UINT32 nPcscfCPort = pIpsec->GetPcscfPort(AosIpsec::TYPE_CLIENT);
     IMS_UINT32 nPcscfSPort = pIpsec->GetPcscfPort(AosIpsec::TYPE_SERVER);
 
@@ -652,7 +652,7 @@ PRIVATE
 IMS_UINT32 AosIpsecHelper::GetValidUePort()
 {
     const IMS_UINT32 MAX_COUNT = 20;
-    const IPAddress& objUeIPA = m_piRegContact->GetIpAddress();
+    const IpAddress& objUeIPA = m_piRegContact->GetIpAddress();
     NetworkService* pNetworkService = NetworkService::GetNetworkService();
     IMS_UINT32 nUePort = m_pNewIpsec->CreateUePort();
 

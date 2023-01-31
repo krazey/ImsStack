@@ -85,7 +85,7 @@ SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket) :
     if (m_piSocket != IMS_NULL)
     {
         IMS_UINT32 nPort;
-        IPAddress objIp;
+        IpAddress objIp;
 
         m_piSocket->GetPeerName(objIp, nPort);
 
@@ -95,7 +95,7 @@ SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket) :
         m_piSocket->SetListener(this);
 
         // Gets the local IP address and port
-        objIp = IPAddress::NONE;
+        objIp = IpAddress::NONE;
         nPort = 0;
         m_piSocket->GetSockName(objIp, nPort);
 
@@ -122,7 +122,7 @@ PUBLIC VIRTUAL SipStreamSocket::~SipStreamSocket()
 
 PUBLIC VIRTUAL void SipStreamSocket::ApplyIpSec(IN ISocket* /*piAcceptedSocket = IMS_NULL*/)
 {
-    IPAddress objIpAddr;
+    IpAddress objIpAddr;
     IMS_UINT32 nPort = 0;
 
     m_piSocket->GetSockName(objIpAddr, nPort);
@@ -173,7 +173,7 @@ PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Connect()
 }
 
 PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Create(
-        IN const IPAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
+        IN const IpAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
 {
     if (!SipSocket::Create(objIp, nPort, bSecure))
     {
@@ -202,7 +202,7 @@ PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Create(
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void SipStreamSocket::GetSockName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort)
+PUBLIC VIRTUAL void SipStreamSocket::GetSockName(OUT IpAddress& objIp, OUT IMS_UINT32& nPort)
 {
     if (m_piSocket != IMS_NULL)
     {
@@ -211,7 +211,7 @@ PUBLIC VIRTUAL void SipStreamSocket::GetSockName(OUT IPAddress& objIp, OUT IMS_U
 }
 
 PUBLIC VIRTUAL IMS_SINT32 SipStreamSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-        IN IMS_UINT32 /*nPort = 0*/, IN const IPAddress& /*objIp = IPAddress::NONE*/)
+        IN IMS_UINT32 /*nPort = 0*/, IN const IpAddress& /*objIp = IpAddress::NONE*/)
 {
     IMS_SINT32 nTotalSentBytes = 0;
     IMS_SINT32 nSendingBytes = nBuffLen;
@@ -312,7 +312,7 @@ void SipStreamSocket::SetConfigForSipKeepAlive(IN IMS_BOOL bSipKeepAlive)
 }
 
 PUBLIC
-void SipStreamSocket::SetFarEnd(IN const IPAddress& objIp, IN IMS_UINT32 nPort)
+void SipStreamSocket::SetFarEnd(IN const IpAddress& objIp, IN IMS_UINT32 nPort)
 {
     m_objSockAddr.SetPort(nPort);
     m_objSockAddr.SetIpAddress(objIp);

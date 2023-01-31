@@ -62,7 +62,7 @@ IMS_BOOL osSocket_IsConnectRetryRequired(IN IMS_SINT32 nSlotId)
 
 LOCAL
 void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT32 nAddrLen,
-        OUT IPAddress& objIpAddr, OUT IMS_UINT32& nPort)
+        OUT IpAddress& objIpAddr, OUT IMS_UINT32& nPort)
 {
     if (pstSockAddr == IMS_NULL)
     {
@@ -148,7 +148,7 @@ OsSocket::OsSocket() :
         m_piListener(IMS_NULL),
         m_nCloseReason(CLOSE_REASON_UNKNOWN),
         m_nOptionForShutdown(-1),
-        m_objSocketAddress(IPAddress::NONE),
+        m_objSocketAddress(IpAddress::NONE),
         m_nSocketPort(0),
         m_nInternalSocketId(0)
 {
@@ -270,7 +270,7 @@ PUBLIC GLOBAL void OsSocket::CleanUp()
 }
 
 PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType)
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType)
 {
     IMS_SINT32 nSockType;
     IMS_SINT32 nAf = PF_INET;
@@ -317,7 +317,7 @@ PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
 
         stSockAddr.sin_family = AF_INET;
 
-        if (objIpAddr.Equals(IPAddress::ANY) || objIpAddr.Equals(IPAddress::NONE))
+        if (objIpAddr.Equals(IpAddress::ANY) || objIpAddr.Equals(IpAddress::NONE))
         {
             stSockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
         }
@@ -614,7 +614,7 @@ PROTECTED VIRTUAL ISocket* OsSocket::Accept()
 }
 
 PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
-        IN const IPAddress& objSocketAddress, IN IMS_UINT32 nSocketPort)
+        IN const IpAddress& objSocketAddress, IN IMS_UINT32 nSocketPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -638,7 +638,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
 
         stSockAddr.sin_family = AF_INET;
 
-        if (objSocketAddress.Equals(IPAddress::ANY) || objSocketAddress.Equals(IPAddress::NONE))
+        if (objSocketAddress.Equals(IpAddress::ANY) || objSocketAddress.Equals(IpAddress::NONE))
         {
             stSockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
         }
@@ -776,7 +776,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
 }
 
 PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
-        IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort)
+        IN const IpAddress& objHostAddress, IN IMS_UINT32 nHostPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -794,7 +794,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
             return RESULT_ERROR;
         }
 
-        if (objHostAddress.Equals(IPAddress::ANY) || objHostAddress.Equals(IPAddress::NONE))
+        if (objHostAddress.Equals(IpAddress::ANY) || objHostAddress.Equals(IpAddress::NONE))
         {
             return RESULT_ERROR;
         }
@@ -905,7 +905,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
             return RESULT_ERROR;
         }
 
-        if (objHostAddress.Equals(IPAddress::IPv6ANY) || objHostAddress.Equals(IPAddress::IPv6NONE))
+        if (objHostAddress.Equals(IpAddress::IPv6ANY) || objHostAddress.Equals(IpAddress::IPv6NONE))
         {
             return RESULT_ERROR;
         }
@@ -1220,7 +1220,7 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_S
 }
 
 PROTECTED VIRTUAL IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-        OUT IPAddress& objHostAddress, OUT IMS_UINT32& nHostPort)
+        OUT IpAddress& objHostAddress, OUT IMS_UINT32& nHostPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1302,7 +1302,7 @@ PROTECTED VIRTUAL IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS
 }
 
 PROTECTED VIRTUAL IMS_SINT32 OsSocket::SendTo(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-        IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort)
+        IN const IpAddress& objHostAddress, IN IMS_UINT32 nHostPort)
 {
     // PATCH_FOR_NON_SOCKET
     IMS_SINT32 nSentCount = 0;
@@ -1332,7 +1332,7 @@ RETRY_SENDTO:
 
         stSockAddr.sin_family = AF_INET;
 
-        if (objHostAddress.Equals(IPAddress::ANY) || objHostAddress.Equals(IPAddress::NONE))
+        if (objHostAddress.Equals(IpAddress::ANY) || objHostAddress.Equals(IpAddress::NONE))
         {
             stSockAddr.sin_addr.s_addr = htonl(INADDR_BROADCAST);
         }
@@ -1458,17 +1458,17 @@ RETRY_SENDTO:
 }
 
 PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetPeerName(
-        OUT IPAddress& objPeerAddress, OUT IMS_UINT32& nPeerPort)
+        OUT IpAddress& objPeerAddress, OUT IMS_UINT32& nPeerPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
         if (m_eAddressFamily == ADDRESS_FAMILY_INET)
         {
-            objPeerAddress = IPAddress::NONE;
+            objPeerAddress = IpAddress::NONE;
         }
         else
         {
-            objPeerAddress = IPAddress::IPv6NONE;
+            objPeerAddress = IpAddress::IPv6NONE;
         }
 
         nPeerPort = 0;
@@ -1509,17 +1509,17 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetPeerName(
 }
 
 PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetSockName(
-        OUT IPAddress& objSocketAddress, OUT IMS_UINT32& nSocketPort)
+        OUT IpAddress& objSocketAddress, OUT IMS_UINT32& nSocketPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
         if (m_eAddressFamily == ADDRESS_FAMILY_INET)
         {
-            objSocketAddress = IPAddress::NONE;
+            objSocketAddress = IpAddress::NONE;
         }
         else
         {
-            objSocketAddress = IPAddress::IPv6NONE;
+            objSocketAddress = IpAddress::IPv6NONE;
         }
 
         nSocketPort = 0;

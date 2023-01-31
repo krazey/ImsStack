@@ -38,11 +38,11 @@ public:
 public:
     void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL) override;
     IMS_BOOL Connect() override;
-    IMS_BOOL Create(IN const IPAddress& objIp, IN IMS_UINT32 nPort = 0,
+    IMS_BOOL Create(IN const IpAddress& objIp, IN IMS_UINT32 nPort = 0,
             IN IMS_BOOL bSecure = IMS_FALSE) override;
-    void GetSockName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort) override;
+    void GetSockName(OUT IpAddress& objIp, OUT IMS_UINT32& nPort) override;
     IMS_SINT32 Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen, IN IMS_UINT32 nPort = 0,
-            IN const IPAddress& objIp = IPAddress::NONE) override;
+            IN const IpAddress& objIp = IpAddress::NONE) override;
     void NotifyForceClosed() override;
 
     void DisableKeepAlive();
@@ -51,7 +51,7 @@ public:
     inline IMS_BOOL IsSecureSocket() const { return m_bSecure; }
     void ReuseSocket();
     void SetConfigForSipKeepAlive(IN IMS_BOOL bSipKeepAlive);
-    void SetFarEnd(IN const IPAddress& objIp, IN IMS_UINT32 nPort);
+    void SetFarEnd(IN const IpAddress& objIp, IN IMS_UINT32 nPort);
     void SetKeepAlivePolicy(IN IMS_SINT32 nPolicy);
     inline void SetListener(IN ISipStreamSocketListener* piListener) { m_piListener = piListener; }
 

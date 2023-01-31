@@ -265,7 +265,7 @@ public:
      * @param nTransportExt Transport extension (Sip::TRANSPORT_EXT_XXX in Sip.h)
      * @note RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
      */
-    virtual void SetTransportTuple(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS,
+    virtual void SetTransportTuple(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS,
             IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY) = 0;
 };

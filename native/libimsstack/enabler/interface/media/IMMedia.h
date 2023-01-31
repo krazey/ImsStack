@@ -277,12 +277,12 @@ class ImsMediaMsgOpenConfigParam : public ImsMediaMsgConfigParam
 public:
     explicit ImsMediaMsgOpenConfigParam(const MEDIA_CONTENT_TYPE type) :
             ImsMediaMsgConfigParam(type),
-            m_objLocalAddress(IPAddress::IPv6NONE),
+            m_objLocalAddress(IpAddress::IPv6NONE),
             m_nLocalPort(0){};
     virtual ~ImsMediaMsgOpenConfigParam() {}
 
 public:
-    IPAddress m_objLocalAddress;
+    IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
 };
 
@@ -340,7 +340,7 @@ class ImsMediaMsgQosParam : public ImsMediaResponseParamBase
 {
 public:
     explicit ImsMediaMsgQosParam(const MEDIA_CONTENT_TYPE type = MEDIA_TYPE_AUDIO,
-            const IPAddress& address = IPAddress(IPAddress::IPv6NONE), const IMS_SINT32 port = 0) :
+            const IpAddress& address = IpAddress(IpAddress::IPv6NONE), const IMS_SINT32 port = 0) :
             ImsMediaResponseParamBase(type),
             m_objIpAddress(address),
             m_nPort(port),
@@ -356,7 +356,7 @@ public:
     }
 
 public:
-    IPAddress m_objIpAddress;
+    IpAddress m_objIpAddress;
     IMS_SINT32 m_nPort;
     IMS_BOOL m_bCallback;
     IMS_BOOL m_bResult;

@@ -321,7 +321,7 @@ void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const Parcel& objPa
 
     AString strIpAddress;
     ConvertString(objParcel.readString16(), strIpAddress);
-    pParam->m_objIpAddress = IPAddress(strIpAddress);
+    pParam->m_objIpAddress = IpAddress(strIpAddress);
     pParam->m_nPort = objParcel.readInt32();
     pParam->m_bResult = (IMS_BOOL)objParcel.readBool();
 

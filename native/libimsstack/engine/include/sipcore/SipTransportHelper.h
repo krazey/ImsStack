@@ -71,27 +71,27 @@ public:
     IMS_BOOL IsClientInitiatedConnection(IN SipSocket* pSocket) const;
 
     // LOCAL_DNS_QUERY
-    IMS_BOOL GetHostByName(IN const IPAddress& objLocalIp, IN const AString& strHostname,
-            OUT IPAddress& objHostIp);
+    IMS_BOOL GetHostByName(IN const IpAddress& objLocalIp, IN const AString& strHostname,
+            OUT IpAddress& objHostIp);
 
 private:
     // ISipTransportHelper
     void ApplyIpSecForServerSockets() override;
     void DestroyAllSockets(
-            IN IMS_SINT32 nMethod = 0, IN const IPAddress& objLocalIp = IPAddress::NONE) override;
-    void DestroyTcpSocket(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
-            IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+            IN IMS_SINT32 nMethod = 0, IN const IpAddress& objLocalIp = IpAddress::NONE) override;
+    void DestroyTcpSocket(IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+            IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort,
             IN IMS_BOOL bIsConnectionByPeer = IMS_FALSE) override;
     void SetIpQos(IN SipRtConfig::IpQos* pIpQos) override;
-    void SetKeepAlivePolicy(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
-            IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+    void SetKeepAlivePolicy(IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+            IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort,
             IN IMS_SINT32 nPolicy = (-1) /* default */) override;
     // LOCAL_DNS_QUERY
     void SetLocalDnsQueryListener(IN ISipLocalDnsQueryListener* piListener) override;
 
     // ISipDatagramSocketListener
     void DatagramSocket_DataReceived(IN SipSocket* pSocket, IN const ByteArray& objBuffer,
-            IN const IPAddress& objIp, IN IMS_SINT32 nPort) override;
+            IN const IpAddress& objIp, IN IMS_SINT32 nPort) override;
     // ISipStreamSocketListener
     void StreamSocket_ConnectionReceived(IN SipSocket* pSocket) override;
     void StreamSocket_DataReceived(IN SipSocket* pSocket, IN_OUT ByteArray& objBuffer) override;

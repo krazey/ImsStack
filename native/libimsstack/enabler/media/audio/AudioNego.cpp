@@ -290,7 +290,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::SetPort(IN IMS_UINT32 nPort)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL const IPAddress& AudioNego::GetNegotiatedRemoteAddress()
+PUBLIC VIRTUAL const IpAddress& AudioNego::GetNegotiatedRemoteAddress()
 {
     AudioProfile* pProfile = GetNegotiatedPeerProfile();
 
@@ -299,7 +299,7 @@ PUBLIC VIRTUAL const IPAddress& AudioNego::GetNegotiatedRemoteAddress()
         return pProfile->objIpAddr;
     }
 
-    return IPAddress::NONE;
+    return IpAddress::NONE;
 }
 
 PUBLIC VIRTUAL IMS_UINT32 AudioNego::GetNegotiatedRemotePort()

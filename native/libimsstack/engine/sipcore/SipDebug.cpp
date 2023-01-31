@@ -102,7 +102,7 @@ PUBLIC GLOBAL const IMS_CHAR* SipDebug::GetCharA2(IN const IMS_CHAR* pszValue, I
     return SipStack::GetLogString(pszValue, pszLog, nCount + 3, cDelimiter);
 }
 
-PUBLIC GLOBAL const IMS_CHAR* SipDebug::GetIp(IN const IPAddress& objIpAddr)
+PUBLIC GLOBAL const IMS_CHAR* SipDebug::GetIp(IN const IpAddress& objIpAddr)
 {
     IMS_CHAR* pszLog = (GetSimSlot() == IMS_SLOT_0) ? &acIpAddr[0] : &acIpAddr_1[0];
 

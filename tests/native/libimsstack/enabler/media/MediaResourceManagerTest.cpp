@@ -66,6 +66,6 @@ TEST_F(MediaResourceManagerTest, testAcquireReleasePort)
 
 TEST_F(MediaResourceManagerTest, testUpdatePdn)
 {
-    IPAddress objIpAddr = IPAddress(LOCAL_IP);
+    IpAddress objIpAddr = IpAddress(LOCAL_IP);
     EXPECT_EQ(m_pManager->UpdatePdn(MediaResourceManager::PDN_IMS, objIpAddr), IMS_TRUE);
 }

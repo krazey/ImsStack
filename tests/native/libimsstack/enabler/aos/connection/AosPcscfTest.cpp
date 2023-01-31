@@ -150,8 +150,8 @@ TEST_F(AosPcscfTest, Configure_GetFromPco)
 {
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .Times(2)
-            .WillOnce(ReturnRef(IPAddress::ANY))
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::ANY))
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     EXPECT_CALL(m_objMockIAosConnection, GetPcscfAddress(_))
             .Times(AnyNumber())
@@ -175,11 +175,11 @@ TEST_F(AosPcscfTest, Configure_GetFromPco)
     SetPcscfs();
 
     // valid local address type but invalid address
-    m_pAosPcscf->Configure(IPAddress::IPV4);
+    m_pAosPcscf->Configure(IpAddress::IPV4);
     EXPECT_FALSE(m_pAosPcscf->IsConfigured());
 
     // valid local address type and valid address
-    m_pAosPcscf->Configure(IPAddress::IPV4);
+    m_pAosPcscf->Configure(IpAddress::IPV4);
     EXPECT_TRUE(m_pAosPcscf->IsConfigured());
 }
 
@@ -187,7 +187,7 @@ TEST_F(AosPcscfTest, Configure_GetFromConf)
 {
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .Times(1)
-            .WillOnce(ReturnRef(IPAddress::LOOPBACK));
+            .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
     IMSVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
@@ -204,7 +204,7 @@ TEST_F(AosPcscfTest, Configure_GetFromConf)
             .WillRepeatedly(ReturnRef(objPcscfAddresses));
 
     // unknown local address type
-    m_pAosPcscf->Configure(IPAddress::UNKNOWN);
+    m_pAosPcscf->Configure(IpAddress::UNKNOWN);
     EXPECT_TRUE(m_pAosPcscf->IsConfigured());
 
     if (pSa)
@@ -217,7 +217,7 @@ TEST_F(AosPcscfTest, Configure_GetFromConf_TryOtherIpType)
 {
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(IPAddress::IPv6LOOPBACK));
+            .WillRepeatedly(ReturnRef(IpAddress::IPv6LOOPBACK));
 
     IMSVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
@@ -234,7 +234,7 @@ TEST_F(AosPcscfTest, Configure_GetFromConf_TryOtherIpType)
             .WillRepeatedly(ReturnRef(objPcscfAddresses));
 
     // unknown local address type
-    m_pAosPcscf->Configure(IPAddress::UNKNOWN);
+    m_pAosPcscf->Configure(IpAddress::UNKNOWN);
     EXPECT_TRUE(m_pAosPcscf->IsConfigured());
 
     if (pSa)
@@ -247,7 +247,7 @@ TEST_F(AosPcscfTest, Configure_ProcessDnsQuery)
 {
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(IPAddress::LOOPBACK));
+            .WillRepeatedly(ReturnRef(IpAddress::LOOPBACK));
 
     IMSVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
@@ -268,7 +268,7 @@ TEST_F(AosPcscfTest, Configure_ProcessDnsQuery)
             .WillRepeatedly(Return(-1));
 
     // unknown local address type
-    m_pAosPcscf->Configure(IPAddress::UNKNOWN);
+    m_pAosPcscf->Configure(IpAddress::UNKNOWN);
     EXPECT_FALSE(m_pAosPcscf->IsConfigured());
     EXPECT_TRUE(SetDnsQueryTimerExpired());
 
@@ -282,7 +282,7 @@ TEST_F(AosPcscfTest, FailToFindDiscoveryMethod)
 {
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(IPAddress::LOOPBACK));
+            .WillRepeatedly(ReturnRef(IpAddress::LOOPBACK));
     EXPECT_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(IAosSubscriber::FAKE))
             .Times(2)
             .WillOnce(Return(nullptr))
@@ -293,8 +293,8 @@ TEST_F(AosPcscfTest, FailToFindDiscoveryMethod)
             .WillRepeatedly(ReturnRef(objDiscoveryMethods));
 
     SetRegType(AosRegistrationType::FAKE);
-    m_pAosPcscf->Configure(IPAddress::IPV4);
-    m_pAosPcscf->Configure(IPAddress::IPV4);
+    m_pAosPcscf->Configure(IpAddress::IPV4);
+    m_pAosPcscf->Configure(IpAddress::IPV4);
 
     EXPECT_FALSE(m_pAosPcscf->IsConfigured());
 }

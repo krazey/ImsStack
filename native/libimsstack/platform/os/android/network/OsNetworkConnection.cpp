@@ -64,10 +64,10 @@ OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId) :
         m_strApn(AString::ConstNull()),
         m_nIfaceId(IMS_NET_IFACE_INVALID_ID),
         m_strIfaceName(AString::ConstNull()),
-        m_nPreferredIpVersion(IPAddress::UNKNOWN),
-        m_objLocalAddress(IPAddress::NONE),
-        m_objLocalAddressIpv4(IPAddress::NONE),
-        m_objLocalAddressIpv6(IPAddress::IPv6NONE),
+        m_nPreferredIpVersion(IpAddress::UNKNOWN),
+        m_objLocalAddress(IpAddress::NONE),
+        m_objLocalAddressIpv4(IpAddress::NONE),
+        m_objLocalAddressIpv6(IpAddress::IPv6NONE),
         m_objPcscfsAddress(AStringArray::ConstNull()),
         m_nConnectionHandle(0),
         m_piOwnerThread(IMS_NULL),
@@ -97,23 +97,23 @@ PUBLIC VIRTUAL OsNetworkConnection::~OsNetworkConnection()
     }
 }
 
-PUBLIC VIRTUAL const IPAddress& OsNetworkConnection::GetLocalAddress(
-        IN IMS_SINT32 nIpVersion /*= IPAddress::UNKNOWN configuration-based*/) const
+PUBLIC VIRTUAL const IpAddress& OsNetworkConnection::GetLocalAddress(
+        IN IMS_SINT32 nIpVersion /*= IpAddress::UNKNOWN configuration-based*/) const
 {
-    if (nIpVersion == IPAddress::UNKNOWN)
+    if (nIpVersion == IpAddress::UNKNOWN)
     {
         return m_objLocalAddress;
     }
-    else if (nIpVersion == IPAddress::IPV4)
+    else if (nIpVersion == IpAddress::IPV4)
     {
         return m_objLocalAddressIpv4;
     }
-    else if (nIpVersion == IPAddress::IPV6)
+    else if (nIpVersion == IpAddress::IPV6)
     {
         return m_objLocalAddressIpv6;
     }
 
-    return IPAddress::NONE;
+    return IpAddress::NONE;
 }
 
 PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
@@ -306,23 +306,23 @@ PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::GetExtraInfo(
 }
 
 PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& strHostName,
-        OUT IMSList<IPAddress>& objIpAddrs,
+        OUT IMSList<IpAddress>& objIpAddrs,
         IN IMS_SINT32 nIpVersion /*= 0 default-local-address-based*/)
 {
     IMS_TRACE_I("DNS lookup (%d) :: apnType=%d, domain=%s", nIpVersion, GetApnType(),
             OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "xxx");
 
-    if ((nIpVersion != IPAddress::IPV4) && (nIpVersion != IPAddress::IPV6))
+    if ((nIpVersion != IpAddress::IPV4) && (nIpVersion != IpAddress::IPV6))
     {
-        const IPAddress& objLocalIp = GetLocalAddress();
+        const IpAddress& objLocalIp = GetLocalAddress();
 
         if (objLocalIp.IsIPv4Address())
         {
-            nIpVersion = IPAddress::IPV4;
+            nIpVersion = IpAddress::IPV4;
         }
         else if (objLocalIp.IsIPv6Address())
         {
-            nIpVersion = IPAddress::IPV6;
+            nIpVersion = IpAddress::IPV6;
         }
         else
         {
@@ -345,7 +345,7 @@ PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& 
     for (IMS_SINT32 i = 0; i < objHostIps.GetCount(); i++)
     {
         const AString& strHostIp = objHostIps.GetElementAt(i);
-        IPAddress objIp;
+        IpAddress objIp;
 
         if (objIp.Parse(strHostIp))
         {
@@ -430,7 +430,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::SetPreferredIpVersion(
     {
         m_nPreferredIpVersion = nPreferredIpVersion;
 
-        if (IsConnected() && (nPreferredIpVersion != IPAddress::UNKNOWN))
+        if (IsConnected() && (nPreferredIpVersion != IpAddress::UNKNOWN))
         {
             AdjustPreferredLocalAddress();
         }
@@ -568,7 +568,7 @@ PRIVATE VIRTUAL void OsNetworkConnection::DispatchServiceMessage(
     }
 }
 
-PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::Equals(IN const IPAddress& objIpAddr) const
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::Equals(IN const IpAddress& objIpAddr) const
 {
     if (objIpAddr.IsIPv4Address())
     {
@@ -674,9 +674,9 @@ PRIVATE VIRTUAL void OsNetworkConnection::System_NotifyEvent(
 PRIVATE
 IMS_BOOL OsNetworkConnection::AdjustPreferredLocalAddress()
 {
-    if (m_nPreferredIpVersion == IPAddress::IPV4)
+    if (m_nPreferredIpVersion == IpAddress::IPV4)
     {
-        if (!m_objLocalAddressIpv4.Equals(IPAddress::NONE) &&
+        if (!m_objLocalAddressIpv4.Equals(IpAddress::NONE) &&
                 !m_objLocalAddressIpv4.Equals(m_objLocalAddress))
         {
             IMS_TRACE_D("Preferred local address :: %s >> %s",
@@ -686,9 +686,9 @@ IMS_BOOL OsNetworkConnection::AdjustPreferredLocalAddress()
             m_objLocalAddress = m_objLocalAddressIpv4;
         }
     }
-    else if (m_nPreferredIpVersion == IPAddress::IPV6)
+    else if (m_nPreferredIpVersion == IpAddress::IPV6)
     {
-        if (!m_objLocalAddressIpv6.Equals(IPAddress::IPv6NONE) &&
+        if (!m_objLocalAddressIpv6.Equals(IpAddress::IPv6NONE) &&
                 !m_objLocalAddressIpv6.Equals(m_objLocalAddress))
         {
             IMS_TRACE_D("Preferred local address :: %s >> %s",
@@ -699,7 +699,7 @@ IMS_BOOL OsNetworkConnection::AdjustPreferredLocalAddress()
         }
     }
 
-    if (m_objLocalAddress.Equals(IPAddress::NONE) || m_objLocalAddress.Equals(IPAddress::IPv6NONE))
+    if (m_objLocalAddress.Equals(IpAddress::NONE) || m_objLocalAddress.Equals(IpAddress::IPv6NONE))
     {
         IMS_TRACE_D("Local address is null", 0, 0, 0);
         return IMS_FALSE;
@@ -738,9 +738,9 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
 
     if (!m_objLocalAddress.Parse(strIpAddr))
     {
-        m_objLocalAddress = IPAddress::NONE;
+        m_objLocalAddress = IpAddress::NONE;
 
-        if (m_nPreferredIpVersion == IPAddress::UNKNOWN)
+        if (m_nPreferredIpVersion == IpAddress::UNKNOWN)
         {
             IMS_TRACE_E(0, "Local Address is null", 0, 0, 0);
             return IMS_FALSE;
@@ -754,20 +754,20 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
 
     // IPv4 address
     strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
-            GetApnType(), IPAddress::IPV4, GetSlotId());
+            GetApnType(), IpAddress::IPV4, GetSlotId());
 
     if (!m_objLocalAddressIpv4.Parse(strIpAddr))
     {
-        m_objLocalAddressIpv4 = IPAddress::NONE;
+        m_objLocalAddressIpv4 = IpAddress::NONE;
     }
 
     // IPv6 address
     strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
-            GetApnType(), IPAddress::IPV6, GetSlotId());
+            GetApnType(), IpAddress::IPV6, GetSlotId());
 
     if (!m_objLocalAddressIpv6.Parse(strIpAddr))
     {
-        m_objLocalAddressIpv6 = IPAddress::IPv6NONE;
+        m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
     }
 
     if (!AdjustPreferredLocalAddress())
@@ -891,9 +891,9 @@ PRIVATE
 void OsNetworkConnection::ClearOnDataDisconnected()
 {
     // Clear Local addresses
-    m_objLocalAddress = IPAddress::NONE;
-    m_objLocalAddressIpv4 = IPAddress::NONE;
-    m_objLocalAddressIpv6 = IPAddress::IPv6NONE;
+    m_objLocalAddress = IpAddress::NONE;
+    m_objLocalAddressIpv4 = IpAddress::NONE;
+    m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
 
     // Clear the previous P-CSCF addresses
     m_objPcscfsAddress.RemoveAllElements();
@@ -1128,23 +1128,23 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
     }
 
     // IPv4 address
-    IPAddress objIpv4;
+    IpAddress objIpv4;
     AString strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
-            GetApnType(), IPAddress::IPV4, GetSlotId());
+            GetApnType(), IpAddress::IPV4, GetSlotId());
 
     if (!objIpv4.Parse(strIpAddr))
     {
-        objIpv4 = IPAddress::NONE;
+        objIpv4 = IpAddress::NONE;
     }
 
     // IPv6 address
-    IPAddress objIpv6;
+    IpAddress objIpv6;
     strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
-            GetApnType(), IPAddress::IPV6, GetSlotId());
+            GetApnType(), IpAddress::IPV6, GetSlotId());
 
     if (!objIpv6.Parse(strIpAddr))
     {
-        objIpv6 = IPAddress::IPv6NONE;
+        objIpv6 = IpAddress::IPv6NONE;
     }
 
     IMS_BOOL bIpUpdated = IMS_FALSE;
@@ -1169,7 +1169,7 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
 
         if (!m_objLocalAddress.Parse(strIpAddr))
         {
-            m_objLocalAddress = IPAddress::NONE;
+            m_objLocalAddress = IpAddress::NONE;
         }
 
         AdjustPreferredLocalAddress();

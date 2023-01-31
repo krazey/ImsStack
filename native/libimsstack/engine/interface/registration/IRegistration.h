@@ -67,7 +67,7 @@ public:
      * @param nExpiresValue expiration value (duration of this binding)
      * @return Pointer to IRegContact or null.
      */
-    virtual IRegContact* CreateContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort,
+    virtual IRegContact* CreateContact(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nExpiresPolicy = POLICY_EXPIRES_CONFIG,
             IN IMS_UINT32 nExpiresValue = DEFAULT_EXPIRES) = 0;
 
@@ -84,7 +84,7 @@ public:
      * @param objIpAddr IP address of Contact
      * @param nPort port number of Contact
      */
-    virtual void DestroyContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) = 0;
+    virtual void DestroyContact(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) = 0;
 
     /**
      * @brief Checks if the specified registration equals or not.
@@ -145,7 +145,7 @@ public:
      * @param nPort port number to be compared
      * @return Pointer to IRegContact.
      */
-    virtual IRegContact* GetContact(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) const = 0;
+    virtual IRegContact* GetContact(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) const = 0;
 
     /**
      * @brief Returns the preferred contact (highest 'q' value) among the contacts.
@@ -169,10 +169,10 @@ public:
      * the first REGISTER request.\n
      * It's available only if the device recognizes that it is located behind NAT device.
      *
-     * @return Reference to IPAddress.
+     * @return Reference to IpAddress.
      * @note NAT_REQ_UE_PUBLIC_IP
      */
-    virtual const IPAddress& GetPublicIpAddress() const = 0;
+    virtual const IpAddress& GetPublicIpAddress() const = 0;
 
     /**
      * @brief Returns the service route set of this registration.

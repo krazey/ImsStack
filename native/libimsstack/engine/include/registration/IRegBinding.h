@@ -64,7 +64,7 @@ public:
      *
      * @return The IP address of preferred contact address.
      */
-    virtual const IPAddress& GetIpAddress() const = 0;
+    virtual const IpAddress& GetIpAddress() const = 0;
 
     /**
      * @brief Returns the Path header list.

@@ -24,10 +24,10 @@ __IMS_TRACE_TAG_SIP__;
 
 PRIVATE
 SipIpSecState::SecurityAssociation::SecurityAssociation() :
-        objIpU(IPAddress::NONE),
+        objIpU(IpAddress::NONE),
         nPortUc(0),
         nPortUs(0),
-        objIpP(IPAddress::NONE),
+        objIpP(IpAddress::NONE),
         nPortPc(0),
         nPortPs(0),
         nState(STATE_INACTIVE)
@@ -35,8 +35,8 @@ SipIpSecState::SecurityAssociation::SecurityAssociation() :
 }
 
 PRIVATE
-SipIpSecState::SecurityAssociation::SecurityAssociation(IN const IPAddress& objIpU_,
-        IN IMS_SINT32 nPortUc_, IN IMS_SINT32 nPortUs_, IN const IPAddress& objIpP_,
+SipIpSecState::SecurityAssociation::SecurityAssociation(IN const IpAddress& objIpU_,
+        IN IMS_SINT32 nPortUc_, IN IMS_SINT32 nPortUs_, IN const IpAddress& objIpP_,
         IN IMS_SINT32 nPortPc_, IN IMS_SINT32 nPortPs_) :
         objIpU(objIpU_),
         nPortUc(nPortUc_),
@@ -359,8 +359,8 @@ PRIVATE VIRTUAL IMS_BOOL SipIpSecState::HasPendingTransaction(IN IMS_SINT32 nSaT
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL void SipIpSecState::SetIpSecSa(IN IMS_SINT32 nSaType, IN const IPAddress& objIpU,
-        IN IMS_SINT32 nPortUc, IN IMS_SINT32 nPortUs, IN const IPAddress& objIpP,
+PRIVATE VIRTUAL void SipIpSecState::SetIpSecSa(IN IMS_SINT32 nSaType, IN const IpAddress& objIpU,
+        IN IMS_SINT32 nPortUc, IN IMS_SINT32 nPortUs, IN const IpAddress& objIpP,
         IN IMS_SINT32 nPortPc, IN IMS_SINT32 nPortPs)
 {
     if (nSaType == SA_NEW)

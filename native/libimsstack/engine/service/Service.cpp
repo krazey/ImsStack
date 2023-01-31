@@ -925,11 +925,11 @@ IMS_UINT32 Service::EvaluateFilterCriteria(IN const ISipMessage* piSipMsg) const
 }
 
 PUBLIC
-const IPAddress& Service::GetIpAddress() const
+const IpAddress& Service::GetIpAddress() const
 {
     if (!IsImsConnected())
     {
-        return IPAddress::NONE;
+        return IpAddress::NONE;
     }
 
     return m_piRegBinding->GetIpAddress();
@@ -1592,7 +1592,7 @@ PUBLIC
 IMS_BOOL Service::ValidateRequestUriForIpAndPort(IN const SipAddress& objRequestUri,
         IN ISipDialog* piDialog /*= IMS_NULL*/, IN IMS_BOOL bIsMidDialogRequest /*= IMS_FALSE*/)
 {
-    IPAddress objIpForRUri(objRequestUri.GetHost());
+    IpAddress objIpForRUri(objRequestUri.GetHost());
 
     if (!objIpForRUri.IsIPv4Address() && !objIpForRUri.IsIPv6Address())
     {
@@ -1633,7 +1633,7 @@ IMS_BOOL Service::ValidateRequestUriForIpAndPort(IN const SipAddress& objRequest
 
         if (pContact != IMS_NULL)
         {
-            IPAddress objIpForContact(pContact->GetHost());
+            IpAddress objIpForContact(pContact->GetHost());
 
             if (objIpForRUri.Equals(objIpForContact) &&
                     (objRequestUri.GetPort() == pContact->GetPort()))
@@ -1647,7 +1647,7 @@ IMS_BOOL Service::ValidateRequestUriForIpAndPort(IN const SipAddress& objRequest
                 ? GetContactAddress()
                 : m_objCachedRegBinding.GetContactAddress();
 
-        IPAddress objIpForContact(objContact.GetHost());
+        IpAddress objIpForContact(objContact.GetHost());
 
         if (objIpForRUri.Equals(objIpForContact) &&
                 (objRequestUri.GetPort() == objContact.GetPort()))
@@ -1661,7 +1661,7 @@ IMS_BOOL Service::ValidateRequestUriForIpAndPort(IN const SipAddress& objRequest
         // Checks if the contact address matches or not.
         const SipAddress& objContact = GetContactAddress();
 
-        IPAddress objIpForContact(objContact.GetHost());
+        IpAddress objIpForContact(objContact.GetHost());
 
         if (objIpForRUri.Equals(objIpForContact) &&
                 (objRequestUri.GetPort() == objContact.GetPort()))
@@ -1675,7 +1675,7 @@ IMS_BOOL Service::ValidateRequestUriForIpAndPort(IN const SipAddress& objRequest
 
         if (pContact != IMS_NULL)
         {
-            IPAddress objIpForContact2(pContact->GetHost());
+            IpAddress objIpForContact2(pContact->GetHost());
 
             if (objIpForRUri.Equals(objIpForContact2) &&
                     (objRequestUri.GetPort() == pContact->GetPort()))
@@ -2347,7 +2347,7 @@ void Service::UpdateRegBindings()
         m_objCachedRegBinding.SetPortFlowControl(Sip::PORT_UNSPECIFIED);
         // MULTI_REG_TRANSPORT
         m_objCachedRegBinding.SetTransportExt(Sip::TRANSPORT_EXT_ANY);
-        m_objCachedRegBinding.SetIpAddress(IPAddress::NONE);
+        m_objCachedRegBinding.SetIpAddress(IpAddress::NONE);
         m_objCachedRegBinding.SetContactAddress(SipAddress::ConstNull());
         m_objCachedRegBinding.SetContactAddressForOutgoingMessage(IMS_NULL);
         // IPSEC {

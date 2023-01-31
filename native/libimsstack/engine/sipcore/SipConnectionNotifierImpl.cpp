@@ -62,7 +62,7 @@ PRIVATE VIRTUAL ISipServerConnection* SipConnectionNotifierImpl::AcceptAndOpen()
     return m_pScn->AcceptAndOpen();
 }
 
-PRIVATE VIRTUAL const IPAddress& SipConnectionNotifierImpl::GetLocalAddress() const
+PRIVATE VIRTUAL const IpAddress& SipConnectionNotifierImpl::GetLocalAddress() const
 {
     return m_pScn->GetLocalAddress();
 }
@@ -100,14 +100,14 @@ PRIVATE VIRTUAL IMS_BOOL SipConnectionNotifierImpl::IsTransportResourceReserved(
 }
 
 PRIVATE VIRTUAL IMS_RESULT SipConnectionNotifierImpl::ReserveTransportResource(
-        IN const IPAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+        IN const IpAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
         IN IMS_SINT32 nPortFlowControl)
 {
     return m_pScn->ReserveTransportResource(objIp, nPortS, nPortC, nPortFlowControl);
 }
 
 PRIVATE VIRTUAL IMS_RESULT SipConnectionNotifierImpl::RestoreTransportResource(
-        IN IMS_SINT32 nType, IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort)
+        IN IMS_SINT32 nType, IN const IpAddress& objPeerIp, IN IMS_SINT32 nPeerPort)
 {
     return m_pScn->RestoreTransportResource(nType, objPeerIp, nPeerPort);
 }

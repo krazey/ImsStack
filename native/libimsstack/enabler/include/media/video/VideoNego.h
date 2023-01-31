@@ -146,9 +146,9 @@ public:
     /**
      * @brief Get the local ip address
      *
-     * @return const IPAddress& The local ip address
+     * @return const IpAddress& The local ip address
      */
-    virtual const IPAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddress; };
+    virtual const IpAddress& GetLocalAddress() { return m_objBaseProfile.objIpAddress; };
 
     /**
      * @brief Get the local port number
@@ -160,9 +160,9 @@ public:
     /**
      * @brief Get the negotiated remote ip address
      *
-     * @return const IPAddress& The ip address
+     * @return const IpAddress& The ip address
      */
-    virtual const IPAddress& GetNegotiatedRemoteAddress();
+    virtual const IpAddress& GetNegotiatedRemoteAddress();
 
     /**
      * @brief Get the negotiated remote port number

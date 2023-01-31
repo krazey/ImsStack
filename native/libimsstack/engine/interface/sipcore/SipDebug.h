@@ -85,7 +85,7 @@ public:
      * @param objIpAddr IP address
      * @return The adjusted logging string.
      */
-    static const IMS_CHAR* GetIp(IN const IPAddress& objIpAddr);
+    static const IMS_CHAR* GetIp(IN const IpAddress& objIpAddr);
 
     /**
      * @brief Gets a string representation of IP address.

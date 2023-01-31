@@ -550,7 +550,7 @@ public:
      *
      * @return IP address of the local endpoint.
      */
-    virtual IPAddress GetLocalAddress() const = 0;
+    virtual IpAddress GetLocalAddress() const = 0;
 
     /**
      * @brief Returns the port number of the local endpoint.
@@ -566,7 +566,7 @@ public:
      *
      * @return IP address of the remote endpoint.
      */
-    virtual IPAddress GetRemoteAddress() const = 0;
+    virtual IpAddress GetRemoteAddress() const = 0;
 
     /**
      * @brief Returns the connection address of the remote endpoint as string.

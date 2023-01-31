@@ -143,7 +143,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
 
     strPort.SetNumber(objNearEnd.GetPort());
 
-    IPAddress objLocalAddress(IPAddress::NONE);
+    IpAddress objLocalAddress(IpAddress::NONE);
 
     // IMS_IPSEC_UDP_ENC
     if (IsIpSecUdpEncRequired())
@@ -154,7 +154,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
                     GetSlotId(), objNearEnd.GetIpAddress());
         }
 
-        if (objLocalAddress.Equals(IPAddress::NONE))
+        if (objLocalAddress.Equals(IpAddress::NONE))
         {
             objLocalAddress = objNearEnd.GetIpAddress();
         }
@@ -328,7 +328,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
     if (m_pServerSocket != IMS_NULL)
     {
         // If the near port number is changed, then destroy & create a TCP server socket.
-        IPAddress objIpAddr;
+        IpAddress objIpAddr;
         IMS_UINT32 nPort = 0;
 
         m_pServerSocket->GetSockName(objIpAddr, nPort);
@@ -534,18 +534,18 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
 
         SetPort(nFarPort, TA_FAR);
 
-        IPAddress objFarAddress(strFarAddress);
+        IpAddress objFarAddress(strFarAddress);
 
 #if defined(__IMS_DNS_QUERY_SIP__)
         // LOCAL_DNS_QUERY
-        const IPAddress& objIpAddr = GetIpAddress();
+        const IpAddress& objIpAddr = GetIpAddress();
         IMS_BOOL bDnsQueryRequired = IMS_FALSE;
 
         if (objFarAddress.IsUnknownAddress())
         {
             bDnsQueryRequired = IMS_TRUE;
 
-            IPAddress objHostIp;
+            IpAddress objHostIp;
 
             if (GetTransportHelper()->GetHostByName(objIpAddr, strFarAddress, objHostIp))
             {
@@ -568,16 +568,16 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
                 return IMS_FALSE;
             }
 
-            IMSList<IPAddress> objIpAddrs;
+            IMSList<IpAddress> objIpAddrs;
             IMS_SINT32 nIpVersion = 0;
 
             if (objIpAddr.IsIPv4Address())
             {
-                nIpVersion = IPAddress::IPV4;
+                nIpVersion = IpAddress::IPV4;
             }
             else if (objIpAddr.IsIPv6Address())
             {
-                nIpVersion = IPAddress::IPV6;
+                nIpVersion = IpAddress::IPV6;
             }
 
             if (piConnection->GetHostByName(strFarAddress, objIpAddrs, nIpVersion) <= 0)
@@ -611,7 +611,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         if (strTemp.GetLength() > 0)
         {
             // Overwrite the host information using "maddr" field
-            SetIpAddress(IPAddress(strTemp), TA_FAR);
+            SetIpAddress(IpAddress(strTemp), TA_FAR);
         }
 
         // If a "method" parameter is present, it should be stripped out.
@@ -674,7 +674,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipClientTransport::ValidateViaHeader(IN ::SipMessage*
         return SipPrivate::MESSAGE_FAILED;
     }
 
-    IPAddress objViaHost(strHost);
+    IpAddress objViaHost(strHost);
 
     // If the address or port is not matched, then the message SHOULD be discarded.
     const SipTransportAddress& objNearEnd = GetAddress(TA_NEAR);
@@ -806,8 +806,8 @@ PRIVATE GLOBAL IMS_BOOL SipClientTransport::IsSameHostAndPort(
         return IMS_FALSE;
     }
 
-    IPAddress objIpAddr1(strHost1);
-    IPAddress objIpAddr2(strHost2);
+    IpAddress objIpAddr1(strHost1);
+    IpAddress objIpAddr2(strHost2);
 
     return objIpAddr1.Equals(objIpAddr2);
 }

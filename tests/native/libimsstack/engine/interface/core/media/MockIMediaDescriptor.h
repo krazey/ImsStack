@@ -68,9 +68,9 @@ public:
             (override));
     MOCK_METHOD(IMS_RESULT, SetPort, (IN IMS_SINT32 nPort), (override));
     MOCK_METHOD(const SdpMedia*, GetMediaDescriptionExAsLocal, (), (const, override));
-    MOCK_METHOD(IPAddress, GetLocalAddress, (), (const, override));
+    MOCK_METHOD(IpAddress, GetLocalAddress, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetLocalPort, (), (const, override));
-    MOCK_METHOD(IPAddress, GetRemoteAddress, (), (const, override));
+    MOCK_METHOD(IpAddress, GetRemoteAddress, (), (const, override));
     MOCK_METHOD(const AString&, GetRemoteAddressAsString, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetRemotePort, (), (const, override));
     MOCK_METHOD(const SdpPrecondition*, GetPrecondition,

@@ -328,7 +328,7 @@ IMS_SINT32 AosServiceAvailableWifi::RequestNetPing()
 
     m_piRegistration->GetProperty(IAosRegistration::PROPERTY_LOCAL_ADDRESS, nNA, strIPA);
 
-    IPAddress objSrcIP(strIPA);
+    IpAddress objSrcIP(strIPA);
     INetworkConnection* piNetCon = NetworkService::GetNetworkService()->FindConnection(objSrcIP);
 
     if (piNetCon != IMS_NULL)
@@ -337,7 +337,7 @@ IMS_SINT32 AosServiceAvailableWifi::RequestNetPing()
         m_piAppContext->GetRegistration()->GetProperty(
                 IAosRegistration::PROPERTY_PCSCF_ADDRESS, nNA, strPCSCF);
 
-        IPAddress objDstIP(strPCSCF);
+        IpAddress objDstIP(strPCSCF);
         IMS_SINT32 nPCSCFPort = 5060;
 
         INetworkPing* piPing = piNetCon->CreatePing();

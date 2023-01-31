@@ -35,8 +35,8 @@ public:
     inline const SipRtConfig::LogMask* GetLogMask() const { return &m_objLogMask; }
     const SipRtConfig::SocketOption* GetSocketOption(IN IMS_SINT32 nItem) const;
     const SipRtConfig::SocketOption* GetSocketOption(
-            IN IMS_SINT32 nItem, IN const IPAddress& objIp, IN IMS_SINT32 nPort = 0) const;
-    const SipRtConfig::IpQos* GetIpQos(IN const IPAddress& objIp, IN IMS_SINT32 nPort = 0) const;
+            IN IMS_SINT32 nItem, IN const IpAddress& objIp, IN IMS_SINT32 nPort = 0) const;
+    const SipRtConfig::IpQos* GetIpQos(IN const IpAddress& objIp, IN IMS_SINT32 nPort = 0) const;
     inline const IMSList<SipRtConfig::IpSecSa>& GetIpSecSas() const { return m_objIpSecSas; }
     const SipAddress* GetRegContactUri(IN const AString& strCallId) const;
     inline IMS_BOOL IsFeatureEnabled(IN IMS_SINT32 nFeature) const

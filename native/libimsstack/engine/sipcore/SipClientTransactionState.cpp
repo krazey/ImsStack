@@ -1444,7 +1444,7 @@ IMS_BOOL SipClientTransactionState::SetDialogRelatedHeaders(IN const SipMethod& 
         if (!SipStack::IsHeaderPresent(m_pSipMsg, ISipHeader::CALL_ID))
         {
             // Add Call-ID in here
-            const IPAddress& objAddress = m_pTransport->GetIpAddress();
+            const IpAddress& objAddress = m_pTransport->GetIpAddress();
             AString strCallId = SipUtils::GenerateCallId(objAddress.ToString());
             SipHeaderBase* pSipHdr = SipStack::DecodeHeader(ISipHeader::CALL_ID, strCallId);
 

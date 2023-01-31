@@ -216,7 +216,7 @@ IMS_BOOL AosIpsec::IsSaEstablished()
 }
 
 PUBLIC
-void AosIpsec::SetIps(IN const IPAddress& objLocalIpa, IN const IPAddress& objPcscfIpa)
+void AosIpsec::SetIps(IN const IpAddress& objLocalIpa, IN const IpAddress& objPcscfIpa)
 {
     A_IMS_TRACE_D(AOSTAG, "Set IPs Local (%s) , P-CSCF (%s)", objLocalIpa.ToString().GetStr(),
             objPcscfIpa.ToString().GetStr(), 0);
@@ -322,7 +322,7 @@ IIpSecPolicy* AosIpsec::GetPolicy()
 }
 
 PUBLIC
-const IPAddress& AosIpsec::GetUeIpa() const
+const IpAddress& AosIpsec::GetUeIpa() const
 {
     return m_pUeInfo->objIpa;
 }
@@ -407,7 +407,7 @@ IMS_UINT32 AosIpsec::GetPcscfSpi(IN IMS_UINT32 nType)
 }
 
 PUBLIC
-const IPAddress& AosIpsec::GetPcscfIpa() const
+const IpAddress& AosIpsec::GetPcscfIpa() const
 {
     return m_pPcscfInfo->objIpa;
 }
@@ -505,9 +505,9 @@ void AosIpsec::CreateSa(IN IMS_UINT32 nType)
 
     IIpSecSa* piSa = m_piPolicy->CreateSa();
 
-    IPAddress objSrcIPA;
+    IpAddress objSrcIPA;
     IMS_UINT32 nSrcPort = 0;
-    IPAddress objDestIPA;
+    IpAddress objDestIPA;
     IMS_UINT32 nDestPort = 0;
     IMS_UINT32 nSpi = 0;
 

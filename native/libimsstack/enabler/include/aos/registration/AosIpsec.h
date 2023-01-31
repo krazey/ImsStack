@@ -47,7 +47,7 @@ public:
     IMS_UINT32 nSpiS;
     IMS_UINT32 nPortC;
     IMS_UINT32 nPortS;
-    IPAddress objIpa;
+    IpAddress objIpa;
     ByteArray objIk;
     ByteArray objCk;
 };
@@ -72,7 +72,7 @@ public:
     IMS_UINT32 nSpiS;
     IMS_UINT32 nPortC;
     IMS_UINT32 nPortS;
-    IPAddress objIpa;
+    IpAddress objIpa;
 };
 
 /**
@@ -140,7 +140,7 @@ public:
     IMS_BOOL IsSaEstablished();
 
     /// Set Local and P-CSCF IP Address
-    void SetIps(IN const IPAddress& objLocalIpa, IN const IPAddress& objPcscfIpa);
+    void SetIps(IN const IpAddress& objLocalIpa, IN const IpAddress& objPcscfIpa);
 
     /// Set Securtity Keys - IK, CK
     void SetKeys(IN const ByteArray& objAuthKey, IN const ByteArray& objEncrKey);
@@ -171,12 +171,12 @@ public:
     IMS_UINT32 GetIntegrityAlgorithm();
 
     /// Get UE Port & Spi
-    const IPAddress& GetUeIpa() const;
+    const IpAddress& GetUeIpa() const;
     IMS_UINT32 GetUePort(IN IMS_UINT32 nType);
     IMS_UINT32 GetUeSpi(IN IMS_UINT32 nType);
 
     /// Get P-CSCF Port & Spi
-    const IPAddress& GetPcscfIpa() const;
+    const IpAddress& GetPcscfIpa() const;
     IMS_UINT32 GetPcscfPort(IN IMS_UINT32 nType);
     IMS_UINT32 GetPcscfSpi(IN IMS_UINT32 nType);
 

@@ -53,7 +53,7 @@ public:
     /**
      * @brief Creates the mandatory SDP lines for the session-level description.
      */
-    IMS_BOOL CreateMandatoryLines(IN const AString& strUserId, IN const IPAddress& objLocalAddress);
+    IMS_BOOL CreateMandatoryLines(IN const AString& strUserId, IN const IpAddress& objLocalAddress);
 
     /**
      * @brief Returns the SdpVersion object from the session-level description.

@@ -38,7 +38,7 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
         m_pConfig(IMS_NULL),
         m_objMediaQualityThreshold(MediaQualityThreshold()),
-        m_objLocalAddress(IPAddress::IPv6NONE),
+        m_objLocalAddress(IpAddress::IPv6NONE),
         m_nLocalPort(0)
 {
     IMS_TRACE_I("+AudioMediaSession() - state[%d]", m_nState, 0, 0);
@@ -443,7 +443,7 @@ IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
 }
 
 PUBLIC
-void AudioMediaSession::SetLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort)
+void AudioMediaSession::SetLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort)
 {
     m_objLocalAddress = objLocalAddr;
     m_nLocalPort = nPort;

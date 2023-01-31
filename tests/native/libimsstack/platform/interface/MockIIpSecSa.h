@@ -29,7 +29,7 @@ public:
     inline virtual ~MockIIpSecSa() {}
 
     MOCK_METHOD(void, SetSa,
-            (IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort, IN const IPAddress& objDstIp,
+            (IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort, IN const IpAddress& objDstIp,
                     IN IMS_UINT32 nDstPort, IN IMS_UINT32 nSecurityProtocol, IN IMS_UINT32 nSpi,
                     IN IMS_UINT32 nMode, IN IMS_UINT32 nAuthAlgorithm,
                     IN IMS_UINT32 nEncryptionAlgorithm, IN const ByteArray& objAuthKey,

@@ -29,7 +29,7 @@ public:
     inline virtual ~MockIIpSecSp() {}
 
     MOCK_METHOD(void, SetTransportInfo,
-            (IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort, IN const IPAddress& objDstIp,
+            (IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort, IN const IpAddress& objDstIp,
                     IN IMS_UINT32 nDstPort, IN IMS_UINT32 nTransportProtocol, IN IMS_UINT32 nAction,
                     IN IMS_UINT32 nDirection, IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode),
             (override));

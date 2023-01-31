@@ -38,9 +38,9 @@ public:
 
     // INetworkConnection Util
     virtual IMS_SINT32 GetMtu() = 0;
-    virtual const IPAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0) = 0;
+    virtual const IpAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0) = 0;
     virtual const AStringArray& GetPcscfAddress(IN IMS_SINT32 nIpVersion = 0) = 0;
-    virtual IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IPAddress>& objIps,
+    virtual IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IpAddress>& objIps,
             IN IMS_SINT32 nIpVersion = 0) = 0;
     virtual const AString& GetIfaceName() = 0;
     virtual IMS_BOOL IsEpdgEnabled() = 0;

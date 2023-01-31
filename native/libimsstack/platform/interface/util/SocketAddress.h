@@ -73,7 +73,7 @@ public:
     /**
      * @brief Returns an IP address of this SocketAddress.
      *
-     * @return IPAddress object
+     * @return IpAddress object
      */
     inline const IpAddress& GetAddress() const { return m_objIpAddress; }
 

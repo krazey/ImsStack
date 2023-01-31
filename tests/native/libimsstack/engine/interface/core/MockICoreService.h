@@ -51,7 +51,7 @@ public:
     MOCK_METHOD(IServiceFilterCriteria*, GetFilterCriteria, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetPathHeaders, (), (const, override));
     MOCK_METHOD(const IRegInfo*, GetRegInfo, (), (const, override));
-    MOCK_METHOD(const IPAddress&, GetIpAddress, (), (const, override));
+    MOCK_METHOD(const IpAddress&, GetIpAddress, (), (const, override));
     MOCK_METHOD(SipProfile*, GetSipProfile, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetUserIdentities, (), (const, override));
     MOCK_METHOD(const AString&, GetUserIdentity, (IN IMS_SINT32 nScheme), (const, override));

@@ -80,9 +80,9 @@ private:
     IMS_RESULT SetPort(IN IMS_SINT32 nPort) override;
 
     const SdpMedia* GetMediaDescriptionExAsLocal() const override;
-    IPAddress GetLocalAddress() const override;
+    IpAddress GetLocalAddress() const override;
     IMS_SINT32 GetLocalPort() const override;
-    IPAddress GetRemoteAddress() const override;
+    IpAddress GetRemoteAddress() const override;
     const AString& GetRemoteAddressAsString() const override;
     IMS_SINT32 GetRemotePort() const override;
 

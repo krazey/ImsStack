@@ -90,7 +90,7 @@ PUBLIC VIRTUAL IMS_BOOL SipServerTransport::FormViaHeader(
     // Parse the host & port information from "sent-by" field
     SipTransport::ParseHostNPort(strSentBy, strHost, nPort);
 
-    IPAddress objHost;
+    IpAddress objHost;
     IMS_BOOL bNumericIpFormat = objHost.Parse(strHost);
 
     // Check if the actual received IP & the host in "sent-by" field are same
@@ -131,7 +131,7 @@ PUBLIC VIRTUAL IMS_BOOL SipServerTransport::UpdateDestinationInfo(IN ::SipMessag
     // Parse the host & port information from "sent-by" field
     SipTransport::ParseHostNPort(strSentBy, strViaHost, nViaPort);
 
-    SetIpAddress(IPAddress(strViaHost), TA_FAR);
+    SetIpAddress(IpAddress(strViaHost), TA_FAR);
     SetPort(nViaPort, TA_FAR);
 
     // Now, check if "maddr" & "received" parameter are present
@@ -141,7 +141,7 @@ PUBLIC VIRTUAL IMS_BOOL SipServerTransport::UpdateDestinationInfo(IN ::SipMessag
     {
         // If "maddr" parameter is found, it is the highest precedence.
         // So, update the destination address as this value.
-        SetIpAddress(IPAddress(strTemp), TA_FAR);
+        SetIpAddress(IpAddress(strTemp), TA_FAR);
     }
     else
     {
@@ -150,7 +150,7 @@ PUBLIC VIRTUAL IMS_BOOL SipServerTransport::UpdateDestinationInfo(IN ::SipMessag
 
         if (strTemp.GetLength() > 0)
         {
-            SetIpAddress(IPAddress(strTemp), TA_FAR);
+            SetIpAddress(IpAddress(strTemp), TA_FAR);
         }
     }
 

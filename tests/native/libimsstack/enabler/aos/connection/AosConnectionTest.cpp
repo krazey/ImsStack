@@ -277,10 +277,10 @@ TEST_F(AosConnectionTest, GetLocalAddress)
 {
     EXPECT_CALL(m_objMockINetworkConnection, GetLocalAddress(_))
             .Times(1)
-            .WillOnce(ReturnRef(IPAddress::NONE));
+            .WillOnce(ReturnRef(IpAddress::NONE));
 
     SetNetworkConnection(&m_objMockINetworkConnection);
-    EXPECT_EQ(m_pAosConnection->GetLocalAddress(), IPAddress::NONE);
+    EXPECT_EQ(m_pAosConnection->GetLocalAddress(), IpAddress::NONE);
 }
 
 TEST_F(AosConnectionTest, GetPcscfAddress)
@@ -300,7 +300,7 @@ TEST_F(AosConnectionTest, GetHostByName)
     SetNetworkConnection(&m_objMockINetworkConnection);
 
     const AString strHostName = AString("hostName");
-    IMSList<IPAddress> objIpas;
+    IMSList<IpAddress> objIpas;
     EXPECT_EQ(m_pAosConnection->GetHostByName(strHostName, objIpas), 1);
 }
 

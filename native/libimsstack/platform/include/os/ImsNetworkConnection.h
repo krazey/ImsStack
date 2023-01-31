@@ -36,7 +36,7 @@ public:
     virtual IMS_BOOL Create(IN const AString& strNetProfile) = 0;
     virtual IMS_BOOL Create(IN IMS_SINT32 nApnType) = 0;
     virtual void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;
-    virtual IMS_BOOL Equals(IN const IPAddress& objIpAddr) const = 0;
+    virtual IMS_BOOL Equals(IN const IpAddress& objIpAddr) const = 0;
     virtual IMS_CONNECTION GetHandle() const = 0;
     virtual const AString& GetProfileName() const = 0;
     virtual IMS_SINT32 GetApnType() const = 0;

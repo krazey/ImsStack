@@ -18,8 +18,6 @@
 
 #include "ByteArray.h"
 
-#define IPAddress IpAddress
-
 class IpAddressPrivate;
 
 class Ipv6Address

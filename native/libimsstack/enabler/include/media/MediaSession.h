@@ -115,7 +115,7 @@ protected:
     IMS_BOOL OnChangeNetworkConnection(IN IMS_UINT32 nAccessNetwork);
 
 private:
-    IPAddress GetAndroidIP();
+    IpAddress GetAndroidIP();
 
 protected:
     IMS_UINT32 m_nSlotId;

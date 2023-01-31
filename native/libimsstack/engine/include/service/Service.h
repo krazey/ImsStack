@@ -100,7 +100,7 @@ public:
     {
         return m_pAppConfig->GetCoreServiceConfigEx(m_strServiceId);
     }
-    const IPAddress& GetIpAddress() const;
+    const IpAddress& GetIpAddress() const;
     inline const IMSList<PreferenceHeader*>& GetAcceptContactHeaders() const
     {
         return m_objAcceptContacts;
@@ -252,7 +252,7 @@ private:
                 m_nPortUs(Sip::PORT_UNSPECIFIED),
                 m_nPortFlowControl(Sip::PORT_UNSPECIFIED),
                 m_nTransportExt(Sip::TRANSPORT_EXT_ANY),
-                m_objIp(IPAddress::NONE),
+                m_objIp(IpAddress::NONE),
                 m_objContactAddress(SipAddress::ConstNull()),
                 m_pContactAddressForOutgoingMessage(IMS_NULL),
                 m_objSecurityClients(AStringArray::ConstNull()),
@@ -290,7 +290,7 @@ private:
         inline IMS_SINT32 GetPortFlowControl() const { return m_nPortFlowControl; }
         // MULTI_REG_TRANSPORT
         inline IMS_SINT32 GetTransportExt() const { return m_nTransportExt; }
-        inline const IPAddress& GetIpAddress() const { return m_objIp; }
+        inline const IpAddress& GetIpAddress() const { return m_objIp; }
         inline const SipAddress& GetContactAddress() const { return m_objContactAddress; }
         inline const SipAddress* GetContactAddressForOutgoingMessage() const
         {
@@ -317,7 +317,7 @@ private:
         {
             m_nTransportExt = nTransportExt;
         }
-        inline void SetIpAddress(IN const IPAddress& objIp) { m_objIp = objIp; }
+        inline void SetIpAddress(IN const IpAddress& objIp) { m_objIp = objIp; }
         inline void SetContactAddress(IN const SipAddress& objContactAddress)
         {
             m_objContactAddress = objContactAddress;
@@ -386,7 +386,7 @@ private:
         // MULTI_REG_TRANSPORT
         IMS_SINT32 m_nTransportExt;
         // IP address
-        IPAddress m_objIp;
+        IpAddress m_objIp;
         // Contact address
         SipAddress m_objContactAddress;
         SipAddress* m_pContactAddressForOutgoingMessage;

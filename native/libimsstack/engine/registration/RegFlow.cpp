@@ -116,7 +116,7 @@ void RegFlow::Restore()
 }
 
 PUBLIC
-void RegFlow::UpdateCallId(IN const IPAddress& objIpAddr)
+void RegFlow::UpdateCallId(IN const IpAddress& objIpAddr)
 {
     // Check if the Call-ID already contains '@' character
     if (m_strCallId.Contains('@'))

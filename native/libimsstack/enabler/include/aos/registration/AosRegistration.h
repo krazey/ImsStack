@@ -488,7 +488,7 @@ protected:
 
     /// this is used for registration
     AString m_strPuid;        /// current
-    IPAddress m_objIpa;       /// local IP
+    IpAddress m_objIpa;       /// local IP
     AString m_strPcscf;       /// current Pcscf Address
     IMS_UINT32 m_nPcscfPort;  /// current Pcscf Port
 

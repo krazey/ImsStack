@@ -81,7 +81,7 @@ PUBLIC GLOBAL SipPortManager* SipPortManager::GetInstance()
 }
 
 PRIVATE
-IMS_SINT32 SipPortManager::SelectNextPortC(IN const IPAddress& objIp) const
+IMS_SINT32 SipPortManager::SelectNextPortC(IN const IpAddress& objIp) const
 {
     IMS_SINT32 nSelectedPort = 0;
     IMS_SINT32 nCurrentPort = GetNextPortC();

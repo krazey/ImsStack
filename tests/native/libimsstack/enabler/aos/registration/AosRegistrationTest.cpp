@@ -451,7 +451,7 @@ TEST_F(AosRegistrationTest, StartAndDestroy)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPcscfPorts));
 
-    IPAddress objLocalIpa(AString("192.168.0.1"));
+    IpAddress objLocalIpa(AString("192.168.0.1"));
     EXPECT_CALL(m_objMockIAosConnection, GetLocalAddress(_))
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objLocalIpa));

@@ -4242,8 +4242,8 @@ GLOBAL IMS_BOOL CompareTxnKeysForCancel(IN ::SipTxnKey* pCancelKey, IN ::SipTxnK
             // Compares IPv6 addresses
             AString strCancelHost(static_cast<const IMS_CHAR*>(pCancelKey->m_pszViaHost));
             AString strTxnHost(static_cast<const IMS_CHAR*>(pTxnKey->m_pszViaHost));
-            IPAddress objCancelIPA(strCancelHost);
-            IPAddress objTxnIPA(strTxnHost);
+            IpAddress objCancelIPA(strCancelHost);
+            IpAddress objTxnIPA(strTxnHost);
 
             if (!objCancelIPA.Equals(objTxnIPA))
             {

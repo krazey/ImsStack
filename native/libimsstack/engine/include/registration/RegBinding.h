@@ -59,7 +59,7 @@ protected:
     const SipAddress& GetAuthorizedAor() const override;
     const SipAddress& GetContactAddress() const override;
     const SipAddress* GetContactAddressForOutgoingMessage() const override;
-    const IPAddress& GetIpAddress() const override;
+    const IpAddress& GetIpAddress() const override;
     const AStringArray& GetPathHeaders() const override;
     IMS_SINT32 GetPortFlowControl() const override;
     IMS_SINT32 GetPortUc() const override;

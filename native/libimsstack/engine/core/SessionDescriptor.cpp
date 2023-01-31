@@ -1059,19 +1059,19 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::SetOriginAddress(IN const AString&
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL IPAddress SessionDescriptor::GetLocalAddress() const
+PRIVATE VIRTUAL IpAddress SessionDescriptor::GetLocalAddress() const
 {
-    return IPAddress(m_piSessionState->GetConnectionAddress());
+    return IpAddress(m_piSessionState->GetConnectionAddress());
 }
 
-PRIVATE VIRTUAL IPAddress SessionDescriptor::GetRemoteAddress() const
+PRIVATE VIRTUAL IpAddress SessionDescriptor::GetRemoteAddress() const
 {
-    IPAddress objAddress;
+    IpAddress objAddress;
 
     if (!objAddress.Parse(GetRemoteAddressAsString()))
     {
         IMS_TRACE_D("Remote connection address may be FQDN or null", 0, 0, 0);
-        return IPAddress::NONE;
+        return IpAddress::NONE;
     }
 
     return objAddress;

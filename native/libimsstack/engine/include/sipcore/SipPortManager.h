@@ -33,7 +33,7 @@ public:
 
 public:
     void Clear();
-    inline IMS_SINT32 GetPortC(IN const IPAddress& objIp) const { return SelectNextPortC(objIp); }
+    inline IMS_SINT32 GetPortC(IN const IpAddress& objIp) const { return SelectNextPortC(objIp); }
     inline IMS_BOOL IsPortCProvisioned() const
     {
         return (m_nPortCStart >= CLIENT_PORT_MIN) && (m_nPortCEnd <= CLIENT_PORT_MAX);
@@ -44,7 +44,7 @@ public:
 
 private:
     inline IMS_SINT32 GetNextPortC() const { return m_nNextPortC; }
-    IMS_SINT32 SelectNextPortC(IN const IPAddress& objIp) const;
+    IMS_SINT32 SelectNextPortC(IN const IpAddress& objIp) const;
     void SetNextPortC(IN IMS_SINT32 nPort) const;
     static IMS_BOOL IsPortAvailable(IN const IpAddress& objIp, IN IMS_SINT32 nPort);
 

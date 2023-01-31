@@ -226,7 +226,7 @@ IMS_BOOL SdpSessionParameter::IsSameVersion(IN const SdpSessionParameter* pSessi
 PUBLIC
 IMS_BOOL SdpSessionParameter::SetConnectionAddress(IN const AString& strAddress)
 {
-    IPAddress objIpAddr;
+    IpAddress objIpAddr;
 
     if (strAddress.GetLength() > 0)
     {

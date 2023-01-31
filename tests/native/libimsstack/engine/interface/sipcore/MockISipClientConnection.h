@@ -55,7 +55,7 @@ public:
     MOCK_METHOD(void, SetExtensionTokenForViaBranch, (IN const AString& strToken), (override));
     MOCK_METHOD(void, SetImplicitRouteHeader, (IN const AString& strRouteHeader), (override));
     MOCK_METHOD(void, SetTransportTuple,
-            (IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+            (IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
                     IN IMS_SINT32 nPortFc, IN IMS_SINT32 nTransportExt),
             (override));
 

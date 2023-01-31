@@ -39,7 +39,7 @@ public:
     TextProfile* m_pLocalProfile;
     TextProfile* m_pPeerProfile;
     TextProfile* m_pNegoProfile;
-    IPAddress m_objIpAddr;
+    IpAddress m_objIpAddr;
 
 protected:
     virtual void SetUp() override
@@ -66,7 +66,7 @@ protected:
         m_pPeerProfile = new TextProfile(*m_pLocalProfile);
         m_pNegoProfile = new TextProfile(*m_pLocalProfile);
 
-        m_objIpAddr = IPAddress(LOCAL_IP);
+        m_objIpAddr = IpAddress(LOCAL_IP);
         ON_CALL(*m_pTextNego, GetLocalAddress()).WillByDefault(ReturnRef(m_objIpAddr));
         ON_CALL(*m_pTextNego, GetLocalPort()).WillByDefault(Return(LOCAL_PORT));
         ON_CALL(*m_pTextNego, GetNegotiatedLocalProfile()).WillByDefault(Return(m_pLocalProfile));

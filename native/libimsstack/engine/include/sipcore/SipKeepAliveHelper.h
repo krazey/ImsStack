@@ -37,8 +37,8 @@ private:
     // ISipKeepAliveHelper class
     IMS_RESULT SendPacket(IN const ByteArray& objPacket) override;
     void SetListener(IN ISipKeepAliveHelperListener* piListener) override;
-    void SetTransportTupleD(IN const IPAddress& objIp, IN IMS_SINT32 nPort) override;
-    void SetTransportTupleS(IN const IPAddress& objIp, IN IMS_SINT32 nPort,
+    void SetTransportTupleD(IN const IpAddress& objIp, IN IMS_SINT32 nPort) override;
+    void SetTransportTupleS(IN const IpAddress& objIp, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nProtocol = Sip::TRANSPORT_UDP) override;
 
     // ISipKeepAliveListener class

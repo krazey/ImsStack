@@ -103,7 +103,7 @@ public:
      * @param objLocalAddr The local ip address
      * @param nPort The local port number
      */
-    void SetLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort);
+    void SetLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort);
 
     /**
      * @brief Get the rtcp is enabled
@@ -157,7 +157,7 @@ public:
 protected:
     AudioConfiguration* m_pConfig;
     MediaQualityThreshold m_objMediaQualityThreshold;
-    IPAddress m_objLocalAddress;
+    IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
     IMSList<IMS_UINTP> m_listNegoId;
 };

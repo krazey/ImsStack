@@ -154,7 +154,7 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
     strValue.Append('0');
     strValue.Append(TextParser::STR_AT);
 
-    IPAddress objIpAddress;
+    IpAddress objIpAddress;
     if (!objIpAddress.Parse(strIpAddress) || objIpAddress.IsIPv4Address())
     {
         strValue.Append(strIpAddress);

@@ -92,9 +92,9 @@ const SipRtConfig::SocketOption* SipRtConfigHelper::GetSocketOption(IN IMS_SINT3
 
 PUBLIC
 const SipRtConfig::SocketOption* SipRtConfigHelper::GetSocketOption(
-        IN IMS_SINT32 nItem, IN const IPAddress& objIp, IN IMS_SINT32 nPort /*= 0*/) const
+        IN IMS_SINT32 nItem, IN const IpAddress& objIp, IN IMS_SINT32 nPort /*= 0*/) const
 {
-    if ((nPort == 0) && (objIp.Equals(IPAddress::NONE) || objIp.Equals(IPAddress::IPv6NONE)))
+    if ((nPort == 0) && (objIp.Equals(IpAddress::NONE) || objIp.Equals(IpAddress::IPv6NONE)))
     {
         return GetSocketOption(nItem);
     }
@@ -141,8 +141,8 @@ const SipRtConfig::SocketOption* SipRtConfigHelper::GetSocketOption(
     {
         const SipRtConfig::SocketOption& objSocketOption = objSocketOptions.GetAt(i);
 
-        if ((objSocketOption.objIpAddr.Equals(IPAddress::NONE) ||
-                    objSocketOption.objIpAddr.Equals(IPAddress::IPv6NONE)) &&
+        if ((objSocketOption.objIpAddr.Equals(IpAddress::NONE) ||
+                    objSocketOption.objIpAddr.Equals(IpAddress::IPv6NONE)) &&
                 (objSocketOption.nPort == nPort))
         {
             return &objSocketOption;
@@ -154,7 +154,7 @@ const SipRtConfig::SocketOption* SipRtConfigHelper::GetSocketOption(
 
 PUBLIC
 const SipRtConfig::IpQos* SipRtConfigHelper::GetIpQos(
-        IN const IPAddress& objIp, IN IMS_SINT32 nPort /*= 0*/) const
+        IN const IpAddress& objIp, IN IMS_SINT32 nPort /*= 0*/) const
 {
     if (m_objIpQoss.IsEmpty())
     {

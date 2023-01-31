@@ -55,7 +55,7 @@ public:
      *
      * @return Textual representation of decimal dotted IP address.
      */
-    virtual const IPAddress& GetLocalAddress() const = 0;
+    virtual const IpAddress& GetLocalAddress() const = 0;
 
     /**
      * @brief Gets the local port for this SIP transaction notifier.
@@ -127,7 +127,7 @@ public:
      * @param nPortFlowControl Port number for flow control
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT ReserveTransportResource(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS,
+    virtual IMS_RESULT ReserveTransportResource(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPortS,
             IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl) = 0;
 
     /**
@@ -143,7 +143,7 @@ public:
      * @note REG_RESTORATION_FOR_ACTIVE_BINDING
      */
     virtual IMS_RESULT RestoreTransportResource(
-            IN IMS_SINT32 nType, IN const IPAddress& objPeerIpAddr, IN IMS_SINT32 nPeerPort) = 0;
+            IN IMS_SINT32 nType, IN const IpAddress& objPeerIpAddr, IN IMS_SINT32 nPeerPort) = 0;
 
     /**
      * @brief Sets a default SIP settings (a default From informantion & user-info in Contact).

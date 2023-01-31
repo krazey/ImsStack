@@ -72,17 +72,17 @@ public:
     //
     virtual IMS_BOOL GetExtraInfo(IN const AString& strType, OUT AString& strInfo) = 0;
     virtual IMS_SINT32 GetHostByName(IN const AString& strHostName,
-            OUT IMSList<IPAddress>& objIpAddrs,
+            OUT IMSList<IpAddress>& objIpAddrs,
             IN IMS_SINT32 nIpVersion = 0 /* default-local-address-based */) = 0;
     virtual IMS_SINT32 GetIfaceId() const = 0;
     virtual const AString& GetIfaceName() const = 0;
     // 0 - configuration-based cached address
-    // IP version : refer to IPAddress class
+    // IP version : refer to IpAddress class
     //         4 - IPv4 cached address
     //         6 - IPv6 cached address
-    virtual const IPAddress& GetLocalAddress(
+    virtual const IpAddress& GetLocalAddress(
             IN IMS_SINT32 nIpVersion = 0 /* configuration-based */) const = 0;
-    // IP version : refer to IPAddress class
+    // IP version : refer to IpAddress class
     virtual const AStringArray& GetPcscfAddress(
             IN IMS_SINT32 nIpVersion = 0 /* configuration-based */) = 0;
     virtual STATE_ENTYPE GetState() const = 0;

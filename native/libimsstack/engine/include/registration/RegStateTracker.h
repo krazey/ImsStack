@@ -44,14 +44,14 @@ public:
     {
         return m_pContactAddressForOutgoingMessage;
     }
-    inline const IPAddress& GetIpAddress() const { return m_objIpAddress; }
+    inline const IpAddress& GetIpAddress() const { return m_objIpAddress; }
     inline const AStringArray& GetPathHeaders() const { return m_objPaths; }
     inline IMS_SINT32 GetPortFlowControl() const { return m_nPortFlowControl; }
     inline IMS_SINT32 GetPortUc() const { return m_nPortUc; }
     inline IMS_SINT32 GetPortUs() const { return m_nPortUs; }
     inline const RegContact* GetPreferredContact() const { return m_pPreferredContact; }
     // NAT_REQ_UE_PUBLIC_IP
-    inline const IPAddress& GetPublicIpAddress() const { return m_objPublicIpAddress; }
+    inline const IpAddress& GetPublicIpAddress() const { return m_objPublicIpAddress; }
     inline const AStringArray& GetSecurityClients() const { return m_objSecurityClients; }
     inline const AStringArray& GetSecurityVerifys() const { return m_objSecurityVerifys; }
     inline const AStringArray& GetServiceRoutes() const { return m_objServiceRoutes; }
@@ -69,7 +69,7 @@ private:
     inline void SetPortUs(IN IMS_SINT32 nPort) { m_nPortUs = nPort; }
     void SetPreferredContact(IN RegContact* pContact);
     // NAT_REQ_UE_PUBLIC_IP
-    inline void SetPublicIpAddress(IN const IPAddress& objIpAddr)
+    inline void SetPublicIpAddress(IN const IpAddress& objIpAddr)
     {
         m_objPublicIpAddress = objIpAddr;
     }
@@ -95,9 +95,9 @@ private:
     // IMPU : Network authorized Public User Identity (Topmost one in P-Associated-URI)
     SipAddress* m_pAuthorizedAor;
     // Preferred Contact address
-    IPAddress m_objIpAddress;
+    IpAddress m_objIpAddress;
     // NAT_REQ_UE_PUBLIC_IP
-    IPAddress m_objPublicIpAddress;
+    IpAddress m_objPublicIpAddress;
     SipAddress m_objPreferredContactAddress;
     SipAddress* m_pContactAddressForOutgoingMessage;
     RegContact* m_pPreferredContact;

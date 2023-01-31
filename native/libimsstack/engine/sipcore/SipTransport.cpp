@@ -244,7 +244,7 @@ const SipTransportAddress& SipTransport::GetAddress(IN IMS_SINT32 nTaType /*= TA
 }
 
 PUBLIC
-const IPAddress& SipTransport::GetIpAddress(IN IMS_SINT32 nTaType /*= TA_NEAR*/)
+const IpAddress& SipTransport::GetIpAddress(IN IMS_SINT32 nTaType /*= TA_NEAR*/)
 {
     if (nTaType == TA_NEAR)
     {
@@ -400,7 +400,7 @@ void SipTransport::SetAddress(
 }
 
 PUBLIC
-void SipTransport::SetIpAddress(IN const IPAddress& objIp, IN IMS_SINT32 nTaType /*= TA_NEAR*/)
+void SipTransport::SetIpAddress(IN const IpAddress& objIp, IN IMS_SINT32 nTaType /*= TA_NEAR*/)
 {
     if (nTaType == TA_NEAR)
     {
@@ -440,7 +440,7 @@ void SipTransport::SetProtocol(IN IMS_SINT32 nProtocol, IN IMS_SINT32 nTaType /*
 
 // RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
 PUBLIC
-void SipTransport::SetTransportTuple(IN const IPAddress& objIp, IN IMS_SINT32 nPortS,
+void SipTransport::SetTransportTuple(IN const IpAddress& objIp, IN IMS_SINT32 nPortS,
         IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc /*= Sip::PORT_UNSPECIFIED*/,
         IN IMS_SINT32 nTransportExt /*= Sip::TRANSPORT_EXT_ANY*/)
 {
@@ -849,7 +849,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
             return IMS_TRUE;
         }
 
-        IPAddress objIp;
+        IpAddress objIp;
         IMS_UINT32 nPort = 0;
         IMS_BOOL bCheckTcpSocketReusability = IMS_FALSE;
 
@@ -885,7 +885,7 @@ IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*
 
         if (bCheckTcpSocketReusability)
         {
-            IPAddress objPeerIp;
+            IpAddress objPeerIp;
             IMS_UINT32 nPeerPort = 0;
 
             m_pSocket->GetPeerName(objPeerIp, nPeerPort);

@@ -23,7 +23,7 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CW");
 
 PUBLIC MediaNetworkConnectionWatcher::MediaNetworkConnectionWatcher(
-        IN const IPAddress& objIpAddress) :
+        IN const IpAddress& objIpAddress) :
         m_piListener(IMS_NULL),
         m_pNetConnection(NetworkService::GetNetworkService()->FindConnection(objIpAddress)),
         m_nMediaConnectionType(0),

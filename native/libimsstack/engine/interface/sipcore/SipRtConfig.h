@@ -154,7 +154,7 @@ public:
         ///    CONFIG_I_TCP_KEEP_INTERVAL - N seconds
         IMS_SINT32 nValue;
         /// O (SET/REMOVE) : Local IP address which the option will be set.
-        IPAddress objIpAddr;
+        IpAddress objIpAddr;
         /// O (SET/REMOVE) : If the port number is not used, fill this value to zero (0).
         IMS_SINT32 nPort;
     };
@@ -182,7 +182,7 @@ public:
         /// M (SET) : 1 byte value (IPv4)
         IMS_SINT32 nValue;
         /// M (SET/REMOVE) : Local IP address which the option will be set.
-        IPAddress objIpAddr;
+        IpAddress objIpAddr;
         /// O (SET/REMOVE) : If the port number is not used, fill this value to zero (0).
         IMS_SINT32 nPort;
     };
@@ -253,7 +253,7 @@ public:
          *
          * @return The IP address.
          */
-        inline const IPAddress& GetIpAddrP() const { return objIpAddrP; }
+        inline const IpAddress& GetIpAddrP() const { return objIpAddrP; }
 
         /**
          * @brief Gets the port-c for UE.
@@ -274,7 +274,7 @@ public:
          *
          * @return The IP address.
          */
-        inline const IPAddress& GetIpAddrU() const { return objIpAddrU; }
+        inline const IpAddress& GetIpAddrU() const { return objIpAddrU; }
 
         /**
          * @brief Checks if it's empty IpSec SA or not.
@@ -290,14 +290,14 @@ public:
         /// M (SET) : port_ps
         IMS_SINT32 nPortPs;
         /// M (SET) : ip_p
-        IPAddress objIpAddrP;
+        IpAddress objIpAddrP;
 
         /// M (SET) : port_uc
         IMS_SINT32 nPortUc;
         /// M (SET) : port_us
         IMS_SINT32 nPortUs;
         /// M (SET) : ip_u
-        IPAddress objIpAddrU;
+        IpAddress objIpAddrU;
     };
 
     /// The configuration for port range of TCP client connection

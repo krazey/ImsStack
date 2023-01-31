@@ -428,7 +428,7 @@ SIP_BOOL SipUri::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         return SIP_FALSE;
     }
 
-    IPAddress objIpAddr;
+    IpAddress objIpAddr;
     if (objIpAddr.Parse(AString(m_pszHost)) == SIP_TRUE)
     {
         m_eHostType = objIpAddr.IsIPv6Address() ? SipAddrSpec::HOST_IPV6 : SipAddrSpec::HOST_IPV4;

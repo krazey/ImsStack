@@ -27,9 +27,9 @@ class OsIpSecSaPrivate
 {
 public:
     inline OsIpSecSaPrivate() :
-            m_objSrcIp(IPAddress::IPv6NONE),
+            m_objSrcIp(IpAddress::IPv6NONE),
             m_nSrcPort(0),
-            m_objDstIp(IPAddress::IPv6NONE),
+            m_objDstIp(IpAddress::IPv6NONE),
             m_nDstPort(0),
             m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP),
             m_nSpi(0),
@@ -45,9 +45,9 @@ public:
     inline ~OsIpSecSaPrivate() {}
 
 public:
-    IPAddress m_objSrcIp;
+    IpAddress m_objSrcIp;
     IMS_UINT32 m_nSrcPort;
-    IPAddress m_objDstIp;
+    IpAddress m_objDstIp;
     IMS_UINT32 m_nDstPort;
     IMS_UINT32 m_nSecurityProtocol;
     IMS_UINT32 m_nSpi;
@@ -75,8 +75,8 @@ PUBLIC VIRTUAL OsIpSecSa::~OsIpSecSa()
     }
 }
 
-PUBLIC VIRTUAL void OsIpSecSa::SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
-        IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort, IN IMS_UINT32 nSecurityProtocol,
+PUBLIC VIRTUAL void OsIpSecSa::SetSa(IN const IpAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+        IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort, IN IMS_UINT32 nSecurityProtocol,
         IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode, IN IMS_UINT32 nAuthAlgorithm,
         IN IMS_UINT32 nEncryptionAlgorithm, IN const ByteArray& objAuthKey,
         IN const ByteArray& objEncryptionKey)

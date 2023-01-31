@@ -21,7 +21,7 @@ PUBLIC
 SipSocketAddress::SipSocketAddress() :
         m_bSecure(IMS_FALSE),
         m_nType(SOCKET_UDP),
-        m_objSockAddr(SocketAddress(IPAddress::NONE, Sip::PORT_UNSPECIFIED))
+        m_objSockAddr(SocketAddress(IpAddress::NONE, Sip::PORT_UNSPECIFIED))
 {
 }
 

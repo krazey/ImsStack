@@ -30,8 +30,8 @@ private:
     {
     public:
         SecurityAssociation();
-        SecurityAssociation(IN const IPAddress& objIpU_, IN IMS_SINT32 nPortUc_,
-                IN IMS_SINT32 nPortUs_, IN const IPAddress& objIpP_, IN IMS_SINT32 nPortPc_,
+        SecurityAssociation(IN const IpAddress& objIpU_, IN IMS_SINT32 nPortUc_,
+                IN IMS_SINT32 nPortUs_, IN const IpAddress& objIpP_, IN IMS_SINT32 nPortPc_,
                 IN IMS_SINT32 nPortPs_);
         SecurityAssociation(IN const SecurityAssociation& other);
         ~SecurityAssociation();
@@ -76,10 +76,10 @@ private:
             SA_END
         };
 
-        IPAddress objIpU;
+        IpAddress objIpU;
         IMS_SINT32 nPortUc;
         IMS_SINT32 nPortUs;
-        IPAddress objIpP;
+        IpAddress objIpP;
         IMS_SINT32 nPortPc;
         IMS_SINT32 nPortPs;
 
@@ -115,8 +115,8 @@ private:
     void ClearIpSecSa(IN IMS_SINT32 nSaType) override;
     IMS_SINT32 GetState(IN IMS_SINT32 nSaType) const override;
     IMS_BOOL HasPendingTransaction(IN IMS_SINT32 nSaType) const override;
-    void SetIpSecSa(IN IMS_SINT32 nSaType, IN const IPAddress& objIpU, IN IMS_SINT32 nPortUc,
-            IN IMS_SINT32 nPortUs, IN const IPAddress& objIpP, IN IMS_SINT32 nPortPc,
+    void SetIpSecSa(IN IMS_SINT32 nSaType, IN const IpAddress& objIpU, IN IMS_SINT32 nPortUc,
+            IN IMS_SINT32 nPortUs, IN const IpAddress& objIpP, IN IMS_SINT32 nPortPc,
             IN IMS_SINT32 nPortPs) override;
     inline void SetListener(IN ISipIpSecStateListener* piListener) override
     {

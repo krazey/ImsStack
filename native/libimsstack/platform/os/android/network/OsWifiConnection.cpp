@@ -52,10 +52,10 @@ OsWifiConnection::OsWifiConnection() :
         m_pPolicy(IMS_NULL),
         m_nIfaceId(IMS_NET_IFACE_INVALID_ID),
         m_strIfaceName(AString::ConstNull()),
-        m_nPreferredIpVersion(IPAddress::UNKNOWN),
-        m_objLocalAddress(IPAddress::NONE),
-        m_objLocalAddressIpv4(IPAddress::NONE),
-        m_objLocalAddressIpv6(IPAddress::IPv6NONE),
+        m_nPreferredIpVersion(IpAddress::UNKNOWN),
+        m_objLocalAddress(IpAddress::NONE),
+        m_objLocalAddressIpv4(IpAddress::NONE),
+        m_objLocalAddressIpv6(IpAddress::IPv6NONE),
         m_objPcscfsAddress(AStringArray::ConstNull()),
         m_nConnectionHandle(0),
         m_piOwnerThread(IMS_NULL),
@@ -85,23 +85,23 @@ PUBLIC VIRTUAL OsWifiConnection::~OsWifiConnection()
     }
 }
 
-PUBLIC VIRTUAL const IPAddress& OsWifiConnection::GetLocalAddress(
+PUBLIC VIRTUAL const IpAddress& OsWifiConnection::GetLocalAddress(
         IN IMS_SINT32 nIpVersion /*= 0 configuration-based*/) const
 {
     if (nIpVersion == 0)
     {
         return m_objLocalAddress;
     }
-    else if (nIpVersion == IPAddress::IPV4)
+    else if (nIpVersion == IpAddress::IPV4)
     {
         return m_objLocalAddressIpv4;
     }
-    else if (nIpVersion == IPAddress::IPV6)
+    else if (nIpVersion == IpAddress::IPV6)
     {
         return m_objLocalAddressIpv6;
     }
 
-    return IPAddress::NONE;
+    return IpAddress::NONE;
 }
 
 PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Activate(
@@ -113,9 +113,9 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Activate(
     {
         if (!IsConnected())
         {
-            m_objLocalAddress = IPAddress::NONE;
-            m_objLocalAddressIpv4 = IPAddress::NONE;
-            m_objLocalAddressIpv6 = IPAddress::IPv6NONE;
+            m_objLocalAddress = IpAddress::NONE;
+            m_objLocalAddressIpv4 = IpAddress::NONE;
+            m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
         }
 
         if (!CacheLocalAddress())
@@ -290,23 +290,23 @@ PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::GetExtraInfo(
 }
 
 PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetHostByName(IN const AString& strHostName,
-        OUT IMSList<IPAddress>& objIpAddrs,
+        OUT IMSList<IpAddress>& objIpAddrs,
         IN IMS_SINT32 nIpVersion /*= 0 default-local-address-based*/)
 {
     IMS_TRACE_I("DNS lookup (%d) :: apnType=%d, domain=%s", nIpVersion, GetApnType(),
             OsUtil::GetInstance()->IsDebugMode() ? strHostName.GetStr() : "xxx");
 
-    if ((nIpVersion != IPAddress::IPV4) && (nIpVersion != IPAddress::IPV6))
+    if ((nIpVersion != IpAddress::IPV4) && (nIpVersion != IpAddress::IPV6))
     {
-        const IPAddress& objLocalIp = GetLocalAddress();
+        const IpAddress& objLocalIp = GetLocalAddress();
 
         if (objLocalIp.IsIPv4Address())
         {
-            nIpVersion = IPAddress::IPV4;
+            nIpVersion = IpAddress::IPV4;
         }
         else if (objLocalIp.IsIPv6Address())
         {
-            nIpVersion = IPAddress::IPV6;
+            nIpVersion = IpAddress::IPV6;
         }
         else
         {
@@ -329,7 +329,7 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetHostByName(IN const AString& str
     for (IMS_SINT32 i = 0; i < objHostIps.GetCount(); i++)
     {
         const AString& strHostIp = objHostIps.GetElementAt(i);
-        IPAddress objIp;
+        IpAddress objIp;
 
         if (objIp.Parse(strHostIp))
         {
@@ -405,7 +405,7 @@ PRIVATE VIRTUAL void OsWifiConnection::SetPreferredIpVersion(
     {
         m_nPreferredIpVersion = nPreferredIpVersion;
 
-        if (IsConnected() && (m_nPreferredIpVersion != IPAddress::UNKNOWN))
+        if (IsConnected() && (m_nPreferredIpVersion != IpAddress::UNKNOWN))
         {
             AdjustPreferredLocalAddress();
         }
@@ -519,7 +519,7 @@ PRIVATE VIRTUAL void OsWifiConnection::DispatchServiceMessage(
     }
 }
 
-PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::Equals(IN const IPAddress& objIpAddr) const
+PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::Equals(IN const IpAddress& objIpAddr) const
 {
     if (objIpAddr.IsIPv4Address())
     {
@@ -582,9 +582,9 @@ PRIVATE VIRTUAL void OsWifiConnection::System_NotifyEvent(
 PRIVATE
 IMS_BOOL OsWifiConnection::AdjustPreferredLocalAddress()
 {
-    if (m_nPreferredIpVersion == IPAddress::IPV4)
+    if (m_nPreferredIpVersion == IpAddress::IPV4)
     {
-        if (!m_objLocalAddressIpv4.Equals(IPAddress::NONE) &&
+        if (!m_objLocalAddressIpv4.Equals(IpAddress::NONE) &&
                 !m_objLocalAddressIpv4.Equals(m_objLocalAddress))
         {
             IMS_TRACE_D("(WiFi) Preferred local address :: %s >> %s",
@@ -594,9 +594,9 @@ IMS_BOOL OsWifiConnection::AdjustPreferredLocalAddress()
             m_objLocalAddress = m_objLocalAddressIpv4;
         }
     }
-    else if (m_nPreferredIpVersion == IPAddress::IPV6)
+    else if (m_nPreferredIpVersion == IpAddress::IPV6)
     {
-        if (!m_objLocalAddressIpv6.Equals(IPAddress::IPv6NONE) &&
+        if (!m_objLocalAddressIpv6.Equals(IpAddress::IPv6NONE) &&
                 !m_objLocalAddressIpv6.Equals(m_objLocalAddress))
         {
             IMS_TRACE_D("(WiFi) Preferred local address :: %s >> %s",
@@ -607,7 +607,7 @@ IMS_BOOL OsWifiConnection::AdjustPreferredLocalAddress()
         }
     }
 
-    if (m_objLocalAddress.Equals(IPAddress::NONE) || m_objLocalAddress.Equals(IPAddress::IPv6NONE))
+    if (m_objLocalAddress.Equals(IpAddress::NONE) || m_objLocalAddress.Equals(IpAddress::IPv6NONE))
     {
         IMS_TRACE_D("Local address is null", 0, 0, 0);
         return IMS_FALSE;
@@ -876,13 +876,13 @@ void OsWifiConnection::CallReferenceListeners(
 PRIVATE
 void OsWifiConnection::CheckValidityForLocalAddress()
 {
-    IPAddress objTmpLocalAddress = m_objLocalAddress;
-    IPAddress objTmpLocalAddressIpv4 = m_objLocalAddressIpv4;
-    IPAddress objTmpLocalAddressIpv6 = m_objLocalAddressIpv6;
+    IpAddress objTmpLocalAddress = m_objLocalAddress;
+    IpAddress objTmpLocalAddressIpv4 = m_objLocalAddressIpv4;
+    IpAddress objTmpLocalAddressIpv6 = m_objLocalAddressIpv6;
 
-    m_objLocalAddress = IPAddress::NONE;
-    m_objLocalAddressIpv4 = IPAddress::NONE;
-    m_objLocalAddressIpv6 = IPAddress::IPv6NONE;
+    m_objLocalAddress = IpAddress::NONE;
+    m_objLocalAddressIpv4 = IpAddress::NONE;
+    m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
 
     if (!CacheLocalAddress())
     {
@@ -983,9 +983,9 @@ void OsWifiConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
         return;
     }
 
-    m_objLocalAddress = IPAddress::NONE;
-    m_objLocalAddressIpv4 = IPAddress::NONE;
-    m_objLocalAddressIpv6 = IPAddress::IPv6NONE;
+    m_objLocalAddress = IpAddress::NONE;
+    m_objLocalAddressIpv4 = IpAddress::NONE;
+    m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
 
     if (!CacheLocalAddress())
     {

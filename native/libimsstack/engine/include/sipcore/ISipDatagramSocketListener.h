@@ -32,7 +32,7 @@ protected:
 
 public:
     virtual void DatagramSocket_DataReceived(IN SipSocket* pSocket, IN const ByteArray& objBuffer,
-            IN const IPAddress& objIp, IN IMS_SINT32 nPort) = 0;
+            IN const IpAddress& objIp, IN IMS_SINT32 nPort) = 0;
 };
 
 #endif

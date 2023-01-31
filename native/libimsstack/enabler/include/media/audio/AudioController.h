@@ -195,7 +195,7 @@ private:
     IMSList<AudioMediaSession*> m_listAudioSession;
     IMS_SINT32 m_nAudioSessionState;
     IMS_UINT32 m_eUpdateCondition;
-    IPAddress m_objLocalAddr;
+    IpAddress m_objLocalAddr;
     IMS_UINT32 m_nPort;
 };
 

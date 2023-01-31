@@ -1083,7 +1083,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 
             if (pParam != IMS_NULL)
             {
-                IPAddress objIpAddress = pParam->m_objIpAddress;
+                IpAddress objIpAddress = pParam->m_objIpAddress;
                 IMS_SINT32 nPort = pParam->m_nPort;
                 IMS_BOOL bResult = pParam->m_bResult;
 

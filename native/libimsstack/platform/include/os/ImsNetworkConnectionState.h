@@ -42,7 +42,7 @@ public:
     void DetachHandle(IN const AString& strNetProfile, IN IMS_SINT32 nSlotId);
     ImsNetworkConnection* LookupHandle(IN const AString& strNetProfile, IN IMS_SINT32 nSlotId);
     ImsNetworkConnection* LookupHandle(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
-    ImsNetworkConnection* LookupHandle(IN const IPAddress& objIpAddr);
+    ImsNetworkConnection* LookupHandle(IN const IpAddress& objIpAddr);
     ImsNetworkConnection* LookupHandle(IN IMS_CONNECTION hConnection);
     IMS_BOOL IsHandlePresent(IN IMS_CONNECTION hConnection);
     IMS_BOOL IsEmpty() const;

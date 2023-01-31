@@ -51,7 +51,7 @@ public:
     {
         return m_piConnection;
     }
-    inline INetworkConnection* FindConnection(IN const IPAddress& /*objIpAddr*/) override
+    inline INetworkConnection* FindConnection(IN const IpAddress& /*objIpAddr*/) override
     {
         return m_piConnection;
     }
@@ -77,7 +77,7 @@ public:
         return m_piSslSocket;
     }
     inline void DestroySocket(IN ISocket*& /*piSocket*/) override {}
-    inline IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress& /*objIpAddr*/,
+    inline IMS_BOOL CheckIpAndPortAvailability(IN const IpAddress& /*objIpAddr*/,
             IN IMS_SINT32 /*nPort*/, IN ISocket::SOCKET_ENTYPE /*enType*/) override
     {
         return IMS_TRUE;

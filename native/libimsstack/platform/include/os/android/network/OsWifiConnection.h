@@ -55,7 +55,7 @@ public:
     };
 
 public:
-    const IPAddress& GetLocalAddress(
+    const IpAddress& GetLocalAddress(
             IN IMS_SINT32 nIpVersion = 0 /*configuration-based*/) const override;
 
 private:
@@ -66,7 +66,7 @@ private:
     void GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
             OUT AString& strTimeStamp, OUT AString& strCellInfoAge) override;
     IMS_BOOL GetExtraInfo(IN const AString& strType, OUT AString& strInfo) override;
-    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IPAddress>& objIpAddrs,
+    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IpAddress>& objIpAddrs,
             IN IMS_SINT32 nIpVersion = 0 /*default-local-address-based*/) override;
     IMS_SINT32 GetIfaceId() const override;
     const AString& GetIfaceName() const override;
@@ -87,7 +87,7 @@ private:
     IMS_BOOL Create(IN const AString& strNetProfile) override;
     IMS_BOOL Create(IN IMS_SINT32 nApnType) override;
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
-    IMS_BOOL Equals(IN const IPAddress& objIpAddr) const override;
+    IMS_BOOL Equals(IN const IpAddress& objIpAddr) const override;
     IMS_CONNECTION GetHandle() const override;
     const AString& GetProfileName() const override;
     IMS_SINT32 GetApnType() const override;
@@ -131,9 +131,9 @@ private:
     // Preferred local IP address's version
     IMS_SINT32 m_nPreferredIpVersion;
     // Configuration-based local IP address
-    IPAddress m_objLocalAddress;
-    IPAddress m_objLocalAddressIpv4;
-    IPAddress m_objLocalAddressIpv6;
+    IpAddress m_objLocalAddress;
+    IpAddress m_objLocalAddressIpv4;
+    IpAddress m_objLocalAddressIpv6;
     AStringArray m_objPcscfsAddress;
 
     IMS_CONNECTION m_nConnectionHandle;

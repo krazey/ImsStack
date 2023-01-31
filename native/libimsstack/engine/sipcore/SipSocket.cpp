@@ -50,7 +50,7 @@ PUBLIC VIRTUAL SipSocket::~SipSocket()
 }
 
 PUBLIC VIRTUAL IMS_BOOL SipSocket::Create(
-        IN const IPAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
+        IN const IpAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
 {
     INetworkConnection* piNetConnection =
             NetworkService::GetNetworkService()->FindConnection(objIp);
@@ -121,7 +121,7 @@ PUBLIC VIRTUAL IMS_BOOL SipSocket::Create(
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void SipSocket::GetSockName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort)
+PUBLIC VIRTUAL void SipSocket::GetSockName(OUT IpAddress& objIp, OUT IMS_UINT32& nPort)
 {
     nPort = m_objSockAddr.GetPort();
     objIp = m_objSockAddr.GetIpAddress();
@@ -136,7 +136,7 @@ PUBLIC VIRTUAL void SipSocket::NotifyForceClosed()
 }
 
 PUBLIC
-void SipSocket::GetPeerName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort)
+void SipSocket::GetPeerName(OUT IpAddress& objIp, OUT IMS_UINT32& nPort)
 {
     if (m_piSocket != IMS_NULL)
     {
@@ -315,7 +315,7 @@ void SipSocket::NotifyPongReceived()
 
 PROTECTED
 void SipSocket::SetSocketOptionForTcpMaxSeg(
-        IN INetworkConnection* piConnection, IN const IPAddress& objLocalIp)
+        IN INetworkConnection* piConnection, IN const IpAddress& objLocalIp)
 {
     // MSS(Max Segment Size) for TCP
     IMS_SINT32 nMss = piConnection->GetMtu();
@@ -349,7 +349,7 @@ void SipSocket::SetSocketOptionForTcpMaxSeg(
 }
 
 PROTECTED
-void SipSocket::SetSocketOptions(IN const IPAddress& objLocalIp, IN IMS_UINT32 nLocalPort)
+void SipSocket::SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 nLocalPort)
 {
     IMS_SINT32 nSocketType = m_objSockAddr.GetType();
 
@@ -417,7 +417,7 @@ void SipSocket::SetState(IN IMS_SINT32 nState)
 }
 
 PROTECTED GLOBAL void SipSocket::SetSocketOption(IN IMS_SINT32 nSlotId, IN ISocket* piSocket,
-        IN const IPAddress& objLocalIp, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
+        IN const IpAddress& objLocalIp, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
         IN IMS_SINT32 nSocketOption, IN const IMS_CHAR* pszOptionName)
 {
     SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);

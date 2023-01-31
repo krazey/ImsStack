@@ -52,8 +52,8 @@ public:
 
     inline IMS_BOOL IsEqual(IN const AString& strCurr)
     {
-        IPAddress objIpaCurr(strCurr);
-        IPAddress objIpa(m_strAddress);
+        IpAddress objIpaCurr(strCurr);
+        IpAddress objIpa(m_strAddress);
         return objIpaCurr.Equals(objIpa);
     }
 
@@ -165,7 +165,7 @@ public:
     void Init() override;
     void CleanUp() override;
 
-    void Configure(IN IMS_UINT32 nIpVersion = IPAddress::UNKNOWN) override;
+    void Configure(IN IMS_UINT32 nIpVersion = IpAddress::UNKNOWN) override;
     IMS_BOOL IsConfigured() const override;
 
     IMS_BOOL IsAsyncDnsDiscovery() const override;
@@ -219,7 +219,7 @@ protected:
 
     IMS_BOOL IsLocalAddressValid(IN IMS_SINT32 nIpVersion);
     IMS_BOOL IsLocalAddressTypeValid(IN IMS_SINT32 nIpVersion) const;
-    IMS_BOOL IsSamePcscf(IN const IPAddress& objPcscfAddress, IN IMS_SINT32 nPort);
+    IMS_BOOL IsSamePcscf(IN const IpAddress& objPcscfAddress, IN IMS_SINT32 nPort);
 
     void SetConfigured(IN IMS_BOOL bConfigured);
 

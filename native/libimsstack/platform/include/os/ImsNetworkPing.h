@@ -31,7 +31,7 @@ public:
 
 public:
     void Destroy() override;
-    IMS_SINT32 Ping(IN const IPAddress& objSrcIp, IN const IPAddress& objDstIp,
+    IMS_SINT32 Ping(IN const IpAddress& objSrcIp, IN const IpAddress& objDstIp,
             IN IMS_SINT32 nDstPort, IN IMS_SINT32 nWaitTime) override;
     void SetListener(IN INetworkPingListener* piListener) override;
 
@@ -48,14 +48,14 @@ protected:
             IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
 
     void ClearResources();
-    IMS_BOOL PrepareResources(IN const IPAddress& objIp, IN IMS_BOOL bTimerRequired);
+    IMS_BOOL PrepareResources(IN const IpAddress& objIp, IN IMS_BOOL bTimerRequired);
     void ClearAndNotifyResult(IN IMS_SINT32 nResult);
     void NotifyResult(IN IMS_SINT32 nResult);
 
     IMS_SINT32 GetState() const;
     void SetState(IN IMS_SINT32 nState);
 
-    static IMS_SINT32 GetRandomPort(IN const IPAddress& objIp);
+    static IMS_SINT32 GetRandomPort(IN const IpAddress& objIp);
 
 private:
     enum

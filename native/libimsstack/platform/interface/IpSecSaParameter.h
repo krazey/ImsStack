@@ -34,8 +34,8 @@ public:
                 IN IMS_SINT32 nTransportProtocol, IN const SocketAddress& objLocalAddress,
                 IN const SocketAddress& objRemoteAddress);
         Policy(IN IMS_SINT32 nSpi, IN IMS_SINT32 nDirection, IN IMS_SINT32 nMode,
-                IN IMS_SINT32 nTransportProtocol, IN const IPAddress& objLocalIpAddress,
-                IN IMS_SINT32 nLocalPort, IN const IPAddress& objRemoteIpAddress,
+                IN IMS_SINT32 nTransportProtocol, IN const IpAddress& objLocalIpAddress,
+                IN IMS_SINT32 nLocalPort, IN const IpAddress& objRemoteIpAddress,
                 IN IMS_SINT32 nRemotePort);
         Policy(IN const Policy& other);
         inline ~Policy() {}

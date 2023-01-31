@@ -44,8 +44,8 @@ PUBLIC VIRTUAL void ImsNetworkPing::Destroy()
     delete this;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 ImsNetworkPing::Ping(IN const IPAddress& objSrcIp,
-        IN const IPAddress& objDstIp, IN IMS_SINT32 nDstPort, IN IMS_SINT32 nWaitTime)
+PUBLIC VIRTUAL IMS_SINT32 ImsNetworkPing::Ping(IN const IpAddress& objSrcIp,
+        IN const IpAddress& objDstIp, IN IMS_SINT32 nDstPort, IN IMS_SINT32 nWaitTime)
 {
     if (GetState() != STATE_IDLE)
     {
@@ -189,7 +189,7 @@ void ImsNetworkPing::ClearResources()
 }
 
 PROTECTED
-IMS_BOOL ImsNetworkPing::PrepareResources(IN const IPAddress& objIp, IN IMS_BOOL bTimerRequired)
+IMS_BOOL ImsNetworkPing::PrepareResources(IN const IpAddress& objIp, IN IMS_BOOL bTimerRequired)
 {
     ClearResources();
 
@@ -284,7 +284,7 @@ void ImsNetworkPing::SetState(IN IMS_SINT32 nState)
     }
 }
 
-PROTECTED GLOBAL IMS_SINT32 ImsNetworkPing::GetRandomPort(IN const IPAddress& objIp)
+PROTECTED GLOBAL IMS_SINT32 ImsNetworkPing::GetRandomPort(IN const IpAddress& objIp)
 {
     const IMS_SINT32 MAX_COUNT = 50;
     NetworkService* pNetworkService = NetworkService::GetNetworkService();

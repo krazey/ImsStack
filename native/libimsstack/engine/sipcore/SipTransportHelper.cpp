@@ -101,7 +101,7 @@ PUBLIC VIRTUAL IMS_BOOL SipTransportHelper::DispatchMessage(IN ImsMessage& objMs
 
         case AMSG_DESTROY_ALL_SOCKETS:
         {
-            IPAddress* pLocalIp = reinterpret_cast<IPAddress*>(objMsg.nLparam);
+            IpAddress* pLocalIp = reinterpret_cast<IpAddress*>(objMsg.nLparam);
 
             if (pLocalIp != IMS_NULL)
             {
@@ -333,7 +333,7 @@ void SipTransportHelper::DestroyStreamSocket(
 
         if (pSocket->Equals(objFarEnd))
         {
-            IPAddress objIp;
+            IpAddress objIp;
             IMS_UINT32 nPort = 0;
 
             pSocket->GetSockName(objIp, nPort);
@@ -489,7 +489,7 @@ IMS_BOOL SipTransportHelper::IsClientInitiatedConnection(IN SipSocket* pSocket) 
 
 PUBLIC
 IMS_BOOL SipTransportHelper::GetHostByName(
-        IN const IPAddress& objLocalIp, IN const AString& strHostname, OUT IPAddress& objHostIp)
+        IN const IpAddress& objLocalIp, IN const AString& strHostname, OUT IpAddress& objHostIp)
 {
     if (m_piDnsQueryListener == IMS_NULL)
     {
@@ -514,7 +514,7 @@ PRIVATE VIRTUAL void SipTransportHelper::ApplyIpSecForServerSockets()
 }
 
 PRIVATE VIRTUAL void SipTransportHelper::DestroyAllSockets(
-        IN IMS_SINT32 nMethod /*= 0*/, IN const IPAddress& objLocalIp /*= IPAddress::NONE*/)
+        IN IMS_SINT32 nMethod /*= 0*/, IN const IpAddress& objLocalIp /*= IpAddress::NONE*/)
 {
     if (nMethod == 0)
     {
@@ -530,7 +530,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyAllSockets(
             {
                 if (!objLocalIp.IsNoneAddress())
                 {
-                    IPAddress objIp(IPAddress::NONE);
+                    IpAddress objIp(IpAddress::NONE);
                     IMS_UINT32 nPort = 0;
 
                     pSocket->GetSockName(objIp, nPort);
@@ -551,13 +551,13 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyAllSockets(
     }
     else
     {
-        IPAddress* pLocalIp = new IPAddress(objLocalIp);
+        IpAddress* pLocalIp = new IpAddress(objLocalIp);
         PostMessage(AMSG_DESTROY_ALL_SOCKETS, 0, reinterpret_cast<IMS_UINTP>(pLocalIp));
     }
 }
 
-PRIVATE VIRTUAL void SipTransportHelper::DestroyTcpSocket(IN const IPAddress& objSrcIp,
-        IN IMS_UINT32 nSrcPort, IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+PRIVATE VIRTUAL void SipTransportHelper::DestroyTcpSocket(IN const IpAddress& objSrcIp,
+        IN IMS_UINT32 nSrcPort, IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort,
         IN IMS_BOOL bIsConnectionByPeer /*= IMS_FALSE*/)
 {
     IMSList<SipSocket*> objRemovedSockets;
@@ -587,7 +587,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyTcpSocket(IN const IPAddress& ob
 
             if (!objSrcIp.IsNoneAddress())
             {
-                IPAddress objIp;
+                IpAddress objIp;
                 IMS_UINT32 nPort = 0;
 
                 pSocket->GetSockName(objIp, nPort);
@@ -648,7 +648,7 @@ PRIVATE VIRTUAL void SipTransportHelper::SetIpQos(IN SipRtConfig::IpQos* pIpQos)
         return;
     }
 
-    if (pIpQos->objIpAddr.Equals(IPAddress::NONE) || pIpQos->objIpAddr.Equals(IPAddress::IPv6NONE))
+    if (pIpQos->objIpAddr.Equals(IpAddress::NONE) || pIpQos->objIpAddr.Equals(IpAddress::IPv6NONE))
     {
         for (IMS_UINT32 i = 0; i < m_objSockets.GetSize(); ++i)
         {
@@ -672,7 +672,7 @@ PRIVATE VIRTUAL void SipTransportHelper::SetIpQos(IN SipRtConfig::IpQos* pIpQos)
         }
 
         IMS_BOOL bMatched = IMS_FALSE;
-        IPAddress objIp;
+        IpAddress objIp;
         IMS_UINT32 nPort = 0;
 
         pSocket->GetSockName(objIp, nPort);
@@ -694,8 +694,8 @@ PRIVATE VIRTUAL void SipTransportHelper::SetIpQos(IN SipRtConfig::IpQos* pIpQos)
     }
 }
 
-PRIVATE VIRTUAL void SipTransportHelper::SetKeepAlivePolicy(IN const IPAddress& objSrcIp,
-        IN IMS_UINT32 nSrcPort, IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+PRIVATE VIRTUAL void SipTransportHelper::SetKeepAlivePolicy(IN const IpAddress& objSrcIp,
+        IN IMS_UINT32 nSrcPort, IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort,
         IN IMS_SINT32 nPolicy /*= (-1) default*/)
 {
     SipSocketAddress objSockAddr;
@@ -714,7 +714,7 @@ PRIVATE VIRTUAL void SipTransportHelper::SetKeepAlivePolicy(IN const IPAddress& 
 
             if (!objSrcIp.IsNoneAddress())
             {
-                IPAddress objIp;
+                IpAddress objIp;
                 IMS_UINT32 nPort = 0;
 
                 pSocket->GetSockName(objIp, nPort);
@@ -753,7 +753,7 @@ PRIVATE VIRTUAL void SipTransportHelper::SetLocalDnsQueryListener(
 }
 
 PRIVATE VIRTUAL void SipTransportHelper::DatagramSocket_DataReceived(IN SipSocket* pSocket,
-        IN const ByteArray& objBuffer, IN const IPAddress& objIp, IN IMS_SINT32 nPort)
+        IN const ByteArray& objBuffer, IN const IpAddress& objIp, IN IMS_SINT32 nPort)
 {
     if (objBuffer.GetLength() == 0)
     {
@@ -774,7 +774,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DatagramSocket_DataReceived(IN SipSocke
     pBuffer->m_objFarEnd.SetPort(nPort);
     pBuffer->m_objFarEnd.SetIpAddress(objIp);
 
-    IPAddress objSockIp;
+    IpAddress objSockIp;
     IMS_UINT32 nSockPort;
 
     // Sets a packet destination(my) transport information
@@ -826,7 +826,7 @@ PRIVATE VIRTUAL void SipTransportHelper::StreamSocket_DataReceived(
 
     if (pBuffer != IMS_NULL)
     {
-        IPAddress objTmpIp;
+        IpAddress objTmpIp;
         IMS_UINT32 nTmpPort;
         IMS_SINT32 nTransportProtocol = SipTransportAddress::PROTOCOL_TCP;
         SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
@@ -973,8 +973,8 @@ SipSocket* SipTransportHelper::LookupSocket(
             if ((nType == SipSocketAddress::SOCKET_TCP_CLIENT) ||
                     (nType == SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER))
             {
-                IPAddress objIp;
-                IPAddress objOtherIp;
+                IpAddress objIp;
+                IpAddress objOtherIp;
                 IMS_UINT32 nPort = 0;
                 IMS_UINT32 nOtherPort = 0;
                 SipSocket* pOtherSocket = const_cast<SipSocket*>(&objSocket);
@@ -1011,7 +1011,7 @@ SipSocket* SipTransportHelper::LookupSocket(
 PRIVATE
 SipSocket* SipTransportHelper::LookupStreamSocket(IN const SipSocketAddress& objSockAddr)
 {
-    IPAddress objIp;
+    IpAddress objIp;
     IMS_UINT32 nPort = 0;
     SipSocket* pStreamSocket = IMS_NULL;
     AString strNearEnd;
@@ -1083,7 +1083,7 @@ SipSocket* SipTransportHelper::LookupStreamSocket(
         return IMS_NULL;
     }
 
-    IPAddress objIp;
+    IpAddress objIp;
     IMS_UINT32 nPort = 0;
     SipSocket* pStreamSocket = IMS_NULL;
 

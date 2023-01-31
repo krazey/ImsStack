@@ -33,7 +33,7 @@ PUBLIC
 SipRtConfig::SocketOption::SocketOption() :
         Base(),
         nValue(0),
-        objIpAddr(IPAddress::NONE),
+        objIpAddr(IpAddress::NONE),
         nPort(0)
 {
 }
@@ -74,7 +74,7 @@ PUBLIC VIRTUAL IMS_BOOL SipRtConfig::SocketOption::Equals(IN const SipRtConfig::
 PUBLIC
 IMS_BOOL SipRtConfig::SocketOption::IsGlobalOption() const
 {
-    return ((objIpAddr.Equals(IPAddress::NONE) || objIpAddr.Equals(IPAddress::IPv6NONE)) &&
+    return ((objIpAddr.Equals(IpAddress::NONE) || objIpAddr.Equals(IpAddress::IPv6NONE)) &&
             (nPort == 0));
 }
 
@@ -83,7 +83,7 @@ PUBLIC
 SipRtConfig::IpQos::IpQos() :
         Base(),
         nValue(0),
-        objIpAddr(IPAddress::NONE),
+        objIpAddr(IpAddress::NONE),
         nPort(0)
 {
 }
@@ -169,10 +169,10 @@ SipRtConfig::IpSecSa::IpSecSa() :
         Base(),
         nPortPc(0),
         nPortPs(0),
-        objIpAddrP(IPAddress::NONE),
+        objIpAddrP(IpAddress::NONE),
         nPortUc(0),
         nPortUs(0),
-        objIpAddrU(IPAddress::NONE)
+        objIpAddrU(IpAddress::NONE)
 {
 }
 

@@ -34,12 +34,12 @@ public:
 public:
     IMS_BOOL Equals(IN const SipSocketAddress& other) const;
 
-    inline const IPAddress& GetIpAddress() const { return m_objSockAddr.GetAddress(); }
+    inline const IpAddress& GetIpAddress() const { return m_objSockAddr.GetAddress(); }
     inline IMS_SINT32 GetPort() const { return m_objSockAddr.GetPort(); }
     inline IMS_BOOL GetSecure() const { return m_bSecure; }
     inline const SocketAddress& GetSocketAddress() const { return m_objSockAddr; }
     inline IMS_SINT32 GetType() const { return m_nType; }
-    inline void SetIpAddress(IN const IPAddress& objIpAddr) { m_objSockAddr.SetAddress(objIpAddr); }
+    inline void SetIpAddress(IN const IpAddress& objIpAddr) { m_objSockAddr.SetAddress(objIpAddr); }
     inline void SetPort(IN IMS_UINT32 nPort) { m_objSockAddr.SetPort(nPort); }
     inline void SetSecure(IN IMS_BOOL bSecure) { m_bSecure = bSecure; }
     inline void SetSocketAddress(IN const SocketAddress& objSockAddr)

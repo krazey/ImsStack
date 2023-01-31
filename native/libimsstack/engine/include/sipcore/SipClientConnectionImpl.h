@@ -87,7 +87,7 @@ private:
     IMS_RESULT SetAuthenticationChallenge(IN ISipGenericChallenge* piChallenge) override;
     void SetExtensionTokenForViaBranch(IN const AString& strToken) override;
     void SetImplicitRouteHeader(IN const AString& strRouteHeader) override;
-    void SetTransportTuple(IN const IPAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+    void SetTransportTuple(IN const IpAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
             IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
             IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY) override;
 

@@ -44,7 +44,7 @@ private:
 
     // ISipConnectionNotifier interface
     ISipServerConnection* AcceptAndOpen() override;
-    const IPAddress& GetLocalAddress() const override;
+    const IpAddress& GetLocalAddress() const override;
     IMS_SINT32 GetLocalPort() const override;
     inline void SetListener(IN ISipServerConnectionListener* piListener) override
     {
@@ -55,10 +55,10 @@ private:
     SipProfile* GetSipProfile() const override;
     IMS_SINT32 GetSlotId() const override;
     IMS_BOOL IsTransportResourceReserved(IN IMS_SINT32 nType = TRANSPORT_ALL) const override;
-    IMS_RESULT ReserveTransportResource(IN const IPAddress& objIp, IN IMS_SINT32 nPortS,
+    IMS_RESULT ReserveTransportResource(IN const IpAddress& objIp, IN IMS_SINT32 nPortS,
             IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl) override;
     IMS_RESULT RestoreTransportResource(
-            IN IMS_SINT32 nType, IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort) override;
+            IN IMS_SINT32 nType, IN const IpAddress& objPeerIp, IN IMS_SINT32 nPeerPort) override;
     void SetFromAndContact(IN const AString& strFrom, IN const AString& strDisplayName,
             IN const AString& strUserInfo) override;
     // MULTI_REG_SIP_PROFILE

@@ -201,7 +201,7 @@ INetworkConnection* NetworkService::FindConnection(IN IMS_SINT32 nApnType, IN IM
 }
 
 PUBLIC
-INetworkConnection* NetworkService::FindConnection(IN const IPAddress& objIpAddr)
+INetworkConnection* NetworkService::FindConnection(IN const IpAddress& objIpAddr)
 {
     return ImsNetworkConnectionState::GetInstance()->LookupHandle(objIpAddr);
 }
@@ -324,7 +324,7 @@ void NetworkService::DestroySocket(IN ISocket*& piSocket)
 
 PUBLIC
 IMS_BOOL NetworkService::CheckIpAndPortAvailability(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType)
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType)
 {
     return PlatformApi::CheckIpAndPortAvailability(objIpAddr, nPort, enType);
 }
@@ -381,7 +381,7 @@ PUBLIC GLOBAL NetworkService* NetworkService::GetNetworkService()
             PlatformContext::GetInstance()->GetService(PlatformContext::SERVICE_NETWORK));
 }
 
-PUBLIC GLOBAL IMS_SINT32 NetworkService::GetSlotId(IN const IPAddress& objIpAddr)
+PUBLIC GLOBAL IMS_SINT32 NetworkService::GetSlotId(IN const IpAddress& objIpAddr)
 {
     NetworkService* pNetworkService = NetworkService::GetNetworkService();
     return GetSlotId(pNetworkService->FindConnection(objIpAddr));

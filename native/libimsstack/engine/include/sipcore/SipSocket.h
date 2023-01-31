@@ -42,7 +42,7 @@ public:
     }
     inline virtual IMS_BOOL Connect() { return IMS_TRUE; }
     virtual IMS_BOOL Create(
-            IN const IPAddress& objIp, IN IMS_UINT32 nPort = 0, IN IMS_BOOL bSecure = IMS_FALSE);
+            IN const IpAddress& objIp, IN IMS_UINT32 nPort = 0, IN IMS_BOOL bSecure = IMS_FALSE);
     inline virtual IMS_BOOL Equals(IN const SipSocketAddress& objSockAddr)
     {
         return m_objSockAddr.Equals(objSockAddr);
@@ -51,9 +51,9 @@ public:
     {
         return m_objSockAddr.Equals(objSocket.m_objSockAddr);
     }
-    virtual void GetSockName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort);
+    virtual void GetSockName(OUT IpAddress& objIp, OUT IMS_UINT32& nPort);
     inline virtual IMS_SINT32 Send(IN const IMS_BYTE* /*pBuffer*/, IN IMS_SINT32 /*nBuffLen*/,
-            IN IMS_UINT32 nPort = 0, IN const IPAddress& objIp = IPAddress::NONE)
+            IN IMS_UINT32 nPort = 0, IN const IpAddress& objIp = IpAddress::NONE)
     {
         (void)nPort;
         (void)objIp;
@@ -61,7 +61,7 @@ public:
     }
     virtual void NotifyForceClosed();
 
-    void GetPeerName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort);
+    void GetPeerName(OUT IpAddress& objIp, OUT IMS_UINT32& nPort);
     IMS_SINT32 RemoveListener(IN const ISipSocketListener* piListener);
     inline void SetKeepAliveListener(IN ISipKeepAliveListener* piKeepAliveListener)
     {
@@ -90,12 +90,12 @@ protected:
     void NotifyPongReceived();
     inline void SetForcinglyClosed(IN IMS_BOOL bClosed) { m_bForcinglyClosed = bClosed; }
     void SetSocketOptionForTcpMaxSeg(
-            IN INetworkConnection* piConnection, IN const IPAddress& objLocalIp);
-    void SetSocketOptions(IN const IPAddress& objLocalIp, IN IMS_UINT32 nLocalPort);
+            IN INetworkConnection* piConnection, IN const IpAddress& objLocalIp);
+    void SetSocketOptions(IN const IpAddress& objLocalIp, IN IMS_UINT32 nLocalPort);
     void SetState(IN IMS_SINT32 nState);
 
     static void SetSocketOption(IN IMS_SINT32 nSlotId, IN ISocket* piSocket,
-            IN const IPAddress& objLocalIp, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
+            IN const IpAddress& objLocalIp, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
             IN IMS_SINT32 nSocketOption, IN const IMS_CHAR* pszOptionName);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 

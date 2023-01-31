@@ -40,9 +40,9 @@ public:
     void RemoveListener(IN IAosConnectionListener* piListener) override;
 
     IMS_SINT32 GetMtu() override;
-    const IPAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0) override;
+    const IpAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0) override;
     const AStringArray& GetPcscfAddress(IN IMS_SINT32 nIpVersion = 0) override;
-    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IPAddress>& objIps,
+    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IpAddress>& objIps,
             IN IMS_SINT32 nIpVersion = 0) override;
     const AString& GetIfaceName() override;
     IMS_BOOL IsEpdgEnabled() override;

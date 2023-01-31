@@ -33,7 +33,7 @@
 __IMS_TRACE_TAG_REG__;
 
 PUBLIC
-RegContact::RegContact(IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort,
+RegContact::RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort,
         IN IRegCapabilityChangeListener* piListener, IN IMS_SINT32 nRegId /*= (-1)*/,
         IN const SipProfile* pProfile /*= IMS_NULL*/) :
         ImsSlot(nSlotId),

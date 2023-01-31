@@ -52,7 +52,7 @@ public:
 
     // ISipConnectionNotifier interface
     ISipServerConnection* AcceptAndOpen();
-    inline const IPAddress& GetLocalAddress() const { return m_objIpAddr; }
+    inline const IpAddress& GetLocalAddress() const { return m_objIpAddr; }
     inline IMS_SINT32 GetLocalPort() const { return m_nPort; }
     inline void SetListener(IN IOnSipServerConnectionListener* piListener)
     {
@@ -63,10 +63,10 @@ public:
     AString GetContactAddress() const;
     inline SipProfile* GetSipProfile() const { return m_pSipProfile.Get(); }
     IMS_BOOL IsTransportResourceReserved(IN IMS_SINT32 nType = TRANSPORT_ALL) const;
-    IMS_RESULT ReserveTransportResource(IN const IPAddress& objIp, IN IMS_SINT32 nPortS,
+    IMS_RESULT ReserveTransportResource(IN const IpAddress& objIp, IN IMS_SINT32 nPortS,
             IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl);
     IMS_RESULT RestoreTransportResource(
-            IN IMS_SINT32 nType, IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort);
+            IN IMS_SINT32 nType, IN const IpAddress& objPeerIp, IN IMS_SINT32 nPeerPort);
     inline void SetErrorListener(IN IOnSipConnectionNotifierErrorListener* piListener)
     {
         m_piErrorListener = piListener;
@@ -120,7 +120,7 @@ private:
     }
 
     IMS_RESULT RestoreTransportResourceForClientInitiatedConnection(
-            IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort);
+            IN const IpAddress& objPeerIp, IN IMS_SINT32 nPeerPort);
     IMS_RESULT RestoreTransportResourceForServerConnection();
 
 private:
@@ -183,7 +183,7 @@ private:
     IMSList<SipParameter*> m_objParameters;
 
     // Identifier for IP connectivity
-    IPAddress m_objIpAddr;
+    IpAddress m_objIpAddr;
     IMS_SINT32 m_nPortC;
     SipSocket* m_pSocketUdp;
     SipSocket* m_pSocketTcp;

@@ -88,7 +88,7 @@ public:
      * @param objLocalAddr The local ip address
      * @param nPort The local port number
      */
-    void UpdateLocalEndPoint(IN const IPAddress& objLocalAddr, IN IMS_UINT32 nPort);
+    void UpdateLocalEndPoint(IN const IpAddress& objLocalAddr, IN IMS_UINT32 nPort);
 
     /**
      * @brief Handles the message from the telecom
@@ -129,7 +129,7 @@ private:
 
     VideoConfiguration* m_pConfig;
     MediaQualityThreshold m_objMediaQualityThreshold;
-    IPAddress m_objLocalAddress;
+    IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
     IMS_SINT32 m_nCameraId;
     IMS_SINT32 m_nCameraZoom;

@@ -233,7 +233,7 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyBinding(
     RegBindingProxy::DestroyBinding(GetSlotId(), strAppId, strServiceId);
 }
 
-PRIVATE VIRTUAL IRegContact* FakeRegistration::CreateContact(IN const IPAddress& objIpAddr,
+PRIVATE VIRTUAL IRegContact* FakeRegistration::CreateContact(IN const IpAddress& objIpAddr,
         IN IMS_SINT32 nPort, IN IMS_SINT32 nExpiresPolicy /*= POLICY_EXPIRES_CONFIG*/,
         IN IMS_UINT32 nExpiresValue /*= DEFAULT_EXPIRES*/)
 {
@@ -359,7 +359,7 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyContact(IN IRegContact* piContact)
 }
 
 PRIVATE VIRTUAL void FakeRegistration::DestroyContact(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort)
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort)
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
@@ -394,7 +394,7 @@ PRIVATE VIRTUAL IMSList<IRegContact*> FakeRegistration::GetAllContacts() const
 }
 
 PRIVATE VIRTUAL IRegContact* FakeRegistration::GetContact(
-        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) const
+        IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) const
 {
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
