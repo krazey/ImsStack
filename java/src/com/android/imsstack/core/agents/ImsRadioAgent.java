@@ -271,6 +271,31 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         }
     }
 
+    private static int convertConnectionFailureReason(int reason) {
+        switch (reason) {
+            case ConnectionFailureInfo.REASON_ACCESS_DENIED:
+                return REASON_ACCESS_DENIED;
+            case ConnectionFailureInfo.REASON_NAS_FAILURE:
+                return REASON_NAS_FAILURE;
+            case ConnectionFailureInfo.REASON_RACH_FAILURE:
+                return REASON_RACH_FAILURE;
+            case ConnectionFailureInfo.REASON_RLC_FAILURE:
+                return REASON_RLC_FAILURE;
+            case ConnectionFailureInfo.REASON_RRC_REJECT:
+                return REASON_RRC_REJECT;
+            case ConnectionFailureInfo.REASON_RRC_TIMEOUT:
+                return REASON_RRC_TIMEOUT;
+            case ConnectionFailureInfo.REASON_NO_SERVICE:
+                return REASON_NO_SERVICE;
+            case ConnectionFailureInfo.REASON_PDN_NOT_AVAILABLE:
+                return REASON_PDN_NOT_AVAILABLE;
+            case ConnectionFailureInfo.REASON_RF_BUSY:
+                return REASON_RF_BUSY;
+            default:
+                return REASON_INTERNAL_ERROR;
+        }
+    }
+
     private static int convertTrafficDirection(int direction) {
         if (direction == DIRECTION_MO) {
             return MmTelFeature.IMS_TRAFFIC_DIRECTION_OUTGOING;
@@ -609,8 +634,8 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
 
         @Override
         public void onError(@NonNull ConnectionFailureInfo info) {
-            handleTrafficCallbackOnError(mId, info.getReason(), info.getCauseCode(),
-                    info.getWaitTimeMillis());
+            handleTrafficCallbackOnError(mId, convertConnectionFailureReason(info.getReason()),
+                    info.getCauseCode(), info.getWaitTimeMillis());
         }
     }
 }

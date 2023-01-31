@@ -5169,10 +5169,10 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(
     }
     else
     {
-        if (nFailureReason == IImsRadio::REASON_RRC_REJECT)
+        if (nFailureReason == IImsRadio::REASON_NAS_FAILURE ||
+                nFailureReason == IImsRadio::REASON_RRC_REJECT)
         {
-            if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() > 0 &&
-                    nWaitTimeMillis > (RETRY_DEFAULT_WAIT_TIME * 1000))
+            if (nWaitTimeMillis > (RETRY_DEFAULT_WAIT_TIME * 1000))
             {
                 Destroy();
 
