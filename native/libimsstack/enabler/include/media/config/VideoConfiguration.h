@@ -61,6 +61,7 @@ public:
     static const IMS_SINT32 DEFAULT_I_FRAME_INTERVAL = 1;
     static const IMS_SINT32 DEFAULT_CHANNEL = 0;
     static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE = 90000;
+    static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = MediaConfiguration::BW_OPTION_SOURCE_VALUE;
 
 public:
     /**
@@ -188,7 +189,7 @@ public:
      * @return IMS_BOOL Return true if BandwidthNegoOption is enabled
      * Return false if BandwidthNegoOption is disabled
      */
-    IMS_BOOL GetBandwidthNegoOption() const { return 0; }
+    IMS_BOOL GetBandwidthNegoOption() const;
 
 protected:
     /**
@@ -219,6 +220,7 @@ private:
     IMS_SINT32 m_nVideoIframeIntervalSec;
     IMS_SINT32 m_nChannel;
     IMS_SINT32 m_nVideoSamplingRate;
+    IMS_BOOL m_bVideoBwNegoOptionEnabled;
 };
 
 #endif

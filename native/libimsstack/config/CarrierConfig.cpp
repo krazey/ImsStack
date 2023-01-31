@@ -1044,6 +1044,7 @@ const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT[] =
         "video_iframe_interval_sec_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT[] =
         "video_send_periodic_sps_pps_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL[] = "video_bw_nego_option_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY[] =
         "text_rtp_port_range_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL[] =

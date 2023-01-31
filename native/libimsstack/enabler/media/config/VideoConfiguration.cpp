@@ -36,7 +36,8 @@ VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
         m_nSdpOfferCapNegoForAvpf(DEFAULT_AVPF_CAPA_NEGO),
         m_nVideoIframeIntervalSec(DEFAULT_I_FRAME_INTERVAL),
         m_nChannel(DEFAULT_CHANNEL),
-        m_nVideoSamplingRate(DEFAULT_VIDEO_SAMPLING_RATE)
+        m_nVideoSamplingRate(DEFAULT_VIDEO_SAMPLING_RATE),
+        m_bVideoBwNegoOptionEnabled(DEFAULT_BW_NEGO_OPTION)
 {
     IMS_TRACE_D("+VideoConfiguration eSessionType(%d)", eSessionType, 0, 0);
     nAsBandwidthKbps = DEFAULT_AS_VIDEO;
@@ -96,7 +97,8 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
 
     m_nVideoIframeIntervalSec =
             piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT);
-
+    m_bVideoBwNegoOptionEnabled =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL);
     // m_nChannel = DEFAULT_CHANNEL; // already set by default at creator
     // m_nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
     if (!CreateCodecConfigs(piCc))
@@ -189,8 +191,9 @@ PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
     IMS_TRACE_D(
             "m_bVideoAvpfTmmbrEnabled(%d), m_bVideoAvpfPliEnabled(%d), m_bVideoAvpfFirEnabled(%d)",
             m_bVideoAvpfTmmbrEnabled, m_bVideoAvpfPliEnabled, m_bVideoAvpfFirEnabled);
-    IMS_TRACE_D("m_nVideoIframeIntervalSec(%d), m_nVideoSamplingRate(%d)",
-            m_nVideoIframeIntervalSec, m_nVideoSamplingRate, 0);
+    IMS_TRACE_D("m_nVideoIframeIntervalSec(%d), m_nVideoSamplingRate(%d), "
+                "m_bVideoBwNegoOptionEnabled(%d)",
+            m_nVideoIframeIntervalSec, m_nVideoSamplingRate, m_bVideoBwNegoOptionEnabled);
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
     {
         ToDebugStringCodecs(objCodecConfigs.GetAt(i));
@@ -279,4 +282,10 @@ PUBLIC
 IMS_SINT32 VideoConfiguration::GetVideoSamplingRate() const
 {
     return m_nVideoSamplingRate;
+}
+
+PUBLIC
+IMS_BOOL VideoConfiguration::GetBandwidthNegoOption() const
+{
+    return m_bVideoBwNegoOptionEnabled;
 }

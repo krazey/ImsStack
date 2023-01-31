@@ -30,7 +30,7 @@ static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const IMS_SINT32 DEFAULT_PTIME = AudioConfiguration::DEFAULT_PTIME;
 static const IMS_SINT32 DEFAULT_MAX_PTIME = AudioConfiguration::DEFAULT_MAX_PTIME;
 static const IMS_SINT32 DEFAULT_MAX_RED = AudioConfiguration::DEFAULT_MAX_RED;
-static const IMS_BOOL DEFAULT_BW_NEGO_OPERION = AudioConfiguration::DEFAULT_BW_NEGO_OPERION;
+static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = AudioConfiguration::DEFAULT_BW_NEGO_OPTION;
 static const IMS_SINT32 DEFAULT_AUDIO_DSCP = AudioConfiguration::DEFAULT_AUDIO_DSCP;
 static const IMS_SINT32 DEFAULT_JITTER_MIN = AudioConfiguration::DEFAULT_JITTER_MIN;
 static const IMS_SINT32 DEFAULT_JITTER_MAX = AudioConfiguration::DEFAULT_JITTER_MAX;
@@ -80,7 +80,7 @@ TEST_F(AudioConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetPtime(), DEFAULT_PTIME);
     EXPECT_EQ(m_pConfig->GetMaxPtime(), DEFAULT_MAX_PTIME);
     EXPECT_EQ(m_pConfig->GetMaxRed(), DEFAULT_MAX_RED);
-    EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(), DEFAULT_BW_NEGO_OPERION);
+    EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(), DEFAULT_BW_NEGO_OPTION);
     EXPECT_EQ(m_pConfig->GetRtpDscp(), DEFAULT_AUDIO_DSCP);
     EXPECT_EQ(m_pConfig->GetJitterBufferMinSize(), DEFAULT_JITTER_MIN);
     EXPECT_EQ(m_pConfig->GetJitterBufferMaxSize(), DEFAULT_JITTER_MAX);

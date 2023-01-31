@@ -43,7 +43,7 @@ static const IMS_BOOL DEFAULT_AVPF_FIR = VideoConfiguration::DEFAULT_AVPF_FIR;
 static const IMS_SINT32 DEFAULT_I_FRAME_INTERVAL = VideoConfiguration::DEFAULT_I_FRAME_INTERVAL;
 static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE =
         VideoConfiguration::DEFAULT_VIDEO_SAMPLING_RATE;
-
+static const IMS_BOOL DEFAULT_BW_NEGO_OPTION = VideoConfiguration::DEFAULT_BW_NEGO_OPTION;
 class VideoConfigurationTest : public ::testing::Test {
 
 public:
@@ -86,6 +86,7 @@ TEST_F(VideoConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetVideoIframeIntervalSec(), DEFAULT_I_FRAME_INTERVAL);
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);
     EXPECT_EQ(m_pConfig->GetVideoSamplingRate(), DEFAULT_VIDEO_SAMPLING_RATE);
+    EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(), DEFAULT_BW_NEGO_OPTION);
 
     delete m_pConfig;
 }
@@ -105,6 +106,8 @@ TEST_F(VideoConfigurationTest, GetConfigTest)
             GetInt(CarrierConfig::Assets::KEY_VIDEO_SDP_OFFER_CAP_NEGO_FOR_AVPF_INT));
     EXPECT_EQ(m_pConfig->GetVideoIframeIntervalSec(),
             GetInt(CarrierConfig::Assets::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT));
+    EXPECT_EQ(m_pConfig->GetBandwidthNegoOption(),
+            GetBoolean(CarrierConfig::Assets::KEY_VIDEO_BW_NEGO_OPTION_BOOL));
     delete m_pConfig;
 }
 
