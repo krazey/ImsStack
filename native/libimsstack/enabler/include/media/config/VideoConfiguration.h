@@ -151,6 +151,13 @@ public:
      */
     IMS_BOOL IsVideoAvpfFirEnabled() const;
     /**
+     * @brief Get whether capability attribute is enabled
+     *
+     * @return IMS_BOOL Return true if AVPF capability negotiation attribute is enabled
+     * Return false if AVPF capability negotiation attribute is disabled
+     */
+    IMS_BOOL IsAvpfCapabilityNegotiationEnabled() const;
+    /**
      * @brief Get whether the sdp offer cap nego for avpf
      *
      * @return IMS_BOOL Return true if SdpOfferCapNegoForAvpf is enabled

@@ -81,6 +81,7 @@ TEST_F(VideoConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->IsVideoAvpfTmmbrEnabled(), DEFAULT_AVPF_TMMBR);
     EXPECT_EQ(m_pConfig->IsVideoAvpfPliEnabled(), DEFAULT_AVPF_PLI);
     EXPECT_EQ(m_pConfig->IsVideoAvpfFirEnabled(), DEFAULT_AVPF_FIR);
+    EXPECT_EQ(m_pConfig->IsAvpfCapabilityNegotiationEnabled(), (DEFAULT_AVPF_CAPA_NEGO > 0));
     EXPECT_EQ(m_pConfig->GetSdpOfferCapNegoForAvpf(), DEFAULT_AVPF_CAPA_NEGO);
     EXPECT_EQ(m_pConfig->GetVideoIframeIntervalSec(), DEFAULT_I_FRAME_INTERVAL);
     EXPECT_EQ(m_pConfig->GetChannel(), DEFAULT_CHANNEL);

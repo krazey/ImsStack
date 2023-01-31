@@ -252,6 +252,12 @@ IMS_BOOL VideoConfiguration::IsVideoAvpfFirEnabled() const
 }
 
 PUBLIC
+IMS_BOOL VideoConfiguration::IsAvpfCapabilityNegotiationEnabled() const
+{
+    return (m_nSdpOfferCapNegoForAvpf > 0);
+}
+
+PUBLIC
 IMS_SINT32 VideoConfiguration::GetSdpOfferCapNegoForAvpf() const
 {
     return m_nSdpOfferCapNegoForAvpf;
