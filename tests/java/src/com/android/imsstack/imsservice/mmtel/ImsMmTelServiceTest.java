@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -47,9 +48,12 @@ import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.sms.SmsTransferLayer;
+import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
+import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.MessageExecutor;
@@ -69,10 +73,12 @@ import java.util.function.Consumer;
 @RunWith(JUnit4.class)
 public class ImsMmTelServiceTest extends ImsStackTest {
     private IContext mMockImsContext;
+    private IBaseContext mMockBaseContext;
     private ImsCallContext mMockCallContext;
     private ImsServiceRegistry mMockServiceRegistry;
     private ImsServiceRecord mMockServiceRecord;
     private ImsRegistrationTracker mMockRegTracker;
+    private IUtInterface mMockUtInterface;
     private ImsCallApp mMockImsCallApp;
     private IImsMmTelListener mMockMmTelListener;
     private ImsServiceManager mServiceManager;
@@ -85,11 +91,14 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     @Before
     public void setUp() throws Exception {
         mMockImsContext = Mockito.mock(ImsContext.class);
+        mMockBaseContext = Mockito.mock(IBaseContext.class);
         when(mMockImsContext.getContext()).thenReturn(mContext);
         when(mMockImsContext.getSlotId()).thenReturn(SLOT_ID);
+        when(mMockBaseContext.getSlotId()).thenReturn(SLOT_ID);
         mMockServiceRegistry = Mockito.mock(ImsServiceRegistry.class);
         mMockServiceRecord = Mockito.mock(ImsServiceRecord.class);
         mMockRegTracker = Mockito.mock(ImsRegistrationTracker.class);
+        mMockUtInterface = Mockito.mock(IUtInterface.class);
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
         mMockCallContext = Mockito.mock(ImsCallContext.class);
         mMockMmTelListener = Mockito.mock(IImsMmTelListener.class);
@@ -101,6 +110,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mMmTelFeature.setDefaultExecutor(mExecutor);
         mMmTelFeature.getBinder().setListener(mMockMmTelListener);
         mMmTelFeatureRegistry = ImsServiceRegistry.getInstance(SLOT_ID).getMmTelFeatureRegistry();
+        UtFactory.getInstance().setUtInterfaceForSlot(SLOT_ID, mMockUtInterface);
     }
 
     @After
@@ -195,9 +205,13 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     public void testChangeEnabledCapabilities() throws Exception {
         mMmTelFeature.changeEnabledCapabilities(null, null);
         verify(mMockRegTracker, never()).changeCapabilities(any(), any());
+        verify(mMockUtInterface, never()).changeCapability(anyBoolean());
 
         CapabilityChangeRequest capabilityRequest = new CapabilityChangeRequest();
         capabilityRequest.addCapabilitiesToEnableForTech(MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
+
+        capabilityRequest.addCapabilitiesToEnableForTech(MmTelCapabilities.CAPABILITY_TYPE_UT,
                 ImsRegistrationImplBase.REGISTRATION_TECH_LTE);
 
         capabilityRequest.addCapabilitiesToDisableForTech(MmTelCapabilities.CAPABILITY_TYPE_VIDEO,
@@ -208,6 +222,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mMmTelFeature.start();
         mMmTelFeature.changeEnabledCapabilities(capabilityRequest, null);
         verify(mMockRegTracker).changeCapabilities(any(), any());
+        verify(mMockUtInterface).changeCapability(anyBoolean());
 
         mMmTelFeature.onCapabilitiesUpdateFailed(MmTelCapabilities.CAPABILITY_TYPE_VOICE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_NONE,
@@ -258,7 +273,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     @Test
     public void testGetUt() {
         ImsUtImplBase utImplBase = mMmTelFeature.getUt();
-        ImsUtImpl utImpl = new ImsUtImpl(mMockCallContext);
+        ImsUtImpl utImpl = new ImsUtImpl(mMockBaseContext);
         assertNull(utImplBase);
 
         mMmTelFeature = createMmTelService(null);
@@ -453,6 +468,9 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         public void changeEnabledCapabilities(CapabilityChangeRequest request,
                 CapabilityCallbackProxy c) {
             c = new CapabilityCallbackProxy(null);
+            ImsUtImpl utImpl = new ImsUtImpl(mMockBaseContext);
+            when(mMockImsCallApp.getUtInterface()).thenReturn(utImpl);
+
             super.changeEnabledCapabilities(request, c);
         }
 
