@@ -27,7 +27,6 @@ import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.system.ISystem;
-import com.android.imsstack.test.IImsTestMode;
 
 public interface IBaseContext extends IContext {
     /**
@@ -57,7 +56,6 @@ public interface IBaseContext extends IContext {
     public ISharedState getSharedState();
     public ISubscription getSubscription();
     public ISystem getSystem();
-    public IImsTestMode getTestMode();
 
     public ILocationAgent getLocationAgent();
 

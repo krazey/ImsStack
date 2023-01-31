@@ -94,7 +94,7 @@ public class ImsGlobal extends ContextWrapper {
     public static boolean isVoLteEnabled(Context context, int slotId) {
         IImsTestMode itm = ImsTestMode.getInstance().getTestMode(slotId);
 
-        if ((itm != null) && (itm.isCallOverWifiEnabled() || itm.isGenericTestMode())) {
+        if ((itm != null) && itm.isGenericTestMode()) {
             return true;
         }
 
@@ -104,7 +104,7 @@ public class ImsGlobal extends ContextWrapper {
     public static boolean isVtEnabled(Context context, int slotId) {
         IImsTestMode itm = ImsTestMode.getInstance().getTestMode(slotId);
 
-        if ((itm != null) && (itm.isCallOverWifiEnabled() || itm.isGenericTestMode())) {
+        if ((itm != null) && itm.isGenericTestMode()) {
             return true;
         }
 
@@ -114,7 +114,7 @@ public class ImsGlobal extends ContextWrapper {
     public static boolean isWfcEnabled(Context context, int slotId) {
         IImsTestMode itm = ImsTestMode.getInstance().getTestMode(slotId);
 
-        if ((itm != null) && (itm.isCallOverWifiEnabled() || itm.isGenericTestMode())) {
+        if ((itm != null) && itm.isGenericTestMode()) {
             return true;
         }
 

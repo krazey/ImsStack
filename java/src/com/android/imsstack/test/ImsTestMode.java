@@ -36,7 +36,6 @@ public final class ImsTestMode {
     public static final int CONFIG_IMS_OFF = 0x00000001;
     public static final int CONFIG_DEBUG = 0x00000002;
     public static final int CONFIG_GENERIC_TEST_MODE = 0x00000004;
-    public static final int CONFIG_CALL_OVER_WIFI = 0x00000008;
     /**
      * Bitmask: Call level test cases (0x0100 ~ 0x8000)
      */
@@ -127,11 +126,6 @@ public final class ImsTestMode {
         @Override
         public int getExtraTestmask() {
             return mExtraTestmask;
-        }
-
-        @Override
-        public boolean isCallOverWifiEnabled() {
-            return isConfigEnabled(CONFIG_CALL_OVER_WIFI);
         }
 
         @Override

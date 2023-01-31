@@ -41,7 +41,6 @@ import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
-import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
@@ -202,55 +201,6 @@ public class ImsCallAppTest {
                 callProfile.getMediaProfile().getAudioQuality());
         assertEquals(ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
                 callProfile.getMediaProfile().getAudioDirection());
-    }
-
-    @Test
-    public void test_createCallProfileForTestMode() {
-        IImsTestMode itm = Mockito.mock(IImsTestMode.class);
-        when(mMockImsCallContext.getTestMode()).thenReturn(itm);
-        when(itm.isCallOverWifiEnabled()).thenReturn(true);
-
-        when(mRegTracker.isCallVoiceRegistered()).thenReturn(true);
-        when(mMockImsCallContext.hasAccessBearerCapabilitiesForHDCall()).thenReturn(true);
-
-        ImsCallProfile callProfile = mImsCallApp.createCallProfile(
-                ImsCallProfile.SERVICE_TYPE_NONE, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE);
-        assertEquals(ImsCallProfile.SERVICE_TYPE_NONE, callProfile.mServiceType);
-        assertEquals(ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE, callProfile.mCallType);
-        assertEquals(ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
-                callProfile.getMediaProfile().getVideoQuality());
-        assertEquals(ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
-                callProfile.getMediaProfile().getVideoDirection());
-
-        callProfile = mImsCallApp.createCallProfile(
-                ImsCallProfile.SERVICE_TYPE_NORMAL, ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE);
-        assertEquals(ImsCallProfile.SERVICE_TYPE_NORMAL, callProfile.mServiceType);
-        //CallType returned by getCallTypeByImsState
-        assertEquals(ImsCallProfile.CALL_TYPE_VT, callProfile.mCallType);
-        assertEquals(ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
-                callProfile.getMediaProfile().getVideoQuality());
-        assertEquals(ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
-                callProfile.getMediaProfile().getVideoDirection());
-
-        callProfile = mImsCallApp.createCallProfile(
-                ImsCallProfile.SERVICE_TYPE_NONE, ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO);
-        assertEquals(ImsCallProfile.SERVICE_TYPE_NONE, callProfile.mServiceType);
-        //CallType returned by getCallTypeByImsState
-        assertEquals(ImsCallProfile.CALL_TYPE_VOICE, callProfile.mCallType);
-        assertEquals(ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
-                callProfile.getMediaProfile().getVideoQuality());
-        assertEquals(ImsStreamMediaProfile.DIRECTION_INVALID,
-                callProfile.getMediaProfile().getVideoDirection());
-
-        callProfile = mImsCallApp.createCallProfile(
-                ImsCallProfile.SERVICE_TYPE_EMERGENCY, ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO);
-        assertEquals(ImsCallProfile.SERVICE_TYPE_EMERGENCY, callProfile.mServiceType);
-        //CallType returned by getCallTypeByImsState
-        assertEquals(ImsCallProfile.CALL_TYPE_VOICE, callProfile.mCallType);
-        assertEquals(ImsStreamMediaProfile.VIDEO_QUALITY_NONE,
-                callProfile.getMediaProfile().getVideoQuality());
-        assertEquals(ImsStreamMediaProfile.DIRECTION_INVALID,
-                callProfile.getMediaProfile().getVideoDirection());
     }
 
     @Test

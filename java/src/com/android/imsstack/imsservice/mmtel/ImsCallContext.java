@@ -51,8 +51,6 @@ import com.android.imsstack.imsservice.mmtel.internal.WfcSettingTracker;
 import com.android.imsstack.imsservice.mmtel.videocall.base.VideoCallUtils;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.test.IImsTestMode;
-import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -221,11 +219,6 @@ public class ImsCallContext implements ICallContext {
     }
 
     @Override
-    public IImsTestMode getTestMode() {
-        return ImsTestMode.getInstance().getTestMode(getSlotId());
-    }
-
-    @Override
     public ILocationAgent getLocationAgent() {
         ILocationAgentManager lam = (ILocationAgentManager)VoLteFactory.getInstance().getAgent(
                 VoLteFactory.AGENT_LOCATION_AGENT_MANAGER);
@@ -339,12 +332,9 @@ public class ImsCallContext implements ICallContext {
 
     public boolean hasAccessBearerCapabilitiesForHDCall() {
         IDcNetWatcher dcnw = getDcNetWatcher();
-        IImsTestMode itm = getTestMode();
-        // __TEST_MODE__ :: call over WiFi
         return ((dcnw != null) && (dcnw.is4G() || dcnw.is5G()))
                 || ((mWfcSettingTracker != null) && mWfcSettingTracker.isWfcEnabled()
-                        && mWfcSettingTracker.isWfcAvailable())
-                || ((itm != null) && itm.isCallOverWifiEnabled());
+                        && mWfcSettingTracker.isWfcAvailable());
     }
 
     public int getAudioHDQuality() {
@@ -376,12 +366,6 @@ public class ImsCallContext implements ICallContext {
             return getAudioHDQuality();
         } else if (ImsCallUtils.isVideoCall(callType) && hasAccessBearerCapabilitiesForHDCall()) {
             return getAudioHDQuality();
-        } else {
-            IImsTestMode itm = getTestMode();
-            if ((itm != null) && itm.isCallOverWifiEnabled()) {
-                // __TEST_MODE__ :: call over WiFi
-                return getAudioHDQuality();
-            }
         }
 
         return ImsStreamMediaProfile.AUDIO_QUALITY_AMR;

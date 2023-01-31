@@ -27,7 +27,6 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.imsservice.mmtel.base.ImsApp;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
-import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
@@ -251,11 +250,7 @@ public class ImsCallApp extends ImsApp {
     public ImsCallProfile createCallProfile(int serviceType, int callType) {
         ImsCallProfile callProfile = null;
 
-        // __TEST_MODE__ :: call over WiFi
-        IImsTestMode itm = mCallContext.getTestMode();
-        if ((itm != null) && itm.isCallOverWifiEnabled()) {
-            callProfile = createCallProfileForTestMode(serviceType, callType);
-        } else if (ImsCallUtils.isVoiceCall(callType)) {
+        if (ImsCallUtils.isVoiceCall(callType)) {
             callProfile = createCallProfileForVoiceCall(serviceType, callType);
         } else if (ImsCallUtils.isVideoCall(callType)) {
             callProfile = createCallProfileForVideoCall(serviceType, callType);
@@ -340,26 +335,6 @@ public class ImsCallApp extends ImsApp {
         if (tmt != null) {
             tmt.setTtyMode(ttyMode);
         }
-    }
-
-    /**
-     * __TEST_MODE__ :: call over WiFi
-     */
-    private ImsCallProfile createCallProfileForTestMode(int serviceType, int callType) {
-        int videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_NONE;
-        int videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
-
-        if (ImsCallUtils.isVideoCall(callType)) {
-            videoQuality = mCallContext.getVideoHDQuality();
-            videoDirection = ImsCallMediaUtils.getVideoDirectionFromCallType(callType);
-        }
-
-        callType = getCallTypeByImsState(serviceType, callType);
-
-        return ImsCallUtils.createCallProfile(serviceType, callType,
-                mCallContext.getAudioHDQuality(),
-                ImsStreamMediaProfile.DIRECTION_SEND_RECEIVE,
-                videoQuality, videoDirection);
     }
 
     private ImsCallProfile createCallProfileForVideoCall(int serviceType, int callType) {

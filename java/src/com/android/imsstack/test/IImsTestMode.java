@@ -18,8 +18,6 @@ package com.android.imsstack.test;
 public interface IImsTestMode {
     public int getExtraTestmask();
 
-    public boolean isCallOverWifiEnabled();
-
     public boolean isDebugEnabled();
 
     public boolean isDebuggable();
