@@ -174,10 +174,9 @@ PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
         IN ISessionDescriptor* pSessionDescriptor, IN NEGO_STATE eNegoState)
 {
     IMS_BOOL bFoundOaModel = IMS_FALSE;
-    IMS_UINT32 nOaModelSize = m_listOaModel.GetSize();
 
     // reset confirmed Session check variable
-    for (IMS_UINT32 i = 0; i < nOaModelSize; i++)
+    for (IMS_UINT32 i = 0; i < m_listOaModel.GetSize(); i++)
     {
         OaModel* pCheckedOaModel = m_listOaModel.GetAt(i);
 
@@ -190,9 +189,9 @@ PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
     // check latest OA model
     OaModel* pLatestOaModel = IMS_NULL;
 
-    if (nOaModelSize > 0)
+    if (m_listOaModel.GetSize() > 0)
     {
-        pLatestOaModel = m_listOaModel.GetAt(nOaModelSize - 1);
+        pLatestOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1);
     }
 
     if (pLatestOaModel != IMS_NULL)
@@ -200,17 +199,17 @@ PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
         if ((pLatestOaModel->IsAllProfileExist() &&
                     (eNegoState == STATE_IDLE || eNegoState == STATE_NEGOTIATED)) == IMS_FALSE)
         {
-            IMS_TRACE_I("FinalizeSDP() - Incomplete OaModel[%d]. Delete profile", nOaModelSize - 1,
-                    0, 0);
+            IMS_TRACE_I("FinalizeSDP() - Incomplete OaModel[%d]. Delete profile",
+                    m_listOaModel.GetSize() - 1, 0, 0);
             delete pLatestOaModel;
-            m_listOaModel.RemoveAt(--nOaModelSize);
+            m_listOaModel.RemoveAt(m_listOaModel.GetSize() - 1);
         }
     }
 
-    for (IMS_UINT32 i = 0; i < nOaModelSize; i++)
+    for (IMS_UINT32 i = 0; i < m_listOaModel.GetSize(); i++)
     {
         // get OaModel
-        OaModel* pTempOaModel = m_listOaModel.GetAt(nOaModelSize - 1 - i);
+        OaModel* pTempOaModel = m_listOaModel.GetAt(m_listOaModel.GetSize() - 1 - i);
 
         // find matched SessionDescriptor key
         if (pTempOaModel != IMS_NULL)
@@ -228,38 +227,9 @@ PUBLIC VIRTUAL void VideoNego::FinalizeSDP(
     }
 
     // SessionDescriptor key mismatch case handling, not select OaModel
-    if (bFoundOaModel != IMS_TRUE && nOaModelSize > 0)
+    if (bFoundOaModel != IMS_TRUE && m_listOaModel.GetSize() > 0)
     {
         IMS_TRACE_D("FinalizeSDP() - not found comfirmed Session OaModel", 0, 0, 0);
-        return;
-    }
-
-    // Remove old OaModels excepts confirmed OaModel
-    for (IMS_UINT32 i = 0; i < nOaModelSize; i++)
-    {
-        if ((nOaModelSize - i - 1) < 6)
-        {
-            IMS_TRACE_D("FinalizeSDP() - nOaModelSize is under 6", 0, 0, 0);
-            break;
-        }
-
-        OaModel* pDeleteCheckOaModel = m_listOaModel.GetAt(0);
-
-        if (pDeleteCheckOaModel != IMS_NULL)
-        {
-            IMS_TRACE_D("FinalizeSDP() - remove old OaModel", 0, 0, 0);
-            if (pDeleteCheckOaModel->nSessionDescriptorKey ==
-                            reinterpret_cast<IMS_SINTP>(pSessionDescriptor) &&
-                    pDeleteCheckOaModel->bConfirmedSession == IMS_TRUE)
-            {
-                break;
-            }
-
-            IMS_TRACE_D("FinalizeSDP() - Delete the oldest[%" PFLS_x "] OaModel",
-                    pDeleteCheckOaModel, 0, 0);
-            delete pDeleteCheckOaModel;
-            m_listOaModel.RemoveAt(0);
-        }
     }
 }
 
