@@ -262,20 +262,13 @@ private:
     IMS_BOOL CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
             IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
             OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
-    IMS_BOOL FindTelephoneEventInProfile(
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
     IMS_SINT32 FindPayloadIndexFromProfile(IN const AString& strCodecName,
             IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL isOfferReceivedCase);
-    void RearrangeModeSetByAs(
-            OUT AudioProfile::Payload* pPayload, IMS_BOOL bIpV6, IN IMS_SINT32 nAs);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
     IMS_BOOL MakeCapaNegoProfileFromSdp(
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakeNegotiatedCapaNegoProfile(IN AudioProfile::CapaNego* pSrcCapaNego,
-            IN AudioProfile::CapaNego* pDestCapaNego,
-            OUT AudioProfile::CapaNego* pNegotiatedCapaNego);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
     IMSList<OaModel*> m_lstOaModel;

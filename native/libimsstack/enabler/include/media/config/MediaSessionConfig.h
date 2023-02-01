@@ -132,9 +132,6 @@ private:
     IMS_BOOL UpdateVideoConfiguration(IN ICarrierConfig* piCc);
     IMS_BOOL UpdateTextConfiguration(IN ICarrierConfig* piCc);
 
-    void MakeAnalyzerList(IN CONST AString& strList);
-    void MakeAnalyzerOptionList(IN CONST AString& strList);
-
 private:
     AudioConfiguration* m_pAudioConfig;
     VideoConfiguration* m_pVideoConfig;

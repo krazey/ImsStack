@@ -333,23 +333,3 @@ IMS_BOOL MediaSessionConfig::UpdateTextConfiguration(IN ICarrierConfig* piCc)
 
     return IMS_TRUE;
 }
-
-PRIVATE
-void MediaSessionConfig::MakeAnalyzerList(IN CONST AString& strList)
-{
-    /** TODO_MEDIA later Analyzer */
-    if (strList == IMS_NULL)
-    {
-        return;
-    }
-}
-
-PRIVATE
-void MediaSessionConfig::MakeAnalyzerOptionList(IN CONST AString& strList)
-{
-    /** TODO_MEDIA later Analyzer */
-    if (strList == IMS_NULL)
-    {
-        return;
-    }
-}
