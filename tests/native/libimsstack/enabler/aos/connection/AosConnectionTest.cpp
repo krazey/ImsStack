@@ -47,7 +47,7 @@ protected:
     virtual void SetUp() override
     {
         m_pAosStaticProfile = new AosStaticProfile();
-        m_pAosStaticProfile->SetProflieType(AosStaticProfile::Type::NORMAL);
+        m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
         EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
                 .Times(AnyNumber())

@@ -35,7 +35,7 @@ AosStaticProfile::AosStaticProfile() :
 PUBLIC VIRTUAL AosStaticProfile::~AosStaticProfile() {}
 
 PUBLIC
-void AosStaticProfile::SetProflieType(IN Type eType)
+void AosStaticProfile::SetProfileType(IN Type eType)
 {
     m_eProfileType = eType;
 

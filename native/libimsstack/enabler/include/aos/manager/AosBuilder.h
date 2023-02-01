@@ -26,7 +26,7 @@ public:
     virtual ~AosBuilder();
 
     /// AosAppContext
-    IAosAppContext* BuildAppContext(IN AosStaticProfile* pProflie) override;
+    IAosAppContext* BuildAppContext(IN AosStaticProfile* pProfile) override;
     IAosApplication* BuildApp(IN IAosAppContext* piAppContext) override;
     IAosHandle* BuildHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strSrvId) override;

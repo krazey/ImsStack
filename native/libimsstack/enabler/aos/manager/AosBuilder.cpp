@@ -60,11 +60,11 @@ PUBLIC VIRTUAL AosBuilder::~AosBuilder()
             "AOS_MEM", "AOS_F : AosBuilder = %" PFLS_u "/%" PFLS_x, sizeof(AosBuilder), this, 0);
 }
 
-PUBLIC VIRTUAL IAosAppContext* AosBuilder::BuildAppContext(IN AosStaticProfile* pProflie)
+PUBLIC VIRTUAL IAosAppContext* AosBuilder::BuildAppContext(IN AosStaticProfile* pProfile)
 {
-    IMS_TRACE_D("BuildAppContext :: profile id (%s)", pProflie->GetId().GetStr(), 0, 0);
+    IMS_TRACE_D("BuildAppContext :: profile id (%s)", pProfile->GetId().GetStr(), 0, 0);
 
-    return new AosAppContext(pProflie);
+    return new AosAppContext(pProfile);
 }
 
 PUBLIC VIRTUAL IAosApplication* AosBuilder::BuildApp(IN IAosAppContext* piAppContext)
