@@ -33,6 +33,7 @@ public:
     virtual IMS_BOOL IsSessionContinuitySupported() = 0;
     virtual IMS_BOOL IsServiceTimerRunning() = 0;
     virtual IMS_BOOL IsImsVoiceCallSupported() = 0;
+    virtual IMS_BOOL IsRoaming() = 0;
 
     // the network type of moblie
     virtual IMS_UINT32 GetMobileChangingNetworkType() = 0;

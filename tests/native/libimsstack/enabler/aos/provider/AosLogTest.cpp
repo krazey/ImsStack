@@ -154,9 +154,10 @@ public:
         PENDING_UPDATE = 0x4,
         PENDING_RECONFIG = 0x8,
         PENDING_UPDATE_HELD_BY_CALL = 0x10,
+        PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
 
-        PENDING_SUBSCRIPTION = 0x20,
-        PENDING_TERMINATED = 0x40
+        PENDING_SUBSCRIPTION = 0x40,
+        PENDING_TERMINATED = 0x80
     };
 
     enum
@@ -388,6 +389,9 @@ TEST(AosLogTest, RegPendingToString)
     EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(
                          RegistrationLogTest::PENDING_UPDATE_HELD_BY_CALL),
             "PENDING_UPDATE_HELD_BY_CALL");
+    EXPECT_STREQ(AosProvider::GetLog()->RegPendingToString(
+                         RegistrationLogTest::PENDING_PLMN_BLOCK_HELD_BY_CALL),
+            "PENDING_PLMN_BLOCK_HELD_BY_CALL");
     EXPECT_STREQ(
             AosProvider::GetLog()->RegPendingToString(RegistrationLogTest::PENDING_SUBSCRIPTION),
             "PENDING_SUBSCRIPTION");
