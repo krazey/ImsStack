@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "Configuration.h"
+#include "GeolocationHelper.h"
+#include "GeolocationPidfCreator.h"
 #include "ServiceConfig.h"
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
@@ -459,8 +463,20 @@ PRIVATE void MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFormat,
     IMS_TRACE_I("SendMtsMessage : eSmsFormat[%s], nSeqId[%d], bEmergency[%s]",
             PS_SmsFormatType(eSmsFormat), nSeqId, _TRACE_B_(bEmergency));
 
+    ICoreService* pMtsICoreService;
+
+    if (bEmergency &&
+            ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
+                    CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL))
+    {
+        pMtsICoreService = m_piMtsService->GetICoreService(IMS_TRUE);
+    }
+    else
+    {
+        pMtsICoreService = m_piMtsService->GetICoreService(IMS_FALSE);
+    }
+
     IMtsServiceState* piMtsServiceState = m_piMtsService->GetIMtsServiceState();
-    ICoreService* pMtsICoreService = m_piMtsService->GetICoreService(bEmergency);
     IMS_SINT32 nGsmMti = SMS_MTI_NONE;
     AString strDestination;
 
@@ -637,7 +653,6 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
     }
 
     // TODO: Add SIP Header for MESSAGE Method here.
-    (void)bEmergency;
 
     if (piMessage->AddHeader(AString("Request-Disposition"), AString("no-fork")) == IMS_FAILURE)
     {
@@ -657,6 +672,18 @@ IMS_BOOL MtsMessageController::ConstructSendMessage(IN IMessage* piMessage,
             {
                 piMessage->AddHeader("In-Reply-To", strCallId);
             }
+        }
+    }
+
+    if (bEmergency)
+    {
+        ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId);
+        IMS_BOOL bSupportPidf = piCc->GetBoolean(
+                CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL);
+
+        if (bSupportPidf)
+        {
+            SetLocationToMessage(piMessage);
         }
     }
 
@@ -1002,6 +1029,53 @@ PRIVATE void MtsMessageController::SetLastIpsmgwAddr(IN const AString& strSmgwAd
 
     IMS_TRACE_D("SetLastIpsmgwAddr : Set Last IPSMGW Address [%s]", strSmgwAddr.GetStr(), 0, 0);
     m_strLastRcvIpsmgwAddr = strSmgwAddr;
+}
+
+PRIVATE void MtsMessageController::SetLocationToMessage(IN IMessage* piMessage)
+{
+    IMS_TRACE_I("SetLocationToMessage", 0, 0, 0);
+
+    GeolocationPidfCreator* pPidfCreator =
+            GeolocationHelper::GetInstance()->GetPidfCreator(m_nSlotId);
+
+    if (pPidfCreator == IMS_NULL)
+    {
+        return;
+    }
+
+    ByteArray objContent;
+
+    if (!pPidfCreator->CreateWithPositionAndCountry(AString::ConstNull(), objContent))
+    {
+        IMS_TRACE_I("SetLocationToMessage : Creating a location information failed", 0, 0, 0);
+        return;
+    }
+
+    ISipMessageBodyPart* piBodyPart = piMessage->GetMessage()->CreateBodyPart();
+
+    // Set a Location
+    piBodyPart->SetContent(objContent);
+
+    // Set a Location Content-Type
+    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, "application/pidf+xml");
+
+    AString strNewContentId = GeolocationHelper::CreateContentId(m_nSlotId);
+
+    // Set a Location Content-ID
+    AString strContentId;
+    strContentId.Sprintf("<%s>", strNewContentId.GetStr());
+    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_ID, strContentId);
+
+    // Set the Content-Length header
+    AString strClen;
+    strClen.SetNumber(objContent.GetLength());
+    piBodyPart->SetHeader(
+            ISipMessageBodyPart::CONTENT_UNKNOWN, strClen, SipHeaderName::CONTENT_LENGTH);
+
+    // Set Geolocation header
+    AString strGeolocation;
+    strGeolocation.Sprintf("<cid:%s>", strNewContentId.GetStr());
+    piMessage->AddHeader(SipHeaderName::GEOLOCATION, strGeolocation.GetStr());
 }
 
 PRIVATE

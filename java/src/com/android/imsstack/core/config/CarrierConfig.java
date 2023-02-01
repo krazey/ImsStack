@@ -924,6 +924,8 @@ public class CarrierConfig {
                 "sms_use_dialed_number_for_request_uri_bool";
         public static final String KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL =
                 "sms_allow_imsi_based_sip_uri_bool";
+        public static final String KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL =
+                "sms_geolocation_pidf_for_emergency_bool";
 
         // Ut/Xcap
         public static final String KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY =

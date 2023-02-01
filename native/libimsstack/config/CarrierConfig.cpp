@@ -1156,6 +1156,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_503_RESPONSE_INT[] =
         "sms_policy_for_503_response_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_504_RESPONSE_INT[] =
         "sms_policy_for_504_response_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL[] =
+        "sms_geolocation_pidf_for_emergency_bool";
 
 // Uce
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =

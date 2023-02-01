@@ -40,7 +40,7 @@ public:
 
     // JniMtsService
     virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId) = 0;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
     virtual void SendMtResult(IN IMS_BOOL bMtResult) = 0;
     virtual void SendScbmNotification(IN IMS_UINT32 nScbmState) = 0;
 };

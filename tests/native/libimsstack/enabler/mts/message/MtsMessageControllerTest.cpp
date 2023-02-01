@@ -15,10 +15,13 @@
  */
 
 #include <gtest/gtest.h>
+#include "CarrierConfig.h"
 #include "ImsTypeDef.h"
 #include "IuMtsService.h"
 #include "MockIMtsService.h"
 #include "MockIMtsServiceState.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "core/IPageMessage.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
@@ -54,14 +57,19 @@ public:
 class MtsMessageControllerTest : public ::testing::Test
 {
 public:
-    TestMtsMessageController* pMtsMessageController;
-    MtsDynamicLoader* pMtsDynamicLoader;
     MockIMtsService* pMockMtsService;
     MockIPageMessage* pMockPageMessage;
+    MtsDynamicLoader* pMtsDynamicLoader;
+
+    TestConfigService objConfigService;
+    TestMtsMessageController* pMtsMessageController;
 
 protected:
     virtual void SetUp() override
     {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+
         pMockMtsService = new MockIMtsService();
         pMockPageMessage = new MockIPageMessage();
         pMtsDynamicLoader = new MtsDynamicLoader(SLOT_ID);
@@ -72,6 +80,8 @@ protected:
 
     virtual void TearDown() override
     {
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
+
         delete pMockMtsService;
         delete pMtsDynamicLoader;
         delete pMtsMessageController;
@@ -99,6 +109,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutEmergencyFlag)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -139,6 +152,12 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithEmergencyFlag)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -176,6 +195,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutTargetAddress)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
 
@@ -199,6 +221,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWithoutRPDU)
 
     ByteArray objRpData;
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
 
@@ -224,6 +249,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsWhenMoServiceBlocked)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_TRUE));
@@ -249,6 +277,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetICoreService)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(nullptr));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -275,6 +306,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetUri)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -304,6 +338,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToCreatePageMessage)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -334,6 +371,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToGetNextRequest)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -366,6 +406,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToAddHeader)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -400,6 +443,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndFailToSendPageMessage)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -435,6 +481,9 @@ TEST_F(MtsMessageControllerTest, NotifyMoSmsAndPageMessageDeliveryFailed)
     objRpData.Append((IMS_BYTE)0x03);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -485,6 +534,9 @@ TEST_F(MtsMessageControllerTest, SendMoSmsAndReceiveAck)
     objRpAck.Append((IMS_BYTE)0x02);     // message reference
     objRpAck.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -544,6 +596,9 @@ TEST_F(MtsMessageControllerTest, SendMoSmsWithSMMAAndFailToFormDestination)
     objRpAck.Append((IMS_BYTE)0x02);     // message reference
     objRpAck.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -595,6 +650,9 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck)
     objRpAck.Append((IMS_BYTE)0x03);     // message reference
     objRpAck.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -655,6 +713,9 @@ TEST_F(MtsMessageControllerTest, ReceiveMtSmsAndSendAck3gpp2)
     objRpAck.Append((IMS_BYTE)0x03);     // message reference
     objRpAck.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -1112,6 +1173,9 @@ TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDelivered)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -1151,6 +1215,9 @@ TEST_F(MtsMessageControllerTest, CannotFindMatchedMtsMessageInPageMessageDeliver
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -1188,6 +1255,9 @@ TEST_F(MtsMessageControllerTest, NoReceivedResponsesInPageMessageDeliveryFailed)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -1227,6 +1297,9 @@ TEST_F(MtsMessageControllerTest, OnServiceDisconnectedThenRemoveAllMessages)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));
@@ -1267,6 +1340,9 @@ TEST_F(MtsMessageControllerTest, OnServiceSuspendedThenRemoveAllMessages)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
 
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pMockMtsService, GetICoreService(bEmergency)).WillByDefault(Return(pMockCoreService));
     ON_CALL(*pMockMtsService, GetIMtsServiceState()).WillByDefault(Return(pMockMtsServiceState));
     ON_CALL(*pMockMtsServiceState, IsMoServiceBlocked()).WillByDefault(Return(IMS_FALSE));

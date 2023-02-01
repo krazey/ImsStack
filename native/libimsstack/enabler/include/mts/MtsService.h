@@ -74,7 +74,7 @@ public:
     void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
     inline void NotifyJniEnablerSet() override {}
     void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-            IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
     void SendScbmNotification(IN IMS_UINT32 nScbmState) override;
 
@@ -101,7 +101,6 @@ private:
             IN IMS_UINT32 nTrafficType, IN IMS_SINT32 nReportedNetwork);
     IMtsTraffic* GetTraffic(IN IMS_UINT32 nTrafficType, IN IMS_UINT32 nDirection);
     IJniMtsServiceThread* GetJniThread();
-    IMS_BOOL IsEccNumber(IN const AString& strDstAddr);
     void StartRadioTraffic(IN IMtsTraffic* piMtsTraffic);
 
     void Init();

@@ -96,6 +96,7 @@ private:
 
     const AString& GetLastIpsmgwAddr();
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
+    void SetLocationToMessage(IN IMessage* piMessage);
 
     AString GetPreviousCallId(IN const ByteArray& objSms);
     static IMS_BOOL GetSmsgwFromReceivedMessage(
