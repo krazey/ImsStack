@@ -267,12 +267,30 @@ void JniMediaSession::OnResponses(
 PRIVATE
 void JniMediaSession::OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
-    ImsMediaNotifyInactivityParam* pParam = new ImsMediaNotifyInactivityParam();
+    MEDIA_CONTENT_TYPE eMediaType =
+            ConvertToMediaType(static_cast<SessionType>(objParcel.readInt32()));
 
-    pParam->m_eMediaType = ConvertToMediaType(static_cast<SessionType>(objParcel.readInt32()));
-    pParam->m_eMediaProtocolType = static_cast<ProtocolType>(objParcel.readInt32());
+    if (eMediaType == MEDIA_TYPE_AUDIO)
+    {
+        ImsMediaNotifyQualityStatusParam* pQualityParam = new ImsMediaNotifyQualityStatusParam();
 
-    GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+        pQualityParam->m_eMediaType = eMediaType;
+        pQualityParam->m_nRtpInactivityTimerMillis = objParcel.readInt32();
+        pQualityParam->m_nRtcpInactivityTimerMillis = objParcel.readInt32();
+
+        GetMediaManager()->SendMessage(
+                nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pQualityParam));
+    }
+    else
+    {
+        ImsMediaNotifyInactivityParam* pInactivityParam = new ImsMediaNotifyInactivityParam();
+
+        pInactivityParam->m_eMediaType = eMediaType;
+        pInactivityParam->m_eMediaProtocolType = static_cast<ProtocolType>(objParcel.readInt32());
+
+        GetMediaManager()->SendMessage(
+                nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pInactivityParam));
+    }
 }
 
 PRIVATE

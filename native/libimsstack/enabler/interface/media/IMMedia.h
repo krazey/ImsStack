@@ -236,6 +236,13 @@ enum ProtocolType
     RTCP = 1,
 };
 
+enum InactivitytimerType
+{
+    RTP_INACTIVITY = 0,
+    RTCP_INACTIVITY = 1,
+    NETWORK_TONE_INACTIVITY = 2
+};
+
 enum
 {
     SURFACE_FAR = 1,
@@ -379,16 +386,28 @@ public:
     IMS_BOOL m_bResult;
 };
 
-class ImsMediaNotifyInactivityParam
+class ImsMediaNotifyInactivityParam : public ImsMediaMsgParamBase
 {
 public:
     ImsMediaNotifyInactivityParam() :
-            m_eMediaProtocolType(RTP),
-            m_eMediaType(MEDIA_TYPE_INVALID){};
+            ImsMediaMsgParamBase(),
+            m_eMediaProtocolType(RTP){};
 
 public:
     ProtocolType m_eMediaProtocolType;
-    MEDIA_CONTENT_TYPE m_eMediaType;
+};
+
+class ImsMediaNotifyQualityStatusParam : public ImsMediaMsgParamBase
+{
+public:
+    explicit ImsMediaNotifyQualityStatusParam() :
+            ImsMediaMsgParamBase(),
+            m_nRtpInactivityTimerMillis(-1),
+            m_nRtcpInactivityTimerMillis(-1){};
+
+public:
+    IMS_SINT32 m_nRtpInactivityTimerMillis;
+    IMS_SINT32 m_nRtcpInactivityTimerMillis;
 };
 
 class ImsMediaNotifyPacketParam : public ImsMediaResponseParamBase

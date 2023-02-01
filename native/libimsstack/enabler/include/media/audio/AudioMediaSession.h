@@ -20,6 +20,7 @@
 #include <AudioConfig.h>
 #include <MediaQualityThreshold.h>
 #include "BaseSession.h"
+#include "IMMedia.h"
 #include "audio/AudioDef.h"
 #include "audio/AudioProfile.h"
 #include "config/AudioConfiguration.h"
@@ -164,9 +165,10 @@ public:
     /**
      * @brief Get Inactivity timer
      *
+     * @param eType Inactivitiy timer type
      * @return IMS_UINT32 Inactivity timer value
      */
-    IMS_UINT32 GetInactivityTimer();
+    IMS_SINT32 GetInactivityTimer(IN InactivitytimerType eType);
 
 protected:
     AudioConfiguration* m_pConfig;
@@ -174,7 +176,7 @@ protected:
     IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
     IMSList<IMS_UINTP> m_listNegoId;
-    IMS_UINT32 m_nInactivityTimer;
+    IMS_SINT32 m_nInactivityTimer;
 };
 
 #endif

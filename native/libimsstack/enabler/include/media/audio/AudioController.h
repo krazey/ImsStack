@@ -211,7 +211,7 @@ public:
      * @param nNegoId The identification to get the audio profile from negotiated parameter
      * @return IMS_UINT32 Inactivity timer value
      */
-    IMS_UINT32 GetInactivityTimer(IN IMS_UINTP nNegoId);
+    IMS_SINT32 GetInactivityTimer(IN InactivitytimerType eType, IN IMS_UINTP nNegoId);
 
 private:
     AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = IMS_NULL);

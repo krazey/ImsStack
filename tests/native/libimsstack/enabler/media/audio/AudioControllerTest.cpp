@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include <ServiceConfig.h>
+#include <IMMedia.h>
 #include <audio/AudioController.h>
 #include <audio/MockAudioNego.h>
 #include <MediaNetworkConnectionWatcher.h>
@@ -192,12 +193,12 @@ TEST_F(AudioControllerTest, testInactivityTimer)
     m_pController->SetInactivityTimer(negoId1, inactivityTime1);
     m_pController->SetInactivityTimer(negoId2, inactivityTime2);
 
-    EXPECT_EQ(m_pController->GetInactivityTimer(negoId1), inactivityTime1);
-    EXPECT_EQ(m_pController->GetInactivityTimer(negoId2), inactivityTime2);
+    EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId1), inactivityTime1);
+    EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId2), inactivityTime2);
 
     m_pController->UpdateSession(negoId2, ACCESS_NETWORK, m_pAudioNego);
 
     m_pController->SetInactivityTimer(IMS_NULL, inactivityTime3);
-    EXPECT_EQ(m_pController->GetInactivityTimer(negoId1), inactivityTime1);
-    EXPECT_EQ(m_pController->GetInactivityTimer(negoId2), inactivityTime3);
+    EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId1), inactivityTime1);
+    EXPECT_EQ(m_pController->GetInactivityTimer(NETWORK_TONE_INACTIVITY, negoId2), inactivityTime3);
 }

@@ -116,21 +116,6 @@ protected:
 
 private:
     IpAddress GetAndroidIP();
-    /**
-     * @brief Set Inactivity timer separately
-     *
-     * @param nNegoId The identification of the target AudioMediaSession instance
-     * @param nTimer Inactivity timer value
-     */
-    void SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer);
-
-    /**
-     * @brief Get Inactivity timer
-     *
-     * @param nNegoId The identification of the target AudioMediaSession instance
-     * @return IMS_UINT32 Inactivity timer value
-     */
-    IMS_UINT32 GetInactivityTimer(IN IMS_UINTP nNegoId);
 
 protected:
     IMS_UINT32 m_nSlotId;

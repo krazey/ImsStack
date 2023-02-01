@@ -15,6 +15,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <IMMedia.h>
 #include <audio/AudioMediaSession.h>
 
 class AudioMediaSessionTest : public ::testing::Test
@@ -33,5 +34,5 @@ TEST_F(AudioMediaSessionTest, testSetGetInactivityTimer)
     IMS_UINT32 INACTIVITY_TIME = 12000;
 
     m_pAudioMediaSession->SetInactivityTimer(INACTIVITY_TIME);
-    EXPECT_EQ(m_pAudioMediaSession->GetInactivityTimer(), INACTIVITY_TIME);
+    EXPECT_EQ(m_pAudioMediaSession->GetInactivityTimer(NETWORK_TONE_INACTIVITY), INACTIVITY_TIME);
 }

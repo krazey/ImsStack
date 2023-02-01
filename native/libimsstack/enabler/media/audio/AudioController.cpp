@@ -446,8 +446,8 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
 
 PUBLIC void AudioController::SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nTimer)
 {
-    IMS_TRACE_I("SetInactivityTimer() - nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]", nNegoId,
-            m_nCurrentActiveNegoId, 0);
+    IMS_TRACE_I("SetInactivityTimer() - NegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "], timer[%d]",
+            nNegoId, m_nCurrentActiveNegoId, nTimer);
 
     if (nNegoId == IMS_NULL)
     {
@@ -461,10 +461,11 @@ PUBLIC void AudioController::SetInactivityTimer(IN IMS_UINTP nNegoId, IN IMS_UIN
     }
 }
 
-PUBLIC IMS_UINT32 AudioController::GetInactivityTimer(IN IMS_UINTP nNegoId)
+PUBLIC IMS_SINT32 AudioController::GetInactivityTimer(
+        IN InactivitytimerType eType, IN IMS_UINTP nNegoId)
 {
-    IMS_TRACE_I("GetInactivityTimer() - nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]", nNegoId,
-            m_nCurrentActiveNegoId, 0);
+    IMS_TRACE_I("GetInactivityTimer() - Type[%d], nNegoId[%" PFLS_x "], CurrentNegoId[%" PFLS_x "]",
+            eType, nNegoId, m_nCurrentActiveNegoId);
 
     if (nNegoId == IMS_NULL)
     {
@@ -474,10 +475,10 @@ PUBLIC IMS_UINT32 AudioController::GetInactivityTimer(IN IMS_UINTP nNegoId)
     AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
     if (pAudioSession != IMS_NULL)
     {
-        return pAudioSession->GetInactivityTimer();
+        return pAudioSession->GetInactivityTimer(eType);
     }
 
-    return 0;
+    return -1;
 }
 
 PRIVATE

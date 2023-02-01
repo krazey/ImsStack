@@ -188,13 +188,19 @@ TEST_F(MediaSessionTest, testNotifyFirstPacket)
 
 TEST_F(MediaSessionTest, testNotifyMediaInactivity)
 {
-    IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
+    IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIOVIDEO);
     EXPECT_NE(negoId, 0);
 
-    ImsMediaNotifyInactivityParam* pParam = new ImsMediaNotifyInactivityParam();
-
+    ImsMediaNotifyQualityStatusParam* pParam = new ImsMediaNotifyQualityStatusParam();
+    pParam->m_eMediaType = MEDIA_TYPE_AUDIO;
     EXPECT_EQ(m_pSession->SendMessage(
                       IMMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(pParam)),
+            IMS_TRUE);
+
+    ImsMediaNotifyInactivityParam* pParam1 = new ImsMediaNotifyInactivityParam();
+    pParam1->m_eMediaType = MEDIA_TYPE_VIDEO;
+    EXPECT_EQ(m_pSession->SendMessage(
+                      IMMedia::NOTIFY_MEDIA_INACTIVITY, reinterpret_cast<IMS_UINTP>(pParam1)),
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
