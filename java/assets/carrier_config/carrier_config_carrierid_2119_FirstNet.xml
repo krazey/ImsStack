@@ -305,21 +305,21 @@
         <item value="4"/>
         <item value="7"/>
     </int-array>
-    <int-array name="asset_evs_payload_type_intarray" num="1">
+    <int-array name="asset_evs_payload_type_int_array" num="1">
         <item value="125"/>
     </int-array>
-    <int-array name="asset_amrwb_payload_type_intarray" num="2">
+    <int-array name="asset_amrwb_payload_type_int_array" num="2">
         <item value="115"/>
         <item value="116"/>
     </int-array>
-    <int-array name="asset_amrnb_payload_type_intarray" num="2">
+    <int-array name="asset_amrnb_payload_type_int_array" num="2">
         <item value="97"/>
         <item value="98"/>
     </int-array>
-    <int-array name="asset_dtmfwb_payload_type_intarray" num="1">
+    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
         <item value="105"/>
     </int-array>
-    <int-array name="asset_dtmfnb_payload_type_intarray" num="1">
+    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
         <item value="103"/>
     </int-array>
     <int-array name="asset_amr_amrwb_codec_attribute_modeset_int_array" num="3">
