@@ -151,9 +151,10 @@ public:
         PENDING_UPDATE = 0x4,
         PENDING_RECONFIG = 0x8,
         PENDING_UPDATE_HELD_BY_CALL = 0x10,
+        PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
 
-        PENDING_SUBSCRIPTION = 0x20,
-        PENDING_TERMINATED = 0x40
+        PENDING_SUBSCRIPTION = 0x40,
+        PENDING_TERMINATED = 0x80
     };
 
     enum
@@ -473,6 +474,9 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
 
         case RegistrationLog::PENDING_UPDATE_HELD_BY_CALL:
             return "PENDING_UPDATE_HELD_BY_CALL";
+
+        case RegistrationLog::PENDING_PLMN_BLOCK_HELD_BY_CALL:
+            return "PENDING_PLMN_BLOCK_HELD_BY_CALL";
 
         case RegistrationLog::PENDING_SUBSCRIPTION:
             return "PENDING_SUBSCRIPTION";

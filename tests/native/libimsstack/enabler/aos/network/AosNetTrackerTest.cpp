@@ -947,3 +947,14 @@ TEST_F(AosNetTrackerTest, AosConnection_ConnectionFailed)
     // Currently, there is no logic that requires tests.
     NotifyConnectionFailed();
 }
+
+TEST_F(AosNetTrackerTest, IsRoaming)
+{
+    SetNetworkWatcher(static_cast<INetworkWatcher*>(&m_objMockINetworkWatcher));
+    EXPECT_CALL(m_objMockINetworkWatcher, GetRoamingState())
+            .Times(2)
+            .WillOnce(Return(1))
+            .WillOnce(Return(0));
+    EXPECT_TRUE(m_pAosNetTracker->IsRoaming());
+    EXPECT_FALSE(m_pAosNetTracker->IsRoaming());
+}
