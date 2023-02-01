@@ -4927,7 +4927,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
              * {@link ConferenceProxy#removeListener} so {@link #onAudioSessionClosed}
              * for foreground session can be delivered from {@link MergeProxy}.
              */
-            if (!mCallDetails.is(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END)) {
+            if (!mCallDetails.is(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END)
+                    || mCall.isConference()) {
                 clearConferenceProxy();
             }
 
