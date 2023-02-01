@@ -52,7 +52,6 @@ public:
 
     void TerminateCalls(
             IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason) override;
-    void RemoveCalls(IN KeyType eKeyType, IN Key nKey) override;
     CallKey Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
     void Attach(IN CallKey nCallKey) override;
     void HandleIncoming(IN IMtcService* pService, IN ISession* piSession) override;
