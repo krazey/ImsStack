@@ -56,6 +56,21 @@ protected:
         delete pConfigurationProxy;
         delete pCallManager;
     }
+
+    void ClearAllCalls()
+    {
+        const CallType eType = CallType::UNKNOWN;
+        const IMS_BOOL bEmergency = IMS_FALSE;
+        const IMS_SINT32 nReason = 0;
+
+        ImsList<IMtcCall*> lstCalls = pCallManager->GetCalls();
+        for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
+        {
+            IMtcCall* pCall = lstCalls.GetAt(nIndex);
+            pCallManager->OnCallStateChanged(
+                    pCall->GetKey(), IMtcCall::State::TERMINATING, eType, bEmergency, nReason);
+        }
+    }
 };
 
 TEST_F(MtcCallManagerTest, InitRegistersThisToCallStateProxy)
@@ -106,26 +121,6 @@ TEST_F(MtcCallManagerTest, CreateCallNotAddsNullCallIfServiceIsNull)
     pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
 
     EXPECT_EQ(0, pCallManager->GetCalls().GetSize());
-}
-
-TEST_F(MtcCallManagerTest, RemoveCallRemovesMatchingCall)
-{
-    CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
-
-    pCallManager->RemoveCall(pCall->GetKey());
-    EXPECT_EQ(0, pCallManager->GetCalls().GetSize());
-}
-
-TEST_F(MtcCallManagerTest, RemoveCallNotRemovesCallIfNoMatchingCall)
-{
-    CallInfo objCallInfo;
-    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
-
-    const CallKey nNotExistingCallKey = pCall->GetKey() + 1;
-
-    pCallManager->RemoveCall(nNotExistingCallKey);
-    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
 }
 
 TEST_F(MtcCallManagerTest, GetCallByCallKeyReturnsMatchingCall)
@@ -196,13 +191,17 @@ TEST_F(MtcCallManagerTest, GetCallsByServiceTypeReturnsCallListOfMatchingCall)
     IMtcCall* pNormalCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
     IMtcCall* pEmergencyCall = pCallManager->CreateCall(ServiceType::EMERGENCY, objCallInfo);
 
-    ImsList<IMtcCall*> lstResult = pCallManager->GetCallsByServiceType(ServiceType::NORMAL);
-    EXPECT_EQ(1, lstResult.GetSize());
-    EXPECT_EQ(pNormalCall, lstResult.GetAt(0));
+    ImsList<IMtcCall*> lstNormalResult = pCallManager->GetCallsByServiceType(ServiceType::NORMAL);
+    EXPECT_EQ(1, lstNormalResult.GetSize());
+    EXPECT_EQ(pNormalCall, lstNormalResult.GetAt(0));
+
+    ImsList<IMtcCall*> lstEmergencyResult =
+            pCallManager->GetCallsByServiceType(ServiceType::EMERGENCY);
+    EXPECT_EQ(1, lstEmergencyResult.GetSize());
+    EXPECT_EQ(pEmergencyCall, lstEmergencyResult.GetAt(0));
 
     // to delete MtcCall before MockIMtcService is deleted
-    pCallManager->RemoveCall(pNormalCall->GetKey());
-    pCallManager->RemoveCall(pEmergencyCall->GetKey());
+    ClearAllCalls();
 }
 
 TEST_F(MtcCallManagerTest, GetCallsInConferenceReturnsCallListOfMatchingCall)
@@ -280,6 +279,20 @@ TEST_F(MtcCallManagerTest, OnCallStateChangedRemoveCallIfTerminating)
     pCallManager->OnCallStateChanged(
             pCall->GetKey(), IMtcCall::State::TERMINATING, eType, bEmergency, nReason);
     EXPECT_EQ(0, pCallManager->GetCalls().GetSize());
+}
+
+TEST_F(MtcCallManagerTest, OnCallStateChangedDoesNothingIfTerminatingInvalidCallKey)
+{
+    CallInfo objCallInfo;
+    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+
+    const CallType eType = CallType::VOIP;
+    const IMS_BOOL bEmergency = IMS_FALSE;
+    const IMS_SINT32 nReason = 0;
+
+    pCallManager->OnCallStateChanged(
+            pCall->GetKey() + 1, IMtcCall::State::TERMINATING, eType, bEmergency, nReason);
+    EXPECT_EQ(1, pCallManager->GetCalls().GetSize());
 }
 
 TEST_F(MtcCallManagerTest, OnTotalCallStateChangedDoNothing)

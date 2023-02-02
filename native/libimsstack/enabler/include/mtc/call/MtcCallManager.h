@@ -44,7 +44,6 @@ public:
     void DeInit();
 
     IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) override;
-    void RemoveCall(IN CallKey nCallKey) override;
 
     IMtcCall* GetCallByCallKey(IN CallKey nCallKey) override;
 
@@ -62,6 +61,14 @@ public:
 private:
     IMS_SINT32 GetFirstIndexByFilter(IN const std::function<IMS_BOOL(MtcCall*)>& objFilter);
     ImsList<IMtcCall*> GetCallsByFilter(IN const std::function<IMS_BOOL(MtcCall*)>& objFilter);
+
+    /**
+     * Deletes the call matching the given call key. Does nothing if the call doesn't exist.
+     * Mtc must guarantee that the target MtcCall is in TERMINATING state when it's removed.
+     *
+     * @param nCallKey Key of the call to be deleted.
+     */
+    void RemoveCall(IN CallKey nCallKey);
 
     IMtcContext& m_objContext;
     ImsList<MtcCall*> m_lstCalls;

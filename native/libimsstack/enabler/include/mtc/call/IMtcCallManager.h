@@ -42,15 +42,6 @@ public:
      */
     virtual IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& objCallInfo) = 0;
 
-    // Deletes the call matching the given call key. Does nothing if the call doesn't exist.
-
-    /**
-     * @brief Removes
-     *
-     * @param nCallKey
-     */
-    virtual void RemoveCall(IN CallKey nCallKey) = 0;
-
     // Returns a call matching the given call key.
     // Returns new `UnknownCall` instance if the call doesn't exist.
 
