@@ -1004,6 +1004,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILL
         "send_udp_keep_alive_interval_time_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[] =
         "call_reject_code_for_not_acceptable_call_type_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[] =
+        "release_emergency_pdn_with_emergency_call_fail_bool";
 
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =

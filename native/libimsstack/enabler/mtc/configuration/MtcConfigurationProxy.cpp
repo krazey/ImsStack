@@ -166,6 +166,8 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsInitializePemWhenNoHeader();
         case Feature::SEND_180_FOR_INITIAL_INVITE:
             return m_pManager->IsSend180ForInitialInvite();
+        case Feature::RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL:
+            return m_pManager->IsReleaseEmergencyPdnWithEmergencyCallFail();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return IMS_FALSE;

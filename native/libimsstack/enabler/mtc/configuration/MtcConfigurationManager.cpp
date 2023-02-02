@@ -859,6 +859,12 @@ IMS_SINT32 MtcConfigurationManager::GetCallRejectCodeForNotAcceptableCallType() 
     return m_objCarrierConfig.nCallRejectCodeForNotAcceptableCallType;
 }
 
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsReleaseEmergencyPdnWithEmergencyCallFail() const
+{
+    return m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallFail;
+}
+
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
         IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)

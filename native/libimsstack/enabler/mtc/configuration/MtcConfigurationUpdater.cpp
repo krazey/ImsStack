@@ -346,4 +346,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetInt(CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT);
     objItems.nCallRejectCodeForNotAcceptableCallType = piCc->GetInt(
             CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT);
+    objItems.bReleaseEmergencyPdnWithEmergencyCallFail = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL);
 }

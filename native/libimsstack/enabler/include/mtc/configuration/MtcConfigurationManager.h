@@ -174,6 +174,7 @@ public:
     IMS_SINT32 GetEpsFallbackWatchdogTime() const override;
     IMS_SINT32 GetSendUdpKeepAliveIntervalTime() const override;
     IMS_SINT32 GetCallRejectCodeForNotAcceptableCallType() const override;
+    IMS_BOOL IsReleaseEmergencyPdnWithEmergencyCallFail() const override;
 
 private:
     static IMS_BOOL ContainsValue(IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue);

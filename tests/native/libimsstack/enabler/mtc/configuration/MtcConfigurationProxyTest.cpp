@@ -244,6 +244,10 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
 
     EXPECT_CALL(*pConfigManager, IsSend180ForInitialInvite).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::SEND_180_FOR_INITIAL_INVITE));
+
+    EXPECT_CALL(*pConfigManager, IsReleaseEmergencyPdnWithEmergencyCallFail)
+            .WillOnce(Return(bValue));
+    EXPECT_EQ(bValue, pConfig->Is(Feature::RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL));
 }
 
 TEST_F(MtcConfigurationProxyTest, IsWithStringArgReturnsFromConfigManager)
