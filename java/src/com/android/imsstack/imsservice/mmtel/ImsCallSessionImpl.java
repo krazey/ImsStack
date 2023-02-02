@@ -4396,7 +4396,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
             }
 
-            if (isConferenceTransitionInProgress() && !mCallDetails.is(CallDetails.ON_MERGING)) {
+            if (isConferenceTransitionInProgress() && isImplicitTerminatedCondition()) {
                 clearConferenceProxy();
                 mConferenceListenerProxy.closeMtcCallIfSessionTerminatedOnConference(mCall);
             }
@@ -4409,7 +4409,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             logi("onCallQualityChanged");
-                mCallback.invokeCallQualityChanged(callQuality);
+            mCallback.invokeCallQualityChanged(callQuality);
         }
 
         private void onVideoCallHoldReceived(final MtcCall call,
