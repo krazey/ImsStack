@@ -182,7 +182,7 @@ protected:
     virtual void SetUp() override
     {
         m_pAosStaticProfile = new AosStaticProfile();
-        m_pAosStaticProfile->SetProflieType(AosStaticProfile::Type::EMERGENCY);
+        m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
 
         IMSList<ImsServiceName> objServiceName =
                 ImsServiceConfig::GetServiceNames(ImsServiceConfig::GetEmergencyServiceProfile());

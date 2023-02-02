@@ -45,7 +45,7 @@ public:
     virtual ~IAosBuilder(){};
 
     /// AosAppContext
-    virtual IAosAppContext* BuildAppContext(IN AosStaticProfile* pProflie) = 0;
+    virtual IAosAppContext* BuildAppContext(IN AosStaticProfile* pProfile) = 0;
     virtual IAosApplication* BuildApp(IN IAosAppContext* piAppContext) = 0;
     virtual IAosHandle* BuildHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strSrvId) = 0;

@@ -41,9 +41,9 @@ protected:
     }
 };
 
-TEST_F(AosStaticProfileTest, SetProflieType_Normal)
+TEST_F(AosStaticProfileTest, SetProfileType_Normal)
 {
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::NORMAL);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
     EXPECT_EQ(pAosStaticProfile->GetProfileType(), AosStaticProfile::Type::NORMAL);
     EXPECT_EQ(pAosStaticProfile->GetId(), AString("aos_normal"));
@@ -54,9 +54,9 @@ TEST_F(AosStaticProfileTest, SetProflieType_Normal)
             static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
 }
 
-TEST_F(AosStaticProfileTest, SetProflieType_Emergency)
+TEST_F(AosStaticProfileTest, SetProfileType_Emergency)
 {
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::EMERGENCY);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
 
     EXPECT_EQ(pAosStaticProfile->GetProfileType(), AosStaticProfile::Type::EMERGENCY);
     EXPECT_EQ(pAosStaticProfile->GetId(), AString("aos_emergency"));
@@ -67,9 +67,9 @@ TEST_F(AosStaticProfileTest, SetProflieType_Emergency)
             static_cast<IMS_UINT32>(AosRegistrationFlowId::EMERGENCY));
 }
 
-TEST_F(AosStaticProfileTest, SetProflieType_Rcs)
+TEST_F(AosStaticProfileTest, SetProfileType_Rcs)
 {
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::RCS);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::RCS);
 
     EXPECT_EQ(pAosStaticProfile->GetProfileType(), AosStaticProfile::Type::RCS);
     EXPECT_EQ(pAosStaticProfile->GetId(), AString("aos_rcs"));

@@ -71,7 +71,7 @@ public:
         RCS
     };
 
-    void SetProflieType(IN Type eType);
+    void SetProfileType(IN Type eType);
     void AddService(IN const AString& strAppId, IN const AString& strServiceId);
 
     AString& GetId();

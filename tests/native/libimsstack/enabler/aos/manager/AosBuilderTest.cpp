@@ -108,19 +108,19 @@ TEST_F(AosBuilderTest, BuildAppContext)
 
 TEST_F(AosBuilderTest, BuildApplication)
 {
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::NORMAL);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
     AosApplication* pAosApplication = static_cast<AosApplication*>(
             pAosBuilder->BuildApp(static_cast<IAosAppContext*>(pMockAosAppContext)));
     ASSERT_TRUE(pAosApplication != nullptr);
     delete pAosApplication;
 
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::EMERGENCY);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
     AosEApplication* pAosEApplication = static_cast<AosEApplication*>(
             pAosBuilder->BuildApp(static_cast<IAosAppContext*>(pMockAosAppContext)));
     ASSERT_TRUE(pAosEApplication != nullptr);
     delete pAosEApplication;
 
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::NORMAL);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 }
 
 TEST_F(AosBuilderTest, BuildHandle)
@@ -166,19 +166,19 @@ TEST_F(AosBuilderTest, BuildHandle)
 
 TEST_F(AosBuilderTest, BuildRegistration)
 {
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::NORMAL);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
     AosRegistration* pAosRegistration = static_cast<AosRegistration*>(
             pAosBuilder->BuildRegistration(static_cast<IAosAppContext*>(pMockAosAppContext)));
     ASSERT_TRUE(pAosRegistration != nullptr);
     delete pAosRegistration;
 
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::EMERGENCY);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
     AosERegistration* pAosERegistration = static_cast<AosERegistration*>(
             pAosBuilder->BuildRegistration(static_cast<IAosAppContext*>(pMockAosAppContext)));
     ASSERT_TRUE(pAosERegistration != nullptr);
     delete pAosERegistration;
 
-    pAosStaticProfile->SetProflieType(AosStaticProfile::Type::NORMAL);
+    pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 }
 
 TEST_F(AosBuilderTest, BuildSubscriber)

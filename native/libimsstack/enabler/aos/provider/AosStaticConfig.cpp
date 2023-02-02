@@ -37,7 +37,7 @@ IMS_BOOL AosStaticConfig::Create()
     IMS_TRACE_D("Create", 0, 0, 0);
     // for normal
     AosStaticProfile* pProfile = new AosStaticProfile();
-    pProfile->SetProflieType(AosStaticProfile::Type::NORMAL);
+    pProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
     IMSList<ImsServiceName> objServiceName =
             ImsServiceConfig::GetServiceNames(ImsServiceConfig::GetServiceProfile());
@@ -51,7 +51,7 @@ IMS_BOOL AosStaticConfig::Create()
 
     // for emergency
     AosStaticProfile* pEProfile = new AosStaticProfile();
-    pEProfile->SetProflieType(AosStaticProfile::Type::EMERGENCY);
+    pEProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
 
     IMSList<ImsServiceName> objEServiceName =
             ImsServiceConfig::GetServiceNames(ImsServiceConfig::GetEmergencyServiceProfile());
