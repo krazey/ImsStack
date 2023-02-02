@@ -401,44 +401,25 @@ IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(
     if (bActiveSession)
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
-                m_pConfig->GetRtpInactivityTimerMillis());
+                std::vector<int32_t>{m_pConfig->GetRtpInactivityTimerMillis()});
 
-        if (bEnableRtcp == IMS_FALSE)
-        {
-            m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(0);
-        }
-        else
-        {
-            m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
-                    m_pConfig->GetRtcpInactivityTimerMillis());
-        }
-
-        m_objMediaQualityThreshold.setRtpPacketLossDurationMillis(15000);
-        m_objMediaQualityThreshold.setRtpPacketLossRate(30);
-        m_objMediaQualityThreshold.setJitterDurationMillis(15000);
-        m_objMediaQualityThreshold.setRtpJitterMillis(100);
+        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
+                (bEnableRtcp) ? m_pConfig->GetRtcpInactivityTimerMillis() : 0);
     }
     else
     {
-        m_objMediaQualityThreshold.setRtpInactivityTimerMillis(0);
+        m_objMediaQualityThreshold.setRtpInactivityTimerMillis(std::vector<int32_t>{0});
         m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
                 m_pConfig->GetRtcpInactivityTimerMillis());
-        m_objMediaQualityThreshold.setRtpPacketLossDurationMillis(0);
-        m_objMediaQualityThreshold.setRtpPacketLossRate(0);
-        m_objMediaQualityThreshold.setJitterDurationMillis(0);
-        m_objMediaQualityThreshold.setRtpJitterMillis(0);
     }
 
     IMS_TRACE_D("UpdateMediaQualityThreshold() - bActiveSession[%d], RtpInactivity[%d], "
                 "RtcpInactivity[%d]",
-            bActiveSession, m_objMediaQualityThreshold.getRtpInactivityTimerMillis(),
+            bActiveSession,
+            (m_objMediaQualityThreshold.getRtpInactivityTimerMillis().empty())
+                    ? -1
+                    : m_objMediaQualityThreshold.getRtpInactivityTimerMillis().front(),
             m_objMediaQualityThreshold.getRtcpInactivityTimerMillis());
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - PacketLossDurationMillis[%d], PacketLossRate[%d]",
-            m_objMediaQualityThreshold.getRtpPacketLossDurationMillis(),
-            m_objMediaQualityThreshold.getRtpPacketLossRate(), 0);
-    IMS_TRACE_D("UpdateMediaQualityThreshold() - JitterDurationMillis[%d], JitterMillis[%d]",
-            m_objMediaQualityThreshold.getJitterDurationMillis(),
-            m_objMediaQualityThreshold.getRtpJitterMillis(), 0);
 
     return IMS_TRUE;
 }
