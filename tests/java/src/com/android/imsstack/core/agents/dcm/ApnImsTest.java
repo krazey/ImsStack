@@ -20,11 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.os.Message;
@@ -44,9 +46,7 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -58,7 +58,6 @@ import java.lang.reflect.Field;
 @TestableLooper.RunWithLooper
 public class ApnImsTest {
     private static final int SLOT_0 = 0;
-    static ContextFixture sContext;
     ApnIms mApnIms;
 
     @Mock private Apn.ImsNetworkCallback mMockNetworkCallback;
@@ -67,27 +66,28 @@ public class ApnImsTest {
     @Mock private IAosInfo mMockIAosInfo;
     @Mock private ISystem mMockISystem;
 
+    private Context mContext;
     private TestableLooper mTestableLooper;
     private ConnectivityManager mConnectivityManager;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
+    private TelephonyManager mTelephonyManager;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mContext = new ContextFixture().getTestDouble();
+        AppContext.init(mContext);
+
         // create the instance to test
         mApnIms = new ApnIms(AppContext.getInstance(), SLOT_0);
         mConnectivityManager = AppContext.getInstance().getSystemService(ConnectivityManager.class);
+        mTelephonyManager = AppContext.getInstance().getSystemService(TelephonyManager.class);
 
         mTestableLooper = TestableLooper.get(ApnImsTest.this);
         mTestableLooper.processAllMessages();
 
         replaceInstance(Apn.class, "mSystem", mApnIms, mMockISystem);
+        replaceInstance(Apn.class, "mDcSettings", mApnIms, mMockIDcSettings);
     }
 
     @After
@@ -96,13 +96,14 @@ public class ApnImsTest {
             mApnIms.cleanup();
             mApnIms = null;
         }
-        mTestableLooper = null;
-    }
 
-    @AfterClass
-    public static void tearDownOnce() {
+        TestableLooper.remove(ApnImsTest.this);
+        mTestableLooper = null;
+        mConnectivityManager = null;
+        mTelephonyManager = null;
+
         AppContext.deinit();
-        sContext = null;
+        mContext = null;
     }
 
     @Test
@@ -115,7 +116,7 @@ public class ApnImsTest {
         assertTrue(mApnIms.connect());
         assertEquals(EApnReqState.APN_REQUEST_DONE, mApnIms.getApnReqState());
         assertEquals(TelephonyManager.DATA_CONNECTING, mApnIms.getDataState());
-        verify(mConnectivityManager, times(1)).requestNetwork(
+        verify(mConnectivityManager).requestNetwork(
                 any(NetworkRequest.class), any(ConnectivityManager.NetworkCallback.class));
 
         // return true without request to connect because request is already done
@@ -135,11 +136,11 @@ public class ApnImsTest {
         mApnIms.setApnReqState(EApnReqState.APN_REQUEST_DONE);
 
         assertTrue(mApnIms.disconnect());
-        verify(mConnectivityManager, times(1)).unregisterNetworkCallback(mMockNetworkCallback);
+        verify(mConnectivityManager).unregisterNetworkCallback(mMockNetworkCallback);
         assertEquals(EApnReqState.APN_REQUEST_IDLE, mApnIms.getApnReqState());
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnIms.getDataState());
         mTestableLooper.processAllMessages();
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.IMS.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
     }
 
@@ -155,8 +156,99 @@ public class ApnImsTest {
         mApnIms.notifyHandoverInfoChanged(
                 IApn.HANDOVER_FAILURE, TelephonyManager.NETWORK_TYPE_IWLAN, failureCause);
 
-        verify(mMockIAosInfo, times(1)).notifyIpcanHandoverFailure(
+        verify(mMockIAosInfo).notifyIpcanHandoverFailure(
                 IApn.IPCAN_CATEGORY_MOBILE, failureCause);
+    }
+
+    @Test
+    public void testHandleCarrierConfigChanged() throws Exception {
+        when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
+
+        mApnIms.registerDefaultNetworkCallback();
+
+        // do not handle the event for other slot
+        mApnIms.handleCarrierConfigChanged(SLOT_0 + 1, 1);
+        // only handle the event for my slot
+        mApnIms.handleCarrierConfigChanged(SLOT_0, 1);
+
+        verify(mConnectivityManager)
+                .unregisterNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+        verify(mConnectivityManager, times(2))
+                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+    }
+
+    @Test
+    public void testUpdateCrossSimStatus() throws Exception {
+        replaceInstance(ApnIms.class, "mAosInfo", mApnIms, mMockIAosInfo);
+        mApnIms.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+
+        // do not notify CrossSim status to AosInfo because default network is not available
+        mApnIms.updateCrossSimStatus(TelephonyManager.NETWORK_TYPE_IWLAN);
+        verify(mMockIAosInfo, never()).notifyCrossSimStatus(anyBoolean());
+
+        // notify CrossSim status as true to AosInfo when default network is available
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;
+        msg.obj = true;
+        mApnIms.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+        verify(mMockIAosInfo).notifyCrossSimStatus(true);
+
+        // notify CrossSim status as false to AosInfo because it does not connected over IWLAN
+        mApnIms.updateCrossSimStatus(TelephonyManager.NETWORK_TYPE_LTE);
+        verify(mMockIAosInfo).notifyCrossSimStatus(false);
+    }
+
+    @Test
+    public void testRegisterDefaultNetworkCallback_SingleSim() throws Exception {
+        when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(1);
+
+        mApnIms.registerDefaultNetworkCallback();
+        verify(mConnectivityManager, never())
+                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+    }
+
+    @Test
+    public void testRegisterDefaultNetworkCallback_CrossSimDisabled() throws Exception {
+        when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(false);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
+
+        mApnIms.registerDefaultNetworkCallback();
+        verify(mConnectivityManager, never())
+                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+    }
+
+    @Test
+    public void testRegisterDefaultNetworkCallback_AlreadyRegistered() throws Exception {
+        when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
+
+        // do not invoke registerDefaultNetworkCallback if it has registered networkCallback once
+        mApnIms.registerDefaultNetworkCallback();
+        mApnIms.registerDefaultNetworkCallback();
+        verify(mConnectivityManager)
+                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+    }
+
+    @Test
+    public void testUnregisterDefaultNetworkCallback() throws Exception {
+        when(mMockIDcSettings.isCrossSimEnabledByPlatform()).thenReturn(true);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(2);
+
+        // do not invoke unregisterNetworkCallback() if callback has not been registered
+        mApnIms.unregisterDefaultNetworkCallback();
+        verify(mConnectivityManager, never())
+                .unregisterNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+
+        mApnIms.registerDefaultNetworkCallback();
+        verify(mConnectivityManager)
+                .registerDefaultNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
+
+        mApnIms.unregisterDefaultNetworkCallback();
+        verify(mConnectivityManager)
+                .unregisterNetworkCallback(any(ConnectivityManager.NetworkCallback.class));
     }
 
     @Test
@@ -172,7 +264,7 @@ public class ApnImsTest {
         mTestableLooper.processAllMessages();
 
         assertEquals(TelephonyManager.DATA_CONNECTED, mApnIms.getDataState());
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.IMS.getType(), EDataState.DATA_STATE_CONNECTED.getState());
     }
 
@@ -191,7 +283,7 @@ public class ApnImsTest {
         mTestableLooper.processAllMessages();
 
         assertEquals(TelephonyManager.DATA_DISCONNECTED, mApnIms.getDataState());
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.IMS.getType(), EDataState.DATA_STATE_DISCONNECTED.getState());
     }
 
@@ -211,7 +303,7 @@ public class ApnImsTest {
         mApnIms.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.IMS.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
     }
 
@@ -226,7 +318,7 @@ public class ApnImsTest {
         mApnIms.sendEmptyMessage(Apn.EVENT_IP_CHANGED);
         mTestableLooper.processAllMessages();
 
-        verify(mMockISystem, times(0)).notifyDataConnectionStateChanged(
+        verify(mMockISystem, never()).notifyDataConnectionStateChanged(
                 EApnType.IMS.getType(), EDataState.DATA_STATE_IP_CHANGED.getState());
     }
 
@@ -234,14 +326,13 @@ public class ApnImsTest {
     public void testHandlePcscfChanged() throws Exception {
         mApnIms.sendEmptyMessage(Apn.EVENT_PCSCF_CHANGED);
         mTestableLooper.processAllMessages();
-        verify(mMockISystem, times(1)).notifyDataConnectionStateChanged(
+        verify(mMockISystem).notifyDataConnectionStateChanged(
                 EApnType.IMS.getType(), EDataState.DATA_STATE_PCSCF_CHANGED.getState());
     }
 
     @Test
     public void testHandleDataConnectionFailed() throws Exception {
         int failureCause = 33;
-        replaceInstance(Apn.class, "mDcSettings", mApnIms, mMockIDcSettings);
         when(mMockIDcSettings.isPermanentFailure(EApnType.IMS, failureCause))
                 .thenReturn(false)
                 .thenReturn(true);
@@ -273,7 +364,28 @@ public class ApnImsTest {
         mApnIms.sendMessage(msg3);
         mTestableLooper.processAllMessages();
 
-        verify(mMockISystem, times(1)).notifyDataConnectionFailed(EApnType.IMS.getType());
+        verify(mMockISystem).notifyDataConnectionFailed(EApnType.IMS.getType());
+    }
+
+    @Test
+    public void testHandleDefaultNetworkStatusChanged() throws Exception {
+        replaceInstance(ApnIms.class, "mAosInfo", mApnIms, mMockIAosInfo);
+        mApnIms.mNetworkType = TelephonyManager.NETWORK_TYPE_IWLAN;
+
+        // do not handle invalid msg.obj
+        Message msg1 = Message.obtain();
+        msg1.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;
+        msg1.obj = null;
+        mApnIms.sendMessage(msg1);
+        mTestableLooper.processAllMessages();
+
+        Message msg2 = Message.obtain();
+        msg2.what = Apn.EVENT_DEFAULT_NETWORK_STATUS_CHANGED;
+        msg2.obj = true;
+        mApnIms.sendMessage(msg2);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockIAosInfo).notifyCrossSimStatus(true);
     }
 
     private synchronized void replaceInstance(final Class c, final String instanceName,

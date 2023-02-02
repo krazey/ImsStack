@@ -77,6 +77,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     private int mRegTriedNetworkType = NetworkType.NONE;
 
+    @VisibleForTesting
+    protected int mFeatureTagBits = 0;
+    @VisibleForTesting
+    protected final Set<String> mFeatureTags = new CopyOnWriteArraySet<String>();
+    @VisibleForTesting
+    protected boolean mIsConnectedOverCrossSim = false;
+
     public void init(int slotId) {
         mSlotId = slotId;
 
@@ -330,6 +337,21 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     @Override
+    public void notifyCrossSimStatus(boolean isConnectedOverCrossSim) {
+        ImsLog.d(mSlotId, "AosService: notifyCrossSimStatus");
+        if (mIsConnectedOverCrossSim == isConnectedOverCrossSim) {
+            return;
+        }
+
+        mIsConnectedOverCrossSim = isConnectedOverCrossSim;
+        if ((mRegisteredNetworkType == NetworkType.CROSS_SIM) && !mIsConnectedOverCrossSim) {
+            updateRegisteredNetworkType(NetworkType.IWLAN);
+        } else if ((mRegisteredNetworkType == NetworkType.IWLAN) && mIsConnectedOverCrossSim) {
+            updateRegisteredNetworkType(NetworkType.CROSS_SIM);
+        }
+    }
+
+    @Override
     public void onSimStateChanged() {
         ImsLog.d(mSlotId, "AosService: onSimStateChanged");
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
@@ -450,25 +472,49 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
-    private void onRegistered(int networkType, int featureTagBits,
-            Set<String> featureTags) {
+    private void updateRegisteredNetworkType(int networkType) {
+        ImsLog.d(mSlotId, "updateRegisteredNetworkType :: networkType(" + networkType + ")");
         mRegisteredNetworkType = networkType;
         mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
-            l.notifyRegistered(networkType, featureTagBits, featureTags);
+            l.notifyRegistered(mRegisteredNetworkType, mFeatureTagBits, mFeatureTags);
         }
     }
 
-    private void onRegistering(int networkType, int featureTagBits,
-            Set<String> featureTags) {
+    private int adjustedNetworkType(int networkType, int featureTagBits, Set<String> featureTags) {
+        mFeatureTagBits = featureTagBits;
+        mFeatureTags.clear();
+        mFeatureTags.addAll(featureTags);
+
+        if (mIsConnectedOverCrossSim) {
+            if (networkType == NetworkType.IWLAN) {
+                return NetworkType.CROSS_SIM;
+            }
+            ImsLog.d(mSlotId, "Even though it connected over CrossSim, networkType is not IWLAN");
+        }
+        return networkType;
+    }
+
+    private void onRegistered(int networkType, int featureTagBits, Set<String> featureTags) {
+        mRegisteredNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
         mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
-            l.notifyRegistering(networkType, featureTagBits, featureTags);
+            l.notifyRegistered(mRegisteredNetworkType, featureTagBits, featureTags);
+        }
+    }
+
+    private void onRegistering(int networkType, int featureTagBits, Set<String> featureTags) {
+        int adjustedNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
+        mRegTriedNetworkType = networkType;
+        for (IAosRegistrationListener l : mAosRegistationListeners) {
+            l.notifyRegistering(adjustedNetworkType, featureTagBits, featureTags);
         }
     }
 
     private void onDeregistered(int reason) {
         mRegisteredNetworkType = NetworkType.NONE;
+        mFeatureTagBits = 0;
+        mFeatureTags.clear();
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyDeregistered(mRegTriedNetworkType, reason);
         }

@@ -455,7 +455,6 @@ TEST_F(AosServiceAvailableWifiTest, HandleWiFiConnectionChanged)
     SetWifiState(IMS_FALSE);
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
 
-    EXPECT_CALL(objMockIAosBlock1, SetBlockReason(BLOCK_WIFI_NO_WIFI, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock1, SetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _)).Times(1);
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock1));
 
@@ -466,7 +465,6 @@ TEST_F(AosServiceAvailableWifiTest, HandleWiFiConnectionChanged)
     SetWifiState(IMS_TRUE);
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
 
-    EXPECT_CALL(objMockIAosBlock2, ResetBlockReason(BLOCK_WIFI_NO_WIFI, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock2, ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _)).Times(1);
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock2));
 
@@ -477,7 +475,6 @@ TEST_F(AosServiceAvailableWifiTest, HandleWiFiConnectionChanged)
     SetWifiState(IMS_FALSE);
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
 
-    EXPECT_CALL(objMockIAosBlock3, SetBlockReason(BLOCK_WIFI_NO_WIFI, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock3, ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _)).Times(1);
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock3));
 
@@ -488,7 +485,6 @@ TEST_F(AosServiceAvailableWifiTest, HandleWiFiConnectionChanged)
     SetWifiState(IMS_TRUE);
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_DETECTED);
 
-    EXPECT_CALL(objMockIAosBlock4, ResetBlockReason(BLOCK_WIFI_NO_WIFI, _)).Times(1);
     EXPECT_CALL(objMockIAosBlock4, SetBlockReason(BLOCK_WIFI_BAD_CONNECTION, _)).Times(1);
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock4));
 

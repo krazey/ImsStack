@@ -226,15 +226,6 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWiFiConnectionChanged()
         return;
     }
 
-    if (m_bWiFiState == IMS_FALSE)
-    {
-        m_piBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
-    }
-    else
-    {
-        m_piBlock->ResetBlockReason(BLOCK_WIFI_NO_WIFI);
-    }
-
     if (m_nBadNetworkState == STATE_BAD_NETWORK_DETECTED)
     {
         m_piBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);

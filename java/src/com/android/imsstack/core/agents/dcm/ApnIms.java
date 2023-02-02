@@ -17,7 +17,9 @@
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Message;
+import android.telephony.Annotation.NetworkType;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -30,12 +32,16 @@ import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 
 /**
  * this is data connection class for ims
  */
 public class ApnIms extends Apn {
     protected IAosInfo mAosInfo;
+    private boolean mIsCellularDefaultNetwork = false;
+    private boolean mIsConnectedOverCrossSim = false;
+    private DefaultNetworkCallback mDefaultNetworkCallback = null;
 
     // Public methods --------------------------------------------
     public ApnIms(Context context, int slotId) {
@@ -48,6 +54,7 @@ public class ApnIms extends Apn {
     @Override
     public void cleanup() {
         ImsLog.d(mSlotId, "clean up");
+        unregisterDefaultNetworkCallback();
 
         super.cleanup();
     }
@@ -127,6 +134,11 @@ public class ApnIms extends Apn {
         registerHandler(EVENT_IP_CHANGED, new HandleIpChanged());
         registerHandler(EVENT_PCSCF_CHANGED, new HandlePcscfChanged());
         registerHandler(EVENT_DATA_CONNECTION_FAILED, new HandleDataConnectionFailed());
+        registerHandler(EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
+                new HandleDefaultNetworkStatusChanged());
+
+        registerSubscription();
+        registerDefaultNetworkCallback();
     }
 
     /**
@@ -146,6 +158,85 @@ public class ApnIms extends Apn {
                 mAosInfo.notifyIpcanHandoverFailure(targetNetwork, failCause);
             }
         }
+    }
+
+    /**
+     * Called when carrier config changes
+     * ApnIms register or unregister DefaultNetworkCallback according to the configuration
+     */
+    @Override
+    protected void handleCarrierConfigChanged(int phoneId, int subId) {
+        super.handleCarrierConfigChanged(phoneId, subId);
+
+        if (mSlotId != phoneId) {
+            return;
+        }
+        unregisterDefaultNetworkCallback();
+        registerDefaultNetworkCallback();
+    }
+
+    /**
+     * If the access network status is changed, update CrossSim connection status and notify it.
+     * @param networkType The type of access network that is carry this data connection
+     */
+    @Override
+    protected void updateCrossSimStatus(@NetworkType int networkType) {
+        boolean isCrossSimUsed = (mIsCellularDefaultNetwork
+                && (networkType == TelephonyManager.NETWORK_TYPE_IWLAN));
+
+        ImsLog.i(mSlotId, "Update CrossSim status from " + mIsConnectedOverCrossSim
+                + " to " + isCrossSimUsed);
+        if (mIsConnectedOverCrossSim != isCrossSimUsed) {
+            mIsConnectedOverCrossSim = isCrossSimUsed;
+            mAosInfo.notifyCrossSimStatus(mIsConnectedOverCrossSim);
+        }
+    }
+
+    protected void registerDefaultNetworkCallback() {
+        if (!MSimUtils.isMultiSimEnabled()) {
+            ImsLog.i(mSlotId, "MultiSim is not enabled");
+            return;
+        }
+        if (mDcSettings == null || !mDcSettings.isCrossSimEnabledByPlatform()) {
+            ImsLog.i(mSlotId, "CrossSim is not enabled");
+            return;
+        }
+        if (mDefaultNetworkCallback != null) {
+            ImsLog.i(mSlotId, "Default network callback already has been registered");
+            return;
+        }
+
+        ImsLog.i(mSlotId, "registerDefaultNetworkCallback");
+        ConnectivityManager cm = (mContext == null) ? null :
+                mContext.getSystemService(ConnectivityManager.class);
+        if (cm != null) {
+            mDefaultNetworkCallback = new DefaultNetworkCallback(mSlotId, this);
+            try {
+                cm.registerDefaultNetworkCallback(mDefaultNetworkCallback);
+            } catch (RuntimeException e) {
+                ImsLog.e(mSlotId, "registerDefaultNetworkCallback: " + e.toString());
+                mDefaultNetworkCallback = null;
+            }
+        }
+    }
+
+    protected void unregisterDefaultNetworkCallback() {
+        if (mDefaultNetworkCallback == null) {
+            ImsLog.i(mSlotId, "Default network callback has been not registered");
+            return;
+        }
+
+        ImsLog.i(mSlotId, "unregisterDefaultNetworkCallback");
+        ConnectivityManager cm = (mContext == null) ? null :
+                mContext.getSystemService(ConnectivityManager.class);
+        if (cm != null) {
+            try {
+                cm.unregisterNetworkCallback(mDefaultNetworkCallback);
+            } catch (RuntimeException e) {
+                ImsLog.e(mSlotId, "unregisterDefaultNetworkCallback: " + e.toString());
+            }
+        }
+        mDefaultNetworkCallback = null;
     }
 
     private class HandleNetworkAvailable implements MsgProcInterface {
@@ -243,6 +334,25 @@ public class ApnIms extends Apn {
                 if (mDcSettings.isPermanentFailure(mType, causeCode)) {
                     sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECT_FAILED);
                 }
+            }
+        }
+    }
+
+    /**
+    * This handle EVENT_DEFAULT_NETWORK_STATUS_CHANGED event
+    */
+    private class HandleDefaultNetworkStatusChanged implements MsgProcInterface {
+        @Override
+        public void procMsg(Message msg) {
+            ImsLog.d(mSlotId, "");
+            if (msg == null || msg.obj == null) {
+                return;
+            }
+
+            boolean isCellularAvailable = (boolean) msg.obj;
+            if (mIsCellularDefaultNetwork != isCellularAvailable) {
+                mIsCellularDefaultNetwork = isCellularAvailable;
+                updateCrossSimStatus(mNetworkType);
             }
         }
     }

@@ -28,6 +28,7 @@ import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.Annotation.NetworkType;
 import android.telephony.DataFailCause;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.TelephonyManager;
@@ -86,6 +87,7 @@ public abstract class Apn extends Handler implements IApn {
     protected static final int EVENT_NOTIFY_DATA_STATE_CHANGED = 1004;
     protected static final int EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED = 1005;
     protected static final int EVENT_DATA_CONNECTION_FAILED = 1006;
+    protected static final int EVENT_DEFAULT_NETWORK_STATUS_CHANGED = 1007;
 
     protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
 
@@ -126,6 +128,8 @@ public abstract class Apn extends Handler implements IApn {
                 "PRECISE_DATA_CONNECTION_STATE_CHANGED");
         sEventToString.put(EVENT_DATA_CONNECTION_FAILED,
                 "DATA_CONNECTION_FAILED");
+        sEventToString.put(EVENT_DEFAULT_NETWORK_STATUS_CHANGED,
+                "DEFAULT_NETWORK_STATUS_CHANGED");
 
         sEventToString.put(EVENT_AIRPLANE_MODE_CHANGED,
                 "AIRPLANE_MODE_CHANGED");
@@ -663,6 +667,14 @@ public abstract class Apn extends Handler implements IApn {
             unregisterCallback();
             registerCallback(mNetworkMonitoringCallback.getEvents());
         }
+    }
+
+    /**
+     * Notifies the change of CrossSim connection status.
+     * @param networkType The type of access network that is carry this data connection
+     */
+    protected void updateCrossSimStatus(@NetworkType int networkType) {
+        // ApnIms need to implement because CrossSim feature is only available for IMS type
     }
 
     /**
@@ -1271,6 +1283,7 @@ public abstract class Apn extends Handler implements IApn {
                         }
                     }
                     if (mNetworkType != networkType) {
+                        updateCrossSimStatus(networkType);
                         if (mNetworkType == TelephonyManager.NETWORK_TYPE_UNKNOWN
                                 || isIpcanChanged(networkType)) {
                             handleIpcanCategory(networkType);
@@ -1303,6 +1316,7 @@ public abstract class Apn extends Handler implements IApn {
                         handleInitialConnectionFailure(causeCode);
                     }
                     mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+                    updateCrossSimStatus(mNetworkType);
                     break;
                 default:
                     // no-op

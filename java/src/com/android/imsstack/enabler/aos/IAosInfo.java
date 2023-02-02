@@ -192,6 +192,15 @@ public interface IAosInfo {
     public void notifyPreciseCallState(int state);
 
     /**
+     * Called to notify the change of CrossSim connection status.
+     *
+     * @param isConnectedOverCrossSim
+     * {@code isConnectedOverCrossSim} is {@code true} if CrossSim is used for IMS service,
+     * {@code false} if CrossSim feature is not used for IMS service
+     */
+    void notifyCrossSimStatus(boolean isConnectedOverCrossSim);
+
+    /**
      * Roaming Preferred Voice Network
      */
     class RoamingPreferredVoiceNetwork {

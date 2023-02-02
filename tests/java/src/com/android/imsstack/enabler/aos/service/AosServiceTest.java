@@ -482,6 +482,35 @@ public class AosServiceTest extends ImsStackTest {
     }
 
     @Test
+    public void notifyCrossSimStatus() {
+        mAosService.addListener(mMockAosRegistrationListener);
+
+        // do not update registered network type when registered network is not IWLAN nor CROSS_SIM
+        mAosService.mIsConnectedOverCrossSim = false;
+        mAosService.mRegisteredNetworkType = NetworkType.LTE;
+        mAosService.notifyCrossSimStatus(true);
+        assertEquals(NetworkType.LTE, mAosService.mRegisteredNetworkType);
+        verify(mMockAosRegistrationListener, never()).notifyRegistered(
+                NetworkType.CROSS_SIM, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
+
+        // update registered network type to IWLAN
+        mAosService.mIsConnectedOverCrossSim = true;
+        mAosService.mRegisteredNetworkType = NetworkType.CROSS_SIM;
+        mAosService.notifyCrossSimStatus(false);
+        assertEquals(NetworkType.IWLAN, mAosService.mRegisteredNetworkType);
+        verify(mMockAosRegistrationListener, times(1)).notifyRegistered(
+                NetworkType.IWLAN, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
+
+        // update registered network type to CROSS_SIM
+        mAosService.mIsConnectedOverCrossSim = false;
+        mAosService.mRegisteredNetworkType = NetworkType.IWLAN;
+        mAosService.notifyCrossSimStatus(true);
+        assertEquals(NetworkType.CROSS_SIM, mAosService.mRegisteredNetworkType);
+        verify(mMockAosRegistrationListener, times(1)).notifyRegistered(
+                NetworkType.CROSS_SIM, mAosService.mFeatureTagBits, mAosService.mFeatureTags);
+    }
+
+    @Test
     public void onSimStateChanged_simLoaded() {
         byte[] simStateData = createBytes(IIAosService.J2N_NOTIFY_PHONE_NUMBER_STATE, 0,
                 PhoneNumberState.SIM_LOADED);

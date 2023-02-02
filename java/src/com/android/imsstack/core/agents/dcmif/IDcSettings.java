@@ -42,6 +42,11 @@ public interface IDcSettings extends IDc {
     int[] getImsSupportedRats();
 
     /**
+     * Returns a platform configuration for Cross SIM
+     */
+    boolean isCrossSimEnabledByPlatform();
+
+    /**
      * Return preferred IP version for connection
      */
     int getPreferredIpVersion();

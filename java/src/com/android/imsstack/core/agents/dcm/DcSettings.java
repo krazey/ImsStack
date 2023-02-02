@@ -123,6 +123,17 @@ public class DcSettings implements IDcSettings {
     }
 
     @Override
+    public boolean isCrossSimEnabledByPlatform() {
+        CarrierConfig config = getCarrierConfig(mSlotId);
+
+        if (config != null) {
+            return config.getBoolean(CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL,
+                    false);
+        }
+        return false;
+    }
+
+    @Override
     public int getPreferredIpVersion() {
         CarrierConfig config = getCarrierConfig(mSlotId);
 

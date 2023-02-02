@@ -153,6 +153,16 @@ public class DcSettingsTest {
     }
 
     @Test
+    public void testIsCrossSimEnabledByPlatform() throws Exception {
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL), anyBoolean()))
+                .thenReturn(false)
+                .thenReturn(true);
+        assertFalse(mDcSettingsUT.isCrossSimEnabledByPlatform());
+        assertTrue(mDcSettingsUT.isCrossSimEnabledByPlatform());
+    }
+
+    @Test
     public void testGetPreferredIpVersion() throws Exception {
         when(mMockCarrierConfig.getInt(
                 eq(CarrierConfig.Assets.KEY_IMS_PREFERRED_IPTYPE_INT), anyInt()))
