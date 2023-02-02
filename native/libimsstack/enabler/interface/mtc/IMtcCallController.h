@@ -52,14 +52,6 @@ public:
             IN KeyType eKeyType, IN Key nKey, IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * Removes the calls that matches the given key without terminating behavior.
-     *
-     * @param eKeyType All existing calls are affected if `NONE`.
-     * @param nKey Key to find the calls.
-     */
-    virtual void RemoveCalls(IN KeyType eKeyType, IN Key nKey) = 0;
-
-    /**
      * Creates a new outgoing call.
      *
      * @param eServiceType Service type of the new call.
