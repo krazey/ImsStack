@@ -74,11 +74,12 @@ public:
     // Digest AKA
     IMS_BOOL IsDigestAkaPresent(IN const OsUsimDigestAka* pDigestAka);
 
-private:
+public:
     // Result of REQUEST_USIM_AUTH(String nonce, int owner)
     // SimAgent#NOTIFICATION_USIM_AUTH (106)
     static const int NOTIFICATION_USIM_AUTH = 106;
 
+private:
     IMSList<OsUsimDigestAka*> m_objDigestAkas;
     IThread* m_piOwnerThread;
 };
