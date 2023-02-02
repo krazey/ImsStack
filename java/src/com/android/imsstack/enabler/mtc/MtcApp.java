@@ -170,7 +170,8 @@ public class MtcApp implements Closeable {
      */
     public void openEmergencyService(MtcCall call, @EmergencyCallRouting int emergencyRouting) {
         mEmergencyServiceManager.setCall(call);
-        mEmergencyServiceManager.openEmergencyService(emergencyRouting);
+        mEmergencyServiceManager.openEmergencyService(
+                emergencyRouting, mContext.getServiceStateTracker());
     }
 
     /**
