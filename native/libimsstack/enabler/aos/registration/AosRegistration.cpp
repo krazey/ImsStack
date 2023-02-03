@@ -5196,7 +5196,7 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(
                 Destroy();
 
                 ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
-                StartTimer(TIMER_OFFLINE_RECOVER, nWaitTimeMillis * 1000);
+                StartTimer(TIMER_OFFLINE_RECOVER, nWaitTimeMillis);
                 return;
             }
         }
