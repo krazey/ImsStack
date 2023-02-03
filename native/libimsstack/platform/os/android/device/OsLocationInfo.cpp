@@ -20,7 +20,7 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-PRIVATE GLOBAL const IMS_CHAR OsLocationInfo::COUNTRY_ISO_UNKNOWN[] = "ZZ";
+PUBLIC GLOBAL const IMS_CHAR OsLocationInfo::COUNTRY_ISO_UNKNOWN[] = "ZZ";
 
 class LocationProperties : public ILocationProperties
 {

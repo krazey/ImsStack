@@ -42,9 +42,10 @@ private:
     void SetLastKnownCountry(IN const AString& strCountry);
     AString GetCountryIso(IN IMS_BOOL bFromUicc = IMS_FALSE) const;
 
-private:
+public:
     static const IMS_CHAR COUNTRY_ISO_UNKNOWN[];
 
+private:
     IMS_BOOL m_bIsStarted;
     AString m_strLastKnownCountry;
     LocationProperties* m_pLocationProperties;
