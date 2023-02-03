@@ -140,8 +140,8 @@ public class DcNetWatcher implements IDcNetWatcher {
 
     private boolean mDoingOffRadio = false;
 
-    private int mDetachReasonCode = 0;
-    private int mLteUpdateResult = ImsEventDef.IMS_LTE_INFO_UPDATE_RESULT_NO_ADD_INFO;
+    private int mLteAttachResultType = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
+    private int mLteAttachExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
     private int mNrRegistrationInfo = ImsEventDef.IMS_NR_INFO_UNKNOWN;
 
     private ISystem mSystem;
@@ -263,6 +263,8 @@ public class DcNetWatcher implements IDcNetWatcher {
         mImsVops = false;
         mEmcbs = false;
         mDoingOffRadio = false;
+        mLteAttachResultType = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
+        mLteAttachExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
         mNrRegistrationInfo = ImsEventDef.IMS_NR_INFO_UNKNOWN;
     }
 
@@ -378,11 +380,6 @@ public class DcNetWatcher implements IDcNetWatcher {
     // Voice service state in ServiceState
     public int getVoiceServiceState() {
         return mVoiceServiceState;
-    }
-
-    @Override
-    public int getLteStateDetachReasonCause() {
-        return mDetachReasonCode;
     }
 
     @Override
@@ -849,6 +846,29 @@ public class DcNetWatcher implements IDcNetWatcher {
         return retState;
     }
 
+    private static int getLteAttachExtraInfo(int extraInfo) {
+        int imsExtraInfo = ImsEventDef.IMS_LTE_INFO_EXTRA_NONE;
+
+        if ((extraInfo
+                & DataSpecificRegistrationInfo.LTE_ATTACH_EXTRA_INFO_CSFB_NOT_PREFERRED) > 0) {
+            imsExtraInfo |= ImsEventDef.IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED;
+        }
+
+        if ((extraInfo & DataSpecificRegistrationInfo.LTE_ATTACH_EXTRA_INFO_SMS_ONLY) > 0) {
+            imsExtraInfo |= ImsEventDef.IMS_LTE_INFO_EXTRA_SMS_ONLY;
+        }
+
+        return imsExtraInfo;
+    }
+
+    private static int getLteAttachResultType(int attachResult) {
+        if (attachResult == DataSpecificRegistrationInfo.LTE_ATTACH_TYPE_COMBINED) {
+            return ImsEventDef.IMS_LTE_INFO_COMBINED_ATTACHED;
+        }
+
+        return ImsEventDef.IMS_LTE_INFO_EPS_ONLY_ATTACHED;
+    }
+
     private boolean is1xRttRequired() {
         return ((mRatPolicy & POLICY_RAT_1XRTT) != 0);
     }
@@ -1097,6 +1117,23 @@ public class DcNetWatcher implements IDcNetWatcher {
                     if (mEmcbs != emcbs) {
                         ImsLog.w(mSlotId, "update emergency service supported info : " + emcbs);
                         mEmcbs = emcbs;
+                    }
+                }
+
+                // LTE attach result and extra info
+                if (is4G()) {
+                    int lteAttachResultType = getLteAttachResultType(
+                            dsrInfo.getLteAttachResultType());
+                    int lteAttachExtraInfo = getLteAttachExtraInfo(dsrInfo.getLteAttachExtraInfo());
+
+                    if (mLteAttachResultType != lteAttachResultType
+                            || mLteAttachExtraInfo != lteAttachExtraInfo) {
+                        ImsLog.d(mSlotId, "lte attach result = " + lteAttachResultType
+                                + ", extra = " + lteAttachExtraInfo);
+                        mLteAttachResultType = lteAttachResultType;
+                        mLteAttachExtraInfo = lteAttachExtraInfo;
+                        mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, mLteAttachResultType,
+                                mLteAttachExtraInfo);
                     }
                 }
             }
@@ -1454,7 +1491,8 @@ public class DcNetWatcher implements IDcNetWatcher {
             notifyRoamingState(mDataRoaming, mVoiceRoaming);
 
             handleVoiceServiceStateChanged();
-            notifyLteInfo(mLteUpdateResult);
+            mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, mLteAttachResultType,
+                    mLteAttachExtraInfo);
         }
 
         private void handleNrRegistrationInfo(int state, int reason) {
@@ -1468,28 +1506,6 @@ public class DcNetWatcher implements IDcNetWatcher {
                         Integer.valueOf(mDataServiceState));
                 mSystem.notifyEvent(ImsEventDef.IMS_EVENT_NR_INFO, state, reason);
             }
-        }
-
-        private void notifyLteInfo(int updateResult) {
-            int state = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
-
-            // TODO: check attach type
-            /*
-            if (code == LteStateInfo.NORMAL_ATTACHED.getCode()) {
-                state = ImsEventDef.IMS_LTE_INFO_NORMAL_ATTACHED;
-            } else if (code == LteStateInfo.EPS_ONLY_ATTACHED.getCode()) {
-                state = ImsEventDef.IMS_LTE_INFO_EPS_ONLY_ATTACHED;
-            } else if (code == LteStateInfo.EMERGENCY_ATTACHED.getCode()) {
-                state = ImsEventDef.IMS_LTE_INFO_EMERGENCY_ATTACHED;
-            } else if (code == LteStateInfo.NORMAL_DETACHED.getCode()) {
-                state = ImsEventDef.IMS_LTE_INFO_DETACHED;
-            } else if (code == LteStateInfo.REATTACH_REQUIRED.getCode()) {
-                state = ImsEventDef.IMS_LTE_INFO_REATTACH_REQUIRED;
-            } else {
-                ImsLog.i(mSlotId, "invalid type = " + state);
-            }*/
-
-            mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, state, updateResult);
         }
 
         private boolean isNrRegistrationInfoValid(int state) {

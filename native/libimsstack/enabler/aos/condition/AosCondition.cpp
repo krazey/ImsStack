@@ -48,7 +48,7 @@ AosCondition::AosCondition(IN IAosAppContext* piAppContext) :
         m_piBlock(m_piAppContext->GetBlock()),
         m_eServiceType(GetServiceType()),
         m_bIsRefreshStarted(IMS_FALSE),
-        m_bIsCombindAttached(IMS_FALSE),
+        m_bIsCombinedAttached(IMS_FALSE),
         m_bCellServiceAvailable(IMS_FALSE),
         m_bWiFiServiceAvailable(IMS_FALSE),
         m_bIsTtyOn(IMS_FALSE),
@@ -783,7 +783,7 @@ void AosCondition::ProcessTtyEvent(IN IMS_BOOL bIsOn)
     A_IMS_TRACE_I(APPPROFILE, "ProcessTtyEvent(), bIsOn(%s)", _TRACE_B_(bIsOn), 0, 0);
     m_bIsTtyOn = bIsOn;
 
-    if (!GET_N_CONFIG(m_nSlotId)->IsRttSupported() || m_bIsCombindAttached)
+    if (!GET_N_CONFIG(m_nSlotId)->IsRttSupported() || m_bIsCombinedAttached)
     {
         if (m_bIsTtyOn)
         {
@@ -823,14 +823,7 @@ void AosCondition::ProcessLteInfoEvent(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessLteInfoEvent(), nState(%d)", nState, 0, 0);
 
-    if (nState == IMS_LTE_INFO_EPS_ONLY_ATTACHED)
-    {
-        m_bIsCombindAttached = IMS_TRUE;
-    }
-    else
-    {
-        m_bIsCombindAttached = IMS_FALSE;
-    }
+    m_bIsCombinedAttached = (nState == IMS_LTE_INFO_COMBINED_ATTACHED);
 }
 
 PRIVATE

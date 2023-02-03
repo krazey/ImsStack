@@ -1145,7 +1145,7 @@ public class DcNetWatcherTest extends ImsStackTest {
                 ServiceState.STATE_IN_SERVICE, 0);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO,
                 ImsEventDef.IMS_LTE_INFO_UNKNOWN,
-                ImsEventDef.IMS_LTE_INFO_UPDATE_RESULT_NO_ADD_INFO);
+                ImsEventDef.IMS_LTE_INFO_EXTRA_NONE);
     }
 
     @Test
@@ -1193,13 +1193,6 @@ public class DcNetWatcherTest extends ImsStackTest {
      * The following test functions are intended to test functions that are not currently in use or
      * don't have actual implementations.
      */
-    @Test
-    public void testGetLteStateDetachReasonCause() throws Exception {
-        replaceInstance(DcNetWatcher.class, "mDetachReasonCode", mDcNetWatcher, 1);
-
-        assertEquals(1, mDcNetWatcher.getLteStateDetachReasonCause());
-    }
-
     @Test
     public void testGetMocnPlmnInfo() {
         assertEquals(0, mDcNetWatcher.getMocnPlmnInfo());

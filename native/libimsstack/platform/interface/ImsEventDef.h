@@ -50,17 +50,13 @@
 #define IMS_EVENT_LTE_INFO                             (0x00000020)
 // WParam
 #define IMS_LTE_INFO_UNKNOWN                           (0)
-#define IMS_LTE_INFO_DETACHED                          (1)
-#define IMS_LTE_INFO_EPS_ONLY_ATTACHED                 (2)
-#define IMS_LTE_INFO_NORMAL_ATTACHED                   (3)
-#define IMS_LTE_INFO_EMERGENCY_ATTACHED                (4)
-#define IMS_LTE_INFO_REATTACH_REQUIRED                 (5)
+#define IMS_LTE_INFO_EPS_ONLY_ATTACHED                 (1)
+#define IMS_LTE_INFO_COMBINED_ATTACHED                 (2)
 
 // LParam
-#define IMS_LTE_INFO_UPDATE_RESULT_NO_ADD_INFO         (0)
-#define IMS_LTE_INFO_UPDATE_RESULT_CSFB_NOT_PREFERRED  (1)
-#define IMS_LTE_INFO_UPDATE_RESULT_SMS_ONLY            (2)
-#define IMS_LTE_INFO_UPDATE_RESULT_RESERVED            (3)
+#define IMS_LTE_INFO_EXTRA_NONE                        (0x0)
+#define IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED          (0x1)
+#define IMS_LTE_INFO_EXTRA_SMS_ONLY                    (0x2)
 
 #define IMS_EVENT_NR_INFO                              (0x00000040)
 // WParam

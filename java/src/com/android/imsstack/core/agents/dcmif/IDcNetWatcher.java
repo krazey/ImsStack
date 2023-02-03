@@ -85,11 +85,6 @@ public interface IDcNetWatcher extends IDc {
     int getVoiceServiceState();
 
     /**
-     * Return LTE Detach reason code stored in DcNetWatcher object
-     */
-    int getLteStateDetachReasonCause();
-
-    /**
      * Return NR registration info stored in DcNetWatcher object
      */
     int getNrRegistrationInfo();

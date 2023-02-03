@@ -178,11 +178,11 @@ protected:
 
     IMS_BOOL GetVopsState() { return m_pAosCondition->m_pAvailableCellular->m_bVopsState; }
 
-    IMS_BOOL GetLteInfo() { return m_pAosCondition->m_bIsCombindAttached; }
+    IMS_BOOL GetLteInfo() { return m_pAosCondition->m_bIsCombinedAttached; }
 
     void SetLteInfo(IN IMS_BOOL bIsCombindAttached)
     {
-        m_pAosCondition->m_bIsCombindAttached = bIsCombindAttached;
+        m_pAosCondition->m_bIsCombinedAttached = bIsCombindAttached;
     }
 
     void SetRefreshStarted(IN IMS_BOOL bIsRefreshStarted)
@@ -648,10 +648,10 @@ TEST_F(AosConditionTest, Event_NotifyEvent_LteInfo)
     m_pAosCondition->Start();
 
     Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_EPS_ONLY_ATTACHED, 0);
-    EXPECT_TRUE(GetLteInfo());
-
-    Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_NORMAL_ATTACHED, 0);
     EXPECT_FALSE(GetLteInfo());
+
+    Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, 0);
+    EXPECT_TRUE(GetLteInfo());
 }
 
 TEST_F(AosConditionTest, CallTracker_StateChanged_Cs_Offhook)

@@ -193,7 +193,7 @@ protected:
     IAosBlock* m_piBlock;
     SERVICE_TYPE m_eServiceType;
     IMS_BOOL m_bIsRefreshStarted;
-    IMS_BOOL m_bIsCombindAttached;
+    IMS_BOOL m_bIsCombinedAttached;
     IMS_BOOL m_bCellServiceAvailable;
     IMS_BOOL m_bWiFiServiceAvailable;
     IMS_BOOL m_bIsTtyOn;
