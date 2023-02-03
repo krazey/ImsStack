@@ -188,9 +188,6 @@ TEST_F(AosCallTrackerTest, IsCsCallActive_CsStateChange)
     SetState(IAosCallTracker::TYPE_CS, CallState::IDLE);
     EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
 
-    SetState(IAosCallTracker::TYPE_CS, CallState::TERMINATING);
-    EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
-
     SetState(IAosCallTracker::TYPE_CS, CallState::RINGBACK);
     EXPECT_FALSE(m_pAosCallTracker->IsCsCallActive());
 
@@ -211,9 +208,6 @@ TEST_F(AosCallTrackerTest, IsCsCallActive_ActiveCsStateChange)
 
     // Expect return True
     m_pAosCallTracker->SetActiveCsCallState(CallState::IDLE);
-    EXPECT_TRUE(m_pAosCallTracker->IsCsCallActive());
-
-    m_pAosCallTracker->SetActiveCsCallState(CallState::TERMINATING);
     EXPECT_TRUE(m_pAosCallTracker->IsCsCallActive());
 
     m_pAosCallTracker->SetActiveCsCallState(CallState::RINGBACK);
@@ -237,9 +231,6 @@ TEST_F(AosCallTrackerTest, IsNormalCallActive)
     EXPECT_FALSE(m_pAosCallTracker->IsNormalCallActive());
 
     // Expect return True
-    SetState(IAosCallTracker::TYPE_NORMAL, CallState::TERMINATING);
-    EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
-
     SetState(IAosCallTracker::TYPE_NORMAL, CallState::RINGBACK);
     EXPECT_TRUE(m_pAosCallTracker->IsNormalCallActive());
 
@@ -260,9 +251,6 @@ TEST_F(AosCallTrackerTest, IsEmergencyCallActive)
     EXPECT_FALSE(m_pAosCallTracker->IsEmergencyCallActive());
 
     // Expect return True
-    SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::TERMINATING);
-    EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
-
     SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::RINGBACK);
     EXPECT_TRUE(m_pAosCallTracker->IsEmergencyCallActive());
 
@@ -287,7 +275,7 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnTrue)
     IMS_ULONG nKey1 = 1001;
     IMS_ULONG nKey2 = 1002;
 
-    AddOrUpdateCall(objNormalCalls, nKey1, CallState::TERMINATING);
+    AddOrUpdateCall(objNormalCalls, nKey1, CallState::RINGBACK);
     AddOrUpdateCall(objNormalCallTypes, nKey1, CallType::VOIP);
 
     AddOrUpdateCall(objNormalCalls, nKey2, CallState::OFFHOOK);
@@ -310,7 +298,7 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnFalse_VtIsNotOffhook)
     IMS_ULONG nKey1 = 1001;
     IMS_ULONG nKey2 = 1002;
 
-    AddOrUpdateCall(objNormalCalls, nKey1, CallState::TERMINATING);
+    AddOrUpdateCall(objNormalCalls, nKey1, CallState::RINGING);
     AddOrUpdateCall(objNormalCallTypes, nKey1, CallType::VOIP);
 
     AddOrUpdateCall(objNormalCalls, nKey2, CallState::IDLE);
@@ -363,9 +351,6 @@ TEST_F(AosCallTrackerTest, GetCallState_TypeCs)
     SetState(IAosCallTracker::TYPE_CS, CallState::IDLE);
     EXPECT_EQ(m_pAosCallTracker->GetCallState(IAosCallTracker::TYPE_CS), CallState::IDLE);
 
-    SetState(IAosCallTracker::TYPE_CS, CallState::TERMINATING);
-    EXPECT_EQ(m_pAosCallTracker->GetCallState(IAosCallTracker::TYPE_CS), CallState::TERMINATING);
-
     SetState(IAosCallTracker::TYPE_CS, CallState::RINGBACK);
     EXPECT_EQ(m_pAosCallTracker->GetCallState(IAosCallTracker::TYPE_CS), CallState::RINGBACK);
 
@@ -384,10 +369,6 @@ TEST_F(AosCallTrackerTest, GetCallState_TypeNormal)
     SetState(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
     EXPECT_EQ(m_pAosCallTracker->GetCallState(IAosCallTracker::TYPE_NORMAL), CallState::IDLE);
 
-    SetState(IAosCallTracker::TYPE_NORMAL, CallState::TERMINATING);
-    EXPECT_EQ(
-            m_pAosCallTracker->GetCallState(IAosCallTracker::TYPE_NORMAL), CallState::TERMINATING);
-
     SetState(IAosCallTracker::TYPE_NORMAL, CallState::RINGBACK);
     EXPECT_EQ(m_pAosCallTracker->GetCallState(IAosCallTracker::TYPE_NORMAL), CallState::RINGBACK);
 
@@ -405,10 +386,6 @@ TEST_F(AosCallTrackerTest, GetCallState_TypeEmergency)
 {
     SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE);
     EXPECT_EQ(m_pAosCallTracker->GetCallState(IAosCallTracker::TYPE_EMERGENCY), CallState::IDLE);
-
-    SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::TERMINATING);
-    EXPECT_EQ(m_pAosCallTracker->GetCallState(IAosCallTracker::TYPE_EMERGENCY),
-            CallState::TERMINATING);
 
     SetState(IAosCallTracker::TYPE_EMERGENCY, CallState::RINGBACK);
     EXPECT_EQ(
@@ -539,24 +516,24 @@ TEST_F(AosCallTrackerTest, AddOrUpdateCall)
     CallKey nKey3 = 1003;
 
     AddOrUpdateCall(objNormalCalls, nKey1, CallState::IDLE);
-    AddOrUpdateCall(objNormalCalls, nKey2, CallState::TERMINATING);
+    AddOrUpdateCall(objNormalCalls, nKey2, CallState::NEW);
     AddOrUpdateCall(objNormalCalls, nKey3, CallState::RINGBACK);
 
     EXPECT_EQ(objNormalCalls.GetSize(), 3);
 
-    AddOrUpdateCall(objNormalCalls, nKey3, CallState::RINGBACK);
+    AddOrUpdateCall(objNormalCalls, nKey3, CallState::OFFHOOK);
     EXPECT_EQ(objNormalCalls.GetSize(), 3);
 }
 
 TEST_F(AosCallTrackerTest, GetConvertedState)
 {
+    EXPECT_EQ(GetConvertedState(IMtcCall::State::IDLE), CallState::NEW);
     EXPECT_EQ(GetConvertedState(IMtcCall::State::OUTGOING), CallState::RINGBACK);
     EXPECT_EQ(GetConvertedState(IMtcCall::State::INCOMING), CallState::RINGING);
     EXPECT_EQ(GetConvertedState(IMtcCall::State::ALERTING), CallState::ALERTING);
     EXPECT_EQ(GetConvertedState(IMtcCall::State::ESTABLISHED), CallState::OFFHOOK);
     EXPECT_EQ(GetConvertedState(IMtcCall::State::UPDATING), CallState::OFFHOOK);
-    EXPECT_EQ(GetConvertedState(IMtcCall::State::TERMINATING), CallState::TERMINATING);
-    EXPECT_EQ(GetConvertedState(IMtcCall::State::IDLE), CallState::IDLE);
+    EXPECT_EQ(GetConvertedState(IMtcCall::State::TERMINATING), CallState::IDLE);
 }
 
 TEST_F(AosCallTrackerTest, GetTotalState_GreaterThanOne)
@@ -580,8 +557,8 @@ TEST_F(AosCallTrackerTest, GetTotalState_SizeOne)
     EXPECT_EQ(GetTotalState(objNormalCalls), CallState::IDLE);
 
     objNormalCalls.Clear();
-    AddOrUpdateCall(objNormalCalls, nKey, CallState::TERMINATING);
-    EXPECT_EQ(GetTotalState(objNormalCalls), CallState::TERMINATING);
+    AddOrUpdateCall(objNormalCalls, nKey, CallState::NEW);
+    EXPECT_EQ(GetTotalState(objNormalCalls), CallState::NEW);
 
     objNormalCalls.Clear();
     AddOrUpdateCall(objNormalCalls, nKey, CallState::RINGBACK);
@@ -872,71 +849,8 @@ TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVt)
     OnCallStateChanged(nKey, IMtcCall::State::ESTABLISHED, CallType::VT, IMS_FALSE, -1);
 }
 
-TEST_F(AosCallTrackerTest, OnTotalCallStateChanged_NormalCountIsNotZero)
+TEST_F(AosCallTrackerTest, OnTotalCallStateChanged)
 {
-    // Set Calls
-    IMSMap<CallKey, CallState> objNormalCalls;
-    IMSMap<CallKey, CallState> objEmergencyCalls;
-    IMSMap<CallKey, CallType> objNormalCallTypes;
-
-    IMS_ULONG nKey1 = 1001;
-    IMS_ULONG nKey2 = 1002;
-
-    AddOrUpdateCall(objNormalCalls, nKey1, CallState::TERMINATING);
-    AddOrUpdateCall(objEmergencyCalls, nKey2, CallState::OFFHOOK);
-
-    SetNormalCalls(objNormalCalls);
-    SetEmergenyCalls(objEmergencyCalls);
-    SetNormalCallTypes(objNormalCallTypes);
-
-    // Set Listener
-    GetCallTrackerListeners().Clear();
-
-    MockIAosCallTrackerListener objListener;
-    m_pAosCallTracker->SetListener(static_cast<IAosCallTrackerListener*>(&objListener));
-
-    EXPECT_CALL(
-            objListener, CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE))
-            .Times(1);
-
-    EXPECT_CALL(
-            objListener, CallTracker_StateChanged(IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE))
-            .Times(1);
-
-    OnTotalCallStateChanged(IMtcCall::State::IDLE);
-}
-
-TEST_F(AosCallTrackerTest, OnTotalCallStateChanged_NormalCallTypeIsNotZero)
-{
-    // Set Calls
-    IMSMap<CallKey, CallState> objNormalCalls;
-    IMSMap<CallKey, CallState> objEmergencyCalls;
-    IMSMap<CallKey, CallType> objNormalCallTypes;
-
-    IMS_ULONG nKey1 = 1001;
-    IMS_ULONG nKey2 = 1002;
-
-    AddOrUpdateCall(objNormalCallTypes, nKey1, CallType::VOIP);
-    AddOrUpdateCall(objEmergencyCalls, nKey2, CallState::OFFHOOK);
-
-    SetNormalCalls(objNormalCalls);
-    SetEmergenyCalls(objEmergencyCalls);
-    SetNormalCallTypes(objNormalCallTypes);
-
-    // Set Listener
-    GetCallTrackerListeners().Clear();
-
-    MockIAosCallTrackerListener objListener;
-    m_pAosCallTracker->SetListener(static_cast<IAosCallTrackerListener*>(&objListener));
-
-    EXPECT_CALL(
-            objListener, CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE))
-            .Times(1);
-
-    EXPECT_CALL(
-            objListener, CallTracker_StateChanged(IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE))
-            .Times(1);
-
     OnTotalCallStateChanged(IMtcCall::State::IDLE);
 }
 
@@ -951,11 +865,11 @@ TEST_F(AosCallTrackerTest, TypeToString)
 TEST_F(AosCallTrackerTest, StateToString)
 {
     EXPECT_STREQ(StateToString(CallState::IDLE), "IDLE");
+    EXPECT_STREQ(StateToString(CallState::NEW), "NEW");
     EXPECT_STREQ(StateToString(CallState::RINGBACK), "RINGBACK");
     EXPECT_STREQ(StateToString(CallState::RINGING), "RINGING");
     EXPECT_STREQ(StateToString(CallState::ALERTING), "ALERTING");
     EXPECT_STREQ(StateToString(CallState::OFFHOOK), "OFFHOOK");
-    EXPECT_STREQ(StateToString(CallState::TERMINATING), "TERMINATING");
 }
 
 TEST_F(AosCallTrackerTest, CallTypeToString)

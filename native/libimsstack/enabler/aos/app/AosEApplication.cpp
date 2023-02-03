@@ -38,8 +38,7 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
 AosEApplication::AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
-        AosApplication(piAppContext, strAppId),
-        m_bIsCallTerminating(IMS_FALSE)
+        AosApplication(piAppContext, strAppId)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosEApplication = %" PFLS_u "/%" PFLS_x, APPID,
             sizeof(AosEApplication), this);
@@ -78,9 +77,7 @@ PUBLIC VIRTUAL IMS_BOOL AosEApplication::RequestCmd(
             {
                 A_IMS_TRACE_D(APPID, "PDN is connected, do fake registration", 0, 0, 0);
                 m_piRegistration->RequestCmd(IAosRegistration::CMD_FAKE_MODE,
-                        (nReason == AoSFakeERegType::TYPE_NEXT_PCSCF)
-                                ? IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF
-                                : IAosRegistration::REASON_FAKE_MODE_SAME_PCSCF);
+                        IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF);
             }
             else
             {
@@ -337,7 +334,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessAppTerminatedTimerExpired()
 {
     StopTimer(TIMER_APP_TERMINATED);
 
-    if (m_piCallTracker->GetCallState(IAosCallTracker::TYPE_EMERGENCY) != CallState::OFFHOOK)
+    if (m_piCallTracker->GetCallState(IAosCallTracker::TYPE_EMERGENCY) == CallState::IDLE)
     {
         ProcessCleanAll();
     }
@@ -372,11 +369,6 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsWlanEmergencyBlocked()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosEApplication::CheckAppTerminatedTimerAndProcessCleanAll()
-{
-    return IsTimerRunning(TIMER_APP_TERMINATED);
-}
-
 PROTECTED VIRTUAL void AosEApplication::ProcessECallStarted()
 {
     SetImsCall(IMS_TRUE);
@@ -402,27 +394,16 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
         return;
     }
 
-    if (CheckAppTerminatedTimerAndProcessCleanAll())
+    if (IsTimerRunning(TIMER_APP_TERMINATED))
     {
-        ProcessCleanAll();
         return;
     }
 
-    if (m_bIsCallTerminating == IMS_FALSE)
+    if (GET_N_CONFIG(m_nSlotId)->IsEmergencyPdnWithEmergencyCallEndReleased() ||
+            m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
     {
-        if (GET_N_CONFIG(m_nSlotId)->IsEmergencyPdnWithEmergencyCallEndReleased())
-        {
-            // For the case that ProcessECallTerminating() is not called before.
-            ProcessCleanAll();
-            return;
-        }
-
-        if (m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
-        {
-            // For the case that ProcessECallTerminating() is not called before.
-            ProcessCleanAll();
-            return;
-        }
+        StartTimer(TIMER_APP_TERMINATED, EPDN_RELEASE_DELAY_TIME_MILLIS);
+        return;
     }
 
     if (!IsTimerRunning(TIMER_APP_ACTIVATED))
@@ -433,21 +414,6 @@ PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminated()
             ProcessCleanAll();
             return;
         }
-    }
-}
-
-PROTECTED VIRTUAL void AosEApplication::ProcessECallTerminating()
-{
-    if (m_piRegistration->IsTerminated())
-    {
-        ProcessCleanAll();
-        return;
-    }
-
-    if (GET_N_CONFIG(m_nSlotId)->IsEmergencyPdnWithEmergencyCallEndReleased() ||
-            m_piRegistration->GetMode() == IAosRegistration::MODE_FAKE)
-    {
-        StartTimer(TIMER_APP_TERMINATED, EPDN_RELEASE_DELAY_TIME_MILLIS);
     }
 }
 
@@ -500,13 +466,6 @@ PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
 
     IMS_BOOL bCurrState = (eState > CallState::IDLE) ? IMS_TRUE : IMS_FALSE;
 
-    if (IsImsCall() && (eState == CallState::TERMINATING))
-    {
-        ProcessECallTerminating();
-        m_bIsCallTerminating = IMS_TRUE;
-        return;
-    }
-
     if (IsImsCall() != bCurrState)
     {
         if (bCurrState)
@@ -517,10 +476,5 @@ PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
         {
             ProcessECallTerminated();
         }
-    }
-
-    if (eState == CallState::IDLE)
-    {
-        m_bIsCallTerminating = IMS_FALSE;
     }
 }

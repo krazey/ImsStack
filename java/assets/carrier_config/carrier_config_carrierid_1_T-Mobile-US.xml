@@ -39,6 +39,9 @@
         <item value="0"/>
         <item value="2"/>
     </int-array>
+
+    <boolean name="imsemergency.release_emergency_pdn_with_emergency_call_end_bool" value="true"/>
+
     <int name="imswfc.registration_private_header_int" value="2"/>
 
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>

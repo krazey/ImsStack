@@ -257,11 +257,16 @@ TEST(AosLogTest, AppRequestToString)
     EXPECT_STREQ(
             AosProvider::GetLog()->AppRequestToString(ImsAosControl::REGISTER_REINITIATE_BY_CSFB),
             "REGISTER_REINITIATE_BY_CSFB");
+    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(
+                         ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF),
+            "E_REGISTER_FAKE_WITH_NEXT_PCSCF");
     EXPECT_STREQ(
             AosProvider::GetLog()->AppRequestToString(ImsAosControl::PCSCF_NEXT), "PCSCF_NEXT");
     EXPECT_STREQ(
             AosProvider::GetLog()->AppRequestToString(ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY),
             "PCSCF_NEXT_WITH_DISCOVERY");
+    EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::IPSEC_DISABLED),
+            "IPSEC_DISABLED");
     EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(ImsAosControl::RETRY_COUNT_INCREASE),
             "RETRY_COUNT_INCREASE");
     EXPECT_STREQ(AosProvider::GetLog()->AppRequestToString(

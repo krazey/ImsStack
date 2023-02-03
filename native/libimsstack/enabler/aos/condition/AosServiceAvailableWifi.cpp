@@ -192,8 +192,7 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleCallStateChanged(
 
     if (nState == IAosCallTracker::TYPE_NORMAL)
     {
-        if ((static_cast<CallState>(nStateEx) == CallState::IDLE) ||
-                (static_cast<CallState>(nStateEx) == CallState::TERMINATING))
+        if (static_cast<CallState>(nStateEx) == CallState::IDLE)
         {
             ClearBadNetworkState();
         }

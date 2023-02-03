@@ -54,7 +54,7 @@ public:
 enum class CallState
 {
     IDLE,
-    TERMINATING,
+    NEW,
     RINGBACK,
     RINGING,
     ALERTING,

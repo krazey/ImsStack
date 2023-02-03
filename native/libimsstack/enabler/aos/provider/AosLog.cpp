@@ -296,11 +296,17 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
         case ImsAosControl::REGISTER_REINITIATE_BY_CSFB:
             return "REGISTER_REINITIATE_BY_CSFB";
 
+        case ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF:
+            return "E_REGISTER_FAKE_WITH_NEXT_PCSCF";
+
         case ImsAosControl::PCSCF_NEXT:
             return "PCSCF_NEXT";
 
         case ImsAosControl::PCSCF_NEXT_WITH_DISCOVERY:
             return "PCSCF_NEXT_WITH_DISCOVERY";
+
+        case ImsAosControl::IPSEC_DISABLED:
+            return "IPSEC_DISABLED";
 
         case ImsAosControl::RETRY_COUNT_INCREASE:
             return "RETRY_COUNT_INCREASE";

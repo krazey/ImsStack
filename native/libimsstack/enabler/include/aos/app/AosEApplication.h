@@ -71,10 +71,8 @@ protected:
     virtual IMS_BOOL IsEmergencyBlocked();
     virtual IMS_BOOL IsWifiConnected();
     virtual IMS_BOOL IsWlanEmergencyBlocked();
-    virtual IMS_BOOL CheckAppTerminatedTimerAndProcessCleanAll();
     virtual void ProcessECallStarted();
     virtual void ProcessECallTerminated();
-    virtual void ProcessECallTerminating();
 
     // To External Interface
     void UpdateRegState() override;
@@ -87,7 +85,5 @@ protected:
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
 
     static const IMS_UINT32 EPDN_RELEASE_DELAY_TIME_MILLIS = 2000;
-
-    IMS_BOOL m_bIsCallTerminating;
 };
 #endif  // AOS_E_APPLICATION_H_

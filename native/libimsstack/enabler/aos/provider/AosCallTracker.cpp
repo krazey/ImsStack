@@ -225,6 +225,9 @@ CallState AosCallTracker::GetConvertedState(IN IMtcCall::State eState)
 {
     switch (eState)
     {
+        case IMtcCall::State::IDLE:
+            return CallState::NEW;
+
         case IMtcCall::State::OUTGOING:
             return CallState::RINGBACK;
 
@@ -238,10 +241,8 @@ CallState AosCallTracker::GetConvertedState(IN IMtcCall::State eState)
         case IMtcCall::State::UPDATING:
             return CallState::OFFHOOK;
 
-        case IMtcCall::State::TERMINATING:
-            return CallState::TERMINATING;
-
         default:
+            // IMtcCall::State::TERMINATING
             return CallState::IDLE;
     }
 }
@@ -484,41 +485,7 @@ PRIVATE VIRTUAL void AosCallTracker::OnCallStateChanged(IN CallKey nCallKey, IN 
     }
 }
 
-PRIVATE VIRTUAL void AosCallTracker::OnTotalCallStateChanged(IN State eState)
-{
-    CallState eCallState = GetConvertedState(eState);
-    A_IMS_TRACE_I(AOSTAG, "OnTotalCallStateChanged :: (%s)", StateToString(eCallState), 0, 0);
-
-    if (eCallState == CallState::IDLE)
-    {
-        IMS_UINT32 nNormalCount = m_objNormalCalls.GetSize();
-        IMS_UINT32 nEmergencyCount = m_objEmergencyCalls.GetSize();
-        IMS_UINT32 nNormalCallTypeCount = m_objNormalCallTypes.GetSize();
-
-        A_IMS_TRACE_I(AOSTAG,
-                "ChangedCallTotalState :: Count Normal(%d) , Emergency(%d), CallType(%d)",
-                nNormalCount, nEmergencyCount, nNormalCallTypeCount);
-
-        if (nNormalCount > 0 || nNormalCallTypeCount > 0)
-        {
-            m_objNormalCalls.Clear();
-            m_objNormalCallTypes.Clear();
-
-            SetState(TYPE_NORMAL, CallState::IDLE);
-            m_nNormalCallType = static_cast<IMS_UINT32>(CallType::UNKNOWN);
-
-            Notify(TYPE_NORMAL, CallState::IDLE);
-        }
-
-        if (nEmergencyCount > 0)
-        {
-            m_objEmergencyCalls.Clear();
-
-            SetState(TYPE_EMERGENCY, CallState::IDLE);
-            Notify(TYPE_EMERGENCY, CallState::IDLE);
-        }
-    }
-}
+PRIVATE VIRTUAL void AosCallTracker::OnTotalCallStateChanged(IN State /* eState */) {}
 
 PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::TypeToString(IN IMS_UINT32 nType)
 {
@@ -545,6 +512,9 @@ PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::StateToString(IN CallState eState
         case CallState::IDLE:
             return "IDLE";
 
+        case CallState::NEW:
+            return "NEW";
+
         case CallState::RINGBACK:
             return "RINGBACK";
 
@@ -556,9 +526,6 @@ PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::StateToString(IN CallState eState
 
         case CallState::OFFHOOK:
             return "OFFHOOK";
-
-        case CallState::TERMINATING:
-            return "TERMINATING";
 
         default:
             return "INVALID";

@@ -369,14 +369,6 @@ TEST_F(AosServiceAvailableWifiTest, HandleCallStateChanged_CallTypeNormal_Idle)
     EXPECT_EQ(GetBadNetworkState(), AosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
 }
 
-TEST_F(AosServiceAvailableWifiTest, HandleCallStateChanged_CallTypeNormal_Terminating)
-{
-    SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_CHECKING);
-
-    HandleCallStateChanged(IAosCallTracker::TYPE_NORMAL, CallState::TERMINATING);
-    EXPECT_EQ(GetBadNetworkState(), AosServiceAvailableWifi::STATE_BAD_NETWORK_NONE);
-}
-
 TEST_F(AosServiceAvailableWifiTest, HandleCallStateChanged_CallTypeCs_Idle)
 {
     SetBadNetworkState(AosServiceAvailableWifi::STATE_BAD_NETWORK_CHECKING);
