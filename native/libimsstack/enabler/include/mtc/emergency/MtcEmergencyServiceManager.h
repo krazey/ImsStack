@@ -20,6 +20,7 @@
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
 #include "emergency/EmergencyNormalRoutingHelper.h"
+#include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/IMtcAosStateListener.h"
 #include <memory>
 
@@ -29,6 +30,7 @@ using EmergencyCallRoutingPdn = IuMtcService::EmergencyCallRoutingPdn;
 using EmergencyServiceState = IuMtcService::EmergencyServiceState;
 
 class MtcEmergencyServiceManager :
+        public IMtcEmergencyServiceManager,
         public IMtcAosStateListener,
         public IEmergencyNormalRoutingHelperListener
 {
@@ -38,7 +40,8 @@ public:
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    virtual void OpenEmergencyService(IN EmergencyCallRoutingPdn ePdn);
+    virtual void StartOpen(IN EmergencyCallRoutingPdn ePdn) override;
+    virtual void StopOpen() override;
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
             IN IMS_UINT32 eAosReason) override;

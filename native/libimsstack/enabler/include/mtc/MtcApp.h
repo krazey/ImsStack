@@ -44,10 +44,10 @@ class IMtcAosConnector;
 class IMtcCallController;
 class IMtcCallManager;
 class IMtcDialingPlan;
+class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
 class IMtcSipInterfaceFactory;
-class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
@@ -82,7 +82,7 @@ public:
     }
     inline IConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
     IEctManager& GetEctManager() override;
-    MtcEmergencyServiceManager& GetEmergencyServiceManager() override;
+    IMtcEmergencyServiceManager& GetEmergencyServiceManager() override;
     OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override;
     inline IMessageUtils& GetMessageUtils() override { return m_objMessageUtils; };
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
@@ -105,7 +105,7 @@ protected:
     MtcSipInterfaceFactory m_objSipInterfaceFactory;
     ConferenceManager m_objConferenceManager;
     std::unique_ptr<EctManager> m_pEctManager;
-    std::unique_ptr<MtcEmergencyServiceManager> m_pEmergencyServiceManager;
+    std::unique_ptr<IMtcEmergencyServiceManager> m_pEmergencyServiceManager;
     MessageUtils m_objMessageUtils;
     MtcRadioChecker m_objMtcRadioChecker;
 

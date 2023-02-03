@@ -55,6 +55,7 @@ class IMtcAosConnector;
 class IMtcCallController;
 class IMtcContext;
 class IMtcDialingPlan;
+class IMtcEmergencyServiceManager;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
 class IMtcRadioChecker;
@@ -67,7 +68,6 @@ class ISession;
 class MessageSender;
 class MessageUtils;
 class MtcConfigurationProxy;
-class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
 class UdpKeepAliveSender;
 class UssiController;
@@ -208,7 +208,7 @@ public:
         return m_objContext.GetConferenceManager();
     }
     inline IEctManager& GetEctManager() override { return m_objContext.GetEctManager(); }
-    inline MtcEmergencyServiceManager& GetEmergencyServiceManager() override
+    inline IMtcEmergencyServiceManager& GetEmergencyServiceManager() override
     {
         return m_objContext.GetEmergencyServiceManager();
     }

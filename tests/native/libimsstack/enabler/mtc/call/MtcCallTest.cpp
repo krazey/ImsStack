@@ -40,7 +40,7 @@
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "ect/MockIEctManager.h"
-#include "emergency/MockMtcEmergencyServiceManager.h"
+#include "emergency/MockIMtcEmergencyServiceManager.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockICallStateProxy.h"
@@ -1148,7 +1148,7 @@ TEST_F(MtcCallTest, GetEmergencyServiceManagerCallsMtcContext)
     MockIMtcCallState* pState = new MockIMtcCallState();
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory(pState)));
 
-    MockMtcEmergencyServiceManager objEsm(objContext);
+    MockIMtcEmergencyServiceManager objEsm;
     EXPECT_CALL(objContext, GetEmergencyServiceManager).Times(1).WillOnce(ReturnRef(objEsm));
 
     objCall.GetEmergencyServiceManager();
