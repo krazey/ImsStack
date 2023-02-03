@@ -30,6 +30,8 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using Result = IMtcBlockRule::Result;
 
+LOCAL const CallKey CALL_KEY = 123;
+
 namespace android
 {
 
@@ -49,6 +51,7 @@ protected:
         ON_CALL(m_objContext, GetRadioChecker).WillByDefault(ReturnRef(m_objMockIMtcRadioChecker));
         ON_CALL(m_objContext, GetCallInfo).WillByDefault(ReturnRef(m_objCallInfo));
         ON_CALL(m_objContext, GetService).WillByDefault(ReturnRef(m_objMtcService));
+        ON_CALL(m_objContext, GetCallKey).WillByDefault(Return(CALL_KEY));
 
         ON_CALL(m_objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
     }
@@ -71,8 +74,8 @@ TEST_F(RadioBlockRuleTest, Check)
 
     EXPECT_CALL(m_objMockIMtcRadioChecker, SetTrafficCheckerListener(_)).Times(4);
 
-    EXPECT_CALL(
-            m_objMockIMtcRadioChecker, Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE))
+    EXPECT_CALL(m_objMockIMtcRadioChecker,
+            Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE, CALL_KEY))
             .Times(3)
             .WillOnce(Return(CheckResult::UNBLOCKED))
             .WillOnce(Return(CheckResult::PENDING))

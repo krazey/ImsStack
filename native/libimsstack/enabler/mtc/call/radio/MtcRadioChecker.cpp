@@ -68,8 +68,8 @@ PUBLIC VIRTUAL void MtcRadioChecker::SetTrafficCheckerListener(
     m_piMtcRadioCheckerListener = pListener;
 }
 
-PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(
-        IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType, IN IMS_BOOL bWifi)
+PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_BOOL bEmergency,
+        IN PeerType ePeerType, IN IMS_BOOL bWifi, IN CallKey nCallKey)
 {
     if (IsSsacBarred(eCallType, bEmergency, ePeerType, bWifi))
     {
@@ -83,7 +83,7 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(
 
     if (ePeerType == PeerType::MT)
     {
-        StartTrafficChecking(eCallType, bEmergency, ePeerType, bWifi);
+        StartTrafficChecking(eCallType, bEmergency, ePeerType, bWifi, nCallKey);
         return CheckResult::UNBLOCKED;
     }
 
@@ -92,7 +92,7 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(
         return CheckResult::BLOCKED;
     }
 
-    StartTrafficChecking(eCallType, bEmergency, ePeerType, bWifi);
+    StartTrafficChecking(eCallType, bEmergency, ePeerType, bWifi, nCallKey);
     return CheckResult::PENDING;
 }
 
@@ -124,29 +124,11 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnIpcanChanged(
 }
 
 PUBLIC VIRTUAL void MtcRadioChecker::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
-        IN Type eType, IN IMS_BOOL bEmergency, IN IMS_SINT32 /* nReason */)
+        IN Type /* eType */, IN IMS_BOOL /* bEmergency */, IN IMS_SINT32 /* nReason */)
 {
-    switch (eState)
+    if (eState == IMtcCall::State::TERMINATING)
     {
-        case IMtcCall::State::OUTGOING:
-            AddCallKeyIfNeeded(ConvertCallTypeToTrafficType(eType, bEmergency),
-                    IImsRadio::DIRECTION_MO, nCallKey);
-            break;
-
-        case IMtcCall::State::INCOMING:
-        case IMtcCall::State::ALERTING:
-            AddCallKeyIfNeeded(ConvertCallTypeToTrafficType(eType, bEmergency),
-                    IImsRadio::DIRECTION_MT, nCallKey);
-            break;
-
-        case IMtcCall::State::TERMINATING:
-            RemoveCallKeyAndStopTrafficCheckingIfNeeded(nCallKey);
-            break;
-
-        case IMtcCall::State::ESTABLISHED:
-        case IMtcCall::State::IDLE:
-        case IMtcCall::State::UPDATING:
-            break;
+        RemoveCallKeyAndStopTrafficCheckingIfNeeded(nCallKey);
     }
 }
 
@@ -219,7 +201,13 @@ PUBLIC VIRTUAL void MtcRadioChecker::Timer_TimerExpired(IN ITimer* piTimer)
 PUBLIC void MtcRadioChecker::CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
         IN CallDirection eCallDirection, IN IMS_BOOL bActive, IN CallKey nCallKeyIn)
 {
-    MtcTrafficInfo* pMtcTrafficInfo = CreateCallTrafficInfo(eTrafficType, eCallDirection);
+    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
+
+    if (pMtcTrafficInfo == IMS_NULL)
+    {
+        pMtcTrafficInfo = CreateCallTrafficInfo(eTrafficType, eCallDirection);
+    }
+
     pMtcTrafficInfo->m_bTrafficActive = bActive;
 
     if (nCallKeyIn != IMtcCall::CALL_KEY_INVALID)
@@ -307,31 +295,9 @@ PRIVATE IMS_UINT32 MtcRadioChecker::ConvertNetworkType(IN IMS_BOOL bWifi) const
     }
 }
 
-PRIVATE void MtcRadioChecker::AddCallKeyIfNeeded(
-        IN TrafficType eTrafficType, IN CallDirection eCallDirection, IN CallKey nCallKeyIn) const
+PRIVATE void MtcRadioChecker::AddCallKey(IN MtcTrafficInfo& pMtcTrafficInfo, IN CallKey nCallKey)
 {
-    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
-
-    if (pMtcTrafficInfo == IMS_NULL)
-    {
-        return;
-    }
-
-    ImsList<CallKey>& objCallKeys = pMtcTrafficInfo->m_objCallKeys;
-
-    for (IMS_UINT32 nIndex = 0; nIndex < objCallKeys.GetSize(); nIndex++)
-    {
-        const CallKey nCallKey = objCallKeys.GetAt(nIndex);
-
-        if (nCallKey == nCallKeyIn)
-        {
-            return;
-        }
-    }
-
-    objCallKeys.Append(nCallKeyIn);
-    IMS_TRACE_D("AddCallKeyIfNeeded TrafficType[%d] CallDirection[%d] CallKey[%d]", eTrafficType,
-            eCallDirection, nCallKeyIn);
+    pMtcTrafficInfo.m_objCallKeys.Append(nCallKey);
 }
 
 PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn)
@@ -341,13 +307,6 @@ PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN Cal
         MtcTrafficInfo* pMtcTrafficInfo = m_objMtcTrafficInfos.GetAt(nInfoIndex);
 
         ImsList<CallKey>& objCallKeys = pMtcTrafficInfo->m_objCallKeys;
-
-        if (objCallKeys.IsEmpty())
-        {
-            delete pMtcTrafficInfo;
-            m_objMtcTrafficInfos.RemoveAt(nInfoIndex);
-            return;
-        }
 
         for (IMS_UINT32 nCallKeyIndex = 0; nCallKeyIndex < objCallKeys.GetSize(); nCallKeyIndex++)
         {
@@ -535,8 +494,8 @@ PRIVATE IMS_BOOL MtcRadioChecker::StartSsacTimer(IN CallType eCallType)
     return IMS_TRUE;
 }
 
-PRIVATE void MtcRadioChecker::StartTrafficChecking(
-        IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType, IN IMS_BOOL bWifi)
+PRIVATE void MtcRadioChecker::StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency,
+        IN PeerType ePeerType, IN IMS_BOOL bWifi, IN CallKey nCallKey)
 {
     TrafficType eTrafficType = ConvertCallTypeToTrafficType(eCallType, bEmergency);
     const IMS_UINT32 eCallDirection =
@@ -556,11 +515,13 @@ PRIVATE void MtcRadioChecker::StartTrafficChecking(
         }
     }
 
+    AddCallKey(*pMtcTrafficInfo, nCallKey);
+
     m_piImsRadio->StartImsTraffic(
             eTrafficType, ConvertNetworkType(bWifi), eCallDirection, pMtcTrafficInfo);
 
-    IMS_TRACE_I("StartTrafficChecking TrafficType[%d] CallDirection[%d]", eTrafficType,
-            eCallDirection, 0);
+    IMS_TRACE_I("StartTrafficChecking TrafficType[%d] CallDirection[%d] CallKey[%d]", eTrafficType,
+            eCallDirection, nCallKey);
 }
 
 PRIVATE void MtcRadioChecker::StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo)
@@ -574,6 +535,8 @@ PRIVATE void MtcRadioChecker::StopTrafficChecking(IN MtcTrafficInfo& objTrafficI
 PRIVATE void MtcTrafficInfo::ImsRadio_OnConnectionFailed(
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode, IN IMS_UINT32 nWaitTimeMillis)
 {
+    // TODO: need to check that Radio(moden) gives ImsRadio_OnConnectionFailed or not due to
+    // fallback to LTE from NR when does redial.
     m_bTrafficActive = IMS_FALSE;
     m_objMtcRadioConnectionListener.OnConnectionFailed(
             m_eTrafficType, m_eCallDirection, nFailureReason, nCauseCode, nWaitTimeMillis);

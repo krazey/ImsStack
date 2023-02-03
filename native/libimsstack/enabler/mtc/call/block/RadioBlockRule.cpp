@@ -30,7 +30,8 @@ RadioBlockRule::RadioBlockRule(IN IMtcCallContext& objContext, IN CallType eCall
         m_ePeerType(objContext.GetCallInfo().ePeerType),
         m_bEmergency(objContext.GetCallInfo().bEmergency),
         m_bWifi(objContext.GetService().IsWlanIpCanType()),
-        m_eCallType(eCallType)
+        m_eCallType(eCallType),
+        m_nCallKey(objContext.GetCallKey())
 {
 }
 
@@ -46,7 +47,7 @@ PUBLIC VIRTUAL RadioBlockRule::Result RadioBlockRule::Check(
     m_objMtcRadioChecker.SetTrafficCheckerListener(this);
 
     CheckResult eCheckResult =
-            m_objMtcRadioChecker.Check(m_eCallType, m_bEmergency, m_ePeerType, m_bWifi);
+            m_objMtcRadioChecker.Check(m_eCallType, m_bEmergency, m_ePeerType, m_bWifi, m_nCallKey);
 
     switch (eCheckResult)
     {

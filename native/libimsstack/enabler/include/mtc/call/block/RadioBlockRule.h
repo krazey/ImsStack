@@ -44,6 +44,7 @@ private:
     IMS_BOOL m_bEmergency;
     IMS_BOOL m_bWifi;
     CallType m_eCallType;
+    CallKey m_nCallKey;
 };
 
 #endif

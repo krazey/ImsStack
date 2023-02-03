@@ -81,7 +81,7 @@ public:
 
     void SetTrafficCheckerListener(IN IMtcRadioCheckerListener* pListener) override;
     CheckResult Check(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_BOOL bWifi) override;
+            IN IMS_BOOL bWifi, IN CallKey nCallKey) override;
 
     // IMtcAosStateListener
     inline void OnAosStateChanged(IN IMtcService&, IN MtcAosState, IN IMS_UINT32) override {}
@@ -110,8 +110,7 @@ private:
     void DeInit();
     static TrafficType ConvertCallTypeToTrafficType(IN CallType eCallType, IN IMS_BOOL bEmergency);
     IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi) const;
-    void AddCallKeyIfNeeded(IN TrafficType eTrafficType, IN CallDirection eCallDirection,
-            IN CallKey nCallKeyIn) const;
+    void AddCallKey(IN MtcTrafficInfo& pMtcTrafficInfo, IN CallKey nCallKey);
     void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn);
     void NotifyRadioConnectionFailedListener(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection);
@@ -128,7 +127,7 @@ private:
     IMS_BOOL IsSsacTimerRunning(IN CallType eCallType) const;
     IMS_BOOL StartSsacTimer(IN CallType eCallType);
     void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_BOOL bWifi);
+            IN IMS_BOOL bWifi, IN CallKey nCallKey);
     void StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo);
 
 private:

@@ -138,21 +138,21 @@ TEST_F(MtcRadioCheckerTest, CheckSsacDoesNothingWhenMt)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(0);
 
-    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE);
+    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE, CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckSsacDoesNothingWhenEmergency)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(0);
 
-    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_TRUE, PeerType::MO, IMS_FALSE);
+    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_TRUE, PeerType::MO, IMS_FALSE, CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckSsacDoesNothingWhenWifi)
 {
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(0);
 
-    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_TRUE);
+    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_TRUE, CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWithStartingTimer)
@@ -168,7 +168,8 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWithStartingTimer)
     EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(1);
 
     EXPECT_EQ(CheckResult::BLOCKED,
-            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckSsacNotBlockedWhenRandomSmallerThanFactor)
@@ -182,7 +183,7 @@ TEST_F(MtcRadioCheckerTest, CheckSsacNotBlockedWhenRandomSmallerThanFactor)
             .WillOnce(Return(50));
     EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(0);
 
-    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE);
+    m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWhenTimerIsRunning)
@@ -198,14 +199,16 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWhenTimerIsRunning)
     EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(1);
 
     EXPECT_EQ(CheckResult::BLOCKED,
-            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(0);
     EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_)).Times(0);
     EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(0);
 
     EXPECT_EQ(CheckResult::BLOCKED,
-            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, MakeSsacTimerNullWhenTimerExpired)
@@ -221,7 +224,7 @@ TEST_F(MtcRadioCheckerTest, MakeSsacTimerNullWhenTimerExpired)
     EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(1);
 
     EXPECT_EQ(CheckResult::BLOCKED,
-            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 
     EXPECT_CALL(m_objTimerService.GetMockTimer(), KillTimer()).Times(2);
 
@@ -235,7 +238,7 @@ TEST_F(MtcRadioCheckerTest, MakeSsacTimerNullWhenTimerExpired)
             .WillOnce(Return(10));
     EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(1);
 
-    m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE);
+    m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckTrafficPreparedReturnsUnblocked)
@@ -244,13 +247,15 @@ TEST_F(MtcRadioCheckerTest, CheckTrafficPreparedReturnsUnblocked)
             IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
 
     EXPECT_EQ(CheckResult::UNBLOCKED,
-            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckMtReturnsUnblocked)
 {
     EXPECT_EQ(CheckResult::UNBLOCKED,
-            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE));
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_FALSE, PeerType::MT, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckNotTrafficAllowedReturnsBlocked)
@@ -260,7 +265,8 @@ TEST_F(MtcRadioCheckerTest, CheckNotTrafficAllowedReturnsBlocked)
             .WillOnce(Return(IMS_FALSE));
 
     EXPECT_EQ(CheckResult::BLOCKED,
-            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_TRUE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_TRUE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckTrafficAllowedReturnsPending)
@@ -270,7 +276,8 @@ TEST_F(MtcRadioCheckerTest, CheckTrafficAllowedReturnsPending)
             .WillOnce(Return(IMS_TRUE));
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(
+                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckStartTrafficChecking)
@@ -285,7 +292,27 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficChecking)
             .Times(1);
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
+}
+
+TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingAddCallKey)
+{
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::ACCESS_NETWORK_TYPE_EUTRAN,
+                    IImsRadio::DIRECTION_MO, _))
+            .Times(1);
+
+    EXPECT_EQ(CheckResult::PENDING,
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
+
+    m_pMtcRadioChecker->OnCallStateChanged(
+            CALL_KEY1, IMtcCall::State::TERMINATING, CallType::VT, IMS_FALSE, 0);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingExistsMtcTrafficInfoWithCallKey)
@@ -303,7 +330,7 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingExistsMtcTrafficInfoWithCal
             .Times(0);
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingEmergency)
@@ -318,7 +345,7 @@ TEST_F(MtcRadioCheckerTest, CheckStartTrafficCheckingEmergency)
             .Times(1);
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(CallType::VT, IMS_TRUE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_TRUE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 }
 
 TEST_F(MtcRadioCheckerTest, OnAosStateChangedDoesNothing)
@@ -478,29 +505,13 @@ TEST_F(MtcRadioCheckerTest, OnCallStateChanged)
     m_pMtcRadioChecker->OnCallStateChanged(
             CALL_KEY1, IMtcCall::State::TERMINATING, CallType::VT, IMS_FALSE, 0);
 
-    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
-            IImsRadio::DIRECTION_MO, IMS_TRUE, IMtcCall::CALL_KEY_INVALID);
-
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY1, IMtcCall::State::OUTGOING, CallType::UNKNOWN, IMS_FALSE, 0);
-
-    // do nothing with a same key.
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY1, IMtcCall::State::OUTGOING, CallType::VOIP, IMS_FALSE, 0);
-
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY2, IMtcCall::State::INCOMING, CallType::VOIP, IMS_FALSE, 0);
+    m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(
+            IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MO, IMS_TRUE, CALL_KEY1);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(1);
 
     m_pMtcRadioChecker->OnCallStateChanged(
             CALL_KEY1, IMtcCall::State::TERMINATING, CallType::VT, IMS_FALSE, 0);
-
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY2, IMtcCall::State::ESTABLISHED, CallType::VOIP, IMS_FALSE, 0);
-
-    m_pMtcRadioChecker->OnCallStateChanged(
-            CALL_KEY2, IMtcCall::State::TERMINATING, CallType::VOIP, IMS_FALSE, 0);
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), StopImsTraffic(_)).Times(0);
 
@@ -626,7 +637,7 @@ TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionFailedNotifies)
                     Invoke(this, &MtcRadioCheckerTest::CaptureIImsRadioConnectionListener)));
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
 
@@ -657,7 +668,7 @@ TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionSetupPreparedNotif
                     Invoke(this, &MtcRadioCheckerTest::CaptureIImsRadioConnectionListener)));
 
     EXPECT_EQ(CheckResult::PENDING,
-            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE));
+            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(1);
 
