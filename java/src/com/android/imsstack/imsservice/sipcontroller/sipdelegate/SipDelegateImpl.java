@@ -259,7 +259,7 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
      */
     @Override
     public void onMessageReceived(SipMessage message) {
-        Log.i(LOG_TAG, "onMessageReceived");
+        Log.i(LOG_TAG, "onMessageReceived callId:" + message.getCallIdParameter());
         mCallBackExecutor.execute(() -> {
             mDelegateRequestData.getDelegateMessageCallback().onMessageReceived(message);
         });
@@ -276,6 +276,8 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
         mCallBackExecutor.execute(() -> {
             mDelegateRequestData.getDelegateMessageCallback().onMessageSent(viaTransactionId);
         });
+        mViaTransactionIds.remove(viaTransactionId);
+        mViaTransactionIdAndCallId.remove(viaTransactionId);
     }
 
     /**
@@ -381,6 +383,14 @@ public class SipDelegateImpl implements SipDelegate, ISipDelegateIncomingMessage
 
     public Set<String> getViaTransactionIds() {
         return mViaTransactionIds;
+    }
+
+    /**
+     * Get the TransactionId and CallId handled by this Sip Delegate
+     */
+
+    public HashMap<String, String> getViaTransactionIdsAndCallId() {
+        return mViaTransactionIdAndCallId;
     }
     //END Getter methods
     //START Setter methods
