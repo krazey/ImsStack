@@ -250,9 +250,9 @@ public class VideoSessionHandler extends MediaState {
                 }
                     break;
 
-                case MediaConstants.NOTIFY_PACKET_LOSS:
+                case MediaConstants.NOTIFY_BITRATE:
                 {
-                    handleVideoPacketLossNotification(msg.arg1);
+                    handleVideoBitrateNotification(msg.arg1);
                 }
                     break;
 
@@ -344,11 +344,11 @@ public class VideoSessionHandler extends MediaState {
         }
 
         @Override
-        public void notifyPacketLoss(final int packetLossPercentage) {
-            ImsLog.d("packetLossPercentage=" + packetLossPercentage);
+        public void notifyBitrate(final int bitrate) {
+            ImsLog.d("notifyBitrate=" + bitrate);
 
-            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_PACKET_LOSS,
-                    packetLossPercentage, UNUSED).sendToTarget();
+            Message.obtain(mVideoMessageHandler, MediaConstants.NOTIFY_BITRATE,
+                    bitrate, UNUSED).sendToTarget();
         }
 
         @Override
@@ -657,9 +657,9 @@ public class VideoSessionHandler extends MediaState {
         }
     }
 
-    private void handleVideoPacketLossNotification(final int packetLossPercentage) {
+    private void handleVideoBitrateNotification(final int bitrate) {
         if (mVideoSessionCallbackHandler != null) {
-            mVideoSessionCallbackHandler.onNotifyPacketLoss(packetLossPercentage);
+            mVideoSessionCallbackHandler.onNotifyBitrate(bitrate);
         }
     }
 

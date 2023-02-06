@@ -287,10 +287,10 @@ public class VideoSessionHandlerTest extends MediaSessionHandlerTest {
     @Test
     public void testMediaQualityNotifications() {
         // Receive Packet Loss Notification
-        mVideoSessionCallback.notifyPacketLoss(MediaTestUtils.PACKET_LOSS_PERCENT);
+        mVideoSessionCallback.notifyBitrate(MediaTestUtils.VIDEO_BITRATE_BPS);
         processAllMessages();
         verify(mMockVideoSessionCallbackHandler)
-                .onNotifyPacketLoss(eq(MediaTestUtils.PACKET_LOSS_PERCENT));
+                .onNotifyBitrate(eq(MediaTestUtils.VIDEO_BITRATE_BPS));
 
         // Receive Video Data Usage Notification
         mVideoSessionCallback.notifyVideoDataUsage(MediaTestUtils.DATA_BYTES);
