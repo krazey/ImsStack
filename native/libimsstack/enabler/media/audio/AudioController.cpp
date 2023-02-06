@@ -424,7 +424,7 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
     {
         AudioMediaSession* pAudioSession = m_listAudioSession.GetAt(nIndex);
 
-        if (pAudioSession == IMS_NULL || pAudioSession->GetState() < AudioMediaSession::STATE_LIVE)
+        if (pAudioSession == IMS_NULL || pAudioSession->GetState() == AudioMediaSession::STATE_NONE)
         {
             continue;
         }
