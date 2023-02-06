@@ -18,6 +18,8 @@
 #define MEDIA_DEF_H_
 
 #include <IpAddress.h>
+#include <list>
+#include <algorithm>
 
 /** Service Type */
 typedef enum
@@ -158,35 +160,40 @@ public:
             m_eMediaType(type),
             m_objIpAddress(address),
             m_nPort(port),
-            m_bCallback(callback),
-            m_bResult(IMS_FALSE)
+            m_bCallback(callback)
     {
     }
 
     bool operator==(const QosRequestParam& param)
     {
-        return (this->m_eMediaType == param.m_eMediaType &&
-                this->m_objIpAddress == param.m_objIpAddress && this->m_nPort == param.m_nPort);
+        return (m_eMediaType == param.m_eMediaType && m_objIpAddress == param.m_objIpAddress &&
+                m_nPort == param.m_nPort);
     }
 
     QosRequestParam(const QosRequestParam& param)
     {
-        this->m_eMediaType = param.m_eMediaType;
-        this->m_objIpAddress = param.m_objIpAddress;
-        this->m_nPort = param.m_nPort;
-        this->m_bCallback = param.m_bCallback;
-        this->m_bResult = param.m_bResult;
+        m_eMediaType = param.m_eMediaType;
+        m_objIpAddress = param.m_objIpAddress;
+        m_nPort = param.m_nPort;
+        m_bCallback = param.m_bCallback;
     }
 
-    void AddNegoId(const IMS_UINTP id) { m_objListNegoId.Append(id); }
+    void AddNegoId(const IMS_UINTP id)
+    {
+        std::list<IMS_UINTP>::iterator foundId =
+                std::find(m_objListNegoId.begin(), m_objListNegoId.end(), id);
+        if (foundId == m_objListNegoId.end())
+        {
+            m_objListNegoId.push_back(id);
+        }
+    }
 
 public:
     MEDIA_CONTENT_TYPE m_eMediaType;
     IpAddress m_objIpAddress;
     IMS_SINT32 m_nPort;
     IMS_BOOL m_bCallback;
-    IMS_BOOL m_bResult;
-    IMSList<IMS_UINTP> m_objListNegoId;
+    std::list<IMS_UINTP> m_objListNegoId;
 };
 
 #define MEDIA_IS_CONTAINED_THIS_TYPE(eDst, eSrc) (((eDst) & (eSrc)) != 0)

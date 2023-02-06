@@ -313,26 +313,16 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
         return IMS_FALSE;
     }
 
-    // check whether qos for negoId was already requested and responded
+    // check whether qos for the remote address already requested
     QosRequestParam* pQosParams = FindQosParam(pParam);
 
-    if (pQosParams != NULL)
+    if (pQosParams != NULL && pQosParams->m_bCallback == IMS_FALSE)  // callback has not responded
     {
-        // qos was requested and callback had been received
-        if (pQosParams->m_bCallback == IMS_TRUE)
-        {
-            IMS_TRACE_D("RequestQos() - eMediaType[%d] has already responded", eMediaType, 0, 0);
-            m_pClientListener->MediaSession_NotifyQos(
-                    nNegoId, pQosParams->m_bResult, pQosParams->m_eMediaType);
-        }
-        else
-        {
-            pQosParams->AddNegoId(nNegoId);
-        }
-
+        IMS_TRACE_D("RequestQos() - eMediaType[%d] yet responded", eMediaType, 0, 0);
+        pQosParams->AddNegoId(nNegoId);
         delete pParam;
     }
-    else  // qos is not requested yet
+    else
     {
         pParam->AddNegoId(nNegoId);
         MediaSession_SendMsgToMediaManager(IMMedia::REQUEST_QOS,
@@ -823,13 +813,13 @@ void MediaSession::ClearMediaNego()
 }
 
 PROTECTED
-QosRequestParam* MediaSession::FindQosParam(const QosRequestParam* srcParam)
+QosRequestParam* MediaSession::FindQosParam(const QosRequestParam* targetParam)
 {
     for (IMS_SINT32 nIndex = 0; nIndex < m_objListQosParams.GetSize(); nIndex++)
     {
         QosRequestParam* param = m_objListQosParams.GetAt(nIndex);
 
-        if (param != NULL && *param == *srcParam)
+        if (param != NULL && *param == *targetParam)
         {
             return param;
         }
@@ -1116,17 +1106,13 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 
                 if (pMatchedParam != IMS_NULL)
                 {
-                    for (IMS_SINT32 nIndex = 0; nIndex < pMatchedParam->m_objListNegoId.GetSize();
-                            nIndex++)
+                    pMatchedParam->m_bCallback = IMS_TRUE;
+
+                    for (auto& negoId : pMatchedParam->m_objListNegoId)
                     {
-                        IMS_UINTP negoId = pMatchedParam->m_objListNegoId.GetAt(nIndex);
                         m_pClientListener->MediaSession_NotifyQos(
                                 negoId, bResult, pMatchedParam->m_eMediaType);
                     }
-
-                    // mark that the callback is already invoked
-                    pMatchedParam->m_bCallback = IMS_TRUE;
-                    pMatchedParam->m_bResult = bResult;
                 }
 
                 delete pParam;

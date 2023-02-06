@@ -99,7 +99,7 @@ protected:
     IMS_BOOL DeleteMediaNego(IN IMS_UINTP nNegoId);
     void ClearMediaNego();
     QosRequestParam* FindQosParam(const QosRequestParam* param);
-    QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
+    virtual QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
     void ClearQosParam();
     // IMediaSessionListener
     IMS_BOOL MediaSession_SendMsgToMediaManager(

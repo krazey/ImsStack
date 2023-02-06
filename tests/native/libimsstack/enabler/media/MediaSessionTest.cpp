@@ -38,6 +38,12 @@ public:
     }
     virtual ~FakeMediaSession() {}
 
+    virtual QosRequestParam* createQosParam(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
+    {
+        (void)nNegoId;
+        return new QosRequestParam(eMediaType, IpAddress(REMOTE_IP), REMOTE_PORT);
+    }
+
     IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) override
     {
@@ -128,26 +134,89 @@ protected:
     }
 };
 
-TEST_F(MediaSessionTest, testQosRequest)
+TEST_F(MediaSessionTest, testQosRequestAndCallbackUnmatch)
 {
-    IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIOVIDEOTEXT);
+    IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
     EXPECT_NE(negoId, 0);
-
     EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
-    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_VIDEO), IMS_TRUE);
-    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_TEXT), IMS_TRUE);
+
+    ImsMediaMsgQosParam* pParam =
+            new ImsMediaMsgQosParam(MEDIA_TYPE_AUDIO, m_objRemoteIpAddress, 30000);
+    pParam->m_bResult = IMS_TRUE;
+
+    EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_TRUE, MEDIA_TYPE_AUDIO))
+            .Times(0);
+
+    EXPECT_EQ(
+            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+            IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
 }
 
-TEST_F(MediaSessionTest, testQosCallback)
+TEST_F(MediaSessionTest, testQosRequestAndCallbackAudio)
 {
     IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
     EXPECT_NE(negoId, 0);
+    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_AUDIO), IMS_TRUE);
+    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_AUDIO), IMS_TRUE);  // check request twice
+
+    EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_TRUE, MEDIA_TYPE_AUDIO))
+            .Times(1);
 
     ImsMediaMsgQosParam* pParam =
             new ImsMediaMsgQosParam(MEDIA_TYPE_AUDIO, m_objRemoteIpAddress, REMOTE_PORT);
     pParam->m_bResult = IMS_TRUE;
+
+    EXPECT_EQ(
+            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+            IMS_TRUE);
+
+    EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_FALSE, MEDIA_TYPE_AUDIO))
+            .Times(1);
+
+    pParam = new ImsMediaMsgQosParam(MEDIA_TYPE_AUDIO, m_objRemoteIpAddress, REMOTE_PORT);
+    pParam->m_bResult = IMS_FALSE;
+
+    EXPECT_EQ(
+            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+            IMS_TRUE);
+
+    EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
+}
+
+TEST_F(MediaSessionTest, testQosRequestAndCallbackVideo)
+{
+    IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_VIDEO);
+    EXPECT_NE(negoId, 0);
+    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_VIDEO), IMS_TRUE);
+
+    ImsMediaMsgQosParam* pParam =
+            new ImsMediaMsgQosParam(MEDIA_TYPE_VIDEO, m_objRemoteIpAddress, REMOTE_PORT);
+    pParam->m_bResult = IMS_TRUE;
+
+    EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_TRUE, MEDIA_TYPE_VIDEO))
+            .Times(1);
+
+    EXPECT_EQ(
+            m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
+            IMS_TRUE);
+
+    EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
+}
+
+TEST_F(MediaSessionTest, testQosRequestAndCallbackText)
+{
+    IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_TEXT);
+    EXPECT_NE(negoId, 0);
+    EXPECT_EQ(m_pSession->RequestQos(negoId, MEDIA_TYPE_TEXT), IMS_TRUE);
+
+    ImsMediaMsgQosParam* pParam =
+            new ImsMediaMsgQosParam(MEDIA_TYPE_TEXT, m_objRemoteIpAddress, REMOTE_PORT);
+    pParam->m_bResult = IMS_TRUE;
+
+    EXPECT_CALL(m_objClientListener, MediaSession_NotifyQos(negoId, IMS_TRUE, MEDIA_TYPE_TEXT))
+            .Times(1);
 
     EXPECT_EQ(
             m_pSession->SendMessage(IMMedia::NOTIFY_QOS_INFO, reinterpret_cast<IMS_UINTP>(pParam)),
