@@ -43,26 +43,28 @@ public class MediaManagerHelper {
     private static boolean sIsImsMediaServiceDisconnected;
     private static ImsMediaManager sImsMediaManager;
     private static Executor sExecutor;
-    private IMediaConnectionObserver mMediaObserver;
-    private static HandlerThread sMediaHandlerThread =
-            new HandlerThread(MediaManagerHelper.class.getSimpleName());
+    private static IMediaConnectionObserver sMediaObserver;
+    private static HandlerThread sMediaHandlerThread;
 
+    @SuppressWarnings("StaticAssignmentInConstructor")
     public MediaManagerHelper(IMediaConnectionObserver mediaObserver) {
 
-        mMediaObserver = mediaObserver;
+        sMediaObserver = mediaObserver;
         mContext = AppContext.getInstance();
         createImsMediaManagerInstance();
     }
 
     @VisibleForTesting
+    @SuppressWarnings("StaticAssignmentInConstructor")
     public MediaManagerHelper(Context context, IMediaConnectionObserver mediaObserver,
         ImsMediaManager imsMediaManager, Executor executor) {
 
         mContext = context;
-        mMediaObserver = mediaObserver;
+        sMediaObserver = mediaObserver;
         if (sImsMediaManager == null) {
             sImsMediaManager = imsMediaManager;
             sExecutor = executor;
+            sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
             if (sMediaHandlerThread.getState() == Thread.State.NEW) {
                 sMediaHandlerThread.start();
             }
@@ -73,6 +75,7 @@ public class MediaManagerHelper {
 
         if (sImsMediaManager == null) {
             ImsLog.v("ImsMediaManager instance created");
+            sMediaHandlerThread = new HandlerThread(MediaManagerHelper.class.getSimpleName());
             sExecutor = Executors.newSingleThreadExecutor();
             sImsMediaManager = new ImsMediaManager(mContext, sExecutor,
                                     new ImsMediaManagerCallback());
@@ -120,8 +123,14 @@ public class MediaManagerHelper {
             sImsMediaManager.release();
             sImsMediaManager = null;
             sExecutor = null;
+            sMediaObserver = null;
             sIsImsMediaManagerReady = false;
             sIsImsMediaServiceDisconnected = false;
+        }
+
+        if (sMediaHandlerThread != null) {
+            sMediaHandlerThread.quitSafely();
+            sMediaHandlerThread = null;
         }
     }
 
@@ -173,6 +182,31 @@ public class MediaManagerHelper {
     }
 
     /**
+     * Handle ImsMedia onConnected callback
+     */
+    private void handleConnected() {
+        if (sIsImsMediaServiceDisconnected) {
+            close();
+            return;
+        }
+        sIsImsMediaManagerReady = true;
+        if (sMediaObserver != null) {
+            sMediaObserver.onMediaConnected();
+        }
+    }
+
+    /**
+     * Handle ImsMedia onDisconnected callback
+     */
+    private void handleDisconnected() {
+        sIsImsMediaManagerReady = false;
+        sIsImsMediaServiceDisconnected = true;
+        if (sMediaObserver != null) {
+            sMediaObserver.onMediaDisconnected();
+        }
+    }
+
+    /**
      * Implements Interface to receive callbacks when the ImsMediaManager is connected
      * or disconnected.
      */
@@ -181,23 +215,13 @@ public class MediaManagerHelper {
         @Override
         public void onConnected() {
             ImsLog.i("ImsMediaManager - connected");
-            sIsImsMediaManagerReady = true;
-            if (mMediaObserver != null) {
-                mMediaObserver.onMediaConnected();
-            }
-            if (sIsImsMediaServiceDisconnected) {
-                close();
-            }
+            handleConnected();
         }
 
         @Override
         public void onDisconnected() {
             ImsLog.i("ImsMediaManager - disconnected");
-            sIsImsMediaManagerReady = false;
-            sIsImsMediaServiceDisconnected = true;
-            if (mMediaObserver != null) {
-                mMediaObserver.onMediaDisconnected();
-            }
+            handleDisconnected();
         }
     }
 }
