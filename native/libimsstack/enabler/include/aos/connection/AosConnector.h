@@ -158,6 +158,7 @@ protected:
     IMS_BOOL m_bDataConnected;
     IMS_BOOL m_bEmergencyType;
     IMS_BOOL m_bIsTerminating;
+    IMS_BOOL m_bIsPcscfChangeIgnored;
 
     AString strTag;
 

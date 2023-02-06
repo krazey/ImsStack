@@ -49,7 +49,8 @@ AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
         m_bPcscfConfigured(IMS_FALSE),
         m_bDataConnected(IMS_FALSE),
         m_bEmergencyType(IMS_FALSE),
-        m_bIsTerminating(IMS_FALSE)
+        m_bIsTerminating(IMS_FALSE),
+        m_bIsPcscfChangeIgnored(IMS_FALSE)
 {
     strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
 
@@ -88,6 +89,13 @@ PUBLIC VIRTUAL IMS_BOOL AosConnector::Start()
     if (m_nState == STATE_READY)
     {
         A_IMS_TRACE_D(APPPROFILE, "Start :: already ready", 0, 0, 0);
+
+        if (m_bIsPcscfChangeIgnored)
+        {
+            m_piPcscf->CheckAndProcessChangeFromPco();
+            m_bIsPcscfChangeIgnored = IMS_FALSE;
+        }
+
         Notify(LISTENER_TYPE_ACTIVATED);
         return IMS_FALSE;
     }
@@ -775,6 +783,18 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_PcscfChanged()
     if (!IsPcscfChangeAvailable())
     {
         return;
+    }
+
+    if (!IsEmergencyType() && GET_N_CONFIG(m_piAppContext->GetSlotId())->IsNoInitRegOnPcscfChange())
+    {
+        if (m_piAppContext->GetApp()->IsOn())
+        {
+            A_IMS_TRACE_D(APPPROFILE, "AosConnection_PcscfChanged :: ignore in registered state", 0,
+                    0, 0);
+
+            m_bIsPcscfChangeIgnored = IMS_TRUE;
+            return;
+        }
     }
 
     if (!m_piPcscf->CheckAndProcessChangeFromPco())

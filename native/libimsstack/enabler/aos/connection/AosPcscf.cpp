@@ -508,6 +508,8 @@ PUBLIC VIRTUAL void AosPcscf::SetFirstPcscfIndex()
 
 PUBLIC VIRTUAL IMS_BOOL AosPcscf::CheckAndProcessChangeFromPco()
 {
+    A_IMS_TRACE_I(APPPROFILE, "CheckAndProcessChangeFromPco", 0, 0, 0);
+
     const AStringArray& objCurrPcscfs = GetPcscfs();
     AString strCurrPcscf;
     IMS_UINT32 nNa;
