@@ -571,6 +571,7 @@ PROTECTED VIRTUAL void AosApplication::AddEventListener()
     if (m_nAppType == TYPE_NORMAL)
     {
         IMS_EVENT_AddListenerForSlotId(IMS_EVENT_REG_CONTROL, this, m_nSlotId);
+        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
     }
 }
 
@@ -578,6 +579,7 @@ PROTECTED VIRTUAL void AosApplication::RemoveEventListener()
 {
     if (m_nAppType == TYPE_NORMAL)
     {
+        IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
         IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_REG_CONTROL, this, m_nSlotId);
     }
 }
@@ -1769,7 +1771,14 @@ PROTECTED VIRTUAL void AosApplication::ProcessNetworkEvent(
 
     if (nType == IMS_EVENT_LTE_INFO)
     {
-        m_nLteAttachState = nState;
+        if (m_nLteAttachState != nState)
+        {
+            m_nLteAttachState = nState;
+            m_piRegistration->RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY,
+                    (m_nLteAttachState != IMS_LTE_INFO_COMBINED_ATTACHED)
+                            ? IAosRegistration::REASON_SET_ENABLE
+                            : IAosRegistration::REASON_SET_DISABLE);
+        }
     }
 
     if (nType == IMS_EVENT_VOICE_SERVICE_STATE)
@@ -1862,14 +1871,35 @@ PROTECTED VIRTUAL void AosApplication::ProcessPingCommand()
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 {
-    m_pConnector->Stop();
-
     IMS_UINT32 nFinalErr = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrFinalType();
 
-    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED ||
-            nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
+    A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: reg err final type - %d", nFinalErr, 0, 0);
+
+    m_pConnector->Stop();
+
+    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED)
     {
-        A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: PLMN is blocked with timeout", 0, 0, 0);
+        NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+        return;
+    }
+
+    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
+    {
+        if (m_nRat != NW_REPORT_RADIO_NR)
+        {
+            if (m_nRat != NW_REPORT_RADIO_LTE)
+            {
+                return;
+            }
+            else
+            {
+                if (m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED)
+                {
+                    return;
+                }
+            }
+        }
+
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
     }
 }
@@ -2587,10 +2617,21 @@ PROTECTED VIRTUAL void AosApplication::NetTracker_StatusChanged()
         return;
     }
 
+    IMS_UINT32 nEps5gsOnlyState;
+
     if (nNewRat == NW_REPORT_RADIO_LTE)
     {
         m_pCondition->ResetBlock(BLOCK_EPS_FALLBACK_STARTED);
+        nEps5gsOnlyState = (m_nLteAttachState != IMS_LTE_INFO_COMBINED_ATTACHED)
+                ? IAosRegistration::REASON_SET_ENABLE
+                : IAosRegistration::REASON_SET_DISABLE;
     }
+    else
+    {
+        nEps5gsOnlyState = (nNewRat == NW_REPORT_RADIO_NR) ? IAosRegistration::REASON_SET_ENABLE
+                                                           : IAosRegistration::REASON_SET_DISABLE;
+    }
+    m_piRegistration->RequestCmd(IAosRegistration::CMD_SET_EPS_5GS_ONLY, nEps5gsOnlyState);
 
     if (!m_piContext->GetConnection()->IsEpdgEnabled() &&
             m_pUtil->IsSupportedNetworkTypeForCellular(m_nRat) &&

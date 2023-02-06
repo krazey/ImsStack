@@ -381,6 +381,10 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             }
             break;
 
+        case CMD_SET_EPS_5GS_ONLY:
+            m_bEps5GsOnly = (nReason == REASON_SET_ENABLE);
+            break;
+
         default:
             break;
     }
@@ -5554,10 +5558,31 @@ IMS_BOOL AosRegistration::IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT3
 PRIVATE
 IMS_BOOL AosRegistration::IsPdnReactivationRequired()
 {
+    IMS_SINT32 nCntForOnlyAttached =
+            GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached();
+
+    IMS_SINT32 nCntForCombinedAttached =
+            GET_N_CONFIG(m_nSlotId)->GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached();
+
+    if (nCntForOnlyAttached <= 0 || nCntForCombinedAttached <= 0)
+    {
+        return IMS_FALSE;
+    }
+
     m_nConsecutiveFailureForPdnReactivated++;
 
-    // TODO: check combined
-    if ((m_piContext->GetPcscf()->GetPcscfCount()) <= m_nConsecutiveFailureForPdnReactivated)
+    IMS_UINT32 nPdnReactivatedCnt = m_piContext->GetPcscf()->GetPcscfCount();
+
+    if (m_bEps5GsOnly)
+    {
+        nPdnReactivatedCnt *= nCntForOnlyAttached;
+    }
+    else
+    {
+        nPdnReactivatedCnt *= nCntForCombinedAttached;
+    }
+
+    if (nPdnReactivatedCnt <= m_nConsecutiveFailureForPdnReactivated)
     {
         m_nPdnReactivateWaitTime = 0;
         m_nConsecutiveFailureForPdnReactivated = 0;
