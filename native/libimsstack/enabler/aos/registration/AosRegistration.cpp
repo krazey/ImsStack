@@ -5193,7 +5193,7 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(
         {
             if (nWaitTimeMillis > (RETRY_DEFAULT_WAIT_TIME * 1000))
             {
-                Destroy();
+                DestroyEx();
 
                 ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
                 StartTimer(TIMER_OFFLINE_RECOVER, nWaitTimeMillis);
