@@ -375,10 +375,10 @@ public:
     public:
         Payload() :
                 pFmtp(IMS_NULL){};
-        Payload(IN const Payload& obj)
+        Payload(IN const Payload& obj) :
+                objRtpMap(obj.objRtpMap),
+                pFmtp(IMS_NULL)
         {
-            objRtpMap = obj.objRtpMap;
-
             if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
                     objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
             {

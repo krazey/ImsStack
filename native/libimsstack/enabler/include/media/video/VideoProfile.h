@@ -289,10 +289,14 @@ public:
                 bIncludeFrameSize(IMS_FALSE),
                 strImageAttr(AString::ConstNull()){};
 
-        Payload(IN const Payload& obj)
+        Payload(IN const Payload& obj) :
+                objRtpMap(obj.objRtpMap),
+                pFmtp(IMS_NULL),
+                bIncludeImageAttr(obj.bIncludeImageAttr),
+                bIncludeFrameSize(obj.bIncludeFrameSize),
+                strImageAttr(obj.strImageAttr),
+                objRtcpFbAttr(obj.objRtcpFbAttr)
         {
-            objRtpMap = obj.objRtpMap;
-
             if (objRtpMap.strPayloadType.Equals("H264"))
             {
                 pFmtp = new VideoProfile::AvcFmtp(
@@ -303,11 +307,6 @@ public:
                 pFmtp = new VideoProfile::HevcFmtp(
                         reinterpret_cast<VideoProfile::HevcFmtp*>(obj.pFmtp));
             }
-
-            bIncludeImageAttr = obj.bIncludeImageAttr;
-            bIncludeFrameSize = obj.bIncludeFrameSize;
-            strImageAttr = obj.strImageAttr;
-            objRtcpFbAttr = obj.objRtcpFbAttr;
         }
 
         virtual ~Payload() { deleteFmtp(); }

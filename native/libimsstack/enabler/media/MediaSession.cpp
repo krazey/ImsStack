@@ -1108,7 +1108,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
                 {
                     pMatchedParam->m_bCallback = IMS_TRUE;
 
-                    for (auto& negoId : pMatchedParam->m_objListNegoId)
+                    for (const auto& negoId : pMatchedParam->m_objListNegoId)
                     {
                         m_pClientListener->MediaSession_NotifyQos(
                                 negoId, bResult, pMatchedParam->m_eMediaType);

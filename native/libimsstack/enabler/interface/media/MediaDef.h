@@ -170,12 +170,12 @@ public:
                 m_nPort == param.m_nPort);
     }
 
-    QosRequestParam(const QosRequestParam& param)
+    QosRequestParam(const QosRequestParam& param) :
+            m_eMediaType(param.m_eMediaType),
+            m_objIpAddress(param.m_objIpAddress),
+            m_nPort(param.m_nPort),
+            m_bCallback(param.m_bCallback)
     {
-        m_eMediaType = param.m_eMediaType;
-        m_objIpAddress = param.m_objIpAddress;
-        m_nPort = param.m_nPort;
-        m_bCallback = param.m_bCallback;
     }
 
     void AddNegoId(const IMS_UINTP id)
