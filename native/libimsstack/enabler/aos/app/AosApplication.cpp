@@ -2765,6 +2765,25 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
     }
 }
 
+PROTECTED VIRTUAL void AosApplication::ServicePhone_LocationInfoChanged(IN LocationInfo eState)
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsReregRetryWithChangedCountryOnWifi())
+    {
+        return;
+    }
+
+    if (eState != LocationInfo::COUNTRY_CHANGED || !m_piContext->GetConnection()->IsEpdgEnabled())
+    {
+        return;
+    }
+
+    A_IMS_TRACE_I(APPID,
+            "ServicePhone_LocationInfoChanged :: reg update due to country change over epdg", 0, 0,
+            0);
+
+    PostMessage(MSG_REG_UPDATE, 0, 0);
+}
+
 PROTECTED VIRTUAL void AosApplication::Init()
 {
     IAosNConfiguration* piNConfig = GET_N_CONFIG(m_nSlotId);
@@ -2818,6 +2837,7 @@ PROTECTED VIRTUAL void AosApplication::Init()
         if (piService != IMS_NULL)
         {
             piService->AddListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
+            piService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
         }
     }
 
@@ -2845,6 +2865,7 @@ PROTECTED VIRTUAL void AosApplication::CleanUp()
         IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
         if (piService != IMS_NULL)
         {
+            piService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
             piService->RemoveListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
         }
 

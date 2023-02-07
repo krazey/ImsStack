@@ -265,6 +265,7 @@ public class VoLteService implements IVoLteService {
                 policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_DISTANCE;
                 policy |= LocationPolicy.POLICY_LOCATION_UPDATE_USING_SMD;
                 policy |= LocationPolicy.POLICY_USE_FLP;
+                policy |= LocationPolicy.POLICY_NOTIFY_COUNTRY_CHANGED_EVENT;
 
                 addressResolutionTimeMillis = 1000;
                 validityPeriod = LocationPolicy.LOCATION_VALIDITY_PERIOD;

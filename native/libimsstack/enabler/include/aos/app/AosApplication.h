@@ -32,6 +32,7 @@
 #include "interface/IAosNetTrackerListener.h"
 #include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosRegistrationListener.h"
+#include "interface/IAosServicePhoneListener.h"
 #include "provider/AosStaticProfile.h"
 
 class IAosAppContext;
@@ -56,7 +57,8 @@ class AosApplication :
         public ITimerListener,
         public IAosNetTrackerListener,
         public IAosNConfigurationListener,
-        public AosRegistrationControlListener
+        public AosRegistrationControlListener,
+        public AosServicePhoneListener
 {
     DECLARE_STATE_MAP()
 
@@ -270,6 +272,9 @@ protected:
     // AosRegistrationControlListener
     void RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
             IN AosPcscfOrder eOrder, IN AosControlCause eCause) override;
+
+    // AosServicePhoneListener
+    void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
 
 protected:
     enum
