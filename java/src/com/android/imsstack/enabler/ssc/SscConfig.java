@@ -409,10 +409,4 @@ public final class SscConfig {
         // TODO: Is this function really needed?
         return "tel";
     }
-
-    static boolean isPdnConnCheckedByDataState(int slotId) {
-        // TODO:
-        //return ImsGlobal.isOperatorCountry(slotId, "RJIL", "IN")  ? true : false;
-        return false;
-    }
 }

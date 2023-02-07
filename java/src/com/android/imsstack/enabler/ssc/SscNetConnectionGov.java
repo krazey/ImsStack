@@ -62,15 +62,6 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
             return false;
         }
 
-        if (!netConnection.isPdnAvailable()) {
-            int otherSlotId = slotId == 0 ? 1 : 0;
-            ISscNetConnection otherNetConnection = mSscNetConnection.get(otherSlotId);
-            if (otherNetConnection != null) {
-                otherNetConnection.disconnect();
-                return true; // it is to retry PDN connect after XCAP PDN release for other slot
-            }
-        }
-
         return netConnection.connect();
     }
 

@@ -33,7 +33,6 @@ import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.LinkedHashMap;
@@ -173,44 +172,6 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         startTimer(EVENT_PDN_REQUEST_TIMEOUT, PDN_CONNECTION_TIMEOUT_TIMER);
-        return true;
-    }
-
-    @Override
-    public boolean isPdnAvailable() {
-        ImsLog.d("");
-
-        if (!MSimUtils.isMultiSimEnabled()) {
-            return true;
-        }
-
-        /* TODO: Need to re-request after disconnection of other slot's connection
-        if (mApnType == null || !mApnType.equals(EApnType.XCAP)) {
-            ImsLog.d(mSlotId, "it's not XCAP, PDN available");
-            return true;
-        }
-
-        // active modem count?
-        int otherSlotId = mSlotId == 0 ? 1 : 0;
-        IDcApn dcGovApnCtrl = (IDcApn) DcFactory.getDc(DcFactory.APN, otherSlotId);
-        if (dcGovApnCtrl == null) {
-            ImsLog.e(mSlotId, "dcGovApnCtrl for other slot is null, PDN available");
-            return true;
-        }
-
-        IApn apnCtrl = dcGovApnCtrl.getApnControl(mApnType.getType());
-        if (apnCtrl == null) {
-            ImsLog.e(mSlotId, "apnCtrl for other slot is null, PDN available");
-            return true;
-        }
-
-        if (SscConfig.isPdnConnCheckedByDataState(otherSlotId)) {
-            return apnCtrl.getDataState() != TelephonyManager.DATA_CONNECTED;
-        } else if (apnCtrl.isConnected()) {
-            ImsLog.e(mSlotId, "XCAP PDN for other slot is connected, PDN not available");
-            return false;
-        }
-        */
         return true;
     }
 

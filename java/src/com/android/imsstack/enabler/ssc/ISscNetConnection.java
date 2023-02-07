@@ -53,13 +53,6 @@ public interface ISscNetConnection {
     boolean connect();
 
     /**
-     * Check if UICC that is inserted in other slot has a network connection or not
-     *
-     * @return true when other slot doesn't have a network connection, otherwise false
-     */
-    boolean isPdnAvailable();
-
-    /**
      * Returns network type of APN used for XCAP operation
      *
      * @return network type. See {@link TelephonyManager#NETWORK_TYPE_XXX}

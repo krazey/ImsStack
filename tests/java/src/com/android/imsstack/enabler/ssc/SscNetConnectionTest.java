@@ -223,11 +223,6 @@ public class SscNetConnectionTest {
     }
 
     @Test
-    public void isPdnAvailable() {
-        // TODO: Should it disconnect other slot's connection?
-    }
-
-    @Test
     public void disconnect_apnTypeNull() {
         mSscNetConnection.init(null);
 
