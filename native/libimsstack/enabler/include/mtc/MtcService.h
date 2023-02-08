@@ -66,7 +66,7 @@ public:
 
     void UpdateSrvccState(IN SrvccState eState) override;
     void SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled) override;
-    void OpenEmergencyService(IN EmergencyCallRoutingPdn ePdn) override;
+    void OpenEmergencyService(IN IuMtcService::EmergencyCallRoutingPdn ePdn) override;
     void ProcessTestCommand(
             IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam) override;
     TbcwStatus GetTbcwStatus() const override { return m_eTbcwStatus; }

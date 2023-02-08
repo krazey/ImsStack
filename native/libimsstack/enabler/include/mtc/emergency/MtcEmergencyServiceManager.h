@@ -19,7 +19,7 @@
 
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
-#include "helper/EmergencyNormalRoutingHelper.h"
+#include "emergency/EmergencyNormalRoutingHelper.h"
 #include "helper/IMtcAosStateListener.h"
 #include <memory>
 

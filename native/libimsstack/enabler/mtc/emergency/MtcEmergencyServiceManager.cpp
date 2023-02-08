@@ -19,12 +19,12 @@
 #include "INetworkWatcher.h"
 #include "ImsAosParameter.h"
 #include "ImsAosReason.h"
-#include "MtcEmergencyServiceManager.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/EmergencyNormalRoutingHelper.h"
+#include "emergency/EmergencyNormalRoutingHelper.h"
+#include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/IMtcAosConnector.h"
 #include <memory>
 

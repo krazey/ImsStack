@@ -18,7 +18,7 @@
 #define MOCK_I_EMERGENCY_NORMAL_ROUTING_HELPER_LISTENER_H_
 
 #include "ImsTypeDef.h"
-#include "helper/EmergencyNormalRoutingHelper.h"
+#include "emergency/EmergencyNormalRoutingHelper.h"
 #include <gmock/gmock.h>
 
 class MockIEmergencyNormalRoutingHelperListener : public IEmergencyNormalRoutingHelperListener

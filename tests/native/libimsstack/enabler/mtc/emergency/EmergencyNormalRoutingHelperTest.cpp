@@ -22,12 +22,12 @@
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "MtcEmergencyServiceManager.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/EmergencyNormalRoutingHelper.h"
+#include "emergency/EmergencyNormalRoutingHelper.h"
+#include "emergency/MockIEmergencyNormalRoutingHelperListener.h"
+#include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/MockICallStateProxy.h"
-#include "helper/MockIEmergencyNormalRoutingHelperListener.h"
 #include <gtest/gtest.h>
 #include <vector>
 

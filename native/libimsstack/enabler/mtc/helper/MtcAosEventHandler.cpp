@@ -21,7 +21,6 @@
 #include "ImsAosParameter.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
-#include "MtcEmergencyServiceManager.h"
 #include "ServiceTrace.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosStateListener.h"

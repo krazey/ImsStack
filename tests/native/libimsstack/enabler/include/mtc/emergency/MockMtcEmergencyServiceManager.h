@@ -18,7 +18,7 @@
 #define MOCK_MTC_EMERGENCY_SERVICE_MANAGER_
 
 #include "ImsTypeDef.h"
-#include "MtcEmergencyServiceManager.h"
+#include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/IMtcAosStateListener.h"
 #include <gmock/gmock.h>
 

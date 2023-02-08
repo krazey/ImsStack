@@ -21,11 +21,11 @@
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "MtcEmergencyServiceManager.h"
 #include "PlatformContext.h"
 #include "TestPhoneInfoService.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/MockICallStateProxy.h"
 #include "helper/MockIMtcAosConnector.h"
 #include <gtest/gtest.h>

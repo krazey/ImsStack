@@ -20,7 +20,6 @@
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
-#include "MockMtcEmergencyServiceManager.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MockMtcConfigurationProxy.h"
 #include "helper/IMtcAosStateListener.h"

@@ -21,7 +21,7 @@
 #include "ServiceTrace.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "helper/EmergencyNormalRoutingHelper.h"
+#include "emergency/EmergencyNormalRoutingHelper.h"
 #include "helper/ICallStateProxy.h"
 #include <memory>
 
