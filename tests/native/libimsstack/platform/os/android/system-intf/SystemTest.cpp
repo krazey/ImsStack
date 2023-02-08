@@ -16,22 +16,23 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "ImsTypeDef.h"
-#include "ImsEventDef.h"
-#include "IIpcan.h"
 #include "IImsRadio.h"
-#include "IPhoneInfoLocation.h"
+#include "IIpcan.h"
+#include "ImsEventDef.h"
 #include "ImsIpSecType.h"
-#include "IPhoneInfoSubscriber.h"
 #include "ImsPrivateProperties.h"
-#include "network/OsNetworkConstants.h"
-#include "device/OsIsim.h"
+#include "ImsTypeDef.h"
+#include "IPhoneInfoLocation.h"
+#include "IPhoneInfoSubscriber.h"
+#include "MockISystemListener.h"
+#include "MockSystemCallback.h"
 #include "OsParcel.h"
 #include "ServiceNetworkPolicy.h"
 #include "System.h"
 #include "SystemConstants.h"
-#include "MockISystemListener.h"
-#include "MockSystemCallback.h"
+#include "device/OsIsim.h"
+#include "device/OsUsim.h"
+#include "network/OsNetworkConstants.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -46,7 +47,6 @@ class SystemTest : public ::testing::Test
 {
 public:
     int EVENT_CONNECTION_SETUP_PREPARED = 2;
-    int NOTIFICATION_USIM_AUTH = 106;
 
     MockISystemListener m_objMockISystemListener;
     MockSystemCallback m_objMockSystemCallback;
@@ -195,7 +195,7 @@ TEST_F(SystemTest, NotifyData)
     out.setDataPosition(0);
     in.writeInt32(0);
     in.writeInt32(SystemConstants::NOTIFY_USIM_EVENT);
-    in.writeInt32(NOTIFICATION_USIM_AUTH);
+    in.writeInt32(OsUsim::NOTIFICATION_USIM_AUTH);
     in.writeInt32(87);
     in.writeString16(String16("response"));
     in.writeInt64(657657576575);
@@ -221,7 +221,7 @@ TEST_F(SystemTest, NotifyData)
     EXPECT_EQ(1, out.readInt32());
 }
 
-TEST_F(SystemTest, AddListener)
+TEST_F(SystemTest, AddAndRemoveListener)
 {
     m_pSystem->AddListener(SystemConstants::CATEGORY_NETWORK, null, 0);
     m_pSystem->AddListener(SystemConstants::CATEGORY_NETWORK, &m_objMockISystemListener, 0);
@@ -470,7 +470,7 @@ TEST_F(SystemTest, AddListener)
     out.setDataPosition(0);
     in.writeInt32(0);
     in.writeInt32(SystemConstants::NOTIFY_USIM_EVENT);
-    in.writeInt32(NOTIFICATION_USIM_AUTH);
+    in.writeInt32(OsUsim::NOTIFICATION_USIM_AUTH);
     in.writeInt32(87);
     in.writeString16(String16("response"));
     in.writeInt64(657657576575);
@@ -498,14 +498,10 @@ TEST_F(SystemTest, AddListener)
 
     EXPECT_EQ(1, out.readInt32());
     EXPECT_CALL(m_objMockISystemListener, System_NotifyEvent(_, _, _)).Times(AnyNumber());
-}
 
-TEST_F(SystemTest, RemoveListener)
-{
+    // Testing RemoveListener
     m_pSystem->RemoveListener(SystemConstants::CATEGORY_NETWORK, null, 0);
     m_pSystem->RemoveListener(SystemConstants::CATEGORY_NETWORK, &m_objMockISystemListener, 0);
-    android::Parcel in;
-    android::Parcel out;
 
     /* Call CATEGORY_NETWORK listener*/
     in.setDataPosition(0);
@@ -626,7 +622,7 @@ TEST_F(SystemTest, RemoveListener)
     out.setDataPosition(0);
     in.writeInt32(0);
     in.writeInt32(SystemConstants::NOTIFY_USIM_EVENT);
-    in.writeInt32(NOTIFICATION_USIM_AUTH);
+    in.writeInt32(OsUsim::NOTIFICATION_USIM_AUTH);
     in.writeInt32(87);
     in.writeString16(String16("response"));
     in.writeInt64(657657576575);
