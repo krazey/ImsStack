@@ -50,11 +50,9 @@ TEST_F(OsDllTest, GetProcAddress)
     void* symbol = OsDll::GetProcAddress(pvHandle, "strlen");
     ASSERT_TRUE(symbol != NULL);
 
-    char* pString = (char*)"abcdef";
+    int (*function)(const char*) = reinterpret_cast<int (*)(const char*)>(symbol);
 
-    int (*function)(char*) = reinterpret_cast<int (*)(char*)>(symbol);
-
-    EXPECT_EQ(function(pString), 6);
+    EXPECT_EQ(function("abcdef"), 6);
 
     OsDll::FreeLibrary(nullptr);
     OsDll::FreeLibrary(pvHandle);
