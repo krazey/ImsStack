@@ -769,6 +769,8 @@ public class CarrierConfig {
                 "location_based_number_list_int_array";
         public static final String KEY_CALL_MERGEABLE_ON_CONFERENCE_ON_HOLD_BOOL =
                 "call_mergeable_on_conference_on_hold_bool";
+        public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL =
+                "release_emergency_pdn_with_emergency_call_fail_bool";
 
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =

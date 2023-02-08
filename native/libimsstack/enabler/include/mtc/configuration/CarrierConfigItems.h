@@ -146,7 +146,8 @@ public:
             bVideoOnDefaultBearerSupported(IMS_FALSE),
             bVideoQosPreconditionSupported(IMS_TRUE),
             bVoiceOnDefaultBearerSupported(IMS_FALSE),
-            bVoiceQosPreconditionSupported(IMS_TRUE)
+            bVoiceQosPreconditionSupported(IMS_TRUE),
+            bReleaseEmergencyPdnWithEmergencyCallFail(IMS_FALSE)
     {
     }
     ~CarrierConfigItems()
@@ -298,6 +299,7 @@ public:
     IMS_BOOL bVideoQosPreconditionSupported;
     IMS_BOOL bVoiceOnDefaultBearerSupported;
     IMS_BOOL bVoiceQosPreconditionSupported;
+    IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallFail;
 };
 
 #endif

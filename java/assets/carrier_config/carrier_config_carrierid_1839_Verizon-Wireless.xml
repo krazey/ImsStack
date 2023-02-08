@@ -256,6 +256,7 @@
     <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>
     <int name="emergency_rtt_guard_timer_millis_int" value="-1"/>
+    <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="true"/>
 
     <!-- Mts -->
     <boolean name="sms_use_dialed_number_for_request_uri_bool" value="true"/>

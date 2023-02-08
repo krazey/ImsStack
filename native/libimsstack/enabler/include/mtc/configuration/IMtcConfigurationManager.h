@@ -978,6 +978,13 @@ public:
      * @return
      */
     virtual IMS_SINT32 GetCallRejectCodeForNotAcceptableCallType() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual IMS_BOOL IsReleaseEmergencyPdnWithEmergencyCallFail() const = 0;
 };
 
 #endif
