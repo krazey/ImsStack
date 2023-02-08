@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -52,6 +54,7 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -89,8 +92,9 @@ public class SscServiceImpl implements IUtInterface {
     }
 
     @Override
-    public void changeCapability(boolean enable) {
-        SscServiceStateAgent.getInstance().changeCapability(mSlotId, enable);
+    public void changeCapabilities(List<CapabilityPair> enabledCaps,
+            List<CapabilityPair> disabledCaps) {
+        SscServiceStateAgent.getInstance().changeCapabilities(mSlotId, enabledCaps, disabledCaps);
     }
 
     @Override

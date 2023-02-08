@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -63,6 +65,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -173,10 +176,13 @@ public class SscServiceImplTest {
     }
 
     @Test
-    public void testChangeCapability() {
-        mSscServiceImpl.changeCapability(true);
+    public void testChangeCapabilities() {
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
 
-        verify(mMockSscServiceState).changeCapability(true);
+        mSscServiceImpl.changeCapabilities(enabledCaps, disabledCaps);
+
+        verify(mMockSscServiceState).changeCapabilities(enabledCaps, disabledCaps);
     }
 
     @Test

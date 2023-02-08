@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +35,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
 
 @RunWith(JUnit4.class)
 public class SscServiceStateAgentTest {
@@ -85,10 +89,13 @@ public class SscServiceStateAgentTest {
     }
 
     @Test
-    public void testChangeCapability() {
-        mSscServiceStateAgent.changeCapability(SLOT_0, false);
+    public void testChangeCapabilities() {
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
 
-        verify(mockSscServiceState).changeCapability(false);
+        mSscServiceStateAgent.changeCapabilities(SLOT_0, enabledCaps, disabledCaps);
+
+        verify(mockSscServiceState).changeCapabilities(enabledCaps, disabledCaps);
     }
 
     @Test
