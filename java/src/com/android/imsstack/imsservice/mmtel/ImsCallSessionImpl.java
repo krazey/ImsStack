@@ -4600,8 +4600,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 }
 
                 logi("Call terminated by ECT");
-
-                closeMtcCall(mCall);
+                /* Wait for {@link #onAudioSessionClosed} for transfer target session.
+                 * Once it receives then will initiate {@link #callSessionTerminated}
+                 * With that FW will call {@link #close} and MtcCall will be closed.
+                 */
             }
 
             mCallDetails.clear(CallDetails.ON_ECT);
