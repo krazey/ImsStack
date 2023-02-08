@@ -16,6 +16,9 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.ServiceState.STATE_IN_SERVICE;
+import static android.telephony.ServiceState.STATE_OUT_OF_SERVICE;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -117,6 +120,7 @@ public class SscServiceStateTest {
         when(mMockAlarmTimer.startTimer(anyLong(), anyLong())).thenReturn(true);
         when(mMockWifiState.isWifiConnected()).thenReturn(false);
         when(mMockDcNetWatcher.isRoaming()).thenReturn(false);
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_IN_SERVICE);
         when(mMockDcNetWatcher.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_LTE);
         when(mMockSimInterface.getSubId()).thenReturn(SUB_ID_0);
 
@@ -177,6 +181,8 @@ public class SscServiceStateTest {
                 SscServiceState.EVENT_WIFI_STATE_CHANGED, null);
         verify(mMockDcNetWatcher).registerForAirplaneModeChanged(mSscServiceState.mHandler,
                 SscServiceState.EVENT_AIRPLANE_MODE_CHANGED, null);
+        verify(mMockDcNetWatcher).registerForDataServiceStateChanged(mSscServiceState.mHandler,
+                SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED, null);
         verify(mMockDcNetWatcher).registerForRatChanged(mSscServiceState.mHandler,
                 SscServiceState.EVENT_DATA_RAT_CHANGED, null);
         verify(mMockDcNetWatcher).registerForRoamingStateChanged(mSscServiceState.mHandler,
@@ -201,6 +207,7 @@ public class SscServiceStateTest {
 
         verify(mMockWifiState).unregisterForWifiStateChanged(mSscServiceState.mHandler);
         verify(mMockDcNetWatcher).unregisterForAirplaneModeChanged(mSscServiceState.mHandler);
+        verify(mMockDcNetWatcher).unregisterForDataServiceStateChanged(mSscServiceState.mHandler);
         verify(mMockDcNetWatcher).unregisterForRatChanged(mSscServiceState.mHandler);
         verify(mMockDcNetWatcher).unregisterForRoamingStateChanged(mSscServiceState.mHandler);
         verify(mMockSimInterface).removeListener(mSscServiceState.mSimStateListener);
@@ -500,6 +507,32 @@ public class SscServiceStateTest {
         when(mMockWifiState.isWifiConnected()).thenReturn(true);
 
         sendMessage(SscServiceState.EVENT_WIFI_STATE_CHANGED);
+        processDelayedMessage();
+
+        assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        assertEquals(false, mSscServiceState.isUtAvailable());
+    }
+
+    @Test
+    public void testSscServiceStateHandler_serviceStateChangedToInService() {
+        mSscServiceState.mUtAvailability = false;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_IN_SERVICE);
+
+        sendMessage(SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED);
+        processDelayedMessage();
+
+        assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        assertEquals(true, mSscServiceState.isUtAvailable());
+    }
+
+    @Test
+    public void testSscServiceStateHandler_serviceStateChangedToOutOfService() {
+        mSscServiceState.mUtAvailability = true;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        sendMessage(SscServiceState.EVENT_DATA_SERVICE_STATE_CHANGED);
         processDelayedMessage();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);

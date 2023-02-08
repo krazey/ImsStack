@@ -16,6 +16,8 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.ServiceState.STATE_IN_SERVICE;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -52,9 +54,11 @@ public class SscServiceState {
     @VisibleForTesting
     protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
     @VisibleForTesting
-    protected static final int EVENT_DATA_RAT_CHANGED = 2002;
+    protected static final int EVENT_DATA_SERVICE_STATE_CHANGED = 2002;
     @VisibleForTesting
-    protected static final int EVENT_DATA_ROAMING_STATE_CHANGED = 2003;
+    protected static final int EVENT_DATA_RAT_CHANGED = 2003;
+    @VisibleForTesting
+    protected static final int EVENT_DATA_ROAMING_STATE_CHANGED = 2004;
 
     private final int mSlotId;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
@@ -96,6 +100,8 @@ public class SscServiceState {
         IDcNetWatcher dnw = getDcNetWatcher();
         if (dnw != null) {
             dnw.registerForAirplaneModeChanged(mHandler, EVENT_AIRPLANE_MODE_CHANGED, null);
+            dnw.registerForDataServiceStateChanged(mHandler, EVENT_DATA_SERVICE_STATE_CHANGED,
+                    null);
             dnw.registerForRatChanged(mHandler, EVENT_DATA_RAT_CHANGED, null);
             dnw.registerForRoamingStateChanged(mHandler, EVENT_DATA_ROAMING_STATE_CHANGED, null);
         }
@@ -134,6 +140,7 @@ public class SscServiceState {
         IDcNetWatcher dnw = getDcNetWatcher();
         if (dnw != null) {
             dnw.unregisterForAirplaneModeChanged(mHandler);
+            dnw.unregisterForDataServiceStateChanged(mHandler);
             dnw.unregisterForRatChanged(mHandler);
             dnw.unregisterForRoamingStateChanged(mHandler);
         }
@@ -286,6 +293,11 @@ public class SscServiceState {
         IDcNetWatcher dnw = getDcNetWatcher();
         if (dnw == null) {
             ImsLog.w(mSlotId, "DcNetWatcher is null");
+            return false;
+        }
+
+        if (dnw.getDataServiceState() != STATE_IN_SERVICE) {
+            ImsLog.w(mSlotId, "Out of service");
             return false;
         }
 
@@ -522,6 +534,7 @@ public class SscServiceState {
                     handleAirplaneModeChanged();
                     break;
                 case EVENT_WIFI_STATE_CHANGED: // FALL-THROUGH
+                case EVENT_DATA_SERVICE_STATE_CHANGED: // FALL-THROUGH
                 case EVENT_DATA_RAT_CHANGED: // FALL-THROUGH
                 case EVENT_DATA_ROAMING_STATE_CHANGED:
                     handleUtFeatureCapabilityChanged();
