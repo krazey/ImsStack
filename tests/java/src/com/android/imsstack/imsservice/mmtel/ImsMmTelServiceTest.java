@@ -119,6 +119,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mServiceManager.getServiceRecordMap().clear();
         ImsServiceManager.setDefault(null);
         mServiceManager = null;
+        UtFactory.getInstance().setUtInterfaceForSlot(SLOT_ID, null);
     }
 
     @Test

@@ -91,8 +91,9 @@ public class UtCommandTest {
                 any())).thenReturn(null);
         when(mMockUsatCmdRes.getResult()).thenReturn(Usat.RESULT_ALLOWED);
 
-        mImsUtImpl = new ImsUtImpl(mMockBaseContext);
         UtFactory.getInstance().setUtInterfaceForSlot(mSlotId, mMockUtInterface);
+
+        mImsUtImpl = new ImsUtImpl(mMockBaseContext);
         mImsUtImpl.init();
     }
 
