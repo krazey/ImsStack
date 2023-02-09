@@ -732,7 +732,7 @@ TEST_F(OutgoingStateTest,
             .WillByDefault(Return(&objMessage));
     ON_CALL(objMessageUtils, IsHeaderPresent(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(IMS_TRUE));
-    AString strUrn("urn:service:sos.country-specific.ANY");
+    AString strUrn("<urn:service:sos.country-specific.ANY>");
     ON_CALL(objMessageUtils, GetHeader(&objMessage, ISipHeader::CONTACT_NORMAL, _))
             .WillByDefault(Return(strUrn));
     AString strNumber("anyNumber");

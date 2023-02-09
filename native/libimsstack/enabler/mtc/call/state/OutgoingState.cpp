@@ -799,7 +799,7 @@ void OutgoingState::HandleCountrySpecificServiceUrn(IN IMessage* piMessage)
         AString strServiceUrn =
                 m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
 
-        if (strServiceUrn.StartsWith("urn:service:sos.country-specific"))
+        if (strServiceUrn.Contains("urn:service:sos.country-specific"))
         {
             AString strNumber =
                     m_objContext.GetMessageUtils().GetUserPart(piMessage, ISipHeader::TO);
