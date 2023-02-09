@@ -168,6 +168,12 @@ IMS_RESULT PageMessage::Send(IN const ByteArray& objContent, IN const AString& s
         }
 
         // Set headers
+        AString strContentLength;
+
+        strContentLength.SetNumber(objContent.GetLength());
+
+        piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, strContentLength,
+                SipHeaderName::CONTENT_LENGTH);
         piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, strContentType);
 
         // Set content
