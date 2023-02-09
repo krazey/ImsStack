@@ -1143,6 +1143,29 @@ Content-Length: 0\r\n\
 
     pBadHeader->SipDelete();
 
+    // Check copy constructor with bad headers
+    pCopyMessage = new SipMessage(*pDecodeMessage);
+    ASSERT_TRUE(pCopyMessage != nullptr);
+
+    EXPECT_EQ(2, pCopyMessage->GetBadHeaderCount());
+
+    pBadHeaders = pCopyMessage->GetBadHdrs();
+    ASSERT_TRUE(pBadHeaders != nullptr);
+
+    pBadHeader = reinterpret_cast<SipBadHeader*>(pBadHeaders->GetObj(0));
+
+    EXPECT_STREQ("Via", pBadHeader->GetHeaderName());
+
+    pBadHeader->SipDelete();
+
+    pBadHeader = reinterpret_cast<SipBadHeader*>(pBadHeaders->GetObj(1));
+
+    EXPECT_STREQ("Accept", pBadHeader->GetHeaderName());
+
+    pBadHeader->SipDelete();
+
+    pCopyMessage->SipDelete();
+
     pDecodeMessage->DeleteBadHdrList();
 
     EXPECT_EQ(0, pDecodeMessage->GetBadHeaderCount());

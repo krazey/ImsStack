@@ -87,7 +87,22 @@ SipMessage::SipMessage(const SipMessage& objSipMsg) :
 #ifdef SIP_BADMESSAGE_PARSING
     if (objSipMsg.m_pBadHdrList != SIP_NULL)
     {
-        m_pBadHdrList = new SipHeaderList(*(objSipMsg.m_pBadHdrList));
+        m_pBadHdrList = new SipHeaderList(SipHeaderBase::TYPE_INVALID);
+
+        SIP_UINT32 nSize = objSipMsg.m_pBadHdrList->GetSize();
+
+        for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
+        {
+            SipHeaderBase* pHdr = objSipMsg.m_pBadHdrList->GetObj(nCount);
+
+            if (pHdr != SIP_NULL)
+            {
+                SipBadHeader* pBadHdr = new SipBadHeader(*(static_cast<SipBadHeader*>(pHdr)));
+                m_pBadHdrList->AddHeader(pBadHdr);
+                pBadHdr->SipDelete();
+                pHdr->SipDelete();
+            }
+        }
     }
 #endif
 }
