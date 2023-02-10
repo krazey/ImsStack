@@ -45,4 +45,25 @@ public:
     virtual void StopOpen() = 0;
 };
 
+/**
+ * Controls emergency service per the device state.
+ */
+class IEmergencyServiceController
+{
+public:
+    virtual ~IEmergencyServiceController(){};
+
+    /**
+     * Triggers an emergency service start.
+     */
+    virtual void Start() = 0;
+
+    /**
+     * Returns PDN type of the controller using.
+     *
+     * @return EmergencyCallRoutingPdn PDN type.
+     */
+    virtual EmergencyCallRoutingPdn GetRoutingPdnType() = 0;
+};
+
 #endif

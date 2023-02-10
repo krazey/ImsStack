@@ -19,20 +19,14 @@
 
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
-#include "emergency/EmergencyNormalRoutingHelper.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
-#include "helper/IMtcAosStateListener.h"
 #include <memory>
 
 class IMtcContext;
 
 using EmergencyCallRoutingPdn = IuMtcService::EmergencyCallRoutingPdn;
-using EmergencyServiceState = IuMtcService::EmergencyServiceState;
 
-class MtcEmergencyServiceManager :
-        public IMtcEmergencyServiceManager,
-        public IMtcAosStateListener,
-        public IEmergencyNormalRoutingHelperListener
+class MtcEmergencyServiceManager : public IMtcEmergencyServiceManager
 {
 public:
     explicit MtcEmergencyServiceManager(IN IMtcContext& objContext);
@@ -40,29 +34,17 @@ public:
     MtcEmergencyServiceManager(IN const MtcEmergencyServiceManager&) = delete;
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
-    virtual void StartOpen(IN EmergencyCallRoutingPdn ePdn) override;
-    virtual void StopOpen() override;
-
-    void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,
-            IN IMS_UINT32 eAosReason) override;
-    inline void OnIpcanChanged(IN IMtcService&, IN IMS_UINT32) override {}
-
-    void OnNormalRoutingClosed() override;
-
-private:
-    void HandleServiceIdle(OUT IMS_BOOL& bNeedToNotify);
-    void HandleServiceActive(OUT IMS_BOOL& bNeedToNotify);
-    void HandleEmergencyCallOverImsPdn();
-    IMS_BOOL IsRetryOverImsPdnRequired(IN IMS_SINT32 eAosReason) const;
-    void SetState(IN EmergencyServiceState eState);
-    void NotifyEmergencyServiceChanged(IN IMS_SINT32 eReason);
-
-    IMtcContext& m_objContext;
-    std::unique_ptr<EmergencyNormalRoutingHelper> m_pNormalRoutingHelper;
+    void StartOpen(IN EmergencyCallRoutingPdn ePdn) override;
+    void StopOpen() override;
 
 protected:
-    // open to unit test
-    EmergencyServiceState m_eState;
+    // Visible for test
+    std::unique_ptr<IEmergencyServiceController> m_pController;
+
+private:
+    IMtcContext& m_objContext;
+
+    IEmergencyServiceController* CreateController(IN EmergencyCallRoutingPdn ePdn);
 };
 
 #endif
