@@ -67,6 +67,7 @@ public:
             nRegRetryCntOnSinglePcscf(0),
             nRegRetryCntPerPcscf(0),
             nRegRetryCntResetPolicy(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION),
+            nRegRetryCntWithIpsecOnAuthFailure(3),
             nRegRetryDefaultPolicy(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC),
             nRegRetryTimerFPolicy(CarrierConfig::Assets::TIMER_F_POLICY_NONE),
             nRegTimerForEmcCallMillis(0),
@@ -136,6 +137,7 @@ public:
     IMS_SINT32 nRegRetryCntOnSinglePcscf;
     IMS_SINT32 nRegRetryCntPerPcscf;
     IMS_SINT32 nRegRetryCntResetPolicy;
+    IMS_SINT32 nRegRetryCntWithIpsecOnAuthFailure;
     IMS_SINT32 nRegRetryDefaultPolicy;
     IMS_SINT32 nRegRetryTimerFPolicy;
     IMS_SINT32 nRegTimerForEmcCallMillis;

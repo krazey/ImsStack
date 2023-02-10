@@ -120,6 +120,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_piTransactionTimer(IMS_NULL),
         m_piInternalErrorTimer(IMS_NULL),
         m_nAuthChallengeCount(0),
+        m_nAuthIpsecCount(0),
         m_nErrorCountForServerSocket(0),
         m_bCallingNumberVerificationSupported(IMS_FALSE),
         m_nNetworkBindingFeatures(0),
@@ -2568,6 +2569,11 @@ PROTECTED VIRTUAL void AosRegistration::ClearAuthChallengedCount()
     m_nAuthChallengeCount = 0;
 }
 
+PROTECTED VIRTUAL void AosRegistration::ClearAuthIpsecCount()
+{
+    m_nAuthIpsecCount = 0;
+}
+
 PROTECTED VIRTUAL void AosRegistration::ClearErrorCount()
 {
     m_nErrorCountForServerSocket = 0;
@@ -4257,7 +4263,13 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
         if (!m_pIpsecHelper->ProcessAuthChallenged(nAlgorithm))
         {
             bResponseToChallenge = IMS_FALSE;
-            SetIsIpsecSupported(IMS_FALSE);
+
+            m_nAuthIpsecCount++;
+            if (m_nAuthIpsecCount >
+                    GET_N_CONFIG(m_nSlotId)->GetRegRetryCountWithIpsecOnAuthFailure())
+            {
+                SetIsIpsecSupported(IMS_FALSE);
+            }
 
             if (GetState() == STATE_REGISTERING)
             {
@@ -4400,6 +4412,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
     ClearRetryTimers();
     ClearRetryValues(IMS_TRUE);
     ClearAuthChallengedCount();
+    ClearAuthIpsecCount();
 
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
             CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION)
@@ -4463,6 +4476,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
     }
 
     ClearAuthChallengedCount();
+    ClearAuthIpsecCount();
 
     nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
 
@@ -4496,6 +4510,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Updated()
     ClearRetryTimers();
     ClearRetryValues(IMS_TRUE);
     ClearAuthChallengedCount();
+    ClearAuthIpsecCount();
 
     if (GET_N_CONFIG(m_nSlotId)->GetRegRetryCountResetPolicy() ==
             CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION)
@@ -4554,6 +4569,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_UpdateFailed(IN IMS_SINT32 
     }
 
     ClearAuthChallengedCount();
+    ClearAuthIpsecCount();
 
     nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
 
@@ -5231,6 +5247,7 @@ PROTECTED VIRTUAL void AosRegistration::NConfiguration_NotifyConfigChanged()
         {
             SetIsIpsecSupported(IMS_TRUE);
             m_pUtil->AddFeature(FEATURE_IPSEC, m_nFeature);
+            ClearAuthIpsecCount();
         }
     }
 }

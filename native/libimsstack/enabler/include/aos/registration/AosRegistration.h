@@ -227,6 +227,7 @@ protected:
     virtual void ClearRetryCount(IN IMS_BOOL bForced = IMS_FALSE);
     virtual void ClearRetryValues(IN IMS_BOOL bRegSuccess = IMS_FALSE);
     virtual void ClearAuthChallengedCount();
+    virtual void ClearAuthIpsecCount();
     virtual void ClearErrorCount();
     virtual void ClearNetworkBindingFeatures();
 
@@ -519,6 +520,9 @@ protected:
 
     /// authentication failure counter
     IMS_UINT32 m_nAuthChallengeCount;
+
+    /// retry count for authentication failure for ipsec.
+    IMS_UINT32 m_nAuthIpsecCount;
 
     /// socket error counter
     IMS_UINT32 m_nErrorCountForServerSocket;

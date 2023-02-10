@@ -634,6 +634,9 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_CNT_RESET_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION));
+    EXPECT_CALL(objCarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT, -1))
+            .WillOnce(Return(3));
     EXPECT_CALL(
             objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_REG_RETRY_DEFAULT_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC));
@@ -808,6 +811,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(0, pAosNConfiguration->GetRegRetryCountPerPcscf());
     EXPECT_EQ(CarrierConfig::Assets::REG_RETRY_CNT_RESET_POLICY_REGISTRATION,
             pAosNConfiguration->GetRegRetryCountResetPolicy());
+    EXPECT_EQ(3, pAosNConfiguration->GetRegRetryCountWithIpsecOnAuthFailure());
     EXPECT_EQ(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC,
             pAosNConfiguration->GetRegRetryDefaultPolicy());
     EXPECT_EQ(CarrierConfig::Assets::TIMER_F_POLICY_NONE,

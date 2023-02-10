@@ -527,6 +527,8 @@ public class CarrierConfig {
         public static final String KEY_REG_RETRY_CNT_PER_PCSCF_INT = "reg_retry_cnt_per_pcscf_int";
         public static final String KEY_REG_RETRY_CNT_RESET_POLICY_INT =
                 "reg_retry_cnt_reset_policy_int";
+        public static final String KEY_REG_RETRY_CNT_WITH_IPSEC_ON_AUTH_FAILURE_INT =
+                "reg_retry_cnt_with_ipsec_on_auth_failure_int";
         public static final String KEY_REG_RETRY_DEFAULT_POLICY_INT =
                 "reg_retry_default_policy_int";
         public static final String KEY_REG_RETRY_TIMER_F_POLICY_INT =

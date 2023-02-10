@@ -777,6 +777,14 @@ public:
     virtual IMS_SINT32 GetRegRetryCountResetPolicy() const = 0;
 
     /**
+     * @brief Get the numbner of registration retry to maintain ipsec setting on authentication
+     *        failure.
+     *
+     * @return IMS_SINT32 Return the number of retry
+     */
+    virtual IMS_SINT32 GetRegRetryCountWithIpsecOnAuthFailure() const = 0;
+
+    /**
      * @brief Get the default policy for the registration retry with pcscf selection.
      *
      *        Specify the default retry policy about how to use the PCSCF address selection.
