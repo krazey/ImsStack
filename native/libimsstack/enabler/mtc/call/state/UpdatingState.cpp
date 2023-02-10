@@ -289,6 +289,17 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnReceivingMediaDataFailed(
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName UpdatingState::OnVideoLowestBitRate()
+{
+    IMS_TRACE_I("OnVideoLowestBitRate", 0, 0, 0);
+    m_objContext.GetPendingOperationHolder().PushPendingOperation(
+            [](IMtcCallState* pState)
+            {
+                return pState->OnVideoLowestBitRate();
+            });
+    return GetStateName();
+}
+
 PUBLIC VIRTUAL CallStateName UpdatingState::OnMediaFailed(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_I("OnMediaFailed", 0, 0, 0);

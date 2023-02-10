@@ -245,6 +245,12 @@ TEST_F(UpdatingStateTest, OnReceivingMediaDataFailedWithVideoPushesPendingOperat
     pUpdatingState->OnReceivingMediaDataFailed(MEDIATYPE_VIDEO, MEDIA_PROTOCOL_RTP);
 }
 
+TEST_F(UpdatingStateTest, OnVideoLowestBitRatePushesPendingOperation)
+{
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(1);
+    pUpdatingState->OnVideoLowestBitRate();
+}
+
 TEST_F(UpdatingStateTest, OnMediaFailed)
 {
     EXPECT_CALL(objMtcSession, Terminate(IMS_TRUE, CallReasonInfo(CODE_MEDIA_INIT_FAILED)))

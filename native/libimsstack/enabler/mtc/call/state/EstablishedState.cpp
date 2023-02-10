@@ -377,9 +377,14 @@ PUBLIC VIRTUAL CallStateName EstablishedState::OnVideoLowestBitRate()
     IMS_TRACE_I("OnVideoLowestBitRate", 0, 0, 0);
 
     CallType eCallType = m_objContext.GetSession()->GetCallType();
-    if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
+    if (eCallType == CallType::VT)
     {
-        // TODO: downgrade to voip
+        return Downgrade(CallType::VOIP);
+    }
+
+    if (eCallType == CallType::VIDEO_RTT)
+    {
+        return Downgrade(CallType::RTT);
     }
 
     return GetStateName();
