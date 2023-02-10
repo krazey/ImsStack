@@ -137,7 +137,7 @@ PUBLIC VIRTUAL IEctManager& MtcApp::GetEctManager()
     return *m_pEctManager.get();
 }
 
-PUBLIC VIRTUAL MtcEmergencyServiceManager& MtcApp::GetEmergencyServiceManager()
+PUBLIC VIRTUAL IMtcEmergencyServiceManager& MtcApp::GetEmergencyServiceManager()
 {
     if (m_pEmergencyServiceManager == nullptr)
     {

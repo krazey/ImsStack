@@ -29,13 +29,13 @@ class IMtcAosConnector;
 class IMtcCallController;
 class IMtcCallManager;
 class IMtcDialingPlan;
+class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
 class IMtcService;
 class IMtcSipInterfaceFactory;
 class MessageUtils;
 class MtcConfigurationProxy;
-class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
 
 class MockIMtcContext : public IMtcContext
@@ -56,7 +56,7 @@ public:
     MOCK_METHOD(IMtcSipInterfaceFactory&, GetSipInterfaceFactory, (), (override));
     MOCK_METHOD(IConferenceManager&, GetConferenceManager, (), (override));
     MOCK_METHOD(IEctManager&, GetEctManager, (), (override));
-    MOCK_METHOD(MtcEmergencyServiceManager&, GetEmergencyServiceManager, (), (override));
+    MOCK_METHOD(IMtcEmergencyServiceManager&, GetEmergencyServiceManager, (), (override));
     MOCK_METHOD(OperationAsyncRunner*, GetAsyncRunner, (IN std::function<void()>), (override));
     MOCK_METHOD(IMessageUtils&, GetMessageUtils, (), (override));
     MOCK_METHOD(IMS_BOOL, IsWifiTestMode, (), (override));

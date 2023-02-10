@@ -27,11 +27,11 @@ class IMtcCallManager;
 class MtcConfigurationProxy;
 class ICallStateProxy;
 class IMtcAosConnector;
+class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcSipInterfaceFactory;
 class IConferenceManager;
 class IEctManager;
-class MtcEmergencyServiceManager;
 class OperationAsyncRunner;
 class IMessageUtils;
 class IMtcRadioChecker;
@@ -139,7 +139,7 @@ public:
      *
      * @return
      */
-    virtual MtcEmergencyServiceManager& GetEmergencyServiceManager() = 0;
+    virtual IMtcEmergencyServiceManager& GetEmergencyServiceManager() = 0;
 
     /**
      * @brief Gets

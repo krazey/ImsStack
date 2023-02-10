@@ -42,7 +42,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockIReference.h"
 #include "core/MockISession.h"
-#include "emergency/MockMtcEmergencyServiceManager.h"
+#include "emergency/MockIMtcEmergencyServiceManager.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIMtcAosStateListener.h"
@@ -96,7 +96,7 @@ public:
     MockIMtcContext objMockContext;
     MockIMtcConfigurationManager* pMockConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
-    MockMtcEmergencyServiceManager* pMockEmergencyManager;
+    MockIMtcEmergencyServiceManager* pMockEmergencyManager;
     MockIMtcCallManager objMockCallManager;
     MockIMtcCallController objMockCallController;
     MockIMtcRadioChecker objMockIMtcRadioChecker;
@@ -124,7 +124,7 @@ protected:
         ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(SLOT_ID));
 
         ON_CALL(objMockContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
-        pMockEmergencyManager = new MockMtcEmergencyServiceManager(objMockContext);
+        pMockEmergencyManager = new MockIMtcEmergencyServiceManager();
         ON_CALL(objMockContext, GetEmergencyServiceManager)
                 .WillByDefault(ReturnRef(*pMockEmergencyManager));
 
@@ -418,8 +418,7 @@ TEST_F(MtcServiceTest, SetAndCheckTerminalBasedCallWaiting)
 
 TEST_F(MtcServiceTest, OpenEmergencyServiceCallsEmergencyServiceManager)
 {
-    EXPECT_CALL(*pMockEmergencyManager, OpenEmergencyService(EmergencyCallRoutingPdn::EMERGENCY))
-            .Times(1);
+    EXPECT_CALL(*pMockEmergencyManager, StartOpen(EmergencyCallRoutingPdn::EMERGENCY)).Times(1);
     pNormalMtcService->OpenEmergencyService(EmergencyCallRoutingPdn::EMERGENCY);
 }
 

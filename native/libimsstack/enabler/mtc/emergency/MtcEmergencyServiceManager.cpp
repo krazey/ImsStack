@@ -54,8 +54,7 @@ PUBLIC VIRTUAL MtcEmergencyServiceManager::~MtcEmergencyServiceManager()
     }
 }
 
-PUBLIC
-void MtcEmergencyServiceManager::OpenEmergencyService(IN EmergencyCallRoutingPdn ePdn)
+PUBLIC VIRTUAL void MtcEmergencyServiceManager::StartOpen(IN EmergencyCallRoutingPdn ePdn)
 {
     IMS_TRACE_D("OpenEmergencyService PDN=[%d]", ePdn, 0, 0);
     if (ePdn == EmergencyCallRoutingPdn::NORMAL)
@@ -82,6 +81,11 @@ void MtcEmergencyServiceManager::OpenEmergencyService(IN EmergencyCallRoutingPdn
         SetState(EmergencyServiceState::OPENING);
         NotifyEmergencyServiceChanged(-1);
     }
+}
+
+PUBLIC VIRTUAL void MtcEmergencyServiceManager::StopOpen()
+{
+    m_pNormalRoutingHelper.reset();
 }
 
 PUBLIC VIRTUAL void MtcEmergencyServiceManager::OnAosStateChanged(
@@ -116,7 +120,7 @@ PUBLIC VIRTUAL void MtcEmergencyServiceManager::OnAosStateChanged(
 
 PUBLIC VIRTUAL void MtcEmergencyServiceManager::OnNormalRoutingClosed()
 {
-    m_pNormalRoutingHelper.reset();
+    StopOpen();
 }
 
 PRIVATE

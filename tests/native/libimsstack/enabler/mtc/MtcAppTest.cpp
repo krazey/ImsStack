@@ -25,7 +25,7 @@
 #include "configuration/MtcConfigurationManager.h"
 #include "dialingplan/IMtcDialingPlan.h"
 #include "ect/IEctManager.h"
-#include "emergency/MtcEmergencyServiceManager.h"
+#include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/OperationAsyncRunner.h"
 #include "utility/IMessageUtils.h"
@@ -145,8 +145,8 @@ TEST_F(MtcAppTest, CreateEctManagerOnlyOnceWhenFirstGetterIsCalled)
 TEST_F(MtcAppTest, CreateEmergencyManagerOnlyOnceWhenFirstGetterIsCalled)
 {
     pMtcApp->Start();  // to have MtcService
-    MtcEmergencyServiceManager* pFirstManager = &pMtcApp->GetEmergencyServiceManager();
-    MtcEmergencyServiceManager* pSecondManager = &pMtcApp->GetEmergencyServiceManager();
+    IMtcEmergencyServiceManager* pFirstManager = &pMtcApp->GetEmergencyServiceManager();
+    IMtcEmergencyServiceManager* pSecondManager = &pMtcApp->GetEmergencyServiceManager();
     EXPECT_EQ(pFirstManager, pSecondManager);
 }
 

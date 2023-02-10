@@ -41,7 +41,7 @@
 #include "ServiceTrace.h"
 #include "SipFactory.h"
 #include "configuration/MtcConfigurationProxy.h"
-#include "emergency/MtcEmergencyServiceManager.h"
+#include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcAosEventHandler.h"
 #include "helper/MtcCapabilityQueryHandler.h"
@@ -179,7 +179,7 @@ PUBLIC VIRTUAL void MtcService::SetTerminalBasedCallWaiting(IN IMS_BOOL bEnabled
 
 PUBLIC VIRTUAL void MtcService::OpenEmergencyService(IN EmergencyCallRoutingPdn ePdn)
 {
-    m_objContext.GetEmergencyServiceManager().OpenEmergencyService(ePdn);
+    m_objContext.GetEmergencyServiceManager().StartOpen(ePdn);
 }
 
 PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
