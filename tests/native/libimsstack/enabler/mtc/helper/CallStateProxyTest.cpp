@@ -19,7 +19,9 @@
 #include "MockIMtcCallStateListener.h"
 #include "PlatformContext.h"
 #include "TestThreadService.h"
+#include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "helper/CallStateProxy.h"
 #include <gtest/gtest.h>
@@ -36,6 +38,7 @@ LOCAL IMS_UINT32 ANY_REASON = 0;
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace android
 {
@@ -169,20 +172,54 @@ TEST_F(CallStateProxyTest, DispatchMessageOtherThanAsyncNotifyReturnsFalse)
     EXPECT_FALSE(pProxy->DispatchMessage(objMessage));
 }
 
-TEST_F(CallStateProxyTest, UpdateTotalCallStateForCallCases)
+TEST_F(CallStateProxyTest, UpdateTotalCallStateForAllCasesExceptIdleNotifiesConvertedState)
 {
+    ON_CALL(objListener, IsSynchronousCallRequired).WillByDefault(Return(IMS_TRUE));
+    pProxy->AddListener(&objListener);
+
     // clang-format off
     std::vector<IMtcCallStateListener::State> objCallStates{
-            IMtcCallStateListener::State::IDLE, IMtcCallStateListener::State::OUTGOING,
-            IMtcCallStateListener::State::INCOMING, IMtcCallStateListener::State::ALERTING,
-            IMtcCallStateListener::State::ESTABLISHED, IMtcCallStateListener::State::UPDATING,
-            IMtcCallStateListener::State::TERMINATING};
+            IMtcCallStateListener::State::OUTGOING, IMtcCallStateListener::State::INCOMING,
+            IMtcCallStateListener::State::ESTABLISHED};
     // clang-format on
     for (IMtcCallStateListener::State eCallState : objCallStates)
     {
         SetTotalCallStateBySingleCallState(eCallState);
+        EXPECT_CALL(objListener, OnTotalCallStateChanged(eCallState));
         pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
     }
+
+    SetTotalCallStateBySingleCallState(IMtcCallStateListener::State::ALERTING);
+    EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::INCOMING));
+    pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
+
+    SetTotalCallStateBySingleCallState(IMtcCallStateListener::State::UPDATING);
+    EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::ESTABLISHED));
+    pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
+
+    SetTotalCallStateBySingleCallState(IMtcCallStateListener::State::TERMINATING);
+    EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::IDLE));
+    pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
+}
+
+TEST_F(CallStateProxyTest, UpdateTotalCallStateChecksPeerTypeIfIdleState)
+{
+    ON_CALL(objListener, IsSynchronousCallRequired).WillByDefault(Return(IMS_TRUE));
+    pProxy->AddListener(&objListener);
+
+    MockIMtcCallContext objCallContext;
+    ON_CALL(objCall, GetCallContext).WillByDefault(ReturnRef(objCallContext));
+    CallInfo objCallInfo;
+    ON_CALL(objCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
+    SetTotalCallStateBySingleCallState(IMtcCallStateListener::State::IDLE);
+
+    objCallInfo.ePeerType = PeerType::MO;
+    EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::OUTGOING));
+    pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
+
+    objCallInfo.ePeerType = PeerType::MT;
+    EXPECT_CALL(objListener, OnTotalCallStateChanged(IMtcCallStateListener::State::INCOMING));
+    pProxy->UpdateCallState(ANY_KEY, ANY_STATE, ANY_TYPE, ANY_ECC_BOOL, ANY_REASON);
 }
 
 }  // namespace android
