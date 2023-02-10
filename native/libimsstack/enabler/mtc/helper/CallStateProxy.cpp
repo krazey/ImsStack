@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+#include "IMtcCallStateListener.h"
 #include "ImsActivity.h"
 #include "ImsMap.h"
 #include "ImsMessage.h"
 #include "ImsTypeDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "helper/CallStateProxy.h"
 
@@ -51,7 +53,7 @@ void CallStateProxy::AddListener(IN IMtcCallStateListener* pListener)
             }
         }
         m_objSynchronousListeners.Append(pListener);
-        IMS_TRACE_D("+AddListener sync size=[%d]", m_objSynchronousListeners.GetSize(), 0, 0);
+        IMS_TRACE_D("AddListener sync size=[%d]", m_objSynchronousListeners.GetSize(), 0, 0);
     }
     else
     {
@@ -63,7 +65,7 @@ void CallStateProxy::AddListener(IN IMtcCallStateListener* pListener)
             }
         }
         m_objAsynchronousListeners.Append(pListener);
-        IMS_TRACE_D("+AddListener async size=[%d]", m_objAsynchronousListeners.GetSize(), 0, 0);
+        IMS_TRACE_D("AddListener async size=[%d]", m_objAsynchronousListeners.GetSize(), 0, 0);
     }
 }
 
@@ -77,8 +79,8 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
             if (pListener == m_objSynchronousListeners.GetAt(i))
             {
                 m_objSynchronousListeners.RemoveAt(i);
-                IMS_TRACE_D("+RemoveListener sync size=[%d]", m_objSynchronousListeners.GetSize(),
-                        0, 0);
+                IMS_TRACE_D(
+                        "RemoveListener sync size=[%d]", m_objSynchronousListeners.GetSize(), 0, 0);
                 return;
             }
         }
@@ -90,7 +92,7 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
             if (pListener == m_objAsynchronousListeners.GetAt(i))
             {
                 m_objAsynchronousListeners.RemoveAt(i);
-                IMS_TRACE_D("+RemoveListener async size=[%d]", m_objAsynchronousListeners.GetSize(),
+                IMS_TRACE_D("RemoveListener async size=[%d]", m_objAsynchronousListeners.GetSize(),
                         0, 0);
                 return;
             }
@@ -102,8 +104,9 @@ PUBLIC
 void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState,
         IN CallType eCallType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason /* = CODE_NONE */)
 {
-    IMS_TRACE_D("UpdateCallState", 0, 0, 0);
     IMS_BOOL bTotalCallStateUpdated = UpdateTotalCallState();
+    IMS_TRACE_D("UpdateCallState state[%d] totalStateUpdated[%s]", eState,
+            _TRACE_B_(bTotalCallStateUpdated), 0);
 
     CallStateDetails* pDetails =
             new CallStateDetails(nCallkey, static_cast<IMtcCallStateListener::State>(eState),
@@ -180,6 +183,11 @@ IMtcCall::State CallStateProxy::CalculateTotalCallState()
                 break;
 
             case IMtcCall::State::IDLE:
+                eTotalState =
+                        objCalls.GetAt(i)->GetCallContext().GetCallInfo().ePeerType == PeerType::MO
+                        ? IMtcCall::State::OUTGOING
+                        : IMtcCall::State::INCOMING;
+                break;
             case IMtcCall::State::TERMINATING:
                 break;
         }
