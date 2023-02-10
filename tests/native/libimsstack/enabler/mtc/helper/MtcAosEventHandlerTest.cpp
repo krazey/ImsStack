@@ -68,18 +68,16 @@ protected:
 
 TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesJni)
 {
-    IMS_UINT32 nFeatures = ImsAosFeature::MMTEL + ImsAosFeature::VIDEO + ImsAosFeature::TEXT;
-    EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures - ImsAosFeature::TEXT, 0));
+    EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_UC, 0));
     EXPECT_CALL(*pConfigProxy, OnRegistrationRefreshed).Times(3);
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
+    pEventHandler->OnConnected(ImsAosFeature::MMTEL + ImsAosFeature::VIDEO + ImsAosFeature::TEXT,
+            IIpcan::CATEGORY_MOBILE);
 
-    nFeatures = ImsAosFeature::MMTEL;
-    EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures, 0));
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
+    EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_VOIP, 0));
+    pEventHandler->OnConnected(ImsAosFeature::MMTEL, IIpcan::CATEGORY_MOBILE);
 
-    nFeatures = ImsAosFeature::VIDEO;
-    EXPECT_CALL(objJniThread, OnServiceChanged(nFeatures, 0));
-    pEventHandler->OnConnected(nFeatures, IIpcan::CATEGORY_MOBILE);
+    EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_VT, 0));
+    pEventHandler->OnConnected(ImsAosFeature::VIDEO, IIpcan::CATEGORY_MOBILE);
 }
 
 TEST_F(MtcAosEventHandlerTest, OnConnectedNotifiesListenersAndNotNotifyAfterRemoveListener)
@@ -130,7 +128,7 @@ TEST_F(MtcAosEventHandlerTest, OnDisconnectedNotifiesJni)
     pEventHandler->AddListener(&objListener);
 
     IMS_UINT32 nAnyReason = 1;
-    EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::SERVICE_NONE, 0));
+    EXPECT_CALL(objJniThread, OnServiceChanged(IuMtcService::ServiceState::SERVICE_NONE, 0));
     EXPECT_CALL(objListener,
             OnAosStateChanged(
                     IsEqualMtcService(&objMtcService), MtcAosState::DISCONNECTED, nAnyReason));

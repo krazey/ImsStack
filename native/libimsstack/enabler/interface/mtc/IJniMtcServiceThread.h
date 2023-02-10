@@ -17,7 +17,9 @@
 #define INTERFACE_JNI_MTC_SERVICE_THREAD_H_
 
 #include "IJniEnablerThread.h"
+#include "IMtcService.h"
 #include "ImsTypeDef.h"
+#include "IuMtcService.h"
 
 class IJniMtcServiceThread : public IJniEnablerThread
 {
@@ -27,20 +29,20 @@ public:
     /**
      * @brief Notifies
      *
-     * @param eStatus
+     * @param eState
      * @param eReason
      */
-    virtual void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason) = 0;
+    virtual void OnServiceChanged(IN IuMtcService::ServiceState eState, IN IMS_SINT32 eReason) = 0;
 
     /**
      * @brief Notifies
      *
-     * @param eStatus
+     * @param eState
      * @param eReason
      * @param eServiceType
      */
-    virtual void OnEmergencyServiceChanged(
-            IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason, IN IMS_SINT32 eServiceType) = 0;
+    virtual void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
+            IN IMS_SINT32 eReason, IN ServiceType eServiceType) = 0;
 
     /**
      * @brief Notifies

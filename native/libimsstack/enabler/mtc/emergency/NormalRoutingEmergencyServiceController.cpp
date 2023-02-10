@@ -92,8 +92,7 @@ void NormalRoutingEmergencyServiceController::Notify(
         return;
     }
 
-    pThread->OnEmergencyServiceChanged(
-            static_cast<IMS_SINT32>(eState), eReason, static_cast<IMS_SINT32>(ServiceType::NORMAL));
+    pThread->OnEmergencyServiceChanged(eState, eReason, ServiceType::NORMAL);
 }
 
 PRIVATE void NormalRoutingEmergencyServiceController::Finish()

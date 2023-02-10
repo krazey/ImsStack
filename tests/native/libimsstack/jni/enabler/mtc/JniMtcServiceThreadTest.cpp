@@ -44,7 +44,7 @@ MATCHER_P2(IsSameMessageTypeAndState, type, state, "")
     android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(arg);
     IMS_UINT32 eType = pParcel->readInt32();
     IMS_SINT32 eState = pParcel->readInt32();
-    return type == eType && state == eState;
+    return type == eType && static_cast<IMS_SINT32>(state) == eState;
 }
 
 class JniMtcServiceThreadTest : public ::testing::Test
@@ -88,7 +88,7 @@ protected:
 TEST_F(JniMtcServiceThreadTest, OnServiceChanged)
 {
     IMS_UINT32 eType = IuMtcService::SERVICE_CHANGED;
-    IMS_UINT32 eState = 3;
+    IuMtcService::ServiceState eState = IuMtcService::ServiceState::SERVICE_UC;
     objParcel.writeInt32(eType);
     objParcel.setDataPosition(0);
 
@@ -112,8 +112,7 @@ TEST_F(JniMtcServiceThreadTest, OnEmergencyServiceChanged)
                     IsSameMessageTypeAndState(eType, static_cast<IMS_SINT32>(eState))))
             .Times(1);
 
-    pJniServiceThread->OnEmergencyServiceChanged(
-            static_cast<IMS_SINT32>(eState), -1, static_cast<IMS_SINT32>(eServiceType));
+    pJniServiceThread->OnEmergencyServiceChanged(eState, -1, eServiceType);
 }
 
 TEST_F(JniMtcServiceThreadTest, OnPreIncomingCallReceived)

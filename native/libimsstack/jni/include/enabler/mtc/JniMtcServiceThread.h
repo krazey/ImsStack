@@ -19,7 +19,9 @@
 
 #include "BaseServiceThread.h"
 #include "IJniMtcServiceThread.h"
+#include "IMtcService.h"
 #include "ImsMap.h"
+#include "IuMtcService.h"
 #include "MtcDef.h"
 
 class JniMtcServiceThread final : public BaseServiceThread, public IJniMtcServiceThread
@@ -28,9 +30,9 @@ public:
     JniMtcServiceThread();
     virtual ~JniMtcServiceThread();
 
-    void OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason) override;  // enum class
-    void OnEmergencyServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 eReason,
-            IN IMS_SINT32 eServiceType) override;  // enum class
+    void OnServiceChanged(IN IuMtcService::ServiceState eState, IN IMS_SINT32 eReason) override;
+    void OnEmergencyServiceChanged(IN IuMtcService::EmergencyServiceState eState,
+            IN IMS_SINT32 eReason, IN ServiceType eServiceType) override;
     void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
 
     void OnJniReady();

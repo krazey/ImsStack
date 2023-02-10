@@ -78,17 +78,12 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpc
     IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
             nIpcan, 0);
 
-    IMS_UINT32 nMmtelConnected =
-            (nFeatures & ImsAosFeature::MMTEL) ? ImsAosFeature::MMTEL : ImsAosFeature::NONE;
-    IMS_UINT32 nVideoConnected =
-            (nFeatures & ImsAosFeature::VIDEO) ? ImsAosFeature::VIDEO : ImsAosFeature::NONE;
-
     if (!m_objService.IsEmergency())
     {
         IJniMtcServiceThread* pThread = m_objService.GetJniServiceThread();
         if (pThread)
         {
-            pThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
+            pThread->OnServiceChanged(ConvertAosFeatureToServiceState(nFeatures), 0);
         }
         // TODO: this must be called when registration is refreshed?
         m_objConfiguration.OnRegistrationRefreshed();
@@ -122,7 +117,7 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason)
         IJniMtcServiceThread* pThread = m_objService.GetJniServiceThread();
         if (pThread)
         {
-            pThread->OnServiceChanged(IuMtcService::SERVICE_NONE, 0);
+            pThread->OnServiceChanged(IuMtcService::ServiceState::SERVICE_NONE, 0);
         }
     }
 
@@ -174,4 +169,26 @@ void MtcAosEventHandler::NotifyIpcanChanged(IN IMS_UINT32 eIpcan) const
     {
         m_objListeners.GetAt(i)->OnIpcanChanged(m_objService, eIpcan);
     }
+}
+
+PRIVATE
+IuMtcService::ServiceState MtcAosEventHandler::ConvertAosFeatureToServiceState(
+        IMS_UINT32 nFeatures) const
+{
+    IMS_BOOL bMmtelConnected = (nFeatures & ImsAosFeature::MMTEL);
+    IMS_BOOL bVideoConnected = (nFeatures & ImsAosFeature::VIDEO);
+
+    if (bMmtelConnected && bVideoConnected)
+    {
+        return IuMtcService::ServiceState::SERVICE_UC;
+    }
+    else if (bVideoConnected)
+    {
+        return IuMtcService::ServiceState::SERVICE_VT;
+    }
+    else if (bMmtelConnected)
+    {
+        return IuMtcService::ServiceState::SERVICE_VOIP;
+    }
+    return IuMtcService::ServiceState::SERVICE_NONE;
 }

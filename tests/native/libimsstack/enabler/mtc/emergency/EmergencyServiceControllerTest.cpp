@@ -118,8 +118,7 @@ TEST_F(EmergencyServiceControllerTest, StartStartsRegistration)
 TEST_F(EmergencyServiceControllerTest, StartNotifiesOpening)
 {
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::OPENING), _,
-                    static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+            OnEmergencyServiceChanged(EmergencyServiceState::OPENING, _, ServiceType::EMERGENCY))
             .Times(1);
 
     pController->Start();
@@ -149,8 +148,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndStartNotifiesOpening)
     pController->Start();
 
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::OPENING), _,
-                    static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+            OnEmergencyServiceChanged(EmergencyServiceState::OPENING, _, ServiceType::EMERGENCY))
             .Times(1);
 
     pController->Start();
@@ -163,8 +161,8 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedNotifiesUnavailabl
     const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
     ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::UNAVAILABLE),
-                    nAosReason, static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+            OnEmergencyServiceChanged(
+                    EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(EmergencyCallRoutingPdn::NORMAL)).Times(0);
 
@@ -179,8 +177,8 @@ TEST_F(EmergencyServiceControllerTest,
     const IMS_UINT32 nAosReason = ImsAosReason::OUT_OF_SERVICE;
     ON_CALL(*pConfigurationManager, IsRetryEmergencyOnImsPdnBool).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::UNAVAILABLE),
-                    nAosReason, static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+            OnEmergencyServiceChanged(
+                    EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(EmergencyCallRoutingPdn::NORMAL)).Times(0);
 
@@ -196,8 +194,8 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosDisconnectedInRoamingNotifiesU
     ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetRoamingState())
             .WillByDefault(Return(1));
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::UNAVAILABLE),
-                    nAosReason, static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+            OnEmergencyServiceChanged(
+                    EmergencyServiceState::UNAVAILABLE, nAosReason, ServiceType::EMERGENCY))
             .Times(1);
     EXPECT_CALL(objEsm, StartOpen(EmergencyCallRoutingPdn::NORMAL)).Times(0);
 
@@ -221,8 +219,7 @@ TEST_F(EmergencyServiceControllerTest, StartAndAosConnectedNotifiesOpened)
     pController->Start();
 
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::OPENED), _,
-                    static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+            OnEmergencyServiceChanged(EmergencyServiceState::OPENED, _, ServiceType::EMERGENCY))
             .Times(1);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
@@ -234,8 +231,7 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndStartNotifiesOpened)
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::CONNECTED, ImsAosReason::NONE);
 
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::OPENED), _,
-                    static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+            OnEmergencyServiceChanged(EmergencyServiceState::OPENED, _, ServiceType::EMERGENCY))
             .Times(1);
 
     pController->Start();
@@ -258,8 +254,8 @@ TEST_F(EmergencyServiceControllerTest, OpenedAndAosDisconnectedNotifiesIdle)
 
     const IMS_UINT32 nAosReason = ImsAosReason::DATA_DISCONNECTED;
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::IDLE),
-                    nAosReason, static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+            OnEmergencyServiceChanged(
+                    EmergencyServiceState::IDLE, nAosReason, ServiceType::EMERGENCY))
             .Times(1);
 
     pController->OnAosStateChanged(objEmergencyService, MtcAosState::DISCONNECTED, nAosReason);

@@ -84,8 +84,7 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest, StartNotifiesOpenedIfNormalS
 {
     ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::OPENED), _,
-                    static_cast<IMS_SINT32>(ServiceType::NORMAL)))
+            OnEmergencyServiceChanged(EmergencyServiceState::OPENED, _, ServiceType::NORMAL))
             .Times(1);
 
     pController->Start();
@@ -96,8 +95,7 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest,
 {
     ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_IDLE));
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::UNAVAILABLE),
-                    _, static_cast<IMS_SINT32>(ServiceType::NORMAL)))
+            OnEmergencyServiceChanged(EmergencyServiceState::UNAVAILABLE, _, ServiceType::NORMAL))
             .Times(1);
 
     pController->Start();
@@ -106,8 +104,7 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest,
 TEST_F(NormalRoutingEmergencyServiceControllerTest, CallTerminatesDoesNothing)
 {
     EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(static_cast<IMS_SINT32>(EmergencyServiceState::IDLE), _,
-                    static_cast<IMS_SINT32>(ServiceType::NORMAL)))
+            OnEmergencyServiceChanged(EmergencyServiceState::IDLE, _, ServiceType::NORMAL))
             .Times(1);
 
     pController->OnCallStateChanged(

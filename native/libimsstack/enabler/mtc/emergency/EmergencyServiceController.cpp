@@ -182,8 +182,7 @@ void EmergencyServiceController::Notify(
         return;
     }
 
-    pThread->OnEmergencyServiceChanged(static_cast<IMS_SINT32>(eState), eReason,
-            static_cast<IMS_SINT32>(ServiceType::EMERGENCY));
+    pThread->OnEmergencyServiceChanged(eState, eReason, ServiceType::EMERGENCY);
 }
 
 PRIVATE void EmergencyServiceController::ControlAos(IN IMS_UINT32 nType) const

@@ -20,6 +20,7 @@
 #include "ImsAosReason.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
+#include "IuMtcService.h"
 #include "helper/IMtcAosStateListener.h"
 
 class IMessage;
@@ -51,6 +52,7 @@ public:
 private:
     void NotifyStateChanged(IN MtcAosState eState, IN IMS_UINT32 eAosReason) const;
     void NotifyIpcanChanged(IN IMS_UINT32 eIpcan) const;
+    IuMtcService::ServiceState ConvertAosFeatureToServiceState(IMS_UINT32 nFeatures) const;
 
     IMtcService& m_objService;
     MtcConfigurationProxy& m_objConfiguration;

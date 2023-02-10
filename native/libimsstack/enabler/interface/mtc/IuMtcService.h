@@ -54,7 +54,7 @@ public:
 
     static const IMS_SINT32 DIALOGS_NOTIFY_INFO = (EVENT_I2U + 60 + 1);
 
-    enum
+    enum class ServiceState
     {
         SERVICE_NONE = 0,
         SERVICE_VOIP = 1,
@@ -62,7 +62,7 @@ public:
         SERVICE_UC = 3,
         SERVICE_EMERGENCY = 4,
         SERVICE_OPENING = 5,
-    };  // SERVICE_STATE
+    };
 
     enum class EmergencyServiceState
     {

@@ -63,8 +63,7 @@ protected:
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsNormalServiceForNormalPdn)
 {
-    EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(_, _, static_cast<IMS_SINT32>(ServiceType::NORMAL)))
+    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::NORMAL))
             .Times(1);
 
     pEsm->StartOpen(EmergencyCallRoutingPdn::NORMAL);
@@ -72,8 +71,7 @@ TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsNormalServiceForNormal
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForEmergencyPdn)
 {
-    EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(_, _, static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
             .Times(1);
 
     pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
@@ -81,8 +79,7 @@ TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForEme
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForUnknownPdn)
 {
-    EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(_, _, static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
             .Times(1);
 
     pEsm->StartOpen(EmergencyCallRoutingPdn::UNKNOWN);
@@ -90,18 +87,15 @@ TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEmergencyServiceForUnk
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEachService)
 {
-    EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(_, _, static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
             .Times(1);
     pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
 
-    EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(_, _, static_cast<IMS_SINT32>(ServiceType::EMERGENCY)))
+    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::EMERGENCY))
             .Times(1);
     pEsm->StartOpen(EmergencyCallRoutingPdn::UNKNOWN);
 
-    EXPECT_CALL(objJniMtcServiceThread,
-            OnEmergencyServiceChanged(_, _, static_cast<IMS_SINT32>(ServiceType::NORMAL)))
+    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, ServiceType::NORMAL))
             .Times(1);
     pEsm->StartOpen(EmergencyCallRoutingPdn::NORMAL);
 }
