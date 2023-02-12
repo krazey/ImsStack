@@ -34,7 +34,9 @@ class OsLocationInfoTest : public ::testing::Test
 {
 protected:
     inline OsLocationInfoTest() :
-            m_strNetworkCountry("US")
+            m_strNetworkCountry("US"),
+            m_pOldSystem(IMS_NULL),
+            m_pPhoneInfoService(IMS_NULL)
     {
     }
 
