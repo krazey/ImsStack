@@ -20,7 +20,6 @@
 #include "IImsRadio.h"
 #include "IMtcCallStateListener.h"
 #include "INetworkWatcher.h"
-#include "ITimer.h"
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "call/IMtcCall.h"
@@ -67,8 +66,7 @@ class MtcRadioChecker final :
         public IMtcRadioChecker,
         public IMtcCallStateListener,
         public IMtcRadioConnectionListener,
-        public IMtcAosStateListener,
-        public ITimerListener
+        public IMtcAosStateListener
 {
 public:
     explicit MtcRadioChecker(IN IMtcContext& objContext,
@@ -98,9 +96,6 @@ public:
             IN IMS_UINT32 nWaitTimeMillis) override;
     void OnConnectionSetupPrepared(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) override;
-
-    // ITimerListener
-    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     // for test
     void CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
@@ -137,8 +132,6 @@ private:
     IImsRadio* m_piImsRadio;
     IMtcRadioCheckerListener* m_piMtcRadioCheckerListener;
     ImsList<MtcTrafficInfo*> m_objMtcTrafficInfos;
-    ITimer* m_piSsacVoiceBarringTimer;
-    ITimer* m_piSsacVideoBarringTimer;
 };
 
 class MtcTrafficInfo final : public IImsRadioConnectionListener

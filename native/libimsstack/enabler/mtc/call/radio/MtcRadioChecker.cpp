@@ -24,11 +24,11 @@
 #include "ServiceImsRadio.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
-#include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/radio/MtcRadioChecker.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/IPassiveTimerHolder.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -41,9 +41,7 @@ MtcRadioChecker::MtcRadioChecker(IN IMtcContext& objContext,
                 m_objContext.GetSlotId())),
         m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId())),
         m_piMtcRadioCheckerListener(IMS_NULL),
-        m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>()),
-        m_piSsacVoiceBarringTimer(IMS_NULL),
-        m_piSsacVideoBarringTimer(IMS_NULL)
+        m_objMtcTrafficInfos(ImsList<MtcTrafficInfo*>())
 {
     IMS_TRACE_D("+MtcRadioChecker", 0, 0, 0);
 }
@@ -172,32 +170,6 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionSetupPrepared(
     NotifyTrafficCheckerListener(IMS_TRUE);
 }
 
-PUBLIC VIRTUAL void MtcRadioChecker::Timer_TimerExpired(IN ITimer* piTimer)
-{
-    if (piTimer == IMS_NULL)
-    {
-        return;
-    }
-
-    if (m_piSsacVoiceBarringTimer == piTimer)
-    {
-        IMS_TRACE_D("Timer_TimerExpired - voice barring", 0, 0, 0);
-        m_piSsacVoiceBarringTimer = IMS_NULL;
-    }
-    else if (m_piSsacVideoBarringTimer == piTimer)
-    {
-        IMS_TRACE_D("Timer_TimerExpired - video barring", 0, 0, 0);
-        m_piSsacVideoBarringTimer = IMS_NULL;
-    }
-    else
-    {
-        return;
-    }
-
-    piTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(piTimer);
-}
-
 PUBLIC void MtcRadioChecker::CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
         IN CallDirection eCallDirection, IN IMS_BOOL bActive, IN CallKey nCallKeyIn)
 {
@@ -242,18 +214,6 @@ PRIVATE void MtcRadioChecker::DeInit()
     }
 
     m_objMtcTrafficInfos.Clear();
-
-    if (m_piSsacVoiceBarringTimer)
-    {
-        m_piSsacVoiceBarringTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(m_piSsacVoiceBarringTimer);
-    }
-
-    if (m_piSsacVideoBarringTimer)
-    {
-        m_piSsacVideoBarringTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(m_piSsacVideoBarringTimer);
-    }
 }
 
 PRIVATE TrafficType MtcRadioChecker::ConvertCallTypeToTrafficType(
@@ -430,14 +390,16 @@ PRIVATE IMS_BOOL MtcRadioChecker::IsSsacBarred(
 
 PRIVATE IMS_BOOL MtcRadioChecker::IsSsacTimerRunning(IN CallType eCallType) const
 {
-    if (m_piSsacVoiceBarringTimer)
+    if (m_objContext.GetPassiveTimerHolder().IsActive(
+                IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
     {
         return IMS_TRUE;
     }
 
     if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
     {
-        return m_piSsacVideoBarringTimer;
+        return m_objContext.GetPassiveTimerHolder().IsActive(
+                IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING);
     }
 
     return IMS_FALSE;
@@ -479,16 +441,15 @@ PRIVATE IMS_BOOL MtcRadioChecker::StartSsacTimer(IN CallType eCallType)
     nRandom = IMS_SYS_GetRandom(10);
     IMS_DOUBLE nCalculatedBarringTime = (0.7 + 0.6 * (nRandom / 10.0)) * nBarringTimeSec;
 
-    ITimer* m_piSsacBarringTimer = TimerService::GetTimerService()->CreateTimer();
-    m_piSsacBarringTimer->SetTimer(nCalculatedBarringTime * 1000, this);
-
     if (eCallType == CallType::VOIP || eCallType == CallType::RTT)
     {
-        m_piSsacVoiceBarringTimer = m_piSsacBarringTimer;
+        m_objContext.GetPassiveTimerHolder().AddTimer(
+                IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, nCalculatedBarringTime * 1000);
     }
     else if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
     {
-        m_piSsacVideoBarringTimer = m_piSsacBarringTimer;
+        m_objContext.GetPassiveTimerHolder().AddTimer(
+                IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, nCalculatedBarringTime * 1000);
     }
 
     return IMS_TRUE;

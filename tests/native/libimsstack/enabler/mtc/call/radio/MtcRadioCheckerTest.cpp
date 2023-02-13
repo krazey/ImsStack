@@ -23,18 +23,18 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MockINetworkWatcher.h"
-#include "MockITimer.h"
 #include "PlatformContext.h"
 #include "TestImsRadioService.h"
 #include "TestPhoneInfoService.h"
 #include "TestSystemTimeService.h"
-#include "TestTimerService.h"
 #include "call/IMtcCall.h"
 #include "call/radio/MockIMtcRadioChecker.h"
 #include "call/radio/MockIMtcRadioConnectionFailureListener.h"
 #include "call/radio/MtcRadioChecker.h"
+#include "helper/IPassiveTimerHolder.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -57,9 +57,10 @@ public:
             m_objContext(),
             m_objConnectionFailureListener(),
             m_objCallStateProxy(),
+            m_objPassiveTimerHolder(),
             m_objPhoneInfoService(),
             m_objImsRadioService(),
-            m_objTimerService(),
+            m_objTestSystemTimeService(),
             m_objSsacInfo(),
             m_piImsRadioConnectionListener(IMS_NULL),
             m_pMtcRadioChecker(IMS_NULL)
@@ -73,9 +74,9 @@ public:
     MockIMtcRadioConnectionFailureListener m_objConnectionFailureListener;
     MockIMtcRadioCheckerListener m_objIMtcRadioCheckerListener;
     MockICallStateProxy m_objCallStateProxy;
+    MockIPassiveTimerHolder m_objPassiveTimerHolder;
     TestPhoneInfoService m_objPhoneInfoService;
     TestImsRadioService m_objImsRadioService;
-    TestTimerService m_objTimerService;
     TestSystemTimeService m_objTestSystemTimeService;
     SsacInfo m_objSsacInfo;
     IImsRadioConnectionListener* m_piImsRadioConnectionListener;
@@ -102,12 +103,12 @@ protected:
         ON_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo())
                 .WillByDefault(ReturnRef(m_objSsacInfo));
         PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_TIMER, &m_objTimerService);
-        PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_SYSTEM_TIME, &m_objTestSystemTimeService);
 
         ON_CALL(m_objContext, GetSlotId).WillByDefault(Return(SLOT_ID));
         ON_CALL(m_objContext, GetCallStateProxy).WillByDefault(ReturnRef(m_objCallStateProxy));
+        ON_CALL(m_objContext, GetPassiveTimerHolder)
+                .WillByDefault(ReturnRef(m_objPassiveTimerHolder));
 
         ON_CALL(m_objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
                 .WillByDefault(Return(NW_REPORT_RADIO_LTE));
@@ -129,7 +130,6 @@ protected:
 
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, IMS_NULL);
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_TIMER, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_SYSTEM_TIME, IMS_NULL);
     }
 };
@@ -157,6 +157,9 @@ TEST_F(MtcRadioCheckerTest, CheckSsacDoesNothingWhenWifi)
 
 TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWithStartingTimer)
 {
+    ON_CALL(m_objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
+            .WillByDefault(Return(IMS_FALSE));
+
     m_objSsacInfo.nBarringFactorForVoice = 90;
     m_objSsacInfo.nBarringTimeSecForVoice = 10;
 
@@ -165,7 +168,8 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWithStartingTimer)
             .Times(2)
             .WillOnce(Return(99))
             .WillOnce(Return(10));
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(1);
+    EXPECT_CALL(m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _))
+            .Times(1);
 
     EXPECT_EQ(CheckResult::BLOCKED,
             m_pMtcRadioChecker->Check(
@@ -174,6 +178,9 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWithStartingTimer)
 
 TEST_F(MtcRadioCheckerTest, CheckSsacNotBlockedWhenRandomSmallerThanFactor)
 {
+    ON_CALL(m_objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
+            .WillByDefault(Return(IMS_FALSE));
+
     m_objSsacInfo.nBarringFactorForVoice = 90;
     m_objSsacInfo.nBarringTimeSecForVoice = 10;
 
@@ -181,64 +188,25 @@ TEST_F(MtcRadioCheckerTest, CheckSsacNotBlockedWhenRandomSmallerThanFactor)
     EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(1)
             .WillOnce(Return(50));
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(0);
+    EXPECT_CALL(m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _))
+            .Times(0);
 
     m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWhenTimerIsRunning)
 {
-    m_objSsacInfo.nBarringFactorForVoice = 90;
-    m_objSsacInfo.nBarringTimeSecForVoice = 10;
-
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
-            .Times(2)
-            .WillOnce(Return(99))
-            .WillOnce(Return(10));
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(1);
-
-    EXPECT_EQ(CheckResult::BLOCKED,
-            m_pMtcRadioChecker->Check(
-                    CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
+    ON_CALL(m_objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING))
+            .WillByDefault(Return(IMS_TRUE));
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(0);
     EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_)).Times(0);
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(0);
+    EXPECT_CALL(m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _))
+            .Times(0);
 
     EXPECT_EQ(CheckResult::BLOCKED,
             m_pMtcRadioChecker->Check(
                     CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
-}
-
-TEST_F(MtcRadioCheckerTest, MakeSsacTimerNullWhenTimerExpired)
-{
-    m_objSsacInfo.nBarringFactorForVideo = 90;
-    m_objSsacInfo.nBarringTimeSecForVideo = 10;
-
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
-            .Times(2)
-            .WillOnce(Return(99))
-            .WillOnce(Return(10));
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(1);
-
-    EXPECT_EQ(CheckResult::BLOCKED,
-            m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
-
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), KillTimer()).Times(2);
-
-    m_pMtcRadioChecker->Timer_TimerExpired(IMS_NULL);  // do nothing, for coverage.
-    m_pMtcRadioChecker->Timer_TimerExpired(&m_objTimerService.GetMockTimer());
-
-    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
-    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
-            .Times(2)
-            .WillOnce(Return(99))
-            .WillOnce(Return(10));
-    EXPECT_CALL(m_objTimerService.GetMockTimer(), SetTimer(_, m_pMtcRadioChecker)).Times(1);
-
-    m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1);
 }
 
 TEST_F(MtcRadioCheckerTest, CheckTrafficPreparedReturnsUnblocked)
