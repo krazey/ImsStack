@@ -100,6 +100,6 @@ PRIVATE void NormalRoutingEmergencyServiceController::Finish()
     m_objContext.GetAsyncRunner(
             [&]()
             {
-                m_objServiceManager.StopOpen();
+                m_objServiceManager.StopOpen(IMS_FALSE);
             });
 }
