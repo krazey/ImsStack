@@ -36,6 +36,7 @@
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/CallStateProxy.h"
 #include "helper/OperationAsyncRunner.h"
+#include "helper/PassiveTimerHolder.h"
 #include "utility/MessageUtils.h"
 #include <functional>
 
@@ -60,6 +61,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_pEctManager(nullptr),
         m_pEmergencyServiceManager(nullptr),
         m_objMessageUtils(MessageUtils()),
+        m_objPassiveTimerHolder(PassiveTimerHolder()),
         m_objMtcRadioChecker(*this, m_objCallController),
         m_bWifiTestMode(IMS_FALSE)
 {
@@ -86,6 +88,7 @@ PUBLIC VIRTUAL void MtcApp::Start()
     CreateServices();
     InitCallManager();
     m_objMtcRadioChecker.Init();
+    m_objPassiveTimerHolder.SetNormalService(GetServiceByType(ServiceType::NORMAL));
 }
 
 PUBLIC VIRTUAL void MtcApp::Stop()
@@ -93,6 +96,7 @@ PUBLIC VIRTUAL void MtcApp::Stop()
     IMS_TRACE_I("Stop", 0, 0, 0);
     DestroyServices();
     m_objCallManager.DeInit();
+    m_objPassiveTimerHolder.SetNormalService(IMS_NULL);
 }
 
 PUBLIC VIRTUAL IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType)

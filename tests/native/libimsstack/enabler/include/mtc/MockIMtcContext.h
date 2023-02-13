@@ -34,6 +34,7 @@ class IMtcImsEventReceiver;
 class IMtcRadioChecker;
 class IMtcService;
 class IMtcSipInterfaceFactory;
+class IPassiveTimerHolder;
 class MessageUtils;
 class MtcConfigurationProxy;
 class OperationAsyncRunner;
@@ -59,6 +60,7 @@ public:
     MOCK_METHOD(IMtcEmergencyServiceManager&, GetEmergencyServiceManager, (), (override));
     MOCK_METHOD(OperationAsyncRunner*, GetAsyncRunner, (IN std::function<void()>), (override));
     MOCK_METHOD(IMessageUtils&, GetMessageUtils, (), (override));
+    MOCK_METHOD(IPassiveTimerHolder&, GetPassiveTimerHolder, (), (override));
     MOCK_METHOD(IMS_BOOL, IsWifiTestMode, (), (override));
 };
 
