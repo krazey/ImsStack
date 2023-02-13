@@ -71,6 +71,9 @@ protected:
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &objImsRadioService);
 
+        ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+                .WillByDefault(Return(NW_REPORT_RADIO_NR));
+
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
@@ -131,30 +134,7 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogSetsTimer)
     pEpsFbTrigger->StartWatchdog();
 }
 
-TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredInvokesTriggerEpsFallbackIfNoQos)
-{
-    IMS_SINT32 nAnyWatchdogTime = 6000;
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
-            .WillByDefault(Return(nAnyWatchdogTime));
-    pEpsFbTrigger->StartWatchdog();
-
-    MockIMtcSession objMtcSession;
-    MockISession objSession;
-    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
-    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
-
-    MockIMtcPreconditionManager objPreconditionManager;
-    ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
-
-    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
-            .WillByDefault(Return(IMS_FALSE));
-    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
-            TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER))
-            .Times(1);
-    pEpsFbTrigger->Timer_TimerExpired(&objTimer);
-}
-
-TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredDoesNotInvokeTriggerEpsFallbackIfQos)
+TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbackIfQosAndNotInNr)
 {
     IMS_SINT32 nAnyWatchdogTime = 6000;
     ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
@@ -171,7 +151,84 @@ TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredDoesNotInvokeTriggerE
 
     ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
+    pEpsFbTrigger->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbackIfQosAndInNr)
+{
+    IMS_SINT32 nAnyWatchdogTime = 6000;
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(nAnyWatchdogTime));
+    pEpsFbTrigger->StartWatchdog();
+
+    MockIMtcSession objMtcSession;
+    MockISession objSession;
+    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+
+    MockIMtcPreconditionManager objPreconditionManager;
+    ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
+
+    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
+    pEpsFbTrigger->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredNotTriggersEpsFallbackIfNoQosAndNotInNr)
+{
+    IMS_SINT32 nAnyWatchdogTime = 6000;
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(nAnyWatchdogTime));
+    pEpsFbTrigger->StartWatchdog();
+
+    MockIMtcSession objMtcSession;
+    MockISession objSession;
+    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+
+    MockIMtcPreconditionManager objPreconditionManager;
+    ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
+
+    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_LTE));
+
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), TriggerEpsFallback(_)).Times(0);
+    pEpsFbTrigger->Timer_TimerExpired(&objTimer);
+}
+
+TEST_F(EpsFallbackTriggerTest, StartWatchdogAndTimerExpiredTriggersEpsFallbackIfNoQosAndInNr)
+{
+    IMS_SINT32 nAnyWatchdogTime = 6000;
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+            .WillByDefault(Return(nAnyWatchdogTime));
+    pEpsFbTrigger->StartWatchdog();
+
+    MockIMtcSession objMtcSession;
+    MockISession objSession;
+    ON_CALL(objContext, GetSession()).WillByDefault(Return(&objMtcSession));
+    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+
+    MockIMtcPreconditionManager objPreconditionManager;
+    ON_CALL(objContext, GetPreconditionManager).WillByDefault(ReturnRef(objPreconditionManager));
+
+    ON_CALL(objPreconditionManager, IsDedicatedBearerAllocated(&objSession, MEDIATYPE_AUDIO))
+            .WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objPhoneInfoService.GetMockNetworkWatcher(), GetNetRadioTechType())
+            .WillByDefault(Return(NW_REPORT_RADIO_NR));
+
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
+            TriggerEpsFallback(IImsRadio::EPSFB_REASON_NO_NETWORK_TRIGGER))
+            .Times(1);
     pEpsFbTrigger->Timer_TimerExpired(&objTimer);
 }
 
