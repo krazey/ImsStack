@@ -16,8 +16,10 @@
 
 package com.android.imsstack.enabler.mts;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +28,10 @@ import android.os.Message;
 import android.os.Parcel;
 import android.util.Base64;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.PhoneCallDBAgent;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mts.MtsJni;
 import com.android.imsstack.util.ImsLog;
@@ -43,9 +49,13 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
 public class MtsControllerTest {
+    private static final int SLOT_ID = 0;
     private MtsController mMtsController;
 
+    @Mock CarrierConfig mMockCarrierConfig;
+    @Mock ConfigInterface mMockConfigInterface;
     @Mock IBaseContext mMockIBaseContext;
+    @Mock PhoneCallDBAgent mMockPhoneCallDBAgent;
     @Mock MtsController.Listener mMockMtsControllerListener = new MtsController.Listener();
 
     // test configurations
@@ -87,23 +97,34 @@ public class MtsControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        AgentFactory.setDefaultAgent(AgentFactory.PHONE_CALL_DB, mMockPhoneCallDBAgent);
+
+        when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
+
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_SMS_USE_DIALED_NUMBER_FOR_REQUEST_URI_BOOL)))
+                .thenReturn(true);
+
         mMtsController = new MtsController(mMockIBaseContext, Looper.getMainLooper());
         mMtsController.setListener(mMockMtsControllerListener);
 
         mMtsJni = new TestMtsJni();
-        mMtsJni.init(mMtsController.getHandler(), 0);
+        mMtsJni.init(mMtsController.getHandler(), SLOT_ID);
 
         mMtsController.startNativeConnection(mMtsJni);
     }
 
     @After
     public void tearDown() {
-        mMtsJni.release(0);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
+        mMtsJni.release(SLOT_ID);
         mMtsController.cleanup();
     }
 
     @Test
-    public void testBasicOperation_sendMessage_SUCCESS() {
+    public void testSendMessageCallBackSuccess() {
+        when(mMockPhoneCallDBAgent.isEmergencyNumber(mDialedNumber)).thenReturn(0);
         boolean result = mMtsController.sendMessage(
                 mSmsFormat, mPduData, mPsiSmsc, mDialedNumber, mSeqId);
 
@@ -125,14 +146,42 @@ public class MtsControllerTest {
         // reason, smsFormat, retryafter, seqid
         verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
                 eq(MtsController.MO_SUCCESS), eq(mSmsFormat), eq(0), eq(mSeqId));
+        assertEquals(result, true);
     }
 
     @Test
-    public void testBasicOperation_sendMessage_ERROR_RETRY() {
-        String tempPsiSmsc = ""; // ERROR-CASE
+    public void testSendMessageWithEmergencyNumber() {
+        when(mMockPhoneCallDBAgent.isEmergencyNumber(mDialedNumber)).thenReturn(1);
+        boolean result = mMtsController.sendMessage(
+                mSmsFormat, mPduData, mPsiSmsc, mDialedNumber, mSeqId);
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(MtsController.REPORTMOSTATUS_REASON, MtsController.MO_SUCCESS);
+        bundle.putInt(MtsController.REPORTMOSTATUS_SMSFORMAT, 1);
+        bundle.putInt(MtsController.REPORTMOSTATUS_RETRYAFTER, 0);
+        bundle.putInt(MtsController.REPORTMOSTATUS_SEQID, 1);
+
+        Message msg = Message.obtain();
+        msg.what = MtsController.REQUEST_REPORT_MO_STATUS;
+        msg.obj = bundle;
+
+        Handler handler = mMtsController.getHandler();
+        handler.sendMessage(msg);
+
+        waitForHandlerActionDelayed(handler, 1000, 0);
+
+        // reason, smsFormat, retryafter, seqid
+        verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
+                eq(MtsController.MO_SUCCESS), eq(mSmsFormat), eq(0), eq(mSeqId));
+        assertEquals(result, true);
+    }
+
+    @Test
+    public void testSendMessageCallBackErrorRetry() {
+        when(mMockPhoneCallDBAgent.isEmergencyNumber(mDialedNumber)).thenReturn(0);
 
         boolean result = mMtsController.sendMessage(
-                mSmsFormat, mPduData, tempPsiSmsc, mDialedNumber, mSeqId);
+                mSmsFormat, mPduData, mPsiSmsc, mDialedNumber, mSeqId);
 
         Bundle bundle = new Bundle();
         bundle.putInt(MtsController.REPORTMOSTATUS_REASON, MtsController.MO_ERROR_RETRY);
@@ -152,10 +201,11 @@ public class MtsControllerTest {
         // reason, smsFormat, retryafter, seqid
         verify(mMockMtsControllerListener).notifyStatusForOutgoingMessage(
                 eq(MtsController.MO_ERROR_RETRY), eq(mSmsFormat), eq(0), eq(mSeqId));
+        assertEquals(result, true);
     }
 
     @Test
-    public void testBasicOperation_receiveMessage() {
+    public void testReceiveMessage() {
         Message msg = Message.obtain();
         msg.what = MtsController.REQUEST_REPORT_MT_SMS;
         msg.arg1 = mSmsFormat;
@@ -173,7 +223,7 @@ public class MtsControllerTest {
     }
 
     @Test
-    public void testBasicOperation_sendNotificationForScbmState() {
+    public void testSendNotificationForScbmState() {
         mMtsController.sendNotificationForScbmState(MtsController.SCBM_STARTED);
         mMtsController.sendNotificationForScbmState(MtsController.SCBM_TERMINATED);
 

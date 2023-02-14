@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "Connector.h"
+#include "ServiceConfig.h"
 #include "ICoreService.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
@@ -80,11 +82,13 @@ PUBLIC VIRTUAL void MtsService::SetListener(IN IMtsServiceListener* piMtsService
 }
 
 PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-        IN const AString& strAddress, IN IMS_SINT32 nSeqId)
+        IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency)
 {
     IMS_TRACE_I("SendMoSms", 0, 0, 0);
 
-    if (IsEccNumber(strAddress) == IMS_TRUE)
+    if (bEmergency &&
+            ConfigService::GetConfigService()->GetCarrierConfig(m_nSlotId)->GetBoolean(
+                    CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL))
     {
         // TODO(Mts): Request SMS RAT SELECTION
 
@@ -92,7 +96,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const 
         {
             delete m_pSmsInfo;
         }
-        m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, strAddress, objData, nSeqId, IMS_TRUE);
+        m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, strAddress, objData, nSeqId, bEmergency);
         m_piImsEmergencyAos->Control(ImsAosControl::REGISTER_START);
 
         // Wait until the Emergency REGISTRATION Procedure done
@@ -104,7 +108,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const 
     if (piMtsTraffic->IsRadioGuardTimerActive())
     {
         piMtsTraffic->StartRadioGuardTimer();
-        m_piMtsServiceListener->NotifyMoSms(eSmsFormat, objData, strAddress, nSeqId, IMS_FALSE);
+        m_piMtsServiceListener->NotifyMoSms(eSmsFormat, objData, strAddress, nSeqId, bEmergency);
     }
     else
     {
@@ -112,7 +116,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const 
         {
             delete m_pSmsInfo;
         }
-        m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, strAddress, objData, nSeqId, IMS_FALSE);
+        m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, strAddress, objData, nSeqId, bEmergency);
         StartRadioTraffic(piMtsTraffic);
     }
 }
@@ -627,20 +631,6 @@ IJniMtsServiceThread* MtsService::GetJniThread()
     }
 
     return reinterpret_cast<IJniMtsServiceThread*>(piJniEnabler->GetJniThread());
-}
-
-PRIVATE
-IMS_BOOL MtsService::IsEccNumber(IN const AString& strDstAddr)
-{
-    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(m_nSlotId)->IsEmergencyNumber(
-                strDstAddr))
-    {
-        IMS_TRACE_I("IsEccNumber : This Number( %s ) is a ECC Number from PhoneInfoService",
-                strDstAddr.GetStr(), 0, 0);
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
 }
 
 PRIVATE

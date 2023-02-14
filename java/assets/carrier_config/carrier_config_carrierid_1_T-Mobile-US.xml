@@ -351,5 +351,6 @@
 
     <!-- Mts -->
     <int name="sms_request_uri_type_int" value="0"/>
+    <boolean name="sms_geolocation_pidf_for_emergency_bool" value="true"/>
 
 </carrier_config>

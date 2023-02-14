@@ -157,6 +157,7 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
     android::String8 strEncodedPdu(objParcel.readString16());
     android::String8 strAddress_(objParcel.readString16());
     IMS_SINT32 nSeqId = objParcel.readInt32();
+    IMS_BOOL bEmergency = objParcel.readBool();
     AString strData = AString::FromBase64(strEncodedPdu.string());
     ByteArray objData(reinterpret_cast<const IMS_BYTE*>(strData.GetStr()),
             static_cast<IMS_SINT32>(strData.GetLength()));
@@ -184,7 +185,7 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
         return;
     }
 
-    piMtsService->SendMoSms(eSmsFormat, objData, strAddress, nSeqId);
+    piMtsService->SendMoSms(eSmsFormat, objData, strAddress, nSeqId, bEmergency);
 }
 
 PRIVATE

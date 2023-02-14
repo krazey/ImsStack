@@ -32,7 +32,6 @@
 #include "PlatformContext.h"
 #include "TestConfigService.h"
 #include "TestImsRadioService.h"
-#include "TestPhoneInfoService.h"
 #include "core/MockIReference.h"
 #include "core/IPageMessage.h"
 #include "../../interface/aos/MockIImsAos.h"
@@ -59,18 +58,14 @@ public:
     MockIMtsServiceListener objMtsServiceListener;
     MtsService* pMtsService;
 
-    TestConfigService* pConfigService;
+    TestConfigService objConfigService;
     TestImsRadioService objImsRadioService;
-    TestPhoneInfoService objPhoneInfoService;
 
 protected:
     virtual void SetUp() override
     {
-        pConfigService = new TestConfigService();
         PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_CONFIG, pConfigService);
-        PlatformContext::GetInstance()->SetService(
-                PlatformContext::SERVICE_PHONE_INFO, &objPhoneInfoService);
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
         PlatformContext::GetInstance()->SetService(
                 PlatformContext::SERVICE_RADIO, &objImsRadioService);
         /*
@@ -80,12 +75,10 @@ protected:
         Configuration::GetInstance()->SetAppConfig(
                 ImsServiceConfig::GetAppName(ImsAppId::MTS), SLOT_ID);
 
-        MockICarrierConfig& objCarrierConfig = pConfigService->GetMockCarrierConfig();
-
-        ON_CALL(objCarrierConfig,
+        ON_CALL(objConfigService.GetMockCarrierConfig(),
                 GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, _))
                 .WillByDefault(Return(IMS_TRUE));
-        ON_CALL(objCarrierConfig,
+        ON_CALL(objConfigService.GetMockCarrierConfig(),
                 GetBoolean(CarrierConfig::Assets::KEY_SMS_ALLOW_IMSI_BASED_SIP_URI_BOOL, _))
                 .WillByDefault(Return(IMS_FALSE));
 
@@ -110,11 +103,9 @@ protected:
     virtual void TearDown() override
     {
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
-        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_PHONE_INFO, IMS_NULL);
         PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_RADIO, IMS_NULL);
 
         delete pMtsService;
-        delete pConfigService;
     }
 };
 
@@ -243,23 +234,35 @@ TEST_F(MtsServiceTest, ForwardScbmNotification)
 TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    IMS_BOOL bEmergency = IMS_FALSE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(0);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
             .WillOnce(Return(IMS_FALSE));
 
-    pMtsService->SendMoSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, strTargetAddress, SEQ_ID_1);
+    pMtsService->SendMoSms(eSmsFormat, objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
 }
 
 TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    IMS_BOOL bEmergency = IMS_FALSE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
@@ -268,7 +271,7 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
 
-    pMtsService->SendMoSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, strTargetAddress, SEQ_ID_2);
+    pMtsService->SendMoSms(eSmsFormat, objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 }
@@ -276,9 +279,15 @@ TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsAllowed)
 TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    IMS_BOOL bEmergency = IMS_FALSE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
     EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(2);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
@@ -287,19 +296,25 @@ TEST_F(MtsServiceTest, SendNormalMoSmsAndGuardTimerIsActived)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
 
-    pMtsService->SendMoSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, strTargetAddress, SEQ_ID_1);
+    pMtsService->SendMoSms(eSmsFormat, objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
 
-    pMtsService->SendMoSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, strTargetAddress, SEQ_ID_2);
+    pMtsService->SendMoSms(eSmsFormat, objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
 }
 
 TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowed)
 {
-    AString strDialedNumber = "911";
+    AString strTargetAddress = "911";
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    IMS_BOOL bEmergency = IMS_TRUE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(1);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
@@ -308,21 +323,50 @@ TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowed)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPhoneInfoService.GetMockCallInfo(), IsEmergencyNumber(strDialedNumber))
-            .WillByDefault(Return(IMS_TRUE));
 
-    pMtsService->SendMoSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, strDialedNumber, SEQ_ID_1);
+    pMtsService->SendMoSms(eSmsFormat, objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, IImsRadio::DIRECTION_MO);
 }
 
-TEST_F(MtsServiceTest, SendE911MoSmsAndGuardTimerIsActived)
+TEST_F(MtsServiceTest, SendE911MoSmsWhenTrafficIsAllowedButDoNotUseEPDN)
 {
-    AString strDialedNumber = "911";
+    AString strTargetAddress = "911";
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    IMS_BOOL bEmergency = IMS_TRUE;
     ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
     objRpData.Append((IMS_BYTE)0x02);     // message reference
     objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(1);
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(objImsRadioService.GetMockImsRadio(),
+            StartImsTraffic(IImsRadio::TRAFFIC_TYPE_SMS, _, IImsRadio::DIRECTION_MO, _))
+            .Times(1);
+
+    pMtsService->SendMoSms(eSmsFormat, objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
+    pMtsService->Traffic_OnConnectionSetupPrepared(
+            IImsRadio::TRAFFIC_TYPE_SMS, IImsRadio::DIRECTION_MO);
+}
+
+TEST_F(MtsServiceTest, SendE911MoSmsAndGuardTimerIsActived)
+{
+    AString strTargetAddress = "911";
+    SmsFormatType eSmsFormat = SmsFormatType::SMSFORMAT_3GPP;
+    IMS_BOOL bEmergency = IMS_TRUE;
+    ByteArray objRpData((IMS_BYTE)0x00);  // message type indicator(RP-MO-DATA)
+    objRpData.Append((IMS_BYTE)0x02);     // message reference
+    objRpData.Append((IMS_BYTE)0x0F);     // other required information elements
+
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetBoolean(CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL, _))
+            .WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objMtsServiceListener, NotifyMoSms(_, _, _, _, _)).Times(2);
     EXPECT_CALL(objImsRadioService.GetMockImsRadio(), IsImsTrafficAllowed(_))
             .Times(1)
@@ -331,15 +375,13 @@ TEST_F(MtsServiceTest, SendE911MoSmsAndGuardTimerIsActived)
             StartImsTraffic(IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, _, IImsRadio::DIRECTION_MO, _))
             .Times(1);
     ON_CALL(objMockIImsEmergencyAos, IsImsConnected()).WillByDefault(Return(IMS_TRUE));
-    ON_CALL(objPhoneInfoService.GetMockCallInfo(), IsEmergencyNumber(strDialedNumber))
-            .WillByDefault(Return(IMS_TRUE));
 
-    pMtsService->SendMoSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, strDialedNumber, SEQ_ID_1);
+    pMtsService->SendMoSms(eSmsFormat, objRpData, strTargetAddress, SEQ_ID_1, bEmergency);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
     pMtsService->Traffic_OnConnectionSetupPrepared(
             IImsRadio::TRAFFIC_TYPE_EMERGENCY_SMS, IImsRadio::DIRECTION_MO);
 
-    pMtsService->SendMoSms(SmsFormatType::SMSFORMAT_3GPP, objRpData, strDialedNumber, SEQ_ID_2);
+    pMtsService->SendMoSms(eSmsFormat, objRpData, strTargetAddress, SEQ_ID_2, bEmergency);
     pMtsService->ImsAos_Connected(ImsAosFeature::SMSIP, IIpcan::CATEGORY_MOBILE);
 }
 
@@ -347,6 +389,7 @@ TEST_F(MtsServiceTest, ReceivedNormalMtSmsWhenTrafficIsAllowed)
 {
     ICoreService* piCoreService = pMtsService->GetICoreService(IMS_FALSE);
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
+
     EXPECT_CALL(objMtsServiceListener, NotifyMtSms(_)).Times(2);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
@@ -362,6 +405,7 @@ TEST_F(MtsServiceTest, ReceivedE911MtSmsWhenTrafficIsAllowed)
 {
     ICoreService* piCoreService = pMtsService->GetICoreService(IMS_TRUE);
     IPageMessage* piMessage = reinterpret_cast<IPageMessage*>(FAKE_ADDRESS);
+
     EXPECT_CALL(objMtsServiceListener, NotifyMtSms(_)).Times(2);
 
     pMtsService->CoreService_PageMessageReceived(piCoreService, piMessage);
