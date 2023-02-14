@@ -46,6 +46,13 @@ protected:
 
 TEST_F(NativeCommandsHandlerTest, OnCommandForSetDeviceConfig)
 {
+    IMS_SINT32 defaultSupportedSimCount = DeviceConfig::GetSupportedSimCount();
+    IMS_SINT32 defaultActiveSimCount = DeviceConfig::GetActiveSimCount();
+    IMS_BOOL defaultEmergencyEnabled = DeviceConfig::IsImsEmergencyEnabled();
+    IMS_BOOL defaultVolteEnabled = DeviceConfig::IsVoLteEnabled();
+    IMS_BOOL defaultVtEnabled = DeviceConfig::IsVtEnabled();
+    IMS_BOOL defaultWfcEnabled = DeviceConfig::IsWfcEnabled();
+
     NativeCommandsHandler objCommandsHandler;
     // <active sim count, supported sim count, emergency, volte, vt, wfc>
     __DeviceConfig objConfig(2, 2, 1, 1, 1, 1);
@@ -70,6 +77,11 @@ TEST_F(NativeCommandsHandlerTest, OnCommandForSetDeviceConfig)
     EXPECT_FALSE(DeviceConfig::IsVoLteEnabled());
     EXPECT_FALSE(DeviceConfig::IsVtEnabled());
     EXPECT_FALSE(DeviceConfig::IsWfcEnabled());
+
+    __DeviceConfig objConfig3(defaultSupportedSimCount, defaultActiveSimCount,
+            defaultEmergencyEnabled, defaultVolteEnabled, defaultVtEnabled, defaultWfcEnabled);
+    pnParam = reinterpret_cast<IMS_UINTP>(&objConfig3);
+    objCommandsHandler.OnCommand(NativeCommands::CMD_SET_DEVICE_CONFIG, -1, pnParam);
 }
 
 TEST_F(NativeCommandsHandlerTest, OnCommandForStartEnabler)
