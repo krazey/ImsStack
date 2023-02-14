@@ -176,9 +176,7 @@ void EpsFallbackTrigger::TriggerEpsFallback(IN EpsFallbackReason eReason)
 PRIVATE
 IMS_BOOL EpsFallbackTrigger::IsEpsFallbackTriggeredByNetwork() const
 {
-    // checking 'handover to LTE' will be done by modem
-    // checking 'RRC release' will be done by modem
-
-    return m_objContext.GetPreconditionManager().IsDedicatedBearerAllocated(
-            &m_objContext.GetSession()->GetISession(), MEDIATYPE_AUDIO);
+    return !IsVoNr() ||
+            m_objContext.GetPreconditionManager().IsDedicatedBearerAllocated(
+                    &m_objContext.GetSession()->GetISession(), MEDIATYPE_AUDIO);
 }
