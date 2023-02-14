@@ -38,6 +38,8 @@ class OsNetworkIpSecTest : public ::testing::Test
 {
 protected:
     inline OsNetworkIpSecTest() :
+            m_nSpi(0),
+            m_nMode(0),
             m_objLocalAddress(AString("192.168.2.3"), 5060),
             m_objRemoteAddress(AString("192.168.5.9"), 5080)
     {
