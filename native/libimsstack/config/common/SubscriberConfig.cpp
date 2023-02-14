@@ -24,6 +24,7 @@
 #include "Credential.h"
 #include "ISubscriberConfigListener.h"
 #include "ISubscriberInfoListener.h"
+#include "ImsIdentity.h"
 #include "ServerAddress.h"
 #include "private/SubscriberConfig.h"
 
@@ -524,10 +525,16 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
         }
     }
 
-    piProperty->SetPersistentBoolean(
-            ImsPrivateProperties::Persistent::KEY_ISIM_ENABLED, IsIsimSupported(), GetSlotId());
-    piProperty->SetPersistentBoolean(
-            ImsPrivateProperties::Persistent::KEY_USIM_ENABLED, IsUsimSupported(), GetSlotId());
+    if (IsDefaultConfig())
+    {
+        piProperty->SetPersistentBoolean(
+                ImsPrivateProperties::Persistent::KEY_ISIM_ENABLED, IsIsimSupported(), GetSlotId());
+        piProperty->SetPersistentBoolean(
+                ImsPrivateProperties::Persistent::KEY_USIM_ENABLED, IsUsimSupported(), GetSlotId());
+
+        // LOG_EXCLUDING_SERVER_INFO, only for default subscriber
+        IMS_UTIL_SYS_PROP_SET_DEBUG_ON(IsDebugOn());
+    }
 
     //
     // Device supports the ISIM application, so the subscriber info. should be read from ISIM.
@@ -561,12 +568,6 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
             SetState(STATE_PROVISIONING);
         }
 
-        if (m_strId.Equals(GetDefaultId()))
-        {
-            // LOG_EXCLUDING_SERVER_INFO, only for default subscriber
-            IMS_UTIL_SYS_PROP_SET_DEBUG_ON(IsDebugOn());
-        }
-
         IMS_TRACE_D(
                 "SubscriberConfig (%s:%s) is loaded", m_strConfName.GetStr(), m_strId.GetStr(), 0);
 
@@ -575,26 +576,38 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
 
     ImsSubscriberInfo* pSubsInfo = new ImsSubscriberInfo();
 
-    pSubsInfo->m_strHomeDomainName = piProperty->GetPersistent(
-            ImsPrivateProperties::Persistent::KEY_CONFIG_HOME_DOMAIN_NAME, GetSlotId());
-
-    pSubsInfo->m_strPrivateUserId = piProperty->GetPersistent(
-            ImsPrivateProperties::Persistent::KEY_CONFIG_IMPI, GetSlotId());
-
-    pSubsInfo->m_nRefIndexOfPrimaryImpu = 0;
-    AString strPublicUserIds = piProperty->GetPersistent(
-            ImsPrivateProperties::Persistent::KEY_CONFIG_IMPU_LIST, GetSlotId());
-
-    pSubsInfo->m_objPublicUserIds = strPublicUserIds.Split(',');
-
-    if (pSubsInfo->m_objPublicUserIds.GetCount() > 0)
+    if (IsDefaultConfig())
     {
-        piProperty->SetPersistent(ImsPrivateProperties::Persistent::KEY_PRIMARY_IMPU,
-                pSubsInfo->m_objPublicUserIds.GetElementAt(0), GetSlotId());
-    }
+        pSubsInfo->m_strHomeDomainName = piProperty->GetPersistent(
+                ImsPrivateProperties::Persistent::KEY_CONFIG_HOME_DOMAIN_NAME, GetSlotId());
 
-    pSubsInfo->m_strPhoneContext =
-            piCc->GetString(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING);
+        pSubsInfo->m_strPrivateUserId = piProperty->GetPersistent(
+                ImsPrivateProperties::Persistent::KEY_CONFIG_IMPI, GetSlotId());
+
+        pSubsInfo->m_nRefIndexOfPrimaryImpu = 0;
+        AString strPublicUserIds = piProperty->GetPersistent(
+                ImsPrivateProperties::Persistent::KEY_CONFIG_IMPU_LIST, GetSlotId());
+
+        pSubsInfo->m_objPublicUserIds = strPublicUserIds.Split(',');
+
+        if (pSubsInfo->m_objPublicUserIds.GetCount() > 0)
+        {
+            piProperty->SetPersistent(ImsPrivateProperties::Persistent::KEY_PRIMARY_IMPU,
+                    pSubsInfo->m_objPublicUserIds.GetElementAt(0), GetSlotId());
+        }
+
+        pSubsInfo->m_strPhoneContext =
+                piCc->GetString(CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING);
+    }
+    else
+    {
+        const AString& strAnonymousUserId = ImsIdentity::GetAnonymousUserId();
+        AString strTemp;
+        strAnonymousUserId.SplitF('@', strTemp, pSubsInfo->m_strHomeDomainName, IMS_FALSE);
+        strAnonymousUserId.SplitF(':', strTemp, pSubsInfo->m_strPrivateUserId, IMS_FALSE);
+        pSubsInfo->m_nRefIndexOfPrimaryImpu = 0;
+        pSubsInfo->m_objPublicUserIds.AddElement(strAnonymousUserId);
+    }
 
     pSubsInfo->m_bIsAuthRealmLenient = IMS_TRUE;
     pSubsInfo->m_objCredential.SetType(Credential::TYPE_AKAv1_MD5);
@@ -614,12 +627,6 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
     }
 
     SetState(STATE_PROVISIONED);
-
-    if (m_strId.Equals(GetDefaultId()))
-    {
-        // LOG_EXCLUDING_SERVER_INFO, only for default subscriber
-        IMS_UTIL_SYS_PROP_SET_DEBUG_ON(IsDebugOn());
-    }
 
     ToDebugString();
 
@@ -2505,6 +2512,11 @@ void SubscriberConfig::UpdateAllConfigs(IN IMS_BOOL bEnforceIsimRefresh)
 PRIVATE
 void SubscriberConfig::WriteProvisioning()
 {
+    if (!IsDefaultConfig())
+    {
+        return;
+    }
+
     IMS_TRACE_D("WriteProvisioning...", 0, 0, 0);
 
     IImsPrivateProperty* piProperty = GetPrivateProperty();
@@ -2669,7 +2681,7 @@ IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
 {
     IMS_SINT32 nSubsAttributes = SUBSCRIPTION_ATTRIBUTE_IMS;
 
-    if (!m_strId.Equals(GetDefaultId()))
+    if (!IsDefaultConfig())
     {
         return nSubsAttributes;
     }

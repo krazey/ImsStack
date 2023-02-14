@@ -116,6 +116,7 @@ public:
         m_piSubsInfoListener = piListener;
     }
 
+    inline IMS_BOOL IsDefaultConfig() const { return m_strId.Equals(GetDefaultId()); }
     static const AString& GetDefaultId();
 
 protected:
