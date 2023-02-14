@@ -21,17 +21,23 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.telephony.ims.ImsCallProfile;
 
+import com.android.imsstack.ContextFixture;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -65,12 +71,25 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
     private CarrierConfig mMockCarrierConfig;
     private ConfigInterface mMockConfigInterface;
     private ImsCallLocationPolicy mImsCallLocationPolicy;
+    private IContext mMockIContext;
+    private Context mMockContext;
+
+    static ContextFixture sContext;
+
+    @BeforeClass
+    public static void setUpOnce() {
+        sContext = new ContextFixture();
+        AppContext.init(sContext.getTestDouble());
+    }
 
     @Before
     public void setUp() throws Exception {
+        mMockIContext = Mockito.mock(IContext.class);
+        mMockContext = Mockito.mock(Context.class);
         mMockCallContext = Mockito.mock(ImsCallContext.class);
         mMockCarrierConfig = Mockito.mock(CarrierConfig.class);
         mMockConfigInterface = Mockito.mock(ConfigInterface.class);
+        when(mMockIContext.getContext()).thenReturn(mMockContext);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCallContext.getSlotId()).thenReturn(SLOT_ID);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
@@ -81,6 +100,12 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
     public void tearDown() throws Exception {
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
         mImsCallLocationPolicy = null;
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AppContext.deinit();
+        sContext = null;
     }
 
     @Test
@@ -209,7 +234,7 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         MessageExecutor executor = new MessageExecutor(ImsServiceManager.class.getSimpleName());
         ImsServiceRecord mockServiceRecord = Mockito.mock(ImsServiceRecord.class);
         ImsRegistrationTracker mockImsRegTracker = Mockito.mock(ImsRegistrationTracker.class);
-        ImsServiceManager serviceManager = new ImsServiceManager(mContext, executor);
+        ImsServiceManager serviceManager = new ImsServiceManager(mMockContext, executor);
         when(mMockCallContext.getSlotId()).thenReturn(SLOT_ID);
         serviceManager.setDefault(serviceManager);
         ConcurrentHashMap<Integer, ImsServiceRecord> serviceMap =

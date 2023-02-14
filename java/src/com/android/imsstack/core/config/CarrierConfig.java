@@ -57,6 +57,7 @@ public class CarrierConfig {
             CarrierConfigManager.KEY_CARRIER_VOLTE_AVAILABLE_BOOL,
             CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL,
             CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL,
+            CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS,
             CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL,
             CarrierConfigManager.KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL,
             CarrierConfigManager.KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL,
@@ -1142,7 +1143,8 @@ public class CarrierConfig {
      * @return A string representation of the value for the given key.
      */
     public static String getValue(@NonNull PersistableBundle config, @NonNull String key) {
-        if (key.endsWith("_bool") || key.endsWith("_boolean")) {
+        if (key.endsWith("_bool") || key.endsWith("_boolean")
+                || key.equals("ignore_data_enabled_changed_for_video_calls")) {
             return String.valueOf(config.getBoolean(key));
         } else if (key.endsWith("_int")) {
             return String.valueOf(config.getInt(key));
@@ -1564,7 +1566,8 @@ public class CarrierConfig {
         int count = 0;
 
         if (src.containsKey(key)) {
-            if (key.endsWith("_bool") || key.endsWith("_boolean")) {
+            if (key.endsWith("_bool") || key.endsWith("_boolean")
+                    || key.equals("ignore_data_enabled_changed_for_video_calls")) {
                 dst.putBoolean(key, src.getBoolean(key));
                 count++;
             } else if (key.endsWith("_int")) {

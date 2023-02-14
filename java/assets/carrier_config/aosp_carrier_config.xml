@@ -51,8 +51,8 @@
     <boolean name="rtt_upgrade_supported_bool" value=""/>
     <boolean name="rtt_downgrade_supported_bool" value=""/>
     <int name="gba_mode_int" value="" />
+    <boolean name="ignore_data_enabled_changed_for_video_calls" value=""/>
 
-    <!-- ignore_data_enabled_changed_for_video_calls -->
     <!-- vilte_data_is_metered_bool -->
     <!-- carrier_default_wfc_ims_mode_int -->
     <!-- carrier_default_wfc_ims_roaming_mode_int -->

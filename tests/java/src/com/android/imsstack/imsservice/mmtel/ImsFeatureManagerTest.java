@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.os.Looper;
 import android.telephony.ims.feature.MmTelFeature;
 import android.util.ArraySet;
@@ -49,6 +50,7 @@ public class ImsFeatureManagerTest {
     private IAosRegistrationListener mAosRegListener;
     MockIAosRegistration mAosReg;
 
+    @Mock Context mContext;
     @Mock IBaseContext mMockBaseContext;
     @Mock IContext mMockContext;
     @Mock IMmTelFeatureCapabilityListener mMockFeatureCapabilityListener;
@@ -58,8 +60,9 @@ public class ImsFeatureManagerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        when(mMockContext.getContext()).thenReturn(mContext);
         when(mMockBaseContext.getDefaultLooper()).thenReturn(Looper.getMainLooper());
-
+        when(mMockContext.getDefaultLooper()).thenReturn(Looper.getMainLooper());
         mAosReg = new MockIAosRegistration();
         mFeatureManager = new ImsFeatureManager(mMockBaseContext, mMockFeatureCapabilityListener);
         mRegTracker = new FakeImsRegistrationTracker(mMockContext, new ImsRegistrationImpl());

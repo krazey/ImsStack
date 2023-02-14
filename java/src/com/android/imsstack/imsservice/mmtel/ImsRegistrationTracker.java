@@ -18,9 +18,13 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
+import android.telephony.CarrierConfigManager;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
@@ -32,6 +36,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.ICommonPackageListener;
+import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
@@ -44,6 +49,7 @@ import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -72,6 +78,7 @@ public class ImsRegistrationTracker {
     private int mFeatures = FeatureTagMask.NONE;
     private List<Pair<Integer, Integer>> mCapabilities;
     private ConfigListener mConfigListener = null;
+    private ContentObserver mDataRoamingSettingObserver = null;
 
     @VisibleForTesting
     public MessageHandler mHandler = null;
@@ -111,6 +118,13 @@ public class ImsRegistrationTracker {
                 }
             }
         }
+
+        if (!isIgnoreDataEnabledChangedForVideoCalls()) {
+            if (mHandler == null) {
+                mHandler = new MessageHandler();
+            }
+            registerDataRoamingSettingObserver();
+        }
     }
 
     public void dispose() {
@@ -129,6 +143,11 @@ public class ImsRegistrationTracker {
             if (configImpl != null) {
                 configImpl.removeListener(mConfigListener);
             }
+        }
+
+        if (mDataRoamingSettingObserver != null) {
+            SettingsUtils.unregisterObserver(mContext.getContext().getContentResolver(),
+                    mDataRoamingSettingObserver);
         }
     }
 
@@ -307,6 +326,15 @@ public class ImsRegistrationTracker {
                 }
             }
 
+            if (!isIgnoreDataEnabledChangedForVideoCalls()) {
+                if (!isMobileDataEnabled()) {
+                    if (capability == IAosRegistrationListener.Capability.VIDEO) {
+                        logi("Mobile data is off :: ignoring video capability");
+                        continue;
+                    }
+                }
+            }
+
             capabilityPairs.addCapability(networkType, capability);
             logi("changeCapabilities::finalCaps networkType"
                     + networkType + " Capability " + capability);
@@ -337,9 +365,22 @@ public class ImsRegistrationTracker {
         return false;
     }
 
+    private boolean isMobileDataEnabled() {
+        TelephonyManager tm = AppContext.getTelephonyManager(mContext.getSubId());
+        if (isRoaming()) {
+            return tm.isDataRoamingEnabled() && tm.isDataEnabled();
+        }
+        return tm.isDataEnabled();
+    }
+
     private boolean isVoiceRoaming() {
         IDcNetWatcher dcnw = getDcNetWatcher(mContext.getSlotId());
         return (dcnw != null) ? dcnw.isVoiceRoaming() : false;
+    }
+
+    private boolean isRoaming() {
+        IDcNetWatcher dcnw = getDcNetWatcher(mContext.getSlotId());
+        return (dcnw != null) ? dcnw.isRoaming() : false;
     }
 
     private boolean isVoWifiCapabilitySupportedWhenWifiOnlyOrPreferredInRoaming() {
@@ -348,6 +389,36 @@ public class ImsRegistrationTracker {
         return cc != null && cc.getBoolean(
                 CarrierConfig.Assets
                 .KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL);
+    }
+
+    private boolean isIgnoreDataEnabledChangedForVideoCalls() {
+        ConfigInterface config = getConfigInterface(mContext.getSlotId());
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+        if (cc != null && cc.getBoolean(
+                CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
+            return true;
+        }
+        return false;
+    }
+
+    private void registerDataRoamingSettingObserver() {
+        if (mDataRoamingSettingObserver != null) {
+            return;
+        }
+
+        mDataRoamingSettingObserver = new ContentObserver(mContext.getDefaultHandler()) {
+            @Override
+            public void onChange(boolean bChange) {
+                CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
+                if (capabilityPairs != null) {
+                    mRegTracker.changeCapabilities(capabilityPairs);
+                }
+            }
+        };
+
+        SettingsUtils.registerObserverForSecure(mContext.getContext().getContentResolver(),
+                Settings.Global.DATA_ROAMING,
+                mDataRoamingSettingObserver);
     }
     /**
      * Call aos to send deregistration
@@ -397,7 +468,8 @@ public class ImsRegistrationTracker {
     }
 
     private class MessageHandler extends Handler {
-        public static final int EVENT_VOICE_ROAMING_STATE_CHANGED = 1;
+        private boolean mInitCompleted = false;
+        public static final int EVENT_ROAMING_STATE_CHANGED = 1;
 
         MessageHandler() {
             super(mContext.getDefaultLooper());
@@ -405,18 +477,22 @@ public class ImsRegistrationTracker {
         }
 
         public void init() {
-            IDcNetWatcher dcnw = getDcNetWatcher(mContext.getSlotId());
-            if (dcnw != null) {
-                dcnw.registerForVoiceRoamingStateChanged(this,
-                        EVENT_VOICE_ROAMING_STATE_CHANGED, null);
+            if (!mInitCompleted) {
+                IDcNetWatcher dcnw = getDcNetWatcher(mContext.getSlotId());
+                if (dcnw != null) {
+                    dcnw.registerForRoamingStateChanged(this,
+                            EVENT_ROAMING_STATE_CHANGED, null);
+                }
+                mInitCompleted = true;
             }
         }
 
         public void clear() {
             IDcNetWatcher dcnw = getDcNetWatcher(mContext.getSlotId());
             if (dcnw != null) {
-                dcnw.unregisterForVoiceRoamingStateChanged(this);
+                dcnw.unregisterForRoamingStateChanged(this);
             }
+            mInitCompleted = false;
         }
 
         @Override
@@ -424,7 +500,7 @@ public class ImsRegistrationTracker {
             logi("MessageHandler :: msg=" + msg.what);
 
             switch (msg.what) {
-                case EVENT_VOICE_ROAMING_STATE_CHANGED: {
+                case EVENT_ROAMING_STATE_CHANGED: {
                     CapabilityPairs capabilityPairs = createCapabilityPairsFromCapabilities();
                     if (capabilityPairs != null) {
                         mRegTracker.changeCapabilities(capabilityPairs);
@@ -629,6 +705,15 @@ public class ImsRegistrationTracker {
                         configImpl.addListener(mConfigListener);
                     }
                 }
+            }
+
+            if (!isIgnoreDataEnabledChangedForVideoCalls()) {
+                if (mHandler == null) {
+                    mHandler = new MessageHandler();
+                } else {
+                    mHandler.init();
+                }
+                registerDataRoamingSettingObserver();
             }
 
             if (mAosReg == null) {

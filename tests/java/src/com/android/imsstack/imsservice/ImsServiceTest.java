@@ -33,9 +33,14 @@ import android.telephony.ims.stub.ImsFeatureConfiguration;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.imsstack.ContextFixture;
+import com.android.imsstack.util.AppContext;
+
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,6 +62,8 @@ public class ImsServiceTest {
     private static final String IMS_PACKAGE_NAME = "com.android.imsstack";
     private static final String CLASS_NAME = "com.android.imsstack.imsservice.ImsService";
 
+    static ContextFixture sContext;
+
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             mImsServiceBinder = IImsServiceController.Stub.asInterface(service);
@@ -66,6 +73,12 @@ public class ImsServiceTest {
             mImsServiceBinder = null;
         }
     };
+
+    @BeforeClass
+    public static void setUpOnce() {
+        sContext = new ContextFixture();
+        AppContext.init(sContext.getTestDouble());
+    }
 
     @Before
     public void setUp() throws InterruptedException {
@@ -80,6 +93,12 @@ public class ImsServiceTest {
         mImsService.setImsControllerReady(true);
         //added delay for service binding
         TimeUnit.MILLISECONDS.sleep(10);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AppContext.deinit();
+        sContext = null;
     }
 
     @Test

@@ -27,6 +27,7 @@
     <boolean name="support_local_session_timer_bool" value="true"/>
     <boolean name="support_ecbm_for_volte_bool" value="true"/>
     <boolean name="support_ecbm_for_vowifi_bool" value="true"/>
+    <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
 
     <!-- Aos -->
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>

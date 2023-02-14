@@ -67,6 +67,7 @@
         <item value="1"/>
         <item value="2"/>
     </int-array>
+    <boolean name="ignore_data_enabled_changed_for_video_calls" value="false"/>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
     <int name="extra_reg_err_final_type_int" value="4"/>
