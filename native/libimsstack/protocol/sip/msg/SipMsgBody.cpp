@@ -867,24 +867,24 @@ SIP_BOOL SipMsgBodyList::GetEncodedMessageBody(
         return SIP_TRUE;
     }
 
-    SIP_CHAR* pBufferStart = *ppMsgBufer;
+    SIP_CHAR* pBufferCurrPos = *ppMsgBufer;
 
     SIP_UINT32 nLen = SIP_ZERO;
     /*Now check for length calculation with boundary or without boundary*/
     if (pszBoundary == SIP_NULL)
     {
         SipMsgBody* pBody = m_objBodyList.GetAt(SIP_ZERO);
-        pBody->EncodeSingleMsgBody(&pBufferStart);
+        pBody->EncodeSingleMsgBody(&pBufferCurrPos);
         pBody->GetMsgBuffLen(&nLen);
     }
     else
     {
-        if (EncodeBody(&pBufferStart, pszBoundary) == SIP_FALSE)
+        if (EncodeBody(&pBufferCurrPos, pszBoundary) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode msg body fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        nLen = SipPf_Strlen(*ppMsgBufer);
+        nLen = pBufferCurrPos - *ppMsgBufer;
     }
 
     nMsgLen = nLen;

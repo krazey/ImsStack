@@ -85,6 +85,53 @@ This is body2\r\n\
     EXPECT_EQ(nLen, strlen(pMsg));
 
     pList->SipDelete();
+
+    // Message body with null character inside buffer (same buffer as previous example with extra
+    // '\0')
+    pList = new SipMsgBodyList();
+    ASSERT_TRUE(pList != nullptr);
+
+    pMessageBody = new SipMsgBody();
+    ASSERT_TRUE(pMessageBody != nullptr);
+
+    EXPECT_EQ(SIP_TRUE, pMessageBody->SetMsgBuffer(const_cast<char*>("This is body1"), 13));
+    EXPECT_EQ(SIP_TRUE, pList->AddBody(pMessageBody));
+
+    pMessageBody->SipDelete();
+
+    pMessageBody = new SipMsgBody();
+    ASSERT_TRUE(pMessageBody != nullptr);
+
+    EXPECT_EQ(SIP_TRUE,
+            pMessageBody->SetMsgBuffer(
+                    const_cast<char*>("This is \0body2"), 14));  // '\0' introduces
+    EXPECT_EQ(SIP_TRUE, pList->AddBody(pMessageBody));
+
+    pMessageBody->SipDelete();
+
+    EXPECT_EQ(SIP_TRUE, pList->GetEncodedMessageBody(&pBuff, nLen));
+
+    nLen = 0;
+    pBuff = &(aBuffer[0]);
+    memset(pBuff, 0, BUFFER_SIZE);
+
+    EXPECT_EQ(SIP_TRUE,
+            pList->GetEncodedMessageBody(&pBuff, nLen, const_cast<char*>("unique-boundary-1")));
+
+    char* pNullCharMsg = const_cast<char*>("--unique-boundary-1\r\n\
+\r\n\
+This is body1\r\n\
+--unique-boundary-1\r\n\
+\r\n\
+This is \0body2\r\n\
+--unique-boundary-1--\r\n");
+
+    // pNullCharMsg length = pMsg + 1 (extra '\0' character)
+    EXPECT_TRUE(memcmp(pNullCharMsg, &(aBuffer[0]), strlen(pMsg) + 1) == 0);
+    EXPECT_EQ(nLen, strlen(pMsg) + 1);
+    EXPECT_TRUE(nLen > strlen(&(aBuffer[0])));  // null character present check
+
+    pList->SipDelete();
 }
 
 TEST_F(SipMsgBodyListTest, DecodeSingleBody)
