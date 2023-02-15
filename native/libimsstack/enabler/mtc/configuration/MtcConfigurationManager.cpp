@@ -871,6 +871,12 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyForAlertNotUsingPreconditionMechani
     return m_objCarrierConfig.nPolicyForAlertNotUsingPreconditionMechanism;
 }
 
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsRequiredCdmalessFeatureTag() const
+{
+    return m_objCarrierConfig.bRequiredCdmalessFeatureTag;
+}
+
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
         IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)
