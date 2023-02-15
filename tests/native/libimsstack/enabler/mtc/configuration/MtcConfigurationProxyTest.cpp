@@ -472,6 +472,10 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, GetCallRejectCodeForNotAcceptableCallType)
             .WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE));
+
+    EXPECT_CALL(*pConfigManager, GetPolicyForAlertNotUsingPreconditionMechanism)
+            .WillOnce(Return(nValue));
+    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM));
 }
 
 TEST_F(MtcConfigurationProxyTest, GetIntWith3BoolArgReturnsFromConfigManager)
