@@ -349,16 +349,42 @@ TEST_F(MtcPreconditionManagerTest, IsDedicatedBearerAllocatedReturnsFalseIfQosSt
     EXPECT_FALSE(pPreconditionManager->IsDedicatedBearerAllocated(&objISession, MEDIATYPE_TEXT));
 }
 
-TEST_F(MtcPreconditionManagerTest, IsPreconditionRequiredToAlertUserReturnsFalse)
+TEST_F(MtcPreconditionManagerTest,
+        PreconditionIsNotRequiredToAlertUserIfNotSupportPreconditionAndCallIsOnWlan)
 {
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_FALSE);
-    EXPECT_FALSE(pPreconditionManager->IsPreconditionRequiredToAlertUser());
+    ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(*pConfigurationManager, GetPolicyForAlertNotUsingPreconditionMechanism()).Times(0);
+    EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
 }
 
-TEST_F(MtcPreconditionManagerTest, IsPreconditionRequiredToAlertUserReturnsTrue)
+TEST_F(MtcPreconditionManagerTest,
+        PreconditionIsNotRequiredToAlertUserIfNotSupportPreconditionAndNotCheckLocalResource)
+{
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_FALSE);
+    ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, GetPolicyForAlertNotUsingPreconditionMechanism())
+            .WillByDefault(
+                    Return(CarrierConfig::ImsVoice::ALERT_POLICY_FOR_NOT_CHECKING_LOCAL_RESOURCE));
+    EXPECT_FALSE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        PreconditionIsRequiredToAlertUserIfNotSupportPreconditionAndCheckDedicatedBearerIsRequired)
+{
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_FALSE);
+    ON_CALL(objService, IsWlanIpCanType()).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, GetPolicyForAlertNotUsingPreconditionMechanism())
+            .WillByDefault(Return(
+                    CarrierConfig::ImsVoice::ALERT_POLICY_FOR_CHECKING_ALLOCATED_DEDICATED_BEARER));
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        PreconditionIsRequiredToAlertUserReturnsTrueIfSupportPrecondition)
 {
     SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
-    EXPECT_TRUE(pPreconditionManager->IsPreconditionRequiredToAlertUser());
+    EXPECT_TRUE(pPreconditionManager->IsCheckingResourcesRequiredToAlertUser());
 }
 
 TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserReturnsFalseIfSessionIsNull)
@@ -366,10 +392,36 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserReturnsFalseIfSessionIs
     EXPECT_FALSE(pPreconditionManager->IsAvailableToAlertUser(nullptr));
 }
 
+TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserReturnsTrueIfDedicatedBearerIsAllocated)
+{
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_FALSE);
+    ON_CALL(*pConfigurationManager, GetPolicyForAlertNotUsingPreconditionMechanism())
+            .WillByDefault(Return(
+                    CarrierConfig::ImsVoice::ALERT_POLICY_FOR_CHECKING_ALLOCATED_DEDICATED_BEARER));
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsAvailableToAlertUserReturnsFalseIfDedicatedBearerIsNotAllocated)
+{
+    SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_FALSE);
+    ON_CALL(*pConfigurationManager, GetPolicyForAlertNotUsingPreconditionMechanism())
+            .WillByDefault(Return(
+                    CarrierConfig::ImsVoice::ALERT_POLICY_FOR_CHECKING_ALLOCATED_DEDICATED_BEARER));
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::IDLE));
+
+    EXPECT_FALSE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
+}
+
 TEST_F(MtcPreconditionManagerTest,
         IsAvailableToAlertUserReturnsFalseIfGuardAvailableTimerIsActivated)
 {
     SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
             .WillByDefault(Return(IMS_TRUE));
 
@@ -379,6 +431,7 @@ TEST_F(MtcPreconditionManagerTest,
 TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfPreconditionIsNotSupported)
 {
     SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_FALSE));
@@ -395,6 +448,7 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfPreconditionIsNotSupp
 TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfRemoteReserved)
 {
     SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
@@ -410,6 +464,7 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfRemoteReserved)
 TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfRemoteNotReservedWhenMediaTypeIsNone)
 {
     SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VOIP, IMS_TRUE);
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
@@ -427,6 +482,7 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfRemoteNotReservedWhen
 TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfRemoteNotReserved)
 {
     SetUpMockQosInfo();
+    SetUpSupportingPreconditionInLocal(CallType::VT, IMS_TRUE);
     ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
             .WillByDefault(Return(IMS_FALSE));
     ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));

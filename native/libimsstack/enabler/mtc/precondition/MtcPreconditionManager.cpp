@@ -144,10 +144,10 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocated(
     return IsStatusAvailable(eStatus);
 }
 
-PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionRequiredToAlertUser() const
+PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsCheckingResourcesRequiredToAlertUser() const
 {
-    IMS_TRACE_D("IsPreconditionRequiredToAlertUser", 0, 0, 0);
-    return IsPreconditionSupportedInLocal();
+    IMS_TRACE_D("IsCheckingResourcesRequiredToAlertUser", 0, 0, 0);
+    return IsPreconditionSupportedInLocal() || IsDedicatedBearerAllocationRequiredToAlertUser();
 }
 
 PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISession* piSession) const
@@ -156,6 +156,11 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISessi
     if (piSession == IMS_NULL)
     {
         return IMS_FALSE;
+    }
+
+    if (!IsPreconditionSupportedInLocal() && IsDedicatedBearerAllocationRequiredToAlertUser())
+    {
+        return IsDedicatedBearerAllocated(piSession, MEDIA_TYPE_AUDIO);
     }
 
     if (GetQosTimer(piSession)->IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
@@ -1257,4 +1262,18 @@ QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession
 
     IMS_TRACE_D("GetActionForQosLoss The next action is %s", PS_QosLossPolicy(eAction), 0, 0);
     return eAction;
+}
+
+PRIVATE
+IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocationRequiredToAlertUser() const
+{
+    if (m_objContext.GetService().IsWlanIpCanType())
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
+            Feature::POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM);
+
+    return nPolicy == CarrierConfig::ImsVoice::ALERT_POLICY_FOR_CHECKING_ALLOCATED_DEDICATED_BEARER;
 }
