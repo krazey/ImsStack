@@ -99,8 +99,7 @@ PUBLIC VIRTUAL ISipMessageBodyPart* SipMessageBodyPart::Clone() const
         }
     }
 
-    pNewBodyPart->m_objOtherMimeHeaders = m_objOtherMimeHeaders;
-    pNewBodyPart->m_objContent = m_objContent;
+    pNewBodyPart->ExtractProperties();
 
     SipPrivate::SetLastError(SipError::NO_ERROR);
     return pNewBodyPart;
