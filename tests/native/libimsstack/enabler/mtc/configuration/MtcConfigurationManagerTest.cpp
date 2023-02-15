@@ -1294,4 +1294,12 @@ TEST_F(MtcConfigurationManagerTest,
                             KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL));
 }
 
+TEST_F(MtcConfigurationManagerTest,
+        GetPolicyForAlertNotUsingPreconditionMechanismReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->GetPolicyForAlertNotUsingPreconditionMechanism(),
+            GetInt(CarrierConfig::Assets::
+                            KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT));
+}
+
 }  // namespace android

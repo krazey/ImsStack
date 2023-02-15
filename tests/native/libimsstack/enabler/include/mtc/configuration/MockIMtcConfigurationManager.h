@@ -174,6 +174,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetSendUdpKeepAliveIntervalTime, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetCallRejectCodeForNotAcceptableCallType, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsReleaseEmergencyPdnWithEmergencyCallFail, (), (const, override));
+    MOCK_METHOD(IMS_SINT32, GetPolicyForAlertNotUsingPreconditionMechanism, (), (const, override));
 };
 
 #endif

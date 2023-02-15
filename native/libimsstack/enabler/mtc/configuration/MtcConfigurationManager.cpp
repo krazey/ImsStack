@@ -865,6 +865,12 @@ IMS_BOOL MtcConfigurationManager::IsReleaseEmergencyPdnWithEmergencyCallFail() c
     return m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallFail;
 }
 
+PUBLIC
+IMS_SINT32 MtcConfigurationManager::GetPolicyForAlertNotUsingPreconditionMechanism() const
+{
+    return m_objCarrierConfig.nPolicyForAlertNotUsingPreconditionMechanism;
+}
+
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
         IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)

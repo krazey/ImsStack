@@ -348,4 +348,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT);
     objItems.bReleaseEmergencyPdnWithEmergencyCallFail = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL);
+    objItems.nPolicyForAlertNotUsingPreconditionMechanism = piCc->GetInt(
+            CarrierConfig::Assets::KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT);
 }
