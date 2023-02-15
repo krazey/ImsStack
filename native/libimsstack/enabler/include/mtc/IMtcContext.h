@@ -35,6 +35,7 @@ class IEctManager;
 class OperationAsyncRunner;
 class IMessageUtils;
 class IMtcRadioChecker;
+class IPassiveTimerHolder;
 
 class IMtcContext
 {
@@ -155,6 +156,13 @@ public:
      * @return
      */
     virtual IMessageUtils& GetMessageUtils() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual IPassiveTimerHolder& GetPassiveTimerHolder() = 0;
 
     /**
      * @brief Checks

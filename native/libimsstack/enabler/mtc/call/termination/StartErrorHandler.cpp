@@ -29,6 +29,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/IMessageBodyPart.h"
 #include "helper/IMtcAosConnector.h"
+#include "helper/IPassiveTimerHolder.h"
 #include "helper/MtcTimerWrapper.h"
 #include "sipcore/ISipMessage.h"
 #include "utility/IMessageUtils.h"
@@ -421,7 +422,8 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
             &objMessage, ISipHeader::RETRY_AFTER_ANY);
     if (nRetryAfter > 0)
     {
-        // TODO: Set block and CSFB for nRetryAfter duration
+        m_objContext.GetPassiveTimerHolder().AddTimer(
+                IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nRetryAfter * 1000);
     }
 
     if (IsRetry1xRequiredForNormalCall(objMessage))

@@ -30,6 +30,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "helper/CallStateProxy.h"
+#include "helper/PassiveTimerHolder.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "utility/MessageUtils.h"
 #include <functional>
@@ -48,6 +49,7 @@ class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
 class IMtcSipInterfaceFactory;
+class IPassiveTimerHolder;
 class OperationAsyncRunner;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
@@ -84,7 +86,8 @@ public:
     IEctManager& GetEctManager() override;
     IMtcEmergencyServiceManager& GetEmergencyServiceManager() override;
     OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override;
-    inline IMessageUtils& GetMessageUtils() override { return m_objMessageUtils; };
+    inline IMessageUtils& GetMessageUtils() override { return m_objMessageUtils; }
+    inline IPassiveTimerHolder& GetPassiveTimerHolder() override { return m_objPassiveTimerHolder; }
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
 
 protected:
@@ -107,6 +110,7 @@ protected:
     std::unique_ptr<EctManager> m_pEctManager;
     std::unique_ptr<IMtcEmergencyServiceManager> m_pEmergencyServiceManager;
     MessageUtils m_objMessageUtils;
+    PassiveTimerHolder m_objPassiveTimerHolder;
     MtcRadioChecker m_objMtcRadioChecker;
 
     IMS_BOOL m_bWifiTestMode;

@@ -63,6 +63,7 @@ class IMtcService;
 class IMtcSession;
 class IMtcSipInterfaceFactory;
 class IMutex;
+class IPassiveTimerHolder;
 class IReference;
 class ISession;
 class MessageSender;
@@ -217,6 +218,10 @@ public:
         return m_objContext.GetAsyncRunner(objOperation);
     }
     inline IMessageUtils& GetMessageUtils() override { return m_objContext.GetMessageUtils(); }
+    inline IPassiveTimerHolder& GetPassiveTimerHolder() override
+    {
+        return m_objContext.GetPassiveTimerHolder();
+    }
     inline IMS_BOOL IsWifiTestMode() override { return m_objContext.IsWifiTestMode(); }
     // end of IMtcContext
 

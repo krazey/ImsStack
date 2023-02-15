@@ -37,6 +37,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MediaDef.h"
@@ -83,6 +84,7 @@ public:
     MockMtcTimerWrapper objTimerWrapper;
     MockUssiController* pUssiController;
     MockIMessageUtils objMessageUtils;
+    MockIPassiveTimerHolder objPassiveTimerHolder;
 
     MediaInfo objInputMediaInfo;
     ImsMap<SuppType, SuppService*> objInputSuppServices;
@@ -120,6 +122,8 @@ protected:
                 .WillByDefault(ReturnRef(objPreconditionManager));
         ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimerWrapper));
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objCallContext, GetPassiveTimerHolder)
+                .WillByDefault(ReturnRef(objPassiveTimerHolder));
 
         pUssiController = new MockUssiController(objCallContext, IMS_NULL);
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));

@@ -38,6 +38,7 @@
 #include "call/block/NetworkBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "call/block/CallWaitingBlockRule.h"
+#include "call/block/TimerBlockRule.h"
 #include "call/block/VopsBlockRule.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/IdleState.h"
@@ -465,15 +466,12 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
 {
     ImsList<IMtcBlockRule*> lstRules;
 
-    // IMS call won't be initiated if
-    // - VoPS is 0 or can be ignored
-    // - The current network is N/A.
-
-    // TODO: SSAC
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
+    lstRules.Append(new TimerBlockRule(
+            m_objContext.GetPassiveTimerHolder(), m_objContext.GetCallInfo().bEmergency));
 
     return lstRules;
 }
