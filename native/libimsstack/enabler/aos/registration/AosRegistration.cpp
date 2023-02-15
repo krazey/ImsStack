@@ -192,6 +192,13 @@ PUBLIC VIRTUAL void AosRegistration::Start()
 
     StopTimer(TIMER_OFFLINE_RECOVER);
 
+    if (m_eRegType == AosRegistrationType::NORMAL && !IsTransactionStarted())
+    {
+        m_pUtil->AddFeature(PENDING_START, m_nTxnPending);
+        A_IMS_TRACE_I(REGID, "Start :: reg can't be started due to block", 0, 0, 0);
+        return;
+    }
+
     if (!CheckRadioReadyAndSetTxnPending())
     {
         A_IMS_TRACE_I(REGID, "Start :: txn is pending due to radio", 0, 0, 0);
@@ -2741,6 +2748,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessScscfRestoration()
 PROTECTED VIRTUAL void AosRegistration::ProcessPendingTransaction()
 {
     A_IMS_TRACE_I(REGID, "ProcessPendingTransaction", 0, 0, 0);
+
+    if (m_pUtil->IsFeatureOn(PENDING_START, m_nTxnPending))
+    {
+        m_pUtil->RemoveFeature(PENDING_START, m_nTxnPending);
+        Start();
+        return;
+    }
 
     if (m_pUtil->IsFeatureOn(PENDING_TRANSACTION, m_nTxnPending))
     {
