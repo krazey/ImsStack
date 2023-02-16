@@ -74,6 +74,14 @@ enum
     TIMER_INTERNAL_ERROR
 };
 
+enum
+{
+    IPSEC_BLOCK_NONE = 0x0,
+    IPSEC_BLOCK_ERROR = 0x1,
+    IPSEC_BLOCK_AUTENTICATION = 0x2,
+    IPSEC_BLOCK_NOT_ESTABLISHED = 0x4
+};
+
 class TestAosRegistration : public AosRegistration
 {
     inline TestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
@@ -92,6 +100,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, CheckBool);
     FRIEND_TEST(AosRegistrationTest, FeatureTagForMtc);
     FRIEND_TEST(AosRegistrationTest, BlockChanged);
+    FRIEND_TEST(AosRegistrationTest, IpsecSupported);
     FRIEND_TEST(AosRegistrationTest, RetryCount);
     FRIEND_TEST(AosRegistrationTest, StartFailed_TxnTimeout);
     FRIEND_TEST(AosRegistrationTest, UpdateFailed_TxnTimeout);
@@ -468,7 +477,7 @@ TEST_F(AosRegistrationTest, StartAndDestroy)
             .WillRepeatedly(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
 
     // TEST_F : Start - StopTimer, CheckRadioReadyAndSetTxnPending
-    // , CreateRegistration - PrepareRegistration (IsIpsecInit, DestroySocket)
+    // , CreateRegistration - PrepareRegistration (DestroySocket)
     // , SetRetryTime, SetAor (IsFakeRegistration, )
     m_pTestAosRegistration->SetMockIRegistration(
             static_cast<IRegistration*>(&m_objMockIRegistration));
@@ -791,6 +800,51 @@ TEST_F(AosRegistrationTest, BlockChanged)
     EXPECT_FALSE(m_pTestAosRegistration->IsTransactionStarted());
 }
 
+TEST_F(AosRegistrationTest, IpsecSupported)
+{
+    // precondition for checking Ipsec supported - IsFakeRegistration()
+    m_pTestAosRegistration->SetFakeReg(IMS_FALSE);
+
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSubscription())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+    m_pTestAosRegistration->InitFeatures();
+
+    m_pTestAosRegistration->ClearIpsecBlock();
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_FALSE))
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_NONE);
+    EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_NONE);
+    EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    m_pTestAosRegistration->InitFeatures();
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_ERROR);
+    EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_AUTENTICATION);
+    EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_TRUE, IPSEC_BLOCK_AUTENTICATION);
+    EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_TRUE, IPSEC_BLOCK_ERROR);
+    EXPECT_TRUE(m_pTestAosRegistration->IsIpsecSupported());
+}
+
 TEST_F(AosRegistrationTest, RetryCount)
 {
     EXPECT_CALL(m_objMockIAosNConfiguration, IsExtraRegErrRetryCntSharedForRegAndSubRequired())
@@ -1060,6 +1114,11 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_TxnTimeout_RegRetryCountPerPcscfC
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
+    IMSVector<IMS_SINT32> objErrWithoutIpsec;
+    objErrWithoutIpsec.Clear();
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objErrWithoutIpsec));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegActualWaitTimePolicy())
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
@@ -1452,6 +1511,9 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Succes
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestVector));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objTestVector));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
@@ -1552,6 +1614,9 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Failur
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objTestVector));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetrySip503CodePolicy())
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
@@ -1674,6 +1739,9 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNex
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestVector));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegPermanentErrCode())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objTestVector));
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestVector));
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())

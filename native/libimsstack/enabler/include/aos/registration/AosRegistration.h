@@ -101,8 +101,6 @@ protected:
     void SetState(IN IMS_UINT32 nState);
     void SetMode(IN IMS_UINT32 nMode);
     void SetFakeReg(IN IMS_BOOL bFake);
-    void SetIsIpsecSupported(IN IMS_BOOL bSupported);
-    void SetIsIpsecInit(IN IMS_BOOL bInit);
     void SetBlocked(IN IMS_BOOL bBlocked);
     void SetHeldByCall(IN IMS_BOOL bHeld);
     void SetImsCall(IN IMS_BOOL bStarted);
@@ -116,7 +114,6 @@ protected:
 
     IMS_BOOL IsFakeRegistration() const;
     IMS_BOOL IsIpsecSupported() const;
-    IMS_BOOL IsIpsecInit() const;
     IMS_BOOL IsAuthChallengedAgain() const;
     IMS_BOOL IsAuthChallengeMoreAllowed();
     IMS_BOOL IsTransactionStarted() const;
@@ -210,6 +207,7 @@ protected:
     virtual void SetActiveBindingsRestorationUsage();
 
     virtual void UpdateTransactionStarted();
+    virtual void UpdateIpsecSupported(IN IMS_BOOL bSupported, IN IMS_UINT32 nReason = 0);
 
     /// Recovery
     virtual IMS_UINT32 GetActualWaitTime();
@@ -230,6 +228,7 @@ protected:
     virtual void ClearAuthIpsecCount();
     virtual void ClearErrorCount();
     virtual void ClearNetworkBindingFeatures();
+    virtual void ClearIpsecBlock();
 
     virtual void CheckPending();
     virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();
@@ -444,6 +443,14 @@ protected:
         IMS_REG_STATE_REGISTERED
     };
 
+    enum
+    {
+        IPSEC_BLOCK_NONE = 0x0,
+        IPSEC_BLOCK_ERROR = 0x1,
+        IPSEC_BLOCK_AUTENTICATION = 0x2,
+        IPSEC_BLOCK_NOT_ESTABLISHED = 0x4
+    };
+
 protected:
     IAosAppContext* m_piContext;
     IAosRegistrationListener* m_piListener;
@@ -461,8 +468,6 @@ protected:
 
     /// Ipsec member
     AosIpsecHelper* m_pIpsecHelper;
-    IMS_BOOL m_bIsIpsecSupported;
-    IMS_BOOL m_bIsIpsecInit;
 
     /// object
     AosUtil* m_pUtil;
@@ -535,6 +540,9 @@ protected:
 
     /// attach type is EPS only or 5GS
     IMS_BOOL m_bEps5GsOnly;
+
+    /// reason information to disable ipsec
+    IMS_UINT32 m_nIpsecBlockReason;
 
     /// the state for notifying ims registration callback in telephony ims
     IMS_UINT32 m_nImsRegState;
