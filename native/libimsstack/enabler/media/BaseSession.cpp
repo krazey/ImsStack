@@ -52,7 +52,7 @@ PUBLIC
 void BaseSession::SetDirection(IN MEDIA_DIRECTION eDirection)
 {
     IMS_TRACE_D("SetDirection() - eDirection[%d]", eDirection, 0, 0);
-    m_ePrevDirection = GetDirection();
+    SetPrevDirection(GetDirection());
 
     switch (eDirection)
     {
@@ -94,6 +94,12 @@ MEDIA_DIRECTION BaseSession::GetDirection()
     }
 
     return MEDIA_DIRECTION_INVALID;
+}
+
+PUBLIC
+void BaseSession::SetPrevDirection(MEDIA_DIRECTION eDir)
+{
+    m_ePrevDirection = eDir;
 }
 
 PUBLIC
