@@ -89,7 +89,7 @@ public:
     virtual IMS_BOOL IsPreconditionSupportedInLocal() const override;
     virtual IMS_BOOL IsDedicatedBearerAllocated(
             IN ISession* piSession, IN IMS_UINT32 eMediaType) const override;
-    virtual IMS_BOOL IsPreconditionRequiredToAlertUser() const override;
+    virtual IMS_BOOL IsCheckingResourcesRequiredToAlertUser() const override;
     virtual IMS_BOOL IsAvailableToAlertUser(IN ISession* piSession) const override;
     virtual IMS_BOOL IsEarlyUpdateRequired(IN ISession* piSession) const override;
     virtual IMS_BOOL IsAvailableToSendEarlyUpdate(IN ISession* piSession) const override;
@@ -152,6 +152,7 @@ private:
     static const SdpMedia* GetSdpMedia(IN IMedia* piMedia, IN IMS_BOOL bRemote);
     QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType) const;
     QosLossPolicy GetActionForQosLoss(IN ISession* piSession) const;
+    IMS_BOOL IsDedicatedBearerAllocationRequiredToAlertUser() const;
 
 protected:
     ImsMap<ISession*, QosInfo*> m_objQosInfos;

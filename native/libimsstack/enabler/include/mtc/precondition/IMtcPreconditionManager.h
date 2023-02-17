@@ -73,7 +73,7 @@ public:
      *
      * @return IMS_BOOL
      */
-    virtual IMS_BOOL IsPreconditionRequiredToAlertUser() const = 0;
+    virtual IMS_BOOL IsCheckingResourcesRequiredToAlertUser() const = 0;
 
     /**
      * @brief Checks
