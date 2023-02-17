@@ -57,6 +57,7 @@ public class MtcAppTest extends ImsStackTest {
     @Mock private MtcApp.ServiceStateListener mServiceStateListener;
     @Mock private MtcApp.CallListener mCallListener;
     @Mock private ISharedState mSharedState;
+    @Mock private IServiceStateTracker mServiceStateTracker;
     @Mock private MtcCall mMtcCall;
     int mCommand;
 
@@ -114,6 +115,8 @@ public class MtcAppTest extends ImsStackTest {
         super.setUp(getClass().getSimpleName());
         mCommand = -1;
         MockitoAnnotations.initMocks(this);
+
+        doReturn(mServiceStateTracker).when(mBaseContext).getServiceStateTracker();
 
         mTestMtcJniProxy = new TestMtcJniProxy();
         mTestMtcApp = new TestMtcApp(mBaseContext, mCM, Looper.myLooper(),
@@ -232,7 +235,7 @@ public class MtcAppTest extends ImsStackTest {
 
         verify(mEmergencyServiceManager, times(1)).setCall(any(MtcCall.class));
         verify(mEmergencyServiceManager, times(1)).openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
     }
 
     @Test
