@@ -57,6 +57,7 @@ import com.android.imsstack.enabler.aos.IAosRegistrationListener.CapabilityReaso
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.ReasonCode;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
 import com.android.imsstack.enabler.aos.IIAosService;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniIms;
@@ -690,6 +691,7 @@ public class AosServiceTest extends ImsStackTest {
         processAllMessages();
 
         assertEquals(NetworkType.LTE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.REGISTERED, mAosService.getRegistrationState());
         verify(mMockAosRegistrationListener).notifyRegistered(NetworkType.LTE, FeatureTagMask.MMTEL,
                 featureTags);
     }
@@ -712,6 +714,7 @@ public class AosServiceTest extends ImsStackTest {
         processAllMessages();
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.REGISTERING, mAosService.getRegistrationState());
         verify(mMockAosRegistrationListener).notifyRegistering(NetworkType.LTE,
                 FeatureTagMask.MMTEL, featureTags);
     }
@@ -730,6 +733,7 @@ public class AosServiceTest extends ImsStackTest {
         processAllMessages();
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
+        assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
         verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.NONE,
                 ReasonCode.CODE_REGISTRATION_ERROR);
     }

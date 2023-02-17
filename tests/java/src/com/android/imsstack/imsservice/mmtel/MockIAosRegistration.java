@@ -62,6 +62,11 @@ class MockIAosRegistration implements IAosRegistration {
     }
 
     @Override
+    public int getRegistrationState() {
+        return IAosRegistrationListener.RegistrationState.REGISTERED;
+    }
+
+    @Override
     public void controlRegistration(int requestType, int pcscfOrder, int cause) {
         assertEquals(IAosRegistration.RequestType.STOP, requestType);
         assertEquals(IAosRegistration.Pcscf.CURRENT, pcscfOrder);
