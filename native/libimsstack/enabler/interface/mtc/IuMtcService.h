@@ -35,7 +35,8 @@ public:
     static const IMS_SINT32 SRVCC_STATE_CHANGED = (EVENT_U2I + 5);
     static const IMS_SINT32 SET_TERMINAL_BASED_CALL_WAITING = (EVENT_U2I + 6);
     static const IMS_SINT32 OPEN_EMERGENCY_SERVICE = (EVENT_U2I + 7);
-    static const IMS_SINT32 TEST_COMMAND = (EVENT_U2I + 8);
+    static const IMS_SINT32 STOP_EMERGENCY_SERVICE = (EVENT_U2I + 8);
+    static const IMS_SINT32 TEST_COMMAND = (EVENT_U2I + 9);
 
     // HO
     static const IMS_SINT32 HO_CONFIRM = (EVENT_U2I + 50 + 1);

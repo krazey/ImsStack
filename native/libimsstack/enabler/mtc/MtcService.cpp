@@ -182,6 +182,11 @@ PUBLIC VIRTUAL void MtcService::OpenEmergencyService(IN EmergencyCallRoutingPdn 
     m_objContext.GetEmergencyServiceManager().StartOpen(ePdn);
 }
 
+PUBLIC VIRTUAL void MtcService::StopEmergencyService()
+{
+    m_objContext.GetEmergencyServiceManager().StopOpen(IMS_TRUE);
+}
+
 PUBLIC VIRTUAL void MtcService::ProcessTestCommand(
         IN IMS_SINT32 nCommand, IN IMS_SINT32 nWParam, IN IMS_SINT32 nLParam)
 {
