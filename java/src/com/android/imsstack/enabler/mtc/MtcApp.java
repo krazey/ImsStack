@@ -100,7 +100,8 @@ public class MtcApp implements Closeable {
 
         mCM = new MtcCallManager(mContext);
         mHandler = new MtcAppHandler(mContext.getCallLooper());
-        mEmergencyServiceManager = new MtcEmergencyServiceManager(mContext);
+        mEmergencyServiceManager =
+                new MtcEmergencyServiceManager(mContext, mCM.getCallStateTracker());
         mMtcJniProxy = MtcJniProxy.getInstance();
 
         init();

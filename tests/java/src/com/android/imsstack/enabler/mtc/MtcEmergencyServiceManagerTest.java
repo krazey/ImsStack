@@ -40,6 +40,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -54,6 +56,8 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     @Mock private MtcJniProxy mMockMtcJniProxy;
     @Mock private MtcCall mMockMtcCall;
     @Mock private IServiceStateTracker mServiceStateTracker;
+    @Mock private ICallStateTracker mICallStateTracker;
+    @Captor ArgumentCaptor<MtcEmergencyServiceManager.ECallStateListener> mECallStateListenerCaptor;
 
     private MtcEmergencyServiceManager mTestMtcEmergencyServiceManager;
 
@@ -65,7 +69,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
         mCommand = mInvalid;
         mNativeObject = mInvalid;
         mTestMtcEmergencyServiceManager = new MtcEmergencyServiceManager(
-                mMockContext, mMockMtcJniProxy);
+                mMockContext, mICallStateTracker, mMockMtcJniProxy);
 
         doReturn(Looper.myLooper()).when(mMockContext).getCallLooper();
         doAnswer(invocation -> {
@@ -104,6 +108,23 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
 
         assertEquals(1, mNativeObject);
         assertEquals(IUMtcService.OPEN_EMERGENCY_SERVICE, mCommand);
+    }
+
+    @Test
+    public void testStopEmergencyService() {
+        mTestMtcEmergencyServiceManager.setNativeObject(1);
+        mTestMtcEmergencyServiceManager.openEmergencyService(
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
+        verify(mICallStateTracker).addListener(mECallStateListenerCaptor.capture());
+
+        MtcEmergencyServiceManager.ECallStateListener eCallStateListener =
+                mECallStateListenerCaptor.getValue();
+
+        eCallStateListener.onCallDestroyed(mMockMtcCall);
+        processAllMessages();
+
+        assertEquals(1, mNativeObject);
+        assertEquals(IUMtcService.STOP_EMERGENCY_SERVICE, mCommand);
     }
 
     @Test

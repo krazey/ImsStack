@@ -382,6 +382,8 @@ public class MtcCall extends Call implements ConferenceTracker {
     private int mVideoState = ONE_WAY_VIDEO_NONE;
     private MtcJniProxy mMtcJniProxy;
 
+    boolean mJniCreated;
+
     public MtcCall(IBaseContext context, CallTracker ct, int callAttributes,
             int index, String logTag) {
         super(context, index, logTag);
@@ -488,8 +490,12 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         synchronized (this) {
             if (!isCallValid() && !isTerminatedByAutoRejectedCall()) {
-                logi("close :: already closed");
-                return;
+                if (isEmergencyCall() && !mJniCreated) {
+                    logi("close :: emergency call has been terminated before Native is ready");
+                } else {
+                    logi("close :: already closed");
+                    return;
+                }
             }
 
             log(toString());
@@ -719,6 +725,8 @@ public class MtcCall extends Call implements ConferenceTracker {
         long nativeCallObject = mMtcJniProxy.getJniInterfaceAndSetListener(
                 mContext.getSlotId(), IUIMS.MTC_CALL, mNativeListener);
         super.updateNativeCallObject(nativeCallObject);
+
+        mJniCreated = true;
     }
 
     public void detach() {
