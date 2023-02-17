@@ -794,24 +794,32 @@ public class SscXmlParser {
             } else if (strCondition.endsWith(SscXmlFormat.CFNL)) {
                 return SscConstant.CONDITION_CFNL;
             }
-        } else { // CB cases
+
+            return SscConstant.CONDITION_CFU;
+        } else if (requestType == ESsType.OCB) {
             if (strCondition == null) {
-                if (requestType == ESsType.OCB) {
-                    return SscConstant.CONDITION_BAOC;
-                } else if (requestType == ESsType.ICB) {
-                    return SscConstant.CONDITION_BAIC;
-                }
+                return SscConstant.CONDITION_BAOC;
             }
 
             if (strCondition.endsWith(SscXmlFormat.BOIC)) {
                 return SscConstant.CONDITION_BOIC;
             } else if (strCondition.endsWith(SscXmlFormat.BOIC_EXHC)) {
                 return SscConstant.CONDITION_BOIC_EXHC;
-            } else if (strCondition.endsWith(SscXmlFormat.BIC_WR)) {
+            }
+
+            return SscConstant.CONDITION_BAOC;
+        } else if (requestType == ESsType.ICB) {
+            if (strCondition == null) {
+                return SscConstant.CONDITION_BAIC;
+            }
+
+            if (strCondition.endsWith(SscXmlFormat.BIC_WR)) {
                 return SscConstant.CONDITION_BIC_WR;
             } else if (strCondition.endsWith(SscXmlFormat.ACR)) {
                 return SscConstant.CONDITION_ACR;
             }
+
+            return SscConstant.CONDITION_BAIC;
         }
 
         return SscConstant.CONDITION_INVALID;
