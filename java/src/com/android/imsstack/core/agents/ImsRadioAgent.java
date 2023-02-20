@@ -359,23 +359,24 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         if (dcnw != null && dcnw.is4G()) {
             BarringServiceInfo mmtelVoice = barringInfo.getBarringServiceInfo(
                     BarringInfo.BARRING_SERVICE_TYPE_MMTEL_VOICE);
+            int voiceBarringFactor = mmtelVoice.getConditionalBarringFactor();
+            int voiceBarringTime = mmtelVoice.getConditionalBarringTimeSeconds();
 
-            if (mmtelVoice.isBarred()) {
-                ssacInfo.setForVoice(mmtelVoice.getConditionalBarringFactor(),
-                        mmtelVoice.getConditionalBarringTimeSeconds());
-            } else {
-                ImsLog.d(mSlotId, "voice is allowed");
+            if (mmtelVoice.isBarred() || (voiceBarringFactor > 0 && voiceBarringFactor < 100)) {
+                ssacInfo.setForVoice(voiceBarringFactor, voiceBarringTime);
             }
 
             BarringServiceInfo mmtelVideo = barringInfo.getBarringServiceInfo(
                     BarringInfo.BARRING_SERVICE_TYPE_MMTEL_VIDEO);
+            int videoBarringFactor = mmtelVideo.getConditionalBarringFactor();
+            int videoBarringTime = mmtelVideo.getConditionalBarringTimeSeconds();
 
-            if (mmtelVideo.isBarred()) {
-                ssacInfo.setForVideo(mmtelVideo.getConditionalBarringFactor(),
-                        mmtelVideo.getConditionalBarringTimeSeconds());
-            } else {
-                ImsLog.d(mSlotId, "video is allowed");
+            if (mmtelVideo.isBarred() || (videoBarringFactor > 0 && videoBarringFactor < 100)) {
+                ssacInfo.setForVideo(videoBarringFactor, videoBarringTime);
             }
+
+            ImsLog.d(mSlotId, "voice - factor=" + voiceBarringFactor + ", time=" + voiceBarringTime
+                    + " : video - factor=" + videoBarringFactor + ", time=" + videoBarringTime);
         }
 
         notifySsacInfo(ssacInfo);
@@ -587,13 +588,11 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         }
 
         public void setForVideo(int factor, int timeSec) {
-            ImsLog.d(mSlotId, "setForVideo :: factor=" + factor + ", timeSec=" + timeSec);
             mBarringFactorForVideo = factor;
             mBarringTimeSecForVideo = timeSec;
         }
 
         public void setForVoice(int factor, int timeSec) {
-            ImsLog.d(mSlotId, "setForVoice :: factor=" + factor + ", timeSec=" + timeSec);
             mBarringFactorForVoice = factor;
             mBarringTimeSecForVoice = timeSec;
         }
