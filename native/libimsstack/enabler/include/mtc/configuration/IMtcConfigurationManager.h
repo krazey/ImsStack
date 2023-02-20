@@ -999,6 +999,13 @@ public:
      * @return
      */
     virtual IMS_BOOL IsRequiredCdmalessFeatureTag() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
+    virtual IMS_BOOL IsEmergencyCallCurrentLocationDiscoverySupported() const = 0;
 };
 
 #endif

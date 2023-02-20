@@ -170,6 +170,8 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsReleaseEmergencyPdnWithEmergencyCallFail();
         case Feature::REQUIRED_CDMALESS_FEATURE_TAG:
             return m_pManager->IsRequiredCdmalessFeatureTag();
+        case Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED:
+            return m_pManager->IsEmergencyCallCurrentLocationDiscoverySupported();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return IMS_FALSE;

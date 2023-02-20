@@ -251,6 +251,10 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
 
     EXPECT_CALL(*pConfigManager, IsRequiredCdmalessFeatureTag).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::REQUIRED_CDMALESS_FEATURE_TAG));
+
+    EXPECT_CALL(*pConfigManager, IsEmergencyCallCurrentLocationDiscoverySupported)
+            .WillOnce(Return(bValue));
+    EXPECT_EQ(bValue, pConfig->Is(Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED));
 }
 
 TEST_F(MtcConfigurationProxyTest, IsWithStringArgReturnsFromConfigManager)
