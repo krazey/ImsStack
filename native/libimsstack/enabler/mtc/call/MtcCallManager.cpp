@@ -60,9 +60,9 @@ PUBLIC VIRTUAL IMtcCall* MtcCallManager::CreateCall(
         IN ServiceType eServiceType, IN CallInfo& objCallInfo)
 {
     IMtcService* pService = m_objContext.GetServiceByType(eServiceType);
-    if (pService == IMS_NULL)
+    if (pService == IMS_NULL || pService->GetStatus() != ServiceStatus::SERVICE_ACTIVE)
     {
-        IMS_TRACE_E(0, "CreateCall : Service is null - type[%" PFLS_d "]",
+        IMS_TRACE_E(0, "CreateCall : Service not active - type[%d]",
                 static_cast<IMS_SINT32>(eServiceType), 0, 0);
         return s_pNullCall;
     }
