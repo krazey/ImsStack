@@ -30,14 +30,16 @@
 __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
-Publication::Publication(IN Service* pService, IN const AString& strEvent) :
+Publication::Publication(IN Service* pService, IN const AString& strEvent,
+        IN IMS_BOOL bImplicitRoutingRequired /*= IMS_FALSE*/) :
         ServiceMethod(pService),
         m_nState(STATE_INACTIVE),
         m_strEvent(strEvent),
         m_piListener(IMS_NULL),
         m_pPubState(IMS_NULL),
         m_piRefreshListener(IMS_NULL),
-        m_pRefreshHelper(IMS_NULL)
+        m_pRefreshHelper(IMS_NULL),
+        m_bImplicitRoutingRequired(bImplicitRoutingRequired)
 {
 }
 
@@ -82,7 +84,10 @@ PUBLIC VIRTUAL void Publication::SetMessageMediator(IN IMessageMediator* piMedia
 PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
         IN const ByteArray& objState, IN const AString& strContentType)
 {
-    if (!IsServiceOpen())
+    // SIP_TXN_N_DIALOG_HANDLING_ON_NO_REG
+    ISipDialog* piDialog = GetDialog();
+
+    if (piDialog == IMS_NULL && !IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
@@ -122,7 +127,17 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
         // return IMS_FAILURE;
     }
 
-    ISipClientConnection* piScc = CreateConnection(SipMethod(SipMethod::PUBLISH));
+    SipMethod objMethod(SipMethod::PUBLISH);
+    ISipClientConnection* piScc;
+
+    if (piDialog == IMS_NULL)
+    {
+        piScc = CreateConnection(objMethod);
+    }
+    else
+    {
+        piScc = CreateConnectionWithDialog(piDialog, objMethod);
+    }
 
     if (piScc == IMS_NULL)
     {
@@ -223,7 +238,10 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
 
 PUBLIC VIRTUAL IMS_RESULT Publication::Unpublish()
 {
-    if (!IsServiceOpen())
+    // SIP_TXN_N_DIALOG_HANDLING_ON_NO_REG
+    ISipDialog* piDialog = GetDialog();
+
+    if (piDialog == IMS_NULL && !IsServiceOpen())
     {
         Ims::SetLastError(ImsError::SERVICE_CLOSED);
         return IMS_FAILURE;
@@ -249,7 +267,17 @@ PUBLIC VIRTUAL IMS_RESULT Publication::Unpublish()
         // return IMS_FAILURE;
     }
 
-    ISipClientConnection* piScc = CreateConnection(SipMethod(SipMethod::PUBLISH));
+    SipMethod objMethod(SipMethod::PUBLISH);
+    ISipClientConnection* piScc;
+
+    if (piDialog == IMS_NULL)
+    {
+        piScc = CreateConnection(objMethod);
+    }
+    else
+    {
+        piScc = CreateConnectionWithDialog(piDialog, objMethod);
+    }
 
     if (piScc == IMS_NULL)
     {
@@ -675,7 +703,18 @@ PRIVATE VIRTUAL IMS_BOOL Publication::Refreshable_RefreshStarted()
         m_pPubState->SetOperation(PubState::OPERATION_REFRESH);
 
         // Send a refresh request : PUBLISH
-        ISipClientConnection* piScc = CreateConnection(SipMethod(SipMethod::PUBLISH));
+        ISipDialog* piDialog = GetDialog();
+        SipMethod objMethod(SipMethod::PUBLISH);
+        ISipClientConnection* piScc;
+
+        if (piDialog == IMS_NULL)
+        {
+            piScc = CreateConnection(objMethod);
+        }
+        else
+        {
+            piScc = CreateConnectionWithDialog(piDialog, objMethod);
+        }
 
         if (piScc == IMS_NULL)
         {
@@ -756,6 +795,26 @@ void Publication::CloseConnection()
     }
 
     m_pPubState->SetOperation(PubState::NO_OPERATION);
+}
+
+PRIVATE
+ISipClientConnection* Publication::CreateConnectionWithDialog(
+        IN ISipDialog* piDialog, IN const SipMethod& objMethod)
+{
+    ISipClientConnection* piScc = CreateConnection(piDialog, objMethod);
+
+    // IMPLICIT_ROUTING_FOR_MID_DIALOG
+    if (m_bImplicitRoutingRequired && (piScc != IMS_NULL))
+    {
+        const AStringArray& objServiceRoutes = GetService()->GetServiceRoutes();
+
+        if (!objServiceRoutes.IsEmpty())
+        {
+            piScc->SetImplicitRouteHeader(objServiceRoutes.GetElementAt(0));
+        }
+    }
+
+    return piScc;
 }
 
 PRIVATE

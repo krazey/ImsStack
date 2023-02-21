@@ -36,6 +36,7 @@ class IRefreshListener;
 class ISessionParameter;
 class ISipAckPackage;
 class Media;
+class Publication;
 class Reference;
 class Replaces;
 class SdpOaState;
@@ -72,6 +73,7 @@ public:
     Reference* CreateReference(IN const AString& strReferTo, IN const AString& strReferMethod);
     // To handle midcall or in-dialog transactions
     Subscription* CreateSubscription(IN const AString& strEvent);
+    Publication* CreatePublication(IN const AString& strEvent);
     ISipClientConnection* CreateTransaction(IN const SipMethod& objMethod);
     const ISipHeader* GetContactHeader() const;
     const Replaces* GetReplaces() const;

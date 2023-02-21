@@ -19,6 +19,7 @@
 #include "CapabilitiesImpl.h"
 #include "ISessionListener.h"
 #include "ImsCore.h"
+#include "PublicationImpl.h"
 #include "ReferenceImpl.h"
 #include "SessionImpl.h"
 #include "SubscriptionImpl.h"
@@ -321,6 +322,29 @@ PRIVATE VIRTUAL ISubscription* SessionImpl::CreateSubscription(IN const AString&
     }
 
     return pSubscriptionImpl;
+}
+
+PRIVATE VIRTUAL IPublication* SessionImpl::CreatePublication(IN const AString& strEvent)
+{
+    Publication* pPublication = m_pSession->CreatePublication(strEvent);
+
+    if (pPublication == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    PublicationImpl* pPublicationImpl = new PublicationImpl(pPublication);
+
+    if (pPublicationImpl == IMS_NULL)
+    {
+        pPublication->Destroy();
+        Ims::SetLastError(ImsError::NO_MEMORY);
+
+        IMS_TRACE_E(0, "Creating PublicationImpl failed", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    return pPublicationImpl;
 }
 
 PRIVATE VIRTUAL void SessionImpl::OnSession_Alerting(IN Session* pSession)
