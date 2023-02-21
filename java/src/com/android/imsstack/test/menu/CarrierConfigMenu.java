@@ -23,7 +23,6 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.telephony.ims.ImsManager;
 import android.telephony.ims.ProvisioningManager;
-import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
@@ -47,8 +46,9 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Collection;
 
 @SuppressWarnings("deprecation")
 public class CarrierConfigMenu extends PreferenceActivity {
@@ -108,7 +108,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private static final int ASSETS_CONFIG_I_STRING_ARRAY = 9;
     private static final int CONFIG_I_MAX = 10;
 
-    private static SparseArray<ArraySet<String>> sConfigKeys = null;
+    private static SparseArray<ArrayList<String>> sConfigKeys = null;
 
     private int mSlotId = 0;
 
@@ -524,11 +524,11 @@ public class CarrierConfigMenu extends PreferenceActivity {
     }
 
     private void initConfigItems() {
-        SparseArray<ArraySet<String>> configKeys = getConfigKeys();
+        SparseArray<ArrayList<String>> configKeys = getConfigKeys();
 
         if (configKeys != null) {
             for (int i = 0; i < CONFIG_I_MAX; ++i) {
-                ArraySet<String> keys = configKeys.valueAt(i);
+                Collection<String> keys = configKeys.valueAt(i);
                 String[] entries = keys.toArray(new String[0]);
 
                 ListPreference itemList = mConfigItems.valueAt(i);
@@ -541,10 +541,10 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
     }
 
-    private static SparseArray<ArraySet<String>> getConfigKeys() {
+    private static SparseArray<ArrayList<String>> getConfigKeys() {
         if (sConfigKeys == null) {
-            ArraySet<String> publicConfigKeys = new ArraySet<>();
-            ArraySet<String> assetsConfigKeys = new ArraySet<>();
+            ArrayList<String> publicConfigKeys = new ArrayList<>();
+            ArrayList<String> assetsConfigKeys = new ArrayList<>();
 
             readConfigKeys(PUBLIC_CARRIER_CONFIG_FILE, publicConfigKeys);
             readConfigKeys(CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE, assetsConfigKeys);
@@ -555,7 +555,7 @@ public class CarrierConfigMenu extends PreferenceActivity {
             sConfigKeys = new SparseArray<>();
 
             for (int i = 0; i < CONFIG_I_MAX; ++i) {
-                sConfigKeys.put(i, new ArraySet<>());
+                sConfigKeys.put(i, new ArrayList<>());
             }
 
             distributeConfigKeys(publicConfigKeys,
@@ -571,12 +571,16 @@ public class CarrierConfigMenu extends PreferenceActivity {
                     sConfigKeys.valueAt(ASSETS_CONFIG_I_STRING),
                     sConfigKeys.valueAt(ASSETS_CONFIG_I_INT_ARRAY),
                     sConfigKeys.valueAt(ASSETS_CONFIG_I_STRING_ARRAY));
+
+            for (int i = 0; i < CONFIG_I_MAX; ++i) {
+                sConfigKeys.valueAt(i).sort(null);
+            }
         }
 
         return sConfigKeys;
     }
 
-    private static void readConfigKeys(String fileName, ArraySet<String> configKeys) {
+    private static void readConfigKeys(String fileName, Collection<String> configKeys) {
         InputStream is = null;
 
         try {
@@ -601,12 +605,11 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
     }
 
-    private static void distributeConfigKeys(ArraySet<String> configKeys,
-            Set<String> booleanKeys, Set<String> intKeys, Set<String> stringKeys,
-            Set<String> intArrayKeys, Set<String> stringArrayKeys) {
-        for (int i = 0; i < configKeys.size(); ++i) {
-            String key = configKeys.valueAt(i);
-
+    private static void distributeConfigKeys(Collection<String> configKeys,
+            Collection<String> booleanKeys, Collection<String> intKeys,
+            Collection<String> stringKeys,
+            Collection<String> intArrayKeys, Collection<String> stringArrayKeys) {
+        for (String key : configKeys) {
             if (key.endsWith("_string")) {
                 stringKeys.add(key);
             } else if (key.endsWith("_string_array")) {
