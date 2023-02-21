@@ -698,6 +698,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
         "ignore_vops_for_volte_enable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL[] =
         "ims_dereg_on_3g_network_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_INITIALIZE_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL[] =
+        "initialize_ipsec_setting_with_new_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL[] =
         "no_init_reg_on_pcscf_change_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_PLMN_BLOCK_WITH_TIMEOUT_ON_VOICE_CALL_UNAVAILABLE_BOOL[] =
