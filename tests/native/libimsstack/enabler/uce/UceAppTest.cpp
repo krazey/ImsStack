@@ -218,6 +218,7 @@ TEST_F(UceAppTest, NotifyNetworkStatus)
     pUceApp->setNetworkWatcher(&objMockINetworkWatcher);
     pUceApp->notifyNetworkStatus(&objMockINetworkWatcher);
     EXPECT_EQ(pUceApp->getNetworkType(), eUCE_RAT_UTRAN);
+    pUceApp->setNetworkWatcher(IMS_NULL);
 }
 
 TEST_F(UceAppTest, NotifyNetworkStatusWithNoMatched)
@@ -240,6 +241,7 @@ TEST_F(UceAppTest, TimerExpired)
     pUceApp->setNetworkWatcher(&objMockINetworkWatcher);
     pUceApp->setTimer(&objTimer);
     pUceApp->expiredTimer(&objTimer);
+    pUceApp->setNetworkWatcher(IMS_NULL);
 }
 
 TEST_F(UceAppTest, StopTimer)
