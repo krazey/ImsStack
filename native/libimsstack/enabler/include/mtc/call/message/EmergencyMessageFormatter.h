@@ -37,10 +37,14 @@ public:
 public:
     virtual IMS_RESULT FormStartMessage(IN CallType eCallType) override;
 
+protected:
+    virtual void SetAcceptHeader();
+
 private:
     void SetPPreferredIdentityHeader();
     void SetPPreferredIdentityHeaderByUserId();
     void SetPPreferredIdentityHeaderByDeviceId();
+    void SetRecvInfoHeader();
     void SetSipInstanceFeature();
 
     IMS_UINT32 GetAoSRegMode(IN ServiceType eServiceType);

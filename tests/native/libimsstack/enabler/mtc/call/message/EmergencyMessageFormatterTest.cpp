@@ -268,4 +268,19 @@ TEST_F(EmergencyMessageFormatterTest, SetSipInstanceFeature)
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
+TEST_F(EmergencyMessageFormatterTest, SetCurrentLocationDiscovery)
+{
+    ON_CALL(*pConfigurationManager, IsEmergencyCallCurrentLocationDiscoverySupported)
+            .WillByDefault(Return(IMS_TRUE));
+
+    IMS_RESULT nResult = pFormatter->FormStartMessage(CallType::VOIP);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+
+    ON_CALL(*pConfigurationManager, IsEmergencyCallCurrentLocationDiscoverySupported)
+            .WillByDefault(Return(IMS_FALSE));
+
+    nResult = pFormatter->FormStartMessage(CallType::VOIP);
+    EXPECT_EQ(nResult, IMS_SUCCESS);
+}
+
 }  // namespace android
