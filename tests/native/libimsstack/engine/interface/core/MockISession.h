@@ -22,8 +22,10 @@
 #include "IServiceMethod.h"
 #include "ISession.h"
 #include "SipMethod.h"
+
 class ICapabilities;
 class IMedia;
+class IPublication;
 class IReference;
 class IRefreshListener;
 class IMessage;
@@ -77,6 +79,7 @@ public:
     MOCK_METHOD(IMS_RESULT, Terminate, (), (override));
     MOCK_METHOD(IMS_RESULT, Update, (), (override));
     MOCK_METHOD(ISubscription*, CreateSubscription, (IN const AString& strEvent), (override));
+    MOCK_METHOD(IPublication*, CreatePublication, (IN const AString& strEvent), (override));
     MOCK_METHOD(
             ISipClientConnection*, CreateTransaction, (IN const SipMethod& objMethod), (override));
     MOCK_METHOD(IMS_SINT32, GetConfiguration, (), (const, override));
