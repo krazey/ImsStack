@@ -549,6 +549,8 @@ protected:
     IMS_BOOL IsRoaming() { return m_pAosHandle->IsRoaming(); }
 
     void SetRoamingState(IN IMS_UINT32 nState) { m_pAosHandle->m_nRoamingState = nState; }
+
+    IMS_BOOL IsCombinedAttach() { return m_pAosHandle->m_bCombinedAttach; }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -4676,11 +4678,27 @@ TEST_F(AosHandleTest, Is3G_Test)
     EXPECT_FALSE(Is3G(NW_REPORT_RADIO_EDGE));
 }
 
-TEST_F(AosHandleTest, Event_NotifyEvent_Test)
+TEST_F(AosHandleTest, Event_NotifyEvent_Vops)
 {
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, 1, 0);
+}
+
+TEST_F(AosHandleTest, Event_NotifyEvent_Roaming_State)
+{
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 1, 0);
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, 0, 0);
+    EXPECT_TRUE(IsRoaming());
+
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 0, 0);
+    EXPECT_FALSE(IsRoaming());
+}
+
+TEST_F(AosHandleTest, Event_NotifyEvent_Test_Attach_Type)
+{
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, 0);
+    EXPECT_TRUE(IsCombinedAttach());
+
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_EPS_ONLY_ATTACHED, 0);
+    EXPECT_FALSE(IsCombinedAttach());
 }
 
 TEST_F(AosHandleTest, RegistrationControl_NotifyCapabilitiesChanged_Test)

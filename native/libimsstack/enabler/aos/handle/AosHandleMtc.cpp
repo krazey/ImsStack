@@ -330,12 +330,26 @@ PROTECTED VIRTUAL void AosHandleMtc::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
-    AosHandle::Init();
-
     m_bVopsIgnoredForVolteEnabled = GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled();
+    m_piImsRadio = ImsRadioService::GetImsRadioService()->GetImsRadio(m_nSlotId);
+
+    AosHandle::Init();
+}
+
+PROTECTED VIRTUAL void AosHandleMtc::CleanUp()
+{
+    A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
+
+    AosHandle::CleanUp();
+}
+
+PROTECTED VIRTUAL void AosHandleMtc::AddListeners()
+{
+    AosHandle::AddListeners();
 
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
+    IMS_EVENT_AddListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
 
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
@@ -343,7 +357,6 @@ PROTECTED VIRTUAL void AosHandleMtc::Init()
         piCallTracker->SetListener(this);
     }
 
-    m_piImsRadio = ImsRadioService::GetImsRadioService()->GetImsRadio(m_nSlotId);
     if (m_piImsRadio != IMS_NULL)
     {
         m_piImsRadio->AddListenerForSsac(this);
@@ -356,14 +369,13 @@ PROTECTED VIRTUAL void AosHandleMtc::Init()
     }
 }
 
-PROTECTED VIRTUAL void AosHandleMtc::CleanUp()
+PROTECTED VIRTUAL void AosHandleMtc::RemoveListeners()
 {
-    A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
-
-    AosHandle::CleanUp();
+    AosHandle::RemoveListeners();
 
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
+    IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
 
     IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
     if (piCallTracker != IMS_NULL)
