@@ -414,10 +414,11 @@ PRIVATE void MtsMessageController::ReceiveMtsMessage(
     UpdateRPAckMap(piPageMessage);
 
     IMS_UINT32 nMtResult = 0;
-    ByteArray objSms = ByteArray::ConstNull();
     piMtsMessage->SetImpu(strImpu);
 
-    if (ProcessReceivedMessage(piPageMessage, piMtsMessage, objSms) != IMS_TRUE)
+    const ByteArray& objSms = ProcessReceivedMessage(piPageMessage, piMtsMessage);
+
+    if (objSms.IsNull())
     {
         return;
     }
@@ -754,8 +755,8 @@ IMS_BOOL MtsMessageController::FormDestinationByMti(IN SmsFormatType eSmsFormat,
 }
 
 PRIVATE
-IMS_BOOL MtsMessageController::ProcessReceivedMessage(
-        IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, OUT ByteArray& objSms)
+const ByteArray& MtsMessageController::ProcessReceivedMessage(
+        IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage)
 {
     AString strTempSmsgw = AString::ConstNull();
 
@@ -768,7 +769,7 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         piPageMessage->Reject(400, 0);
 
         delete piMtsMessage;
-        return IMS_FALSE;
+        return ByteArray::ConstNull();
     }
 
     ImsList<AString> objSipToHeaderList = piMessage->GetHeaders("To");
@@ -780,7 +781,7 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         piPageMessage->Reject(400, 0);
 
         delete piMtsMessage;
-        return IMS_FALSE;
+        return ByteArray::ConstNull();
     }
 
     ImsList<IMessageBodyPart*> objMessageBodies = piMessage->GetBodyParts();
@@ -792,7 +793,7 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         piPageMessage->Reject(400, 0);
 
         delete piMtsMessage;
-        return IMS_FALSE;
+        return ByteArray::ConstNull();
     }
 
     /*
@@ -809,10 +810,10 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
         piPageMessage->Reject(415, 0);
 
         delete piMtsMessage;
-        return IMS_FALSE;
+        return ByteArray::ConstNull();
     }
 
-    objSms = objMessageBodies.GetAt(0)->GetContent();
+    const ByteArray& objSms = objMessageBodies.GetAt(0)->GetContent();
 
     if (GetSmsgwFromReceivedMessage(piPageMessage, strTempSmsgw) == IMS_TRUE)
     {
@@ -824,7 +825,7 @@ IMS_BOOL MtsMessageController::ProcessReceivedMessage(
     piMtsMessage->PrintInfo();
     m_pMtsDynamicLoader->GetMtsSmUtils()->PrintSmsDataBurst(objSms);
 
-    return IMS_TRUE;
+    return objSms;
 }
 
 PRIVATE void MtsMessageController::ReportTransmissionResult(
@@ -920,7 +921,6 @@ PRIVATE
 void MtsMessageController::Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessage)
 {
     IMS_UINT32 nMtResult = 0;
-    ByteArray objSms = ByteArray::ConstNull();
     IPageMessage* piPageMessage = piMtsMessage->GetPageMessage();
     SmsFormatType eSmsFormat = piMtsMessage->GetSmsFormat();
 
@@ -931,7 +931,7 @@ void MtsMessageController::Retry_MtsMessageInPending(IN IMtsMessage* piMtsMessag
 
     m_bProcessingMsg = IMS_TRUE;
 
-    ProcessReceivedMessage(piPageMessage, piMtsMessage, objSms);
+    const ByteArray& objSms = ProcessReceivedMessage(piPageMessage, piMtsMessage);
 
     nMtResult = ReportMtSms(eSmsFormat, objSms.GetLength(), objSms.GetData());
 

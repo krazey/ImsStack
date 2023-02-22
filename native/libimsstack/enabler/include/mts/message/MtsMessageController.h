@@ -17,6 +17,7 @@
 #ifndef MTS_MESSAGE_CONTROLLER_H_
 #define MTS_MESSAGE_CONTROLLER_H_
 
+#include "ByteArray.h"
 #include "IMtsServiceListener.h"
 #include "IPageMessageListener.h"
 #include "ImsActivityEx.h"
@@ -81,8 +82,8 @@ private:
             IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergency);
     IMS_BOOL FormDestinationByMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, OUT AString& strDestination);
-    IMS_BOOL ProcessReceivedMessage(
-            IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage, OUT ByteArray& objSms);
+    const ByteArray& ProcessReceivedMessage(
+            IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage);
     void ReportTransmissionResult(
             IN IMS_SINT32 nResponse, IN SmsFormatType eSmsFormat, IN IMS_SINT32 nSeqId = -1);
     IMS_BOOL RespondReceivedMessage(IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage,
