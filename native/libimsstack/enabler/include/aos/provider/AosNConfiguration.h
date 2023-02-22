@@ -68,6 +68,7 @@ public:
     IMS_BOOL IsSecurityServerPortInRegContactOfInitRegUsed() const override;
     IMS_BOOL IsSecurityServerPortInInitRegUsed() const override;
     IMS_BOOL IsOldSaOnEstablishingSaRemoved() const override;
+    IMS_BOOL IsCallEndAndPdnReactivationByRegTerminated() const override;
     IMS_BOOL IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const override;
     IMS_BOOL IsEmergencyPdnWithEmergencyCallEndReleased() const override;
     IMS_BOOL IsSmsOverImsSupported() const override;
@@ -172,7 +173,6 @@ public:
     IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() override;
     IMSVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() override;
     IMSVector<IMS_SINT32>& GetReregErrCodeForCallEnd() override;
-    IMSVector<IMS_SINT32>& GetReregErrCodeForPdnReactivationAfterCallEnd() override;
     IMSVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() override;
     IMSVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() override;
 

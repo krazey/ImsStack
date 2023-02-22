@@ -25,6 +25,7 @@ struct AosAsset
 {
 public:
     AosAsset() :
+            bCallEndAndPdnReactivationByRegTerminated(IMS_FALSE),
             bDestroyUnsecureTcpSocketOnAccomplishingReg(IMS_FALSE),
             bEmcCallBasedOnPAssociatedUriOfNormalReg(IMS_FALSE),
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
@@ -84,7 +85,6 @@ public:
             objReregErrCodeForCallEnd(IMSVector<IMS_SINT32>()),
             objReregErrCodeForImsPdnReactivation(IMSVector<IMS_SINT32>()),
             objReregErrCodeForInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
-            objReregErrCodeForPdnReactivationAfterCallEnd(IMSVector<IMS_SINT32>()),
             objReregRetryErrCodeForInitRegWithSamePcscf(IMSVector<IMS_SINT32>()),
             objSubErrorCodeForInitRegWithNextPcscf(IMSVector<IMS_SINT32>()),
             objSubErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
@@ -98,6 +98,7 @@ public:
     AosAsset& operator=(IN const AosAsset&) = delete;
 
 public:
+    IMS_BOOL bCallEndAndPdnReactivationByRegTerminated;
     IMS_BOOL bDestroyUnsecureTcpSocketOnAccomplishingReg;
     IMS_BOOL bEmcCallBasedOnPAssociatedUriOfNormalReg;
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
@@ -154,7 +155,6 @@ public:
     IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
     IMSVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
     IMSVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
-    IMSVector<IMS_SINT32> objReregErrCodeForPdnReactivationAfterCallEnd;
     IMSVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
     IMSVector<IMS_SINT32> objSubErrorCodeForInitRegWithNextPcscf;
     IMSVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;
