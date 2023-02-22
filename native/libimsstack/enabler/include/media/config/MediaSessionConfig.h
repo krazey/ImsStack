@@ -121,16 +121,12 @@ public:
 
 private:
     void Clear();
-    IMS_BOOL Update(IN ICarrierConfig* piCc);
+    void ResetMediaConfigurations(IN IMS_SINT32 nSlotId);
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
     IMS_BOOL CreateAudioConfiguration(IN ICarrierConfig* piCc);
     IMS_BOOL CreateVideoConfiguration(IN ICarrierConfig* piCc);
     IMS_BOOL CreateTextConfiguration(IN ICarrierConfig* piCc);
-
-    IMS_BOOL UpdateAudioConfiguration(IN ICarrierConfig* piCc);
-    IMS_BOOL UpdateVideoConfiguration(IN ICarrierConfig* piCc);
-    IMS_BOOL UpdateTextConfiguration(IN ICarrierConfig* piCc);
 
 private:
     AudioConfiguration* m_pAudioConfig;
