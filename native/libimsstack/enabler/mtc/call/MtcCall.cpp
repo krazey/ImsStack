@@ -31,6 +31,7 @@
 #include "call/block/MtcBlockChecker.h"
 #include "call/message/MessageSender.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "emergency/CurrentLocationDiscoveryController.h"
 #include "helper/ICallStateProxy.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
@@ -68,7 +69,8 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService,
         m_objMessageMediator(MtcMessageMediator(*this)),
         m_pUssiController(IMS_NULL),
         m_pEpsFallbackTrigger(IMS_NULL),
-        m_pUdpKeepAliveSender(IMS_NULL)
+        m_pUdpKeepAliveSender(IMS_NULL),
+        m_pCurrentLocationDiscoveryController(IMS_NULL)
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
 
@@ -96,6 +98,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
     delete m_pUssiController;
     delete m_pEpsFallbackTrigger;
     delete m_pUdpKeepAliveSender;
+    delete m_pCurrentLocationDiscoveryController;
 }
 
 PUBLIC VIRTUAL void MtcCall::HandleIncoming(IN ISession* piSession)
@@ -415,6 +418,16 @@ PUBLIC VIRTUAL UdpKeepAliveSender& MtcCall::GetUdpKeepAliveSender()
         m_pUdpKeepAliveSender = new UdpKeepAliveSender(*this);
     }
     return *m_pUdpKeepAliveSender;
+}
+
+PUBLIC VIRTUAL CurrentLocationDiscoveryController& MtcCall::GetCurrentLocationDiscoveryController()
+{
+    if (m_pCurrentLocationDiscoveryController == IMS_NULL)
+    {
+        m_pCurrentLocationDiscoveryController = new CurrentLocationDiscoveryController(*this);
+    }
+
+    return *m_pCurrentLocationDiscoveryController;
 }
 
 PUBLIC VIRTUAL IMtcSession* MtcCall::CreateSession(IN ISession* piSession)
@@ -946,7 +959,7 @@ PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
 {
     IMS_TRACE_I("SessionTransactionReceived : key[%d]", m_nKey, 0, 0);
 
-    if (piSession == IMS_NULL)
+    if (piSession == IMS_NULL || piSipServerConnection == IMS_NULL)
     {
         OnInternalFailure();
         return;

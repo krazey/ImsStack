@@ -24,6 +24,7 @@
 #include <gmock/gmock.h>
 #include <functional>
 
+class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;
 class IMtcBlockChecker;
 class IMtcBlockRule;
@@ -68,6 +69,8 @@ public:
     MOCK_METHOD(UpdatingInfo&, GetUpdatingInfo, (), (override));
     MOCK_METHOD(EpsFallbackTrigger&, GetEpsFallbackTrigger, (), (override));
     MOCK_METHOD(UdpKeepAliveSender&, GetUdpKeepAliveSender, (), (override));
+    MOCK_METHOD(CurrentLocationDiscoveryController&, GetCurrentLocationDiscoveryController, (),
+            (override));
     MOCK_METHOD(UssiController*, GetUssiController, (), (override));
     MOCK_METHOD(MtcPendingOperationHolder&, GetPendingOperationHolder, (), (override));
     MOCK_METHOD(IMtcCall&, GetCall, (), (override));
