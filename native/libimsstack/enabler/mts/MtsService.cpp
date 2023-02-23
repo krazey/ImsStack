@@ -81,8 +81,9 @@ PUBLIC VIRTUAL void MtsService::SetListener(IN IMtsServiceListener* piMtsService
     m_piMtsServiceListener = piMtsServiceListener;
 }
 
-PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
-        IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency)
+PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat,
+        IN const ByteArray& objContent, IN const AString& strAddress, IN IMS_SINT32 nSeqId,
+        IN IMS_BOOL bEmergency)
 {
     IMS_TRACE_I("SendMoSms", 0, 0, 0);
 
@@ -96,7 +97,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const 
         {
             delete m_pSmsInfo;
         }
-        m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, strAddress, objData, nSeqId, bEmergency);
+        m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, strAddress, objContent, nSeqId, bEmergency);
         m_piImsEmergencyAos->Control(ImsAosControl::REGISTER_START);
 
         // Wait until the Emergency REGISTRATION Procedure done
@@ -108,7 +109,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const 
     if (piMtsTraffic->IsRadioGuardTimerActive())
     {
         piMtsTraffic->StartRadioGuardTimer();
-        m_piMtsServiceListener->NotifyMoSms(eSmsFormat, objData, strAddress, nSeqId, bEmergency);
+        m_piMtsServiceListener->NotifyMoSms(eSmsFormat, objContent, strAddress, nSeqId, bEmergency);
     }
     else
     {
@@ -116,7 +117,7 @@ PUBLIC VIRTUAL void MtsService::SendMoSms(IN SmsFormatType eSmsFormat, IN const 
         {
             delete m_pSmsInfo;
         }
-        m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, strAddress, objData, nSeqId, bEmergency);
+        m_pSmsInfo = new SmsSendRequestInfo(eSmsFormat, strAddress, objContent, nSeqId, bEmergency);
         StartRadioTraffic(piMtsTraffic);
     }
 }
@@ -152,14 +153,14 @@ void MtsService::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsForm
 }
 
 PUBLIC
-IMS_UINT32 MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData)
+IMS_UINT32 MtsService::ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent)
 {
     IMS_TRACE_I("ReportMtSms", 0, 0, 0);
 
     IJniMtsServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
-        piJniThread->ReportMtSms(eSmsFormat, objData, m_nSlotId);
+        piJniThread->ReportMtSms(eSmsFormat, objContent, m_nSlotId);
     }
 
     // TODO: Call back is being considered
@@ -286,7 +287,7 @@ void MtsService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
             if (piMtsTraffic->IsRadioGuardTimerActive())
             {
                 piMtsTraffic->StartRadioGuardTimer();
-                m_piMtsServiceListener->NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->objSmsData,
+                m_piMtsServiceListener->NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->objContent,
                         m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId, m_pSmsInfo->bEmergency);
 
                 delete m_pSmsInfo;
@@ -392,7 +393,7 @@ void MtsService::Traffic_OnConnectionSetupPrepared(IN IMS_UINT32 nType, IN IMS_U
     }
 
     piMtsTraffic->StartRadioGuardTimer();
-    m_piMtsServiceListener->NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->objSmsData,
+    m_piMtsServiceListener->NotifyMoSms(m_pSmsInfo->eSmsFormat, m_pSmsInfo->objContent,
             m_pSmsInfo->strAddress, m_pSmsInfo->nSeqId, m_pSmsInfo->bEmergency);
 
     delete m_pSmsInfo;
