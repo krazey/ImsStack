@@ -34,12 +34,12 @@ public:
     virtual IMtsServiceState* GetIMtsServiceState() = 0;
     virtual void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId) = 0;
-    virtual IMS_UINT32 ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData) = 0;
+    virtual IMS_UINT32 ReportMtSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent) = 0;
     virtual void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) = 0;
     virtual void SetListener(IN IMtsServiceListener* piMtsServiceListener) = 0;
 
     // JniMtsService
-    virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+    virtual void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) = 0;
     virtual void SendMtResult(IN IMS_BOOL bMtResult) = 0;
     virtual void SendScbmNotification(IN IMS_UINT32 nScbmState) = 0;
