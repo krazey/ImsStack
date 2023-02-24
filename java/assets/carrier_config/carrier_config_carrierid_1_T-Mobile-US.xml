@@ -159,7 +159,7 @@
         <item value="411"/>
     </int-array>
     <int name="policy_for_tcall_timer_expiry_of_volte_call_int" value="1"/>
-    <int-array name="imsvoice.reject_code_for_csfb_int_array" num="41">
+    <int-array name="imsvoice.reject_code_for_csfb_int_array" num="42">
         <item value="300"/>
         <item value="301"/>
         <item value="302"/>
@@ -179,6 +179,7 @@
         <item value="416"/>
         <item value="420"/>
         <item value="421"/>
+        <item value="422"/>
         <item value="423"/>
         <item value="480"/>
         <item value="481"/>
