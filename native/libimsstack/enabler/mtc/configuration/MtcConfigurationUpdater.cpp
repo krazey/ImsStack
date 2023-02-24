@@ -154,8 +154,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
                     KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING));
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
             CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING));
-    objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
-            CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_REDIRECTION_FAILURE_STRING));
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(CarrierConfig::ImsVoice::
                     KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING));
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
@@ -164,8 +162,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
                     KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING));
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(CarrierConfig::ImsVoice::
                     KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING));
-    objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
-            CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_INTERNAL_ERROR_STRING));
     // reject reason
     objItems.objCallRejectReasonPhrases.Push(piCc->GetString(
             CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING));

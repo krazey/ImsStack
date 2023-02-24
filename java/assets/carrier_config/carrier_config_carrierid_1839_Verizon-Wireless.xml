@@ -226,7 +226,6 @@
     <string name="imsvoice.call_terminate_reason_header_terminating_earlydialog_string">USER;text=&quot;New Dialog Established&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string">USER;text=&quot;Session Expired&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_conference_call_joined_string">USER;text=&quot;Far Device Joined N-way Call&quot;</string>
-    <string name="imsvoice.call_terminate_reason_header_internal_error_string">USER;text=&quot;Internal Error Code:%d&quot;</string>
 
     <!-- MTC reject phrase -->
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string">Call Rejected By User</string>
