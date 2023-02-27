@@ -21,6 +21,7 @@
 
 class ICapabilities;
 class IMedia;
+class IPublication;
 class IReasonHeaderSetter;
 class IReference;
 class IRefreshListener;
@@ -285,6 +286,14 @@ public:
      * @return Pointer to new ISubscription.
      */
     virtual ISubscription* CreateSubscription(IN const AString& strEvent) = 0;
+
+    /**
+     * @brief Creates a publication for the specified event using the existing session dialog.
+     *
+     * @param strEvent Event package name
+     * @return Pointer to new IPublication.
+     */
+    virtual IPublication* CreatePublication(IN const AString& strEvent) = 0;
 
     /**
      * @brief Creates a new mid-call or in-dialog transaction using this ISession.

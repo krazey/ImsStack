@@ -97,6 +97,7 @@ private:
     inline IMS_RESULT Update() override { return m_pSession->Update(); }
 
     ISubscription* CreateSubscription(IN const AString& strEvent) override;
+    IPublication* CreatePublication(IN const AString& strEvent) override;
     inline ISipClientConnection* CreateTransaction(IN const SipMethod& objMethod) override
     {
         return m_pSession->CreateTransaction(objMethod);

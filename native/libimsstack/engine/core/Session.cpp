@@ -31,6 +31,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISipServerConnection.h"
+#include "Publication.h"
 #include "Reference.h"
 #include "Replaces.h"
 #include "SdpOaState.h"
@@ -584,7 +585,7 @@ Subscription* Session::CreateSubscription(IN const AString& strEvent)
         return IMS_NULL;
     }
 
-    // If the subscriptino can not be created, throw exception
+    // If the subscription can not be created, throw exception
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
     Subscription* pSubscription =
             new Subscription(GetService(), strEvent, m_bImplicitRoutingRequired);
@@ -609,6 +610,52 @@ Subscription* Session::CreateSubscription(IN const AString& strEvent)
     Ims::SetLastError(ImsError::NO_ERROR);
 
     return pSubscription;
+}
+
+PUBLIC
+Publication* Session::CreatePublication(IN const AString& strEvent)
+{
+    if (!IsMidDialogTransactionCreatable())
+    {
+        Ims::SetLastError(ImsError::ILLEGAL_STATE);
+
+        IMS_TRACE_E(0, "Publication can't be created in the state(%s)", StateToString(GetState()),
+                0, 0);
+        return IMS_NULL;
+    }
+
+    // Checks an event package from the application configuration
+    if (!GetService()->IsEventPackageSupported(strEvent))
+    {
+        Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
+
+        IMS_TRACE_E(0, "Invalid argument: event (%s)", strEvent.GetStr(), 0, 0);
+        return IMS_NULL;
+    }
+
+    // If the publication can not be created, throw exception
+    Publication* pPublication = new Publication(GetService(), strEvent, m_bImplicitRoutingRequired);
+
+    if (pPublication == IMS_NULL)
+    {
+        Ims::SetLastError(ImsError::NO_MEMORY);
+
+        IMS_TRACE_E(0, "Creating Publication failed", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    if (!pPublication->InitMethod(this))
+    {
+        delete pPublication;
+        Ims::SetLastError(ImsError::GENERAL_ERROR);
+
+        IMS_TRACE_E(0, "Initializing Publication failed", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    Ims::SetLastError(ImsError::NO_ERROR);
+
+    return pPublication;
 }
 
 PUBLIC
