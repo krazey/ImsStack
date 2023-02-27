@@ -334,8 +334,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_terminate_reason_header_user_ends_and_sip_response_timeout_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_call_setup_timeout_string";
-        public static final String KEY_CALL_TERMINATE_REASON_HEADER_REDIRECTION_FAILURE_STRING =
-                KEY_PREFIX + "call_terminate_reason_header_redirection_failure_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_terminating_earlydialog_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_VOPS_OFF_STRING =
@@ -344,8 +342,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_terminate_reason_header_session_refresh_failure_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_conference_call_joined_string";
-        public static final String KEY_CALL_TERMINATE_REASON_HEADER_INTERNAL_ERROR_STRING =
-                KEY_PREFIX + "call_terminate_reason_header_internal_error_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING =
                 KEY_PREFIX + "call_reject_reason_phrase_on_cscall_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_ON_VILTE_AND_NO_LTE_STRING =

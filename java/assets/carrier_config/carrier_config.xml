@@ -102,12 +102,10 @@
     <string name="imsvoice.call_terminate_reason_header_sip_response_timeout_string">RELEASE_CAUSE;cause=5;text=&quot;SIP response time-out&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_sip_response_timeout_string"></string>
     <string name="imsvoice.call_terminate_reason_header_call_setup_timeout_string">RELEASE_CAUSE;cause=6;text=&quot;Call-setup time-out&quot;</string>
-    <string name="imsvoice.call_terminate_reason_header_redirection_failure_string">RELEASE_CAUSE;cause=7;text=&quot;Redirection failure&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_terminating_earlydialog_string"></string>
     <string name="imsvoice.call_terminate_reason_header_vops_off_string"></string>
     <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string"></string>
     <string name="imsvoice.call_terminate_reason_header_conference_call_joined_string"></string>
-    <string name="imsvoice.call_terminate_reason_header_internal_error_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_on_cscall_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_on_vilte_and_no_lte_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_on_connecting_call_string"></string>
