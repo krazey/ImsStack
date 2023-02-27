@@ -31,21 +31,21 @@ public:
     virtual AString& GetImpu() = 0;
     virtual void SetImpu(IN const AString& strImpu) = 0;
     virtual IMS_SINT32 GetMessageReference() = 0;
-    virtual void SetMessageReference(IMS_SINT32 nMrOfRp) = 0;
+    virtual void SetMessageReference(IN IMS_SINT32 nMrOfRp) = 0;
     virtual IMS_SINT32 GetMti() = 0;
-    virtual void SetMti(IMS_SINT32 nMti) = 0;
+    virtual void SetMti(IN IMS_SINT32 nMti) = 0;
     virtual IPageMessage* GetPageMessage() = 0;
-    virtual void SetPageMessage(IPageMessage* piPageMessage) = 0;
+    virtual void SetPageMessage(IN IPageMessage* piPageMessage) = 0;
     virtual IMS_SINT32 GetSeqId() = 0;
     virtual void SetSeqId(IN IMS_SINT32 nSeqId) = 0;
     virtual IMS_SINT32 GetSlotId() = 0;
     virtual void SetSlotId(IN IMS_SINT32 nSlotId) = 0;
     virtual SmsFormatType GetSmsFormat() = 0;
-    virtual void SetSmsFormat(SmsFormatType eSmsFormat) = 0;
+    virtual void SetSmsFormat(IN SmsFormatType eSmsFormat) = 0;
     virtual IMS_SINT32 GetSmSize() = 0;
-    virtual void SetSmSize(IMS_SINT32 nSmSize) = 0;
+    virtual void SetSmSize(IN IMS_SINT32 nSmSize) = 0;
     virtual MtsTransactionType GetTransactionType() = 0;
-    virtual void SetTransactionType(MtsTransactionType eTransactionType) = 0;
+    virtual void SetTransactionType(IN MtsTransactionType eTransactionType) = 0;
 
     virtual void PrintInfo() = 0;
 };
