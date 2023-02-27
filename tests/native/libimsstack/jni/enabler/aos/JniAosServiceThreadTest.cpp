@@ -64,7 +64,7 @@ TEST_F(JniAosServiceThreadTest, NotifyRegistering)
 
 TEST_F(JniAosServiceThreadTest, NotifyDeregistered)
 {
-    EXPECT_THAT(m_pJniAosServiceThread->NotifyDeregistered(0), AnyOf(IMS_TRUE, IMS_FALSE));
+    EXPECT_THAT(m_pJniAosServiceThread->NotifyDeregistered(0, 0), AnyOf(IMS_TRUE, IMS_FALSE));
 }
 
 TEST_F(JniAosServiceThreadTest, NotifyTechnologyChangeFailed)

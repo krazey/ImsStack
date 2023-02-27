@@ -997,6 +997,15 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
         }
     }
 
+    AosReasonCode eReason = GetReasonCode();
+    if (eReason == AosReasonCode::PLMN_BLOCK || eReason == AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT)
+    {
+        if (eImsRegNetwork == AosNetworkType::NONE)
+        {
+            eImsRegNetwork = m_eImsRegNetwork;
+        }
+    }
+
     m_nImsRegState = nImsRegState;
     m_nImsRegFeatures = nImsRegFeatures;
     m_eImsRegNetwork = eImsRegNetwork;
@@ -1006,7 +1015,7 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
     {
         if (m_nImsRegState == IMS_REG_STATE_DEREGISTERED)
         {
-            piService->NotifyDeregistered(GetReasonCode());
+            piService->NotifyDeregistered(m_eImsRegNetwork, eReason);
             m_eImsReasonCode = AosReasonCode::UNSPECIFIED;
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERING)

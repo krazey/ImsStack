@@ -77,7 +77,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     protected int mRegisteredNetworkType = NetworkType.NONE;
 
     private int mRegState = RegistrationState.DEREGISTERED;
-    private int mRegTriedNetworkType = NetworkType.NONE;
 
     @VisibleForTesting
     protected int mFeatureTagBits = 0;
@@ -482,7 +481,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void updateRegisteredNetworkType(int networkType) {
         ImsLog.d(mSlotId, "updateRegisteredNetworkType :: networkType(" + networkType + ")");
         mRegisteredNetworkType = networkType;
-        mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyRegistered(mRegisteredNetworkType, mFeatureTagBits, mFeatureTags);
         }
@@ -505,7 +503,6 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void onRegistered(int networkType, int featureTagBits, Set<String> featureTags) {
         mRegState = IAosRegistrationListener.RegistrationState.REGISTERED;
         mRegisteredNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
-        mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyRegistered(mRegisteredNetworkType, featureTagBits, featureTags);
         }
@@ -514,13 +511,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     private void onRegistering(int networkType, int featureTagBits, Set<String> featureTags) {
         int adjustedNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
         mRegState = IAosRegistrationListener.RegistrationState.REGISTERING;
-        mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyRegistering(adjustedNetworkType, featureTagBits, featureTags);
         }
     }
 
-    private void onDeregistered(int reason) {
+    private void onDeregistered(int networkType, int reason) {
         if (mRegState == IAosRegistrationListener.RegistrationState.DEREGISTERED
                 && reason == IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED) {
             return;
@@ -530,9 +526,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         mFeatureTagBits = 0;
         mFeatureTags.clear();
         for (IAosRegistrationListener l : mAosRegistationListeners) {
-            l.notifyDeregistered(mRegTriedNetworkType, reason);
+            l.notifyDeregistered(networkType, reason);
         }
-        mRegTriedNetworkType = NetworkType.NONE;
     }
 
     private void onTechnologyChangeFailed(int networkType, int causeCode) {
@@ -602,12 +597,13 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         });
     }
 
-    private void updateDeregistered(int reason) {
-        ImsLog.d(mSlotId, "updateDeregistered :: reason(" + reason + ")");
+    private void updateDeregistered(int networkType, int reason) {
+        ImsLog.d(mSlotId, "updateDeregistered :: networkType(" + networkType + "), reason("
+                + reason + ")");
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                onDeregistered(reason);
+                onDeregistered(networkType, reason);
             }
         });
     }
@@ -785,9 +781,10 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
                 }
 
                 case IIAosService.N2J_NOTIFY_DEREGISTERED: {
+                    int networkType = parcel.readInt();
                     int reason = parcel.readInt();
 
-                    updateDeregistered(reason);
+                    updateDeregistered(networkType, reason);
                     break;
                 }
 

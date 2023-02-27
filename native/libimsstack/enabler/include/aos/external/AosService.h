@@ -77,7 +77,7 @@ public:
     IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const IMSList<AString>& objFeatureTags) override;
 
-    IMS_BOOL NotifyDeregistered(IN AosReasonCode eReason) override;
+    IMS_BOOL NotifyDeregistered(IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
     IMS_BOOL NotifyTechnologyChangeFailed(
             IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) override;
     IMS_BOOL NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) override;
