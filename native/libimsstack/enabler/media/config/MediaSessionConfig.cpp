@@ -58,6 +58,7 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
     {
         return IMS_FALSE;
     }
+    piCc->AddListener(this);
 
     m_bIsSessLevelBW =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL);
@@ -153,7 +154,7 @@ IMS_BOOL MediaSessionConfig::IsSdpReofferFullCapability() const
 PRIVATE
 void MediaSessionConfig::Clear()
 {
-    IMS_TRACE_D("clear()", 0, 0, 0);
+    IMS_TRACE_D("Clear()", 0, 0, 0);
 
     if (m_pAudioConfig != IMS_NULL)
     {
@@ -175,21 +176,11 @@ void MediaSessionConfig::Clear()
 }
 
 PRIVATE
-IMS_BOOL MediaSessionConfig::Update(IN ICarrierConfig* piCc)
+void MediaSessionConfig::ResetMediaConfigurations(IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("Update", 0, 0, 0);
-    if (piCc == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (!UpdateAudioConfiguration(piCc) || !UpdateVideoConfiguration(piCc) ||
-            !UpdateTextConfiguration(piCc))
-    {
-        return IMS_FALSE;
-    }
-
-    return IMS_TRUE;
+    IMS_TRACE_D("ResetMediaConfigurations()", 0, 0, 0);
+    Clear();
+    Create(nSlotId);
 }
 
 PRIVATE VIRTUAL void MediaSessionConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
@@ -197,8 +188,7 @@ PRIVATE VIRTUAL void MediaSessionConfig::CarrierConfig_NotifyConfigChanged(IN IM
     if (MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(nSlotId, m_nServiceType) ==
             this)
     {
-        ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
-        Update(piCc);
+        ResetMediaConfigurations(nSlotId);
     }
 }
 
@@ -273,63 +263,6 @@ IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
     }
 
     m_pTextConfig = pConfig;
-
-    return IMS_TRUE;
-}
-
-PRIVATE
-IMS_BOOL MediaSessionConfig::UpdateAudioConfiguration(IN ICarrierConfig* piCc)
-{
-    IMS_TRACE_D("UpdateA udioConfiguration", 0, 0, 0);
-
-    if (m_pAudioConfig == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (!m_pAudioConfig->Update(piCc))
-    {
-        IMS_TRACE_E(0, "Updating an audio configuration failed", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    return IMS_TRUE;
-}
-
-PRIVATE
-IMS_BOOL MediaSessionConfig::UpdateVideoConfiguration(IN ICarrierConfig* piCc)
-{
-    IMS_TRACE_D("Update VideoConfiguration", 0, 0, 0);
-
-    if (m_pVideoConfig == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (!m_pVideoConfig->Update(piCc))
-    {
-        IMS_TRACE_E(0, "Updating a video configuration failed", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    return IMS_TRUE;
-}
-
-PRIVATE
-IMS_BOOL MediaSessionConfig::UpdateTextConfiguration(IN ICarrierConfig* piCc)
-{
-    IMS_TRACE_D("Update TextConfiguration", 0, 0, 0);
-    if (m_pTextConfig == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (!m_pTextConfig->Update(piCc))
-    {
-        IMS_TRACE_E(0, "Updating a text configuration failed", 0, 0, 0);
-
-        return IMS_FALSE;
-    }
 
     return IMS_TRUE;
 }
