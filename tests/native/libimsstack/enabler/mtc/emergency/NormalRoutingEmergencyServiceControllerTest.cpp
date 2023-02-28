@@ -21,6 +21,7 @@
 #include "emergency/MockIMtcEmergencyServiceManager.h"
 #include "emergency/NormalRoutingEmergencyServiceController.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockIMtcAosConnector.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -33,6 +34,7 @@ protected:
     MockIMtcContext objContext;
     MockIMtcService objNormalService;
     MockICallStateProxy objCallStateProxy;
+    MockIMtcAosConnector objAosConnector;
     MockIJniMtcServiceThread objJniMtcServiceThread;
     MockIMtcEmergencyServiceManager objEsm;
 
@@ -43,6 +45,7 @@ protected:
         ON_CALL(objContext, GetServiceByType(ServiceType::NORMAL))
                 .WillByDefault(Return(&objNormalService));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetAosConnector(_)).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objNormalService, GetJniServiceThread)
                 .WillByDefault(Return(&objJniMtcServiceThread));
@@ -88,6 +91,13 @@ TEST_F(NormalRoutingEmergencyServiceControllerTest, StartNotifiesOpenedIfNormalS
             .Times(1);
 
     pController->Start();
+}
+
+TEST_F(NormalRoutingEmergencyServiceControllerTest, CloseDoesNothing)
+{
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
+
+    pController->Close();
 }
 
 TEST_F(NormalRoutingEmergencyServiceControllerTest,
