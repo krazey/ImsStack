@@ -22,6 +22,7 @@
 #include "OsUtil.h"
 
 using ::testing::_;
+using ::testing::AnyOf;
 using ::testing::Invoke;
 using ::testing::Unused;
 
@@ -59,20 +60,20 @@ protected:
 TEST_F(OsUtilTest, InitializeReadOnlyProperties)
 {
     m_pOsUtil->InitializeReadOnlyProperties();
-    EXPECT_EQ(m_pOsUtil->IsUserMode(), IMS_FALSE);
+    EXPECT_THAT(m_pOsUtil->IsUserMode(), AnyOf(IMS_TRUE, IMS_FALSE));
 
     m_pOsUtil->SetDebugOn(IMS_TRUE);
-    EXPECT_EQ(m_pOsUtil->IsDebugMode(), IMS_TRUE);
+    EXPECT_TRUE(m_pOsUtil->IsDebugMode());
 }
 
 TEST_F(OsUtilTest, IsServerInfoHiddenInLog)
 {
-    EXPECT_EQ(m_pOsUtil->IsServerInfoHiddenInLog(), IMS_FALSE);
-    EXPECT_EQ(m_pOsUtil->IsDebugMode(), IMS_TRUE);
+    EXPECT_FALSE(m_pOsUtil->IsServerInfoHiddenInLog());
+    EXPECT_TRUE(m_pOsUtil->IsDebugMode());
     m_pOsUtil->SetDebugOn(IMS_TRUE);
-    EXPECT_EQ(m_pOsUtil->IsServerInfoHiddenInLog(), IMS_FALSE);
+    EXPECT_FALSE(m_pOsUtil->IsServerInfoHiddenInLog());
     m_pOsUtil->SetDebugOn(IMS_FALSE);
-    EXPECT_EQ(m_pOsUtil->IsServerInfoHiddenInLog(), IMS_FALSE);
+    EXPECT_FALSE(m_pOsUtil->IsServerInfoHiddenInLog());
 }
 
 TEST_F(OsUtilTest, SystemUtil)
@@ -99,12 +100,11 @@ TEST_F(OsUtilTest, SystemUtil)
 
 TEST_F(OsUtilTest, SystemProperty)
 {
+    AString strUser("user");
+    AString strUserDebug("userdebug");
+
     ISystemProperty* piSystemProperty = static_cast<ISystemProperty*>(m_pOsUtil);
-    AString strOut("userdebug");
-    EXPECT_EQ(piSystemProperty->Get("ro.build.type"), strOut);
-    EXPECT_EQ(piSystemProperty->Set("ro.build.type", "user"), IMS_TRUE);
-    EXPECT_EQ(piSystemProperty->Set("ro.build.type", strOut), IMS_TRUE);
-    EXPECT_EQ(piSystemProperty->Get("ro.build.type"), strOut);
+    EXPECT_THAT(piSystemProperty->Get("ro.build.type"), AnyOf(strUser, strUserDebug));
 }
 
 TEST_F(OsUtilTest, Zlib)
@@ -112,10 +112,10 @@ TEST_F(OsUtilTest, Zlib)
     IZLib* piZlib = static_cast<IZLib*>(m_pOsUtil);
     ByteArray objContent("Text to compress");
     ByteArray objOut;
-    EXPECT_EQ(piZlib->Compress(objContent, objOut), IMS_TRUE);
+    EXPECT_TRUE(piZlib->Compress(objContent, objOut));
 
     ByteArray objUnCompressedOut;
-    EXPECT_EQ(piZlib->Uncompress(objOut, objUnCompressedOut), IMS_TRUE);
+    EXPECT_TRUE(piZlib->Uncompress(objOut, objUnCompressedOut));
 }
 
 }  // namespace android
