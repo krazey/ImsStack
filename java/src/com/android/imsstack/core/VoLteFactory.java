@@ -25,6 +25,7 @@ import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.test.ImsTestHelper;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -106,6 +107,16 @@ public class VoLteFactory {
         stopAgents(slotID);
 
         ImsLog.d("size[" + sVoLteServices.size() + "] " + "slotID[" + slotID + "]");
+    }
+
+    /**
+     * Sets VoLte service
+     * @param slotId : slot id
+     * @param service : VoLte service
+     */
+    @VisibleForTesting
+    public void setService(int slotId, IVoLteService service) {
+        sVoLteServices.put(slotId, service);
     }
 
     public void updateService(int slotID) {
