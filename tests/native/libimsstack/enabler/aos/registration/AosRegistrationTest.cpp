@@ -1866,7 +1866,7 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming)
 
     EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
 
     m_pTestAosRegistration->SetIRegistration(static_cast<IRegistration*>(&m_objMockIRegistration));
     EXPECT_CALL(m_objMockIRegistration, GetPreviousResponse())
@@ -1897,7 +1897,7 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming)
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL))
             .Times(2);
 
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(AosReasonCode::PLMN_BLOCK)).Times(2);
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, AosReasonCode::PLMN_BLOCK)).Times(2);
 
     m_pTestAosRegistration->Registration_UpdateFailed(IRegistration::REASON_STATUS_CODE);
     EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
@@ -1937,7 +1937,7 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming_HeldByCall)
 
     EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
             .Times(AnyNumber())
-            .WillRepeatedly(Return(static_cast<IMS_UINT32>(AosNetworkType::LTE)));
+            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
 
     m_pTestAosRegistration->SetIRegistration(static_cast<IRegistration*>(&m_objMockIRegistration));
     EXPECT_CALL(m_objMockIRegistration, GetPreviousResponse())
@@ -1974,7 +1974,7 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming_HeldByCall)
             Registration_StateChanged(
                     IAosRegistration::RESULT_FAILURE, IAosRegistration::REASON_FAILURE_GENERAL))
             .Times(1);
-    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(AosReasonCode::PLMN_BLOCK)).Times(1);
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(_, AosReasonCode::PLMN_BLOCK)).Times(1);
 
     m_pTestAosRegistration->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
     EXPECT_FALSE(m_pTestAosRegistration->IsHeldByCall());

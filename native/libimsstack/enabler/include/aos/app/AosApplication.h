@@ -43,6 +43,7 @@ class AosCondition;
 class AosConnector;
 class AosUtil;
 
+enum class AosNetworkType;
 enum class AosReasonCode;
 
 class AosApplication :
@@ -92,6 +93,8 @@ public:
 protected:
     void ClearOffReason();
     void ClearPending();
+
+    AosNetworkType GetNetworkTypeForImsRegState() const;
 
     void SetOffReason(IN IMS_UINT32 nReason);
     void SetImsCall(IN IMS_BOOL bActive);
@@ -426,5 +429,6 @@ protected:
     static const IMS_UINT32 APP_START_WAITING_TIME_MILLIS = 4000;
     static const IMS_UINT32 DELAY_STOPPING_PDN_TO_KEEP_SESSION_TIME_SECONDS = 2;
     static const IMS_UINT32 UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS = 10000;
+    static const IMS_UINT32 PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS = 5;
 };
 #endif  // AOS_APPLICATION_H_
