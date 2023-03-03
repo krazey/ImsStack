@@ -176,6 +176,7 @@ public:
     IMS_SINT32 GetCallRejectCodeForNotAcceptableCallType() const override;
     IMS_BOOL IsReleaseEmergencyPdnWithEmergencyCallFail() const override;
     IMS_SINT32 GetPolicyForAlertNotUsingPreconditionMechanism() const override;
+    IMS_BOOL IsRequiredCdmalessFeatureTag() const override;
 
 private:
     static IMS_BOOL ContainsValue(IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue);
