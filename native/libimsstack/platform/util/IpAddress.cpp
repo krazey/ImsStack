@@ -80,14 +80,14 @@ IMS_BOOL ipAddress_ParseIpv6(IN const AString& strIp6, OUT IMS_BYTE* pIp6)
 
         const AString& strValue = objIpv6.GetElementAt(i);
 
-        if (strValue.IsEmpty())
+        if (strValue.GetLength() == 0)
         {
             if (i == nCount - 1)
             {
                 // Special case: ":" is last character
                 const AString& strTmp = objIpv6.GetElementAt(i - 1);
 
-                if (!strTmp.IsEmpty())
+                if (strTmp.GetLength() != 0)
                 {
                     return IMS_FALSE;
                 }
@@ -100,7 +100,7 @@ IMS_BOOL ipAddress_ParseIpv6(IN const AString& strIp6, OUT IMS_BYTE* pIp6)
                 // Special case: ":" is first character
                 const AString& strTmp = objIpv6.GetElementAt(i + 1);
 
-                if (!strTmp.IsEmpty())
+                if (strTmp.GetLength() != 0)
                 {
                     return IMS_FALSE;
                 }
