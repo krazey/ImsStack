@@ -877,6 +877,12 @@ IMS_BOOL MtcConfigurationManager::IsRequiredCdmalessFeatureTag() const
     return m_objCarrierConfig.bRequiredCdmalessFeatureTag;
 }
 
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsEmergencyCallCurrentLocationDiscoverySupported() const
+{
+    return m_objCarrierConfig.bEmergencyCallCurrentLocationDiscoverySupported;
+}
+
 PRIVATE
 IMS_BOOL MtcConfigurationManager::ContainsValue(
         IN const ImsVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue)
