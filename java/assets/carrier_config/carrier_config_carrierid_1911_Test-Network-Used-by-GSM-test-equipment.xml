@@ -99,4 +99,5 @@
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
     <boolean name="imsvoice.prack_supported_for_18x_bool" value="true"/>
     <int name="imsvoice.session_refresher_type_int" value="0"/>
+    <int name="imsvoice.session_refresh_method_int" value="2"/>
 </carrier_config>
