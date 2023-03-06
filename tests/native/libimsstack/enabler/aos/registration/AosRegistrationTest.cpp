@@ -118,6 +118,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Success);
     FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Failure);
     FRIEND_TEST(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNextPcscf);
+    FRIEND_TEST(AosRegistrationTest, Registration_UpdateFailed_CallEndByReregErr);
     FRIEND_TEST(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming);
     FRIEND_TEST(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming_HeldByCall);
 
@@ -1843,6 +1844,58 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNex
     EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_REGISTERING);
 }
 
+TEST_F(AosRegistrationTest, Registration_UpdateFailed_CallEndByReregErr)
+{
+    // BEGIN uninteresting preparation
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsContactUriValidationChecked())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegRetryCountResetPolicy())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(0));
+
+    EXPECT_CALL(m_objMockIAosPcscf, SetFirstPcscfIndex()).Times(AnyNumber());
+    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTried()).Times(AnyNumber());
+    EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(AnyNumber());
+
+    m_pTestAosRegistration->SetIRegistration(static_cast<IRegistration*>(&m_objMockIRegistration));
+    EXPECT_CALL(m_objMockIRegistration, GetPreviousResponse())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(&m_objMockISipMessage));
+    EXPECT_CALL(m_objMockISipMessage, GetStatusCode())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(403));
+
+    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(AnyNumber());
+    EXPECT_CALL(m_objMockIRegistration, SetListener(IMS_NULL)).Times(AnyNumber());
+
+    // SetState - for ignoring UpdateDetailState()
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    // END uninteresting preparation
+
+    m_pTestAosRegistration->m_nState = IAosRegistration::STATE_REFRESHING;
+    m_pTestAosRegistration->SetListener(
+            static_cast<IAosRegistrationListener*>(&m_objMockIAosRegistrationListener));
+
+    // IsImsCall() GetReregErrCodeForCallEnd()
+    m_pTestAosRegistration->SetImsCall(IMS_TRUE);
+    IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
+    objReregErrCodeForCallEnd.Clear();
+    objReregErrCodeForCallEnd.Add(403);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForCallEnd())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objReregErrCodeForCallEnd));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(IAosRegistration::RESULT_FAILURE,
+                    IAosRegistration::REASON_FAILURE_REG_TERMINATING))
+            .Times(1);
+    m_pTestAosRegistration->Registration_UpdateFailed(IRegistration::REASON_STATUS_CODE);
+
+    EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
+}
+
 TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming)
 {
     // BEGIN uninteresting preparation
@@ -1917,6 +1970,12 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming)
 TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming_HeldByCall)
 {
     // BEGIN uninteresting preparation
+    IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
+    objReregErrCodeForCallEnd.Clear();
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForCallEnd())
+            .Times(AnyNumber())
+            .WillRepeatedly(ReturnRef(objReregErrCodeForCallEnd));
+
     EXPECT_CALL(m_objMockIAosNConfiguration, IsContactUriValidationChecked())
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));

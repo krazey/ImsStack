@@ -205,6 +205,7 @@ class TestAosApplication : public AosApplication
     FRIEND_TEST(AosApplicationTest, RegRetryCount);
     FRIEND_TEST(AosApplicationTest, StateMachine);
     FRIEND_TEST(AosApplicationTest, Process);
+    FRIEND_TEST(AosApplicationTest, RegTerminating);
     FRIEND_TEST(AosApplicationTest, PdnDisconnect);
     FRIEND_TEST(AosApplicationTest, Callback);
 
@@ -1178,6 +1179,16 @@ TEST_F(AosApplicationTest, Process)
 
     // TEST_F : UpdateMonitorNotify()
     m_pTestAosApplication->UpdateMonitorNotify(0, 0);
+}
+
+TEST_F(AosApplicationTest, RegTerminating)
+{
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    m_pTestAosApplication->SetImsCall(IMS_TRUE);
+
+    m_pTestAosApplication->ProcessRegTerminating();
+    EXPECT_EQ(m_pTestAosApplication->GetOffReason(), AosReason::REG_TERMINATING);
+    EXPECT_EQ(m_pTestAosApplication->GetState(), IAosApplication::STATE_CONNECTING);
 }
 
 TEST_F(AosApplicationTest, PdnDisconnect)

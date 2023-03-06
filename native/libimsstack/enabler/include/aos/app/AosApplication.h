@@ -209,6 +209,7 @@ protected:
     virtual void ProcessRegAuthenticationFailed();
     virtual void ProcessRegTerminated();
     virtual void ProcessPingCommand();
+    virtual void ProcessRegTerminating();
     virtual void ProcessPdnDisconnect();
 
     virtual void ProcessAppActivatedTimerExpired();
