@@ -63,6 +63,7 @@ public:
 
     /* MediaSession */
     virtual void CreateMediaSession() override;
+    virtual void DestroyMediaSession() override;
 
     /* Media Profile */
     virtual void CreateMediaProfile(
@@ -91,14 +92,6 @@ public:
     /* Media Operations */
     virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly) override;
 
-    virtual void Terminate() override;
-
-    // tMediaValueInfo GetNegotiatedMediaValue(IN ISession* piSession, IN IMS_UINT32 eMediaTypes);
-    /* won't use MediaSession::GetNegotiatedMediaValue() anymore.
-       We need to use the new following APIs.
-       MediaSession::GetNegotiatedQuality(), MediaSession::GetNegotiatedCodecBitrate()
-       MediaSession::GetNegotiatedCodecBandWidth() */
-
     virtual void SetRtpPort(
             IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort) override;
     virtual void SetConferenceCall(IN IMS_BOOL bConference) override;
@@ -120,7 +113,6 @@ public:
     IMS_BOOL IsOnHold() override;
 
 private:
-    void DestroyMediaSession();
     void SetState(IN MediaState eState);
     void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
     void UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bAudioBlocked);
