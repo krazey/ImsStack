@@ -90,6 +90,7 @@ public class SscServiceState {
     @VisibleForTesting
     SscCrossSimDataStateListener mCrossSimDataStateListener =  null;
 
+    private boolean mIsInitialized = false;
     @VisibleForTesting
     boolean mIsUtFeatureEnabled = true;
     @VisibleForTesting
@@ -136,6 +137,7 @@ public class SscServiceState {
         registerMobileDataStateListener(mSubId);
         registerCrossSimDataStateListener();
 
+        mIsInitialized = true;
         handleUtFeatureCapabilityChanged();
     }
 
@@ -167,6 +169,9 @@ public class SscServiceState {
         unregisterImsRegistrationStateListener();
         unregisterMobileDataStateListener(mSubId);
         unregisterCrossSimDataStateListener();
+
+        mIsInitialized = false;
+        notifyUtFeatureCapabilityChanged();
     }
 
     protected boolean isUtAvailable() {
@@ -275,13 +280,16 @@ public class SscServiceState {
         authAgent.setETag("");
 
         stopUtBlockTimer(true);
-
-        notifyUtFeatureCapabilityChanged();
     }
 
     private boolean getCurrentUtAvailability() {
         if (!SscConfig.isUtSupported(mSlotId)) {
             ImsLog.i(mSlotId, "Ut not supported");
+            return false;
+        }
+
+        if (!mIsInitialized) {
+            ImsLog.i(mSlotId, "Not initialized");
             return false;
         }
 
@@ -735,8 +743,10 @@ public class SscServiceState {
 
                 if (simCardState == Sim.STATE_ABSENT) {
                     resetAllUtStatus();
+                    handleUtFeatureCapabilityChanged();
                 } else if (simCardState == Sim.STATE_LOADED) {
                     updateSubscription(sim.getSubId());
+                    handleUtFeatureCapabilityChanged();
                 }
             }
         }
