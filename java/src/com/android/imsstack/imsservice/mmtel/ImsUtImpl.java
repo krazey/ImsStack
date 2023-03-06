@@ -69,9 +69,9 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return;
         }
 
+        mUt.close();
         mUtListenerProxy = null;
         mUt.setListener(null);
-        UtFactory.getInstance().releaseUtInterface(mContext.getSlotId());
         mUt = null;
     }
 
@@ -92,6 +92,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
     @Override
     public void close() {
         clear();
+        UtFactory.getInstance().releaseUtInterface(mContext.getSlotId());
     }
 
     @Override
