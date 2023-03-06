@@ -100,6 +100,7 @@ public class UtCommandTest {
     @After
     public void tearDown() {
         mImsUtImpl.clear();
+        UtFactory.getInstance().setUtInterfaceForSlot(mSlotId, null);
     }
 
     @AfterClass
