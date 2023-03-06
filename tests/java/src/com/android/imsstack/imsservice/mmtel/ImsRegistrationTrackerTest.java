@@ -43,6 +43,7 @@ import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.MessageExecutor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -55,9 +56,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -68,7 +67,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
@@ -78,6 +76,7 @@ public class ImsRegistrationTrackerTest {
     private ImsFeatureManager mFeatureManager;
     private IAosRegistrationListener mAosRegListener = null;
     private MockIAosRegistration mAosReg;
+    private ContextFixture mContextFixture;
 
     @Mock CarrierConfig mMockCarrierConfig;
     @Mock ConfigInterface mMockConfigInterface;
@@ -87,22 +86,16 @@ public class ImsRegistrationTrackerTest {
     @Mock ImsRegistrationTracker.CapabilityUpdateListener mMockCapabilityListener;
     @Mock IMmTelFeatureCapabilityListener mMockFeatureCapabilityListener;
     @Mock Context mContext;
-    @Mock Executor mExecutor;
+    @Mock MessageExecutor mExecutor;
     @Mock SharedPreferences mSp;
     @Mock SharedPreferences.Editor mSpEditor;
     @Mock TelephonyManager mTelephonyManager;
 
-    static ContextFixture sContext;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
 
         when(mMockContext.getSlotId()).thenReturn(0);
         when(mMockContext.getPhoneId()).thenReturn(0);
@@ -130,7 +123,8 @@ public class ImsRegistrationTrackerTest {
         mAosRegListener = mAosReg.getListener();
         mFeatureManager.setRegistrationTracker(mRegTracker);
         mMmTelCapabilities = new MmTelFeature.MmTelCapabilities(0);
-        mTelephonyManager = sContext.getTestDouble().getSystemService(TelephonyManager.class);
+        mTelephonyManager = mContextFixture.getTestDouble()
+                .getSystemService(TelephonyManager.class);
         when(AppContext.getTelephonyManager(0)).thenReturn(mTelephonyManager);
         when(mTelephonyManager.isDataEnabled()).thenReturn(true);
     }
@@ -138,12 +132,8 @@ public class ImsRegistrationTrackerTest {
     @After
     public void tearDown() {
         mRegTracker.dispose();
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        mContextFixture = null;
         AppContext.deinit();
-        sContext = null;
     }
 
     @Test

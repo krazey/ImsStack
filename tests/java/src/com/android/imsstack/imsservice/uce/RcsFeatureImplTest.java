@@ -44,6 +44,7 @@ import com.android.imsstack.enabler.uce.interf.IUceApi;
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.Log;
+import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -55,14 +56,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 @RunWith(JUnit4.class)
 public class RcsFeatureImplTest {
     private TestRcsFeatureImpl mFeature;
     public static final int STATE_READY = 2;
     private int mSlotId = 1;
     private int mTestSubId = 1;
+    private MessageExecutor mExecutor = null;
 
     @Mock
     IContext mIContext;
@@ -103,10 +103,10 @@ public class RcsFeatureImplTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        Executor executor = Executors.newSingleThreadExecutor();
+        mExecutor = new MessageExecutor(RcsFeatureImplTest.class.getSimpleName());
         mMockContext = Mockito.spy(ApplicationProvider.getApplicationContext());
 
-        mIContext = new ImsContext(mContextMock, executor, mSlotId);
+        mIContext = new ImsContext(mContextMock, mExecutor, mSlotId);
         AppContext.init(mMockContext);
         mFeature = new TestRcsFeatureImpl(mIContext);
         mFeature.initialize(mMockContext, mSlotId);
@@ -193,6 +193,11 @@ public class RcsFeatureImplTest {
         mCapabilityExchangeEventListener = null;
         mMockCarrierConfigManager = null;
         mMockSubscriptionManager = null;
+
+        if (mExecutor != null) {
+            mExecutor.getLooper().quit();
+            mExecutor = null;
+        }
     }
 
     class TestRcsFeatureImpl extends RcsFeatureImpl {

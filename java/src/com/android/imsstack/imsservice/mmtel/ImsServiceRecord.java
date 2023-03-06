@@ -22,9 +22,8 @@ import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.sipcontroller.ImsSipTransport;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MessageExecutor;
 import com.android.internal.annotations.VisibleForTesting;
-
-import java.util.concurrent.Executor;
 
 public class ImsServiceRecord {
     public static interface Listener {
@@ -43,11 +42,11 @@ public class ImsServiceRecord {
 
     //This is an implementation of SipTransport required for single registration support.
     private ImsSipTransport mSipTransport = null;
-    private Executor mExecutor = null;
+    private MessageExecutor mExecutor = null;
     private int mSlotId = -1;
 
 
-    public ImsServiceRecord(Context context, Executor executor, int phoneId) {
+    public ImsServiceRecord(Context context, MessageExecutor executor, int phoneId) {
         log("ImsServiceRecord :: phoneId=" + phoneId);
 
         mContext = new ImsContext(context, executor, phoneId);
