@@ -30,6 +30,7 @@ class IMessage;
 class IMtcCallContext;
 class ISession;
 class ISipMessage;
+class MtcSupplementaryService;
 struct CallReasonInfo;
 
 class MessageFormatter : public IReasonHeaderSetter
@@ -98,6 +99,7 @@ private:
     void SetAlertInfoHeader(IN IMS_BOOL bIncludeAlertInfo);
     void SetReasonHeader(IN const AString& strReason);
     void SetCarrierSpecificHeaders();
+    void SetCallComposerElements();
 
     IMS_SINT32 GetRejectStatusCode(IN const CallReasonInfo& objReason);
     void GetRejectPhrase(IN const CallReasonInfo& objReason, OUT AString& strPhrase);

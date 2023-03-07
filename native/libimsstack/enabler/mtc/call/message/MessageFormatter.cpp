@@ -39,6 +39,7 @@
 #include "sipcore/SipHeaderName.h"
 #include "sipcore/SipProfile.h"
 #include "sipcore/SipStatusCode.h"
+#include "utility/CallComposerUtil.h"
 #include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 
@@ -152,6 +153,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage(IN CallType eCallTy
     // SetTipHeader();
     SetPEarlyMediaHeader();
     SetCarrierSpecificHeaders();
+    SetCallComposerElements();
 
     if (m_objContext.GetConfigurationProxy().Is(Feature::MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF,
                 static_cast<IMS_SINT32>(MessageTypeForGeolocationPidf::INVITE)))
@@ -695,6 +697,42 @@ void MessageFormatter::SetCarrierSpecificHeaders()
             m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage, "normal",
                     ISipHeader::UNKNOWN, MessageUtil::STR_P_SKT_BYE_CAUSE);
         }
+    }
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PRIVATE
+void MessageFormatter::SetCallComposerElements()
+{
+    MtcSupplementaryService& objSupplementaryServices = m_objContext.GetSupplementaryService();
+
+    const SuppService* pPriority = objSupplementaryServices.Get(SuppType::CALL_COMPOSER_PRIORITY);
+    if (pPriority != IMS_NULL)
+    {
+        CallComposerUtil::SetPriority(pPriority->nValue, *m_piNextMessage);
+    }
+
+    const SuppService* pSubject = objSupplementaryServices.Get(SuppType::CALL_COMPOSER_SUBJECT);
+    if (pSubject != IMS_NULL)
+    {
+        CallComposerUtil::SetSubject(pSubject->strValue, *m_piNextMessage);
+    }
+
+    const SuppService* pPicture = objSupplementaryServices.Get(SuppType::CALL_COMPOSER_PICTURE_URL);
+    if (pPicture != IMS_NULL)
+    {
+        CallComposerUtil::SetPicture(pPicture->strValue, *m_piNextMessage);
+    }
+
+    const SuppService* pLatitude =
+            objSupplementaryServices.Get(SuppType::CALL_COMPOSER_LOCATION_LAT);
+    const SuppService* pLongitude =
+            objSupplementaryServices.Get(SuppType::CALL_COMPOSER_LOCATION_LONG);
+    if (pLatitude != IMS_NULL && pLongitude != IMS_NULL)
+    {
+        CallComposerUtil::SetLocation(
+                pLatitude->strValue, pLongitude->strValue, m_objContext, *m_piNextMessage);
     }
 }
 

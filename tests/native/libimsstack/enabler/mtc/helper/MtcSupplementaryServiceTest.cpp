@@ -525,4 +525,35 @@ TEST_F(MtcSupplementaryServiceTest, UpdateCallingNumVerification)
             CALLING_NUM_VERSTAT_VERIFIED);
 }
 
+TEST_F(MtcSupplementaryServiceTest, UpdateCallComposerElements)
+{
+    pMtcSupplementaryService->UpdateCallComposerElements(&objMockIMessage);
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY), nullptr);
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT), nullptr);
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LAT), nullptr);
+    EXPECT_EQ(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_LOCATION_LONG), nullptr);
+
+    ImsList<AString> lstPriorityHeaders;
+    lstPriorityHeaders.Append("none");
+    ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::PRIORITY)))
+            .WillByDefault(Return(lstPriorityHeaders));
+
+    ImsList<AString> lstSubjectHeaders;
+    lstSubjectHeaders.Append("subject");
+    ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::SUBJECT)))
+            .WillByDefault(Return(lstSubjectHeaders));
+
+    ImsList<AString> lstCallInfoHeaders;
+    lstCallInfoHeaders.Append("<https://it-is-a/picture.jpg>;purpose=icon");
+    ON_CALL(objMockIMessage, GetHeaders(AString(SipHeaderName::CALL_INFO)))
+            .WillByDefault(Return(lstCallInfoHeaders));
+
+    pMtcSupplementaryService->UpdateCallComposerElements(&objMockIMessage);
+    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PRIORITY), nullptr);
+    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_SUBJECT), nullptr);
+    EXPECT_NE(pMtcSupplementaryService->Get(SuppType::CALL_COMPOSER_PICTURE_URL), nullptr);
+    // TODO: Location is hard to test now
+}
+
 }  // namespace android
