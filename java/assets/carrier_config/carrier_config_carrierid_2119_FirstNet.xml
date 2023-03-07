@@ -157,7 +157,6 @@
         <item value="711"/>
         <item value="811"/>
     </int-array>
-    <boolean name="imsvoice.validate_verstat_feature_in_registration_to_check_network_capability_bool" value="true"/>
     <boolean name="imsvoice.allow_multiple_call_including_video_call_bool" value="true"/>
     <int-array name="imsvoice.reject_code_for_csfb_int_array" num="1">
         <item value="380"/>

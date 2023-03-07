@@ -77,8 +77,6 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsEnableSendReinviteOnRatChange();
         case Feature::DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR:
             return m_pManager->IsDefaultEpsBearerContextUsageRestrictionOnCellular();
-        case Feature::VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY:
-            return m_pManager->IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability();
         case Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL:
             return m_pManager->IsAllowMultipleCallIncludingVideoCall();
         case Feature::REJECT_OFFERLESS_INVITE:

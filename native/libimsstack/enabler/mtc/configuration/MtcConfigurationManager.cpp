@@ -304,13 +304,6 @@ IMS_BOOL MtcConfigurationManager::IsShortCallCode(IN IMS_SINT32 nCode) const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability()
-        const
-{
-    return m_objCarrierConfig.bValidateVerstatFeatureInRegistrationToCheckNetworkCapability;
-}
-
-PUBLIC
 IMS_BOOL MtcConfigurationManager::IsAllowMultipleCallIncludingVideoCall() const
 {
     return m_objCarrierConfig.bAllowMultipleCallIncludingVideoCall;
