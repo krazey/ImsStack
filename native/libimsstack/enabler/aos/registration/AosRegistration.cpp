@@ -4043,6 +4043,16 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
 {
     A_IMS_TRACE_I(REGID, "ProcessUpdateFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
+    if (IsImsCall())
+    {
+        if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregErrCodeForCallEnd(), nStatusCode))
+        {
+            Destroy();
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_REG_TERMINATING);
+            return;
+        }
+    }
+
     if (ProcessUnpredictableFailureHeldByCall())
     {
         ProcessPendingPlmnBlockOnUpdateFailure();
