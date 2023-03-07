@@ -303,8 +303,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_type_after_audio_and_video_call_merged_int";
         public static final String KEY_SHORT_CALL_CODE_INT_ARRAY =
                 KEY_PREFIX + "short_call_code_int_array";
-        public static final String KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL =
-                KEY_PREFIX + "validate_verstat_feature_in_registration_to_check_network_capability_bool";
         public static final String KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL =
                 KEY_PREFIX + "allow_multiple_call_including_video_call_bool";
         public static final String KEY_REJECT_CODE_FOR_CSFB_INT_ARRAY =

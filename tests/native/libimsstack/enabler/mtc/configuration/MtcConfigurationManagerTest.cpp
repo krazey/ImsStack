@@ -379,14 +379,6 @@ TEST_F(MtcConfigurationManagerTest, IsShortCallCodeReturnsValueInCarrierConfig)
 }
 
 TEST_F(MtcConfigurationManagerTest,
-        IsValidateVerstatFeatureInRegistrationToCheckNetworkCapabilityReturnsValueInCarrierConfig)
-{
-    EXPECT_EQ(pManager->IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability(),
-            GetBool(CarrierConfig::ImsVoice::
-                            KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL));
-}
-
-TEST_F(MtcConfigurationManagerTest,
         IsAllowMultipleCallIncludingVideoCallReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsAllowMultipleCallIncludingVideoCall(),

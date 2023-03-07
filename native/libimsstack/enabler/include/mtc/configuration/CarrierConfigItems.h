@@ -143,7 +143,6 @@ public:
             bUseLtePreferredStatusForServiceCapability(IMS_FALSE),
             bUseMcidSupplementaryService(IMS_FALSE),
             bUseMmcSupplementaryService(IMS_FALSE),
-            bValidateVerstatFeatureInRegistrationToCheckNetworkCapability(IMS_FALSE),
             bVideoOnDefaultBearerSupported(IMS_FALSE),
             bVideoQosPreconditionSupported(IMS_TRUE),
             bVoiceOnDefaultBearerSupported(IMS_FALSE),
@@ -298,7 +297,6 @@ public:
     IMS_BOOL bUseLtePreferredStatusForServiceCapability;
     IMS_BOOL bUseMcidSupplementaryService;
     IMS_BOOL bUseMmcSupplementaryService;
-    IMS_BOOL bValidateVerstatFeatureInRegistrationToCheckNetworkCapability;
     IMS_BOOL bVideoOnDefaultBearerSupported;
     IMS_BOOL bVideoQosPreconditionSupported;
     IMS_BOOL bVoiceOnDefaultBearerSupported;

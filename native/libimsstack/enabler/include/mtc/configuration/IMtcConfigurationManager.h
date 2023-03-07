@@ -356,13 +356,6 @@ public:
      *
      * @return
      */
-    virtual IMS_BOOL IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability() const = 0;
-
-    /**
-     * @brief Checks
-     *
-     * @return
-     */
     virtual IMS_BOOL IsAllowMultipleCallIncludingVideoCall() const = 0;
 
     /**

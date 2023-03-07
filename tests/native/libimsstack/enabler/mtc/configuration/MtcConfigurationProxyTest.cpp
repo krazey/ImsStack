@@ -85,12 +85,6 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
     EXPECT_EQ(
             bValue, pConfig->Is(Feature::DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR));
 
-    EXPECT_CALL(*pConfigManager, IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(
-                    Feature::VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY));
-
     EXPECT_CALL(*pConfigManager, IsAllowMultipleCallIncludingVideoCall).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL));
 
