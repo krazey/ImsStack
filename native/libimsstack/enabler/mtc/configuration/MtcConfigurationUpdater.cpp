@@ -121,9 +121,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT);
     objItems.objShortCallCodes =
             piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY);
-    objItems.bValidateVerstatFeatureInRegistrationToCheckNetworkCapability = piCc->GetBoolean(
-            CarrierConfig::ImsVoice::
-                    KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL);
     objItems.bAllowMultipleCallIncludingVideoCall = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL);
     objItems.objRejectCodeForCsfbs =

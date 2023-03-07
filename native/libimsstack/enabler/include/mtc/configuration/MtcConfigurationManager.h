@@ -81,7 +81,6 @@ public:
     IMS_SINT32 GetSilentRedialInterval() const override;
     IMS_SINT32 GetCallTypeAfterAudioAndVideoCallMerged() const override;
     IMS_BOOL IsShortCallCode(IN IMS_SINT32 nCode) const override;
-    IMS_BOOL IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability() const override;
     IMS_BOOL IsAllowMultipleCallIncludingVideoCall() const override;
     IMS_BOOL IsRejectCodeForCsfb(IN IMS_SINT32 nCode) const override;
     IMS_SINT32 GetSilentRedialMaxRetryCount() const override;

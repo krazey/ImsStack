@@ -487,10 +487,6 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL
         KEY_IMS_VOICE_PREFIX "call_type_after_audio_and_video_call_merged_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "short_call_code_int_array";
-const IMS_CHAR CarrierConfig::ImsVoice::
-        KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL[] =
-                KEY_IMS_VOICE_PREFIX
-        "validate_verstat_feature_in_registration_to_check_network_capability_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL[] =
         KEY_IMS_VOICE_PREFIX "allow_multiple_call_including_video_call_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REJECT_CODE_FOR_CSFB_INT_ARRAY[] =
