@@ -1084,6 +1084,12 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                 return IMS_FALSE;
             }
 
+            if (!strValue.IsNull())
+            {
+                pSubsInfo->m_strScscfAddress = strValue;
+                break;
+            }
+
             IImsPrivateProperty* piProperty = GetPrivateProperty();
 
             pSubsInfo->m_strScscfAddress = piProperty->GetPersistent(
