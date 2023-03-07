@@ -21,11 +21,16 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.telephony.SubscriptionManager;
+import android.telephony.ims.ImsException;
+import android.telephony.ims.ImsManager;
+import android.telephony.ims.ImsMmTelManager;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
+import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.LogUtils;
@@ -40,6 +45,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private static final String KEY_TEST_TESTMODE_ENABLED = "test_testmode_enabled";
     private static final String KEY_TEST_WIFI_TEST_ENABLED = "test_wifi_test_enabled";
     private static final String KEY_TEST_IMS_HAL_ENABLED = "test_ims_hal_enabled";
+    private static final String KEY_TEST_CROSS_SIM_ENABLED = "test_cross_sim_enabled";
     private static final String KEY_TEST_PCSCF_ADDRESS = "test_pcscf_address";
     private static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
     private static final String KEY_TEST_RESTART_IMSSTACK = "test_restart_imsstack";
@@ -62,6 +68,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private CheckBoxPreference mTestModeEnabled;
     private CheckBoxPreference mWifiTestEnabled;
     private CheckBoxPreference mImsHalTestEnabled;
+    private CheckBoxPreference mCrossSimEnabled;
     private EditTextPreference mHomeDomainName;
     private EditTextPreference mImpi;
     private EditTextPreference mImpu;
@@ -164,6 +171,23 @@ public class TestConfigMenu extends PreferenceActivity {
             mImsHalTestEnabled.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
         }
 
+        mCrossSimEnabled = (CheckBoxPreference) findPreference(KEY_TEST_CROSS_SIM_ENABLED);
+
+        if (mCrossSimEnabled != null) {
+            boolean crossSimEnabled = false;
+            ImsMmTelManager imsMmTelMgr = getImsMmTelManager();
+            if (imsMmTelMgr != null) {
+                try {
+                    crossSimEnabled = imsMmTelMgr.isCrossSimCallingEnabled();
+                } catch (ImsException exception) {
+                    // do noting
+                }
+            }
+
+            mCrossSimEnabled.setChecked(crossSimEnabled);
+            mCrossSimEnabled.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
+        }
+
         mHomeDomainName = (EditTextPreference) findPreference(KEY_SUBSCRIBER_HOME_DOMAIN_NAME);
 
         if (mHomeDomainName != null) {
@@ -260,6 +284,17 @@ public class TestConfigMenu extends PreferenceActivity {
         }
     }
 
+    private ImsMmTelManager getImsMmTelManager() {
+        int subId = MSimUtils.getSubId(mSlotId);
+
+        if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
+            return null;
+        }
+
+        ImsManager imsMgr = AppContext.getInstance().getSystemService(ImsManager.class);
+        return (imsMgr == null) ? null : imsMgr.getImsMmTelManager(subId);
+    }
+
     private final class CheckBoxItemChangeListener
             implements Preference.OnPreferenceChangeListener {
         @Override
@@ -285,6 +320,16 @@ public class TestConfigMenu extends PreferenceActivity {
                 case KEY_TEST_IMS_HAL_ENABLED:
                     key = ImsPrivateProperties.Persistent.KEY_IMS_HAL_TEST;
                     isValueTypeInt = true;
+                    break;
+                case KEY_TEST_CROSS_SIM_ENABLED:
+                    ImsMmTelManager imsMmTelMgr = getImsMmTelManager();
+                    if (imsMmTelMgr != null) {
+                        try {
+                            imsMmTelMgr.setCrossSimCallingEnabled(value);
+                        } catch (ImsException exception) {
+                            // do noting
+                        }
+                    }
                     break;
                 case KEY_USER_AGENT_USE_PREDEFINED_UA_STRING:
                     key = ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_UA_STRING;
