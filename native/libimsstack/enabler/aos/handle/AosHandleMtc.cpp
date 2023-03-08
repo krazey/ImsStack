@@ -533,6 +533,18 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
             ProcessBlock(GetVoiceBlockReasonForIpcan(), !bIsVoiceCapable);
             ProcessBlock(GetVideoBlockReasonForIpcan(), !bIsVideoCapable);
         }
+
+        if (GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockBySsac())
+        {
+            if (m_nNetworkType == NW_REPORT_RADIO_LTE)
+            {
+                SsacInfo objSsacInfo = m_piImsRadio->GetSsacInfo();
+                if (m_bSsacBarred != (objSsacInfo.nBarringFactorForVoice == 0))
+                {
+                    ImsRadio_OnSsacChanged(objSsacInfo);
+                }
+            }
+        }
     }
     else if (Is3G(m_nNetworkType))
     {
