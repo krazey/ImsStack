@@ -44,7 +44,7 @@ protected:
 
 TEST_F(JniAosServiceThreadTest, NotifyRegistered)
 {
-    IMSList<AString> objFeatureTags = IMSList<AString>();
+    ImsList<AString> objFeatureTags = ImsList<AString>();
     objFeatureTags.Append(AString("featureTag1"));
     objFeatureTags.Append(AString("featureTag2"));
     objFeatureTags.Append(AString("featureTag3"));
@@ -54,7 +54,7 @@ TEST_F(JniAosServiceThreadTest, NotifyRegistered)
 
 TEST_F(JniAosServiceThreadTest, NotifyRegistering)
 {
-    IMSList<AString> objFeatureTags = IMSList<AString>();
+    ImsList<AString> objFeatureTags = ImsList<AString>();
     objFeatureTags.Append(AString("featureTag1"));
     objFeatureTags.Append(AString("featureTag2"));
     objFeatureTags.Append(AString("featureTag3"));
@@ -75,7 +75,7 @@ TEST_F(JniAosServiceThreadTest, NotifyTechnologyChangeFailed)
 
 TEST_F(JniAosServiceThreadTest, NotifyAssociatedUriChanged)
 {
-    IMSList<AString> objUris = IMSList<AString>();
+    ImsList<AString> objUris = ImsList<AString>();
     objUris.Append(AString("uri1"));
     objUris.Append(AString("uri2"));
     objUris.Append(AString("uri3"));

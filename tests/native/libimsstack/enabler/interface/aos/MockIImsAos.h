@@ -41,7 +41,7 @@ public:
     MOCK_METHOD(void, SetMonitor, (IN IImsAosMonitor*), (override));
     MOCK_METHOD(IMS_BOOL, SetReady, (IN IMS_BOOL, IN IMS_UINT32), (override));
     MOCK_METHOD(void, UpdateFeature, (IN IMS_UINT32), (override));
-    MOCK_METHOD(void, UpdateFeature, (IN IMSList<ImsAosFeatureTag*>&), (override));
+    MOCK_METHOD(void, UpdateFeature, (IN ImsList<ImsAosFeatureTag*>&), (override));
 };
 
 #endif  // MOCK_I_IMS_AOS_H_

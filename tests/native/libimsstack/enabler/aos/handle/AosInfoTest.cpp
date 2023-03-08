@@ -154,7 +154,7 @@ TEST_F(AosInfoTest, GetImsFeatures_Test1)
     // Test1: Ims connected
     // Expectation: Return binded features
 
-    IMSMap<AString, IAosHandle*> objHandles;
+    ImsMap<AString, IAosHandle*> objHandles;
     objHandles.Add(m_pTestAosHandle->GetServiceId(), static_cast<IAosHandle*>(m_pTestAosHandle));
 
     m_pTestAosHandle->SetHandleState(AosHandle::STATE_CONNECTED);
@@ -170,7 +170,7 @@ TEST_F(AosInfoTest, GetImsFeatures_Test2)
     // Test2: Ims disconnected
     // Expectation: Return None
 
-    IMSMap<AString, IAosHandle*> objHandles;
+    ImsMap<AString, IAosHandle*> objHandles;
     objHandles.Add(m_pTestAosHandle->GetServiceId(), static_cast<IAosHandle*>(m_pTestAosHandle));
 
     m_pTestAosHandle->GetBindedFeatureTagList().AddFeature(ImsAosFeature::MMTEL);

@@ -161,7 +161,7 @@ IMS_BOOL AosUtil::IsInitialRegistrationRequired(IN ISipMessage* piSipMsg)
 
     if (piSipMsg != IMS_NULL)
     {
-        IMSList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
+        ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
         if (!objBodyParts.IsEmpty())
         {
             ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(0);
@@ -203,7 +203,7 @@ IMS_BOOL AosUtil::IsParameterIncluded(
         return IMS_FALSE;
     }
 
-    IMSList<AString> objHeaders = piSipMsg->GetHeaders(nHeaderType);
+    ImsList<AString> objHeaders = piSipMsg->GetHeaders(nHeaderType);
 
     if (objHeaders.IsEmpty())
     {
@@ -233,7 +233,7 @@ IMS_BOOL AosUtil::IsParameterIncluded(IN const ISipMessage* piSipMsg, IN IMS_SIN
         return IMS_FALSE;
     }
 
-    IMSList<AString> objHeaders = piSipMsg->GetHeaders(nHeaderType, strName);
+    ImsList<AString> objHeaders = piSipMsg->GetHeaders(nHeaderType, strName);
 
     if (objHeaders.IsEmpty())
     {
@@ -322,7 +322,7 @@ void AosUtil::StopTimer(IN ITimer*& piTimer, IN AString strLog /* = AString("") 
 }
 
 PUBLIC
-void AosUtil::AddElementToList(IN IMS_UINT32 nElement, IN IMSList<IMS_UINT32>& objTarget)
+void AosUtil::AddElementToList(IN IMS_UINT32 nElement, IN ImsList<IMS_UINT32>& objTarget)
 {
     for (IMS_UINT32 nAt = 0; nAt < objTarget.GetSize(); nAt++)
     {
@@ -415,8 +415,8 @@ IMS_BOOL AosUtil::IsStrExistInList(IN const AString& strValue, IN const AStringA
 }
 
 PUBLIC
-IMS_BOOL AosUtil::IsListEqual(IN const IMSList<IMS_UINT32>& objLeft,
-        IN const IMSList<IMS_UINT32>& objRight, IN IMS_BOOL bOrderChecked)
+IMS_BOOL AosUtil::IsListEqual(IN const ImsList<IMS_UINT32>& objLeft,
+        IN const ImsList<IMS_UINT32>& objRight, IN IMS_BOOL bOrderChecked)
 {
     if (objLeft.GetSize() != objRight.GetSize())
     {
@@ -461,7 +461,7 @@ IMS_BOOL AosUtil::IsListEqual(IN const IMSList<IMS_UINT32>& objLeft,
 
 PUBLIC
 IMS_BOOL AosUtil::IsElementExistInList(
-        IN const IMSList<IMS_UINT32>& objElements, IN const IMSList<IMS_UINT32>& objTarget)
+        IN const ImsList<IMS_UINT32>& objElements, IN const ImsList<IMS_UINT32>& objTarget)
 {
     for (IMS_UINT32 nAt = 0; nAt < objElements.GetSize(); nAt++)
     {

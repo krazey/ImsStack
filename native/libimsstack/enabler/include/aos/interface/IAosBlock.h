@@ -161,7 +161,7 @@ public:
      * @param
      */
     virtual void GetBlockReasons(
-            OUT IMSList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType = SERVICE_WHOLE) = 0;
+            OUT ImsList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType = SERVICE_WHOLE) = 0;
 
     /**
      * @brief

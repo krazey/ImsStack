@@ -69,12 +69,12 @@ protected:
         pAosServiceAvailable->m_piAppContext = piAppContext;
     }
 
-    void SetListeners(IN const IMSList<IAosServiceAvailableListener*>& objListeners)
+    void SetListeners(IN const ImsList<IAosServiceAvailableListener*>& objListeners)
     {
         pAosServiceAvailable->m_objListeners = objListeners;
     }
 
-    IMSList<IAosServiceAvailableListener*> GetListeners()
+    ImsList<IAosServiceAvailableListener*> GetListeners()
     {
         return pAosServiceAvailable->m_objListeners;
     }
@@ -274,7 +274,7 @@ TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners)
     MockIAosServiceAvailableListener* pMockIListener2 = new MockIAosServiceAvailableListener();
     MockIAosServiceAvailableListener* pMockIListener3 = new MockIAosServiceAvailableListener();
 
-    IMSList<IAosServiceAvailableListener*> objListeners;
+    ImsList<IAosServiceAvailableListener*> objListeners;
     objListeners.Append(static_cast<IAosServiceAvailableListener*>(pMockIListener1));
     objListeners.Append(static_cast<IAosServiceAvailableListener*>(pMockIListener2));
     objListeners.Append(static_cast<IAosServiceAvailableListener*>(pMockIListener3));

@@ -41,7 +41,7 @@ public:
 
     virtual IAosHandle* GetHandle(IN const AString& strSrvId) const = 0;
     virtual IAosHandle* GetHandle(IN IMS_UINT32 nServiceType) = 0;
-    virtual IMSMap<AString, IAosHandle*>& GetHandles() = 0;
+    virtual ImsMap<AString, IAosHandle*>& GetHandles() = 0;
 
     virtual IAosApplication* GetApp() const = 0;
     virtual IAosConnection* GetConnection() const = 0;

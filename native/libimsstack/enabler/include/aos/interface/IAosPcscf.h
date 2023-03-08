@@ -35,9 +35,9 @@ public:
     virtual IMS_BOOL IsSinglePcoScheme() = 0;
 
     virtual const AStringArray& GetPcscfs() = 0;
-    virtual const IMSList<IMS_SINT32>& GetPcscfsPorts() = 0;
+    virtual const ImsList<IMS_SINT32>& GetPcscfsPorts() = 0;
     virtual void UpdatePcscfs(IN const AStringArray& objPcscfs,
-            IN IMSList<IMS_SINT32> objPorts = IMSList<IMS_SINT32>()) = 0;
+            IN ImsList<IMS_SINT32> objPorts = ImsList<IMS_SINT32>()) = 0;
 
     virtual IMS_BOOL HasPcscf(IN IMS_SINT32 nIndex) = 0;
     virtual IMS_UINT32 GetPcscfCount() = 0;

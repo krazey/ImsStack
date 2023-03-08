@@ -28,10 +28,10 @@ public:
     IMS_BOOL Create();
     void Destroy();
     AosStaticProfile* GetProfile(IN const AString& strAppId, IN const AString& strServiceId);
-    const IMSList<AosStaticProfile*>& GetProfiles() const;
+    const ImsList<AosStaticProfile*>& GetProfiles() const;
 
 private:
-    IMSList<AosStaticProfile*> m_objProfiles;
+    ImsList<AosStaticProfile*> m_objProfiles;
 };
 
 #endif  // AOS_STATIC_CONFIG_H_

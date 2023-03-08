@@ -56,9 +56,7 @@ protected:
         }
     }
 
-    IMSList<IAosBlockListener*> GetBlockListeners() {
-        return m_pAosBlock->m_objListeners;
-    }
+    ImsList<IAosBlockListener*> GetBlockListeners() { return m_pAosBlock->m_objListeners; }
 };
 
 TEST_F(AosBlockTest, SetListener_ParamNull) {
@@ -187,7 +185,7 @@ TEST_F(AosBlockTest, SetBlockReason_Success) {
     EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE));
     EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_WIFI_AIRPLANE_MODE_ON));
 
-    IMSList<IMS_UINT32> objReason;
+    ImsList<IMS_UINT32> objReason;
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 9);
 
@@ -232,7 +230,7 @@ TEST_F(AosBlockTest, ResetBlockReason_Success) {
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    IMSList<IMS_UINT32> objReason;
+    ImsList<IMS_UINT32> objReason;
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 9);
 
@@ -272,7 +270,7 @@ TEST_F(AosBlockTest, ClearAllBlockReasons) {
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    IMSList<IMS_UINT32> objReason;
+    ImsList<IMS_UINT32> objReason;
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 9);
 
@@ -317,7 +315,7 @@ TEST_F(AosBlockTest, GetBlockReasons) {
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    IMSList<IMS_UINT32> objReason;
+    ImsList<IMS_UINT32> objReason;
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 9);
 
@@ -407,7 +405,7 @@ TEST_F(AosBlockTest, IsCleared_Cellular) {
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    IMSList<IMS_UINT32> objReason;
+    ImsList<IMS_UINT32> objReason;
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 9);
 
@@ -438,7 +436,7 @@ TEST_F(AosBlockTest, IsCleared_Wifi) {
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    IMSList<IMS_UINT32> objReason;
+    ImsList<IMS_UINT32> objReason;
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 9);
 
@@ -469,7 +467,7 @@ TEST_F(AosBlockTest, IsCleared_Whole) {
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
     m_pAosBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
 
-    IMSList<IMS_UINT32> objReason;
+    ImsList<IMS_UINT32> objReason;
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 9);
 

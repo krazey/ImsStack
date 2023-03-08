@@ -264,7 +264,7 @@ void JniAosService::TriggerFullNetworkRegistration(IN const Parcel& objParcel)
 PRIVATE
 void JniAosService::NotifyCapabilitiesChanged(IN const Parcel& objParcel)
 {
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
 
     IMS_SINT32 nSize = objParcel.readInt32();
     for (int i = 0; i < nSize; ++i)

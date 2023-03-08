@@ -78,19 +78,19 @@ public:
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NOT_DEFINED),
             nSipMessageThresholdForTransportChange(200),
             nVolteHysTimeSec(0),
-            objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>()),
-            objRegErrCodeForPcscfDiscovery(IMSVector<IMS_SINT32>()),
-            objRegPermanentErrMaxCnt(IMSVector<IMS_SINT32>()),
-            objRegRetryErrCodeWithoutIpsec(IMSVector<IMS_SINT32>()),
-            objReregErrCodeForCallEnd(IMSVector<IMS_SINT32>()),
-            objReregErrCodeForImsPdnReactivation(IMSVector<IMS_SINT32>()),
-            objReregErrCodeForInitRegWithAvailablePcscf(IMSVector<IMS_SINT32>()),
-            objReregRetryErrCodeForInitRegWithSamePcscf(IMSVector<IMS_SINT32>()),
-            objSubErrorCodeForInitRegWithNextPcscf(IMSVector<IMS_SINT32>()),
-            objSubErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
-            objSupportedRoamingRats(IMSVector<IMS_SINT32>()),
-            objVowifiSubErrorCodeForInitReg(IMSVector<IMS_SINT32>()),
-            objWfcSubErrByMissing911Address(IMSVector<IMS_SINT32>())
+            objEmergencyPcscfRetryWaitTimeSec(ImsVector<IMS_SINT32>()),
+            objRegErrCodeForPcscfDiscovery(ImsVector<IMS_SINT32>()),
+            objRegPermanentErrMaxCnt(ImsVector<IMS_SINT32>()),
+            objRegRetryErrCodeWithoutIpsec(ImsVector<IMS_SINT32>()),
+            objReregErrCodeForCallEnd(ImsVector<IMS_SINT32>()),
+            objReregErrCodeForImsPdnReactivation(ImsVector<IMS_SINT32>()),
+            objReregErrCodeForInitRegWithAvailablePcscf(ImsVector<IMS_SINT32>()),
+            objReregRetryErrCodeForInitRegWithSamePcscf(ImsVector<IMS_SINT32>()),
+            objSubErrorCodeForInitRegWithNextPcscf(ImsVector<IMS_SINT32>()),
+            objSubErrorCodeForStoppingByExpirationTime(ImsVector<IMS_SINT32>()),
+            objSupportedRoamingRats(ImsVector<IMS_SINT32>()),
+            objVowifiSubErrorCodeForInitReg(ImsVector<IMS_SINT32>()),
+            objWfcSubErrByMissing911Address(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -148,18 +148,18 @@ public:
     IMS_SINT32 nRoamingPreferredEmcReg;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMS_SINT32 nVolteHysTimeSec;
-    IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
-    IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
-    IMSVector<IMS_SINT32> objRegPermanentErrMaxCnt;
-    IMSVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
-    IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
-    IMSVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
-    IMSVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
-    IMSVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
-    IMSVector<IMS_SINT32> objSubErrorCodeForInitRegWithNextPcscf;
-    IMSVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;
-    IMSVector<IMS_SINT32> objSupportedRoamingRats;
-    IMSVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
-    IMSVector<IMS_SINT32> objWfcSubErrByMissing911Address;
+    ImsVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
+    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
+    ImsVector<IMS_SINT32> objRegPermanentErrMaxCnt;
+    ImsVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
+    ImsVector<IMS_SINT32> objReregErrCodeForCallEnd;
+    ImsVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
+    ImsVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
+    ImsVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
+    ImsVector<IMS_SINT32> objSubErrorCodeForInitRegWithNextPcscf;
+    ImsVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;
+    ImsVector<IMS_SINT32> objSupportedRoamingRats;
+    ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
+    ImsVector<IMS_SINT32> objWfcSubErrByMissing911Address;
 };
 #endif  // AOS_ASSET_H_

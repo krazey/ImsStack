@@ -31,7 +31,7 @@ PUBLIC
 AosAppContext::AosAppContext(IN AosStaticProfile* pProfile) :
         m_nSlotId(IMS_SLOT_0),
         m_pStaticProfile(pProfile),
-        objAosHandles(IMSMap<AString, IAosHandle*>()),
+        objAosHandles(ImsMap<AString, IAosHandle*>()),
         m_piApp(IMS_NULL),
         m_piConnection(IMS_NULL),
         m_piRegistration(IMS_NULL),
@@ -131,7 +131,7 @@ PUBLIC VIRTUAL IAosHandle* AosAppContext::GetHandle(IN IMS_UINT32 nServiceType)
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL IMSMap<AString, IAosHandle*>& AosAppContext::GetHandles()
+PUBLIC VIRTUAL ImsMap<AString, IAosHandle*>& AosAppContext::GetHandles()
 {
     return objAosHandles;
 }

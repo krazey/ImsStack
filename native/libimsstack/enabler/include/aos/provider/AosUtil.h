@@ -65,16 +65,16 @@ public:
     void StopTimer(IN ITimer*& piTimer, IN AString strLog = AString(""));
 
     // List
-    void AddElementToList(IN IMS_UINT32 nElement, IN IMSList<IMS_UINT32>& objTarget);
+    void AddElementToList(IN IMS_UINT32 nElement, IN ImsList<IMS_UINT32>& objTarget);
 
     IMS_BOOL IsListEqual(IN const AStringArray& objLeft, IN const AStringArray& objRight,
             IN IMS_BOOL bIsIpAddress = IMS_FALSE);
     IMS_BOOL IsStrExistInList(IN const AString& strValue, IN const AStringArray& objList,
             IN IMS_BOOL bIsIpAddress = IMS_FALSE);
-    IMS_BOOL IsListEqual(IN const IMSList<IMS_UINT32>& objLeft,
-            IN const IMSList<IMS_UINT32>& objRight, IN IMS_BOOL bOrderChecked);
+    IMS_BOOL IsListEqual(IN const ImsList<IMS_UINT32>& objLeft,
+            IN const ImsList<IMS_UINT32>& objRight, IN IMS_BOOL bOrderChecked);
     IMS_BOOL IsElementExistInList(
-            IN const IMSList<IMS_UINT32>& objElements, IN const IMSList<IMS_UINT32>& objTarget);
+            IN const ImsList<IMS_UINT32>& objElements, IN const ImsList<IMS_UINT32>& objTarget);
 
     // Misc
     IMS_UINT32 Pow(IN IMS_UINT32 nArg1, IN IMS_UINT32 nArg2);
