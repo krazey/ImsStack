@@ -196,6 +196,7 @@ public:
     std::list<IMS_UINTP> m_objListNegoId;
 };
 
+#define MEDIA_PORT_INVALID                       (-1)
 #define MEDIA_IS_CONTAINED_THIS_TYPE(eDst, eSrc) (((eDst) & (eSrc)) != 0)
 #define MEDIA_TYPE_WITHOUT_TEXT(eSrc)            ((eSrc) & (~MEDIA_TYPE_TEXT))
 

@@ -544,6 +544,41 @@ PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetNegotiatedCodecBitrate(
     return 0;
 }
 
+PUBLIC VIRTUAL IMS_SINT32 MediaSession::GetRemotePort(
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type)
+{
+    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+
+    if (pMediaNego == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "GetRemotePort() - Can't find nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+        return MEDIA_PORT_INVALID;
+    }
+
+    switch (type)
+    {
+        case MEDIA_TYPE_AUDIO:
+        {
+            AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+            return (pAudioNego) ? (IMS_SINT32)pAudioNego->GetRemotePort() : MEDIA_PORT_INVALID;
+        }
+        case MEDIA_TYPE_VIDEO:
+        {
+            VideoNego* pVideoNego = pMediaNego->GetVideoNego();
+            return (pVideoNego) ? (IMS_SINT32)pVideoNego->GetRemotePort() : MEDIA_PORT_INVALID;
+        }
+        case MEDIA_TYPE_TEXT:
+        {
+            TextNego* pTextNego = pMediaNego->GetTextNego();
+            return (pTextNego) ? (IMS_SINT32)pTextNego->GetRemotePort() : MEDIA_PORT_INVALID;
+        }
+        default:
+            break;
+    }
+
+    return MEDIA_PORT_INVALID;
+}
+
 /* TODO: add implementation
 PUBLIC VIRTUAL
 IMS_SINT32 MediaSession::GetNegotiatedCodecBandwidth(IN IMS_UINTP nNegoId,
@@ -849,10 +884,9 @@ PROTECTED QosRequestParam* MediaSession::createQosParam(
             return IMS_NULL;
         }
 
-        IMS_TRACE_I(
-                "createQosParam() - audio, nPort[%d]", pAudioNego->GetNegotiatedRemotePort(), 0, 0);
+        IMS_TRACE_I("createQosParam() - audio, nPort[%d]", pAudioNego->GetRemotePort(), 0, 0);
         return new QosRequestParam(MEDIA_TYPE_AUDIO, pAudioNego->GetNegotiatedRemoteAddress(),
-                pAudioNego->GetNegotiatedRemotePort());
+                pAudioNego->GetRemotePort());
     }
 
     if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
@@ -865,10 +899,9 @@ PROTECTED QosRequestParam* MediaSession::createQosParam(
             return IMS_NULL;
         }
 
-        IMS_TRACE_I(
-                "createQosParam() - video, nPort[%d]", pVideoNego->GetNegotiatedRemotePort(), 0, 0);
+        IMS_TRACE_I("createQosParam() - video, nPort[%d]", pVideoNego->GetRemotePort(), 0, 0);
         return new QosRequestParam(MEDIA_TYPE_VIDEO, pVideoNego->GetNegotiatedRemoteAddress(),
-                pVideoNego->GetNegotiatedRemotePort());
+                pVideoNego->GetRemotePort());
     }
 
     if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
@@ -881,10 +914,9 @@ PROTECTED QosRequestParam* MediaSession::createQosParam(
             return IMS_NULL;
         }
 
-        IMS_TRACE_I(
-                "createQosParam() - text, nPort[%d]", pTextNego->GetNegotiatedRemotePort(), 0, 0);
+        IMS_TRACE_I("createQosParam() - text, nPort[%d]", pTextNego->GetRemotePort(), 0, 0);
         return new QosRequestParam(MEDIA_TYPE_TEXT, pTextNego->GetNegotiatedRemoteAddress(),
-                pTextNego->GetNegotiatedRemotePort());
+                pTextNego->GetRemotePort());
     }
 
     return IMS_NULL;

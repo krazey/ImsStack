@@ -194,6 +194,15 @@ public:
             IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) = 0;
 
     /**
+     * @brief Get the remote port number
+     *
+     * @param nNegoId The target Audio/Video/TextMediaSession identification
+     * @param type The media type to retrieve
+     * @return IMS_SINT32 Returns the remote port number
+     *                    Returns -1 when invalid nNegoId
+     */
+    virtual IMS_SINT32 GetRemotePort(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type) = 0;
+    /**
      * @brief Get the negotiated direction
      *
      * @param nNegoId The target Audio/Video/TextMediaSession identification

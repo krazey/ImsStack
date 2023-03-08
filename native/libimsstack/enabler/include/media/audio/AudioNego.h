@@ -177,7 +177,7 @@ public:
      *
      * @return IMS_UINT32 The port number
      */
-    virtual IMS_UINT32 GetNegotiatedRemotePort();
+    virtual IMS_SINT32 GetRemotePort();
 
     /**
      * @brief Get the negotiated local profile object

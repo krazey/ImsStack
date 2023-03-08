@@ -110,6 +110,16 @@ public:
         return negoId;
     }
 
+    IMS_UINTP createVideoSession()
+    {
+        IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIOVIDEO);
+        m_pSession->FormSDP(negoId, m_pIsession, MEDIA_TYPE_AUDIOVIDEO,
+                MEDIA_DIRECTION_SEND_RECEIVE, MEDIA_DIRECTION_SEND_RECEIVE,
+                MEDIA_DIRECTION_INVALID);
+
+        return negoId;
+    }
+
     void destroyAudioSession() { EXPECT_EQ(m_pSession->Terminate(), IMS_TRUE); }
 
 protected:
@@ -294,4 +304,18 @@ TEST_F(MediaSessionTest, testNotifyMediaInactivity)
             IMS_TRUE);
 
     EXPECT_EQ(m_pSession->DestroyProfile(negoId), IMS_TRUE);
+}
+
+TEST_F(MediaSessionTest, testGetRemotePort)
+{
+    MediaNego::MediaNegoResult eErrorReason = MediaNego::MediaNegoResult::NO_ERROR;
+    IMS_SINT32 eAudioDirection = MEDIA_DIRECTION_INVALID;
+    IMS_SINT32 eVideoDirection = MEDIA_DIRECTION_INVALID;
+    IMS_SINT32 eTextDirection = MEDIA_DIRECTION_INVALID;
+
+    IMS_UINTP nNegoId = createVideoSession();
+    m_pSession->NegotiateSDP(nNegoId, m_pIsession, &eAudioDirection, &eVideoDirection,
+            &eTextDirection, eErrorReason);
+    EXPECT_EQ(m_pSession->GetRemotePort(nNegoId, MEDIA_TYPE_AUDIO), -1);
+    EXPECT_EQ(m_pSession->GetRemotePort(nNegoId, MEDIA_TYPE_VIDEO), -1);
 }

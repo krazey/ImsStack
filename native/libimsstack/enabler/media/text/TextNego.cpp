@@ -267,7 +267,7 @@ const IpAddress& TextNego::GetNegotiatedRemoteAddress()
 }
 
 PUBLIC
-IMS_UINT32 TextNego::GetNegotiatedRemotePort()
+IMS_SINT32 TextNego::GetRemotePort()
 {
     TextProfile* pProfile = GetNegotiatedPeerProfile();
 
@@ -276,7 +276,7 @@ IMS_UINT32 TextNego::GetNegotiatedRemotePort()
         return pProfile->nDataPort;
     }
 
-    return 0;
+    return MEDIA_PORT_INVALID;
 }
 
 PUBLIC
