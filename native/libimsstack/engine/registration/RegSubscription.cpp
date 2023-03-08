@@ -909,7 +909,7 @@ PRIVATE VIRTUAL IMS_BOOL RegSubscription::Dialog_NotifyRequest(IN ISipServerConn
     IMS_TRACE_D("START - reginfo parsing ...", 0, 0, 0);
 
     // Parsing 'application/reginfo+xml' using XML parser & update the reginfo.
-    IMSList<ISipMessageBodyPart*> objBodyParts = piSipMsgNotify->GetBodyParts();
+    ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsgNotify->GetBodyParts();
     IMS_UINT16 nBodyParts = 0;
 
     if (!objBodyParts.IsEmpty())
@@ -1443,7 +1443,7 @@ IMS_BOOL RegSubscription::SetContactHeader(
 
         if (piHeader != IMS_NULL)
         {
-            const IMSList<SipParameter*>& objParams = piHeader->GetParameters();
+            const ImsList<SipParameter*>& objParams = piHeader->GetParameters();
 
             for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
             {

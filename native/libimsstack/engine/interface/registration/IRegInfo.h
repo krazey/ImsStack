@@ -48,7 +48,7 @@ public:
      *
      * @return List of pointer to IRegInfoRegistration
      */
-    virtual IMSList<IRegInfoRegistration*> GetRegistrations() const = 0;
+    virtual ImsList<IRegInfoRegistration*> GetRegistrations() const = 0;
 };
 
 #endif

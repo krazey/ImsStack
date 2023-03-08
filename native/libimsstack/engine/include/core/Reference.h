@@ -46,7 +46,7 @@ public:
         void RemoveScc(IN const ISipClientConnection* piScc);
 
     private:
-        IMSList<ISipClientConnection*> m_objSccs;
+        ImsList<ISipClientConnection*> m_objSccs;
     };
 
 public:
@@ -168,7 +168,7 @@ private:
     // IMPLICIT_ROUTING_FOR_MID_DIALOG
     IMS_BOOL m_bImplicitRoutingRequired;
     // Queue for NOTIFY request messages
-    IMSList<Message*> m_objNotifyMessages;
+    ImsList<Message*> m_objNotifyMessages;
     // Notification listener for notifier's behavior
     IOnNotificationListener* m_piNotificationListener;
     // Notifier's state

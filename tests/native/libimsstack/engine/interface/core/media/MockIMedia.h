@@ -23,7 +23,7 @@ class MockIMedia : public IMedia
 {
 public:
     MOCK_METHOD(IMS_SINT32, GetDirection, (), (const, override));
-    MOCK_METHOD(IMSList<IMediaDescriptor*>, GetMediaDescriptors, (), (const, override));
+    MOCK_METHOD(ImsList<IMediaDescriptor*>, GetMediaDescriptors, (), (const, override));
     MOCK_METHOD(IMedia*, GetProposal, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetUpdateState, (), (const, override));

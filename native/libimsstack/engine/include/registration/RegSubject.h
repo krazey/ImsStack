@@ -37,7 +37,7 @@ protected:
     virtual void NotifyObservers(IN IMS_SINT32 nWhat);
 
 private:
-    IMSList<RegObserver*> m_objObservers;
+    ImsList<RegObserver*> m_objObservers;
 };
 
 #endif

@@ -183,13 +183,13 @@ protected:
     // this flag is set to IMS_TRUE.
     IMS_BOOL m_bSecure;
     // Route set
-    IMSList<SipHeaderBase*> m_objRouteSet;
+    ImsList<SipHeaderBase*> m_objRouteSet;
     // Local target URI : multiple may be used
     SipHeaderBase* m_pLocalTargetUri;
     // Remote target URI (Contact list need to be managed ???)
     SipHeaderBase* m_pRemoteTargetUri;
     // REMOTE_TARGET_UPDATE_FROM_MID_DIALOG_REQUEST
-    IMSList<PendingRemoteTarget*> m_objPendingRemoteTargets;
+    ImsList<PendingRemoteTarget*> m_objPendingRemoteTargets;
 
     // Remote & local sequence number
     IMS_UINT32 m_nLocalCSeq;

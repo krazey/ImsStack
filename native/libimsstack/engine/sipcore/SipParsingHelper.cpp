@@ -108,7 +108,7 @@ PUBLIC GLOBAL IMS_BOOL SipParsingHelper::CreateMessageBodyParts(IN_OUT ISipMessa
 }
 
 PUBLIC GLOBAL const AString& SipParsingHelper::GetSipReasonHeader(
-        IN const IMSList<AString>& objReasonHeaders)
+        IN const ImsList<AString>& objReasonHeaders)
 {
     if (objReasonHeaders.IsEmpty())
     {

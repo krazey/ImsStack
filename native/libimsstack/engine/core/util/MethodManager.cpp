@@ -21,7 +21,7 @@
 PUBLIC
 MethodManager::MethodManager() :
         RcObject(),
-        m_objMethods(IMSList<Method*>())
+        m_objMethods(ImsList<Method*>())
 {
 }
 

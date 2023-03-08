@@ -57,7 +57,7 @@ public:
 
 private:
     AString m_strCallId;
-    IMSList<SipAck*> m_objAcks;
+    ImsList<SipAck*> m_objAcks;
 
     static SipAckPackagePrivate* s_pAckPackagePrivate;
 };

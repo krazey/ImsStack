@@ -46,7 +46,7 @@ public:
      * @param strServiceId an IMS service identifier
      * @return List of pointer to IRegBinding
      */
-    static IMSList<IRegBinding*> GetRegBindings(IN IMS_SINT32 nSlotId);
+    static ImsList<IRegBinding*> GetRegBindings(IN IMS_SINT32 nSlotId);
 
     /**
      * @brief Returns all the registered IRegBinding.

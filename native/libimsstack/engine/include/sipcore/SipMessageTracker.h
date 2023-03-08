@@ -94,8 +94,8 @@ private:
         IMS_SINT32 m_nStatusCode;
     };
 
-    IMSList<MessageFilter*> m_objIncomingFilters;
-    IMSList<MessageFilter*> m_objOutgoingFilters;
+    ImsList<MessageFilter*> m_objIncomingFilters;
+    ImsList<MessageFilter*> m_objOutgoingFilters;
     ISipMessageTrackerListener* m_piListener;
 };
 

@@ -49,7 +49,7 @@ public:
             IN const AString& strName = AString::ConstNull()) const override;
     IMS_SINT32 GetHeaderCount(
             IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const override;
-    IMSList<AString> GetHeaders(
+    ImsList<AString> GetHeaders(
             IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const override;
     inline const SipMethod& GetMethod() const override { return m_objMethod; }
     inline const AString& GetReasonPhrase() const override
@@ -71,9 +71,9 @@ public:
 
     ISipMessageBodyPart* CreateBodyPart() override;
     ISipMessageBodyPart* CreateSdpBodyPart() override;
-    IMSList<ISipMessageBodyPart*> GetBodyParts() const override;
+    ImsList<ISipMessageBodyPart*> GetBodyParts() const override;
     ISipMessageBodyPart* GetSdpBodyPart() const override;
-    IMSList<ISipMessageBodyPart*> GetSdpBodyParts() const override;
+    ImsList<ISipMessageBodyPart*> GetSdpBodyParts() const override;
 
     IMS_RESULT CopyHeadersAndBodyParts(IN const ISipMessage* piSipMsg) override;
     IMS_BOOL IsHeaderPresent(
@@ -118,7 +118,7 @@ private:
     SipStatusCode m_objStatusCode;
     SipUnknownHeaders m_objUnknownHeaders;
     IMS_BOOL m_bBodyPartParsed;
-    IMSList<SipMessageBodyPart*> m_objBodyParts;
+    ImsList<SipMessageBodyPart*> m_objBodyParts;
     ::SipMessage* m_pSipMsg;
 };
 

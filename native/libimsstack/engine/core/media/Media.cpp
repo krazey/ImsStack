@@ -36,7 +36,7 @@ Media::Media(IN Service* pService, IN ISdpOaState* piOaState) :
         m_nState(STATE_INACTIVE),
         m_nUpdateState(UPDATE_UNCHANGED),
         m_nDirection(DIRECTION_NONE),
-        m_objDescriptors(IMSList<MediaDescriptor*>()),
+        m_objDescriptors(ImsList<MediaDescriptor*>()),
         m_piListener(IMS_NULL),
         m_bDirectionOnlyUpdated(IMS_FALSE),
         m_bInitializationDone(IMS_FALSE),
@@ -224,7 +224,7 @@ void Media::RemoveMedia()
 
         if (m_pMediaProposal != IMS_NULL)
         {
-            const IMSList<MediaDescriptor*>& objDescriptors =
+            const ImsList<MediaDescriptor*>& objDescriptors =
                     m_pMediaProposal->GetMediaDescriptors();
 
             for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
@@ -743,7 +743,7 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
     // If nCountOfDescriptor is zero, the descriptor will be created from the media profile
     // with full capabilities.
 
-    IMSList<IMS_SINT32> objMids;
+    ImsList<IMS_SINT32> objMids;
     IMS_SINT32 nSdpDirection = ConvertDirectionMediaToSdp(m_nDirection);
 
     if (nCountOfDescriptor == 0)
@@ -773,7 +773,7 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
 }
 
 PROTECTED
-IMS_BOOL Media::InitInstance(IN const IMSList<IMS_SINT32>& objMids)
+IMS_BOOL Media::InitInstance(IN const ImsList<IMS_SINT32>& objMids)
 {
     if (!PreviewInitInstance())
     {

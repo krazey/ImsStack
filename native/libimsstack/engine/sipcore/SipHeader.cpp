@@ -320,7 +320,7 @@ PUBLIC VIRTUAL const SipParameter* SipHeader::GetParameter(IN const AString& str
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL IMS_RESULT SipHeader::GetParameterNames(OUT IMSList<AString>& objParamNames) const
+PUBLIC VIRTUAL IMS_RESULT SipHeader::GetParameterNames(OUT ImsList<AString>& objParamNames) const
 {
     for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {

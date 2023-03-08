@@ -37,7 +37,7 @@ public:
     const SipRtConfig::SocketOption* GetSocketOption(
             IN IMS_SINT32 nItem, IN const IpAddress& objIp, IN IMS_SINT32 nPort = 0) const;
     const SipRtConfig::IpQos* GetIpQos(IN const IpAddress& objIp, IN IMS_SINT32 nPort = 0) const;
-    inline const IMSList<SipRtConfig::IpSecSa>& GetIpSecSas() const { return m_objIpSecSas; }
+    inline const ImsList<SipRtConfig::IpSecSa>& GetIpSecSas() const { return m_objIpSecSas; }
     const SipAddress* GetRegContactUri(IN const AString& strCallId) const;
     inline IMS_BOOL IsFeatureEnabled(IN IMS_SINT32 nFeature) const
     {
@@ -66,7 +66,7 @@ private:
     IMS_RESULT SetSocketOption(IN IMS_SINT32 nItem, IN const SipRtConfig::SocketOption* pSockOpt);
 
 private:
-    IMSMap<IMS_SINT32, IMS_BOOL> m_objConfigSet;
+    ImsMap<IMS_SINT32, IMS_BOOL> m_objConfigSet;
 
     // Features
     IMS_SINT32 m_nFeatures;
@@ -75,19 +75,19 @@ private:
     SipRtConfig::LogMask m_objLogMask;
 
     // Socket options: <Item, List of SocketOption>
-    IMSMap<IMS_SINT32, IMSList<SipRtConfig::SocketOption>> m_objSocketOptionMap;
+    ImsMap<IMS_SINT32, ImsList<SipRtConfig::SocketOption>> m_objSocketOptionMap;
 
     // IP-level QoS
-    IMSList<SipRtConfig::IpQos> m_objIpQoss;
+    ImsList<SipRtConfig::IpQos> m_objIpQoss;
 
     // SIP header control
-    IMSList<SipRtConfig::Header> m_objHeaders;
+    ImsList<SipRtConfig::Header> m_objHeaders;
 
     // IPSec SA
-    IMSList<SipRtConfig::IpSecSa> m_objIpSecSas;
+    ImsList<SipRtConfig::IpSecSa> m_objIpSecSas;
 
     // RegContactAddress
-    IMSList<SipRtConfig::RegContactAddress> m_objRegContacts;
+    ImsList<SipRtConfig::RegContactAddress> m_objRegContacts;
 };
 
 #endif

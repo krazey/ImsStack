@@ -79,7 +79,7 @@ public:
     const Replaces* GetReplaces() const;
     inline const AString& GetSessionId() const { return m_strSessionIdForCallControl; }
     IMS_SINT32 GetTerminationReason() const;
-    const IMSList<Media*>& GetMedia() const;
+    const ImsList<Media*>& GetMedia() const;
     SessionDescriptor* GetSessionDescriptor();
     inline IMS_SINT32 GetState() const { return m_nState; }
     IMS_BOOL HasPendingUpdate() const;
@@ -97,7 +97,7 @@ public:
     IMS_RESULT SendAck();
     IMS_RESULT SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
             IN const AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0);
-    IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference);
+    IMS_RESULT SetCallerPreference(IN const ImsList<AString>& objCallerPreference);
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
     IMS_RESULT SetContactParameter(
             IN const AString& strParameter, IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
@@ -493,7 +493,7 @@ private:
 
     SdpOaState* m_pOaState;
     SessionDescriptor* m_pSessionDescriptor;
-    IMSList<Media*> m_objMedias;
+    ImsList<Media*> m_objMedias;
 
     IOnSessionListener* m_piSessionListener;
     // For session refresh
@@ -509,7 +509,7 @@ private:
     // For internal BYE transaction
     ISipClientConnection* m_piSccBye;
     // CALLER_PREFERENCE_MANAGER
-    IMSList<AString> m_objPreviousCallerPreference;
+    ImsList<AString> m_objPreviousCallerPreference;
     // Management of forked session to handle PRACK
     RcPtr<MethodManager> m_pForkedSessions;
     // EARLY_SESSION_MODEL

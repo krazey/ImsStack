@@ -39,8 +39,8 @@ public:
     void DetachService(IN Service* pService);
     Service* GetService(IN IMS_SINT32 nSlotId, IN const AString& strAppId,
             IN const AString& strServiceId) const;
-    const IMSList<Service*>& GetServices() const;
-    IMSList<Service*> GetServices(IN IMS_SINT32 nSlotId) const;
+    const ImsList<Service*>& GetServices() const;
+    ImsList<Service*> GetServices(IN IMS_SINT32 nSlotId) const;
 
     static ServiceManager* GetInstance();
 

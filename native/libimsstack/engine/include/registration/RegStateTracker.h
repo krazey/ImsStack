@@ -73,8 +73,8 @@ private:
     {
         m_objPublicIpAddress = objIpAddr;
     }
-    void SetSecurityClients(IN const IMSList<SipSecurityHeader>& objClients);
-    void SetSecurityVerifys(IN const IMSList<SipSecurityHeader>& objVerifys);
+    void SetSecurityClients(IN const ImsList<SipSecurityHeader>& objClients);
+    void SetSecurityVerifys(IN const ImsList<SipSecurityHeader>& objVerifys);
     inline void SetServiceRoutes(IN const AStringArray& objServiceRoutes)
     {
         m_objServiceRoutes = objServiceRoutes;

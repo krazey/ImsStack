@@ -45,7 +45,7 @@ private:
 private:
     IMutex* m_piLock;
     // List of registration (bindings): < AOR (IMPU) + Contacts >
-    IMSMap<RegKey, IRegistration*> m_objRegistrations;
+    ImsMap<RegKey, IRegistration*> m_objRegistrations;
 };
 
 PUBLIC

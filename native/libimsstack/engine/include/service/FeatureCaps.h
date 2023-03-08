@@ -63,8 +63,8 @@ private:
 private:
     CallerCapability* m_pExcludedFeaturesForRegCaps;
     CallerCapability* m_pFeaturesForAllMessage;
-    IMSMap<IMS_SINT32, CallerCapability*>* m_pFeaturesForRequest;
-    IMSMap<IMS_SINT32, CallerCapability*>* m_pFeaturesForResponse;
+    ImsMap<IMS_SINT32, CallerCapability*>* m_pFeaturesForRequest;
+    ImsMap<IMS_SINT32, CallerCapability*>* m_pFeaturesForResponse;
 
     CallerCapability* m_pRegCaps;
 };

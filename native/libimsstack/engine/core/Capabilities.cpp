@@ -49,7 +49,7 @@ PUBLIC
 Capabilities::Capabilities(IN Service* pService) :
         ServiceMethod(pService),
         m_nState(STATE_INACTIVE),
-        m_objRemoteUserIdentities(IMSList<AString>()),
+        m_objRemoteUserIdentities(ImsList<AString>()),
         m_piListener(IMS_NULL),
         m_pRemoteCapabilities(IMS_NULL)
 {
@@ -67,12 +67,12 @@ PUBLIC VIRTUAL Capabilities::~Capabilities()
 }
 
 PUBLIC
-IMSList<AString> Capabilities::GetRemoteUserIdentities() const
+ImsList<AString> Capabilities::GetRemoteUserIdentities() const
 {
     if (GetState() != STATE_ACTIVE)
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     return m_objRemoteUserIdentities;
@@ -835,7 +835,7 @@ IMS_BOOL Capabilities::CreateSdp(OUT AString& strSdp,
     SdpDescription objFramedSdpFields;
     SdpDescription objAudioSdpFields;
     SdpDescription objVideoSdpFields;
-    IMSList<Service*> objServices = ServiceManager::GetInstance()->GetServices(GetSlotId());
+    ImsList<Service*> objServices = ServiceManager::GetInstance()->GetServices(GetSlotId());
 
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
     {
@@ -1014,7 +1014,7 @@ void Capabilities::HandleCapabilities(IN ISipClientConnection* piScc)
     ISipMessage* piSipMsg = piScc->GetMessage();
 
     // Gets the Contact headers
-    IMSList<AString> objContacts = piSipMsg->GetHeaders(ISipHeader::CONTACT_ANY);
+    ImsList<AString> objContacts = piSipMsg->GetHeaders(ISipHeader::CONTACT_ANY);
 
     if (objContacts.IsEmpty())
     {
@@ -1055,7 +1055,7 @@ void Capabilities::HandleCapabilities(IN ISipClientConnection* piScc)
     // If q-value is present, choose a contact header according to the 'q' value.
     // If q-value is not present, choose the topmost contact header with "SIP" URI scheme.
     const AString& strContactHeader = objContacts.GetAt(0);
-    IMSList<AString> objTokens;
+    ImsList<AString> objTokens;
     IMS_SINT32 nStartIndex = strContactHeader.GetIndexOf(TextParser::CHAR_RAQUOT);
 
     if (nStartIndex == AString::NPOS)
@@ -1122,7 +1122,7 @@ IMS_BOOL Capabilities::ParseConnectionName(
     strAppId = strAppId.GetSubStr(2);
 
     // If 'serviceId' parameter is present, extract the parameter value from the connection string
-    IMSList<AString> objTokens = strParams.Split(TextParser::CHAR_SEMICOLON);
+    ImsList<AString> objTokens = strParams.Split(TextParser::CHAR_SEMICOLON);
 
     if (objTokens.IsEmpty())
     {
@@ -1194,7 +1194,7 @@ PRIVATE GLOBAL void Capabilities::CopySdpFields(
 {
     if (objSdpDesc.Contains(Sdp::TYPE_B))
     {
-        const IMSList<SdpBandwidth>& objBandwidths = objSdpDesc.GetBandwidths();
+        const ImsList<SdpBandwidth>& objBandwidths = objSdpDesc.GetBandwidths();
 
         for (IMS_UINT32 i = 0; i < objBandwidths.GetSize(); ++i)
         {
@@ -1206,7 +1206,7 @@ PRIVATE GLOBAL void Capabilities::CopySdpFields(
 
     if (objSdpDesc.Contains(Sdp::TYPE_A))
     {
-        const IMSList<SdpAttribute>& objAttributes = objSdpDesc.GetAttributes();
+        const ImsList<SdpAttribute>& objAttributes = objSdpDesc.GetAttributes();
 
         for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); ++i)
         {
@@ -1230,7 +1230,7 @@ PRIVATE GLOBAL void Capabilities::SetSdpFields(
 
     if (objTempDesc.Contains(Sdp::TYPE_B))
     {
-        const IMSList<SdpBandwidth>& objBandwidths = objTempDesc.GetBandwidths();
+        const ImsList<SdpBandwidth>& objBandwidths = objTempDesc.GetBandwidths();
 
         for (IMS_UINT32 i = 0; i < objBandwidths.GetSize(); ++i)
         {
@@ -1245,7 +1245,7 @@ PRIVATE GLOBAL void Capabilities::SetSdpFields(
 
     if (objTempDesc.Contains(Sdp::TYPE_A))
     {
-        const IMSList<SdpAttribute>& objAttributes = objTempDesc.GetAttributes();
+        const ImsList<SdpAttribute>& objAttributes = objTempDesc.GetAttributes();
 
         for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); ++i)
         {

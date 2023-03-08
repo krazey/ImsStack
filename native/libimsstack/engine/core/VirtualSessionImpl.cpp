@@ -105,7 +105,7 @@ PRIVATE VIRTUAL IMessage* VirtualSessionImpl::GetPreviousResponse(
     return IMS_NULL;
 }
 
-PRIVATE VIRTUAL IMSList<IMessage*> VirtualSessionImpl::GetPreviousResponses(
+PRIVATE VIRTUAL ImsList<IMessage*> VirtualSessionImpl::GetPreviousResponses(
         IN IMS_SINT32 nServiceMethod) const
 {
     if (m_piOwnerSession != IMS_NULL)
@@ -113,17 +113,17 @@ PRIVATE VIRTUAL IMSList<IMessage*> VirtualSessionImpl::GetPreviousResponses(
         return m_piOwnerSession->GetPreviousResponses(nServiceMethod);
     }
 
-    return IMSList<IMessage*>();
+    return ImsList<IMessage*>();
 }
 
-PRIVATE VIRTUAL IMSList<AString> VirtualSessionImpl::GetRemoteUserId() const
+PRIVATE VIRTUAL ImsList<AString> VirtualSessionImpl::GetRemoteUserId() const
 {
     if (m_piOwnerSession != IMS_NULL)
     {
         return m_piOwnerSession->GetRemoteUserId();
     }
 
-    return IMSList<AString>();
+    return ImsList<AString>();
 }
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::Accept()
@@ -197,15 +197,15 @@ PRIVATE VIRTUAL IReference* VirtualSessionImpl::CreateReference(
     return IMS_NULL;
 }
 
-PRIVATE VIRTUAL IMSList<IMedia*> VirtualSessionImpl::GetMedia()
+PRIVATE VIRTUAL ImsList<IMedia*> VirtualSessionImpl::GetMedia()
 {
     if (m_pSession.IsNull())
     {
         IMS_TRACE_E(0, "VirtualSession is null", 0, 0, 0);
-        return IMSList<IMedia*>();
+        return ImsList<IMedia*>();
     }
 
-    const IMSList<Media*>& objMedias = m_pSession->GetMedia();
+    const ImsList<Media*>& objMedias = m_pSession->GetMedia();
 
     if (objMedias.GetSize() > m_objMediaImpls.GetSize())
     {
@@ -237,10 +237,10 @@ PRIVATE VIRTUAL IMSList<IMedia*> VirtualSessionImpl::GetMedia()
     if (m_objMediaImpls.IsEmpty())
     {
         IMS_TRACE_D("No media in the current session", 0, 0, 0);
-        return IMSList<IMedia*>();
+        return ImsList<IMedia*>();
     }
 
-    IMSList<IMedia*> objIMedias;
+    ImsList<IMedia*> objIMedias;
 
     for (IMS_UINT32 i = 0; i < m_objMediaImpls.GetSize(); ++i)
     {
@@ -535,7 +535,7 @@ PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SendRpr(IN IMS_SINT32 /*nStatusCo
 }
 
 PRIVATE VIRTUAL IMS_RESULT VirtualSessionImpl::SetCallerPreference(
-        IN const IMSList<AString>& /*objCallerPreference*/)
+        IN const ImsList<AString>& /*objCallerPreference*/)
 {
     virtualSessionImpl_MethodNotSupported();
     return IMS_FAILURE;

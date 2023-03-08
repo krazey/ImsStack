@@ -163,7 +163,7 @@ private:
     AString m_strXml;
     AString m_strDefaultNamespace;
     XmlError* m_pError;
-    IMSList<XmlPrefix*> m_objPrefixes;
+    ImsList<XmlPrefix*> m_objPrefixes;
     ImsStack<XmlElement*> m_objElements;
 };
 

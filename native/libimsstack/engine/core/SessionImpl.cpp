@@ -97,11 +97,11 @@ PRIVATE VIRTUAL void SessionImpl::Destroy()
     delete this;
 }
 
-PRIVATE VIRTUAL IMSList<IMessage*> SessionImpl::GetPreviousResponses(
+PRIVATE VIRTUAL ImsList<IMessage*> SessionImpl::GetPreviousResponses(
         IN IMS_SINT32 nServiceMethod) const
 {
-    IMSList<IMessage*> objIMessages;
-    IMSList<Message*> objResponses = m_pSession->GetPreviousResponses(nServiceMethod);
+    ImsList<IMessage*> objIMessages;
+    ImsList<Message*> objResponses = m_pSession->GetPreviousResponses(nServiceMethod);
 
     for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
     {
@@ -204,9 +204,9 @@ PRIVATE VIRTUAL IReference* SessionImpl::CreateReference(
     return pReferenceImpl;
 }
 
-PRIVATE VIRTUAL IMSList<IMedia*> SessionImpl::GetMedia()
+PRIVATE VIRTUAL ImsList<IMedia*> SessionImpl::GetMedia()
 {
-    const IMSList<Media*>& objMedias = m_pSession->GetMedia();
+    const ImsList<Media*>& objMedias = m_pSession->GetMedia();
 
     if (objMedias.GetSize() > m_objMediaImpls.GetSize())
     {
@@ -238,10 +238,10 @@ PRIVATE VIRTUAL IMSList<IMedia*> SessionImpl::GetMedia()
     if (m_objMediaImpls.IsEmpty())
     {
         IMS_TRACE_D("No media in the current session", 0, 0, 0);
-        return IMSList<IMedia*>();
+        return ImsList<IMedia*>();
     }
 
-    IMSList<IMedia*> objIMedias;
+    ImsList<IMedia*> objIMedias;
 
     for (IMS_UINT32 i = 0; i < m_objMediaImpls.GetSize(); ++i)
     {

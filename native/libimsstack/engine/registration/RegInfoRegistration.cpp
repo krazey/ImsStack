@@ -30,7 +30,7 @@ PUBLIC
 RegInfoRegistration::RegInfoRegistration() :
         m_strId(AString::ConstNull()),
         m_nState(STATE_CREATED),
-        m_objContacts(IMSList<RegInfoContact*>())
+        m_objContacts(ImsList<RegInfoContact*>())
 {
 }
 
@@ -66,9 +66,9 @@ PUBLIC VIRTUAL IRegInfoContact* RegInfoRegistration::GetContact(
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL IMSList<IRegInfoContact*> RegInfoRegistration::GetContacts() const
+PUBLIC VIRTUAL ImsList<IRegInfoContact*> RegInfoRegistration::GetContacts() const
 {
-    IMSList<IRegInfoContact*> objRegInfoContacts;
+    ImsList<IRegInfoContact*> objRegInfoContacts;
 
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {

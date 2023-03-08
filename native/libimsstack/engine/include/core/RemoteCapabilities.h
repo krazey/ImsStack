@@ -32,7 +32,7 @@ public:
     RemoteCapabilities& operator=(IN const RemoteCapabilities&) = delete;
 
 public:
-    IMS_BOOL Create(IN const IMSList<AString>& objCapabilities);
+    IMS_BOOL Create(IN const ImsList<AString>& objCapabilities);
     IMS_BOOL IsCompatible(IN const AppConfig* pAppConfig, IN const AString& strServiceId) const;
 
 private:
@@ -60,7 +60,7 @@ private:
             IN const AppConfig* pAppConfig, IN const AString& strServiceId) const;
     IMS_BOOL IsCoreServiceCompatible(IN const CoreServiceConfig* pServiceConfig) const;
 
-    static void RemoveAllFeatureSets(IN_OUT IMSList<FeatureSet*>& objFeatureSets);
+    static void RemoveAllFeatureSets(IN_OUT ImsList<FeatureSet*>& objFeatureSets);
 
 private:
     IMS_BOOL m_bAudioSupported;
@@ -68,11 +68,11 @@ private:
     IMS_BOOL m_bFramedMediaSupported;
     IMS_BOOL m_bApplicationSupported;
 
-    IMSList<FeatureSet*> m_objAppSubTypes;
-    IMSList<FeatureSet*> m_objEvents;
-    IMSList<FeatureSet*> m_objIcsis;
-    IMSList<FeatureSet*> m_objIaris;
-    IMSList<FeatureSet*> m_objFeatureTags;
+    ImsList<FeatureSet*> m_objAppSubTypes;
+    ImsList<FeatureSet*> m_objEvents;
+    ImsList<FeatureSet*> m_objIcsis;
+    ImsList<FeatureSet*> m_objIaris;
+    ImsList<FeatureSet*> m_objFeatureTags;
 };
 
 #endif

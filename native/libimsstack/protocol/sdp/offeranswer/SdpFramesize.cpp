@@ -113,7 +113,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpFramesize::SetValue(IN const AString& strValue)
 
     if (IsStandardCompatible(strValue))
     {
-        IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_HYPHEN);
+        ImsList<AString> objTokens = strValue.Split(TextParser::CHAR_HYPHEN);
 
         if (objTokens.GetSize() != 2)
         {

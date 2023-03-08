@@ -50,7 +50,7 @@ public:
         return (*this);
     }
 
-    // For IMSMap class
+    // For ImsMap class
     inline IMS_BOOL operator<(IN const RegKey& other)
     {
         return GetHashCode() < other.GetHashCode();

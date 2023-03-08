@@ -46,7 +46,7 @@ PUBLIC GLOBAL const IMS_CHAR Reference::MEDIA_TYPE[] = "message/sipfrag";
 
 PUBLIC
 Reference::NotifierState::NotifierState() :
-        m_objSccs(IMSList<ISipClientConnection*>())
+        m_objSccs(ImsList<ISipClientConnection*>())
 {
 }
 
@@ -99,7 +99,7 @@ Reference::Reference(IN Service* pService, IN const AString& strReferToUri,
         m_pSubState(IMS_NULL),
         m_bReferenceInOtherDialog(IMS_FALSE),
         m_bImplicitRoutingRequired(bImplicitRoutingRequired),
-        m_objNotifyMessages(IMSList<Message*>()),
+        m_objNotifyMessages(ImsList<Message*>()),
         m_piNotificationListener(IMS_NULL),
         m_pNotifierState(IMS_NULL)
 {

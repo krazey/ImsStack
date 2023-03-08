@@ -27,7 +27,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 PRIVATE
 CancellableMethodManager::CancellableMethodManager() :
         m_piLock(IMS_NULL),
-        m_objCancellableMethods(IMSMap<AString, ICancellableMethod*>())
+        m_objCancellableMethods(ImsMap<AString, ICancellableMethod*>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }

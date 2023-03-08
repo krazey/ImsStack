@@ -85,7 +85,7 @@ public:
      *
      * @return List of all attribute values.
      */
-    virtual IMSList<AString> GetAttributes() const = 0;
+    virtual ImsList<AString> GetAttributes() const = 0;
 
     /**
      * @brief Returns the version(v=) of the SDP.

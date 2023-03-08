@@ -189,9 +189,9 @@ private:
     IMutex* m_piLock;
     SipServerConnectionListenerProxy** m_ppListenerProxy;
     // < (IP + Port), ISipConnectionNotifier* >
-    IMSMap<AString, ISipConnectionNotifier*> m_objConnectionNotifiers;
+    ImsMap<AString, ISipConnectionNotifier*> m_objConnectionNotifiers;
     // < (IP + Port), Count >
-    IMSMap<AString, IMS_SINT32> m_objReferenceCounts;
+    ImsMap<AString, IMS_SINT32> m_objReferenceCounts;
 };
 
 PUBLIC

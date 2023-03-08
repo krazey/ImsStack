@@ -143,7 +143,7 @@ public:
      *                       for digest authentication
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetCredentials(IN IMSList<Credential>& objCredentials) = 0;
+    virtual IMS_RESULT SetCredentials(IN ImsList<Credential>& objCredentials) = 0;
 
     /**
      * @brief Sets credential triplets for possible digest authentication.

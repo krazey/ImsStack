@@ -44,7 +44,7 @@ public:
     IMS_RESULT AddNamedItem(IN INode* piNode);
 
 private:
-    IMSList<INode*> m_objNamedItems;
+    ImsList<INode*> m_objNamedItems;
 };
 
 #endif

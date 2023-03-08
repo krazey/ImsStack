@@ -197,13 +197,13 @@ PUBLIC VIRTUAL AString SipClientConnection::GetHeader(
     return SipConnection::GetHeader(strName, nIndex);
 }
 
-PUBLIC VIRTUAL IMSList<AString> SipClientConnection::GetHeaders(IN const AString& strName)
+PUBLIC VIRTUAL ImsList<AString> SipClientConnection::GetHeaders(IN const AString& strName)
 {
     // Message is not initialized or the connection is closed
     if ((m_nState == STATE_CREATED) || (m_nState == STATE_TERMINATED))
     {
         SipPrivate::SetLastError(SipError::NO_ERROR);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     return SipConnection::GetHeaders(strName);
@@ -677,7 +677,7 @@ IMS_RESULT SipClientConnection::Receive(IN IMS_SLONG /* nTimeout = 0 */)
 }
 
 PUBLIC
-IMS_RESULT SipClientConnection::SetCredentials(IN IMSList<Credential>& objCredentials)
+IMS_RESULT SipClientConnection::SetCredentials(IN ImsList<Credential>& objCredentials)
 {
     if ((m_nState != STATE_INITIALIZED) && (m_nState != STATE_UNAUTHORIZED))
     {

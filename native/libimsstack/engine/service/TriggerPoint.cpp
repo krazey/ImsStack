@@ -397,8 +397,8 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeader(IN const ISipHeader* piHea
     // The below header fields will be evaluated for only SIP parameters ...
     if (IsParameterComparisonRequired(piHeader))
     {
-        const IMSList<SipParameter*>& objParameters = piHeader->GetParameters();
-        const IMSList<SipParameter*>& objOtherParameters = piOtherHeader->GetParameters();
+        const ImsList<SipParameter*>& objParameters = piHeader->GetParameters();
+        const ImsList<SipParameter*>& objOtherParameters = piOtherHeader->GetParameters();
 
         if (objParameters.IsEmpty())
         {
@@ -494,7 +494,7 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeaderInMessage(IN const ISipHead
         return SPT_MATCH_NOK;
     }
 
-    IMSList<AString> objValues = piSipMsg->GetHeaders(piHeader->GetType(), piHeader->GetName());
+    ImsList<AString> objValues = piSipMsg->GetHeaders(piHeader->GetType(), piHeader->GetName());
 
     if (objValues.IsEmpty())
     {
@@ -567,8 +567,8 @@ PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareHeaderInMessage(IN const ISipHead
     return nMatchResult;
 }
 
-PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSdpInfo(IN const IMSList<AString>& objMLines,
-        IN const IMSList<AString>& objALines, IN const ISipMessage* piSipMsg,
+PRIVATE GLOBAL IMS_SINT32 TriggerPoint::CompareSdpInfo(IN const ImsList<AString>& objMLines,
+        IN const ImsList<AString>& objALines, IN const ISipMessage* piSipMsg,
         IN IMS_SINT32 nEvaluationRule, IN IMS_BOOL bConditionNegated /*= IMS_FALSE*/)
 {
     if (objMLines.IsEmpty() && objALines.IsEmpty())

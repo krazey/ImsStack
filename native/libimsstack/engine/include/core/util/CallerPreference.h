@@ -32,22 +32,22 @@ public:
 public:
     static IMS_BOOL CreateAcceptContactHeaders(IN const AppConfig* pAppConfig,
             IN const CoreServiceConfig* pServiceConfig, IN const ISipConfigV* piSipConfigV,
-            OUT IMSList<PreferenceHeader*>& objHeaders);
+            OUT ImsList<PreferenceHeader*>& objHeaders);
     static IMS_SINT32 GetCandidateScore(IN const AppConfig* pAppConfig,
             IN const CoreServiceConfig* pServiceConfig,
-            IN const IMSList<PreferenceHeader*>& objHeaders,
-            IN const IMSList<FeatureSet*>& objExtraFeatures);
+            IN const ImsList<PreferenceHeader*>& objHeaders,
+            IN const ImsList<FeatureSet*>& objExtraFeatures);
 
 private:
-    static void AddFeature(IN const AString& strTag, OUT IMSList<PreferenceHeader*>& objHeaders);
+    static void AddFeature(IN const AString& strTag, OUT ImsList<PreferenceHeader*>& objHeaders);
     static void AddFeature(IN const AString& strTag, IN const AString& strValue,
-            OUT IMSList<PreferenceHeader*>& objHeaders);
+            OUT ImsList<PreferenceHeader*>& objHeaders);
     static void AddFeature(IN const AString& strTag, IN const AString& strValue,
             IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire,
-            OUT IMSList<PreferenceHeader*>& objHeaders);
+            OUT ImsList<PreferenceHeader*>& objHeaders);
     static void AddFeature(IN IMS_BOOL bBooleanFeature, IN const AString& strTag,
             IN const AString& strValue, IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire,
-            OUT IMSList<PreferenceHeader*>& objHeaders);
+            OUT ImsList<PreferenceHeader*>& objHeaders);
 
 public:
     enum
