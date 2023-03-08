@@ -362,7 +362,7 @@ PROTECTED VIRTUAL void SipStreamSocket::Timer_TimerExpired(IN ITimer* piTimer)
 
         StopTxTimer();
 
-        IMSList<ISipSocketListener*> objTmpListeners = m_objListeners;
+        ImsList<ISipSocketListener*> objTmpListeners = m_objListeners;
 
         if (GetState() == STATE_CONNECTING)
         {

@@ -66,7 +66,7 @@ public:
 
 private:
     IMutex* m_piLock;
-    IMSMap<IMS_UINT32, IMSList<SipStackTransaction*>> m_objTxnAggregate;
+    ImsMap<IMS_UINT32, ImsList<SipStackTransaction*>> m_objTxnAggregate;
 };
 
 #endif

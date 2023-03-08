@@ -101,7 +101,7 @@ public:
         return m_pAppConfig->GetCoreServiceConfigEx(m_strServiceId);
     }
     const IpAddress& GetIpAddress() const;
-    inline const IMSList<PreferenceHeader*>& GetAcceptContactHeaders() const
+    inline const ImsList<PreferenceHeader*>& GetAcceptContactHeaders() const
     {
         return m_objAcceptContacts;
     }
@@ -131,7 +131,7 @@ public:
 
     const SipAddress* GetPublicGruu() const;
     const SipAddress* GetTemporaryGruu() const;
-    const IMSList<SipAddress*>& GetTemporaryGruus() const;
+    const ImsList<SipAddress*>& GetTemporaryGruus() const;
 
     IMS_BOOL IsBehindNat() const;
     IMS_BOOL IsEventPackageSupported(IN const AString& strEvent) const;
@@ -139,16 +139,16 @@ public:
     IMS_BOOL IsWithinTrustDomain() const;
 
     inline IMS_BOOL AddFeatureTags(
-            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE)
+            IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE)
     {
         return UpdateFeatureTags(objFeatureTags, bRegRequired, FEATURE_TAG_OP_ADD);
     }
     inline IMS_BOOL RemoveFeatureTags(
-            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE)
+            IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE)
     {
         return UpdateFeatureTags(objFeatureTags, bRegRequired, FEATURE_TAG_OP_REMOVE);
     }
-    IMS_BOOL UpdateFeatureTags(IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired,
+    IMS_BOOL UpdateFeatureTags(IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired,
             IN IMS_SINT32 nOperation);
 
     void NotifyError(IN IMS_SINT32 nErrorCode);
@@ -425,12 +425,12 @@ private:
     // P-Preferred-Identity, From, AOR for registration
     IMS_BOOL m_bProvisionedUserId;
     SipAddress m_objImpu;
-    IMSList<ISipHeader*> m_objAuthorizedUserIds;
+    ImsList<ISipHeader*> m_objAuthorizedUserIds;
 
     // Default feature tags
     IMS_UINT32 m_nFeatureTags;
     // Caller preference; This field is included in Accept-Contact/Reject-Contact header.
-    IMSList<PreferenceHeader*> m_objAcceptContacts;
+    ImsList<PreferenceHeader*> m_objAcceptContacts;
     // Service capability; It is used to indicate the caller capability in Contact header
     CallerCapability* m_pCallerCapability;
     // Flag to track the caller capability changes

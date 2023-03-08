@@ -55,7 +55,7 @@ public:
     MOCK_METHOD(const SipAddress&, GetAor, (), (const, override));
     MOCK_METHOD(const AStringArray&, GetAssociatedUris, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetAuthorizedAor, (), (const, override));
-    MOCK_METHOD(IMSList<IRegContact*>, GetAllContacts, (), (const, override));
+    MOCK_METHOD(ImsList<IRegContact*>, GetAllContacts, (), (const, override));
     MOCK_METHOD(IRegContact*, GetContact, (IN const IpAddress& objIPA, IN IMS_SINT32 nPort),
             (const, override));
     MOCK_METHOD(IRegContact*, GetPreferredContact, (), (const, override));

@@ -138,12 +138,12 @@ PUBLIC VIRTUAL AString SipConnection::GetHeader(
     return m_pMessage->GetHeader(nHType, nIndex, strName);
 }
 
-PUBLIC VIRTUAL IMSList<AString> SipConnection::GetHeaders(IN const AString& strName)
+PUBLIC VIRTUAL ImsList<AString> SipConnection::GetHeaders(IN const AString& strName)
 {
     if (strName.GetLength() == 0)
     {
         SipPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     IMS_SINT32 nHType = SipStack::GetHeaderTypeFromName(strName);
@@ -151,7 +151,7 @@ PUBLIC VIRTUAL IMSList<AString> SipConnection::GetHeaders(IN const AString& strN
     if (SipConnection::IsInaccessibleHeader(nHType, strName))
     {
         SipPrivate::SetLastError(SipError::INVALID_OPERATION);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     return m_pMessage->GetHeaders(nHType, strName);

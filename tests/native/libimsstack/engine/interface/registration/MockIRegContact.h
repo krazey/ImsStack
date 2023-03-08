@@ -35,12 +35,12 @@ public:
     MOCK_METHOD(IMS_UINT32, GetExpires, (), (const, override));
     MOCK_METHOD(const IpAddress&, GetIpAddress, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPort, (), (const, override));
-    MOCK_METHOD(const IMSList<SipParameter*>&, GetHeaderParameters, (), (const, override));
+    MOCK_METHOD(const ImsList<SipParameter*>&, GetHeaderParameters, (), (const, override));
     MOCK_METHOD(const SipParameter*, GetInstanceParameter, (), (const, override));
     MOCK_METHOD(const SipParameter*, GetRegIdParameter, (), (const, override));
     MOCK_METHOD(const SipAddress*, GetPublicGruu, (), (const, override));
     MOCK_METHOD(const SipAddress*, GetTemporaryGruu, (), (const, override));
-    MOCK_METHOD(const IMSList<SipAddress*>&, GetTemporaryGruus, (), (const, override));
+    MOCK_METHOD(const ImsList<SipAddress*>&, GetTemporaryGruus, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsActiveBinding, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmpty, (), (const, override));
     MOCK_METHOD(void, RemoveAllHeaderParameters, (), (override));

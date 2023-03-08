@@ -124,7 +124,7 @@ public:
      *
      * @return An array of all IMedia in the ISession.
      */
-    virtual IMSList<IMedia*> GetMedia() = 0;
+    virtual ImsList<IMedia*> GetMedia() = 0;
 
     /**
      * @brief Returns the session descriptor associated with this ISession.
@@ -486,7 +486,7 @@ public:
      * @return If the caller preference is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference) = 0;
+    virtual IMS_RESULT SetCallerPreference(IN const ImsList<AString>& objCallerPreference) = 0;
 
     /**
      * @brief Sets the configurations for session control.

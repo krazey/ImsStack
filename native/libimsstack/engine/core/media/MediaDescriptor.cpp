@@ -153,7 +153,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN const AString& strAt
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes() const
+PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetAttributes() const
 {
     SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
@@ -162,11 +162,11 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes() const
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
-    const IMSList<SdpAttribute>& objSdpAttributes = pMediaParam->GetAttributes();
-    IMSList<AString> objAttributes;
+    const ImsList<SdpAttribute>& objSdpAttributes = pMediaParam->GetAttributes();
+    ImsList<AString> objAttributes;
 
     for (IMS_UINT32 i = 0; i < objSdpAttributes.GetSize(); ++i)
     {
@@ -178,7 +178,7 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes() const
     return objAttributes;
 }
 
-PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetBandwidthInfo() const
+PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetBandwidthInfo() const
 {
     SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
@@ -187,11 +187,11 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetBandwidthInfo() const
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
-    const IMSList<SdpBandwidth>& objSdpBandwidths = pMediaParam->GetBandwidths();
-    IMSList<AString> objBandwidths;
+    const ImsList<SdpBandwidth>& objSdpBandwidths = pMediaParam->GetBandwidths();
+    ImsList<AString> objBandwidths;
 
     for (IMS_UINT32 i = 0; i < objSdpBandwidths.GetSize(); ++i)
     {
@@ -312,7 +312,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN const AString& st
 }
 
 PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetBandwidthInfo(
-        IN const IMSList<AString>& strBandwidthInfos)
+        IN const ImsList<AString>& strBandwidthInfos)
 {
     // Check a media state
     IMS_SINT32 nState = m_piMediaState->GetMediaState();
@@ -338,7 +338,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetBandwidthInfo(
         return IMS_FAILURE;
     }
 
-    IMSList<SdpBandwidth> objBandwidths;
+    ImsList<SdpBandwidth> objBandwidths;
     SdpBandwidth objBandwidth;
 
     for (IMS_UINT32 i = 0; i < strBandwidthInfos.GetSize(); ++i)
@@ -649,7 +649,7 @@ PRIVATE VIRTUAL const AString& MediaDescriptor::GetAttribute(
     return pAttribute->GetAttributeValue();
 }
 
-PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes(
+PRIVATE VIRTUAL ImsList<AString> MediaDescriptor::GetAttributes(
         IN IMS_SINT32 nType, IN const AString& strType /*= AString::ConstNull()*/) const
 {
     SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
@@ -659,7 +659,7 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes(
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0, "No peer media parameter", 0, 0, 0);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     // Special attributes for SDP negotiation
@@ -671,19 +671,19 @@ PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes(
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
     else if (nType == SdpAttribute::MID)
     {
-        IMSList<AString> objAttributeValues;
+        ImsList<AString> objAttributeValues;
 
         objAttributeValues.Append(pMediaParam->GetAttributeMid());
 
         return objAttributeValues;
     }
 
-    IMSList<AString> objAttributeValues;
-    const IMSList<SdpAttribute>& objAttributes = pMediaParam->GetAttributes();
+    ImsList<AString> objAttributeValues;
+    const ImsList<SdpAttribute>& objAttributes = pMediaParam->GetAttributes();
 
     if (nType != SdpAttribute::ATTRIBUTE_OTHER)
     {
@@ -877,13 +877,13 @@ PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionEx() const
     return &(pMediaParam->GetMedia());
 }
 
-PRIVATE VIRTUAL const IMSList<SdpMediaFormat*>& MediaDescriptor::GetMediaFormats() const
+PRIVATE VIRTUAL const ImsList<SdpMediaFormat*>& MediaDescriptor::GetMediaFormats() const
 {
     SdpMediaParameter* pMediaParam = m_piMediaState->GetPeerMediaParameter(m_nMid);
 
     if (pMediaParam == IMS_NULL)
     {
-        static IMSList<SdpMediaFormat*> objMediaFormats;
+        static ImsList<SdpMediaFormat*> objMediaFormats;
 
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
@@ -1283,7 +1283,7 @@ PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN const SdpMediaForm
             }
 
             // Media format parameter :: rtcp-fb / framesize / ...
-            const IMSList<SdpMediaFormatParameter*>& objExtraParameters =
+            const ImsList<SdpMediaFormatParameter*>& objExtraParameters =
                     pMediaFormat->GetExtraParameters();
 
             for (IMS_UINT32 i = 0; i < objExtraParameters.GetSize(); ++i)

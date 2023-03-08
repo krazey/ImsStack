@@ -51,11 +51,11 @@ PRIVATE VIRTUAL void CapabilitiesImpl::Destroy()
     delete this;
 }
 
-PRIVATE VIRTUAL IMSList<IMessage*> CapabilitiesImpl::GetPreviousResponses(
+PRIVATE VIRTUAL ImsList<IMessage*> CapabilitiesImpl::GetPreviousResponses(
         IN IMS_SINT32 nServiceMethod) const
 {
-    IMSList<IMessage*> objIMessages;
-    IMSList<Message*> objResponses = m_pCapabilities->GetPreviousResponses(nServiceMethod);
+    ImsList<IMessage*> objIMessages;
+    ImsList<Message*> objResponses = m_pCapabilities->GetPreviousResponses(nServiceMethod);
 
     for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
     {

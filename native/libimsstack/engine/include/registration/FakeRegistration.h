@@ -51,7 +51,7 @@ public:
     IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN const SipAddress& objAor,
             IN const AString& strSubsId = AString::ConstNull(), IN SipProfile* pProfile = IMS_NULL);
     void Destroy();
-    inline const IMSList<RegContact*>& GetAllContactsEx() const { return m_objContacts; }
+    inline const ImsList<RegContact*>& GetAllContactsEx() const { return m_objContacts; }
     IMS_BOOL HasActiveBindings() const;
     IMS_BOOL IsAllBindingsRemoved() const;
 
@@ -83,7 +83,7 @@ private:
     {
         return m_pStateTracker->GetAuthorizedAor();
     }
-    IMSList<IRegContact*> GetAllContacts() const override;
+    ImsList<IRegContact*> GetAllContacts() const override;
     IRegContact* GetContact(IN const IpAddress& objIpAddr, IN IMS_SINT32 nPort) const override;
     inline IRegContact* GetPreferredContact() const override
     {
@@ -220,7 +220,7 @@ private:
     // Parameters for registration
     RegParameter* m_pRegParam;
     // Registration contact list
-    IMSList<RegContact*> m_objContacts;
+    ImsList<RegContact*> m_objContacts;
     // Registration State Tracker
     // IMPU & Network authorized IMPU (topmost one in P-Associated-URI)
     // Persistent information (P-Associated-URI, Service-Routes) which MUST be kept
@@ -232,7 +232,7 @@ private:
     IRegUserIdentityNotifier* m_piUserIdNotifier;
 
     // Observers of reg. state
-    IMSList<RegObserver*> m_objObservers;
+    ImsList<RegObserver*> m_objObservers;
 
     // For trust domain checking
     IMS_BOOL m_bIsWithinTrustDomain;

@@ -20,7 +20,7 @@
 PRIVATE
 CallerPreferenceManager::CallerPreferenceManager() :
         m_objEmptyPreferenceWrapper(PreferenceWrapper()),
-        m_objPreferenceWrappers(IMSMap<AString, PreferenceWrapper>())
+        m_objPreferenceWrappers(ImsMap<AString, PreferenceWrapper>())
 {
 }
 
@@ -49,7 +49,7 @@ void CallerPreferenceManager::DestroyPreferenceWrapper(IN const AString& strName
 }
 
 PUBLIC
-const IMSList<AString>& CallerPreferenceManager::GetAcceptContacts(
+const ImsList<AString>& CallerPreferenceManager::GetAcceptContacts(
         IN const AString& strDialogId) const
 {
     for (IMS_UINT32 i = 0; i < m_objPreferenceWrappers.GetSize(); ++i)
@@ -66,7 +66,7 @@ const IMSList<AString>& CallerPreferenceManager::GetAcceptContacts(
 }
 
 PUBLIC
-const IMSList<AString>& CallerPreferenceManager::GetAcceptContactsByName(
+const ImsList<AString>& CallerPreferenceManager::GetAcceptContactsByName(
         IN const AString& strName) const
 {
     IMS_SLONG nIndex = m_objPreferenceWrappers.GetIndexOfKey(strName);
@@ -83,7 +83,7 @@ const IMSList<AString>& CallerPreferenceManager::GetAcceptContactsByName(
 
 PUBLIC
 void CallerPreferenceManager::UpdateAcceptContacts(
-        IN const AString& strName, IN const IMSList<AString>& objAcceptContacts)
+        IN const AString& strName, IN const ImsList<AString>& objAcceptContacts)
 {
     IMS_SLONG nIndex = m_objPreferenceWrappers.GetIndexOfKey(strName);
 

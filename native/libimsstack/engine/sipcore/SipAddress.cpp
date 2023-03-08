@@ -109,7 +109,7 @@ IMS_BOOL SipAddress::UserInfoPart::Create(IN const AString& strUserInfo)
 
     if (m_strUser.Contains(TextParser::CHAR_SEMICOLON))
     {
-        IMSList<AString> objTokens = m_strUser.Split(TextParser::CHAR_SEMICOLON);
+        ImsList<AString> objTokens = m_strUser.Split(TextParser::CHAR_SEMICOLON);
 
         m_strUser = objTokens.GetAt(0);
 
@@ -1087,9 +1087,9 @@ AString SipAddress::ToString() const
     return static_cast<const AStringBuffer&>(objSipAddr).GetString();
 }
 
-PUBLIC GLOBAL const IMSList<SipAddress*>& SipAddress::ConstEmptyList()
+PUBLIC GLOBAL const ImsList<SipAddress*>& SipAddress::ConstEmptyList()
 {
-    static const IMSList<SipAddress*> CONST_EMPTY_LIST = IMSList<SipAddress*>();
+    static const ImsList<SipAddress*> CONST_EMPTY_LIST = ImsList<SipAddress*>();
     return CONST_EMPTY_LIST;
 }
 
@@ -1608,7 +1608,7 @@ IMS_BOOL SipAddress::Decode(IN const AString& strAddress, IN IMS_BOOL bParsePara
                 AString strParams = strUri.GetSubStr(nParamIndex + 1);
 
                 // Parsing the uri-parameters
-                IMSList<AString> objTokens = strParams.Split(TextParser::CHAR_SEMICOLON);
+                ImsList<AString> objTokens = strParams.Split(TextParser::CHAR_SEMICOLON);
 
                 for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
                 {

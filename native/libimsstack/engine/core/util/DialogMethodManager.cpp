@@ -27,7 +27,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 PRIVATE
 DialogMethodManager::DialogMethodManager() :
         m_piLock(IMS_NULL),
-        m_objDialogMethods(IMSMap<AString, IDialogMethod*>())
+        m_objDialogMethods(ImsMap<AString, IDialogMethod*>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }

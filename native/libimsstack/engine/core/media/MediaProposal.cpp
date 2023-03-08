@@ -25,7 +25,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 PUBLIC
 MediaProposal::MediaProposal(IN ISdpOaState* piOaState) :
         m_piOaState(piOaState),
-        m_objDescriptors(IMSList<MediaDescriptor*>())
+        m_objDescriptors(ImsList<MediaDescriptor*>())
 {
 }
 
@@ -50,7 +50,7 @@ PUBLIC VIRTUAL MediaProposal::~MediaProposal()
 }
 
 PUBLIC
-IMS_BOOL MediaProposal::CreateDescriptor(IN const IMSList<MediaDescriptor*>& objDescriptors)
+IMS_BOOL MediaProposal::CreateDescriptor(IN const ImsList<MediaDescriptor*>& objDescriptors)
 {
     IMS_SINT32 nResult = m_piOaState->CreateProposalView();
 

@@ -278,7 +278,7 @@ Media* VirtualSession::CreateMedia(IN const AString& strType, IN IMS_SINT32 nDir
 }
 
 PUBLIC
-const IMSList<Media*>& VirtualSession::GetMedia() const
+const ImsList<Media*>& VirtualSession::GetMedia() const
 {
     if (GetState() == STATE_TERMINATED)
     {
@@ -698,7 +698,7 @@ IMS_SINT32 VirtualSession::HandleSdpOfferAnswer(IN const ISipMessage* piSipMsg)
 
             if (pSessionParam != IMS_NULL)
             {
-                const IMSList<SdpMediaParameter*>& objMediaParams =
+                const ImsList<SdpMediaParameter*>& objMediaParams =
                         pSessionParam->GetMediaParameters();
 
                 for (IMS_UINT32 i = 0; i < objMediaParams.GetSize(); i++)
@@ -976,7 +976,7 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
     {
         // Iterate over all offered media parameters and update and create a media object.
         IMS_UINT32 nMediaIndex = 0;
-        IMSList<SdpMediaParameter*> objGroupMediaParams;
+        ImsList<SdpMediaParameter*> objGroupMediaParams;
 
         for (IMS_SINT32 i = 0; i < nMediaCount; ++i)
         {
@@ -1012,7 +1012,7 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 
                 if (nMediaIndex >= m_objMedias.GetSize())
                 {
-                    IMSList<IMS_SINT32> objMids;
+                    ImsList<IMS_SINT32> objMids;
 
                     for (IMS_UINT32 j = 0; j < objGroupMediaParams.GetSize(); ++j)
                     {

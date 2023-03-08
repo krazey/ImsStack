@@ -32,10 +32,10 @@ public:
 public:
     IMS_BOOL CreatePreferenceWrapper(IN const AString& strName, IN const AString& strDialogId);
     void DestroyPreferenceWrapper(IN const AString& strName);
-    const IMSList<AString>& GetAcceptContacts(IN const AString& strDialogId) const;
-    const IMSList<AString>& GetAcceptContactsByName(IN const AString& strName) const;
+    const ImsList<AString>& GetAcceptContacts(IN const AString& strDialogId) const;
+    const ImsList<AString>& GetAcceptContactsByName(IN const AString& strName) const;
     void UpdateAcceptContacts(
-            IN const AString& strName, IN const IMSList<AString>& objAcceptContacts);
+            IN const AString& strName, IN const ImsList<AString>& objAcceptContacts);
     void UpdateDialogId(IN const AString& strName, IN const AString& strDialogId);
 
     static CallerPreferenceManager* GetInstance();
@@ -46,7 +46,7 @@ private:
     public:
         inline PreferenceWrapper() :
                 m_strDialogId(AString::ConstNull()),
-                m_objAcceptContacts(IMSList<AString>())
+                m_objAcceptContacts(ImsList<AString>())
         {
         }
 
@@ -71,9 +71,9 @@ private:
         }
 
     public:
-        inline const IMSList<AString>& GetAcceptContacts() const { return m_objAcceptContacts; }
+        inline const ImsList<AString>& GetAcceptContacts() const { return m_objAcceptContacts; }
         inline const AString& GetDialogId() const { return m_strDialogId; }
-        inline void SetAcceptContacts(IN const IMSList<AString>& objAcceptContacts)
+        inline void SetAcceptContacts(IN const ImsList<AString>& objAcceptContacts)
         {
             m_objAcceptContacts = objAcceptContacts;
         }
@@ -81,14 +81,14 @@ private:
 
     public:
         AString m_strDialogId;
-        IMSList<AString> m_objAcceptContacts;
+        ImsList<AString> m_objAcceptContacts;
     };
 
 private:
     // Empty PreferenceWrapper
     PreferenceWrapper m_objEmptyPreferenceWrapper;
     // Name (identifier) / AcceptContactWrapper
-    IMSMap<AString, PreferenceWrapper> m_objPreferenceWrappers;
+    ImsMap<AString, PreferenceWrapper> m_objPreferenceWrappers;
 };
 
 #endif

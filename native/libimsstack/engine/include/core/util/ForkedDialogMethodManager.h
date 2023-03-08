@@ -48,7 +48,7 @@ private:
 
     IMutex* m_piLock;
     // Name (identifier), Pointer of IForkedDialogMethod
-    IMSMap<AString, IForkedDialogMethod*> m_objDialogMethods;
+    ImsMap<AString, IForkedDialogMethod*> m_objDialogMethods;
 };
 
 #endif

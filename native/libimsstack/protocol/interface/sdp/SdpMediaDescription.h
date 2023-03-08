@@ -55,7 +55,7 @@ public:
     /**
      * @brief Returns the list of SdpConnection object in the media-level description.
      */
-    inline const IMSList<SdpConnection>& GetConnections() const { return m_objConnections; }
+    inline const ImsList<SdpConnection>& GetConnections() const { return m_objConnections; }
 
     /**
      * @brief Removes all the SdpConnection objects from the media-level description.
@@ -65,7 +65,7 @@ public:
     /**
      * @brief Sets the SdpConnection objects to the media-level description.
      */
-    void SetConnections(IN const IMSList<SdpConnection>& objConnections);
+    void SetConnections(IN const ImsList<SdpConnection>& objConnections);
 
     /**
      * @brief Sets the SdpMedia object to the media-level description.
@@ -74,7 +74,7 @@ public:
 
 private:
     SdpMedia m_objMedia;
-    IMSList<SdpConnection> m_objConnections;
+    ImsList<SdpConnection> m_objConnections;
 };
 
 #endif

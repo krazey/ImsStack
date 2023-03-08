@@ -45,7 +45,7 @@ public:
 private:
     IMS_UINT32 m_nGlobalSessionId;
     // <session-id> , <replaces> pair
-    IMSMap<AString, Replaces*> m_objSessions;
+    ImsMap<AString, Replaces*> m_objSessions;
 };
 
 #endif

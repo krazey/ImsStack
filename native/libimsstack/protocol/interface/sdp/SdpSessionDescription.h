@@ -83,7 +83,7 @@ public:
     /**
      * @brief Returns the SdpTimeDescription objects from the session-level description.
      */
-    inline const IMSList<SdpTimeDescription>& GetTimeDescriptions() const
+    inline const ImsList<SdpTimeDescription>& GetTimeDescriptions() const
     {
         return m_objTimeDescriptions;
     }
@@ -110,7 +110,7 @@ protected:
     SdpSessionName m_objSessionName;
     SdpUri* m_pUri;
     SdpConnection* m_pConnection;
-    IMSList<SdpTimeDescription> m_objTimeDescriptions;
+    ImsList<SdpTimeDescription> m_objTimeDescriptions;
     SdpTimezone* m_pTimezone;
 
     // SDPEmail / SDPPhone does not include in this version

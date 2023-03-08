@@ -58,8 +58,8 @@ private:
     };
 
     IMS_SINT32 m_nState;
-    IMSList<SipDialogState*> m_objDialogStates;
-    IMSList<SipConnectionNotifier*> m_objScns;
+    ImsList<SipDialogState*> m_objDialogStates;
+    ImsList<SipConnectionNotifier*> m_objScns;
 };
 
 #endif

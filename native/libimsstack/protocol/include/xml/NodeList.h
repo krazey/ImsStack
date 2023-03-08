@@ -35,7 +35,7 @@ public:
     IMS_RESULT AddNode(IN INode* piNode);
 
 private:
-    IMSList<INode*> m_objNodes;
+    ImsList<INode*> m_objNodes;
 };
 
 #endif

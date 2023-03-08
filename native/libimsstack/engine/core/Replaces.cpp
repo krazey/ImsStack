@@ -106,7 +106,7 @@ PUBLIC
 IMS_BOOL Replaces::Create(IN const AString& strReplacesHeader, IN IMS_BOOL bUas /*= IMS_TRUE*/)
 {
     AString strReplaces = TextParser::DoPercentDecoding(strReplacesHeader);
-    IMSList<AString> objTokens = strReplaces.Split(TextParser::CHAR_SEMICOLON);
+    ImsList<AString> objTokens = strReplaces.Split(TextParser::CHAR_SEMICOLON);
 
     if (objTokens.GetSize() < 3)
     {

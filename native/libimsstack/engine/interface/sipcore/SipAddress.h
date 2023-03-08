@@ -85,7 +85,7 @@ public:
          *
          * @return List of pointer to SipParameter.
          */
-        inline const IMSList<SipParameter*>& GetParameters() const { return m_objParameters; }
+        inline const ImsList<SipParameter*>& GetParameters() const { return m_objParameters; }
 
     private:
         void RemoveAllParameters();
@@ -93,7 +93,7 @@ public:
     private:
         AString m_strUser;
         AString m_strPassword;
-        IMSList<SipParameter*> m_objParameters;
+        ImsList<SipParameter*> m_objParameters;
     };
 
 public:
@@ -172,7 +172,7 @@ public:
      *
      * @return List of uri-header parameter.
      */
-    inline const IMSList<ISipHeader*>& GetHeaders() const { return m_objHeaders; }
+    inline const ImsList<ISipHeader*>& GetHeaders() const { return m_objHeaders; }
 
     /**
      * @brief Returns the host part of SIP address.
@@ -199,7 +199,7 @@ public:
      *
      * @return List of uri-parameter.
      */
-    inline const IMSList<SipParameter*>& GetParameters() const { return m_objParams; }
+    inline const ImsList<SipParameter*>& GetParameters() const { return m_objParams; }
 
     /**
      * @brief Returns the port number of the SIP address.
@@ -487,7 +487,7 @@ public:
      *
      * @return Reference to the list of SipAddresses (empty list).
      */
-    static const IMSList<SipAddress*>& ConstEmptyList();
+    static const ImsList<SipAddress*>& ConstEmptyList();
 
     /**
      * @brief Returns the default SipAddress (null).
@@ -565,10 +565,10 @@ private:
     // Optional field
     //        headers := header *("&" header)
     //        header := hname "=" hvalue
-    IMSList<ISipHeader*> m_objHeaders;
+    ImsList<ISipHeader*> m_objHeaders;
 
     // URI parameters
-    IMSList<SipParameter*> m_objParams;
+    ImsList<SipParameter*> m_objParams;
 
     // Parser of userinfo part
     mutable UserInfoPart* m_pUserInfoPart;

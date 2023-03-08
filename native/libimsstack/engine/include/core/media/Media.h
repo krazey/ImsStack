@@ -44,7 +44,7 @@ public:
     virtual IMS_SINT32 GetType() const = 0;
 
     inline IMS_SINT32 GetDirection() const { return m_nDirection; }
-    inline const IMSList<MediaDescriptor*>& GetMediaDescriptors() const { return m_objDescriptors; }
+    inline const ImsList<MediaDescriptor*>& GetMediaDescriptors() const { return m_objDescriptors; }
     MediaProposal* GetProposal() const;
     inline IMS_SINT32 GetState() const { return m_nState; }
     IMS_SINT32 GetUpdateState() const;
@@ -88,7 +88,7 @@ protected:
     inline virtual void PostRemoveMedia() {}
 
     IMS_BOOL InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDirection);
-    IMS_BOOL InitInstance(IN const IMSList<IMS_SINT32>& objMids);
+    IMS_BOOL InitInstance(IN const ImsList<IMS_SINT32>& objMids);
     IMS_BOOL IsMediaAccepted() const;
     IMS_BOOL IsMediaProposed() const;
     inline Service* GetService() const { return m_pService; }
@@ -183,7 +183,7 @@ private:
     IMS_SINT32 m_nState;
     IMS_SINT32 m_nUpdateState;
     IMS_SINT32 m_nDirection;
-    IMSList<MediaDescriptor*> m_objDescriptors;
+    ImsList<MediaDescriptor*> m_objDescriptors;
     IOnMediaListener* m_piListener;
     IMS_BOOL m_bDirectionOnlyUpdated;
     IMS_BOOL m_bInitializationDone;

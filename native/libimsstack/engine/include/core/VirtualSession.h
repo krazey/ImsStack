@@ -44,7 +44,7 @@ public:
 
     Media* CreateMedia(IN const AString& strType, IN IMS_SINT32 nDirection,
             IN IMS_SINT32 nCountOfDescriptor = 0);
-    const IMSList<Media*>& GetMedia() const;
+    const ImsList<Media*>& GetMedia() const;
     SessionDescriptor* GetSessionDescriptor();
     inline IMS_SINT32 GetState() const { return m_nState; }
     IMS_RESULT RemoveMedia(IN Media* pMedia);
@@ -108,7 +108,7 @@ private:
     IMS_SINT32 m_nState;
     SdpOaState* m_pOaState;
     SessionDescriptor* m_pSessionDescriptor;
-    IMSList<Media*> m_objMedias;
+    ImsList<Media*> m_objMedias;
 };
 
 #endif
