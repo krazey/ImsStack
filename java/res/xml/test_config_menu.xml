@@ -106,4 +106,10 @@
         android:key="test_clear_config" android:defaultValue="-1" android:enabled="true"
         android:selectable="true">
     </ListPreference>
+    <ListPreference android:title="Debug Screen"
+        android:entryValues="@array/two_state_value"
+        android:entries="@array/two_state_entry"
+        android:key="test_debug_screen" android:defaultValue="-1" android:enabled="true"
+        android:selectable="true">
+    </ListPreference>
 </PreferenceScreen>

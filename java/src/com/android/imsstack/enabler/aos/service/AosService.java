@@ -494,6 +494,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
 
         sendRequest(parcel);
+
+        notifyCapabilitiesUpdated(mCapabilityPairs);
     }
 
     private void handleCarrierSignalPcoValueChanged(Intent intent) {
@@ -636,6 +638,12 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
         }
     }
 
+    private void onCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
+        for (IAosRegistrationListener l : mAosRegistationListeners) {
+            l.notifyCapabilitiesUpdated(pairs);
+        }
+    }
+
     private void onRegEventStateChanged(int statusCode, Set<Uri> impus) {
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyRegEventStateChanged(statusCode, impus);
@@ -727,6 +735,16 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
             @Override
             public void run() {
                 onCapabilitiesUpdateFailed(capabilities, networkType, reason);
+            }
+        });
+    }
+
+    private void notifyCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
+        ImsLog.d(mSlotId, "notifyCapabilitiesUpdated :: pairs(" + pairs.toString() + ")");
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                onCapabilitiesUpdated(pairs);
             }
         });
     }

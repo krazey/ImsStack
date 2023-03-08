@@ -32,6 +32,7 @@ import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.jni.JniIms;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.ImsPrivateProperties;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -54,6 +55,7 @@ public class AosFactoryTest {
     @Mock JniIms mMockJniIms;
     @Mock AosService mMockAosService;
     @Mock AosSettingService mMockAosSettingService;
+    @Mock AosDebug mMockAosDebug;
 
     @BeforeClass
     public static void setUpOnce() {
@@ -104,9 +106,36 @@ public class AosFactoryTest {
     }
 
     @Test
+    public void init_creatingServices_withoutDebugScreen() {
+        boolean originalDebugScreenEnabled = getDebugScreenEnabled(SLOT_0);
+        setDebugScreenEnabled(false, SLOT_0);
+        assertNull(mAosFactory.getAosDebug(SLOT_0));
+
+        mAosFactory.init(SLOT_0);
+        assertNull(mAosFactory.getAosDebug(SLOT_0));
+
+        setDebugScreenEnabled(originalDebugScreenEnabled, SLOT_0);
+        mAosFactory.cleanup(SLOT_0);
+    }
+
+    @Test
+    public void init_creatingServices_withDebugScreen() {
+        boolean originalDebugScreenEnabled = getDebugScreenEnabled(SLOT_0);
+        setDebugScreenEnabled(true, SLOT_0);
+        assertNull(mAosFactory.getAosDebug(SLOT_0));
+
+        mAosFactory.init(SLOT_0);
+        assertNotNull(mAosFactory.getAosDebug(SLOT_0));
+
+        setDebugScreenEnabled(originalDebugScreenEnabled, SLOT_0);
+        mAosFactory.cleanup(SLOT_0);
+    }
+
+    @Test
     public void cleanup_removingServices() {
         mAosFactory.mAosServices.put(SLOT_0, mMockAosService);
         mAosFactory.mAosSettingServices.put(SLOT_0, mMockAosSettingService);
+        mAosFactory.mAosDebugs.put(SLOT_0, mMockAosDebug);
 
         mAosFactory.cleanup(SLOT_0);
 
@@ -115,6 +144,7 @@ public class AosFactoryTest {
         assertNull(mAosFactory.getAosRegistration(SLOT_0));
         assertNull(mAosFactory.getAosInfo(SLOT_0));
         assertEquals(0, mAosFactory.mAosSettingServices.size());
+        assertNull(mAosFactory.getAosDebug(SLOT_0));
     }
 
     @Test
@@ -133,5 +163,15 @@ public class AosFactoryTest {
         mAosFactory.stop(SLOT_0);
 
         verify(mMockAosService).stop();
+    }
+
+    private void setDebugScreenEnabled(boolean isEnabled, int slotId) {
+        ImsPrivateProperties.Persistent.setBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_SCREEN_ENABLED, isEnabled, slotId);
+    }
+
+    private boolean getDebugScreenEnabled(int slotId) {
+        return ImsPrivateProperties.Persistent.getBoolean(
+                ImsPrivateProperties.Persistent.KEY_TEST_DEBUG_SCREEN_ENABLED, false, slotId);
     }
 }

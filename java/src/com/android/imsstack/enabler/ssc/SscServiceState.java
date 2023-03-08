@@ -828,6 +828,11 @@ public class SscServiceState {
         }
 
         @Override
+        public void notifyCapabilitiesUpdated(IAosRegistration.CapabilityPairs pairs) {
+            // Do nothing.
+        }
+
+        @Override
         public void notifyRegEventStateChanged(int statusCode, @NonNull Set<Uri> impus){
             // do nothing
         }
