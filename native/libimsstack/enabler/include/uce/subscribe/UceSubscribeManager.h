@@ -38,7 +38,7 @@ public:
   */
 public:
     IMS_BOOL QuerySingleCapability(IN const AString& strUser, IN IMS_UINT32 key);
-    IMS_BOOL QueryMultiCapability(IN const IMSList<AString>& objUsers, IN IMS_UINT32 key);
+    IMS_BOOL QueryMultiCapability(IN const ImsList<AString>& objUsers, IN IMS_UINT32 key);
     IMS_BOOL AosConnected(IMS_UINT32 conectedService);
     IMS_BOOL AosDisConnected();
     void ClosedService();  // core service closed
@@ -54,7 +54,7 @@ private:
     ---------------------------------------------------------------------------------------------
   */
 protected:
-    IMSList<UceSubscribe*> m_objUceSubscribeList;  // Subscription List
+    ImsList<UceSubscribe*> m_objUceSubscribeList;  // Subscription List
     ICoreService* m_piCoreService;
     AString m_strAppName;
     IMS_SINT32 m_nSimSlot;

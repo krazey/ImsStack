@@ -404,7 +404,7 @@ IMS_BOOL UceSubscribe::QuerySingleCapability(IN const AString& strUser, IN IMS_U
     return IMS_TRUE;
 }
 
-IMS_BOOL UceSubscribe::QueryMultiCapability(IN const IMSList<AString>& objUsers, IN IMS_UINT32 key)
+IMS_BOOL UceSubscribe::QueryMultiCapability(IN const ImsList<AString>& objUsers, IN IMS_UINT32 key)
 {
     IMS_TRACE_I("QueryMultiCapability - Trigger multi capability discovery", 0, 0, 0);
     m_nKey = key;
@@ -1072,7 +1072,7 @@ void UceSubscribe::SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError)
     m_nKey = 0;
 }
 
-void UceSubscribe::SendPresenceNotifyInd(const IMSList<AString>& pidfXmls)
+void UceSubscribe::SendPresenceNotifyInd(const ImsList<AString>& pidfXmls)
 {
     if (m_nKey == 0)
     {
@@ -1105,10 +1105,10 @@ void UceSubscribe::SendSubscribeResourceTerminatedInd(UceNonCapabilityUsers* non
         IMS_TRACE_E(0, "SendSubscribeResourceTerminatedInd:nonCapUsers is null", 0, 0, 0);
         return;
     }
-    IMSList<UceNonCapabilityUser*> pList = nonCapUsers->GetNonCapabilityUser();
+    ImsList<UceNonCapabilityUser*> pList = nonCapUsers->GetNonCapabilityUser();
     IMS_TRACE_I("SendSubscribeResourceTerminatedInd:key[%d],size[%d]", m_nKey, pList.GetSize(), 0);
     IMS_UINT32 nCount = 0;
-    IMSList<IUceTerminatedReason*> terminateContacts;
+    ImsList<IUceTerminatedReason*> terminateContacts;
     for (IMS_UINT32 i = 0; i < pList.GetSize(); i++)
     {
         UceNonCapabilityUser* user = pList.GetAt(i);
@@ -1328,7 +1328,7 @@ ISubscribeResponseData* UceSubscribe::GetSubscribeResponseData(ISipMessage* piMe
     pSubscribeResponseData->m_nResponseCode = piMessage->GetStatusCode();
     pSubscribeResponseData->m_strReason = piMessage->GetReasonPhrase();
 
-    IMSList<AString> objReasonHeaders = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
+    ImsList<AString> objReasonHeaders = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
     if (objReasonHeaders.IsEmpty())
     {
         return pSubscribeResponseData;
@@ -1379,7 +1379,7 @@ IMS_BOOL UceSubscribe::Handle403FailureResponse(ISipMessage* piSIPMessage)
         IMS_TRACE_I("ReasonPhrase:Not Authorized for presence", 0, 0, 0);
         return IMS_FALSE;
     }
-    IMSList<AString> objReasonList = piSIPMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
+    ImsList<AString> objReasonList = piSIPMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
     if (objReasonList.IsEmpty() == IMS_TRUE)
     {
         IMS_TRACE_D("No Reason header present", 0, 0, 0);
@@ -1441,13 +1441,13 @@ IMS_BOOL UceSubscribe::HandleNotifyInd(IN ISipMessage* piSIPMessage)
 {
     IMS_TRACE_D("HandleNotifyInd:m_nThreadRunningCompleted [%d]", m_nThreadRunningCompleted, 0, 0);
     AString strSIPSubState = piSIPMessage->GetHeader(ISipHeader::SUBSCRIPTION_STATE);
-    IMSList<ISipMessageBodyPart*> objBodyParts = piSIPMessage->GetBodyParts();
+    ImsList<ISipMessageBodyPart*> objBodyParts = piSIPMessage->GetBodyParts();
     IMS_TRACE_D("HandleNotifyInd:Subscription-State [%s]", strSIPSubState.GetStr(), 0, 0);
 
     AString strContentType = piSIPMessage->GetHeader(ISipHeader::CONTENT_TYPE);
     if (strContentType.Contains("application/pidf+xml"))
     {
-        IMSList<AString> pidfXmls = IMSList<AString>();
+        ImsList<AString> pidfXmls = ImsList<AString>();
         for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); i++)
         {
             ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);

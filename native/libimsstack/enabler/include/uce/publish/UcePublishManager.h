@@ -275,7 +275,7 @@ private:
     AString m_strAppName;
 
     // variable that caches the configuration value.
-    IMSVector<IMS_SINT32> m_objExponentialRetryTimeSec;
+    ImsVector<IMS_SINT32> m_objExponentialRetryTimeSec;
     IMS_BOOL m_bAoSConnected;
     IMS_UINT32 m_nExtended;  // service availability = timer of publish refresh
     // If TMUS supports the encoded body, the pidf xml must be gzipped. If a

@@ -37,7 +37,7 @@ UceRlmiComposer::~UceRlmiComposer()
 }
 
 PUBLIC
-AString UceRlmiComposer::ComposeRLMIList(IN IMSList<AString>& pContactInfoList)
+AString UceRlmiComposer::ComposeRLMIList(IN ImsList<AString>& pContactInfoList)
 {
     IMS_TRACE_D("ComposeRLMIList ", 0, 0, 0);
     IXmlStreamWriter* piWriter = IMS_NULL;

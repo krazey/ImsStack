@@ -23,8 +23,8 @@ __IMS_TRACE_TAG_USER_DECL__("Uce");
 
 PRIVATE GLOBAL UceFactory* UceFactory::m_gpUceFactory = IMS_NULL;
 
-PRIVATE GLOBAL IMSMap<IMS_SINT32, UceApp*> UceFactory::m_objUceManagers =
-        IMSMap<IMS_SINT32, UceApp*>();
+PRIVATE GLOBAL ImsMap<IMS_SINT32, UceApp*> UceFactory::m_objUceManagers =
+        ImsMap<IMS_SINT32, UceApp*>();
 
 PUBLIC
 UceFactory::UceFactory()

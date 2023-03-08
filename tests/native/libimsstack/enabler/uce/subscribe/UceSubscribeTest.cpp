@@ -78,8 +78,8 @@ public:
     void SetKey(IMS_UINT32 key) { m_nKey = key; }
     void SetRemoteUser(const AString& remoteUser) { m_strRemoteUser = remoteUser; }
     AString GetRemoteUser() const { return m_strRemoteUser; }
-    void SetRemoteUsers(const IMSList<AString>& objUsers) { m_objRemoteUsers = objUsers; }
-    IMSList<AString> GetRemoteUsers() const { return m_objRemoteUsers; }
+    void SetRemoteUsers(const ImsList<AString>& objUsers) { m_objRemoteUsers = objUsers; }
+    ImsList<AString> GetRemoteUsers() const { return m_objRemoteUsers; }
     IMS_UINT32 GetState() const { return m_eState; }
     void setState(IMS_UINT32 state) { SetState(state); }
     void SetConectedService(IMS_UINT32 service) { m_nConnectedServices = service; }
@@ -317,7 +317,7 @@ TEST_F(UceSubscribeTest, QueryMultiCapability)
     AString strUser3 = AString("tel:+123458");
     AString strUser4 = AString("tel:+123459");
 
-    IMSList<AString> objUsers = IMSList<AString>();
+    ImsList<AString> objUsers = ImsList<AString>();
     objUsers.Append(strUser1);
     objUsers.Append(strUser2);
     objUsers.Append(strUser3);
@@ -562,7 +562,7 @@ TEST_F(UceSubscribeTest, StateON_ListSubscribeRequested)
     pUceSubscribe->onListSubscribeRequested(objMsg);
 
     pUceSubscribe->SetKey(key);
-    IMSList<AString> objUsers = IMSList<AString>();
+    ImsList<AString> objUsers = ImsList<AString>();
     AString strUser1 = AString("tel:+123456");
     objUsers.Append(strUser1);
     pUceSubscribe->SetRemoteUsers(objUsers);
@@ -660,7 +660,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBING_Subscribed)
     pUceSubscribe->SetISubscription(&objMockISubscription);
     MockISipMessage objMockISipMessage;
     AString reason = "OK";
-    IMSList<AString> objReasonHeaders;
+    ImsList<AString> objReasonHeaders;
     objReasonHeaders.Clear();
     ON_CALL(objMockISubscription, GetPreviousResponse).WillByDefault(Return(&objMockIMessage));
     ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
@@ -697,7 +697,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBING_SubscribeFailed)
     pUceSubscribe->SetISubscription(&objMockISubscription);
     MockISipMessage objMockISipMessage;
     AString reason = "OK";
-    IMSList<AString> objReasonHeaders;
+    ImsList<AString> objReasonHeaders;
     objReasonHeaders.Clear();
     ON_CALL(objMockISubscription, GetPreviousResponse).WillByDefault(Return(&objMockIMessage));
     ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
@@ -776,7 +776,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBING_NotifyReceivedWithNotifyBody)
     MockIMessage objMockIMessage;
     MockISipMessage objMockISipMessage;
     MockISipMessageBodyPart objISipMessageBodyPart;
-    IMSList<ISipMessageBodyPart*> objBodyParts;
+    ImsList<ISipMessageBodyPart*> objBodyParts;
     objBodyParts.Append(&objISipMessageBodyPart);
     ByteArray objContent = ByteArray("test");
 
@@ -841,7 +841,7 @@ TEST_F(UceSubscribeTest, StateSUBSCRIBED_NotifyReceivedWithNotifyBody)
     MockIMessage objMockIMessage;
     MockISipMessage objMockISipMessage;
     MockISipMessageBodyPart objISipMessageBodyPart;
-    IMSList<ISipMessageBodyPart*> objBodyParts;
+    ImsList<ISipMessageBodyPart*> objBodyParts;
     objBodyParts.Append(&objISipMessageBodyPart);
     ByteArray objContent = ByteArray("test");
 

@@ -61,7 +61,7 @@ TEST_F(UceNotifyMessageBodyTest, SetNotifyBodyPartData)
     UceNotifyBodyPartData* pData = new UceNotifyBodyPartData(contentType, contentId, objContent);
     pUceNotifyMessageBody->SetNotifyBodyPartData(pData);
 
-    IMSList<UceNotifyBodyPartData*> list = pUceNotifyMessageBody->GetNotifyBodyPartDatas();
+    ImsList<UceNotifyBodyPartData*> list = pUceNotifyMessageBody->GetNotifyBodyPartDatas();
     EXPECT_EQ(1, list.GetSize());
     UceNotifyBodyPartData* pRet = list.GetAt(0);
     EXPECT_STREQ(contentType.GetStr(), pRet->GetContentType().GetStr());

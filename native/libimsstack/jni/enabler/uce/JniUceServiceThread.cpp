@@ -132,7 +132,7 @@ PUBLIC IMS_BOOL JniUceServiceThread::SubscribeResponseInd(IMS_UINT32 key, IMS_SI
 }
 
 PUBLIC IMS_BOOL JniUceServiceThread::NotifyInd(
-        IMS_UINT32 key, IMS_UINT32 count, IMSList<AString> pidfXmls)
+        IMS_UINT32 key, IMS_UINT32 count, ImsList<AString> pidfXmls)
 {
     IMS_TRACE_D("NotifyInd", 0, 0, 0);
 
@@ -160,7 +160,7 @@ PUBLIC IMS_BOOL JniUceServiceThread::SubscribeErrorInd(IMS_UINT32 key, IMS_UINT3
 }
 
 PUBLIC IMS_BOOL JniUceServiceThread::SubscribeResourceTerminatedInd(
-        IMS_UINT32 key, IMS_UINT32 count, IMSList<IUceTerminatedReason*> terminateContacts)
+        IMS_UINT32 key, IMS_UINT32 count, ImsList<IUceTerminatedReason*> terminateContacts)
 {
     IMS_TRACE_D("SubscribeResourceTerminatedInd", 0, 0, 0);
 

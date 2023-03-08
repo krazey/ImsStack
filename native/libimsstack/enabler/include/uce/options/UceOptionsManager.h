@@ -53,8 +53,8 @@ private:
 
 protected:
     IMS_BOOL m_bAoSConnected;
-    IMSMap<IMS_UINT32, UceOptions*> m_objSentUceOptionsMap;
-    IMSMap<IMS_UINT32, UceOptions*> m_objReceivedUceOptionsMap;
+    ImsMap<IMS_UINT32, UceOptions*> m_objSentUceOptionsMap;
+    ImsMap<IMS_UINT32, UceOptions*> m_objReceivedUceOptionsMap;
 
 private:
     IMS_SINT32 m_nSimSlot;

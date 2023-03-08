@@ -126,7 +126,7 @@ UcePublishManager::UcePublishManager(
         m_nSimSlot(nSimSlot),
         m_piCoreService(_piCoreService),
         m_strAppName(strAppName),
-        m_objExponentialRetryTimeSec(IMSVector<IMS_SINT32>()),
+        m_objExponentialRetryTimeSec(ImsVector<IMS_SINT32>()),
         m_bAoSConnected(IMS_FALSE),
         m_nExtended(1),
         m_bEnablePIDFCompression(IMS_FALSE),
@@ -1238,7 +1238,7 @@ IPublishResponseData* UcePublishManager::GetPublishResponseData(ISipMessage* piM
     pPublishResponseData->m_nResponseCode = piMessage->GetStatusCode();
     pPublishResponseData->m_strReason = piMessage->GetReasonPhrase();
 
-    IMSList<AString> objReasonHeaders = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
+    ImsList<AString> objReasonHeaders = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
     if (objReasonHeaders.IsEmpty())
     {
         return pPublishResponseData;
@@ -1710,7 +1710,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
         return IMS_TRUE;
     }
 
-    IMSList<AString> objReasonList = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
+    ImsList<AString> objReasonList = piMessage->GetHeaders(ISipHeader::UNKNOWN, "Reason");
     if (objReasonList.IsEmpty() == IMS_TRUE)
     {
         IMS_TRACE_D("No Reason header present.Send Register Recovery message to the App", 0, 0, 0);
