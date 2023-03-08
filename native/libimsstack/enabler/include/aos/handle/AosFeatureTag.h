@@ -81,7 +81,7 @@ public:
     IMS_BOOL Equals(IN AosFeatureTagList& objTargetList);
     void Copy(IN AosFeatureTagList& objSourceList);
     void CopyFeatures(IN const AosFeatureTagList& objSourceList);
-    void CopyFeatureTags(IN IMSList<ImsAosFeatureTag*>& objFeatureTag);
+    void CopyFeatureTags(IN ImsList<ImsAosFeatureTag*>& objFeatureTag);
 
     IMS_UINT32 GetSize();
     AosFeatureTag* GetAt(IN IMS_UINT32 nIndex);
@@ -94,7 +94,7 @@ public:
     void PrintFeatureTagList();
 
 private:
-    IMSList<AosFeatureTag*> m_objFeatureTagList;
+    ImsList<AosFeatureTag*> m_objFeatureTagList;
     IMS_UINT32 m_nFeatures;
     IMS_UINT32 m_nUnavailableFeatures;
 

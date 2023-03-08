@@ -62,18 +62,18 @@ public:
             nPreferredEmergencyRegistration(
                     CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
             nRegistrationPrivateHeader(0),
-            objCarrierNrAvailabilities(IMSVector<IMS_SINT32>()),
-            objPcscfDiscoveryMethod(IMSVector<IMS_SINT32>()),
-            objImsPdnEnabledInNoVopsSupport(IMSVector<IMS_SINT32>()),
-            objIpsecAuthenticationAlgorithms(IMSVector<IMS_SINT32>()),
-            objIpsecEncryptionAlgorithms(IMSVector<IMS_SINT32>()),
-            objSupportedRats(IMSVector<IMS_SINT32>()),
-            objSmsOverImsSupportedRats(IMSVector<IMS_SINT32>()),
-            objEmergencyOverImsSupportedRats(IMSVector<IMS_SINT32>()),
-            objGeolocationPidfInSipRegisterSupport(IMSVector<IMS_SINT32>()),
-            objImsIdentityPriority(IMSVector<IMS_SINT32>()),
-            objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>()),
-            objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>())
+            objCarrierNrAvailabilities(ImsVector<IMS_SINT32>()),
+            objPcscfDiscoveryMethod(ImsVector<IMS_SINT32>()),
+            objImsPdnEnabledInNoVopsSupport(ImsVector<IMS_SINT32>()),
+            objIpsecAuthenticationAlgorithms(ImsVector<IMS_SINT32>()),
+            objIpsecEncryptionAlgorithms(ImsVector<IMS_SINT32>()),
+            objSupportedRats(ImsVector<IMS_SINT32>()),
+            objSmsOverImsSupportedRats(ImsVector<IMS_SINT32>()),
+            objEmergencyOverImsSupportedRats(ImsVector<IMS_SINT32>()),
+            objGeolocationPidfInSipRegisterSupport(ImsVector<IMS_SINT32>()),
+            objImsIdentityPriority(ImsVector<IMS_SINT32>()),
+            objRegistrationPermanentErrorCode(ImsVector<IMS_SINT32>()),
+            objUpdateRegistrationWithRatChange(ImsVector<IMS_SINT32>())
     {
         // temp setting
         objSupportedRats.Push(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
@@ -137,22 +137,22 @@ public:
     IMS_SINT32 nRegistrationPrivateHeader;
 
     /// aosp_carrier_config - no prefix
-    IMSVector<IMS_SINT32> objCarrierNrAvailabilities;
+    ImsVector<IMS_SINT32> objCarrierNrAvailabilities;
     /// aosp_carrier_config - ims.
-    IMSVector<IMS_SINT32> objPcscfDiscoveryMethod;
-    IMSVector<IMS_SINT32> objImsPdnEnabledInNoVopsSupport;
-    IMSVector<IMS_SINT32> objIpsecAuthenticationAlgorithms;
-    IMSVector<IMS_SINT32> objIpsecEncryptionAlgorithms;
-    IMSVector<IMS_SINT32> objSupportedRats;
+    ImsVector<IMS_SINT32> objPcscfDiscoveryMethod;
+    ImsVector<IMS_SINT32> objImsPdnEnabledInNoVopsSupport;
+    ImsVector<IMS_SINT32> objIpsecAuthenticationAlgorithms;
+    ImsVector<IMS_SINT32> objIpsecEncryptionAlgorithms;
+    ImsVector<IMS_SINT32> objSupportedRats;
     /// aosp_carrier_config - imssms.
-    IMSVector<IMS_SINT32> objSmsOverImsSupportedRats;
+    ImsVector<IMS_SINT32> objSmsOverImsSupportedRats;
     /// aosp_carrier_config - imsemergency.
-    IMSVector<IMS_SINT32> objEmergencyOverImsSupportedRats;
+    ImsVector<IMS_SINT32> objEmergencyOverImsSupportedRats;
 
     /// carrier_config - ims
-    IMSVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
-    IMSVector<IMS_SINT32> objImsIdentityPriority;
-    IMSVector<IMS_SINT32> objRegistrationPermanentErrorCode;
-    IMSVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
+    ImsVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
+    ImsVector<IMS_SINT32> objRegistrationPermanentErrorCode;
+    ImsVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
 };
 #endif  // AOS_CARRIER_CONFIG_H_

@@ -439,7 +439,7 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessBlockChanged()
 }
 
 PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
-        IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+        IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",
             objNewCapabilities.GetSize(), 0, 0);

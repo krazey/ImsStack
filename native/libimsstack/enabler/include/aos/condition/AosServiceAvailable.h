@@ -95,8 +95,8 @@ protected:
 private:
     IMS_BOOL m_bAvailableLastNotified;
 
-    IMSList<IMS_UINT32> m_objBlockReasonsLastNotified;
-    IMSList<IAosServiceAvailableListener*> m_objListeners;
+    ImsList<IMS_UINT32> m_objBlockReasonsLastNotified;
+    ImsList<IAosServiceAvailableListener*> m_objListeners;
 
 private:
     friend class AosServiceAvailableTest;

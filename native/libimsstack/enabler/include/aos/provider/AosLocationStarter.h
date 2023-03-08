@@ -79,8 +79,8 @@ private:
     IMS_BOOL m_bInitialized;
     IMS_BOOL m_bWfcSetting;
     IMS_UINT32 m_nDefaultUpdateInterval;
-    IMSList<IMS_UINT32> m_objVolteBlockReasons;
-    IMSList<IMS_UINT32> m_objWfcBlockReasons;
+    ImsList<IMS_UINT32> m_objVolteBlockReasons;
+    ImsList<IMS_UINT32> m_objWfcBlockReasons;
     ITimer* m_piStopDelayTimer;
     IAosAppContext* m_piAppContext;
     IAosBlock* m_piBlock;

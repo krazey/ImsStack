@@ -38,8 +38,8 @@ private:
 
 public:
     IAosHandle* GetAosHandle(IN const AString& strAppId, IN const AString& strSrvId);
-    IMSList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId, IN const AString& strSrvId);
-    IMSList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId);
+    ImsList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId, IN const AString& strSrvId);
+    ImsList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId);
 
 private:
     void CreateStaticConfig();
@@ -51,8 +51,8 @@ private:
 
 private:
     IMS_SINT32 m_nSlotId;
-    IMSList<AString> m_objAppId;
-    IMSMap<AString, IAosAppContext*> m_objAppContext;
+    ImsList<AString> m_objAppId;
+    ImsMap<AString, IAosAppContext*> m_objAppContext;
     AosBuildDirector* m_pBuildDirector;
     AosStaticConfig* m_pStaticConfig;
 

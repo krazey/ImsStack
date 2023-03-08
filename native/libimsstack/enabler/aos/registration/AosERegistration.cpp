@@ -569,7 +569,7 @@ PROTECTED VIRTUAL void AosERegistration::Transaction_OnTrafficPriorityChanged() 
 
 PROTECTED IMS_UINT32 AosERegistration::GetRetryTime()
 {
-    IMSVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
+    ImsVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
     IMS_UINT32 nRetryMaxCount = objWaitTime.GetSize();
 
     if (nRetryMaxCount == 0)
@@ -638,7 +638,7 @@ PROTECTED IMS_BOOL AosERegistration::IsReinitiationRequested() const
 
 PROTECTED IMS_BOOL AosERegistration::IsRetryAllowed() const
 {
-    IMSVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
+    ImsVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
 
     return m_nConsecutiveFailure < objWaitTime.GetSize();
 }
@@ -706,7 +706,7 @@ PROTECTED void AosERegistration::ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegi
 
 PROTECTED void AosERegistration::ProcessRearrangePcscf()
 {
-    IMSVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
+    ImsVector<IMS_SINT32>& objWaitTime = GET_N_CONFIG(m_nSlotId)->GetEmergencyPcscfRetryWaitTime();
 
     IMS_UINT32 nRetryMaxCount = objWaitTime.GetSize();
     AStringArray objPcscfs = m_piContext->GetPcscf()->GetPcscfs();

@@ -449,7 +449,7 @@ TEST_F(AosIpsecHelperTest, Create)
     EXPECT_CALL(objMockIRegContact, SetPort(_)).Times(AnyNumber());
 
     // SetSecurityClientHeader() return IMS_FALSE;
-    IMSVector<IMS_SINT32> objAuthenticationAlgs;
+    ImsVector<IMS_SINT32> objAuthenticationAlgs;
     objAuthenticationAlgs.Clear();
     EXPECT_CALL(objMockAosConfig, GetIpsecAuthenticationAlgorithms())
             .Times(AnyNumber())
@@ -466,7 +466,7 @@ TEST_F(AosIpsecHelperTest, Create)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objAuthenticationAlgs));
 
-    IMSVector<IMS_SINT32> objEncryptionAlgs;
+    ImsVector<IMS_SINT32> objEncryptionAlgs;
     objEncryptionAlgs.Clear();
     objEncryptionAlgs.Add(0);
     objEncryptionAlgs.Add(1);
@@ -645,7 +645,7 @@ TEST_F(AosIpsecHelperTest, MakeSas)
 
 TEST_F(AosIpsecHelperTest, ProcessAuthChallenged)
 {
-    IMSList<SipSecurityHeader> objSecuServerHs;
+    ImsList<SipSecurityHeader> objSecuServerHs;
     objSecuServerHs.Clear();
 
     EXPECT_CALL(objMockIRegParameter, GetSecurityServers()).WillOnce(ReturnRef(objSecuServerHs));
@@ -861,7 +861,7 @@ TEST_F(AosIpsecHelperTest, IgnoreCurrentPolicyExpired)
 
 TEST_F(AosIpsecHelperTest, SetPcscfPortnSpi)
 {
-    IMSList<SipSecurityHeader> objSecuServerH;
+    ImsList<SipSecurityHeader> objSecuServerH;
     objSecuServerH.Clear();
 
     EXPECT_CALL(objMockIRegParameter, GetSecurityServers()).WillOnce(ReturnRef(objSecuServerH));

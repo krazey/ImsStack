@@ -34,7 +34,7 @@ public:
     MOCK_METHOD(const AString&, GetProfileId, (), (const, override));
     MOCK_METHOD(IAosHandle*, GetHandle, (IN const AString& strSrvId), (const, override));
     MOCK_METHOD(IAosHandle*, GetHandle, (IN IMS_UINT32 nServiceType), (override));
-    MOCK_METHOD((IMSMap<AString, IAosHandle*>&), GetHandles, (), (override));
+    MOCK_METHOD((ImsMap<AString, IAosHandle*>&), GetHandles, (), (override));
     MOCK_METHOD(IAosApplication*, GetApp, (), (const, override));
     MOCK_METHOD(IAosConnection*, GetConnection, (), (const, override));
     MOCK_METHOD(IAosRegistration*, GetRegistration, (), (const, override));

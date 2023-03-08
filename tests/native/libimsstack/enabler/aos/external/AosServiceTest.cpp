@@ -268,7 +268,7 @@ TEST_F(AosServiceTest, NotifyCapabilitiesChanged)
     EXPECT_CALL(objMockListener2, RegistrationControl_NotifyCapabilitiesChanged(_)).Times(1);
     EXPECT_CALL(objMockListener3, RegistrationControl_NotifyCapabilitiesChanged(_)).Times(1);
 
-    const IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    const ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     m_pAosService->NotifyCapabilitiesChanged(objCapabilities);
 }
 
@@ -664,13 +664,13 @@ TEST_F(AosServiceTest, NotifyPreciseCallState)
 
 TEST_F(AosServiceTest, NotifyRegistered)
 {
-    const IMSList<AString> objFeatureTags;
+    const ImsList<AString> objFeatureTags;
     EXPECT_TRUE(m_pAosService->NotifyRegistered(AosNetworkType::LTE, 1, objFeatureTags));
 }
 
 TEST_F(AosServiceTest, NotifyRegistering)
 {
-    const IMSList<AString> objFeatureTags;
+    const ImsList<AString> objFeatureTags;
     EXPECT_TRUE(m_pAosService->NotifyRegistering(AosNetworkType::LTE, 1, objFeatureTags));
 }
 
@@ -686,7 +686,7 @@ TEST_F(AosServiceTest, NotifyTechnologyChangeFailed)
 
 TEST_F(AosServiceTest, NotifyAssociatedUriChanged)
 {
-    const IMSList<AString> objUris;
+    const ImsList<AString> objUris;
     EXPECT_TRUE(m_pAosService->NotifyAssociatedUriChanged(objUris));
 }
 
@@ -718,7 +718,7 @@ TEST_F(AosServiceTest, RequestWifiService)
 
 TEST_F(AosServiceTest, GetCapabilities)
 {
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO) |
@@ -744,7 +744,7 @@ TEST_F(AosServiceTest, GetCapabilities)
 
 TEST_F(AosServiceTest, GetCapabilitiesForNetwork_ReturnValue)
 {
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO) |
@@ -774,7 +774,7 @@ TEST_F(AosServiceTest, GetCapabilitiesForNetwork_ReturnZero)
 
 TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
 {
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO) |
@@ -823,7 +823,7 @@ TEST_F(AosServiceTest, IsSupportCapabilitiesForNetwork)
 
 TEST_F(AosServiceTest, PrintCapabilities)
 {
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO) |

@@ -28,7 +28,7 @@ AosStaticProfile::AosStaticProfile() :
         m_eRegistrationType(AosRegistrationType::NORMAL),
         m_nConnectionType(NetworkPolicy::APN_IMS),
         m_nRegistrationFlowId(0),
-        m_objServiceProfiles(IMSList<AosServiceProfile*>())
+        m_objServiceProfiles(ImsList<AosServiceProfile*>())
 {
 }
 
@@ -120,7 +120,7 @@ AosRegistrationType AosStaticProfile::GetRegistrationType() const
 }
 
 PUBLIC
-const IMSList<AosServiceProfile*>& AosStaticProfile::GetServiceProfiles() const
+const ImsList<AosServiceProfile*>& AosStaticProfile::GetServiceProfiles() const
 {
     return m_objServiceProfiles;
 }

@@ -170,9 +170,9 @@ protected:
                 PlatformContext::SERVICE_RADIO, m_pPlatformService);
     }
 
-    IMSMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandleMtc->m_objCapabilities; }
+    ImsMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandleMtc->m_objCapabilities; }
 
-    void SetCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    void SetCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
     {
         m_pAosHandleMtc->m_objCapabilities = objNewCapabilities;
     }
@@ -301,13 +301,13 @@ protected:
 
     void ProcessBlockChanged() { m_pAosHandleMtc->ProcessBlockChanged(); }
 
-    void ProcessCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    void ProcessCapabilitiesChanged(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
     {
         m_pAosHandleMtc->ProcessCapabilitiesChanged(objNewCapabilities);
     }
 
-    IMS_BOOL IsEqualCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objSrcCapabilities,
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objDestCapabilities)
+    IMS_BOOL IsEqualCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objSrcCapabilities,
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objDestCapabilities)
     {
         if (objSrcCapabilities.GetSize() != objDestCapabilities.GetSize())
         {
@@ -388,7 +388,7 @@ protected:
 
     IMS_BOOL IsInvalidMobileNetwork() { return m_pAosHandleMtc->IsInvalidMobileNetwork(); }
 
-    IMSList<IMS_UINT32> GetHoldingBlocksPolicyForWifi()
+    ImsList<IMS_UINT32> GetHoldingBlocksPolicyForWifi()
     {
         return m_pAosHandleMtc->m_objHoldingBlocksPolicyForWifi;
     }
@@ -1624,7 +1624,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test1)
     // Test1: No capability(LTE,IWLAN,NR), Unsupported network(GSM)
     // Expectation: Set none capa for all networks. No block.
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::NONE));
@@ -1651,7 +1651,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test2)
 
     Init();
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::NONE));
@@ -1692,7 +1692,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test3)
 
     Init();
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::NONE));
@@ -1734,7 +1734,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test4)
     // Test4: WFC OFF on WiFi->ON on LTE (Voice capa changed for IWLAN),  Current network=LTE
     // Expectation: Remove BLOCK_VOWIFI_CAPABILITY from holding block for wifi
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
@@ -1768,7 +1768,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test5)
     // Test5: Video OFF on WiFi->ON on LTE (Video capa changed for IWLAN),  Current network=LTE
     // Expectation: Remove BLOCK_VIWIFI_CAPABILITY from holding block for wifi
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
@@ -1803,7 +1803,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test6)
     // Current mobile network=LTE, Current network=WiFi
     // Expectation: Remove BLOCK_VILTE_CAPABILITY from holding block for mobile
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
@@ -1842,7 +1842,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test7)
     // Current mobile network=NR, Current network=WiFi
     // Expectation: Remove BLOCK_VILTE_CAPABILITY from holding block for mobile
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
@@ -1881,7 +1881,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test8)
     // Current mobile network=Not supported type(GSM), Current network=WiFi
     // Expectation: BLOCK_VILTE_CAPABILITY is still in holding block for mobile
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
 
     objNewCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
@@ -1923,7 +1923,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test9)
 
     Init();
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::NONE));
@@ -1964,7 +1964,7 @@ TEST_F(AosHandleMtcTest, ProcessCapabilitiesChanged_Test10)
 
     Init();
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities, objExpectedCapabilities;
 
     objExpectedCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::NONE));
@@ -2007,7 +2007,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test1)
     // Blocked BLOCK_NETWORK
     // Expectation: block none
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2042,7 +2042,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test2)
     // Test2: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=WLAN
     // Expectation: block BLOCK_VOWIFI_CAPABILITY
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2084,7 +2084,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test3)
     // Test3: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=NR
     // Expectation: block BLOCK_VOLTE_CAPABILITY, BLOCK_VILTE_CAPABILITY
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2124,7 +2124,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test4)
     //        unavailable feature policy is existed.
     // Expectation: block none
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2161,12 +2161,12 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test5)
     //        unavailable feature policy is existed.
     // Expectation: Video blocked after network changed to LTE again.
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoiceVideo;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoiceVideo;
     objCapabilitiesVoiceVideo.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoice;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoice;
     objCapabilitiesVoice.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE));
 
@@ -2211,7 +2211,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test6)
     // Test6: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=2G
     // Expectation: No block network
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2249,7 +2249,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test7)
     // Test7: Capa=(LTE:voice,video / IWLAN:video / NR:none), unavailable policy, network=2G
     // Expectation: No block network
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2287,7 +2287,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test8)
     // Test8: Capa=(LTE:voice,video / IWLAN:video / NR:none), no unavailable policy, network=3G
     // Expectation: Block network on 3G but LTE
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2330,7 +2330,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test9)
     // Data not connected / epdg not enabled
     // Expectation: Hold block network on 3G but LTE
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2377,7 +2377,7 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test10)
     // Epdg enabled
     // Expectation: Holding block network is maintained on WLAN
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -2669,7 +2669,7 @@ TEST_F(AosHandleMtcTest, ReevaluateUnavailableFeature_Test2)
 
     SetNetworkType(NW_REPORT_RADIO_LTE);
 
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoice;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilitiesVoice;
     objCapabilitiesVoice.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE));
 

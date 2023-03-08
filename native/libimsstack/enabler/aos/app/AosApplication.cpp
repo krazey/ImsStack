@@ -685,7 +685,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegReconfigAvailable()
 
 PROTECTED VIRTUAL IMS_BOOL AosApplication::IsReconfigHandleChanged()
 {
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_BOOL bChanged = IMS_FALSE;
 
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
@@ -749,7 +749,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRequestCmdHeldByCondition(
 
 PROTECTED VIRTUAL IMS_BOOL AosApplication::IsAllHandleDetached()
 {
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
 
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
     {
@@ -773,7 +773,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsConditionTimerSkippedDueToTimer()
 
 PROTECTED VIRTUAL IMS_BOOL AosApplication::IsRegUpdatedByNrLteRatChange()
 {
-    IMSVector<IMS_SINT32>& objRegUpdateRats =
+    ImsVector<IMS_SINT32>& objRegUpdateRats =
             GET_N_CONFIG(m_nSlotId)->GetUpdateRegistrationWithRatChange();
 
     IMS_BOOL bLte = IMS_FALSE;
@@ -2254,7 +2254,7 @@ PROTECTED VIRTUAL void AosApplication::Report_StateChanged(
 
     m_nReportState = nReportingState;
 
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
 
     for (IMS_UINT32 nAt = 0; nAt < objHandles.GetSize(); nAt++)
     {
@@ -2272,7 +2272,7 @@ PROTECTED VIRTUAL void AosApplication::Report_StateChanged(
 
 PROTECTED VIRTUAL void AosApplication::Report_Notify()
 {
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
 
     for (IMS_UINT32 nAt = 0; nAt < objHandles.GetSize(); nAt++)
     {
@@ -2283,7 +2283,7 @@ PROTECTED VIRTUAL void AosApplication::Report_Notify()
 
 PROTECTED VIRTUAL void AosApplication::Report_Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
 
     for (IMS_UINT32 nAt = 0; nAt < objHandles.GetSize(); nAt++)
     {
@@ -2520,7 +2520,7 @@ PROTECTED VIRTUAL void AosApplication::UpdateRegState()
 PROTECTED VIRTUAL IMS_UINT32 AosApplication::UpdateConnectedServices(
         IN IMS_BOOL /*bEnforceUpdateRegService*/)
 {
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_UINT32 nReportServices = ImsAosService::NONE;
     IMS_BOOL bWlanIpcan = m_piContext->GetConnection()->IsEpdgEnabled();
     IMS_UINT32 nAt = 0;
@@ -2569,7 +2569,7 @@ PROTECTED VIRTUAL void AosApplication::UpdateMonitorNotify(
 {
     A_IMS_TRACE_I(APPID, "UpdateMonitorNotify :: nType(%d) , nState(%d)", nType, nState, 0);
 
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
 
     for (IMS_UINT32 nAt = 0; nAt < objHandles.GetSize(); ++nAt)
     {

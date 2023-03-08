@@ -185,7 +185,7 @@ PUBLIC VIRTUAL const AStringArray& AosConnection::GetPcscfAddress(
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetHostByName(IN const AString& strHostName,
-        OUT IMSList<IpAddress>& objIps, IN IMS_SINT32 nIpVersion /* = 0 */)
+        OUT ImsList<IpAddress>& objIps, IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetHostByName(strHostName, objIps, nIpVersion);
 }

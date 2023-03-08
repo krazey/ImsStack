@@ -38,7 +38,7 @@ protected:
     void InitializeServiceFeature() override;
 
     void ProcessCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
 
     IMS_BOOL IsHandleBlocked() const override;
     IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const override;

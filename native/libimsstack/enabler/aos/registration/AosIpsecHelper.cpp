@@ -141,7 +141,7 @@ PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::SetPcscfPortnSpi()
     A_IMS_TRACE_I(REGID, "SetPcscfPortnSpi", 0, 0, 0);
 
     // get Security Server Header
-    const IMSList<SipSecurityHeader>& objSecuServerH = m_piRegParameter->GetSecurityServers();
+    const ImsList<SipSecurityHeader>& objSecuServerH = m_piRegParameter->GetSecurityServers();
 
     if (objSecuServerH.IsEmpty() == IMS_TRUE)
     {
@@ -447,7 +447,7 @@ PROTECTED VIRTUAL void AosIpsecHelper::SetUePortnSpi(IN IMS_BOOL bInitial)
 
 PROTECTED VIRTUAL IMS_BOOL AosIpsecHelper::SetSecurityClientHeader()
 {
-    const IMSVector<IMS_SINT32>& objAuthenticationAlgs =
+    const ImsVector<IMS_SINT32>& objAuthenticationAlgs =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetIpsecAuthenticationAlgorithms();
     if (objAuthenticationAlgs.GetSize() == 0)
     {
@@ -455,7 +455,7 @@ PROTECTED VIRTUAL IMS_BOOL AosIpsecHelper::SetSecurityClientHeader()
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32>& objEncryptionAlgs =
+    ImsVector<IMS_SINT32>& objEncryptionAlgs =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetIpsecEncryptionAlgorithms();
 
     if (objEncryptionAlgs.GetSize() == 0)
@@ -489,7 +489,7 @@ PROTECTED VIRTUAL IMS_BOOL AosIpsecHelper::CheckSecurityServerHeader()
 {
     A_IMS_TRACE_I(REGID, "CheckSecurityServerHeader", 0, 0, 0);
 
-    const IMSList<SipSecurityHeader>& objSecuServerH = m_piRegParameter->GetSecurityServers();
+    const ImsList<SipSecurityHeader>& objSecuServerH = m_piRegParameter->GetSecurityServers();
 
     if (!objSecuServerH.IsEmpty())
     {

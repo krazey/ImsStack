@@ -38,7 +38,7 @@ public:
     IMS_BOOL PrintBlockReasons() override;
 
     void GetBlockReasons(
-            OUT IMSList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
+            OUT ImsList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
 
     IMS_BOOL IsReasonBlocked(IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled = IMS_FALSE,
             IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
@@ -69,10 +69,10 @@ private:
     ImsHashMap m_objBlockCellular;
     ImsHashMap m_objBlockWifi;
 
-    IMSList<IAosBlockListener*> m_objListeners;
+    ImsList<IAosBlockListener*> m_objListeners;
 
     AString m_strTag;
-    IMSList<IMS_UINT32> objServiceBlockReasons;
+    ImsList<IMS_UINT32> objServiceBlockReasons;
 
 private:
     friend class AosBlockTest;

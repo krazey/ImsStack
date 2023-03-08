@@ -40,16 +40,16 @@ IImsAos* ImsAosManager::GetImsAos(
 }
 
 PUBLIC
-IMSList<IImsAos*> ImsAosManager::GetImsAosList(
+ImsList<IImsAos*> ImsAosManager::GetImsAosList(
         IN const AString& /*strAppId*/, IN const AString& /*strServiceId*/)
 {
-    return IMSList<IImsAos*>();
+    return ImsList<IImsAos*>();
 }
 
 PUBLIC
-IMSList<IImsAos*> ImsAosManager::GetImsAosList(IN const AString& /*strAppId*/)
+ImsList<IImsAos*> ImsAosManager::GetImsAosList(IN const AString& /*strAppId*/)
 {
-    return IMSList<IImsAos*>();
+    return ImsList<IImsAos*>();
 }
 
 PUBLIC VIRTUAL IMS_BOOL ImsAosManager::OnPreprocess(IN IMSMSG& /*objMSG*/)

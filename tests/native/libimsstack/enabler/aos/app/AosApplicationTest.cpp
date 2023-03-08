@@ -299,7 +299,7 @@ public:
     MockIAosService m_objMockIAosService;
     MockIAosRetryRepository m_objMockAosRetryRepository;
 
-    IMSMap<AString, IAosHandle*> m_objHandles;
+    ImsMap<AString, IAosHandle*> m_objHandles;
     AStringArray m_objPcscfs;
 
 protected:
@@ -308,7 +308,7 @@ protected:
         m_pAosStaticProfile = new AosStaticProfile();
         m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
-        IMSList<ImsServiceName> objServiceName =
+        ImsList<ImsServiceName> objServiceName =
                 ImsServiceConfig::GetServiceNames(ImsServiceConfig::GetServiceProfile());
 
         for (IMS_UINT32 i = 0; i < objServiceName.GetSize(); i++)
@@ -646,7 +646,7 @@ TEST_F(AosApplicationTest, GetAndSet)
     EXPECT_FALSE(m_pTestAosApplication->IsConditionTimerSkippedDueToTimer());
 
     // TEST_F : IsRegUpdatedByNrLteRatChange
-    IMSVector<IMS_SINT32> objRegUpdateRats;
+    ImsVector<IMS_SINT32> objRegUpdateRats;
 
     EXPECT_CALL(m_objMockIAosNConfiguration, GetUpdateRegistrationWithRatChange())
             .Times(AnyNumber())

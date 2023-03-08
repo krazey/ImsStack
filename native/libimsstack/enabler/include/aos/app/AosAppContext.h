@@ -35,7 +35,7 @@ public:
 
     IAosHandle* GetHandle(IN const AString& strSrvId) const override;
     IAosHandle* GetHandle(IN IMS_UINT32 nServiceType) override;
-    IMSMap<AString, IAosHandle*>& GetHandles() override;
+    ImsMap<AString, IAosHandle*>& GetHandles() override;
 
     IAosApplication* GetApp() const override;
     IAosConnection* GetConnection() const override;
@@ -64,7 +64,7 @@ private:
 
     AosStaticProfile* m_pStaticProfile;
 
-    IMSMap<AString, IAosHandle*> objAosHandles;
+    ImsMap<AString, IAosHandle*> objAosHandles;
 
     IAosApplication* m_piApp;
     IAosConnection* m_piConnection;

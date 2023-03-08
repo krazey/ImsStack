@@ -383,7 +383,7 @@ private:
     void UpdateCallingNumberVerification();
 
     IMS_BOOL IsErrorCodeExisted(
-            IN const IMSVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
+            IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
     IMS_BOOL IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT32 nCode) const;
     IMS_BOOL IsPdnReactivationRequired();
     IMS_BOOL IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt);

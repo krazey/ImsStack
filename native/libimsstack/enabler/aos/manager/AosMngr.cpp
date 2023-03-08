@@ -31,8 +31,8 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosMngr::AosMngr(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_objAppId(IMSList<AString>()),
-        m_objAppContext(IMSMap<AString, IAosAppContext*>()),
+        m_objAppId(ImsList<AString>()),
+        m_objAppContext(ImsMap<AString, IAosAppContext*>()),
         m_pBuildDirector(IMS_NULL),
         m_pStaticConfig(IMS_NULL)
 {
@@ -84,17 +84,17 @@ IAosHandle* AosMngr::GetAosHandle(IN const AString& strAppId, IN const AString& 
 }
 
 PUBLIC
-IMSList<IAosHandle*> AosMngr::GetAllAosHandles(
+ImsList<IAosHandle*> AosMngr::GetAllAosHandles(
         IN const AString& strAppId, IN const AString& strSrvId)
 {
-    IMSList<IAosHandle*> objHandles;
+    ImsList<IAosHandle*> objHandles;
 
     if (m_pStaticConfig == IMS_NULL)
     {
         return objHandles;
     }
 
-    const IMSList<AosStaticProfile*> objProfiles = m_pStaticConfig->GetProfiles();
+    const ImsList<AosStaticProfile*> objProfiles = m_pStaticConfig->GetProfiles();
 
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
@@ -123,16 +123,16 @@ IMSList<IAosHandle*> AosMngr::GetAllAosHandles(
 }
 
 PUBLIC
-IMSList<IAosHandle*> AosMngr::GetAllAosHandles(IN const AString& strAppId)
+ImsList<IAosHandle*> AosMngr::GetAllAosHandles(IN const AString& strAppId)
 {
-    IMSList<IAosHandle*> objHandles;
+    ImsList<IAosHandle*> objHandles;
 
     if (m_pStaticConfig == IMS_NULL)
     {
         return objHandles;
     }
 
-    const IMSList<AosStaticProfile*> objProfiles = m_pStaticConfig->GetProfiles();
+    const ImsList<AosStaticProfile*> objProfiles = m_pStaticConfig->GetProfiles();
 
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
@@ -143,7 +143,7 @@ IMSList<IAosHandle*> AosMngr::GetAllAosHandles(IN const AString& strAppId)
             continue;
         }
 
-        const IMSList<AosServiceProfile*> objServices = pProfile->GetServiceProfiles();
+        const ImsList<AosServiceProfile*> objServices = pProfile->GetServiceProfiles();
 
         for (IMS_UINT32 j = 0; j < objServices.GetSize(); j++)
         {
@@ -183,7 +183,7 @@ void AosMngr::CreateStaticConfig()
     m_pStaticConfig = new AosStaticConfig();
     m_pStaticConfig->Create();
 
-    const IMSList<AosStaticProfile*>& objProfiles = m_pStaticConfig->GetProfiles();
+    const ImsList<AosStaticProfile*>& objProfiles = m_pStaticConfig->GetProfiles();
 
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
@@ -223,7 +223,7 @@ void AosMngr::CreateAos()
         return;
     }
 
-    const IMSList<AosStaticProfile*>& objProfiles = m_pStaticConfig->GetProfiles();
+    const ImsList<AosStaticProfile*>& objProfiles = m_pStaticConfig->GetProfiles();
     AString strLog;
 
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
