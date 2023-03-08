@@ -34,12 +34,12 @@ public:
         SipControllerFactory::m_gpFactory = gpFactory;
     }
 
-    inline static IMSMap<IMS_SINT32, SipControllerManager*> GetManagers()
+    inline static ImsMap<IMS_SINT32, SipControllerManager*> GetManagers()
     {
         return SipControllerFactory::m_objManagers;
     }
 
-    inline static void SetManagers(IN const IMSMap<IMS_SINT32, SipControllerManager*>& objManagers)
+    inline static void SetManagers(IN const ImsMap<IMS_SINT32, SipControllerManager*>& objManagers)
     {
         SipControllerFactory::m_objManagers = objManagers;
     }
@@ -57,7 +57,7 @@ class SipControllerFactoryTest : public ::testing::Test
 {
 public:
     SipControllerFactory* m_pFactory;
-    IMSMap<IMS_SINT32, SipControllerManager*> m_objManagers;
+    ImsMap<IMS_SINT32, SipControllerManager*> m_objManagers;
 
 protected:
     virtual void SetUp() override

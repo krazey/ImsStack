@@ -38,7 +38,7 @@ private:
     IMS_BOOL isPreDefindedFeature(IN const AString& feature);
     void EnableAoS();
     IJniSipControllerServiceThread* GetJniThread();
-    IMSList<AString> GetFeatureTags(IN IMS_UINT32 nFeatures);
+    ImsList<AString> GetFeatureTags(IN IMS_UINT32 nFeatures);
     IMS_SINT32 GetReason(IN IMS_UINT32 nReason);
 
 protected:
@@ -52,7 +52,7 @@ protected:
 private:
     IMS_SINT32 m_nSlotId;
     IImsAos* m_piImsAos;
-    IMSMap<AString, IMS_UINT32> m_objDefinedFeatures;
-    IMSList<AString> m_objCurrentFeatures;
+    ImsMap<AString, IMS_UINT32> m_objDefinedFeatures;
+    ImsList<AString> m_objCurrentFeatures;
 };
 #endif  // RCS_REGISTRATION_SERVICE_H_
