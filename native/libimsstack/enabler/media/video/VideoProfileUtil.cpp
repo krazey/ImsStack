@@ -80,7 +80,7 @@ PUBLIC GLOBAL VideoProfile* VideoProfileUtil::CreateProfile(
         pVideoProfile->strTransportType = "RTP/AVP";
     }
 
-    IMSList<CodecConfig*> pCodecs;
+    ImsList<CodecConfig*> pCodecs;
     pCodecs = pConfig->GetCodecConfigs();
 
     for (IMS_UINT32 i = 0; i < pCodecs.GetSize(); i++)

@@ -180,7 +180,7 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
     }
 
     // Get a list of media line
-    IMSList<IMedia*> lstIMedia = GetIMediaListFromSession(pSession, eNeedToMakeMedia);
+    ImsList<IMedia*> lstIMedia = GetIMediaListFromSession(pSession, eNeedToMakeMedia);
 
     // Determine what descriptor will be used for each media
     IMediaDescriptor* pDescriptorForAudio = IMS_NULL;
@@ -448,7 +448,7 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32& nAudioDi
     SetSessionType(pSession);
 
     // get a list of media line
-    IMSList<IMedia*> lstIMedia = pSession->GetMedia();
+    ImsList<IMedia*> lstIMedia = pSession->GetMedia();
 
     // Code to support a case of receiving multiple m-line for same media type
     IMediaDescriptor* pNegotiatedAudioDescriptor = IMS_NULL;
@@ -672,7 +672,7 @@ void MediaNego::FinalizeSDP(IN ISession* pSession)
         SetNegoState(STATE_IDLE);
     }
 
-    IMSList<IMedia*> lstIMedia = pSession->GetMedia();
+    ImsList<IMedia*> lstIMedia = pSession->GetMedia();
 
     for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
     {
@@ -805,19 +805,19 @@ IMS_BOOL MediaNego::IsForking()
 }
 
 PRIVATE
-IMSList<IMedia*> MediaNego::GetIMediaListFromSession(
+ImsList<IMedia*> MediaNego::GetIMediaListFromSession(
         IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType)
 {
     if (pSession == IMS_NULL || m_pMediaEnvironment == IMS_NULL)
     {
-        return IMSList<IMedia*>();
+        return ImsList<IMedia*>();
     }
 
     IMS_TRACE_D("GetIMediaListFromSession() - NegoState[%d], ServiceType[%d], MediaType[%d]",
             m_eNegoState, m_pMediaEnvironment->eServiceType, eMediaType);
 
     IMS_UINT32 nCountMediaRequired = 0;
-    IMSList<IMedia*> objIMediaList = pSession->GetMedia();
+    ImsList<IMedia*> objIMediaList = pSession->GetMedia();
 
     if (GetNegoState() == STATE_IDLE || GetNegoState() == STATE_NEGOTIATED)
     {
@@ -869,7 +869,7 @@ void MediaNego::SetSessionType(IN ISession* pSession)
     }
 
     // Check the requested media type
-    IMSList<IMedia*> lstIMedia = pSession->GetMedia();
+    ImsList<IMedia*> lstIMedia = pSession->GetMedia();
     IMS_UINT32 eMediaType = 0;
 
     for (IMS_UINT32 i = 0; i < lstIMedia.GetSize(); i++)
@@ -912,7 +912,7 @@ void MediaNego::SetMediaDescriptorAsNotSupported(
 
     // clean attr & bandwidth lines
     pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
-    IMSList<AString> strEmptyList;
+    ImsList<AString> strEmptyList;
     pDescriptor->SetBandwidthInfo(strEmptyList);
 
     // set RTP Port to zero

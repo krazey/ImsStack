@@ -28,11 +28,11 @@ struct MediaAudioCodecCapabilityPayloadTypesBundle
 public:
     MediaAudioCodecCapabilityPayloadTypesBundle() :
             // KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
-            objEvsPayloadType(IMSVector<IMS_SINT32>()),     // KEY_EVS_PAYLOAD_TYPE_INT_ARRAY
-            objAmrwbPayloadType(IMSVector<IMS_SINT32>()),   // KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY
-            objAmrnbPayloadType(IMSVector<IMS_SINT32>()),   // KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY
-            objDtmfwbPayloadType(IMSVector<IMS_SINT32>()),  // KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY
-            objDtmfnbPayloadType(IMSVector<IMS_SINT32>())   // KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY
+            objEvsPayloadType(ImsVector<IMS_SINT32>()),     // KEY_EVS_PAYLOAD_TYPE_INT_ARRAY
+            objAmrwbPayloadType(ImsVector<IMS_SINT32>()),   // KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY
+            objAmrnbPayloadType(ImsVector<IMS_SINT32>()),   // KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY
+            objDtmfwbPayloadType(ImsVector<IMS_SINT32>()),  // KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY
+            objDtmfnbPayloadType(ImsVector<IMS_SINT32>())   // KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY
     {
     }
 
@@ -42,11 +42,11 @@ public:
             IN const MediaAudioCodecCapabilityPayloadTypesBundle&) = delete;
 
 public:
-    IMSVector<IMS_SINT32> objEvsPayloadType;
-    IMSVector<IMS_SINT32> objAmrwbPayloadType;
-    IMSVector<IMS_SINT32> objAmrnbPayloadType;
-    IMSVector<IMS_SINT32> objDtmfwbPayloadType;
-    IMSVector<IMS_SINT32> objDtmfnbPayloadType;
+    ImsVector<IMS_SINT32> objEvsPayloadType;
+    ImsVector<IMS_SINT32> objAmrwbPayloadType;
+    ImsVector<IMS_SINT32> objAmrnbPayloadType;
+    ImsVector<IMS_SINT32> objDtmfwbPayloadType;
+    ImsVector<IMS_SINT32> objDtmfnbPayloadType;
 };
 
 struct MediaAmrnbPayloadDescriptionBundle
@@ -56,7 +56,7 @@ public:
             // KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE
             nAmrnbCodecAttributePayloadFormat(CarrierConfig::ImsVoice::AMR_BANDWIDTH_EFFICIENT),
             // KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT
-            objAmrnbCodecAttributeModeset(IMSVector<IMS_SINT32>())
+            objAmrnbCodecAttributeModeset(ImsVector<IMS_SINT32>())
     // KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY
     {
     }
@@ -67,7 +67,7 @@ public:
 
 public:
     IMS_SINT32 nAmrnbCodecAttributePayloadFormat;
-    IMSVector<IMS_SINT32> objAmrnbCodecAttributeModeset;
+    ImsVector<IMS_SINT32> objAmrnbCodecAttributeModeset;
 };
 
 struct MediaAmrwbPayloadDescriptionBundle
@@ -77,7 +77,7 @@ public:
             // KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE
             nAmrwbCodecAttributePayloadFormat(CarrierConfig::ImsVoice::AMR_BANDWIDTH_EFFICIENT),
             // KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT
-            objAmrwbCodecAttributeModeset(IMSVector<IMS_SINT32>())
+            objAmrwbCodecAttributeModeset(ImsVector<IMS_SINT32>())
     // KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY
     {
     }
@@ -88,7 +88,7 @@ public:
 
 public:
     IMS_SINT32 nAmrwbCodecAttributePayloadFormat;
-    IMSVector<IMS_SINT32> objAmrwbCodecAttributeModeset;
+    ImsVector<IMS_SINT32> objAmrwbCodecAttributeModeset;
 };
 
 struct MediaEvsPayloadDescriptionBundle
@@ -98,7 +98,7 @@ public:
             // KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE
             nEvsCodecAttributeModeSwitch(0),  // KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT
             nEvsCodecAttributeBandwidth(0),   // KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT
-            objEvsCodecAttributeBitrate(IMSVector<IMS_SINT32>()),
+            objEvsCodecAttributeBitrate(ImsVector<IMS_SINT32>()),
             // KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY
             nEvsCodecAttributeChAwRecv(0),         // KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT
             nEvsCodecAttributeHfOnly(0),           // KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT
@@ -120,7 +120,7 @@ public:
 public:
     IMS_SINT32 nEvsCodecAttributeModeSwitch;            // KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT
     IMS_SINT32 nEvsCodecAttributeBandwidth;             // KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT
-    IMSVector<IMS_SINT32> objEvsCodecAttributeBitrate;  // KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY
+    ImsVector<IMS_SINT32> objEvsCodecAttributeBitrate;  // KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY
     IMS_SINT32 nEvsCodecAttributeChAwRecv;              // KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT
     IMS_SINT32 nEvsCodecAttributeHfOnly;                // KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT
     IMS_BOOL bEvsCodecAttributeDtx;                     // KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL
@@ -160,7 +160,7 @@ struct MediaVideoCodecCapabilityPayloadTypesBundle
 public:
     MediaVideoCodecCapabilityPayloadTypesBundle() :
             // KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
-            objAvcPayloadType(IMSVector<IMS_SINT32>())  // KEY_H264_PAYLOAD_TYPE_INT_ARRAY
+            objAvcPayloadType(ImsVector<IMS_SINT32>())  // KEY_H264_PAYLOAD_TYPE_INT_ARRAY
     {
     }
 
@@ -170,7 +170,7 @@ public:
             IN const MediaVideoCodecCapabilityPayloadTypesBundle&) = delete;
 
 public:
-    IMSVector<IMS_SINT32> objAvcPayloadType;
+    ImsVector<IMS_SINT32> objAvcPayloadType;
 };
 
 struct MediaH264PayloadDescriptionBundle
@@ -181,7 +181,7 @@ public:
             nVideoCodecAttributePacketizationMode(1),
             // KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT
             nVideoCodecAttributeFrameRate(15),  // KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT
-            objVideoCodecAttributeResolution(IMSVector<IMS_SINT32>()),
+            objVideoCodecAttributeResolution(ImsVector<IMS_SINT32>()),
             // KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY
             strH264VideoCodecAttributeProfileLevelId(AString::ConstEmpty())
     // KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING
@@ -195,7 +195,7 @@ public:
 public:
     IMS_SINT32 nVideoCodecAttributePacketizationMode;
     IMS_SINT32 nVideoCodecAttributeFrameRate;
-    IMSVector<IMS_SINT32> objVideoCodecAttributeResolution;
+    ImsVector<IMS_SINT32> objVideoCodecAttributeResolution;
     AString strH264VideoCodecAttributeProfileLevelId;
 };
 

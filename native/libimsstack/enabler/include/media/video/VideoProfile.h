@@ -246,9 +246,9 @@ public:
     class CapaNego
     {
     public:
-        IMSMap<IMS_SINT32, AString> mapTransportCapa;
-        IMSMap<IMS_SINT32, AString> mapAttributeCapa;
-        IMSList<AString> lstPotentialConfig;
+        ImsMap<IMS_SINT32, AString> mapTransportCapa;
+        ImsMap<IMS_SINT32, AString> mapAttributeCapa;
+        ImsList<AString> lstPotentialConfig;
         AString strNegotiatedAcfg;
         IMS_BOOL bIsAttCapaInPcfg;
 
@@ -375,7 +375,7 @@ public:
     IMS_SINT32 nBandwidthAs;
     IMS_SINT32 nBandwidthRs;
     IMS_SINT32 nBandwidthRr;
-    IMSList<Payload*> lstPayload;
+    ImsList<Payload*> lstPayload;
     MEDIA_DIRECTION eDirection;
     IMS_SINT32 nFrameRate;
     IMS_BOOL bSupportAvpf;

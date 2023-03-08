@@ -51,11 +51,11 @@ protected:
     virtual void TearDown() override {}
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
     AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetIntArray(pszKey);
     }
-    IMSVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
+    ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetStringArray(pszKey);
     }
@@ -99,7 +99,7 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoResolution)
 {
     CodecAvcConfig* m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
 
-    IMSVector<IMS_SINT32> objVideoCodecResolution;
+    ImsVector<IMS_SINT32> objVideoCodecResolution;
     objVideoCodecResolution.Push(480);
     objVideoCodecResolution.Push(640);
 
@@ -121,7 +121,7 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoBitrate)
 {
     CodecAvcConfig* m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
 
-    IMSVector<IMS_SINT32> objVideoBitrate;
+    ImsVector<IMS_SINT32> objVideoBitrate;
     objVideoBitrate.Push(512);
 
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
@@ -141,7 +141,7 @@ TEST_F(CodecAvcConfigTest, GetConfigVideoImageAttr)
 {
     CodecAvcConfig* m_pConfig = new CodecAvcConfig(DEFAULT_TYPE, DEFAULT_PAYLOAD_NUM);
 
-    IMSVector<AString> objImageAttr;
+    ImsVector<AString> objImageAttr;
     objImageAttr.Push("send [x=640,y=480] recv [x=640,y=480]");
 
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();

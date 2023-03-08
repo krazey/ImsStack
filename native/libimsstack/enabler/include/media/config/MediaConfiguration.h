@@ -68,9 +68,9 @@ public:
     /**
      * @brief Get the codec configs
      *
-     * @return const IMSList<CodecConfig*>& Return the codec config
+     * @return const ImsList<CodecConfig*>& Return the codec config
      */
-    virtual const IMSList<CodecConfig*>& GetCodecConfigs() const;
+    virtual const ImsList<CodecConfig*>& GetCodecConfigs() const;
 
     /**
      * @brief Get media session type
@@ -142,7 +142,7 @@ public:
 protected:
     virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
     virtual IMS_UINT32 MakeEachCodecs(IN ICarrierConfig* piCc, IN IMS_UINT32 nCodec,
-            IN IMS_UINT32 nCodecIndex, IN IMSVector<IMS_SINT32> objPayloadTypeArray);
+            IN IMS_UINT32 nCodecIndex, IN ImsVector<IMS_SINT32> objPayloadTypeArray);
     virtual IMS_UINT32 MakeCodec(IN ICarrierConfig* piCc, IN IMS_UINT32 nCodec,
             IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum, IMS_SINT32 nCodecIdx);
     virtual void ToDebugString() const;
@@ -215,7 +215,7 @@ protected:
     IMS_SINT32 nRtcpInactivityTimerMillis;
 
     // Provisioned codecs
-    IMSList<CodecConfig*> objCodecConfigs;
+    ImsList<CodecConfig*> objCodecConfigs;
 };
 
 #endif

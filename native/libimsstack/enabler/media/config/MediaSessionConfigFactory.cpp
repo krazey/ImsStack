@@ -37,11 +37,11 @@ PUBLIC
 void MediaSessionConfigFactory::CreateMediaSessionConfig(
         IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_TYPE eServiceType)
 {
-    IMSList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
+    ImsList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
 
     if (pListMediaSessionConfig == IMS_NULL)
     {
-        pListMediaSessionConfig = new IMSList<MediaSessionConfig*>();
+        pListMediaSessionConfig = new ImsList<MediaSessionConfig*>();
         m_mapListMediaSessionConfig.Add(nSlotId, pListMediaSessionConfig);
     }
 
@@ -59,11 +59,11 @@ PUBLIC
 void MediaSessionConfigFactory::AddMediaSessionConfig(
         IN IMS_SINT32 nSlotId, IN MediaSessionConfig* objMediaSessionConfig)
 {
-    IMSList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
+    ImsList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
 
     if (pListMediaSessionConfig == IMS_NULL)
     {
-        pListMediaSessionConfig = new IMSList<MediaSessionConfig*>();
+        pListMediaSessionConfig = new ImsList<MediaSessionConfig*>();
         pListMediaSessionConfig->Append(objMediaSessionConfig);
 
         IMS_TRACE_D("AddMediaSessionConfig - nSlotId[%d], listSize[%d]", nSlotId,
@@ -92,7 +92,7 @@ void MediaSessionConfigFactory::AddMediaSessionConfig(
 PUBLIC
 void MediaSessionConfigFactory::DestroyListSessionConfig(IN IMS_SINT32 nSlotId)
 {
-    IMSList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
+    ImsList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
 
     if (pListMediaSessionConfig != IMS_NULL)
     {
@@ -111,7 +111,7 @@ void MediaSessionConfigFactory::DestroyListSessionConfig(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMSList<MediaSessionConfig*>* MediaSessionConfigFactory::GetListSessionConfig(IN IMS_SINT32 nSlotId)
+ImsList<MediaSessionConfig*>* MediaSessionConfigFactory::GetListSessionConfig(IN IMS_SINT32 nSlotId)
 {
     if (m_mapListMediaSessionConfig.GetIndexOfKey(nSlotId) >= 0)
     {
@@ -125,7 +125,7 @@ PUBLIC
 MediaSessionConfig* MediaSessionConfigFactory::FindMediaSessionConfig(
         IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_TYPE eServiceType)
 {
-    IMSList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
+    ImsList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
 
     MediaSessionConfig* objMediaSessionConfig = IMS_NULL;
 
@@ -166,7 +166,7 @@ void MediaSessionConfigFactory::DestroySessionConfig(
 {
     for (IMS_UINT32 nIdxSlot = 0; nIdxSlot <= IMS_SLOT_1; nIdxSlot++)
     {
-        IMSList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nIdxSlot);
+        ImsList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nIdxSlot);
 
         if (pListMediaSessionConfig != IMS_NULL)
         {

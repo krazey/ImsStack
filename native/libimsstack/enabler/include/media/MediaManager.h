@@ -136,9 +136,9 @@ private:
             IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
 
 protected:
-    static IMSMap<IMS_SINT32, MediaManager*> m_objMapMediaManager;
+    static ImsMap<IMS_SINT32, MediaManager*> m_objMapMediaManager;
     IMS_SINT32 m_nSlotId;
-    IMSList<MediaSessionNode*> m_lstSessionNode;
+    ImsList<MediaSessionNode*> m_lstSessionNode;
     MediaResourceManager* m_pResourceMngr;
 };
 

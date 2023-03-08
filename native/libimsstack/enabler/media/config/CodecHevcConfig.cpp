@@ -71,7 +71,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc, IN IMS_
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32> objVideoCodecAttributeResolution = piCcSubBundle->GetIntArray(
+    ImsVector<IMS_SINT32> objVideoCodecAttributeResolution = piCcSubBundle->GetIntArray(
             CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
     if (!objVideoCodecAttributeResolution.IsEmpty())
     {

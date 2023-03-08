@@ -44,11 +44,11 @@ protected:
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
     IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
     AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetIntArray(pszKey);
     }
-    IMSVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
+    ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetStringArray(pszKey);
     }
@@ -88,7 +88,7 @@ TEST_F(TextConfigurationTest, GetConfigTextPort)
 {
     TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
 
-    IMSVector<IMS_SINT32> objTextPortRtp;
+    ImsVector<IMS_SINT32> objTextPortRtp;
     objTextPortRtp.Push(50100);
     objTextPortRtp.Push(50500);
 
@@ -111,7 +111,7 @@ TEST_F(TextConfigurationTest, GetConfigTextRtcpInterval)
 {
     TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
 
-    IMSVector<IMS_SINT32> objTextRtcpInterval;
+    ImsVector<IMS_SINT32> objTextRtcpInterval;
     objTextRtcpInterval.Push(3);
     objTextRtcpInterval.Push(10);
 
