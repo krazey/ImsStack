@@ -17,7 +17,7 @@
 #include "IMtcImsEventReceiver.h"
 #include "ImsEventDef.h"
 #include "MockIMtcImsEventReceiver.h"
-#include "MockIMtcService.h"
+#include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/MockIMtcBlockRule.h"
@@ -31,67 +31,60 @@ using Result = IMtcBlockRule::Result;
 class CsCallBlockRuleTest : public ::testing::Test
 {
 public:
-    MockIMtcService objService;
     MockIMtcImsEventReceiver objImsEventReceiver;
     MockIMtcCallContext objContext;
     MockIMtcBlockRuleCheckListener objListener;
-    CsCallBlockRule* pBlockRule;
+    CallInfo objCallInfo;
 
 protected:
     virtual void SetUp() override
     {
-        ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
-
-        pBlockRule = new CsCallBlockRule(objContext);
+        ON_CALL(objContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
     }
-
-    virtual void TearDown() override { delete pBlockRule; }
 };
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedForEmergencyCall)
 {
-    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::EMERGENCY));
+    objCallInfo.bEmergency = IMS_TRUE;
+    CsCallBlockRule objBlockRule(objContext);
 
     EXPECT_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE)).Times(0);
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = objBlockRule.Check(objListener);
 
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedIfCsCallStateIdle)
 {
-    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
-
+    CsCallBlockRule objBlockRule(objContext);
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMS_CSCALL_STATE_IDLE));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = objBlockRule.Check(objListener);
 
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsUnblockedIfCsCallStateUnknown)
 {
-    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
-
+    CsCallBlockRule objBlockRule(objContext);
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMtcImsEventReceiver::UNKNOWN_VALUE));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = objBlockRule.Check(objListener);
 
     EXPECT_EQ(Result::Status::UNBLOCKED, objResult.eStatus);
 }
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallIncoming)
 {
-    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
-
+    CsCallBlockRule objBlockRule(objContext);
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMS_CSCALL_STATE_INCOMING));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = objBlockRule.Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
     EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CS_CALL), objResult.objReason);
@@ -99,12 +92,11 @@ TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallIncoming)
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallActive)
 {
-    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
-
+    CsCallBlockRule objBlockRule(objContext);
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMS_CSCALL_STATE_ACTIVE));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = objBlockRule.Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
     EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CS_CALL), objResult.objReason);
@@ -112,12 +104,11 @@ TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallActive)
 
 TEST_F(CsCallBlockRuleTest, CheckReturnsBlockedIfCsCallActiveE911)
 {
-    ON_CALL(objService, GetServiceType).WillByDefault(Return(ServiceType::NORMAL));
-
+    CsCallBlockRule objBlockRule(objContext);
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_CSCALL_STATE))
             .WillByDefault(Return(IMS_CSCALL_STATE_ACTIVE_E911));
 
-    Result objResult = pBlockRule->Check(objListener);
+    Result objResult = objBlockRule.Check(objListener);
 
     EXPECT_EQ(Result::Status::BLOCKED, objResult.eStatus);
     EXPECT_EQ(CallReasonInfo(CODE_REJECT_ONGOING_CS_CALL), objResult.objReason);

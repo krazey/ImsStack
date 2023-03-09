@@ -17,7 +17,6 @@
 #ifndef CS_CALL_BLOCK_RULE_H_
 #define CS_CALL_BLOCK_RULE_H_
 
-#include "call/IMtcCall.h"
 #include "call/block/IMtcBlockRule.h"
 
 class IMtcCallContext;
@@ -34,8 +33,8 @@ public:
     Result Check(IN IMtcBlockRuleCheckListener& objListener) override;
 
 private:
-    const IMtcService& m_objService;
     IMtcImsEventReceiver& m_objEventReceiver;
+    IMS_BOOL m_bEmergencyCall;
 };
 
 #endif
