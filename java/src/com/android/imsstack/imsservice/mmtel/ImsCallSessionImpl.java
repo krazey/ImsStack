@@ -117,7 +117,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     // Negotiated call profile (local capa. + remote capa.)
     private ImsCallProfile mCallProfile = null;
     private ImsCallProfile mProposedCallProfile = new ImsCallProfile();
-    private ImsReasonInfo mImmediateCallEndReason = null;
+    protected ImsReasonInfo mImmediateCallEndReason = null;
     private ImsReasonInfo mOperationFailReason = null;
     private int mTerminationReason = ImsReasonInfo.CODE_UNSPECIFIED;
     private long mCallTakenTime = 0;
@@ -133,20 +133,28 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     // WFC w/ geolocation }
     private UsatBasedCall mUsatBasedCall = null;
     private String mCallTransferTarget = null;
-    private boolean mIsEctConfirmationRequired = false;
-    private ImsCallSessionImpl mTransferRequestedSession = null;
+    protected boolean mIsEctConfirmationRequired = false;
+    protected ImsCallSessionImpl mTransferRequestedSession = null;
     private Map<Integer, Boolean> mCallFeatureCache = new HashMap<Integer, Boolean>();
     private CallReasonInfo mCacheCallReasonInfo = null;
 
     public ImsCallSessionImpl(ICallContext callContext,
             CallTracker ct, MtcCall call,
             String callId, ImsCallProfile profile, boolean isMO) {
+        this(callContext, ct, call, callId, profile, isMO,
+                new ImsCallSessionCallback(callContext.getExecutor()));
+    }
+
+    @VisibleForTesting
+    public ImsCallSessionImpl(ICallContext callContext, CallTracker ct, MtcCall call,
+            String callId, ImsCallProfile profile, boolean isMO, ImsCallSessionCallback callBack) {
+
         mCallContext = callContext;
 
         mCT = ct;
         mCall = call;
         mCallId = createCallId(callId);
-        mCallback = new ImsCallSessionCallback(mCallContext.getExecutor());
+        mCallback = callBack;
 
         initCallProfile(profile);
 
@@ -1312,27 +1320,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     @VisibleForTesting
-    public ImsCallSessionImpl(ICallContext callContext, CallTracker ct, MtcCall call,
-            String callId, ImsCallProfile profile, boolean isMO,
-            ImsCallSessionCallback callBack) {
-        mCallContext = callContext;
-        mCT = ct;
-        mCall = call;
-        mCallId = createCallId(callId);
-        mCallback = callBack;
-        initCallProfile(profile);
-        mCallDetails.set(CallDetails.MO);
-        mVideoCallSession = new ImsVideoCallSession(mCallContext, this, isMO);
-        mVideoCallProvider = ImsVideoCallProviderFactory.createVideoCallProvider(
-                mVideoCallSession,
-                (call != null) ? call.getMediaSession() : null);
-
-        clearProposedCallProfile();
+    public CallDetails getCallDetails() {
+        return mCallDetails;
     }
 
     @VisibleForTesting
-    public CallDetails getCallDetails() {
-        return mCallDetails;
+    protected MtcCallListenerProxy getCallListenerProxy() {
+        return mListenerProxy;
     }
 
     @VisibleForTesting
@@ -2073,7 +2067,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         ImsCallMediaUtils.setRttInfo(mi, rttDirection, isRttOn);
     }
 
-    private void setTerminationReason(int reason) {
+    @VisibleForTesting
+    protected void setTerminationReason(int reason) {
         if (mTerminationReason != ImsReasonInfo.CODE_UNSPECIFIED) {
             return;
         }
@@ -2256,7 +2251,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     private boolean updateCallTypeChangeCapability() {
         int callType = mCallProfile.getCallType();
-
         // Google-Native: enable call switch capability from voice to video
         // Q-OS: enable call switch capability from voice to video
         if (mCallProfile.getCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE, false)) {
@@ -3237,7 +3231,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         return false;
     }
 
-    private class MtcCallListenerProxy extends MtcCall.Listener {
+    protected class MtcCallListenerProxy extends MtcCall.Listener {
         @Override
         public void onCallProxyHold(MtcCall call) {
             if (!call.equals(mCall)) {
@@ -3430,7 +3424,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             notifyCallStartFailedWithDelay(reasonInfo, delayForCallback);
-
             if (MtcCallUtils.isOutgoingCallsBarred(callReasonInfo)) {
                 mCallback.invokeSuppServiceReceived(ImsCallSessionImpl.this,
                         ImsSuppServiceUtils.MO.getOutgoingCallsBarred());
