@@ -1292,4 +1292,12 @@ TEST_F(MtcConfigurationManagerTest, IsRequiredCdmalessFeatureTag)
             GetBool(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL));
 }
 
+TEST_F(MtcConfigurationManagerTest,
+        IsEmergencyCallCurrentLocationDiscoverySupportedReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->IsEmergencyCallCurrentLocationDiscoverySupported(),
+            GetBool(CarrierConfig::Assets::
+                            KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL));
+}
+
 }  // namespace android
