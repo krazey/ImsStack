@@ -18,6 +18,9 @@
 #include "JniEnablerConnector.h"
 #include "JniMtcCall.h"
 #include "MockIMtcCallController.h"
+#include "MockIThread.h"
+#include "PlatformContext.h"
+#include "TestThreadService.h"
 #include <binder/Parcel.h>
 #include <gtest/gtest.h>
 
@@ -26,6 +29,13 @@ using ::testing::Return;
 
 namespace android
 {
+
+MATCHER_P(IsSameMessageType, type, "")
+{
+    android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(arg);
+    IMS_UINT32 eType = pParcel->readInt32();
+    return type == eType;
+}
 
 LOCAL IMS_SINT32 SLOT_ID = 0;
 
@@ -48,6 +58,8 @@ class JniMtcCallTest : public ::testing::Test
 {
 public:
     MockIMtcCallController objMockController;
+    MockIThread objMockThread;
+    TestThreadService* pThreadService;
     Parcel objParcel;
     JniMtcCall* pJniCall;
 
@@ -58,6 +70,10 @@ protected:
         JniEnablerConnector::GetInstance().SetNativeEnabler(
                 SLOT_ID, EnablerType::MTC_CALL, &objMockController);
 
+        pThreadService = new TestThreadService();
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, pThreadService);
+        pThreadService->SetThread(&objMockThread);
+
         pJniCall = new TestJniMtcCall(reinterpret_cast<Jni_SendDataToJava>(0x01), SLOT_ID);
     }
 
@@ -66,6 +82,9 @@ protected:
         delete pJniCall;
         JniEnablerConnector::GetInstance().SetNativeEnabler(
                 SLOT_ID, EnablerType::MTC_CALL, IMS_NULL);
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_THREAD, IMS_NULL);
+        delete pThreadService;
     }
 };
 
@@ -74,12 +93,26 @@ TEST_F(JniMtcCallTest, CreatesJniMtcCallThread)
     EXPECT_NE(nullptr, pJniCall->GetJniThread());
 }
 
-TEST_F(JniMtcCallTest, SendDataOpen)
+TEST_F(JniMtcCallTest, SendDataOpenInvokesOpenAndAttach)
 {
+    CallKey nValidKey = 1;
     objParcel.writeInt32(IuMtcCall::OPEN);
     objParcel.setDataPosition(0);
 
-    EXPECT_CALL(objMockController, Open(_, _)).Times(1);
+    EXPECT_CALL(objMockController, Open(_, _)).WillOnce(Return(nValidKey));
+    EXPECT_CALL(objMockController, Attach(nValidKey));
+
+    pJniCall->SendData(objParcel);
+}
+
+TEST_F(JniMtcCallTest, SendDataOpenDoesNotInvokeAttachIfCallKeyIsInvalid)
+{
+    CallKey nInvalidKey = 0;
+    objParcel.writeInt32(IuMtcCall::OPEN);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockController, Open(_, _)).WillOnce(Return(nInvalidKey));
+    EXPECT_CALL(objMockController, Attach(_)).Times(0);
 
     pJniCall->SendData(objParcel);
 }
@@ -96,10 +129,41 @@ TEST_F(JniMtcCallTest, SendDataAttach)
 
 TEST_F(JniMtcCallTest, SendDataStart)
 {
+    // set m_nCallKey to 1
+    CallKey nValidKey = 1;
+    objParcel.writeInt32(IuMtcCall::OPEN);
+    objParcel.setDataPosition(0);
+    ON_CALL(objMockController, Open(_, _)).WillByDefault(Return(nValidKey));
+    pJniCall->SendData(objParcel);
+
+    objParcel.setDataPosition(0);
     objParcel.writeInt32(IuMtcCall::START);
     objParcel.setDataPosition(0);
 
     EXPECT_CALL(objMockController, Start(_, _, _, _, _)).Times(1);
+
+    pJniCall->SendData(objParcel);
+}
+
+TEST_F(JniMtcCallTest, SendDataStartDoesNotInvokeStartIfCallKeyIsInvalid)
+{
+    // set m_nCallKey to 0
+    CallKey nInvalidKey = 0;
+    objParcel.writeInt32(IuMtcCall::OPEN);
+    objParcel.setDataPosition(0);
+    ON_CALL(objMockController, Open(_, _)).WillByDefault(Return(nInvalidKey));
+    ;
+    pJniCall->SendData(objParcel);
+
+    // BaseServiceThread::MESSAGE_THREAD_SWITCHING = 0
+    EXPECT_CALL(objMockThread, PostMessageI(0, _, IsSameMessageType(IuMtcCall::START_FAILED)))
+            .Times(1);
+
+    objParcel.setDataPosition(0);
+    objParcel.writeInt32(IuMtcCall::START);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockController, Start(_, _, _, _, _)).Times(0);
 
     pJniCall->SendData(objParcel);
 }

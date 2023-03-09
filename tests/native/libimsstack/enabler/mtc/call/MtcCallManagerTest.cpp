@@ -44,6 +44,7 @@ protected:
     {
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
         ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(&objService));
+        ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
 
         pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
@@ -106,6 +107,26 @@ TEST_F(MtcCallManagerTest, CreateCallAddsNewCallToList)
 TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsNull)
 {
     ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(nullptr));
+
+    CallInfo objCallInfo;
+    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+
+    EXPECT_EQ(DYNAMIC_CAST(IMtcCall*, MtcCallManager::s_pNullCall), pCall);
+}
+
+TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsSuspended)
+{
+    ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_SUSPENDED));
+
+    CallInfo objCallInfo;
+    IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
+
+    EXPECT_EQ(DYNAMIC_CAST(IMtcCall*, MtcCallManager::s_pNullCall), pCall);
+}
+
+TEST_F(MtcCallManagerTest, CreateCallReturnsNullCallIfServiceIsIdle)
+{
+    ON_CALL(objService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_IDLE));
 
     CallInfo objCallInfo;
     IMtcCall* pCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
@@ -184,8 +205,10 @@ TEST_F(MtcCallManagerTest, GetCallsByServiceTypeReturnsCallListOfMatchingCall)
 
     ON_CALL(objContext, GetServiceByType(ServiceType::NORMAL))
             .WillByDefault(Return(&objNormalService));
+    ON_CALL(objNormalService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
     ON_CALL(objContext, GetServiceByType(ServiceType::EMERGENCY))
             .WillByDefault(Return(&objEmergencyService));
+    ON_CALL(objEmergencyService, GetStatus).WillByDefault(Return(ServiceStatus::SERVICE_ACTIVE));
 
     CallInfo objCallInfo;
     IMtcCall* pNormalCall = pCallManager->CreateCall(ServiceType::NORMAL, objCallInfo);
