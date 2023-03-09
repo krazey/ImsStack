@@ -474,84 +474,6 @@ GeolocationPidfCreator::~GeolocationPidfCreator()
 {
 }
 
-// This method creates PIDF for Geolocation with country only.
-PUBLIC
-IMS_BOOL GeolocationPidfCreator::Create(IN const AString& strEntityUri,
-        IN const AString& strCountry, OUT ByteArray& objContent) const
-{
-    ISystemTime* piSystemTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
-    AString strTimeStamp = piSystemTime->GetUtcFormat();
-
-    geolocationPidfCreator_CreatePIDF(
-            (strEntityUri.GetLength() > 0) ? strEntityUri : CreateEntityUri(GetSlotId()),
-            GetTupleId(), GetDeviceName(), GetDeviceId(),
-            strCountry, AString::ConstNull(),
-            AString::ConstNull(), AString::ConstNull(), AString::ConstNull(),
-            AString::ConstNull(), AString::ConstNull(), AString::ConstNull(),
-            AString::ConstNull(), AString::ConstNull(),
-            strTimeStamp, objContent, NAMESPACE_COUNTRY);
-
-    return objContent.GetLength() != 0;
-}
-
-// This method creates PIDF for Geolocation based on the option (country info.),
-// but if country is not determined, then don't create PIDF.
-PUBLIC
-IMS_BOOL GeolocationPidfCreator::Create(IN const AString& strEntityUri,
-        IN IMS_BOOL bUnknownCountryAllowed, OUT ByteArray& objContent) const
-{
-    ILocationProperties* piLocation = GetLocationProperties();
-
-    if (piLocation == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "ILocationProperties is not available", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    const AString& strCountry = piLocation->GetCountry();
-
-    if (!bUnknownCountryAllowed && ((strCountry.GetLength() == 0) || strCountry.Equals("ZZ")))
-    {
-        IMS_TRACE_I("Country is empty or unknown", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    const AString& strLatitude = piLocation->GetLatitude();
-    const AString& strLongitude = piLocation->GetLongitude();
-    const AString& strRadius = piLocation->GetRadius();
-    const AString& strShape = piLocation->GetShape();
-    const AString& strConfidence = piLocation->GetConfidence();
-    const AString& strCurrentTime = piLocation->GetCurrentTime();
-    const AString& strMethod = IsFeatureSet(FEATURE_NO_METHOD) ?\
-            AString::ConstNull() : piLocation->GetMethod();
-    const AString& strState = piLocation->GetState();
-    const AString& strCity = piLocation->GetCity();
-    const AString& strPostal = piLocation->GetPostal();
-    const AString& strAltitude = piLocation->GetAltitude();
-    const AString& strVerticalAccuracy = piLocation->GetVerticalAccuracy();
-
-    AString strPosition(AString::ConstEmpty());
-
-    if ((strLatitude.GetLength() != 0) && (strLongitude.GetLength() != 0))
-    {
-        strPosition.Sprintf("%s %s", strLatitude.GetStr(), strLongitude.GetStr());
-        if (strAltitude.GetLength() != 0 && strShape.EqualsIgnoreCase("Ellipsoid"))
-        {
-            strPosition.Append(" ");
-            strPosition.Append(strAltitude);
-        }
-    }
-
-    geolocationPidfCreator_CreatePIDF(
-            (strEntityUri.GetLength() > 0) ? strEntityUri : CreateEntityUri(GetSlotId()),
-            GetTupleId(), GetDeviceName(), GetDeviceId(),
-            strCountry, strState, strCity, strPostal,
-            strPosition, strRadius, strVerticalAccuracy, strShape, strConfidence,
-            strMethod, strCurrentTime, objContent);
-
-    return objContent.GetLength() != 0;
-}
-
 // This method creates PIDF for Geolocation with country only or country and state.
 // but if country is not determined, then don't create PIDF.
 PUBLIC
@@ -625,8 +547,8 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPosition(IN const AString& strEntityU
     const AString& strShape = piLocation->GetShape();
     AString strConfidence = piLocation->GetConfidence();
     const AString& strCurrentTime = piLocation->GetCurrentTime();
-    const AString& strMethod = IsFeatureSet(FEATURE_NO_METHOD) ?\
-            AString::ConstNull() : piLocation->GetMethod();
+    const AString& strMethod =
+            IsFeatureSet(FEATURE_NO_METHOD) ? AString::ConstNull() : piLocation->GetMethod();
     const AString& strCountry =
             IsFeatureSet(FEATURE_NO_COUNTRY_IF_UNKNOWN) && piLocation->GetCountry().Equals("ZZ")
             ? AString::ConstNull()
@@ -690,8 +612,8 @@ IMS_BOOL GeolocationPidfCreator::CreateWithPositionAndCountry(IN const AString& 
     const AString& strShape = piLocation->GetShape();
     AString strConfidence = piLocation->GetConfidence();
     const AString& strCurrentTime = piLocation->GetCurrentTime();
-    const AString& strMethod = IsFeatureSet(FEATURE_NO_METHOD) ?\
-            AString::ConstNull() : piLocation->GetMethod();
+    const AString& strMethod =
+            IsFeatureSet(FEATURE_NO_METHOD) ? AString::ConstNull() : piLocation->GetMethod();
     const AString& strCountry =
             IsFeatureSet(FEATURE_NO_COUNTRY_IF_UNKNOWN) && piLocation->GetCountry().Equals("ZZ")
             ? AString::ConstNull()
@@ -751,8 +673,8 @@ IMS_BOOL GeolocationPidfCreator::CreateWithoutCivic(IN const AString& strEntityU
     const AString& strShape = piLocation->GetShape();
     AString strConfidence = piLocation->GetConfidence();
     const AString& strCurrentTime = piLocation->GetCurrentTime();
-    const AString& strMethod = IsFeatureSet(FEATURE_NO_METHOD) ?\
-            AString::ConstNull() : piLocation->GetMethod();
+    const AString& strMethod =
+            IsFeatureSet(FEATURE_NO_METHOD) ? AString::ConstNull() : piLocation->GetMethod();
     const AString& strAltitude = piLocation->GetAltitude();
     const AString& strVerticalAccuracy = piLocation->GetVerticalAccuracy();
     AString strPosition;
