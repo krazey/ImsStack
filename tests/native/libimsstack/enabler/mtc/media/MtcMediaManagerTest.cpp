@@ -142,13 +142,6 @@ TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithSuccessReport)
     EXPECT_EQ(MediaState::STARTED, pMediaManager->GetState());
 }
 
-TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithCloseSessionReport)
-{
-    pMediaManager->MediaSession_Notify(REPORT_CLOSE_SESSION);
-
-    EXPECT_EQ(MediaState::TERMINATED, pMediaManager->GetState());
-}
-
 TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithDataReceivedStartedReport)
 {
     EXPECT_CALL(*pListener, OnReceivingMediaDataStarted(_, _)).Times(2);

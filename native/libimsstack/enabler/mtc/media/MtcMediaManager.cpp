@@ -87,9 +87,6 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
         case REPORT_SUCCESS:
             SetState(MediaState::STARTED);
             break;
-        case REPORT_CLOSE_SESSION:
-            SetState(MediaState::TERMINATED);
-            break;
         case REPORT_DATA_RECEIVE_FAILED:
             if (eReportedMediaType == MEDIATYPE_AUDIO)
             {
