@@ -388,6 +388,12 @@ PRIVATE VIRTUAL ISubscription* VirtualSessionImpl::CreateSubscription(
     return IMS_NULL;
 }
 
+PRIVATE VIRTUAL IPublication* VirtualSessionImpl::CreatePublication(IN const AString& /*strEvent*/)
+{
+    virtualSessionImpl_MethodNotSupported();
+    return IMS_NULL;
+}
+
 PRIVATE VIRTUAL ISipClientConnection* VirtualSessionImpl::CreateTransaction(
         IN const SipMethod& /*objMethod*/)
 {
