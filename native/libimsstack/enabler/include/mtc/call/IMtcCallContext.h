@@ -23,6 +23,7 @@
 #include "JniCallInfo.h"
 #include "sipcore/SipMethod.h"
 
+class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;
 class IMtcBlockChecker;
 class IMtcBlockRule;
@@ -159,6 +160,13 @@ public:
      * @return
      */
     virtual UdpKeepAliveSender& GetUdpKeepAliveSender() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual CurrentLocationDiscoveryController& GetCurrentLocationDiscoveryController() = 0;
 
     /**
      * @brief Gets

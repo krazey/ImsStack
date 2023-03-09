@@ -38,6 +38,7 @@
 #include "sipcore/ISipConnection.h"
 #include "sipcore/ISipServerConnection.h"
 #include "sipcore/MockISipClientConnection.h"
+#include "sipcore/MockISipServerConnection.h"
 #include <gtest/gtest.h>
 
 LOCAL CallStateName INITIAL_CALL_STATE = CallStateName::IDLE;
@@ -339,9 +340,10 @@ TEST_F(MtcCallStateTest, SessionRPRReceivedDoesNothing)
 
 TEST_F(MtcCallStateTest, SessionTransactionReceivedDoesNothing)
 {
-    ISipServerConnection* piFakeConnection = reinterpret_cast<ISipServerConnection*>(0x1);
+    MockISipServerConnection objSipServerConnection;
     EXPECT_EQ(
-            INITIAL_CALL_STATE, pState->SessionTransactionReceived(&objISession, piFakeConnection));
+            INITIAL_CALL_STATE, pState->SessionTransactionReceived(
+                    &objISession, &objSipServerConnection));
 }
 
 TEST_F(MtcCallStateTest, Refresh_NotifyCompletedDoesNothing)

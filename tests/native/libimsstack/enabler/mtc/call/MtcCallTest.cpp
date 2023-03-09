@@ -40,6 +40,7 @@
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "ect/MockIEctManager.h"
+#include "emergency/CurrentLocationDiscoveryController.h"
 #include "emergency/MockIMtcEmergencyServiceManager.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
@@ -723,6 +724,16 @@ TEST_F(MtcCallTest, GetUdpKeepAliveSenderCreatesInstance)
     UdpKeepAliveSender* pUdpKeepAliveSender = &objCall.GetUdpKeepAliveSender();
 
     EXPECT_NE(nullptr, pUdpKeepAliveSender);
+}
+
+TEST_F(MtcCallTest, GetCurrentLocationDiscoveryControllerCreatesInstance)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+
+    CurrentLocationDiscoveryController* pCurrentLocationDiscoveryController =
+            &objCall.GetCurrentLocationDiscoveryController();
+
+    EXPECT_NE(nullptr, pCurrentLocationDiscoveryController);
 }
 
 TEST_F(MtcCallTest, CreateSessionDoesNothingIfSessionIsNull)
