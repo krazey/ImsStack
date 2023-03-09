@@ -121,9 +121,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT);
     objItems.objShortCallCodes =
             piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY);
-    objItems.bValidateVerstatFeatureInRegistrationToCheckNetworkCapability = piCc->GetBoolean(
-            CarrierConfig::ImsVoice::
-                    KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL);
     objItems.bAllowMultipleCallIncludingVideoCall = piCc->GetBoolean(
             CarrierConfig::ImsVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL);
     objItems.objRejectCodeForCsfbs =
@@ -154,8 +151,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
                     KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING));
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
             CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING));
-    objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
-            CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_REDIRECTION_FAILURE_STRING));
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(CarrierConfig::ImsVoice::
                     KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING));
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
@@ -164,8 +159,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
                     KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING));
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(CarrierConfig::ImsVoice::
                     KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING));
-    objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
-            CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_INTERNAL_ERROR_STRING));
     // reject reason
     objItems.objCallRejectReasonPhrases.Push(piCc->GetString(
             CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING));
@@ -348,4 +341,10 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT);
     objItems.bReleaseEmergencyPdnWithEmergencyCallFail = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL);
+    objItems.nPolicyForAlertNotUsingPreconditionMechanism = piCc->GetInt(
+            CarrierConfig::Assets::KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT);
+    objItems.bRequiredCdmalessFeatureTag =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
+    objItems.bEmergencyCallCurrentLocationDiscoverySupported = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL);
 }

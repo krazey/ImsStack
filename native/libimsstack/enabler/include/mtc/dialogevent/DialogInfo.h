@@ -23,23 +23,22 @@
 
 class Dialog;
 class IElement;
-struct JniExternalCall;
 
 class DialogInfo
 {
 public:
-    explicit DialogInfo();
+    explicit DialogInfo(IN_OUT ImsList<Dialog*>& objDialogs);
     ~DialogInfo();
     DialogInfo(IN const DialogInfo&) = delete;
     DialogInfo& operator=(IN const DialogInfo&) = delete;
 
     IMS_RESULT Update(IN IElement* piElementDialogInfo);
-    ImsList<JniExternalCall*> GetJniExternalCalls() const;
 
     inline IMS_UINT32 GetState() const { return m_nState; }
     inline IMS_UINT32 GetVersion() const { return m_nVersion; }
-    inline AString& GetEntity() { return m_strEntity; }
+    inline const AString& GetEntity() const { return m_strEntity; }
 
+    // TODO: move to common area?
     static IElement* GetSubElement(IN const IElement* piElement, IN const IMS_CHAR* pszElement);
     static AString& GetSubElementValue(IN const IElement* piElement, IN const IMS_CHAR* pszElement,
             OUT AString& strElementValue);
@@ -49,25 +48,18 @@ public:
 
 private:
     static IMS_UINT32 ConvertState(IN const AString& strState);
-    void Clear();
     IMS_SLONG GetIndexOfKeyHasSameId(IN const AString& strDialogId);
-    static AString GetDialogId(Dialog* pDialog);
-    static AString GetDialogRemoteAddress(Dialog* pDialog);
-    static AString GetDialogLocalAddress(Dialog* pDialog);
-    static IMS_BOOL IsPullableDialog(Dialog* pDialog);
-    static IMS_UINT32 GetDialogCallState(Dialog* pDialog);
-    static IMS_UINT32 GetDialogCallType(Dialog* pDialog);
-    static IMS_BOOL IsHeldDialog(Dialog* pDialog);
 
 public:
     enum
     {
+        STATE_INVALID = 0,
         STATE_FULL = 1,
         STATE_PARTIAL = 2,
     };
 
 private:
-    ImsList<Dialog*> m_objDialogs;
+    ImsList<Dialog*>& m_objDialogs;
 
     IMS_UINT32 m_nVersion;
     IMS_UINT32 m_nState;
@@ -80,7 +72,7 @@ public:
     class State final
     {
     public:
-        explicit State() :
+        State() :
                 m_nEvent(EVENT_IDLE),
                 m_nCode(0),
                 m_nState(STATE_IDLE)
@@ -91,6 +83,10 @@ public:
         State& operator=(IN const State&) = delete;
 
         void Update(IN const IElement* piElementState);
+
+        inline IMS_UINT32 GetEvent() const { return m_nEvent; }
+        inline IMS_UINT32 GetCode() const { return m_nCode; }
+        inline IMS_UINT32 GetState() const { return m_nState; }
 
     private:
         static IMS_UINT32 ConvertDialogState(IN const AString& strState);
@@ -130,7 +126,7 @@ public:
     class Replaces final
     {
     public:
-        explicit Replaces() :
+        Replaces() :
                 m_strCallId(AString::ConstNull()),
                 m_strLocalTag(AString::ConstNull()),
                 m_strRemoteTag(AString::ConstNull())
@@ -141,6 +137,10 @@ public:
         Replaces& operator=(IN const Replaces&) = delete;
 
         void Update(IN const IElement* piElementReplaces);
+
+        inline const AString& GetCallId() const { return m_strCallId; }
+        inline const AString& GetLoalTag() const { return m_strLocalTag; }
+        inline const AString& GetRemoteTag() const { return m_strRemoteTag; }
 
     private:
         friend class DialogInfo;
@@ -153,7 +153,7 @@ public:
     class NameAddr final
     {
     public:
-        explicit NameAddr() :
+        NameAddr() :
                 m_strDisplay(AString::ConstNull()),
                 m_strUri(AString::ConstNull())
         {
@@ -163,6 +163,9 @@ public:
         NameAddr& operator=(IN const NameAddr&) = delete;
 
         void Update(IN const IElement* piElementNameaddr);
+
+        inline const AString& GetDiaplay() const { return m_strDisplay; }
+        inline const AString& GetUri() const { return m_strUri; }
 
     private:
         friend class DialogInfo;
@@ -174,7 +177,7 @@ public:
     class Target final
     {
     public:
-        explicit Target() :
+        Target() :
                 m_objParamMap(ImsMap<AString, AString>()),
                 m_strUri(AString::ConstNull())
         {
@@ -184,6 +187,9 @@ public:
         Target& operator=(IN const Target&) = delete;
 
         void Update(IN const IElement* piElementTarget);
+
+        inline const ImsMap<AString, AString>& GetParams() const { return m_objParamMap; }
+        inline const AString& GetUri() const { return m_strUri; }
 
     private:
         friend class DialogInfo;
@@ -197,7 +203,7 @@ public:
     class Participant final
     {
     public:
-        explicit Participant() :
+        Participant() :
                 m_objIdentity(NameAddr()),
                 m_objTarget(Target())
         {
@@ -207,6 +213,9 @@ public:
         Participant& operator=(IN const Participant&) = delete;
 
         void Update(IN const IElement* piElementParticipant);
+
+        inline const NameAddr& GetIdentity() const { return m_objIdentity; }
+        inline const Target& GetTarget() const { return m_objTarget; }
 
     private:
         friend class DialogInfo;
@@ -220,7 +229,7 @@ public:
     class ExtraInfo final
     {
     public:
-        explicit ExtraInfo() :
+        ExtraInfo() :
                 m_strExclusive(AString::ConstNull()),
                 m_objMediaInfo(MediaInfo())
         {
@@ -230,6 +239,9 @@ public:
         ExtraInfo& operator=(IN const ExtraInfo&) = delete;
 
         void Update(IN const IElement* piElementDialog);
+
+        inline const AString& GetExclusive() const { return m_strExclusive; }
+        inline const MediaInfo& GetMediaInfo() const { return m_objMediaInfo; }
 
     private:
         void HandleMediaInfo(IN const IElement* piElementDialog);
@@ -243,7 +255,7 @@ public:
     };
 
 public:
-    explicit Dialog() :
+    Dialog() :
             m_objState(State()),
             m_nDuration(0),
             m_objReplaces(Replaces()),
@@ -263,6 +275,18 @@ public:
     Dialog& operator=(IN const Dialog&) = delete;
 
     IMS_RESULT Update(IN IElement* piElementDialog);
+
+    inline const State& GetState() const { return m_objState; }
+    inline IMS_UINT32 GetDuration() const { return m_nDuration; }
+    inline const Replaces& GetReplaces() const { return m_objReplaces; }
+    inline const NameAddr& GetReferredBy() const { return m_objReferredBy; }
+    inline const Participant& GetLocalParticipant() const { return m_objLocal; }
+    inline const Participant& GetRemoteParticipant() const { return m_objRemote; }
+    inline const ExtraInfo& GetExtraInfo() const { return m_objExtraInfo; }
+    inline const AString& GetId() const { return m_strId; }
+    inline const AString& GetCallId() const { return m_strCallId; }
+    inline const AString& GetLocalTag() const { return m_strLocalTag; }
+    inline const AString& GetRemoteTag() const { return m_strRemoteTag; }
 
 private:
     static IMS_UINT32 ConvertDirection(IN const AString& strState);

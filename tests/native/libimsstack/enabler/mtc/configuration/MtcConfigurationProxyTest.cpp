@@ -85,12 +85,6 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
     EXPECT_EQ(
             bValue, pConfig->Is(Feature::DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR));
 
-    EXPECT_CALL(*pConfigManager, IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability)
-            .WillOnce(Return(bValue));
-    EXPECT_EQ(bValue,
-            pConfig->Is(
-                    Feature::VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY));
-
     EXPECT_CALL(*pConfigManager, IsAllowMultipleCallIncludingVideoCall).WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL));
 
@@ -248,6 +242,13 @@ TEST_F(MtcConfigurationProxyTest, IsReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, IsReleaseEmergencyPdnWithEmergencyCallFail)
             .WillOnce(Return(bValue));
     EXPECT_EQ(bValue, pConfig->Is(Feature::RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL));
+
+    EXPECT_CALL(*pConfigManager, IsRequiredCdmalessFeatureTag).WillOnce(Return(bValue));
+    EXPECT_EQ(bValue, pConfig->Is(Feature::REQUIRED_CDMALESS_FEATURE_TAG));
+
+    EXPECT_CALL(*pConfigManager, IsEmergencyCallCurrentLocationDiscoverySupported)
+            .WillOnce(Return(bValue));
+    EXPECT_EQ(bValue, pConfig->Is(Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED));
 }
 
 TEST_F(MtcConfigurationProxyTest, IsWithStringArgReturnsFromConfigManager)
@@ -472,6 +473,10 @@ TEST_F(MtcConfigurationProxyTest, GetIntReturnsFromConfigManager)
     EXPECT_CALL(*pConfigManager, GetCallRejectCodeForNotAcceptableCallType)
             .WillOnce(Return(nValue));
     EXPECT_EQ(nValue, pConfig->GetInt(Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE));
+
+    EXPECT_CALL(*pConfigManager, GetPolicyForAlertNotUsingPreconditionMechanism)
+            .WillOnce(Return(nValue));
+    EXPECT_EQ(nValue, pConfig->GetInt(Feature::POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM));
 }
 
 TEST_F(MtcConfigurationProxyTest, GetIntWith3BoolArgReturnsFromConfigManager)

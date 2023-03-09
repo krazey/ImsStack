@@ -66,6 +66,7 @@ public:
             nMoCallRequestTimeout(5000),
             nOipTypeForUnavailable(1),
             nPolicyFor403ResponseForInvite(1),
+            nPolicyForAlertNotUsingPreconditionMechanism(0),
             nPolicyForCheckingQosWhileCallUpgrading(0),
             nPolicyForEmergencyUrnEscvMapping(0),
             nPolicyForLocalRingbackToneWith180Response(0),
@@ -142,12 +143,13 @@ public:
             bUseLtePreferredStatusForServiceCapability(IMS_FALSE),
             bUseMcidSupplementaryService(IMS_FALSE),
             bUseMmcSupplementaryService(IMS_FALSE),
-            bValidateVerstatFeatureInRegistrationToCheckNetworkCapability(IMS_FALSE),
             bVideoOnDefaultBearerSupported(IMS_FALSE),
             bVideoQosPreconditionSupported(IMS_TRUE),
             bVoiceOnDefaultBearerSupported(IMS_FALSE),
             bVoiceQosPreconditionSupported(IMS_TRUE),
-            bReleaseEmergencyPdnWithEmergencyCallFail(IMS_FALSE)
+            bReleaseEmergencyPdnWithEmergencyCallFail(IMS_FALSE),
+            bRequiredCdmalessFeatureTag(IMS_FALSE),
+            bEmergencyCallCurrentLocationDiscoverySupported(IMS_TRUE)
     {
     }
     ~CarrierConfigItems()
@@ -217,6 +219,7 @@ public:
     IMS_SINT32 nMoCallRequestTimeout;
     IMS_SINT32 nOipTypeForUnavailable;
     IMS_SINT32 nPolicyFor403ResponseForInvite;
+    IMS_SINT32 nPolicyForAlertNotUsingPreconditionMechanism;
     IMS_SINT32 nPolicyForCheckingQosWhileCallUpgrading;
     IMS_SINT32 nPolicyForEmergencyUrnEscvMapping;
     IMS_SINT32 nPolicyForLocalRingbackToneWith180Response;
@@ -294,12 +297,13 @@ public:
     IMS_BOOL bUseLtePreferredStatusForServiceCapability;
     IMS_BOOL bUseMcidSupplementaryService;
     IMS_BOOL bUseMmcSupplementaryService;
-    IMS_BOOL bValidateVerstatFeatureInRegistrationToCheckNetworkCapability;
     IMS_BOOL bVideoOnDefaultBearerSupported;
     IMS_BOOL bVideoQosPreconditionSupported;
     IMS_BOOL bVoiceOnDefaultBearerSupported;
     IMS_BOOL bVoiceQosPreconditionSupported;
     IMS_BOOL bReleaseEmergencyPdnWithEmergencyCallFail;
+    IMS_BOOL bRequiredCdmalessFeatureTag;
+    IMS_BOOL bEmergencyCallCurrentLocationDiscoverySupported;
 };
 
 #endif

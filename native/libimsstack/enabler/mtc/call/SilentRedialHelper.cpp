@@ -160,6 +160,7 @@ void SilentRedialHelper::SetRedialDetail()
     switch (m_nType)
     {
         case EXTRA_CODE_REDIAL_BY_RETRY_AFTER:
+            m_nInterval = m_strExtra.ToInt32();
             m_nMaxCount = 1;
             return;
         case EXTRA_CODE_REDIAL_BY_REQUEST_TIMEOUT:
@@ -193,7 +194,7 @@ void SilentRedialHelper::ReleaseCallResources()
         m_objContext.RemoveSession(&pSession->GetISession());
     }
 
-    m_objContext.GetMediaManager().Terminate();
+    m_objContext.GetMediaManager().DestroyMediaSession();
     StopCallTimers();
 }
 

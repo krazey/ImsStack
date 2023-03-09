@@ -379,14 +379,6 @@ TEST_F(MtcConfigurationManagerTest, IsShortCallCodeReturnsValueInCarrierConfig)
 }
 
 TEST_F(MtcConfigurationManagerTest,
-        IsValidateVerstatFeatureInRegistrationToCheckNetworkCapabilityReturnsValueInCarrierConfig)
-{
-    EXPECT_EQ(pManager->IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability(),
-            GetBool(CarrierConfig::ImsVoice::
-                            KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL));
-}
-
-TEST_F(MtcConfigurationManagerTest,
         IsAllowMultipleCallIncludingVideoCallReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->IsAllowMultipleCallIncludingVideoCall(),
@@ -446,12 +438,16 @@ TEST_F(MtcConfigurationManagerTest, GetCallTerminateReasonHeaderReturnsValueInCa
 {
     AString strReason0 = "user ends call";
     AString strReason1 = "rtp timeout";
-    AString strReason2 = "";
+    AString strReason2 = "user ends and rtp timeout";
     AString strReason3 = "media bearer loss";
     AString strReason4 = "sip timeout";
     AString strReason5 = "sip response timeout";
-    AString strReason6 = "";
-    AString strReasonEmpty = AString::ConstNull();
+    AString strReason6 = "user ends and sip response timeout";
+    AString strReason7 = "call setup timeout";
+    AString strReason8 = "terminating early dialog";
+    AString strReason9 = "vops off";
+    AString strReason10 = "session refresh failure";
+    AString strReason11 = "conference call joined";
 
     MockICarrierConfig* piMockCarrierConfig = new MockICarrierConfig();
     ON_CALL(*piMockCarrierConfig,
@@ -492,40 +488,25 @@ TEST_F(MtcConfigurationManagerTest, GetCallTerminateReasonHeaderReturnsValueInCa
             GetString(CarrierConfig::ImsVoice::
                               KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING,
                     _))
-            .WillByDefault(Return(strReasonEmpty));
-    ON_CALL(*piMockCarrierConfig,
-            GetString(CarrierConfig::ImsVoice::
-                              KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING,
-                    _))
-            .WillByDefault(Return(strReasonEmpty));
-    ON_CALL(*piMockCarrierConfig,
-            GetString(CarrierConfig::ImsVoice::
-                              KEY_CALL_TERMINATE_REASON_HEADER_REDIRECTION_FAILURE_STRING,
-                    _))
-            .WillByDefault(Return(strReasonEmpty));
+            .WillByDefault(Return(strReason7));
     ON_CALL(*piMockCarrierConfig,
             GetString(CarrierConfig::ImsVoice::
                               KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING,
                     _))
-            .WillByDefault(Return(strReasonEmpty));
+            .WillByDefault(Return(strReason8));
     ON_CALL(*piMockCarrierConfig,
             GetString(CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_VOPS_OFF_STRING, _))
-            .WillByDefault(Return(strReasonEmpty));
+            .WillByDefault(Return(strReason9));
     ON_CALL(*piMockCarrierConfig,
             GetString(CarrierConfig::ImsVoice::
                               KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING,
                     _))
-            .WillByDefault(Return(strReasonEmpty));
+            .WillByDefault(Return(strReason10));
     ON_CALL(*piMockCarrierConfig,
             GetString(CarrierConfig::ImsVoice::
                               KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING,
                     _))
-            .WillByDefault(Return(strReasonEmpty));
-    ON_CALL(*piMockCarrierConfig,
-            GetString(
-                    CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_INTERNAL_ERROR_STRING,
-                    _))
-            .WillByDefault(Return(strReasonEmpty));
+            .WillByDefault(Return(strReason11));
 
     pManager->UpdateFullConfig(piMockCarrierConfig);
 
@@ -549,23 +530,18 @@ TEST_F(MtcConfigurationManagerTest, GetCallTerminateReasonHeaderReturnsValueInCa
                          .GetStr(),
             strReason6.GetStr());
     EXPECT_STREQ(pManager->GetCallTerminateReasonHeader(TerminateType::CALL_SETUP_TIMEOUT).GetStr(),
-            strReasonEmpty.GetStr());
-    EXPECT_STREQ(
-            pManager->GetCallTerminateReasonHeader(TerminateType::REDIRECTION_FAILURE).GetStr(),
-            strReasonEmpty.GetStr());
+            strReason7.GetStr());
     EXPECT_STREQ(pManager->GetCallTerminateReasonHeader(TerminateType::TERMINATING_EARLY_DIALOG)
                          .GetStr(),
-            strReasonEmpty.GetStr());
+            strReason8.GetStr());
     EXPECT_STREQ(pManager->GetCallTerminateReasonHeader(TerminateType::VOPS_OFF).GetStr(),
-            strReasonEmpty.GetStr());
+            strReason9.GetStr());
     EXPECT_STREQ(
             pManager->GetCallTerminateReasonHeader(TerminateType::SESSION_REFRESH_FAILURE).GetStr(),
-            strReasonEmpty.GetStr());
+            strReason10.GetStr());
     EXPECT_STREQ(
             pManager->GetCallTerminateReasonHeader(TerminateType::CONFERENCE_CALL_JOINED).GetStr(),
-            strReasonEmpty.GetStr());
-    EXPECT_STREQ(pManager->GetCallTerminateReasonHeader(TerminateType::INTERNAL_ERROR).GetStr(),
-            strReasonEmpty.GetStr());
+            strReason11.GetStr());
 }
 
 TEST_F(MtcConfigurationManagerTest, GetCallRejectReasonPhraseReturnsValueInCarrierConfig)
@@ -1292,6 +1268,28 @@ TEST_F(MtcConfigurationManagerTest,
     EXPECT_EQ(pManager->IsReleaseEmergencyPdnWithEmergencyCallFail(),
             GetBool(CarrierConfig::Assets::
                             KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL));
+}
+
+TEST_F(MtcConfigurationManagerTest,
+        GetPolicyForAlertNotUsingPreconditionMechanismReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->GetPolicyForAlertNotUsingPreconditionMechanism(),
+            GetInt(CarrierConfig::Assets::
+                            KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT));
+}
+
+TEST_F(MtcConfigurationManagerTest, IsRequiredCdmalessFeatureTag)
+{
+    EXPECT_EQ(pManager->IsRequiredCdmalessFeatureTag(),
+            GetBool(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL));
+}
+
+TEST_F(MtcConfigurationManagerTest,
+        IsEmergencyCallCurrentLocationDiscoverySupportedReturnsValueInCarrierConfig)
+{
+    EXPECT_EQ(pManager->IsEmergencyCallCurrentLocationDiscoverySupported(),
+            GetBool(CarrierConfig::Assets::
+                            KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL));
 }
 
 }  // namespace android

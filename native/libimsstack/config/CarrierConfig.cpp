@@ -487,10 +487,6 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL
         KEY_IMS_VOICE_PREFIX "call_type_after_audio_and_video_call_merged_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "short_call_code_int_array";
-const IMS_CHAR CarrierConfig::ImsVoice::
-        KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL[] =
-                KEY_IMS_VOICE_PREFIX
-        "validate_verstat_feature_in_registration_to_check_network_capability_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL[] =
         KEY_IMS_VOICE_PREFIX "allow_multiple_call_including_video_call_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REJECT_CODE_FOR_CSFB_INT_ARRAY[] =
@@ -528,9 +524,6 @@ const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING[] =
                 KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_call_setup_timeout_string";
 const IMS_CHAR
-        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_REDIRECTION_FAILURE_STRING[] =
-                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_redirection_failure_string";
-const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING[] =
                 KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_terminating_earlydialog_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_VOPS_OFF_STRING[] =
@@ -541,8 +534,6 @@ const IMS_CHAR
 const IMS_CHAR
         CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING[] =
                 KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_conference_call_joined_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_INTERNAL_ERROR_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_internal_error_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_on_cscall_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_VILTE_AND_NO_LTE_STRING[] =
@@ -1008,6 +999,11 @@ const IMS_CHAR CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CA
         "call_reject_code_for_not_acceptable_call_type_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[] =
         "release_emergency_pdn_with_emergency_call_fail_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT[] =
+        "policy_for_alert_not_using_precondition_mechanism_int";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL[] =
+                "emergency_call_current_location_discovery_supported_bool";
 
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =

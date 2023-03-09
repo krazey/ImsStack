@@ -84,6 +84,13 @@ public:
     virtual void CreateMediaSession() = 0;
 
     /**
+     * @brief Destroys the media session.
+     *
+     * It can be invoked when the call is released or needs to be redialed silently.
+     */
+    virtual void DestroyMediaSession() = 0;
+
+    /**
      * @brief This method to create a media profile.
      *        It can be called when a dialog is added like outgoing call, incoming call,
      *        forking case, and early-session case(video ring back tone).
@@ -171,11 +178,6 @@ public:
      *               Otherwise it is in confirmed state, set to IMS_FALSE.
      */
     virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly) = 0;
-
-    /**
-     * @brief Terminate the media session when the call is terminated.
-     */
-    virtual void Terminate() = 0;
 
     /**
      * @brief Set RTP port with the specific media line by force.

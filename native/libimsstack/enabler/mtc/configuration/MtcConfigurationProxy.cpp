@@ -77,8 +77,6 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsEnableSendReinviteOnRatChange();
         case Feature::DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR:
             return m_pManager->IsDefaultEpsBearerContextUsageRestrictionOnCellular();
-        case Feature::VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY:
-            return m_pManager->IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability();
         case Feature::ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL:
             return m_pManager->IsAllowMultipleCallIncludingVideoCall();
         case Feature::REJECT_OFFERLESS_INVITE:
@@ -168,6 +166,10 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsSend180ForInitialInvite();
         case Feature::RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL:
             return m_pManager->IsReleaseEmergencyPdnWithEmergencyCallFail();
+        case Feature::REQUIRED_CDMALESS_FEATURE_TAG:
+            return m_pManager->IsRequiredCdmalessFeatureTag();
+        case Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED:
+            return m_pManager->IsEmergencyCallCurrentLocationDiscoverySupported();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return IMS_FALSE;
@@ -333,6 +335,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_pManager->GetSendUdpKeepAliveIntervalTime();
         case Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE:
             return m_pManager->GetCallRejectCodeForNotAcceptableCallType();
+        case Feature::POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM:
+            return m_pManager->GetPolicyForAlertNotUsingPreconditionMechanism();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return 0;

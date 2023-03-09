@@ -356,13 +356,6 @@ public:
      *
      * @return
      */
-    virtual IMS_BOOL IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability() const = 0;
-
-    /**
-     * @brief Checks
-     *
-     * @return
-     */
     virtual IMS_BOOL IsAllowMultipleCallIncludingVideoCall() const = 0;
 
     /**
@@ -985,6 +978,27 @@ public:
      * @return
      */
     virtual IMS_BOOL IsReleaseEmergencyPdnWithEmergencyCallFail() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual IMS_SINT32 GetPolicyForAlertNotUsingPreconditionMechanism() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
+    virtual IMS_BOOL IsRequiredCdmalessFeatureTag() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
+    virtual IMS_BOOL IsEmergencyCallCurrentLocationDiscoverySupported() const = 0;
 };
 
 #endif

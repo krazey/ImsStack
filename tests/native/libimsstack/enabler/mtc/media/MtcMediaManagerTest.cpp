@@ -128,9 +128,9 @@ TEST_F(MtcMediaManagerTest, GetStateReturnsIdleInitially)
     EXPECT_EQ(MediaState::IDLE, pMediaManager->GetOldState());
 }
 
-TEST_F(MtcMediaManagerTest, TerminateSetsStateToTerminating)
+TEST_F(MtcMediaManagerTest, DestroyMediaSessionSetsStateToTerminating)
 {
-    pMediaManager->Terminate();
+    pMediaManager->DestroyMediaSession();
 
     EXPECT_EQ(MediaState::TERMINATING, pMediaManager->GetState());
 }
@@ -140,13 +140,6 @@ TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithSuccessReport)
     pMediaManager->MediaSession_Notify(REPORT_SUCCESS);
 
     EXPECT_EQ(MediaState::STARTED, pMediaManager->GetState());
-}
-
-TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithCloseSessionReport)
-{
-    pMediaManager->MediaSession_Notify(REPORT_CLOSE_SESSION);
-
-    EXPECT_EQ(MediaState::TERMINATED, pMediaManager->GetState());
 }
 
 TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithDataReceivedStartedReport)

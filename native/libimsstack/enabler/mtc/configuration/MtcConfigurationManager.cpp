@@ -304,13 +304,6 @@ IMS_BOOL MtcConfigurationManager::IsShortCallCode(IN IMS_SINT32 nCode) const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability()
-        const
-{
-    return m_objCarrierConfig.bValidateVerstatFeatureInRegistrationToCheckNetworkCapability;
-}
-
-PUBLIC
 IMS_BOOL MtcConfigurationManager::IsAllowMultipleCallIncludingVideoCall() const
 {
     return m_objCarrierConfig.bAllowMultipleCallIncludingVideoCall;
@@ -863,6 +856,24 @@ PUBLIC
 IMS_BOOL MtcConfigurationManager::IsReleaseEmergencyPdnWithEmergencyCallFail() const
 {
     return m_objCarrierConfig.bReleaseEmergencyPdnWithEmergencyCallFail;
+}
+
+PUBLIC
+IMS_SINT32 MtcConfigurationManager::GetPolicyForAlertNotUsingPreconditionMechanism() const
+{
+    return m_objCarrierConfig.nPolicyForAlertNotUsingPreconditionMechanism;
+}
+
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsRequiredCdmalessFeatureTag() const
+{
+    return m_objCarrierConfig.bRequiredCdmalessFeatureTag;
+}
+
+PUBLIC
+IMS_BOOL MtcConfigurationManager::IsEmergencyCallCurrentLocationDiscoverySupported() const
+{
+    return m_objCarrierConfig.bEmergencyCallCurrentLocationDiscoverySupported;
 }
 
 PRIVATE

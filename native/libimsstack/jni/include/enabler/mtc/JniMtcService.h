@@ -47,6 +47,7 @@ private:
     void NotifySrvccStateChanged(IN const android::Parcel& objParcel);
     void SetTerminalBasedCallWaiting(IN const android::Parcel& objParcel);
     void OpenEmergencyService(IN const android::Parcel& objParcel);
+    void StopEmergencyService();
     void ProcessTestCommand(IN const android::Parcel& objParcel);
 
 private:

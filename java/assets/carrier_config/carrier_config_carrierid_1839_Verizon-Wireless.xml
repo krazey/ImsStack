@@ -167,7 +167,6 @@
     <int name="imsvoice.session_refresh_method_int" value="1"/>
     <int name="imsvoice.session_expires_timer_sec_int" value="300"/>
     <int name="imsvoice.minimum_session_expires_timer_sec_int" value="300"/>
-    <boolean name="imsvoice.validate_verstat_feature_in_registration_to_check_network_capability_bool" value="false"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="-1"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="2"/>
     <int name="imsvoice.call_max_count_int" value="2"/>
@@ -212,6 +211,7 @@
     <boolean name="one_way_video_call_by_remote_end_supported_bool" value="false"/>
     <boolean name="notify_conf_state_when_anonymous_user_bool" value="true"/>
     <boolean name="call_mergeable_on_conference_on_hold_bool" value="true"/>
+    <int name="policy_for_alert_not_using_precondition_mechanism_int" value="1"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_call_string">USER;text=&quot;User Triggered&quot;</string>
@@ -225,7 +225,6 @@
     <string name="imsvoice.call_terminate_reason_header_terminating_earlydialog_string">USER;text=&quot;New Dialog Established&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_session_refresh_failure_string">USER;text=&quot;Session Expired&quot;</string>
     <string name="imsvoice.call_terminate_reason_header_conference_call_joined_string">USER;text=&quot;Far Device Joined N-way Call&quot;</string>
-    <string name="imsvoice.call_terminate_reason_header_internal_error_string">USER;text=&quot;Internal Error Code:%d&quot;</string>
 
     <!-- MTC reject phrase -->
     <string name="imsvoice.call_reject_reason_phrase_user_reject_string">Call Rejected By User</string>

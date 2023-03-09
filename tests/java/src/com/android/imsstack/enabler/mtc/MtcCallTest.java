@@ -190,7 +190,7 @@ public class MtcCallTest extends ImsStackTest {
 
         verifyNoMoreInteractions(mMtcConference);
 
-        mTestMtcCall.createNativeCallObject();
+        mTestMtcCall.setCallExtraBoolean(Call.EXTRA_E_CALL, true);
 
         mTestMtcCall.close();
         processAllMessages();
@@ -202,6 +202,19 @@ public class MtcCallTest extends ImsStackTest {
         verify(mMtcMediaSession, times(1)).dispose();
         assertTrue(mClearInterface);
         verify(mCT, times(1)).updateCallState(
+                eq(mTestMtcCall), eq(CallTracker.CALL_EVENT_DESTROY), any());
+
+        mTestMtcCall.createNativeCallObject();
+
+        mTestMtcCall.close();
+        processAllMessages();
+
+        verify(mMtcConference, times(2)).dispose();
+        verify(mMtcMediaSession, times(6)).onMessage(any(Parcel.class));
+        verify(mMtcMediaSession, times(2)).setAudioListener(eq(null));
+        verify(mMtcMediaSession, times(2)).setTextListener(eq(null));
+        verify(mMtcMediaSession, times(2)).dispose();
+        verify(mCT, times(2)).updateCallState(
                 eq(mTestMtcCall), eq(CallTracker.CALL_EVENT_DESTROY), any());
     }
 

@@ -121,6 +121,9 @@ PROTECTED VIRTUAL void JniMtcService::HandleMessage(
         case IuMtcService::OPEN_EMERGENCY_SERVICE:
             OpenEmergencyService(objParcel);
             break;
+        case IuMtcService::STOP_EMERGENCY_SERVICE:
+            StopEmergencyService();
+            break;
         case IuMtcService::TEST_COMMAND:
             ProcessTestCommand(objParcel);
             break;
@@ -176,6 +179,17 @@ void JniMtcService::OpenEmergencyService(IN const android::Parcel& objParcel)
     }
     piNativeService->OpenEmergencyService(
             static_cast<IuMtcService::EmergencyCallRoutingPdn>(objParcel.readInt32()));
+}
+
+PRIVATE
+void JniMtcService::StopEmergencyService()
+{
+    IMtcService* piNativeService = GetNativeService();
+    if (piNativeService == IMS_NULL)
+    {
+        return;
+    }
+    piNativeService->StopEmergencyService();
 }
 
 PRIVATE

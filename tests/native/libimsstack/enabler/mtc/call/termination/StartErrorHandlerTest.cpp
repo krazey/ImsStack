@@ -30,6 +30,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "helper/MockIMtcAosConnector.h"
+#include "helper/MockIPassiveTimerHolder.h"
 #include "internal/Ims3gpp.h"
 #include "sipcore/ISipHeader.h"
 #include "sipcore/MockISipMessage.h"
@@ -194,23 +195,6 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoLte)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-
-    // EPS Fallback Trigger case test
-    SetTcallTimerConfig(
-            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT);
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(-1));
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-
-    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
-    MockEpsFallbackTrigger objEpsFbTrigger(objCallContext);
-    ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(objEpsFbTrigger));
-    ON_CALL(objEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_FALSE));
-    EXPECT_TRUE(CheckHandleResult(
-            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
-
-    ON_CALL(objEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_TRUE));
-    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
@@ -251,6 +235,33 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+}
+
+TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
+{
+    SetMessageCode(SipStatusCode::SC_INVALID);
+    ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
+
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT);
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(-1));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime).WillByDefault(Return(6000));
+    MockEpsFallbackTrigger objEpsFbTrigger(objCallContext);
+    ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(objEpsFbTrigger));
+    ON_CALL(objEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_FALSE));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    ON_CALL(*pConfigurationManager, IsRequiredCdmalessFeatureTag).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+
+    ON_CALL(objEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK));
 }
 
 TEST_F(StartErrorHandlerTest, HandleReturnsCsfbIfStatusCodeIsIncludedInCsfbConfiguration)
@@ -575,11 +586,56 @@ TEST_F(StartErrorHandlerTest, Handle500Response)
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVER_ERROR, SipStatusCode::SC_500));
 }
 
-TEST_F(StartErrorHandlerTest, Handle503Response)
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithoutRetryAfterAndCsfbConfigEnabled)
 {
-    // TODO: more tests
+    SetCsfbConfig(SipStatusCode::SC_503);
     SetMessageCode(SipStatusCode::SC_503);
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(0));
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+}
+
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithoutRetryAfterAndCsfbConfigDisabled)
+{
+    SetMessageCode(SipStatusCode::SC_503);
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(0));
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503));
+}
+
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithRetryAfterAndCsfbConfigEnabled)
+{
+    IMS_SINT32 nAnyRetryAfter = 10;
+    SetCsfbConfig(SipStatusCode::SC_503);
+    SetMessageCode(SipStatusCode::SC_503);
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+
+    MockIPassiveTimerHolder objPassiveTimer;
+    ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(
+                    IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000));
+
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+}
+
+TEST_F(StartErrorHandlerTest, Handle503ResponseWithRetryAfterAndCsfbConfigDisabled)
+{
+    IMS_SINT32 nAnyRetryAfter = 10;
+    SetMessageCode(SipStatusCode::SC_503);
+    ON_CALL(objMessageUtils, GetHeaderValueInt(&objMessage, ISipHeader::RETRY_AFTER_ANY, _))
+            .WillByDefault(Return(nAnyRetryAfter));
+
+    MockIPassiveTimerHolder objPassiveTimer;
+    ON_CALL(objCallContext, GetPassiveTimerHolder).WillByDefault(ReturnRef(objPassiveTimer));
+    EXPECT_CALL(objPassiveTimer,
+            AddTimer(
+                    IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nAnyRetryAfter * 1000));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "10000"));
 }
 
 TEST_F(StartErrorHandlerTest, Handle503ResponseForEmergencyCall)

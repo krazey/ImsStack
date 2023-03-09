@@ -57,11 +57,6 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
 {
     IMS_TRACE_D("~MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 
-    if (m_piMediaSession)
-    {
-        m_piMediaSession->Terminate();
-    }
-
     m_pMediaReportListener = IMS_NULL;
     m_pQosListener = IMS_NULL;
 
@@ -77,7 +72,7 @@ PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
         delete m_pOldMediaInfo;
     }
 
-    DestroyMediaSession();
+    MediaManager::GetInstance(m_objContext.GetSlotId())->DestroySession(m_piMediaSession);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportType,
@@ -91,9 +86,6 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
     {
         case REPORT_SUCCESS:
             SetState(MediaState::STARTED);
-            break;
-        case REPORT_CLOSE_SESSION:
-            SetState(MediaState::TERMINATED);
             break;
         case REPORT_DATA_RECEIVE_FAILED:
             if (eReportedMediaType == MEDIATYPE_AUDIO)
@@ -210,17 +202,12 @@ PUBLIC VIRTUAL void MtcMediaManager::RestoreMediaInfo()
 
 PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
 {
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_objContext.GetSlotId());
-    if (!pMediaManager)
-    {
-        return;
-    }
-
     ServiceType eServiceType = m_objContext.GetService().GetServiceType();
     MEDIA_SERVICE_TYPE eMediaServiceType = MtcMediaUtil::GetMediaServiceType(eServiceType);
     IMS_TRACE_D("CreateMediaSession", 0, 0, 0);
 
-    m_piMediaSession = pMediaManager->CreateSession(eMediaServiceType, m_objContext.GetCallKey());
+    m_piMediaSession = MediaManager::GetInstance(m_objContext.GetSlotId())
+                               ->CreateSession(eMediaServiceType, m_objContext.GetCallKey());
 
     if (m_piMediaSession == IMS_NULL)
     {
@@ -246,6 +233,15 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession()
         IMS_TRACE_D("Setting media environment is failed.", 0, 0, 0);
         delete pEnvironment;
     }
+}
+
+PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
+{
+    IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
+
+    MediaManager::GetInstance(m_objContext.GetSlotId())->DestroySession(m_piMediaSession);
+    m_piMediaSession = IMS_NULL;
+    SetState(MediaState::TERMINATING);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(
@@ -469,20 +465,6 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
     m_pProfileManager->UpdateProfileForMediaActivation(piSession);
 }
 
-PUBLIC VIRTUAL void MtcMediaManager::Terminate()
-{
-    IMS_TRACE_D("Terminate", 0, 0, 0);
-    SetState(MediaState::TERMINATING);
-
-    if (!m_piMediaSession)
-    {
-        IMS_TRACE_D("Terminate : nothing to terminate for media.", 0, 0, 0);
-        return;
-    }
-
-    m_piMediaSession->Terminate();
-}
-
 PUBLIC VIRTUAL void MtcMediaManager::SetRtpPort(
         IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort)
 {
@@ -631,20 +613,6 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsOnHold()
 {
     IMS_SINT32 nAudioDirection = m_pMediaInfo->eAudioDirection;
     return (nAudioDirection != DIRECTION_INVALID && nAudioDirection != DIRECTION_SEND_RECEIVE);
-}
-
-PRIVATE
-void MtcMediaManager::DestroyMediaSession()
-{
-    MediaManager* pMediaManager = MediaManager::GetInstance(m_objContext.GetSlotId());
-    if (!pMediaManager)
-    {
-        IMS_TRACE_D("DestroyMediaSession : Failed to destroy Media Session.", 0, 0, 0);
-        return;
-    }
-
-    IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
-    pMediaManager->DestroySession(m_piMediaSession);
 }
 
 PRIVATE

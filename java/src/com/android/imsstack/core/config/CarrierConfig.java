@@ -303,8 +303,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_type_after_audio_and_video_call_merged_int";
         public static final String KEY_SHORT_CALL_CODE_INT_ARRAY =
                 KEY_PREFIX + "short_call_code_int_array";
-        public static final String KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL =
-                KEY_PREFIX + "validate_verstat_feature_in_registration_to_check_network_capability_bool";
         public static final String KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL =
                 KEY_PREFIX + "allow_multiple_call_including_video_call_bool";
         public static final String KEY_REJECT_CODE_FOR_CSFB_INT_ARRAY =
@@ -334,8 +332,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_terminate_reason_header_user_ends_and_sip_response_timeout_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_call_setup_timeout_string";
-        public static final String KEY_CALL_TERMINATE_REASON_HEADER_REDIRECTION_FAILURE_STRING =
-                KEY_PREFIX + "call_terminate_reason_header_redirection_failure_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_terminating_earlydialog_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_VOPS_OFF_STRING =
@@ -344,8 +340,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_terminate_reason_header_session_refresh_failure_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_conference_call_joined_string";
-        public static final String KEY_CALL_TERMINATE_REASON_HEADER_INTERNAL_ERROR_STRING =
-                KEY_PREFIX + "call_terminate_reason_header_internal_error_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING =
                 KEY_PREFIX + "call_reject_reason_phrase_on_cscall_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_ON_VILTE_AND_NO_LTE_STRING =
@@ -774,6 +768,10 @@ public class CarrierConfig {
                 "call_mergeable_on_conference_on_hold_bool";
         public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL =
                 "release_emergency_pdn_with_emergency_call_fail_bool";
+        public static final String KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT =
+                "policy_for_alert_not_using_precondition_mechanism_int";
+        public static final String KEY_EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED_BOOL =
+                "emergency_call_current_location_discovery_supported_bool";
 
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =

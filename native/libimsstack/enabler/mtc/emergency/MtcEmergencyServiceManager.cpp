@@ -53,10 +53,14 @@ PUBLIC VIRTUAL void MtcEmergencyServiceManager::StartOpen(IN EmergencyCallRoutin
     }
 }
 
-PUBLIC VIRTUAL void MtcEmergencyServiceManager::StopOpen()
+PUBLIC VIRTUAL void MtcEmergencyServiceManager::StopOpen(IN IMS_BOOL bClose)
 {
     IMS_TRACE_D("StopOpen", 0, 0, 0);
 
+    if (bClose && m_pController)
+    {
+        m_pController->Close();
+    }
     m_pController.reset();
 }
 

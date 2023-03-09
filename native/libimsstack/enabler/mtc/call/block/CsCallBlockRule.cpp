@@ -17,6 +17,7 @@
 #include "IMtcImsEventReceiver.h"
 #include "ImsEventDef.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/block/CsCallBlockRule.h"
 
@@ -24,8 +25,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 CsCallBlockRule::CsCallBlockRule(IN IMtcCallContext& objContext) :
-        m_objService(objContext.GetService()),
-        m_objEventReceiver(objContext.GetImsEventReceiver())
+        m_objEventReceiver(objContext.GetImsEventReceiver()),
+        m_bEmergencyCall(objContext.GetCallInfo().bEmergency)
 {
 }
 
@@ -34,7 +35,7 @@ PUBLIC VIRTUAL CsCallBlockRule::~CsCallBlockRule() {}
 PUBLIC VIRTUAL CsCallBlockRule::Result CsCallBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (m_objService.GetServiceType() == ServiceType::EMERGENCY)
+    if (m_bEmergencyCall)
     {
         return Result(Result::Status::UNBLOCKED);
     }

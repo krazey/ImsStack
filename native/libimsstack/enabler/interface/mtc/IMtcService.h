@@ -156,6 +156,12 @@ public:
     virtual void OpenEmergencyService(IN IuMtcService::EmergencyCallRoutingPdn ePdn) = 0;
 
     /**
+     * @brief Stops
+     *
+     */
+    virtual void StopEmergencyService() = 0;
+
+    /**
      * @brief Sends
      *
      * @return

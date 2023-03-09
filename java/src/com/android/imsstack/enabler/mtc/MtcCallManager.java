@@ -153,6 +153,11 @@ public final class MtcCallManager implements ICallStateTracker, IMtcCallManager 
     }
 
     @Override
+    public ICallStateTracker getCallStateTracker() {
+        return this;
+    }
+
+    @Override
     public synchronized Call getCall(long callId) {
         CallNode node = getCallNode(callId);
 
