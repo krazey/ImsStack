@@ -370,6 +370,17 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormTerminateMessage(IN const CallRe
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
+PROTECTED VIRTUAL
+void MessageFormatter::SetAcceptHeader()
+{
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
+            m_piNextMessage, MessageUtil::STR_ACCEPT_TYPE_APPLICATION_SDP, ISipHeader::ACCEPT);
+    m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
+            MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_IMS_XML, ISipHeader::ACCEPT);
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
 PROTECTED VIRTUAL void MessageFormatter::SetLocation()
 {
     if (!MtcLocationObject::IsGeolocationInfoRequired(m_objContext))
@@ -434,17 +445,6 @@ void MessageFormatter::SetAcceptContactHeader(IN CallType eCallType)
 
     m_objContext.GetMessageUtils().SetHeader(
             m_piNextMessage, strAcceptContact, ISipHeader::ACCEPT_CONTACT);
-}
-
-/* -------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------- */
-PRIVATE
-void MessageFormatter::SetAcceptHeader()
-{
-    m_objContext.GetMessageUtils().AddValueIfNotExists(
-            m_piNextMessage, MessageUtil::STR_ACCEPT_TYPE_APPLICATION_SDP, ISipHeader::ACCEPT);
-    m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
-            MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_IMS_XML, ISipHeader::ACCEPT);
 }
 
 /* -------------------------------------------------------------------------------------------------
