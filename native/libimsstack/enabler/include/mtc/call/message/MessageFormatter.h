@@ -81,6 +81,7 @@ public:
     virtual IMS_RESULT FormTerminateMessage(IN const CallReasonInfo& objReason);
 
 protected:
+    virtual void SetAcceptHeader();
     virtual void SetLocation();
 
     ICoreService* GetICoreService();
@@ -89,7 +90,6 @@ protected:
 private:
     void SetPPreferredServiceHeader();
     void SetAcceptContactHeader(IN CallType eCallType);
-    void SetAcceptHeader();
     void AddSrvccFeature();
     void SetSrvccContactParameter();
     void SetCallerIdHeader();

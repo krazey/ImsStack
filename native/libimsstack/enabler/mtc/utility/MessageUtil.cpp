@@ -29,12 +29,16 @@ const IMS_CHAR MessageUtil::STR_CONTENT_TYPE_RESOURCE_LISTS_XML[] =
         "application/resource-lists+xml";
 const IMS_CHAR MessageUtil::STR_CONTENT_TYPE_SIP_FRAG[] = "message/sipfrag";
 const IMS_CHAR MessageUtil::STR_ACCEPT_TYPE_APPLICATION_SDP[] = "application/sdp";
+const IMS_CHAR MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_CURRENT_LOCATION_DISCOVERY_XML[] =
+        "application/vnd.3gpp.current-location-discovery+xml";
 const IMS_CHAR MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_IMS_XML[] = "application/3gpp-ims+xml";
 const IMS_CHAR MessageUtil::STR_HEADER[] = "header";
 const IMS_CHAR MessageUtil::STR_HISTINFO[] = "histinfo";
 const IMS_CHAR MessageUtil::STR_ICSI[] = "+g.3gpp.icsi-ref=";
 const IMS_CHAR MessageUtil::STR_ID[] = "id";
 const IMS_CHAR MessageUtil::STR_NONE[] = "none";
+const IMS_CHAR MessageUtil::STR_PACKAGE_CURRENT_LOCATION_DISCOVERY[] =
+        "g.3gpp.current-location-discovery";
 const IMS_CHAR MessageUtil::STR_PARAMETER_IS_FOCUS[] = "isfocus";
 const IMS_CHAR MessageUtil::STR_PRECONDITION[] = "precondition";
 const IMS_CHAR MessageUtil::STR_REASON_FAILURE_TO_TRANSITION[] =

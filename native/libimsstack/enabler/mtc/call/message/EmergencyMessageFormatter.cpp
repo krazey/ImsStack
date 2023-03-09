@@ -26,8 +26,11 @@
 #include "TextParser.h"
 #include "call/IMtcCallContext.h"
 #include "call/message/EmergencyMessageFormatter.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/IMtcAosConnector.h"
+#include "sipcore/SipHeaderName.h"
 #include "utility/IMessageUtils.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -67,9 +70,28 @@ PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage(IN CallTyp
     }
 
     SetPPreferredIdentityHeader();
+    SetRecvInfoHeader();
     SetSipInstanceFeature();
 
     return IMS_SUCCESS;
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PROTECTED VIRTUAL
+void EmergencyMessageFormatter::SetAcceptHeader()
+{
+    MessageFormatter::SetAcceptHeader();
+
+    if (!m_objContext.GetConfigurationProxy().Is(
+            Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED))
+    {
+        return;
+    }
+
+    m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
+            MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_CURRENT_LOCATION_DISCOVERY_XML,
+            ISipHeader::ACCEPT);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -205,6 +227,22 @@ void EmergencyMessageFormatter::SetSipInstanceFeature()
     }
 
     piFeatureCaps->AddFeature(pParameter->GetName(), pParameter->GetValue());
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PRIVATE
+void EmergencyMessageFormatter::SetRecvInfoHeader()
+{
+    if (!m_objContext.GetConfigurationProxy().Is(
+            Feature::EMERGENCY_CALL_CURRENT_LOCATION_DISCOVERY_SUPPORTED))
+    {
+        return;
+    }
+
+    m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage,
+            MessageUtil::STR_PACKAGE_CURRENT_LOCATION_DISCOVERY, ISipHeader::UNKNOWN,
+            SipHeaderName::RECV_INFO);
 }
 
 /* -------------------------------------------------------------------------------------------------
