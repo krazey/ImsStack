@@ -514,18 +514,7 @@ PROTECTED VIRTUAL void AosHandle::Init()
     InitializeServiceFeature();
     InitializeFeatureTags();
 
-    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
-    if (piNetTracker != IMS_NULL)
-    {
-        piNetTracker->SetListener(this);
-    }
-
-    IAosService* piAosService = AosProvider::GetInstance()->GetService(m_nSlotId);
-    if (piAosService != IMS_NULL)
-    {
-        piAosService->AddListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
-        piAosService->AddListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
-    }
+    AddListeners();
 
     m_piInfo = new AosInfo(m_piAppContext);
     m_piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
@@ -543,18 +532,7 @@ PROTECTED VIRTUAL void AosHandle::CleanUp()
         delete m_piInfo;
     }
 
-    IAosService* piAosService = AosProvider::GetInstance()->GetService(m_nSlotId);
-    if (piAosService != IMS_NULL)
-    {
-        piAosService->RemoveListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
-        piAosService->RemoveListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
-    }
-
-    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
-    if (piNetTracker != IMS_NULL)
-    {
-        piNetTracker->RemoveListener(this);
-    }
+    RemoveListeners();
 }
 
 PROTECTED
@@ -1229,6 +1207,47 @@ PROTECTED VIRTUAL void AosHandle::ProcessPsRoamingStateChanged(IN IMS_UINT32 nSt
     m_nRoamingState = nState;
 }
 
+PROTECTED VIRTUAL void AosHandle::ProcessNetworkEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+{
+    if (nType == IMS_EVENT_LTE_INFO)
+    {
+        A_IMS_TRACE_I(APPPROFILE, "ProcessNetworkEvent :: type(%d), state(%d)", nType, nState, 0);
+        m_bCombinedAttach = (nState == IMS_LTE_INFO_COMBINED_ATTACHED);
+    }
+}
+
+PROTECTED VIRTUAL void AosHandle::AddListeners()
+{
+    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
+    if (piNetTracker != IMS_NULL)
+    {
+        piNetTracker->SetListener(this);
+    }
+
+    IAosService* piAosService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piAosService != IMS_NULL)
+    {
+        piAosService->AddListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
+        piAosService->AddListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
+    }
+}
+
+PROTECTED VIRTUAL void AosHandle::RemoveListeners()
+{
+    IAosService* piAosService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piAosService != IMS_NULL)
+    {
+        piAosService->RemoveListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
+        piAosService->RemoveListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
+    }
+
+    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
+    if (piNetTracker != IMS_NULL)
+    {
+        piNetTracker->RemoveListener(this);
+    }
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
 {
     A_IMS_TRACE_I(APPPROFILE, "StateDisconnected :: (%s)", MsgToString(objMSG.nMSG), 0, 0);
@@ -1730,6 +1749,10 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
             // ProcessCsRoamingStateChanged(nLParam);
 
             ProcessPsRoamingStateChanged(nWParam);
+            break;
+
+        case IMS_EVENT_LTE_INFO:
+            ProcessNetworkEvent(nEvent, nWParam);
             break;
 
         default:
