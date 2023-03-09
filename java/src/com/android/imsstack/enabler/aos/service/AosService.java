@@ -76,8 +76,8 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     @VisibleForTesting
     protected int mRegisteredNetworkType = NetworkType.NONE;
 
-    private int mRegTriedNetworkType = NetworkType.NONE;
     private int mRegState = RegistrationState.DEREGISTERED;
+    private int mRegTriedNetworkType = NetworkType.NONE;
 
     @VisibleForTesting
     protected int mFeatureTagBits = 0;
@@ -226,6 +226,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     @Override
     public int getRegisteredNetworkType() {
         return mRegisteredNetworkType;
+    }
+
+    @Override
+    public int getRegistrationState() {
+        return mRegState;
     }
 
     @Override
