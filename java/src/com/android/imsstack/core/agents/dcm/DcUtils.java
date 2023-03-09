@@ -302,7 +302,7 @@ public class DcUtils implements IDcUtils {
     @SuppressWarnings("unchecked")
     private static <T> T getCellIdentity(@NonNull NetworkRegistrationInfo nri, Class<T> clazz) {
         try {
-            return (T) nri.getCellIdentity();
+            return (clazz != null) ? clazz.cast(nri.getCellIdentity()) : (T) nri.getCellIdentity();
         } catch (ClassCastException e) {
             ImsLog.d("getCellIdentity: " + e + " class: " + clazz.getName());
             return null;
