@@ -111,7 +111,7 @@ protected:
 
 TEST_F(SilentRedialHelperTest, CreateHelperWithRetryAfterType)
 {
-    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER);
+    const CallReasonInfo objReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "1000");
     pRedialHelper = new SilentRedialHelper(objContext, objReason);
     EXPECT_EQ(pRedialHelper->GetType(), EXTRA_CODE_REDIAL_BY_RETRY_AFTER);
 }
@@ -253,9 +253,10 @@ TEST_F(SilentRedialHelperTest, TimerExpiresDoesNothingIfTimerIsNull)
 
 TEST_F(SilentRedialHelperTest, TimerExpiresInvokesReStartWithRetryAfterType)
 {
-    const CallReasonInfo objAnyReason(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER);
+    const CallReasonInfo objAnyReason(
+            CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, "1000");
     pRedialHelper = new SilentRedialHelper(objContext, objAnyReason);
-    pRedialHelper->Redial(10000);
+    pRedialHelper->Redial();
 
     CallInfo objCallInfo;
     ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));  // initial type is VOIP
