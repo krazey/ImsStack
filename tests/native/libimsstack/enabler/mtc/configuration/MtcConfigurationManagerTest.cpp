@@ -1286,4 +1286,10 @@ TEST_F(MtcConfigurationManagerTest,
                             KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT));
 }
 
+TEST_F(MtcConfigurationManagerTest, IsRequiredCdmalessFeatureTag)
+{
+    EXPECT_EQ(pManager->IsRequiredCdmalessFeatureTag(),
+            GetBool(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL));
+}
+
 }  // namespace android

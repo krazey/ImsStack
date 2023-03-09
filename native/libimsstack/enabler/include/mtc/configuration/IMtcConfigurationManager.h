@@ -992,6 +992,13 @@ public:
      * @return
      */
     virtual IMS_SINT32 GetPolicyForAlertNotUsingPreconditionMechanism() const = 0;
+
+    /**
+     * @brief Checks
+     *
+     * @return
+     */
+    virtual IMS_BOOL IsRequiredCdmalessFeatureTag() const = 0;
 };
 
 #endif
