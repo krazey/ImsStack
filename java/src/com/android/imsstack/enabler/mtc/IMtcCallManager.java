@@ -41,6 +41,11 @@ public interface IMtcCallManager {
     CallTracker getCallTracker();
 
     /**
+     * Gets {@code ICallStateTracker}.
+     */
+    ICallStateTracker getCallStateTracker();
+
+    /**
      * gets an index that is not owned by other calls.
      */
     int getVacantCallIndex();

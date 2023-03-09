@@ -36,22 +36,21 @@ public class MtcEmergencyServiceManager {
     private MtcCall mCall = null;
     private long mNativeObject = 0;
     private MtcJniProxy mMtcJniProxy;
+    private ECallStateListener mECallStateListener = null;
+    private final ICallStateTracker mCallStateTracker;
 
-    public MtcEmergencyServiceManager(IBaseContext context) {
+    public MtcEmergencyServiceManager(IBaseContext context, ICallStateTracker callStateTracker) {
         mContext = context;
+        mCallStateTracker = callStateTracker;
         mMtcJniProxy = MtcJniProxy.getInstance();
     }
 
     @VisibleForTesting
-    public MtcEmergencyServiceManager(IBaseContext context, MtcJniProxy mtcJniProxy) {
+    public MtcEmergencyServiceManager(IBaseContext context,
+            ICallStateTracker callStateTracker, MtcJniProxy mtcJniProxy) {
         mContext = context;
+        mCallStateTracker = callStateTracker;
         mMtcJniProxy = mtcJniProxy;
-    }
-
-    public void dispose() {
-        log("dispose");
-
-        clear();
     }
 
     public void init() {
@@ -60,6 +59,7 @@ public class MtcEmergencyServiceManager {
         mMessageHandler = new MessageHandler(mContext.getCallLooper());
         mCall = null;
         mNativeObject = 0;
+        mECallStateListener = new ECallStateListener();
     }
 
     public void clear() {
@@ -68,6 +68,7 @@ public class MtcEmergencyServiceManager {
         mMessageHandler = null;
         mCall = null;
         mNativeObject = 0;
+        mCallStateTracker.removeListener(mECallStateListener);
     }
 
     public void setNativeObject(long nativeObject) {
@@ -94,9 +95,19 @@ public class MtcEmergencyServiceManager {
             return;
         }
 
+        mCallStateTracker.addListener(mECallStateListener);
+
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
         parcel.writeInt(convertEmergencyRouting(emergencyRouting));
+        sendRequest(parcel);
+    }
+
+    private void stopEmergencyService() {
+        log("stopEmergencyService");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcService.STOP_EMERGENCY_SERVICE);
         sendRequest(parcel);
     }
 
@@ -127,7 +138,8 @@ public class MtcEmergencyServiceManager {
 
     private void onEsIdle() {
         log("onEsIdle");
-        mCall = null;
+
+        releaseCall();
     }
 
     private void onEsOpening() {
@@ -143,12 +155,12 @@ public class MtcEmergencyServiceManager {
 
         mCall.createNativeCallObject();
         mCall.open(serviceType, true, false, false);
-        mCall = null;
+        releaseCall();
     }
 
     private void onEsUnavailable() {
         log("onEsUnavailable");
-        mCall = null;
+        releaseCall();
     }
 
     private void onEsInCall() {
@@ -172,6 +184,11 @@ public class MtcEmergencyServiceManager {
 
     private long getNativeObject() {
         return mNativeObject;
+    }
+
+    private void releaseCall() {
+        mCall = null;
+        mCallStateTracker.removeListener(mECallStateListener);
     }
 
     private static void log(String s) {
@@ -201,6 +218,19 @@ public class MtcEmergencyServiceManager {
                 default:
                     break;
             }
+        }
+    }
+
+    @VisibleForTesting
+    class ECallStateListener extends CallStateListener {
+        @Override
+        public void onCallDestroyed(Call call) {
+            if (mCall != call) {
+                return;
+            }
+
+            releaseCall();
+            stopEmergencyService();
         }
     }
 }

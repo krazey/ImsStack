@@ -55,6 +55,7 @@ public:
     MOCK_METHOD(void, SetTerminalBasedCallWaiting, (IN IMS_BOOL bEnabled), (override));
     MOCK_METHOD(void, OpenEmergencyService, (IN IuMtcService::EmergencyCallRoutingPdn ePdn),
             (override));
+    MOCK_METHOD(void, StopEmergencyService, (), (override));
     MOCK_METHOD(
             void, ProcessTestCommand, (IN IMS_SINT32, IN IMS_SINT32, IN IMS_SINT32), (override));
     MOCK_METHOD(TbcwStatus, GetTbcwStatus, (), (const, override));
