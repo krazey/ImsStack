@@ -20,7 +20,7 @@
 #include "BaseService.h"
 #include "ImsTypeDef.h"
 #include "IJniEnabler.h"
-#include "IMediaManager.h"
+#include "IJniMediaManager.h"
 #include "IMMedia.h"
 
 using namespace android;
@@ -48,7 +48,7 @@ protected:
 
 private:
     void SetJniMediaSessionThread();
-    IMediaManager* GetMediaManager();
+    IJniMediaManager* GetMediaManager();
     MEDIA_CONTENT_TYPE ConvertToMediaType(IN SessionType eSessiontype);
     void OnResponses(IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const Parcel& objParcel);
     void OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const Parcel& objParcel);
