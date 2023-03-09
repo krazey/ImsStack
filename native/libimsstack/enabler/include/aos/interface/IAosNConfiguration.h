@@ -136,13 +136,6 @@ public:
     virtual IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const = 0;
 
     /**
-     * @brief Check if VoLTE service block by Airplane mode is required.
-     *
-     * @return IMS_TRUE if required, IMS_FALSE if not required.
-     */
-    virtual IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const = 0;
-
-    /**
      * @brief Check if VoLTE service block by SSAC is required.
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.

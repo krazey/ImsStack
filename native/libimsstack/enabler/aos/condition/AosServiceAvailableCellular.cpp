@@ -101,11 +101,6 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN I
 {
     AosServiceAvailable::HandleAirplaneModeChanged(nState);
 
-    if (!GET_N_CONFIG(m_nSlotId)->IsRequiredVolteBlockByAirplaneMode())
-    {
-        return;
-    }
-
     if (m_bAirplaneMode)
     {
         if (m_piBlock != IMS_NULL)
