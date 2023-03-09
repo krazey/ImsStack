@@ -233,9 +233,9 @@ ByteArray& ByteArray::operator=(IN const ByteArray& other)
                 Realloc(nLen);
             }
 
-            // include NULL character
-            IMS_MEM_Memcpy(m_pData->pValue, other.m_pData->pValue, nLen + 1);
+            IMS_MEM_Memcpy(m_pData->pValue, other.m_pData->pValue, nLen);
             m_pData->nSize = nLen;
+            m_pData->pValue[m_pData->nSize] = '\0';
         }
     }
 
@@ -514,6 +514,33 @@ ByteArray ByteArray::GetSubData(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount /*= 
     }
 
     return ByteArray(m_pData->pValue + nOffset, nCount);
+}
+
+PUBLIC
+IMS_BOOL ByteArray::Equals(IN IMS_BYTE byte) const
+{
+    if (m_pData->nSize != 1)
+    {
+        return IMS_FALSE;
+    }
+
+    return (m_pData->pValue[0] == byte);
+}
+
+PUBLIC
+IMS_BOOL ByteArray::Equals(IN const ByteArray& objBa) const
+{
+    if (m_pData == objBa.m_pData)
+    {
+        return IMS_TRUE;
+    }
+
+    if (m_pData->nSize != objBa.m_pData->nSize)
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_MEM_Memcmp(m_pData->pValue, objBa.m_pData->pValue, m_pData->nSize) == 0;
 }
 
 PUBLIC
