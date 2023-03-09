@@ -83,6 +83,9 @@ public:
     inline IMS_SINT32 GetLength() const { return m_pData->nSize; }
     ByteArray GetSubData(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount = -1) const;
 
+    IMS_BOOL Equals(IN IMS_BYTE byte) const;
+    IMS_BOOL Equals(IN const ByteArray& objBa) const;
+
     inline IMS_BOOL IsNull() const { return (m_pData == &SHARED_NULL); }
     inline IMS_BOOL IsNULL() const { return IsNull(); }
     AString ToString() const;
@@ -110,19 +113,45 @@ private:
     Data* m_pData;
 };
 
+inline IMS_BOOL operator==(IN const ByteArray& objBa1, IN const ByteArray& objBa2)
+{
+    return objBa1.Equals(objBa2);
+}
+inline IMS_BOOL operator==(IN const ByteArray& objBa, IN IMS_BYTE byte)
+{
+    return objBa.Equals(byte);
+}
+inline IMS_BOOL operator==(IN IMS_BYTE byte, IN const ByteArray& objBa)
+{
+    return objBa.Equals(byte);
+}
+
+inline IMS_BOOL operator!=(IN const ByteArray& objBa1, IN const ByteArray& objBa2)
+{
+    return !objBa1.Equals(objBa2);
+}
+inline IMS_BOOL operator!=(IN const ByteArray& objBa, IN IMS_BYTE byte)
+{
+    return !objBa.Equals(byte);
+}
+inline IMS_BOOL operator!=(IN IMS_BYTE byte, IN const ByteArray& objBa)
+{
+    return !objBa.Equals(byte);
+}
+
 inline const ByteArray operator+(IN const ByteArray& objBa1, IN const ByteArray& objBa2)
 {
     return ByteArray(objBa1) += objBa2;
 }
 
-inline const ByteArray operator+(IN const ByteArray& objBa1, IN IMS_BYTE byte)
+inline const ByteArray operator+(IN const ByteArray& objBa, IN IMS_BYTE byte)
 {
-    return ByteArray(objBa1) += byte;
+    return ByteArray(objBa) += byte;
 }
 
-inline const ByteArray operator+(IN IMS_BYTE byte, IN const ByteArray& objBa1)
+inline const ByteArray operator+(IN IMS_BYTE byte, IN const ByteArray& objBa)
 {
-    return ByteArray(byte) += objBa1;
+    return ByteArray(byte) += objBa;
 }
 
 #endif
