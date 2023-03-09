@@ -45,6 +45,7 @@ public:
     MOCK_METHOD(const MediaInfo&, GetMediaInfo, (), (const, override));
     MOCK_METHOD(void, RestoreMediaInfo, (), (override));
     MOCK_METHOD(void, CreateMediaSession, (), (override));
+    MOCK_METHOD(void, DestroyMediaSession, (), (override));
     MOCK_METHOD(void, CreateMediaProfile,
             (IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile),
             (override));
@@ -61,7 +62,6 @@ public:
     MOCK_METHOD(void, UpdatePemType, (IN ISession* piSession, IN IMessage* piMessage), (override));
     MOCK_METHOD(void, Run, (IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly),
             (override));
-    MOCK_METHOD(void, Terminate, (), (override));
     MOCK_METHOD(void, SetRtpPort,
             (IN ISession * piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort), (override));
     MOCK_METHOD(void, SetConferenceCall, (IN IMS_BOOL bConference), (override));

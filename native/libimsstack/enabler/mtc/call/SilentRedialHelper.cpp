@@ -194,7 +194,7 @@ void SilentRedialHelper::ReleaseCallResources()
         m_objContext.RemoveSession(&pSession->GetISession());
     }
 
-    m_objContext.GetMediaManager().Terminate();
+    m_objContext.GetMediaManager().DestroyMediaSession();
     StopCallTimers();
 }
 
