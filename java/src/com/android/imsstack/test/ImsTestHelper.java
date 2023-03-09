@@ -42,6 +42,7 @@ import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * IMS Test Helper
@@ -82,7 +83,8 @@ public final class ImsTestHelper {
         ImsLog.d("cleanup()");
     }
 
-    private static class ImsTestHelperReceiver extends BroadcastReceiver {
+    @VisibleForTesting
+    protected static class ImsTestHelperReceiver extends BroadcastReceiver {
         IntentFilter mIntentFilter = new IntentFilter();
 
         public ImsTestHelperReceiver() {
