@@ -204,7 +204,7 @@ TEST_F(SilentRedialHelperTest, IsSynchronousCallRequiredReturnsTrue)
 
 TEST_F(SilentRedialHelperTest, RedialReleasesSessionResources)
 {
-    EXPECT_CALL(objMediaManager, Terminate());
+    EXPECT_CALL(objMediaManager, DestroyMediaSession());
     EXPECT_CALL(objContext, RemoveSession(&objSession));
     EXPECT_CALL(objTimerWrapper, StopAll());
 
@@ -215,7 +215,7 @@ TEST_F(SilentRedialHelperTest, RedialReleasesSessionResources)
 
 TEST_F(SilentRedialHelperTest, RedialReleaseSessionResourceIfRedialEmergency)
 {
-    EXPECT_CALL(objMediaManager, Terminate());
+    EXPECT_CALL(objMediaManager, DestroyMediaSession());
     EXPECT_CALL(objContext, RemoveSession(&objSession));
     EXPECT_CALL(objTimerWrapper, Stop(_));
 
