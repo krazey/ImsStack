@@ -31,6 +31,7 @@ import com.android.imsstack.enabler.aos.IAosInfoListener;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.RegistrationState;
 import com.android.imsstack.enabler.aos.IIAosService;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsListener;
@@ -76,6 +77,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     protected int mRegisteredNetworkType = NetworkType.NONE;
 
     private int mRegTriedNetworkType = NetworkType.NONE;
+    private int mRegState = RegistrationState.DEREGISTERED;
 
     @VisibleForTesting
     protected int mFeatureTagBits = 0;
@@ -496,6 +498,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private void onRegistered(int networkType, int featureTagBits, Set<String> featureTags) {
+        mRegState = IAosRegistrationListener.RegistrationState.REGISTERED;
         mRegisteredNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
         mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
@@ -505,6 +508,7 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
 
     private void onRegistering(int networkType, int featureTagBits, Set<String> featureTags) {
         int adjustedNetworkType = adjustedNetworkType(networkType, featureTagBits, featureTags);
+        mRegState = IAosRegistrationListener.RegistrationState.REGISTERING;
         mRegTriedNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyRegistering(adjustedNetworkType, featureTagBits, featureTags);
@@ -512,6 +516,11 @@ public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim
     }
 
     private void onDeregistered(int reason) {
+        if (mRegState == IAosRegistrationListener.RegistrationState.DEREGISTERED
+                && reason == IAosRegistrationListener.ReasonCode.CODE_UNSPECIFIED) {
+            return;
+        }
+        mRegState = IAosRegistrationListener.RegistrationState.DEREGISTERED;
         mRegisteredNetworkType = NetworkType.NONE;
         mFeatureTagBits = 0;
         mFeatureTags.clear();
