@@ -15,12 +15,14 @@
  */
 
 #include "IMtcService.h"
+#include "ImsAosParameter.h"
 #include "ImsTypeDef.h"
 #include "MockIJniMtcServiceThread.h"
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockIMtcAosConnector.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -44,6 +46,7 @@ protected:
     MockIMtcContext objContext;
     MockIMtcService objService;
     MockICallStateProxy objCallStateProxy;
+    MockIMtcAosConnector objAosConnector;
     MockIJniMtcServiceThread objJniMtcServiceThread;
 
     TestEmergencyServiceManager* pEsm;
@@ -52,6 +55,8 @@ protected:
     {
         ON_CALL(objContext, GetServiceByType(_)).WillByDefault(Return(&objService));
         ON_CALL(objContext, GetCallStateProxy).WillByDefault(ReturnRef(objCallStateProxy));
+        ON_CALL(objContext, GetAosConnector(ServiceType::EMERGENCY))
+                .WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objService, GetJniServiceThread).WillByDefault(Return(&objJniMtcServiceThread));
 
@@ -102,9 +107,28 @@ TEST_F(MtcEmergencyServiceManagerTest, StartOpenNotifiesAsEachService)
 
 TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNothing)
 {
-    pEsm->StopOpen();
+    EXPECT_CALL(objAosConnector, Control(_)).Times(0);
 
-    EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);
+    pEsm->StopOpen(IMS_FALSE);
+    pEsm->StopOpen(IMS_TRUE);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, StopOpenStopsRegistrationForEmergencyService)
+{
+    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
+
+    pEsm->StopOpen(IMS_TRUE);
+}
+
+TEST_F(MtcEmergencyServiceManagerTest, StopOpenDoesNotStopRegistrationForEmergencyService)
+{
+    pEsm->StartOpen(EmergencyCallRoutingPdn::EMERGENCY);
+
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(0);
+
+    pEsm->StopOpen(IMS_FALSE);
 }
 
 TEST_F(MtcEmergencyServiceManagerTest, StartOpenMakesNewInstanceForPdnType)

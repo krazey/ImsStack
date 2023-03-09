@@ -40,9 +40,10 @@ public:
 
     /**
      * Stops the ongoing process and releases the resources.
-     * This method doesn't close the emergency service.
+     *
+     * @param bClose Close the emergency service if true.
      */
-    virtual void StopOpen() = 0;
+    virtual void StopOpen(IN IMS_BOOL bClose) = 0;
 };
 
 /**
@@ -59,11 +60,16 @@ public:
     virtual void Start() = 0;
 
     /**
+     * Requests to close the opened emergency service.
+     */
+    virtual void Close() = 0;
+
+    /**
      * Returns PDN type of the controller using.
      *
      * @return EmergencyCallRoutingPdn PDN type.
      */
-    virtual EmergencyCallRoutingPdn GetRoutingPdnType() = 0;
+    virtual EmergencyCallRoutingPdn GetRoutingPdnType() const = 0;
 };
 
 #endif

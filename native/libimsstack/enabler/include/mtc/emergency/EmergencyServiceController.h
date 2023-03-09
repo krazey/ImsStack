@@ -41,7 +41,8 @@ public:
     EmergencyServiceController& operator=(IN const EmergencyServiceController&) = delete;
 
     void Start() override;
-    inline EmergencyCallRoutingPdn GetRoutingPdnType() override
+    void Close() override;
+    inline EmergencyCallRoutingPdn GetRoutingPdnType() const override
     {
         return EmergencyCallRoutingPdn::EMERGENCY;
     }

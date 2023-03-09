@@ -70,6 +70,11 @@ PUBLIC VIRTUAL void EmergencyServiceController::Start()
     }
 }
 
+PUBLIC VIRTUAL void EmergencyServiceController::Close()
+{
+    ControlAos(ImsAosControl::REGISTER_STOP);
+}
+
 PUBLIC VIRTUAL void EmergencyServiceController::OnAosStateChanged(
         IN IMtcService& /* objMtcService */, IN MtcAosState eState, IN IMS_UINT32 eAosReason)
 {
@@ -112,7 +117,7 @@ PUBLIC VIRTUAL void EmergencyServiceController::OnCallStateChanged(IN CallKey nC
             m_objContext.GetConfigurationProxy().Is(
                     Feature::RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL))
     {
-        ControlAos(ImsAosControl::REGISTER_STOP);
+        Close();
     }
 
     if (eState == IMtcCall::State::OUTGOING)
@@ -201,7 +206,7 @@ PRIVATE void EmergencyServiceController::Finish()
     m_objContext.GetAsyncRunner(
             [&]()
             {
-                m_objServiceManager.StopOpen();
+                m_objServiceManager.StopOpen(IMS_FALSE);
             });
 }
 
