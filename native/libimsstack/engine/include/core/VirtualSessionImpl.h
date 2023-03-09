@@ -71,6 +71,7 @@ private:
     IMS_RESULT Update() override;
 
     ISubscription* CreateSubscription(IN const AString& strEvent) override;
+    IPublication* CreatePublication(IN const AString& strEvent) override;
     ISipClientConnection* CreateTransaction(IN const SipMethod& objMethod) override;
     IMS_SINT32 GetConfiguration() const override;
     const ISipHeader* GetContactHeader() const override;

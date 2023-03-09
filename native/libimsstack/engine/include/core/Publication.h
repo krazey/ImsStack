@@ -27,7 +27,8 @@ class PublicationRefreshHelper;
 class Publication : public ServiceMethod, public IRefreshable
 {
 public:
-    Publication(IN Service* pService, IN const AString& strEvent);
+    Publication(IN Service* pService, IN const AString& strEvent,
+            IN IMS_BOOL bImplicitRoutingRequired = IMS_FALSE);
     virtual ~Publication();
 
     Publication(IN const Publication&) = delete;
@@ -73,6 +74,8 @@ protected:
 
 private:
     void CloseConnection();
+    ISipClientConnection* CreateConnectionWithDialog(
+            IN ISipDialog* piDialog, IN const SipMethod& objMethod);
     void ReceiveResponse(IN ISipClientConnection* piScc);
     void SetState(IN IMS_SINT32 nState);
 
@@ -143,6 +146,8 @@ private:
     // Publication refresh timer
     IRefreshListener* m_piRefreshListener;
     PublicationRefreshHelper* m_pRefreshHelper;
+    // IMPLICIT_ROUTING_FOR_MID_DIALOG
+    IMS_BOOL m_bImplicitRoutingRequired;
 };
 
 #endif
