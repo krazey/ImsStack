@@ -278,6 +278,13 @@ public:
     virtual IMS_BOOL IsDeregOn3gNetwork() const = 0;
 
     /**
+     * @brief Flag indicating whether ipsec setting is initialized with new pcscf.
+     *
+     * @return IMS_BOOL Return whether initialize ipsec wetting with new pcscf or not.
+     */
+    virtual IMS_BOOL IsIpsecInitializedWithNewPcscf() const = 0;
+
+    /**
      * @brief Returns whether UE doesn't send initial registration due to pcscf change
      *
      *        If this is set as TRUE, UE doesn't send initial registration due to pcscf change.

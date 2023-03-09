@@ -30,6 +30,7 @@ public:
             bHoldRegWithIpcanChangedDuringImsCall(IMS_FALSE),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
             bImsDeregOn3gNetwork(IMS_FALSE),
+            bInitializeIpsecWithNewPcscf(IMS_FALSE),
             bNoInitRegOnPcscfChange(IMS_FALSE),
             bPlmnBlockWithTimeoutOnVoiceCallUnavailable(IMS_FALSE),
             bRegContactValidation(IMS_FALSE),
@@ -102,6 +103,7 @@ public:
     IMS_BOOL bHoldRegWithIpcanChangedDuringImsCall;
     IMS_BOOL bIgnoreVopsForVolteEnable;
     IMS_BOOL bImsDeregOn3gNetwork;
+    IMS_BOOL bInitializeIpsecWithNewPcscf;
     IMS_BOOL bNoInitRegOnPcscfChange;
     IMS_BOOL bPlmnBlockWithTimeoutOnVoiceCallUnavailable;
     IMS_BOOL bRegContactValidation;
