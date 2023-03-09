@@ -418,15 +418,24 @@ CallReasonInfo StartErrorHandler::Handle503Response(IN const IMessage& objMessag
         return CallReasonInfo(CODE_SIP_SERVICE_UNAVAILABLE, SipStatusCode::SC_503);
     }
 
-    IMS_SINT32 nRetryAfter = m_objContext.GetMessageUtils().GetHeaderValueInt(
-            &objMessage, ISipHeader::RETRY_AFTER_ANY);
-    if (nRetryAfter > 0)
+    IMS_SINT32 nRetryAfterInMillis = m_objContext.GetMessageUtils().GetHeaderValueInt(
+                                             &objMessage, ISipHeader::RETRY_AFTER_ANY) *
+            1000;
+    IMS_BOOL bCsfbRequired = IsRetry1xRequiredForNormalCall(objMessage);
+    if (nRetryAfterInMillis > 0)
     {
         m_objContext.GetPassiveTimerHolder().AddTimer(
-                IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nRetryAfter * 1000);
+                IPassiveTimerHolder::Type::CALL_BLOCKED_BY_RETRY_AFTER, nRetryAfterInMillis);
+        if (!bCsfbRequired)
+        {
+            AString strRetryAfter;
+            strRetryAfter.SetNumber(nRetryAfterInMillis);
+            return CallReasonInfo(
+                    CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_BY_RETRY_AFTER, strRetryAfter);
+        }
     }
 
-    if (IsRetry1xRequiredForNormalCall(objMessage))
+    if (bCsfbRequired)
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
