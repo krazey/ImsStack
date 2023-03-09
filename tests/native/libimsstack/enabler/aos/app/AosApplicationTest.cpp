@@ -190,6 +190,7 @@ class TestAosApplication : public AosApplication
     inline TestAosApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
             AosApplication(piAppContext, strAppId),
             m_pOrigAosCondition(IMS_NULL),
+            m_pOrigAosConnector(IMS_NULL),
             m_piOrigAosRegistration(IMS_NULL)
     {
         m_pUtil = AosUtil::GetInstance();
@@ -362,6 +363,12 @@ protected:
         EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+        EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
+        EXPECT_CALL(m_objMockIAosNetTracker, IsRoaming())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_FALSE));
         EXPECT_CALL(m_objMockIAosNetTracker, SetListener(_)).Times(AnyNumber());
 
         EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
@@ -775,11 +782,11 @@ TEST_F(AosApplicationTest, ProcessMessage)
     EXPECT_TRUE(m_pTestAosApplication->ProcessMessage(objMessage));
 
     // MSG_REG_STOP
-    // TEST_F : ProcessRegStop - ProcessPdnDisconnect, ProcessStateStart
+    // TEST_F : ProcessRegStop - ProcessStateStart
     objMessage.nMSG = MSG_REG_STOP;
     EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _))
             .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
+            .WillRepeatedly(Return(IMS_FALSE));
     m_pTestAosApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
     EXPECT_CALL(m_objMockIAosRegistration, GetState())
             .Times(AnyNumber())
@@ -875,9 +882,11 @@ TEST_F(AosApplicationTest, ProcessMessage)
     // MSG_PLMN_BLOCK_WITH_TIMEOUT
     // TEST_F : ProcessPlmnBlockWithTimeout
     objMessage.nMSG = MSG_PLMN_BLOCK_WITH_TIMEOUT;
+    m_pTestAosApplication->SetNetTrackerListener();
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
-            .Times(1);
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
     EXPECT_TRUE(m_pTestAosApplication->ProcessMessage(objMessage));
 
     // MSG_RETRY_COUNT_INCREASE
@@ -931,7 +940,8 @@ TEST_F(AosApplicationTest, RegRetryCount)
 
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
-            .Times(1);
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
 
     EXPECT_TRUE(m_pTestAosApplication->ProcessMessage(objMessage));
 
@@ -1216,7 +1226,8 @@ TEST_F(AosApplicationTest, PdnDisconnect)
     m_pTestAosApplication->SetImsCall(IMS_FALSE);
     EXPECT_CALL(m_objMockIAosService,
             NotifyDeregistered(AosNetworkType::LTE, AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
-            .Times(2);
+            .Times(2)
+            .WillRepeatedly(Return(IMS_TRUE));
     m_pTestAosApplication->ProcessPdnDisconnect();
 
     m_pTestAosApplication->SetRat(NW_REPORT_RADIO_NR);

@@ -128,7 +128,8 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_bIsImsCall(IMS_FALSE),
         m_bIsPublished(IMS_FALSE),
         m_bIsActivated(IMS_TRUE),
-        m_bEpdgEnabled(IMS_FALSE)
+        m_bEpdgEnabled(IMS_FALSE),
+        m_bDataRoaming(IMS_FALSE)
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, strAppId.GetStr());
 
@@ -560,6 +561,18 @@ IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
     return IMS_FALSE;
 }
 
+PROTECTED
+IMS_BOOL AosApplication::IsPlmnBlockWithTimeoutRequired() const
+{
+    if (m_piNetTracker->GetMobileNetworkType() == NW_REPORT_RADIO_LTE &&
+            m_piNetTracker->IsRoaming() && m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED)
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
 PROTECTED VIRTUAL void AosApplication::CreateAosCondition()
 {
     if (m_nAppType == TYPE_NORMAL)
@@ -605,6 +618,7 @@ PROTECTED VIRTUAL void AosApplication::AddEventListener()
     {
         IMS_EVENT_AddListenerForSlotId(IMS_EVENT_REG_CONTROL, this, m_nSlotId);
         IMS_EVENT_AddListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
+        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
     }
 }
 
@@ -612,6 +626,7 @@ PROTECTED VIRTUAL void AosApplication::RemoveEventListener()
 {
     if (m_nAppType == TYPE_NORMAL)
     {
+        IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_ROAMING_STATE, this, m_nSlotId);
         IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
         IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_REG_CONTROL, this, m_nSlotId);
     }
@@ -2006,6 +2021,27 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
 }
 
+PROTECTED VIRTUAL void AosApplication::ProcessRoamingState(IN IMS_BOOL bRoaming)
+{
+    if (m_bDataRoaming != bRoaming)
+    {
+        A_IMS_TRACE_I(APPID, "ProcessRoamingState :: data roaming (%s)", _TRACE_B_(bRoaming), 0, 0);
+        m_bDataRoaming = bRoaming;
+
+        if (IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
+        {
+            IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime();
+
+            if (nEstTime <= 0)
+            {
+                return;
+            }
+
+            StartTimer(TIMER_IMS_ESTABLISHMENT, nEstTime * 1000);
+        }
+    }
+}
+
 PROTECTED VIRTUAL void AosApplication::ProcessAppActivatedTimerExpired()
 {
     StopTimer(TIMER_APP_ACTIVATED);
@@ -2138,6 +2174,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
 {
     StopTimer(TIMER_IMS_ESTABLISHMENT);
 
+    if (!IsPlmnBlockWithTimeoutRequired())
+    {
+        return;
+    }
+
     A_IMS_TRACE_I(
             APPID, "ProcessImsEstablishmentTimerExpired :: PLMN is blocked with timeout", 0, 0, 0);
     NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
@@ -2182,7 +2223,15 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
 
         IMS_UINT32 nNewRat = m_piNetTracker->GetMobileNetworkType();
 
-        if (!m_pUtil->IsSupportedNetworkTypeForCellular(nNewRat))
+        if (m_pUtil->IsSupportedNetworkTypeForCellular(nNewRat))
+        {
+            if (!IsPlmnBlockWithTimeoutRequired())
+            {
+                StopTimer(TIMER_IMS_ESTABLISHMENT);
+                return;
+            }
+        }
+        else
         {
             StopTimer(TIMER_IMS_ESTABLISHMENT);
             return;
@@ -2234,6 +2283,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessPlmnBlockWithTimeout()
     }
     else
     {
+        if (!IsPlmnBlockWithTimeoutRequired())
+        {
+            return;
+        }
+
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
         m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
     }
@@ -2785,6 +2839,11 @@ PROTECTED VIRTUAL void AosApplication::Event_NotifyEvent(
     {
         case IMS_EVENT_REG_CONTROL:
             ProcessRegControlEvent(nWParam, nLParam);
+            break;
+
+        case IMS_EVENT_ROAMING_STATE:
+            ProcessImsEstablishmentStart();
+            ProcessRoamingState(nWParam == IMS_ROAMING_STATE_ON);
             break;
 
         case IMS_EVENT_VOICE_SERVICE_STATE:  // FALL-THROUGH
