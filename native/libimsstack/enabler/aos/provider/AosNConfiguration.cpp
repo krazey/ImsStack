@@ -230,6 +230,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsOldSaOnEstablishingSaRemoved() cons
     return m_objAsset.bRemoveOldSaOnEstablishingSa;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsCallEndAndPdnReactivationByRegTerminated() const
+{
+    return m_objAsset.bCallEndAndPdnReactivationByRegTerminated;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsUnsecureTcpSocketOnAccomplishingRegDestroyed() const
 {
     return m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg;
@@ -756,12 +761,6 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForCallE
 }
 
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
-AosNConfiguration::GetReregErrCodeForPdnReactivationAfterCallEnd()
-{
-    return m_objAsset.objReregErrCodeForPdnReactivationAfterCallEnd;
-}
-
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
 AosNConfiguration::GetReregErrCodeForInitRegWithAvailablePcscf()
 {
     return m_objAsset.objReregErrCodeForInitRegWithAvailablePcscf;
@@ -1165,6 +1164,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
 PRIVATE
 void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 {
+    m_objAsset.bCallEndAndPdnReactivationByRegTerminated = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL);
     m_objAsset.bDestroyUnsecureTcpSocketOnAccomplishingReg = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL);
     m_objAsset.bEmcCallBasedOnPAssociatedUriOfNormalReg = piCc->GetBoolean(
@@ -1274,8 +1275,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY);
     m_objAsset.objReregErrCodeForCallEnd =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY);
-    m_objAsset.objReregErrCodeForPdnReactivationAfterCallEnd = piCc->GetIntArray(CarrierConfig::
-                    Assets::KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY);
     m_objAsset.objReregErrCodeForImsPdnReactivation = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY);
     m_objAsset.objReregErrCodeForInitRegWithAvailablePcscf = piCc->GetIntArray(

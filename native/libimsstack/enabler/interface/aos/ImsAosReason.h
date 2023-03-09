@@ -49,10 +49,14 @@ public:
         /// Indicate that data connection is disconnected.
         DATA_DISCONNECTED,
         /// Indicate that registration is terminated with the specific causes.
-        REG_TERMINATED,  // REG_REFRESH_FORBIDDEN, REG_TERMINATED_EXPIRE
-                         /// Indicate that the initial registration is tried soon.
-        REG_NEW_REQUIRED,  // INITIAL_REG_REQUESTED
-                           /// Indicate that the reason is not specified.
+        /// Indicate that the initial registration is tried soon.
+        REG_TERMINATED,
+        /// Indicate that initial registration was required. the reason is not specified.
+        REG_NEW_REQUIRED,
+        /// Indicate that registration is terminating.
+        /// So services may send a BYE message to terminate the session if there is on a sesson.
+        REG_TERMINATING,
+
         NOT_SPECIFIED
     };
 

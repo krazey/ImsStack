@@ -53,6 +53,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSecurityServerPortInRegContactOfInitRegUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSecurityServerPortInInitRegUsed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsOldSaOnEstablishingSaRemoved, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsCallEndAndPdnReactivationByRegTerminated, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsUnsecureTcpSocketOnAccomplishingRegDestroyed, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyPdnWithEmergencyCallEndReleased, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsSupported, (), (const, override));
@@ -160,8 +161,6 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetEmergencyPcscfRetryWaitTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeForPcscfDiscovery, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeForCallEnd, (), (override));
-    MOCK_METHOD(
-            IMSVector<IMS_SINT32>&, GetReregErrCodeForPdnReactivationAfterCallEnd, (), (override));
     MOCK_METHOD(
             IMSVector<IMS_SINT32>&, GetReregErrCodeForInitRegWithAvailablePcscf, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeForImsPdnReactivation, (), (override));

@@ -497,6 +497,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     MockICarrierConfig objCarrierConfig;
 
     EXPECT_CALL(objCarrierConfig,
+            GetBoolean(
+                    CarrierConfig::Assets::KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL,
+                    IMS_FALSE))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::
                                KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL,
                     IMS_FALSE))
@@ -705,13 +710,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                             KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY))
             .WillOnce(Return(objReregErrCodeForInitRegWithAvailablePcscf));
 
-    IMSVector<IMS_SINT32> objReregErrForPdnReactivationAfterCallEnd;
-    objReregErrForPdnReactivationAfterCallEnd.Clear();
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Assets::
-                            KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY))
-            .WillOnce(Return(objReregErrForPdnReactivationAfterCallEnd));
-
     IMSVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
     objReregErrCodeForImsPdnReactivation.Clear();
     objReregErrCodeForImsPdnReactivation.Add(408);
@@ -772,6 +770,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     InitAssetsConfig(static_cast<ICarrierConfig*>(&objCarrierConfig));
 
     EXPECT_FALSE(pAosNConfiguration->IsCdmalessFeatureTagRequired());
+    EXPECT_FALSE(pAosNConfiguration->IsCallEndAndPdnReactivationByRegTerminated());
     EXPECT_FALSE(pAosNConfiguration->IsUnsecureTcpSocketOnAccomplishingRegDestroyed());
     EXPECT_FALSE(pAosNConfiguration->IsEmergencyCallBasedOnPauOfNormalRegistrationSupported());
     EXPECT_FALSE(pAosNConfiguration->IsRegWithIpcanChangedDuringImsCallHeld());
@@ -852,9 +851,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     }
     EXPECT_EQ(2, cnt);
 
-    objErrCode.Clear();
-    objErrCode = pAosNConfiguration->GetReregErrCodeForPdnReactivationAfterCallEnd();
-    EXPECT_EQ(0, objErrCode.GetSize());
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetReregErrCodeForImsPdnReactivation();
     EXPECT_EQ(1, objErrCode.GetSize());

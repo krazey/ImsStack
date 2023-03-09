@@ -1513,17 +1513,14 @@ TEST_F(AosHandleTest, SetReason_Test)
     SetReason(AosReason::REG_FAILURE);
     EXPECT_EQ(GetReason(), AosReason::REG_FAILURE);
 
-    SetReason(AosReason::REG_REFRESH_FORBIDDEN);
-    EXPECT_EQ(GetReason(), AosReason::REG_REFRESH_FORBIDDEN);
-
     SetReason(AosReason::REG_TERMINATED);
     EXPECT_EQ(GetReason(), AosReason::REG_TERMINATED);
 
-    SetReason(AosReason::REG_TERMINATED_EXPIRE);
-    EXPECT_EQ(GetReason(), AosReason::REG_TERMINATED_EXPIRE);
-
     SetReason(AosReason::INITIAL_REG_REQUESTED);
     EXPECT_EQ(GetReason(), AosReason::INITIAL_REG_REQUESTED);
+
+    SetReason(AosReason::REG_TERMINATING);
+    EXPECT_EQ(GetReason(), AosReason::REG_TERMINATING);
 
     SetReason(AosReason::PCSCF_DISCOVERY_FAILED);
     EXPECT_EQ(GetReason(), AosReason::PCSCF_DISCOVERY_FAILED);
@@ -1567,11 +1564,9 @@ TEST_F(AosHandleTest, GetImsAosReason_Test)
     EXPECT_EQ(GetImsAosReason(AosReason::SERVICE_POLICY), ImsAosReason::SERVICE_POLICY);
     EXPECT_EQ(GetImsAosReason(AosReason::SERVICE_BLOCKED), ImsAosReason::SERVICE_BLOCKED);
     EXPECT_EQ(GetImsAosReason(AosReason::SRV_OUT), ImsAosReason::OUT_OF_SERVICE);
-    EXPECT_EQ(GetImsAosReason(AosReason::REG_REFRESH_FORBIDDEN), ImsAosReason::REG_TERMINATED);
-    EXPECT_EQ(GetImsAosReason(AosReason::REG_TERMINATED_EXPIRE), ImsAosReason::REG_TERMINATED);
     EXPECT_EQ(GetImsAosReason(AosReason::REG_TERMINATED), ImsAosReason::REG_TERMINATED);
     EXPECT_EQ(GetImsAosReason(AosReason::INITIAL_REG_REQUESTED), ImsAosReason::REG_NEW_REQUIRED);
-
+    EXPECT_EQ(GetImsAosReason(AosReason::REG_TERMINATING), ImsAosReason::REG_TERMINATING);
     EXPECT_EQ(GetImsAosReason(AosReason::IMS_DISABLED), ImsAosReason::NOT_SPECIFIED);
     EXPECT_EQ(GetImsAosReason(AosReason::TTYMODEON), ImsAosReason::NOT_SPECIFIED);
 }

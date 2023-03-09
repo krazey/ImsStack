@@ -611,13 +611,14 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
         case AosReason::SRV_OUT:
             nImsAosReason = ImsAosReason::OUT_OF_SERVICE;
             break;
-        case AosReason::REG_REFRESH_FORBIDDEN:  // FALL-THROUGH
-        case AosReason::REG_TERMINATED_EXPIRE:  // FALL-THROUGH
         case AosReason::REG_TERMINATED:
             nImsAosReason = ImsAosReason::REG_TERMINATED;
             break;
         case AosReason::INITIAL_REG_REQUESTED:
             nImsAosReason = ImsAosReason::REG_NEW_REQUIRED;
+            break;
+        case AosReason::REG_TERMINATING:
+            nImsAosReason = ImsAosReason::REG_TERMINATING;
             break;
         default:
             break;
