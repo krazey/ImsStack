@@ -41,7 +41,7 @@ LOCAL const IMS_CHAR ATTR_REPLACES_CALL_ID[] = "call-id";
 LOCAL const IMS_CHAR ATTR_REPLACES_LOCAL_TAG[] = "local-tag";
 LOCAL const IMS_CHAR ATTR_REPLACES_REMOTE_TAG[] = "remote-tag";
 LOCAL const IMS_CHAR ELEMENT_REFERRED_BY[] = "referred-by";
-LOCAL const IMS_CHAR ATTR_NAMEADDR_DISPLAY_NAME[] = "display-name";
+LOCAL const IMS_CHAR ATTR_NAMEADDR_DISPLAY[] = "display";
 LOCAL const IMS_CHAR ELEMENT_LOCAL[] = "local";
 LOCAL const IMS_CHAR ELEMENT_REMOTE[] = "remote";
 LOCAL const IMS_CHAR ELEMENT_IDENTITY[] = "identity";
@@ -50,7 +50,6 @@ LOCAL const IMS_CHAR ATTR_TARGET_URI[] = "uri";
 LOCAL const IMS_CHAR ELEMENT_PARAM[] = "param";
 LOCAL const IMS_CHAR ATTR_PARAM_PNAME[] = "pname";
 LOCAL const IMS_CHAR ATTR_PARAM_PVAL[] = "pval";
-LOCAL const IMS_CHAR TARGET_PARAM_SIP_RENDERING[] = "+sip.rendering";
 
 LOCAL const IMS_CHAR EXTRA_ELEMENT_EXCLUSIVE[] = "exclusive";
 LOCAL const IMS_CHAR EXTRA_ELEMENT_MEDIAATTRIBUTES[] = "mediaAttributes";
@@ -59,8 +58,8 @@ LOCAL const IMS_CHAR EXTRA_ELEMENT_MEDIADIRECTION[] = "mediaDirection";
 LOCAL const IMS_CHAR EXTRA_ELEMENT_PORT0[] = "port0";
 
 PUBLIC
-DialogInfo::DialogInfo() :
-        m_objDialogs(ImsList<Dialog*>()),
+DialogInfo::DialogInfo(IN_OUT ImsList<Dialog*>& objDialogs) :
+        m_objDialogs(objDialogs),
         m_nVersion(0),
         m_nState(STATE_FULL),
         m_strEntity(AString::ConstNull())
@@ -72,7 +71,11 @@ PUBLIC
 DialogInfo::~DialogInfo()
 {
     IMS_TRACE_I("~DialogInfo", 0, 0, 0);
-    Clear();
+    for (IMS_UINT32 i = 0; i < m_objDialogs.GetSize(); ++i)
+    {
+        delete m_objDialogs.GetAt(i);
+    }
+    m_objDialogs.Clear();
 }
 
 PUBLIC
@@ -108,10 +111,8 @@ IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
             continue;
         }
 
-        IElement* piElementDialog = DYNAMIC_CAST(IElement*, piNodeDialog);
-
         Dialog* pNewDialog = new Dialog();
-        if (pNewDialog->Update(piElementDialog) == IMS_FAILURE)
+        if (pNewDialog->Update(DYNAMIC_CAST(IElement*, piNodeDialog)) == IMS_FAILURE)
         {
             IMS_TRACE_E(0, "UpdateDialog failed", 0, 0, 0);
             delete pNewDialog;
@@ -119,49 +120,27 @@ IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
         }
 
         IMS_SLONG nIndex = GetIndexOfKeyHasSameId(pNewDialog->m_strId);
-
         if (nIndex != -1)
         {
             delete m_objDialogs.GetAt(nIndex);
             m_objDialogs.RemoveAt(nIndex);
         }
 
-        m_objDialogs.Append(pNewDialog);
+        if (pNewDialog->GetState().GetState() == Dialog::State::STATE_TERMINATED)
+        {
+            // Upper layers(Telephony/GII) set the state to terminated
+            // if a Dialog is deleted from the list.
+            delete pNewDialog;
+        }
+        else
+        {
+            m_objDialogs.Append(pNewDialog);
+        }
     }
     piElementDialogInfo->DestroyNodeList(piNodeListdialog);
 
     IMS_TRACE_I("Update : done", 0, 0, 0);
     return IMS_SUCCESS;
-}
-
-PUBLIC
-ImsList<JniExternalCall*> DialogInfo::GetJniExternalCalls() const
-{
-    ImsList<JniExternalCall*> objJniExternalCalls;
-
-    for (IMS_UINT32 index = 0; index < m_objDialogs.GetSize(); index++)
-    {
-        Dialog* pDialog = m_objDialogs.GetAt(index);
-
-        if (pDialog == IMS_NULL)
-        {
-            continue;
-        }
-
-        JniExternalCall* pJniExternalCall = new JniExternalCall();
-
-        pJniExternalCall->m_strCallId = GetDialogId(pDialog);
-        pJniExternalCall->m_strAddress = GetDialogRemoteAddress(pDialog);
-        pJniExternalCall->m_strLocalAddress = GetDialogLocalAddress(pDialog);
-        pJniExternalCall->m_bIsPullable = IsPullableDialog(pDialog);
-        pJniExternalCall->m_nCallState = GetDialogCallState(pDialog);
-        pJniExternalCall->m_nCallType = GetDialogCallType(pDialog);
-        pJniExternalCall->m_bIsHeld = IsHeldDialog(pDialog);
-
-        objJniExternalCalls.Append(pJniExternalCall);
-    }
-
-    return objJniExternalCalls;
 }
 
 PUBLIC GLOBAL IElement* DialogInfo::GetSubElement(
@@ -238,6 +217,10 @@ PUBLIC GLOBAL IMS_BOOL DialogInfo::IsAttrExist(
 PRIVATE
 IMS_UINT32 DialogInfo::ConvertState(IN const AString& strState)
 {
+    // TODO: this information must be used.
+    // Only VZW guarantees that the first one is FULL and all the subsequent NOTIFYs are partial.
+    // If the state is FULL and a dialog doesn't exist in it, it must be set as
+    // a Terminated-state dialog and deleted.
     if (strState.Equals("partial"))
     {
         return STATE_PARTIAL;
@@ -247,21 +230,6 @@ IMS_UINT32 DialogInfo::ConvertState(IN const AString& strState)
         // default value
         return STATE_FULL;
     }
-}
-
-PRIVATE
-void DialogInfo::Clear()
-{
-    IMS_UINT32 nSize = m_objDialogs.GetSize();
-
-    IMS_TRACE_I("Clear : Size[%d]", nSize, 0, 0);
-
-    for (IMS_UINT32 index = 0; index < nSize; index++)
-    {
-        delete m_objDialogs.GetAt(index);
-    }
-
-    m_objDialogs.Clear();
 }
 
 PRIVATE
@@ -280,78 +248,6 @@ IMS_SLONG DialogInfo::GetIndexOfKeyHasSameId(IN const AString& strDialogId)
     }
 
     return -1;
-}
-
-PRIVATE
-AString DialogInfo::GetDialogId(Dialog* pDialog)
-{
-    return pDialog->m_strId;
-}
-
-PRIVATE
-AString DialogInfo::GetDialogRemoteAddress(Dialog* pDialog)
-{
-    return pDialog->m_objRemote.m_objIdentity.m_strUri;
-}
-
-PRIVATE
-AString DialogInfo::GetDialogLocalAddress(Dialog* pDialog)
-{
-    return pDialog->m_objLocal.m_objIdentity.m_strUri;
-}
-
-PRIVATE
-IMS_BOOL DialogInfo::IsPullableDialog(Dialog* pDialog)
-{
-    if (GetDialogCallState(pDialog) == Dialog::State::STATE_CONFIRMED &&
-            pDialog->m_objExtraInfo.m_strExclusive.EqualsIgnoreCase("false") &&
-            (pDialog->m_objExtraInfo.m_objMediaInfo.eAudioQuality == AUDIO_QUALITY_AMR_WB &&
-                    pDialog->m_objExtraInfo.m_objMediaInfo.eAudioDirection ==
-                            DIRECTION_SEND_RECEIVE))
-    {
-        if (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_NONE ||
-                pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_NOTUSED ||
-                (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_QVGA_PR &&
-                        pDialog->m_objExtraInfo.m_objMediaInfo.eVideoDirection ==
-                                DIRECTION_SEND_RECEIVE))
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_UINT32 DialogInfo::GetDialogCallState(Dialog* pDialog)
-{
-    return pDialog->m_objState.m_nState;
-}
-
-PRIVATE
-IMS_UINT32 DialogInfo::GetDialogCallType(Dialog* pDialog)
-{
-    if (pDialog->m_objExtraInfo.m_objMediaInfo.eAudioQuality == AUDIO_QUALITY_AMR_WB)
-    {
-        if (pDialog->m_objExtraInfo.m_objMediaInfo.eVideoQuality == VIDEO_QUALITY_QVGA_PR)
-        {
-            return static_cast<IMS_UINT32>(CallType::VT);
-        }
-        else
-        {
-            return static_cast<IMS_UINT32>(CallType::VOIP);
-        }
-    }
-
-    return static_cast<IMS_UINT32>(CallType::UNKNOWN);
-}
-
-PRIVATE
-IMS_BOOL DialogInfo::IsHeldDialog(Dialog* pDialog)
-{
-    AString strPval = pDialog->m_objLocal.m_objTarget.m_objParamMap.GetValue(
-            AString(TARGET_PARAM_SIP_RENDERING));
-    return strPval.EqualsIgnoreCase("false");
 }
 
 PUBLIC
@@ -409,7 +305,7 @@ IMS_RESULT Dialog::Update(IN IElement* piElementDialog)
         }
         else
         {
-            IMS_TRACE_E(0, "Update : remain element [%s]", strName.GetStr(), 0, 0);
+            IMS_TRACE_D("Update : [%s] will be parsed as an Extra", strName.GetStr(), 0, 0);
         }
         piNode = DYNAMIC_CAST(INode*, piElement);
         piNode = piNode->GetNextSibling();
@@ -531,7 +427,7 @@ void Dialog::Replaces::Update(IN const IElement* piElementReplaces)
 PUBLIC
 void Dialog::NameAddr::Update(IN const IElement* piElementNameaddr)
 {
-    m_strDisplay = piElementNameaddr->GetAttribute(ATTR_NAMEADDR_DISPLAY_NAME);
+    m_strDisplay = piElementNameaddr->GetAttribute(ATTR_NAMEADDR_DISPLAY);
 
     AString strUri;
     if (DialogInfo::GetElementValue(piElementNameaddr, strUri).GetLength() > 0)
@@ -560,7 +456,7 @@ void Dialog::Participant::Update(IN const IElement* piElementParticipant)
         }
         else
         {
-            IMS_TRACE_E(0, "invalid element", 0, 0, 0);
+            IMS_TRACE_D("Update : [%s] will be parsed as an Extra", strName.GetStr(), 0, 0);
         }
         piNode = piNode->GetNextSibling();
     }
@@ -595,6 +491,7 @@ void Dialog::Target::Update(IN const IElement* piElementTarget)
 PUBLIC
 void Dialog::ExtraInfo::Update(IN const IElement* piElementDialog)
 {
+    // Updates carrier specific elements
     INode* piNode = piElementDialog->GetFirstChild();
 
     while (piNode != IMS_NULL)
@@ -623,6 +520,7 @@ void Dialog::ExtraInfo::Update(IN const IElement* piElementDialog)
 PRIVATE
 void Dialog::ExtraInfo::HandleMediaInfo(IN const IElement* piElementDialog)
 {
+    IMS_TRACE_D("HandleMediaInfo", 0, 0, 0);
     INode* piNode = piElementDialog->GetFirstChild();
 
     while (piNode != IMS_NULL)
