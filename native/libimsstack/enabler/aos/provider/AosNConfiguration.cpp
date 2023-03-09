@@ -274,6 +274,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsDeregOn3gNetwork() const
     return m_objAsset.bImsDeregOn3gNetwork;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsIpsecInitializedWithNewPcscf() const
+{
+    return m_objAsset.bInitializeIpsecWithNewPcscf;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsNoInitRegOnPcscfChange() const
 {
     return m_objAsset.bNoInitRegOnPcscfChange;
@@ -1170,6 +1175,8 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
     m_objAsset.bImsDeregOn3gNetwork =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREG_ON_3G_NETWORK_BOOL);
+    m_objAsset.bInitializeIpsecWithNewPcscf = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_INITIALIZE_IPSEC_SETTING_WITH_NEW_PCSCF_BOOL);
     m_objAsset.bNoInitRegOnPcscfChange =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_NO_INIT_REG_ON_PCSCF_CHANGE_BOOL);
     m_objAsset.bPlmnBlockWithTimeoutOnVoiceCallUnavailable = piCc->GetBoolean(

@@ -89,8 +89,6 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_piRegParameter(IMS_NULL),
         m_pSubscription(IMS_NULL),
         m_pIpsecHelper(IMS_NULL),
-        m_bIsIpsecSupported(IMS_FALSE),
-        m_bIsIpsecInit(IMS_FALSE),
         m_pUtil(IMS_NULL),
         m_nFeature(FEATURE_NONE),
         m_nState(STATE_OFFLINE),
@@ -125,6 +123,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
         m_bCallingNumberVerificationSupported(IMS_FALSE),
         m_nNetworkBindingFeatures(0),
         m_bEps5GsOnly(IMS_TRUE),
+        m_nIpsecBlockReason(0),
         m_nImsRegState(IMS_REG_STATE_DEREGISTERED),
         m_nImsRegFeatures(ImsAosFeature::NONE),
         m_eImsRegNetwork(AosNetworkType::NONE),
@@ -614,20 +613,6 @@ void AosRegistration::SetFakeReg(IN IMS_BOOL bFake)
 }
 
 PROTECTED
-void AosRegistration::SetIsIpsecSupported(IN IMS_BOOL bSupported)
-{
-    A_IMS_TRACE_I(REGID, "SetIsIpsecSupported :: (%s)", (bSupported) ? "ON" : "OFF", 0, 0);
-    m_bIsIpsecSupported = bSupported;
-}
-
-PROTECTED
-void AosRegistration::SetIsIpsecInit(IN IMS_BOOL bInit)
-{
-    A_IMS_TRACE_I(REGID, "SetIsIpsecInit :: (%s)", (bInit) ? "TRUE" : "FALSE", 0, 0);
-    m_bIsIpsecInit = bInit;
-}
-
-PROTECTED
 void AosRegistration::SetBlocked(IN IMS_BOOL bBlocked)
 {
     A_IMS_TRACE_I(REGID, "SetBlocked :: (%s)", (bBlocked) ? "BLOCK" : "NOT BLOCK", 0, 0);
@@ -760,13 +745,8 @@ IMS_BOOL AosRegistration::IsIpsecSupported() const
         return IMS_FALSE;
     }
 
-    return m_bIsIpsecSupported;
-}
-
-PROTECTED
-IMS_BOOL AosRegistration::IsIpsecInit() const
-{
-    return m_bIsIpsecInit;
+    return (m_pUtil->IsFeatureOn(FEATURE_IPSEC, m_nFeature)) &&
+            (m_nIpsecBlockReason == IPSEC_BLOCK_NONE);
 }
 
 PROTECTED
@@ -1124,7 +1104,6 @@ PROTECTED VIRTUAL void AosRegistration::InitFeatures()
 
     if (GET_N_CONFIG(m_nSlotId)->IsIpsecEnabled())
     {
-        SetIsIpsecSupported(IMS_TRUE);
         m_pUtil->AddFeature(FEATURE_IPSEC, m_nFeature);
     }
 
@@ -1309,18 +1288,6 @@ void AosRegistration::PrepareRegistration()
         m_piRegistration = IMS_NULL;
 
         DestroySubscription();
-    }
-
-    if (IsIpsecInit())  // TODO : check init condition
-    {
-        if (GET_N_CONFIG(m_nSlotId)->IsIpsecEnabled())
-        {
-            SetIsIpsecSupported(IMS_TRUE);
-        }
-        else
-        {
-            SetIsIpsecSupported(IMS_FALSE);
-        }
     }
 }
 
@@ -2339,6 +2306,26 @@ PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
             (m_bIsTransactionStarted) ? "READY" : "NOT READY", 0, 0);
 }
 
+PROTECTED VIRTUAL void AosRegistration::UpdateIpsecSupported(
+        IN IMS_BOOL bSupported, IN IMS_UINT32 nReason /* = 0 */)
+{
+    if (!m_pUtil->IsFeatureOn(FEATURE_IPSEC, m_nFeature))
+    {
+        return;
+    }
+
+    if (!bSupported)
+    {
+        m_nIpsecBlockReason |= nReason;
+    }
+    else
+    {
+        m_nIpsecBlockReason &= ~(nReason);
+    }
+
+    A_IMS_TRACE_I(REGID, "UpdateIpsecSupported :: (%x)", m_nIpsecBlockReason, 0, 0);
+}
+
 PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetActualWaitTime()
 {
     if (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
@@ -2422,6 +2409,15 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetNextPcscf(
     if (!bUpdateParameter)
     {
         return IMS_TRUE;
+    }
+
+    if (GET_N_CONFIG(m_nSlotId)->IsIpsecInitializedWithNewPcscf())
+    {
+        ClearIpsecBlock();
+        if (IsIpsecSupported())
+        {
+            CreateIpsecHelper();
+        }
     }
 
     return UpdatePreloadedRoute();
@@ -2591,6 +2587,12 @@ PROTECTED VIRTUAL void AosRegistration::ClearNetworkBindingFeatures()
     m_nNetworkBindingFeatures = 0;
 }
 
+PROTECTED VIRTUAL void AosRegistration::ClearIpsecBlock()
+{
+    ClearAuthIpsecCount();
+    m_nIpsecBlockReason = 0;
+}
+
 PROTECTED VIRTUAL void AosRegistration::CheckPending()
 {
     if (m_pUtil->IsFeatureOn(PENDING_RECONFIG, m_nTxnPending))
@@ -2648,11 +2650,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessSetIpsec(IN IMS_UINT32 nReason)
 {
     A_IMS_TRACE_I(REGID, "ProcessSetIpsec :: (%d)", nReason, 0, 0);
 
-    if (nReason == IAosRegistration::REASON_SET_IPSEC_INIT)
-    {
-        SetIsIpsecInit(IMS_TRUE);
-    }
-    else if (nReason == IAosRegistration::REASON_SET_IPSEC_ENABLE)
+    if (nReason == IAosRegistration::REASON_SET_IPSEC_ENABLE)
     {
         ProcessIpsecFallback(IMS_TRUE);
     }
@@ -3256,14 +3254,14 @@ PROTECTED VIRTUAL void AosRegistration::ProcessAwtRecovery()
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
 }
 
-PROTECTED VIRTUAL void AosRegistration::ProcessIpsecFallback(IN IMS_BOOL bIsIpsecRetry)
+PROTECTED VIRTUAL void AosRegistration::ProcessIpsecFallback(IN IMS_BOOL bIsSupported)
 {
     A_IMS_TRACE_I(REGID, "ProcessIpsecFallback", 0, 0, 0);
 
-    if ((bIsIpsecRetry && !IsIpsecSupported()) || (!bIsIpsecRetry && IsIpsecSupported()))
+    if ((bIsSupported && !IsIpsecSupported()) || (!bIsSupported && IsIpsecSupported()))
     {
         Destroy();
-        SetIsIpsecSupported(bIsIpsecRetry);
+        UpdateIpsecSupported(bIsSupported, IPSEC_BLOCK_ERROR);
 
         if (!CreateRegistration())
         {
@@ -3839,6 +3837,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
         }
     }
 
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithoutIpsec(), nStatusCode))
+    {
+        ProcessIpsecFallback(IMS_FALSE);
+        return;
+    }
+
     if (GET_N_CONFIG(m_nSlotId)->IsRegRetryWithIpVerFallback() &&
             nStatusCode >= SipStatusCode::SC_500 && nStatusCode < SipStatusCode::SC_600)
     {
@@ -3933,6 +3937,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_TxnTimeout()
         return;
     }
 
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithoutIpsec(),
+                CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
+    {
+        ProcessIpsecFallback(IMS_FALSE);
+        return;
+    }
+
     if (IsErrorCodeExistedForSpecificRegistration(CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
     {
         ProcessDefaultFlowRecovery_Start();
@@ -4008,6 +4019,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
         {
             return;
         }
+    }
+
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithoutIpsec(), nStatusCode))
+    {
+        ProcessIpsecFallback(IMS_FALSE);
+        return;
     }
 
     if (IsErrorCodeExisted(
@@ -4096,6 +4113,13 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()
             ProcessRegRequiredWithAvailableNextPcscf(IMS_TRUE);
         }
 
+        return;
+    }
+
+    if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithoutIpsec(),
+                CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F))
+    {
+        ProcessIpsecFallback(IMS_FALSE);
         return;
     }
 
@@ -4282,7 +4306,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_AuthenticationChallenged(
             if (m_nAuthIpsecCount >
                     GET_N_CONFIG(m_nSlotId)->GetRegRetryCountWithIpsecOnAuthFailure())
             {
-                SetIsIpsecSupported(IMS_FALSE);
+                UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_AUTENTICATION);
             }
 
             if (GetState() == STATE_REGISTERING)
@@ -4445,7 +4469,7 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Started()
         else
         {
             A_IMS_TRACE_I(REGID, "Registration_Started :: ipsec is not established", 0, 0, 0);
-            SetIsIpsecSupported(IMS_FALSE);
+            UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_NOT_ESTABLISHED);
             DestroyIpsecHelper();
             PostMessage(MSG_REG_REINITIATE, 0, 0);
             return;
@@ -5255,14 +5279,21 @@ PROTECTED VIRTUAL void AosRegistration::NConfiguration_NotifyConfigChanged()
             {
                 m_pUtil->AddFeature(FEATURE_SUBSCRIPTION, m_nFeature);
             }
+            else
+            {
+                m_pUtil->RemoveFeature(FEATURE_SUBSCRIPTION, m_nFeature);
+            }
         }
 
         if (GET_N_CONFIG(m_nSlotId)->IsIpsecEnabled())
         {
-            SetIsIpsecSupported(IMS_TRUE);
             m_pUtil->AddFeature(FEATURE_IPSEC, m_nFeature);
-            ClearAuthIpsecCount();
         }
+        else
+        {
+            m_pUtil->RemoveFeature(FEATURE_IPSEC, m_nFeature);
+        }
+        ClearIpsecBlock();
     }
 }
 
