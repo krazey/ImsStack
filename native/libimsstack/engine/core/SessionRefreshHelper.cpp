@@ -248,7 +248,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeader(IN ISipConnectio
                     }
                 }
             }
-            else if (m_nLocalSessionTimerDuration > 0)
+            else if (m_nLocalSessionTimerDuration > 0 && !piSipMsg->IsOptionSupported(STR_TIMER))
             {
                 // Set a Supported header field
                 if (piSipMsg->AddHeader(ISipHeader::SUPPORTED, STR_TIMER) != IMS_SUCCESS)
@@ -506,7 +506,7 @@ PUBLIC VIRTUAL IMS_BOOL SessionRefreshHelper::AddSpecificHeaderWithoutParameterC
                     }
                 }
             }
-            else if (m_nLocalSessionTimerDuration > 0)
+            else if (m_nLocalSessionTimerDuration > 0 && !piSipMsg->IsOptionSupported(STR_TIMER))
             {
                 // Set a Supported header field
                 if (piSipMsg->AddHeader(ISipHeader::SUPPORTED, STR_TIMER) != IMS_SUCCESS)
@@ -684,6 +684,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
             // which originate from this UA goes without "Session-Expires" header.
             m_nSessionTimerDuration = 0;
             m_nMinSe = 0;
+            m_nRefresher = REFRESHER_NONE;
         }
 
         UpdateProperties(piSc, bTimerOptionSupported, IMS_FALSE);
@@ -1557,8 +1558,7 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
     m_nLocalSessionTimerDuration = 0;
 
     //// To handle other optional cases for session refresh...
-    if (IsLocalSessionTimerRequired() && !bSent &&
-            !piSipMsg->IsHeaderPresent(ISipHeader::SESSION_EXPIRES) && bTimerOptionSupported)
+    if (!bSent && !piSipMsg->IsHeaderPresent(ISipHeader::SESSION_EXPIRES) && bTimerOptionSupported)
     {
         // According to RFC 4028,
         // UAC
@@ -1582,22 +1582,43 @@ void SessionRefreshHelper::UpdateProperties(IN const ISipConnection* piSc,
         }
         else
         {
-            m_nRefresher = REFRESHER_LOCAL;
-
-            const SipConfigV* pSipConfigV = m_pService->GetSipConfigV();
-
-            if (pSipConfigV != IMS_NULL)
+            if (IsLocalSessionTimerRequired())
             {
-                m_nLocalSessionTimerDuration = pSipConfigV->GetSessionExpires();
+                m_nRefresher = REFRESHER_LOCAL;
 
-                if ((m_nMinSe > 0) && (m_nLocalSessionTimerDuration > m_nMinSe))
+                const SipConfigV* pSipConfigV = m_pService->GetSipConfigV();
+
+                if (pSipConfigV != IMS_NULL)
                 {
-                    m_nLocalSessionTimerDuration = m_nMinSe;
-                }
+                    m_nLocalSessionTimerDuration = pSipConfigV->GetSessionExpires();
 
-                IMS_TRACE_D("Remote endpoint is not requesting the session timer,"
-                            " but local endpoint supports it (%d:%d)",
-                        m_nLocalSessionTimerDuration, m_nMinSe, 0);
+                    if ((m_nMinSe > 0) && (m_nLocalSessionTimerDuration < m_nMinSe))
+                    {
+                        m_nLocalSessionTimerDuration = m_nMinSe;
+                    }
+
+                    IMS_TRACE_D("Remote endpoint is not requesting the session timer,"
+                                " but local endpoint supports it (%d:%d)",
+                            m_nLocalSessionTimerDuration, m_nMinSe, 0);
+                }
+            }
+            else if (m_nSessionTimerDuration == 0)
+            {
+                const SipConfigV* pSipConfigV = m_pService->GetSipConfigV();
+
+                if (pSipConfigV != IMS_NULL)
+                {
+                    m_nSessionTimerDuration = pSipConfigV->GetSessionExpires();
+
+                    if ((m_nMinSe > 0) && (m_nSessionTimerDuration < m_nMinSe))
+                    {
+                        m_nSessionTimerDuration = m_nMinSe;
+                    }
+
+                    IMS_TRACE_I("Remote endpoint does not have Session-Expires header,"
+                                " but it supports \"timer\" option tag(%d:%d).",
+                            m_nSessionTimerDuration, m_nMinSe, 0);
+                }
             }
         }
     }
