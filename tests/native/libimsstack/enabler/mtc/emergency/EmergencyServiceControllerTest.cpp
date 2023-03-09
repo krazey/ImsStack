@@ -124,6 +124,13 @@ TEST_F(EmergencyServiceControllerTest, StartNotifiesOpening)
     pController->Start();
 }
 
+TEST_F(EmergencyServiceControllerTest, CloseStopsRegistration)
+{
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_STOP)).Times(1);
+
+    pController->Close();
+}
+
 TEST_F(EmergencyServiceControllerTest, AosStateChangeNotifiesNothingInitially)
 {
     EXPECT_CALL(objJniMtcServiceThread, OnEmergencyServiceChanged(_, _, _)).Times(0);

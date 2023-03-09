@@ -35,7 +35,7 @@ public:
     MtcEmergencyServiceManager& operator=(IN const MtcEmergencyServiceManager&) = delete;
 
     void StartOpen(IN EmergencyCallRoutingPdn ePdn) override;
-    void StopOpen() override;
+    void StopOpen(IN IMS_BOOL bClose) override;
 
 protected:
     // Visible for test
