@@ -4696,6 +4696,19 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Terminated(IN IMS_SINT32 nR
         return;
     }
 
+    if (GET_N_CONFIG(m_nSlotId)->IsCallEndAndPdnReactivationByRegTerminated())
+    {
+        if (IsImsCall())
+        {
+            SetHeldByCall(IMS_FALSE);
+            UpdateTransactionStarted();
+
+            Destroy();
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+            return;
+        }
+    }
+
     ProcessRegTerminated();
 }
 

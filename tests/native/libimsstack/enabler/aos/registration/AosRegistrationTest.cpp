@@ -107,6 +107,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, UpdateFailed_TxnTimeout);
     FRIEND_TEST(AosRegistrationTest, StandardPcscfSelection);
     FRIEND_TEST(AosRegistrationTest, RefreshTimerExpired);
+    FRIEND_TEST(AosRegistrationTest, Terminated);
     FRIEND_TEST(AosRegistrationTest, SetNextPcscf_SamePcscf);
     FRIEND_TEST(AosRegistrationTest, IsRetryOnSamePcscfRequired);
     FRIEND_TEST(AosRegistrationTest, ProcessDefaultFlowRecovery_Start_NotSamePcscf);
@@ -1026,6 +1027,36 @@ TEST_F(AosRegistrationTest, RefreshTimerExpired)
     m_pTestAosRegistration->Registration_RefreshTimerExpired(bDoImplicitRefresh);
     EXPECT_TRUE(bDoImplicitRefresh);
     EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_REFRESHING);
+}
+
+TEST_F(AosRegistrationTest, Terminated)
+{
+    // IsHandlingServerSocketErrorRequired - IMS_FALSE
+    m_pTestAosRegistration->SetImsCall(IMS_TRUE);
+    m_pTestAosRegistration->SetBlocked(IMS_FALSE);
+    m_pTestAosRegistration->SetRadioWaiting(IMS_FALSE);
+    m_pTestAosRegistration->Registration_Terminated(IRegistration::REASON_REFRESH_TIMEOUT);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsContactUriValidationChecked())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    EXPECT_CALL(m_objMockIAosRegistrationListener, Registration_StateChanged(_, _))
+            .Times(AnyNumber());
+
+    m_pTestAosRegistration->Registration_Terminated(IRegistration::REASON_REFRESH_TIMEOUT);
+
+    m_pTestAosRegistration->SetImsCall(IMS_FALSE);
+    m_pTestAosRegistration->Registration_Terminated(IRegistration::REASON_REFRESH_TIMEOUT);
+
+    // IsCallEndAndPdnReactivationByRegTerminated - IMS_FALSE
+    m_pTestAosRegistration->Registration_Terminated(IRegistration::REASON_REFRESH_TIMEOUT);
 }
 
 TEST_F(AosRegistrationTest, SetNextPcscf_SamePcscf)

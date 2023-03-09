@@ -167,6 +167,7 @@ class TestAosConnector : public AosConnector
 public:
     inline IMS_BOOL Start() override { return IMS_TRUE; }
     inline void Stop() override {}
+    inline void Stop(IN IMS_SINT32 /* nDelayTimeSec */) override {}
 
 private:
 };
@@ -204,6 +205,7 @@ class TestAosApplication : public AosApplication
     FRIEND_TEST(AosApplicationTest, RegRetryCount);
     FRIEND_TEST(AosApplicationTest, StateMachine);
     FRIEND_TEST(AosApplicationTest, Process);
+    FRIEND_TEST(AosApplicationTest, PdnDisconnect);
     FRIEND_TEST(AosApplicationTest, Callback);
 
 public:
@@ -255,6 +257,10 @@ public:
             m_piRegistration = m_piOrigAosRegistration;
         }
     }
+
+    void SetRat(IN IMS_UINT32 nRat) { m_nRat = nRat; }
+
+    void SetLteAttachState(IN IMS_UINT32 nLteAttachState) { m_nLteAttachState = nLteAttachState; }
 
 private:
     AosCondition* m_pOrigAosCondition;
@@ -1170,6 +1176,44 @@ TEST_F(AosApplicationTest, Process)
 
     // TEST_F : UpdateMonitorNotify()
     m_pTestAosApplication->UpdateMonitorNotify(0, 0);
+}
+
+TEST_F(AosApplicationTest, PdnDisconnect)
+{
+    // TEST_F : ProcessPdnDisconnect
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrFinalType())
+            .Times(AnyNumber())
+            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_NOT_SPECIFIED))
+            .WillOnce(Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED))
+            .WillRepeatedly(
+                    Return(CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallEndAndPdnReactivationByRegTerminated())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_TRUE))
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    m_pTestAosApplication->SetImsCall(IMS_TRUE);
+    m_pTestAosApplication->ProcessPdnDisconnect();
+    EXPECT_EQ(m_pTestAosApplication->GetOffReason(), AosReason::REG_TERMINATING);
+    EXPECT_EQ(m_pTestAosApplication->GetState(), IAosApplication::STATE_NOTREADY);
+
+    m_pTestAosApplication->SetImsCall(IMS_FALSE);
+    EXPECT_CALL(m_objMockIAosService, NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT))
+            .Times(2);
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_NR);
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_INVALID);
+    m_pTestAosApplication->ProcessPdnDisconnect();
+
+    m_pTestAosApplication->SetRat(NW_REPORT_RADIO_LTE);
+    m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
+    m_pTestAosApplication->ProcessPdnDisconnect();
 }
 
 TEST_F(AosApplicationTest, Callback)

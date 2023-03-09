@@ -1925,6 +1925,18 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 
     A_IMS_TRACE_I(APPID, "ProcessPdnDisconnect :: reg err final type - %d", nFinalErr, 0, 0);
 
+    if (GET_N_CONFIG(m_nSlotId)->IsCallEndAndPdnReactivationByRegTerminated())
+    {
+        if (IsImsCall())
+        {
+            m_pConnector->Stop(DELAY_STOPPING_PDN_TO_KEEP_SESSION_TIME_SECONDS);
+            SetOffReason(AosReason::REG_TERMINATING);
+            SetAppState(STATE_NOTREADY);
+            Report_StateChanged();
+            return;
+        }
+    }
+
     m_pConnector->Stop();
 
     if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED)

@@ -56,6 +56,7 @@
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
 
     <!-- Aos -->
+    <boolean name="call_end_and_pdn_reactivation_by_reg_terminated_bool" value="true"/>
     <boolean name="initialize_ipsec_setting_with_new_pcscf_bool" value="true"/>
     <int name="reg_out_of_service_policy_int" value="1"/>
     <int name="reg_retry_cnt_on_single_pcscf_int" value="1"/>

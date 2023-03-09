@@ -226,6 +226,13 @@ public:
     virtual IMS_BOOL IsOldSaOnEstablishingSaRemoved() const = 0;
 
     /**
+     * @brief Returns whether a call should be terminated due to expiration of registration.
+     *
+     * @return IMS_BOOL Return wherther to be applied or not
+     */
+    virtual IMS_BOOL IsCallEndAndPdnReactivationByRegTerminated() const = 0;
+
+    /**
      * @brief Returns whether unsecure tcp socket is destroyed on accomplishing the registration
      *
      * @return IMS_BOOL Return wherther to be applied or not
@@ -1290,14 +1297,6 @@ public:
      * @return vector error code
      */
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeForCallEnd() = 0;
-
-    /**
-     * @brief Indicate the list of error codes that results in reactivating IMS PDN
-     *        after terminating the IMS call when reregistraiton fails.
-     *
-     * @return vector error code
-     */
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForPdnReactivationAfterCallEnd() = 0;
 
     /**
      * @brief Indicate the error codes of the reregistration followed by intital registration

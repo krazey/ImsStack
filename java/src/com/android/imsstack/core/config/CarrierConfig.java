@@ -442,6 +442,8 @@ public class CarrierConfig {
         public static final String KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL =
                 "support_ecbm_for_vowifi_bool";
         // Aos
+        public static final String KEY_CALL_END_AND_PDN_REACTIVATION_BY_REG_TERMINATED_BOOL =
+                "call_end_and_pdn_reactivation_by_reg_terminated_bool";
         public static final String KEY_DESTROY_UNSECURE_TCP_SOCKET_ON_ACCOMPLISHING_REG_BOOL =
                 "destroy_unsecure_tcp_socket_on_accomplishing_reg_bool";
         public static final String KEY_EMC_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REG_BOOL =
@@ -557,9 +559,6 @@ public class CarrierConfig {
         public static final String
                 KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY =
                         "rereg_err_code_for_init_reg_with_available_pcscf_int_array";
-        public static final String
-                KEY_REREG_ERR_CODE_FOR_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY =
-                        "rereg_err_code_for_pdn_reactivation_after_call_end_int_array";
         public static final String KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY =
                 "rereg_retry_err_code_for_init_reg_with_same_pcscf_int_array";
         public static final String KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY =
