@@ -333,7 +333,7 @@ TEST_F(JniUceServiceThreadTest, NotifyInd)
     IMS_UINT32 eType = IUUceService::UCE_PRESENCE_NOTIFY_IND;
     IMS_UINT32 key = 10;
     IMS_UINT32 count = 0;
-    IMSList<AString> pidfXmls;
+    ImsList<AString> pidfXmls;
 
     objParcel.writeInt32(eType);
     objParcel.writeInt32(key);
@@ -370,7 +370,7 @@ TEST_F(JniUceServiceThreadTest, SubscribeResourceTerminatedInd)
     IMS_UINT32 eType = IUUceService::UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND;
     IMS_UINT32 key = 10;
     IMS_UINT32 count = 0;
-    IMSList<IUceTerminatedReason*> terminateContacts;
+    ImsList<IUceTerminatedReason*> terminateContacts;
 
     objParcel.writeInt32(eType);
     objParcel.writeInt32(key);

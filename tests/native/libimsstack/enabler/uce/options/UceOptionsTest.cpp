@@ -230,7 +230,7 @@ TEST_F(UceOptionsTest, AoSDisconnected)
 TEST_F(UceOptionsTest, GetCapability)
 {
     IMS_TRACE_D("GetCapability", 0, 0, 0);
-    IMSList<AString> objContactList = IMSList<AString>();
+    ImsList<AString> objContactList = ImsList<AString>();
 
     EXPECT_EQ(pUceOptions->GetCapability(objContactList), 0);
 
@@ -369,7 +369,7 @@ TEST_F(UceOptionsTest, capaDeliverd)
     ON_CALL(objMockICapabilities, GetPreviousResponse(IMessage::CAPABILITIES_QUERY))
             .WillByDefault(Return(&objMockIMessage));
     ON_CALL(objMockIMessage, GetMessage()).WillByDefault(Return(&objMockISipMessage));
-    IMSList<AString> objHeaders;
+    ImsList<AString> objHeaders;
     objHeaders.Clear();
     AString reason = "OK";
 

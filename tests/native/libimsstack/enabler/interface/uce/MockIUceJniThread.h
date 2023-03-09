@@ -37,11 +37,11 @@ public:
     MOCK_METHOD(IMS_BOOL, UnPublishedInd, (), (override));
     MOCK_METHOD(IMS_BOOL, SubscribeResponseInd,
             (IMS_UINT32, IMS_SINT32, AString, IMS_SINT32, AString), (override));
-    MOCK_METHOD(IMS_BOOL, NotifyInd, (IMS_UINT32, IMS_UINT32, IMSList<AString>), (override));
+    MOCK_METHOD(IMS_BOOL, NotifyInd, (IMS_UINT32, IMS_UINT32, ImsList<AString>), (override));
 
     MOCK_METHOD(IMS_BOOL, SubscribeErrorInd, (IMS_UINT32, IMS_UINT32), (override));
     MOCK_METHOD(IMS_BOOL, SubscribeResourceTerminatedInd,
-            (IMS_UINT32, IMS_UINT32, IMSList<IUceTerminatedReason*>), (override));
+            (IMS_UINT32, IMS_UINT32, ImsList<IUceTerminatedReason*>), (override));
     MOCK_METHOD(IMS_BOOL, SubscribeTerminatedInd, (IMS_UINT32, AString, IMS_UINT32), (override));
     MOCK_METHOD(IMS_BOOL, OptionsResponseInd, (IMS_UINT32, IMS_UINT32, AString, IMS_UINT32),
             (override));

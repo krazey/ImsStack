@@ -40,10 +40,10 @@ public:
     virtual IMS_BOOL SubscribeResponseInd(IMS_UINT32 key, IMS_SINT32 responseCode, AString reason,
             IMS_SINT32 reasonHeaderCause, AString reasonHeaderText) override;
     virtual IMS_BOOL NotifyInd(
-            IMS_UINT32 key, IMS_UINT32 count, IMSList<AString> pidfXmls) override;
+            IMS_UINT32 key, IMS_UINT32 count, ImsList<AString> pidfXmls) override;
     virtual IMS_BOOL SubscribeErrorInd(IMS_UINT32 key, IMS_UINT32 commandError) override;
     virtual IMS_BOOL SubscribeResourceTerminatedInd(IMS_UINT32 key, IMS_UINT32 count,
-            IMSList<IUceTerminatedReason*> terminateContacts) override;
+            ImsList<IUceTerminatedReason*> terminateContacts) override;
     virtual IMS_BOOL SubscribeTerminatedInd(
             IMS_UINT32 key, AString reason, IMS_UINT32 retryAfterMillsecond) override;
     virtual IMS_BOOL OptionsResponseInd(

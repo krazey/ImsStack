@@ -52,7 +52,7 @@ public:
 
     // related to subscribe
     IMS_BOOL SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user);
-    IMS_BOOL SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList);
+    IMS_BOOL SendListSubscribeCmd(IMS_UINT32 key, const ImsList<AString>& userList);
 
     // related to options
     IMS_BOOL SendOptionsCmd(IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri);

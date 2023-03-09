@@ -132,7 +132,7 @@ void UceOptions::AoSDisconnected()
     OptionsTerminated();
 }
 
-IMS_UINT32 UceOptions::GetCapability(IMSList<AString> objContactList)
+IMS_UINT32 UceOptions::GetCapability(ImsList<AString> objContactList)
 {
     IMS_UINT32 capabilities = 0;
     for (IMS_UINT32 i = 0; i < objContactList.GetSize(); i++)
@@ -462,7 +462,7 @@ PROTECTED VIRTUAL void UceOptions::CapabilityQueryDelivered(IN ICapabilities* pi
         return;
     }
 
-    IMSList<AString> objContactList = piSIPMessage->GetHeaders(ISipHeader::CONTACT_NORMAL);
+    ImsList<AString> objContactList = piSIPMessage->GetHeaders(ISipHeader::CONTACT_NORMAL);
     IMS_UINT32 capabilities = GetCapability(objContactList);
     SendOptionsResponseInd(piMessage->GetStatusCode(), piMessage->GetReasonPhrase(), capabilities);
     OptionsTerminated();

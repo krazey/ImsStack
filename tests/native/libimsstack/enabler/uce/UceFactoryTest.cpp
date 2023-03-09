@@ -34,12 +34,12 @@ public:
         UceFactory::m_gpUceFactory = gpUceFactory;
     }
 
-    inline static IMSMap<IMS_SINT32, UceApp*> GetUceManagers()
+    inline static ImsMap<IMS_SINT32, UceApp*> GetUceManagers()
     {
         return UceFactory::m_objUceManagers;
     }
 
-    inline static void SetUceManagers(IN const IMSMap<IMS_SINT32, UceApp*>& objManagers)
+    inline static void SetUceManagers(IN const ImsMap<IMS_SINT32, UceApp*>& objManagers)
     {
         UceFactory::m_objUceManagers = objManagers;
     }
@@ -57,7 +57,7 @@ class UceFactoryTest : public ::testing::Test
 {
 public:
     UceFactory* m_pUceFactory;
-    IMSMap<IMS_SINT32, UceApp*> m_objUceManagers;
+    ImsMap<IMS_SINT32, UceApp*> m_objUceManagers;
 
 protected:
     virtual void SetUp() override

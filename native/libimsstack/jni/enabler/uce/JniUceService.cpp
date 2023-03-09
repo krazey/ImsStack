@@ -203,7 +203,7 @@ void JniUceService::SendListSubscribeCmd(IUceJni* pJniUce, const Parcel& pParcel
     // cppcheck-suppress duplicateAssignExpression
     IMS_UINT32 key = pParcel.readInt32();
     IMS_UINT32 size = pParcel.readInt32();
-    IMSList<AString> userList;
+    ImsList<AString> userList;
 
     for (IMS_SINT32 i = 0; i < size; i++)
     {

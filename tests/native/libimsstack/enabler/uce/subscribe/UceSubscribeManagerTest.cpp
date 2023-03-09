@@ -90,7 +90,7 @@ TEST_F(UceSubscribeManagerTest, QuerySingleCapability)
 TEST_F(UceSubscribeManagerTest, QueryMultiCapability)
 {
     IMS_TRACE_D("QueryMultiCapability", 0, 0, 0);
-    IMSList<AString> objUsers = IMSList<AString>();
+    ImsList<AString> objUsers = ImsList<AString>();
     objUsers.Append("tel:+123456789");
     EXPECT_EQ(pUceSubscribeManager->QueryMultiCapability(objUsers, SUBSCRIBE_KEY), IMS_TRUE);
     EXPECT_EQ(pUceSubscribeManager->GetListCount(), 1);

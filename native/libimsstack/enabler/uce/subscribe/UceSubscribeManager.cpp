@@ -69,7 +69,7 @@ IMS_BOOL UceSubscribeManager::QuerySingleCapability(IN const AString& strUser, I
 }
 
 IMS_BOOL UceSubscribeManager::QueryMultiCapability(
-        IN const IMSList<AString>& objUsers, IN IMS_UINT32 key)
+        IN const ImsList<AString>& objUsers, IN IMS_UINT32 key)
 {
     UceSubscribe* pUceSubscribe = new UceSubscribe(
             m_piCoreService, m_strAppName, GetName(), m_nConnectedServices, m_nSimSlot);

@@ -174,11 +174,11 @@ TEST_F(UceConfigTestTest, GetBoolValue)
 TEST_F(UceConfigTestTest, GetExponentialRetryPublishRespTimeArray)
 {
     IMS_TRACE_D("GetExponentialRetryPublishRespTimeArray", 0, 0, 0);
-    IMSVector<IMS_SINT32> returnValue = pUceConfig->GetExponentialRetryPublishRespTimeArray(10);
+    ImsVector<IMS_SINT32> returnValue = pUceConfig->GetExponentialRetryPublishRespTimeArray(10);
     EXPECT_EQ(returnValue.GetSize(), 0);
 
     UceAssetItems* objNew = new UceAssetItems();
-    IMSVector<IMS_SINT32> objExponentialRetryTimeSec;
+    ImsVector<IMS_SINT32> objExponentialRetryTimeSec;
     objExponentialRetryTimeSec.Push(10);
     objNew->m_objVariableRetryPublishResponseTimeSec = objExponentialRetryTimeSec;
     pUceConfig->SetConfig(10, objNew);
@@ -194,19 +194,19 @@ TEST_F(UceConfigTestTest, GetPublishRetryType)
     EXPECT_EQ(pUceConfig->GetPublishRetryType(200, 10), UceConfig::NONE);
 
     UceAssetItems* objNew = new UceAssetItems();
-    IMSVector<IMS_SINT32> objVariableRetryPublishResponse;
+    ImsVector<IMS_SINT32> objVariableRetryPublishResponse;
     objVariableRetryPublishResponse.Push(200);
     objNew->m_objVariableRetryPublishResponse = objVariableRetryPublishResponse;
     pUceConfig->SetConfig(10, objNew);
     EXPECT_EQ(pUceConfig->GetPublishRetryType(200, 10), UceConfig::EXPONENTIAL);
 
-    IMSVector<IMS_SINT32> objRetryPublishResponse;
+    ImsVector<IMS_SINT32> objRetryPublishResponse;
     objRetryPublishResponse.Push(200);
     objNew->m_objRetryPublishResponse = objRetryPublishResponse;
     pUceConfig->SetConfig(10, objNew);
     EXPECT_EQ(pUceConfig->GetPublishRetryType(200, 10), UceConfig::RETRY);
 
-    IMSVector<IMS_SINT32> objImmediatelyRetryPublishResponse;
+    ImsVector<IMS_SINT32> objImmediatelyRetryPublishResponse;
     objImmediatelyRetryPublishResponse.Push(200);
     objNew->m_objImmediatelyRetryPublishResponse = objImmediatelyRetryPublishResponse;
     pUceConfig->SetConfig(10, objNew);
@@ -221,11 +221,11 @@ TEST_F(UceConfigTestTest, IsImsRegistrationRequired)
     EXPECT_FALSE(pUceConfig->IsImsRegistrationRequired(IMS_TRUE, 200, 10));
 
     UceAssetItems* objNew = new UceAssetItems();
-    IMSVector<IMS_SINT32> objReAttemptPublishResponse;
+    ImsVector<IMS_SINT32> objReAttemptPublishResponse;
     objReAttemptPublishResponse.Push(200);
     objNew->m_objReAttemptRegistrationPublishResponse = objReAttemptPublishResponse;
 
-    IMSVector<IMS_SINT32> objReAttemptSubscribeResponse;
+    ImsVector<IMS_SINT32> objReAttemptSubscribeResponse;
     objReAttemptSubscribeResponse.Push(200);
     objNew->m_objReAttemptRegistrationSubscribeResponse = objReAttemptSubscribeResponse;
 

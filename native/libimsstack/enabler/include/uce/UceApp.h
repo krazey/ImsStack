@@ -84,7 +84,7 @@ protected:
             const AString& pidfXml, const AString& eTag) override;
     virtual IMS_BOOL SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user) override;
     virtual IMS_BOOL SendListSubscribeCmd(
-            IMS_UINT32 key, const IMSList<AString>& userList) override;
+            IMS_UINT32 key, const ImsList<AString>& userList) override;
     virtual IMS_BOOL SendOptionsCmd(
             IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri) override;
     virtual IMS_BOOL SendOptionsRespCmd(IMS_UINT32 key, IMS_SINT32 responseCode,

@@ -82,7 +82,7 @@ public:
     AString GetAStringValue(IN KEY_UCE_STRING eKey, IN IMS_SINT32 nSimSlot = 0);
     IMS_UINT32 GetIntValue(IN KEY_UCE_INT eKey, IN IMS_SINT32 nSimSlot = 0);
     IMS_BOOL GetBoolValue(IN KEY_UCE_BOOL eKey, IN IMS_SINT32 nSimSlot = 0);
-    IMSVector<IMS_SINT32> GetExponentialRetryPublishRespTimeArray(IN IMS_SINT32 nSimSlot = 0);
+    ImsVector<IMS_SINT32> GetExponentialRetryPublishRespTimeArray(IN IMS_SINT32 nSimSlot = 0);
     IMS_UINT32 GetPublishRetryType(IN IMS_SINT32 nResponseCode, IN IMS_SINT32 nSimSlot = 0);
     IMS_BOOL IsImsRegistrationRequired(
             IN IMS_BOOL isPublish, IN IMS_SINT32 nResponseCode, IN IMS_SINT32 nSimSlot = 0);
@@ -97,7 +97,7 @@ private:
     void Update(IN ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot = 0);
 
 private:
-    IMSMap<IMS_SINT32, UceAssetItems*> m_objAssetMap;
+    ImsMap<IMS_SINT32, UceAssetItems*> m_objAssetMap;
 };
 
 #endif  // __UCE_CONFIG_H_
