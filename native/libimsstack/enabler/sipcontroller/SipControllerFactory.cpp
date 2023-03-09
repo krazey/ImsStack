@@ -22,8 +22,8 @@
 __IMS_TRACE_TAG_USER_DECL__("IMS_SNC");
 
 PRIVATE GLOBAL SipControllerFactory* SipControllerFactory::m_gpFactory = IMS_NULL;
-PRIVATE GLOBAL IMSMap<IMS_SINT32, SipControllerManager*> SipControllerFactory::m_objManagers =
-        IMSMap<IMS_SINT32, SipControllerManager*>();
+PRIVATE GLOBAL ImsMap<IMS_SINT32, SipControllerManager*> SipControllerFactory::m_objManagers =
+        ImsMap<IMS_SINT32, SipControllerManager*>();
 
 PUBLIC SipControllerFactory::SipControllerFactory()
 {
