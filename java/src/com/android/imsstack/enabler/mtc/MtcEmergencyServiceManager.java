@@ -85,8 +85,14 @@ public class MtcEmergencyServiceManager {
      *
      * @param emergencyRouting The routing information for emergency call.
      */
-    public void openEmergencyService(@EmergencyCallRouting int emergencyRouting) {
+    public void openEmergencyService(
+            @EmergencyCallRouting int emergencyRouting, IServiceStateTracker serviceStateTracker) {
         log("openEmergencyService");
+
+        if (serviceStateTracker.isServiceRegistered(IUMtcService.SERVICE_EMERGENCY)) {
+            onEsOpened(IUMtcCall.SERVICETYPE_EMERGENCY);
+            return;
+        }
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IUMtcService.OPEN_EMERGENCY_SERVICE);
