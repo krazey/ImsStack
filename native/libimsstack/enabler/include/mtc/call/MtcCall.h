@@ -48,6 +48,7 @@
 #include <functional>
 #include <memory>
 
+class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;
 class IConferenceManager;
 class IEctManager;
@@ -157,6 +158,7 @@ public:
     UpdatingInfo& GetUpdatingInfo() override;
     EpsFallbackTrigger& GetEpsFallbackTrigger() override;
     UdpKeepAliveSender& GetUdpKeepAliveSender() override;
+    CurrentLocationDiscoveryController& GetCurrentLocationDiscoveryController() override;
     IMtcSession* CreateSession(IN ISession* piSession) override;
     IMtcSession* CreateSession() override;
     IMtcBlockChecker* CreateBlockChecker(IN const ImsList<IMtcBlockRule*>& lstRules) override;
@@ -311,6 +313,7 @@ private:
     UssiController* m_pUssiController;
     EpsFallbackTrigger* m_pEpsFallbackTrigger;
     UdpKeepAliveSender* m_pUdpKeepAliveSender;
+    CurrentLocationDiscoveryController* m_pCurrentLocationDiscoveryController;
 };
 
 #endif

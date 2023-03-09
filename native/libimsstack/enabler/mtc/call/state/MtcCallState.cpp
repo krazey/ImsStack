@@ -36,6 +36,7 @@
 #include "call/state/MtcCallState.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "emergency/CurrentLocationDiscoveryController.h"
 #include "helper/IMtcAosConnector.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MtcSupplementaryService.h"
@@ -316,8 +317,17 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SessionRPRReceived(
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::SessionTransactionReceived(
-        IN ISession* /* piSession */, IN ISipServerConnection* /* piSipServerConnection */)
+        IN ISession* /* piSession */, IN ISipServerConnection* piSipServerConnection)
 {
+    IMS_TRACE_I("SessionTransactionReceived", 0, 0, 0);
+
+    if (CurrentLocationDiscoveryController::IsCurrentLocationDiscoveryInfoReceived(
+            *piSipServerConnection))
+    {
+        m_objContext.GetCurrentLocationDiscoveryController().OnCurrentLocationDiscoveryInfoReceived(
+                *piSipServerConnection);
+    }
+
     return GetStateName();
 }
 
