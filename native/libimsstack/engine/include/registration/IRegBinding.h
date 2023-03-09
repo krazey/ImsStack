@@ -184,7 +184,7 @@ public:
      *
      * @return The list of temporary GRUU.
      */
-    virtual const IMSList<SipAddress*>& GetTemporaryGruus() const = 0;
+    virtual const ImsList<SipAddress*>& GetTemporaryGruus() const = 0;
 
     /**
      * @brief Checks if the UA is located behind a NAT or not.

@@ -67,9 +67,9 @@ Service::Service(IN const AString& strScheme, IN const AString& strAppId,
         m_piRegBinding(IMS_NULL),
         m_pSipProfile(IMS_NULL),
         m_bProvisionedUserId(IMS_FALSE),
-        m_objAuthorizedUserIds(IMSList<ISipHeader*>()),
+        m_objAuthorizedUserIds(ImsList<ISipHeader*>()),
         m_nFeatureTags(ISipConfigV::FEATURE_TAG_DEFAULT),
-        m_objAcceptContacts(IMSList<PreferenceHeader*>()),
+        m_objAcceptContacts(ImsList<PreferenceHeader*>()),
         m_pCallerCapability(IMS_NULL),
         m_bCallerCapabilityChanged(IMS_FALSE),
         m_pMethodMngr(IMS_NULL),
@@ -198,7 +198,7 @@ PUBLIC VIRTUAL IMS_BOOL Service::CreateConfig(IN const AppConfig& objAppConfig)
     {
         IMS_TRACE_D("Service :: IARI (%s)", pServiceConfig->GetIari().ToString().GetStr(), 0, 0);
 
-        const IMSList<ServiceIdentifier>& objIcsis = pServiceConfig->GetIcsis();
+        const ImsList<ServiceIdentifier>& objIcsis = pServiceConfig->GetIcsis();
 
         for (IMS_UINT32 i = 0; i < objIcsis.GetSize(); ++i)
         {
@@ -538,7 +538,7 @@ PUBLIC VIRTUAL ISipClientConnection* Service::CreateConnection(IN ISipDialog* pi
     if (!(SipConfigProxy::IsNoAcceptContactHeaderInBye(GetSlotId(), GetSipProfile()) &&
                 piSipMsg->GetMethod().Equals(SipMethod::BYE)))
     {
-        const IMSList<AString>& objAcceptContactsInDialog =
+        const ImsList<AString>& objAcceptContactsInDialog =
                 CallerPreferenceManager::GetInstance()->GetAcceptContacts(strDialogId);
 
         if (!objAcceptContactsInDialog.IsEmpty())
@@ -1184,7 +1184,7 @@ const SipAddress* Service::GetTemporaryGruu() const
 }
 
 PUBLIC
-const IMSList<SipAddress*>& Service::GetTemporaryGruus() const
+const ImsList<SipAddress*>& Service::GetTemporaryGruus() const
 {
     if (m_piRegBinding == IMS_NULL)
     {
@@ -1228,7 +1228,7 @@ IMS_BOOL Service::IsWithinTrustDomain() const
 }
 
 PUBLIC
-IMS_BOOL Service::UpdateFeatureTags(IN const IMSList<AString>& objFeatureTags,
+IMS_BOOL Service::UpdateFeatureTags(IN const ImsList<AString>& objFeatureTags,
         IN IMS_BOOL bRegRequired, IN IMS_SINT32 nOperation)
 {
     if (objFeatureTags.IsEmpty())
@@ -1311,7 +1311,7 @@ void Service::NotifyError(IN IMS_SINT32 nErrorCode)
 {
     // The subclass MUST implement this method to handle a loss of network,
     // no communication with proxy.
-    const IMSList<Method*>& objMethods = m_pMethodMngr->GetMethods();
+    const ImsList<Method*>& objMethods = m_pMethodMngr->GetMethods();
 
     for (IMS_UINT32 i = 0; i < objMethods.GetSize(); ++i)
     {

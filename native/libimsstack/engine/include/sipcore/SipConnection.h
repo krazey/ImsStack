@@ -46,7 +46,7 @@ public:
     virtual IMS_RESULT AddHeader(IN const AString& strName, IN const AString& strValue);
     inline virtual SipDialog* GetDialog() const { return m_pDialog; }
     virtual AString GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex = 0);
-    virtual IMSList<AString> GetHeaders(IN const AString& strName);
+    virtual ImsList<AString> GetHeaders(IN const AString& strName);
     inline virtual const SipMethod& GetMethod() const { return m_pMessage->GetMethod(); }
     inline virtual const AString& GetReasonPhrase() const { return m_pMessage->GetReasonPhrase(); }
     inline virtual const AString& GetRequestUri() const { return m_pMessage->GetRequestUri(); }

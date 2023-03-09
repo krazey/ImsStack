@@ -92,8 +92,8 @@ protected:
     static IMS_SINT32 CompareHeaderInMessage(IN const ISipHeader* piHeader,
             IN const ISipMessage* piSipMsg, IN IMS_SINT32 nEvaluationRule,
             IN IMS_BOOL bConditionNegated = IMS_FALSE);
-    static IMS_SINT32 CompareSdpInfo(IN const IMSList<AString>& objMLines,
-            IN const IMSList<AString>& objALines, IN const ISipMessage* piSipMsg,
+    static IMS_SINT32 CompareSdpInfo(IN const ImsList<AString>& objMLines,
+            IN const ImsList<AString>& objALines, IN const ISipMessage* piSipMsg,
             IN IMS_SINT32 nEvaluationRule, IN IMS_BOOL bConditionNegated = IMS_FALSE);
     static IMS_SINT32 GetIndexOf(IN const AStringArray& objSdpLines, IN const AString& strToken,
             IN IMS_BOOL bContain = IMS_TRUE);
@@ -137,12 +137,12 @@ private:
     SipMethod m_objMethod;
 
     // SPT : Header field
-    IMSList<ISipHeader*> m_objHeaders;
-    IMSList<ISipHeader*> m_objNegatedHeaders;
+    ImsList<ISipHeader*> m_objHeaders;
+    ImsList<ISipHeader*> m_objNegatedHeaders;
 
     // Additional field : SDP, ...
-    IMSList<AString> m_objSdpMLines;
-    IMSList<AString> m_objSdpALines;
+    ImsList<AString> m_objSdpMLines;
+    ImsList<AString> m_objSdpALines;
 };
 
 #endif

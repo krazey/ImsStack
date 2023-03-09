@@ -41,7 +41,7 @@ private:
     public:
         AString strCompactName;
         AString strName;
-        IMSList<AString> objBodys;
+        ImsList<AString> objBodys;
     };
 
 public:
@@ -61,7 +61,7 @@ public:
     AString GetHeaderBodys(IN const AString& strName) const;
     IMS_SINT32 GetHeaderCount(IN const AString& strName) const;
     const AString& GetHeaderName(IN IMS_SINT32 nPos, IN IMS_BOOL bCompactForm = IMS_FALSE) const;
-    IMSList<AString> GetHeaders(IN const AString& strName) const;
+    ImsList<AString> GetHeaders(IN const AString& strName) const;
     inline IMS_BOOL IsHeaderPresent(IN const AString& strName) const
     {
         return (FindHeader(strName) != IMS_NULL);
@@ -76,7 +76,7 @@ private:
     Header* FindHeader(IN const AString& strName) const;
 
 private:
-    IMSList<Header*> m_objHeaders;
+    ImsList<Header*> m_objHeaders;
 };
 
 #endif

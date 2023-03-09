@@ -87,7 +87,7 @@ public:
      *
      * @return List of header parameter of this contact.
      */
-    virtual const IMSList<SipParameter*>& GetHeaderParameters() const = 0;
+    virtual const ImsList<SipParameter*>& GetHeaderParameters() const = 0;
 
     /**
      * @brief Returns the instance("+sip.instance") header parameter.
@@ -122,7 +122,7 @@ public:
      *
      * @return List of temporary GRUU.
      */
-    virtual const IMSList<SipAddress*>& GetTemporaryGruus() const = 0;
+    virtual const ImsList<SipAddress*>& GetTemporaryGruus() const = 0;
 
     /**
      * @brief Checks if the contact is an active or not.

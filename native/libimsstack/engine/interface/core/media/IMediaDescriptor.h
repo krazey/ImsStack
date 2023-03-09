@@ -87,7 +87,7 @@ public:
      *
      * @return List of all attribute values.
      */
-    virtual IMSList<AString> GetAttributes() const = 0;
+    virtual ImsList<AString> GetAttributes() const = 0;
 
     /**
      * @brief Returns the proposed bandwidth (b=) to be used by the media.
@@ -96,7 +96,7 @@ public:
      *
      * @return List of all bandwidth values.
      */
-    virtual IMSList<AString> GetBandwidthInfo() const = 0;
+    virtual ImsList<AString> GetBandwidthInfo() const = 0;
 
     /**
      * @brief Returns the contents of the media description field (m=) of the current incoming SDP
@@ -156,7 +156,7 @@ public:
      * @param strBandwidthInfos List of bandwidth attributes to be set
      * @return If it succeeds, return IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetBandwidthInfo(IN const IMSList<AString>& strBandwidthInfos) = 0;
+    virtual IMS_RESULT SetBandwidthInfo(IN const ImsList<AString>& strBandwidthInfos) = 0;
 
     /**
      * @brief Sets a title (i=) to the IMedia.
@@ -305,7 +305,7 @@ public:
      * @param strType Name of unknown attribute type
      * @return Attribute value or null if not present.
      */
-    virtual IMSList<AString> GetAttributes(
+    virtual ImsList<AString> GetAttributes(
             IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const = 0;
 
     /**
@@ -364,7 +364,7 @@ public:
      *
      * @return List of SdpMediaFormat object.
      */
-    virtual const IMSList<SdpMediaFormat*>& GetMediaFormats() const = 0;
+    virtual const ImsList<SdpMediaFormat*>& GetMediaFormats() const = 0;
 
     /**
      * @brief Removes an attribute (a=) form the IMedia.

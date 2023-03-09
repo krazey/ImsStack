@@ -32,11 +32,11 @@ RemoteCapabilities::RemoteCapabilities() :
         m_bVideoSupported(IMS_FALSE),
         m_bFramedMediaSupported(IMS_FALSE),
         m_bApplicationSupported(IMS_FALSE),
-        m_objAppSubTypes(IMSList<FeatureSet*>()),
-        m_objEvents(IMSList<FeatureSet*>()),
-        m_objIcsis(IMSList<FeatureSet*>()),
-        m_objIaris(IMSList<FeatureSet*>()),
-        m_objFeatureTags(IMSList<FeatureSet*>())
+        m_objAppSubTypes(ImsList<FeatureSet*>()),
+        m_objEvents(ImsList<FeatureSet*>()),
+        m_objIcsis(ImsList<FeatureSet*>()),
+        m_objIaris(ImsList<FeatureSet*>()),
+        m_objFeatureTags(ImsList<FeatureSet*>())
 {
 }
 
@@ -51,7 +51,7 @@ RemoteCapabilities::~RemoteCapabilities()
 }
 
 PUBLIC
-IMS_BOOL RemoteCapabilities::Create(IN const IMSList<AString>& objCapabilities)
+IMS_BOOL RemoteCapabilities::Create(IN const ImsList<AString>& objCapabilities)
 {
     FeatureSet* pFeatureSet;
     AString strName;
@@ -441,7 +441,7 @@ PRIVATE
 IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
         IN const AppConfig* pAppConfig, IN const AString& strServiceId) const
 {
-    const IMSList<CoreServiceConfig*>& objCoreServiceConfigs = pAppConfig->GetCoreServiceConfigs();
+    const ImsList<CoreServiceConfig*>& objCoreServiceConfigs = pAppConfig->GetCoreServiceConfigs();
 
     if (objCoreServiceConfigs.IsEmpty())
     {
@@ -485,7 +485,7 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
         IN const CoreServiceConfig* pServiceConfig) const
 {
     /// Evaluate the ICSIs
-    const IMSList<ServiceIdentifier>& objLocalIcsis = pServiceConfig->GetIcsis();
+    const ImsList<ServiceIdentifier>& objLocalIcsis = pServiceConfig->GetIcsis();
 
     if (!objLocalIcsis.IsEmpty())
     {
@@ -512,7 +512,7 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
     }
 
     /// Evaluates the feature-tags
-    const IMSList<ServiceIdentifier>& objLocalFeatureTags = pServiceConfig->GetFeatureTags();
+    const ImsList<ServiceIdentifier>& objLocalFeatureTags = pServiceConfig->GetFeatureTags();
 
     if (!objLocalFeatureTags.IsEmpty())
     {
@@ -531,7 +531,7 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
 }
 
 PRIVATE GLOBAL void RemoteCapabilities::RemoveAllFeatureSets(
-        IN_OUT IMSList<FeatureSet*>& objFeatureSets)
+        IN_OUT ImsList<FeatureSet*>& objFeatureSets)
 {
     if (objFeatureSets.IsEmpty())
     {

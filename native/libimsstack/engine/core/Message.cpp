@@ -33,7 +33,7 @@ Message::Message(IN AppConfig* pAppConfig, IN IMS_SINT32 nState) :
         m_pAppConfig(pAppConfig),
         m_nState(nState),
         m_piSipMsg(IMS_NULL),
-        m_objBodyParts(IMSList<MessageBodyPart*>())
+        m_objBodyParts(ImsList<MessageBodyPart*>())
 {
 }
 
@@ -114,7 +114,7 @@ void Message::UpdateSentMessage(IN ISipMessage* piSipMsg)
     }
 
     // Update a message body parts if present (except for SDP message body)
-    IMSList<ISipMessageBodyPart*> objSipBodyParts = m_piSipMsg->GetBodyParts();
+    ImsList<ISipMessageBodyPart*> objSipBodyParts = m_piSipMsg->GetBodyParts();
 
     if (!objSipBodyParts.IsEmpty())
     {
@@ -318,9 +318,9 @@ PRIVATE VIRTUAL IMessageBodyPart* Message::CreateBodyPart()
     return pBodyPart;
 }
 
-PRIVATE VIRTUAL IMSList<IMessageBodyPart*> Message::GetBodyParts() const
+PRIVATE VIRTUAL ImsList<IMessageBodyPart*> Message::GetBodyParts() const
 {
-    IMSList<IMessageBodyPart*> objIBodyParts;
+    ImsList<IMessageBodyPart*> objIBodyParts;
 
     for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
     {
@@ -391,14 +391,14 @@ PRIVATE VIRTUAL IMS_RESULT Message::AddHeader(IN const AString& strName, IN cons
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN const AString& strName) const
+PRIVATE VIRTUAL ImsList<AString> Message::GetHeaders(IN const AString& strName) const
 {
     AString strHName = strName.Trim();
 
     if (strHName.GetLength() == 0)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     ISipHeader* piHeader = SipParsingHelper::CreateHeader(strHName);
@@ -406,7 +406,7 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN const AString& strName) 
     if (piHeader == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     IMS_SINT32 nHType = piHeader->GetType();
@@ -418,7 +418,7 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN const AString& strName) 
         piHeader->Destroy();
 
         Ims::SetLastError(ImsError::INVALID_OPERATION);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     if (!m_pAppConfig->IsHeaderReadable(strHName))
@@ -428,7 +428,7 @@ PRIVATE VIRTUAL IMSList<AString> Message::GetHeaders(IN const AString& strName) 
         piHeader->Destroy();
 
         Ims::SetLastError(ImsError::INVALID_OPERATION);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     piHeader->Destroy();
@@ -446,7 +446,7 @@ IMS_BOOL Message::CreateBodyParts()
         return IMS_TRUE;
     }
 
-    IMSList<ISipMessageBodyPart*> objSipBodyParts = m_piSipMsg->GetBodyParts();
+    ImsList<ISipMessageBodyPart*> objSipBodyParts = m_piSipMsg->GetBodyParts();
 
     if (!objSipBodyParts.IsEmpty())
     {

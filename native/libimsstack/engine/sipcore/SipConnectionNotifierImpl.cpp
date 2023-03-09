@@ -231,7 +231,7 @@ PRIVATE VIRTUAL void SipConnectionNotifierImpl::OnConnectionNotifierError_Notify
         return;
     }
 
-    IMSList<ISipConnectionNotifierErrorListener*> objTempListeners = m_objErrorListeners;
+    ImsList<ISipConnectionNotifierErrorListener*> objTempListeners = m_objErrorListeners;
 
     for (IMS_UINT32 i = 0; i < objTempListeners.GetSize(); ++i)
     {

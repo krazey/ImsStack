@@ -73,17 +73,17 @@ public:
     /**
      * @brief Returns all the SdpAttribute objects.
      */
-    inline const IMSList<SdpAttribute>& GetAttributes() const { return m_objAttributes; }
+    inline const ImsList<SdpAttribute>& GetAttributes() const { return m_objAttributes; }
 
     /**
      * @brief Returns all the SdpAttribute objects which the specified type matches.
      */
-    IMSList<SdpAttribute> GetAttributes(IN IMS_SINT32 nAttribute) const;
+    ImsList<SdpAttribute> GetAttributes(IN IMS_SINT32 nAttribute) const;
 
     /**
      * @brief Returns all the SdpAttribute objects which the specified name matches.
      */
-    IMSList<SdpAttribute> GetAttributes(IN const AString& strAttribute) const;
+    ImsList<SdpAttribute> GetAttributes(IN const AString& strAttribute) const;
 
     /**
      * @brief Returns the SdpBandwidth object which the specified type matches.
@@ -98,7 +98,7 @@ public:
     /**
      * @brief Returns all the SdpBandwidth objects.
      */
-    inline const IMSList<SdpBandwidth>& GetBandwidths() const { return m_objBandwidths; }
+    inline const ImsList<SdpBandwidth>& GetBandwidths() const { return m_objBandwidths; }
 
     /**
      * @brief Returns the direction value of the SDP parameter.
@@ -174,7 +174,7 @@ public:
     /**
      * @brief Sets the bandwidth fields with the list of SdpBandwidth object.
      */
-    void SetBandwidths(IN const IMSList<SdpBandwidth>& objBandwidths);
+    void SetBandwidths(IN const ImsList<SdpBandwidth>& objBandwidths);
 
     /**
      * @brief Sets the direction value.
@@ -300,13 +300,13 @@ private:
     SdpInformation* m_pInformation;
 
     // Bandwidth information lines
-    IMSList<SdpBandwidth> m_objBandwidths;
+    ImsList<SdpBandwidth> m_objBandwidths;
 
     // Encryption key
     SdpEncryptionKey* m_pKey;
 
     // Session or media attribute lines
-    IMSList<SdpAttribute> m_objAttributes;
+    ImsList<SdpAttribute> m_objAttributes;
 };
 
 #endif

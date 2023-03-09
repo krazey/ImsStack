@@ -137,8 +137,8 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
         IN const SdpMediaParameter* pPeerParam, OUT SdpMediaParameter*& pNegotiatedPeerParam,
         OUT SdpMediaParameter*& pProposalParam)
 {
-    IMSList<SdpMediaFormat*> objAcceptedMediaFormats;
-    IMSList<SdpMediaFormat*> objPeerMediaFormats;
+    ImsList<SdpMediaFormat*> objAcceptedMediaFormats;
+    ImsList<SdpMediaFormat*> objPeerMediaFormats;
     IMS_BOOL bAtLeastOneCodecMatched = IMS_FALSE;
 
     // Copy the m-line from the peer view
@@ -203,8 +203,8 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
             }
         }
 
-        const IMSList<SdpMediaFormat*>* pOfferedMediaFormats = IMS_NULL;
-        const IMSList<SdpMediaFormat*>* pAnsweredMediaFormats = IMS_NULL;
+        const ImsList<SdpMediaFormat*>* pOfferedMediaFormats = IMS_NULL;
+        const ImsList<SdpMediaFormat*>* pAnsweredMediaFormats = IMS_NULL;
 
 // MEDIA_FORMAT_PREFERENCE_ORDER_BY_REMOTE_ENDPOINT
 #ifdef __IMS_MEDIA_FORMAT_PREFERENCE_ORDER_BY_REMOTE_ENDPOINT__
@@ -291,7 +291,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                             // then skip the media format
                             if (!IsSameAvCodecPresent(objPeerMediaFormats, pPeerMediaFormat))
                             {
-                                IMSList<SdpMediaFormat*> objTempMediaFormats;
+                                ImsList<SdpMediaFormat*> objTempMediaFormats;
 
                                 // Update the peer media formats
                                 objTempMediaFormats.Append(pPeerMediaFormat);
@@ -308,7 +308,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
 
                     bAtLeastOneCodecMatched = IMS_TRUE;
 
-                    IMSList<SdpMediaFormat*> objTempMediaFormats;
+                    ImsList<SdpMediaFormat*> objTempMediaFormats;
 
                     // Update the peer media formats
                     objTempMediaFormats.Append(pPeerMediaFormat);
@@ -336,7 +336,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                     bAtLeastOneCodecMatched = IMS_TRUE;
                 }
 
-                IMSList<SdpMediaFormat*> objTempMediaFormats;
+                ImsList<SdpMediaFormat*> objTempMediaFormats;
 
                 // Update the peer media formats
                 objTempMediaFormats.Append(pOfferedMediaFormat);
@@ -377,7 +377,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                     bAtLeastOneCodecMatched = IMS_TRUE;
                 }
 
-                IMSList<SdpMediaFormat*> objTempMediaFormats;
+                ImsList<SdpMediaFormat*> objTempMediaFormats;
 
                 // Update the peer media formats
                 objTempMediaFormats.Append(pPeerMediaFormat);
@@ -511,11 +511,11 @@ IMS_BOOL SdpMediaParameter::Create(IN const SdpMediaDescription& objMediaDescrip
 #if defined(__IMS_SDP_PRECONDITION__)
     {
         // QoS attributes (a=curr:xxxx, a=des:xxxx, a=conf:xxxx)
-        IMSList<SdpAttribute> objAttrs = GetAttributes(SdpAttribute::CURR);
+        ImsList<SdpAttribute> objAttrs = GetAttributes(SdpAttribute::CURR);
 
         if (!objAttrs.IsEmpty())
         {
-            IMSList<SdpAttribute> objQoSAttrs;
+            ImsList<SdpAttribute> objQoSAttrs;
 
             m_pCurrentStatus = CreatePrecondition(objAttrs, objQoSAttrs);
 
@@ -534,7 +534,7 @@ IMS_BOOL SdpMediaParameter::Create(IN const SdpMediaDescription& objMediaDescrip
 
         if (!objAttrs.IsEmpty())
         {
-            IMSList<SdpAttribute> objQoSAttrs;
+            ImsList<SdpAttribute> objQoSAttrs;
 
             m_pDesiredStatus = CreatePrecondition(objAttrs, objQoSAttrs);
 
@@ -553,7 +553,7 @@ IMS_BOOL SdpMediaParameter::Create(IN const SdpMediaDescription& objMediaDescrip
 
         if (!objAttrs.IsEmpty())
         {
-            IMSList<SdpAttribute> objQoSAttrs;
+            ImsList<SdpAttribute> objQoSAttrs;
 
             m_pConfirmedStatus = CreatePrecondition(objAttrs, objQoSAttrs);
 
@@ -868,7 +868,7 @@ AString SdpMediaParameter::ToSdp() const
 
     if (m_abLineContains[Sdp::TYPE_B])
     {
-        const IMSList<SdpBandwidth>& objBLines = GetBandwidths();
+        const ImsList<SdpBandwidth>& objBLines = GetBandwidths();
 
         for (IMS_UINT32 i = 0; i < objBLines.GetSize(); ++i)
         {
@@ -901,7 +901,7 @@ AString SdpMediaParameter::ToSdp() const
 
         if (pMediaFormat->HasAttribute())
         {
-            const IMSList<SdpMediaFormatParameter*>& objExtraParameters =
+            const ImsList<SdpMediaFormatParameter*>& objExtraParameters =
                     pMediaFormat->GetExtraParameters();
 
             for (IMS_UINT32 j = 0; j < objExtraParameters.GetSize(); ++j)
@@ -1241,7 +1241,7 @@ PRIVATE VIRTUAL IMS_BOOL SdpMediaParameter::IsDirectionAttributeRequired() const
 }
 
 PRIVATE GLOBAL void SdpMediaParameter::ClearMediaFormat(
-        IN_OUT IMSList<SdpMediaFormat*>& objMediaFormats)
+        IN_OUT ImsList<SdpMediaFormat*>& objMediaFormats)
 {
     for (IMS_UINT32 i = 0; i < objMediaFormats.GetSize(); ++i)
     {
@@ -1254,8 +1254,8 @@ PRIVATE GLOBAL void SdpMediaParameter::ClearMediaFormat(
 }
 
 PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyMediaFormat(
-        IN const IMSList<SdpMediaFormat*>& objInFormats,
-        OUT IMSList<SdpMediaFormat*>& objOutFormats)
+        IN const ImsList<SdpMediaFormat*>& objInFormats,
+        OUT ImsList<SdpMediaFormat*>& objOutFormats)
 {
     if (objInFormats.IsEmpty())
     {
@@ -1305,7 +1305,7 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyMediaFormat(
 }
 
 PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
-        IN const SdpMediaDescription& objMediaDesc, OUT IMSList<SdpMediaFormat*>& objOutFormats)
+        IN const SdpMediaDescription& objMediaDesc, OUT ImsList<SdpMediaFormat*>& objOutFormats)
 {
     const SdpMedia& objMedia = objMediaDesc.GetMedia();
     const AStringArray& objFormats = objMedia.GetFormats();
@@ -1316,18 +1316,18 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
             (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP) ||
             (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF))
     {
-        IMSList<SdpAttribute> objRtpmaps = objMediaDesc.GetAttributes(SdpAttribute::RTPMAP);
-        IMSList<SdpAttribute> objFmtps = objMediaDesc.GetAttributes(SdpAttribute::FMTP);
+        ImsList<SdpAttribute> objRtpmaps = objMediaDesc.GetAttributes(SdpAttribute::RTPMAP);
+        ImsList<SdpAttribute> objFmtps = objMediaDesc.GetAttributes(SdpAttribute::FMTP);
 
         // Additional payload specific parameters - framesize / rtcp-fb / ...
-        IMSList<SdpAttribute> objRtcpFbs = objMediaDesc.GetAttributes(SdpAttribute::RTCP_FB);
+        ImsList<SdpAttribute> objRtcpFbs = objMediaDesc.GetAttributes(SdpAttribute::RTCP_FB);
 
         // Convert the payload type to an integer value
-        IMSList<IMS_SINT32> objPts;
-        IMSList<IMS_SINT32> objPts4Rtpmap;
-        IMSList<IMS_SINT32> objPts4Fmtp;
+        ImsList<IMS_SINT32> objPts;
+        ImsList<IMS_SINT32> objPts4Rtpmap;
+        ImsList<IMS_SINT32> objPts4Fmtp;
         // rtcp-fb attribute
-        IMSList<IMS_SINT32> objPts4RtcpFb;
+        ImsList<IMS_SINT32> objPts4RtcpFb;
 
         for (IMS_SINT32 i = 0; i < objFormats.GetCount(); ++i)
         {
@@ -1337,8 +1337,8 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
         IMS_UINT32 nRtpmap;
         IMS_UINT32 nFmtp;
         // rtcp-fb attribute
-        IMSList<IMS_UINT32> objRtcpFbIndices;
-        IMSList<IMS_UINT32> objWildcardRtcpFbIndices;
+        ImsList<IMS_UINT32> objRtcpFbIndices;
+        ImsList<IMS_UINT32> objWildcardRtcpFbIndices;
 
         for (nRtpmap = 0; nRtpmap < objRtpmaps.GetSize(); ++nRtpmap)
         {
@@ -1597,7 +1597,7 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
 }
 
 PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::IsSameAvCodecPresent(
-        IN const IMSList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat)
+        IN const ImsList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat)
 {
     if (pMediaFormat == IMS_NULL)
     {
@@ -1649,7 +1649,7 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::IsSameAvCodecPresent(
 }
 
 PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::IsSameNonAvCodecPresent(
-        IN const IMSList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat)
+        IN const ImsList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat)
 {
     if (pMediaFormat == IMS_NULL)
     {
@@ -1793,7 +1793,7 @@ PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyPrecondition(
 }
 
 PRIVATE GLOBAL SdpPrecondition* SdpMediaParameter::CreatePrecondition(
-        IN const IMSList<SdpAttribute>& objAttributes, OUT IMSList<SdpAttribute>& objQosAttrs)
+        IN const ImsList<SdpAttribute>& objAttributes, OUT ImsList<SdpAttribute>& objQosAttrs)
 {
     if (objAttributes.IsEmpty())
     {

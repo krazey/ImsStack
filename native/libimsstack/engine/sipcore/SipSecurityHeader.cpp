@@ -63,8 +63,8 @@ SipSecurityHeader::SipSecurityHeader(IN IMS_SINT32 nMechanism /* = MECHANISM_IPS
         m_nSpiS(0),
         m_nPortC(0),
         m_nPortS(0),
-        m_objUnknownParamValues(IMSMap<IMS_SINT32, AString>()),
-        m_objExtensions(IMSMap<AString, AString>()),
+        m_objUnknownParamValues(ImsMap<IMS_SINT32, AString>()),
+        m_objExtensions(ImsMap<AString, AString>()),
         m_nMechParams(0),
         m_bSpi3gppCompliant(IMS_TRUE)
 {
@@ -459,7 +459,7 @@ PUBLIC GLOBAL SipSecurityHeader* SipSecurityHeader::FromSipHeader(IN ISipHeader*
     pSecurityHeader->m_nMode = MODE_UNSPECIFIED;
     pSecurityHeader->m_nEncryptionAlgorithm = EALG_UNSPECIFIED;
 
-    const IMSList<SipParameter*>& objParameters = piHeader->GetParameters();
+    const ImsList<SipParameter*>& objParameters = piHeader->GetParameters();
 
     for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
     {

@@ -38,10 +38,10 @@ PUBLIC GLOBAL IRegBinding* ServiceResolver::GetRegBinding(
     return IMS_NULL;
 }
 
-PUBLIC GLOBAL IMSList<IRegBinding*> ServiceResolver::GetRegBindings(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ImsList<IRegBinding*> ServiceResolver::GetRegBindings(IN IMS_SINT32 nSlotId)
 {
-    IMSList<Service*> objServices = ServiceManager::GetInstance()->GetServices(nSlotId);
-    IMSList<IRegBinding*> objRegBindings;
+    ImsList<Service*> objServices = ServiceManager::GetInstance()->GetServices(nSlotId);
+    ImsList<IRegBinding*> objRegBindings;
 
     for (IMS_UINT32 i = 0; i < objServices.GetSize(); ++i)
     {

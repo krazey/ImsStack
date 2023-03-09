@@ -279,9 +279,9 @@ private:
     static const IMS_CHAR STR_URI[];
     static const IMS_CHAR STR_USERNAME[];
 
-    IMSList<Credential> m_objCredentials;
-    IMSList<SipGenericChallenge*> m_objChallenges;
-    IMSList<SipGenericResponse*> m_objResponses;
+    ImsList<Credential> m_objCredentials;
+    ImsList<SipGenericChallenge*> m_objChallenges;
+    ImsList<SipGenericResponse*> m_objResponses;
 };
 
 PRIVATE GLOBAL const IMS_CHAR SipAuHelperPrivate::STR_ALGORITHM[] = "algorithm";

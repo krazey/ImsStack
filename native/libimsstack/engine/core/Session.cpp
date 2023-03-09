@@ -89,7 +89,7 @@ Session::Session(IN Service* pService) :
         m_piAckPackage(IMS_NULL),
         m_strSessionIdForCallControl(AString::ConstNull()),
         m_piSccBye(IMS_NULL),
-        m_objPreviousCallerPreference(IMSList<AString>()),
+        m_objPreviousCallerPreference(ImsList<AString>()),
         m_pForkedSessions(IMS_NULL),
         m_pVirtualEarlySession(IMS_NULL),
         m_piReasonHeaderSetter(IMS_NULL)
@@ -748,7 +748,7 @@ IMS_SINT32 Session::GetTerminationReason() const
 }
 
 PUBLIC
-const IMSList<Media*>& Session::GetMedia() const
+const ImsList<Media*>& Session::GetMedia() const
 {
     if (GetState() == STATE_TERMINATED)
     {
@@ -807,7 +807,7 @@ IMS_BOOL Session::IsFinalResponseReceivedForInitialInviteRequest() const
         return IsInviteFinalResponseReceived(IMessage::SESSION_START);
     }
 
-    const IMSList<Method*>& objMethods = m_pForkedSessions->GetMethods();
+    const ImsList<Method*>& objMethods = m_pForkedSessions->GetMethods();
 
     if (objMethods.IsEmpty())
     {
@@ -1549,7 +1549,7 @@ IMS_RESULT Session::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
 }
 
 PUBLIC
-IMS_RESULT Session::SetCallerPreference(IN const IMSList<AString>& objCallerPreference)
+IMS_RESULT Session::SetCallerPreference(IN const ImsList<AString>& objCallerPreference)
 {
     // CALLER_PREFERENCE_MANAGER
     m_objPreviousCallerPreference.Clear();
@@ -3907,7 +3907,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
         if (IsConfigurationSet(CONFIG_NOTIFY_100_TRYING_RESPONSE_RECEIVED))
         {
             // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-            IMSList<Message*> objResponses;
+            ImsList<Message*> objResponses;
 
             if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
             {
@@ -3957,7 +3957,7 @@ PROTECTED VIRTUAL IMS_RESULT Session::HandleProvisionalResponse(IN ISipClientCon
     }
 
     // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-    IMSList<Message*> objResponses;
+    ImsList<Message*> objResponses;
 
     if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
     {
@@ -4576,7 +4576,7 @@ IMS_SINT32 Session::HandleSdpOfferAnswer(IN ISipMessage* piSipMsg)
 
             if (pSessionParam != IMS_NULL)
             {
-                const IMSList<SdpMediaParameter*>& objMediaParams =
+                const ImsList<SdpMediaParameter*>& objMediaParams =
                         pSessionParam->GetMediaParameters();
 
                 for (IMS_UINT32 i = 0; i < objMediaParams.GetSize(); i++)
@@ -6538,7 +6538,7 @@ IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT
     if (pMessage != IMS_NULL)
     {
         // Sets Require header fields from the previous INVITE request
-        IMSList<AString> objRequires = pMessage->GetMessage()->GetHeaders(ISipHeader::REQUIRE);
+        ImsList<AString> objRequires = pMessage->GetMessage()->GetHeaders(ISipHeader::REQUIRE);
 
         for (IMS_UINT32 i = 0; i < objRequires.GetSize(); ++i)
         {
@@ -6546,7 +6546,7 @@ IMS_RESULT Session::SendRequestToAck(IN ISipClientConnection* piScc, IN IMS_SINT
         }
 
         // Sets Proxy-Require header fields from the previous INVITE request
-        IMSList<AString> objProxyRequires = pMessage->GetMessage()->GetHeaders(
+        ImsList<AString> objProxyRequires = pMessage->GetMessage()->GetHeaders(
                 ISipHeader::UNKNOWN, SipHeaderName::PROXY_REQUIRE);
 
         for (IMS_UINT32 i = 0; i < objProxyRequires.GetSize(); ++i)
@@ -6896,7 +6896,7 @@ IMS_RESULT Session::SendRequestToInviteOn422Received()
 
     if (piHeader != IMS_NULL)
     {
-        IMSList<AString> objTokens = piHeader->GetValue().Split(' ');
+        ImsList<AString> objTokens = piHeader->GetValue().Split(' ');
 
         if (!objTokens.IsEmpty())
         {
@@ -7390,7 +7390,7 @@ void Session::TerminateForkedSessionsOnNegotiating()
         return;
     }
 
-    const IMSList<Method*>& objMethods = m_pForkedSessions->GetMethods();
+    const ImsList<Method*>& objMethods = m_pForkedSessions->GetMethods();
 
     if (objMethods.IsEmpty())
     {
@@ -7455,7 +7455,7 @@ IMS_BOOL Session::CreateMediaFromSdp()
     {
         // Iterate over all offered media parameters and update and create a media object.
         IMS_UINT32 nMediaIndex = 0;
-        IMSList<SdpMediaParameter*> objGroupMediaParams;
+        ImsList<SdpMediaParameter*> objGroupMediaParams;
 
         for (IMS_SINT32 i = 0; i < nMediaCount; ++i)
         {
@@ -7488,7 +7488,7 @@ IMS_BOOL Session::CreateMediaFromSdp()
 
                 if (nMediaIndex >= m_objMedias.GetSize())
                 {
-                    IMSList<IMS_SINT32> objMids;
+                    ImsList<IMS_SINT32> objMids;
 
                     for (IMS_UINT32 j = 0; j < objGroupMediaParams.GetSize(); ++j)
                     {
@@ -7591,7 +7591,7 @@ IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
     {
         // Iterate over all offered media parameters and update and create a media object.
         IMS_UINT32 nMediaIndex = 0;
-        IMSList<SdpMediaParameter*> objGroupMediaParams;
+        ImsList<SdpMediaParameter*> objGroupMediaParams;
 
         for (IMS_SINT32 i = 0; i < nMediaCount; ++i)
         {
@@ -7627,7 +7627,7 @@ IMS_BOOL Session::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 
                 if (nMediaIndex >= m_objMedias.GetSize())
                 {
-                    IMSList<IMS_SINT32> objMids;
+                    ImsList<IMS_SINT32> objMids;
 
                     for (IMS_UINT32 j = 0; j < objGroupMediaParams.GetSize(); ++j)
                     {

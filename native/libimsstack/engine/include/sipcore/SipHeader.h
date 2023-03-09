@@ -55,8 +55,8 @@ public:
     AString GetHeaderValue() const override;
     inline const AString& GetName() const override { return m_strName; }
     const SipParameter* GetParameter(IN const AString& strName) const override;
-    IMS_RESULT GetParameterNames(OUT IMSList<AString>& objParamNames) const override;
-    inline const IMSList<SipParameter*>& GetParameters() const override { return m_objParams; }
+    IMS_RESULT GetParameterNames(OUT ImsList<AString>& objParamNames) const override;
+    inline const ImsList<SipParameter*>& GetParameters() const override { return m_objParams; }
     inline IMS_SINT32 GetType() const override { return m_nType; }
     inline const AString& GetValue() const override { return m_strBody; }
     IMS_SINT32 GetValueInt() const override;
@@ -90,7 +90,7 @@ private:
     AString m_strBody;
     // This field is not NULL if the header type can have an URI format body
     SipAddress* m_pAddress;
-    IMSList<SipParameter*> m_objParams;
+    ImsList<SipParameter*> m_objParams;
 };
 
 #endif

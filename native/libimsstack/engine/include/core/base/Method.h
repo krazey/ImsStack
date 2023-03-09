@@ -95,7 +95,7 @@ protected:
     void DestroyDialog();
     inline const SipAddress* GetUserAor() const { return m_pUserAor; }
     inline const SipAddress* GetRemoteUserAor() const { return m_pRemoteUserAor; }
-    inline const IMSList<AString>& GetRemoteUserIds() const { return m_objRemoteUserIds; }
+    inline const ImsList<AString>& GetRemoteUserIds() const { return m_objRemoteUserIds; }
     IMS_BOOL HandleAllSipResponse(IN ISipClientConnection* piScc);
     inline IMS_BOOL IsMobileOriginated() const { return m_bMobileOriginated; }
 
@@ -154,7 +154,7 @@ private:
     // Logical identity of the recipient of the request; To header field in SIP message
     SipAddress* m_pRemoteUserAor;
     // Remote asserted user identities; from P-Asserted-Identity header in SIP message
-    IMSList<AString> m_objRemoteUserIds;
+    ImsList<AString> m_objRemoteUserIds;
     // Pointer to ISipDialog object
     ISipDialog* m_piDialog;
     // If the authentication is failed for the consecutive three times,
@@ -164,7 +164,7 @@ private:
     // when SIP digest authentication is used
     ISipGenericChallenge* m_piAuthChallenge;
     // Authentication challenge counts
-    IMSMap<IMS_SINT32, IMS_SINT32> m_objAuthChallengeMap;
+    ImsMap<IMS_SINT32, IMS_SINT32> m_objAuthChallengeMap;
     // It gives a chance to modify the message before sending the SIP message to the network.
     // The application can control the SIP header & message body part using this.
     IMessageMediator* m_piMessageMediator;

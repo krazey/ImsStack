@@ -58,14 +58,14 @@ public:
     MOCK_METHOD(const SipParameter*, GetInstanceParameter, (), (const, override));
     MOCK_METHOD(const SipAddress*, GetPublicGruu, (), (const, override));
     MOCK_METHOD(const SipAddress*, GetTemporaryGruu, (), (const, override));
-    MOCK_METHOD(const IMSList<SipAddress*>&, GetTemporaryGruus, (), (const, override));
+    MOCK_METHOD(const ImsList<SipAddress*>&, GetTemporaryGruus, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsBehindNat, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsImsConnected, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsWithinTrustDomain, (), (const, override));
     MOCK_METHOD(IMS_BOOL, AddFeatureTags,
-            (IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired), (override));
+            (IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired), (override));
     MOCK_METHOD(IMS_BOOL, RemoveFeatureTags,
-            (IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired), (override));
+            (IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired), (override));
     MOCK_METHOD(void, SetSipProfile, (IN SipProfile * pProfile), (override));
 
     // ICoreService

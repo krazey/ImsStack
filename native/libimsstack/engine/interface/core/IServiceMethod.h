@@ -138,7 +138,7 @@ public:
      *                       #IMessage#SESSION_STALE_UPDATE
      * @return List of pointer to IMessage that has the previous response messages.
      */
-    virtual IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const = 0;
+    virtual ImsList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const = 0;
 
     /**
      * @brief Returns the remote user identity of this IServiceMethod.
@@ -151,7 +151,7 @@ public:
      *
      * @return List of trusted user identity; P-Asserted-Identity header field.
      */
-    virtual IMSList<AString> GetRemoteUserId() const = 0;
+    virtual ImsList<AString> GetRemoteUserId() const = 0;
 };
 
 #endif

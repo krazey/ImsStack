@@ -87,7 +87,7 @@ public:
     /**
      * @brief Returns all the additional payload specific parameters for this media format.
      */
-    inline const IMSList<SdpMediaFormatParameter*>& GetExtraParameters() const
+    inline const ImsList<SdpMediaFormatParameter*>& GetExtraParameters() const
     {
         return m_objExtraParameters;
     }
@@ -108,7 +108,7 @@ private:
     AString m_strValue;
 
     // Additional payload specific parameters
-    IMSList<SdpMediaFormatParameter*> m_objExtraParameters;
+    ImsList<SdpMediaFormatParameter*> m_objExtraParameters;
 };
 
 #endif

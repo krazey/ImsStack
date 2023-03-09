@@ -288,7 +288,7 @@ PUBLIC VIRTUAL AString SdpAvCodec::ToSdp() const
     }
 
     // Extra parameters : rtcp-fb / framesize
-    const IMSList<SdpMediaFormatParameter*>& objExtraParameters = GetExtraParameters();
+    const ImsList<SdpMediaFormatParameter*>& objExtraParameters = GetExtraParameters();
 
     for (IMS_UINT32 i = 0; i < objExtraParameters.GetSize(); ++i)
     {
@@ -339,7 +339,7 @@ PUBLIC GLOBAL IMS_BOOL SdpAvCodec::GetDefaultRtpmap(IN IMS_SINT32 nType, IN_OUT 
 
 PUBLIC GLOBAL IMS_SINT32 SdpAvCodec::GetAmrOperationMode(IN const AString& strFmtp)
 {
-    IMSList<AString> objTokens = strFmtp.Split(TextParser::CHAR_SEMICOLON);
+    ImsList<AString> objTokens = strFmtp.Split(TextParser::CHAR_SEMICOLON);
 
     if (objTokens.IsEmpty())
     {

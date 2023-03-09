@@ -23,12 +23,12 @@ class MockIMediaDescriptor : public IMediaDescriptor
 {
 public:
     MOCK_METHOD(IMS_RESULT, AddAttribute, (IN const AString& strAttribute), (override));
-    MOCK_METHOD(IMSList<AString>, GetAttributes, (), (const, override));
-    MOCK_METHOD(IMSList<AString>, GetBandwidthInfo, (), (const, override));
+    MOCK_METHOD(ImsList<AString>, GetAttributes, (), (const, override));
+    MOCK_METHOD(ImsList<AString>, GetBandwidthInfo, (), (const, override));
     MOCK_METHOD(AString, GetMediaDescription, (), (const, override));
     MOCK_METHOD(AString, GetMediaTitle, (), (const, override));
     MOCK_METHOD(IMS_RESULT, RemoveAttribute, (IN const AString& strAttribute), (override));
-    MOCK_METHOD(IMS_RESULT, SetBandwidthInfo, (IN const IMSList<AString>& strBandwidthInfos),
+    MOCK_METHOD(IMS_RESULT, SetBandwidthInfo, (IN const ImsList<AString>& strBandwidthInfos),
             (override));
     MOCK_METHOD(IMS_RESULT, SetMediaTitle, (IN const AString& strTitle), (override));
     MOCK_METHOD(IMS_RESULT, AddAttribute,
@@ -40,7 +40,7 @@ public:
             (IN IMS_SINT32 nType, IN IMS_SINT32 nBandwidth, IN const AString& strType), (override));
     MOCK_METHOD(const AString&, GetAttribute, (IN IMS_SINT32 nType, IN const AString& strType),
             (const, override));
-    MOCK_METHOD(IMSList<AString>, GetAttributes, (IN IMS_SINT32 nType, IN const AString& strType),
+    MOCK_METHOD(ImsList<AString>, GetAttributes, (IN IMS_SINT32 nType, IN const AString& strType),
             (const, override));
     MOCK_METHOD(IMS_SINT32, GetAttributeInt, (IN IMS_SINT32 nType, IN const AString& strType),
             (const, override));
@@ -48,7 +48,7 @@ public:
             (const, override));
     MOCK_METHOD(IMS_SINT32, GetDirection, (), (const, override));
     MOCK_METHOD(const SdpMedia*, GetMediaDescriptionEx, (), (const, override));
-    MOCK_METHOD(const IMSList<SdpMediaFormat*>&, GetMediaFormats, (), (const, override));
+    MOCK_METHOD(const ImsList<SdpMediaFormat*>&, GetMediaFormats, (), (const, override));
     MOCK_METHOD(IMS_RESULT, RemoveAttribute, (IN const SdpAttribute& objAttribute), (override));
     MOCK_METHOD(IMS_RESULT, RemoveAttribute,
             (IN IMS_SINT32 nType, IN const AString& strAttrValue, IN const AString& strType),

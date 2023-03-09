@@ -62,7 +62,7 @@ public:
     /**
      * @brief Returns the list of SdpConnection object from the media-level parameter.
      */
-    inline const IMSList<SdpConnection>& GetConnections() const { return m_objConnections; }
+    inline const ImsList<SdpConnection>& GetConnections() const { return m_objConnections; }
 
     /**
      * @brief Returns the SdpMedia object from the media-level parameter.
@@ -82,7 +82,7 @@ public:
     /**
      * @brief Returns all the media formats which the media-level parameter has.
      */
-    inline const IMSList<SdpMediaFormat*>& GetMediaFormats() const { return m_objMediaFormats; }
+    inline const ImsList<SdpMediaFormat*>& GetMediaFormats() const { return m_objMediaFormats; }
 
     /**
      * @brief Returns the media identifier for this media-level parameter.
@@ -187,33 +187,33 @@ private:
     /**
      * @brief Clears the media formats from the list of media format.
      */
-    static void ClearMediaFormat(IN_OUT IMSList<SdpMediaFormat*>& objMediaFormats);
+    static void ClearMediaFormat(IN_OUT ImsList<SdpMediaFormat*>& objMediaFormats);
 
     /**
      * @brief Copies all the media formats.
      */
-    static IMS_BOOL CopyMediaFormat(IN const IMSList<SdpMediaFormat*>& objInFormats,
-            OUT IMSList<SdpMediaFormat*>& objOutFormats);
+    static IMS_BOOL CopyMediaFormat(IN const ImsList<SdpMediaFormat*>& objInFormats,
+            OUT ImsList<SdpMediaFormat*>& objOutFormats);
 
     /**
      * @brief Extracts the media format from the SDP media description.
      */
     static IMS_BOOL ExtractMediaFormat(IN const SdpMediaDescription& objMediaDesc,
-            OUT IMSList<SdpMediaFormat*>& objOutFormats);
+            OUT ImsList<SdpMediaFormat*>& objOutFormats);
 
     /**
      * @brief Checks if the same AVCodec is present or not.
      *        It will just check the payload type for each media format.
      */
     static IMS_BOOL IsSameAvCodecPresent(
-            IN const IMSList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat);
+            IN const ImsList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat);
 
     /**
      * @brief Checks if the same non-AVCodec is present or not.
      *        It will just check the payload type for each media format.
      */
     static IMS_BOOL IsSameNonAvCodecPresent(
-            IN const IMSList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat);
+            IN const ImsList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat);
 
     /**
      * @brief Clears the 'qos' precondition from the SDP media parameter.
@@ -230,7 +230,7 @@ private:
      * @brief Creates the 'qos' precondition from the SDP attributes.
      */
     static SdpPrecondition* CreatePrecondition(
-            IN const IMSList<SdpAttribute>& objAttributes, OUT IMSList<SdpAttribute>& objQosAttrs);
+            IN const ImsList<SdpAttribute>& objAttributes, OUT ImsList<SdpAttribute>& objQosAttrs);
 
 #if defined(__SDP_CORRECT_FMTP_FOR_DUPLICATE_PAYLOAD_TYPES__)
     // 4 workaround solution for multiple fmtp
@@ -257,14 +257,14 @@ private:
     SdpMedia m_objMedia;
 
     // c-line (media connection information)
-    IMSList<SdpConnection> m_objConnections;
-    IMSList<SdpConnection> m_objPrevConnections;
+    ImsList<SdpConnection> m_objConnections;
+    ImsList<SdpConnection> m_objPrevConnections;
 
     // a-line (media attributes)
 
     // Codecs (in case of RTP/AVP or RTP/SAVP) & format-specific parameters
     // a=rtpmap:xxxx , a=fmtp:xxxx
-    IMSList<SdpMediaFormat*> m_objMediaFormats;
+    ImsList<SdpMediaFormat*> m_objMediaFormats;
 
     // Attribute flags
     IMS_BOOL m_abAttributeContains[ATTR_MAX];

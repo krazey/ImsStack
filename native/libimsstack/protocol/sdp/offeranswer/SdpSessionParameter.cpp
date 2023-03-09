@@ -292,7 +292,7 @@ AString SdpSessionParameter::ToSdp() const
 
     if (m_abLineContains[Sdp::TYPE_B])
     {
-        const IMSList<SdpBandwidth>& objBLines = GetBandwidths();
+        const ImsList<SdpBandwidth>& objBLines = GetBandwidths();
 
         for (IMS_UINT32 i = 0; i < objBLines.GetSize(); ++i)
         {

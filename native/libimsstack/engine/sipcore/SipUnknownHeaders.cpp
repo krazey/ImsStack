@@ -334,13 +334,13 @@ const AString& SipUnknownHeaders::GetHeaderName(
 }
 
 PUBLIC
-IMSList<AString> SipUnknownHeaders::GetHeaders(IN const AString& strName) const
+ImsList<AString> SipUnknownHeaders::GetHeaders(IN const AString& strName) const
 {
     Header* pHeader = FindHeader(strName);
 
     if (pHeader == IMS_NULL)
     {
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     return pHeader->objBodys;

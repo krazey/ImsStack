@@ -31,12 +31,12 @@ public:
     MethodManager& operator=(IN const MethodManager&) = delete;
 
 public:
-    inline const IMSList<Method*>& GetMethods() const { return m_objMethods; }
+    inline const ImsList<Method*>& GetMethods() const { return m_objMethods; }
     IMS_BOOL AddMethod(IN Method* pMethod);
     void RemoveMethod(IN Method* pMethod);
 
 private:
-    IMSList<Method*> m_objMethods;
+    ImsList<Method*> m_objMethods;
 };
 
 #endif

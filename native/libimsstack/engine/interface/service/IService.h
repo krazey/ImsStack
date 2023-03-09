@@ -207,7 +207,7 @@ public:
      * @return List of temporary GRUU.
      * @note IMS EXTENSION METHOD
      */
-    virtual const IMSList<SipAddress*>& GetTemporaryGruus() const = 0;
+    virtual const ImsList<SipAddress*>& GetTemporaryGruus() const = 0;
 
     /**
      * @brief Checks if the UA is located behind a NAT or not.
@@ -248,7 +248,7 @@ public:
      * @note IMS EXTENSION METHOD
      */
     virtual IMS_BOOL AddFeatureTags(
-            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
+            IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
 
     /**
      * @brief Removes the specified feature tags from this service.
@@ -262,7 +262,7 @@ public:
      * @note IMS EXTENSION METHOD
      */
     virtual IMS_BOOL RemoveFeatureTags(
-            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
+            IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
 
     /**
      * @brief Sets the SIP profile for specific configuration of SIP connections

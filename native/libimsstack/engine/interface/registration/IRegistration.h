@@ -136,7 +136,7 @@ public:
      *
      * @return List of pointer to IRegContact.
      */
-    virtual IMSList<IRegContact*> GetAllContacts() const = 0;
+    virtual ImsList<IRegContact*> GetAllContacts() const = 0;
 
     /**
      * @brief Returns the Contact which are matched with IP & Port.

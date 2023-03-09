@@ -105,7 +105,7 @@ public:
      * @param strName Name of the header, either full or compact form
      * @return List of header field value(s).
      */
-    virtual IMSList<AString> GetHeaders(IN const AString& strName) = 0;
+    virtual ImsList<AString> GetHeaders(IN const AString& strName) = 0;
 
     /**
      * @brief Gets the SIP method.

@@ -36,7 +36,7 @@ public:
     void DetachService(IN Service* pService);
     Service* GetService(IN IMS_SINT32 nSlotId, IN const AString& strAppId,
             IN const AString& strServiceId) const;
-    void GetServices(IN IMS_SINT32 nSlotId, OUT IMSList<Service*>& objServicesOnSlot) const;
+    void GetServices(IN IMS_SINT32 nSlotId, OUT ImsList<Service*>& objServicesOnSlot) const;
 
 private:
     // EngineActivity class
@@ -46,7 +46,7 @@ private:
     friend class ServiceManager;
 
     IMutex* m_piLock;
-    IMSList<Service*> m_objServices;
+    ImsList<Service*> m_objServices;
 };
 
 PUBLIC
@@ -130,7 +130,7 @@ Service* ServiceManagerPrivate::GetService(
 
 PUBLIC
 void ServiceManagerPrivate::GetServices(
-        IN IMS_SINT32 nSlotId, OUT IMSList<Service*>& objServicesOnSlot) const
+        IN IMS_SINT32 nSlotId, OUT ImsList<Service*>& objServicesOnSlot) const
 {
     LockGuard objLock(m_piLock);
 
@@ -184,15 +184,15 @@ Service* ServiceManager::GetService(
 }
 
 PUBLIC
-const IMSList<Service*>& ServiceManager::GetServices() const
+const ImsList<Service*>& ServiceManager::GetServices() const
 {
     return m_pServiceMngrPrivate->m_objServices;
 }
 
 PUBLIC
-IMSList<Service*> ServiceManager::GetServices(IN IMS_SINT32 nSlotId) const
+ImsList<Service*> ServiceManager::GetServices(IN IMS_SINT32 nSlotId) const
 {
-    IMSList<Service*> objServices;
+    ImsList<Service*> objServices;
 
     m_pServiceMngrPrivate->GetServices(nSlotId, objServices);
 

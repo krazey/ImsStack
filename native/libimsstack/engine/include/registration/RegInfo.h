@@ -35,7 +35,7 @@ public:
     // IRegInfo interface
     IRegInfoRegistration* GetRegistration(IN const AString& strAor) const override;
     IRegInfoRegistration* GetRegistration(IN const SipAddress& objAor) const override;
-    IMSList<IRegInfoRegistration*> GetRegistrations() const override;
+    ImsList<IRegInfoRegistration*> GetRegistrations() const override;
 
     void AddListener(IN IRegInfoListener* piListener);
     void RemoveListener(IN const IRegInfoListener* piListener);
@@ -58,8 +58,8 @@ private:
 
     IMS_BOOL m_bIsCreated;
     IMS_UINT32 m_nVersion;
-    IMSList<IRegInfoListener*> m_objListeners;
-    IMSList<RegInfoRegistration*> m_objRegistrations;
+    ImsList<IRegInfoListener*> m_objListeners;
+    ImsList<RegInfoRegistration*> m_objRegistrations;
 };
 
 #endif

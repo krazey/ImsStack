@@ -125,7 +125,7 @@ private:
     SdpConnection* m_pPreviousConnection;
 
     // t-line & r-line & z-line
-    IMSList<SdpTimeDescription> m_objTimeDescriptions;
+    ImsList<SdpTimeDescription> m_objTimeDescriptions;
     SdpTimezone* m_pTimezone;
 };
 

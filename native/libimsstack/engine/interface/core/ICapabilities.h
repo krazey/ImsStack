@@ -40,7 +40,7 @@ public:
      *
      * @return All SIP & TEL URIs which are in the Contact header.
      */
-    virtual IMSList<AString> GetRemoteUserIdentities() const = 0;
+    virtual ImsList<AString> GetRemoteUserIdentities() const = 0;
 
     /**
      * @brief Returns the current state of this ICapabilities.

@@ -179,7 +179,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpMedia::Decode(IN const AString& strValue)
     {
         if (m_strTransportProtocol.Contains(TextParser::CHAR_SLASH))
         {
-            IMSList<AString> objProtoTokens = m_strTransportProtocol.Split(TextParser::CHAR_SLASH);
+            ImsList<AString> objProtoTokens = m_strTransportProtocol.Split(TextParser::CHAR_SLASH);
 
             for (IMS_UINT32 i = 0; i < objProtoTokens.GetSize(); ++i)
             {
@@ -202,7 +202,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpMedia::Decode(IN const AString& strValue)
         }
     }
 
-    IMSList<AString> objPayloadTokens = objTokens.GetElementAt(3).Split(TextParser::CHAR_SP);
+    ImsList<AString> objPayloadTokens = objTokens.GetElementAt(3).Split(TextParser::CHAR_SP);
 
     for (IMS_UINT32 i = 0; i < objPayloadTokens.GetSize(); ++i)
     {

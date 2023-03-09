@@ -62,12 +62,12 @@ public:
     /**
      * @brief Returns the SdpRepeatTime objects from the time description.
      */
-    inline const IMSList<SdpRepeatTime>& GetRepeatTimes() const { return m_objRepeatTimes; }
+    inline const ImsList<SdpRepeatTime>& GetRepeatTimes() const { return m_objRepeatTimes; }
 
 private:
     // SDP order: t, *(r)
     SdpTime* m_pTime;
-    IMSList<SdpRepeatTime> m_objRepeatTimes;
+    ImsList<SdpRepeatTime> m_objRepeatTimes;
 };
 
 #endif
