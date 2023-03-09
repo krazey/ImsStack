@@ -52,6 +52,7 @@ public:
     IMS_BOOL IsSessionContinuitySupported() override;
     IMS_BOOL IsServiceTimerRunning() override;
     IMS_BOOL IsImsVoiceCallSupported() override;
+    IMS_BOOL IsRoaming() override;
 
     IMS_UINT32 GetMobileChangingNetworkType() override;
     IMS_UINT32 GetMobileNetworkType() override;

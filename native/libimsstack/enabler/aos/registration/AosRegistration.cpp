@@ -2646,6 +2646,32 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::CheckRadioReadyAndSetTxnPending()
     }
 }
 
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessPendingPlmnBlockOnUpdateFailure()
+{
+    if (GET_N_CONFIG(m_nSlotId)->IsExtraReregErrInRoamingAsFailureHandled() && m_bEps5GsOnly &&
+            m_piContext->GetNetTracker()->IsRoaming())
+    {
+        m_pUtil->AddFeature(PENDING_PLMN_BLOCK_HELD_BY_CALL, m_nTxnPending);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessPlmnBlockOnUpdateFailure()
+{
+    if (GET_N_CONFIG(m_nSlotId)->IsExtraReregErrInRoamingAsFailureHandled() && m_bEps5GsOnly &&
+            m_piContext->GetNetTracker()->IsRoaming())
+    {
+        m_eImsReasonCode = AosReasonCode::PLMN_BLOCK;
+        Destroy();
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
 PROTECTED VIRTUAL void AosRegistration::ProcessSetIpsec(IN IMS_UINT32 nReason)
 {
     A_IMS_TRACE_I(REGID, "ProcessSetIpsec :: (%d)", nReason, 0, 0);
@@ -2766,7 +2792,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessPendingTransaction()
         {
             if (IsRetryHeld())
             {
-                if (!SendRegister((GetState() == STATE_REFRESHSTOP) ? IMS_FALSE : IMS_TRUE))
+                if (!SendRegister(GetState() != STATE_REFRESHSTOP))
                 {
                     ProcessUnpredictableFailure();
                     return;
@@ -2836,7 +2862,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessRetryInRegStopped(
         SetTraffic(IMS_TRUE);
     }
 
-    if (!SendRegister((m_nState == STATE_REGSTOP) ? IMS_TRUE : IMS_FALSE))
+    if (!SendRegister(m_nState == STATE_REGSTOP))
     {
         ProcessUnpredictableFailure();
         return;
@@ -4010,6 +4036,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
 
     if (ProcessUnpredictableFailureHeldByCall())
     {
+        ProcessPendingPlmnBlockOnUpdateFailure();
+        return;
+    }
+
+    if (ProcessPlmnBlockOnUpdateFailure())
+    {
         return;
     }
 
@@ -4095,6 +4127,12 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SI
 PROTECTED VIRTUAL void AosRegistration::ProcessUpdateFailed_TxnTimeout()
 {
     if (ProcessUnpredictableFailureHeldByCall())
+    {
+        ProcessPendingPlmnBlockOnUpdateFailure();
+        return;
+    }
+
+    if (ProcessPlmnBlockOnUpdateFailure())
     {
         return;
     }
@@ -4500,8 +4538,6 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
     A_IMS_TRACE_I(REGID, "Registration_StartFailed :: (%s)",
             AosProvider::GetLog()->RegReasonToString(nReason), 0, 0);
 
-    IMS_SINT32 nStatusCode = -1;
-
     if (m_piRegistration == IMS_NULL)
     {
         return;
@@ -4516,12 +4552,11 @@ PROTECTED VIRTUAL void AosRegistration::Registration_StartFailed(IN IMS_SINT32 n
     ClearAuthChallengedCount();
     ClearAuthIpsecCount();
 
-    nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
-
     switch (nReason)
     {
         case IRegistration::REASON_STATUS_CODE:
-            ProcessStartFailed_StatusCode(nStatusCode);
+            ProcessStartFailed_StatusCode(
+                    m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse()));
             break;
 
         case IRegistration::REASON_TRANSACTION_TIMEOUT:
@@ -4598,8 +4633,6 @@ PROTECTED VIRTUAL void AosRegistration::Registration_UpdateFailed(IN IMS_SINT32 
     A_IMS_TRACE_I(REGID, "Registration_UpdateFailed :: (%s)",
             AosProvider::GetLog()->RegReasonToString(nReason), 0, 0);
 
-    IMS_SINT32 nStatusCode = -1;
-
     if (!IsAuthChallengeMoreAllowed())
     {
         ProcessAuthenticationFailed();
@@ -4609,12 +4642,11 @@ PROTECTED VIRTUAL void AosRegistration::Registration_UpdateFailed(IN IMS_SINT32 
     ClearAuthChallengedCount();
     ClearAuthIpsecCount();
 
-    nStatusCode = m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse());
-
     switch (nReason)
     {
         case IRegistration::REASON_STATUS_CODE:
-            ProcessUpdateFailed_StatusCode(nStatusCode);
+            ProcessUpdateFailed_StatusCode(
+                    m_pUtil->GetResponseCode(m_piRegistration->GetPreviousResponse()));
             break;
 
         case IRegistration::REASON_TRANSACTION_TIMEOUT:
@@ -4728,7 +4760,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStopRetryTimerExpired()
 
     if (IsTransactionStarted())
     {
-        if (SendRegister((GetState() == STATE_REFRESHSTOP) ? IMS_FALSE : IMS_TRUE))
+        if (SendRegister(GetState() != STATE_REFRESHSTOP))
         {
             SetRetryState();
             ReportTryingState();
@@ -5247,6 +5279,16 @@ PROTECTED VIRTUAL void AosRegistration::CallTracker_StateChanged(
     {
         SetHeldByCall(IMS_FALSE);
         UpdateTransactionStarted();
+
+        if (m_pUtil->IsFeatureOn(PENDING_PLMN_BLOCK_HELD_BY_CALL, m_nTxnPending))
+        {
+            m_pUtil->RemoveFeature(PENDING_PLMN_BLOCK_HELD_BY_CALL, m_nTxnPending);
+
+            if (ProcessPlmnBlockOnUpdateFailure())
+            {
+                return;
+            }
+        }
 
         if (GET_N_CONFIG(m_nSlotId)->IsRegRequiredAfterImsCallEndOnRegHeld())
         {
