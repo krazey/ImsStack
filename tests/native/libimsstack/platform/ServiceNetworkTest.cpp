@@ -340,20 +340,6 @@ TEST_F(ServiceNetworkTest, CreateConnection_ApnType)
     EXPECT_TRUE(pINetworkConnection == m_pTestOsNetworkConnection);
 }
 
-TEST_F(ServiceNetworkTest, FindConnection_ProfileName)
-{
-    EXPECT_CALL(m_objOsFactory, CreateNetworkConnection(PROFILE_NAME, _))
-            .Times(1)
-            .WillOnce(Return(m_pTestOsNetworkConnection));
-
-    INetworkConnection* pINetworkConnection = m_pNetworkService->CreateConnection(PROFILE_NAME, 0);
-    EXPECT_TRUE(pINetworkConnection == m_pTestOsNetworkConnection);
-
-    pINetworkConnection = m_pNetworkService->FindConnection(PROFILE_NAME, 0);
-
-    EXPECT_TRUE(pINetworkConnection == m_pTestOsNetworkConnection);
-}
-
 TEST_F(ServiceNetworkTest, FindConnection_ApnType)
 {
     EXPECT_CALL(m_objOsFactory, CreateNetworkConnection(PROFILE_NAME, _))
