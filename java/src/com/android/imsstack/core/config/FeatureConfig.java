@@ -55,8 +55,8 @@ public final class FeatureConfig {
     }
 
     public static synchronized void init(int slotId) {
-        CarrierConfigManager ccm =
-                AppContext.getInstance().getSystemService(CarrierConfigManager.class);
+        CarrierConfigManager ccm = AppContext.getInstance().getSystemService(
+                CarrierConfigManager.class);
 
         if (ccm == null) {
             initUnavailable(slotId);
