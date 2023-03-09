@@ -2945,6 +2945,8 @@ PROTECTED VIRTUAL void AosApplication::CleanUp()
     CleanAll();
 
     StopTimer(TIMER_RECONFIG_GUARD);
+    StopTimer(TIMER_PDN_BLOCKED);
+    StopTimer(TIMER_IMS_ESTABLISHMENT);
 
     if (m_piNetTracker != IMS_NULL)
     {
