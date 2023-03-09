@@ -333,6 +333,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_pManager->GetSendUdpKeepAliveIntervalTime();
         case Feature::CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE:
             return m_pManager->GetCallRejectCodeForNotAcceptableCallType();
+        case Feature::POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM:
+            return m_pManager->GetPolicyForAlertNotUsingPreconditionMechanism();
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return 0;

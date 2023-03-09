@@ -774,6 +774,8 @@ public class CarrierConfig {
                 "call_mergeable_on_conference_on_hold_bool";
         public static final String KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL =
                 "release_emergency_pdn_with_emergency_call_fail_bool";
+        public static final String KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT =
+                "policy_for_alert_not_using_precondition_mechanism_int";
 
         // Media
         public static final String KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY =
