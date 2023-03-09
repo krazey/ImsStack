@@ -53,6 +53,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     @Mock private IBaseContext mMockContext;
     @Mock private MtcJniProxy mMockMtcJniProxy;
     @Mock private MtcCall mMockMtcCall;
+    @Mock private IServiceStateTracker mServiceStateTracker;
 
     private MtcEmergencyServiceManager mTestMtcEmergencyServiceManager;
 
@@ -98,7 +99,7 @@ public class MtcEmergencyServiceManagerTest extends ImsStackTest {
     public void testOpenEmergencyService() {
         mTestMtcEmergencyServiceManager.setNativeObject(1);
         mTestMtcEmergencyServiceManager.openEmergencyService(
-                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY);
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY, mServiceStateTracker);
         processAllMessages();
 
         assertEquals(1, mNativeObject);
