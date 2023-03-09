@@ -183,6 +183,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsImsVoiceCallSupported()
     return m_piNetWatcherInfo->IsImsVoiceCallSupported();
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsRoaming()
+{
+    return m_piNetWatcherInfo->GetRoamingState() > 0;
+}
+
 PUBLIC VIRTUAL void AosNetTracker::SetListener(IN IAosNetTrackerListener* piListener)
 {
     if (piListener == IMS_NULL)

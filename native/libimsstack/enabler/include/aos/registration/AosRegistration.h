@@ -232,6 +232,8 @@ protected:
 
     virtual void CheckPending();
     virtual IMS_BOOL CheckRadioReadyAndSetTxnPending();
+    virtual IMS_BOOL ProcessPendingPlmnBlockOnUpdateFailure();
+    virtual IMS_BOOL ProcessPlmnBlockOnUpdateFailure();
     virtual void ProcessSetIpsec(IN IMS_UINT32 nReason);
     virtual void ProcessRefreshRegInfo();
     virtual void ProcessIpcanChanged();
@@ -432,9 +434,10 @@ protected:
         PENDING_UPDATE = 0x4,
         PENDING_RECONFIG = 0x8,
         PENDING_UPDATE_HELD_BY_CALL = 0x10,
+        PENDING_PLMN_BLOCK_HELD_BY_CALL = 0x20,
 
-        PENDING_SUBSCRIPTION = 0x20,
-        PENDING_TERMINATED = 0x40
+        PENDING_SUBSCRIPTION = 0x40,
+        PENDING_TERMINATED = 0x80
     };
 
     enum
