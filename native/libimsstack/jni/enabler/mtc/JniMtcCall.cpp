@@ -270,12 +270,22 @@ void JniMtcCall::Open(IN const android::Parcel& objParcel)
     objCallInfo.bUssi = objJniCallInfo.bUssi;
 
     m_nCallKey = m_objCallController.Open(eServiceType, objCallInfo);
-    Attach();
+    if (m_nCallKey != IMtcCall::CALL_KEY_INVALID)
+    {
+        Attach();
+    }
 }
 
 PRIVATE
 void JniMtcCall::Start(IN const android::Parcel& objParcel)
 {
+    if (m_nCallKey == IMtcCall::CALL_KEY_INVALID)
+    {
+        IMS_TRACE_E(0, "Invalid call key. Try CSFB.", 0, 0, 0);
+        return m_pThread->OnStartFailed(CallReasonInfo(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+    }
+
     CallType eCallType = JniMtcUtils::ReadCallType(objParcel);
 
     AString strTarget;
@@ -381,6 +391,11 @@ PRIVATE
 void JniMtcCall::StartGroupCall(IN const android::Parcel& /*objParcel*/)
 {
     /*
+    if (m_nCallKey != IMtcCall::CALL_KEY_INVALID)
+    {
+        return m_pThread->OnStartFailed(CallReasonInfo(CODE_LOCAL_NOT_REGISTERED));
+    }
+
     CallType eCallType = JniMtcUtils::ReadCallType(objParcel);
 
     AString strTarget;
