@@ -428,13 +428,14 @@ protected:
     enum
     {
         PENDING_NONE = 0x0,
-        PENDING_TRANSACTION = 0x1,
-        PENDING_UPDATE = 0x2,
-        PENDING_RECONFIG = 0x4,
-        PENDING_UPDATE_HELD_BY_CALL = 0x8,
+        PENDING_START = 0x1,
+        PENDING_TRANSACTION = 0x2,
+        PENDING_UPDATE = 0x4,
+        PENDING_RECONFIG = 0x8,
+        PENDING_UPDATE_HELD_BY_CALL = 0x10,
 
-        PENDING_SUBSCRIPTION = 0x10,
-        PENDING_TERMINATED = 0x20
+        PENDING_SUBSCRIPTION = 0x20,
+        PENDING_TERMINATED = 0x40
     };
 
     enum

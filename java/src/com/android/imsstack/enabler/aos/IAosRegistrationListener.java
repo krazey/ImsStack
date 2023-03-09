@@ -75,6 +75,15 @@ public interface IAosRegistrationListener {
     public void notifyCapabilitiesUpdateFailed(int capabilities, int networkType, int reason);
 
     /**
+     * Regsitration State
+     */
+    class RegistrationState {
+        public static final int DEREGISTERED = 0;
+        public static final int REGISTERING = 1;
+        public static final int REGISTERED = 2;
+    }
+
+    /**
      * NETWORK_TYPE
      */
     class NetworkType {

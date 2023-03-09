@@ -256,21 +256,6 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, slotId);
     }
 
-    private static int convertAccessNetworkType(int type) {
-        switch (type) {
-            case ACCESS_NETWORK_TYPE_UTRAN:
-                return AccessNetworkConstants.AccessNetworkType.UTRAN;
-            case ACCESS_NETWORK_TYPE_EUTRAN:
-                return AccessNetworkConstants.AccessNetworkType.EUTRAN;
-            case ACCESS_NETWORK_TYPE_NGRAN:
-                return AccessNetworkConstants.AccessNetworkType.NGRAN;
-            case ACCESS_NETWORK_TYPE_IWLAN:
-                return AccessNetworkConstants.AccessNetworkType.IWLAN;
-            default:
-                return AccessNetworkConstants.AccessNetworkType.UNKNOWN;
-        }
-    }
-
     private static int convertConnectionFailureReason(int reason) {
         switch (reason) {
             case ConnectionFailureInfo.REASON_ACCESS_DENIED:
@@ -322,6 +307,37 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
                 return MmTelFeature.IMS_TRAFFIC_TYPE_UT_XCAP;
             default:
                 return MmTelFeature.IMS_TRAFFIC_TYPE_NONE;
+        }
+    }
+
+    private int convertAccessNetworkType(int type) {
+        if (type == ACCESS_NETWORK_TYPE_UNKNOWN) {
+            IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
+
+            if (dcnw != null) {
+                if (dcnw.is4G()) {
+                    return AccessNetworkConstants.AccessNetworkType.EUTRAN;
+                }
+                if (dcnw.is5G()) {
+                    return AccessNetworkConstants.AccessNetworkType.NGRAN;
+                }
+                if (dcnw.is3G()) {
+                    return AccessNetworkConstants.AccessNetworkType.UTRAN;
+                }
+            }
+        }
+
+        switch (type) {
+            case ACCESS_NETWORK_TYPE_UTRAN:
+                return AccessNetworkConstants.AccessNetworkType.UTRAN;
+            case ACCESS_NETWORK_TYPE_EUTRAN:
+                return AccessNetworkConstants.AccessNetworkType.EUTRAN;
+            case ACCESS_NETWORK_TYPE_NGRAN:
+                return AccessNetworkConstants.AccessNetworkType.NGRAN;
+            case ACCESS_NETWORK_TYPE_IWLAN:
+                return AccessNetworkConstants.AccessNetworkType.IWLAN;
+            default:
+                return AccessNetworkConstants.AccessNetworkType.UNKNOWN;
         }
     }
 
