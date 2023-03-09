@@ -682,6 +682,13 @@ public:
             GEOLOCATION_PIDF_INFO_COUNTRY_CODE_ONLY = 2,
             GEOLOCATION_PIDF_INFO_COUNTRY_CODE_AND_STATE = 3,
         };
+
+        // Policy for alert not using precondition mechanism
+        enum
+        {
+            ALERT_POLICY_FOR_NOT_CHECKING_LOCAL_RESOURCE = 0,
+            ALERT_POLICY_FOR_CHECKING_ALLOCATED_DEDICATED_BEARER = 1,
+        };
     };
 
     class ImsVt
@@ -964,6 +971,8 @@ public:
         static const IMS_CHAR KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[];
         static const IMS_CHAR KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CALL_TYPE_INT[];
         static const IMS_CHAR KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[];
+        static const IMS_CHAR KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT[];
+
         // Media
         static const IMS_CHAR KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[];
         static const IMS_CHAR KEY_AUDIO_BW_NEGO_OPTION_BOOL[];

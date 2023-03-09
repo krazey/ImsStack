@@ -1008,6 +1008,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_CALL_REJECT_CODE_FOR_NOT_ACCEPTABLE_CA
         "call_reject_code_for_not_acceptable_call_type_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL_BOOL[] =
         "release_emergency_pdn_with_emergency_call_fail_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM_INT[] =
+        "policy_for_alert_not_using_precondition_mechanism_int";
 
 // Media
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_PORT_RANGE_INT_ARRAY[] =

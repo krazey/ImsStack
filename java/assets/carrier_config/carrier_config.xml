@@ -464,6 +464,8 @@
     </int-array>
     <boolean name="call_mergeable_on_conference_on_hold_bool" value="false"/>
     <boolean name="release_emergency_pdn_with_emergency_call_fail_bool" value="false"/>
+    <int name="policy_for_alert_not_using_precondition_mechanism_int" value="0"/>
+
     <!-- Media -->
     <boolean name="support_multi_config_in_early_session_bool" value="false"/>
     <boolean name="media_session_level_bandwidth_bool" value="false"/>
