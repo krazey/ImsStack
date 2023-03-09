@@ -77,7 +77,7 @@ PUBLIC GLOBAL TextProfile* TextProfileUtil::CreateProfile(
     }
 
     // Setting each payload and bandwidth
-    IMSList<CodecConfig*> pCodecs;
+    ImsList<CodecConfig*> pCodecs;
     pCodecs = pConfig->GetCodecConfigs();
 
     for (IMS_UINT32 i = 0; i < pCodecs.GetSize(); i++)

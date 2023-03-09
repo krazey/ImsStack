@@ -29,7 +29,7 @@ __IMS_TRACE_TAG_USER_DECL__("MED.VN");
 
 PUBLIC VideoNego::VideoNego(IN const IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
-        m_listOaModel(IMSList<OaModel*>()),
+        m_listOaModel(ImsList<OaModel*>()),
         m_objBaseProfile(VideoProfile()),
         m_pEnvironment(IMS_NULL),
         m_pConfig(IMS_NULL),
@@ -841,7 +841,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor
             pProfile->nBandwidthAs, 0);
 
     pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
-    IMSList<AString> strEmptyList;
+    ImsList<AString> strEmptyList;
     pDescriptor->SetBandwidthInfo(strEmptyList);
 
     // make "c" line of media level if IP does not matched
@@ -1070,7 +1070,7 @@ IMS_BOOL VideoNego::MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor
             */
             if (pHevcFmtp->bShow_SpropParam)
             {
-                IMSList<AString> objSplitComma = pHevcFmtp->strSpropParam.Split(',');
+                ImsList<AString> objSplitComma = pHevcFmtp->strSpropParam.Split(',');
 
                 if (objSplitComma.GetSize() == 3)
                 {
@@ -1411,13 +1411,13 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             pProfile->bSupportAvpf, pProfile->bSupportCapaNegoForAvpf, 0);
 
     // payload
-    IMSList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
+    ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
 
     // Read ImageAttr list From SDP
-    IMSList<AString> objImageAttributes = pDescriptor->GetAttributes(SdpAttribute::IMAGEATTR);
+    ImsList<AString> objImageAttributes = pDescriptor->GetAttributes(SdpAttribute::IMAGEATTR);
 
     // Read FrameSize list From SDP
-    IMSList<AString> objFrameSizes = pDescriptor->GetAttributes(SdpAttribute::FRAMESIZE);
+    ImsList<AString> objFrameSizes = pDescriptor->GetAttributes(SdpAttribute::FRAMESIZE);
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
@@ -1535,7 +1535,7 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
     pProfile->nFrameRate = pDescriptor->GetAttributeInt(SdpAttribute::FRAMERATE);
 
     // find CVO
-    IMSList<AString> objAttributes =
+    ImsList<AString> objAttributes =
             pDescriptor->GetAttributes(SdpAttribute::ATTRIBUTE_OTHER, "extmap");
     for (IMS_UINT32 nIndex = 0; nIndex < objAttributes.GetSize(); nIndex++)
     {
@@ -1544,13 +1544,13 @@ IMS_BOOL VideoNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
         if (strExtmap.Contains("urn:3gpp:video-orientation") == IMS_TRUE)
         {
             AString strCVOTrim = strExtmap.Trim();
-            IMSList<AString> strSplitSpace = strCVOTrim.Split(' ');
+            ImsList<AString> strSplitSpace = strCVOTrim.Split(' ');
 
             if (strSplitSpace.GetAt(0).GetLength() > 0)
             {
                 if (strSplitSpace.GetAt(0).Contains("/"))
                 {
-                    IMSList<AString> strSplitSlash = strSplitSpace.GetAt(0).Split('/');
+                    ImsList<AString> strSplitSlash = strSplitSpace.GetAt(0).Split('/');
 
                     if (strSplitSlash.GetSize() > 0 && strSplitSlash.GetAt(0).GetLength() > 0)
                     {
@@ -2447,7 +2447,7 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfil
         return IMS_FALSE;
     }
 
-    IMSList<AString> objSplitColon = strFmtp.Split(';');
+    ImsList<AString> objSplitColon = strFmtp.Split(';');
 
     for (IMS_UINT32 i = 0; i < objSplitColon.GetSize(); i++)
     {
@@ -2456,7 +2456,7 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfil
             continue;
         }
 
-        IMSList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
+        ImsList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
 
         if (objSplitEqual.GetSize() < 2)
         {
@@ -2490,7 +2490,7 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfil
             IMS_SINT32 nIndexOf1stEqual = objSplitColon.GetAt(i).GetIndexOf("=");
             AString strRealSpropParam = objSplitColon.GetAt(i).GetSubStr(nIndexOf1stEqual + 1);
 
-            IMSList<AString> objSplitComma = strRealSpropParam.Split(',');
+            ImsList<AString> objSplitComma = strRealSpropParam.Split(',');
             if (objSplitComma.GetSize() < 2)
             {
                 IMS_TRACE_E(
@@ -2526,7 +2526,7 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfil
         return IMS_FALSE;
     }
 
-    IMSList<AString> objSplitColon = strFmtp.Split(';');
+    ImsList<AString> objSplitColon = strFmtp.Split(';');
 
     for (IMS_UINT32 i = 0; i < objSplitColon.GetSize(); i++)
     {
@@ -2535,7 +2535,7 @@ IMS_BOOL VideoNego::GetFmtpFromString(IN const AString& strFmtp, OUT VideoProfil
             continue;
         }
 
-        IMSList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
+        ImsList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
 
         if (objSplitEqual.GetSize() < 2)
         {
@@ -2899,11 +2899,11 @@ MEDIA_DIRECTION VideoNego::UpdateDirectionToMine(
 }
 
 PRIVATE IMS_BOOL VideoNego::GetCorrectImageIndex(
-        IN IMS_SINT32 nPayloadTypeNum, IN IMSList<AString> objAttributes, OUT IMS_UINT32* nIndex)
+        IN IMS_SINT32 nPayloadTypeNum, IN ImsList<AString> objAttributes, OUT IMS_UINT32* nIndex)
 {
     for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); i++)
     {
-        IMSList<AString> objTokens = objAttributes.GetAt(i).Split(TextParser::CHAR_SP);
+        ImsList<AString> objTokens = objAttributes.GetAt(i).Split(TextParser::CHAR_SP);
 
         if (objTokens.GetSize() < 2)
         {
@@ -2982,8 +2982,8 @@ PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(IN const AString& st
     IMS_UINT32 nImagePayloadNum = 0;  // Payload Number in Image Attr
     IMS_UINT32 nDirection = 1;        // Direction : send or recv
     IMS_UINT32 nImageValueIndex = 2;  // Image value : width and height
-    IMSList<AString> objTokens;
-    IMSList<AString> strTempValue;
+    ImsList<AString> objTokens;
+    ImsList<AString> strTempValue;
     AString nRealValueString = AString::ConstNull();
     // Check SPACE is ...
     if (strImageAttrFromSdp.Contains(TextParser::CHAR_SP) == IMS_FALSE)
@@ -3088,7 +3088,7 @@ PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(IN const AString& st
             }
             else
             {
-                IMSList<AString> strSendValue = strTempValue.GetAt(i).Split(TextParser::CHAR_EQUAL);
+                ImsList<AString> strSendValue = strTempValue.GetAt(i).Split(TextParser::CHAR_EQUAL);
 
                 if (strSendValue.GetAt(0).Equals("x") == IMS_TRUE)
                 {
@@ -3203,7 +3203,7 @@ PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_ImageAttr(IN const AString& st
             }
             else
             {
-                IMSList<AString> strRecvValue = strTempValue.GetAt(i).Split(TextParser::CHAR_EQUAL);
+                ImsList<AString> strRecvValue = strTempValue.GetAt(i).Split(TextParser::CHAR_EQUAL);
 
                 if (strRecvValue.GetAt(0).Equals("x") == IMS_TRUE)
                 {
@@ -3292,7 +3292,7 @@ PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_FrameSize(
 {
     IMS_UINT32 nFrameSizePayloadNum = 0;  // Payload Number in Image Attr
 
-    IMSList<AString> objTokens = strFrameSizeFromSdp.Split(TextParser::CHAR_SP);
+    ImsList<AString> objTokens = strFrameSizeFromSdp.Split(TextParser::CHAR_SP);
 
     if (objTokens.GetSize() < 2)
     {
@@ -3314,7 +3314,7 @@ PRIVATE IMS_BOOL VideoNego::GetWidthHeightFromSdp_FrameSize(
     }
     else
     {
-        IMSList<AString> strFrameSizeValue = objTokens.GetAt(1).Split(TextParser::CHAR_HYPHEN);
+        ImsList<AString> strFrameSizeValue = objTokens.GetAt(1).Split(TextParser::CHAR_HYPHEN);
 
         *nImageWidth = strFrameSizeValue.GetAt(0).ToInt32();   // Width
         *nImageHeight = strFrameSizeValue.GetAt(1).ToInt32();  // Height
@@ -3405,7 +3405,7 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes(IN SdpMediaFormat* pMediaForma
     if (pMediaFormat == IMS_NULL || pRtcpFbAttr == IMS_NULL || pCapaNego == IMS_NULL)
         return IMS_FALSE;
 
-    IMSList<SdpMediaFormatParameter*> lstRTCPFeedback = pMediaFormat->GetExtraParameters();
+    ImsList<SdpMediaFormatParameter*> lstRTCPFeedback = pMediaFormat->GetExtraParameters();
 
     IMS_TRACE_I("GetAvpfFromAttributes() - Entered. number of RTCP attributes[%d]",
             lstRTCPFeedback.GetSize(), 0, 0);
@@ -3461,7 +3461,7 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes(IN SdpMediaFormat* pMediaForma
         {
             if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("trr-int") == IMS_TRUE)
             {
-                IMSList<AString> strTemp =
+                ImsList<AString> strTemp =
                         pCapaNego->mapAttributeCapa.GetValueAt(i).Split(TextParser::CHAR_SP);
 
                 if (strTemp.GetSize() >= 2)
@@ -3504,7 +3504,7 @@ PRIVATE IMS_BOOL VideoNego::GetAvpfFromAttributes_EX(
         {
             if (pCapaNego->mapAttributeCapa.GetValueAt(i).Contains("trr-int") == IMS_TRUE)
             {
-                IMSList<AString> strTemp =
+                ImsList<AString> strTemp =
                         pCapaNego->mapAttributeCapa.GetValueAt(i).Split(TextParser::CHAR_SP);
 
                 if (strTemp.GetSize() >= 2)
@@ -3540,9 +3540,9 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
     if (pDescriptor == IMS_NULL || pObjCapaNego == IMS_NULL)
         return IMS_FALSE;
 
-    IMSList<AString> lstTCAPAttr = pDescriptor->GetAttributes(SdpAttribute::TCAP);
-    IMSList<AString> lstACAPAttr = pDescriptor->GetAttributes(SdpAttribute::ACAP);
-    IMSList<AString> lstACFGAttr = pDescriptor->GetAttributes(SdpAttribute::ACFG);
+    ImsList<AString> lstTCAPAttr = pDescriptor->GetAttributes(SdpAttribute::TCAP);
+    ImsList<AString> lstACAPAttr = pDescriptor->GetAttributes(SdpAttribute::ACAP);
+    ImsList<AString> lstACFGAttr = pDescriptor->GetAttributes(SdpAttribute::ACFG);
 
     if (lstACFGAttr.GetSize() > 0)
     {
@@ -3566,7 +3566,7 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
         if (strTCAPline.GetLength() == 0)
             continue;
 
-        IMSList<AString> lstSplitSpace = strTCAPline.Split(' ');
+        ImsList<AString> lstSplitSpace = strTCAPline.Split(' ');
         IMS_SINT32 nTcapInitNum = 0;
 
         // save Tcap String to CapaNego Obj
@@ -3597,7 +3597,7 @@ PRIVATE IMS_BOOL VideoNego::MakeCapaNegoProfileFromSdp(
         if (strACAPline.GetLength() == 0)
             continue;
 
-        IMSList<AString> lstSplitSpace = strACAPline.Split(' ');
+        ImsList<AString> lstSplitSpace = strACAPline.Split(' ');
 
         // save Acap String to CapaNego Obj
         for (IMS_UINT32 j = 0; j < lstSplitSpace.GetSize(); j++)
@@ -3659,12 +3659,12 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
     IMS_BOOL bAttributeCheckable = IMS_FALSE;
     IMS_BOOL bPCFGSupportable = IMS_FALSE;
 
-    IMSMap<IMS_SINT32, AString> mapLocalTCap = pLocalCapaNego->mapTransportCapa;
-    IMSMap<IMS_SINT32, AString> mapLocalACap = pLocalCapaNego->mapAttributeCapa;
+    ImsMap<IMS_SINT32, AString> mapLocalTCap = pLocalCapaNego->mapTransportCapa;
+    ImsMap<IMS_SINT32, AString> mapLocalACap = pLocalCapaNego->mapAttributeCapa;
 
-    IMSList<AString> lstDstPCFG = pPeerCapaNego->lstPotentialConfig;
-    IMSMap<IMS_SINT32, AString> mapPeerTCap = pPeerCapaNego->mapTransportCapa;
-    IMSMap<IMS_SINT32, AString> mapPeerACap = pPeerCapaNego->mapAttributeCapa;
+    ImsList<AString> lstDstPCFG = pPeerCapaNego->lstPotentialConfig;
+    ImsMap<IMS_SINT32, AString> mapPeerTCap = pPeerCapaNego->mapTransportCapa;
+    ImsMap<IMS_SINT32, AString> mapPeerACap = pPeerCapaNego->mapAttributeCapa;
 
     if (pPeerCapaNego->strNegotiatedAcfg.GetLength() > 0)
     {
@@ -3685,7 +3685,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
         if (strPCFGline.GetLength() == 0)
             continue;
 
-        IMSList<AString> lstSplitSpace = lstDstPCFG.GetAt(i).Split(' ');
+        ImsList<AString> lstSplitSpace = lstDstPCFG.GetAt(i).Split(' ');
 
         for (j = 0; j < lstSplitSpace.GetSize(); j++)
         {
@@ -3696,7 +3696,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                 if (strPCFG_Transport.GetLength() == 0)
                     continue;
 
-                IMSList<AString> lstSplitEquals = strPCFG_Transport.Split('=');
+                ImsList<AString> lstSplitEquals = strPCFG_Transport.Split('=');
                 if (lstSplitEquals.GetSize() == 0)
                     continue;
 
@@ -3742,7 +3742,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                 if (strPCFG_Attribute.GetLength() == 0)
                     continue;
 
-                IMSList<AString> lstSplitEquals = strPCFG_Attribute.Split('=');
+                ImsList<AString> lstSplitEquals = strPCFG_Attribute.Split('=');
                 if (lstSplitEquals.GetSize() == 0)
                     continue;
 
@@ -3753,7 +3753,7 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                     AString strTmp = lstSplitEquals.GetAt(1);  // tmp = "1,2,3,4"
 
                     // attribute comma parsing..
-                    IMSList<AString> lstSplitComma = strTmp.Split(',');
+                    ImsList<AString> lstSplitComma = strTmp.Split(',');
                     IMS_TRACE_I("MakeNegotiatedCapaNego() attribute size[%d]",
                             lstSplitComma.GetSize(), 0, 0);
 
@@ -3788,9 +3788,9 @@ PRIVATE IMS_BOOL VideoNego::MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaN
                         else if (strDestAttributeCapa.Contains("crypto") == IMS_TRUE)
                         {
                             // crypto attribute negotiate only srtp profile type
-                            IMSList<AString> lstSrcCryptoAttribute =
+                            ImsList<AString> lstSrcCryptoAttribute =
                                     mapLocalACap.GetValueAt(l).Split(' ');
-                            IMSList<AString> lstDestCryptoAttribute =
+                            ImsList<AString> lstDestCryptoAttribute =
                                     strDestAttributeCapa.Split(' ');
                             if (lstDestCryptoAttribute.GetAt(1).Equals(
                                         lstSrcCryptoAttribute.GetAt(1)) == IMS_TRUE)

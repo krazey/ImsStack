@@ -38,7 +38,7 @@ public:
      * @return IMS_BOOL IMS_TRUE when there is a valid object existed with respects of remote
      * address and port
      */
-    static IMS_BOOL GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMediaNegoMap,
+    static IMS_BOOL GetMediaNegoInfo(IN ImsMap<IMS_UINTP, MediaNego*>* pMediaNegoMap,
             IN const AString& strIpAddr, IN IMS_SINT32 nPort, OUT IMS_UINTP& nNegoId,
             OUT MEDIA_CONTENT_TYPE& eMediaType);
 };

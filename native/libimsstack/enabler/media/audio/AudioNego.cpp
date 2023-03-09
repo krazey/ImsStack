@@ -35,7 +35,7 @@ __IMS_TRACE_TAG_USER_DECL__("MED.AN");
 PUBLIC
 AudioNego::AudioNego(IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
-        m_lstOaModel(IMSList<OaModel*>()),
+        m_lstOaModel(ImsList<OaModel*>()),
         m_objBaseProfile(AudioProfile()),
         m_pEnvironment(IMS_NULL),
         m_pConfig(IMS_NULL)
@@ -1036,7 +1036,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
 
     // clean attr & bandwidth line
     pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
-    IMSList<AString> strEmptyList;
+    ImsList<AString> strEmptyList;
     pDescriptor->SetBandwidthInfo(strEmptyList);
 
     // make"c" &"o" line of session level if IP does not matched
@@ -1812,7 +1812,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
     MakeCapaNegoProfileFromSdp(pDescriptor, &(pProfile->objCapaNego));
 
     // payload
-    IMSList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
+    ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
@@ -1920,7 +1920,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
     pProfile->nMaxPtime = pDescriptor->GetAttributeInt(SdpAttribute::MAXPTIME);
 
     // RTCP-XR
-    IMSList<AString> lstRtcpXrAttr = pDescriptor->GetAttributes(SdpAttribute::RTCP_XR);
+    ImsList<AString> lstRtcpXrAttr = pDescriptor->GetAttributes(SdpAttribute::RTCP_XR);
 
     if (lstRtcpXrAttr.GetSize() > 0)
     {
@@ -1989,7 +1989,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
 
     // Compare each payload based destination's profile
     AudioProfile::Payload* pNegotiatedPayload = IMS_NULL;
-    IMSList<AudioProfile::Payload*> lstNegotiatedPayloads;
+    ImsList<AudioProfile::Payload*> lstNegotiatedPayloads;
 
     IMS_BOOL bProperNegotiatedTe = IMS_FALSE;
     IMS_UINT32 nNegoModeSetList = 0;
@@ -1999,7 +1999,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
     IMS_UINT32 ModeSetNegoList;
 
     // find negotiation aduioCodec, because of telephonyEvent negotiation
-    IMSList<AudioProfile::Payload*> templstNegotiatedPayloads;
+    ImsList<AudioProfile::Payload*> templstNegotiatedPayloads;
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
     {
@@ -2486,7 +2486,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         return IMS_FALSE;
     }
 
-    IMSList<AString> objSplitColon = strFmtp.Split(';');
+    ImsList<AString> objSplitColon = strFmtp.Split(';');
 
     for (IMS_UINT32 i = 0; i < objSplitColon.GetSize(); i++)
     {
@@ -2494,7 +2494,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         {
             continue;
         }
-        IMSList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
+        ImsList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
 
         if (objSplitEqual.GetSize() < 2)
         {
@@ -2541,8 +2541,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("br") == IMS_TRUE)
         {
-            IMSList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
-            IMSList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
+            ImsList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
+            ImsList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
             if (objSplitHyphen.GetSize() == 2)
             {
                 IMS_UINT32 nFirstBr = 0;
@@ -2584,8 +2584,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("bw") == IMS_TRUE)
         {
-            IMSList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
-            IMSList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
+            ImsList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
+            ImsList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
             if (objSplitHyphen.GetSize() == 2)
             {
                 IMS_UINT32 nFirstBw = 0;
@@ -2650,7 +2650,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-set") == IMS_TRUE)
         {
-            IMSList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
+            ImsList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
             for (IMS_UINT32 j = 0; j < objSplitComma.GetSize(); j++)
             {
                 IMS_UINT32 nModeSet = (IMS_UINT32)objSplitComma.GetAt(j).ToInt32();
@@ -2675,8 +2675,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("br-send") == IMS_TRUE)
         {
-            IMSList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
-            IMSList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
+            ImsList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
+            ImsList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
             if (objSplitHyphen.GetSize() == 2)
             {
                 IMS_UINT32 nFirstBr = 0;
@@ -2719,8 +2719,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("br-recv") == IMS_TRUE)
         {
-            IMSList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
-            IMSList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
+            ImsList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
+            ImsList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
             if (objSplitHyphen.GetSize() == 2)
             {
                 IMS_UINT32 nFirstBr = 0;
@@ -2762,8 +2762,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("bw-send") == IMS_TRUE)
         {
-            IMSList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
-            IMSList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
+            ImsList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
+            ImsList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
             if (objSplitHyphen.GetSize() == 2)
             {
                 IMS_UINT32 nFirstBw = 0;
@@ -2807,8 +2807,8 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         }
         else if (objSplitEqual.GetAt(0).Equals("bw-recv") == IMS_TRUE)
         {
-            IMSList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
-            IMSList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
+            ImsList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
+            ImsList<AString> objSplitHyphen = objSplitEqual.GetAt(1).Split('-');
             if (objSplitHyphen.GetSize() == 2)
             {
                 IMS_UINT32 nFirstBw = 0;
@@ -2999,7 +2999,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
         return IMS_FALSE;
     }
 
-    IMSList<AString> objSplitColon = strFmtp.Split(';');
+    ImsList<AString> objSplitColon = strFmtp.Split(';');
 
     for (IMS_UINT32 i = 0; i < objSplitColon.GetSize(); i++)
     {
@@ -3008,7 +3008,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
             continue;
         }
 
-        IMSList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
+        ImsList<AString> objSplitEqual = objSplitColon.GetAt(i).Split('=');
 
         if (objSplitEqual.GetSize() < 2)
         {
@@ -3025,7 +3025,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
 
         if (objSplitEqual.GetAt(0).Equals("mode-set") == IMS_TRUE)
         {
-            IMSList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
+            ImsList<AString> objSplitComma = objSplitEqual.GetAt(1).Split(',');
 
             for (IMS_UINT32 j = 0; j < objSplitComma.GetSize(); j++)
             {
@@ -3933,9 +3933,9 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
         return IMS_FALSE;
     }
 
-    IMSList<AString> lstTcapAttr = pDescriptor->GetAttributes(SdpAttribute::TCAP);
-    IMSList<AString> lstAcapAttr = pDescriptor->GetAttributes(SdpAttribute::ACAP);
-    IMSList<AString> lstAcfgAttr = pDescriptor->GetAttributes(SdpAttribute::ACFG);
+    ImsList<AString> lstTcapAttr = pDescriptor->GetAttributes(SdpAttribute::TCAP);
+    ImsList<AString> lstAcapAttr = pDescriptor->GetAttributes(SdpAttribute::ACAP);
+    ImsList<AString> lstAcfgAttr = pDescriptor->GetAttributes(SdpAttribute::ACFG);
 
     if (lstAcfgAttr.GetSize() > 0)
     {
@@ -3961,7 +3961,7 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
             continue;
         }
 
-        IMSList<AString> lstSplitSpace = strTcapline.Split(' ');
+        ImsList<AString> lstSplitSpace = strTcapline.Split(' ');
         IMS_SINT32 nTcapInitNum = 0;
 
         // save Tcap String to CapaNego Obj
@@ -3995,7 +3995,7 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
             continue;
         }
 
-        IMSList<AString> lstSplitSpace = strAcapline.Split(' ');
+        ImsList<AString> lstSplitSpace = strAcapline.Split(' ');
 
         // save Acap String to CapaNego Obj
         for (IMS_UINT32 j = 0; j < lstSplitSpace.GetSize(); j++)

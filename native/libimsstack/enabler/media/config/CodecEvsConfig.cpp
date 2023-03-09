@@ -88,7 +88,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     m_nHfOnly = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT);
     m_nEvsModeSwitch =
             piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT);
-    IMSVector<IMS_SINT32> objBitrateList = piCc->GetIntArray(
+    ImsVector<IMS_SINT32> objBitrateList = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_ASSET_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY);
 
     /** TODO - to access bundle for EVS - later */
@@ -100,7 +100,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     m_nHfOnly = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT);
     m_nEvsModeSwitch =
             piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT);
-    IMSVector<IMS_SINT32> objBitrateList = piCcBundle->GetIntArray(
+    ImsVector<IMS_SINT32> objBitrateList = piCcBundle->GetIntArray(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY);*/
 
     IMS_SINT32 nBrStart = DEFAULT_BR;

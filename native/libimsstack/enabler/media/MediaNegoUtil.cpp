@@ -24,7 +24,7 @@ PUBLIC
 MediaNegoUtil::~MediaNegoUtil() {}
 
 PUBLIC
-IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN IMSMap<IMS_UINTP, MediaNego*>* pMediaNegoMap,
+IMS_BOOL MediaNegoUtil::GetMediaNegoInfo(IN ImsMap<IMS_UINTP, MediaNego*>* pMediaNegoMap,
         IN const AString& strIpAddr, IN IMS_SINT32 nPort, OUT IMS_UINTP& nNegoId,
         OUT MEDIA_CONTENT_TYPE& eMediaType)
 {

@@ -31,13 +31,13 @@ __IMS_TRACE_TAG_USER_DECL__("MED.MM");
 
 #define CALL_KEY_BROADCAST 0
 
-PRIVATE GLOBAL IMSMap<IMS_SINT32, MediaManager*> MediaManager::m_objMapMediaManager;
+PRIVATE GLOBAL ImsMap<IMS_SINT32, MediaManager*> MediaManager::m_objMapMediaManager;
 
 PRIVATE
 MediaManager::MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId) :
         ImsActivityEx(strName),
         m_nSlotId(nSlotId),
-        m_lstSessionNode(IMSList<MediaSessionNode*>()),
+        m_lstSessionNode(ImsList<MediaSessionNode*>()),
         m_pResourceMngr(IMS_NULL)
 {
     IMS_TRACE_D("+MediaManager() thread[%s], nSlotId[%d]", strName.GetStr(), nSlotId, 0);

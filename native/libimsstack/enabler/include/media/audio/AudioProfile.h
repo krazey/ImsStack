@@ -441,9 +441,9 @@ public:
     class CapaNego
     {
     public:
-        IMSMap<IMS_SINT32, AString> mapTransportCapa;
-        IMSMap<IMS_SINT32, AString> mapAttributeCapa;
-        IMSList<AString> lstPotentialConfig;
+        ImsMap<IMS_SINT32, AString> mapTransportCapa;
+        ImsMap<IMS_SINT32, AString> mapAttributeCapa;
+        ImsList<AString> lstPotentialConfig;
 
         AString strNegotiatedAcfg;
         IMS_BOOL bIsAttCapaInPcfg;
@@ -516,11 +516,11 @@ public:
     IMS_SINT32 nBandwidthAs;
     IMS_SINT32 nBandwidthRs;
     IMS_SINT32 nBandwidthRr;
-    IMSList<Payload*> lstPayload;
+    ImsList<Payload*> lstPayload;
     MEDIA_DIRECTION eDirection;
     IMS_SINT32 nPtime;
     IMS_SINT32 nMaxPtime;
-    IMSVector<AString> objCandidateAttr;
+    ImsVector<AString> objCandidateAttr;
     IMS_SINT32 nNegotiatedPayloadIndex;
     IMS_BOOL bIsOfferCase;
     CapaNego objCapaNego;
@@ -538,11 +538,11 @@ public:
             nBandwidthAs(0),
             nBandwidthRs(0),
             nBandwidthRr(0),
-            lstPayload(IMSList<Payload*>()),
+            lstPayload(ImsList<Payload*>()),
             eDirection(MEDIA_DIRECTION_SEND_RECEIVE),
             nPtime(0),
             nMaxPtime(0),
-            objCandidateAttr(IMSVector<AString>()),
+            objCandidateAttr(ImsVector<AString>()),
             nNegotiatedPayloadIndex(-1),
             bIsOfferCase(IMS_FALSE),
             objCapaNego(CapaNego()),

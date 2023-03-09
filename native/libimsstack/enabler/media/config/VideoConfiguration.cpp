@@ -147,15 +147,15 @@ PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierCon
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32> objAvcPayloadType =
+    ImsVector<IMS_SINT32> objAvcPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY); */
 
     // TODO: read carrier_config xml instead of Bundle due to comment out above
-    IMSVector<IMS_SINT32> objAvcPayloadType =
+    ImsVector<IMS_SINT32> objAvcPayloadType =
             piCc->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
     /** TODO: need to add after creating HEVC in CarrierConfig */
-    /* IMSVector<IMS_SINT32> objHevcPayloadType = piCcBundle->GetIntArray(
+    /* ImsVector<IMS_SINT32> objHevcPayloadType = piCcBundle->GetIntArray(
             CarrierConfig::ImsVt::KEY_HEVC_PAYLOAD_TYPE_INT_ARRAY); */
 
     IMS_UINT32 nCodecCnt = 0;

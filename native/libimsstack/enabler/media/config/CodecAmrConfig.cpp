@@ -43,8 +43,8 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
 {
     IMS_TRACE_D("Create - nCodec[%d %s]", m_nCodec, ImsCodec::CodecToString(m_nCodec), 0);
 
-    IMSVector<IMS_SINT32> objCodecAttributeModeset;
-    IMSVector<IMS_SINT32> objCodecAttributeDefaultModeset;
+    ImsVector<IMS_SINT32> objCodecAttributeModeset;
+    ImsVector<IMS_SINT32> objCodecAttributeDefaultModeset;
 
     if (piCc == IMS_NULL)
     {
@@ -59,7 +59,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     if (m_nCodec == ImsCodec::AUDIO_AMR)
     {
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMR;
-        IMSVector<IMS_SINT32> objOctetAlign = piCc->GetIntArray(
+        ImsVector<IMS_SINT32> objOctetAlign = piCc->GetIntArray(
                 CarrierConfig::Assets::KEY_ASSET_AMRNB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY);
 
         IMS_TRACE_D("Create - Codec[%d] nCodecIdx[%d] octet size[%d]", m_nCodec, nCodecIdx,
@@ -86,7 +86,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     else if (m_nCodec == ImsCodec::AUDIO_AMR_WB)
     {
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMRWB;
-        IMSVector<IMS_SINT32> objOctetAlign = piCc->GetIntArray(
+        ImsVector<IMS_SINT32> objOctetAlign = piCc->GetIntArray(
                 CarrierConfig::Assets::KEY_ASSET_AMRWB_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT_ARRAY);
 
         IMS_TRACE_D("Create - Codec[%d] nCodecIdx[%d] octet size[%d]", m_nCodec, nCodecIdx,

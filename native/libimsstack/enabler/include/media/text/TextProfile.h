@@ -160,7 +160,7 @@ public:
     IMS_SINT32 nBandwidthAs;
     IMS_SINT32 nBandwidthRs;
     IMS_SINT32 nBandwidthRr;
-    IMSList<Payload*> lstPayload;
+    ImsList<Payload*> lstPayload;
     MEDIA_DIRECTION eDirection;
     IMS_BOOL bISOfferCase;
     IMS_BOOL bIsHold;

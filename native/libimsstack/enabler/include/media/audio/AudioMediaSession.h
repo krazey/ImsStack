@@ -175,7 +175,7 @@ protected:
     MediaQualityThreshold m_objMediaQualityThreshold;
     IpAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
-    IMSList<IMS_UINTP> m_listNegoId;
+    ImsList<IMS_UINTP> m_listNegoId;
     IMS_SINT32 m_nInactivityTimer;
 };
 

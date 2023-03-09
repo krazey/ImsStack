@@ -34,7 +34,7 @@ PUBLIC MediaResourceManager::MediaResourceManager(IN IMS_SINT32 nSlotId) :
         m_bIsIpv6(IMS_FALSE),
         m_nNetworkType(MediaNetworkConnectionWatcher::UNKNOWN),
         m_nMtu(1500),
-        m_lstUsedRtpPort(IMSList<IMS_UINT32>()),
+        m_lstUsedRtpPort(ImsList<IMS_UINT32>()),
         m_pNetworkConnectionWatcher(IMS_NULL)
 {
 }

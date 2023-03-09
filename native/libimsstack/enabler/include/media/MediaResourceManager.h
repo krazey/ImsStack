@@ -87,7 +87,7 @@ private:
     IMS_BOOL m_bIsIpv6;
     IMS_SINT32 m_nNetworkType;
     IMS_SINT32 m_nMtu;
-    IMSList<IMS_UINT32> m_lstUsedRtpPort;
+    ImsList<IMS_UINT32> m_lstUsedRtpPort;
     MediaNetworkConnectionWatcher* m_pNetworkConnectionWatcher;
 };
 
