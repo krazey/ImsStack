@@ -62,12 +62,11 @@ import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -81,8 +80,7 @@ import java.util.Set;
 @TestableLooper.RunWithLooper
 public class ImsCallSessionImplTest extends ImsStackTest {
     private static final String LOG_TAG = "ImsCallSessionImplTest";
-    private static final int SLOT_ID = 0;
-    private static Context sMockContext;
+    private Context mMockContext;
     private CarrierConfig mMockCarrierConfig;
     private ConfigInterface mMockConfigInterface;
     private ImsCallContext mMockCallContext;
@@ -101,15 +99,12 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     private Map<Integer, Boolean> mCallFeaturemap = new HashMap<Integer, Boolean>();
     private ImsCallSessionImpl.CallDetails mCallDetails;
 
-    @BeforeClass
-    public static void setUpOnce() {
-        sMockContext = Mockito.mock(Context.class);
-        AppContext.init(sMockContext);
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp(getClass().getSimpleName());
+        mMockContext = Mockito.mock(Context.class);
+        AppContext.init(mMockContext);
+
         mMockCallContext = Mockito.mock(ImsCallContext.class);
         mMockCallTracker = Mockito.mock(CallTracker.class);
         mMockCallInfo = Mockito.mock(CallInfo.class);
@@ -133,7 +128,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         Handler handler = new MessageExecutor(ImsCallUtils.class.getSimpleName());
         when(mMockCallContext.getCallHandler()).thenReturn(handler);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface,
+                MSimUtils.DEFAULT_SLOT_ID);
     }
 
     @After
@@ -142,12 +138,9 @@ public class ImsCallSessionImplTest extends ImsStackTest {
         mImsCallSession = null;
         mImsCallProfile = null;
         mMediaInfoCaptor = null;
+        mMockContext = null;
         mCallFeaturemap.clear();
-        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, MSimUtils.DEFAULT_SLOT_ID);
         AppContext.deinit();
     }
 

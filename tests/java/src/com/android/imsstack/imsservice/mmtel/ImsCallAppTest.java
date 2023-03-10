@@ -46,9 +46,7 @@ import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -58,17 +56,14 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
 public class ImsCallAppTest {
-    private static final int PHONE_ID = MSimUtils.DEFAULT_PHONE_ID;
     private ImsCallApp mImsCallApp;
     private MessageExecutor mExecutor;
     private MockIAosRegistration mAosReg;
-    private int mSlotId0 = MSimUtils.DEFAULT_SLOT_ID;
     ImsUtImpl mImsUtImpl;
     ImsEcbmImpl mImsEcbmImpl;
     ImsMultiEndpointImpl mMultiEndpoint;
     ImsSmsImpl mImsSmsImpl;
 
-    @Mock private static Context sMockContext;
     @Mock private Context mMockContext;
     @Mock private ImsCallContext mMockImsCallContext;
     @Mock private IMmTelFeatureCapabilityListener mMockFeatureCapabilityListener;
@@ -80,30 +75,22 @@ public class ImsCallAppTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        AppContext.init(mMockContext);
 
         mExecutor = new MessageExecutor(ImsCallApp.class.getSimpleName());
         when(mMockImsCallContext.getExecutor()).thenReturn(mExecutor);
         doReturn(Looper.getMainLooper()).when(mMockImsCallContext).getCallLooper();
 
-        mImsCallApp = new ImsCallApp(PHONE_ID, mMockContext, mExecutor, mRegTracker,
-                        mMockFeatureCapabilityListener, mMockCallListener, mMockImsCallContext,
-                        mMockImsCallManager, mFeatureManager);
-    }
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sMockContext = Mockito.mock(Context.class);
-        AppContext.init(sMockContext);
+        mImsCallApp = new ImsCallApp(MSimUtils.DEFAULT_PHONE_ID, mMockContext, mExecutor,
+                        mRegTracker, mMockFeatureCapabilityListener, mMockCallListener,
+                        mMockImsCallContext, mMockImsCallManager, mFeatureManager);
     }
 
     @After
     public void tearDown() throws Exception {
         mImsCallApp = null;
         mExecutor = null;
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        mMockContext = null;
         AppContext.deinit();
     }
 
