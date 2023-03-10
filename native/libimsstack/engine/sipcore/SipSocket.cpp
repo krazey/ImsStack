@@ -204,7 +204,7 @@ void SipSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
 
 PROTECTED VIRTUAL void SipSocket::Socket_OnSendEnabled(IN ISocket* /*piSocket*/)
 {
-    IMSList<ISipSocketListener*> objTmpListeners = m_objListeners;
+    ImsList<ISipSocketListener*> objTmpListeners = m_objListeners;
 
     for (IMS_UINT32 i = 0; i < objTmpListeners.GetSize(); ++i)
     {
@@ -219,7 +219,7 @@ PROTECTED VIRTUAL void SipSocket::Socket_OnSendEnabled(IN ISocket* /*piSocket*/)
 
 PROTECTED VIRTUAL void SipSocket::Socket_OnConnected(IN ISocket* /*piSocket*/)
 {
-    IMSList<ISipSocketListener*> objTmpListeners = m_objListeners;
+    ImsList<ISipSocketListener*> objTmpListeners = m_objListeners;
 
     for (IMS_UINT32 i = 0; i < objTmpListeners.GetSize(); ++i)
     {
@@ -235,7 +235,7 @@ PROTECTED VIRTUAL void SipSocket::Socket_OnConnected(IN ISocket* /*piSocket*/)
 PROTECTED VIRTUAL void SipSocket::Socket_OnClosed(
         IN ISocket* /*piSocket*/, IN IMS_SINT32 nReason /*= ISocket::CLOSE_REASON_UNKNOWN*/)
 {
-    IMSList<ISipSocketListener*> objTmpListeners = m_objListeners;
+    ImsList<ISipSocketListener*> objTmpListeners = m_objListeners;
     IMS_SINT32 nErrorCode = ERROR_CLOSED;
     IMS_SINT32 nPrevState = GetState();
 

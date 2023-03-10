@@ -64,7 +64,7 @@ PUBLIC VIRTUAL IConnection* ServiceProtocol::OpenPrim(
         return IMS_NULL;
     }
 
-    IMSList<AString> objTokens = strParams.Split(TextParser::CHAR_SEMICOLON);
+    ImsList<AString> objTokens = strParams.Split(TextParser::CHAR_SEMICOLON);
 
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
     {

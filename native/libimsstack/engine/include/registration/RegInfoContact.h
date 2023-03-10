@@ -40,7 +40,7 @@ public:
     inline IMS_UINT32 GetRetryAfterValue() const override { return m_nRetryAfter; }
     inline IMS_SINT32 GetState() const override { return m_nState; }
     const AString& GetUnknownParameter(IN const AString& strName) const override;
-    inline const IMSMap<AString, AString>& GetUnknownParameters() const override
+    inline const ImsMap<AString, AString>& GetUnknownParameters() const override
     {
         return m_objUnknownParameters;
     }
@@ -135,7 +135,7 @@ private:
     TempGruu m_objTempGruu;
 
     // Map for unknown parameters
-    IMSMap<AString, AString> m_objUnknownParameters;
+    ImsMap<AString, AString> m_objUnknownParameters;
 };
 
 #endif

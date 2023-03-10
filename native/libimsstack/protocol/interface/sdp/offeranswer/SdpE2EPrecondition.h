@@ -35,10 +35,10 @@ public:
     inline IMS_BOOL IsPreconditionPresent() const override { return !m_objE2EDetails.IsEmpty(); }
     AString ToSdp(IN IMS_SINT32 nAttribute) const override;
 
-    inline const IMSList<DetailInfo>& GetE2EDetails() const { return m_objE2EDetails; }
+    inline const ImsList<DetailInfo>& GetE2EDetails() const { return m_objE2EDetails; }
 
 private:
-    IMSList<DetailInfo> m_objE2EDetails;
+    ImsList<DetailInfo> m_objE2EDetails;
 };
 
 #endif

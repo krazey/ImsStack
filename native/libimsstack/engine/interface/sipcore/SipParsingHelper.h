@@ -96,7 +96,7 @@ public:
      * @param objReasonHeaders Reason header list
      * @return Reason header which indicates "SIP" protocol.
      */
-    static const AString& GetSipReasonHeader(IN const IMSList<AString>& objReasonHeaders);
+    static const AString& GetSipReasonHeader(IN const ImsList<AString>& objReasonHeaders);
 
     /**
      * @brief Parses Reason header with "cause" / "text" parameters.

@@ -35,12 +35,12 @@ public:
     IMS_BOOL IsPreconditionPresent() const override;
     AString ToSdp(IN IMS_SINT32 nAttribute) const override;
 
-    inline const IMSList<DetailInfo>& GetLocalDetails() const { return m_objLocalDetails; }
-    inline const IMSList<DetailInfo>& GetRemoteDetails() const { return m_objRemoteDetails; }
+    inline const ImsList<DetailInfo>& GetLocalDetails() const { return m_objLocalDetails; }
+    inline const ImsList<DetailInfo>& GetRemoteDetails() const { return m_objRemoteDetails; }
 
 private:
-    IMSList<DetailInfo> m_objLocalDetails;
-    IMSList<DetailInfo> m_objRemoteDetails;
+    ImsList<DetailInfo> m_objLocalDetails;
+    ImsList<DetailInfo> m_objRemoteDetails;
 };
 
 #endif

@@ -43,10 +43,10 @@ public:
 
 private:
     // < SIP method, Flag of callee preference >
-    IMSMap<IMS_SINT32, IMS_BOOL> m_objCalleePreferences;
+    ImsMap<IMS_SINT32, IMS_BOOL> m_objCalleePreferences;
 
     IMS_UINT32 m_nNextTriggerPointId;
-    IMSMap<IMS_UINT32, TriggerPoint*> m_objTriggerPoints;
+    ImsMap<IMS_UINT32, TriggerPoint*> m_objTriggerPoints;
 };
 
 #endif

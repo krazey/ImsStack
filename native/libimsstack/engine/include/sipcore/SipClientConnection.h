@@ -52,7 +52,7 @@ public:
     // ISipConnection interface
     IMS_RESULT AddHeader(IN const AString& strName, IN const AString& strValue) override;
     AString GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex = 0) override;
-    IMSList<AString> GetHeaders(IN const AString& strName) override;
+    ImsList<AString> GetHeaders(IN const AString& strName) override;
     const SipMethod& GetMethod() const override;
     const AString& GetReasonPhrase() const override;
     const AString& GetRequestUri() const override;
@@ -70,7 +70,7 @@ public:
     SipClientConnection* InitCancel();
     IMS_RESULT InitRequest(IN const AString& strMethod, IN SipConnectionNotifier* pScn);
     IMS_RESULT Receive(IN IMS_SLONG nTimeout = 0);
-    IMS_RESULT SetCredentials(IN IMSList<Credential>& objCredentials);
+    IMS_RESULT SetCredentials(IN ImsList<Credential>& objCredentials);
     IMS_RESULT SetCredentials(IN const Credential& objCredential);
     inline void SetListener(IN IOnSipClientConnectionListener* piListener)
     {
@@ -140,7 +140,7 @@ private:
     //    : CANCEL & ACK to non-2xx response
     AString m_strTargetUri;
     RcPtr<SipClientTransactionState> m_pCtState;
-    IMSList<sipcore::SipMessage*> m_objResponseMessages;
+    ImsList<sipcore::SipMessage*> m_objResponseMessages;
     SipAuHelper* m_pAuHelper;
     IOnSipClientConnectionListener* m_piListener;
     // UDP_FALLBACK

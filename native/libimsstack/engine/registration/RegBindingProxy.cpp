@@ -77,7 +77,7 @@ PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
 PUBLIC GLOBAL void RegBindingProxy::DestroyBinding(
         IN IMS_SINT32 nSlotId, IN IRegistrationEx* piRegEx)
 {
-    IMSList<IRegBinding*> objRegBindings = ServiceResolver::GetRegBindings(nSlotId);
+    ImsList<IRegBinding*> objRegBindings = ServiceResolver::GetRegBindings(nSlotId);
 
     for (IMS_UINT32 i = 0; i < objRegBindings.GetSize();)
     {
@@ -149,7 +149,7 @@ PUBLIC GLOBAL void RegBindingProxy::UnbindContact(
 
 PUBLIC GLOBAL void RegBindingProxy::UnbindContact(IN IMS_SINT32 nSlotId, IN IRegContact* piContact)
 {
-    IMSList<IRegBinding*> objRegBindings = ServiceResolver::GetRegBindings(nSlotId);
+    ImsList<IRegBinding*> objRegBindings = ServiceResolver::GetRegBindings(nSlotId);
 
     for (IMS_UINT32 i = 0; i < objRegBindings.GetSize(); ++i)
     {

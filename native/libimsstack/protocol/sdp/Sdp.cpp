@@ -296,7 +296,7 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeRtpmap(IN const AString& strValue,
         OUT IMS_SINT32& nPayloadType, OUT AString& strEncodingName, OUT IMS_UINT32& nClockRate,
         OUT AString& strEncodingParameters)
 {
-    IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
+    ImsList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
 
     if (objTokens.GetSize() < 2)
     {
@@ -306,7 +306,7 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeRtpmap(IN const AString& strValue,
     // Payload type
     nPayloadType = objTokens.GetAt(0).ToInt32();
 
-    IMSList<AString> objTokens2 = objTokens.GetAt(1).Split(TextParser::CHAR_SLASH);
+    ImsList<AString> objTokens2 = objTokens.GetAt(1).Split(TextParser::CHAR_SLASH);
 
     if (objTokens2.GetSize() < 2)
     {
@@ -365,7 +365,7 @@ PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeRtcp(IN const AString& strValue, OUT I
         return IMS_FALSE;
     }
 
-    IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
+    ImsList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
 
     if (objTokens.GetSize() < 1)
     {

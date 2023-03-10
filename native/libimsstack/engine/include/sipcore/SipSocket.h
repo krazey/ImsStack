@@ -139,7 +139,7 @@ protected:
     SipSocketAddress m_objSockAddr;
 
     ISocket* m_piSocket;
-    IMSList<ISipSocketListener*> m_objListeners;
+    ImsList<ISipSocketListener*> m_objListeners;
     ISipKeepAliveListener* m_piKeepAliveListener;
 
 private:

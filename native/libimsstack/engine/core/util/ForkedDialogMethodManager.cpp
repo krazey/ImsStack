@@ -27,7 +27,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 PRIVATE
 ForkedDialogMethodManager::ForkedDialogMethodManager() :
         m_piLock(IMS_NULL),
-        m_objDialogMethods(IMSMap<AString, IForkedDialogMethod*>())
+        m_objDialogMethods(ImsMap<AString, IForkedDialogMethod*>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }

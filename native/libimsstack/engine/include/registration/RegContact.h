@@ -42,7 +42,7 @@ public:
     IMS_UINT32 GetExpires() const override;
     inline const IpAddress& GetIpAddress() const override { return m_objIpAddr; }
     inline IMS_SINT32 GetPort() const override { return m_objContactAddress.GetPort(); }
-    inline const IMSList<SipParameter*>& GetHeaderParameters() const override
+    inline const ImsList<SipParameter*>& GetHeaderParameters() const override
     {
         return m_objHeaderParams;
     }
@@ -54,7 +54,7 @@ public:
 
     inline const SipAddress* GetPublicGruu() const override { return m_pPubGruu; }
     inline const SipAddress* GetTemporaryGruu() const override { return m_pTempGruu; }
-    inline const IMSList<SipAddress*>& GetTemporaryGruus() const override { return m_objTempGruus; }
+    inline const ImsList<SipAddress*>& GetTemporaryGruus() const override { return m_objTempGruus; }
 
     IMS_BOOL IsActiveBinding() const override;
     inline IMS_BOOL IsEmpty() const override { return m_objCallerCapabilities.IsEmpty(); }
@@ -83,7 +83,7 @@ public:
     // For fake registration
     IMS_SINT32 UpdateParameter(IN IMS_SINT32 nExpiresValue);
     IMS_SINT32 UpdateParameter(
-            IN const IMSList<ISipHeader*>& objContactHeaders, IN IMS_SINT32 nExpiresValue);
+            IN const ImsList<ISipHeader*>& objContactHeaders, IN IMS_SINT32 nExpiresValue);
 
 private:
     // IRegContact interface
@@ -166,7 +166,7 @@ private:
 
     SipAddress* m_pPubGruu;
     SipAddress* m_pTempGruu;
-    IMSList<SipAddress*> m_objTempGruus;
+    ImsList<SipAddress*> m_objTempGruus;
 
     // All the caller capabilities for this contact
     IMS_BOOL m_bBindingsUpdateTracker;
@@ -175,7 +175,7 @@ private:
     CallerCapability* m_pAllCapabilities;
     CallerCapability* m_pExtraCapabilities;
     // Caller capability for each service
-    IMSList<CallerCapability*> m_objCallerCapabilities;
+    ImsList<CallerCapability*> m_objCallerCapabilities;
     IRegCapabilityChangeListener* m_piCapabilityChangeListener;
     // Registered capabilities: composed from 200OK-REGISTER
     CallerCapability* m_pRegisteredCapabilities;
@@ -186,7 +186,7 @@ private:
     IMS_UINT32 m_nNetworkProvisionedExpires;
 
     // Header parameters
-    IMSList<SipParameter*> m_objHeaderParams;
+    ImsList<SipParameter*> m_objHeaderParams;
 };
 
 #endif

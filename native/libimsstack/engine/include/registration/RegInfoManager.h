@@ -63,9 +63,9 @@ private:
     IMutex* m_piLock;
 
     // List of "reginfo" parser
-    IMSList<RegInfoParser*> m_objParsers;
+    ImsList<RegInfoParser*> m_objParsers;
     // < RegKey , RegInfo* >
-    IMSMap<RegKey, RegInfo*> m_objRegInfos;
+    ImsMap<RegKey, RegInfo*> m_objRegInfos;
 };
 
 #endif

@@ -38,7 +38,7 @@ public:
     // ISipConnection interface
     IMS_RESULT AddHeader(IN const AString& strName, IN const AString& strValue) override;
     AString GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex = 0) override;
-    IMSList<AString> GetHeaders(IN const AString& strName) override;
+    ImsList<AString> GetHeaders(IN const AString& strName) override;
     const SipMethod& GetMethod() const override;
     const AString& GetReasonPhrase() const override;
     const AString& GetRequestUri() const override;

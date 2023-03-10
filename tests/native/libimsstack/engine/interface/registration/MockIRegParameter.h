@@ -40,7 +40,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetPort, (), (const, override));
     MOCK_METHOD(const SipSecurityHeader*, GetPreferredSecurityClient, (), (const, override));
     MOCK_METHOD(const SipSecurityHeader*, GetPreferredSecurityServer, (), (const, override));
-    MOCK_METHOD(const IMSList<SipSecurityHeader>&, GetSecurityServers, (), (const, override));
+    MOCK_METHOD(const ImsList<SipSecurityHeader>&, GetSecurityServers, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetTopmostRouteAddress, (), (const, override));
     MOCK_METHOD(void, RemoveAllMessageBodyParts, (), (override));
     MOCK_METHOD(void, RemoveAllPreloadedRoutes, (), (override));
@@ -50,7 +50,7 @@ public:
     MOCK_METHOD(void, SetFlowControlOption, (IN IMS_SINT32 nOption), (override));
     MOCK_METHOD(void, SetPort, (IN IMS_SINT32 nPort), (override));
     MOCK_METHOD(void, SetPortFlowControl, (IN IMS_SINT32 nPort), (override));
-    MOCK_METHOD(void, SetSecurityVerifys, (IN const IMSList<SipSecurityHeader>& objSecurityVerifys),
+    MOCK_METHOD(void, SetSecurityVerifys, (IN const ImsList<SipSecurityHeader>& objSecurityVerifys),
             (override));
     MOCK_METHOD(void, SetSipTimerValues, (IN const SipTimerValues& objTimerValues), (override));
     MOCK_METHOD(void, SetTransportExt, (IN IMS_SINT32 nTransportExt), (override));

@@ -24,11 +24,11 @@
 
 PUBLIC
 PreferenceHeader::PreferenceHeader(IN const AString& strHeader) :
-        m_objPreferenceFeatures(IMSList<FeatureSet*>()),
+        m_objPreferenceFeatures(ImsList<FeatureSet*>()),
         m_bExplicit(IMS_FALSE),
         m_bRequire(IMS_FALSE)
 {
-    IMSList<AString> objTokens = strHeader.Split(TextParser::CHAR_SEMICOLON);
+    ImsList<AString> objTokens = strHeader.Split(TextParser::CHAR_SEMICOLON);
 
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
     {
@@ -55,7 +55,7 @@ PreferenceHeader::PreferenceHeader(IN const AString& strHeader) :
 
 PUBLIC
 PreferenceHeader::PreferenceHeader(IN const ISipHeader* piHeader) :
-        m_objPreferenceFeatures(IMSList<FeatureSet*>()),
+        m_objPreferenceFeatures(ImsList<FeatureSet*>()),
         m_bExplicit(IMS_FALSE),
         m_bRequire(IMS_FALSE)
 {
@@ -64,7 +64,7 @@ PreferenceHeader::PreferenceHeader(IN const ISipHeader* piHeader) :
         return;
     }
 
-    const IMSList<SipParameter*>& objParameters = piHeader->GetParameters();
+    const ImsList<SipParameter*>& objParameters = piHeader->GetParameters();
 
     for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
     {
@@ -106,7 +106,7 @@ PreferenceHeader::PreferenceHeader(IN const ISipHeader* piHeader) :
 
 PUBLIC
 PreferenceHeader::PreferenceHeader(IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire) :
-        m_objPreferenceFeatures(IMSList<FeatureSet*>()),
+        m_objPreferenceFeatures(ImsList<FeatureSet*>()),
         m_bExplicit(bExplicit),
         m_bRequire(bRequire)
 {
@@ -294,7 +294,7 @@ void PreferenceHeader::ExtractProperties(IN const AString& strFeatureSet)
 
         if (strValue.Contains(TextParser::CHAR_COMMA))
         {
-            IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_COMMA);
+            ImsList<AString> objTokens = strValue.Split(TextParser::CHAR_COMMA);
 
             for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
             {

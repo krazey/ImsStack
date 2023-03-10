@@ -162,7 +162,7 @@ void RegStateTracker::SetPreferredContact(IN RegContact* pContact)
 }
 
 PRIVATE
-void RegStateTracker::SetSecurityClients(IN const IMSList<SipSecurityHeader>& objClients)
+void RegStateTracker::SetSecurityClients(IN const ImsList<SipSecurityHeader>& objClients)
 {
     m_objSecurityClients.RemoveAllElements();
 
@@ -175,7 +175,7 @@ void RegStateTracker::SetSecurityClients(IN const IMSList<SipSecurityHeader>& ob
 }
 
 PRIVATE
-void RegStateTracker::SetSecurityVerifys(IN const IMSList<SipSecurityHeader>& objVerifys)
+void RegStateTracker::SetSecurityVerifys(IN const ImsList<SipSecurityHeader>& objVerifys)
 {
     m_objSecurityVerifys.RemoveAllElements();
 

@@ -36,7 +36,7 @@ public:
             (override));
     MOCK_METHOD(ISipDialog*, GetDialog, (), (const, override));
     MOCK_METHOD(AString, GetHeader, (IN const AString& strName, IN IMS_SINT32 nIndex), (override));
-    MOCK_METHOD(IMSList<AString>, GetHeaders, (IN const AString& strName), (override));
+    MOCK_METHOD(ImsList<AString>, GetHeaders, (IN const AString& strName), (override));
     MOCK_METHOD(const SipMethod&, GetMethod, (), (const, override));
     MOCK_METHOD(const AString&, GetReasonPhrase, (), (const, override));
     MOCK_METHOD(const AString&, GetRequestUri, (), (const, override));

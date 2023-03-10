@@ -38,7 +38,7 @@ public:
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
     MOCK_METHOD(
             const AString&, GetUnknownParameter, (IN const AString& strName), (const, override));
-    MOCK_METHOD((const IMSMap<AString, AString>&), GetUnknownParameters, (), (const, override));
+    MOCK_METHOD((const ImsMap<AString, AString>&), GetUnknownParameters, (), (const, override));
     MOCK_METHOD(const SipAddress&, GetUri, (), (const, override));
 };
 

@@ -47,7 +47,7 @@ protected:
             IN const AString& strOld, IN const AString& strNew) override;
 
 private:
-    IMSMap<AString, IMSList<SipAddress*>>* GetSubscribers(IN IMS_SINT32 nSlotId) const;
+    ImsMap<AString, ImsList<SipAddress*>>* GetSubscribers(IN IMS_SINT32 nSlotId) const;
     void Initialize();
     void InitForSlot(IN IMS_SINT32 nSlotId);
 
@@ -57,7 +57,7 @@ private:
     IMutex* m_piLock;
     // < SubscriberConfig id, IMPUs >
     // DEFAULT_ID : "default"
-    IMSMap<AString, IMSList<SipAddress*>>* m_pSubscriberMaps;
+    ImsMap<AString, ImsList<SipAddress*>>* m_pSubscriberMaps;
 };
 
 #endif

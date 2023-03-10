@@ -509,7 +509,7 @@ PROTECTED VIRTUAL const SipAddress* RegBinding::GetTemporaryGruu() const
     return m_piContact->GetTemporaryGruu();
 }
 
-PROTECTED VIRTUAL const IMSList<SipAddress*>& RegBinding::GetTemporaryGruus() const
+PROTECTED VIRTUAL const ImsList<SipAddress*>& RegBinding::GetTemporaryGruus() const
 {
     if (m_piRegEx == IMS_NULL)
     {

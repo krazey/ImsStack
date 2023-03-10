@@ -41,7 +41,7 @@ public:
     IMS_BOOL Create(IN const AppConfig* pAppConfig, IN const ICoreServiceConfig* piServiceConfig,
             IN const ISipConfigV* piSipConfigV);
     IMS_BOOL Equals(IN const CallerCapability* pCc) const;
-    inline const IMSList<FeatureSet*>& GetFeatures() const { return m_objContactFeatures; }
+    inline const ImsList<FeatureSet*>& GetFeatures() const { return m_objContactFeatures; }
     IMS_BOOL HasFeature(IN const Feature* pFeature) const;
     inline IMS_BOOL IsEmpty() const { return m_objContactFeatures.IsEmpty(); }
     IMS_BOOL RemoveFeature(IN const Feature* pFeature);
@@ -67,7 +67,7 @@ private:
     };
 
     IMS_UINT32 m_nId;
-    IMSList<FeatureSet*> m_objContactFeatures;
+    ImsList<FeatureSet*> m_objContactFeatures;
 };
 
 #endif

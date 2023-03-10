@@ -277,7 +277,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipMessage::GetHeaderCount(
     }
 }
 
-PUBLIC VIRTUAL IMSList<AString> SipMessage::GetHeaders(
+PUBLIC VIRTUAL ImsList<AString> SipMessage::GetHeaders(
         IN IMS_SINT32 nType, IN const AString& strName /*= AString::ConstNull()*/) const
 {
     SipPrivate::SetLastError(SipError::NO_ERROR);
@@ -288,7 +288,7 @@ PUBLIC VIRTUAL IMSList<AString> SipMessage::GetHeaders(
     }
     else
     {
-        IMSList<AString> objHeaders;
+        ImsList<AString> objHeaders;
         IMS_SINT32 nHCount = SipStack::GetHeaderCount(m_pSipMsg, nType);
         AString strHeader;
 
@@ -303,7 +303,7 @@ PUBLIC VIRTUAL IMSList<AString> SipMessage::GetHeaders(
                 if (!objHeaders.Append(strHeader))
                 {
                     SipStack::FreeHeaderEx(pSipHdr);
-                    return IMSList<AString>();
+                    return ImsList<AString>();
                 }
             }
 
@@ -441,14 +441,14 @@ PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::CreateSdpBodyPart()
     return pBodyPart;
 }
 
-PUBLIC VIRTUAL IMSList<ISipMessageBodyPart*> SipMessage::GetBodyParts() const
+PUBLIC VIRTUAL ImsList<ISipMessageBodyPart*> SipMessage::GetBodyParts() const
 {
     if (m_objBodyParts.IsEmpty())
     {
-        return IMSList<ISipMessageBodyPart*>();
+        return ImsList<ISipMessageBodyPart*>();
     }
 
-    IMSList<ISipMessageBodyPart*> objSipBodyParts;
+    ImsList<ISipMessageBodyPart*> objSipBodyParts;
 
     for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
     {
@@ -483,14 +483,14 @@ PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::GetSdpBodyPart() const
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL IMSList<ISipMessageBodyPart*> SipMessage::GetSdpBodyParts() const
+PUBLIC VIRTUAL ImsList<ISipMessageBodyPart*> SipMessage::GetSdpBodyParts() const
 {
     if (m_objBodyParts.IsEmpty())
     {
-        return IMSList<ISipMessageBodyPart*>();
+        return ImsList<ISipMessageBodyPart*>();
     }
 
-    IMSList<ISipMessageBodyPart*> objSipBodyParts;
+    ImsList<ISipMessageBodyPart*> objSipBodyParts;
 
     for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
     {

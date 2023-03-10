@@ -167,9 +167,9 @@ private:
     IRefreshListener* m_piRefreshListener;
     SubscriberRefreshHelper* m_pRefreshHelper;
     // Queue for NOTIFY request messages
-    IMSList<Message*> m_objNotifyMessages;
+    ImsList<Message*> m_objNotifyMessages;
     // For forked NOTIFY request
-    IMSList<Subscription*> m_objForkedSubscriptions;
+    ImsList<Subscription*> m_objForkedSubscriptions;
     // Flag to indicate that the subscription is created inside of any dialog (INVITE)
     IMS_BOOL m_bSubscriptionInOtherDialog;
     // IMPLICIT_ROUTING_FOR_MID_DIALOG

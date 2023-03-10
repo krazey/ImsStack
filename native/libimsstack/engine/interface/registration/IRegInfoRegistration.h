@@ -49,7 +49,7 @@ public:
      * @param objContactUri the contact URI to be retrieved
      * @return List of pointer to IRegInfoContact.
      */
-    virtual IMSList<IRegInfoContact*> GetContacts() const = 0;
+    virtual ImsList<IRegInfoContact*> GetContacts() const = 0;
 
     /**
      * @brief Returns the preferred contact information in this registration element.

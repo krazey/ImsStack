@@ -47,7 +47,7 @@ private:
 
     IMutex* m_piLock;
     // Name (identifier), Pointer of ICancellableMethod
-    IMSMap<AString, ICancellableMethod*> m_objCancellableMethods;
+    ImsMap<AString, ICancellableMethod*> m_objCancellableMethods;
 };
 
 #endif

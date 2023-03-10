@@ -46,7 +46,7 @@ public:
     {
         return m_objTopmostRouteAddress;
     }
-    inline void SetSecurityVerifys(IN const IMSList<SipSecurityHeader>& objSecurityVerifys) override
+    inline void SetSecurityVerifys(IN const ImsList<SipSecurityHeader>& objSecurityVerifys) override
     {
         m_objSecurityVerifys = objSecurityVerifys;
     }
@@ -62,11 +62,11 @@ public:
     inline const AStringArray& GetPreloadedRoutes() const { return m_objPreloadedRoutes; }
     IMS_SINT32 GetProtectedPortUc() const;
     IMS_SINT32 GetProtectedPortUs() const;
-    inline const IMSList<SipSecurityHeader>& GetSecurityClients() const
+    inline const ImsList<SipSecurityHeader>& GetSecurityClients() const
     {
         return m_objSecurityClients;
     }
-    const IMSList<SipSecurityHeader>& GetSecurityVerifys() const;
+    const ImsList<SipSecurityHeader>& GetSecurityVerifys() const;
     inline const SipTimerValues* GetSipTimerValues() const { return m_pSipTimerValues; }
     inline IMS_SINT32 GetTransportExt() const { return m_nTransportExt; }
     inline IMS_SINT32 GetTransportExtForRegOnly() const { return m_nTransportExtForRegOnly; }
@@ -113,7 +113,7 @@ private:
     {
         return m_pPreferredSecurityServer;
     }
-    inline const IMSList<SipSecurityHeader>& GetSecurityServers() const override
+    inline const ImsList<SipSecurityHeader>& GetSecurityServers() const override
     {
         return m_objSecurityServers;
     }
@@ -162,15 +162,15 @@ private:
     SipAddress m_objTopmostRouteAddress;
 
     // Security-Client headers
-    IMSList<SipSecurityHeader> m_objSecurityClients;
-    IMSList<SipSecurityHeader> m_objNewSecurityClients;
-    IMSList<SipSecurityHeader> m_objOldSecurityClients;
+    ImsList<SipSecurityHeader> m_objSecurityClients;
+    ImsList<SipSecurityHeader> m_objNewSecurityClients;
+    ImsList<SipSecurityHeader> m_objOldSecurityClients;
     // Security-Server header
-    IMSList<SipSecurityHeader> m_objSecurityServers;
-    IMSList<SipSecurityHeader> m_objOldSecurityServers;
+    ImsList<SipSecurityHeader> m_objSecurityServers;
+    ImsList<SipSecurityHeader> m_objOldSecurityServers;
     // Security-Verify header
-    IMSList<SipSecurityHeader> m_objSecurityVerifys;
-    IMSList<SipSecurityHeader> m_objOldSecurityVerifys;
+    ImsList<SipSecurityHeader> m_objSecurityVerifys;
+    ImsList<SipSecurityHeader> m_objOldSecurityVerifys;
 
     // Preferred Security Client/Server
     SipSecurityHeader* m_pPreferredSecurityClient;
@@ -179,7 +179,7 @@ private:
     // Extra headers from IMS registry
     ExtraHeaders* m_pExtraHeaders;
     // Message body parts which are always added in initial-REG/re-REG/de-REG
-    IMSList<ISipMessageBodyPart*> m_objBodyParts;
+    ImsList<ISipMessageBodyPart*> m_objBodyParts;
     // Credentials if present
     Credential m_objCredential;
     IMS_BOOL m_bIsAuthRealmLenient;

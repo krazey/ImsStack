@@ -23,7 +23,7 @@
 PRIVATE
 CallControlHelper::CallControlHelper() :
         m_nGlobalSessionId(0),
-        m_objSessions(IMSMap<AString, Replaces*>())
+        m_objSessions(ImsMap<AString, Replaces*>())
 {
 }
 

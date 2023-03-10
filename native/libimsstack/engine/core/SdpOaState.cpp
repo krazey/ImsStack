@@ -39,7 +39,7 @@ public:
 
     inline IMS_BOOL Create(IN const SdpSessionDescription& objSessionDesc)
     {
-        IMSList<SdpMediaDescription> objMediaDescs;
+        ImsList<SdpMediaDescription> objMediaDescs;
 
         if (!m_objCapabilities.Create(objSessionDesc, objMediaDescs))
         {
@@ -50,7 +50,7 @@ public:
     }
 
     inline IMS_BOOL Create(IN const SdpSessionDescription& objSessionDesc,
-            IN const IMSList<SdpMediaDescription>& objMediaDescs)
+            IN const ImsList<SdpMediaDescription>& objMediaDescs)
     {
         if (!m_objCapabilities.Create(objSessionDesc, objMediaDescs))
         {
@@ -70,9 +70,9 @@ public:
         return &objCapabilities;
     }
 
-    inline void GetBasicReliableMedias(OUT IMSList<SdpMediaParameter*> &objMediaParams) const
+    inline void GetBasicReliableMedias(OUT ImsList<SdpMediaParameter*> &objMediaParams) const
     {
-        const IMSList<SdpMediaParameter*> &objMedias = m_objCapabilities.GetMediaParameters();
+        const ImsList<SdpMediaParameter*> &objMedias = m_objCapabilities.GetMediaParameters();
 
         for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
         {
@@ -86,9 +86,9 @@ public:
         }
     }
 
-    inline void GetBasicUnreliableMedias(OUT IMSList<SdpMediaParameter*> &objMediaParams) const
+    inline void GetBasicUnreliableMedias(OUT ImsList<SdpMediaParameter*> &objMediaParams) const
     {
-        const IMSList<SdpMediaParameter*> &objMedias = m_objCapabilities.GetMediaParameters();
+        const ImsList<SdpMediaParameter*> &objMedias = m_objCapabilities.GetMediaParameters();
 
         for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
         {
@@ -102,9 +102,9 @@ public:
         }
     }
 
-    inline void GetFramedMedias(OUT IMSList<SdpMediaParameter*> &objMediaParams) const
+    inline void GetFramedMedias(OUT ImsList<SdpMediaParameter*> &objMediaParams) const
     {
-        const IMSList<SdpMediaParameter*> &objMedias = m_objCapabilities.GetMediaParameters();
+        const ImsList<SdpMediaParameter*> &objMedias = m_objCapabilities.GetMediaParameters();
 
         for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
         {
@@ -119,9 +119,9 @@ public:
         }
     }
 
-    inline void GetStreamMedias(OUT IMSList<SdpMediaParameter*> &objMediaParams) const
+    inline void GetStreamMedias(OUT ImsList<SdpMediaParameter*> &objMediaParams) const
     {
-        const IMSList<SdpMediaParameter*> &objMedias = m_objCapabilities.GetMediaParameters();
+        const ImsList<SdpMediaParameter*> &objMedias = m_objCapabilities.GetMediaParameters();
 
         for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
         {
@@ -734,7 +734,7 @@ IMS_BOOL SdpOaState::CreateCapabilities(
                                                                : AString::ConstNull();
         const MediaConfig* pMediaConfig =
                 ConfigurationManager::GetInstance()->GetMediaConfig(pService->GetSlotId());
-        IMSList<SdpMediaDescription> objMediaDescs;
+        ImsList<SdpMediaDescription> objMediaDescs;
 
         if (pMediaConfig != IMS_NULL)
         {

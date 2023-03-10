@@ -52,7 +52,7 @@ public:
 private:
     // FIX_NO_ACK_RETRANSMISSION :: this will be used for 2xx response received case only
     IMS_SINT32 m_nStatusCode;
-    IMSList<RcPtr<SipClientTransactionState>> m_objTxnStates;
+    ImsList<RcPtr<SipClientTransactionState>> m_objTxnStates;
 };
 
 #endif

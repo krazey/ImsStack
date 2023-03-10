@@ -44,12 +44,12 @@ public:
     SdpMediaParameter* GetMediaParameter(IN IMS_UINT32 nMid) const override;
 
     IMS_BOOL Create(IN const SdpSessionDescription& objSessionDescription,
-            IN const IMSList<SdpMediaDescription>& objMediaDescriptions);
+            IN const ImsList<SdpMediaDescription>& objMediaDescriptions);
     // Get session parameter as non-const
     inline SdpSessionParameter& GetSessionParameterNc() { return m_objSessionParam; }
     SdpMediaParameter* CreateMediaParameter();
     const SdpMediaGroup* GetMediaGroup(IN const AString& strMid) const;
-    inline const IMSList<SdpMediaParameter*>& GetMediaParameters() const
+    inline const ImsList<SdpMediaParameter*>& GetMediaParameters() const
     {
         return m_objMediaParams;
     }
@@ -57,7 +57,7 @@ public:
     IMS_BOOL IsSameVersion(IN const SessionParameter* pSessionParam) const;
     void RemoveMediaParameter(IN IMS_UINT32 nMid, IN IMS_BOOL bRejectedOrRemoved);
     IMS_BOOL FindGroupStartingWithMediaParameter(
-            IN IMS_SINT32 nIndex, OUT IMSList<SdpMediaParameter*>& objGroupMediaParams) const;
+            IN IMS_SINT32 nIndex, OUT ImsList<SdpMediaParameter*>& objGroupMediaParams) const;
     IMS_SINT32 GenerateAnswer(IN const SessionParameter* pOffer,
             OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView);
     IMS_SINT32 GenerateAnswer(IN const SessionParameter* pOffer,
@@ -93,10 +93,10 @@ private:
     // Session-level description
     SdpSessionParameter m_objSessionParam;
     // Attribute: "group" in the session level; it's related to "mid" attribute in the media-level
-    IMSList<SdpMediaGroup> m_objMediaGroups;
+    ImsList<SdpMediaGroup> m_objMediaGroups;
     // Media lines
     IMS_SINT32 m_nMid;  // Next Media Parameter Identifier
-    IMSList<SdpMediaParameter*> m_objMediaParams;
+    ImsList<SdpMediaParameter*> m_objMediaParams;
 };
 
 #endif

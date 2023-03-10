@@ -41,7 +41,7 @@ RegInfoContact::RegInfoContact() :
         m_nCSeq(0),
         m_strPubGruu(AString::ConstNull()),
         m_objTempGruu(TempGruu()),
-        m_objUnknownParameters(IMSMap<AString, AString>())
+        m_objUnknownParameters(ImsMap<AString, AString>())
 {
 }
 

@@ -65,7 +65,7 @@ PUBLIC GLOBAL Media* MediaFactory::CreateOutgoingMedia(IN const AString& strMTyp
 }
 
 PUBLIC GLOBAL Media* MediaFactory::CreateIncomingMedia(IN IMS_SINT32 nTransportProtocol,
-        IN Service* pService, IN ISdpOaState* piOaState, IN const IMSList<IMS_SINT32>& objMids)
+        IN Service* pService, IN ISdpOaState* piOaState, IN const ImsList<IMS_SINT32>& objMids)
 {
     const IMS_CHAR* pszMType = IMS_NULL;
     Media* pMedia = IMS_NULL;

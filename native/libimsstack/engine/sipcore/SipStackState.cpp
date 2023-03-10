@@ -31,7 +31,7 @@ __IMS_TRACE_TAG_SIP__;
 PRIVATE
 SipStackState::SipStackState() :
         m_piLock(IMS_NULL),
-        m_objTxnAggregate(IMSMap<IMS_UINT32, IMSList<SipStackTransaction*>>())
+        m_objTxnAggregate(ImsMap<IMS_UINT32, ImsList<SipStackTransaction*>>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
@@ -54,7 +54,7 @@ void SipStackState::CleanUp()
     {
         for (IMS_UINT32 i = 0; i < m_objTxnAggregate.GetSize(); ++i)
         {
-            IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(i);
+            ImsList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(i);
 
             for (IMS_UINT32 j = 0; j < objTransactions.GetSize(); ++j)
             {
@@ -224,7 +224,7 @@ IMS_BOOL SipStackState::AddTransaction(IN ::SipTxnKey* pKey, IN SipTxn* pTxn)
 
     if (nKeyIndex >= 0)
     {
-        IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
+        ImsList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
 
         if (!objTransactions.Append(pTransaction))
         {
@@ -235,7 +235,7 @@ IMS_BOOL SipStackState::AddTransaction(IN ::SipTxnKey* pKey, IN SipTxn* pTxn)
         return IMS_TRUE;
     }
 
-    IMSList<SipStackTransaction*> objTransactions;
+    ImsList<SipStackTransaction*> objTransactions;
 
     if (!objTransactions.Append(pTransaction))
     {
@@ -264,7 +264,7 @@ SipStackTransaction* SipStackState::FindTransaction(IN ::SipTxnKey* pKey)
         return IMS_NULL;
     }
 
-    IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
+    ImsList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
 
     for (IMS_UINT32 i = 0; i < objTransactions.GetSize(); ++i)
     {
@@ -295,7 +295,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
         return IMS_NULL;
     }
 
-    IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
+    ImsList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
 
     for (IMS_UINT32 i = 0; i < objTransactions.GetSize(); ++i)
     {
@@ -337,7 +337,7 @@ IMS_UINT32 SipStackState::GetTransactionCount() const
 
     for (IMS_UINT32 i = 0; i < m_objTxnAggregate.GetSize(); ++i)
     {
-        const IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(i);
+        const ImsList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(i);
 
         nCount += objTransactions.GetSize();
     }

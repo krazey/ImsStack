@@ -88,7 +88,7 @@ private:
     {
         return m_pService->GetTemporaryGruu();
     }
-    inline const IMSList<SipAddress*>& GetTemporaryGruus() const override
+    inline const ImsList<SipAddress*>& GetTemporaryGruus() const override
     {
         return m_pService->GetTemporaryGruus();
     }
@@ -101,12 +101,12 @@ private:
     }
 
     inline IMS_BOOL AddFeatureTags(
-            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) override
+            IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) override
     {
         return m_pService->AddFeatureTags(objFeatureTags, bRegRequired);
     }
     inline IMS_BOOL RemoveFeatureTags(
-            IN const IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) override
+            IN const ImsList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) override
     {
         return m_pService->RemoveFeatureTags(objFeatureTags, bRegRequired);
     }

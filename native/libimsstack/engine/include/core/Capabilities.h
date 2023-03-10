@@ -36,7 +36,7 @@ public:
     inline void Destroy() override { ServiceMethod::Destroy(); }
 
     // ICapabilities interface
-    IMSList<AString> GetRemoteUserIdentities() const;
+    ImsList<AString> GetRemoteUserIdentities() const;
     inline IMS_SINT32 GetState() const { return m_nState; }
     IMS_BOOL HasCapabilities(IN const AString& strConnection) const;
     IMS_RESULT QueryCapabilities(IN IMS_SINT32 nFlags = FLAG_REQUEST_DEFAULT);
@@ -125,7 +125,7 @@ protected:
 
 private:
     IMS_SINT32 m_nState;
-    IMSList<AString> m_objRemoteUserIdentities;
+    ImsList<AString> m_objRemoteUserIdentities;
     IOnCapabilitiesListener* m_piListener;
     RemoteCapabilities* m_pRemoteCapabilities;
 };

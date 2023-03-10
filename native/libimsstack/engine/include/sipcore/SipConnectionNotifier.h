@@ -180,7 +180,7 @@ private:
     IMS_SINT32 m_nTransportExt;
     AString m_strType;
     AString m_strFilter;  // For PushRegistry
-    IMSList<SipParameter*> m_objParameters;
+    ImsList<SipParameter*> m_objParameters;
 
     // Identifier for IP connectivity
     IpAddress m_objIpAddr;
@@ -200,8 +200,8 @@ private:
     SipSocketAddress* m_pSockAddrFarEnd;
     RcPtr<SipProfile> m_pSipProfile;
     // Queue for incoming request messages
-    IMSList<RcPtr<SipServerTransactionState>> m_objTxnStates;
-    IMSList<ForkedTxnState*> m_objForkedTxnStates;
+    ImsList<RcPtr<SipServerTransactionState>> m_objTxnStates;
+    ImsList<ForkedTxnState*> m_objForkedTxnStates;
     IOnSipServerConnectionListener* m_piListener;
     IOnSipConnectionNotifierErrorListener* m_piErrorListener;
 };

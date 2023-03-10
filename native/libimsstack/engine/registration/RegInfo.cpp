@@ -31,8 +31,8 @@ PUBLIC
 RegInfo::RegInfo() :
         m_bIsCreated(IMS_FALSE),
         m_nVersion(0),
-        m_objListeners(IMSList<IRegInfoListener*>()),
-        m_objRegistrations(IMSList<RegInfoRegistration*>())
+        m_objListeners(ImsList<IRegInfoListener*>()),
+        m_objRegistrations(ImsList<RegInfoRegistration*>())
 {
 }
 
@@ -68,9 +68,9 @@ PUBLIC VIRTUAL IRegInfoRegistration* RegInfo::GetRegistration(IN const SipAddres
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL IMSList<IRegInfoRegistration*> RegInfo::GetRegistrations() const
+PUBLIC VIRTUAL ImsList<IRegInfoRegistration*> RegInfo::GetRegistrations() const
 {
-    IMSList<IRegInfoRegistration*> objRegInfoRegistrations;
+    ImsList<IRegInfoRegistration*> objRegInfoRegistrations;
 
     for (IMS_UINT32 i = 0; i < m_objRegistrations.GetSize(); ++i)
     {
