@@ -662,10 +662,12 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
 
     // Step 1. Make new Offer/Answer model, and copy source profile from previous negotiated profile
     OaModel* pNewOaModel = new OaModel();
+    IMS_BOOL bIsFullCapability = IMS_FALSE;
 
     if (m_listOaModel.GetSize() == 0)
     {
         pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+        bIsFullCapability = IMS_TRUE;
     }
     else
     {
@@ -690,7 +692,8 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
                 bEnforceReofferMode == IMS_TRUE)
         {
             pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
-            IMS_TRACE_I("TextNego::FormReOffer() - Fullcapa - enforce reoffer[%d]",
+            bIsFullCapability = IMS_TRUE;
+            IMS_TRACE_I("TextNego::FormReOffer() - Fullcapability - enforce reoffer[%d]",
                     bEnforceReofferMode, 0, 0);
         }
         else
@@ -699,8 +702,9 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             {
                 if (m_objBaseProfile.lstPayload.GetSize() > 0)
                 {
-                    IMS_TRACE_I("FormReoffer() - Fullcapa", 0, 0, 0);
+                    IMS_TRACE_I("FormReoffer() - Fullcapability", 0, 0, 0);
                     pNewOaModel->pLocalProfile = new TextProfile(m_objBaseProfile);
+                    bIsFullCapability = IMS_TRUE;
                 }
                 else
                 {
@@ -711,7 +715,7 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
             }
             else
             {
-                IMS_TRACE_I("FormReoffer() - src profile is empty, use nego profile", 0, 0, 0);
+                IMS_TRACE_I("FormReoffer() - use nego profile", 0, 0, 0);
                 pNewOaModel->pLocalProfile = new TextProfile(*pPrevOaModel->pNegotiatedProfile);
             }
         }
@@ -725,7 +729,8 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
     }
 
     // Modify a Rtp/RTCP port if text is not supported
-    if (bDisable == IMS_TRUE)
+    // TODO : change "bDisable" naming to be more clear
+    if (bDisable)
     {
         pNewOaModel->pLocalProfile->nDataPort = 0;
         pNewOaModel->pLocalProfile->nControlPort = 0;
@@ -738,16 +743,19 @@ IMS_BOOL TextNego::FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
         pNewOaModel->pLocalProfile->nDataPort = m_objBaseProfile.nDataPort;
         pNewOaModel->pLocalProfile->nControlPort = m_objBaseProfile.nControlPort;
 
-        // set default AS value when srcProfile AS value is 0 in ReOffer case
-        if (pNewOaModel->pLocalProfile->nBandwidthAs <= 0)
+        if (bIsFullCapability)
         {
-            IMS_TRACE_I("FormReoffer() LocalProfile AS value is 0.. so change to default AS value",
-                    0, 0, 0);
-            pNewOaModel->pLocalProfile->nBandwidthAs = m_objBaseProfile.nBandwidthAs;
-        }
+            // set default AS value when srcProfile AS value is 0 in ReOffer case
+            if (pNewOaModel->pLocalProfile->nBandwidthAs <= 0)
+            {
+                IMS_TRACE_I("FormReoffer() LocalProfile AS value is 0, change to default AS value",
+                        0, 0, 0);
+                pNewOaModel->pLocalProfile->nBandwidthAs = m_objBaseProfile.nBandwidthAs;
+            }
 
-        pNewOaModel->pLocalProfile->nBandwidthRs = m_pConfig->GetRsBandwidthBps();
-        pNewOaModel->pLocalProfile->nBandwidthRr = m_pConfig->GetRrBandwidthBps();
+            pNewOaModel->pLocalProfile->nBandwidthRs = m_pConfig->GetRsBandwidthBps();
+            pNewOaModel->pLocalProfile->nBandwidthRr = m_pConfig->GetRrBandwidthBps();
+        }
     }
 
     pNewOaModel->pLocalProfile->bISOfferCase = IMS_TRUE;
