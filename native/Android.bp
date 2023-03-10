@@ -19,6 +19,7 @@ package {
 // ImsStack basic build modules
 cc_defaults {
     name: "imsstack_native_defaults",
+    compile_multilib: "first",
     cflags: [
         "-Wall",
         "-Wno-error=non-virtual-dtor",
@@ -34,4 +35,26 @@ cc_defaults {
             ],
         },
     },
+}
+
+cc_defaults {
+    name: "imsstack_shared_libs_defaults",
+    shared_libs: [
+        "libandroid_runtime",
+        "libbinder",
+        "libcutils",
+        "liblog",
+        "libnativehelper",
+        "libutils",
+        "libxml2",
+        "libz",
+    ],
+}
+
+cc_defaults {
+    name: "imsstack_tls_libs_defaults",
+    shared_libs: [
+        "libcrypto",
+        "libssl",
+    ],
 }
