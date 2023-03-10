@@ -116,6 +116,7 @@ protected:
     IMS_BOOL IsRegTypeNormal() const;
     IMS_BOOL IsRegStateUpdatedByNrLteRatChange() const;
     IMS_BOOL IsPdnDisconnectRequired() const;
+    IMS_BOOL IsPlmnBlockWithTimeoutRequired() const;
 
     // Create
     virtual void CreateAosCondition();
@@ -211,6 +212,7 @@ protected:
     virtual void ProcessPingCommand();
     virtual void ProcessRegTerminating();
     virtual void ProcessPdnDisconnect();
+    virtual void ProcessRoamingState(IN IMS_BOOL bRoaming);
 
     virtual void ProcessAppActivatedTimerExpired();
     virtual void ProcessAppConnectedTimerExpired();
@@ -422,6 +424,7 @@ protected:
     IMS_BOOL m_bIsPublished;
     IMS_BOOL m_bIsActivated;
     IMS_BOOL m_bEpdgEnabled;
+    IMS_BOOL m_bDataRoaming;
 
     AString m_strTag;
 
