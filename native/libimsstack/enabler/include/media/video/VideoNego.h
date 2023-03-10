@@ -243,7 +243,7 @@ private:
             IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
     IMS_BOOL GetAvpfFromAttributes(IN SdpMediaFormat* pMediaFormat,
             IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
-    IMS_BOOL GetCorrectImageIndex(IN IMS_SINT32 nPayloadTypeNum, IN IMSList<AString> objAttributes,
+    IMS_BOOL GetCorrectImageIndex(IN IMS_SINT32 nPayloadTypeNum, IN ImsList<AString> objAttributes,
             OUT IMS_UINT32* nIndex);
     VIDEO_RESOLUTION GetResolutionFromSdp(IN VIDEO_CODEC codecType,
             IN const AString& strImageAttrFromSdp, IN const AString& strFrameSizeFromSdp,
@@ -281,7 +281,7 @@ private:
             IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
     VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
 
-    IMSList<OaModel*> m_listOaModel;
+    ImsList<OaModel*> m_listOaModel;
     VideoProfile m_objBaseProfile;
     MediaEnvironment* m_pEnvironment;
     VideoConfiguration* m_pConfig;

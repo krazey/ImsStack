@@ -30,7 +30,7 @@ public:
     MOCK_METHOD(IMS_BOOL, Create, (IN ICarrierConfig * piCc), (override));
     MOCK_METHOD(IMS_BOOL, Update, (IN ICarrierConfig * piCc), (override));
     MOCK_METHOD(CodecConfig*, GetCodecConfig, (IN IMS_UINT32 nCodec), (const, override));
-    MOCK_METHOD(const IMSList<CodecConfig*>&, GetCodecConfigs, (), (const, override));
+    MOCK_METHOD(const ImsList<CodecConfig*>&, GetCodecConfigs, (), (const, override));
     MOCK_METHOD(MEDIA_CONTENT_TYPE, GetSessionType, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPortRtp, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPortRtpEnd, (), (const, override));
@@ -45,7 +45,7 @@ public:
     MOCK_METHOD(IMS_BOOL, CreateCodecConfigs, (IN ICarrierConfig * piCc), (override));
     MOCK_METHOD(IMS_UINT32, MakeEachCodecs,
             (IN ICarrierConfig * piCc, IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex,
-                    IN IMSVector<IMS_SINT32> objPayloadTypeArray),
+                    IN ImsVector<IMS_SINT32> objPayloadTypeArray),
             (override));
     MOCK_METHOD(IMS_UINT32, MakeCodec,
             (IN ICarrierConfig * piCc, IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex,

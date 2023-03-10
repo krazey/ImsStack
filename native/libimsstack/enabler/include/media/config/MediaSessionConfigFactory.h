@@ -62,9 +62,9 @@ public:
      * @brief Get the list session config
      *
      * @param nSlotId SIM sloit id - default : 0
-     * @return IMSList<MediaSessionConfig*>* mediasession config list
+     * @return ImsList<MediaSessionConfig*>* mediasession config list
      */
-    IMSList<MediaSessionConfig*>* GetListSessionConfig(IN IMS_SINT32 nSlotId);
+    ImsList<MediaSessionConfig*>* GetListSessionConfig(IN IMS_SINT32 nSlotId);
     /**
      * @brief Find a media session config
      *
@@ -94,7 +94,7 @@ public:
     static void ReleaseInstance(MediaSessionConfigFactory* pSessionConfigFactory);
 
 private:
-    IMSMap<IMS_UINT32, IMSList<MediaSessionConfig*>*> m_mapListMediaSessionConfig;
+    ImsMap<IMS_UINT32, ImsList<MediaSessionConfig*>*> m_mapListMediaSessionConfig;
 };
 
 #endif

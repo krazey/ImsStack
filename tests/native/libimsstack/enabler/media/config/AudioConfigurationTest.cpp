@@ -63,11 +63,11 @@ protected:
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
     IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
     AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetIntArray(pszKey);
     }
-    IMSVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
+    ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetStringArray(pszKey);
     }
@@ -96,7 +96,7 @@ TEST_F(AudioConfigurationTest, GetConfigDefault)
     EXPECT_EQ(m_pConfig->GetModeChangePeriod(), DEFAULT_MODECHANGE_PERIOD);
     EXPECT_EQ(m_pConfig->GetModeChangeNeighbor(), DEFAULT_MODECHANGE_NEIGHBOR);
 
-    IMSVector<AString> objCandidateAttr = m_pConfig->GetAudioCandidateAttribute();
+    ImsVector<AString> objCandidateAttr = m_pConfig->GetAudioCandidateAttribute();
     EXPECT_EQ(objCandidateAttr.GetAt(0), DEFAULT_CANDIDATE_ATTRIBUTE);
 
     delete m_pConfig;
@@ -149,7 +149,7 @@ TEST_F(AudioConfigurationTest, GetConfigTest)
 TEST_F(AudioConfigurationTest, GetConfigAudioPort)
 {
     AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
-    IMSVector<IMS_SINT32> objAudioPortRtp;
+    ImsVector<IMS_SINT32> objAudioPortRtp;
     objAudioPortRtp.Push(50000);
     objAudioPortRtp.Push(50500);
 
@@ -171,7 +171,7 @@ TEST_F(AudioConfigurationTest, GetConfigAudioPort)
 TEST_F(AudioConfigurationTest, GetConfigAudioRtcpInterval)
 {
     AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
-    IMSVector<IMS_SINT32> objAudioRtcpInterval;
+    ImsVector<IMS_SINT32> objAudioRtcpInterval;
     objAudioRtcpInterval.Push(3);
     objAudioRtcpInterval.Push(10);
 
@@ -239,7 +239,7 @@ TEST_F(AudioConfigurationTest, GetConfigJitterBuffer)
 {
     AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
 
-    IMSVector<IMS_SINT32> objJitterArray;
+    ImsVector<IMS_SINT32> objJitterArray;
     objJitterArray.Push(5);
     objJitterArray.Push(10);
     objJitterArray.Push(5);
@@ -265,7 +265,7 @@ TEST_F(AudioConfigurationTest, GetConfigCandidateAttr)
 {
     AudioConfiguration* m_pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
 
-    IMSVector<AString> objAudioCandidateAttribute;
+    ImsVector<AString> objAudioCandidateAttribute;
     objAudioCandidateAttribute.Push("2, UDP, 1119400811, 10.3.210.77, 7010, typ, host");
 
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
@@ -275,7 +275,7 @@ TEST_F(AudioConfigurationTest, GetConfigCandidateAttr)
 
     EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
 
-    IMSVector<AString> objCandidateAttr = m_pConfig->GetAudioCandidateAttribute();
+    ImsVector<AString> objCandidateAttr = m_pConfig->GetAudioCandidateAttribute();
     EXPECT_EQ(objCandidateAttr.GetAt(0), "2, UDP, 1119400811, 10.3.210.77, 7010, typ, host");
 
     delete pMockICarrierConfig;

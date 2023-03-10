@@ -78,7 +78,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32> objVideoCodecAttributeResolution = piCcSubBundle->GetIntArray(
+    ImsVector<IMS_SINT32> objVideoCodecAttributeResolution = piCcSubBundle->GetIntArray(
             CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
     if (!objVideoCodecAttributeResolution.IsEmpty())
     {
@@ -122,7 +122,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     piCcBundle->ReleaseBundle();
     piCcBundle = IMS_NULL;
 #else
-    IMSVector<IMS_SINT32> objVideoCodecAttributeResolution =
+    ImsVector<IMS_SINT32> objVideoCodecAttributeResolution =
             piCc->GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY);
     if (!objVideoCodecAttributeResolution.IsEmpty())
     {
@@ -134,7 +134,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
     }
 
     m_nFramerate = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT);
-    IMSVector<IMS_SINT32> objVideoBitrate =
+    ImsVector<IMS_SINT32> objVideoBitrate =
             piCc->GetIntArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_BITRATE_INT_ARRAY);
     if (!objVideoBitrate.IsEmpty())
     {
@@ -151,7 +151,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecAvcConfig::Create(IN ICarrierConfig* piCc, IN IMS_S
             CarrierConfig::ImsVt::KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING,
             AString::ConstNull());
 
-    IMSVector<AString> objImageAttr =
+    ImsVector<AString> objImageAttr =
             piCc->GetStringArray(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_IMAGE_ATTR_STRING_ARRAY);
     if (objImageAttr.IsEmpty())
     {

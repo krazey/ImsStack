@@ -46,7 +46,7 @@ AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
         m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
         m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
-        m_objAudioCandidateAttribute(IMSVector<AString>())
+        m_objAudioCandidateAttribute(ImsVector<AString>())
 {
     IMS_TRACE_D("+AudioConfiguration eSessionType(%d)", eSessionType, 0, 0);
     m_objAudioCandidateAttribute.Push(DEFAULT_CANDIDATE_ATTRIBUTE);
@@ -97,7 +97,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
     m_nAudioRtpDscp = piCc->GetInt(CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT);
     m_nAudioRtpDscp = m_nAudioRtpDscp << 2;
 
-    IMSVector<IMS_SINT32> objAudioJitterBufferSize =
+    ImsVector<IMS_SINT32> objAudioJitterBufferSize =
             piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY);
     if (!objAudioJitterBufferSize.IsEmpty())
     {
@@ -201,15 +201,15 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32> objEvsPayloadType =
+    ImsVector<IMS_SINT32> objEvsPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
-    IMSVector<IMS_SINT32> objAmrwbPayloadType =
+    ImsVector<IMS_SINT32> objAmrwbPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY);
-    IMSVector<IMS_SINT32> objAmrnbPayloadType =
+    ImsVector<IMS_SINT32> objAmrnbPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY);
-    IMSVector<IMS_SINT32> objDtmfwbPayloadType =
+    ImsVector<IMS_SINT32> objDtmfwbPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVoice::KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY);
-    IMSVector<IMS_SINT32> objDtmfnbPayloadType =
+    ImsVector<IMS_SINT32> objDtmfnbPayloadType =
             piCcBundle->GetIntArray(CarrierConfig::ImsVoice::KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY);
 
     piCcBundle->ReleaseBundle();
@@ -218,15 +218,15 @@ PROTECTED VIRTUAL IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierCon
 
     /** TODO: Need to change to carrier configuration bundle later */
     IMS_TRACE_D("CreateCodecConfigs - Update the values with Assets", 0, 0, 0);
-    IMSVector<IMS_SINT32> objEvsPayloadType =
+    ImsVector<IMS_SINT32> objEvsPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_EVS_PAYLOAD_TYPE_INT_ARRAY);
-    IMSVector<IMS_SINT32> objAmrwbPayloadType =
+    ImsVector<IMS_SINT32> objAmrwbPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_AMRWB_PAYLOAD_TYPE_INT_ARRAY);
-    IMSVector<IMS_SINT32> objAmrnbPayloadType =
+    ImsVector<IMS_SINT32> objAmrnbPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_AMRNB_PAYLOAD_TYPE_INT_ARRAY);
-    IMSVector<IMS_SINT32> objDtmfwbPayloadType =
+    ImsVector<IMS_SINT32> objDtmfwbPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_DTMFWB_PAYLOAD_TYPE_INT_ARRAY);
-    IMSVector<IMS_SINT32> objDtmfnbPayloadType =
+    ImsVector<IMS_SINT32> objDtmfnbPayloadType =
             piCc->GetIntArray(CarrierConfig::Assets::KEY_ASSET_DTMFNB_PAYLOAD_TYPE_INT_ARRAY);
     /** TODO: END - Need to change to carrier configuration bundle later */
 
@@ -431,7 +431,7 @@ IMS_SINT32 AudioConfiguration::GetModeChangeNeighbor() const
 }
 
 PUBLIC
-const IMSVector<AString>& AudioConfiguration::GetAudioCandidateAttribute() const
+const ImsVector<AString>& AudioConfiguration::GetAudioCandidateAttribute() const
 {
     return m_objAudioCandidateAttribute;
 }

@@ -250,7 +250,7 @@ TEST_F(CodecEvsConfigTest, GetAmrWbIoModeSetList)
 TEST_F(CodecEvsConfigTest, GetConfigEvsBitrateList)
 {
     CodecEvsConfig* pConfig = new CodecEvsConfig(ImsCodec::AUDIO_EVS, 125);
-    IMSVector<IMS_SINT32> objBitrateList;
+    ImsVector<IMS_SINT32> objBitrateList;
     objBitrateList.Push(0);
     objBitrateList.Push(4);
 

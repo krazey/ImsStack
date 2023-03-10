@@ -212,7 +212,7 @@ public:
     IMS_BOOL IsForking();
 
 private:
-    IMSList<IMedia*> GetIMediaListFromSession(
+    ImsList<IMedia*> GetIMediaListFromSession(
             IN ISession* pSession, IN MEDIA_CONTENT_TYPE eMediaType);
     void SetSessionType(IN ISession* pSession);
     void SetMediaDescriptorAsNotSupported(IN IMediaDescriptor* pDescriptor, IN SdpMedia* pSDPMedia);

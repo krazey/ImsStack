@@ -23,7 +23,7 @@ __IMS_TRACE_TAG_USER_DECL__("MED.AC");
 
 PUBLIC
 AudioController::AudioController() :
-        m_listAudioSession(IMSList<AudioMediaSession*>()),
+        m_listAudioSession(ImsList<AudioMediaSession*>()),
         m_nAudioSessionState(AudioMediaSession::STATE_NONE),
         m_eUpdateCondition(EARLY_SESSION),
         m_objLocalAddr(IpAddress::IPv6NONE),

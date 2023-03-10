@@ -51,11 +51,11 @@ protected:
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
     IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
     AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetIntArray(pszKey);
     }
-    IMSVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
+    ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetStringArray(pszKey);
     }
