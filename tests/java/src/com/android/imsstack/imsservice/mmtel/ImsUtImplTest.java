@@ -89,6 +89,8 @@ public class ImsUtImplTest  {
         if (mImsUtImpl != null) {
             mImsUtImpl.close();
         }
+
+        UtFactory.getInstance().setUtInterfaceForSlot(SLOT_0, null);
     }
 
     @Test
