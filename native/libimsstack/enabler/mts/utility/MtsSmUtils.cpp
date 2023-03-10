@@ -33,39 +33,39 @@ MtsSmUtils::~MtsSmUtils()
 }
 
 PUBLIC
-IMS_SINT32 MtsSmUtils::GetRpMr(IN const IMS_BYTE* pbySmsData)
+IMS_SINT32 MtsSmUtils::GetRpMr(IN const IMS_BYTE* pbyContent)
 {
-    if (pbySmsData == IMS_NULL)
+    if (pbyContent == IMS_NULL)
     {
         return (-1);
     }
 
-    return static_cast<IMS_SINT32>(pbySmsData[1]);
+    return static_cast<IMS_SINT32>(pbyContent[1]);
 }
 
 PUBLIC
-IMS_SINT32 MtsSmUtils::GetRpMr(IN const ByteArray& objSmsData)
+IMS_SINT32 MtsSmUtils::GetRpMr(IN const ByteArray& objContent)
 {
-    if (objSmsData.GetLength() < 2)
+    if (objContent.GetLength() < 2)
     {
         return (-1);
     }
 
-    return GetRpMr(objSmsData.GetData());
+    return GetRpMr(objContent.GetData());
 }
 
 PUBLIC
-IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* pbySmsData)
+IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* pbyContent)
 {
-    if (pbySmsData != IMS_NULL)
+    if (pbyContent != IMS_NULL)
     {
         if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP)
         {
-            return static_cast<IMS_SINT32>(pbySmsData[0] & 0x07);
+            return static_cast<IMS_SINT32>(pbyContent[0] & 0x07);
         }
         else if (eSmsFormat == SmsFormatType::SMSFORMAT_3GPP2)
         {
-            return static_cast<IMS_SINT32>(pbySmsData[0]);
+            return static_cast<IMS_SINT32>(pbyContent[0]);
         }
     }
 
@@ -73,20 +73,20 @@ IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* pb
 }
 
 PUBLIC
-IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objSmsData)
+IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent)
 {
-    if (objSmsData.GetLength() == 0)
+    if (objContent.GetLength() == 0)
     {
         return (-1);
     }
 
-    return GetMti(eSmsFormat, objSmsData.GetData());
+    return GetMti(eSmsFormat, objContent.GetData());
 }
 
 PUBLIC
-void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objSmsData)
+void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objContent)
 {
-    if (objSmsData.IsNULL())
+    if (objContent.IsNULL())
     {
         return;
     }
@@ -96,13 +96,13 @@ void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objSmsData)
     };
     AString strSmsMsg = AString::ConstNull();
 
-    for (IMS_SINT32 i = 0; i < objSmsData.GetLength(); i++)
+    for (IMS_SINT32 i = 0; i < objContent.GetLength(); i++)
     {
-        IMS_Sprintf(szTemp, 4, "%02X ", objSmsData[i]);
+        IMS_Sprintf(szTemp, 4, "%02X ", objContent[i]);
 
         strSmsMsg += szTemp;
     }
 
-    IMS_TRACE_D("<< Received SMS data burst >> (%d) >>  %s", objSmsData.GetLength(),
+    IMS_TRACE_D("<< Received SMS data burst >> (%d) >>  %s", objContent.GetLength(),
             strSmsMsg.GetStr(), 0);
 }

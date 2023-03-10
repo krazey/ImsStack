@@ -30,7 +30,7 @@ public:
     virtual void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId, IN IMS_SINT32 nSlotId) = 0;
     virtual void ReportMtSms(
-            IN SmsFormatType eSmsFormat, IN const ByteArray& objData, IN IMS_SINT32 nSlotId) = 0;
+            IN SmsFormatType eSmsFormat, IN const ByteArray& objContent, IN IMS_SINT32 nSlotId) = 0;
 };
 
 #endif
