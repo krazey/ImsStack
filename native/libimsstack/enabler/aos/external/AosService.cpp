@@ -559,13 +559,16 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistering(IN AosNetworkType eNetwork
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::NotifyDeregistered(IN AosReasonCode eReason)
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyDeregistered(
+        IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
 {
-    IMS_TRACE_I("NotifyDeregistered", 0, 0, 0);
+    IMS_TRACE_I("NotifyDeregistered - network(%d), reason(%d)",
+            static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason), 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
     if (piJniThread)
     {
-        piJniThread->NotifyDeregistered(static_cast<IMS_SINT32>(eReason));
+        piJniThread->NotifyDeregistered(
+                static_cast<IMS_SINT32>(eNetworkType), static_cast<IMS_SINT32>(eReason));
     }
 
     return IMS_TRUE;

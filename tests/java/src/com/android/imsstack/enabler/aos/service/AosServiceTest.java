@@ -726,6 +726,7 @@ public class AosServiceTest extends ImsStackTest {
 
         Parcel parcel = Parcel.obtain();
         parcel.writeInt(IIAosService.N2J_NOTIFY_DEREGISTERED);
+        parcel.writeInt(NetworkType.LTE);
         parcel.writeInt(ReasonCode.CODE_REGISTRATION_ERROR);
         parcel.setDataPosition(0);
         JniImsListener jniImsListener = mAosService.mNativeListener;
@@ -734,7 +735,7 @@ public class AosServiceTest extends ImsStackTest {
 
         assertEquals(NetworkType.NONE, mAosService.getRegisteredNetworkType());
         assertEquals(RegistrationState.DEREGISTERED, mAosService.getRegistrationState());
-        verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.NONE,
+        verify(mMockAosRegistrationListener).notifyDeregistered(NetworkType.LTE,
                 ReasonCode.CODE_REGISTRATION_ERROR);
     }
 

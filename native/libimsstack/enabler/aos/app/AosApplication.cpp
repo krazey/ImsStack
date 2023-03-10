@@ -354,6 +354,31 @@ void AosApplication::ClearPending()
 }
 
 PROTECTED
+AosNetworkType AosApplication::GetNetworkTypeForImsRegState() const
+{
+    if (m_pUtil->IsWifiTest())
+    {
+        return AosNetworkType::LTE;
+    }
+
+    switch (m_piContext->GetNetTracker()->GetNetworkType())
+    {
+        case NW_REPORT_RADIO_WLAN:
+            return AosNetworkType::IWLAN;
+        case NW_REPORT_RADIO_LTE:
+            return AosNetworkType::LTE;
+        case NW_REPORT_RADIO_NR:
+            return AosNetworkType::NR;
+        case NW_REPORT_RADIO_WCDMA:  // FALL-THROUGH
+        case NW_REPORT_RADIO_HSPA:
+            return AosNetworkType::UTRAN;
+
+        default:
+            return AosNetworkType::NONE;
+    }
+}
+
+PROTECTED
 void AosApplication::SetOffReason(IN IMS_UINT32 nReason)
 {
     m_nOffReason = nReason;
@@ -393,7 +418,7 @@ void AosApplication::NotifyDeregistered(IN AosReasonCode eReason)
     if (piService != IMS_NULL)
     {
         A_IMS_TRACE_D(APPID, "NotifyDeregistered :: Reason(%d)", eReason, 0, 0);
-        piService->NotifyDeregistered(eReason);
+        piService->NotifyDeregistered(GetNetworkTypeForImsRegState(), eReason);
     }
 }
 
@@ -1937,15 +1962,11 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
         }
     }
 
-    m_pConnector->Stop();
-
     if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED)
     {
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
-        return;
     }
-
-    if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
+    else if (nFinalErr == CarrierConfig::Assets::ERROR_TYPE_REPEATED_WITH_ONLY_ATTACHED_NETWORK)
     {
         if (m_nRat != NW_REPORT_RADIO_NR)
         {
@@ -1964,6 +1985,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
     }
+
+    m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessAppActivatedTimerExpired()
@@ -2096,13 +2119,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnBlockedTimerExpired()
 
 PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
 {
-    m_pConnector->Stop();
-
     StopTimer(TIMER_IMS_ESTABLISHMENT);
 
     A_IMS_TRACE_I(
             APPID, "ProcessImsEstablishmentTimerExpired :: PLMN is blocked with timeout", 0, 0, 0);
     NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+
+    m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnBlock() {}
@@ -2194,8 +2217,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessPlmnBlockWithTimeout()
     }
     else
     {
-        m_pConnector->Stop();
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
+        m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
     }
 }
 
