@@ -15,6 +15,7 @@
  */
 #include <gtest/gtest.h>
 
+#include "ISipConfigV.h"
 #include "MockICarrierConfig.h"
 #include "PlatformContext.h"
 #include "TestConfigService.h"
@@ -24,6 +25,7 @@
 #include "private/SipConfigV.h"
 
 using ::testing::_;
+using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRoundRobin;
 
@@ -61,6 +63,7 @@ protected:
 
 protected:
     TestConfigService* m_pConfigService;
+    MockICarrierConfig m_objMockICarrierConfig;
     AStringArray m_objAllowMethods;
 };
 
@@ -114,6 +117,103 @@ TEST_F(SipConfigVTest, GetSessionHeaders)
 
     nDefaultSessionHeaders |= SipConfigV::SESSION_HEADER_LOCAL_TIMER_REQUIRED;
     EXPECT_EQ(objSipConfigV.GetSessionHeaders(), nDefaultSessionHeaders);
+}
+
+TEST_F(SipConfigVTest, Update)
+{
+    SipConfigV objSipConfigV(IMS_SLOT_0);
+    IConfigurable* piConfigurable =
+            static_cast<const ISipConfigV*>(&objSipConfigV)->GetConfigurable();
+
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_START_SIP_V));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_END_SIP_V));
+
+    IMS_SINT32 nIntValue = 10;
+    AString strIntValue;
+
+    strIntValue.SetNumber(nIntValue);
+
+    AString strValue("ServiceVersion");
+
+    m_pConfigService->SetCarrierConfig(&m_objMockICarrierConfig);
+
+    EXPECT_CALL(
+            m_objMockICarrierConfig, GetString(CarrierConfig::Ims::KEY_IMS_USER_AGENT_STRING, _))
+            .Times(2)
+            .WillOnce(Return(strValue));
+
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_T1, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_T2, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_T4, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_A, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_B, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_C, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_D, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_E, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_F, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_G, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_H, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_I, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_J, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_TIMER_K, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_UA_VERSION));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_FEATURE_TAG_OPTIONS, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_SESSION_MINSE, strIntValue));
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_SESSION_EXPIRES, strIntValue));
+
+    EXPECT_EQ(objSipConfigV.GetTargetNumberFormat(), ISipConfigV::TARGET_NUMBER_FORMAT_LOCAL);
+    EXPECT_EQ(objSipConfigV.GetTargetScheme(), ISipConfigV::TARGET_SCHEME_TEL);
+    EXPECT_EQ(objSipConfigV.GetPreferredId(), SipConfigV::PREFERRED_ID_DEFAULT);
+    EXPECT_EQ(objSipConfigV.GetServiceVersion(), strValue);
+    EXPECT_EQ(objSipConfigV.GetPredefinedPaniForEutran(), AString::ConstNull());
+    EXPECT_EQ(objSipConfigV.GetPredefinedPaniForUtran(), AString::ConstNull());
+
+    EXPECT_TRUE(objSipConfigV.IsTimerValueConfiguredOnRuntime());
+    EXPECT_TRUE(objSipConfigV.IsSessionTimerSupported());
+    EXPECT_TRUE(objSipConfigV.IsPageMessageRespByApp());
+    EXPECT_TRUE(objSipConfigV.IsReferenceRespByApp());
+
+    EXPECT_EQ(objSipConfigV.GetTimerValueT2(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueT4(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueA(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueB(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueC(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueD(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueE(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueF(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueG(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueH(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueI(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueJ(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueK(), nIntValue);
+
+    EXPECT_CALL(m_objMockICarrierConfig, GetBoolean(_, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    nIntValue = 1000;
+
+    EXPECT_CALL(m_objMockICarrierConfig, GetInt(_, _))
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(nIntValue));
+
+    EXPECT_TRUE(piConfigurable->Update(IConfigurable::CP_I_SIP_ALL));
+
+    EXPECT_EQ(objSipConfigV.GetTimerValueT2(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueT4(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueA(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueB(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueC(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueD(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueE(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueF(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueG(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueH(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueI(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueJ(), nIntValue);
+    EXPECT_EQ(objSipConfigV.GetTimerValueK(), nIntValue);
+
+    EXPECT_FALSE(piConfigurable->Update(IConfigurable::CP_I_MAX));
 }
 
 }  // namespace android
