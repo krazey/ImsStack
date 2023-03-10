@@ -25,7 +25,11 @@ class NatHelperTest : public ::testing::Test
 protected:
     virtual void SetUp() override {}
 
-    virtual void TearDown() override {}
+    virtual void TearDown() override
+    {
+        NatHelper::GetInstance()->Clear(IMS_SLOT_0);
+        NatHelper::GetInstance()->Clear(IMS_SLOT_1);
+    }
 };
 
 TEST_F(NatHelperTest, SetPublicAddress)
@@ -81,7 +85,7 @@ TEST_F(NatHelperTest, IsBehindNat)
 
     pNatHelper->SetPublicAddress(IMS_SLOT_0, 1234, objPrivateIp, objPublicIp);
 
-    EXPECT_FALSE(pNatHelper->IsBehindNat(IMS_SLOT_0, objPrivateIp));
+    EXPECT_TRUE(pNatHelper->IsBehindNat(IMS_SLOT_0, objPrivateIp));
     pNatHelper->RemovePublicAddress(IMS_SLOT_0, 1234);
     pNatHelper->RemovePublicAddress(IMS_SLOT_0, 1234);
 
