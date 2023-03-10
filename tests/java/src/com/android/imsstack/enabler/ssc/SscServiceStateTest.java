@@ -234,6 +234,9 @@ public class SscServiceStateTest {
                 .registerDefaultNetworkCallback(mSscServiceState.mCrossSimDataStateListener);
         assertTrue(((Handler) mSscServiceState.mHandler)
                 .hasMessages(SscServiceState.EVENT_UT_CAPABILITY_CHANGED));
+
+        processDelayedMessage();
+        verifyNoMoreInteractions(mMockUtInterface);
     }
 
     @Test
@@ -257,6 +260,7 @@ public class SscServiceStateTest {
         mSscServiceState.init();
         processDelayedMessage();
 
+        verify(mMockUtInterface).onServiceStateChanged();
         verify(mMockDcNetWatcher).registerForAirplaneModeChanged(mSscServiceState.mHandler,
                 SscServiceState.EVENT_AIRPLANE_MODE_CHANGED, null);
         verify(mMockDcNetWatcher).registerForDataServiceStateChanged(mSscServiceState.mHandler,
@@ -349,10 +353,12 @@ public class SscServiceStateTest {
         mSscServiceState = new SscServiceState(SLOT_0, mLooper.getLooper());
         mSscServiceState.init();
         processDelayedMessage();
+        verify(mMockUtInterface).onServiceStateChanged();
 
         mSscServiceState.deInit();
         processDelayedMessage();
 
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
         verify(mMockDcNetWatcher).unregisterForAirplaneModeChanged(mSscServiceState.mHandler);
         verify(mMockDcNetWatcher).unregisterForDataServiceStateChanged(mSscServiceState.mHandler);
         verify(mMockDcNetWatcher).unregisterForRatChanged(mSscServiceState.mHandler);
@@ -512,6 +518,7 @@ public class SscServiceStateTest {
 
         mSscServiceState.setErrorResponseCode(errorCode);
 
+        verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(true, mSscServiceState.isUtAvailable());
     }
 
@@ -528,6 +535,7 @@ public class SscServiceStateTest {
 
         verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 60 * 1000);
         assertEquals(false, mSscServiceState.isUtAvailable());
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }
 
     @Test
@@ -544,6 +552,7 @@ public class SscServiceStateTest {
 
         assertEquals(false, mSscServiceState.isUtAvailable());
         verifyNoMoreInteractions(mMockAlarmTimer);
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }
 
     @Test
@@ -560,6 +569,7 @@ public class SscServiceStateTest {
 
         verify(mMockAlarmTimer).startTimer((long) mTimerId, (long) mBlockTimer * 60 * 1000);
         assertEquals(false, mSscServiceState.isUtAvailable());
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }
 
     @Test
@@ -576,6 +586,7 @@ public class SscServiceStateTest {
 
         assertEquals(false, mSscServiceState.isUtAvailable());
         verifyNoMoreInteractions(mMockAlarmTimer);
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
     }
 
     @Test
@@ -855,6 +866,7 @@ public class SscServiceStateTest {
         when(mMockSimInterface.getSimCardState()).thenReturn(Sim.STATE_ABSENT);
 
         ((Sim.Listener) mSscServiceState.mSimStateListener).onSimCardStateChanged();
+        processDelayedMessage();
 
         assertEquals(SscConstant.BLOCK_REASON_NONE, mSscServiceState.mUtBlockReason);
         assertEquals(false, authAgent.isCredentialInfoUpdated());
@@ -1244,7 +1256,7 @@ public class SscServiceStateTest {
     }
 
     private void processDelayedMessage() {
-        mLooper.moveTimeForward(1000);
+        mLooper.moveTimeForward(2000);
         mLooper.processAllMessages();
     }
 
