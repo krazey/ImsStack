@@ -1668,6 +1668,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_StateUpdating(IN IMS_UIN
             ProcessRegInternalFailed();
             break;
 
+        case IAosRegistration::REASON_FAILURE_REG_TERMINATING:
+            ProcessRegTerminating();
+            break;
+
         case IAosRegistration::REASON_FAILURE_PDN_RECONNECT:
             ProcessPdnDisconnect();
             break;
@@ -1942,6 +1946,19 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegTerminated()
 PROTECTED VIRTUAL void AosApplication::ProcessPingCommand()
 {
     // Do nothing on AOS BASE
+}
+
+PROTECTED VIRTUAL void AosApplication::ProcessRegTerminating()
+{
+    A_IMS_TRACE_I(APPID, "ProcessRegTerminating ::", 0, 0, 0);
+    if (IsImsCall())
+    {
+        SetOffReason(AosReason::REG_TERMINATING);
+        SetAppState(STATE_CONNECTING);
+        Report_StateChanged();
+
+        PostMessage(MSG_REG_RECOVER, 0, 0);
+    }
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
