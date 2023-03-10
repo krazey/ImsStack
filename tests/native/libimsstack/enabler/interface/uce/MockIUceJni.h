@@ -28,7 +28,7 @@ public:
     MOCK_METHOD(IMS_BOOL, SendPublishCmd,
             (IMS_UINT32, IMS_UINT32, IMS_UINT32, const AString&, const AString&), (override));
     MOCK_METHOD(IMS_BOOL, SendSingleSubscribeCmd, (IMS_UINT32, const AString&), (override));
-    MOCK_METHOD(IMS_BOOL, SendListSubscribeCmd, (IMS_UINT32, const IMSList<AString>&), (override));
+    MOCK_METHOD(IMS_BOOL, SendListSubscribeCmd, (IMS_UINT32, const ImsList<AString>&), (override));
     MOCK_METHOD(IMS_BOOL, SendOptionsCmd,
             (IMS_UINT32 key, IMS_UINT32 myCaps, const AString& remoteUri), (override));
     MOCK_METHOD(IMS_BOOL, SendOptionsRespCmd,

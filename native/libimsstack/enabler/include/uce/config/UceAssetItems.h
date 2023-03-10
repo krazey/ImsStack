@@ -33,16 +33,16 @@ public:
             m_bUseContactHeaderInPublish(IMS_FALSE),
             m_bUseContactHeaderInSubscribe(IMS_FALSE),
             m_bAddVideoTagContactHeaderInPublish(IMS_FALSE),
-            m_objImmediatelyRetryPublishResponse(IMSVector<IMS_SINT32>()),
+            m_objImmediatelyRetryPublishResponse(ImsVector<IMS_SINT32>()),
             m_nImmediatelyRetryPublishResponseMaxCount(0),
-            m_objRetryPublishResponse(IMSVector<IMS_SINT32>()),
+            m_objRetryPublishResponse(ImsVector<IMS_SINT32>()),
             m_nRetryPublishResponseMaxCount(0),
             m_nRetryPublishResponseTimeSec(0),
-            m_objVariableRetryPublishResponse(IMSVector<IMS_SINT32>()),
+            m_objVariableRetryPublishResponse(ImsVector<IMS_SINT32>()),
             m_nVariableRetryPublishResponseMaxCount(0),
-            m_objVariableRetryPublishResponseTimeSec(IMSVector<IMS_SINT32>()),
-            m_objReAttemptRegistrationPublishResponse(IMSVector<IMS_SINT32>()),
-            m_objReAttemptRegistrationSubscribeResponse(IMSVector<IMS_SINT32>())
+            m_objVariableRetryPublishResponseTimeSec(ImsVector<IMS_SINT32>()),
+            m_objReAttemptRegistrationPublishResponse(ImsVector<IMS_SINT32>()),
+            m_objReAttemptRegistrationSubscribeResponse(ImsVector<IMS_SINT32>())
     {
         m_objImmediatelyRetryPublishResponse.Push(412);
 
@@ -71,15 +71,15 @@ public:
     IMS_BOOL m_bUseContactHeaderInPublish;
     IMS_BOOL m_bUseContactHeaderInSubscribe;
     IMS_BOOL m_bAddVideoTagContactHeaderInPublish;
-    IMSVector<IMS_SINT32> m_objImmediatelyRetryPublishResponse;
+    ImsVector<IMS_SINT32> m_objImmediatelyRetryPublishResponse;
     IMS_UINT32 m_nImmediatelyRetryPublishResponseMaxCount;
-    IMSVector<IMS_SINT32> m_objRetryPublishResponse;
+    ImsVector<IMS_SINT32> m_objRetryPublishResponse;
     IMS_UINT32 m_nRetryPublishResponseMaxCount;
     IMS_UINT32 m_nRetryPublishResponseTimeSec;
-    IMSVector<IMS_SINT32> m_objVariableRetryPublishResponse;
+    ImsVector<IMS_SINT32> m_objVariableRetryPublishResponse;
     IMS_UINT32 m_nVariableRetryPublishResponseMaxCount;
-    IMSVector<IMS_SINT32> m_objVariableRetryPublishResponseTimeSec;
-    IMSVector<IMS_SINT32> m_objReAttemptRegistrationPublishResponse;
-    IMSVector<IMS_SINT32> m_objReAttemptRegistrationSubscribeResponse;
+    ImsVector<IMS_SINT32> m_objVariableRetryPublishResponseTimeSec;
+    ImsVector<IMS_SINT32> m_objReAttemptRegistrationPublishResponse;
+    ImsVector<IMS_SINT32> m_objReAttemptRegistrationSubscribeResponse;
 };
 #endif

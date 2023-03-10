@@ -63,7 +63,7 @@ public:
      * @return Returns IMS_TRUE when the request is successfully passed.
      *      Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList) = 0;
+    virtual IMS_BOOL SendListSubscribeCmd(IMS_UINT32 key, const ImsList<AString>& userList) = 0;
 
     /**
      * Receives options request from the Framework.

@@ -73,7 +73,7 @@ public:
         XMLINFO_INVALID = 0,
         XMLINFO_RLMI_LIST,
     } XMLInfo;
-    IMSMap<IMS_SINT32, msgHandler> m_objMessageMap;
+    ImsMap<IMS_SINT32, msgHandler> m_objMessageMap;
 
 protected:
     IThread* m_piThread;
@@ -85,11 +85,11 @@ private:
     AString m_strQueryName;
     AString m_strThreadName;
     IXmlTransactionProvider* m_pXMLTransactionProvider;
-    IMSList<AString> m_objRlmiCidList;
+    ImsList<AString> m_objRlmiCidList;
     UcePidfXmls* m_pPidfXmls;
     UceNonCapabilityUsers* m_pNonCapabilities;
     UceNotifyMessageBody* m_pUceNotifyMessageBody;
-    IMSList<UceNotifyBodyPartData*> m_objBodyParts;
+    ImsList<UceNotifyBodyPartData*> m_objBodyParts;
 };
 
 #endif  // _UCE_XML_DOCUMENT_HELPER_THREAD_H_

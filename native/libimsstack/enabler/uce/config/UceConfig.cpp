@@ -25,7 +25,7 @@ __IMS_TRACE_TAG_USER_DECL__("CONF");
 
 PUBLIC
 UceConfig::UceConfig() :
-        m_objAssetMap(IMSMap<IMS_SINT32, UceAssetItems*>())
+        m_objAssetMap(ImsMap<IMS_SINT32, UceAssetItems*>())
 {
     IMS_TRACE_D("UCE_M : UceConfig - static = %" PFLS_u, sizeof(UceConfig), 0, 0);
 }
@@ -161,13 +161,13 @@ IMS_BOOL UceConfig::GetBoolValue(IN KEY_UCE_BOOL eKey, IN IMS_SINT32 nSimSlot)
     return bRet;
 }
 
-IMSVector<IMS_SINT32> UceConfig::GetExponentialRetryPublishRespTimeArray(IN IMS_SINT32 nSimSlot)
+ImsVector<IMS_SINT32> UceConfig::GetExponentialRetryPublishRespTimeArray(IN IMS_SINT32 nSimSlot)
 {
     if (m_objAssetMap.GetIndexOfKey(nSimSlot) < 0)
     {
-        return IMSVector<IMS_SINT32>();
+        return ImsVector<IMS_SINT32>();
     }
-    IMSVector<IMS_SINT32> objExponentialRetryPublishResponseTimeSec =
+    ImsVector<IMS_SINT32> objExponentialRetryPublishResponseTimeSec =
             m_objAssetMap.GetValue(nSimSlot)->m_objVariableRetryPublishResponseTimeSec;
     return objExponentialRetryPublishResponseTimeSec;
 }
@@ -183,7 +183,7 @@ IMS_UINT32 UceConfig::GetPublishRetryType(IN IMS_SINT32 nResponseCode, IN IMS_SI
     IMS_TRACE_D("GetPublishRetryType:simSlot[%d], respoonseCode[%d]", nSimSlot, nResponseCode, 0);
 
     UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
-    IMSVector<IMS_SINT32> temporary = objUceAssetItems->m_objImmediatelyRetryPublishResponse;
+    ImsVector<IMS_SINT32> temporary = objUceAssetItems->m_objImmediatelyRetryPublishResponse;
     if (!temporary.IsEmpty())
     {
         for (IMS_UINT32 index = 0; index < temporary.GetSize(); index++)
@@ -233,7 +233,7 @@ IMS_BOOL UceConfig::IsImsRegistrationRequired(
     }
     UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
 
-    IMSVector<IMS_SINT32> temporary;
+    ImsVector<IMS_SINT32> temporary;
     if (isPublish)
     {
         temporary = objUceAssetItems->m_objReAttemptRegistrationPublishResponse;

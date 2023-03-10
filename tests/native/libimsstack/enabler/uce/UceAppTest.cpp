@@ -107,7 +107,7 @@ public:
     IMS_BOOL sendSingleSubscribeCmd() { return SendSingleSubscribeCmd(0, ""); }
     IMS_BOOL sendListSubscribeCmd()
     {
-        const IMSList<AString> userList;
+        const ImsList<AString> userList;
         return SendListSubscribeCmd(0, userList);
     }
     IMS_BOOL sendOptionsCmd() { return SendOptionsCmd(0, 0, ""); }

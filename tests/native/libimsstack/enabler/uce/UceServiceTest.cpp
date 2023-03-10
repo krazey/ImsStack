@@ -305,7 +305,7 @@ TEST_F(UceServiceTest, SendSingleSubscribeCmd)
 TEST_F(UceServiceTest, SendListSubscribeCmd)
 {
     IMS_UINT32 key = 1;
-    IMSList<AString> userList;
+    ImsList<AString> userList;
 
     IMS_TRACE_D("SendListSubscribeCmd", 0, 0, 0);
     pUceService->disableManagers();

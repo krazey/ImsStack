@@ -43,13 +43,13 @@ public:
         m_objNotifyBodyPartDatas.Append(pData);
     }
     AString& GetContentType() { return m_strContentType; }
-    IMSList<UceNotifyBodyPartData*> GetNotifyBodyPartDatas() const
+    ImsList<UceNotifyBodyPartData*> GetNotifyBodyPartDatas() const
     {
         return m_objNotifyBodyPartDatas;
     }
 
 private:
     AString m_strContentType;
-    IMSList<UceNotifyBodyPartData*> m_objNotifyBodyPartDatas;
+    ImsList<UceNotifyBodyPartData*> m_objNotifyBodyPartDatas;
 };
 #endif /* UCE_NOTIFY_MESSAGE_BODY_H_ */

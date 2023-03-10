@@ -469,7 +469,7 @@ IMS_BOOL UceApp::SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user)
     return IMS_TRUE;
 }
 
-IMS_BOOL UceApp::SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList)
+IMS_BOOL UceApp::SendListSubscribeCmd(IMS_UINT32 key, const ImsList<AString>& userList)
 {
     IMS_TRACE_D("SendListSubscribeCmd", 0, 0, 0);
     if (m_pUceService == IMS_NULL)
@@ -652,7 +652,7 @@ void UceApp::EnableAllAoSApps()
 {
     IMS_TRACE_I("EnableAllAoSApps.AppName[%s]", m_strAppName.GetStr(), 0, 0);
 
-    IMSList<IImsAos*> objImsAosList = ImsAos::GetImsAosList(m_strAppID, m_strServiceID, m_nSlotId);
+    ImsList<IImsAos*> objImsAosList = ImsAos::GetImsAosList(m_strAppID, m_strServiceID, m_nSlotId);
 
     for (IMS_UINT32 i = 0; i < objImsAosList.GetSize(); ++i)
     {
@@ -669,7 +669,7 @@ void UceApp::SelectActiveAoSApp()
 {
     IMS_TRACE_I("SelectActiveAoSApp", 0, 0, 0);
 
-    IMSList<IImsAos*> objImsAosList = ImsAos::GetImsAosList(m_strAppID, m_strServiceID, m_nSlotId);
+    ImsList<IImsAos*> objImsAosList = ImsAos::GetImsAosList(m_strAppID, m_strServiceID, m_nSlotId);
     IImsAos* piActiveImsAos = IMS_NULL;
 
     for (IMS_UINT32 i = 0; i < objImsAosList.GetSize(); ++i)

@@ -43,8 +43,8 @@ UceOptionsManager::UceOptionsManager(
     m_nSimSlot = simSlotId;
     IMS_TRACE_D("UCE_M : UceOptionsManager = %" PFLS_u, sizeof(UceOptionsManager), 0, 0);
     IMS_TRACE_I("UceOptionsManager", 0, 0, 0);
-    m_objSentUceOptionsMap = IMSMap<IMS_UINT32, UceOptions*>();
-    m_objReceivedUceOptionsMap = IMSMap<IMS_UINT32, UceOptions*>();
+    m_objSentUceOptionsMap = ImsMap<IMS_UINT32, UceOptions*>();
+    m_objReceivedUceOptionsMap = ImsMap<IMS_UINT32, UceOptions*>();
 }
 
 PUBLIC VIRTUAL UceOptionsManager::~UceOptionsManager()
@@ -145,7 +145,7 @@ IMS_BOOL UceOptionsManager::ReceivedOptions(
     AString from = objSIPAddress.ToString();
     IMS_TRACE_D("ReceivedOptions:From [%s]", from.GetStr(), 0, 0);
 
-    IMSList<AString> objContactList = piSIPMessage->GetHeaders(ISipHeader::CONTACT_NORMAL);
+    ImsList<AString> objContactList = piSIPMessage->GetHeaders(ISipHeader::CONTACT_NORMAL);
     IMS_UINT32 capabilities = pOptions->GetCapability(objContactList);
     SendOptionsReceivedInd(key, from, capabilities);
     return IMS_TRUE;
