@@ -26,11 +26,11 @@ class SmsSendRequestInfo
 {
 public:
     SmsSendRequestInfo(IN SmsFormatType eInitSmsFormat, IN const AString& strInitAddress,
-            IN const ByteArray& objInitSmsData, IN IMS_SINT32 nInitSeqId,
+            IN const ByteArray& objInitContent, IN IMS_SINT32 nInitSeqId,
             IN IMS_BOOL bInitEmergency) :
             eSmsFormat(eInitSmsFormat),
             strAddress(strInitAddress),
-            objSmsData(objInitSmsData),
+            objContent(objInitContent),
             nSeqId(nInitSeqId),
             bEmergency(bInitEmergency)
     {
@@ -38,7 +38,7 @@ public:
 
     SmsFormatType eSmsFormat;
     AString strAddress;
-    ByteArray objSmsData;
+    ByteArray objContent;
     IMS_SINT32 nSeqId;
     IMS_BOOL bEmergency;
 };

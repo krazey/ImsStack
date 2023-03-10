@@ -57,14 +57,14 @@ void JniMtsServiceThread::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType
 
 PUBLIC
 void JniMtsServiceThread::ReportMtSms(
-        IN SmsFormatType eSmsFormat, IN const ByteArray& objData, IN IMS_SINT32 nSlotId)
+        IN SmsFormatType eSmsFormat, IN const ByteArray& objContent, IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("ReportMtSms", 0, 0, 0);
 
     Parcel objParcel;
     objParcel.writeInt32(IuMtsService::REPORT_MTS_MT_SMS);
     objParcel.writeInt32(ConvertSmsFormatToInt(eSmsFormat));
-    objParcel.writeString16(android::String16(objData.ToString().GetStr()));
+    objParcel.writeString16(android::String16(objContent.ToString().GetStr()));
     objParcel.writeInt32(nSlotId);
 
     SendData2Java(objParcel);

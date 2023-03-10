@@ -27,11 +27,11 @@ public:
     MtsSmUtils();
     ~MtsSmUtils();
 
-    static IMS_SINT32 GetRpMr(IN const IMS_BYTE* pbySmsData);
-    static IMS_SINT32 GetRpMr(IN const ByteArray& objSmsData);
-    static IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* pbySmsData);
-    static IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objSmsData);
-    static void PrintSmsDataBurst(IN const ByteArray& objSmsData);
+    static IMS_SINT32 GetRpMr(IN const IMS_BYTE* pbyContent);
+    static IMS_SINT32 GetRpMr(IN const ByteArray& objContent);
+    static IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* pbyContent);
+    static IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent);
+    static void PrintSmsDataBurst(IN const ByteArray& objContent);
 };
 
 #endif
