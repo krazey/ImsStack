@@ -633,7 +633,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_Published)
     pUcePublishManager->SetKey(10);
 
     MockISipMessage objMockISipMessage;
-    IMSList<AString> objReasonHeaders;
+    ImsList<AString> objReasonHeaders;
     objReasonHeaders.Clear();
     AString reason = "OK";
 
@@ -680,7 +680,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_Failed)
     ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
 
     AString reason = "Not Implemented";
-    IMSList<AString> objReasonHeaders;
+    ImsList<AString> objReasonHeaders;
     objReasonHeaders.Clear();
 
     ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(501));
@@ -705,7 +705,7 @@ TEST_F(UcePublishManagerTest, StatePUBLISHING_FailedWithNoKey)
     ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
 
     AString reason = "Not Implemented";
-    IMSList<AString> objReasonHeaders;
+    ImsList<AString> objReasonHeaders;
     objReasonHeaders.Clear();
 
     ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(501));
@@ -881,7 +881,7 @@ TEST_F(UcePublishManagerTest, StateREFRESHING_RefreshFailed)
     ON_CALL(objMockIMessage, GetMessage).WillByDefault(Return(&objMockISipMessage));
 
     AString reason = "Not Implemented";
-    IMSList<AString> objReasonHeaders;
+    ImsList<AString> objReasonHeaders;
     objReasonHeaders.Clear();
 
     ON_CALL(objMockISipMessage, GetStatusCode).WillByDefault(Return(501));

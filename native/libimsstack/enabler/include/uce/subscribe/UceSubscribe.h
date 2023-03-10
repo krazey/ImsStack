@@ -74,7 +74,7 @@ public:
             IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) override;
 
     IMS_BOOL QuerySingleCapability(IN const AString& strUser, IN IMS_UINT32 key);
-    IMS_BOOL QueryMultiCapability(IN const IMSList<AString>& objUsers, IN IMS_UINT32 key);
+    IMS_BOOL QueryMultiCapability(IN const ImsList<AString>& objUsers, IN IMS_UINT32 key);
     IMS_BOOL AosDisConnected();  // AoS-disconnected
     /* ------------------------------------------------------------------------------------------
         Methods
@@ -122,7 +122,7 @@ private:
     void SendSubscribeResponseInd(IMS_SINT32 nResponseCode, const AString& strReason,
             IMS_SINT32 nReasonHeaderCause, const AString& strReasonHeaderText);
     void SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError);
-    void SendPresenceNotifyInd(const IMSList<AString>& pidfXmls);
+    void SendPresenceNotifyInd(const ImsList<AString>& pidfXmls);
     void SendSubscribeResourceTerminatedInd(UceNonCapabilityUsers* nonCapUsers);
     void SendSubscribeTerminatedInd();
 
@@ -170,7 +170,7 @@ protected:
     IMS_SINT32 m_nSimSlot;
     IMS_UINT32 m_nConnectedServices;
     AString m_strRemoteUser;
-    IMSList<AString> m_objRemoteUsers;
+    ImsList<AString> m_objRemoteUsers;
     IMS_UINT32 m_eState;
     ITimer* m_pWaitNotifyMsgTimer;
     ITimer* m_pRetryAfterTimer;

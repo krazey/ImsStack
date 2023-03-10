@@ -38,7 +38,7 @@ protected:
     static UceFactory* m_gpUceFactory;
 
     /// <slot-id, ImsAosManager>
-    static IMSMap<IMS_SINT32, UceApp*> m_objUceManagers;
+    static ImsMap<IMS_SINT32, UceApp*> m_objUceManagers;
 };
 
 #endif  // UCE_FACTORY_H_

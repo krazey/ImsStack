@@ -50,13 +50,13 @@ public:
         m_lstUceNonCapabilityUsers.Append(user);
     }
 
-    IMSList<UceNonCapabilityUser*> GetNonCapabilityUser() const
+    ImsList<UceNonCapabilityUser*> GetNonCapabilityUser() const
     {
         return m_lstUceNonCapabilityUsers;
     }
 
 private:
-    IMSList<UceNonCapabilityUser*> m_lstUceNonCapabilityUsers;
+    ImsList<UceNonCapabilityUser*> m_lstUceNonCapabilityUsers;
 };
 
 class UcePidfXmls
@@ -66,9 +66,9 @@ public:
     virtual ~UcePidfXmls() {}
     void SetPidfXml(const AString& pidfXml) { m_lstPidfXmls.Append(pidfXml); }
 
-    IMSList<AString> GetPidfXmls() const { return m_lstPidfXmls; }
+    ImsList<AString> GetPidfXmls() const { return m_lstPidfXmls; }
 
 private:
-    IMSList<AString> m_lstPidfXmls;
+    ImsList<AString> m_lstPidfXmls;
 };
 #endif /* UCE_NON_CAPABILITY_USER_H_ */

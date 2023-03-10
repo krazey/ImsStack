@@ -124,7 +124,7 @@ public:
      * @param count is number of pidfXmls.
      * @param pidfXmls The list of the PIDF XML data for the contact URIs that it subscribed for.
      */
-    virtual IMS_BOOL NotifyInd(IMS_UINT32 key, IMS_UINT32 count, IMSList<AString> pidfXmls) = 0;
+    virtual IMS_BOOL NotifyInd(IMS_UINT32 key, IMS_UINT32 count, ImsList<AString> pidfXmls) = 0;
 
     /**
      * Notify the application that subscribe request is failed due to internal error
@@ -142,7 +142,7 @@ public:
      * @param terminateContacts The contact URIs which have been terminated.
      */
     virtual IMS_BOOL SubscribeResourceTerminatedInd(
-            IMS_UINT32 key, IMS_UINT32 count, IMSList<IUceTerminatedReason*> terminateContacts) = 0;
+            IMS_UINT32 key, IMS_UINT32 count, ImsList<IUceTerminatedReason*> terminateContacts) = 0;
 
     /**
      * Notify the application that subscribe request is terminated

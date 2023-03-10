@@ -185,7 +185,7 @@ IMS_BOOL UceService::SendSingleSubscribeCmd(IMS_UINT32 key, const AString& user)
     return IMS_TRUE;
 }
 
-IMS_BOOL UceService::SendListSubscribeCmd(IMS_UINT32 key, const IMSList<AString>& userList)
+IMS_BOOL UceService::SendListSubscribeCmd(IMS_UINT32 key, const ImsList<AString>& userList)
 {
     if (m_pUceSubscribeManager == IMS_NULL)
     {

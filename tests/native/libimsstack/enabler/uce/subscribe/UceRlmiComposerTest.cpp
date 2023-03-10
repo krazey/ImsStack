@@ -47,7 +47,7 @@ protected:
 TEST_F(UceRlmiComposerTest, ComposeRLMIList)
 {
     IMS_TRACE_D("ComposeRLMIList", 0, 0, 0);
-    IMSList<AString> pContactInfoList;
+    ImsList<AString> pContactInfoList;
     AString user1 = "+12345678901";
     AString user2 = "+12345678902";
     pContactInfoList.Append(user1);
