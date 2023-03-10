@@ -122,8 +122,8 @@ protected:
     IMS_SINTP m_nCallKey;
     IMediaSessionClientListener* m_pClientListener;
     MediaEnvironment* m_pEnvironment;
-    IMSMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
-    IMSList<QosRequestParam*> m_objListQosParams;
+    ImsMap<IMS_UINTP, MediaNego*> m_objMapMediaNego;
+    ImsList<QosRequestParam*> m_objListQosParams;
     AudioController m_objAudioController;
     VideoController m_objVideoController;
     TextController m_objTextController;

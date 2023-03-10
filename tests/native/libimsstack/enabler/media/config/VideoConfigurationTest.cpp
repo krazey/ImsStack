@@ -58,11 +58,11 @@ protected:
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
     IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
     AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetIntArray(pszKey);
     }
-    IMSVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
+    ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetStringArray(pszKey);
     }
@@ -151,7 +151,7 @@ TEST_F(VideoConfigurationTest, GetConfigVideoAvpfFeature)
 TEST_F(VideoConfigurationTest, GetConfigVideoPort)
 {
     VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-    IMSVector<IMS_SINT32> objVideoPortRtp;
+    ImsVector<IMS_SINT32> objVideoPortRtp;
     objVideoPortRtp.Push(50100);
     objVideoPortRtp.Push(50700);
 
@@ -173,7 +173,7 @@ TEST_F(VideoConfigurationTest, GetConfigVideoPort)
 TEST_F(VideoConfigurationTest, GetConfigVideoRtcpInterval)
 {
     VideoConfiguration* m_pConfig = new VideoConfiguration(MEDIA_TYPE_VIDEO);
-    IMSVector<IMS_SINT32> objVideoRtcpInterval;
+    ImsVector<IMS_SINT32> objVideoRtcpInterval;
     objVideoRtcpInterval.Push(3);
     objVideoRtcpInterval.Push(10);
 

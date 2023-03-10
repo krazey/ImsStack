@@ -176,9 +176,9 @@ public:
     /**
      * @brief Get the audio candidate attribute
      *
-     * @return const IMSVector<AString>& Return audio-candidate-attribute
+     * @return const ImsVector<AString>& Return audio-candidate-attribute
      */
-    const IMSVector<AString>& GetAudioCandidateAttribute() const;
+    const ImsVector<AString>& GetAudioCandidateAttribute() const;
 
 public:
     enum
@@ -237,7 +237,7 @@ private:
     IMS_SINT32 m_nModeChangeCapability;
     IMS_SINT32 m_nModeChangePeriod;
     IMS_SINT32 m_nModeChangeNeighbor;
-    IMSVector<AString> m_objAudioCandidateAttribute;
+    ImsVector<AString> m_objAudioCandidateAttribute;
 };
 
 #endif

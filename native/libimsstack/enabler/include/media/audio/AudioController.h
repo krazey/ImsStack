@@ -217,7 +217,7 @@ private:
     AudioMediaSession* FindAudioSession(IN IMS_UINTP nNegoId = IMS_NULL);
     void ClearSession();
 
-    IMSList<AudioMediaSession*> m_listAudioSession;
+    ImsList<AudioMediaSession*> m_listAudioSession;
     IMS_SINT32 m_nAudioSessionState;
     IMS_UINT32 m_eUpdateCondition;
     IpAddress m_objLocalAddr;

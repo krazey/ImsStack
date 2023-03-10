@@ -71,7 +71,7 @@ PUBLIC VIRTUAL CodecConfig* MediaConfiguration::GetCodecConfig(IN IMS_UINT32 nCo
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL const IMSList<CodecConfig*>& MediaConfiguration::GetCodecConfigs() const
+PUBLIC VIRTUAL const ImsList<CodecConfig*>& MediaConfiguration::GetCodecConfigs() const
 {
     return objCodecConfigs;
 }
@@ -84,7 +84,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaConfiguration::CreateCodecConfigs(IN ICarrierCon
 
 PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeEachCodecs(IN ICarrierConfig* piCc,
         IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex,
-        IN IMSVector<IMS_SINT32> objPayloadTypeArray)
+        IN ImsVector<IMS_SINT32> objPayloadTypeArray)
 {
     if (!GetCodecType(nCodec))
     {
@@ -311,7 +311,7 @@ IMS_UINT32 MediaConfiguration::GetCodecType(IN IMS_UINT32 nCodec) const
 PROTECTED
 void MediaConfiguration::SetPorts(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey)
 {
-    IMSVector<IMS_SINT32> objPortRtp = piCc->GetIntArray(pszKey);
+    ImsVector<IMS_SINT32> objPortRtp = piCc->GetIntArray(pszKey);
     if (!objPortRtp.IsEmpty())
     {
         nPortRtp = objPortRtp.GetAt(0);
@@ -327,7 +327,7 @@ void MediaConfiguration::SetPorts(IN ICarrierConfig* piCc, IN const IMS_CHAR* ps
 PROTECTED
 void MediaConfiguration::SetRtcpIntervals(IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey)
 {
-    IMSVector<IMS_SINT32> objRtcpInterval = piCc->GetIntArray(pszKey);
+    ImsVector<IMS_SINT32> objRtcpInterval = piCc->GetIntArray(pszKey);
     if (!objRtcpInterval.IsEmpty())
     {
         nRtcpLiveInterval = objRtcpInterval.GetAt(0);

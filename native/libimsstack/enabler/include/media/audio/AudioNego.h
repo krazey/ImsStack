@@ -271,7 +271,7 @@ private:
             IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
     OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
 
-    IMSList<OaModel*> m_lstOaModel;
+    ImsList<OaModel*> m_lstOaModel;
     AudioProfile m_objBaseProfile;
     MediaEnvironment* m_pEnvironment;
     AudioConfiguration* m_pConfig;

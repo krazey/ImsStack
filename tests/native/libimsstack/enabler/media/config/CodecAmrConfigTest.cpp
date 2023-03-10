@@ -47,7 +47,7 @@ protected:
     }
     virtual void TearDown() override {}
     IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
     {
         return m_piCc->GetIntArray(pszKey);
     }
@@ -73,7 +73,7 @@ TEST_F(CodecAmrConfigTest, GetConfigOctetAlignAsset)
     CodecAmrConfig* m_pConfig_amrwb;
     CodecAmrConfig* m_pConfig_amrnb;
 
-    IMSVector<IMS_SINT32> objOctetAlign;
+    ImsVector<IMS_SINT32> objOctetAlign;
     objOctetAlign.Push(1);
     objOctetAlign.Push(0);
 
@@ -137,7 +137,7 @@ TEST_F(CodecAmrConfigTest, GetConfigModeSetListAsset)
 {
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     CodecAmrConfig* m_pConfig_amrwb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, 99);
-    IMSVector<IMS_SINT32> objCodecAttributeModesetWb;
+    ImsVector<IMS_SINT32> objCodecAttributeModesetWb;
     objCodecAttributeModesetWb.Push(0);
     objCodecAttributeModesetWb.Push(1);
     objCodecAttributeModesetWb.Push(2);
@@ -154,7 +154,7 @@ TEST_F(CodecAmrConfigTest, GetConfigModeSetListAsset)
     delete m_pConfig_amrwb;
 
     CodecAmrConfig* m_pConfig_amrnb = new CodecAmrConfig(ImsCodec::AUDIO_AMR, 100);
-    IMSVector<IMS_SINT32> objCodecAttributeModesetNb;
+    ImsVector<IMS_SINT32> objCodecAttributeModesetNb;
     objCodecAttributeModesetNb.Push(0);
     objCodecAttributeModesetNb.Push(2);
     objCodecAttributeModesetNb.Push(4);
@@ -178,7 +178,7 @@ TEST_F(CodecAmrConfigTest, GetConfigDefaultModeSetListAsset)
 {
     MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
     CodecAmrConfig* m_pConfig_amrwb = new CodecAmrConfig(ImsCodec::AUDIO_AMR_WB, 99);
-    IMSVector<IMS_SINT32> objCodecAttributeDefaultModesetWb;
+    ImsVector<IMS_SINT32> objCodecAttributeDefaultModesetWb;
     objCodecAttributeDefaultModesetWb.Push(0);
     objCodecAttributeDefaultModesetWb.Push(1);
     objCodecAttributeDefaultModesetWb.Push(2);
@@ -194,7 +194,7 @@ TEST_F(CodecAmrConfigTest, GetConfigDefaultModeSetListAsset)
     delete m_pConfig_amrwb;
 
     CodecAmrConfig* m_pConfig_amrnb = new CodecAmrConfig(ImsCodec::AUDIO_AMR, 100);
-    IMSVector<IMS_SINT32> objCodecAttributeDefaultModesetNb;
+    ImsVector<IMS_SINT32> objCodecAttributeDefaultModesetNb;
     objCodecAttributeDefaultModesetNb.Push(0);
     objCodecAttributeDefaultModesetNb.Push(2);
     objCodecAttributeDefaultModesetNb.Push(4);

@@ -28,7 +28,7 @@ __IMS_TRACE_TAG_USER_DECL__("MED.TN");
 
 PUBLIC TextNego::TextNego(IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
-        m_listOaModel(IMSList<OaModel*>()),
+        m_listOaModel(ImsList<OaModel*>()),
         m_objBaseProfile(TextProfile()),
         m_pEnvironment(IMS_NULL),
         m_pConfig(IMS_NULL)
@@ -874,7 +874,7 @@ IMS_BOOL TextNego::MakeSDPFromProfile(OUT ISessionDescriptor* pSessionDescriptor
 
     // clean attr & bandwidth line
     pDescriptor->RemoveAttribute(SdpAttribute::ATTRIBUTE_ALL);
-    IMSList<AString> strEmptyList;
+    ImsList<AString> strEmptyList;
     pDescriptor->SetBandwidthInfo(strEmptyList);
 
     // Make "c" & "o" line of session level if IP does not matched
@@ -1084,7 +1084,7 @@ PRIVATE IMS_BOOL TextNego::MakeProfileFromSDP(IN ISessionDescriptor* pSessionDes
             pProfile->nBandwidthRs, pProfile->nBandwidthRr);
 
     // payload
-    IMSList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
+    ImsList<SdpMediaFormat*> lstMediaFormat = pDescriptor->GetMediaFormats();
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
@@ -1231,7 +1231,7 @@ IMS_BOOL TextNego::MakeNegotiatedProfile(IN TextProfile* pLocalProfile,
     }
 
     // Compare each payload based destination's profile
-    IMSList<TextProfile::Payload*> listNegotiatedPayloads;
+    ImsList<TextProfile::Payload*> listNegotiatedPayloads;
 
     for (IMS_UINT32 i = 0; i < pPeerProfile->lstPayload.GetSize(); i++)
     {
@@ -1340,7 +1340,7 @@ PRIVATE IMS_BOOL TextNego::GetFmtpFromString(
     if (pFmtp == IMS_NULL || strFmtp.IsEmpty() == IMS_TRUE)
         return IMS_FALSE;
 
-    IMSList<AString> strArrTemp = strFmtp.Split('/');
+    ImsList<AString> strArrTemp = strFmtp.Split('/');
     pFmtp->nRedLevel = strArrTemp.GetSize();
 
     if (pFmtp->nRedLevel == 0)
