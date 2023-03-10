@@ -34,7 +34,7 @@ PUBLIC RcsRegistrationService::RcsRegistrationService(
         ImsService(strName),
         m_nSlotId(nSlotId),
         m_piImsAos(IMS_NULL),
-        m_objDefinedFeatures(IMSMap<AString, IMS_UINT32>())
+        m_objDefinedFeatures(ImsMap<AString, IMS_UINT32>())
 {
     IMS_TRACE_I("+RcsRegistrationService : Service Name = %s\n Slot = %d", GetName().GetStr(),
             m_nSlotId, 0);
@@ -56,7 +56,7 @@ PUBLIC RcsRegistrationService::RcsRegistrationService(
         ImsService("RcsRegistrationService"),
         m_nSlotId(nSlotId),
         m_piImsAos(piImsAos),
-        m_objDefinedFeatures(IMSMap<AString, IMS_UINT32>())
+        m_objDefinedFeatures(ImsMap<AString, IMS_UINT32>())
 {
     IMS_TRACE_MEM("SNC_MSG", "RCSRegService = %" PFLS_u, sizeof(RcsRegistrationService), 0, 0);
     RcsFeatureTags();
@@ -98,7 +98,7 @@ PUBLIC IMS_BOOL RcsRegistrationService::UpdateDelegateRegistration(IN IMS_UINTP 
     }
     else
     {
-        IMSList<ImsAosFeatureTag*> objTags;
+        ImsList<ImsAosFeatureTag*> objTags;
         for (int i = 0; i < pParam->m_nFeatureCount; i++)
         {
             objTags.Append(new ImsAosFeatureTag(
@@ -159,9 +159,9 @@ PRIVATE IJniSipControllerServiceThread* RcsRegistrationService::GetJniThread()
     return reinterpret_cast<IJniSipControllerServiceThread*>(piJniEnabler->GetJniThread());
 }
 
-PRIVATE IMSList<AString> RcsRegistrationService::GetFeatureTags(IN const IMS_UINT32 nFeatures)
+PRIVATE ImsList<AString> RcsRegistrationService::GetFeatureTags(IN const IMS_UINT32 nFeatures)
 {
-    IMSList<AString> objCurrentFeatures;
+    ImsList<AString> objCurrentFeatures;
     if ((nFeatures & m_objDefinedFeatures.GetValue(IMConstants::TAG_STANDALONE_PAGER)) > 0)
     {
         objCurrentFeatures.Append(IMConstants::TAG_STANDALONE_PAGER);
