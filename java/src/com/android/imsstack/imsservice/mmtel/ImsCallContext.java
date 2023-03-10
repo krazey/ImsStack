@@ -23,7 +23,6 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.ICommonPackageListener;
-import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -62,6 +61,7 @@ import java.util.concurrent.Executor;
 public class ImsCallContext implements ICallContext {
     private final Context mContext;
     private final Executor mExecutor;
+    private final Handler mHandler;
     private final ImsApp mApp;
 
     private SrvccStateTracker mSrvccStateTracker;
@@ -72,13 +72,13 @@ public class ImsCallContext implements ICallContext {
     private MtcApp mMtcApp;
     private MtcServiceStateTracker mServiceStateTracker;
 
-    public ImsCallContext(Context context, Executor executor, ImsApp app) {
+    public ImsCallContext(Context context, Executor executor, Looper looper, ImsApp app) {
         mContext = context;
         mExecutor = executor;
         mApp = app;
+        mHandler = new Handler(looper);
 
         mWfcSettingTracker = new WfcSettingTracker(this);
-
         mServiceStateTracker = new MtcServiceStateTracker(this);
 
         mMtcApp = new MtcApp(this);
@@ -88,7 +88,7 @@ public class ImsCallContext implements ICallContext {
     @VisibleForTesting
     public ImsCallContext(Context context, Executor executor, ImsApp app,
             WfcSettingTracker wfcsettingtracker, MtcServiceStateTracker stateTracker,
-            MtcApp mtcApp) {
+            MtcApp mtcApp, Looper looper) {
         mContext = context;
         mExecutor = executor;
         mApp = app;
@@ -96,6 +96,7 @@ public class ImsCallContext implements ICallContext {
         mServiceStateTracker = stateTracker;
         mMtcApp = mtcApp;
         mMtcApp.setServiceStateListener(mServiceStateTracker);
+        mHandler = new Handler(looper);
     }
 
     public void init() {
@@ -110,9 +111,7 @@ public class ImsCallContext implements ICallContext {
 
         mMtcApp.setServiceStateListener(null);
         mMtcApp.clear();
-
         mServiceStateTracker.clear();
-
         mWfcSettingTracker.clear();
 
         mCallLocationPolicy = null;
@@ -121,6 +120,8 @@ public class ImsCallContext implements ICallContext {
             mSrvccStateTracker.dispose();
             mSrvccStateTracker = null;
         }
+
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     public void dispose() {
@@ -139,6 +140,8 @@ public class ImsCallContext implements ICallContext {
             mSrvccStateTracker.dispose();
             mSrvccStateTracker = null;
         }
+
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -153,12 +156,12 @@ public class ImsCallContext implements ICallContext {
 
     @Override
     public Handler getCallHandler() {
-        return ImsGlobal.getInstance().getCallHandler();
+        return mHandler;
     }
 
     @Override
     public Looper getCallLooper() {
-        return ImsGlobal.getInstance().getCallLooper();
+        return getLooper();
     }
 
     @Override
@@ -186,6 +189,11 @@ public class ImsCallContext implements ICallContext {
     public int getSubId() {
         ISubscription isub = getSubscription();
         return (isub != null) ? isub.getSubId(getSlotId()) : MSimUtils.getSubId(getPhoneId());
+    }
+
+    @Override
+    public Looper getLooper() {
+        return mHandler.getLooper();
     }
 
     @Override

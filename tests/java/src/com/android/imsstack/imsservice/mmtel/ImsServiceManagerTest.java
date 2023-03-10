@@ -36,6 +36,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.imsservice.ImsServiceController;
+import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.util.AppContext;
@@ -53,7 +54,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
 public class ImsServiceManagerTest extends ImsStackTest {
@@ -167,27 +167,29 @@ public class ImsServiceManagerTest extends ImsStackTest {
         IMmTelCallListener mockCallListener = Mockito.mock(IMmTelCallListener.class);
         IMmTelFeatureCapabilityListener mockFeatureCapaListener =
                 Mockito.mock(IMmTelFeatureCapabilityListener.class);
+        ImsContext mockImsContext = Mockito.mock(ImsContext.class);
         mServiceRecordMap.clear();
+        when(mockImsContext.getPhoneId()).thenReturn(DEFAULT_PHONE_ID);
 
-        ImsCallApp callApp = mServiceManager.createCallApp(DEFAULT_PHONE_ID,
-                mockFeatureCapaListener, mockCallListener);
+        ImsCallApp callApp = mServiceManager.createCallApp(mockImsContext, mockFeatureCapaListener,
+                mockCallListener);
         assertNull(callApp);
 
         mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
-        callApp = mServiceManager.createCallApp(DEFAULT_PHONE_ID,
-                mockFeatureCapaListener, mockCallListener);
+        callApp = mServiceManager.createCallApp(mockImsContext, mockFeatureCapaListener,
+                mockCallListener);
         assertEquals(1, mCallAppMap.size());
         verify(mMockServiceRecord).setCallApp(any(ImsCallApp.class));
         assertNotNull(callApp);
 
-        callApp = mServiceManager.createCallApp(DEFAULT_PHONE_ID,
-                mockFeatureCapaListener, mockCallListener);
+        callApp = mServiceManager.createCallApp(mockImsContext, mockFeatureCapaListener,
+                mockCallListener);
         verify(callApp).unbindCallApp();
         verify(callApp).bindCallApp();
 
         mServiceManager.setMultiImsEnabled(false);
-        callApp = mServiceManager.createCallApp(DEFAULT_PHONE_ID,
-                mockFeatureCapaListener, mockCallListener);
+        callApp = mServiceManager.createCallApp(mockImsContext, mockFeatureCapaListener,
+                mockCallListener);
         verify(callApp).bindCallApp();
     }
 
@@ -338,7 +340,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
         int mSimPhoneId = 0;
         boolean mIsMultiImsEnabled = true;
 
-        TestImsServiceManager(Context context, Executor executor) {
+        TestImsServiceManager(Context context, MessageExecutor executor) {
             super(context, executor);
         }
 
@@ -358,7 +360,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
         }
 
         @Override
-        protected ImsCallApp createCallAppInternal(int phoneId, ImsServiceRecord isr,
+        protected ImsCallApp createCallAppInternal(ImsContext imsContext, ImsServiceRecord isr,
                 IMmTelFeatureCapabilityListener featureCapabilityListener,
                 IMmTelCallListener callListener) {
             return mMockImsCallApp;

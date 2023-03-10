@@ -24,15 +24,16 @@ import com.android.imsstack.core.agents.ISubscription;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.util.MessageExecutor;
 
 import java.util.concurrent.Executor;
 
 public class ImsContext implements IContext {
     private final Context mContext;
-    private final Executor mExecutor;
+    private final MessageExecutor mExecutor;
     private final int mSlotId;
 
-    public ImsContext(Context context, Executor executor, int slotId) {
+    public ImsContext(Context context, MessageExecutor executor, int slotId) {
         mContext = context;
         mExecutor = executor;
         mSlotId = slotId;
@@ -85,5 +86,13 @@ public class ImsContext implements IContext {
     public int getSubId() {
         ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
         return (isub != null) ? isub.getSubId(getSlotId()) : MSimUtils.getSubId(getPhoneId());
+    }
+
+    /**
+     * Returns the looper associated with handler.
+     */
+    @Override
+    public Looper getLooper() {
+        return mExecutor.getLooper();
     }
 }

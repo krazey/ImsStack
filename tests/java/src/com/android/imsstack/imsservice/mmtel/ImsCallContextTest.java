@@ -19,12 +19,12 @@ package com.android.imsstack.imsservice.mmtel;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Looper;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsStreamMediaProfile;
 
 import com.android.imsstack.ImsStackTest;
-import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.ISharedState;
@@ -112,17 +112,18 @@ public class ImsCallContextTest extends ImsStackTest {
             public  void onBinderDied() {}
         };
         mImsCallContext = new ImsCallContext(mContext, mExecutor, mImsApp,
-                mWfcsettingtracker, mStateTracker, mMtcapp);
+                mWfcsettingtracker, mStateTracker, mMtcapp, Looper.getMainLooper());
     }
 
     @After
     public void tearDown() throws Exception {
-        AppContext.deinit();
         AgentFactory.getInstance().setAgent(ConfigInterface.class, null, mSlotId);
         AgentFactory.getInstance().setDefaultAgent(SUBSCRIPTION, null);
         DcFactory.setObjects(mSlotId, null);
         mStateTracker = null;
+        mImsCallContext.dispose();
         mImsCallContext = null;
+        AppContext.deinit();
         super.tearDown();
     }
 
@@ -176,13 +177,11 @@ public class ImsCallContextTest extends ImsStackTest {
 
     @Test
     public void getCallHandlerTest() {
-        ImsGlobal.create(mContext);
         Assert.assertNotNull(mImsCallContext.getCallHandler());
     }
 
     @Test
     public void getCallLooperTest() {
-        ImsGlobal.create(mContext);
         Assert.assertNotNull(mImsCallContext.getCallLooper());
     }
 
