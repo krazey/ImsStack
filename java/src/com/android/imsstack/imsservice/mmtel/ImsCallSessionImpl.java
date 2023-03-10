@@ -132,9 +132,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private LocationBasedCall mLocationBasedCall = null;
     // WFC w/ geolocation }
     private UsatBasedCall mUsatBasedCall = null;
-    private String mCallTransferTarget = null;
+    private String mTransferTargetNumber = null;
     protected boolean mIsEctConfirmationRequired = false;
     protected ImsCallSessionImpl mTransferRequestedSession = null;
+    protected ImsCallSessionImpl mTransferTargetSession = null;
     private Map<Integer, Boolean> mCallFeatureCache = new HashMap<Integer, Boolean>();
     private CallReasonInfo mCacheCallReasonInfo = null;
 
@@ -598,12 +599,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         mIsEctConfirmationRequired = isConfirmationRequired;
-        mCallTransferTarget = number;
+        mTransferTargetNumber = number;
 
         mTransferRequestedSession = this;
 
         if (mCall.isOnHold()) {
-            mCall.transfer(mCallTransferTarget);
+            mCall.transfer(mTransferTargetNumber);
         } else if (!mCallDetails.is(CallDetails.ON_HOLDING)) {
             mCall.hold(MtcCallUtils.createHoldMedia(
                     mCall.getCallInfo(), mCall.getMediaInfo(),
@@ -616,18 +617,25 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     @Override
     public void transfer(@NonNull ImsCallSessionImplBase otherSession)  {
-         // FIXME : Need to Implement the Call transfer for given Session
         log("Consultative CallTransfer :: callId=" + getCallId());
 
         ImsCallApp callApp = (ImsCallApp) mCallContext.getApp();
         ImsCallSessionImpl fgCallSession = callApp.getCallManager().getActiveSession();
 
         if (this != fgCallSession) {
+            /* {@link #mTransferTargetSession} is a session which is getting hold before
+             * it get transferred and transfer request will be send
+             * on {@link #mTransferRequestedSession}
+             */
+            mTransferTargetSession = fgCallSession;
+            mIsEctConfirmationRequired = true;
             fgCallSession.doConsultativeTransfer(this);
             return;
         }
-
-        doConsultativeTransfer(this);
+        /* Per 3GPP TS 24.629 - A.2, the signalling for a consultative transfer should send the
+         * REFER on the background held call with the foreground call specified as the destination.
+         * FW will call {@link #transfer} on background session only.
+         */
     }
 
     private void doConsultativeTransfer(ImsCallSessionImpl transferRequestedSession) {
@@ -635,14 +643,16 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             log("ECT is already in progress.");
             return;
         }
+        log("Consultative CallTransfer :: callId=" + getCallId());
 
-        mIsEctConfirmationRequired = true;
         mTransferRequestedSession = transferRequestedSession;
 
-        //If required we can pass transfer target ID or Session to native
-        //Currently we can pass "null" to keep native implemation as it is for Consultative transfer
+        /* If required we can pass transfer target ID or Session to native
+         * Currently we can pass "null" to keep native implemation as it is for
+         * Consultative transfer.
+         */
         if (mCall.isOnHold()) {
-            mCall.transfer(null);
+            mTransferRequestedSession.mCall.transfer(null);
         } else if (!mCallDetails.is(CallDetails.ON_HOLDING)) {
             mCall.hold(MtcCallUtils.createHoldMedia(
                     mCall.getCallInfo(), mCall.getMediaInfo(),
@@ -650,6 +660,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     isCallFeatureSupported(CF_TEXT_HOLD_WITH_INACTIVE)));
         }
 
+        /* {@link #ON_ECT} will be set for {@link #mTransferTargetSession} session only.
+         */
         mCallDetails.set(CallDetails.ON_ECT);
     }
 
@@ -3510,12 +3522,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 postAndRunTask(new Runnable() {
                     @Override
                     public void run() {
-                        logi("transfer :: " + mCall);
-                        if (mCallTransferTarget != null) {
-                            mCall.transfer(mCallTransferTarget);
+                        MtcCall transferRequestedCall = mTransferRequestedSession.mCall;
+                        logi("transfer :: " + transferRequestedCall);
+                        if (mTransferTargetNumber != null) {
+                            transferRequestedCall.transfer(mTransferTargetNumber);
                         } else {
                             // Here we can pass the Session received from FW
-                            mCall.transfer(null);
+                            transferRequestedCall.transfer(null);
                         }
                     }
                 });
@@ -3584,7 +3597,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         callReasonInfo.mExtraMessage, ImsCallUtils.FLAG_REASON_INFO_ALL, 0);
 
                 if (!mCallDetails.is(CallDetails.ON_HOLDING)) {
-                    if (!mIsEctConfirmationRequired) {
+                    if (!mTransferRequestedSession.mIsEctConfirmationRequired) {
                         log("CallTransfer: Confirmation not required");
                     } else {
                         mTransferRequestedSession.mCallback.invokeCallSessionTransferFailed(
@@ -3592,22 +3605,20 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     }
                     return;
                 } else {
-                    if (!mIsEctConfirmationRequired) {
+                    if (!mTransferRequestedSession.mIsEctConfirmationRequired) {
                         log("CallTransfer: Confirmation not required");
+                        clearTransferRequestedSessionEctDetails();
                     } else {
                         postAndRunTask(new Runnable() {
                             @Override
                             public void run() {
                                 mTransferRequestedSession.mCallback.invokeCallSessionTransferFailed(
                                         mTransferRequestedSession, reasonInfo);
-                                mTransferRequestedSession = null;
+                                clearTransferRequestedSessionEctDetails();
                             }
                         });
                     }
                 }
-
-                mCallTransferTarget = null;
-                mIsEctConfirmationRequired = false;
             }
 
             int oldState = getState();
@@ -3740,7 +3751,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
 
                 if (mOperationFailReason != null) {
-                    if (!mIsEctConfirmationRequired) {
+                    if (!mTransferRequestedSession.mIsEctConfirmationRequired) {
                         log("CallTransfer: Confirmation not required");
                     } else {
                         mTransferRequestedSession.mCallback.invokeCallSessionTransferFailed(
@@ -3750,10 +3761,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mOperationFailReason = null;
                 }
 
-                mCallTransferTarget = null;
-                mIsEctConfirmationRequired = false;
-                mTransferRequestedSession = null;
-
+                clearTransferRequestedSessionEctDetails();
                 return;
             }
 
@@ -3821,7 +3829,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
 
                 if (mOperationFailReason != null) {
-                    if (!mIsEctConfirmationRequired) {
+                    if (!mTransferRequestedSession.mIsEctConfirmationRequired) {
                         log("CallTransfer: Confirmation not required");
                     } else {
                         mTransferRequestedSession.mCallback.invokeCallSessionTransferFailed(
@@ -3831,10 +3839,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mOperationFailReason = null;
                 }
 
-                mCallTransferTarget = null;
-                mIsEctConfirmationRequired = false;
-                mTransferRequestedSession = null;
-
+                clearTransferRequestedSessionEctDetails();
                 return;
             }
 
@@ -4226,20 +4231,18 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if (!call.equals(mCall)) {
                 return;
             }
+            log("onCallTransferred callId=" + getCallId());
 
-            mCallDetails.clear(CallDetails.ON_ECT);
-            mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
+            mTransferTargetSession.mCallDetails.clear(CallDetails.ON_ECT);
+            mTransferTargetSession.mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
 
             if (!mIsEctConfirmationRequired) {
                 log("CallTransfer: Confirmation not required");
             } else {
-                mTransferRequestedSession.mCallback.invokeCallSessionTransferred(
-                        mTransferRequestedSession);
+                mCallback.invokeCallSessionTransferred(ImsCallSessionImpl.this);
             }
 
-            mCallTransferTarget = null;
-            mIsEctConfirmationRequired = false;
-            mTransferRequestedSession = null;
+            clearTransferTargetSessionEctDetails();
         }
 
         @Override
@@ -4247,32 +4250,33 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if (!call.equals(mCall)) {
                 return;
             }
+            log("onCallTransferFailed callId=" + getCallId());
 
             ImsReasonInfo reasonInfo = ImsCallUtils.createReasonInfo(
                     callReasonInfo.mCode, ImsReasonInfo.CODE_UNSPECIFIED,
                     callReasonInfo.mExtraMessage, ImsCallUtils.FLAG_REASON_INFO_ALL);
 
-            if (mCall.isOnHold() && mCallDetails.is(CallDetails.IMPLICIT_ON_HOLD)) {
-                mOperationFailReason = reasonInfo;
-                mCall.resume(MtcCallUtils.createUnholdMedia(
-                        mCall.getCallInfo(), mCall.getMediaInfo(),
-                        isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE)));
-                return;
+            if (mTransferTargetSession.mCallDetails.is(CallDetails.ON_ECT)) {
+                MtcCall transferTargetCall = mTransferTargetSession.mCall;
+                if (transferTargetCall.isOnHold()
+                        && mTransferTargetSession.mCallDetails.is(CallDetails.IMPLICIT_ON_HOLD)) {
+                    mOperationFailReason = reasonInfo;
+                    transferTargetCall.resume(MtcCallUtils.createUnholdMedia(
+                            transferTargetCall.getCallInfo(), transferTargetCall.getMediaInfo(),
+                            isCallFeatureSupported(CF_VIDEO_HOLD_WITH_INACTIVE)));
+                }
             }
 
-            mCallDetails.clear(CallDetails.ON_ECT);
-            mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
+            mTransferTargetSession.mCallDetails.clear(CallDetails.ON_ECT);
+            mTransferTargetSession.mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
 
             if (!mIsEctConfirmationRequired) {
                 log("CallTransfer: Confirmation not required");
             } else {
-                mTransferRequestedSession.mCallback.invokeCallSessionTransferFailed(
-                        mTransferRequestedSession, reasonInfo);
+                mCallback.invokeCallSessionTransferFailed(ImsCallSessionImpl.this, reasonInfo);
             }
 
-            mCallTransferTarget = null;
-            mIsEctConfirmationRequired = false;
-            mTransferRequestedSession = null;
+            clearTransferTargetSessionEctDetails();
         }
 
         @Override
@@ -4433,6 +4437,24 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             logi("onCallRtpHeaderExtensionsReceived");
             mCallback.invokeRtpHeaderExtensionsReceived(extensions);
+        }
+
+        private void clearTransferRequestedSessionEctDetails() {
+            if (mTransferRequestedSession != null) {
+                mTransferRequestedSession.mTransferTargetNumber = null;
+                mTransferRequestedSession.mIsEctConfirmationRequired = false;
+                mTransferRequestedSession.mTransferTargetSession = null;
+                mTransferRequestedSession = null;
+            }
+        }
+
+        private void clearTransferTargetSessionEctDetails() {
+            if (mTransferTargetSession != null) {
+                mIsEctConfirmationRequired = false;
+                mTransferTargetNumber = null;
+                mTransferTargetSession.mTransferRequestedSession = null;
+                mTransferTargetSession = null;
+            }
         }
 
         private void onVideoCallHoldReceived(final MtcCall call,
@@ -4628,9 +4650,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             mCallDetails.clear(CallDetails.ON_ECT);
             mCallDetails.clear(CallDetails.IMPLICIT_ON_HOLD);
-            mCallTransferTarget = null;
+            mTransferTargetNumber = null;
             mIsEctConfirmationRequired = false;
             mTransferRequestedSession = null;
+            mTransferTargetSession = null;
         }
 
         private void checkAndNotifyCallOperationFailureOnCallTerminated(
