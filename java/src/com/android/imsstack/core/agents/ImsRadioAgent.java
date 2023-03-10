@@ -64,8 +64,7 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     private static final int EVENT_CONNECTION_SETUP_PREPARED = 2;
     private static final int EVENT_SSAC_STATE_CHANGED = 3;
 
-    private static final int EVENT_RAT_CHANGED = 101;
-    private static final int EVENT_NATIVE_BOOT_COMPLETED = 102;
+    private static final int EVENT_NATIVE_BOOT_COMPLETED = 101;
 
     private static final int ID_MIN = 1000000;
     private static final int ID_MAX = 1100000;
@@ -109,12 +108,6 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
         IJNIUpCallEvt juce = JNIUpCallEvtManager.getInstance().getJNIUpCallEvt(mSlotId);
         if (juce != null) {
             juce.unregisterForNativeBootComplete(mHandler);
-        }
-
-        IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
-
-        if (dcnw != null) {
-            dcnw.unregisterForRatChanged(mHandler);
         }
 
         setSystemRadioInterface(null);
@@ -353,51 +346,34 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
     }
 
     private void handleBarringInfo(BarringInfo barringInfo) {
-        IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
         SsacInfo ssacInfo = new SsacInfo();
 
-        if (dcnw != null && dcnw.is4G()) {
-            BarringServiceInfo mmtelVoice = barringInfo.getBarringServiceInfo(
-                    BarringInfo.BARRING_SERVICE_TYPE_MMTEL_VOICE);
-            int voiceBarringFactor = mmtelVoice.getConditionalBarringFactor();
-            int voiceBarringTime = mmtelVoice.getConditionalBarringTimeSeconds();
+        BarringServiceInfo mmtelVoice = barringInfo.getBarringServiceInfo(
+                BarringInfo.BARRING_SERVICE_TYPE_MMTEL_VOICE);
+        int voiceBarringFactor = mmtelVoice.getConditionalBarringFactor();
+        int voiceBarringTime = mmtelVoice.getConditionalBarringTimeSeconds();
 
-            if (mmtelVoice.isBarred() || (voiceBarringFactor > 0 && voiceBarringFactor < 100)) {
-                ssacInfo.setForVoice(voiceBarringFactor, voiceBarringTime);
-            }
-
-            BarringServiceInfo mmtelVideo = barringInfo.getBarringServiceInfo(
-                    BarringInfo.BARRING_SERVICE_TYPE_MMTEL_VIDEO);
-            int videoBarringFactor = mmtelVideo.getConditionalBarringFactor();
-            int videoBarringTime = mmtelVideo.getConditionalBarringTimeSeconds();
-
-            if (mmtelVideo.isBarred() || (videoBarringFactor > 0 && videoBarringFactor < 100)) {
-                ssacInfo.setForVideo(videoBarringFactor, videoBarringTime);
-            }
-
-            ImsLog.d(mSlotId, "voice - factor=" + voiceBarringFactor + ", time=" + voiceBarringTime
-                    + " : video - factor=" + videoBarringFactor + ", time=" + videoBarringTime);
+        if (mmtelVoice.isBarred() || (voiceBarringFactor > 0 && voiceBarringFactor < 100)) {
+            ssacInfo.setForVoice(voiceBarringFactor, voiceBarringTime);
         }
+
+        BarringServiceInfo mmtelVideo = barringInfo.getBarringServiceInfo(
+                BarringInfo.BARRING_SERVICE_TYPE_MMTEL_VIDEO);
+        int videoBarringFactor = mmtelVideo.getConditionalBarringFactor();
+        int videoBarringTime = mmtelVideo.getConditionalBarringTimeSeconds();
+
+        if (mmtelVideo.isBarred() || (videoBarringFactor > 0 && videoBarringFactor < 100)) {
+            ssacInfo.setForVideo(videoBarringFactor, videoBarringTime);
+        }
+
+        ImsLog.d(mSlotId, "voice - factor=" + voiceBarringFactor + ", time=" + voiceBarringTime
+                + " : video - factor=" + videoBarringFactor + ", time=" + videoBarringTime);
 
         notifySsacInfo(ssacInfo);
     }
 
     private void handleNativeBootCompleted() {
-        IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
-
-        if (dcnw != null) {
-            dcnw.registerForRatChanged(mHandler, EVENT_RAT_CHANGED, null);
-        }
-
         notifySsacInfoToNative();
-    }
-
-    private void handleRatChanged() {
-        IDcNetWatcher dcnw = getDcNetWatcher(mSlotId);
-
-        if (dcnw != null && !dcnw.is4G()) {
-            notifySsacInfo(new SsacInfo());
-        }
     }
 
     private void handleTrafficCallbackOnError(
@@ -624,9 +600,6 @@ public class ImsRadioAgent implements ImsRadioInterface, SystemRadioInterface {
             switch (msg.what) {
                 case EVENT_NATIVE_BOOT_COMPLETED:
                     handleNativeBootCompleted();
-                    break;
-                case EVENT_RAT_CHANGED:
-                    handleRatChanged();
                     break;
 
                 default:
