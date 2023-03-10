@@ -49,7 +49,7 @@ public:
     void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
 
     // IMtsServiceListener
-    void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+    void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     void NotifyMtSms(IN IPageMessage* piPageMessage) override;
     void OnServiceDisconnected() override;
@@ -71,16 +71,16 @@ private:
             IN MtsTransactionType eMessageType = MtsTransactionType::MESSAGE_TYPE_RECEIVE);
 
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency);
-    void SendMtsMessage(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+    void SendMtsMessage(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
     IMS_RESULT ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1);
-    IMS_UINT32 ReportMtSms(
-            IN SmsFormatType eSmsFormat, IN IMS_UINT32 nSmsLength, IN const IMS_BYTE* pbySmsData);
+    IMS_UINT32 ReportMtSms(IN SmsFormatType eSmsFormat, IN IMS_UINT32 nContentLength,
+            IN const IMS_BYTE* pbyContent);
 
-    IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objSms,
+    IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objContent,
             IN SmsFormatType eSmsFormat, IN IMS_BOOL bEmergency);
-    IMS_BOOL FormDestinationByMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objData,
+    IMS_BOOL FormDestinationByMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, OUT AString& strDestination);
     const ByteArray& ProcessReceivedMessage(
             IN IPageMessage* piPageMessage, IN IMtsMessage* piMtsMessage);
@@ -99,13 +99,13 @@ private:
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
     void SetLocationToMessage(IN IMessage* piMessage);
 
-    AString GetPreviousCallId(IN const ByteArray& objSms);
+    AString GetPreviousCallId(IN const ByteArray& objContent);
     static IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
     static void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri);
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
     static IMS_BOOL IsReceivedMessage(IN IMtsMessage* piMtsMessage);
-    void SetMessageInfo(IN IPageMessage* piPageMessage, IN const ByteArray& objSms,
+    void SetMessageInfo(IN IPageMessage* piPageMessage, IN const ByteArray& objContent,
             IN SmsFormatType eSmsFormat, IN const AString& strDestination,
             IN MtsTransactionType eMessageType, OUT IMtsMessage* piMtsMessage);
     void UpdateRPAckMap(IN IPageMessage* piPageMessage);
