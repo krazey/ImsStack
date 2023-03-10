@@ -26,19 +26,19 @@ PUBLIC GLOBAL IImsAos* ImsAos::GetImsAos(IN const AString& strAppId, IN const AS
     return (pManager != IMS_NULL) ? pManager->GetImsAos(strAppId, strServiceId) : IMS_NULL;
 }
 
-PUBLIC GLOBAL IMSList<IImsAos*> ImsAos::GetImsAosList(IN const AString& strAppId,
+PUBLIC GLOBAL ImsList<IImsAos*> ImsAos::GetImsAosList(IN const AString& strAppId,
         IN const AString& strServiceId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     ImsAosManager* pManager = AosFactory::GetManager(nSlotId);
 
     return (pManager != IMS_NULL) ? pManager->GetImsAosList(strAppId, strServiceId)
-                                  : IMSList<IImsAos*>();
+                                  : ImsList<IImsAos*>();
 }
 
-PUBLIC GLOBAL IMSList<IImsAos*> ImsAos::GetImsAosList(
+PUBLIC GLOBAL ImsList<IImsAos*> ImsAos::GetImsAosList(
         IN const AString& strAppId, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     ImsAosManager* pManager = AosFactory::GetManager(nSlotId);
 
-    return (pManager != IMS_NULL) ? pManager->GetImsAosList(strAppId) : IMSList<IImsAos*>();
+    return (pManager != IMS_NULL) ? pManager->GetImsAosList(strAppId) : ImsList<IImsAos*>();
 }

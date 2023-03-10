@@ -132,7 +132,7 @@ public:
      *
      * @param objFeatureTag Indicate the list of the feature-tag (@see ImsAosFeatureTag)
      */
-    virtual void UpdateFeature(IN IMSList<ImsAosFeatureTag*>& objFeatureTag) = 0;
+    virtual void UpdateFeature(IN ImsList<ImsAosFeatureTag*>& objFeatureTag) = 0;
 };
 
 #endif  // INTERFACE_IMS_AOS_H_

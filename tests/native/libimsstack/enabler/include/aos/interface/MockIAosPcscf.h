@@ -33,9 +33,9 @@ public:
     MOCK_METHOD(IMS_BOOL, IsAsyncDnsDiscovery, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSinglePcoScheme, (), (override));
     MOCK_METHOD(const AStringArray&, GetPcscfs, (), (override));
-    MOCK_METHOD(const IMSList<IMS_SINT32>&, GetPcscfsPorts, (), (override));
+    MOCK_METHOD(const ImsList<IMS_SINT32>&, GetPcscfsPorts, (), (override));
     MOCK_METHOD(void, UpdatePcscfs,
-            (IN const AStringArray& objPcscfs, IN IMSList<IMS_SINT32> objPorts), (override));
+            (IN const AStringArray& objPcscfs, IN ImsList<IMS_SINT32> objPorts), (override));
     MOCK_METHOD(IMS_BOOL, HasPcscf, (IN IMS_SINT32 nIndex), (override));
     MOCK_METHOD(IMS_UINT32, GetPcscfCount, (), (override));
     MOCK_METHOD(void, SetCurrentPcscfInvalid, (IN IMS_BOOL bIsTimer, IN IMS_UINT32 nSeconds),

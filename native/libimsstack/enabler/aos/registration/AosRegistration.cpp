@@ -406,7 +406,7 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetMode()
 PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
         IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue)
 {
-    IMSList<AString> strList;
+    ImsList<AString> strList;
 
     switch (nType)
     {
@@ -943,7 +943,7 @@ IMS_SINT32 AosRegistration::GetRegIpcanCategory() const
 PROTECTED
 IMS_UINT32 AosRegistration::GetRegFeatures()
 {
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_UINT32 nFeatures = ImsAosFeature::NONE;
 
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
@@ -1020,12 +1020,12 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERING)
         {
-            IMSList<AString> objFeatureTags = IMSList<AString>();
+            ImsList<AString> objFeatureTags = ImsList<AString>();
             piService->NotifyRegistering(m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERED)
         {
-            IMSList<AString> objFeatureTags = IMSList<AString>();
+            ImsList<AString> objFeatureTags = ImsList<AString>();
             piService->NotifyRegistered(m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
     }
@@ -1286,7 +1286,7 @@ void AosRegistration::PrepareRegistration()
     {
         A_IMS_TRACE_I(REGID, "PrepareRegistration :: destroy registration for creating", 0, 0, 0);
 
-        IMSList<IRegContact*> objContactList = m_piRegistration->GetAllContacts();
+        ImsList<IRegContact*> objContactList = m_piRegistration->GetAllContacts();
 
         for (IMS_UINT32 nAt = 0; nAt < objContactList.GetSize(); ++nAt)
         {
@@ -1421,7 +1421,7 @@ PROTECTED VIRTUAL IRegistration* AosRegistration::GetRegistration()
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::StartRegBinding()
 {
     // attach services (add and create binding)
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     AString strLog;
 
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
@@ -1470,7 +1470,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateRegBinding()
         return IMS_FALSE;
     }
 
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_BOOL bChanged = IMS_FALSE;
     AString strLog;
 
@@ -1558,7 +1558,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateNetworkRegBinding()
         return IMS_FALSE;
     }
 
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_BOOL bChanged = IMS_FALSE;
 
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
@@ -1621,7 +1621,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::UpdateNetworkRegFeatureBinding()
         return IMS_FALSE;
     }
 
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
     {
         IAosHandle* piHandle = objHandles.GetValueAt(i);
@@ -2010,7 +2010,7 @@ PROTECTED VIRTUAL void AosRegistration::UpdateFinalAddFeatureTag()
 {
     A_IMS_TRACE_I(REGID, "UpdateFinalAddFeatureTag", 0, 0, 0);
 
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     for (IMS_UINT32 i = 0; i < objHandles.GetSize(); ++i)
     {
         IAosHandle* piHandle = objHandles.GetValueAt(i);
@@ -2112,7 +2112,7 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetPcscf()
     }
 
     const AStringArray& objPcscfs = piPcscf->GetPcscfs();
-    const IMSList<IMS_SINT32>& objPcscfPorts = piPcscf->GetPcscfsPorts();
+    const ImsList<IMS_SINT32>& objPcscfPorts = piPcscf->GetPcscfsPorts();
 
     m_strPcscf = objPcscfs.GetElementAt(nPcscfIndex);
     m_nPcscfPort = objPcscfPorts.GetAt(nPcscfIndex);
@@ -2340,14 +2340,14 @@ PROTECTED VIRTUAL IMS_UINT32 AosRegistration::GetActualWaitTime()
     if (GET_N_CONFIG(m_nSlotId)->GetRegActualWaitTimePolicy() ==
             CarrierConfig::Assets::AWT_POLICY_SPECIFIED_INTERVAL)
     {
-        const IMSVector<IMS_SINT32>& objInterval = GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
+        const ImsVector<IMS_SINT32>& objInterval = GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
         IMS_UINT32 nSize = objInterval.GetSize();
 
         if (nSize > 0)
         {
             IMS_SINT32 nAt = (m_nConsecutiveFailure > nSize) ? nSize : m_nConsecutiveFailure;
 
-            const IMSVector<IMS_SINT32>& objUpperRandom =
+            const ImsVector<IMS_SINT32>& objUpperRandom =
                     GET_N_CONFIG(m_nSlotId)->GetRegRandomRetryIntervals();
 
             if (objUpperRandom.GetSize() == nSize)
@@ -3462,7 +3462,7 @@ PROTECTED VIRTUAL void AosRegistration::ProcessDefaultFlowRecovery_StartWithSpec
             }
             else
             {
-                const IMSVector<IMS_SINT32>& objInterval =
+                const ImsVector<IMS_SINT32>& objInterval =
                         GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
 
                 nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0) : RETRY_DEFAULT_WAIT_TIME;
@@ -3583,7 +3583,7 @@ AosRegistration::ProcessDefaultFlowRecovery_UpdateWithSpecifiedIntervalPolicy(
                 IMS_UINT32 nAwt = m_pUtil->GetRetryAfterValue(m_piRegistration);
                 if (nAwt == 0)
                 {
-                    const IMSVector<IMS_SINT32>& objInterval =
+                    const ImsVector<IMS_SINT32>& objInterval =
                             GET_N_CONFIG(m_nSlotId)->GetRegRetryIntervals();
 
                     nAwt = (objInterval.GetSize() > 0) ? objInterval.GetAt(0)
@@ -4301,7 +4301,7 @@ PROTECTED VIRTUAL void AosRegistration::RecordImpu()
     A_IMS_TRACE_I(REGID, "RecordImpu :: size (%d) m_nSlotId(%d)", objAssociatedUris.GetCount(),
             m_nSlotId, 0);
 
-    IMSList<AString> objUris = IMSList<AString>();
+    ImsList<AString> objUris = ImsList<AString>();
     for (IMS_SINT32 i = 0; i < objAssociatedUris.GetCount() && (i < 9); i++)
     {
         IMS_CHAR strKey[4];
@@ -5547,7 +5547,7 @@ void AosRegistration::ControlPrivateHeader()
 PRIVATE
 IMS_UINT32 AosRegistration::GetSpecificErrWaitTime()
 {
-    IMSVector<IMS_SINT32>& objErrTime = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrWaitTime();
+    ImsVector<IMS_SINT32>& objErrTime = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrWaitTime();
     IMS_SINT32 nWaitTime = (objErrTime.GetSize() > 1) ? objErrTime.GetAt(0) : -1;
 
     return ((nWaitTime > 0) ? static_cast<IMS_UINT32>(nWaitTime) : RETRY_DEFAULT_WAIT_TIME);
@@ -5717,7 +5717,7 @@ void AosRegistration::UpdateRegIpcanCategory()
 
 PRIVATE
 IMS_BOOL AosRegistration::IsErrorCodeExisted(
-        IN const IMSVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const
+        IN const ImsVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const
 {
     for (int i = 0; i < objErrorCode.GetSize(); i++)
     {
@@ -5733,7 +5733,7 @@ IMS_BOOL AosRegistration::IsErrorCodeExisted(
 PRIVATE
 IMS_BOOL AosRegistration::IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT32 nCode) const
 {
-    IMSVector<IMS_SINT32>& objErrorCode = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode();
+    ImsVector<IMS_SINT32>& objErrorCode = GET_N_CONFIG(m_nSlotId)->GetExtraRegErrCode();
 
     for (int i = 0; i < objErrorCode.GetSize(); i++)
     {

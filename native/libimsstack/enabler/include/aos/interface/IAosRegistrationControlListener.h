@@ -34,7 +34,7 @@ public:
     virtual void RegistrationControl_TriggerFullNetworkRegistration(
             IN IMS_SINT32 nSipCode, IN const AString& strTarget) = 0;
     virtual void RegistrationControl_NotifyCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
     virtual void RegistrationControl_ControlRegistration(
             IN AosRegRequestType eType, IN AosPcscfOrder eOrder, IN AosControlCause eCause) = 0;
 };
@@ -47,7 +47,7 @@ public:
     inline void RegistrationControl_TriggerFullNetworkRegistration(
             IN IMS_SINT32 /*nSipCode*/, IN const AString& /*strTarget*/) override{};
     inline void RegistrationControl_NotifyCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override{};
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override{};
     inline void RegistrationControl_ControlRegistration(IN AosRegRequestType /*eType*/,
             IN AosPcscfOrder /*eOrder*/, IN AosControlCause /*eCause*/) override{};
 };

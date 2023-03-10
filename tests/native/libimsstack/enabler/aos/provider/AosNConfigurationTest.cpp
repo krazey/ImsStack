@@ -140,7 +140,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             GetBoolean(CarrierConfig::KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, IMS_FALSE))
             .Times(2)
             .WillRepeatedly(Return(IMS_TRUE));
-    IMSVector<IMS_SINT32> objCarrierNrAvailabilities;
+    ImsVector<IMS_SINT32> objCarrierNrAvailabilities;
     objCarrierNrAvailabilities.Clear();
     objCarrierNrAvailabilities.Add(CarrierConfig::Ims::CARRIER_NR_AVAILABILITY_NSA);
     objCarrierNrAvailabilities.Add(CarrierConfig::Ims::CARRIER_NR_AVAILABILITY_SA);
@@ -151,7 +151,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::KEY_CARRIER_USSD_METHOD_INT, -1))
             .Times(2)
             .WillRepeatedly(Return(CarrierConfig::USSD_OVER_IMS_PREFERRED));
-    IMSVector<IMS_SINT32> objPcscfDiscoveryMethod;
+    ImsVector<IMS_SINT32> objPcscfDiscoveryMethod;
     objPcscfDiscoveryMethod.Clear();
     objPcscfDiscoveryMethod.Add(0);
     EXPECT_CALL(
@@ -183,7 +183,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .WillRepeatedly(Return(1500));
 
     // currently it doesn't have a function
-    IMSVector<IMS_SINT32> objImsPdnEnabledInNoVopsSupport;
+    ImsVector<IMS_SINT32> objImsPdnEnabledInNoVopsSupport;
     objImsPdnEnabledInNoVopsSupport.Clear();
     objImsPdnEnabledInNoVopsSupport.Add(0);
     objImsPdnEnabledInNoVopsSupport.Add(1);
@@ -198,7 +198,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .WillRepeatedly(Return(IMS_TRUE));
 
     // InitIpsecAlgorithm
-    IMSVector<IMS_SINT32> objAuthAlgo;
+    ImsVector<IMS_SINT32> objAuthAlgo;
     objAuthAlgo.Clear();
     objAuthAlgo.Add(0);
     objAuthAlgo.Add(1);
@@ -207,7 +207,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .Times(2)
             .WillRepeatedly(Return(objAuthAlgo));
 
-    IMSVector<IMS_SINT32> objEncryAlgo;
+    ImsVector<IMS_SINT32> objEncryAlgo;
     objEncryAlgo.Clear();
     objEncryAlgo.Add(0);
     objEncryAlgo.Add(1);
@@ -239,7 +239,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .Times(2)
             .WillRepeatedly(Return(600000));
 
-    IMSVector<IMS_SINT32> objSupportedRats;
+    ImsVector<IMS_SINT32> objSupportedRats;
     objSupportedRats.Clear();
     objSupportedRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
     objSupportedRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
@@ -258,7 +258,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_SUPPORTED_BOOL, IMS_FALSE))
             .Times(2)
             .WillRepeatedly(Return(IMS_TRUE));
-    IMSVector<IMS_SINT32> objSmsOverImsSupportedRats;
+    ImsVector<IMS_SINT32> objSmsOverImsSupportedRats;
     objSmsOverImsSupportedRats.Clear();
     objSmsOverImsSupportedRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
     objSmsOverImsSupportedRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
@@ -273,7 +273,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
                     IMS_FALSE))
             .Times(2)
             .WillRepeatedly(Return(IMS_TRUE));
-    IMSVector<IMS_SINT32> objEmergencyOverImsSupportedRats;
+    ImsVector<IMS_SINT32> objEmergencyOverImsSupportedRats;
     objEmergencyOverImsSupportedRats.Clear();
     objEmergencyOverImsSupportedRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
     EXPECT_CALL(objCarrierConfig,
@@ -316,7 +316,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .Times(2)
             .WillRepeatedly(Return(CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED));
 
-    IMSVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
+    ImsVector<IMS_SINT32> objGeolocationPidfInSipRegisterSupport;
     objGeolocationPidfInSipRegisterSupport.Clear();
     objGeolocationPidfInSipRegisterSupport.Add(
             CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI);
@@ -325,7 +325,7 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .Times(2)
             .WillRepeatedly(Return(objGeolocationPidfInSipRegisterSupport));
 
-    IMSVector<IMS_SINT32> objImsIdentityPriority;
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
     objImsIdentityPriority.Clear();
     objImsIdentityPriority.Add(0);
     objImsIdentityPriority.Add(1);
@@ -334,14 +334,14 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .Times(2)
             .WillRepeatedly(Return(objImsIdentityPriority));
 
-    IMSVector<IMS_SINT32> objRegistrationPermanentErrorCode;
+    ImsVector<IMS_SINT32> objRegistrationPermanentErrorCode;
     objRegistrationPermanentErrorCode.Clear();
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY))
             .Times(2)
             .WillRepeatedly(Return(objRegistrationPermanentErrorCode));
 
-    IMSVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
+    ImsVector<IMS_SINT32> objUpdateRegistrationWithRatChange;
     objUpdateRegistrationWithRatChange.Clear();
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Ims::KEY_UPDATE_REGISTRATION_WITH_RAT_CHANGE_INT_ARRAY))
@@ -666,7 +666,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_CALL(objCarrierConfig, GetInt(CarrierConfig::Assets::KEY_VOLTE_HYS_TIME_SEC_INT, -1))
             .WillOnce(Return(60));
 
-    IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
+    ImsVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
     objEmergencyPcscfRetryWaitTimeSec.Clear();
     objEmergencyPcscfRetryWaitTimeSec.Add(2);
     objEmergencyPcscfRetryWaitTimeSec.Add(2);
@@ -674,28 +674,28 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY))
             .WillOnce(Return(objEmergencyPcscfRetryWaitTimeSec));
 
-    IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
+    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Clear();
     objRegErrCodeForPcscfDiscovery.Add(408);
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_REG_ERR_CODE_FOR_PCSCF_DISCOVERY_INT_ARRAY))
             .WillOnce(Return(objRegErrCodeForPcscfDiscovery));
 
-    IMSVector<IMS_SINT32> objRegPermanentErrMaxCnt;
+    ImsVector<IMS_SINT32> objRegPermanentErrMaxCnt;
     objRegPermanentErrMaxCnt.Clear();
     objRegPermanentErrMaxCnt.Add(2);
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_REG_PERMANENT_ERR_MAX_CNT_INT_ARRAY))
             .WillOnce(Return(objRegPermanentErrMaxCnt));
 
-    IMSVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
+    ImsVector<IMS_SINT32> objRegRetryErrCodeWithoutIpsec;
     objRegRetryErrCodeWithoutIpsec.Clear();
     objRegRetryErrCodeWithoutIpsec.Add(406);
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_REG_RETRY_ERR_CODE_WITHOUT_IPSEC_INT_ARRAY))
             .WillOnce(Return(objRegRetryErrCodeWithoutIpsec));
 
-    IMSVector<IMS_SINT32> objReregErrForCallEnd;
+    ImsVector<IMS_SINT32> objReregErrForCallEnd;
     objReregErrForCallEnd.Clear();
     objReregErrForCallEnd.Add(403);
     objReregErrForCallEnd.Add(406);
@@ -703,14 +703,14 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_CALL_END_INT_ARRAY))
             .WillOnce(Return(objReregErrForCallEnd));
 
-    IMSVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
+    ImsVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
     objReregErrCodeForInitRegWithAvailablePcscf.Clear();
     EXPECT_CALL(objCarrierConfig,
             GetIntArray(CarrierConfig::Assets::
                             KEY_REREG_ERR_CODE_FOR_INIT_REG_WITH_AVAILABLE_PCSCF_INT_ARRAY))
             .WillOnce(Return(objReregErrCodeForInitRegWithAvailablePcscf));
 
-    IMSVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
+    ImsVector<IMS_SINT32> objReregErrCodeForImsPdnReactivation;
     objReregErrCodeForImsPdnReactivation.Clear();
     objReregErrCodeForImsPdnReactivation.Add(408);
     EXPECT_CALL(objCarrierConfig,
@@ -718,7 +718,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     CarrierConfig::Assets::KEY_REREG_ERR_CODE_FOR_IMS_PDN_REACTIVATION_INT_ARRAY))
             .WillOnce(Return(objReregErrCodeForImsPdnReactivation));
 
-    IMSVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
+    ImsVector<IMS_SINT32> objReregRetryErrCodeForInitRegWithSamePcscf;
     objReregRetryErrCodeForInitRegWithSamePcscf.Clear();
     objReregRetryErrCodeForInitRegWithSamePcscf.Add(407);
     EXPECT_CALL(objCarrierConfig,
@@ -726,7 +726,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                             KEY_REREG_RETRY_ERR_CODE_FOR_INIT_REG_WITH_SAME_PCSCF_INT_ARRAY))
             .WillOnce(Return(objReregRetryErrCodeForInitRegWithSamePcscf));
 
-    IMSVector<IMS_SINT32> objSubErrorCodeForInitRegWithNextPcscf;
+    ImsVector<IMS_SINT32> objSubErrorCodeForInitRegWithNextPcscf;
     objSubErrorCodeForInitRegWithNextPcscf.Clear();
     objSubErrorCodeForInitRegWithNextPcscf.Add(404);
     EXPECT_CALL(objCarrierConfig,
@@ -734,7 +734,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_NEXT_PCSCF_INT_ARRAY))
             .WillOnce(Return(objSubErrorCodeForInitRegWithNextPcscf));
 
-    IMSVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;
+    ImsVector<IMS_SINT32> objSubErrorCodeForStoppingByExpirationTime;
     objSubErrorCodeForStoppingByExpirationTime.Clear();
     objSubErrorCodeForStoppingByExpirationTime.Add(606);
     EXPECT_CALL(objCarrierConfig,
@@ -742,7 +742,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                             KEY_SUB_ERR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY))
             .WillOnce(Return(objSubErrorCodeForStoppingByExpirationTime));
 
-    IMSVector<IMS_SINT32> objSupportedRoamingRats;
+    ImsVector<IMS_SINT32> objSupportedRoamingRats;
     objSupportedRoamingRats.Clear();
     objSupportedRoamingRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
     objSupportedRoamingRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
@@ -751,7 +751,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_SUPPORTED_ROAMING_RATS_INT_ARRAY))
             .WillOnce(Return(objSupportedRoamingRats));
 
-    IMSVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
+    ImsVector<IMS_SINT32> objVowifiSubErrorCodeForInitReg;
     objVowifiSubErrorCodeForInitReg.Clear();
     objVowifiSubErrorCodeForInitReg.Add(0);
     objVowifiSubErrorCodeForInitReg.Add(403);
@@ -759,7 +759,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
             GetIntArray(CarrierConfig::Assets::KEY_VOWIFI_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY))
             .WillOnce(Return(objVowifiSubErrorCodeForInitReg));
 
-    IMSVector<IMS_SINT32> objWfcSubErrByMissing911Address;
+    ImsVector<IMS_SINT32> objWfcSubErrByMissing911Address;
     objWfcSubErrByMissing911Address.Clear();
     objWfcSubErrByMissing911Address.Add(403);
     EXPECT_CALL(objCarrierConfig,
@@ -830,11 +830,11 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_EQ(200, pAosNConfiguration->GetSipMessageThresholdForTransportChange());
     EXPECT_EQ(60, pAosNConfiguration->GetVolteHysTime());
 
-    IMSVector<IMS_SINT32> objWaitTime = pAosNConfiguration->GetEmergencyPcscfRetryWaitTime();
+    ImsVector<IMS_SINT32> objWaitTime = pAosNConfiguration->GetEmergencyPcscfRetryWaitTime();
     EXPECT_EQ(2, objWaitTime.GetSize());
-    IMSVector<IMS_SINT32> objErrCode = pAosNConfiguration->GetRegErrCodeForPcscfDiscovery();
+    ImsVector<IMS_SINT32> objErrCode = pAosNConfiguration->GetRegErrCodeForPcscfDiscovery();
     EXPECT_EQ(408, objErrCode.GetAt(0));
-    IMSVector<IMS_SINT32> objCount = pAosNConfiguration->GetRegPermanentErrMaxCount();
+    ImsVector<IMS_SINT32> objCount = pAosNConfiguration->GetRegPermanentErrMaxCount();
     EXPECT_EQ(1, objCount.GetSize());
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetRegErrCodeWithoutIpsec();
@@ -866,7 +866,7 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetSubErrorStoppingResub();
     EXPECT_EQ(606, objErrCode.GetAt(0));
-    IMSVector<IMS_SINT32> objRats = pAosNConfiguration->GetSupportedRoamingRats();
+    ImsVector<IMS_SINT32> objRats = pAosNConfiguration->GetSupportedRoamingRats();
     IMS_BOOL bNrSupported = IMS_FALSE;
     for (IMS_UINT32 i = 0; i < objErrCode.GetSize(); i++)
     {
@@ -936,21 +936,21 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
     EXPECT_CALL(objExtraRegErr, GetInt(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_POLICY_INT, -1))
             .WillOnce(Return(CarrierConfig::Assets::ERROR_POLICY_PCSCF_FAILED));
 
-    IMSVector<IMS_SINT32> objExtraRegErrCode;
+    ImsVector<IMS_SINT32> objExtraRegErrCode;
     objExtraRegErrCode.Clear();
     objExtraRegErrCode.Add(400);
     EXPECT_CALL(
             objExtraRegErr, GetIntArray(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_CODE_INT_ARRAY))
             .WillOnce(Return(objExtraRegErrCode));
 
-    IMSVector<IMS_SINT32> objExtraReregErrCode;
+    ImsVector<IMS_SINT32> objExtraReregErrCode;
     objExtraReregErrCode.Clear();
     objExtraReregErrCode.Add(500);
     EXPECT_CALL(objExtraRegErr,
             GetIntArray(CarrierConfig::Assets::KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY))
             .WillOnce(Return(objExtraReregErrCode));
 
-    IMSVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
+    ImsVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
     objExtraRegErrWaitTimeSec.Clear();
     objExtraRegErrWaitTimeSec.Add(30);
     EXPECT_CALL(objExtraRegErr,
@@ -970,7 +970,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
                     -1))
             .WillOnce(Return(40));
 
-    IMSVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
+    ImsVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
     objEventForInitRegOnTerminatedState.Clear();
     objEventForInitRegOnTerminatedState.Add(1);
     objEventForInitRegOnTerminatedState.Add(2);
@@ -980,7 +980,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
                     CarrierConfig::Assets::KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY))
             .WillOnce(Return(objEventForInitRegOnTerminatedState));
 
-    IMSVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
+    ImsVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
     objEventWithWtForInitRegOnTerminatedState.Clear();
     objEventWithWtForInitRegOnTerminatedState.Add(2);
     objEventWithWtForInitRegOnTerminatedState.Add(5);
@@ -1002,14 +1002,14 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objRegErrCodeWithRaTime;
+    ImsVector<IMS_SINT32> objRegErrCodeWithRaTime;
     objRegErrCodeWithRaTime.Clear();
     objRegErrCodeWithRaTime.Add(486);
     EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
             GetIntArray(CarrierConfig::Assets::KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY))
             .WillOnce(Return(objRegErrCodeWithRaTime));
 
-    IMSVector<IMS_SINT32> objReregErrCodeWithRaTime;
+    ImsVector<IMS_SINT32> objReregErrCodeWithRaTime;
     objReregErrCodeWithRaTime.Clear();
     objReregErrCodeWithRaTime.Add(486);
     EXPECT_CALL(objRegErrCodeWithRaTimeBundle,
@@ -1027,7 +1027,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
             GetBoolean(CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
 
-    IMSVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
+    ImsVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
     objRegRetryRandomUpperValueSec.Clear();
     objRegRetryRandomUpperValueSec.Add(0);
     objRegRetryRandomUpperValueSec.Add(0);
@@ -1040,7 +1040,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
                     CarrierConfig::Assets::KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY))
             .WillOnce(Return(objRegRetryRandomUpperValueSec));
 
-    IMSVector<IMS_SINT32> objRegRetryIntervalSec;
+    ImsVector<IMS_SINT32> objRegRetryIntervalSec;
     objRegRetryIntervalSec.Clear();
     objRegRetryIntervalSec.Add(30);
     objRegRetryIntervalSec.Add(30);
@@ -1064,7 +1064,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
             GetInt(CarrierConfig::Assets::KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT, -1))
             .WillOnce(Return(2));
 
-    IMSVector<IMS_SINT32> objSubErrCodeForInitReg;
+    ImsVector<IMS_SINT32> objSubErrCodeForInitReg;
     objSubErrCodeForInitReg.Clear();
     objSubErrCodeForInitReg.Add(408);
     objSubErrCodeForInitReg.Add(504);
@@ -1086,7 +1086,7 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
                     -1))
             .WillOnce(Return(0));
 
-    IMSVector<IMS_SINT32> objSubErrCodeForTerminated;
+    ImsVector<IMS_SINT32> objSubErrCodeForTerminated;
     objSubErrCodeForTerminated.Clear();
     objSubErrCodeForTerminated.Add(491);
     objSubErrCodeForTerminated.Add(500);
@@ -1109,14 +1109,14 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
     EXPECT_EQ(2, pAosNConfiguration->GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached());
     EXPECT_EQ(CarrierConfig::Assets::ERROR_POLICY_PCSCF_FAILED,
             pAosNConfiguration->GetExtraRegErrPolicy());
-    IMSVector<IMS_SINT32>& objErrCode = pAosNConfiguration->GetExtraRegErrCode();
+    ImsVector<IMS_SINT32>& objErrCode = pAosNConfiguration->GetExtraRegErrCode();
     EXPECT_EQ(1, objErrCode.GetSize());
     EXPECT_EQ(400, objErrCode.GetAt(0));
     objErrCode.Clear();
     objErrCode = pAosNConfiguration->GetExtraReregErrCode();
     EXPECT_EQ(1, objErrCode.GetSize());
     EXPECT_EQ(500, objErrCode.GetAt(0));
-    IMSVector<IMS_SINT32>& objWaitTime = pAosNConfiguration->GetExtraRegErrWaitTime();
+    ImsVector<IMS_SINT32>& objWaitTime = pAosNConfiguration->GetExtraRegErrWaitTime();
     EXPECT_EQ(30, objWaitTime.GetAt(0));
 
     // AosNotifyTerminatedForInitRegBundle
@@ -1150,8 +1150,8 @@ TEST_F(AosNConfigurationTest, InitBundleConfig)
 
     // AosRegRetryIntervalBundle
     EXPECT_TRUE(pAosNConfiguration->IsRegRetryIntervalsUsedForSub());
-    IMSVector<IMS_SINT32>& objRandomInterval = pAosNConfiguration->GetRegRandomRetryIntervals();
-    IMSVector<IMS_SINT32>& objInterval = pAosNConfiguration->GetRegRetryIntervals();
+    ImsVector<IMS_SINT32>& objRandomInterval = pAosNConfiguration->GetRegRandomRetryIntervals();
+    ImsVector<IMS_SINT32>& objInterval = pAosNConfiguration->GetRegRetryIntervals();
     EXPECT_EQ(objRandomInterval.GetSize(), objInterval.GetSize());
 
     // AosSubErrCodeForInitRegBundle

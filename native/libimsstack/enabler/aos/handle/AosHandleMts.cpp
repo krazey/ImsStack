@@ -68,7 +68,7 @@ PUBLIC VIRTUAL void AosHandleMts::NConfiguration_NotifyConfigChanged()
 PROTECTED
 void AosHandleMts::InitializeSupportedRats()
 {
-    IMSVector<IMS_SINT32> objRats = GET_N_CONFIG(m_nSlotId)->GetSmsOverImsSupportedRats();
+    ImsVector<IMS_SINT32> objRats = GET_N_CONFIG(m_nSlotId)->GetSmsOverImsSupportedRats();
 
     m_nSupportedRats = NW_REPORT_RADIO_INVALID;
 
@@ -175,7 +175,7 @@ PROTECTED VIRTUAL void AosHandleMts::InitializeServiceFeature()
 }
 
 PROTECTED VIRTUAL void AosHandleMts::ProcessCapabilitiesChanged(
-        IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/)
+        IN const ImsMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/)
 {
     /* jryou:: Temp blocked until GII is changed to consider SMS capability.
     A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",

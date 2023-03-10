@@ -37,7 +37,7 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosProvider::AosProvider() :
         m_piLock(IMS_NULL),
-        m_objParam(IMSMap<IMS_SINT32, ProviderParam*>())
+        m_objParam(ImsMap<IMS_SINT32, ProviderParam*>())
 
 {
     IMS_TRACE_D("AosProvider()", 0, 0, 0);

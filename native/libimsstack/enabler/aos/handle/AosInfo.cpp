@@ -55,7 +55,7 @@ PRIVATE VIRTUAL IMS_SINT32 AosInfo::GetConnectionType()
 
 PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetImsFeatures()
 {
-    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+    ImsMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_UINT32 nFeatures = ImsAosFeature::NONE;
 
     for (int i = 0; i < objHandles.GetSize(); ++i)

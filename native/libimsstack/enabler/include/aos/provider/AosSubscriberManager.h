@@ -161,8 +161,8 @@ protected:
 protected:
     IMS_SINT32 m_nSlotId;
 
-    IMSList<IAosSubscriberManagerListener*> m_objListeners;
-    IMSList<IAosSubscriberManagerListener*> m_objMonitorListeners;
+    ImsList<IAosSubscriberManagerListener*> m_objListeners;
+    ImsList<IAosSubscriberManagerListener*> m_objMonitorListeners;
 
     const ISubscriberConfig* m_piSubscriberConfig;
     const ISubscriberConfig* m_piSubscriberConfigFake;
@@ -190,7 +190,7 @@ protected:
     // Carrier Configuration
     IMS_UINT32 m_nIsimIndexForImpu;
     IMS_BOOL m_bSupportLimitedAdminSmsMode;
-    IMSVector<IMS_SINT32> m_objImsIdentityPriority;
+    ImsVector<IMS_SINT32> m_objImsIdentityPriority;
 
     static const IMS_UINT32 ISIM_RECOVERY_MAX_COUNT = 2;
     static const IMS_UINT32 ISIM_RECOVERY_DEFAULT_INTERVAL = 2;

@@ -38,7 +38,7 @@ PUBLIC VIRTUAL JniAosServiceThread::~JniAosServiceThread()
 
 PUBLIC
 IMS_BOOL JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nNetworkType,
-        IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
+        IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
 {
     IMS_TRACE_D("NotifyRegistered", 0, 0, 0);
 
@@ -60,7 +60,7 @@ IMS_BOOL JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nNetworkType,
 
 PUBLIC
 IMS_BOOL JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nNetworkType,
-        IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
+        IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
 {
     IMS_TRACE_D("NotifyRegistering", 0, 0, 0);
 
@@ -108,7 +108,7 @@ IMS_BOOL JniAosServiceThread::NotifyTechnologyChangeFailed(
 }
 
 PUBLIC
-IMS_BOOL JniAosServiceThread::NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris)
+IMS_BOOL JniAosServiceThread::NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris)
 {
     IMS_TRACE_D("NotifyAssociatedUriChanged", 0, 0, 0);
 

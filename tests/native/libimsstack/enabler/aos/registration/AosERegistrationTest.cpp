@@ -174,9 +174,9 @@ public:
     AString m_strHeader;
     AStringArray m_objImpus;
     AStringArray m_objPcscfs;
-    IMSList<IMS_SINT32> m_objPcscfPorts;
-    IMSVector<IMS_SINT32> m_objWaitTime;
-    IMSMap<AString, IAosHandle*> m_objHandles;
+    ImsList<IMS_SINT32> m_objPcscfPorts;
+    ImsVector<IMS_SINT32> m_objWaitTime;
+    ImsMap<AString, IAosHandle*> m_objHandles;
 
 protected:
     virtual void SetUp() override
@@ -184,7 +184,7 @@ protected:
         m_pAosStaticProfile = new AosStaticProfile();
         m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
 
-        IMSList<ImsServiceName> objServiceName =
+        ImsList<ImsServiceName> objServiceName =
                 ImsServiceConfig::GetServiceNames(ImsServiceConfig::GetEmergencyServiceProfile());
 
         for (IMS_UINT32 i = 0; i < objServiceName.GetSize(); i++)
@@ -385,7 +385,7 @@ protected:
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(m_strHeader));
 
-        const IMSList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
+        const ImsList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
         if (objProfiles.GetSize() > 0)
         {
             AosServiceProfile* pServiceProfile = objProfiles.GetAt(0);

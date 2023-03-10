@@ -25,9 +25,9 @@ struct AosMmtelRequiresProvisioningBundle
 {
 public:
     AosMmtelRequiresProvisioningBundle() :
-            objCapabilityTypeVoice(IMSVector<IMS_SINT32>()),
-            objCapabilityTypeVideo(IMSVector<IMS_SINT32>()),
-            objCapabilityTypeSms(IMSVector<IMS_SINT32>())
+            objCapabilityTypeVoice(ImsVector<IMS_SINT32>()),
+            objCapabilityTypeVideo(ImsVector<IMS_SINT32>()),
+            objCapabilityTypeSms(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -36,9 +36,9 @@ public:
             IN const AosMmtelRequiresProvisioningBundle&) = delete;
 
 public:
-    IMSVector<IMS_SINT32> objCapabilityTypeVoice;
-    IMSVector<IMS_SINT32> objCapabilityTypeVideo;
-    IMSVector<IMS_SINT32> objCapabilityTypeSms;
+    ImsVector<IMS_SINT32> objCapabilityTypeVoice;
+    ImsVector<IMS_SINT32> objCapabilityTypeVideo;
+    ImsVector<IMS_SINT32> objCapabilityTypeSms;
 };
 
 #endif  // AOS_CARRIER_CONFIG_BUNDLE_H_

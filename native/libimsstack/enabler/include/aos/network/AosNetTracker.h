@@ -99,8 +99,8 @@ public:
 
 private:
     void InitConfig();
-    void InitCnxPolicy(IN IMSVector<IMS_SINT32>& objRats);
-    void InitRoamingCnxPolicy(IN IMSVector<IMS_SINT32>& objRoamingRats);
+    void InitCnxPolicy(IN ImsVector<IMS_SINT32>& objRats);
+    void InitRoamingCnxPolicy(IN ImsVector<IMS_SINT32>& objRoamingRats);
     void InitObject();
 
     IMS_BOOL UpdateNetworkStatus();
@@ -211,7 +211,7 @@ private:
     ITimer* m_piRatTimer;
     ITimer* m_piVoiceRatTimer;
 
-    IMSList<IAosNetTrackerListener*> m_objListeners;
+    ImsList<IAosNetTrackerListener*> m_objListeners;
 
     AString m_strTag;
 

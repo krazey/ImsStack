@@ -45,7 +45,7 @@ protected:
 
 TEST_F(ImsAosTest, GetImsAos)
 {
-    IMSList<IImsAos*> objImsAosList =
+    ImsList<IImsAos*> objImsAosList =
             ImsAos::GetImsAosList("ims.app.mtc", "ims.service.mtc", SLOT_ID);
     EXPECT_LE(0, objImsAosList.GetSize());
 
@@ -55,7 +55,7 @@ TEST_F(ImsAosTest, GetImsAos)
     objImsAosList = ImsAos::GetImsAosList("ims.app.mts", "ims.service.mts", SLOT_ID);
     EXPECT_LE(0, objImsAosList.GetSize());
 
-    IMSList<IImsAos*> objImsAosList2 = ImsAos::GetImsAosList("ims.app.mtc", SLOT_ID);
+    ImsList<IImsAos*> objImsAosList2 = ImsAos::GetImsAosList("ims.app.mtc", SLOT_ID);
     EXPECT_LE(0, objImsAosList2.GetSize());
 
     objImsAosList2 = ImsAos::GetImsAosList("ims.app.mts", SLOT_ID);

@@ -96,7 +96,7 @@ protected:
         AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration);
     }
 
-    IMSMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandleMts->m_objCapabilities; }
+    ImsMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandleMts->m_objCapabilities; }
 
     IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature)
     {
@@ -124,7 +124,7 @@ protected:
 
     IMS_BOOL IsHandleBlocked() { return m_pAosHandleMts->IsHandleBlocked(); }
 
-    void ProcessCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
+    void ProcessCapabilitiesChanged(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
     {
         m_pAosHandleMts->ProcessCapabilitiesChanged(objCapabilities);
     }
@@ -173,7 +173,7 @@ TEST_F(AosHandleMtsTest, NConfiguration_NotifyConfigChanged_Test)
     // Test: no supported rat
     // Expectation: Supported rat = 0
 
-    IMSVector<IMS_SINT32> objTestRats;
+    ImsVector<IMS_SINT32> objTestRats;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetSmsOverImsSupportedRats())
             .Times(1)
             .WillOnce(ReturnRef(objTestRats));
@@ -188,7 +188,7 @@ TEST_F(AosHandleMtsTest, InitializeSupportedRats_Test)
     // Test: supported rats = EUTRAN, UTRAN, GERAN, NGRAN
     // Expectation: Supported rat = LTE, WCDMA, HSPA, GSM, EDGE, NR
 
-    IMSVector<IMS_SINT32> objTestRats;
+    ImsVector<IMS_SINT32> objTestRats;
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_UTRAN);
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN);
@@ -207,7 +207,7 @@ TEST_F(AosHandleMtsTest, InitializeSupportedRats_Test)
 
 TEST_F(AosHandleMtsTest, Init_Test)
 {
-    IMSVector<IMS_SINT32> objTestRats;
+    ImsVector<IMS_SINT32> objTestRats;
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
     objTestRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_NGRAN);
 
@@ -285,7 +285,7 @@ TEST_F(AosHandleMtsTest, InitializeServiceFeature_Test)
 
 TEST_F(AosHandleMtsTest, ProcessCapabilitiesChanged_Test)
 {
-    IMSMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objNewCapabilities;
     ProcessCapabilitiesChanged(objNewCapabilities);
 }
 
@@ -312,7 +312,7 @@ TEST_F(AosHandleMtsTest, IsHandleBlocked_Test)
 
 TEST_F(AosHandleMtsTest, IsSupportedNetworkTypeForCellular_Test)
 {
-    IMSVector<IMS_SINT32> objRats;
+    ImsVector<IMS_SINT32> objRats;
     objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_EUTRAN);
     objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_UTRAN);
     objRats.Add(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_GERAN);

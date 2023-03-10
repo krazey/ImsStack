@@ -82,7 +82,7 @@ public:
     Type GetProfileType() const;
     AosRegistrationType GetRegistrationType() const;
 
-    const IMSList<AosServiceProfile*>& GetServiceProfiles() const;
+    const ImsList<AosServiceProfile*>& GetServiceProfiles() const;
 
 private:
     IMS_BOOL IsWifiTest();
@@ -95,7 +95,7 @@ private:
 
     IMS_SINT32 m_nConnectionType;
     IMS_UINT32 m_nRegistrationFlowId;
-    IMSList<AosServiceProfile*> m_objServiceProfiles;
+    ImsList<AosServiceProfile*> m_objServiceProfiles;
 };
 
 #endif  // AOS_STATIC_PROFILE_H_

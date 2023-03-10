@@ -100,6 +100,6 @@ private:
 
     IMutex* m_piLock;
     // <slot-id, ProviderParam>
-    IMSMap<IMS_SINT32, ProviderParam*> m_objParam;
+    ImsMap<IMS_SINT32, ProviderParam*> m_objParam;
 };
 #endif  // AOS_PROVIDER_H_
