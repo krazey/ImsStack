@@ -16,7 +16,11 @@
 
 package com.android.imsstack.imsservice.mmtel.ut.base;
 
+import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+
 import android.content.Context;
+
+import java.util.List;
 
 /**
  * Provides the Ut interface interworking to get/set the supplementary service configuration.
@@ -29,9 +33,9 @@ public interface IUtInterface {
     boolean isUtAvailable();
 
     /**
-     * Changes Ut capability
+     * Changes capabilities and radio technologies
      */
-    void changeCapability(boolean enable);
+    void changeCapabilities(List<CapabilityPair> enabledCaps, List<CapabilityPair> disabledCaps);
 
     /**
      * Initialize Ut service

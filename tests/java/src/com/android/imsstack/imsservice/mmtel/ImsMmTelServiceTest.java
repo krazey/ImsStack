@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -236,7 +235,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     public void testChangeEnabledCapabilities() throws Exception {
         mMmTelFeature.changeEnabledCapabilities(null, null);
         verify(mMockRegTracker, never()).changeCapabilities(any(), any());
-        verify(mMockUtInterface, never()).changeCapability(anyBoolean());
+        verify(mMockUtInterface, never()).changeCapabilities(any(), any());
 
         CapabilityChangeRequest capabilityRequest = new CapabilityChangeRequest();
         capabilityRequest.addCapabilitiesToEnableForTech(MmTelCapabilities.CAPABILITY_TYPE_VOICE,
@@ -253,7 +252,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mMmTelFeature.start();
         mMmTelFeature.changeEnabledCapabilities(capabilityRequest, null);
         verify(mMockRegTracker).changeCapabilities(any(), any());
-        verify(mMockUtInterface).changeCapability(anyBoolean());
+        verify(mMockUtInterface).changeCapabilities(any(), any());
 
         mMmTelFeature.onCapabilitiesUpdateFailed(MmTelCapabilities.CAPABILITY_TYPE_VOICE,
                 ImsRegistrationImplBase.REGISTRATION_TECH_NONE,

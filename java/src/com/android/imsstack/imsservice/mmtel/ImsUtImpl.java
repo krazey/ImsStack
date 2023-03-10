@@ -16,13 +16,13 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
+import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+
 import android.os.DeadObjectException;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
 import android.telephony.ims.ImsUtListener;
-import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
-import android.telephony.ims.feature.MmTelFeature.MmTelCapabilities;
 import android.telephony.ims.stub.ImsUtImplBase;
 import android.text.TextUtils;
 
@@ -434,9 +434,8 @@ public final class ImsUtImpl extends ImsUtImplBase {
     }
 
     /**
-     * Updating Ut feature capability when capabilities are changed. Currently, radio technologies
-     * are ignored because they're not updated properly.
-     * See also {@link com.android.ims.ImsManager#updateUtFeatureValue}.
+     * Updating feature capabilities when capabilities are changed from
+     * {@link com.android.ims.ImsManager#changeMmTelCapability}
      *
      * @param enabledCaps list of CapabilityPair of features which are enabled.
      * @param disabledCaps list of CapabilityPair of features which are disabled.
@@ -447,19 +446,7 @@ public final class ImsUtImpl extends ImsUtImplBase {
             return;
         }
 
-        for (CapabilityPair capabilityPair : enabledCaps) {
-            if (capabilityPair.getCapability() == MmTelCapabilities.CAPABILITY_TYPE_UT) {
-                mUt.changeCapability(true);
-                return;
-            }
-        }
-
-        for (CapabilityPair capabilityPair : disabledCaps) {
-            if (capabilityPair.getCapability() == MmTelCapabilities.CAPABILITY_TYPE_UT) {
-                mUt.changeCapability(false);
-                return;
-            }
-        }
+        mUt.changeCapabilities(enabledCaps, disabledCaps);
     }
 
     private void postAndRunTask(Runnable task) {

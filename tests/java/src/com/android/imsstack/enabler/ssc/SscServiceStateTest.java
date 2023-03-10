@@ -18,6 +18,11 @@ package com.android.imsstack.enabler.ssc;
 
 import static android.telephony.ServiceState.STATE_IN_SERVICE;
 import static android.telephony.ServiceState.STATE_OUT_OF_SERVICE;
+import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT;
+import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM;
+import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_LTE;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -27,6 +32,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -61,8 +70,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @RunWith(AndroidTestingRunner.class)
@@ -80,6 +91,7 @@ public class SscServiceStateTest {
     private TestableLooper mLooper;
 
     private TelephonyManager mMockTelephonyManager;
+    private ConnectivityManager mMockConnectivityManager;
     @Mock private AlarmTimerAgent mMockAlarmTimer;
     @Mock private AosService mMockAosService;
     @Mock private CarrierConfig mMockCarrierConfig;
@@ -103,7 +115,7 @@ public class SscServiceStateTest {
                 .thenReturn(false);
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsSs.KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY))
-                .thenReturn(new int[] { AccessNetworkType.EUTRAN });
+                .thenReturn(new int[] { AccessNetworkType.EUTRAN, AccessNetworkType.IWLAN });
         when(mMockCarrierConfig.getBoolean(
                 CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL))
                 .thenReturn(true);
@@ -131,6 +143,8 @@ public class SscServiceStateTest {
         when(mMockTelephonyManager.createForSubscriptionId(SUB_ID_0))
                 .thenReturn(mMockTelephonyManager);
         when(mMockTelephonyManager.getSupportedModemCount()).thenReturn(MAX_SIM_SLOT);
+
+        mMockConnectivityManager = context.getSystemService(ConnectivityManager.class);
 
         AgentFactory.setDefaultAgent(AgentFactory.ALARM_TIMER, mMockAlarmTimer);
         AgentFactory.setDefaultAgent(AgentFactory.WIFI_STATE, mMockWifiState);
@@ -193,6 +207,8 @@ public class SscServiceStateTest {
         verify(mMockTelephonyManager).registerTelephonyCallback(
                 AppContext.getInstance().getMainExecutor(),
                 mSscServiceState.mMobileDataStateListener);
+        verify(mMockConnectivityManager)
+                .registerDefaultNetworkCallback(mSscServiceState.mCrossSimDataStateListener);
     }
 
     @Test
@@ -215,6 +231,8 @@ public class SscServiceStateTest {
         verify(mMockAosService).removeListener(mSscServiceState.mRegiStateListener);
         verify(mMockTelephonyManager)
                 .unregisterTelephonyCallback(mSscServiceState.mMobileDataStateListener);
+        verify(mMockConnectivityManager)
+                .unregisterNetworkCallback(mSscServiceState.mCrossSimDataStateListener);
 
         // verifying deInit() calls resetAllUtStatus()
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
@@ -246,21 +264,107 @@ public class SscServiceStateTest {
     }
 
     @Test
-    public void testChangeCapability_sameCapabilityAsBefore() {
-        mSscServiceState.changeCapability(true);
+    public void testChangeCapabilities_utEnabled() {
+        mSscServiceState.mIsUtFeatureEnabled = false;
+        mSscServiceState.mUtAvailability = false;
+
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_UT, REGISTRATION_TECH_LTE));
+        disabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
+
+        mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
         processDelayedMessage();
 
-        verifyNoMoreInteractions(mMockUtInterface);
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(true, mSscServiceState.isUtAvailable());
+        assertEquals(true, mSscServiceState.mIsUtFeatureEnabled);
     }
 
     @Test
-    public void testChangeCapability_changeCapabilityToFalse() {
-        mSscServiceState.changeCapability(false);
+    public void testChangeCapabilities_utDisabled() {
+        mSscServiceState.mIsUtFeatureEnabled = true;
+        mSscServiceState.mUtAvailability = true;
+
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
+        disabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_UT, REGISTRATION_TECH_LTE));
+
+        mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
         processDelayedMessage();
 
         verify(mMockUtInterface, times(2)).onServiceStateChanged();
         assertEquals(false, mSscServiceState.isUtAvailable());
+        assertEquals(false, mSscServiceState.mIsUtFeatureEnabled);
+    }
+
+    @Test
+    public void testChangeCapabilities_noUtCapability() {
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
+
+        mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
+        processDelayedMessage();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+        assertEquals(true, mSscServiceState.isUtAvailable());
+        assertEquals(true, mSscServiceState.mIsUtFeatureEnabled);
+    }
+
+    @Test
+    public void testChangeCapabilities_crossSimEnabled() {
+        mSscServiceState.mIsCrossSimFeatureEnabled = false;
+        mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = true;
+        mSscServiceState.mUtAvailability = false;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_CROSS_SIM));
+        disabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
+
+        mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
+        processDelayedMessage();
+
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        assertEquals(true, mSscServiceState.isUtAvailable());
+        assertEquals(true, mSscServiceState.mIsCrossSimFeatureEnabled);
+    }
+
+    @Test
+    public void testChangeCapabilities_crossSimDisabled() {
+        mSscServiceState.mIsCrossSimFeatureEnabled = true;
+        mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = true;
+        mSscServiceState.mUtAvailability = true;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
+        disabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_CROSS_SIM));
+
+        mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
+        processDelayedMessage();
+
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        assertEquals(false, mSscServiceState.isUtAvailable());
+        assertEquals(false, mSscServiceState.mIsCrossSimFeatureEnabled);
+    }
+
+    @Test
+    public void testChangeCapabilities_noCrossSimCapability() {
+        ArrayList<CapabilityPair> enabledCaps = new ArrayList<CapabilityPair>();
+        ArrayList<CapabilityPair> disabledCaps = new ArrayList<CapabilityPair>();
+        enabledCaps.add(new CapabilityPair(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE));
+
+        mSscServiceState.changeCapabilities(enabledCaps, disabledCaps);
+        processDelayedMessage();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+        assertEquals(true, mSscServiceState.isUtAvailable());
+        assertEquals(false, mSscServiceState.mIsCrossSimFeatureEnabled);
     }
 
     @Test
@@ -780,6 +884,123 @@ public class SscServiceStateTest {
 
         verifyNoMoreInteractions(mMockUtInterface);
         assertEquals(false, mSscServiceState.mMobileDataStateListener.getUserMobileDataState());
+    }
+
+    @Test
+    public void testCrossSimDataStateListener_onLostWhileCrossSimDataAvailable() {
+        mSscServiceState.mIsCrossSimFeatureEnabled = true;
+        mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = true;
+        mSscServiceState.mUtAvailability = true;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        Network network = Mockito.mock(Network.class);
+        mSscServiceState.mCrossSimDataStateListener.onLost(network);
+        mLooper.processAllMessages();
+        processDelayedMessage();
+
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        assertEquals(false, mSscServiceState.isUtAvailable());
+        assertEquals(false, mSscServiceState.mCrossSimDataStateListener.getCrossSimDataState());
+    }
+
+    @Test
+    public void testCrossSimDataStateListener_onLostWhileCrossSimDataUnavailable() {
+        mSscServiceState.mIsCrossSimFeatureEnabled = true;
+        mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
+        mSscServiceState.mUtAvailability = true;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        Network network = Mockito.mock(Network.class);
+        mSscServiceState.mCrossSimDataStateListener.onLost(network);
+        mLooper.processAllMessages();
+        processDelayedMessage();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+        assertEquals(true, mSscServiceState.isUtAvailable()); // mUtAvailability not changed
+        assertEquals(false, mSscServiceState.mCrossSimDataStateListener.getCrossSimDataState());
+    }
+
+    @Test
+    public void testCrossSimDataStateListener_onCapabilitiesChangedWithoutCellularTransportType() {
+        mSscServiceState.mIsCrossSimFeatureEnabled = true;
+        mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
+        mSscServiceState.mUtAvailability = false;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        Network network = Mockito.mock(Network.class);
+        NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder().build();
+        mSscServiceState.mCrossSimDataStateListener
+                .onCapabilitiesChanged(network, networkCapabilities);
+        mLooper.processAllMessages();
+        processDelayedMessage();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+        assertEquals(false, mSscServiceState.isUtAvailable());
+        assertEquals(false, mSscServiceState.mCrossSimDataStateListener.getCrossSimDataState());
+    }
+
+    @Test
+    public void testCrossSimDataStateListener_onCapabilitiesChangedWithoutNetworkSpecifier() {
+        mSscServiceState.mIsCrossSimFeatureEnabled = true;
+        mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
+        mSscServiceState.mUtAvailability = false;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        Network network = Mockito.mock(Network.class);
+        NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build();
+        mSscServiceState.mCrossSimDataStateListener
+                .onCapabilitiesChanged(network, networkCapabilities);
+        mLooper.processAllMessages();
+        processDelayedMessage();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+        assertEquals(false, mSscServiceState.isUtAvailable());
+        assertEquals(false, mSscServiceState.mCrossSimDataStateListener.getCrossSimDataState());
+    }
+
+    @Test
+    public void testCrossSimDataStateListener_onCapabilitiesChangedWithSamSubscriptionId() {
+        mSscServiceState.mIsCrossSimFeatureEnabled = true;
+        mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
+        mSscServiceState.mUtAvailability = false;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        Network network = Mockito.mock(Network.class);
+        NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .setNetworkSpecifier(new TelephonyNetworkSpecifier(SUB_ID_0))
+                .build();
+        mSscServiceState.mCrossSimDataStateListener
+                .onCapabilitiesChanged(network, networkCapabilities);
+        mLooper.processAllMessages();
+        processDelayedMessage();
+
+        verifyNoMoreInteractions(mMockUtInterface);
+        assertEquals(false, mSscServiceState.isUtAvailable());
+        assertEquals(false, mSscServiceState.mCrossSimDataStateListener.getCrossSimDataState());
+    }
+
+    @Test
+    public void testCrossSimDataStateListener_onCapabilitiesChangedWhenCrossSimAvailable() {
+        mSscServiceState.mIsCrossSimFeatureEnabled = true;
+        mSscServiceState.mCrossSimDataStateListener.mCrossSimDataAvailable = false;
+        mSscServiceState.mUtAvailability = false;
+        when(mMockDcNetWatcher.getDataServiceState()).thenReturn(STATE_OUT_OF_SERVICE);
+
+        Network network = Mockito.mock(Network.class);
+        NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .setNetworkSpecifier(new TelephonyNetworkSpecifier(SUB_ID_1))
+                .build();
+        mSscServiceState.mCrossSimDataStateListener
+                .onCapabilitiesChanged(network, networkCapabilities);
+        mLooper.processAllMessages();
+        processDelayedMessage();
+
+        verify(mMockUtInterface, times(2)).onServiceStateChanged();
+        assertEquals(true, mSscServiceState.isUtAvailable());
+        assertEquals(true, mSscServiceState.mCrossSimDataStateListener.getCrossSimDataState());
     }
 
     private void sendMessage(int what) {

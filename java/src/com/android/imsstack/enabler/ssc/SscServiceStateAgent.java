@@ -16,12 +16,15 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import static android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
+
 import android.os.Looper;
 
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class SscServiceStateAgent {
     private static final SscServiceStateAgent sSscServiceStateAgent = new SscServiceStateAgent();
@@ -73,14 +76,15 @@ public class SscServiceStateAgent {
         return serviceState.isUtAvailable();
     }
 
-    protected void changeCapability(int slotId, boolean enable) {
+    protected void changeCapabilities(int slotId, List<CapabilityPair> enabledCaps,
+            List<CapabilityPair> disabledCaps) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.e(slotId, "serviceState is null");
             return;
         }
 
-        serviceState.changeCapability(enable);
+        serviceState.changeCapabilities(enabledCaps, disabledCaps);
     }
 
     protected void setErrorResponseCode(int slotId, int responseCode) {

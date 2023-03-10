@@ -183,8 +183,7 @@ public final class SscConfig {
     }
 
     static boolean isImsRegistrationRequired(int slotId) {
-        return getBoolean(slotId,
-                CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL);
+        return getBoolean(slotId, CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL);
     }
 
     static boolean isCsfbSupported(int slotId) {
