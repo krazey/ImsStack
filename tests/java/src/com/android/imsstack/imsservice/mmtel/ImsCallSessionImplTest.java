@@ -350,16 +350,17 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     @Test
     public void testConsultativeTransfer() {
         //When Call on hold
+        ImsCallSessionImpl imsCallSession = createImsCallSession("2");
         when(mMockCallContext.getApp()).thenReturn(mMockImsCallApp);
         when(mMockImsCallApp.getCallManager()).thenReturn(mMockImsCallManager);
-        when(mMockImsCallManager.getActiveSession()).thenReturn(mImsCallSession);
+        when(mMockImsCallManager.getActiveSession()).thenReturn(imsCallSession);
         when(mMockMtcCall.isOnHold()).thenReturn(true);
         mImsCallSession.transfer(new ImsCallSessionImplBase());
         verify(mMockMtcCall).transfer(null);
 
-        //When ECT on background call
-        mImsCallSession = createImsCallSession("2");
-        ImsCallSessionImpl imsCallSession = createImsCallSession("3");
+        //When call is not on hold
+        mImsCallSession = createImsCallSession("3");
+        imsCallSession = createImsCallSession("4");
         when(mMockImsCallManager.getActiveSession()).thenReturn(imsCallSession);
         when(mMockMtcCall.isOnHold()).thenReturn(false);
         when(mMockMtcCall.getCallInfo()).thenReturn(mMockCallInfo);
@@ -987,54 +988,81 @@ public class ImsCallSessionImplTest extends ImsStackTest {
 
     @Test
     public void testOnCallTransferred() {
+        mImsCallSession.mTransferTargetSession = createImsCallSession("1");
+        ImsCallSessionImpl targetSession = mImsCallSession.mTransferTargetSession;
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
         mImsCallSession.mIsEctConfirmationRequired = false;
-        mCallDetails.set(mCallDetails.ON_ECT);
+        targetSession.getCallDetails().set(mCallDetails.ON_ECT);
         mImsCallSession.getCallListenerProxy().onCallTransferred(mockMtcCall);
         assertTrue(mCallDetails.is(mCallDetails.ON_ECT));
 
+        //verify {@link #invokeCallSessionTransferred} not called
         mImsCallSession.getCallListenerProxy().onCallTransferred(mMockMtcCall);
-        //verify clear ON_ECT
-        assertFalse(mCallDetails.is(mCallDetails.ON_ECT));
+        assertFalse(targetSession.getCallDetails().is(mCallDetails.ON_ECT));
+        assertFalse(targetSession.getCallDetails().is(mCallDetails.IMPLICIT_ON_HOLD));
+        assertFalse(mImsCallSession.mIsEctConfirmationRequired);
+        verify(mMockImsCallSessionCallback, never()).invokeCallSessionTransferred(
+                any(ImsCallSessionImplBase.class));
 
-        mImsCallSession = createImsCallSession("1");
+        //verify {@link #invokeCallSessionTransferred} is called
+        mImsCallSession = createImsCallSession("2");
+        mImsCallSession.mTransferTargetSession = createImsCallSession("3");
+        targetSession = mImsCallSession.mTransferTargetSession;
+        targetSession.getCallDetails().set(mCallDetails.ON_ECT);
         mImsCallSession.mIsEctConfirmationRequired = true;
-        mImsCallSession.mTransferRequestedSession = mImsCallSession;
         mImsCallSession.getCallListenerProxy().onCallTransferred(mMockMtcCall);
+        processAllMessages();
         verify(mMockImsCallSessionCallback).invokeCallSessionTransferred(
                 any(ImsCallSessionImplBase.class));
-        assertEquals(null, mImsCallSession.mTransferRequestedSession);
+        assertFalse(mImsCallSession.mIsEctConfirmationRequired);
+        assertEquals(null, mImsCallSession.mTransferTargetSession);
     }
 
     @Test
     public void testOnCallTransferFailed() {
+        mImsCallSession.mTransferTargetSession = createImsCallSession("1");
+        ImsCallSessionImpl targetSession = mImsCallSession.mTransferTargetSession;
         CallReasonInfo mockCallReasonInfo = Mockito.mock(CallReasonInfo.class);
         MtcCall mockMtcCall = Mockito.mock(MtcCall.class);
-        mCallDetails.set(mCallDetails.ON_ECT);
+
+        targetSession.getCallDetails().set(mCallDetails.ON_ECT);
         mImsCallSession.getCallListenerProxy().onCallTransferFailed(mockMtcCall,
                 mockCallReasonInfo);
-        assertTrue(mCallDetails.is(mCallDetails.ON_ECT));
+        assertTrue(targetSession.getCallDetails().is(mCallDetails.ON_ECT));
 
-        when(mMockMtcCall.isOnHold()).thenReturn(true).thenReturn(false);
-        // set state IMPLICIT_ON_HOLD
-        mCallDetails.set(mCallDetails.IMPLICIT_ON_HOLD);
-        when(mMockMtcCall.getCallInfo()).thenReturn(mMockCallInfo);
-        when(mMockMtcCall.getMediaInfo()).thenReturn(mMockMediaInfo);
+        //verify {@link #resume} and {@link #nvokeCallSessionTransferFailed} is not called
+        MtcCall targetCall = targetSession.getMtcCall();
+        when(targetCall.isOnHold()).thenReturn(false).thenReturn(true);
         mImsCallSession.getCallListenerProxy().onCallTransferFailed(mMockMtcCall,
                 mockCallReasonInfo);
-        verify(mMockMtcCall).resume(any(MediaInfo.class));
+        verify(mMockMtcCall, never()).resume(any(MediaInfo.class));
+        assertFalse(targetSession.getCallDetails().is(mCallDetails.ON_ECT));
+        assertFalse(targetSession.getCallDetails().is(mCallDetails.IMPLICIT_ON_HOLD));
+        assertFalse(mImsCallSession.mIsEctConfirmationRequired);
+        verify(mMockImsCallSessionCallback, never()).invokeCallSessionTransferFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
 
-        mImsCallSession = createImsCallSession("1");
-        mCallDetails.set(mCallDetails.IMPLICIT_ON_HOLD);
-        mImsCallSession.getCallListenerProxy().onCallTransferFailed(mMockMtcCall,
-                mockCallReasonInfo);
-        assertFalse(mCallDetails.is(mCallDetails.ON_ECT));
-
+        //verify {@link #resume} and {@link #nvokeCallSessionTransferFailed} is called
+        mImsCallSession = createImsCallSession("2");
+        mImsCallSession.mTransferTargetSession = createImsCallSession("3");
+        targetSession = mImsCallSession.mTransferTargetSession;
+        targetSession.getCallDetails().set(mCallDetails.ON_ECT);
         mImsCallSession.mIsEctConfirmationRequired = true;
-        mImsCallSession.mTransferRequestedSession = mImsCallSession;
+        // set state IMPLICIT_ON_HOLD
+        targetSession.getCallDetails().set(mCallDetails.IMPLICIT_ON_HOLD);
+        when(targetCall.getCallInfo()).thenReturn(mMockCallInfo);
+        when(targetCall.getMediaInfo()).thenReturn(mMockMediaInfo);
         mImsCallSession.getCallListenerProxy().onCallTransferFailed(mMockMtcCall,
                 mockCallReasonInfo);
-        assertEquals(null, mImsCallSession.mTransferRequestedSession);
+        processAllMessages();
+        verify(mMockMtcCall).resume(any(MediaInfo.class));
+        assertFalse(targetSession.getCallDetails().is(mCallDetails.ON_ECT));
+        assertFalse(targetSession.getCallDetails().is(mCallDetails.IMPLICIT_ON_HOLD));
+        processAllMessages();
+        verify(mMockImsCallSessionCallback).invokeCallSessionTransferFailed(
+                any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+        assertFalse(mImsCallSession.mIsEctConfirmationRequired);
+        assertEquals(null, mImsCallSession.mTransferTargetSession);
     }
 
     @Test
