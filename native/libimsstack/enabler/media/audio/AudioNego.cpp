@@ -2216,6 +2216,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pLocalProfile,
                     if (((pEvsFmtp->nBrList & 0x10) != 0) && ((pEvsFmtp->nBrList & 0xFFE0) == 0))
                     {
                         pEvsFmtp->nModeSetList = 0x07;  // mode-set = 0,1,2;
+                        pEvsFmtp->bShowModeSetList = IMS_TRUE;
                         IMS_TRACE_D("MakeNegotiatedProfile() - add EVS mode-set", 0, 0, 0);
                     }
                 }
@@ -2655,6 +2656,7 @@ IMS_BOOL AudioNego::GetFmtpFromString(IN const AString& strFmtp, OUT AudioProfil
                 IMS_UINT32 nModeSet = (IMS_UINT32)objSplitComma.GetAt(j).ToInt32();
                 pFmtp->nModeSetList = (pFmtp->nModeSetList | (1 << nModeSet));
             }
+            pFmtp->bShowModeSetList = IMS_TRUE;
         }
         else if (objSplitEqual.GetAt(0).Equals("mode-change-capability") == IMS_TRUE)
         {
