@@ -37,6 +37,6 @@ public:
 protected:
     static SipControllerFactory* m_gpFactory;
     // <slotId, SipControllerManager>
-    static IMSMap<IMS_SINT32, SipControllerManager*> m_objManagers;
+    static ImsMap<IMS_SINT32, SipControllerManager*> m_objManagers;
 };
 #endif  // SIPCONTROLLER_FACTORY_H_
