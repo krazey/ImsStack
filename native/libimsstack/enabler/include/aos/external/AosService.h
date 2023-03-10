@@ -44,7 +44,7 @@ public:
     void TriggerFullNetworkRegistration(
             IN IMS_SINT32 nSipCode, IN const AString& sipReason) override;
     void NotifyCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
     void ControlRegistration(
             IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause) override;
 
@@ -72,15 +72,15 @@ public:
 
     // Native -> Java
     IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const IMSList<AString>& objFeatureTags) override;
+            IN const ImsList<AString>& objFeatureTags) override;
 
     IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const IMSList<AString>& objFeatureTags) override;
+            IN const ImsList<AString>& objFeatureTags) override;
 
     IMS_BOOL NotifyDeregistered(IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
     IMS_BOOL NotifyTechnologyChangeFailed(
             IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) override;
-    IMS_BOOL NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) override;
+    IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) override;
     IMS_BOOL NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
 
@@ -89,14 +89,14 @@ public:
     IMS_BOOL RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) override;
     IMS_BOOL RequestWifiService(IN IMS_BOOL bIsOn) override;
 
-    IMSMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
+    ImsMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
     IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) override;
     IMS_BOOL IsSupportCapabilitiesForNetwork(
             AosNetworkType eNetworkType, AosCapability eCapability) override;
 
     inline void NotifyJniEnablerSet() override {}
 
-    static AString PrintCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
+    static AString PrintCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
     static const IMS_CHAR* NetworkTypeToString(IN IMS_SINT32 nType);
     static const AString CapabilitiesToString(IN IMS_UINT32 nCapabilities);
 
@@ -110,12 +110,12 @@ private:
     IMS_SINT32 m_nSlotId;
     AString m_strTag;
 
-    IMSList<IAosRegistrationControlListener*> m_objAosRegistrationControlListeners;
-    IMSList<IAosServiceSettingListener*> m_objAosServiceSettingListeners;
-    IMSList<IAosServicePhoneListener*> m_objAosServicePhoneListeners;
+    ImsList<IAosRegistrationControlListener*> m_objAosRegistrationControlListeners;
+    ImsList<IAosServiceSettingListener*> m_objAosServiceSettingListeners;
+    ImsList<IAosServicePhoneListener*> m_objAosServicePhoneListeners;
 
     // <AosNetworkType, AosCapability>
-    IMSMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
 };
 
 #endif  // AOS_SERVICE_H_

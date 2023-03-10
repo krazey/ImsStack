@@ -405,7 +405,7 @@ PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN IMS_UINT32 /*nFeatures*/)
     // It is for SipController so it will be overridden in AosSipController
 }
 
-PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN IMSList<ImsAosFeatureTag*>& /*objFeatureTag*/)
+PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN ImsList<ImsAosFeatureTag*>& /*objFeatureTag*/)
 {
     // It is for SipController so it will be overridden in AosSipControllers
 }
@@ -1010,7 +1010,7 @@ void AosHandle::BackupAllBlocks()
 
 PROTECTED
 void AosHandle::BackupBlocks(
-        IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
+        IN ImsList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
 {
     for (IMS_UINT32 i = 0; i < objHoldingBlocksPolicy.GetSize(); i++)
     {
@@ -1027,7 +1027,7 @@ void AosHandle::BackupBlocks(
 
 PROTECTED
 void AosHandle::RestoreBlocks(
-        IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
+        IN ImsList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks)
 {
     for (IMS_UINT32 i = 0; i < objHoldingBlocksPolicy.GetSize(); i++)
     {
@@ -1187,7 +1187,7 @@ PROTECTED VIRTUAL void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN
 }
 
 PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
-        IN const IMSMap<IMS_UINT32, IMS_UINT32>& /* objNewCapabilities */)
+        IN const ImsMap<IMS_UINT32, IMS_UINT32>& /* objNewCapabilities */)
 {
     // Implemented in child
 }
@@ -1762,7 +1762,7 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
 }
 
 PUBLIC VIRTUAL void AosHandle::RegistrationControl_NotifyCapabilitiesChanged(
-        IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
+        IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
 {
     if (AosUtil::GetInstance()->IsWifiTest())
     {

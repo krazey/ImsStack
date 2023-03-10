@@ -35,7 +35,7 @@ class MockIAosDnsQueryListener : public IAosDnsQueryListener
 public:
     MOCK_METHOD(void, DnsQuery_Ready, (), (override));
     MOCK_METHOD(
-            void, DnsQuery_Done, (IN IMS_BOOL bResult, IN IMSList<IpAddress> objIps), (override));
+            void, DnsQuery_Done, (IN IMS_BOOL bResult, IN ImsList<IpAddress> objIps), (override));
 };
 
 #endif  // MOCK_AOS_DNS_QUERY_H_

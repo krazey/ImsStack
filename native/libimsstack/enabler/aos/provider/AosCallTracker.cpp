@@ -39,10 +39,10 @@ AosCallTracker::AosCallTracker(IN IMS_SINT32 nSlotId) :
         m_eEmergencyState(CallState::IDLE),
         m_nNormalCallType(static_cast<IMS_UINT32>(CallType::UNKNOWN)),
         m_eActiveCsState(CallState::IDLE),
-        m_objNormalCalls(IMSMap<CallKey, CallState>()),
-        m_objEmergencyCalls(IMSMap<CallKey, CallState>()),
-        m_objNormalCallTypes(IMSMap<CallKey, CallType>()),
-        m_objListeners(IMSList<IAosCallTrackerListener*>())
+        m_objNormalCalls(ImsMap<CallKey, CallState>()),
+        m_objEmergencyCalls(ImsMap<CallKey, CallState>()),
+        m_objNormalCallTypes(ImsMap<CallKey, CallType>()),
+        m_objListeners(ImsList<IAosCallTrackerListener*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosCallTracker = %" PFLS_u "/%" PFLS_x, m_nSlotId,
             sizeof(AosCallTracker), this);
@@ -190,7 +190,7 @@ PUBLIC VIRTUAL void AosCallTracker::RemoveListener(IN IAosCallTrackerListener* p
 
 PRIVATE
 template <typename T>
-void AosCallTracker::AddOrUpdateCall(OUT IMSMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue)
+void AosCallTracker::AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue)
 {
     IMS_SINT32 nAt = objCalls.GetIndexOfKey(eKey);
 
@@ -208,7 +208,7 @@ void AosCallTracker::AddOrUpdateCall(OUT IMSMap<CallKey, T>& objCalls, IN CallKe
 
 PRIVATE
 template <typename T>
-void AosCallTracker::RemoveCall(OUT IMSMap<CallKey, T>& objCalls, IN CallKey eKey)
+void AosCallTracker::RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey)
 {
     IMS_SINT32 nAt = objCalls.GetIndexOfKey(eKey);
 
@@ -248,7 +248,7 @@ CallState AosCallTracker::GetConvertedState(IN IMtcCall::State eState)
 }
 
 PRIVATE
-CallState AosCallTracker::GetTotalState(IN IMSMap<CallKey, CallState>& objCalls)
+CallState AosCallTracker::GetTotalState(IN ImsMap<CallKey, CallState>& objCalls)
 {
     if (objCalls.IsEmpty())
     {
@@ -264,7 +264,7 @@ CallState AosCallTracker::GetTotalState(IN IMSMap<CallKey, CallState>& objCalls)
 }
 
 PRIVATE
-IMS_UINT32 AosCallTracker::GetTotalCallType(IN IMSMap<CallKey, CallType>& objCallTypes)
+IMS_UINT32 AosCallTracker::GetTotalCallType(IN ImsMap<CallKey, CallType>& objCallTypes)
 {
     IMS_UINT32 nTotalCallType = static_cast<IMS_UINT32>(CallType::UNKNOWN);
 

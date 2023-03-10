@@ -64,12 +64,12 @@ protected:
         m_pAosLocationStarter->m_bInitialized = bIsInitialized;
     }
 
-    IMSList<IMS_UINT32> GetVolteBlockReasons()
+    ImsList<IMS_UINT32> GetVolteBlockReasons()
     {
         return m_pAosLocationStarter->m_objVolteBlockReasons;
     }
 
-    IMSList<IMS_UINT32> GetWfcBlockReasons() { return m_pAosLocationStarter->m_objWfcBlockReasons; }
+    ImsList<IMS_UINT32> GetWfcBlockReasons() { return m_pAosLocationStarter->m_objWfcBlockReasons; }
 
     void ClearBlockReasons()
     {

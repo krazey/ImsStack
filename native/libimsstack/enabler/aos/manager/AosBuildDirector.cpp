@@ -44,9 +44,9 @@ PUBLIC
 AosBuildDirector::AosBuildDirector(IN IAosBuilder* piBuilder, IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_piBuilder(piBuilder),
-        m_objConnection(IMSMap<IMS_SINT32, IAosConnection*>()),
-        m_objNetTracker(IMSMap<IMS_SINT32, IAosNetTracker*>()),
-        m_objAppContext(IMSMap<AString, IAosAppContext*>())
+        m_objConnection(ImsMap<IMS_SINT32, IAosConnection*>()),
+        m_objNetTracker(ImsMap<IMS_SINT32, IAosNetTracker*>()),
+        m_objAppContext(ImsMap<AString, IAosAppContext*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosBuildDirector = %" PFLS_u "/%" PFLS_x, m_nSlotId,
             sizeof(AosBuildDirector), this);
@@ -119,7 +119,7 @@ IAosAppContext* AosBuildDirector::ConstructAos(IN AosStaticProfile* pProfile)
     piAppContext->SetApp(piApp);
 
     /// AoSHandles
-    const IMSList<AosServiceProfile*>& objProfiles = pProfile->GetServiceProfiles();
+    const ImsList<AosServiceProfile*>& objProfiles = pProfile->GetServiceProfiles();
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
         AosServiceProfile* pServiceProfile = objProfiles.GetAt(i);

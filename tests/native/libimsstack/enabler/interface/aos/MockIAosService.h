@@ -41,7 +41,7 @@ public:
     MOCK_METHOD(void, TriggerFullNetworkRegistration,
             (IN IMS_SINT32 nSipCode, IN const AString& sipReason), (override));
     MOCK_METHOD(void, NotifyCapabilitiesChanged,
-            ((IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)), (override));
+            ((IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities)), (override));
     MOCK_METHOD(void, ControlRegistration,
             (IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause),
             (override));
@@ -69,18 +69,18 @@ public:
     MOCK_METHOD(void, NotifyPreciseCallState, (IN IMS_SINT32 nState), (override));
     MOCK_METHOD(IMS_BOOL, NotifyRegistered,
             (IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-                    IN const IMSList<AString>& objFeatureTags),
+                    IN const ImsList<AString>& objFeatureTags),
             (override));
     MOCK_METHOD(IMS_BOOL, NotifyRegistering,
             (IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-                    IN const IMSList<AString>& objFeatureTags),
+                    IN const ImsList<AString>& objFeatureTags),
             (override));
     MOCK_METHOD(IMS_BOOL, NotifyDeregistered,
             (IN AosNetworkType eNetworkType, IN AosReasonCode eReason), (override));
     MOCK_METHOD(IMS_BOOL, NotifyTechnologyChangeFailed,
             (IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode), (override));
     MOCK_METHOD(
-            IMS_BOOL, NotifyAssociatedUriChanged, (IN const IMSList<AString>& objUris), (override));
+            IMS_BOOL, NotifyAssociatedUriChanged, (IN const ImsList<AString>& objUris), (override));
     MOCK_METHOD(IMS_BOOL, NotifyCapabilitiesUpdateFailed,
             (IN AosCapability eCapabilities, IN AosNetworkType eNetworkType,
                     IN AosReasonCode eReason),
@@ -90,7 +90,7 @@ public:
     MOCK_METHOD(IMS_BOOL, RequestPhoneNumberRetry, (IN AosPhoneNumberRetryCommand eCommand),
             (override));
     MOCK_METHOD(IMS_BOOL, RequestWifiService, (IN IMS_BOOL bIsOn), (override));
-    MOCK_METHOD((IMSMap<IMS_UINT32, IMS_UINT32>&), GetCapabilities, (), (override));
+    MOCK_METHOD((ImsMap<IMS_UINT32, IMS_UINT32>&), GetCapabilities, (), (override));
     MOCK_METHOD(IMS_UINT32, GetCapabilitiesForNetwork, (AosNetworkType eNetworkType), (override));
     MOCK_METHOD(IMS_BOOL, IsSupportCapabilitiesForNetwork,
             (AosNetworkType eNetworkType, AosCapability eCapability), (override));

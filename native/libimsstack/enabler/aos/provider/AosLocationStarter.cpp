@@ -33,8 +33,8 @@ AosLocationStarter::AosLocationStarter() :
         m_bInitialized(IMS_FALSE),
         m_bWfcSetting(IMS_FALSE),
         m_nDefaultUpdateInterval(DEFAULT_UPDATE_INTERVAL),
-        m_objVolteBlockReasons(IMSList<IMS_UINT32>()),
-        m_objWfcBlockReasons(IMSList<IMS_UINT32>()),
+        m_objVolteBlockReasons(ImsList<IMS_UINT32>()),
+        m_objWfcBlockReasons(ImsList<IMS_UINT32>()),
         m_piStopDelayTimer(IMS_NULL),
         m_piAppContext(IMS_NULL),
         m_piBlock(IMS_NULL)
@@ -272,7 +272,7 @@ IMS_BOOL AosLocationStarter::HandleStartConditionChanged()
         }
     }
 
-    IMSList<IMS_UINT32> objBlocks;
+    ImsList<IMS_UINT32> objBlocks;
 
     // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_AFTER_CHECKING_VOLTE_BLOCK_REASON))

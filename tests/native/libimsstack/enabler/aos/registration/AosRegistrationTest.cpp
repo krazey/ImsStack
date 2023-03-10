@@ -199,7 +199,7 @@ protected:
         m_pAosStaticProfile = new AosStaticProfile();
         m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::NORMAL);
 
-        IMSList<ImsServiceName> objServiceName =
+        ImsList<ImsServiceName> objServiceName =
                 ImsServiceConfig::GetServiceNames(ImsServiceConfig::GetServiceProfile());
 
         for (IMS_UINT32 i = 0; i < objServiceName.GetSize(); i++)
@@ -413,8 +413,8 @@ TEST_F(AosRegistrationTest, StartAndDestroy)
             .Times(AnyNumber())
             .WillRepeatedly(Return(strHeader));
 
-    IMSMap<AString, IAosHandle*> objHandles;
-    const IMSList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
+    ImsMap<AString, IAosHandle*> objHandles;
+    const ImsList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
     if (objProfiles.GetSize() > 0)
     {
         AosServiceProfile* pServiceProfile = objProfiles.GetAt(0);
@@ -466,7 +466,7 @@ TEST_F(AosRegistrationTest, StartAndDestroy)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPcscf));
 
-    IMSList<IMS_SINT32> objPcscfPorts;
+    ImsList<IMS_SINT32> objPcscfPorts;
     objPcscfPorts.Append(5060);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfsPorts())
             .Times(AnyNumber())
@@ -579,8 +579,8 @@ TEST_F(AosRegistrationTest, Reconfig)
 
     EXPECT_CALL(m_objMockIRegistration, Restore()).Times(AnyNumber());
 
-    IMSMap<AString, IAosHandle*> objHandles;
-    const IMSList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
+    ImsMap<AString, IAosHandle*> objHandles;
+    const ImsList<AosServiceProfile*>& objProfiles = m_pAosStaticProfile->GetServiceProfiles();
 
     if (objProfiles.GetSize() > 0)
     {
@@ -875,7 +875,7 @@ TEST_F(AosRegistrationTest, RetryCount)
 TEST_F(AosRegistrationTest, StartFailed_TxnTimeout)
 {
     // Covers GetRegErrCodeForPcscfDiscovery() == CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F
-    IMSVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
+    ImsVector<IMS_SINT32> objRegErrCodeForPcscfDiscovery;
     objRegErrCodeForPcscfDiscovery.Clear();
     objRegErrCodeForPcscfDiscovery.Add(0);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
@@ -908,7 +908,7 @@ TEST_F(AosRegistrationTest, UpdateFailed_TxnTimeout)
     // CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F
     m_pTestAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
 
-    IMSVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
+    ImsVector<IMS_SINT32> objReregErrCodeForInitRegWithAvailablePcscf;
     objReregErrCodeForInitRegWithAvailablePcscf.Clear();
     objReregErrCodeForInitRegWithAvailablePcscf.Add(0);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForInitRegWithAvailablePcscf())
@@ -1074,7 +1074,7 @@ TEST_F(AosRegistrationTest, SetNextPcscf_SamePcscf)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPcscfs));
 
-    IMSList<IMS_SINT32> objPcscfPorts;
+    ImsList<IMS_SINT32> objPcscfPorts;
     objPcscfPorts.Append(5060);
     objPcscfPorts.Append(5060);
     objPcscfPorts.Append(5060);
@@ -1149,7 +1149,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_TxnTimeout_RegRetryCountPerPcscfC
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrPolicy())
             .Times(AnyNumber())
             .WillRepeatedly(Return(0));
-    IMSVector<IMS_SINT32> objErrWithoutIpsec;
+    ImsVector<IMS_SINT32> objErrWithoutIpsec;
     objErrWithoutIpsec.Clear();
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeWithoutIpsec())
             .Times(AnyNumber())
@@ -1192,12 +1192,12 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_TxnTimeout_RegRetryCountPerPcscfC
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    IMSVector<IMS_SINT32> objTestVector;
+    ImsVector<IMS_SINT32> objTestVector;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestVector));
 
-    IMSMap<AString, IAosHandle*> objTestHandles;
+    ImsMap<AString, IAosHandle*> objTestHandles;
     EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestHandles));
@@ -1220,7 +1220,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_TxnTimeout_RegRetryCountPerPcscfC
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPcscfs));
 
-    IMSList<IMS_SINT32> objPcscfPorts;
+    ImsList<IMS_SINT32> objPcscfPorts;
     objPcscfPorts.Append(5060);
     objPcscfPorts.Append(5061);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfsPorts())
@@ -1357,7 +1357,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_TxnTimeout_RegRetryCountOnSingleP
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    IMSVector<IMS_SINT32> objExtraRegErrCodeList;
+    ImsVector<IMS_SINT32> objExtraRegErrCodeList;
     objExtraRegErrCodeList.Add(0);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .Times(AnyNumber())
@@ -1367,7 +1367,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_TxnTimeout_RegRetryCountOnSingleP
             .Times(AnyNumber())
             .WillRepeatedly(Return(CarrierConfig::Assets::TIMER_F_POLICY_SPEC_WITH_AWT));
 
-    IMSMap<AString, IAosHandle*> objTestHandles;
+    ImsMap<AString, IAosHandle*> objTestHandles;
     EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestHandles));
@@ -1375,7 +1375,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_TxnTimeout_RegRetryCountOnSingleP
     EXPECT_CALL(m_objMockIAosPcscf, SetCurrentPcscfInvalid(_, _)).Times(AnyNumber());
     // END uninteresting preparation
 
-    IMSVector<IMS_SINT32> objTestVector;
+    ImsVector<IMS_SINT32> objTestVector;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetExtraRegErrCode())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestVector));
@@ -1396,7 +1396,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_TxnTimeout_RegRetryCountOnSingleP
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objPcscfs));
 
-    IMSList<IMS_SINT32> objPcscfPorts;
+    ImsList<IMS_SINT32> objPcscfPorts;
     objPcscfPorts.Append(5060);
     EXPECT_CALL(m_objMockIAosPcscf, GetPcscfsPorts())
             .Times(AnyNumber())
@@ -1539,7 +1539,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Succes
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    IMSVector<IMS_SINT32> objTestVector;
+    ImsVector<IMS_SINT32> objTestVector;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestVector));
@@ -1556,7 +1556,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Succes
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSMap<AString, IAosHandle*> objTestHandles;
+    ImsMap<AString, IAosHandle*> objTestHandles;
     EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestHandles));
@@ -1585,7 +1585,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Succes
     objPcscfsIpv6.AddElement(AString("fc01:cafe::2"));
     objPcscfsIpv6.AddElement(AString("fc01:cafe::3"));
 
-    IMSList<IMS_SINT32> objPcscfPorts;
+    ImsList<IMS_SINT32> objPcscfPorts;
     objPcscfPorts.Append(5060);
     objPcscfPorts.Append(5061);
     objPcscfPorts.Append(5062);
@@ -1639,7 +1639,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Succes
 TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_Failure)
 {
     // BEGIN uninteresting preparation
-    IMSVector<IMS_SINT32> objTestVector;
+    ImsVector<IMS_SINT32> objTestVector;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestVector));
@@ -1769,7 +1769,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNex
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_TRUE));
 
-    IMSVector<IMS_SINT32> objTestVector;
+    ImsVector<IMS_SINT32> objTestVector;
     EXPECT_CALL(m_objMockIAosNConfiguration, GetRegErrCodeForPcscfDiscovery())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestVector));
@@ -1786,7 +1786,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNex
             .Times(AnyNumber())
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSMap<AString, IAosHandle*> objTestHandles;
+    ImsMap<AString, IAosHandle*> objTestHandles;
     EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestHandles));
@@ -1816,7 +1816,7 @@ TEST_F(AosRegistrationTest, ProcessStartFailed_StatusCode_IpVersionChange_HasNex
     objPcscfsIpv6.AddElement(AString("fc01:cafe::2"));
     objPcscfsIpv6.AddElement(AString("fc01:cafe::3"));
 
-    IMSList<IMS_SINT32> objPcscfPorts;
+    ImsList<IMS_SINT32> objPcscfPorts;
     objPcscfPorts.Append(5060);
     objPcscfPorts.Append(5061);
     objPcscfPorts.Append(5062);
@@ -1880,7 +1880,7 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_CallEndByReregErr)
 
     // IsImsCall() GetReregErrCodeForCallEnd()
     m_pTestAosRegistration->SetImsCall(IMS_TRUE);
-    IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
+    ImsVector<IMS_SINT32> objReregErrCodeForCallEnd;
     objReregErrCodeForCallEnd.Clear();
     objReregErrCodeForCallEnd.Add(403);
     EXPECT_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForCallEnd())
@@ -1909,7 +1909,7 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming)
 
     EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(AnyNumber());
 
-    IMSMap<AString, IAosHandle*> objTestHandles;
+    ImsMap<AString, IAosHandle*> objTestHandles;
     EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestHandles));
@@ -1970,7 +1970,7 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming)
 TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming_HeldByCall)
 {
     // BEGIN uninteresting preparation
-    IMSVector<IMS_SINT32> objReregErrCodeForCallEnd;
+    ImsVector<IMS_SINT32> objReregErrCodeForCallEnd;
     objReregErrCodeForCallEnd.Clear();
     EXPECT_CALL(m_objMockIAosNConfiguration, GetReregErrCodeForCallEnd())
             .Times(AnyNumber())
@@ -1986,7 +1986,7 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming_HeldByCall)
 
     EXPECT_CALL(m_objMockIAosPcscf, ResetAllPcscfTriedCount()).Times(AnyNumber());
 
-    IMSMap<AString, IAosHandle*> objTestHandles;
+    ImsMap<AString, IAosHandle*> objTestHandles;
     EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objTestHandles));

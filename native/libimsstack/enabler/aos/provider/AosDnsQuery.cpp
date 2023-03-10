@@ -154,7 +154,7 @@ PRIVATE VIRTUAL void AosDnsQueryPrivate::RunImp()
 
         if ((nEventCache & DNS_QUERY_EXEC) != 0)
         {
-            IMSList<IpAddress> objIps;
+            ImsList<IpAddress> objIps;
 
             if (m_piConnection->GetHostByName(m_strDomainName, objIps) == -1)
             {
@@ -361,7 +361,7 @@ IMS_BOOL AosDnsQuery::DnsQueryPrivate_Ready()
 }
 
 PUBLIC
-IMS_BOOL AosDnsQuery::DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const IMSList<IpAddress>& objIps)
+IMS_BOOL AosDnsQuery::DnsQueryPrivate_Done(IN IMS_BOOL bResult, IN const ImsList<IpAddress>& objIps)
 {
     m_objIps = objIps;
     return (m_bIsTest) ? IMS_TRUE : PostMessage(MSG_DONE, (bResult) ? 1 : 0, 0);

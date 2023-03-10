@@ -34,9 +34,9 @@ public:
 
     /// Implement child class
     virtual IImsAos* GetImsAos(IN const AString& strAppId, IN const AString& strServiceId);
-    virtual IMSList<IImsAos*> GetImsAosList(
+    virtual ImsList<IImsAos*> GetImsAosList(
             IN const AString& strAppId, IN const AString& strServiceId);
-    virtual IMSList<IImsAos*> GetImsAosList(IN const AString& strAppId);
+    virtual ImsList<IImsAos*> GetImsAosList(IN const AString& strAppId);
 
     /// ImsApp Class
     virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);

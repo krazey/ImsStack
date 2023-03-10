@@ -27,8 +27,8 @@ PRIVATE GLOBAL AosFactory* AosFactory::m_gpAosFactory = IMS_NULL;
 
 PRIVATE GLOBAL IMutex* AosFactory::m_gpiLock = IMS_NULL;
 
-PRIVATE GLOBAL IMSMap<IMS_SINT32, ImsAosManager*> AosFactory::m_objManagers =
-        IMSMap<IMS_SINT32, ImsAosManager*>();
+PRIVATE GLOBAL ImsMap<IMS_SINT32, ImsAosManager*> AosFactory::m_objManagers =
+        ImsMap<IMS_SINT32, ImsAosManager*>();
 
 PUBLIC
 AosFactory::AosFactory()

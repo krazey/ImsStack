@@ -119,7 +119,7 @@ TEST_F(AosUtilTest, IsInitialRegistrationRequired)
 {
     EXPECT_FALSE(pAosUtil->IsInitialRegistrationRequired(IMS_NULL));
 
-    IMSList<ISipMessageBodyPart*> objBodyParts;
+    ImsList<ISipMessageBodyPart*> objBodyParts;
     objBodyParts.Clear();
 
     MockISipMessage objMockSipMsg;
@@ -155,7 +155,7 @@ TEST_F(AosUtilTest, IsParameterIncluded3)
     EXPECT_FALSE(pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strParameter));
 
     MockISipMessage objMockSipMsg;
-    IMSList<AString> objHeaders;
+    ImsList<AString> objHeaders;
     objHeaders.Clear();
     EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, (AString::ConstNull())))
             .WillOnce(Return(objHeaders));
@@ -185,7 +185,7 @@ TEST_F(AosUtilTest, IsParameterIncluded4)
     EXPECT_FALSE(pAosUtil->IsParameterIncluded(IMS_NULL, nHeaderType, strName, strParameter));
 
     MockISipMessage objMockSipMsg;
-    IMSList<AString> objHeaders;
+    ImsList<AString> objHeaders;
     objHeaders.Clear();
     EXPECT_CALL(objMockSipMsg, GetHeaders(nHeaderType, strName)).WillOnce(Return(objHeaders));
     EXPECT_FALSE(pAosUtil->IsParameterIncluded(
@@ -353,8 +353,8 @@ TEST_F(AosUtilTest, CompareListIPv6)
 
 TEST_F(AosUtilTest, ManageIntList)
 {
-    IMSList<IMS_UINT32> reasons;
-    IMSList<IMS_UINT32> compareReasons;
+    ImsList<IMS_UINT32> reasons;
+    ImsList<IMS_UINT32> compareReasons;
     reasons.Clear();
     compareReasons.Clear();
 

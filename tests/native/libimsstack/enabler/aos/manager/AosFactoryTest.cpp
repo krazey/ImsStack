@@ -39,12 +39,12 @@ public:
 
     inline static void SetLock(IN IMutex* gpiLock) { AosFactory::m_gpiLock = gpiLock; }
 
-    inline static IMSMap<IMS_SINT32, ImsAosManager*> GetManagers()
+    inline static ImsMap<IMS_SINT32, ImsAosManager*> GetManagers()
     {
         return AosFactory::m_objManagers;
     }
 
-    inline static void SetManagers(IN const IMSMap<IMS_SINT32, ImsAosManager*>& objManagers)
+    inline static void SetManagers(IN const ImsMap<IMS_SINT32, ImsAosManager*>& objManagers)
     {
         AosFactory::m_objManagers = objManagers;
     }
@@ -63,7 +63,7 @@ class AosFactoryTest : public ::testing::Test
 public:
     AosFactory* m_pOriginAosFactory;
     IMutex* m_pOriginLock;
-    IMSMap<IMS_SINT32, ImsAosManager*> m_objOriginManagers;
+    ImsMap<IMS_SINT32, ImsAosManager*> m_objOriginManagers;
 
 protected:
     virtual void SetUp() override

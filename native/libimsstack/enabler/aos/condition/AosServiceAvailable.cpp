@@ -40,8 +40,8 @@ AosServiceAvailable::AosServiceAvailable(const AString& strName) :
         m_bAirplaneMode(IMS_FALSE),
         m_bRoamingState(IMS_FALSE),
         m_bAvailableLastNotified(IMS_FALSE),
-        m_objBlockReasonsLastNotified(IMSList<IMS_UINT32>()),
-        m_objListeners(IMSList<IAosServiceAvailableListener*>())
+        m_objBlockReasonsLastNotified(ImsList<IMS_UINT32>()),
+        m_objListeners(ImsList<IAosServiceAvailableListener*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosServiceAvailable = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailable), this, 0);
@@ -320,7 +320,7 @@ IMS_BOOL AosServiceAvailable::IsSameAsBeforeUnavailableReason()
         return IMS_FALSE;
     }
 
-    IMSList<IMS_UINT32> objCurrReason;
+    ImsList<IMS_UINT32> objCurrReason;
     m_piBlock->GetBlockReasons(objCurrReason);
 
     return AosUtil::GetInstance()->IsListEqual(

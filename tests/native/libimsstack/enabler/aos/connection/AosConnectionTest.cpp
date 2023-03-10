@@ -300,7 +300,7 @@ TEST_F(AosConnectionTest, GetHostByName)
     SetNetworkConnection(&m_objMockINetworkConnection);
 
     const AString strHostName = AString("hostName");
-    IMSList<IpAddress> objIpas;
+    ImsList<IpAddress> objIpas;
     EXPECT_EQ(m_pAosConnection->GetHostByName(strHostName, objIpas), 1);
 }
 

@@ -70,7 +70,7 @@ protected:
         m_pAosCallTracker->SetState(nType, eState);
     }
 
-    IMSList<IAosCallTrackerListener*> GetCallTrackerListeners()
+    ImsList<IAosCallTrackerListener*> GetCallTrackerListeners()
     {
         return m_pAosCallTracker->m_objListeners;
     }
@@ -85,33 +85,33 @@ protected:
         m_pAosCallTracker->m_nNormalCallType = nNormalCallType;
     }
 
-    void SetNormalCalls(IN const IMSMap<CallKey, CallState>& objNormalCalls)
+    void SetNormalCalls(IN const ImsMap<CallKey, CallState>& objNormalCalls)
     {
         m_pAosCallTracker->m_objNormalCalls = objNormalCalls;
     }
 
-    void SetEmergenyCalls(IN const IMSMap<CallKey, CallState>& objEmergencyCalls)
+    void SetEmergenyCalls(IN const ImsMap<CallKey, CallState>& objEmergencyCalls)
     {
         m_pAosCallTracker->m_objEmergencyCalls = objEmergencyCalls;
     }
 
-    void SetNormalCallTypes(IN const IMSMap<CallKey, CallType>& objNormalCallTypes)
+    void SetNormalCallTypes(IN const ImsMap<CallKey, CallType>& objNormalCallTypes)
     {
         m_pAosCallTracker->m_objNormalCallTypes = objNormalCallTypes;
     }
 
     template <typename T>
-    void AddOrUpdateCall(OUT IMSMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue)
+    void AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue)
     {
         m_pAosCallTracker->AddOrUpdateCall(objCalls, eKey, eValue);
     }
 
-    CallState GetTotalState(IN IMSMap<CallKey, CallState>& objCalls)
+    CallState GetTotalState(IN ImsMap<CallKey, CallState>& objCalls)
     {
         return m_pAosCallTracker->GetTotalState(objCalls);
     }
 
-    IMS_UINT32 GetTotalCallType(IN IMSMap<CallKey, CallType>& objCallTypes)
+    IMS_UINT32 GetTotalCallType(IN ImsMap<CallKey, CallType>& objCallTypes)
     {
         return m_pAosCallTracker->GetTotalCallType(objCallTypes);
     }
@@ -270,8 +270,8 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnTrue)
             (0x1 << static_cast<IMS_UINT32>(CallType::VOIP));
     SetNormalCallType(nNormalCallType);
 
-    IMSMap<CallKey, CallState> objNormalCalls;
-    IMSMap<CallKey, CallType> objNormalCallTypes;
+    ImsMap<CallKey, CallState> objNormalCalls;
+    ImsMap<CallKey, CallType> objNormalCallTypes;
     IMS_ULONG nKey1 = 1001;
     IMS_ULONG nKey2 = 1002;
 
@@ -293,8 +293,8 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnFalse_VtIsNotOffhook)
             (0x1 << static_cast<IMS_UINT32>(CallType::VOIP));
     SetNormalCallType(nNormalCallType);
 
-    IMSMap<CallKey, CallState> objNormalCalls;
-    IMSMap<CallKey, CallType> objNormalCallTypes;
+    ImsMap<CallKey, CallState> objNormalCalls;
+    ImsMap<CallKey, CallType> objNormalCallTypes;
     IMS_ULONG nKey1 = 1001;
     IMS_ULONG nKey2 = 1002;
 
@@ -316,8 +316,8 @@ TEST_F(AosCallTrackerTest, IsVideoCallingActive_returnFalse_NormalCallTypesEmpty
             (0x1 << static_cast<IMS_UINT32>(CallType::VOIP));
     SetNormalCallType(nNormalCallType);
 
-    IMSMap<CallKey, CallState> objNormalCalls;
-    IMSMap<CallKey, CallType> objNormalCallTypes;
+    ImsMap<CallKey, CallState> objNormalCalls;
+    ImsMap<CallKey, CallType> objNormalCallTypes;
 
     SetNormalCalls(objNormalCalls);
     SetNormalCallTypes(objNormalCallTypes);
@@ -510,7 +510,7 @@ TEST_F(AosCallTrackerTest, RemoveListener_NotExistListener)
 
 TEST_F(AosCallTrackerTest, AddOrUpdateCall)
 {
-    IMSMap<CallKey, CallState> objNormalCalls;
+    ImsMap<CallKey, CallState> objNormalCalls;
     CallKey nKey1 = 1001;
     CallKey nKey2 = 1002;
     CallKey nKey3 = 1003;
@@ -538,7 +538,7 @@ TEST_F(AosCallTrackerTest, GetConvertedState)
 
 TEST_F(AosCallTrackerTest, GetTotalState_GreaterThanOne)
 {
-    IMSMap<CallKey, CallState> objNormalCalls;
+    ImsMap<CallKey, CallState> objNormalCalls;
     IMS_ULONG nKey1 = 1001;
     IMS_ULONG nKey2 = 1002;
 
@@ -550,7 +550,7 @@ TEST_F(AosCallTrackerTest, GetTotalState_GreaterThanOne)
 
 TEST_F(AosCallTrackerTest, GetTotalState_SizeOne)
 {
-    IMSMap<CallKey, CallState> objNormalCalls;
+    ImsMap<CallKey, CallState> objNormalCalls;
     IMS_ULONG nKey = 1000;
 
     AddOrUpdateCall(objNormalCalls, nKey, CallState::IDLE);
@@ -579,13 +579,13 @@ TEST_F(AosCallTrackerTest, GetTotalState_SizeOne)
 
 TEST_F(AosCallTrackerTest, GetTotalState_Empty)
 {
-    IMSMap<CallKey, CallState> objNormalCalls;
+    ImsMap<CallKey, CallState> objNormalCalls;
     EXPECT_EQ(GetTotalState(objNormalCalls), CallState::IDLE);
 }
 
 TEST_F(AosCallTrackerTest, GetTotalCallType_IsNotEmpty)
 {
-    IMSMap<CallKey, CallType> objNormalCallTypes;
+    ImsMap<CallKey, CallType> objNormalCallTypes;
     IMS_ULONG nKey1 = 1001;
     IMS_ULONG nKey2 = 1002;
     IMS_ULONG nKey3 = 1003;
@@ -612,7 +612,7 @@ TEST_F(AosCallTrackerTest, GetTotalCallType_IsNotEmpty)
 
 TEST_F(AosCallTrackerTest, GetTotalCallType_IsEmpty)
 {
-    IMSMap<CallKey, CallType> objNormalCallTypes;
+    ImsMap<CallKey, CallType> objNormalCallTypes;
 
     IMS_UINT32 nExpectCallType = static_cast<IMS_UINT32>(CallType::UNKNOWN);
     EXPECT_EQ(GetTotalCallType(objNormalCallTypes), nExpectCallType);

@@ -40,7 +40,7 @@ AosNConfiguration::AosNConfiguration() :
         m_objSubErrCodeForTerminated(AosSubErrCodeForTerminatedBundle()),
         m_nEventForInitRegOnTerminatedState(0),
         m_nEventToFollowWtForInitRegOnTerminatedState(0),
-        m_objListeners(IMSList<IAosNConfigurationListener*>())
+        m_objListeners(ImsList<IAosNConfigurationListener*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosNConfiguration = %" PFLS_u "/%" PFLS_x,
             sizeof(AosNConfiguration), this, 0);
@@ -297,7 +297,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVideoOverWifiSupportedWithoutVoice(
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsGeolocationPidfSupported(
         IN IMS_SINT32 nGeolocationPidfType) const
 {
-    const IMSVector<IMS_SINT32>& objGeolocationPidfTypes =
+    const ImsVector<IMS_SINT32>& objGeolocationPidfTypes =
             m_objCarrierConfig.objGeolocationPidfInSipRegisterSupport;
 
     for (IMS_UINT32 i = 0; i < objGeolocationPidfTypes.GetSize(); ++i)
@@ -594,22 +594,22 @@ AosNConfiguration::GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached() const
     return m_objExtraRegErr.nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegRetryIntervals()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegRetryIntervals()
 {
     return m_objRegRetryInterval.objRegRetryIntervalSec;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegRandomRetryIntervals()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegRandomRetryIntervals()
 {
     return m_objRegRetryInterval.objRegRetryRandomUpperValueSec;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetIpsecAuthenticationAlgorithms()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetIpsecAuthenticationAlgorithms()
 {
     return m_objCarrierConfig.objIpsecAuthenticationAlgorithms;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetIpsecEncryptionAlgorithms()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetIpsecEncryptionAlgorithms()
 {
     return m_objCarrierConfig.objIpsecEncryptionAlgorithms;
 }
@@ -634,17 +634,17 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRetryCountSubErrorRegRequired() 
     return m_objSubErrCodeForInitReg.nSubErrCodeForInitRegWithRetryMaxCnt;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequired()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequired()
 {
     return m_objSubErrCodeForInitReg.objSubErrCodeForInitReg;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequiredWithNextPcscf()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSubErrorRegRequiredWithNextPcscf()
 {
     return m_objAsset.objSubErrorCodeForInitRegWithNextPcscf;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetWfcSubErrorByMissing911Address()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetWfcSubErrorByMissing911Address()
 {
     return m_objAsset.objWfcSubErrByMissing911Address;
 }
@@ -654,119 +654,119 @@ PUBLIC VIRTUAL IMS_SINT32 AosNConfiguration::GetRetryCountSubErrorSubTerminated(
     return m_objSubErrCodeForTerminated.nSubErrCodeForTerminatedRetryMaxCnt;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorSubTerminated()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSubErrorSubTerminated()
 {
     return m_objSubErrCodeForTerminated.objSubErrCodeForTerminated;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSubErrorStoppingResub()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSubErrorStoppingResub()
 {
     return m_objAsset.objSubErrorCodeForStoppingByExpirationTime;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetVowifiSubErrorRegRequired()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetVowifiSubErrorRegRequired()
 {
     return m_objAsset.objVowifiSubErrorCodeForInitReg;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetImsIdentityPriority()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetImsIdentityPriority()
 {
     return m_objCarrierConfig.objImsIdentityPriority;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetPcscfDiscoveryMethod()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetPcscfDiscoveryMethod()
 {
     return m_objCarrierConfig.objPcscfDiscoveryMethod;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetUpdateRegistrationWithRatChange()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetUpdateRegistrationWithRatChange()
 {
     return m_objCarrierConfig.objUpdateRegistrationWithRatChange;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSupportedRats()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSupportedRats()
 {
     return m_objCarrierConfig.objSupportedRats;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSupportedRoamingRats()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSupportedRoamingRats()
 {
     return m_objAsset.objSupportedRoamingRats;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetSmsOverImsSupportedRats()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSmsOverImsSupportedRats()
 {
     return m_objCarrierConfig.objSmsOverImsSupportedRats;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrCode()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrCode()
 {
     return m_objExtraRegErr.objExtraRegErrCode;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraReregErrCode()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetExtraReregErrCode()
 {
     return m_objExtraRegErr.objExtraReregErrCode;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrWaitTime()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetExtraRegErrWaitTime()
 {
     return m_objExtraRegErr.objExtraRegErrWaitTimeSec;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>&
 AosNConfiguration::GetReregRetryErrCodeForInitRegWithSamePcscf()
 {
     return m_objAsset.objReregRetryErrCodeForInitRegWithSamePcscf;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrCode()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrCode()
 {
     return m_objCarrierConfig.objRegistrationPermanentErrorCode;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrMaxCount()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrMaxCount()
 {
     return m_objAsset.objRegPermanentErrMaxCnt;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithoutIpsec()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithoutIpsec()
 {
     return m_objAsset.objRegRetryErrCodeWithoutIpsec;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryAfterTime()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryAfterTime()
 {
     return m_objRegErrCodeWithRaTime.objRegErrCodeWithRaTime;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetryAfterTime()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetryAfterTime()
 {
     return m_objRegErrCodeWithRaTime.objReregErrCodeWithRaTime;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryWaitTime()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryWaitTime()
 {
     return m_objAsset.objEmergencyPcscfRetryWaitTimeSec;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeForPcscfDiscovery()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeForPcscfDiscovery()
 {
     return m_objAsset.objRegErrCodeForPcscfDiscovery;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForCallEnd()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForCallEnd()
 {
     return m_objAsset.objReregErrCodeForCallEnd;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>&
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>&
 AosNConfiguration::GetReregErrCodeForInitRegWithAvailablePcscf()
 {
     return m_objAsset.objReregErrCodeForInitRegWithAvailablePcscf;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForImsPdnReactivation()
+PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeForImsPdnReactivation()
 {
     return m_objAsset.objReregErrCodeForImsPdnReactivation;
 }
@@ -923,7 +923,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
             A_IMS_TRACE_D(LOGTAG, "ETFWFIROTS(%d), ", nValue, 0, 0);
         }
 #endif
-        IMSVector<IMS_SINT32>& objNotifyEvents =
+        ImsVector<IMS_SINT32>& objNotifyEvents =
                 m_objNotifyTerminated.objEventForInitRegOnTerminatedState;
         m_nEventForInitRegOnTerminatedState = 0;
         for (int i = 0; i < objNotifyEvents.GetSize(); i++)
@@ -931,7 +931,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
             m_nEventForInitRegOnTerminatedState |= 0x1 << (objNotifyEvents.GetAt(i) - 1);
         }
 
-        IMSVector<IMS_SINT32>& objEventToFollow =
+        ImsVector<IMS_SINT32>& objEventToFollow =
                 m_objNotifyTerminated.objEventWithWtForInitRegOnTerminatedState;
         m_nEventToFollowWtForInitRegOnTerminatedState = 0;
         for (int i = 0; i < objEventToFollow.GetSize(); i++)
@@ -1097,7 +1097,7 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT);
 
     // temp code
-    IMSVector<IMS_SINT32> objTemp =
+    ImsVector<IMS_SINT32> objTemp =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_SUPPORTED_RATS_INT_ARRAY);
     if (objTemp.GetSize() > 0)
     {
@@ -1296,7 +1296,7 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
 PRIVATE
 void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
 {
-    IMSVector<IMS_SINT32> objAuthAlgo =
+    ImsVector<IMS_SINT32> objAuthAlgo =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY);
 
     m_objCarrierConfig.objIpsecAuthenticationAlgorithms.Clear();
@@ -1306,7 +1306,7 @@ void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
         m_objCarrierConfig.objIpsecAuthenticationAlgorithms.Push(objAuthAlgo.GetAt(i));
     }
 
-    IMSVector<IMS_SINT32> objEncryAlgo =
+    ImsVector<IMS_SINT32> objEncryAlgo =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_IPSEC_ENCRYPTION_ALGORITHMS_INT_ARRAY);
 
     m_objCarrierConfig.objIpsecEncryptionAlgorithms.Clear();

@@ -73,7 +73,7 @@ protected:
     void SetRadioWaiting(IN IMS_BOOL bWaiting);
 
     // Print Log
-    void PrintRegInfo(IN IMSList<IRegInfoContact*>& objRegInfo);
+    void PrintRegInfo(IN ImsList<IRegInfoContact*>& objRegInfo);
 
     virtual IMS_BOOL SendSubscribe();
     virtual IMS_BOOL ProcessFailureResponse_423(IN IMS_BOOL bIsRefreshed);
@@ -105,11 +105,11 @@ protected:
     virtual void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason);
 
     virtual IMS_SINT32 GetRetryAfter();
-    virtual IMS_SINT32 GetNextThrottlingTime(IN const IMSVector<IMS_SINT32>& objInterval);
+    virtual IMS_SINT32 GetNextThrottlingTime(IN const ImsVector<IMS_SINT32>& objInterval);
     virtual void ProcessTimerExpired();
     virtual void SetRefreshPolicy();
 
-    virtual IRegInfoContact* GetRegInfoContact(IN const IMSList<IRegInfoContact*>& objContact);
+    virtual IRegInfoContact* GetRegInfoContact(IN const ImsList<IRegInfoContact*>& objContact);
     virtual IMS_BOOL CompareUriAssociatedWithContact(IN const SipAddress& objUri);
 
     virtual IMS_SINT32 ConvertRegInfoEvent(IN IMS_SINT32 nEvent);

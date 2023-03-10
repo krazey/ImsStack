@@ -310,7 +310,7 @@ void AosFeatureTagList::CopyFeatures(IN const AosFeatureTagList& objSourceList)
 }
 
 PUBLIC
-void AosFeatureTagList::CopyFeatureTags(IN IMSList<ImsAosFeatureTag*>& objFeatureTag)
+void AosFeatureTagList::CopyFeatureTags(IN ImsList<ImsAosFeatureTag*>& objFeatureTag)
 {
     ClearFeatureTags();
 

@@ -363,7 +363,7 @@ TEST_F(AosSubscriptionTest, CheckSubscriptionTerminated)
 
     EXPECT_FALSE(m_pAosSubscription->IsSubscriptionTerminated(403));
 
-    IMSVector<IMS_SINT32> objErrSubTerminated;
+    ImsVector<IMS_SINT32> objErrSubTerminated;
     objErrSubTerminated.Clear();
     objErrSubTerminated.Add(404);
     objErrSubTerminated.Add(403);
@@ -399,7 +399,7 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequired)
 
     EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationRequired(403, IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objErrRegRequired;
+    ImsVector<IMS_SINT32> objErrRegRequired;
     objErrRegRequired.Clear();
     objErrRegRequired.Add(404);
     objErrRegRequired.Add(403);
@@ -452,7 +452,7 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequired)
 TEST_F(AosSubscriptionTest, CheckInitialRegWithNextPcscfRequired)
 {
     SetState(AosSubscription::STATE_SUBSTOP);
-    IMSVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
     objErrRegRequiredWithNextPcscf.Clear();
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
             .Times(AnyNumber())
@@ -503,7 +503,7 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
     EXPECT_FALSE(m_pAosSubscription->IsInitialRegistrationRequiredInWifi(403, IMS_FALSE));
 
     // GetVowifiSubErrorRegRequired() - no info
-    IMSVector<IMS_SINT32> objErrRegRequiredInWifi;
+    ImsVector<IMS_SINT32> objErrRegRequiredInWifi;
     objErrRegRequiredInWifi.Clear();
     EXPECT_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
             .Times(AnyNumber())
@@ -519,7 +519,7 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
             .WillRepeatedly(ReturnRef(objErrRegRequiredInWifi));
 
     // bErrCodeByNo911Addr
-    IMSVector<IMS_SINT32> objErrCodeByNo911Addr;
+    ImsVector<IMS_SINT32> objErrCodeByNo911Addr;
     objErrCodeByNo911Addr.Clear();
     objErrCodeByNo911Addr.Add(2);
     EXPECT_CALL(m_objMockAosConfig, GetWfcSubErrorByMissing911Address())
@@ -567,7 +567,7 @@ TEST_F(AosSubscriptionTest, CheckInitialRegRequiredInWifi)
 TEST_F(AosSubscriptionTest, CheckIsReSubscriptionStopped)
 {
     SetState(AosSubscription::STATE_SUBSTOP);
-    IMSVector<IMS_SINT32> objErrResubStopped;
+    ImsVector<IMS_SINT32> objErrResubStopped;
     objErrResubStopped.Clear();
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
             .Times(AnyNumber())
@@ -613,7 +613,7 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
             .WillOnce(Return(2))
             .WillRepeatedly(Return(0));
 
-    IMSVector<IMS_SINT32> objErrSubTerminated;
+    ImsVector<IMS_SINT32> objErrSubTerminated;
     objErrSubTerminated.Clear();
     objErrSubTerminated.Add(404);
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorSubTerminated())
@@ -642,7 +642,7 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
             .WillOnce(Return(3))
             .WillRepeatedly(Return(0));
 
-    IMSVector<IMS_SINT32> objErrRegRequired;
+    ImsVector<IMS_SINT32> objErrRegRequired;
     objErrRegRequired.Clear();
     objErrRegRequired.Add(403);
 
@@ -656,7 +656,7 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
     EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(403, IMS_FALSE));
 
     // IsInitialRegistrationWithNextPcscfRequired() - 1st: true, others: false
-    IMSVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
     objErrRegRequiredWithNextPcscf.Clear();
     objErrRegRequiredWithNextPcscf.Add(403);
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
@@ -668,7 +668,7 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
             .Times(1);
     EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(403, IMS_FALSE));
 
-    // IMSVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    // ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
     objErrRegRequiredWithNextPcscf.Clear();
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
             .WillRepeatedly(ReturnRef(objErrRegRequiredWithNextPcscf));
@@ -682,7 +682,7 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
             .WillOnce(Return(IMS_TRUE))
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objErrRegRequiredInWifi;
+    ImsVector<IMS_SINT32> objErrRegRequiredInWifi;
     objErrRegRequiredInWifi.Clear();
     objErrRegRequiredInWifi.Add(403);
     EXPECT_CALL(m_objMockAosConfig, GetVowifiSubErrorRegRequired())
@@ -725,7 +725,7 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
     EXPECT_FALSE(m_pAosSubscription->ProcessFailed_StatusCode(423, IMS_FALSE));
 
     // nStatusCode == SipStatusCode::SC_504;
-    IMSList<ISipMessageBodyPart*> objBodyParts;
+    ImsList<ISipMessageBodyPart*> objBodyParts;
     objBodyParts.Clear();
     SipMessageBodyPart objBodyPart;
     ISipMessageBodyPart* piBodyPart = static_cast<ISipMessageBodyPart*>(&objBodyPart);
@@ -769,7 +769,7 @@ TEST_F(AosSubscriptionTest, ProcessFailedStatusCode)
     EXPECT_TRUE(m_pAosSubscription->ProcessFailed_StatusCode(481, IMS_TRUE));
 
     // bIsRefreshed IMS_TRUE IsResubscriptionStopped
-    IMSVector<IMS_SINT32> objErrResubStopped;
+    ImsVector<IMS_SINT32> objErrResubStopped;
     objErrResubStopped.Clear();
     objErrResubStopped.Add(403);
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
@@ -823,7 +823,7 @@ TEST_F(AosSubscriptionTest, IsWfcErrorCodeByMissing911Address)
     EXPECT_FALSE(m_pAosSubscription->IsWfcErrorCodeByMissing911Address(
             CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403));
 
-    IMSVector<IMS_SINT32> objErrDisplayRequired;
+    ImsVector<IMS_SINT32> objErrDisplayRequired;
     objErrDisplayRequired.Clear();
     objErrDisplayRequired.Add(CarrierConfig::Assets::WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403);
     EXPECT_CALL(m_objMockAosConfig, GetWfcSubErrorByMissing911Address())
@@ -871,7 +871,7 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
     NotifyListenerEvent(AMSG_REG_SUBSCRIPTION_NOTIFY_RECEIVED, 0, IMS_TRUE);
     EXPECT_EQ(GetAorState(), IRegInfoContact::STATE_TERMINATED);
 
-    IMSList<IRegInfoContact*> objContact;
+    ImsList<IRegInfoContact*> objContact;
     objContact.Clear();
 
     EXPECT_CALL(objMockIRegInfoRegistration, GetContacts()).Times(1).WillOnce(Return(objContact));
@@ -1060,7 +1060,7 @@ TEST_F(AosSubscriptionTest, CheckNotifyReceived)
             .WillOnce(Return(IMS_TRUE))
             .WillRepeatedly(Return(IMS_FALSE));
 
-    IMSVector<IMS_SINT32> objErrDisplayRequired;
+    ImsVector<IMS_SINT32> objErrDisplayRequired;
     objErrDisplayRequired.Clear();
     objErrDisplayRequired.Add(1);
     EXPECT_CALL(m_objMockAosConfig, GetWfcSubErrorByMissing911Address())
@@ -1174,7 +1174,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_Others)
             .WillRepeatedly(Return(1800000));
 
     // SetRetryTimer - GetNextThrottlingTime(objRetryIntervals)
-    IMSVector<IMS_SINT32> objRetryIntervals;
+    ImsVector<IMS_SINT32> objRetryIntervals;
     objRetryIntervals.Clear();
     objRetryIntervals.Add(10);
     objRetryIntervals.Add(10);
@@ -1184,7 +1184,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_Others)
             .WillOnce(ReturnRef(objRetryIntervals));
 
     SetThrottlingCount(0);
-    IMSVector<IMS_SINT32> objRetryRandomIntervals;
+    ImsVector<IMS_SINT32> objRetryRandomIntervals;
     objRetryRandomIntervals.Clear();
     objRetryRandomIntervals.Add(0);
     objRetryRandomIntervals.Add(5);
@@ -1225,7 +1225,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionStartFailed_StatusCode)
             .WillRepeatedly(Return(0));
 
     // IsInitialRegistrationWithNextPcscfRequired - FALSE
-    IMSVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
     objErrRegRequiredWithNextPcscf.Clear();
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
             .Times(3)
@@ -1315,7 +1315,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed_StatusCode)
             .WillRepeatedly(Return(0));
 
     // IsInitialRegistrationWithNextPcscfRequired - FALSE
-    IMSVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
+    ImsVector<IMS_SINT32> objErrRegRequiredWithNextPcscf;
     objErrRegRequiredWithNextPcscf.Clear();
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorRegRequiredWithNextPcscf())
             .Times(AnyNumber())
@@ -1333,7 +1333,7 @@ TEST_F(AosSubscriptionTest, CheckRegSubscriptionUpdateFailed_StatusCode)
             .WillRepeatedly(Return(static_cast<IAosConnection*>(&objMockIAosConnection)));
 
     // IsResubscriptionStopped - FALSE
-    IMSVector<IMS_SINT32> objErrResubStopped;
+    ImsVector<IMS_SINT32> objErrResubStopped;
     objErrResubStopped.Clear();
     EXPECT_CALL(m_objMockAosConfig, GetSubErrorStoppingResub())
             .Times(2)

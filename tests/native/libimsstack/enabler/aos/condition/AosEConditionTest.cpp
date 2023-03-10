@@ -128,7 +128,7 @@ TEST_F(AosEConditionTest, IsReady) {
     m_pAosECondition->ResetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
     EXPECT_TRUE(m_pAosECondition->IsReady());
 
-    IMSList<IMS_UINT32> objReason;
+    ImsList<IMS_UINT32> objReason;
     m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 3);
 

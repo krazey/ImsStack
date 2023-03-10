@@ -261,7 +261,7 @@ TEST_F(AosFeatureTagTest, CopyFeatureTags_Test)
 {
     // Expectation: Target becomes to have same feature tags.
 
-    IMSList<ImsAosFeatureTag*> objFeatureTag;
+    ImsList<ImsAosFeatureTag*> objFeatureTag;
     objFeatureTag.Append(new ImsAosFeatureTag("+test1", "ImsAosFeatureTag"));
     objFeatureTag.Append(new ImsAosFeatureTag("+test2", "ImsAosFeatureTag2"));
 

@@ -958,9 +958,9 @@ public:
      *        These values represent wait times for next registration for retry.
      *        It defines in second.
      *
-     * @return IMSVector<IMS_SINT32>& Return registration retry intervals.
+     * @return ImsVector<IMS_SINT32>& Return registration retry intervals.
      */
-    virtual IMSVector<IMS_SINT32>& GetRegRetryIntervals() = 0;
+    virtual ImsVector<IMS_SINT32>& GetRegRetryIntervals() = 0;
 
     /**
      * @brief Get the registration retry random intervals following the registration retry intervals
@@ -971,27 +971,27 @@ public:
      *        GetRegRetryIntervals()
      *        It defines in second.
      *
-     * @return IMSVector<IMS_SINT32>& Return random value for registration retry intervals
+     * @return ImsVector<IMS_SINT32>& Return random value for registration retry intervals
      */
-    virtual IMSVector<IMS_SINT32>& GetRegRandomRetryIntervals() = 0;
+    virtual ImsVector<IMS_SINT32>& GetRegRandomRetryIntervals() = 0;
 
     /**
      * @brief Get the ipsec authentication algorithms which will be used.
      *
      *        These algorithms consist of the IpSecType class
      *
-     * @return IMSVector<IMS_SINT32>& Return what authentication algorithms will be used
+     * @return ImsVector<IMS_SINT32>& Return what authentication algorithms will be used
      */
-    virtual IMSVector<IMS_SINT32>& GetIpsecAuthenticationAlgorithms() = 0;
+    virtual ImsVector<IMS_SINT32>& GetIpsecAuthenticationAlgorithms() = 0;
 
     /**
      * @brief Get the ipsec encryption algorithms which will be used.
      *
      *        These algorithms consist of the IpSecType class
      *
-     * @return IMSVector<IMS_SINT32>& Return what encryption algorithms will be used
+     * @return ImsVector<IMS_SINT32>& Return what encryption algorithms will be used
      */
-    virtual IMSVector<IMS_SINT32>& GetIpsecEncryptionAlgorithms() = 0;
+    virtual ImsVector<IMS_SINT32>& GetIpsecEncryptionAlgorithms() = 0;
 
     /**
      * @brief Get what NOTIFY event that is condition to perform initial registration.
@@ -1037,9 +1037,9 @@ public:
      *
      *        This function relates to GetRetryCountSubErrorRegRequired()
      *
-     * @return IMSVector<IMS_SINT32>& return array list for error response information
+     * @return ImsVector<IMS_SINT32>& return array list for error response information
      */
-    virtual IMSVector<IMS_SINT32>& GetSubErrorRegRequired() = 0;
+    virtual ImsVector<IMS_SINT32>& GetSubErrorRegRequired() = 0;
 
     /**
      * @brief Get the number of error responses against SUBSCRIBE message that is condition to
@@ -1055,9 +1055,9 @@ public:
      * @brief Get error response information against SUBSCRIBE msg that is condition to perform
      *        initial registration with next pcscf.
      *
-     * @return IMSVector<IMS_SINT32>& return array list for error response information
+     * @return ImsVector<IMS_SINT32>& return array list for error response information
      */
-    virtual IMSVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() = 0;
+    virtual ImsVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() = 0;
 
     /**
      * @brief Get error codes of reg event package(SUBSCRIBE msg) by missing 911 Address
@@ -1066,18 +1066,18 @@ public:
      *        WFC_NO_ADDRESSS_ERROR_CODE_NOTIFY_TERMINATED = 1,
      *        WFC_NO_ADDRESSS_ERROR_CODE_SUBSCRIPTION_403 = 2
      *
-     * @return IMSVector<IMS_SINT32>&  return array list for error codes
+     * @return ImsVector<IMS_SINT32>&  return array list for error codes
      */
-    virtual IMSVector<IMS_SINT32>& GetWfcSubErrorByMissing911Address() = 0;
+    virtual ImsVector<IMS_SINT32>& GetWfcSubErrorByMissing911Address() = 0;
     /**
      * @brief Get error response information against SUBSCRIBE msg that is condition to terminate
      *        its subscription.
      *
      *        This function relates to GetRetryCountSubErrorSubTerminated()
      *
-     * @return IMSVector<IMS_SINT32>& return array list for error response information
+     * @return ImsVector<IMS_SINT32>& return array list for error response information
      */
-    virtual IMSVector<IMS_SINT32>& GetSubErrorSubTerminated() = 0;
+    virtual ImsVector<IMS_SINT32>& GetSubErrorSubTerminated() = 0;
 
     /**
      * @brief Get the number of error responses against SUBSCRIBE message that is condition to
@@ -1096,17 +1096,17 @@ public:
      *        When there are error responses, it stops retrying the current subscription and keeps
      *        its subscription until its expiration time
      *
-     * @return IMSVector<IMS_SINT32>& return array list for error response information
+     * @return ImsVector<IMS_SINT32>& return array list for error response information
      */
-    virtual IMSVector<IMS_SINT32>& GetSubErrorStoppingResub() = 0;
+    virtual ImsVector<IMS_SINT32>& GetSubErrorStoppingResub() = 0;
 
     /**
      * @brief Get error response information against SUBSCRIBE msg in Wifi that is condition to
      *        perform initial registration.
      *
-     * @return IMSVector<IMS_SINT32>& return array list for error response information
+     * @return ImsVector<IMS_SINT32>& return array list for error response information
      */
-    virtual IMSVector<IMS_SINT32>& GetVowifiSubErrorRegRequired() = 0;
+    virtual ImsVector<IMS_SINT32>& GetVowifiSubErrorRegRequired() = 0;
 
     /**
      * @brief Get a priority of ISIM and USIM provisioning to obtain IMS Identity.
@@ -1117,7 +1117,7 @@ public:
             {2} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM_IMSI
             {3} CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF
      */
-    virtual IMSVector<IMS_SINT32>& GetImsIdentityPriority() = 0;
+    virtual ImsVector<IMS_SINT32>& GetImsIdentityPriority() = 0;
 
     /**
      * @brief Get a P-CSCF address discovery methods and its preference order.
@@ -1128,7 +1128,7 @@ public:
      * @return vector list
      * @see CarrierConfig::Ims::PCSCF_DISCOVERY_METHOD_PCO
      */
-    virtual IMSVector<IMS_SINT32>& GetPcscfDiscoveryMethod() = 0;
+    virtual ImsVector<IMS_SINT32>& GetPcscfDiscoveryMethod() = 0;
 
     /**
      * @brief Indicate the list of RATs where registration is updated with RAT change.
@@ -1140,7 +1140,7 @@ public:
      *
      * @return vector rat list
      */
-    virtual IMSVector<IMS_SINT32>& GetUpdateRegistrationWithRatChange() = 0;
+    virtual ImsVector<IMS_SINT32>& GetUpdateRegistrationWithRatChange() = 0;
 
     /**
      * @brief List of different RAT technologies on which IMS is supported
@@ -1153,7 +1153,7 @@ public:
      *
      * @return vector rat list
      */
-    virtual IMSVector<IMS_SINT32>& GetSupportedRats() = 0;
+    virtual ImsVector<IMS_SINT32>& GetSupportedRats() = 0;
 
     /**
      * @brief List of different RAT technologies on which IMS is supported in roaming network
@@ -1166,7 +1166,7 @@ public:
      *
      * @return vector rat list
      */
-    virtual IMSVector<IMS_SINT32>& GetSupportedRoamingRats() = 0;
+    virtual ImsVector<IMS_SINT32>& GetSupportedRoamingRats() = 0;
 
     /**
      * @brief List of different RAT technologies on which SMS over IMS is supported.
@@ -1179,7 +1179,7 @@ public:
      *
      * @return vector rat list
      */
-    virtual IMSVector<IMS_SINT32>& GetSmsOverImsSupportedRats() = 0;
+    virtual ImsVector<IMS_SINT32>& GetSmsOverImsSupportedRats() = 0;
 
     /**
      * @brief Indicate the error codes for registration
@@ -1202,7 +1202,7 @@ public:
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetExtraRegErrCode() = 0;
+    virtual ImsVector<IMS_SINT32>& GetExtraRegErrCode() = 0;
 
     /**
      * @brief Indicate the error codes for reregistration
@@ -1210,21 +1210,21 @@ public:
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetExtraReregErrCode() = 0;
+    virtual ImsVector<IMS_SINT32>& GetExtraReregErrCode() = 0;
 
     /**
      * @brief Indicate the list of wait-time seconds when registration is retried.
      *
      * @return vector wait time list
      */
-    virtual IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime() = 0;
+    virtual ImsVector<IMS_SINT32>& GetExtraRegErrWaitTime() = 0;
 
     /**
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf() = 0;
+    virtual ImsVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf() = 0;
 
     /**
      * @brief Indicate the list of error responses. It shall not attempt any more IMS registrations
@@ -1232,7 +1232,7 @@ public:
      *
      * @return vector permanent error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetRegPermanentErrCode() = 0;
+    virtual ImsVector<IMS_SINT32>& GetRegPermanentErrCode() = 0;
 
     /**
      * @brief Indicate the number of error code considered the final result.
@@ -1247,14 +1247,14 @@ public:
      *
      * @return vector max count list
      */
-    virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount() = 0;
+    virtual ImsVector<IMS_SINT32>& GetRegPermanentErrMaxCount() = 0;
 
     /**
      * @brief Inidicate the list of error codes to attempt initial registration without ipsec.
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() = 0;
+    virtual ImsVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() = 0;
 
     /**
      * @brief Indicate the list of the error response with time value containing Retry-After header
@@ -1264,7 +1264,7 @@ public:
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() = 0;
+    virtual ImsVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() = 0;
 
     /**
      * @brief Indicate the list of the error response with time value containing Retry-After header
@@ -1274,21 +1274,21 @@ public:
      *
      * @return vector error code list
      */
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() = 0;
+    virtual ImsVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() = 0;
 
     /**
      * @brief Indicate the list of the time seconds waiting after the emergency registration is
      *        failed and pcscf is changed
      * @return vector retry wait time
      */
-    virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() = 0;
+    virtual ImsVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() = 0;
 
     /**
      * @brief Indicate the error codes of the registration followed by PCSCF discovery
      *        when PCSCF is unavailable.
      * @return vector error code
      */
-    virtual IMSVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() = 0;
+    virtual ImsVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() = 0;
 
     /**
      * @brief Indicate the list of error codes that result in terminating the IMS call
@@ -1296,21 +1296,21 @@ public:
      *
      * @return vector error code
      */
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForCallEnd() = 0;
+    virtual ImsVector<IMS_SINT32>& GetReregErrCodeForCallEnd() = 0;
 
     /**
      * @brief Indicate the error codes of the reregistration followed by intital registration
      *        with available PCSCF. If no available PCSCF, IMS PDN is re-activated.
      * @return vector error code
      */
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() = 0;
+    virtual ImsVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() = 0;
 
     /**
      * @brief Indicate the error codes of the reregistration followed by IMS PDN reactivation
      *
      * @return vector error code
      */
-    virtual IMSVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() = 0;
+    virtual ImsVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() = 0;
 
     enum
     {

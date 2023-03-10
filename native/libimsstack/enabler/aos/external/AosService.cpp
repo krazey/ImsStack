@@ -30,10 +30,10 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosService::AosService(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_objAosRegistrationControlListeners(IMSList<IAosRegistrationControlListener*>()),
-        m_objAosServiceSettingListeners(IMSList<IAosServiceSettingListener*>()),
-        m_objAosServicePhoneListeners(IMSList<IAosServicePhoneListener*>()),
-        m_objCapabilities(IMSMap<IMS_UINT32, IMS_UINT32>())
+        m_objAosRegistrationControlListeners(ImsList<IAosRegistrationControlListener*>()),
+        m_objAosServiceSettingListeners(ImsList<IAosServiceSettingListener*>()),
+        m_objAosServicePhoneListeners(ImsList<IAosServicePhoneListener*>()),
+        m_objCapabilities(ImsMap<IMS_UINT32, IMS_UINT32>())
 {
     IMS_TRACE_I("+AosService [slot_%d]", m_nSlotId, 0, 0);
     Init();
@@ -222,7 +222,7 @@ PUBLIC VIRTUAL void AosService::TriggerFullNetworkRegistration(
 }
 
 PUBLIC VIRTUAL void AosService::NotifyCapabilitiesChanged(
-        IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
+        IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
 {
     IMS_TRACE_I("NotifyCapabilitiesChanged", 0, 0, 0);
     PrintCapabilities(objCapabilities);
@@ -532,7 +532,7 @@ PUBLIC VIRTUAL void AosService::NotifyPreciseCallState(IN IMS_SINT32 nState)
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN AosNetworkType eNetworkType,
-        IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
+        IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
 {
     IMS_TRACE_I("NotifyRegistered", 0, 0, 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
@@ -546,7 +546,7 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistered(IN AosNetworkType eNetworkT
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosService::NotifyRegistering(IN AosNetworkType eNetworkType,
-        IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
+        IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags)
 {
     IMS_TRACE_I("NotifyRegistering", 0, 0, 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
@@ -588,7 +588,7 @@ PUBLIC VIRTUAL IMS_BOOL AosService::NotifyTechnologyChangeFailed(
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosService::NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris)
+PUBLIC VIRTUAL IMS_BOOL AosService::NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris)
 {
     IMS_TRACE_I("NotifyAssociatedUriChanged", 0, 0, 0);
     IJniAosServiceThread* piJniThread = GetJniThread();
@@ -662,7 +662,7 @@ PUBLIC VIRTUAL IMS_BOOL AosService::RequestWifiService(IN IMS_BOOL bIsOn)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMSMap<IMS_UINT32, IMS_UINT32>& AosService::GetCapabilities()
+PUBLIC VIRTUAL ImsMap<IMS_UINT32, IMS_UINT32>& AosService::GetCapabilities()
 {
     IMS_TRACE_I("GetCapabilities", 0, 0, 0);
     return m_objCapabilities;
@@ -687,7 +687,7 @@ PUBLIC VIRTUAL IMS_BOOL AosService::IsSupportCapabilitiesForNetwork(
 }
 
 PUBLIC GLOBAL AString AosService::PrintCapabilities(
-        IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
+        IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
 {
     AString strCapabilities;
 
