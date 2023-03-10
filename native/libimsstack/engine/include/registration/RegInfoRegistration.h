@@ -32,7 +32,7 @@ public:
     // IRegInfoRegistration interface
     inline const SipAddress& GetAor() const override { return m_objAor; }
     IRegInfoContact* GetContact(IN const SipAddress& objContactUri) const override;
-    IMSList<IRegInfoContact*> GetContacts() const override;
+    ImsList<IRegInfoContact*> GetContacts() const override;
     RegInfoContact* GetPriorContact() const override;
     inline IMS_SINT32 GetState() const override { return m_nState; }
 
@@ -52,7 +52,7 @@ private:
     AString m_strId;
     IMS_SINT32 m_nState;
     SipAddress m_objAor;
-    IMSList<RegInfoContact*> m_objContacts;
+    ImsList<RegInfoContact*> m_objContacts;
 };
 
 #endif

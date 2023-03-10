@@ -185,7 +185,7 @@ IMS_BOOL SdpPrecondition::ExtractProperties(IN const AString& strStatusLine, OUT
         return IMS_FALSE;
     }
 
-    IMSList<AString> objTokens = strStatusLine.Split(TextParser::CHAR_SP);
+    ImsList<AString> objTokens = strStatusLine.Split(TextParser::CHAR_SP);
 
     if ((objTokens.GetSize() != 3) && (objTokens.GetSize() != 4))
     {

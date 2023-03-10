@@ -24,11 +24,11 @@ __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
 SipRtConfigHelper::SipRtConfigHelper() :
-        m_objConfigSet(IMSMap<IMS_SINT32, IMS_BOOL>()),
+        m_objConfigSet(ImsMap<IMS_SINT32, IMS_BOOL>()),
         m_nFeatures(SipRtConfig::FEATURE_NONE),
-        m_objIpQoss(IMSList<SipRtConfig::IpQos>()),
-        m_objHeaders(IMSList<SipRtConfig::Header>()),
-        m_objIpSecSas(IMSList<SipRtConfig::IpSecSa>())
+        m_objIpQoss(ImsList<SipRtConfig::IpQos>()),
+        m_objHeaders(ImsList<SipRtConfig::Header>()),
+        m_objIpSecSas(ImsList<SipRtConfig::IpSecSa>())
 {
     for (IMS_SINT32 i = 0; i < SipRtConfig::CONFIG_I_MAX; ++i)
     {
@@ -69,7 +69,7 @@ const SipRtConfig::SocketOption* SipRtConfigHelper::GetSocketOption(IN IMS_SINT3
         return IMS_NULL;
     }
 
-    const IMSList<SipRtConfig::SocketOption>& objSocketOptions =
+    const ImsList<SipRtConfig::SocketOption>& objSocketOptions =
             m_objSocketOptionMap.GetValueAt(nIndex);
 
     if (objSocketOptions.IsEmpty())
@@ -106,7 +106,7 @@ const SipRtConfig::SocketOption* SipRtConfigHelper::GetSocketOption(
         return IMS_NULL;
     }
 
-    const IMSList<SipRtConfig::SocketOption>& objSocketOptions =
+    const ImsList<SipRtConfig::SocketOption>& objSocketOptions =
             m_objSocketOptionMap.GetValueAt(nIndex);
 
     if (objSocketOptions.IsEmpty())
@@ -644,7 +644,7 @@ IMS_UINT32 SipRtConfigHelper::GetSocketOptionCount(IN IMS_SINT32 nItem) const
         return 0;
     }
 
-    const IMSList<SipRtConfig::SocketOption>& objSocketOptions =
+    const ImsList<SipRtConfig::SocketOption>& objSocketOptions =
             m_objSocketOptionMap.GetValueAt(nIndex);
 
     return objSocketOptions.GetSize();
@@ -667,7 +667,7 @@ void SipRtConfigHelper::RemoveSocketOption(
         return;
     }
 
-    IMSList<SipRtConfig::SocketOption>& objSocketOptions = m_objSocketOptionMap.GetValueAt(nIndex);
+    ImsList<SipRtConfig::SocketOption>& objSocketOptions = m_objSocketOptionMap.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objSocketOptions.GetSize(); ++i)
     {
@@ -700,7 +700,7 @@ IMS_RESULT SipRtConfigHelper::SetSocketOption(
 
     if (nIndex < 0)
     {
-        IMSList<SipRtConfig::SocketOption> objSocketOptions;
+        ImsList<SipRtConfig::SocketOption> objSocketOptions;
         objSocketOptions.Append(*pSockOpt);
 
         m_objSocketOptionMap.Add(nItem, objSocketOptions);
@@ -708,7 +708,7 @@ IMS_RESULT SipRtConfigHelper::SetSocketOption(
         return IMS_SUCCESS;
     }
 
-    IMSList<SipRtConfig::SocketOption>& objSocketOptions = m_objSocketOptionMap.GetValueAt(nIndex);
+    ImsList<SipRtConfig::SocketOption>& objSocketOptions = m_objSocketOptionMap.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objSocketOptions.GetSize(); ++i)
     {

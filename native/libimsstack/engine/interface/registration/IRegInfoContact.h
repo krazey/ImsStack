@@ -127,7 +127,7 @@ public:
      *
      * @return Unknown parameters of contact - list of <key,value> pair.
      */
-    virtual const IMSMap<AString, AString>& GetUnknownParameters() const = 0;
+    virtual const ImsMap<AString, AString>& GetUnknownParameters() const = 0;
 
     /**
      * @brief Returns the URI of contact.

@@ -48,8 +48,8 @@ private:
     {
         return m_pSubscription->GetPreviousResponse(nServiceMethod);
     }
-    IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
-    inline IMSList<AString> GetRemoteUserId() const override
+    ImsList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
+    inline ImsList<AString> GetRemoteUserId() const override
     {
         return m_pSubscription->GetRemoteUserId();
     }

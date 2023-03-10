@@ -104,7 +104,7 @@ void SipParameter::AddValues(IN const AString& strValues)
 
         if (strTmpVal.Contains(TextParser::CHAR_COMMA))
         {
-            IMSList<AString> objTokens = strTmpVal.Split(TextParser::CHAR_COMMA);
+            ImsList<AString> objTokens = strTmpVal.Split(TextParser::CHAR_COMMA);
 
             for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
             {
@@ -132,7 +132,7 @@ void SipParameter::AddValues(IN const AString& strValues)
     }
     else if (strValues.Contains(TextParser::CHAR_COMMA))
     {
-        IMSList<AString> objTokens = strValues.Split(TextParser::CHAR_COMMA);
+        ImsList<AString> objTokens = strValues.Split(TextParser::CHAR_COMMA);
 
         for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
         {

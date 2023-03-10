@@ -62,7 +62,7 @@ public:
     /**
      * @brief Returns all the media-level descriptions.
      */
-    inline const IMSList<SdpMediaDescription>& GetMediaDescriptions() const
+    inline const ImsList<SdpMediaDescription>& GetMediaDescriptions() const
     {
         return m_objMediaDescriptions;
     }
@@ -76,7 +76,7 @@ private:
     /**
      * @brief Returns all the media indexes from the specified SDP lines.
      */
-    static IMSList<IMS_SINT32> GetMediaIndexes(IN const AStringArray& objSdpLines);
+    static ImsList<IMS_SINT32> GetMediaIndexes(IN const AStringArray& objSdpLines);
 
     /**
      * @brief Splits the message for each lines.
@@ -85,7 +85,7 @@ private:
 
 private:
     SdpSessionDescription m_objSessionDescription;
-    IMSList<SdpMediaDescription> m_objMediaDescriptions;
+    ImsList<SdpMediaDescription> m_objMediaDescriptions;
 };
 
 #endif

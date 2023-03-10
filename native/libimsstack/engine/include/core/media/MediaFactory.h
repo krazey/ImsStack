@@ -31,7 +31,7 @@ public:
             IN Service* pService, IN ISdpOaState* piOaState, IN IMS_SINT32 nCountOfDescriptor);
 
     static Media* CreateIncomingMedia(IN IMS_SINT32 nTransportProtocol, IN Service* pService,
-            IN ISdpOaState* piOaState, IN const IMSList<IMS_SINT32>& objMids);
+            IN ISdpOaState* piOaState, IN const ImsList<IMS_SINT32>& objMids);
 
     static void DestroyMedia(IN Media*& pMedia);
 };

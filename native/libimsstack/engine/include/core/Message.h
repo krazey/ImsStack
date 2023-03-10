@@ -44,9 +44,9 @@ public:
 private:
     // IMessage interface
     IMessageBodyPart* CreateBodyPart() override;
-    IMSList<IMessageBodyPart*> GetBodyParts() const override;
+    ImsList<IMessageBodyPart*> GetBodyParts() const override;
     IMS_RESULT AddHeader(IN const AString& strName, IN const AString& strValue) override;
-    IMSList<AString> GetHeaders(IN const AString& strName) const override;
+    ImsList<AString> GetHeaders(IN const AString& strName) const override;
     inline const SipMethod& GetMethod() const override { return m_piSipMsg->GetMethod(); }
     inline const AString& GetReasonPhrase() const override { return m_piSipMsg->GetReasonPhrase(); }
     inline IMS_SINT32 GetState() const override { return m_nState; }
@@ -60,7 +60,7 @@ private:
     AppConfig* m_pAppConfig;
     IMS_SINT32 m_nState;
     ISipMessage* m_piSipMsg;
-    IMSList<MessageBodyPart*> m_objBodyParts;
+    ImsList<MessageBodyPart*> m_objBodyParts;
 };
 
 #endif

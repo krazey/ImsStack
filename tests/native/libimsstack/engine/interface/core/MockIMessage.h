@@ -33,8 +33,8 @@ public:
     MOCK_METHOD(IMS_RESULT, AddHeader, (IN const AString& strName, IN const AString& strValue),
             (override));
     MOCK_METHOD(IMessageBodyPart*, CreateBodyPart, (), (override));
-    MOCK_METHOD(IMSList<IMessageBodyPart*>, GetBodyParts, (), (const, override));
-    MOCK_METHOD(IMSList<AString>, GetHeaders, (IN const AString& strName), (const, override));
+    MOCK_METHOD(ImsList<IMessageBodyPart*>, GetBodyParts, (), (const, override));
+    MOCK_METHOD(ImsList<AString>, GetHeaders, (IN const AString& strName), (const, override));
     MOCK_METHOD(ISipMessage*, GetMessage, (), (const, override));
     MOCK_METHOD(const SipMethod&, GetMethod, (), (const, override));
     MOCK_METHOD(const AString&, GetReasonPhrase, (), (const, override));

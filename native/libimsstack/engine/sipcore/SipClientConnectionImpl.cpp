@@ -116,7 +116,7 @@ PRIVATE VIRTUAL AString SipClientConnectionImpl::GetHeader(
     return m_pScc->GetHeader(strName, nIndex);
 }
 
-PRIVATE VIRTUAL IMSList<AString> SipClientConnectionImpl::GetHeaders(IN const AString& strName)
+PRIVATE VIRTUAL ImsList<AString> SipClientConnectionImpl::GetHeaders(IN const AString& strName)
 {
     return m_pScc->GetHeaders(strName);
 }
@@ -278,7 +278,7 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::Receive(IN IMS_SLONG /* nTim
 }
 
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetCredentials(
-        IN IMSList<Credential>& objCredentials)
+        IN ImsList<Credential>& objCredentials)
 {
     return m_pScc->SetCredentials(objCredentials);
 }

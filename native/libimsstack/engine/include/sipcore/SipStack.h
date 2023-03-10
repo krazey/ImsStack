@@ -205,9 +205,9 @@ GLOBAL IMS_BOOL EncodeMessage(IN ::SipMessage* pMessage, IN IMS_SINT32 nOptions,
         OUT IMS_BYTE*& pBuffer, OUT IMS_SINT32& nBuffLen);
 GLOBAL IMS_BOOL EncodePartialMessage(
         IN ::SipMessage* pMessage, IN IMS_SINT32 nOptions, OUT ByteArray& objMessage);
-GLOBAL IMSList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader);
-GLOBAL IMSList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec);
-GLOBAL IMSList<SipParameter*> ExtractParameters(IN const AString& strParams, IN IMS_CHAR cSep);
+GLOBAL ImsList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader);
+GLOBAL ImsList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec);
+GLOBAL ImsList<SipParameter*> ExtractParameters(IN const AString& strParams, IN IMS_CHAR cSep);
 
 GLOBAL void FreeAddrSpec(IN SipAddrSpec*& pAddrSpec);
 GLOBAL void FreeHeader(IN SipHeaderBase* pHeader);

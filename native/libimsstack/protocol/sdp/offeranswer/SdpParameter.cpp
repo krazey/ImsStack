@@ -359,9 +359,9 @@ const SdpAttribute* SdpParameter::GetAttribute(IN const AString& strAttribute) c
 }
 
 PUBLIC
-IMSList<SdpAttribute> SdpParameter::GetAttributes(IN IMS_SINT32 nAttribute) const
+ImsList<SdpAttribute> SdpParameter::GetAttributes(IN IMS_SINT32 nAttribute) const
 {
-    IMSList<SdpAttribute> objCollectedAttributes;
+    ImsList<SdpAttribute> objCollectedAttributes;
 
     for (IMS_UINT32 i = 0; i < m_objAttributes.GetSize(); ++i)
     {
@@ -377,9 +377,9 @@ IMSList<SdpAttribute> SdpParameter::GetAttributes(IN IMS_SINT32 nAttribute) cons
 }
 
 PUBLIC
-IMSList<SdpAttribute> SdpParameter::GetAttributes(IN const AString& strAttribute) const
+ImsList<SdpAttribute> SdpParameter::GetAttributes(IN const AString& strAttribute) const
 {
-    IMSList<SdpAttribute> objCollectedAttributes;
+    ImsList<SdpAttribute> objCollectedAttributes;
 
     for (IMS_UINT32 i = 0; i < m_objAttributes.GetSize(); ++i)
     {
@@ -568,7 +568,7 @@ void SdpParameter::RemoveInformation()
 }
 
 PUBLIC
-void SdpParameter::SetBandwidths(IN const IMSList<SdpBandwidth>& objBandwidths)
+void SdpParameter::SetBandwidths(IN const ImsList<SdpBandwidth>& objBandwidths)
 {
     m_objBandwidths.Clear();
     m_objBandwidths = objBandwidths;

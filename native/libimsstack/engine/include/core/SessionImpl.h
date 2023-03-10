@@ -60,8 +60,8 @@ private:
     {
         return m_pSession->GetPreviousResponse(nServiceMethod);
     }
-    IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
-    inline IMSList<AString> GetRemoteUserId() const override
+    ImsList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
+    inline ImsList<AString> GetRemoteUserId() const override
     {
         return m_pSession->GetRemoteUserId();
     }
@@ -73,7 +73,7 @@ private:
             IN IMS_SINT32 nCountOfDescriptor = 0) override;
     IReference* CreateReference(
             IN const AString& strReferTo, IN const AString& strReferMethod) override;
-    IMSList<IMedia*> GetMedia() override;
+    ImsList<IMedia*> GetMedia() override;
     inline ISessionDescriptor* GetSessionDescriptor() override
     {
         return m_pSession->GetSessionDescriptor();
@@ -153,7 +153,7 @@ private:
     {
         return m_pSession->SendRpr(nStatusCode, strReason, bSdp, nFlags);
     }
-    inline IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference) override
+    inline IMS_RESULT SetCallerPreference(IN const ImsList<AString>& objCallerPreference) override
     {
         return m_pSession->SetCallerPreference(objCallerPreference);
     }
@@ -247,7 +247,7 @@ private:
 private:
     SessionEx* m_pSession;
     ISessionListener* m_piListener;
-    IMSList<MediaImpl*> m_objMediaImpls;
+    ImsList<MediaImpl*> m_objMediaImpls;
     VirtualSessionImpl* m_pVirtualSessionImpl;
 };
 

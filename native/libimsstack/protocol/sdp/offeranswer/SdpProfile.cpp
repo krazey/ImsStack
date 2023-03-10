@@ -35,7 +35,7 @@ public:
 
 public:
     // Pair: slot-id / features
-    IMSMap<IMS_SINT32, IMS_SINT32> m_objFeatures;
+    ImsMap<IMS_SINT32, IMS_SINT32> m_objFeatures;
 };
 
 PUBLIC

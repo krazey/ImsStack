@@ -52,11 +52,11 @@ PRIVATE VIRTUAL void SubscriptionImpl::Destroy()
     delete this;
 }
 
-PRIVATE VIRTUAL IMSList<IMessage*> SubscriptionImpl::GetPreviousResponses(
+PRIVATE VIRTUAL ImsList<IMessage*> SubscriptionImpl::GetPreviousResponses(
         IN IMS_SINT32 nServiceMethod) const
 {
-    IMSList<IMessage*> objIMessages;
-    IMSList<Message*> objResponses = m_pSubscription->GetPreviousResponses(nServiceMethod);
+    ImsList<IMessage*> objIMessages;
+    ImsList<Message*> objResponses = m_pSubscription->GetPreviousResponses(nServiceMethod);
 
     for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
     {

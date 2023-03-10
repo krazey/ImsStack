@@ -62,7 +62,7 @@ SdpBandwidth& SdpBandwidth::operator=(IN const SdpBandwidth& other)
 PUBLIC VIRTUAL IMS_BOOL SdpBandwidth::Decode(IN const AString& strValue)
 {
     // b=<bwtype>:<bandwidth>
-    IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_COLON);
+    ImsList<AString> objTokens = strValue.Split(TextParser::CHAR_COLON);
 
     if (objTokens.GetSize() != 2)
     {

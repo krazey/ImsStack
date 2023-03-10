@@ -113,7 +113,7 @@ public:
      *
      * @return List of Security-Server header.
      */
-    virtual const IMSList<SipSecurityHeader>& GetSecurityServers() const = 0;
+    virtual const ImsList<SipSecurityHeader>& GetSecurityServers() const = 0;
 
     /**
      * @brief Returns the topmost Route header.
@@ -197,7 +197,7 @@ public:
      *
      * @param objSecurityVerifys List of Security-Verify header
      */
-    virtual void SetSecurityVerifys(IN const IMSList<SipSecurityHeader>& objSecurityVerifys) = 0;
+    virtual void SetSecurityVerifys(IN const ImsList<SipSecurityHeader>& objSecurityVerifys) = 0;
 
     /**
      * @brief Sets the timer values of SIP transaction layer for registration.

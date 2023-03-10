@@ -90,13 +90,13 @@ public:
 
 public:
     IMS_BOOL AddHeader(IN const AString& strName, IN const AString& strValue);
-    IMS_BOOL AddHeader(IN const AString& strName, IN const IMSList<AString>& objValues);
+    IMS_BOOL AddHeader(IN const AString& strName, IN const ImsList<AString>& objValues);
     void RemoveHeader(IN const AString& strName, IN const AString& strValue);
-    void RemoveHeader(IN const AString& strName, IN const IMSList<AString>& objValues);
-    inline const IMSList<ExtraHeader*>& GetHeaders() const { return m_objHeaders; }
+    void RemoveHeader(IN const AString& strName, IN const ImsList<AString>& objValues);
+    inline const ImsList<ExtraHeader*>& GetHeaders() const { return m_objHeaders; }
 
 private:
-    IMSList<ExtraHeader*> m_objHeaders;
+    ImsList<ExtraHeader*> m_objHeaders;
 };
 
 PUBLIC
@@ -160,7 +160,7 @@ IMS_BOOL ExtraHeaders::AddHeader(IN const AString& strName, IN const AString& st
 }
 
 PUBLIC
-IMS_BOOL ExtraHeaders::AddHeader(IN const AString& strName, IN const IMSList<AString>& objValues)
+IMS_BOOL ExtraHeaders::AddHeader(IN const AString& strName, IN const ImsList<AString>& objValues)
 {
     for (IMS_UINT32 i = 0; i < objValues.GetSize(); ++i)
     {
@@ -214,7 +214,7 @@ void ExtraHeaders::RemoveHeader(IN const AString& strName, IN const AString& str
 }
 
 PUBLIC
-void ExtraHeaders::RemoveHeader(IN const AString& strName, IN const IMSList<AString>& objValues)
+void ExtraHeaders::RemoveHeader(IN const AString& strName, IN const ImsList<AString>& objValues)
 {
     for (IMS_UINT32 i = 0; i < objValues.GetSize(); ++i)
     {
@@ -237,7 +237,7 @@ RegParameter::RegParameter(IN IMS_SINT32 nSlotId) :
         m_pPreferredSecurityClient(IMS_NULL),
         m_pPreferredSecurityServer(IMS_NULL),
         m_pExtraHeaders(IMS_NULL),
-        m_objBodyParts(IMSList<ISipMessageBodyPart*>()),
+        m_objBodyParts(ImsList<ISipMessageBodyPart*>()),
         m_bIsAuthRealmLenient(IMS_FALSE),
         m_pSipTimerValues(IMS_NULL)
 {
@@ -311,7 +311,7 @@ IMS_RESULT RegParameter::FormHeaders(
     }
 
     // Add an additional registration headers from the CoreService configuration
-    const IMSList<ExtraHeader*>& objHeaders = m_pExtraHeaders->GetHeaders();
+    const ImsList<ExtraHeader*>& objHeaders = m_pExtraHeaders->GetHeaders();
 
     for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
     {
@@ -561,7 +561,7 @@ IMS_RESULT RegParameter::FormSecurityHeaders(IN_OUT ISipClientConnection*& piScc
         }
     }
 
-    IMSList<SipSecurityHeader>* pSecurityHeaders = &m_objSecurityServers;
+    ImsList<SipSecurityHeader>* pSecurityHeaders = &m_objSecurityServers;
 
     if (!m_objSecurityVerifys.IsEmpty())
     {
@@ -626,7 +626,7 @@ IMS_SINT32 RegParameter::GetProtectedPortUs() const
 }
 
 PUBLIC
-const IMSList<SipSecurityHeader>& RegParameter::GetSecurityVerifys() const
+const ImsList<SipSecurityHeader>& RegParameter::GetSecurityVerifys() const
 {
     if (!m_objSecurityVerifys.IsEmpty())
     {
@@ -809,7 +809,7 @@ IMS_BOOL RegParameter::UpdateSecurityHeaders(IN const ISipMessage* piSipMsg)
     }
 
     // Updates the Security-Server headers
-    IMSList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::SECURITY_SERVER);
+    ImsList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::SECURITY_SERVER);
 
     if (!objHeaders.IsEmpty())
     {
@@ -882,7 +882,7 @@ PRIVATE VIRTUAL IMS_BOOL RegParameter::AddExtraHeaders(IN const AStringArray& ob
 {
     AString strName;
     AString strValue;
-    IMSList<AString> objValues;
+    ImsList<AString> objValues;
 
     for (IMS_SINT32 i = 0; i < objHeaders.GetCount(); ++i)
     {
@@ -999,7 +999,7 @@ PRIVATE VIRTUAL void RegParameter::RemoveExtraHeaders(IN const AStringArray& obj
 {
     AString strName;
     AString strValue;
-    IMSList<AString> objValues;
+    ImsList<AString> objValues;
 
     for (IMS_SINT32 i = 0; i < objHeaders.GetCount(); ++i)
     {

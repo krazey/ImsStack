@@ -36,7 +36,7 @@ PUBLIC
 SipTransportHelper::SipTransportHelper() :
         EngineActivity(),
         m_piMessageListener(IMS_NULL),
-        m_objClientInitiatedConnections(IMSMap<IMS_UINTP, IMS_SINT32>()),
+        m_objClientInitiatedConnections(ImsMap<IMS_UINTP, IMS_SINT32>()),
         m_piDnsQueryListener(IMS_NULL)
 {
 }
@@ -520,7 +520,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyAllSockets(
     {
         IMS_TRACE_D("DestroyAllSockets (S) :: Sockets (%d)", m_objSockets.GetSize(), 0, 0);
 
-        IMSList<SipSocket*> objTmpSockets = m_objSockets;
+        ImsList<SipSocket*> objTmpSockets = m_objSockets;
 
         for (IMS_UINT32 i = 0; i < objTmpSockets.GetSize(); ++i)
         {
@@ -560,7 +560,7 @@ PRIVATE VIRTUAL void SipTransportHelper::DestroyTcpSocket(IN const IpAddress& ob
         IN IMS_UINT32 nSrcPort, IN const IpAddress& objDstIp, IN IMS_UINT32 nDstPort,
         IN IMS_BOOL bIsConnectionByPeer /*= IMS_FALSE*/)
 {
-    IMSList<SipSocket*> objRemovedSockets;
+    ImsList<SipSocket*> objRemovedSockets;
     SipSocketAddress objSockAddr;
 
     IMS_TRACE_D("DestroyTcpSocket (S) :: Sockets (%d)", m_objSockets.GetSize(), 0, 0);
@@ -1056,7 +1056,7 @@ PRIVATE
 SipSocket* SipTransportHelper::LookupStreamSocket(
         IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd)
 {
-    IMSList<SipSocket*> objCandidates;
+    ImsList<SipSocket*> objCandidates;
     AString strFarEnd;
 
     // LOG_EXCLUDING_SERVER_INFO

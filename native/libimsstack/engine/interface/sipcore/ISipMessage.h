@@ -98,7 +98,7 @@ public:
      * @return It returns the list of header field values (topmost first).\n
      *         If an error occurs, it returns the empty list.
      */
-    virtual IMSList<AString> GetHeaders(
+    virtual ImsList<AString> GetHeaders(
             IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
@@ -213,7 +213,7 @@ public:
      *
      * @return List of pointer to ISipMessageBodyPart.
      */
-    virtual IMSList<ISipMessageBodyPart*> GetBodyParts() const = 0;
+    virtual ImsList<ISipMessageBodyPart*> GetBodyParts() const = 0;
 
     /**
      * @brief Returns a SDP message body if present.
@@ -229,7 +229,7 @@ public:
      * @return List of pointer to ISipMessageBodyPart.\n
      *         The list will be empty if SDP message body does not exist.
      */
-    virtual IMSList<ISipMessageBodyPart*> GetSdpBodyParts() const = 0;
+    virtual ImsList<ISipMessageBodyPart*> GetSdpBodyParts() const = 0;
 
     /**
      * @brief Updates the SIP headers & message body parts with the specified SIP message.

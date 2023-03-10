@@ -124,12 +124,12 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::AddAttribute(IN const AString& str
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL IMSList<AString> SessionDescriptor::GetAttributes() const
+PRIVATE VIRTUAL ImsList<AString> SessionDescriptor::GetAttributes() const
 {
     if (m_piSessionState == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     SdpSessionParameter* pSessionParam = m_piSessionState->GetPeerSessionParameter();
@@ -137,11 +137,11 @@ PRIVATE VIRTUAL IMSList<AString> SessionDescriptor::GetAttributes() const
     if (pSessionParam == IMS_NULL)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
-    const IMSList<SdpAttribute>& objSdpAttributes = pSessionParam->GetAttributes();
-    IMSList<AString> objAttributes;
+    const ImsList<SdpAttribute>& objSdpAttributes = pSessionParam->GetAttributes();
+    ImsList<AString> objAttributes;
 
     for (IMS_UINT32 i = 0; i < objSdpAttributes.GetSize(); ++i)
     {
@@ -933,7 +933,7 @@ PRIVATE VIRTUAL IMS_RESULT SessionDescriptor::RemoveAllBandwidths()
         return IMS_FAILURE;
     }
 
-    IMSList<SdpBandwidth> objBandwidths;
+    ImsList<SdpBandwidth> objBandwidths;
 
     pSessionParam->SetBandwidths(objBandwidths);
 

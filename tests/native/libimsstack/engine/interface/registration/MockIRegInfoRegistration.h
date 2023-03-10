@@ -27,7 +27,7 @@ public:
     MOCK_METHOD(const SipAddress&, GetAor, (), (const, override));
     MOCK_METHOD(
             IRegInfoContact*, GetContact, (IN const SipAddress& objContactUri), (const, override));
-    MOCK_METHOD(IMSList<IRegInfoContact*>, GetContacts, (), (const, override));
+    MOCK_METHOD(ImsList<IRegInfoContact*>, GetContacts, (), (const, override));
     MOCK_METHOD(IRegInfoContact*, GetPriorContact, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetState, (), (const, override));
 };

@@ -62,7 +62,7 @@ private:
     void RemoveListener(IN ISipRoutingRejectListener* piListener) override;
 
 private:
-    IMSList<ISipRoutingRejectListener*> m_objListeners;
+    ImsList<ISipRoutingRejectListener*> m_objListeners;
 };
 
 #endif

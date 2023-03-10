@@ -39,11 +39,11 @@ FakeRegistration::FakeRegistration() :
         m_nSubState(SUB_STATE_IDLE),
         m_pRegFlow(IMS_NULL),
         m_pRegParam(IMS_NULL),
-        m_objContacts(IMSList<RegContact*>()),
+        m_objContacts(ImsList<RegContact*>()),
         m_pStateTracker(new RegStateTracker()),
         m_piListener(IMS_NULL),
         m_piUserIdNotifier(IMS_NULL),
-        m_objObservers(IMSList<RegObserver*>()),
+        m_objObservers(ImsList<RegObserver*>()),
         m_bIsWithinTrustDomain(IMS_TRUE),
         m_nRefCountForScnErrorListener(0)
 {
@@ -379,9 +379,9 @@ PRIVATE VIRTUAL void FakeRegistration::DestroyContact(
     ChoosePreferredContact();
 }
 
-PRIVATE VIRTUAL IMSList<IRegContact*> FakeRegistration::GetAllContacts() const
+PRIVATE VIRTUAL ImsList<IRegContact*> FakeRegistration::GetAllContacts() const
 {
-    IMSList<IRegContact*> objAllContacts;
+    ImsList<IRegContact*> objAllContacts;
 
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {

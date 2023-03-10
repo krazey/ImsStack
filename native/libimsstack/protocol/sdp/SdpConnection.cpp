@@ -122,7 +122,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpConnection::Decode(IN const AString& strValue)
     // TODO:: allow FQDN, so needs to be parsed using URI parser
     // TODO:: multicast ???
     // connection-address field
-    IMSList<AString> objConnectionAddress = objTokens.GetElementAt(2).Split(TextParser::CHAR_SLASH);
+    ImsList<AString> objConnectionAddress = objTokens.GetElementAt(2).Split(TextParser::CHAR_SLASH);
 
     if (objConnectionAddress.IsEmpty())
     {

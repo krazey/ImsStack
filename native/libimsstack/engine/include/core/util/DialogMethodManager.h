@@ -50,7 +50,7 @@ private:
 
     IMutex* m_piLock;
     // Name (identifier), Pointer of IDialogMethod
-    IMSMap<AString, IDialogMethod*> m_objDialogMethods;
+    ImsMap<AString, IDialogMethod*> m_objDialogMethods;
 };
 
 #endif

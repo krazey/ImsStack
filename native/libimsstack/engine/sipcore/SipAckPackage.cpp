@@ -44,7 +44,7 @@ public:
     }
 
 public:
-    IMSList<SipAckPackage*> objAckPackages;
+    ImsList<SipAckPackage*> objAckPackages;
 };
 
 PRIVATE GLOBAL SipAckPackagePrivate* SipAckPackage::s_pAckPackagePrivate = IMS_NULL;

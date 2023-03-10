@@ -33,13 +33,13 @@ public:
 
 public:
     // IMedia interface
-    inline virtual const IMSList<MediaDescriptor*>& GetMediaDescriptors() const
+    inline virtual const ImsList<MediaDescriptor*>& GetMediaDescriptors() const
     {
         return m_objDescriptors;
     }
     virtual IMS_SINT32 GetType() const = 0;
 
-    IMS_BOOL CreateDescriptor(IN const IMSList<MediaDescriptor*>& objDescriptors);
+    IMS_BOOL CreateDescriptor(IN const ImsList<MediaDescriptor*>& objDescriptors);
     IMS_SINT32 GetDirection() const;
     MediaDescriptor* GetMediaDescriptor() const;
     MediaDescriptor* GetMediaDescriptor(IN IMS_SINT32 nMid) const;
@@ -55,7 +55,7 @@ protected:
 
 private:
     ISdpOaState* m_piOaState;
-    IMSList<MediaDescriptor*> m_objDescriptors;
+    ImsList<MediaDescriptor*> m_objDescriptors;
 };
 
 #endif

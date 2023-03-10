@@ -46,8 +46,8 @@ private:
     IMessage* GetNextResponse() override;
     IMessage* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const override;
     IMessage* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const override;
-    IMSList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
-    IMSList<AString> GetRemoteUserId() const override;
+    ImsList<IMessage*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const override;
+    ImsList<AString> GetRemoteUserId() const override;
 
     // ISession interface
     IMS_RESULT Accept() override;
@@ -56,7 +56,7 @@ private:
             IN IMS_SINT32 nCountOfDescriptor = 0) override;
     IReference* CreateReference(
             IN const AString& strReferTo, IN const AString& strReferMethod) override;
-    IMSList<IMedia*> GetMedia() override;
+    ImsList<IMedia*> GetMedia() override;
     ISessionDescriptor* GetSessionDescriptor() override;
     IMS_SINT32 GetState() const override;
     IMS_BOOL HasPendingUpdate() const override;
@@ -94,7 +94,7 @@ private:
     IMS_RESULT SendRpr(IN IMS_SINT32 nStatusCode,
             IN const AString& strReason = AString::ConstNull(), IN IMS_BOOL bSdp = IMS_TRUE,
             IN IMS_SINT32 nFlags = 0) override;
-    IMS_RESULT SetCallerPreference(IN const IMSList<AString>& objCallerPreference) override;
+    IMS_RESULT SetCallerPreference(IN const ImsList<AString>& objCallerPreference) override;
     void SetConfiguration(IN IMS_SINT32 nConfigValue) override;
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
     IMS_RESULT SetContactParameter(IN const AString& strParameter,
@@ -124,7 +124,7 @@ private:
 private:
     ISession* m_piOwnerSession;
     RcPtr<VirtualSession> m_pSession;
-    IMSList<MediaImpl*> m_objMediaImpls;
+    ImsList<MediaImpl*> m_objMediaImpls;
 };
 
 #endif

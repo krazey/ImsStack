@@ -1188,9 +1188,9 @@ GLOBAL IMS_BOOL IsUnknownHeader(IN_OUT IMS_SINT32& nType, IN const AString& strN
     return (nType == ISipHeader::UNKNOWN);
 }
 
-GLOBAL IMSList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
+GLOBAL ImsList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 {
-    IMSList<SipParameter*> objParams;
+    ImsList<SipParameter*> objParams;
     SipParameters* pParams = GetParameters(const_cast<SipHeaderBase*>(pHeader), IMS_FALSE);
 
     if (pParams != IMS_NULL)
@@ -1229,9 +1229,9 @@ GLOBAL IMSList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
     return objParams;
 }
 
-GLOBAL IMSList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec)
+GLOBAL ImsList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec)
 {
-    IMSList<SipParameter*> objParams;
+    ImsList<SipParameter*> objParams;
 
     if (pAddrSpec == IMS_NULL)
     {
@@ -1301,9 +1301,9 @@ GLOBAL IMSList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec)
     return objParams;
 }
 
-GLOBAL IMSList<SipParameter*> ExtractParameters(IN const AString& strParams, IN IMS_CHAR cSep)
+GLOBAL ImsList<SipParameter*> ExtractParameters(IN const AString& strParams, IN IMS_CHAR cSep)
 {
-    IMSList<SipParameter*> objParams;
+    ImsList<SipParameter*> objParams;
     AString strTmp = strParams.Trim();
 
     SIPStackError(EERR_NOERR);

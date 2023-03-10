@@ -41,10 +41,10 @@ Method::Method() :
         m_bMobileOriginated(IMS_TRUE),
         m_pUserAor(IMS_NULL),
         m_pRemoteUserAor(IMS_NULL),
-        m_objRemoteUserIds(IMSList<AString>()),
+        m_objRemoteUserIds(ImsList<AString>()),
         m_piDialog(IMS_NULL),
         m_piAuthChallenge(IMS_NULL),
-        m_objAuthChallengeMap(IMSMap<IMS_SINT32, IMS_SINT32>()),
+        m_objAuthChallengeMap(ImsMap<IMS_SINT32, IMS_SINT32>()),
         m_piMessageMediator(IMS_NULL)
 {
     // AUTH_SIP_DIGEST {
@@ -633,7 +633,7 @@ void Method::UpdateRemoteUserIds(IN ISipConnection* piSc)
     }
     else
     {
-        IMSList<AString> objLatestPaids = piSipMsg->GetHeaders(ISipHeader::P_ASSERTED_IDENTITY);
+        ImsList<AString> objLatestPaids = piSipMsg->GetHeaders(ISipHeader::P_ASSERTED_IDENTITY);
 
         if (!objLatestPaids.IsEmpty())
         {

@@ -68,7 +68,7 @@ public:
      *
      * @return List of pointer to IMediaDescriptor.
      */
-    virtual IMSList<IMediaDescriptor*> GetMediaDescriptors() const = 0;
+    virtual ImsList<IMediaDescriptor*> GetMediaDescriptors() const = 0;
 
     /**
      * @brief Returns a fictitious media that is only meant to track changes that are about

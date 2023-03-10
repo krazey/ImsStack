@@ -1111,7 +1111,7 @@ PROTECTED VIRTUAL IMS_RESULT SessionEx::HandleProvisionalResponse(IN ISipClientC
     }
 
     // INDEX_FOR_PROVISIONAL_RESPONSE_MESSAGE
-    IMSList<Message*> objResponses;
+    ImsList<Message*> objResponses;
 
     if ((GetState() == STATE_ESTABLISHING) || (GetState() == STATE_NEGOTIATING))
     {

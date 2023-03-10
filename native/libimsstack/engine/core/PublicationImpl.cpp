@@ -52,11 +52,11 @@ PRIVATE VIRTUAL void PublicationImpl::Destroy()
     delete this;
 }
 
-PRIVATE VIRTUAL IMSList<IMessage*> PublicationImpl::GetPreviousResponses(
+PRIVATE VIRTUAL ImsList<IMessage*> PublicationImpl::GetPreviousResponses(
         IN IMS_SINT32 nServiceMethod) const
 {
-    IMSList<IMessage*> objIMessages;
-    IMSList<Message*> objResponses = m_pPublication->GetPreviousResponses(nServiceMethod);
+    ImsList<IMessage*> objIMessages;
+    ImsList<Message*> objResponses = m_pPublication->GetPreviousResponses(nServiceMethod);
 
     for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
     {

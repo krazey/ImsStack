@@ -56,11 +56,11 @@ PRIVATE VIRTUAL void ReferenceImpl::Destroy()
     delete this;
 }
 
-PRIVATE VIRTUAL IMSList<IMessage*> ReferenceImpl::GetPreviousResponses(
+PRIVATE VIRTUAL ImsList<IMessage*> ReferenceImpl::GetPreviousResponses(
         IN IMS_SINT32 nServiceMethod) const
 {
-    IMSList<IMessage*> objIMessages;
-    IMSList<Message*> objResponses = m_pReference->GetPreviousResponses(nServiceMethod);
+    ImsList<IMessage*> objIMessages;
+    ImsList<Message*> objResponses = m_pReference->GetPreviousResponses(nServiceMethod);
 
     for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
     {

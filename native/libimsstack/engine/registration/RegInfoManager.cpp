@@ -26,8 +26,8 @@ __IMS_TRACE_TAG_REG__;
 PRIVATE
 RegInfoManager::RegInfoManager() :
         m_piLock(IMS_NULL),
-        m_objParsers(IMSList<RegInfoParser*>()),
-        m_objRegInfos(IMSMap<RegKey, RegInfo*>())
+        m_objParsers(ImsList<RegInfoParser*>()),
+        m_objRegInfos(ImsMap<RegKey, RegInfo*>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }

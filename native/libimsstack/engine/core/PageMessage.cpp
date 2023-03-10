@@ -59,7 +59,7 @@ const ByteArray& PageMessage::GetContent() const
     Ims::SetLastError(ImsError::NO_ERROR);
 
     ISipMessage* piSipMsg = pMessage->GetMessage();
-    IMSList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
+    ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
 
     if (objBodyParts.IsEmpty())
     {
@@ -96,7 +96,7 @@ AString PageMessage::GetContentType() const
     Ims::SetLastError(ImsError::NO_ERROR);
 
     ISipMessage* piSipMsg = pMessage->GetMessage();
-    IMSList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
+    ImsList<ISipMessageBodyPart*> objBodyParts = piSipMsg->GetBodyParts();
 
     if (objBodyParts.IsEmpty())
     {
