@@ -34,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * Implements ImsService to provide VoLTE/Emergency/RCS features.
@@ -240,5 +241,11 @@ public class ImsService extends android.telephony.ims.ImsService {
         if (isc != null) {
             isc.dump(pw);
         }
+    }
+
+    @Override
+    public Executor getExecutor() {
+        Executor executor = ImsServiceController.getInstance().getExecutor();
+        return (executor != null) ? executor : Runnable::run;
     }
 }

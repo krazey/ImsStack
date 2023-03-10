@@ -25,6 +25,7 @@ import com.android.imsstack.enabler.sipcontroller.impl.SipControllerAgent;
 import com.android.imsstack.imsservice.sipcontroller.ImsSipTransport;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -32,20 +33,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.concurrent.Executor;
-
 public class ImsServiceRecordTest {
     protected Context mMockContext;
     private ImsCallApp mImsCallApp;
     private ImsServiceRegistry mImsServiceRegistry;
-    private Executor mExecutor;
+    private MessageExecutor mExecutor;
     private ImsMmTelService mImsMmTelService;
     private TestImsServiceRecord mImsServiceRecord;
     private SipControllerAgent mSipControllerAgent;
     @Before
     public void setUp() {
         mMockContext = Mockito.mock(Context.class);
-        mExecutor = Mockito.mock(Executor.class);
+        mExecutor = Mockito.mock(MessageExecutor.class);
         mImsCallApp = Mockito.mock(ImsCallApp.class);
         mImsMmTelService = Mockito.mock(ImsMmTelService.class);
         mImsServiceRegistry = Mockito.mock(ImsServiceRegistry.class);
@@ -143,7 +142,7 @@ public class ImsServiceRecordTest {
         private final Object mLock = new Object();
         ImsSipTransport mSipTransport;
         int mPhoneId = -1;
-        TestImsServiceRecord(Context context, Executor executor, int phoneId) {
+        TestImsServiceRecord(Context context, MessageExecutor executor, int phoneId) {
             super(context, executor, phoneId);
             mPhoneId = phoneId;
         }

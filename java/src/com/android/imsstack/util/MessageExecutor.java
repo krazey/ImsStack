@@ -76,7 +76,7 @@ public class MessageExecutor extends Handler implements Executor {
         if (looper == null) {
             return Looper.getMainLooper();
         }
-
+        log("Looper: name=" + name + ", tid=" + thread.getThreadId());
         return looper;
     }
 }

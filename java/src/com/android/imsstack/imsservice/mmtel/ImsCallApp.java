@@ -23,6 +23,7 @@ import android.telephony.ims.ImsStreamMediaProfile;
 
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.mtc.MtcStateUtils;
+import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.imsservice.mmtel.base.ImsApp;
@@ -46,13 +47,13 @@ public class ImsCallApp extends ImsApp {
     private ImsUtImpl mUt = null;
     private boolean mInitCompleted = false;
 
-    public ImsCallApp(int phoneId, Context context, Executor executor,
-            ImsRegistrationTracker regTracker,
+    public ImsCallApp(ImsContext imsContext, ImsRegistrationTracker regTracker,
             IMmTelFeatureCapabilityListener featureCapabilityListener,
             IMmTelCallListener callListener) {
-        super(phoneId);
+        super(imsContext.getPhoneId());
 
-        mCallContext = new ImsCallContext(context, executor, this);
+        mCallContext = new ImsCallContext(imsContext.getContext(), imsContext.getExecutor(),
+                imsContext.getLooper(), this);
         mRegTracker = regTracker;
 
         mFeatureManager = new ImsFeatureManager(mCallContext, featureCapabilityListener);
@@ -81,7 +82,6 @@ public class ImsCallApp extends ImsApp {
         mRegTracker = regTracker;
         mFeatureManager = featureManager;
         mCallManager = callManager;
-
         mInitCompleted = true;
     }
 
