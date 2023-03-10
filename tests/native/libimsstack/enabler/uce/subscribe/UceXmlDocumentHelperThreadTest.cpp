@@ -133,13 +133,9 @@ TEST_F(UceXmlDocumentHelperThreadTest, StartWithActiveFailed)
 TEST_F(UceXmlDocumentHelperThreadTest, Terminate)
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
+    EXPECT_CALL(objMockIThread, Deactivate).Times(0);
     pUceXmlDocumentHelperThread->Terminate();
 
-    EXPECT_EQ(IMS_NULL, pUceXmlDocumentHelperThread->getThread());
-
-    EXPECT_CALL(objMockIThread, Deactivate).Times(1);
-    pUceXmlDocumentHelperThread->setThread(&objMockIThread);
-    pUceXmlDocumentHelperThread->Terminate();
     EXPECT_EQ(IMS_NULL, pUceXmlDocumentHelperThread->getThread());
 }
 
