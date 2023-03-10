@@ -32,6 +32,7 @@ public:
             bRttSupported(IMS_FALSE),
             bCarrierCrossSimImsAvailable(IMS_FALSE),
             bCarrierVolteTtySupported(IMS_FALSE),
+            bSupportsCallComposer(IMS_FALSE),
             bImsSingleRegistrationRequired(IMS_FALSE),
             bKeepPdnUpInNoVops(IMS_FALSE),
             bSipOverIpsecEnabled(IMS_FALSE)  // default - IMS_TRUE
@@ -67,6 +68,7 @@ public:
             objImsPdnEnabledInNoVopsSupport(ImsVector<IMS_SINT32>()),
             objIpsecAuthenticationAlgorithms(ImsVector<IMS_SINT32>()),
             objIpsecEncryptionAlgorithms(ImsVector<IMS_SINT32>()),
+            objCapabilityTypeCallComposer(ImsVector<IMS_SINT32>()),
             objSupportedRats(ImsVector<IMS_SINT32>()),
             objSmsOverImsSupportedRats(ImsVector<IMS_SINT32>()),
             objEmergencyOverImsSupportedRats(ImsVector<IMS_SINT32>()),
@@ -92,6 +94,7 @@ public:
     IMS_BOOL bRttSupported;
     IMS_BOOL bCarrierCrossSimImsAvailable;
     IMS_BOOL bCarrierVolteTtySupported;
+    IMS_BOOL bSupportsCallComposer;
     /// aosp_carrier_config - ims.
     IMS_BOOL bImsSingleRegistrationRequired;
     IMS_BOOL bKeepPdnUpInNoVops;
@@ -143,6 +146,7 @@ public:
     ImsVector<IMS_SINT32> objImsPdnEnabledInNoVopsSupport;
     ImsVector<IMS_SINT32> objIpsecAuthenticationAlgorithms;
     ImsVector<IMS_SINT32> objIpsecEncryptionAlgorithms;
+    ImsVector<IMS_SINT32> objCapabilityTypeCallComposer;
     ImsVector<IMS_SINT32> objSupportedRats;
     /// aosp_carrier_config - imssms.
     ImsVector<IMS_SINT32> objSmsOverImsSupportedRats;
