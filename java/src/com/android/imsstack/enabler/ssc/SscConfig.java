@@ -182,6 +182,10 @@ public final class SscConfig {
         return getInt(slotId, CarrierConfigManager.KEY_GBA_MODE_INT);
     }
 
+    static boolean isCrossSimFeatureEnabled(int slotId) {
+        return getBoolean(slotId, CarrierConfigManager.KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL);
+    }
+
     static boolean isImsRegistrationRequired(int slotId) {
         return getBoolean(slotId, CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL);
     }
