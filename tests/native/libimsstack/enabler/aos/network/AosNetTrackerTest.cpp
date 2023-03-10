@@ -47,7 +47,7 @@ public:
     MockINetworkWatcher m_objMockINetworkWatcher;
     MockIWifiWatcher m_objMockIWifiWatcher;
 
-    IMSVector<IMS_SINT32> objRats;
+    ImsVector<IMS_SINT32> objRats;
 
 protected:
     virtual void SetUp() override

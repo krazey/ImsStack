@@ -28,7 +28,7 @@ public:
     MOCK_METHOD(void, RegistrationControl_TriggerFullNetworkRegistration,
             (IN IMS_SINT32 nSipCode, IN const AString& strTarget), (override));
     MOCK_METHOD(void, RegistrationControl_NotifyCapabilitiesChanged,
-            ((IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)), (override));
+            ((IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities)), (override));
     MOCK_METHOD(void, RegistrationControl_ControlRegistration,
             (IN AosRegRequestType eType, IN AosPcscfOrder eOrder, IN AosControlCause eCause),
             (override));

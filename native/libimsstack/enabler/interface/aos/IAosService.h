@@ -56,7 +56,7 @@ public:
     virtual void TriggerFullNetworkRegistration(
             IN IMS_SINT32 nSipCode, IN const AString& sipReason) = 0;
     virtual void NotifyCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
     virtual void ControlRegistration(
             IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause) = 0;
 
@@ -95,24 +95,24 @@ public:
      *
      * @param eNetworkType The radio access technology.
      * @param nFeatureTagBits Type of bits an integer.
-     * @param objFeatureTags Type of IMSList<AString>&.
+     * @param objFeatureTags Type of ImsList<AString>&.
      * @see class ImsAosFeature
      * @see class AosNetworkType
      */
     virtual IMS_BOOL NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-            IN const IMSList<AString>& objFeatureTags) = 0;
+            IN const ImsList<AString>& objFeatureTags) = 0;
 
     /**
      * Notify the application that the device is connected to the IMS network.
      *
      * @param eNetworkType The radio access technology.
      * @param nFeatureTagBits Type of bits an integer.
-     * @param objFeatureTags Type of IMSList<AString>&.
+     * @param objFeatureTags Type of ImsList<AString>&.
      * @see class ImsAosFeature
      * @see class NetworkType
      */
     virtual IMS_BOOL NotifyRegistering(IN AosNetworkType eNetworkType,
-            IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags) = 0;
+            IN IMS_UINT32 nFeatureTagBits, IN const ImsList<AString>& objFeatureTags) = 0;
 
     /**
      * Notify the application that the device is disconnected from the IMS network.
@@ -141,10 +141,10 @@ public:
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
      * this device's {@link Uri}s during conference calling.
      *
-     * @param objUris is type of const IMSList<AString>&, the network provisioned
+     * @param objUris is type of const ImsList<AString>&, the network provisioned
      * public user identities.
      */
-    virtual IMS_BOOL NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) = 0;
+    virtual IMS_BOOL NotifyAssociatedUriChanged(IN const ImsList<AString>& objUris) = 0;
 
     /**
      * This method is called when capability update fails after
@@ -198,9 +198,9 @@ public:
     /**
      * Returns capabilities.
      *
-     * @return Returns capabilities of type IMSMap<IMS_UINT32, IMS_UINT32>&.
+     * @return Returns capabilities of type ImsMap<IMS_UINT32, IMS_UINT32>&.
      */
-    virtual IMSMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() = 0;
+    virtual ImsMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() = 0;
 
     /**
      * Gets the capabilities for the network.

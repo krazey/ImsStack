@@ -42,7 +42,7 @@ public:
     IMS_SINT32 GetMtu() override;
     const IpAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0) override;
     const AStringArray& GetPcscfAddress(IN IMS_SINT32 nIpVersion = 0) override;
-    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IpAddress>& objIps,
+    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT ImsList<IpAddress>& objIps,
             IN IMS_SINT32 nIpVersion = 0) override;
     const AString& GetIfaceName() override;
     IMS_BOOL IsEpdgEnabled() override;
@@ -95,7 +95,7 @@ protected:
 
     IMS_BOOL m_bActivationRequested;
 
-    IMSList<IAosConnectionListener*> m_objListeners;
+    ImsList<IAosConnectionListener*> m_objListeners;
 
     AString m_strTag;
 

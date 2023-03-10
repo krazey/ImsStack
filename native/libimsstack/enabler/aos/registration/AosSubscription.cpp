@@ -195,14 +195,14 @@ PUBLIC VIRTUAL void AosSubscription::SetRetryTimer(IN IMS_BOOL bCheckRetryAfter)
             GET_N_CONFIG(m_piContext->GetSlotId())->IsRegRetryIntervalsUsedForSub();
     if (bUseRegsitrationRetryIntervals == IMS_TRUE)
     {
-        IMSVector<IMS_SINT32>& objRetryIntervals =
+        ImsVector<IMS_SINT32>& objRetryIntervals =
                 GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRetryIntervals();
 
         StartTimer(static_cast<IMS_UINT32>(GetNextThrottlingTime(objRetryIntervals)));
     }
     else
     {
-        StartTimer(static_cast<IMS_UINT32>(GetNextThrottlingTime(IMSVector<IMS_SINT32>())));
+        StartTimer(static_cast<IMS_UINT32>(GetNextThrottlingTime(ImsVector<IMS_SINT32>())));
     }
 }
 
@@ -418,7 +418,7 @@ void AosSubscription::SetRadioWaiting(IN IMS_BOOL bWaiting)
 }
 
 PROTECTED
-void AosSubscription::PrintRegInfo(IN IMSList<IRegInfoContact*>& objRegInfo)
+void AosSubscription::PrintRegInfo(IN ImsList<IRegInfoContact*>& objRegInfo)
 {
     AString strLog;
     for (IMS_UINT32 i = 0; i < objRegInfo.GetSize(); i++)
@@ -539,7 +539,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT32 
 
     if (nRetryInfoSubTerminated > 0)
     {
-        IMSVector<IMS_SINT32>& objErrSubTerminated =
+        ImsVector<IMS_SINT32>& objErrSubTerminated =
                 GET_N_CONFIG(m_piContext->GetSlotId())->GetSubErrorSubTerminated();
 
         IMS_UINT32 nSize = objErrSubTerminated.GetSize();
@@ -576,7 +576,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRetryCountSubErrorRegRequired();
     if (nRetryInfoRegRequired > 0)
     {
-        IMSVector<IMS_SINT32>& objErrRegRequired =
+        ImsVector<IMS_SINT32>& objErrRegRequired =
                 GET_N_CONFIG(m_piContext->GetSlotId())->GetSubErrorRegRequired();
         IMS_UINT32 nSize = objErrRegRequired.GetSize();
         for (IMS_UINT32 i = 0; i < nSize; i++)
@@ -608,7 +608,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(
 PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequired(
         IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed)
 {
-    IMSVector<IMS_SINT32>& objErrRegRequiredWithNextPcscf =
+    ImsVector<IMS_SINT32>& objErrRegRequiredWithNextPcscf =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetSubErrorRegRequiredWithNextPcscf();
     IMS_UINT32 nSize = objErrRegRequiredWithNextPcscf.GetSize();
     if (nSize > 0)
@@ -637,7 +637,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32>& objErrRegRequiredInWifi =
+    ImsVector<IMS_SINT32>& objErrRegRequiredInWifi =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetVowifiSubErrorRegRequired();
     IMS_UINT32 nSize = objErrRegRequiredInWifi.GetSize();
     if (nSize > 0)
@@ -669,7 +669,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
 
 PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 nStatusCode)
 {
-    IMSVector<IMS_SINT32>& objErrResubStopped =
+    ImsVector<IMS_SINT32>& objErrResubStopped =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetSubErrorStoppingResub();
     IMS_UINT32 nSize = objErrResubStopped.GetSize();
     if (nSize > 0)
@@ -769,7 +769,7 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsWfcErrorCodeByMissing911Address(IN IM
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32>& objErrDisplayRequired =
+    ImsVector<IMS_SINT32>& objErrDisplayRequired =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetWfcSubErrorByMissing911Address();
     for (IMS_UINT32 i = 0; i < objErrDisplayRequired.GetSize(); i++)
     {
@@ -892,7 +892,7 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetRetryAfter()
 }
 
 PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetNextThrottlingTime(
-        IN const IMSVector<IMS_SINT32>& objInterval)
+        IN const ImsVector<IMS_SINT32>& objInterval)
 {
     IMS_UINT32 nMaxCount = objInterval.GetSize();
 
@@ -920,7 +920,7 @@ PROTECTED VIRTUAL IMS_SINT32 AosSubscription::GetNextThrottlingTime(
         nTimeIndex = m_nThrottlingCount;
     }
 
-    IMSVector<IMS_SINT32>& objRetryRandomIntervals =
+    ImsVector<IMS_SINT32>& objRetryRandomIntervals =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRegRandomRetryIntervals();
 
     nThrotllingTime = (objInterval.GetAt(nTimeIndex - 1) * 1000);
@@ -960,7 +960,7 @@ PROTECTED VIRTUAL void AosSubscription::SetRefreshPolicy()
 }
 
 PROTECTED VIRTUAL IRegInfoContact* AosSubscription::GetRegInfoContact(
-        IN const IMSList<IRegInfoContact*>& objContact)
+        IN const ImsList<IRegInfoContact*>& objContact)
 {
     IRegInfoContact* piRegInfoContact = IMS_NULL;
 
@@ -1078,7 +1078,7 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
     {
         IRegInfoRegistration* piRegInfo = IMS_NULL;
         IRegInfoContact* piRegInfoContact = IMS_NULL;
-        IMSList<IRegInfoContact*> objContact;
+        ImsList<IRegInfoContact*> objContact;
 
         m_nAorState = IRegInfoContact::STATE_TERMINATED;
 

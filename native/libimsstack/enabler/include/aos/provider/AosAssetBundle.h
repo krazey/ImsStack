@@ -33,9 +33,9 @@ public:
             nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached(0),
             nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached(0),
             nExtraRegErrPolicy(CarrierConfig::Assets::ERROR_POLICY_NOT_SPECIFIED),
-            objExtraRegErrCode(IMSVector<IMS_SINT32>()),
-            objExtraReregErrCode(IMSVector<IMS_SINT32>()),
-            objExtraRegErrWaitTimeSec(IMSVector<IMS_SINT32>())
+            objExtraRegErrCode(ImsVector<IMS_SINT32>()),
+            objExtraReregErrCode(ImsVector<IMS_SINT32>()),
+            objExtraRegErrWaitTimeSec(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -51,9 +51,9 @@ public:
     IMS_SINT32 nExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached;
     IMS_SINT32 nExtraRegErrPcscfsRepeatedCntForLteCombinedAttached;
     IMS_SINT32 nExtraRegErrPolicy;
-    IMSVector<IMS_SINT32> objExtraRegErrCode;
-    IMSVector<IMS_SINT32> objExtraReregErrCode;
-    IMSVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
+    ImsVector<IMS_SINT32> objExtraRegErrCode;
+    ImsVector<IMS_SINT32> objExtraReregErrCode;
+    ImsVector<IMS_SINT32> objExtraRegErrWaitTimeSec;
 };
 
 struct AosNotifyTerminatedForInitRegBundle
@@ -61,8 +61,8 @@ struct AosNotifyTerminatedForInitRegBundle
 public:
     AosNotifyTerminatedForInitRegBundle() :
             nWaitTimeForInitRegOnTerminatedState(0),
-            objEventForInitRegOnTerminatedState(IMSVector<IMS_SINT32>()),
-            objEventWithWtForInitRegOnTerminatedState(IMSVector<IMS_SINT32>())
+            objEventForInitRegOnTerminatedState(ImsVector<IMS_SINT32>()),
+            objEventWithWtForInitRegOnTerminatedState(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -72,8 +72,8 @@ public:
 
 public:
     IMS_SINT32 nWaitTimeForInitRegOnTerminatedState;
-    IMSVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
-    IMSVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
+    ImsVector<IMS_SINT32> objEventForInitRegOnTerminatedState;
+    ImsVector<IMS_SINT32> objEventWithWtForInitRegOnTerminatedState;
 };
 
 struct AosRegErrCodeWithRaTimeBundle
@@ -81,8 +81,8 @@ struct AosRegErrCodeWithRaTimeBundle
 public:
     AosRegErrCodeWithRaTimeBundle() :
             bRegErrCodeWithRaTimeOnlyDefined(IMS_FALSE),
-            objRegErrCodeWithRaTime(IMSVector<IMS_SINT32>()),
-            objReregErrCodeWithRaTime(IMSVector<IMS_SINT32>())
+            objRegErrCodeWithRaTime(ImsVector<IMS_SINT32>()),
+            objReregErrCodeWithRaTime(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -91,8 +91,8 @@ public:
 
 public:
     IMS_BOOL bRegErrCodeWithRaTimeOnlyDefined;
-    IMSVector<IMS_SINT32> objRegErrCodeWithRaTime;
-    IMSVector<IMS_SINT32> objReregErrCodeWithRaTime;
+    ImsVector<IMS_SINT32> objRegErrCodeWithRaTime;
+    ImsVector<IMS_SINT32> objReregErrCodeWithRaTime;
 };
 
 struct AosRegRetryIntervalBundle
@@ -100,8 +100,8 @@ struct AosRegRetryIntervalBundle
 public:
     AosRegRetryIntervalBundle() :
             bUseRegRetryIntervalForSub(IMS_TRUE),
-            objRegRetryRandomUpperValueSec(IMSVector<IMS_SINT32>()),
-            objRegRetryIntervalSec(IMSVector<IMS_SINT32>())
+            objRegRetryRandomUpperValueSec(ImsVector<IMS_SINT32>()),
+            objRegRetryIntervalSec(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -110,8 +110,8 @@ public:
 
 public:
     IMS_BOOL bUseRegRetryIntervalForSub;
-    IMSVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
-    IMSVector<IMS_SINT32> objRegRetryIntervalSec;
+    ImsVector<IMS_SINT32> objRegRetryRandomUpperValueSec;
+    ImsVector<IMS_SINT32> objRegRetryIntervalSec;
 };
 
 struct AosSubErrCodeForInitRegBundle
@@ -119,7 +119,7 @@ struct AosSubErrCodeForInitRegBundle
 public:
     AosSubErrCodeForInitRegBundle() :
             nSubErrCodeForInitRegWithRetryMaxCnt(0),
-            objSubErrCodeForInitReg(IMSVector<IMS_SINT32>())
+            objSubErrCodeForInitReg(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -128,7 +128,7 @@ public:
 
 public:
     IMS_SINT32 nSubErrCodeForInitRegWithRetryMaxCnt;
-    IMSVector<IMS_SINT32> objSubErrCodeForInitReg;
+    ImsVector<IMS_SINT32> objSubErrCodeForInitReg;
 };
 
 struct AosSubErrCodeForTerminatedBundle
@@ -136,7 +136,7 @@ struct AosSubErrCodeForTerminatedBundle
 public:
     AosSubErrCodeForTerminatedBundle() :
             nSubErrCodeForTerminatedRetryMaxCnt(0),
-            objSubErrCodeForTerminated(IMSVector<IMS_SINT32>())
+            objSubErrCodeForTerminated(ImsVector<IMS_SINT32>())
     {
     }
 
@@ -146,7 +146,7 @@ public:
 
 public:
     IMS_SINT32 nSubErrCodeForTerminatedRetryMaxCnt;
-    IMSVector<IMS_SINT32> objSubErrCodeForTerminated;
+    ImsVector<IMS_SINT32> objSubErrCodeForTerminated;
 };
 
 #endif  // AOS_ASSET_BUNDLE_H_

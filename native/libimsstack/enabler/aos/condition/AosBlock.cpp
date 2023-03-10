@@ -26,7 +26,7 @@ PUBLIC
 AosBlock::AosBlock(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
         BLOCK_ENABLED(1),
-        objServiceBlockReasons(IMSList<IMS_UINT32>())
+        objServiceBlockReasons(ImsList<IMS_UINT32>())
 {
     m_strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
 
@@ -209,7 +209,7 @@ PUBLIC VIRTUAL IMS_BOOL AosBlock::PrintBlockReasons()
 }
 
 PUBLIC VIRTUAL void AosBlock::GetBlockReasons(
-        OUT IMSList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType /* = SERVICE_WHOLE*/)
+        OUT ImsList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType /* = SERVICE_WHOLE*/)
 {
     objReasons.Clear();
 

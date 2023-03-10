@@ -105,7 +105,7 @@ public:
     void SetMonitor(IN IImsAosMonitor* piMonitor) override;
     IMS_BOOL SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) override;
     void UpdateFeature(IN IMS_UINT32 nFeatures) override;
-    void UpdateFeature(IN IMSList<ImsAosFeatureTag*>& objFeatureTag) override;
+    void UpdateFeature(IN ImsList<ImsAosFeatureTag*>& objFeatureTag) override;
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
@@ -126,7 +126,7 @@ public:
     inline void RegistrationControl_TriggerFullNetworkRegistration(
             IN IMS_SINT32 /*nSipCode*/, IN const AString& /*strTarget*/) override{};
     void RegistrationControl_NotifyCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override;
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override;
 
     // IAosServiceSettingListener
     void ServiceSetting_RoamingPreferredVoiceNetworkChanged(
@@ -210,9 +210,9 @@ protected:
 
     void BackupAllBlocks();
     void BackupBlocks(
-            IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks);
+            IN ImsList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks);
     void RestoreBlocks(
-            IN IMSList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks);
+            IN ImsList<IMS_UINT32>& objHoldingBlocksPolicy, IN_OUT IMS_UINT32& nHoldingBlocks);
     IMS_BOOL HoldBlockForInvalidNetwork(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded);
     void ReevaluateBlocks();
     IMS_BOOL UpdateIpcan();
@@ -230,7 +230,7 @@ protected:
 
     virtual void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
     virtual void ProcessCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
     virtual void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState);
@@ -323,10 +323,10 @@ protected:
     IMS_BOOL m_bVopsIgnoredForVolteEnabled;
     IMS_BOOL m_bCombinedAttach;
 
-    IMSMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
-    IMSList<IMS_UINT32> m_objServiceFeatures;
-    IMSList<IMS_UINT32> m_objHoldingBlocksPolicyForMobile;
-    IMSList<IMS_UINT32> m_objHoldingBlocksPolicyForWifi;
+    ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
+    ImsList<IMS_UINT32> m_objServiceFeatures;
+    ImsList<IMS_UINT32> m_objHoldingBlocksPolicyForMobile;
+    ImsList<IMS_UINT32> m_objHoldingBlocksPolicyForWifi;
 
     IMS_BOOL m_bEpdgEnabled;
     IMS_BOOL m_bDataConnected;

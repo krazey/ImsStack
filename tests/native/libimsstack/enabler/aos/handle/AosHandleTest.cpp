@@ -483,7 +483,7 @@ protected:
 
     void ReportRegState() { m_pAosHandle->ReportRegState(); }
 
-    void ProcessCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    void ProcessCapabilitiesChanged(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
     {
         m_pAosHandle->ProcessCapabilitiesChanged(objNewCapabilities);
     }
@@ -533,9 +533,9 @@ protected:
         m_pAosHandle->m_piWifiWatcher = piWifiWatcher;
     }
 
-    IMSMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandle->m_objCapabilities; }
+    ImsMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandle->m_objCapabilities; }
 
-    void SetCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
+    void SetCapabilities(IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
     {
         m_pAosHandle->m_objCapabilities = objNewCapabilities;
     }
@@ -1679,7 +1679,7 @@ TEST_F(AosHandleTest, IsCapabilityExisted_Test)
 
 TEST_F(AosHandleTest, IsCapabilityExistedForNetworkType_Test)
 {
-    IMSMap<IMS_UINT32, IMS_UINT32> objCapabilities;
+    ImsMap<IMS_UINT32, IMS_UINT32> objCapabilities;
     objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
@@ -4611,7 +4611,7 @@ TEST_F(AosHandleTest, UpdateFeature_Test)
 
 TEST_F(AosHandleTest, UpdateFeature_for_ImsAosFeatureTag_Test)
 {
-    IMSList<ImsAosFeatureTag*> objFeatureTag;
+    ImsList<ImsAosFeatureTag*> objFeatureTag;
     m_pAosHandle->UpdateFeature(objFeatureTag);
 }
 
@@ -4627,7 +4627,7 @@ TEST_F(AosHandleTest, ReevaluateUnavailableFeature_Test)
 
 TEST_F(AosHandleTest, ProcessCapabilitiesChanged_Test)
 {
-    ProcessCapabilitiesChanged(IMSMap<IMS_UINT32, IMS_UINT32>());
+    ProcessCapabilitiesChanged(ImsMap<IMS_UINT32, IMS_UINT32>());
 }
 
 TEST_F(AosHandleTest, ProcessNetworkChanged_Test)
@@ -4698,7 +4698,7 @@ TEST_F(AosHandleTest, Event_NotifyEvent_Test_Attach_Type)
 
 TEST_F(AosHandleTest, RegistrationControl_NotifyCapabilitiesChanged_Test)
 {
-    m_pAosHandle->RegistrationControl_NotifyCapabilitiesChanged(IMSMap<IMS_UINT32, IMS_UINT32>());
+    m_pAosHandle->RegistrationControl_NotifyCapabilitiesChanged(ImsMap<IMS_UINT32, IMS_UINT32>());
 }
 
 TEST_F(AosHandleTest, ServiceSetting_RoamingPreferredVoiceNetworkChanged_Test)

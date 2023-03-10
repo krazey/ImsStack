@@ -139,7 +139,7 @@ PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsSinglePcoScheme()
         return IMS_FALSE;
     }
 
-    const IMSVector<IMS_SINT32>& objMethods = piSubsConfig->GetPcscfDiscoveryMethods();
+    const ImsVector<IMS_SINT32>& objMethods = piSubsConfig->GetPcscfDiscoveryMethods();
 
     if (objMethods.IsEmpty())
     {
@@ -173,7 +173,7 @@ PUBLIC VIRTUAL const AStringArray& AosPcscf::GetPcscfs()
     return m_objCurrAddresses;
 }
 
-PUBLIC VIRTUAL const IMSList<IMS_SINT32>& AosPcscf::GetPcscfsPorts()
+PUBLIC VIRTUAL const ImsList<IMS_SINT32>& AosPcscf::GetPcscfsPorts()
 {
     m_objCurrPorts.Clear();
 
@@ -190,7 +190,7 @@ PUBLIC VIRTUAL const IMSList<IMS_SINT32>& AosPcscf::GetPcscfsPorts()
 }
 
 PUBLIC VIRTUAL void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
-        IN IMSList<IMS_SINT32> objPorts /* = IMSList<IMS_SINT32>() */)
+        IN ImsList<IMS_SINT32> objPorts /* = ImsList<IMS_SINT32>() */)
 {
     ClearPcscfList();
 
@@ -724,7 +724,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetNextDiscoveryMethod(OUT IMS_SINT32& nMet
         return IMS_FALSE;
     }
 
-    const IMSVector<IMS_SINT32>& objMethods = piSubsConfig->GetPcscfDiscoveryMethods();
+    const ImsVector<IMS_SINT32>& objMethods = piSubsConfig->GetPcscfDiscoveryMethods();
     if (objMethods.IsEmpty())
     {
         return IMS_FALSE;
@@ -799,7 +799,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
         return IMS_FALSE;
     }
 
-    const IMSVector<ServerAddress*>& objHosts = piSubsConfig->GetPcscfAddresses();
+    const ImsVector<ServerAddress*>& objHosts = piSubsConfig->GetPcscfAddresses();
 
     if (objHosts.IsEmpty())
     {
@@ -856,7 +856,7 @@ PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
 PROTECTED VIRTUAL IMS_BOOL AosPcscf::ProcessDnsQuery(
         IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion)
 {
-    IMSList<IpAddress> objIpas;
+    ImsList<IpAddress> objIpas;
 
     A_IMS_TRACE_D(APPPROFILE, "DNS query :: host (%s)", strHost.GetStr(), 0, 0);
     if (m_piAppContext->GetConnection()->GetHostByName(strHost, objIpas, nIpVersion) == -1)

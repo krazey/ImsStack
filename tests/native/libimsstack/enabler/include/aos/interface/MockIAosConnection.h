@@ -36,7 +36,7 @@ public:
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (IN IMS_SINT32 nIpVersion), (override));
     MOCK_METHOD(const AStringArray&, GetPcscfAddress, (IN IMS_SINT32 nIpVersion), (override));
     MOCK_METHOD(IMS_SINT32, GetHostByName,
-            (IN const AString& strHostName, OUT IMSList<IpAddress>& objIps,
+            (IN const AString& strHostName, OUT ImsList<IpAddress>& objIps,
                     IN IMS_SINT32 nIpVersion),
             (override));
     MOCK_METHOD(const AString&, GetIfaceName, (), (override));

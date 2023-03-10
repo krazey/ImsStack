@@ -138,43 +138,43 @@ public:
     IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForLteCombinedAttached() const override;
     IMS_SINT32 GetExtraRegErrPcscfsRepeatedCntForEps5gsOnlyAttached() const override;
 
-    IMSVector<IMS_SINT32>& GetRegRetryIntervals() override;
-    IMSVector<IMS_SINT32>& GetRegRandomRetryIntervals() override;
-    IMSVector<IMS_SINT32>& GetIpsecAuthenticationAlgorithms() override;
-    IMSVector<IMS_SINT32>& GetIpsecEncryptionAlgorithms() override;
+    ImsVector<IMS_SINT32>& GetRegRetryIntervals() override;
+    ImsVector<IMS_SINT32>& GetRegRandomRetryIntervals() override;
+    ImsVector<IMS_SINT32>& GetIpsecAuthenticationAlgorithms() override;
+    ImsVector<IMS_SINT32>& GetIpsecEncryptionAlgorithms() override;
 
     IMS_UINT32 GetNotifyEventForInitialRegistration() const override;
     IMS_SINT32 GetNotifyWaitTime() const override;
     IMS_UINT32 GetNotifyEventForInitialRegWithWaitTime() const override;
 
-    IMSVector<IMS_SINT32>& GetSubErrorRegRequired() override;
+    ImsVector<IMS_SINT32>& GetSubErrorRegRequired() override;
     IMS_SINT32 GetRetryCountSubErrorRegRequired() const override;
-    IMSVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() override;
-    IMSVector<IMS_SINT32>& GetWfcSubErrorByMissing911Address() override;
-    IMSVector<IMS_SINT32>& GetSubErrorSubTerminated() override;
+    ImsVector<IMS_SINT32>& GetSubErrorRegRequiredWithNextPcscf() override;
+    ImsVector<IMS_SINT32>& GetWfcSubErrorByMissing911Address() override;
+    ImsVector<IMS_SINT32>& GetSubErrorSubTerminated() override;
     IMS_SINT32 GetRetryCountSubErrorSubTerminated() const override;
-    IMSVector<IMS_SINT32>& GetSubErrorStoppingResub() override;
-    IMSVector<IMS_SINT32>& GetVowifiSubErrorRegRequired() override;
-    IMSVector<IMS_SINT32>& GetImsIdentityPriority() override;
-    IMSVector<IMS_SINT32>& GetPcscfDiscoveryMethod() override;
-    IMSVector<IMS_SINT32>& GetUpdateRegistrationWithRatChange() override;
-    IMSVector<IMS_SINT32>& GetSupportedRats() override;
-    IMSVector<IMS_SINT32>& GetSupportedRoamingRats() override;
-    IMSVector<IMS_SINT32>& GetSmsOverImsSupportedRats() override;
-    IMSVector<IMS_SINT32>& GetExtraRegErrCode() override;
-    IMSVector<IMS_SINT32>& GetExtraReregErrCode() override;
-    IMSVector<IMS_SINT32>& GetExtraRegErrWaitTime() override;
-    IMSVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf() override;
-    IMSVector<IMS_SINT32>& GetRegPermanentErrCode() override;
-    IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount() override;
-    IMSVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() override;
-    IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() override;
-    IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() override;
-    IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() override;
-    IMSVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() override;
-    IMSVector<IMS_SINT32>& GetReregErrCodeForCallEnd() override;
-    IMSVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() override;
-    IMSVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() override;
+    ImsVector<IMS_SINT32>& GetSubErrorStoppingResub() override;
+    ImsVector<IMS_SINT32>& GetVowifiSubErrorRegRequired() override;
+    ImsVector<IMS_SINT32>& GetImsIdentityPriority() override;
+    ImsVector<IMS_SINT32>& GetPcscfDiscoveryMethod() override;
+    ImsVector<IMS_SINT32>& GetUpdateRegistrationWithRatChange() override;
+    ImsVector<IMS_SINT32>& GetSupportedRats() override;
+    ImsVector<IMS_SINT32>& GetSupportedRoamingRats() override;
+    ImsVector<IMS_SINT32>& GetSmsOverImsSupportedRats() override;
+    ImsVector<IMS_SINT32>& GetExtraRegErrCode() override;
+    ImsVector<IMS_SINT32>& GetExtraReregErrCode() override;
+    ImsVector<IMS_SINT32>& GetExtraRegErrWaitTime() override;
+    ImsVector<IMS_SINT32>& GetReregRetryErrCodeForInitRegWithSamePcscf() override;
+    ImsVector<IMS_SINT32>& GetRegPermanentErrCode() override;
+    ImsVector<IMS_SINT32>& GetRegPermanentErrMaxCount() override;
+    ImsVector<IMS_SINT32>& GetRegErrCodeWithoutIpsec() override;
+    ImsVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() override;
+    ImsVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() override;
+    ImsVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() override;
+    ImsVector<IMS_SINT32>& GetRegErrCodeForPcscfDiscovery() override;
+    ImsVector<IMS_SINT32>& GetReregErrCodeForCallEnd() override;
+    ImsVector<IMS_SINT32>& GetReregErrCodeForInitRegWithAvailablePcscf() override;
+    ImsVector<IMS_SINT32>& GetReregErrCodeForImsPdnReactivation() override;
 
 private:
     friend class AosBuildDirector;
@@ -205,7 +205,7 @@ private:
     IMS_UINT32 m_nEventForInitRegOnTerminatedState;
     IMS_UINT32 m_nEventToFollowWtForInitRegOnTerminatedState;
 
-    IMSList<IAosNConfigurationListener*> m_objListeners;
+    ImsList<IAosNConfigurationListener*> m_objListeners;
 
     AString m_strLogTag;
 

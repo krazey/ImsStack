@@ -486,7 +486,7 @@ void AosNetTracker::InitConfig()
 }
 
 PRIVATE
-void AosNetTracker::InitCnxPolicy(IN IMSVector<IMS_SINT32>& objRats)
+void AosNetTracker::InitCnxPolicy(IN ImsVector<IMS_SINT32>& objRats)
 {
     for (int i = 0; i < objRats.GetSize(); i++)
     {
@@ -510,7 +510,7 @@ void AosNetTracker::InitCnxPolicy(IN IMSVector<IMS_SINT32>& objRats)
 }
 
 PRIVATE
-void AosNetTracker::InitRoamingCnxPolicy(IN IMSVector<IMS_SINT32>& objRoamingRats)
+void AosNetTracker::InitRoamingCnxPolicy(IN ImsVector<IMS_SINT32>& objRoamingRats)
 {
     for (int i = 0; i < objRoamingRats.GetSize(); i++)
     {

@@ -64,7 +64,7 @@ protected:
     void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked) override;
     void ProcessBlockChanged() override;
     void ProcessCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities) override;
+            IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities) override;
     void ProcessNetworkChanged() override;
     void ProcessVopsStateChanged(
             IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE) override;

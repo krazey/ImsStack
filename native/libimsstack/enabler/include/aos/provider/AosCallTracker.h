@@ -52,13 +52,13 @@ public:
 
 private:
     template <typename T>
-    void AddOrUpdateCall(OUT IMSMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue);
+    void AddOrUpdateCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue);
     template <typename T>
-    void RemoveCall(OUT IMSMap<CallKey, T>& objCalls, IN CallKey eKey);
+    void RemoveCall(OUT ImsMap<CallKey, T>& objCalls, IN CallKey eKey);
 
     CallState GetConvertedState(IN IMtcCall::State eState);
-    CallState GetTotalState(IN IMSMap<CallKey, CallState>& objCalls);
-    IMS_UINT32 GetTotalCallType(IN IMSMap<CallKey, CallType>& objCallTypes);
+    CallState GetTotalState(IN ImsMap<CallKey, CallState>& objCalls);
+    IMS_UINT32 GetTotalCallType(IN ImsMap<CallKey, CallType>& objCallTypes);
     IMS_BOOL IsExistCallType(IN CallType eCallType) const;
 
     CallState GetState(IN IMS_UINT32 nType) const;
@@ -97,11 +97,11 @@ private:
     IMS_UINT32 m_nNormalCallType;
     CallState m_eActiveCsState;
 
-    IMSMap<CallKey, CallState> m_objNormalCalls;
-    IMSMap<CallKey, CallState> m_objEmergencyCalls;
-    IMSMap<CallKey, CallType> m_objNormalCallTypes;
+    ImsMap<CallKey, CallState> m_objNormalCalls;
+    ImsMap<CallKey, CallState> m_objEmergencyCalls;
+    ImsMap<CallKey, CallType> m_objNormalCallTypes;
 
-    IMSList<IAosCallTrackerListener*> m_objListeners;
+    ImsList<IAosCallTrackerListener*> m_objListeners;
 
     AString m_strTag;
 

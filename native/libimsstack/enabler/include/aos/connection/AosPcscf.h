@@ -172,9 +172,9 @@ public:
     IMS_BOOL IsSinglePcoScheme() override;
 
     const AStringArray& GetPcscfs() override;
-    const IMSList<IMS_SINT32>& GetPcscfsPorts() override;
+    const ImsList<IMS_SINT32>& GetPcscfsPorts() override;
     void UpdatePcscfs(IN const AStringArray& objPcscfs,
-            IN IMSList<IMS_SINT32> objPorts = IMSList<IMS_SINT32>()) override;
+            IN ImsList<IMS_SINT32> objPorts = ImsList<IMS_SINT32>()) override;
 
     IMS_BOOL HasPcscf(IN IMS_SINT32 nIndex) override;
     IMS_UINT32 GetPcscfCount() override;
@@ -283,10 +283,10 @@ protected:
     IMS_UINT32 m_nDiscoveryMethodIndex;
 
     AStringArray m_objCurrAddresses;
-    IMSList<IMS_SINT32> m_objCurrPorts;
+    ImsList<IMS_SINT32> m_objCurrPorts;
 
-    IMSList<Pcscf*> m_objPcscfList;
-    IMSList<RetryHost*> m_objRetryHostList;
+    ImsList<Pcscf*> m_objPcscfList;
+    ImsList<RetryHost*> m_objRetryHostList;
 
     AString m_strTag;
 

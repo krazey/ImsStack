@@ -41,8 +41,8 @@ private:
     IMS_SINT32 m_nSlotId;
     IAosBuilder* m_piBuilder;
 
-    IMSMap<IMS_SINT32, IAosConnection*> m_objConnection;
-    IMSMap<IMS_SINT32, IAosNetTracker*> m_objNetTracker;
-    IMSMap<AString, IAosAppContext*> m_objAppContext;
+    ImsMap<IMS_SINT32, IAosConnection*> m_objConnection;
+    ImsMap<IMS_SINT32, IAosNetTracker*> m_objNetTracker;
+    ImsMap<AString, IAosAppContext*> m_objAppContext;
 };
 #endif  // AOS_BUILD_DIRECTOR_H_

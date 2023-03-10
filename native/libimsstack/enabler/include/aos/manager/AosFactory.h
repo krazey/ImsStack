@@ -41,7 +41,7 @@ protected:
     static IMutex* m_gpiLock;
 
     /// <slot-id, ImsAosManager>
-    static IMSMap<IMS_SINT32, ImsAosManager*> m_objManagers;
+    static ImsMap<IMS_SINT32, ImsAosManager*> m_objManagers;
 };
 
 #endif  // AOS_FACTORY_H_

@@ -94,12 +94,12 @@ public:
     FRIEND_TEST(AosSubscriberManagerTest, TimerToString);
     FRIEND_TEST(AosSubscriberManagerTest, StateToString);
 
-    IMSList<IAosSubscriberManagerListener*> GetSubscriberManagerListeners()
+    ImsList<IAosSubscriberManagerListener*> GetSubscriberManagerListeners()
     {
         return m_objListeners;
     }
 
-    IMSList<IAosSubscriberManagerListener*> GetSubscriberManagerMonitorListeners()
+    ImsList<IAosSubscriberManagerListener*> GetSubscriberManagerMonitorListeners()
     {
         return m_objMonitorListeners;
     }
@@ -162,7 +162,7 @@ public:
         }
     }
 
-    void SetImsIdentityPriority(IN const IMSVector<IMS_SINT32>& objImsIdentityPriority)
+    void SetImsIdentityPriority(IN const ImsVector<IMS_SINT32>& objImsIdentityPriority)
     {
         m_objImsIdentityPriority = objImsIdentityPriority;
     }
@@ -765,7 +765,7 @@ TEST_F(AosSubscriberManagerTest, NConfiguration_NotifyConfigChanged)
     EXPECT_CALL(objMockIAosNConfiguration, GetIsimIndexForImpu()).WillRepeatedly(Return(0));
     EXPECT_CALL(objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
             .WillRepeatedly(Return(IMS_TRUE));
-    IMSVector<IMS_SINT32> objImsIdentityPriority;
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
     objImsIdentityPriority.Add(CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF);
     EXPECT_CALL(objMockIAosNConfiguration, GetImsIdentityPriority())
             .WillRepeatedly(ReturnRef(objImsIdentityPriority));
@@ -900,7 +900,7 @@ TEST_F(AosSubscriberManagerTest, ServicePhone_IsimStateChangedReturnFalse)
 
 TEST_F(AosSubscriberManagerTest, IdentityPriorityToString)
 {
-    IMSVector<IMS_SINT32> objImsIdentityPriority;
+    ImsVector<IMS_SINT32> objImsIdentityPriority;
 
     // Test1 : IdentityPriority is empty
     m_pTestAosSubscriberManager->SetImsIdentityPriority(objImsIdentityPriority);

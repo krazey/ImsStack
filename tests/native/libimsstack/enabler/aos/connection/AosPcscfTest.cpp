@@ -40,7 +40,7 @@ class AosPcscfTest : public ::testing::Test
 public:
     AosPcscf* m_pAosPcscf;
     AStringArray m_objPcscfAddressPreset;
-    IMSList<IMS_SINT32> m_objPcscfPortPreset;
+    ImsList<IMS_SINT32> m_objPcscfPortPreset;
 
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosConnection m_objMockIAosConnection;
@@ -157,7 +157,7 @@ TEST_F(AosPcscfTest, Configure_GetFromPco)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(m_objPcscfAddressPreset));
 
-    IMSVector<IMS_SINT32> objDiscoveryMethods;
+    ImsVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
             .Times(AnyNumber())
@@ -189,7 +189,7 @@ TEST_F(AosPcscfTest, Configure_GetFromConf)
             .Times(1)
             .WillOnce(ReturnRef(IpAddress::LOOPBACK));
 
-    IMSVector<IMS_SINT32> objDiscoveryMethods;
+    ImsVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
             .Times(AnyNumber())
@@ -197,7 +197,7 @@ TEST_F(AosPcscfTest, Configure_GetFromConf)
 
     const AString strAddress = AString("0.0.0.4");
     ServerAddress* pSa = new ServerAddress(strAddress, 5060);
-    IMSVector<ServerAddress*> objPcscfAddresses;
+    ImsVector<ServerAddress*> objPcscfAddresses;
     objPcscfAddresses.Add(pSa);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
             .Times(AnyNumber())
@@ -219,7 +219,7 @@ TEST_F(AosPcscfTest, Configure_GetFromConf_TryOtherIpType)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(IpAddress::IPv6LOOPBACK));
 
-    IMSVector<IMS_SINT32> objDiscoveryMethods;
+    ImsVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
             .Times(AnyNumber())
@@ -227,7 +227,7 @@ TEST_F(AosPcscfTest, Configure_GetFromConf_TryOtherIpType)
 
     const AString strAddress = AString("0.0.0.4");
     ServerAddress* pSa = new ServerAddress(strAddress, 5060);
-    IMSVector<ServerAddress*> objPcscfAddresses;
+    ImsVector<ServerAddress*> objPcscfAddresses;
     objPcscfAddresses.Add(pSa);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
             .Times(AnyNumber())
@@ -249,7 +249,7 @@ TEST_F(AosPcscfTest, Configure_ProcessDnsQuery)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(IpAddress::LOOPBACK));
 
-    IMSVector<IMS_SINT32> objDiscoveryMethods;
+    ImsVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
             .Times(AnyNumber())
@@ -257,7 +257,7 @@ TEST_F(AosPcscfTest, Configure_ProcessDnsQuery)
 
     const AString strAddress = AString("aaa.bbb.ccc");
     ServerAddress* pSa = new ServerAddress(strAddress, 5060);
-    IMSVector<ServerAddress*> objPcscfAddresses;
+    ImsVector<ServerAddress*> objPcscfAddresses;
     objPcscfAddresses.Add(pSa);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfAddresses())
             .Times(AnyNumber())
@@ -287,7 +287,7 @@ TEST_F(AosPcscfTest, FailToFindDiscoveryMethod)
             .Times(2)
             .WillOnce(Return(nullptr))
             .WillOnce(Return(&m_objMockISubscriberConfig));
-    IMSVector<IMS_SINT32> objDiscoveryMethods;
+    ImsVector<IMS_SINT32> objDiscoveryMethods;
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objDiscoveryMethods));
@@ -333,7 +333,7 @@ TEST_F(AosPcscfTest, IsAsyncDnsDiscovery)
 
 TEST_F(AosPcscfTest, IsSinglePcoScheme_EmptyDiscoveryMethod)
 {
-    IMSVector<IMS_SINT32> objDiscoveryMethods;
+    ImsVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
             .Times(AnyNumber())
@@ -347,7 +347,7 @@ TEST_F(AosPcscfTest, IsSinglePcoScheme_InvalidSubscriber)
 {
     EXPECT_CALL(m_objMockIAosSubscriber, GetSubscriberConfig(IAosSubscriber::FAKE))
             .WillOnce(Return(nullptr));
-    IMSVector<IMS_SINT32> objDiscoveryMethods;
+    ImsVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
             .Times(AnyNumber())
@@ -359,7 +359,7 @@ TEST_F(AosPcscfTest, IsSinglePcoScheme_InvalidSubscriber)
 
 TEST_F(AosPcscfTest, IsSinglePcoScheme)
 {
-    IMSVector<IMS_SINT32> objDiscoveryMethods;
+    ImsVector<IMS_SINT32> objDiscoveryMethods;
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_CONFIG);
     objDiscoveryMethods.Add(ISubscriberConfig::PCSCF_DISCOVERY_METHOD_PCO);
     EXPECT_CALL(m_objMockISubscriberConfig, GetPcscfDiscoveryMethods())
@@ -384,7 +384,7 @@ TEST_F(AosPcscfTest, GetPcscfs)
 TEST_F(AosPcscfTest, GetPcscfsPorts)
 {
     SetPcscfs();
-    IMSList<IMS_SINT32> objGetPcscfsPorts = m_pAosPcscf->GetPcscfsPorts();
+    ImsList<IMS_SINT32> objGetPcscfsPorts = m_pAosPcscf->GetPcscfsPorts();
     for (int i = 0; i < objGetPcscfsPorts.GetSize(); i++)
     {
         EXPECT_EQ(objGetPcscfsPorts.GetAt(i), m_objPcscfPortPreset.GetAt(i));

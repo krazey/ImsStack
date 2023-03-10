@@ -32,8 +32,8 @@ public:
             (override));
     MOCK_METHOD(void, ClearAllBlockReasons, (), (override));
     MOCK_METHOD(IMS_BOOL, PrintBlockReasons, (), (override));
-    MOCK_METHOD(void, GetBlockReasons, (OUT IMSList<IMS_UINT32>& objReasons,
-            IN SERVICE_TYPE eType), (override));
+    MOCK_METHOD(void, GetBlockReasons,
+            (OUT ImsList<IMS_UINT32> & objReasons, IN SERVICE_TYPE eType), (override));
     MOCK_METHOD(IMS_BOOL, IsReasonBlocked, (IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled,
             IN SERVICE_TYPE eType), (override));
     MOCK_METHOD(IMS_BOOL, IsCleared, (IN SERVICE_TYPE eType), (override));

@@ -132,7 +132,7 @@ public:
  * @brief This class provides the feature-tag data for IImsAos#UpdateFeature()
  *
  * The API using this class is below. \n
- *     - IImsAos#UpdateFeature(IN IMSList<ImsAosFeatureTag*>& objFeatureTag)
+ *     - IImsAos#UpdateFeature(IN ImsList<ImsAosFeatureTag*>& objFeatureTag)
  */
 class ImsAosFeatureTag
 {

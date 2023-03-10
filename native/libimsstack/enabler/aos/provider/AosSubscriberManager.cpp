@@ -43,8 +43,8 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_objListeners(IMSList<IAosSubscriberManagerListener*>()),
-        m_objMonitorListeners(IMSList<IAosSubscriberManagerListener*>()),
+        m_objListeners(ImsList<IAosSubscriberManagerListener*>()),
+        m_objMonitorListeners(ImsList<IAosSubscriberManagerListener*>()),
         m_piSubscriberConfig(IMS_NULL),
         m_piSubscriberConfigFake(IMS_NULL),
         m_bIsim(IMS_FALSE),
@@ -60,7 +60,7 @@ AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId) :
         m_piNConfig(IMS_NULL),
         m_nIsimIndexForImpu(DEFAULT_ISIM_INDEX_FOR_IMPU),
         m_bSupportLimitedAdminSmsMode(IMS_FALSE),
-        m_objImsIdentityPriority(IMSVector<IMS_SINT32>())
+        m_objImsIdentityPriority(ImsVector<IMS_SINT32>())
 {
     m_strTag.Sprintf("%d", m_nSlotId);
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosSubscriberManager = %" PFLS_u "/%" PFLS_x,
@@ -1120,7 +1120,7 @@ IMS_BOOL AosSubscriberManager::UpdateNConfiguration()
 
     IMS_UINT32 nIsimIndexForImpu = m_piNConfig->GetIsimIndexForImpu();
     IMS_BOOL bSupportLimitedAdminSmsMode = m_piNConfig->IsSupportLimitedAdminSmsMode();
-    IMSVector<IMS_SINT32> objImsIdentityPriority = m_piNConfig->GetImsIdentityPriority();
+    ImsVector<IMS_SINT32> objImsIdentityPriority = m_piNConfig->GetImsIdentityPriority();
 
     if (m_nIsimIndexForImpu != nIsimIndexForImpu)
     {
