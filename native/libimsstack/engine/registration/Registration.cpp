@@ -69,7 +69,7 @@ Registration::Registration() :
         m_nSubState(SUB_STATE_IDLE),
         m_pRegFlow(IMS_NULL),
         m_pRegParam(IMS_NULL),
-        m_objContacts(IMSList<RegContact*>()),
+        m_objContacts(ImsList<RegContact*>()),
         m_pStateTracker(new RegStateTracker()),
         m_piListener(IMS_NULL),
         m_piBindingStateListener(IMS_NULL),
@@ -82,7 +82,7 @@ Registration::Registration() :
         m_piPreviousRequest(IMS_NULL),
         m_piPreviousResponse(IMS_NULL),
         m_piMessageMediator(IMS_NULL),
-        m_objObservers(IMSList<RegObserver*>()),
+        m_objObservers(ImsList<RegObserver*>()),
         m_bIsBehindNat(IMS_FALSE),
         m_bIsWithinTrustDomain(IMS_TRUE),
         m_bActiveBindingsRestorationEnabled(IMS_FALSE),
@@ -754,9 +754,9 @@ PRIVATE VIRTUAL void Registration::DestroyContact(
     ChoosePreferredContact();
 }
 
-PRIVATE VIRTUAL IMSList<IRegContact*> Registration::GetAllContacts() const
+PRIVATE VIRTUAL ImsList<IRegContact*> Registration::GetAllContacts() const
 {
-    IMSList<IRegContact*> objAllContacts;
+    ImsList<IRegContact*> objAllContacts;
 
     for (IMS_UINT32 i = 0; i < m_objContacts.GetSize(); ++i)
     {
@@ -1682,7 +1682,7 @@ PRIVATE VIRTUAL void Registration::RegInfo_Updated(IN IMS_BOOL bStale /*= IMS_FA
 
     IMS_BOOL bUpdateRefreshTimer = IMS_FALSE;
     IMS_UINT32 nShortenedExpires = 0;
-    IMSList<IRegInfoContact*> objRegInfoContacts = piRegInfoReg->GetContacts();
+    ImsList<IRegInfoContact*> objRegInfoContacts = piRegInfoReg->GetContacts();
 
     for (IMS_UINT32 i = 0; i < objRegInfoContacts.GetSize(); ++i)
     {
@@ -2119,7 +2119,7 @@ IMS_BOOL Registration::CreateSa(IN const Credential& objCredential, IN const Ims
 
     if (SipConfigProxy::IsIpSecConfigured(GetSlotId(), m_pStateTracker->GetSipProfile()))
     {
-        IMSList<SipSecurityHeader> objSecurityVerifys;
+        ImsList<SipSecurityHeader> objSecurityVerifys;
 
         m_pRegParam->SetSecurityVerifys(objSecurityVerifys);
 
@@ -3136,7 +3136,7 @@ void Registration::SetNextNonce(IN ISipMessage* piSipMsg)
     }
 
     const IMS_CHAR NEXT_NONCE[] = "nextnonce";
-    IMSList<AString> objTokens = strAuthenticationInfo.Split(TextParser::CHAR_COMMA);
+    ImsList<AString> objTokens = strAuthenticationInfo.Split(TextParser::CHAR_COMMA);
     AString strName;
     AString strValue;
     IMS_BOOL bNextNoncePresent = IMS_FALSE;
@@ -3337,7 +3337,7 @@ IMS_RESULT Registration::UpdateBindings(IN const ISipMessage* piSipMsg)
     ISipHeader* piHeader;
 
     IMS_SINT32 nExpiresValue = (-1);
-    IMSList<ISipHeader*> objHeaders;
+    ImsList<ISipHeader*> objHeaders;
 
     // Extract the expiration value from Expires header field
     if (piSipMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
@@ -3684,7 +3684,7 @@ PRIVATE GLOBAL ISipClientConnection* Registration::CreateConnection(IN Registrat
     return piScc;
 }
 
-PRIVATE GLOBAL void Registration::DestroyAllHeaders(IN_OUT IMSList<ISipHeader*>& objHeaders)
+PRIVATE GLOBAL void Registration::DestroyAllHeaders(IN_OUT ImsList<ISipHeader*>& objHeaders)
 {
     if (objHeaders.IsEmpty())
     {

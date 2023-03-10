@@ -76,7 +76,7 @@ protected:
 
     const SipAddress* GetPublicGruu() const override;
     const SipAddress* GetTemporaryGruu() const override;
-    const IMSList<SipAddress*>& GetTemporaryGruus() const override;
+    const ImsList<SipAddress*>& GetTemporaryGruus() const override;
 
     IMS_BOOL IsBehindNat() const override;
     IMS_BOOL IsWithinTrustDomain() const override;

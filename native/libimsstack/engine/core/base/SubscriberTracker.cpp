@@ -33,7 +33,7 @@ SubscriberTracker::SubscriberTracker() :
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
     m_pSubscriberMaps =
-            new IMSMap<AString, IMSList<SipAddress*>>[SystemConfig::GetSupportedSimCount()];
+            new ImsMap<AString, ImsList<SipAddress*>>[SystemConfig::GetSupportedSimCount()];
 }
 
 PUBLIC VIRTUAL SubscriberTracker::~SubscriberTracker()
@@ -72,7 +72,7 @@ const AString& SubscriberTracker::GetSubscriberId(
 
     LockGuard objLock(m_piLock);
 
-    IMSMap<AString, IMSList<SipAddress*>>* pSubscribers = GetSubscribers(nSlotId);
+    ImsMap<AString, ImsList<SipAddress*>>* pSubscribers = GetSubscribers(nSlotId);
 
     if (pSubscribers == IMS_NULL)
     {
@@ -90,7 +90,7 @@ const AString& SubscriberTracker::GetSubscriberId(
     for (IMS_UINT32 i = 0; i < pSubscribers->GetSize(); ++i)
     {
         const AString& strId = pSubscribers->GetKeyAt(i);
-        const IMSList<SipAddress*>& objImpus = pSubscribers->GetValueAt(i);
+        const ImsList<SipAddress*>& objImpus = pSubscribers->GetValueAt(i);
 
         for (IMS_UINT32 j = 0; j < objImpus.GetSize(); ++j)
         {
@@ -126,7 +126,7 @@ PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateImpu(IN IMS_SINT3
 
     LockGuard objLock(m_piLock);
 
-    IMSMap<AString, IMSList<SipAddress*>>* pSubscribers = GetSubscribers(nSlotId);
+    ImsMap<AString, ImsList<SipAddress*>>* pSubscribers = GetSubscribers(nSlotId);
 
     if (pSubscribers == IMS_NULL)
     {
@@ -160,7 +160,7 @@ PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateImpu(IN IMS_SINT3
             return;
         }
 
-        IMSList<SipAddress*> objImpus;
+        ImsList<SipAddress*> objImpus;
 
         objImpus.Append(pImpu);
 
@@ -172,7 +172,7 @@ PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateImpu(IN IMS_SINT3
     if ((strOld.GetLength() == 0) && (strNew.GetLength() == 0))
     {
         // Remove all the IMPUs
-        IMSList<SipAddress*>& objImpus = pSubscribers->GetValueAt(nIndex);
+        ImsList<SipAddress*>& objImpus = pSubscribers->GetValueAt(nIndex);
 
         while (!objImpus.IsEmpty())
         {
@@ -195,7 +195,7 @@ PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateImpu(IN IMS_SINT3
         return;
     }
 
-    IMSList<SipAddress*>& objImpus = pSubscribers->GetValueAt(nIndex);
+    ImsList<SipAddress*>& objImpus = pSubscribers->GetValueAt(nIndex);
 
     // OLD : empty, NEW : not empty
     // OLD : not empty, NEW : empty
@@ -250,7 +250,7 @@ PROTECTED VIRTUAL void SubscriberTracker::SubscriberInfo_UpdateImpu(IN IMS_SINT3
 }
 
 PRIVATE
-IMSMap<AString, IMSList<SipAddress*>>* SubscriberTracker::GetSubscribers(
+ImsMap<AString, ImsList<SipAddress*>>* SubscriberTracker::GetSubscribers(
         IN IMS_SINT32 nSlotId) const
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetSupportedSimCount()))
@@ -275,7 +275,7 @@ void SubscriberTracker::Initialize()
 PRIVATE
 void SubscriberTracker::InitForSlot(IN IMS_SINT32 nSlotId)
 {
-    const IMSList<SubscriberConfig*>& objSubsConfigs =
+    const ImsList<SubscriberConfig*>& objSubsConfigs =
             ConfigurationManager::GetInstance()->GetSubscriberConfigs(nSlotId);
 
     if (objSubsConfigs.IsEmpty())

@@ -47,7 +47,7 @@ private:
     IMS_RESULT AddHeader(IN const AString& strName, IN const AString& strValue) override;
     ISipDialog* GetDialog() const override;
     AString GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex = 0) override;
-    IMSList<AString> GetHeaders(IN const AString& strName) override;
+    ImsList<AString> GetHeaders(IN const AString& strName) override;
     const SipMethod& GetMethod() const override;
     const AString& GetReasonPhrase() const override;
     const AString& GetRequestUri() const override;
@@ -72,7 +72,7 @@ private:
     ISipClientConnection* InitCancel() override;
     IMS_RESULT InitRequest(IN const AString& strMethod, IN ISipConnectionNotifier* piScn) override;
     IMS_RESULT Receive(IN IMS_SLONG nTimeout = 0) override;
-    IMS_RESULT SetCredentials(IN IMSList<Credential>& objCredentials) override;
+    IMS_RESULT SetCredentials(IN ImsList<Credential>& objCredentials) override;
     IMS_RESULT SetCredentials(IN const Credential& objCredential) override;
     inline void SetListener(IN ISipClientConnectionListener* piListener) override
     {

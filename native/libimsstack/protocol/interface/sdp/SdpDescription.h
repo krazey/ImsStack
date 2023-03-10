@@ -88,24 +88,24 @@ public:
     /**
      * @brief Returns all the SdpAttribute objects.
      */
-    inline const IMSList<SdpAttribute>& GetAttributes() const { return m_objAttributes; }
+    inline const ImsList<SdpAttribute>& GetAttributes() const { return m_objAttributes; }
 
     /**
      * @brief Returns the list of SdpAttribute object from the specified attribute type
      *        (integer value).
      */
-    IMSList<SdpAttribute> GetAttributes(IN IMS_SINT32 nAttribute) const;
+    ImsList<SdpAttribute> GetAttributes(IN IMS_SINT32 nAttribute) const;
 
     /**
      * @brief Returns the list of SdpAttribute object from the specified attribute type
      *        (string value).
      */
-    IMSList<SdpAttribute> GetAttributes(IN const AString& strAttribute) const;
+    ImsList<SdpAttribute> GetAttributes(IN const AString& strAttribute) const;
 
     /**
      * @brief Returns all the SdpBandwidth objects.
      */
-    inline const IMSList<SdpBandwidth>& GetBandwidths() const { return m_objBandwidths; }
+    inline const ImsList<SdpBandwidth>& GetBandwidths() const { return m_objBandwidths; }
 
     /**
      * @brief Returns the direction value in this description.
@@ -130,12 +130,12 @@ public:
     /**
      * @brief Sets the list of SdpAttribute object.
      */
-    void SetAttributes(IN const IMSList<SdpAttribute>& objAttributes);
+    void SetAttributes(IN const ImsList<SdpAttribute>& objAttributes);
 
     /**
      * @brief Sets the list of SdpBandwidth object.
      */
-    void SetBandwidths(IN const IMSList<SdpBandwidth>& objBandwidths);
+    void SetBandwidths(IN const ImsList<SdpBandwidth>& objBandwidths);
 
     /**
      * @brief Sets the encryption key.
@@ -155,13 +155,13 @@ private:
     SdpInformation* m_pInformation;
 
     // Bandwidth information lines
-    IMSList<SdpBandwidth> m_objBandwidths;
+    ImsList<SdpBandwidth> m_objBandwidths;
 
     // Encryption key
     SdpEncryptionKey* m_pEncryptionKey;
 
     // Session or media attribute lines
-    IMSList<SdpAttribute> m_objAttributes;
+    ImsList<SdpAttribute> m_objAttributes;
 };
 
 #endif

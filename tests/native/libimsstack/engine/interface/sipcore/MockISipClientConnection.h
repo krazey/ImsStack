@@ -40,7 +40,7 @@ public:
     MOCK_METHOD(IMS_RESULT, InitRequest,
             (IN const AString& strMethod, IN ISipConnectionNotifier* piScn), (override));
     MOCK_METHOD(IMS_RESULT, Receive, (IN IMS_SLONG nTimeout), (override));
-    MOCK_METHOD(IMS_RESULT, SetCredentials, (IN IMSList<Credential>& objCredentials), (override));
+    MOCK_METHOD(IMS_RESULT, SetCredentials, (IN ImsList<Credential> & objCredentials), (override));
     MOCK_METHOD(IMS_RESULT, SetCredentials, (IN const Credential& objCredential), (override));
     MOCK_METHOD(void, SetListener, (IN ISipClientConnectionListener* piListener), (override));
     MOCK_METHOD(IMS_RESULT, SetRequestUri, (IN const AString& strUri), (override));
@@ -63,7 +63,7 @@ public:
             (override));
     MOCK_METHOD(ISipDialog*, GetDialog, (), (const, override));
     MOCK_METHOD(AString, GetHeader, (IN const AString& strName, IN IMS_SINT32 nIndex), (override));
-    MOCK_METHOD(IMSList<AString>, GetHeaders, (IN const AString& strName), (override));
+    MOCK_METHOD(ImsList<AString>, GetHeaders, (IN const AString& strName), (override));
     MOCK_METHOD(const SipMethod&, GetMethod, (), (const, override));
     MOCK_METHOD(const AString&, GetReasonPhrase, (), (const, override));
     MOCK_METHOD(const AString&, GetRequestUri, (), (const, override));

@@ -32,7 +32,7 @@ public:
 private:
     // ISessionDescriptor interface implementations
     IMS_RESULT AddAttribute(IN const AString& strAttribute) override;
-    IMSList<AString> GetAttributes() const override;
+    ImsList<AString> GetAttributes() const override;
     AString GetProtocolVersion() const override;
     const AString& GetSessionId() const override;
     AString GetSessionInfo() const override;

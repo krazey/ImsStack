@@ -28,7 +28,7 @@ public:
             IRegInfoRegistration*, GetRegistration, (IN const AString& strAor), (const, override));
     MOCK_METHOD(IRegInfoRegistration*, GetRegistration, (IN const SipAddress& objAor),
             (const, override));
-    MOCK_METHOD(IMSList<IRegInfoRegistration*>, GetRegistrations, (), (const, override));
+    MOCK_METHOD(ImsList<IRegInfoRegistration*>, GetRegistrations, (), (const, override));
 };
 
 #endif  // MOCK_I_REG_INFO_H_

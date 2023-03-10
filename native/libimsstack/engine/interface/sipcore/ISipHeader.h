@@ -87,14 +87,14 @@ public:
      * @param objParamNames Names of the header parameters
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT GetParameterNames(OUT IMSList<AString>& objParamNames) const = 0;
+    virtual IMS_RESULT GetParameterNames(OUT ImsList<AString>& objParamNames) const = 0;
 
     /**
      * @brief Returns the list of all the header parameters in this SipHeader.
      *
      * @return The list of SipParameter for this SipHeader.
      */
-    virtual const IMSList<SipParameter*>& GetParameters() const = 0;
+    virtual const ImsList<SipParameter*>& GetParameters() const = 0;
 
     /**
      * @brief Returns the enumeration type of this SipHeader which corresponds to the header name.

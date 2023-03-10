@@ -568,7 +568,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
                 return IMS_FALSE;
             }
 
-            IMSList<IpAddress> objIpAddrs;
+            ImsList<IpAddress> objIpAddrs;
             IMS_SINT32 nIpVersion = 0;
 
             if (objIpAddr.IsIPv4Address())

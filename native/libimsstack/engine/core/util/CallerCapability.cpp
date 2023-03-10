@@ -30,7 +30,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 PUBLIC
 CallerCapability::CallerCapability(IN IMS_UINT32 nId) :
         m_nId(nId),
-        m_objContactFeatures(IMSList<FeatureSet*>())
+        m_objContactFeatures(ImsList<FeatureSet*>())
 {
 }
 
@@ -71,7 +71,7 @@ IMS_BOOL CallerCapability::AddFeature(IN const FeatureSet* pFeatureSet)
     }
 
     IMS_SINT32 nUpdateFlag = FEATURE_UNCHANGED;
-    const IMSList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
+    const ImsList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
 
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
@@ -104,7 +104,7 @@ IMS_BOOL CallerCapability::AddFeatures(IN const CallerCapability* pCc)
     {
         const FeatureSet* pFeatureSet = pCc->m_objContactFeatures.GetAt(i);
 
-        const IMSList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
+        const ImsList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
 
         for (IMS_UINT32 j = 0; j < objFeatures.GetSize(); ++j)
         {
@@ -172,7 +172,7 @@ IMS_BOOL CallerCapability::Create(IN const AppConfig* pAppConfig,
         }
 
         // ICSIs : "+g.3gpp.icsi-ref"
-        const IMSList<ServiceIdentifier>& objIcsis = piServiceConfig->GetIcsis();
+        const ImsList<ServiceIdentifier>& objIcsis = piServiceConfig->GetIcsis();
 
         if (!objIcsis.IsEmpty())
         {
@@ -185,7 +185,7 @@ IMS_BOOL CallerCapability::Create(IN const AppConfig* pAppConfig,
         }
 
         // Feature tags
-        const IMSList<ServiceIdentifier>& objFeatureTags = piServiceConfig->GetFeatureTags();
+        const ImsList<ServiceIdentifier>& objFeatureTags = piServiceConfig->GetFeatureTags();
 
         if (!objFeatureTags.IsEmpty())
         {
@@ -264,7 +264,7 @@ IMS_BOOL CallerCapability::Create(IN const AppConfig* pAppConfig,
     if (pAppConfig->IsBasicMediaSupported() &&
             ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_BASIC) != 0))
     {
-        IMSList<AString> objTokens;
+        ImsList<AString> objTokens;
         const AStringArray& objBasicMediaMimeTypes = pAppConfig->GetBasicMediaMimeTypes();
 
         for (IMS_SINT32 j = 0; j < objBasicMediaMimeTypes.GetCount(); ++j)
@@ -368,7 +368,7 @@ IMS_BOOL CallerCapability::RemoveFeature(IN const FeatureSet* pFeatureSet)
     }
 
     IMS_SINT32 nUpdateFlag = FEATURE_UNCHANGED;
-    const IMSList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
+    const ImsList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
 
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
@@ -402,7 +402,7 @@ IMS_BOOL CallerCapability::RemoveFeatures(
     {
         const FeatureSet* pFeatureSet = pCc->m_objContactFeatures.GetAt(i);
 
-        const IMSList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
+        const ImsList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
 
         for (IMS_UINT32 j = 0; j < objFeatures.GetSize(); ++j)
         {

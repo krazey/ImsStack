@@ -730,7 +730,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
         // Checks if Allow header contains UPDATE method
         m_bUpdateMethodAllowed = IMS_FALSE;
 
-        IMSList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::ALLOW);
+        ImsList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::ALLOW);
 
         for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
         {
@@ -795,7 +795,7 @@ PUBLIC VIRTUAL IMS_RESULT SessionRefreshHelper::UpdateOnMessageReceived(
             // Checks if Allow header contains UPDATE method
             m_bUpdateMethodAllowed = IMS_FALSE;
 
-            IMSList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::ALLOW);
+            ImsList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::ALLOW);
 
             for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
             {

@@ -396,7 +396,7 @@ CallerCapability* FeatureCaps::GetFeaturesForRequest(
     {
         if (bCreate)
         {
-            m_pFeaturesForRequest = new IMSMap<IMS_SINT32, CallerCapability*>();
+            m_pFeaturesForRequest = new ImsMap<IMS_SINT32, CallerCapability*>();
         }
     }
 
@@ -440,7 +440,7 @@ CallerCapability* FeatureCaps::GetFeaturesForResponse(
     {
         if (bCreate)
         {
-            m_pFeaturesForResponse = new IMSMap<IMS_SINT32, CallerCapability*>();
+            m_pFeaturesForResponse = new ImsMap<IMS_SINT32, CallerCapability*>();
         }
     }
 

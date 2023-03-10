@@ -49,9 +49,9 @@ SdpMediaGroup& SdpMediaGroup::operator=(IN const SdpMediaGroup& other)
 
 PUBLIC
 IMS_BOOL SdpMediaGroup::Create(
-        IN const AString& strGroupAttribute, IN const IMSList<SdpMediaParameter*>& objMediaParams)
+        IN const AString& strGroupAttribute, IN const ImsList<SdpMediaParameter*>& objMediaParams)
 {
-    IMSList<AString> objTokens = strGroupAttribute.Split(TextParser::CHAR_SP);
+    ImsList<AString> objTokens = strGroupAttribute.Split(TextParser::CHAR_SP);
 
     if (objTokens.GetSize() < 1)
     {

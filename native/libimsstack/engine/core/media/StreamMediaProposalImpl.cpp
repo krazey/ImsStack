@@ -21,17 +21,17 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PRIVATE VIRTUAL IMSList<IMediaDescriptor*> StreamMediaProposalImpl::GetMediaDescriptors() const
+PRIVATE VIRTUAL ImsList<IMediaDescriptor*> StreamMediaProposalImpl::GetMediaDescriptors() const
 {
-    const IMSList<MediaDescriptor*> objMediaDescriptors = m_pMediaProposal->GetMediaDescriptors();
+    const ImsList<MediaDescriptor*> objMediaDescriptors = m_pMediaProposal->GetMediaDescriptors();
 
     if (objMediaDescriptors.IsEmpty())
     {
         IMS_TRACE_E(0, "No media descriptors in the current media", 0, 0, 0);
-        return IMSList<IMediaDescriptor*>();
+        return ImsList<IMediaDescriptor*>();
     }
 
-    IMSList<IMediaDescriptor*> objIMediaDescriptors;
+    ImsList<IMediaDescriptor*> objIMediaDescriptors;
 
     for (IMS_UINT32 i = 0; i < objMediaDescriptors.GetSize(); ++i)
     {

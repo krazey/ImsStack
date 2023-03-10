@@ -51,17 +51,17 @@ PRIVATE VIRTUAL IMS_BOOL FramedMediaImpl::Equals(IN const IMedia* piMedia) const
     return (this == pMediaImpl);
 }
 
-PRIVATE VIRTUAL IMSList<IMediaDescriptor*> FramedMediaImpl::GetMediaDescriptors() const
+PRIVATE VIRTUAL ImsList<IMediaDescriptor*> FramedMediaImpl::GetMediaDescriptors() const
 {
-    const IMSList<MediaDescriptor*>& objMediaDescriptors = m_pFramedMedia->GetMediaDescriptors();
+    const ImsList<MediaDescriptor*>& objMediaDescriptors = m_pFramedMedia->GetMediaDescriptors();
 
     if (objMediaDescriptors.IsEmpty())
     {
         IMS_TRACE_E(0, "No media descriptors in the current media", 0, 0, 0);
-        return IMSList<IMediaDescriptor*>();
+        return ImsList<IMediaDescriptor*>();
     }
 
-    IMSList<IMediaDescriptor*> objIMediaDescriptors;
+    ImsList<IMediaDescriptor*> objIMediaDescriptors;
 
     for (IMS_UINT32 i = 0; i < objMediaDescriptors.GetSize(); ++i)
     {

@@ -471,7 +471,7 @@ IMS_BOOL SipMessageHandler::IsIpSecSaMatched(IN IMS_SINT32 nSlotId,
 {
     SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
     IMS_BOOL bAtLeastOneSaMatched = IMS_FALSE;
-    const IMSList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
+    const ImsList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
 
     for (IMS_UINT32 i = 0; i < objIpSecSas.GetSize(); ++i)
     {
@@ -528,7 +528,7 @@ IMS_BOOL SipMessageHandler::IsIpSecSaMatchedForUs(
         IN IMS_SINT32 nSlotId, IN const IpAddress& objIp, IN IMS_SINT32 nPort)
 {
     SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
-    const IMSList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
+    const ImsList<SipRtConfig::IpSecSa>& objIpSecSas = pConfigHelper->GetIpSecSas();
 
     for (IMS_UINT32 i = 0; i < objIpSecSas.GetSize(); ++i)
     {

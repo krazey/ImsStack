@@ -45,12 +45,12 @@ RegContact::RegContact(IN IMS_SINT32 nSlotId, IN const IpAddress& objIpAddr, IN 
         m_pRegIdParameter(IMS_NULL),
         m_pPubGruu(IMS_NULL),
         m_pTempGruu(IMS_NULL),
-        m_objTempGruus(IMSList<SipAddress*>()),
+        m_objTempGruus(ImsList<SipAddress*>()),
         m_bBindingsUpdateTracker(IMS_TRUE),
         m_bAllCapabilitiesByConfig(IMS_TRUE),
         m_pAllCapabilities(new CallerCapability(0xFFFFFFFF)),
         m_pExtraCapabilities(new CallerCapability(0xFFFFFFFF)),
-        m_objCallerCapabilities(IMSList<CallerCapability*>()),
+        m_objCallerCapabilities(ImsList<CallerCapability*>()),
         m_piCapabilityChangeListener(piListener),
         m_pRegisteredCapabilities(IMS_NULL),
         m_nInitialExpires(EXPIRES_NOT_SPECIFIED),
@@ -274,7 +274,7 @@ IMS_SINT32 RegContact::UpdateParameter(IN IMS_SINT32 nExpiresValue)
 
 PUBLIC
 IMS_SINT32 RegContact::UpdateParameter(
-        IN const IMSList<ISipHeader*>& objContactHeaders, IN IMS_SINT32 nExpiresValue)
+        IN const ImsList<ISipHeader*>& objContactHeaders, IN IMS_SINT32 nExpiresValue)
 {
     m_bBindingsUpdateTracker = IMS_FALSE;
 
@@ -717,7 +717,7 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsServiceRegistered(
         pFeature = IMS_NULL;
     }
 
-    const IMSList<ServiceIdentifier>& objIcsis = piServiceConfig->GetIcsis();
+    const ImsList<ServiceIdentifier>& objIcsis = piServiceConfig->GetIcsis();
 
     for (IMS_UINT32 i = 0; i < objIcsis.GetSize(); i++)
     {
@@ -732,7 +732,7 @@ PRIVATE VIRTUAL IMS_BOOL RegContact::IsServiceRegistered(
         pFeature = IMS_NULL;
     }
 
-    const IMSList<ServiceIdentifier>& objFeatureTags = piServiceConfig->GetFeatureTags();
+    const ImsList<ServiceIdentifier>& objFeatureTags = piServiceConfig->GetFeatureTags();
 
     for (IMS_UINT32 i = 0; i < objFeatureTags.GetSize(); i++)
     {
@@ -1075,7 +1075,7 @@ void RegContact::UpdateRegisteredCapabilities(IN const ISipHeader* piHeader)
         m_pRegisteredCapabilities = IMS_NULL;
     }
 
-    const IMSList<SipParameter*>& objParameters = piHeader->GetParameters();
+    const ImsList<SipParameter*>& objParameters = piHeader->GetParameters();
 
     if (objParameters.IsEmpty())
     {

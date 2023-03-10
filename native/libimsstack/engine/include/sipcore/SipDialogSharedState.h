@@ -58,7 +58,7 @@ private:
 
     IMS_SINT32 m_nSharedState;
     // References of dialog state
-    IMSList<SipDialogEx*> m_objDialogExs;
+    ImsList<SipDialogEx*> m_objDialogExs;
 };
 
 #endif

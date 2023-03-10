@@ -43,14 +43,14 @@ private:
 
     ISipConnection* m_piSc;
     Message* m_pRequest;
-    IMSList<Message*> m_objResponses;
+    ImsList<Message*> m_objResponses;
 };
 
 PUBLIC
 PreviousMessage::PreviousMessage(IN Message* pRequest) :
         m_piSc(IMS_NULL),
         m_pRequest(pRequest),
-        m_objResponses(IMSList<Message*>())
+        m_objResponses(ImsList<Message*>())
 {
 }
 
@@ -91,7 +91,7 @@ ServiceMethod::ServiceMethod(IN Service* pService) :
         m_pService(pService),
         m_pNextRequest(IMS_NULL),
         m_pNextResponse(IMS_NULL),
-        m_objPreviousMessages(IMSMap<IMS_SINT32, PreviousMessage*>())
+        m_objPreviousMessages(ImsMap<IMS_SINT32, PreviousMessage*>())
 {
 }
 
@@ -215,14 +215,14 @@ Message* ServiceMethod::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
 }
 
 PUBLIC
-IMSList<Message*> ServiceMethod::GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const
+ImsList<Message*> ServiceMethod::GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const
 {
     IMS_SLONG nIndex = m_objPreviousMessages.GetIndexOfKey(nServiceMethod);
 
     if (nIndex < 0)
     {
         Ims::SetLastError(ImsError::ILLEGAL_ARGUMENT);
-        return IMSList<Message*>();
+        return ImsList<Message*>();
     }
 
     PreviousMessage* pPreviousMessage = m_objPreviousMessages.GetValueAt(nIndex);
@@ -533,7 +533,7 @@ IMS_BOOL ServiceMethod::IsPrivacyRequested(IN IMS_BOOL bRequest /*= IMS_TRUE*/) 
             return IMS_FALSE;
         }
 
-        IMSList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::PRIVACY);
+        ImsList<AString> objHeaders = piSipMsg->GetHeaders(ISipHeader::PRIVACY);
 
         for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
         {

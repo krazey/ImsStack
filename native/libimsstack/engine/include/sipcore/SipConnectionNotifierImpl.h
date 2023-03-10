@@ -79,7 +79,7 @@ private:
 private:
     SipConnectionNotifier* m_pScn;
     ISipServerConnectionListener* m_piListener;
-    IMSList<ISipConnectionNotifierErrorListener*> m_objErrorListeners;
+    ImsList<ISipConnectionNotifierErrorListener*> m_objErrorListeners;
 };
 
 #endif

@@ -132,7 +132,7 @@ public:
      *
      * @return Map of <key,value> pair.
      */
-    inline const IMSMap<AString, AString>& GetExtensionParameters() const
+    inline const ImsMap<AString, AString>& GetExtensionParameters() const
     {
         return m_objExtensions;
     }
@@ -154,7 +154,7 @@ public:
      *
      * @return All the unknown parameter values.
      */
-    inline const IMSMap<IMS_SINT32, AString>& GetUnknownParameterValues() const
+    inline const ImsMap<IMS_SINT32, AString>& GetUnknownParameterValues() const
     {
         return m_objUnknownParamValues;
     }
@@ -408,8 +408,8 @@ private:
     IMS_SINT32 m_nPortC;
     IMS_SINT32 m_nPortS;
     // <pre-defined parameter, value>
-    IMSMap<IMS_SINT32, AString> m_objUnknownParamValues;
-    IMSMap<AString, AString> m_objExtensions;
+    ImsMap<IMS_SINT32, AString> m_objUnknownParamValues;
+    ImsMap<AString, AString> m_objExtensions;
 
     // To check the parameter's presentity : spi, port
     IMS_SINT32 m_nMechParams;

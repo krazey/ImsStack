@@ -37,7 +37,7 @@ public:
     IMS_BOOL AddFeature(IN const AString& strTag, IN const AString& strValue);
     IMS_BOOL Contains(IN const AString& strTag) const;
     IMS_BOOL Contains(IN const AString& strTag, IN const AString& strValue) const;
-    inline const IMSList<FeatureSet*>& GetFeatureSets() const { return m_objPreferenceFeatures; }
+    inline const ImsList<FeatureSet*>& GetFeatureSets() const { return m_objPreferenceFeatures; }
     inline IMS_BOOL IsExplicitPresent() const { return m_bExplicit; }
     inline IMS_BOOL IsRequirePresent() const { return m_bRequire; }
     AString ToString() const;
@@ -49,7 +49,7 @@ private:
     void ExtractProperties(IN const AString& strFeatureSet);
 
 private:
-    IMSList<FeatureSet*> m_objPreferenceFeatures;
+    ImsList<FeatureSet*> m_objPreferenceFeatures;
     IMS_BOOL m_bExplicit;
     IMS_BOOL m_bRequire;
 };

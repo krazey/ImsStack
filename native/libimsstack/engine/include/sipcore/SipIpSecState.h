@@ -85,7 +85,7 @@ private:
 
         IMS_SINT32 nState;
         // For tracking SIP transaction
-        IMSList<sipcore::SipTxnKey> objSipTxnKeys;
+        ImsList<sipcore::SipTxnKey> objSipTxnKeys;
     };
 
 public:

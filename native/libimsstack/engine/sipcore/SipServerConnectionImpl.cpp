@@ -90,7 +90,7 @@ PRIVATE VIRTUAL AString SipServerConnectionImpl::GetHeader(
     return m_pSsc->GetHeader(strName, nIndex);
 }
 
-PRIVATE VIRTUAL IMSList<AString> SipServerConnectionImpl::GetHeaders(IN const AString& strName)
+PRIVATE VIRTUAL ImsList<AString> SipServerConnectionImpl::GetHeaders(IN const AString& strName)
 {
     return m_pSsc->GetHeaders(strName);
 }

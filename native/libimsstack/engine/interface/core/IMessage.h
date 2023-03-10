@@ -55,7 +55,7 @@ public:
      *
      * @return List of pointer to IMessageBodyPart.
      */
-    virtual IMSList<IMessageBodyPart*> GetBodyParts() const = 0;
+    virtual ImsList<IMessageBodyPart*> GetBodyParts() const = 0;
 
     /**
      * @brief Returns the value(s) of a header in this message.
@@ -63,7 +63,7 @@ public:
      * @param strName The header name, in full or compact form
      * @return List of SIP header field(s).
      */
-    virtual IMSList<AString> GetHeaders(IN const AString& strName) const = 0;
+    virtual ImsList<AString> GetHeaders(IN const AString& strName) const = 0;
 
     /**
      * @brief Returns the SIP message for this IMessage.

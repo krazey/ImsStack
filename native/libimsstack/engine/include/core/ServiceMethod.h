@@ -42,8 +42,8 @@ public:
     Message* GetNextResponse();
     Message* GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const;
     Message* GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const;
-    IMSList<Message*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const;
-    inline IMSList<AString> GetRemoteUserId() const { return GetRemoteUserIds(); }
+    ImsList<Message*> GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const;
+    inline ImsList<AString> GetRemoteUserId() const { return GetRemoteUserIds(); }
 
 protected:
     inline const AString& GetSubscriberId() const override { return m_pService->GetSubscriberId(); }
@@ -100,7 +100,7 @@ private:
     // Message object to outgoing SIP response message
     Message* m_pNextResponse;
     // Storage for the previous SIP message according to the method type
-    IMSMap<IMS_SINT32, PreviousMessage*> m_objPreviousMessages;
+    ImsMap<IMS_SINT32, PreviousMessage*> m_objPreviousMessages;
 };
 
 #endif

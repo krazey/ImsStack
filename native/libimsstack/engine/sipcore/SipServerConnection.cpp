@@ -112,13 +112,13 @@ PUBLIC VIRTUAL AString SipServerConnection::GetHeader(
     return SipConnection::GetHeader(strName, nIndex);
 }
 
-PUBLIC VIRTUAL IMSList<AString> SipServerConnection::GetHeaders(IN const AString& strName)
+PUBLIC VIRTUAL ImsList<AString> SipServerConnection::GetHeaders(IN const AString& strName)
 {
     // Message is not initialized or the connection is closed
     if (m_nState == STATE_TERMINATED)
     {
         SipPrivate::SetLastError(SipError::NO_ERROR);
-        return IMSList<AString>();
+        return ImsList<AString>();
     }
 
     return SipConnection::GetHeaders(strName);

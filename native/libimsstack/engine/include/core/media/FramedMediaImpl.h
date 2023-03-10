@@ -39,7 +39,7 @@ private:
 
     // IMedia interface
     inline IMS_SINT32 GetDirection() const override { return m_pFramedMedia->GetDirection(); }
-    IMSList<IMediaDescriptor*> GetMediaDescriptors() const override;
+    ImsList<IMediaDescriptor*> GetMediaDescriptors() const override;
     IMedia* GetProposal() const override;
     inline IMS_SINT32 GetState() const override { return m_pFramedMedia->GetState(); }
     inline IMS_SINT32 GetUpdateState() const override { return m_pFramedMedia->GetUpdateState(); }

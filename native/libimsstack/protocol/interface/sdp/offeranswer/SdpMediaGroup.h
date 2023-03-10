@@ -33,7 +33,7 @@ public:
      * @brief Creates a media group from the group attribute & media parameters.
      */
     IMS_BOOL Create(IN const AString& strGroupAttribute,
-            IN const IMSList<SdpMediaParameter*>& objMediaParams);
+            IN const ImsList<SdpMediaParameter*>& objMediaParams);
 
     /**
      * @brief Returns the type of group.
@@ -70,7 +70,7 @@ public:
     /**
      * @brief Returns all the list of media stream index in the current media group.
      */
-    inline const IMSList<IMS_SINT32>& GetMediaStreams() const { return m_objMediaStreamIndexes; }
+    inline const ImsList<IMS_SINT32>& GetMediaStreams() const { return m_objMediaStreamIndexes; }
 
     /**
      * @brief Removes the media stream which matches with the specified mid value.
@@ -97,7 +97,7 @@ private:
     IMS_SINT32 m_nType;
     AString m_strType;
     AStringArray m_objMids;
-    IMSList<IMS_SINT32> m_objMediaStreamIndexes;
+    ImsList<IMS_SINT32> m_objMediaStreamIndexes;
 };
 
 #endif

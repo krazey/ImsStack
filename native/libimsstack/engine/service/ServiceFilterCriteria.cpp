@@ -22,9 +22,9 @@ __IMS_TRACE_TAG_IMS__;
 
 PUBLIC
 ServiceFilterCriteria::ServiceFilterCriteria() :
-        m_objCalleePreferences(IMSMap<IMS_SINT32, IMS_BOOL>()),
+        m_objCalleePreferences(ImsMap<IMS_SINT32, IMS_BOOL>()),
         m_nNextTriggerPointId(1),
-        m_objTriggerPoints(IMSMap<IMS_UINT32, TriggerPoint*>())
+        m_objTriggerPoints(ImsMap<IMS_UINT32, TriggerPoint*>())
 {
     m_objCalleePreferences.Add(SipMethod::INVITE, IMS_FALSE);
     m_objCalleePreferences.Add(SipMethod::OPTIONS, IMS_FALSE);

@@ -36,7 +36,7 @@ IMS_BOOL SdpParser::Decode(IN const AString& strSdp)
 
     SplitLines(strSdp, objSdpLines);
 
-    IMSList<IMS_SINT32> objMediaLines = GetMediaIndexes(objSdpLines);
+    ImsList<IMS_SINT32> objMediaLines = GetMediaIndexes(objSdpLines);
 
     if (objMediaLines.IsEmpty())
     {
@@ -90,7 +90,7 @@ IMS_BOOL SdpParser::DecodeWithoutSession(IN const AString& strSdp)
 
     SplitLines(strSdp, objSdpLines);
 
-    IMSList<IMS_SINT32> objMediaLines = GetMediaIndexes(objSdpLines);
+    ImsList<IMS_SINT32> objMediaLines = GetMediaIndexes(objSdpLines);
 
     if (objMediaLines.IsEmpty())
     {
@@ -168,9 +168,9 @@ IMS_BOOL SdpParser::ValidateSdp() const
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL IMSList<IMS_SINT32> SdpParser::GetMediaIndexes(IN const AStringArray& objSdpLines)
+PRIVATE GLOBAL ImsList<IMS_SINT32> SdpParser::GetMediaIndexes(IN const AStringArray& objSdpLines)
 {
-    IMSList<IMS_SINT32> objMLines;
+    ImsList<IMS_SINT32> objMLines;
 
     for (IMS_SINT32 i = 0; i < objSdpLines.GetCount(); ++i)
     {

@@ -41,12 +41,12 @@ public:
 private:
     // IMediaDescriptor interface
     IMS_RESULT AddAttribute(IN const AString& strAttribute) override;
-    IMSList<AString> GetAttributes() const override;
-    IMSList<AString> GetBandwidthInfo() const override;
+    ImsList<AString> GetAttributes() const override;
+    ImsList<AString> GetBandwidthInfo() const override;
     AString GetMediaDescription() const override;
     AString GetMediaTitle() const override;
     IMS_RESULT RemoveAttribute(IN const AString& strAttribute) override;
-    IMS_RESULT SetBandwidthInfo(IN const IMSList<AString>& strBandwidthInfos) override;
+    IMS_RESULT SetBandwidthInfo(IN const ImsList<AString>& strBandwidthInfos) override;
     IMS_RESULT SetMediaTitle(IN const AString& strTitle) override;
     IMS_RESULT AddAttribute(IN IMS_SINT32 nType, IN const AString& strAttrValue,
             IN const AString& strType = AString::ConstNull()) override;
@@ -56,7 +56,7 @@ private:
             IN const AString& strType = AString::ConstNull()) override;
     const AString& GetAttribute(
             IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const override;
-    IMSList<AString> GetAttributes(
+    ImsList<AString> GetAttributes(
             IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const override;
     IMS_SINT32 GetAttributeInt(
             IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const override;
@@ -64,7 +64,7 @@ private:
             IN IMS_SINT32 nType, IN const AString& strType = AString::ConstNull()) const override;
     IMS_SINT32 GetDirection() const override;
     const SdpMedia* GetMediaDescriptionEx() const override;
-    const IMSList<SdpMediaFormat*>& GetMediaFormats() const override;
+    const ImsList<SdpMediaFormat*>& GetMediaFormats() const override;
     IMS_RESULT RemoveAttribute(IN const SdpAttribute& objAttribute) override;
     IMS_RESULT RemoveAttribute(IN IMS_SINT32 nType,
             IN const AString& strAttrValue = AString::ConstNull(),

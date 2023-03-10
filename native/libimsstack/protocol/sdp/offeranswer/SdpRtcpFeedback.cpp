@@ -111,7 +111,7 @@ PUBLIC VIRTUAL IMS_BOOL SdpRtcpFeedback::SetValue(IN const AString& strValue)
 {
     // The specified value will be the attribute line without the payload type number
     // a=rtcp-fb:98 nack sli -> value: nack sli
-    IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
+    ImsList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
 
     if (objTokens.GetSize() < 1)
     {
@@ -198,7 +198,7 @@ PUBLIC GLOBAL SdpRtcpFeedback* SdpRtcpFeedback::Decode(IN const AString& strRtcp
 {
     // The specified value will be the attribute line without the attribute name
     // a=rtcp-fb:98 nack sli -> value: 98 nack sli
-    IMSList<AString> objTokens = strRtcpFb.Split(TextParser::CHAR_SP);
+    ImsList<AString> objTokens = strRtcpFb.Split(TextParser::CHAR_SP);
 
     if (objTokens.GetSize() < 2)
     {
