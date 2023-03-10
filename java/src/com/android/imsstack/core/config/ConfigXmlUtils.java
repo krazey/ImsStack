@@ -22,7 +22,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collection;
 
 public final class ConfigXmlUtils {
 
@@ -48,7 +48,7 @@ public final class ConfigXmlUtils {
                 "Document ended before " + tagName + " end tag");
     }
 
-    public static void readConfigKeys(XmlPullParser parser, Set<String> configKeys)
+    public static void readConfigKeys(XmlPullParser parser, Collection<String> configKeys)
             throws XmlPullParserException, IOException {
         String rootName = parser.getName();
         int event;
