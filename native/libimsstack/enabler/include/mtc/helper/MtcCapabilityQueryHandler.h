@@ -20,12 +20,14 @@
 #include "ImsTypeDef.h"
 #include "base/IMessageMediator.h"
 
-class IMessage;
-class ICoreService;
-class ICapabilities;
-class IMtcContext;
 class AString;
 class AStringArray;
+class ICapabilities;
+class ICoreService;
+class ICoreServiceConfig;
+class IMediaConfig;
+class IMessage;
+class IMtcContext;
 
 class MtcCapabilityQueryHandler : public IMessageMediator
 {
@@ -46,6 +48,8 @@ private:
     void SetHeaderForCapabilityQuery(IN IMessage* piMessage);
     IMS_RESULT SetBodyForCapabilityQuery(IN ICoreService* piService, IN IMessage* piMessage,
             IN const AString& strAppId, IN const AString& strServiceId, IN IMS_UINT32 nFeatures);
+    virtual const AStringArray& GetMediaCapability(IN const ICoreServiceConfig* piCoreServiceConfig,
+            IN const IMediaConfig* piMediaConfig, IN IMS_SINT32 nMediaType) const;
     static IMS_RESULT SetSessionLevelDescription(IN ICoreService* piService, OUT AString& strDesc);
 
     // if EVS is supported by default, this should be removed.

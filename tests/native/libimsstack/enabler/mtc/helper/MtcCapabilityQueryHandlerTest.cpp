@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AStringArray.h"
 #include "ImsAosParameter.h"
 #include "MockIMtcContext.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -34,6 +35,28 @@ using ::testing::ReturnRef;
 
 namespace android
 {
+
+class TestMtcCapabilityQueryHandler : public MtcCapabilityQueryHandler
+{
+public:
+    inline explicit TestMtcCapabilityQueryHandler(IN IMtcContext& objContext) :
+            MtcCapabilityQueryHandler(objContext)
+    {
+        // TODO: setting up objAnyMediaCapability
+        // objAnyMediaCapability.AddElement("audio");
+        // objAnyMediaCapability.AddElement("video");
+    }
+
+    inline const AStringArray& GetMediaCapability(
+            IN const ICoreServiceConfig* /*piCoreServiceConfig*/,
+            IN const IMediaConfig* /*piMediaConfig*/, IN IMS_SINT32 /*nMediaType*/) const override
+    {
+        return objAnyMediaCapability;
+    }
+
+private:
+    AStringArray objAnyMediaCapability;
+};
 
 class MtcCapabilityQueryHandlerTest : public ::testing::Test
 {
@@ -56,7 +79,7 @@ protected:
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objMockContext, GetSlotId).WillByDefault(Return(1));
 
-        pCapaQueryHandler = new MtcCapabilityQueryHandler(objMockContext);
+        pCapaQueryHandler = new TestMtcCapabilityQueryHandler(objMockContext);
     }
 
     virtual void TearDown() override
