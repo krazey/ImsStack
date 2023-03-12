@@ -42,6 +42,7 @@ cc_library_static {
     name:"libimsstack-platform",
     defaults: [
         "imsstack_native_defaults",
+        "imsstack_tls_libs_defaults",
     ],
     srcs: [
         "**/*.cpp",
@@ -72,8 +73,6 @@ cc_library_static {
         "include/os/android",
     ],
     shared_libs: [
-        "libssl",
-        "libcrypto",
         "libcutils",
     ],
 }

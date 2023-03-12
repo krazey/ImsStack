@@ -21,6 +21,8 @@ cc_library_shared {
     system_ext_specific: true,
     defaults: [
         "imsstack_native_defaults",
+        "imsstack_shared_libs_defaults",
+        "imsstack_tls_libs_defaults",
     ],
     srcs: [
         "libimsstack.cpp",
@@ -34,20 +36,5 @@ cc_library_shared {
         "libimsstack-enabler",
         "libimsstack-main",
         "libimsstack-jni",
-    ],
-    shared_libs: [
-        "libandroid_runtime",
-        "libbinder",
-        "libcutils",
-        "liblog",
-        "libnativehelper",
-        "libutils",
-        // TLS
-        "libcrypto",
-        "libssl",
-        // XML
-        "libxml2",
-        // ZLIB
-        "libz",
     ],
 }
