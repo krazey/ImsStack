@@ -36,6 +36,7 @@ class OperationAsyncRunner;
 class IMessageUtils;
 class IMtcRadioChecker;
 class IPassiveTimerHolder;
+class IMultiEndpointManager;
 
 class IMtcContext
 {
@@ -163,6 +164,13 @@ public:
      * @return
      */
     virtual IPassiveTimerHolder& GetPassiveTimerHolder() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual IMultiEndpointManager* GetMultiEndpointManager() = 0;
 
     /**
      * @brief Checks
