@@ -19,6 +19,8 @@
 #include "ISipHeader.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
+#include "ImsEventDef.h"
+#include "MtcImsEventReceiver.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipStatusCode.h"
@@ -519,12 +521,20 @@ CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
         return CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK);
     }
 
-    if (m_objContext.GetConfigurationProxy().Is(Feature::REQUIRED_CDMALESS_FEATURE_TAG))
+    if (m_objContext.GetConfigurationProxy().Is(Feature::REQUIRED_CDMALESS_FEATURE_TAG) &&
+            !IsRoaming())
     {
         ControlAos(ImsAosControl::REGISTER_REINITIATE);
         return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
     }
 
+    if (m_objContext.GetService().IsWlanIpCanType())
+    {
+        ControlAos(ImsAosControl::REGISTER_REINITIATE);
+        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+    }
+
+    ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
     return CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
 }
 
@@ -684,6 +694,13 @@ IMS_BOOL StartErrorHandler::IsRedialEmergencyWithNextPcscfRequired(
     // an emergency call is over sos pdn,
     // and it receives error response except 3xx before receiving 100 Trying.
     return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL StartErrorHandler::IsRoaming() const
+{
+    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
+            IMS_ROAMING_STATE_ON;
 }
 
 PRIVATE

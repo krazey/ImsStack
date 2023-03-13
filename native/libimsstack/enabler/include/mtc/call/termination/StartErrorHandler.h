@@ -77,6 +77,7 @@ private:
     IMS_BOOL IsAlternativeEmergencyService(IN const IMessage& objMessage) const;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage& objMessage) const;
     IMS_BOOL IsRedialEmergencyWithNextPcscfRequired(IN const IMessage* piMessage) const;
+    IMS_BOOL IsRoaming() const;
 
     void ControlAos(IMS_UINT32 nCommand) const;
     AString GetPathHeader() const;

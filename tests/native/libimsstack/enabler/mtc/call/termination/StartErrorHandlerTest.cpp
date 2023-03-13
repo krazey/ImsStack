@@ -18,6 +18,8 @@
 #include "CarrierConfig.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
+#include "ImsEventDef.h"
+#include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
 #include "MtcContextRepository.h"
 #include "call/IMtcCall.h"
@@ -60,6 +62,7 @@ public:
     MockIMessageUtils objMessageUtils;
     MockIMtcSession objMtcSession;
     MockISession objSession;
+    MockIMtcImsEventReceiver objImsEventReceiver;
 
     StartErrorHandler* pHandler;
 
@@ -80,6 +83,10 @@ protected:
         ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objMtcSession, GetISession()).WillByDefault(ReturnRef(objSession));
+
+        ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
+        ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+                .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
 
         pHandler = new StartErrorHandler(objCallContext);
     }
@@ -235,6 +242,13 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutInVoWiFi)
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
     EXPECT_TRUE(CheckHandleResult(
             CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
+
+    SetTcallTimerConfig(
+            CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_REDIAL_BY_NETWORK_CONTEXT);
+    ON_CALL(*pConfigurationManager, IsRequiredCdmalessFeatureTag).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMtcService, IsWlanIpCanType).WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
 }
 
 TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
@@ -258,6 +272,12 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
     ON_CALL(*pConfigurationManager, IsRequiredCdmalessFeatureTag).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
+            .WillByDefault(Return(IMS_ROAMING_STATE_ON));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE_BY_CSFB)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(
+            CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL));
 
     ON_CALL(objEpsFbTrigger, IsVoNr).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objAosConnector, Control(_)).Times(0);
