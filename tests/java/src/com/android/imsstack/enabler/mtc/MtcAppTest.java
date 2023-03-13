@@ -135,6 +135,7 @@ public class MtcAppTest extends ImsStackTest {
 
     @After
     public void tearDown() throws Exception {
+        mTestMtcApp.clear();
         mTestMtcApp = null;
         mTestMtcJniProxy = null;
         AppContext.deinit();
