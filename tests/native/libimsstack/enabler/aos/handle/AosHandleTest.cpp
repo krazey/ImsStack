@@ -350,6 +350,7 @@ protected:
 
     void SetHoldingBlocksPolicyForTest()
     {
+        m_pAosHandle->m_objHoldingBlocksPolicyForMobile.Append(AosHandle::BLOCK_SMS_CAPABILITY);
         m_pAosHandle->m_objHoldingBlocksPolicyForWifi.Append(AosHandle::BLOCK_SMS_CAPABILITY);
     }
 
@@ -550,7 +551,12 @@ protected:
 
     void SetRoamingState(IN IMS_UINT32 nState) { m_pAosHandle->m_nRoamingState = nState; }
 
-    IMS_BOOL IsCombinedAttach() { return m_pAosHandle->m_bCombinedAttach; }
+    IMS_BOOL StateConnecting(IN IMSMSG& objMSG) { return m_pAosHandle->StateConnecting(objMSG); }
+    IMS_BOOL StateConnected(IN IMSMSG& objMSG) { return m_pAosHandle->StateConnected(objMSG); }
+    IMS_BOOL StateDisconnecting(IN IMSMSG& objMSG)
+    {
+        return m_pAosHandle->StateDisconnecting(objMSG);
+    }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -3816,8 +3822,7 @@ TEST_F(AosHandleTest, StateConnecting_Test7)
     SetNotify(IMS_FALSE);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
-    m_pAosHandle->OnStateMessage(objMSG);
-
+    EXPECT_TRUE(StateConnecting(objMSG));
     EXPECT_FALSE(GetNotify());
 }
 
@@ -3990,8 +3995,7 @@ TEST_F(AosHandleTest, StateConnected_Test10)
     SetHandleState(AosHandle::STATE_CONNECTED);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_INVALID*/, 0, 0);
-    m_pAosHandle->OnStateMessage(objMSG);
-
+    EXPECT_TRUE(StateConnected(objMSG));
     EXPECT_FALSE(GetNotify());
 }
 
@@ -4200,8 +4204,7 @@ TEST_F(AosHandleTest, StateDisconnecting_Test13)
     SetNotify(IMS_FALSE);
 
     IMSMSG objMSG(2 /*AosHandle::HANDLE_MSG_APP_INVALID*/, 0, 0);
-    m_pAosHandle->OnStateMessage(objMSG);
-
+    EXPECT_TRUE(StateDisconnecting(objMSG));
     EXPECT_FALSE(GetNotify());
 }
 
@@ -4673,27 +4676,16 @@ TEST_F(AosHandleTest, Is3G_Test)
     EXPECT_FALSE(Is3G(NW_REPORT_RADIO_EDGE));
 }
 
-TEST_F(AosHandleTest, Event_NotifyEvent_Vops)
+TEST_F(AosHandleTest, Event_NotifyEvent_Test)
 {
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, 1, 0);
-}
-
-TEST_F(AosHandleTest, Event_NotifyEvent_Roaming_State)
-{
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 1, 0);
-    EXPECT_TRUE(IsRoaming());
-
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 0, 0);
-    EXPECT_FALSE(IsRoaming());
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, 0, 0);
 }
 
-TEST_F(AosHandleTest, Event_NotifyEvent_Test_Attach_Type)
+TEST_F(AosHandleTest, Event_NotifyEvent_InvalidEvent)
 {
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, 0);
-    EXPECT_TRUE(IsCombinedAttach());
-
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_EPS_ONLY_ATTACHED, 0);
-    EXPECT_FALSE(IsCombinedAttach());
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_VOLTE_SETTING, IMS_VOLTE_SETTING_OFF, 0);
 }
 
 TEST_F(AosHandleTest, RegistrationControl_NotifyCapabilitiesChanged_Test)
