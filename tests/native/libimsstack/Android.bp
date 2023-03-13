@@ -20,6 +20,8 @@ cc_defaults {
     name: "imsstack_native_test_defaults",
     defaults: [
         "imsstack_native_defaults",
+        "imsstack_shared_libs_defaults",
+        "imsstack_tls_libs_defaults",
     ],
     test_suites: [
         "general-tests"
@@ -28,22 +30,6 @@ cc_defaults {
         "libgmock",
         "libgtest_main",
         "liblog",
-    ],
-    shared_libs: [
-        "libandroid_runtime",
-        "libbinder",
-        "libcutils",
-        "libgui",
-        "liblog",
-        "libnativehelper",
-        "libutils",
-        // TLS
-        "libcrypto",
-        "libssl",
-        // XML
-        "libxml2",
-        // ZLIB
-        "libz",
     ],
 }
 
