@@ -53,7 +53,7 @@ protected:
 public:
     IMutex* m_piMutex;
     IMS_BOOL m_bLogging;
-    IMSList<OsTraceNode*> m_objTraceNodes;
+    ImsList<OsTraceNode*> m_objTraceNodes;
 };
 
 #endif

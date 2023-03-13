@@ -47,7 +47,7 @@ private:
         AMSG_SEND_TO = (IMS_MSG_USER + 11)
     };
 
-    IMSList<IAsyncConfig*> m_objAsyncConfigs;
+    ImsList<IAsyncConfig*> m_objAsyncConfigs;
 };
 
 #endif

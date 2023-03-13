@@ -117,8 +117,8 @@ public:
     inline const ByteArray& GetCk() const { return m_objCk; }
 
     void AddPolicy(IN const Policy& objPolicy);
-    void AddPolicys(IN const IMSList<Policy>& objPolicys);
-    inline const IMSList<Policy>& GetPolicys() const { return m_objPolicys; }
+    void AddPolicys(IN const ImsList<Policy>& objPolicys);
+    inline const ImsList<Policy>& GetPolicys() const { return m_objPolicys; }
     void RemoveAllPolicys();
     AString ToString() const;
 
@@ -157,7 +157,7 @@ private:
     ByteArray m_objIk;
     ByteArray m_objCk;
 
-    IMSList<Policy> m_objPolicys;
+    ImsList<Policy> m_objPolicys;
 };
 
 #endif

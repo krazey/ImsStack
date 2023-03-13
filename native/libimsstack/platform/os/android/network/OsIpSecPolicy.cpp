@@ -28,8 +28,8 @@ __IMS_TRACE_TAG_ADAPT__;
 PUBLIC
 OsIpSecPolicy::OsIpSecPolicy(IN IMS_SINT32 nId) :
         m_nId(nId),
-        m_objIpSecSps(IMSList<OsIpSecSp*>()),
-        m_objIpSecSas(IMSList<OsIpSecSa*>()),
+        m_objIpSecSps(ImsList<OsIpSecSp*>()),
+        m_objIpSecSas(ImsList<OsIpSecSa*>()),
         m_piListener(IMS_NULL),
         m_piTimer(IMS_NULL)
 {
@@ -143,13 +143,13 @@ void OsIpSecPolicy::DestroyAllSas()
 }
 
 PUBLIC
-const IMSList<OsIpSecSp*>& OsIpSecPolicy::GetSPs() const
+const ImsList<OsIpSecSp*>& OsIpSecPolicy::GetSPs() const
 {
     return m_objIpSecSps;
 }
 
 PUBLIC
-const IMSList<OsIpSecSa*>& OsIpSecPolicy::GetSAs() const
+const ImsList<OsIpSecSa*>& OsIpSecPolicy::GetSAs() const
 {
     return m_objIpSecSas;
 }

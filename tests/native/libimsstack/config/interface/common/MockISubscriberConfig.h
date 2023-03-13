@@ -28,9 +28,9 @@ class MockISubscriberConfig : public ISubscriberConfig
 {
 public:
     MOCK_METHOD(ServerAddress*, GetPcscfAddress, (), (const, override));
-    MOCK_METHOD(const IMSVector<ServerAddress*>&, GetPcscfAddresses, (), (const, override));
+    MOCK_METHOD(const ImsVector<ServerAddress*>&, GetPcscfAddresses, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetPcscfDiscoveryMethod, (), (const, override));
-    MOCK_METHOD(const IMSVector<IMS_SINT32>&, GetPcscfDiscoveryMethods, (), (const, override));
+    MOCK_METHOD(const ImsVector<IMS_SINT32>&, GetPcscfDiscoveryMethods, (), (const, override));
     MOCK_METHOD(IMS_SINT32, GetSubscriberCount, (), (const, override));
     MOCK_METHOD(IImsSubscriberInfo*, GetSubscriberInfo, (IN IMS_SINT32 nIndex), (const, override));
     MOCK_METHOD(IMS_BOOL, IsAkaSupported, (), (const, override));

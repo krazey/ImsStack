@@ -44,7 +44,7 @@ public:
     void DetachAll();
     void DetachAll(IN IMS_CONNECTION hConnection);
     void DetachHandle(IN IMS_SOCKET hSocket);
-    inline const IMSMap<IMS_SOCKET, ImsSocket*>& GetHandle2ObjectMap() const
+    inline const ImsMap<IMS_SOCKET, ImsSocket*>& GetHandle2ObjectMap() const
     {
         return m_objHandle2Object;
     }
@@ -61,9 +61,9 @@ private:
     IMutex* m_piLock;
 
     // List of map (IMS_SOCKET, ImsSocket)
-    IMSMap<IMS_SOCKET, ImsSocket*> m_objHandle2Object;
+    ImsMap<IMS_SOCKET, ImsSocket*> m_objHandle2Object;
     // List of ImsSocket
-    IMSList<ImsSocket*> m_objDeadSockets;
+    ImsList<ImsSocket*> m_objDeadSockets;
 };
 
 #endif

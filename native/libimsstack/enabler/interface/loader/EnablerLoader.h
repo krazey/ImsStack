@@ -70,7 +70,7 @@ private:
     EnablerFactory* m_pEnablerFactory;
 
     // <slot-id, enabler-thread>
-    IMSMap<IMS_SINT32, EnablerThread*> m_objEnablerThreads;
+    ImsMap<IMS_SINT32, EnablerThread*> m_objEnablerThreads;
 };
 
 #endif

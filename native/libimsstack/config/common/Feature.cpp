@@ -512,14 +512,14 @@ PRIVATE GLOBAL AString Feature::StripPrefixInSipTree(IN const AString& strName)
 PUBLIC
 FeatureSet::FeatureSet(IN const AString& strTag) :
         m_strTag(strTag),
-        m_objFeatures(IMSList<Feature*>())
+        m_objFeatures(ImsList<Feature*>())
 {
 }
 
 PUBLIC
 FeatureSet::FeatureSet(IN const AString& strTag, IN const AString& strValues) :
         m_strTag(strTag),
-        m_objFeatures(IMSList<Feature*>())
+        m_objFeatures(ImsList<Feature*>())
 {
     AddFeatures(strValues);
 }
@@ -704,7 +704,7 @@ PUBLIC GLOBAL FeatureSet* FeatureSet::FromServiceIdentifier(
 
         if (strValue.Contains(TextParser::CHAR_COMMA))
         {
-            IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_COMMA);
+            ImsList<AString> objTokens = strValue.Split(TextParser::CHAR_COMMA);
 
             for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
             {
@@ -750,7 +750,7 @@ IMS_SINT32 FeatureSet::Add(IN Feature* pFeature)
 PRIVATE
 void FeatureSet::AddFeatures(IN const AString& strValues)
 {
-    IMSList<AString> objTokens;
+    ImsList<AString> objTokens;
 
     if (strValues.StartsWith(TextParser::CHAR_DQUOT) && strValues.EndsWith(TextParser::CHAR_DQUOT))
     {

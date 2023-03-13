@@ -19,7 +19,7 @@
 
 PUBLIC
 ImsRegistry::ImsRegistry() :
-        m_objProperties(IMSList<AStringArray>())
+        m_objProperties(ImsList<AStringArray>())
 {
 }
 

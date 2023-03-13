@@ -54,10 +54,10 @@ public:
     IMS_BOOL AddAppConfig(IN AppConfig* pAppConfig);
     AppConfig* RemoveAppConfig(IN const AString& strAppId);
     AppConfig* GetAppConfig(IN const AString& strAppId) const;
-    inline const IMSList<AppConfig*>& GetAppConfigs() const { return m_objAppConfigs; }
+    inline const ImsList<AppConfig*>& GetAppConfigs() const { return m_objAppConfigs; }
 
     SubscriberConfig* GetSubscriberConfig(IN const AString& strId) const;
-    inline const IMSList<SubscriberConfig*>& GetSubscriberConfigs() const
+    inline const ImsList<SubscriberConfig*>& GetSubscriberConfigs() const
     {
         return m_objSubscriberConfigs;
     }
@@ -85,10 +85,10 @@ private:
     AsyncConfigHelper* m_pConfigHelper;
 
     // List of IMS application configuration
-    IMSList<AppConfig*> m_objAppConfigs;
+    ImsList<AppConfig*> m_objAppConfigs;
 
     // Configuration for subscriber
-    IMSList<SubscriberConfig*> m_objSubscriberConfigs;
+    ImsList<SubscriberConfig*> m_objSubscriberConfigs;
 
     // Configuration for J281 engine classes
     EngineConfig* m_pEngineConfig;
@@ -105,8 +105,8 @@ ConfigurationHolder::ConfigurationHolder() :
         m_bCreated(IMS_FALSE),
         m_bInitialized(IMS_FALSE),
         m_pConfigHelper(IMS_NULL),
-        m_objAppConfigs(IMSList<AppConfig*>()),
-        m_objSubscriberConfigs(IMSList<SubscriberConfig*>()),
+        m_objAppConfigs(ImsList<AppConfig*>()),
+        m_objSubscriberConfigs(ImsList<SubscriberConfig*>()),
         m_pEngineConfig(IMS_NULL),
         m_pSipConfig(IMS_NULL),
         m_pMediaConfig(IMS_NULL)
@@ -380,7 +380,7 @@ PRIVATE
 IMS_BOOL ConfigurationHolder::CreateSubscriberConfig(IN IMS_SINT32 nId)
 {
     const AString strConfName = SUBSCRIBER_CONFIG_NAMES;
-    IMSList<AString> objConfNames = strConfName.Split(',');
+    ImsList<AString> objConfNames = strConfName.Split(',');
 
     if (objConfNames.IsEmpty())
     {
@@ -406,7 +406,7 @@ PRIVATE
 IMS_BOOL ConfigurationHolder::CreateSubscriberConfigIfNotPresent(IN IMS_SINT32 nId)
 {
     const AString strConfNames = SUBSCRIBER_CONFIG_NAMES;
-    IMSList<AString> objConfNames = strConfNames.Split(',');
+    ImsList<AString> objConfNames = strConfNames.Split(',');
 
     if (objConfNames.IsEmpty())
     {
@@ -638,7 +638,7 @@ PUBLIC
 AStringArray ConfigurationManager::GetAppIds(IN IMS_SINT32 nSlotId) const
 {
     ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);
-    const IMSList<AppConfig*>& objAppConfigs = pHolder->GetAppConfigs();
+    const ImsList<AppConfig*>& objAppConfigs = pHolder->GetAppConfigs();
     AStringArray objAppIds;
 
     for (IMS_UINT32 i = 0; i < objAppConfigs.GetSize(); ++i)
@@ -713,7 +713,7 @@ const SubscriberConfig* ConfigurationManager::GetSubscriberConfig(
 }
 
 PUBLIC
-const IMSList<SubscriberConfig*>& ConfigurationManager::GetSubscriberConfigs(
+const ImsList<SubscriberConfig*>& ConfigurationManager::GetSubscriberConfigs(
         IN IMS_SINT32 nSlotId) const
 {
     ConfigurationHolder* pHolder = m_pConfigMngrPrivate->GetHolder(nSlotId);

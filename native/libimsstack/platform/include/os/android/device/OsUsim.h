@@ -80,7 +80,7 @@ public:
     static const int NOTIFICATION_USIM_AUTH = 106;
 
 private:
-    IMSList<OsUsimDigestAka*> m_objDigestAkas;
+    ImsList<OsUsimDigestAka*> m_objDigestAkas;
     IThread* m_piOwnerThread;
 };
 

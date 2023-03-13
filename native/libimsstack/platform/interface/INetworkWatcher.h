@@ -254,11 +254,11 @@ private:
 
     public:
         IThread* m_piOwnerThread;
-        IMSList<INetworkWatcherListener*> m_objListeners;
+        ImsList<INetworkWatcherListener*> m_objListeners;
     };
 
 private:
-    IMSList<ObserverList*> m_objObserverLists;
+    ImsList<ObserverList*> m_objObserverLists;
 };
 
 #endif

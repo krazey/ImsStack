@@ -45,7 +45,7 @@ GLOBAL IMS_BOOL ImsNetworkConnectionState_InitInstance()
 PRIVATE
 ImsNetworkConnectionState::ImsNetworkConnectionState() :
         m_piLock(IMS_NULL),
-        m_objNetConnectionList(IMSList<ImsNetworkConnection*>()),
+        m_objNetConnectionList(ImsList<ImsNetworkConnection*>()),
         m_nHandleForMobile(HANDLE_MOBILE_MIN),
         m_nHandleForWiFi(HANDLE_WIFI_MIN)
 {
@@ -65,7 +65,7 @@ void ImsNetworkConnectionState::AttachHandle(IN ImsNetworkConnection* pConnectio
 PUBLIC
 void ImsNetworkConnectionState::DetachAll()
 {
-    IMSList<ImsNetworkConnection*> objNetConnections;
+    ImsList<ImsNetworkConnection*> objNetConnections;
 
     {
         LockGuard objLock(m_piLock);

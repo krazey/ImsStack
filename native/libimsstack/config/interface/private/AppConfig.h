@@ -56,7 +56,7 @@ public:
     IMS_BOOL IsHeaderWritable(IN const AString& strHeader) const;
     AStringArray GetCapabilitySdps(IN IMS_SINT32 nSector, IN IMS_SINT32 nMessageType) const;
     const CoreServiceConfig* GetCoreServiceConfigEx(IN const AString& strServiceId) const;
-    const IMSList<CoreServiceConfig*>& GetCoreServiceConfigs() const;
+    const ImsList<CoreServiceConfig*>& GetCoreServiceConfigs() const;
 
 private:
     AppConfigPrivate* m_pConfigPrivate;

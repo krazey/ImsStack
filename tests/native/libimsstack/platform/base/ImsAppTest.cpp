@@ -72,7 +72,7 @@ TEST_F(ImsAppTest, AttachAndDetach)
 
     strName = "TT00.unit_test";
     EXPECT_EQ(m_pImsApp->GetService(strName), pService);
-    IMSList<ImsService*> objServiceList = m_pImsApp->GetServices();
+    ImsList<ImsService*> objServiceList = m_pImsApp->GetServices();
     EXPECT_EQ(objServiceList.GetSize(), 1);
     EXPECT_EQ(objServiceList.GetValueAt(0), pService);
 

@@ -32,7 +32,7 @@ public:
     IMS_BOOL AttachService(IN ImsService* pService);
     void DetachService(IN const ImsService* pService);
     ImsService* GetService(IN const AString& strServiceName);
-    inline const IMSList<ImsService*> GetServices() const { return m_objServices; }
+    inline const ImsList<ImsService*> GetServices() const { return m_objServices; }
 
 protected:
     inline virtual IMS_BOOL OnPreprocess(IN ImsMessage& /*objMsg*/) { return IMS_FALSE; }
@@ -45,7 +45,7 @@ private:
     IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
 private:
-    IMSList<ImsService*> m_objServices;
+    ImsList<ImsService*> m_objServices;
 };
 
 // Definition of function pointer to create the ImsApp derived classes

@@ -30,7 +30,7 @@ public:
 
 public:
     inline IMS_BOOL AddValue(IN const AString& strValue) { return m_objHeaders.Append(strValue); }
-    inline const IMSList<AString>& GetValues() const { return m_objHeaders; }
+    inline const ImsList<AString>& GetValues() const { return m_objHeaders; }
 
 protected:
     IMS_BOOL Equals(IN const ImsProperty& objOther) const override;
@@ -38,7 +38,7 @@ protected:
 private:
     AString m_strServiceId;
     // "Name: Value"
-    IMSList<AString> m_objHeaders;
+    ImsList<AString> m_objHeaders;
 };
 
 #endif

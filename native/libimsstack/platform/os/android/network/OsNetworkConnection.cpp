@@ -72,7 +72,7 @@ OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId) :
         m_nConnectionHandle(0),
         m_piOwnerThread(IMS_NULL),
         m_piConnectionListener(IMS_NULL),
-        m_objReferenceListeners(IMSList<INetworkConnectionListener*>())
+        m_objReferenceListeners(ImsList<INetworkConnectionListener*>())
 {
     IMS_TRACE_D("Constructor :: Mobile network connection", 0, 0, 0);
 
@@ -306,7 +306,7 @@ PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::GetExtraInfo(
 }
 
 PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& strHostName,
-        OUT IMSList<IpAddress>& objIpAddrs,
+        OUT ImsList<IpAddress>& objIpAddrs,
         IN IMS_SINT32 nIpVersion /*= 0 default-local-address-based*/)
 {
     IMS_TRACE_I("DNS lookup (%d) :: apnType=%d, domain=%s", nIpVersion, GetApnType(),
@@ -921,7 +921,7 @@ PRIVATE
 void OsNetworkConnection::GetAccessNetworkInfoForWiFi(OUT AccessNetworkInfo& objAccessNetInfo)
 {
     AString strMacAddress = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
-    IMSList<AString> objTokens = strMacAddress.Split(':');
+    ImsList<AString> objTokens = strMacAddress.Split(':');
 
     if (objTokens.GetSize() == ANI_WLAN_MAX_MAC)
     {

@@ -174,11 +174,11 @@ private:
 
     public:
         IThread* m_piOwnerThread;
-        IMSList<IWifiWatcherListener*> m_objListeners;
+        ImsList<IWifiWatcherListener*> m_objListeners;
     };
 
 private:
-    IMSList<ObserverList*> m_objObserverLists;
+    ImsList<ObserverList*> m_objObserverLists;
 };
 
 #endif

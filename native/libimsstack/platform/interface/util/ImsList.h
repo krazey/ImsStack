@@ -18,8 +18,6 @@
 
 #include "ImsVector.h"
 
-#define IMSList ImsList
-
 template <class T>
 class ImsList : private ImsVector<T>
 {
