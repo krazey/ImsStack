@@ -52,4 +52,35 @@ TEST_F(AppConfigTest, IsStreamMediaTextSupported)
     EXPECT_TRUE(objAppConfig.IsStreamMediaTextSupported());
 }
 
+TEST_F(AppConfigTest, AssignmentOperator)
+{
+    AppConfig objAppConfig(m_strAppId);
+
+    ImsRegistry objRegistry;
+    ASSERT_TRUE(ImsRegistryLoader::GetRegistryFromContent(m_strAppId, m_strConfig, objRegistry));
+    ASSERT_TRUE(objAppConfig.Create(objRegistry, IMS_SLOT_0));
+
+    AppConfig objAssignedAppConfig(AString("TestAssignApp"));
+
+    objAssignedAppConfig = objAppConfig;
+
+    ImsRegistry* pRegistry = objAssignedAppConfig.ToRegistry();
+
+    ASSERT_TRUE(pRegistry != IMS_NULL);
+
+    EXPECT_EQ(pRegistry->GetCount(), objRegistry.GetCount());
+
+    EXPECT_TRUE(objAssignedAppConfig.Equals(m_strAppId));
+
+    EXPECT_EQ(4096, objAssignedAppConfig.GetFramedMediaMaxSize());
+    EXPECT_TRUE(objAssignedAppConfig.IsEventPackageSupported(AString("conference")));
+    EXPECT_TRUE(objAssignedAppConfig.IsHeaderReadable(AString("Privacy")));
+    EXPECT_TRUE(objAssignedAppConfig.IsHeaderWritable(AString("Geolocation")));
+
+    const ImsList<CoreServiceConfig*>& objCoreServiceConfigs =
+            objAssignedAppConfig.GetCoreServiceConfigs();
+
+    EXPECT_TRUE(objCoreServiceConfigs.GetSize() == 2);
+}
+
 }  // namespace android

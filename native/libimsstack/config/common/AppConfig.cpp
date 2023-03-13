@@ -717,6 +717,8 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
     // Event package property
     if (m_pConfigPrivate->m_objEventPackages.GetCount() > 0)
     {
+        objProperty.RemoveAllElements();
+
         objProperty.AddElement(ImsProperty::PKEY_STRING[ImsProperty::PKEY_EVENT]);
 
         for (IMS_SINT32 i = 0; i < m_pConfigPrivate->m_objEventPackages.GetCount(); ++i)
@@ -730,6 +732,8 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
     // Read property
     if (m_pConfigPrivate->m_objReadHeaders.GetCount() > 0)
     {
+        objProperty.RemoveAllElements();
+
         objProperty.AddElement(ImsProperty::PKEY_STRING[ImsProperty::PKEY_READ]);
 
         for (IMS_SINT32 i = 0; i < m_pConfigPrivate->m_objReadHeaders.GetCount(); ++i)
@@ -743,6 +747,8 @@ PUBLIC VIRTUAL ImsRegistry* AppConfig::ToRegistry() const
     // Write property
     if (m_pConfigPrivate->m_objWriteHeaders.GetCount() > 0)
     {
+        objProperty.RemoveAllElements();
+
         objProperty.AddElement(ImsProperty::PKEY_STRING[ImsProperty::PKEY_WRITE]);
 
         for (IMS_SINT32 i = 0; i < m_pConfigPrivate->m_objWriteHeaders.GetCount(); ++i)
