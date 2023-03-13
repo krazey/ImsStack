@@ -38,8 +38,8 @@ public:
 
     MOCK_METHOD(void, NotifyJniEnablerSet, (), (override));
     MOCK_METHOD(void, SendMoSms,
-            (IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
-                    IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),
+            (IN SmsFormatType eSmsFormat, IN ByteArray* pContent, IN const AString& strAddress,
+                    IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency),
             (override));
     MOCK_METHOD(void, SendMtResult, (IN IMS_BOOL bMtResult), (override));
     MOCK_METHOD(void, SendScbmNotification, (IN IMS_UINT32 nScbmState), (override));

@@ -20,17 +20,17 @@
 #include "ImsTypeDef.h"
 
 class IMessage;
-class IMtsErrorHandlerListener;
+class MtsDynamicLoader;
 
 class IMtsErrorHandler
 {
 public:
     virtual ~IMtsErrorHandler() {}
 
-    // MtsMessageController
-    virtual IMS_SINT32 Handle(IN const IMessage* piMessage = IMS_NULL) = 0;
-    virtual void SetListener(IN IMtsErrorHandlerListener* piListener) = 0;
-    virtual IMtsErrorHandlerListener* GetListener() = 0;
+    virtual IMS_SINT32 Handle(IN IMtsService* piMtsService, IN MtsDynamicLoader* pMtsDynamicLoader,
+            IN const IMessage* piMessage = IMS_NULL) = 0;
+    virtual IMS_SINT32 GetRetryAfterValue() const = 0;
+    virtual void ResetRetryAfterStatus() = 0;
 };
 
 #endif
