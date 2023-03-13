@@ -119,27 +119,6 @@ IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService*
         IN IMessage* piMessage, IN const AString& strAppId, IN const AString& strServiceId,
         IN IMS_UINT32 nFeatures)
 {
-    Configuration* pConfig = Configuration::GetInstance();
-
-    const IAppConfig* piAppConfig = pConfig->GetAppConfig(strAppId, m_objContext.GetSlotId());
-    if (piAppConfig == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
-    const ICoreServiceConfig* piCoreServiceConfig = piAppConfig->GetCoreServiceConfig(strServiceId);
-    if (piCoreServiceConfig == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
-    const IMediaConfig* piMediaConfig = pConfig->GetMediaConfig(m_objContext.GetSlotId());
-    if (piMediaConfig == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "MediaConfig for slot[%d] is null", m_objContext.GetSlotId(), 0, 0);
-        return IMS_FAILURE;
-    }
-
     // session-level description
     AString strSDP;
     if (SetSessionLevelDescription(piService, strSDP) == IMS_FAILURE)
@@ -147,11 +126,21 @@ IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService*
         return IMS_FAILURE;
     }
 
-    // audio media description
-    const AString strMprofName = piCoreServiceConfig->GetMediaProfile();
-    const AStringArray& objAudioCap =
-            piMediaConfig->GetMediaProfile(strMprofName, IMediaConfig::STREAM_AUDIO);
+    const IAppConfig* piAppConfig =
+            Configuration::GetInstance()->GetAppConfig(strAppId, m_objContext.GetSlotId());
+    const ICoreServiceConfig* piCoreServiceConfig =
+            piAppConfig ? piAppConfig->GetCoreServiceConfig(strServiceId) : IMS_NULL;
+    const IMediaConfig* piMediaConfig =
+            Configuration::GetInstance()->GetMediaConfig(m_objContext.GetSlotId());
 
+    // audio media description
+    const AStringArray& objAudioCap =
+            GetMediaCapability(piCoreServiceConfig, piMediaConfig, IMediaConfig::STREAM_AUDIO);
+
+    if (objAudioCap.IsEmpty())
+    {
+        return IMS_FAILURE;
+    }
     strSDP.Append(GetAdjustedCodecList(objAudioCap));
 
     if (nFeatures & ImsAosFeature::VIDEO)
@@ -159,7 +148,7 @@ IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService*
         // video media description
         SdpMediaDescription objStreamVideoDesc;
         const AStringArray& objVideoCap =
-                piMediaConfig->GetMediaProfile(strMprofName, IMediaConfig::STREAM_VIDEO);
+                GetMediaCapability(piCoreServiceConfig, piMediaConfig, IMediaConfig::STREAM_VIDEO);
 
         if (!objStreamVideoDesc.Decode(objVideoCap))
         {
@@ -176,6 +165,19 @@ IMS_RESULT MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService*
     pIBodyPart->SetHeader(SipHeaderName::CONTENT_TYPE, Sip::STR_APPLICATION_SDP);
     pIBodyPart->SetContent(ByteArray(strSDP));
     return IMS_SUCCESS;
+}
+
+PRIVATE VIRTUAL const AStringArray& MtcCapabilityQueryHandler::GetMediaCapability(
+        IN const ICoreServiceConfig* piCoreServiceConfig, IN const IMediaConfig* piMediaConfig,
+        IN IMS_SINT32 nMediaType) const
+{
+    if (!piCoreServiceConfig || !piMediaConfig)
+    {
+        IMS_TRACE_E(0, "config is null", 0, 0, 0);
+        return AStringArray::ConstNull();
+    }
+
+    return piMediaConfig->GetMediaProfile(piCoreServiceConfig->GetMediaProfile(), nMediaType);
 }
 
 PRIVATE
