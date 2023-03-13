@@ -55,6 +55,7 @@ public class VoLteFactoryTest {
 
     @After
     public void tearDown() throws Exception {
+        mVoLteFactory.clear();
         AppContext.deinit();
         mVoLteFactory = null;
     }
