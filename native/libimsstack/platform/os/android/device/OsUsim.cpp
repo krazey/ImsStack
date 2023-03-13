@@ -279,7 +279,7 @@ PROTECTED VIRTUAL void OsUsimDigestAka::SetListener(IN IDigestAkaListener* piLis
 PUBLIC
 OsUsim::OsUsim(IN IMS_SINT32 nSlotId) :
         ImsUsim(nSlotId),
-        m_objDigestAkas(IMSList<OsUsimDigestAka*>()),
+        m_objDigestAkas(ImsList<OsUsimDigestAka*>()),
         m_piOwnerThread(IMS_NULL)
 {
     IMS_TRACE_D("Constructor :: USIM%02d", nSlotId, 0, 0);

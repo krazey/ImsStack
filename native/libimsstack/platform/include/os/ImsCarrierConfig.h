@@ -58,21 +58,21 @@ public:
     {
         return strDefaultValue;
     }
-    inline IMSVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* /*pszKey*/) const override
+    inline ImsVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* /*pszKey*/) const override
     {
-        return IMSVector<IMS_BOOL>();
+        return ImsVector<IMS_BOOL>();
     }
-    inline IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* /*pszKey*/) const override
+    inline ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* /*pszKey*/) const override
     {
-        return IMSVector<IMS_SINT32>();
+        return ImsVector<IMS_SINT32>();
     }
-    inline IMSVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* /*pszKey*/) const override
+    inline ImsVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* /*pszKey*/) const override
     {
-        return IMSVector<IMS_SLONG>();
+        return ImsVector<IMS_SLONG>();
     }
-    inline IMSVector<AString> GetStringArray(IN const IMS_CHAR* /*pszKey*/) const override
+    inline ImsVector<AString> GetStringArray(IN const IMS_CHAR* /*pszKey*/) const override
     {
-        return IMSVector<AString>();
+        return ImsVector<AString>();
     }
     inline ICarrierConfig* GetBundle(IN const IMS_CHAR* /*pszKey*/) const override
     {

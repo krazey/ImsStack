@@ -39,13 +39,13 @@ public:
     const AString& GetServiceId() const override;
     IMS_BOOL IsIariSupported() const override;
     const ServiceIdentifier& GetIari() const override;
-    const IMSList<ServiceIdentifier>& GetIcsis() const override;
-    const IMSList<ServiceIdentifier>& GetFeatureTags() const override;
+    const ImsList<ServiceIdentifier>& GetIcsis() const override;
+    const ImsList<ServiceIdentifier>& GetFeatureTags() const override;
     const AString& GetMediaProfile() const override;
 
     IMS_BOOL Create(IN const AStringArray& objCoreServiceProperty);
     IMS_BOOL AddProperty(IN const AStringArray& objProperty);
-    const IMSList<FeatureSet*>& GetFeatureSets() const;
+    const ImsList<FeatureSet*>& GetFeatureSets() const;
     AStringArray GetQosContentTypes() const;
     const QosProperty* GetFlowSpecSend(IN const AString& strContentType) const;
     const QosProperty* GetFlowSpecReceive(IN const AString& strContentType) const;

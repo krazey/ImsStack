@@ -27,8 +27,8 @@ public:
     virtual const AString& GetServiceId() const = 0;
     virtual IMS_BOOL IsIariSupported() const = 0;
     virtual const ServiceIdentifier& GetIari() const = 0;
-    virtual const IMSList<ServiceIdentifier>& GetIcsis() const = 0;
-    virtual const IMSList<ServiceIdentifier>& GetFeatureTags() const = 0;
+    virtual const ImsList<ServiceIdentifier>& GetIcsis() const = 0;
+    virtual const ImsList<ServiceIdentifier>& GetFeatureTags() const = 0;
     virtual const AString& GetMediaProfile() const = 0;
 };
 

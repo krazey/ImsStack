@@ -31,7 +31,7 @@ PRIVATE GLOBAL EnablerLoader* EnablerLoader::s_pEnablerLoader = IMS_NULL;
 PRIVATE
 EnablerLoader::EnablerLoader() :
         m_pEnablerFactory(IMS_NULL),
-        m_objEnablerThreads(IMSMap<IMS_SINT32, EnablerThread*>())
+        m_objEnablerThreads(ImsMap<IMS_SINT32, EnablerThread*>())
 {
     m_pEnablerFactory = new EnablerFactory();
 }

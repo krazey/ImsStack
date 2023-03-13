@@ -46,7 +46,7 @@ PRIVATE
 ImsProcess::ImsProcess() :
         m_strFrameworkThreadName(IMS_FRAMEWORK_THREAD),
         m_piLock(IMS_NULL),
-        m_objThreads(IMSList<ImsThreadMap*>())
+        m_objThreads(ImsList<ImsThreadMap*>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }

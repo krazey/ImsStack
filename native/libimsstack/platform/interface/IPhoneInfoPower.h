@@ -182,11 +182,11 @@ private:
 
     public:
         IThread* m_piOwnerThread;
-        IMSList<IPowerInfoListener*> m_objListeners;
+        ImsList<IPowerInfoListener*> m_objListeners;
     };
 
 private:
-    IMSList<ObserverList*> m_objObserverLists;
+    ImsList<ObserverList*> m_objObserverLists;
 };
 
 #endif

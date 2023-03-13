@@ -48,7 +48,7 @@ public:
     {
         return m_objPcscfAddresses.IsEmpty() ? IMS_NULL : m_objPcscfAddresses.GetAt(0);
     }
-    inline const IMSVector<ServerAddress*>& GetPcscfAddresses() const override
+    inline const ImsVector<ServerAddress*>& GetPcscfAddresses() const override
     {
         return m_objPcscfAddresses;
     }
@@ -57,7 +57,7 @@ public:
         return m_objPcscfDiscoveryMethods.IsEmpty() ? PCSCF_DISCOVERY_METHOD_PCO
                                                     : m_objPcscfDiscoveryMethods.GetAt(0);
     }
-    inline const IMSVector<IMS_SINT32>& GetPcscfDiscoveryMethods() const override
+    inline const ImsVector<IMS_SINT32>& GetPcscfDiscoveryMethods() const override
     {
         return m_objPcscfDiscoveryMethods;
     }
@@ -139,10 +139,10 @@ protected:
 
 private:
     // IIsimListener class
-    void Isim_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteArray>& objValues) override;
+    void Isim_OnField(IN IMS_SINT32 nField, IN const ImsList<ByteArray>& objValues) override;
     void Isim_OnHomeDomainName(IN const ByteArray& objDomainName) override;
     void Isim_OnImpi(IN const ByteArray& objPrivateUserId) override;
-    void Isim_OnImpu(IN const IMSList<ByteArray>& objPublicUserIds) override;
+    void Isim_OnImpu(IN const ImsList<ByteArray>& objPublicUserIds) override;
     void Isim_OnError(IN IMS_SINT32 nErrorCode) override;
     void Isim_OnStateChanged(IN IMS_SINT32 nState) override;
 
@@ -199,7 +199,7 @@ private:
     void ToDebugString();
 
     IMS_SINT32 ReadSubscriptionAttributes(IN ICarrierConfig* piCc);
-    static IMSVector<IMS_SINT32> ReadPcscfDiscoveryMethods(IN ICarrierConfig* piCc);
+    static ImsVector<IMS_SINT32> ReadPcscfDiscoveryMethods(IN ICarrierConfig* piCc);
 
     static const IMS_CHAR* IsimStateToString(IN IMS_SINT32 nState);
     static const IMS_CHAR* PcscfDiscoveryMethodToString(IN IMS_SINT32 nMethod);
@@ -275,10 +275,10 @@ private:
     IMS_SINT32 m_nSubscriptionAttributes;
     // P-CSCF discovery methods w/ priority (provisioned by int-array)
     // : first one is top priority
-    IMSVector<IMS_SINT32> m_objPcscfDiscoveryMethods;
+    ImsVector<IMS_SINT32> m_objPcscfDiscoveryMethods;
     // The list of P-CSCF address is provided when the P-CSCF discovery method
     // is PCSCF_DISCOVERY_METHOD_CONFIG.
-    IMSVector<ServerAddress*> m_objPcscfAddresses;
+    ImsVector<ServerAddress*> m_objPcscfAddresses;
 
     IIsim* m_piIsim;
     IMS_BOOL m_bFlagRequestPending;
@@ -290,9 +290,9 @@ private:
     IMS_BYTE m_byIst1;
 
     IMS_SINT32 m_nState;
-    IMSList<ImsSubscriberInfo*> m_objSubscriberInfos;
+    ImsList<ImsSubscriberInfo*> m_objSubscriberInfos;
 
-    mutable IMSList<ISubscriberConfigListener*> m_objListeners;
+    mutable ImsList<ISubscriberConfigListener*> m_objListeners;
     ISubscriberInfoListener* m_piSubsInfoListener;
 
     // Configurable class

@@ -33,7 +33,7 @@ EnablerFactory::EnablerFactory() :
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
     {
-        m_objImsEnablers.Add(i, new IMSList<IEnabler*>());
+        m_objImsEnablers.Add(i, new ImsList<IEnabler*>());
     }
 
     if (nSimCount > 1)
@@ -54,7 +54,7 @@ EnablerFactory::~EnablerFactory()
         {
             DestroyEnablers(i);
 
-            IMSList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(i);
+            ImsList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(i);
 
             if (pEnablers != IMS_NULL)
             {
@@ -80,7 +80,7 @@ void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId)
         return;
     }
 
-    IMSList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(nIndex);
+    ImsList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(nIndex);
 
     if ((pEnablers != IMS_NULL) && pEnablers->IsEmpty())
     {
@@ -100,7 +100,7 @@ void EnablerFactory::DestroyEnablers(IN IMS_SINT32 nSlotId)
         return;
     }
 
-    IMSList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(nIndex);
+    ImsList<IEnabler*>* pEnablers = m_objImsEnablers.GetValueAt(nIndex);
 
     if ((pEnablers != IMS_NULL) && !pEnablers->IsEmpty())
     {
@@ -121,7 +121,7 @@ void EnablerFactory::DestroyEnablers(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-const IMSList<IEnabler*>* EnablerFactory::GetEnablers(IN IMS_SINT32 nSlotId) const
+const ImsList<IEnabler*>* EnablerFactory::GetEnablers(IN IMS_SINT32 nSlotId) const
 {
     LockGuard objLock(m_piLock);
 
@@ -136,7 +136,7 @@ const IMSList<IEnabler*>* EnablerFactory::GetEnablers(IN IMS_SINT32 nSlotId) con
 }
 
 PRIVATE
-void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId, OUT IMSList<IEnabler*>*& pEnablers)
+void EnablerFactory::CreateEnablers(IN IMS_SINT32 nSlotId, OUT ImsList<IEnabler*>*& pEnablers)
 {
     pEnablers->Append(new ConfigEnabler(nSlotId));
     pEnablers->Append(new AosEnabler(nSlotId));

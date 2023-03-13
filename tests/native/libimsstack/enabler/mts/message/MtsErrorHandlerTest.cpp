@@ -72,7 +72,7 @@ TEST_F(MtsErrorHandlerTest, Handle403Error)
     MockIMessage* pMockMessage = new MockIMessage();
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_403));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_400);
     objArray.Push(SipStatusCode::SC_403);
     objArray.Push(SipStatusCode::SC_404);
@@ -101,7 +101,7 @@ TEST_F(MtsErrorHandlerTest, Handle404Error)
     MockIMessage* pMockMessage = new MockIMessage();
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_404));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_400);
     objArray.Push(SipStatusCode::SC_403);
     objArray.Push(SipStatusCode::SC_404);
@@ -130,7 +130,7 @@ TEST_F(MtsErrorHandlerTest, Handle406Error)
     MockIMessage* pMockMessage = new MockIMessage();
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_406));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_400);
     objArray.Push(SipStatusCode::SC_403);
     objArray.Push(SipStatusCode::SC_404);
@@ -159,7 +159,7 @@ TEST_F(MtsErrorHandlerTest, Handle408Error)
     MockIMessage* pMockMessage = new MockIMessage();
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_408));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_400);
     objArray.Push(SipStatusCode::SC_403);
     objArray.Push(SipStatusCode::SC_404);
@@ -188,7 +188,7 @@ TEST_F(MtsErrorHandlerTest, Handle500Error)
     MockIMessage* pMockMessage = new MockIMessage();
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_500));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_500);
     objArray.Push(SipStatusCode::SC_503);
     objArray.Push(SipStatusCode::SC_504);
@@ -215,7 +215,7 @@ TEST_F(MtsErrorHandlerTest, Handle503Error)
     MockIMessage* pMockMessage = new MockIMessage();
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_500);
     objArray.Push(SipStatusCode::SC_503);
     objArray.Push(SipStatusCode::SC_504);
@@ -244,7 +244,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithReasonHeader)
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
     ON_CALL(*pMockMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_500);
     objArray.Push(SipStatusCode::SC_503);
     objArray.Push(SipStatusCode::SC_504);
@@ -273,7 +273,7 @@ TEST_F(MtsErrorHandlerTest, Handle503ErrorWithoutReasonHeader)
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_503));
     ON_CALL(*pMockMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_500);
     objArray.Push(SipStatusCode::SC_503);
     objArray.Push(SipStatusCode::SC_504);
@@ -300,7 +300,7 @@ TEST_F(MtsErrorHandlerTest, Handle504Error)
     MockIMessage* pMockMessage = new MockIMessage();
     ON_CALL(*pMockMessage, GetStatusCode()).WillByDefault(Return(SipStatusCode::SC_504));
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_500);
     objArray.Push(SipStatusCode::SC_503);
     objArray.Push(SipStatusCode::SC_504);
@@ -324,7 +324,7 @@ TEST_F(MtsErrorHandlerTest, HandleTimerFExpired)
     MockIMtsErrorHandlerListener* piListener = new MockIMtsErrorHandlerListener();
     pMtsErrorHandler->SetListener(piListener);
 
-    IMSVector<IMS_SINT32> objArray;
+    ImsVector<IMS_SINT32> objArray;
     objArray.Push(SipStatusCode::SC_406);
     objArray.Push(SipStatusCode::SC_503);
     objArray.Push(SipStatusCode::SC_INVALID);

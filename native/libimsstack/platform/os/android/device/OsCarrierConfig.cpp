@@ -33,7 +33,7 @@ using namespace android::os;
 
 #ifdef __IMS_DEBUG__
 LOCAL
-AString osCarrierConfig_GetStringFromIntVector(IN const IMSVector<IMS_SINT32>& objIntVector)
+AString osCarrierConfig_GetStringFromIntVector(IN const ImsVector<IMS_SINT32>& objIntVector)
 {
     AStringBuffer objValue(32);
 
@@ -52,7 +52,7 @@ AString osCarrierConfig_GetStringFromIntVector(IN const IMSVector<IMS_SINT32>& o
 }
 
 LOCAL
-AString osCarrierConfig_GetStringFromStringVector(IN const IMSVector<AString>& objStrVector)
+AString osCarrierConfig_GetStringFromStringVector(IN const ImsVector<AString>& objStrVector)
 {
     AStringBuffer objValue(128);
 
@@ -244,17 +244,17 @@ PUBLIC VIRTUAL AString OsCarrierConfig::GetString(IN const IMS_CHAR* pszKey,
     return AString(str8.string());
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ImsVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     std::vector<bool> out;
 
     if (!m_objConfig.getBooleanVector(strKey, &out))
     {
-        return IMSVector<IMS_BOOL>();
+        return ImsVector<IMS_BOOL>();
     }
 
-    IMSVector<IMS_BOOL> objBooleanArray;
+    ImsVector<IMS_BOOL> objBooleanArray;
 
     for (IMS_UINT32 i = 0; i < out.size(); ++i)
     {
@@ -264,17 +264,17 @@ PUBLIC VIRTUAL IMSVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS
     return objBooleanArray;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SINT32> OsCarrierConfig::GetIntArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ImsVector<IMS_SINT32> OsCarrierConfig::GetIntArray(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     std::vector<int32_t> out;
 
     if (!m_objConfig.getIntVector(strKey, &out))
     {
-        return IMSVector<IMS_SINT32>();
+        return ImsVector<IMS_SINT32>();
     }
 
-    IMSVector<IMS_SINT32> objIntArray;
+    ImsVector<IMS_SINT32> objIntArray;
 
     for (IMS_UINT32 i = 0; i < out.size(); ++i)
     {
@@ -284,17 +284,17 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32> OsCarrierConfig::GetIntArray(IN const IMS_C
     return objIntArray;
 }
 
-PUBLIC VIRTUAL IMSVector<IMS_SLONG> OsCarrierConfig::GetLongArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ImsVector<IMS_SLONG> OsCarrierConfig::GetLongArray(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     std::vector<int64_t> out;
 
     if (!m_objConfig.getLongVector(strKey, &out))
     {
-        return IMSVector<IMS_SLONG>();
+        return ImsVector<IMS_SLONG>();
     }
 
-    IMSVector<IMS_SLONG> objLongArray;
+    ImsVector<IMS_SLONG> objLongArray;
 
     for (IMS_UINT32 i = 0; i < out.size(); ++i)
     {
@@ -304,17 +304,17 @@ PUBLIC VIRTUAL IMSVector<IMS_SLONG> OsCarrierConfig::GetLongArray(IN const IMS_C
     return objLongArray;
 }
 
-PUBLIC VIRTUAL IMSVector<AString> OsCarrierConfig::GetStringArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ImsVector<AString> OsCarrierConfig::GetStringArray(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     std::vector<String16> out;
 
     if (!m_objConfig.getStringVector(strKey, &out))
     {
-        return IMSVector<AString>();
+        return ImsVector<AString>();
     }
 
-    IMSVector<AString> objStrArray;
+    ImsVector<AString> objStrArray;
 
     for (IMS_UINT32 i = 0; i < out.size(); ++i)
     {
@@ -528,13 +528,13 @@ void OsCarrierConfig::DisplaySpecificConfigs()
     IMS_TRACE_D("carrier-config: ipSecEnabled=%s, serverPort=%d, userAgentFormat=%s",
             _TRACE_B_(bSipOverIpSecEnabled), nServerPort, strUserAgentFormat.GetStr());
 
-    IMSVector<IMS_SINT32> objIntArray = GetIntArray("ims.ipsec_encryption_algorithms_int_array");
+    ImsVector<IMS_SINT32> objIntArray = GetIntArray("ims.ipsec_encryption_algorithms_int_array");
     AString strValue = osCarrierConfig_GetStringFromIntVector(objIntArray);
 
     IMS_TRACE_D(
             "carrier-config: ipsec_encryption_algorithms_int_array=%s", strValue.GetStr(), 0, 0);
 
-    IMSVector<AString> objStrArray = GetStringArray("imsvt.video_codec_image_attr_string_array");
+    ImsVector<AString> objStrArray = GetStringArray("imsvt.video_codec_image_attr_string_array");
     strValue = osCarrierConfig_GetStringFromStringVector(objStrArray);
 
     IMS_TRACE_D("carrier-config: video_codec_image_attr_string_array=%s", strValue.GetStr(), 0, 0);

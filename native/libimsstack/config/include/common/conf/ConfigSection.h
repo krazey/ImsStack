@@ -45,7 +45,7 @@ private:
     friend class ConfigFileBuffer;
 
     AString m_strSectionName;
-    IMSList<ConfigSectionData*> m_objSectionData;
+    ImsList<ConfigSectionData*> m_objSectionData;
 
     ConfigComment m_objComment;
 };

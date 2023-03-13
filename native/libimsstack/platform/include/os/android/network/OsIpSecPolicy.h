@@ -44,8 +44,8 @@ public:
 
     OsIpSecSp* FindSp(IN IMS_UINT32 nSpi);
     OsIpSecSa* FindSa(IN IMS_UINT32 nSpi);
-    const IMSList<OsIpSecSp*>& GetSPs() const;
-    const IMSList<OsIpSecSa*>& GetSAs() const;
+    const ImsList<OsIpSecSp*>& GetSPs() const;
+    const ImsList<OsIpSecSa*>& GetSAs() const;
 
 private:
     // ITimerListener class
@@ -57,8 +57,8 @@ private:
     // An identifier of IPSec SA parameter
     IMS_SINT32 m_nId;
 
-    IMSList<OsIpSecSp*> m_objIpSecSps;
-    IMSList<OsIpSecSa*> m_objIpSecSas;
+    ImsList<OsIpSecSp*> m_objIpSecSps;
+    ImsList<OsIpSecSa*> m_objIpSecSas;
 
     IIpSecPolicyListener* m_piListener;
     ITimer* m_piTimer;

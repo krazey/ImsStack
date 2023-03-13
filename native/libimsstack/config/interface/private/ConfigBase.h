@@ -105,7 +105,7 @@ public:
     static const IMS_CHAR SECTION_UNIQUENESS[];
 
     // Listener for configuration update notification
-    IMSMap<IMS_SINT32, IMSList<IConfigUpdateListener*>> m_objConfigUpdateListeners;
+    ImsMap<IMS_SINT32, ImsList<IConfigUpdateListener*>> m_objConfigUpdateListeners;
 };
 
 #endif

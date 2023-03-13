@@ -22,7 +22,7 @@ PUBLIC
 ImsFramework::ImsFramework() :
         ImsAppThread(),
         m_piLock(IMS_NULL),
-        m_objListeners(IMSList<IFrameworkThreadListener*>())
+        m_objListeners(ImsList<IFrameworkThreadListener*>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
@@ -113,7 +113,7 @@ PROTECTED VIRTUAL IMS_BOOL ImsFramework::OnMessage(IN ImsMessage& objMsg)
 PRIVATE
 void ImsFramework::NotifyThreadStarted()
 {
-    IMSList<IFrameworkThreadListener*> objThreadListeners;
+    ImsList<IFrameworkThreadListener*> objThreadListeners;
 
     {
         LockGuard objLock(m_piLock);
@@ -134,7 +134,7 @@ void ImsFramework::NotifyThreadStarted()
 PRIVATE
 void ImsFramework::NotifyThreadTerminated()
 {
-    IMSList<IFrameworkThreadListener*> objThreadListeners;
+    ImsList<IFrameworkThreadListener*> objThreadListeners;
 
     {
         LockGuard objLock(m_piLock);

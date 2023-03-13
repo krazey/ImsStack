@@ -34,7 +34,7 @@ public:
     IMS_SINT32 GetCount() const;
 
 private:
-    IMSList<AStringArray> m_objProperties;
+    ImsList<AStringArray> m_objProperties;
 };
 
 #endif

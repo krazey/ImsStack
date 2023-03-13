@@ -507,7 +507,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::ReadFrom()
     IImsPrivateProperty* piProperty = GetPrivateProperty();
     AString strPcscfAddressList = piProperty->GetPersistent(
             ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST, GetSlotId());
-    IMSList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
+    ImsList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
 
     for (IMS_UINT32 i = 0; i < objPcscfAddresses.GetSize(); ++i)
     {
@@ -1105,7 +1105,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             {
                 m_objPcscfDiscoveryMethods.Clear();
 
-                IMSList<AString> objDiscoveryMethods = strValue.Split(',');
+                ImsList<AString> objDiscoveryMethods = strValue.Split(',');
 
                 for (IMS_UINT32 i = 0; i < objDiscoveryMethods.GetSize(); ++i)
                 {
@@ -1140,7 +1140,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
         case IConfigurable::CP_I_PCSCF_ADDRESS_8:  // FALL-THROUGH
         case IConfigurable::CP_I_PCSCF_ADDRESS_9:
         {
-            IMSVector<ServerAddress*>* pPcscfAddresses = &m_objPcscfAddresses;
+            ImsVector<ServerAddress*>* pPcscfAddresses = &m_objPcscfAddresses;
 
             if (pPcscfAddresses->IsEmpty())
             {
@@ -1178,7 +1178,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
                     AString strPcscfAddressList = piProperty->GetPersistent(
                             ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST,
                             GetSlotId());
-                    IMSList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
+                    ImsList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
                     const AString& strPcscfAddress = (nIndex < objPcscfAddresses.GetSize())
                             ? objPcscfAddresses.GetAt(nIndex)
                             : AString::ConstNull();
@@ -1201,7 +1201,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
         case IConfigurable::CP_I_PCSCF_PORT_8:  // FALL-THROUGH
         case IConfigurable::CP_I_PCSCF_PORT_9:
         {
-            IMSVector<ServerAddress*>* pPcscfAddresses = &m_objPcscfAddresses;
+            ImsVector<ServerAddress*>* pPcscfAddresses = &m_objPcscfAddresses;
 
             if (pPcscfAddresses->IsEmpty())
             {
@@ -1261,7 +1261,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
         }
         case IConfigurable::CP_I_PCSCF_ALL:
         {
-            IMSVector<ServerAddress*>* pPcscfAddresses = &m_objPcscfAddresses;
+            ImsVector<ServerAddress*>* pPcscfAddresses = &m_objPcscfAddresses;
 
             if (pPcscfAddresses->IsEmpty())
             {
@@ -1271,7 +1271,7 @@ PROTECTED VIRTUAL IMS_BOOL SubscriberConfig::Update(
             IImsPrivateProperty* piProperty = GetPrivateProperty();
             AString strPcscfAddressList = piProperty->GetPersistent(
                     ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST, GetSlotId());
-            IMSList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
+            ImsList<AString> objPcscfAddresses = strPcscfAddressList.Split(',');
 
             ICarrierConfig* piCc = GetCarrierConfig();
             IMS_SINT32 nPort = (piCc != IMS_NULL)
@@ -1361,7 +1361,7 @@ PROTECTED VIRTUAL void SubscriberConfig::CarrierConfig_NotifyConfigChanged(IN IM
 }
 
 PRIVATE VIRTUAL void SubscriberConfig::Isim_OnField(
-        IN IMS_SINT32 nField, IN const IMSList<ByteArray>& objValues)
+        IN IMS_SINT32 nField, IN const ImsList<ByteArray>& objValues)
 {
     switch (nField)
     {
@@ -1523,7 +1523,7 @@ PRIVATE VIRTUAL void SubscriberConfig::Isim_OnImpi(IN const ByteArray& objPrivat
     SendMessage(ACMSG_READ_ISIM_RECORD, 1, 0);
 }
 
-PRIVATE VIRTUAL void SubscriberConfig::Isim_OnImpu(IN const IMSList<ByteArray>& objPublicUserIds)
+PRIVATE VIRTUAL void SubscriberConfig::Isim_OnImpu(IN const ImsList<ByteArray>& objPublicUserIds)
 {
     if (!IsIsimSupported())
     {
@@ -2607,7 +2607,7 @@ void SubscriberConfig::ToDebugString()
     // LOG_EXCLUDING_SERVER_INFO
     if (!IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() || IsDebugOn())
     {
-        IMSVector<ServerAddress*>* pPcscfAddresses = &m_objPcscfAddresses;
+        ImsVector<ServerAddress*>* pPcscfAddresses = &m_objPcscfAddresses;
 
         for (IMS_UINT32 i = 0; i < pPcscfAddresses->GetSize(); ++i)
         {
@@ -2692,7 +2692,7 @@ IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
         return nSubsAttributes;
     }
 
-    IMSVector<IMS_SINT32> objIdentityPriorities =
+    ImsVector<IMS_SINT32> objIdentityPriorities =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY);
 
     for (IMS_UINT32 i = 0; i < objIdentityPriorities.GetSize(); ++i)
@@ -2713,10 +2713,10 @@ IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
     return nSubsAttributes;
 }
 
-PRIVATE GLOBAL IMSVector<IMS_SINT32> SubscriberConfig::ReadPcscfDiscoveryMethods(
+PRIVATE GLOBAL ImsVector<IMS_SINT32> SubscriberConfig::ReadPcscfDiscoveryMethods(
         IN ICarrierConfig* piCc)
 {
-    IMSVector<IMS_SINT32> objPcscfDiscoveryMethods =
+    ImsVector<IMS_SINT32> objPcscfDiscoveryMethods =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY);
 
     if (objPcscfDiscoveryMethods.IsEmpty())

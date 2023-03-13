@@ -36,12 +36,12 @@ public:
     void RemoveAllPolicies();
 
 private:
-    IMSList<NetworkPolicy*> m_objPolicys;
+    ImsList<NetworkPolicy*> m_objPolicys;
 };
 
 PUBLIC
 NetworkPolicyHolder::NetworkPolicyHolder() :
-        m_objPolicys(IMSList<NetworkPolicy*>())
+        m_objPolicys(ImsList<NetworkPolicy*>())
 {
     InitPolicies();
 }

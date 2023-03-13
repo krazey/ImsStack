@@ -72,7 +72,7 @@ public:
     //
     virtual IMS_BOOL GetExtraInfo(IN const AString& strType, OUT AString& strInfo) = 0;
     virtual IMS_SINT32 GetHostByName(IN const AString& strHostName,
-            OUT IMSList<IpAddress>& objIpAddrs,
+            OUT ImsList<IpAddress>& objIpAddrs,
             IN IMS_SINT32 nIpVersion = 0 /* default-local-address-based */) = 0;
     virtual IMS_SINT32 GetIfaceId() const = 0;
     virtual const AString& GetIfaceName() const = 0;

@@ -309,7 +309,7 @@ TEST_F(IpSecSaParameterTest, ToString)
             IpSecSaParameter::INTEGRITY_ALG_HMAC_SHA_1_96, IpSecSaParameter::ENCRYPTION_ALG_AES_CBC,
             ByteArray(AString("12345")), ByteArray(AString("67890")));
 
-    IMSList<IpSecSaParameter::Policy> objPolicys;
+    ImsList<IpSecSaParameter::Policy> objPolicys;
     IpSecSaParameter::Policy objPolicy;
     objPolicys.Append(objPolicy);
 

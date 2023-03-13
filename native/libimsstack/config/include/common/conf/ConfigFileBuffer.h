@@ -71,7 +71,7 @@ private:
     IMS_UINT32 m_nIndexOfWorkSection;
     ConfigSection* m_pWorkSection;
 
-    IMSList<ConfigSection*> m_objSections;
+    ImsList<ConfigSection*> m_objSections;
     ConfigComment m_objStartComment;
     ConfigComment m_objEndComment;
 };

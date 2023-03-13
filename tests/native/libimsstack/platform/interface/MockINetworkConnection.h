@@ -40,7 +40,7 @@ public:
     MOCK_METHOD(
             IMS_BOOL, GetExtraInfo, (IN const AString& strType, OUT AString& strInfo), (override));
     MOCK_METHOD(IMS_SINT32, GetHostByName,
-            (IN const AString& strHostName, OUT IMSList<IpAddress>& objIpAddrs,
+            (IN const AString& strHostName, OUT ImsList<IpAddress>& objIpAddrs,
                     IN IMS_SINT32 nIpVersion),
             (override));
     MOCK_METHOD(IMS_SINT32, GetIfaceId, (), (const, override));

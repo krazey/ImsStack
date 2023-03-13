@@ -46,7 +46,7 @@ public:
      *
      * @return A list of P-CSCF address.
      */
-    virtual const IMSVector<ServerAddress*>& GetPcscfAddresses() const = 0;
+    virtual const ImsVector<ServerAddress*>& GetPcscfAddresses() const = 0;
 
     /**
      * @brief Returns the primary P-CSCF discovery method.
@@ -66,7 +66,7 @@ public:
      *         #PCSCF_DISCOVERY_METHOD_PCO\n
      *         #PCSCF_DISCOVERY_METHOD_CONFIG
      */
-    virtual const IMSVector<IMS_SINT32>& GetPcscfDiscoveryMethods() const = 0;
+    virtual const ImsVector<IMS_SINT32>& GetPcscfDiscoveryMethods() const = 0;
 
     /**
      * @brief Returns the count of IMS subscriber information.

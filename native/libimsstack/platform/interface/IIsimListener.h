@@ -31,7 +31,7 @@ public:
      * @param nField The field type to be requested
      * @param objValues The field values
      */
-    virtual void Isim_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteArray>& objValues) = 0;
+    virtual void Isim_OnField(IN IMS_SINT32 nField, IN const ImsList<ByteArray>& objValues) = 0;
 
     /**
      * @brief Notifies the application that the home domain name is retrieved.
@@ -52,7 +52,7 @@ public:
      *
      * @param objImpus The list of public user identity
      */
-    virtual void Isim_OnImpu(IN const IMSList<ByteArray>& objImpus) = 0;
+    virtual void Isim_OnImpu(IN const ImsList<ByteArray>& objImpus) = 0;
 
     /**
      * @brief Notifies the application that the error occurrs in the ISIM module.

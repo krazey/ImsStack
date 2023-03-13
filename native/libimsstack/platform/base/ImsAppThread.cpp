@@ -23,7 +23,7 @@ __IMS_TRACE_TAG_BASE__;
 PUBLIC
 ImsAppThread::ImsAppThread() :
         BaseThread(),
-        m_objApps(IMSList<ImsApp*>())
+        m_objApps(ImsList<ImsApp*>())
 {
 }
 

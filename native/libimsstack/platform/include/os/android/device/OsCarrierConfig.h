@@ -49,10 +49,10 @@ public:
     IMS_SLONG GetLong(IN const IMS_CHAR* pszKey, IN IMS_SLONG nDefaultValue = -1L) const final;
     AString GetString(IN const IMS_CHAR* pszKey,
             IN const AString& strDefaultValue = AString::ConstNull()) const final;
-    IMSVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* pszKey) const final;
-    IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey) const final;
-    IMSVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* pszKey) const final;
-    IMSVector<AString> GetStringArray(IN const IMS_CHAR* pszKey) const final;
+    ImsVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* pszKey) const final;
+    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey) const final;
+    ImsVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* pszKey) const final;
+    ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey) const final;
     ICarrierConfig* GetBundle(IN const IMS_CHAR* pszKey) const final;
     void ReleaseBundle() final;
     void AddListener(IN ICarrierConfigListener* piListener) final;
@@ -69,7 +69,7 @@ private:
 private:
     IThread* m_piOwnerThread;
     IMS_BOOL m_bIsBundle;
-    IMSList<ICarrierConfigListener*> m_objListeners;
+    ImsList<ICarrierConfigListener*> m_objListeners;
     android::os::PersistableBundle m_objConfig;
 };
 

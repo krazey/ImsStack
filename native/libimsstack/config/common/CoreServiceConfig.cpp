@@ -51,15 +51,15 @@ private:
     // IARI of CoreService property
     ServiceIdentifier m_objIari;
     // ICSIs of CoreService property
-    IMSList<ServiceIdentifier> m_objIcsis;
+    ImsList<ServiceIdentifier> m_objIcsis;
     // Features of CoreService property
-    IMSList<ServiceIdentifier> m_objFeatureTags;
-    IMSList<FeatureSet*> m_objFeatureSets;
+    ImsList<ServiceIdentifier> m_objFeatureTags;
+    ImsList<FeatureSet*> m_objFeatureSets;
 
     // SEND flowspec of Qos property
-    IMSList<QosProperty> m_objFlowSpecSends;
+    ImsList<QosProperty> m_objFlowSpecSends;
     // RECEIVE flowspec of Qos property
-    IMSList<QosProperty> m_objFlowSpecReceives;
+    ImsList<QosProperty> m_objFlowSpecReceives;
 
     // Registration headers property
     AStringArray m_objRegHeaders;
@@ -305,12 +305,12 @@ PUBLIC VIRTUAL const ServiceIdentifier& CoreServiceConfig::GetIari() const
     return m_pConfigPrivate->m_objIari;
 }
 
-PUBLIC VIRTUAL const IMSList<ServiceIdentifier>& CoreServiceConfig::GetIcsis() const
+PUBLIC VIRTUAL const ImsList<ServiceIdentifier>& CoreServiceConfig::GetIcsis() const
 {
     return m_pConfigPrivate->m_objIcsis;
 }
 
-PUBLIC VIRTUAL const IMSList<ServiceIdentifier>& CoreServiceConfig::GetFeatureTags() const
+PUBLIC VIRTUAL const ImsList<ServiceIdentifier>& CoreServiceConfig::GetFeatureTags() const
 {
     return m_pConfigPrivate->m_objFeatureTags;
 }
@@ -355,7 +355,7 @@ IMS_BOOL CoreServiceConfig::AddProperty(IN const AStringArray& objProperty)
 }
 
 PUBLIC
-const IMSList<FeatureSet*>& CoreServiceConfig::GetFeatureSets() const
+const ImsList<FeatureSet*>& CoreServiceConfig::GetFeatureSets() const
 {
     return m_pConfigPrivate->m_objFeatureSets;
 }

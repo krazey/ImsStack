@@ -19,7 +19,7 @@
 PUBLIC
 ImsApp::ImsApp(IN const AString& strName) :
         ImsActivity(strName),
-        m_objServices(IMSList<ImsService*>())
+        m_objServices(ImsList<ImsService*>())
 {
 }
 

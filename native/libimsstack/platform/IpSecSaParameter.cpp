@@ -270,7 +270,7 @@ void IpSecSaParameter::AddPolicy(IN const IpSecSaParameter::Policy& objPolicy)
 }
 
 PUBLIC
-void IpSecSaParameter::AddPolicys(IN const IMSList<IpSecSaParameter::Policy>& objPolicys)
+void IpSecSaParameter::AddPolicys(IN const ImsList<IpSecSaParameter::Policy>& objPolicys)
 {
     IMS_TRACE_D("AddPolicys: old=%d, new=%d", m_objPolicys.GetSize(), objPolicys.GetSize(), 0);
     m_objPolicys = objPolicys;

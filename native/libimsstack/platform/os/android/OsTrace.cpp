@@ -71,7 +71,7 @@ OsTrace::OsTrace() :
         ImsTrace(),
         m_piMutex(IMS_NULL),
         m_bLogging(IMS_FALSE),
-        m_objTraceNodes(IMSList<OsTraceNode*>())
+        m_objTraceNodes(ImsList<OsTraceNode*>())
 {
     m_piMutex = MutexService::GetMutexService()->CreateMutex();
 }
@@ -135,7 +135,7 @@ PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* ps
 
     AddTraceNode(pNode);
 
-    IMSList<OsTraceNode*> objTmpTraceNodes;
+    ImsList<OsTraceNode*> objTmpTraceNodes;
 
     if (m_piMutex != IMS_NULL)
     {

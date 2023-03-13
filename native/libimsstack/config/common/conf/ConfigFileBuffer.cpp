@@ -29,7 +29,7 @@ ConfigFileBuffer::ConfigFileBuffer(IN const AString& strLocator, IN const AStrin
         ConfigBuffer(strLocator, strName),
         m_nIndexOfWorkSection(0),
         m_pWorkSection(IMS_NULL),
-        m_objSections(IMSList<ConfigSection*>())
+        m_objSections(ImsList<ConfigSection*>())
 {
 }
 
@@ -56,7 +56,7 @@ ConfigFileBuffer::ConfigFileBuffer() :
         ConfigBuffer(AString::ConstNull(), AString::ConstNull()),
         m_nIndexOfWorkSection(0),
         m_pWorkSection(IMS_NULL),
-        m_objSections(IMSList<ConfigSection*>())
+        m_objSections(ImsList<ConfigSection*>())
 {
 }
 
@@ -506,7 +506,7 @@ void ConfigFileBuffer::FormConfig(OUT AString& strConfigData) const
 PRIVATE
 IMS_BOOL ConfigFileBuffer::ParseConfig(IN const AString& strConfigData)
 {
-    IMSList<AString> objLines = strConfigData.Split(TextParser::CHAR_LF);
+    ImsList<AString> objLines = strConfigData.Split(TextParser::CHAR_LF);
     IMS_UINT32 i;
     IMS_UINT32 nConfigStart = 0;
 
@@ -669,7 +669,7 @@ AString ConfigFileBuffer::ResolveLocator() const
     AString strLocator(GetLocator());
 
     const AString& strConfName = GetName();
-    IMSList<AString> objTokens = strConfName.Split(TextParser::CHAR_DOT);
+    ImsList<AString> objTokens = strConfName.Split(TextParser::CHAR_DOT);
     const IMS_CHAR* pszFileSeparator = IMS_FILE_GetSeparator();
 
     // 4 if the last dir. is not matched with "gims", then add this dir. name.
