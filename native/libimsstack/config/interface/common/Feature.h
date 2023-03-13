@@ -134,7 +134,7 @@ public:
     IMS_BOOL Contains(IN const Feature* pFeature) const;
     IMS_BOOL Contains(IN const AString& strValue) const;
     inline const AString& GetTag() const { return m_strTag; }
-    inline const IMSList<Feature*>& GetFeatures() const { return m_objFeatures; }
+    inline const ImsList<Feature*>& GetFeatures() const { return m_objFeatures; }
     inline IMS_BOOL IsEmpty() const { return (m_objFeatures.GetSize() == 0); }
     Feature* Lookup(IN const Feature* pFeature, IN IMS_BOOL bDetach = IMS_FALSE);
     IMS_SINT32 Remove(IN const AString& strTag);
@@ -160,7 +160,7 @@ public:
 
 private:
     AString m_strTag;
-    IMSList<Feature*> m_objFeatures;
+    ImsList<Feature*> m_objFeatures;
 };
 
 #endif

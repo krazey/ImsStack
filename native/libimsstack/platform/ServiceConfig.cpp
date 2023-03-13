@@ -36,7 +36,7 @@ public:
     ImsCarrierConfig* GetCarrierConfig(IN IMS_SINT32 nSlotId);
 
 public:
-    IMSMap<IMS_SINT32, ImsCarrierConfig*> m_objCarrierConfigs;
+    ImsMap<IMS_SINT32, ImsCarrierConfig*> m_objCarrierConfigs;
 };
 
 PUBLIC

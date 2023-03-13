@@ -42,7 +42,7 @@ private:
 private:
     IMS_UINT32 m_nMajorId;
     IMS_UINT32 m_nMinorId;
-    IMSList<ImsActivity*> m_objActivities;
+    ImsList<ImsActivity*> m_objActivities;
 };
 
 #endif

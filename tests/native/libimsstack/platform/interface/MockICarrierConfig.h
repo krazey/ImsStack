@@ -31,10 +31,10 @@ public:
     MOCK_METHOD(IMS_SINT32, GetInt, (IN const IMS_CHAR*, IN IMS_SINT32), (const, override));
     MOCK_METHOD(IMS_SLONG, GetLong, (IN const IMS_CHAR*, IN IMS_SLONG), (const, override));
     MOCK_METHOD(AString, GetString, (IN const IMS_CHAR*, IN const AString&), (const, override));
-    MOCK_METHOD(IMSVector<IMS_BOOL>, GetBooleanArray, (IN const IMS_CHAR*), (const, override));
-    MOCK_METHOD(IMSVector<IMS_SINT32>, GetIntArray, (IN const IMS_CHAR*), (const, override));
-    MOCK_METHOD(IMSVector<IMS_SLONG>, GetLongArray, (IN const IMS_CHAR*), (const, override));
-    MOCK_METHOD(IMSVector<AString>, GetStringArray, (IN const IMS_CHAR*), (const, override));
+    MOCK_METHOD(ImsVector<IMS_BOOL>, GetBooleanArray, (IN const IMS_CHAR*), (const, override));
+    MOCK_METHOD(ImsVector<IMS_SINT32>, GetIntArray, (IN const IMS_CHAR*), (const, override));
+    MOCK_METHOD(ImsVector<IMS_SLONG>, GetLongArray, (IN const IMS_CHAR*), (const, override));
+    MOCK_METHOD(ImsVector<AString>, GetStringArray, (IN const IMS_CHAR*), (const, override));
     MOCK_METHOD(ICarrierConfig*, GetBundle, (IN const IMS_CHAR*), (const, override));
     MOCK_METHOD(void, ReleaseBundle, (), (override));
     MOCK_METHOD(void, AddListener, (IN ICarrierConfigListener*), (override));

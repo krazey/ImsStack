@@ -87,7 +87,7 @@ private:
     AString m_strName;
     AString m_strConfName;
 
-    IMSList<MediaProfileParameter> m_objParameters;
+    ImsList<MediaProfileParameter> m_objParameters;
 };
 
 PUBLIC
@@ -160,7 +160,7 @@ public:
     static const IMS_CHAR KEY_BASIC_RELIABLE[];
 
 private:
-    IMSList<MediaProfile*> m_objProfiles;
+    ImsList<MediaProfile*> m_objProfiles;
 };
 
 PUBLIC GLOBAL const IMS_CHAR MediaConfigPrivate::MPROF_CAPABILITIES[] = "capabilities";
@@ -419,7 +419,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaConfig::ReadFrom()
 
     // Read the value: "ids"
     const AString& strIds = piBuffer->ReadValue(KEY_IDS);
-    IMSList<AString> objIds = strIds.Split(TextParser::CHAR_COMMA);
+    ImsList<AString> objIds = strIds.Split(TextParser::CHAR_COMMA);
 
     if (objIds.IsEmpty())
     {

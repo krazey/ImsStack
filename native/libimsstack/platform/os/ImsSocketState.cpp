@@ -50,8 +50,8 @@ GLOBAL IMS_BOOL ImsSocketState_InitInstance()
 PRIVATE
 ImsSocketState::ImsSocketState() :
         m_piLock(IMS_NULL),
-        m_objHandle2Object(IMSMap<IMS_SOCKET, ImsSocket*>()),
-        m_objDeadSockets(IMSList<ImsSocket*>())
+        m_objHandle2Object(ImsMap<IMS_SOCKET, ImsSocket*>()),
+        m_objDeadSockets(ImsList<ImsSocket*>())
 {
 }
 
@@ -71,7 +71,7 @@ void ImsSocketState::AddDeadSocket(IN ImsSocket* pSocket)
 PUBLIC
 void ImsSocketState::DestroyDeadSockets()
 {
-    IMSList<ImsSocket*> objTmpDeadSockets;
+    ImsList<ImsSocket*> objTmpDeadSockets;
 
     {
         LockGuard objLock(m_piLock);
@@ -112,7 +112,7 @@ void ImsSocketState::AttachHandle(IN IMS_SOCKET hSocket, IN ImsSocket* pSocket)
 PUBLIC
 void ImsSocketState::DetachAll()
 {
-    IMSList<ImsSocket*> objSockets;
+    ImsList<ImsSocket*> objSockets;
 
     {
         LockGuard objLock(m_piLock);
@@ -143,7 +143,7 @@ void ImsSocketState::DetachAll()
 PUBLIC
 void ImsSocketState::DetachAll(IN IMS_CONNECTION hConnection)
 {
-    IMSList<ImsSocket*> objSockets;
+    ImsList<ImsSocket*> objSockets;
 
     {
         LockGuard objLock(m_piLock);

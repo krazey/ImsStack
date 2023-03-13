@@ -42,25 +42,25 @@ public:
 public:
     void AddListener(IN IMS_UINT32 nCategory, IN ISystemListener* piListener);
     void RemoveListener(IN IMS_UINT32 nCategory, const IN ISystemListener* piListener);
-    IMSList<ISystemListener*>* GetListeners(IN IMS_UINT32 nCategory);
+    ImsList<ISystemListener*>* GetListeners(IN IMS_UINT32 nCategory);
 
     static const IMS_CHAR* CategoryToString(IN IMS_UINT32 nCategory);
 
 private:
     IMutex* m_piLock;
     // <category, listener>
-    IMSMap<IMS_UINT32, IMSList<ISystemListener*>> m_objListenerMap;
+    ImsMap<IMS_UINT32, ImsList<ISystemListener*>> m_objListenerMap;
 };
 
 PUBLIC
 SystemListenerHolder::SystemListenerHolder() :
         m_piLock(IMS_NULL),
-        m_objListenerMap(IMSMap<IMS_UINT32, IMSList<ISystemListener*>>())
+        m_objListenerMap(ImsMap<IMS_UINT32, ImsList<ISystemListener*>>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 
     // Initialize the listener map to avoid memory re-allocation
-    IMSList<ISystemListener*> objListeners;
+    ImsList<ISystemListener*> objListeners;
     IMS_UINT32 nCategories[] = {
             SystemConstants::CATEGORY_NETWORK,
             SystemConstants::CATEGORY_WIFI,
@@ -89,7 +89,7 @@ SystemListenerHolder::~SystemListenerHolder()
 }
 
 PUBLIC
-IMSList<ISystemListener*>* SystemListenerHolder::GetListeners(IN IMS_UINT32 nCategory)
+ImsList<ISystemListener*>* SystemListenerHolder::GetListeners(IN IMS_UINT32 nCategory)
 {
     LockGuard objLock(m_piLock);
 
@@ -101,7 +101,7 @@ IMSList<ISystemListener*>* SystemListenerHolder::GetListeners(IN IMS_UINT32 nCat
         return IMS_NULL;
     }
 
-    IMSList<ISystemListener*>& objListeners = m_objListenerMap.GetValueAt(nIndex);
+    ImsList<ISystemListener*>& objListeners = m_objListenerMap.GetValueAt(nIndex);
 
     if (objListeners.IsEmpty())
     {
@@ -121,7 +121,7 @@ void SystemListenerHolder::AddListener(IN IMS_UINT32 nCategory, IN ISystemListen
 
     if (nIndex < 0)
     {
-        IMSList<ISystemListener*> objListeners;
+        ImsList<ISystemListener*> objListeners;
 
         if (!objListeners.Append(piListener))
         {
@@ -133,7 +133,7 @@ void SystemListenerHolder::AddListener(IN IMS_UINT32 nCategory, IN ISystemListen
         return;
     }
 
-    IMSList<ISystemListener*>& objListeners = m_objListenerMap.GetValueAt(nIndex);
+    ImsList<ISystemListener*>& objListeners = m_objListenerMap.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
@@ -170,7 +170,7 @@ void SystemListenerHolder::RemoveListener(
         return;
     }
 
-    IMSList<ISystemListener*>& objListeners = m_objListenerMap.GetValueAt(nIndex);
+    ImsList<ISystemListener*>& objListeners = m_objListenerMap.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
@@ -1604,7 +1604,7 @@ IMS_SINT32 System::AddIpSecSaParameter(IN const IpSecSaParameter& objSaParam, IN
     in.writeInt32(objCk.GetLength());
     in.writeByteArray(objCk.GetLength(), static_cast<const uint8_t*>(objCk.GetData()));
 
-    const IMSList<IpSecSaParameter::Policy>& objPolicys = objSaParam.GetPolicys();
+    const ImsList<IpSecSaParameter::Policy>& objPolicys = objSaParam.GetPolicys();
 
     in.writeInt32(objPolicys.GetSize());
 
@@ -1736,7 +1736,7 @@ void System::NotifyNetworkCategory(
         IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners =
+    ImsList<ISystemListener*>* pListeners =
             pHolder->GetListeners(SystemConstants::CATEGORY_NETWORK);
 
     if (pListeners == IMS_NULL)
@@ -1809,7 +1809,7 @@ void System::NotifyWifiCategory(
     (void)nSlotId;
 
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
-    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_WIFI);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_WIFI);
 
     if (pListeners == IMS_NULL)
     {
@@ -1852,7 +1852,7 @@ void System::NotifyCallCategory(
         IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_CALL);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_CALL);
 
     if (pListeners == IMS_NULL)
     {
@@ -1899,7 +1899,7 @@ void System::NotifyPowerCategory(
     (void)nSlotId;
 
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
-    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_POWER);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_POWER);
 
     if (pListeners == IMS_NULL)
     {
@@ -1939,7 +1939,7 @@ void System::NotifyAlarmCategory(
     (void)nSlotId;
 
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
-    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_ALARM);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_ALARM);
 
     if (pListeners == IMS_NULL)
     {
@@ -1977,7 +1977,7 @@ void System::NotifyConfigCategory(
         IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_CONFIG);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_CONFIG);
 
     if (pListeners == IMS_NULL)
     {
@@ -2015,7 +2015,7 @@ void System::NotifyEventCategory(
         IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_EVENT);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_EVENT);
 
     if (pListeners == IMS_NULL)
     {
@@ -2054,7 +2054,7 @@ void System::NotifySimCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 /*nCmd*/,
         IN IMS_UINT32 nCategory, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(nCategory);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(nCategory);
 
     if (pListeners == IMS_NULL)
     {
@@ -2090,7 +2090,7 @@ void System::NotifyRadioCategory(
         IN IMS_SINT32 nSlotId, IN IMS_UINT32 /*nCmd*/, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_RADIO);
+    ImsList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_RADIO);
 
     if (pListeners == IMS_NULL)
     {

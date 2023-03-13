@@ -55,7 +55,7 @@ PROTECTED VIRTUAL void OsIpcan::GetAccessInfo(
 PROTECTED VIRTUAL void OsIpcan::GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni)
 {
     AString strMacAddress = PlatformContext::GetInstance()->GetSystem()->GetWifiBssId();
-    IMSList<AString> objTokens = strMacAddress.Split(':');
+    ImsList<AString> objTokens = strMacAddress.Split(':');
 
     if (objTokens.GetSize() == ANI_WLAN_MAX_MAC)
     {

@@ -84,7 +84,7 @@ private:
     AStringArray m_objEventPackages;
 
     // CoreService property
-    IMSList<CoreServiceConfig*> m_objCoreServiceConfigs;
+    ImsList<CoreServiceConfig*> m_objCoreServiceConfigs;
 
     // Writable headers property
     AStringArray m_objWriteHeaders;
@@ -93,7 +93,7 @@ private:
     AStringArray m_objReadHeaders;
 
     // SDP fields property for Capabilities
-    IMSList<CapProperty*> m_objCapabilities;
+    ImsList<CapProperty*> m_objCapabilities;
 };
 
 PUBLIC
@@ -1004,7 +1004,7 @@ const CoreServiceConfig* AppConfig::GetCoreServiceConfigEx(IN const AString& str
 }
 
 PUBLIC
-const IMSList<CoreServiceConfig*>& AppConfig::GetCoreServiceConfigs() const
+const ImsList<CoreServiceConfig*>& AppConfig::GetCoreServiceConfigs() const
 {
     return m_pConfigPrivate->m_objCoreServiceConfigs;
 }

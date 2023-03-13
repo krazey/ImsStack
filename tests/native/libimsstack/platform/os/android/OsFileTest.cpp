@@ -172,7 +172,7 @@ TEST_F(OsFileTest, Directory)
     EXPECT_EQ(m_pOsFile->Open(strFileName2, FILE_OPEN_WRITEONLY), IMS_TRUE);
     m_pOsFile->Close();
 
-    IMSList<AString> objstrFileNameList = m_pOsFileUtil->GetAllFiles(strRootstrDirName);
+    ImsList<AString> objstrFileNameList = m_pOsFileUtil->GetAllFiles(strRootstrDirName);
 
     EXPECT_EQ(objstrFileNameList.GetSize(), 4);
 

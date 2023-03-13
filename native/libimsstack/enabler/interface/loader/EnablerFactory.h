@@ -35,15 +35,15 @@ public:
 public:
     void CreateEnablers(IN IMS_SINT32 nSlotId);
     void DestroyEnablers(IN IMS_SINT32 nSlotId);
-    const IMSList<IEnabler*>* GetEnablers(IN IMS_SINT32 nSlotId) const;
+    const ImsList<IEnabler*>* GetEnablers(IN IMS_SINT32 nSlotId) const;
 
 private:
-    void CreateEnablers(IN IMS_SINT32 nSlotId, OUT IMSList<IEnabler*>*& pEnablers);
+    void CreateEnablers(IN IMS_SINT32 nSlotId, OUT ImsList<IEnabler*>*& pEnablers);
 
 private:
     IMutex* m_piLock;
     // <slotId, enablers>
-    IMSMap<IMS_SINT32, IMSList<IEnabler*>*> m_objImsEnablers;
+    ImsMap<IMS_SINT32, ImsList<IEnabler*>*> m_objImsEnablers;
 };
 
 #endif

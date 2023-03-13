@@ -50,7 +50,7 @@ public:
     void DetachSocketHandle(IN IMS_SOCKET hSocket);
     void DetachAllSocketHandle();
     IMS_SINT32 GetMaxSocketHandle();
-    void GetSocketHandles(OUT IMSList<IMS_SOCKET>& objSocketHandles);
+    void GetSocketHandles(OUT ImsList<IMS_SOCKET>& objSocketHandles);
 
     // __IMS_SOCKET_EVENT__ {
     void CreateControlPipe();
@@ -67,7 +67,7 @@ private:
     ImsFdSet* m_pFdSetBackup;
 
     OsMutex m_objLockSocket;
-    IMSList<IMS_SOCKET> m_objSockets;
+    ImsList<IMS_SOCKET> m_objSockets;
 
     // __IMS_SOCKET_EVENT__ {
     OsMutex m_objLockCtrlEvent;
@@ -245,7 +245,7 @@ IMS_SINT32 SocketFdManager::GetMaxSocketHandle()
 }
 
 PUBLIC
-void SocketFdManager::GetSocketHandles(OUT IMSList<IMS_SOCKET>& objSocketHandles)
+void SocketFdManager::GetSocketHandles(OUT ImsList<IMS_SOCKET>& objSocketHandles)
 {
     m_objLockSocket.Lock();
 
@@ -520,7 +520,7 @@ PUBLIC VIRTUAL void OsSocketThread::RunImp()
     IMS_SINT32 nSignaledEvents = 0;
     IOsFactory* piOsFactory = PlatformContext::GetInstance()->GetOsFactory();
     ImsFdSet* pFdSet = piOsFactory->CreateFdSet(IMS_FD_SET);
-    IMSList<IMS_SOCKET> objSocketHandles;
+    ImsList<IMS_SOCKET> objSocketHandles;
 
     while (bLoop)
     {

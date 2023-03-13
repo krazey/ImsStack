@@ -68,7 +68,7 @@ private:
 private:
     AString m_strFrameworkThreadName;
     IMutex* m_piLock;
-    IMSList<ImsThreadMap*> m_objThreads;
+    ImsList<ImsThreadMap*> m_objThreads;
 };
 
 #endif

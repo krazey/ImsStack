@@ -66,7 +66,7 @@ private:
     void GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
             OUT AString& strTimeStamp, OUT AString& strCellInfoAge) override;
     IMS_BOOL GetExtraInfo(IN const AString& strType, OUT AString& strInfo) override;
-    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IpAddress>& objIpAddrs,
+    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT ImsList<IpAddress>& objIpAddrs,
             IN IMS_SINT32 nIpVersion = 0 /*default-local-address-based*/) override;
     IMS_SINT32 GetIfaceId() const override;
     const AString& GetIfaceName() const override;
@@ -140,7 +140,7 @@ private:
 
     IThread* m_piOwnerThread;
     INetworkConnectionListener* m_piConnectionListener;
-    IMSList<INetworkConnectionListener*> m_objReferenceListeners;
+    ImsList<INetworkConnectionListener*> m_objReferenceListeners;
 };
 
 #endif

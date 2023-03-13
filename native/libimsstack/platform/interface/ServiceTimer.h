@@ -43,7 +43,7 @@ public:
 
 private:
     IMutex* m_piLock;
-    IMSList<ITimer*> m_objTimers;
+    ImsList<ITimer*> m_objTimers;
 };
 
 #endif

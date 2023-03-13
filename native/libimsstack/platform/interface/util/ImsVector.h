@@ -20,8 +20,6 @@
 
 #include "ImsNew.h"
 
-#define IMSVector ImsVector
-
 /**
  * @brief This is a wrapper class using c++ stl vector class.
  */

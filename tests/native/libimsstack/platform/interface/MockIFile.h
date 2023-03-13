@@ -66,7 +66,7 @@ public:
     ;
     MOCK_METHOD(IMS_BOOL, DeleteAllFiles,
             (IN const AString& strPathName, IN const AString& strFileType), (override));
-    MOCK_METHOD(IMSList<AString>, GetAllFiles,
+    MOCK_METHOD(ImsList<AString>, GetAllFiles,
             (IN const AString& strPathName, IN const AString& strFileType), (override));
     MOCK_METHOD(IMS_SLONG, GetLastModifiedTime, (IN const AString& strPathName), (override));
 };

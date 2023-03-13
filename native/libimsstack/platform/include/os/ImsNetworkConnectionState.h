@@ -71,8 +71,8 @@ private:
     IMutex* m_piLock;
 
     // List of map (IMS_CONNECTION, ImsNetworkConnection)
-    // IMSMap objHandle2Object;
-    IMSList<ImsNetworkConnection*> m_objNetConnectionList;
+    // ImsMap objHandle2Object;
+    ImsList<ImsNetworkConnection*> m_objNetConnectionList;
 
     IMS_UINT32 m_nHandleForMobile;
     IMS_UINT32 m_nHandleForWiFi;

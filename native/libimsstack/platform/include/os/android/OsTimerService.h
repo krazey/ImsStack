@@ -50,7 +50,7 @@ private:
     static OsTimerService* s_pTimerService;
 
     OsMutex m_objLockTimer;
-    IMSList<OsTimerWrapper*> m_objTimers;
+    ImsList<OsTimerWrapper*> m_objTimers;
 };
 
 #endif

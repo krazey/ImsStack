@@ -18,8 +18,6 @@
 
 #include "ImsSortedVector.h"
 
-#define IMSMap ImsMap
-
 template <typename K, typename V>
 class MapPair
 {

@@ -64,7 +64,7 @@ private:
 
     IMutex* m_piLock;
     // List of (IThread*)
-    IMSList<IThread*> m_objThreads;
+    ImsList<IThread*> m_objThreads;
 
     static INativeThreadMethods* s_piNativeThreadMethods;
 };

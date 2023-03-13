@@ -175,7 +175,7 @@ public:
     }
 
     IMS_SINT32 GetHostByName(IN const AString& /*strHostName*/,
-            OUT IMSList<IpAddress>& /*objIpAddrs*/,
+            OUT ImsList<IpAddress>& /*objIpAddrs*/,
             IN IMS_SINT32 /*nIpVersion = 0*/ /* default-local-address-based */) override
     {
         return 0;

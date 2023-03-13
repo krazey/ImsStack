@@ -399,7 +399,7 @@ PUBLIC VIRTUAL IMS_BOOL OsFileUtil::MakeDirs(
         return IMS_FALSE;
     }
 
-    IMSList<AString> objFolders = strPathName.Split('/');
+    ImsList<AString> objFolders = strPathName.Split('/');
     AString strPath = "/";
     for (IMS_UINT32 i = 0; i < objFolders.GetSize(); ++i)
     {
@@ -516,12 +516,12 @@ PUBLIC VIRTUAL IMS_BOOL OsFileUtil::DeleteAllFiles(
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMSList<AString> OsFileUtil::GetAllFiles(
+PUBLIC VIRTUAL ImsList<AString> OsFileUtil::GetAllFiles(
         IN const AString& strPathName, IN const AString& strFileType /*= AString::ConstNull()*/)
 {
     IMS_TRACE_D("GetAllFiles [%s] [%s]", strPathName.GetStr(), strFileType.GetStr(), 0);
 
-    IMSList<AString> objFileNameList;
+    ImsList<AString> objFileNameList;
     DIR* pDir = opendir(strPathName.GetStr());
 
     if (pDir == IMS_NULL)

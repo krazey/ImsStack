@@ -171,7 +171,7 @@ void EnablerThread::SetState(IN IMS_SINT32 nState)
 PROTECTED
 IMS_BOOL EnablerThread::StartEnablers()
 {
-    const IMSList<IEnabler*>* pEnablers = m_pEnablerFactory->GetEnablers(GetSlotId());
+    const ImsList<IEnabler*>* pEnablers = m_pEnablerFactory->GetEnablers(GetSlotId());
 
     if (pEnablers == IMS_NULL)
     {
@@ -200,7 +200,7 @@ IMS_BOOL EnablerThread::StartEnablers()
 PROTECTED
 void EnablerThread::StopEnablers()
 {
-    const IMSList<IEnabler*>* pEnablers = m_pEnablerFactory->GetEnablers(GetSlotId());
+    const ImsList<IEnabler*>* pEnablers = m_pEnablerFactory->GetEnablers(GetSlotId());
 
     if (pEnablers == IMS_NULL)
     {

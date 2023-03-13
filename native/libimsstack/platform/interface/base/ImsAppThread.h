@@ -81,7 +81,7 @@ protected:
     };
 
 private:
-    IMSList<ImsApp*> m_objApps;
+    ImsList<ImsApp*> m_objApps;
     ImsActivityManager m_objActivityManager;
 };
 

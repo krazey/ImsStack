@@ -29,7 +29,7 @@ PUBLIC GLOBAL const IMS_CHAR ConfigBase::SECTION_UNIQUENESS[] = "Uniqueness";
 PUBLIC
 ConfigBase::ConfigBase(IN IMS_SINT32 nSlotId) :
         ImsSlot(nSlotId),
-        m_objConfigUpdateListeners(IMSMap<IMS_SINT32, IMSList<IConfigUpdateListener*>>())
+        m_objConfigUpdateListeners(ImsMap<IMS_SINT32, ImsList<IConfigUpdateListener*>>())
 {
 }
 
@@ -104,7 +104,7 @@ IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* p
 
     if (nIndex < 0)
     {
-        IMSList<IConfigUpdateListener*> objListeners;
+        ImsList<IConfigUpdateListener*> objListeners;
 
         objListeners.Append(piListener);
 
@@ -119,7 +119,7 @@ IMS_BOOL ConfigBase::AddListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* p
         return IMS_TRUE;
     }
 
-    IMSList<IConfigUpdateListener*>& objListeners = m_objConfigUpdateListeners.GetValueAt(nIndex);
+    ImsList<IConfigUpdateListener*>& objListeners = m_objConfigUpdateListeners.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
@@ -158,7 +158,7 @@ void ConfigBase::RemoveListener(IN IMS_SINT32 nCpi, IN IConfigUpdateListener* pi
         return;
     }
 
-    IMSList<IConfigUpdateListener*>& objListeners = m_objConfigUpdateListeners.GetValueAt(nIndex);
+    ImsList<IConfigUpdateListener*>& objListeners = m_objConfigUpdateListeners.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
@@ -199,7 +199,7 @@ IMS_BOOL ConfigBase::NotifyUpdate(IN IMS_SINT32 nCpi,
         return IMS_FALSE;
     }
 
-    const IMSList<IConfigUpdateListener*>& objListeners =
+    const ImsList<IConfigUpdateListener*>& objListeners =
             m_objConfigUpdateListeners.GetValueAt(nIndex);
 
     if (objListeners.IsEmpty())

@@ -20,7 +20,7 @@ PUBLIC
 ImsActivityManager::ImsActivityManager() :
         m_nMajorId(0),
         m_nMinorId(0),
-        m_objActivities(IMSList<ImsActivity*>())
+        m_objActivities(ImsList<ImsActivity*>())
 {
 }
 

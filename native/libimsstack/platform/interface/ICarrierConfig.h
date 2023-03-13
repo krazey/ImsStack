@@ -73,7 +73,7 @@ public:
      * @param pszKey The config key
      * @return A boolean-array value if present. Otherwise, returns an empty vector.
      */
-    virtual IMSVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* pszKey) const = 0;
+    virtual ImsVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* pszKey) const = 0;
 
     /**
      * @brief Returns the integer-array value for a specified key.
@@ -81,7 +81,7 @@ public:
      * @param pszKey The config key
      * @return An integer-array value if present. Otherwise, returns an empty vector.
      */
-    virtual IMSVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey) const = 0;
+    virtual ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey) const = 0;
 
     /**
      * @brief Returns the long-array value for a specified key.
@@ -89,7 +89,7 @@ public:
      * @param pszKey The config key
      * @return A long-array value if present. Otherwise, returns an empty vector.
      */
-    virtual IMSVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* pszKey) const = 0;
+    virtual ImsVector<IMS_SLONG> GetLongArray(IN const IMS_CHAR* pszKey) const = 0;
 
     /**
      * @brief Returns the string-array value for a specified key.
@@ -97,7 +97,7 @@ public:
      * @param pszKey The config key
      * @return A string-array value if present. Otherwise, returns an empty vector.
      */
-    virtual IMSVector<AString> GetStringArray(IN const IMS_CHAR* pszKey) const = 0;
+    virtual ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey) const = 0;
 
     /**
      * @brief Returns the bundle value for a specified key.

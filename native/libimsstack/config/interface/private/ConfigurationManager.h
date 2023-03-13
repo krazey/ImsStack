@@ -49,7 +49,7 @@ public:
     //    This config. includes IMS-related information in the ISIM.
     const SubscriberConfig* GetSubscriberConfig(
             IN const AString& strId, IN IMS_SINT32 nSlotId) const;
-    const IMSList<SubscriberConfig*>& GetSubscriberConfigs(IN IMS_SINT32 nSlotId) const;
+    const ImsList<SubscriberConfig*>& GetSubscriberConfigs(IN IMS_SINT32 nSlotId) const;
     // Engine configuration - impl. defined
     //    This config. includes the information for an optional/additional operation
     //    in J281 engine implementation.

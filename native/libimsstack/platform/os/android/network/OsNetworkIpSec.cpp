@@ -73,8 +73,8 @@ PUBLIC VIRTUAL void OsNetworkIpSec::DestroyAllPolicies()
     {
         OsIpSecPolicy* pPolicy = m_objPolicies.GetAt(i);
 
-        const IMSList<OsIpSecSp*>& objSPs = pPolicy->GetSPs();
-        const IMSList<OsIpSecSa*>& objSAs = pPolicy->GetSAs();
+        const ImsList<OsIpSecSp*>& objSPs = pPolicy->GetSPs();
+        const ImsList<OsIpSecSa*>& objSAs = pPolicy->GetSAs();
 
         IMS_TRACE_D("DestroyAllPolicies :: Policy(%p) , SP-size(%d), SA-size(%d)", pPolicy,
                 objSPs.GetSize(), objSAs.GetSize());
@@ -105,8 +105,8 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIpSecPolicy* piPolicy)
     IMS_TRACE_D("AddPolicy(SP+SA) -- starts", 0, 0, 0);
 
     OsIpSecPolicy* pPolicy = DYNAMIC_CAST(OsIpSecPolicy*, piPolicy);
-    const IMSList<OsIpSecSp*>& objSPs = pPolicy->GetSPs();
-    const IMSList<OsIpSecSa*>& objSAs = pPolicy->GetSAs();
+    const ImsList<OsIpSecSp*>& objSPs = pPolicy->GetSPs();
+    const ImsList<OsIpSecSa*>& objSAs = pPolicy->GetSAs();
 
     IMS_TRACE_I("AddPolicy :: SP-size=%d, SA-size=%d", objSPs.GetSize(), objSAs.GetSize(), 0);
 
@@ -215,7 +215,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN ISocket* piSocket
     for (IMS_UINT32 i = 0; i < m_objSaParams.GetSize(); i++)
     {
         const IpSecSaParameter& objSaParam = m_objSaParams.GetValueAt(i);
-        const IMSList<IpSecSaParameter::Policy>& objPolicys = objSaParam.GetPolicys();
+        const ImsList<IpSecSaParameter::Policy>& objPolicys = objSaParam.GetPolicys();
 
         for (IMS_UINT32 j = 0; j < objPolicys.GetSize(); j++)
         {
@@ -275,7 +275,7 @@ PUBLIC VIRTUAL IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(
     for (IMS_UINT32 i = 0; i < m_objSaParams.GetSize(); i++)
     {
         const IpSecSaParameter& objSaParam = m_objSaParams.GetValueAt(i);
-        const IMSList<IpSecSaParameter::Policy>& objPolicys = objSaParam.GetPolicys();
+        const ImsList<IpSecSaParameter::Policy>& objPolicys = objSaParam.GetPolicys();
 
         for (IMS_UINT32 j = 0; j < objPolicys.GetSize(); j++)
         {
@@ -310,7 +310,7 @@ PUBLIC VIRTUAL void OsNetworkIpSec::RemoveIpSecTransforms(IN IMS_SINT32 nSocketI
     for (IMS_UINT32 i = 0; i < m_objSaParams.GetSize(); i++)
     {
         const IpSecSaParameter& objSaParam = m_objSaParams.GetValueAt(i);
-        const IMSList<IpSecSaParameter::Policy>& objPolicys = objSaParam.GetPolicys();
+        const ImsList<IpSecSaParameter::Policy>& objPolicys = objSaParam.GetPolicys();
 
         for (IMS_UINT32 j = 0; j < objPolicys.GetSize(); j++)
         {

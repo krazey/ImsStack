@@ -48,7 +48,7 @@ private:
 
 private:
     IMutex* m_piLock;
-    IMSList<IFrameworkThreadListener*> m_objListeners;
+    ImsList<IFrameworkThreadListener*> m_objListeners;
 };
 
 #endif

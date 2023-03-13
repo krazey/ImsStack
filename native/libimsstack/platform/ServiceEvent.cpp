@@ -125,14 +125,14 @@ private:
     IMutex* m_piLock;
     IEventReceiver* m_piReceiver;
     // <Event, EventActivity>
-    IMSMap<IMS_SINT32, IMSList<EventActivity*>> m_objEventMap;
+    ImsMap<IMS_SINT32, ImsList<EventActivity*>> m_objEventMap;
 };
 
 PUBLIC
 EventHolder::EventHolder(IN IMS_SINT32 nSlotId) :
         m_piLock(IMS_NULL),
         m_piReceiver(IMS_NULL),
-        m_objEventMap(IMSMap<IMS_SINT32, IMSList<EventActivity*>>())
+        m_objEventMap(ImsMap<IMS_SINT32, ImsList<EventActivity*>>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 
@@ -148,7 +148,7 @@ PUBLIC VIRTUAL EventHolder::~EventHolder()
 
         for (IMS_UINT32 i = 0; i < m_objEventMap.GetSize(); ++i)
         {
-            IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(i);
+            ImsList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(i);
 
             for (IMS_UINT32 j = 0; j < objActivities.GetSize(); ++j)
             {
@@ -179,7 +179,7 @@ IMS_BOOL EventHolder::AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piLis
 
     if (nIndex < 0)
     {
-        IMSList<EventActivity*> objActivities;
+        ImsList<EventActivity*> objActivities;
         EventActivity* pActivity = new EventActivity(nEvent, piListener);
 
         if (pActivity == IMS_NULL)
@@ -201,7 +201,7 @@ IMS_BOOL EventHolder::AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piLis
         return IMS_TRUE;
     }
 
-    IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
+    ImsList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objActivities.GetSize(); ++i)
     {
@@ -248,7 +248,7 @@ void EventHolder::RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener* piList
         return;
     }
 
-    IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
+    ImsList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objActivities.GetSize(); ++i)
     {
@@ -284,7 +284,7 @@ void EventHolder::SetUnregisteredEvents()
         for (IMS_UINT32 i = 0; i < m_objEventMap.GetSize(); i++)
         {
             IMS_SINT32 nEvent = m_objEventMap.GetKeyAt(i);
-            const IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(i);
+            const ImsList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(i);
 
             m_piReceiver->SetEvent(nEvent);
 
@@ -313,7 +313,7 @@ PRIVATE VIRTUAL IMS_BOOL EventHolder::EventReceiver_NotifyEvent(
 
     IMS_TRACE_I("EventReceiver :: E (%d), W (%d), L (%d)", nEvent, nWParam, nLParam);
 
-    IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
+    ImsList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
 
     if (objActivities.IsEmpty())
     {

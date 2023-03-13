@@ -234,7 +234,7 @@ public:
     virtual IMS_BOOL DeleteAllFiles(IN const AString& strPathName,
             IN const AString& strFileType = AString::ConstNull()) = 0;
 
-    virtual IMSList<AString> GetAllFiles(IN const AString& strPathName,
+    virtual ImsList<AString> GetAllFiles(IN const AString& strPathName,
             IN const AString& strFileType = AString::ConstNull()) = 0;
 
     virtual IMS_SLONG GetLastModifiedTime(IN const AString& strPathName) = 0;
