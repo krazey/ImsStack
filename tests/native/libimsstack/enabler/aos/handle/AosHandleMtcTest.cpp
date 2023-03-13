@@ -47,7 +47,6 @@
 
 #include "../../interface/aos/MockIAosService.h"
 #include "../../interface/aos/MockIImsAosListener.h"
-#include "../../../platform/interface/MockIImsRadio.h"
 #include "../../../platform/interface/TestImsRadioService.h"
 
 using ::testing::_;
@@ -2410,6 +2409,52 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_Test10)
 
     ProcessNetworkChanged();
     EXPECT_TRUE(IsHoldingBlockForMobile(AosHandle::BLOCK_NETWORK));
+}
+
+TEST_F(AosHandleMtcTest, ProcessNetworkChanged_RefreshSsacInfoOnLte)
+{
+    SsacInfo objSsacInfoBarred;
+    SsacInfo objSsacInfoNotBarred;
+
+    objSsacInfoBarred.nBarringFactorForVoice = 0;
+    objSsacInfoBarred.nBarringFactorForVideo = 100;
+    objSsacInfoBarred.nBarringTimeSecForVoice = 60;
+    objSsacInfoBarred.nBarringTimeSecForVideo = 0;
+
+    objSsacInfoNotBarred.nBarringFactorForVoice = 100;
+    objSsacInfoNotBarred.nBarringFactorForVideo = 100;
+    objSsacInfoNotBarred.nBarringTimeSecForVoice = 0;
+    objSsacInfoNotBarred.nBarringTimeSecForVideo = 0;
+
+    EXPECT_CALL(m_objTestImsRadioService.GetMockImsRadio(), GetSsacInfo())
+            .Times(2)
+            .WillOnce(ReturnRef(objSsacInfoNotBarred))
+            .WillOnce(ReturnRef(objSsacInfoBarred));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRequiredVolteBlockBySsac())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetVolteHysTime())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(0));
+
+    SetNetworkType(NW_REPORT_RADIO_LTE);
+    SetEpdgEnabled(IMS_FALSE);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsRegWithFeatureTagUnavailableSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    SetSsacBarred(IMS_TRUE);
+
+    Init();
+
+    ProcessNetworkChanged();
+    EXPECT_FALSE(IsSsacBarred());
+
+    ProcessNetworkChanged();
+    EXPECT_TRUE(IsSsacBarred());
 }
 
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test1)
