@@ -66,13 +66,12 @@ public:
     inline MediaConfig* GetMediaConfig() const { return m_pMediaConfig; }
 
     IMS_BOOL CreateConfigs(IN IMS_SINT32 nId);
+    void DestroyConfigs();
 
     void InitConfigs(IN IMS_SINT32 nId);
     void RefreshConfigs(IN IMS_SINT32 nId);
 
 private:
-    void DestroyConfigs();
-
     IMS_BOOL CreateSubscriberConfig(IN IMS_SINT32 nId);
     IMS_BOOL CreateSubscriberConfigIfNotPresent(IN IMS_SINT32 nId);
     IMS_BOOL CreateEngineConfig(IN IMS_SINT32 nId);
@@ -355,7 +354,7 @@ void ConfigurationHolder::RefreshConfigs(IN IMS_SINT32 nId)
     }
 }
 
-PRIVATE
+PUBLIC
 void ConfigurationHolder::DestroyConfigs()
 {
     if (!m_objSubscriberConfigs.IsEmpty())
@@ -551,6 +550,7 @@ public:
     }
 
     IMS_BOOL Initialize();
+    void DestroyConfigs();
 
 private:
     friend class ConfigurationManager;
@@ -612,6 +612,24 @@ IMS_BOOL ConfigurationManagerPrivate::Initialize()
     }
 
     return IMS_TRUE;
+}
+
+PUBLIC
+void ConfigurationManagerPrivate::DestroyConfigs()
+{
+    IMS_SINT32 nSimCount = SystemConfig::GetActiveSimCount();
+
+    for (IMS_SINT32 i = 0; i < nSimCount; ++i)
+    {
+        ConfigurationHolder* pHolder = GetHolder(i);
+
+        if (pHolder == IMS_NULL)
+        {
+            continue;
+        }
+
+        pHolder->DestroyConfigs();
+    }
 }
 
 PRIVATE
@@ -770,6 +788,12 @@ PUBLIC
 IMS_BOOL ConfigurationManager::Initialize()
 {
     return m_pConfigMngrPrivate->Initialize();
+}
+
+PUBLIC
+void ConfigurationManager::DestroyConfigs()
+{
+    m_pConfigMngrPrivate->DestroyConfigs();
 }
 
 PUBLIC
