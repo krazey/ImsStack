@@ -46,7 +46,6 @@
 
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
     <boolean name="required_init_reg_after_ims_call_end_on_reg_held_bool" value="true"/>
-    <boolean name="required_volte_block_by_airplane_mode_bool" value="true"/>
     <boolean name="rereg_with_changed_country_on_wifi_bool" value="true"/>
     <int name="geolocation_pidf_forming_policy_int" value="3"/>
     <int name="reg_actual_wait_time_policy_int" value="2"/>

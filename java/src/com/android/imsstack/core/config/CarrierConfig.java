@@ -470,8 +470,6 @@ public class CarrierConfig {
                 "required_cdmaless_feature_tag_bool";
         public static final String KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL =
                 "required_init_reg_after_ims_call_end_on_reg_held_bool";
-        public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL =
-                "required_volte_block_by_airplane_mode_bool";
         public static final String KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL =
                 "required_volte_block_by_ssac_bool";
         public static final String KEY_REQUIRED_WFC_BLOCK_BY_AIRPLANE_MODE_BOOL =

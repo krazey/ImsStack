@@ -39,7 +39,6 @@ public:
             bRemoveOldSaOnEstablishingSa(IMS_FALSE),
             bRequiredCdmalessFeatureTag(IMS_FALSE),
             bRequiredInitRegAfterImsCallEndOnRegHeld(IMS_FALSE),
-            bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
             bRequiredVolteBlockBySsac(IMS_FALSE),
             bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
             bReregWithChangedCountryOnWifi(IMS_FALSE),
@@ -112,7 +111,6 @@ public:
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
     IMS_BOOL bRequiredCdmalessFeatureTag;
     IMS_BOOL bRequiredInitRegAfterImsCallEndOnRegHeld;
-    IMS_BOOL bRequiredVolteBlockByAirplaneMode;
     IMS_BOOL bRequiredVolteBlockBySsac;
     IMS_BOOL bRequiredWfcBlockByAirplaneMode;
     IMS_BOOL bReregWithChangedCountryOnWifi;

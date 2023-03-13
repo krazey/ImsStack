@@ -56,7 +56,6 @@ public:
     IMS_BOOL IsTtySupported() const override;
     IMS_BOOL IsVopsIgnoredForVolteEnabled() const override;
     IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const override;
-    IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const override;
     IMS_BOOL IsRequiredVolteBlockBySsac() const override;
     IMS_BOOL IsRequiredWfcBlockByAirplaneMode() const override;
     IMS_BOOL IsReregRetryWithChangedCountryOnWifi() const override;
