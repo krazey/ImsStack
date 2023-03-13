@@ -22,6 +22,7 @@
 #include "ImsMap.h"
 #include "ImsTypeDef.h"
 #include "JniCallInfo.h"
+#include "JniExternalCall.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
 
@@ -48,7 +49,8 @@ public:
             IN_OUT android::Parcel& objParcel);
     static void WriteConfUsersToParcel(
             IN const ImsList<ConfUser*>& objUsers, IN_OUT android::Parcel& objParcel);
-    // static void WriteDialogInfoToParcel(IN DialogInfo* pInfo, IN_OUT android::Parcel& objParcel);
+    static void WriteExternalCallsToParcel(IN ImsList<const JniExternalCall*>& objJniExternalCalls,
+            IN_OUT android::Parcel& objParcel);
     static void WriteCallReasonInfoToParcel(
             IN const CallReasonInfo& objReason, IN_OUT android::Parcel& objParcel);
 };

@@ -139,4 +139,17 @@ TEST_F(JniMtcServiceThreadTest, OnJniReady)
     pJniServiceThread->OnJniReady();
 }
 
+TEST_F(JniMtcServiceThreadTest, OnExternalCallsChanged)
+{
+    IMS_UINT32 eType = IuMtcService::EXTERNAL_CALLS_CHANGED;
+    objParcel.writeInt32(eType);
+    objParcel.setDataPosition(0);
+
+    EXPECT_CALL(objMockThread, PostMessageI(MESSAGE_THREAD_SWITCHING, _, IsSameMessageType(eType)))
+            .Times(1);
+
+    ImsList<const JniExternalCall*> objJniExternalCall;
+    pJniServiceThread->OnExternalCallsChanged(objJniExternalCall);
+}
+
 }  // namespace android
