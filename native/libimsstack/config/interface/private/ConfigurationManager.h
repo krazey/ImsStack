@@ -65,6 +65,7 @@ public:
 
     //// Load a default basic configuration for IMS client platform
     IMS_BOOL Initialize();
+    void DestroyConfigs();
 
     // Invoked by enabler threads
     void InitConfigs(IN IMS_SINT32 nSlotId);
