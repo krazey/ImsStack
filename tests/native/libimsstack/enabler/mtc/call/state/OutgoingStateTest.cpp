@@ -134,6 +134,7 @@ protected:
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
 
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMediaManager, GetRemoteRtpPort(_, MEDIATYPE_AUDIO)).WillByDefault(Return(12345));
 
         pOutgoingState = new OutgoingState(objCallContext);
     }
@@ -1405,6 +1406,29 @@ TEST_F(OutgoingStateTest, SessionRPRReceivedUpdatesQosPreconditionInfo)
     EXPECT_CALL(objPreconditionManager, OnMessageReceived(&objSession, &objMessage));
 
     EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionRPRReceived(&objSession, 0));
+}
+
+TEST_F(OutgoingStateTest, SessionRPRReceivedTerminatesCallIfRemoteAudioPortIsZero)
+{
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+    ON_CALL(objMessageUtils, GetResponseStatusCode(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(SipStatusCode::SC_180));
+    MockIMessage objMessage;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_START, 0))
+            .WillByDefault(Return(&objMessage));
+
+    ON_CALL(objMediaManager, GetRemoteRtpPort(_, MEDIATYPE_AUDIO)).WillByDefault(Return(0));
+
+    EXPECT_CALL(objMtcSession,
+            Terminate(_,
+                    CallReasonInfo(CODE_LOCAL_CALL_CS_RETRY_REQUIRED,
+                            EXTRA_CODE_CALL_RETRY_SILENT_REDIAL)));
+    EXPECT_CALL(objNotifier,
+            SendStartFailed(CallReasonInfo(
+                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL)));
+    EXPECT_EQ(CallStateName::TERMINATING, pOutgoingState->SessionRPRReceived(&objSession, 0));
 }
 
 TEST_F(OutgoingStateTest, SessionRPRReceivedTerminatesCallIfSendingPrackFails)

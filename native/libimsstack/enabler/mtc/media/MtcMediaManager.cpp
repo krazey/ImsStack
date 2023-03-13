@@ -466,13 +466,20 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::SetRtpPort(
-        IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort)
+        IN ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_UINT32 nPort)
 {
-    IMS_TRACE_D("SetRtpPort : MediaType[%d] Port[%d]", eMediaTypes, nPort, 0);
+    IMS_TRACE_D("SetRtpPort : MediaType[%d] Port[%d]", eMediaType, nPort, 0);
 
-    MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaTypes);
+    MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaType);
     m_piMediaSession->SetOptions(
             GetMediaNegoId(piSession), IMediaSession::OptionType::SET_RTP_PORT, eContents, nPort);
+}
+
+PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetRemoteRtpPort(
+        IN ISession* piSession, IN IMS_UINT32 eMediaType)
+{
+    return m_piMediaSession->GetRemotePort(
+            GetMediaNegoId(piSession), MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaType));
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::SetConferenceCall(IN IMS_BOOL bConference)
