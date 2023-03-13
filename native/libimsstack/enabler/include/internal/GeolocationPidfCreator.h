@@ -33,13 +33,6 @@ public:
     GeolocationPidfCreator& operator=(IN const GeolocationPidfCreator&) = delete;
 
 public:
-    // This method creates PIDF for Geolocation with country only.
-    IMS_BOOL Create(IN const AString& strEntityUri, IN const AString& strCountry,
-            OUT ByteArray& objContent) const;
-    // This method creates PIDF for Geolocation based on the option (country info.),
-    // but if country is not determined, then don't create PIDF.
-    IMS_BOOL Create(IN const AString& strEntityUri, IN IMS_BOOL bUnknownCountryAllowed,
-            OUT ByteArray& objContent) const;
     // This method creates PIDF for Geolocation with country only or country and state.
     // but if country is not determined, then don't create PIDF.
     IMS_BOOL CreateWithoutPosition(IN const AString& strEntityUri,
