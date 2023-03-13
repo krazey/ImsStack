@@ -551,10 +551,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
                     IMS_FALSE))
             .WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL,
-                    IMS_FALSE))
-            .WillOnce(Return(IMS_FALSE));
-    EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL, IMS_FALSE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(objCarrierConfig,
@@ -783,7 +779,6 @@ TEST_F(AosNConfigurationTest, InitAssetConfig)
     EXPECT_FALSE(pAosNConfiguration->IsRegRetryWithIpVerFallback());
     EXPECT_FALSE(pAosNConfiguration->IsOldSaOnEstablishingSaRemoved());
     EXPECT_TRUE(pAosNConfiguration->IsRegRequiredAfterImsCallEndOnRegHeld());
-    EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredVolteBlockBySsac());
     EXPECT_FALSE(pAosNConfiguration->IsRequiredWfcBlockByAirplaneMode());
     EXPECT_FALSE(pAosNConfiguration->IsReregRetryWithChangedCountryOnWifi());

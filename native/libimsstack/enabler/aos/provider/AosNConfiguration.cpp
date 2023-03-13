@@ -169,11 +169,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsAvailableWithoutVoiceCapa
     return m_objAsset.bSmsOverImsAvailableWithoutVoiceCapa;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockByAirplaneMode() const
-{
-    return m_objAsset.bRequiredVolteBlockByAirplaneMode;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredVolteBlockBySsac() const
 {
     return m_objAsset.bRequiredVolteBlockBySsac;
@@ -1192,8 +1187,6 @@ void AosNConfiguration::InitAssetsConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL);
     m_objAsset.bRequiredInitRegAfterImsCallEndOnRegHeld = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_REQUIRED_INIT_REG_AFTER_IMS_CALL_END_ON_REG_HELD_BOOL);
-    m_objAsset.bRequiredVolteBlockByAirplaneMode =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_AIRPLANE_MODE_BOOL);
     m_objAsset.bRequiredVolteBlockBySsac =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_REQUIRED_VOLTE_BLOCK_BY_SSAC_BOOL);
     m_objAsset.bRequiredWfcBlockByAirplaneMode =
