@@ -333,6 +333,13 @@ public class ImsCallUtils {
             }
         }
 
+        // EXTRA_IS_CALL_PULL (true: Idicates a pull of an external call)
+        boolean isCallPull = profile.getCallExtraBoolean(ImsCallProfile.EXTRA_IS_CALL_PULL, false);
+
+        if (isCallPull) {
+            si.addService_bool(SuppInfo.TYPE_CALL_PULL, isCallPull);
+        }
+
         // "sos" URN for IMS emergency call
         if (isEmergencyCall(profile)) {
             List<String> urns = profile.getEmergencyUrns();

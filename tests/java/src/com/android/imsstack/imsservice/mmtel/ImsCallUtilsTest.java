@@ -54,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ImsCallUtilsTest {
@@ -182,17 +183,51 @@ public class ImsCallUtilsTest {
 
     @Test
     public void testCreateSuppInfoFromCallProfile() {
-        ImsCallProfile profile = new ImsCallProfile();
+        ImsCallProfile profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_EMERGENCY,
+                ImsCallProfile.CALL_TYPE_VOICE);
+        List<String> urns = new ArrayList<String>();
+        /*
+        * verify SOS URN for IMS emergency call
+        * Case 1:- urns is empty and ESCV is EMERGENCY_SERVICE_CATEGORY_POLICE
+        */
+        profile.setEmergencyUrns(urns);
+        profile.setEmergencyServiceCategories(1);
+        SuppInfo suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile);
+        assertEquals(1, suppInfo.getServiceSize());
+        assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_POLICE,
+                suppInfo.getService(SuppInfo.TYPE_TARGET_URI).strValue);
+
+        //Case 2:- urns is empty and ESCV is UNSPECIFIED
+        profile.setEmergencyServiceCategories(0);
+        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile);
+        assertEquals(1, suppInfo.getServiceSize());
+        assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_GENERIC,
+                suppInfo.getService(SuppInfo.TYPE_TARGET_URI).strValue);
+
+        //Case 3:- urns is not empty
+        urns.add(SOS_SERVICE_URN_AMBULANCE);
+        profile.setEmergencyUrns(urns);
+        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile);
+        assertEquals(1, suppInfo.getServiceSize());
+        assertNotNull(suppInfo.getService(SuppInfo.TYPE_TARGET_URI));
+        assertEquals(SOS_SERVICE_URN_AMBULANCE,
+                suppInfo.getService(SuppInfo.TYPE_TARGET_URI).strValue);
+
+        //verify SuppInfo for TYPE_CALLERID, TYPE_CNAP and TYPE_CALL_PULL
+        profile = new ImsCallProfile();
         profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR, 1);
-        Bundle extras = new Bundle();
-        extras.putBoolean(ImsCallProfile.EXTRA_IS_CALL_PULL, true);
-        profile.mCallExtras.putBundle(ImsCallProfile.EXTRA_OEM_EXTRAS, extras);
-        profile.setCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING, ImsCallProfile.DIALSTRING_NORMAL);
         profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR, ImsCallProfile.OIR_DEFAULT);
         profile.setCallExtraInt(ImsCallProfile.EXTRA_CNAP,
                 ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED);
-        SuppInfo ret = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile);
-        assertNotNull(ret);
+        profile.setCallExtra(ImsCallProfile.EXTRA_CNA, "UNKNOWN");
+        profile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_CALL_PULL, true);
+        suppInfo = ImsCallUtils.createSuppInfoFromCallProfile(mContext, profile);
+        assertEquals(3, suppInfo.getServiceSize());
+        assertNotNull(suppInfo.getService(SuppInfo.TYPE_CALLERID));
+        assertNotNull(suppInfo.getService(SuppInfo.TYPE_CNAP));
+        assertNotNull(suppInfo.getService(SuppInfo.TYPE_CALL_PULL));
     }
 
     @Test
