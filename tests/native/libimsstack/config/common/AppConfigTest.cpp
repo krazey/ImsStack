@@ -81,6 +81,8 @@ TEST_F(AppConfigTest, AssignmentOperator)
             objAssignedAppConfig.GetCoreServiceConfigs();
 
     EXPECT_TRUE(objCoreServiceConfigs.GetSize() == 2);
+
+    delete pRegistry;
 }
 
 }  // namespace android
