@@ -1459,6 +1459,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             public void run() {
                 try {
                     if (session != null) {
+                        /* When {@link #close} the {@link #ImsCallSessionImpl} internally will clear
+                         * the {@link #WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END} so it will not
+                         * wait for {#link #onAudioSessionClosed}
+                         */
+                        mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
                         session.close();
                     }
                 } catch (Throwable t) {
@@ -1787,7 +1792,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             if (ImsCallUtils.isCsSilentRedialRequired(reasonInfo)) {
-                // Call StarFailed callback to re-dial the call via CS
+                /* Call StarFailed callback to re-dial the call via CS
+                 * {@link #invokeStartFailed} will called only in case of
+                 * {@link #CODE_LOCAL_CALL_CS_RETRY_REQUIRED}. For other cases will call
+                 * {@link #invokeTerminated}
+                 */
                 callbackReplacementRequired = false;
             }
         } else {
@@ -1811,11 +1820,17 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         if (delay <= 0) {
             mCallback.invokeStartFailed(this, reasonInfo);
+            /* When {@link #invokeStartFailed} is called, from framework side {@link #close} will
+             * not get called so {@link #MtcCall} for start failed session will not close.
+             * This will close the {@link #MtcCall} when call session start failed.
+            */
+            closeInternal(ImsCallSessionImpl.this);
         } else {
             mStartFailedCallback = new Runnable() {
                 @Override
                 public void run() {
                     mCallback.invokeStartFailed(ImsCallSessionImpl.this, reasonInfo);
+                    closeInternal(ImsCallSessionImpl.this);
                 }
             };
 
