@@ -47,7 +47,7 @@ PUBLIC GLOBAL const IMS_CHAR ConfigMtc::APP_CONFIG[] = {
         "media_types=audio video text\n"
         "\n"
         "[Event]\n"
-        "package_names=conference presence\n"
+        "package_names=conference dialog presence\n"
         "\n"
         "[CoreService_0]\n"
         "service_id=" CONFIG_SERVICE_NAME "\n"

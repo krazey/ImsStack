@@ -26,8 +26,7 @@ import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
-import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
-import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;
+import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsListener;
@@ -64,7 +63,7 @@ public class MtcApp implements Closeable {
         /**
          * Notifies the application when the dialog state is changed.
          */
-        public void onDialogStateChanged(MtcApp app, DialogsInfo dialogsInfo) {
+        public void onExternalCallStateChanged(MtcApp app, ExternalCalls externalCalls) {
             // no-op
         }
 
@@ -427,7 +426,7 @@ public class MtcApp implements Closeable {
                 case IUMtcService.PRE_INCOMING_CALL: // FALL-THROUGH
                 case IUMtcService.INCOMING_CALL_INFO: // FALL-THROUGH
                 case IUMtcService.AUTO_REJECTED_CALL: // FALL-THROUGH
-                case IUDialogs.NOTIFY_DIALOG_INFO: // FALL-THROUGH
+                case IUMtcService.EXTERNAL_CALLS_CHANGED: // FALL-THROUGH
                     onMessageForCallApp(msg, parcel);
                     break;
                 case IUMtcService.SERVICE_CHANGED: // FALL-THROUGH
@@ -483,11 +482,11 @@ public class MtcApp implements Closeable {
             //         //mCallListener.onIncomingCallReceived(MtcApp.this, 0, incomingCall);
             //     }
             // }
-            else if (msg == IUDialogs.NOTIFY_DIALOG_INFO) {
-                DialogsInfo dialogsInfo = new DialogsInfo(parcel);
+            else if (msg == IUMtcService.EXTERNAL_CALLS_CHANGED) {
+                ExternalCalls externalCalls = new ExternalCalls(parcel);
 
                 if (mCallListener != null) {
-                    mCallListener.onDialogStateChanged(MtcApp.this, dialogsInfo);
+                    mCallListener.onExternalCallStateChanged(MtcApp.this, externalCalls);
                 }
             }
         }

@@ -88,3 +88,15 @@ void JniMtcServiceThread::OnJniReady()
 
     SendData2Java(objParcel);
 }
+
+PUBLIC
+void JniMtcServiceThread::OnExternalCallsChanged(
+        IN ImsList<const JniExternalCall*>& objJniExternalCalls)
+{
+    IMS_TRACE_D("OnExternalCallsChanged", 0, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcService::EXTERNAL_CALLS_CHANGED);
+    JniMtcUtils::WriteExternalCallsToParcel(objJniExternalCalls, objParcel);
+
+    SendData2Java(objParcel);
+}

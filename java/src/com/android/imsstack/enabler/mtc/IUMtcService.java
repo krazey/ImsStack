@@ -39,6 +39,7 @@ public class IUMtcService {
     public static final int INCOMING_CALL_INFO = (EVENT_I2U + 4);
     public static final int AUTO_REJECTED_CALL = (EVENT_I2U + 5);
     public static final int JNI_READY          = (EVENT_I2U + 6);
+    public static final int EXTERNAL_CALLS_CHANGED = (EVENT_I2U + 7);
 
     // Service Status
     public static final int SERVICE_NONE      = 0;
