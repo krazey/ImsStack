@@ -136,6 +136,7 @@ public class SscTransactionTest {
     public void tearDown() {
         AgentFactory.getInstance().setAgent(ImsRadioInterface.class, null, SLOT_0);
         mSscTransaction.close();
+        SscConfig.clear(SLOT_0);
     }
 
     @Test

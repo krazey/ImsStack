@@ -39,6 +39,7 @@ import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.config.CarrierConfig;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,7 +98,15 @@ public class SscHttpConnectionTest {
         dcs.put(DcFactory.APN, mMockDcApn);
         DcFactory.setObjects(SLOT_0, dcs);
 
+        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+
         mSscHttpConnection = new FakeSscHttpConnection(SLOT_0, mApnType);
+    }
+
+    @After
+    public void tearDown() {
+        SscConfig.clear(SLOT_0);
     }
 
     @Test
@@ -195,10 +204,8 @@ public class SscHttpConnectionTest {
     public void sendRequest_setExtraHeadersWithoutBody() {
         String identity = "\"" + mXui + "\"";
         String xmlBody = "";
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING))
                 .thenReturn("ImsClient");
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_GET, mRequestUri, mXui,
                 xmlBody);
@@ -217,10 +224,8 @@ public class SscHttpConnectionTest {
         String identity = "\"" + mXui + "\"";
         String xmlBody = "This is XML body";
         when(mMockConnection.getOutputStream()).thenReturn(mMockOutputStream);
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING))
                 .thenReturn("ImsClient");
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         mSscHttpConnection.sendRequest(ISscHttpConnection.HTTP_REQUEST_PUT, mRequestUri, mXui,
                 xmlBody);
