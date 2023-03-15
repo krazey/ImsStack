@@ -48,6 +48,7 @@
 
 using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::AnyOf;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -172,6 +173,53 @@ TEST_F(MergeControllerTest, ProcessMergeCommand)
     EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_SUBSCRIBE, _)).Times(1);
     EXPECT_CALL(*pMockQueue, CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE, _, IMS_FALSE))
             .Times(2);
+    EXPECT_CALL(*pMockQueue, CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_CALL, _, _))
+            .Times(2);
+    EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, _)).Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_MTCCALL, _)).Times(1);
+
+    pController->ProcessCommand(IConferenceController::MERGE, objUsers);
+
+    EXPECT_EQ(pController->GetState(), ConferenceController::STATE_MERGING);
+}
+
+TEST_F(MergeControllerTest, ProcessMergeCommandWithSubscriptionNotifyReferFlow)
+{
+    ConfUser* pUser1 = new ConfUser();
+    ConfUser* pUser2 = new ConfUser();
+    pUser1->nConnectionId = 0;
+    pUser2->nConnectionId = 1;
+    ImsList<ConfUser*> objUsers;
+    objUsers.Append(pUser1);
+    objUsers.Append(pUser2);
+
+    ImsList<ConfUser*> objUsersCopied;
+    objUsersCopied.Append(new ConfUser(*pUser1));
+    objUsersCopied.Append(new ConfUser(*pUser2));
+
+    ON_CALL(*pMockConfigurationManager, GetConferenceInvitingReferType).WillByDefault(Return(1));
+    ON_CALL(*pMockConfigurationManager, GetConferenceSubscribeType).WillByDefault(Return(0));
+    ON_CALL(*pMockConfigurationManager, GetConferenceSipFlowOrder).WillByDefault(Return(2));
+
+    EXPECT_CALL(*pMockParticipantList, GetSize)
+            .Times(AnyNumber())
+            .WillOnce(Return(0))
+            .WillRepeatedly(Return(2));
+
+    ON_CALL(*pMockParticipantList, GetConfUsers).WillByDefault(Return(objUsersCopied));
+
+    EXPECT_CALL(*pMockParticipantList, AddUser(pUser1)).Times(1);
+    EXPECT_CALL(*pMockParticipantList, AddUser(pUser2)).Times(1);
+
+    EXPECT_CALL(*pMockQueue,
+            CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, _, IMS_FALSE))
+            .Times(1);
+    EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_SUBSCRIBE, _)).Times(1);
+    EXPECT_CALL(*pMockQueue,
+            CreateNPutWithUser(
+                    AnyOf(CONTROL_OPERATION_REFER_INVITE, CONTROL_OPERATION_CHECK_CONNECTED), _,
+                    IMS_FALSE))
+            .Times(4);
     EXPECT_CALL(*pMockQueue, CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_CALL, _, _))
             .Times(2);
     EXPECT_CALL(*pMockQueue, CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, _)).Times(1);
