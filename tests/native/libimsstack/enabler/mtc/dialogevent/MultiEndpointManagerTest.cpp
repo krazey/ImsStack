@@ -59,21 +59,6 @@ MATCHER_P(IsSameListSize, size, "")
     return arg.GetSize() == size;
 }
 
-MATCHER_P(IsPullableCall, expectation, "")
-{
-    return arg.GetAt(0)->m_bIsPullable == expectation;
-}
-
-MATCHER_P(IsHeldCall, expectation, "")
-{
-    return arg.GetAt(0)->m_bIsHeld == expectation;
-}
-
-MATCHER_P(IsSameCallType, expectation, "")
-{
-    return arg.GetAt(0)->m_nCallType == expectation;
-}
-
 class MultiEndpointManagerTest : public ::testing::Test
 {
 public:

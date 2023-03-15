@@ -139,7 +139,7 @@ TEST_F(ParticipantInfoTest, GetRemoteNumberReturnsNullInitially)
     EXPECT_TRUE(pParticipantInfo->GetRemoteNumber().IsNull());
 }
 
-TEST_F(ParticipantInfoTest, GetRemoteUriReturnsFromSupplementaryService)
+TEST_F(ParticipantInfoTest, GetRemoteUriReturnsFromSupplementaryServiceIfTargetUriIsSet)
 {
     const AString strUri("some_uri");
 
@@ -168,6 +168,25 @@ TEST_F(ParticipantInfoTest, GetRemoteUriReturnsInitialRemoteUri)
     ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_EQ(AString::ConstNull(), pParticipantInfo->GetRemoteUri());
+}
+
+TEST_F(ParticipantInfoTest, GetRemoteUriReturnsLocalUriIfCallPullIsEnabled)
+{
+    MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
+    ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
+    MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
+    ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
+    objSupplementaryService.Add(SuppType::CALL_PULL, IMS_FALSE);
+
+    SipAddress objSipAddress("localAddress");
+    MockICoreService objCoreService;
+    ON_CALL(objCoreService, GetAuthorizedUserId).WillByDefault(ReturnRef(objSipAddress));
+
+    MockIMtcService objService;
+    ON_CALL(objService, GetICoreService).WillByDefault(Return(&objCoreService));
+    ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));
+
+    EXPECT_STREQ("localAddress", pParticipantInfo->GetRemoteUri().GetStr());
 }
 
 TEST_F(ParticipantInfoTest, GetRemoteDisplayNameReturnsFromSupplementaryService)

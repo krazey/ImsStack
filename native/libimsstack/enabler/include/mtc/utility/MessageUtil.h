@@ -371,6 +371,7 @@ public:
     static const IMS_CHAR STR_P_TTA_VOLTE_INFO[];
     static const IMS_CHAR STR_AVCHANGE[];
     static const IMS_CHAR STR_REASON_USER_SESSIONEXPIRED[];
+    static const IMS_CHAR STR_P_COM_ENABLETRANSCODING[];
 
 private:
     static const IMS_SINT32 INVALID_INDEX;

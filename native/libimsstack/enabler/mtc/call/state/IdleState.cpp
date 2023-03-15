@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "ICoreService.h"
 #include "ISession.h"
 #include "ISipHeader.h"
@@ -47,6 +48,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/IMessage.h"
 #include "dialingplan/IMtcDialingPlan.h"
+#include "dialogevent/IMultiEndpointManager.h"
 #include "helper/LastComeFirstServedHelper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
@@ -72,13 +74,24 @@ PUBLIC VIRTUAL IdleState::~IdleState() {}
 PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AString& strTarget,
         IN MediaInfo& objMediaInfo, IN const ImsMap<SuppType, SuppService*>& objSuppServices)
 {
-    IMS_TRACE_D("Start", 0, 0, 0);
-
-    m_objContext.GetCallInfo().eInitialCallType = eCallType;
-    m_objContext.GetCallInfo().ePeerType = PeerType::MO;
-    m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
+    IMS_TRACE_D("Start [%s]", strTarget.GetStr(), 0, 0);
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
-    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+
+    if (IsCallPull())
+    {
+        if (HandleCallPull(strTarget) == IMS_FAILURE)
+        {
+            // TODO: Need to optimize the reason code.
+            return Terminate(CallReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC));
+        }
+    }
+    else
+    {
+        m_objContext.GetCallInfo().eInitialCallType = eCallType;
+        m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
+    }
+    m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
+    m_objContext.GetCallInfo().ePeerType = PeerType::MO;
 
     if (m_objContext.IsUssi())
     {
@@ -106,12 +119,11 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
         IN const ImsList<ConfUser*>& lstUsers)
 {
     IMS_TRACE_D("StartConference", 0, 0, 0);
-
+    m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
     m_objContext.GetCallInfo().eInitialCallType = eCallType;
     m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
-    m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 
     m_objOperationAfterBlockCheck = [&]()
@@ -482,4 +494,34 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
             m_objContext.GetPassiveTimerHolder(), m_objContext.GetCallInfo().bEmergency));
 
     return lstRules;
+}
+
+PRIVATE
+IMS_BOOL IdleState::IsCallPull() const
+{
+    // The value of Supptype::CALL_PULL doesn't have any meaning.
+    return m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL);
+}
+
+PRIVATE
+IMS_RESULT IdleState::HandleCallPull(IN const AString& strTarget)
+{
+    IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
+    if (!piMultiEndpointManager)
+    {
+        // No use case - CODE_MULTIENDPOINT_NOT_SUPPORTED
+        return IMS_FAILURE;
+    }
+
+    IMultiEndpointManager::PullingDialogInfo objDialogInfo =
+            piMultiEndpointManager->GetDialogInfo(strTarget);
+    if (objDialogInfo.strCallId.GetLength() == 0)
+    {
+        return IMS_FAILURE;
+    }
+
+    m_objContext.GetCallInfo().eInitialCallType = objDialogInfo.eCallType;
+    m_objContext.GetMediaManager().SetMediaInfo(*objDialogInfo.pMediaInfo);
+
+    return IMS_SUCCESS;
 }

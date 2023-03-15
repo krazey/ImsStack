@@ -89,6 +89,21 @@ AString ParticipantInfo::GetRemoteUri() const
         return pSuppService->strValue;
     }
 
+    if (m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL))
+    {
+        const ICoreService* piCoreService = m_objContext.GetService().GetICoreService();
+        if (piCoreService == IMS_NULL)
+        {
+            IMS_TRACE_E(0, "GetRemoteUri : CoreService is null", 0, 0, 0);
+            return AString::ConstNull();
+        }
+
+        IMS_TRACE_D("GetRemoteUri : Use local uri for call pull[%s]",
+                piCoreService->GetAuthorizedUserId().ToString().GetStr(), 0, 0);
+        // CoreService also use this value when URI_SET_BY_IMS_ENGINE is used.
+        return piCoreService->GetAuthorizedUserId().ToString();
+    }
+
     IMS_TRACE_D("GetRemoteUri : URI[%s]", m_strRemoteUri.GetStr(), 0, 0);
     return m_strRemoteUri;
 }

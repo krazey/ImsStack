@@ -109,10 +109,11 @@ VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::Ge
     for (IMS_UINT32 i = 0; i < m_piDialogInfoManager->GetDialogs().GetSize(); ++i)
     {
         const Dialog* pDialog = m_piDialogInfoManager->GetDialogs().GetAt(i);
-        AString strRemoteNumber =
-                pDialog->GetRemoteParticipant().GetIdentity().GetUri();  // TODO: get number only.
+
+        // TODO: This will be determined by the information passed by Telephony layer.
+        AString strRemoteNumber = pDialog->GetRemoteParticipant().GetIdentity().GetUri();
         IMS_TRACE_I("GetDialogInfo RemoteNumber[%s]", strRemoteNumber.GetStr(), 0, 0);
-        if (strRemoteNumber.Equals(strTarget))
+        if (strRemoteNumber.Contains(strTarget))
         {
             IMS_TRACE_I("GetDialogInfo matched dialog ID[%s]", pDialog->GetId().GetStr(), 0, 0);
             objInfo.strCallId = pDialog->GetCallId();
@@ -346,7 +347,8 @@ CallType MultiEndpointManager::GetCallType(const Dialog& objDialog) const
 {
     if (objDialog.GetExtraInfo().GetMediaInfo().eAudioQuality == AUDIO_QUALITY_AMR_WB)
     {
-        return objDialog.GetExtraInfo().GetMediaInfo().eVideoQuality == VIDEO_QUALITY_QVGA_PR
+        // VIDEO_QUALITY_NOTUSED is downgraded VT.
+        return objDialog.GetExtraInfo().GetMediaInfo().eVideoQuality != VIDEO_QUALITY_NONE
                 ? CallType::VT
                 : CallType::VOIP;
     }
