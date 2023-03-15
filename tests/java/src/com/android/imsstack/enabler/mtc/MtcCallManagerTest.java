@@ -39,39 +39,31 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class MtcCallManagerTest extends ImsStackTest {
-    private static Context sMockContext;
     @Mock private IBaseContext mMockBaseContext;
     @Mock private CallStateListener mMockCallStateListener;
     @Mock private MtcCall mMockMtcCall;
+    @Mock private Context mMockContext;
     private long mNativeCallId = 1;
     private int mSlotId0 = 0;
 
     private MessageExecutor mExecutor;
     private MtcCallManager mTestMtcCallManager;
 
-    @BeforeClass
-    public static void setUpOnce() {
-        sMockContext = Mockito.mock(Context.class);
-        AppContext.init(sMockContext);
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
 
+        AppContext.init(mMockContext);
         mTestMtcCallManager = new MtcCallManager(mMockBaseContext);
 
         doReturn(mSlotId0).when(mMockBaseContext).getSlotId();
@@ -88,10 +80,6 @@ public class MtcCallManagerTest extends ImsStackTest {
         mTestMtcCallManager = null;
         mExecutor = null;
         super.tearDown();
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
         AppContext.deinit();
     }
 

@@ -32,12 +32,11 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -66,7 +65,6 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
     private static final int LOCATION_FOR_EMERGENCY_WIFI_NUMBER_LIST_ONLY = FLAG_LOCATION_REQUIRED
             | FLAG_WIFI_CALL_ONLY | FLAG_EMERGENCY_CALL_ONLY | FLAG_NUMBER_LIST_AND_EMERGENCY_CALL;
 
-    private static final int SLOT_ID = 0;
     private ImsCallContext mMockCallContext;
     private CarrierConfig mMockCarrierConfig;
     private ConfigInterface mMockConfigInterface;
@@ -74,16 +72,11 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
     private IContext mMockIContext;
     private Context mMockContext;
 
-    static ContextFixture sContext;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
-
     @Before
     public void setUp() throws Exception {
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
+
         mMockIContext = Mockito.mock(IContext.class);
         mMockContext = Mockito.mock(Context.class);
         mMockCallContext = Mockito.mock(ImsCallContext.class);
@@ -91,21 +84,18 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         mMockConfigInterface = Mockito.mock(ConfigInterface.class);
         when(mMockIContext.getContext()).thenReturn(mMockContext);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        when(mMockCallContext.getSlotId()).thenReturn(SLOT_ID);
-        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
+        when(mMockCallContext.getSlotId()).thenReturn(MSimUtils.DEFAULT_SLOT_ID);
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface,
+                MSimUtils.DEFAULT_SLOT_ID);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
     }
 
     @After
     public void tearDown() throws Exception {
-        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
         mImsCallLocationPolicy = null;
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        mContextFixture = null;
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, MSimUtils.DEFAULT_SLOT_ID);
         AppContext.deinit();
-        sContext = null;
     }
 
     @Test
@@ -132,13 +122,13 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
 
     @Test
     public void testPublicIsLocationRequired() {
-        assertFalse(mImsCallLocationPolicy.isLocationRequired(mContext, SLOT_ID));
+        assertFalse(mImsCallLocationPolicy.isLocationRequired(mContext, MSimUtils.DEFAULT_SLOT_ID));
 
         when(mMockCarrierConfig.getInt(
                 CarrierConfig.Assets.KEY_GEOLOCATION_POLICY_FOR_LOCATION_BASED_CALL_INT))
                 .thenReturn(FLAG_LOCATION_REQUIRED);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
-        assertTrue(mImsCallLocationPolicy.isLocationRequired(mContext, SLOT_ID));
+        assertTrue(mImsCallLocationPolicy.isLocationRequired(mContext, MSimUtils.DEFAULT_SLOT_ID));
     }
 
     @Test
@@ -235,11 +225,11 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         ImsServiceRecord mockServiceRecord = Mockito.mock(ImsServiceRecord.class);
         ImsRegistrationTracker mockImsRegTracker = Mockito.mock(ImsRegistrationTracker.class);
         ImsServiceManager serviceManager = new ImsServiceManager(mMockContext, executor);
-        when(mMockCallContext.getSlotId()).thenReturn(SLOT_ID);
+        when(mMockCallContext.getSlotId()).thenReturn(MSimUtils.DEFAULT_SLOT_ID);
         serviceManager.setDefault(serviceManager);
         ConcurrentHashMap<Integer, ImsServiceRecord> serviceMap =
                 serviceManager.getServiceRecordMap();
-        serviceMap.put(SLOT_ID, mockServiceRecord);
+        serviceMap.put(MSimUtils.DEFAULT_SLOT_ID, mockServiceRecord);
 
         when(mockServiceRecord.getRegistrationTracker()).thenReturn(mockImsRegTracker);
         when(mockImsRegTracker.isCallRegistered()).thenReturn(isRegistered);
