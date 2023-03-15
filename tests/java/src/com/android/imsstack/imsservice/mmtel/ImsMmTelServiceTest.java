@@ -59,12 +59,11 @@ import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -96,25 +95,17 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     @Mock Context mMockContext;
     @Mock TelephonyManager mMockTelephonyManager;
 
-    private static final int SLOT_ID = 0;
-
-    static ContextFixture sContext;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
 
         mMockImsContext = Mockito.mock(ImsContext.class);
         mMockBaseContext = Mockito.mock(IBaseContext.class);
         when(mMockImsContext.getContext()).thenReturn(mMockContext);
-        when(mMockImsContext.getSlotId()).thenReturn(SLOT_ID);
-        when(mMockBaseContext.getSlotId()).thenReturn(SLOT_ID);
+        when(mMockImsContext.getSlotId()).thenReturn(MSimUtils.DEFAULT_SLOT_ID);
+        when(mMockBaseContext.getSlotId()).thenReturn(MSimUtils.DEFAULT_SLOT_ID);
         mMockServiceRegistry = Mockito.mock(ImsServiceRegistry.class);
         mMockServiceRecord = Mockito.mock(ImsServiceRecord.class);
         mMockRegTracker = Mockito.mock(ImsRegistrationTracker.class);
@@ -129,8 +120,10 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         when(mMockImsContext.getExecutor()).thenReturn(mExecutor);
         mMmTelFeature.setDefaultExecutor(mExecutor);
         mMmTelFeature.getBinder().setListener(mMockMmTelListener);
-        mMmTelFeatureRegistry = ImsServiceRegistry.getInstance(SLOT_ID).getMmTelFeatureRegistry();
-        mMockTelephonyManager = sContext.getTestDouble().getSystemService(TelephonyManager.class);
+        mMmTelFeatureRegistry = ImsServiceRegistry
+                .getInstance(MSimUtils.DEFAULT_SLOT_ID).getMmTelFeatureRegistry();
+        mMockTelephonyManager = mContextFixture.getTestDouble()
+                .getSystemService(TelephonyManager.class);
         when(AppContext.getTelephonyManager(0)).thenReturn(mMockTelephonyManager);
         when(mMockTelephonyManager.getSupportedModemCount()).thenReturn(1);
         UtFactory.getInstance().setUtInterfaceForSlot(0, mMockUtInterface);
@@ -142,13 +135,9 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mServiceManager.getServiceRecordMap().clear();
         ImsServiceManager.setDefault(null);
         mServiceManager = null;
-        UtFactory.getInstance().setUtInterfaceForSlot(SLOT_ID, null);
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        mContextFixture = null;
+        UtFactory.getInstance().setUtInterfaceForSlot(MSimUtils.DEFAULT_SLOT_ID, null);
         AppContext.deinit();
-        sContext = null;
     }
 
     @Test

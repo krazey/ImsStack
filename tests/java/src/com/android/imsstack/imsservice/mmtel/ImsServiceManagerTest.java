@@ -40,12 +40,11 @@ import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.MessageExecutor;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -57,11 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RunWith(JUnit4.class)
 public class ImsServiceManagerTest extends ImsStackTest {
-    public static final int DEFAULT_PHONE_ID = 0;
-    public static final int INVALID_PHONE_ID = (-1);
-    public static final int SUBSCRIPTION = 1;
-    private static Context sMockContext;
-    private static ISubscription sMockISubscription;
     private ImsServiceRecord mMockServiceRecord;
     private ImsCallApp mMockImsCallApp;
     private TestImsServiceManager mServiceManager;
@@ -69,26 +63,22 @@ public class ImsServiceManagerTest extends ImsStackTest {
     private ConcurrentHashMap<Integer, ImsCallApp> mCallAppMap = null;
     private ConcurrentHashMap<Integer, ImsServiceRecord> mServiceRecordMap = null;
 
-    static ContextFixture sContext;
-
     @Mock Context mMockContext;
     @Mock TelephonyManager mMockTelephonyManager;
-
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-        sMockISubscription = Mockito.mock(ISubscription.class);
-        AgentFactory.getInstance().setDefaultAgent(SUBSCRIPTION, sMockISubscription);
-    }
+    @Mock ISubscription mMockISubscription;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
+        AgentFactory.getInstance().setDefaultAgent(AgentFactory.SUBSCRIPTION, mMockISubscription);
 
-        mMockTelephonyManager = sContext.getTestDouble().getSystemService(TelephonyManager.class);
+        mMockTelephonyManager = mContextFixture.getTestDouble()
+                .getSystemService(TelephonyManager.class);
         when(AppContext.getTelephonyManager()).thenReturn(mMockTelephonyManager);
         when(mMockTelephonyManager.getSupportedModemCount()).thenReturn(1);
+        when(mMockISubscription.getPhoneId()).thenReturn(MSimUtils.DEFAULT_PHONE_ID);
 
         mMockServiceRecord = Mockito.mock(ImsServiceRecord.class);
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
@@ -96,7 +86,6 @@ public class ImsServiceManagerTest extends ImsStackTest {
         mServiceManager = new TestImsServiceManager(mMockContext, mExecutor);
         mCallAppMap = mServiceManager.getCallAppMap();
         mServiceRecordMap = mServiceManager.getServiceRecordMap();
-        when(sMockISubscription.getPhoneId()).thenReturn(DEFAULT_PHONE_ID);
     }
 
     @After
@@ -107,18 +96,14 @@ public class ImsServiceManagerTest extends ImsStackTest {
         mServiceManager = null;
         mCallAppMap = null;
         mServiceRecordMap = null;
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        mContextFixture = null;
+        AgentFactory.getInstance().setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
         AppContext.deinit();
-        sContext = null;
-        AgentFactory.getInstance().setDefaultAgent(SUBSCRIPTION, null);
     }
 
     @Test
     public void testConstructor() {
-        verify(sMockISubscription).addListener(mServiceManager.getSubscriptionListenerProxy());
+        verify(mMockISubscription).addListener(mServiceManager.getSubscriptionListenerProxy());
         assertEquals(1, mServiceRecordMap.size());
         assertNotNull(mServiceManager.getSubscriptionListenerProxy());
         assertNotNull(mServiceManager.getCommonPackageListener());
@@ -133,26 +118,26 @@ public class ImsServiceManagerTest extends ImsStackTest {
 
     @Test
     public void testGetServiceRecord() {
-        assertNull(mServiceManager.getServiceRecord(DEFAULT_PHONE_ID));
+        assertNull(mServiceManager.getServiceRecord(MSimUtils.DEFAULT_PHONE_ID));
         mServiceManager.setDefault(mServiceManager);
         assertEquals(1, mServiceRecordMap.size());
-        assertEquals(mServiceRecordMap.get(DEFAULT_PHONE_ID),
-                mServiceManager.getServiceRecord(DEFAULT_PHONE_ID));
+        assertEquals(mServiceRecordMap.get(MSimUtils.DEFAULT_PHONE_ID),
+                mServiceManager.getServiceRecord(MSimUtils.DEFAULT_PHONE_ID));
     }
 
     @Test
     public void testDispose() {
         mServiceManager.dispose();
-        verify(sMockISubscription).removeListener(mServiceManager.getSubscriptionListenerProxy());
+        verify(mMockISubscription).removeListener(mServiceManager.getSubscriptionListenerProxy());
         verify(mMockImsCallApp, never()).close();
         assertTrue(mCallAppMap.isEmpty());
 
-        mCallAppMap.put(DEFAULT_PHONE_ID, mMockImsCallApp);
+        mCallAppMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockImsCallApp);
         assertEquals(1, mCallAppMap.size());
 
         mServiceRecordMap.clear();
         assertTrue(mServiceRecordMap.isEmpty());
-        mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
+        mServiceRecordMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockServiceRecord);
         when(mMockServiceRecord.isServiceUp()).thenReturn(true);
         mServiceManager.dispose();
         verify(mMockImsCallApp).close();
@@ -169,13 +154,13 @@ public class ImsServiceManagerTest extends ImsStackTest {
                 Mockito.mock(IMmTelFeatureCapabilityListener.class);
         ImsContext mockImsContext = Mockito.mock(ImsContext.class);
         mServiceRecordMap.clear();
-        when(mockImsContext.getPhoneId()).thenReturn(DEFAULT_PHONE_ID);
+        when(mockImsContext.getPhoneId()).thenReturn(MSimUtils.DEFAULT_PHONE_ID);
 
         ImsCallApp callApp = mServiceManager.createCallApp(mockImsContext, mockFeatureCapaListener,
                 mockCallListener);
         assertNull(callApp);
 
-        mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
+        mServiceRecordMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockServiceRecord);
         callApp = mServiceManager.createCallApp(mockImsContext, mockFeatureCapaListener,
                 mockCallListener);
         assertEquals(1, mCallAppMap.size());
@@ -197,12 +182,12 @@ public class ImsServiceManagerTest extends ImsStackTest {
     public void testDestroyCallApp() {
         mCallAppMap.clear();
         mServiceRecordMap.clear();
-        mServiceManager.destroyCallApp(DEFAULT_PHONE_ID);
+        mServiceManager.destroyCallApp(MSimUtils.DEFAULT_PHONE_ID);
         verify(mMockImsCallApp, never()).close();
 
-        mCallAppMap.put(DEFAULT_PHONE_ID, mMockImsCallApp);
-        mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
-        mServiceManager.destroyCallApp(DEFAULT_PHONE_ID);
+        mCallAppMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockImsCallApp);
+        mServiceRecordMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockServiceRecord);
+        mServiceManager.destroyCallApp(MSimUtils.DEFAULT_PHONE_ID);
         verify(mMockServiceRecord).setCallApp(null);
         verify(mMockImsCallApp).close();
         assertTrue(mCallAppMap.isEmpty());
@@ -211,27 +196,27 @@ public class ImsServiceManagerTest extends ImsStackTest {
     @Test
     public void testGetCallApp() {
         mCallAppMap.clear();
-        ImsCallApp callApp = mServiceManager.getCallApp(DEFAULT_PHONE_ID);
+        ImsCallApp callApp = mServiceManager.getCallApp(MSimUtils.DEFAULT_PHONE_ID);
         assertNull(callApp);
 
-        mCallAppMap.put(DEFAULT_PHONE_ID, mMockImsCallApp);
-        callApp = mServiceManager.getCallApp(DEFAULT_PHONE_ID);
+        mCallAppMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockImsCallApp);
+        callApp = mServiceManager.getCallApp(MSimUtils.DEFAULT_PHONE_ID);
         assertEquals(mMockImsCallApp, callApp);
     }
 
     @Test
     public void testGetCallAppByPhoneId() {
         mServiceManager.setMultiImsEnabled(false);
-        ImsCallApp callApp = mServiceManager.getCallAppByPhoneId(INVALID_PHONE_ID);
+        ImsCallApp callApp = mServiceManager.getCallAppByPhoneId(MSimUtils.INVALID_PHONE_ID);
         assertNull(callApp);
 
         mServiceRecordMap.clear();
-        callApp = mServiceManager.getCallAppByPhoneId(DEFAULT_PHONE_ID);
+        callApp = mServiceManager.getCallAppByPhoneId(MSimUtils.DEFAULT_PHONE_ID);
         assertNull(callApp);
 
-        mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
+        mServiceRecordMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockServiceRecord);
         when(mMockServiceRecord.getCallApp()).thenReturn(mMockImsCallApp);
-        callApp = mServiceManager.getCallAppByPhoneId(DEFAULT_PHONE_ID);
+        callApp = mServiceManager.getCallAppByPhoneId(MSimUtils.DEFAULT_PHONE_ID);
         verify(mMockServiceRecord).getCallApp();
         assertEquals(mMockImsCallApp, callApp);
     }
@@ -239,7 +224,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
     @Test
     public void testGetCallAppCount() {
         assertEquals(0, mServiceManager.getCallAppCount());
-        mCallAppMap.put(DEFAULT_PHONE_ID, mMockImsCallApp);
+        mCallAppMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockImsCallApp);
         assertEquals(1, mServiceManager.getCallAppCount());
     }
 
@@ -250,35 +235,35 @@ public class ImsServiceManagerTest extends ImsStackTest {
 
     @Test
     public void testgetDefaultPhoneId() {
-        assertEquals(DEFAULT_PHONE_ID, mServiceManager.getDefaultPhoneId());
-        when(sMockISubscription.getPhoneId()).thenReturn(INVALID_PHONE_ID);
+        assertEquals(MSimUtils.DEFAULT_PHONE_ID, mServiceManager.getDefaultPhoneId());
+        when(mMockISubscription.getPhoneId()).thenReturn(MSimUtils.INVALID_PHONE_ID);
         mServiceManager = new TestImsServiceManager(mMockContext, mExecutor);
-        assertEquals(INVALID_PHONE_ID, mServiceManager.getDefaultPhoneId());
+        assertEquals(MSimUtils.INVALID_PHONE_ID, mServiceManager.getDefaultPhoneId());
     }
 
     @Test
     public void testgetDefaultServiceRecord() {
         mServiceRecordMap.clear();
-        mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
+        mServiceRecordMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockServiceRecord);
         assertEquals(mMockServiceRecord, mServiceManager.getDefaultServiceRecord());
     }
 
     @Test
     public void testIsValidPhoneId() {
-        assertTrue(mServiceManager.isValidPhoneId(DEFAULT_PHONE_ID));
-        assertFalse(mServiceManager.isValidPhoneId(INVALID_PHONE_ID));
+        assertTrue(mServiceManager.isValidPhoneId(MSimUtils.DEFAULT_PHONE_ID));
+        assertFalse(mServiceManager.isValidPhoneId(MSimUtils.INVALID_PHONE_ID));
 
         mServiceManager.setMultiImsEnabled(false);
-        assertFalse(mServiceManager.isValidPhoneId(INVALID_PHONE_ID));
-        assertTrue(mServiceManager.isValidPhoneId(DEFAULT_PHONE_ID));
+        assertFalse(mServiceManager.isValidPhoneId(MSimUtils.INVALID_PHONE_ID));
+        assertTrue(mServiceManager.isValidPhoneId(MSimUtils.DEFAULT_PHONE_ID));
     }
 
     @Test
     public void testOnDefaultSubscriptionChanged() {
         mServiceRecordMap.clear();
-        mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
+        mServiceRecordMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockServiceRecord);
         mServiceManager.getSubscriptionListenerProxy()
-            .onDefaultSubscriptionChanged(DEFAULT_PHONE_ID);
+            .onDefaultSubscriptionChanged(MSimUtils.DEFAULT_PHONE_ID);
         verify(mMockServiceRecord, never()).getCallApp();
         //switchImsService() is verified in below test
     }
@@ -319,7 +304,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
     private void setUpOnDefaultDataSubscriptionChanged(int phoneId, ImsServiceRecord sr) {
         mServiceRecordMap = mServiceManager.getServiceRecordMap();
         mServiceRecordMap.clear();
-        mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
+        mServiceRecordMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockServiceRecord);
         mServiceRecordMap.put(phoneId, sr);
         mServiceManager.setMultiImsEnabled(false);
         mServiceManager.setPhoneId(1);
@@ -329,7 +314,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
     public void testOnCarrierConfigChanged() {
         int newPhoneId = -1;
         mServiceRecordMap.clear();
-        mServiceRecordMap.put(DEFAULT_PHONE_ID, mMockServiceRecord);
+        mServiceRecordMap.put(MSimUtils.DEFAULT_PHONE_ID, mMockServiceRecord);
         mServiceManager.getSubscriptionListenerProxy()
             .onCarrierConfigChanged(newPhoneId, 1);
         verify(mMockServiceRecord, never()).getCallApp();

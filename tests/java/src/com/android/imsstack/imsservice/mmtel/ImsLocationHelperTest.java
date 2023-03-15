@@ -39,9 +39,7 @@ import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.GeocoderProxy;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -54,21 +52,19 @@ import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
 public class ImsLocationHelperTest {
-    private static ContextFixture sContext;
-    private ImsLocationHelper mLocHelper = null;
     private static final String TAG = ImsLocationHelperTest.class.getName();
-
-    private HandlerThread mTestThread = new HandlerThread("TestThread");
-    private Handler mTestHandler;
-
-    private CountDownLatch mLatch;
-
     private static final int VALIDITY_PERIOD = 10000;
     private static final int WAITING_TIME = 2000;
     private static final int LOCATION_UPDATE_GUARD_TIMEOUT = 3000;
     private static final int MAX_LATCH_TIME = 3000;
     private static final int EVENT_RELEASE_LATCH = 20;
     private static final int ALARM_TIMER = 2;
+
+    private ContextFixture mContextFixture;
+    private ImsLocationHelper mLocHelper = null;
+    private HandlerThread mTestThread = new HandlerThread("TestThread");
+    private Handler mTestHandler;
+    private CountDownLatch mLatch;
 
     //Mocked classes
     @Mock ICallContext mICallContext;
@@ -91,15 +87,12 @@ public class ImsLocationHelperTest {
         }
     }
 
-    @BeforeClass
-    public static void setUpOnce() {
-        sContext = new ContextFixture();
-        AppContext.init(sContext.getTestDouble());
-    }
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mContextFixture = new ContextFixture();
+        AppContext.init(mContextFixture.getTestDouble());
+
         mTestThread.start();
 
         /* handler bound to this looper */
@@ -135,12 +128,8 @@ public class ImsLocationHelperTest {
         }
 
         mTestHandler = null;
-    }
-
-    @AfterClass
-    public static void tearDownOnce() {
+        mContextFixture = null;
         AppContext.deinit();
-        sContext = null;
     }
 
     @Test
