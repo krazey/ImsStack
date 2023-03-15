@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "call/IMtcSession.h"
 #include "call/UpdatingInfo.h"
@@ -25,6 +26,7 @@ PUBLIC
 UpdatingInfo::UpdatingInfo(IN IMtcCallContext& objContext) :
         m_objContext(objContext),
         m_eTargetCallType(CallType::UNKNOWN),
+        m_eRequestingType(UpdateType::NORMAL),
         m_objNegotiatedInfo(MediaInfo()),
         m_objModifyingInfo(MediaInfo()),
         m_objAlertingInfo(MediaInfo()),
