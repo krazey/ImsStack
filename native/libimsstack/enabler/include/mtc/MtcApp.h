@@ -29,6 +29,7 @@
 #include "conferencecall/ConferenceManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
+#include "dialogevent/MultiEndpointManager.h"
 #include "helper/CallStateProxy.h"
 #include "helper/PassiveTimerHolder.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
@@ -49,6 +50,7 @@ class IMtcEmergencyServiceManager;
 class IMtcImsEventReceiver;
 class IMtcRadioChecker;
 class IMtcSipInterfaceFactory;
+class IMultiEndpointManager;
 class IPassiveTimerHolder;
 class OperationAsyncRunner;
 
@@ -88,6 +90,10 @@ public:
     OperationAsyncRunner* GetAsyncRunner(IN std::function<void()> objOperation) override;
     inline IMessageUtils& GetMessageUtils() override { return m_objMessageUtils; }
     inline IPassiveTimerHolder& GetPassiveTimerHolder() override { return m_objPassiveTimerHolder; }
+    inline IMultiEndpointManager* GetMultiEndpointManager() override
+    {
+        return m_pMultiEndpointManager.get();
+    }
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
 
 protected:
@@ -111,6 +117,7 @@ protected:
     std::unique_ptr<IMtcEmergencyServiceManager> m_pEmergencyServiceManager;
     MessageUtils m_objMessageUtils;
     PassiveTimerHolder m_objPassiveTimerHolder;
+    std::unique_ptr<MultiEndpointManager> m_pMultiEndpointManager;
     MtcRadioChecker m_objMtcRadioChecker;
 
     IMS_BOOL m_bWifiTestMode;

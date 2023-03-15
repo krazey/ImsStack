@@ -36,6 +36,7 @@ public:
     void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) override;
 
     void OnJniReady();
+    void OnExternalCallsChanged(IN ImsList<const JniExternalCall*>& objJniExternalCalls) override;
 };
 
 #endif

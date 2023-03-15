@@ -18,8 +18,11 @@
 
 #include "IJniEnablerThread.h"
 #include "IMtcService.h"
+#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "IuMtcService.h"
+
+struct JniExternalCall;
 
 class IJniMtcServiceThread : public IJniEnablerThread
 {
@@ -50,6 +53,14 @@ public:
      * @param nCallKey
      */
     virtual void OnPreIncomingCallReceived(IN IMS_ULONG nCallKey) = 0;
+
+    /**
+     * @brief Notifies Java that {@code JniExternalCall} state is changed.
+     *
+     * @param objJniExternalCalls The list of existing {@code JniExternalCall}
+     */
+    virtual void OnExternalCallsChanged(
+            IN ImsList<const JniExternalCall*>& objJniExternalCalls) = 0;
 };
 
 #endif

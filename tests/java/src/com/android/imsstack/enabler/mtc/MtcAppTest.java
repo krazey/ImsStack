@@ -36,8 +36,7 @@ import android.testing.TestableLooper;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
-import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;
+import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsListener;
 
@@ -350,13 +349,13 @@ public class MtcAppTest extends ImsStackTest {
         verify(mMtcCall, times(1)).attach(anyLong());
 
         Parcel parcel2 = Parcel.obtain();
-        parcel2.writeInt(IUDialogs.NOTIFY_DIALOG_INFO);
+        parcel2.writeInt(IUMtcService.EXTERNAL_CALLS_CHANGED);
         parcel2.setDataPosition(0);
         mTestMtcApp.getNativeListener().onMessage(parcel2);
         parcel2.recycle();
 
-        verify(mCallListener, times(1)).onDialogStateChanged(
-                any(MtcApp.class), any(DialogsInfo.class));
+        verify(mCallListener, times(1)).onExternalCallStateChanged(
+                any(MtcApp.class), any(ExternalCalls.class));
     }
 
     @Test

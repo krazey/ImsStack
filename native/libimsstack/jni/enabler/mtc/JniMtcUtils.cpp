@@ -185,6 +185,26 @@ PUBLIC GLOBAL void JniMtcUtils::WriteConfUsersToParcel(
     }
 }
 
+PUBLIC GLOBAL void JniMtcUtils::WriteExternalCallsToParcel(
+        IN ImsList<const JniExternalCall*>& objJniExternalCalls, IN_OUT Parcel& objParcel)
+{
+    IMS_UINT32 nCallsSize = objJniExternalCalls.GetSize();
+    objParcel.writeInt32(nCallsSize);
+
+    for (IMS_UINT32 i = 0; i < nCallsSize; i++)
+    {
+        const JniExternalCall* pJniExternalCall = objJniExternalCalls.GetAt(i);
+
+        objParcel.writeString16(android::String16(pJniExternalCall->m_strCallId.GetStr()));
+        objParcel.writeString16(android::String16(pJniExternalCall->m_strAddress.GetStr()));
+        objParcel.writeString16(android::String16(pJniExternalCall->m_strLocalAddress.GetStr()));
+        objParcel.writeInt32((pJniExternalCall->m_bIsPullable) ? 1 : 0);
+        objParcel.writeInt32(pJniExternalCall->m_nCallState);
+        objParcel.writeInt32(pJniExternalCall->m_nCallType);
+        objParcel.writeInt32((pJniExternalCall->m_bIsHeld) ? 1 : 0);
+    }
+}
+
 PUBLIC GLOBAL void JniMtcUtils::WriteCallReasonInfoToParcel(
         IN const CallReasonInfo& objReason, IN_OUT Parcel& objParcel)
 {
