@@ -190,6 +190,7 @@ public class SscServiceStateTest {
         DcFactory.setObjects(SLOT_0, null);
         UtFactory.getInstance().setUtInterfaceForSlot(SLOT_0, null);
 
+        SscConfig.clear(SLOT_0);
         AppContext.deinit();
     }
 

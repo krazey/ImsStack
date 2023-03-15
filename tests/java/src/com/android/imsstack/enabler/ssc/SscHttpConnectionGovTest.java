@@ -66,6 +66,7 @@ public class SscHttpConnectionGovTest {
     public void teardown() {
         replaceInstance(SscHttpConnectionGov.class, "sSscHttpConnections", null,
                 new HashMap<Integer, ISscHttpConnection>());
+        SscConfig.clear(SLOT_0);
     }
 
     @Test

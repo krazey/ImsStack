@@ -101,6 +101,7 @@ public class SscNetConnectionTest {
     @After
     public void tearDown() {
         mSscNetConnection.cleanup();
+        SscConfig.clear(SLOT_0);
     }
 
     @Test

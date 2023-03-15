@@ -108,7 +108,7 @@ public final class SscConfig {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CarrierConfigServiceType {}
 
-    private static HashMap<Integer, ConfigAgent> mConfigAgent = new HashMap<>();
+    private static HashMap<Integer, ConfigAgent> sConfigAgent = new HashMap<>();
 
     public static void init(int slotId) {
         ImsLog.d("init(" + slotId + ")");
@@ -124,17 +124,17 @@ public final class SscConfig {
             return;
         }
 
-        mConfigAgent.put(slotId, configAgent);
+        sConfigAgent.put(slotId, configAgent);
     }
 
     public static void clear(int slotId) {
         ImsLog.d("clear (" + slotId + ")");
 
-        mConfigAgent.remove(slotId);
+        sConfigAgent.remove(slotId);
     }
 
     private static String getString(int slotId, String key) {
-        ConfigAgent ca = mConfigAgent.get(slotId);
+        ConfigAgent ca = sConfigAgent.get(slotId);
         if (ca == null) {
             return null;
         }
@@ -143,7 +143,7 @@ public final class SscConfig {
     }
 
     private static boolean getBoolean(int slotId, String key) {
-        ConfigAgent ca = mConfigAgent.get(slotId);
+        ConfigAgent ca = sConfigAgent.get(slotId);
         if (ca == null) {
             return false;
         }
@@ -152,7 +152,7 @@ public final class SscConfig {
     }
 
     private static int getInt(int slotId, String key) {
-        ConfigAgent ca = mConfigAgent.get(slotId);
+        ConfigAgent ca = sConfigAgent.get(slotId);
         if (ca == null) {
             return -1;
         }
@@ -161,7 +161,7 @@ public final class SscConfig {
     }
 
     private static int[] getIntArray(int slotId, String key) {
-        ConfigAgent ca = mConfigAgent.get(slotId);
+        ConfigAgent ca = sConfigAgent.get(slotId);
         if (ca == null) {
             return null;
         }

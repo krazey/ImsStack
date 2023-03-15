@@ -59,6 +59,9 @@ public class SscXmlParserTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+
         SscXmlFormat.init(SLOT_0);
         mSscXmlParser = new SscXmlParser();
     }
@@ -986,8 +989,6 @@ public class SscXmlParserTest {
 
     @Test
     public void getSscServiceFromDoc_serviceCapability() {
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
 
@@ -1032,8 +1033,6 @@ public class SscXmlParserTest {
 
     @Test
     public void getSscServiceFromDoc_serviceCapabilityWhenNoData() {
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets.KEY_UT_INSERT_NEW_RULE_BOOL)))
                 .thenReturn(true);
 

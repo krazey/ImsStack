@@ -171,6 +171,7 @@ public class SscServiceImplTest {
     public void tearDown() {
         mSscServiceImpl.close();
         mLooper.destroy();
+        SscConfig.clear(SLOT_0);
 
         AppContext.deinit();
     }

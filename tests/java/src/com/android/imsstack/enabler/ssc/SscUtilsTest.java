@@ -57,6 +57,9 @@ public class SscUtilsTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
+        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+
         mSscUtils = new FakeSscUtils();
     }
 
@@ -269,10 +272,8 @@ public class SscUtilsTest {
 
     @Test
     public void getSscUserAgent_emptyUserAgent() {
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING))
             .thenReturn(null);
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         String userAgent = mSscUtils.getSscUserAgent(SLOT_0);
 
@@ -281,10 +282,8 @@ public class SscUtilsTest {
 
     @Test
     public void getSscUserAgent_includingImsUserAgent() {
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING))
                 .thenReturn("IMS client");
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         String userAgent = mSscUtils.getSscUserAgent(SLOT_0);
 
@@ -345,11 +344,9 @@ public class SscUtilsTest {
 
     @Test
     public void getNumberFromUri_replaceZeroWithCountrycode() {
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(
                 CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
                 .thenReturn("+81");
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         String number = mSscUtils.getNumberFromUri(SLOT_0,
                 "sip:0234567890;phone-context:operator.com");
@@ -359,11 +356,9 @@ public class SscUtilsTest {
 
     @Test
     public void getNumberFromUri_replaceCountryCodeWithZero() {
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(
                 CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
                 .thenReturn("+81");
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         String number = mSscUtils.getNumberFromUri(SLOT_0, "tel:+81234567890");
 
@@ -408,11 +403,9 @@ public class SscUtilsTest {
 
     @Test
     public void getUriFromNumer_telWithContextFromConfig() {
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(
                 CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_PHONE_CONTEXT_STRING))
                 .thenReturn("contextFromConfig.com");
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "1234567890");
 
@@ -423,11 +416,9 @@ public class SscUtilsTest {
     public void getUriFromNumer_replaceZeroWithCountrycode() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(
                 CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING))
                 .thenReturn("+81");
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "01234567890");
 
@@ -438,11 +429,9 @@ public class SscUtilsTest {
     public void getUriFromNumer_replaceCountryCodeWithZero() {
         when(mMockSubsInfoInterface.isIsimEnabled()).thenReturn(true);
         when(mMockSimInterface.getIsimImpi()).thenReturn("impi@operator.com");
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCarrierConfig.getString(
                 CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_COUNTRY_CODE_REPLACE_TO_ZERO_STRING))
                 .thenReturn("+81");
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
 
         String uri = mSscUtils.getUriFromNumber(SLOT_0, "+81234567890");
 
