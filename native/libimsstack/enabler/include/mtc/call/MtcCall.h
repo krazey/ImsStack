@@ -63,6 +63,7 @@ class IMtcRadioChecker;
 class IMtcService;
 class IMtcSession;
 class IMtcSipInterfaceFactory;
+class IMultiEndpointManager;
 class IMutex;
 class IPassiveTimerHolder;
 class IReference;
@@ -223,6 +224,10 @@ public:
     inline IPassiveTimerHolder& GetPassiveTimerHolder() override
     {
         return m_objContext.GetPassiveTimerHolder();
+    }
+    inline IMultiEndpointManager* GetMultiEndpointManager() override
+    {
+        return m_objContext.GetMultiEndpointManager();
     }
     inline IMS_BOOL IsWifiTestMode() override { return m_objContext.IsWifiTestMode(); }
     // end of IMtcContext

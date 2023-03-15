@@ -66,10 +66,10 @@ private:
     AString m_strEntity;
 };
 
-class Dialog final
+class Dialog
 {
 public:
-    class State final
+    class State
     {
     public:
         State() :
@@ -80,7 +80,16 @@ public:
         }
         ~State(){};
         State(IN const State&) = delete;
-        State& operator=(IN const State&) = delete;
+        State& operator=(IN const State& objRhs)
+        {
+            if (this != &objRhs)
+            {
+                m_nEvent = objRhs.m_nEvent;
+                m_nCode = objRhs.m_nCode;
+                m_nState = objRhs.m_nState;
+            }
+            return *this;
+        }
 
         void Update(IN const IElement* piElementState);
 
@@ -114,12 +123,9 @@ public:
             EVENT_TIMEOUT = 5,
         };
 
-    private:
-        friend class DialogInfo;
-
+    protected:
         IMS_UINT32 m_nEvent;
         IMS_UINT32 m_nCode;
-
         IMS_UINT32 m_nState;
     };
 
@@ -143,14 +149,12 @@ public:
         inline const AString& GetRemoteTag() const { return m_strRemoteTag; }
 
     private:
-        friend class DialogInfo;
-
         AString m_strCallId;
         AString m_strLocalTag;
         AString m_strRemoteTag;
     };
 
-    class NameAddr final
+    class NameAddr
     {
     public:
         NameAddr() :
@@ -160,21 +164,27 @@ public:
         }
         ~NameAddr(){};
         NameAddr(IN const NameAddr&) = delete;
-        NameAddr& operator=(IN const NameAddr&) = delete;
+        NameAddr& operator=(IN const NameAddr& objRhs)
+        {
+            if (this != &objRhs)
+            {
+                m_strDisplay = objRhs.m_strDisplay;
+                m_strUri = objRhs.m_strUri;
+            }
+            return *this;
+        }
 
         void Update(IN const IElement* piElementNameaddr);
 
         inline const AString& GetDiaplay() const { return m_strDisplay; }
         inline const AString& GetUri() const { return m_strUri; }
 
-    private:
-        friend class DialogInfo;
-
+    protected:
         AString m_strDisplay;
         AString m_strUri;
     };
 
-    class Target final
+    class Target
     {
     public:
         Target() :
@@ -184,23 +194,29 @@ public:
         }
         ~Target(){};
         Target(IN const Target&) = delete;
-        Target& operator=(IN const Target&) = delete;
+        Target& operator=(IN const Target& objRhs)
+        {
+            if (this != &objRhs)
+            {
+                m_objParamMap = objRhs.m_objParamMap;
+                m_strUri = objRhs.m_strUri;
+            }
+            return *this;
+        }
 
         void Update(IN const IElement* piElementTarget);
 
         inline const ImsMap<AString, AString>& GetParams() const { return m_objParamMap; }
         inline const AString& GetUri() const { return m_strUri; }
 
-    private:
-        friend class DialogInfo;
-
+    protected:
         ImsMap<AString, AString> m_objParamMap;
         AString m_strUri;
         // session-description
         // cseq
     };
 
-    class Participant final
+    class Participant
     {
     public:
         Participant() :
@@ -210,23 +226,29 @@ public:
         }
         ~Participant(){};
         Participant(IN const Participant&) = delete;
-        Participant& operator=(IN const Participant&) = delete;
+        Participant& operator=(IN const Participant& objRhs)
+        {
+            if (this != &objRhs)
+            {
+                m_objIdentity = objRhs.m_objIdentity;
+                m_objTarget = objRhs.m_objTarget;
+            }
+            return *this;
+        }
 
         void Update(IN const IElement* piElementParticipant);
 
         inline const NameAddr& GetIdentity() const { return m_objIdentity; }
         inline const Target& GetTarget() const { return m_objTarget; }
 
-    private:
-        friend class DialogInfo;
-
+    protected:
         NameAddr m_objIdentity;
         Target m_objTarget;
         // session-description
         // cseq
     };
 
-    class ExtraInfo final
+    class ExtraInfo
     {
     public:
         ExtraInfo() :
@@ -236,7 +258,15 @@ public:
         }
         ~ExtraInfo(){};
         ExtraInfo(IN const ExtraInfo&) = delete;
-        ExtraInfo& operator=(IN const ExtraInfo&) = delete;
+        ExtraInfo& operator=(IN const ExtraInfo& objRhs)
+        {
+            if (this != &objRhs)
+            {
+                m_strExclusive = objRhs.m_strExclusive;
+                m_objMediaInfo = objRhs.m_objMediaInfo;
+            }
+            return *this;
+        }
 
         void Update(IN const IElement* piElementDialog);
 
@@ -247,9 +277,7 @@ public:
         void HandleMediaInfo(IN const IElement* piElementDialog);
         static IMS_SINT32 ConvertMediaDirection(IN const AString& strMediaDirection);
 
-    private:
-        friend class DialogInfo;
-
+    protected:
         AString m_strExclusive;
         MediaInfo m_objMediaInfo;
     };
@@ -299,7 +327,7 @@ public:
         DIRECTION_RECIPIENT = 2,
     };
 
-private:
+protected:
     friend class DialogInfo;
 
     State m_objState;

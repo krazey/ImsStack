@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.imsstack.enabler.mtc.dialogs;
+package com.android.imsstack.enabler.mtc.externalcalls;
 
-import com.android.imsstack.enabler.mtc.IUMtcService;
-
-public class IUDialogs {
-
-    public static final int EVENT_U2I        = IUMtcService.EVENT_U2I + 60;
-    public static final int EVENT_I2U        = IUMtcService.EVENT_I2U + 60;
-
-    // Event : UI to IMS
-
-    // Event : IMS to UI
-    public static final int NOTIFY_DIALOG_INFO      = (EVENT_I2U + 1);
-
-}
+parcelable ExternalCalls;

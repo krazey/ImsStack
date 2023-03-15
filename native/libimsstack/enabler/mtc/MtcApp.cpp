@@ -32,6 +32,8 @@
 #include "conferencecall/ConferenceManager.h"
 #include "configuration/MtcConfigurationManager.h"
 #include "dialingplan/MtcDialingPlan.h"
+#include "dialogevent/MultiEndpointFactory.h"
+#include "dialogevent/MultiEndpointManager.h"
 #include "ect/EctManager.h"
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/CallStateProxy.h"
@@ -62,6 +64,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_pEmergencyServiceManager(nullptr),
         m_objMessageUtils(MessageUtils()),
         m_objPassiveTimerHolder(PassiveTimerHolder()),
+        m_pMultiEndpointManager(nullptr),
         m_objMtcRadioChecker(*this, m_objCallController),
         m_bWifiTestMode(IMS_FALSE)
 {
@@ -89,6 +92,17 @@ PUBLIC VIRTUAL void MtcApp::Start()
     InitCallManager();
     m_objMtcRadioChecker.Init();
     m_objPassiveTimerHolder.SetNormalService(GetServiceByType(ServiceType::NORMAL));
+
+#ifdef __MTC_MULTI_ENDPOINT__
+    if (MultiEndpointManager::IsRequired(GetConfigurationProxy()))
+    {
+        // TODO: this feature must be turned off until being verified using a dialer.
+        // TODO: depends on which configuration to be checked, MultiEndpointManager can be created
+        // regardless of configuration value.
+        m_pMultiEndpointManager = std::make_unique<MultiEndpointManager>(
+                *this, std::make_unique<MultiEndpointFactory>());
+    }
+#endif
 }
 
 PUBLIC VIRTUAL void MtcApp::Stop()
