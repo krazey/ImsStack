@@ -151,6 +151,13 @@ enum class SuppType
     VRBT = 16,
     TIP = 17,
     GEOLOCATION = 18,
+    CALL_PULL = 19,
+    CALL_COMPOSER_PRIORITY = 20,
+    CALL_COMPOSER_SUBJECT = 21,
+    CALL_COMPOSER_LOCATION_LAT = 22,
+    CALL_COMPOSER_LOCATION_LONG = 23,
+    CALL_COMPOSER_PICTURE_URL = 24,
+    CALL_COMPOSER_IS_BUSINESS = 25,
 };
 
 enum class OipType
@@ -158,7 +165,7 @@ enum class OipType
     INVALID = -1,
     NONE = 0,
     IDENTITY = 1,
-    RESTRICTED = 2
+    RESTRICTED = 2,
 };
 
 enum class CdivCause
@@ -172,8 +179,7 @@ enum class CdivCause
     DEFLECTION = 6,
     NOT_LOGGED_IN = 7,
     DEFLECTION_ALERTING = 8,
-    NOT_REACHABLE = 9
-
+    NOT_REACHABLE = 9,
 };
 
 enum
