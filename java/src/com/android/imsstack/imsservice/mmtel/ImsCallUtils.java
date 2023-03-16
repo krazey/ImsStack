@@ -358,6 +358,7 @@ public class ImsCallUtils {
         }
 
         ImsSuppInfoUtils.addSuppInfoForIms(context, profile, si);
+        ImsSuppInfoUtils.addSuppInfoForCallComposer(profile, si);
 
         return si;
     }
@@ -820,6 +821,8 @@ public class ImsCallUtils {
                 }
             }
         }
+
+        ImsSuppInfoUtils.addCallExtraForCallComposer(si, profile);
     }
 
     public static void updateCallProfileFromSuppInfoExtension(ICallContext context,

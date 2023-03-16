@@ -27,7 +27,6 @@ import java.util.ArrayList;
 public class SuppInfo implements Parcelable {
 
     public static class SuppService {
-
         public int            type;
 
         public String        strValue;
@@ -35,45 +34,51 @@ public class SuppInfo implements Parcelable {
         public boolean        boolValue;
     };
 
-    public ArrayList<SuppService>   objSuppService = new ArrayList<SuppService>();
+    public ArrayList<SuppService> objSuppService = new ArrayList<SuppService>();
 
     // SuppService Type
-    public static final int TYPE_CALLERID                   = 0; // int
-    public static final int TYPE_CNAP                       = 1; // String
-    public static final int TYPE_CNAPEX                     = 2; // String
-    public static final int TYPE_MMC                        = 3; // boolean
-    public static final int TYPE_GTT                        = 4; // boolean
-    public static final int TYPE_CDIV_CAUSE                 = 5; // int
-    public static final int TYPE_CDIV_HISTORY               = 6; // String
-    public static final int TYPE_CW                         = 7; // String
-    public static final int TYPE_VM                         = 8; // boolean
-    public static final int TYPE_HD                         = 9; // boolean
-    public static final int TYPE_ANSWERHOLD                 = 10; // boolean
-    public static final int TYPE_MCID                       = 11; // boolean
-    public static final int TYPE_DUALNUMBER                 = 12; // String
-    public static final int TYPE_ENFORCE_LT                 = 13; // boolean
-    public static final int TYPE_TARGET_URI                 = 14; // String
-    public static final int TYPE_CALLING_NUM_VERIFICATION   = 15; // int
-    public static final int TYPE_VRBT                       = 16; // boolean
-    public static final int TYPE_TIP                        = 17; // int, String
-    public static final int TYPE_GEOLOCATION                = 18; // boolean
-    public static final int TYPE_CALL_PULL                  = 19; // boolean
+    public static final int TYPE_CALLERID = 0;                          // int
+    public static final int TYPE_CNAP = 1;                              // String
+    public static final int TYPE_CNAPEX = 2;                            // String
+    public static final int TYPE_MMC = 3;                               // boolean
+    public static final int TYPE_GTT = 4;                               // boolean
+    public static final int TYPE_CDIV_CAUSE = 5;                        // int
+    public static final int TYPE_CDIV_HISTORY = 6;                      // String
+    public static final int TYPE_CW = 7;                                // String
+    public static final int TYPE_VM = 8;                                // boolean
+    public static final int TYPE_HD = 9;                                // boolean
+    public static final int TYPE_ANSWERHOLD = 10;                       // boolean
+    public static final int TYPE_MCID = 11;                             // boolean
+    public static final int TYPE_DUALNUMBER = 12;                       // String
+    public static final int TYPE_ENFORCE_LT = 13;                       // boolean
+    public static final int TYPE_TARGET_URI = 14;                       // String
+    public static final int TYPE_CALLING_NUM_VERIFICATION = 15;         // int
+    public static final int TYPE_VRBT = 16;                             // boolean
+    public static final int TYPE_TIP = 17;                              // int, String
+    public static final int TYPE_GEOLOCATION = 18;                      // boolean
+    public static final int TYPE_CALL_PULL = 19;                        // boolean
+    public static final int TYPE_CALL_COMPOSER_PRIORITY = 20;           // int
+    public static final int TYPE_CALL_COMPOSER_SUBJECT = 21;            // String
+    public static final int TYPE_CALL_COMPOSER_LOCATION_LAT = 22;       // String (from double)
+    public static final int TYPE_CALL_COMPOSER_LOCATION_LONG = 23;      // String (from double)
+    public static final int TYPE_CALL_COMPOSER_PICTURE_URL = 24;        // String
+    public static final int TYPE_CALL_COMPOSER_IS_BUSINESS = 25;        // boolean
 
     // CallerID
-    public static final int CALLERID_NONE           = 0;
-    public static final int CALLERID_NETWORK        = 1;
-    public static final int CALLERID_RESTRICTED      = 2;
-    public static final int CALLERID_IDENTITY       = 3;
+    public static final int CALLERID_NONE = 0;
+    public static final int CALLERID_NETWORK = 1;
+    public static final int CALLERID_RESTRICTED = 2;
+    public static final int CALLERID_IDENTITY = 3;
 
     // Calling Number Verification
-    public static final int CALLING_NUM_VERSTAT_NONE            = 0;
-    public static final int CALLING_NUM_VERSTAT_VERIFIED        = 1;
-    public static final int CALLING_NUM_VERSTAT_NOT_VERIFIED    = 2;
+    public static final int CALLING_NUM_VERSTAT_NONE = 0;
+    public static final int CALLING_NUM_VERSTAT_VERIFIED = 1;
+    public static final int CALLING_NUM_VERSTAT_NOT_VERIFIED = 2;
 
     // TIP
-    public static final int TIP_NONE         = 0;
-    public static final int TIP_IDENTITY     = 1;
-    public static final int TIP_RESTRICTED    = 2;
+    public static final int TIP_NONE = 0;
+    public static final int TIP_IDENTITY = 1;
+    public static final int TIP_RESTRICTED = 2;
 
     //------------------------------------------------------------------------------------------//
 
