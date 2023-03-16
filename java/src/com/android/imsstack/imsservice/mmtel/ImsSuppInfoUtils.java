@@ -15,6 +15,7 @@
  */
 package com.android.imsstack.imsservice.mmtel;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.telephony.ims.ImsCallProfile;
 
@@ -22,7 +23,9 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.mtc.SuppInfo;
+import com.android.imsstack.enabler.mtc.SuppInfo.SuppService;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
+import com.android.imsstack.util.ImsLog;
 
 /**
  * Extension class for operator specific supplementary information handling.
@@ -53,6 +56,84 @@ public final class ImsSuppInfoUtils {
         if (hasCallExtra(callExtras, EXTRA_GEOLOCATION)) {
             outSuppInfo.addService_bool(SuppInfo.TYPE_GEOLOCATION,
                     getCallExtraBoolean(callExtras, EXTRA_GEOLOCATION, true));
+        }
+    }
+
+    /**
+     * Gets call composer elements from the SuppInfo and adds to ImsCallProfile if they exist.
+     *
+     * @param suppInfo May contain the call composer elements.
+     * @param outProfile Call composer elements will be added to here.
+     */
+    public static void addCallExtraForCallComposer(
+            final SuppInfo suppInfo, ImsCallProfile outProfile) {
+        SuppService ss = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_PRIORITY);
+        if (ss != null) {
+            outProfile.setCallExtraInt(ImsCallProfile.EXTRA_PRIORITY, ss.intValue);
+        }
+
+        ss = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_SUBJECT);
+        if (ss != null) {
+            outProfile.setCallExtra(ImsCallProfile.EXTRA_CALL_SUBJECT, ss.strValue);
+        }
+
+        ss = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_PICTURE_URL);
+        if (ss != null) {
+            outProfile.setCallExtra(ImsCallProfile.EXTRA_PICTURE_URL, ss.strValue);
+        }
+
+        ss = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_IS_BUSINESS);
+        if (ss != null) {
+            outProfile.setCallExtraBoolean(ImsCallProfile.EXTRA_IS_BUSINESS_CALL, ss.boolValue);
+        }
+
+        SuppService ssLat = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT);
+        SuppService ssLong = suppInfo.getService(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG);
+        if (ssLat != null && ssLong != null) {
+            try {
+                double latitude = Double.parseDouble(ssLat.strValue);
+                double longitude = Double.parseDouble(ssLong.strValue);
+                String emptyProvider = "";
+
+                Location location = new Location(emptyProvider);
+                location.setLatitude(latitude);
+                location.setLongitude(longitude);
+                outProfile.setCallExtraParcelable(ImsCallProfile.EXTRA_LOCATION, location);
+            } catch (NumberFormatException e) {
+                ImsLog.e("Location parsing error: " + ssLat.strValue + ", " + ssLong.strValue);
+            }
+        }
+    }
+
+    /**
+     * Gets call composer elements from the ImsCallProfile and adds to SuppInfo if they exist.
+     *
+     * @param profile May contain the call composer elements.
+     * @param outSuppInfo Call composer elements will be added to here.
+     */
+    public static void addSuppInfoForCallComposer(
+            final ImsCallProfile profile, SuppInfo outSuppInfo) {
+        int priority = profile.getCallExtraInt(ImsCallProfile.EXTRA_PRIORITY);
+        if (priority >= 0) {
+            outSuppInfo.addService_int(SuppInfo.TYPE_CALL_COMPOSER_PRIORITY, priority);
+        }
+
+        String subject = profile.getCallExtra(ImsCallProfile.EXTRA_CALL_SUBJECT);
+        if (subject.length() > 0) {
+            outSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_SUBJECT, subject);
+        }
+
+        String picture = profile.getCallExtra(ImsCallProfile.EXTRA_PICTURE_URL);
+        if (picture.length() > 0) {
+            outSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_PICTURE_URL, picture);
+        }
+
+        Location location = profile.getCallExtraParcelable(ImsCallProfile.EXTRA_LOCATION);
+        if (location != null) {
+            outSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LAT,
+                    String.valueOf(location.getLatitude()));
+            outSuppInfo.addService_str(SuppInfo.TYPE_CALL_COMPOSER_LOCATION_LONG,
+                    String.valueOf(location.getLongitude()));
         }
     }
 
