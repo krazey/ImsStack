@@ -69,17 +69,21 @@
     </int-array>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <int-array name="extra_reg_err_code_int_array" num="2">
-        <item value="0"/>
-        <item value="2"/>
-    </int-array>
+    <pbundle name="extra_reg_err_bundle">
+        <int-array name="extra_reg_err_code_int_array" num="2">
+            <item value="0"/>
+            <item value="2"/>
+        </int-array>
+    </pbundle>
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
-    <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
-    <int-array name="sub_err_code_for_init_reg_int_array" num="3">
-        <item value="403"/>
-        <item value="504"/>
-        <item value="0"/>
-    </int-array>
+    <pbundle name="sub_err_code_for_init_reg_bundle">
+        <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="1"/>
+        <int-array name="sub_err_code_for_init_reg_int_array" num="3">
+            <item value="403"/>
+            <item value="504"/>
+            <item value="0"/>
+        </int-array>
+    </pbundle>
 
     <!-- Uce -->
     <int name="imsuce.anonymous_fetch_method_int" value="0"/>
@@ -284,6 +288,100 @@
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="1"/>
 
     <!-- Media -->
+    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="125"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="115"/>
+            <item value="116"/>
+        </int-array>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
+            <item value="97"/>
+            <item value="98"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="105"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="103"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvoice.evs_payload_description_bundle">
+        <pbundle name="125">
+            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="0"/>
+                <item value="4"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
+            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.amrwb_payload_description_bundle">
+        <pbundle name="115">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle>
+        <pbundle name="116">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.amrnb_payload_description_bundle">
+        <pbundle name="97">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
+                <item value="0"/>
+                <item value="2"/>
+                <item value="4"/>
+                <item value="7"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+        </pbundle>
+        <pbundle name="98">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
+                <item value="0"/>
+                <item value="2"/>
+                <item value="4"/>
+                <item value="7"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
+        <int-array name="imsvt.h264_payload_type_int_array" num="1">
+            <item value="119"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvt.h264_payload_description_bundle">
+        <pbundle name="119">
+            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
+            <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
+            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+                <item value="240"/>
+                <item value="320"/>
+            </int-array>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
+        <int name="imsrtt.t140_payload_type_int" value="111"/>
+        <int name="imsrtt.red_payload_type_int" value="112"/>
+    </pbundle>
     <boolean name="audio_evs_support_bool" value="true"/>
     <int name="audio_maxred_int" value="0"/>
     <boolean name="audio_bw_nego_option_bool" value="true"/>

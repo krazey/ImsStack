@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import com.android.imsstack.util.AppContext;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -969,6 +970,18 @@ public class CarrierConfig {
         public static final int IPV6_PREFERRED = 1;
     }
 
+    // PAYLOAD_DESCRIPTION_BUNDLE is excluded from this list because it has a nested bundle.
+    private static final List<String> IMS_BUNDLE_KEYS = List.of(
+            CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+            CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+            CarrierConfigManager.ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+            Assets.KEY_EXTRA_REG_ERR_BUNDLE,
+            Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
+            Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
+            Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
+            Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
+            Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE);
+
     private final PersistableBundle mConfig = new PersistableBundle();
 
     public CarrierConfig() {
@@ -978,8 +991,7 @@ public class CarrierConfig {
         mConfig.clear();
         mConfig.putAll(config);
 
-        refineSpecialKeys(slotId);
-        refineBundles();
+        adjustSpecialKeys(slotId);
     }
 
     /**
@@ -1142,17 +1154,16 @@ public class CarrierConfig {
      * @return A string representation of the value for the given key.
      */
     public static String getValue(@NonNull PersistableBundle config, @NonNull String key) {
-        if (key.endsWith("_bool") || key.endsWith("_boolean")
-                || key.equals("ignore_data_enabled_changed_for_video_calls")) {
-            return String.valueOf(config.getBoolean(key));
+        if (key.endsWith("_bool") || key.endsWith("_boolean")) {
+            return String.valueOf(config.getBoolean(key, false));
         } else if (key.endsWith("_int")) {
-            return String.valueOf(config.getInt(key));
+            return String.valueOf(config.getInt(key, -1));
         } else if (key.endsWith("_long")) {
-            return String.valueOf(config.getLong(key));
+            return String.valueOf(config.getLong(key, -1L));
         } else if (key.endsWith("_string")) {
             return config.getString(key);
         } else if (key.endsWith("_double")) {
-            return String.valueOf(config.getDouble(key));
+            return String.valueOf(config.getDouble(key, 0.0));
         } else if (key.endsWith("_bool_array")) {
             return Arrays.toString(config.getBooleanArray(key));
         } else if (key.endsWith("_int_array")) {
@@ -1179,13 +1190,46 @@ public class CarrierConfig {
                 sb.append(" }");
                 return sb.toString();
             }
-            return "(null)";
+            return "null";
+        } else if (key.equals(
+                CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
+            return String.valueOf(config.getBoolean(key, false));
         }
 
         return "UnknownKeyType";
     }
 
-    private void refineSpecialKeys(int slotId) {
+    /**
+     * Overrides the bundle item - merge two configurations ({@code defaultConfig}: low priority,
+     * {@code overrideConfig}: high priority) and puts the updated value to the
+     * {@code overrideConfig} argument.
+     *
+     * @param defaultConfig A configuration with lower priority
+     * @param overrideConfig A configuration with higher priority
+     */
+    public static void overrideNestedBundles(PersistableBundle defaultConfig,
+            PersistableBundle overrideConfig) {
+        for (int i = 0; i < IMS_BUNDLE_KEYS.size(); ++i) {
+            final String key = IMS_BUNDLE_KEYS.get(i);
+            PersistableBundle newBundle = new PersistableBundle();
+            PersistableBundle defaultBundle = defaultConfig.getPersistableBundle(key);
+            PersistableBundle overrideBundle = overrideConfig.getPersistableBundle(key);
+
+            if (defaultBundle != null) {
+                newBundle.putAll(defaultBundle);
+            }
+
+            if (overrideBundle != null) {
+                newBundle.putAll(overrideBundle);
+            }
+
+            overrideConfig.putPersistableBundle(key, newBundle);
+        }
+
+        overridePayloadDescriptionBundles(defaultConfig, overrideConfig);
+    }
+
+    private void adjustSpecialKeys(int slotId) {
         // User-Agent string
         String uaString = mConfig.getString(CarrierConfigManager.Ims.KEY_IMS_USER_AGENT_STRING);
 
@@ -1255,348 +1299,79 @@ public class CarrierConfig {
         return imei + sv;
     }
 
-    private void refineBundles() {
-        refineBundlesForIms();
-        refineBundlesForImsRtt();
-        refineBundlesForImsVoice();
-        //refineBundlesForImsVt(); // TODO_MEDIA temp block waiting for bundle
-        refineBundlesForAssets();
-    }
-
-    private void refineBundlesForIms() {
-        // These bundles are set by the Telephony Service,
-        // so we don't need to adjust these bundles.
-        // KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
-        // KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
-    }
-
-    private void refineBundlesForImsRtt() {
-        // Check the following keys:
-        // KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
-        final String[] TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE_KEYS =
-            {
-                CarrierConfigManager.ImsRtt.KEY_T140_PAYLOAD_TYPE_INT,
-                CarrierConfigManager.ImsRtt.KEY_RED_PAYLOAD_TYPE_INT
-            };
-
-        setBundle(mConfig,
-                CarrierConfigManager.ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-                TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE_KEYS);
-    }
-
-    private void refineBundlesForImsVoice() {
-        // Check the following keys:
-        // KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
-        // KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE
-        // KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE
-        // KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE
-
-        final String[] AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE_KEYS =
-            {
-                CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
-                CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
-                CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
-                CarrierConfigManager.ImsVoice.KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY,
-                CarrierConfigManager.ImsVoice.KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY
-            };
-
-        setBundle(mConfig,
+    private static void overridePayloadDescriptionBundles(PersistableBundle defaultConfig,
+            PersistableBundle overrideConfig) {
+        overridePayloadDescriptionBundle(defaultConfig, overrideConfig,
                 CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-                AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE_KEYS);
+                CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
+                CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE);
 
-        PersistableBundle audioCodecCapabilityPayloadTypes = getBundle(
-                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+        overridePayloadDescriptionBundle(defaultConfig, overrideConfig,
+                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+                CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
+                CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE);
 
-        if (audioCodecCapabilityPayloadTypes != null) {
-            int[] payloadTypesForAmrNb = audioCodecCapabilityPayloadTypes.getIntArray(
-                    CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY);
+        overridePayloadDescriptionBundle(defaultConfig, overrideConfig,
+                CarrierConfigManager.ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
+                CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
+                CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE);
 
-            if (payloadTypesForAmrNb != null) {
-                PersistableBundle payloadDescForAmrNb = new PersistableBundle();
-
-                if (payloadTypesForAmrNb.length >= 1) {
-                    // Bandwidth-efficient mode
-                    payloadDescForAmrNb.putPersistableBundle(
-                            String.valueOf(payloadTypesForAmrNb[0]), new PersistableBundle());
-                }
-
-                if (payloadTypesForAmrNb.length >= 2) {
-                    PersistableBundle codecAttrForAmrNb = new PersistableBundle();
-
-                    codecAttrForAmrNb.putInt(
-                            CarrierConfigManager.ImsVoice.
-                                    KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
-                            CarrierConfigManager.ImsVoice.OCTET_ALIGNED);
-
-                    payloadDescForAmrNb.putPersistableBundle(
-                            String.valueOf(payloadTypesForAmrNb[1]), codecAttrForAmrNb);
-                }
-
-                // How to handle this when the count of payload type is greater than two ?
-                // How to configure the mode-set?
-
-                mConfig.putPersistableBundle(
-                        CarrierConfigManager.ImsVoice.KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE,
-                        payloadDescForAmrNb);
-            }
-
-            int[] payloadTypesForAmrWb = audioCodecCapabilityPayloadTypes.getIntArray(
-                    CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY);
-
-            if (payloadTypesForAmrWb != null) {
-                PersistableBundle payloadDescForAmrWb = new PersistableBundle();
-                final String[] AMRWB_CODEC_ATTRIBUTE_KEYS =
-                    {
-                        CarrierConfigManager.ImsVoice.
-                                KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
-                        CarrierConfigManager.ImsVoice.
-                                KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
-                        CarrierConfigManager.ImsVoice.
-                                KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT
-                    };
-
-                if (payloadTypesForAmrWb.length >= 1) {
-                    // Bandwidth-efficient mode
-                    PersistableBundle codecAttrForAmrWb = new PersistableBundle();
-
-                    for (String key : AMRWB_CODEC_ATTRIBUTE_KEYS) {
-                        moveItemToBundle(mConfig, codecAttrForAmrWb, key, false);
-                    }
-
-                    payloadDescForAmrWb.putPersistableBundle(
-                            String.valueOf(payloadTypesForAmrWb[0]), codecAttrForAmrWb);
-                }
-
-                if (payloadTypesForAmrWb.length >= 2) {
-                    PersistableBundle codecAttrForAmrWb = new PersistableBundle();
-
-                    codecAttrForAmrWb.putInt(
-                            CarrierConfigManager.ImsVoice.
-                                    KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
-                            CarrierConfigManager.ImsVoice.OCTET_ALIGNED);
-
-                    for (String key : AMRWB_CODEC_ATTRIBUTE_KEYS) {
-                        moveItemToBundle(mConfig, codecAttrForAmrWb, key, false);
-                    }
-
-                    payloadDescForAmrWb.putPersistableBundle(
-                            String.valueOf(payloadTypesForAmrWb[1]), codecAttrForAmrWb);
-                }
-
-                // How to handle this when the count of payload type is greater than two ?
-                // How to configure the mode-set?
-
-                mConfig.putPersistableBundle(
-                        CarrierConfigManager.ImsVoice.KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE,
-                        payloadDescForAmrWb);
-            }
-
-            int[] payloadTypesForEvs = audioCodecCapabilityPayloadTypes.getIntArray(
-                    CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
-
-            if (payloadTypesForEvs != null) {
-                PersistableBundle payloadDescForEvs = new PersistableBundle();
-
-                if (payloadTypesForEvs.length >= 1) {
-                    PersistableBundle codecAttrForEvs = new PersistableBundle();
-
-                    final String[] EVS_CODEC_ATTRIBUTE_KEYS =
-                        {
-                            CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT,
-                            CarrierConfigManager.ImsVoice.
-                                    KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY,
-                            CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
-                            CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT,
-                            CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL,
-                            CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL,
-                            CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT,
-                            CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CMR_INT,
-                            CarrierConfigManager.ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT,
-                            CarrierConfigManager.ImsVoice.
-                                    KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
-                            CarrierConfigManager.ImsVoice.
-                                    KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
-                            CarrierConfigManager.ImsVoice.
-                                    KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT
-                        };
-
-                    for (String key : EVS_CODEC_ATTRIBUTE_KEYS) {
-                        moveItemToBundle(mConfig, codecAttrForEvs, key, false);
-                    }
-
-                    payloadDescForEvs.putPersistableBundle(
-                            String.valueOf(payloadTypesForEvs[0]), codecAttrForEvs);
-                }
-
-                // How to handle this when the count of payload type is greater than one ?
-
-                mConfig.putPersistableBundle(
-                        CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE,
-                        payloadDescForEvs);
-            }
-        }
-    }
-
-    // TODO_MEDIA temp block waiting for bundle
-    /*private void refineBundlesForImsVt() {
-        // Check the following keys:
-        // KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE
-        // KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE
-
-        final String[] VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE_KEYS =
-            {
-                CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY
-            };
-
-        setBundle(mConfig,
+        overridePayloadDescriptionBundle(defaultConfig, overrideConfig,
                 CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE,
-                VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE_KEYS);
-
-        final String[] H264_PAYLOAD_DESCRIPTION_BUNDLE_KEYS =
-            {
-                CarrierConfigManager.ImsVt.KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING,
-                CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
-                CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
-                CarrierConfigManager.ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY
-            };
-
-        setBundle(mConfig,
-                CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE,
-                H264_PAYLOAD_DESCRIPTION_BUNDLE_KEYS);
-    }*/
-
-    private void refineBundlesForAssets() {
-        // Check the following keys:
-        // KEY_EXTRA_REG_ERR_BUNDLE
-        // KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE
-        // KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE
-        // KEY_REG_RETRY_INTERVAL_BUNDLE
-        // KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE
-        // KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE
-
-        final String[] extraRegErrBundleKeys = {
-                Assets.KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
-                Assets.KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
-                Assets.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
-                Assets.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
-                Assets.KEY_EXTRA_REG_ERR_MIN_CNT_INT,
-                Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
-                Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
-                Assets.KEY_EXTRA_REG_ERR_POLICY_INT,
-                Assets.KEY_EXTRA_REG_ERR_CODE_INT_ARRAY,
-                Assets.KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY,
-                Assets.KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY
-        };
-
-        setBundle(mConfig,
-                Assets.KEY_EXTRA_REG_ERR_BUNDLE,
-                extraRegErrBundleKeys);
-
-        final String[] notifyTerminatedForInitRegBundleKeys = {
-                Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT,
-                Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
-                Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY
-        };
-
-        setBundle(mConfig,
-                Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
-                notifyTerminatedForInitRegBundleKeys);
-
-        final String[] regErrCodeWithRaTimeBundleKeys = {
-                Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL,
-                Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,
-                Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY
-        };
-
-        setBundle(mConfig,
-                Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
-                regErrCodeWithRaTimeBundleKeys);
-
-        final String[] regRetryIntervalBundleKeys = {
-                Assets.KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL,
-                Assets.KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
-                Assets.KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY
-        };
-
-        setBundle(mConfig,
-                Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
-                regRetryIntervalBundleKeys);
-
-        final String[] subErrCodeForInitRegBundleKeys = {
-                Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT,
-                Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY
-        };
-
-        setBundle(mConfig,
-                Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
-                subErrCodeForInitRegBundleKeys);
-
-        final String[] subErrCodeForTerminatedBundleKeys = {
-                Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT,
-                Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY
-        };
-
-        setBundle(mConfig,
-                Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE,
-                subErrCodeForTerminatedBundleKeys);
+                CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY,
+                CarrierConfigManager.ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE);
     }
 
-    private static void setBundle(PersistableBundle config,
-            String bundleKey, String[] itemKeys) {
-        PersistableBundle bundle = config.getPersistableBundle(bundleKey);
+    private static void overridePayloadDescriptionBundle(PersistableBundle defaultConfig,
+            PersistableBundle overrideConfig, String payloadTypesBundleKey, String payloadTypesKey,
+            String payloadDescriptionBundleKey) {
+        PersistableBundle defaultPayloadDescriptionBundle =
+                defaultConfig.getPersistableBundle(payloadDescriptionBundleKey);
 
-        if (bundle == null) {
-            bundle = new PersistableBundle();
+        if (defaultPayloadDescriptionBundle == null || defaultPayloadDescriptionBundle.isEmpty()) {
+            // Use a prioritized configuration (overrideConfig) if present
+            return;
         }
 
-        int itemCount = 0;
+        PersistableBundle overridePayloadTypesBundle =
+                overrideConfig.getPersistableBundle(payloadTypesBundleKey);
+        int[] overridePayloadTypes = (overridePayloadTypesBundle != null)
+                ? overridePayloadTypesBundle.getIntArray(payloadTypesKey) : null;
 
-        for (String itemKey : itemKeys) {
-            itemCount += moveItemToBundle(config, bundle, itemKey, true);
+        if (overridePayloadTypes == null || overridePayloadTypes.length == 0) {
+            // Use a default configuration
+            return;
         }
 
-        if (itemCount > 0) {
-            config.putPersistableBundle(bundleKey, bundle);
-        }
-    }
+        PersistableBundle newPayloadDescriptionBundle = new PersistableBundle();
+        PersistableBundle overridePayloadDescriptionBundle =
+                overrideConfig.getPersistableBundle(payloadDescriptionBundleKey);
 
-    private static int moveItemToBundle(PersistableBundle src,
-            PersistableBundle dst, String key, boolean removeKeyFromSrc) {
-        int count = 0;
+        if (overridePayloadDescriptionBundle == null
+                || overridePayloadDescriptionBundle.isEmpty()) {
+            newPayloadDescriptionBundle.putAll(defaultPayloadDescriptionBundle);
+        } else {
+            for (int i = 0; i < overridePayloadTypes.length; ++i) {
+                final String payloadKey = String.valueOf(overridePayloadTypes[i]);
+                PersistableBundle newPayloadBundle = new PersistableBundle();
+                PersistableBundle defaultPayloadBundle =
+                        defaultPayloadDescriptionBundle.getPersistableBundle(payloadKey);
+                PersistableBundle overridePayloadBundle =
+                        overridePayloadDescriptionBundle.getPersistableBundle(payloadKey);
 
-        if (src.containsKey(key)) {
-            if (key.endsWith("_bool") || key.endsWith("_boolean")
-                    || key.equals("ignore_data_enabled_changed_for_video_calls")) {
-                dst.putBoolean(key, src.getBoolean(key));
-                count++;
-            } else if (key.endsWith("_int")) {
-                dst.putInt(key, src.getInt(key));
-                count++;
-            } else if (key.endsWith("_long")) {
-                dst.putLong(key, src.getLong(key));
-                count++;
-            } else if (key.endsWith("_string")) {
-                dst.putString(key, src.getString(key));
-                count++;
-            } else if (key.endsWith("_bool_array")) {
-                dst.putBooleanArray(key, src.getBooleanArray(key));
-                count++;
-            } else if (key.endsWith("_int_array")) {
-                dst.putIntArray(key, src.getIntArray(key));
-                count++;
-            } else if (key.endsWith("_long_array")) {
-                dst.putLongArray(key, src.getLongArray(key));
-                count++;
-            } else if (key.endsWith("_string_array")) {
-                dst.putStringArray(key, src.getStringArray(key));
-                count++;
-            }
+                if (defaultPayloadBundle != null) {
+                    newPayloadBundle.putAll(defaultPayloadBundle);
+                }
 
-            if (count > 0 && removeKeyFromSrc) {
-                src.remove(key);
+                if (overridePayloadBundle != null) {
+                    newPayloadBundle.putAll(overridePayloadBundle);
+                }
+
+                newPayloadDescriptionBundle.putPersistableBundle(payloadKey, newPayloadBundle);
             }
         }
 
-        return count;
+        overrideConfig.putPersistableBundle(
+                payloadDescriptionBundleKey, newPayloadDescriptionBundle);
     }
 }
