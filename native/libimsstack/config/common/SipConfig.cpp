@@ -433,7 +433,6 @@ PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
     nSipFeatureCaps |= SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_USER_AGENT;
     nSipFeatureCaps |= SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX;
-    nSipFeatureCaps |= SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN;
 
     if (piCc->GetBoolean(CarrierConfig::Ims::KEY_GRUU_ENABLED_BOOL))
     {
