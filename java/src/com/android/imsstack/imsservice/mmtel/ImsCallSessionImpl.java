@@ -206,6 +206,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         clearUsatBasedCall();
         clearApnStateListener();
 
+        logi("close");
+
         if (mCall != null) {
             if (mCallDetails.is(CallDetails.IMPLICIT_TERMINATED)
                     && isImplicitTerminatedCondition()) {
@@ -219,6 +221,14 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 garbageCalls.add(mCallContext.getSlotId(), this);
 
                 mCT.updateCallState(this, CallTracker.CALL_EVENT_DESTROY, null);
+                return;
+            }
+
+            /* Don't close the {@link #MtcCall} before {@link onAudioSessionClosed} is called
+             */
+            if (mCallDetails.is(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END)) {
+                logi("Don't close MtcCall before audio session closed");
+                mCallDetails.set(CallDetails.CLOSE_PENDING);
                 return;
             }
 
@@ -1832,6 +1842,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         setTerminationReason(reasonInfo.getCode());
 
+        mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
         mCallDetails.set(CallDetails.CALL_END_FINISHED);
         mCallback.invokeTerminated(this, reasonInfo);
     }
@@ -1843,6 +1854,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         setTerminationReason(reasonInfo.getCode());
 
+        mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
         mCallDetails.set(CallDetails.CALL_END_FINISHED);
 
         if (delay <= 0) {
@@ -1851,6 +1863,28 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             Handler h = mCallContext.getCallHandler();
             h.postDelayed(() -> {
                 mCallback.invokeTerminated(ImsCallSessionImpl.this, reasonInfo);
+            }, delay);
+        }
+    }
+
+    @VisibleForTesting
+    protected void closeSessionWithDelay(final ImsCallSessionImpl session, long delay) {
+        if ((session == null) && !mCallDetails.is(CallDetails.CLOSE_PENDING)) {
+            return;
+        }
+
+        logi("closeSessionWithDelay ::" + delay);
+
+        if (delay <= 0) {
+            session.close();
+            mCallDetails.clear(CallDetails.CLOSE_PENDING);
+        } else {
+            Handler h = mCallContext.getCallHandler();
+            h.postDelayed(() -> {
+                if (session.getMtcCall() != null) {
+                    session.close();
+                    mCallDetails.clear(CallDetails.CLOSE_PENDING);
+                }
             }, delay);
         }
     }
@@ -4410,6 +4444,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                             mCacheCallReasonInfo.mExtraMessage);
                 }
                 mCallDetails.clear(CallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END);
+
+                if (mCallDetails.is(CallDetails.CLOSE_PENDING)
+                        && !mCallDetails.is(CallDetails.IMPLICIT_TERMINATED)) {
+                    closeSessionWithDelay(ImsCallSessionImpl.this, 500);
+                }
             }
 
             if (isConferenceTransitionInProgress() && isImplicitTerminatedCondition()) {
@@ -4425,7 +4464,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             logi("onCallQualityChanged");
-            mCallback.invokeCallQualityChanged(callQuality);
+            /* After SRVCC success case don't invoke callQualityChanged as ImsCallSession
+             * will be closed from framework side.
+             */
+            if (!mCallDetails.is(CallDetails.CLOSE_PENDING)) {
+                mCallback.invokeCallQualityChanged(callQuality);
+            }
         }
 
         @Override
