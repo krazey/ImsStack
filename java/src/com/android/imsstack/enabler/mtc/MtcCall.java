@@ -464,6 +464,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         mConference = mtcConference;
         mMediaSession = mtcMediaSession;
         mAudioListener = new AudioSessionListener();
+        mTextListener = new TextSessionListener();
         mMtcJniProxy = mtcJniProxy;
         mCallInfo = new MtcCallInfo(callInfo);
         mMediaInfo = mediaInfo;
@@ -472,6 +473,11 @@ public class MtcCall extends Call implements ConferenceTracker {
     @VisibleForTesting
     MtcMediaSession.AudioListener getAudioListener() {
         return mAudioListener;
+    }
+
+    @VisibleForTesting
+    MtcMediaSession.TextListener getTextListener() {
+        return mTextListener;
     }
 
     @Override
