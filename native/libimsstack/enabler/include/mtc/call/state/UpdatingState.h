@@ -49,6 +49,7 @@ public:
     CallStateName SessionTerminated(IN ISession* piSession) override;
     CallStateName SessionUpdated(IN ISession* piSession) override;
     CallStateName SessionUpdateFailed(IN ISession* piSession) override;
+    CallStateName SessionUpdateReceived(IN ISession* piSession) override;
     // TODO, PR
 
     CallStateName Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
@@ -72,7 +73,9 @@ private:
     CallStateName HandleModificationSucceeded();
     CallStateName HandleRequestedModificationSucceeded();
     CallStateName HandleReceivedModificationSucceeded();
+    CallStateName HandleRetry();
     void RecoverModificationFailure();
+    void NotifyFailure();
     void StopTimer();
     void UpdateCallType();
 };
