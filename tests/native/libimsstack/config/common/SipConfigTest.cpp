@@ -250,7 +250,7 @@ TEST_F(SipConfigTest, Update)
     EXPECT_TRUE(objSipConfig.IsPPreferredIdInRegSubRequired());
     EXPECT_FALSE(objSipConfig.IsRouteHeaderInRegRequired());
     EXPECT_TRUE(objSipConfig.IsRportConfigured());
-    EXPECT_TRUE(objSipConfig.IsTransportErrorReportOnTxnRequired());
+    EXPECT_FALSE(objSipConfig.IsTransportErrorReportOnTxnRequired());
     EXPECT_TRUE(objSipConfig.IsTrustDomainConfigured());
     EXPECT_TRUE(objSipConfig.IsUdpFallbackConfigured());
     EXPECT_TRUE(objSipConfig.IsUserAgentConfigured());
