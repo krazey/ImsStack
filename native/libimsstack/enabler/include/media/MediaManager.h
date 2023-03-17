@@ -22,6 +22,7 @@
 #include "ImsActivityEx.h"
 #include "ImsMap.h"
 #include "IJniMediaManager.h"
+#include "IMediaManager.h"
 #include "IMMedia.h"
 #include "MediaDef.h"
 
@@ -30,7 +31,7 @@ class MediaMsgHandler;
 class MediaSession;
 class MediaResourceManager;
 
-class MediaManager : public ImsActivityEx, public IJniMediaManager
+class MediaManager : public ImsActivityEx, public IJniMediaManager, public IMediaManager
 {
 public:
     class MediaSessionNode
@@ -67,11 +68,11 @@ public:
      * instance to communicate with jni thread to send and receive a message from java layer
      *
      * @param nService service type, normal or emergency
-     * @param callKey The key to identify the call session, each MediaSession has a unique key to
+     * @param nCallKey The key to identify the call session, each MediaSession has a unique key to
      * match with the call session
      * @return IMediaSession* created IMediaSession instance
      */
-    IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP callKey);
+    IMediaSession* CreateSession(IN MEDIA_SERVICE_TYPE nService, IN IMS_SINTP nCallKey);
 
     /**
      * @brief Destroys the MediaSession instance
