@@ -34,6 +34,8 @@
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
 #include "sipcore/SipMethod.h"
+#include "sipcore/SipStatusCode.h"
+#include "utility/MockIMessageUtils.h"
 #include <gtest/gtest.h>
 
 using ::testing::_;
@@ -55,9 +57,10 @@ public:
     MockIMtcUiNotifier objUiNotifier;
     MtcSupplementaryService* pMtcSupplementaryService;
     MockIMtcPreconditionManager objMtcPreconditionManager;
-    MockIMessage* pMessage;
+    MockIMessage objMessage;
     MockMtcTimerWrapper objTimer;
     MockMtcPendingOperationHolder objPendingOperationHolder;
+    MockIMessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
@@ -87,14 +90,14 @@ protected:
         ON_CALL(objContext, GetPendingOperationHolder)
                 .WillByDefault(ReturnRef(objPendingOperationHolder));
 
-        pMessage = new MockIMessage();
+        ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+
         pUpdatingState = new UpdatingState(objContext);
     }
 
     virtual void TearDown() override
     {
         delete pUpdatingState;
-        delete pMessage;
         delete pUpdatingInfo;
         delete pConfigurationProxy;
         delete pMtcSupplementaryService;
@@ -175,9 +178,9 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
     EXPECT_CALL(objMtcPreconditionManager, FormPreconditionSdp(_, _)).Times(1);
     EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
-    EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(pMessage));
+    EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
     SipMethod objSipMethod(SipMethod::UPDATE);
-    EXPECT_CALL(*pMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
+    EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
     EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
 
     EXPECT_EQ(
@@ -188,9 +191,9 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
 TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)
 {
     ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
-    EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(pMessage));
+    EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
     SipMethod objSipMethod(SipMethod::INVITE);
-    EXPECT_CALL(*pMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
+    EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
     MediaInfo objMediaInfo;
     EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
 
@@ -287,4 +290,81 @@ TEST_F(UpdatingStateTest, HandleSrvccStartedAsNotModifier)
     EXPECT_CALL(objMtcSession, Reject(objReason)).Times(1);
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->OnSrvccStateUpdated(SrvccState::STARTED));
+}
+
+TEST_F(UpdatingStateTest, OnRequestPendingErrorStartsGlareConditionTimer)
+{
+    objCallInfo.ePeerType = PeerType::MO;
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
+
+    EXPECT_CALL(objMediaManager, RestoreSdp(_));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TIMER_GLARE_CONDITION, _));
+
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionUpdateFailed(&objSession));
+}
+
+TEST_F(UpdatingStateTest, OnGlareConditionTimerExpiredRetriesUpdate)
+{
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(5);
+
+    pUpdatingInfo->SetRequestingType(UpdateType::HOLD);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+
+    pUpdatingInfo->SetRequestingType(UpdateType::RESUME);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+
+    pUpdatingInfo->SetRequestingType(UpdateType::SESSION);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+
+    pUpdatingInfo->SetRequestingType(UpdateType::SRVCC_RECOVERED_CANCEL);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+
+    pUpdatingInfo->SetRequestingType(UpdateType::SRVCC_RECOVERED_FAILURE);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+}
+
+TEST_F(UpdatingStateTest, OnGlareConditionTimerExpiredDoesNotRetryUpdateIfInvalidUpdateType)
+{
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(0);
+
+    pUpdatingInfo->SetRequestingType(UpdateType::NORMAL);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+
+    pUpdatingInfo->SetRequestingType(UpdateType::CONF);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+
+    pUpdatingInfo->SetRequestingType(UpdateType::REFRESH);
+    pUpdatingState->OnTimerExpired(MtcCallState::TIMER_GLARE_CONDITION);
+}
+
+TEST_F(UpdatingStateTest, SessionUpdateReceivedReturnsEstablishedIfGlareTimerActive)
+{
+    ON_CALL(objTimer, IsActive(MtcCallState::TIMER_GLARE_CONDITION))
+            .WillByDefault(Return(IMS_TRUE));
+    EXPECT_CALL(objPendingOperationHolder, PushPendingOperation(_)).Times(3);
+
+    // No Held / Resumed case.
+    EXPECT_CALL(objUiNotifier, SendUpdateFailed(_));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
+
+    // Held case
+    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND;
+    EXPECT_CALL(objUiNotifier, SendHoldFailed(_));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
+
+    // Resumed case
+    pUpdatingInfo->GetNegotiatedInfo().eAudioDirection = DIRECTION_SEND;
+    pUpdatingInfo->GetModifyingInfo().eAudioDirection = DIRECTION_SEND_RECEIVE;
+    EXPECT_CALL(objUiNotifier, SendResumeFailed(_));
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->SessionUpdateReceived(&objSession));
+}
+
+TEST_F(UpdatingStateTest, SessionUpdateReceivedDoesNothingIfGlareTimerInActive)
+{
+    ON_CALL(objTimer, IsActive(MtcCallState::TIMER_GLARE_CONDITION))
+            .WillByDefault(Return(IMS_FALSE));
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->SessionUpdateReceived(&objSession));
 }

@@ -31,6 +31,7 @@ public:
 
 public:
     inline CallType GetTargetCallType() const { return m_eTargetCallType; }
+    inline UpdateType GetRequestingType() const { return m_eRequestingType; }
     inline MediaInfo& GetNegotiatedInfo() { return m_objNegotiatedInfo; }
     inline MediaInfo& GetModifyingInfo() { return m_objModifyingInfo; }
     inline MediaInfo& GetAlertingInfo() { return m_objAlertingInfo; }
@@ -38,6 +39,7 @@ public:
     inline IMS_BOOL IsModifier() { return m_bModifier; }
     inline IMS_BOOL IsAlerted() { return m_bAlerted; }
     inline void SetTargetCallType(IN CallType eCallType) { m_eTargetCallType = eCallType; }
+    inline void SetRequestingType(IN UpdateType eType) { m_eRequestingType = eType; }
     inline void SetModifier() { m_bModifier = IMS_TRUE; }
     inline void SetAlerted() { m_bAlerted = IMS_TRUE; }
     inline void SetPendingUpdate(IN IMS_BOOL bHasPendingUpdate)
@@ -63,10 +65,11 @@ private:
 private:
     IMtcCallContext& m_objContext;
     CallType m_eTargetCallType;
-    MediaInfo m_objNegotiatedInfo;
-    MediaInfo m_objModifyingInfo;
-    MediaInfo m_objAlertingInfo;
-    MediaInfo m_objModifiedInfo;
+    UpdateType m_eRequestingType;
+    MediaInfo m_objNegotiatedInfo;  // Info before starting update.
+    MediaInfo m_objModifyingInfo;   // Info after sending update.
+    MediaInfo m_objAlertingInfo;    // Info after receiving update.
+    MediaInfo m_objModifiedInfo;    // Info after update completed.
     IMS_BOOL m_bModifier;
     IMS_BOOL m_bAlerted;
     IMS_BOOL m_bHasPendingUpdate;
