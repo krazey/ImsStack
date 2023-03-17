@@ -486,6 +486,7 @@ IMS_RESULT EstablishedState::HandleUpdate(
 {
     IMS_TRACE_D("HandleUpdate Type[%d]", eUpdateType, 0, 0);
     m_objContext.GetUpdatingInfo().SetModifier();
+    m_objContext.GetUpdatingInfo().SetRequestingType(eUpdateType);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     m_objContext.GetUpdatingInfo().GetNegotiatedInfo() = objMediaManager.GetMediaInfo();

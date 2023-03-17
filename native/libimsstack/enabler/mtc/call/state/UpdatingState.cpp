@@ -233,11 +233,36 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piS
         m_objContext.GetUiNotifier().SendTerminated(objReason);
         return CallStateName::TERMINATING;
     }
-    else  // TODO: retry
+    else if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
     {
+        // Keep UpdatingState to block another outgoing request or pending operation
+        // during this period. Also, UpdatingInfo is going to be deleted if transits to Established.
+        // And, when a incoming request is received, transits to Established to handle the request.
         RecoverModificationFailure();
+        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
+        return GetStateName();
+    }
+
+    RecoverModificationFailure();
+    NotifyFailure();
+    return CallStateName::ESTABLISHED;
+}
+
+PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateReceived(IN ISession* piSession)
+{
+    if (m_objContext.GetTimer().IsActive(TIMER_GLARE_CONDITION))
+    {
+        IMS_TRACE_I("SessionUpdateReceived during waiting glare condition timer", 0, 0, 0);
+
+        NotifyFailure();
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [piSession](IMtcCallState* pState)
+                {
+                    return pState->SessionUpdateReceived(piSession);
+                });
         return CallStateName::ESTABLISHED;
     }
+    return GetStateName();
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::Refresh_NotifyTimerExpired(
@@ -260,6 +285,8 @@ PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
             return RejectUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
         case TIMER_CONVERT_REMOTE_RESPONSE:
             return CancelUpdate(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE));
+        case TIMER_GLARE_CONDITION:
+            return HandleRetry();
         default:
             break;
     }
@@ -532,12 +559,70 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
 }
 
 PRIVATE
+CallStateName UpdatingState::HandleRetry()
+{
+    MediaInfo objMediaInfo = m_objContext.GetUpdatingInfo().GetModifyingInfo();
+    UpdateType eType = m_objContext.GetUpdatingInfo().GetRequestingType();
+    CallType eCallType = m_objContext.GetUpdatingInfo().GetTargetCallType();
+
+    IMS_TRACE_I("HandleRetry UpdateType[%d]", eType, 0, 0);
+    if (eType == UpdateType::HOLD)
+    {
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [objMediaInfo](IMtcCallState* pState) mutable
+                {
+                    return pState->Hold(objMediaInfo);
+                });
+    }
+    else if (eType == UpdateType::RESUME)
+    {
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [objMediaInfo](IMtcCallState* pState) mutable
+                {
+                    return pState->Resume(objMediaInfo);
+                });
+    }
+    else if (eType == UpdateType::SESSION)
+    {
+        // TODO: receiving 491 for RejectUpdate->SendUpdate.
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [eCallType, objMediaInfo](IMtcCallState* pState) mutable
+                {
+                    return pState->Update(eCallType, objMediaInfo);
+                });
+    }
+    else if (eType == UpdateType::SRVCC_RECOVERED_CANCEL)
+    {
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [](IMtcCallState* pState)
+                {
+                    return pState->OnSrvccStateUpdated(SrvccState::CANCELED);
+                });
+    }
+    else if (eType == UpdateType::SRVCC_RECOVERED_FAILURE)
+    {
+        m_objContext.GetPendingOperationHolder().PushPendingOperation(
+                [](IMtcCallState* pState)
+                {
+                    return pState->OnSrvccStateUpdated(SrvccState::FAILED);
+                });
+    }
+
+    // Other UpdateTypes are not used.
+    return CallStateName::ESTABLISHED;
+}
+
+PRIVATE
 void UpdatingState::RecoverModificationFailure()
 {
     IMS_TRACE_D("RecoverModificationFailure", 0, 0, 0);
-
     m_objContext.GetMediaManager().RestoreSdp(&m_objContext.GetSession()->GetISession());
+}
 
+PRIVATE
+void UpdatingState::NotifyFailure()
+{
+    IMS_TRACE_D("NotifyFailure", 0, 0, 0);
     if (m_objContext.GetUpdatingInfo().IsHeld())
     {
         m_objContext.GetUiNotifier().SendHoldFailed(CallReasonInfo(CODE_SUPP_SVC_FAILED));
@@ -561,6 +646,7 @@ void UpdatingState::StopTimer()
     if (m_objContext.GetUpdatingInfo().IsModifier())
     {
         m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
+        m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
     }
 
     if (m_objContext.GetUpdatingInfo().IsAlerted())
