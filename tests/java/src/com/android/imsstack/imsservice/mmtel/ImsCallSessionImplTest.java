@@ -1143,6 +1143,57 @@ public class ImsCallSessionImplTest extends ImsStackTest {
                 any(ImsCallSessionImplBase.class), any(ImsStreamMediaProfile.class));
     }
 
+    @Test
+    public void testOnAudioSessionOpened() {
+        MtcCall mockMtcCall  = Mockito.mock(MtcCall.class);
+        mImsCallSession.getCallListenerProxy().onAudioSessionOpened(mockMtcCall);
+        assertFalse(mCallDetails.is(mCallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END));
+
+        mImsCallSession.getCallListenerProxy().onAudioSessionOpened(mMockMtcCall);
+        assertTrue(mCallDetails.is(mCallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END));
+    }
+
+    @Test
+    public void testOnAudioSessionClosed() {
+        MtcCall mockMtcCall  = Mockito.mock(MtcCall.class);
+        ConferenceProxy mockConferenceProxy = Mockito.mock(ConferenceProxy.class);
+        mImsCallSession.getCallListenerProxy().onAudioSessionClosed(mockMtcCall);
+        verify(mMockImsCallSessionCallback, never())
+                .invokeTerminated(any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+
+        //verify conference call case
+        mCallDetails.set(mCallDetails.MERGED);
+        mCallDetails.set(mCallDetails.SESSION_TERMINATED_ON_CONFERENCE);
+        mImsCallSession.setConferenceProxy(mockConferenceProxy);
+        mImsCallSession.getCallListenerProxy().onAudioSessionClosed(mMockMtcCall);
+        assertFalse(mCallDetails.is(mCallDetails.SESSION_TERMINATED_ON_CONFERENCE));
+
+        //verify normal call case
+        mImsCallSession = createImsCallSession("1");
+        mImsCallSession.setState(ImsCallSessionImplBase.State.TERMINATED);
+        verifyWaitOrNotifyCallTerminated();
+        mCallDetails.set(mCallDetails.CLOSE_PENDING);
+        mImsCallSession.getCallListenerProxy().onAudioSessionClosed(mMockMtcCall);
+        assertFalse(mCallDetails.is(mCallDetails.WAIT_AUDIO_SESSION_CLOSE_ON_CALL_END));
+        verify(mMockImsCallSessionCallback)
+                .invokeTerminated(any(ImsCallSessionImplBase.class), any(ImsReasonInfo.class));
+
+        //verify closeSessionWithDelay is called.
+        assertFalse(mCallDetails.is(mCallDetails.CLOSE_PENDING));
+    }
+
+    @Test
+    public void testOnCallQualityChanged() {
+        MtcCall mockMtcCall  = Mockito.mock(MtcCall.class);
+        mCallDetails.set(mCallDetails.CLOSE_PENDING);
+        mImsCallSession.getCallListenerProxy().onCallQualityChanged(mockMtcCall, null);
+        verify(mMockImsCallSessionCallback, never()).invokeCallQualityChanged(null);
+
+        mCallDetails.clear(mCallDetails.CLOSE_PENDING);
+        mImsCallSession.getCallListenerProxy().onCallQualityChanged(mMockMtcCall, null);
+        verify(mMockImsCallSessionCallback).invokeCallQualityChanged(null);
+    }
+
     private TestImsCallSessionImpl createImsCallSession(String callId) {
         TestImsCallSessionImpl callSession =  new TestImsCallSessionImpl(mMockCallContext,
                 mMockCallTracker, mMockMtcCall, callId, mImsCallProfile, true,
@@ -1153,6 +1204,8 @@ public class ImsCallSessionImplTest extends ImsStackTest {
     }
 
     private class TestImsCallSessionImpl extends ImsCallSessionImpl {
+        private ConferenceProxy mConferenceProxy = null;
+
         TestImsCallSessionImpl(ICallContext callContext,
                 CallTracker ct, MtcCall call, String callId, ImsCallProfile profile, boolean isMO,
                 ImsCallSessionCallback callBack) {
@@ -1167,6 +1220,21 @@ public class ImsCallSessionImplTest extends ImsStackTest {
             } else {
                 return false;
             }
+        }
+
+        @Override
+        public boolean isConferenceTransitionInProgress() {
+            return (mConferenceProxy != null) ? true : false;
+        }
+
+        @Override
+        public void setConferenceProxy(ConferenceProxy confProxy) {
+            mConferenceProxy = confProxy;
+        }
+
+        @Override
+        protected void closeSessionWithDelay(final ImsCallSessionImpl session, long delay) {
+            super.closeSessionWithDelay(session, 0);
         }
     }
 }
