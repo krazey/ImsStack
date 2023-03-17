@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.os.Looper;
 import android.os.Parcel;
+import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -134,15 +135,15 @@ public class MtcCallTest extends ImsStackTest {
         mCcid = "mCcid";
         MockitoAnnotations.initMocks(this);
 
+        doReturn((long) 1).when(mMtcJniProxy).getJniInterfaceAndSetListener(
+                    anyInt(), anyInt(), any());
+        doReturn(0).when(mBaseContext).getSlotId();
+
         mTestMtcJniProxy = new TestMtcJniProxy();
         mTestMtcCall = new TestMtcCall(mBaseContext, mCT, 0, "", Looper.myLooper(),
                 mMtcConference, mMtcMediaSession, mTestMtcJniProxy, mCallInfo, mMediaInfo);
         mTestMtcCallWithMockJniProxy = new TestMtcCall(mBaseContext, mCT, 0, "", Looper.myLooper(),
                 mMtcConference, mMtcMediaSession, mMtcJniProxy, mCallInfo, mMediaInfo);
-
-        doReturn((long) 1).when(mMtcJniProxy).getJniInterfaceAndSetListener(
-                    anyInt(), anyInt(), any());
-        doReturn(0).when(mBaseContext).getSlotId();
     }
 
     @After
@@ -249,6 +250,31 @@ public class MtcCallTest extends ImsStackTest {
 
         mTestMtcCall.terminate(1, false);
         verifyNoMoreInteractions(mListener);
+    }
+
+    @Test
+    public void testTerminate2() {
+        assertFalse(mTestMtcCall.isCallValid());
+        mTestMtcCall.terminate(1);
+        processAllMessages();
+
+        assertEquals(mInvalidCommand, mCommand);
+
+        mTestMtcCall.createNativeCallObject();
+        assertTrue(mTestMtcCall.isCallValid());
+        mTestMtcCall.setCallState(CallTracker.CALL_STATE_OFFHOOK);
+        mTestMtcCall.setOnHeld(true);
+        mTestMtcCall.setOnHold(true);
+        mTestMtcCall.terminate(1);
+        processAllMessages();
+
+        assertFalse(mTestMtcCall.isOnHeld());
+        assertFalse(mTestMtcCall.isOnHold());
+        assertEquals(CallTracker.CALL_STATE_IDLE, mTestMtcCall.getCallState());
+        assertEquals(IUMtcCall.TERMINATE, mCommand);
+
+        verify(mCT, times(1)).updateCallState(
+                eq(mTestMtcCall), eq(CallTracker.CALL_EVENT_TERMINATING), any());
     }
 
     @Test
@@ -623,6 +649,16 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     @Test
+    public void testSendUssd() {
+        mTestMtcCall.createNativeCallObject();
+
+        mTestMtcCall.sendUssd("");
+        processAllMessages();
+
+        assertEquals(IUMtcCall.SEND_USSD, mCommand);
+    }
+
+    @Test
     public void testGetMediaSession() {
         assertEquals(mMtcMediaSession, mTestMtcCall.getMediaSession());
     }
@@ -856,13 +892,42 @@ public class MtcCallTest extends ImsStackTest {
     }
 
     @Test
-    public void testRtpHeaderExtensionsReceived() {
+    public void testAudioSessionListener() {
         mTestMtcCall.setListener(mListener);
+
+        mTestMtcCall.getAudioListener().onAudioSessionOpened();
+        processAllMessages();
+
+        verify(mListener, times(1)).onAudioSessionOpened(eq(mTestMtcCall));
+
+        mTestMtcCall.getAudioListener().onAudioSessionClosed();
+        processAllMessages();
+
+        verify(mListener, times(1)).onAudioSessionClosed(eq(mTestMtcCall));
+
+        mTestMtcCall.getAudioListener().onCallQualityChanged(new CallQuality());
+        processAllMessages();
+
+        verify(mListener, times(1)).onCallQualityChanged(eq(mTestMtcCall), any());
+
         Set<RtpHeaderExtension> extensions = MediaTestUtils.createRtpExtensionsSet();
         mTestMtcCall.getAudioListener().onRtpHeaderExtensionsReceived(extensions);
         processAllMessages();
 
         verify(mListener, times(1)).onCallRtpHeaderExtensionsReceived(
                 eq(mTestMtcCall), eq(extensions));
+    }
+
+    @Test
+    public void testTextSessionListener() {
+        mTestMtcCall.setListener(mListener);
+
+        mTestMtcCall.getTextListener().onRttMessageReceived(mMtcMediaSession, "");
+
+        verify(mListener, times(1)).onCallRttMessageReceived(eq(mTestMtcCall), any());
+
+        mTestMtcCall.getTextListener().onRttAudioIndication(mMtcMediaSession, true);
+
+        verify(mListener, times(1)).onCallRttAudioIndication(eq(mTestMtcCall), eq(true));
     }
 }
