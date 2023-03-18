@@ -39,6 +39,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRttSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSupportLimitedAdminSmsMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTtySupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsCallComposerSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVopsIgnoredForVolteEnabled, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSmsOverImsAvailableWithoutVoiceCapability, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySsac, (), (const, override));
@@ -144,6 +145,7 @@ public:
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetImsIdentityPriority, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetPcscfDiscoveryMethod, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetUpdateRegistrationWithRatChange, (), (override));
+    MOCK_METHOD(ImsVector<IMS_SINT32>&, GetRegistrationTechForCallComposer, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSupportedRats, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSupportedRoamingRats, (), (override));
     MOCK_METHOD(ImsVector<IMS_SINT32>&, GetSmsOverImsSupportedRats, (), (override));

@@ -75,10 +75,12 @@ private:
     void UpdateGGsmaRcsTelephonyFeatureTag();
     IMS_UINT32 GetVoiceBlockReasonForIpcan();
     IMS_UINT32 GetVideoBlockReasonForIpcan();
+    IMS_UINT32 GetNetworkTypeFromRegistrationTech(IN IMS_SINT32 nRegistrationTech);
 
     IMS_BOOL IsCsFeatureTagRequired() const;
     IMS_BOOL IsInvalidMobileNetwork() const;
     IMS_BOOL IsPlmnBlockCondition() const;
+    IMS_BOOL IsCallComposerSupportedRat(IN IMS_UINT32 nNetworkType);
 
     IMS_BOOL ProcessHoldingVopsState(IN IMS_UINT32 nState);
     IMS_BOOL ProcessHoldingSsacState(IN IMS_SINT32 nBarringFactorForVoice);
