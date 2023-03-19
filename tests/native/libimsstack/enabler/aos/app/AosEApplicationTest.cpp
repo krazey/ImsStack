@@ -1,0 +1,770 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+#include "AString.h"
+#include "AStringArray.h"
+#include "ImsEventDef.h"
+#include "ImsMap.h"
+#include "INetworkWatcher.h"
+#include "ServiceNetworkPolicy.h"
+
+#include "../../../config/interface/CarrierConfig.h"
+#include "../../../config/interface/ImsServiceConfig.h"
+
+#include "../../interface/aos/MockIAosService.h"
+#include "../../interface/aos/MockIImsAosMonitor.h"
+
+#include "app/MockAosAppContext.h"
+#include "connection/MockAosConnector.h"
+#include "interface/MockIAosAppContext.h"
+#include "interface/MockIAosBlock.h"
+#include "interface/MockIAosCallTracker.h"
+#include "interface/MockIAosConnection.h"
+#include "interface/MockIAosHandle.h"
+#include "interface/MockIAosNConfiguration.h"
+#include "interface/MockIAosNetTracker.h"
+#include "interface/MockIAosPcscf.h"
+#include "interface/MockIAosRegistration.h"
+
+#include "AoSAppRequestType.h"
+#include "AosReason.h"
+#include "ImsAosParameter.h"
+#include "app/AosEApplication.h"
+#include "condition/AosCondition.h"
+#include "connection/AosConnection.h"
+#include "connection/AosConnector.h"
+#include "registration/AosRegistration.h"
+#include "interface/IAosAppContext.h"
+#include "interface/IAosHandle.h"
+#include "interface/IAosNConfiguration.h"
+#include "provider/AosProvider.h"
+#include "provider/AosStaticProfile.h"
+
+using ::testing::_;
+using ::testing::AnyNumber;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
+const IMS_SINT32 SLOT_ID = 0;
+
+enum
+{
+    TIMER_INVALID = -1,
+    TIMER_RECONFIG_GUARD = 0,
+    TIMER_MSG_CONITION,
+    TIMER_REG_STOP,
+    TIMER_REG_BLOCKED,
+    TIMER_APP_ACTIVATED,
+    TIMER_APP_CONNECTED,
+    TIMER_APP_TERMINATED,
+    TIMER_PDN_BLOCKED,
+    TIMER_IMS_ESTABLISHMENT
+};
+
+enum
+{
+    // State-Machine MSG
+    MSG_CONDITION = AOSMSG_SERVICE_INTERNAL,
+    MSG_CONNECTION,
+    MSG_REGISTRATION,
+
+    // NO State-Machine MSG
+    MSG_INIT = AOSMSG_SERVICE_INTERNAL + 10,
+    MSG_REG_START,
+    MSG_REG_UPDATE,
+    MSG_REG_STOP,
+    MSG_REG_RECONFIG,
+    MSG_REG_RECOVER,
+    MSG_IPCAN_CHANGED,
+    MSG_PUB_TERMINATED,
+    MSG_DESTROY,
+    MSG_SERVICE_CONTROL,
+    MSG_REG_EXCHANGE,
+    MSG_AC_CONFIGURED,
+    MSG_PCSCF_RECOVER,
+    MSG_SCSCF_RESTORATION,
+    MSG_PLMN_BLOCK_WITH_TIMEOUT,
+    MSG_RETRY_COUNT_INCREASE,
+    MSG_OTHERS
+};
+
+enum
+{
+    CONNECTION_ACTIVATED = 10,
+    CONNECTION_DEACTIVATED,
+    CONNECTION_UPDATED
+};
+
+enum
+{
+    REQUEST_NONE = 0,
+    REQUEST_STOP,
+    REQUEST_DESTROY,
+    REQUEST_RECOVER,
+    REQUEST_PDN_DISCONNECT
+};
+
+class TestAosCondition : public AosCondition
+{
+    inline explicit TestAosCondition(IN IAosAppContext* piAppContext) :
+            AosCondition(piAppContext)
+    {
+    }
+
+    friend class AosEApplicationTest;
+
+public:
+private:
+};
+
+class AppTestAosRegistration : public AosRegistration
+{
+    inline AppTestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
+            AosRegistration(piAppContext, strRegId)
+    {
+    }
+
+    friend class AosEApplicationTest;
+
+public:
+private:
+};
+
+class TestAosEApplication : public AosEApplication
+{
+    inline TestAosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId) :
+            AosEApplication(piAppContext, strAppId)
+    {
+        m_pUtil = AosUtil::GetInstance();
+    }
+
+    friend class AosEApplicationTest;
+
+    FRIEND_TEST(AosEApplicationTest, RequestCmd);
+    FRIEND_TEST(AosEApplicationTest, GetProperty);
+    FRIEND_TEST(AosEApplicationTest, ClearConnection);
+    FRIEND_TEST(AosEApplicationTest, ProcessMessage);
+    FRIEND_TEST(AosEApplicationTest, ProcessRegStart);
+    FRIEND_TEST(AosEApplicationTest, ProcessRegStop);
+    FRIEND_TEST(AosEApplicationTest, StateNotReady_Condition);
+    FRIEND_TEST(AosEApplicationTest, StateReady_Connection);
+    FRIEND_TEST(AosEApplicationTest, StateReady_Condition);
+    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_StateUpdating);
+    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_StateConnecting);
+    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_StateConnected);
+    FRIEND_TEST(AosEApplicationTest, ProcessConnectionUpdated_StateDisconnecting);
+    FRIEND_TEST(AosEApplicationTest, ProcessConnectionDeactivated);
+    FRIEND_TEST(AosEApplicationTest, ProcessConnectionUpdated);
+    FRIEND_TEST(AosEApplicationTest, ProcessRegSucceeded);
+    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_Start);
+    FRIEND_TEST(AosEApplicationTest, ProcessRegFailed_Update);
+    FRIEND_TEST(AosEApplicationTest, ProcessAppActivatedTimerExpired);
+    FRIEND_TEST(AosEApplicationTest, ProcessAppConnectedTimerExpired);
+    FRIEND_TEST(AosEApplicationTest, ProcessAppTerminatedTimerExpired);
+    FRIEND_TEST(AosEApplicationTest, ProcessReconfigTimerExpired);
+    FRIEND_TEST(AosEApplicationTest, ProcessECallStarted);
+    FRIEND_TEST(AosEApplicationTest, ProcessECallTerminated);
+    FRIEND_TEST(AosEApplicationTest, UpdateRegState);
+    FRIEND_TEST(AosEApplicationTest, UpdateConnectedServices);
+    FRIEND_TEST(AosEApplicationTest, Condition_RequestCommand);
+    FRIEND_TEST(AosEApplicationTest, CallTracker_StateChanged);
+
+public:
+    inline void SetAosCondition(IN AosCondition* pCondition) { m_pCondition = pCondition; }
+
+    inline void SetAosConnector(IN AosConnector* pConnector) { m_pConnector = pConnector; }
+
+    inline void SetAosRegistration(IN IAosRegistration* piAosRegistration)
+    {
+        m_piRegistration = piAosRegistration;
+    }
+
+    inline void SetAosCallTracker(IN IAosCallTracker* piAosCallTracker)
+    {
+        m_piCallTracker = piAosCallTracker;
+    }
+
+private:
+};
+
+class AosEApplicationTest : public ::testing::Test
+{
+public:
+    TestAosEApplication* m_pTestAosEApplication;
+    TestAosCondition* m_pTestAosCondition;
+    AosStaticProfile* m_pAosStaticProfile;
+    IAosNConfiguration* m_piAosNConfiguration;
+
+    MockAosConnector* m_pMockAosConnector;
+    MockIAosAppContext m_objMockIAosAppContext;
+    MockIAosBlock m_objMockIAosBlock;
+    MockIAosCallTracker m_objMockIAosCallTracker;
+    MockIAosConnection m_objMockIAosConnection;
+    MockIAosHandle m_objMockIAosHandle;
+    MockIAosNConfiguration m_objMockIAosNConfiguration;
+    MockIAosNetTracker m_objMockIAosNetTracker;
+    MockIAosPcscf m_objMockIAosPcscf;
+    MockIAosRegistration m_objMockIAosRegistration;
+    MockIImsAosMonitor m_objMockIImsAosMonitor;
+
+    AString m_strAppId = AString("ims.app.test");
+    AString m_strServiceId = AString("ims.service.test");
+    ImsMap<AString, IAosHandle*> m_objHandles;
+    AStringArray m_objPcscfs;
+
+protected:
+    virtual void SetUp() override
+    {
+        m_pAosStaticProfile = new AosStaticProfile();
+        m_pAosStaticProfile->SetProfileType(AosStaticProfile::Type::EMERGENCY);
+
+        ImsList<ImsServiceName> objServiceName =
+                ImsServiceConfig::GetServiceNames(ImsServiceConfig::GetServiceProfile());
+
+        for (IMS_UINT32 i = 0; i < objServiceName.GetSize(); i++)
+        {
+            ImsServiceName objService = objServiceName.GetAt(i);
+            m_pAosStaticProfile->AddService(objService.GetAppId(), objService.GetServiceId());
+        }
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetSlotId())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(SLOT_ID));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetProfileId())
+                .Times(AnyNumber())
+                .WillRepeatedly(ReturnRef(m_pAosStaticProfile->GetId()));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetBlock())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosBlock));
+
+        EXPECT_CALL(m_objMockIAosBlock, SetBlockReason(_, _)).Times(AnyNumber());
+
+        EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(_, _, _))
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_FALSE));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetConnection())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosConnection));
+
+        EXPECT_CALL(m_objMockIAosConnection, GetConnectionType())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(NetworkPolicy::APN_EMERGENCY));
+
+        EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_FALSE));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetPcscf())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosPcscf));
+
+        m_objPcscfs.AddElement(AString("192.168.0.100"));
+        EXPECT_CALL(m_objMockIAosPcscf, GetPcscfs())
+                .Times(AnyNumber())
+                .WillRepeatedly(ReturnRef(m_objPcscfs));
+
+        EXPECT_CALL(m_objMockIAosPcscf, GetNextPcscfIndex())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(0));
+
+        EXPECT_CALL(m_objMockIAosPcscf, GetChangedType())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IAosPcscf::TYPE_CHANGED_SAME));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosNetTracker));
+
+        m_objHandles.Add(m_strServiceId, &m_objMockIAosHandle);
+        EXPECT_CALL(m_objMockIAosAppContext, GetHandles())
+                .Times(AnyNumber())
+                .WillRepeatedly(ReturnRef(m_objHandles));
+
+        EXPECT_CALL(m_objMockIAosHandle, GetAppId())
+                .Times(AnyNumber())
+                .WillRepeatedly(ReturnRef(m_strAppId));
+
+        EXPECT_CALL(m_objMockIAosHandle, GetServiceId())
+                .Times(AnyNumber())
+                .WillRepeatedly(ReturnRef(m_strServiceId));
+
+        EXPECT_CALL(m_objMockIAosHandle, GetMonitor())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIImsAosMonitor));
+
+        m_piAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+        AosProvider::GetInstance()->SetNConfiguration(
+                static_cast<IAosNConfiguration*>(&m_objMockIAosNConfiguration), SLOT_ID);
+
+        EXPECT_CALL(m_objMockIAosNConfiguration, IsVoLteAvailable())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_TRUE));
+        EXPECT_CALL(m_objMockIAosNConfiguration, IsWfcImsAvailable())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(IMS_TRUE));
+
+        m_pTestAosEApplication =
+                new TestAosEApplication(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
+                        m_pAosStaticProfile->GetId());
+
+        m_pTestAosCondition =
+                new TestAosCondition(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+        m_pTestAosEApplication->SetAosCondition(m_pTestAosCondition);
+
+        m_pMockAosConnector =
+                new MockAosConnector(static_cast<IAosAppContext*>(&m_objMockIAosAppContext));
+        m_pTestAosEApplication->SetAosConnector(m_pMockAosConnector);
+        EXPECT_CALL(*m_pMockAosConnector, Stop()).Times(AnyNumber());
+
+        m_pTestAosEApplication->SetAosRegistration(
+                static_cast<IAosRegistration*>(&m_objMockIAosRegistration));
+        EXPECT_CALL(m_objMockIAosRegistration, SetAppReady(_)).Times(AnyNumber());
+        EXPECT_CALL(m_objMockIAosRegistration, Destroy()).Times(AnyNumber());
+
+        m_pTestAosEApplication->SetAosCallTracker(
+                static_cast<IAosCallTracker*>(&m_objMockIAosCallTracker));
+    }
+
+    virtual void TearDown() override
+    {
+        AosProvider::GetInstance()->SetNConfiguration(m_piAosNConfiguration, SLOT_ID);
+
+        if (m_pMockAosConnector)
+        {
+            delete m_pMockAosConnector;
+        }
+
+        if (m_pTestAosCondition)
+        {
+            delete m_pTestAosCondition;
+        }
+
+        if (m_pTestAosEApplication)
+        {
+            delete m_pTestAosEApplication;
+        }
+
+        if (m_pAosStaticProfile)
+        {
+            delete m_pAosStaticProfile;
+        }
+    }
+};
+
+TEST_F(AosEApplicationTest, RequestCmd)
+{
+    // REGISTER_START - STATE_NOTREADY
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_NOTREADY);
+    EXPECT_FALSE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0));
+    // REGISTER_START - STATE_READY
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_START, 0));
+
+    // REGISTER_STOP
+    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_STOP, 0));
+
+    // E_REGISTER_FAKE_WITH_NEXT_PCSCF - connection state is STATE_ACTIVE
+    EXPECT_CALL(m_objMockIAosConnection, GetState()).WillOnce(Return(IAosConnection::STATE_ACTIVE));
+    EXPECT_CALL(m_objMockIAosRegistration,
+            RequestCmd(
+                    IAosRegistration::CMD_FAKE_MODE, IAosRegistration::REASON_FAKE_MODE_NEXT_PCSCF))
+            .Times(1);
+    EXPECT_TRUE(
+            m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF, 0));
+    // E_REGISTER_FAKE_WITH_NEXT_PCSCF - connection state is STATE_IDLE
+    EXPECT_CALL(m_objMockIAosConnection, GetState()).WillOnce(Return(IAosConnection::STATE_IDLE));
+    EXPECT_TRUE(
+            m_pTestAosEApplication->RequestCmd(ImsAosControl::E_REGISTER_FAKE_WITH_NEXT_PCSCF, 0));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+
+    // RETRY_COUNT_INCREASE
+    EXPECT_TRUE(m_pTestAosEApplication->RequestCmd(ImsAosControl::RETRY_COUNT_INCREASE, 0));
+
+    // REGISTER_REFRESH - won't handled
+    EXPECT_FALSE(m_pTestAosEApplication->RequestCmd(ImsAosControl::REGISTER_REFRESH, 0));
+}
+
+TEST_F(AosEApplicationTest, GetProperty)
+{
+    IMS_UINT32 nValue;
+    AString strValue;
+    m_pTestAosEApplication->GetProperty(IAosApplication::PROPERTY_REGISTERED_RAT, nValue, strValue);
+    EXPECT_EQ(strValue, AString::ConstNull());
+}
+
+TEST_F(AosEApplicationTest, ClearConnection)
+{
+    m_pTestAosEApplication->ClearConnection();
+}
+
+TEST_F(AosEApplicationTest, ProcessMessage)
+{
+    // MSG_DESTROY
+    ImsMessage objMessage(MSG_DESTROY, 0, 0);
+    EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
+
+    // MSG_RETRY_COUNT_INCREASE
+    objMessage.nMSG = MSG_RETRY_COUNT_INCREASE;
+    EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
+
+    // MSG_OTHERS
+    objMessage.nMSG = MSG_OTHERS;
+    EXPECT_FALSE(m_pTestAosEApplication->ProcessMessage(objMessage));
+}
+
+TEST_F(AosEApplicationTest, ProcessRegStart)
+{
+    ImsMessage objMessage(MSG_REG_START, AoSRegType::TYPE_IPCAN_WLAN, 0);
+    // STATE_CONNECTED
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis()).Times(0);
+    EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
+
+    // STATE_CONNECTING - Connector::IsReady() return true
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetEmergencyRegistrationTimerMillis())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(1000));
+    EXPECT_CALL(*m_pMockAosConnector, IsReady()).WillOnce(Return(IMS_TRUE));
+    EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTING);
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+    m_pTestAosEApplication->StopTimer(TIMER_APP_CONNECTED);
+
+    // STATE_CONNECTING - Connector::IsReady() return false
+    EXPECT_CALL(*m_pMockAosConnector, IsReady()).WillOnce(Return(IMS_FALSE));
+    EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+    m_pTestAosEApplication->StopTimer(TIMER_APP_CONNECTED);
+}
+
+TEST_F(AosEApplicationTest, ProcessRegStop)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    ImsMessage objMessage(MSG_REG_STOP, 0, 0);
+    EXPECT_TRUE(m_pTestAosEApplication->ProcessMessage(objMessage));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest, StateNotReady_Condition)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_NOTREADY);
+    ImsMessage objMessageCnd(MSG_CONDITION, 0, 0);
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_AOS_INCOMPLETED, _, _))
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE));
+
+    // EmergencyBlocked
+    m_pTestAosEApplication->StateNotReady_Condition(objMessageCnd);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+
+    // not EmergencyBlocked
+    m_pTestAosEApplication->StateNotReady_Condition(objMessageCnd);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
+}
+
+TEST_F(AosEApplicationTest, StateReady_Connection)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_ACTIVATED, 0);
+
+    // CONNECTION_ACTIVATED
+    m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTING);
+
+    // CONNECTION_DEACTIVATED
+    objMessageCnx.nWparam = CONNECTION_DEACTIVATED;
+    m_pTestAosEApplication->StateReady_Connection(objMessageCnx);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest, StateReady_Condition)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    ImsMessage objMessageCnd(MSG_CONDITION, 0, 0);
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_AOS_INCOMPLETED, _, _))
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
+    // not EmergencyBlocked
+    m_pTestAosEApplication->StateReady_Condition(objMessageCnd);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_READY);
+
+    // EmergencyBlocked
+    m_pTestAosEApplication->StateReady_Condition(objMessageCnd);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest, ProcessRegFailed_StateUpdating)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_UPDATING);
+    ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_FAILURE, 0);
+    m_pTestAosEApplication->StateUpdating_Registration(objMessageReg);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
+}
+
+TEST_F(AosEApplicationTest, ProcessRegFailed_StateConnecting)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTING);
+    ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_FAILURE, 0);
+    m_pTestAosEApplication->StateConnecting_Registration(objMessageReg);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
+}
+
+TEST_F(AosEApplicationTest, ProcessRegFailed_StateConnected)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_FAILURE, 0);
+    m_pTestAosEApplication->StateConnected_Registration(objMessageReg);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
+}
+
+TEST_F(AosEApplicationTest, ProcessConnectionUpdated_StateDisconnecting)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
+    ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_UPDATED, 0);
+    m_pTestAosEApplication->StateDisconnecting_Connection(objMessageCnx);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
+}
+
+TEST_F(AosEApplicationTest, ProcessConnectionDeactivated)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_DEACTIVATED, 0);
+    m_pTestAosEApplication->StateConnected_Connection(objMessageCnx);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+}
+
+TEST_F(AosEApplicationTest, ProcessConnectionUpdated)
+{
+    ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_UPDATED, AosConnector::REASON_IP_CHANGED);
+
+    // STATE_CONNECTED or STATE_UPDATING -  REASON_IP_CHANGED
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    m_pTestAosEApplication->StateConnected_Connection(objMessageCnx);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::IP_CHANGED);
+
+    // STATE_CONNECTED or STATE_UPDATING -  REASON_OTHERS
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    objMessageCnx.nLparam = AosConnector::REASON_OTHERS;
+    m_pTestAosEApplication->StateConnected_Connection(objMessageCnx);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTED);
+
+    // STATE_CONNECTING
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTING);
+    objMessageCnx.nLparam = AosConnector::REASON_NONE;
+    m_pTestAosEApplication->StateConnecting_Connection(objMessageCnx);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTING);
+}
+
+TEST_F(AosEApplicationTest, ProcessRegSucceeded)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTING);
+    m_pTestAosEApplication->StartTimer(TIMER_APP_CONNECTED, 1000);
+    m_pTestAosEApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
+    ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_SUCCESS, 0);
+
+    m_pTestAosEApplication->StateConnecting_Registration(objMessageReg);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTED);
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+}
+
+TEST_F(AosEApplicationTest, ProcessRegFailed_Start)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTING);
+    ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_FAILURE,
+            IAosRegistration::REASON_FAILURE_GENERAL);
+
+    m_pTestAosEApplication->StateConnecting_Registration(objMessageReg);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
+}
+
+TEST_F(AosEApplicationTest, ProcessRegFailed_Update)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTING);
+    ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_FAILURE,
+            IAosRegistration::REASON_FAILURE_GENERAL);
+
+    m_pTestAosEApplication->StateUpdating_Registration(objMessageReg);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::REG_FAILURE);
+}
+
+TEST_F(AosEApplicationTest, ProcessAppActivatedTimerExpired)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_READY);
+    m_pTestAosEApplication->StartTimer(TIMER_APP_ACTIVATED, 1000);
+    EXPECT_CALL(m_objMockIAosCallTracker, GetCallState(IAosCallTracker::TYPE_EMERGENCY))
+            .WillOnce(Return(CallState::IDLE));
+
+    m_pTestAosEApplication->ProcessAppActivatedTimerExpired();
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_ACTIVATED));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::NONE);
+}
+
+TEST_F(AosEApplicationTest, ProcessAppConnectedTimerExpired)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTING);
+
+    // PREFERRED_EMERGENCY_REGISTRATION_FALLBACK
+    m_pTestAosEApplication->StartTimer(TIMER_APP_CONNECTED, 1000);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillOnce(
+                    Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK));
+    EXPECT_CALL(m_objMockIAosRegistration, RequestCmd(IAosRegistration::CMD_FAKE_MODE, _)).Times(1);
+    m_pTestAosEApplication->ProcessAppConnectedTimerExpired();
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTING);
+
+    // PREFERRED_EMERGENCY_REGISTRATION_NORMAL
+    m_pTestAosEApplication->StartTimer(TIMER_APP_CONNECTED, 1000);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetPreferredEmergencyRegistration())
+            .WillOnce(Return(CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_NORMAL));
+    m_pTestAosEApplication->ProcessAppConnectedTimerExpired();
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+    EXPECT_EQ(m_pTestAosEApplication->GetOffReason(), AosReason::DATA_DISCONNECTED);
+}
+
+TEST_F(AosEApplicationTest, ProcessAppTerminatedTimerExpired)
+{
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_DISCONNECTING);
+
+    // CallState is not IDLE
+    EXPECT_CALL(m_objMockIAosCallTracker, GetCallState(IAosCallTracker::TYPE_EMERGENCY))
+            .WillOnce(Return(CallState::OFFHOOK));
+    m_pTestAosEApplication->StartTimer(TIMER_APP_TERMINATED, 1000);
+    m_pTestAosEApplication->ProcessAppTerminatedTimerExpired();
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_DISCONNECTING);
+
+    // CallState is IDLE
+    EXPECT_CALL(m_objMockIAosCallTracker, GetCallState(IAosCallTracker::TYPE_EMERGENCY))
+            .WillOnce(Return(CallState::IDLE));
+    m_pTestAosEApplication->StartTimer(TIMER_APP_TERMINATED, 1000);
+    m_pTestAosEApplication->ProcessAppTerminatedTimerExpired();
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_CONNECTED));
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest, ProcessReconfigTimerExpired)
+{
+    m_pTestAosEApplication->StartTimer(TIMER_RECONFIG_GUARD, 1000);
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SERVICE_CONNECTING, _, _))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosBlock, ResetBlockReason(BLOCK_SERVICE_CONNECTING, _)).Times(1);
+    m_pTestAosEApplication->ProcessReconfigTimerExpired();
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_RECONFIG_GUARD));
+}
+
+TEST_F(AosEApplicationTest, ProcessECallStarted)
+{
+    m_pTestAosEApplication->SetImsCall(IMS_FALSE);
+    m_pTestAosEApplication->StartTimer(TIMER_APP_ACTIVATED, 1000);
+    m_pTestAosEApplication->StartTimer(TIMER_APP_TERMINATED, 1000);
+    m_pTestAosEApplication->ProcessECallStarted();
+    EXPECT_TRUE(m_pTestAosEApplication->IsImsCall());
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_ACTIVATED));
+    EXPECT_FALSE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+}
+
+TEST_F(AosEApplicationTest, ProcessECallTerminated)
+{
+    // e-call over ePDG is terminated
+    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(AnyNumber())
+            .WillOnce(Return(IMS_TRUE));
+    m_pTestAosEApplication->ProcessECallTerminated();
+    EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+
+    // fake mode
+    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosRegistration, GetMode()).WillOnce(Return(IAosRegistration::MODE_FAKE));
+    m_pTestAosEApplication->ProcessECallTerminated();
+    EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
+    EXPECT_TRUE(m_pTestAosEApplication->IsTimerRunning(TIMER_APP_TERMINATED));
+
+    // TIMER_APP_TERMINATED is running
+    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
+    m_pTestAosEApplication->ProcessECallTerminated();
+    EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
+    m_pTestAosEApplication->StopTimer(TIMER_APP_TERMINATED);
+
+    // registration is terminated
+    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    EXPECT_CALL(m_objMockIAosRegistration, IsTerminated()).WillOnce(Return(IMS_TRUE));
+    m_pTestAosEApplication->ProcessECallTerminated();
+    EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_NOTREADY);
+}
+
+TEST_F(AosEApplicationTest, UpdateConnectedServices)
+{
+    EXPECT_EQ(m_pTestAosEApplication->UpdateConnectedServices(IMS_FALSE), 0);
+}
+
+TEST_F(AosEApplicationTest, Condition_RequestCommand)
+{
+    // other than REQUEST_DESTROY
+    m_pTestAosEApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    m_pTestAosEApplication->Condition_RequestCommand(REQUEST_STOP);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_CONNECTED);
+
+    // REQUEST_DESTROY
+    EXPECT_CALL(m_objMockIAosRegistration, IsRegistered()).WillOnce(Return(IMS_TRUE));
+    m_pTestAosEApplication->Condition_RequestCommand(REQUEST_DESTROY);
+    EXPECT_EQ(m_pTestAosEApplication->GetState(), IAosApplication::STATE_DISCONNECTING);
+}
+
+TEST_F(AosEApplicationTest, CallTracker_StateChanged)
+{
+    // not TYPE_EMERGENCY
+    m_pTestAosEApplication->CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    // ProcessECallStarted
+    m_pTestAosEApplication->SetImsCall(IMS_FALSE);
+    m_pTestAosEApplication->CallTracker_StateChanged(
+            IAosCallTracker::TYPE_EMERGENCY, CallState::NEW);
+    EXPECT_TRUE(m_pTestAosEApplication->IsImsCall());
+
+    // ProcessECallTerminated
+    m_pTestAosEApplication->SetImsCall(IMS_TRUE);
+    m_pTestAosEApplication->CallTracker_StateChanged(
+            IAosCallTracker::TYPE_EMERGENCY, CallState::IDLE);
+    EXPECT_FALSE(m_pTestAosEApplication->IsImsCall());
+}
