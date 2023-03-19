@@ -104,4 +104,5 @@
     <int name="imsvoice.session_refresher_type_int" value="0"/>
     <int name="imsvoice.session_refresh_method_int" value="2"/>
     <int name="imsvoice.session_expires_timer_sec_int" value="1800"/>
+    <int name="imsvoice.conference_sip_flow_order_int" value="2"/>
 </carrier_config>
