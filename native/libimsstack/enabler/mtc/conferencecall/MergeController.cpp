@@ -66,7 +66,8 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
         return ProcessMergeWithoutRefer(objUsers);
     }
 
-    IMS_BOOL bSubFirstAndRefer = ConferenceConfigurationWrapper::IsSubscriptionFirst();
+    IMS_BOOL bSubFirstAndRefer = ConferenceConfigurationWrapper::IsSubscriptionFirst() ||
+            ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer();
     IMS_SINT32 nOldState = GetState();
     SetState(STATE_MERGING);
 
@@ -89,6 +90,11 @@ PROTECTED VIRTUAL void MergeController::ProcessMerge(IN ImsList<ConfUser*>& objU
                 CONTROL_OPERATION_REFER_INVITE, m_objParticipantList.GetConfUsers().GetAt(i));
         m_objOperationQueue.CreateNPutWithId(CONTROL_OPERATION_TERMINATE_1TO1_CALL,
                 m_objParticipantList.GetConfUsers().GetAt(i)->nConnectionId);
+        if (ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer())
+        {
+            m_objOperationQueue.CreateNPutWithUser(CONTROL_OPERATION_CHECK_CONNECTED,
+                    m_objParticipantList.GetConfUsers().GetAt(i));
+        }
     }
 
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);

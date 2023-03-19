@@ -25,7 +25,8 @@
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired()
 {
     return MtcContextRepository::GetContext()->GetConfigurationProxy().GetInt(
-                   Feature::CONFERENCE_SUBSCRIBE_TYPE) > -1;
+                   Feature::CONFERENCE_SUBSCRIBE_TYPE) !=
+            CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_NOT_SUPPORT;
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsReferSubscriptionRequired()
@@ -37,7 +38,8 @@ PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsReferSubscriptionRequir
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsSubscriptionOutDialog()
 {
     return MtcContextRepository::GetContext()->GetConfigurationProxy().GetInt(
-                   Feature::CONFERENCE_SUBSCRIBE_TYPE) > 0;
+                   Feature::CONFERENCE_SUBSCRIBE_TYPE) ==
+            CarrierConfig::ImsVoice::CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG;
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsPackageVersionCheckRequired()
@@ -49,7 +51,15 @@ PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsPackageVersionCheckRequ
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsSubscriptionFirst()
 {
     return MtcContextRepository::GetContext()->GetConfigurationProxy().GetInt(
-                   Feature::CONFERENCE_SIP_FLOW_ORDER) == 0;
+                   Feature::CONFERENCE_SIP_FLOW_ORDER) ==
+            CarrierConfig::ImsVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER;
+}
+
+PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer()
+{
+    return MtcContextRepository::GetContext()->GetConfigurationProxy().GetInt(
+                   Feature::CONFERENCE_SIP_FLOW_ORDER) ==
+            CarrierConfig::ImsVoice::CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER;
 }
 
 PUBLIC GLOBAL IMS_BOOL ConferenceConfigurationWrapper::IsPaidPreferred()
