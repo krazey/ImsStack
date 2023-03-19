@@ -499,6 +499,7 @@ public:
         // Conference subscribe types
         enum
         {
+            CONFERENCE_SUBSCRIBE_NOT_SUPPORT = -1,
             CONFERENCE_SUBSCRIBE_TYPE_IN_DIALOG = 0,
             CONFERENCE_SUBSCRIBE_TYPE_OUT_OF_DIALOG = 1
         };
@@ -561,7 +562,8 @@ public:
         enum
         {
             CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_REFER = 0,
-            CONFERENCE_SIP_FLOW_REFER_AND_SUBSCRIBE = 1
+            CONFERENCE_SIP_FLOW_REFER_AND_SUBSCRIBE = 1,
+            CONFERENCE_SIP_FLOW_SUBSCRIBE_AND_NOTIFY_REFER = 2
         };
 
         // Conference invite types

@@ -118,7 +118,10 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
     switch (eType)
     {
         case SubscriptionUpdateType::SUCCEEDED:
-            CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_SUBSCRIBE);
+            if (!ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer())
+            {
+                CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_SUBSCRIBE);
+            }
             break;
         case SubscriptionUpdateType::FAILED:
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_SUBSCRIBE);
@@ -135,6 +138,10 @@ PUBLIC VIRTUAL void ConferenceController::OnSubscriptionUpdated(IN SubscriptionU
                     CONTROL_OPERATION_TERMINATE_CONFERENCE, CODE_NONE, IMS_TRUE);
             break;
         case SubscriptionUpdateType::NOTIFY_RECEIVED:
+            if (ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer())
+            {
+                CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_SUBSCRIBE);
+            }
             if (m_objParticipantList.GetSize() <= 0)
             {
                 break;
@@ -883,7 +890,10 @@ void ConferenceController::DoNextOperation()
             RemoveParticipants(pOperation->GetUsers());
             break;
         case CONTROL_OPERATION_CHECK_CONNECTED:
-            CheckUserEntityConnected(pOperation->GetUsers().GetAt(0));
+            if (!ConferenceConfigurationWrapper::IsSubscriptionNotifyRequiredForRefer())
+            {
+                CheckUserEntityConnected(pOperation->GetUsers().GetAt(0));
+            }
             break;
         case CONTROL_OPERATION_NOTIFY_RESULT_TO_UI:
             NotifyCmdResult();

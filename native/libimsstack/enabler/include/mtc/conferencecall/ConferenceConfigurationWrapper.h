@@ -31,6 +31,7 @@ public:
     // SKT always set it 1.
     static IMS_BOOL IsPackageVersionCheckRequired();
     static IMS_BOOL IsSubscriptionFirst();
+    static IMS_BOOL IsSubscriptionNotifyRequiredForRefer();
     static IMS_BOOL IsPaidPreferred();
     static IMS_BOOL IsReUseReferToUri();
     static IMS_BOOL IsReferUsed();
