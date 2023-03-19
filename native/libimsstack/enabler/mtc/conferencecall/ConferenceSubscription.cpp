@@ -366,12 +366,11 @@ void ConferenceSubscription::HandleUpdateResult(IN IMS_UINT32 nResult)
     switch (nResult)
     {
         case ConferenceInfoUpdater::RESULT_UPDATED:
+        case ConferenceInfoUpdater::RESULT_NOTHING_UPDATED:
             Notify();
             break;
         case ConferenceInfoUpdater::RESULT_MALFORMED_XML:
             // stop subscription
-        case ConferenceInfoUpdater::RESULT_NOTHING_UPDATED:
-            // re-send Subscription or ignore as it's an initial notify
             break;
         case ConferenceInfoUpdater::RESULT_INVALID_VERSION:
             // re-send Subscription
