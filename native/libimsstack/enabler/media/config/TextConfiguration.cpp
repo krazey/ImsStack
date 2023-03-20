@@ -21,17 +21,14 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-TextConfiguration::TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType) :
-        MediaConfiguration(_eSessionType),
+TextConfiguration::TextConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
+        MediaConfiguration(eSessionType),
         m_nT140PayloadType(DEFAULT_PAYLOAD_T140),
         m_nRedPayloadType(DEFAULT_PAYLOAD_RED),
         m_nTextDscp(DEFAULT_TEXT_DSCP),
         m_bTextCodecEmptyRedundantEnabled(DEFAULT_EMPTY_REDUNDANT)
 {
-    IMS_TRACE_I("+TextConfiguration sessiontype[%d]", _eSessionType, 0, 0);
-    nAsBandwidthKbps = DEFAULT_AS;
-    nRsBandwidthBps = DEFAULT_RR;
-    nRrBandwidthBps = DEFAULT_RS;
+    IMS_TRACE_I("+TextConfiguration eSessionType[%d]", eSessionType, 0, 0);
 }
 
 PUBLIC
@@ -53,26 +50,31 @@ PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
     SetPorts(piCc, CarrierConfig::Assets::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY);
 
-    nAsBandwidthKbps = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_AS_BANDWIDTH_KBPS_INT);
-    nRrBandwidthBps = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RR_BANDWIDTH_BPS_INT);
-    nRsBandwidthBps = piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT);
+    m_nAsBandwidthKbps =
+            piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_AS_BANDWIDTH_KBPS_INT, DEFAULT_AS);
+    m_nRrBandwidthBps =
+            piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RR_BANDWIDTH_BPS_INT, DEFAULT_RR);
+    m_nRsBandwidthBps =
+            piCc->GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT, DEFAULT_RS);
 
-    nRtpInactivityTimerMillis =
-            piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT);
-    nRtcpInactivityTimerMillis =
-            piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT);
+    m_nRtpInactivityTimerMillis =
+            piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTP_INACTIVITY);
+    m_nRtcpInactivityTimerMillis =
+            piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTCP_INACTIVITY);
 
     IMS_TRACE_D("Create Text Configuration: rtpinactivity: %d rtcpinactivity: %d",
-            nRtpInactivityTimerMillis, nRtcpInactivityTimerMillis, 0);
+            m_nRtpInactivityTimerMillis, m_nRtcpInactivityTimerMillis, 0);
 
     /** According to RFC 2474, six bits of the DS field are used as a codepoint (DSCP),
      * a two-bit currently unused (CU) field is reserved. So two left shift operations are required.
      */
-    m_nTextDscp = piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT);
+    m_nTextDscp = piCc->GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT, DEFAULT_TEXT_DSCP);
     m_nTextDscp = m_nTextDscp << 2;
 
-    m_bTextCodecEmptyRedundantEnabled =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL);
+    m_bTextCodecEmptyRedundantEnabled = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL, DEFAULT_EMPTY_REDUNDANT);
 
     if (!CreateCodecConfigs(piCc))
     {
@@ -110,14 +112,12 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
         return IMS_FALSE;
     }
 
-    /** TODO: Bundle implementation - Need to enable later */
-    /*
-    // MediaTextCodecCapabilityPayloadTypesBundle
     ICarrierConfig* piCcBundle =
             piCc->GetBundle(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
     if (piCcBundle == IMS_NULL)
     {
+        IMS_TRACE_E(0, "CreateCodecConfigs - piCcBundle is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -125,12 +125,6 @@ PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConf
     m_nRedPayloadType = piCcBundle->GetInt(CarrierConfig::ImsRtt::KEY_RED_PAYLOAD_TYPE_INT);
 
     piCcBundle->ReleaseBundle();
-    piCcBundle = IMS_NULL;
-    */
-
-    /** TODO: Need to remove later - read Asset value temporarily */
-    m_nT140PayloadType = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_T140_PAYLOAD_TYPE_INT);
-    m_nRedPayloadType = piCc->GetInt(CarrierConfig::Assets::KEY_ASSET_RED_PAYLOAD_TYPE_INT);
 
     IMS_TRACE_D("m_nT140PayloadType[%d], m_nRedPayloadType[%d]", m_nT140PayloadType,
             m_nRedPayloadType, 0);
@@ -159,14 +153,15 @@ PROTECTED VIRTUAL void TextConfiguration::ToDebugString() const
     IMS_TRACE_D(
             "m_nT140PayloadType[%d], m_nRedPayloadType[%d], m_bTextCodecEmptyRedundantEnabled(%d)",
             m_nT140PayloadType, m_nRedPayloadType, m_bTextCodecEmptyRedundantEnabled);
-    IMS_TRACE_D("nAsBandwidthKbps[%d], nRsBandwidthBps[%d], nRrBandwidthBps(%d)", nAsBandwidthKbps,
-            nRsBandwidthBps, nRrBandwidthBps);
-    IMS_TRACE_D("m_nTextDscp[%d], nRtpInactivityTimerMillis[%d], nRtcpInactivityTimerMillis[%d]",
-            m_nTextDscp, nRtpInactivityTimerMillis, nRtcpInactivityTimerMillis);
+    IMS_TRACE_D("m_nAsBandwidthKbps[%d], m_nRsBandwidthBps[%d], m_nRrBandwidthBps(%d)",
+            m_nAsBandwidthKbps, m_nRsBandwidthBps, m_nRrBandwidthBps);
+    IMS_TRACE_D(
+            "m_nTextDscp[%d], m_nRtpInactivityTimerMillis[%d], m_nRtcpInactivityTimerMillis[%d]",
+            m_nTextDscp, m_nRtpInactivityTimerMillis, m_nRtcpInactivityTimerMillis);
 
-    for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objCodecConfigs.GetSize(); ++i)
     {
-        ToDebugStringCodecs(objCodecConfigs.GetAt(i));
+        ToDebugStringCodecs(m_objCodecConfigs.GetAt(i));
     }
 }
 

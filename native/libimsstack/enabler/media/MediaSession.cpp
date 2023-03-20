@@ -953,8 +953,7 @@ PROTECTED VIRTUAL IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(
     return IMS_FALSE;
 }
 
-PROTECTED
-IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
+PROTECTED VIRTUAL IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
 {
     IMS_TRACE_D("CreateMediaConfig()", 0, 0, 0);
     MediaSessionConfigFactory::GetInstance()->CreateMediaSessionConfig(m_nSlotId, eServiceType);

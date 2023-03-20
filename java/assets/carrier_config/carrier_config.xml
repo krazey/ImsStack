@@ -122,6 +122,42 @@
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
 
     <!-- Media -->
+    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="100"/>
+            <item value="99"/>
+        </int-array>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="2">
+            <item value="98"/>
+            <item value="97"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="96"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="95"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvoice.amrwb_payload_description_bundle">
+        <pbundle name="100">
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle>
+        <pbundle name="99">
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.amrnb_payload_description_bundle">
+        <pbundle name="98">
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle>
+        <pbundle name="97">
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+            <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
+        </pbundle>
+    </pbundle>
     <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
         <int-array name="imsvt.h264_payload_type_int_array" num="1">
             <item value="104"/>
@@ -137,6 +173,10 @@
                 <item value="320"/>
             </int-array>
         </pbundle>
+    </pbundle>
+    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
+        <int name="imsrtt.t140_payload_type_int" value="111"/>
+        <int name="imsrtt.red_payload_type_int" value="112"/>
     </pbundle>
     <int-array name="imsvoice.audio_jitter_buffer_size_int_array" num="3">
         <item value="4"/>
@@ -541,8 +581,6 @@
     <int name="video_send_periodic_sps_pps_int" value="2"/>
     <boolean name="video_bw_nego_option_bool" value="false"/>
     <int name="video_lowest_bitrate_bps_int" value="0"/>
-    <int name="asset_t140_payload_type_int" value="111"/>
-    <int name="asset_red_payload_type_int" value="112"/>
     <int-array name="text_rtp_port_range_int_array" num="2">
         <item value="50010"/>
         <item value="50060"/>
@@ -555,47 +593,8 @@
     <boolean name="dynamic_video_quality_supported_bool" value="false"/>
 
     <!-- TODO Media - to testcases-->
-    <int-array name="asset_evs_payload_type_int_array" num="0">
-    </int-array>
-    <int-array name="asset_amrwb_payload_type_int_array" num="2">
-        <item value="100"/>
-        <item value="99"/>
-    </int-array>
-    <int-array name="asset_amrnb_payload_type_int_array" num="2">
-        <item value="98"/>
-        <item value="97"/>
-    </int-array>
-    <int-array name="asset_dtmfwb_payload_type_int_array" num="1">
-        <item value="96"/>
-    </int-array>
-    <int-array name="asset_dtmfnb_payload_type_int_array" num="1">
-        <item value="95"/>
-    </int-array>
-    <int-array name="asset_amr_amrwb_codec_attribute_modeset_int_array" num="0">
-    </int-array>
-    <int-array name="asset_amr_amrnb_codec_attribute_modeset_int_array" num="0">
-    </int-array>
-    <int-array name="asset_amrwb_codec_attribute_payload_format_int_array" num="2">
-        <item value="0"/>
-        <item value="1"/>
-    </int-array>
-    <int-array name="asset_amrnb_codec_attribute_payload_format_int_array" num="2">
-        <item value="0"/>
-        <item value="1"/>
-    </int-array>
-    <int-array name="asset_evs_codec_attribute_bitrate_int_array" num="0">
-    </int-array>
-    <int-array name="asset_amr_codec_attribute_modeset_int_array" num="0">
-    </int-array>
-    <boolean name="asset_evs_codec_attribute_dtx_bool" value="false"/>
-    <boolean name="asset_evs_codec_attribute_dtx_recv_bool" value="false"/>
     <int name="asset_evs_codec_attribute_hf_only_int" value="-1"/>
     <int name="asset_evs_codec_attribute_mode_switch_int" value="-1"/>
-    <int name="asset_evs_codec_attribute_bandwidth_int" value="5"/>
-    <int name="asset_evs_codec_attribute_cmr_int" value="-2"/>
-    <int name="asset_evs_codec_attribute_ch_aw_recv_int" value="-1"/>
-    <int name="asset_evs_amrwb_io_mode_set_int" value="7"/>
-    <int name="asset_codec_attribute_mode_change_capability_int" value="2"/>
 
     <!-- Media additional for CallFeature-->
     <boolean name="audio_hold_with_direction_inactive_bool" value="false"/>

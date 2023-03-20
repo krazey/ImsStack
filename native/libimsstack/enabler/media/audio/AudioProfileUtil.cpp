@@ -212,36 +212,36 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pAmrFmtp->nOctetAlign = CodecAmrConfig::DEFAULT_OCTET_ALIGN;
             }
 
-            if (pConfig->GetModeChangeCapability() != -1)
+            if (pAmrConfig->GetModeChangeCapability() != -1)
             {
-                pAmrFmtp->nModeChangeCapability = pConfig->GetModeChangeCapability();
+                pAmrFmtp->nModeChangeCapability = pAmrConfig->GetModeChangeCapability();
                 pAmrFmtp->bShowModeChangeCapability = IMS_TRUE;
             }
             else
             {
-                pAmrFmtp->nModeChangeCapability = AudioConfiguration::DEFAULT_MODECHANGE_CAPABILITY;
+                pAmrFmtp->nModeChangeCapability = CodecAmrConfig::DEFAULT_MODECHANGE_CAPABILITY;
                 pAmrFmtp->bShowModeChangeCapability = IMS_FALSE;
             }
 
-            if (pConfig->GetModeChangePeriod() != -1)
+            if (pAmrConfig->GetModeChangePeriod() != -1)
             {
-                pAmrFmtp->nModeChangePeriod = pConfig->GetModeChangePeriod();
+                pAmrFmtp->nModeChangePeriod = pAmrConfig->GetModeChangePeriod();
                 pAmrFmtp->bShowModeChangePeriod = IMS_TRUE;
             }
             else
             {
-                pAmrFmtp->nModeChangePeriod = AudioConfiguration::DEFAULT_MODECHANGE_PERIOD;
+                pAmrFmtp->nModeChangePeriod = CodecAmrConfig::DEFAULT_MODECHANGE_PERIOD;
                 pAmrFmtp->bShowModeChangePeriod = IMS_FALSE;
             }
 
-            if (pConfig->GetModeChangeNeighbor() != -1)
+            if (pAmrConfig->GetModeChangeNeighbor() != -1)
             {
-                pAmrFmtp->nModeChangeNeighbor = pConfig->GetModeChangeNeighbor();
+                pAmrFmtp->nModeChangeNeighbor = pAmrConfig->GetModeChangeNeighbor();
                 pAmrFmtp->bShowModeChangeNeighbor = IMS_TRUE;
             }
             else
             {
-                pAmrFmtp->nModeChangeNeighbor = AudioConfiguration::DEFAULT_MODECHANGE_NEIGHBOR;
+                pAmrFmtp->nModeChangeNeighbor = CodecAmrConfig::DEFAULT_MODECHANGE_NEIGHBOR;
                 pAmrFmtp->bShowModeChangeNeighbor = IMS_FALSE;
             }
 
@@ -368,33 +368,33 @@ AudioProfile* AudioProfileUtil::CreateProfile(
                 pEvsFmtp->bShowBwList = IMS_TRUE;
             }
 
-            if (pConfig->GetModeChangeCapability() == -1)  // Not Present
+            if (pEvsConfig->GetModeChangeCapability() == -1)  // Not Present
             {
-                pEvsFmtp->nModeChangeCapability = AudioConfiguration::DEFAULT_MODECHANGE_CAPABILITY;
+                pEvsFmtp->nModeChangeCapability = CodecEvsConfig::DEFAULT_MODECHANGE_CAPABILITY;
             }
             else
             {
-                pEvsFmtp->nModeChangeCapability = pConfig->GetModeChangeCapability();
+                pEvsFmtp->nModeChangeCapability = pEvsConfig->GetModeChangeCapability();
                 pEvsFmtp->bShowModeChangeCapability = IMS_TRUE;
             }
 
-            if (pConfig->GetModeChangePeriod() == -1)  // Not Present
+            if (pEvsConfig->GetModeChangePeriod() == -1)  // Not Present
             {
-                pEvsFmtp->nModeChangePeriod = AudioConfiguration::DEFAULT_MODECHANGE_PERIOD;
+                pEvsFmtp->nModeChangePeriod = CodecEvsConfig::DEFAULT_MODECHANGE_PERIOD;
             }
             else
             {
-                pEvsFmtp->nModeChangePeriod = pConfig->GetModeChangePeriod();
+                pEvsFmtp->nModeChangePeriod = pEvsConfig->GetModeChangePeriod();
                 pEvsFmtp->bShowModeChangePeriod = IMS_TRUE;
             }
 
-            if (pConfig->GetModeChangeNeighbor() == -1)  // Not Present
+            if (pEvsConfig->GetModeChangeNeighbor() == -1)  // Not Present
             {
-                pEvsFmtp->nModeChangeNeighbor = AudioConfiguration::DEFAULT_MODECHANGE_NEIGHBOR;
+                pEvsFmtp->nModeChangeNeighbor = CodecEvsConfig::DEFAULT_MODECHANGE_NEIGHBOR;
             }
             else
             {
-                pEvsFmtp->nModeChangeNeighbor = pConfig->GetModeChangeNeighbor();
+                pEvsFmtp->nModeChangeNeighbor = pEvsConfig->GetModeChangeNeighbor();
                 pEvsFmtp->bShowModeChangeNeighbor = IMS_TRUE;
             }
 

@@ -26,180 +26,169 @@
 
 using ::testing::Return;
 
-static const IMS_SINT32 DEFAULT_SLOT_ID = 0;
 static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = TextConfiguration::DEFAULT_PAYLOAD_T140;
 static const IMS_SINT32 DEFAULT_PAYLOAD_RED = TextConfiguration::DEFAULT_PAYLOAD_RED;
 static const IMS_SINT32 DEFAULT_TEXT_DSCP = TextConfiguration::DEFAULT_TEXT_DSCP;
 static const IMS_BOOL DEFAULT_EMPTY_REDUNDANT = TextConfiguration::DEFAULT_EMPTY_REDUNDANT;
+static const IMS_SINT32 DEFAULT_AS = MediaConfiguration::DEFAULT_AS;
+static const IMS_SINT32 DEFAULT_RS = MediaConfiguration::DEFAULT_RS;
+static const IMS_SINT32 DEFAULT_RR = MediaConfiguration::DEFAULT_RR;
+static const IMS_SINT32 DEFAULT_RTP_INACTIVITY = MediaConfiguration::DEFAULT_RTP_INACTIVITY;
+static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = MediaConfiguration::DEFAULT_RTCP_INACTIVITY;
 
 class TextConfigurationTest : public ::testing::Test
 {
 public:
-    ICarrierConfig* m_piCc;
+    TextConfiguration* m_pConfig;
+    MockICarrierConfig* m_pMockICarrierConfig;
+    MockICarrierConfig* m_pTextBundle;
 
 protected:
-    virtual void SetUp() override {}
-    virtual void TearDown() override {}
-
-    IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey) { return m_piCc->GetInt(pszKey); }
-    IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey) { return m_piCc->GetBoolean(pszKey); }
-    AString GetString(IN const IMS_CHAR* pszKey) { return m_piCc->GetString(pszKey); }
-    ImsVector<IMS_SINT32> GetIntArray(IN const IMS_CHAR* pszKey)
+    virtual void SetUp() override
     {
-        return m_piCc->GetIntArray(pszKey);
+        m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
+        m_pMockICarrierConfig = new MockICarrierConfig();
+        m_pTextBundle = new MockICarrierConfig();
     }
-    ImsVector<AString> GetStringArray(IN const IMS_CHAR* pszKey)
+
+    virtual void TearDown() override
     {
-        return m_piCc->GetStringArray(pszKey);
+        delete m_pConfig;
+        delete m_pMockICarrierConfig;
+        delete m_pTextBundle;
+
+        m_pConfig = IMS_NULL;
+        m_pMockICarrierConfig = IMS_NULL;
+        m_pTextBundle = IMS_NULL;
+    }
+
+    inline void GetReadyToCreate()
+    {
+        ON_CALL(*m_pMockICarrierConfig,
+                GetBundle(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE))
+                .WillByDefault(Return(m_pTextBundle));
     }
 };
 
 TEST_F(TextConfigurationTest, GetConfigDefault)
 {
-    TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
-    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
-
     EXPECT_EQ(m_pConfig->GetT140PayloadType(), DEFAULT_PAYLOAD_T140);
     EXPECT_EQ(m_pConfig->GetRedPayloadType(), DEFAULT_PAYLOAD_RED);
     EXPECT_EQ(m_pConfig->GetTextDscp(), DEFAULT_TEXT_DSCP);
     EXPECT_EQ(m_pConfig->IsTextCodecEmptyRedundantEnabled(), DEFAULT_EMPTY_REDUNDANT);
-
-    delete m_pConfig;
-}
-
-TEST_F(TextConfigurationTest, GetConfigTest)
-{
-    TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
-    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
-
-    EXPECT_TRUE(m_pConfig->Create(m_piCc));
-
-    EXPECT_EQ(m_pConfig->GetT140PayloadType(),
-            GetInt(CarrierConfig::Assets::KEY_ASSET_T140_PAYLOAD_TYPE_INT));
-    EXPECT_EQ(m_pConfig->GetRedPayloadType(),
-            GetInt(CarrierConfig::Assets::KEY_ASSET_RED_PAYLOAD_TYPE_INT));
-    EXPECT_EQ(m_pConfig->IsTextCodecEmptyRedundantEnabled(),
-            GetBoolean(CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL));
-
-    delete m_pConfig;
 }
 
 TEST_F(TextConfigurationTest, GetConfigTextPort)
 {
-    TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
+    IMS_SINT32 nTextRtpStart = 50300;
+    IMS_SINT32 nTextRtpEnd = 50900;
 
     ImsVector<IMS_SINT32> objTextPortRtp;
-    objTextPortRtp.Push(50100);
-    objTextPortRtp.Push(50500);
+    objTextPortRtp.Push(nTextRtpStart);
+    objTextPortRtp.Push(nTextRtpEnd);
 
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
-    ON_CALL(*pMockICarrierConfig,
+    ON_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::Assets::KEY_TEXT_RTP_PORT_RANGE_INT_ARRAY))
             .WillByDefault(Return(objTextPortRtp));
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetPortRtp(), objTextPortRtp.GetAt(0));
-    EXPECT_EQ(m_pConfig->GetPortRtpEnd(), objTextPortRtp.GetAt(1));
-    EXPECT_EQ(m_pConfig->GetPortRtcp(), objTextPortRtp.GetAt(0) + 1);
-
-    delete pMockICarrierConfig;
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->GetPortRtp(), nTextRtpStart);
+    EXPECT_EQ(m_pConfig->GetPortRtpEnd(), nTextRtpEnd);
+    EXPECT_EQ(m_pConfig->GetPortRtcp(), nTextRtpStart + 1);
 }
 
 TEST_F(TextConfigurationTest, GetConfigTextRtcpInterval)
 {
-    TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
+    IMS_SINT32 nTextRtcpLiveInterval = 0;
+    IMS_SINT32 nTextRtcpInterval = 3;
 
     ImsVector<IMS_SINT32> objTextRtcpInterval;
-    objTextRtcpInterval.Push(3);
-    objTextRtcpInterval.Push(10);
+    objTextRtcpInterval.Push(nTextRtcpLiveInterval);
+    objTextRtcpInterval.Push(nTextRtcpInterval);
 
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
-    ON_CALL(*pMockICarrierConfig,
+    ON_CALL(*m_pMockICarrierConfig,
             GetIntArray(CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY))
             .WillByDefault(Return(objTextRtcpInterval));
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), objTextRtcpInterval.GetAt(0));
-    EXPECT_EQ(m_pConfig->GetRtcpInterval(), objTextRtcpInterval.GetAt(1));
-
-    delete pMockICarrierConfig;
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->GetRtcpLiveInterval(), nTextRtcpLiveInterval);
+    EXPECT_EQ(m_pConfig->GetRtcpInterval(), nTextRtcpInterval);
 }
 
-// TODO: need to check later - due to access fail
 TEST_F(TextConfigurationTest, GetConfigTextBandwidth)
 {
-    TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
-    m_piCc = ConfigService::GetConfigService()->GetCarrierConfig(DEFAULT_SLOT_ID);
+    IMS_SINT32 nAsBandwidthKbps = 40;
+    IMS_SINT32 nRsBandwidthBps = 100;
+    IMS_SINT32 nRrBandwidthBps = 200;
 
-    EXPECT_TRUE(m_pConfig->Create(m_piCc));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_AS_BANDWIDTH_KBPS_INT, DEFAULT_AS))
+            .WillByDefault(Return(nAsBandwidthKbps));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT, DEFAULT_RS))
+            .WillByDefault(Return(nRsBandwidthBps));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RR_BANDWIDTH_BPS_INT, DEFAULT_RR))
+            .WillByDefault(Return(nRrBandwidthBps));
 
-    EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(),
-            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_AS_BANDWIDTH_KBPS_INT));
-    EXPECT_EQ(m_pConfig->GetRsBandwidthBps(),
-            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RR_BANDWIDTH_BPS_INT));
-    EXPECT_EQ(m_pConfig->GetRrBandwidthBps(),
-            GetInt(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT));
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->GetAsBandwidthKbps(), nAsBandwidthKbps);
+    EXPECT_EQ(m_pConfig->GetRsBandwidthBps(), nRsBandwidthBps);
+    EXPECT_EQ(m_pConfig->GetRrBandwidthBps(), nRrBandwidthBps);
 }
 
 TEST_F(TextConfigurationTest, GetConfigTextInactivityTimer)
 {
-    TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
-    IMS_UINT32 nMockTextRtpInactivity = 5000;
-    IMS_UINT32 nMockTextRtcpInactivity = 10000;
+    IMS_UINT32 nTextRtpInactivity = 5000;
+    IMS_UINT32 nTextRtcpInactivity = 10000;
 
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
-    ON_CALL(*pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT, -1))
-            .WillByDefault(Return(nMockTextRtpInactivity));
-    ON_CALL(*pMockICarrierConfig,
-            GetInt(CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT, -1))
-            .WillByDefault(Return(nMockTextRtcpInactivity));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTP_INACTIVITY))
+            .WillByDefault(Return(nTextRtpInactivity));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_TEXT_RTCP_INACTIVITY_TIMER_MILLIS_INT,
+                    DEFAULT_RTCP_INACTIVITY))
+            .WillByDefault(Return(nTextRtcpInactivity));
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
-    EXPECT_EQ(m_pConfig->GetRtpInactivityTimerMillis(), nMockTextRtpInactivity);
-    EXPECT_EQ(m_pConfig->GetRtcpInactivityTimerMillis(), nMockTextRtcpInactivity);
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    delete pMockICarrierConfig;
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->GetRtpInactivityTimerMillis(), nTextRtpInactivity);
+    EXPECT_EQ(m_pConfig->GetRtcpInactivityTimerMillis(), nTextRtcpInactivity);
 }
 
 TEST_F(TextConfigurationTest, GetConfigTextDscp)
 {
-    TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
-    IMS_UINT32 nMockTextDscp = 40;
+    IMS_UINT32 nTextDscp = 40;
 
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
-    ON_CALL(*pMockICarrierConfig, GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT, -1))
-            .WillByDefault(Return(nMockTextDscp));
+    ON_CALL(*m_pMockICarrierConfig,
+            GetInt(CarrierConfig::Assets::KEY_TEXT_RTP_DSCP_INT, DEFAULT_TEXT_DSCP))
+            .WillByDefault(Return(nTextDscp));
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
-    EXPECT_EQ(m_pConfig->GetTextDscp(), nMockTextDscp << 2);
-
-    delete pMockICarrierConfig;
-    delete m_pConfig;
+    EXPECT_EQ(m_pConfig->GetTextDscp(), nTextDscp << 2);
 }
 
 TEST_F(TextConfigurationTest, GetConfigTextCodecEmptyRedundantEnabled)
 {
-    TextConfiguration* m_pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
     IMS_BOOL bTextEmptyRedundantEnabled = IMS_TRUE;
 
-    MockICarrierConfig* pMockICarrierConfig = new MockICarrierConfig();
-    ON_CALL(*pMockICarrierConfig,
-            GetBoolean(CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL, IMS_FALSE))
+    ON_CALL(*m_pMockICarrierConfig,
+            GetBoolean(CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL,
+                    DEFAULT_EMPTY_REDUNDANT))
             .WillByDefault(Return(bTextEmptyRedundantEnabled));
 
-    EXPECT_TRUE(m_pConfig->Create(pMockICarrierConfig));
+    GetReadyToCreate();
+    EXPECT_TRUE(m_pConfig->Create(m_pMockICarrierConfig));
 
     EXPECT_EQ(m_pConfig->IsTextCodecEmptyRedundantEnabled(), bTextEmptyRedundantEnabled);
-
-    delete pMockICarrierConfig;
-    delete m_pConfig;
 }
