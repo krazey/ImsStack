@@ -81,7 +81,6 @@ public class SscServiceImpl implements IUtInterface {
 
     public SscServiceImpl(int slotId) {
         mSlotId = slotId;
-        SscConfig.init(mSlotId);
         mSscRequestQueue = new ConcurrentLinkedDeque<SscRequestData>();
         setSscTransactionFactory(new SscTransactionFactory());
     }
@@ -107,8 +106,10 @@ public class SscServiceImpl implements IUtInterface {
             return;
         }
 
-        initConnections();
+        SscConfig.init(mSlotId);
         SscXmlGov.getInstance(mSlotId).init();
+
+        initConnections();
 
         mSscServiceThread = new HandlerThread("SscServiceImplThread");
         mSscServiceThread.start();
