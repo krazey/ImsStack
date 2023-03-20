@@ -32,27 +32,31 @@
     <int name="rereg_retry_305_policy_int" value="0"/>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <boolean name="extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="true"/>
-    <int name="extra_reg_err_final_type_int" value="1"/>
-    <int name="extra_reg_err_max_cnt_int" value="5"/>
-    <int-array name="extra_reg_err_code_int_array" num="2">
-        <item value="0"/>
-        <item value="2"/>
-    </int-array>
-    <int-array name="extra_reg_err_code_for_update_int_array" num="8">
-        <item value="0"/>
-        <item value="305"/>
-        <item value="403"/>
-        <item value="404"/>
-        <item value="408"/>
-        <item value="500"/>
-        <item value="503"/>
-        <item value="504"/>
-    </int-array>
+    <pbundle name="extra_reg_err_bundle">
+        <boolean name="extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="true"/>
+        <int name="extra_reg_err_final_type_int" value="1"/>
+        <int name="extra_reg_err_max_cnt_int" value="5"/>
+        <int-array name="extra_reg_err_code_int_array" num="2">
+            <item value="0"/>
+            <item value="2"/>
+        </int-array>
+        <int-array name="extra_reg_err_code_for_update_int_array" num="8">
+            <item value="0"/>
+            <item value="305"/>
+            <item value="403"/>
+            <item value="404"/>
+            <item value="408"/>
+            <item value="500"/>
+            <item value="503"/>
+            <item value="504"/>
+        </int-array>
+    </pbundle>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <int-array name="reg_retry_interval_sec_int_array" num="1">
-        <item value="10"/>
-    </int-array>
+    <pbundle name="reg_retry_interval_bundle">
+        <int-array name="reg_retry_interval_sec_int_array" num="1">
+            <item value="10"/>
+        </int-array>
+    </pbundle>
 
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
