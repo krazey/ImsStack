@@ -122,6 +122,22 @@
     <int name="imsemergency.emergency_registration_timer_millis_int" value="10000"/>
 
     <!-- Media -->
+    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
+        <int-array name="imsvt.h264_payload_type_int_array" num="1">
+            <item value="104"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvt.h264_payload_description_bundle">
+        <pbundle name="104">
+            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C016</string>
+            <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
+            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+                <item value="240"/>
+                <item value="320"/>
+            </int-array>
+        </pbundle>
+    </pbundle>
     <int-array name="imsvoice.audio_jitter_buffer_size_int_array" num="3">
         <item value="4"/>
         <item value="4"/>
@@ -332,49 +348,61 @@
     </int-array>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <boolean name="extra_reg_err_code_as_failure_in_roaming_for_update_bool" value="false"/>
-    <boolean name="extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="false"/>
-    <int name="extra_reg_err_final_type_int" value="0"/>
-    <int name="extra_reg_err_max_cnt_int" value="0"/>
-    <int name="extra_reg_err_min_cnt_int" value="0"/>
-    <int name="extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int" value="0"/>
-    <int name="extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int" value="0"/>
-    <int name="extra_reg_err_policy_int" value="0"/>
-    <int-array name="extra_reg_err_code_int_array" num="0">
-    </int-array>
-    <int-array name="extra_reg_err_code_for_update_int_array" num="0">
-    </int-array>
-    <int-array name="extra_reg_err_wait_time_sec_int_array" num="0">
-    </int-array>
+    <pbundle name="extra_reg_err_bundle">
+        <boolean name="extra_reg_err_code_as_failure_in_roaming_for_update_bool" value="false"/>
+        <boolean name="extra_reg_err_retry_cnt_shared_for_reg_and_sub_bool" value="false"/>
+        <int name="extra_reg_err_final_type_int" value="0"/>
+        <int name="extra_reg_err_max_cnt_int" value="0"/>
+        <int name="extra_reg_err_min_cnt_int" value="0"/>
+        <int name="extra_reg_err_pcscfs_repeated_cnt_for_eps_5gs_only_attached_int" value="0"/>
+        <int name="extra_reg_err_pcscfs_repeated_cnt_for_lte_combined_attached_int" value="0"/>
+        <int name="extra_reg_err_policy_int" value="0"/>
+        <int-array name="extra_reg_err_code_int_array" num="0">
+        </int-array>
+        <int-array name="extra_reg_err_code_for_update_int_array" num="0">
+        </int-array>
+        <int-array name="extra_reg_err_wait_time_sec_int_array" num="0">
+        </int-array>
+    </pbundle>
     <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
-    <int name="notify_terminated_for_init_reg_with_wait_time_int" value="0"/>
-    <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="3">
-        <item value="1"/>
-        <item value="2"/>
-        <item value="3"/>
-    </int-array>
-    <int-array name="notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="0">
-    </int-array>
+    <pbundle name="notify_terminated_for_init_reg_bundle">
+        <int name="notify_terminated_for_init_reg_with_wait_time_int" value="0"/>
+        <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="3">
+            <item value="1"/>
+            <item value="2"/>
+            <item value="3"/>
+        </int-array>
+        <int-array name="notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="0">
+        </int-array>
+    </pbundle>
     <!-- KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE -->
-    <boolean name="reg_err_code_with_ra_time_only_defined_bool" value="false"/>
-    <int-array name="reg_err_code_with_ra_time_int_array" num="0">
-    </int-array>
-    <int-array name="reg_err_code_with_ra_time_for_update_int_array" num="0">
-    </int-array>
+    <pbundle name="reg_err_code_with_ra_time_bundle">
+        <boolean name="reg_err_code_with_ra_time_only_defined_bool" value="false"/>
+        <int-array name="reg_err_code_with_ra_time_int_array" num="0">
+        </int-array>
+        <int-array name="reg_err_code_with_ra_time_for_update_int_array" num="0">
+        </int-array>
+    </pbundle>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <boolean name="reg_retry_interval_used_for_sub_bool" value="true"/>
-    <int-array name="reg_retry_interval_random_upper_value_sec_int_array" num="0">
-    </int-array>
-    <int-array name="reg_retry_interval_sec_int_array" num="0">
-    </int-array>
+    <pbundle name="reg_retry_interval_bundle">
+        <boolean name="reg_retry_interval_used_for_sub_bool" value="true"/>
+        <int-array name="reg_retry_interval_random_upper_value_sec_int_array" num="0">
+        </int-array>
+        <int-array name="reg_retry_interval_sec_int_array" num="0">
+        </int-array>
+    </pbundle>
     <!-- KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE -->
-    <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="0"/>
-    <int-array name="sub_err_code_for_init_reg_int_array" num="0">
-    </int-array>
+    <pbundle name="sub_err_code_for_init_reg_bundle">
+        <int name="sub_err_code_for_init_reg_with_retry_max_cnt_int" value="0"/>
+        <int-array name="sub_err_code_for_init_reg_int_array" num="0">
+        </int-array>
+    </pbundle>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
-    <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="0"/>
-    <int-array name="sub_err_code_for_terminated_int_array" num="0">
-    </int-array>
+    <pbundle name="sub_err_code_for_terminated_bundle">
+        <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="0"/>
+        <int-array name="sub_err_code_for_terminated_int_array" num="0">
+        </int-array>
+    </pbundle>
 
     <!-- Mtc -->
     <boolean name="check_conference_event_package_version_bool" value="true"/>

@@ -79,74 +79,84 @@
     </int-array>
 
     <!-- KEY_EXTRA_REG_ERR_BUNDLE -->
-    <int name="extra_reg_err_final_type_int" value="2"/>
-    <int name="extra_reg_err_policy_int" value="2"/>
-    <int-array name="extra_reg_err_code_for_update_int_array" num="2">
-        <item value="403"/>
-        <item value="404"/>
-    </int-array>
-    <int-array name="extra_reg_err_code_int_array" num="4">
-        <item value="0"/>
-        <item value="2"/>
-        <item value="403"/>
-        <item value="404"/>
-    </int-array>
-    <int-array name="extra_reg_err_wait_time_sec_int_array" num="1">
-        <item value="30"/>
-    </int-array>
+    <pbundle name="extra_reg_err_bundle">
+        <int name="extra_reg_err_final_type_int" value="2"/>
+        <int name="extra_reg_err_policy_int" value="2"/>
+        <int-array name="extra_reg_err_code_for_update_int_array" num="2">
+            <item value="403"/>
+            <item value="404"/>
+        </int-array>
+        <int-array name="extra_reg_err_code_int_array" num="4">
+            <item value="0"/>
+            <item value="2"/>
+            <item value="403"/>
+            <item value="404"/>
+        </int-array>
+        <int-array name="extra_reg_err_wait_time_sec_int_array" num="1">
+            <item value="30"/>
+        </int-array>
+    </pbundle>
     <!-- KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE -->
-    <int name="notify_terminated_for_init_reg_with_wait_time_int" value="60"/>
-    <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="4">
-        <item value="1"/>
-        <item value="2"/>
-        <item value="3"/>
-        <item value="5"/>
-    </int-array>
-    <int-array name="notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="2">
-        <item value="2"/>
-        <item value="5"/>
-    </int-array>
+    <pbundle name="notify_terminated_for_init_reg_bundle">
+        <int name="notify_terminated_for_init_reg_with_wait_time_int" value="60"/>
+        <int-array name="notify_terminated_for_init_reg_used_event_int_array" num="4">
+            <item value="1"/>
+            <item value="2"/>
+            <item value="3"/>
+            <item value="5"/>
+        </int-array>
+        <int-array name="notify_terminated_for_init_reg_used_event_with_wait_time_int_array" num="2">
+            <item value="2"/>
+            <item value="5"/>
+        </int-array>
+    </pbundle>
     <!-- KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE -->
-    <boolean name="reg_err_code_with_ra_time_only_defined_bool" value="true"/>
-    <int-array name="reg_err_code_with_ra_time_int_array" num="5">
-        <item value="480"/>
-        <item value="486"/>
-        <item value="500"/>
-        <item value="503"/>
-        <item value="600"/>
-    </int-array>
-    <int-array name="reg_err_code_with_ra_time_for_update_int_array" num="5">
-        <item value="480"/>
-        <item value="486"/>
-        <item value="500"/>
-        <item value="503"/>
-        <item value="600"/>
-    </int-array>
+    <pbundle name="reg_err_code_with_ra_time_bundle">
+        <boolean name="reg_err_code_with_ra_time_only_defined_bool" value="true"/>
+        <int-array name="reg_err_code_with_ra_time_int_array" num="5">
+            <item value="480"/>
+            <item value="486"/>
+            <item value="500"/>
+            <item value="503"/>
+            <item value="600"/>
+        </int-array>
+        <int-array name="reg_err_code_with_ra_time_for_update_int_array" num="5">
+            <item value="480"/>
+            <item value="486"/>
+            <item value="500"/>
+            <item value="503"/>
+            <item value="600"/>
+        </int-array>
+    </pbundle>
     <!-- KEY_REG_RETRY_INTERVAL_BUNDLE -->
-    <int-array name="reg_retry_interval_random_upper_value_sec_int_array" num="6">
-        <item value="0"/>
-        <item value="0"/>
-        <item value="15"/>
-        <item value="0"/>
-        <item value="0"/>
-        <item value="0"/>
-    </int-array>
-    <int-array name="reg_retry_interval_sec_int_array" num="6">
-        <item value="30"/>
-        <item value="30"/>
-        <item value="60"/>
-        <item value="120"/>
-        <item value="480"/>
-        <item value="900"/>
-    </int-array>
+    <pbundle name="reg_retry_interval_bundle">
+        <int-array name="reg_retry_interval_random_upper_value_sec_int_array" num="6">
+            <item value="0"/>
+            <item value="0"/>
+            <item value="15"/>
+            <item value="0"/>
+            <item value="0"/>
+            <item value="0"/>
+        </int-array>
+        <int-array name="reg_retry_interval_sec_int_array" num="6">
+            <item value="30"/>
+            <item value="30"/>
+            <item value="60"/>
+            <item value="120"/>
+            <item value="480"/>
+            <item value="900"/>
+        </int-array>
+    </pbundle>
     <!-- KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE -->
-    <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="2"/>
-    <int-array name="sub_err_code_for_terminated_int_array" num="4">
-        <item value="400"/>
-        <item value="403"/>
-        <item value="404"/>
-        <item value="420"/>
-    </int-array>
+    <pbundle name="sub_err_code_for_terminated_bundle">
+        <int name="sub_err_code_for_terminated_with_retry_max_count_int" value="2"/>
+        <int-array name="sub_err_code_for_terminated_int_array" num="4">
+            <item value="400"/>
+            <item value="403"/>
+            <item value="404"/>
+            <item value="420"/>
+        </int-array>
+    </pbundle>
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>
@@ -294,6 +304,107 @@
     </int-array>
 
     <!-- Media -->
+    <pbundle name="imsvoice.audio_codec_capability_payload_types_bundle">
+        <int-array name="imsvoice.evs_payload_type_int_array" num="1">
+            <item value="109"/>
+        </int-array>
+        <int-array name="imsvoice.amrwb_payload_type_int_array" num="2">
+            <item value="104"/>
+            <item value="110"/>
+        </int-array>
+        <int-array name="imsvoice.amrnb_payload_type_int_array" num="3">
+            <item value="102"/>
+            <item value="108"/>
+            <item value="106"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfwb_payload_type_int_array" num="1">
+            <item value="105"/>
+        </int-array>
+        <int-array name="imsvoice.dtmfnb_payload_type_int_array" num="1">
+            <item value="100"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvoice.evs_payload_description_bundle">
+        <pbundle name="109">
+            <int name="imsvoice.codec_attribute_cmr_int" value="-2"/>
+            <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="2"/>
+            <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+                <item value="4"/>
+                <item value="4"/>
+            </int-array>
+            <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="3"/>
+            <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="false"/>
+            <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="false"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.amrwb_payload_description_bundle">
+        <pbundle name="104">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+        </pbundle>
+        <pbundle name="110">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
+                <item value="0"/>
+                <item value="1"/>
+                <item value="2"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvoice.amrnb_payload_description_bundle">
+        <pbundle name="102">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
+                <item value="0"/>
+                <item value="2"/>
+                <item value="4"/>
+                <item value="7"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+        </pbundle>
+        <pbundle name="108">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
+                <item value="0"/>
+                <item value="2"/>
+                <item value="4"/>
+                <item value="7"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
+        </pbundle>
+        <pbundle name="106">
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
+                <item value="0"/>
+                <item value="2"/>
+                <item value="4"/>
+                <item value="7"/>
+            </int-array>
+            <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsvt.video_codec_capability_payload_types_bundle">
+        <int-array name="imsvt.h264_payload_type_int_array" num="1">
+            <item value="121"/>
+        </int-array>
+    </pbundle>
+    <pbundle name="imsvt.h264_payload_description_bundle">
+        <pbundle name="121">
+            <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
+            <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
+            <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+            <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+                <item value="240"/>
+                <item value="320"/>
+            </int-array>
+        </pbundle>
+    </pbundle>
+    <pbundle name="imsrtt.text_codec_capability_payload_types_bundle">
+        <int name="imsrtt.t140_payload_type_int" value="111"/>
+        <int name="imsrtt.red_payload_type_int" value="112"/>
+    </pbundle>
     <int name="imsvt.video_as_bandwidth_kbps_int" value="425"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="800"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2400"/>

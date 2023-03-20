@@ -192,6 +192,7 @@ public class ConfigAgent implements ConfigInterface {
         // Loads IMS specific carrier configuration from asset.
         PersistableBundle configFromAsset = loadCarrierConfig(subId, id);
 
+        CarrierConfig.overrideNestedBundles(config, configFromAsset);
         config.putAll(configFromAsset);
 
         ImsLog.d(mSlotId, "updateCarrierConfig: " + config.toString());
@@ -233,7 +234,15 @@ public class ConfigAgent implements ConfigInterface {
         PersistableBundle testConfig = readTestConfig();
 
         if (!testConfig.isEmpty()) {
-            config.putAll(testConfig);
+            PersistableBundle newTestConfig = testConfig.deepCopy();
+            CarrierConfig.overrideNestedBundles(config, newTestConfig);
+            config.putAll(newTestConfig);
+
+            java.util.Set<String> keys = testConfig.keySet();
+
+            for (String key : keys) {
+                ImsLog.d(mSlotId, key + "=" + CarrierConfig.getValue(testConfig, key));
+            }
         }
     }
 
@@ -390,8 +399,7 @@ public class ConfigAgent implements ConfigInterface {
             dst.putLong(key, src.getLong(key));
         } else if (key.endsWith("_double")) {
             dst.putDouble(key, src.getDouble(key));
-        } else if (key.endsWith("_bool") || key.endsWith("_boolean")
-                || key.equals("ignore_data_enabled_changed_for_video_calls")) {
+        } else if (key.endsWith("_bool") || key.endsWith("_boolean")) {
             dst.putBoolean(key, src.getBoolean(key));
         } else if (key.endsWith("_int_array")) {
             dst.putIntArray(key, src.getIntArray(key));
@@ -403,6 +411,9 @@ public class ConfigAgent implements ConfigInterface {
             dst.putLongArray(key, src.getLongArray(key));
         } else if (key.endsWith("_bundle")) {
             dst.putPersistableBundle(key, src.getPersistableBundle(key));
+        } else if (key.equals(
+                CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
+            dst.putBoolean(key, src.getBoolean(key));
         }
     }
 
@@ -584,8 +595,7 @@ public class ConfigAgent implements ConfigInterface {
                 mConfig.putDouble(key, value);
                 mTestConfig.putDouble(key, value);
                 mCarrierConfig.getConfig().putDouble(key, value);
-            } else if (key.endsWith("_bool") || key.endsWith("_boolean")
-                    || key.equals("ignore_data_enabled_changed_for_video_calls")) {
+            } else if (key.endsWith("_bool") || key.endsWith("_boolean")) {
                 boolean value = intent.getBooleanExtra(KEY_VALUE, false);
                 valueForLog = String.valueOf(value);
                 mConfig.putBoolean(key, value);
@@ -609,6 +619,13 @@ public class ConfigAgent implements ConfigInterface {
                 mConfig.putLongArray(key, value);
                 mTestConfig.putLongArray(key, value);
                 mCarrierConfig.getConfig().putLongArray(key, value);
+            } else if (key.equals(
+                    CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
+                boolean value = intent.getBooleanExtra(KEY_VALUE, false);
+                valueForLog = String.valueOf(value);
+                mConfig.putBoolean(key, value);
+                mTestConfig.putBoolean(key, value);
+                mCarrierConfig.getConfig().putBoolean(key, value);
             }
 
             ImsLog.d(mSlotId, "TestCarrierConfigPut: [" + key + "=" + valueForLog + "]");
