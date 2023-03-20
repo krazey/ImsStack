@@ -94,6 +94,29 @@
                 android:dialogMessage="">
             </EditTextPreference>
         </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig: bundle"
+            android:key="category_config_bundle">
+            <ListPreference android:title="Bundle"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="config_bundle_keys"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="config_bundle_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="config_bundle_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
     </PreferenceScreen>
     <PreferenceScreen android:title="CarrierConfig - Assets"
         android:key="screen_carrier_config_assets">
@@ -172,6 +195,31 @@
                 android:dialogMessage="">
             </EditTextPreference>
         </PreferenceCategory>
+        <PreferenceCategory android:title="CarrierConfig(assets): bundle"
+            android:key="category_assets_config_bundle">
+            <ListPreference android:title="Bundle"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="assets_config_bundle_keys"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <ListPreference android:title="Item"
+                android:entryValues="@array/carrier_config_items"
+                android:entries="@array/carrier_config_items"
+                android:key="assets_config_bundle_items"
+                android:defaultValue=""
+                android:enabled="true"
+                android:selectable="true">
+            </ListPreference>
+            <EditTextPreference android:title="Value"
+                android:key="assets_config_bundle_value"
+                android:dialogMessage="">
+            </EditTextPreference>
+        </PreferenceCategory>
+    </PreferenceScreen>
+    <PreferenceScreen android:title="Dump Config" android:key="dump_config">
     </PreferenceScreen>
     <ListPreference android:title="Clear Test Config"
         android:entryValues="@array/two_state_value" android:entries="@array/two_state_entry"

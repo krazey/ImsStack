@@ -60,10 +60,18 @@ public final class ConfigXmlUtils {
                 configKeys.add(parser.getAttributeValue(null, "name"));
 
                 int innerEvent;
+                int sameTagCount = 1;
                 while ((innerEvent = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                    if (innerEvent == XmlPullParser.END_TAG) {
+                    if (innerEvent == XmlPullParser.START_TAG) {
                         if (parser.getName().equals(tagName)) {
-                            break;
+                            sameTagCount++;
+                        }
+                    } else if (innerEvent == XmlPullParser.END_TAG) {
+                        if (parser.getName().equals(tagName)) {
+                            sameTagCount--;
+                            if (sameTagCount == 0) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -119,6 +127,9 @@ public final class ConfigXmlUtils {
             return;
         } else if (tagName.equals("string-array")) {
             config.putStringArray(key, readStringArray(parser, "string-array"));
+            return;
+        } else if (tagName.equals("pbundle")) {
+            config.putPersistableBundle(key, readConfig(parser));
             return;
         } else {
             throw new XmlPullParserException("Unknown tag: " + tagName);

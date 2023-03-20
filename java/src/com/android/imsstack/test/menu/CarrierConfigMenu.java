@@ -15,12 +15,17 @@
  */
 package com.android.imsstack.test.menu;
 
+import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.telephony.CarrierConfigManager;
+import android.telephony.CarrierConfigManager.ImsRtt;
+import android.telephony.CarrierConfigManager.ImsVoice;
+import android.telephony.CarrierConfigManager.ImsVt;
 import android.telephony.ims.ImsManager;
 import android.telephony.ims.ProvisioningManager;
 import android.util.SparseArray;
@@ -33,11 +38,13 @@ import com.android.imsstack.core.ConfigLoader;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.core.config.CarrierConfig.Assets;
 import com.android.imsstack.core.config.ConfigXmlUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.IoUtils;
+import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -49,12 +56,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("deprecation")
 public class CarrierConfigMenu extends PreferenceActivity {
     private static final String PUBLIC_CARRIER_CONFIG_FILE =
             "carrier_config/aosp_carrier_config.xml";
 
+    private static final String KEY_DUMP_CONFIG = "dump_config";
     private static final String KEY_CLEAR_TEST_CONFIG = "clear_test_config";
     private static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
     private static final String KEY_VOLTE_PROVISIONING = "volte_provisioning";
@@ -69,33 +80,6 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private static final String KEY_CONFIG_INT_ARRAY_VALUE = "config_int_array_value";
     private static final String KEY_CONFIG_STRING_ARRAY_ITEMS = "config_string_array_items";
     private static final String KEY_CONFIG_STRING_ARRAY_VALUE = "config_string_array_value";
-    private static final String KEY_LIST_PREFERENCES[] =
-        {
-            KEY_CONFIG_BOOLEAN_ITEMS,
-            KEY_CONFIG_INT_ITEMS,
-            KEY_CONFIG_STRING_ITEMS,
-            KEY_CONFIG_INT_ARRAY_ITEMS,
-            KEY_CONFIG_STRING_ARRAY_ITEMS,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_BOOLEAN_ITEMS,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_INT_ITEMS,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_ITEMS,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_INT_ARRAY_ITEMS,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_ARRAY_ITEMS
-        };
-    private static final String KEY_EDIT_TEXT_PREFERENCES[] =
-        {
-            KEY_CONFIG_BOOLEAN_VALUE,
-            KEY_CONFIG_INT_VALUE,
-            KEY_CONFIG_STRING_VALUE,
-            KEY_CONFIG_INT_ARRAY_VALUE,
-            KEY_CONFIG_STRING_ARRAY_VALUE,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_BOOLEAN_VALUE,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_INT_VALUE,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_VALUE,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_INT_ARRAY_VALUE,
-            KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_ARRAY_VALUE
-        };
-
     private static final int CONFIG_I_BOOLEAN = 0;
     private static final int CONFIG_I_INT = 1;
     private static final int CONFIG_I_STRING = 2;
@@ -107,6 +91,130 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private static final int ASSETS_CONFIG_I_INT_ARRAY = 8;
     private static final int ASSETS_CONFIG_I_STRING_ARRAY = 9;
     private static final int CONFIG_I_MAX = 10;
+    private static final Map<Integer, String> KEY_LIST_PREFERENCES = Map.ofEntries(
+            Map.entry(CONFIG_I_BOOLEAN, KEY_CONFIG_BOOLEAN_ITEMS),
+            Map.entry(CONFIG_I_INT, KEY_CONFIG_INT_ITEMS),
+            Map.entry(CONFIG_I_STRING, KEY_CONFIG_STRING_ITEMS),
+            Map.entry(CONFIG_I_INT_ARRAY, KEY_CONFIG_INT_ARRAY_ITEMS),
+            Map.entry(CONFIG_I_STRING_ARRAY, KEY_CONFIG_STRING_ARRAY_ITEMS),
+            Map.entry(ASSETS_CONFIG_I_BOOLEAN, KEY_ASSETS_PREFIX + KEY_CONFIG_BOOLEAN_ITEMS),
+            Map.entry(ASSETS_CONFIG_I_INT, KEY_ASSETS_PREFIX + KEY_CONFIG_INT_ITEMS),
+            Map.entry(ASSETS_CONFIG_I_STRING, KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_ITEMS),
+            Map.entry(ASSETS_CONFIG_I_INT_ARRAY, KEY_ASSETS_PREFIX + KEY_CONFIG_INT_ARRAY_ITEMS),
+            Map.entry(ASSETS_CONFIG_I_STRING_ARRAY,
+                    KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_ARRAY_ITEMS));
+    private static final Map<Integer, String> KEY_EDIT_TEXT_PREFERENCES = Map.ofEntries(
+            Map.entry(CONFIG_I_BOOLEAN, KEY_CONFIG_BOOLEAN_VALUE),
+            Map.entry(CONFIG_I_INT, KEY_CONFIG_INT_VALUE),
+            Map.entry(CONFIG_I_STRING, KEY_CONFIG_STRING_VALUE),
+            Map.entry(CONFIG_I_INT_ARRAY, KEY_CONFIG_INT_ARRAY_VALUE),
+            Map.entry(CONFIG_I_STRING_ARRAY, KEY_CONFIG_STRING_ARRAY_VALUE),
+            Map.entry(ASSETS_CONFIG_I_BOOLEAN, KEY_ASSETS_PREFIX + KEY_CONFIG_BOOLEAN_VALUE),
+            Map.entry(ASSETS_CONFIG_I_INT, KEY_ASSETS_PREFIX + KEY_CONFIG_INT_VALUE),
+            Map.entry(ASSETS_CONFIG_I_STRING, KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_VALUE),
+            Map.entry(ASSETS_CONFIG_I_INT_ARRAY, KEY_ASSETS_PREFIX + KEY_CONFIG_INT_ARRAY_VALUE),
+            Map.entry(ASSETS_CONFIG_I_STRING_ARRAY,
+                    KEY_ASSETS_PREFIX + KEY_CONFIG_STRING_ARRAY_VALUE));
+
+    private static final String KEY_CONFIG_BUNDLE_KEYS = "config_bundle_keys";
+    private static final String KEY_CONFIG_BUNDLE_ITEMS = "config_bundle_items";
+    private static final String KEY_CONFIG_BUNDLE_VALUE = "config_bundle_value";
+    private static final int CONFIG_I_BUNDLE = 0;
+    private static final int ASSETS_CONFIG_I_BUNDLE = 1;
+    private static final int CONFIG_I_BUNDLE_MAX = 2;
+    private static final Map<Integer, String> KEY_BUNDLE_KEY_LIST_PREFERENCES = Map.of(
+            CONFIG_I_BUNDLE, KEY_CONFIG_BUNDLE_KEYS,
+            ASSETS_CONFIG_I_BUNDLE, KEY_ASSETS_PREFIX + KEY_CONFIG_BUNDLE_KEYS);
+    private static final Map<Integer, String> KEY_BUNDLE_LIST_PREFERENCES = Map.of(
+            CONFIG_I_BUNDLE, KEY_CONFIG_BUNDLE_ITEMS,
+            ASSETS_CONFIG_I_BUNDLE, KEY_ASSETS_PREFIX + KEY_CONFIG_BUNDLE_ITEMS);
+    private static final Map<Integer, String> KEY_BUNDLE_EDIT_TEXT_PREFERENCES = Map.of(
+            CONFIG_I_BUNDLE, KEY_CONFIG_BUNDLE_VALUE,
+            ASSETS_CONFIG_I_BUNDLE, KEY_ASSETS_PREFIX + KEY_CONFIG_BUNDLE_VALUE);
+    private static final List<String> ASSETS_BUNDLE_KEYS = Arrays.asList(
+            Assets.KEY_EXTRA_REG_ERR_BUNDLE,
+            Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE,
+            Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE,
+            Assets.KEY_REG_RETRY_INTERVAL_BUNDLE,
+            Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE,
+            Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE);
+    private static final Map<String, List<String>> BUNDLE_ITEMS_MAP = Map.ofEntries(
+            Map.entry(ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
+                    ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
+                    ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
+                    ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
+                    ImsVoice.KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY,
+                    ImsVoice.KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY)),
+            Map.entry(ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
+                    ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY)),
+            Map.entry(ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE, Arrays.asList(
+                    ImsRtt.KEY_T140_PAYLOAD_TYPE_INT,
+                    ImsRtt.KEY_RED_PAYLOAD_TYPE_INT)),
+            Map.entry(ImsVoice.KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT,
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY,
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT,
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT,
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL,
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL,
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT,
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CMR_INT,
+                    ImsVoice.KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT)),
+            Map.entry(ImsVoice.KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
+                    ImsVoice.KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
+                    ImsVoice.KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT)),
+            Map.entry(ImsVoice.KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
+                    ImsVoice.KEY_AMR_CODEC_ATTRIBUTE_PAYLOAD_FORMAT_INT,
+                    ImsVoice.KEY_AMR_CODEC_ATTRIBUTE_MODESET_INT_ARRAY,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT,
+                    ImsVoice.KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT)),
+            Map.entry(ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE, Arrays.asList(
+                    ImsVt.KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING,
+                    ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT,
+                    ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT,
+                    ImsVt.KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY)),
+            Map.entry(Assets.KEY_EXTRA_REG_ERR_BUNDLE, Arrays.asList(
+                    Assets.KEY_EXTRA_REG_ERR_CODE_AS_FAILURE_IN_ROAMING_FOR_UPDATE_BOOL,
+                    Assets.KEY_EXTRA_REG_ERR_CODE_FOR_UPDATE_INT_ARRAY,
+                    Assets.KEY_EXTRA_REG_ERR_CODE_INT_ARRAY,
+                    Assets.KEY_EXTRA_REG_ERR_FINAL_TYPE_INT,
+                    Assets.KEY_EXTRA_REG_ERR_MAX_CNT_INT,
+                    Assets.KEY_EXTRA_REG_ERR_MIN_CNT_INT,
+                    Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_EPS_5GS_ONLY_ATTACHED_INT,
+                    Assets.KEY_EXTRA_REG_ERR_PCSCFS_REPEATED_CNT_FOR_LTE_COMBINDED_ATTACHED_INT,
+                    Assets.KEY_EXTRA_REG_ERR_POLICY_INT,
+                    Assets.KEY_EXTRA_REG_ERR_RETRY_CNT_SHARED_FOR_REG_AND_SUB_BOOL,
+                    Assets.KEY_EXTRA_REG_ERR_WAIT_TIME_SEC_INT_ARRAY)),
+            Map.entry(Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_BUNDLE, Arrays.asList(
+                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_INT_ARRAY,
+                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_USED_EVENT_WITH_WAIT_TIME_INT_ARRAY,
+                    Assets.KEY_NOTIFY_TERMINATED_FOR_INIT_REG_WITH_WAIT_TIME_INT)),
+            Map.entry(Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_BUNDLE, Arrays.asList(
+                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_FOR_UPDATE_INT_ARRAY,
+                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_INT_ARRAY,
+                    Assets.KEY_REG_ERR_CODE_WITH_RA_TIME_ONLY_DEFINED_BOOL)),
+            Map.entry(Assets.KEY_REG_RETRY_INTERVAL_BUNDLE, Arrays.asList(
+                    Assets.KEY_REG_RETRY_INTERVAL_RANDOM_UPPER_VALUE_SEC_INT_ARRAY,
+                    Assets.KEY_REG_RETRY_INTERVAL_SEC_INT_ARRAY,
+                    Assets.KEY_REG_RETRY_INTERVAL_USED_FOR_SUB_BOOL)),
+            Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_BUNDLE, Arrays.asList(
+                    Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_INT_ARRAY,
+                    Assets.KEY_SUB_ERR_CODE_FOR_INIT_REG_WITH_RETRY_MAX_CNT_INT)),
+            Map.entry(Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_BUNDLE, Arrays.asList(
+                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_INT_ARRAY,
+                    Assets.KEY_SUB_ERR_CODE_FOR_TERMINATED_WITH_RETRY_MAX_COUNT_INT)));
+    private static final List<String> KEYS_OF_VALUE_USED_AS_BUNDLE_KEY = List.of(
+            ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY,
+            ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY,
+            ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY,
+            ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
     private static SparseArray<ArrayList<String>> sConfigKeys = null;
 
@@ -115,6 +223,13 @@ public class CarrierConfigMenu extends PreferenceActivity {
     private PersistableBundle mTestConfig;
     private final SparseArray<ListPreference> mConfigItems = new SparseArray<>(CONFIG_I_MAX);
     private final SparseArray<EditTextPreference> mConfigValues = new SparseArray<>(CONFIG_I_MAX);
+    private final SparseArray<ListPreference> mConfigBundleKeys =
+            new SparseArray<>(CONFIG_I_BUNDLE_MAX);
+    private final SparseArray<ListPreference> mConfigBundleItems =
+            new SparseArray<>(CONFIG_I_BUNDLE_MAX);
+    private final SparseArray<EditTextPreference> mConfigBundleValues =
+            new SparseArray<>(CONFIG_I_BUNDLE_MAX);
+    private final List<String> mBundleKeys = new ArrayList<>();
     private ListPreference mClearTestConfig;
     private ListPreference mTestCarrierId;
     private ListPreference mVoLteProvisioning;
@@ -190,6 +305,8 @@ public class CarrierConfigMenu extends PreferenceActivity {
         } else {
             mTestConfig = new PersistableBundle();
         }
+
+        createBundleKeys(false);
     }
 
     private void storeTestConfig() {
@@ -214,8 +331,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
 
     private void initPreferences() {
         for (int i = 0; i < CONFIG_I_MAX; ++i) {
-            ListPreference itemList = (ListPreference)
-                    findPreference(KEY_LIST_PREFERENCES[i]);
+            String key = KEY_LIST_PREFERENCES.get(i);
+            if (key == null) {
+                continue;
+            }
+
+            ListPreference itemList = (ListPreference) findPreference(key);
             mConfigItems.put(i, itemList);
 
             if (itemList != null) {
@@ -227,8 +348,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
         initConfigItems();
 
         for (int i = 0; i < CONFIG_I_MAX; ++i) {
-            EditTextPreference valueEdit = (EditTextPreference)
-                    findPreference(KEY_EDIT_TEXT_PREFERENCES[i]);
+            String key = KEY_EDIT_TEXT_PREFERENCES.get(i);
+            if (key == null) {
+                continue;
+            }
+
+            EditTextPreference valueEdit = (EditTextPreference) findPreference(key);
             mConfigValues.put(i, valueEdit);
 
             if (valueEdit != null) {
@@ -237,15 +362,65 @@ public class CarrierConfigMenu extends PreferenceActivity {
             }
         }
 
-        mClearTestConfig = (ListPreference) findPreference(KEY_CLEAR_TEST_CONFIG);
+        for (int i = 0; i < CONFIG_I_BUNDLE_MAX; ++i) {
+            String key = KEY_BUNDLE_KEY_LIST_PREFERENCES.get(i);
+            if (key == null) {
+                continue;
+            }
 
+            ListPreference keyList = (ListPreference) findPreference(key);
+            mConfigBundleKeys.put(i, keyList);
+
+            if (keyList != null) {
+                keyList.setValue("");
+                keyList.setOnPreferenceChangeListener(new ConfigBundleKeyChangeListener(i));
+            }
+        }
+
+        initBundleKeys();
+
+        for (int i = 0; i < CONFIG_I_BUNDLE_MAX; ++i) {
+            String key = KEY_BUNDLE_LIST_PREFERENCES.get(i);
+            if (key == null) {
+                continue;
+            }
+
+            ListPreference itemList = (ListPreference) findPreference(key);
+            mConfigBundleItems.put(i, itemList);
+
+            if (itemList != null) {
+                itemList.setValue("");
+                itemList.setOnPreferenceChangeListener(new ConfigBundleItemChangeListener(i));
+            }
+        }
+
+        for (int i = 0; i < CONFIG_I_BUNDLE_MAX; ++i) {
+            String key = KEY_BUNDLE_EDIT_TEXT_PREFERENCES.get(i);
+            if (key == null) {
+                continue;
+            }
+
+            EditTextPreference valueEdit = (EditTextPreference) findPreference(key);
+            mConfigBundleValues.put(i, valueEdit);
+
+            if (valueEdit != null) {
+                valueEdit.setText("");
+                valueEdit.setOnPreferenceChangeListener(new ConfigBundleValueChangeListener(i));
+            }
+        }
+
+        Preference dumpConfig = findPreference(KEY_DUMP_CONFIG);
+        if (dumpConfig != null) {
+            dumpConfig.setOnPreferenceClickListener(new PreferenceClickListener());
+        }
+
+        mClearTestConfig = (ListPreference) findPreference(KEY_CLEAR_TEST_CONFIG);
         if (mClearTestConfig != null) {
             mClearTestConfig.setValue("");
             mClearTestConfig.setOnPreferenceChangeListener(new ListItemChangeListener());
         }
 
         mTestCarrierId = (ListPreference) findPreference(KEY_TEST_CARRIER_ID);
-
         if (mTestCarrierId != null) {
             int carrierId = ImsPrivateProperties.Persistent.getInt(
                     ImsPrivateProperties.Persistent.KEY_TEST_CARRIER_ID, mSlotId);
@@ -256,17 +431,39 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
 
         mVoLteProvisioning = (ListPreference) findPreference(KEY_VOLTE_PROVISIONING);
-
         if (mVoLteProvisioning != null) {
             mVoLteProvisioning.setValue("-1");
             mVoLteProvisioning.setOnPreferenceChangeListener(new ListItemChangeListener());
         }
     }
 
+    private final class PreferenceClickListener implements Preference.OnPreferenceClickListener {
+        @Override
+        public boolean onPreferenceClick(@NonNull Preference preference) {
+            if (KEY_DUMP_CONFIG.equals(preference.getKey())) {
+                ConfigInterface config = AgentFactory.getInstance().getAgent(
+                        ConfigInterface.class, mSlotId);
+                CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+                PersistableBundle pb = (cc != null) ? cc.getConfig() : null;
+
+                if (pb != null) {
+                    Set<String> keys = pb.keySet();
+                    Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - starts");
+                    for (String key : keys) {
+                        Log.i(Log.TAG, "CarrierConfig: " + key
+                                + "=" + CarrierConfig.getValue(pb, key));
+                    }
+                    Log.i(Log.TAG, "CarrierConfig(" + mSlotId + ") - ends");
+                }
+            }
+            return true;
+        }
+    }
+
     private final class ListItemChangeListener
             implements Preference.OnPreferenceChangeListener {
         @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
             String value = newValue.toString();
 
             if (KEY_CLEAR_TEST_CONFIG.equals(preference.getKey())) {
@@ -344,71 +541,74 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
     }
 
-    private final class ConfigItemChangeListener
-            implements Preference.OnPreferenceChangeListener {
-        private final int mConfigType;
+    private class ConfigListener {
+        protected final int mConfigType;
 
-        public ConfigItemChangeListener(int configType) {
+        ConfigListener(int configType) {
             mConfigType = configType;
+        }
+    }
+
+    private final class ConfigItemChangeListener extends ConfigListener
+            implements Preference.OnPreferenceChangeListener {
+        ConfigItemChangeListener(int configType) {
+            super(configType);
         }
 
         @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
             String key = newValue.toString();
 
             ImsLog.d(mSlotId, "onConfigItemChanged: key=" + key);
 
             ConfigInterface config = AgentFactory.getInstance().getAgent(
                     ConfigInterface.class, mSlotId);
+            CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
             String value = "";
 
-            if (config != null) {
-                CarrierConfig cc = config.getCarrierConfig();
+            if (cc != null) {
+                switch (mConfigType) {
+                    case CONFIG_I_BOOLEAN: // FALL-THROUGH
+                    case ASSETS_CONFIG_I_BOOLEAN: {
+                        boolean booleanValue = cc.getBoolean(key);
+                        value = String.valueOf(booleanValue);
+                        break;
+                    }
+                    case CONFIG_I_INT: // FALL-THROUGH
+                    case ASSETS_CONFIG_I_INT: {
+                        int intValue = cc.getInt(key);
 
-                if (cc != null) {
-                    switch (mConfigType) {
-                        case CONFIG_I_BOOLEAN: // FALL-THROUGH
-                        case ASSETS_CONFIG_I_BOOLEAN: {
-                            boolean booleanValue = cc.getBoolean(key);
-                            value = String.valueOf(booleanValue);
-                            break;
+                        if (intValue >= 0) {
+                            value = String.valueOf(intValue);
                         }
-                        case CONFIG_I_INT: // FALL-THROUGH
-                        case ASSETS_CONFIG_I_INT: {
-                            int intValue = cc.getInt(key);
+                        break;
+                    }
+                    case CONFIG_I_STRING: // FALL-THROUGH
+                    case ASSETS_CONFIG_I_STRING: {
+                        String stringValue = cc.getString(key);
 
-                            if (intValue >= 0) {
-                                value = String.valueOf(intValue);
-                            }
-                            break;
+                        if (stringValue != null) {
+                            value = stringValue;
                         }
-                        case CONFIG_I_STRING: // FALL-THROUGH
-                        case ASSETS_CONFIG_I_STRING: {
-                            String stringValue = cc.getString(key);
+                        break;
+                    }
+                    case CONFIG_I_INT_ARRAY: // FALL-THROUGH
+                    case ASSETS_CONFIG_I_INT_ARRAY: {
+                        int[] intArrayValue = cc.getIntArray(key);
 
-                            if (stringValue != null) {
-                                value = stringValue;
-                            }
-                            break;
+                        if (intArrayValue != null) {
+                            value = Arrays.toString(intArrayValue);
                         }
-                        case CONFIG_I_INT_ARRAY: // FALL-THROUGH
-                        case ASSETS_CONFIG_I_INT_ARRAY: {
-                            int[] intArrayValue = cc.getIntArray(key);
+                        break;
+                    }
+                    case CONFIG_I_STRING_ARRAY: // FALL-THROUGH
+                    case ASSETS_CONFIG_I_STRING_ARRAY: {
+                        String[] stringArrayValue = cc.getStringArray(key);
 
-                            if (intArrayValue != null) {
-                                value = Arrays.toString(intArrayValue);
-                            }
-                            break;
+                        if (stringArrayValue != null) {
+                            value = Arrays.toString(stringArrayValue);
                         }
-                        case CONFIG_I_STRING_ARRAY: // FALL-THROUGH
-                        case ASSETS_CONFIG_I_STRING_ARRAY: {
-                            String[] stringArrayValue = cc.getStringArray(key);
-
-                            if (stringArrayValue != null) {
-                                value = Arrays.toString(stringArrayValue);
-                            }
-                            break;
-                        }
+                        break;
                     }
                 }
             }
@@ -438,16 +638,14 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
     }
 
-    private final class ConfigValueChangeListener
+    private final class ConfigValueChangeListener extends ConfigListener
             implements Preference.OnPreferenceChangeListener {
-        private final int mConfigType;
-
-        public ConfigValueChangeListener(int configType) {
-            mConfigType = configType;
+        ConfigValueChangeListener(int configType) {
+            super(configType);
         }
 
         @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
             ListPreference itemList = mConfigItems.valueAt(mConfigType);
             String key = (itemList != null) ? itemList.getValue() : null;
             String newConfigValue = newValue.toString();
@@ -455,17 +653,16 @@ public class CarrierConfigMenu extends PreferenceActivity {
             ImsLog.d(mSlotId, "onConfigValueChanged: value=" + newConfigValue + ", key=" + key);
 
             if (key == null) {
-                Toast.makeText(AppContext.getInstance(), "CarrierConfig: key is invalid",
+                Toast.makeText(AppContext.getInstance(), "CarrierConfig: key is invalid.",
                         Toast.LENGTH_LONG).show();
                 return false;
             }
 
             ConfigInterface config = AgentFactory.getInstance().getAgent(
                     ConfigInterface.class, mSlotId);
+            CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
 
-            if (config != null) {
-                CarrierConfig cc = config.getCarrierConfig();
-
+            if (cc != null) {
                 switch (mConfigType) {
                     case CONFIG_I_BOOLEAN: // FALL-THROUGH
                     case ASSETS_CONFIG_I_BOOLEAN: {
@@ -501,6 +698,9 @@ public class CarrierConfigMenu extends PreferenceActivity {
                         mTestConfig.putStringArray(key, value);
                         break;
                     }
+                    default:
+                        ImsLog.e(mSlotId, "Unknown configuration type.");
+                        return false;
                 }
 
                 mConfigChanged = true;
@@ -520,6 +720,386 @@ public class CarrierConfigMenu extends PreferenceActivity {
             }
 
             return true;
+        }
+    }
+
+    private final class ConfigBundleKeyChangeListener extends ConfigListener
+            implements Preference.OnPreferenceChangeListener {
+        ConfigBundleKeyChangeListener(int configType) {
+            super(configType);
+        }
+
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+            String key = newValue.toString();
+
+            ImsLog.d(mSlotId, "onConfigBundleKeyChanged: key=" + key);
+
+            ListPreference keyList = mConfigBundleKeys.valueAt(mConfigType);
+
+            if (keyList != null) {
+                keyList.setSummary(key);
+            }
+
+            ListPreference itemList = mConfigBundleItems.valueAt(mConfigType);
+
+            if (itemList != null) {
+                String rootKey = getFirstToken(key, "/");
+                List<String> items = BUNDLE_ITEMS_MAP.get(rootKey);
+                if (items != null) {
+                    String[] entries = items.toArray(new String[0]);
+                    itemList.setEntries(entries);
+                    itemList.setEntryValues(entries);
+                }
+                itemList.setSummary("");
+            }
+
+            EditTextPreference valueEdit = mConfigBundleValues.valueAt(mConfigType);
+
+            if (valueEdit != null) {
+                valueEdit.setDialogMessage("");
+                valueEdit.setSummary("");
+                valueEdit.setText("");
+            }
+
+            return true;
+        }
+    }
+
+    private final class ConfigBundleItemChangeListener extends ConfigListener
+            implements Preference.OnPreferenceChangeListener {
+        ConfigBundleItemChangeListener(int configType) {
+            super(configType);
+        }
+
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+            String key = newValue.toString();
+
+            ImsLog.d(mSlotId, "onConfigBundleItemChanged: key=" + key);
+
+            ListPreference keyList = mConfigBundleKeys.valueAt(mConfigType);
+            String bundleKey = (keyList != null) ? keyList.getValue() : null;
+
+            if (bundleKey == null) {
+                Toast.makeText(AppContext.getInstance(), "Bundle key is not found.",
+                        Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+            String rootBundleKey = getFirstToken(bundleKey, "/");
+            String subBundleKey = getLastToken(bundleKey, "/");
+            ConfigInterface config = AgentFactory.getInstance().getAgent(
+                    ConfigInterface.class, mSlotId);
+            CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+            PersistableBundle pb = (cc != null) ? cc.getBundle(rootBundleKey) : null;
+
+            if (pb != null && subBundleKey != null) {
+                pb = pb.getPersistableBundle(subBundleKey);
+            }
+
+            String value = "";
+
+            if (pb != null) {
+                int configType = getConfigType(key);
+
+                switch (configType) {
+                    case CONFIG_I_BOOLEAN: {
+                        boolean booleanValue = pb.getBoolean(key, false);
+                        value = String.valueOf(booleanValue);
+                        break;
+                    }
+                    case CONFIG_I_INT: {
+                        int intValue = pb.getInt(key, -1);
+
+                        if (intValue >= 0) {
+                            value = String.valueOf(intValue);
+                        }
+                        break;
+                    }
+                    case CONFIG_I_STRING: {
+                        String stringValue = pb.getString(key, null);
+
+                        if (stringValue != null) {
+                            value = stringValue;
+                        }
+                        break;
+                    }
+                    case CONFIG_I_INT_ARRAY: {
+                        int[] intArrayValue = pb.getIntArray(key);
+
+                        if (intArrayValue != null) {
+                            value = Arrays.toString(intArrayValue);
+                        }
+                        break;
+                    }
+                    case CONFIG_I_STRING_ARRAY: {
+                        String[] stringArrayValue = pb.getStringArray(key);
+
+                        if (stringArrayValue != null) {
+                            value = Arrays.toString(stringArrayValue);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            ListPreference itemList = mConfigBundleItems.valueAt(mConfigType);
+
+            if (itemList != null) {
+                itemList.setSummary(key);
+            }
+
+            EditTextPreference valueEdit = mConfigBundleValues.valueAt(mConfigType);
+
+            if (valueEdit != null) {
+                valueEdit.setDialogMessage(key);
+                valueEdit.setSummary(value);
+
+                if (value.equals("[]")) {
+                    valueEdit.setText("");
+                } else if (value.startsWith("[") && value.endsWith("]")) {
+                    valueEdit.setText(value.substring(1, value.length() - 1));
+                } else {
+                    valueEdit.setText(value);
+                }
+            }
+
+            return true;
+        }
+    }
+
+    private final class ConfigBundleValueChangeListener extends ConfigListener
+            implements Preference.OnPreferenceChangeListener {
+        ConfigBundleValueChangeListener(int configType) {
+            super(configType);
+        }
+
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+            ListPreference keyList = mConfigBundleKeys.valueAt(mConfigType);
+            String bundleKey = (keyList != null) ? keyList.getValue() : null;
+            ListPreference itemList = mConfigBundleItems.valueAt(mConfigType);
+            String key = (itemList != null) ? itemList.getValue() : null;
+            String newConfigValue = newValue.toString();
+
+            ImsLog.d(mSlotId, "onConfigBundleValueChanged: value=" + newConfigValue
+                    + ", key=" + key + ", bundleKey=" + bundleKey);
+
+            if (key == null) {
+                Toast.makeText(AppContext.getInstance(), "CarrierConfig: key is invalid.",
+                        Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+            if (bundleKey == null) {
+                Toast.makeText(AppContext.getInstance(), "Bundle key is not found.",
+                        Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+            String rootBundleKey = getFirstToken(bundleKey, "/");
+            String subBundleKey = getLastToken(bundleKey, "/");
+            ConfigInterface config = AgentFactory.getInstance().getAgent(
+                    ConfigInterface.class, mSlotId);
+            CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+            PersistableBundle rootPb = (cc != null) ? cc.getBundle(rootBundleKey) : null;
+            PersistableBundle subPb = null;
+            boolean rootPbCreated = false;
+            boolean subPbCreated = false;
+            PersistableBundle testRootPb = mTestConfig.getPersistableBundle(rootBundleKey);
+            PersistableBundle testSubPb = null;
+            boolean testRootPbCreated = false;
+            boolean testSubPbCreated = false;
+
+
+            if (rootPb == null) {
+                ImsLog.i(mSlotId, "New PersistableBundle is created: " + bundleKey);
+                rootPb = new PersistableBundle();
+                rootPbCreated = true;
+            }
+
+            if (testRootPb == null) {
+                ImsLog.i(mSlotId, "New PersistableBundle(test) is created: " + bundleKey);
+                testRootPb = new PersistableBundle();
+                testRootPbCreated = true;
+            }
+
+            if (subBundleKey != null) {
+                subPb = rootPb.getPersistableBundle(subBundleKey);
+
+                if (subPb == null) {
+                    ImsLog.i(mSlotId, "New PersistableBundle(sub) is created: " + bundleKey);
+                    subPb = new PersistableBundle();
+                    subPbCreated = true;
+                }
+
+                testSubPb = testRootPb.getPersistableBundle(subBundleKey);
+
+                if (testSubPb == null) {
+                    ImsLog.i(mSlotId, "New PersistableBundle(sub/test) is created: " + bundleKey);
+                    testSubPb = new PersistableBundle();
+                    testSubPbCreated = true;
+                }
+            }
+
+            PersistableBundle pb = (subPb != null) ? subPb : rootPb;
+            PersistableBundle testPb = (testSubPb != null) ? testSubPb : testRootPb;
+            int configType = getConfigType(key);
+
+            switch (configType) {
+                case CONFIG_I_BOOLEAN: {
+                    boolean value = Boolean.valueOf(newConfigValue);
+                    pb.putBoolean(key, value);
+                    testPb.putBoolean(key, value);
+                    break;
+                }
+                case CONFIG_I_INT: {
+                    int value = parseInt(newConfigValue, -1);
+                    pb.putInt(key, value);
+                    testPb.putInt(key, value);
+                    break;
+                }
+                case CONFIG_I_STRING: {
+                    pb.putString(key, newConfigValue);
+                    testPb.putString(key, newConfigValue);
+                    break;
+                }
+                case CONFIG_I_INT_ARRAY: {
+                    int[] value = toIntArray(newConfigValue);
+                    pb.putIntArray(key, value);
+                    testPb.putIntArray(key, value);
+                    break;
+                }
+                case CONFIG_I_STRING_ARRAY: {
+                    String[] value = toStringArray(newConfigValue);
+                    pb.putStringArray(key, value);
+                    testPb.putStringArray(key, value);
+                    break;
+                }
+                default:
+                    ImsLog.e(mSlotId, "Unknown configuration type.");
+                    return false;
+            }
+
+            if (subPbCreated) {
+                rootPb.putPersistableBundle(subBundleKey, subPb);
+            }
+
+            if (rootPbCreated && cc != null) {
+                cc.getConfig().putPersistableBundle(rootBundleKey, rootPb);
+            }
+
+            if (testSubPbCreated) {
+                testRootPb.putPersistableBundle(subBundleKey, testSubPb);
+            }
+
+            if (testRootPbCreated) {
+                mTestConfig.putPersistableBundle(rootBundleKey, testRootPb);
+            }
+
+            mConfigChanged = true;
+
+            EditTextPreference valueEdit = mConfigBundleValues.valueAt(mConfigType);
+
+            if (valueEdit != null) {
+                if (configType == CONFIG_I_INT_ARRAY
+                        || configType == CONFIG_I_STRING_ARRAY) {
+                    valueEdit.setSummary("[" + newConfigValue + "]");
+                } else {
+                    valueEdit.setSummary(newConfigValue);
+                }
+            }
+
+            if (KEYS_OF_VALUE_USED_AS_BUNDLE_KEY.contains(key)) {
+                createBundleKeys(true);
+                initBundleKeys();
+            }
+
+            return true;
+        }
+    }
+
+    private void createBundleKeys(boolean forceCreate) {
+        if (forceCreate) {
+            mBundleKeys.clear();
+        }
+
+        if (!mBundleKeys.isEmpty()) {
+            return;
+        }
+
+        mBundleKeys.add(ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+        mBundleKeys.add(ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+        mBundleKeys.add(ImsRtt.KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mSlotId);
+        CarrierConfig cc = (config != null) ? config.getCarrierConfig() : null;
+
+        if (cc == null) {
+            Toast.makeText(AppContext.getInstance(), "CarrierConfig is not found.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        PersistableBundle audioPayloadTypes = cc.getBundle(
+                ImsVoice.KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+
+        if (audioPayloadTypes != null) {
+            int[] amrWbPayloadTypes = audioPayloadTypes.getIntArray(
+                    ImsVoice.KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY);
+            addPayloadDescriptionKeys(mBundleKeys,
+                    ImsVoice.KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE,
+                    amrWbPayloadTypes);
+
+            int[] amrNbPayloadTypes = audioPayloadTypes.getIntArray(
+                    ImsVoice.KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY);
+            addPayloadDescriptionKeys(mBundleKeys,
+                    ImsVoice.KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE,
+                    amrNbPayloadTypes);
+
+            int[] evsPayloadTypes = audioPayloadTypes.getIntArray(
+                    ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
+            addPayloadDescriptionKeys(mBundleKeys,
+                    ImsVoice.KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE,
+                    evsPayloadTypes);
+        }
+
+        PersistableBundle videoPayloadTypes = cc.getBundle(
+                ImsVt.KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+
+        if (videoPayloadTypes != null) {
+            int[] h264PayloadTypes = videoPayloadTypes.getIntArray(
+                    ImsVt.KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
+            addPayloadDescriptionKeys(mBundleKeys,
+                    ImsVt.KEY_H264_PAYLOAD_DESCRIPTION_BUNDLE,
+                    h264PayloadTypes);
+        }
+    }
+
+    private void initBundleKeys() {
+        ListPreference keyList = mConfigBundleKeys.valueAt(CONFIG_I_BUNDLE);
+        if (keyList != null) {
+            String[] entries = mBundleKeys.toArray(new String[0]);
+            keyList.setEntries(entries);
+            keyList.setEntryValues(entries);
+        }
+
+        keyList = mConfigBundleKeys.valueAt(ASSETS_CONFIG_I_BUNDLE);
+        if (keyList != null) {
+            String[] entries = ASSETS_BUNDLE_KEYS.toArray(new String[0]);
+            keyList.setEntries(entries);
+            keyList.setEntryValues(entries);
+        }
+    }
+
+    private static void addPayloadDescriptionKeys(List<String> bundleKeys, String rootKey,
+            int[] payloadTypes) {
+        if (payloadTypes != null) {
+            for (int payloadType : payloadTypes) {
+                bundleKeys.add(rootKey + "/" + String.valueOf(payloadType));
+            }
         }
     }
 
@@ -620,8 +1200,26 @@ public class CarrierConfigMenu extends PreferenceActivity {
                 booleanKeys.add(key);
             } else if (key.endsWith("_int_array")) {
                 intArrayKeys.add(key);
+            } else if (key.equals(
+                    CarrierConfigManager.KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS)) {
+                booleanKeys.add(key);
             }
         }
+    }
+
+    private static int getConfigType(String key) {
+        if (key.endsWith("_string")) {
+            return CONFIG_I_STRING;
+        } else if (key.endsWith("_string_array")) {
+            return CONFIG_I_STRING_ARRAY;
+        } else if (key.endsWith("_int")) {
+            return CONFIG_I_INT;
+        } else if (key.endsWith("_bool") || key.endsWith("_boolean")) {
+            return CONFIG_I_BOOLEAN;
+        } else if (key.endsWith("_int_array")) {
+            return CONFIG_I_INT_ARRAY;
+        }
+        return CONFIG_I_MAX;
     }
 
     private static int[] toIntArray(String value) {
@@ -655,5 +1253,15 @@ public class CarrierConfigMenu extends PreferenceActivity {
         }
 
         return intValue;
+    }
+
+    private static String getFirstToken(@NonNull String s, @NonNull String delimiter) {
+        int index = s.indexOf(delimiter);
+        return (index < 0) ? s : s.substring(0, index);
+    }
+
+    private static String getLastToken(@NonNull String s, @NonNull String delimiter) {
+        int index = s.indexOf(delimiter);
+        return (index < 0) ? null : s.substring(index + 1, s.length());
     }
 }
