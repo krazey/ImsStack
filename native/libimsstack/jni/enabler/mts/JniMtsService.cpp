@@ -159,7 +159,8 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
     IMS_SINT32 nSeqId = objParcel.readInt32();
     IMS_BOOL bEmergency = objParcel.readBool();
     AString strContent = AString::FromBase64(strEncodedPdu.string());
-    ByteArray objContent(reinterpret_cast<const IMS_BYTE*>(strContent.GetStr()),
+    // This object will be deleted by MtsMessageController after being used.
+    ByteArray* pContent = new ByteArray(reinterpret_cast<const IMS_BYTE*>(strContent.GetStr()),
             static_cast<IMS_SINT32>(strContent.GetLength()));
     AString strAddress = strAddress_.string();
 
@@ -185,7 +186,7 @@ void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
         return;
     }
 
-    piMtsService->SendMoSms(eSmsFormat, objContent, strAddress, nSeqId, bEmergency);
+    piMtsService->SendMoSms(eSmsFormat, pContent, strAddress, nSeqId, bEmergency);
 }
 
 PRIVATE

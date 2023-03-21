@@ -1156,6 +1156,13 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SMS_POLICY_FOR_504_RESPONSE_INT[] =
         "sms_policy_for_504_response_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SMS_GEOLOCATION_PIDF_FOR_EMERGENCY_BOOL[] =
         "sms_geolocation_pidf_for_emergency_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_TIME_SEC_INT[] =
+        "sms_retry_after_max_time_sec_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_SMS_RETRY_AFTER_MAX_COUNT_INT[] =
+        "sms_retry_after_max_count_int";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_SMS_REPORT_GENERIC_ERROR_IF_RETRY_AFTER_NOT_POSSIBLE_BOOL[] =
+                "sms_report_generic_error_if_retry_after_not_possible_bool";
 
 // Uce
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =

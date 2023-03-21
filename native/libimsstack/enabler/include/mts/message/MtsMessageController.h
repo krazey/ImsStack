@@ -20,9 +20,10 @@
 #include "ByteArray.h"
 #include "IMtsServiceListener.h"
 #include "IPageMessageListener.h"
+#include "ITimer.h"
 #include "ImsActivityEx.h"
 #include "MtsDef.h"
-#include "message/IMtsErrorHandlerListener.h"
+#include <functional>
 
 class IMessage;
 class IMtsMessage;
@@ -35,7 +36,7 @@ class MtsMessageController :
         public ImsActivityEx,
         public IPageMessageListener,
         public IMtsServiceListener,
-        public IMtsErrorHandlerListener
+        public ITimerListener
 {
 public:
     MtsMessageController(IN IMS_SINT32 nSlotId, IN IMtsService* piMtsService,
@@ -44,22 +45,18 @@ public:
     MtsMessageController(IN const MtsMessageController&) = delete;
     MtsMessageController& operator=(IN const MtsMessageController&) = delete;
 
-    // IPageMessageListener
     void PageMessageDelivered(IN IPageMessage* piPageMessage) override;
     void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) override;
 
-    // IMtsServiceListener
-    void NotifyMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
+    void NotifyMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     void NotifyMtSms(IN IPageMessage* piPageMessage) override;
     void OnServiceDisconnected() override;
     void OnServiceSuspended() override;
 
-    // IMtsErrorHandlerListener
-    void NotifyControlAos(IMS_UINT32 nCommand) override;
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
 private:
-    // ImsActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
     void DestroyMtsMessage();
@@ -71,7 +68,7 @@ private:
             IN MtsTransactionType eMessageType = MtsTransactionType::MESSAGE_TYPE_RECEIVE);
 
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bEmergency);
-    void SendMtsMessage(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
+    IMS_RESULT SendMtsMessage(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency);
     IMS_RESULT ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
             IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1);
@@ -92,6 +89,7 @@ private:
 
     void CleanMtsMessage(IN IMtsMessage* piMtsMessage);
     void CleanMtsMessageWithRpMr(IN IMS_SINT32 nMrOfRp);
+    void CleanRetryContent();
     void TerminateAllMessages();
     void TerminateMessage(IN IMtsMessage* piMtsMessage);
 
@@ -99,6 +97,7 @@ private:
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
     void SetLocationToMessage(IN IMessage* piMessage);
 
+    ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const;
     AString GetPreviousCallId(IN const ByteArray& objContent);
     static IMS_BOOL GetSmsgwFromReceivedMessage(
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
@@ -110,19 +109,23 @@ private:
             IN MtsTransactionType eMessageType, OUT IMtsMessage* piMtsMessage);
     void UpdateRPAckMap(IN IPageMessage* piPageMessage);
 
+    void StartRetryAfterTimer(IN IMS_SINT32 nRetryAfterValue);
+    void StopRetryAfterTimer();
+
 protected:
     ImsList<IMtsMessage*> m_objMsgList;
 
 private:
     IMS_BOOL m_bProcessingMsg;
-    IMS_UINT32 m_nCallStateMsg;
-    IMS_UINT32 m_nCallTypeMsg;
     IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
     ImsList<IMtsMessage*> m_objRpAckedMsgList;
     IMtsService* m_piMtsService;
     IMtsErrorHandler* m_piMtsErrorHandler;
     MtsDynamicLoader* m_pMtsDynamicLoader;
+    ITimer* m_piRetryAfterTimer;
+    std::function<void()> m_objRetryFunction;
+    ByteArray* m_pRetryContent;
 };
 
 #endif

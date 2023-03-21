@@ -16,11 +16,15 @@
 
 #include "AString.h"
 #include "CarrierConfig.h"
+#include "IMessage.h"
+#include "ISipHeader.h"
 #include "ImsLib.h"
 #include "IpAddress.h"
 #include "MtsDef.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"
+#include "SipHeaderName.h"
+#include "SipParsingHelper.h"
 #include "helper/dialing/MtsDialingPlan.h"
 #include "utility/MtsSipFormUtils.h"
 
@@ -242,6 +246,36 @@ IMS_SINT32 MtsSipFormUtils::CheckScheme(IN const AString& strTargetAddress)
         }
     }
     return URI_SCHEME_UNKNOWN;
+}
+
+PUBLIC
+IMS_SINT32 MtsSipFormUtils::GetRetryAfterValue(IN const IMessage* piMessage) const
+{
+    ImsList<AString> objHeaderList = piMessage->GetHeaders(SipHeaderName::RETRY_AFTER);
+    if (objHeaderList.IsEmpty())
+    {
+        IMS_TRACE_E(0, "Error Response Message has not Retry-After Header", 0, 0, 0);
+        return -1;
+    }
+
+    AString strHeader = objHeaderList.GetAt(objHeaderList.GetSize() - 1);
+    if (strHeader.GetLength() == 0)
+    {
+        return -1;
+    }
+
+    ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::RETRY_AFTER_SEC, strHeader);
+    if (piHeader == IMS_NULL)
+    {
+        return -1;
+    }
+
+    IMS_SINT32 nValue = piHeader->GetValueInt();
+    piHeader->Destroy();
+
+    IMS_TRACE_I("GetRetryAfterValue : Retry-After[%d]", nValue, 0, 0);
+
+    return nValue;
 }
 
 PRIVATE
