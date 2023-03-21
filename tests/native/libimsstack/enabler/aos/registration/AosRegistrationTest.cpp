@@ -143,6 +143,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, SpecificOperation);
     FRIEND_TEST(AosRegistrationTest, StartFailed_TxnTimeout);
     FRIEND_TEST(AosRegistrationTest, UpdateFailed_TxnTimeout);
+    FRIEND_TEST(AosRegistrationTest, UpdateTransactionStarted);
     FRIEND_TEST(AosRegistrationTest, StandardPcscfSelection);
     FRIEND_TEST(AosRegistrationTest, RefreshTimerExpired);
     FRIEND_TEST(AosRegistrationTest, Terminated);
@@ -1174,6 +1175,25 @@ TEST_F(AosRegistrationTest, UpdateFailed_TxnTimeout)
             .WillOnce(Return(IMS_FALSE));
 
     m_pTestAosRegistration->ProcessUpdateFailed_TxnTimeout();
+}
+
+TEST_F(AosRegistrationTest, UpdateTransactionStarted)
+{
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::EMERGENCY);
+    m_pTestAosRegistration->SetImsCall(IMS_TRUE);
+    m_pTestAosRegistration->UpdateTransactionStarted();
+    EXPECT_TRUE(m_pTestAosRegistration->IsTransactionStarted());
+
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .Times(1)
+            .WillOnce(Return(IMS_TRUE));
+    m_pTestAosRegistration->SetHeldByCall(IMS_TRUE);
+    m_pTestAosRegistration->SetState(IAosRegistration::STATE_REFRESHSTOP);
+    m_pTestAosRegistration->SetBlocked(IMS_FALSE);
+    m_pTestAosRegistration->SetRadioWaiting(IMS_FALSE);
+    m_pTestAosRegistration->UpdateTransactionStarted();
+    EXPECT_TRUE(m_pTestAosRegistration->IsTransactionStarted());
 }
 
 TEST_F(AosRegistrationTest, StandardPcscfSelection)
