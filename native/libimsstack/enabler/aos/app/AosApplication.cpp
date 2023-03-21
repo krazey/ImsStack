@@ -1556,11 +1556,6 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::StateDisconnecting_Registration(IN IM
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegTrying_StateConnecting(IN IMS_UINT32 /* nReason */)
 {
-    if (!IsRegTypeNormal())
-    {
-        return;
-    }
-
     ProcessImsEstablishmentStart();
 }
 
@@ -1604,6 +1599,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegTrying_StateConnected(IN IMS_UI
     switch (nReason)
     {
         case IAosRegistration::REASON_TRYING_START:
+            ProcessImsEstablishmentStart();
             SetAppState(STATE_CONNECTING);
             break;
 
@@ -1652,6 +1648,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegTrying_StateUpdating(IN IMS_UIN
     switch (nReason)
     {
         case IAosRegistration::REASON_TRYING_START:
+            ProcessImsEstablishmentStart();
             SetAppState(STATE_CONNECTING);
             break;
 
@@ -1820,6 +1817,13 @@ PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_Start(IN IMS_UINT32 /* n
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegFailed_Update(IN IMS_UINT32 /* nReason */)
 {
+    if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() && IsImsCall())
+    {
+        A_IMS_TRACE_I(
+                APPID, "ProcessRegFailed_Update :: skip re-reg failuire during call", 0, 0, 0);
+        return;
+    }
+
     if (m_piRegistration->IsRefreshing())
     {
         SetOffReason(AosReason::REG_FAILURE);
@@ -2215,7 +2219,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
             return;
         }
 
-        if (m_piContext->GetConnection()->IsEpdgEnabled() || IsOn())
+        if (m_piContext->GetConnection()->IsEpdgEnabled() || m_piRegistration->IsRegistered())
         {
             StopTimer(TIMER_IMS_ESTABLISHMENT);
             return;
