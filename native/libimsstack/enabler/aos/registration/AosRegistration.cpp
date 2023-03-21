@@ -5407,14 +5407,14 @@ PROTECTED VIRTUAL void AosRegistration::Transaction_OnConnectionFailed(
         Destroy();
 
         ReportStateChanged(RESULT_TRYING, REASON_TRYING_START);
-        StartTimer(TIMER_OFFLINE_RECOVER, RETRY_DEFAULT_WAIT_TIME * 1000);
+        StartTimer(TIMER_OFFLINE_RECOVER, CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME * 1000);
     }
     else
     {
         if (nFailureReason == IImsRadio::REASON_NAS_FAILURE ||
                 nFailureReason == IImsRadio::REASON_RRC_REJECT)
         {
-            if (nWaitTimeMillis > (RETRY_DEFAULT_WAIT_TIME * 1000))
+            if (nWaitTimeMillis > (CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME * 1000))
             {
                 DestroyEx();
 
