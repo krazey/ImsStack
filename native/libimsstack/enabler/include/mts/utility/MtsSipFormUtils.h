@@ -20,6 +20,7 @@
 #include "AString.h"
 #include "MtsDef.h"
 
+class IMessage;
 class MtsDialingPlan;
 
 class MtsSipFormUtils final
@@ -38,6 +39,7 @@ public:
     static IMS_BOOL IsNumberFormat(IN const AString& strDial);
     static IMS_BOOL IsIpAddress(IN const AString& strIp);
     static IMS_SINT32 CheckScheme(IN const AString& strTargetAddress);
+    IMS_SINT32 GetRetryAfterValue(IN const IMessage* piMessage) const;
 
 private:
     IMS_SINT32 GetRequestUriType();
