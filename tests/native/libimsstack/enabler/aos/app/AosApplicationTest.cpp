@@ -1357,6 +1357,16 @@ TEST_F(AosApplicationTest, StateMachine)
     // ProcessRegFailed_StateUpdating - ProcessRegFailed_Update
     objMessageReg.nWparam = IAosRegistration::RESULT_FAILURE;
     objMessageReg.nLparam = 0;
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsCdmalessFeatureTagRequired())
+            .WillOnce(Return(IMS_TRUE))
+            .WillRepeatedly(Return(IMS_FALSE));
+    m_pTestAosApplication->SetImsCall(IMS_TRUE);
+    m_pTestAosApplication->SetOffReason(AosReason::NONE);
+    EXPECT_TRUE(m_pTestAosApplication->StateUpdating_Registration(objMessageReg));
+    EXPECT_EQ(m_pTestAosApplication->GetOffReason(), AosReason::NONE);
+    m_pTestAosApplication->SetImsCall(IMS_FALSE);
+
     EXPECT_TRUE(m_pTestAosApplication->StateUpdating_Registration(objMessageReg));
     EXPECT_CALL(m_objMockIAosRegistration, IsRefreshing()).WillOnce(Return(IMS_TRUE));
     EXPECT_TRUE(m_pTestAosApplication->StateUpdating_Registration(objMessageReg));
@@ -1625,13 +1635,17 @@ TEST_F(AosApplicationTest, ImsEstablishmentStart)
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(0);
     m_pTestAosApplication->ProcessImsEstablishmentStart();
 
-    // STATE_CONNECTED
-    m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    // Registered
+    EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())
+            .Times(1)
+            .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(0);
     m_pTestAosApplication->ProcessImsEstablishmentStart();
 
     // IsSupportedNetworkTypeForCellular is false
-    m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTING);
+    EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
     m_pTestAosApplication->StartTimer(TIMER_IMS_ESTABLISHMENT, 1000);
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType())
             .Times(AnyNumber())

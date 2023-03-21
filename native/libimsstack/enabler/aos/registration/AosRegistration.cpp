@@ -2308,6 +2308,12 @@ PROTECTED VIRTUAL void AosRegistration::UpdateTransactionStarted()
     }
     else
     {
+        if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired() &&
+                GetState() == STATE_REFRESHSTOP)
+        {
+            SetHeldByCall(IMS_FALSE);
+        }
+
         m_bIsTransactionStarted = !(IsBlocked() || IsHeldByCall() || IsRadioWaiting());
     }
 
@@ -2965,6 +2971,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessUnpredictableFailure()
 
 PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessUnpredictableFailureHeldByCall()
 {
+    if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired())
+    {
+        return IMS_FALSE;
+    }
+
     if (IsRegTypeEqual(AosRegistrationType::NORMAL) && IsRegistered() && IsImsCall())
     {
         SetHeldByCall(IMS_TRUE);
