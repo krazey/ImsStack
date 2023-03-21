@@ -1269,6 +1269,20 @@ TEST_F(AosRegistrationTest, RefreshTimerExpired)
 
 TEST_F(AosRegistrationTest, Terminated)
 {
+    // IsHandlingServerSocketErrorRequired - IMS_TRUE
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+    m_pTestAosRegistration->SetState(IAosRegistration::STATE_REGISTERED);
+    EXPECT_TRUE(m_pTestAosRegistration->IsReconnectingServerSocketErrorAllowed());
+
+    m_pTestAosRegistration->Registration_Terminated(IRegistration::REASON_SERVER_SOCKET_ERROR);
+    EXPECT_EQ(m_pTestAosRegistration->m_nErrorCountForServerSocket, 1);
+    EXPECT_TRUE(m_pTestAosRegistration->IsTimerRunning(TIMER_INTERNAL_ERROR));
+
+    m_pTestAosRegistration->Registration_Terminated(IRegistration::REASON_SERVER_SOCKET_ERROR);
+    EXPECT_EQ(m_pTestAosRegistration->m_nErrorCountForServerSocket, 1);
+    m_pTestAosRegistration->StopTimer(TIMER_INTERNAL_ERROR);
+    m_pTestAosRegistration->SetState(IAosRegistration::STATE_OFFLINE);
+
     // IsHandlingServerSocketErrorRequired - IMS_FALSE
     m_pTestAosRegistration->SetImsCall(IMS_TRUE);
     m_pTestAosRegistration->SetBlocked(IMS_FALSE);
