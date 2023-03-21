@@ -42,7 +42,6 @@ public:
     MtsService(IN const MtsService&) = delete;
     MtsService& operator=(IN const MtsService&) = delete;
 
-    // ICoreServiceListener
     void CoreService_PageMessageReceived(
             IN ICoreService* piService, IN IPageMessage* piMessage) override;
     void CoreService_ReferenceReceived(
@@ -56,7 +55,6 @@ public:
     void CoreService_CapabilityQueryReceived(
             IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 
-    // IImsAosListener
     void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
     void ImsAos_Connecting() override;
     void ImsAos_Disconnecting(IN IMS_UINT32 nReason) override;
@@ -64,7 +62,6 @@ public:
     void ImsAos_Suspended(IN IMS_UINT32 nReason) override;
     void ImsAos_Resumed() override;
 
-    // IMtsService
     ICoreService* GetICoreService(IN IMS_BOOL bEmergency) const override;
     inline IMtsServiceState* GetIMtsServiceState() override { return m_piMtsServiceState; }
     void ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
@@ -73,12 +70,11 @@ public:
     void RequestRegistrationRecovery(IN IMS_UINT32 nRecoveryType) override;
     void SetListener(IN IMtsServiceListener* piMtsServiceListener) override;
     inline void NotifyJniEnablerSet() override {}
-    void SendMoSms(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent,
+    void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
     void SendScbmNotification(IN IMS_UINT32 nScbmState) override;
 
-    // IMtsTrafficListener
     void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,
             IN IMS_UINT32 nWaitTimeMillis) override;

@@ -25,20 +25,20 @@ enum class SmsFormatType;
 class SmsSendRequestInfo
 {
 public:
-    SmsSendRequestInfo(IN SmsFormatType eInitSmsFormat, IN const AString& strInitAddress,
-            IN const ByteArray& objInitContent, IN IMS_SINT32 nInitSeqId,
+    SmsSendRequestInfo(IN SmsFormatType eInitSmsFormat, IN ByteArray* pInitContent,
+            IN const AString& strInitAddress, IN IMS_SINT32 nInitSeqId,
             IN IMS_BOOL bInitEmergency) :
             eSmsFormat(eInitSmsFormat),
+            pContent(pInitContent),
             strAddress(strInitAddress),
-            objContent(objInitContent),
             nSeqId(nInitSeqId),
             bEmergency(bInitEmergency)
     {
     }
 
     SmsFormatType eSmsFormat;
+    ByteArray* pContent;
     AString strAddress;
-    ByteArray objContent;
     IMS_SINT32 nSeqId;
     IMS_BOOL bEmergency;
 };

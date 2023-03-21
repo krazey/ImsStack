@@ -20,6 +20,7 @@
 #include "message/IMtsErrorHandler.h"
 
 class ICarrierConfig;
+class MtsDynamicLoader;
 
 class MtsErrorHandler final : public IMtsErrorHandler
 {
@@ -27,17 +28,18 @@ public:
     explicit MtsErrorHandler(IN ICarrierConfig* piCarrierConfig);
     ~MtsErrorHandler();
 
-    // IMtsErrorHandler
-    IMS_SINT32 Handle(IN const IMessage* piMessage = IMS_NULL) override;
-    inline void SetListener(IN IMtsErrorHandlerListener* piListener) override
+    IMS_SINT32 Handle(IN IMtsService* piMtsService, IN MtsDynamicLoader* pMtsDynamicLoader,
+            IN const IMessage* piMessage = IMS_NULL) override;
+    inline IMS_SINT32 GetRetryAfterValue() const override { return m_nRetryAfterValue; }
+    inline void ResetRetryAfterStatus() override
     {
-        m_piListener = piListener;
+        m_nCumulativeDuration = 0;
+        m_nCurrentRetryCount = 0;
+        m_nRetryAfterValue = 0;
     }
-    inline IMtsErrorHandlerListener* GetListener() override { return m_piListener; }
 
 private:
     IMS_SINT32 GetRegistrationRecoveryPolicy(IN const IMessage* piMessage) const;
-    void ControlAos(IN IMS_UINT32 nCommand) const;
 
     IMS_SINT32 GetExpiryTimerFPolicy() const;
 
@@ -52,9 +54,14 @@ private:
     IMS_SINT32 Get503ResponsePolicy(IN const IMessage* piMessage) const;
     IMS_SINT32 Get504ResponsePolicy() const;
 
+    void CalculateRetryAfterCondition(IN const IMS_SINT32 nRetryAfterValue);
+    IMS_BOOL IsRetryPossible() const;
+
 private:
     ICarrierConfig* m_piCarrierConfig;
-    IMtsErrorHandlerListener* m_piListener;
+    IMS_SINT32 m_nCumulativeDuration;
+    IMS_SINT32 m_nCurrentRetryCount;
+    IMS_SINT32 m_nRetryAfterValue;
 };
 
 #endif
