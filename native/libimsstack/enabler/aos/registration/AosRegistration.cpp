@@ -1825,6 +1825,18 @@ PROTECTED VIRTUAL void AosRegistration::AddSpecificOperation()
         m_piRegContact->AddUriParameter("sos");
     }
 
+    if (!GET_N_CONFIG(m_nSlotId)->IsSipOverIpsecInRoamingEnabled())
+    {
+        if (m_piContext->GetNetTracker()->IsRoaming())
+        {
+            UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_ROAMING);
+        }
+        else
+        {
+            UpdateIpsecSupported(IMS_TRUE, IPSEC_BLOCK_ROAMING);
+        }
+    }
+
     AddAccesstypeFeatureTag();
 }
 
