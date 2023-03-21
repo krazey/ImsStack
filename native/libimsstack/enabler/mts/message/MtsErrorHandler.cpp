@@ -80,7 +80,7 @@ IMS_SINT32 MtsErrorHandler::Handle(IN IMtsService* piMtsService,
         else
         {
             if (m_piCarrierConfig->GetBoolean(CarrierConfig::Assets::
-                                KEY_SMS_REPORT_GENERIC_ERROR_IF_RETRY_AFTER_NOT_POSSIBLE_BOOL))
+                                KEY_SMS_REPORT_GENERIC_ERROR_WHEN_RETRY_AFTER_NOT_POSSIBLE_BOOL))
             {
                 nResult = MO_ERROR_GENERIC;
             }
