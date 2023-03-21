@@ -114,7 +114,8 @@ enum
     IPSEC_BLOCK_NONE = 0x0,
     IPSEC_BLOCK_ERROR = 0x1,
     IPSEC_BLOCK_AUTENTICATION = 0x2,
-    IPSEC_BLOCK_NOT_ESTABLISHED = 0x4
+    IPSEC_BLOCK_NOT_ESTABLISHED = 0x4,
+    IPSEC_BLOCK_ROAMING = 0x8
 };
 
 class TestAosRegistration : public AosRegistration
@@ -139,6 +140,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, BlockChanged);
     FRIEND_TEST(AosRegistrationTest, IpsecSupported);
     FRIEND_TEST(AosRegistrationTest, RetryCount);
+    FRIEND_TEST(AosRegistrationTest, SpecificOperation);
     FRIEND_TEST(AosRegistrationTest, StartFailed_TxnTimeout);
     FRIEND_TEST(AosRegistrationTest, UpdateFailed_TxnTimeout);
     FRIEND_TEST(AosRegistrationTest, StandardPcscfSelection);
@@ -1018,7 +1020,7 @@ TEST_F(AosRegistrationTest, IpsecSupported)
     // FEATURE_IPSEC is set
     EXPECT_CALL(m_objMockIAosNConfiguration, IsIpsecEnabled())
             .Times(AnyNumber())
-            .WillOnce(Return(IMS_TRUE));
+            .WillRepeatedly(Return(IMS_TRUE));
     m_pTestAosRegistration->InitFeatures();
 
     m_pTestAosRegistration->UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_ERROR);
@@ -1031,6 +1033,18 @@ TEST_F(AosRegistrationTest, IpsecSupported)
     EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
 
     m_pTestAosRegistration->UpdateIpsecSupported(IMS_TRUE, IPSEC_BLOCK_ERROR);
+    EXPECT_TRUE(m_pTestAosRegistration->IsIpsecSupported());
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_ROAMING);
+    EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_FALSE, IPSEC_BLOCK_NOT_ESTABLISHED);
+    EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_TRUE, IPSEC_BLOCK_NOT_ESTABLISHED);
+    EXPECT_FALSE(m_pTestAosRegistration->IsIpsecSupported());
+
+    m_pTestAosRegistration->UpdateIpsecSupported(IMS_TRUE, IPSEC_BLOCK_ROAMING);
     EXPECT_TRUE(m_pTestAosRegistration->IsIpsecSupported());
 }
 
@@ -1054,6 +1068,49 @@ TEST_F(AosRegistrationTest, RetryCount)
 
     m_pTestAosRegistration->ClearRetryCount(IMS_TRUE);
     EXPECT_TRUE(m_pTestAosRegistration->IsRetryCountClear());
+}
+
+TEST_F(AosRegistrationTest, SpecificOperation)
+{
+    m_pTestAosRegistration->SetRegType(AosRegistrationType::NORMAL);
+    m_pTestAosRegistration->SetFakeReg(IMS_FALSE);
+
+    IMS_BOOL bIsIpsecSupported = m_pTestAosRegistration->IsIpsecSupported();
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSipOverIpsecInRoamingEnabled())
+            .Times(5)
+            .WillRepeatedly(Return(IMS_FALSE));
+
+    // IMS_SINT32 nAccessType = CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED;
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegistrationPreferredAccessTypeFeatureTag())
+            .Times(5)
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED))
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED))
+            .WillOnce(Return(CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED))
+            .WillRepeatedly(Return(CarrierConfig::Ims::
+                            PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE));
+
+    m_pTestAosRegistration->AddSpecificOperation();
+
+    EXPECT_EQ(bIsIpsecSupported, m_pTestAosRegistration->IsIpsecSupported());
+
+    EXPECT_CALL(m_objMockIAosConnection, IsEpdgEnabled())
+            .Times(4)
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE))
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
+    m_pTestAosRegistration->SetIRegContact(static_cast<IRegContact*>(&m_objMockIRegContact));
+
+    EXPECT_CALL(m_objMockIRegContact, AddHeaderParameter(_, _))
+            .Times(4)
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    m_pTestAosRegistration->AddSpecificOperation();
+    m_pTestAosRegistration->AddSpecificOperation();
+    m_pTestAosRegistration->AddSpecificOperation();
+    m_pTestAosRegistration->AddSpecificOperation();
 }
 
 TEST_F(AosRegistrationTest, StartFailed_TxnTimeout)
