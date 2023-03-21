@@ -58,6 +58,27 @@
         </int-array>
     </pbundle>
 
+    <!-- Mts -->
+    <int-array name="sms_generic_error_codes_int_array" num="7">
+        <item value="0"/>
+        <item value="403"/>
+        <item value="404"/>
+        <item value="408"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="504"/>
+    </int-array>
+    <int name="sms_policy_for_expiry_timer_f_int" value="12"/>
+    <int name="sms_policy_for_403_response_int" value="12"/>
+    <int name="sms_policy_for_404_response_int" value="12"/>
+    <int name="sms_policy_for_408_response_int" value="12"/>
+    <int name="sms_policy_for_500_response_int" value="12"/>
+    <int name="sms_policy_for_503_response_int" value="12"/>
+    <int name="sms_policy_for_504_response_int" value="12"/>
+    <int name="sms_retry_after_max_time_sec_int" value="45"/>
+    <int name="sms_retry_after_max_count_int" value="5"/>
+    <boolean name="sms_report_generic_error_if_retry_after_not_possible_bool" value="true"/>
+
     <!-- Ut/Xcap AOSP -->
     <int name="gba_mode_int" value="1"/>
     <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
