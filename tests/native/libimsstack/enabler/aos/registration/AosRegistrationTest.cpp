@@ -20,6 +20,7 @@
 #include "AString.h"
 #include "ImsMap.h"
 #include "CarrierConfig.h"
+#include "IImsRadio.h"
 #include "IIpcan.h"
 #include "INetworkWatcher.h"
 #include "SipStatusCode.h"
@@ -159,6 +160,7 @@ class TestAosRegistration : public AosRegistration
     FRIEND_TEST(AosRegistrationTest, Registration_UpdateFailed_CallEndByReregErr);
     FRIEND_TEST(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming);
     FRIEND_TEST(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming_HeldByCall);
+    FRIEND_TEST(AosRegistrationTest, Transaction_OnConnectionFailed);
 
 protected:
     inline IRegistration* GetRegistration() override { return m_piMockRegistration; }
@@ -2142,4 +2144,28 @@ TEST_F(AosRegistrationTest, Registration_UpdateFailed_FailOnRoaming_HeldByCall)
     EXPECT_EQ(m_pTestAosRegistration->GetState(), IAosRegistration::STATE_OFFLINE);
     EXPECT_FALSE((m_pTestAosRegistration->m_nTxnPending &
                          TestAosRegistration::PENDING_PLMN_BLOCK_HELD_BY_CALL) > 0);
+}
+
+TEST_F(AosRegistrationTest, Transaction_OnConnectionFailed)
+{
+    // BEGIN uninteresting preparation
+    m_pTestAosRegistration->SetIRegistration(static_cast<IRegistration*>(&m_objMockIRegistration));
+    EXPECT_CALL(m_objMockIRegistration, DestroyContact(_)).Times(AnyNumber());
+    m_pTestAosRegistration->SetListener(
+            static_cast<IAosRegistrationListener*>(&m_objMockIAosRegistrationListener));
+    // END uninteresting preparation
+
+    // IImsRadio::REASON_ACCESS_DENIED
+    EXPECT_CALL(m_objMockIAosRegistrationListener,
+            Registration_StateChanged(
+                    IAosRegistration::RESULT_TRYING, IAosRegistration::REASON_TRYING_START))
+            .Times(1);
+
+    m_pTestAosRegistration->Transaction_OnConnectionFailed(IImsRadio::REASON_ACCESS_DENIED, 0, 0);
+    EXPECT_TRUE(m_pTestAosRegistration->IsTimerRunning(TIMER_OFFLINE_RECOVER));
+    m_pTestAosRegistration->StopTimer(TIMER_OFFLINE_RECOVER);
+
+    // IImsRadio::REASON_NAS_FAILURE
+    m_pTestAosRegistration->Transaction_OnConnectionFailed(IImsRadio::REASON_NAS_FAILURE, 0, 15000);
+    EXPECT_FALSE(m_pTestAosRegistration->IsTimerRunning(TIMER_OFFLINE_RECOVER));
 }
