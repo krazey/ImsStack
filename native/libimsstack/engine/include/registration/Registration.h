@@ -182,6 +182,10 @@ private:
     IMS_SINT32 AddReferenceForScnErrorListener() override;
     IMS_SINT32 RemoveReferenceForScnErrorListener() override;
     void NotifyCallerCapabilityChanged() override;
+    inline IMS_BOOL IsActiveBindingsRestorationEnabled() const override
+    {
+        return m_bActiveBindingsRestorationEnabled;
+    }
 
     // IRefreshable interface
     void Refreshable_RefreshCompleted(

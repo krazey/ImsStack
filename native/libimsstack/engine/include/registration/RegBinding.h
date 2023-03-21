@@ -89,7 +89,7 @@ private:
     IMS_BOOL IsBindingActive() const;
     // REG_RESTORATION_FOR_ACTIVE_BINDING
     void RestoreTransportResourceForClientInitiatedConnection();
-    void RestoreTransportResourceForServerConnection();
+    void RestoreTransportResourceForServerConnection(IN IMS_BOOL bNotifyError = IMS_TRUE);
     void SetState(IN IMS_SINT32 nState);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);

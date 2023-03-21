@@ -147,6 +147,7 @@ private:
     IMS_SINT32 AddReferenceForScnErrorListener() override;
     IMS_SINT32 RemoveReferenceForScnErrorListener() override;
     inline void NotifyCallerCapabilityChanged() override {}
+    inline IMS_BOOL IsActiveBindingsRestorationEnabled() const override { return IMS_FALSE; }
 
     // IRegCapabilityChangeListener interface
     void RegCapabilityChange_ServiceAdded(
