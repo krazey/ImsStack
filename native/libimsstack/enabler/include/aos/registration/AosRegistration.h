@@ -568,6 +568,7 @@ protected:
 
     static const IMS_UINT32 INTERNAL_ERROR_INTERVAL = 3;   // 3 Sec.
     static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;  // 30 Sec
+    static const IMS_UINT32 CONNECTION_FAILURE_RETRY_DEFAULT_WAIT_TIME = 16;  // 16 Sec
 
 private:
     /// IPCAN category being registered
