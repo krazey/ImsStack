@@ -144,17 +144,16 @@ public class SscServiceImplTest {
         mQueryCount = 1;
         mUpdateCount = 1;
         mSscServiceImpl = new SscServiceImpl(SLOT_0);
-
-        // mMockConfigAgent should be set before starting SscServiceImpl
-        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
-        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
-        when(mMockCarrierConfig.getIntArray(
-                CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
-                .thenReturn(mServerBasedServices);
-
         mSscServiceImpl.start(context);
         mSscServiceImpl.setListener(mMockUtListener);
         mSscServiceImpl.setSscTransactionFactory(mMockSscTransactionFactory);
+
+        // mMockConfigAgent should be set after starting SscServiceImpl
+        SscConfig.setConfigAgent(SLOT_0, mMockConfigAgent);
+        when(mMockConfigAgent.getCarrierConfig()).thenReturn(mMockCarrierConfig);
+        when(mMockCarrierConfig.getIntArray(
+            CarrierConfigManager.ImsSs.KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY))
+            .thenReturn(mServerBasedServices);
 
         HandlerThread serviceThreadHandler = mSscServiceImpl.getServiceHandlerThread();
         mLooper = new TestableLooper(serviceThreadHandler.getLooper());
