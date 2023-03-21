@@ -452,7 +452,8 @@ protected:
         IPSEC_BLOCK_NONE = 0x0,
         IPSEC_BLOCK_ERROR = 0x1,
         IPSEC_BLOCK_AUTENTICATION = 0x2,
-        IPSEC_BLOCK_NOT_ESTABLISHED = 0x4
+        IPSEC_BLOCK_NOT_ESTABLISHED = 0x4,
+        IPSEC_BLOCK_ROAMING = 0x8
     };
 
 protected:
