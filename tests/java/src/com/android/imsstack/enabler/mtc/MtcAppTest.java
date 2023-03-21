@@ -34,6 +34,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.externalcalls.ExternalCalls;
@@ -44,8 +45,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.Executor;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -58,6 +63,8 @@ public class MtcAppTest extends ImsStackTest {
     @Mock private ISharedState mSharedState;
     @Mock private IServiceStateTracker mServiceStateTracker;
     @Mock private MtcCall mMtcCall;
+    @Mock private Executor mExecutor;
+    @Captor ArgumentCaptor<ICommonPackageListener> mCommonPackageListener;
     int mCommand;
 
     private TestMtcJniProxy mTestMtcJniProxy;
@@ -165,7 +172,7 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.init();
 
         verify(mCM, times(1)).init();
-        verify(mBaseContext, times(1)).addCommonPackageListener(any());
+
         verify(mEmergencyServiceManager, times(1)).init();
         verify(mEmergencyServiceManager, times(0)).setNativeObject(anyLong());
 
@@ -212,6 +219,7 @@ public class MtcAppTest extends ImsStackTest {
     @Test
     public void testClearWithoutNativeObj() {
         mTestMtcApp.setNativeObj(1);
+        mTestMtcApp.getMmtelFeatureListener();
 
         assertTrue(mTestMtcApp.isServiceValid());
 
@@ -224,6 +232,7 @@ public class MtcAppTest extends ImsStackTest {
         verify(mBaseContext, times(1)).removeCommonPackageListener(any());
         verify(mCM, times(1)).clear();
 
+        assertEquals(null, mTestMtcApp.mMmtelFeatureListener);
         assertFalse(mTestMtcApp.isServiceValid());
     }
 
@@ -328,7 +337,10 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.setNativeObj(0);
         assertFalse(mTestMtcApp.isServiceValid());
 
-        ((Handler) mTestMtcApp.getHandler()).sendEmptyMessage(2);
+        mTestMtcApp.init();
+        verify(mBaseContext, times(1)).addCommonPackageListener(mCommonPackageListener.capture());
+        mCommonPackageListener.getValue().onCommonPackageReady(0);
+        mCommonPackageListener.getValue().onCommonPackageStop(0);
         processAllMessages();
 
         assertTrue(mTestMtcApp.isServiceValid());
@@ -348,6 +360,17 @@ public class MtcAppTest extends ImsStackTest {
         verify(mCallListener, times(1)).onPreIncomingCallReceived(any(MtcApp.class), anyLong());
         verify(mMtcCall, times(1)).attach(anyLong());
 
+        doReturn(mExecutor).when(mBaseContext).getExecutor();
+        mTestMtcApp.setCallListener(null);
+        parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcService.PRE_INCOMING_CALL);
+        parcel.setDataPosition(0);
+        mTestMtcApp.getNativeListener().onMessage(parcel);
+        parcel.recycle();
+
+        verify(mExecutor, times(1)).execute(any());
+
+        mTestMtcApp.setCallListener(mCallListener);
         Parcel parcel2 = Parcel.obtain();
         parcel2.writeInt(IUMtcService.EXTERNAL_CALLS_CHANGED);
         parcel2.setDataPosition(0);
