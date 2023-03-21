@@ -4709,6 +4709,11 @@ PROTECTED VIRTUAL void AosRegistration::Registration_Terminated(IN IMS_SINT32 nR
     {
         if (IsReconnectingServerSocketErrorAllowed())
         {
+            if (m_piInternalErrorTimer != IMS_NULL)
+            {
+                return;
+            }
+
             ++m_nErrorCountForServerSocket;
             A_IMS_TRACE_I(
                     REGID, "server socket error count (%d)", m_nErrorCountForServerSocket, 0, 0);
