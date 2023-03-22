@@ -916,6 +916,11 @@ TEST_F(AosRegistrationTest, GetProperty)
     m_pTestAosRegistration->GetProperty(
             IAosRegistration::PROPERTY_PDN_REACIVATE_WAIT_TIME, nValue, strValue);
     EXPECT_EQ(nValue, 30);
+
+    // PROPERTY_REG_FAILURE_COUNT
+    m_pTestAosRegistration->GetProperty(
+            IAosRegistration::PROPERTY_REG_FAILURE_COUNT, nValue, strValue);
+    EXPECT_EQ(nValue, 0);
 }
 
 TEST_F(AosRegistrationTest, CheckBool)

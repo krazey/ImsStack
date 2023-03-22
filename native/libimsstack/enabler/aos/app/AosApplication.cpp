@@ -2021,6 +2021,10 @@ PROTECTED VIRTUAL void AosApplication::ProcessPdnDisconnect()
 
         NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
     }
+    else
+    {
+        return;
+    }
 
     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
 }
@@ -2187,6 +2191,23 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
             APPID, "ProcessImsEstablishmentTimerExpired :: PLMN is blocked with timeout", 0, 0, 0);
     NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
 
+    AString strNa;
+    IMS_UINT32 nFailureCount;
+    m_piRegistration->GetProperty(
+            IAosRegistration::PROPERTY_PDN_REACIVATE_WAIT_TIME, nFailureCount, strNa);
+
+    if (m_piContext->GetConnection()->GetState() != IAosConnection::STATE_ACTIVE)
+    {
+        A_IMS_TRACE_I(APPID, "ims est timer :: not to stop ims pdn", 0, 0, 0);
+        return;
+    }
+
+    if (m_piRegistration->IsRegistered() || nFailureCount > 0)
+    {
+        A_IMS_TRACE_I(APPID, "ims est timer :: not to stop ims pdn - (%d)", nFailureCount, 0, 0);
+        return;
+    }
+
     m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
 }
 
@@ -2278,23 +2299,18 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
 
 PROTECTED VIRTUAL void AosApplication::ProcessPlmnBlockWithTimeout()
 {
-    if (IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
+    if (!IsPlmnBlockWithTimeoutRequired())
     {
-        A_IMS_TRACE_D(APPID,
-                "ProcessPlmnBlockWithTimeout :: Stop Ims Estb. Timer due to plmn block request", 0,
-                0, 0);
-        ProcessImsEstablishmentTimerExpired();
+        return;
     }
-    else
-    {
-        if (!IsPlmnBlockWithTimeoutRequired())
-        {
-            return;
-        }
 
-        NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
-        m_pConnector->Stop(PLMN_BLOCK_PDN_STOP_WAITING_TIME_SECONDS);
-    }
+    StopTimer(TIMER_IMS_ESTABLISHMENT);
+
+    A_IMS_TRACE_D(APPID,
+            "ProcessPlmnBlockWithTimeout :: Stop Ims Estb. Timer due to plmn block request", 0, 0,
+            0);
+
+    NotifyDeregistered(AosReasonCode::PLMN_BLOCK_WITH_TIMEOUT);
 }
 
 PROTECTED VIRTUAL void AosApplication::Report_StateChanged(
