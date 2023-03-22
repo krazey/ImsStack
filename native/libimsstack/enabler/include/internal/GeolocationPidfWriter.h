@@ -72,7 +72,7 @@ public:
         COUNTRY = DM | GP | CL,
     };
 
-    inline Presence(IN Namespace nNamespaces, IN const AString& strEntityUri,
+    inline Presence(IN IMS_SINT32 nNamespaces, IN const AString& strEntityUri,
             std::initializer_list<Element*> lstChildren) :
             Element(lstChildren),
             m_nNamespaces(nNamespaces),
@@ -83,7 +83,7 @@ public:
     void Write(IN_OUT IXmlStreamWriter& objWriter) const override;
 
 private:
-    const Namespace m_nNamespaces;
+    const IMS_SINT32 m_nNamespaces;
     const AString m_strEntityUri;
 };
 
