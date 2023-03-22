@@ -164,6 +164,14 @@ PROTECTED VIRTUAL void RegBinding::Update(IN IMS_SINT32 nWhat)
                 if (m_piContact != IMS_NULL)
                 {
                     SetState(STATE_ACTIVE_PENDING);
+
+                    if (m_piRegEx != IMS_NULL && m_piRegEx->IsActiveBindingsRestorationEnabled())
+                    {
+                        // If the server connection was lost by some reasons and re-REGISTER
+                        // request is being sent, this silently restores the server connection
+                        // using the connection that was used by the REGISTER transaction.
+                        RestoreTransportResourceForServerConnection(IMS_FALSE);
+                    }
                 }
                 else
                 {
@@ -686,7 +694,8 @@ void RegBinding::RestoreTransportResourceForClientInitiatedConnection()
 }
 
 PRIVATE
-void RegBinding::RestoreTransportResourceForServerConnection()
+void RegBinding::RestoreTransportResourceForServerConnection(
+        IN IMS_BOOL bNotifyError /*= IMS_TRUE*/)
 {
     if ((m_piRegEx == IMS_NULL) || (m_piScn == IMS_NULL))
     {
@@ -702,9 +711,12 @@ void RegBinding::RestoreTransportResourceForServerConnection()
 
     if (m_piScn->RestoreTransportResource(nTransportResource, IpAddress::NONE, 0) != IMS_SUCCESS)
     {
-        m_piRegEx->ConnectionNotifierError_NotifyError(m_piScn,
-                ISipConnectionNotifier::TRANSPORT_ERROR_UDP_SERVER,
-                "Restoration of server connection is failed");
+        if (bNotifyError)
+        {
+            m_piRegEx->ConnectionNotifierError_NotifyError(m_piScn,
+                    ISipConnectionNotifier::TRANSPORT_ERROR_UDP_SERVER,
+                    "Restoration of server connection is failed");
+        }
     }
 }
 
