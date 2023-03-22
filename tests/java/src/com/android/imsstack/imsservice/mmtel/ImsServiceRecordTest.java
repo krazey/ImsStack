@@ -136,6 +136,7 @@ public class ImsServiceRecordTest {
     @After
     public void tearDown() {
         mImsServiceRecord = null;
+        AppContext.deinit();
     }
 
     class TestImsServiceRecord extends ImsServiceRecord {

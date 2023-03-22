@@ -15,9 +15,6 @@
  */
 package com.android.imsstack.test;
 
-import android.content.Context;
-
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
@@ -57,10 +54,10 @@ public final class ImsTestMode {
         return sImsTestMode;
     }
 
-    public ImsTestMode() {
+    private ImsTestMode() {
     }
 
-    public synchronized void init(Context context, int slotId) {
+    public synchronized void init(int slotId) {
         ImsLog.d("SLOT = " + slotId);
 
         IImsTestMode itm = sTestModes.get(slotId);
@@ -68,7 +65,7 @@ public final class ImsTestMode {
             return;
         }
 
-        TestMode tm = new TestMode(slotId, context);
+        TestMode tm = new TestMode(slotId);
         tm.init();
         sTestModes.put(slotId, tm);
     }
@@ -91,21 +88,19 @@ public final class ImsTestMode {
             return itm;
         }
 
-        TestMode tm = new TestMode(slotId, AppContext.getInstance());
+        TestMode tm = new TestMode(slotId);
         tm.init();
         sTestModes.put(slotId, tm);
         return tm;
     }
 
     private static class TestMode implements IImsTestMode {
-        private int mSlotId = 0;
+        private final int mSlotId;
         private int mTestmodes = CONFIG_NONE;
         private int mExtraTestmask = 0;
-        private Context mContext;
 
-        public TestMode(int slotId, Context context) {
+        TestMode(int slotId) {
             mSlotId = slotId;
-            mContext = context;
         }
 
         public void init() {
@@ -154,10 +149,6 @@ public final class ImsTestMode {
         }
 
         private void initFromConfig() {
-            if (mContext == null) {
-                return;
-            }
-
             ImsLog.i("ImsTestMode(" + mSlotId + ") : init");
 
             if (ImsPrivateProperties.Persistent.getBoolean(
