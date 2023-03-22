@@ -232,7 +232,8 @@ protected:
     virtual void ProcessCapabilitiesChanged(
             IN const ImsMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
-    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
+    virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState,
+            IN IMS_BOOL bSkipVolteHysTimer = IMS_FALSE, IN IMS_BOOL bUpdateState = IMS_TRUE);
     virtual void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState);
     virtual void ProcessNetworkEvent(
             IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nExtraInfo);

@@ -329,9 +329,10 @@ protected:
 
     void ProcessNetworkChanged() { m_pAosHandleMtc->ProcessNetworkChanged(); }
 
-    void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE)
+    void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bSkipVolteHysTimer = IMS_FALSE,
+            IN IMS_BOOL bUpdateState = IMS_TRUE)
     {
-        m_pAosHandleMtc->ProcessVopsStateChanged(nState, bUpdateState);
+        m_pAosHandleMtc->ProcessVopsStateChanged(nState, bSkipVolteHysTimer, bUpdateState);
     }
 
     void SetDataConnected(IN IMS_BOOL bConnected)
@@ -2695,24 +2696,24 @@ TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test5)
     SetVopsIgnoredForVolteEnabled(IMS_TRUE);
     SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
 
-    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, IMS_FALSE);
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
     EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 
-    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, IMS_FALSE);
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
     EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 
     SetVopsIgnoredForVolteEnabled(IMS_TRUE);
 
-    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, IMS_FALSE);
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_SUPPORTED, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
     EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
 
-    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, IMS_FALSE);
+    ProcessVopsStateChanged(IMS_VOICE_OVER_PS_NOT_SUPPORTED, IMS_FALSE, IMS_FALSE);
     EXPECT_EQ(GetHoldingVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
     EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_NOT_SUPPORTED);
     EXPECT_TRUE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
@@ -3489,12 +3490,29 @@ TEST_F(AosHandleMtcTest, ImsRadio_OnSsacChanged_Test6)
 
 TEST_F(AosHandleMtcTest, ServicePhone_PlmnChanged_Test)
 {
-    // Expectation: Do nothing if invalid network. Run VolteHysTimerExpired if the timer is running.
+    // Expectation: Do nothing if invalid network or Volte_hys time is 0.
+    // Vops state is changed to support in advance if it will be changed.
+    // Run VolteHysTimerExpired if the timer is running.
 
     SetNetworkType(NW_REPORT_RADIO_CDMA);
     ServicePhone_PlmnChanged();
 
     SetNetworkType(NW_REPORT_RADIO_LTE);
+    EXPECT_CALL(m_objMockIAosNConfiguration, GetVolteHysTime())
+            .Times(AnyNumber())
+            .WillOnce(Return(0))
+            .WillRepeatedly(Return(60));
+    ServicePhone_PlmnChanged();
+
+    SetVopsState(IMS_VOICE_OVER_PS_NOT_SUPPORTED);
+    AddBlock(AosHandle::BLOCK_VOPS);
+    EXPECT_CALL(m_objMockIAosNetTracker, IsImsVoiceCallSupported())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    ServicePhone_PlmnChanged();
+    EXPECT_EQ(GetVopsState(), IMS_VOICE_OVER_PS_SUPPORTED);
+    EXPECT_FALSE(IsHandleBlocked(AosHandle::BLOCK_VOPS));
+
     AddBlock(AosHandle::BLOCK_VOPS);
     StartVolteHysTimer(60);
     ServicePhone_PlmnChanged();

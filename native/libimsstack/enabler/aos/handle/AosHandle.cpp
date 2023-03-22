@@ -1187,8 +1187,8 @@ PROTECTED VIRTUAL void AosHandle::ProcessNetworkChanged()
     // Implemented in child
 }
 
-PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(
-        IN IMS_UINT32 /*nState*/, IN IMS_BOOL /*bUpdateState = IMS_TRUE*/)
+PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(IN IMS_UINT32 /*nState*/,
+        IN IMS_BOOL /*bSkipVolteHysTimer = IMS_FALSE*/, IN IMS_BOOL /*bUpdateState = IMS_TRUE*/)
 {
     // Implemented in child
 }
