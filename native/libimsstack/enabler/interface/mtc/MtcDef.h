@@ -22,6 +22,7 @@
 
 enum class UpdateType
 {
+    NONE,
     NORMAL,
     HOLD,
     RESUME,

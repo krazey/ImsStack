@@ -55,7 +55,8 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_bVideoCapable(IMS_FALSE),
         m_bRttCapable(IMS_FALSE),
         m_bTerminated(IMS_FALSE),
-        m_strSessionIdHeader(AString::ConstNull())
+        m_strSessionIdHeader(AString::ConstNull()),
+        m_eOngoingUpdateType(UpdateType::NONE)
 {
     IMS_TRACE_I("+MtcSession", 0, 0, 0);
     IMS_ASSERT(m_pMessageSender != IMS_NULL);
@@ -169,6 +170,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendEarlyUpdate(IN UpdateType eUpdateType)
         return IMS_FAILURE;
     }
 
+    m_eOngoingUpdateType = eUpdateType;
     m_objExtensionSet.FormatRequest(RequestType::EARLY_UPDATE, *m_objSession.GetNextRequest());
     return m_pMessageSender->SendEarlyUpdate(eUpdateType);
 }
@@ -316,6 +318,12 @@ PUBLIC VIRTUAL void MtcSession::HandleResponse(
     {
         UpdateCallTypeFromMessage(objResponse);
         UpdateCapabilityFromMessage(objResponse);
+    }
+
+    if (eType == ResponseType::EARLY_UPDATE_RESPONSE &&
+            objResponse.GetStatusCode() == SipStatusCode::SC_200)
+    {
+        m_eOngoingUpdateType = UpdateType::NONE;
     }
 
     if (objResponse.GetStatusCode() == SipStatusCode::SC_199)
