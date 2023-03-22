@@ -37,27 +37,16 @@ PUBLIC VIRTUAL OsWifiWatcher::~OsWifiWatcher()
 
 PUBLIC VIRTUAL IMS_SINT32 OsWifiWatcher::GetState()
 {
-    IMS_SINT32 nWifiDetailedState =
-            PlatformContext::GetInstance()->GetSystem()->GetWifiDetailedState();
+    IMS_SINT32 nConnectionState =
+            PlatformContext::GetInstance()->GetSystem()->GetWifiConnectionState();
 
-    if ((nWifiDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK) ||
-            (nWifiDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED))
+    if (nConnectionState == WIFI_CONNECTION_STATE_CONNECTED)
     {
         m_nWifiState = IWifiWatcher::STATE_CONNECTED;
     }
     else
     {
-        // While connected, the detailed state goes to obtain IP to renew ip resources.
-        if ((m_nWifiState == IWifiWatcher::STATE_CONNECTED) &&
-                ((nWifiDetailedState == WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR) ||
-                        (nWifiDetailedState == WIFI_NET_DETAILED_STATE_VERIFYING_POOR_LINK)))
-        {
-            m_nWifiState = IWifiWatcher::STATE_CONNECTED;
-        }
-        else
-        {
-            m_nWifiState = IWifiWatcher::STATE_DISCONNECTED;
-        }
+        m_nWifiState = IWifiWatcher::STATE_DISCONNECTED;
     }
 
     IMS_TRACE_D("GetState :: state=%d", m_nWifiState, 0, 0);
@@ -77,8 +66,8 @@ PUBLIC VIRTUAL void OsWifiWatcher::System_NotifyEvent(
         case IMS_SYSTEM_WIFI_STATE_CHANGED:
             UpdateWifiStateChanged(LONG_TO_INT(nWParam));
             break;
-        case IMS_SYSTEM_WIFINETWORK_STATE_CHANGED:
-            UpdateWifiNetworkStateChanged(LONG_TO_INT(nWParam));
+        case IMS_SYSTEM_WIFI_CONNECTION_STATE_CHANGED:
+            UpdateWifiConnectionStateChanged(LONG_TO_INT(nWParam));
             break;
         default:
             break;
@@ -86,38 +75,20 @@ PUBLIC VIRTUAL void OsWifiWatcher::System_NotifyEvent(
 }
 
 /**
- * Detailed State
- * WIFI_NET_DETAILED_STATE_IDLE                    = 0,
- * WIFI_NET_DETAILED_STATE_SCANNING,
- * WIFI_NET_DETAILED_STATE_CONNECTING,
- * WIFI_NET_DETAILED_STATE_AUTHENTICATING,
- * WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR,
- * WIFI_NET_DETAILED_STATE_CONNECTED,
- * WIFI_NET_DETAILED_STATE_SUSPENDED,
- * WIFI_NET_DETAILED_STATE_DISCONNECTING,
- * WIFI_NET_DETAILED_STATE_DISCONNECTED,
- * WIFI_NET_DETAILED_STATE_FAILED
+ * Wi-Fi connection state
+ * WIFI_CONNECTION_STATE_CONNECTED,
+ * WIFI_CONNECTION_STATE_DISCONNECTED
  */
 PRIVATE
-void OsWifiWatcher::UpdateWifiNetworkStateChanged(IN IMS_UINT32 nDetailedState)
+void OsWifiWatcher::UpdateWifiConnectionStateChanged(IN IMS_UINT32 nConnectionState)
 {
-    if ((nDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK) ||
-            (nDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED))
+    if (nConnectionState == WIFI_CONNECTION_STATE_CONNECTED)
     {
         m_nWifiState = IWifiWatcher::STATE_CONNECTED;
     }
     else
     {
-        if ((m_nWifiState == IWifiWatcher::STATE_CONNECTED) &&
-                ((nDetailedState == WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR) ||
-                        (nDetailedState == WIFI_NET_DETAILED_STATE_VERIFYING_POOR_LINK)))
-        {
-            m_nWifiState = IWifiWatcher::STATE_CONNECTED;
-        }
-        else
-        {
-            m_nWifiState = IWifiWatcher::STATE_DISCONNECTED;
-        }
+        m_nWifiState = IWifiWatcher::STATE_DISCONNECTED;
     }
 
     PostMsgRegisteredThread();

@@ -359,8 +359,8 @@ TEST_F(SystemTest, AddAndRemoveListener)
     in.setDataPosition(0);
     out.setDataPosition(0);
     in.writeInt32(0);
-    in.writeInt32(SystemConstants::NOTIFY_WIFI_DETAILED_STATE_CHANGED);
-    in.writeInt32(WIFI_NET_DETAILED_STATE_CONNECTED);
+    in.writeInt32(SystemConstants::NOTIFY_WIFI_CONNECTION_STATE_CHANGED);
+    in.writeInt32(WIFI_CONNECTION_STATE_CONNECTED);
     in.setDataPosition(0);
 
     m_pSystem->NotifyData(in, out);
@@ -1490,12 +1490,12 @@ TEST_F(SystemTest, GetWifiBssId)
     EXPECT_EQ(m_pSystem->GetWifiBssId(), strValue);
 }
 
-TEST_F(SystemTest, GetWifiDetailedState)
+TEST_F(SystemTest, GetWifiConnectionState)
 {
     EXPECT_CALL(m_objMockSystemCallback, SendDataToJava(_, _, _))
             .Times(AnyNumber())
             .WillRepeatedly(Return(1));
-    EXPECT_EQ(m_pSystem->GetWifiDetailedState(), 0);
+    EXPECT_EQ(m_pSystem->GetWifiConnectionState(), 0);
 }
 
 TEST_F(SystemTest, GetWifiState)

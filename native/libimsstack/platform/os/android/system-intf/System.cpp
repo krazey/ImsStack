@@ -1094,9 +1094,9 @@ AString System::GetWifiBssId()
 }
 
 PUBLIC
-IMS_SINT32 System::GetWifiDetailedState()
+IMS_SINT32 System::GetWifiConnectionState()
 {
-    return GetInt(SystemConstants::GET_WIFI_DETAILED_STATE);
+    return GetInt(SystemConstants::GET_WIFI_CONNECTION_STATE);
 }
 
 PUBLIC
@@ -1825,9 +1825,9 @@ void System::NotifyWifiCategory(
         nEvent = IMS_SYSTEM_WIFI_STATE_CHANGED;
         nWParam = in.readInt32();
     }
-    else if (nCmd == SystemConstants::NOTIFY_WIFI_DETAILED_STATE_CHANGED)
+    else if (nCmd == SystemConstants::NOTIFY_WIFI_CONNECTION_STATE_CHANGED)
     {
-        nEvent = IMS_SYSTEM_WIFINETWORK_STATE_CHANGED;
+        nEvent = IMS_SYSTEM_WIFI_CONNECTION_STATE_CHANGED;
         nWParam = in.readInt32();
     }
     else
