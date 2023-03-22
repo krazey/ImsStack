@@ -26,11 +26,12 @@
 
 class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;
+class ILastComeFirstServedHelper;
 class IMtcBlockChecker;
 class IMtcBlockRule;
-class IMtcRadioChecker;
 class IMtcMediaManager;
 class IMtcPreconditionManager;
+class IMtcRadioChecker;
 class IMtcService;
 class IMtcSession;
 class IMtcUiNotifier;
@@ -108,6 +109,7 @@ public:
     MOCK_METHOD(IMessageUtils&, GetMessageUtils, (), (override));
     MOCK_METHOD(IPassiveTimerHolder&, GetPassiveTimerHolder, (), (override));
     MOCK_METHOD(IMultiEndpointManager*, GetMultiEndpointManager, (), (override));
+    MOCK_METHOD(ILastComeFirstServedHelper&, GetLastComeFirstServedHelper, (), (override));
     MOCK_METHOD(IMS_BOOL, IsWifiTestMode, (), (override));
 };
 

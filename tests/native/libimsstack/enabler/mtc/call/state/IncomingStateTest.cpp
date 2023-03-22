@@ -127,6 +127,16 @@ protected:
     }
 };
 
+TEST_F(IncomingStateTest, RejectTransitsStateToTerminating)
+{
+    const CallReasonInfo objAnyReason(CODE_REJECT_ONGOING_CALL_SETUP);
+
+    EXPECT_CALL(objMtcSession, Reject(objAnyReason));
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objAnyReason));
+
+    EXPECT_EQ(CallStateName::TERMINATING, pIncomingState->Reject(objAnyReason));
+}
+
 TEST_F(IncomingStateTest, TerminateInvokesTerminate)
 {
     const CallReasonInfo objAnyReason(CODE_USER_DECLINE);

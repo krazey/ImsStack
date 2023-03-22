@@ -37,6 +37,7 @@
 #include "ect/EctManager.h"
 #include "emergency/MtcEmergencyServiceManager.h"
 #include "helper/CallStateProxy.h"
+#include "helper/LastComeFirstServedHelper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/PassiveTimerHolder.h"
 #include "utility/MessageUtils.h"
@@ -66,6 +67,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objPassiveTimerHolder(PassiveTimerHolder()),
         m_pMultiEndpointManager(nullptr),
         m_objMtcRadioChecker(*this, m_objCallController),
+        m_pLastComeFirstServedHelper(nullptr),
         m_bWifiTestMode(IMS_FALSE)
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
@@ -173,6 +175,16 @@ PUBLIC VIRTUAL OperationAsyncRunner* MtcApp::GetAsyncRunner(IN std::function<voi
     }
     // object is deleted by itself
     return new OperationAsyncRunner(m_nSlotId, objOperation);
+}
+
+PUBLIC VIRTUAL ILastComeFirstServedHelper& MtcApp::GetLastComeFirstServedHelper()
+{
+    if (m_pLastComeFirstServedHelper == nullptr)
+    {
+        m_pLastComeFirstServedHelper = std::make_unique<LastComeFirstServedHelper>(*this);
+    }
+
+    return *m_pLastComeFirstServedHelper.get();
 }
 
 PROTECTED VIRTUAL void MtcApp::InitConfiguration()
