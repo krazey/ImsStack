@@ -21,7 +21,6 @@ import static com.android.imsstack.util.ImsPrivateProperties.Persistent.KEY_TEST
 import static com.android.imsstack.util.ImsPrivateProperties.Persistent.KEY_TEST_TESTMODE_ENABLED;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,7 +33,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.imsstack.ContextFixture;
 import com.android.imsstack.util.AppContext;
 
 import org.junit.After;
@@ -44,61 +42,68 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public class ImsTestModeTest {
-    private static final int SLOT_0 = 0;
-    private static final boolean DEFAULT_VALUE_TEST_BOOL = true;
-    @Mock
-    private SharedPreferences mSp;
-    @Mock
-    private SharedPreferences.Editor mSpEditor;
-    private Context mContext;
+    private static final int SLOT0 = 0;
+
+    @Mock private Context mContext;
+    @Mock private SharedPreferences mSp;
+
     private ImsTestMode mImsTestModeTest;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mContext = new ContextFixture().getTestDouble();
-        doReturn(mSp).when(mContext).getSharedPreferences(anyString(),
-                anyInt());
-        when(mSp.edit()).thenReturn(mSpEditor);
+
+        doReturn(mSp).when(mContext).getSharedPreferences(anyString(), anyInt());
         when(mSp.getString(eq(KEY_TEST_TESTMODE_ENABLED), anyString()))
-                .thenReturn(String.valueOf(DEFAULT_VALUE_TEST_BOOL));
+                .thenReturn(String.valueOf(true));
         when(mSp.getString(eq(KEY_TEST_IMS_DISABLED), anyString()))
-                .thenReturn(String.valueOf(DEFAULT_VALUE_TEST_BOOL));
+                .thenReturn(String.valueOf(true));
         when(mSp.getString(eq(KEY_TEST_DEBUG_ENABLED), anyString()))
-                .thenReturn(String.valueOf(DEFAULT_VALUE_TEST_BOOL));
+                .thenReturn(String.valueOf(true));
         AppContext.init(mContext);
 
         mImsTestModeTest = ImsTestMode.getInstance();
+        // This is a singleton object and it needs to be cleaned up before starting the test.
+        mImsTestModeTest.cleanUp(SLOT0);
     }
 
     @After
     public void tearDown() throws Exception {
+        if (mImsTestModeTest != null) {
+            mImsTestModeTest.cleanUp(SLOT0);
+            mImsTestModeTest = null;
+        }
         AppContext.deinit();
-        mImsTestModeTest = null;
+        mSp = null;
+        mContext = null;
     }
 
     @Test
     @SmallTest
-    public void readTestMode() {
-        mImsTestModeTest.init(mContext, SLOT_0);
-        assertNotNull(mImsTestModeTest.getTestMode(SLOT_0));
-        IImsTestMode testMode = mImsTestModeTest.getTestMode(SLOT_0);
+    public void testInit() {
+        mImsTestModeTest.init(SLOT0);
+        IImsTestMode testMode = mImsTestModeTest.getTestMode(SLOT0);
+
+        assertNotNull(testMode);
         assertEquals(0, testMode.getExtraTestmask());
         assertTrue(testMode.isGenericTestMode());
-
         assertTrue(testMode.isImsOff());
         assertTrue(testMode.isDebugEnabled());
         assertTrue(testMode.isDebuggable());
         assertTrue(testMode.isLocalHoldToneEnabled());
+    }
 
-        mImsTestModeTest.cleanUp(SLOT_0);
-        mImsTestModeTest.init(null, SLOT_0);
-        IImsTestMode testModeNull = mImsTestModeTest.getTestMode(SLOT_0);
-        assertEquals(0, testModeNull.getExtraTestmask());
-        assertFalse(testModeNull.isImsOff());
-        assertFalse(testModeNull.isDebugEnabled());
-        assertFalse(testModeNull.isDebuggable());
-        assertFalse(testModeNull.isGenericTestMode());
-        assertFalse(testModeNull.isLocalHoldToneEnabled());
+    @Test
+    @SmallTest
+    public void testGetTestMode() {
+        IImsTestMode testMode = mImsTestModeTest.getTestMode(SLOT0);
+
+        assertNotNull(testMode);
+        assertEquals(0, testMode.getExtraTestmask());
+        assertTrue(testMode.isGenericTestMode());
+        assertTrue(testMode.isImsOff());
+        assertTrue(testMode.isDebugEnabled());
+        assertTrue(testMode.isDebuggable());
+        assertTrue(testMode.isLocalHoldToneEnabled());
     }
 }

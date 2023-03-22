@@ -148,7 +148,7 @@ public class CommonStarter {
 
         Context context = AppContext.getInstance();
 
-        ImsTestMode.getInstance().init(context, slotId);
+        ImsTestMode.getInstance().init(slotId);
 
         FeatureConfig.init(slotId);
 
