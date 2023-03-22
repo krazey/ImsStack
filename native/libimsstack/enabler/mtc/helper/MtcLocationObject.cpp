@@ -16,22 +16,34 @@
 
 #include "CarrierConfig.h"
 #include "Configuration.h"
+#include "DocumentBuilder.h"
+#include "DomDocumentBuilderFactory.h"
 #include "GeolocationHelper.h"
 #include "GeolocationPidfCreator.h"
+#include "IDocument.h"
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
 #include "ISipMessage.h"
 #include "ISubscriberConfig.h"
+#include "IXmlStreamWriter.h"
 #include "MtcDef.h"
+#include "ServiceMemory.h"
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipHeaderName.h"
+#include "TextParser.h"
+#include "XmlFactory.h"
 #include "call/IMtcCallContext.h"
 #include "call/ParticipantInfo.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/XmlElementWrapper.h"
+#include "internal/GeolocationPidfWriter.h"
 #include "utility/IMessageUtils.h"
+
+using namespace enabler;
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -88,14 +100,65 @@ PUBLIC GLOBAL IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired(IN IMtcCallC
             (pSuppService == IMS_NULL || pSuppService->bValue);
 }
 
-PUBLIC
-void MtcLocationObject::SetLocationToMessage(
-        IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting)
+PUBLIC GLOBAL MtcLocationProperties* MtcLocationObject::GetLocationFromMessage(
+        IN const IMessage& objMessage)
 {
-    ByteArray objContent = CreateLocationBody();
+    AString strXmlBody = GetLocationBodyFrom(objMessage);
+    if (strXmlBody.GetLength() <= 0)
+    {
+        IMS_TRACE_D("GetLocationFromMessage : No PIDF-LO content", 0, 0, 0);
+        return IMS_NULL;
+    }
+
+    DocumentBuilder* pDocumentBuilder =
+            DomDocumentBuilderFactory::GetInstance()->NewDocumentBuilder();
+    IDocument* pDocument = pDocumentBuilder->Parse(strXmlBody);
+    DomDocumentBuilderFactory::DestroyDocumentBuilder(pDocumentBuilder);
+    if (pDocument == IMS_NULL)
+    {
+        return IMS_NULL;
+    }
+
+    XmlElementWrapper objShapeElement = XmlElementWrapper(pDocument->GetDocumentElement())
+                                                .GetFirstChild("person")
+                                                .GetFirstChild("geopriv")
+                                                .GetFirstChild("location-info")
+                                                .GetFirstChild();
+    while (objShapeElement.IsValid())
+    {
+        if (!objShapeElement.GetTagName().EqualsIgnoreCase("Circle") &&
+                !objShapeElement.GetTagName().EqualsIgnoreCase("Point"))
+        {
+            objShapeElement = objShapeElement.GetNextSibling();
+            continue;
+        }
+
+        MtcLocationProperties* pLocation = new MtcLocationProperties();
+
+        AString strPos = objShapeElement.GetFirstChild("pos").GetValue().GetStr();
+        ImsList<AString> objPosTokens = strPos.Split(TextParser::CHAR_SP);
+        if (objPosTokens.GetSize() >= 2)
+        {
+            pLocation->SetLatitude(objPosTokens.GetAt(0));
+            pLocation->SetLongitude(objPosTokens.GetAt(1));
+        }
+
+        pLocation->SetRadius(objShapeElement.GetFirstChild("radius").GetValue());
+
+        return pLocation;
+    }
+
+    pDocument->DestroyDocument();
+    return IMS_NULL;
+}
+
+PUBLIC
+void MtcLocationObject::SetLocationToMessage(IN_OUT IMessage& objMessage,
+        IN const ByteArray& objContent, IN IMS_BOOL bGeolocationRouting)
+{
     if (objContent.GetLength() <= 0)
     {
-        IMS_TRACE_I("SetLocationToMessage : Creating a location information failed", 0, 0, 0);
+        IMS_TRACE_I("SetLocationToMessage : Content is empty", 0, 0, 0);
         return;
     }
 
@@ -115,14 +178,7 @@ void MtcLocationObject::SetLocationToMessage(
     piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, GetContentDispositionHeader());
 }
 
-PRIVATE
-AString MtcLocationObject::CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const
-{
-    return m_objContext.GetMessageUtils().GenerateContentId(
-            objSubscriberConfig.GetHomeDomainName());
-}
-
-PRIVATE
+PUBLIC
 ByteArray MtcLocationObject::CreateLocationBody() const
 {
     ByteArray objContent;
@@ -156,6 +212,73 @@ ByteArray MtcLocationObject::CreateLocationBody() const
     return objContent;
 }
 
+PUBLIC
+ByteArray MtcLocationObject::CreateCallComposerLocationBody(
+        IN const AString& strLatitude, IN const AString& strLongitude) const
+{
+    XmlFactory* pXmlFactory = XmlFactory::GetInstance();
+    IXmlStreamWriter* pWriter = pXmlFactory->CreateStreamWriter();
+
+    const IMS_SINT32 eNamespaces = Presence::Namespace::DM | Presence::Namespace::GP |
+            Presence::Namespace::GML | Presence::Namespace::GS;
+
+    AString strEntityUri = GetEntityUri(
+            *Configuration::GetInstance()->GetSubscriberConfig(m_objContext.GetSlotId()));
+
+    // clang-format off
+    PidfLoXml{
+        new Presence{eNamespaces, strEntityUri, {
+            new Person{CreatePersonId(), {
+                new Geopriv{
+                    new LocationInfo{
+                        new Circle{strLatitude, strLongitude, ""},
+                    },
+                    new UsageRules{},
+                },
+            }},
+        }},
+    }.Write(*pWriter);
+    // clang-format on
+
+    ByteArray objContent;
+
+    IMS_CHAR* pszXml = pWriter->Flush();
+    if (pszXml != IMS_NULL)
+    {
+        objContent.Attach(reinterpret_cast<IMS_BYTE*>(pszXml), pWriter->GetContentLength());
+        objContent.Detach();
+        IMS_MEM_Free(pszXml);
+    }
+
+    pWriter->Close();
+    pXmlFactory->DestroyStreamWriter(pWriter);
+    return objContent;
+}
+
+PRIVATE
+AString MtcLocationObject::CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const
+{
+    return m_objContext.GetMessageUtils().GenerateContentId(
+            objSubscriberConfig.GetHomeDomainName());
+}
+
+PRIVATE
+AString MtcLocationObject::CreatePersonId() const
+{
+    ISubscriberInfo* pSubscriberInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_objContext.GetSlotId());
+    if (pSubscriberInfo == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "CreatePersonId : SubscriberInfo is null", 0, 0, 0);
+        return AString::ConstNull();
+    }
+
+    // No specific requirement for the person ID value
+    AString strPersonId;
+    pSubscriberInfo->GetPhoneNumber(strPersonId);
+    return strPersonId;
+}
+
 PRIVATE
 IMS_SINT32 MtcLocationObject::GetInformationLevel() const
 {
@@ -164,6 +287,23 @@ IMS_SINT32 MtcLocationObject::GetInformationLevel() const
             m_objContext.GetService().IsWlanIpCanType(),
             m_objContext.GetConfigurationProxy().Is(
                     Feature::PIDF_SHORT_CODE, m_objContext.GetParticipantInfo().GetRemoteNumber()));
+}
+
+PRIVATE
+AString MtcLocationObject::GetLocationBodyFrom(IN const IMessage& objMessage)
+{
+    ImsList<IMessageBodyPart*> lstMessageBodies = objMessage.GetBodyParts();
+    for (IMS_UINT32 nIndex = 0; nIndex < lstMessageBodies.GetSize(); nIndex++)
+    {
+        IMessageBodyPart* pBody = lstMessageBodies.GetAt(nIndex);
+
+        if (pBody->GetHeader(SipHeaderName::CONTENT_TYPE).EqualsIgnoreCase(CONTENT_TYPE_PIDF_XML))
+        {
+            return pBody->GetContent().ToString();
+        }
+    }
+
+    return AString::ConstNull();
 }
 
 PRIVATE
@@ -196,4 +336,12 @@ AString MtcLocationObject::GetContentDispositionHeader()
     AString strHeader;
     strHeader.Sprintf("%s;%s", CONTENT_DISPOSITION_RENDER, CONTENT_DISPOSITION_HANDLING_OPTIONAL);
     return strHeader;
+}
+
+PRIVATE
+AString MtcLocationObject::GetEntityUri(IN const ISubscriberConfig& objSubscriberConfig)
+{
+    AString strEntityUri;
+    strEntityUri.Sprintf("pres:%s", objSubscriberConfig.GetPrivateUserId().GetStr());
+    return strEntityUri;
 }

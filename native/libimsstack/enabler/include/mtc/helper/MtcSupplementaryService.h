@@ -53,6 +53,7 @@ public:
     IMS_BOOL UpdateMcid(IN IMessage* piMessage);
     static IMS_BOOL UpdateDualNumber(IN IMessage* piMessage);
     IMS_BOOL UpdateCallingNumVerification(IN IMessage* piMessage);
+    IMS_BOOL UpdateCallComposerElements(IN IMessage* piMessage);
     void Delete(IN SuppType eType);
     void DeleteServices();
     const SuppService* Get(IN SuppType eType);

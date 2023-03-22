@@ -16,7 +16,10 @@
 
 #include "CarrierConfig.h"
 #include "INetworkWatcher.h"
+#include "MockIMessage.h"
+#include "MockIMessageBodyPart.h"
 #include "MockIMtcService.h"
+#include "SipHeaderName.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -25,6 +28,7 @@
 #include "helper/MtcSupplementaryService.h"
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -137,4 +141,151 @@ TEST_F(MtcLocationObjectTest, IsGeolocationInfoRequiredReturnsConfigForCellularE
     ON_CALL(objService, IsWlanIpCanType).WillByDefault(Return(IMS_FALSE));
 
     EXPECT_EQ(bConfig, MtcLocationObject::IsGeolocationInfoRequired(objContext));
+}
+
+TEST_F(MtcLocationObjectTest, GetLocationFromMessageIfNoContent)
+{
+    MockIMessageBodyPart objOtherBody;
+    ON_CALL(objOtherBody, GetHeader(AString(SipHeaderName::CONTENT_TYPE)))
+            .WillByDefault(Return(AString("not_location")));
+
+    ImsList<IMessageBodyPart*> lstMessageBodies;
+    lstMessageBodies.Append(&objOtherBody);
+
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetBodyParts).WillByDefault(Return(lstMessageBodies));
+
+    EXPECT_EQ(MtcLocationObject::GetLocationFromMessage(objMessage), nullptr);
+}
+
+TEST_F(MtcLocationObjectTest, GetLocationFromMessageWithInvalidShape)
+{
+    MockIMessageBodyPart objLocationBody;
+    ByteArray objLocationContent("<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                                 "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                                 "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                                 "xmlns:gml=\"http://www.opengis.net/gml\" "
+                                 "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+                                 "entity=\"tel:+491711234567\">"
+                                 "<dm:person id=\"sh2204\">"
+                                 "<gp:geopriv>"
+                                 "<gp:location-info>"
+                                 "<invalid-shape/>"  // Malformed
+                                 "</gp:location-info>"
+                                 "<gp:usage-rules/>"
+                                 "</gp:geopriv>"
+                                 "</dm:person>"
+                                 "</presence>");
+
+    ON_CALL(objLocationBody, GetHeader(AString(SipHeaderName::CONTENT_TYPE)))
+            .WillByDefault(Return(AString("application/pidf+xml")));
+    ON_CALL(objLocationBody, GetContent).WillByDefault(ReturnRef(objLocationContent));
+
+    ImsList<IMessageBodyPart*> lstMessageBodies;
+    lstMessageBodies.Append(&objLocationBody);
+
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetBodyParts).WillByDefault(Return(lstMessageBodies));
+
+    EXPECT_EQ(MtcLocationObject::GetLocationFromMessage(objMessage), nullptr);
+}
+
+TEST_F(MtcLocationObjectTest, GetLocationFromMessageWithPointShape)
+{
+    MockIMessageBodyPart objOtherBody;
+    ON_CALL(objOtherBody, GetHeader(AString(SipHeaderName::CONTENT_TYPE)))
+            .WillByDefault(Return(AString("not_location")));
+
+    MockIMessageBodyPart objLocationBody;
+    ByteArray objLocationContent("<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+                                 "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+                                 "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+                                 "xmlns:gml=\"http://www.opengis.net/gml\" "
+                                 "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+                                 "entity=\"tel:+491711234567\">"
+                                 "<dm:person id=\"sh2204\">"
+                                 "<gp:geopriv>"
+                                 "<gp:location-info>"
+                                 "<gml:Point srsName=\"urn:ogc:def:crs:EPSG::4326\">"
+                                 "<gml:pos>-34.407 150.883</gml:pos>"
+                                 "</gml:Point>"
+                                 "</gp:location-info>"
+                                 "<gp:usage-rules/>"
+                                 "</gp:geopriv>"
+                                 "</dm:person>"
+                                 "</presence>");
+
+    ON_CALL(objLocationBody, GetHeader(AString(SipHeaderName::CONTENT_TYPE)))
+            .WillByDefault(Return(AString("application/pidf+xml")));
+    ON_CALL(objLocationBody, GetContent).WillByDefault(ReturnRef(objLocationContent));
+
+    ImsList<IMessageBodyPart*> lstMessageBodies;
+    lstMessageBodies.Append(&objOtherBody);
+    lstMessageBodies.Append(&objLocationBody);
+
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetBodyParts).WillByDefault(Return(lstMessageBodies));
+
+    MtcLocationProperties* pLocation = MtcLocationObject::GetLocationFromMessage(objMessage);
+    ASSERT_NE(pLocation, nullptr);
+    EXPECT_EQ(pLocation->GetLatitude(), AString("-34.407"));
+    EXPECT_EQ(pLocation->GetLongitude(), AString("150.883"));
+    EXPECT_EQ(pLocation->GetRadius().GetLength(), 0);
+    delete pLocation;
+}
+
+TEST_F(MtcLocationObjectTest, GetLocationFromMessageWithCircleShape)
+{
+    MockIMessageBodyPart objOtherBody;
+    ON_CALL(objOtherBody, GetHeader(AString(SipHeaderName::CONTENT_TYPE)))
+            .WillByDefault(Return(AString("not_location")));
+
+    MockIMessageBodyPart objLocationBody;
+    ByteArray objLocationContent(  // From RCC.20
+            "<presence xmlns=\"urn:ietf:params:xml:ns:pidf\" "
+            "xmlns:dm=\"urn:ietf:params:xml:ns:pidf:data-model\" "
+            "xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\" "
+            "xmlns:gml=\"http://www.opengis.net/gml\" "
+            "xmlns:gs=\"http://www.opengis.net/pidflo/1.0\" "
+            "entity=\"tel:+491711234567\">"
+            "<dm:person id=\"sh2204\">"
+            "<gp:geopriv>"
+            "<gp:location-info>"
+            "<gs:Circle srsName=\"urn:ogc:def:crs:EPSG::4326\">"
+            "<gml:pos>47.577866 -122.164080</gml:pos>"
+            "<gs:radius uom=\"urn:ogc:def:uom:EPSG::9001\">30</gs:radius>"
+            "</gs:Circle>"
+            "</gp:location-info>"
+            "<gp:usage-rules/>"
+            "</gp:geopriv>"
+            "</dm:person>"
+            "</presence>");
+
+    ON_CALL(objLocationBody, GetHeader(AString(SipHeaderName::CONTENT_TYPE)))
+            .WillByDefault(Return(AString("application/pidf+xml")));
+    ON_CALL(objLocationBody, GetContent).WillByDefault(ReturnRef(objLocationContent));
+
+    ImsList<IMessageBodyPart*> lstMessageBodies;
+    lstMessageBodies.Append(&objOtherBody);
+    lstMessageBodies.Append(&objLocationBody);
+
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetBodyParts).WillByDefault(Return(lstMessageBodies));
+
+    MtcLocationProperties* pLocation = MtcLocationObject::GetLocationFromMessage(objMessage);
+    ASSERT_NE(pLocation, nullptr);
+    EXPECT_EQ(pLocation->GetLatitude(), AString("47.577866"));
+    EXPECT_EQ(pLocation->GetLongitude(), AString("-122.164080"));
+    EXPECT_EQ(pLocation->GetRadius(), AString("30"));
+    delete pLocation;
+}
+
+TEST_F(MtcLocationObjectTest, SetLocationToMessageDoesNothingIfContentEmpty)
+{
+    ByteArray objEmptyContent;
+    MockIMessage objMessage;
+
+    EXPECT_CALL(objMessage, AddHeader(_, _)).Times(0);
+    EXPECT_CALL(objMessage, GetMessage).Times(0);
+    MtcLocationObject(objContext).SetLocationToMessage(objMessage, objEmptyContent, IMS_FALSE);
 }

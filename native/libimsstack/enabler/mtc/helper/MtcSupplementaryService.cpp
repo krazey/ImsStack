@@ -29,7 +29,9 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "ussi/UssiController.h"
+#include "utility/CallComposerUtil.h"
 #include "utility/MessageUtil.h"
+#include <utility>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -126,6 +128,7 @@ IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
     bUpdate |= UpdateMcid(piMessage);
     bUpdate |= UpdateDualNumber(piMessage);
     bUpdate |= UpdateCallingNumVerification(piMessage);
+    bUpdate |= UpdateCallComposerElements(piMessage);
 
     IMS_TRACE_I("UpdateService : [%s]", _TRACE_B_(bUpdate), 0, 0);
     return bUpdate;
@@ -303,6 +306,37 @@ IMS_BOOL MtcSupplementaryService::UpdateCallingNumVerification(IN IMessage* piMe
     }
 
     Add(SuppType::CALLING_NUM_VERIFICATION, GetCallingNumVerificationResult(strValue));
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL MtcSupplementaryService::UpdateCallComposerElements(IN IMessage* piMessage)
+{
+    IMS_SINT32 nPriority = CallComposerUtil::GetPriority(*piMessage);
+    if (nPriority >= 0)
+    {
+        Add(SuppType::CALL_COMPOSER_PRIORITY, nPriority);
+    }
+
+    AString strSubject = CallComposerUtil::GetSubject(*piMessage);
+    if (strSubject.GetLength() > 0)
+    {
+        Add(SuppType::CALL_COMPOSER_SUBJECT, strSubject);
+    }
+
+    AString strPicture = CallComposerUtil::GetPicture(*piMessage);
+    if (strPicture.GetLength() > 0)
+    {
+        Add(SuppType::CALL_COMPOSER_PICTURE_URL, strPicture);
+    }
+
+    std::pair<AString, AString> objLocation = CallComposerUtil::GetLocation(*piMessage);
+    if (objLocation.first.GetLength() > 0 && objLocation.second.GetLength() > 0)
+    {
+        Add(SuppType::CALL_COMPOSER_LOCATION_LAT, objLocation.first);
+        Add(SuppType::CALL_COMPOSER_LOCATION_LONG, objLocation.second);
+    }
+
     return IMS_TRUE;
 }
 

@@ -229,6 +229,12 @@ enum
     CONF_CREATE_EXPANDED_BY = 5,
 };
 
+enum
+{
+    CALL_COMPOSER_PRIORITY_NONE = 0,
+    CALL_COMPOSER_PRIORITY_URGENT = 1,
+};
+
 struct MediaInfo
 {
 public:

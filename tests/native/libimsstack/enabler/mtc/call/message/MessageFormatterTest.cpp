@@ -151,6 +151,61 @@ TEST_F(MessageFormatterTest, FormStartMessageWithGeolocation)
     EXPECT_EQ(nResult, IMS_SUCCESS);
 }
 
+TEST_F(MessageFormatterTest, FormStartMessageWithoutCallComposerElements)
+{
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::PRIORITY), _)).Times(0);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::SUBJECT), _)).Times(0);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::CALL_INFO), _)).Times(0);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::GEOLOCATION), _)).Times(0);
+
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(MessageFormatterTest, FormStartMessageWithCallComposerPriority)
+{
+    pSupplementaryService->Add(SuppType::CALL_COMPOSER_PRIORITY, CALL_COMPOSER_PRIORITY_NONE);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::PRIORITY), AString("none"))).Times(1);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(MessageFormatterTest, FormStartMessageWithCallComposerSubject)
+{
+    pSupplementaryService->Add(SuppType::CALL_COMPOSER_SUBJECT, AString("subject"));
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::SUBJECT), AString("subject")))
+            .Times(1);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(MessageFormatterTest, FormStartMessageWithCallComposerPicture)
+{
+    pSupplementaryService->Add(SuppType::CALL_COMPOSER_PICTURE_URL, AString("url"));
+    EXPECT_CALL(
+            objMessage, AddHeader(AString(SipHeaderName::CALL_INFO), AString("<url>;purpose=icon")))
+            .Times(1);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(MessageFormatterTest, FormStartMessageWithIncompleteCallComposerLocation)
+{
+    pSupplementaryService->Delete(SuppType::CALL_COMPOSER_LOCATION_LAT);
+    pSupplementaryService->Add(SuppType::CALL_COMPOSER_LOCATION_LONG, AString("2"));
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::GEOLOCATION), _)).Times(0);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+
+    pSupplementaryService->Add(SuppType::CALL_COMPOSER_LOCATION_LAT, AString("1"));
+    pSupplementaryService->Delete(SuppType::CALL_COMPOSER_LOCATION_LONG);
+    EXPECT_CALL(objMessage, AddHeader(AString(SipHeaderName::GEOLOCATION), _)).Times(0);
+    EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
+TEST_F(MessageFormatterTest, FormStartMessageWithCallComposerLocation)
+{
+    pSupplementaryService->Add(SuppType::CALL_COMPOSER_LOCATION_LAT, AString("1"));
+    pSupplementaryService->Add(SuppType::CALL_COMPOSER_LOCATION_LONG, AString("2"));
+    // TODO: Location is hard to test now
+    // EXPECT_EQ(pFormatter->FormStartMessage(CallType::VOIP), IMS_SUCCESS);
+}
+
 TEST_F(MessageFormatterTest, FormProvisionalResponseMessageNormalCase)
 {
     IMS_RESULT nResult = pFormatter->FormProvisionalResponseMessage(IMS_TRUE);
