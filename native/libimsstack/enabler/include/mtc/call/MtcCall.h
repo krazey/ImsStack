@@ -139,6 +139,7 @@ public:
     inline ParticipantInfo& GetParticipantInfo() override { return m_objParticipantInfo; }
     IMtcSession* GetSession(IN const ISession* piSession) const override;
     IMtcSession* GetSession() const override;
+    inline const ImsList<IMtcSession*>& GetSessions() const override { return m_lstSessions; }
     inline IMtcService& GetService() override { return m_objService; }
     inline IMtcUiNotifier& GetUiNotifier() override { return m_objUiNotifier; }
     inline IMtcMediaManager& GetMediaManager() override { return m_objMediaManager; }
