@@ -77,6 +77,14 @@ public:
      */
     virtual void NotifyCallerCapabilityChanged() = 0;
 
+    /**
+     * @brief Checks whether the restoration of active bindings is enabled or not.
+     *
+     * @return IMS_TRUE if the restoration of active bindings is enabled, IMS_FALSE otherwise.
+     * @note REG_RESTORATION_FOR_ACTIVE_BINDING
+     */
+    virtual IMS_BOOL IsActiveBindingsRestorationEnabled() const = 0;
+
 public:
     /// Update states for registration binding
     enum
