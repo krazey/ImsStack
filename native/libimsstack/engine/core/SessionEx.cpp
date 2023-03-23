@@ -643,11 +643,14 @@ IMS_RESULT SessionEx::UpdateEarlyMedia()
 
     if (nState == STATE_RENEGOTIATING)
     {
-        if (GetPreviousRequest(IMessage::SESSION_UPDATE) != IMS_NULL)
+        // If re-INVITE/UPDATE transaction and SDP negotiation is in progress,
+        // we could not send the early UPDATE here.
+        if (GetPreviousRequest(IMessage::SESSION_UPDATE) != IMS_NULL &&
+                GetOfferAnswerState() != SdpOaState::STATE_ESTABLISHED)
         {
             Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-            IMS_TRACE_E(0, "Early UPDATE :: invalid state", 0, 0, 0);
+            IMS_TRACE_E(0, "Early UPDATE :: invalid state - SDP negotiation in progress", 0, 0, 0);
             return IMS_FAILURE;
         }
     }
