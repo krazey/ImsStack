@@ -169,40 +169,9 @@ TEST_F(MtcSessionTest, StartFailsIfSetSdpFails)
     EXPECT_EQ(pMtcSession->Start(), IMS_FAILURE);
 }
 
-TEST_F(MtcSessionTest, SendProvisionalResponseSends180NotReliablyWithoutSdp)
-{
-    CreateMtcSession();
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_TRUE));
-    SetUpForSetSdp(NegotiationState::STATE_OFFER_SENT, IMS_SUCCESS);
-    ImsList<IMtcCall*> objCalls;
-    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
-
-    EXPECT_CALL(*pMessageSender,
-            SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_FALSE, IMS_FALSE))
-            .Times(1);
-
-    pMtcSession->SendProvisionalResponse(IMS_TRUE);
-}
-
-TEST_F(MtcSessionTest, SendProvisionalResponseSends180NotReliablyWithSdp)
-{
-    CreateMtcSession();
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_TRUE));
-    SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
-    ImsList<IMtcCall*> objCalls;
-    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
-
-    EXPECT_CALL(*pMessageSender,
-            SendProvisionalResponse(SipStatusCode::SC_180, IMS_FALSE, IMS_TRUE, IMS_FALSE))
-            .Times(1);
-
-    pMtcSession->SendProvisionalResponse(IMS_TRUE);
-}
-
 TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithoutSdp)
 {
     CreateMtcSession();
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_FALSE));
     SetUpForSetSdp(NegotiationState::STATE_OFFER_SENT, IMS_SUCCESS);
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
@@ -217,7 +186,6 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithoutSdp)
 TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
 {
     CreateMtcSession();
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_FALSE));
     SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
@@ -232,7 +200,6 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
 TEST_F(MtcSessionTest, SendProvisionalResponseFailsIfResultSetSdpIsFailure)
 {
     CreateMtcSession();
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_FALSE));
     SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_FAILURE);
 
     EXPECT_CALL(*pMessageSender, SendProvisionalResponse(_, _, _, _)).Times(0);

@@ -108,20 +108,16 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::SendProvisionalResponse(IN IMS_BOOL bUserA
 {
     IMS_TRACE_D("SendProvisionalResponse", 0, 0, 0);
 
-    IMS_BOOL bIncludeSdp = !IsNeedToRemoveSdpInPr();
-
-    if (bIncludeSdp)
+    IMS_BOOL bIncludeSdp = true;
+    switch (SetSdpToSend(IMS_FALSE))
     {
-        switch (SetSdpToSend(IMS_FALSE))
-        {
-            case ResultSetSdp::NO_SDP:
-                bIncludeSdp = IMS_FALSE;
-                break;
-            case ResultSetSdp::FAILURE:
-                return IMS_FAILURE;
-            case ResultSetSdp::SUCCESS:
-                break;
-        }
+        case ResultSetSdp::NO_SDP:
+            bIncludeSdp = IMS_FALSE;
+            break;
+        case ResultSetSdp::FAILURE:
+            return IMS_FAILURE;
+        case ResultSetSdp::SUCCESS:
+            break;
     }
 
     // TODO: determine the response code based on the configuration for KR carriers?
@@ -546,21 +542,5 @@ IMS_BOOL MtcSession::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
         return IMS_TRUE;
     }
 
-    return IMS_FALSE;
-}
-
-PRIVATE
-IMS_BOOL MtcSession::IsNeedToRemoveSdpInPr() const
-{
-    // This is only for the case of VZW equipment TC.
-    if (m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE))
-    {
-        IMS_TRACE_D("IsNeedToRemoveSdpInPr - VZW Test Config On", 0, 0, 0);
-        if (m_objContext.GetMediaManager().GetNegotiationState(&m_objSession) ==
-                STATE_OFFER_RECEIVED)
-        {
-            return IMS_TRUE;
-        }
-    }
     return IMS_FALSE;
 }
