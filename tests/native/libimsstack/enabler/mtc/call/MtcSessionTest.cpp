@@ -304,6 +304,25 @@ TEST_F(MtcSessionTest, SendEarlyUpdateFailsIfSetSdpFails)
     pMtcSession->SendEarlyUpdate(eAnyType);
 }
 
+TEST_F(MtcSessionTest, GetOngoingUpdateTypeInitiallyReturnsNone)
+{
+    CreateMtcSession();
+    EXPECT_EQ(pMtcSession->GetOngoingUpdateType(), UpdateType::NONE);
+}
+
+TEST_F(MtcSessionTest, GetOngoingUpdateTypeReturnsTypeOfSendEarlyUpdate)
+{
+    UpdateType eSomeType = UpdateType::SESSION;
+    CreateMtcSession();
+
+    // If SetSdpToSend() is failed, UpdateType is not updated.
+    SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
+
+    pMtcSession->SendEarlyUpdate(eSomeType);
+
+    EXPECT_EQ(pMtcSession->GetOngoingUpdateType(), eSomeType);
+}
+
 TEST_F(MtcSessionTest, RespondToEarlyUpdateRespondsToEarlyUpdate)
 {
     IMS_SINT32 eAnyStatusCode = 200;

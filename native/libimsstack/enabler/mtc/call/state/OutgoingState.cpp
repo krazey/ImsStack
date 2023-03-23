@@ -69,6 +69,7 @@ PUBLIC VIRTUAL OutgoingState::~OutgoingState() {}
 
 PUBLIC VIRTUAL void OutgoingState::OnExit()
 {
+    m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
     if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
     {
         m_objContext.GetUdpKeepAliveSender().Stop();
@@ -116,7 +117,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
         return GetStateName();
     }
 
-    if (m_objContext.GetSession(piSession)->SendEarlyUpdate(UpdateType::NORMAL) == IMS_FAILURE)
+    if (SendEarlyUpdate(UpdateType::NORMAL, m_objContext.GetSession(piSession)) == IMS_FAILURE)
     {
         IMS_TRACE_D("QosReserved : Fail to send early UPDATE.", 0, 0, 0);
 
@@ -266,8 +267,13 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISe
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
     IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
-    CallReasonInfo objReason = EarlyUpdateErrorHandler::Handle(piResponse);
-
+    CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
+    if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
+    {
+        m_objContext.GetMediaManager().FinalizeSdp(piSession);
+        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
+        return GetStateName();
+    }
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
 
@@ -372,7 +378,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
             return GetStateName();
         }
 
-        if (pSession->SendEarlyUpdate(UpdateType::NORMAL) == IMS_FAILURE)
+        if (SendEarlyUpdate(UpdateType::NORMAL, m_objContext.GetSession(piSession)) == IMS_FAILURE)
         {
             CallReasonInfo objReason(CODE_REJECT_INTERNAL_ERROR);
             HandleCancel(piSession, objReason);
@@ -618,24 +624,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
     return GetStateName();
 }
 
-PROTECTED VIRTUAL CallStateName OutgoingState::SendUpdateBySrvcc(IN UpdateType eType)
-{
-    IMtcSession* piMtcSession = m_objContext.GetSession();
-    if (piMtcSession == IMS_NULL)
-    {
-        return GetStateName();
-    }
-
-    ISession& objSession = piMtcSession->GetISession();
-
-    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) ==
-            NegotiationState::STATE_NEGOTIATED)
-    {
-        piMtcSession->SendEarlyUpdate(eType);
-    }
-    return GetStateName();
-}
-
 PROTECTED VIRTUAL CallStateName OutgoingState::HandleAosConnected()
 {
     IMS_TRACE_I("HandleAosConnected", 0, 0, 0);
@@ -683,6 +671,18 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
             OnStartFailed(GetISession(), objReason);
             return CallStateName::TERMINATING;
         }
+        case TIMER_GLARE_CONDITION:
+            // TODO: Not considering that multiple early sessions are in glare condition.
+            for (IMS_UINT32 i = 0; i < m_objContext.GetSessions().GetSize(); ++i)
+            {
+                IMtcSession* pSession = m_objContext.GetSessions().GetAt(i);
+                if (pSession->GetOngoingUpdateType() != UpdateType::NONE)
+                {
+                    SendEarlyUpdate(pSession->GetOngoingUpdateType(), pSession);
+                    break;
+                }
+            }
+            return GetStateName();
         default:
             return GetStateName();
     }

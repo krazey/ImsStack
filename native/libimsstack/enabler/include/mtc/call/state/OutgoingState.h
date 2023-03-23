@@ -17,7 +17,6 @@
 #ifndef OUTGOING_STATE_H_
 #define OUTGOING_STATE_H_
 
-#include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/state/MtcCallState.h"
@@ -69,7 +68,6 @@ public:
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
 
 protected:
-    CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
     CallStateName HandleAosConnected() override;
 
 private:

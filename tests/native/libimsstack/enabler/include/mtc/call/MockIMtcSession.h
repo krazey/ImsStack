@@ -18,6 +18,7 @@
 #define MOCK_I_MTC_SESSION_H_
 
 #include "ImsTypeDef.h"
+#include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcSession.h"
 #include <gmock/gmock.h>
@@ -59,6 +60,7 @@ public:
     MOCK_METHOD(MtcExtensionSet&, GetExtensionSet, (), (override));
     MOCK_METHOD(IMS_BOOL, IsVideoCapable, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRttCapable, (), (const, override));
+    MOCK_METHOD(UpdateType, GetOngoingUpdateType, (), (const, override));
 };
 
 #endif

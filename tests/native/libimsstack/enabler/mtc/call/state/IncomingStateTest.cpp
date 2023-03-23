@@ -27,6 +27,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "helper/ISrvccStateListener.h"
+#include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "media/MockIMtcMediaManager.h"
 #include "precondition/MockIMtcPreconditionManager.h"
@@ -61,6 +62,7 @@ public:
     MockIMtcConfigurationManager* pConfigurationManager;
     MtcConfigurationProxy* pConfigurationProxy;
     CallInfo objCallInfo;
+    MockMtcTimerWrapper objTimer;
     MtcSupplementaryService* pSupplementaryService;
     ParticipantInfo* pParticipantInfo;
     MediaInfo objMediaInfo;
@@ -82,6 +84,7 @@ protected:
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
 
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
+        ON_CALL(objCallContext, GetTimer).WillByDefault(ReturnRef(objTimer));
 
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
@@ -171,6 +174,20 @@ TEST_F(IncomingStateTest, SessionEarlyMediaUpdateFailedNotifiesStartFailed)
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
     EXPECT_EQ(CallStateName::TERMINATING,
             pIncomingState->SessionEarlyMediaUpdateFailed(&objISession));
+}
+
+TEST_F(IncomingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareCondition)
+{
+    ON_CALL(objIMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+    EXPECT_CALL(objMediaManager, FinalizeSdp(&objISession));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _));
+
+    EXPECT_EQ(CallStateName::INCOMING, pIncomingState->SessionEarlyMediaUpdateFailed(&objISession));
 }
 
 TEST_F(IncomingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUpdate200)
@@ -352,6 +369,9 @@ TEST_F(IncomingStateTest, SendUpdateBySrvccByCanceled)
 {
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(&objMtcSession);
+    ON_CALL(objCallContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_CANCEL)).Times(1);
 
     EXPECT_EQ(CallStateName::INCOMING, pIncomingState->OnSrvccStateUpdated(SrvccState::CANCELED));
@@ -361,6 +381,9 @@ TEST_F(IncomingStateTest, SendUpdateBySrvccByFailed)
 {
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(&objMtcSession);
+    ON_CALL(objCallContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_FAILURE)).Times(1);
 
     EXPECT_EQ(CallStateName::INCOMING, pIncomingState->OnSrvccStateUpdated(SrvccState::FAILED));

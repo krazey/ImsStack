@@ -88,6 +88,7 @@ public:
     SipMethod objInviteMethod;
     MtcSupplementaryService* pSupplementaryService;
     MediaInfo objMediaInfo;
+    ImsList<IMtcSession*> objSessions;
 
 protected:
     virtual void SetUp() override
@@ -109,6 +110,8 @@ protected:
         ON_CALL(objController, GetRedialHelper).WillByDefault(ReturnRef(objRedialHelper));
         ON_CALL(objCallContext, GetUiNotifier).WillByDefault(ReturnRef(objNotifier));
 
+        objSessions.Append(&objMtcSession);
+        ON_CALL(objCallContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
         ON_CALL(objCallContext, GetSession()).WillByDefault(Return(&objMtcSession));
         ON_CALL(objCallContext, GetSession(_)).WillByDefault(Return(&objMtcSession));
         ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
@@ -474,6 +477,8 @@ TEST_F(OutgoingStateTest, QosReservedSendsEarlyUpdate)
             .WillByDefault(Return(IMS_TRUE));
     ON_CALL(objPreconditionManager, IsAvailableToSendEarlyUpdate(&objSession))
             .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
 
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL))
             .Times(2)
@@ -870,6 +875,22 @@ TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedReturnsTerminating)
 
     EXPECT_EQ(
             CallStateName::TERMINATING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
+}
+
+TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareCondition)
+{
+    MockIMessage objMessage;
+    ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objSession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objMessage));
+    ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    EXPECT_CALL(objMtcSession, Terminate(_, _)).Times(0);
+    EXPECT_CALL(objNotifier, SendStartFailed(_)).Times(0);
+    EXPECT_CALL(objMediaManager, FinalizeSdp(&objSession));
+    EXPECT_CALL(objTimer, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _));
+
+    EXPECT_EQ(CallStateName::OUTGOING, pOutgoingState->SessionEarlyMediaUpdateFailed(&objSession));
 }
 
 TEST_F(OutgoingStateTest, SessionEarlyMediaUpdateReceivedRejectsRequestIfSdpOaFails)

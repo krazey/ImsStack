@@ -17,7 +17,6 @@
 #include "IMessage.h"
 #include "ISipClientConnection.h"
 #include "ISipConnection.h"
-#include "ISipHeader.h"
 #include "ISipServerConnection.h"
 #include "ImsAosReason.h"
 #include "IuMtcCall.h"
@@ -488,6 +487,17 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnIpcanChanged(IN IMS_UINT32 /*eIpcan
     return GetStateName();
 }
 
+PROTECTED VIRTUAL CallStateName MtcCallState::SendUpdateBySrvcc(IN UpdateType eType)
+{
+    // Not checking the state because EstablishedState overrides this and UpdatingState will put
+    // the operation into MtcPendingOperationHolder.
+    for (IMS_UINT32 i = 0; i < m_objContext.GetSessions().GetSize(); ++i)
+    {
+        SendEarlyUpdate(eType, m_objContext.GetSessions().GetAt(i));
+    }
+    return GetStateName();
+}
+
 PROTECTED
 CallStateName MtcCallState::HandleAosConnected()
 {
@@ -624,6 +634,24 @@ void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
     IMS_BOOL bEarly =
             !m_objContext.GetMessageUtils().IsResponseExist(piSession, SipStatusCode::SC_200);
     m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly);
+}
+
+PROTECTED
+IMS_RESULT MtcCallState::SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession)
+{
+    if (!piMtcSession)
+    {
+        return IMS_FAILURE;
+    }
+
+    IMS_TRACE_D("SendEarlyUpdate UpdateType[%d]", eType, 0, 0);
+    ISession& objSession = piMtcSession->GetISession();
+    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) ==
+            NegotiationState::STATE_NEGOTIATED)
+    {
+        return piMtcSession->SendEarlyUpdate(eType);
+    }
+    return IMS_FAILURE;
 }
 
 PROTECTED

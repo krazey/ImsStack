@@ -32,6 +32,7 @@
 class AString;
 class IMessage;
 class IMtcCallContext;
+class IMtcSession;
 class IReference;
 class ISession;
 class ISipClientConnection;
@@ -169,11 +170,7 @@ public:
 
 protected:
     inline virtual CallStateName HandleSrvccStarted() { return GetStateName(); }
-    inline virtual CallStateName SendUpdateBySrvcc(IN UpdateType /*eType*/)
-    {
-        return GetStateName();
-    }
-
+    virtual CallStateName SendUpdateBySrvcc(IN UpdateType eType);
     virtual CallStateName HandleAosConnected();
     virtual CallStateName HandleAosDisconnected(IN IMS_UINT32 eAosReason);
 
@@ -186,6 +183,7 @@ protected:
     IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
     void RunMedia(IN ISession* piSession, IN IMessage* piMessage);
 
+    IMS_RESULT SendEarlyUpdate(IN UpdateType eType, IN IMtcSession* piMtcSession);
     CallStateName RejectIncomingAndToTerminating(IN const CallReasonInfo& objReason);
 
     void SendPreIncomingCallReceived();

@@ -44,6 +44,27 @@ CallReasonInfo UpdateErrorHandler::Handle(IN const IMessage* piMessage) const
     return GetCallReasonInfoForResponse(*piMessage);
 }
 
+PUBLIC
+IMS_UINT32 UpdateErrorHandler::GetGlareTimeMillisecond(IN PeerType ePeerType)
+{
+    IMS_UINT32 nUpperT = 0;
+    IMS_UINT32 nBaseT = 0;
+
+    // RFC 3261 14.1: Glare condition for 491 response
+    if (ePeerType == PeerType::MO)
+    {
+        nUpperT = 4000;
+        nBaseT = 2100;
+    }
+    else
+    {
+        nUpperT = 2000;
+        nBaseT = 0;
+    }
+
+    return nBaseT + IMS_SYS_GetRandom(nUpperT - nBaseT);
+}
+
 PRIVATE
 CallReasonInfo UpdateErrorHandler::GetCallReasonInfoForResponse(IN const IMessage& objMessage) const
 {
@@ -133,25 +154,4 @@ CallReasonInfo UpdateErrorHandler::GetCallReasonInfoFor6xxResponse(IN const IMes
     }
 
     return CallReasonInfo(CODE_SIP_SERVER_ERROR, nStatusCode);
-}
-
-PRIVATE
-IMS_UINT32 UpdateErrorHandler::GetGlareTimeMillisecond(IN PeerType ePeerType)
-{
-    IMS_UINT32 nUpperT = 0;
-    IMS_UINT32 nBaseT = 0;
-
-    // RFC 3261 14.1: Glare condition for 491 response
-    if (ePeerType == PeerType::MO)
-    {
-        nUpperT = 4000;
-        nBaseT = 2100;
-    }
-    else
-    {
-        nUpperT = 2000;
-        nBaseT = 0;
-    }
-
-    return nBaseT + IMS_SYS_GetRandom(nUpperT - nBaseT);
 }
