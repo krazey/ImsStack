@@ -17,9 +17,20 @@
 #include "IMessage.h"
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
+#include "call/IMtcCallContext.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
+#include "call/termination/UpdateErrorHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
+
+PUBLIC
+EarlyUpdateErrorHandler::EarlyUpdateErrorHandler(IN IMtcCallContext& objContext) :
+        m_objContext(objContext)
+{
+}
+
+PUBLIC
+EarlyUpdateErrorHandler::~EarlyUpdateErrorHandler() {}
 
 PUBLIC
 CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage)
@@ -32,6 +43,12 @@ CallReasonInfo EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage)
 
     IMS_SINT32 nStatusCode = piMessage->GetStatusCode();
     IMS_ASSERT(nStatusCode >= SipStatusCode::SC_300);
+
+    if (nStatusCode == SipStatusCode::SC_491)
+    {
+        return CallReasonInfo(CODE_SIP_REQUEST_PENDING,
+                UpdateErrorHandler::GetGlareTimeMillisecond(m_objContext.GetCallInfo().ePeerType));
+    }
 
     return CallReasonInfo(CODE_REJECT_INTERNAL_ERROR, nStatusCode);
 }

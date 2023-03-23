@@ -30,8 +30,8 @@ class IMtcCallContext;
 class EarlyUpdateErrorHandler final
 {
 public:
-    EarlyUpdateErrorHandler() = delete;
-    ~EarlyUpdateErrorHandler() = delete;
+    explicit EarlyUpdateErrorHandler(IN IMtcCallContext& objContext);
+    ~EarlyUpdateErrorHandler();
     EarlyUpdateErrorHandler(const EarlyUpdateErrorHandler&) = delete;
     EarlyUpdateErrorHandler& operator=(const EarlyUpdateErrorHandler&) = delete;
 
@@ -41,10 +41,12 @@ public:
      * @param piMessage Received error response. Could be null if no response has came.
      * @return See `CallReasonInfo.h` for the possible values.
      */
-    static CallReasonInfo Handle(IN const IMessage* piMessage);
+    CallReasonInfo Handle(IN const IMessage* piMessage);
 
 private:
     static IMS_BOOL IsTransactionTimeout(IN const IMessage* piMessage);
+
+    IMtcCallContext& m_objContext;
 };
 
 #endif

@@ -197,6 +197,9 @@ TEST_F(AlertingStateTest, AcceptDifferentCallTypeInvokesSendEarlyUpdate)
     CallType eCurrentCallType = CallType::VT;
     ON_CALL(objMtcSession, GetCallType).WillByDefault(Return(eCurrentCallType));
 
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
     EXPECT_CALL(objMtcSession, Accept).Times(0);
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::NORMAL));
 
@@ -294,9 +297,7 @@ TEST_F(AlertingStateTest, AcceptIsCalledWhenUpdateIsNotSentBySrvcc)
     ON_CALL(objISession, GetPreviousResponse(_)).WillByDefault(Return(&objIMessage));
     ON_CALL(objIMessage, GetState).WillByDefault(Return(IMessage::STATE_SENT));
 
-    const AString strHeaderName(SipHeaderName::REASON);
-    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::UNKNOWN, strHeaderName))
-            .WillByDefault(Return(AString::ConstEmpty()));
+    ON_CALL(objMtcSession, GetOngoingUpdateType).WillByDefault(Return(UpdateType::NORMAL));
     EXPECT_CALL(objMtcSession, Accept).Times(1);
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionEarlyMediaUpdated(&objISession));
 }
@@ -306,9 +307,8 @@ TEST_F(AlertingStateTest, NoAcceptIsCalledWhenUpdateIsSentBySrvcc)
     ON_CALL(objISession, GetPreviousResponse(_)).WillByDefault(Return(&objIMessage));
     ON_CALL(objIMessage, GetState).WillByDefault(Return(IMessage::STATE_SENT));
 
-    const AString strHeaderName(SipHeaderName::REASON);
-    ON_CALL(objMessageUtils, GetHeader(&objIMessage, ISipHeader::UNKNOWN, strHeaderName))
-            .WillByDefault(Return(MessageUtil::STR_REASON_HANDOVER_CANCELLED));
+    ON_CALL(objMtcSession, GetOngoingUpdateType)
+            .WillByDefault(Return(UpdateType::SRVCC_RECOVERED_CANCEL));
     EXPECT_CALL(objMtcSession, Accept).Times(0);
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionEarlyMediaUpdated(&objISession));
 }
@@ -318,6 +318,20 @@ TEST_F(AlertingStateTest, SessionEarlyMediaUpdateFailedNotifiesStartFailed)
     EXPECT_CALL(objUiNotifier, SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR)));
     EXPECT_EQ(CallStateName::TERMINATING,
             pAlertingState->SessionEarlyMediaUpdateFailed(&objISession));
+}
+
+TEST_F(AlertingStateTest, SessionEarlyMediaUpdateFailedWith491StartsGlareCondition)
+{
+    ON_CALL(objIMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_491));
+    ON_CALL(objMessageUtils, GetPreviousResponse(&objISession, IMessage::SESSION_EARLY_UPDATE, _))
+            .WillByDefault(Return(&objIMessage));
+    ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(_)).Times(0);
+    EXPECT_CALL(objMediaManager, FinalizeSdp(&objISession));
+    EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TimerType::TIMER_GLARE_CONDITION, _));
+
+    EXPECT_EQ(CallStateName::ALERTING, pAlertingState->SessionEarlyMediaUpdateFailed(&objISession));
 }
 
 TEST_F(AlertingStateTest, SessionEarlyMediaUpdateReceivedInvokesRespondToEarlyUpdate200)
@@ -495,6 +509,9 @@ TEST_F(AlertingStateTest, SendUpdateBySrvccByCanceled)
 {
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(&objMtcSession);
+    ON_CALL(objCallContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_CANCEL)).Times(1);
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->OnSrvccStateUpdated(SrvccState::CANCELED));
@@ -504,6 +521,9 @@ TEST_F(AlertingStateTest, SendUpdateBySrvccByFailed)
 {
     ON_CALL(objMediaManager, GetNegotiationState(_))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(&objMtcSession);
+    ON_CALL(objCallContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
     EXPECT_CALL(objMtcSession, SendEarlyUpdate(UpdateType::SRVCC_RECOVERED_FAILURE)).Times(1);
 
     EXPECT_EQ(CallStateName::ALERTING, pAlertingState->OnSrvccStateUpdated(SrvccState::FAILED));

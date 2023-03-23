@@ -43,6 +43,7 @@ public:
      * @return See `CallReasonInfo.h` for the possible values.
      */
     CallReasonInfo Handle(IN const IMessage* piMessage) const;
+    static IMS_UINT32 GetGlareTimeMillisecond(IN PeerType ePeerType);
 
 private:
     CallReasonInfo GetCallReasonInfoForResponse(IN const IMessage& objMessage) const;
@@ -50,8 +51,6 @@ private:
     CallReasonInfo GetCallReasonInfoFor4xxResponse(IN const IMessage& objMessage) const;
     static CallReasonInfo GetCallReasonInfoFor5xxResponse(IN const IMessage& objMessage);
     static CallReasonInfo GetCallReasonInfoFor6xxResponse(IN const IMessage& objMessage);
-
-    static IMS_UINT32 GetGlareTimeMillisecond(IN PeerType ePeerType);
 
     IMtcCallContext& m_objContext;
 };

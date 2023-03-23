@@ -41,6 +41,8 @@ public:
     IncomingState(IN const IncomingState&) = delete;
     IncomingState& operator=(IN const IncomingState&) = delete;
 
+    void OnExit() override;
+
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;
@@ -55,9 +57,6 @@ public:
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
-
-protected:
-    CallStateName SendUpdateBySrvcc(IN UpdateType eType) override;
 };
 
 #endif

@@ -643,6 +643,21 @@ TEST_F(MtcCallTest, GetSessionReturnsLastSession)
     EXPECT_EQ(pMtcSession2, objCall.GetSession());
 }
 
+TEST_F(MtcCallTest, GetSessionsReturnsAllSessions)
+{
+    MockISession objSession1;
+    MockISession objSession2;
+
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    IMtcSession* pMtcSession1 = objCall.CreateSession(&objSession1);
+    IMtcSession* pMtcSession2 = objCall.CreateSession(&objSession2);
+
+    ImsList<IMtcSession*> objSessions = objCall.GetSessions();
+
+    EXPECT_EQ(objSessions.GetAt(0), pMtcSession1);
+    EXPECT_EQ(objSessions.GetAt(1), pMtcSession2);
+}
+
 TEST_F(MtcCallTest, GetServiceReturnsGivenService)
 {
     MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));

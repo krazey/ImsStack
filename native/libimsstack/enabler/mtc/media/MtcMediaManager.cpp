@@ -372,15 +372,7 @@ PUBLIC VIRTUAL void MtcMediaManager::RestoreSdp(IN ISession* piSession)
 PUBLIC
 void MtcMediaManager::FinalizeSdp(IN ISession* piSession)
 {
-    // don't finalizeSDP when the session is in early dialog state.
-    if (!m_pProfileManager->IsConfirmed(piSession))
-    {
-        IMS_TRACE_D("FinalizeSdp : Do not finalize SDP - it is the confirmed session.", 0, 0, 0);
-        return;
-    }
-
     IMS_TRACE_D("FinalizeSdp", 0, 0, 0);
-
     m_piMediaSession->FinalizeSDP(GetMediaNegoId(piSession), piSession);
 }
 
