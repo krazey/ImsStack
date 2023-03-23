@@ -51,6 +51,8 @@ PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_CONFIG_IMPU_L
         "config_impu_list";
 PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_CONFIG_HOME_DOMAIN_NAME[] =
         "config_home_domain_name";
+PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_TEST_IMS_DEREGISTER[] =
+        "test_ims_deregister";
 PUBLIC GLOBAL const IMS_CHAR ImsPrivateProperties::Persistent::KEY_TEST_LOG_OPTIONS[] =
         "test_log_options";
 

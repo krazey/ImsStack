@@ -175,6 +175,7 @@ private:
     IMS_BOOL RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0) const;
 
     void UpdateRegistrationMode() const;
+    IMS_BOOL IsServiceBlockedByMenu() const;
 
 protected:
     enum

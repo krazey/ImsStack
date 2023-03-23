@@ -78,6 +78,14 @@
             android:dialogMessage="">
         </EditTextPreference>
     </PreferenceScreen>
+    <ListPreference android:title="IMS De-Registration"
+        android:entryValues="@array/ims_deregistration_entry"
+        android:entries="@array/ims_deregistration_entry"
+        android:key="test_ims_deregister"
+        android:defaultValue="NO"
+        android:enabled="true"
+        android:selectable="true">
+    </ListPreference>
     <EditTextPreference android:title="NR Duplex Mode"
         android:key="nr_duplex_mode"
         android:dialogMessage="FDD or TDD">
