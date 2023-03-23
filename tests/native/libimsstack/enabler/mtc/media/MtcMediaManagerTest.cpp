@@ -907,6 +907,16 @@ TEST_F(MtcMediaManagerTest, SetRtpPortInvokesMediaSessionSetOptions)
     pMediaManager->SetRtpPort(&objISession, eMediaType, nPort);
 }
 
+TEST_F(MtcMediaManagerTest, GetRtpPortInvokesMediaSessionGetRemotePort)
+{
+    IMS_UINT32 eMediaType = MEDIATYPE_AUDIO;
+    MEDIA_CONTENT_TYPE eContentType = MEDIA_CONTENT_TYPE::MEDIA_TYPE_AUDIO;
+    IMS_UINT32 nPort = 12345;
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+    EXPECT_CALL(*piMediaSession, GetRemotePort(NEGO_ID, eContentType)).WillOnce(Return(nPort));
+    EXPECT_EQ(pMediaManager->GetRemoteRtpPort(&objISession, eMediaType), nPort);
+}
+
 TEST_F(MtcMediaManagerTest, SetConferenceCallInvokesMediaSessionSetOptions)
 {
     EXPECT_CALL(*piMediaSession,

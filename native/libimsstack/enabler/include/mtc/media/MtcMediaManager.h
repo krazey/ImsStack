@@ -93,7 +93,8 @@ public:
     virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly) override;
 
     virtual void SetRtpPort(
-            IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort) override;
+            IN ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_UINT32 nPort) override;
+    IMS_SINT32 GetRemoteRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
     virtual void SetConferenceCall(IN IMS_BOOL bConference) override;
     virtual void SetConfirmedSession(IN ISession* piSession) override;
 

@@ -618,7 +618,7 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
     if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
     {
         IMS_TRACE_D("OnSdpReceived - Nego SDP Failed", 0, 0, 0);
-        // TODO: return fail reasone? IMS_RESULT? it's always NEGOFAIL?
+        // TODO: return fail reason? IMS_RESULT? it's always NEGOFAIL?
         return CODE_MEDIA_NOT_ACCEPTABLE;
     }
 

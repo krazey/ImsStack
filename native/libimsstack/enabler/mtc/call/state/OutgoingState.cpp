@@ -548,6 +548,16 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         return CallStateName::TERMINATING;
     }
 
+    if (objMediaManager.GetRemoteRtpPort(piSession, MEDIATYPE_AUDIO) == 0)
+    {
+        CallReasonInfo objReason(
+                CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+        HandleCancel(piSession, objReason);
+        OnStartFailed(piSession, objReason);
+
+        return CallStateName::TERMINATING;
+    }
+
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
     if (pSession->SendPrack() == IMS_FAILURE)

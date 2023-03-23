@@ -189,11 +189,20 @@ public:
     /**
      * @brief Set RTP port with the specific media line by force.
      * @param piSession ISession instance to get media profile id.
-     * @param eMediaTypes Media types for setting the RTP port.
+     * @param eMediaType Media type for setting the RTP port.
      * @param nPort The number to set the port.
      */
     virtual void SetRtpPort(
-            IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort) = 0;
+            IN ISession* piSession, IN IMS_UINT32 eMediaType, IN IMS_UINT32 nPort) = 0;
+
+    /**
+     * @brief Gets RTP port with the specific media line by force.
+     *
+     * @param piSession ISession instance to get media profile id.
+     * @param eMediaType Media type for getting the RTP port.
+     * @return The port number
+     */
+    virtual IMS_SINT32 GetRemoteRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
 
     virtual void SetConferenceCall(/* IN ISession* piSession, */ IN IMS_BOOL bConference) = 0;
     virtual void SetConfirmedSession(IN ISession* piSession) = 0;
