@@ -37,15 +37,17 @@ public:
     virtual ~IPassiveTimerHolder() = default;
 
     /**
-     * Adds a timer with specific type.
+     * @brief Adds a timer with specific type.
      *
      * @param eType the type of the timer.
      * @param nTimeInMillis the duration time of the timer to be active.
+     * @param bAllowReset Reset the active timer if it is true.
      */
-    virtual void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_UINT32 nTimeInMillis) = 0;
+    virtual void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_UINT32 nTimeInMillis,
+            IN IMS_BOOL bAllowReset = IMS_FALSE) = 0;
 
     /**
-     * Gets existence of a timer with specific type.
+     * @brief Gets existence of a timer with specific type.
      *
      * @param eType the type of the timer.
      * @return True if the timer is active.

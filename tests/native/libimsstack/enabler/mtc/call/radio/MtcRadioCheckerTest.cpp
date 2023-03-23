@@ -168,7 +168,8 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWithStartingTimer)
             .Times(2)
             .WillOnce(Return(99))
             .WillOnce(Return(10));
-    EXPECT_CALL(m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _))
+    EXPECT_CALL(
+            m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _, _))
             .Times(1);
 
     EXPECT_EQ(CheckResult::BLOCKED,
@@ -188,7 +189,8 @@ TEST_F(MtcRadioCheckerTest, CheckSsacNotBlockedWhenRandomSmallerThanFactor)
     EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
             .Times(1)
             .WillOnce(Return(50));
-    EXPECT_CALL(m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _))
+    EXPECT_CALL(
+            m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _, _))
             .Times(0);
 
     m_pMtcRadioChecker->Check(CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1);
@@ -201,7 +203,8 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWhenTimerIsRunning)
 
     EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(0);
     EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_)).Times(0);
-    EXPECT_CALL(m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _))
+    EXPECT_CALL(
+            m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, _, _))
             .Times(0);
 
     EXPECT_EQ(CheckResult::BLOCKED,
