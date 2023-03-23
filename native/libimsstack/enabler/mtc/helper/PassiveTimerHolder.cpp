@@ -47,13 +47,18 @@ PUBLIC VIRTUAL PassiveTimerHolder::~PassiveTimerHolder()
     m_objTimers.Clear();
 }
 
-PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(
-        IN IPassiveTimerHolder::Type eType, IN IMS_UINT32 nTimeInMillis)
+PUBLIC VIRTUAL void PassiveTimerHolder::AddTimer(IN IPassiveTimerHolder::Type eType,
+        IN IMS_UINT32 nTimeInMillis, IN IMS_BOOL bAllowReset /* = IMS_FALSE */)
 {
     if (IsActive(eType))
     {
-        IMS_TRACE_D("AddTimer Type[%d] is ignored. Same type is active.", eType, 0, 0);
-        return;
+        if (bAllowReset == IMS_FALSE)
+        {
+            IMS_TRACE_D("AddTimer Type[%d] is ignored. Same type is active.", eType, 0, 0);
+            return;
+        }
+
+        ReleaseTimer(m_objTimers.GetValue(eType));
     }
 
     IMS_TRACE_D("AddTimer Type[%d] Duration[%d]", eType, nTimeInMillis, 0);

@@ -36,7 +36,8 @@ public:
     PassiveTimerHolder(IN const PassiveTimerHolder&) = delete;
     PassiveTimerHolder& operator=(IN const PassiveTimerHolder&) = delete;
 
-    void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_UINT32 nTimeInMillis) override;
+    void AddTimer(IN IPassiveTimerHolder::Type eType, IN IMS_UINT32 nTimeInMillis,
+            IN IMS_BOOL bAllowReset = IMS_FALSE) override;
     IMS_BOOL IsActive(IN IPassiveTimerHolder::Type eType) const override;
 
     void OnAosStateChanged(IN IMtcService& objMtcService, IN MtcAosState eState,

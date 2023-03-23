@@ -60,21 +60,33 @@ TEST_F(PassiveTimerHolderTest, IsActiveReturnsFalseInitially)
 
 TEST_F(PassiveTimerHolderTest, AddTimerCreatesTimerAndLetsIsActiveReturnTrue)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
-TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeDoesNothing)
+TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeDoesNothingIfNotAllowsReset)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION);
+    EXPECT_CALL(objTimer, SetTimer(ANY_TIMER_DURATION, pPassiveTimerHolder)).Times(1);
+
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
+    EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
+}
+
+TEST_F(PassiveTimerHolderTest, AddTimerWithSameTimeResetsTimerIfAllowsReset)
+{
+    EXPECT_CALL(objTimer, SetTimer(ANY_TIMER_DURATION, pPassiveTimerHolder)).Times(2);
+
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_TRUE);
+    EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_TRUE);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
 TEST_F(PassiveTimerHolderTest, IsActiveReturnsFalseAfterAosDisconnected)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
     pPassiveTimerHolder->OnAosStateChanged(objService, MtcAosState::DISCONNECTED, 0);
     EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
@@ -88,14 +100,14 @@ TEST_F(PassiveTimerHolderTest, SerNormalServiceAddsAosStateListener)
 
 TEST_F(PassiveTimerHolderTest, TimerExpiredReleasesTimer)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
     pPassiveTimerHolder->Timer_TimerExpired(&objTimer);
     EXPECT_FALSE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
 }
 
 TEST_F(PassiveTimerHolderTest, InvalidTimerExpiredInvokesNothing)
 {
-    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION);
+    pPassiveTimerHolder->AddTimer(ANY_TIMER_TYPE, ANY_TIMER_DURATION, IMS_FALSE);
     MockITimer* pDiffTimer = new MockITimer();
     pPassiveTimerHolder->Timer_TimerExpired(pDiffTimer);
     EXPECT_TRUE(pPassiveTimerHolder->IsActive(ANY_TIMER_TYPE));
