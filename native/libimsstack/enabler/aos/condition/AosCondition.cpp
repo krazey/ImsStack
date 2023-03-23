@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "IImsPrivateProperty.h"
 #include "ServiceEvent.h"
+#include "ServiceUtil.h"
 #include "ServiceTrace.h"
 #include "ServiceNetworkPolicy.h"
 #include "AosReason.h"
@@ -675,6 +677,11 @@ void AosCondition::SetInitialBlockReason()
         ProcessBlockReason(IMS_TRUE, BLOCK_SUBSCRIBER_INCOMPLETED, IMS_FALSE);
     }
 
+    if (IsServiceBlockedByMenu())
+    {
+        ProcessBlockReason(IMS_TRUE, BLOCK_IMS_DISABLED);
+    }
+
     SetStartBlockReason();
 }
 
@@ -917,4 +924,15 @@ void AosCondition::UpdateRegistrationMode() const
                     IAosRegistration::CMD_SET_MODE, IAosRegistration::MODE_LIMITED);
         }
     }
+}
+
+PRIVATE
+IMS_BOOL AosCondition::IsServiceBlockedByMenu() const
+{
+    IImsPrivateProperty* piProperty = UtilService::GetUtilService()->GetPrivateProperty();
+    AString strTestImsDeregister = piProperty->GetPersistent(
+            ImsPrivateProperties::Persistent::KEY_TEST_IMS_DEREGISTER, m_nSlotId);
+
+    A_IMS_TRACE_D(APPPROFILE, "IsServiceBlockedByMenu : %s", strTestImsDeregister.GetStr(), 0, 0);
+    return strTestImsDeregister.Equals("YES");
 }

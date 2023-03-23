@@ -264,7 +264,11 @@ public final class ImsPrivateProperties {
          * Value : string
          */
         public static final String KEY_CONFIG_NR_DUPLEX_MODE = "config_nr_duplex_mode";
-
+        /**
+         * Keeps the pre-defined ims deregister.
+         * Value : string
+         */
+        public static final String KEY_TEST_IMS_DEREGISTER = "test_ims_deregister";
         /**
          * Keeps the log options for the ImsStack's logging.
          * Value : string (e.g. 0x0001000F)

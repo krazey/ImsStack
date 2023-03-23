@@ -97,11 +97,23 @@ public class AosFactory {
         }
     }
 
+    /**
+     * Returns IAosRegistration.
+     *
+     * @param slotId The slot-id
+     * @return Returns the interface of AosService.
+     */
     public synchronized IAosRegistration getAosRegistration(int slotId) {
-        return (IAosRegistration) mAosServices.get(slotId);
+        return mAosServices.get(slotId);
     }
 
+    /**
+     * Returns IAosInfo.
+     *
+     * @param slotId The slot-id
+     * @return Returns the interface of AosService.
+     */
     public synchronized IAosInfo getAosInfo(int slotId) {
-        return (IAosInfo) mAosServices.get(slotId);
+        return mAosServices.get(slotId);
     }
 }
