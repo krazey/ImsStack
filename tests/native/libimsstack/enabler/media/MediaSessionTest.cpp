@@ -262,6 +262,22 @@ TEST_F(MediaSessionTest, testNotifySrvccFailed)
     destroyAudioSession();
 }
 
+TEST_F(MediaSessionTest, testNotifySrvccCanceled)
+{
+    IMS_UINTP negoId = createAudioSession();
+
+    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_CANCELED), IMS_FALSE);
+
+    m_pSession->ModifySession(negoId);
+
+    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_CANCELED), IMS_TRUE);
+
+    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_STARTED), IMS_TRUE);
+    EXPECT_EQ(m_pSession->NotifySrvccStatus(MEDIA_SRVCC_CANCELED), IMS_TRUE);
+
+    destroyAudioSession();
+}
+
 TEST_F(MediaSessionTest, testNotifyFirstPacket)
 {
     IMS_UINTP negoId = m_pSession->CreateProfile(0, MEDIA_TYPE_AUDIO);
