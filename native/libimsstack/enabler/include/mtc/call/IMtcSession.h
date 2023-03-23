@@ -175,6 +175,14 @@ public:
      * @return
      */
     virtual IMS_BOOL IsRttCapable() const = 0;
+
+    /**
+     * @brief Gets the UpdateType of Early UPDATE previously sent and not succeeded yet.
+     *
+     * @return The UpdateType. If no previous Early UPDATE sent and not succeeded yet exists,
+     *         UpdateType::NONE.
+     */
+    virtual UpdateType GetOngoingUpdateType() const = 0;
 };
 
 #endif

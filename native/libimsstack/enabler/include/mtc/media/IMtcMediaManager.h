@@ -152,6 +152,13 @@ public:
     virtual void RestoreSdp(IN ISession* piSession) = 0;
 
     /**
+     * @brief Finalize the Sdp. It will reset the media negotiation state.
+     *
+     * @param piSession ISession instance is used for managing the media profile.
+     */
+    virtual void FinalizeSdp(IN ISession* piSession) = 0;
+
+    /**
      * @brief Update P-Early-Media header value and decide whether local tone should be played or
      *        not through the PemType and SIP status codes in the early dialog state.
      *        This method can be called if the UE receives

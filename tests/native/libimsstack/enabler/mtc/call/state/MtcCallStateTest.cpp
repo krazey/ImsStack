@@ -17,10 +17,12 @@
 #include "IIpcan.h"
 #include "ImsList.h"
 #include "ImsMap.h"
+#include "MediaDef.h"
 #include "MockIMtcService.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/MockIMtcSession.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/state/IMtcCallState.h"
 #include "call/state/MtcCallState.h"
@@ -44,6 +46,7 @@
 LOCAL CallStateName INITIAL_CALL_STATE = CallStateName::IDLE;
 LOCAL CallType ANY_CALL_TYPE = CallType::VOIP;
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -463,11 +466,41 @@ TEST_F(MtcCallStateTest, OnMediaFailedDoesNothing)
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnMediaFailed(*pReason));
 }
 
-TEST_F(MtcCallStateTest, OnSrvccStateUpdatedDoesNothing)
+TEST_F(MtcCallStateTest, OnSrvccStateUpdatedDoesNothingIfNotFailedOrCanceled)
 {
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::IDLE));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::STARTED));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::SUCCEEDED));
+}
+
+TEST_F(MtcCallStateTest, OnSrvccStateUpdateSendEarlyUpdateIfFailedOrCanceled)
+{
+    MockIMtcSession objMtcSession;
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(&objMtcSession);
+    ON_CALL(objContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
+    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(_)).Times(2);
+
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::FAILED));
+    EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::CANCELED));
+}
+
+TEST_F(MtcCallStateTest, OnSrvccStateUpdateDoesNothingIfFailedOrCanceledButNegoStateNotNegotiated)
+{
+    MockIMtcSession objMtcSession;
+    ImsList<IMtcSession*> objSessions;
+    objSessions.Append(&objMtcSession);
+    ON_CALL(objContext, GetSessions()).WillByDefault(ReturnRef(objSessions));
+    ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objISession));
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_IDLE));
+
+    EXPECT_CALL(objMtcSession, SendEarlyUpdate(_)).Times(0);
+
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::FAILED));
     EXPECT_EQ(INITIAL_CALL_STATE, pState->OnSrvccStateUpdated(SrvccState::CANCELED));
 }

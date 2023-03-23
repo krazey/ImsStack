@@ -103,6 +103,13 @@ public:
      *
      * @return
      */
+    virtual const ImsList<IMtcSession*>& GetSessions() const = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
     virtual IMtcService& GetService() = 0;
 
     /**

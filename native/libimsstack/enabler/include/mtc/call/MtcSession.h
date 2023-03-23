@@ -72,6 +72,7 @@ public:
     inline MtcExtensionSet& GetExtensionSet() override { return m_objExtensionSet; }
     inline IMS_BOOL IsVideoCapable() const override { return m_bVideoCapable; }
     inline IMS_BOOL IsRttCapable() const override { return m_bRttCapable; }
+    inline UpdateType GetOngoingUpdateType() const override { return m_eOngoingUpdateType; }
 
 private:
     enum class ResultSetSdp
@@ -108,6 +109,7 @@ private:
     IMS_BOOL m_bRttCapable;
     IMS_BOOL m_bTerminated;
     AString m_strSessionIdHeader;
+    UpdateType m_eOngoingUpdateType;
 };
 
 #endif
