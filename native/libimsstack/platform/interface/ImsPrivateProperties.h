@@ -72,6 +72,7 @@ public:
         /**
          * Test configurations.
          */
+        static const IMS_CHAR KEY_TEST_IMS_DEREGISTER[];
         static const IMS_CHAR KEY_TEST_LOG_OPTIONS[];
     };
 };

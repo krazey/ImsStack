@@ -30,6 +30,9 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
+import com.android.imsstack.enabler.IUIMS;
+import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -47,6 +50,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private static final String KEY_TEST_IMS_HAL_ENABLED = "test_ims_hal_enabled";
     private static final String KEY_TEST_CROSS_SIM_ENABLED = "test_cross_sim_enabled";
     private static final String KEY_TEST_PCSCF_ADDRESS = "test_pcscf_address";
+    private static final String KEY_TEST_IMS_DEREGISTER = "test_ims_deregister";
     private static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
     private static final String KEY_TEST_RESTART_IMSSTACK = "test_restart_imsstack";
     private static final String KEY_TEST_CLEAR_CONFIG = "test_clear_config";
@@ -76,6 +80,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private CheckBoxPreference mUsePredefinedUaString;
     private EditTextPreference mUaString;
     private EditTextPreference mNrDuplexMode;
+    private ListPreference mImsDeregister;
     private EditTextPreference mLogOptions;
     private ListPreference mRestartImsStack;
     private ListPreference mClearTestConfig;
@@ -258,6 +263,16 @@ public class TestConfigMenu extends PreferenceActivity {
             mNrDuplexMode.setOnPreferenceChangeListener(new EditTextItemChangeListener());
         }
 
+        mImsDeregister = (ListPreference) findPreference(KEY_TEST_IMS_DEREGISTER);
+
+        if (mImsDeregister != null) {
+            String imsDeregister = ImsPrivateProperties.Persistent.get(
+                    ImsPrivateProperties.Persistent.KEY_TEST_IMS_DEREGISTER, "NO", mSlotId);
+            mImsDeregister.setValue(imsDeregister);
+            mImsDeregister.setSummary(getImsDeregisterSummary(imsDeregister));
+            mImsDeregister.setOnPreferenceChangeListener(new ListItemChangeListener());
+        }
+
         mLogOptions = (EditTextPreference) findPreference(KEY_TEST_LOG_OPTIONS);
 
         if (mLogOptions != null) {
@@ -293,6 +308,11 @@ public class TestConfigMenu extends PreferenceActivity {
 
         ImsManager imsMgr = AppContext.getInstance().getSystemService(ImsManager.class);
         return (imsMgr == null) ? null : imsMgr.getImsMmTelManager(subId);
+    }
+
+    private String getImsDeregisterSummary(String value) {
+        return ("YES".equals(value)) ? "YES : The IMS service is blocked" :
+                "NO : The IMS service is unblocked";
     }
 
     private final class CheckBoxItemChangeListener
@@ -424,6 +444,24 @@ public class TestConfigMenu extends PreferenceActivity {
                 if ("1".equals(value)) {
                     ImsPrivateProperties.Persistent.removeTestProperties(mSlotId);
                     ImsLog.d(mSlotId, "TestConfig: test config cleared.");
+                }
+            } else if (KEY_TEST_IMS_DEREGISTER.equals(preference.getKey())) {
+                ImsLog.d(mSlotId, "TestConfig: " + preference.getKey() + "=" + value);
+                ImsPrivateProperties.Persistent.set(
+                        ImsPrivateProperties.Persistent.KEY_TEST_IMS_DEREGISTER, value, mSlotId);
+                preference.setSummary(getImsDeregisterSummary(value));
+
+                IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotId);
+                if (aosInfo != null) {
+                    if ("YES".equals(value)) {
+                        aosInfo.notifyServiceSetting(
+                                IAosInfo.ServiceSetting.OFF, IUIMS.M_SERVICE_ALL);
+                        Toast.makeText(TestConfigMenu.this,
+                                "Send IMS deregister message!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        aosInfo.notifyServiceSetting(
+                                IAosInfo.ServiceSetting.ON, IUIMS.M_SERVICE_ALL);
+                    }
                 }
             }
 
