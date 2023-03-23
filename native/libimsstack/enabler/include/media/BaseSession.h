@@ -63,7 +63,12 @@ public:
     virtual MEDIA_DIRECTION GetDirection();
 
     /**
-     * @brief Get the media direction
+     * @brief Set the cached media direction
+     */
+    virtual void SetPrevDirection(MEDIA_DIRECTION eDir);
+
+    /**
+     * @brief Get the cached media direction
      */
     virtual MEDIA_DIRECTION GetPrevDirection();
 

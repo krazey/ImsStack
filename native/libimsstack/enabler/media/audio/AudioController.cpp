@@ -429,15 +429,27 @@ IMS_BOOL AudioController::UpdateMediaDirection(MEDIA_DIRECTION eDirection, IMS_B
             continue;
         }
 
+        MEDIA_DIRECTION eTempDirection = eDirection;
+
         if (bRestore)
         {
-            pAudioSession->SetDirection(pAudioSession->GetPrevDirection());
-            bRet = pAudioSession->Modify();
+            eTempDirection = pAudioSession->GetPrevDirection();
+
+            if (eTempDirection == MEDIA_DIRECTION_INVALID)
+            {
+                eTempDirection = pAudioSession->GetDirection();
+            }
         }
-        else
+
+        IMS_TRACE_I("UpdateMediaDirection() - bRestore[%d], PrevDirection[%d], eTempDirection[%d]",
+                bRestore, pAudioSession->GetPrevDirection(), eTempDirection);
+
+        pAudioSession->SetDirection(eTempDirection);
+        bRet = pAudioSession->Modify();
+
+        if (bRestore)
         {
-            pAudioSession->SetDirection(eDirection);
-            bRet = pAudioSession->Modify();
+            pAudioSession->SetPrevDirection(MEDIA_DIRECTION_INVALID);
         }
     }
 
