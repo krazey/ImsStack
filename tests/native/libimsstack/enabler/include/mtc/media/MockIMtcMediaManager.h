@@ -59,6 +59,7 @@ public:
             (override));
     MOCK_METHOD(NegotiationResult, NegotiateSdp, (IN ISession* piSession), (override));
     MOCK_METHOD(void, RestoreSdp, (IN ISession* piSession), (override));
+    MOCK_METHOD(void, FinalizeSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(void, UpdatePemType, (IN ISession* piSession, IN IMessage* piMessage), (override));
     MOCK_METHOD(void, Run, (IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly),
             (override));

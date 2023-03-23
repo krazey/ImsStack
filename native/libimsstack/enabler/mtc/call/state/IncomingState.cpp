@@ -24,6 +24,7 @@
 #include "call/MtcPendingOperationHolder.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/state/IncomingState.h"
+#include "call/termination/EarlyUpdateErrorHandler.h"
 #include "call/termination/TerminationHandler.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
@@ -44,6 +45,11 @@ IncomingState::IncomingState(IN IMtcCallContext& objContext) :
 PUBLIC VIRTUAL IncomingState::~IncomingState()
 {
     IMS_TRACE_D("~IncomingState", 0, 0, 0);
+}
+
+PUBLIC VIRTUAL void IncomingState::OnExit()
+{
+    m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
 }
 
 PUBLIC VIRTUAL CallStateName IncomingState::Terminate(IN const CallReasonInfo& objReason)
@@ -90,15 +96,18 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
     return CallStateName::ALERTING;
 }
 
-PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(
-        IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
-    /*
-    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
+    IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
-    TODO: failure handler
-    */
+    CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
+    if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
+    {
+        m_objContext.GetMediaManager().FinalizeSdp(piSession);
+        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
+        return GetStateName();
+    }
     m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     return CallStateName::TERMINATING;
 }
@@ -195,7 +204,12 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
-        // TODO: introduce a new guard timer just in case? otherwise, delete this function.
+        case TIMER_GLARE_CONDITION:
+        {
+            IMtcSession* pSession = m_objContext.GetSession();
+            SendEarlyUpdate(pSession->GetOngoingUpdateType(), pSession);
+            return GetStateName();
+        }
         default:
             break;
     }
@@ -257,23 +271,5 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
             {
                 return pState->OnIpcanChanged(eIpcan);
             });
-    return GetStateName();
-}
-
-PROTECTED VIRTUAL CallStateName IncomingState::SendUpdateBySrvcc(IN UpdateType eType)
-{
-    IMtcSession* piMtcSession = m_objContext.GetSession();
-    if (piMtcSession == IMS_NULL)
-    {
-        return GetStateName();
-    }
-
-    ISession& objSession = piMtcSession->GetISession();
-
-    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) ==
-            NegotiationState::STATE_NEGOTIATED)
-    {
-        piMtcSession->SendEarlyUpdate(eType);
-    }
     return GetStateName();
 }

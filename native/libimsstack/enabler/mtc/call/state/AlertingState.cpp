@@ -25,6 +25,7 @@
 #include "call/MtcPendingOperationHolder.h"
 #include "call/state/AlertingState.h"
 #include "call/termination/CancelHandler.h"
+#include "call/termination/EarlyUpdateErrorHandler.h"
 #include "call/termination/TerminationHandler.h"
 #include "configuration/ConfigDef.h"
 #include "helper/MtcSupplementaryService.h"
@@ -34,10 +35,9 @@
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "sipcore/ISipHeader.h"
-#include "sipcore/SipHeaderName.h"
 #include "ussi/UssiController.h"
 #include "ussi/UssiDef.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -59,6 +59,7 @@ PUBLIC VIRTUAL void AlertingState::OnEnter()
 
 PUBLIC VIRTUAL void AlertingState::OnExit()
 {
+    m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
     if (UdpKeepAliveSender::IsRequired(m_objContext.GetConfigurationProxy()))
     {
         m_objContext.GetUdpKeepAliveSender().Stop();
@@ -91,7 +92,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::Accept(
     m_objContext.GetTimer().StopAll();
     if (bCallTypeChanged)
     {
-        if (pSession->SendEarlyUpdate(UpdateType::NORMAL) == IMS_FAILURE)
+        if (SendEarlyUpdate(UpdateType::NORMAL, pSession) == IMS_FAILURE)
         {
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
         }
@@ -215,6 +216,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
     IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_EARLY_UPDATE);
     IMtcSession* pSession = m_objContext.GetSession();
 
+    UpdateType eUpdateType = pSession->GetOngoingUpdateType();
     pSession->HandleResponse(ResponseType::EARLY_UPDATE_RESPONSE, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != CODE_NONE)
@@ -222,7 +224,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
     }
 
-    if (IsUpdateBySrvcc(piSession) == IMS_FALSE)
+    if (eUpdateType == UpdateType::NORMAL)
     {
         // if there is another case sending early UPDATE other than SRVCC, need to be checked.
         if (pSession->Accept() == IMS_FAILURE)
@@ -234,15 +236,17 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateFailed(
-        IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
-    /*
-    IMS_SINT32 nStatusCode = m_objContext.GetMessageUtils().GetResponseStatusCode(
+    IMessage* piResponse = m_objContext.GetMessageUtils().GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
-    TODO: failure handler
-    */
-
+    CallReasonInfo objReason = EarlyUpdateErrorHandler(m_objContext).Handle(piResponse);
+    if (objReason.nCode == CODE_SIP_REQUEST_PENDING)
+    {
+        m_objContext.GetMediaManager().FinalizeSdp(piSession);
+        m_objContext.GetTimer().Start(TIMER_GLARE_CONDITION, objReason.nExtraCode);
+        return GetStateName();
+    }
     m_objContext.GetUiNotifier().SendStartFailed(CallReasonInfo(CODE_REJECT_INTERNAL_ERROR));
     return CallStateName::TERMINATING;
 }
@@ -323,6 +327,12 @@ PUBLIC VIRTUAL CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
     {
         case TIMER_MT_ALERTING:
             return RejectIncomingAndToTerminating(CallReasonInfo(CODE_TIMEOUT_NO_ANSWER));
+        case TIMER_GLARE_CONDITION:
+        {
+            IMtcSession* pSession = m_objContext.GetSession();
+            SendEarlyUpdate(pSession->GetOngoingUpdateType(), pSession);
+            return GetStateName();
+        }
         default:
             break;
     }
@@ -364,47 +374,4 @@ PUBLIC VIRTUAL CallStateName AlertingState::OnIpcanChanged(IN IMS_UINT32 eIpcan)
                 return pState->OnIpcanChanged(eIpcan);
             });
     return GetStateName();
-}
-
-PROTECTED VIRTUAL CallStateName AlertingState::SendUpdateBySrvcc(IN UpdateType eType)
-{
-    IMtcSession* piMtcSession = m_objContext.GetSession();
-    if (piMtcSession == IMS_NULL)
-    {
-        return GetStateName();
-    }
-
-    ISession& objSession = piMtcSession->GetISession();
-
-    if (m_objContext.GetMediaManager().GetNegotiationState(&objSession) ==
-            NegotiationState::STATE_NEGOTIATED)
-    {
-        piMtcSession->SendEarlyUpdate(eType);
-    }
-    return GetStateName();
-}
-
-PRIVATE
-IMS_BOOL AlertingState::IsUpdateBySrvcc(IN ISession* piSession) const
-{
-    IMessage* piUpdateMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-    if (piUpdateMessage == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (piUpdateMessage->GetState() != IMessage::STATE_SENT)
-    {
-        // TODO: glare condition
-        return IMS_FALSE;
-    }
-
-    AString strReason = m_objContext.GetMessageUtils().GetHeader(
-            piUpdateMessage, ISipHeader::UNKNOWN, SipHeaderName::REASON);
-    if (strReason.Equals(MessageUtil::STR_REASON_HANDOVER_CANCELLED) ||
-            strReason.Equals(MessageUtil::STR_REASON_FAILURE_TO_TRANSITION))
-    {
-        return IMS_TRUE;
-    }
-    return IMS_FALSE;
 }

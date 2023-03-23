@@ -84,7 +84,7 @@ public:
             IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE) override;
     virtual NegotiationResult NegotiateSdp(IN ISession* piSession) override;
     virtual void RestoreSdp(IN ISession* piSession) override;
-    void FinalizeSdp(IN ISession* piSession);
+    void FinalizeSdp(IN ISession* piSession) override;
 
     /* P-Early-Media */
     virtual void UpdatePemType(IN ISession* piSession, IN IMessage* piMessage) override;
