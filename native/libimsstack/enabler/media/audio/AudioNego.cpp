@@ -272,7 +272,7 @@ PUBLIC VIRTUAL const IpAddress& AudioNego::GetNegotiatedRemoteAddress()
     return IpAddress::NONE;
 }
 
-PUBLIC VIRTUAL IMS_UINT32 AudioNego::GetNegotiatedRemotePort()
+PUBLIC VIRTUAL IMS_SINT32 AudioNego::GetRemotePort()
 {
     AudioProfile* pProfile = GetNegotiatedPeerProfile();
 
@@ -281,7 +281,7 @@ PUBLIC VIRTUAL IMS_UINT32 AudioNego::GetNegotiatedRemotePort()
         return pProfile->nDataPort;
     }
 
-    return 0;
+    return MEDIA_PORT_INVALID;
 }
 
 PUBLIC VIRTUAL AudioProfile* AudioNego::GetNegotiatedLocalProfile()

@@ -57,6 +57,8 @@ public:
             (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type), (override));
     MOCK_METHOD(IMS_SINT32, GetNegotiatedCodecBitrate,
             (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type), (override));
+    MOCK_METHOD(IMS_SINT32, GetRemotePort, (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type),
+            (override));
     MOCK_METHOD(MEDIA_DIRECTION, GetNegotiatedDirection,
             (IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type), (override));
     MOCK_METHOD(void, SetOptions,

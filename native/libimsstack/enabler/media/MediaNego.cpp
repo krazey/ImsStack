@@ -716,7 +716,7 @@ AUDIO_CODEC MediaNego::GetNegotiatedAudioQuality()
 PUBLIC
 VIDEO_RESOLUTION MediaNego::GetNegotiatedVideoQuality()
 {
-    if (m_pVideoNego == IMS_NULL || m_pVideoNego->GetNegotiatedRemotePort() == 0)
+    if (m_pVideoNego == IMS_NULL || m_pVideoNego->GetRemotePort() <= 0)
     {
         return VIDEO_RESOLUTION_NOT_USED;
     }

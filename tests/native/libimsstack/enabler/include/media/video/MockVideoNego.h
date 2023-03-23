@@ -44,7 +44,7 @@ public:
     MOCK_METHOD(const IpAddress&, GetLocalAddress, (), (override));
     MOCK_METHOD(IMS_UINT32, GetLocalPort, (), (override));
     MOCK_METHOD(const IpAddress&, GetNegotiatedRemoteAddress, (), (override));
-    MOCK_METHOD(IMS_UINT32, GetNegotiatedRemotePort, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetRemotePort, (), (override));
     MOCK_METHOD(VideoProfile*, GetNegotiatedLocalProfile, (), (override));
     MOCK_METHOD(VideoProfile*, GetNegotiatedNegoProfile, (), (override));
     MOCK_METHOD(VideoProfile*, GetNegotiatedPeerProfile, (), (override));
