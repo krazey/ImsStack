@@ -619,7 +619,7 @@
     <boolean name="sms_geolocation_pidf_for_emergency_bool" value="false"/>
     <int name="sms_retry_after_max_time_sec_int" value="130"/>
     <int name="sms_retry_after_max_count_int" value="0"/>
-    <boolean name="sms_report_generic_error_if_retry_after_not_possible_bool" value="false"/>
+    <boolean name="sms_report_generic_error_when_retry_after_not_possible_bool" value="false"/>
 
     <!-- Ut/Xcap -->
     <int-array name="imsss.ut_sm_cause_temporary_block_int_array" num="0">
