@@ -115,8 +115,6 @@ typedef enum _REPORT_TYPE
     REPORT_SUCCESS = 0,
     // Failures, based on IMMedia.h - RtpError
     REPORT_FAILURE,
-    // After sending CloseSession successfully to ImsMedia
-    REPORT_CLOSE_SESSION,
     // No received RTP or RTCP packets
     REPORT_DATA_RECEIVE_FAILED,
     // Notify the first packet received
