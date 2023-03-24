@@ -480,6 +480,12 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
             {
                 case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
                     break;
+                case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
+                    if (!IsEpsOnlyAttach())
+                    {
+                        break;
+                    }
+                    __IMS_FALLTHROUGH__
                 case CarrierConfig::ImsVoice::
                         REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
                     ControlAos(ImsAosControl::PCSCF_NEXT);
@@ -492,7 +498,6 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
                     ControlAos(ImsAosControl::REGISTER_REINITIATE);
                     break;
             }
-            return CallReasonInfo(CODE_SIP_SERVER_TIMEOUT, GetDefaultExtraCode(objMessage));
         }
     }
 
