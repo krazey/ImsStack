@@ -52,6 +52,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_pMessageSender(pMessageSender),
         m_objExtensionSet(GetSupportedExtensions()),
         m_eCallType(eCallType),
+        m_ePreviousCallType(CallType::UNKNOWN),
         m_bVideoCapable(IMS_FALSE),
         m_bRttCapable(IMS_FALSE),
         m_bTerminated(IMS_FALSE),
@@ -94,12 +95,10 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Start()
 {
     IMS_TRACE_D("Start", 0, 0, 0);
 
-    if (m_objContext.GetMediaManager().FormSdp(&m_objSession, m_eCallType) == IMS_FAILURE)
+    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }
-
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(&m_objSession, IMS_FALSE);
 
     m_objExtensionSet.FormatRequest(RequestType::START, *m_objSession.GetNextRequest());
     return m_pMessageSender->Start(GetCallType());
@@ -245,6 +244,11 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::AcceptUpdate()
 {
     IMS_TRACE_D("AcceptUpdate", 0, 0, 0);
 
+    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
     m_objExtensionSet.FormatResponse(ResponseType::ACCEPT_UPDATE, *m_objSession.GetNextResponse());
     return m_pMessageSender->AcceptUpdate();
 }
@@ -288,14 +292,15 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
         }
     }
 
-    if (eType == RequestType::START || eType == RequestType::EARLY_UPDATE)
+    if (eType == RequestType::START || eType == RequestType::EARLY_UPDATE ||
+            eType == RequestType::UPDATE)
     {
         UpdateCallTypeFromMessage(objRequest);
         if (m_eCallType == CallType::UNKNOWN)
         {
             // UE must send full media list for the incoming INVITE w/o SDP
             // TODO: but, let us optimize.
-            m_eCallType = CallType::VOIP;
+            SetCallType(CallType::VOIP);
             m_objContext.GetMediaManager().UpdateMediaDirection(
                     MEDIATYPE_AUDIO, DIRECTION_SEND_RECEIVE);
         }
@@ -335,6 +340,13 @@ PUBLIC VIRTUAL void MtcSession::HandleResponse(
     {
         SetInConference(objResponse);
     }
+}
+
+PUBLIC VIRTUAL void MtcSession::SetCallType(IN CallType eNewCallType)
+{
+    IMS_TRACE_D("SetCallType [%d] -> [%d]", m_eCallType, eNewCallType, 0);
+    m_ePreviousCallType = m_eCallType;
+    m_eCallType = eNewCallType;
 }
 
 PRIVATE
@@ -383,7 +395,12 @@ void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage)
             m_objContext.GetMessageUtils().GetCallType(&objMessage, &m_objSession, IMS_TRUE);
     if (eNewCallType != CallType::UNKNOWN)
     {
-        m_eCallType = eNewCallType;
+        SetCallType(eNewCallType);
+    }
+    else
+    {
+        // To update the m_ePreviousCallType.
+        SetCallType(m_eCallType);
     }
 
     CheckCallTypeWithRegisteredFeature();
@@ -452,21 +469,21 @@ void MtcSession::CheckCallTypeWithRegisteredFeature()
     if ((m_eCallType == CallType::VT && !bVideoFeature) ||
             (m_eCallType == CallType::RTT && !bTextFeature))
     {
-        m_eCallType = CallType::VOIP;
+        SetCallType(CallType::VOIP);
     }
 }
 
 PRIVATE
 MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer)
 {
-    // TODO: RFC 6337 instead of bAllowReOffer?
-    // Need 'Method'/'Request or Response' information of the message to be sent
+    // Answering for offerless re-INVITE case must not come into this.
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     NegotiationState eState = objMediaManager.GetNegotiationState(&m_objSession);
 
     if (eState == NegotiationState::STATE_OFFER_SENT)
     {
+        IMS_TRACE_D("SetSdpToSend - already STATE_OFFER_SENT", 0, 0, 0);
         return ResultSetSdp::NO_SDP;
     }
 

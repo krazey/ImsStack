@@ -168,9 +168,7 @@ TEST_F(EstablishedStateTest, OnVideoLowestBitRateInvokesDowngradeIfCallTypeIsVt)
 {
     ON_CALL(objMockMtcSession, GetCallType).WillByDefault(Return(CallType::VT));
 
-    EXPECT_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::VOIP, IMS_FALSE))
-            .WillOnce(Return(IMS_SUCCESS));
-
+    EXPECT_CALL(objMockMtcSession, SetCallType(CallType::VOIP));
     EXPECT_CALL(objMockMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE))
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _)).Times(1);
@@ -182,8 +180,7 @@ TEST_F(EstablishedStateTest, OnVideoLowestBitRateInvokesDowngradeIfCallTypeIsVid
 {
     ON_CALL(objMockMtcSession, GetCallType).WillByDefault(Return(CallType::VIDEO_RTT));
 
-    EXPECT_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::RTT, IMS_FALSE))
-            .WillOnce(Return(IMS_SUCCESS));
+    EXPECT_CALL(objMockMtcSession, SetCallType(CallType::RTT));
     EXPECT_CALL(objMockMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE))
             .WillOnce(Return(IMS_SUCCESS));
     EXPECT_CALL(objTimerWrapper, Start(MtcCallState::TIMER_CONVERT_REMOTE_RESPONSE, _)).Times(1);

@@ -56,6 +56,7 @@ public:
             (override));
     MOCK_METHOD(void, SetCallType, (IN CallType eCallType), (override));
     MOCK_METHOD(CallType, GetCallType, (), (const, override));
+    MOCK_METHOD(CallType, GetPreviousCallType, (), (const, override));
     MOCK_METHOD(ISession&, GetISession, (), (override));
     MOCK_METHOD(MtcExtensionSet&, GetExtensionSet, (), (override));
     MOCK_METHOD(IMS_BOOL, IsVideoCapable, (), (const, override));

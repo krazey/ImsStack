@@ -626,3 +626,14 @@ TEST_F(MtcSessionTest, HandleResponseSetsInConferenceIfIsFocus)
 
     EXPECT_TRUE(objCallInfo.bConference);
 }
+
+TEST_F(MtcSessionTest, SetCallTypeUpdatesCurrentCallTypeAndPreviousCallType)
+{
+    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    EXPECT_EQ(pMtcSession->GetCallType(), CallType::VOIP);
+    EXPECT_EQ(pMtcSession->GetPreviousCallType(), CallType::UNKNOWN);
+
+    pMtcSession->SetCallType(CallType::VT);
+    EXPECT_EQ(pMtcSession->GetCallType(), CallType::VT);
+    EXPECT_EQ(pMtcSession->GetPreviousCallType(), CallType::VOIP);
+}
