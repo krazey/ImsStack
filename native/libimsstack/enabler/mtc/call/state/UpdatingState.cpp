@@ -106,13 +106,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
     m_objContext.GetUpdatingInfo().AdjustDirectionIfNeededForHoldOrResume(objMediaInfo);
 
     m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
-
-    if (m_objContext.GetMediaManager().FormSdp(&objSession, eCallType) == IMS_FAILURE)
-    {
-        // TODO
-    }
-
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(&objSession, IMS_FALSE);
+    pSession->SetCallType(eCallType);
 
     m_objContext.GetUpdatingInfo().GetModifiedInfo() =
             m_objContext.GetMediaManager().GetMediaInfo();

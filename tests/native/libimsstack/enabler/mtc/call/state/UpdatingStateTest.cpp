@@ -174,8 +174,7 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpd
 
     EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
     EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
-    EXPECT_CALL(objMediaManager, FormSdp(_, _, _)).Times(1);
-    EXPECT_CALL(objMtcPreconditionManager, FormPreconditionSdp(_, _)).Times(1);
+    EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
     EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
     EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
     EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));

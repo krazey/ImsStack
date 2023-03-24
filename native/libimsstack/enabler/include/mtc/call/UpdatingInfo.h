@@ -55,11 +55,19 @@ public:
     IMS_BOOL IsNeedToAlert() const;
     IMS_BOOL IsRequestedHoldResume() const;
     IMS_BOOL IsRequestedModifying() const;
+
+    /**
+     * @brief Checks whether the received Request is call modification or not.
+     *        It compares the CallType before the Request and the CallType of this Request.
+     *
+     * @return IMS_TRUE if the CallTypes are different. IMS_FALSE otherwise.
+     */
     IMS_BOOL IsModified() const;
     inline IMS_BOOL HasPendingUpdate() const { return m_bHasPendingUpdate; }
     void AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const;
 
 private:
+    // This returns the original CallType before this update is successfully completed.
     CallType GetCurrentCallType() const;
 
 private:

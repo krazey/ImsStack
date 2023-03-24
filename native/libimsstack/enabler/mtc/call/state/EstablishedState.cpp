@@ -493,20 +493,13 @@ IMS_RESULT EstablishedState::HandleUpdate(
     objMediaManager.SetMediaInfo(objMediaInfo);
 
     IMtcSession* pSession = m_objContext.GetSession();
-
-    if (objMediaManager.FormSdp(&(pSession->GetISession()), eCallType) == IMS_FAILURE)
-    {
-        // TODO
-    }
-
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(
-            &(pSession->GetISession()), IMS_FALSE);
+    pSession->SetCallType(eCallType);
 
     m_objContext.GetUpdatingInfo().GetModifyingInfo() = objMediaManager.GetMediaInfo();
 
     if (pSession->Update(eUpdateType, IMS_FALSE, SipMethod::INVITE) == IMS_FAILURE)
     {
-        // TODO
+        // TODO: reset the CallType
     }
 
     m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,

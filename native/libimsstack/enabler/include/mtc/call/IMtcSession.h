@@ -135,18 +135,28 @@ public:
     virtual IMS_RESULT Terminate(IMS_BOOL bUseBye, IN const CallReasonInfo& objReason) = 0;
 
     /**
-     * @brief Sets
+     * @brief Sets the current CallType with the input param.
      *
-     * @param eCallType
+     * @param eCallType The CallType to set.
      */
     virtual void SetCallType(IN CallType eCallType) = 0;
 
     /**
-     * @brief Gets
+     * @brief Gets the current CallType.
      *
-     * @return
+     * @return The current CallType.
+     *         If it's after handling an incoming SIP message, it will be from the SIP message.
+     *         If #SetCallType is invoked previously and no handling of incoming SIP message after
+     *         that, it will be same as the input param of #SetCallType.
      */
     virtual CallType GetCallType() const = 0;
+
+    /**
+     * @brief Gets the previous CallType.
+     *
+     * @return The previous CallType.
+     */
+    virtual CallType GetPreviousCallType() const = 0;
 
     /**
      * @brief Gets
