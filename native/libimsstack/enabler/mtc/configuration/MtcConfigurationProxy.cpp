@@ -162,8 +162,6 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_pManager->IsStopRingbackTimerBy183WithSdpBody();
         case Feature::INITIALIZE_PEM_WHEN_NO_HEADER:
             return m_pManager->IsInitializePemWhenNoHeader();
-        case Feature::SEND_180_FOR_INITIAL_INVITE:
-            return m_pManager->IsSend180ForInitialInvite();
         case Feature::RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_FAIL:
             return m_pManager->IsReleaseEmergencyPdnWithEmergencyCallFail();
         case Feature::REQUIRED_CDMALESS_FEATURE_TAG:
