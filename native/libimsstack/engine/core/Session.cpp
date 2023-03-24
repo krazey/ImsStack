@@ -169,8 +169,7 @@ IMS_RESULT Session::Accept()
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
         IMS_TRACE_E(0,
-                "To accept a session, the state MUST be a NEGOTIATING or RENEGOTIATING; "
-                "(%s)",
+                "To accept a session, the state MUST be a NEGOTIATING or RENEGOTIATING; (%s)",
                 StateToString(nState), 0, 0);
         return IMS_FAILURE;
     }
@@ -179,9 +178,7 @@ IMS_RESULT Session::Accept()
     {
         Ims::SetLastError(ImsError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0,
-                "UAS MUST delay sending 2XX until the provisional response "
-                "is acknowledged",
+        IMS_TRACE_E(0, "UAS MUST delay sending 2XX until the provisional response is acknowledged",
                 0, 0, 0);
         return IMS_FAILURE;
     }
@@ -297,20 +294,48 @@ IMS_RESULT Session::Accept()
     }
     else
     {
-        // If re-INVITE is received with SDP, it will be set by the SDP offer/answer context
-        // If no SDP in the re-INVITE, generate the SDP from the current view (capabilities)
+        IMS_BOOL bSdpFromCurrentView = IMS_TRUE;
+
+        // 1) If re-INVITE is received with SDP, it will be set by the SDP offer/answer context.
+        // 2) If no SDP in the re-INVITE, generate the SDP from the current view (capabilities).
         if (piSipMsg->GetMethod().Equals(SipMethod::INVITE) &&
-                (GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED))
+                GetOfferAnswerState() == SdpOaState::STATE_ESTABLISHED &&
+                (m_pOaState == IMS_NULL || !m_pOaState->IsOfferProgress()))
         {
-            if ((m_pOaState != IMS_NULL) && (m_pOaState->IsOfferProgress()))
+            // Current view will be used when the following conditions match:
+            // 1) re-INVITE w/o SDP received and no responses.
+            // 2) re-INVITE w/o SDP received and any provisional response w/o SDP sent.
+            Message* pRequest = GetPreviousRequest(IMessage::SESSION_UPDATE);
+
+            if (pRequest != IMS_NULL && pRequest->GetMessage()->GetSdpBodyPart() == IMS_NULL)
             {
-                // Offer change will be sent in 200 OK to re-INVITE request
-                CheckNSetSdpBodyPart(piSipMsg);
+                ImsList<Message*> objResponses = GetPreviousResponses(IMessage::SESSION_UPDATE);
+
+                for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
+                {
+                    Message* pResponse = objResponses.GetAt(i);
+
+                    if (pResponse != IMS_NULL &&
+                            pResponse->GetMessage()->GetSdpBodyPart() != IMS_NULL)
+                    {
+                        bSdpFromCurrentView = IMS_FALSE;
+                        break;
+                    }
+                }
             }
             else
             {
-                SetSdpBodyPartFromCurrentView(piSipMsg);
+                bSdpFromCurrentView = IMS_FALSE;
             }
+        }
+        else
+        {
+            bSdpFromCurrentView = IMS_FALSE;
+        }
+
+        if (bSdpFromCurrentView)
+        {
+            SetSdpBodyPartFromCurrentView(piSipMsg);
         }
         else
         {
