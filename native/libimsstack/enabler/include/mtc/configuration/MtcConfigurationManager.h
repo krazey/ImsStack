@@ -169,7 +169,6 @@ public:
             IN MessageTypeForGeolocationPidf eType) const override;
     IMS_BOOL IsInitializePemWhenNoHeader() const override;
     IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const override;
-    IMS_BOOL IsSend180ForInitialInvite() const override;
     IMS_SINT32 GetEpsFallbackWatchdogTime() const override;
     IMS_SINT32 GetSendUdpKeepAliveIntervalTime() const override;
     IMS_SINT32 GetCallRejectCodeForNotAcceptableCallType() const override;

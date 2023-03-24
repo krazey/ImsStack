@@ -945,13 +945,6 @@ public:
     virtual IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const = 0;
 
     /**
-     * @brief Checks
-     *
-     * @return
-     */
-    virtual IMS_BOOL IsSend180ForInitialInvite() const = 0;
-
-    /**
      * @brief Gets
      *
      * @return
