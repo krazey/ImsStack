@@ -703,7 +703,6 @@ TEST_F(IdleStateTest, OnAttachedRejectsIfSendProvisionalResponseFailed)
     const AString strRprTag(MtcExtensionSet::OPTION_TAG_RPR);
     ON_CALL(objMtcSession, GetExtensionSet)
             .WillByDefault(ReturnRef(*GetTestExtensionSet(strRprTag)));
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMtcSession, SendProvisionalResponse(IMS_FALSE)).WillByDefault(Return(IMS_FAILURE));
 
     const CallReasonInfo objReasonInfo(CODE_REJECT_INTERNAL_ERROR);
@@ -728,7 +727,6 @@ TEST_F(IdleStateTest, OnAttachedTransitsIncomingState)
     const AString strRprTag(MtcExtensionSet::OPTION_TAG_RPR);
     ON_CALL(objMtcSession, GetExtensionSet)
             .WillByDefault(ReturnRef(*GetTestExtensionSet(strRprTag)));
-    ON_CALL(*pConfigurationManager, IsSend180ForInitialInvite).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMtcSession, SendProvisionalResponse(IMS_FALSE)).WillByDefault(Return(IMS_SUCCESS));
     ON_CALL(objMessage, GetStatusCode).WillByDefault(Return(SipStatusCode::SC_180));
 
