@@ -87,6 +87,8 @@ protected:
         ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
         ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
                 .WillByDefault(Return(IMS_ROAMING_STATE_OFF));
+        ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+                .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
 
         pHandler = new StartErrorHandler(objCallContext);
     }
@@ -272,6 +274,14 @@ TEST_F(StartErrorHandlerTest, HandleTransactionTimeoutForEpsfb)
     ON_CALL(*pConfigurationManager, IsRequiredCdmalessFeatureTag).WillByDefault(Return(IMS_TRUE));
     EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
     EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_EPS_ONLY_ATTACHED));
+    EXPECT_CALL(objAosConnector, Control(ImsAosControl::REGISTER_REINITIATE)).Times(1);
+    EXPECT_TRUE(CheckHandleResult(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE));
+
+    ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+            .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
 
     ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_ROAMING_STATE))
             .WillByDefault(Return(IMS_ROAMING_STATE_ON));
