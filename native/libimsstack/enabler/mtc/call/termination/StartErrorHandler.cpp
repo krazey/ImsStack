@@ -528,6 +528,12 @@ CallReasonInfo StartErrorHandler::HandleRedialByNetworkContext() const
         return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
     }
 
+    if (IsEpsOnlyAttach())
+    {
+        ControlAos(ImsAosControl::REGISTER_REINITIATE);
+        return CallReasonInfo(CODE_NETWORK_RESP_TIMEOUT, EXTRA_CODE_METHOD_INVITE);
+    }
+
     if (m_objContext.GetService().IsWlanIpCanType())
     {
         ControlAos(ImsAosControl::REGISTER_REINITIATE);
@@ -701,6 +707,13 @@ IMS_BOOL StartErrorHandler::IsRoaming() const
 {
     return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_ROAMING_STATE) ==
             IMS_ROAMING_STATE_ON;
+}
+
+PRIVATE
+IMS_BOOL StartErrorHandler::IsEpsOnlyAttach() const
+{
+    return m_objContext.GetImsEventReceiver().GetWParam(IMS_EVENT_LTE_INFO) ==
+            IMS_LTE_INFO_EPS_ONLY_ATTACHED;
 }
 
 PRIVATE
