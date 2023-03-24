@@ -17,7 +17,9 @@
 #include "CallReasonInfo.h"
 #include "CarrierConfig.h"
 #include "Ims3gpp.h"
+#include "ImsEventDef.h"
 #include "MockIMtcCallController.h"
+#include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
 #include "MtcContextRepository.h"
 #include "MtcDef.h"
@@ -89,6 +91,7 @@ public:
     MtcSupplementaryService* pSupplementaryService;
     MediaInfo objMediaInfo;
     ImsList<IMtcSession*> objSessions;
+    MockIMtcImsEventReceiver objImsEventReceiver;
 
 protected:
     virtual void SetUp() override
@@ -135,6 +138,10 @@ protected:
                 .WillByDefault(Return(pSessionInterfaceHolder));
         ON_CALL(objCallContext, GetSipInterfaceFactory)
                 .WillByDefault(ReturnRef(objSipInterfaceFactory));
+
+        ON_CALL(objCallContext, GetImsEventReceiver).WillByDefault(ReturnRef(objImsEventReceiver));
+        ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
+                .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
 
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
         ON_CALL(objMediaManager, GetRemoteRtpPort(_, MEDIATYPE_AUDIO)).WillByDefault(Return(12345));
