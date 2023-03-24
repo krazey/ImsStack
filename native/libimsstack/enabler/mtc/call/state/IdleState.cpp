@@ -232,8 +232,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 
     m_objContext.GetPreconditionManager().OnMessageReceived(piSession, piMessage);
 
-    if (IsRprSupported() &&
-            !m_objContext.GetConfigurationProxy().Is(Feature::SEND_180_FOR_INITIAL_INVITE))
+    if (IsRprSupported())
     {
         if (m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
         {

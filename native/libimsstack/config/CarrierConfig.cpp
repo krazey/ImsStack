@@ -989,8 +989,6 @@ const IMS_CHAR CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADE
         "initialize_p_early_media_when_no_header_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =
         "policy_for_local_ringback_tone_with_180_response_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL[] =
-        "send_180_for_initial_invite_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_EPS_FALLBACK_WATCHDOG_TIME_MILLIS_INT[] =
         "eps_fallback_watchdog_time_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SEND_UDP_KEEP_ALIVE_INTERVAL_TIME_MILLIS_INT[] =

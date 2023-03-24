@@ -829,12 +829,6 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyForLocalRingbackToneWith180Response
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsSend180ForInitialInvite() const
-{
-    return m_objCarrierConfig.bSend180ForInitialInvite;
-}
-
-PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetEpsFallbackWatchdogTime() const
 {
     return m_objCarrierConfig.nEpsFallbackWatchDogTime;
