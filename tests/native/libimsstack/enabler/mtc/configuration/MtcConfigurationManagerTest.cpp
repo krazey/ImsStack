@@ -1237,12 +1237,6 @@ TEST_F(MtcConfigurationManagerTest,
                             KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT));
 }
 
-TEST_F(MtcConfigurationManagerTest, IsSend180ForInitialInviteReturnsValueInCarrierConfig)
-{
-    EXPECT_EQ(pManager->IsSend180ForInitialInvite(),
-            GetBool(CarrierConfig::Assets::KEY_SEND_180_FOR_INITIAL_INVITE_BOOL));
-}
-
 TEST_F(MtcConfigurationManagerTest, GetEpsFallbackWatchdogTimeReturnsValueInCarrierConfig)
 {
     EXPECT_EQ(pManager->GetEpsFallbackWatchdogTime(),

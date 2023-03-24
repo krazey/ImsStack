@@ -124,7 +124,6 @@ public:
             bRejectVowifiVoiceCallWhenVowifiSettingOff(IMS_FALSE),
             bRetryEmergencyCallOverEmergencyPdnWithNextPcscf(IMS_FALSE),
             bRetryEmergencyOnImsPdnBool(IMS_FALSE),
-            bSend180ForInitialInvite(IMS_FALSE),
             bSessionTimerSupported(IMS_TRUE),
             bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType(IMS_FALSE),
             bStopRingbackTimerBy183WithSdpBody(IMS_FALSE),
@@ -278,7 +277,6 @@ public:
     IMS_BOOL bRejectVowifiVoiceCallWhenVowifiSettingOff;
     IMS_BOOL bRetryEmergencyCallOverEmergencyPdnWithNextPcscf;
     IMS_BOOL bRetryEmergencyOnImsPdnBool;
-    IMS_BOOL bSend180ForInitialInvite;
     IMS_BOOL bSessionTimerSupported;
     IMS_BOOL bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType;
     IMS_BOOL bStopRingbackTimerBy183WithSdpBody;
