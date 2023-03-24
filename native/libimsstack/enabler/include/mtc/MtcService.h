@@ -97,6 +97,8 @@ public:
     void ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
 
 private:
+    IMS_BOOL m_bFeatureAddedForCallComposer;
+
     void Init();
     void SetStatus(IN ServiceStatus eStatus);
     static AString GetServiceName(IN ServiceType eType);
@@ -104,6 +106,7 @@ private:
     void AttachAosInterface();
     void SetServiceFilterCriteria() const;
     void SetAosReady(IN IMS_BOOL);
+    void UpdateCallComposerFeature(IN IMS_UINT32 nFeatures);
 
 protected:
     ServiceType m_eType;
@@ -121,7 +124,6 @@ protected:
     {
         TEST_COMMAND_AOS_CONNECTED = 0,
         TEST_COMMAND_AOS_DISCONNECTED = 1
-
     };
 };
 

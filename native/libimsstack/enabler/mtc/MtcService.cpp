@@ -20,6 +20,7 @@
 #include "ICapabilities.h"
 #include "ICarrierConfig.h"
 #include "ICoreService.h"
+#include "IFeatureCaps.h"
 #include "IImsAos.h"
 #include "IIpcan.h"
 #include "IJniEnabler.h"
@@ -40,6 +41,7 @@
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "SipFactory.h"
+#include "SipMethod.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/MtcAosConnector.h"
@@ -49,9 +51,12 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
+LOCAL IMS_CHAR FEATURE_TAG_CALL_COMPOSER[] = "+g.gsma.callcomposer";
+
 PUBLIC
 MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         ImsService(AString::ConstNull()),
+        m_bFeatureAddedForCallComposer(IMS_FALSE),
         m_eType(eType),
         m_objContext(objContext),
         m_strServiceName(GetServiceName(eType)),
@@ -80,7 +85,7 @@ PUBLIC VIRTUAL MtcService::~MtcService()
 
     if (m_piCoreService)
     {
-        m_piCoreService->SetListener(this);
+        m_piCoreService->SetListener(IMS_NULL);
         m_piCoreService->Close();
         m_piCoreService = IMS_NULL;
     }
@@ -231,6 +236,10 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
 {
     IMS_TRACE_I("ImsAos_Connected", 0, 0, 0);
     SetStatus(ServiceStatus::SERVICE_ACTIVE);
+    if (!IsEmergency())
+    {
+        UpdateCallComposerFeature(nFeatures);
+    }
     m_pAosEventHandler->OnConnected(nFeatures, nIpcan);
     SetAosReady(IMS_TRUE);
 }
@@ -389,5 +398,36 @@ void MtcService::SetAosReady(IN IMS_BOOL bReady)
     else
     {
         m_pAosConnector->SetReady(bReady, ImsAosService::EMERGENCY_MTC);
+    }
+}
+
+PRIVATE
+void MtcService::UpdateCallComposerFeature(IN IMS_UINT32 nFeatures)
+{
+    ICoreService* pCoreService = GetICoreService();
+    IFeatureCaps* pFeatureCapabilities =
+            pCoreService != IMS_NULL ? pCoreService->GetFeatureCaps() : IMS_NULL;
+    if (pFeatureCapabilities == IMS_NULL)
+    {
+        return;
+    }
+
+    if (nFeatures & ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY)
+    {
+        if (!m_bFeatureAddedForCallComposer)
+        {
+            pFeatureCapabilities->AddFeature(
+                    FEATURE_TAG_CALL_COMPOSER, AString::ConstEmpty(), SipMethod::INVITE);
+            m_bFeatureAddedForCallComposer = IMS_TRUE;
+        }
+    }
+    else
+    {
+        if (m_bFeatureAddedForCallComposer)
+        {
+            pFeatureCapabilities->RemoveFeature(
+                    FEATURE_TAG_CALL_COMPOSER, AString::ConstEmpty(), SipMethod::INVITE);
+            m_bFeatureAddedForCallComposer = IMS_FALSE;
+        }
     }
 }
