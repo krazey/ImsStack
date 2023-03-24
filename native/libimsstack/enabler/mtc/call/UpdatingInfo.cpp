@@ -203,12 +203,8 @@ PUBLIC
 IMS_BOOL UpdatingInfo::IsModified() const
 {
     ISession& objSession = m_objContext.GetSession()->GetISession();
-    if (GetCurrentCallType() != m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession))
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
+    return GetCurrentCallType() !=
+            m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession);
 }
 
 PUBLIC
@@ -240,5 +236,5 @@ CallType UpdatingInfo::GetCurrentCallType() const
         return CallType::UNKNOWN;
     }
 
-    return pSession->GetCallType();
+    return pSession->GetPreviousCallType();
 }

@@ -66,8 +66,9 @@ public:
     void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
     void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
-    inline void SetCallType(IN CallType eCallType) override { m_eCallType = eCallType; }
+    void SetCallType(IN CallType eNewCallType) override;
     inline CallType GetCallType() const override { return m_eCallType; }
+    inline CallType GetPreviousCallType() const override { return m_ePreviousCallType; }
     inline ISession& GetISession() override { return m_objSession; }
     inline MtcExtensionSet& GetExtensionSet() override { return m_objExtensionSet; }
     inline IMS_BOOL IsVideoCapable() const override { return m_bVideoCapable; }
@@ -105,6 +106,7 @@ private:
     MtcExtensionSet m_objExtensionSet;
 
     CallType m_eCallType;
+    CallType m_ePreviousCallType;
     IMS_BOOL m_bVideoCapable;
     IMS_BOOL m_bRttCapable;
     IMS_BOOL m_bTerminated;
