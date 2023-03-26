@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -57,13 +56,6 @@ public class CallFeatureTest {
     public void testCallFeature() {
         int[] intArray = {0, 1};
         int[] emptyArray = new int[0];
-
-        when(mMockCarrierConfig.getInt(
-                CarrierConfig.Assets.KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT))
-                .thenReturn(200)
-                .thenReturn(486);
-        assertEquals(200, CallFeature.getStatusCodeforCallTypeChangeReject(SLOT_ID));
-        assertEquals(486, CallFeature.getStatusCodeforCallTypeChangeReject(SLOT_ID));
 
         when(mMockCarrierConfig.getIntArray(
                 CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY))
