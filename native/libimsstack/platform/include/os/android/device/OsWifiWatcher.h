@@ -38,7 +38,7 @@ public:
 
 private:
     void UpdateWifiStateChanged(IN IMS_UINT32 nState);
-    void UpdateWifiNetworkStateChanged(IN IMS_UINT32 nDetailedState);
+    void UpdateWifiConnectionStateChanged(IN IMS_UINT32 nConnectionState);
 
 private:
     IMS_SINT32 m_nWifiState;

@@ -36,9 +36,9 @@ import android.telephony.TelephonyManager;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IAlarmTimer;
-import com.android.imsstack.core.agents.IWifiState;
 import com.android.imsstack.core.agents.Sim;
 import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.aos.AosFactory;
@@ -63,17 +63,15 @@ public class SscServiceState {
 
     // external events
     @VisibleForTesting
-    protected static final int EVENT_WIFI_STATE_CHANGED = 2000;
+    protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2000;
     @VisibleForTesting
-    protected static final int EVENT_AIRPLANE_MODE_CHANGED = 2001;
+    protected static final int EVENT_DATA_SERVICE_STATE_CHANGED = 2001;
     @VisibleForTesting
-    protected static final int EVENT_DATA_SERVICE_STATE_CHANGED = 2002;
+    protected static final int EVENT_DATA_RAT_CHANGED = 2002;
     @VisibleForTesting
-    protected static final int EVENT_DATA_RAT_CHANGED = 2003;
+    protected static final int EVENT_DATA_ROAMING_STATE_CHANGED = 2003;
     @VisibleForTesting
-    protected static final int EVENT_DATA_ROAMING_STATE_CHANGED = 2004;
-    @VisibleForTesting
-    protected static final int EVENT_CROSS_SIM_DATA_STATE_CHANGED = 2005;
+    protected static final int EVENT_CROSS_SIM_DATA_STATE_CHANGED = 2004;
 
     private final int mSlotId;
     private int mSubId = MSimUtils.INVALID_SUB_ID;
@@ -83,6 +81,8 @@ public class SscServiceState {
     final SscSimStateListener mSimStateListener;
     @VisibleForTesting
     final SscCarrierConfigListener mCarrierConfigListener;
+    @VisibleForTesting
+    SscWifiListener mWifiListener;
     @VisibleForTesting
     SscRegiStateListener mRegiStateListener = null;
     @VisibleForTesting
@@ -131,7 +131,7 @@ public class SscServiceState {
         }
 
         // register listeners related to carrier configuration
-        registerWifiStateChangedEvent();
+        registerWifiConnectionStateChangedEvent();
         registerMobileDataRoamingStateEvent();
         registerImsRegistrationStateListener();
         registerMobileDataStateListener(mSubId);
@@ -164,7 +164,7 @@ public class SscServiceState {
         }
 
         // unregister listeners related to carrier configuration
-        unregisterWifiStateChangedEvent();
+        unregisterWifiConnectionStateChangedEvent();
         unregisterMobileDataRoamingStateEvent();
         unregisterImsRegistrationStateListener();
         unregisterMobileDataStateListener(mSubId);
@@ -330,8 +330,8 @@ public class SscServiceState {
 
     private boolean isValidNetwork() {
         if (SscConfig.isSupportedNetwork(mSlotId, SscConstant.NETWORK_TYPE_IWLAN)) {
-            IWifiState ws = getWifiStateAgent();
-            if (ws != null && ws.isWifiConnected()) {
+            WifiInterface wifi = getWifiInterface();
+            if (wifi != null && wifi.isWifiConnected()) {
                 ImsLog.d(mSlotId, "support Ut over wifi");
                 return true;
             }
@@ -487,8 +487,8 @@ public class SscServiceState {
         return (IAlarmTimer) AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
     }
 
-    private IWifiState getWifiStateAgent() {
-        return (IWifiState) AgentFactory.getAgent(AgentFactory.WIFI_STATE, mSlotId);
+    private WifiInterface getWifiInterface() {
+        return AgentFactory.getInstance().getAgent(WifiInterface.class);
     }
 
     private SimInterface getSimInterface() {
@@ -507,21 +507,28 @@ public class SscServiceState {
         return (IDcNetWatcher) DcFactory.getDc(DcFactory.NETWORK_WATCHER, mSlotId);
     }
 
-    private void registerWifiStateChangedEvent() {
+    private void registerWifiConnectionStateChangedEvent() {
         if (!SscConfig.isSupportedNetwork(mSlotId, SscConstant.NETWORK_TYPE_IWLAN)) {
             return;
         }
 
-        IWifiState ws = getWifiStateAgent();
-        if (ws != null) {
-            ws.registerForWifiStateChanged(mHandler, EVENT_WIFI_STATE_CHANGED, null);
+        if (mWifiListener == null) {
+            mWifiListener = new SscWifiListener();
+        }
+
+        WifiInterface wifi = getWifiInterface();
+        if (wifi != null) {
+            wifi.addListener(mWifiListener);
         }
     }
 
-    private void unregisterWifiStateChangedEvent() {
-        IWifiState ws = getWifiStateAgent();
-        if (ws != null) {
-            ws.unregisterForWifiStateChanged(mHandler);
+    private void unregisterWifiConnectionStateChangedEvent() {
+        if (mWifiListener != null) {
+            WifiInterface wifi = getWifiInterface();
+            if (wifi != null) {
+                wifi.removeListener(mWifiListener);
+            }
+            mWifiListener = null;
         }
     }
 
@@ -694,7 +701,6 @@ public class SscServiceState {
                 case EVENT_AIRPLANE_MODE_CHANGED:
                     handleAirplaneModeChanged();
                     break;
-                case EVENT_WIFI_STATE_CHANGED: // FALL-THROUGH
                 case EVENT_DATA_SERVICE_STATE_CHANGED: // FALL-THROUGH
                 case EVENT_DATA_RAT_CHANGED: // FALL-THROUGH
                 case EVENT_DATA_ROAMING_STATE_CHANGED: // FALL-THROUGH
@@ -758,18 +764,25 @@ public class SscServiceState {
         public void onCarrierConfigChanged(int slotId, int subId) {
             ImsLog.d(mSlotId, "slotId : " + slotId + ", subId : " + subId);
 
-            unregisterWifiStateChangedEvent();
+            unregisterWifiConnectionStateChangedEvent();
             unregisterMobileDataRoamingStateEvent();
             unregisterImsRegistrationStateListener();
             unregisterMobileDataStateListener(mSubId);
             unregisterCrossSimDataStateListener();
 
-            registerWifiStateChangedEvent();
+            registerWifiConnectionStateChangedEvent();
             registerMobileDataRoamingStateEvent();
             registerImsRegistrationStateListener();
             registerMobileDataStateListener(mSubId);
             registerCrossSimDataStateListener();
 
+            handleUtFeatureCapabilityChanged();
+        }
+    }
+
+    private final class SscWifiListener implements WifiInterface.Listener {
+        @Override
+        public void onWifiConnectionStateChanged() {
             handleUtFeatureCapabilityChanged();
         }
     }

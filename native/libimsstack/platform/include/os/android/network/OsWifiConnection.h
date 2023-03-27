@@ -68,16 +68,30 @@ private:
     IMS_BOOL GetExtraInfo(IN const AString& strType, OUT AString& strInfo) override;
     IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT ImsList<IpAddress>& objIpAddrs,
             IN IMS_SINT32 nIpVersion = 0 /*default-local-address-based*/) override;
-    IMS_SINT32 GetIfaceId() const override;
-    const AString& GetIfaceName() const override;
-    const AStringArray& GetPcscfAddress(
-            IN IMS_SINT32 nIpVersion = 0 /*configuration-based*/) override;
-    STATE_ENTYPE GetState() const override;
-    IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const override;
-    IMS_BOOL IsePDGEnabled() const override;
-    IMS_BOOL IsMobileDataEnabled() const override;
+    inline IMS_SINT32 GetIfaceId() const override { return m_nIfaceId; }
+    inline const AString& GetIfaceName() const override { return m_strIfaceName; }
+    inline const AStringArray& GetPcscfAddress(
+            IN IMS_SINT32 nIpVersion = 0 /*configuration-based*/) override
+    {
+        (void)nIpVersion;
+        return m_objPcscfsAddress;
+    }
+    inline STATE_ENTYPE GetState() const override
+    {
+        return (m_nState == STATE_ACTIVE) ? STATE_CONNECTED : STATE_DISCONNECTED;
+    }
+    inline IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const override
+    {
+        (void)nCategory;
+        return m_nState == STATE_ACTIVE;
+    }
+    inline IMS_BOOL IsePDGEnabled() const override { return IMS_FALSE; }
+    inline IMS_BOOL IsMobileDataEnabled() const override { return IMS_FALSE; }
     IMS_SINT32 GetMtu() const override;
-    void SetListener(IN INetworkConnectionListener* piListener) override;
+    inline void SetListener(IN INetworkConnectionListener* piListener) override
+    {
+        m_piConnectionListener = piListener;
+    }
     void SetPreferredIpVersion(
             IN IMS_SINT32 nPreferredIpVersion = 0 /*default-aos-connection-profile*/) override;
     void AddReferenceListener(IN INetworkConnectionListener* piListener) override;
@@ -88,7 +102,7 @@ private:
     IMS_BOOL Create(IN IMS_SINT32 nApnType) override;
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
     IMS_BOOL Equals(IN const IpAddress& objIpAddr) const override;
-    IMS_CONNECTION GetHandle() const override;
+    inline IMS_CONNECTION GetHandle() const override { return m_nConnectionHandle; }
     const AString& GetProfileName() const override;
     IMS_SINT32 GetApnType() const override;
 
@@ -102,7 +116,7 @@ private:
     void CallReferenceListeners(IN IMS_SINT32 nEvent, IN IMS_SINT32 nErrorCode = 0);
     void CheckValidityForLocalAddress();
     void ClearOnDataDisconnected();
-    IMS_SINT32 GetWifiDetailedState();
+    IMS_SINT32 GetWifiConnectionState();
     IMS_SINT32 GetWifiState();
     IMS_BOOL IsConnectedInternal();
     IMS_BOOL IsDisconnected();
@@ -110,7 +124,7 @@ private:
     void NotifyDataDisconnected(IN IMS_SINT32 nErrorCode);
     void NotifyDataConnectionFailed(IN IMS_SINT32 nErrorCode);
     void NotifyIpChanged(IN IMS_SINT32 nErrorCode);
-    void OnWifiNetworkStateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nDetailedState);
+    void OnWifiConnectionStateChanged(IN IMS_UINT32 nConnectionState);
     void OnWifiStateChanged(IN IMS_UINT32 nState);
     void PostEvent(IN IMS_UINT32 nEvent);
     void SetState(IN IMS_UINT32 nState);
@@ -120,7 +134,7 @@ private:
 private:
     IMS_UINT32 m_nState;
     IMS_SINT32 m_nWifiState;
-    IMS_SINT32 m_nWifiDetailedState;
+    IMS_SINT32 m_nWifiConnectionState;
 
     NetworkPolicy* m_pPolicy;
     // Network interface identifier when data connection is connected
