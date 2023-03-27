@@ -91,7 +91,8 @@ private:
     void UpdateSessionIdFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);
     void CheckCallTypeWithRegisteredFeature();
-    ResultSetSdp SetSdpToSend(IN IMS_BOOL bAllowReOffer);
+    ResultSetSdp SetSdpToSend(
+            IN IMS_BOOL bAllowReOffer, IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE);
 
     static AString GenerateSessionId();
     IMS_BOOL IsRegisteredFeature(IMS_UINT32 nFeature);
