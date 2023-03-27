@@ -30,11 +30,6 @@ public final class CallFeature {
         // no-op
     }
 
-    public static int getStatusCodeforCallTypeChangeReject(int slotId) {
-        return getConfigInterface(slotId).getCarrierConfig().getInt(
-                CarrierConfig.Assets.KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT);
-    }
-
     public static boolean isAudioEvsSupported(int slotId) {
         int[] evsCodecs = getConfigInterface(slotId).getCarrierConfig()
                 .getIntArray(CarrierConfigManager.ImsVoice.KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
