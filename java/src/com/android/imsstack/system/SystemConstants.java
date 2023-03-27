@@ -48,7 +48,7 @@ public class SystemConstants {
     public static final int NOTIFY_SERVICE_STATE_CHANGED = CATEGORY_NETWORK + 7;
     public static final int NOTIFY_VOICE_CALL_STATE_CHANGED = CATEGORY_CALL + 8;
     public static final int NOTIFY_WIFI_STATE_CHANGED = CATEGORY_WIFI + 9;
-    public static final int NOTIFY_WIFI_DETAILED_STATE_CHANGED = CATEGORY_WIFI + 10;
+    public static final int NOTIFY_WIFI_CONNECTION_STATE_CHANGED = CATEGORY_WIFI + 10;
     public static final int NOTIFY_CONFIGURATION_CHANGED = CATEGORY_CONFIG + 11;
     public static final int NOTIFY_EVENT = CATEGORY_EVENT + 12;
     public static final int NOTIFY_ISIM_EVENT = CATEGORY_ISIM_EVENT + 13;
@@ -138,7 +138,7 @@ public class SystemConstants {
      * WiFi-related information
      */
     public static final int GET_WIFI_BSS_ID = CATEGORY_BASE + 501;
-    public static final int GET_WIFI_DETAILED_STATE = CATEGORY_BASE + 502;
+    public static final int GET_WIFI_CONNECTION_STATE = CATEGORY_BASE + 502;
     public static final int GET_WIFI_STATE = CATEGORY_BASE + 503;
     public static final int GET_WIFI_SSID = CATEGORY_BASE + 504;
 

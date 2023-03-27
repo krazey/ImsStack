@@ -13,13 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <errno.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <linux/if.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-
 #include "ImsMessageDef.h"
 #include "ImsAccessNetworkInfoType.h"
 #include "ImsNetworkConnectionState.h"
@@ -38,17 +31,12 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-#define WLAN_DESCRIPT "wlan"
-#define WLAN_DESCRIPT_SIZE 4
-#define MAX_INTERFACE_REQ 30
-#define MAX_IOCTL_LOOKUP 30
-
 PUBLIC
 OsWifiConnection::OsWifiConnection() :
         ImsNetworkConnection(IMS_SLOT_0),
         m_nState(STATE_IDLE),
-        m_nWifiState(0),
-        m_nWifiDetailedState(0),
+        m_nWifiState(WIFI_STATE_DISABLED),
+        m_nWifiConnectionState(WIFI_CONNECTION_STATE_DISCONNECTED),
         m_pPolicy(IMS_NULL),
         m_nIfaceId(IMS_NET_IFACE_INVALID_ID),
         m_strIfaceName(AString::ConstNull()),
@@ -62,7 +50,7 @@ OsWifiConnection::OsWifiConnection() :
         m_piConnectionListener(IMS_NULL),
         m_objReferenceListeners(ImsList<INetworkConnectionListener*>())
 {
-    IMS_TRACE_D("Constructor :: WiFi connection", 0, 0, 0);
+    IMS_TRACE_D("Constructor :: Wifi connection", 0, 0, 0);
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -72,7 +60,7 @@ OsWifiConnection::OsWifiConnection() :
 
 PUBLIC VIRTUAL OsWifiConnection::~OsWifiConnection()
 {
-    IMS_TRACE_D("Destructor :: WiFi connection", 0, 0, 0);
+    IMS_TRACE_D("Destructor :: Wifi connection", 0, 0, 0);
 
     PlatformContext::GetInstance()->GetSystem()->RemoveListener(
             SystemConstants::CATEGORY_WIFI, this, GetSlotId());
@@ -107,7 +95,7 @@ PUBLIC VIRTUAL const IpAddress& OsWifiConnection::GetLocalAddress(
 PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Activate(
         IN IMS_BOOL /*bEnableApn = IMS_FALSE*/)
 {
-    // If the connection with WiFi network is already established,
+    // If the connection with Wi-Fi network is already established,
     // then it sends an event to the application.
     if (IsConnectedInternal())
     {
@@ -120,44 +108,20 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Activate(
 
         if (!CacheLocalAddress())
         {
-            if (m_nWifiDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED)
-            {
-                // Try to cache the local address one more.
-                // If it's also failed, it means the permanent failure.
-                if (!CacheLocalAddress())
-                {
-                    // Fatal error
-                    IMS_TRACE_E(0, "Caching the local IP address failed", 0, 0, 0);
-                }
-            }
-            else if (m_nWifiDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK)
-            {
-                if (!CacheLocalAddress())
-                {
-                    IMS_TRACE_D("WiFi :: Waits for CONNECTED on CAPTIVE_PORTAL_CHECK", 0, 0, 0);
-                    SetState(STATE_ACTIVATING);
-                    return RESULT_DOING;
-                }
-            }
-            else
-            {
-                IMS_TRACE_D("WiFi :: Waits for CONNECTED on OBTAINING_IPADDR", 0, 0, 0);
-                SetState(STATE_ACTIVATING);
-                return RESULT_DOING;
-            }
+            IMS_TRACE_E(0, "Caching the local IP address failed", 0, 0, 0);
         }
 
-        IMS_TRACE_I("WiFi :: Activate() - APN (%s) is already activated; "
+        IMS_TRACE_I("Wifi :: Activate() - APN (%s) is already activated; "
                     "state=%d, detailed_state=%d",
-                GetProfileName().GetStr(), m_nWifiState, m_nWifiDetailedState);
+                GetProfileName().GetStr(), m_nWifiState, m_nWifiConnectionState);
 
         SetState(STATE_ACTIVE);
 
         return RESULT_DONE;
     }
 
-    IMS_TRACE_D("WiFi :: Activate() - state=%d, detailed_state=%d", m_nWifiState,
-            m_nWifiDetailedState, 0);
+    IMS_TRACE_D("Wifi :: Activate() - state=%d, detailed_state=%d", m_nWifiState,
+            m_nWifiConnectionState, 0);
 
     SetState(STATE_ACTIVATING);
 
@@ -169,20 +133,20 @@ PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsWifiConnection::Deactivate(
 {
     if (m_nState == STATE_TERMINATED)
     {
-        IMS_TRACE_D("WiFi :: Deactivate() in TERMINATED state", 0, 0, 0);
+        IMS_TRACE_D("Wifi :: Deactivate() in TERMINATED state", 0, 0, 0);
         return RESULT_DONE;
     }
 
     if (IsDisconnected())
     {
-        IMS_TRACE_D("WiFi :: Deactivate() in DATA_DISCONNECTED state", 0, 0, 0);
+        IMS_TRACE_D("Wifi :: Deactivate() in DATA_DISCONNECTED state", 0, 0, 0);
 
         SetState(STATE_TERMINATED);
         return RESULT_DONE;
     }
 
-    IMS_TRACE_D("WiFi :: Deactivate() - state=%d, detailed_state=%d", m_nWifiState,
-            m_nWifiDetailedState, 0);
+    IMS_TRACE_D("Wifi :: Deactivate() - state=%d, detailed_state=%d", m_nWifiState,
+            m_nWifiConnectionState, 0);
 
     SetState(STATE_TERMINATED);
 
@@ -349,51 +313,9 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetHostByName(IN const AString& str
     return 1;
 }
 
-PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetIfaceId() const
-{
-    return m_nIfaceId;
-}
-
-PRIVATE VIRTUAL const AString& OsWifiConnection::GetIfaceName() const
-{
-    return m_strIfaceName;
-}
-
-PRIVATE VIRTUAL const AStringArray& OsWifiConnection::GetPcscfAddress(
-        IN IMS_SINT32 /*nIpVersion = 0 (configuration-based)*/)
-{
-    return m_objPcscfsAddress;
-}
-
-PRIVATE VIRTUAL INetworkConnection::STATE_ENTYPE OsWifiConnection::GetState() const
-{
-    return (m_nState == STATE_ACTIVE) ? STATE_CONNECTED : STATE_DISCONNECTED;
-}
-
-PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::IsConnected(
-        IN IMS_SINT32 /*nCategory = IIpcan::CATEGORY_ANY*/) const
-{
-    return (m_nState == STATE_ACTIVE);
-}
-
-PUBLIC VIRTUAL IMS_BOOL OsWifiConnection::IsePDGEnabled() const
-{
-    return IMS_FALSE;
-}
-
-PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::IsMobileDataEnabled() const
-{
-    return IMS_FALSE;
-}
-
 PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetMtu() const
 {
     return PlatformContext::GetInstance()->GetSystem()->GetMtu(GetApnType(), GetSlotId());
-}
-
-PRIVATE VIRTUAL void OsWifiConnection::SetListener(IN INetworkConnectionListener* piListener)
-{
-    m_piConnectionListener = piListener;
 }
 
 PRIVATE VIRTUAL void OsWifiConnection::SetPreferredIpVersion(
@@ -460,7 +382,7 @@ PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::Create(IN const AString& strNetProfil
 
     if (pTmpPolicy == IMS_NULL)
     {
-        IMS_TRACE_D("NetworkPolicy (%s) is not present; can not create a WiFi connection",
+        IMS_TRACE_D("NetworkPolicy (%s) is not present; can not create a Wi-Fi connection",
                 strNetProfile.GetStr(), 0, 0);
         return IMS_FALSE;
     }
@@ -479,8 +401,8 @@ PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::Create(IN IMS_SINT32 nApnType)
 
     if (pTmpPolicy == IMS_NULL)
     {
-        IMS_TRACE_D("NetworkPolicy (%d) is not present; can not create a WiFi connection", nApnType,
-                0, 0);
+        IMS_TRACE_D("NetworkPolicy (%d) is not present; can not create a Wi-Fi connection",
+                nApnType, 0, 0);
         return IMS_FALSE;
     }
 
@@ -533,11 +455,6 @@ PRIVATE VIRTUAL IMS_BOOL OsWifiConnection::Equals(IN const IpAddress& objIpAddr)
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL IMS_CONNECTION OsWifiConnection::GetHandle() const
-{
-    return m_nConnectionHandle;
-}
-
 PRIVATE VIRTUAL const AString& OsWifiConnection::GetProfileName() const
 {
     return (m_pPolicy != IMS_NULL) ? m_pPolicy->GetName() : AString::ConstNull();
@@ -551,24 +468,24 @@ PRIVATE VIRTUAL IMS_SINT32 OsWifiConnection::GetApnType() const
 PRIVATE VIRTUAL void OsWifiConnection::System_NotifyEvent(
         IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    IMS_TRACE_D("WiFi :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
+    IMS_TRACE_D("Wifi :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {
         case IMS_SYSTEM_WIFI_STATE_CHANGED:
         {
-            IMS_TRACE_D("WiFi :: wifi state changed in %s - %" PFLS_d, StateToString(m_nState),
-                    nWParam, 0);
+            IMS_TRACE_D(
+                    "Wifi :: State changed in %s - %" PFLS_d, StateToString(m_nState), nWParam, 0);
 
             OnWifiStateChanged(LONG_TO_INT(nWParam));
             break;
         }
-        case IMS_SYSTEM_WIFINETWORK_STATE_CHANGED:
+        case IMS_SYSTEM_WIFI_CONNECTION_STATE_CHANGED:
         {
-            IMS_TRACE_I("WiFi :: wifi network state changed in %s - %" PFLS_d ", %" PFLS_d,
-                    StateToString(m_nState), nWParam, nLParam);
+            IMS_TRACE_I("Wifi :: Connection state changed in %s - %" PFLS_d,
+                    StateToString(m_nState), nWParam, 0);
 
-            OnWifiNetworkStateChanged(LONG_TO_INT(nWParam), LONG_TO_INT(nLParam));
+            OnWifiConnectionStateChanged(LONG_TO_INT(nWParam));
             break;
         }
         default:
@@ -587,7 +504,7 @@ IMS_BOOL OsWifiConnection::AdjustPreferredLocalAddress()
         if (!m_objLocalAddressIpv4.Equals(IpAddress::NONE) &&
                 !m_objLocalAddressIpv4.Equals(m_objLocalAddress))
         {
-            IMS_TRACE_D("(WiFi) Preferred local address :: %s >> %s",
+            IMS_TRACE_D("Wifi: Preferred local address changed from %s to %s",
                     m_objLocalAddress.ToString().GetStr(),
                     m_objLocalAddressIpv4.ToString().GetStr(), 0);
 
@@ -599,7 +516,7 @@ IMS_BOOL OsWifiConnection::AdjustPreferredLocalAddress()
         if (!m_objLocalAddressIpv6.Equals(IpAddress::IPv6NONE) &&
                 !m_objLocalAddressIpv6.Equals(m_objLocalAddress))
         {
-            IMS_TRACE_D("(WiFi) Preferred local address :: %s >> %s",
+            IMS_TRACE_D("Wifi: Preferred local address changed from %s to %s",
                     m_objLocalAddress.ToString().GetStr(),
                     m_objLocalAddressIpv6.ToString().GetStr(), 0);
 
@@ -609,8 +526,20 @@ IMS_BOOL OsWifiConnection::AdjustPreferredLocalAddress()
 
     if (m_objLocalAddress.Equals(IpAddress::NONE) || m_objLocalAddress.Equals(IpAddress::IPv6NONE))
     {
-        IMS_TRACE_D("Local address is null", 0, 0, 0);
-        return IMS_FALSE;
+        // As default, IPv4 is a default address for Wi-Fi network.
+        if (!m_objLocalAddressIpv4.Equals(IpAddress::NONE))
+        {
+            m_objLocalAddress = m_objLocalAddressIpv4;
+        }
+        else if (!m_objLocalAddressIpv6.Equals(IpAddress::IPv6NONE))
+        {
+            m_objLocalAddress = m_objLocalAddressIpv6;
+        }
+        else
+        {
+            IMS_TRACE_D("Local address is null", 0, 0, 0);
+            return IMS_FALSE;
+        }
     }
 
     return IMS_TRUE;
@@ -636,182 +565,43 @@ IMS_CONNECTION OsWifiConnection::AttachNetworkConnection()
 PRIVATE
 IMS_BOOL OsWifiConnection::CacheLocalAddress()
 {
-    struct ifreq* pIfreq;
-    struct ifconf ifcfg;
+    // IPv4 address
+    AString strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), IpAddress::IPV4, GetSlotId());
 
-    IMS_SINT32 nSockFd = socket(AF_INET6, SOCK_DGRAM | SOCK_CLOEXEC, 0);
-
-    memset(&ifcfg, 0, sizeof(ifcfg));
-
-    ifcfg.ifc_len = sizeof(struct ifreq) * MAX_INTERFACE_REQ;
-    ifcfg.ifc_buf = static_cast<char*>(malloc(ifcfg.ifc_len));
-
-    for (IMS_SINT32 i = 0; i < MAX_IOCTL_LOOKUP; ++i)
+    if (!m_objLocalAddressIpv4.Parse(strIpAddr))
     {
-        ifcfg.ifc_len = sizeof(struct ifreq) * MAX_INTERFACE_REQ;
-        ifcfg.ifc_buf = static_cast<char*>(realloc(ifcfg.ifc_buf, ifcfg.ifc_len));
-
-        if (ioctl(nSockFd, SIOCGIFCONF, (void*)&ifcfg) < 0)
-        {
-            IMS_TRACE_E(0, "ioctl(SIOCGIFCONF) (%d-th) error", i, 0, 0);
-            continue;
-        }
-
-        break;
+        m_objLocalAddressIpv4 = IpAddress::NONE;
     }
 
-    if (nSockFd != (-1))
+    // IPv6 address
+    strIpAddr = PlatformContext::GetInstance()->GetSystem()->GetLocalAddress(
+            GetApnType(), IpAddress::IPV6, GetSlotId());
+
+    if (!m_objLocalAddressIpv6.Parse(strIpAddr))
     {
-        close(nSockFd);
+        m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
     }
 
-    IMS_BOOL bIpFound = IMS_FALSE;
-
-    // Look up IPv6 address ...
-    pIfreq = ifcfg.ifc_req;
-    for (IMS_SINT32 i = 0; i < ifcfg.ifc_len; i += sizeof(struct ifreq))
+    if (!AdjustPreferredLocalAddress())
     {
-        if (IMS_StrNCmp(pIfreq->ifr_name, WLAN_DESCRIPT, WLAN_DESCRIPT_SIZE) == 0)
-        {
-            struct sockaddr* sa = reinterpret_cast<struct sockaddr*>(&pIfreq->ifr_addr);
-
-            if (sa->sa_family != AF_INET6)
-            {
-                pIfreq++;
-                continue;
-            }
-
-            struct sockaddr_in6* sin6 = reinterpret_cast<struct sockaddr_in6*>(sa);
-            IMS_CHAR acIpv6[64] = {
-                    0,
-            };
-            const IMS_CHAR* pszIpv6 = inet_ntop(
-                    AF_INET6, (const void*)&(sin6->sin6_addr.s6_addr), acIpv6, sizeof(acIpv6));
-
-            if (!m_objLocalAddress.Parse(pszIpv6))
-            {
-                IMS_TRACE_E(0, "Parsing IPv6 address (%s) failed", pszIpv6, 0, 0);
-
-                pIfreq++;
-                continue;
-            }
-
-            // IPv6 address
-            m_objLocalAddressIpv6 = m_objLocalAddress;
-
-            IMS_TRACE_D("GetLocalAddress() on WiFi :: %s", m_objLocalAddress.ToCharString(), 0, 0);
-
-            bIpFound = IMS_TRUE;
-            break;
-        }
-
-        pIfreq++;
+        IMS_TRACE_E(0, "Local Address is null", 0, 0, 0);
+        return IMS_FALSE;
     }
 
-    if (bIpFound)
-    {
-        // Look up IPv4 address ...
-        pIfreq = ifcfg.ifc_req;
-        for (IMS_SINT32 i = 0; i < ifcfg.ifc_len; i += sizeof(struct ifreq))
-        {
-            if (IMS_StrNCmp(pIfreq->ifr_name, WLAN_DESCRIPT, WLAN_DESCRIPT_SIZE) == 0)
-            {
-                struct sockaddr* sa = reinterpret_cast<struct sockaddr*>(&pIfreq->ifr_addr);
-
-                if (sa->sa_family != AF_INET)
-                {
-                    pIfreq++;
-                    continue;
-                }
-
-                struct sockaddr_in* sin = reinterpret_cast<struct sockaddr_in*>(sa);
-                IMS_CHAR acIpv4[32] = {
-                        0,
-                };
-                const IMS_CHAR* pszIpv4 = inet_ntop(
-                        AF_INET, (const void*)&(sin->sin_addr.s_addr), acIpv4, sizeof(acIpv4));
-
-                if (!m_objLocalAddressIpv4.Parse(pszIpv4))
-                {
-                    IMS_TRACE_E(0, "Parsing IPv4 address (%s) failed", pszIpv4, 0, 0);
-
-                    pIfreq++;
-                    continue;
-                }
-                break;
-            }
-
-            pIfreq++;
-        }
-
-        IMS_TRACE_D("WiFi :: LOCAL - IPv4 (%s), IPv6 (%s)",
-                m_objLocalAddressIpv4.ToString().GetStr(),
-                m_objLocalAddressIpv6.ToString().GetStr(), 0);
-
-        goto EXIT_LookupLocalIpAddress;
-    }
-
-    // Look up IPv4 address ...
-    pIfreq = ifcfg.ifc_req;
-    for (IMS_SINT32 i = 0; i < ifcfg.ifc_len; i += sizeof(struct ifreq))
-    {
-        if (IMS_StrNCmp(pIfreq->ifr_name, WLAN_DESCRIPT, WLAN_DESCRIPT_SIZE) == 0)
-        {
-            struct sockaddr* sa = reinterpret_cast<struct sockaddr*>(&pIfreq->ifr_addr);
-
-            if (sa->sa_family != AF_INET)
-            {
-                pIfreq++;
-                continue;
-            }
-
-            struct sockaddr_in* sin = reinterpret_cast<struct sockaddr_in*>(sa);
-            IMS_CHAR acIpv4[32] = {
-                    0,
-            };
-            const IMS_CHAR* pszIpv4 = inet_ntop(
-                    AF_INET, (const void*)&(sin->sin_addr.s_addr), acIpv4, sizeof(acIpv4));
-
-            if (!m_objLocalAddress.Parse(pszIpv4))
-            {
-                IMS_TRACE_E(0, "Parsing IPv4 address (%s) failed", pszIpv4, 0, 0);
-
-                pIfreq++;
-                continue;
-            }
-
-            // IPv4 address
-            m_objLocalAddressIpv4 = m_objLocalAddress;
-
-            IMS_TRACE_D(
-                    "CacheLocalAddress() on WiFi :: %s", m_objLocalAddress.ToCharString(), 0, 0);
-
-            bIpFound = IMS_TRUE;
-            break;
-        }
-
-        pIfreq++;
-    }
-
-    IMS_TRACE_D("WiFi :: LOCAL - IPv4 (%s), IPv6 (NONE)", m_objLocalAddressIpv4.ToString().GetStr(),
-            0, 0);
-
-EXIT_LookupLocalIpAddress:
-
-    if (ifcfg.ifc_buf != IMS_NULL)
-    {
-        free(ifcfg.ifc_buf);
-        ifcfg.ifc_buf = IMS_NULL;
-    }
-
-    AdjustPreferredLocalAddress();
+    IMS_TRACE_D("Wifi :: LOCAL - IPv4 (%s), IPv6 (%s)", m_objLocalAddressIpv4.ToString().GetStr(),
+            m_objLocalAddressIpv6.ToString().GetStr(), 0);
 
     // Network interface identifier
     m_nIfaceId = PlatformContext::GetInstance()->GetSystem()->GetIfaceId(GetApnType(), GetSlotId());
 
-    IMS_TRACE_D("WiFi :: IfaceId=%d", m_nIfaceId, 0, 0);
+    // Network interface name
+    m_strIfaceName =
+            PlatformContext::GetInstance()->GetSystem()->GetIfaceName(GetApnType(), GetSlotId());
 
-    return bIpFound;
+    IMS_TRACE_D("Wifi :: IfaceId=%d, IfaceName=%s", m_nIfaceId, m_strIfaceName.GetStr(), 0);
+
+    return IMS_TRUE;
 }
 
 PRIVATE
@@ -891,7 +681,7 @@ void OsWifiConnection::CheckValidityForLocalAddress()
         m_objLocalAddressIpv4 = objTmpLocalAddressIpv4;
         m_objLocalAddressIpv6 = objTmpLocalAddressIpv6;
 
-        IMS_TRACE_D("WiFi :: IP_VALIDITY_CHECK - caching local address failed", 0, 0, 0);
+        IMS_TRACE_D("Wifi :: IP_VALIDITY_CHECK - caching local address failed", 0, 0, 0);
         return;
     }
 
@@ -901,7 +691,7 @@ void OsWifiConnection::CheckValidityForLocalAddress()
 
     if (bDefaultChanged || bIpv4Changed || bIpv6Changed)
     {
-        IMS_TRACE_D("WiFi :: IP_VALIDITY_CHECK - change detected; default(%s), v4(%s), v6(%s)",
+        IMS_TRACE_D("Wifi :: IP_VALIDITY_CHECK - change detected; default(%s), v4(%s), v6(%s)",
                 _TRACE_B_(bDefaultChanged), _TRACE_B_(bIpv4Changed), _TRACE_B_(bIpv6Changed));
     }
 }
@@ -917,11 +707,8 @@ void OsWifiConnection::ClearOnDataDisconnected()
 }
 
 /**
- * @see #WIFI_STATE_DISABLING = 0
  * @see #WIFI_STATE_DISABLED
- * @see #WIFI_STATE_ENABLING
  * @see #WIFI_STATE_ENABLED
- * @see #WIFI_STATE_UNKNOWN
  */
 PRIVATE
 IMS_SINT32 OsWifiConnection::GetWifiState()
@@ -932,44 +719,40 @@ IMS_SINT32 OsWifiConnection::GetWifiState()
 }
 
 /**
- * IDLE, SCANNING, CONNECTING, AUTHENTICATING,
- * OBTAINING_IPADDR, CONNECTED, SUSPENDED,
- * DISCONNECTING, DISCONNECTED, FAILED
+ * @see #WIFI_CONNECTION_STATE_CONNECTED
+ * @see #WIFI_CONNECTION_STATE_DISCONNECTED
  */
 PRIVATE
-IMS_SINT32 OsWifiConnection::GetWifiDetailedState()
+IMS_SINT32 OsWifiConnection::GetWifiConnectionState()
 {
-    m_nWifiDetailedState = PlatformContext::GetInstance()->GetSystem()->GetWifiDetailedState();
+    m_nWifiConnectionState = PlatformContext::GetInstance()->GetSystem()->GetWifiConnectionState();
 
-    return m_nWifiDetailedState;
+    return m_nWifiConnectionState;
 }
 
 PRIVATE
 IMS_BOOL OsWifiConnection::IsConnectedInternal()
 {
-    IMS_SINT32 nWState = GetWifiState();
-    IMS_SINT32 nWDetailedState = GetWifiDetailedState();
+    IMS_SINT32 nState = GetWifiState();
+    IMS_SINT32 nConnectionState = GetWifiConnectionState();
 
-    return (((nWState == WIFI_STATE_ENABLED) &&
-                    (nWDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED)) ||
-            (nWDetailedState == WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR) ||
-            (nWDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK));
+    return (nState == WIFI_STATE_ENABLED) && (nConnectionState == WIFI_CONNECTION_STATE_CONNECTED);
 }
 
 PRIVATE
 IMS_BOOL OsWifiConnection::IsDisconnected()
 {
-    IMS_SINT32 nWState = GetWifiState();
+    IMS_SINT32 nState = GetWifiState();
 
-    if (nWState == WIFI_STATE_DISABLED)
+    if (nState == WIFI_STATE_DISABLED)
     {
         return IMS_TRUE;
     }
 
-    IMS_SINT32 nWDetailedState = GetWifiDetailedState();
+    IMS_SINT32 nConnectionState = GetWifiConnectionState();
 
-    return (nWState == WIFI_STATE_ENABLED) &&
-            (nWDetailedState == WIFI_NET_DETAILED_STATE_DISCONNECTED);
+    return (nState == WIFI_STATE_ENABLED) &&
+            (nConnectionState == WIFI_CONNECTION_STATE_DISCONNECTED);
 }
 
 PRIVATE
@@ -977,7 +760,7 @@ void OsWifiConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
 {
     if (IsConnected())
     {
-        IMS_TRACE_I("WiFi :: Network Connection is already activated.", 0, 0, 0);
+        IMS_TRACE_I("Wifi :: Network Connection is already activated.", 0, 0, 0);
 
         CheckValidityForLocalAddress();
         return;
@@ -987,34 +770,7 @@ void OsWifiConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
     m_objLocalAddressIpv4 = IpAddress::NONE;
     m_objLocalAddressIpv6 = IpAddress::IPv6NONE;
 
-    if (!CacheLocalAddress())
-    {
-        IMS_SINT32 nWDetailedState = GetWifiDetailedState();
-
-        if (nWDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED)
-        {
-            // Try to cache the local address one more.
-            // If it's also failed, it means the permanent failure.
-            if (!CacheLocalAddress())
-            {
-                // Fatal error
-                IMS_TRACE_E(0, "Caching the local IP address failed", 0, 0, 0);
-            }
-        }
-        else if (nWDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK)
-        {
-            if (!CacheLocalAddress())
-            {
-                IMS_TRACE_D("WiFi :: Waits for CONNECTED on CAPTIVE_PORTAL_CHECK", 0, 0, 0);
-                return;
-            }
-        }
-        else
-        {
-            IMS_TRACE_D("WiFi :: Waits for CONNECTED on detailed_state(%d)", nWDetailedState, 0, 0);
-            return;
-        }
-    }
+    CacheLocalAddress();
 
     SetState(STATE_ACTIVE);
 
@@ -1068,7 +824,7 @@ void OsWifiConnection::NotifyIpChanged(IN IMS_SINT32 nErrorCode)
     if (m_nState != STATE_ACTIVE)
     {
         // Ignore the event
-        IMS_TRACE_D("WiFi :: IP changed - not ACTIVE", 0, 0, 0);
+        IMS_TRACE_D("Wifi :: IP changed - not ACTIVE", 0, 0, 0);
         return;
     }
 
@@ -1088,15 +844,14 @@ void OsWifiConnection::NotifyIpChanged(IN IMS_SINT32 nErrorCode)
 }
 
 /**
- * WIFI_STATE_DISABLING = 0,
- * WIFI_STATE_DISABLED = 1,
- * WIFI_STATE_ENABLING = 2,
- * WIFI_STATE_ENABLED = 3,
- * WIFI_STATE_UNKNOWN = 4,
+ * @see #WIFI_STATE_DISABLED
+ * @see #WIFI_STATE_ENABLED
  */
 PRIVATE
 void OsWifiConnection::OnWifiStateChanged(IN IMS_UINT32 nState)
 {
+    m_nWifiState = nState;
+
     if (nState == WIFI_STATE_DISABLED)
     {
         PostEvent(NET_DISCONNECTED);
@@ -1105,45 +860,15 @@ void OsWifiConnection::OnWifiStateChanged(IN IMS_UINT32 nState)
 }
 
 /**
- *
- * State
- *     WIFI_NET_STATE_CONNECTING = 0,
- *     WIFI_NET_STATE_CONNECTED,
- *     WIFI_NET_STATE_SUSPENDED,
- *     WIFI_NET_STATE_DISCONNECTING,
- *     WIFI_NET_STATE_DISCONNECTED,
- *     WIFI_NET_STATE_UNKNOWN
- *
- * Detailed State
- *     WIFI_NET_DETAILED_STATE_IDLE = 0,
- *     WIFI_NET_DETAILED_STATE_SCANNING,
- *     WIFI_NET_DETAILED_STATE_CONNECTING,
- *     WIFI_NET_DETAILED_STATE_AUTHENTICATING,
- *     WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR,
- *     WIFI_NET_DETAILED_STATE_CONNECTED,
- *     WIFI_NET_DETAILED_STATE_SUSPENDED,
- *     WIFI_NET_DETAILED_STATE_DISCONNECTING,
- *     WIFI_NET_DETAILED_STATE_DISCONNECTED,
- *     WIFI_NET_DETAILED_STATE_FAILED
+ * @see #WIFI_CONNECTION_STATE_CONNECTED
+ * @see #WIFI_CONNECTION_STATE_DISCONNECTED
  */
 PRIVATE
-void OsWifiConnection::OnWifiNetworkStateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nDetailedState)
+void OsWifiConnection::OnWifiConnectionStateChanged(IN IMS_UINT32 nConnectionState)
 {
-    (void)nDetailedState;
+    m_nWifiConnectionState = nConnectionState;
 
-    if (IsConnected() && (nState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK))
-    {
-        // Keep the current WiFi connection state
-        IMS_TRACE_D("CAPTIVE_PORTAL_CHECK :: WiFi is already connected; ignore it.", 0, 0, 0);
-    }
-    else if (IsConnected() && (nState == WIFI_NET_DETAILED_STATE_VERIFYING_POOR_LINK))
-    {
-        // Keep the current WiFi connection state
-        IMS_TRACE_D("VERIFYING_POOR_LINK :: WiFi is already connected; ignore it.", 0, 0, 0);
-    }
-    else if ((nState == WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR) ||
-            (nState == WIFI_NET_DETAILED_STATE_CONNECTED) ||
-            (nState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK))
+    if (nConnectionState == WIFI_CONNECTION_STATE_CONNECTED)
     {
         PostEvent(NET_CONNECTED);
     }
@@ -1187,9 +912,7 @@ void OsWifiConnection::SetState(IN IMS_UINT32 nState)
 {
     if (m_nState != nState)
     {
-        IMS_TRACE_I(
-                "WiFi :: connection - %s >> %s", StateToString(m_nState), StateToString(nState), 0);
-
+        IMS_TRACE_I("Wifi :: %s >> %s", StateToString(m_nState), StateToString(nState), 0);
         m_nState = nState;
     }
 }

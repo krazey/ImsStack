@@ -388,18 +388,21 @@ public class QosAgent {
         List<Network> allNetworks = new ArrayList<>();
         IDcApn dcApn = (IDcApn) DcFactory.getDc(DcFactory.APN, slotId);
 
-        if (dcApn == null) {
-            return allNetworks;
+        if (dcApn != null) {
+            Network network = dcApn.getNetworkByCapability(EApnType.IMS.getType());
+            if (network != null) {
+                allNetworks.add(network);
+            }
+
+            network = dcApn.getNetworkByCapability(EApnType.EMERGENCY.getType());
+            if (network != null) {
+                allNetworks.add(network);
+            }
         }
 
-        Network network = dcApn.getNetworkByCapability(EApnType.IMS.getType());
-        if (network != null) {
-            allNetworks.add(network);
-        }
-
-        network = dcApn.getNetworkByCapability(EApnType.EMERGENCY.getType());
-        if (network != null) {
-            allNetworks.add(network);
+        WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+        if (wifi != null && wifi.isWifiConnected()) {
+            allNetworks.add(wifi.getNetwork());
         }
 
         return allNetworks;
