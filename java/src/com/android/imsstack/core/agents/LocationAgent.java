@@ -586,15 +586,15 @@ public final class LocationAgent implements ILocationAgent {
         } else if (LocationApi.isLocationFromNetwork(location)) {
             method = "Cell";
 
-            IWifiState wifiState = (IWifiState) AgentFactory.getAgent(AgentFactory.WIFI_STATE);
+            WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
 
-            if (wifiState != null) {
+            if (wifi != null) {
                 IDcNetWatcher dcnw = (IDcNetWatcher) DcFactory.getDc(
                         DcFactory.NETWORK_WATCHER, mSlotId);
 
                 if ((dcnw != null)
                         && (dcnw.getDataServiceState() != ServiceState.STATE_IN_SERVICE)
-                        && wifiState.isWifiConnected()) {
+                        && wifi.isWifiConnected()) {
                     method = "802.11";
                 }
             }

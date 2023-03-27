@@ -128,37 +128,22 @@ public abstract class SystemNotifier {
     public abstract void notifyVoiceCallStateChanged(final int state);
 
     /**
-     * Notifies the state of the WiFi module.
+     * Notifies the Wi-Fi setting state.
      *
-     * @param state the state of the WiFi module
-     *            {@link WifiManager.WIFI_STATE_DISABLING} (0)
-     *            {@link WifiManager.WIFI_STATE_DISABLED} (1)
-     *            {@link WifiManager.WIFI_STATE_ENABLING} (2)
-     *            {@link WifiManager.WIFI_STATE_ENABLED} (3)
-     *            {@link WifiManager.WIFI_STATE_UNKNOWN} (4)
+     * @param state the Wi-Fi setting state.
+     *            {@link WifiInterface#STATE_DISABLED}
+     *            {@link WifiInterface#STATE_ENABLED}
      */
-    public abstract void notifyWifiStateChanged(final int state);
+    public abstract void notifyWifiStateChanged(int state);
 
     /**
-     * Notifies the state of the WiFi data connection.
+     * Notifies the Wi-Fi connection state.
      *
-     * @param state the state of the WiFi data connection
-     *            (NetworkInfo.DetailedState enum)
-     *            {@link NetworkInfo.DetailedState.IDLE} (0)
-     *            {@link NetworkInfo.DetailedState.SCANNING} (1)
-     *            {@link NetworkInfo.DetailedState.CONNECTING} (2)
-     *            {@link NetworkInfo.DetailedState.AUTHENTICATING} (3)
-     *            {@link NetworkInfo.DetailedState.OBTAINING_IPADDR} (4)
-     *            {@link NetworkInfo.DetailedState.CONNECTED} (5)
-     *            {@link NetworkInfo.DetailedState.SUSPENDED} (6)
-     *            {@link NetworkInfo.DetailedState.DISCONNECTING} (7)
-     *            {@link NetworkInfo.DetailedState.DISCONNECTED} (8)
-     *            {@link NetworkInfo.DetailedState.FAILED} (9)
-     *            {@link NetworkInfo.DetailedState.BLOCKED} (10)
-     *            {@link NetworkInfo.DetailedState.VERIFYING_POOR_LINK} (11)
-     *            {@link NetworkInfo.DetailedState.CAPTIVE_PORTAL_CHECK} (12)
+     * @param state the Wi-Fi connection state.
+     *            {@link WifiInterface#CONNECTION_STATE_DISCONNECTED}
+     *            {@link WifiInterface#CONNECTION_STATE_CONNECTED}
      */
-    public abstract void notifyWifiDetailedStateChanged(final int state);
+    public abstract void notifyWifiConnectionStateChanged(int state);
 
     /**
      * Notifies the changes of the IMS configuration.

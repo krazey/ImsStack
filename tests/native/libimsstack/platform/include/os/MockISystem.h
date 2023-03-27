@@ -145,7 +145,7 @@ public:
     // WiFi-related information
     ////
     MOCK_METHOD(AString, GetWifiBssId, (), (override));
-    MOCK_METHOD(IMS_SINT32, GetWifiDetailedState, (), (override));
+    MOCK_METHOD(IMS_SINT32, GetWifiConnectionState, (), (override));
     MOCK_METHOD(IMS_SINT32, GetWifiState, (), (override));
     MOCK_METHOD(AString, GetWifiSsId, (), (override));
 

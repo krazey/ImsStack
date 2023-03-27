@@ -122,7 +122,7 @@ public:
     // WiFi-related information
     ////
     virtual AString GetWifiBssId() = 0;
-    virtual IMS_SINT32 GetWifiDetailedState() = 0;
+    virtual IMS_SINT32 GetWifiConnectionState() = 0;
     virtual IMS_SINT32 GetWifiState() = 0;
     virtual AString GetWifiSsId() = 0;
 

@@ -35,7 +35,6 @@ import android.net.InetAddresses;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
-import android.net.wifi.WifiManager;
 import android.os.Message;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.SubscriptionManager;
@@ -86,7 +85,6 @@ public class DcApnTest {
     @Mock ISharedState mMockISharedState;
     @Mock ISubscription mMockISubscription;
     @Mock Network mMockNetwork;
-    @Mock WifiManager mMockWifiManager;
 
     @Before
     public void setUp() throws Exception {
@@ -96,7 +94,6 @@ public class DcApnTest {
         AppContext.init(mContext);
 
         mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
-        mMockWifiManager = mContext.getSystemService(WifiManager.class);
         mSubscriptionManager = mContext.getSystemService(SubscriptionManager.class);
         mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
 
@@ -118,7 +115,6 @@ public class DcApnTest {
         mTelephonyManager = null;
         mSubscriptionManager = null;
         mConnectivityManager = null;
-        mMockWifiManager = null;
 
         AppContext.deinit();
     }
@@ -559,18 +555,7 @@ public class DcApnTest {
     }
 
     @Test
-    public void testGetNetworkByCapability_WifiType() throws Exception {
-        WifiManager wifiManager = mContext.getSystemService(WifiManager.class);
-        when(wifiManager.getCurrentNetwork()).thenReturn(mMockNetwork);
-
-        assertEquals(mMockNetwork, mDcApn.getNetworkByCapability(EApnType.WIFI.getType()));
-
-        setContext(null);
-        assertNull(mDcApn.getNetworkByCapability(EApnType.WIFI.getType()));
-    }
-
-    @Test
-    public void testGetNetworkByCapability_NonWifiType() throws Exception {
+    public void testGetNetworkByCapability() throws Exception {
         when(mMockIApn.getCachedNetwork()).thenReturn(mMockNetwork);
         mDcApn.setApn(EApnType.IMS.getType(), mMockIApn);
 
