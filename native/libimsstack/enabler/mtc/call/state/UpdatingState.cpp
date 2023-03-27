@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
+#include "ICarrierConfig.h"
 #include "IMessage.h"
+#include "ServiceConfig.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcSession.h"
@@ -31,6 +34,7 @@
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
+#include "sipcore/SipStatusCode.h"
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -131,6 +135,23 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptUpdate(
 PUBLIC VIRTUAL CallStateName UpdatingState::RejectUpdate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("RejectUpdate", 0, 0, 0);
+
+    IMtcSession* pMtcSession = m_objContext.GetSession();
+    if (m_objContext.GetMediaManager().GetNegotiationState(&pMtcSession->GetISession()) !=
+            NegotiationState::STATE_NEGOTIATED)
+    {
+        // TODO: Use this reject code in MessageFormatter#GetRejectStatusCode.
+        IMS_SINT32 nRejectCode =
+                ConfigService::GetConfigService()
+                        ->GetCarrierConfig(m_objContext.GetSlotId())
+                        ->GetInt(CarrierConfig::Assets::
+                                        KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT);
+        if (nRejectCode == SipStatusCode::SC_200)
+        {
+            return AcceptUpdate(pMtcSession->GetPreviousCallType(),
+                    m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+        }
+    }
 
     m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
 

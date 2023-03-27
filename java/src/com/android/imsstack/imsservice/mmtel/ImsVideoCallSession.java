@@ -27,7 +27,6 @@ import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
-import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
@@ -218,13 +217,9 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
         if (modificationType == MODIFICATION_CALL_TYPE) {
             callTypeChanged = ImsCallUtils.isCallTypeChanged(callProfile.getCallType(), callType);
-            int statusCode = CallFeature.getStatusCodeforCallTypeChangeReject(
-                        mCallContext.getSlotId());
-            if (callTypeChanged || statusCode == 200) {
+            if (callTypeChanged) {
                 acceptSessionModification(callType, mediaProfile);
             } else {
-                // need to map statusCode with ImsReasonInfo.CODE_USER_DECLINE for operator specific
-                // reject code rejectSessionModification(statusCode);
                 rejectSessionModification(ImsReasonInfo.CODE_USER_REJECTED_SESSION_MODIFICATION);
             }
         } else if (modificationType == MODIFICATION_VIDEO_PROFILE) {
