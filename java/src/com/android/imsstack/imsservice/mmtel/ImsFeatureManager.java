@@ -21,7 +21,7 @@ import android.telephony.ims.feature.MmTelFeature;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ISubscription;
-import com.android.imsstack.core.agents.IWifiState;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
@@ -202,8 +202,8 @@ public class ImsFeatureManager {
         }
     }
 
-    private static IWifiState getWifiState() {
-        return (IWifiState)AgentFactory.getAgent(AgentFactory.WIFI_STATE);
+    private static WifiInterface getWifiInterface() {
+        return AgentFactory.getInstance().getAgent(WifiInterface.class);
     }
 
     private static boolean isAllSimAbsent() {
@@ -219,9 +219,8 @@ public class ImsFeatureManager {
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private class NetworkTracker extends Handler {
+    private class NetworkTracker extends Handler implements WifiInterface.Listener {
         private static final int EVENT_RAT_CHANGED = 1;
-        private static final int EVENT_WIFI_STATE_CHANGED = 2;
 
         public NetworkTracker() {
             super(mContext.getDefaultLooper());
@@ -235,10 +234,10 @@ public class ImsFeatureManager {
                 idnw.unregisterForRatChanged(this);
             }
 
-            IWifiState iws = getWifiState();
+            WifiInterface wifi = getWifiInterface();
 
-            if (iws != null) {
-                iws.unregisterForWifiStateChanged(this);
+            if (wifi != null) {
+                wifi.removeListener(this);
             }
         }
 
@@ -249,11 +248,19 @@ public class ImsFeatureManager {
                 idnw.registerForRatChanged(this, EVENT_RAT_CHANGED, null);
             }
 
-            IWifiState iws = getWifiState();
+            WifiInterface wifi = getWifiInterface();
 
-            if (iws != null) {
-                iws.registerForWifiStateChanged(this, EVENT_WIFI_STATE_CHANGED, null);
+            if (wifi != null) {
+                wifi.addListener(this);
             }
+        }
+
+        @Override
+        public void onWifiConnectionStateChanged() {
+            post(() -> {
+                logi("WiFi state changed");
+                updateAndNotifyFeatureCapabilitiesIfChanged();
+            });
         }
 
         @Override
@@ -261,12 +268,6 @@ public class ImsFeatureManager {
             switch (msg.what) {
                 case EVENT_RAT_CHANGED: {
                     logi("RAT changed");
-
-                    updateAndNotifyFeatureCapabilitiesIfChanged();
-                    break;
-                }
-                case EVENT_WIFI_STATE_CHANGED: {
-                    logi("WiFi state changed");
 
                     updateAndNotifyFeatureCapabilitiesIfChanged();
                     break;
