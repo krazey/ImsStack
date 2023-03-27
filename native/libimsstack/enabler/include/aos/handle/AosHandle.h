@@ -234,7 +234,8 @@ protected:
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState, IN IMS_BOOL bUpdateState = IMS_TRUE);
     virtual void ProcessPsRoamingStateChanged(IN IMS_UINT32 nState);
-    virtual void ProcessNetworkEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
+    virtual void ProcessNetworkEvent(
+            IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nExtraInfo);
 
     virtual void AddListeners();
     virtual void RemoveListeners();
