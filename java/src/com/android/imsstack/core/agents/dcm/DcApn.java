@@ -21,7 +21,6 @@ import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
-import android.net.wifi.WifiManager;
 import android.os.Message;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.TelephonyCallback;
@@ -454,15 +453,6 @@ public class DcApn implements IDcApn {
 
     @Override
     public Network getNetworkByCapability(int apnType) {
-        if (EApnType.WIFI.getType() == apnType) {
-            if (mContext == null) {
-                return null;
-            }
-
-            WifiManager wm = mContext.getSystemService(WifiManager.class);
-            return (wm != null) ? wm.getCurrentNetwork() : null;
-        }
-
         IApn apn = getApnControl(apnType);
         return (apn != null) ? apn.getCachedNetwork() : null;
     }

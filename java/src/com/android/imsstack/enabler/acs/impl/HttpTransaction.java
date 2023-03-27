@@ -27,7 +27,7 @@ import android.os.Message;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IWifiState;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
@@ -391,8 +391,8 @@ public class HttpTransaction {
     }
 
     private int getEApnType(String acsApnType) {
-        IWifiState ws = (IWifiState) AgentFactory.getAgent(AgentFactory.WIFI_STATE, mSlotId);
-        boolean wifiConnected = (ws != null && (!ws.isWifiConnected()));
+        WifiInterface wifi = AgentFactory.getInstance().getAgent(WifiInterface.class);
+        boolean wifiConnected = (wifi != null && !wifi.isWifiConnected());
 
         int netType = -1;
         if (TextUtils.isEmpty(acsApnType)) {

@@ -135,7 +135,7 @@ public:
     // WiFi-related information
     ////
     AString GetWifiBssId() override;
-    IMS_SINT32 GetWifiDetailedState() override;
+    IMS_SINT32 GetWifiConnectionState() override;
     IMS_SINT32 GetWifiState() override;
     AString GetWifiSsId() override;
 

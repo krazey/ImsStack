@@ -21,6 +21,7 @@ import android.util.SparseArray;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ICallSetting;
+import com.android.imsstack.core.agents.WifiInterface;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
@@ -32,6 +33,7 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.ThreadMessageExecutor;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.FileDescriptor;
 
@@ -39,9 +41,7 @@ import java.io.FileDescriptor;
  * This class provides the system interfaces to communicate with native and Java layer.
  */
 public class SystemInterface implements JniSystemListener {
-    // Constants--------------------------------------------------
-    // Variables--------------------------------------------------
-    private static SystemInterface sSystemInterface = new SystemInterface();
+    private static SystemInterface sSystemInterface = null;
     private static final SparseArray<String> sMethodToString = new SparseArray<>();
 
     private long mNativeObject = 0;
@@ -52,26 +52,35 @@ public class SystemInterface implements JniSystemListener {
     private ThreadMessageExecutor mDefaultExecutor =
             new ThreadMessageExecutor(SystemInterface.class.getSimpleName() + "_DEFAULT");
 
+    private DefaultSystemCallInterface mDefaultSystemCall;
     private ISystemAPIAlarm mISystemAPIAlarm;
     private ISystemAPIBattery mISystemAPIBattery;
     private ISystemAPIDevice mISystemAPIDevice;
     private ISystemAPIPreference mISystemAPIPreference;
-    private ISystemAPIWifi mISystemAPIWifi;
     private ISystemAPIWakeLock mWakeLock;
 
-    // Static loading materials ----------------------------------
-    // Public methods --------------------------------------------
+    /**
+     * Returns a singleton System interface.
+     */
     public static SystemInterface getInstance() {
+        if (sSystemInterface == null) {
+            sSystemInterface = new SystemInterface();
+        }
         return sSystemInterface;
     }
 
-    public SystemInterface() {
-        ImsLog.d("");
+    /**
+     * Sets a System interface for testing.
+     *
+     * @param systemInterface A new System interface
+     */
+    @VisibleForTesting
+    public static void setSystemInterface(SystemInterface systemInterface) {
+        sSystemInterface = systemInterface;
     }
 
     public void init() {
         if (mNativeObject == 0) {
-            sSystemInterface = this;
 
             mNativeObject = JniImsProxy.getInterface(
                     SystemConstants.SYSTEM_INTERFACE, MSimUtils.DEFAULT_SLOT_ID);
@@ -120,6 +129,10 @@ public class SystemInterface implements JniSystemListener {
         mSystems.remove(slotId);
     }
 
+    public void setSystemCallInterface(DefaultSystemCallInterface systemCall) {
+        mDefaultSystemCall = systemCall;
+    }
+
     public void setISystemAPIAlarm(ISystemAPIAlarm api) {
         mISystemAPIAlarm = api;
     }
@@ -134,10 +147,6 @@ public class SystemInterface implements JniSystemListener {
 
     public void setISystemAPIPreference(ISystemAPIPreference api) {
         mISystemAPIPreference = api;
-    }
-
-    public void setISystemAPIWifi(ISystemAPIWifi api) {
-        mISystemAPIWifi = api;
     }
 
     public void setWakeLock(ISystemAPIWakeLock wakeLock) {
@@ -198,13 +207,10 @@ public class SystemInterface implements JniSystemListener {
      * Notifies the state of the WiFi module.
      *
      * @param state the state of the WiFi module
-     *          {@link WifiManager.WIFI_STATE_DISABLING} (0)
-     *          {@link WifiManager.WIFI_STATE_DISABLED} (1)
-     *          {@link WifiManager.WIFI_STATE_ENABLING} (2)
-     *          {@link WifiManager.WIFI_STATE_ENABLED} (3)
-     *          {@link WifiManager.WIFI_STATE_UNKNOWN} (4)
+     *              {@link WifiInterface#STATE_DISABLED}
+     *              {@link WifiInterface#STATE_ENABLED}
      */
-    public void notifyWifiStateChanged(final int state) {
+    public void notifyWifiStateChanged(int state) {
         mDefaultExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -225,24 +231,13 @@ public class SystemInterface implements JniSystemListener {
     }
 
     /**
-     * Notifies the state of the WiFi data connection.
+     * Notifies the Wi-Fi connection state.
      *
-     * @param state the state of the WiFi data connection (NetworkInfo.DetailedState enum)
-     *          {@link NetworkInfo.DetailedState.IDLE} (0)
-     *          {@link NetworkInfo.DetailedState.SCANNING} (1)
-     *          {@link NetworkInfo.DetailedState.CONNECTING} (2)
-     *          {@link NetworkInfo.DetailedState.AUTHENTICATING} (3)
-     *          {@link NetworkInfo.DetailedState.OBTAINING_IPADDR} (4)
-     *          {@link NetworkInfo.DetailedState.CONNECTED} (5)
-     *          {@link NetworkInfo.DetailedState.SUSPENDED} (6)
-     *          {@link NetworkInfo.DetailedState.DISCONNECTING} (7)
-     *          {@link NetworkInfo.DetailedState.DISCONNECTED} (8)
-     *          {@link NetworkInfo.DetailedState.FAILED} (9)
-     *          {@link NetworkInfo.DetailedState.BLOCKED} (10)
-     *          {@link NetworkInfo.DetailedState.VERIFYING_POOR_LINK} (11)
-     *          {@link NetworkInfo.DetailedState.CAPTIVE_PORTAL_CHECK} (12)
+     * @param state the Wi-Fi connection state.
+     *              {@link WifiInterface#CONNECTION_STATE_DISCONNECTED}
+     *              {@link WifiInterface#CONNECTION_STATE_CONNECTED}
      */
-    public void notifyWifiDetailedStateChanged(final int state) {
+    public void notifyWifiConnectionStateChanged(int state) {
         mDefaultExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -254,7 +249,7 @@ public class SystemInterface implements JniSystemListener {
                 }
 
                 parcel.writeInt(MSimUtils.DEFAULT_SLOT_ID);
-                parcel.writeInt(SystemConstants.NOTIFY_WIFI_DETAILED_STATE_CHANGED);
+                parcel.writeInt(SystemConstants.NOTIFY_WIFI_CONNECTION_STATE_CHANGED);
                 parcel.writeInt(state);
 
                 sendData2Native(mNativeObject, parcel);
@@ -275,10 +270,10 @@ public class SystemInterface implements JniSystemListener {
                 result = handleSystemAPIPreference(method, parcel);
                 break;
             case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
-            case SystemConstants.GET_WIFI_DETAILED_STATE: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_CONNECTION_STATE: //FALL-THROUGH
             case SystemConstants.GET_WIFI_BSS_ID: //FALL-THROUGH
             case SystemConstants.GET_WIFI_SSID:
-                result = handleSystemAPIWifi(method, parcel);
+                result = handleSystemCallForWifi(method, parcel);
                 break;
             case SystemConstants.GET_BATTERY_LEVEL:
                 result = handleSystemAPIBattery(method);
@@ -321,12 +316,14 @@ public class SystemInterface implements JniSystemListener {
                 }
                 break;
 
-            case ImsEventDef.IMS_EVENT_WIFI_SERVICE:
-                if (mISystemAPIWifi != null) {
-                    mISystemAPIWifi.turnOnOff((wParam == ImsEventDef.IMS_WIFI_ON) ? true : false);
+            case ImsEventDef.IMS_EVENT_WIFI_SERVICE: {
+                WifiInterface wifi = (mDefaultSystemCall != null)
+                        ? mDefaultSystemCall.getWifiInterface() : null;
+                if (wifi != null) {
+                    wifi.requestWifiService((wParam == ImsEventDef.IMS_WIFI_ON) ? true : false);
                 }
                 break;
-
+            }
             default:
                 returnValue = 0;
                 break;
@@ -574,28 +571,35 @@ public class SystemInterface implements JniSystemListener {
         return result;
     }
 
-    public Parcel handleSystemAPIWifi(int method, Parcel parcel) {
-        if (mISystemAPIWifi == null) {
+    private Parcel handleSystemCallForWifi(int method, Parcel parcel) {
+        WifiInterface wifi = (mDefaultSystemCall != null)
+                ? mDefaultSystemCall.getWifiInterface() : null;
+        if (wifi == null) {
             return null;
         }
 
         Parcel result = Parcel.obtain();
+
         switch (method) {
-        case SystemConstants.GET_WIFI_STATE:
-            result.writeInt(mISystemAPIWifi.getWifiState4Sys());
-            break;
-        case SystemConstants.GET_WIFI_DETAILED_STATE:
-            result.writeInt(mISystemAPIWifi.getWifiDetailedState4Sys());
-            break;
-        case SystemConstants.GET_WIFI_BSS_ID:
-            result.writeString(mISystemAPIWifi.getWifiBssId4Sys());
-            break;
-        case SystemConstants.GET_WIFI_SSID:
-            result.writeString(mISystemAPIWifi.getWifiSsId4Sys());
-            break;
-        default:
-            result.recycle();
-            return null;
+            case SystemConstants.GET_WIFI_STATE:
+                result.writeInt(wifi.isWifiEnabled()
+                        ? WifiInterface.STATE_ENABLED
+                        : WifiInterface.STATE_DISABLED);
+                break;
+            case SystemConstants.GET_WIFI_CONNECTION_STATE:
+                result.writeInt(wifi.isWifiConnected()
+                        ? WifiInterface.CONNECTION_STATE_CONNECTED
+                        : WifiInterface.CONNECTION_STATE_DISCONNECTED);
+                break;
+            case SystemConstants.GET_WIFI_BSS_ID:
+                result.writeString(wifi.getBssId());
+                break;
+            case SystemConstants.GET_WIFI_SSID:
+                result.writeString(wifi.getSsId());
+                break;
+            default:
+                result.recycle();
+                return null;
         }
 
         return result;
@@ -627,22 +631,22 @@ public class SystemInterface implements JniSystemListener {
         }
 
         switch (method) {
-        case SystemConstants.SET_ALARM: //FALL-THROUGH
-        case SystemConstants.KILL_ALARM: //FALL-THROUGH
-        case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
-        case SystemConstants.SET_PREFERENCE: //FALL-THROUGH
-        case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
-        case SystemConstants.GET_WIFI_DETAILED_STATE: //FALL-THROUGH
-        case SystemConstants.GET_WIFI_BSS_ID: //FALL-THROUGH
-        case SystemConstants.GET_WIFI_SSID: //FALL-THROUGH
-        case SystemConstants.GET_BATTERY_LEVEL: //FALL-THROUGH
-        case SystemConstants.GET_EXTERNAL_STORAGE_PATH: //FALL-THROUGH
-        case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
-        case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
-        case SystemConstants.SET_PRIVATE_PROPERTY:
-            return true;
-        default:
-            break;
+            case SystemConstants.SET_ALARM: //FALL-THROUGH
+            case SystemConstants.KILL_ALARM: //FALL-THROUGH
+            case SystemConstants.GET_PREFERENCE: //FALL-THROUGH
+            case SystemConstants.SET_PREFERENCE: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_STATE: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_CONNECTION_STATE: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_BSS_ID: //FALL-THROUGH
+            case SystemConstants.GET_WIFI_SSID: //FALL-THROUGH
+            case SystemConstants.GET_BATTERY_LEVEL: //FALL-THROUGH
+            case SystemConstants.GET_EXTERNAL_STORAGE_PATH: //FALL-THROUGH
+            case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
+            case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
+            case SystemConstants.SET_PRIVATE_PROPERTY:
+                return true;
+            default:
+                break;
         }
 
         return false;
@@ -763,8 +767,8 @@ public class SystemInterface implements JniSystemListener {
                 "GET_UICC_GBA_SUPPORT");
         sMethodToString.put(SystemConstants.GET_WIFI_STATE,
                 "GET_WIFI_STATE");
-        sMethodToString.put(SystemConstants.GET_WIFI_DETAILED_STATE,
-                "GET_WIFI_DETAILED_STATE");
+        sMethodToString.put(SystemConstants.GET_WIFI_CONNECTION_STATE,
+                "GET_WIFI_CONNECTION_STATE");
         sMethodToString.put(SystemConstants.GET_WIFI_BSS_ID,
                 "GET_WIFI_BSS_ID");
         sMethodToString.put(SystemConstants.GET_WIFI_SSID,
@@ -1668,9 +1672,21 @@ public class SystemInterface implements JniSystemListener {
                     result.writeInt(
                             mISystemAPINetwork.getDataConnectionState4Sys(parcel.readInt()));
                     break;
-                case SystemConstants.GET_HOST_BY_NAME:
-                    String[] ipAddrs = mISystemAPINetwork.getHostByName4Sys(
-                            parcel.readInt(), parcel.readInt(), parcel.readString());
+                case SystemConstants.GET_HOST_BY_NAME: {
+                    int apnType = parcel.readInt();
+                    int ipVersion = parcel.readInt();
+                    String host = parcel.readString();
+                    String[] ipAddrs = null;
+
+                    if (apnType == EApnType.WIFI.getType()) {
+                        WifiInterface wifi = (mDefaultSystemCall != null)
+                                ? mDefaultSystemCall.getWifiInterface() : null;
+                        if (wifi != null) {
+                            ipAddrs = wifi.getHostByName(ipVersion, host);
+                        }
+                    } else {
+                        ipAddrs = mISystemAPINetwork.getHostByName4Sys(apnType, ipVersion, host);
+                    }
 
                     if (ipAddrs == null) {
                         result.writeInt(0);
@@ -1683,24 +1699,39 @@ public class SystemInterface implements JniSystemListener {
                         result.writeString(ipAddrs[i]);
                     }
                     break;
+                }
                 case SystemConstants.GET_IFACE_ID: {
                     int apnType = parcel.readInt();
+                    int ifaceId = -1;
 
                     if (apnType == EApnType.WIFI.getType()) {
-                        if (mISystemAPIWifi != null) {
-                            result.writeInt(mISystemAPIWifi.getWifiIfaceId4Sys());
-                        } else {
-                            // Invalid interface id
-                            result.writeInt(-1);
+                        WifiInterface wifi = (mDefaultSystemCall != null)
+                                ? mDefaultSystemCall.getWifiInterface() : null;
+                        if (wifi != null) {
+                            ifaceId = wifi.getIfaceId();
                         }
                     } else {
-                        result.writeInt(mISystemAPINetwork.getIfaceId4Sys(apnType));
+                        ifaceId = mISystemAPINetwork.getIfaceId4Sys(apnType);
                     }
+                    result.writeInt(ifaceId);
                     break;
                 }
-                case SystemConstants.GET_IFACE_NAME:
-                    result.writeString(mISystemAPINetwork.getIfaceName4Sys(parcel.readInt()));
+                case SystemConstants.GET_IFACE_NAME: {
+                    int apnType = parcel.readInt();
+                    String ifaceName = null;
+
+                    if (apnType == EApnType.WIFI.getType()) {
+                        WifiInterface wifi = (mDefaultSystemCall != null)
+                                ? mDefaultSystemCall.getWifiInterface() : null;
+                        if (wifi != null) {
+                            ifaceName = wifi.getIfaceName();
+                        }
+                    } else {
+                        ifaceName = mISystemAPINetwork.getIfaceName4Sys(apnType);
+                    }
+                    result.writeString(ifaceName);
                     break;
+                }
                 case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO:
                     String[] lastANInfo = mISystemAPINetwork.getLastAccessNetworkInfo4Sys(
                             parcel.readInt());
@@ -1716,10 +1747,23 @@ public class SystemInterface implements JniSystemListener {
                         result.writeString(lastANInfo[i]);
                     }
                     break;
-                case SystemConstants.GET_LOCAL_ADDRESS:
-                    result.writeString(mISystemAPINetwork.getLocalAddress4Sys(parcel.readInt(),
-                            parcel.readInt()));
+                case SystemConstants.GET_LOCAL_ADDRESS: {
+                    int apnType = parcel.readInt();
+                    int ipVersion = parcel.readInt();
+                    String localAddress = null;
+
+                    if (apnType == EApnType.WIFI.getType()) {
+                        WifiInterface wifi = (mDefaultSystemCall != null)
+                                ? mDefaultSystemCall.getWifiInterface() : null;
+                        if (wifi != null) {
+                            localAddress = wifi.getLocalAddress(ipVersion);
+                        }
+                    } else {
+                        localAddress = mISystemAPINetwork.getLocalAddress4Sys(apnType, ipVersion);
+                    }
+                    result.writeString(localAddress);
                     break;
+                }
                 default:
                     result.recycle();
                     return null;
@@ -1735,81 +1779,93 @@ public class SystemInterface implements JniSystemListener {
 
             Parcel result = Parcel.obtain();
             switch (method) {
-            case SystemConstants.GET_IPCAN_CATEGORY: {
-                int apnType = parcel.readInt();
+                case SystemConstants.GET_IPCAN_CATEGORY: {
+                    int apnType = parcel.readInt();
 
-                if (apnType == EApnType.WIFI.getType()) {
-                    result.writeInt(IApn.IPCAN_CATEGORY_WLAN);
-                } else {
-                    result.writeInt(mISystemAPINetwork.getIpcanCategory4Sys(apnType));
-                }
-                break;
-            }
-            case SystemConstants.GET_PCSCF_ADDRESSES:
-                String[] pcscfs = mISystemAPINetwork.getPcscfAddresses4Sys(parcel.readInt(),
-                    parcel.readInt());
-
-                if (pcscfs == null) {
-                    result.writeInt(0);
+                    if (apnType == EApnType.WIFI.getType()) {
+                        result.writeInt(IApn.IPCAN_CATEGORY_WLAN);
+                    } else {
+                        result.writeInt(mISystemAPINetwork.getIpcanCategory4Sys(apnType));
+                    }
                     break;
                 }
+                case SystemConstants.GET_PCSCF_ADDRESSES:
+                    String[] pcscfs = mISystemAPINetwork.getPcscfAddresses4Sys(parcel.readInt(),
+                        parcel.readInt());
 
-                result.writeInt(pcscfs.length);
-
-                for (int i = 0; i < pcscfs.length; ++i) {
-                    result.writeString(pcscfs[i]);
-                }
-                break;
-            case SystemConstants.GET_ROAMING_STATE:
-                result.writeInt(mISystemAPINetwork.getRoamingState4Sys());
-                break;
-            case SystemConstants.GET_SERVICE_STATE:
-                result.writeInt(mISystemAPINetwork.getServiceState4Sys());
-                break;
-            case SystemConstants.IS_LTE_EMERGENCY_ONLY:
-                result.writeInt(mISystemAPINetwork.isLteEmergencyOnly4Sys());
-                break;
-            case SystemConstants.IS_MOBILE_DATA_ENABLED:
-                result.writeInt(mISystemAPINetwork.isMobileDataEnabled() ? 1 : 0);
-                break;
-            case SystemConstants.GET_MOCN_PLMN_INFO:
-                result.writeInt(mISystemAPINetwork.getMocnPlmnInfo4Sys());
-                break;
-            case SystemConstants.GET_VOICE_SERVICE_STATE:
-                result.writeInt(mISystemAPINetwork.getVoiceServiceState4Sys());
-                break;
-            case SystemConstants.GET_VOICE_ROAMING_TYPE:
-                result.writeInt(mISystemAPINetwork.getVoiceRoamingType4Sys());
-                break;
-            case SystemConstants.GET_DATA_ROAMING_TYPE:
-                result.writeInt(mISystemAPINetwork.getDataRoamingType4Sys());
-                break;
-            case SystemConstants.GET_MTU: {
-                int apnType = parcel.readInt();
-
-                if (apnType == EApnType.WIFI.getType()) {
-                    if (mISystemAPIWifi != null) {
-                        result.writeInt(mISystemAPIWifi.getWifiMtu4Sys());
-                    } else {
-                        // Use a default MTU size (1500)
+                    if (pcscfs == null) {
                         result.writeInt(0);
+                        break;
                     }
-                } else {
-                    result.writeInt(mISystemAPINetwork.getMtu4Sys(apnType));
+
+                    result.writeInt(pcscfs.length);
+
+                    for (int i = 0; i < pcscfs.length; ++i) {
+                        result.writeString(pcscfs[i]);
+                    }
+                    break;
+                case SystemConstants.GET_ROAMING_STATE:
+                    result.writeInt(mISystemAPINetwork.getRoamingState4Sys());
+                    break;
+                case SystemConstants.GET_SERVICE_STATE:
+                    result.writeInt(mISystemAPINetwork.getServiceState4Sys());
+                    break;
+                case SystemConstants.IS_LTE_EMERGENCY_ONLY:
+                    result.writeInt(mISystemAPINetwork.isLteEmergencyOnly4Sys());
+                    break;
+                case SystemConstants.IS_MOBILE_DATA_ENABLED:
+                    result.writeInt(mISystemAPINetwork.isMobileDataEnabled() ? 1 : 0);
+                    break;
+                case SystemConstants.GET_MOCN_PLMN_INFO:
+                    result.writeInt(mISystemAPINetwork.getMocnPlmnInfo4Sys());
+                    break;
+                case SystemConstants.GET_VOICE_SERVICE_STATE:
+                    result.writeInt(mISystemAPINetwork.getVoiceServiceState4Sys());
+                    break;
+                case SystemConstants.GET_VOICE_ROAMING_TYPE:
+                    result.writeInt(mISystemAPINetwork.getVoiceRoamingType4Sys());
+                    break;
+                case SystemConstants.GET_DATA_ROAMING_TYPE:
+                    result.writeInt(mISystemAPINetwork.getDataRoamingType4Sys());
+                    break;
+                case SystemConstants.GET_MTU: {
+                    int apnType = parcel.readInt();
+                    int mtu = 0; // Use a default MTU size (1500)
+
+                    if (apnType == EApnType.WIFI.getType()) {
+                        WifiInterface wifi = (mDefaultSystemCall != null)
+                                ? mDefaultSystemCall.getWifiInterface() : null;
+                        if (wifi != null) {
+                            mtu = wifi.getMtu();
+                        }
+                    } else {
+                        mtu = mISystemAPINetwork.getMtu4Sys(apnType);
+                    }
+                    result.writeInt(mtu);
+                    break;
                 }
-                break;
-            }
-            case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED:
-                result.writeInt(mISystemAPINetwork.isEmergencyAttachSupported4Sys());
-                break;
-            case SystemConstants.BIND_SOCKET: {
-                int apnType = parcel.readInt();
-                result.writeInt(mISystemAPINetwork.bindSocket(apnType, fd));
-                break;
-            }
-            default:
-                result.recycle();
-                return null;
+                case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED:
+                    result.writeInt(mISystemAPINetwork.isEmergencyAttachSupported4Sys());
+                    break;
+                case SystemConstants.BIND_SOCKET: {
+                    int apnType = parcel.readInt();
+                    int bindResult = 0;
+
+                    if (apnType == EApnType.WIFI.getType()) {
+                        WifiInterface wifi = (mDefaultSystemCall != null)
+                                ? mDefaultSystemCall.getWifiInterface() : null;
+                        if (wifi != null) {
+                            bindResult = wifi.bindSocket(fd);
+                        }
+                    } else {
+                        bindResult = mISystemAPINetwork.bindSocket(apnType, fd);
+                    }
+                    result.writeInt(bindResult);
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
             }
 
             return result;

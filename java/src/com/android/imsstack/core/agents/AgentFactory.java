@@ -37,8 +37,7 @@ public final class AgentFactory {
     public static final int BATTERY_STATE = 3;
     public static final int PREFERENCE = 4;
     public static final int WAKE_LOCK = 5;
-    public static final int WIFI_STATE = 6;
-    public static final int DEVICE = 7;
+    public static final int DEVICE = 6;
 
     // agents with slot id
     public static final int SHARED_STATE = 10;
@@ -60,6 +59,8 @@ public final class AgentFactory {
             new HashMap<Integer, HashMap<Integer, IAgent>>(MSimUtils.getSupportedSimCount());
 
     private final Object mLock = new Object();
+    private DefaultSystemCallAgent mDefaultSystemCallAgent;
+    private final ArrayMap<Class<?>, IAgent> mAgents = new ArrayMap<>();
     private final SparseArray<SystemCallAgent> mSystemCallAgents;
     private final SparseArray<ArrayMap<Class<?>, IAgent>> mAgentsForSlot;
     private static AgentFactory sInstance;
@@ -84,6 +85,29 @@ public final class AgentFactory {
     }
 
     /**
+     * Returns the specific agent corresponding to the given class.
+     *
+     * @param clazz The requested class name
+     * @return A {@link IAgent} object corresponding to the given class.
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends IAgent> T getAgent(Class<T> clazz) {
+        return (T) mAgents.get(clazz);
+    }
+
+    /**
+     * Sets the specific agent corresponding to the given class for testing.
+     *
+     * @param clazz The requested class name
+     * @param agent A {@link IAgent} object corresponding to the given class
+     */
+    @VisibleForTesting
+    @SuppressWarnings("unchecked")
+    public void setAgent(Class<?> clazz, IAgent agent) {
+        mAgents.put(clazz, agent);
+    }
+
+    /**
      * Returns the specific agent corresponding to the given class for the specified slot.
      *
      * @param clazz The requested class name
@@ -100,6 +124,32 @@ public final class AgentFactory {
 
         synchronized(mLock) {
             return (T) agents.get(clazz);
+        }
+    }
+
+    /**
+     * Sets the specific agent corresponding to the given class for the specified slot for testing.
+     *
+     * @param clazz The requested class name
+     * @param agent A {@link IAgent} object corresponding to the given class
+     * @param slotId The slot-id
+     */
+    @VisibleForTesting
+    @SuppressWarnings("unchecked")
+    public void setAgent(Class<?> clazz, IAgent agent, int slotId) {
+        if (slotId < 0) {
+            return;
+        }
+
+        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
+
+        synchronized (mLock) {
+            if (agents == null) {
+                agents = new ArrayMap<Class<?>, IAgent>();
+                mAgentsForSlot.put(slotId, agents);
+            }
+
+            agents.put(clazz, agent);
         }
     }
 
@@ -123,24 +173,6 @@ public final class AgentFactory {
         }
 
         return getAgent(agentType);
-    }
-
-    @VisibleForTesting
-    public void setAgent(Class<?> clazz, IAgent agent, int slotId) {
-        if (slotId < 0) {
-            return;
-        }
-
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.get(slotId);
-
-        synchronized (mLock) {
-            if (agents == null) {
-                agents = new ArrayMap<Class<?>, IAgent>();
-                mAgentsForSlot.put(slotId, agents);
-            }
-
-            agents.put(clazz, agent);
-        }
     }
 
     public static synchronized void createAgents(Context context, int slotId) {
@@ -196,8 +228,9 @@ public final class AgentFactory {
         sAgents.put(BATTERY_STATE, BatteryStateAgent.getInstance());
         sAgents.put(PREFERENCE, PreferenceAgent.getInstance());
         sAgents.put(WAKE_LOCK, WakeLockAgent.getInstance());
-        sAgents.put(WIFI_STATE, WifiStateAgent.getInstance());
         sAgents.put(DEVICE, DeviceAgent.getInstance());
+
+        getInstance().createAgents();
     }
 
     public static void initAgentsForMIms(Context context, int slotId) {
@@ -230,8 +263,9 @@ public final class AgentFactory {
         BatteryStateAgent.getInstance().init(context);
         PreferenceAgent.getInstance().init(context);
         WakeLockAgent.getInstance().init(context);
-        WifiStateAgent.getInstance().init(context);
         DeviceAgent.getInstance().init(context);
+
+        getInstance().initAgents(context);
     }
 
     public static void setAgentForMIms(IAgent agent, int agentType, int slotId) {
@@ -239,6 +273,50 @@ public final class AgentFactory {
 
         if (agents != null) {
             agents.put(agentType, agent);
+        }
+    }
+
+    /**
+     * Creates the default agents.
+     */
+    public void createAgents() {
+        if (mDefaultSystemCallAgent == null) {
+            mDefaultSystemCallAgent = new DefaultSystemCallAgent();
+        }
+
+        mAgents.put(WifiInterface.class, new WifiAgent());
+    }
+
+    /**
+     * Destroys the default agents.
+     */
+    public void destroyAgents() {
+        for (int i = 0; i < mAgents.size(); ++i) {
+            IAgent agent = mAgents.valueAt(i);
+
+            if (agent != null) {
+                agent.cleanup();
+            }
+        }
+
+        if (mDefaultSystemCallAgent != null) {
+            mDefaultSystemCallAgent.destroy();
+            mDefaultSystemCallAgent = null;
+        }
+    }
+
+    /**
+     * Initiaizes the default agents.
+     *
+     * @param context A {@code Context} object.
+     */
+    public void initAgents(Context context) {
+        for (int i = 0; i < mAgents.size(); ++i) {
+            IAgent agent = mAgents.valueAt(i);
+
+            if (agent != null) {
+                agent.init(context);
+            }
         }
     }
 
@@ -256,15 +334,6 @@ public final class AgentFactory {
                 agents.put(GbaInterface.class, new GbaAgent(slotId));
                 agents.put(ImsRadioInterface.class, new ImsRadioAgent(slotId));
             }
-        }
-    }
-
-    @VisibleForTesting
-    public void setAgentsForSlot(IAgent agent, Class<?> agentName, int slotId) {
-        ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
-
-        if (agents != null) {
-            agents.put(agentName, agent);
         }
     }
 
