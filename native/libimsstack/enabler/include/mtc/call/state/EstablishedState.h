@@ -70,7 +70,7 @@ private:
             IN UpdateType eUpdateType, IN CallType eCallType, IN const MediaInfo& objMediaInfo);
     IMS_RESULT HandleReceivedUpdate(OUT CallStateName& eStateName);
     IMS_RESULT HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
-    IMS_RESULT FormAutoAccept(IN IMS_BOOL bWithoutOffer);
+    void FormAutoAccept(IN IMS_BOOL bWithoutOffer);
     IMS_BOOL IsConferenceCallParticipant() const;
     ImsList<IMtcBlockRule*> GetCallUpdateBlockRules() const;
     CallStateName Downgrade(IN CallType eCallType);

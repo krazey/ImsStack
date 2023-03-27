@@ -238,9 +238,13 @@ PUBLIC VIRTUAL IMS_RESULT MtcSession::Update(
 
 PUBLIC VIRTUAL IMS_RESULT MtcSession::AcceptUpdate()
 {
-    IMS_TRACE_D("AcceptUpdate", 0, 0, 0);
+    IMS_BOOL bAnswerForOfferlessReInvite = !m_objContext.GetMessageUtils().HasSdp(
+            m_objSession.GetPreviousRequest(IMessage::SESSION_UPDATE));
+    IMS_TRACE_D("AcceptUpdate Offerless case[%s]", _TRACE_B_(bAnswerForOfferlessReInvite), 0, 0);
 
-    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
+    // bAnswerForOfferlessReInvite should allow re-offer.
+    if (SetSdpToSend(bAnswerForOfferlessReInvite, bAnswerForOfferlessReInvite) ==
+            ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;
     }
@@ -470,10 +474,10 @@ void MtcSession::CheckCallTypeWithRegisteredFeature()
 }
 
 PRIVATE
-MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer)
+MtcSession::ResultSetSdp MtcSession::SetSdpToSend(
+        IN IMS_BOOL bAllowReOffer, IN IMS_BOOL bAnswerForOfferlessReInvite /* = IMS_FALSE*/)
 {
     // Answering for offerless re-INVITE case must not come into this.
-
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     NegotiationState eState = objMediaManager.GetNegotiationState(&m_objSession);
 
@@ -489,7 +493,8 @@ MtcSession::ResultSetSdp MtcSession::SetSdpToSend(IN IMS_BOOL bAllowReOffer)
         return ResultSetSdp::NO_SDP;
     }
 
-    if (objMediaManager.FormSdp(&m_objSession, GetCallType()) == IMS_FAILURE)
+    if (objMediaManager.FormSdp(&m_objSession, GetCallType(), bAnswerForOfferlessReInvite) ==
+            IMS_FAILURE)
     {
         IMS_TRACE_D("SetSdpToSend - Form SDP Failed", 0, 0, 0);
         return ResultSetSdp::FAILURE;

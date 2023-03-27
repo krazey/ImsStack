@@ -274,12 +274,6 @@ TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
     ON_CALL(objMockCallContext, IsHeldByMe).WillByDefault(Return(IMS_FALSE));
     ON_CALL(objMockMtcSession, GetCallType()).WillByDefault(Return(CallType::VOIP));
 
-    EXPECT_CALL(objMockMediaManager, FormSdp(&objMockISession, CallType::VOIP, IMS_TRUE))
-            .Times(1)
-            .WillOnce(Return(IMS_SUCCESS));
-
-    EXPECT_CALL(objMockPreconditionManager, FormPreconditionSdp(_, IMS_FALSE)).Times(1);
-
     EXPECT_CALL(objMockMtcSession, AcceptUpdate()).Times(1).WillOnce(Return(IMS_SUCCESS));
 
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
