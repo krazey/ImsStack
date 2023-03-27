@@ -985,6 +985,10 @@ const IMS_CHAR CarrierConfig::Assets::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_
         "information_level_of_geolocation_pidf_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_MESSAGE_TYPE_SUPPORT_GEOLOCATION_PIDF_INT_ARRAY[] =
         "message_type_support_geolocation_pidf_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_INCOMING_RESUME_EVENT_SUPPORT_BOOL[] =
+        "incoming_resume_event_support_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT[] =
+        "sip_status_code_for_rejecting_call_type_change_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_INITIALIZE_P_EARLY_MEDIA_WHEN_NO_HEADER_BOOL[] =
         "initialize_p_early_media_when_no_header_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_LOCAL_RINGBACK_TONE_WITH_180_RESPONSE_INT[] =

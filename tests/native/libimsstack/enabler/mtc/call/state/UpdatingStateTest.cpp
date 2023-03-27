@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include "CarrierConfig.h"
 #include "MtcDef.h"
+#include "PlatformContext.h"
+#include "TestConfigService.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
@@ -39,6 +42,7 @@
 #include <gtest/gtest.h>
 
 using ::testing::_;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -61,10 +65,14 @@ public:
     MockMtcTimerWrapper objTimer;
     MockMtcPendingOperationHolder objPendingOperationHolder;
     MockIMessageUtils objMessageUtils;
+    TestConfigService objConfigService;
 
 protected:
     virtual void SetUp() override
     {
+        PlatformContext::GetInstance()->SetService(
+                PlatformContext::SERVICE_CONFIG, &objConfigService);
+
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
         pMtcSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
@@ -101,6 +109,8 @@ protected:
         delete pUpdatingInfo;
         delete pConfigurationProxy;
         delete pMtcSupplementaryService;
+
+        PlatformContext::GetInstance()->SetService(PlatformContext::SERVICE_CONFIG, IMS_NULL);
     }
 };
 
@@ -197,6 +207,77 @@ TEST_F(UpdatingStateTest, AcceptUpdateReturnsUpdating)
     EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
 
     EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->AcceptUpdate(CallType::VOIP, objMediaInfo));
+}
+
+TEST_F(UpdatingStateTest, RejectUpdateInvokesMtcSessionRejectIfMediaAlreadyNegotiated)
+{
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
+
+    const CallReasonInfo objInfo(CODE_UNSPECIFIED);
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE));
+    EXPECT_CALL(objMtcSession, Reject(Ref(objInfo)));
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->RejectUpdate(objInfo));
+}
+
+TEST_F(UpdatingStateTest, RejectUpdateInvokesMtcSessionUpdateIfSessionAlreadyEstablished)
+{
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+
+    const CallReasonInfo objInfo(CODE_UNSPECIFIED);
+    EXPECT_CALL(objMtcSession, Update(UpdateType::SESSION, IMS_FALSE, SipMethod::INVITE));
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->RejectUpdate(objInfo));
+}
+
+TEST_F(UpdatingStateTest, RejectUpdateInvokesMtcSessionRejectIfRejectCodeIsNot200)
+{
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
+                    _))
+            .WillByDefault(Return(603));
+    ON_CALL(objSession, GetState).WillByDefault(Return(ISession::STATE_NEGOTIATING));
+
+    const CallReasonInfo objInfo(CODE_UNSPECIFIED);
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE));
+    EXPECT_CALL(objMtcSession, Reject(Ref(objInfo)));
+    EXPECT_EQ(CallStateName::UPDATING, pUpdatingState->RejectUpdate(objInfo));
+}
+
+TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
+{
+    ON_CALL(objMediaManager, GetNegotiationState(_))
+            .WillByDefault(Return(NegotiationState::STATE_OFFER_SENT));
+    ON_CALL(objConfigService.GetMockCarrierConfig(),
+            GetInt(CarrierConfig::Assets::KEY_SIP_STATUS_CODE_FOR_REJECTING_CALL_TYPE_CHANGE_INT,
+                    _))
+            .WillByDefault(Return(200));
+
+    MediaInfo objMediaInfo;
+    ON_CALL(objMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
+    objContext.GetUpdatingInfo().GetNegotiatedInfo() = objMediaInfo;
+
+    {
+        // Copied from AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpdate
+        ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+
+        EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
+        EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+        EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
+        EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
+        EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
+        EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
+        SipMethod objSipMethod(SipMethod::UPDATE);
+        EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
+        EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
+    }
+
+    const CallReasonInfo objInfo(CODE_UNSPECIFIED);
+    EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->RejectUpdate(objInfo));
 }
 
 TEST_F(UpdatingStateTest, OnUserResponseTimerExpiredCallsReject)
