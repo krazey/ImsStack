@@ -328,39 +328,6 @@ TEST_F(SipHeadersTest, GetHdrObj_Index)
     delete pHdrs;
 }
 
-TEST_F(SipHeadersTest, GetNewHdrObj)
-{
-    SipHeaders* pHdrs = new SipHeaders();
-    ASSERT_TRUE(pHdrs != nullptr);
-
-    EXPECT_TRUE(nullptr == pHdrs->GetNewHdrObj(SipHeaderBase::TYPE_END));
-    EXPECT_TRUE(nullptr == pHdrs->GetNewHdrObj(SipHeaderBase::TYPE_INVALID));
-
-    SipIntegerHeader* pMaxForwardsHdr = reinterpret_cast<SipIntegerHeader*>(
-            SipHeaders::CreateCoreHdrObj(SipHeaderBase::MAX_FORWARDS));
-    ASSERT_TRUE(pMaxForwardsHdr != nullptr);
-
-    char* pMaxForwardsValue = const_cast<char*>("70");
-
-    EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
-    EXPECT_EQ(SIP_TRUE, pHdrs->SetHdr(pMaxForwardsHdr));
-    pMaxForwardsHdr->SipDelete();
-
-    pMaxForwardsHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetNewHdrObj(SipHeaderBase::MAX_FORWARDS));
-    ASSERT_TRUE(pMaxForwardsHdr != nullptr);
-    EXPECT_EQ(70, pMaxForwardsHdr->GetValueInt());
-    pMaxForwardsHdr->SipDelete();
-
-    SipHeaderBase* pUserAgentHdr = pHdrs->GetNewHdrObj(SipHeaderBase::USER_AGENT);
-    ASSERT_TRUE(pUserAgentHdr != nullptr);
-
-    SipHeaderBase* pViaHdr = pHdrs->GetNewHdrObj(SipHeaderBase::VIA);
-    ASSERT_TRUE(pViaHdr != nullptr);
-
-    delete pHdrs;
-}
-
 TEST_F(SipHeadersTest, RemoveHdr)
 {
     SipHeaders* pHdrs = new SipHeaders();
@@ -377,12 +344,6 @@ TEST_F(SipHeadersTest, RemoveHdr)
 
     EXPECT_EQ(SIP_TRUE, pMaxForwardsHdr->DecodeHdr(pMaxForwardsValue, strlen(pMaxForwardsValue)));
     EXPECT_EQ(SIP_TRUE, pHdrs->SetHdr(pMaxForwardsHdr));
-    pMaxForwardsHdr->SipDelete();
-
-    pMaxForwardsHdr =
-            reinterpret_cast<SipIntegerHeader*>(pHdrs->GetNewHdrObj(SipHeaderBase::MAX_FORWARDS));
-    ASSERT_TRUE(pMaxForwardsHdr != nullptr);
-    EXPECT_EQ(70, pMaxForwardsHdr->GetValueInt());
     pMaxForwardsHdr->SipDelete();
 
     EXPECT_EQ(SIP_TRUE, pHdrs->RemoveHdr(SipHeaderBase::MAX_FORWARDS));
@@ -841,6 +802,26 @@ TEST_F(SipHeadersTest, DecodeHdrs)
     ASSERT_TRUE(nullptr != pUnknownHdr);
     pUnknownHdr->SipDelete();
     delete[] pszHeaderName;
+    delete[] pszHeaderBody;
+    pszHeaderName = nullptr;
+    pszHeaderBody = nullptr;
+
+    pHeaderBuffer = const_cast<char*>("cseq: 1 REGISTER");
+    ASSERT_EQ(SIP_TRUE,
+            pHdrs->DecodeHdrs(
+                    pHeaderBuffer, strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
+    delete[] pszHeaderName;
+    delete[] pszHeaderBody;
+    pszHeaderName = nullptr;
+    pszHeaderBody = nullptr;
+
+    // Decoding again single header cseq fails.
+    EXPECT_EQ(SIP_FALSE,
+            pHdrs->DecodeHdrs(
+                    pHeaderBuffer, strlen(pHeaderBuffer), &pszHeaderName, &pszHeaderBody));
+    ASSERT_TRUE(nullptr != pszHeaderName);
+    delete[] pszHeaderName;
+    ASSERT_TRUE(nullptr != pszHeaderBody);
     delete[] pszHeaderBody;
     pszHeaderName = nullptr;
     pszHeaderBody = nullptr;
