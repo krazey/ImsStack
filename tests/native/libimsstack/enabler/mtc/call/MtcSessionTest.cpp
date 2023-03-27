@@ -572,6 +572,116 @@ TEST_F(MtcSessionTest, HandleRequestUpdatesVideoCapabilityByAvchange)
     EXPECT_FALSE(pMtcSession->IsVideoCapable());
 }
 
+TEST_F(MtcSessionTest, HandleUpdateRequestInvokesSetCallTypeIfSameCallType)
+{
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    RequestType eType = RequestType::UPDATE;
+
+    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
+            .WillByDefault(Return(IMS_FALSE));
+    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    // previous call type is changed.
+    EXPECT_EQ(CallType::VT, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleEarlyUpdateRequestDoesNotInvokeSetCallTypeIfSameCallType)
+{
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    RequestType eType = RequestType::EARLY_UPDATE;
+
+    ON_CALL(*pConfigurationManager, IsSupportSipSessionIdHeader).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
+            .WillByDefault(Return(IMS_FALSE));
+    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+
+    pMtcSession->HandleRequest(eType, objMessage);
+
+    // previous call type is not changed.
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleResponseInvokesSetCallTypeIfDifferentCallType)
+{
+    CreateMtcSession(CallType::VOIP, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    ResponseType eType = ResponseType::PROVISIONAL_RESPONSE;
+
+    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
+            .WillByDefault(Return(IMS_FALSE));
+    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VOIP, pMtcSession->GetCallType());
+
+    pMtcSession->HandleResponse(eType, objMessage);
+
+    // previous call type is not changed.
+    EXPECT_EQ(CallType::VOIP, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+}
+
+TEST_F(MtcSessionTest, HandleResponseDoesNotInvokeSetCallTypeIfSameCallType)
+{
+    CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
+    ResponseType eType = ResponseType::EARLY_UPDATE_RESPONSE;
+
+    ON_CALL(*pConfigurationManager, IsSupportVideoCallUpgradeRegardlessOfFeatureTags)
+            .WillByDefault(Return(IMS_FALSE));
+    AString strHeader(MessageUtil::STR_P_TTA_VOLTE_INFO);
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader(strHeader))
+            .WillByDefault(Return(IMS_FALSE));
+
+    ON_CALL(objMessageUtils, IsVideoFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objMessageUtils, IsTextFeatureIncluded(&objMessage)).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(objMessageUtils, GetCallType(&objMessage, &objSession, IMS_TRUE))
+            .WillByDefault(Return(CallType::VT));
+    ON_CALL(objMessageUtils, IsFocusConf(&objMessage)).WillByDefault(Return(IMS_FALSE));
+
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+
+    pMtcSession->HandleResponse(eType, objMessage);
+
+    // previous call type is not changed.
+    EXPECT_EQ(CallType::UNKNOWN, pMtcSession->GetPreviousCallType());
+    EXPECT_EQ(CallType::VT, pMtcSession->GetCallType());
+}
+
 TEST_F(MtcSessionTest, HandleResponseSetsInConferenceIfIsFocus)
 {
     CreateMtcSession(CallType::VT, PeerType::MO, IMS_TRUE, IMS_TRUE, IMS_TRUE);
