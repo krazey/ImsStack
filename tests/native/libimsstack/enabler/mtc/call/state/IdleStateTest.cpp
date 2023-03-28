@@ -18,6 +18,7 @@
 #include "MockIMtcService.h"
 #include "MtcContextRepository.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
@@ -37,6 +38,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
+#include "helper/MockILastComeFirstServedHelper.h"
 #include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
@@ -85,6 +87,7 @@ public:
     MockUssiController* pUssiController;
     MockIMessageUtils objMessageUtils;
     MockIPassiveTimerHolder objPassiveTimerHolder;
+    MockILastComeFirstServedHelper objLastComeFirstServedHelper;
 
     MediaInfo objInputMediaInfo;
     ImsMap<SuppType, SuppService*> objInputSuppServices;
@@ -124,6 +127,8 @@ protected:
         ON_CALL(objCallContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objCallContext, GetPassiveTimerHolder)
                 .WillByDefault(ReturnRef(objPassiveTimerHolder));
+        ON_CALL(objCallContext, GetLastComeFirstServedHelper)
+                .WillByDefault(ReturnRef(objLastComeFirstServedHelper));
 
         pUssiController = new MockUssiController(objCallContext, IMS_NULL);
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
@@ -657,6 +662,66 @@ TEST_F(IdleStateTest, HandleIncomingInvokesSendPreIncomingCallReceived)
                     Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
 
     EXPECT_CALL(objUiNotifier, SendPreIncomingCallReceived(_));
+
+    EXPECT_EQ(CallStateName::IDLE, pIdleState->HandleIncoming(&objSession));
+
+    delete pMessage;
+}
+
+TEST_F(IdleStateTest, HandleIncomingInvokesOnCallReceivedForLastComeFirstServedHelperIfSupported)
+{
+    ON_CALL(objCallContext, CreateSession(&objSession)).WillByDefault(Return(&objMtcSession));
+    MockIMessage* pMessage = new MockIMessage();
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(pMessage));
+
+    ImsList<AString> objRequiredExtensions;
+    objRequiredExtensions.Append(AString("supportedExtension"));
+    ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(objRequiredExtensions));
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+
+    ON_CALL(*pConfigurationManager, IsRejectOfferlessInvite).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, GetPreAlertingTimer).WillByDefault(Return(7000));
+    const IMS_UINTP ANY_KEY = 100;
+    ON_CALL(objCallContext, GetCallKey()).WillByDefault(Return(ANY_KEY));
+    EXPECT_CALL(objLastComeFirstServedHelper, OnCallReceived(ANY_KEY)).Times(1);
+
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
+
+    EXPECT_EQ(CallStateName::IDLE, pIdleState->HandleIncoming(&objSession));
+
+    delete pMessage;
+}
+
+TEST_F(IdleStateTest, HandleIncomingDoesNothingForLastComeFirstServedHelperIfNotSupported)
+{
+    ON_CALL(objCallContext, CreateSession(&objSession)).WillByDefault(Return(&objMtcSession));
+    MockIMessage* pMessage = new MockIMessage();
+    ON_CALL(objSession, GetPreviousRequest(IMessage::SESSION_START))
+            .WillByDefault(Return(pMessage));
+
+    ImsList<AString> objRequiredExtensions;
+    objRequiredExtensions.Append(AString("supportedExtension"));
+    ON_CALL(objMessageUtils, GetHeaders(pMessage, ISipHeader::REQUIRE, _))
+            .WillByDefault(Return(objRequiredExtensions));
+    const AString strSupportedOptionTag("supportedExtension");
+    ON_CALL(objMtcSession, GetExtensionSet)
+            .WillByDefault(ReturnRef(*GetTestExtensionSet(strSupportedOptionTag)));
+
+    ON_CALL(*pConfigurationManager, IsRejectOfferlessInvite).WillByDefault(Return(IMS_FALSE));
+    ON_CALL(*pConfigurationManager, GetPreAlertingTimer).WillByDefault(Return(0));
+    const IMS_UINTP ANY_KEY = 100;
+    ON_CALL(objCallContext, GetCallKey()).WillByDefault(Return(ANY_KEY));
+    EXPECT_CALL(objLastComeFirstServedHelper, OnCallReceived(ANY_KEY)).Times(0);
+
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::UNBLOCKED)));
 
     EXPECT_EQ(CallStateName::IDLE, pIdleState->HandleIncoming(&objSession));
 

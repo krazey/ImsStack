@@ -43,6 +43,7 @@ public:
 
     void OnExit() override;
 
+    CallStateName Reject(IN const CallReasonInfo& objReason) override;
     CallStateName Terminate(IN const CallReasonInfo& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;

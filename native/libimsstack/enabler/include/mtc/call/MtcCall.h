@@ -52,6 +52,7 @@ class CurrentLocationDiscoveryController;
 class EpsFallbackTrigger;
 class IConferenceManager;
 class IEctManager;
+class ILastComeFirstServedHelper;
 class IMtcAosConnector;
 class IMtcCallController;
 class IMtcContext;
@@ -229,6 +230,10 @@ public:
     inline IMultiEndpointManager* GetMultiEndpointManager() override
     {
         return m_objContext.GetMultiEndpointManager();
+    }
+    inline ILastComeFirstServedHelper& GetLastComeFirstServedHelper() override
+    {
+        return m_objContext.GetLastComeFirstServedHelper();
     }
     inline IMS_BOOL IsWifiTestMode() override { return m_objContext.IsWifiTestMode(); }
     // end of IMtcContext
