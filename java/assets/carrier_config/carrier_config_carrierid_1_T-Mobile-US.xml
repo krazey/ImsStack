@@ -214,6 +214,7 @@
     <boolean name="initialize_p_early_media_when_no_header_bool" value="true"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="1"/>
     <int name="imsvoice.registration_restoration_mode_on_504_for_invite_int" value="4"/>
+    <int name="prealerting_timer_millis_int" value="7000"/>
 
     <!-- MTC terminate reason -->
     <string name="imsvoice.call_terminate_reason_header_user_ends_and_rtp_timeout_string">RELEASE_CAUSE;cause=2;text="User ends call RTP/RTCP time-out"</string>

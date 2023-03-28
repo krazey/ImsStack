@@ -41,6 +41,7 @@ class EctManager;
 class ICallStateProxy;
 class IConferenceManager;
 class IEctManager;
+class ILastComeFirstServedHelper;
 class IMessageUtils;
 class IMtcAosConnector;
 class IMtcCallController;
@@ -52,6 +53,7 @@ class IMtcRadioChecker;
 class IMtcSipInterfaceFactory;
 class IMultiEndpointManager;
 class IPassiveTimerHolder;
+class LastComeFirstServedHelper;
 class OperationAsyncRunner;
 
 class MtcApp : public ImsApp, public IMtcApp, public IMtcContext
@@ -94,6 +96,7 @@ public:
     {
         return m_pMultiEndpointManager.get();
     }
+    ILastComeFirstServedHelper& GetLastComeFirstServedHelper() override;
     inline IMS_BOOL IsWifiTestMode() override { return m_bWifiTestMode; }
 
 protected:
@@ -119,6 +122,7 @@ protected:
     PassiveTimerHolder m_objPassiveTimerHolder;
     std::unique_ptr<MultiEndpointManager> m_pMultiEndpointManager;
     MtcRadioChecker m_objMtcRadioChecker;
+    std::unique_ptr<LastComeFirstServedHelper> m_pLastComeFirstServedHelper;
 
     IMS_BOOL m_bWifiTestMode;
 };

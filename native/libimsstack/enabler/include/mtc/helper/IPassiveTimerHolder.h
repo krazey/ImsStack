@@ -32,6 +32,7 @@ public:
         CALL_BLOCKED_BY_RETRY_AFTER,
         SSAC_VOICE_BARRING,
         SSAC_VIDEO_BARRING,
+        PRE_ALERTING_GUARD,
     };
 
     virtual ~IPassiveTimerHolder() = default;

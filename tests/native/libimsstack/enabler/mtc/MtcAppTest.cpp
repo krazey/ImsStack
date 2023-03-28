@@ -27,6 +27,7 @@
 #include "ect/IEctManager.h"
 #include "emergency/IMtcEmergencyServiceManager.h"
 #include "helper/ICallStateProxy.h"
+#include "helper/ILastComeFirstServedHelper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "utility/IMessageUtils.h"
 #include <gtest/gtest.h>
@@ -226,6 +227,13 @@ TEST_F(MtcAppTest, GetMessageUtilsAfterConstructor)
 {
     IMessageUtils* piMessageUtils = &pMtcApp->GetMessageUtils();
     ASSERT_NE(piMessageUtils, nullptr);
+}
+
+TEST_F(MtcAppTest, CreateLastComeFirstServedHelperOnlyOnceWhenFirstGetterIsCalled)
+{
+    ILastComeFirstServedHelper* pFirstHelper = &pMtcApp->GetLastComeFirstServedHelper();
+    ILastComeFirstServedHelper* pSecondHelper = &pMtcApp->GetLastComeFirstServedHelper();
+    EXPECT_EQ(pFirstHelper, pSecondHelper);
 }
 
 TEST_F(MtcAppTest, IsWifiTestModeReturnsSameValueOfUtilService)

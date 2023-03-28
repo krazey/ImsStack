@@ -52,6 +52,12 @@ PUBLIC VIRTUAL void IncomingState::OnExit()
     m_objContext.GetTimer().Stop(TIMER_GLARE_CONDITION);
 }
 
+PUBLIC VIRTUAL CallStateName IncomingState::Reject(IN const CallReasonInfo& objReason)
+{
+    IMS_TRACE_D("Reject reason[%s]", _TRACE_CR_(objReason), 0, 0);
+    return RejectIncomingAndToTerminating(objReason);
+}
+
 PUBLIC VIRTUAL CallStateName IncomingState::Terminate(IN const CallReasonInfo& objReason)
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
