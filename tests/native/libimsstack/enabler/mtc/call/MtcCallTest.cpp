@@ -45,6 +45,7 @@
 #include "helper/IMtcAosStateListener.h"
 #include "helper/ISrvccStateListener.h"
 #include "helper/MockICallStateProxy.h"
+#include "helper/MockILastComeFirstServedHelper.h"
 #include "helper/MtcTimerWrapper.h"
 #include "helper/OperationAsyncRunner.h"
 #include "helper/sipinterfaceholder/MockIInterfaceHolderListener.h"
@@ -1198,6 +1199,16 @@ TEST_F(MtcCallTest, GetMessageUtilsCallsMtcContext)
     EXPECT_CALL(objContext, GetMessageUtils).Times(1).WillRepeatedly(ReturnRef(objMessageUtils));
 
     objCall.GetMessageUtils();
+}
+
+TEST_F(MtcCallTest, GetLastComeFirstServedHelperCallsMtcContext)
+{
+    MtcCall objCall(objContext, objService, objCallInfo, std::move(CreateStateFactory()));
+    MockILastComeFirstServedHelper objLastComeFirstServedHelper;
+    EXPECT_CALL(objContext, GetLastComeFirstServedHelper)
+            .WillOnce(ReturnRef(objLastComeFirstServedHelper));
+
+    objCall.GetLastComeFirstServedHelper();
 }
 
 TEST_F(MtcCallTest, GetWifiTestModeCallsMtcContext)

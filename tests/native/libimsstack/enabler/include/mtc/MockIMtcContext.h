@@ -25,6 +25,7 @@
 class ICallStateProxy;
 class IConferenceManager;
 class IEctManager;
+class ILastComeFirstServedHelper;
 class IMtcAosConnector;
 class IMtcCallController;
 class IMtcCallManager;
@@ -63,6 +64,7 @@ public:
     MOCK_METHOD(IMessageUtils&, GetMessageUtils, (), (override));
     MOCK_METHOD(IPassiveTimerHolder&, GetPassiveTimerHolder, (), (override));
     MOCK_METHOD(IMultiEndpointManager*, GetMultiEndpointManager, (), (override));
+    MOCK_METHOD(ILastComeFirstServedHelper&, GetLastComeFirstServedHelper, (), (override));
     MOCK_METHOD(IMS_BOOL, IsWifiTestMode, (), (override));
 };
 

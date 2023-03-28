@@ -21,22 +21,23 @@
 #include "ImsTypeDef.h"
 #include <functional>
 
-class IMtcDialingPlan;
-class IMtcCallController;
-class IMtcCallManager;
-class MtcConfigurationProxy;
 class ICallStateProxy;
-class IMtcAosConnector;
-class IMtcEmergencyServiceManager;
-class IMtcImsEventReceiver;
-class IMtcSipInterfaceFactory;
 class IConferenceManager;
 class IEctManager;
-class OperationAsyncRunner;
+class ILastComeFirstServedHelper;
 class IMessageUtils;
+class IMtcAosConnector;
+class IMtcCallController;
+class IMtcCallManager;
+class IMtcDialingPlan;
+class IMtcEmergencyServiceManager;
+class IMtcImsEventReceiver;
 class IMtcRadioChecker;
-class IPassiveTimerHolder;
+class IMtcSipInterfaceFactory;
 class IMultiEndpointManager;
+class IPassiveTimerHolder;
+class MtcConfigurationProxy;
+class OperationAsyncRunner;
 
 class IMtcContext
 {
@@ -171,6 +172,13 @@ public:
      * @return
      */
     virtual IMultiEndpointManager* GetMultiEndpointManager() = 0;
+
+    /**
+     * @brief Gets
+     *
+     * @return
+     */
+    virtual ILastComeFirstServedHelper& GetLastComeFirstServedHelper() = 0;
 
     /**
      * @brief Checks

@@ -31,13 +31,13 @@
 #include "call/IMtcUiNotifier.h"
 #include "call/ParticipantInfo.h"
 #include "call/block/CallCountBlockRule.h"
-#include "call/block/RadioBlockRule.h"
 #include "call/block/CallTypeBlockRule.h"
+#include "call/block/CallWaitingBlockRule.h"
 #include "call/block/CsCallBlockRule.h"
 #include "call/block/IMtcBlockChecker.h"
 #include "call/block/NetworkBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
-#include "call/block/CallWaitingBlockRule.h"
+#include "call/block/RadioBlockRule.h"
 #include "call/block/TimerBlockRule.h"
 #include "call/block/VopsBlockRule.h"
 #include "call/extension/MtcExtensionSet.h"
@@ -46,6 +46,7 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/IMessage.h"
 #include "dialingplan/IMtcDialingPlan.h"
+#include "helper/LastComeFirstServedHelper.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
 #include "media/IMtcMediaManager.h"
@@ -176,6 +177,11 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(IN ISession* piSession)
             !m_objContext.GetMessageUtils().HasSdp(piMessage))
     {
         return RejectIncomingAndToTerminating(CallReasonInfo(CODE_MEDIA_NOT_ACCEPTABLE));
+    }
+
+    if (LastComeFirstServedHelper::IsSupported(m_objContext.GetConfigurationProxy()))
+    {
+        m_objContext.GetLastComeFirstServedHelper().OnCallReceived(m_objContext.GetCallKey());
     }
 
     m_objOperationAfterBlockCheck = [&]()
