@@ -1208,12 +1208,14 @@ PROTECTED VIRTUAL void AosHandle::ProcessPsRoamingStateChanged(IN IMS_UINT32 nSt
     m_nRoamingState = nState;
 }
 
-PROTECTED VIRTUAL void AosHandle::ProcessNetworkEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosHandle::ProcessNetworkEvent(
+        IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nExtraInfo)
 {
     if (nType == IMS_EVENT_LTE_INFO)
     {
         A_IMS_TRACE_I(APPPROFILE, "ProcessNetworkEvent :: type(%d), state(%d)", nType, nState, 0);
-        m_bCombinedAttach = (nState == IMS_LTE_INFO_COMBINED_ATTACHED);
+        m_bCombinedAttach = (nState == IMS_LTE_INFO_COMBINED_ATTACHED &&
+                ((nExtraInfo & IMS_LTE_INFO_EXTRA_SMS_ONLY) == 0));
     }
 }
 
@@ -1753,7 +1755,7 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
             break;
 
         case IMS_EVENT_LTE_INFO:
-            ProcessNetworkEvent(nEvent, nWParam);
+            ProcessNetworkEvent(nEvent, nWParam, nLParam);
             break;
 
         default:
