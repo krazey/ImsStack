@@ -168,7 +168,7 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToAlertUser(IN ISessi
         return IMS_FALSE;
     }
 
-    IMS_BOOL bLocalReserved = IsLocalResourceReserved(piSession, IMS_TRUE);
+    IMS_BOOL bLocalReserved = IsLocalResourceReserved(piSession, !IsConfirmedDialog(piSession));
     if (!IsPreconditionSupported(piSession))
     {
         return bLocalReserved;
@@ -185,12 +185,16 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsEarlyUpdateRequired(IN ISessio
         return IMS_FALSE;
     }
 
-    if (m_pSdpPreconditionHelper->IsLocalResourceReservedInSdp(piSession, IMessage::SESSION_START))
+    IMS_SINT32 nMethod =
+            IsConfirmedDialog(piSession) ? IMessage::SESSION_UPDATE : IMessage::SESSION_START;
+    if (m_pSdpPreconditionHelper->IsLocalResourceReservedInSdp(piSession, nMethod))
     {
         return IMS_FALSE;
     }
 
-    if (piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) != IMS_NULL &&
+    // TODO: Can all UPDATE be skipped in UPGRADE case?
+    if (nMethod == IMessage::SESSION_START &&
+            piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) != IMS_NULL &&
             m_pSdpPreconditionHelper->IsLocalResourceReservedInSdp(
                     piSession, IMessage::SESSION_EARLY_UPDATE))
     {
@@ -209,7 +213,7 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsAvailableToSendEarlyUpdate(
         return IMS_FALSE;
     }
 
-    return IsLocalResourceReserved(piSession, IMS_TRUE);
+    return IsLocalResourceReserved(piSession, !IsConfirmedDialog(piSession));
 }
 
 PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(

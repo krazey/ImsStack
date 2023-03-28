@@ -42,6 +42,7 @@
 
 using ::testing::_;
 using ::testing::AnyNumber;
+using ::testing::AnyOf;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -497,6 +498,60 @@ TEST_F(MtcPreconditionManagerTest, IsAvailableToAlertUserIfRemoteNotReserved)
             IsCurrentStatusEnabled(SdpMedia::TYPE_VIDEO, SdpPrecondition::STATUS_REMOTE))
             .WillOnce(Return(IMS_FALSE));
     EXPECT_FALSE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsAvailableToAlertUserReturnsFalseIfOnlyAudioIsReservedForVtUpgrade)
+{
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    SetUpMockQosInfo();
+    SetUpNothingOnDefaultBearerSupported();
+    SetUpSupportingPreconditionInLocal(CallType::VT, IMS_TRUE);
+    ON_CALL(*pConfigurationManager, IsVideoQosPreconditionSupported())
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
+            .WillByDefault(Return(IMS_FALSE));
+
+    // local
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::IDLE));
+
+    // remote is not reached.
+
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_FALSE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
+}
+
+TEST_F(MtcPreconditionManagerTest,
+        IsAvailableToAlertUserReturnsTrueIfVoiceAndVideoAreReservedForVtUpgrade)
+{
+    ON_CALL(objISession, GetState()).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    SetUpMockQosInfo();
+    SetUpNothingOnDefaultBearerSupported();
+    SetUpSupportingPreconditionInLocal(CallType::VT, IMS_TRUE);
+    ON_CALL(*pConfigurationManager, IsVideoQosPreconditionSupported())
+            .WillByDefault(Return(IMS_TRUE));
+    ON_CALL(objTimer, IsQosTimerActivated(QosTimerType::GUARD_AVAILABLE))
+            .WillByDefault(Return(IMS_FALSE));
+
+    // local
+    ON_CALL(*pInfo, GetAudioStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+    ON_CALL(*pInfo, GetVideoStatus()).WillByDefault(Return(QosStatus::AVAILABLE));
+
+    // remote
+    ON_CALL(*pSdpPreconditionHelper, GetMediaTypesBySdp(&objISession))
+            .WillByDefault(Return(MEDIATYPE_AUDIO | MEDIATYPE_VIDEO));
+    ON_CALL(objStatusTable,
+            IsCurrentStatusEnabled(
+                    AnyOf(SdpMedia::TYPE_AUDIO, SdpMedia::TYPE_VIDEO, SdpMedia::TYPE_TEXT),
+                    SdpPrecondition::STATUS_REMOTE))
+            .WillByDefault(Return(IMS_TRUE));
+
+    ON_CALL(*pInfo, IsPreconditionSupported()).WillByDefault(Return(IMS_TRUE));
+
+    EXPECT_TRUE(pPreconditionManager->IsAvailableToAlertUser(&objISession));
 }
 
 TEST_F(MtcPreconditionManagerTest, IsEarlyUpdateRequiredReturnsFalseIfPreconditionIsNotSupported)
