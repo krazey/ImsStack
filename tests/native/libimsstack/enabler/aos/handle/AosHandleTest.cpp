@@ -557,6 +557,8 @@ protected:
     {
         return m_pAosHandle->StateDisconnecting(objMSG);
     }
+
+    IMS_BOOL IsCombinedAttach() { return m_pAosHandle->m_bCombinedAttach; }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -4680,7 +4682,22 @@ TEST_F(AosHandleTest, Event_NotifyEvent_Test)
 {
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, 1, 0);
     m_pAosHandle->Event_NotifyEvent(IMS_EVENT_ROAMING_STATE, 1, 0);
-    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, 0, 0);
+
+    m_pAosHandle->Event_NotifyEvent(
+            IMS_EVENT_LTE_INFO, IMS_LTE_INFO_EPS_ONLY_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
+    EXPECT_FALSE(IsCombinedAttach());
+    m_pAosHandle->Event_NotifyEvent(
+            IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
+    EXPECT_TRUE(IsCombinedAttach());
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED,
+            IMS_LTE_INFO_EXTRA_CSFB_NOT_PREFERRED);
+    EXPECT_TRUE(IsCombinedAttach());
+    m_pAosHandle->Event_NotifyEvent(
+            IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_SMS_ONLY);
+    EXPECT_FALSE(IsCombinedAttach());
+    m_pAosHandle->Event_NotifyEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED,
+            (IMS_LTE_INFO_COMBINED_ATTACHED | IMS_LTE_INFO_EXTRA_SMS_ONLY));
+    EXPECT_FALSE(IsCombinedAttach());
 }
 
 TEST_F(AosHandleTest, Event_NotifyEvent_InvalidEvent)
