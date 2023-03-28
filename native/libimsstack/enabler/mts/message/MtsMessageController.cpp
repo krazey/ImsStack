@@ -664,7 +664,6 @@ PRIVATE IMS_RESULT MtsMessageController::SendMtsMessage(IN SmsFormatType eSmsFor
     SetMessageInfo(piPageMessage, *pContent, eSmsFormat, strDestination,
             MtsTransactionType::MESSAGE_TYPE_SEND, piMtsMessage);
     piMtsMessage->PrintInfo();
-    m_pMtsDynamicLoader->GetMtsSmUtils()->PrintSmsDataBurst(*pContent);
 
     return IMS_SUCCESS;
 }
@@ -878,7 +877,6 @@ const ByteArray& MtsMessageController::ProcessReceivedMessage(
     SetMessageInfo(piPageMessage, objContent, eContentSmsType, strTempSmsgw,
             MtsTransactionType::MESSAGE_TYPE_RECEIVE, piMtsMessage);
     piMtsMessage->PrintInfo();
-    m_pMtsDynamicLoader->GetMtsSmUtils()->PrintSmsDataBurst(objContent);
 
     return objContent;
 }

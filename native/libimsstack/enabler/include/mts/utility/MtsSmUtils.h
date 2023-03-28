@@ -31,7 +31,6 @@ public:
     static IMS_SINT32 GetRpMr(IN const ByteArray& objContent);
     static IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const IMS_BYTE* pbyContent);
     static IMS_SINT32 GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& objContent);
-    static void PrintSmsDataBurst(IN const ByteArray& objContent);
 };
 
 #endif

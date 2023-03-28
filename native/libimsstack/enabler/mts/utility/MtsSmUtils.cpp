@@ -82,27 +82,3 @@ IMS_SINT32 MtsSmUtils::GetMti(IN SmsFormatType eSmsFormat, IN const ByteArray& o
 
     return GetMti(eSmsFormat, objContent.GetData());
 }
-
-PUBLIC
-void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objContent)
-{
-    if (objContent.IsNULL())
-    {
-        return;
-    }
-
-    IMS_CHAR szTemp[4] = {
-            0,
-    };
-    AString strSmsMsg = AString::ConstNull();
-
-    for (IMS_SINT32 i = 0; i < objContent.GetLength(); i++)
-    {
-        IMS_Sprintf(szTemp, 4, "%02X ", objContent[i]);
-
-        strSmsMsg += szTemp;
-    }
-
-    IMS_TRACE_D("<< Received SMS data burst >> (%d) >>  %s", objContent.GetLength(),
-            strSmsMsg.GetStr(), 0);
-}
