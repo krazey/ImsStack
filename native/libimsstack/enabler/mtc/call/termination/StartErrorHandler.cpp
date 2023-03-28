@@ -104,8 +104,11 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB:
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_CSFB_IF_AVAILABLE:
-            nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;  // TODO : check requirement
-            nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
+            if (!IsEpsOnlyAttach())
+            {
+                nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+                nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
+            }
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_CURRENT_PCSCF:
             ControlAos(ImsAosControl::REGISTER_REINITIATE);
@@ -115,9 +118,12 @@ CallReasonInfo StartErrorHandler::HandleTransactionTimeout() const
             break;
         case CarrierConfig::ImsVoice::
                 MO_CALL_REQUEST_TIMEOUT_POLICY_INITIAL_REGISTER_WITH_PDN_RECONNECT_AFTER_CSFB:
-            nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
-            nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
-            ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
+            if (!IsEpsOnlyAttach())
+            {
+                nReason = CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
+                nExtraCode = EXTRA_CODE_CALL_RETRY_SILENT_REDIAL;
+                ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);  // TODO: check timing
+            }
             break;
         case CarrierConfig::ImsVoice::MO_CALL_REQUEST_TIMEOUT_POLICY_SILENT_REDIAL:
             nReason = CODE_INTERNAL_REDIAL;
@@ -318,13 +324,21 @@ CallReasonInfo StartErrorHandler::Handle403Response() const
             break;
 
         case CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB:
-            return CallReasonInfo(
-                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+            if (!IsEpsOnlyAttach())
+            {
+                return CallReasonInfo(
+                        CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+            }
+            break;
 
         case CarrierConfig::ImsVoice::SIP_403_POLICY_CSFB_AND_RECOVER_REGISTRATION:
-            ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
-            return CallReasonInfo(
-                    CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+            if (!IsEpsOnlyAttach())
+            {
+                ControlAos(ImsAosControl::REGISTER_REINITIATE_BY_CSFB);
+                return CallReasonInfo(
+                        CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
+            }
+            break;
     }
 
     return CallReasonInfo(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403);
@@ -333,7 +347,7 @@ CallReasonInfo StartErrorHandler::Handle403Response() const
 PRIVATE
 CallReasonInfo StartErrorHandler::Handle404Response() const
 {
-    if (m_objContext.GetCallInfo().bUssi)
+    if (m_objContext.GetCallInfo().bUssi && !IsEpsOnlyAttach())
     {
         return CallReasonInfo(
                 CODE_LOCAL_CALL_CS_RETRY_REQUIRED, EXTRA_CODE_CALL_RETRY_SILENT_REDIAL);
@@ -466,7 +480,12 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
             {
                 case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
                     break;
-
+                case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_RECOVER_BY_NETWORK_CONTEXT:
+                    if (!IsEpsOnlyAttach())
+                    {
+                        break;
+                    }
+                    __IMS_FALLTHROUGH__
                 case CarrierConfig::ImsVoice::
                         REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
                     ControlAos(ImsAosControl::PCSCF_NEXT);
@@ -479,7 +498,6 @@ CallReasonInfo StartErrorHandler::Handle504Response(IN const IMessage& objMessag
                     ControlAos(ImsAosControl::REGISTER_REINITIATE);
                     break;
             }
-            return CallReasonInfo(CODE_SIP_SERVER_TIMEOUT, GetDefaultExtraCode(objMessage));
         }
     }
 
@@ -577,6 +595,11 @@ PRIVATE
 IMS_BOOL StartErrorHandler::IsRetry1xRequiredForNormalCall(IN const IMessage& objMessage) const
 {
     if (m_objContext.GetCallInfo().bEmergency)
+    {
+        return IMS_FALSE;
+    }
+
+    if (IsEpsOnlyAttach())
     {
         return IMS_FALSE;
     }
