@@ -17,9 +17,10 @@
 #include "ServiceTimer.h"
 #include "ServiceNetworkPolicy.h"
 #include "ServiceEvent.h"
+#include "ServiceUtil.h"
 #include "CarrierConfig.h"
 #include "IIpcan.h"
-
+#include "IAosService.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosApplication.h"
 #include "interface/IAosConnection.h"
@@ -38,10 +39,12 @@ PUBLIC
 AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
         m_piConnection(IMS_NULL),
+        m_piService(IMS_NULL),
         m_piPcscf(IMS_NULL),
         m_piIpv6Timer(IMS_NULL),
         m_piStopDelayTimer(IMS_NULL),
         m_piReadyRecoveryTimer(IMS_NULL),
+        m_piPcoWaitingTimer(IMS_NULL),
         m_piListener(IMS_NULL),
         m_nState(STATE_IDLE),
         m_nPendingFeature(PENDING_NONE),
@@ -68,6 +71,12 @@ AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
     if (m_piPcscf != IMS_NULL)
     {
         m_piPcscf->SetListener(this);
+    }
+
+    m_piService = AosProvider::GetInstance()->GetService(m_piAppContext->GetSlotId());
+    if (m_piService != IMS_NULL)
+    {
+        m_piService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
     }
 
     m_pUtil = AosUtil::GetInstance();
@@ -212,7 +221,7 @@ IMS_BOOL AosConnector::IsEmergencyType() const
 }
 
 PROTECTED
-IMS_BOOL AosConnector::IsIpv6DelayRequired()
+IMS_BOOL AosConnector::IsIpv6DelayRequired() const
 {
     IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
     IMS_SINT32 nPreferredType = CarrierConfig::Assets::IP_VERSION_6;
@@ -240,7 +249,7 @@ IMS_BOOL AosConnector::IsIpv6DelayRequired()
 }
 
 PROTECTED
-IMS_BOOL AosConnector::IsPcscfChangeAvailable()
+IMS_BOOL AosConnector::IsPcscfChangeAvailable() const
 {
     IMS_UINT32 nAppState = m_piAppContext->GetApp()->GetAppState();
 
@@ -260,6 +269,33 @@ PROTECTED
 IMS_BOOL AosConnector::IsPcscfConfigured() const
 {
     return m_bPcscfConfigured;
+}
+
+PROTECTED
+IMS_BOOL AosConnector::IsPcoWaitingRequired() const
+{
+    IMS_BOOL bResult = IMS_FALSE;
+
+    if (!IsCarrierSignalPcoEnabled())
+    {
+        return bResult;
+    }
+
+    IMS_SINT32 nSlotId = m_piAppContext->GetSlotId();
+    if (GET_N_CONFIG(nSlotId) != IMS_NULL && GET_N_CONFIG(nSlotId)->IsSupportLimitedAdminSmsMode())
+    {
+        bResult = m_piConnection->GetCarrierSignalPcoValue() == PCO_INVALID_VALUE;
+    }
+
+    A_IMS_TRACE_D(APPPROFILE, "IsPcoWaitingRequired : %s", _TRACE_B_(bResult), 0, 0);
+    return bResult;
+}
+
+PROTECTED
+IMS_BOOL AosConnector::IsCarrierSignalPcoEnabled() const
+{
+    return (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
+                    ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, 0) == 1);
 }
 
 PROTECTED
@@ -291,8 +327,28 @@ IMS_BOOL AosConnector::IsTimerRunning(IN IMS_UINT32 nType) const
     {
         return (m_piReadyRecoveryTimer != IMS_NULL);
     }
+    if (nType == TIMER_PCO_WAITING)
+    {
+        return (m_piPcoWaitingTimer != IMS_NULL);
+    }
 
     return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL AosConnector::IsDataConnectedWithoutPending() const
+{
+    if (IsPending())
+    {
+        return IMS_FALSE;
+    }
+
+    if (!IsDataConnected())
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
 }
 
 PROTECTED
@@ -512,33 +568,16 @@ PROTECTED VIRTUAL void AosConnector::ProcessIpv6TimerExpired()
 
     m_pUtil->RemoveFeature(PENDING_IPV6_DELAY, m_nPendingFeature);
 
-    if (IsPending())
+    if (IsPcoWaitingRequired())
     {
+        m_pUtil->AddFeature(PENDING_PCO_WAITING, m_nPendingFeature);
+        StartTimer(TIMER_PCO_WAITING, WAITING_PCO_VALUE_TIMEOUT_MILLIS);
         return;
     }
 
-    if (m_nState == STATE_READY)
+    if (!IsReady() && IsDataConnectedWithoutPending())
     {
-        return;
-    }
-
-    if (!IsDataConnected())
-    {
-        return;
-    }
-
-    if (!ConfigurePcscf())
-    {
-        A_IMS_TRACE_I(APPPROFILE, "ProcessIpv6TimerExpired :: p-cscf is not configured", 0, 0, 0);
-        m_pUtil->AddFeature(PENDING_PCSCF_CONFIG_READY, m_nPendingFeature);
-        CheckReadyRecoveryAndSetTimer();
-        return;
-    }
-
-    if (CheckIpaAndProcessReadyRecovery())
-    {
-        SetState(STATE_READY);
-        Notify(LISTENER_TYPE_ACTIVATED);
+        ProcessCheckingPcscfAndIpa();
     }
 }
 
@@ -562,6 +601,44 @@ PROTECTED VIRTUAL void AosConnector::ProcessReadyRecoveryTimerExpired()
     }
 }
 
+PROTECTED VIRTUAL void AosConnector::ProcessPcoWaitingTimerExpired()
+{
+    A_IMS_TRACE_I(APPPROFILE, "ProcessPcoWaitingTimerExpired", 0, 0, 0);
+    StopTimer(TIMER_PCO_WAITING);
+
+    m_pUtil->RemoveFeature(PENDING_PCO_WAITING, m_nPendingFeature);
+
+    if (!IsReady() && IsDataConnectedWithoutPending())
+    {
+        ProcessCheckingPcscfAndIpa();
+    }
+}
+
+PROTECTED VIRTUAL void AosConnector::ProcessCheckingPcscfAndIpa()
+{
+    A_IMS_TRACE_I(APPPROFILE, "ProcessCheckingPcscfAndIpa", 0, 0, 0);
+    if (ConfigurePcscf())
+    {
+        if (CheckIpaAndProcessReadyRecovery())
+        {
+            SetState(STATE_READY);
+            Notify(LISTENER_TYPE_ACTIVATED);
+        }
+        return;
+    }
+
+    if (IsEmergencyType())
+    {
+        CleanAll();
+        Notify(LISTENER_TYPE_DEACTIVATED, REASON_FAILED);
+        return;
+    }
+
+    A_IMS_TRACE_I(APPPROFILE, "p-cscf is not configured", 0, 0, 0);
+    m_pUtil->AddFeature(PENDING_PCSCF_CONFIG_READY, m_nPendingFeature);
+    CheckReadyRecoveryAndSetTimer();
+}
+
 PROTECTED VIRTUAL void AosConnector::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
     ITimer** ppiTimer = IMS_NULL;
@@ -578,6 +655,10 @@ PROTECTED VIRTUAL void AosConnector::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT
 
         case TIMER_READY_RECOVERY:
             ppiTimer = &m_piReadyRecoveryTimer;
+            break;
+
+        case TIMER_PCO_WAITING:
+            ppiTimer = &m_piPcoWaitingTimer;
             break;
 
         default:
@@ -610,6 +691,10 @@ PROTECTED VIRTUAL void AosConnector::StopTimer(IN IMS_UINT32 nType)
             ppiTimer = &m_piReadyRecoveryTimer;
             break;
 
+        case TIMER_PCO_WAITING:
+            ppiTimer = &m_piPcoWaitingTimer;
+            break;
+
         default:
             return;
     }
@@ -634,6 +719,7 @@ PROTECTED VIRTUAL void AosConnector::ClearTimers()
     }
 
     StopTimer(TIMER_READY_RECOVERY);
+    StopTimer(TIMER_PCO_WAITING);
 }
 
 PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nDataState)
@@ -666,34 +752,20 @@ PROTECTED VIRTUAL void AosConnector::AosConnection_StateChanged(IN IMS_UINT32 nD
 
         SetDataConnected(IMS_TRUE);
 
+        if (IsPcoWaitingRequired())
+        {
+            m_pUtil->AddFeature(PENDING_PCO_WAITING, m_nPendingFeature);
+            StartTimer(TIMER_PCO_WAITING, WAITING_PCO_VALUE_TIMEOUT_MILLIS);
+            return;
+        }
+
         if (IsPending())
         {
             A_IMS_TRACE_I(APPPROFILE, "connection is pending (%d)", m_nPendingFeature, 0, 0);
             return;
         }
 
-        // check P-CSCF availability and local IP address
-        if (ConfigurePcscf())
-        {
-            if (CheckIpaAndProcessReadyRecovery())
-            {
-                SetState(STATE_READY);
-                Notify(LISTENER_TYPE_ACTIVATED);
-            }
-        }
-        else
-        {
-            if (IsEmergencyType())
-            {
-                CleanAll();
-                Notify(LISTENER_TYPE_DEACTIVATED, REASON_FAILED);
-                return;
-            }
-
-            A_IMS_TRACE_I(APPPROFILE, "p-cscf is not configured", 0, 0, 0);
-            m_pUtil->AddFeature(PENDING_PCSCF_CONFIG_READY, m_nPendingFeature);
-            CheckReadyRecoveryAndSetTimer();
-        }
+        ProcessCheckingPcscfAndIpa();
     }
     else  // STATE_IDLE, STATE_ACTIVATING
     {
@@ -823,26 +895,43 @@ PROTECTED VIRTUAL void AosConnector::Pcscf_NotifyResult(IN IMS_BOOL bResult)
     {
         m_pUtil->RemoveFeature(PENDING_PCSCF_CONFIG_READY, m_nPendingFeature);
 
-        if (IsReady())
-        {
-            return;
-        }
-
-        if (!IsDataConnected())
-        {
-            return;
-        }
-
-        if (IsPending())
-        {
-            return;
-        }
-
-        if (CheckIpaAndProcessReadyRecovery())
+        if (!IsReady() && IsDataConnectedWithoutPending() && CheckIpaAndProcessReadyRecovery())
         {
             SetState(STATE_READY);
             Notify(LISTENER_TYPE_ACTIVATED);
         }
+    }
+}
+
+PROTECTED VIRTUAL void AosConnector::ServicePhone_PcoValueChanged(IN IMS_SINT32 nValue)
+{
+    A_IMS_TRACE_I(APPPROFILE, "ServicePhone_PcoValueChanged :: nValue(%d)", nValue, 0, 0);
+
+    StopTimer(TIMER_PCO_WAITING);
+    m_pUtil->RemoveFeature(PENDING_PCO_WAITING, m_nPendingFeature);
+
+    m_piConnection->SetCarrierSignalPcoValue(nValue);
+
+    if (!IsReady())
+    {
+        if (IsDataConnectedWithoutPending())
+        {
+            ProcessCheckingPcscfAndIpa();
+        }
+        return;
+    }
+
+    if (m_piAppContext->GetRegistration()->GetState() == IAosRegistration::STATE_DEREGISTERING)
+    {
+        return;
+    }
+
+    IMS_BOOL bIsLimited = m_piConnection->IsLimitedServicePcoValue();
+    IMS_BOOL bLimitedMode =
+            m_piAppContext->GetRegistration()->GetMode() == IAosRegistration::MODE_LIMITED;
+    if (bIsLimited != bLimitedMode)
+    {
+        Notify(LISTENER_TYPE_DEACTIVATED, REASON_LIMITED_SERVICE_PCO);
     }
 }
 
@@ -870,6 +959,12 @@ PROTECTED VIRTUAL void AosConnector::Timer_TimerExpired(IN ITimer* piTimer)
         ProcessReadyRecoveryTimerExpired();
         return;
     }
+
+    if (piTimer == m_piPcoWaitingTimer)
+    {
+        ProcessPcoWaitingTimerExpired();
+        return;
+    }
 }
 
 PROTECTED VIRTUAL void AosConnector::CleanUp()
@@ -879,6 +974,11 @@ PROTECTED VIRTUAL void AosConnector::CleanUp()
     m_bIsTerminating = IMS_TRUE;
 
     CleanAll();
+
+    if (m_piService != IMS_NULL)
+    {
+        m_piService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    }
 
     if (m_piPcscf != IMS_NULL)
     {
@@ -903,6 +1003,9 @@ PROTECTED GLOBAL const IMS_CHAR* AosConnector::TimerToString(IN IMS_UINT32 nType
 
         case TIMER_READY_RECOVERY:
             return "TIMER_READY_RECOVERY";
+
+        case TIMER_PCO_WAITING:
+            return "TIMER_PCO_WAITING";
 
         default:
             return "__INVALID__";

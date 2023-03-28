@@ -47,6 +47,11 @@
         android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
         android:enabled="true" android:defaultValue="false">
     </CheckBoxPreference>
+    <CheckBoxPreference android:title="Carrier Signal PCO Enabled"
+        android:key="test_carrier_signal_pco_enabled"
+        android:summaryOn="@string/label_enabled" android:summaryOff="@string/label_disabled"
+        android:enabled="true" android:defaultValue="false">
+    </CheckBoxPreference>
     <PreferenceScreen android:title="Subscriber"
         android:key="screen_subscriber">
         <EditTextPreference android:title="Home Domain Name"

@@ -49,6 +49,8 @@ public class TestConfigMenu extends PreferenceActivity {
     private static final String KEY_TEST_WIFI_TEST_ENABLED = "test_wifi_test_enabled";
     private static final String KEY_TEST_IMS_HAL_ENABLED = "test_ims_hal_enabled";
     private static final String KEY_TEST_CROSS_SIM_ENABLED = "test_cross_sim_enabled";
+    private static final String KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED =
+            "test_carrier_signal_pco_enabled";
     private static final String KEY_TEST_PCSCF_ADDRESS = "test_pcscf_address";
     private static final String KEY_TEST_IMS_DEREGISTER = "test_ims_deregister";
     private static final String KEY_TEST_LOG_OPTIONS = "test_log_options";
@@ -73,6 +75,7 @@ public class TestConfigMenu extends PreferenceActivity {
     private CheckBoxPreference mWifiTestEnabled;
     private CheckBoxPreference mImsHalTestEnabled;
     private CheckBoxPreference mCrossSimEnabled;
+    private CheckBoxPreference mCarrierSignalPcoEnabled;
     private EditTextPreference mHomeDomainName;
     private EditTextPreference mImpi;
     private EditTextPreference mImpu;
@@ -191,6 +194,18 @@ public class TestConfigMenu extends PreferenceActivity {
 
             mCrossSimEnabled.setChecked(crossSimEnabled);
             mCrossSimEnabled.setOnPreferenceChangeListener(new CheckBoxItemChangeListener());
+        }
+
+        mCarrierSignalPcoEnabled =
+                (CheckBoxPreference) findPreference(KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED);
+
+        if (mCarrierSignalPcoEnabled != null) {
+            boolean carrierSignalPcoEnabled = (ImsPrivateProperties.Persistent.getInt(
+                    ImsPrivateProperties.Persistent.KEY_CARRIER_SIGNAL_PCO_TEST,
+                    0, mSlotId) == 1);
+            mCarrierSignalPcoEnabled.setChecked(carrierSignalPcoEnabled);
+            mCarrierSignalPcoEnabled.setOnPreferenceChangeListener(
+                    new CheckBoxItemChangeListener());
         }
 
         mHomeDomainName = (EditTextPreference) findPreference(KEY_SUBSCRIBER_HOME_DOMAIN_NAME);
@@ -350,6 +365,10 @@ public class TestConfigMenu extends PreferenceActivity {
                             // do noting
                         }
                     }
+                    break;
+                case KEY_TEST_CARRIER_SIGNAL_PCO_ENABLED:
+                    key = ImsPrivateProperties.Persistent.KEY_CARRIER_SIGNAL_PCO_TEST;
+                    isValueTypeInt = true;
                     break;
                 case KEY_USER_AGENT_USE_PREDEFINED_UA_STRING:
                     key = ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_UA_STRING;

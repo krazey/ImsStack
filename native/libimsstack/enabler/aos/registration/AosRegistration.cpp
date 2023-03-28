@@ -2115,9 +2115,30 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::SetAor()
         A_IMS_TRACE_I(REGID, "SetAor :: No Puids", 0, 0, 0);
         return IMS_FALSE;
     }
+
+    if (objImpu.GetCount() > 1)
+    {
+        if (IsNeedToSetLimitedMode())
+        {
+            m_strPuid = objImpu.GetElementAt(1);
+            SetMode(MODE_LIMITED);
+        }
+        else
+        {
+            m_strPuid = objImpu.GetElementAt(0);
+            if (m_eRegType == AosRegistrationType::NORMAL)
+            {
+                SetMode(MODE_NORMAL);
+            }
+        }
+    }
     else
     {
         m_strPuid = objImpu.GetElementAt(0);
+        if (m_eRegType == AosRegistrationType::NORMAL && !IsFakeRegistration())
+        {
+            SetMode(MODE_LIMITED);
+        }
     }
 
     return IMS_TRUE;
@@ -2695,6 +2716,18 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessPendingPlmnBlockOnUpdateFailu
             m_piContext->GetNetTracker()->IsRoaming())
     {
         m_pUtil->AddFeature(PENDING_PLMN_BLOCK_HELD_BY_CALL, m_nTxnPending);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosRegistration::ProcessPlmnBlockWithPcoLimitedModeOnStartFailure()
+{
+    if (m_piContext->GetConnection()->IsLimitedServicePcoValue() && m_nRegMode == MODE_LIMITED)
+    {
+        Destroy();
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PCO_LIMITED_SERVICE);
         return IMS_TRUE;
     }
 
@@ -3899,6 +3932,11 @@ PROTECTED VIRTUAL void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SIN
     }
 
     if (ProcessForbiddenFailed(nStatusCode) || ProcessSubscriberFailed(nStatusCode))
+    {
+        return;
+    }
+
+    if (ProcessPlmnBlockWithPcoLimitedModeOnStartFailure())
     {
         return;
     }
@@ -5856,4 +5894,18 @@ IMS_BOOL AosRegistration::IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt)
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL AosRegistration::IsNeedToSetLimitedMode()
+{
+    IMS_BOOL bResult = IMS_FALSE;
+    if (m_eRegType == AosRegistrationType::NORMAL && !IsFakeRegistration() &&
+            m_piContext->GetConnection()->IsLimitedServicePcoValue())
+    {
+        bResult = IMS_TRUE;
+    }
+
+    A_IMS_TRACE_D(REGID, "IsNeedToSetLimitedMode : %s", _TRACE_B_(bResult), 0, 0);
+    return bResult;
 }

@@ -19,6 +19,7 @@
 
 #include "CarrierConfig.h"
 #include "IIpcan.h"
+#include "ImsPrivateProperty.h"
 #include "ServiceNetworkPolicy.h"
 #include "connection/AosConnector.h"
 #include "interface/IAosNConfiguration.h"
@@ -39,6 +40,7 @@ using ::testing::ReturnRef;
 
 const IMS_SINT32 SLOT_ID = 0;
 const IMS_UINT32 TIMER_DURATION_FIVE_SEC = 5;
+const IMS_UINT32 WAITING_PCO_VALUE_TIMEOUT_MILLIS = 2000;
 
 class AosConnectorTest : public ::testing::Test
 {
@@ -111,6 +113,8 @@ protected:
 
     IMS_BOOL IsIpv6DelayRequired() { return m_pAosConnector->IsIpv6DelayRequired(); }
 
+    IMS_BOOL IsPcoWaitingRequired() { return m_pAosConnector->IsPcoWaitingRequired(); }
+
     IMS_BOOL IsIpChangedForEmergency() { return m_pAosConnector->CheckIpChangedForEmergency(); }
 
     void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
@@ -135,6 +139,10 @@ protected:
             case AosConnector::TIMER_READY_RECOVERY:
                 m_pAosConnector->Timer_TimerExpired(m_pAosConnector->m_piReadyRecoveryTimer);
                 break;
+
+            case AosConnector::TIMER_PCO_WAITING:
+                m_pAosConnector->Timer_TimerExpired(m_pAosConnector->m_piPcoWaitingTimer);
+                break;
         }
     }
 
@@ -156,6 +164,23 @@ protected:
     void NotifyPcscfConfigured(IN IMS_BOOL bResult)
     {
         m_pAosConnector->Pcscf_NotifyResult(bResult);
+    }
+
+    void ServicePhone_PcoValueChanged(IN IMS_SINT32 nValue)
+    {
+        m_pAosConnector->ServicePhone_PcoValueChanged(nValue);
+    }
+
+    void SetIntToProperty(IN const AString& strKey, IN IMS_SINT32 nValue, IN IMS_SINT32 nSlotId)
+    {
+        ImsPrivateProperty* pImsPrivateProperty = ImsPrivateProperty::GetInstance();
+        pImsPrivateProperty->SetInt(strKey, nValue, nSlotId);
+    }
+
+    IMS_SINT32 GetIntFromProperty(IN const AString& strKey, IN IMS_SINT32 nSlotId)
+    {
+        ImsPrivateProperty* pImsPrivateProperty = ImsPrivateProperty::GetInstance();
+        return pImsPrivateProperty->GetInt(strKey, nSlotId);
     }
 };
 
@@ -302,6 +327,42 @@ TEST_F(AosConnectorTest, IsIpv6DelayRequired_ImsType)
     EXPECT_FALSE(IsIpv6DelayRequired());
     EXPECT_FALSE(IsIpv6DelayRequired());
     EXPECT_TRUE(IsIpv6DelayRequired());
+}
+
+TEST_F(AosConnectorTest, IsPcoWaitingRequired_NotSupportLimitedAdminSmsMode)
+{
+    IMS_SINT32 nOriginValue = GetIntFromProperty(
+            ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, IMS_SLOT_0);
+    SetIntToProperty(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, 1, IMS_SLOT_0);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue()).Times(0);
+
+    EXPECT_FALSE(IsPcoWaitingRequired());
+    EXPECT_FALSE(IsPcoWaitingRequired());
+
+    SetIntToProperty(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, nOriginValue,
+            IMS_SLOT_0);
+}
+
+TEST_F(AosConnectorTest, IsPcoWaitingRequired_IsNotEnabled)
+{
+    IMS_SINT32 nOriginValue = GetIntFromProperty(
+            ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, IMS_SLOT_0);
+    SetIntToProperty(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, 1, IMS_SLOT_0);
+
+    EXPECT_CALL(m_objMockIAosNConfiguration, IsSupportLimitedAdminSmsMode())
+            .Times(AnyNumber())
+            .WillRepeatedly(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosConnection, GetCarrierSignalPcoValue()).Times(0);
+
+    EXPECT_FALSE(IsPcoWaitingRequired());
+    EXPECT_FALSE(IsPcoWaitingRequired());
+
+    SetIntToProperty(ImsPrivateProperties::Persistent::KEY_CARRIER_SIGNAL_PCO_TEST, nOriginValue,
+            IMS_SLOT_0);
 }
 
 TEST_F(AosConnectorTest, CheckIpChangedForEmergency)
@@ -783,6 +844,117 @@ TEST_F(AosConnectorTest, Pcscf_NotifyResult)
     EXPECT_EQ(GetState(), AosConnector::STATE_READY);
 }
 
+TEST_F(AosConnectorTest, ServicePhone_PcoValueChanged_NotReadyAndDataIsNotConnected)
+{
+    StartTimer(AosConnector::TIMER_PCO_WAITING, WAITING_PCO_VALUE_TIMEOUT_MILLIS);
+    SetFeature(AosConnector::PENDING_PCO_WAITING);
+    SetState(AosConnector::STATE_IDLE);
+    SetDataConnected(IMS_FALSE);
+
+    EXPECT_TRUE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_TRUE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+    EXPECT_CALL(m_objMockIAosConnection, SetCarrierSignalPcoValue(5)).Times(1);
+
+    ServicePhone_PcoValueChanged(5);
+
+    EXPECT_FALSE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_FALSE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+}
+
+TEST_F(AosConnectorTest, ServicePhone_PcoValueChanged_ReadyAndLimitedModeChange)
+{
+    StartTimer(AosConnector::TIMER_PCO_WAITING, WAITING_PCO_VALUE_TIMEOUT_MILLIS);
+    SetFeature(AosConnector::PENDING_PCO_WAITING);
+    SetState(AosConnector::STATE_READY);
+
+    EXPECT_TRUE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_TRUE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+    EXPECT_CALL(m_objMockIAosConnection, SetCarrierSignalPcoValue(5)).Times(1);
+
+    MockIAosRegistration objMockIAosRegistration;
+    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
+            .WillRepeatedly(Return(&objMockIAosRegistration));
+    EXPECT_CALL(objMockIAosRegistration, GetState())
+            .WillRepeatedly(Return(IAosRegistration::STATE_REGISTERED));
+    EXPECT_CALL(objMockIAosRegistration, GetMode())
+            .WillRepeatedly(Return(IAosRegistration::MODE_NORMAL));
+    EXPECT_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    // notify Activated
+    EXPECT_CALL(m_objMockIAosConnectorListener,
+            Connector_Deactivated(AosConnector::REASON_LIMITED_SERVICE_PCO))
+            .Times(1);
+    m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
+
+    ServicePhone_PcoValueChanged(5);
+
+    EXPECT_FALSE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_FALSE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+}
+
+TEST_F(AosConnectorTest, ServicePhone_PcoValueChanged_ReadyAndLimitedModeNotChange)
+{
+    StartTimer(AosConnector::TIMER_PCO_WAITING, WAITING_PCO_VALUE_TIMEOUT_MILLIS);
+    SetFeature(AosConnector::PENDING_PCO_WAITING);
+    SetState(AosConnector::STATE_READY);
+
+    EXPECT_TRUE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_TRUE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+    EXPECT_CALL(m_objMockIAosConnection, SetCarrierSignalPcoValue(5)).Times(1);
+
+    MockIAosRegistration objMockIAosRegistration;
+    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
+            .WillRepeatedly(Return(&objMockIAosRegistration));
+    EXPECT_CALL(objMockIAosRegistration, GetState())
+            .WillRepeatedly(Return(IAosRegistration::STATE_REGISTERED));
+    EXPECT_CALL(objMockIAosRegistration, GetMode())
+            .WillRepeatedly(Return(IAosRegistration::MODE_LIMITED));
+    EXPECT_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue())
+            .WillRepeatedly(Return(IMS_TRUE));
+
+    // notify Activated
+    EXPECT_CALL(m_objMockIAosConnectorListener,
+            Connector_Deactivated(AosConnector::REASON_LIMITED_SERVICE_PCO))
+            .Times(0);
+    m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
+
+    ServicePhone_PcoValueChanged(5);
+
+    EXPECT_FALSE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_FALSE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+}
+
+TEST_F(AosConnectorTest, ServicePhone_PcoValueChanged_ReadyAndDeregisteringState)
+{
+    StartTimer(AosConnector::TIMER_PCO_WAITING, WAITING_PCO_VALUE_TIMEOUT_MILLIS);
+    SetFeature(AosConnector::PENDING_PCO_WAITING);
+    SetState(AosConnector::STATE_READY);
+
+    EXPECT_TRUE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_TRUE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+    EXPECT_CALL(m_objMockIAosConnection, SetCarrierSignalPcoValue(5)).Times(1);
+
+    MockIAosRegistration objMockIAosRegistration;
+    EXPECT_CALL(m_objMockIAosAppContext, GetRegistration())
+            .WillRepeatedly(Return(&objMockIAosRegistration));
+    EXPECT_CALL(objMockIAosRegistration, GetState())
+            .WillRepeatedly(Return(IAosRegistration::STATE_DEREGISTERING));
+    EXPECT_CALL(objMockIAosRegistration, GetMode()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnection, IsLimitedServicePcoValue()).Times(0);
+
+    // notify Activated
+    EXPECT_CALL(m_objMockIAosConnectorListener,
+            Connector_Deactivated(AosConnector::REASON_LIMITED_SERVICE_PCO))
+            .Times(0);
+    m_pAosConnector->SetListener(&m_objMockIAosConnectorListener);
+
+    ServicePhone_PcoValueChanged(5);
+
+    EXPECT_FALSE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_FALSE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+}
+
 TEST_F(AosConnectorTest, Ipv6TimerExpired_Pending)
 {
     EXPECT_CALL(m_objMockIAosPcscf, Configure(_)).Times(0);
@@ -908,6 +1080,21 @@ TEST_F(AosConnectorTest, ReadyRecoveryTimerExpired)
     NotifyTimerExpired(AosConnector::TIMER_READY_RECOVERY);
     EXPECT_EQ(GetState(), AosConnector::STATE_IDLE);
     EXPECT_FALSE(IsTimerRunning(AosConnector::TIMER_READY_RECOVERY));
+}
+
+TEST_F(AosConnectorTest, PcoWaitingTimerExpired_StateReady)
+{
+    StartTimer(AosConnector::TIMER_PCO_WAITING, WAITING_PCO_VALUE_TIMEOUT_MILLIS);
+    SetFeature(AosConnector::PENDING_PCO_WAITING);
+    SetState(AosConnector::STATE_READY);
+
+    EXPECT_TRUE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_TRUE(AosConnector::PENDING_PCO_WAITING & GetFeature());
+
+    NotifyTimerExpired(AosConnector::TIMER_PCO_WAITING);
+
+    EXPECT_FALSE(IsTimerRunning(AosConnector::TIMER_PCO_WAITING));
+    EXPECT_FALSE(AosConnector::PENDING_PCO_WAITING & GetFeature());
 }
 
 TEST_F(AosConnectorTest, InvalidTimer)

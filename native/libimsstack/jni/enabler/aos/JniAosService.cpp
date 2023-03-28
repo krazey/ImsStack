@@ -207,6 +207,10 @@ PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const P
             NotifyPreciseCallState(objParcel);
             break;
 
+        case IIAosService::J2N_NOTIFY_CARRIER_SIGNAL_PCO_VALUE_CHANGED:
+            NotifyCarrierSignalPcoValueChanged(objParcel);
+            break;
+
         default:
             break;
     }
@@ -477,6 +481,16 @@ void JniAosService::NotifyPreciseCallState(IN const android::Parcel& objParcel)
     if (piAosService)
     {
         piAosService->NotifyPreciseCallState(objParcel.readInt32());
+    }
+}
+
+PRIVATE
+void JniAosService::NotifyCarrierSignalPcoValueChanged(IN const android::Parcel& objParcel)
+{
+    IAosService* piAosService = GetNativeService();
+    if (piAosService)
+    {
+        piAosService->NotifyCarrierSignalPcoValueChanged(objParcel.readInt32());
     }
 }
 

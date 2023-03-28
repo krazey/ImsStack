@@ -46,6 +46,9 @@ public:
     virtual const AString& GetIfaceName() = 0;
     virtual IMS_BOOL IsEpdgEnabled() = 0;
     virtual IMS_SINT32 GetIpcanCategory() = 0;
+    virtual IMS_BOOL IsLimitedServicePcoValue() = 0;
+    virtual IMS_SINT32 GetCarrierSignalPcoValue() = 0;
+    virtual void SetCarrierSignalPcoValue(IN IMS_SINT32 nValue) = 0;
 
     enum
     {
