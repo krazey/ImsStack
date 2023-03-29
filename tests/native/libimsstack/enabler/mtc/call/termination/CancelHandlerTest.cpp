@@ -101,6 +101,20 @@ TEST_F(CancelHandlerTest, HandleMessageWith603DeclinedReturnsRejectedElsewhere)
     EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
 }
 
+TEST_F(CancelHandlerTest, HandleMessageWithCallCompletedVzwReturnsAnsweredElsewhere)
+{
+    SetUpReasonHeader(999, "\"Call Completion Elsewhere\"");
+
+    EXPECT_EQ(CallReasonInfo(CODE_ANSWERED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
+TEST_F(CancelHandlerTest, HandleMessageWithBusyEverywhereVzwReturnsRejectedElsewhere)
+{
+    SetUpReasonHeader(999, "\"Another device sent All Devices Busy response\"");
+
+    EXPECT_EQ(CallReasonInfo(CODE_REJECTED_ELSEWHERE), objHandler.Handle(objMessage));
+}
+
 TEST_F(CancelHandlerTest, HandleMessageCheckReasonTextCaseInsensitive)
 {
     SetUpReasonHeader(603, "\"DECLINED\"");

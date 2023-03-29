@@ -150,6 +150,7 @@ TEST_F(TerminationHandlerTest, HandleSessionReturnsDefaultReasonAndMessageHasRea
 {
     IMS_SINT32 nReason = ISession::TERMINATION_REASON_UNKNOWN;
     ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+
     AString strReason("any reason");
     ReasonHeaderValue objValue;
     objValue.nCause = 10;
@@ -159,4 +160,17 @@ TEST_F(TerminationHandlerTest, HandleSessionReturnsDefaultReasonAndMessageHasRea
 
     EXPECT_EQ(CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE, nReason, strReason),
             objHandler.Handle(objSession));
+}
+
+TEST_F(TerminationHandlerTest, HandleSessionTerminatedByCallPull)
+{
+    IMS_SINT32 nReason = ISession::TERMINATION_REASON_UNKNOWN;
+    ON_CALL(objSession, GetTerminationReason).WillByDefault(Return(nReason));
+
+    ReasonHeaderValue objValue;
+    objValue.strText = "Call Has Been Pulled by Another Device";
+    ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
+            .WillByDefault(Return(objValue));
+
+    EXPECT_EQ(CallReasonInfo(CODE_CALL_END_CAUSE_CALL_PULL), objHandler.Handle(objSession));
 }
