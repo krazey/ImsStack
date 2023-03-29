@@ -43,20 +43,6 @@ public class MtcStateUtils {
     private MtcStateUtils() {
     }
 
-    // Invoked on boot-up.
-    public static void initializeStateOnceOnBootup(Context context) {
-        logi("initializeStateOnceOnBootup");
-
-        if (MSimUtils.isMultiSimEnabled()) {
-            int activeSimCount = MSimUtils.getActiveSimCount();
-            for (int i = 0; i < activeSimCount; ++i) {
-                ImsStateStore.init(i);
-            }
-        } else {
-            ImsStateStore.init(MSimUtils.DEFAULT_PHONE_ID);
-        }
-    }
-
     // When "ims" service is opened or operator is changed
     public static void initializeState(Context context, int slotId) {
         int phoneId = getPhoneId(slotId);
