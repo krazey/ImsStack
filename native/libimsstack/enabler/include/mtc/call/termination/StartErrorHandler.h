@@ -52,7 +52,7 @@ private:
     CallReasonInfo HandleRedirection(IN const IMessage& objMessage) const;
 
     CallReasonInfo Handle4xxResponse(IN const IMessage& objMessage) const;
-    CallReasonInfo Handle403Response() const;
+    CallReasonInfo Handle403Response(IN const IMessage& objMessage) const;
     CallReasonInfo Handle404Response() const;
     static CallReasonInfo Handle407Response();
     CallReasonInfo Handle488Response(IN const IMessage& objMessage) const;
@@ -76,6 +76,7 @@ private:
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL IsAlternativeEmergencyService(IN const IMessage& objMessage) const;
     IMS_BOOL IsInitialRegistrationRequired(IN const IMessage& objMessage) const;
+    IMS_BOOL IsByMaxCallLimit(IN const IMessage& objMessage) const;
     IMS_BOOL IsRedialEmergencyWithNextPcscfRequired(IN const IMessage* piMessage) const;
     IMS_BOOL IsRoaming() const;
     IMS_BOOL IsEpsOnlyAttach() const;

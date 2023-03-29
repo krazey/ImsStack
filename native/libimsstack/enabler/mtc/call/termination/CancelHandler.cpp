@@ -22,10 +22,12 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PRIVATE
-const AString CancelHandler::REASON_TEXT_CALL_BUSY = "busy everywhere";
-const AString CancelHandler::REASON_TEXT_CALL_COMPLETED = "call completed elsewhere";
-const AString CancelHandler::REASON_TEXT_CALL_DECLINED = "declined";
+LOCAL const AString REASON_TEXT_CALL_BUSY = "busy everywhere";
+LOCAL const AString REASON_TEXT_CALL_COMPLETED = "call completed elsewhere";
+LOCAL const AString REASON_TEXT_CALL_DECLINED = "declined";
+
+LOCAL const AString REASON_TEXT_CALL_BUSY_VZW = "another device sent all devices busy response";
+LOCAL const AString REASON_TEXT_CALL_COMPLETED_VZW = "call completion elsewhere";
 
 PUBLIC
 CancelHandler::CancelHandler(IN IMtcCallContext& objContext) :
@@ -41,12 +43,6 @@ CallReasonInfo CancelHandler::Handle(IN const IMessage& objMessage) const
 {
     ReasonHeaderValue objValue =
             m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
-    if (objValue.nCause == -1)
-    {
-        IMS_TRACE_D("Handle : No Reason header", 0, 0, 0);
-        return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);
-    }
-
     IMS_TRACE_D("Handle : [%d] [%s]", objValue.nCause, objValue.strText.GetStr(), 0);
 
     return GetCallReasonInfoFromReasonHeader(objValue.nCause, objValue.strText);
@@ -68,6 +64,15 @@ CallReasonInfo CancelHandler::GetCallReasonInfoFromReasonHeader(
                     strNormalizedText.Contains(REASON_TEXT_CALL_DECLINED)))
     {
         return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
+    }
+
+    if (strNormalizedText.Contains(REASON_TEXT_CALL_BUSY_VZW))
+    {
+        return CallReasonInfo(CODE_REJECTED_ELSEWHERE);
+    }
+    else if (strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED_VZW))
+    {
+        return CallReasonInfo(CODE_ANSWERED_ELSEWHERE);
     }
 
     return CallReasonInfo(CODE_USER_TERMINATED_BY_REMOTE);

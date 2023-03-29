@@ -91,6 +91,8 @@ protected:
         ON_CALL(objImsEventReceiver, GetWParam(IMS_EVENT_LTE_INFO))
                 .WillByDefault(Return(IMS_LTE_INFO_COMBINED_ATTACHED));
 
+        ON_CALL(objMessage, GetReasonPhrase()).WillByDefault(ReturnRef(AString::ConstNull()));
+
         pHandler = new StartErrorHandler(objCallContext);
     }
 
@@ -576,6 +578,30 @@ TEST_F(StartErrorHandlerTest, Handle403ResponseForEmergencyCall)
             .WillByDefault(Return(2));
 
     EXPECT_TRUE(CheckHandleResult(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403));
+}
+
+TEST_F(StartErrorHandlerTest, Handle403ResponseForMaxCallLimitInReasonHeader)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    ReasonHeaderValue objValue;
+    objValue.strText = "Simultaneous Call Limit Has Already Been Reached";
+    ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
+            .WillByDefault(Return(objValue));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED));
+}
+
+TEST_F(StartErrorHandlerTest, Handle403ResponseForMaxCallLimitInReasonPhrase)
+{
+    SetMessageCode(SipStatusCode::SC_403);
+    ReasonHeaderValue objValue;
+    ON_CALL(objMessageUtils, GetCauseAndTextFromReasonHeader(&objMessage, _))
+            .WillByDefault(Return(objValue));
+
+    AString strReasonPhrase = "Simultaneous Call Limit Has Already Been Reached";
+    ON_CALL(objMessage, GetReasonPhrase()).WillByDefault(ReturnRef(strReasonPhrase));
+
+    EXPECT_TRUE(CheckHandleResult(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED));
 }
 
 TEST_F(StartErrorHandlerTest, Handle404Response)
