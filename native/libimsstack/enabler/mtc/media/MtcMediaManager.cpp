@@ -366,7 +366,10 @@ PUBLIC VIRTUAL void MtcMediaManager::RestoreSdp(IN ISession* piSession)
     IMS_TRACE_D("RestoreSdp", 0, 0, 0);
     RestoreMediaInfo();
     FinalizeSdp(piSession);
-    piSession->Restore();
+    if (piSession->GetState() == ISession::STATE_ESTABLISHED)
+    {
+        piSession->Restore();
+    }
 }
 
 PUBLIC
