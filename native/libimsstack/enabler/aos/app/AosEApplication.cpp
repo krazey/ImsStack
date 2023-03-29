@@ -192,7 +192,14 @@ PROTECTED VIRTUAL void AosEApplication::ProcessRegStart(IN IMSMSG& objMsg)
         }
         else
         {
-            m_pConnector->Start();
+            if (IsRegWaitingRequired())
+            {
+                ProcessRegStateCheck();
+            }
+            else
+            {
+                m_pConnector->Start();
+            }
         }
     }
 }
@@ -356,6 +363,17 @@ PROTECTED VIRTUAL void AosEApplication::ProcessReconfigTimerExpired()
     ResetBlock(BLOCK_SERVICE_CONNECTING);
 }
 
+PROTECTED VIRTUAL void AosEApplication::ProcessRegBlockedTimerExpired()
+{
+    StopTimer(TIMER_REG_BLOCKED);
+
+    if (!m_pConnector->IsReady())
+    {
+        A_IMS_TRACE_I(APPID, "Emergency call fail since normal registration is not done", 0, 0, 0);
+        ProcessCleanAll(AosReason::REG_FAILURE);
+    }
+}
+
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsEmergencyBlocked()
 {
     return m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED);
@@ -376,6 +394,35 @@ PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsWifiConnected()
 PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsWlanEmergencyBlocked()
 {
     return IMS_FALSE;
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosEApplication::IsRegWaitingRequired()
+{
+    return (GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall() > 0);
+}
+
+PROTECTED VIRTUAL void AosEApplication::ProcessRegStateCheck()
+{
+    StopTimer(TIMER_REG_BLOCKED);
+
+    IAosRegStateManager* piRegState = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
+    if (piRegState == IMS_NULL)
+    {
+        m_pConnector->Start();
+        return;
+    }
+
+    A_IMS_TRACE_I(
+            APPID, "ProcessRegStateCheck :: RegState(%d)", piRegState->GetImsRegState(), 0, 0);
+
+    if (piRegState->GetImsRegState() == IMS_REG_ON)
+    {
+        m_pConnector->Start();
+    }
+    else
+    {
+        StartTimer(TIMER_REG_BLOCKED, GET_N_CONFIG(m_nSlotId)->GetRegTimerForEmcCall());
+    }
 }
 
 PROTECTED VIRTUAL void AosEApplication::ProcessECallStarted()
@@ -486,4 +533,52 @@ PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
             ProcessECallTerminated();
         }
     }
+}
+
+PROTECTED VIRTUAL void AosEApplication::NConfiguration_NotifyConfigChanged()
+{
+    AosApplication::NConfiguration_NotifyConfigChanged();
+
+    IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
+    if (IsRegWaitingRequired())
+    {
+        piRsm->SetListener(this);
+    }
+    else
+    {
+        piRsm->SetListener(IMS_NULL);
+    }
+}
+
+PROTECTED VIRTUAL void AosEApplication::RegStateManager_RegStateChanged(IN IMS_UINT32 nState)
+{
+    if (IsTimerRunning(TIMER_REG_BLOCKED))
+    {
+        A_IMS_TRACE_I(APPID, "RegStateManager_RegStateChanged :: state(%d)", nState, 0, 0);
+
+        if (nState == IMS_REG_ON)
+        {
+            StopTimer(TIMER_REG_BLOCKED);
+            m_pConnector->Start();
+        }
+    }
+}
+
+PROTECTED VIRTUAL void AosEApplication::Init()
+{
+    AosApplication::Init();
+
+    if (IsRegWaitingRequired())
+    {
+        IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
+        piRsm->SetListener(this);
+    }
+}
+
+PROTECTED VIRTUAL void AosEApplication::CleanUp()
+{
+    IAosRegStateManager* piRsm = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
+    piRsm->SetListener(IMS_NULL);
+
+    AosApplication::CleanUp();
 }

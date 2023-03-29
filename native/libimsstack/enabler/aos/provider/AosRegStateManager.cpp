@@ -16,10 +16,12 @@
 #include "ServiceTrace.h"
 #include "IUIMS.h"
 #include "ImsAosParameter.h"
+#include "interface/IAosRegStateManagerListener.h"
 #include "provider/AosRegStateManager.h"
 
 PUBLIC
 AosRegStateManager::AosRegStateManager() :
+        m_piListener(IMS_NULL),
         m_nSlotId(IMS_SLOT_0),
         m_nRegState(IMS_REG_OFF),
         m_nERegState(IMS_REG_OFF),
@@ -33,6 +35,11 @@ PUBLIC VIRTUAL AosRegStateManager::~AosRegStateManager()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosRegStateManager = %" PFLS_u "/%" PFLS_x,
             sizeof(AosRegStateManager), this, 0);
+}
+
+PUBLIC VIRTUAL void AosRegStateManager::SetListener(IN IAosRegStateManagerListener* piRegListener)
+{
+    m_piListener = piRegListener;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 AosRegStateManager::GetSlotId() const
@@ -50,6 +57,14 @@ PUBLIC VIRTUAL void AosRegStateManager::SetSlotId(IN IMS_SINT32 nSlotId)
 PUBLIC VIRTUAL void AosRegStateManager::SetImsRegState(
         IN IMS_UINT32 nState, IN IMS_BOOL /*bLimited*/)
 {
+    if (m_piListener != IMS_NULL)
+    {
+        if (m_nRegState != nState)
+        {
+            m_piListener->RegStateManager_RegStateChanged(nState);
+        }
+    }
+
     m_nRegState = nState;
 }
 
