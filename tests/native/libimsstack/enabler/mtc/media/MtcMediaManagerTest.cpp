@@ -1130,3 +1130,27 @@ TEST_F(MtcMediaManagerTest, FinalizeSdpInvokesMediaSessionFinalizeSDP)
     EXPECT_CALL(*piMediaSession, FinalizeSDP(NEGO_ID, &objISession));
     pMediaManager->FinalizeSdp(&objISession);
 }
+
+TEST_F(MtcMediaManagerTest, RestoreSdpInvokesISessionRestoreIfEstablishedState)
+{
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+    ON_CALL(*pMediaProfileManager, IsConfirmed(&objISession)).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(*piMediaSession, FinalizeSDP(NEGO_ID, &objISession));
+
+    ON_CALL(objISession, GetState).WillByDefault(Return(ISession::STATE_ESTABLISHED));
+    EXPECT_CALL(objISession, Restore);
+
+    pMediaManager->RestoreSdp(&objISession);
+}
+
+TEST_F(MtcMediaManagerTest, RestoreSdpDoesNotInvokeISessionRestoreIfNotEstablishedState)
+{
+    ON_CALL(*pMediaProfileManager, GetNegoId(&objISession)).WillByDefault(Return(NEGO_ID));
+    ON_CALL(*pMediaProfileManager, IsConfirmed(&objISession)).WillByDefault(Return(IMS_FALSE));
+    EXPECT_CALL(*piMediaSession, FinalizeSDP(NEGO_ID, &objISession));
+
+    ON_CALL(objISession, GetState).WillByDefault(Return(ISession::STATE_CREATED));
+    EXPECT_CALL(objISession, Restore).Times(0);
+
+    pMediaManager->RestoreSdp(&objISession);
+}
