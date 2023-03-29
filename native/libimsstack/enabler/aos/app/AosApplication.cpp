@@ -926,8 +926,8 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::ProcessMessage(IN IMSMSG& objMsg)
             ProcessDestroy(objMsg);
             break;
 
-        case MSG_SERVICE_CONTROL:
-            ProcessServiceControl(objMsg);
+        case MSG_IMS_EST_TIMER_CONTROL:
+            ProcessImsEstablishmentControl(objMsg);
             break;
 
         case MSG_REG_EXCHANGE:
@@ -1113,7 +1113,46 @@ PROTECTED VIRTUAL void AosApplication::ProcessDestroy(IN IMSMSG& /* objMsg */)
     }
 }
 
-PROTECTED VIRTUAL void AosApplication::ProcessServiceControl(IN IMSMSG& /* objMsg */) {}
+PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentControl(IN IMSMSG& /* objMsg */)
+{
+    if (IsRegTypeNormal())
+    {
+        IMS_SINT32 nEstTime = GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() - 1;
+
+        if (nEstTime <= 0)
+        {
+            return;
+        }
+
+        if (IsOn() || IsTimerRunning(TIMER_IMS_ESTABLISHMENT))
+        {
+            return;
+        }
+
+        if (!IsPlmnBlockWithTimeoutRequired() || !m_piNetTracker->IsImsVoiceCallSupported())
+        {
+            return;
+        }
+
+        if (m_pCondition->IsReasonBlocked(BLOCK_AC_INCOMPLETED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_AUTHENTICATION_FAILED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_AOS_INCOMPLETED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_DATA_FAILED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_ENABLER_DETACHED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_IMS_DISABLED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_PERMANENT_REG_FAILED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
+                m_pCondition->IsReasonBlocked(BLOCK_IMS_SERVICE_DISABLED))
+        {
+            return;
+        }
+
+        A_IMS_TRACE_D(
+                APPID, "ProcessImsEstablishmentControl :: ims est time (%d sec)", nEstTime, 0, 0);
+
+        StartTimer(TIMER_IMS_ESTABLISHMENT, nEstTime * 1000);
+    }
+}
 
 PROTECTED VIRTUAL void AosApplication::ProcessRegExchange(IN IMSMSG& /* objMsg */) {}
 
@@ -2989,6 +3028,16 @@ PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
     {
         ProcessDisconnectingState();
         PostMessage(MSG_REG_STOP, 0, 0);
+        return;
+    }
+
+    if (eType == AosRegRequestType::START_IMS_EST_TIMER)
+    {
+        if (GET_N_CONFIG(m_nSlotId)->GetImsEstablishmentTime() > 0)
+        {
+            PostMessage(MSG_IMS_EST_TIMER_CONTROL, 0, 0);
+        }
+
         return;
     }
 }

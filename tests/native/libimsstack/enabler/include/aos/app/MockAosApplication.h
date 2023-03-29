@@ -86,7 +86,7 @@ public:
     MOCK_METHOD(void, ProcessRegRecovery, (IN IMSMSG & objMsg), (override));
     MOCK_METHOD(void, ProcessIpcanChanged, (IN IMSMSG & objMsg), (override));
     MOCK_METHOD(void, ProcessDestroy, (IN IMSMSG & objMsg), (override));
-    MOCK_METHOD(void, ProcessServiceControl, (IN IMSMSG & objMsg), (override));
+    MOCK_METHOD(void, ProcessImsEstablishmentControl, (IN IMSMSG & objMsg), (override));
     MOCK_METHOD(void, ProcessRegExchange, (IN IMSMSG & objMsg), (override));
     MOCK_METHOD(void, ProcessAutoConfigurationComplete, (IN IMSMSG & objMsg), (override));
     MOCK_METHOD(void, ProcessPcscfRecovery, (IN IMSMSG & objMsg), (override));

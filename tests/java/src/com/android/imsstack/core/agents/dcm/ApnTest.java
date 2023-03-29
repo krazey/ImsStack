@@ -759,6 +759,24 @@ public class ApnTest {
     }
 
     @Test
+    public void testHandlePreciseDataConnectionStateChanged_connecting() throws Exception {
+        replaceInstance(Apn.class, "mAosReg", mApn, mMockIAosReg);
+        replaceInstance(Apn.class, "mDcSettings", mApn, mMockIDcSettings);
+        when(mMockIDcSettings.isCdmalessFeatureTagRequired()).thenReturn(true);
+
+        Message msg = Message.obtain();
+        msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
+        msg.obj = getPreciseDataConnectionState(TelephonyManager.DATA_CONNECTING,
+                TelephonyManager.NETWORK_TYPE_LTE, DataFailCause.NONE);
+        mApn.sendMessage(msg);
+        mTestableLooper.processAllMessages();
+
+        verify(mMockIAosReg).controlRegistration(IAosRegistration.RequestType.START_IMS_EST_TIMER,
+                IAosRegistration.Pcscf.CURRENT, IAosRegistration.Cause.DATA_CONNECTING);
+        assertEquals(TelephonyManager.DATA_CONNECTING, mApn.mPreciseDcState);
+    }
+
+    @Test
     public void testHandlePreciseDataConnectionStateChanged_disconnecting() throws Exception {
         replaceInstance(Apn.class, "mAosReg", mApn, mMockIAosReg);
         when(mMockIAosReg.getRegisteredNetworkType())
