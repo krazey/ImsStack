@@ -102,7 +102,7 @@ enum
     MSG_IPCAN_CHANGED,
     MSG_PUB_TERMINATED,
     MSG_DESTROY,
-    MSG_SERVICE_CONTROL,
+    MSG_IMS_EST_TIMER_CONTROL,
     MSG_REG_EXCHANGE,
     MSG_AC_CONFIGURED,
     MSG_PCSCF_RECOVER,
@@ -969,9 +969,9 @@ TEST_F(AosApplicationTest, ProcessMessage)
     m_pTestAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
     m_pTestAosApplication->ClearTimers();
 
-    // MSG_SERVICE_CONTROL
-    // TEST_F : ProcessServiceControl
-    objMessage.nMSG = MSG_SERVICE_CONTROL;
+    // MSG_IMS_EST_TIMER_CONTROL
+    // TEST_F : ProcessImsEstablishmentControl
+    objMessage.nMSG = MSG_IMS_EST_TIMER_CONTROL;
     EXPECT_TRUE(m_pTestAosApplication->ProcessMessage(objMessage));
 
     // MSG_REG_EXCHANGE

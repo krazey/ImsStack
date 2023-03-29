@@ -69,7 +69,8 @@ enum class AosRegRequestType
 {
     START = 0,
     REFRESH = 1,
-    STOP = 2
+    STOP = 2,
+    START_IMS_EST_TIMER = 3
 };
 
 /**
@@ -82,6 +83,7 @@ enum class AosControlCause
     RADIO = 2,
     IMS_SERVICE = 3,
     IMS_SUBSCRIBER = 4,
+    DATA_CONNECTING = 5,
 
     /* From modem */
     RADIO_SIM_REMOVED = 11,

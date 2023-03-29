@@ -204,6 +204,16 @@ public class DcSettingsTest {
     }
 
     @Test
+    public void testIsCdmalessFeatureTagRequired() throws Exception {
+        when(mMockCarrierConfig.getBoolean(
+                eq(CarrierConfig.Assets.KEY_REQUIRED_CDMALESS_FEATURE_TAG_BOOL), anyBoolean()))
+                .thenReturn(false)
+                .thenReturn(true);
+        assertFalse(mDcSettingsUT.isCdmalessFeatureTagRequired());
+        assertTrue(mDcSettingsUT.isCdmalessFeatureTagRequired());
+    }
+
+    @Test
     public void testFailToGetCarrierConfig() throws Exception {
         int permanentFailureCause = 33;
 
