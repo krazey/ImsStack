@@ -121,6 +121,7 @@ AosApplication::AosApplication(IN IAosAppContext* piAppContext, IN AString& strA
         m_nRegisteredRat(NW_REPORT_RADIO_INVALID),
         m_nRecoverReason(0),
         m_nLteAttachState(IMS_LTE_INFO_UNKNOWN),
+        m_nLteExtraInfo(IMS_LTE_INFO_EXTRA_NONE),
         m_nVoiceServiceState(IMS_VOICE_SERVICE_OUT_OF_SERVICE),
         m_nSlotId(piAppContext->GetSlotId()),
         m_bConnected(IMS_FALSE),
@@ -564,8 +565,11 @@ IMS_BOOL AosApplication::IsPdnDisconnectRequired() const
 PROTECTED
 IMS_BOOL AosApplication::IsPlmnBlockWithTimeoutRequired() const
 {
+    IMS_BOOL bLteInfoSmsOnly = (m_nLteExtraInfo & IMS_LTE_INFO_EXTRA_SMS_ONLY) > 0;
+
     if (m_piNetTracker->GetMobileNetworkType() == NW_REPORT_RADIO_LTE &&
-            m_piNetTracker->IsRoaming() && m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED)
+            m_piNetTracker->IsRoaming() && m_nLteAttachState == IMS_LTE_INFO_COMBINED_ATTACHED &&
+            !bLteInfoSmsOnly)
     {
         return IMS_FALSE;
     }
@@ -1863,7 +1867,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessDisconnectingState(IN IMS_UINT32 n
 }
 
 PROTECTED VIRTUAL void AosApplication::ProcessNetworkEvent(
-        IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+        IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx)
 {
     A_IMS_TRACE_I(APPID, "ProcessNetworkEvent :: type(%d), state(%d)", nType, nState, 0);
 
@@ -1877,6 +1881,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessNetworkEvent(
                             ? IAosRegistration::REASON_SET_ENABLE
                             : IAosRegistration::REASON_SET_DISABLE);
         }
+
+        m_nLteExtraInfo = nStateEx;
     }
 
     if (nType == IMS_EVENT_VOICE_SERVICE_STATE)
@@ -2852,7 +2858,7 @@ PROTECTED VIRTUAL void AosApplication::Event_NotifyEvent(
 
         case IMS_EVENT_VOICE_SERVICE_STATE:  // FALL-THROUGH
         case IMS_EVENT_LTE_INFO:
-            ProcessNetworkEvent(nEvent, nWParam);
+            ProcessNetworkEvent(nEvent, nWParam, nLParam);
             break;
 
         default:

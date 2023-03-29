@@ -203,7 +203,8 @@ protected:
     virtual void ProcessRegFailed_Terminated();
 
     virtual void ProcessDisconnectingState(IN IMS_UINT32 nReason = 0);
-    virtual void ProcessNetworkEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
+    virtual void ProcessNetworkEvent(
+            IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx);
     virtual void ProcessStateStart(IN IMS_UINT32 nTime = 0);
     virtual void ProcessRegControlEvent(IN IMS_UINT32 nType, IN IMS_UINT32 nReason);
     virtual void ProcessRegInternalFailed(IN IMS_UINT32 nReason = 0);
@@ -415,6 +416,7 @@ protected:
     IMS_UINT32 m_nRegisteredRat;
     IMS_UINT32 m_nRecoverReason;
     IMS_UINT32 m_nLteAttachState;
+    IMS_UINT32 m_nLteExtraInfo;
     IMS_UINT32 m_nVoiceServiceState;
     IMS_SINT32 m_nSlotId;
 

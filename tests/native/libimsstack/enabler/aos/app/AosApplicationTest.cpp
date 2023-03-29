@@ -1443,8 +1443,9 @@ TEST_F(AosApplicationTest, Process)
     m_pTestAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
 
     // TEST_F : ProcessNetworkEvent
-    m_pTestAosApplication->ProcessNetworkEvent(IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED);
-    m_pTestAosApplication->ProcessNetworkEvent(IMS_EVENT_VOICE_SERVICE_STATE, 0);
+    m_pTestAosApplication->ProcessNetworkEvent(
+            IMS_EVENT_LTE_INFO, IMS_LTE_INFO_COMBINED_ATTACHED, IMS_LTE_INFO_EXTRA_NONE);
+    m_pTestAosApplication->ProcessNetworkEvent(IMS_EVENT_VOICE_SERVICE_STATE, 0, 0);
 
     // TEST_F : ProcessRegControlEvent
     // ProcessRegControlEvent - won't handled
