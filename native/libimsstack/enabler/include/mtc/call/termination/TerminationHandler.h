@@ -19,6 +19,7 @@
 
 #include "CallReasonInfo.h"
 #include "ImsTypeDef.h"
+#include "utility/IMessageUtils.h"
 
 class IMtcCallContext;
 class ISession;
@@ -36,6 +37,7 @@ public:
 private:
     static CallReasonInfo GetCallReasonInfoFromSessionTerminationReason(
             IN IMS_SINT32 nTerminationReason);
+    IMS_BOOL IsByCallPull(IN const ReasonHeaderValue& objValue) const;
 
     IMtcCallContext& m_objContext;
 };

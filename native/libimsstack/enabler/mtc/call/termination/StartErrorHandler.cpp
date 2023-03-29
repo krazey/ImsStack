@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "CarrierConfig.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
@@ -37,6 +38,9 @@
 #include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
+
+LOCAL const AString REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW =
+        "simultaneous call limit has already been reached";
 
 PUBLIC
 StartErrorHandler::StartErrorHandler(IN IMtcCallContext& objContext) :
@@ -241,7 +245,7 @@ CallReasonInfo StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessag
         case SipStatusCode::SC_401:
             return CallReasonInfo(CODE_SIP_CLIENT_ERROR, GetDefaultExtraCode(objMessage));
         case SipStatusCode::SC_403:
-            return Handle403Response();
+            return Handle403Response(objMessage);
         case SipStatusCode::SC_404:
             return Handle404Response();
         case SipStatusCode::SC_405:
@@ -301,11 +305,16 @@ CallReasonInfo StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessag
 }
 
 PRIVATE
-CallReasonInfo StartErrorHandler::Handle403Response() const
+CallReasonInfo StartErrorHandler::Handle403Response(IN const IMessage& objMessage) const
 {
     if (m_objContext.GetCallInfo().bEmergency)
     {
         return CallReasonInfo(CODE_SIP_FORBIDDEN, SipStatusCode::SC_403);
+    }
+
+    if (IsByMaxCallLimit(objMessage))
+    {
+        return CallReasonInfo(CODE_MAXIMUM_NUMBER_OF_CALLS_REACHED);
     }
 
     const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
@@ -689,6 +698,22 @@ IMS_BOOL StartErrorHandler::IsInitialRegistrationRequired(IN const IMessage& obj
             Ims3gpp::AlternativeService::TYPE_RESTORATION &&
             objIms3gppData.eAlternativeServiceAction ==
             Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION;
+}
+
+PRIVATE
+IMS_BOOL StartErrorHandler::IsByMaxCallLimit(IN const IMessage& objMessage) const
+{
+    const AString strNormalizedReasonPhrase =
+            objMessage.GetReasonPhrase().SimplifyWsp().MakeLower();
+    if (strNormalizedReasonPhrase.Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW))
+    {
+        return IMS_TRUE;
+    }
+
+    ReasonHeaderValue objValue =
+            m_objContext.GetMessageUtils().GetCauseAndTextFromReasonHeader(&objMessage);
+    const AString strNormalizedText = objValue.strText.SimplifyWsp().MakeLower();
+    return strNormalizedText.Contains(REASON_TEXT_MAX_CALL_LIMIT_REACHED_VZW);
 }
 
 PRIVATE
