@@ -53,7 +53,7 @@ public:
         MSG_IPCAN_CHANGED,
         MSG_PUB_TERMINATED,
         MSG_DESTROY,
-        MSG_SERVICE_CONTROL,
+        MSG_IMS_EST_TIMER_CONTROL,
         MSG_REG_EXCHANGE,
         MSG_AC_CONFIGURED,
         MSG_PCSCF_RECOVER,
@@ -220,8 +220,8 @@ PUBLIC GLOBAL const IMS_CHAR* AosLog::AppMessageToString(IN IMS_UINT32 nType)
         case ApplicationLog::MSG_DESTROY:
             return "MSG_DESTROY";
 
-        case ApplicationLog::MSG_SERVICE_CONTROL:
-            return "MSG_SERVICE_CONTROL";
+        case ApplicationLog::MSG_IMS_EST_TIMER_CONTROL:
+            return "MSG_IMS_EST_TIMER_CONTROL";
 
         case ApplicationLog::MSG_REG_EXCHANGE:
             return "MSG_REG_EXCHANGE";

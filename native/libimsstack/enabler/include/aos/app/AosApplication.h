@@ -157,7 +157,7 @@ protected:
     virtual void ProcessRegRecovery(IN IMSMSG& objMsg);
     virtual void ProcessIpcanChanged(IN IMSMSG& objMsg);
     virtual void ProcessDestroy(IN IMSMSG& objMsg);
-    virtual void ProcessServiceControl(IN IMSMSG& objMsg);
+    virtual void ProcessImsEstablishmentControl(IN IMSMSG& objMsg);
     virtual void ProcessRegExchange(IN IMSMSG& objMsg);
     virtual void ProcessAutoConfigurationComplete(IN IMSMSG& objMsg);
     virtual void ProcessPcscfRecovery(IN IMSMSG& objMsg);
@@ -308,7 +308,7 @@ protected:
         MSG_IPCAN_CHANGED,
         MSG_PUB_TERMINATED,
         MSG_DESTROY,
-        MSG_SERVICE_CONTROL,
+        MSG_IMS_EST_TIMER_CONTROL,
         MSG_REG_EXCHANGE,
         MSG_AC_CONFIGURED,
         MSG_PCSCF_RECOVER,

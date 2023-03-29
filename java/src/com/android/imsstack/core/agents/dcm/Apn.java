@@ -1294,6 +1294,19 @@ public abstract class Apn extends Handler implements IApn {
                         mNetworkType = networkType;
                     }
                     break;
+                case TelephonyManager.DATA_CONNECTING:
+                    if (mType.getType() == DcConstants.TYPE_IMS
+                            && mPreciseDcState != TelephonyManager.DATA_CONNECTING) {
+                        if (mDcSettings != null && mDcSettings.isCdmalessFeatureTagRequired()) {
+                            if (mAosReg != null) {
+                                mAosReg.controlRegistration(
+                                        IAosRegistration.RequestType.START_IMS_EST_TIMER,
+                                        IAosRegistration.Pcscf.CURRENT,
+                                        IAosRegistration.Cause.DATA_CONNECTING);
+                            }
+                        }
+                    }
+                    break;
                 case TelephonyManager.DATA_HANDOVER_IN_PROGRESS:
                     handleHandoverStart(networkType);
                     break;

@@ -57,7 +57,7 @@ public:
         MSG_IPCAN_CHANGED,
         MSG_PUB_TERMINATED,
         MSG_DESTROY,
-        MSG_SERVICE_CONTROL,
+        MSG_IMS_EST_TIMER_CONTROL,
         MSG_REG_EXCHANGE,
         MSG_AC_CONFIGURED,
         MSG_PCSCF_RECOVER,
@@ -198,8 +198,9 @@ TEST(AosLogTest, AppMessageToString)
             "MSG_PUB_TERMINATED");
     EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_DESTROY),
             "MSG_DESTROY");
-    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_SERVICE_CONTROL),
-            "MSG_SERVICE_CONTROL");
+    EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(
+                         ApplicationLogTest::MSG_IMS_EST_TIMER_CONTROL),
+            "MSG_IMS_EST_TIMER_CONTROL");
     EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_REG_EXCHANGE),
             "MSG_REG_EXCHANGE");
     EXPECT_STREQ(AosProvider::GetLog()->AppMessageToString(ApplicationLogTest::MSG_AC_CONFIGURED),
