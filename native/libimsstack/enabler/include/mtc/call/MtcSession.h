@@ -86,7 +86,7 @@ private:
     ImsList<IMtcExtension*> GetSupportedExtensions() const;
 
     void UpdateSessionProperty();
-    void UpdateCallTypeFromMessage(IN const IMessage& objMessage);
+    void UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType);
     void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
     void UpdateSessionIdFromMessage(IN const IMessage& objMessage);
     void SetInConference(IN const IMessage& objMessage);

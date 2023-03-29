@@ -292,10 +292,9 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
         }
     }
 
-    if (eType == RequestType::START || eType == RequestType::EARLY_UPDATE ||
-            eType == RequestType::UPDATE)
+    if (eType == RequestType::START || eType == RequestType::UPDATE)
     {
-        UpdateCallTypeFromMessage(objRequest);
+        UpdateCallTypeFromMessage(objRequest, IMS_FALSE);
         if (m_eCallType == CallType::UNKNOWN)
         {
             // UE must send full media list for the incoming INVITE w/o SDP
@@ -306,11 +305,12 @@ PUBLIC VIRTUAL void MtcSession::HandleRequest(IN RequestType eType, IN const IMe
         }
 
         UpdateCapabilityFromMessage(objRequest);
-    }
-
-    if (eType == RequestType::START || eType == RequestType::UPDATE)
-    {
         SetInConference(objRequest);
+    }
+    else if (eType == RequestType::EARLY_UPDATE)
+    {
+        UpdateCallTypeFromMessage(objRequest, IMS_TRUE);
+        UpdateCapabilityFromMessage(objRequest);
     }
 }
 
@@ -321,7 +321,7 @@ PUBLIC VIRTUAL void MtcSession::HandleResponse(
 
     if (eType == ResponseType::PROVISIONAL_RESPONSE || eType == ResponseType::EARLY_UPDATE_RESPONSE)
     {
-        UpdateCallTypeFromMessage(objResponse);
+        UpdateCallTypeFromMessage(objResponse, IMS_TRUE);
         UpdateCapabilityFromMessage(objResponse);
     }
 
@@ -389,10 +389,16 @@ void MtcSession::UpdateSessionProperty()
 }
 
 PRIVATE
-void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage)
+void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage, IN IMS_BOOL bSkipSameType)
 {
     CallType eNewCallType =
             m_objContext.GetMessageUtils().GetCallType(&objMessage, &m_objSession, IMS_TRUE);
+
+    if (bSkipSameType && eNewCallType == m_eCallType)
+    {
+        return;
+    }
+
     if (eNewCallType != CallType::UNKNOWN)
     {
         SetCallType(eNewCallType);
