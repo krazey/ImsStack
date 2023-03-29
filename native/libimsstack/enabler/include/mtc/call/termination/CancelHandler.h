@@ -34,10 +34,6 @@ public:
     CallReasonInfo Handle(IN const IMessage& objMessage) const;
 
 private:
-    static const AString REASON_TEXT_CALL_BUSY;
-    static const AString REASON_TEXT_CALL_COMPLETED;
-    static const AString REASON_TEXT_CALL_DECLINED;
-
     static CallReasonInfo GetCallReasonInfoFromReasonHeader(
             IN IMS_SINT32 nCause, IN const AString& strText);
 
