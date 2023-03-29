@@ -126,7 +126,8 @@ public:
     MOCK_METHOD(void, ProcessRegFailed_Update, (IN IMS_UINT32 nReason), (override));
     MOCK_METHOD(void, ProcessRegFailed_Terminated, (), (override));
     MOCK_METHOD(void, ProcessDisconnectingState, (IN IMS_UINT32 nReason), (override));
-    MOCK_METHOD(void, ProcessNetworkEvent, (IN IMS_UINT32 nType, IN IMS_UINT32 nState), (override));
+    MOCK_METHOD(void, ProcessNetworkEvent,
+            (IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx), (override));
     MOCK_METHOD(void, ProcessStateStart, (IN IMS_UINT32 nTime), (override));
     MOCK_METHOD(
             void, ProcessRegControlEvent, (IN IMS_UINT32 nType, IN IMS_UINT32 nReason), (override));
