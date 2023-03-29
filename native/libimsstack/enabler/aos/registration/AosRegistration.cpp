@@ -525,6 +525,10 @@ PUBLIC VIRTUAL IMS_UINT32 AosRegistration::GetProperty(
             nValue = m_nPdnReactivateWaitTime;
             break;
 
+        case PROPERTY_REG_FAILURE_COUNT:
+            nValue = m_nConsecutiveFailure;
+            break;
+
         default:
             break;
     }
