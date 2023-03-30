@@ -1265,6 +1265,10 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage(IN IMSMSG& obj
     {
         PreprocessStateMessage_Connection(objMsg);
     }
+    else if (objMsg.nMSG == MSG_CONDITION)
+    {
+        PreprocessStateMessage_Condition(objMsg);
+    }
 
     return IMS_TRUE;
 }
@@ -1301,6 +1305,30 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage_Connection(IN 
         }
 
         m_piRegistration->RequestCmd(IAosRegistration::CMD_UPDATE_IPCAN);
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL IMS_BOOL AosApplication::PreprocessStateMessage_Condition(IN IMSMSG& /* objMsg */)
+{
+    if (IsEmergency())
+    {
+        return IMS_TRUE;
+    }
+
+    if (GetState() == STATE_NOTREADY || GetState() == STATE_READY)
+    {
+        if (!m_pCondition->IsReady() && m_pCondition->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED))
+        {
+            if (m_piContext->GetConnection()->IsActivationRequested() &&
+                    m_piContext->GetConnection()->GetState() != IAosConnection::STATE_ACTIVE)
+            {
+                A_IMS_TRACE_D(APPID, "PreprocessStateMessage_Condition :: deactivate connection", 0,
+                        0, 0);
+                m_pConnector->Stop();
+            }
+        }
     }
 
     return IMS_TRUE;
