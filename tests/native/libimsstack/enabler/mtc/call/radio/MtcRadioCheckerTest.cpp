@@ -212,6 +212,43 @@ TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWhenTimerIsRunning)
                     CallType::VOIP, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 }
 
+TEST_F(MtcRadioCheckerTest, CheckSsacReturnsBlockedWhenFactorIsZero)
+{
+    ON_CALL(m_objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING))
+            .WillByDefault(Return(IMS_FALSE));
+
+    m_objSsacInfo.nBarringFactorForVideo = 0;
+    m_objSsacInfo.nBarringTimeSecForVideo = 10;
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
+    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_))
+            .Times(2)
+            .WillOnce(Return(0))
+            .WillOnce(Return(50));
+    EXPECT_CALL(
+            m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, _, _))
+            .Times(1);
+
+    m_pMtcRadioChecker->Check(CallType::VIDEO_RTT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1);
+}
+
+TEST_F(MtcRadioCheckerTest, CheckSsacReturnsNotBlockedWhenTimeIsZeroButFactorIsNotZero)
+{
+    ON_CALL(m_objPassiveTimerHolder, IsActive(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING))
+            .WillByDefault(Return(IMS_FALSE));
+
+    m_objSsacInfo.nBarringFactorForVideo = 99;
+    m_objSsacInfo.nBarringTimeSecForVideo = 0;
+
+    EXPECT_CALL(m_objImsRadioService.GetMockImsRadio(), GetSsacInfo()).Times(1);
+    EXPECT_CALL(m_objTestSystemTimeService.GetMockSystemTime(), GetRandom(_)).Times(0);
+    EXPECT_CALL(
+            m_objPassiveTimerHolder, AddTimer(IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, _, _))
+            .Times(0);
+
+    m_pMtcRadioChecker->Check(CallType::VIDEO_RTT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1);
+}
+
 TEST_F(MtcRadioCheckerTest, CheckTrafficPreparedReturnsUnblocked)
 {
     m_pMtcRadioChecker->CreateCallTrafficInfoWithGivenValue(IImsRadio::TRAFFIC_TYPE_VOICE,
