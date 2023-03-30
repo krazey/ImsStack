@@ -931,6 +931,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
 
     if (pTxnContext == IMS_NULL)
     {
+        SipStack::FreeTxnKey(pTxnKey);
         IMS_TRACE_E(0, "SipTxnContext is null", 0, 0, 0);
         return SipPrivate::MESSAGE_FAILED;
     }
@@ -999,9 +1000,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
     if ((pTxnKey != IMS_NULL) && (pTxnKey != pCtState->m_pTxnKey))
     {
         SipStack::FreeTxnKey(pCtState->m_pTxnKey);
-
         pCtState->m_pTxnKey = pTxnKey;
-        SipStack::AddReference(pCtState->m_pTxnKey);
     }
     else
     {
