@@ -54,7 +54,7 @@ public:
         /// Indicate that initial registration was required. the reason is not specified.
         REG_NEW_REQUIRED,
         /// Indicate that registration is terminating.
-        /// So services may send a BYE message to terminate the session if there is on a sesson.
+        /// So services may send a BYE message to terminate the session if there is on a session.
         REG_TERMINATING,
 
         NOT_SPECIFIED

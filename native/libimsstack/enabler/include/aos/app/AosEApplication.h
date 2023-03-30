@@ -16,6 +16,7 @@
 #ifndef AOS_E_APPLICATION_H_
 #define AOS_E_APPLICATION_H_
 
+#include "interface/IAosRegStateManagerListener.h"
 #include "app/AosApplication.h"
 
 /**
@@ -25,7 +26,7 @@
  *
  */
 
-class AosEApplication : public AosApplication
+class AosEApplication : public AosApplication, public IAosRegStateManagerListener
 {
 public:
     AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId);
@@ -67,10 +68,13 @@ protected:
     void ProcessAppConnectedTimerExpired() override;
     void ProcessAppTerminatedTimerExpired() override;
     void ProcessReconfigTimerExpired() override;
+    void ProcessRegBlockedTimerExpired() override;
 
     virtual IMS_BOOL IsEmergencyBlocked();
     virtual IMS_BOOL IsWifiConnected();
     virtual IMS_BOOL IsWlanEmergencyBlocked();
+    virtual IMS_BOOL IsRegWaitingRequired();
+    virtual void ProcessRegStateCheck();
     virtual void ProcessECallStarted();
     virtual void ProcessECallTerminated();
 
@@ -83,6 +87,15 @@ protected:
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
+
+    // IAosNConfigurationListener
+    void NConfiguration_NotifyConfigChanged() override;
+
+    // IAosRegStateManagerListener
+    void RegStateManager_RegStateChanged(IN IMS_UINT32 nState) override;
+
+    void Init() override;
+    void CleanUp() override;
 
     static const IMS_UINT32 EPDN_RELEASE_DELAY_TIME_MILLIS = 2000;
 };

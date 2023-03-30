@@ -23,6 +23,7 @@
 class MockIAosRegStateManager : public IAosRegStateManager
 {
 public:
+    MOCK_METHOD(void, SetListener, (IN IAosRegStateManagerListener * piRegListener), (override));
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
     MOCK_METHOD(void, SetSlotId, (IN IMS_SINT32 nSlotId), (override));
     MOCK_METHOD(void, SetImsRegState, (IN IMS_UINT32 nState, IN IMS_BOOL bLimited), (override));
