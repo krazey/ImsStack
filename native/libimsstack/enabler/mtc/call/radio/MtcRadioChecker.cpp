@@ -71,11 +71,13 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_
 {
     if (IsSsacBarred(eCallType, bEmergency, ePeerType, bWifi))
     {
+        IMS_TRACE_D("Check blocked - SSAC barred", 0, 0, 0);
         return CheckResult::BLOCKED;
     }
 
     if (IsTrafficPrepared(eCallType, bEmergency, ePeerType))
     {
+        IMS_TRACE_D("Check unblocked - traffic has been prepared", 0, 0, 0);
         return CheckResult::UNBLOCKED;
     }
 
@@ -87,10 +89,12 @@ PUBLIC VIRTUAL CheckResult MtcRadioChecker::Check(IN CallType eCallType, IN IMS_
 
     if (IsTrafficAllowed(eCallType, bEmergency) == IMS_FALSE)
     {
+        IMS_TRACE_D("Check blocked - traffic hasn't been allowed", 0, 0, 0);
         return CheckResult::BLOCKED;
     }
 
     StartTrafficChecking(eCallType, bEmergency, ePeerType, bWifi, nCallKey);
+    IMS_TRACE_D("Check pending", 0, 0, 0);
     return CheckResult::PENDING;
 }
 
@@ -415,25 +419,31 @@ PRIVATE IMS_BOOL MtcRadioChecker::StartSsacTimer(IN CallType eCallType)
     const SsacInfo& objSsacInfo = m_piImsRadio->GetSsacInfo();
     IMS_SINT32 nBarringFactor;
     IMS_SINT32 nBarringTimeSec;
+    IPassiveTimerHolder::Type nSsacType;
 
     if (eCallType == CallType::VOIP || eCallType == CallType::RTT)
     {
         nBarringFactor = objSsacInfo.nBarringFactorForVoice;
         nBarringTimeSec = objSsacInfo.nBarringTimeSecForVoice;
+        nSsacType = IPassiveTimerHolder::Type::SSAC_VOICE_BARRING;
     }
     else
     {
         nBarringFactor = objSsacInfo.nBarringFactorForVideo;
         nBarringTimeSec = objSsacInfo.nBarringTimeSecForVideo;
+        nSsacType = IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING;
     }
 
-    if (nBarringFactor >= 100 || nBarringTimeSec <= 0)
+    IMS_TRACE_D("StartSsacTimer BarringFactor[%d] BarringTimeSec[%d]", nBarringFactor,
+            nBarringTimeSec, 0);
+
+    if (nBarringFactor >= 100 || (nBarringFactor != 0 && nBarringTimeSec <= 0))
     {
         return IMS_FALSE;
     }
 
     IMS_UINT32 nRandom = IMS_SYS_GetRandom(100);
-    if (nRandom <= static_cast<IMS_UINT32>(nBarringFactor))
+    if (nRandom < static_cast<IMS_UINT32>(nBarringFactor))
     {
         return IMS_FALSE;
     }
@@ -441,16 +451,7 @@ PRIVATE IMS_BOOL MtcRadioChecker::StartSsacTimer(IN CallType eCallType)
     nRandom = IMS_SYS_GetRandom(10);
     IMS_DOUBLE nCalculatedBarringTime = (0.7 + 0.6 * (nRandom / 10.0)) * nBarringTimeSec;
 
-    if (eCallType == CallType::VOIP || eCallType == CallType::RTT)
-    {
-        m_objContext.GetPassiveTimerHolder().AddTimer(
-                IPassiveTimerHolder::Type::SSAC_VOICE_BARRING, nCalculatedBarringTime * 1000);
-    }
-    else if (eCallType == CallType::VT || eCallType == CallType::VIDEO_RTT)
-    {
-        m_objContext.GetPassiveTimerHolder().AddTimer(
-                IPassiveTimerHolder::Type::SSAC_VIDEO_BARRING, nCalculatedBarringTime * 1000);
-    }
+    m_objContext.GetPassiveTimerHolder().AddTimer(nSsacType, nCalculatedBarringTime * 1000);
 
     return IMS_TRUE;
 }
