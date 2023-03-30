@@ -55,9 +55,9 @@ public enum NgranBandArfcnFrequency {
     NR_BAND_74(NgranBands.BAND_74, 295000, 303600, ServiceState.DUPLEX_MODE_FDD),
     NR_BAND_75(NgranBands.BAND_75, 286400, 303400, ServiceState.DUPLEX_MODE_FDD), // SDL
     NR_BAND_76(NgranBands.BAND_76, 285400, 286400, ServiceState.DUPLEX_MODE_FDD), // SDL
-    NR_BAND_77(NgranBands.BAND_77, 620000, 680000, ServiceState.DUPLEX_MODE_FDD),
-    NR_BAND_78(NgranBands.BAND_78, 620000, 653333, ServiceState.DUPLEX_MODE_FDD),
-    NR_BAND_79(NgranBands.BAND_79, 693334, 733333, ServiceState.DUPLEX_MODE_FDD),
+    NR_BAND_77(NgranBands.BAND_77, 620000, 680000, ServiceState.DUPLEX_MODE_TDD),
+    NR_BAND_78(NgranBands.BAND_78, 620000, 653333, ServiceState.DUPLEX_MODE_TDD),
+    NR_BAND_79(NgranBands.BAND_79, 693334, 733333, ServiceState.DUPLEX_MODE_TDD),
     // For SUL band 80, 81, 82, 83, 84, 86, and 89, they don't have downlink frequency
     NR_BAND_90(NgranBands.BAND_90, 499200, 538000, ServiceState.DUPLEX_MODE_TDD),
     NR_BAND_91(NgranBands.BAND_91, 285400, 286400, ServiceState.DUPLEX_MODE_FDD),
