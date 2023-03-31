@@ -32,6 +32,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
@@ -50,7 +53,11 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class MtcECallStateTrackerTest extends ImsStackTest {
+    private static final int SLOT_ID = 0;
+
     @Mock private IBaseContext mMockContext;
+    @Mock private CarrierConfig mMockCarrierConfig;
+    @Mock private ConfigInterface mMockConfigInterface;
     @Mock private ICallStateTracker mMockICallStateTracker;
     @Mock private IServiceStateTracker mMockIServiceStateTracker;
     @Mock private EcbmListener mMockEcbmListener;
@@ -62,22 +69,19 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
 
     private MtcECallStateTracker mTestMtcECallStateTracker;
 
-    private static class TestMtcECallStateTracker extends MtcECallStateTracker {
-        TestMtcECallStateTracker(IBaseContext context, ICallStateTracker csTracker) {
-            super(context, csTracker);
-        }
-
-        @Override
-        protected void initEcbmSupportType() {
-            setEcbmSupportType(1 | 2);
-        }
-    }
-
     @Before
     public void setUp() throws Exception {
         super.setUp(getClass().getSimpleName());
         MockitoAnnotations.initMocks(this);
 
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, SLOT_ID);
+        doReturn(mMockCarrierConfig).when(mMockConfigInterface).getCarrierConfig();
+        doReturn(true).when(mMockCarrierConfig).getBoolean(
+                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+        doReturn(true).when(mMockCarrierConfig).getBoolean(
+                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+
+        doReturn(SLOT_ID).when(mMockContext).getSlotId();
         doReturn(mMockIServiceStateTracker).when(mMockContext).getServiceStateTracker();
         doReturn(mContext).when(mMockContext).getContext();
         doReturn(Looper.myLooper()).when(mContext).getMainLooper();
@@ -85,12 +89,13 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
         doReturn(0).when(mMockContext).getSlotId();
         doReturn(true).when(mMockMtcCall).isEmergencyCall();
 
-        mTestMtcECallStateTracker = new TestMtcECallStateTracker(
+        mTestMtcECallStateTracker = new MtcECallStateTracker(
                 mMockContext, mMockICallStateTracker);
     }
 
     @After
     public void tearDown() throws Exception {
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, SLOT_ID);
         mTestMtcECallStateTracker = null;
         super.tearDown();
     }
@@ -275,20 +280,31 @@ public class MtcECallStateTrackerTest extends ImsStackTest {
 
         assertTrue(mTestMtcECallStateTracker.isProceedingExitEmergency());
         assertTrue(mTestMtcECallStateTracker.isECallState(0));
+    }
 
+    @Test
+    public void testMtcECallStateListenerOnCallTerminated2() {
+        doReturn(false).when(mMockCarrierConfig).getBoolean(
+                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+        doReturn(false).when(mMockCarrierConfig).getBoolean(
+                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+        MtcECallStateTracker testMtcECallStateTracker = new MtcECallStateTracker(
+                mMockContext, mMockICallStateTracker);
+        testMtcECallStateTracker.setECallListener();
+        MtcECallStateTracker.MtcECallStateListener mtcECallStateListener2 = getECallListener();
+        testMtcECallStateTracker.setECallState(3);
+        testMtcECallStateTracker.setProceedingExitEmergency(false);
+        doReturn(new CallReasonInfo()).when(mMockMtcCall).getTerminationReason();
 
-        mTestMtcECallStateTracker.setECallState(3);
-        mTestMtcECallStateTracker.setProceedingExitEmergency(false);
-        mTestMtcECallStateTracker.setEcbmSupportType(0);
-        mtcECallStateListener.onCallTerminated(mMockMtcCall);
+        mtcECallStateListener2.onCallTerminated(mMockMtcCall);
         processAllMessages();
 
-        assertTrue(mTestMtcECallStateTracker.isProceedingExitEmergency());
-        assertTrue(mTestMtcECallStateTracker.isECallState(0));
+        assertTrue(testMtcECallStateTracker.isProceedingExitEmergency());
+        assertTrue(testMtcECallStateTracker.isECallState(0));
 
         processAllFutureMessages();
 
-        assertFalse(mTestMtcECallStateTracker.isProceedingExitEmergency());
+        assertFalse(testMtcECallStateTracker.isProceedingExitEmergency());
     }
 
     private MtcECallStateTracker.ECallStateHandler getECallStateHandler() {

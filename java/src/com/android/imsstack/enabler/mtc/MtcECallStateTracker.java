@@ -148,16 +148,6 @@ public class MtcECallStateTracker implements IECallStateTracker {
     }
 
     @VisibleForTesting
-    protected void setEcbmSupportType(int ecbmType) {
-        // TODO : need to apply below to carreir id xml.
-        //USC : VoLTE ECBM supported
-        //SPR : VoLTE ECBM supported
-        //ACG : VoLTE ECBM supported
-
-        mEcbmSupportType = ecbmType;
-    }
-
-    @VisibleForTesting
     protected void setECallListener() {
         if (mCallListener == null) {
             mCallListener = new MtcECallStateListener();
@@ -199,8 +189,16 @@ public class MtcECallStateTracker implements IECallStateTracker {
         }
     }
 
-    @VisibleForTesting
-    protected void initEcbmSupportType() {
+    private void setEcbmSupportType(int ecbmType) {
+        // TODO : need to apply below to carreir id xml.
+        //USC : VoLTE ECBM supported
+        //SPR : VoLTE ECBM supported
+        //ACG : VoLTE ECBM supported
+
+        mEcbmSupportType = ecbmType;
+    }
+
+    private void initEcbmSupportType() {
         int ecbmType = ECBM_SUPPORT_TYPE_NONE;
 
         if (isEcbmSupportedForVolte(mContext.getSlotId())) {
