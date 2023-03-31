@@ -23,6 +23,7 @@
 #include "ServiceTrace.h"
 #include "SipStatusCode.h"
 #include "call/IMtcSession.h"
+#include "call/UpdatingInfo.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "media/IMedia.h"
@@ -254,15 +255,8 @@ PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
                 piSession, m_pSdpPreconditionHelper->GetMediaType(pLocalSdp, piMedia->GetState()));
     }
 
-    IMS_BOOL bUseConf = (m_objContext.GetCallInfo().ePeerType == PeerType::MT);
-    if (IsConfirmedDialog(piSession))
-    {
-        // TODO: check if the confirmation status should be added when UE uses qos check
-        // for upgrading the call.
-        bUseConf = IMS_FALSE;
-    }
-
-    m_pSdpPreconditionHelper->FormPreconditionSdp(piSession, pStatusTable, bUseConf);
+    m_pSdpPreconditionHelper->FormPreconditionSdp(
+            piSession, pStatusTable, IsConfirmationRequired(*piSession));
 }
 
 PUBLIC VIRTUAL void MtcPreconditionManager::HandleQosOnIpcanChanged()
@@ -289,8 +283,7 @@ PUBLIC VIRTUAL void MtcPreconditionManager::HandleQosOnIpcanChanged()
         }
         else
         {
-            NotifyQosStatusToListener(
-                    piSession, IMS_TRUE, m_pSdpPreconditionHelper->GetMediaTypesBySdp(piSession));
+            NotifyQosStatusToListener(piSession, IMS_TRUE, GetMediaTypesFromCallType());
         }
     }
 }
@@ -359,16 +352,28 @@ PUBLIC VIRTUAL void MtcPreconditionManager::OnCallEstablished(IN ISession* piSes
 PUBLIC VIRTUAL void MtcPreconditionManager::OnCallModified(IN ISession* piSession)
 {
     IMS_TRACE_D("OnCallModified", 0, 0, 0);
-    if (m_objContext.GetConfigurationProxy().GetInt(
-                Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING) !=
-            CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE)
-    {
-        return;
-    }
 
-    if (!IsLocalResourceReserved(piSession, IMS_FALSE))
+    IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
+            Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING);
+    if (nPolicy == CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE)
     {
-        StartQosTimer(piSession, QosTimerType::GUARD_AVAILABLE);
+        if (!IsLocalResourceReserved(piSession, IMS_FALSE))
+        {
+            StartQosTimer(piSession, QosTimerType::GUARD_AVAILABLE);
+        }
+    }
+    else if (nPolicy ==
+            CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING)
+    {
+        // To change Local status from QosStatus::LOST to QosStatus::IDLE for removed medias
+        InitializeStatusForLostQos(piSession, IMS_TRUE);
+
+        // To change remote status to QosStatus::IDLE for removed medias
+        QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
+        if (pStatusTable != IMS_NULL)
+        {
+            pStatusTable->RemoveUnusedStatusRecords(GetMediaTypesFromCallType());
+        }
     }
 }
 
@@ -455,6 +460,12 @@ void MtcPreconditionManager::SetQosStatus(
     {
         IMS_TRACE_D("SetQosStatus nothing to update", 0, 0, 0);
         return;
+    }
+
+    // To change Local status from QosStatus::LOST to QosStatus::IDLE for removed medias
+    if (eStatus == QosStatus::LOST && !(GetMediaTypesFromCallType() & eMediaType))
+    {
+        eStatus = QosStatus::IDLE;
     }
 
     if (eMediaType == MEDIATYPE_AUDIO)
@@ -600,7 +611,7 @@ void MtcPreconditionManager::OnGuardAvailableTimerExpired(IN QosTimer* pTimer)
     }
 
     IMS_UINT32 eReservedMediaTypes = MEDIATYPE_NONE;
-    IMS_UINT32 eMediaTypesBySdp = m_pSdpPreconditionHelper->GetMediaTypesBySdp(piSession);
+    IMS_UINT32 eMediaTypesBySdp = GetMediaTypesFromCallType();
     std::vector<IMS_UINT32> objMediaTypes{MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
     for (IMS_UINT32 eMediaType : objMediaTypes)
     {
@@ -627,19 +638,21 @@ void MtcPreconditionManager::HandleReservationFailureByTimerExpiration(IN const 
 
     IMS_TRACE_D("HandleReservationFailureByTimerExpiration", 0, 0, 0);
     NotifyQosStatusToListener(piSession, IMS_FALSE, MEDIATYPE_NONE);
-    InitializeStatusForLostQos(piSession);
+    InitializeStatusForLostQos(piSession, IMS_FALSE);
 }
 
 PRIVATE
-void MtcPreconditionManager::InitializeStatusForLostQos(IN ISession* piSession) const
+void MtcPreconditionManager::InitializeStatusForLostQos(
+        IN ISession* piSession, IN IMS_BOOL bRemovedMedia) const
 {
-    IMS_UINT32 eMediaTypesBySdp = m_pSdpPreconditionHelper->GetMediaTypesBySdp(piSession);
+    IMS_UINT32 eMediaTypesBySdp = GetMediaTypesFromCallType();
 
     std::vector<IMS_UINT32> objMediaTypes{MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
     for (IMS_UINT32 eMediaType : objMediaTypes)
     {
-        if ((eMediaTypesBySdp & eMediaType) &&
-                GetQosStatus(piSession, eMediaType) == QosStatus::LOST)
+        IMS_BOOL bTarget =
+                bRemovedMedia ? !(eMediaTypesBySdp & eMediaType) : eMediaTypesBySdp & eMediaType;
+        if (bTarget && GetQosStatus(piSession, eMediaType) == QosStatus::LOST)
         {
             IMS_TRACE_D("InitializeStatusForLostQos [%d]", eMediaType, 0, 0);
             SetQosStatus(piSession, QosStatus::IDLE, eMediaType);
@@ -652,7 +665,7 @@ void MtcPreconditionManager::CreateStatusRecordsWithActiveMediaTypes(IN ISession
 {
     IMS_TRACE_D("CreateStatusRecordsWithActiveMediaTypes", 0, 0, 0);
 
-    IMS_UINT32 eMediaTypesBySdp = m_pSdpPreconditionHelper->GetMediaTypesBySdp(piSession);
+    IMS_UINT32 eMediaTypesBySdp = GetMediaTypesFromCallType();
     std::vector<IMS_UINT32> objMediaTypes{MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
     for (IMS_UINT32 eMediaType : objMediaTypes)
     {
@@ -883,7 +896,7 @@ IMS_BOOL MtcPreconditionManager::IsDefaultBearerUsed(IN IMS_UINT32 eMediaType) c
 PRIVATE
 IMS_BOOL MtcPreconditionManager::IsRemoteResourceReserved(IN ISession* piSession) const
 {
-    IMS_UINT32 eMediaTypesBySdp = m_pSdpPreconditionHelper->GetMediaTypesBySdp(piSession);
+    IMS_UINT32 eMediaTypesBySdp = GetMediaTypesFromCallType();
     if (eMediaTypesBySdp == MEDIATYPE_NONE)
     {
         IMS_TRACE_D("IsRemoteResourceReserved Can't get media types from SDP.", 0, 0, 0);
@@ -906,7 +919,7 @@ PRIVATE
 IMS_BOOL MtcPreconditionManager::IsLocalResourceReserved(
         IN ISession* piSession, IN IMS_BOOL bAtLeastOneReserved) const
 {
-    IMS_UINT32 eMediaTypes = m_pSdpPreconditionHelper->GetMediaTypesBySdp(piSession);
+    IMS_UINT32 eMediaTypes = GetMediaTypesFromCallType();
     if (eMediaTypes == MEDIATYPE_NONE)
     {
         IMS_TRACE_D("IsLocalResourceReserved can't get media types from SDP.", 0, 0, 0);
@@ -1048,11 +1061,7 @@ PRIVATE
 IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession) const
 {
     IMS_UINT32 eEnabledMediaTypes = MEDIATYPE_NONE;
-    IMS_UINT32 eMediaTypesBySdp = m_pSdpPreconditionHelper->GetMediaTypesBySdp(piSession);
-    if (eMediaTypesBySdp == MEDIATYPE_NONE)
-    {
-        eMediaTypesBySdp = GetMediaTypesFromCallType();
-    }
+    IMS_UINT32 eMediaTypesBySdp = GetMediaTypesFromCallType();
 
     std::vector<IMS_UINT32> objMediaTypes{MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
     for (IMS_UINT32 eMediaType : objMediaTypes)
@@ -1248,7 +1257,8 @@ PRIVATE
 QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession) const
 {
     QosLossPolicy eAction = QosLossPolicy::MAINTAIN;
-    IMS_UINT32 eMediaTypesBySdp = m_pSdpPreconditionHelper->GetMediaTypesBySdp(piSession);
+
+    IMS_UINT32 eMediaTypesBySdp = GetMediaTypesFromCallType();
     std::vector<IMS_UINT32> objMediaTypes{MEDIATYPE_AUDIO, MEDIATYPE_VIDEO, MEDIATYPE_TEXT};
 
     for (IMS_UINT32 eMediaType : objMediaTypes)
@@ -1280,4 +1290,25 @@ IMS_BOOL MtcPreconditionManager::IsDedicatedBearerAllocationRequiredToAlertUser(
             Feature::POLICY_FOR_ALERT_NOT_USING_PRECONDITION_MECHANISM);
 
     return nPolicy == CarrierConfig::ImsVoice::ALERT_POLICY_FOR_CHECKING_ALLOCATED_DEDICATED_BEARER;
+}
+
+PRIVATE
+IMS_BOOL MtcPreconditionManager::IsConfirmationRequired(IN const ISession& objISession) const
+{
+    if (IsConfirmedDialog(&objISession))
+    {
+        // Check if it's sending a first response for re-INVITE.
+        if (!m_objContext.GetUpdatingInfo().IsModifier() &&
+                objISession.GetPreviousResponse(IMessage::SESSION_UPDATE) == IMS_NULL)
+        {
+            // TODO: check after sending 100 Tyring.
+            return IMS_TRUE;
+        }
+        else
+        {
+            return IMS_FALSE;
+        }
+    }
+
+    return (m_objContext.GetCallInfo().ePeerType == PeerType::MT);
 }
