@@ -340,17 +340,13 @@
     </pbundle>
     <pbundle name="imsvoice.amrwb_payload_description_bundle">
         <pbundle name="104">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
-                <item value="0"/>
-                <item value="1"/>
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
                 <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
         </pbundle>
         <pbundle name="110">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="3">
-                <item value="0"/>
-                <item value="1"/>
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
                 <item value="2"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
@@ -358,30 +354,18 @@
     </pbundle>
     <pbundle name="imsvoice.amrnb_payload_description_bundle">
         <pbundle name="102">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
-                <item value="0"/>
-                <item value="2"/>
-                <item value="4"/>
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
                 <item value="7"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
         </pbundle>
         <pbundle name="108">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
-                <item value="0"/>
-                <item value="2"/>
-                <item value="4"/>
+            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="1">
                 <item value="7"/>
             </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="1"/>
         </pbundle>
         <pbundle name="106">
-            <int-array name="imsvoice.amr_codec_attribute_modeset_int_array" num="4">
-                <item value="0"/>
-                <item value="2"/>
-                <item value="4"/>
-                <item value="7"/>
-            </int-array>
             <int name="imsvoice.amr_codec_attribute_payload_format_int" value="0"/>
         </pbundle>
     </pbundle>
