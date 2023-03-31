@@ -171,7 +171,7 @@ public class DcUtilsTest extends ImsStackTest {
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_MNC], ci.getMncString());
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_CELL_ID], Long.toHexString(ci.getNci()));
         assertEquals(ani.mAni[DcUtils.ANI_INDEX_TAC_OR_LAC], Integer.toHexString(ci.getTac()));
-        assertEquals(ani.mAni[DcUtils.ANI_INDEX_MODE], DcUtils.MODE_FDD);
+        assertEquals(ani.mAni[DcUtils.ANI_INDEX_MODE], DcUtils.MODE_TDD);
     }
 
     @Test
@@ -385,7 +385,7 @@ public class DcUtilsTest extends ImsStackTest {
         assertEquals(ci.getMncString(), networks[DcUtils.ANI_INDEX_MNC]);
         assertEquals(Long.toHexString(ci.getNci()), networks[DcUtils.ANI_INDEX_CELL_ID]);
         assertEquals(Integer.toHexString(ci.getTac()), networks[DcUtils.ANI_INDEX_TAC_OR_LAC]);
-        assertEquals(DcUtils.MODE_FDD, networks[DcUtils.ANI_INDEX_MODE]);
+        assertEquals(DcUtils.MODE_TDD, networks[DcUtils.ANI_INDEX_MODE]);
     }
 
     @Test
@@ -499,7 +499,7 @@ public class DcUtilsTest extends ImsStackTest {
                 return new CellIdentityLte(0x1111111, 13, 0x2222, 0, new int[] {}, 0,
                         "001", "01", "Test-SIM", "Test", Collections.emptyList(), null);
             case TelephonyManager.NETWORK_TYPE_NR:
-                return new CellIdentityNr(20, 0x333333, 423000, new int[] {34, 1},
+                return new CellIdentityNr(20, 0x333333, 633693, new int[] {1, 78},
                         "001", "01", 0x555555555L, "Test-SIM", "Test", Collections.emptyList());
             case TelephonyManager.NETWORK_TYPE_UMTS: // FALL-THROUGH
             case TelephonyManager.NETWORK_TYPE_HSDPA: // FALL-THROUGH
