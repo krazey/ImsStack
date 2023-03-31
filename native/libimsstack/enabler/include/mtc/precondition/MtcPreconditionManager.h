@@ -120,7 +120,7 @@ private:
     void OnForceAvailableTimerExpired(IN QosTimer* pTimer);
     void OnGuardAvailableTimerExpired(IN QosTimer* pTimer);
     void HandleReservationFailureByTimerExpiration(IN const QosTimer* pTimer);
-    void InitializeStatusForLostQos(IN ISession* piSession) const;
+    void InitializeStatusForLostQos(IN ISession* piSession, IN IMS_BOOL bRemovedMedia) const;
     void CreateStatusRecordsWithActiveMediaTypes(IN ISession* piSession);
     void CreateStatusRecords(IN ISession* piSession, IN IMS_UINT32 eMediaType);
     void HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrentStatus,
@@ -153,6 +153,7 @@ private:
     QosLossPolicy GetQosLossPolicy(IN IMS_UINT32 eMediaType) const;
     QosLossPolicy GetActionForQosLoss(IN ISession* piSession) const;
     IMS_BOOL IsDedicatedBearerAllocationRequiredToAlertUser() const;
+    IMS_BOOL IsConfirmationRequired(IN const ISession& objISession) const;
 
 protected:
     ImsMap<ISession*, QosInfo*> m_objQosInfos;
