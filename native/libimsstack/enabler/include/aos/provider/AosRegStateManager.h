@@ -19,6 +19,8 @@
 #include "ImsTypeDef.h"
 #include "interface/IAosRegStateManager.h"
 
+class IAosRegStateManagerListener;
+
 class AosRegStateManager : public IAosRegStateManager
 {
 public:
@@ -26,6 +28,8 @@ public:
     virtual ~AosRegStateManager();
 
     /// IAosRegStateManager Interface
+    void SetListener(IN IAosRegStateManagerListener* piRegListener) override;
+
     IMS_SINT32 GetSlotId() const override;
     void SetSlotId(IN IMS_SINT32 nSlotId) override;
 
@@ -41,6 +45,8 @@ protected:
     IMS_BOOL IsRegService(IN IMS_UINT32 nType) const;
 
 protected:
+    IAosRegStateManagerListener* m_piListener;
+
     IMS_SINT32 m_nSlotId;
     IMS_UINT32 m_nRegState;
     IMS_UINT32 m_nERegState;
