@@ -33,6 +33,9 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.imsstack.ImsStackTest;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.AppContext;
@@ -43,6 +46,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
@@ -52,6 +56,8 @@ public class MtcCallManagerTest extends ImsStackTest {
     @Mock private CallStateListener mMockCallStateListener;
     @Mock private MtcCall mMockMtcCall;
     @Mock private Context mMockContext;
+    @Mock private CarrierConfig mMockCarrierConfig;
+    @Mock private ConfigInterface mMockConfigInterface;
     private long mNativeCallId = 1;
     private int mSlotId0 = 0;
 
@@ -66,6 +72,8 @@ public class MtcCallManagerTest extends ImsStackTest {
         AppContext.init(mMockContext);
         mTestMtcCallManager = new MtcCallManager(mMockBaseContext);
 
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface, mSlotId0);
+        doReturn(mMockCarrierConfig).when(mMockConfigInterface).getCarrierConfig();
         doReturn(mSlotId0).when(mMockBaseContext).getSlotId();
         mExecutor = new MessageExecutor(Looper.myLooper());
         doReturn(mExecutor).when(mMockBaseContext).getExecutor();
@@ -77,6 +85,7 @@ public class MtcCallManagerTest extends ImsStackTest {
 
     @After
     public void tearDown() throws Exception {
+        AgentFactory.getInstance().setAgent(ConfigInterface.class, null, mSlotId0);
         mTestMtcCallManager = null;
         mExecutor = null;
         super.tearDown();
@@ -93,6 +102,50 @@ public class MtcCallManagerTest extends ImsStackTest {
         mTestMtcCallManager.dispose();
 
         assertNull(mTestMtcCallManager.getCallTracker());
+        assertNull(mTestMtcCallManager.getCall(mNativeCallId));
+        assertNull(mTestMtcCallManager.getPendingCall(mNativeCallId));
+    }
+
+    @Test
+    public void testInit() {
+        IServiceStateTracker sst = Mockito.mock(IServiceStateTracker.class);
+        doReturn(mMockContext).when(mMockBaseContext).getContext();
+        doReturn(Looper.myLooper()).when(mMockContext).getMainLooper();
+        doReturn(sst).when(mMockBaseContext).getServiceStateTracker();
+        doReturn(false).when(mMockCarrierConfig).getBoolean(
+                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+        doReturn(true).when(mMockCarrierConfig).getBoolean(
+                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+
+        mTestMtcCallManager.init();
+
+        assertNotNull(mTestMtcCallManager.getECallStateTracker());
+    }
+
+    @Test
+    public void testClear() {
+        IServiceStateTracker sst = Mockito.mock(IServiceStateTracker.class);
+        doReturn(mMockContext).when(mMockBaseContext).getContext();
+        doReturn(Looper.myLooper()).when(mMockContext).getMainLooper();
+        doReturn(sst).when(mMockBaseContext).getServiceStateTracker();
+        doReturn(false).when(mMockCarrierConfig).getBoolean(
+                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOLTE_BOOL);
+        doReturn(true).when(mMockCarrierConfig).getBoolean(
+                CarrierConfig.Assets.KEY_SUPPORT_ECBM_FOR_VOWIFI_BOOL);
+
+        mTestMtcCallManager.init();
+        mTestMtcCallManager.addListener(mMockCallStateListener);
+        mTestMtcCallManager.attachCall(mMockMtcCall);
+        mTestMtcCallManager.attachPreIncomingCall(mMockMtcCall);
+        processAllMessages();
+
+        assertNotNull(mTestMtcCallManager.getECallStateTracker());
+        assertNotNull(mTestMtcCallManager.getCall(mNativeCallId));
+        assertNotNull(mTestMtcCallManager.getPendingCall(mNativeCallId));
+
+        mTestMtcCallManager.clear();
+
+        assertNull(mTestMtcCallManager.getECallStateTracker());
         assertNull(mTestMtcCallManager.getCall(mNativeCallId));
         assertNull(mTestMtcCallManager.getPendingCall(mNativeCallId));
     }
