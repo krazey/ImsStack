@@ -54,7 +54,8 @@ PUBLIC VIRTUAL void RprExtension::FormatRequest(IN RequestType eType, IN_OUT IMe
 
 PUBLIC VIRTUAL void RprExtension::HandleRequest(IN RequestType eType, IN const IMessage& objRequest)
 {
-    if (eType != RequestType::START)
+    // re-INVITE should update 100rel extension supportability
+    if (eType != RequestType::START && eType != RequestType::UPDATE)
     {
         return;
     }
