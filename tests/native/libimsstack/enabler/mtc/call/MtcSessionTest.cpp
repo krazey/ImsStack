@@ -21,6 +21,7 @@
 #include "MtcContextRepository.h"
 #include "SipStatusCode.h"
 #include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MtcSession.h"
@@ -66,6 +67,7 @@ public:
     MockIMtcService objMtcService;
     MockIMessageUtils objMessageUtils;
     MockIMtcAosConnector objAosConnector;
+    MockIMtcCall objThisCall;
     CallInfo objCallInfo;
     MtcSession* pMtcSession;
 
@@ -100,6 +102,9 @@ protected:
 
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
+
+        ON_CALL(objThisCall, GetState).WillByDefault(Return(IMtcCall::State::IDLE));
+        ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objThisCall));
 
         pMessageSender = new MockIMessageSender();
         pMtcSession = IMS_NULL;
@@ -189,6 +194,42 @@ TEST_F(MtcSessionTest, SendProvisionalResponseSends183NotReliablyWithSdp)
     SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
     ImsList<IMtcCall*> objCalls;
     ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
+
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_TRUE, IMS_FALSE))
+            .Times(1);
+
+    pMtcSession->SendProvisionalResponse(IMS_FALSE);
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithAlertInfoIfUpdatingSessionExists)
+{
+    CreateMtcSession();
+    SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
+    ImsList<IMtcCall*> objCalls;
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState).WillByDefault(Return(IMtcCall::State::UPDATING));
+    objCalls.Append(&objOtherCall);
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
+
+    EXPECT_CALL(*pMessageSender,
+            SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_TRUE, IMS_TRUE))
+            .Times(1);
+
+    pMtcSession->SendProvisionalResponse(IMS_FALSE);
+}
+
+TEST_F(MtcSessionTest, SendProvisionalResponseSends183WithoutAlertInfoIfItIsConfirmedDialog)
+{
+    CreateMtcSession();
+    SetUpForSetSdp(NegotiationState::STATE_IDLE, IMS_SUCCESS);
+    ImsList<IMtcCall*> objCalls;
+    MockIMtcCall objOtherCall;
+    ON_CALL(objOtherCall, GetState).WillByDefault(Return(IMtcCall::State::UPDATING));
+    objCalls.Append(&objOtherCall);
+    ON_CALL(objCallManager, GetCalls).WillByDefault(Return(objCalls));
+
+    ON_CALL(objThisCall, GetState).WillByDefault(Return(IMtcCall::State::UPDATING));
 
     EXPECT_CALL(*pMessageSender,
             SendProvisionalResponse(SipStatusCode::SC_183, IMS_FALSE, IMS_TRUE, IMS_FALSE))

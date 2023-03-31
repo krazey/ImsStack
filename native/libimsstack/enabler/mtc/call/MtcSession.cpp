@@ -541,8 +541,14 @@ IMS_BOOL MtcSession::IsRegisteredFeature(IMS_UINT32 nFeature)
 PRIVATE
 IMS_BOOL MtcSession::IsCallWaiting() const
 {
-    ImsList<IMtcCall*> lstCalls = m_objContext.GetCallManager().GetCalls();
+    if (m_objContext.GetCall().GetState() != IMtcCall::State::IDLE &&
+            m_objContext.GetCall().GetState() != IMtcCall::State::INCOMING &&
+            m_objContext.GetCall().GetState() != IMtcCall::State::ALERTING)
+    {
+        return IMS_FALSE;
+    }
 
+    ImsList<IMtcCall*> lstCalls = m_objContext.GetCallManager().GetCalls();
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();

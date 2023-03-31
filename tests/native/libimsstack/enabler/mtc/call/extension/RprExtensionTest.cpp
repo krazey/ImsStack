@@ -143,10 +143,6 @@ TEST_F(RprExtensionTest, HandleRequestForSomeMessageDoesNothing)
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 
-    pExtension->HandleRequest(RequestType::UPDATE, objMessageRequiresRpr);
-    EXPECT_FALSE(pExtension->IsAvailableOnRemote());
-    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
-
     pExtension->HandleRequest(RequestType::CANCEL_UPDATE, objMessageRequiresRpr);
     EXPECT_FALSE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
@@ -166,6 +162,20 @@ TEST_F(RprExtensionTest, HandleRequestForRequiringStartMessageUpdatesAvailabilit
 TEST_F(RprExtensionTest, HandleRequestForSupportingStartMessageUpdatesAvailability)
 {
     pExtension->HandleRequest(RequestType::START, objMessageSupportsRpr);
+    EXPECT_TRUE(pExtension->IsAvailableOnRemote());
+    EXPECT_FALSE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(RprExtensionTest, HandleRequestForRequiringUpdateMessageUpdatesAvailability)
+{
+    pExtension->HandleRequest(RequestType::UPDATE, objMessageRequiresRpr);
+    EXPECT_TRUE(pExtension->IsAvailableOnRemote());
+    EXPECT_TRUE(pExtension->IsRequiredOnRemote());
+}
+
+TEST_F(RprExtensionTest, HandleRequestForSupportingUpdateMessageUpdatesAvailability)
+{
+    pExtension->HandleRequest(RequestType::UPDATE, objMessageSupportsRpr);
     EXPECT_TRUE(pExtension->IsAvailableOnRemote());
     EXPECT_FALSE(pExtension->IsRequiredOnRemote());
 }
