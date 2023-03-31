@@ -37,7 +37,6 @@ public:
     MOCK_METHOD(void, FormFailurePreconditionSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_UINT32, GetMediaType, (IN const SdpMedia* pSdpMedia, IN IMS_SINT32 nMediaState),
             (override));
-    MOCK_METHOD(IMS_UINT32, GetMediaTypesBySdp, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsPreconditionIncludedInSdp, (IN ISession * piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsLocalResourceReservedInSdp,
             (IN ISession * piSession, IN IMS_SINT32 nServiceMethod), (override));

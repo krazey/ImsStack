@@ -190,62 +190,6 @@ PUBLIC VIRTUAL IMS_UINT32 SdpPreconditionHelper::GetMediaType(
     return eMediaType;
 }
 
-PUBLIC VIRTUAL IMS_UINT32 SdpPreconditionHelper::GetMediaTypesBySdp(IN ISession* piSession)
-{
-    IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
-
-    if (piSession == IMS_NULL)
-    {
-        return eMediaTypes;
-    }
-
-    ImsList<IMedia*> lstMedias = piSession->GetMedia();
-
-    IMS_UINT32 eLocalTypes = MEDIATYPE_NONE;
-    IMS_UINT32 eRemoteTypes = MEDIATYPE_NONE;
-
-    for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
-    {
-        IMedia* piMedia = lstMedias.GetAt(index);
-        if (piMedia == IMS_NULL)
-        {
-            continue;
-        }
-
-        IMediaDescriptor* pDescriptor = GetMediaDescriptor(piMedia);
-        if (pDescriptor == IMS_NULL)
-        {
-            continue;
-        }
-
-        IMS_SINT32 nMediaState = piMedia->GetState();
-        const SdpMedia* pRemoteSdp = pDescriptor->GetMediaDescriptionEx();
-        const SdpMedia* pLocalSdp = (nMediaState == IMedia::STATE_DELETED)
-                ? IMS_NULL
-                : pDescriptor->GetMediaDescriptionExAsLocal();
-
-        eRemoteTypes |= GetMediaType(pRemoteSdp, nMediaState);
-        eLocalTypes |= GetMediaType(pLocalSdp, nMediaState);
-    }
-
-    if (eRemoteTypes == MEDIATYPE_NONE)
-    {
-        eMediaTypes |= eLocalTypes;
-    }
-    else if (eLocalTypes == MEDIATYPE_NONE)
-    {
-        eMediaTypes |= eRemoteTypes;
-    }
-    else
-    {
-        eMediaTypes |= (eLocalTypes & eRemoteTypes);
-    }
-
-    IMS_TRACE_D("GetMediaTypesBySdp : %d", eMediaTypes, 0, 0);
-
-    return eMediaTypes;
-}
-
 PUBLIC VIRTUAL IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN ISession* piSession)
 {
     IMS_BOOL bResult = IMS_FALSE;
