@@ -261,20 +261,18 @@ TEST_F(UpdatingStateTest, RejectUpdateInvokesAcceptUpdateIfRejectCodeIs200)
     ON_CALL(objMtcSession, GetPreviousCallType).WillByDefault(Return(CallType::VOIP));
     objContext.GetUpdatingInfo().GetNegotiatedInfo() = objMediaInfo;
 
-    {
-        // Copied from AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpdate
-        ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
+    // Copied from AcceptUpdateReturnsEstablishedWhenPreviousRequestIsUpdate
+    ON_CALL(objSession, GetState()).WillByDefault(Return(ISession::STATE_RENEGOTIATING));
 
-        EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
-        EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
-        EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
-        EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
-        EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
-        EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
-        SipMethod objSipMethod(SipMethod::UPDATE);
-        EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
-        EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
-    }
+    EXPECT_CALL(objTimer, Stop(MtcCallState::TIMER_CONVERT_USER_RESPONSE)).Times(1);
+    EXPECT_CALL(objMediaManager, SetMediaInfo(_)).Times(1);
+    EXPECT_CALL(objMtcSession, SetCallType(_)).Times(1);
+    EXPECT_CALL(objMediaManager, GetMediaInfo()).Times(1).WillOnce(ReturnRef(objMediaInfo));
+    EXPECT_CALL(objMtcSession, AcceptUpdate()).Times(1);
+    EXPECT_CALL(objSession, GetPreviousRequest(_)).Times(1).WillOnce(Return(&objMessage));
+    SipMethod objSipMethod(SipMethod::UPDATE);
+    EXPECT_CALL(objMessage, GetMethod()).Times(1).WillOnce(ReturnRef(objSipMethod));
+    EXPECT_CALL(objUiNotifier, SendUpdated(_, _, _)).Times(1);
 
     const CallReasonInfo objInfo(CODE_UNSPECIFIED);
     EXPECT_EQ(CallStateName::ESTABLISHED, pUpdatingState->RejectUpdate(objInfo));
