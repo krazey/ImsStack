@@ -24,6 +24,7 @@ import android.os.Registrant;
 import android.os.RegistrantList;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
@@ -721,7 +722,8 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isMobileDataEnabled() {
-        return SettingsUtils.isMobileDataEnabled(getContext().getContentResolver());
+        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(getSlotId()));
+        return (tm != null) ? tm.isDataEnabled() : false;
     }
 
     private boolean isVoLTEEnabled() {
@@ -783,7 +785,8 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isDataRoamingSettingEnabled() {
-        return SettingsUtils.isDataRoamingEnabled(getContext().getContentResolver());
+        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(getSlotId()));
+        return (tm != null) ? tm.isDataRoamingEnabled() : false;
     }
 
     private void notifySystemEventForVoLTE() {
