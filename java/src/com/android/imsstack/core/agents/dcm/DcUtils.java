@@ -29,7 +29,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
-import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
@@ -153,7 +152,8 @@ public class DcUtils implements IDcUtils {
     */
     @Override
     public boolean isMobileDataEnabled() {
-        return SettingsUtils.isMobileDataEnabled(AppContext.getInstance().getContentResolver());
+        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
+        return (tm != null) ? tm.isDataEnabled() : false;
     }
 
     @Override
