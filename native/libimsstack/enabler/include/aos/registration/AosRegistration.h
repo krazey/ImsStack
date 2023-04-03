@@ -108,7 +108,7 @@ protected:
     void SetRetryTime();
     IMS_BOOL SetTraffic(IN IMS_BOOL bStarted);
     void SetTrafficListener(IN IMS_BOOL bSet);
-
+    void UpdateRegIpcanCategory();
     void ClearPending();
     void ClearCallingNumberVerification();
 
@@ -379,7 +379,6 @@ private:
     void SetContactAddressConfiguration(IN IMS_BOOL bAdd);
     void SetPlaniHeader();
     void UpdateUserInfoInContact();
-    void UpdateRegIpcanCategory();
     void UpdateCallingNumberVerification();
 
     IMS_BOOL IsErrorCodeExisted(
