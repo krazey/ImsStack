@@ -15,8 +15,20 @@
  */
 package com.android.imsstack.system;
 
+/**
+ * An interface for providing the call related information.
+ */
 public interface ISystemAPICallInfo {
+    /**
+     * Checks whether the specified number is an emergency number or not.
+     *
+     * @param number The number to be checked.
+     * @return {@code true} if the specified number is an emergency number, {@code false} otherwise.
+     */
     int isEmergencyNumber(String number);
-    int getTTYMode();
+
+    /**
+     * Returns the call state of the other slot.
+     */
     int getCallStateInOtherSlot();
 }

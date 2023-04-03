@@ -16,6 +16,8 @@
 
 package com.android.imsstack.internal.imsservice;
 
+import android.telecom.TelecomManager;
+
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Set;
@@ -59,6 +61,7 @@ public class MmTelFeatureRegistry {
     private final int mSlotId;
     private boolean mTerminalBasedCallWaitingEnabled;
     private int mSrvccState = SRVCC_STATE_NONE;
+    private int mTtyMode = TelecomManager.TTY_MODE_OFF;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     MmTelFeatureRegistry(int slotId, Object lock) {
@@ -139,6 +142,40 @@ public class MmTelFeatureRegistry {
 
         if (notifyChange) {
             notifySrvccStateChanged(srvccState);
+        }
+    }
+
+    /**
+     * Returns the preferred TTY mode.
+     *
+     * @return The current TTY mode. Possible values are:
+     *         {@link TelecomManager#TTY_MODE_OFF}
+     *         {@link TelecomManager#TTY_MODE_FULL}
+     *         {@link TelecomManager#TTY_MODE_HCO}
+     *         {@link TelecomManager#TTY_MODE_VCO}
+     */
+    public int getTtyMode() {
+        synchronized (mLock) {
+            return mTtyMode;
+        }
+    }
+
+    /**
+     * Sets the preferred TTY mode. This is the preferred TTY mode that the user sets in the call
+     * settings screen.
+     *
+     * @param ttyMode The current TTY mode. Possible values are:
+     *                {@link TelecomManager#TTY_MODE_OFF}
+     *                {@link TelecomManager#TTY_MODE_FULL}
+     *                {@link TelecomManager#TTY_MODE_HCO}
+     *                {@link TelecomManager#TTY_MODE_VCO}
+     */
+    public void setTtyMode(int ttyMode) {
+        synchronized (mLock) {
+            if (mTtyMode != ttyMode) {
+                ImsLog.i(mSlotId, "setTtyMode: " + mTtyMode + " >> " + ttyMode);
+                mTtyMode = ttyMode;
+            }
         }
     }
 
