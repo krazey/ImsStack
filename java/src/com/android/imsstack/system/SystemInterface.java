@@ -26,6 +26,8 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDcUtils;
 import com.android.imsstack.core.config.CarrierConfig;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.jni.JniSystemListener;
 import com.android.imsstack.system.SystemConstants;
@@ -1569,27 +1571,30 @@ public class SystemInterface implements JniSystemListener {
             Parcel result = Parcel.obtain();
 
             switch (method) {
-            case SystemConstants.IS_EMERGENCY_NUMBER:
-                result.writeInt(mISystemAPICallInfo.isEmergencyNumber(
-                    parcel.readString()));
-                break;
-            case SystemConstants.GET_TTY_MODE:
-                result.writeInt(mISystemAPICallInfo.getTTYMode());
-                break;
-            case SystemConstants.GET_RTT_MODE:
-                int nRTTmode = 0;
-                ICallSetting cso = (ICallSetting)AgentFactory.getAgent(AgentFactory.CALL_SETTING, mSlotId);
-                if (cso != null) {
-                    nRTTmode = cso.getRTTMode();
+                case SystemConstants.IS_EMERGENCY_NUMBER:
+                    result.writeInt(mISystemAPICallInfo.isEmergencyNumber(parcel.readString()));
+                    break;
+                case SystemConstants.GET_TTY_MODE: {
+                    ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mSlotId);
+                    MmTelFeatureRegistry mtfr = isr.getMmTelFeatureRegistry();
+                    result.writeInt(mtfr.getTtyMode());
+                    break;
                 }
-                result.writeInt(nRTTmode);
-                break;
-            case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
-                result.writeInt(mISystemAPICallInfo.getCallStateInOtherSlot());
-                break;
-            default:
-                result.recycle();
-                return null;
+                case SystemConstants.GET_RTT_MODE:
+                    int nRTTmode = 0;
+                    ICallSetting cso = (ICallSetting)
+                            AgentFactory.getAgent(AgentFactory.CALL_SETTING, mSlotId);
+                    if (cso != null) {
+                        nRTTmode = cso.getRTTMode();
+                    }
+                    result.writeInt(nRTTmode);
+                    break;
+                case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
+                    result.writeInt(mISystemAPICallInfo.getCallStateInOtherSlot());
+                    break;
+                default:
+                    result.recycle();
+                    return null;
             }
 
             return result;

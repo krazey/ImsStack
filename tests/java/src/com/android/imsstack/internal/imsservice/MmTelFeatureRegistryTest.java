@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.content.Context;
+import android.telecom.TelecomManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import org.junit.After;
@@ -59,7 +60,7 @@ public class MmTelFeatureRegistryTest {
 
     @Test
     @SmallTest
-    public void setTerminalBasedCallWaitingStatus() throws Exception {
+    public void testSetTerminalBasedCallWaitingStatus() {
         mMmTelFeatureRegistry.setTerminalBasedCallWaitingStatus(true);
         assertTrue(mMmTelFeatureRegistry.isTerminalBasedCallWaitingEnabled());
 
@@ -69,7 +70,7 @@ public class MmTelFeatureRegistryTest {
 
     @Test
     @SmallTest
-    public void setSrvccState() throws Exception {
+    public void testSetSrvccState() {
         mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
         assertEquals(MmTelFeatureRegistry.SRVCC_STATE_STARTED,
                 mMmTelFeatureRegistry.getSrvccState());
@@ -93,7 +94,22 @@ public class MmTelFeatureRegistryTest {
 
     @Test
     @SmallTest
-    public void addListener() throws Exception {
+    public void testSetTtyMode() {
+        assertEquals(TelecomManager.TTY_MODE_OFF, mMmTelFeatureRegistry.getTtyMode());
+
+        mMmTelFeatureRegistry.setTtyMode(TelecomManager.TTY_MODE_FULL);
+        assertEquals(TelecomManager.TTY_MODE_FULL, mMmTelFeatureRegistry.getTtyMode());
+
+        mMmTelFeatureRegistry.setTtyMode(TelecomManager.TTY_MODE_HCO);
+        assertEquals(TelecomManager.TTY_MODE_HCO, mMmTelFeatureRegistry.getTtyMode());
+
+        mMmTelFeatureRegistry.setTtyMode(TelecomManager.TTY_MODE_VCO);
+        assertEquals(TelecomManager.TTY_MODE_VCO, mMmTelFeatureRegistry.getTtyMode());
+    }
+
+    @Test
+    @SmallTest
+    public void testAddListener() {
         verify(mListener, never()).onTerminalBasedCallWaitingStatusChanged();
         verify(mListener, never()).onSrvccStateChanged(anyInt());
 
@@ -117,7 +133,7 @@ public class MmTelFeatureRegistryTest {
 
     @Test
     @SmallTest
-    public void addListener_srvccState() throws Exception {
+    public void testAddListenerWhenSrvccStateChanged() {
         verify(mListener, never()).onSrvccStateChanged(anyInt());
 
         mMmTelFeatureRegistry.addListener(mListener);

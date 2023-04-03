@@ -19,7 +19,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.provider.Settings;
-import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.ImsMmTelManager;
@@ -44,12 +43,6 @@ public final class SettingsUtils {
         public static final int CELLULAR_PREFERRED = ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED;
         public static final int WIFI_PREFERRED = ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
         public static final int IMS_PREFERRED = 3;
-    }
-
-    /** Returns the TTY mode. */
-    public static int getTtyMode(ContentResolver cr) {
-        return Settings.Secure.getInt(
-                cr, Settings.Secure.PREFERRED_TTY_MODE, TelecomManager.TTY_MODE_OFF);
     }
 
     /** Returns the Wi-Fi calling mode. */
