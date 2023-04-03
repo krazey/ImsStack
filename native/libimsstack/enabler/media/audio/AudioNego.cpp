@@ -29,6 +29,8 @@
 #define MODESET_MAX_AMRWB    8
 #define EVS_NEGO_RETRY_COUNT 2
 #define MAX_OAMODEL_SIZE     6
+#define RETURN_MODE_MATCHED  IMS_FALSE
+#define RETURN_MODE_SIMILAR  IMS_TRUE
 
 __IMS_TRACE_TAG_USER_DECL__("MED.AN");
 
@@ -3088,6 +3090,29 @@ IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile:
         return IMS_FALSE;
     }
 
+    IMS_BOOL bRetModeSetFound = IMS_FALSE;
+
+    bRetModeSetFound = FindMatchedAmrInProfile(pProfile, pPayload, bIsOfferReceived,
+            RETURN_MODE_MATCHED, pnNegoModeSetList, pnNegoDefaultRtpModeSet);
+    IMS_TRACE_D("FindMatchedAmrInProfile() Ended. the 1st bRetModeSetFound: %d", bRetModeSetFound,
+            0, 0);
+
+    if (!bRetModeSetFound)
+    {
+        bRetModeSetFound = FindMatchedAmrInProfile(pProfile, pPayload, bIsOfferReceived,
+                RETURN_MODE_SIMILAR, pnNegoModeSetList, pnNegoDefaultRtpModeSet);
+        IMS_TRACE_D("FindMatchedAmrInProfile() Ended. the 2nd bRetModeSetFound: %d",
+                bRetModeSetFound, 0, 0);
+    }
+
+    return bRetModeSetFound;
+}
+
+PRIVATE
+IMS_BOOL AudioNego::FindMatchedAmrInProfile(IN AudioProfile* pProfile,
+        IN AudioProfile::Payload* pPayload, IN IMS_BOOL bIsOfferReceived, IN IMS_BOOL bReturnMode,
+        OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet)
+{
     IMS_UINT32 nTempNegoModeSetList = 0;
     IMS_UINT32 nTempDefaultNegoModeSetList = 0;
     IMS_BOOL bModeSetFound = IMS_FALSE;
@@ -3128,7 +3153,7 @@ IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile:
             /** Fix for AMR Open Offer In case of MO, mode-set from MT could be mismatched Keep
             negotiated mode-set and try to find exact one */
             IMS_SINT32 nCompareResult = CompareModeSet(pCompareFmtp, pReceivedFmtp,
-                    bIsOfferReceived, pnNegoModeSetList, pnNegoDefaultRtpModeSet);
+                    bIsOfferReceived, bReturnMode, pnNegoModeSetList, pnNegoDefaultRtpModeSet);
 
             if (nCompareResult == -1)
             {
@@ -3137,7 +3162,9 @@ IMS_BOOL AudioNego::FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile:
             }
             else if (nCompareResult == 0)  // similarly matched
             {
-                if (bModeSetFound == IMS_FALSE)
+                IMS_TRACE_D("FindAmrInProfile() Enter similar match - bReturnMode: %d", bReturnMode,
+                        0, 0);
+                if (bModeSetFound == IMS_FALSE && bReturnMode == RETURN_MODE_SIMILAR)
                 {
                     nTempNegoModeSetList = *pnNegoModeSetList;
                     nTempDefaultNegoModeSetList = *pnNegoDefaultRtpModeSet;
@@ -3225,7 +3252,7 @@ IMS_BOOL AudioNego::FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile:
 
 PRIVATE
 IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
-        IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
+        IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived, IN IMS_BOOL bReturnMode,
         OUT IMS_UINT32* nNegoModeSet, OUT IMS_UINT32* nNegoDefaultRtpModeSet)
 {
     IMS_TRACE_I("CompareModeSet() - Src modeSet[0x%04x] Dest modeSet[0x%04x], bIsOfferReceived[%d]",
@@ -3269,8 +3296,18 @@ IMS_SINT32 AudioNego::CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
 
             if (*nNegoModeSet == 0)
             {
-                IMS_TRACE_E(0, "CompareModeSet() - ModeSet Not Matched...", 0, 0, 0);
-                return -1;
+                IMS_TRACE_D(
+                        "CompareModeSet() - ModeSet Not Matched - isFinal: %d", bReturnMode, 0, 0);
+                if (bReturnMode == RETURN_MODE_SIMILAR)
+                {
+                    *nNegoModeSet = pDestFmtp->nModeSetList;  // Copy Dest Mode-set to Nego Mode-set
+                    IMS_TRACE_D("CompareModeSet() - Copy Dest Mode-set", 0, 0, 0);
+                }
+                else
+                {
+                    IMS_TRACE_E(0, "CompareModeSet() - ModeSet Not Matched...", 0, 0, 0);
+                    return -1;
+                }
             }
         }
         else  // one of two has no modeset
@@ -3679,7 +3716,32 @@ PRIVATE IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN const AString& strC
         return -1;
     }
 
+    IMS_SINT32 nRetIndex = -1;
+
+    IMS_TRACE_D("FindPayloadIndexFromProfile()", 0, 0, 0);
+
+    nRetIndex = FindMatchedPayloadIndexFromProfile(
+            strCodecName, pLocalProfile, pDstPayload, bIsOfferReceived, RETURN_MODE_MATCHED);
+
+    IMS_TRACE_D("FindPayloadIndexFromProfile() the 1st nRetIndex: %d", nRetIndex, 0, 0);
+
+    if (nRetIndex == -1)
+    {
+        nRetIndex = FindMatchedPayloadIndexFromProfile(
+                strCodecName, pLocalProfile, pDstPayload, bIsOfferReceived, RETURN_MODE_SIMILAR);
+        IMS_TRACE_D("FindPayloadIndexFromProfile() the 2nd nRetIndex: %d", nRetIndex, 0, 0);
+    }
+
+    return nRetIndex;
+}
+
+PRIVATE IMS_SINT32 AudioNego::FindMatchedPayloadIndexFromProfile(IN const AString& strCodecName,
+        IN AudioProfile* pLocalProfile, IN AudioProfile::Payload* pDstPayload,
+        IN IMS_BOOL bIsOfferReceived, IN IMS_BOOL bReturnMode)
+{
     IMS_SINT32 nTempIndex = -1;
+
+    IMS_TRACE_D("FindMatchedPayloadIndexFromProfile()", 0, 0, 0);
 
     for (IMS_UINT32 legacyCheck = 0; legacyCheck < EVS_NEGO_RETRY_COUNT; legacyCheck++)
     {
@@ -3745,15 +3807,17 @@ PRIVATE IMS_SINT32 AudioNego::FindPayloadIndexFromProfile(IN const AString& strC
                     // In case of MO, mode-set from MT could be mismatched
                     // => Keep negotiated mode-set and try to find exact one
 
-                    IMS_SINT32 nCompareResult = CompareModeSet(pCompareFmtp, pReceivedFmtp,
-                            bIsOfferReceived, &pnNegoModeSetList, &pnNegoDefaultRtpModeSet);
+                    IMS_SINT32 nCompareResult =
+                            CompareModeSet(pCompareFmtp, pReceivedFmtp, bIsOfferReceived,
+                                    bReturnMode, &pnNegoModeSetList, &pnNegoDefaultRtpModeSet);
                     if (nCompareResult == -1)
                     {
                         continue;  // mismatched
                     }
                     else if (nCompareResult == 0)  // similarly matched
                     {
-                        if (nTempIndex == -1)
+                        IMS_TRACE_D("isFinal: %d", bReturnMode, 0, 0);
+                        if (nTempIndex == -1 && bReturnMode == RETURN_MODE_SIMILAR)
                         {
                             nTempIndex = i;
                             IMS_TRACE_I("FindPayloadIndexFromProfile() Found Similar AMR at[%d], \

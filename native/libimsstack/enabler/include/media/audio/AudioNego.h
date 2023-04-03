@@ -251,10 +251,14 @@ private:
     IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
             OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
+    IMS_BOOL FindMatchedAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
+            IN IMS_BOOL bIsOfferReceived, IN IMS_BOOL bReturnMode,
+            OUT IMS_UINT32* pnNegoModeSetList, OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
     IMS_BOOL FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
     IMS_SINT32 CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
             IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoModeSet, OUT IMS_UINT32* nNegoDefaultRtpModeSet);
+            IN IMS_BOOL bReturnMode, OUT IMS_UINT32* nNegoModeSet,
+            OUT IMS_UINT32* nNegoDefaultRtpModeSet);
     IMS_BOOL CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
             IN AudioProfile::EvsFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
             OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList,
@@ -265,6 +269,9 @@ private:
     IMS_SINT32 FindPayloadIndexFromProfile(IN const AString& strCodecName,
             IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
             IN IMS_BOOL isOfferReceivedCase);
+    IMS_SINT32 FindMatchedPayloadIndexFromProfile(IN const AString& strCodecName,
+            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
+            IN IMS_BOOL isOfferReceivedCase, IN IMS_BOOL bReturnMode);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDirection,
             IN MEDIA_DIRECTION eLocalDirection, IN IMS_BOOL bIsMtCase);
     IMS_BOOL MakeCapaNegoProfileFromSdp(
