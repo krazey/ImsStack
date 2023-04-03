@@ -16,26 +16,20 @@
 
 package com.android.imsstack.util;
 
-import static com.android.imsstack.util.ImsUtils.NR_NETWORK_MODE_SA;
-import static com.android.imsstack.util.ImsUtils.NR_UE_CAPABILITY_I_SA;
-import static com.android.imsstack.util.ImsUtils.NR_UE_CAPABILITY_I_VONR;
-import static com.android.imsstack.util.ImsUtils.NR_UE_CAPABILITY_VONR;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.os.PersistableBundle;
-import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.ims.ImsManager;
 import com.android.imsstack.ContextFixture;
-import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,90 +40,105 @@ import org.mockito.Mockito;
 
 @RunWith(JUnit4.class)
 public class ImsUtilsTest {
+    private static final int SLOT0 = 0;
 
     private Context mContext;
-    private static final int SLOT_0 = 0;
-    private static final int[] SUB_ID = {1};
 
     @Before
     public void setup() {
         mContext = new ContextFixture().getTestDouble();
         TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-        when(mContext.getResources().getBoolean(anyInt())).thenReturn(true);
         when(tm.getActiveModemCount()).thenReturn(1);
         when(tm.getSupportedModemCount()).thenReturn(1);
-        SubscriptionManager mockSubscriptionManager = mContext.getSystemService(
-                SubscriptionManager.class);
-        when(mockSubscriptionManager.getSubscriptionIds(anyInt()))
-                .thenReturn(SUB_ID);
-
-        CarrierConfig mockCarrierConfig = Mockito.mock(CarrierConfig.class);
-        CarrierConfigManager mockCarrierConfigManager = mContext.getSystemService(
-                CarrierConfigManager.class);
-        PersistableBundle bundle = new PersistableBundle();
-        bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL, true);
-        bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
-        doReturn(bundle).when(mockCarrierConfigManager).getConfigForSubId(SUB_ID[0]);
-        when(mockCarrierConfig.getConfig()).thenReturn(bundle);
-
         AppContext.init(mContext);
     }
 
     @After
     public  void tearDown() {
+        ImsUtils.clear();
         AppContext.deinit();
         mContext = null;
     }
 
     @Test
     @SmallTest
-    public void setUeCapabilityVoNrAndNrNetworkMode() {
-
-        ImsUtils.setUeCapabilityVoNr(SLOT_0, NR_UE_CAPABILITY_I_VONR);
-        assertEquals(NR_UE_CAPABILITY_VONR, ImsUtils.getNrUeCapability(SLOT_0));
-
-        ImsUtils.setNrNetworkMode(SLOT_0, NR_NETWORK_MODE_SA);
-        assertEquals(NR_UE_CAPABILITY_I_SA, ImsUtils.getNrUeCapability(SLOT_0));
-
-        ImsUtils.setNrUeCapability(SLOT_0, NR_UE_CAPABILITY_I_SA);
-        assertEquals(NR_UE_CAPABILITY_I_SA, ImsUtils.getNrUeCapability(SLOT_0));
+    public void testUpdateImsManager() {
+        assertNotNull(ImsUtils.getImsManager(SLOT0));
+        assertNotNull(ImsUtils.getImsManager(2));
 
         ImsUtils.init();
-        ImsUtils.getImsManager(SLOT_0);
-        ImsUtils.setNrUeCapability(SLOT_0, NR_UE_CAPABILITY_I_VONR);
-        assertEquals(NR_UE_CAPABILITY_I_VONR, ImsUtils.getNrUeCapability(SLOT_0));
 
-        assertEquals(NR_NETWORK_MODE_SA, ImsUtils.getDefaultNrNetworkMode());
-        assertEquals(NR_UE_CAPABILITY_I_SA, ImsUtils.getDefaultNrUeCapability());
+        assertNotNull(ImsUtils.getImsManager(SLOT0));
+
+        ImsUtils.updateImsManager();
+
+        assertNotNull(ImsUtils.getImsManager(SLOT0));
     }
 
     @Test
     @SmallTest
-    public void getPlatformConfigurations() {
-        ImsUtils.init();
-        ImsUtils.getImsManager(SLOT_0);
-        assertNotNull(ImsUtils.getNrUeCapability(SLOT_0));
-        assertEquals(true, ImsUtils.isEmergencyCallEnabledOnNonVoLteSim());
-        assertEquals(true, ImsUtils.isEmergencyCallEnabledOnServiceRestricted());
+    public void testGetDeviceConfigurations() {
+        when(mContext.getResources().getBoolean(anyInt())).thenReturn(true);
 
-        assertEquals(true, ImsUtils.isWfcEnabledByDevice(mContext, SLOT_0));
-
-        // Blocked these assertions temporarily - flaky tests.
-        //assertEquals(true, ImsUtils.isVtEnabledByPlatform(mContext, SLOT_0));
-        //assertEquals(true, ImsUtils.isWfcEnabledByPlatform(mContext, SLOT_0));
+        assertEquals(true, ImsUtils.isVoLteEnabledByDevice(mContext, SLOT0));
+        assertEquals(true, ImsUtils.isVtEnabledByDevice(mContext, SLOT0));
+        assertEquals(true, ImsUtils.isWfcEnabledByDevice(mContext, SLOT0));
     }
 
     @Test
     @SmallTest
-    public void checkDefaultServiceCapability() {
+    public void testGetPlatformConfigurations() {
+        ImsManager imsManager = Mockito.mock(ImsManager.class);
+        ImsUtils.setImsManager(SLOT0, imsManager);
+
+        when(imsManager.isVolteEnabledByPlatform()).thenReturn(false);
+        when(imsManager.isVtEnabledByPlatform()).thenReturn(false);
+        when(imsManager.isWfcEnabledByPlatform()).thenReturn(false);
+
+        assertFalse(ImsUtils.isVoLteEnabledByPlatform(mContext, SLOT0));
+        assertFalse(ImsUtils.isVtEnabledByPlatform(mContext, SLOT0));
+        assertFalse(ImsUtils.isWfcEnabledByPlatform(mContext, SLOT0));
+
+        when(imsManager.isVolteEnabledByPlatform()).thenReturn(true);
+        when(imsManager.isVtEnabledByPlatform()).thenReturn(true);
+        when(imsManager.isWfcEnabledByPlatform()).thenReturn(true);
+
+        assertTrue(ImsUtils.isVoLteEnabledByPlatform(mContext, SLOT0));
+        assertTrue(ImsUtils.isVtEnabledByPlatform(mContext, SLOT0));
+        assertTrue(ImsUtils.isWfcEnabledByPlatform(mContext, SLOT0));
+    }
+
+    @Test
+    @SmallTest
+    public void testSetServiceCapsToLocalStorage() {
+        ImsUtils.setServiceCapsToLocalStorage(SLOT0, null);
+        ImsUtils.ServiceCaps serviceCaps = ImsUtils.getServiceCapsFromLocalStorage(SLOT0);
+
+        assertNull(serviceCaps);
+
+        ImsUtils.ServiceCaps serviceCapsForAllEnabled = new ImsUtils.ServiceCaps(true, true, true);
         ImsUtils.init();
-        ImsUtils.ServiceCaps capsFromLocalStorage = ImsUtils.getServiceCapsFromLocalStorage(
-                SLOT_0);
-        assertEquals(false, capsFromLocalStorage.isVoLteEnabled());
-        assertEquals(false, capsFromLocalStorage.isVtEnabled());
-        assertEquals(false, capsFromLocalStorage.isVoLteEnabled());
-        assertEquals(false, capsFromLocalStorage.isVtEnabled());
-        assertEquals(false, capsFromLocalStorage.isWfcEnabled());
+        ImsUtils.setServiceCapsToLocalStorage(-1, serviceCapsForAllEnabled);
+        serviceCaps = ImsUtils.getServiceCapsFromLocalStorage(-1);
+
+        assertNull(serviceCaps);
+
+        serviceCaps = ImsUtils.getServiceCapsFromLocalStorage(SLOT0);
+
+        assertNotNull(serviceCaps);
+        assertFalse(serviceCaps.isVoLteEnabled());
+        assertFalse(serviceCaps.isVtEnabled());
+        assertFalse(serviceCaps.isWfcEnabled());
+        assertNotNull(serviceCaps.toString());
+
+        ImsUtils.setServiceCapsToLocalStorage(SLOT0, serviceCapsForAllEnabled);
+        serviceCaps = ImsUtils.getServiceCapsFromLocalStorage(SLOT0);
+
+        assertNotNull(serviceCaps);
+        assertTrue(serviceCaps.isVoLteEnabled());
+        assertTrue(serviceCaps.isVtEnabled());
+        assertTrue(serviceCaps.isWfcEnabled());
+        assertNotNull(serviceCaps.toString());
     }
 }
 

@@ -493,20 +493,18 @@ public class ImsServiceManager {
                 operatorOrServiceFeaturesChanged = true;
             }
 
-            if (ImsUtils.isEmergencyCallEnabledOnServiceRestricted()) {
-                // IMS emergency call when no SIM present
-                int voLteServiceFeatures = getVoLteServiceFeatures(phoneId);
+            // IMS emergency call when no SIM present
+            int voLteServiceFeatures = getVoLteServiceFeatures(phoneId);
 
-                if (voLteServiceFeatures != mVoLteServiceFeatures[phoneId]) {
-                    logi("voLteServiceFeaturesChanged :: 0x"
-                            + Integer.toHexString(mVoLteServiceFeatures[phoneId])
-                            + " >> 0x" + Integer.toHexString(voLteServiceFeatures));
+            if (voLteServiceFeatures != mVoLteServiceFeatures[phoneId]) {
+                logi("voLteServiceFeaturesChanged :: 0x"
+                        + Integer.toHexString(mVoLteServiceFeatures[phoneId])
+                        + " >> 0x" + Integer.toHexString(voLteServiceFeatures));
 
-                    mVoLteServiceFeatures[phoneId] = voLteServiceFeatures;
+                mVoLteServiceFeatures[phoneId] = voLteServiceFeatures;
 
-                    if (!"KR".equals(ImsGlobal.getCountry(phoneId))) {
-                        operatorOrServiceFeaturesChanged = true;
-                    }
+                if (!"KR".equals(ImsGlobal.getCountry(phoneId))) {
+                    operatorOrServiceFeaturesChanged = true;
                 }
             }
         }
@@ -525,8 +523,7 @@ public class ImsServiceManager {
         if (serviceFeatures == 0) {
             ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
 
-            if ((isub != null) && (isub.isSimAbsent(phoneId) || isub.isSimLocked(phoneId))
-                    && ImsUtils.isEmergencyCallEnabledOnServiceRestricted()) {
+            if ((isub != null) && (isub.isSimAbsent(phoneId) || isub.isSimLocked(phoneId))) {
                 logi("SimAbsentOrLocked: VoLTE is enabled for IMS e-call");
                 serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
                 serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE_EMERGENCY;
@@ -535,7 +532,7 @@ public class ImsServiceManager {
 
         // VOLTE_EMERGENCY_CALLING
         // FIXME: Dual VoLTE
-        if ((serviceFeatures == 0) && ImsUtils.isEmergencyCallEnabledOnNonVoLteSim()) {
+        if (serviceFeatures == 0) {
             logi("NonVoLteSim: VoLTE is enabled for IMS e-call");
             serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE;
             serviceFeatures |= FeatureConfig.FEATURE_S_VOLTE_EMERGENCY;
