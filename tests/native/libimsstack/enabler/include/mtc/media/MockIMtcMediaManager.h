@@ -28,7 +28,6 @@ class IMediaReportEventListener;
 class IMessage;
 class ISession;
 enum class CallType;
-enum class MediaState;
 enum class PemType;
 struct MediaInfo;
 
@@ -51,8 +50,6 @@ public:
             (override));
     MOCK_METHOD(void, DestroyMediaProfile, (IN ISession* piSession), (override));
     MOCK_METHOD(IMS_BOOL, IsLocalTone, (), (override));
-    MOCK_METHOD(MediaState, GetState, (), (override));
-    MOCK_METHOD(MediaState, GetOldState, (), (override));
     MOCK_METHOD(IMS_RESULT, FormSdp,
             (IN ISession* piSession, IN CallType eCallType,
                     IN IMS_BOOL bAnswerForOfferlessReInvite),

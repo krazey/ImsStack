@@ -26,7 +26,6 @@ class IMediaReportEventListener;
 class IMessage;
 class ISession;
 enum class CallType;
-enum class MediaState;
 enum class PemType;
 struct MediaInfo;
 
@@ -114,20 +113,6 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     virtual IMS_BOOL IsLocalTone() = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @return
-     */
-    virtual MediaState GetState() = 0;
-
-    /**
-     * @brief Gets
-     *
-     * @return
-     */
-    virtual MediaState GetOldState() = 0;
 
     /**
      * @brief This method calls the media interface API to form SDP attributes.
@@ -271,15 +256,6 @@ public:
      * @return
      */
     virtual IMS_BOOL IsOnHold() = 0;
-};
-
-enum class MediaState
-{
-    IDLE,
-    STARTING,
-    STARTED,
-    TERMINATING,
-    TERMINATED,
 };
 
 #endif

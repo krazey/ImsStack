@@ -75,10 +75,6 @@ public:
     void SetLocalTone(IN IMS_BOOL bLocalTone);  // private?
     virtual IMS_BOOL IsLocalTone() override;
 
-    /* Media State */
-    virtual MediaState GetState() override;
-    virtual MediaState GetOldState() override;
-
     /* Handling SDP */
     virtual IMS_RESULT FormSdp(IN ISession* piSession, IN CallType eCallType,
             IN IMS_BOOL bAnswerForOfferlessReInvite = IMS_FALSE) override;
@@ -114,7 +110,6 @@ public:
     IMS_BOOL IsOnHold() override;
 
 private:
-    void SetState(IN MediaState eState);
     void UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage);
     void UpdateLocalTone(IN ISession* piSession, IN IMS_BOOL bAudioBlocked);
     void SetNetworkToneRtpTimer(IN IMS_UINTP nNegoId, IN IMS_UINT32 nDuration);
@@ -140,8 +135,6 @@ protected:
     IMS_BOOL m_bLocalTone;
     IMS_BOOL m_bAudioInactive;
     IMediaSession* m_piMediaSession;
-    MediaState m_eState;
-    MediaState m_eOldState;
 
     static const IMS_UINT32 TIME_WAIT_NW_TONE_RTP = 1000;
     static const IMS_UINT32 TIME_NO_WAIT_NW_TONE_RTP = 0;

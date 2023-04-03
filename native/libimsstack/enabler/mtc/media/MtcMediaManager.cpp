@@ -46,9 +46,7 @@ MtcMediaManager::MtcMediaManager(IN IMtcCallContext& objContext) :
         m_pOldMediaInfo(new MediaInfo()),
         m_bLocalTone(IMS_FALSE),
         m_bAudioInactive(IMS_FALSE),
-        m_piMediaSession(IMS_NULL),
-        m_eState(MediaState::IDLE),
-        m_eOldState(MediaState::IDLE)
+        m_piMediaSession(IMS_NULL)
 {
     IMS_TRACE_D("+MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 }
@@ -84,9 +82,6 @@ PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportTy
 
     switch (eReportType)
     {
-        case REPORT_SUCCESS:
-            SetState(MediaState::STARTED);
-            break;
         case REPORT_DATA_RECEIVE_FAILED:
             if (eReportedMediaType == MEDIATYPE_AUDIO)
             {
@@ -241,7 +236,6 @@ PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
 
     MediaManager::GetInstance(m_objContext.GetSlotId())->DestroySession(m_piMediaSession);
     m_piMediaSession = IMS_NULL;
-    SetState(MediaState::TERMINATING);
 }
 
 PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(
@@ -256,11 +250,6 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(
 
 PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaProfile(IN ISession* piSession)
 {
-    if (GetState() >= MediaState::TERMINATING)
-    {
-        return;
-    }
-
     IMS_TRACE_D("DestroyMediaProfile", 0, 0, 0);
     m_pProfileManager->DestroyMediaProfile(piSession, m_piMediaSession);
 }
@@ -268,11 +257,6 @@ PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaProfile(IN ISession* piSession)
 PUBLIC
 void MtcMediaManager::DestroyAllMediaProfiles()
 {
-    if (GetState() >= MediaState::TERMINATING)
-    {
-        return;
-    }
-
     IMS_TRACE_D("DestroyAllMediaProfiles", 0, 0, 0);
     m_pProfileManager->DestroyAllMediaProfiles(m_piMediaSession);
 }
@@ -286,16 +270,6 @@ void MtcMediaManager::SetLocalTone(IN IMS_BOOL bLocalTone)
 PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsLocalTone()
 {
     return m_bLocalTone;
-}
-
-PUBLIC VIRTUAL MediaState MtcMediaManager::GetState()
-{
-    return m_eState;
-}
-
-PUBLIC VIRTUAL MediaState MtcMediaManager::GetOldState()
-{
-    return m_eOldState;
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN CallType eCallType,
@@ -456,7 +430,6 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(
         return;
     }
 
-    SetState(MediaState::STARTING);
     m_pProfileManager->UpdateProfileForMediaActivation(piSession);
 }
 
@@ -615,18 +588,6 @@ PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsOnHold()
 {
     IMS_SINT32 nAudioDirection = m_pMediaInfo->eAudioDirection;
     return (nAudioDirection != DIRECTION_INVALID && nAudioDirection != DIRECTION_SEND_RECEIVE);
-}
-
-PRIVATE
-void MtcMediaManager::SetState(IN MediaState eState)
-{
-    if (m_eState == eState)
-    {
-        return;
-    }
-
-    m_eOldState = m_eState;
-    m_eState = eState;
 }
 
 PRIVATE
