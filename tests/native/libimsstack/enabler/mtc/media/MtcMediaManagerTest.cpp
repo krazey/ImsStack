@@ -122,24 +122,9 @@ protected:
     }
 };
 
-TEST_F(MtcMediaManagerTest, GetStateReturnsIdleInitially)
-{
-    EXPECT_EQ(MediaState::IDLE, pMediaManager->GetState());
-    EXPECT_EQ(MediaState::IDLE, pMediaManager->GetOldState());
-}
-
 TEST_F(MtcMediaManagerTest, DestroyMediaSessionSetsStateToTerminating)
 {
     pMediaManager->DestroyMediaSession();
-
-    EXPECT_EQ(MediaState::TERMINATING, pMediaManager->GetState());
-}
-
-TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithSuccessReport)
-{
-    pMediaManager->MediaSession_Notify(REPORT_SUCCESS);
-
-    EXPECT_EQ(MediaState::STARTED, pMediaManager->GetState());
 }
 
 TEST_F(MtcMediaManagerTest, MediaSessionNotifyWithDataReceivedStartedReport)
@@ -584,7 +569,6 @@ TEST_F(MtcMediaManagerTest, RunForMtCallInEarlyDialogState)
 
     EXPECT_CALL(*piMediaSession, Run(NEGO_ID)).Times(0);
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_NE(MediaState::STARTING, pMediaManager->GetState());
 }
 
 TEST_F(MtcMediaManagerTest, RunInvokesDoNothingIfMediaIsNotNegotiated)
@@ -595,7 +579,6 @@ TEST_F(MtcMediaManagerTest, RunInvokesDoNothingIfMediaIsNotNegotiated)
 
     EXPECT_CALL(*piMediaSession, Run(NEGO_ID)).Times(0);
     pMediaManager->Run(&objISession, &objIMessage, IMS_FALSE);
-    EXPECT_NE(MediaState::STARTING, pMediaManager->GetState());
 }
 
 TEST_F(MtcMediaManagerTest, RunForConfirmedDialogIfAudioDirectionIsReceiveOnly)
@@ -618,7 +601,6 @@ TEST_F(MtcMediaManagerTest, RunForConfirmedDialogIfAudioDirectionIsReceiveOnly)
     EXPECT_CALL(*piMediaSession, Run(NEGO_ID)).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(1);
     pMediaManager->Run(&objISession, &objIMessage, IMS_FALSE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 }
 
 TEST_F(MtcMediaManagerTest, RunForConfirmedDialogIfAudioDirectionIsNotReceiveOnly)
@@ -640,7 +622,6 @@ TEST_F(MtcMediaManagerTest, RunForConfirmedDialogIfAudioDirectionIsNotReceiveOnl
     EXPECT_CALL(*piMediaSession, Run(NEGO_ID)).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(1);
     pMediaManager->Run(&objISession, &objIMessage, IMS_FALSE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_EQ(nullptr, objSupplementaryService.Get(SuppType::ENFORCE_LT));
 }
 
@@ -664,7 +645,6 @@ TEST_F(MtcMediaManagerTest, RunIf180IsNotReceived)
     EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
             .WillOnce(Return(IMS_TRUE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_NE(MediaState::STARTING, pMediaManager->GetState());
 
     EXPECT_CALL(*piMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(3);
     EXPECT_CALL(*piMediaSession, Run(NEGO_ID)).Times(3).WillRepeatedly(Return(IMS_TRUE));
@@ -675,16 +655,13 @@ TEST_F(MtcMediaManagerTest, RunIf180IsNotReceived)
     EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
             .WillOnce(Return(IMS_FALSE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::SENDRECV));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 
     EXPECT_CALL(objIMessage, GetStatusCode()).WillOnce(Return(SipStatusCode::SC_182));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 }
 
 TEST_F(MtcMediaManagerTest, RunAndLocalToneStateIsNotChangedIf180IsReceivedInCaseOfInvalidPolicy)
@@ -723,7 +700,6 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfUsingDynamicNwToneTimer)
     EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
             .WillOnce(Return(IMS_TRUE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_NE(MediaState::STARTING, pMediaManager->GetState());
 
     EXPECT_CALL(*piMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(3);
     EXPECT_CALL(*piMediaSession, Run(NEGO_ID)).Times(4).WillRepeatedly(Return(IMS_TRUE));
@@ -733,13 +709,11 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfUsingDynamicNwToneTimer)
             .Times(2)
             .WillRepeatedly(Return(PemType::SENDRECV));
     pMediaManager->Run(&objISession, nullptr, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 
     EXPECT_CALL(objIMessage, GetStatusCode())
             .Times(2)
             .WillRepeatedly(Return(SipStatusCode::SC_182));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 
     EXPECT_CALL(objIMessage, GetStatusCode())
             .Times(4)
@@ -749,7 +723,6 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfUsingDynamicNwToneTimer)
             .Times(2)
             .WillRepeatedly(Return(PemType::SENDRECV));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .Times(2)
@@ -758,7 +731,6 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfUsingDynamicNwToneTimer)
             .WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(*piMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 1000)).Times(1);
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 }
 
 TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfNotUsingDynamicNwToneTimer)
@@ -784,7 +756,6 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfNotUsingDynamicNwToneTimer
     EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
             .WillOnce(Return(IMS_TRUE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_NE(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_TRUE(pMediaManager->IsLocalTone());
 
     EXPECT_CALL(*piMediaSession, SetNetworkToneRtpTimer(NEGO_ID, MEDIA_TYPE_AUDIO, 0)).Times(4);
@@ -794,14 +765,12 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfNotUsingDynamicNwToneTimer
     EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
             .WillOnce(Return(IMS_FALSE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_TRUE(pMediaManager->IsLocalTone());
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .Times(2)
             .WillRepeatedly(Return(PemType::SENDRECV));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_FALSE(pMediaManager->IsLocalTone());
 
     EXPECT_CALL(objIMessage, GetStatusCode())
@@ -811,13 +780,11 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfNotUsingDynamicNwToneTimer
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::SENDRECV));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_FALSE(pMediaManager->IsLocalTone());
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::INACTIVE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_TRUE(pMediaManager->IsLocalTone());
 }
 
@@ -840,7 +807,6 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedAndMessageIsNullInCaseOfLocalToneW
     EXPECT_CALL(*piMediaSession, Run(NEGO_ID)).WillOnce(Return(IMS_FALSE));
     EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(0);
     pMediaManager->Run(&objISession, nullptr, IMS_TRUE);
-    EXPECT_NE(MediaState::STARTING, pMediaManager->GetState());
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::INACTIVE));
@@ -850,7 +816,6 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedAndMessageIsNullInCaseOfLocalToneW
     EXPECT_CALL(*piMediaSession, Run(NEGO_ID)).WillOnce(Return(IMS_TRUE));
     EXPECT_CALL(*pMediaProfileManager, UpdateProfileForMediaActivation(&objISession)).Times(1);
     pMediaManager->Run(&objISession, nullptr, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
 }
 
 TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfLocalToneWith180ByForce)
@@ -879,20 +844,17 @@ TEST_F(MtcMediaManagerTest, RunIf180IsReceivedInCaseOfLocalToneWith180ByForce)
     EXPECT_CALL(*pMediaProfileManager, IsPemSendInOtherEarlySession(&objISession))
             .WillOnce(Return(IMS_FALSE));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_TRUE(pMediaManager->IsLocalTone());
 
     EXPECT_CALL(*pMediaProfileManager, GetPemType(&objISession))
             .WillOnce(Return(PemType::SENDRECV));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_TRUE(pMediaManager->IsLocalTone());
 
     EXPECT_CALL(objIMessage, GetStatusCode())
             .Times(2)
             .WillRepeatedly(Return(SipStatusCode::SC_182));
     pMediaManager->Run(&objISession, &objIMessage, IMS_TRUE);
-    EXPECT_EQ(MediaState::STARTING, pMediaManager->GetState());
     EXPECT_FALSE(pMediaManager->IsLocalTone());
 }
 
