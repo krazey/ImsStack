@@ -23,7 +23,6 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.ICommonPackageListener;
-import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ILocationAgent;
@@ -300,9 +299,9 @@ public class ImsCallContext implements ICallContext {
     public TtyModeTracker getTtyModeTracker() {
         if (mTtyModeTracker == null) {
             if (CallFeature.isTtySupported(getSlotId())) {
-                // Reads the settings
-                mTtyModeTracker = new TtyModeTracker(
-                        SettingsUtils.getTtyMode(mContext.getContentResolver()));
+                // A preferred TTY mode will be set by the ImsPhoneCallTracker
+                // when the ImsService is available.
+                mTtyModeTracker = new TtyModeTracker();
             }
         }
 

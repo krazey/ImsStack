@@ -76,15 +76,6 @@ public class PhoneCallDBAgent implements IAgent, ISystemAPICallInfo {
     }
 
     @Override
-    public int getTTYMode() {
-        int settingsTtyMode = android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
-            android.provider.Settings.Secure.PREFERRED_TTY_MODE, 0);
-
-        ImsLog.i(mSlotId, "tty mode setting = " + settingsTtyMode);
-        return settingsTtyMode;
-    }
-
-    @Override
     public int getCallStateInOtherSlot() {
         // TODO: add CS call state in other slot using AOSP API
         return TelephonyManager.CALL_STATE_IDLE;

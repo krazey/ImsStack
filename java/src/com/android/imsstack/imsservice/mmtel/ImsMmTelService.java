@@ -276,6 +276,8 @@ public class ImsMmTelService extends MmTelFeature
         // So, we don't send reply using Message.
         log("setUiTtyMode :: ttyMode=" + mode);
 
+        mMmTelFeatureRegistry.setTtyMode(mode);
+
         if (!isReady()) {
             log("Service not ready - setUiTtyMode");
             return;

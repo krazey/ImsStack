@@ -37,10 +37,6 @@ public class TtyModeTracker {
     public TtyModeTracker() {
     }
 
-    public TtyModeTracker(int ttyMode) {
-        mTtyMode = ttyMode;
-    }
-
     public void addListener(TtyModeTracker.Listener listener) {
         mListeners.add(listener);
     }

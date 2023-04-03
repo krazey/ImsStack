@@ -39,7 +39,7 @@ public class TtyModeTrackerTest {
 
     @Before
     public void setUp() throws Exception {
-        mTtyModeTracker = new TtyModeTracker(TelecomManager.TTY_MODE_OFF);
+        mTtyModeTracker = new TtyModeTracker();
         mListener = new TtyListener();
         mTtyModeTracker.addListener(mListener);
     }
@@ -62,10 +62,9 @@ public class TtyModeTrackerTest {
 
     @Test
     public void testGetTtyMode() {
-        TtyModeTracker ttyModeTracker = new TtyModeTracker();
-        assertEquals(ttyModeTracker.getTtyMode(), TelecomManager.TTY_MODE_OFF);
-        ttyModeTracker.setTtyMode(TelecomManager.TTY_MODE_FULL);
-        assertEquals(ttyModeTracker.getTtyMode(), TelecomManager.TTY_MODE_FULL);
+        assertEquals(mTtyModeTracker.getTtyMode(), TelecomManager.TTY_MODE_OFF);
+        mTtyModeTracker.setTtyMode(TelecomManager.TTY_MODE_FULL);
+        assertEquals(mTtyModeTracker.getTtyMode(), TelecomManager.TTY_MODE_FULL);
     }
 
     @Test
