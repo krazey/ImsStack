@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.SharedPreferences;
-import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellIdentity;
 import android.telephony.CellIdentityGsm;
@@ -225,10 +224,14 @@ public class DcUtilsTest extends ImsStackTest {
     @Test
     @SmallTest
     public void isMobileDataEnabled() {
-        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.MOBILE_DATA, 0);
+        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(null);
         assertEquals(false, mDcUtils.isMobileDataEnabled());
 
-        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.MOBILE_DATA, 1);
+        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
+        when(mTelephonyManager.isDataEnabled()).thenReturn(false);
+        assertEquals(false, mDcUtils.isMobileDataEnabled());
+
+        when(mTelephonyManager.isDataEnabled()).thenReturn(true);
         assertEquals(true, mDcUtils.isMobileDataEnabled());
     }
 

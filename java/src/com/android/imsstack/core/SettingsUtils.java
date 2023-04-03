@@ -52,11 +52,6 @@ public final class SettingsUtils {
                 cr, Settings.Secure.PREFERRED_TTY_MODE, TelecomManager.TTY_MODE_OFF);
     }
 
-    /** Checks whether the data roaming is enabled or not. */
-    public static boolean isDataRoamingEnabled(ContentResolver cr) {
-        return Settings.Global.getInt(cr, Settings.Global.DATA_ROAMING, 0) == 1;
-    }
-
     /** Returns the Wi-Fi calling mode. */
     // Type: int - 2=Wi-Fi preferred, 1=Cellular preferred, 0=Wi-Fi only
     public static int getWFCImsMode(Context c, int slotId) {
@@ -92,11 +87,6 @@ public final class SettingsUtils {
         }
 
         return isWfcImsRoamingEnabled(c, slotId);
-    }
-
-    /** Checks whether the mobile data setting is enabled or not. */
-    public static boolean isMobileDataEnabled(ContentResolver cr) {
-        return Settings.Global.getInt(cr, Settings.Global.MOBILE_DATA, 0) == 1;
     }
 
     /** Returns a default Wi-Fi calling enabled. */
