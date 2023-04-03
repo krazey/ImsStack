@@ -5741,7 +5741,7 @@ void AosRegistration::UpdateCallingNumberVerification()
     */
 }
 
-PRIVATE
+PROTECTED
 void AosRegistration::UpdateRegIpcanCategory()
 {
     m_nRegIpcanCategory = m_piContext->GetConnection()->GetIpcanCategory();
