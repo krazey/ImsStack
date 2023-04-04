@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MTC_MESSAGE_FORMATTER_H_
-#define MTC_MESSAGE_FORMATTER_H_
+#ifndef MESSAGE_FORMATTER_H_
+#define MESSAGE_FORMATTER_H_
 
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
