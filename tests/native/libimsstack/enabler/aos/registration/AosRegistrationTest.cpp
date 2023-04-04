@@ -181,7 +181,8 @@ class TestAosRegistration : public AosRegistration
 {
     inline TestAosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
             AosRegistration(piAppContext, strRegId),
-            m_piMockRegistration(IMS_NULL)
+            m_piMockRegistration(IMS_NULL),
+            m_pAosSubscription(IMS_NULL)
     {
     }
 
