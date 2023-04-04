@@ -15,7 +15,9 @@
  */
 
 #include "CallReasonInfo.h"
+#include "CarrierConfig.h"
 #include "ImsTypeDef.h"
+#include "MockIMtcService.h"
 #include "MtcContextRepository.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
@@ -53,6 +55,7 @@ class EstablishedStateTest : public ::testing::Test
 public:
     EstablishedState* pEstablishedState;
     MockIMtcCallContext objMockCallContext;
+    MockIMtcService objService;
     MockIMtcMediaManager objMockMediaManager;
     MockIMtcSession objMockMtcSession;
     MockIMtcUiNotifier objUiNotifier;
@@ -65,14 +68,18 @@ public:
     MtcConfigurationProxy* pConfigurationProxy;
     UpdatingInfo* pUpdatingInfo;
     MediaInfo objMediaInfo;
+    CallInfo objCallInfo;
+    MtcSupplementaryService* pSupplementaryService;
 
 protected:
     virtual void SetUp() override
     {
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objMockCallContext);
 
+        ON_CALL(objMockCallContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
         ON_CALL(objMockMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
+        ON_CALL(objMockCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objMockCallContext, GetSession()).WillByDefault(Return(&objMockMtcSession));
         ON_CALL(objMockMtcSession, GetISession).WillByDefault(ReturnRef(objMockISession));
         ON_CALL(objMockISession, GetPreviousRequest(_)).WillByDefault(Return(&objMessage));
@@ -96,6 +103,9 @@ protected:
         ON_CALL(objMockPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
 
         ON_CALL(objMockCallContext, GetTimer).WillByDefault(ReturnRef(objTimerWrapper));
+        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        ON_CALL(objMockCallContext, GetSupplementaryService)
+                .WillByDefault(ReturnRef(*pSupplementaryService));
 
         pEstablishedState = new EstablishedState(objMockCallContext);
     }
@@ -105,6 +115,7 @@ protected:
         delete pConfigurationProxy;
         delete pUpdatingInfo;
         delete pEstablishedState;
+        delete pSupplementaryService;
     }
 };
 
@@ -126,9 +137,6 @@ TEST_F(EstablishedStateTest, OnEnterRunsPendingOperationAsynchronouslyIfOnRefres
 
 TEST_F(EstablishedStateTest, TerminateByUserActionWhenNoReceivingAudioPackets)
 {
-    CallInfo objCallInfo;
-    ON_CALL(objMockCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
-
     EXPECT_CALL(objMockMediaManager, IsAudioInactive)
             .Times(2)
             .WillOnce(Return(IMS_TRUE))
@@ -279,14 +287,51 @@ TEST_F(EstablishedStateTest, SendOfferWithFullCapaOnResponseToReInvite)
     EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
 }
 
+TEST_F(EstablishedStateTest, SendIncomingUpdateIsInvokedIfUpdateNeedsToAlert)
+{
+    ON_CALL(*pMockConfigurationManager, GetPolicyForTextWithVideo)
+            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pMockConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading)
+            .WillByDefault(Return(
+                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_AFTER_UPGRADE));
+
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    // SetUp IsNeedToAlert() true.
+    ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _));
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
+TEST_F(EstablishedStateTest, SendProvisionalResponseIsInvokedIfPreconditionIsSupported)
+{
+    ON_CALL(*pMockConfigurationManager, GetPolicyForTextWithVideo)
+            .WillByDefault(Return(CarrierConfig::ImsVt::TEXT_VIDEO_ALLOWED));
+    ON_CALL(*pMockConfigurationManager, GetPolicyForCheckingQosWhileCallUpgrading)
+            .WillByDefault(Return(
+                    CarrierConfig::ImsVoice::QOS_CHECK_POLICY_ON_UPGRADING_CALL_DURING_UPGRADING));
+
+    ON_CALL(objService, GetSrvccState).WillByDefault(Return(SrvccState::IDLE));
+    ON_CALL(objMessageUtils, GetCallType(_, _, _)).WillByDefault(Return(CallType::UNKNOWN));
+    ON_CALL(objMessageUtils, HasSdp(&objMessage)).WillByDefault(Return(IMS_TRUE));
+
+    // SetUp IsNeedToAlert() true.
+    ON_CALL(objMockMtcSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMockMediaManager, GetNegotiatedCallType(_)).WillByDefault(Return(CallType::VT));
+
+    EXPECT_CALL(objUiNotifier, SendIncomingUpdate(_, _, _, _)).Times(0);
+    EXPECT_CALL(objMockMtcSession, SendProvisionalResponse(IMS_FALSE));
+
+    EXPECT_EQ(CallStateName::UPDATING, pEstablishedState->SessionUpdateReceived(&objMockISession));
+}
+
 TEST_F(EstablishedStateTest, OnReceivingNetworkToneStartedAndFailedInvokesSendHeldBy)
 {
-    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
-    ON_CALL(objMockCallContext, GetSupplementaryService)
-            .WillByDefault(ReturnRef(objSupplementaryService));
-    CallInfo objCallInfo;
-    ON_CALL(objMockCallContext, GetCallInfo()).WillByDefault(ReturnRef(objCallInfo));
-
     EXPECT_CALL(objUiNotifier, SendHeldBy(&objCallInfo, objMediaInfo, _)).Times(2);
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneStarted());
     EXPECT_EQ(CallStateName::ESTABLISHED, pEstablishedState->OnReceivingNetworkToneFailed());

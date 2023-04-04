@@ -599,3 +599,96 @@ TEST_F(UpdatingInfoTest, IsModifiedReturnsFalseIfCallTypeIsNotChanged)
 
     EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsModified());
 }
+
+TEST_F(UpdatingInfoTest, IsDowngradedReturnsTrueIfCallTypeIsDowngraded)
+{
+    // VT -> VOIP
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+
+    // RTT -> VOIP
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VOIP));
+
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+
+    // VIDEO_RTT -> RTT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::RTT));
+
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+
+    // VIDEO_RTT -> VT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+
+    // VIDEO_RTT -> VOIP
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VIDEO_RTT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+
+    EXPECT_EQ(IMS_TRUE, pUpdatingInfo->IsDowngraded());
+}
+
+TEST_F(UpdatingInfoTest, IsDowngradedReturnsFalseIfCallTypeIsNotModified)
+{
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+}
+
+TEST_F(UpdatingInfoTest, IsDowngradedReturnsFalseIfCallTypeIsUpgraded)
+{
+    // VOIP -> VT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+
+    // VOIP -> RTT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::RTT));
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+
+    // VOIP -> VIDEO_RTT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VOIP));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VIDEO_RTT));
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+
+    // VT -> VIDEO_RTT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VIDEO_RTT));
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+
+    // RTT -> VIDEO_RTT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VIDEO_RTT));
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+
+    // Invalid : VT -> RTT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::VT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::RTT));
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+
+    // Invalid : RTT -> VT
+    ON_CALL(objSession, GetPreviousCallType()).WillByDefault(Return(CallType::RTT));
+    ON_CALL(objMediaManager, GetNegotiatedCallType(&objISession))
+            .WillByDefault(Return(CallType::VT));
+
+    EXPECT_EQ(IMS_FALSE, pUpdatingInfo->IsDowngraded());
+}

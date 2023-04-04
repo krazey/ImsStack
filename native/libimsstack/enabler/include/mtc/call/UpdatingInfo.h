@@ -63,6 +63,7 @@ public:
      * @return IMS_TRUE if the CallTypes are different. IMS_FALSE otherwise.
      */
     IMS_BOOL IsModified() const;
+    IMS_BOOL IsDowngraded() const;
     inline IMS_BOOL HasPendingUpdate() const { return m_bHasPendingUpdate; }
     void AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const;
 
