@@ -25,6 +25,8 @@ import android.os.RegistrantList;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.ims.ImsManager;
+import android.telephony.ims.ImsMmTelManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
@@ -45,6 +47,8 @@ import com.android.imsstack.util.MSimUtils;
 
 /** this class is the interface for the call setting */
 public class CallSettingService implements ICallSettingService {
+    private static final int VALUE_NOT_INITIALIZED = -1;
+
     private ContentObserver mVoLTESettingObserver = null;
     private ContentObserver mVoWIFISettingObserver = null;
     private ContentObserver mMobileDataSettingObserver = null;
@@ -132,7 +136,7 @@ public class CallSettingService implements ICallSettingService {
 
     @Override
     public int isWifiCallingEnabled4Sys() {
-        return isVoWIFIEnabled() ? 1 : 0;
+        return isVoWiFiSettingEnabled() ? 1 : 0;
     }
 
     @Override
@@ -155,12 +159,12 @@ public class CallSettingService implements ICallSettingService {
 
     @Override
     public boolean isWfcEnabled() {
-        return isVoWIFIEnabled();
+        return isVoWiFiSettingEnabled();
     }
 
     @Override
     public boolean isVideoCallEnabled() {
-        return isVideoCallSetEnabled();
+        return isVtSettingEnabled();
     }
 
     @Override
@@ -592,7 +596,7 @@ public class CallSettingService implements ICallSettingService {
             public void onChange(boolean bChange) {
                 super.onChange(bChange);
 
-                boolean roamingEnabled = isVoWIFIRoamingEnabled();
+                boolean roamingEnabled = isVoWiFiRoamingSettingEnabled();
                 if (mVoWIFIRoamingSet == roamingEnabled) {
                     return;
                 }
@@ -611,7 +615,7 @@ public class CallSettingService implements ICallSettingService {
                 SubscriptionManager.WFC_IMS_ROAMING_ENABLED,
                 mVoWIFIRoamingSetObserver, getSlotId());
 
-        mVoWIFIRoamingSet = isVoWIFIRoamingEnabled();
+        mVoWIFIRoamingSet = isVoWiFiRoamingSettingEnabled();
 
         notifySystemEventForVoWIFIRoaming();
     }
@@ -681,9 +685,9 @@ public class CallSettingService implements ICallSettingService {
         }
 
         boolean bVolteEnable = false;
-        int hdVoiceSetting = SettingsUtils.VALUE_NOT_INITIALIZED;
+        int hdVoiceSetting = VALUE_NOT_INITIALIZED;
         boolean bVolteSet = (hdVoiceSetting == 1
-                || hdVoiceSetting == SettingsUtils.VALUE_NOT_INITIALIZED);
+                || hdVoiceSetting == VALUE_NOT_INITIALIZED);
 
         ImsLog.d(getSlotId(), "VoLte :: setting=" + bVolteSet + ", lteMode=" + bNetMode);
 
@@ -700,7 +704,7 @@ public class CallSettingService implements ICallSettingService {
             return ImsEventDef.MODE_WFC_PREFERRED;
         }
 
-        return SettingsUtils.getWFCImsMode(getContext(), getSlotId());
+        return getVoWiFiModeSetting();
     }
 
     private int getRttMode() {
@@ -732,10 +736,6 @@ public class CallSettingService implements ICallSettingService {
 
     private boolean isVoLTERoamingEnabled() {
         return false;
-    }
-
-    private boolean isVoWIFIEnabled() {
-        return SettingsUtils.isWFCImsEnabled(getContext(), getSlotId());
     }
 
     private boolean isVoWIFIProvisioned() {
@@ -770,14 +770,6 @@ public class CallSettingService implements ICallSettingService {
                 + (result ? "Provisioned" : "not Provisioned"));
 
         return result;
-    }
-
-    private boolean isVoWIFIRoamingEnabled() {
-        return SettingsUtils.isWFCImsRoamingEnabled(getContext(), getSlotId());
-    }
-
-    private boolean isVideoCallSetEnabled() {
-        return SettingsUtils.isVtImsEnabled(getContext(), getSlotId());
     }
 
     private boolean isVideoCallRoamingSetEnabled() {
@@ -839,7 +831,7 @@ public class CallSettingService implements ICallSettingService {
 
         if (system != null) {
             system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
-                    isVoWIFIEnabled() ? 1 : 0, mVoWIFIPreference);
+                    isVoWiFiSettingEnabled() ? 1 : 0, mVoWIFIPreference);
         }
     }
 
@@ -853,7 +845,7 @@ public class CallSettingService implements ICallSettingService {
         if (system != null) {
             if (isRoaming()) {
                 system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
-                        isVoWIFIEnabled() ? 1 : 0,
+                        isVoWiFiSettingEnabled() ? 1 : 0,
                         mVoWIFIRoamingSet ? ImsEventDef.MODE_WFC_PREFERRED
                                 : ImsEventDef.MODE_CELLULAR_PREFERRED);
             }
@@ -888,7 +880,7 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private void onVideoCallSetChanged() {
-        boolean setValue = isVideoCallSetEnabled();
+        boolean setValue = isVtSettingEnabled();
 
         if (mVideoCallSet == setValue) {
             return;
@@ -991,7 +983,7 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private void onVoWIFISetChanged() {
-        boolean setValue = isVoWIFIEnabled();
+        boolean setValue = isVoWiFiSettingEnabled();
 
         if (mVoWIFISet == setValue) {
             return;
@@ -1108,5 +1100,60 @@ public class CallSettingService implements ICallSettingService {
 
     private int getSlotId() {
         return (mVoLteService != null) ? mVoLteService.getSlotID() : (-1);
+    }
+
+    private ImsMmTelManager getImsMmTelManager() {
+        int subId = MSimUtils.getSubId(getSlotId());
+
+        if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
+            return null;
+        }
+
+        ImsManager imsManager = getContext().getSystemService(ImsManager.class);
+        return (imsManager != null) ? imsManager.getImsMmTelManager(subId) : null;
+    }
+
+    private boolean isVoWiFiSettingEnabled() {
+        ImsMmTelManager mmTelManager = getImsMmTelManager();
+
+        try {
+            return mmTelManager.isVoWiFiSettingEnabled();
+        } catch (Exception e) {
+            ImsLog.e(getSlotId(), "isVoWiFiSettingEnabled: " + e.toString());
+            return false;
+        }
+    }
+
+    private int getVoWiFiModeSetting() {
+        ImsMmTelManager mmTelManager = getImsMmTelManager();
+
+        try {
+            return mmTelManager.getVoWiFiModeSetting();
+        } catch (Exception e) {
+            ImsLog.e(getSlotId(), "getVoWiFiModeSetting: " + e.toString());
+            return ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+        }
+    }
+
+    private boolean isVoWiFiRoamingSettingEnabled() {
+        ImsMmTelManager mmTelManager = getImsMmTelManager();
+
+        try {
+            return mmTelManager.isVoWiFiRoamingSettingEnabled();
+        } catch (Exception e) {
+            ImsLog.e(getSlotId(), "isVoWiFiRoamingSettingEnabled: " + e.toString());
+            return false;
+        }
+    }
+
+    private boolean isVtSettingEnabled() {
+        ImsMmTelManager mmTelManager = getImsMmTelManager();
+
+        try {
+            return mmTelManager.isVtSettingEnabled();
+        } catch (Exception e) {
+            ImsLog.e(getSlotId(), "isVtSettingEnabled: " + e.toString());
+            return false;
+        }
     }
 }
