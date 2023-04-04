@@ -15,39 +15,39 @@
  */
 
 #include "CallReasonInfo.h"
+#include "IImsRadio.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
+#include "call/EpsFallbackTrigger.h"
 #include "call/block/IMtcBlockRule.h"
 #include "call/block/RadioBlockRule.h"
 #include "call/radio/IMtcRadioChecker.h"
+#include "configuration/MtcConfigurationProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 RadioBlockRule::RadioBlockRule(IN IMtcCallContext& objContext, IN CallType eCallType) :
+        m_objContext(objContext),
         m_piMtcBlockRuleCheckListener(IMS_NULL),
-        m_objMtcRadioChecker(objContext.GetRadioChecker()),
-        m_ePeerType(objContext.GetCallInfo().ePeerType),
-        m_bEmergency(objContext.GetCallInfo().bEmergency),
-        m_bWifi(objContext.GetService().IsWlanIpCanType()),
-        m_eCallType(eCallType),
-        m_nCallKey(objContext.GetCallKey())
+        m_eCallType(eCallType)
 {
 }
 
 PUBLIC VIRTUAL RadioBlockRule::~RadioBlockRule()
 {
-    m_objMtcRadioChecker.SetTrafficCheckerListener(IMS_NULL);
+    m_objContext.GetRadioChecker().SetTrafficCheckerListener(IMS_NULL);
 }
 
 PUBLIC VIRTUAL RadioBlockRule::Result RadioBlockRule::Check(
         IN IMtcBlockRuleCheckListener& objListener)
 {
     m_piMtcBlockRuleCheckListener = &objListener;
-    m_objMtcRadioChecker.SetTrafficCheckerListener(this);
+    m_objContext.GetRadioChecker().SetTrafficCheckerListener(this);
 
-    CheckResult eCheckResult =
-            m_objMtcRadioChecker.Check(m_eCallType, m_bEmergency, m_ePeerType, m_bWifi, m_nCallKey);
+    CheckResult eCheckResult = m_objContext.GetRadioChecker().Check(m_eCallType,
+            m_objContext.GetCallInfo().bEmergency, m_objContext.GetCallInfo().ePeerType,
+            m_objContext.GetService().IsWlanIpCanType(), m_objContext.GetCallKey());
 
     switch (eCheckResult)
     {
@@ -66,8 +66,27 @@ PUBLIC VIRTUAL void RadioBlockRule::OnConnectionSetupPrepared()
     m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(Result(Result::Status::UNBLOCKED));
 }
 
-PUBLIC VIRTUAL void RadioBlockRule::OnConnectionFailed()
+PUBLIC VIRTUAL void RadioBlockRule::OnConnectionFailed(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis)
 {
-    m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(
-            Result(Result::Status::BLOCKED, CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE)));
+    CallReasonInfo objReason = IsEpsFallbackRequired(nFailureReason, nWaitTimeMillis)
+            ? CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK)
+            : CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
+
+    m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
+}
+
+PRIVATE
+IMS_BOOL RadioBlockRule::IsEpsFallbackRequired(
+        IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const
+{
+    if (!m_objContext.GetEpsFallbackTrigger().IsVoNr())
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_UINT32 nTimerVzw =
+            m_objContext.GetConfigurationProxy().GetInt(Feature::MO_CALL_REQUEST_TIMEOUT);
+    return nFailureReason == IImsRadio::REASON_RRC_REJECT && nWaitTimeMillis >= nTimerVzw &&
+            EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy());
 }

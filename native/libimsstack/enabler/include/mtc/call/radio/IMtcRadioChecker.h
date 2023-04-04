@@ -56,13 +56,16 @@ public:
      * @brief Notifies
      *
      */
-    virtual void OnConnectionFailed() = 0;
+    virtual void OnConnectionSetupPrepared() = 0;
 
     /**
      * @brief Notifies
      *
+     * @param nFailureReason See ConnectionFailureReason of IImsRadio.
+     * @param nWaitTimeMillis
      */
-    virtual void OnConnectionSetupPrepared() = 0;
+    virtual void OnConnectionFailed(
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) = 0;
 };
 
 class IMtcRadioConnectionFailureListener

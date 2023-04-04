@@ -109,7 +109,6 @@ private:
     void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn);
     void NotifyRadioConnectionFailedListener(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection);
-    void NotifyTrafficCheckerListener(IN IMS_BOOL bReady);
     MtcTrafficInfo* GetCallTrafficInfo(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) const;
     MtcTrafficInfo* CreateCallTrafficInfo(
