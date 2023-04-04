@@ -20,10 +20,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
+import android.telephony.ims.ImsManager;
+import android.telephony.ims.ImsMmTelManager;
 
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
@@ -56,6 +58,7 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
@@ -409,8 +412,7 @@ public class VoLteService implements IVoLteService {
             }
         } else if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "TMO", "US")) {
             system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
-                SettingsUtils.isWFCImsEnabled(mContext, getSlotID()) ? 1 : 0,
-                SettingsUtils.getWFCImsMode(mContext, getSlotID()));
+                    isVoWiFiSettingEnabled() ? 1 : 0, getVoWiFiModeSetting());
 
             // IMS_RTT {
             if (CapabilityConfigs.isRttEnabled(mSlotID)) {
@@ -667,5 +669,38 @@ public class VoLteService implements IVoLteService {
         }
 
         return false;
+    }
+
+    private ImsMmTelManager getImsMmTelManager() {
+        int subId = MSimUtils.getSubId(getSlotID());
+
+        if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
+            return null;
+        }
+
+        ImsManager imsManager = mContext.getSystemService(ImsManager.class);
+        return (imsManager != null) ? imsManager.getImsMmTelManager(subId) : null;
+    }
+
+    private boolean isVoWiFiSettingEnabled() {
+        ImsMmTelManager mmTelManager = getImsMmTelManager();
+
+        try {
+            return mmTelManager.isVoWiFiSettingEnabled();
+        } catch (Exception e) {
+            ImsLog.e(getSlotID(), "isVoWiFiSettingEnabled: " + e.toString());
+            return false;
+        }
+    }
+
+    private int getVoWiFiModeSetting() {
+        ImsMmTelManager mmTelManager = getImsMmTelManager();
+
+        try {
+            return mmTelManager.getVoWiFiModeSetting();
+        } catch (Exception e) {
+            ImsLog.e(getSlotID(), "getVoWiFiModeSetting: " + e.toString());
+            return ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
+        }
     }
 }

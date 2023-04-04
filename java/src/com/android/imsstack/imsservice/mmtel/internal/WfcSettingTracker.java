@@ -15,31 +15,18 @@
  */
 package com.android.imsstack.imsservice.mmtel.internal;
 
-import android.content.ContentResolver;
-import android.content.Context;
-import android.database.ContentObserver;
-import android.os.Handler;
 import android.telephony.SubscriptionManager;
+import android.telephony.ims.ImsManager;
 import android.telephony.ims.ImsMmTelManager;
 
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.MSimUtils;
 
 public class WfcSettingTracker {
-    /** 0 : Wi-Fi only, 1 : Cellular preferred, 2 : Wi-Fi preferred */
-    public static final int MODE_NONE = (-1);
-    public static final int MODE_WIFI_ONLY = ImsMmTelManager.WIFI_MODE_WIFI_ONLY;
-    public static final int MODE_CELLULAR_PREFERRED = ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED;
-    public static final int MODE_WIFI_PREFERRED = ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
-
     private final IBaseContext mContext;
-    private SettingObserver mSettingObserver;
-    private ModeObserver mModeObserver;
     private boolean mWfcEnabled;
-    private boolean mWfcSettingOn;
-    private int mWfcMode;
 
     public WfcSettingTracker(IBaseContext context) {
         mContext = context;
@@ -52,54 +39,24 @@ public class WfcSettingTracker {
     }
 
     public void init() {
-        Context context = mContext.getContext();
-        int slotId = mContext.getSlotId();
+        mWfcEnabled = ImsGlobal.isWfcEnabled(mContext.getContext(), mContext.getSlotId());
 
-        mWfcEnabled = ImsGlobal.isWfcEnabled(context, slotId);
-
-        if (isWfcEnabled()) {
-            mSettingObserver = new SettingObserver(mContext.getDefaultHandler());
-            mModeObserver = new ModeObserver(mContext.getDefaultHandler());
-
-            ContentResolver cr = context.getContentResolver();
-
-            mWfcSettingOn = SettingsUtils.isWFCImsEnabled(context, slotId);
-            mWfcMode = SettingsUtils.getWFCImsMode(context, slotId);
-
-            SettingsUtils.registerObserverForGlobal(cr,
-                    SubscriptionManager.WFC_IMS_ENABLED, mSettingObserver);
-            SettingsUtils.registerObserverForGlobal(cr,
-                    SubscriptionManager.WFC_IMS_MODE, mModeObserver);
-        } else {
-            mSettingObserver = null;
-            mModeObserver = null;
-        }
     }
 
     public void clear() {
-        ContentResolver cr = mContext.getContext().getContentResolver();
-
-        if (mSettingObserver != null) {
-            SettingsUtils.unregisterObserver(cr, mSettingObserver);
-            mSettingObserver = null;
-        }
-
-        if (mModeObserver != null) {
-            SettingsUtils.unregisterObserver(cr, mModeObserver);
-            mModeObserver = null;
-        }
-
         mWfcEnabled = false;
-        mWfcSettingOn = false;
-        mWfcMode = MODE_NONE;
     }
 
     public boolean isWfcAvailable() {
         if (isWfcSettingEditable()) {
-            return mWfcSettingOn
-                    && ((mWfcMode == MODE_WIFI_ONLY)
-                        || (mWfcMode == MODE_WIFI_PREFERRED)
-                        || (mWfcMode == MODE_CELLULAR_PREFERRED));
+            if (isVoWiFiSettingEnabled()) {
+                int wfcMode = getVoWiFiModeSetting();
+                return wfcMode == ImsMmTelManager.WIFI_MODE_WIFI_ONLY
+                        || wfcMode == ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED
+                        || wfcMode == ImsMmTelManager.WIFI_MODE_CELLULAR_PREFERRED;
+            } else {
+                return false;
+            }
         }
 
         return isWfcEnabled();
@@ -113,47 +70,36 @@ public class WfcSettingTracker {
         return mWfcEnabled;
     }
 
-    private static void logi(String s) {
-        ImsLog.i("[GII-IMPL] " + s);
+    private ImsMmTelManager getImsMmTelManager() {
+        int subId = MSimUtils.getSubId(mContext.getSlotId());
+
+        if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
+            return null;
+        }
+
+        ImsManager imsManager = mContext.getContext().getSystemService(ImsManager.class);
+        return (imsManager != null) ? imsManager.getImsMmTelManager(subId) : null;
     }
 
-    private class SettingObserver extends ContentObserver {
-        public SettingObserver(Handler handler) {
-            super(handler);
-        }
+    private boolean isVoWiFiSettingEnabled() {
+        ImsMmTelManager mmTelManager = getImsMmTelManager();
 
-        @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
-
-            final boolean wfcSettingOn = SettingsUtils.isWFCImsEnabled(
-                    mContext.getContext(), mContext.getSlotId());
-
-            if (mWfcSettingOn != wfcSettingOn) {
-                logi("WFC-Setting :: " + mWfcSettingOn + " >> " + wfcSettingOn
-                        + "; phoneId=" + mContext.getPhoneId());
-                mWfcSettingOn = wfcSettingOn;
-            }
+        try {
+            return mmTelManager.isVoWiFiSettingEnabled();
+        } catch (Exception e) {
+            ImsLog.e(mContext.getSlotId(), "isVoWiFiSettingEnabled: " + e.toString());
+            return false;
         }
     }
 
-    private class ModeObserver extends ContentObserver {
-        public ModeObserver(Handler handler) {
-            super(handler);
-        }
+    private int getVoWiFiModeSetting() {
+        ImsMmTelManager mmTelManager = getImsMmTelManager();
 
-        @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
-
-            final int wfcMode = SettingsUtils.getWFCImsMode(
-                    mContext.getContext(), mContext.getSlotId());
-
-            if (mWfcMode != wfcMode) {
-                logi("WFC-Mode :: " + mWfcMode + " >> " + wfcMode
-                        + "; phoneId=" + mContext.getPhoneId());
-                mWfcMode = wfcMode;
-            }
+        try {
+            return mmTelManager.getVoWiFiModeSetting();
+        } catch (Exception e) {
+            ImsLog.e(mContext.getSlotId(), "getVoWiFiModeSetting: " + e.toString());
+            return ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
         }
     }
 }
