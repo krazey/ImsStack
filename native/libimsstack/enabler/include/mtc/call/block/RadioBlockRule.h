@@ -35,16 +35,15 @@ public:
 
     // IMtcRadioCheckerListener
     void OnConnectionSetupPrepared() override;
-    void OnConnectionFailed() override;
+    void OnConnectionFailed(IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) override;
 
 private:
+    IMtcCallContext& m_objContext;
     IMtcBlockRuleCheckListener* m_piMtcBlockRuleCheckListener;
-    IMtcRadioChecker& m_objMtcRadioChecker;
-    PeerType m_ePeerType;
-    IMS_BOOL m_bEmergency;
-    IMS_BOOL m_bWifi;
     CallType m_eCallType;
-    CallKey m_nCallKey;
+
+    IMS_BOOL IsEpsFallbackRequired(
+            IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const;
 };
 
 #endif
