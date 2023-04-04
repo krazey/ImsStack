@@ -451,20 +451,15 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedTemporarily)
     m_pMtcRadioChecker->SetTrafficCheckerListener(&m_objIMtcRadioCheckerListener);
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
-    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(1);
+    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(7);
     EXPECT_CALL(m_objConnectionFailureListener, OnConnectionFailed(_)).Times(0);
 
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_NAS_FAILURE, 0, 0);
-
-    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(7);
-
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_RACH_FAILURE, 0, 0);
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_RLC_FAILURE, 0, 0);
-    m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
-            IImsRadio::REASON_RRC_REJECT, 0, 0);
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_RRC_TIMEOUT, 0, 0);
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
@@ -511,15 +506,13 @@ TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionFailedNotifies)
     EXPECT_EQ(CheckResult::PENDING,
             m_pMtcRadioChecker->Check(CallType::VT, IMS_FALSE, PeerType::MO, IMS_FALSE, CALL_KEY1));
 
-    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
+    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(3);
 
     m_piImsRadioConnectionListener->ImsRadio_OnConnectionFailed(
             IImsRadio::REASON_ACCESS_DENIED, 0, 0);
-
-    EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(1);
-
     m_piImsRadioConnectionListener->ImsRadio_OnConnectionFailed(
-            IImsRadio::REASON_NAS_FAILURE, 0, 0);
+            IImsRadio::REASON_INTERNAL_ERROR, 0, 0);
+    m_piImsRadioConnectionListener->ImsRadio_OnConnectionFailed(IImsRadio::REASON_RRC_REJECT, 0, 0);
 }
 
 TEST_F(MtcRadioCheckerTest, MtcTrafficInfoImsRadioOnConnectionSetupPreparedNotifies)

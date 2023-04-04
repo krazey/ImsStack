@@ -133,7 +133,7 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnTotalCallStateChanged(IN State /* eState 
 
 PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficType,
         IN CallDirection eCallDirection, IN IMS_UINT32 nFailureReason,
-        IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 /* nWaitTimeMillis */)
+        IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 nWaitTimeMillis)
 {
     IMS_TRACE_D("OnConnectionFailed TrafficType[%d] FailureReason[%d]", eTrafficType,
             nFailureReason, 0);
@@ -142,19 +142,27 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficT
     {
         case IImsRadio::REASON_ACCESS_DENIED:
         case IImsRadio::REASON_INTERNAL_ERROR:
-            NotifyTrafficCheckerListener(IMS_FALSE);
+        case IImsRadio::REASON_RRC_REJECT:
+            if (m_piMtcRadioCheckerListener != IMS_NULL)
+            {
+                m_piMtcRadioCheckerListener->OnConnectionFailed(nFailureReason, nWaitTimeMillis);
+            }
             NotifyRadioConnectionFailedListener(eTrafficType, eCallDirection);
             break;
 
         case IImsRadio::REASON_NAS_FAILURE:
         case IImsRadio::REASON_RACH_FAILURE:
         case IImsRadio::REASON_RLC_FAILURE:
-        case IImsRadio::REASON_RRC_REJECT:
         case IImsRadio::REASON_RRC_TIMEOUT:
         case IImsRadio::REASON_NO_SERVICE:
         case IImsRadio::REASON_PDN_NOT_AVAILABLE:
         case IImsRadio::REASON_RF_BUSY:
-            NotifyTrafficCheckerListener(IMS_TRUE);
+            if (m_piMtcRadioCheckerListener != IMS_NULL)
+            {
+                // Calls will be blocked in these cases (e.g. message cannot be sent),
+                // so they could be handled as success here.
+                m_piMtcRadioCheckerListener->OnConnectionSetupPrepared();
+            }
             break;
     }
 }
@@ -163,7 +171,10 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionSetupPrepared(
         IN TrafficType eTrafficType, IN CallDirection /* eCallDirection */)
 {
     IMS_TRACE_D("OnConnectionSetupPrepared TrafficType[%d]", eTrafficType, 0, 0);
-    NotifyTrafficCheckerListener(IMS_TRUE);
+    if (m_piMtcRadioCheckerListener != IMS_NULL)
+    {
+        m_piMtcRadioCheckerListener->OnConnectionSetupPrepared();
+    }
 }
 
 PUBLIC void MtcRadioChecker::CreateCallTrafficInfoWithGivenValue(IN TrafficType eTrafficType,
@@ -301,23 +312,6 @@ PRIVATE void MtcRadioChecker::NotifyRadioConnectionFailedListener(
     for (IMS_UINT32 nIndex = 0; nIndex < objCallKeys.GetSize(); nIndex++)
     {
         m_objMtcRadioConnectionFailureListener.OnConnectionFailed(objCallKeys.GetAt(nIndex));
-    }
-}
-
-PRIVATE void MtcRadioChecker::NotifyTrafficCheckerListener(IN IMS_BOOL bReady)
-{
-    if (m_piMtcRadioCheckerListener == IMS_NULL)
-    {
-        return;
-    }
-
-    if (bReady)
-    {
-        m_piMtcRadioCheckerListener->OnConnectionSetupPrepared();
-    }
-    else
-    {
-        m_piMtcRadioCheckerListener->OnConnectionFailed();
     }
 }
 

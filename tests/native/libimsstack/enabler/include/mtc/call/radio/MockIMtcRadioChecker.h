@@ -41,8 +41,9 @@ class MockIMtcRadioCheckerListener : public IMtcRadioCheckerListener
 public:
     ~MockIMtcRadioCheckerListener() = default;
 
-    MOCK_METHOD(void, OnConnectionFailed, (), (override));
     MOCK_METHOD(void, OnConnectionSetupPrepared, (), (override));
+    MOCK_METHOD(void, OnConnectionFailed,
+            (IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis), (override));
 };
 
 class MockIMtcRadioConnectionListener : public IMtcRadioConnectionListener
