@@ -117,10 +117,6 @@ private:
     IMS_BOOL IsTrafficPrepared(
             IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType) const;
     IMS_BOOL IsTrafficAllowed(IN CallType eCallType, IN IMS_BOOL bEmergency) const;
-    IMS_BOOL IsSsacBarred(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
-            IN IMS_BOOL bWifi);
-    IMS_BOOL IsSsacTimerRunning(IN CallType eCallType) const;
-    IMS_BOOL StartSsacTimer(IN CallType eCallType);
     void StartTrafficChecking(IN CallType eCallType, IN IMS_BOOL bEmergency, IN PeerType ePeerType,
             IN IMS_BOOL bWifi, IN CallKey nCallKey);
     void StopTrafficChecking(IN MtcTrafficInfo& objTrafficInfo);

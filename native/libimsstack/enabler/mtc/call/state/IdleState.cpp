@@ -38,6 +38,7 @@
 #include "call/block/NetworkBlockRule.h"
 #include "call/block/ProcessingCallBlockRule.h"
 #include "call/block/RadioBlockRule.h"
+#include "call/block/SsacBlockRule.h"
 #include "call/block/TimerBlockRule.h"
 #include "call/block/VopsBlockRule.h"
 #include "call/extension/MtcExtensionSet.h"
@@ -462,6 +463,7 @@ ImsList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
     lstRules.Append(new CallCountBlockRule(m_objContext));
     lstRules.Append(new CallTypeBlockRule(m_objContext));
     lstRules.Append(new CallWaitingBlockRule(m_objContext));
+    lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetSession()->GetCallType()));
     return lstRules;
 }
@@ -474,6 +476,7 @@ ImsList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
     lstRules.Append(new ProcessingCallBlockRule(m_objContext));
     lstRules.Append(new CsCallBlockRule(m_objContext));
     lstRules.Append(new CallCountBlockRule(m_objContext));
+    lstRules.Append(new SsacBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
     lstRules.Append(new RadioBlockRule(m_objContext, m_objContext.GetCallInfo().eInitialCallType));
     lstRules.Append(new TimerBlockRule(
             m_objContext.GetPassiveTimerHolder(), m_objContext.GetCallInfo().bEmergency));
