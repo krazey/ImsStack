@@ -21,28 +21,12 @@ import android.os.Process;
 import android.os.SystemProperties;
 
 import com.android.ims.ImsManager;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * This class provides the common utility methods for IMS services.
  */
 public final class ImsUtils {
-    // getNrUeCapability - NR_UE_CAPABILITY {
-    public static final int NR_UE_CAPABILITY_I_NONE = 0x80000000;
-    // Bitmask of integer value
-    public static final int NR_UE_CAPABILITY_I_SA = 0x00000001;
-    public static final int NR_UE_CAPABILITY_I_VONR = 0x00000002;
-    // }
-
-    // getUeCapabilityVoNr - 5G_UE_CAPABILITY_VONR {
-    public static final int NR_UE_CAPABILITY_EPS_FB = 0;
-    public static final int NR_UE_CAPABILITY_VONR = 1;
-    // }
-
-    // getNrNetworkMode - 5G_NETWORK_MODE {
-    public static final int NR_NETWORK_MODE_SA = 0;
-    public static final int NR_NETWORK_MODE_NSA = 1;
-    // }
-
     private static final String KEY_VOLTE_AVAIL_OVR = "persist.dbg.volte_avail_ovr";
     private static final String KEY_VT_AVAIL_OVR = "persist.dbg.vt_avail_ovr";
     private static final String KEY_WFC_AVAIL_OVR = "persist.dbg.wfc_avail_ovr";
@@ -56,10 +40,6 @@ public final class ImsUtils {
      * Cache for ImsManager to check any configuration / settings.
      */
     private static ImsManager[] sImsManagers = null;
-    /**
-     * VoNR: NR_UE_CAPABILITY
-     */
-    private static int[] sNrUeCapability = null;
 
     public static class ServiceCaps {
         private boolean mVoLteEnabled;
@@ -114,30 +94,23 @@ public final class ImsUtils {
 
         if (sImsManagers == null) {
             sImsManagers = new ImsManager[supportedSimCount];
-            int activeSimCount = MSimUtils.getActiveSimCount();
-            int simCount = Math.min(activeSimCount, supportedSimCount);
-
-            for (int i = 0; i < simCount; i++) {
-                sImsManagers[i] = ImsManager.getInstance(AppContext.getInstance(), i);
-            }
         }
 
-        if (sNrUeCapability == null) {
-            sNrUeCapability = new int[supportedSimCount];
+        int activeSimCount = MSimUtils.getActiveSimCount();
+        int simCount = Math.min(activeSimCount, supportedSimCount);
 
-            for (int i = 0; i < sNrUeCapability.length; i++) {
-                sNrUeCapability[i] = getDefaultNrUeCapability();
-            }
+        for (int i = 0; i < simCount; i++) {
+            sImsManagers[i] = ImsManager.getInstance(AppContext.getInstance(), i);
         }
     }
 
-    public static boolean isEmergencyCallEnabledOnServiceRestricted() {
-        // P-OS: VoLte service always runs, VoLte only enabled
-        return true;
-    }
-
-    public static boolean isEmergencyCallEnabledOnNonVoLteSim() {
-        return true;
+    /**
+     * Clears the static member variables for testing.
+     */
+    @VisibleForTesting
+    public static synchronized void clear() {
+        sCacheForServiceCaps = null;
+        sImsManagers = null;
     }
 
     /** APIs for ImsManager - starts */
@@ -155,6 +128,23 @@ public final class ImsUtils {
         }
 
         return sImsManagers[phoneId];
+    }
+
+    /**
+     * Sets {@link ImsManager} instance for testing.
+     */
+    @VisibleForTesting
+    public static synchronized void setImsManager(int phoneId, ImsManager imsManager) {
+        if (sImsManagers == null) {
+            int supportedSimCount = MSimUtils.getSupportedSimCount();
+            sImsManagers = new ImsManager[supportedSimCount];
+        }
+
+        if (phoneId < 0 || phoneId >= sImsManagers.length) {
+            return;
+        }
+
+        sImsManagers[phoneId] = imsManager;
     }
 
     public static synchronized void updateImsManager() {
@@ -265,70 +255,6 @@ public final class ImsUtils {
         }
     }
     // CACHE_FOR_SERVICE_CAPS }
-
-    public static int getDefaultNrUeCapability() {
-        return NR_UE_CAPABILITY_I_SA;
-    }
-
-    public static int getNrUeCapability(int slotId) {
-        if (sNrUeCapability == null) {
-            return getDefaultNrUeCapability();
-        }
-
-        if (slotId < 0 || slotId >= sNrUeCapability.length) {
-            return getDefaultNrUeCapability();
-        }
-
-        return sNrUeCapability[slotId];
-    }
-
-    public static void setNrUeCapability(int slotId, int nrUeCapability) {
-        if (sNrUeCapability == null) {
-            return;
-        }
-
-        if (slotId < 0 || slotId >= sNrUeCapability.length) {
-            return;
-        }
-
-        sNrUeCapability[slotId] = nrUeCapability;
-    }
-
-    public static int getDefaultNrNetworkMode() {
-        return NR_NETWORK_MODE_SA;
-    }
-
-    public static void setNrNetworkMode(int slotId, int mode) {
-        int nrUeCapability = getNrUeCapability(slotId);
-
-        nrUeCapability &= ~(NR_UE_CAPABILITY_I_SA);
-
-        if (mode == NR_NETWORK_MODE_SA) {
-            nrUeCapability |= NR_UE_CAPABILITY_I_SA;
-        }
-
-        setNrUeCapability(slotId, nrUeCapability);
-    }
-
-    public static int getDefaultUeCapabilityVoNr() {
-        return NR_UE_CAPABILITY_EPS_FB;
-    }
-
-    public static void setUeCapabilityVoNr(int slotId, int capability) {
-        int nrUeCapability = getNrUeCapability(slotId);
-
-        nrUeCapability &= ~(NR_UE_CAPABILITY_I_VONR);
-
-        if (capability == NR_UE_CAPABILITY_VONR) {
-            nrUeCapability |= NR_UE_CAPABILITY_I_VONR;
-        }
-
-        setNrUeCapability(slotId, nrUeCapability);
-    }
-
-    public static boolean has(int value, int bitmask) {
-        return (value & bitmask) != 0;
-    }
 
     public static void killProcess(long millis) {
         if (millis <= 0) {
