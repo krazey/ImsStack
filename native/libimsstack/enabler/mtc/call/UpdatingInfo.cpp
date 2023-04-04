@@ -208,6 +208,25 @@ IMS_BOOL UpdatingInfo::IsModified() const
 }
 
 PUBLIC
+IMS_BOOL UpdatingInfo::IsDowngraded() const
+{
+    CallType eOriginalCallType = GetCurrentCallType();
+    CallType eModifyingCallType = m_objContext.GetMediaManager().GetNegotiatedCallType(
+            &m_objContext.GetSession()->GetISession());
+    if (eOriginalCallType == eModifyingCallType)
+    {
+        return IMS_FALSE;
+    }
+
+    if (eModifyingCallType == CallType::VOIP)
+    {
+        return IMS_TRUE;
+    }
+
+    return eOriginalCallType == CallType::VIDEO_RTT;
+}
+
+PUBLIC
 void UpdatingInfo::AdjustDirectionIfNeededForHoldOrResume(IN MediaInfo& objMediaInfo) const
 {
     if (objMediaInfo.eAudioDirection != DIRECTION_INVALID)
@@ -230,7 +249,6 @@ PRIVATE
 CallType UpdatingInfo::GetCurrentCallType() const
 {
     IMtcSession* pSession = m_objContext.GetSession();
-
     if (!pSession)
     {
         return CallType::UNKNOWN;
