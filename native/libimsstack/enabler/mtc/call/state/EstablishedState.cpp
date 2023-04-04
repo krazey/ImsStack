@@ -28,6 +28,7 @@
 #include "call/block/MtcBlockChecker.h"
 #include "call/block/SrvccBlockRule.h"
 #include "call/state/EstablishedState.h"
+#include "call/state/UpdatingState.h"
 #include "call/termination/TerminationHandler.h"
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/IConferenceManager.h"
@@ -138,8 +139,6 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Update(
                 });
         return GetStateName();
     }
-
-    m_objContext.GetUpdatingInfo().SetTargetCallType(eCallType);
 
     if (HandleUpdate(UpdateType::SESSION, eCallType, objMediaInfo) == IMS_FAILURE)
     {
@@ -433,7 +432,9 @@ PUBLIC VIRTUAL CallStateName EstablishedState::QosReserveFailed(
         return CallStateName::TERMINATING;
     }
 
-    if (eNextAction == QosLossPolicy::MODIFY)
+    // For the case that QosReserveFailed() is called by MtcPendingOperationHolder after downgraded.
+    if (eNextAction == QosLossPolicy::MODIFY &&
+            m_objContext.GetSession()->GetCallType() != CallType::VOIP)
     {
         return Downgrade(CallType::VOIP);
     }
@@ -485,6 +486,7 @@ IMS_RESULT EstablishedState::HandleUpdate(
         IN UpdateType eUpdateType, IN CallType eCallType, IN const MediaInfo& objMediaInfo)
 {
     IMS_TRACE_D("HandleUpdate Type[%d]", eUpdateType, 0, 0);
+    m_objContext.GetUpdatingInfo().SetTargetCallType(eCallType);
     m_objContext.GetUpdatingInfo().SetModifier();
     m_objContext.GetUpdatingInfo().SetRequestingType(eUpdateType);
 
@@ -512,7 +514,8 @@ PRIVATE
 IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 {
     IMS_TRACE_D("HandleReceivedUpdate", 0, 0, 0);
-    ISession& objSession = m_objContext.GetSession()->GetISession();
+    IMtcSession* pMtcSession = m_objContext.GetSession();
+    ISession& objSession = pMtcSession->GetISession();
     if (m_objContext.GetMediaManager().NegotiateSdp(&objSession) == IMS_FAILURE)
     {
         // TODO
@@ -527,8 +530,25 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 
     if (m_objContext.GetUpdatingInfo().IsNeedToAlert())
     {
-        SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(
-                &m_objContext.GetSession()->GetISession()));
+        if (UpdatingState::IsPreconditionRequired(
+                    m_objContext.GetConfigurationProxy(), m_objContext.GetUpdatingInfo()))
+        {
+            // re-INVITE for update call type is just received.
+            m_objContext.GetSession()->SendProvisionalResponse(IMS_FALSE);
+
+            // No QoS wait timer is used for Upgrade media.
+            // And, TIMER_CONVERT_USER_RESPONSE is started when the precondition negotiation is
+            // done. So, to guarantee there is at least one timer to limit UpdatingState, the timer
+            // is started here.
+            // Once the incoming upgrade is notified to the user, this timer will re-start.
+            m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
+                    m_objContext.GetConfigurationProxy().GetInt(
+                            Feature::CONVERT_USER_RESPONSE_TIMER));
+        }
+        else
+        {
+            SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(&objSession));
+        }
 
         return IMS_SUCCESS;
     }
@@ -540,7 +560,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
     }
 
     FormAutoAccept(IMS_FALSE);
-    if (m_objContext.GetSession()->AcceptUpdate() == IMS_FAILURE)
+    if (pMtcSession->AcceptUpdate() == IMS_FAILURE)
     {
         // TODO
     }

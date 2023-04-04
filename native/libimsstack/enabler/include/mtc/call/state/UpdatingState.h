@@ -17,10 +17,13 @@
 #ifndef UPDATING_STATE_H_
 #define UPDATING_STATE_H_
 
+#include "CarrierConfig.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/state/MtcCallState.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "core/ISession.h"
 #include "precondition/QosDef.h"
 
@@ -50,7 +53,16 @@ public:
     CallStateName SessionUpdated(IN ISession* piSession) override;
     CallStateName SessionUpdateFailed(IN ISession* piSession) override;
     CallStateName SessionUpdateReceived(IN ISession* piSession) override;
-    // TODO, PR
+
+    CallStateName SessionCancelDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
+    CallStateName SessionPRAckDelivered(IN ISession* piSession) override;
+    CallStateName SessionPRAckDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionPRAckReceived(IN ISession* piSession) override;
+    CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
 
     CallStateName Refresh_NotifyTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) override;
 
@@ -60,8 +72,12 @@ public:
             IN IMS_UINT32 eMediaType, IN IMS_UINT32 eProtocolType) override;
     CallStateName OnVideoLowestBitRate() override;
     CallStateName OnMediaFailed(IN const CallReasonInfo& objReason) override;
+    CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
     CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
     CallStateName OnIpcanChanged(IN IMS_UINT32 eIpcan) override;
+
+    static IMS_BOOL IsPreconditionRequired(
+            IN const MtcConfigurationProxy& objConfigProxy, IN const UpdatingInfo& objInfo);
 
 protected:
     CallStateName HandleSrvccStarted() override;
@@ -78,6 +94,7 @@ private:
     void NotifyFailure();
     void StopTimer();
     void UpdateCallType();
+    void CheckPreconditionAndNotifyIncomingUpdate(IN ISession* piSession);
 };
 
 #endif
