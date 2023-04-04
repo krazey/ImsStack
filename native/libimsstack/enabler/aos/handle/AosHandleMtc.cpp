@@ -63,12 +63,6 @@ AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& st
     m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
                     static_cast<IMS_UINT32>(AosCapability::VIDEO));
-
-    m_objServiceFeatures.Append(ImsAosFeature::MMTEL);
-    m_objServiceFeatures.Append(ImsAosFeature::VIDEO);
-    m_objServiceFeatures.Append(ImsAosFeature::TEXT);
-    m_objServiceFeatures.Append(ImsAosFeature::USSI);
-    m_objServiceFeatures.Append(ImsAosFeature::VERSTAT);
 }
 
 PUBLIC VIRTUAL AosHandleMtc::~AosHandleMtc()
