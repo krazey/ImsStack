@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef MTC_EMERGENCY_MESSAGE_FORMATTER_H_
-#define MTC_EMERGENCY_MESSAGE_FORMATTER_H_
+#ifndef EMERGENCY_MESSAGE_FORMATTER_H_
+#define EMERGENCY_MESSAGE_FORMATTER_H_
 
 #include "IMtcService.h"
 #include "ImsTypeDef.h"
