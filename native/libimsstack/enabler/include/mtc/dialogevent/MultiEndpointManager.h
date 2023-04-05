@@ -76,6 +76,7 @@ private:
     CallType GetCallType(IN const Dialog& objDialog) const;
     IMS_BOOL IsHeld(IN const Dialog& objDialog) const;
     IMS_BOOL IsOwnDialog(IN const Dialog& objDialog) const;
+    IMS_BOOL IsEarlyState(IN const Dialog& objDialog) const;
 
     IMtcContext& m_objContext;
     std::unique_ptr<MultiEndpointFactory> m_pFactory;

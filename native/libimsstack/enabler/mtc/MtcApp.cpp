@@ -95,16 +95,13 @@ PUBLIC VIRTUAL void MtcApp::Start()
     m_objMtcRadioChecker.Init();
     m_objPassiveTimerHolder.SetNormalService(GetServiceByType(ServiceType::NORMAL));
 
-#ifdef __MTC_MULTI_ENDPOINT__
     if (MultiEndpointManager::IsRequired(GetConfigurationProxy()))
     {
-        // TODO: this feature must be turned off until being verified using a dialer.
         // TODO: depends on which configuration to be checked, MultiEndpointManager can be created
         // regardless of configuration value.
         m_pMultiEndpointManager = std::make_unique<MultiEndpointManager>(
                 *this, std::make_unique<MultiEndpointFactory>());
     }
-#endif
 }
 
 PUBLIC VIRTUAL void MtcApp::Stop()
