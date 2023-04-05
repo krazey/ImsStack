@@ -476,7 +476,9 @@ PRIVATE VIRTUAL void AosCallTracker::OnCallStateChanged(IN CallKey nCallKey, IN 
     switch (eType)
     {
         case CallType::VOIP:  // FALL-THROUGH
-        case CallType::VT:
+        case CallType::VT:    // FALL-THROUGH
+        case CallType::RTT:   // FALL-THROUGH
+        case CallType::VIDEO_RTT:
             ProcessNormalChanged(nCallKey, eCallState, eType);
             break;
 
