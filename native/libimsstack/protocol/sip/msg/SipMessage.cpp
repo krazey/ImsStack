@@ -1114,6 +1114,10 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         return SIP_TRUE;
     }
 
+#ifdef SIP_BADMESSAGE_PARSING
+    SIP_INT32 nBadMandatoryHdrMask = 0;
+#endif
+
     while ((pStartPt < pEndPt) && (bHdrEnd == SIP_FALSE))
     {
         /*find next terminating CRLF*/
@@ -1144,6 +1148,39 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
                 }
                 m_pBadHdrList->AddHeader(pBadHdr);
                 pBadHdr->SipDelete();
+            }
+
+            SIP_INT32 eHdrType = SipGetHdrType(pszHdrName);
+
+            switch (eHdrType)
+            {
+                case SipHeaderBase::FROM:
+                {
+                    nBadMandatoryHdrMask = (nBadMandatoryHdrMask | MANDATORY_HDR_FROM);
+                    break;
+                }
+                case SipHeaderBase::TO:
+                {
+                    nBadMandatoryHdrMask = (nBadMandatoryHdrMask | MANDATORY_HDR_TO);
+                    break;
+                }
+                case SipHeaderBase::CALL_ID:
+                {
+                    nBadMandatoryHdrMask = (nBadMandatoryHdrMask | MANDATORY_HDR_CALL_ID);
+                    break;
+                }
+                case SipHeaderBase::CSEQ:
+                {
+                    nBadMandatoryHdrMask = (nBadMandatoryHdrMask | MANDATORY_HDR_CSEQ);
+                    break;
+                }
+                case SipHeaderBase::VIA:
+                {
+                    nBadMandatoryHdrMask = (nBadMandatoryHdrMask | MANDATORY_HDR_VIA);
+                    break;
+                }
+                default:
+                    break;
             }
 #else
             if (pszHdrName != SIP_NULL)
@@ -1208,6 +1245,31 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
         pStartPt = pTempPos + SIP_THREE;
         pTempPos = SIP_NULL;
     }
+
+#ifdef SIP_BADMESSAGE_PARSING
+    mbitMask = (mbitMask & ~nBadMandatoryHdrMask);
+
+    if ((mbitMask & MANDATORY_HDR_FROM) == 0)
+    {
+        m_objHdrs->RemoveHdr(SipHeaderBase::FROM);
+    }
+    if ((mbitMask & MANDATORY_HDR_TO) == 0)
+    {
+        m_objHdrs->RemoveHdr(SipHeaderBase::TO);
+    }
+    if ((mbitMask & MANDATORY_HDR_CALL_ID) == 0)
+    {
+        m_objHdrs->RemoveHdr(SipHeaderBase::CALL_ID);
+    }
+    if ((mbitMask & MANDATORY_HDR_CSEQ) == 0)
+    {
+        m_objHdrs->RemoveHdr(SipHeaderBase::CSEQ);
+    }
+    if ((mbitMask & MANDATORY_HDR_VIA) == 0)
+    {
+        m_objHdrs->RemoveHdr(SipHeaderBase::VIA);
+    }
+#endif
 
     /*Check for Header end completion*/
     if (bHdrEnd != SIP_TRUE)
