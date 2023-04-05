@@ -1559,6 +1559,10 @@ TEST_F(AosApplicationTest, Process)
     m_pTestAosApplication->SetLteAttachState(IMS_LTE_INFO_COMBINED_ATTACHED);
     m_pTestAosApplication->ProcessImsEstablishmentTimerExpired();
     EXPECT_FALSE(m_pTestAosApplication->IsTimerRunning(TIMER_IMS_ESTABLISHMENT));
+    m_pTestAosApplication->SetImsCall(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(0);
+    m_pTestAosApplication->ProcessImsEstablishmentTimerExpired();
+    m_pTestAosApplication->SetImsCall(IMS_FALSE);
 
     // TEST_F : UpdateRegRecoveryHeld
     m_pTestAosApplication->SetImsCall(IMS_TRUE);
@@ -1642,6 +1646,15 @@ TEST_F(AosApplicationTest, ImsEstablishmentStart)
             .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(0);
     m_pTestAosApplication->ProcessImsEstablishmentStart();
+
+    // IMS call is active
+    EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())
+            .Times(1)
+            .WillRepeatedly(Return(IMS_FALSE));
+    m_pTestAosApplication->SetImsCall(IMS_TRUE);
+    EXPECT_CALL(m_objMockIAosNetTracker, GetMobileNetworkType()).Times(0);
+    m_pTestAosApplication->ProcessImsEstablishmentStart();
+    m_pTestAosApplication->SetImsCall(IMS_FALSE);
 
     // IsSupportedNetworkTypeForCellular is false
     EXPECT_CALL(m_objMockIAosRegistration, IsRegistered())
