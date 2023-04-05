@@ -714,20 +714,6 @@ IMS_BOOL AosHandle::IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT3
 }
 
 PROTECTED
-IMS_BOOL AosHandle::IsServiceFeature(IN IMS_UINT32 nFeature) const
-{
-    for (IMS_UINT32 i = 0; i < m_objServiceFeatures.GetSize(); i++)
-    {
-        if (nFeature == m_objServiceFeatures.GetAt(i))
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
-}
-
-PROTECTED
 IMS_BOOL AosHandle::IsWifiConnected()
 {
     return (m_piWifiWatcher->GetState() == IWifiWatcher::STATE_CONNECTED);
