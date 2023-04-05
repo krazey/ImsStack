@@ -89,6 +89,7 @@ private:
 
     void CleanMtsMessage(IN IMtsMessage* piMtsMessage);
     void CleanMtsMessageWithRpMr(IN IMS_SINT32 nMrOfRp);
+    void CleanMtsMessageWithInReplyTo(IN IPageMessage* piPageMessage);
     void CleanRetryContent();
     void TerminateAllMessages();
     void TerminateMessage(IN IMtsMessage* piMtsMessage);
@@ -107,7 +108,6 @@ private:
     void SetMessageInfo(IN IPageMessage* piPageMessage, IN const ByteArray& objContent,
             IN SmsFormatType eSmsFormat, IN const AString& strDestination,
             IN MtsTransactionType eMessageType, OUT IMtsMessage* piMtsMessage);
-    void UpdateRPAckMap(IN IPageMessage* piPageMessage);
 
     void StartRetryAfterTimer(IN IMS_SINT32 nRetryAfterValue);
     void StopRetryAfterTimer();
@@ -119,7 +119,6 @@ private:
     IMS_BOOL m_bProcessingMsg;
     IMS_SINT32 m_nSlotId;
     AString m_strLastRcvIpsmgwAddr;
-    ImsList<IMtsMessage*> m_objRpAckedMsgList;
     IMtsService* m_piMtsService;
     IMtsErrorHandler* m_piMtsErrorHandler;
     MtsDynamicLoader* m_pMtsDynamicLoader;
