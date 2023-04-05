@@ -86,7 +86,6 @@ public class CarrierConfig {
             CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL,
             CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL,
             CarrierConfigManager.KEY_GBA_MODE_INT,
-            CarrierConfigManager.KEY_SUPPORTS_CALL_COMPOSER_BOOL,
 
             // Internal usage temporarily
             CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL,
@@ -130,8 +129,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "registration_preferred_accesstype_feature_tag_int";
         public static final String KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY =
                 KEY_PREFIX + "registration_permanent_error_code_int_array";
-        public static final String KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY =
-                KEY_PREFIX + "capability_type_call_composer_int_array";
     }
 
     public static class ImsAcs {

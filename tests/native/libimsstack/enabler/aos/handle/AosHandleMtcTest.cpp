@@ -448,11 +448,6 @@ protected:
     ITimer* GetVolteHysTimer() { return m_pAosHandleMtc->m_piVolteHysTimer; }
 
     void Timer_TimerExpired(IN ITimer* piTimer) { m_pAosHandleMtc->Timer_TimerExpired(piTimer); }
-
-    IMS_UINT32 GetNetworkTypeFromRegistrationTech(IN IMS_SINT32 nRegistrationTech)
-    {
-        return m_pAosHandleMtc->GetNetworkTypeFromRegistrationTech(nRegistrationTech);
-    }
 };
 
 TEST_F(AosHandleMtcTest, Constructor)
@@ -961,7 +956,7 @@ TEST_F(AosHandleMtcTest, InitializeServiceBlock_Test)
 TEST_F(AosHandleMtcTest, InitializeServiceFeature_Test1)
 {
     // Test1: All support
-    // Expectation: MMTEL, VIDEO, TEXT, VERSTAT, USSI, Call Composer
+    // Expectation: MMTEL, VIDEO, TEXT, VERSTAT, USSI
 
     EXPECT_CALL(m_objMockIAosNConfiguration, IsRttSupported())
             .Times(AnyNumber())
@@ -975,22 +970,6 @@ TEST_F(AosHandleMtcTest, InitializeServiceFeature_Test1)
             .Times(AnyNumber())
             .WillRepeatedly(Return(CarrierConfig::USSD_OVER_IMS_PREFERRED));
 
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallComposerSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    ImsVector<IMS_SINT32> objRegTechForCallComposer;
-    objRegTechForCallComposer.Clear();
-    objRegTechForCallComposer.Add(CarrierConfig::Ims::REGISTRATION_TECH_LTE);
-    objRegTechForCallComposer.Add(CarrierConfig::Ims::REGISTRATION_TECH_NR);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegistrationTechForCallComposer())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegTechForCallComposer));
-
-    EXPECT_CALL(m_objMockIAosNetTracker, GetNetworkType())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(NW_REPORT_RADIO_LTE));
-
     InitializeServiceFeature();
 
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(ImsAosFeature::MMTEL));
@@ -998,8 +977,6 @@ TEST_F(AosHandleMtcTest, InitializeServiceFeature_Test1)
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(ImsAosFeature::TEXT));
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(ImsAosFeature::VERSTAT));
     EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(ImsAosFeature::USSI));
-    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(
-            ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY));
 }
 
 TEST_F(AosHandleMtcTest, InitializeServiceFeature_Test2)
@@ -1021,10 +998,6 @@ TEST_F(AosHandleMtcTest, InitializeServiceFeature_Test2)
     EXPECT_CALL(m_objMockIAosNConfiguration, GetUssdMethod())
             .Times(AnyNumber())
             .WillRepeatedly(Return(CarrierConfig::USSD_OVER_CS_ONLY));
-
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallComposerSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_FALSE));
 
     InitializeServiceFeature();
 
@@ -2484,36 +2457,6 @@ TEST_F(AosHandleMtcTest, ProcessNetworkChanged_RefreshSsacInfoOnLte)
     EXPECT_TRUE(IsSsacBarred());
 }
 
-TEST_F(AosHandleMtcTest, ProcessNetworkChanged_CallComposerChanged)
-{
-    EXPECT_CALL(m_objMockIAosNConfiguration, IsCallComposerSupported())
-            .Times(AnyNumber())
-            .WillRepeatedly(Return(IMS_TRUE));
-
-    ImsVector<IMS_SINT32> objRegTechForCallComposer;
-    objRegTechForCallComposer.Clear();
-    objRegTechForCallComposer.Add(CarrierConfig::Ims::REGISTRATION_TECH_LTE);
-    objRegTechForCallComposer.Add(CarrierConfig::Ims::REGISTRATION_TECH_NR);
-    EXPECT_CALL(m_objMockIAosNConfiguration, GetRegistrationTechForCallComposer())
-            .Times(AnyNumber())
-            .WillRepeatedly(ReturnRef(objRegTechForCallComposer));
-
-    SetNetworkType(NW_REPORT_RADIO_LTE);
-    ProcessNetworkChanged();
-    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(
-            ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY));
-
-    SetNetworkType(NW_REPORT_RADIO_WLAN);
-    ProcessNetworkChanged();
-    EXPECT_FALSE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(
-            ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY));
-
-    SetNetworkType(NW_REPORT_RADIO_NR);
-    ProcessNetworkChanged();
-    EXPECT_TRUE(m_pAosHandleMtc->GetFeatureTagList().HasFeature(
-            ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY));
-}
-
 TEST_F(AosHandleMtcTest, ProcessVopsStateChanged_Test1)
 {
     // Test1: call active
@@ -2960,20 +2903,6 @@ TEST_F(AosHandleMtcTest, GetVideoBlockReasonForIpcan_Test)
 
     SetNetworkType(NW_REPORT_RADIO_WLAN);
     EXPECT_EQ(GetVideoBlockReasonForIpcan(), AosHandle::BLOCK_VIWIFI_CAPABILITY);
-}
-
-TEST_F(AosHandleMtcTest, GetNetworkTypeFromRegistrationTech_Test)
-{
-    EXPECT_EQ(GetNetworkTypeFromRegistrationTech(CarrierConfig::Ims::REGISTRATION_TECH_LTE),
-            NW_REPORT_RADIO_LTE);
-    EXPECT_EQ(GetNetworkTypeFromRegistrationTech(CarrierConfig::Ims::REGISTRATION_TECH_IWLAN),
-            NW_REPORT_RADIO_WLAN);
-    EXPECT_EQ(GetNetworkTypeFromRegistrationTech(CarrierConfig::Ims::REGISTRATION_TECH_CROSS_SIM),
-            NW_REPORT_RADIO_NOSRV);
-    EXPECT_EQ(GetNetworkTypeFromRegistrationTech(CarrierConfig::Ims::REGISTRATION_TECH_NR),
-            NW_REPORT_RADIO_NR);
-    EXPECT_EQ(GetNetworkTypeFromRegistrationTech(CarrierConfig::Ims::REGISTRATION_TECH_NONE),
-            NW_REPORT_RADIO_NOSRV);
 }
 
 TEST_F(AosHandleMtcTest, IsCsFeatureTagRequired_Test)
