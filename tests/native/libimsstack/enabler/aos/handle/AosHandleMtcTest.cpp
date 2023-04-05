@@ -176,11 +176,6 @@ protected:
         m_pAosHandleMtc->m_objCapabilities = objNewCapabilities;
     }
 
-    IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature)
-    {
-        return m_pAosHandleMtc->IsServiceFeature(nFeature);
-    }
-
     IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock)
     {
         return m_pAosHandleMtc->IsBlockForMobile(nBlock);
@@ -474,12 +469,6 @@ TEST_F(AosHandleMtcTest, Constructor)
                         static_cast<IMS_UINT32>(AosCapability::VOICE)) > 0);
     EXPECT_TRUE((GetCapabilities().GetValue(static_cast<IMS_UINT32>(AosNetworkType::NR)) &
                         static_cast<IMS_UINT32>(AosCapability::VIDEO)) > 0);
-
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::MMTEL));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VIDEO));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::TEXT));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::USSI));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VERSTAT));
 }
 
 TEST_F(AosHandleMtcTest, Destructor)

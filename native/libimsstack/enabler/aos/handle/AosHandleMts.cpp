@@ -43,8 +43,6 @@ AosHandleMts::AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& st
             static_cast<IMS_UINT32>(AosCapability::SMS));
     m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::SMS));
-
-    m_objServiceFeatures.Append(ImsAosFeature::SMSIP);
 }
 
 PUBLIC VIRTUAL AosHandleMts::~AosHandleMts()

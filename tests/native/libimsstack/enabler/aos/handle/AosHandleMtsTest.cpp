@@ -98,11 +98,6 @@ protected:
 
     ImsMap<IMS_UINT32, IMS_UINT32> GetCapabilities() { return m_pAosHandleMts->m_objCapabilities; }
 
-    IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature)
-    {
-        return m_pAosHandleMts->IsServiceFeature(nFeature);
-    }
-
     IMS_UINT32 GetSupportedRats() { return m_pAosHandleMts->m_nSupportedRats; }
 
     void InitializeSupportedRats() { m_pAosHandleMts->InitializeSupportedRats(); }
@@ -164,8 +159,6 @@ TEST_F(AosHandleMtsTest, Constructor_Test)
                         static_cast<IMS_UINT32>(AosCapability::SMS)) > 0);
     EXPECT_TRUE((GetCapabilities().GetValue(static_cast<IMS_UINT32>(AosNetworkType::NR)) &
                         static_cast<IMS_UINT32>(AosCapability::SMS)) > 0);
-
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::SMSIP));
 }
 
 TEST_F(AosHandleMtsTest, NConfiguration_NotifyConfigChanged_Test)
