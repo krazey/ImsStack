@@ -72,7 +72,8 @@ private:
             IN_OUT IMessage& objMessage, IN const ImsList<AString>& lstEntryUris);
     ImsList<IMtcBlockRule*> GetIncomingCallBlockRules();
     ImsList<IMtcBlockRule*> GetOutgoingCallBlockRules();
-    void SetAcceptContact(IN ISipMessage* piSipMessage);
+    IMS_BOOL IsCallPull() const;
+    IMS_RESULT HandleCallPull(IN const AString& strTarget);
 
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
     std::function<CallStateName()> m_objOperationAfterBlockCheck;

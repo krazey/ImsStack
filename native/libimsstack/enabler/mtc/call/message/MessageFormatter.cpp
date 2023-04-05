@@ -29,9 +29,12 @@
 #include "ServiceTrace.h"
 #include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
+#include "call/ParticipantInfo.h"
 #include "call/message/MessageFormatter.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "core/Replaces.h"
+#include "dialogevent/IMultiEndpointManager.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
 #include "sipcore/Sip.h"
@@ -152,6 +155,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage(IN CallType eCallTy
     SetCallerIdHeader();
     // SetTipHeader();
     SetPEarlyMediaHeader();
+    SetReplacesHeader();
     SetCarrierSpecificHeaders();
     SetCallComposerElements();
 
@@ -674,7 +678,6 @@ void MessageFormatter::SetReasonHeader(IN const AString& strReason)
 PRIVATE
 void MessageFormatter::SetCarrierSpecificHeaders()
 {
-    // TODO: add SetCarrierSpecificHeaders() to all message depends on the requirements
     MtcConfigurationProxy& objConfig = m_objContext.GetConfigurationProxy();
     if (objConfig.Is(Feature::CARRIER_SPECIFIC_SIP_HEADER, MessageUtil::STR_P_TTA_VOLTE_INFO))
     {
@@ -696,6 +699,16 @@ void MessageFormatter::SetCarrierSpecificHeaders()
             // TODO: update KT carrier's config for termination reason
             m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage, "normal",
                     ISipHeader::UNKNOWN, MessageUtil::STR_P_SKT_BYE_CAUSE);
+        }
+    }
+
+    // Assumes only VZW supports CALL_PULL and it's a carrier specific feature.
+    if (m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL))
+    {
+        if (m_eFormType == FormType::START)
+        {
+            m_objContext.GetMessageUtils().AddValueIfNotExists(m_piNextMessage, "true",
+                    ISipHeader::UNKNOWN, MessageUtil::STR_P_COM_ENABLETRANSCODING);
         }
     }
 }
@@ -734,6 +747,30 @@ void MessageFormatter::SetCallComposerElements()
         CallComposerUtil::SetLocation(
                 pLatitude->strValue, pLongitude->strValue, m_objContext, *m_piNextMessage);
     }
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PRIVATE
+void MessageFormatter::SetReplacesHeader()
+{
+    if (!m_objContext.GetSupplementaryService().Get(SuppType::CALL_PULL))
+    {
+        return;
+    }
+
+    IMultiEndpointManager* piMultiEndpointManager = m_objContext.GetMultiEndpointManager();
+    if (!piMultiEndpointManager)
+    {
+        return;
+    }
+
+    IMultiEndpointManager::PullingDialogInfo objDialogInfo = piMultiEndpointManager->GetDialogInfo(
+            m_objContext.GetParticipantInfo().GetRemoteNumber());
+    Replaces* pReplaces = new Replaces(
+            objDialogInfo.strCallId, objDialogInfo.strLocalTag, objDialogInfo.strRemoteTag);
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
+            m_piNextMessage, pReplaces->ToString(IMS_FALSE), ISipHeader::REPLACES);
 }
 
 /* -------------------------------------------------------------------------------------------------

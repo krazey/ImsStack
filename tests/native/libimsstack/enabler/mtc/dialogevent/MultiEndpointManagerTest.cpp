@@ -59,21 +59,6 @@ MATCHER_P(IsSameListSize, size, "")
     return arg.GetSize() == size;
 }
 
-MATCHER_P(IsPullableCall, expectation, "")
-{
-    return arg.GetAt(0)->m_bIsPullable == expectation;
-}
-
-MATCHER_P(IsHeldCall, expectation, "")
-{
-    return arg.GetAt(0)->m_bIsHeld == expectation;
-}
-
-MATCHER_P(IsSameCallType, expectation, "")
-{
-    return arg.GetAt(0)->m_nCallType == expectation;
-}
-
 class MultiEndpointManagerTest : public ::testing::Test
 {
 public:
@@ -509,6 +494,53 @@ TEST_F(MultiEndpointManagerTest, OnSubscriptionNotifiedNotifiesExteralCallsToJni
     pMultiEndpointManager->OnSubscriptionNotified(strAnyXml);
 }
 
+TEST_F(MultiEndpointManagerTest, OnSubscriptionNotifiedNotifiesExteralCallsToJniIfConfirmedState)
+{
+    ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
+    ON_CALL(*(piDialogSubscription.get()), Subscribe).WillByDefault(Return(IMS_SUCCESS));
+
+    const AString strAnyXml;
+    ON_CALL(*(piDialogInfoManager.get()), Update(strAnyXml)).WillByDefault(Return(IMS_SUCCESS));
+
+    MockState objState(0, 0, Dialog::State::STATE_CONFIRMED);
+    MockDialog objDialog;
+    objDialog.SetState(objState);
+    const AString strNonLocalUri("someUri");
+    objDialog.SetLocalUri(strNonLocalUri);
+    ImsList<Dialog*> objDialogs;
+    objDialogs.Append(&objDialog);
+
+    EXPECT_CALL(*(piDialogInfoManager.get()), GetDialogs).WillRepeatedly(ReturnRef(objDialogs));
+    EXPECT_CALL(objJniMtcServiceThread, OnExternalCallsChanged(IsSameListSize(1)));
+
+    CreateManager(IMS_TRUE);
+    pMultiEndpointManager->OnSubscriptionNotified(strAnyXml);
+}
+
+TEST_F(MultiEndpointManagerTest,
+        OnSubscriptionNotifiedNotifiesExteralCallsToJniExcludingTryingState)
+{
+    ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
+    ON_CALL(*(piDialogSubscription.get()), Subscribe).WillByDefault(Return(IMS_SUCCESS));
+
+    const AString strAnyXml;
+    ON_CALL(*(piDialogInfoManager.get()), Update(strAnyXml)).WillByDefault(Return(IMS_SUCCESS));
+
+    MockState objState(0, 0, Dialog::State::STATE_TRYING);
+    MockDialog objDialog;
+    objDialog.SetState(objState);
+    const AString strNonLocalUri("someUri");
+    objDialog.SetLocalUri(strNonLocalUri);
+    ImsList<Dialog*> objDialogs;
+    objDialogs.Append(&objDialog);
+
+    EXPECT_CALL(*(piDialogInfoManager.get()), GetDialogs).WillRepeatedly(ReturnRef(objDialogs));
+    EXPECT_CALL(objJniMtcServiceThread, OnExternalCallsChanged(IsSameListSize(0)));
+
+    CreateManager(IMS_TRUE);
+    pMultiEndpointManager->OnSubscriptionNotified(strAnyXml);
+}
+
 TEST_F(MultiEndpointManagerTest, OnSubscriptionNotifiedDoesNotNotifyIfServiceIsNull)
 {
     ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
@@ -604,6 +636,8 @@ TEST_F(MultiEndpointManagerTest, JniExternalCallsDoesNotExcludeNonOwnDialog)
     const AString strLocalOwnUri("sip:local;gr=urn:gsma:imei:98765432-109876-0");
     ImsList<Dialog*> objDialogs;
     MockDialog objDialog;
+    MockState objState(0, 0, Dialog::State::STATE_CONFIRMED);
+    objDialog.SetState(objState);
     objDialog.SetLocalUri(strLocalOwnUri);
     objDialogs.Append(&objDialog);
     ON_CALL(*(piDialogInfoManager.get()), GetDialogs).WillByDefault(ReturnRef(objDialogs));

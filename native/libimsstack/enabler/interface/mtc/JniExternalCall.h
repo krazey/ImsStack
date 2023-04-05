@@ -17,7 +17,9 @@
 #ifndef JNI_EXTERNAL_CALL_H_
 #define JNI_EXTERNAL_CALL_H_
 
+#include "AString.h"
 #include "ImsTypeDef.h"
+#include "ServiceTrace.h"
 
 struct JniExternalCall
 {
@@ -60,7 +62,21 @@ public:
         return *this;
     }
 
+    inline const AString ToString() const
+    {
+        AString strLog;
+        strLog.Sprintf("CallId: %s, Address: %s, LocalAddrsss: %s, IsPullable: %s, CallState: %d, \
+                CallType: %d",
+                m_strCallId.GetStr(), m_strAddress.GetStr(), m_strLocalAddress.GetStr(),
+                _TRACE_B_(m_bIsPullable), m_nCallState, m_nCallType);
+        return strLog;
+    }
+
 public:
+    // See ImsExternalCallState in Telephony framework.
+    static const IMS_UINT32 CALL_STATE_CONFIRMED = 1;
+    static const IMS_UINT32 CALL_STATE_TERMINATED = 2;
+
     AString m_strCallId;
     AString m_strAddress;
     AString m_strLocalAddress;

@@ -109,10 +109,10 @@ VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::Ge
     for (IMS_UINT32 i = 0; i < m_piDialogInfoManager->GetDialogs().GetSize(); ++i)
     {
         const Dialog* pDialog = m_piDialogInfoManager->GetDialogs().GetAt(i);
-        AString strRemoteNumber =
-                pDialog->GetRemoteParticipant().GetIdentity().GetUri();  // TODO: get number only.
+
+        AString strRemoteNumber = pDialog->GetRemoteParticipant().GetIdentity().GetUri();
         IMS_TRACE_I("GetDialogInfo RemoteNumber[%s]", strRemoteNumber.GetStr(), 0, 0);
-        if (strRemoteNumber.Equals(strTarget))
+        if (strRemoteNumber.Contains(strTarget))
         {
             IMS_TRACE_I("GetDialogInfo matched dialog ID[%s]", pDialog->GetId().GetStr(), 0, 0);
             objInfo.strCallId = pDialog->GetCallId();
@@ -291,6 +291,13 @@ ImsList<const JniExternalCall*> MultiEndpointManager::GetJniExternalCalls() cons
             continue;
         }
 
+        if (IsEarlyState(objDialog))
+        {
+            IMS_TRACE_D("GetJniExternalCalls ignores early states [%d]",
+                    objDialog.GetState().GetState(), 0, 0);
+            continue;
+        }
+
         JniExternalCall* pJniExternalCall = new JniExternalCall();
 
         pJniExternalCall->m_strCallId = objDialog.GetId();
@@ -298,13 +305,14 @@ ImsList<const JniExternalCall*> MultiEndpointManager::GetJniExternalCalls() cons
         pJniExternalCall->m_strLocalAddress =
                 objDialog.GetLocalParticipant().GetIdentity().GetUri();
         pJniExternalCall->m_bIsPullable = IsPullable(objDialog);
-        pJniExternalCall->m_nCallState = objDialog.GetState().GetState();
+        pJniExternalCall->m_nCallState =
+                objDialog.GetState().GetState() == Dialog::State::STATE_CONFIRMED
+                ? JniExternalCall::CALL_STATE_CONFIRMED
+                : JniExternalCall::CALL_STATE_TERMINATED;
         pJniExternalCall->m_nCallType = static_cast<IMS_UINT32>(GetCallType(objDialog));
         pJniExternalCall->m_bIsHeld = IsHeld(objDialog);
 
-        IMS_TRACE_D("GetJniExternalCalls CallId[%s] Address[%s] LocalAddress[%s]",
-                pJniExternalCall->m_strCallId.GetStr(), pJniExternalCall->m_strAddress.GetStr(),
-                pJniExternalCall->m_strLocalAddress.GetStr());
+        IMS_TRACE_D("GetJniExternalCalls >> %s", pJniExternalCall->ToString().GetStr(), 0, 0);
 
         objJniExternalCalls.Append(pJniExternalCall);
     }
@@ -346,7 +354,8 @@ CallType MultiEndpointManager::GetCallType(const Dialog& objDialog) const
 {
     if (objDialog.GetExtraInfo().GetMediaInfo().eAudioQuality == AUDIO_QUALITY_AMR_WB)
     {
-        return objDialog.GetExtraInfo().GetMediaInfo().eVideoQuality == VIDEO_QUALITY_QVGA_PR
+        // VIDEO_QUALITY_NOTUSED is downgraded VT.
+        return objDialog.GetExtraInfo().GetMediaInfo().eVideoQuality != VIDEO_QUALITY_NONE
                 ? CallType::VT
                 : CallType::VOIP;
     }
@@ -396,4 +405,19 @@ IMS_BOOL MultiEndpointManager::IsOwnDialog(const Dialog& objDialog) const
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL MultiEndpointManager::IsEarlyState(const Dialog& objDialog) const
+{
+    switch (objDialog.GetState().GetState())
+    {
+        case Dialog::State::STATE_IDLE:
+        case Dialog::State::STATE_TRYING:
+        case Dialog::State::STATE_PROCEEDING:
+        case Dialog::State::STATE_EARLY:
+            return IMS_TRUE;
+        default:
+            return IMS_FALSE;
+    }
 }
