@@ -50,7 +50,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession,
         m_objContext(objContext),
         m_objSession(objSession),
         m_pMessageSender(pMessageSender),
-        m_objExtensionSet(GetSupportedExtensions()),
+        m_objExtensionSet(objContext, GetSupportedExtensions()),
         m_eCallType(eCallType),
         m_ePreviousCallType(CallType::UNKNOWN),
         m_bVideoCapable(IMS_FALSE),
@@ -354,19 +354,19 @@ ImsList<IMtcExtension*> MtcSession::GetSupportedExtensions() const
 {
     ImsList<IMtcExtension*> lstExtensions;
 
-    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_FROM_CHANGE));
-    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_HISTORY_INFO));
-    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_REPLACES));
-    lstExtensions.Append(new MtcExtension(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
-    lstExtensions.Append(new EarlyDialogTerminatedExtension());
-    lstExtensions.Append(new RprExtension());
-    lstExtensions.Append(new SessionTimerExtension());
+    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_FROM_CHANGE));
+    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_HISTORY_INFO));
+    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_REPLACES));
+    lstExtensions.Append(new MtcExtension(m_objContext, MtcExtensionSet::OPTION_TAG_TARGET_DIALOG));
+    lstExtensions.Append(new EarlyDialogTerminatedExtension(m_objContext));
+    lstExtensions.Append(new RprExtension(m_objContext));
+    lstExtensions.Append(new SessionTimerExtension(m_objContext));
 
     // TODO: check CallType.
     if (!m_objContext.GetCallInfo().bUssi &&
             m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED))
     {
-        lstExtensions.Append(new PreconditionExtension());
+        lstExtensions.Append(new PreconditionExtension(m_objContext));
     }
 
     return lstExtensions;

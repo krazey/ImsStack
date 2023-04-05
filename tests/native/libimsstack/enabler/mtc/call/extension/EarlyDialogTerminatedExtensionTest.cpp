@@ -15,8 +15,7 @@
  */
 
 #include "ISipHeader.h"
-#include "MockIMtcContext.h"
-#include "MtcContextRepository.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/extension/EarlyDialogTerminatedExtension.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "core/MockIMessage.h"
@@ -34,7 +33,7 @@ class EarlyDialogTerminatedExtensionTest : public ::testing::Test
 public:
     EarlyDialogTerminatedExtension* pExtension;
 
-    MockIMtcContext objContext;
+    MockIMtcCallContext objContext;
     MockISipMessage objSipMessage;
     MockIMessage objMessage;
     MockIMessageUtils objMessageUtils;
@@ -42,11 +41,10 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
-        pExtension = new EarlyDialogTerminatedExtension();
+        pExtension = new EarlyDialogTerminatedExtension(objContext);
     }
 
     virtual void TearDown() override { delete pExtension; }

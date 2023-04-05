@@ -22,6 +22,7 @@
 #include "ImsTypeDef.h"
 #include "call/message/IMtcMessageHandler.h"
 
+class IMtcCallContext;
 class IMtcExtension;
 
 /*
@@ -40,7 +41,8 @@ public:
     static const AString OPTION_TAG_SESSION_TIMER;
     static const AString OPTION_TAG_TARGET_DIALOG;
 
-    explicit MtcExtensionSet(IN const ImsList<IMtcExtension*>& lstExtensions);
+    explicit MtcExtensionSet(
+            IN IMtcCallContext& objContext, IN const ImsList<IMtcExtension*>& lstExtensions);
     explicit MtcExtensionSet(IN const MtcExtensionSet& objRhs);
     virtual ~MtcExtensionSet();
     MtcExtensionSet& operator=(IN const MtcExtensionSet& objRhs);
@@ -88,6 +90,7 @@ private:
     void Clear();
     IMtcExtension* CreateExtension(IN const AString& strOptionTag) const;
 
+    IMtcCallContext& m_objContext;
     ImsMap<AString, IMtcExtension*> m_objExtensions;
 };
 

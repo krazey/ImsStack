@@ -18,15 +18,16 @@
 #include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "SipMethod.h"
+#include "call/IMtcCallContext.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-PreconditionExtension::PreconditionExtension() :
-        MtcExtension(MtcExtensionSet::OPTION_TAG_PRECONDITION)
+PreconditionExtension::PreconditionExtension(IN IMtcCallContext& objContext) :
+        MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_PRECONDITION)
 {
 }
 
@@ -74,7 +75,7 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatRequest(
             return;
     }
 
-    MessageUtil::AddValueIfNotExists(&objRequest, GetOptionTag(), eHeaderType);
+    m_objContext.GetMessageUtils().AddValueIfNotExists(&objRequest, GetOptionTag(), eHeaderType);
 }
 
 PUBLIC VIRTUAL void PreconditionExtension::FormatResponse(
@@ -89,7 +90,8 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatResponse(
         return;
     }
 
-    MessageUtil::AddValueIfNotExists(&objResponse, GetOptionTag(), ISipHeader::REQUIRE);
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
+            &objResponse, GetOptionTag(), ISipHeader::REQUIRE);
 }
 
 PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
@@ -101,7 +103,7 @@ PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
         return;
     }
 
-    if (eType != RequestType::START && !MessageUtil::HasSdp(&objRequest))
+    if (eType != RequestType::START && !m_objContext.GetMessageUtils().HasSdp(&objRequest))
     {
         IMS_TRACE_D("HandleRequest : Don't check precondition feature without SDP.", 0, 0, 0);
         return;
@@ -118,7 +120,7 @@ PUBLIC VIRTUAL void PreconditionExtension::HandleResponse(
         return;
     }
 
-    if (!MessageUtil::HasSdp(&objResponse))
+    if (!m_objContext.GetMessageUtils().HasSdp(&objResponse))
     {
         IMS_TRACE_D("HandleResponse : Don't check precondition feature without SDP.", 0, 0, 0);
         return;

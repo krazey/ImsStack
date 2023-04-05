@@ -22,6 +22,7 @@
 #include "call/extension/IMtcExtension.h"
 
 class IMessage;
+class IMtcCallContext;
 
 /**
  * This class provides basic methods for general extensions without any extension-specific logic.
@@ -29,7 +30,7 @@ class IMessage;
 class MtcExtension : public IMtcExtension
 {
 public:
-    explicit MtcExtension(IN const AString& strOptionTag);
+    explicit MtcExtension(IN IMtcCallContext& objContext, IN const AString& strOptionTag);
     explicit MtcExtension(IN const MtcExtension& objRhs);
     virtual ~MtcExtension();
     MtcExtension& operator=(IN const MtcExtension&) = delete;
@@ -44,11 +45,13 @@ public:
     void HandleRequest(IN RequestType eType, IN const IMessage& objRequest) override;
     void HandleResponse(IN ResponseType eType, IN const IMessage& objResponse) override;
 
+protected:
+    IMtcCallContext& m_objContext;
+
 private:
     void UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage);
 
     AString m_strOptionTag;
-
     IMS_BOOL m_bRequiredOnRemote;
     IMS_BOOL m_bSupportedOnRemote;
 };

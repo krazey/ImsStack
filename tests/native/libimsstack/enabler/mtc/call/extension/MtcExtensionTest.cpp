@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-#include "../../../../engine/interface/core/MockIMessage.h"
-#include "../../../../engine/interface/sipcore/MockISipMessage.h"
-#include "ISipHeader.h"
 #include "ImsList.h"
-#include "MockIMtcContext.h"
-#include "MtcContextRepository.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/extension/MtcExtension.h"
+#include "core/MockIMessage.h"
+#include "sipcore/ISipHeader.h"
+#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -40,16 +39,15 @@ public:
     MockISipMessage objSipMessageSupportsSomeOptionTag;
     MockIMessage objMessageRequiresSomeOptionTag;
     MockIMessage objMessageSupportsSomeOptionTag;
-    MockIMtcContext objContext;
+    MockIMtcCallContext objContext;
     MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        pExtension = new MtcExtension(strSomeOptionTag);
+        pExtension = new MtcExtension(objContext, strSomeOptionTag);
 
         InitMessageRequiresOptionTag(strSomeOptionTag);
         InitMessageSupportsOptionTag(strSomeOptionTag);

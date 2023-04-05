@@ -20,6 +20,8 @@
 #include "ImsTypeDef.h"
 #include "call/extension/MtcExtension.h"
 
+class IMtcCallContext;
+
 /**
  * This class represents the session timer extension.
  * But, timer header is controlled by SIP engine so this class only handles
@@ -28,7 +30,7 @@
 class SessionTimerExtension final : public MtcExtension
 {
 public:
-    explicit SessionTimerExtension();
+    explicit SessionTimerExtension(IN IMtcCallContext& objContext);
     explicit SessionTimerExtension(IN const SessionTimerExtension& objRhs);
     virtual ~SessionTimerExtension();
     SessionTimerExtension& operator=(IN const SessionTimerExtension&) = delete;
