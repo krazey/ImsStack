@@ -18,7 +18,6 @@
 #define INTERFACE_DIALOG_SUBSCRIPTION_H_
 
 #include "ImsTypeDef.h"
-#include "sipcore/SipStatusCode.h"
 
 class AString;
 

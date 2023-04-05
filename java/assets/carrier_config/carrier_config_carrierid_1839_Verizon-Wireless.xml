@@ -262,6 +262,8 @@
     <boolean name="imsvoice.support_conference_refer_subscribe_bool" value="true"/>
     <int name="imsvoice.call_type_after_audio_and_video_call_merged_int" value="0"/>
 
+    <boolean name="imsvoice.multiendpoint_supported_bool" value="false"/>
+
     <!-- MTC emergency call -->
     <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <boolean name="imsemergency.emergency_call_over_emergency_pdn_on_cellular_bool" value="true"/>

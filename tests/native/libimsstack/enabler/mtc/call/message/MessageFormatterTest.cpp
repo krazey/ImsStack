@@ -22,12 +22,14 @@
 #include "MtcContextRepository.h"
 #include "SipStatusCode.h"
 #include "call/MockIMtcCallContext.h"
+#include "call/ParticipantInfo.h"
 #include "call/message/MessageFormatter.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/MockICoreService.h"
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
+#include "dialogevent/MockIMultiEndpointManager.h"
 #include "helper/MtcSupplementaryService.h"
 #include "service/MockIFeatureCaps.h"
 #include "sipcore/MockISipMessage.h"
@@ -42,6 +44,7 @@ LOCAL IMS_SINT32 SLOT_ID = 0;
 
 using ::testing::_;
 using ::testing::AnyOf;
+using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
@@ -67,6 +70,7 @@ public:
     MtcConfigurationProxy* pConfigurationProxy;
     MtcSupplementaryService* pSupplementaryService;
     MessageUtils objMessageUtils;
+    ParticipantInfo* pParticipantInfo;
 
 protected:
     virtual void SetUp() override
@@ -87,6 +91,9 @@ protected:
         ON_CALL(objSession, GetNextRequest).WillByDefault(Return(&objMessage));
         ON_CALL(objSession, GetNextResponse).WillByDefault(Return(&objMessage));
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
+
+        pParticipantInfo = new ParticipantInfo(objContext);
+        ON_CALL(objContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
 
         pFormatter = new MessageFormatter(objContext, objSession);
     }
@@ -617,6 +624,42 @@ TEST_F(MessageFormatterTest, SetCarrierSpecificHeaders)
     pFormatter->FormAcceptMessage();
     pFormatter->FormUpdateMessage(UpdateType::NORMAL, IMS_TRUE);
     pFormatter->FormAcceptUpdateMessage();
+}
+
+TEST_F(MessageFormatterTest, SetCarrierSpecificHeadersSetsTranscodingHeaderIfCallPull)
+{
+    MockIMessageUtils objMockMessageUtils;
+    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
+    ON_CALL(*pConfigurationManager, IsCarrierSpecificSipHeader).WillByDefault(Return(IMS_FALSE));
+    pSupplementaryService->Add(SuppType::CALL_PULL, IMS_FALSE);
+    const AString strTranscodingHeader(MessageUtil::STR_P_COM_ENABLETRANSCODING);
+
+    // TODO: make this be checked isolated.
+    // EXPECT_CALL(objMockMessageUtils, AddValueIfNotExists(
+    //        &objMessage, _, ISipHeader::UNKNOWN, strTranscodingHeader));
+    pFormatter->FormStartMessage(CallType::VOIP);
+}
+
+TEST_F(MessageFormatterTest, FormStartMessageSetsReplaceHeaderIfCallPull)
+{
+    MockIMultiEndpointManager objMepManager;
+    ON_CALL(objContext, GetMultiEndpointManager).WillByDefault(Return(&objMepManager));
+    IMultiEndpointManager::PullingDialogInfo objDialogInfo;
+    objDialogInfo.strCallId = "anyCallId";
+    objDialogInfo.strLocalTag = "anyLocalTag";
+    objDialogInfo.strRemoteTag = "anyRemoteTag";
+    ON_CALL(objMepManager, GetDialogInfo(_)).WillByDefault(Return(objDialogInfo));
+    AString strReplaces("anyCallId;from-tag=anyLocalTag;to-tag=anyRemoteTag");
+
+    MockIMessageUtils objMockMessageUtils;
+    ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMockMessageUtils));
+
+    pSupplementaryService->Add(SuppType::CALL_PULL, IMS_FALSE);
+
+    // TODO: make this be checked isolated.
+    // EXPECT_CALL(objMockMessageUtils, AddValueIfNotExists(
+    //        &objMessage, strReplaces, ISipHeader::REPLACES, _));
+    pFormatter->FormStartMessage(CallType::VOIP);
 }
 
 TEST_F(MessageFormatterTest, GetRejectStatusCode)

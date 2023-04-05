@@ -38,6 +38,7 @@
 #include "core/MockIMessage.h"
 #include "core/MockISession.h"
 #include "dialingplan/MockIMtcDialingPlan.h"
+#include "dialogevent/MockIMultiEndpointManager.h"
 #include "helper/MockILastComeFirstServedHelper.h"
 #include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
@@ -90,6 +91,7 @@ public:
     MockILastComeFirstServedHelper objLastComeFirstServedHelper;
 
     MediaInfo objInputMediaInfo;
+    MediaInfo objOutputMediaInfo;
     ImsMap<SuppType, SuppService*> objInputSuppServices;
     CallInfo objCallInfo;
 
@@ -133,6 +135,8 @@ protected:
         pUssiController = new MockUssiController(objCallContext, IMS_NULL);
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+
+        ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objOutputMediaInfo));
 
         pIdleState = new IdleState(objCallContext);
     }
@@ -320,6 +324,77 @@ TEST_F(IdleStateTest, StartSetsOnly100WaitTimerAndTransitsToOutgoingState)
 
     EXPECT_EQ(CallStateName::OUTGOING,
             pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices));
+}
+
+TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabledButFailsIfMepIsNotSupported)
+{
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("any_target");
+
+    ON_CALL(objCallContext, GetMultiEndpointManager).WillByDefault(Return(nullptr));
+    SuppType eSuppType = SuppType::CALL_PULL;
+    objInputSuppServices.Add(eSuppType, new SuppService());
+
+    CallReasonInfo objReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+
+    pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
+}
+
+TEST_F(IdleStateTest, StartHandlesCallPullButFailsIfNoMatchedDialogExists)
+{
+    MockIMultiEndpointManager objMepManager;
+    ON_CALL(objCallContext, GetMultiEndpointManager).WillByDefault(Return(&objMepManager));
+
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("any_target");
+    IMS_BOOL bUssi = IMS_FALSE;
+
+    SuppType eSuppType = SuppType::CALL_PULL;
+    objInputSuppServices.Add(eSuppType, new SuppService());
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+
+    IMultiEndpointManager::PullingDialogInfo objDialogInfo;
+    EXPECT_CALL(objMepManager, GetDialogInfo(strTarget)).WillOnce(Return(objDialogInfo));
+
+    CallReasonInfo objReasonInfo(CODE_CALL_PULL_OUT_OF_SYNC);
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+
+    pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
+}
+
+TEST_F(IdleStateTest, StartHandlesCallPullIfCallPullIsEnabled)
+{
+    MockIMultiEndpointManager objMepManager;
+    ON_CALL(objCallContext, GetMultiEndpointManager).WillByDefault(Return(&objMepManager));
+
+    CallType eCallType = CallType::VOIP;
+    AString strTarget("any_target");
+    IMS_BOOL bUssi = IMS_FALSE;
+
+    SuppType eSuppType = SuppType::CALL_PULL;
+    objInputSuppServices.Add(eSuppType, new SuppService());
+
+    ON_CALL(objCallContext, IsUssi).WillByDefault(Return(bUssi));
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(
+                    Return(IMtcBlockChecker::Result(IMtcBlockChecker::Result::Status::PENDING)));
+
+    IMultiEndpointManager::PullingDialogInfo objDialogInfo;
+    objDialogInfo.strCallId = "anyCallId";
+    objDialogInfo.eCallType = CallType::VT;
+    objDialogInfo.pMediaInfo = new MediaInfo();
+    EXPECT_CALL(objMepManager, GetDialogInfo(strTarget)).WillOnce(Return(objDialogInfo));
+    EXPECT_CALL(objMediaManager, SetMediaInfo(*objDialogInfo.pMediaInfo)).Times(1);
+
+    pIdleState->Start(eCallType, strTarget, objInputMediaInfo, objInputSuppServices);
+    EXPECT_EQ(objDialogInfo.eCallType, objCallInfo.eInitialCallType);
+
+    delete objDialogInfo.pMediaInfo;
 }
 
 TEST_F(IdleStateTest, StartUssiInvokesSendStartFailedIfCreateSessionFailed)
@@ -813,8 +888,6 @@ TEST_F(IdleStateTest, OnAttachedInvokesSendIncomingCallReceivedIfRprNotSupported
     ON_CALL(objMtcSession, GetExtensionSet)
             .WillByDefault(ReturnRef(*GetTestExtensionSet(strNoRprTag)));
 
-    MediaInfo objMediaInfo;
-    ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
 
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnAttached());
@@ -973,8 +1046,6 @@ TEST_F(IdleStateTest, OnUssiAttachedTransitsAlertingState)
     ON_CALL(objMediaManager, GetNegotiationState(&objSession))
             .WillByDefault(Return(NegotiationState::STATE_IDLE));
 
-    MediaInfo objMediaInfo;
-    ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
     EXPECT_CALL(objUiNotifier, SendIncomingCallReceived(_, _, _, _, _));
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnUssiAttached());
 

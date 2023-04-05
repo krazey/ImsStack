@@ -100,6 +100,7 @@ private:
     void SetReasonHeader(IN const AString& strReason);
     void SetCarrierSpecificHeaders();
     void SetCallComposerElements();
+    void SetReplacesHeader();
 
     IMS_SINT32 GetRejectStatusCode(IN const CallReasonInfo& objReason);
     void GetRejectPhrase(IN const CallReasonInfo& objReason, OUT AString& strPhrase);
