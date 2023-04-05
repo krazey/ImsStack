@@ -96,6 +96,7 @@ public:
 protected:
     virtual void SetUp() override
     {
+        // For MtcSupplementaryService using MessageUtil
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objCallContext);
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
@@ -153,7 +154,7 @@ protected:
         ON_CALL(*pExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
         ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
         objExtensions.Append(pExtension);
-        return new MtcExtensionSet(objExtensions);
+        return new MtcExtensionSet(objCallContext, objExtensions);
     }
 };
 

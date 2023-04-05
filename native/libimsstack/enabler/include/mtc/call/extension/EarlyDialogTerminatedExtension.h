@@ -21,6 +21,7 @@
 #include "call/extension/MtcExtension.h"
 
 class IMessage;
+class IMtcCallContext;
 
 /**
  * This class represents the 199 extension.
@@ -28,7 +29,7 @@ class IMessage;
 class EarlyDialogTerminatedExtension final : public MtcExtension
 {
 public:
-    explicit EarlyDialogTerminatedExtension();
+    explicit EarlyDialogTerminatedExtension(IN IMtcCallContext& objContext);
     explicit EarlyDialogTerminatedExtension(IN const EarlyDialogTerminatedExtension& objRhs);
     virtual ~EarlyDialogTerminatedExtension();
     EarlyDialogTerminatedExtension& operator=(IN const EarlyDialogTerminatedExtension&) = delete;

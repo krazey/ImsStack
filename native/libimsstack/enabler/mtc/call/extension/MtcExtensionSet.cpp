@@ -17,9 +17,10 @@
 #include "ISipHeader.h"
 #include "ImsList.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCallContext.h"
 #include "call/extension/IMtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -33,7 +34,9 @@ const AString MtcExtensionSet::OPTION_TAG_SESSION_TIMER = "timer";
 const AString MtcExtensionSet::OPTION_TAG_TARGET_DIALOG = "tdialog";
 
 PUBLIC
-MtcExtensionSet::MtcExtensionSet(IN const ImsList<IMtcExtension*>& lstExtensions)
+MtcExtensionSet::MtcExtensionSet(
+        IN IMtcCallContext& objContext, IN const ImsList<IMtcExtension*>& lstExtensions) :
+        m_objContext(objContext)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < lstExtensions.GetSize(); nIndex++)
     {
@@ -46,7 +49,8 @@ MtcExtensionSet::MtcExtensionSet(IN const ImsList<IMtcExtension*>& lstExtensions
 }
 
 PUBLIC
-MtcExtensionSet::MtcExtensionSet(IN const MtcExtensionSet& objRhs)
+MtcExtensionSet::MtcExtensionSet(IN const MtcExtensionSet& objRhs) :
+        m_objContext(objRhs.m_objContext)
 {
     CopyFrom(objRhs);
 }
@@ -91,8 +95,8 @@ PUBLIC
 IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(
         IN const IMessage& objMessage, OUT AString& strNotSupportedExtension) const
 {
-    ImsList<AString> lstRequiredExtensions;
-    MessageUtil::GetHeaders(&objMessage, ISipHeader::REQUIRE, lstRequiredExtensions);
+    ImsList<AString> lstRequiredExtensions =
+            m_objContext.GetMessageUtils().GetHeaders(&objMessage, ISipHeader::REQUIRE);
 
     for (IMS_UINT32 nIndex = 0; nIndex < lstRequiredExtensions.GetSize(); nIndex++)
     {

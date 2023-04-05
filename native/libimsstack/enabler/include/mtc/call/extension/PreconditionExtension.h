@@ -21,6 +21,7 @@
 #include "call/extension/MtcExtension.h"
 
 class IMessage;
+class IMtcCallContext;
 
 /**
  * This class represents the precondition extension.
@@ -28,7 +29,7 @@ class IMessage;
 class PreconditionExtension final : public MtcExtension
 {
 public:
-    explicit PreconditionExtension();
+    explicit PreconditionExtension(IN IMtcCallContext& objContext);
     explicit PreconditionExtension(IN const PreconditionExtension& objRhs);
     virtual ~PreconditionExtension();
     PreconditionExtension& operator=(IN const PreconditionExtension&) = delete;
