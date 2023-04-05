@@ -849,6 +849,40 @@ TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVt)
     OnCallStateChanged(nKey, IMtcCall::State::ESTABLISHED, CallType::VT, IMS_FALSE, -1);
 }
 
+TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeRtt)
+{
+    GetCallTrackerListeners().Clear();
+
+    MockIAosCallTrackerListener objListener;
+    m_pAosCallTracker->SetListener(static_cast<IAosCallTrackerListener*>(&objListener));
+
+    EXPECT_CALL(
+            objListener, CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK))
+            .Times(1);
+
+    SetState(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    IMS_ULONG nKey = 1000;
+    OnCallStateChanged(nKey, IMtcCall::State::ESTABLISHED, CallType::RTT, IMS_FALSE, -1);
+}
+
+TEST_F(AosCallTrackerTest, OnCallStateChanged_CallTypeVideoRtt)
+{
+    GetCallTrackerListeners().Clear();
+
+    MockIAosCallTrackerListener objListener;
+    m_pAosCallTracker->SetListener(static_cast<IAosCallTrackerListener*>(&objListener));
+
+    EXPECT_CALL(
+            objListener, CallTracker_StateChanged(IAosCallTracker::TYPE_NORMAL, CallState::OFFHOOK))
+            .Times(1);
+
+    SetState(IAosCallTracker::TYPE_NORMAL, CallState::IDLE);
+
+    IMS_ULONG nKey = 1000;
+    OnCallStateChanged(nKey, IMtcCall::State::ESTABLISHED, CallType::VIDEO_RTT, IMS_FALSE, -1);
+}
+
 TEST_F(AosCallTrackerTest, OnTotalCallStateChanged)
 {
     OnTotalCallStateChanged(IMtcCall::State::IDLE);
