@@ -62,7 +62,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_FALSE(pAosNConfiguration->IsRttSupported());
     // bCarrierCrossSimImsAvailable (IMS_FALSE)
     EXPECT_FALSE(pAosNConfiguration->IsTtySupported());
-    EXPECT_FALSE(pAosNConfiguration->IsCallComposerSupported());
     EXPECT_FALSE(pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_CS_PREFERRED, pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(0, pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
@@ -83,7 +82,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(1800000, pAosNConfiguration->GetRegistrationRetryMaxTime());
     EXPECT_TRUE(pAosNConfiguration->IsSubscription());
     // KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT
-    EXPECT_EQ(0, pAosNConfiguration->GetRegistrationTechForCallComposer().GetSize());
     EXPECT_EQ(2, pAosNConfiguration->GetSupportedRats().GetSize());
 
     EXPECT_TRUE(pAosNConfiguration->IsVoLteRoamingAvailable());
@@ -140,10 +138,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
             .WillRepeatedly(Return(IMS_TRUE));
     EXPECT_CALL(objCarrierConfig,
             GetBoolean(CarrierConfig::KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL, IMS_FALSE))
-            .Times(2)
-            .WillRepeatedly(Return(IMS_TRUE));
-    EXPECT_CALL(
-            objCarrierConfig, GetBoolean(CarrierConfig::KEY_SUPPORTS_CALL_COMPOSER_BOOL, IMS_FALSE))
             .Times(2)
             .WillRepeatedly(Return(IMS_TRUE));
     ImsVector<IMS_SINT32> objCarrierNrAvailabilities;
@@ -244,15 +238,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
             GetInt(CarrierConfig::Ims::KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT, -1))
             .Times(2)
             .WillRepeatedly(Return(600000));
-
-    ImsVector<IMS_SINT32> objRegTechForCallComposer;
-    objRegTechForCallComposer.Clear();
-    objRegTechForCallComposer.Add(CarrierConfig::Ims::REGISTRATION_TECH_LTE);
-    objRegTechForCallComposer.Add(CarrierConfig::Ims::REGISTRATION_TECH_NR);
-    EXPECT_CALL(objCarrierConfig,
-            GetIntArray(CarrierConfig::Ims::KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY))
-            .Times(2)
-            .WillRepeatedly(Return(objRegTechForCallComposer));
 
     ImsVector<IMS_SINT32> objSupportedRats;
     objSupportedRats.Clear();
@@ -398,7 +383,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(pAosNConfiguration->IsRttSupported());
     // KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL
     EXPECT_TRUE(pAosNConfiguration->IsTtySupported());
-    EXPECT_TRUE(pAosNConfiguration->IsCallComposerSupported());
     EXPECT_TRUE(pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_IMS_PREFERRED, pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(1, pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
@@ -419,7 +403,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(1800000, pAosNConfiguration->GetRegistrationRetryMaxTime());
     EXPECT_TRUE(pAosNConfiguration->IsSubscription());
     // KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT
-    EXPECT_EQ(2, pAosNConfiguration->GetRegistrationTechForCallComposer().GetSize());
     EXPECT_EQ(2, pAosNConfiguration->GetSupportedRats().GetSize());
 
     EXPECT_TRUE(pAosNConfiguration->IsVoLteRoamingAvailable());
@@ -459,7 +442,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_TRUE(pAosNConfiguration->IsRttSupported());
     // KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL
     EXPECT_TRUE(pAosNConfiguration->IsTtySupported());
-    EXPECT_TRUE(pAosNConfiguration->IsCallComposerSupported());
     EXPECT_TRUE(pAosNConfiguration->IsImsOverNrEnabled());
     EXPECT_EQ(CarrierConfig::USSD_OVER_IMS_PREFERRED, pAosNConfiguration->GetUssdMethod());
     EXPECT_EQ(1, pAosNConfiguration->GetPcscfDiscoveryMethod().GetSize());
@@ -480,7 +462,6 @@ TEST_F(AosNConfigurationTest, InitConfig)
     EXPECT_EQ(1800000, pAosNConfiguration->GetRegistrationRetryMaxTime());
     EXPECT_TRUE(pAosNConfiguration->IsSubscription());
     // KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT
-    EXPECT_EQ(2, pAosNConfiguration->GetRegistrationTechForCallComposer().GetSize());
     EXPECT_EQ(2, pAosNConfiguration->GetSupportedRats().GetSize());
 
     EXPECT_TRUE(pAosNConfiguration->IsVoLteRoamingAvailable());
