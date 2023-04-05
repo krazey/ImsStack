@@ -84,5 +84,3 @@ const IMS_CHAR MessageUtil::STR_P_TTA_VOLTE_INFO[] = "P-TTA-VoLTE-Info";
 const IMS_CHAR MessageUtil::STR_AVCHANGE[] = "avchange";
 const IMS_CHAR MessageUtil::STR_REASON_USER_SESSIONEXPIRED[] = "Reason.User.SessionExpired";
 const IMS_CHAR MessageUtil::STR_P_COM_ENABLETRANSCODING[] = "P-com.EnableTranscoding";
-
-const IMS_SINT32 MessageUtil::INVALID_INDEX = -1;
