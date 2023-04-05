@@ -122,13 +122,6 @@ public:
     virtual IMS_BOOL IsTtySupported() const = 0;
 
     /**
-     * @brief Check if Call Composer is supported.
-     *
-     * @return IMS_TRUE if supported, IMS_FALSE if not supported.
-     */
-    virtual IMS_BOOL IsCallComposerSupported() const = 0;
-
-    /**
      * @brief Check if VOPS is ignored for VoLTE enable.
      *
      * @return IMS_TRUE if ignored, IMS_FALSE if considered.
@@ -1141,17 +1134,6 @@ public:
      * @return vector rat list
      */
     virtual ImsVector<IMS_SINT32>& GetUpdateRegistrationWithRatChange() = 0;
-
-    /**
-     * @brief List of different RAT technologies on which Provisioning for Call Composer
-     *        (section 2.4 of RCC.20) is supported.
-     *        Possible values are,
-     *        CarrierConfig::Ims::REGISTRATION_TECH_LTE
-     *        CarrierConfig::Ims::REGISTRATION_TECH_IWLAN
-     *        CarrierConfig::Ims::REGISTRATION_TECH_CROSS_SIM
-     *        CarrierConfig::Ims::REGISTRATION_TECH_NR
-     */
-    virtual ImsVector<IMS_SINT32>& GetRegistrationTechForCallComposer() = 0;
 
     /**
      * @brief List of different RAT technologies on which IMS is supported

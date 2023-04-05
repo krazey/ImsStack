@@ -235,14 +235,6 @@ PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceFeature()
         m_objFeatureTagList.AddFeature(ImsAosFeature::VIDEO);
     }
 
-    if (objConfig->IsCallComposerSupported())
-    {
-        if (IsCallComposerSupportedRat(GetNetworkType()))
-        {
-            m_objFeatureTagList.AddFeature(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
-        }
-    }
-
     if (objConfig->IsRttSupported())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::TEXT);
@@ -547,20 +539,6 @@ PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
                 }
             }
         }
-
-        if (GET_N_CONFIG(m_nSlotId)->IsCallComposerSupported())
-        {
-            if (IsCallComposerSupportedRat(m_nNetworkType))
-            {
-                m_objFeatureTagList.AddFeature(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
-            }
-            else
-            {
-                m_objFeatureTagList.RemoveFeature(ImsAosFeature::CALL_COMPOSER_VIA_TELEPHONY);
-            }
-
-            ProcessFeatureTagChange();
-        }
     }
     else if (Is3G(m_nNetworkType))
     {
@@ -734,25 +712,6 @@ IMS_UINT32 AosHandleMtc::GetVideoBlockReasonForIpcan()
 }
 
 PRIVATE
-IMS_UINT32 AosHandleMtc::GetNetworkTypeFromRegistrationTech(IN IMS_SINT32 nRegistrationTech)
-{
-    switch (nRegistrationTech)
-    {
-        case CarrierConfig::Ims::REGISTRATION_TECH_LTE:
-            return NW_REPORT_RADIO_LTE;
-
-        case CarrierConfig::Ims::REGISTRATION_TECH_IWLAN:
-            return NW_REPORT_RADIO_WLAN;
-
-        case CarrierConfig::Ims::REGISTRATION_TECH_NR:
-            return NW_REPORT_RADIO_NR;
-
-        default:
-            return NW_REPORT_RADIO_NOSRV;
-    }
-}
-
-PRIVATE
 IMS_BOOL AosHandleMtc::IsCsFeatureTagRequired() const
 {
     if (!GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
@@ -813,23 +772,6 @@ IMS_BOOL AosHandleMtc::IsPlmnBlockCondition() const
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE
-IMS_BOOL AosHandleMtc::IsCallComposerSupportedRat(IN IMS_UINT32 nNetworkType)
-{
-    ImsVector<IMS_SINT32> objRegTechForCallComposer =
-            GET_N_CONFIG(m_nSlotId)->GetRegistrationTechForCallComposer();
-
-    for (IMS_UINT32 i = 0; i < objRegTechForCallComposer.GetSize(); i++)
-    {
-        if (GetNetworkTypeFromRegistrationTech(objRegTechForCallComposer.GetAt(i)) == nNetworkType)
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
 }
 
 PRIVATE

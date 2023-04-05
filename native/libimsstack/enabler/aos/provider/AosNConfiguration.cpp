@@ -159,11 +159,6 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsTtySupported() const
     return m_objCarrierConfig.bCarrierVolteTtySupported;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsCallComposerSupported() const
-{
-    return m_objCarrierConfig.bSupportsCallComposer;
-}
-
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVopsIgnoredForVolteEnabled() const
 {
     return m_objAsset.bIgnoreVopsForVolteEnable;
@@ -684,11 +679,6 @@ PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetUpdateRegistrationWi
     return m_objCarrierConfig.objUpdateRegistrationWithRatChange;
 }
 
-PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetRegistrationTechForCallComposer()
-{
-    return m_objCarrierConfig.objCapabilityTypeCallComposer;
-}
-
 PUBLIC VIRTUAL ImsVector<IMS_SINT32>& AosNConfiguration::GetSupportedRats()
 {
     return m_objCarrierConfig.objSupportedRats;
@@ -1066,8 +1056,6 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL);
     m_objCarrierConfig.bCarrierVolteTtySupported =
             piCc->GetBoolean(CarrierConfig::KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL);
-    m_objCarrierConfig.bSupportsCallComposer =
-            piCc->GetBoolean(CarrierConfig::KEY_SUPPORTS_CALL_COMPOSER_BOOL);
     m_objCarrierConfig.objCarrierNrAvailabilities =
             piCc->GetIntArray(CarrierConfig::KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY);
     m_objCarrierConfig.nCarrierUssdMethod =
@@ -1102,8 +1090,6 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetBoolean(CarrierConfig::Ims::KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL);
     m_objCarrierConfig.nRegistrationSubscribeExpiryTimerSec =
             piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT);
-    m_objCarrierConfig.objCapabilityTypeCallComposer =
-            piCc->GetIntArray(CarrierConfig::Ims::KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY);
 
     // temp code
     ImsVector<IMS_SINT32> objTemp =

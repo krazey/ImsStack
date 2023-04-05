@@ -50,8 +50,6 @@ public:
     static const IMS_CHAR KEY_RTT_DOWNGRADE_SUPPORTED_BOOL[];
     static const IMS_CHAR KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL[];
     static const IMS_CHAR KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL[];
-    static const IMS_CHAR KEY_SUPPORTS_CALL_COMPOSER_BOOL[];
-
     // Public carrier-config - ends
 
     // USSD Method
@@ -242,16 +240,6 @@ public:
             PREFERRED_ACCESSTYPE_FEATURE_TAG_DISABLED = 0,
             PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED = 1,
             PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED_WITHOUT_NUMERICAL_VALUE = 2
-        };
-
-        // Registration tech for call composer
-        enum
-        {
-            REGISTRATION_TECH_NONE = -1,
-            REGISTRATION_TECH_LTE = 0,
-            REGISTRATION_TECH_IWLAN = 1,
-            REGISTRATION_TECH_CROSS_SIM = 2,
-            REGISTRATION_TECH_NR = 3
         };
     };
 
