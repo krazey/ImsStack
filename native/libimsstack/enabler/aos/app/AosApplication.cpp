@@ -2227,7 +2227,7 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentTimerExpired()
 {
     StopTimer(TIMER_IMS_ESTABLISHMENT);
 
-    if (!IsPlmnBlockWithTimeoutRequired())
+    if (IsImsCall() || !IsPlmnBlockWithTimeoutRequired())
     {
         return;
     }
@@ -2285,7 +2285,8 @@ PROTECTED VIRTUAL void AosApplication::ProcessImsEstablishmentStart()
             return;
         }
 
-        if (m_piContext->GetConnection()->IsEpdgEnabled() || m_piRegistration->IsRegistered())
+        if (m_piContext->GetConnection()->IsEpdgEnabled() || m_piRegistration->IsRegistered() ||
+                IsImsCall())
         {
             StopTimer(TIMER_IMS_ESTABLISHMENT);
             return;
