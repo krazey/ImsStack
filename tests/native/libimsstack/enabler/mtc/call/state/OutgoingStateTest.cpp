@@ -96,6 +96,7 @@ public:
 protected:
     virtual void SetUp() override
     {
+        // For MtcSupplementaryService using MessageUtil
         MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objCallContext);
         objAckMethod = SipMethod::ACK;
         objInviteMethod = SipMethod::INVITE;
@@ -205,7 +206,7 @@ protected:
         ON_CALL(objExtension, GetOptionTag).WillByDefault(ReturnRef(strOptionTag));
         ON_CALL(objExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
         objExtensions.Append(&objExtension);
-        return new MtcExtensionSet(objExtensions);
+        return new MtcExtensionSet(objCallContext, objExtensions);
     }
 };
 

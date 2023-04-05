@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+#include "call/IMtcCallContext.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/SessionTimerExtension.h"
 
 PUBLIC
-SessionTimerExtension::SessionTimerExtension() :
-        MtcExtension(MtcExtensionSet::OPTION_TAG_SESSION_TIMER)
+SessionTimerExtension::SessionTimerExtension(IN IMtcCallContext& objContext) :
+        MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_SESSION_TIMER)
 {
 }
 

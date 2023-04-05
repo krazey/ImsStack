@@ -16,8 +16,7 @@
 
 #include "ISipHeader.h"
 #include "ImsList.h"
-#include "MockIMtcContext.h"
-#include "MtcContextRepository.h"
+#include "call/MockIMtcCallContext.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
 #include "core/MockIMessage.h"
@@ -41,16 +40,15 @@ public:
     MockIMessage objMessage;
     MockIMessage objMessageRequiresPrecondition;
     MockIMessage objMessageSupportsPrecondition;
-    MockIMtcContext objContext;
+    MockIMtcCallContext objContext;
     MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
-        pExtension = new PreconditionExtension();
+        pExtension = new PreconditionExtension(objContext);
 
         ON_CALL(objMessage, GetMessage).WillByDefault(Return(&objSipMessage));
 
