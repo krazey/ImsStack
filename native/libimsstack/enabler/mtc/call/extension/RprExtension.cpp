@@ -17,15 +17,16 @@
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCallContext.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/RprExtension.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-RprExtension::RprExtension() :
-        MtcExtension(MtcExtensionSet::OPTION_TAG_RPR)
+RprExtension::RprExtension(IN IMtcCallContext& objContext) :
+        MtcExtension(objContext, MtcExtensionSet::OPTION_TAG_RPR)
 {
 }
 
@@ -49,7 +50,8 @@ PUBLIC VIRTUAL void RprExtension::FormatRequest(IN RequestType eType, IN_OUT IMe
         return;
     }
 
-    MessageUtil::AddValueIfNotExists(&objRequest, GetOptionTag(), ISipHeader::SUPPORTED);
+    m_objContext.GetMessageUtils().AddValueIfNotExists(
+            &objRequest, GetOptionTag(), ISipHeader::SUPPORTED);
 }
 
 PUBLIC VIRTUAL void RprExtension::HandleRequest(IN RequestType eType, IN const IMessage& objRequest)

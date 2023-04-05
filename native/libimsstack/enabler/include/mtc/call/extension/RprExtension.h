@@ -21,6 +21,7 @@
 #include "call/extension/MtcExtension.h"
 
 class IMessage;
+class IMtcCallContext;
 
 /**
  * This class represents the 100rel extension.
@@ -28,7 +29,7 @@ class IMessage;
 class RprExtension final : public MtcExtension
 {
 public:
-    explicit RprExtension();
+    explicit RprExtension(IN IMtcCallContext& objContext);
     explicit RprExtension(IN const RprExtension& objRhs);
     virtual ~RprExtension();
     RprExtension& operator=(IN const RprExtension&) = delete;

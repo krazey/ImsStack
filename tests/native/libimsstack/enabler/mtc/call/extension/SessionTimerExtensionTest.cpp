@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "call/MockIMtcCallContext.h"
 #include "call/extension/IMtcExtension.h"
 #include "call/extension/SessionTimerExtension.h"
 #include <gmock/gmock.h>
@@ -22,15 +23,18 @@
 class SessionTimerExtensionTest : public ::testing::Test
 {
 public:
-    SessionTimerExtension objExtension;
+    MockIMtcCallContext objContext;
+    SessionTimerExtension* pExtension;
 };
 
 TEST_F(SessionTimerExtensionTest, Clone)
 {
-    IMtcExtension* pCopiedExtension = objExtension.Clone();
+    pExtension = new SessionTimerExtension(objContext);
+    IMtcExtension* pCopiedExtension = pExtension->Clone();
 
-    EXPECT_STREQ(objExtension.GetOptionTag().GetStr(), pCopiedExtension->GetOptionTag().GetStr());
-    EXPECT_EQ(objExtension.IsAvailableOnRemote(), pCopiedExtension->IsAvailableOnRemote());
+    EXPECT_STREQ(pExtension->GetOptionTag().GetStr(), pCopiedExtension->GetOptionTag().GetStr());
+    EXPECT_EQ(pExtension->IsAvailableOnRemote(), pCopiedExtension->IsAvailableOnRemote());
 
     delete pCopiedExtension;
+    delete pExtension;
 }

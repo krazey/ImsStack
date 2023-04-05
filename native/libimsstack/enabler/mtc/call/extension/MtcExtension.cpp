@@ -17,14 +17,16 @@
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ServiceTrace.h"
+#include "call/IMtcCallContext.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcExtension::MtcExtension(IN const AString& strOptionTag) :
+MtcExtension::MtcExtension(IN IMtcCallContext& objContext, IN const AString& strOptionTag) :
+        m_objContext(objContext),
         m_strOptionTag(strOptionTag),
         m_bRequiredOnRemote(IMS_FALSE),
         m_bSupportedOnRemote(IMS_FALSE)
@@ -33,6 +35,7 @@ MtcExtension::MtcExtension(IN const AString& strOptionTag) :
 
 PUBLIC
 MtcExtension::MtcExtension(IN const MtcExtension& objRhs) :
+        m_objContext(objRhs.m_objContext),
         m_strOptionTag(objRhs.m_strOptionTag),
         m_bRequiredOnRemote(objRhs.m_bRequiredOnRemote),
         m_bSupportedOnRemote(objRhs.m_bSupportedOnRemote)
@@ -86,9 +89,10 @@ PUBLIC VIRTUAL void MtcExtension::HandleResponse(
 PRIVATE
 void MtcExtension::UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage)
 {
-    m_bRequiredOnRemote = MessageUtil::HasValue(&objMessage, GetOptionTag(), ISipHeader::REQUIRE);
-    m_bSupportedOnRemote =
-            MessageUtil::HasValue(&objMessage, GetOptionTag(), ISipHeader::SUPPORTED);
+    m_bRequiredOnRemote = m_objContext.GetMessageUtils().HasValue(
+            &objMessage, GetOptionTag(), ISipHeader::REQUIRE);
+    m_bSupportedOnRemote = m_objContext.GetMessageUtils().HasValue(
+            &objMessage, GetOptionTag(), ISipHeader::SUPPORTED);
 
     IMS_TRACE_D("UpdateFromRequireAndSupportedHeader : Tag[%s] Require[%s] Supported[%s]",
             m_strOptionTag.GetStr(), _TRACE_B_(m_bRequiredOnRemote),
