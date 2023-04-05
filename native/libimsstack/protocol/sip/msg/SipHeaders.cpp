@@ -265,17 +265,9 @@ SipHeaderBase* SipHeaders::GetNewHdrObj(SIP_INT32 eHdrType)
     {
         return SIP_NULL;
     }
-    if (m_HeaderArray[eHdrType] != SIP_NULL)
-    {
-        m_HeaderArray[eHdrType]->Increment();
-        return m_HeaderArray[eHdrType];
-    }
 
-    m_HeaderArray[eHdrType] = (IsListHdr(eHdrType) == SIP_TRUE)
-            ? SipHeaderList::GetNewListObj(eHdrType, SIP_NULL)
-            : gaFactoryArray[eHdrType](eHdrType, SIP_NULL);
-
-    return m_HeaderArray[eHdrType];
+    return (IsListHdr(eHdrType) == SIP_TRUE) ? SipHeaderList::GetNewListObj(eHdrType, SIP_NULL)
+                                             : gaFactoryArray[eHdrType](eHdrType, SIP_NULL);
 }
 
 SIP_BOOL SipHeaders::RemoveHdr(SIP_INT32 eHdrType)
@@ -532,28 +524,37 @@ SIP_BOOL SipHeaders::DecodeHdrs(
     pTempPos = SipSkipRwWSP(pStartPt, pTempPos);
 
     /*Create  the header name*/
-    SIP_CHAR* pszHdrName = SipCreateString(pStartPt, pTempPos);
-    if (pszHdrName == SIP_NULL)
+    *ppHdrName = SipCreateString(pStartPt, pTempPos);
+    if (*ppHdrName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    *ppHdrName = SipPf_Strdup(pszHdrName);
-
     /*this will return the type of header on passing name*/
-    SIP_INT32 eHdrType = SipGetHdrType(pszHdrName);
-    delete[] pszHdrName;
+    SIP_INT32 eHdrType = SipGetHdrType(*ppHdrName);
+
+    if ((m_HeaderArray[eHdrType] != SIP_NULL) && (IsListHdr(eHdrType) == SIP_FALSE))
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Single value header %d appears more than once",
+                eHdrType, SIP_ZERO);
+        *ppHdrBody = SipCreateString(pTempNext, pEndPt);
+        return SIP_FALSE;
+    }
 
     /*Get the header object*/
-    SipHeaderBase* pHdrBase = GetNewHdrObj(eHdrType);
+    if (m_HeaderArray[eHdrType] == SIP_NULL)
+    {
+        m_HeaderArray[eHdrType] = GetNewHdrObj(eHdrType);
+    }
 
-    if (pHdrBase == SIP_NULL)
+    if (m_HeaderArray[eHdrType] == SIP_NULL)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "Getting object of header %d fail", eHdrType, SIP_ZERO);
         return SIP_FALSE;
     }
+
     /*Case of Unknown Header*/
     if (eHdrType == SipHeaderBase::UNKNOWN)
     {
@@ -571,8 +572,8 @@ SIP_BOOL SipHeaders::DecodeHdrs(
             return SIP_FALSE;
         }
 
-        SIP_CHAR* pszHdrValue = SipCreateString(pTempNext, pEndPt);
-        if (pszHdrValue == SIP_NULL)
+        *ppHdrBody = SipCreateString(pTempNext, pEndPt);
+        if (*ppHdrBody == SIP_NULL)
         {
             pUnknown->SipDelete();
             if (pTempNext > pEndPt)
@@ -585,16 +586,12 @@ SIP_BOOL SipHeaders::DecodeHdrs(
             return SIP_FALSE;
         }
 
-        *ppHdrBody = SipPf_Strdup(pszHdrValue);
-
-        if (pUnknown->SetHeaderValue(pszHdrValue) == SIP_FALSE)
+        if (pUnknown->SetHeaderValue(*ppHdrBody) == SIP_FALSE)
         {
             pUnknown->SipDelete();
-            delete[] pszHdrValue;
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Set header value fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        delete[] pszHdrValue;
 
         /*Add the header into the unknown list*/
         if ((static_cast<SipHeaderList*>(m_HeaderArray[SipHeaderBase::UNKNOWN]))
@@ -614,9 +611,10 @@ SIP_BOOL SipHeaders::DecodeHdrs(
         /*Update the length for decoding*/
         nDecLen = pEndPt - pStartPt + SIP_ONE;
 
-        /*Call the Decoder function*/
         *ppHdrBody = SipCreateString(pTempNext, pEndPt);
-        if (pHdrBase->DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
+
+        /*Call the Decoder function*/
+        if (m_HeaderArray[eHdrType]->DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode header %d fail", eHdrType, SIP_ZERO);
             return SIP_FALSE;
