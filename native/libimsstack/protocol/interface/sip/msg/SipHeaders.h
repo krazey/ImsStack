@@ -74,8 +74,6 @@ public:
 
     SipHeaderBase* GetHdrObj(SIP_INT32 eHdrType, SIP_UINT16 eIndex);
 
-    SipHeaderBase* GetNewHdrObj(SIP_INT32 eHdrType);
-
     SIP_BOOL SetHdr(SipHeaderBase* pHeader);
     SIP_BOOL AppendHdr(SipHeaderBase* pHdr);
     SIP_BOOL InsertHdr(SipHeaderBase* pHdr, SIP_UINT32 nIndex);
@@ -90,6 +88,8 @@ public:
     static SIP_BOOL SipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos);
 
 private:
+    SipHeaderBase* GetNewHdrObj(SIP_INT32 eHdrType);
+
     SIP_BOOL EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
     SIP_BOOL EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
