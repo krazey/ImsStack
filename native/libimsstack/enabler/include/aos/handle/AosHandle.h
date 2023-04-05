@@ -187,7 +187,6 @@ protected:
     IMS_BOOL IsCapabilityExistedForNetworkType(
             IN IMS_UINT32 nNetworkType, IN AosCapability eCapability) const;
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const;
-    IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature) const;
     IMS_BOOL IsWifiConnected();
     IMS_BOOL IsDataConnected();
     IMS_BOOL IsEmergencyService();
@@ -325,7 +324,6 @@ protected:
     IMS_BOOL m_bCombinedAttach;
 
     ImsMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
-    ImsList<IMS_UINT32> m_objServiceFeatures;
     ImsList<IMS_UINT32> m_objHoldingBlocksPolicyForMobile;
     ImsList<IMS_UINT32> m_objHoldingBlocksPolicyForWifi;
 

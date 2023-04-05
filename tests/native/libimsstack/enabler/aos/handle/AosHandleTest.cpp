@@ -284,16 +284,6 @@ protected:
         return m_pAosHandle->IsNetworkTypeMatchedToRat(nNetworkType, nRat);
     }
 
-    IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature) const
-    {
-        return m_pAosHandle->IsServiceFeature(nFeature);
-    }
-
-    void AddServiceFeature(IMS_UINT32 nAosServiceFeature)
-    {
-        m_pAosHandle->m_objServiceFeatures.Append(nAosServiceFeature);
-    }
-
     IMS_UINT32 GetNetworkType() const { return m_pAosHandle->GetNetworkType(); }
 
     IMS_UINT32 GetMobileNetworkType() const { return m_pAosHandle->GetMobileNetworkType(); }
@@ -1727,50 +1717,6 @@ TEST_F(AosHandleTest, IsNetworkTypeMatchedToRat_Test)
     EXPECT_FALSE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_EHRPD));
     EXPECT_FALSE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_GSM));
     EXPECT_FALSE(IsNetworkTypeMatchedToRat(0, NW_REPORT_RADIO_WCDMA));
-}
-
-TEST_F(AosHandleTest, IsServiceFeature_Test)
-{
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::MMTEL));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::VIDEO));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::TEXT));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::USSI));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::VERSTAT));
-
-    AddServiceFeature(ImsAosFeature::MMTEL);
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::MMTEL));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::VIDEO));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::TEXT));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::USSI));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::VERSTAT));
-
-    AddServiceFeature(ImsAosFeature::VIDEO);
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::MMTEL));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VIDEO));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::TEXT));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::USSI));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::VERSTAT));
-
-    AddServiceFeature(ImsAosFeature::TEXT);
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::MMTEL));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VIDEO));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::TEXT));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::USSI));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::VERSTAT));
-
-    AddServiceFeature(ImsAosFeature::USSI);
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::MMTEL));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VIDEO));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::TEXT));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::USSI));
-    EXPECT_FALSE(IsServiceFeature(ImsAosFeature::VERSTAT));
-
-    AddServiceFeature(ImsAosFeature::VERSTAT);
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::MMTEL));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VIDEO));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::TEXT));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::USSI));
-    EXPECT_TRUE(IsServiceFeature(ImsAosFeature::VERSTAT));
 }
 
 TEST_F(AosHandleTest, IsEmergencyService_Test)
