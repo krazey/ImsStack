@@ -81,7 +81,7 @@ DialogInfo::~DialogInfo()
 PUBLIC
 IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
 {
-    IMS_TRACE_I("+Update", 0, 0, 0);
+    IMS_TRACE_I("Update", 0, 0, 0);
 
     if (!IsAttrExist(piElementDialogInfo, ATTR_DIALOG_INFO_VERSION) ||
             !IsAttrExist(piElementDialogInfo, ATTR_DIALOG_INFO_STATE) ||
@@ -97,9 +97,9 @@ IMS_RESULT DialogInfo::Update(IN IElement* piElementDialogInfo)
 
     INodeList* piNodeListdialog = piElementDialogInfo->GetElementsByTagName(ELEMENT_DIALOG);
 
-    if (piNodeListdialog->GetLength() == 0)
+    if (!piNodeListdialog || piNodeListdialog->GetLength() == 0)
     {
-        return IMS_FAILURE;
+        return m_nState == STATE_FULL ? IMS_SUCCESS : IMS_FAILURE;
     }
 
     for (IMS_SINT32 Index = 0; Index < piNodeListdialog->GetLength(); Index++)
