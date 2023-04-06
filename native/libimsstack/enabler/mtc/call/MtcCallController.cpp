@@ -31,7 +31,6 @@
 #include "ect/IEctManager.h"
 #include "helper/OperationAsyncRunner.h"
 #include "ussi/UssiConstants.h"
-#include "utility/MessageUtil.h"
 
 PUBLIC
 MtcCallController::MtcCallController(IN IMtcContext& objContext) :

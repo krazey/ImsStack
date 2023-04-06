@@ -21,7 +21,6 @@
 #include "MockIMtcCallController.h"
 #include "MockIMtcImsEventReceiver.h"
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockEpsFallbackTrigger.h"
@@ -96,8 +95,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        // For MtcSupplementaryService using MessageUtil
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objCallContext);
         objAckMethod = SipMethod::ACK;
         objInviteMethod = SipMethod::INVITE;
 
@@ -106,7 +103,7 @@ protected:
         ON_CALL(objCallContext, GetConfigurationProxy)
                 .WillByDefault(ReturnRef(*pConfigurationProxy));
 
-        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        pSupplementaryService = new MtcSupplementaryService(objCallContext, *pConfigurationProxy);
         ON_CALL(objCallContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
 

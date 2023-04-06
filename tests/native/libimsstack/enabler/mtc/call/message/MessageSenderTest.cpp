@@ -16,7 +16,6 @@
 
 #include "CallReasonInfo.h"
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "SipStatusCode.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/MessageSender.h"
@@ -57,10 +56,8 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-
         pConfigurationProxy = new MtcConfigurationProxy(new MockIMtcConfigurationManager());
-        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
 
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
         ON_CALL(objContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));

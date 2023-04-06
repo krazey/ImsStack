@@ -22,6 +22,7 @@
 
 class ISession;
 class IMessage;
+class IMtcCallContext;
 class ISipHeader;
 class SipAddress;
 class MtcConfigurationProxy;
@@ -29,7 +30,8 @@ class MtcConfigurationProxy;
 class MtcSupplementaryService final
 {
 public:
-    explicit MtcSupplementaryService(IN MtcConfigurationProxy& objConfigurationProxy,
+    explicit MtcSupplementaryService(IN IMtcCallContext& objContext,
+            IN MtcConfigurationProxy& objConfigurationProxy,
             IN const ImsMap<SuppType, SuppService*>& objSuppServices =
                     ImsMap<SuppType, SuppService*>());
     ~MtcSupplementaryService();
@@ -63,7 +65,7 @@ public:
     void Add(IN SuppType eSuppType, IN IMS_BOOL bValue);
 
 private:
-    static ISipHeader* GetHistoryInfoHeader(IN IMessage* piMessage);
+    ISipHeader* GetHistoryInfoHeader(IN IMessage* piMessage);
     static IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
     static IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
     static IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
@@ -76,6 +78,7 @@ private:
     IMS_BOOL IsExist(IN SuppType suppType);
 
 private:
+    IMtcCallContext& m_objContext;
     ImsMap<SuppType, SuppService*> m_objSuppService;
     MtcConfigurationProxy& m_objConfigurationProxy;
 };
