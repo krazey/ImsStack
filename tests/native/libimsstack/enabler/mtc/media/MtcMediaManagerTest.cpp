@@ -229,7 +229,7 @@ TEST_F(MtcMediaManagerTest,
     objInfo.eAudioDirection = DIRECTION_RECEIVE;
     pMediaManager->SetMediaInfo(objInfo);
 
-    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
+    MtcSupplementaryService objSupplementaryService(objContext, *pConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService())
             .WillByDefault(ReturnRef(objSupplementaryService));
 
@@ -248,7 +248,7 @@ TEST_F(MtcMediaManagerTest,
     objInfo.eAudioDirection = DIRECTION_RECEIVE;
     pMediaManager->SetMediaInfo(objInfo);
 
-    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
+    MtcSupplementaryService objSupplementaryService(objContext, *pConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService())
             .WillByDefault(ReturnRef(objSupplementaryService));
 
@@ -609,7 +609,7 @@ TEST_F(MtcMediaManagerTest, RunForConfirmedDialogIfAudioDirectionIsNotReceiveOnl
     ON_CALL(*piMediaSession, GetNegoState(NEGO_ID))
             .WillByDefault(Return(NegotiationState::STATE_NEGOTIATED));
     ON_CALL(*pMediaProfileManager, IsConfirmed(&objISession)).WillByDefault(Return(IMS_TRUE));
-    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
+    MtcSupplementaryService objSupplementaryService(objContext, *pConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService())
             .WillByDefault(ReturnRef(objSupplementaryService));
 

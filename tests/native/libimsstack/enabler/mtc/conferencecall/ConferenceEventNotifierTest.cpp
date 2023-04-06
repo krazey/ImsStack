@@ -107,7 +107,7 @@ protected:
 TEST_F(ConferenceEventNotifierTest, NotifyMerged)
 {
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
-    MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
+    MtcSupplementaryService objSupplementaryService(objContext, objConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     EXPECT_CALL(objUiNotifier, SendMerged(_, _, _, objUsers));

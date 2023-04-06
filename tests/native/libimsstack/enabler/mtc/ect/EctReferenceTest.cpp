@@ -91,6 +91,7 @@ public:
 protected:
     virtual void SetUp() override
     {
+        // For ConferenceConfigurationWrapper through UriFormatter
         MtcContextRepository::GetInstance()->AddContext(0, &objMockContext);
 
         pMockConfigurationManager = new MockIMtcConfigurationManager();
@@ -115,7 +116,8 @@ protected:
         ON_CALL(*pMockReferenceInterfaceHolder, GetIReference(_, _, _))
                 .WillByDefault(Return(&objMockReference));
 
-        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        pSupplementaryService =
+                new MtcSupplementaryService(objMockTargetContext, *pConfigurationProxy);
         ON_CALL(objMockTargetContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
 

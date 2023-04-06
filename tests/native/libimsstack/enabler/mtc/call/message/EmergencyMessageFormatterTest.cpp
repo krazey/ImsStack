@@ -17,7 +17,6 @@
 #include "FeatureCaps.h"
 #include "IImsAosInfo.h"
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/message/EmergencyMessageFormatter.h"
 #include "configuration/MockIMtcConfigurationManager.h"
@@ -60,11 +59,9 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
-
         pConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pConfigurationManager);
-        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
         pFeatureCaps = new FeatureCaps();
 
         ON_CALL(objContext, GetService).WillByDefault(ReturnRef(objService));

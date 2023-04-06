@@ -51,6 +51,7 @@ public:
 protected:
     virtual void SetUp() override
     {
+        // For ConferenceConfigurationWrapper
         MtcContextRepository::GetInstance()->AddContext(0, &objContext);
 
         ON_CALL(objContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
@@ -67,7 +68,7 @@ protected:
 TEST_F(UriFormatterTest, GetReferToForInvite)
 {
     // TODO: test for PAID should be added
-    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
+    MtcSupplementaryService objSupplementaryService(objContext, *pConfigurationProxy);
     ON_CALL(objContext, GetSupplementaryService).WillByDefault(ReturnRef(objSupplementaryService));
 
     ParticipantInfo objParticipantInfo(objContext);

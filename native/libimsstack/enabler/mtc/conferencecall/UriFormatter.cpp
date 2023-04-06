@@ -27,7 +27,7 @@
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/UriFormatter.h"
 #include "dialingplan/IMtcDialingPlan.h"
-#include "utility/MessageUtil.h"
+#include "utility/IMessageUtils.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

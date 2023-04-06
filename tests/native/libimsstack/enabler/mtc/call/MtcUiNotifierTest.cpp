@@ -108,7 +108,7 @@ TEST_F(MtcUiNotifierTest, SendIncomingCallReceived)
     MtcConfigurationProxy objConfigurationProxy(new MockIMtcConfigurationManager());
     ON_CALL(objMockContext, GetConfigurationProxy).WillByDefault(ReturnRef(objConfigurationProxy));
 
-    MtcSupplementaryService objSupplementaryService(objConfigurationProxy);
+    MtcSupplementaryService objSupplementaryService(objMockContext, objConfigurationProxy);
     ON_CALL(objMockContext, GetSupplementaryService)
             .WillByDefault(ReturnRef(objSupplementaryService));
 
