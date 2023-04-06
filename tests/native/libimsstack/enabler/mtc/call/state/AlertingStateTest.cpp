@@ -250,7 +250,7 @@ TEST_F(AlertingStateTest, QosReserveFailedDoesNothingIfNextActionIsModify)
 
 TEST_F(AlertingStateTest, SessionStartedTransitsStateToEstablished)
 {
-    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
+    MtcSupplementaryService objSupplementaryService(objCallContext, *pConfigurationProxy);
     ON_CALL(objCallContext, GetSupplementaryService)
             .WillByDefault(ReturnRef(objSupplementaryService));
 
@@ -445,7 +445,7 @@ TEST_F(AlertingStateTest, RejectIncomingUssiIfAcceptUssiFails)
 
 TEST_F(AlertingStateTest, UssiStartedTransitsStateToEstablished)
 {
-    MtcSupplementaryService objSupplementaryService(*pConfigurationProxy);
+    MtcSupplementaryService objSupplementaryService(objCallContext, *pConfigurationProxy);
     ON_CALL(objCallContext, GetSupplementaryService)
             .WillByDefault(ReturnRef(objSupplementaryService));
     SetUpForUssi();

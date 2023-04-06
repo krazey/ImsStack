@@ -96,7 +96,7 @@ protected:
         pMockConfigurationManager = new MockIMtcConfigurationManager();
         pConfigurationProxy = new MtcConfigurationProxy(pMockConfigurationManager);
         ON_CALL(objContext, GetConfigurationProxy).WillByDefault(ReturnRef(*pConfigurationProxy));
-        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        pSupplementaryService = new MtcSupplementaryService(objContext, *pConfigurationProxy);
         ON_CALL(objContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
         ON_CALL(objContext, GetTimer()).WillByDefault(ReturnRef(objTimerWrapper));

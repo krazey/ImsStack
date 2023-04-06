@@ -18,7 +18,6 @@
 #include "CarrierConfig.h"
 #include "ImsTypeDef.h"
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -74,8 +73,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objMockCallContext);
-
         ON_CALL(objMockCallContext, GetService).WillByDefault(ReturnRef(objService));
         ON_CALL(objMockCallContext, GetMediaManager).WillByDefault(ReturnRef(objMockMediaManager));
         ON_CALL(objMockMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objMediaInfo));
@@ -103,7 +100,8 @@ protected:
         ON_CALL(objMockPreconditionManager, FormPreconditionSdp(_, _)).WillByDefault(Return());
 
         ON_CALL(objMockCallContext, GetTimer).WillByDefault(ReturnRef(objTimerWrapper));
-        pSupplementaryService = new MtcSupplementaryService(*pConfigurationProxy);
+        pSupplementaryService =
+                new MtcSupplementaryService(objMockCallContext, *pConfigurationProxy);
         ON_CALL(objMockCallContext, GetSupplementaryService)
                 .WillByDefault(ReturnRef(*pSupplementaryService));
 
