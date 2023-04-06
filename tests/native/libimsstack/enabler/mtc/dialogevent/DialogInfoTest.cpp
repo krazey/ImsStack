@@ -138,6 +138,22 @@ const AString strNotificationBodySample3(
         "<identity display=\"Mark\">sip:Mark@example.org</identity>"
         "<target uri=\"sip:bobster@phone21.example.org\"/></remote></dialog></dialog-info>");
 
+const AString strNotificationBodySampleFullEmptyDialogs(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        "<dialog-info xmlns=\"urn:ietf:params:xml:ns:dialog-info\" "
+        "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+        "xsi:schemaLocation=\"urn:ietf:params:xml:ns:dialog-info\" "
+        "version=\"1\" state=\"full\" entity=\"sip:alice@example.com\">"
+        "</dialog-info>");
+
+const AString strNotificationBodySamplePartialEmptyDialogs(
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+        "<dialog-info xmlns=\"urn:ietf:params:xml:ns:dialog-info\" "
+        "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+        "xsi:schemaLocation=\"urn:ietf:params:xml:ns:dialog-info\" "
+        "version=\"1\" state=\"partial\" entity=\"sip:alice@example.com\">"
+        "</dialog-info>");
+
 namespace android
 {
 
@@ -322,6 +338,23 @@ TEST_F(DialogInfoTest, TerminatedDialogIsDeletedFromTheList)
 
     const ImsList<Dialog*>& objDialogs = objDialogInfoManager.GetDialogs();
     EXPECT_TRUE(objDialogs.GetSize() == 1);
+}
+
+TEST_F(DialogInfoTest, EmptyDialogInfoReturnsSuccessIfFullState)
+{
+    EXPECT_EQ(IMS_SUCCESS, objDialogInfoManager.Update(strNotificationBodySampleFullEmptyDialogs));
+
+    const ImsList<Dialog*>& objDialogs = objDialogInfoManager.GetDialogs();
+    EXPECT_TRUE(objDialogs.GetSize() == 0);
+}
+
+TEST_F(DialogInfoTest, EmptyDialogInfoReturnsFailureIfPartialState)
+{
+    EXPECT_EQ(
+            IMS_FAILURE, objDialogInfoManager.Update(strNotificationBodySamplePartialEmptyDialogs));
+
+    const ImsList<Dialog*>& objDialogs = objDialogInfoManager.GetDialogs();
+    EXPECT_TRUE(objDialogs.GetSize() == 0);
 }
 
 }  // namespace android
