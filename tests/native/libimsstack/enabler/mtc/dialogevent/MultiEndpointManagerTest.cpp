@@ -322,6 +322,35 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsHeldDialogIfMatched)
     IMultiEndpointManager::PullingDialogInfo objInfo =
             pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
     EXPECT_TRUE(objInfo.bHeld);
+
+    // If it's held, it's not pullable.
+    EXPECT_FALSE(objInfo.bPullable);
+}
+
+TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsUnHeldDialogIfMatched)
+{
+    const AString strSomeRemoteUri("someUri");
+    const AString strLocalUri("localUri");
+
+    MockDialog objDialogMatched;
+    ImsMap<AString, AString> objParamMap;
+    objParamMap.Add("+sip.rendering", "yes");
+    MockTarget objTarget(objParamMap, strLocalUri);
+
+    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
+    objDialogMatched.SetLocalUri(strLocalUri, objTarget);
+
+    ImsList<Dialog*> objDialogs;
+    objDialogs.Append(&objDialogMatched);
+
+    ON_CALL(*(piDialogInfoManager.get()), GetDialogs).WillByDefault(ReturnRef(objDialogs));
+    ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
+    ON_CALL(*(piDialogSubscription.get()), Subscribe).WillByDefault(Return(IMS_SUCCESS));
+    CreateManager(IMS_TRUE);
+
+    IMultiEndpointManager::PullingDialogInfo objInfo =
+            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+    EXPECT_FALSE(objInfo.bHeld);
 }
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsPullableDialogIfMatched)
@@ -354,6 +383,38 @@ TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsPullableDialogIfMatched)
     IMultiEndpointManager::PullingDialogInfo objInfo =
             pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
     EXPECT_TRUE(objInfo.bPullable);
+}
+
+TEST_F(MultiEndpointManagerTest, VideoInactiveDialogIsNotPullable)
+{
+    const AString strSomeRemoteUri("someUri");
+
+    MockDialog objDialogMatched;
+
+    MockState objState(0, 0, Dialog::State::STATE_CONFIRMED);
+
+    const AString strExclusive("false");
+    MediaInfo objMediaInfo;
+    objMediaInfo.eAudioQuality = AUDIO_QUALITY_AMR_WB;
+    objMediaInfo.eAudioDirection = DIRECTION_SEND_RECEIVE;
+    objMediaInfo.eVideoQuality = VIDEO_QUALITY_QVGA_PR;
+    objMediaInfo.eVideoDirection = DIRECTION_INACTIVE;
+    MockExtraInfo objExtraInfo(strExclusive, objMediaInfo);
+    objDialogMatched.SetState(objState);
+    objDialogMatched.SetExtraInfo(objExtraInfo);
+    objDialogMatched.SetRemoteUri(strSomeRemoteUri);
+
+    ImsList<Dialog*> objDialogs;
+    objDialogs.Append(&objDialogMatched);
+
+    ON_CALL(*(piDialogInfoManager.get()), GetDialogs).WillByDefault(ReturnRef(objDialogs));
+    ON_CALL(objAosConnector, GetFeatures).WillByDefault(Return(ImsAosFeature::MMTEL));
+    ON_CALL(*(piDialogSubscription.get()), Subscribe).WillByDefault(Return(IMS_SUCCESS));
+    CreateManager(IMS_TRUE);
+
+    IMultiEndpointManager::PullingDialogInfo objInfo =
+            pMultiEndpointManager->GetDialogInfo(strSomeRemoteUri);
+    EXPECT_FALSE(objInfo.bPullable);
 }
 
 TEST_F(MultiEndpointManagerTest, GetDialogInfoReturnsVoipCallTypeIfMatched)
