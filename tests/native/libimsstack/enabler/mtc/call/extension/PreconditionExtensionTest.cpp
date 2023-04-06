@@ -16,6 +16,8 @@
 
 #include "ISipHeader.h"
 #include "ImsList.h"
+#include "call/IMtcCall.h"
+#include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
@@ -149,13 +151,34 @@ TEST_F(PreconditionExtensionTest, FormatRequestForUpdateMessageSetsSupportedHead
     pExtension->FormatRequest(RequestType::UPDATE, objMessage);
 }
 
-TEST_F(PreconditionExtensionTest, FormatRequestForEarlyUpdateMessageSetsRequireHeader)
+TEST_F(PreconditionExtensionTest, FormatRequestForEarlyUpdateMessageSetsRequireHeaderIfOutgoing)
 {
+    MockIMtcCall objCall;
+    ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objCall));
+    ON_CALL(objCall, GetState).WillByDefault(Return(IMtcCall::State::OUTGOING));
+
     // Set remote availability true
     pExtension->HandleRequest(RequestType::START, objMessageRequiresPrecondition);
 
     EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, pExtension->GetOptionTag(), _))
             .Times(1);
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, _, _)).Times(0);
+
+    pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
+}
+
+TEST_F(PreconditionExtensionTest, FormatRequestForEarlyUpdateMessageSetsSupportedHeaderIfUpdating)
+{
+    MockIMtcCall objCall;
+    ON_CALL(objContext, GetCall).WillByDefault(ReturnRef(objCall));
+    ON_CALL(objCall, GetState).WillByDefault(Return(IMtcCall::State::UPDATING));
+
+    // Set remote availability true
+    pExtension->HandleRequest(RequestType::START, objMessageRequiresPrecondition);
+
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::SUPPORTED, pExtension->GetOptionTag(), _))
+            .Times(1);
+    EXPECT_CALL(objSipMessage, AddHeader(ISipHeader::REQUIRE, _, _)).Times(0);
 
     pExtension->FormatRequest(RequestType::EARLY_UPDATE, objMessage);
 }
