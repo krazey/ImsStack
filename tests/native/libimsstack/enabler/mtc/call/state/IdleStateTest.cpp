@@ -18,6 +18,7 @@
 #include "MockIMtcService.h"
 #include "MtcDef.h"
 #include "call/IMtcCall.h"
+#include "call/MockEpsFallbackTrigger.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcCallManager.h"
 #include "call/MockIMtcSession.h"
@@ -39,6 +40,7 @@
 #include "dialingplan/MockIMtcDialingPlan.h"
 #include "dialogevent/MockIMultiEndpointManager.h"
 #include "helper/MockILastComeFirstServedHelper.h"
+#include "helper/MockIMtcAosConnector.h"
 #include "helper/MockIPassiveTimerHolder.h"
 #include "helper/MockMtcTimerWrapper.h"
 #include "helper/MtcSupplementaryService.h"
@@ -79,10 +81,12 @@ public:
     MockIMtcCallManager objCallManager;
     MockIMtcRadioChecker objMockIMtcRadioChecker;
     MockIMtcBlockChecker* pBlockChecker;
+    MockEpsFallbackTrigger* pEpsFbTrigger;
     MockIMtcSession objMtcSession;
     MockIMtcUiNotifier objUiNotifier;
     MockISession objSession;
     MockIMtcPreconditionManager objPreconditionManager;
+    MockIMtcAosConnector objAosConnector;
     MockMtcTimerWrapper objTimerWrapper;
     MockUssiController* pUssiController;
     MockIMessageUtils objMessageUtils;
@@ -111,6 +115,8 @@ protected:
         pParticipantInfo = new ParticipantInfo(objCallContext);
         ON_CALL(objCallContext, GetParticipantInfo).WillByDefault(ReturnRef(*pParticipantInfo));
 
+        pEpsFbTrigger = new MockEpsFallbackTrigger(objCallContext);
+
         ON_CALL(objCallContext, GetDialingPlan).WillByDefault(ReturnRef(objDialingPlan));
         ON_CALL(objCallContext, GetCallInfo).WillByDefault(ReturnRef(objCallInfo));
         ON_CALL(objCallContext, GetService).WillByDefault(ReturnRef(objService));
@@ -129,10 +135,13 @@ protected:
                 .WillByDefault(ReturnRef(objPassiveTimerHolder));
         ON_CALL(objCallContext, GetLastComeFirstServedHelper)
                 .WillByDefault(ReturnRef(objLastComeFirstServedHelper));
+        ON_CALL(objCallContext, GetEpsFallbackTrigger).WillByDefault(ReturnRef(*pEpsFbTrigger));
 
         pUssiController = new MockUssiController(objCallContext, IMS_NULL);
         ON_CALL(objCallContext, GetUssiController).WillByDefault(Return(pUssiController));
         ON_CALL(objMtcSession, GetISession).WillByDefault(ReturnRef(objSession));
+
+        ON_CALL(objService, GetAosConnector).WillByDefault(Return(&objAosConnector));
 
         ON_CALL(objMediaManager, GetMediaInfo).WillByDefault(ReturnRef(objOutputMediaInfo));
 
@@ -146,6 +155,7 @@ protected:
         delete pSupplementaryService;
         delete pParticipantInfo;
         delete pUssiController;
+        delete pEpsFbTrigger;
     }
 
     MtcExtensionSet* GetTestExtensionSet(IN const AString& strOptionTag)
@@ -156,6 +166,12 @@ protected:
         ON_CALL(*pExtension, IsAvailableOnRemote).WillByDefault(Return(IMS_TRUE));
         objExtensions.Append(pExtension);
         return new MtcExtensionSet(objCallContext, objExtensions);
+    }
+
+    void SetEpsFallbackRequiredByConfig(IN IMS_BOOL bRequired)
+    {
+        ON_CALL(*pConfigurationManager, GetEpsFallbackWatchdogTime)
+                .WillByDefault(Return(bRequired ? 1 : 0));
     }
 };
 
@@ -1048,4 +1064,110 @@ TEST_F(IdleStateTest, OnUssiAttachedTransitsAlertingState)
     EXPECT_EQ(CallStateName::ALERTING, pIdleState->OnUssiAttached());
 
     delete pMessage;
+}
+
+TEST_F(IdleStateTest, OnBlockCheckedDoesNotInvokeEpsFbIfMt)
+{
+    const CallReasonInfo objReasonInfo(CODE_ACCESS_CLASS_BLOCKED);  // Can triggers EPSFB
+    const IMtcBlockChecker::Result objBlockResult(
+            IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(_, _)).Times(0);
+
+    objCallInfo.ePeerType = PeerType::MT;
+    SetEpsFallbackRequiredByConfig(IMS_TRUE);
+    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnBlockChecked(objBlockResult));
+}
+
+TEST_F(IdleStateTest, OnBlockCheckedDoesNotInvokeEpsFbIfConfigOff)
+{
+    const CallReasonInfo objReasonInfo(CODE_ACCESS_CLASS_BLOCKED);  // Can triggers EPSFB
+    const IMtcBlockChecker::Result objBlockResult(
+            IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(_, _)).Times(0);
+
+    objCallInfo.ePeerType = PeerType::MO;
+    SetEpsFallbackRequiredByConfig(IMS_FALSE);
+    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnBlockChecked(objBlockResult));
+}
+
+TEST_F(IdleStateTest, OnBlockCheckedDoesNotInvokeEpsFbIfNotInVoNr)
+{
+    const CallReasonInfo objReasonInfo(CODE_ACCESS_CLASS_BLOCKED);  // Can triggers EPSFB
+    const IMtcBlockChecker::Result objBlockResult(
+            IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo));
+    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(_, _)).Times(0);
+
+    objCallInfo.ePeerType = PeerType::MO;
+    SetEpsFallbackRequiredByConfig(IMS_TRUE);
+    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_FALSE));
+    EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnBlockChecked(objBlockResult));
+}
+
+TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsFbForAcBlocked)
+{
+    const CallReasonInfo objReasonInfo(CODE_ACCESS_CLASS_BLOCKED);
+    const IMtcBlockChecker::Result objBlockResult(
+            IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo)).Times(0);
+    EXPECT_CALL(
+            *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE));
+
+    objCallInfo.ePeerType = PeerType::MO;
+    SetEpsFallbackRequiredByConfig(IMS_TRUE);
+    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
+}
+
+TEST_F(IdleStateTest, OnBlockCheckedTriggersEpsFbForRrcReject)
+{
+    const IMS_UINT32 nTimerVzw = 2;
+    const IMS_UINT32 nRejectWaitTimeMillis = 2;
+    const CallReasonInfo objReasonInfo(CODE_INTERNAL_RRC_REJECT, nRejectWaitTimeMillis);
+    const IMtcBlockChecker::Result objBlockResult(
+            IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
+
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(Return(IMtcBlockChecker::Result(
+                    IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo)));
+    ON_CALL(*pConfigurationManager, GetMoCallRequestTimeout).WillByDefault(Return(nTimerVzw));
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo)).Times(0);
+    EXPECT_CALL(
+            *pEpsFbTrigger, TriggerEpsFallback(EpsFallbackReason::NO_NETWORK_TRIGGER, IMS_TRUE));
+
+    objCallInfo.ePeerType = PeerType::MO;
+    SetEpsFallbackRequiredByConfig(IMS_TRUE);
+    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    EXPECT_EQ(CallStateName::IDLE, pIdleState->OnBlockChecked(objBlockResult));
+}
+
+TEST_F(IdleStateTest, OnBlockCheckedDoesNotTriggerEpsFbForRrcRejectIfRejectTimeIsLessThanTimerVzw)
+{
+    const IMS_UINT32 nTimerVzw = 2;
+    const IMS_UINT32 nRejectWaitTimeMillis = 1;
+    const CallReasonInfo objReasonInfo(CODE_INTERNAL_RRC_REJECT, nRejectWaitTimeMillis);
+    const IMtcBlockChecker::Result objBlockResult(
+            IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo);
+
+    ON_CALL(*pBlockChecker, Check)
+            .WillByDefault(Return(IMtcBlockChecker::Result(
+                    IMtcBlockChecker::Result::Status::BLOCKED, objReasonInfo)));
+    ON_CALL(*pConfigurationManager, GetMoCallRequestTimeout).WillByDefault(Return(nTimerVzw));
+
+    EXPECT_CALL(objUiNotifier, SendStartFailed(objReasonInfo.ConvertFromInternal()));
+    EXPECT_CALL(*pEpsFbTrigger, TriggerEpsFallback(_, _)).Times(0);
+
+    objCallInfo.ePeerType = PeerType::MO;
+    SetEpsFallbackRequiredByConfig(IMS_TRUE);
+    ON_CALL(*pEpsFbTrigger, IsVoNr()).WillByDefault(Return(IMS_TRUE));
+    EXPECT_EQ(CallStateName::TERMINATING, pIdleState->OnBlockChecked(objBlockResult));
 }

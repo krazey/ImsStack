@@ -68,19 +68,6 @@ public:
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) = 0;
 };
 
-class IMtcRadioConnectionFailureListener
-{
-public:
-    virtual ~IMtcRadioConnectionFailureListener() = default;
-
-    /**
-     * @brief Notifies
-     *
-     * @param nCallKey
-     */
-    virtual void OnConnectionFailed(IN CallKey nCallKey) = 0;
-};
-
 enum class CheckResult
 {
     UNBLOCKED,

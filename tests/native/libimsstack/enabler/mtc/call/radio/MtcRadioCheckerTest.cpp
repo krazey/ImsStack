@@ -28,7 +28,6 @@
 #include "TestPhoneInfoService.h"
 #include "call/IMtcCall.h"
 #include "call/radio/MockIMtcRadioChecker.h"
-#include "call/radio/MockIMtcRadioConnectionFailureListener.h"
 #include "call/radio/MtcRadioChecker.h"
 #include "helper/IMtcAosStateListener.h"
 #include "helper/MockICallStateProxy.h"
@@ -52,7 +51,6 @@ class MtcRadioCheckerTest : public ::testing::Test
 public:
     MtcRadioCheckerTest() :
             m_objContext(),
-            m_objConnectionFailureListener(),
             m_objCallStateProxy(),
             m_objPhoneInfoService(),
             m_objImsRadioService(),
@@ -65,7 +63,6 @@ public:
     MockIMtcContext m_objContext;
     MockIMtcService m_objNormalService;
     MockIMtcService m_objEmergencyService;
-    MockIMtcRadioConnectionFailureListener m_objConnectionFailureListener;
     MockIMtcRadioCheckerListener m_objIMtcRadioCheckerListener;
     MockICallStateProxy m_objCallStateProxy;
     TestPhoneInfoService m_objPhoneInfoService;
@@ -100,7 +97,7 @@ protected:
                 .WillByDefault(Return(&m_objEmergencyService));
         ON_CALL(m_objEmergencyService, IsEmergency).WillByDefault(Return(IMS_TRUE));
 
-        m_pMtcRadioChecker = new MtcRadioChecker(m_objContext, m_objConnectionFailureListener);
+        m_pMtcRadioChecker = new MtcRadioChecker(m_objContext);
         m_pMtcRadioChecker->Init();
     }
 
@@ -398,7 +395,6 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyWithOutMtcRadioCheckerL
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(0);
-    EXPECT_CALL(m_objConnectionFailureListener, OnConnectionFailed(_)).Times(1);
 
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_ACCESS_DENIED, 0, 0);
@@ -410,7 +406,6 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyWithOutMtcTrafficInfo)
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(0);
-    EXPECT_CALL(m_objConnectionFailureListener, OnConnectionFailed(_)).Times(0);
 
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_ACCESS_DENIED, 0, 0);
@@ -424,7 +419,6 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyExistsMtcTrafficInfoWit
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(0);
-    EXPECT_CALL(m_objConnectionFailureListener, OnConnectionFailed(_)).Times(1);
 
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_ACCESS_DENIED, 0, 0);
@@ -438,7 +432,6 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedPermanentlyExistsMtcTrafficInfoWit
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(1);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(0);
-    EXPECT_CALL(m_objConnectionFailureListener, OnConnectionFailed(_)).Times(0);
 
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VOICE, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_INTERNAL_ERROR, 0, 0);
@@ -452,7 +445,6 @@ TEST_F(MtcRadioCheckerTest, OnConnectionFailedTemporarily)
 
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionFailed).Times(0);
     EXPECT_CALL(m_objIMtcRadioCheckerListener, OnConnectionSetupPrepared).Times(7);
-    EXPECT_CALL(m_objConnectionFailureListener, OnConnectionFailed(_)).Times(0);
 
     m_pMtcRadioChecker->OnConnectionFailed(IImsRadio::TRAFFIC_TYPE_VIDEO, IImsRadio::DIRECTION_MT,
             IImsRadio::REASON_NAS_FAILURE, 0, 0);

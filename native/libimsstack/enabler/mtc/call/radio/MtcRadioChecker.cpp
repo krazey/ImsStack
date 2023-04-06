@@ -31,10 +31,8 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcRadioChecker::MtcRadioChecker(IN IMtcContext& objContext,
-        IN IMtcRadioConnectionFailureListener& objMtcRadioConnectionFailureListener) :
+MtcRadioChecker::MtcRadioChecker(IN IMtcContext& objContext) :
         m_objContext(objContext),
-        m_objMtcRadioConnectionFailureListener(objMtcRadioConnectionFailureListener),
         m_piNetworkWatcher(PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
                 m_objContext.GetSlotId())),
         m_piImsRadio(ImsRadioService::GetImsRadioService()->GetImsRadio(m_objContext.GetSlotId())),
@@ -132,7 +130,7 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnTotalCallStateChanged(IN State /* eState 
 }
 
 PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficType,
-        IN CallDirection eCallDirection, IN IMS_UINT32 nFailureReason,
+        IN CallDirection /* eCallDirection */, IN IMS_UINT32 nFailureReason,
         IN IMS_UINT32 /* nCauseCode */, IN IMS_UINT32 nWaitTimeMillis)
 {
     IMS_TRACE_D("OnConnectionFailed TrafficType[%d] FailureReason[%d]", eTrafficType,
@@ -147,7 +145,6 @@ PUBLIC VIRTUAL void MtcRadioChecker::OnConnectionFailed(IN TrafficType eTrafficT
             {
                 m_piMtcRadioCheckerListener->OnConnectionFailed(nFailureReason, nWaitTimeMillis);
             }
-            NotifyRadioConnectionFailedListener(eTrafficType, eCallDirection);
             break;
 
         case IImsRadio::REASON_NAS_FAILURE:
@@ -294,24 +291,6 @@ PRIVATE void MtcRadioChecker::RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN Cal
                 return;
             }
         }
-    }
-}
-
-PRIVATE void MtcRadioChecker::NotifyRadioConnectionFailedListener(
-        IN TrafficType eTrafficType, IN CallDirection eCallDirection)
-{
-    MtcTrafficInfo* pMtcTrafficInfo = GetCallTrafficInfo(eTrafficType, eCallDirection);
-
-    if (pMtcTrafficInfo == IMS_NULL)
-    {
-        return;
-    }
-
-    ImsList<CallKey> objCallKeys = pMtcTrafficInfo->m_objCallKeys;
-
-    for (IMS_UINT32 nIndex = 0; nIndex < objCallKeys.GetSize(); nIndex++)
-    {
-        m_objMtcRadioConnectionFailureListener.OnConnectionFailed(objCallKeys.GetAt(nIndex));
     }
 }
 

@@ -25,7 +25,6 @@
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "call/IMtcCall.h"
-#include "call/radio/IMtcRadioChecker.h"
 
 class IMtcCallManager;
 class IMtcContext;
@@ -40,7 +39,7 @@ union Key;
  * Provides operations to manipulate calls. Each operation could be failed or not handled if the
  * current status is not applicable or some other reasons.
  */
-class MtcCallController final : public IMtcCallController, public IMtcRadioConnectionFailureListener
+class MtcCallController final : public IMtcCallController
 {
 public:
     explicit MtcCallController(IN IMtcContext& objContext);
@@ -90,9 +89,6 @@ public:
     ISilentRedialHelper& GetRedialHelper(
             IN IMtcCallContext& objContext, IN const CallReasonInfo& objReason) override;
     void ReleaseRedialHelper() override;
-
-    // IMtcRadioConnectionFailureListener
-    void OnConnectionFailed(IN CallKey nCallKey) override;
 
 private:
     IMtcContext& m_objContext;

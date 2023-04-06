@@ -58,7 +58,6 @@ public:
 };
 
 class IMtcContext;
-class IMtcRadioConnectionFailureListener;
 class IMtcService;
 class MtcTrafficInfo;
 
@@ -69,8 +68,7 @@ class MtcRadioChecker final :
         public IMtcAosStateListener
 {
 public:
-    explicit MtcRadioChecker(IN IMtcContext& objContext,
-            IN IMtcRadioConnectionFailureListener& objMtcRadioConnectionFailureListener);
+    explicit MtcRadioChecker(IN IMtcContext& objContext);
     ~MtcRadioChecker();
     MtcRadioChecker(IN const MtcRadioChecker&) = delete;
     MtcRadioChecker& operator=(IN const MtcRadioChecker&) = delete;
@@ -107,8 +105,6 @@ private:
     IMS_UINT32 ConvertNetworkType(IN IMS_BOOL bWifi) const;
     void AddCallKey(IN MtcTrafficInfo& pMtcTrafficInfo, IN CallKey nCallKey);
     void RemoveCallKeyAndStopTrafficCheckingIfNeeded(IN CallKey nCallKeyIn);
-    void NotifyRadioConnectionFailedListener(
-            IN TrafficType eTrafficType, IN CallDirection eCallDirection);
     MtcTrafficInfo* GetCallTrafficInfo(
             IN TrafficType eTrafficType, IN CallDirection eCallDirection) const;
     MtcTrafficInfo* CreateCallTrafficInfo(
@@ -122,7 +118,6 @@ private:
 
 private:
     IMtcContext& m_objContext;
-    IMtcRadioConnectionFailureListener& m_objMtcRadioConnectionFailureListener;
     INetworkWatcher* m_piNetworkWatcher;
     IImsRadio* m_piImsRadio;
     IMtcRadioCheckerListener* m_piMtcRadioCheckerListener;

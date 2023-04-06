@@ -42,7 +42,7 @@ public:
     virtual void StartWatchdog();
     virtual void OnEpsFallbackCompleted();
     void Timer_TimerExpired(IN ITimer* piTimer) override;
-    virtual void TriggerEpsFallback(IN EpsFallbackReason eReason);
+    virtual void TriggerEpsFallback(IN EpsFallbackReason eReason, IN IMS_BOOL bStartTimer);
     inline virtual IMS_BOOL IsWaitingEpsFallbackForNoResponse() const
     {
         return m_bWaitingEpsFallbackForNoResponse;

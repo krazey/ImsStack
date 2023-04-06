@@ -767,7 +767,7 @@ CallStateName OutgoingState::HandleSilentRedial(
     if (objReason.nExtraCode == EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK)
     {
         m_objContext.GetEpsFallbackTrigger().TriggerEpsFallback(
-                EpsFallbackReason::NO_NETWORK_RESPONSE);
+                EpsFallbackReason::NO_NETWORK_RESPONSE, IMS_TRUE);
         return GetStateName();
     }
 

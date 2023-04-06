@@ -18,11 +18,9 @@
 #include "IImsRadio.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
-#include "call/EpsFallbackTrigger.h"
 #include "call/block/IMtcBlockRule.h"
 #include "call/block/RadioBlockRule.h"
 #include "call/radio/IMtcRadioChecker.h"
-#include "configuration/MtcConfigurationProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -69,24 +67,17 @@ PUBLIC VIRTUAL void RadioBlockRule::OnConnectionSetupPrepared()
 PUBLIC VIRTUAL void RadioBlockRule::OnConnectionFailed(
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis)
 {
-    CallReasonInfo objReason = IsEpsFallbackRequired(nFailureReason, nWaitTimeMillis)
-            ? CallReasonInfo(CODE_INTERNAL_REDIAL, EXTRA_CODE_REDIAL_AFTER_EPS_FALLBACK)
-            : CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
-
-    m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(Result(Result::Status::BLOCKED, objReason));
+    m_piMtcBlockRuleCheckListener->OnBlockRuleChecked(Result(Result::Status::BLOCKED,
+            CovertConnectionFailureToCallReasonInfo(nFailureReason, nWaitTimeMillis)));
 }
 
 PRIVATE
-IMS_BOOL RadioBlockRule::IsEpsFallbackRequired(
+CallReasonInfo RadioBlockRule::CovertConnectionFailureToCallReasonInfo(
         IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nWaitTimeMillis) const
 {
-    if (!m_objContext.GetEpsFallbackTrigger().IsVoNr())
+    if (nFailureReason == IImsRadio::REASON_RRC_REJECT)
     {
-        return IMS_FALSE;
+        return CallReasonInfo(CODE_INTERNAL_RRC_REJECT, nWaitTimeMillis);
     }
-
-    IMS_UINT32 nTimerVzw =
-            m_objContext.GetConfigurationProxy().GetInt(Feature::MO_CALL_REQUEST_TIMEOUT);
-    return nFailureReason == IImsRadio::REASON_RRC_REJECT && nWaitTimeMillis >= nTimerVzw &&
-            EpsFallbackTrigger::IsRequired(m_objContext.GetConfigurationProxy());
+    return CallReasonInfo(CODE_LOCAL_NETWORK_NO_SERVICE);
 }
