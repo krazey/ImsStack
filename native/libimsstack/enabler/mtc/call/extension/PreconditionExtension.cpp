@@ -18,6 +18,7 @@
 #include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "SipMethod.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcCallContext.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"
@@ -57,21 +58,20 @@ PUBLIC VIRTUAL void PreconditionExtension::FormatRequest(
     {
         case RequestType::START:
         case RequestType::UPDATE:
-            // TODO: In UPDATE, precondition supportability check
             break;
 
         case RequestType::EARLY_UPDATE:
-            eHeaderType = ISipHeader::REQUIRE;  // TODO, B_SEND_UPDATE_WITH_REQUIRE_PRECONDITION
+            if (m_objContext.GetCall().GetState() == IMtcCall::State::UPDATING)
+            {
+                break;
+            }
+            eHeaderType = ISipHeader::REQUIRE;
             break;
 
-        case RequestType::PRACK:
+        case RequestType::PRACK:  // TODO: Check SDP and set Supported header.
         case RequestType::ACK:
         case RequestType::CANCEL_UPDATE:
         case RequestType::TERMINATE:
-            return;
-
-        default:
-            IMS_TRACE_E(0, "FormatRequest : Invalid message type[%d]", eType, 0, 0);
             return;
     }
 
