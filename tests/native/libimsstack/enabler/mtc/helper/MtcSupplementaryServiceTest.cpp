@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-#include "../../../engine/interface/core/MockIMessage.h"
-#include "../../../engine/interface/sipcore/MockISipMessage.h"
 #include "IMessage.h"
 #include "ISipHeader.h"
 #include "ImsList.h"
 #include "ImsMap.h"
-#include "MockIMtcContext.h"
-#include "MtcContextRepository.h"
 #include "MtcDef.h"
 #include "SipHeaderName.h"
+#include "call/MockIMtcCallContext.h"
 #include "configuration/MockIMtcConfigurationManager.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "core/MockIMessage.h"
 #include "helper/MtcSupplementaryService.h"
+#include "sipcore/MockISipMessage.h"
 #include "utility/MessageUtils.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -46,19 +45,18 @@ public:
     MtcSupplementaryService* pMtcSupplementaryService;
     MockISipMessage objMockISipMessage;
     MockIMessage objMockIMessage;
-    MockIMtcContext objContext;
+    MockIMtcCallContext objContext;
     MessageUtils objMessageUtils;
 
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objContext);
         ON_CALL(objContext, GetMessageUtils).WillByDefault(ReturnRef(objMessageUtils));
 
         pMockIMtcConfigurationManager = new MockIMtcConfigurationManager();
         pMtcConfigurationProxy = new MtcConfigurationProxy(
                 static_cast<IMtcConfigurationManager*>(pMockIMtcConfigurationManager));
-        pMtcSupplementaryService = new MtcSupplementaryService(*pMtcConfigurationProxy);
+        pMtcSupplementaryService = new MtcSupplementaryService(objContext, *pMtcConfigurationProxy);
 
         EXPECT_CALL(objMockIMessage, GetMessage())
                 .Times(AnyNumber())

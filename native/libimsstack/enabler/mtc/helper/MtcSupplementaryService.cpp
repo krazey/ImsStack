@@ -15,7 +15,6 @@
  */
 
 #include "IMessage.h"
-#include "IMtcContext.h"
 #include "ISipHeader.h"
 #include "IuMtcService.h"
 #include "MtcDef.h"
@@ -25,11 +24,13 @@
 #include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
+#include "call/IMtcCallContext.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "ussi/UssiController.h"
 #include "utility/CallComposerUtil.h"
+#include "utility/IMessageUtils.h"
 #include "utility/MessageUtil.h"
 #include <utility>
 
@@ -40,8 +41,10 @@ LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_PASSED[] = "TN-Validation-Passed"
 LOCAL const IMS_CHAR STR_VERSTAT_TN_VALIDATION_FAILED[] = "TN-Validation-Failed";
 
 PUBLIC
-MtcSupplementaryService::MtcSupplementaryService(IN MtcConfigurationProxy& objConfigurationProxy,
+MtcSupplementaryService::MtcSupplementaryService(IN IMtcCallContext& objContext,
+        IN MtcConfigurationProxy& objConfigurationProxy,
         IN const ImsMap<SuppType, SuppService*>& objSuppServices) :
+        m_objContext(objContext),
         m_objSuppService(objSuppServices),
         m_objConfigurationProxy(objConfigurationProxy)
 {
@@ -80,10 +83,9 @@ void MtcSupplementaryService::UpdateOutgoingServices(
 PUBLIC
 void MtcSupplementaryService::UpdateTip(IN IMessage* piMessage)
 {
-    AString strPrivacy;
-    MessageUtil::GetHeader(piMessage, ISipHeader::PRIVACY, strPrivacy);
-    IMS_BOOL bHasPAssertedIdentity =
-            MessageUtil::IsHeaderPresent(piMessage, ISipHeader::P_ASSERTED_IDENTITY);
+    AString strPrivacy = m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::PRIVACY);
+    IMS_BOOL bHasPAssertedIdentity = m_objContext.GetMessageUtils().IsHeaderPresent(
+            piMessage, ISipHeader::P_ASSERTED_IDENTITY);
 
     IMS_SINT32 tipType;
     AString tipStr;
@@ -98,10 +100,10 @@ void MtcSupplementaryService::UpdateTip(IN IMessage* piMessage)
     else
     {
         tipType = TIP_TYPE_IDENTITY;
-        AString strNumber;
-        AString strName;
-        MessageUtil::GetUserPart(piMessage, ISipHeader::P_ASSERTED_IDENTITY, strNumber);
-        MessageUtil::GetDisplayName(piMessage, ISipHeader::P_ASSERTED_IDENTITY, strName);
+        AString strNumber = m_objContext.GetMessageUtils().GetUserPart(
+                piMessage, ISipHeader::P_ASSERTED_IDENTITY);
+        AString strName = m_objContext.GetMessageUtils().GetDisplayName(
+                piMessage, ISipHeader::P_ASSERTED_IDENTITY);
         tipStr.Append(strNumber);
         tipStr.Append(',');
         tipStr.Append(strName);
@@ -137,16 +139,13 @@ IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateCallerId(IN IMessage* piMessage)
 {
-    AString strPrivacy;
-    if (MessageUtil::GetHeader(piMessage, ISipHeader::PRIVACY, strPrivacy) == IMS_SUCCESS)
+    AString strPrivacy = m_objContext.GetMessageUtils().GetHeader(piMessage, ISipHeader::PRIVACY);
+    if (strPrivacy.EqualsIgnoreCase("id"))
     {
-        if (strPrivacy.EqualsIgnoreCase("id"))
-        {
-            // 3GPP 24.607 requires to check absence of PAID as well in this case.
-            Add(SuppType::CALLER_ID, static_cast<IMS_SINT32>(OipType::RESTRICTED));
-            IMS_TRACE_I("UpdateCallerId Privacy header value is id", 0, 0, 0);
-            return IMS_TRUE;
-        }
+        // 3GPP 24.607 requires to check absence of PAID as well in this case.
+        Add(SuppType::CALLER_ID, static_cast<IMS_SINT32>(OipType::RESTRICTED));
+        IMS_TRACE_I("UpdateCallerId Privacy header value is id", 0, 0, 0);
+        return IMS_TRUE;
     }
 
     IMS_BOOL bPolicyFallBack =
@@ -255,8 +254,8 @@ IMS_BOOL MtcSupplementaryService::UpdateCdivHistory(IN IMessage* piMessage)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateCw(IN IMessage* piMessage)
 {
-    if (MessageUtil::IsHeaderPresent(piMessage, ISipHeader::UNKNOWN, SipHeaderName::ALERT_INFO) ==
-            IMS_FALSE)
+    if (m_objContext.GetMessageUtils().IsHeaderPresent(
+                piMessage, ISipHeader::UNKNOWN, SipHeaderName::ALERT_INFO) == IMS_FALSE)
     {
         return IMS_FALSE;
     }
@@ -445,8 +444,8 @@ void MtcSupplementaryService::Add(IN SuppType eSuppType, IN IMS_BOOL bValue)
 PRIVATE
 ISipHeader* MtcSupplementaryService::GetHistoryInfoHeader(IN IMessage* piMessage)
 {
-    ImsList<AString> lstHistoryInfos;
-    MessageUtil::GetHeaders(piMessage, ISipHeader::HISTORY_INFO, lstHistoryInfos);
+    ImsList<AString> lstHistoryInfos =
+            m_objContext.GetMessageUtils().GetHeaders(piMessage, ISipHeader::HISTORY_INFO);
     if (lstHistoryInfos.IsEmpty())
     {
         return IMS_NULL;
@@ -575,17 +574,15 @@ IMS_SINT32 MtcSupplementaryService::GetCallingNumVerificationResult(IN const ASt
 PRIVATE
 AString MtcSupplementaryService::GetCnvParameterValue(IN IMessage* piMessage) const
 {
-    AString strValue;
-    MessageUtil::GetParameterValueFromUri(piMessage, STR_VERSTAT, ISipHeader::P_ASSERTED_IDENTITY,
-            strValue, AString::ConstNull());
+    AString strValue = m_objContext.GetMessageUtils().GetParameterValueFromUri(
+            piMessage, STR_VERSTAT, ISipHeader::P_ASSERTED_IDENTITY);
     if (strValue.GetLength() > 0)
     {
         return strValue;
     }
 
-    MessageUtil::GetParameterValueFromUri(
-            piMessage, STR_VERSTAT, ISipHeader::FROM, strValue, AString::ConstNull());
-    return strValue;
+    return m_objContext.GetMessageUtils().GetParameterValueFromUri(
+            piMessage, STR_VERSTAT, ISipHeader::FROM);
 }
 
 PRIVATE
@@ -593,10 +590,10 @@ OipType MtcSupplementaryService::GetOipTypeByHeader(
         IN IMessage* piMessage, IN IMS_BOOL bFromHeader, IN IMS_BOOL bDoFallBack)
 {
     OipType eOipType = OipType::INVALID;
-    ImsList<AString> objHeaders;
     IMS_SINT32 nDeterminationPolicyHeader =
             bFromHeader ? ISipHeader::FROM : ISipHeader::P_ASSERTED_IDENTITY;
-    MessageUtil::GetHeaders(piMessage, nDeterminationPolicyHeader, objHeaders);
+    ImsList<AString> objHeaders =
+            m_objContext.GetMessageUtils().GetHeaders(piMessage, nDeterminationPolicyHeader);
     for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); i++)
     {
         // only PAID can be multiple.
@@ -639,7 +636,7 @@ void MtcSupplementaryService::GetCnapByHeader(IN IMessage* piMessage, IN IMS_BOO
 {
     IMS_SINT32 nDeterminationPolicyHeader =
             bFromHeader ? ISipHeader::FROM : ISipHeader::P_ASSERTED_IDENTITY;
-    MessageUtil::GetDisplayName(piMessage, nDeterminationPolicyHeader, strCnap);
+    strCnap = m_objContext.GetMessageUtils().GetDisplayName(piMessage, nDeterminationPolicyHeader);
 
     if (strCnap.GetLength() <= 0 && bDoFallBack)
     {
