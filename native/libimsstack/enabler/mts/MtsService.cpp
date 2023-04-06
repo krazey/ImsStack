@@ -128,16 +128,6 @@ PUBLIC VIRTUAL void MtsService::SendMtResult(IN IMS_BOOL bMtResult)
     (void)bMtResult;
 }
 
-PUBLIC VIRTUAL void MtsService::SendScbmNotification(IN IMS_UINT32 nScbmState)
-{
-    IMS_TRACE_I("SendScbmNotification : SCBM State[%s]", PS_ScbmState(nScbmState), 0, 0);
-
-    if (m_piImsEmergencyAos != IMS_NULL)
-    {
-        m_piImsEmergencyAos->GetAosInfo()->NotifyScbmState(nScbmState);
-    }
-}
-
 PUBLIC
 void MtsService::ReportMoStatus(IN IMS_SINT32 nReason, IN SmsFormatType eSmsFormat,
         IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId)

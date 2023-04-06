@@ -38,7 +38,6 @@ public class MtsJni {
     public static final int NOTI_MTSENABLER_SEND_MT_RESULT = JAVA2MTSENABLER + 2;
 
     public static final int NOTI_MTS_RAT_SELECTION = JAVA2MTSENABLER + 10;
-    public static final int NOTI_SCBM_STATE = JAVA2MTSENABLER + 11;
 
     private static final int REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;
     private static final int REPORT_MTS_MT_SMS = MTSENABLER2JAVA + 2;
