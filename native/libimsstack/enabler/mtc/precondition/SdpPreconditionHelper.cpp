@@ -70,14 +70,6 @@ PUBLIC VIRTUAL void SdpPreconditionHelper::FormPreconditionSdp(
         }
 
         IMS_SINT32 eSdpMediaType = pLocalSdp->GetType();
-
-        if (pLocalSdp->GetPort() <= 0)
-        {
-            IMS_TRACE_D("FormPreconditionSdp : %s, don't form qos attributes, port is %d.",
-                    PS_SdpMediaType(eSdpMediaType), pLocalSdp->GetPort(), 0);
-            continue;
-        }
-
         IMS_TRACE_D(
                 "FormPreconditionSdp : %s, start forming", PS_SdpMediaType(eSdpMediaType), 0, 0);
 
