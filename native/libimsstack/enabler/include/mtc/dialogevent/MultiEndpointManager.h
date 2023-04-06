@@ -72,7 +72,7 @@ private:
     void NotifyExternalCalls() const;
 
     ImsList<IN const JniExternalCall*> GetJniExternalCalls() const;
-    IMS_BOOL IsPullable(IN const Dialog& objDialog) const;
+    IMS_BOOL IsPullable(IN const Dialog& objDialog, IN IMS_BOOL bHeld) const;
     CallType GetCallType(IN const Dialog& objDialog) const;
     IMS_BOOL IsHeld(IN const Dialog& objDialog) const;
     IMS_BOOL IsOwnDialog(IN const Dialog& objDialog) const;

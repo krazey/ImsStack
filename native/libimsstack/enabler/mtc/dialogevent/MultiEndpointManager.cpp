@@ -119,7 +119,7 @@ VIRTUAL PUBLIC IMultiEndpointManager::PullingDialogInfo MultiEndpointManager::Ge
             objInfo.strLocalTag = pDialog->GetLocalTag();
             objInfo.strRemoteTag = pDialog->GetRemoteTag();
             objInfo.bHeld = IsHeld(*pDialog);
-            objInfo.bPullable = IsPullable(*pDialog);
+            objInfo.bPullable = IsPullable(*pDialog, objInfo.bHeld);
             objInfo.eCallType = GetCallType(*pDialog);
             objInfo.pMediaInfo = &pDialog->GetExtraInfo().GetMediaInfo();
             break;
@@ -304,13 +304,13 @@ ImsList<const JniExternalCall*> MultiEndpointManager::GetJniExternalCalls() cons
         pJniExternalCall->m_strAddress = objDialog.GetRemoteParticipant().GetIdentity().GetUri();
         pJniExternalCall->m_strLocalAddress =
                 objDialog.GetLocalParticipant().GetIdentity().GetUri();
-        pJniExternalCall->m_bIsPullable = IsPullable(objDialog);
+        pJniExternalCall->m_bIsHeld = IsHeld(objDialog);
+        pJniExternalCall->m_bIsPullable = IsPullable(objDialog, pJniExternalCall->m_bIsHeld);
         pJniExternalCall->m_nCallState =
                 objDialog.GetState().GetState() == Dialog::State::STATE_CONFIRMED
                 ? JniExternalCall::CALL_STATE_CONFIRMED
                 : JniExternalCall::CALL_STATE_TERMINATED;
         pJniExternalCall->m_nCallType = static_cast<IMS_UINT32>(GetCallType(objDialog));
-        pJniExternalCall->m_bIsHeld = IsHeld(objDialog);
 
         IMS_TRACE_D("GetJniExternalCalls >> %s", pJniExternalCall->ToString().GetStr(), 0, 0);
 
@@ -321,8 +321,13 @@ ImsList<const JniExternalCall*> MultiEndpointManager::GetJniExternalCalls() cons
 }
 
 PRIVATE
-IMS_BOOL MultiEndpointManager::IsPullable(const Dialog& objDialog) const
+IMS_BOOL MultiEndpointManager::IsPullable(const Dialog& objDialog, IN IMS_BOOL bHeld) const
 {
+    if (bHeld)
+    {
+        return IMS_FALSE;
+    }
+
     if (objDialog.GetState().GetState() != Dialog::State::STATE_CONFIRMED)
     {
         return IMS_FALSE;
@@ -334,19 +339,23 @@ IMS_BOOL MultiEndpointManager::IsPullable(const Dialog& objDialog) const
         return IMS_FALSE;
     }
 
-    if ((objExtraInfo.GetMediaInfo().eAudioQuality == AUDIO_QUALITY_AMR_WB &&
-                objExtraInfo.GetMediaInfo().eAudioDirection == DIRECTION_SEND_RECEIVE))
+    if (objExtraInfo.GetMediaInfo().eVideoQuality != VIDEO_QUALITY_NONE &&
+            objExtraInfo.GetMediaInfo().eVideoQuality != VIDEO_QUALITY_NOTUSED)
     {
-        if (objExtraInfo.GetMediaInfo().eVideoQuality == VIDEO_QUALITY_NONE ||
-                objExtraInfo.GetMediaInfo().eVideoQuality == VIDEO_QUALITY_NOTUSED ||
-                (objExtraInfo.GetMediaInfo().eVideoQuality == VIDEO_QUALITY_QVGA_PR &&
-                        objExtraInfo.GetMediaInfo().eVideoDirection == DIRECTION_SEND_RECEIVE))
+        if (objExtraInfo.GetMediaInfo().eVideoDirection == DIRECTION_INVALID ||
+                objExtraInfo.GetMediaInfo().eVideoDirection == DIRECTION_INACTIVE)
         {
-            return IMS_TRUE;
+            // video is used but direction is inactive
+            return IMS_FALSE;
         }
     }
 
-    return IMS_FALSE;
+    if (objExtraInfo.GetMediaInfo().eAudioDirection != DIRECTION_SEND_RECEIVE)
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
 }
 
 PRIVATE
@@ -370,13 +379,8 @@ IMS_BOOL MultiEndpointManager::IsHeld(const Dialog& objDialog) const
     IMS_SLONG nIndex =
             objDialog.GetLocalParticipant().GetTarget().GetParams().GetIndexOfKey(strSipRendering);
 
-    IMS_TRACE_D("IsHeld [%d]", nIndex, 0, 0);
-
     if (nIndex >= 0)
     {
-        IMS_TRACE_D("IsHeld [%s]",
-                objDialog.GetLocalParticipant().GetTarget().GetParams().GetValueAt(nIndex).GetStr(),
-                0, 0);
         return objDialog.GetLocalParticipant()
                 .GetTarget()
                 .GetParams()
