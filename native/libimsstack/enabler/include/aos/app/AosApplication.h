@@ -168,6 +168,7 @@ protected:
     // StateMachine
     virtual IMS_BOOL PreprocessStateMessage(IN IMSMSG& objMsg);
     virtual IMS_BOOL PreprocessStateMessage_Connection(IN IMSMSG& objMsg);
+    virtual IMS_BOOL PreprocessStateMessage_Condition(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateNotReady_Condition(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateNotReady_Connection(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateReady_Condition(IN IMSMSG& objMsg);

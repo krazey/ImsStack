@@ -29,6 +29,7 @@ public:
 
     virtual IMS_BOOL Activate() = 0;
     virtual void Deactivate() = 0;
+    virtual IMS_BOOL IsActivationRequested() = 0;
     virtual IMS_UINT32 GetState() = 0;
 
     virtual IMS_SINT32 GetConnectionType() = 0;

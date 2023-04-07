@@ -172,7 +172,13 @@ class TestAosConnector : public AosConnector
 
 public:
     inline IMS_BOOL Start() override { return IMS_TRUE; }
-    inline void Stop() override {}
+    inline void Stop() override
+    {
+        if (m_piConnection != IMS_NULL)
+        {
+            m_piConnection->Deactivate();
+        }
+    }
     inline void Stop(IN IMS_SINT32 /* nDelayTimeSec */) override {}
 
 private:
@@ -211,6 +217,7 @@ class TestAosApplication : public AosApplication
     FRIEND_TEST(AosApplicationTest, OnMessage);
     FRIEND_TEST(AosApplicationTest, ProcessMessage);
     FRIEND_TEST(AosApplicationTest, RegRetryCount);
+    FRIEND_TEST(AosApplicationTest, StateMachinePreProcess);
     FRIEND_TEST(AosApplicationTest, StateMachine);
     FRIEND_TEST(AosApplicationTest, Process);
     FRIEND_TEST(AosApplicationTest, RegTerminating);
@@ -1075,11 +1082,10 @@ TEST_F(AosApplicationTest, RegRetryCount)
     EXPECT_TRUE(m_pTestAosApplication->ProcessMessage(objMessage));
 }
 
-TEST_F(AosApplicationTest, StateMachine)
+TEST_F(AosApplicationTest, StateMachinePreProcess)
 {
     ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_ACTIVATED, 0);
     ImsMessage objMessageCnd(MSG_CONDITION, 0, 0);
-    ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_SUCCESS, 0);
 
     // TEST_F : PreprocessStateMessage - PreprocessStateMessage_Connection
     // PreprocessStateMessage_Connection - CONNECTION_ACTIVATED
@@ -1101,6 +1107,76 @@ TEST_F(AosApplicationTest, StateMachine)
             .Times(1);
     objMessageCnx.nWparam = CONNECTION_DEACTIVATED;
     EXPECT_TRUE(m_pTestAosApplication->PreprocessStateMessage(objMessageCnx));
+
+    // TEST_F : PreprocessStateMessage_Condition
+    // STATE_NOTREADY, AosBlock with invalid UICC, Emergency
+    m_pTestAosApplication->SetAppType(AosRegistrationType::EMERGENCY);
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
+    m_pTestAosCondition->SetIsReady(IMS_FALSE);
+    EXPECT_CALL(m_objMockIAosConnection, IsActivationRequested()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnection, GetState()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(0);
+    EXPECT_TRUE(m_pTestAosApplication->PreprocessStateMessage(objMessageCnd));
+
+    // STATE_NOTREADY, AosBlock with invalid UICC, Normal, IMS PDN not requested
+    m_pTestAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
+    m_pTestAosCondition->SetIsReady(IMS_FALSE);
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosConnection, IsActivationRequested()).WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosConnection, GetState()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(0);
+    EXPECT_TRUE(m_pTestAosApplication->PreprocessStateMessage(objMessageCnd));
+
+    // STATE_NOTREADY, AosBlock with invalid UICC, IMS PDN not connected
+    m_pTestAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
+    m_pTestAosCondition->SetIsReady(IMS_FALSE);
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosConnection, IsActivationRequested()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosConnection, GetState())
+            .WillOnce(Return(IAosConnection::STATE_ACTIVATING));
+    EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(1);
+    EXPECT_TRUE(m_pTestAosApplication->PreprocessStateMessage(objMessageCnd));
+
+    // STATE_NOTREADY, AosBlock with invalid UICC, IMS PDN connected
+    m_pTestAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_NOTREADY);
+    m_pTestAosCondition->SetIsReady(IMS_FALSE);
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
+            .WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosConnection, IsActivationRequested()).WillOnce(Return(IMS_TRUE));
+    EXPECT_CALL(m_objMockIAosConnection, GetState()).WillOnce(Return(IAosConnection::STATE_ACTIVE));
+    EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(0);
+    EXPECT_TRUE(m_pTestAosApplication->PreprocessStateMessage(objMessageCnd));
+
+    // STATE_READY, AosBlock not blocked with invalid UICC
+    m_pTestAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_READY);
+    m_pTestAosCondition->SetIsReady(IMS_FALSE);
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _))
+            .WillOnce(Return(IMS_FALSE));
+    EXPECT_CALL(m_objMockIAosConnection, IsActivationRequested()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(0);
+    EXPECT_TRUE(m_pTestAosApplication->PreprocessStateMessage(objMessageCnd));
+
+    // STATE_CONNECTED, AosBlock with invalid UICC
+    m_pTestAosApplication->SetAppType(AosRegistrationType::NORMAL);
+    m_pTestAosApplication->SetAppState(IAosApplication::STATE_CONNECTED);
+    m_pTestAosCondition->SetIsReady(IMS_FALSE);
+    EXPECT_CALL(m_objMockIAosBlock, IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED, _, _)).Times(0);
+    EXPECT_CALL(m_objMockIAosConnection, IsActivationRequested()).Times(0);
+    EXPECT_CALL(m_objMockIAosConnection, Deactivate()).Times(0);
+    EXPECT_TRUE(m_pTestAosApplication->PreprocessStateMessage(objMessageCnd));
+}
+
+TEST_F(AosApplicationTest, StateMachine)
+{
+    ImsMessage objMessageCnx(MSG_CONNECTION, CONNECTION_ACTIVATED, 0);
+    ImsMessage objMessageCnd(MSG_CONDITION, 0, 0);
+    ImsMessage objMessageReg(MSG_REGISTRATION, IAosRegistration::RESULT_SUCCESS, 0);
 
     // TEST_F : StateNotReady_Condition
     m_pTestAosApplication->SetAppType(AosRegistrationType::NORMAL);

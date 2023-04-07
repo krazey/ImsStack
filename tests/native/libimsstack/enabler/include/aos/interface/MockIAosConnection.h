@@ -28,6 +28,7 @@ class MockIAosConnection : public IAosConnection {
 public:
     MOCK_METHOD(IMS_BOOL, Activate, (), (override));
     MOCK_METHOD(void, Deactivate, (), (override));
+    MOCK_METHOD(IMS_BOOL, IsActivationRequested, (), (override));
     MOCK_METHOD(IMS_UINT32, GetState, (), (override));
     MOCK_METHOD(IMS_SINT32, GetConnectionType, (), (override));
     MOCK_METHOD(void, SetListener, (IN IAosConnectionListener* piListener), (override));
