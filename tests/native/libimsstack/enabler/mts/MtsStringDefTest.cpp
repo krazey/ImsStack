@@ -113,14 +113,6 @@ TEST_F(MtsStringDefTest, PrintStringRadioTechType)
     EXPECT_STREQ(PS_RadioTechType(INetworkWatcher::RADIOTECH_TYPE_INVALID), "__INVALID__");
 }
 
-TEST_F(MtsStringDefTest, PrintStringScbmState)
-{
-    EXPECT_STREQ(PS_ScbmState(NOTIFY_SCBM_STARTED), "SCBM_STARTED");
-    EXPECT_STREQ(PS_ScbmState(NOTIFY_SCBM_TERMINATED), "SCBM_TERMINATED");
-    EXPECT_STREQ(PS_ScbmState(NOTIFY_SCBM_TERMINATED_BY_ECALL), "SCBM_TERMINATED_BY_ECALL");
-    EXPECT_STREQ(PS_ScbmState(NOTIFY_SCBM_INVALID), "__INVALID__");
-}
-
 TEST_F(MtsStringDefTest, PrintStringServiceState)
 {
     EXPECT_STREQ(PS_ServiceState(STATE_INIT), "STATE_INIT");

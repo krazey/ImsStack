@@ -73,7 +73,6 @@ public:
     void SendMoSms(IN SmsFormatType eSmsFormat, IN ByteArray* pContent,
             IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bEmergency) override;
     void SendMtResult(IN IMS_BOOL bMtResult) override;
-    void SendScbmNotification(IN IMS_UINT32 nScbmState) override;
 
     void Traffic_OnConnectionFailed(IN IMS_UINT32 nType, IN IMS_UINT32 nDirection,
             IN IMS_UINT32 nFailureReason, IN IMS_UINT32 nCauseCode,

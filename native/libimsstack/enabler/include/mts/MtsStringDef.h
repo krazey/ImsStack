@@ -165,21 +165,6 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* PS_ScbmState(IN IMS_UINT32 nScbmState)
-    {
-        switch (nScbmState)
-        {
-            case NOTIFY_SCBM_STARTED:
-                return "SCBM_STARTED";
-            case NOTIFY_SCBM_TERMINATED:
-                return "SCBM_TERMINATED";
-            case NOTIFY_SCBM_TERMINATED_BY_ECALL:
-                return "SCBM_TERMINATED_BY_ECALL";
-            default:
-                return "__INVALID__";
-        }
-    }
-
     inline static const IMS_CHAR* PS_ServiceState(IN IMS_SINT32 nState)
     {
         switch (nState)
@@ -259,10 +244,6 @@ public:
 
 #ifndef PS_RadioTechType
 #define PS_RadioTechType(A) MtsStringDef::PS_RadioTechType(A)
-#endif
-
-#ifndef PS_ScbmState
-#define PS_ScbmState(A) MtsStringDef::PS_ScbmState(A)
 #endif
 
 #ifndef PS_ServiceState

@@ -33,7 +33,6 @@ public:
     static const IMS_SINT32 NOTI_MTSENABLER_SEND_MT_RESULT  = JAVA2MTSENABLER + 2;
 
     static const IMS_SINT32 NOTI_MTS_RAT_SELECTION          = JAVA2MTSENABLER + 10;
-    static const IMS_SINT32 NOTI_SCBM_STATE                 = JAVA2MTSENABLER + 11;
 
 
     // Event : IMS to Java
@@ -60,14 +59,6 @@ enum
     MT_FAILURE = 2,
     MT_SMS_FORMAT_FAILURE = 3,
     MT_SMS_NODATA_FAILURE = 4,
-};
-
-enum
-{
-    NOTIFY_SCBM_INVALID = 0,
-    NOTIFY_SCBM_STARTED = 1,
-    NOTIFY_SCBM_TERMINATED = 2,
-    NOTIFY_SCBM_TERMINATED_BY_ECALL = 3,
 };
 
 enum
