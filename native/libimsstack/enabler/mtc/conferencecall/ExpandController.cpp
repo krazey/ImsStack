@@ -23,6 +23,7 @@
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ExpandController.h"
 #include "conferencecall/IConferenceReference.h"
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -70,8 +71,8 @@ PUBLIC VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_
             GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
     p1to1User->strTarget = objSIPAddress.GetUserInfoPart()->GetUser();
 
-    m_objParticipantList.AddUser(p1to1User);
-    m_objParticipantList.Login();
+    m_pParticipantList->AddUser(p1to1User);
+    m_pParticipantList->Login();
 
     CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_REFER_INVITE);
     SetState(STATE_IDLE);
@@ -84,7 +85,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceStarted(IN IConferenceReference
     if ((ConferenceConfigurationWrapper::IsReferSubscriptionRequired() == IMS_FALSE) &&
             (GetState() == STATE_EXPANDING) && (piConfRef->GetType() == REFERENCE_TYPE_INVITE))
     {
-        m_objNotifier.NotifyExpanded();
+        m_pNotifier->NotifyExpanded();
     }
     else
     {
@@ -103,7 +104,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceStartFailed(IN IConferenceRefer
 
     StopFinalSipfragWaitTimer();
 
-    ConfUser* pTempUser = m_objParticipantList.GetConfUser(piConfRef);
+    ConfUser* pTempUser = m_pParticipantList->GetConfUser(piConfRef);
     if (pTempUser != IMS_NULL)
     {
         pTempUser->eStatus = STATUS_FAIL;
@@ -121,7 +122,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceStartFailed(IN IConferenceRefer
 
     if ((GetState() == STATE_JOINING) && (m_objIConfReferences.GetSize() <= 0))
     {
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_TRUE);
+        m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_TRUE);
     }
 }
 
@@ -135,7 +136,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceUpdated(IN IConferenceReference
         return ConferenceController::OnReferenceUpdated(piConfRef, nSipFragCode, eState);
     }
 
-    ConfUser* pTempUser = m_objParticipantList.GetConfUser(piConfRef);
+    ConfUser* pTempUser = m_pParticipantList->GetConfUser(piConfRef);
     UpdateUserStatusByReferResult(pTempUser, piConfRef, nSipFragCode);
 
     if (SipStatusCode::IsFinalSuccess(nSipFragCode))
@@ -182,7 +183,7 @@ PUBLIC VIRTUAL void ExpandController::OnReferenceUpdated(IN IConferenceReference
 
     if ((GetState() == STATE_JOINING) && (m_objIConfReferences.GetSize() <= 0))
     {
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_TRUE);
+        m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_TRUE);
     }
 }
 
@@ -193,7 +194,7 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
 
     if (GetState() != STATE_CREATED)
     {
-        m_objNotifier.NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1));
+        m_pNotifier->NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1));
         return;
     }
 
@@ -205,22 +206,22 @@ void ExpandController::ProcessExpand(IN ImsList<ConfUser*>& objUsers)
 
     if (nReferType == REFER_INVITE_SINGLE)  // SKT
     {
-        m_objOperationQueue.CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
-        m_objOperationQueue.CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE,
-                m_objParticipantList.GetConfUsers().GetAt(nStartIndex));
+        m_pOperationQueue->CreateNPutWithUsers(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, objUsers);
+        m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
+        m_pOperationQueue->CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE,
+                m_pParticipantList->GetConfUsers().GetAt(nStartIndex));
 
         // Terminate the exist 1-to-1 session : it is triggered by GII operation.
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
+        m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     }
     else if (nReferType == REFER_INVITE_MULTIPLE)  // LGU+
     {
-        m_objOperationQueue.CreateNPutWithUsers(
-                CONTROL_OPERATION_REFER_INVITE, m_objParticipantList.GetConfUsers());
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
+        m_pOperationQueue->CreateNPutWithUsers(
+                CONTROL_OPERATION_REFER_INVITE, m_pParticipantList->GetConfUsers());
+        m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
     }
 
-    m_objOperationQueue.SetAddingOperationSetCompleted();
+    m_pOperationQueue->SetAddingOperationSetCompleted();
 }
 
 PUBLIC VIRTUAL void ExpandController::StartConferenceCall(
@@ -265,7 +266,7 @@ PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() cons
 PROTECTED VIRTUAL void ExpandController::Recover()
 {
     IMS_TRACE_I("Recover", 0, 0, 0);
-    switch (m_objOperationQueue.GetTypeOfCurrentOperation())
+    switch (m_pOperationQueue->GetTypeOfCurrentOperation())
     {
         case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
             RecoverOnCreating();
@@ -391,17 +392,17 @@ void ExpandController::ProcessJoinAfterExpand()
     // Invite other participants when conference session is expanded.
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyJoinFailed(
-                CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1), m_objParticipantList);
+        m_pNotifier->NotifyJoinFailed(
+                CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1), *m_pParticipantList);
     }
 
     SetState(STATE_JOINING);
 
     IMS_UINT32 nStartIndex = 0;
 
-    for (IMS_UINT32 i = 0; i < m_objParticipantList.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_pParticipantList->GetSize(); i++)
     {
-        ConfUser* pConfUser = m_objParticipantList.GetConfUsers().GetAt(i);
+        ConfUser* pConfUser = m_pParticipantList->GetConfUsers().GetAt(i);
         if (pConfUser->eStatus == STATUS_IDLE)
         {
             nStartIndex = i;
@@ -409,14 +410,14 @@ void ExpandController::ProcessJoinAfterExpand()
         }
     }
 
-    for (IMS_UINT32 i = nStartIndex; i < m_objParticipantList.GetSize(); i++)
+    for (IMS_UINT32 i = nStartIndex; i < m_pParticipantList->GetSize(); i++)
     {
-        ConfUser* pConfUser = m_objParticipantList.GetConfUsers().GetAt(i);
+        ConfUser* pConfUser = m_pParticipantList->GetConfUsers().GetAt(i);
         IMS_TRACE_D("ProcessJoinAfterExpand : user [%s]", pConfUser->strTarget.GetStr(), 0, 0);
-        m_objOperationQueue.CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE, pConfUser);
+        m_pOperationQueue->CreateNPutWithUser(CONTROL_OPERATION_REFER_INVITE, pConfUser);
     }
 
-    m_objOperationQueue.SetAddingOperationSetCompleted();
+    m_pOperationQueue->SetAddingOperationSetCompleted();
 }
 
 PRIVATE
@@ -430,8 +431,8 @@ void ExpandController::RecoverOnCreating()
 
     IMS_TRACE_D("RecoverOnCreating", 0, 0, 0);
 
-    m_objNotifier.NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
-    m_objOperationQueue.Clear();
+    m_pNotifier->NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
+    m_pOperationQueue->Clear();
     SetState(STATE_IDLE);
 
     Resume1to1Session();
@@ -444,8 +445,8 @@ void ExpandController::RecoverOnReferring()
 
     if (GetState() == STATE_EXPANDING)
     {
-        m_objNotifier.NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
-        m_objOperationQueue.Clear();
+        m_pNotifier->NotifyExpandFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
+        m_pOperationQueue->Clear();
         SetState(STATE_IDLE);
 
         if (ConferenceConfigurationWrapper::GetReferTypeForInvite() == REFER_INVITE_SINGLE)
@@ -457,7 +458,7 @@ void ExpandController::RecoverOnReferring()
         return;
     }
 
-    ImsList<ConfUser*> objConfUsers = m_objOperationQueue.GetUsersOfCurrentOperation();
+    ImsList<ConfUser*> objConfUsers = m_pOperationQueue->GetUsersOfCurrentOperation();
 
     for (IMS_UINT32 nIndex = 0; nIndex < objConfUsers.GetSize(); nIndex++)
     {

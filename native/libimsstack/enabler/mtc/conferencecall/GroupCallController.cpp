@@ -20,6 +20,7 @@
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/GroupCallController.h"
+#include <memory>
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -46,7 +47,7 @@ PUBLIC VIRTUAL void GroupCallController::OnReferenceStartFailed(IN IConferenceRe
     }
 
     StopFinalSipfragWaitTimer();
-    ConfUser* pTempUser = m_objParticipantList.GetConfUser(piConfRef);
+    ConfUser* pTempUser = m_pParticipantList->GetConfUser(piConfRef);
 
     if (pTempUser != IMS_NULL)
     {
@@ -59,7 +60,7 @@ PUBLIC VIRTUAL void GroupCallController::OnReferenceStartFailed(IN IConferenceRe
 
     if ((GetState() == STATE_JOINING) && (m_objIConfReferences.GetSize() <= 0))
     {
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_TRUE);
+        m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI, IMS_TRUE);
     }
 }
 
@@ -73,7 +74,7 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN ImsList<ConfUser
     IMS_TRACE_I("ProcessGroupCall", 0, 0, 0);
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyGroupCallFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1));
+        m_pNotifier->NotifyGroupCallFailed(CallReasonInfo(CODE_LOCAL_ILLEGAL_STATE, -1));
         return;
     }
 
@@ -84,11 +85,11 @@ PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN ImsList<ConfUser
     CallStartOperationParams* pParams = new CallStartOperationParams(
             CONF_CREATE_START, objCallInfo, objMediaInfo, objUsers, objSuppServices);
 
-    m_objOperationQueue.CreateNPutWithStartParam(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, pParams);
-    m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
-    m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
+    m_pOperationQueue->CreateNPutWithStartParam(CONTROL_OPERATION_CREATE_CONFERENCE_CALL, pParams);
+    m_pOperationQueue->CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
+    m_pOperationQueue->CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
 
-    m_objOperationQueue.SetAddingOperationSetCompleted();
+    m_pOperationQueue->SetAddingOperationSetCompleted();
 }
 
 PUBLIC VIRTUAL void GroupCallController::StartConferenceCall(
@@ -117,7 +118,7 @@ PROTECTED VIRTUAL void GroupCallController::Recover()
 {
     IMS_TRACE_I("Recover", 0, 0, 0);
 
-    switch (m_objOperationQueue.GetTypeOfCurrentOperation())
+    switch (m_pOperationQueue->GetTypeOfCurrentOperation())
     {
         case CONTROL_OPERATION_CREATE_CONFERENCE_CALL:
             RecoverOnCreating();
@@ -145,8 +146,8 @@ void GroupCallController::RecoverOnCreating()
 
     IMS_TRACE_D("RecoverOnCreating", 0, 0, 0);
 
-    m_objNotifier.NotifyGroupCallFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
-    m_objOperationQueue.Clear();
+    m_pNotifier->NotifyGroupCallFailed(CallReasonInfo(CODE_LOCAL_INTERNAL_ERROR, -1));
+    m_pOperationQueue->Clear();
     SetState(STATE_IDLE);
 }
 
