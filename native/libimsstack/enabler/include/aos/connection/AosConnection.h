@@ -32,6 +32,7 @@ public:
 
     IMS_BOOL Activate() override;
     void Deactivate() override;
+    IMS_BOOL IsActivationRequested() override;
     IMS_UINT32 GetState() override;
 
     IMS_SINT32 GetConnectionType() override;
@@ -54,7 +55,6 @@ public:
 protected:
     void Notify(IN IMS_UINT32 nType = TYPE_STATE_CHANGED);
 
-    IMS_BOOL IsActivationRequested() const;
     IMS_BOOL IsConnected() const;
     IMS_BOOL IsOnDemandControl() const;
 
