@@ -36,7 +36,6 @@ import android.util.SparseArray;
 
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.ICommonPackageListener;
-import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.dcm.DcFactory;
@@ -146,7 +145,7 @@ public class ImsRegistrationTracker {
         }
 
         if (mDataRoamingSettingObserver != null) {
-            SettingsUtils.unregisterObserver(mContext.getContext().getContentResolver(),
+            mContext.getContext().getContentResolver().unregisterContentObserver(
                     mDataRoamingSettingObserver);
         }
     }
@@ -416,8 +415,8 @@ public class ImsRegistrationTracker {
             }
         };
 
-        SettingsUtils.registerObserverForSecure(mContext.getContext().getContentResolver(),
-                Settings.Global.DATA_ROAMING,
+        mContext.getContext().getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.DATA_ROAMING), true,
                 mDataRoamingSettingObserver);
     }
     /**

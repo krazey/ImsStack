@@ -48,6 +48,7 @@ import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
+import android.test.mock.MockContentResolver;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.ImsStackTest;
@@ -91,6 +92,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
     private TestImsMmTelService mMmTelFeature;
     private MessageExecutor mExecutor;
     private MmTelFeatureRegistry mMmTelFeatureRegistry;
+    private MockContentResolver mContentResolver;
 
     @Mock Context mMockContext;
     @Mock TelephonyManager mMockTelephonyManager;
@@ -100,6 +102,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         MockitoAnnotations.initMocks(this);
         mContextFixture = new ContextFixture();
         AppContext.init(mContextFixture.getTestDouble());
+        mContentResolver = new MockContentResolver();
 
         mMockImsContext = Mockito.mock(ImsContext.class);
         mMockBaseContext = Mockito.mock(IBaseContext.class);
@@ -113,6 +116,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
         mMockCallContext = Mockito.mock(ImsCallContext.class);
         mMockMmTelListener = Mockito.mock(IImsMmTelListener.class);
+        when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
 
         mServiceManager = new ImsServiceManager(mMockContext, mExecutor);
         mMmTelFeature = createMmTelService(mMockServiceRecord);
@@ -136,6 +140,7 @@ public class ImsMmTelServiceTest extends ImsStackTest {
         ImsServiceManager.setDefault(null);
         mServiceManager = null;
         mContextFixture = null;
+        mContentResolver = null;
         UtFactory.getInstance().setUtInterfaceForSlot(MSimUtils.DEFAULT_SLOT_ID, null);
         AppContext.deinit();
     }

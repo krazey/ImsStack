@@ -18,8 +18,10 @@ package com.android.imsstack.imsservice.mmtel;
 
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.test.mock.MockContentResolver;
 
 import com.android.imsstack.enabler.sipcontroller.impl.SipControllerAgent;
 import com.android.imsstack.imsservice.sipcontroller.ImsSipTransport;
@@ -35,19 +37,23 @@ import org.mockito.Mockito;
 
 public class ImsServiceRecordTest {
     protected Context mMockContext;
+    private MockContentResolver mContentResolver;
     private ImsCallApp mImsCallApp;
     private ImsServiceRegistry mImsServiceRegistry;
     private MessageExecutor mExecutor;
     private ImsMmTelService mImsMmTelService;
     private TestImsServiceRecord mImsServiceRecord;
     private SipControllerAgent mSipControllerAgent;
+
     @Before
     public void setUp() {
+        mContentResolver = new MockContentResolver();
         mMockContext = Mockito.mock(Context.class);
         mExecutor = Mockito.mock(MessageExecutor.class);
         mImsCallApp = Mockito.mock(ImsCallApp.class);
         mImsMmTelService = Mockito.mock(ImsMmTelService.class);
         mImsServiceRegistry = Mockito.mock(ImsServiceRegistry.class);
+        when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
         AppContext.init(mMockContext);
         int phoneId = 1;
         mImsServiceRecord = new TestImsServiceRecord(mMockContext, mExecutor, phoneId);
@@ -135,6 +141,7 @@ public class ImsServiceRecordTest {
 
     @After
     public void tearDown() {
+        mContentResolver = null;
         mImsServiceRecord = null;
         AppContext.deinit();
     }

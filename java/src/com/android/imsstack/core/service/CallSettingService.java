@@ -30,7 +30,6 @@ import android.telephony.ims.ImsMmTelManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.SettingsUtils;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
@@ -420,8 +419,9 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForSecure(getContext().getContentResolver(),
-                Settings.Global.MOBILE_DATA, mMobileDataSettingObserver);
+        getContext().getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.MOBILE_DATA), true,
+                mMobileDataSettingObserver);
 
         onMobileDataSettingChanged();
     }
@@ -441,9 +441,8 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForCallSettings(getContext(),
-                SubscriptionManager.VT_IMS_ENABLED,
-                mVideoCallSettingObserver, getSlotId());
+        getContext().getContentResolver().registerContentObserver(
+                SubscriptionManager.CONTENT_URI, true, mVideoCallSettingObserver);
 
         onVideoCallSetChanged();
     }
@@ -463,9 +462,8 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForSecure(getContext().getContentResolver(),
-                "data_network_video_calling_status_roaming"
-                /*SettingsConstants.Secure.DATA_NETWORK_VIDEO_CALLING_STATUS_ROAMING*/,
+        getContext().getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor("data_network_video_calling_status_roaming"), true,
                 mVideoCallRoamingSettingObserver);
 
         onVideoCallRoamingSetChanged();
@@ -486,9 +484,8 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForCallSettings(getContext(),
-                SubscriptionManager.ENHANCED_4G_MODE_ENABLED,
-                mVoLTESettingObserver, getSlotId());
+        getContext().getContentResolver().registerContentObserver(
+                SubscriptionManager.CONTENT_URI, true, mVoLTESettingObserver);
 
         onVoLTESetChanged();
     }
@@ -510,15 +507,11 @@ public class CallSettingService implements ICallSettingService {
 
         ContentResolver cr = getContext().getContentResolver();
 
-        SettingsUtils.registerObserverForGlobal(cr,
-                "roaming_hdvoice_enabled"
-                /*SettingsConstants.Global.ROAMING_HDVOICE_ENABLED*/,
+        cr.registerContentObserver(Settings.Global.getUriFor("roaming_hdvoice_enabled"), true,
                 mVoLTERoamingObserver);
 
         if (!ImsGlobal.isOperator(getSlotId(), "SKT")) {
-            SettingsUtils.registerObserverForSecure(cr,
-                    "data_lte_roaming"
-                    /*SettingsConstants.Secure.DATA_LTE_ROAMING*/,
+            cr.registerContentObserver(Settings.Secure.getUriFor("data_lte_roaming"), true,
                     mVoLTERoamingObserver);
         }
 
@@ -540,9 +533,8 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForCallSettings(getContext(),
-                SubscriptionManager.WFC_IMS_ENABLED,
-                mVoWIFISettingObserver, getSlotId());
+        getContext().getContentResolver().registerContentObserver(
+                SubscriptionManager.CONTENT_URI, true, mVoWIFISettingObserver);
 
         onVoWIFISetChanged();
     }
@@ -575,9 +567,8 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForCallSettings(getContext(),
-                SubscriptionManager.WFC_IMS_MODE,
-                mVoWIFIPreferenceObserver, getSlotId());
+        getContext().getContentResolver().registerContentObserver(
+                SubscriptionManager.CONTENT_URI, true, mVoWIFIPreferenceObserver);
 
         mVoWIFIPreference = getVoWIFIPreference();
 
@@ -611,9 +602,8 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForCallSettings(getContext(),
-                SubscriptionManager.WFC_IMS_ROAMING_ENABLED,
-                mVoWIFIRoamingSetObserver, getSlotId());
+        getContext().getContentResolver().registerContentObserver(
+                SubscriptionManager.CONTENT_URI, true, mVoWIFIRoamingSetObserver);
 
         mVoWIFIRoamingSet = isVoWiFiRoamingSettingEnabled();
 
@@ -635,8 +625,8 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForSecure(getContext().getContentResolver(),
-                Settings.Global.DATA_ROAMING,
+        getContext().getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.DATA_ROAMING), true,
                 mDataRoamingSettingObserver);
 
         onDataRoamingSettingChanged();
@@ -657,20 +647,23 @@ public class CallSettingService implements ICallSettingService {
             }
         };
 
-        SettingsUtils.registerObserverForSystem(getContext().getContentResolver(),
-                "rtt_option"
-                /*SettingsConstants.System.RTT_OPTION*/,
-                mRttModeSettingObserver);
-        SettingsUtils.registerObserverForSystem(getContext().getContentResolver(),
-                "rtt_operation_mode"
-                /*SettingsConstants.System.RTT_OPERATION_MODE*/,
-                mRttModeSettingObserver);
+        getContext().getContentResolver().registerContentObserver(
+                Settings.System.getUriFor("rtt_option"), true, mRttModeSettingObserver);
+        getContext().getContentResolver().registerContentObserver(
+                Settings.System.getUriFor("rtt_operation_mode"), true, mRttModeSettingObserver);
 
         onRttModeSettingChanged();
     }
 
     private void unregisterObserver(ContentObserver co) {
-        SettingsUtils.unregisterObserver(getContext().getContentResolver(), co);
+        if (co == null) {
+            return;
+        }
+
+        ContentResolver cr = getContext().getContentResolver();
+        if (cr != null) {
+            cr.unregisterContentObserver(co);
+        }
     }
 
     private boolean getVoLTERoamingSetForKR() {
