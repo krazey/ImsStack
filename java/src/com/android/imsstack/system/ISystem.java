@@ -36,7 +36,6 @@ public interface ISystem {
     public void setISystemAPISendEvent(ISystemAPISendEvent api);
     public void setISystemAPITelephonyState(ISystemAPITelephonyState api);
     public void setISystemAPITelephonySubscriber(ISystemAPITelephonySubscriber api);
-    public void setISystemAPIWifiCalling(ISystemAPIWifiCalling api);
     public void setISystemAPILocation(ISystemAPILocation api);
 
     /**

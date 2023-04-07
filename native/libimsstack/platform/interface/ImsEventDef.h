@@ -97,10 +97,9 @@
 #define IMS_WFC_ON                                     (1)
 #define IMS_WFC_OFF                                    (0)
 // LParam
-#define MODE_WFC_PREFERRED                             (2)
 #define MODE_WFC_ONLY                                  (0)
 #define MODE_CELLULAR_PREFERRED                        (1)
-#define MODE_IMS_PREFERRED                             (10)
+#define MODE_WFC_PREFERRED                             (2)
 
 // Event for modem state
 #define IMS_EVENT_VOLTE_SETTING                        (0x00000400)

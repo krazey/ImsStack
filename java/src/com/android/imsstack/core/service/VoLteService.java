@@ -20,9 +20,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
-import android.telephony.ims.ImsManager;
-import android.telephony.ims.ImsMmTelManager;
 
 import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.ImsGlobal;
@@ -30,7 +27,6 @@ import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IBatteryState;
-import com.android.imsstack.core.agents.ICallSetting;
 import com.android.imsstack.core.agents.ICellInfo;
 import com.android.imsstack.core.agents.ILocationAgent;
 import com.android.imsstack.core.agents.ILocationAgentManager;
@@ -44,21 +40,20 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDcApn;
 import com.android.imsstack.core.agents.dcmif.IDcNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.core.service.CallSettingService;
-import com.android.imsstack.core.service.serviceif.ICallSettingService;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.internal.enabler.ImsStateStore;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ConcurrentHashMap;
@@ -193,8 +188,6 @@ public class VoLteService implements IVoLteService {
     --------------------------------------------------------------------------------------------- */
     protected void startServices() {
         ImsLog.i("");
-
-        mServics.put(TYPE_CALLSETTING, new CallSettingService());
 
         for (int type = TYPE_DEFAULT; type < TYPE_MAX; type++) {
             IService service = mServics.get(type);
@@ -369,26 +362,10 @@ public class VoLteService implements IVoLteService {
     protected void clearOperatorSpecificApp() {
         ImsLog.i("");
 
-        ICallSettingService callSettingService =
-                (ICallSettingService)getService(IVoLteService.TYPE_CALLSETTING);
-        if (callSettingService != null) {
-            callSettingService.unregisterForVoWIFISetChanged(null);
-        }
-
         ICellInfo ci = (ICellInfo)AgentFactory.getAgent(AgentFactory.CELL_INFO, mSlotID);
         if (ci != null) {
             ci.stopTrackingCellInfo(mContext);
             ci.cleanup();
-        }
-
-        if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "TMO", "US")) {
-            // IMS_RTT {
-            if (CapabilityConfigs.isRttEnabled(mSlotID)) {
-                if (callSettingService != null) {
-                    callSettingService.unregisterForRttModeSettingChanged(null);
-                }
-            }
-            // IMS_RTT }
         }
     }
 
@@ -398,32 +375,7 @@ public class VoLteService implements IVoLteService {
         if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "ATT", "US")) {
             // VoLTE initial start case
             updateServiceProvisioned(getSlotID());
-
-            //enable video call with DISS
-            SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
-                    SubsInfoInterface.class, getSlotID());
-            if ((subsInfo != null) && subsInfo.isTestModeEnabled()) {
-                ICallSetting cso = (ICallSetting)AgentFactory.getAgent(
-                        AgentFactory.CALL_SETTING, getSlotID());
-                if (cso != null) {
-                    cso.registerForVideoCallSetChanged(null, -1, null);
-                    cso.registerForMobileDataSettingChanged(null, -1, null);
-                }
-            }
         } else if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "TMO", "US")) {
-            system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
-                    isVoWiFiSettingEnabled() ? 1 : 0, getVoWiFiModeSetting());
-
-            // IMS_RTT {
-            if (CapabilityConfigs.isRttEnabled(mSlotID)) {
-                ICallSettingService callSettingService
-                        = (ICallSettingService)getService(IVoLteService.TYPE_CALLSETTING);
-                if (callSettingService != null) {
-                    callSettingService.registerForRttModeSettingChanged(null, -1, null);
-                }
-            }
-            // IMS_RTT }
-
             ICellInfo ci = (ICellInfo)AgentFactory.getAgent(AgentFactory.CELL_INFO, mSlotID);
             if (ci != null) {
                 ci.init(mContext);
@@ -454,12 +406,6 @@ public class VoLteService implements IVoLteService {
                 if (isSetLastCellInfoStorageRequired()) {
                     ci.setLastCellInfoStorage(true);
                 }
-            }
-
-            ICallSettingService callSettingService
-                    = (ICallSettingService)getService(IVoLteService.TYPE_CALLSETTING);
-            if (callSettingService != null) {
-                callSettingService.registerForVoWIFISetChanged(null, -1, null);
             }
         }
 
@@ -500,11 +446,20 @@ public class VoLteService implements IVoLteService {
         }
 
         // notify system events for setting
-        ICallSettingService callSettingService = (ICallSettingService)getService(
-                IVoLteService.TYPE_CALLSETTING);
-        if (callSettingService != null) {
-            callSettingService.notifySystemEvents();
-        }
+        MmTelFeatureRegistry mtfr =
+                ImsServiceRegistry.getInstance(mSlotID).getMmTelFeatureRegistry();
+
+        system.notifyEvent(ImsEventDef.IMS_EVENT_VOLTE_SETTING,
+                mtfr.isAdvancedCallingSettingEnabled()
+                ? ImsEventDef.IMS_VOLTE_SETTING_ON
+                : ImsEventDef.IMS_VOLTE_SETTING_OFF, 0);
+
+        system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
+                mtfr.isVoWiFiSettingEnabled()
+                ? ImsEventDef.IMS_WFC_ON
+                : ImsEventDef.IMS_WFC_OFF, mtfr.getVoWiFiModeSetting());
+
+        system.notifyEvent(ImsEventDef.IMS_EVENT_RTT_SETTING, mtfr.getRttMode(), 0);
 
         operatorSpecificImsBootCompleted();
     }
@@ -669,38 +624,5 @@ public class VoLteService implements IVoLteService {
         }
 
         return false;
-    }
-
-    private ImsMmTelManager getImsMmTelManager() {
-        int subId = MSimUtils.getSubId(getSlotID());
-
-        if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
-            return null;
-        }
-
-        ImsManager imsManager = mContext.getSystemService(ImsManager.class);
-        return (imsManager != null) ? imsManager.getImsMmTelManager(subId) : null;
-    }
-
-    private boolean isVoWiFiSettingEnabled() {
-        ImsMmTelManager mmTelManager = getImsMmTelManager();
-
-        try {
-            return mmTelManager.isVoWiFiSettingEnabled();
-        } catch (Exception e) {
-            ImsLog.e(getSlotID(), "isVoWiFiSettingEnabled: " + e.toString());
-            return false;
-        }
-    }
-
-    private int getVoWiFiModeSetting() {
-        ImsMmTelManager mmTelManager = getImsMmTelManager();
-
-        try {
-            return mmTelManager.getVoWiFiModeSetting();
-        } catch (Exception e) {
-            ImsLog.e(getSlotID(), "getVoWiFiModeSetting: " + e.toString());
-            return ImsMmTelManager.WIFI_MODE_WIFI_PREFERRED;
-        }
     }
 }
