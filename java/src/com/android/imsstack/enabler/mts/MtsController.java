@@ -52,10 +52,6 @@ public class MtsController {
     public static final int MT_SMS_FORMAT_FAILURE = 3;
     public static final int MT_SMS_NODATA_FAILURE = 4;
 
-    public static final int SCBM_STARTED = 1;
-    public static final int SCBM_TERMINATED = 2;
-    public static final int SCBM_TERMINATED_BY_ECALL = 3;
-
     public static final int SMS_FORMAT_INVALID = 0;
     public static final int SMS_FORMAT_3GPP = 1;
     public static final int SMS_FORMAT_3GPP2 = 2;
@@ -232,29 +228,6 @@ public class MtsController {
         parcel.writeBoolean(bEmergencyNumber);
         mMtsJni.sendMessage(parcel, mSlotId);
         return true;
-    }
-
-    /**
-     * Notify the enabler that the SCBM state has changed.
-     * This is used by the enabler to decide whether to manage IMS registration.
-     *
-     * @param state about the SCBM timer(Tsmsto911)
-     * {@link MtsController#SCBM_STARTED},
-     * {@link MtsController#SCBM_TERMINATED},
-     * {@link MtsController#SCBM_TERMINATED_BY_ECALL}
-     */
-    public void sendNotificationForScbmState(int state) {
-        ImsLog.d("");
-
-        Parcel parcel = Parcel.obtain();
-        if (parcel == null) {
-            ImsLog.e("parcel is null");
-            return;
-        }
-
-        parcel.writeInt(MtsJni.NOTI_SCBM_STATE);
-        parcel.writeInt(state);
-        mMtsJni.sendMessage(parcel, mContext.getSlotId());
     }
 
     private void processNotifySendMoSmsError(int smsFormat, int seqId) {
