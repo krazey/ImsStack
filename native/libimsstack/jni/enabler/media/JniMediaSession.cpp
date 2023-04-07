@@ -148,7 +148,7 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
 
     if (GetMediaManager() == IMS_NULL)
     {
-        IMS_TRACE_E(0, "HandleMessage() IMediaManager is not exist", 0, 0, 0);
+        IMS_TRACE_E(0, "HandleMessage() IJniMediaManager is not exist", 0, 0, 0);
         return;
     }
 
@@ -200,9 +200,9 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
 }
 
 PRIVATE
-IMediaManager* JniMediaSession::GetMediaManager()
+IJniMediaManager* JniMediaSession::GetMediaManager()
 {
-    return DYNAMIC_CAST(IMediaManager*,
+    return DYNAMIC_CAST(IJniMediaManager*,
             JniEnablerConnector::GetInstance().GetNativeEnabler(
                     GetSlotId(), EnablerType::MEDIA_SESSION));
 }
@@ -321,7 +321,7 @@ void JniMediaSession::OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const Parce
 
         pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
 
-        m_piMediaManager->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+        GetMediaManager()->SendMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
     */
 }
 
