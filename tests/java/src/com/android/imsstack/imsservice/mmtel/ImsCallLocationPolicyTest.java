@@ -23,13 +23,13 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.telephony.ims.ImsCallProfile;
+import android.test.mock.MockContentResolver;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.ImsStackTest;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MSimUtils;
@@ -69,7 +69,6 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
     private CarrierConfig mMockCarrierConfig;
     private ConfigInterface mMockConfigInterface;
     private ImsCallLocationPolicy mImsCallLocationPolicy;
-    private IContext mMockIContext;
     private Context mMockContext;
 
     @Before
@@ -77,12 +76,10 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
         mContextFixture = new ContextFixture();
         AppContext.init(mContextFixture.getTestDouble());
 
-        mMockIContext = Mockito.mock(IContext.class);
         mMockContext = Mockito.mock(Context.class);
         mMockCallContext = Mockito.mock(ImsCallContext.class);
         mMockCarrierConfig = Mockito.mock(CarrierConfig.class);
         mMockConfigInterface = Mockito.mock(ConfigInterface.class);
-        when(mMockIContext.getContext()).thenReturn(mMockContext);
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mMockCallContext.getSlotId()).thenReturn(MSimUtils.DEFAULT_SLOT_ID);
         AgentFactory.getInstance().setAgent(ConfigInterface.class, mMockConfigInterface,
@@ -218,23 +215,28 @@ public class ImsCallLocationPolicyTest extends ImsStackTest {
                 .thenReturn(FLAG_LOCATION_REQUIRED);
         mImsCallLocationPolicy = new ImsCallLocationPolicy(mMockCallContext);
         assertFalse(mImsCallLocationPolicy.isLocationRequired("910", callProfile));
+
+        ImsServiceManager.setDefault(null);
     }
 
     private void mockForIsWiFi(boolean isRegistered) {
         MessageExecutor executor = new MessageExecutor(ImsServiceManager.class.getSimpleName());
         ImsServiceRecord mockServiceRecord = Mockito.mock(ImsServiceRecord.class);
         ImsRegistrationTracker mockImsRegTracker = Mockito.mock(ImsRegistrationTracker.class);
-        ImsServiceManager serviceManager = new ImsServiceManager(mMockContext, executor);
+        Context mockContext = Mockito.mock(Context.class);
+        MockContentResolver mockContentResolver = new MockContentResolver();
         when(mMockCallContext.getSlotId()).thenReturn(MSimUtils.DEFAULT_SLOT_ID);
-        serviceManager.setDefault(serviceManager);
-        ConcurrentHashMap<Integer, ImsServiceRecord> serviceMap =
-                serviceManager.getServiceRecordMap();
-        serviceMap.put(MSimUtils.DEFAULT_SLOT_ID, mockServiceRecord);
-
         when(mockServiceRecord.getRegistrationTracker()).thenReturn(mockImsRegTracker);
         when(mockImsRegTracker.isCallRegistered()).thenReturn(isRegistered);
         when(mockImsRegTracker.getRegisteredNetworkType()).thenReturn(
                 IAosRegistrationListener.NetworkType.IWLAN);
+        when(mockContext.getContentResolver()).thenReturn(mockContentResolver);
+
+        ImsServiceManager serviceManager = new ImsServiceManager(mockContext, executor);
+        serviceManager.setDefault(serviceManager);
+        ConcurrentHashMap<Integer, ImsServiceRecord> serviceMap =
+                serviceManager.getServiceRecordMap();
+        serviceMap.put(MSimUtils.DEFAULT_SLOT_ID, mockServiceRecord);
     }
 }
 

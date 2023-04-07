@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.telephony.TelephonyManager;
+import android.test.mock.MockContentResolver;
 
 import com.android.imsstack.ContextFixture;
 import com.android.imsstack.ImsStackTest;
@@ -62,6 +63,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
     private MessageExecutor mExecutor;
     private ConcurrentHashMap<Integer, ImsCallApp> mCallAppMap = null;
     private ConcurrentHashMap<Integer, ImsServiceRecord> mServiceRecordMap = null;
+    private MockContentResolver mContentResolver;
 
     @Mock Context mMockContext;
     @Mock TelephonyManager mMockTelephonyManager;
@@ -73,6 +75,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
         mContextFixture = new ContextFixture();
         AppContext.init(mContextFixture.getTestDouble());
         AgentFactory.getInstance().setDefaultAgent(AgentFactory.SUBSCRIPTION, mMockISubscription);
+        mContentResolver = new MockContentResolver();
 
         mMockTelephonyManager = mContextFixture.getTestDouble()
                 .getSystemService(TelephonyManager.class);
@@ -82,6 +85,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
 
         mMockServiceRecord = Mockito.mock(ImsServiceRecord.class);
         mMockImsCallApp = Mockito.mock(ImsCallApp.class);
+        when(mMockContext.getContentResolver()).thenReturn(mContentResolver);
         mExecutor = new MessageExecutor(ImsServiceController.class.getSimpleName());
         mServiceManager = new TestImsServiceManager(mMockContext, mExecutor);
         mCallAppMap = mServiceManager.getCallAppMap();
@@ -96,6 +100,7 @@ public class ImsServiceManagerTest extends ImsStackTest {
         mServiceManager = null;
         mCallAppMap = null;
         mServiceRecordMap = null;
+        mContentResolver = null;
         mContextFixture = null;
         AgentFactory.getInstance().setDefaultAgent(AgentFactory.SUBSCRIPTION, null);
         AppContext.deinit();

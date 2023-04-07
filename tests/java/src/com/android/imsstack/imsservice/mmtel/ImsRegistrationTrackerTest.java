@@ -29,6 +29,7 @@ import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
+import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 
 import com.android.imsstack.ContextFixture;
@@ -77,6 +78,7 @@ public class ImsRegistrationTrackerTest {
     private IAosRegistrationListener mAosRegListener = null;
     private MockIAosRegistration mAosReg;
     private ContextFixture mContextFixture;
+    private MockContentResolver mContentResolver;
 
     @Mock CarrierConfig mMockCarrierConfig;
     @Mock ConfigInterface mMockConfigInterface;
@@ -96,6 +98,7 @@ public class ImsRegistrationTrackerTest {
         MockitoAnnotations.initMocks(this);
         mContextFixture = new ContextFixture();
         AppContext.init(mContextFixture.getTestDouble());
+        mContentResolver = new MockContentResolver();
 
         when(mMockContext.getSlotId()).thenReturn(0);
         when(mMockContext.getPhoneId()).thenReturn(0);
@@ -105,6 +108,7 @@ public class ImsRegistrationTrackerTest {
         when(mMockConfigInterface.getCarrierConfig()).thenReturn(mMockCarrierConfig);
         when(mContext.getSharedPreferences(anyString(), anyInt())).thenReturn(mSp);
         when(mSp.edit()).thenReturn(mSpEditor);
+        when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mMockCarrierConfig.getBoolean(eq(CarrierConfig.Assets
                 .KEY_SUPPORT_VOWIFI_CAPABILITY_WHEN_WIFI_ONLY_OR_PREFERRED_IN_ROAMING_BOOL)))
                 .thenReturn(true);
@@ -132,6 +136,7 @@ public class ImsRegistrationTrackerTest {
     @After
     public void tearDown() {
         mRegTracker.dispose();
+        mContentResolver = null;
         mContextFixture = null;
         AppContext.deinit();
     }
