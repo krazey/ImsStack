@@ -32,6 +32,7 @@
 #include "conferencecall/IConferenceOperationQueueListener.h"
 #include "conferencecall/IConferenceReferenceListener.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
+#include <memory>
 
 class IMtcContext;
 class IConferenceReference;
@@ -205,9 +206,9 @@ protected:
     IMtcCallManager& m_objCallManager;
     CallConnectionIdManager& m_objConnectionIdManager;
     ConferenceFactory& m_objFactory;
-    ConferenceParticipantList& m_objParticipantList;
-    ConferenceEventNotifier& m_objNotifier;
-    ConferenceOperationQueue& m_objOperationQueue;
+    std::unique_ptr<ConferenceParticipantList> m_pParticipantList;
+    std::unique_ptr<ConferenceEventNotifier> m_pNotifier;
+    std::unique_ptr<ConferenceOperationQueue> m_pOperationQueue;
     ConferenceSubscription* m_pSubscription;
     ImsList<IConferenceReference*> m_objIConfReferences;
     ITimer* m_piTimer;
