@@ -316,13 +316,30 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::RequestQos(
     // check whether qos for the remote address already requested
     QosRequestParam* pQosParams = FindQosParam(pParam);
 
-    if (pQosParams != NULL && pQosParams->m_bCallback == IMS_FALSE)  // callback has not responded
+    if (pQosParams != NULL)
     {
-        IMS_TRACE_D("RequestQos() - eMediaType[%d] yet responded", eMediaType, 0, 0);
+        IMS_TRACE_D("RequestQos() - eMediaType[%d] found, port[%d]", eMediaType,
+                pQosParams->m_nPort, 0);
         pQosParams->AddNegoId(nNegoId);
+
+        if (pQosParams->m_bResult)  // The qos already acquired
+        {
+            for (const auto& negoId : pQosParams->m_objListNegoId)
+            {
+                m_pClientListener->MediaSession_NotifyQos(
+                        negoId, pQosParams->m_bResult, pQosParams->m_eMediaType);
+            }
+        }
+        else  // request again
+        {
+            MediaSession_SendMsgToMediaManager(IMMedia::REQUEST_QOS,
+                    new ImsMediaMsgQosParam(
+                            pParam->m_eMediaType, pParam->m_objIpAddress, pParam->m_nPort));
+        }
+
         delete pParam;
     }
-    else
+    else  // new request
     {
         pParam->AddNegoId(nNegoId);
         MediaSession_SendMsgToMediaManager(IMMedia::REQUEST_QOS,
@@ -1171,7 +1188,7 @@ IMS_BOOL MediaSession::OnNotify(IN IMS_SINT32 nMsg, IN IMS_UINTP nParam)
 
                 if (pMatchedParam != IMS_NULL)
                 {
-                    pMatchedParam->m_bCallback = IMS_TRUE;
+                    pMatchedParam->m_bResult = bResult;
 
                     for (const auto& negoId : pMatchedParam->m_objListNegoId)
                     {

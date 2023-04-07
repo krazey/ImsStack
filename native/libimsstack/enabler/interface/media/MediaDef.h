@@ -154,11 +154,11 @@ struct QosRequestParam
 {
 public:
     QosRequestParam(const MEDIA_CONTENT_TYPE type, const IpAddress& address, const IMS_SINT32 port,
-            const IMS_BOOL callback = IMS_FALSE) :
+            const IMS_BOOL result = IMS_FALSE) :
             m_eMediaType(type),
             m_objIpAddress(address),
             m_nPort(port),
-            m_bCallback(callback)
+            m_bResult(result)
     {
     }
 
@@ -172,7 +172,7 @@ public:
             m_eMediaType(param.m_eMediaType),
             m_objIpAddress(param.m_objIpAddress),
             m_nPort(param.m_nPort),
-            m_bCallback(param.m_bCallback)
+            m_bResult(param.m_bResult)
     {
     }
 
@@ -190,7 +190,7 @@ public:
     MEDIA_CONTENT_TYPE m_eMediaType;
     IpAddress m_objIpAddress;
     IMS_SINT32 m_nPort;
-    IMS_BOOL m_bCallback;
+    IMS_BOOL m_bResult;
     std::list<IMS_UINTP> m_objListNegoId;
 };
 
