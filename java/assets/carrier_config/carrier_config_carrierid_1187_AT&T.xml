@@ -471,6 +471,9 @@
     <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="2"/>
     <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
 
+    <int name="imsvt.video_as_bandwidth_kbps_int" value="416"/>
+    <int name="imsvt.video_rs_bandwidth_bps_int" value="800"/>
+    <int name="imsvt.video_rr_bandwidth_bps_int" value="2400"/>
     <int name="video_cvo_value_int" value="4"/>
     <int name="video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
     <boolean name="video_avpf_enable_bool" value="true"/>
