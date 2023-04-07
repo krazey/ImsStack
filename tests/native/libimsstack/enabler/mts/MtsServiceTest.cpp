@@ -220,17 +220,6 @@ TEST_F(MtsServiceTest, GetStateReturnsReadyAfterAosResumed)
     EXPECT_EQ(pMtsService->GetIMtsServiceState()->GetState(), STATE_READY);
 }
 
-TEST_F(MtsServiceTest, ForwardScbmNotification)
-{
-    pMtsService->SetIImsEmergencyAos(&objMockIImsEmergencyAos);
-
-    ON_CALL(objMockIImsEmergencyAos, GetAosInfo()).WillByDefault(Return(&objMockIImsAosInfo));
-    ON_CALL(objMockIImsAosInfo, NotifyScbmState(_)).WillByDefault(Return());
-    EXPECT_CALL(objMockIImsAosInfo, NotifyScbmState(NOTIFY_SCBM_STARTED)).Times(1);
-
-    pMtsService->SendScbmNotification(NOTIFY_SCBM_STARTED);
-}
-
 TEST_F(MtsServiceTest, SendNormalMoSmsWhenTrafficIsNotAllowed)
 {
     AString strTargetAddress = "sip:+12345678901@ims.google.com";

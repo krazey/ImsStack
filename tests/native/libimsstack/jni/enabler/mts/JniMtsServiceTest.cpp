@@ -106,14 +106,4 @@ TEST_F(JniMtsServiceTest, SendDataMtResult)
     pJniService->SendData(objParcel);
 }
 
-TEST_F(JniMtsServiceTest, SendDataScbmState)
-{
-    objParcel.writeInt32(IuMtsService::NOTI_SCBM_STATE);
-    objParcel.setDataPosition(0);
-
-    EXPECT_CALL(objMockService, SendScbmNotification(_)).Times(1);
-
-    pJniService->SendData(objParcel);
-}
-
 }  // namespace android

@@ -33,7 +33,7 @@
 #include "ISipHeader.h"
 #include "IPageMessage.h"
 #include "IMessageBodyPart.h"
-#include "IuMts.h"
+#include "IuMtsService.h"
 #include "MtsStringDef.h"
 #include "MtsService.h"
 #include "MtsServiceState.h"
