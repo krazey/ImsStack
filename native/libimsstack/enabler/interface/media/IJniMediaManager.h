@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef INTERFACE_MEDIA_MANAGER_H_
-#define INTERFACE_MEDIA_MANAGER_H_
+#ifndef INTERFACE_JNI_MEDIA_MANAGER_H_
+#define INTERFACE_JNI_MEDIA_MANAGER_H_
 
 #include "ImsList.h"
 #include "ImsTypeDef.h"
 #include "INativeEnabler.h"
 
-class IMediaManager : public INativeEnabler
+class IJniMediaManager : public INativeEnabler
 {
 public:
-    virtual ~IMediaManager() {};
+    virtual ~IJniMediaManager(){};
 
     /**
      * @brief Sends a message from java layer through jni interface

@@ -21,7 +21,7 @@
 #include "IEventListener.h"
 #include "ImsActivityEx.h"
 #include "ImsMap.h"
-#include "IMediaManager.h"
+#include "IJniMediaManager.h"
 #include "IMMedia.h"
 #include "MediaDef.h"
 
@@ -30,7 +30,7 @@ class MediaMsgHandler;
 class MediaSession;
 class MediaResourceManager;
 
-class MediaManager : public ImsActivityEx, public IMediaManager
+class MediaManager : public ImsActivityEx, public IJniMediaManager
 {
 public:
     class MediaSessionNode
