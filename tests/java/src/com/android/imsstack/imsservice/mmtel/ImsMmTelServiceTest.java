@@ -38,6 +38,8 @@ import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsExternalCallState;
+import android.telephony.ims.MediaQualityStatus;
+import android.telephony.ims.MediaThreshold;
 import android.telephony.ims.SrvccCall;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.ImsFeature;
@@ -59,6 +61,7 @@ import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtInterface;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
+import com.android.imsstack.internal.imsservice.MmTelMediaRegistry;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.MSimUtils;
 
@@ -467,6 +470,31 @@ public class ImsMmTelServiceTest extends ImsStackTest {
                 .onSrvccStateChanged(MmTelFeatureRegistry.SRVCC_STATE_CANCELED);
 
         mMmTelFeatureRegistry.removeListener(mMmtelFeatureListener);
+    }
+
+    @Test
+    public void testSetMediaThreshold() {
+        int sessionType = MediaQualityStatus.MEDIA_SESSION_TYPE_AUDIO;
+        int[] packetLossRate = {1, 20};
+        int[] jitterMillies = {20};
+        long[] inactivityTimeMillies = {100, 7000};
+
+        MediaThreshold mediaThreshold = new MediaThreshold.Builder()
+                .setThresholdsRtpPacketLossRate(packetLossRate)
+                .setThresholdsRtpJitterMillis(jitterMillies)
+                .setThresholdsRtpInactivityTimeMillis(inactivityTimeMillies)
+                .build();
+        MmTelMediaRegistry mockMediaRegistry = Mockito.mock(MmTelMediaRegistry.class);
+        when(mMockServiceRegistry.getMmTelMediaRegistry()).thenReturn(mockMediaRegistry);
+
+        mMmTelFeature.setMediaThreshold(sessionType, mediaThreshold);
+        verify(mockMediaRegistry).setMediaThreshold(sessionType, mediaThreshold);
+
+        mMmTelFeature.setMediaThreshold(sessionType, null);
+        verify(mockMediaRegistry).setMediaThreshold(sessionType, null);
+
+        mMmTelFeature.clearMediaThreshold(sessionType);
+        verify(mockMediaRegistry, times(2)).setMediaThreshold(sessionType, null);
     }
 
     private TestImsMmTelService createMmTelService(ImsServiceRecord sr) {

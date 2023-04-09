@@ -37,6 +37,8 @@ import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.internal.SrvccStateTracker;
 import com.android.imsstack.internal.enabler.ImsStateStore;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
+import com.android.imsstack.internal.imsservice.MmTelMediaQualityReporter;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsWakeLock;
 import com.android.internal.annotations.VisibleForTesting;
@@ -49,10 +51,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ImsCallManager {
     private static final int MAX_CALL_ID = Integer.MAX_VALUE;
-    protected final ConcurrentHashMap<String, ImsCallSessionImpl> mSessions
-            = new ConcurrentHashMap<String, ImsCallSessionImpl>(8, 0.9f, 1);
-    protected final ConcurrentHashMap<String, ImsCallSessionImpl> mPendingSessions
-            = new ConcurrentHashMap<String, ImsCallSessionImpl>(4, 0.9f, 1);
+    protected final ConcurrentHashMap<String, ImsCallSessionImpl> mSessions =
+            new ConcurrentHashMap<String, ImsCallSessionImpl>(8, 0.9f, 1);
+    protected final ConcurrentHashMap<String, ImsCallSessionImpl> mPendingSessions =
+            new ConcurrentHashMap<String, ImsCallSessionImpl>(4, 0.9f, 1);
     private final Object mLock = new Object();
     private final ICallContext mCallContext;
     private final MtcApp mMtcApp;
@@ -76,11 +78,19 @@ public class ImsCallManager {
      */
     @VisibleForTesting
     public ImsCallSessionImpl createImsCallSession(ICallContext callContext,
-            CallTracker ct, MtcCall call,
-            String callId, ImsCallProfile profile, boolean isMO) {
-
-        return new ImsCallSessionImpl(
+            CallTracker ct, MtcCall call, String callId,
+            ImsCallProfile profile, boolean isMO) {
+        ImsCallSessionImpl callSession =  new ImsCallSessionImpl(
                 mCallContext, ct, call, callId, profile, isMO);
+
+        MmTelMediaQualityReporter mediaQualityReporter =
+                ImsServiceRegistry.getInstance(callContext.getSlotId())
+                .createMediaQualityReporter(callId);
+
+        callSession.getMtcCall().getMediaSession()
+                .setMediaQualityReporter(mediaQualityReporter);
+
+        return callSession;
     }
 
     public void dispose() {

@@ -94,6 +94,18 @@ public class ImsServiceRegistryTest {
 
     @Test
     @SmallTest
+    public void getMmTelMediaRegistry() {
+        assertNotNull(mServiceRegistry.getMmTelMediaRegistry());
+    }
+
+    @Test
+    @SmallTest
+    public void createMediaQualityReporter() {
+        assertNotNull(mServiceRegistry.createMediaQualityReporter("1"));
+    }
+
+    @Test
+    @SmallTest
     public void addListener() throws Exception {
         verify(mListener, never()).onMmTelFeatureChanged();
         verify(mListener, never()).onImsOnOffChanged();

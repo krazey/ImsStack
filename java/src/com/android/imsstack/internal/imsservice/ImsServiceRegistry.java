@@ -16,6 +16,7 @@
 
 package com.android.imsstack.internal.imsservice;
 
+import android.annotation.NonNull;
 import android.telephony.ims.feature.MmTelFeature;
 import android.util.SparseArray;
 
@@ -58,6 +59,7 @@ public class ImsServiceRegistry {
     private volatile boolean mImsEnabled;
     private volatile MmTelFeature mMmTelFeature;
     private final MmTelFeatureRegistry mMmTelFeatureRegistry;
+    private final MmTelMediaRegistry mMmTelMediaRegistry;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     ImsServiceRegistry(int slotId) {
@@ -65,6 +67,7 @@ public class ImsServiceRegistry {
         mImsEnabled = true;
         mMmTelFeature = null;
         mMmTelFeatureRegistry = new MmTelFeatureRegistry(slotId);
+        mMmTelMediaRegistry = new MmTelMediaRegistry();
     }
 
     /**
@@ -134,9 +137,30 @@ public class ImsServiceRegistry {
     }
 
     /**
+     * Returns the {@link MmTelMediaRegistry} to access the {@link MediaThreshold} value.
+     *
+     * @return {@link MmTelMediaRegistry}
+     */
+    @NonNull
+    public MmTelMediaRegistry getMmTelMediaRegistry() {
+        return mMmTelMediaRegistry;
+    }
+
+    /**
+     * Creates and returns the {@link MmTelMediaQualityReporter} to
+     * notify media quality status changed.
+     *
+     * @return  {@link MmTelMediaQualityReporter}
+     */
+    @NonNull
+    public MmTelMediaQualityReporter createMediaQualityReporter(@NonNull String callId) {
+        return new MmTelMediaQualityReporter(mMmTelMediaRegistry, mMmTelFeature, callId);
+    }
+
+    /**
      * Adds the listener to monitor the state of this class.
      *
-     * @param listener The listener to be aded.
+     * @param listener The listener to be added.
      */
     public void addListener(Listener listener) {
         mListeners.add(listener);
