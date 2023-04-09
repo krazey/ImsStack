@@ -17,7 +17,6 @@
 #include "MockIMtcContext.h"
 #include "MockIMtcService.h"
 #include "MockITimer.h"
-#include "MtcContextRepository.h"
 #include "call/IMtcCall.h"
 #include "call/MockIMtcCall.h"
 #include "call/MockIMtcCallContext.h"
@@ -56,7 +55,7 @@ namespace android
 {
 
 LOCAL CallKey CONFERENCE_CALL_KEY = 100;
-LOCAL IMS_SINT32 SLOT_ID = 0;
+
 class MergeControllerTest : public ::testing::Test
 {
 public:
@@ -80,8 +79,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(SLOT_ID, &objMockContext);
-
         ON_CALL(objMockContext, GetCallManager).WillByDefault(ReturnRef(objMockCallManager));
         ON_CALL(objMockContext, GetCallStateProxy).WillByDefault(ReturnRef(objMockCallStateProxy));
 

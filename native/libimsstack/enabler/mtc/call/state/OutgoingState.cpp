@@ -38,7 +38,6 @@
 #include "call/termination/EarlyUpdateErrorHandler.h"
 #include "call/termination/StartErrorHandler.h"
 #include "call/termination/TerminationHandler.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "core/IMessage.h"

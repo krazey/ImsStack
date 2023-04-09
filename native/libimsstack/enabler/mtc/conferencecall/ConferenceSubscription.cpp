@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AString.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
 #include "IMessage.h"
@@ -23,6 +24,7 @@
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "ISubscription.h"
+#include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
@@ -33,7 +35,7 @@
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcSession.h"
-#include "conferencecall/ConferenceConfigurationWrapper.h"
+#include "conferencecall/ConferenceConfigurationHelper.h"
 #include "conferencecall/ConferenceConst.h"
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/ConferenceFactory.h"
@@ -64,7 +66,8 @@ ConferenceSubscription::ConferenceSubscription(IN IMtcContext& objContext, IN Ca
 {
     IMS_TRACE_I("+ConferenceSubscription", 0, 0, 0);
 
-    m_nDialogType = ConferenceConfigurationWrapper::IsSubscriptionOutDialog()
+    m_nDialogType = ConferenceConfigurationHelper::IsSubscriptionOutDialog(
+                            m_objContext.GetConfigurationProxy())
             ? CONF_SUBSCRIPTION_DIALOG_TYPE_OUT
             : CONF_SUBSCRIPTION_DIALOG_TYPE_IN;
 }
