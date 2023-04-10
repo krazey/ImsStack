@@ -21,6 +21,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.dcm.DcFactory;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.jni.JniImsProxy;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
@@ -147,6 +148,8 @@ public class CommonStarter {
         Log.i(TAG, "startAgents(" + slotId + ")");
 
         Context context = AppContext.getInstance();
+
+        ImsServiceRegistry.getInstance(slotId).getMmTelFeatureRegistry().initUserSettings();
 
         ImsTestMode.getInstance().init(slotId);
 

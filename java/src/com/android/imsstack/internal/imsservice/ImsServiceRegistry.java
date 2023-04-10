@@ -54,10 +54,9 @@ public class ImsServiceRegistry {
     // Maps a slot-id to a list of ImsServiceRegistry.
     private static SparseArray<ImsServiceRegistry> sImsServiceRegistrys = new SparseArray<>(2);
 
-    private final Object mLock = new Object();
     private final int mSlotId;
-    private boolean mImsEnabled;
-    private MmTelFeature mMmTelFeature;
+    private volatile boolean mImsEnabled;
+    private volatile MmTelFeature mMmTelFeature;
     private final MmTelFeatureRegistry mMmTelFeatureRegistry;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
@@ -65,7 +64,7 @@ public class ImsServiceRegistry {
         mSlotId = slotId;
         mImsEnabled = true;
         mMmTelFeature = null;
-        mMmTelFeatureRegistry = new MmTelFeatureRegistry(slotId, mLock);
+        mMmTelFeatureRegistry = new MmTelFeatureRegistry(slotId);
     }
 
     /**
@@ -94,9 +93,7 @@ public class ImsServiceRegistry {
      * @return A MmTelFeature.
      */
     public MmTelFeature getMmTelFeature() {
-        synchronized (mLock) {
-            return mMmTelFeature;
-        }
+        return mMmTelFeature;
     }
 
     /**
@@ -108,16 +105,8 @@ public class ImsServiceRegistry {
      * @param feature A MmTelFeature to be set.
      */
     public void setMmTelFeature(MmTelFeature feature) {
-        boolean notifyChange = false;
-
-        synchronized (mLock) {
-            if (!Objects.equals(mMmTelFeature, feature)) {
-                mMmTelFeature = feature;
-                notifyChange = true;
-            }
-        }
-
-        if (notifyChange) {
+        if (!Objects.equals(mMmTelFeature, feature)) {
+            mMmTelFeature = feature;
             notifyMmTelFeatureChanged();
         }
     }
@@ -128,9 +117,7 @@ public class ImsServiceRegistry {
      * @return true if IMS is enabled, false otherwise.
      */
     public boolean isImsEnabled() {
-        synchronized (mLock) {
-            return mImsEnabled;
-        }
+        return mImsEnabled;
     }
 
     /**
@@ -139,17 +126,9 @@ public class ImsServiceRegistry {
      * @param enabled The IMS status to be turned on or off.
      */
     public void setImsEnabled(boolean enabled) {
-        boolean notifyChange = false;
-
-        synchronized (mLock) {
-            if (mImsEnabled != enabled) {
-                ImsLog.i(mSlotId, "setImsEnabled: " + mImsEnabled + " >> " + enabled);
-                mImsEnabled = enabled;
-                notifyChange = true;
-            }
-        }
-
-        if (notifyChange) {
+        if (mImsEnabled != enabled) {
+            ImsLog.i(mSlotId, "setImsEnabled: " + mImsEnabled + " >> " + enabled);
+            mImsEnabled = enabled;
             notifyImsOnOffChanged();
         }
     }
