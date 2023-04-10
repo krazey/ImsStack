@@ -99,7 +99,7 @@ TEST_F(SipAddrSpecTest, EncodeAndDecodeAddrSpec)
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
     EXPECT_EQ(
-            SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(const_cast<char*>("sips:192.168.2.8:9091"), 22));
+            SIP_TRUE, pSipAddrSpec->DecodeAddrSpec(const_cast<char*>("sips:192.168.2.8:9091"), 21));
 
     EXPECT_EQ(SipUri::SCHEME_SIPS, pSipAddrSpec->GetUriScheme());
 

@@ -306,6 +306,33 @@ TEST_F(SipUriTest, DecodeSipUri)
     pSipUri = new SipUri();
     ASSERT_TRUE(pSipUri != nullptr);
 
+    /* Only IPv6 host with port value 0, SUCCESS */
+    EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri(const_cast<char*>("[2001::2]:0"), 11));
+
+    EXPECT_STREQ("2001::2", pSipUri->GetHost());
+    EXPECT_EQ(0, pSipUri->GetPort());
+
+    pSipUri->SipDelete();
+
+    pSipUri = new SipUri();
+    ASSERT_TRUE(pSipUri != nullptr);
+
+    /* Only IPv6 host with port value alphabet, SUCCESS */
+    EXPECT_EQ(SIP_FALSE, pSipUri->DecodeSipUri(const_cast<char*>("[2001::2]:a"), 11));
+
+    pSipUri->SipDelete();
+
+    pSipUri = new SipUri();
+    ASSERT_TRUE(pSipUri != nullptr);
+
+    /* Only IPv6 host with port value alphabet, SUCCESS */
+    EXPECT_EQ(SIP_FALSE, pSipUri->DecodeSipUri(const_cast<char*>("[2001::2]:12ab"), 14));
+
+    pSipUri->SipDelete();
+
+    pSipUri = new SipUri();
+    ASSERT_TRUE(pSipUri != nullptr);
+
     /* user without password and host:port, SUCCESS */
     EXPECT_EQ(SIP_TRUE, pSipUri->DecodeSipUri(const_cast<char*>("UserName@192.168.1.2:9090"), 25));
 
