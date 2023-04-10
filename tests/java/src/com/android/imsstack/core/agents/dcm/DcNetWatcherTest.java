@@ -59,7 +59,6 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IDc;
 import com.android.imsstack.core.agents.internal.PhoneStateNotifier;
-import com.android.imsstack.core.service.serviceif.ICallSettingService;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.system.IJNIUpCallEvt;
@@ -92,7 +91,6 @@ public class DcNetWatcherTest extends ImsStackTest {
     @Mock ISystem mMockSystem;
     @Mock IAosInfo mMockAosInfo;
     @Mock IJNIUpCallEvt mMockJniUpCallEvt;
-    @Mock ICallSettingService mMockCallSetting;
     @Mock IPhoneState mMockPhoneState;
     @Mock PhoneStateNotifier mMockPhoneStateNotifier;
     @Mock ITelephonyState mMockTelephonyState;
@@ -125,7 +123,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         Map<Integer, HashMap<Integer, IAgent>> agentMaps =
                 new HashMap<Integer, HashMap<Integer, IAgent>>(NUM_OF_SLOT);
         HashMap<Integer, IAgent> agents = new HashMap<>(3);
-        agents.put(AgentFactory.CALL_SETTING, mMockCallSetting);
         agents.put(AgentFactory.PHONE_STATE, mMockPhoneState);
         agents.put(AgentFactory.TELEPHONY_STATE, mMockTelephonyState);
         agentMaps.put(SLOT_0, agents);
@@ -740,7 +737,6 @@ public class DcNetWatcherTest extends ImsStackTest {
 
         verify(mRegistrantList).notifyResult("45000");
         verify(mMockAosInfo).notifyPlmnChanged();
-        verify(mMockCallSetting).updateForSetting();
         assertEquals("45000", mDcNetWatcher.getOperatorNumeric());
     }
 
@@ -900,7 +896,6 @@ public class DcNetWatcherTest extends ImsStackTest {
         verify(tempRegistrantList).notifyResult(true);
         verify(mMockSystem).notifyEvent(ImsEventDef.IMS_EVENT_ROAMING_STATE,
                 ImsEventDef.IMS_ROAMING_STATE_ON, ImsEventDef.IMS_ROAMING_STATE_ON);
-        verify(mMockCallSetting).updateForRoamingSetting(true);
         assertEquals(true, mDcNetWatcher.isRoaming());
         assertEquals(true, mDcNetWatcher.isVoiceRoaming());
     }
