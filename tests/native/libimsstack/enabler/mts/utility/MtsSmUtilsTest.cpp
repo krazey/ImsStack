@@ -36,4 +36,24 @@ TEST_F(MtsSmUtilsTest, Constructor)
     ASSERT_NE(pMtsSmUtils, nullptr);
 }
 
+TEST_F(MtsSmUtilsTest, GetRpMrWithNull)
+{
+    const IMS_BYTE* pbyContent = IMS_NULL;
+    EXPECT_EQ(pMtsSmUtils->GetRpMr(pbyContent), -1);
+
+    const ByteArray* pContent = new ByteArray();
+    EXPECT_EQ(pMtsSmUtils->GetRpMr(*pContent), -1);
+    delete pContent;
+}
+
+TEST_F(MtsSmUtilsTest, GetMtiWithNull)
+{
+    const IMS_BYTE* pbyContent = IMS_NULL;
+    EXPECT_EQ(pMtsSmUtils->GetMti(SmsFormatType::SMSFORMAT_3GPP, pbyContent), -1);
+
+    const ByteArray* pContent = new ByteArray();
+    EXPECT_EQ(pMtsSmUtils->GetMti(SmsFormatType::SMSFORMAT_3GPP, *pContent), -1);
+    delete pContent;
+}
+
 }  // namespace android
