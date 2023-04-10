@@ -273,6 +273,13 @@
     <!-- Mts -->
     <boolean name="sms_use_dialed_number_for_request_uri_bool" value="true"/>
     <boolean name="sms_allow_imsi_based_sip_uri_bool" value="true"/>
+    <int-array name="sms_permanent_error_codes_int_array" num="5">
+        <item value="400"/>
+        <item value="404"/>
+        <item value="500"/>
+        <item value="502"/>
+        <item value="503"/>
+    </int-array>
     <int name="sms_policy_for_503_response_int" value="5"/>
 
     <!-- Uce -->
