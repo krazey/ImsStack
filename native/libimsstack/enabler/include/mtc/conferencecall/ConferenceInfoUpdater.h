@@ -23,6 +23,7 @@
 
 class ConferenceFactory;
 class ConferenceParticipantList;
+class MtcConfigurationProxy;
 
 enum class MatchingPolicy
 {
@@ -35,7 +36,8 @@ enum class MatchingPolicy
 class ConferenceInfoUpdater
 {
 public:
-    explicit ConferenceInfoUpdater(IN ConferenceFactory& objFactory);
+    explicit ConferenceInfoUpdater(
+            IN ConferenceFactory& objFactory, IN MtcConfigurationProxy& objConfigProxy);
     virtual ~ConferenceInfoUpdater();
     ConferenceInfoUpdater(IN const ConferenceInfoUpdater&) = delete;
     ConferenceInfoUpdater& operator=(IN const ConferenceInfoUpdater&) = delete;
@@ -84,7 +86,7 @@ protected:
     static IMS_BOOL IsConnectedStatusCategory(IN IMS_UINT32 nStatus);
 
 private:
-    static void ModifyParticipantInfoByConfig(IN ConfUser* pConfUser);
+    void ModifyParticipantInfoByConfig(IN ConfUser* pConfUser);
 
 public:
     enum
@@ -98,6 +100,7 @@ public:
     };
 
 private:
+    MtcConfigurationProxy& m_objConfigProxy;
     ConferenceInfo* m_pConferenceInfo;
     ConferenceFactory& m_objFactory;
     ConferenceParticipantList* m_pParticipantList;

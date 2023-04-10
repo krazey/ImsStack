@@ -15,7 +15,6 @@
  */
 
 #include "MockIMtcService.h"
-#include "MtcContextRepository.h"
 #include "call/MockIMtcCallContext.h"
 #include "call/MockIMtcSession.h"
 #include "call/MockIMtcUiNotifier.h"
@@ -76,8 +75,6 @@ public:
 protected:
     virtual void SetUp() override
     {
-        MtcContextRepository::GetInstance()->AddContext(IMS_SLOT_0, &objCallContext);
-
         ON_CALL(objISession, GetPreviousRequest(_)).WillByDefault(Return(&objIMessage));
         ON_CALL(objIMessage, GetMessage).WillByDefault(Return(&objISipMessage));
         ON_CALL(objISession, GetPreviousRequest(_)).WillByDefault(Return(&objIMessage));
